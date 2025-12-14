@@ -26,12 +26,21 @@ export const metadata: Metadata = {
     description:
       'Learn about planets, zodiac signs, and astronomical knowledge. Understand the cosmic forces that shape our world.',
     type: 'article',
+    images: [
+      {
+        url: '/api/og/grimoire/astronomy',
+        width: 1200,
+        height: 630,
+        alt: 'Astronomy & Astrology Guide - Lunary',
+      },
+    ],
   },
   twitter: {
-    card: 'summary',
+    card: 'summary_large_image',
     title: 'Astronomy & Astrology: Planets & Zodiac Signs - Lunary',
     description:
       'Learn about planets, zodiac signs, and astronomical knowledge. Understand the cosmic forces that shape our world.',
+    images: ['/api/og/grimoire/astronomy'],
   },
   alternates: {
     canonical: 'https://lunary.app/grimoire/astronomy',
@@ -175,7 +184,7 @@ Working with planetary and zodiac energies creates powerful alignment between yo
             text: 'Magical Correspondences',
             href: '/grimoire/correspondences',
           },
-          { text: 'Spells & Rituals', href: '/grimoire/practices' },
+          { text: 'Spells & Rituals', href: '/grimoire/spells' },
         ]}
       />
       <div className='max-w-4xl mx-auto p-4'>

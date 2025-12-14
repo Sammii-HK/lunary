@@ -1,3 +1,5 @@
+import { renderJsonLd } from '@/lib/schema';
+
 interface ComparisonPageStructuredDataProps {
   competitorName: string;
   competitorUrl?: string;
@@ -51,12 +53,5 @@ export function ComparisonPageStructuredData({
     text: conclusion,
   };
 
-  return (
-    <script
-      type='application/ld+json'
-      dangerouslySetInnerHTML={{
-        __html: JSON.stringify(comparisonPageSchema),
-      }}
-    />
-  );
+  return renderJsonLd(comparisonPageSchema);
 }

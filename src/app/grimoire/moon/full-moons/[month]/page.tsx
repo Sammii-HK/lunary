@@ -1,6 +1,7 @@
 import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { SEOContentTemplate } from '@/components/grimoire/SEOContentTemplate';
+import { CosmicConnections } from '@/components/grimoire/CosmicConnections';
 import { annualFullMoons } from '@/constants/moon/annualFullMoons';
 
 const monthKeys = Object.keys(annualFullMoons);
@@ -188,6 +189,13 @@ Understanding the ${moonData.name}'s energy helps you plan meaningful rituals an
         ctaText={`Want personalized full moon insights?`}
         ctaHref='/pricing'
         faqs={faqs}
+        cosmicConnections={
+          <CosmicConnections
+            entityType='moon'
+            entityKey={`full-moon-${month}`}
+            title={`${moonData.name} Cosmic Connections`}
+          />
+        }
       />
     </div>
   );

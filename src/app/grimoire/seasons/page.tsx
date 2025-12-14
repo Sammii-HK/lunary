@@ -1,8 +1,13 @@
 import { Metadata } from 'next';
 import Link from 'next/link';
+import { ExploreGrimoire } from '@/components/grimoire/ExploreGrimoire';
 import { ZODIAC_SEASONS, getSeasonDates } from '@/constants/seo/zodiac-seasons';
 import { Breadcrumbs } from '@/components/grimoire/Breadcrumbs';
-import { createItemListSchema, renderJsonLd } from '@/lib/schema';
+import {
+  createItemListSchema,
+  renderJsonLd,
+  createBreadcrumbSchema,
+} from '@/lib/schema';
 
 const currentYear = new Date().getFullYear();
 const nextYear = currentYear + 1;
@@ -56,6 +61,12 @@ export default function SeasonsIndexPage() {
   return (
     <div className='min-h-screen bg-zinc-950 text-zinc-100'>
       {renderJsonLd(seasonsListSchema)}
+      {renderJsonLd(
+        createBreadcrumbSchema([
+          { name: 'Grimoire', url: '/grimoire' },
+          { name: 'Seasons', url: '/grimoire/seasons' },
+        ]),
+      )}
       <div className='max-w-6xl mx-auto px-4 py-12'>
         <Breadcrumbs
           items={[
@@ -123,6 +134,7 @@ export default function SeasonsIndexPage() {
             View Your Personalized Horoscope
           </Link>
         </div>
+        <ExploreGrimoire />
       </div>
     </div>
   );

@@ -1,8 +1,13 @@
 import { Metadata } from 'next';
 import Link from 'next/link';
+import { ExploreGrimoire } from '@/components/grimoire/ExploreGrimoire';
 import { ArrowUpRight, ArrowDownLeft } from 'lucide-react';
 import { Breadcrumbs } from '@/components/grimoire/Breadcrumbs';
-import { createItemListSchema, renderJsonLd } from '@/lib/schema';
+import {
+  createItemListSchema,
+  renderJsonLd,
+  createBreadcrumbSchema,
+} from '@/lib/schema';
 
 const lunarNodes = [
   {
@@ -77,6 +82,12 @@ export default function LunarNodesIndexPage() {
   return (
     <div className='p-4 md:p-6 lg:p-8 xl:p-10 min-h-full'>
       {renderJsonLd(nodesListSchema)}
+      {renderJsonLd(
+        createBreadcrumbSchema([
+          { name: 'Grimoire', url: '/grimoire' },
+          { name: 'Lunar Nodes', url: '/grimoire/lunar-nodes' },
+        ]),
+      )}
       <div className='max-w-5xl mx-auto'>
         <Breadcrumbs
           items={[
@@ -239,6 +250,7 @@ export default function LunarNodesIndexPage() {
             </Link>
           </div>
         </div>
+        <ExploreGrimoire />
       </div>
     </div>
   );

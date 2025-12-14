@@ -1,8 +1,13 @@
 import { Metadata } from 'next';
 import Link from 'next/link';
+import { ExploreGrimoire } from '@/components/grimoire/ExploreGrimoire';
 import { RotateCcw } from 'lucide-react';
 import { Breadcrumbs } from '@/components/grimoire/Breadcrumbs';
-import { createItemListSchema, renderJsonLd } from '@/lib/schema';
+import {
+  createItemListSchema,
+  renderJsonLd,
+  createBreadcrumbSchema,
+} from '@/lib/schema';
 
 const retrogrades = [
   {
@@ -112,6 +117,13 @@ export default function RetrogradesIndexPage() {
   return (
     <div className='p-4 md:p-6 lg:p-8 xl:p-10 min-h-full'>
       {renderJsonLd(retrogradesListSchema)}
+      {renderJsonLd(
+        createBreadcrumbSchema([
+          { name: 'Grimoire', url: '/grimoire' },
+          { name: 'Astronomy', url: '/grimoire/astronomy' },
+          { name: 'Retrogrades', url: '/grimoire/astronomy/retrogrades' },
+        ]),
+      )}
       <div className='max-w-5xl mx-auto'>
         <Breadcrumbs
           items={[
@@ -218,6 +230,7 @@ export default function RetrogradesIndexPage() {
             </Link>
           </div>
         </div>
+        <ExploreGrimoire />
       </div>
     </div>
   );

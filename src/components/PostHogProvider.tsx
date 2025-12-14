@@ -3,6 +3,11 @@
 import { useEffect, useRef, useState } from 'react';
 import { usePathname, useSearchParams } from 'next/navigation';
 import { getCookieConsent } from './CookieConsent';
+import {
+  initializeAttribution,
+  getStoredAttribution,
+  getAttributionForTracking,
+} from '@/lib/attribution';
 
 let posthogModule: any = null;
 let posthogLoaded = false;
@@ -117,6 +122,24 @@ function PostHogProviderContent({ children }: { children: React.ReactNode }) {
                   is_playwright: isPlaywright,
                 });
               }
+
+              const attribution = initializeAttribution();
+              if (attribution) {
+                posthog.register({
+                  first_touch_source: attribution.source,
+                  first_touch_medium: attribution.medium,
+                  first_touch_page: attribution.landingPage,
+                });
+
+                if (attribution.source === 'seo') {
+                  posthog.capture('seo_landing', {
+                    landing_page: attribution.landingPage,
+                    referrer: attribution.referrer,
+                    search_engine: attribution.medium,
+                    keyword: attribution.keyword,
+                  });
+                }
+              }
             },
             capture_pageview: false,
             capture_pageleave: true,
@@ -157,7 +180,17 @@ function PostHogProviderContent({ children }: { children: React.ReactNode }) {
         if (searchParams?.toString()) {
           url += `?${searchParams.toString()}`;
         }
-        posthogRef.current?.capture?.('$pageview', { $current_url: url });
+
+        const attribution = getStoredAttribution();
+        const attributionData = getAttributionForTracking();
+
+        posthogRef.current?.capture?.('$pageview', {
+          $current_url: url,
+          ...attributionData,
+          is_seo_traffic: attribution?.source === 'seo',
+          is_grimoire_page: pathname.startsWith('/grimoire'),
+          is_blog_page: pathname.startsWith('/blog'),
+        });
       } catch (error) {
         console.error('[PostHog] Failed to capture pageview:', error);
       }

@@ -535,6 +535,16 @@ async function setupDatabase() {
           EXECUTE FUNCTION update_shop_purchases_updated_at()
     `;
 
+    await sql`
+      ALTER TABLE shop_purchases
+      ADD COLUMN IF NOT EXISTS pack_name TEXT,
+      ADD COLUMN IF NOT EXISTS pack_slug TEXT,
+      ADD COLUMN IF NOT EXISTS blob_url TEXT,
+      ADD COLUMN IF NOT EXISTS currency TEXT,
+      ADD COLUMN IF NOT EXISTS stripe_product_id TEXT,
+      ADD COLUMN IF NOT EXISTS stripe_price_id TEXT
+    `;
+
     console.log('✅ Shop purchases table created');
 
     // Create user_notes table
@@ -574,46 +584,6 @@ async function setupDatabase() {
     `;
 
     console.log('✅ User notes table created');
-
-    // Create jazz_migration_status table
-    await sql`
-      CREATE TABLE IF NOT EXISTS jazz_migration_status (
-        user_id TEXT PRIMARY KEY,
-        migrated_at TIMESTAMP WITH TIME ZONE,
-        migration_status TEXT NOT NULL DEFAULT 'pending',
-        last_sync_at TIMESTAMP WITH TIME ZONE,
-        jazz_account_id TEXT,
-        error_message TEXT,
-        created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-        updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
-      )
-    `;
-
-    await sql`CREATE INDEX IF NOT EXISTS idx_jazz_migration_status_status ON jazz_migration_status(migration_status)`;
-    await sql`CREATE INDEX IF NOT EXISTS idx_jazz_migration_status_jazz_account_id ON jazz_migration_status(jazz_account_id)`;
-
-    await sql`
-      CREATE OR REPLACE FUNCTION update_jazz_migration_status_updated_at()
-      RETURNS TRIGGER AS $$
-      BEGIN
-          NEW.updated_at = NOW();
-          RETURN NEW;
-      END;
-      $$ language 'plpgsql'
-    `;
-
-    await sql`
-      DROP TRIGGER IF EXISTS update_jazz_migration_status_updated_at ON jazz_migration_status
-    `;
-
-    await sql`
-      CREATE TRIGGER update_jazz_migration_status_updated_at
-          BEFORE UPDATE ON jazz_migration_status
-          FOR EACH ROW
-          EXECUTE FUNCTION update_jazz_migration_status_updated_at()
-    `;
-
-    console.log('✅ Jazz migration status table created');
 
     await sql`
       CREATE TABLE IF NOT EXISTS journal_patterns (
@@ -946,9 +916,102 @@ async function setupDatabase() {
 
     console.log('✅ Email preferences table created');
 
+    // Collections table for Book of Shadows (journal entries, dreams, etc.)
+    await sql`
+      CREATE TABLE IF NOT EXISTS collections (
+        id SERIAL PRIMARY KEY,
+        user_id TEXT NOT NULL,
+        title TEXT NOT NULL,
+        description TEXT,
+        category TEXT NOT NULL CHECK (category IN ('chat', 'ritual', 'insight', 'moon_circle', 'tarot', 'journal', 'dream')),
+        content JSONB NOT NULL,
+        tags TEXT[],
+        folder_id INTEGER,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+        updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+      )
+    `;
+    await sql`CREATE INDEX IF NOT EXISTS idx_collections_user_id ON collections(user_id)`;
+    await sql`CREATE INDEX IF NOT EXISTS idx_collections_category ON collections(category)`;
+    await sql`CREATE INDEX IF NOT EXISTS idx_collections_created_at ON collections(created_at DESC)`;
+    await sql`CREATE INDEX IF NOT EXISTS idx_collections_tags ON collections USING GIN(tags)`;
+    await sql`CREATE INDEX IF NOT EXISTS idx_collections_dream_category ON collections(user_id, created_at DESC) WHERE category = 'dream'`;
+
+    console.log('✅ Collections table created');
+
+    // Collection folders for organizing entries
+    await sql`
+      CREATE TABLE IF NOT EXISTS collection_folders (
+        id SERIAL PRIMARY KEY,
+        user_id TEXT NOT NULL,
+        name TEXT NOT NULL,
+        description TEXT,
+        color TEXT DEFAULT '#6366f1',
+        icon TEXT DEFAULT 'book',
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+        updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+      )
+    `;
+    await sql`CREATE INDEX IF NOT EXISTS idx_collection_folders_user_id ON collection_folders(user_id)`;
+
+    console.log('✅ Collection folders table created');
+
+    // User attribution table for SEO/marketing tracking
+    await sql`
+      CREATE TABLE IF NOT EXISTS user_attribution (
+        id SERIAL PRIMARY KEY,
+        user_id TEXT UNIQUE,
+        anonymous_id TEXT,
+        first_touch_source TEXT,
+        first_touch_medium TEXT,
+        first_touch_campaign TEXT,
+        first_touch_keyword TEXT,
+        first_touch_page TEXT,
+        first_touch_referrer TEXT,
+        first_touch_at TIMESTAMP WITH TIME ZONE,
+        utm_source TEXT,
+        utm_medium TEXT,
+        utm_campaign TEXT,
+        utm_term TEXT,
+        utm_content TEXT,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+        updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+      )
+    `;
+
+    await sql`CREATE INDEX IF NOT EXISTS idx_user_attribution_user_id ON user_attribution(user_id)`;
+    await sql`CREATE INDEX IF NOT EXISTS idx_user_attribution_source ON user_attribution(first_touch_source)`;
+    await sql`CREATE INDEX IF NOT EXISTS idx_user_attribution_medium ON user_attribution(first_touch_medium)`;
+    await sql`CREATE INDEX IF NOT EXISTS idx_user_attribution_created_at ON user_attribution(created_at)`;
+    await sql`CREATE INDEX IF NOT EXISTS idx_user_attribution_first_touch_at ON user_attribution(first_touch_at)`;
+    await sql`CREATE INDEX IF NOT EXISTS idx_user_attribution_source_medium ON user_attribution(first_touch_source, first_touch_medium)`;
+
+    await sql`
+      CREATE OR REPLACE FUNCTION update_user_attribution_updated_at()
+      RETURNS TRIGGER AS $$
+      BEGIN
+          NEW.updated_at = NOW();
+          RETURN NEW;
+      END;
+      $$ language 'plpgsql'
+    `;
+
+    await sql`
+      DROP TRIGGER IF EXISTS update_user_attribution_timestamp ON user_attribution
+    `;
+
+    await sql`
+      CREATE TRIGGER update_user_attribution_timestamp
+          BEFORE UPDATE ON user_attribution
+          FOR EACH ROW
+          EXECUTE FUNCTION update_user_attribution_updated_at()
+    `;
+
+    console.log('✅ User attribution table created');
+
     console.log('✅ Database setup complete!');
     console.log(
-      '📊 Database ready for push subscriptions, conversion tracking, social posts, subscriptions, tarot readings, AI threads, user profiles, shop data, notes, API keys, consent, and email preferences',
+      '📊 Database ready for push subscriptions, conversion tracking, social posts, subscriptions, tarot readings, AI threads, user profiles, shop data, notes, API keys, consent, email preferences, and user attribution',
     );
   } catch (error) {
     console.error('❌ Database setup failed:', error);

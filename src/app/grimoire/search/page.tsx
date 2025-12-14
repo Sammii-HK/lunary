@@ -8,7 +8,9 @@ import {
   type GrimoireEntry,
 } from '@/constants/seo/grimoire-search-index';
 import { AskTheGrimoire } from '@/components/grimoire/AskTheGrimoire';
+import { ExploreGrimoire } from '@/components/grimoire/ExploreGrimoire';
 
+import { createBreadcrumbSchema, renderJsonLd } from '@/lib/schema';
 export const metadata: Metadata = {
   title: 'Search the Grimoire | Lunary',
   description:
@@ -35,6 +37,7 @@ const CATEGORY_ICONS: Record<GrimoireEntry['category'], string> = {
   birthday: '🎂',
   compatibility: '💕',
   glossary: '📖',
+  archetype: '🔮',
 };
 
 const CATEGORY_COLORS: Record<GrimoireEntry['category'], string> = {
@@ -61,6 +64,7 @@ const CATEGORY_COLORS: Record<GrimoireEntry['category'], string> = {
     'bg-lunary-highlight-900 text-lunary-highlight-300 border-lunary-highlight-700',
   glossary:
     'bg-lunary-secondary-900 text-lunary-secondary-300 border-lunary-secondary-700',
+  archetype: 'bg-purple-500/20 text-purple-300 border-purple-500/30',
 };
 
 interface SearchResultCardProps {
@@ -134,8 +138,14 @@ function SearchContent({ query }: { query: string }) {
 
   const isDefaultView = !query;
 
+  const breadcrumbSchema = createBreadcrumbSchema([
+    { name: 'Grimoire', url: '/grimoire' },
+    { name: 'Search', url: '/grimoire/search' },
+  ]);
+
   return (
     <div className='space-y-6'>
+      {renderJsonLd(breadcrumbSchema)}
       {/* Results Header */}
       <div className='flex items-center justify-between'>
         <div className='flex items-center gap-2 text-lunary-primary-300/70'>
@@ -302,6 +312,10 @@ export default async function GrimoireSearchPage({
           }),
         }}
       />
+
+      <div className='max-w-4xl mx-auto px-4'>
+        <ExploreGrimoire />
+      </div>
     </main>
   );
 }

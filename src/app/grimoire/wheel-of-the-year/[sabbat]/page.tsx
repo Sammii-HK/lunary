@@ -174,7 +174,7 @@ ${sabbatData.spiritualMeaning}
             href: '/grimoire/wheel-of-the-year',
           },
           { text: 'Moon Phases', href: '/grimoire/moon' },
-          { text: 'Spells & Rituals', href: '/grimoire/practices' },
+          { text: 'Spells & Rituals', href: '/grimoire/spells' },
           { text: 'Grimoire Home', href: '/grimoire' },
         ]}
         ctaText={`Plan your ${sabbatData.name} celebration`}

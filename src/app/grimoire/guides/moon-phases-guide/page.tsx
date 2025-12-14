@@ -6,7 +6,11 @@ import {
   createArticleWithSpeakableSchema,
   createFAQPageSchema,
   renderJsonLd,
+  createBreadcrumbSchema,
 } from '@/lib/schema';
+import { Button } from '@/components/ui/button';
+import { ExploreGrimoire } from '@/components/grimoire/ExploreGrimoire';
+import { CosmicConnections } from '@/components/grimoire/CosmicConnections';
 
 export const metadata: Metadata = {
   title: 'Moon Phases: The Complete Guide to Lunar Cycles & Rituals - Lunary',
@@ -304,8 +308,18 @@ export default function MoonPhasesGuidePage() {
   const faqSchema = createFAQPageSchema(faqs);
 
   return (
-    <div className='min-h-screen p-4 md:p-8 max-w-4xl mx-auto'>
+    <div className='p-4 md:p-8 max-w-4xl mx-auto'>
       {renderJsonLd(articleSchema)}
+      {renderJsonLd(
+        createBreadcrumbSchema([
+          { name: 'Grimoire', url: '/grimoire' },
+          { name: 'Guides', url: '/grimoire/guides' },
+          {
+            name: 'Moon Phases Guide',
+            url: '/grimoire/guides/moon-phases-guide',
+          },
+        ]),
+      )}
       {renderJsonLd(faqSchema)}
 
       {/* Breadcrumbs */}
@@ -336,18 +350,12 @@ export default function MoonPhasesGuidePage() {
           rituals for every part of the cycle.
         </p>
         <div className='flex flex-wrap gap-4'>
-          <Link
-            href='/moon'
-            className='px-6 py-3 bg-lunary-primary-600 hover:bg-lunary-primary-700 text-white rounded-lg font-medium transition-colors'
-          >
-            Today&apos;s Moon Phase
-          </Link>
-          <Link
-            href='#eight-phases'
-            className='px-6 py-3 border border-zinc-700 hover:border-lunary-primary text-zinc-300 rounded-lg font-medium transition-colors'
-          >
-            Explore the Phases
-          </Link>
+          <Button asChild variant='lunary-solid' size='lg'>
+            <Link href='/moon'>Today&apos;s Moon Phase</Link>
+          </Button>
+          <Button asChild variant='outline' size='lg'>
+            <Link href='#eight-phases'>Explore the Phases</Link>
+          </Button>
         </div>
       </header>
 
@@ -923,6 +931,81 @@ export default function MoonPhasesGuidePage() {
         </div>
       </section>
 
+      {/* Where to Go Next */}
+      <section className='mb-16'>
+        <h2 className='text-3xl font-light text-zinc-100 mb-6'>
+          Continue Your Lunar Journey
+        </h2>
+        <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4'>
+          <Link
+            href='/grimoire/moon/rituals'
+            className='bg-zinc-900/50 border border-zinc-800 rounded-lg p-5 hover:border-lunary-primary transition-colors'
+          >
+            <h4 className='text-lg font-medium text-zinc-100 mb-2'>
+              Moon Rituals
+            </h4>
+            <p className='text-sm text-zinc-400'>
+              Detailed rituals for each lunar phase
+            </p>
+          </Link>
+          <Link
+            href='/grimoire/spells/fundamentals'
+            className='bg-zinc-900/50 border border-zinc-800 rounded-lg p-5 hover:border-lunary-primary transition-colors'
+          >
+            <h4 className='text-lg font-medium text-zinc-100 mb-2'>
+              Spellcraft Fundamentals
+            </h4>
+            <p className='text-sm text-zinc-400'>
+              Learn how to time spells with the Moon
+            </p>
+          </Link>
+          <Link
+            href='/grimoire/events/2026'
+            className='bg-zinc-900/50 border border-zinc-800 rounded-lg p-5 hover:border-lunary-primary transition-colors'
+          >
+            <h4 className='text-lg font-medium text-zinc-100 mb-2'>
+              2026 Cosmic Events
+            </h4>
+            <p className='text-sm text-zinc-400'>
+              Upcoming eclipses, supermoons, and retrogrades
+            </p>
+          </Link>
+          <Link
+            href='/grimoire/wheel-of-the-year'
+            className='bg-zinc-900/50 border border-zinc-800 rounded-lg p-5 hover:border-lunary-primary transition-colors'
+          >
+            <h4 className='text-lg font-medium text-zinc-100 mb-2'>
+              Wheel of the Year
+            </h4>
+            <p className='text-sm text-zinc-400'>
+              Seasonal sabbats and their lunar connections
+            </p>
+          </Link>
+          <Link
+            href='/grimoire/moon-in'
+            className='bg-zinc-900/50 border border-zinc-800 rounded-lg p-5 hover:border-lunary-primary transition-colors'
+          >
+            <h4 className='text-lg font-medium text-zinc-100 mb-2'>
+              Moon in Signs
+            </h4>
+            <p className='text-sm text-zinc-400'>
+              How each zodiac sign colors lunar energy
+            </p>
+          </Link>
+          <Link
+            href='/grimoire/crystals'
+            className='bg-zinc-900/50 border border-zinc-800 rounded-lg p-5 hover:border-lunary-primary transition-colors'
+          >
+            <h4 className='text-lg font-medium text-zinc-100 mb-2'>
+              Crystals for Moon Work
+            </h4>
+            <p className='text-sm text-zinc-400'>
+              Moonstone, selenite, and lunar allies
+            </p>
+          </Link>
+        </div>
+      </section>
+
       {/* CTA Section */}
       <section className='bg-gradient-to-r from-lunary-primary-900/30 to-blue-900/30 border border-lunary-primary-700 rounded-xl p-8 text-center'>
         <h2 className='text-2xl font-light text-zinc-100 mb-4'>
@@ -947,6 +1030,14 @@ export default function MoonPhasesGuidePage() {
           </Link>
         </div>
       </section>
+
+      <CosmicConnections
+        entityType='hub-moon'
+        entityKey='moon-phases-guide'
+        title='Moon Phases Connections'
+      />
+
+      <ExploreGrimoire />
     </div>
   );
 }

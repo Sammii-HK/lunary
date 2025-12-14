@@ -17,33 +17,28 @@ A complete digital product shop built for Lunary, featuring automatic pack gener
 ### Core Components
 
 1. **Pack Generation API** (`/api/shop/packs/generate`)
-
    - Generates content based on category (moon phases, crystals, spells, etc.)
    - Creates PDF files using pdf-lib
    - Uploads to Vercel Blob with private access
    - Generates OG images for previews
 
-2. **Stripe Integration** (`/api/shop/stripe/`)
-
+2. **Stripe Integration** (`/api/shop/`)
    - Creates products and prices in Stripe
    - Handles checkout sessions
    - Processes webhooks for payment confirmation
 
-3. **Purchase Flow** (`/api/shop/purchase`)
-
+3. **Purchase Flow** (`/api/shop/purchases`)
    - Creates secure checkout sessions
    - Generates download tokens
    - Tracks purchase status
 
 4. **Secure Downloads** (`/api/shop/download/[token]`)
-
    - Token-based authentication
    - Download limits (5 per purchase)
    - 30-day expiry
    - Signed URL generation
 
 5. **Shop Interface** (`/shop`)
-
    - Category filtering
    - Real-time product display
    - Stripe Checkout integration

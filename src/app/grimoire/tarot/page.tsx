@@ -27,6 +27,21 @@ export const metadata: Metadata = {
     siteName: 'Lunary',
     locale: 'en_US',
     type: 'article',
+    images: [
+      {
+        url: '/api/og/grimoire/tarot',
+        width: 1200,
+        height: 630,
+        alt: 'Tarot Cards Guide - All 78 Cards',
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'All 78 Tarot Cards: Major & Minor Arcana Meanings | Lunary',
+    description:
+      'Explore all 78 tarot cards with detailed meanings. Learn the Major Arcana, Minor Arcana, and how to read tarot cards.',
+    images: ['/api/og/grimoire/tarot'],
   },
   alternates: {
     canonical: 'https://lunary.app/grimoire/tarot',

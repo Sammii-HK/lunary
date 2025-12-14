@@ -18,6 +18,9 @@ import {
 export const metadata = {
   title: 'Explore | Lunary',
   description: 'Discover all features and resources in Lunary',
+  alternates: {
+    canonical: 'https://lunary.app/explore',
+  },
 };
 
 type ExploreItem = {
@@ -31,7 +34,7 @@ type ExploreItem = {
 const exploreItems: ExploreItem[] = [
   // Your Space - Personalized features
   {
-    href: '/book-of-shadows/journal',
+    href: '/book-of-shadows',
     label: 'Book of Shadows',
     description: 'Your reflections and patterns connected',
     icon: NotebookPen,
@@ -99,9 +102,9 @@ const exploreItems: ExploreItem[] = [
     icon: BookOpen,
   },
   {
-    href: '/shop',
+    href: '/shop?from=explore',
     label: 'Shop',
-    description: 'Crystals, tools, and magical supplies',
+    description: 'Digital packs, rituals, and cosmic guides',
     icon: Store,
   },
   {

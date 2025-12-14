@@ -296,7 +296,7 @@ While traditional tools like the ${toolData.name} are valued in many practices, 
         internalLinks={[
           { text: 'Witchcraft Tools', href: '/grimoire/witchcraft-tools' },
           { text: 'Modern Witchcraft', href: '/grimoire/modern-witchcraft' },
-          { text: 'Altar Setup', href: '/grimoire/practices' },
+          { text: 'Altar Setup', href: '/grimoire/spells/fundamentals' },
           { text: 'Grimoire Home', href: '/grimoire' },
         ]}
         ctaText='Explore more witchcraft tools'

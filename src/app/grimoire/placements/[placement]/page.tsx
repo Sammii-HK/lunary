@@ -1,6 +1,9 @@
 import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
+import { ExploreGrimoire } from '@/components/grimoire/ExploreGrimoire';
+import { Breadcrumbs } from '@/components/grimoire/Breadcrumbs';
+import { CosmicConnections } from '@/components/grimoire/CosmicConnections';
 import { ArrowRight, Star, AlertTriangle, Lightbulb } from 'lucide-react';
 import {
   generatePlanetSignContent,
@@ -8,7 +11,11 @@ import {
   planetDescriptions,
   signDescriptions,
 } from '@/constants/seo/planet-sign-content';
-import { createArticleSchema, renderJsonLd } from '@/lib/schema';
+import {
+  createArticleSchema,
+  renderJsonLd,
+  createBreadcrumbSchema,
+} from '@/lib/schema';
 
 interface PageProps {
   params: Promise<{ placement: string }>;
@@ -107,20 +114,21 @@ export default async function PlacementPage({ params }: PageProps) {
   return (
     <div className='min-h-screen bg-zinc-950 text-zinc-100'>
       {renderJsonLd(articleSchema)}
+      {renderJsonLd(
+        createBreadcrumbSchema([
+          { name: 'Grimoire', url: '/grimoire' },
+          { name: 'Placements', url: '/grimoire/placements' },
+        ]),
+      )}
 
       <div className='max-w-4xl mx-auto px-4 py-12'>
-        {/* Breadcrumbs */}
-        <nav className='flex items-center gap-2 text-sm text-zinc-400 mb-8'>
-          <Link href='/grimoire' className='hover:text-zinc-300'>
-            Grimoire
-          </Link>
-          <span>/</span>
-          <Link href='/grimoire/placements' className='hover:text-zinc-300'>
-            Placements
-          </Link>
-          <span>/</span>
-          <span className='text-zinc-400'>{content.title}</span>
-        </nav>
+        <Breadcrumbs
+          items={[
+            { label: 'Grimoire', href: '/grimoire' },
+            { label: 'Placements', href: '/grimoire/placements' },
+            { label: content.title },
+          ]}
+        />
 
         {/* Header */}
         <header className='mb-12'>
@@ -234,8 +242,67 @@ export default async function PlacementPage({ params }: PageProps) {
           </section>
         </article>
 
-        {/* Related Placements */}
+        {/* Cross-Links to Core Resources */}
         <section className='mt-12 pt-8 border-t border-zinc-800'>
+          <h2 className='text-xl font-medium text-zinc-100 mb-6'>
+            Deep Dive Resources
+          </h2>
+          <div className='grid grid-cols-2 md:grid-cols-3 gap-3 mb-8'>
+            <Link
+              href={`/grimoire/astronomy/planets/${parsed.planet}`}
+              className='p-4 rounded-lg border border-zinc-800 bg-zinc-900/50 hover:border-lunary-primary-600 transition-colors text-center'
+            >
+              <div className='text-lg mb-1'>🪐</div>
+              <div className='text-sm text-zinc-300'>{content.planet}</div>
+              <div className='text-xs text-zinc-500'>
+                Learn about this planet
+              </div>
+            </Link>
+            <Link
+              href={`/grimoire/zodiac/${parsed.sign}`}
+              className='p-4 rounded-lg border border-zinc-800 bg-zinc-900/50 hover:border-lunary-primary-600 transition-colors text-center'
+            >
+              <div className='text-lg mb-1'>♈</div>
+              <div className='text-sm text-zinc-300'>{content.sign}</div>
+              <div className='text-xs text-zinc-500'>Explore this sign</div>
+            </Link>
+            <Link
+              href='/grimoire/houses/overview'
+              className='p-4 rounded-lg border border-zinc-800 bg-zinc-900/50 hover:border-lunary-primary-600 transition-colors text-center'
+            >
+              <div className='text-lg mb-1'>🏠</div>
+              <div className='text-sm text-zinc-300'>Houses</div>
+              <div className='text-xs text-zinc-500'>Where it manifests</div>
+            </Link>
+            <Link
+              href='/grimoire/guides/birth-chart-complete-guide'
+              className='p-4 rounded-lg border border-zinc-800 bg-zinc-900/50 hover:border-lunary-primary-600 transition-colors text-center'
+            >
+              <div className='text-lg mb-1'>📚</div>
+              <div className='text-sm text-zinc-300'>Birth Chart Guide</div>
+              <div className='text-xs text-zinc-500'>Complete guide</div>
+            </Link>
+            <Link
+              href='/grimoire/zodiac'
+              className='p-4 rounded-lg border border-zinc-800 bg-zinc-900/50 hover:border-lunary-primary-600 transition-colors text-center'
+            >
+              <div className='text-lg mb-1'>✨</div>
+              <div className='text-sm text-zinc-300'>All Zodiac Signs</div>
+              <div className='text-xs text-zinc-500'>Browse all 12 signs</div>
+            </Link>
+            <Link
+              href='/grimoire/placements'
+              className='p-4 rounded-lg border border-zinc-800 bg-zinc-900/50 hover:border-lunary-primary-600 transition-colors text-center'
+            >
+              <div className='text-lg mb-1'>🌟</div>
+              <div className='text-sm text-zinc-300'>All Placements</div>
+              <div className='text-xs text-zinc-500'>144+ combinations</div>
+            </Link>
+          </div>
+        </section>
+
+        {/* Related Placements */}
+        <section className='pt-8 border-t border-zinc-800'>
           <h2 className='text-xl font-medium text-zinc-100 mb-6'>
             Explore Related Placements
           </h2>
@@ -275,6 +342,13 @@ export default async function PlacementPage({ params }: PageProps) {
           </div>
         </section>
 
+        {/* Cosmic Connections */}
+        <CosmicConnections
+          entityType='placement'
+          entityKey={placement}
+          title={`${content.planet} in ${content.sign} Cosmic Web`}
+        />
+
         {/* CTA */}
         <section className='mt-12 text-center'>
           <div className='p-8 rounded-lg border border-lunary-primary-700 bg-lunary-primary-900/10'>
@@ -310,6 +384,7 @@ export default async function PlacementPage({ params }: PageProps) {
             astrology interpretations
           </p>
         </footer>
+        <ExploreGrimoire />
       </div>
     </div>
   );

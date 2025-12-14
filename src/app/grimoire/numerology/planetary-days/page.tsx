@@ -1,7 +1,9 @@
 import { Metadata } from 'next';
 import Link from 'next/link';
+import { ExploreGrimoire } from '@/components/grimoire/ExploreGrimoire';
 import { Sun } from 'lucide-react';
 
+import { createBreadcrumbSchema, renderJsonLd } from '@/lib/schema';
 const planetaryDays = [
   {
     day: 'sunday',
@@ -87,8 +89,15 @@ export const metadata: Metadata = {
 };
 
 export default function PlanetaryDaysIndexPage() {
+  const breadcrumbSchema = createBreadcrumbSchema([
+    { name: 'Grimoire', url: '/grimoire' },
+    { name: 'Numerology', url: '/grimoire/numerology' },
+    { name: 'Planetary Days', url: '/grimoire/numerology/planetary-days' },
+  ]);
+
   return (
     <div className='p-4 md:p-6 lg:p-8 xl:p-10 min-h-full'>
+      {renderJsonLd(breadcrumbSchema)}
       <div className='max-w-5xl mx-auto'>
         {/* Header */}
         <div className='text-center mb-12'>
@@ -230,6 +239,7 @@ export default function PlanetaryDaysIndexPage() {
             </Link>
           </div>
         </div>
+        <ExploreGrimoire />
       </div>
     </div>
   );

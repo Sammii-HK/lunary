@@ -1,8 +1,10 @@
 import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
+import { ExploreGrimoire } from '@/components/grimoire/ExploreGrimoire';
 import { Sun } from 'lucide-react';
 
+import { createBreadcrumbSchema, renderJsonLd } from '@/lib/schema';
 const VALID_YEARS = ['2024', '2025', '2026'];
 
 const seasons = [
@@ -129,8 +131,14 @@ export default async function YearSeasonsPage({
     notFound();
   }
 
+  const breadcrumbSchema = createBreadcrumbSchema([
+    { name: 'Grimoire', url: '/grimoire' },
+    { name: 'Seasons', url: '/grimoire/seasons' },
+  ]);
+
   return (
     <div className='p-4 md:p-6 lg:p-8 xl:p-10 min-h-full'>
+      {renderJsonLd(breadcrumbSchema)}
       <div className='max-w-5xl mx-auto'>
         <div className='text-center mb-12'>
           <div className='flex justify-center mb-4'>
@@ -199,6 +207,7 @@ export default async function YearSeasonsPage({
             </Link>
           </div>
         </div>
+        <ExploreGrimoire />
       </div>
     </div>
   );

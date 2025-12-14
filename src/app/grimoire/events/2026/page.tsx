@@ -1,8 +1,10 @@
 import { Metadata } from 'next';
 import Link from 'next/link';
+import { ExploreGrimoire } from '@/components/grimoire/ExploreGrimoire';
 import { Calendar, Moon, Star, ArrowRight, Sparkles } from 'lucide-react';
 import { Breadcrumbs } from '@/components/grimoire/Breadcrumbs';
 
+import { createBreadcrumbSchema, renderJsonLd } from '@/lib/schema';
 export const metadata: Metadata = {
   title: '2026 Astrological Events Calendar | Lunary',
   description:
@@ -50,8 +52,15 @@ const events2026 = [
 ];
 
 export default function Events2026Page() {
+  const breadcrumbSchema = createBreadcrumbSchema([
+    { name: 'Grimoire', url: '/grimoire' },
+    { name: 'Events', url: '/grimoire/events' },
+    { name: '2026', url: '/grimoire/events/2026' },
+  ]);
+
   return (
     <main className='min-h-screen bg-gradient-to-b from-[#0a0a0f] via-[#12121a] to-[#0a0a0f] text-white'>
+      {renderJsonLd(breadcrumbSchema)}
       <div className='max-w-4xl mx-auto px-4 py-12'>
         <Breadcrumbs
           items={[
@@ -115,6 +124,8 @@ export default function Events2026Page() {
             View Your Birth Chart
           </Link>
         </section>
+
+        <ExploreGrimoire />
       </div>
     </main>
   );

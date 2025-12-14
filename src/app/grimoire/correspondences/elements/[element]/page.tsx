@@ -145,10 +145,10 @@ The ${elementKey.toLowerCase()} element's energy is ${elementData.colors.join(',
         },
         {
           text: 'Spellcraft Fundamentals',
-          href: '/grimoire/spellcraft-fundamentals',
+          href: '/grimoire/spells/fundamentals',
         },
         { text: 'Candle Magic', href: '/grimoire/candle-magic' },
-        { text: 'Spells & Rituals', href: '/grimoire/practices' },
+        { text: 'Spells & Rituals', href: '/grimoire/spells' },
       ]}
       tables={[
         {

@@ -647,7 +647,7 @@ ${details.history}`;
       ]}
       internalLinks={[
         { text: 'Wheel of the Year', href: '/grimoire/wheel-of-the-year' },
-        { text: 'Spells & Rituals', href: '/grimoire/practices' },
+        { text: 'Spells & Rituals', href: '/grimoire/spells' },
         { text: 'Magical Correspondences', href: '/grimoire/correspondences' },
         { text: 'Moon Rituals', href: '/grimoire/moon-rituals' },
       ]}

@@ -1,12 +1,11 @@
 import { NextResponse } from 'next/server';
 import {
-  spells,
+  spellDatabase,
   spellCategories,
   getSpellsByCategory,
   getSpellsBySabbat,
   getSpellsByMoonPhase,
-} from '@/constants/spells';
-import type { MoonPhaseLabels } from '../../../../../utils/moon/moonPhases';
+} from '@/lib/spells';
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
@@ -15,15 +14,16 @@ export async function GET(request: Request) {
   const moonPhase = searchParams.get('moonPhase');
 
   let data;
+
   if (category) {
     data = getSpellsByCategory(category);
   } else if (sabbat) {
     data = getSpellsBySabbat(sabbat);
   } else if (moonPhase) {
-    data = getSpellsByMoonPhase(moonPhase as MoonPhaseLabels);
+    data = getSpellsByMoonPhase(moonPhase);
   } else {
     data = {
-      spells,
+      spells: spellDatabase,
       categories: spellCategories,
     };
   }

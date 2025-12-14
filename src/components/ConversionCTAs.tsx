@@ -1,3 +1,4 @@
+// NOTE: Currently unused but kept for future use - generic conversion CTA component
 'use client';
 
 import Link from 'next/link';

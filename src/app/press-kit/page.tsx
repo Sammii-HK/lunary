@@ -28,6 +28,9 @@ export const metadata: Metadata = {
       'Download logos, product screenshots, brand assets, and press materials.',
     images: ['/api/og/cosmic'],
   },
+  alternates: {
+    canonical: 'https://lunary.app/press-kit',
+  },
 };
 
 const brandColors = [
@@ -290,6 +293,46 @@ export default function PressKitPage() {
       <section className='space-y-4 rounded-3xl border border-white/10 bg-black/40 p-6'>
         <div>
           <p className='text-xs uppercase tracking-[0.4em] text-lunary-primary-200 mb-2'>
+            Press Boilerplate
+          </p>
+          <h2 className='text-2xl font-semibold mb-4'>About Lunary</h2>
+        </div>
+        <blockquote className='border-l-4 border-lunary-primary-400 pl-4 text-lg text-zinc-200 italic'>
+          Lunary is the AI-powered spiritual intelligence platform that blends
+          astronomy-grade accuracy with personalised astrology, tarot, and
+          ritual guidance. Available on web and app.
+        </blockquote>
+        <p className='text-sm text-zinc-400'>
+          Use the above paragraph for press coverage and media mentions.
+        </p>
+      </section>
+
+      <section className='space-y-4 rounded-3xl border border-white/10 bg-black/40 p-6'>
+        <div>
+          <p className='text-xs uppercase tracking-[0.4em] text-lunary-primary-200 mb-2'>
+            Featured In
+          </p>
+          <h2 className='text-2xl font-semibold mb-4'>As Seen On</h2>
+        </div>
+        <div className='flex flex-wrap gap-8 items-center justify-center opacity-50'>
+          <div className='text-center'>
+            <p className='text-zinc-400 text-sm'>Media Partner</p>
+          </div>
+          <div className='text-center'>
+            <p className='text-zinc-400 text-sm'>Featured Publication</p>
+          </div>
+          <div className='text-center'>
+            <p className='text-zinc-400 text-sm'>Press Coverage</p>
+          </div>
+        </div>
+        <p className='text-xs text-zinc-500 text-center'>
+          Placeholder - logos will be added as press coverage grows.
+        </p>
+      </section>
+
+      <section className='space-y-4 rounded-3xl border border-white/10 bg-black/40 p-6'>
+        <div>
+          <p className='text-xs uppercase tracking-[0.4em] text-lunary-primary-200 mb-2'>
             Positioning
           </p>
           <h2 className='text-2xl font-semibold mb-4'>Positioning Statement</h2>
@@ -462,6 +505,35 @@ export default function PressKitPage() {
                 https://www.lunary.app
               </a>
             </p>
+            <div className='mt-4'>
+              <p className='font-semibold text-zinc-200 mb-2'>Social:</p>
+              <div className='flex flex-wrap gap-3'>
+                <a
+                  href='https://instagram.com/lunary.app'
+                  className='text-lunary-primary-200 underline hover:text-lunary-primary-100'
+                  target='_blank'
+                  rel='noopener noreferrer'
+                >
+                  Instagram
+                </a>
+                <a
+                  href='https://tiktok.com/@lunary.app'
+                  className='text-lunary-primary-200 underline hover:text-lunary-primary-100'
+                  target='_blank'
+                  rel='noopener noreferrer'
+                >
+                  TikTok
+                </a>
+                <a
+                  href='https://discord.gg/2WCJncKrKj'
+                  className='text-lunary-primary-200 underline hover:text-lunary-primary-100'
+                  target='_blank'
+                  rel='noopener noreferrer'
+                >
+                  Discord
+                </a>
+              </div>
+            </div>
             <p className='mt-4'>
               For investor materials, visit:{' '}
               <a

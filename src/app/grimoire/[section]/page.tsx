@@ -9,6 +9,7 @@ import {
   getAllGrimoireSectionSlugs,
 } from '@/utils/grimoire';
 import GrimoireLayout from '../GrimoireLayout';
+import { createBreadcrumbSchema, renderJsonLd } from '@/lib/schema';
 
 const sectionDescriptions: Record<string, string> = {
   moon: "Explore moon phases, full moon names, and lunar wisdom. Learn about the moon's influence on magic and daily life.",
@@ -296,5 +297,16 @@ export default async function GrimoireSectionPage({
     notFound();
   }
 
-  return <GrimoireLayout currentSectionSlug={section} />;
+  const sectionData = grimoire[slugToSection(section)];
+  const breadcrumbSchema = createBreadcrumbSchema([
+    { name: 'Grimoire', url: '/grimoire' },
+    { name: sectionData?.title || section, url: `/grimoire/${section}` },
+  ]);
+
+  return (
+    <>
+      {renderJsonLd(breadcrumbSchema)}
+      <GrimoireLayout currentSectionSlug={section} />
+    </>
+  );
 }

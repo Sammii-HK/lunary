@@ -1,11 +1,17 @@
 import { Metadata } from 'next';
 import Link from 'next/link';
+import { ExploreGrimoire } from '@/components/grimoire/ExploreGrimoire';
 import {
   YEARLY_TRANSITS,
   getTransitsForYear,
 } from '@/constants/seo/yearly-transits';
 import { Breadcrumbs } from '@/components/grimoire/Breadcrumbs';
-import { createItemListSchema, renderJsonLd } from '@/lib/schema';
+import { CosmicConnections } from '@/components/grimoire/CosmicConnections';
+import {
+  createItemListSchema,
+  renderJsonLd,
+  createBreadcrumbSchema,
+} from '@/lib/schema';
 
 export const metadata: Metadata = {
   title:
@@ -20,6 +26,26 @@ export const metadata: Metadata = {
     '2025 transits',
     '2026 transits',
   ],
+  openGraph: {
+    title: 'Yearly Astrological Transits 2025-2030 | Lunary',
+    description:
+      'Complete guide to major astrological transits. Saturn Return, Jupiter transits, and more.',
+    url: 'https://lunary.app/grimoire/transits',
+    images: [
+      {
+        url: '/api/og/grimoire/transits',
+        width: 1200,
+        height: 630,
+        alt: 'Astrological Transits Guide',
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Yearly Astrological Transits 2025-2030 | Lunary',
+    description: 'Complete guide to major astrological transits.',
+    images: ['/api/og/grimoire/transits'],
+  },
   alternates: { canonical: 'https://lunary.app/grimoire/transits' },
 };
 
@@ -41,6 +67,12 @@ export default function TransitsIndexPage() {
   return (
     <div className='min-h-screen bg-zinc-950 text-zinc-100'>
       {renderJsonLd(transitsListSchema)}
+      {renderJsonLd(
+        createBreadcrumbSchema([
+          { name: 'Grimoire', url: '/grimoire' },
+          { name: 'Transits', url: '/grimoire/transits' },
+        ]),
+      )}
       <div className='max-w-6xl mx-auto px-4 py-12'>
         <Breadcrumbs
           items={[
@@ -127,6 +159,14 @@ export default function TransitsIndexPage() {
             View Your Personal Transits
           </Link>
         </div>
+        <div className='mt-8'>
+          <CosmicConnections
+            entityType='hub-transits'
+            entityKey='transits'
+            title='Transits Connections'
+          />
+        </div>
+        <ExploreGrimoire />
       </div>
     </div>
   );

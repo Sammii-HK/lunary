@@ -208,7 +208,7 @@ Walking the ${witchData.name} path means integrating these practices into your d
       ]}
       internalLinks={[
         { text: 'Modern Witchcraft', href: '/grimoire/modern-witchcraft' },
-        { text: 'Spellcraft Practices', href: '/grimoire/practices' },
+        { text: 'Spellcraft Practices', href: '/grimoire/spells/fundamentals' },
         {
           text: 'Spellcraft Fundamentals',
           href: '/grimoire/spells/fundamentals',

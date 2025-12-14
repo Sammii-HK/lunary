@@ -174,6 +174,13 @@ export function TarotSpreadExperience({
   );
 
   const refreshReadings = useCallback(async () => {
+    // Don't fetch if user is not authenticated
+    if (!userId) {
+      setIsLoading(false);
+      setError(null);
+      return;
+    }
+
     setIsLoading(true);
     setError(null);
 
@@ -293,7 +300,12 @@ export function TarotSpreadExperience({
     } finally {
       setIsLoading(false);
     }
-  }, [selectedSpreadSlug, subscriptionPlan.plan, subscriptionPlan.status]);
+  }, [
+    userId,
+    selectedSpreadSlug,
+    subscriptionPlan.plan,
+    subscriptionPlan.status,
+  ]);
 
   useEffect(() => {
     refreshReadings();
@@ -505,7 +517,7 @@ export function TarotSpreadExperience({
         )}
       </div>
 
-      {error && (
+      {error && !error.toLowerCase().includes('authentication required') && (
         <div className='rounded-lg border border-red-500/30 bg-red-500/10 p-3 text-sm text-red-200'>
           {error}
         </div>

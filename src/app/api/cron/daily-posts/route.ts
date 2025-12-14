@@ -37,6 +37,10 @@ import {
   calculateRealAspects,
   checkRetrogradeEvents,
 } from '../../../../../utils/astrology/cosmic-og';
+import {
+  getAllPlatformHashtags,
+  CosmicContext,
+} from '../../../../../utils/hashtags';
 
 // Track if cron is already running to prevent duplicate execution
 // Using a Map to track by date for better serverless resilience
@@ -528,8 +532,8 @@ async function runDailyPosts(dateStr: string) {
   // Cron runs at 2 PM UTC the day before, schedule posts starting at 12 PM UTC next day
   const scheduleBase = new Date(dateStr + 'T12:00:00Z'); // Start at 12 PM UTC on target date
 
-  // Always post to our own subreddit r/LunaryApp
-  const subreddit = { name: 'LunaryApp' };
+  // Always post to our own subreddit r/lunary_insights
+  const subreddit = { name: 'lunary_insights' };
 
   // Generate Reddit title from cosmic content
   const redditTitle = `Daily Cosmic Guidance - ${dateStr}: ${cosmicContent.primaryEvent.name}`;
@@ -540,6 +544,19 @@ async function runDailyPosts(dateStr: string) {
   // Generate AI quote for Pinterest/TikTok using shared utility
   const quote = await generateCatchyQuote(postContent, 'cosmic');
   const quoteImageUrl = getQuoteImageUrl(quote, productionUrl);
+
+  // Build cosmic context for dynamic hashtags
+  const cosmicContext: CosmicContext = {
+    moonPhase: cosmicContent.astronomicalData?.moonPhase?.name,
+    zodiacSign: cosmicContent.astronomicalData?.planets?.sun?.sign,
+    retrograde: Object.entries(cosmicContent.astronomicalData?.planets || {})
+      .filter(([_, data]: [string, any]) => data?.retrograde)
+      .map(([name]) => name.charAt(0).toUpperCase() + name.slice(1)),
+    primaryEvent: cosmicContent.primaryEvent?.name,
+  };
+
+  // Generate platform-optimized hashtags
+  const platformHashtags = getAllPlatformHashtags(dateStr, cosmicContext);
 
   // Generate posts with dynamic content
   const posts = [
@@ -556,6 +573,7 @@ async function runDailyPosts(dateStr: string) {
       },
       variants: {
         instagram: {
+          content: `${postContent}\n\n${platformHashtags.instagram}`,
           media: [
             `${productionUrl}/api/og/cosmic/${dateStr}`,
             `${productionUrl}/api/og/crystal?date=${dateStr}`,
@@ -565,10 +583,7 @@ async function runDailyPosts(dateStr: string) {
           ],
         },
         x: {
-          content: generateCosmicPost(cosmicContent).snippetShort.replace(
-            /\n/g,
-            ' ',
-          ),
+          content: `${generateCosmicPost(cosmicContent).snippetShort.replace(/\n/g, ' ')} ${platformHashtags.twitter}`,
           media: [
             `${productionUrl}/api/og/cosmic/${dateStr}/landscape`,
             `${productionUrl}/api/og/crystal?date=${dateStr}&size=landscape`,
@@ -588,6 +603,17 @@ async function runDailyPosts(dateStr: string) {
             `${productionUrl}/api/og/moon?date=${dateStr}`,
             `${productionUrl}/api/og/horoscope?date=${dateStr}`,
           ],
+        },
+        tiktok: {
+          content: `${generateCosmicPost(cosmicContent).snippetShort} ${platformHashtags.tiktok}`,
+        },
+        linkedin: {
+          content: `${postContent}\n\n${platformHashtags.linkedin}`,
+        },
+        facebook: {
+          content: platformHashtags.facebook
+            ? `${postContent}\n\n${platformHashtags.facebook}`
+            : postContent,
         },
       },
     },

@@ -198,7 +198,7 @@ Rarity: ${crystalData.rarity}`}
           <CosmicConnections
             entityType='crystal'
             entityKey={crystal}
-            title={`${crystalData.name} Cosmic Web`}
+            title={`${crystalData.name} Cosmic Connections`}
           />
         }
       />

@@ -13,6 +13,7 @@ import {
   Aspect,
 } from '@/constants/seo/aspects';
 import { SEOContentTemplate } from '@/components/grimoire/SEOContentTemplate';
+import { CosmicConnections } from '@/components/grimoire/CosmicConnections';
 
 interface PageParams {
   planet1: string;
@@ -158,6 +159,14 @@ ${interp.inSynastry}
       ctaText='Discover aspects in your chart'
       ctaHref='/birth-chart'
       sources={[{ name: 'Traditional astrological aspects' }]}
+      cosmicConnections={
+        <CosmicConnections
+          entityType='aspect'
+          entityKey={`${planet1}-${aspect}-${planet2}`}
+          title={`${interp.title} Connections`}
+          extraParams={{ planet1, aspect, planet2 }}
+        />
+      }
     >
       <div className='mt-8'>
         <h3 className='text-lg font-medium mb-4'>Other Aspects</h3>

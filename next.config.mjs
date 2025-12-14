@@ -5,8 +5,8 @@ const require = createRequire(import.meta.url);
 const withBundleAnalyzer =
   process.env.ANALYZE === 'true'
     ? require('@next/bundle-analyzer')({
-        enabled: true,
-      })
+      enabled: true,
+    })
     : (config) => config;
 
 /** @type {import('next').NextConfig} */
@@ -219,8 +219,8 @@ const nextConfig = {
     removeConsole:
       process.env.NODE_ENV === 'production'
         ? {
-            exclude: ['error', 'warn'], // Keep console.error and console.warn
-          }
+          exclude: ['error', 'warn'], // Keep console.error and console.warn
+        }
         : false,
   },
 
@@ -387,10 +387,15 @@ const nextConfig = {
 
   async redirects() {
     return [
-      // Book of Shadows -> Guide redirect (chat renamed)
+      // Forecast -> Transits hub redirect
       {
-        source: '/book-of-shadows',
-        destination: '/guide',
+        source: '/forecast',
+        destination: '/transits',
+        permanent: true,
+      },
+      {
+        source: '/forecast/:year',
+        destination: '/grimoire/transits#year-:year',
         permanent: true,
       },
       // Blog week URL format normalization

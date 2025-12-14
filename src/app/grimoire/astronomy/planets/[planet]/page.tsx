@@ -1,13 +1,17 @@
 import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { SEOContentTemplate } from '@/components/grimoire/SEOContentTemplate';
+import { CosmicConnections } from '@/components/grimoire/CosmicConnections';
 import {
   planetaryBodies,
   bodiesSymbols,
   planetUnicode,
 } from '../../../../../../utils/zodiac/zodiac';
 import { createPlanetSchema, renderJsonLd } from '@/lib/schema';
-import { getEntityRelationships } from '@/constants/entity-relationships';
+import {
+  getEntityRelationships,
+  getWikipediaUrl,
+} from '@/constants/entity-relationships';
 
 const planetKeys = Object.keys(planetaryBodies);
 
@@ -67,7 +71,7 @@ export async function generateMetadata({
       card: 'summary_large_image',
       title,
       description,
-      images: ['/api/og/cosmic'],
+      images: ['/api/og/grimoire/planets'],
     },
     alternates: {
       canonical: `https://lunary.app/grimoire/astronomy/planets/${planet}`,
@@ -199,6 +203,7 @@ export default async function PlanetPage({
     rules: planetData.rules || [],
     themes: correspondences.themes,
     day: correspondences.day,
+    sameAs: getWikipediaUrl('planets', planetKey),
   });
 
   return (
@@ -287,6 +292,13 @@ In magical practice, ${planetData.name} is invoked for matters relating to ${cor
         ctaText={`Discover ${planetData.name} in your birth chart`}
         ctaHref='/pricing'
         faqs={faqs}
+        cosmicConnections={
+          <CosmicConnections
+            entityType='planet'
+            entityKey={planetKey}
+            title={`${planetData.name} Cosmic Connections`}
+          />
+        }
       />
     </div>
   );

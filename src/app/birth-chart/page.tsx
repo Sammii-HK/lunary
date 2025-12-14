@@ -521,16 +521,54 @@ const getChartPatterns = (birthChart: BirthChartData[]): ChartPattern[] => {
   // 4. YOD (Finger of God) - 2 quincunx + 1 sextile
   const quincunxes = getQuincunxAspects(birthChart);
   if (quincunxes.length >= 2 && sextiles.length >= 1) {
-    const yodPlanets = new Set(
-      quincunxes.flatMap((q) => [q.planet1, q.planet2]),
-    );
-    if (yodPlanets.size >= 3) {
+    // Find pairs of quincunxes that share one planet (the apex)
+    let yodFound = false;
+    let yodPattern: {
+      apexPlanet: string;
+      basePlanets: string[];
+    } | null = null;
+
+    for (let i = 0; i < quincunxes.length && !yodFound; i++) {
+      for (let j = i + 1; j < quincunxes.length && !yodFound; j++) {
+        const q1 = quincunxes[i];
+        const q2 = quincunxes[j];
+
+        // Check if these two quincunxes share a planet (the apex)
+        let apexPlanet: string | null = null;
+        let basePlanets: string[] = [];
+
+        if (q1.planet1 === q2.planet1) {
+          apexPlanet = q1.planet1;
+          basePlanets = [q1.planet2, q2.planet2];
+        } else if (q1.planet1 === q2.planet2) {
+          apexPlanet = q1.planet1;
+          basePlanets = [q1.planet2, q2.planet1];
+        } else if (q1.planet2 === q2.planet1) {
+          apexPlanet = q1.planet2;
+          basePlanets = [q1.planet1, q2.planet2];
+        } else if (q1.planet2 === q2.planet2) {
+          apexPlanet = q1.planet2;
+          basePlanets = [q1.planet1, q2.planet1];
+        }
+
+        if (
+          apexPlanet &&
+          basePlanets.length === 2 &&
+          basePlanets[0] !== basePlanets[1]
+        ) {
+          yodPattern = { apexPlanet, basePlanets };
+          yodFound = true;
+          break;
+        }
+      }
+      if (yodFound) break;
+    }
+
+    if (yodFound && yodPattern) {
       patterns.push({
         name: 'Yod (Finger of God)',
-        description:
-          'Two quincunx aspects pointing to one planet - karmic configuration',
-        meaning:
-          'Special mission or destiny. The apex planet represents a unique gift that must be developed for spiritual growth.',
+        description: `${yodPattern.basePlanets[0]} and ${yodPattern.basePlanets[1]} form quincunx aspects pointing to ${yodPattern.apexPlanet} - karmic configuration`,
+        meaning: `Special mission or destiny. ${yodPattern.apexPlanet} (the apex planet) represents a unique gift that must be developed for spiritual growth. The quincunx aspects from ${yodPattern.basePlanets[0]} and ${yodPattern.basePlanets[1]} create tension that drives you toward developing ${yodPattern.apexPlanet}'s potential.`,
       });
     }
   }
@@ -632,6 +670,30 @@ const getChartPatterns = (birthChart: BirthChartData[]): ChartPattern[] => {
   const bowlPattern = getBowlPattern(birthChart);
   if (bowlPattern) {
     patterns.push(bowlPattern);
+  }
+
+  // 13. SEESAW PATTERN (only if no other shape pattern detected)
+  if (!shapePattern && !locomotivePattern && !bowlPattern) {
+    const seesawPattern = getSeesawPattern(birthChart);
+    if (seesawPattern) {
+      patterns.push(seesawPattern);
+    }
+  }
+
+  // 14. SPLASH PATTERN (only if no other shape pattern detected)
+  if (!shapePattern && !locomotivePattern && !bowlPattern) {
+    const splashPattern = getSplashPattern(birthChart);
+    if (splashPattern) {
+      patterns.push(splashPattern);
+    }
+  }
+
+  // 15. SPLAY PATTERN (only if no other shape pattern detected)
+  if (!shapePattern && !locomotivePattern && !bowlPattern) {
+    const splayPattern = getSplayPattern(birthChart);
+    if (splayPattern) {
+      patterns.push(splayPattern);
+    }
   }
 
   return patterns;
@@ -844,6 +906,155 @@ const getBowlPattern = (birthChart: BirthChartData[]): ChartPattern | null => {
   return null;
 };
 
+const getSeesawPattern = (
+  birthChart: BirthChartData[],
+): ChartPattern | null => {
+  if (birthChart.length < 8) return null; // Need at least 8 planets for seesaw
+
+  const longitudes = birthChart
+    .map((p) => p.eclipticLongitude)
+    .sort((a, b) => a - b);
+
+  // Calculate gaps between consecutive planets
+  const spans = [];
+  for (let i = 0; i < longitudes.length - 1; i++) {
+    spans.push(longitudes[i + 1] - longitudes[i]);
+  }
+  spans.push(360 + longitudes[0] - longitudes[longitudes.length - 1]);
+
+  // Find the largest gap (should be roughly 180° for seesaw)
+  const maxSpan = Math.max(...spans);
+  const maxSpanIndex = spans.indexOf(maxSpan);
+
+  // Check if the gap is roughly 180° (allow 30° orb)
+  if (maxSpan < 150 || maxSpan > 210) return null;
+
+  // Split planets into two groups based on the largest gap
+  const group1: BirthChartData[] = [];
+  const group2: BirthChartData[] = [];
+
+  for (let i = 0; i < birthChart.length; i++) {
+    const planet = birthChart[i];
+    const planetIndex = longitudes.indexOf(planet.eclipticLongitude);
+
+    if (planetIndex <= maxSpanIndex) {
+      group1.push(planet);
+    } else {
+      group2.push(planet);
+    }
+  }
+
+  // Each group should have at least 4 planets
+  if (group1.length >= 4 && group2.length >= 4) {
+    // Check that there are no more than 2-3 planets in the gap area
+    const gapPlanets = Math.min(group1.length, group2.length);
+    if (gapPlanets <= 3) {
+      return {
+        name: 'Seesaw Pattern',
+        description: `Planets divided into two opposing groups (${group1.length} and ${group2.length} planets)`,
+        meaning:
+          'Life is a constant balancing act between two opposing forces. You excel at diplomacy and seeing both sides of situations. Your challenge is integrating these polarities rather than swinging between extremes. This pattern gives you versatility but requires conscious choice-making.',
+      };
+    }
+  }
+
+  return null;
+};
+
+const getSplashPattern = (
+  birthChart: BirthChartData[],
+): ChartPattern | null => {
+  if (birthChart.length < 7) return null; // Need at least 7 planets
+
+  const longitudes = birthChart
+    .map((p) => p.eclipticLongitude)
+    .sort((a, b) => a - b);
+
+  // Check distribution across signs
+  const uniqueSigns = new Set(birthChart.map((p) => p.sign)).size;
+  if (uniqueSigns < 8) return null; // Need planets in 8+ different signs
+
+  // Calculate gaps between consecutive planets
+  const spans = [];
+  for (let i = 0; i < longitudes.length - 1; i++) {
+    spans.push(longitudes[i + 1] - longitudes[i]);
+  }
+  spans.push(360 + longitudes[0] - longitudes[longitudes.length - 1]);
+
+  // Check that no gap is larger than 60° (even distribution)
+  const maxGap = Math.max(...spans);
+  if (maxGap > 60) return null;
+
+  // Check that gaps are relatively even (no huge variations)
+  const avgGap = spans.reduce((a, b) => a + b, 0) / spans.length;
+  const gapVariance =
+    spans.reduce((sum, gap) => sum + Math.abs(gap - avgGap), 0) / spans.length;
+
+  // If gaps are relatively even (low variance), it's a splash
+  if (gapVariance < 25) {
+    return {
+      name: 'Splash Pattern',
+      description: `Planets spread evenly across ${uniqueSigns} signs with no major gaps`,
+      meaning:
+        'Versatile and adaptable, you have interests and talents in many areas. You can relate to diverse perspectives and situations. The challenge is maintaining focus and depth rather than scattering your energy too widely. You thrive on variety and change.',
+    };
+  }
+
+  return null;
+};
+
+const getSplayPattern = (birthChart: BirthChartData[]): ChartPattern | null => {
+  if (birthChart.length < 5) return null; // Need at least 5 planets
+
+  const longitudes = birthChart
+    .map((p) => p.eclipticLongitude)
+    .sort((a, b) => a - b);
+
+  const totalSpread = longitudes[longitudes.length - 1] - longitudes[0];
+
+  // Splay: planets spread across more than 180° but not evenly
+  // Not a bundle (all within 120°), not a bowl (all within 180°)
+  if (totalSpread <= 180) return null;
+
+  // Check distribution - should be in different hemispheres
+  const upperHemisphere = birthChart.filter(
+    (p) => p.eclipticLongitude >= 0 && p.eclipticLongitude < 180,
+  ).length;
+  const lowerHemisphere = birthChart.filter(
+    (p) => p.eclipticLongitude >= 180 && p.eclipticLongitude < 360,
+  ).length;
+
+  // Should have planets in both hemispheres
+  if (upperHemisphere === 0 || lowerHemisphere === 0) return null;
+
+  // Check for gaps - should have some clustering but not too much
+  const spans = [];
+  for (let i = 0; i < longitudes.length - 1; i++) {
+    spans.push(longitudes[i + 1] - longitudes[i]);
+  }
+  spans.push(360 + longitudes[0] - longitudes[longitudes.length - 1]);
+
+  const maxGap = Math.max(...spans);
+  const minGap = Math.min(...spans);
+
+  // Should have some variation in gaps (not evenly distributed like splash)
+  // But not all clustered (max gap should be > 60°)
+  if (maxGap > 60 && maxGap < 120 && minGap < 30) {
+    const uniqueSigns = new Set(birthChart.map((p) => p.sign)).size;
+    // Should be spread across multiple signs but not all signs (unlike splash)
+    if (uniqueSigns >= 5 && uniqueSigns < 8) {
+      return {
+        name: 'Splay Pattern',
+        description: `Planets spread across ${uniqueSigns} signs in different hemispheres with varied spacing`,
+        meaning:
+          'Independent and self-directed, you have multiple areas of focus that you pursue simultaneously. You resist being boxed into one category and prefer flexibility. Your energy flows in several directions, requiring good time management and prioritization skills.',
+      };
+    }
+  }
+
+  return null;
+};
+
 const BirthChartPage = () => {
   const { user, loading } = useUser();
   const subscription = useSubscription();
@@ -956,30 +1167,60 @@ const BirthChartPage = () => {
   }
 
   return (
-    <div className='h-full space-y-6 p-4 overflow-auto'>
-      <BirthChart
-        birthChart={birthChartData}
-        userName={userName}
-        birthDate={userBirthday}
-      />
+    <div className='h-full overflow-auto'>
+      <div className='flex w-full flex-col gap-4 max-w-2xl md:max-w-4xl mx-auto p-4'>
+        {/* Internal Links for SEO */}
+        <nav className='p-4 bg-zinc-900/50 rounded-lg border border-zinc-800'>
+          <p className='text-sm text-zinc-400 mb-3'>
+            Learn more about your cosmic blueprint:
+          </p>
+          <div className='flex flex-wrap gap-2'>
+            <Link
+              href='/grimoire/birth-chart'
+              className='text-xs px-3 py-1.5 bg-lunary-primary-900/30 text-lunary-primary-300 border border-lunary-primary-700/50 rounded-full hover:bg-lunary-primary-900/50 transition-colors'
+            >
+              Birth Chart Guide
+            </Link>
+            <Link
+              href='/grimoire/astronomy/planets'
+              className='text-xs px-3 py-1.5 bg-lunary-accent-900/30 text-lunary-accent-300 border border-lunary-accent-700/50 rounded-full hover:bg-lunary-accent-900/50 transition-colors'
+            >
+              Planet Meanings
+            </Link>
+            <Link
+              href='/grimoire/houses/overview/first'
+              className='text-xs px-3 py-1.5 bg-lunary-secondary-900/30 text-lunary-secondary-300 border border-lunary-secondary-700/50 rounded-full hover:bg-lunary-secondary-900/50 transition-colors'
+            >
+              The 12 Houses
+            </Link>
+            <Link
+              href='/grimoire/zodiac'
+              className='text-xs px-3 py-1.5 bg-lunary-rose-900/30 text-lunary-rose-300 border border-lunary-rose-700/50 rounded-full hover:bg-lunary-rose-900/50 transition-colors'
+            >
+              Zodiac Signs
+            </Link>
+          </div>
+        </nav>
 
-      {birthChartData && (
-        <div className='flex flex-col items-center gap-3 mt-4'>
-          <ShareBirthChart
-            birthChart={birthChartData}
-            userName={userName}
-            userBirthday={userBirthday}
-          />
-        </div>
-      )}
+        <BirthChart
+          birthChart={birthChartData}
+          userName={userName}
+          birthDate={userBirthday}
+        />
 
-      {/* Planetary Interpretations */}
-      {birthChartData && (
-        <div className='bg-lunary-bg rounded-lg p-4 max-w-md mx-auto border border-zinc-800'>
-          <h3 className='text-lg font-semibold text-lunary-success mb-3'>
-            Your Cosmic Blueprint
-          </h3>
-          <div className='space-y-4'>
+        {birthChartData && (
+          <div className='flex flex-col items-center gap-3'>
+            <ShareBirthChart
+              birthChart={birthChartData}
+              userName={userName}
+              userBirthday={userBirthday}
+            />
+          </div>
+        )}
+
+        {/* Planetary Interpretations - Responsive Grid */}
+        {birthChartData && (
+          <div className='grid grid-cols-1 md:grid-cols-2 gap-3'>
             {/* Big Three - Sun, Moon, Rising */}
             {(() => {
               const sun = birthChartData.find((p) => p.body === 'Sun');
@@ -988,11 +1229,11 @@ const BirthChartPage = () => {
 
               if (sun || moon || rising) {
                 return (
-                  <div className='mb-4 pb-4 border-b border-zinc-700'>
+                  <div className='bg-lunary-bg rounded-lg p-4 border border-zinc-800 md:col-span-2'>
                     <h4 className='text-xs font-medium text-lunary-primary-400 mb-3 uppercase tracking-wide'>
                       The Big Three
                     </h4>
-                    <div className='grid grid-cols-1 gap-3'>
+                    <div className='grid grid-cols-1 md:grid-cols-3 gap-3'>
                       {sun && (
                         <div className='bg-zinc-900 rounded p-3'>
                           <div className='flex items-center gap-2 mb-1'>
@@ -1060,7 +1301,7 @@ const BirthChartPage = () => {
               const houses = calculateWholeSigHouses(birthChartData);
               if (!houses) {
                 return (
-                  <div className='mb-4 pb-4 border-b border-zinc-700'>
+                  <div className='bg-lunary-bg rounded-lg p-4 border border-zinc-800 md:col-span-2'>
                     <h4 className='text-xs font-medium text-lunary-highlight mb-2 uppercase tracking-wide'>
                       Houses
                     </h4>
@@ -1072,7 +1313,7 @@ const BirthChartPage = () => {
               }
 
               return (
-                <div className='mb-4 pb-4 border-b border-zinc-700'>
+                <div className='bg-lunary-bg rounded-lg p-4 border border-zinc-800 md:col-span-2'>
                   <h4 className='text-xs font-medium text-lunary-highlight mb-3 uppercase tracking-wide'>
                     Your 12 Houses
                   </h4>
@@ -1139,7 +1380,7 @@ const BirthChartPage = () => {
             })()}
 
             {/* Personal Planets */}
-            <div>
+            <div className='bg-lunary-bg rounded-lg p-4 border border-zinc-800'>
               <h4 className='text-xs font-medium text-lunary-secondary mb-2 uppercase tracking-wide'>
                 Personal Planets
               </h4>
@@ -1180,7 +1421,7 @@ const BirthChartPage = () => {
             </div>
 
             {/* Social Planets */}
-            <div>
+            <div className='bg-lunary-bg rounded-lg p-4 border border-zinc-800'>
               <h4 className='text-xs font-medium text-lunary-accent mb-2 uppercase tracking-wide'>
                 Social Planets
               </h4>
@@ -1219,7 +1460,7 @@ const BirthChartPage = () => {
             </div>
 
             {/* Generational Planets */}
-            <div>
+            <div className='bg-lunary-bg rounded-lg p-4 border border-zinc-800'>
               <h4 className='text-xs font-medium text-lunary-primary-400 mb-2 uppercase tracking-wide'>
                 Generational Planets
               </h4>
@@ -1277,7 +1518,7 @@ const BirthChartPage = () => {
               if (!hasPoints) return null;
 
               return (
-                <div>
+                <div className='bg-lunary-bg rounded-lg p-4 border border-zinc-800'>
                   <h4 className='text-xs font-medium text-lunary-highlight mb-2 uppercase tracking-wide'>
                     Sensitive Points
                   </h4>
@@ -1402,7 +1643,7 @@ const BirthChartPage = () => {
               });
 
               return (
-                <div>
+                <div className='bg-lunary-bg rounded-lg p-4 border border-zinc-800 md:col-span-2'>
                   <h4 className='text-xs font-medium text-lunary-secondary mb-2 uppercase tracking-wide'>
                     Houses
                   </h4>
@@ -1447,222 +1688,268 @@ const BirthChartPage = () => {
                 </div>
               );
             })()}
-          </div>
 
-          {/* Chart Patterns & Analysis */}
-          <div className='mt-6 pt-4 border-t border-zinc-700'>
-            <h4 className='text-sm font-medium text-lunary-secondary mb-3'>
-              Chart Analysis
-            </h4>
-            <div className='space-y-3'>
-              {getChartAnalysis(birthChartData).map((analysis, index) => (
-                <div key={index} className='bg-zinc-900 rounded p-3'>
-                  <h5 className='text-xs font-medium text-lunary-secondary-300 mb-1'>
-                    {analysis.category}
-                  </h5>
-                  <p className='text-xs text-zinc-300'>{analysis.insight}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Element & Modality Breakdown */}
-          <div className='mt-4'>
-            <h4 className='text-sm font-medium text-lunary-rose mb-3'>
-              Elemental & Modal Balance
-            </h4>
-            <div className='grid grid-cols-2 gap-3'>
-              {/* Elements */}
-              <div>
-                <h5 className='text-xs font-medium text-lunary-rose-300 mb-2'>
-                  Elements
-                </h5>
-                <div className='space-y-1'>
-                  {getElementModality(birthChartData).elements.map(
-                    (element) => (
-                      <div
-                        key={element.name}
-                        className='bg-zinc-900 rounded p-2'
-                      >
-                        <div className='flex items-center justify-between mb-1'>
-                          <div className='flex items-center gap-2'>
-                            <span className='text-sm font-astro'>
-                              {element.symbol}
-                            </span>
-                            <span className='text-xs text-zinc-300'>
-                              {element.name}
-                            </span>
-                          </div>
-                          <span className='text-xs text-lunary-rose-300'>
-                            {element.count}
-                          </span>
-                        </div>
-                        {element.count > 0 && (
-                          <div className='flex flex-wrap gap-1'>
-                            {(element as any).planets?.map(
-                              (planet: BirthChartData) => (
-                                <span
-                                  key={planet.body}
-                                  className='text-xs font-astro bg-zinc-800 px-1 rounded'
-                                >
-                                  {
-                                    bodiesSymbols[
-                                      planet.body.toLowerCase() as keyof typeof bodiesSymbols
-                                    ]
-                                  }
-                                </span>
-                              ),
-                            )}
-                          </div>
-                        )}
-                      </div>
-                    ),
-                  )}
+            {/* Chart Analysis */}
+            {getChartAnalysis(birthChartData).length > 0 && (
+              <div className='bg-lunary-bg rounded-lg p-4 border border-zinc-800 md:col-span-2'>
+                <h4 className='text-sm font-medium text-lunary-secondary mb-3'>
+                  Chart Analysis
+                </h4>
+                <div className='space-y-3'>
+                  {getChartAnalysis(birthChartData).map((analysis, index) => (
+                    <div key={index} className='bg-zinc-900 rounded p-3'>
+                      <h5 className='text-xs font-medium text-lunary-secondary-300 mb-1'>
+                        {analysis.category}
+                      </h5>
+                      <p className='text-xs text-zinc-300'>
+                        {analysis.insight}
+                      </p>
+                    </div>
+                  ))}
                 </div>
               </div>
+            )}
 
-              {/* Modalities */}
-              <div>
-                <h5 className='text-xs font-medium text-lunary-rose-300 mb-2'>
-                  Modalities
-                </h5>
-                <div className='space-y-1'>
-                  {getElementModality(birthChartData).modalities.map(
-                    (modality) => (
-                      <div
-                        key={modality.name}
-                        className='bg-zinc-900 rounded p-2'
-                      >
-                        <div className='flex items-center justify-between mb-1'>
-                          <div className='flex items-center gap-2'>
-                            <span className='text-sm font-astro'>
-                              {getModalitySymbol(modality.name)}
-                            </span>
-                            <span className='text-xs text-zinc-300'>
-                              {modality.name}
+            {/* Element & Modality Breakdown */}
+            <div className='bg-lunary-bg rounded-lg p-4 border border-zinc-800 md:col-span-2'>
+              <h4 className='text-sm font-medium text-lunary-rose mb-3'>
+                Elemental & Modal Balance
+              </h4>
+              <div className='grid grid-cols-2 gap-3'>
+                {/* Elements */}
+                <div>
+                  <h5 className='text-xs font-medium text-lunary-rose-300 mb-2'>
+                    Elements
+                  </h5>
+                  <div className='space-y-1'>
+                    {getElementModality(birthChartData).elements.map(
+                      (element) => (
+                        <div
+                          key={element.name}
+                          className='bg-zinc-900 rounded p-2'
+                        >
+                          <div className='flex items-center justify-between mb-1'>
+                            <div className='flex items-center gap-2'>
+                              <span className='text-sm font-astro'>
+                                {element.symbol}
+                              </span>
+                              <span className='text-xs text-zinc-300'>
+                                {element.name}
+                              </span>
+                            </div>
+                            <span className='text-xs text-lunary-rose-300'>
+                              {element.count}
                             </span>
                           </div>
-                          <span className='text-xs text-lunary-rose-300'>
-                            {modality.count}
-                          </span>
-                        </div>
-                        {modality.count > 0 && (
-                          <div className='space-y-1'>
+                          {element.count > 0 && (
                             <div className='flex flex-wrap gap-1'>
-                              {(modality as any).planets?.map(
-                                (planet: BirthChartData) => (
-                                  <span
-                                    key={planet.body}
-                                    className='text-xs font-astro bg-zinc-800 px-1 rounded'
-                                  >
-                                    {
-                                      bodiesSymbols[
-                                        planet.body.toLowerCase() as keyof typeof bodiesSymbols
-                                      ]
-                                    }
-                                  </span>
-                                ),
+                              {(element as any).planets?.map(
+                                (planet: BirthChartData) => {
+                                  const symbolKey = planet.body
+                                    .toLowerCase()
+                                    .replace(
+                                      /\s+/g,
+                                      '',
+                                    ) as keyof typeof bodiesSymbols;
+                                  const symbol =
+                                    bodiesSymbols[symbolKey] ||
+                                    astroPointSymbols[
+                                      symbolKey as keyof typeof astroPointSymbols
+                                    ] ||
+                                    '';
+                                  return (
+                                    <span
+                                      key={planet.body}
+                                      className='text-xs font-astro bg-zinc-800 px-1 rounded'
+                                      title={planet.body}
+                                    >
+                                      {symbol}
+                                    </span>
+                                  );
+                                },
                               )}
                             </div>
-                            <p className='text-xs text-zinc-400 mt-1'>
-                              {getModalityMeaning(
-                                modality.name,
-                                (modality as any).planets || [],
-                              )}
-                            </p>
+                          )}
+                        </div>
+                      ),
+                    )}
+                  </div>
+                </div>
+
+                {/* Modalities */}
+                <div>
+                  <h5 className='text-xs font-medium text-lunary-rose-300 mb-2'>
+                    Modalities
+                  </h5>
+                  <div className='space-y-1'>
+                    {getElementModality(birthChartData).modalities.map(
+                      (modality) => (
+                        <div
+                          key={modality.name}
+                          className='bg-zinc-900 rounded p-2'
+                        >
+                          <div className='flex items-center justify-between mb-1'>
+                            <div className='flex items-center gap-2'>
+                              <span className='text-sm font-astro'>
+                                {getModalitySymbol(modality.name)}
+                              </span>
+                              <span className='text-xs text-zinc-300'>
+                                {modality.name}
+                              </span>
+                            </div>
+                            <span className='text-xs text-lunary-rose-300'>
+                              {modality.count}
+                            </span>
                           </div>
-                        )}
+                          {modality.count > 0 && (
+                            <div className='space-y-1'>
+                              <div className='flex flex-wrap gap-1'>
+                                {(modality as any).planets?.map(
+                                  (planet: BirthChartData) => {
+                                    const symbolKey = planet.body
+                                      .toLowerCase()
+                                      .replace(
+                                        /\s+/g,
+                                        '',
+                                      ) as keyof typeof bodiesSymbols;
+                                    const symbol =
+                                      bodiesSymbols[symbolKey] ||
+                                      astroPointSymbols[
+                                        symbolKey as keyof typeof astroPointSymbols
+                                      ] ||
+                                      '';
+                                    return (
+                                      <span
+                                        key={planet.body}
+                                        className='text-xs font-astro bg-zinc-800 px-1 rounded'
+                                        title={planet.body}
+                                      >
+                                        {symbol}
+                                      </span>
+                                    );
+                                  },
+                                )}
+                              </div>
+                              <p className='text-xs text-zinc-400 mt-1'>
+                                {getModalityMeaning(
+                                  modality.name,
+                                  (modality as any).planets || [],
+                                )}
+                              </p>
+                            </div>
+                          )}
+                        </div>
+                      ),
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Planetary Aspects */}
+            {getPlanetaryAspects(birthChartData).length > 0 && (
+              <div className='bg-lunary-bg rounded-lg p-4 border border-zinc-800 md:col-span-2'>
+                <h4 className='text-sm font-medium text-lunary-primary mb-3'>
+                  Major Aspects
+                </h4>
+                <div className='space-y-2'>
+                  {getPlanetaryAspects(birthChartData).map((aspect, index) => (
+                    <div
+                      key={index}
+                      className='border-l-2 border-lunary-primary pl-3'
+                    >
+                      <h5 className='text-xs font-medium text-lunary-primary-300'>
+                        {aspect.planet1} {aspect.aspectSymbol} {aspect.planet2}
+                      </h5>
+                      <p className='text-xs text-zinc-300'>{aspect.meaning}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Chart Patterns */}
+            {getChartPatterns(birthChartData).length > 0 && (
+              <div className='bg-lunary-bg rounded-lg p-4 border border-zinc-800 md:col-span-2'>
+                <h4 className='text-sm font-medium text-lunary-success mb-3'>
+                  Chart Patterns
+                </h4>
+                <div className='space-y-2'>
+                  {getChartPatterns(birthChartData).map((pattern, index) => (
+                    <div key={index} className='bg-zinc-900 rounded p-3'>
+                      <h5 className='text-xs font-medium text-lunary-success-300 mb-1'>
+                        {pattern.name}
+                      </h5>
+                      <p className='text-xs text-zinc-300'>
+                        {pattern.description}
+                      </p>
+                      <p className='text-xs text-lunary-success-200 mt-1'>
+                        {pattern.meaning}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Stelliums */}
+            {getStelliums(birthChartData).length > 0 && (
+              <div className='bg-lunary-bg rounded-lg p-4 border border-zinc-800 md:col-span-2'>
+                <h4 className='text-sm font-medium text-lunary-highlight mb-3'>
+                  Stelliums & Concentrations
+                </h4>
+                <div className='space-y-2'>
+                  {getStelliums(birthChartData).map((stellium, index) => (
+                    <div
+                      key={index}
+                      className='border-l-2 border-lunary-highlight pl-3'
+                    >
+                      <h5 className='text-xs font-medium text-lunary-highlight-300'>
+                        {stellium.sign} Stellium ({stellium.planets.length}{' '}
+                        planets)
+                      </h5>
+                      <p className='text-xs text-zinc-400 mb-1'>
+                        {stellium.planets
+                          .map((p) => `${p.body} (${p.degree}°)`)
+                          .join(', ')}
+                      </p>
+                      <p className='text-xs text-zinc-300'>
+                        {stellium.meaning}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Planetary Dignities */}
+            {getPlanetaryDignities(birthChartData).length > 0 && (
+              <div className='bg-lunary-bg rounded-lg p-4 border border-zinc-800 md:col-span-2'>
+                <h4 className='text-sm font-medium text-lunary-rose mb-3'>
+                  Special Placements
+                </h4>
+                <div className='space-y-2'>
+                  {getPlanetaryDignities(birthChartData).map(
+                    (dignity, index) => (
+                      <div
+                        key={index}
+                        className='border-l-2 border-lunary-rose pl-3'
+                      >
+                        <h5 className='text-xs font-medium text-lunary-rose-300'>
+                          {dignity.planet} {dignity.type}
+                        </h5>
+                        <p className='text-xs text-zinc-300'>
+                          {dignity.meaning}
+                        </p>
                       </div>
                     ),
                   )}
                 </div>
               </div>
-            </div>
+            )}
           </div>
-
-          {/* Planetary Aspects */}
-          <div className='mt-4'>
-            <h4 className='text-sm font-medium text-lunary-primary mb-3'>
-              Major Aspects
-            </h4>
-            <div className='space-y-2'>
-              {getPlanetaryAspects(birthChartData).map((aspect, index) => (
-                <div
-                  key={index}
-                  className='border-l-2 border-lunary-primary pl-3'
-                >
-                  <h5 className='text-xs font-medium text-lunary-primary-300'>
-                    {aspect.planet1} {aspect.aspectSymbol} {aspect.planet2}
-                  </h5>
-                  <p className='text-xs text-zinc-300'>{aspect.meaning}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Chart Patterns */}
-          <div className='mt-4'>
-            <h4 className='text-sm font-medium text-lunary-success mb-3'>
-              Chart Patterns
-            </h4>
-            <div className='space-y-2'>
-              {getChartPatterns(birthChartData).map((pattern, index) => (
-                <div key={index} className='bg-zinc-900 rounded p-3'>
-                  <h5 className='text-xs font-medium text-lunary-success-300 mb-1'>
-                    {pattern.name}
-                  </h5>
-                  <p className='text-xs text-zinc-300'>{pattern.description}</p>
-                  <p className='text-xs text-lunary-success-200 mt-1'>
-                    {pattern.meaning}
-                  </p>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Stelliums */}
-          <div className='mt-4'>
-            <h4 className='text-sm font-medium text-lunary-highlight mb-3'>
-              Stelliums & Concentrations
-            </h4>
-            <div className='space-y-2'>
-              {getStelliums(birthChartData).map((stellium, index) => (
-                <div
-                  key={index}
-                  className='border-l-2 border-lunary-highlight pl-3'
-                >
-                  <h5 className='text-xs font-medium text-lunary-highlight-300'>
-                    {stellium.sign} Stellium ({stellium.planets.length} planets)
-                  </h5>
-                  <p className='text-xs text-zinc-400 mb-1'>
-                    {stellium.planets
-                      .map((p) => `${p.body} (${p.degree}°)`)
-                      .join(', ')}
-                  </p>
-                  <p className='text-xs text-zinc-300'>{stellium.meaning}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Planetary Dignities */}
-          <div className='mt-4'>
-            <h4 className='text-sm font-medium text-lunary-rose mb-3'>
-              Special Placements
-            </h4>
-            <div className='space-y-2'>
-              {getPlanetaryDignities(birthChartData).map((dignity, index) => (
-                <div key={index} className='border-l-2 border-lunary-rose pl-3'>
-                  <h5 className='text-xs font-medium text-lunary-rose-300'>
-                    {dignity.planet} {dignity.type}
-                  </h5>
-                  <p className='text-xs text-zinc-300'>{dignity.meaning}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      )}
+        )}
+      </div>
     </div>
   );
 };

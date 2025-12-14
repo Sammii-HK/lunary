@@ -1,6 +1,7 @@
 import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { SEOContentTemplate } from '@/components/grimoire/SEOContentTemplate';
+import { CosmicConnections } from '@/components/grimoire/CosmicConnections';
 import { zodiacSigns, zodiacSymbol } from '../../../../../utils/zodiac/zodiac';
 import { stringToKebabCase } from '../../../../../utils/string';
 
@@ -221,6 +222,13 @@ Emotional Expression: ${signData.element.toLowerCase()}`}
         ctaText={`Want to see Moon in ${signData.name} in your birth chart?`}
         ctaHref='/pricing'
         faqs={faqs}
+        cosmicConnections={
+          <CosmicConnections
+            entityType='placement'
+            entityKey={`moon-in-${sign}`}
+            title={`Moon in ${signData.name} Cosmic Web`}
+          />
+        }
       />
     </div>
   );

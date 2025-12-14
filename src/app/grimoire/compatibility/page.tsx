@@ -4,7 +4,12 @@ import { Heart } from 'lucide-react';
 import { signDescriptions } from '@/constants/seo/planet-sign-content';
 import { CompatibilityMatrix } from '@/components/CompatibilityMatrix';
 import { Breadcrumbs } from '@/components/grimoire/Breadcrumbs';
-import { createItemListSchema, renderJsonLd } from '@/lib/schema';
+import { ExploreGrimoire } from '@/components/grimoire/ExploreGrimoire';
+import {
+  createItemListSchema,
+  renderJsonLd,
+  createBreadcrumbSchema,
+} from '@/lib/schema';
 
 const ZODIAC_SYMBOLS: Record<string, string> = {
   aries: '♈',
@@ -31,6 +36,21 @@ export const metadata: Metadata = {
     description:
       'Explore compatibility between all 12 zodiac signs in love and relationships.',
     url: 'https://lunary.app/grimoire/compatibility',
+    images: [
+      {
+        url: '/api/og/grimoire/compatibility',
+        width: 1200,
+        height: 630,
+        alt: 'Zodiac Compatibility Guide - Lunary',
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Zodiac Compatibility: Best & Worst Matches for Every Sign - Lunary',
+    description:
+      'Explore compatibility between all 12 zodiac signs in love and relationships.',
+    images: ['/api/og/grimoire/compatibility'],
   },
   alternates: {
     canonical: 'https://lunary.app/grimoire/compatibility',
@@ -55,6 +75,12 @@ export default function CompatibilityIndexPage() {
   return (
     <div className='min-h-screen bg-zinc-950 text-zinc-100'>
       {renderJsonLd(compatibilityListSchema)}
+      {renderJsonLd(
+        createBreadcrumbSchema([
+          { name: 'Grimoire', url: '/grimoire' },
+          { name: 'Compatibility', url: '/grimoire/compatibility' },
+        ]),
+      )}
       <div className='max-w-6xl mx-auto px-4 py-12'>
         <Breadcrumbs
           items={[
@@ -176,6 +202,8 @@ export default function CompatibilityIndexPage() {
             Understand your complete astrological profile
           </p>
         </section>
+
+        <ExploreGrimoire />
       </div>
     </div>
   );

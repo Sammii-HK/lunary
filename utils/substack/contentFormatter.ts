@@ -250,9 +250,7 @@ ${crystal.reason}
 }
 
 function generateSpellRecommendations(data: WeeklyCosmicData): string {
-  const {
-    getSpellsByCategory,
-  } = require('../../src/constants/grimoire/spells');
+  const { getSpellsByCategory } = require('@/lib/spells/index');
   const categories = ['protection', 'manifestation', 'healing'];
   const spells: string[] = [];
 

@@ -1,65 +1,52 @@
+// app/shop/page.tsx
+import { Metadata } from 'next';
 import { ShopClient } from './ShopClient';
+import {
+  getFeaturedProducts,
+  getCurrentSeasonalPack,
+} from '@/lib/shop/generators';
+import { getShopListingsFromStripe } from '@/lib/shop/catalogue';
 
-interface DigitalPack {
-  id: string;
-  name: string;
-  description: string;
-  category: string;
-  subcategory?: string;
-  price: number;
-  imageUrl?: string;
-  stripePriceId?: string;
-  isActive: boolean;
-  metadata?: {
-    dateRange?: string;
-    format?: string;
-    itemCount?: number;
-  };
-}
+const PRODUCTS_PER_PAGE = 12;
 
-async function getProducts(): Promise<DigitalPack[]> {
-  try {
-    const baseUrl = process.env.VERCEL_URL
-      ? `https://${process.env.VERCEL_URL}`
-      : process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
+// Optional but recommended so this can ISR instead of re-running constantly
+export const revalidate = 2592000; // 30 days
 
-    const response = await fetch(`${baseUrl}/api/shop/products`, {
-      next: { revalidate: 3600 },
-    });
-
-    if (!response.ok) {
-      return [];
-    }
-
-    const data = await response.json();
-
-    if (!data.success) {
-      return [];
-    }
-
-    return (data.packs || []).map((pack: any) => ({
-      id: pack.id || 'unknown',
-      name: pack.name || 'Unnamed Product',
-      description: pack.description || '',
-      category: pack.category || 'spells',
-      subcategory: pack.subcategory,
-      price: pack.price || 0,
-      imageUrl: pack.imageUrl,
-      stripePriceId: pack.stripePriceId,
-      isActive: pack.isActive !== false,
-      metadata: {
-        dateRange: pack.metadata?.dateRange,
-        format: pack.metadata?.format || 'PDF',
-        itemCount: pack.metadata?.itemCount,
-      },
-    }));
-  } catch {
-    return [];
-  }
-}
+export const metadata: Metadata = {
+  title: 'Digital Ritual Packs & Spell Collections | Lunary Shop',
+  description:
+    'Curated packs of rituals, tarot spreads, crystal guides, and cosmic wisdom. Instant digital access to deepen your spiritual practice.',
+};
 
 export default async function ShopPage() {
-  const packs = await getProducts();
+  const allProducts = await getShopListingsFromStripe();
 
-  return <ShopClient initialPacks={packs} />;
+  const totalPages = Math.ceil(allProducts.length / PRODUCTS_PER_PAGE);
+
+  const featuredLocal = getCurrentSeasonalPack() || getFeaturedProducts()[0];
+  const featuredProduct =
+    allProducts.find((p) => p.slug === featuredLocal?.slug) || allProducts[0];
+
+  const allProductCounts = {
+    all: allProducts.length,
+    spell: allProducts.filter((p) => p.category === 'spell').length,
+    crystal: allProducts.filter((p) => p.category === 'crystal').length,
+    tarot: allProducts.filter((p) => p.category === 'tarot').length,
+    seasonal: allProducts.filter((p) => p.category === 'seasonal').length,
+    astrology: allProducts.filter((p) => p.category === 'astrology').length,
+    birthchart: allProducts.filter((p) => p.category === 'birthchart').length,
+    bundle: allProducts.filter((p) => p.category === 'bundle').length,
+    retrograde: allProducts.filter((p) => p.category === 'retrograde').length,
+  } as const;
+
+  return (
+    <ShopClient
+      products={allProducts}
+      featuredProduct={featuredProduct}
+      currentPage={1}
+      totalPages={totalPages}
+      totalProducts={allProducts.length}
+      allProductCounts={allProductCounts}
+    />
+  );
 }

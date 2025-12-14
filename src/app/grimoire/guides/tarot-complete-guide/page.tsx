@@ -6,7 +6,11 @@ import {
   createArticleWithSpeakableSchema,
   createFAQPageSchema,
   renderJsonLd,
+  createBreadcrumbSchema,
 } from '@/lib/schema';
+import { Button } from '@/components/ui/button';
+import { ExploreGrimoire } from '@/components/grimoire/ExploreGrimoire';
+import { CosmicConnections } from '@/components/grimoire/CosmicConnections';
 
 const currentYear = new Date().getFullYear();
 
@@ -272,8 +276,18 @@ export default function TarotCompleteGuidePage() {
   const faqSchema = createFAQPageSchema(faqs);
 
   return (
-    <div className='min-h-screen p-4 md:p-8 max-w-4xl mx-auto'>
+    <div className='p-4 md:p-8 max-w-4xl mx-auto'>
       {renderJsonLd(articleSchema)}
+      {renderJsonLd(
+        createBreadcrumbSchema([
+          { name: 'Grimoire', url: '/grimoire' },
+          { name: 'Guides', url: '/grimoire/guides' },
+          {
+            name: 'Tarot Complete Guide',
+            url: '/grimoire/guides/tarot-complete-guide',
+          },
+        ]),
+      )}
       {renderJsonLd(faqSchema)}
 
       {/* Breadcrumbs */}
@@ -305,18 +319,12 @@ export default function TarotCompleteGuidePage() {
           meaning behind every card.
         </p>
         <div className='flex flex-wrap gap-4'>
-          <Link
-            href='/tarot'
-            className='px-6 py-3 bg-lunary-primary-600 hover:bg-lunary-primary-700 text-white rounded-lg font-medium transition-colors'
-          >
-            Get a Free Tarot Reading
-          </Link>
-          <Link
-            href='#major-arcana'
-            className='px-6 py-3 border border-zinc-700 hover:border-lunary-primary text-zinc-300 rounded-lg font-medium transition-colors'
-          >
-            Start Learning
-          </Link>
+          <Button asChild variant='lunary-solid' size='lg'>
+            <Link href='/tarot'>Get a Free Tarot Reading</Link>
+          </Button>
+          <Button asChild variant='outline' size='lg'>
+            <Link href='#major-arcana'>Start Learning</Link>
+          </Button>
         </div>
       </header>
 
@@ -837,6 +845,28 @@ export default function TarotCompleteGuidePage() {
           </Link>
         </div>
       </section>
+
+      <CosmicConnections
+        entityType='tarot'
+        entityKey='tarot-guide'
+        title='Tarot Connections'
+        sections={[
+          {
+            title: 'Related Pages',
+            links: [
+              { label: 'All Tarot Cards', href: '/grimoire/tarot' },
+              { label: 'Tarot Spreads', href: '/grimoire/tarot/spreads' },
+              { label: 'Daily Tarot Reading', href: '/tarot' },
+              {
+                label: 'Card Combinations',
+                href: '/grimoire/card-combinations',
+              },
+            ],
+          },
+        ]}
+      />
+
+      <ExploreGrimoire />
     </div>
   );
 }

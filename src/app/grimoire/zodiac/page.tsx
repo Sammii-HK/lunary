@@ -22,6 +22,21 @@ export const metadata: Metadata = {
     description:
       'Explore all 12 zodiac signs and their unique characteristics.',
     url: 'https://lunary.app/grimoire/zodiac',
+    images: [
+      {
+        url: '/api/og/grimoire/zodiac',
+        width: 1200,
+        height: 630,
+        alt: 'All 12 Zodiac Signs - Lunary',
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'All 12 Zodiac Signs: Dates, Traits & Compatibility - Lunary',
+    description:
+      'Explore all 12 zodiac signs. Learn about each sign\u2019s traits, elements, ruling planets, and compatibility.',
+    images: ['/api/og/grimoire/zodiac'],
   },
   alternates: {
     canonical: 'https://lunary.app/grimoire/zodiac',

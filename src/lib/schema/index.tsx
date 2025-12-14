@@ -152,6 +152,10 @@ interface ArticleSchemaProps {
   dateModified?: string;
   image?: string;
   section?: string;
+  aboutEntity?: {
+    '@id': string;
+    name: string;
+  };
 }
 
 export function createArticleSchema({
@@ -163,6 +167,7 @@ export function createArticleSchema({
   dateModified,
   image,
   section,
+  aboutEntity,
 }: ArticleSchemaProps) {
   return {
     '@context': 'https://schema.org',
@@ -192,6 +197,16 @@ export function createArticleSchema({
       '@type': 'WebPage',
       '@id': url,
     },
+    ...(aboutEntity && {
+      about: {
+        '@type': 'Thing',
+        '@id': aboutEntity['@id'],
+        name: aboutEntity.name,
+      },
+      mainEntity: {
+        '@id': aboutEntity['@id'],
+      },
+    }),
     ...(section && { articleSection: section }),
     inLanguage: 'en-US',
     isAccessibleForFree: true,
@@ -206,6 +221,7 @@ interface ProductSchemaProps {
   interval?: 'month' | 'year';
   features?: string[];
   sku?: string;
+  stripePriceId?: string;
 }
 
 export function createProductSchema({
@@ -213,6 +229,7 @@ export function createProductSchema({
   description,
   price,
   priceCurrency = 'USD',
+  stripePriceId,
   interval,
   features = [],
   sku,
@@ -226,6 +243,7 @@ export function createProductSchema({
       '@type': 'Brand',
       name: 'Lunary',
     },
+    stripePriceId,
     offers: {
       '@type': 'Offer',
       price: price.toString(),
@@ -554,6 +572,10 @@ export function createAggregateRatingSchema({
   };
 }
 
+function stringifySafe(data: object) {
+  return JSON.stringify(data).replace(/</g, '\\u003c');
+}
+
 export function renderJsonLd(schema: object | null) {
   if (!schema) return null;
 
@@ -561,9 +583,28 @@ export function renderJsonLd(schema: object | null) {
     <script
       type='application/ld+json'
       dangerouslySetInnerHTML={{
-        __html: JSON.stringify(schema),
+        __html: stringifySafe(schema),
       }}
     />
+  );
+}
+
+export function renderJsonLdMulti(schemas: Array<object | null | undefined>) {
+  const filtered = schemas.filter(Boolean) as object[];
+  if (!filtered.length) return null;
+
+  return (
+    <>
+      {filtered.map((block, idx) => (
+        <script
+          key={idx}
+          type='application/ld+json'
+          dangerouslySetInnerHTML={{
+            __html: stringifySafe(block),
+          }}
+        />
+      ))}
+    </>
   );
 }
 
@@ -635,6 +676,7 @@ interface ZodiacSignSchemaProps {
   compatibility: string[];
   relatedCrystals?: string[];
   relatedTarot?: string;
+  sameAs?: string;
 }
 
 export function createZodiacSignSchema({
@@ -648,6 +690,7 @@ export function createZodiacSignSchema({
   compatibility,
   relatedCrystals,
   relatedTarot,
+  sameAs,
 }: ZodiacSignSchemaProps) {
   return {
     '@context': 'https://schema.org',
@@ -658,6 +701,7 @@ export function createZodiacSignSchema({
     description,
     url: `${BASE_URL}/grimoire/zodiac/${sign.toLowerCase()}`,
     additionalType: 'https://en.wikipedia.org/wiki/Zodiac',
+    ...(sameAs && { sameAs }),
     identifier: {
       '@type': 'PropertyValue',
       name: 'Zodiac Sign',
@@ -732,6 +776,7 @@ interface PlanetSchemaProps {
   crystals?: string[];
   day?: string;
   chakra?: string;
+  sameAs?: string;
 }
 
 export function createPlanetSchema({
@@ -745,6 +790,7 @@ export function createPlanetSchema({
   crystals,
   day,
   chakra,
+  sameAs,
 }: PlanetSchemaProps) {
   const relatedEntities: {
     '@type': string;
@@ -789,6 +835,7 @@ export function createPlanetSchema({
     description,
     url: `${BASE_URL}/grimoire/astronomy/planets/${planet.toLowerCase()}`,
     additionalType: 'https://en.wikipedia.org/wiki/Planet',
+    ...(sameAs && { sameAs }),
     isRelatedTo: relatedEntities,
     keywords: [
       planet,

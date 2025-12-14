@@ -98,5 +98,19 @@
       "salt-water-aura-cleanse",
       "freezer-spell"
     ]
+  },
+  "sabbatSpells": {
+    "Samhain": [
+      "samhain-ancestor-connection",
+      "black-tourmaline-shield",
+      "sage-space-cleansing"
+    ],
+    "Yule": ["salt-circle-protection", "lavender-healing-bath"],
+    "Imbolc": ["sage-space-cleansing", "rose-quartz-self-love"],
+    "Ostara": ["basil-prosperity-jar", "rose-quartz-self-love"],
+    "Beltane": ["beltane-fertility-blessing", "rose-quartz-self-love"],
+    "Litha": ["lavender-healing-bath", "basil-prosperity-jar"],
+    "Lammas": ["basil-prosperity-jar"],
+    "Mabon": ["lavender-healing-bath", "sage-space-cleansing"]
   }
 }

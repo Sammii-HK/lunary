@@ -22,6 +22,7 @@ import {
   Hash,
   Wand,
 } from 'lucide-react';
+import { ExploreGrimoire } from '@/components/grimoire/ExploreGrimoire';
 
 const currentYear = new Date().getFullYear();
 
@@ -30,7 +31,7 @@ const SIDEBAR_CATEGORIES = [
   {
     name: 'Complete Guides',
     icon: <Sparkles size={14} />,
-    sections: ['guides'],
+    sections: ['guides', 'beginners'],
   },
   {
     name: 'Zodiac & Signs',
@@ -55,6 +56,7 @@ const SIDEBAR_CATEGORIES = [
       'transits',
       'horoscopes',
       'astronomy',
+      'astronomyVsAstrology',
     ],
   },
   {
@@ -86,7 +88,14 @@ const SIDEBAR_CATEGORIES = [
       'candleMagic',
       'correspondences',
       'meditation',
+      'protection',
+      'manifestation',
     ],
+  },
+  {
+    name: 'Self-Discovery',
+    icon: <Sparkles size={14} />,
+    sections: ['archetypes', 'shadowWork'],
   },
   {
     name: 'Other',
@@ -102,6 +111,7 @@ const SIDEBAR_CATEGORIES = [
 ];
 import { AskTheGrimoire } from './AskTheGrimoire';
 import { captureEvent } from '@/lib/posthog-client';
+import { getStoredAttribution, extractSearchQuery } from '@/lib/attribution';
 
 // Dynamic imports for grimoire components (lazy load to improve build speed)
 const Moon = dynamic(() => import('./components/Moon'), {
@@ -223,6 +233,11 @@ const GRIMOIRE_FULL_STRUCTURE = [
     icon: <Star className='w-5 h-5' />,
     items: [
       {
+        title: "Beginner's Guide",
+        href: '/grimoire/beginners',
+        description: 'Start your spiritual journey',
+      },
+      {
         title: 'All Guides',
         href: '/grimoire/guides',
         description: 'In-depth pillar content',
@@ -246,6 +261,11 @@ const GRIMOIRE_FULL_STRUCTURE = [
         title: 'Crystal Healing Guide',
         href: '/grimoire/guides/crystal-healing-guide',
         description: 'Properties & practices',
+      },
+      {
+        title: 'Archetypes Guide',
+        href: '/grimoire/archetypes',
+        description: 'Inner patterns & shadow work',
       },
     ],
   },
@@ -344,6 +364,11 @@ const GRIMOIRE_FULL_STRUCTURE = [
         href: '/grimoire/astronomy',
         description: 'Planets & celestial bodies',
       },
+      {
+        title: 'Astronomy vs Astrology',
+        href: '/grimoire/astronomy-vs-astrology',
+        description: 'Understanding the difference',
+      },
     ],
   },
   {
@@ -362,17 +387,12 @@ const GRIMOIRE_FULL_STRUCTURE = [
       },
       {
         title: 'Moon Signs',
-        href: '/grimoire/moon-signs',
+        href: '/grimoire/moon/moon-signs',
         description: 'Emotional moon placements',
       },
       {
-        title: 'Moon in Signs',
-        href: '/grimoire/moon-signs',
-        description: 'Transit moon positions',
-      },
-      {
         title: 'Moon Rituals',
-        href: '/grimoire/moon-rituals',
+        href: '/grimoire/moon/moon-rituals',
         description: 'Lunar ceremonies',
       },
       {
@@ -525,6 +545,11 @@ const GRIMOIRE_FULL_STRUCTURE = [
         description: 'Witchcraft overview',
       },
       {
+        title: 'Witchcraft Practices',
+        href: '/grimoire/practices',
+        description: 'Complete guide to all practices',
+      },
+      {
         title: 'Witch Types',
         href: '/grimoire/modern-witchcraft/witch-types',
         description: 'Green, Kitchen, Hedge...',
@@ -540,14 +565,24 @@ const GRIMOIRE_FULL_STRUCTURE = [
         description: 'Ethical practice',
       },
       {
+        title: 'Book of Shadows',
+        href: '/grimoire/book-of-shadows',
+        description: 'Create your personal grimoire',
+      },
+      {
         title: 'Spellcraft',
-        href: '/grimoire/spellcraft-fundamentals',
+        href: '/grimoire/spells/fundamentals',
         description: 'Spell basics',
       },
       {
         title: 'Spells',
-        href: '/grimoire/practices',
+        href: '/grimoire/spells',
         description: 'Spell collection',
+      },
+      {
+        title: 'Jar Spells',
+        href: '/grimoire/jar-spells',
+        description: 'Spell jars & witch bottles',
       },
       {
         title: 'Candle Magic',
@@ -579,6 +614,92 @@ const GRIMOIRE_FULL_STRUCTURE = [
         href: '/grimoire/meditation/grounding',
         description: 'Grounding exercises',
       },
+      {
+        title: 'Protection',
+        href: '/grimoire/protection',
+        description: 'Energetic protection & boundaries',
+      },
+      {
+        title: 'Manifestation',
+        href: '/grimoire/manifestation',
+        description: 'Intention setting & creation',
+      },
+    ],
+  },
+  {
+    name: 'Self-Discovery',
+    icon: <Sparkles className='w-5 h-5' />,
+    items: [
+      {
+        title: 'Lunary Archetypes',
+        href: '/grimoire/archetypes',
+        description: 'Explore inner patterns',
+      },
+      {
+        title: 'The Restorer',
+        href: '/grimoire/archetypes#restorer',
+        description: 'Healing & recovery',
+      },
+      {
+        title: 'The Seeker',
+        href: '/grimoire/archetypes#seeker',
+        description: 'Quest for meaning',
+      },
+      {
+        title: 'The Catalyst',
+        href: '/grimoire/archetypes#catalyst',
+        description: 'Transformative energy',
+      },
+      {
+        title: 'The Grounded One',
+        href: '/grimoire/archetypes#grounded-one',
+        description: 'Stability & roots',
+      },
+      {
+        title: 'The Empath',
+        href: '/grimoire/archetypes#empath',
+        description: 'Emotional sensitivity',
+      },
+      {
+        title: 'The Shadow Dancer',
+        href: '/grimoire/archetypes#shadow-dancer',
+        description: 'Embrace the shadow',
+      },
+      {
+        title: 'The Visionary',
+        href: '/grimoire/archetypes#visionary',
+        description: 'Future sight',
+      },
+      {
+        title: 'The Mystic',
+        href: '/grimoire/archetypes#mystic',
+        description: 'Spiritual depths',
+      },
+      {
+        title: 'The Protector',
+        href: '/grimoire/archetypes#protector',
+        description: 'Guardian energy',
+      },
+      {
+        title: 'The Heart Opener',
+        href: '/grimoire/archetypes#heart-opener',
+        description: 'Love & connection',
+      },
+      {
+        title: 'The Lunar Weaver',
+        href: '/grimoire/archetypes#lunar-weaver',
+        description: 'Moon mysteries',
+      },
+      {
+        title: 'The Alchemist',
+        href: '/grimoire/archetypes#alchemist',
+        description: 'Transformation',
+      },
+      {
+        title: 'Shadow Work',
+        href: '/grimoire/shadow-work',
+        description: 'Healing & integration',
+      },
     ],
   },
   {
@@ -594,6 +715,11 @@ const GRIMOIRE_FULL_STRUCTURE = [
         title: 'Wheel of the Year',
         href: '/grimoire/wheel-of-the-year',
         description: '8 sabbats',
+      },
+      {
+        title: 'Sabbats',
+        href: '/grimoire/sabbats',
+        description: 'Seasonal festivals',
       },
       {
         title: 'Chinese Zodiac',
@@ -687,13 +813,25 @@ export default function GrimoireLayout({
 
   useEffect(() => {
     if (currentSection && currentSection !== trackedSectionRef.current) {
+      const attribution = getStoredAttribution();
+      const referrer =
+        typeof document !== 'undefined' ? document.referrer : undefined;
+      const searchQuery = referrer ? extractSearchQuery(referrer) : undefined;
+
       captureEvent('grimoire_viewed', {
         section: currentSection,
         section_title: grimoire[currentSection]?.title,
+        source: attribution?.source || 'direct',
+        landing_page: pathname,
+        referrer,
+        search_query: searchQuery || attribution?.keyword,
+        first_touch_source: attribution?.source,
+        first_touch_page: attribution?.landingPage,
+        is_seo_traffic: attribution?.source === 'seo',
       });
       trackedSectionRef.current = currentSection;
     }
-  }, [currentSection]);
+  }, [currentSection, pathname]);
 
   // Auto-expand active section
   useEffect(() => {
@@ -936,10 +1074,16 @@ export default function GrimoireLayout({
           <div className='p-4 md:p-6 lg:p-8 xl:p-10 min-h-full'>
             <div className='max-w-7xl mx-auto'>
               {GrimoireContent[currentSection as keyof typeof GrimoireContent]}
+              <ExploreGrimoire />
             </div>
           </div>
         ) : (
-          <GrimoireIndexPage />
+          <div>
+            <GrimoireIndexPage />
+            <div className='max-w-7xl mx-auto px-4'>
+              <ExploreGrimoire />
+            </div>
+          </div>
         )}
       </div>
     </div>

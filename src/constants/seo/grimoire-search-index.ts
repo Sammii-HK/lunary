@@ -20,7 +20,8 @@ export interface GrimoireEntry {
     | 'numerology'
     | 'birthday'
     | 'compatibility'
-    | 'glossary';
+    | 'glossary'
+    | 'archetype';
   keywords: string[];
   summary: string;
   relatedSlugs: string[];
@@ -551,6 +552,193 @@ export const GRIMOIRE_SEARCH_INDEX: GrimoireEntry[] = [
     summary:
       'Moon rituals are practices aligned with lunar phases to manifest intentions, release what no longer serves, and work with cosmic energy.',
     relatedSlugs: ['astronomy/planets/moon', 'events/2025/eclipses'],
+  },
+  {
+    slug: 'jar-spells',
+    title: 'Jar Spells',
+    category: 'ritual',
+    keywords: [
+      'jar spells',
+      'spell jars',
+      'witch bottles',
+      'honey jar',
+      'protection jar',
+      'spell jar ingredients',
+      'how to make spell jar',
+      'witchcraft spells',
+      'container magic',
+    ],
+    summary:
+      'Jar spells are physical containers holding ingredients that correspond to your magical intention, working continuously on your behalf over time.',
+    relatedSlugs: ['spells', 'correspondences', 'candle-magic'],
+  },
+  {
+    slug: 'protection',
+    title: 'Energetic Protection',
+    category: 'ritual',
+    keywords: [
+      'energetic protection',
+      'magical protection',
+      'shielding',
+      'warding',
+      'protection spells',
+      'energetic boundaries',
+      'psychic protection',
+      'energy protection',
+      'spiritual protection',
+    ],
+    summary:
+      'Complete guide to energetic protection and magical boundaries. Learn shielding techniques, cleansing methods, and how to maintain healthy energetic hygiene.',
+    relatedSlugs: ['spells', 'jar-spells', 'correspondences'],
+  },
+  {
+    slug: 'shadow-work',
+    title: 'Shadow Work',
+    category: 'concept',
+    keywords: [
+      'shadow work',
+      'shadow self',
+      'inner work',
+      'healing',
+      'self-discovery',
+      'shadow integration',
+      'jung shadow',
+      'dark side',
+      'unconscious',
+      'shadow healing',
+    ],
+    summary:
+      'Complete guide to shadow work for witches and spiritual practitioners. Learn what the shadow is, safe practices for self-exploration, journaling prompts, and integration rituals.',
+    relatedSlugs: ['archetypes', 'meditation', 'manifestation'],
+  },
+  {
+    slug: 'manifestation',
+    title: 'Manifestation',
+    category: 'concept',
+    keywords: [
+      'manifestation',
+      'intention setting',
+      'law of attraction',
+      'conscious creation',
+      'manifesting',
+      'manifestation techniques',
+      'visualization',
+      'affirmations',
+      'goal setting',
+      'desire',
+    ],
+    summary:
+      'Complete guide to manifestation and intention setting. Learn the science and spirit of conscious creation, optimal timing with moon phases, and practical techniques for manifesting your goals.',
+    relatedSlugs: ['moon-rituals', 'jar-spells', 'meditation'],
+  },
+  {
+    slug: 'beginners',
+    title: "Beginner's Guide to Astrology, Tarot & Modern Witchcraft",
+    category: 'concept',
+    keywords: [
+      'astrology for beginners',
+      'learn astrology',
+      'tarot for beginners',
+      'witchcraft for beginners',
+      'how to read birth chart',
+      'learn tarot',
+      'modern witchcraft guide',
+      'spiritual practice beginners',
+      'beginner guide',
+      'getting started',
+    ],
+    summary:
+      'Your complete introduction to astrology, tarot, and modern witchcraft. Learn the fundamentals of birth charts, tarot reading, moon magic, and safe spiritual practice.',
+    relatedSlugs: [
+      'birth-chart',
+      'tarot',
+      'modern-witchcraft',
+      'moon',
+      'crystals',
+    ],
+  },
+  {
+    slug: 'book-of-shadows',
+    title: 'Book of Shadows',
+    category: 'concept',
+    keywords: [
+      'book of shadows',
+      'grimoire',
+      'witchcraft journal',
+      'spell book',
+      'how to create book of shadows',
+      'digital grimoire',
+      'witchcraft journaling',
+      'magical journal',
+      'personal grimoire',
+      'witchcraft record keeping',
+    ],
+    summary:
+      'Learn how to create and maintain your Book of Shadows. Discover what to include, how to organize it, digital vs. physical options, and why recording your practice matters for growth.',
+    relatedSlugs: ['modern-witchcraft', 'spells', 'practices'],
+  },
+  {
+    slug: 'sabbats',
+    title: 'Sabbats',
+    category: 'concept',
+    keywords: [
+      'sabbats',
+      'wheel of the year',
+      'pagan holidays',
+      'seasonal festivals',
+      'samhain',
+      'yule',
+      'imbolc',
+      'ostara',
+      'beltane',
+      'litha',
+      'lammas',
+      'mabon',
+      'greater sabbats',
+      'lesser sabbats',
+    ],
+    summary:
+      'Sabbats are the eight seasonal festivals in the Wheel of the Year. They mark significant points in the solar cycle: solstices, equinoxes, and the cross-quarter days between them.',
+    relatedSlugs: ['wheel-of-the-year', 'modern-witchcraft', 'moon'],
+  },
+  {
+    slug: 'witchcraft-tools',
+    title: 'Witchcraft Tools',
+    category: 'concept',
+    keywords: [
+      'witchcraft tools',
+      'athame',
+      'wand',
+      'chalice',
+      'pentacle',
+      'cauldron',
+      'witchcraft supplies',
+      'ritual tools',
+      'altar tools',
+      'magical tools',
+      'witchcraft equipment',
+    ],
+    summary:
+      'Learn about essential witchcraft tools: athame, wand, chalice, pentacle, cauldron, and more. Discover what each tool represents and how to use them in your practice.',
+    relatedSlugs: ['modern-witchcraft', 'practices', 'correspondences'],
+  },
+  {
+    slug: 'astronomy-vs-astrology',
+    title: 'Astronomy vs Astrology',
+    category: 'concept',
+    keywords: [
+      'astronomy vs astrology',
+      'difference between astronomy and astrology',
+      'is astrology a science',
+      'astronomy definition',
+      'astrology meaning',
+      'astronomy science',
+      'astrology symbolic',
+      'astronomical vs astrological',
+    ],
+    summary:
+      'Understand the key differences between astronomy and astrology. One is a science, the other a symbolic system. Learn how they relate and diverge.',
+    relatedSlugs: ['astronomy', 'birth-chart', 'horoscopes'],
   },
   {
     slug: 'mercury-retrograde',
@@ -2236,6 +2424,273 @@ export const GRIMOIRE_SEARCH_INDEX: GrimoireEntry[] = [
     summary:
       'A zodiac aligned with actual star constellations, used in Vedic astrology.',
     relatedSlugs: ['glossary#tropical-zodiac'],
+  },
+
+  // ============================================================================
+  // LUNARY ARCHETYPES
+  // ============================================================================
+  {
+    slug: 'archetypes',
+    title: 'Lunary Archetypes',
+    category: 'archetype',
+    keywords: [
+      'archetype',
+      'archetypes',
+      'lunary archetypes',
+      'inner patterns',
+      'psychological archetypes',
+      'jungian',
+      'shadow work',
+      'self-discovery',
+      'soul archetypes',
+    ],
+    summary:
+      'The 12 Lunary Archetypes reveal your emotional cycles, strengths, and spiritual themes through universal inner patterns.',
+    relatedSlugs: [
+      'archetypes#restorer',
+      'archetypes#seeker',
+      'archetypes#mystic',
+    ],
+  },
+  {
+    slug: 'archetypes#restorer',
+    title: 'The Restorer',
+    category: 'archetype',
+    keywords: [
+      'restorer',
+      'the restorer',
+      'healing',
+      'recovery',
+      'emotional healing',
+      'self-healing',
+      'resilience',
+      'nurturing',
+    ],
+    summary:
+      'The Restorer archetype embodies the profound capacity for healing and emotional reconstruction, rebuilding foundations that support future growth.',
+    relatedSlugs: [
+      'archetypes',
+      'archetypes#empath',
+      'archetypes#heart-opener',
+    ],
+  },
+  {
+    slug: 'archetypes#seeker',
+    title: 'The Seeker',
+    category: 'archetype',
+    keywords: [
+      'seeker',
+      'the seeker',
+      'searching',
+      'meaning',
+      'purpose',
+      'spiritual quest',
+      'wisdom',
+      'explorer',
+      'truth',
+    ],
+    summary:
+      'The Seeker archetype represents the eternal quest for meaning, driven by an unquenchable thirst for understanding and deeper truth.',
+    relatedSlugs: ['archetypes', 'archetypes#visionary', 'archetypes#mystic'],
+  },
+  {
+    slug: 'archetypes#catalyst',
+    title: 'The Catalyst',
+    category: 'archetype',
+    keywords: [
+      'catalyst',
+      'the catalyst',
+      'change',
+      'transformation',
+      'disruption',
+      'innovation',
+      'breakthrough',
+      'revolutionary',
+    ],
+    summary:
+      'The Catalyst archetype embodies the power to initiate profound change, challenging stagnation and awakening dormant potential.',
+    relatedSlugs: [
+      'archetypes',
+      'archetypes#alchemist',
+      'archetypes#shadow-dancer',
+    ],
+  },
+  {
+    slug: 'archetypes#grounded-one',
+    title: 'The Grounded One',
+    category: 'archetype',
+    keywords: [
+      'grounded one',
+      'the grounded one',
+      'stability',
+      'earth',
+      'practical',
+      'centered',
+      'reliable',
+      'foundation',
+    ],
+    summary:
+      'The Grounded One archetype represents stability, practical wisdom, and the capacity to create secure foundations in uncertain times.',
+    relatedSlugs: ['archetypes', 'archetypes#protector', 'archetypes#restorer'],
+  },
+  {
+    slug: 'archetypes#empath',
+    title: 'The Empath',
+    category: 'archetype',
+    keywords: [
+      'empath',
+      'the empath',
+      'empathy',
+      'emotions',
+      'sensitivity',
+      'feelings',
+      'compassion',
+      'intuition',
+    ],
+    summary:
+      "The Empath archetype represents profound emotional sensitivity and the gift of deeply feeling and understanding others' experiences.",
+    relatedSlugs: [
+      'archetypes',
+      'archetypes#heart-opener',
+      'archetypes#mystic',
+    ],
+  },
+  {
+    slug: 'archetypes#shadow-dancer',
+    title: 'The Shadow Dancer',
+    category: 'archetype',
+    keywords: [
+      'shadow dancer',
+      'the shadow dancer',
+      'shadow work',
+      'dark side',
+      'integration',
+      'unconscious',
+      'transformation',
+    ],
+    summary:
+      'The Shadow Dancer archetype represents mastery of the unconscious, transforming darkness into wisdom through integration.',
+    relatedSlugs: ['archetypes', 'archetypes#alchemist', 'archetypes#catalyst'],
+  },
+  {
+    slug: 'archetypes#visionary',
+    title: 'The Visionary',
+    category: 'archetype',
+    keywords: [
+      'visionary',
+      'the visionary',
+      'vision',
+      'future',
+      'dreams',
+      'imagination',
+      'innovation',
+      'possibility',
+    ],
+    summary:
+      'The Visionary archetype perceives possibilities that others cannot see, holding space for what could be and inspiring collective evolution.',
+    relatedSlugs: ['archetypes', 'archetypes#seeker', 'archetypes#mystic'],
+  },
+  {
+    slug: 'archetypes#mystic',
+    title: 'The Mystic',
+    category: 'archetype',
+    keywords: [
+      'mystic',
+      'the mystic',
+      'spiritual',
+      'transcendence',
+      'divine',
+      'meditation',
+      'enlightenment',
+      'sacred',
+    ],
+    summary:
+      'The Mystic archetype represents the direct experience of the divine and the capacity to perceive sacred dimensions of reality.',
+    relatedSlugs: [
+      'archetypes',
+      'archetypes#lunar-weaver',
+      'archetypes#visionary',
+    ],
+  },
+  {
+    slug: 'archetypes#protector',
+    title: 'The Protector',
+    category: 'archetype',
+    keywords: [
+      'protector',
+      'the protector',
+      'guardian',
+      'safety',
+      'boundaries',
+      'strength',
+      'defender',
+      'security',
+    ],
+    summary:
+      'The Protector archetype represents the fierce capacity to create safety, defend what is precious, and maintain healthy boundaries.',
+    relatedSlugs: [
+      'archetypes',
+      'archetypes#grounded-one',
+      'archetypes#heart-opener',
+    ],
+  },
+  {
+    slug: 'archetypes#heart-opener',
+    title: 'The Heart Opener',
+    category: 'archetype',
+    keywords: [
+      'heart opener',
+      'the heart opener',
+      'love',
+      'vulnerability',
+      'connection',
+      'intimacy',
+      'openness',
+      'compassion',
+    ],
+    summary:
+      'The Heart Opener archetype represents the courage to love fully, embracing vulnerability as the path to authentic connection.',
+    relatedSlugs: ['archetypes', 'archetypes#empath', 'archetypes#restorer'],
+  },
+  {
+    slug: 'archetypes#lunar-weaver',
+    title: 'The Lunar Weaver',
+    category: 'archetype',
+    keywords: [
+      'lunar weaver',
+      'the lunar weaver',
+      'moon',
+      'cycles',
+      'rhythm',
+      'intuition',
+      'feminine',
+      'flow',
+    ],
+    summary:
+      'The Lunar Weaver archetype represents attunement to natural rhythms and cycles, weaving together the threads of intuition and timing.',
+    relatedSlugs: ['archetypes', 'archetypes#mystic', 'archetypes#empath'],
+  },
+  {
+    slug: 'archetypes#alchemist',
+    title: 'The Alchemist',
+    category: 'archetype',
+    keywords: [
+      'alchemist',
+      'the alchemist',
+      'transformation',
+      'transmutation',
+      'change',
+      'magic',
+      'evolution',
+      'gold',
+    ],
+    summary:
+      'The Alchemist archetype represents the power to transmute base experiences into gold, finding meaning and growth in all circumstances.',
+    relatedSlugs: [
+      'archetypes',
+      'archetypes#shadow-dancer',
+      'archetypes#catalyst',
+    ],
   },
 ];
 

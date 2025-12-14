@@ -3,10 +3,7 @@ import {
   MoonPhaseEvent,
   BestDaysGuidance,
 } from '../blog/weeklyContentGenerator';
-import {
-  getSpellsByCategory,
-  getSpellsByMoonPhase,
-} from '../../src/constants/grimoire/spells';
+import { getSpellsByCategory, getSpellsByMoonPhase } from '@/lib/spells/index';
 
 export function generateWeeklyRitualGuides(data: WeeklyCosmicData): string {
   if (

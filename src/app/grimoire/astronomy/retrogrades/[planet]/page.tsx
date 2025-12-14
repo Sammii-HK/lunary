@@ -1,6 +1,7 @@
 import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { SEOContentTemplate } from '@/components/grimoire/SEOContentTemplate';
+import { CosmicConnections } from '@/components/grimoire/CosmicConnections';
 import { retrogradeInfo } from '@/constants/grimoire/seo-data';
 import { createEventSchema, renderJsonLd } from '@/lib/schema';
 
@@ -195,6 +196,13 @@ Understanding ${retrogradeData.name} helps you navigate this period consciously,
           { text: 'Grimoire Home', href: '/grimoire' },
         ]}
         faqs={faqs}
+        cosmicConnections={
+          <CosmicConnections
+            entityType='planet'
+            entityKey={planet}
+            title={`${retrogradeData.name} Cosmic Connections`}
+          />
+        }
       />
     </div>
   );

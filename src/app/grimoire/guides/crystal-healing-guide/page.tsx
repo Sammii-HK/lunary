@@ -6,7 +6,11 @@ import {
   createArticleWithSpeakableSchema,
   createFAQPageSchema,
   renderJsonLd,
+  createBreadcrumbSchema,
 } from '@/lib/schema';
+import { Button } from '@/components/ui/button';
+import { ExploreGrimoire } from '@/components/grimoire/ExploreGrimoire';
+import { CosmicConnections } from '@/components/grimoire/CosmicConnections';
 
 export const metadata: Metadata = {
   title:
@@ -226,8 +230,18 @@ export default function CrystalHealingGuidePage() {
   const faqSchema = createFAQPageSchema(faqs);
 
   return (
-    <div className='min-h-screen p-4 md:p-8 max-w-4xl mx-auto'>
+    <div className='p-4 md:p-8 max-w-4xl mx-auto'>
       {renderJsonLd(articleSchema)}
+      {renderJsonLd(
+        createBreadcrumbSchema([
+          { name: 'Grimoire', url: '/grimoire' },
+          { name: 'Guides', url: '/grimoire/guides' },
+          {
+            name: 'Crystal Healing Guide',
+            url: '/grimoire/guides/crystal-healing-guide',
+          },
+        ]),
+      )}
       {renderJsonLd(faqSchema)}
 
       {/* Breadcrumbs */}
@@ -261,18 +275,12 @@ export default function CrystalHealingGuidePage() {
           choosing and cleansing to programming and placement.
         </p>
         <div className='flex flex-wrap gap-4'>
-          <Link
-            href='/grimoire/crystals'
-            className='px-6 py-3 bg-lunary-primary-600 hover:bg-lunary-primary-700 text-white rounded-lg font-medium transition-colors'
-          >
-            Explore Crystal Library
-          </Link>
-          <Link
-            href='#essential-crystals'
-            className='px-6 py-3 border border-zinc-700 hover:border-lunary-primary text-zinc-300 rounded-lg font-medium transition-colors'
-          >
-            Start Learning
-          </Link>
+          <Button asChild variant='lunary-solid' size='lg'>
+            <Link href='/grimoire/crystals'>Explore Crystal Library</Link>
+          </Button>
+          <Button asChild variant='outline' size='lg'>
+            <Link href='#essential-crystals'>Start Learning</Link>
+          </Button>
         </div>
       </header>
 
@@ -908,6 +916,25 @@ export default function CrystalHealingGuidePage() {
           </Link>
         </div>
       </section>
+
+      <CosmicConnections
+        entityType='crystal'
+        entityKey='crystal-guide'
+        title='Crystal Connections'
+        sections={[
+          {
+            title: 'Related Pages',
+            links: [
+              { label: 'All Crystals', href: '/grimoire/crystals' },
+              { label: 'Chakras Guide', href: '/grimoire/chakras' },
+              { label: 'Moon Rituals', href: '/grimoire/moon/rituals' },
+              { label: 'Meditation', href: '/grimoire/meditation' },
+            ],
+          },
+        ]}
+      />
+
+      <ExploreGrimoire />
     </div>
   );
 }

@@ -1,5 +1,6 @@
 import { notFound } from 'next/navigation';
 import { SEOContentTemplate } from '@/components/grimoire/SEOContentTemplate';
+import { CosmicConnections } from '@/components/grimoire/CosmicConnections';
 import { chakras } from '@/constants/chakras';
 import { stringToKebabCase } from '../../../../../utils/string';
 import { createGrimoireMetadata } from '@/lib/grimoire-metadata';
@@ -188,6 +189,30 @@ Foods: ${chakraData.foods.slice(0, 3).join(', ')}`}
           { text: 'Grimoire Home', href: '/grimoire' },
         ]}
         faqs={faqs}
+        cosmicConnections={
+          <CosmicConnections
+            entityType='crystal'
+            entityKey={chakra}
+            title={`${chakraData.name} Chakra Connections`}
+            sections={[
+              {
+                title: 'Related Pages',
+                links: [
+                  { label: 'All Chakras', href: '/grimoire/chakras' },
+                  {
+                    label: 'Crystal Healing',
+                    href: '/grimoire/guides/crystal-healing-guide',
+                  },
+                  { label: 'Meditation', href: '/grimoire/meditation' },
+                  ...chakraData.crystals.slice(0, 2).map((c: string) => ({
+                    label: c,
+                    href: `/grimoire/crystals/${c.toLowerCase().replace(/\s+/g, '-')}`,
+                  })),
+                ],
+              },
+            ]}
+          />
+        }
       />
     </div>
   );

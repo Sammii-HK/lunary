@@ -1,7 +1,9 @@
 import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
+import { ExploreGrimoire } from '@/components/grimoire/ExploreGrimoire';
 import { Star } from 'lucide-react';
+import { createBreadcrumbSchema, renderJsonLd } from '@/lib/schema';
 import {
   ZODIAC_SIGNS,
   SIGN_DISPLAY,
@@ -70,8 +72,14 @@ export default async function SignDecansPage({
     ...getDecanData(sign as ZodiacSign, num as 1 | 2 | 3),
   }));
 
+  const breadcrumbSchema = createBreadcrumbSchema([
+    { name: 'Grimoire', url: '/grimoire' },
+    { name: 'Decans', url: '/grimoire/decans' },
+  ]);
+
   return (
     <div className='p-4 md:p-6 lg:p-8 xl:p-10 min-h-full'>
+      {renderJsonLd(breadcrumbSchema)}
       <div className='max-w-5xl mx-auto'>
         <div className='text-center mb-12'>
           <div className='flex justify-center mb-4'>
@@ -159,6 +167,7 @@ export default async function SignDecansPage({
             </Link>
           </div>
         </div>
+        <ExploreGrimoire />
       </div>
     </div>
   );

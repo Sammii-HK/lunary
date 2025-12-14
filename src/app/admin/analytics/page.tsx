@@ -22,6 +22,7 @@ import { ConversionFunnel } from '@/components/admin/ConversionFunnel';
 import { PostHogHeatmap } from '@/components/admin/PostHogHeatmap';
 import { SuccessMetrics } from '@/components/admin/SuccessMetrics';
 import { SearchConsoleMetrics } from '@/components/admin/SearchConsoleMetrics';
+import { AttributionMetrics } from '@/components/admin/AttributionMetrics';
 import { Button } from '@/components/ui/button';
 import {
   Card,
@@ -921,6 +922,23 @@ export default function AnalyticsPage() {
           </Card>
         </section>
       )}
+
+      <section>
+        <Card className='border-zinc-800/30 bg-zinc-900/10'>
+          <CardHeader>
+            <CardTitle className='text-base font-medium'>
+              SEO & Attribution
+            </CardTitle>
+            <CardDescription className='text-xs text-zinc-400'>
+              First-touch attribution tracking for organic and marketing
+              channels
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <AttributionMetrics startDate={startDate} endDate={endDate} />
+          </CardContent>
+        </Card>
+      </section>
     </div>
   );
 }

@@ -23,7 +23,58 @@ import {
 } from '@/constants/grimoire/numerology-extended-data';
 import { NumerologyCalculator } from '@/components/grimoire/NumerologyCalculator';
 import { Breadcrumbs } from '@/components/grimoire/Breadcrumbs';
-import { createItemListSchema, renderJsonLd } from '@/lib/schema';
+import { CosmicConnections } from '@/components/grimoire/CosmicConnections';
+import { CosmicConnectionSection } from '@/lib/cosmicConnectionsConfig';
+import {
+  createItemListSchema,
+  createFAQPageSchema,
+  createBreadcrumbSchema,
+  renderJsonLd,
+} from '@/lib/schema';
+
+const faqs = [
+  {
+    question: 'What is numerology?',
+    answer:
+      'Numerology is the study of the spiritual significance of numbers and their influence on human life. It holds that numbers carry vibrational frequencies that affect personality, life path, and destiny. Numerology is used for self-discovery, guidance, and understanding life patterns.',
+  },
+  {
+    question: 'How do I calculate my Life Path Number?',
+    answer:
+      'Add all the digits of your birth date until you reach a single digit (1-9) or a Master Number (11, 22, 33). For example, if born March 15, 1990: 3+1+5+1+9+9+0=28, then 2+8=10, then 1+0=1. Your Life Path Number is 1.',
+  },
+  {
+    question: 'What are angel numbers?',
+    answer:
+      'Angel numbers are repeating number sequences (like 111, 222, 333) that many believe carry messages from angels or the universe. When you repeatedly notice these numbers on clocks, receipts, or elsewhere, pay attention to what you were thinking—the context often reveals the message.',
+  },
+  {
+    question: 'What is a Universal Year?',
+    answer:
+      'The Universal Year is the numerological energy affecting everyone globally during a calendar year. Calculate it by adding the digits of the year (e.g., 2025 = 2+0+2+5 = 9). Each Universal Year has themes that influence collective experiences and opportunities.',
+  },
+];
+
+const cosmicConnectionsSections: CosmicConnectionSection[] = [
+  {
+    title: 'Numerology Branches',
+    links: [
+      { label: 'Angel Numbers', href: '/grimoire/angel-numbers' },
+      { label: 'Life Path Numbers', href: '/grimoire/life-path' },
+      { label: 'Mirror Hours', href: '/grimoire/mirror-hours' },
+      { label: 'Double Hours', href: '/grimoire/double-hours' },
+    ],
+  },
+  {
+    title: 'Related Practices',
+    links: [
+      { label: 'Tarot', href: '/grimoire/tarot' },
+      { label: 'Astrology Basics', href: '/grimoire/beginners' },
+      { label: 'Birth Chart', href: '/birth-chart' },
+      { label: 'Divination', href: '/grimoire/divination' },
+    ],
+  },
+];
 
 export const metadata: Metadata = {
   title:
@@ -45,6 +96,21 @@ export const metadata: Metadata = {
     description:
       'Complete guide to numerology - angel numbers, life path numbers, and universal year meanings.',
     url: 'https://lunary.app/grimoire/numerology',
+    images: [
+      {
+        url: '/api/og/grimoire/numerology',
+        width: 1200,
+        height: 630,
+        alt: 'Numerology Guide - Lunary',
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Numerology Guide: Angel Numbers, Life Path & Universal Years',
+    description:
+      'Complete guide to numerology - angel numbers, life path numbers, and universal year meanings.',
+    images: ['/api/og/grimoire/numerology'],
   },
   alternates: {
     canonical: 'https://lunary.app/grimoire/numerology',
@@ -54,6 +120,8 @@ export const metadata: Metadata = {
 export default function NumerologyIndexPage() {
   const currentYear = new Date().getFullYear();
   const currentUniversalYear = getUniversalYear(currentYear);
+
+  const faqSchema = createFAQPageSchema(faqs);
 
   const numerologyListSchema = createItemListSchema({
     name: 'Numerology Guide',
@@ -97,6 +165,13 @@ export default function NumerologyIndexPage() {
   return (
     <div className='min-h-screen bg-zinc-950 text-zinc-100'>
       {renderJsonLd(numerologyListSchema)}
+      {renderJsonLd(faqSchema)}
+      {renderJsonLd(
+        createBreadcrumbSchema([
+          { name: 'Grimoire', url: '/grimoire' },
+          { name: 'Numerology', url: '/grimoire/numerology' },
+        ]),
+      )}
       <div className='max-w-6xl mx-auto px-4 py-12'>
         <Breadcrumbs
           items={[
@@ -438,6 +513,13 @@ export default function NumerologyIndexPage() {
             </div>
           </div>
         </div>
+
+        <CosmicConnections
+          entityType='hub-glossary'
+          entityKey='numerology'
+          title='Numerology Connections'
+          sections={cosmicConnectionsSections}
+        />
       </div>
     </div>
   );

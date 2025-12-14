@@ -9,6 +9,10 @@ import {
 } from '@/constants/grimoire/crystals';
 import { correspondencesData } from '@/constants/grimoire/correspondences';
 
+function stringifySafe(data: object) {
+  return JSON.stringify(data).replace(/</g, '\\u003c');
+}
+
 type CompatibilityType = 'zodiac' | 'element' | 'crystal' | 'moon';
 
 interface CompatibilityResult {
@@ -1225,7 +1229,7 @@ export default function CompatibilityChart() {
         <script
           type='application/ld+json'
           dangerouslySetInnerHTML={{
-            __html: JSON.stringify({
+            __html: stringifySafe({
               '@context': 'https://schema.org',
               '@type': 'BreadcrumbList',
               itemListElement: [
@@ -1256,7 +1260,7 @@ export default function CompatibilityChart() {
         <script
           type='application/ld+json'
           dangerouslySetInnerHTML={{
-            __html: JSON.stringify({
+            __html: stringifySafe({
               '@context': 'https://schema.org',
               '@type': 'Article',
               headline: 'Compatibility Chart - Lunary Grimoire',
@@ -1300,7 +1304,7 @@ export default function CompatibilityChart() {
         <script
           type='application/ld+json'
           dangerouslySetInnerHTML={{
-            __html: JSON.stringify({
+            __html: stringifySafe({
               '@context': 'https://schema.org',
               '@type': 'WebApplication',
               name: 'Compatibility Chart - Lunary Grimoire',
@@ -1331,7 +1335,7 @@ export default function CompatibilityChart() {
         <script
           type='application/ld+json'
           dangerouslySetInnerHTML={{
-            __html: JSON.stringify({
+            __html: stringifySafe({
               '@context': 'https://schema.org',
               '@type': 'FAQPage',
               mainEntity: [

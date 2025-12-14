@@ -1,5 +1,9 @@
 import GrimoireLayout from './GrimoireLayout';
-import { createItemListSchema, renderJsonLd } from '@/lib/schema';
+import {
+  createItemListSchema,
+  renderJsonLd,
+  createBreadcrumbSchema,
+} from '@/lib/schema';
 
 const grimoireCategories = [
   {
@@ -49,6 +53,12 @@ const grimoireCategories = [
       'Magical correspondences for elements, colors, herbs, and more',
   },
   {
+    name: 'Witchcraft Practices',
+    url: 'https://lunary.app/grimoire/practices',
+    description:
+      'Complete guide to spells, meditation, divination, shadow work, and more',
+  },
+  {
     name: 'Spells',
     url: 'https://lunary.app/grimoire/spells',
     description: 'Protection, love, prosperity, and healing spells',
@@ -67,6 +77,12 @@ const GrimoireHome = () => {
   return (
     <div className='h-full w-full'>
       {renderJsonLd(grimoireListSchema)}
+      {renderJsonLd(
+        createBreadcrumbSchema([
+          { name: 'Grimoire', url: '/grimoire' },
+          { name: 'Page.tsx', url: '/grimoire/page.tsx' },
+        ]),
+      )}
       <GrimoireLayout />
     </div>
   );

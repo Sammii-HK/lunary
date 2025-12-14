@@ -15,8 +15,7 @@ import { hasBirthChartAccess, hasDateAccess } from '../../utils/pricing';
 import { useAstronomyContext } from '../context/AstronomyContext';
 import dayjs from 'dayjs';
 import Link from 'next/link';
-import { Info } from 'lucide-react';
-import { Popover } from '@base-ui-components/react/popover';
+import { Info, X } from 'lucide-react';
 import { Paywall } from './Paywall';
 
 export const CrystalWidget = () => {
@@ -26,6 +25,7 @@ export const CrystalWidget = () => {
   const userBirthday = user?.birthday;
   const birthChart = user?.birthChart;
   const [observer, setObserver] = useState<any>(null);
+  const [showInfo, setShowInfo] = useState(false);
 
   useEffect(() => {
     import('astronomy-engine').then((module) => {
@@ -194,41 +194,44 @@ export const CrystalWidget = () => {
   return (
     <div className='py-3 px-4 border border-stone-800 rounded-md w-full relative min-h-64'>
       {/* Info Icon with Popover */}
-      <Popover.Root>
-        <Popover.Trigger className='absolute top-2 right-2 p-1 text-zinc-400 hover:text-zinc-300 transition-colors'>
-          <Info size={14} />
-        </Popover.Trigger>
-        <Popover.Portal>
-          <Popover.Positioner sideOffset={8}>
-            <Popover.Popup className='bg-zinc-800 border border-zinc-700 rounded-lg p-4 max-w-sm text-xs text-zinc-300 shadow-lg z-50'>
-              <div className='space-y-3'>
-                <div>
-                  <h4 className='font-semibold text-white mb-2'>
-                    Crystal Selection Process
-                  </h4>
-                  <p className='mb-2'>
-                    Your daily crystal is calculated using:
-                  </p>
-                  <ul className='list-disc list-inside space-y-1 text-zinc-400'>
-                    <li>Your birth chart placements (Sun, Moon, planets)</li>
-                    <li>Current planetary positions and transits</li>
-                    <li>Selected date&apos;s numerological vibration</li>
-                    <li>Day-of-week planetary ruler energies</li>
-                    <li>Astrological aspects and alignments</li>
-                  </ul>
-                </div>
-                <div>
-                  <p className='text-zinc-400'>
-                    Each crystal&apos;s properties are matched against these
-                    cosmic factors to find your most beneficial stone for the
-                    selected date.
-                  </p>
-                </div>
-              </div>
-            </Popover.Popup>
-          </Popover.Positioner>
-        </Popover.Portal>
-      </Popover.Root>
+      <button
+        onClick={() => setShowInfo(!showInfo)}
+        className='absolute top-2 right-2 p-1 text-zinc-400 hover:text-zinc-300 transition-colors'
+      >
+        <Info size={14} />
+      </button>
+      {showInfo && (
+        <div className='absolute top-8 right-2 bg-zinc-800 border border-zinc-700 rounded-lg p-4 max-w-sm text-xs text-zinc-300 shadow-lg z-50'>
+          <button
+            onClick={() => setShowInfo(false)}
+            className='absolute top-2 right-2 text-zinc-400 hover:text-zinc-300'
+          >
+            <X size={12} />
+          </button>
+          <div className='space-y-3'>
+            <div>
+              <h4 className='font-semibold text-white mb-2'>
+                Crystal Selection Process
+              </h4>
+              <p className='mb-2'>Your daily crystal is calculated using:</p>
+              <ul className='list-disc list-inside space-y-1 text-zinc-400'>
+                <li>Your birth chart placements (Sun, Moon, planets)</li>
+                <li>Current planetary positions and transits</li>
+                <li>Selected date&apos;s numerological vibration</li>
+                <li>Day-of-week planetary ruler energies</li>
+                <li>Astrological aspects and alignments</li>
+              </ul>
+            </div>
+            <div>
+              <p className='text-zinc-400'>
+                Each crystal&apos;s properties are matched against these cosmic
+                factors to find your most beneficial stone for the selected
+                date.
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
 
       <div className='space-y-2'>
         <div className='flex items-center justify-between'>

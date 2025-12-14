@@ -97,6 +97,43 @@ export const spellCategories = {
     description: 'Removing unwanted influences and letting go',
     icon: '🌙',
   },
+  'shadow-work': {
+    name: 'Shadow Work',
+    description: 'Rituals for exploring and integrating hidden aspects of self',
+    icon: '🖤',
+  },
+  'self-love': {
+    name: 'Self-Love',
+    description: 'Spells for confidence, self-worth, and inner radiance',
+    icon: '💗',
+  },
+  'moon-magic': {
+    name: 'Moon Magic',
+    description:
+      'Rituals aligned with lunar phases for manifestation and release',
+    icon: '🌕',
+  },
+  'planetary-magic': {
+    name: 'Planetary Magic',
+    description: 'Spells utilizing planetary energies and days of the week',
+    icon: '☿️',
+  },
+  'emotional-healing': {
+    name: 'Emotional Healing',
+    description:
+      'Rituals for heartbreak, grief, forgiveness, and inner child work',
+    icon: '💜',
+  },
+  'house-rituals': {
+    name: 'House Rituals',
+    description: 'Astrological house-based rituals for life areas',
+    icon: '🏠',
+  },
+  'sabbat-rituals': {
+    name: 'Sabbat Rituals',
+    description: 'Seasonal celebrations for the Wheel of the Year',
+    icon: '🌾',
+  },
 };
 
 export const spells: Spell[] = [

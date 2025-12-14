@@ -2,9 +2,13 @@
 
 import { useMemo } from 'react';
 import { useUser } from '@/context/UserContext';
+import { useAuthStatus } from '@/components/AuthStatus';
 import Link from 'next/link';
-import { Sparkles, ArrowRight } from 'lucide-react';
-import { getUpcomingTransits } from '../../utils/astrology/transitCalendar';
+import { Sparkles, ArrowRight, Lock } from 'lucide-react';
+import {
+  getUpcomingTransits,
+  TransitEvent,
+} from '../../utils/astrology/transitCalendar';
 import {
   getPersonalTransitImpacts,
   PersonalTransitImpact,
@@ -35,15 +39,51 @@ const getPlanetSymbol = (planet: string): string => {
 
 export const TransitOfTheDay = () => {
   const { user } = useUser();
+  const authStatus = useAuthStatus();
   const subscription = useSubscription();
 
-  const hasChartAccess = hasBirthChartAccess(
-    subscription.status,
-    subscription.plan,
-  );
+  // For unauthenticated users, force hasChartAccess to false immediately
+  // Don't wait for subscription to resolve
+  const hasChartAccess = !authStatus.isAuthenticated
+    ? false
+    : hasBirthChartAccess(subscription.status, subscription.plan);
 
+  // Get general transits for unauthenticated users or when no chart access
+  const generalTransit = useMemo((): TransitEvent | null => {
+    if (authStatus.isAuthenticated && hasChartAccess) return null;
+
+    const upcomingTransits = getUpcomingTransits();
+    if (upcomingTransits.length === 0) return null;
+
+    const today = dayjs().startOf('day');
+    const nextWeek = today.add(7, 'day');
+
+    const relevantTransits = upcomingTransits.filter((t) => {
+      const transitDate = dayjs(t.date);
+      return (
+        transitDate.isAfter(today.subtract(1, 'day')) &&
+        transitDate.isBefore(nextWeek)
+      );
+    });
+
+    if (relevantTransits.length === 0) {
+      return upcomingTransits[0];
+    }
+
+    const priorityOrder = { high: 3, medium: 2, low: 1 };
+    const sorted = relevantTransits.sort((a, b) => {
+      const priorityDiff =
+        priorityOrder[b.significance] - priorityOrder[a.significance];
+      if (priorityDiff !== 0) return priorityDiff;
+      return dayjs(a.date).diff(dayjs(b.date));
+    });
+
+    return sorted[0];
+  }, [authStatus.isAuthenticated, hasChartAccess]);
+
+  // Get personalized transit for authenticated users with chart access
   const transit = useMemo((): PersonalTransitImpact | null => {
-    if (!user || !hasChartAccess) return null;
+    if (!authStatus.isAuthenticated || !user || !hasChartAccess) return null;
     const birthChart = user.birthChart;
     if (!birthChart || birthChart.length === 0) return null;
 
@@ -80,28 +120,124 @@ export const TransitOfTheDay = () => {
     });
 
     return sorted[0];
-  }, [user, hasChartAccess]);
+  }, [authStatus.isAuthenticated, user, hasChartAccess]);
 
-  if (!hasChartAccess) {
+  // Show general transit for unauthenticated users or users without chart access
+  if (!authStatus.isAuthenticated || !hasChartAccess) {
+    if (!generalTransit) {
+      // Fallback: show upsell if no transits available (shouldn't happen)
+      return (
+        <Link
+          href='/pricing'
+          className='block py-3 px-4 bg-lunary-bg border border-zinc-800/50 rounded-md w-full h-full hover:border-lunary-primary-700/50 transition-colors'
+        >
+          <div className='flex items-center justify-between'>
+            <div className='flex items-center gap-2'>
+              <Sparkles className='w-4 h-4 text-lunary-secondary-200' />
+              <span className='text-sm text-lunary-primary-200'>
+                Unlock personal transit insights
+              </span>
+            </div>
+            <ArrowRight className='w-4 h-4 text-lunary-secondary-200' />
+          </div>
+        </Link>
+      );
+    }
+
+    const transitDate = dayjs(generalTransit.date);
+    const isToday = transitDate.isSame(dayjs(), 'day');
+    const isTomorrow = transitDate.isSame(dayjs().add(1, 'day'), 'day');
+    const dateLabel = isToday
+      ? 'Today'
+      : isTomorrow
+        ? 'Tomorrow'
+        : transitDate.format('MMM D');
+
     return (
       <Link
         href='/pricing'
-        className='block py-3 px-4 bg-lunary-bg border border-zinc-800/50 rounded-md w-full h-full hover:border-lunary-primary-700/50 transition-colors'
+        className='block py-3 px-4 bg-lunary-bg border border-zinc-800/50 rounded-md w-full h-full hover:border-lunary-primary-700/50 transition-colors group'
       >
-        <div className='flex items-center justify-between'>
-          <div className='flex items-center gap-2'>
-            <Sparkles className='w-4 h-4 text-lunary-secondary-200' />
-            <span className='text-sm text-lunary-primary-200'>
-              Unlock personal transit insights
-            </span>
+        <div className='flex items-start justify-between gap-3'>
+          <div className='flex-1 min-w-0'>
+            <div className='flex items-center justify-between mb-1'>
+              <div className='flex items-center gap-2'>
+                <span className='font-astro text-lg text-lunary-secondary-200'>
+                  {getPlanetSymbol(generalTransit.planet)}
+                </span>
+                <span className='text-xs text-zinc-400 uppercase tracking-wide'>
+                  {dateLabel}
+                </span>
+              </div>
+              {generalTransit.significance === 'high' && (
+                <span className='text-xs bg-zinc-800/50 text-lunary-primary-200 px-1.5 py-0.5 rounded'>
+                  Major
+                </span>
+              )}
+            </div>
+            <p className='text-sm text-zinc-200 mb-1'>
+              {generalTransit.planet} {generalTransit.event}
+            </p>
+            <p className='text-xs text-zinc-400 line-clamp-2 mb-2'>
+              {generalTransit.description}
+            </p>
+            <div className='flex items-center gap-1.5 text-xs text-lunary-primary-200 group-hover:text-lunary-primary-100'>
+              <Lock className='w-3 h-3' />
+              <span>Unlock personal transit insights</span>
+            </div>
           </div>
-          <ArrowRight className='w-4 h-4 text-lunary-secondary-200' />
+          <ArrowRight className='w-4 h-4 text-zinc-600 group-hover:text-lunary-secondary-200 transition-colors flex-shrink-0 mt-1' />
         </div>
       </Link>
     );
   }
 
   if (!transit) {
+    // Fallback: show general transit if no personalized transit available
+    if (generalTransit) {
+      const transitDate = dayjs(generalTransit.date);
+      const isToday = transitDate.isSame(dayjs(), 'day');
+      const isTomorrow = transitDate.isSame(dayjs().add(1, 'day'), 'day');
+      const dateLabel = isToday
+        ? 'Today'
+        : isTomorrow
+          ? 'Tomorrow'
+          : transitDate.format('MMM D');
+
+      return (
+        <Link
+          href='/horoscope'
+          className='block py-3 px-4 bg-lunary-bg border border-zinc-800/50 rounded-md w-full h-full hover:border-lunary-primary-700/50 transition-colors group'
+        >
+          <div className='flex items-start justify-between gap-3'>
+            <div className='flex-1 min-w-0'>
+              <div className='flex items-center justify-between mb-1'>
+                <div className='flex items-center gap-2'>
+                  <span className='font-astro text-lg text-lunary-secondary-200'>
+                    {getPlanetSymbol(generalTransit.planet)}
+                  </span>
+                  <span className='text-xs text-zinc-400 uppercase tracking-wide'>
+                    {dateLabel}
+                  </span>
+                </div>
+                {generalTransit.significance === 'high' && (
+                  <span className='text-xs bg-zinc-800/50 text-lunary-primary-200 px-1.5 py-0.5 rounded'>
+                    Major
+                  </span>
+                )}
+              </div>
+              <p className='text-sm text-zinc-200 mb-1'>
+                {generalTransit.planet} {generalTransit.event}
+              </p>
+              <p className='text-xs text-zinc-400 line-clamp-2'>
+                {generalTransit.description}
+              </p>
+            </div>
+            <ArrowRight className='w-4 h-4 text-zinc-600 group-hover:text-lunary-secondary-200 transition-colors flex-shrink-0 mt-1' />
+          </div>
+        </Link>
+      );
+    }
     return null;
   }
 

@@ -1,13 +1,15 @@
+// src/app/grimoire/spells/page.tsx
+
 import { Metadata } from 'next';
-import Link from 'next/link';
-import { spellDatabase, spellCategories } from '@/constants/grimoire/spells';
+import { spellCategories, spellDatabase } from '@/lib/spells';
 import { SEOContentTemplate } from '@/components/grimoire/SEOContentTemplate';
 import { createItemListSchema, renderJsonLd } from '@/lib/schema';
+import { SpellsClient } from './SpellsClient';
 
 export const metadata: Metadata = {
-  title: 'Spells for Beginners: Love, Protection & Prosperity Magic - Lunary',
+  title: 'Spells & Rituals: Complete Witchcraft Spell Library - Lunary',
   description:
-    'Explore our collection of spells for protection, love, prosperity, healing, and more. Find detailed instructions, correspondences, and guidance for your magical practice.',
+    'Explore our collection of 200+ spells for protection, love, prosperity, healing, moon magic, shadow work, and more. Find detailed instructions, correspondences, and guidance for your magical practice.',
   keywords: [
     'spells',
     'magic spells',
@@ -15,36 +17,159 @@ export const metadata: Metadata = {
     'protection spells',
     'love spells',
     'healing spells',
+    'moon spells',
+    'ritual magic',
     'spell collection',
+    'beginner spells',
   ],
   openGraph: {
-    title: 'Spell Collection | Lunary',
+    title: 'Spells & Rituals Library | Lunary',
     description:
-      'Explore our collection of spells for protection, love, prosperity, healing, and more.',
+      'Explore our collection of 200+ spells for protection, love, prosperity, healing, and more.',
     url: 'https://lunary.app/grimoire/spells',
     siteName: 'Lunary',
     locale: 'en_US',
     type: 'article',
+    images: [
+      {
+        url: '/api/og/grimoire/spells',
+        width: 1200,
+        height: 630,
+        alt: 'Spell Collection - Lunary',
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Spells & Rituals: Complete Witchcraft Spell Library - Lunary',
+    description:
+      'Explore our collection of 200+ spells for protection, love, prosperity, healing, and more.',
+    images: ['/api/og/grimoire/spells'],
   },
   alternates: {
     canonical: 'https://lunary.app/grimoire/spells',
   },
 };
 
-const difficultyColors: Record<string, string> = {
-  beginner: 'text-emerald-400 bg-emerald-900/20',
-  intermediate: 'text-amber-400 bg-amber-900/20',
-  advanced: 'text-orange-400 bg-orange-900/20',
-  master: 'text-red-400 bg-red-900/20',
-};
+const PAGE_SIZE = 10;
 
-export default function SpellsIndexPage() {
+// Spell type for the client component
+interface SpellForClient {
+  id: string;
+  title: string;
+  category: string;
+  subcategory?: string;
+  type: string;
+  difficulty: string;
+  duration: string;
+  description: string;
+  purpose: string;
+  timing?: {
+    moonPhase?: string[];
+    planetaryDay?: string[];
+  };
+  correspondences?: {
+    elements?: string[];
+    planets?: string[];
+  };
+}
+
+// Convert your normalised spell shape into what the list UI needs
+function toClientSpell(spell: any): SpellForClient {
+  return {
+    id: spell.id || '',
+    title: spell.title || '',
+    category: spell.category || '',
+    subcategory: spell.subcategory,
+    type: spell.type || 'spell',
+    difficulty: spell.difficulty || 'beginner',
+    duration: spell.duration || '10-15 minutes',
+    description: spell.description || spell.purpose || '',
+    purpose: spell.purpose || spell.description || '',
+    timing: spell.timing,
+    correspondences: spell.correspondences,
+  };
+}
+
+function getAllCategories() {
+  const merged: Record<
+    string,
+    { name: string; description: string; icon: string }
+  > = {};
+
+  Object.entries(spellCategories).forEach(([key, cat]: any) => {
+    merged[key] = {
+      name: cat.name,
+      description: cat.description,
+      icon: cat.icon ?? '✨',
+    };
+  });
+
+  return merged;
+}
+
+// Global category counts for ALL spells (not just the current page)
+function getGlobalCategoryCounts(allSpells: SpellForClient[]) {
+  const counts: Record<string, number> = { all: allSpells.length };
+
+  for (const s of allSpells) {
+    if (!s?.category) continue;
+    counts[s.category] = (counts[s.category] || 0) + 1;
+  }
+
+  return counts;
+}
+
+export default async function SpellsIndexPage({
+  searchParams,
+}: {
+  searchParams?: Promise<{
+    q?: string;
+    category?: string;
+    difficulty?: string;
+  }>;
+}) {
+  const sp = (await searchParams) ?? {};
+
+  const initialQuery = sp.q ?? '';
+  const initialCategory = sp.category ?? 'all';
+  const initialDifficulty = sp.difficulty ?? 'all';
+  const allSpells: SpellForClient[] = spellDatabase.map(toClientSpell);
+  const allCategories = getAllCategories();
+
+  // filter globally (this is the key change)
+  const filteredAll = allSpells.filter((s) => {
+    const matchesQ =
+      !sp.q ||
+      s.title.toLowerCase().includes(sp.q) ||
+      s.description.toLowerCase().includes(sp.q) ||
+      s.purpose.toLowerCase().includes(sp.q) ||
+      s.category.toLowerCase().includes(sp.q) ||
+      (s.subcategory ? s.subcategory.toLowerCase().includes(sp.q) : false);
+
+    const matchesCategory =
+      initialCategory === 'all' ? true : s.category === initialCategory;
+    const matchesDifficulty =
+      initialDifficulty === 'all' ? true : s.difficulty === initialDifficulty;
+
+    return matchesQ && matchesCategory && matchesDifficulty;
+  });
+
+  const totalCount = filteredAll.length;
+  const totalPages = Math.max(1, Math.ceil(totalCount / PAGE_SIZE));
+  const currentPage = 1;
+
+  const spellsForPage = filteredAll.slice(0, PAGE_SIZE);
+
+  // counts should match the filtered result set (so they feel correct during search)
+  const categoryCounts = getGlobalCategoryCounts(filteredAll);
+
   const spellListSchema = createItemListSchema({
     name: 'Spell Collection',
     description:
-      'Curated collection of spells for protection, love, prosperity, healing, and magical practice.',
+      'Curated collection of spells for protection, love, prosperity, healing, moon magic, shadow work, and magical practice.',
     url: 'https://lunary.app/grimoire/spells',
-    items: spellDatabase.slice(0, 20).map((spell) => ({
+    items: spellsForPage.map((spell) => ({
       name: spell.title,
       url: `https://lunary.app/grimoire/spells/${spell.id}`,
       description: spell.description,
@@ -54,16 +179,19 @@ export default function SpellsIndexPage() {
   return (
     <>
       {renderJsonLd(spellListSchema)}
+
       <SEOContentTemplate
-        title='Spells: Complete Spell Collection'
-        h1='Spells'
-        description='Explore our curated collection of spells. Each includes detailed instructions, materials, correspondences, and guidance for safe, ethical practice.'
+        title='Spells & Rituals Library'
+        h1='Spells & Rituals'
+        description='Explore our curated collection of spells and rituals. Each includes detailed instructions, materials, correspondences, and guidance for safe, ethical practice.'
         keywords={[
           'spells',
           'magic spells',
           'witchcraft spells',
           'protection spells',
           'love spells',
+          'moon magic',
+          'ritual magic',
         ]}
         canonicalUrl='https://lunary.app/grimoire/spells'
         whatIs={{
@@ -89,11 +217,16 @@ export default function SpellsIndexPage() {
             answer:
               'Timing matters in magic. New moons favor beginnings and manifestation; full moons favor completion and release. Planetary hours and days add power (Venus for love, Mars for courage). However, urgent needs can override ideal timing.',
           },
+          {
+            question: 'Are spells safe for beginners?',
+            answer:
+              'Yes. Start with beginner-level spells that focus on protection, self-love, and personal growth. Avoid any spells that attempt to control others or involve advanced techniques until you have more experience. Always read through a spell completely before beginning.',
+          },
         ]}
         relatedItems={[
           {
             name: 'Spellcraft Fundamentals',
-            href: '/grimoire/spellcraft-fundamentals',
+            href: '/grimoire/spells/fundamentals',
             type: 'guide',
           },
           {
@@ -113,73 +246,19 @@ export default function SpellsIndexPage() {
           },
         ]}
       >
-        <div className='space-y-12'>
-          <section>
-            <h2 className='text-2xl font-medium text-zinc-100 mb-6'>
-              Spell Categories
-            </h2>
-            <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4'>
-              {Object.entries(spellCategories).map(([key, category]) => (
-                <div
-                  key={key}
-                  className='rounded-xl border border-zinc-800 bg-zinc-900/30 p-5'
-                >
-                  <h3 className='text-lg font-medium text-zinc-100 mb-2'>
-                    {category.name}
-                  </h3>
-                  <p className='text-sm text-zinc-400 mb-3'>
-                    {category.description}
-                  </p>
-                  <div className='flex flex-wrap gap-1'>
-                    {category.subcategories.slice(0, 3).map((sub) => (
-                      <span
-                        key={sub}
-                        className='text-xs px-2 py-0.5 bg-zinc-800 text-zinc-400 rounded'
-                      >
-                        {sub.replace(/-/g, ' ')}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-              ))}
-            </div>
-          </section>
-
-          {spellDatabase.length > 0 && (
-            <section>
-              <h2 className='text-2xl font-medium text-zinc-100 mb-6'>
-                Featured Spells
-              </h2>
-              <div className='space-y-4'>
-                {spellDatabase.slice(0, 5).map((spell) => (
-                  <Link
-                    key={spell.id}
-                    href={`/grimoire/spells/${spell.id}`}
-                    className='group block rounded-xl border border-zinc-800 bg-zinc-900/30 p-5 hover:bg-zinc-900/50 hover:border-violet-700/50 transition-all'
-                  >
-                    <div className='flex items-center justify-between mb-2'>
-                      <h3 className='font-medium text-zinc-100 group-hover:text-violet-300 transition-colors'>
-                        {spell.title}
-                      </h3>
-                      <span
-                        className={`text-xs px-2 py-1 rounded ${difficultyColors[spell.difficulty]}`}
-                      >
-                        {spell.difficulty}
-                      </span>
-                    </div>
-                    <p className='text-sm text-zinc-400 mb-3'>
-                      {spell.description}
-                    </p>
-                    <div className='flex items-center gap-4 text-xs text-zinc-400'>
-                      <span>{spell.duration}</span>
-                      <span>{spell.category}</span>
-                    </div>
-                  </Link>
-                ))}
-              </div>
-            </section>
-          )}
-        </div>
+        <SpellsClient
+          spells={spellsForPage}
+          totalCount={totalCount}
+          currentPage={currentPage}
+          totalPages={totalPages}
+          pageSize={PAGE_SIZE}
+          basePath='/grimoire/spells'
+          categories={allCategories}
+          categoryCounts={categoryCounts}
+          initialQuery={initialQuery}
+          initialCategory={initialCategory}
+          initialDifficulty={initialDifficulty}
+        />
       </SEOContentTemplate>
     </>
   );

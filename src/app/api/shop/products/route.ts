@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import Stripe from 'stripe';
+import { getAllProducts, getProductBySlug } from '@/lib/shop/generators';
 
 export const runtime = 'nodejs';
-export const revalidate = 300; // Cache products for 5 minutes - they don't change frequently
+export const revalidate = 300;
 
 function getStripe() {
   if (!process.env.STRIPE_SECRET_KEY) {
@@ -11,85 +12,97 @@ function getStripe() {
   return new Stripe(process.env.STRIPE_SECRET_KEY);
 }
 
-export async function GET(request: NextRequest) {
+interface StripeProductMapping {
+  [packId: string]: {
+    stripePriceId: string;
+    stripeProductId: string;
+  };
+}
+
+async function getStripeProductMappings(): Promise<StripeProductMapping> {
   try {
     const stripe = getStripe();
-    console.log('🛍️ Fetching products from Stripe (SSOT)...');
-
-    // Fetch all active products from Stripe (SSOT)
     const products = await stripe.products.list({
       active: true,
       limit: 100,
       expand: ['data.default_price'],
     });
 
-    // Filter products that are shop packs (have grimoireType metadata or packId or category)
-    // Also include products without metadata if they have a price (for debugging)
-    const shopProducts = products.data.filter((product) => {
-      const hasMetadata =
-        product.metadata?.grimoireType === 'grimoire-pack' ||
-        product.metadata?.packId ||
-        product.metadata?.category;
+    const mappings: StripeProductMapping = {};
 
-      // Log products for debugging
-      console.log(`Product: ${product.name}`, {
-        id: product.id,
-        hasMetadata,
-        metadata: product.metadata,
-        hasPrice: !!product.default_price,
-      });
-
-      return hasMetadata || (product.active && product.default_price);
+    products.data.forEach((product) => {
+      const packId = product.metadata?.packId || product.metadata?.slug;
+      if (packId && product.default_price) {
+        const price = product.default_price;
+        if (typeof price === 'object' && price.type === 'one_time') {
+          mappings[packId] = {
+            stripePriceId: price.id,
+            stripeProductId: product.id,
+          };
+        }
+      }
     });
 
-    // Transform Stripe products to shop format
-    const packs = shopProducts
-      .map((product) => {
-        const price = product.default_price;
-        const priceData =
-          typeof price === 'object' && price !== null ? price : null;
+    return mappings;
+  } catch (error) {
+    console.error('Failed to fetch Stripe products:', error);
+    return {};
+  }
+}
 
-        if (!priceData || priceData.type !== 'one_time') {
-          return null;
-        }
+export async function GET(request: NextRequest) {
+  try {
+    const { searchParams } = new URL(request.url);
+    const category = searchParams.get('category');
+    const slug = searchParams.get('slug');
 
-        // Get category from metadata or infer from product name
-        const category =
-          product.metadata?.category ||
-          extractCategoryFromName(product.name) ||
-          'spells';
+    if (slug) {
+      const product = getProductBySlug(slug);
+      if (!product) {
+        return NextResponse.json(
+          { error: 'Product not found' },
+          { status: 404 },
+        );
+      }
 
-        return {
-          id: product.metadata?.packId || product.id,
-          name: product.name,
-          description: product.description || '',
-          category,
-          subcategory: product.metadata?.subcategory,
-          price: priceData.unit_amount || 0,
-          imageUrl:
-            product.images?.[0] || generateOGImageUrl(product, category),
-          stripeProductId: product.id,
-          stripePriceId: priceData.id,
-          isActive: product.active,
-          metadata: {
-            dateRange: product.metadata?.dateRange,
-            format: product.metadata?.fileFormat || 'PDF',
-            itemCount: parseInt(product.metadata?.itemCount || '0'),
-            blobUrl: product.metadata?.blobUrl,
-            blobKey: product.metadata?.blobKey,
-          },
-          createdAt: new Date(product.created * 1000).toISOString(),
-        };
-      })
-      .filter((pack): pack is NonNullable<typeof pack> => pack !== null);
+      const mappings = await getStripeProductMappings();
+      const stripeData = mappings[product.id] || mappings[product.slug];
 
-    console.log(`✅ Found ${packs.length} active shop products`);
+      return NextResponse.json({
+        success: true,
+        product: {
+          ...product,
+          stripePriceId: stripeData?.stripePriceId,
+          stripeProductId: stripeData?.stripeProductId,
+        },
+      });
+    }
+
+    let products = getAllProducts();
+
+    if (category && category !== 'all') {
+      products = products.filter((p) => p.category === category);
+    }
+
+    const mappings = await getStripeProductMappings();
+
+    const productsWithStripe = products.map((product) => {
+      const stripeData = mappings[product.id] || mappings[product.slug];
+      return {
+        ...product,
+        stripePriceId: stripeData?.stripePriceId,
+        stripeProductId: stripeData?.stripeProductId,
+        isAvailable: !!stripeData?.stripePriceId,
+      };
+    });
 
     return NextResponse.json(
       {
         success: true,
-        packs,
-        total: packs.length,
+        products: productsWithStripe,
+        total: productsWithStripe.length,
+        availableForPurchase: productsWithStripe.filter((p) => p.isAvailable)
+          .length,
       },
       {
         headers: {
@@ -101,7 +114,7 @@ export async function GET(request: NextRequest) {
       },
     );
   } catch (error: any) {
-    console.error('❌ Failed to fetch products from Stripe:', error);
+    console.error('Failed to fetch products:', error);
     return NextResponse.json(
       {
         error: 'Failed to fetch products',
@@ -110,36 +123,4 @@ export async function GET(request: NextRequest) {
       { status: 500 },
     );
   }
-}
-
-// Helper to extract category from product name
-function extractCategoryFromName(name: string): string | null {
-  const lowerName = name.toLowerCase();
-  if (
-    lowerName.includes('calendar') ||
-    lowerName.includes('ical') ||
-    lowerName.includes('gcal')
-  )
-    return 'calendar';
-  if (lowerName.includes('moon')) return 'moon_phases';
-  if (lowerName.includes('crystal')) return 'crystals';
-  if (lowerName.includes('spell') || lowerName.includes('ritual'))
-    return 'spells';
-  if (lowerName.includes('tarot')) return 'tarot';
-  if (lowerName.includes('astrology') || lowerName.includes('birth chart'))
-    return 'astrology';
-  if (
-    lowerName.includes('seasonal') ||
-    lowerName.includes('sabbat') ||
-    lowerName.includes('wheel')
-  )
-    return 'seasonal';
-  return null;
-}
-
-// Helper to generate OG image URL
-function generateOGImageUrl(product: Stripe.Product, category: string): string {
-  const name = encodeURIComponent(product.name);
-  const itemCount = product.metadata?.itemCount || '0';
-  return `/api/shop/og?category=${category}&name=${name}&items=${itemCount}`;
 }

@@ -6,13 +6,7 @@ export default function robots(): MetadataRoute.Robots {
       {
         userAgent: '*',
         allow: '/',
-        disallow: [
-          '/admin/',
-          '/api/',
-          '/profile/',
-          '/settings/',
-          '/onboarding/',
-        ],
+        disallow: ['/admin/', '/api/', '/profile/'],
       },
       // Allow AI crawlers to index content
       {
@@ -24,7 +18,7 @@ export default function robots(): MetadataRoute.Robots {
           '/llms.txt',
           '/llms-full.txt',
         ],
-        disallow: ['/api/', '/profile/', '/settings/'],
+        disallow: ['/api/', '/profile/'],
       },
       {
         userAgent: 'ChatGPT-User',
@@ -35,7 +29,7 @@ export default function robots(): MetadataRoute.Robots {
           '/llms.txt',
           '/llms-full.txt',
         ],
-        disallow: ['/api/', '/profile/', '/settings/'],
+        disallow: ['/api/', '/profile/'],
       },
       {
         userAgent: 'Claude-Web',
@@ -46,7 +40,7 @@ export default function robots(): MetadataRoute.Robots {
           '/llms.txt',
           '/llms-full.txt',
         ],
-        disallow: ['/api/', '/profile/', '/settings/'],
+        disallow: ['/api/', '/profile/'],
       },
       {
         userAgent: 'Anthropic-AI',
@@ -57,7 +51,7 @@ export default function robots(): MetadataRoute.Robots {
           '/llms.txt',
           '/llms-full.txt',
         ],
-        disallow: ['/api/', '/profile/', '/settings/'],
+        disallow: ['/api/', '/profile/'],
       },
       {
         userAgent: 'PerplexityBot',
@@ -68,7 +62,7 @@ export default function robots(): MetadataRoute.Robots {
           '/llms.txt',
           '/llms-full.txt',
         ],
-        disallow: ['/api/', '/profile/', '/settings/'],
+        disallow: ['/api/', '/profile/'],
       },
     ],
     sitemap: 'https://lunary.app/sitemap.xml',

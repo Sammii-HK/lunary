@@ -1,7 +1,7 @@
 import { MetadataRoute } from 'next';
 import { grimoire } from '@/constants/grimoire';
 import { sectionToSlug } from '@/utils/grimoire';
-import { spells } from '@/constants/spells';
+import spellsJson from '@/data/spells.json';
 import { crystalDatabase } from '@/constants/grimoire/crystals';
 import { runesList } from '@/constants/runes';
 import { chakras } from '@/constants/chakras';
@@ -34,6 +34,7 @@ import {
 } from '@/constants/grimoire/numerology-extended-data';
 import { stringToKebabCase } from '../../utils/string';
 import dayjs from 'dayjs';
+import { getAllProducts } from '@/lib/shop/generators';
 
 export default function sitemap(): MetadataRoute.Sitemap {
   // Use canonical domain (non-www)
@@ -86,13 +87,13 @@ export default function sitemap(): MetadataRoute.Sitemap {
       priority: 0.8,
     },
     {
-      url: `${baseUrl}/grimoire/astronomy`,
+      url: `${baseUrl}/grimoire/spells`,
       lastModified: now,
       changeFrequency: 'monthly' as const,
       priority: 0.8,
     },
     {
-      url: `${baseUrl}/grimoire/spells`,
+      url: `${baseUrl}/grimoire/practices`,
       lastModified: now,
       changeFrequency: 'monthly' as const,
       priority: 0.8,
@@ -165,12 +166,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
     },
     {
       url: `${baseUrl}/grimoire/moon`,
-      lastModified: now,
-      changeFrequency: 'monthly' as const,
-      priority: 0.8,
-    },
-    {
-      url: `${baseUrl}/grimoire/moon/rituals`,
       lastModified: now,
       changeFrequency: 'monthly' as const,
       priority: 0.8,
@@ -267,18 +262,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
     },
     {
       url: `${baseUrl}/grimoire/modern-witchcraft`,
-      lastModified: now,
-      changeFrequency: 'monthly' as const,
-      priority: 0.7,
-    },
-    {
-      url: `${baseUrl}/grimoire/astronomy`,
-      lastModified: now,
-      changeFrequency: 'monthly' as const,
-      priority: 0.7,
-    },
-    {
-      url: `${baseUrl}/grimoire/practices`,
       lastModified: now,
       changeFrequency: 'monthly' as const,
       priority: 0.7,
@@ -464,12 +447,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
       priority: 0.6,
     },
     {
-      url: `${baseUrl}/grimoire/moon/rituals`,
-      lastModified: now,
-      changeFrequency: 'monthly' as const,
-      priority: 0.6,
-    },
-    {
       url: `${baseUrl}/grimoire/moon/signs`,
       lastModified: now,
       changeFrequency: 'monthly' as const,
@@ -519,6 +496,75 @@ export default function sitemap(): MetadataRoute.Sitemap {
       changeFrequency: 'monthly' as const,
       priority: 0.7,
     },
+    // New hub pages
+    {
+      url: `${baseUrl}/transits`,
+      lastModified: now,
+      changeFrequency: 'weekly' as const,
+      priority: 0.8,
+    },
+    {
+      url: `${baseUrl}/moon-calendar`,
+      lastModified: now,
+      changeFrequency: 'monthly' as const,
+      priority: 0.8,
+    },
+    {
+      url: `${baseUrl}/horoscope/today`,
+      lastModified: now,
+      changeFrequency: 'daily' as const,
+      priority: 0.8,
+    },
+    {
+      url: `${baseUrl}/horoscope/weekly`,
+      lastModified: now,
+      changeFrequency: 'weekly' as const,
+      priority: 0.8,
+    },
+    // E-E-A-T pages
+    {
+      url: `${baseUrl}/about/sammii`,
+      lastModified: now,
+      changeFrequency: 'monthly' as const,
+      priority: 0.7,
+    },
+    {
+      url: `${baseUrl}/about/editorial-guidelines`,
+      lastModified: now,
+      changeFrequency: 'monthly' as const,
+      priority: 0.6,
+    },
+    {
+      url: `${baseUrl}/about/methodology`,
+      lastModified: now,
+      changeFrequency: 'monthly' as const,
+      priority: 0.6,
+    },
+    // Topical authority pages
+    {
+      url: `${baseUrl}/birth-chart/example`,
+      lastModified: now,
+      changeFrequency: 'monthly' as const,
+      priority: 0.7,
+    },
+    {
+      url: `${baseUrl}/grimoire/a-z`,
+      lastModified: now,
+      changeFrequency: 'monthly' as const,
+      priority: 0.7,
+    },
+    {
+      url: `${baseUrl}/grimoire/beginners`,
+      lastModified: now,
+      changeFrequency: 'monthly' as const,
+      priority: 0.8,
+    },
+    {
+      url: `${baseUrl}/grimoire/astronomy-vs-astrology`,
+      lastModified: now,
+      changeFrequency: 'monthly' as const,
+      priority: 0.7,
+    },
   ];
 
   // Generate all blog week posts (from start of 2025 to current week)
@@ -547,6 +593,21 @@ export default function sitemap(): MetadataRoute.Sitemap {
     weekNumber++;
   }
 
+  // Generate blog pagination pages
+  const BLOG_POSTS_PER_PAGE = 8;
+  const totalBlogPosts = blogRoutes.length;
+  const totalBlogPages = Math.ceil(totalBlogPosts / BLOG_POSTS_PER_PAGE);
+  const blogPaginationRoutes: MetadataRoute.Sitemap = [];
+
+  for (let page = 2; page <= totalBlogPages; page++) {
+    blogPaginationRoutes.push({
+      url: `${baseUrl}/blog/page/${page}`,
+      lastModified: now,
+      changeFrequency: 'weekly' as const,
+      priority: 0.6,
+    });
+  }
+
   // Add all grimoire sections
   const grimoireItems = Object.keys(grimoire);
   const grimoireRoutes = grimoireItems.map((item) => ({
@@ -557,7 +618,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
   }));
 
   // Add all spell pages
-  const spellRoutes = spells.map((spell) => ({
+  const spellRoutes = spellsJson.map((spell) => ({
     url: `${baseUrl}/grimoire/spells/${spell.id}`,
     lastModified: now,
     changeFrequency: 'monthly' as const,
@@ -907,6 +968,22 @@ export default function sitemap(): MetadataRoute.Sitemap {
     lastModified: now,
     changeFrequency: 'monthly' as const,
     priority: 0.8,
+  }));
+
+  // Add daily horoscope sign pages
+  const dailyHoroscopeSignRoutes = Object.keys(zodiacSigns).map((sign) => ({
+    url: `${baseUrl}/horoscope/today/${stringToKebabCase(sign)}`,
+    lastModified: now,
+    changeFrequency: 'daily' as const,
+    priority: 0.7,
+  }));
+
+  // Add weekly horoscope sign pages
+  const weeklyHoroscopeSignRoutes = Object.keys(zodiacSigns).map((sign) => ({
+    url: `${baseUrl}/horoscope/weekly/${stringToKebabCase(sign)}`,
+    lastModified: now,
+    changeFrequency: 'weekly' as const,
+    priority: 0.7,
   }));
 
   // Add all house pages
@@ -1340,6 +1417,30 @@ export default function sitemap(): MetadataRoute.Sitemap {
       changeFrequency: 'monthly' as const,
       priority: 0.7,
     },
+    {
+      url: `${baseUrl}/grimoire/jar-spells`,
+      lastModified: now,
+      changeFrequency: 'monthly' as const,
+      priority: 0.7,
+    },
+    {
+      url: `${baseUrl}/grimoire/book-of-shadows`,
+      lastModified: now,
+      changeFrequency: 'monthly' as const,
+      priority: 0.7,
+    },
+    {
+      url: `${baseUrl}/grimoire/sabbats`,
+      lastModified: now,
+      changeFrequency: 'monthly' as const,
+      priority: 0.7,
+    },
+    {
+      url: `${baseUrl}/grimoire/witchcraft-tools`,
+      lastModified: now,
+      changeFrequency: 'monthly' as const,
+      priority: 0.7,
+    },
   ];
 
   // Add 2025/2026 events subpages
@@ -1398,9 +1499,32 @@ export default function sitemap(): MetadataRoute.Sitemap {
     }),
   );
 
+  // Add shop product routes
+  const shopProducts = getAllProducts();
+  const shopProductRoutes = shopProducts.map((product) => ({
+    url: `${baseUrl}/shop/${product.slug}`,
+    lastModified: now,
+    changeFrequency: 'weekly' as const,
+    priority: 0.7,
+  }));
+
+  // Add shop pagination routes
+  const PRODUCTS_PER_PAGE = 12;
+  const shopTotalPages = Math.ceil(shopProducts.length / PRODUCTS_PER_PAGE);
+  const shopPaginationRoutes = Array.from(
+    { length: shopTotalPages },
+    (_, i) => ({
+      url: i === 0 ? `${baseUrl}/shop` : `${baseUrl}/shop/page/${i + 1}`,
+      lastModified: now,
+      changeFrequency: 'weekly' as const,
+      priority: i === 0 ? 0.8 : 0.4,
+    }),
+  );
+
   return [
     ...routes,
     ...blogRoutes,
+    ...blogPaginationRoutes,
     ...grimoireRoutes,
     ...spellRoutes,
     ...crystalRoutes,
@@ -1463,5 +1587,9 @@ export default function sitemap(): MetadataRoute.Sitemap {
     ...additionalGrimoirePages,
     ...eventSubpages,
     ...tarotSuitRoutes,
+    ...dailyHoroscopeSignRoutes,
+    ...weeklyHoroscopeSignRoutes,
+    ...shopProductRoutes,
+    ...shopPaginationRoutes,
   ];
 }

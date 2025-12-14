@@ -8,7 +8,12 @@ import {
   getOrdinalSuffix,
 } from '@/constants/seo/houses';
 import { Breadcrumbs } from '@/components/grimoire/Breadcrumbs';
-import { createItemListSchema, renderJsonLd } from '@/lib/schema';
+import { ExploreGrimoire } from '@/components/grimoire/ExploreGrimoire';
+import {
+  createItemListSchema,
+  renderJsonLd,
+  createBreadcrumbSchema,
+} from '@/lib/schema';
 
 export const metadata: Metadata = {
   title: 'The 12 Astrological Houses: Meanings & Themes Explained | Lunary',
@@ -22,6 +27,27 @@ export const metadata: Metadata = {
     'planets in houses',
   ],
   alternates: { canonical: 'https://lunary.app/grimoire/houses' },
+  openGraph: {
+    title: 'The 12 Astrological Houses: Meanings & Themes Explained | Lunary',
+    description:
+      'Complete guide to the 12 houses in astrology. Learn what each house represents.',
+    url: 'https://lunary.app/grimoire/houses',
+    images: [
+      {
+        url: '/api/og/grimoire/houses',
+        width: 1200,
+        height: 630,
+        alt: 'The 12 Astrological Houses - Lunary',
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'The 12 Astrological Houses: Meanings & Themes Explained | Lunary',
+    description:
+      'Complete guide to the 12 houses in astrology. Learn what each house represents.',
+    images: ['/api/og/grimoire/houses'],
+  },
 };
 
 export default function HousesIndexPage() {
@@ -40,6 +66,12 @@ export default function HousesIndexPage() {
   return (
     <div className='min-h-screen bg-zinc-950 text-zinc-100'>
       {renderJsonLd(housesListSchema)}
+      {renderJsonLd(
+        createBreadcrumbSchema([
+          { name: 'Grimoire', url: '/grimoire' },
+          { name: 'Houses', url: '/grimoire/houses' },
+        ]),
+      )}
       <div className='max-w-6xl mx-auto px-4 py-12'>
         <Breadcrumbs
           items={[
@@ -111,6 +143,8 @@ export default function HousesIndexPage() {
             View Your Birth Chart
           </Link>
         </div>
+
+        <ExploreGrimoire />
       </div>
     </div>
   );

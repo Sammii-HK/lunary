@@ -1,93 +1,156 @@
-import { BlogClient } from './BlogClient';
+import { Metadata } from 'next';
+import { BlogList } from './BlogList';
+import { getPaginatedPosts } from './blog-utils';
+import { generateWeeklyContent } from '../../../utils/blog/weeklyContentGenerator';
 
-interface BlogPost {
-  id: string;
-  title: string;
-  subtitle: string;
-  summary: string;
-  weekStart: string;
-  weekEnd: string;
-  weekNumber: number;
-  year: number;
-  generatedAt: string;
-  contentSummary: {
-    planetaryHighlights: number;
-    retrogradeChanges: number;
-    majorAspects: number;
-    moonPhases: number;
-  };
-  slug: string;
-}
+export const revalidate = 3600;
 
-function generateWeeks(): BlogPost[] {
-  const weeks: BlogPost[] = [];
-  const startOf2025 = new Date('2025-01-06');
-  const today = new Date();
+const year = new Date().getFullYear();
 
-  const getMonday = (d: Date) => {
-    const date = new Date(d);
-    const day = date.getDay();
-    const diff = date.getDate() - day + (day === 0 ? -6 : 1);
-    return new Date(date.setDate(diff));
-  };
-
-  const currentWeekStart = getMonday(today);
-
-  let weekDate = new Date(startOf2025);
-  let weekNumber = 1;
-  const year = 2025;
-
-  const formatDate = (d: Date) => {
-    const months = [
-      'Jan',
-      'Feb',
-      'Mar',
-      'Apr',
-      'May',
-      'Jun',
-      'Jul',
-      'Aug',
-      'Sep',
-      'Oct',
-      'Nov',
-      'Dec',
-    ];
-    return `${months[d.getMonth()]} ${d.getDate()}`;
-  };
-
-  while (weekDate <= currentWeekStart) {
-    const weekEnd = new Date(weekDate);
-    weekEnd.setDate(weekEnd.getDate() + 6);
-
-    weeks.push({
-      id: `week-${weekNumber}-${year}`,
-      title: `Week ${weekNumber} Forecast - ${formatDate(weekDate)} - ${formatDate(weekEnd)}, ${weekEnd.getFullYear()}`,
-      subtitle: `Cosmic guidance for week ${weekNumber} of ${year}`,
-      summary: `Discover the planetary movements, moon phases, and cosmic energies shaping week ${weekNumber} of ${year}.`,
-      weekStart: weekDate.toISOString(),
-      weekEnd: weekEnd.toISOString(),
-      weekNumber,
-      year,
-      generatedAt: new Date().toISOString(),
-      contentSummary: {
-        planetaryHighlights: 0,
-        retrogradeChanges: 0,
-        majorAspects: 0,
-        moonPhases: 0,
+export const metadata: Metadata = {
+  title: `Weekly Astrology Forecast ${year}: Transits, Moon Phases & More - Lunary`,
+  description: `Weekly astrology updates for ${year}. This week's planetary transits, moon phases, retrogrades & cosmic events. Your personalized cosmic forecast.`,
+  openGraph: {
+    title: `Weekly Astrology Forecast ${year} - Lunary`,
+    description:
+      'Weekly cosmic insights, planetary highlights, moon phases, and astrological guidance.',
+    url: 'https://lunary.app/blog',
+    siteName: 'Lunary',
+    images: [
+      {
+        url: '/api/og/blog',
+        width: 1200,
+        height: 630,
+        alt: 'Weekly Astrology Forecast - Lunary Blog',
       },
-      slug: `week-${weekNumber}-${year}`,
-    });
+    ],
+    locale: 'en_US',
+    type: 'website',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: `Weekly Astrology Forecast ${year} - Lunary`,
+    description:
+      'Weekly cosmic insights, planetary highlights, moon phases, and astrological guidance.',
+    images: ['/api/og/blog'],
+  },
+  alternates: {
+    canonical: 'https://lunary.app/blog',
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      'max-video-preview': -1,
+      'max-image-preview': 'large',
+      'max-snippet': -1,
+    },
+  },
+  keywords: [
+    'astrology blog',
+    'weekly horoscope',
+    'planetary transits',
+    'moon phases',
+    'astrological guidance',
+    'cosmic insights',
+    'weekly forecast',
+    'astrology weekly',
+  ],
+};
 
-    weekDate = new Date(weekDate);
-    weekDate.setDate(weekDate.getDate() + 7);
-    weekNumber++;
+async function getCurrentWeekData() {
+  try {
+    const today = new Date();
+    const weeklyData = await generateWeeklyContent(today);
+    return weeklyData;
+  } catch {
+    return null;
   }
-
-  return weeks;
 }
 
-export default function BlogPage() {
-  const initialPosts = generateWeeks();
+export default async function BlogPage() {
+  const { posts, totalPages, totalPosts } = getPaginatedPosts(1);
+  const currentWeekData = await getCurrentWeekData();
 
-  return <BlogClient initialPosts={initialPosts} />;
+  return (
+    <>
+      <BlogList
+        posts={posts}
+        currentWeekData={currentWeekData}
+        currentPage={1}
+        totalPages={totalPages}
+        totalPosts={totalPosts}
+      />
+
+      {totalPages > 1 && (
+        <head>
+          <link rel='next' href='https://lunary.app/blog/page/2' />
+        </head>
+      )}
+
+      <script
+        type='application/ld+json'
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            '@context': 'https://schema.org',
+            '@type': 'CollectionPage',
+            name: `Weekly Astrology Forecast ${year}`,
+            description: `Weekly astrology updates for ${year}. This week's planetary transits, moon phases, retrogrades & cosmic events.`,
+            url: 'https://lunary.app/blog',
+            publisher: {
+              '@type': 'Organization',
+              name: 'Lunary',
+              url: 'https://lunary.app',
+              logo: {
+                '@type': 'ImageObject',
+                url: 'https://lunary.app/logo.png',
+              },
+            },
+            mainEntity: {
+              '@type': 'ItemList',
+              numberOfItems: totalPosts,
+              itemListElement: posts.map((post, index) => ({
+                '@type': 'ListItem',
+                position: index + 1,
+                url: `https://lunary.app/blog/week/${post.slug}`,
+                item: {
+                  '@type': 'Article',
+                  headline: post.title,
+                  description: post.subtitle,
+                  datePublished: post.weekStart,
+                  url: `https://lunary.app/blog/week/${post.slug}`,
+                },
+              })),
+            },
+          }),
+        }}
+      />
+
+      <script
+        type='application/ld+json'
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            '@context': 'https://schema.org',
+            '@type': 'BreadcrumbList',
+            itemListElement: [
+              {
+                '@type': 'ListItem',
+                position: 1,
+                name: 'Home',
+                item: 'https://lunary.app',
+              },
+              {
+                '@type': 'ListItem',
+                position: 2,
+                name: 'Blog',
+                item: 'https://lunary.app/blog',
+              },
+            ],
+          }),
+        }}
+      />
+    </>
+  );
 }

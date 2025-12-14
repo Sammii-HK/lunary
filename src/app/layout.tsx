@@ -98,9 +98,6 @@ export async function generateMetadata(): Promise<Metadata> {
     },
     other: {
       'mobile-web-app-capable': 'yes',
-      'apple-mobile-web-app-capable': 'yes',
-      'apple-mobile-web-app-status-bar-style': 'black-translucent',
-      'apple-mobile-web-app-title': 'Lunary',
       'application-name': 'Lunary',
       'msapplication-TileColor': '#18181b',
       'msapplication-config': '/browserconfig.xml',
@@ -135,13 +132,6 @@ export default function RootLayout({
           crossOrigin='anonymous'
         />
         <link rel='dns-prefetch' href='https://fonts.googleapis.com' />
-        {/* Preload hero image for LCP optimization */}
-        <link
-          rel='preload'
-          href='/lunary_hero.png'
-          as='image'
-          type='image/png'
-        />
         {/* Prefetch API endpoint for app dashboard */}
         <link
           rel='prefetch'

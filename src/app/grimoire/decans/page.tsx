@@ -1,5 +1,6 @@
 import { Metadata } from 'next';
 import Link from 'next/link';
+import { ExploreGrimoire } from '@/components/grimoire/ExploreGrimoire';
 import {
   ZODIAC_SIGNS,
   SIGN_DISPLAY,
@@ -7,7 +8,11 @@ import {
   getDecanData,
 } from '@/constants/seo/decans';
 import { Breadcrumbs } from '@/components/grimoire/Breadcrumbs';
-import { createItemListSchema, renderJsonLd } from '@/lib/schema';
+import {
+  createItemListSchema,
+  renderJsonLd,
+  createBreadcrumbSchema,
+} from '@/lib/schema';
 
 export const metadata: Metadata = {
   title: "Zodiac Decans: Your Sign's Hidden Layer Revealed | Lunary",
@@ -21,6 +26,26 @@ export const metadata: Metadata = {
     'third decan',
     'sub-ruler',
   ],
+  openGraph: {
+    title: "Zodiac Decans: Your Sign's Hidden Layer Revealed | Lunary",
+    description:
+      'Complete guide to the 36 zodiac decans. Each sign is divided into three 10-degree sections.',
+    url: 'https://lunary.app/grimoire/decans',
+    images: [
+      {
+        url: '/api/og/grimoire/decans',
+        width: 1200,
+        height: 630,
+        alt: 'Zodiac Decans Guide',
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: "Zodiac Decans: Your Sign's Hidden Layer Revealed | Lunary",
+    description: 'Complete guide to the 36 zodiac decans.',
+    images: ['/api/og/grimoire/decans'],
+  },
   alternates: { canonical: 'https://lunary.app/grimoire/decans' },
 };
 
@@ -40,6 +65,12 @@ export default function DecansIndexPage() {
   return (
     <div className='min-h-screen bg-zinc-950 text-zinc-100'>
       {renderJsonLd(decansListSchema)}
+      {renderJsonLd(
+        createBreadcrumbSchema([
+          { name: 'Grimoire', url: '/grimoire' },
+          { name: 'Decans', url: '/grimoire/decans' },
+        ]),
+      )}
       <div className='max-w-6xl mx-auto px-4 py-12'>
         <Breadcrumbs
           items={[
@@ -96,6 +127,7 @@ export default function DecansIndexPage() {
             );
           })}
         </div>
+        <ExploreGrimoire />
       </div>
     </div>
   );

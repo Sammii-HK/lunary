@@ -367,7 +367,7 @@ The practice involves following specific steps that guide you into a meditative 
         { text: 'Breathwork Techniques', href: '/grimoire/breathwork' },
         {
           text: 'Spellcraft Fundamentals',
-          href: '/grimoire/spellcraft-fundamentals',
+          href: '/grimoire/spells/fundamentals',
         },
       ]}
     />

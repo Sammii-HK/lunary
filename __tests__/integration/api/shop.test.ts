@@ -13,7 +13,7 @@ describe('Shop API', () => {
   });
 
   it('should handle product purchase', async () => {
-    const response = await fetch('http://localhost:3000/api/shop/purchase', {
+    const response = await fetch('http://localhost:3000/api/shop/purchases', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

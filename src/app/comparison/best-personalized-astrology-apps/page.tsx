@@ -498,7 +498,7 @@ export default function BestPersonalizedAstrologyAppsPage() {
         </section>
 
         {/* CTA */}
-        <section className='text-center'>
+        <section className='text-center mb-12'>
           <Link
             href='/pricing'
             className='inline-flex items-center gap-2 px-8 py-4 rounded-lg bg-lunary-primary-900/20 hover:bg-lunary-primary-900/30 border border-lunary-primary-700 text-lunary-primary-300 font-medium text-lg transition-colors'
@@ -508,8 +508,78 @@ export default function BestPersonalizedAstrologyAppsPage() {
           </Link>
         </section>
 
+        {/* Explore Grimoire */}
+        <section className='mb-12'>
+          <h2 className='text-2xl font-medium text-zinc-100 mb-6'>
+            Explore the Lunary Grimoire
+          </h2>
+          <p className='text-sm text-zinc-400 mb-6'>
+            Discover our comprehensive knowledge library that sets Lunary apart.
+          </p>
+          <div className='grid sm:grid-cols-2 lg:grid-cols-3 gap-3'>
+            <Link
+              href='/grimoire/guides/birth-chart-complete-guide'
+              className='p-4 bg-zinc-900/50 border border-zinc-800 rounded-lg hover:border-lunary-primary-600 transition-colors'
+            >
+              <span className='text-zinc-300 font-medium'>
+                Birth Chart Guide
+              </span>
+              <p className='text-xs text-zinc-500 mt-1'>
+                Complete guide to reading your chart
+              </p>
+            </Link>
+            <Link
+              href='/grimoire/astronomy/planets'
+              className='p-4 bg-zinc-900/50 border border-zinc-800 rounded-lg hover:border-lunary-primary-600 transition-colors'
+            >
+              <span className='text-zinc-300 font-medium'>
+                Planetary Meanings
+              </span>
+              <p className='text-xs text-zinc-500 mt-1'>
+                Understand astrological planets
+              </p>
+            </Link>
+            <Link
+              href='/grimoire/tarot'
+              className='p-4 bg-zinc-900/50 border border-zinc-800 rounded-lg hover:border-lunary-primary-600 transition-colors'
+            >
+              <span className='text-zinc-300 font-medium'>78 Tarot Cards</span>
+              <p className='text-xs text-zinc-500 mt-1'>
+                Major & Minor Arcana meanings
+              </p>
+            </Link>
+            <Link
+              href='/grimoire/crystals'
+              className='p-4 bg-zinc-900/50 border border-zinc-800 rounded-lg hover:border-lunary-primary-600 transition-colors'
+            >
+              <span className='text-zinc-300 font-medium'>Crystal Guide</span>
+              <p className='text-xs text-zinc-500 mt-1'>
+                Properties and correspondences
+              </p>
+            </Link>
+            <Link
+              href='/grimoire/zodiac'
+              className='p-4 bg-zinc-900/50 border border-zinc-800 rounded-lg hover:border-lunary-primary-600 transition-colors'
+            >
+              <span className='text-zinc-300 font-medium'>12 Zodiac Signs</span>
+              <p className='text-xs text-zinc-500 mt-1'>
+                Traits, dates, and compatibility
+              </p>
+            </Link>
+            <Link
+              href='/grimoire'
+              className='p-4 bg-zinc-900/50 border border-zinc-800 rounded-lg hover:border-lunary-primary-600 transition-colors'
+            >
+              <span className='text-zinc-300 font-medium'>Full Grimoire</span>
+              <p className='text-xs text-zinc-500 mt-1'>
+                500+ pages of cosmic wisdom
+              </p>
+            </Link>
+          </div>
+        </section>
+
         {/* Legal Disclaimer */}
-        <section className='mt-12 pt-8 border-t border-zinc-800'>
+        <section className='pt-8 border-t border-zinc-800 pb-8'>
           <p className='text-xs text-zinc-400 leading-relaxed'>
             <strong>Disclaimer:</strong> This comparison is based on publicly
             available information as of 2025. Features and pricing may change.

@@ -4,6 +4,10 @@ import Link from 'next/link';
 import { ChevronRight, Home } from 'lucide-react';
 import { useAuthStatus } from '@/components/AuthStatus';
 
+function stringifySafe(data: object) {
+  return JSON.stringify(data).replace(/</g, '\\u003c');
+}
+
 export interface BreadcrumbItem {
   label: string;
   href?: string;
@@ -84,7 +88,7 @@ export function Breadcrumbs({
       <script
         type='application/ld+json'
         dangerouslySetInnerHTML={{
-          __html: JSON.stringify(breadcrumbSchema),
+          __html: stringifySafe(breadcrumbSchema),
         }}
       />
     </>

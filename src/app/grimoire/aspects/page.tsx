@@ -1,5 +1,6 @@
 import { Metadata } from 'next';
 import Link from 'next/link';
+import { ExploreGrimoire } from '@/components/grimoire/ExploreGrimoire';
 import {
   PLANETS,
   ASPECTS,
@@ -8,7 +9,11 @@ import {
   ASPECT_DATA,
 } from '@/constants/seo/aspects';
 import { Breadcrumbs } from '@/components/grimoire/Breadcrumbs';
-import { createItemListSchema, renderJsonLd } from '@/lib/schema';
+import {
+  createItemListSchema,
+  renderJsonLd,
+  createBreadcrumbSchema,
+} from '@/lib/schema';
 
 export const metadata: Metadata = {
   title:
@@ -25,6 +30,27 @@ export const metadata: Metadata = {
     'natal aspects',
     'synastry aspects',
   ],
+  openGraph: {
+    title:
+      'Astrological Aspects: Conjunct, Trine, Square, Sextile, Opposition | Lunary',
+    description:
+      'Complete guide to astrological aspects in natal charts, transits, and synastry.',
+    url: 'https://lunary.app/grimoire/aspects',
+    images: [
+      {
+        url: '/api/og/grimoire/aspects',
+        width: 1200,
+        height: 630,
+        alt: 'Astrological Aspects Guide',
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Astrological Aspects Guide | Lunary',
+    description: 'Complete guide to astrological aspects.',
+    images: ['/api/og/grimoire/aspects'],
+  },
   alternates: { canonical: 'https://lunary.app/grimoire/aspects' },
 };
 
@@ -44,6 +70,12 @@ export default function AspectsIndexPage() {
   return (
     <div className='min-h-screen bg-zinc-950 text-zinc-100'>
       {renderJsonLd(aspectsListSchema)}
+      {renderJsonLd(
+        createBreadcrumbSchema([
+          { name: 'Grimoire', url: '/grimoire' },
+          { name: 'Aspects', url: '/grimoire/aspects' },
+        ]),
+      )}
       <div className='max-w-6xl mx-auto px-4 py-12'>
         <Breadcrumbs
           items={[
@@ -122,6 +154,7 @@ export default function AspectsIndexPage() {
             View Your Birth Chart
           </Link>
         </div>
+        <ExploreGrimoire />
       </div>
     </div>
   );

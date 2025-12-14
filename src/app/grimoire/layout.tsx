@@ -27,10 +27,10 @@ export const metadata: Metadata = {
     siteName: 'Lunary',
     images: [
       {
-        url: '/api/og/cosmic',
+        url: '/api/og/grimoire',
         width: 1200,
         height: 630,
-        alt: 'Lunary Grimoire',
+        alt: 'Lunary Grimoire - 500+ Spells, Crystals, Tarot & More',
       },
     ],
     locale: 'en_US',
@@ -41,7 +41,7 @@ export const metadata: Metadata = {
     title: 'Free Grimoire [500+ Spells, Crystals, Tarot & More] | Lunary',
     description:
       '78 tarot cards, 50+ crystals, 24 runes, moon phases, candle magic & correspondences. Complete digital grimoire.',
-    images: ['/api/og/cosmic'],
+    images: ['/api/og/grimoire'],
   },
   alternates: {
     canonical: 'https://lunary.app/grimoire',

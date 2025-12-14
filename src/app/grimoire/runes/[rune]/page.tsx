@@ -1,5 +1,6 @@
 import { notFound } from 'next/navigation';
 import { SEOContentTemplate } from '@/components/grimoire/SEOContentTemplate';
+import { CosmicConnections } from '@/components/grimoire/CosmicConnections';
 import { runesList } from '@/constants/runes';
 import { stringToKebabCase } from '../../../../../utils/string';
 import { createGrimoireMetadata } from '@/lib/grimoire-metadata';
@@ -169,6 +170,24 @@ ${runeData.notes}`}
           { text: 'Grimoire Home', href: '/grimoire' },
         ]}
         faqs={faqs}
+        cosmicConnections={
+          <CosmicConnections
+            entityType='tarot'
+            entityKey={rune}
+            title={`${runeData.name} Connections`}
+            sections={[
+              {
+                title: 'Related Pages',
+                links: [
+                  { label: 'All Runes', href: '/grimoire/runes' },
+                  { label: 'Divination', href: '/grimoire/divination' },
+                  { label: 'Tarot Guide', href: '/grimoire/tarot' },
+                  { label: 'Spells', href: '/grimoire/spells' },
+                ],
+              },
+            ]}
+          />
+        }
       />
     </div>
   );

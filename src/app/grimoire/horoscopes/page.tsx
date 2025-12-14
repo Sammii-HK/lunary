@@ -1,13 +1,14 @@
 import { Metadata } from 'next';
 import Link from 'next/link';
+import { ExploreGrimoire } from '@/components/grimoire/ExploreGrimoire';
 import {
   ZODIAC_SIGNS,
   SIGN_DISPLAY_NAMES,
   SIGN_SYMBOLS,
   SIGN_ELEMENTS,
 } from '@/constants/seo/monthly-horoscope';
-import Script from 'next/script';
 import { Breadcrumbs } from '@/components/grimoire/Breadcrumbs';
+import { renderJsonLd, createBreadcrumbSchema } from '@/lib/schema';
 
 const currentYear = new Date().getFullYear();
 const nextYear = currentYear + 1;
@@ -69,11 +70,13 @@ const currentMonth = currentDate
 export default function GrimoireHoroscopesPage() {
   return (
     <>
-      <Script
-        id='horoscope-structured-data'
-        type='application/ld+json'
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
-      />
+      {renderJsonLd(structuredData)}
+      {renderJsonLd(
+        createBreadcrumbSchema([
+          { name: 'Grimoire', url: '/grimoire' },
+          { name: 'Horoscopes', url: '/grimoire/horoscopes' },
+        ]),
+      )}
       <div className='min-h-screen bg-zinc-950 text-zinc-100'>
         <div className='max-w-6xl mx-auto px-4 py-12'>
           <Breadcrumbs
@@ -131,6 +134,8 @@ export default function GrimoireHoroscopesPage() {
             </Link>
           </div>
         </div>
+
+        <ExploreGrimoire />
       </div>
     </>
   );

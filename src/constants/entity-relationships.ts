@@ -483,3 +483,67 @@ export function getEntityRelationships(
 
   return relationships;
 }
+
+export const WIKIPEDIA_ENTITY_URLS = {
+  planets: {
+    sun: 'https://en.wikipedia.org/wiki/Sun_(astrology)',
+    moon: 'https://en.wikipedia.org/wiki/Moon_(astrology)',
+    mercury: 'https://en.wikipedia.org/wiki/Mercury_(astrology)',
+    venus: 'https://en.wikipedia.org/wiki/Venus_(astrology)',
+    mars: 'https://en.wikipedia.org/wiki/Mars_(astrology)',
+    jupiter: 'https://en.wikipedia.org/wiki/Jupiter_(astrology)',
+    saturn: 'https://en.wikipedia.org/wiki/Saturn_(astrology)',
+    uranus: 'https://en.wikipedia.org/wiki/Uranus_(astrology)',
+    neptune: 'https://en.wikipedia.org/wiki/Neptune_(astrology)',
+    pluto: 'https://en.wikipedia.org/wiki/Pluto_(astrology)',
+  } as Record<string, string>,
+  zodiac: {
+    aries: 'https://en.wikipedia.org/wiki/Aries_(astrology)',
+    taurus: 'https://en.wikipedia.org/wiki/Taurus_(astrology)',
+    gemini: 'https://en.wikipedia.org/wiki/Gemini_(astrology)',
+    cancer: 'https://en.wikipedia.org/wiki/Cancer_(astrology)',
+    leo: 'https://en.wikipedia.org/wiki/Leo_(astrology)',
+    virgo: 'https://en.wikipedia.org/wiki/Virgo_(astrology)',
+    libra: 'https://en.wikipedia.org/wiki/Libra_(astrology)',
+    scorpio: 'https://en.wikipedia.org/wiki/Scorpio_(astrology)',
+    sagittarius: 'https://en.wikipedia.org/wiki/Sagittarius_(astrology)',
+    capricorn: 'https://en.wikipedia.org/wiki/Capricorn_(astrology)',
+    aquarius: 'https://en.wikipedia.org/wiki/Aquarius_(astrology)',
+    pisces: 'https://en.wikipedia.org/wiki/Pisces_(astrology)',
+  } as Record<string, string>,
+  tarot: {
+    'the-fool': 'https://en.wikipedia.org/wiki/The_Fool_(tarot_card)',
+    'the-magician': 'https://en.wikipedia.org/wiki/The_Magician_(tarot_card)',
+    'the-high-priestess':
+      'https://en.wikipedia.org/wiki/The_High_Priestess_(tarot_card)',
+    'the-empress': 'https://en.wikipedia.org/wiki/The_Empress_(tarot_card)',
+    'the-emperor': 'https://en.wikipedia.org/wiki/The_Emperor_(tarot_card)',
+    'the-hierophant':
+      'https://en.wikipedia.org/wiki/The_Hierophant_(tarot_card)',
+    'the-lovers': 'https://en.wikipedia.org/wiki/The_Lovers_(tarot_card)',
+    'the-chariot': 'https://en.wikipedia.org/wiki/The_Chariot_(tarot_card)',
+    strength: 'https://en.wikipedia.org/wiki/Strength_(tarot_card)',
+    'the-hermit': 'https://en.wikipedia.org/wiki/The_Hermit_(tarot_card)',
+    'wheel-of-fortune':
+      'https://en.wikipedia.org/wiki/Wheel_of_Fortune_(tarot_card)',
+    justice: 'https://en.wikipedia.org/wiki/Justice_(tarot_card)',
+    'the-hanged-man':
+      'https://en.wikipedia.org/wiki/The_Hanged_Man_(tarot_card)',
+    death: 'https://en.wikipedia.org/wiki/Death_(tarot_card)',
+    temperance: 'https://en.wikipedia.org/wiki/Temperance_(tarot_card)',
+    'the-devil': 'https://en.wikipedia.org/wiki/The_Devil_(tarot_card)',
+    'the-tower': 'https://en.wikipedia.org/wiki/The_Tower_(tarot_card)',
+    'the-star': 'https://en.wikipedia.org/wiki/The_Star_(tarot_card)',
+    'the-moon': 'https://en.wikipedia.org/wiki/The_Moon_(tarot_card)',
+    'the-sun': 'https://en.wikipedia.org/wiki/The_Sun_(tarot_card)',
+    judgement: 'https://en.wikipedia.org/wiki/Judgement_(tarot_card)',
+    'the-world': 'https://en.wikipedia.org/wiki/The_World_(tarot_card)',
+  } as Record<string, string>,
+};
+
+export function getWikipediaUrl(
+  type: 'planets' | 'zodiac' | 'tarot',
+  key: string,
+): string | undefined {
+  return WIKIPEDIA_ENTITY_URLS[type][key.toLowerCase()];
+}

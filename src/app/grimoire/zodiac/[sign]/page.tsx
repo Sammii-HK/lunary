@@ -7,7 +7,10 @@ import {
   zodiacUnicode,
 } from '../../../../../utils/zodiac/zodiac';
 import { stringToKebabCase } from '../../../../../utils/string';
-import { getEntityRelationships } from '@/constants/entity-relationships';
+import {
+  getEntityRelationships,
+  getWikipediaUrl,
+} from '@/constants/entity-relationships';
 import { createGrimoireMetadata } from '@/lib/grimoire-metadata';
 import { createZodiacSignSchema, renderJsonLd } from '@/lib/schema';
 
@@ -159,6 +162,7 @@ export default async function ZodiacSignPage({
     description: `${signData.name} is a ${signData.element} sign known for ${signData.mysticalProperties.toLowerCase()}`,
     traits: signData.mysticalProperties.split(',').map((t) => t.trim()),
     compatibility: compatibleSigns.slice(0, 4),
+    sameAs: getWikipediaUrl('zodiac', signKey),
   });
 
   return (
@@ -250,17 +254,31 @@ Season: (varies by sign)`}
           },
         ]}
         internalLinks={[
-          { text: "View Today's Horoscope", href: '/horoscope' },
+          {
+            text: `${signData.name} Daily Horoscope`,
+            href: `/horoscope/${signKey.toLowerCase()}`,
+          },
+          {
+            text: `${signData.name} Compatibility`,
+            href: `/grimoire/compatibility/${signKey.toLowerCase()}`,
+          },
+          {
+            text: `Moon in ${signData.name}`,
+            href: `/grimoire/moon-in/${signKey.toLowerCase()}`,
+          },
+          {
+            text: `${signData.name} Crystals`,
+            href: `/grimoire/crystals?sign=${signKey.toLowerCase()}`,
+          },
           { text: 'Calculate Birth Chart', href: '/birth-chart' },
-          { text: 'Explore Tarot', href: '/tarot' },
-          { text: 'Grimoire Home', href: '/grimoire' },
+          { text: 'All Zodiac Signs', href: '/grimoire/zodiac' },
         ]}
         ctaText={`Want personalized insights for your ${signData.name} chart?`}
         ctaHref='/pricing'
         faqs={faqs}
         cosmicConnections={
           <CosmicConnections
-            entityType='zodiac'
+            entityType='sign'
             entityKey={signKey}
             title={`${signData.name} Cosmic Web`}
           />

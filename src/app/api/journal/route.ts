@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { sql } from '@vercel/postgres';
 import { requireUser } from '@/lib/ai/auth';
+import { isDreamEntry } from '@/lib/journal/dream-classifier';
 
 export interface JournalEntry {
   id: number;
@@ -9,9 +10,10 @@ export interface JournalEntry {
   cardReferences: string[];
   moonPhase: string | null;
   transitHighlight: string | null;
-  source: 'manual' | 'chat';
+  source: 'manual' | 'chat' | 'astral-guide';
   sourceMessageId: string | null;
   createdAt: string;
+  category?: 'journal' | 'dream';
 }
 
 export async function GET(request: NextRequest) {
@@ -24,12 +26,13 @@ export async function GET(request: NextRequest) {
     const result = await sql`
       SELECT 
         id,
+        category,
         content,
         tags,
         created_at
       FROM collections
       WHERE user_id = ${user.id}
-      AND category = 'journal'
+      AND category IN ('journal', 'dream')
       ORDER BY created_at DESC
       LIMIT ${limit}
       OFFSET ${offset}
@@ -49,6 +52,7 @@ export async function GET(request: NextRequest) {
         source: contentData.source || 'manual',
         sourceMessageId: contentData.sourceMessageId || null,
         createdAt: row.created_at,
+        category: row.category as 'journal' | 'dream',
       };
     });
 
@@ -56,7 +60,7 @@ export async function GET(request: NextRequest) {
       SELECT COUNT(*) as total
       FROM collections
       WHERE user_id = ${user.id}
-      AND category = 'journal'
+      AND category IN ('journal', 'dream')
     `;
     const total = parseInt(totalResult.rows[0]?.total || '0', 10);
 
@@ -108,6 +112,10 @@ export async function POST(request: NextRequest) {
     const title =
       content.length > 50 ? content.substring(0, 50) + '...' : content;
 
+    const category = isDreamEntry({ content, moodTags, source })
+      ? 'dream'
+      : 'journal';
+
     const contentData = {
       text: content.trim(),
       moodTags,
@@ -123,11 +131,11 @@ export async function POST(request: NextRequest) {
       VALUES (
         ${user.id},
         ${title},
-        'journal',
+        ${category},
         ${JSON.stringify(contentData)}::jsonb,
         ${moodTags}::text[]
       )
-      RETURNING id, created_at
+      RETURNING id, category, created_at
     `;
 
     const entry = result.rows[0];
@@ -144,6 +152,7 @@ export async function POST(request: NextRequest) {
         source,
         sourceMessageId,
         createdAt: entry.created_at,
+        category: entry.category,
       },
     });
   } catch (error) {

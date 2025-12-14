@@ -1,6 +1,8 @@
 import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
+import { ExploreGrimoire } from '@/components/grimoire/ExploreGrimoire';
+import { createBreadcrumbSchema, renderJsonLd } from '@/lib/schema';
 import {
   PLANETS,
   PLANET_DISPLAY,
@@ -99,8 +101,14 @@ export default async function PlanetAspectTypePage({
   const aspectSymbol = aspectSymbols[aspect as Aspect];
   const otherPlanets = PLANETS.filter((p) => p !== planet1);
 
+  const breadcrumbSchema = createBreadcrumbSchema([
+    { name: 'Grimoire', url: '/grimoire' },
+    { name: 'Aspects', url: '/grimoire/aspects' },
+  ]);
+
   return (
     <div className='p-4 md:p-6 lg:p-8 xl:p-10 min-h-full'>
+      {renderJsonLd(breadcrumbSchema)}
       <div className='max-w-5xl mx-auto'>
         <div className='text-center mb-12'>
           <div className='flex justify-center items-center gap-4 mb-4'>
@@ -171,6 +179,7 @@ export default async function PlanetAspectTypePage({
             </Link>
           </div>
         </div>
+        <ExploreGrimoire />
       </div>
     </div>
   );

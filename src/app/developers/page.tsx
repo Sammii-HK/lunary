@@ -1,7 +1,7 @@
 import { Metadata } from 'next';
 import Link from 'next/link';
 import { Code, Zap, Moon, Star, Sparkles, Key } from 'lucide-react';
-import Script from 'next/script';
+import { renderJsonLd } from '@/lib/schema';
 
 export const metadata: Metadata = {
   title: 'Lunary API - Astrology & Moon Phase Data for Developers',
@@ -253,11 +253,7 @@ const endpoints = [
 export default function DevelopersPage() {
   return (
     <>
-      <Script
-        id='developers-structured-data'
-        type='application/ld+json'
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
-      />
+      {renderJsonLd(structuredData)}
       <div className='min-h-screen bg-zinc-950 text-zinc-100'>
         <div className='max-w-4xl mx-auto px-4 py-12'>
           {/* Header */}

@@ -1,8 +1,13 @@
 import { Metadata } from 'next';
 import Link from 'next/link';
+import { ExploreGrimoire } from '@/components/grimoire/ExploreGrimoire';
 import { ZODIAC_CUSPS, getCuspData, CuspId } from '@/constants/seo/cusps';
 import { Breadcrumbs } from '@/components/grimoire/Breadcrumbs';
-import { createItemListSchema, renderJsonLd } from '@/lib/schema';
+import {
+  createItemListSchema,
+  renderJsonLd,
+  createBreadcrumbSchema,
+} from '@/lib/schema';
 
 export const metadata: Metadata = {
   title: 'Zodiac Cusps: Born on the Cusp? What It Means | Lunary',
@@ -16,6 +21,26 @@ export const metadata: Metadata = {
     'aries taurus cusp',
     'pisces aries cusp',
   ],
+  openGraph: {
+    title: 'Zodiac Cusps: Born on the Cusp? What It Means | Lunary',
+    description:
+      'Complete guide to zodiac cusps. Born between two signs? Find your cusp personality.',
+    url: 'https://lunary.app/grimoire/cusps',
+    images: [
+      {
+        url: '/api/og/grimoire/cusps',
+        width: 1200,
+        height: 630,
+        alt: 'Zodiac Cusps Guide',
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Zodiac Cusps: Born on the Cusp? What It Means | Lunary',
+    description: 'Complete guide to zodiac cusps.',
+    images: ['/api/og/grimoire/cusps'],
+  },
   alternates: { canonical: 'https://lunary.app/grimoire/cusps' },
 };
 
@@ -38,6 +63,12 @@ export default function CuspsIndexPage() {
   return (
     <div className='min-h-screen bg-zinc-950 text-zinc-100'>
       {renderJsonLd(cuspsListSchema)}
+      {renderJsonLd(
+        createBreadcrumbSchema([
+          { name: 'Grimoire', url: '/grimoire' },
+          { name: 'Cusps', url: '/grimoire/cusps' },
+        ]),
+      )}
       <div className='max-w-6xl mx-auto px-4 py-12'>
         <Breadcrumbs
           items={[{ label: 'Grimoire', href: '/grimoire' }, { label: 'Cusps' }]}
@@ -89,6 +120,7 @@ export default function CuspsIndexPage() {
             Check Your Birth Chart
           </Link>
         </div>
+        <ExploreGrimoire />
       </div>
     </div>
   );

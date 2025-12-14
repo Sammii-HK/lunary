@@ -89,8 +89,8 @@ export function AppChrome() {
         })()
       : false;
 
-    // Check if current page is a contextual page (blog/pricing)
-    const isContextualPageCheck = ['/blog', '/pricing'].some(
+    // Check if current page is a contextual page (blog/pricing/shop)
+    const isContextualPageCheck = ['/blog', '/pricing', '/shop'].some(
       (page) => pathname === page || pathname.startsWith(`${page}/`),
     );
 
@@ -116,7 +116,7 @@ export function AppChrome() {
 
   const isAdminSurface = isAdminHost || pathname?.startsWith('/admin');
 
-  // Define app pages
+  // Define app pages (always show app nav)
   const appPages = [
     '/app',
     '/tarot',
@@ -129,6 +129,7 @@ export function AppChrome() {
     '/cosmic-report-generator',
     '/guide',
     '/blog',
+    '/explore', // Explore is always app-only
   ];
 
   // Define core marketing pages (always show marketing nav)
@@ -154,9 +155,8 @@ export function AppChrome() {
     pathname?.startsWith('/comparison/') ||
     pathname?.startsWith('/admin');
 
-  // Define explore pages (can show app nav if coming from app)
+  // Explore pages: contextual, show app nav if coming from app
   const explorePages = [
-    '/explore',
     '/shop',
     '/moon-circles',
     '/collections',
@@ -175,26 +175,16 @@ export function AppChrome() {
     (page) => pathname === page || pathname?.startsWith(`${page}/`),
   );
 
-  // Ensure marketing and app routes are mutually exclusive
-  // Core marketing routes take precedence - if it's a core marketing route, it's NOT an app page
-  // Contextual pages (blog/pricing/explore) are NOT treated as actual app pages - they respect cameFromApp
+  // Actual app pages: in appPages, not a marketing route, not a contextual page
   const isActuallyAppPage =
     isAppPage && !isCoreMarketingRoute && !isContextualPage;
 
-  // For contextual pages (blog/pricing/explore), show app nav if coming from app
-  // Otherwise show marketing nav (default for contextual pages)
-  const _shouldShowAppNavOnContextualPage = isContextualPage && cameFromApp;
-
-  // Show marketing nav on:
-  // 1. Core marketing pages (always)
-  // 2. Contextual pages (blog/pricing/explore) UNLESS coming from app/explore
+  // Marketing nav: core marketing pages OR contextual pages without app context
   const showMarketingNav =
     (isCoreMarketingRoute || (isContextualPage && !cameFromApp)) &&
     !isAdminSurface;
 
-  // Show app nav on:
-  // 1. Actual app pages
-  // 2. Contextual pages (blog/pricing/explore) if coming from app/explore
+  // App nav: actual app pages OR contextual pages with app context
   const showAppNav =
     (isActuallyAppPage || (isContextualPage && cameFromApp)) && !isAdminSurface;
 

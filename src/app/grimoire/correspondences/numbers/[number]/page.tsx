@@ -145,9 +145,9 @@ Understanding number ${numberKey}'s correspondences helps you incorporate numeri
         { text: 'Numerology', href: '/grimoire/numerology' },
         {
           text: 'Spellcraft Fundamentals',
-          href: '/grimoire/spellcraft-fundamentals',
+          href: '/grimoire/spells/fundamentals',
         },
-        { text: 'Spells & Rituals', href: '/grimoire/practices' },
+        { text: 'Spells & Rituals', href: '/grimoire/spells' },
       ]}
       tables={[
         {

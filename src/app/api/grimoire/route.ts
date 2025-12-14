@@ -10,7 +10,7 @@ import {
   getSpellById,
   getSpellsByCategory,
   searchSpells,
-} from '../../../constants/grimoire/spells';
+} from '@/lib/spells/index';
 import { runesList } from '../../../constants/runes';
 import { wiccanWeek } from '../../../constants/weekDays';
 import { wheelOfTheYearSabbats } from '../../../constants/sabbats';

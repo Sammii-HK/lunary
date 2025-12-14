@@ -1,12 +1,17 @@
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
+import { ExploreGrimoire } from '@/components/grimoire/ExploreGrimoire';
 import { ArrowRight, Heart, Users, Briefcase, Star } from 'lucide-react';
 import { signDescriptions } from '@/constants/seo/planet-sign-content';
 import {
   generateCompatibilityContent,
   getAllCompatibilitySlugs,
 } from '@/constants/seo/compatibility-content';
-import { createArticleSchema, renderJsonLd } from '@/lib/schema';
+import {
+  createArticleSchema,
+  renderJsonLd,
+  createBreadcrumbSchema,
+} from '@/lib/schema';
 import { createGrimoireMetadata } from '@/lib/grimoire-metadata';
 
 const ZODIAC_SYMBOLS: Record<string, string> = {
@@ -82,6 +87,7 @@ function ScoreBar({ score, label }: { score: number; label: string }) {
           }`}
           style={{ width: `${score * 10}%` }}
         />
+        <ExploreGrimoire />
       </div>
     </div>
   );
@@ -116,6 +122,12 @@ export default async function CompatibilityPage({ params }: PageProps) {
   return (
     <div className='min-h-screen bg-zinc-950 text-zinc-100'>
       {renderJsonLd(articleSchema)}
+      {renderJsonLd(
+        createBreadcrumbSchema([
+          { name: 'Grimoire', url: '/grimoire' },
+          { name: 'Compatibility', url: '/grimoire/compatibility' },
+        ]),
+      )}
 
       <div className='max-w-4xl mx-auto px-4 py-12'>
         {/* Breadcrumbs */}

@@ -144,9 +144,9 @@ Understanding ${flowerKey.toLowerCase()}'s correspondences helps you incorporate
         },
         {
           text: 'Spellcraft Fundamentals',
-          href: '/grimoire/spellcraft-fundamentals',
+          href: '/grimoire/spells/fundamentals',
         },
-        { text: 'Spells & Rituals', href: '/grimoire/practices' },
+        { text: 'Spells & Rituals', href: '/grimoire/spells' },
         { text: 'Candle Magic', href: '/grimoire/candle-magic' },
       ]}
       tables={[

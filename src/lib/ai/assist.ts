@@ -1,5 +1,5 @@
 import { LunaryContext, TransitRecord } from './types';
-import { getRecommendedSpells } from '@/constants/spells';
+import { getRecommendedSpells } from '@/lib/spells/index';
 
 export type AssistCommand =
   | { type: 'summarise_week' }

@@ -111,6 +111,9 @@ export const grimoire: {
     title: 'Astronomy',
     contents: ['Planets', 'Zodiac'],
   },
+  astronomyVsAstrology: {
+    title: 'Astronomy vs Astrology',
+  },
 
   // ═══════════════════════════════════════════════════════════
   // MOON
@@ -191,8 +194,20 @@ export const grimoire: {
     ],
   },
   practices: {
-    title: 'Spellcraft & Rituals',
-    contents: ['Spells & Rituals', 'Spellcraft Fundamentals'],
+    title: 'Witchcraft Practices',
+    contents: [
+      'Spells & Rituals',
+      'Spellcraft Fundamentals',
+      'Meditation & Grounding',
+      'Divination',
+      'Shadow Work',
+      'Protection Magic',
+      'Manifestation',
+      'Candle Magic',
+      'Moon Rituals',
+      'Jar Spells',
+      'Breathwork',
+    ],
   },
   candleMagic: {
     title: 'Candle Magic',
@@ -231,6 +246,15 @@ export const grimoire: {
       'Journaling',
     ],
   },
+  protection: {
+    title: 'Energetic Protection',
+  },
+  shadowWork: {
+    title: 'Shadow Work',
+  },
+  manifestation: {
+    title: 'Manifestation',
+  },
 
   // ═══════════════════════════════════════════════════════════
   // OTHER
@@ -240,6 +264,7 @@ export const grimoire: {
   },
   wheelOfTheYear: {
     title: 'Wheel of the Year',
+    contents: ['Sabbats'],
   },
   chineseZodiac: {
     title: 'Chinese Zodiac',
@@ -263,6 +288,27 @@ export const grimoire: {
       'Tarot Guide',
       'Moon Phases Guide',
       'Crystal Healing Guide',
+      'Archetypes Guide',
+    ],
+  },
+  beginners: {
+    title: "Beginner's Guide",
+  },
+  archetypes: {
+    title: 'Lunary Archetypes',
+    contents: [
+      'Restorer',
+      'Seeker',
+      'Catalyst',
+      'Grounded One',
+      'Empath',
+      'Shadow Dancer',
+      'Visionary',
+      'Mystic',
+      'Protector',
+      'Heart Opener',
+      'Lunar Weaver',
+      'Alchemist',
     ],
   },
 };
@@ -380,8 +426,17 @@ export const customContentHrefs: Record<string, Record<string, string>> = {
   },
   // Practices
   practices: {
-    'Spells & Rituals': '/grimoire/spells/protection-circle',
-    'Spellcraft Fundamentals': '/grimoire/spellcraft-fundamentals',
+    'Spells & Rituals': '/grimoire/spells',
+    'Spellcraft Fundamentals': '/grimoire/spells/fundamentals',
+    'Meditation & Grounding': '/grimoire/meditation',
+    Breathwork: '/grimoire/meditation/breathwork',
+    Divination: '/grimoire/divination',
+    'Shadow Work': '/grimoire/shadow-work',
+    'Protection Magic': '/grimoire/protection',
+    Manifestation: '/grimoire/manifestation',
+    'Candle Magic': '/grimoire/candle-magic',
+    'Moon Rituals': '/grimoire/moon/rituals',
+    'Jar Spells': '/grimoire/jar-spells',
   },
   // Candle Magic
   candleMagic: {
@@ -422,5 +477,25 @@ export const customContentHrefs: Record<string, Record<string, string>> = {
     'Tarot Guide': '/grimoire/guides/tarot-complete-guide',
     'Moon Phases Guide': '/grimoire/guides/moon-phases-guide',
     'Crystal Healing Guide': '/grimoire/guides/crystal-healing-guide',
+    'Archetypes Guide': '/grimoire/archetypes',
+  },
+  // Lunary Archetypes
+  archetypes: {
+    Restorer: '/grimoire/archetypes#restorer',
+    Seeker: '/grimoire/archetypes#seeker',
+    Catalyst: '/grimoire/archetypes#catalyst',
+    'Grounded One': '/grimoire/archetypes#grounded-one',
+    Empath: '/grimoire/archetypes#empath',
+    'Shadow Dancer': '/grimoire/archetypes#shadow-dancer',
+    Visionary: '/grimoire/archetypes#visionary',
+    Mystic: '/grimoire/archetypes#mystic',
+    Protector: '/grimoire/archetypes#protector',
+    'Heart Opener': '/grimoire/archetypes#heart-opener',
+    'Lunar Weaver': '/grimoire/archetypes#lunar-weaver',
+    Alchemist: '/grimoire/archetypes#alchemist',
+  },
+  // Wheel of the Year
+  wheelOfTheYear: {
+    Sabbats: '/grimoire/sabbats',
   },
 };

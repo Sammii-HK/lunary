@@ -1,118 +1,128 @@
 import { NextRequest, NextResponse } from 'next/server';
+import Stripe from 'stripe';
 import { sql } from '@vercel/postgres';
-import { getCurrentUser } from '@/lib/get-user-session';
-import crypto from 'crypto';
 
-function generateDownloadToken(): string {
-  return crypto.randomBytes(32).toString('hex');
-}
+export const runtime = 'nodejs';
+export const dynamic = 'force-dynamic';
 
-export async function GET(request: NextRequest) {
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
+
+/* -------------------------------------------------------------------------- */
+/* POST – Create Stripe Checkout session                                       */
+/* -------------------------------------------------------------------------- */
+export async function POST(request: NextRequest) {
   try {
-    const user = await getCurrentUser(request);
-    if (!user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    const body = await request.json();
+    const { packId, stripePriceId } = body;
+
+    if (!packId || !stripePriceId) {
+      return NextResponse.json(
+        { error: 'Missing packId or stripePriceId' },
+        { status: 400 },
+      );
     }
 
-    const result = await sql`
-      SELECT * FROM shop_purchases
-      WHERE user_id = ${user.id}
-      ORDER BY created_at DESC
-    `;
+    const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000';
+
+    const downloadToken = crypto.randomUUID().replace(/-/g, '');
+
+    const session = await stripe.checkout.sessions.create({
+      mode: 'payment',
+      payment_method_types: ['card'],
+      allow_promotion_codes: true,
+
+      line_items: [
+        {
+          price: stripePriceId,
+          quantity: 1,
+        },
+      ],
+
+      success_url: `${baseUrl}/shop/success?session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${baseUrl}/shop`,
+
+      metadata: {
+        purchaseType: 'digital_pack',
+        packId,
+        downloadToken,
+        userId: 'anonymous',
+      },
+    });
 
     return NextResponse.json({
-      purchases: result.rows.map((row) => ({
-        id: row.id,
-        userId: row.user_id,
-        packId: row.pack_id,
-        stripeSessionId: row.stripe_session_id,
-        stripePaymentIntentId: row.stripe_payment_intent_id,
-        status: row.status,
-        amount: row.amount,
-        downloadToken: row.download_token,
-        downloadCount: row.download_count,
-        maxDownloads: row.max_downloads,
-        expiresAt: row.expires_at,
-        createdAt: row.created_at,
-        updatedAt: row.updated_at,
-      })),
+      checkoutUrl: session.url,
     });
-  } catch (error) {
-    console.error('Error fetching purchases:', error);
+  } catch (err: any) {
+    console.error('❌ Failed to create checkout session:', err);
     return NextResponse.json(
-      { error: 'Failed to fetch purchases' },
+      { error: 'Failed to create checkout session' },
       { status: 500 },
     );
   }
 }
 
-export async function POST(request: NextRequest) {
+/* -------------------------------------------------------------------------- */
+/* GET – Fetch completed purchase by session_id                                */
+/* -------------------------------------------------------------------------- */
+export async function GET(request: NextRequest) {
   try {
-    const user = await getCurrentUser(request);
-    if (!user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
+    const { searchParams } = new URL(request.url);
+    const sessionId = searchParams.get('session_id');
 
-    const body = await request.json();
-    const {
-      id,
-      packId,
-      stripeSessionId,
-      stripePaymentIntentId,
-      status = 'pending',
-      amount,
-      maxDownloads = 5,
-      expiresAt,
-    } = body;
-
-    if (!id || !packId || !amount) {
+    if (!sessionId) {
       return NextResponse.json(
-        { error: 'Missing required fields: id, packId, amount' },
+        { error: 'Missing session_id' },
         { status: 400 },
       );
     }
 
-    const downloadToken = generateDownloadToken();
-
     const result = await sql`
-      INSERT INTO shop_purchases (
-        id, user_id, pack_id, stripe_session_id, stripe_payment_intent_id,
-        status, amount, download_token, max_downloads, expires_at
-      )
-      VALUES (
-        ${id}, ${user.id}, ${packId}, ${stripeSessionId || null},
-        ${stripePaymentIntentId || null}, ${status}, ${amount},
-        ${downloadToken}, ${maxDownloads}, ${expiresAt ? new Date(expiresAt).toISOString() : null}
-      )
-      ON CONFLICT (id) DO UPDATE SET
-        status = EXCLUDED.status,
-        stripe_payment_intent_id = EXCLUDED.stripe_payment_intent_id,
-        updated_at = NOW()
-      RETURNING *
+      SELECT
+        id,
+        pack_id,
+        amount,
+        currency,
+        download_token,
+        blob_url,
+        status
+      FROM shop_purchases
+      WHERE stripe_session_id = ${sessionId}
+      ORDER BY created_at DESC
+      LIMIT 1
     `;
 
-    const purchase = result.rows[0];
+    const row = result.rows[0];
+
+    if (!row) {
+      return NextResponse.json(
+        {
+          error: 'Purchase not found yet. Webhook may still be processing.',
+        },
+        { status: 404 },
+      );
+    }
+
+    if (row.status !== 'completed') {
+      return NextResponse.json(
+        { error: `Purchase status is ${row.status}` },
+        { status: 409 },
+      );
+    }
+
     return NextResponse.json({
       purchase: {
-        id: purchase.id,
-        userId: purchase.user_id,
-        packId: purchase.pack_id,
-        stripeSessionId: purchase.stripe_session_id,
-        stripePaymentIntentId: purchase.stripe_payment_intent_id,
-        status: purchase.status,
-        amount: purchase.amount,
-        downloadToken: purchase.download_token,
-        downloadCount: purchase.download_count,
-        maxDownloads: purchase.max_downloads,
-        expiresAt: purchase.expires_at,
-        createdAt: purchase.created_at,
-        updatedAt: purchase.updated_at,
+        id: row.id,
+        packId: row.pack_id,
+        amount: row.amount,
+        currency: row.currency,
+        downloadToken: row.download_token,
       },
+      downloadUrl: `/api/shop/download/${row.download_token}`,
     });
-  } catch (error) {
-    console.error('Error creating purchase:', error);
+  } catch (err) {
+    console.error('❌ Failed to fetch purchase:', err);
     return NextResponse.json(
-      { error: 'Failed to create purchase' },
+      { error: 'Failed to fetch purchase details' },
       { status: 500 },
     );
   }

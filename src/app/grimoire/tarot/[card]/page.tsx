@@ -372,7 +372,7 @@ Mystical Properties: ${suitInfo.mysticalProperties}`
           <CosmicConnections
             entityType='tarot'
             entityKey={card}
-            title={`${cardData.card.name} Cosmic Web`}
+            title={`${cardData.card.name} Cosmic Connections`}
           />
         }
       />

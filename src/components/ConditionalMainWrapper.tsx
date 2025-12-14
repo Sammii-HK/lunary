@@ -57,9 +57,8 @@ export function ConditionalMainWrapper({
       '/guide',
     ];
 
-    // Define explore pages
+    // Explore pages: contextual, show app nav if coming from app
     const explorePages = [
-      '/explore',
       '/shop',
       '/moon-circles',
       '/collections',
@@ -78,7 +77,7 @@ export function ConditionalMainWrapper({
       (page) => pathname === page || pathname.startsWith(`${page}/`),
     );
 
-    // Contextual pages (blog/pricing/explore) are NOT treated as actual app pages - they respect cameFromApp
+    // Actual app pages: in appPages, not a marketing route, not a contextual page
     const isActuallyAppPage =
       isAppPage && !isCoreMarketingRoute && !isContextualPage;
 
@@ -121,8 +120,8 @@ export function ConditionalMainWrapper({
         })()
       : false;
 
-    // Check if current page is a contextual page (blog/pricing)
-    const isContextualPageCheck = ['/blog', '/pricing'].some(
+    // Check if current page is a contextual page (blog/pricing/shop)
+    const isContextualPageCheck = ['/blog', '/pricing', '/shop'].some(
       (page) => pathname === page || pathname.startsWith(`${page}/`),
     );
 
@@ -141,12 +140,11 @@ export function ConditionalMainWrapper({
         referrerIsAppPage;
     }
 
-    // Determine which nav is shown
-    // Marketing nav shows on core marketing pages and contextual pages (unless coming from app/explore)
+    // Marketing nav: core marketing pages OR contextual pages without app context
     const marketingNav =
       (isCoreMarketingRoute || (isContextualPage && !cameFromApp)) &&
       !pathname.startsWith('/admin');
-    // App nav shows on actual app pages OR contextual pages if coming from app/explore
+    // App nav: actual app pages OR contextual pages with app context
     const appNav =
       (isActuallyAppPage || (isContextualPage && cameFromApp)) &&
       !pathname.startsWith('/admin');

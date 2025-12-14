@@ -7,6 +7,7 @@
  * - Mobile-first responsiveness
  * - Metadata validation
  * - Structured data testing
+ * - Lunary-specific SEO (noindex on tools, cosmic connections, TOC, internal links)
  * - Indexing (robots.txt, sitemap.xml)
  *
  * Usage:
@@ -378,7 +379,161 @@ async function testStructuredData() {
 }
 
 /**
- * 5. Indexing Tests
+ * 5. Lunary-Specific SEO Tests
+ */
+async function testLunarySEO() {
+  console.log('\n🌙 Testing Lunary-Specific SEO...\n');
+
+  try {
+    const checkPageContent = (url: string): string | null => {
+      try {
+        const response = execSync(`curl -sL "${url}"`, {
+          encoding: 'utf-8',
+          timeout: 15000,
+        });
+        return response;
+      } catch {
+        return null;
+      }
+    };
+
+    const birthChartContent = checkPageContent(`${BASE_URL}/birth-chart`);
+    if (birthChartContent) {
+      const hasNoindex =
+        birthChartContent.toLowerCase().includes('noindex') ||
+        birthChartContent.includes('robots" content="noindex');
+      logResult({
+        name: 'Birth Chart Noindex',
+        passed: hasNoindex,
+        message: hasNoindex
+          ? '/birth-chart correctly has noindex meta tag'
+          : '/birth-chart should have noindex meta tag',
+      });
+    } else {
+      logResult({
+        name: 'Birth Chart Noindex',
+        passed: false,
+        message:
+          'Could not fetch /birth-chart page (server may not be running)',
+      });
+    }
+
+    const guidePages = [
+      {
+        path: '/grimoire/guides/birth-chart-complete-guide',
+        name: 'Birth Chart Guide',
+      },
+      { path: '/grimoire/guides/moon-phases-guide', name: 'Moon Phases Guide' },
+    ];
+
+    for (const guide of guidePages) {
+      const content = checkPageContent(`${BASE_URL}${guide.path}`);
+      if (content) {
+        const contentLower = content.toLowerCase();
+        const hasToc =
+          contentLower.includes('on this page') ||
+          contentLower.includes('table of contents') ||
+          contentLower.includes('contents');
+
+        logResult({
+          name: `TOC: ${guide.name}`,
+          passed: hasToc,
+          message: hasToc
+            ? `${guide.path} has TOC navigation`
+            : `${guide.path} missing TOC navigation`,
+        });
+      } else {
+        logResult({
+          name: `TOC: ${guide.name}`,
+          passed: false,
+          message: `Could not fetch ${guide.path}`,
+        });
+      }
+    }
+
+    const grimoirePages = [
+      { path: '/grimoire/crystals/amethyst', name: 'Amethyst Crystal' },
+      { path: '/grimoire/zodiac/aries', name: 'Aries Zodiac' },
+    ];
+
+    for (const page of grimoirePages) {
+      const content = checkPageContent(`${BASE_URL}${page.path}`);
+      if (content) {
+        const contentLower = content.toLowerCase();
+        const hasCosmicConnections =
+          contentLower.includes('cosmic connection') ||
+          contentLower.includes('connections');
+
+        logResult({
+          name: `Cosmic Connections: ${page.name}`,
+          passed: hasCosmicConnections,
+          message: hasCosmicConnections
+            ? `${page.path} has Cosmic Connections section`
+            : `${page.path} missing Cosmic Connections section`,
+        });
+      } else {
+        logResult({
+          name: `Cosmic Connections: ${page.name}`,
+          passed: false,
+          message: `Could not fetch ${page.path}`,
+        });
+      }
+    }
+
+    const horoscopeContent = checkPageContent(`${BASE_URL}/horoscope/aries`);
+    if (horoscopeContent) {
+      const hasGrimoireLink = horoscopeContent.includes(
+        '/grimoire/zodiac/aries',
+      );
+      logResult({
+        name: 'Horoscope Internal Links',
+        passed: hasGrimoireLink,
+        message: hasGrimoireLink
+          ? 'Horoscope page links to grimoire zodiac page'
+          : 'Horoscope page should link to grimoire zodiac page',
+      });
+
+      const hasJsonLd = horoscopeContent.includes('application/ld+json');
+      logResult({
+        name: 'Horoscope JSON-LD',
+        passed: hasJsonLd,
+        message: hasJsonLd
+          ? 'Horoscope page has JSON-LD structured data'
+          : 'Horoscope page missing JSON-LD structured data',
+      });
+    } else {
+      logResult({
+        name: 'Horoscope Internal Links',
+        passed: false,
+        message: 'Could not fetch /horoscope/aries (server may not be running)',
+      });
+    }
+
+    const indexablePages = ['/', '/grimoire', '/pricing', '/blog'];
+    for (const pagePath of indexablePages) {
+      const content = checkPageContent(`${BASE_URL}${pagePath}`);
+      if (content) {
+        const hasNoindex = content.toLowerCase().includes('noindex');
+        logResult({
+          name: `Indexable: ${pagePath}`,
+          passed: !hasNoindex,
+          message: !hasNoindex
+            ? `${pagePath} is indexable (no noindex)`
+            : `${pagePath} has noindex but should be indexable`,
+        });
+      }
+    }
+  } catch (error: any) {
+    logResult({
+      name: 'Lunary SEO Tests',
+      passed: false,
+      message: `Error: ${error.message}`,
+    });
+  }
+}
+
+/**
+ * 6. Indexing Tests
  */
 async function testIndexing() {
   console.log('\n🔍 Testing Indexing Configuration...\n');
@@ -489,6 +644,7 @@ async function main() {
   await checkMobileResponsiveness();
   await validateMetadata();
   await testStructuredData();
+  await testLunarySEO();
   await testIndexing();
 
   // Summary
