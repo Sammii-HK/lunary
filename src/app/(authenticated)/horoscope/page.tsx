@@ -1,6 +1,7 @@
 'use client';
 
 import { useUser } from '@/context/UserContext';
+import { useAuthStatus } from '@/components/AuthStatus';
 import { useSubscription } from '../../../hooks/useSubscription';
 import { hasBirthChartAccess } from '../../../../utils/pricing';
 import { FreeHoroscopeView } from './components/FreeHoroscopeView';
@@ -10,11 +11,13 @@ import { useEffect } from 'react';
 
 export default function HoroscopePage() {
   const { user, loading } = useUser();
+  const authStatus = useAuthStatus();
   const subscription = useSubscription();
-  const hasChartAccess = hasBirthChartAccess(
-    subscription.status,
-    subscription.plan,
-  );
+  // For unauthenticated users, force hasChartAccess to false immediately
+  // Don't wait for subscription to resolve
+  const hasChartAccess = !authStatus.isAuthenticated
+    ? false
+    : hasBirthChartAccess(subscription.status, subscription.plan);
 
   useEffect(() => {
     if (hasChartAccess && user?.id) {
@@ -23,7 +26,9 @@ export default function HoroscopePage() {
     }
   }, [hasChartAccess, user?.id]);
 
-  if (loading) {
+  // Simple sequential loading checks - prioritize unauthenticated users
+  if (authStatus.loading) {
+    // Still checking authentication - show loading
     return (
       <div className='min-h-screen flex items-center justify-center'>
         <div className='text-center'>
@@ -33,6 +38,24 @@ export default function HoroscopePage() {
       </div>
     );
   }
+
+  // If unauthenticated, show content immediately (don't wait for useUser)
+  // hasChartAccess will be false, so FreeHoroscopeView will be shown
+  // Continue to render content below
+
+  // If authenticated but user data is still loading, show loading
+  if (authStatus.isAuthenticated && loading) {
+    return (
+      <div className='min-h-screen flex items-center justify-center'>
+        <div className='text-center'>
+          <div className='w-8 h-8 border-2 border-lunary-primary border-t-transparent rounded-full animate-spin mx-auto mb-4'></div>
+          <p className='text-zinc-400'>Loading your horoscope...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Otherwise, continue to render content
 
   if (!hasChartAccess) {
     return <FreeHoroscopeView />;

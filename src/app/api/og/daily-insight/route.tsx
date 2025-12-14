@@ -14,6 +14,26 @@ export const runtime = 'nodejs';
 let astronomiconFont: Buffer | null = null;
 let robotoFont: Buffer | null = null;
 
+function getMoonPhaseSvgPath(phaseName: string): string {
+  const lower = phaseName.toLowerCase();
+
+  if (lower.includes('new')) return 'new-moon';
+  if (lower.includes('waxing') && lower.includes('crescent'))
+    return 'waxing-cresent-moon';
+  if (lower.includes('first quarter')) return 'first-quarter';
+  if (lower.includes('waxing') && lower.includes('gibbous'))
+    return 'waxing-gibbous-moon';
+  if (lower.includes('full')) return 'full-moon';
+  if (lower.includes('waning') && lower.includes('gibbous'))
+    return 'waning-gibbous-moon';
+  if (lower.includes('last quarter') || lower.includes('third quarter'))
+    return 'last-quarter';
+  if (lower.includes('waning') && lower.includes('crescent'))
+    return 'waning-cresent-moon';
+
+  return 'full-moon';
+}
+
 function loadAssets() {
   if (!astronomiconFont) {
     try {
@@ -130,6 +150,10 @@ export async function GET(request: NextRequest): Promise<Response> {
     loadAssets();
 
     const { searchParams } = new URL(request.url);
+    const baseUrl =
+      process.env.NODE_ENV === 'production'
+        ? 'https://lunary.app'
+        : `${request.nextUrl.protocol}//${request.nextUrl.host}`;
     const userName = searchParams.get('name') || '';
     const tarotCard = searchParams.get('tarot') || 'Two of Wands';
     const tarotKeywords =
@@ -260,9 +284,14 @@ export async function GET(request: NextRequest): Promise<Response> {
               gap: '16px',
             }}
           >
-            <div style={{ fontSize: '44px', display: 'flex' }}>
-              {moonPhase.emoji}
-            </div>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={`${baseUrl}/icons/moon-phases/${getMoonPhaseSvgPath(moonPhase.name)}.png`}
+              width={44}
+              height={44}
+              alt={moonPhase.name}
+              style={{ display: 'flex' }}
+            />
             <div style={{ display: 'flex', flexDirection: 'column' }}>
               <div
                 style={{

@@ -42,10 +42,11 @@ export const TransitOfTheDay = () => {
   const authStatus = useAuthStatus();
   const subscription = useSubscription();
 
-  const hasChartAccess = hasBirthChartAccess(
-    subscription.status,
-    subscription.plan,
-  );
+  // For unauthenticated users, force hasChartAccess to false immediately
+  // Don't wait for subscription to resolve
+  const hasChartAccess = !authStatus.isAuthenticated
+    ? false
+    : hasBirthChartAccess(subscription.status, subscription.plan);
 
   // Get general transits for unauthenticated users or when no chart access
   const generalTransit = useMemo((): TransitEvent | null => {

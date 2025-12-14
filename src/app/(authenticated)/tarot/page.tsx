@@ -3,6 +3,7 @@
 import dayjs from 'dayjs';
 import { useState, useMemo, useEffect, useCallback } from 'react';
 import { useUser } from '@/context/UserContext';
+import { useAuthStatus } from '@/components/AuthStatus';
 import { SmartTrialButton } from '@/components/SmartTrialButton';
 import { getTarotCard } from '../../../../utils/tarot/tarot';
 import { getImprovedTarotReading } from '../../../../utils/tarot/improvedTarot';
@@ -153,6 +154,7 @@ const sanitizeInsightForParam = (value: string) => value.replace(/\|/g, ' / ');
 
 const TarotReadings = () => {
   const { user, loading } = useUser();
+  const authStatus = useAuthStatus();
   const subscription = useSubscription();
   const userName = user?.name;
   const userBirthday = user?.birthday;
@@ -161,10 +163,11 @@ const TarotReadings = () => {
     plan: subscription.plan as TarotPlan,
     status: subscription.status as SubscriptionStatus,
   };
-  const hasChartAccess = hasBirthChartAccess(
-    subscription.status,
-    subscription.plan,
-  );
+  // For unauthenticated users, force hasChartAccess to false immediately
+  // Don't wait for subscription to resolve
+  const hasChartAccess = !authStatus.isAuthenticated
+    ? false
+    : hasBirthChartAccess(subscription.status, subscription.plan);
 
   const [shareOrigin, setShareOrigin] = useState('https://lunary.app');
   const [sharePopover, setSharePopover] = useState<string | null>(null);
@@ -191,7 +194,12 @@ const TarotReadings = () => {
   // All hooks must be called before any early returns
   const generalTarot = useMemo(() => {
     if (hasChartAccess) return null;
-    return getGeneralTarotReading();
+    try {
+      return getGeneralTarotReading();
+    } catch (error) {
+      console.error('Failed to load general tarot reading:', error);
+      return null;
+    }
   }, [hasChartAccess]);
 
   const shareDate = useMemo(() => dayjs().format('YYYY-MM-DD'), []);
@@ -538,7 +546,9 @@ const TarotReadings = () => {
     }
   }, [hasChartAccess, personalizedReading, userId]);
 
-  if (loading) {
+  // Simple sequential loading checks - prioritize unauthenticated users
+  if (authStatus.loading) {
+    // Still checking authentication - show loading
     return (
       <div className='min-h-screen flex items-center justify-center'>
         <div className='text-center'>
@@ -549,8 +559,94 @@ const TarotReadings = () => {
     );
   }
 
+  // If unauthenticated, show content immediately (don't wait for useUser)
+  // hasChartAccess will be false because useSubscription returns status: 'free' when !user
+  // generalTarot will be calculated correctly
+  // Continue to render content below
+
+  // If authenticated but user data is still loading, show loading
+  if (authStatus.isAuthenticated && loading) {
+    return (
+      <div className='min-h-screen flex items-center justify-center'>
+        <div className='text-center'>
+          <div className='w-8 h-8 border-2 border-zinc-600 border-t-transparent rounded-full animate-spin mx-auto mb-4'></div>
+          <p className='text-zinc-400'>Loading your tarot reading...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Otherwise, continue to render content
+
   if (!hasChartAccess) {
-    if (!generalTarot) return null;
+    // If generalTarot failed to load, show error state with upsell instead of blank page
+    if (!generalTarot) {
+      return (
+        <div className='h-full space-y-6 p-4 overflow-auto'>
+          <div className='pt-6'>
+            <h1 className='text-2xl md:text-3xl font-light text-zinc-100 mb-2'>
+              Your Tarot Readings
+            </h1>
+            <p className='text-sm text-zinc-400'>
+              General cosmic guidance based on universal energies
+            </p>
+          </div>
+
+          <div className='rounded-lg border border-lunary-primary-700 bg-zinc-900/50 p-6'>
+            <h3 className='text-lg font-medium text-zinc-100 mb-2'>
+              Unable to load tarot reading
+            </h3>
+            <p className='text-sm text-zinc-300 mb-4 leading-relaxed'>
+              We're having trouble loading your tarot reading. Please try
+              refreshing the page, or unlock personalized readings with a birth
+              chart.
+            </p>
+            <SmartTrialButton />
+          </div>
+
+          <div className='rounded-lg border border-lunary-primary-700 bg-zinc-900/50 p-6'>
+            <h3 className='text-lg font-medium text-zinc-100 mb-2'>
+              Unlock Personal Tarot Readings
+            </h3>
+            <p className='text-sm text-zinc-300 mb-4 leading-relaxed'>
+              Get readings based on YOUR name and birthday, plus discover your
+              personal tarot patterns and card trends over time.
+            </p>
+            <ul className='text-xs text-zinc-400 space-y-2 mb-4'>
+              <li className='flex items-start gap-2'>
+                <Check
+                  className='w-3 h-3 text-lunary-primary-400/80 mt-0.5 flex-shrink-0'
+                  strokeWidth={2}
+                />
+                <span>Cards chosen specifically for you</span>
+              </li>
+              <li className='flex items-start gap-2'>
+                <Check
+                  className='w-3 h-3 text-lunary-primary-400/80 mt-0.5 flex-shrink-0'
+                  strokeWidth={2}
+                />
+                <span>30-90 day pattern analysis</span>
+              </li>
+              <li className='flex items-start gap-2'>
+                <Check
+                  className='w-3 h-3 text-lunary-primary-400/80 mt-0.5 flex-shrink-0'
+                  strokeWidth={2}
+                />
+                <span>Personal card frequency tracking</span>
+              </li>
+              <li className='flex items-start gap-2'>
+                <Check
+                  className='w-3 h-3 text-lunary-primary-400/80 mt-0.5 flex-shrink-0'
+                  strokeWidth={2}
+                />
+                <span>Suit and number pattern insights</span>
+              </li>
+            </ul>
+            <SmartTrialButton />
+          </div>
+        </div>
+      );
+    }
 
     return (
       <div className='h-full space-y-6 p-4 overflow-auto'>
@@ -746,12 +842,41 @@ const TarotReadings = () => {
 
           <div id='tarot-spreads-section-free'>
             <CollapsibleSection title='Tarot Spreads' defaultCollapsed={false}>
-              <TarotSpreadExperience
-                userId={userId}
-                userName={userName}
-                subscriptionPlan={tarotPlan}
-                onCardPreview={(card) => setSelectedCard(card)}
-              />
+              {!authStatus.isAuthenticated ? (
+                <div className='relative overflow-hidden'>
+                  <div className='filter blur-sm pointer-events-none'>
+                    <TarotSpreadExperience
+                      userId={undefined}
+                      userName={undefined}
+                      subscriptionPlan={tarotPlan}
+                      onCardPreview={(card) => setSelectedCard(card)}
+                    />
+                  </div>
+                  <div className='absolute inset-0 flex items-center justify-center rounded-lg bg-zinc-900/90'>
+                    <div className='text-center p-6 max-w-sm'>
+                      <Sparkles
+                        className='w-8 h-8 text-lunary-primary-400/80 mx-auto mb-3'
+                        strokeWidth={1.5}
+                      />
+                      <h3 className='text-lg font-medium text-zinc-100 mb-2'>
+                        Guided Tarot Spreads
+                      </h3>
+                      <p className='text-sm text-zinc-400 mb-4 leading-relaxed'>
+                        Choose a spread, draw cards instantly, and save your
+                        insights. Sign in to unlock this feature.
+                      </p>
+                      <SmartTrialButton />
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <TarotSpreadExperience
+                  userId={userId}
+                  userName={userName}
+                  subscriptionPlan={tarotPlan}
+                  onCardPreview={(card) => setSelectedCard(card)}
+                />
+              )}
             </CollapsibleSection>
           </div>
 
@@ -807,7 +932,7 @@ const TarotReadings = () => {
           featureName='personalized_tarot'
           title='Unlock Personalized Tarot Readings'
           description='Get tarot readings based on your name and birthday, plus discover your personal tarot patterns'
-          className='max-w-2xl mx-auto'
+          className='w-full mx-auto'
         />
       </div>
     );

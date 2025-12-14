@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import dayjs from 'dayjs';
-import { ChevronDown, Heart, Briefcase, Sparkles } from 'lucide-react';
+import { ChevronDown, Heart, Briefcase, Sparkles, Lock } from 'lucide-react';
 import { getEnhancedPersonalizedHoroscope } from '../../../../../utils/astrology/enhancedHoroscope';
 import {
   getBirthChartFromProfile,
@@ -812,7 +812,7 @@ export function PaidHoroscopeView({
                 </div>
                 <p className='text-xs text-zinc-300'>{universalDay.meaning}</p>
               </div>
-              {personalDay && (
+              {personalDay ? (
                 <div className='text-center'>
                   <div className='text-2xl font-light text-lunary-accent-400 mb-1'>
                     {personalDay.number}
@@ -821,6 +821,27 @@ export function PaidHoroscopeView({
                     Personal Day
                   </div>
                   <p className='text-xs text-zinc-300'>{personalDay.meaning}</p>
+                </div>
+              ) : (
+                <div className='text-center border border-zinc-700/50 rounded-lg p-4 bg-zinc-900/30'>
+                  <div className='flex items-center justify-center mb-2'>
+                    <Lock className='w-4 h-4 text-zinc-500 mr-1' />
+                    <div className='text-2xl font-light text-zinc-500 mb-1'>
+                      ?
+                    </div>
+                  </div>
+                  <div className='text-xs text-zinc-500 uppercase tracking-wide mb-1'>
+                    Personal Day
+                  </div>
+                  <p className='text-xs text-zinc-500 mb-3'>
+                    Add your birthday to unlock your Personal Day number
+                  </p>
+                  <Link
+                    href='/settings'
+                    className='inline-block text-xs px-3 py-1.5 bg-lunary-primary-900/20 border border-lunary-primary-700 text-lunary-primary-300 rounded hover:bg-lunary-primary-900/30 transition-colors'
+                  >
+                    Add Birthday
+                  </Link>
                 </div>
               )}
             </div>
