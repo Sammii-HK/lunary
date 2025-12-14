@@ -1,14 +1,14 @@
 import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
-import { getSpellById, spells, spellCategories } from '@/constants/spells';
+import { getSpellById, spellDatabase, spellCategories } from '@/lib/spells';
 import { Clock, Star, Moon, Leaf } from 'lucide-react';
 import { createHowToSchema, renderJsonLd } from '@/lib/schema';
 import { SEOContentTemplate } from '@/components/grimoire/SEOContentTemplate';
 import { stringToKebabCase } from '../../../../../utils/string';
 
 export async function generateStaticParams() {
-  return spells.map((spell) => ({
+  return spellDatabase.map((spell) => ({
     spellId: spell.id,
   }));
 }
@@ -90,7 +90,12 @@ export default async function SpellPage({
     notFound();
   }
 
-  const categoryInfo = spellCategories[spell.category];
+  const categoryInfo = spellCategories[spell.category] ?? {
+    name: spell.category,
+    description: '',
+    icon: '',
+  };
+
   const difficultyColors: Record<string, string> = {
     beginner: 'text-lunary-success',
     intermediate: 'text-lunary-accent',

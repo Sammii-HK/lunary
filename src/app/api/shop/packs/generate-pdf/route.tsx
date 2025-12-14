@@ -10,15 +10,20 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { getProductBySlug } from '@/lib/shop/generators';
-import { generateSpellPackPDF, SpellPackData } from '@/lib/pdf/generator';
-import { spells as spellsFromConstants } from '@/constants/spells';
-import spellsJson from '@/data/spells.json';
+import { generateSpellPackPDF } from '@/lib/pdf/generator';
+import {
+  spellDatabaseRaw,
+  getMaterialsForPdf,
+  spellDatabase,
+  getSpellsForMoonPhase,
+} from '@/lib/spells';
+
+import { PdfPack } from '@/lib/pdf/schema';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
-// Combine spell sources
-const allSpells = [...spellsJson, ...spellsFromConstants];
+const allSpells = spellDatabaseRaw;
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
@@ -66,7 +71,7 @@ async function generatePackPDF(packSlug: string) {
     console.log(`✅ PDF generated: ${Math.round(pdfBuffer.length / 1024)}KB`);
 
     // Return PDF as download
-    return new NextResponse(pdfBuffer, {
+    return new NextResponse(Buffer.from(pdfBuffer), {
       headers: {
         'Content-Type': 'application/pdf',
         'Content-Disposition': `attachment; filename="${packSlug}.pdf"`,
@@ -110,8 +115,24 @@ async function generateSpellPackPDFContent(pack: any): Promise<Uint8Array> {
     .slice(0, 8); // Limit to 8 spells per pack
 
   // If no matches, get some general spells
-  const spellsToUse =
-    matchedSpells.length > 0 ? matchedSpells : allSpells.slice(0, 5);
+  let spellsToUse = [] as any[];
+
+  if (pack.moonPhases?.length) {
+    // take first moon phase as the “pack phase”
+    spellsToUse = getSpellsForMoonPhase(pack.moonPhases[0]).slice(0, 8);
+  }
+
+  if (!spellsToUse.length) {
+    // fallback: category-based
+    spellsToUse = spellDatabase
+      .filter((s) => pack.spellCategories?.includes(s.category))
+      .slice(0, 8);
+  }
+
+  if (!spellsToUse.length) {
+    // last resort fallback
+    spellsToUse = spellDatabase.slice(0, 8);
+  }
 
   // Ensure all strings are actually strings (not objects)
   const safeString = (val: any): string => {
@@ -154,11 +175,12 @@ async function generateSpellPackPDFContent(pack: any): Promise<Uint8Array> {
     return String(moonPhase);
   };
 
-  const packData: SpellPackData = {
+  const packData: PdfPack = {
     title: safeString(pack.title),
     tagline: safeString(pack.tagline),
     description: safeString(pack.description),
     category: safeString(pack.category),
+    slug: safeString(pack.slug),
     perfectFor: safeStringArray(pack.perfectFor),
     introduction: `This ${safeString(pack.title)} has been carefully curated to support your magical practice. Each spell has been selected for its alignment with ${safeStringArray(pack.tags).join(', ') || 'your intentions'}.`,
     spells: spellsToUse.map((spell: any) => ({
@@ -169,11 +191,14 @@ async function generateSpellPackPDFContent(pack: any): Promise<Uint8Array> {
           spell.information ||
           'A magical spell for transformation.',
       ),
+      level: spell.difficulty as 'beginner' | 'intermediate' | 'advanced',
       category: safeString(spell.category),
       difficulty: safeString(spell.difficulty),
       duration: safeString(spell.duration),
       moonPhase: formatMoonPhase(spell),
-      materials: safeStringArray(spell.materials || spell.ingredients),
+      materials: getMaterialsForPdf(spell).essential.map(
+        (m) => m.name + (m.amount ? ` (${m.amount})` : ''),
+      ),
       steps: safeStringArray(spell.steps || spell.instructions),
       incantation: safeString(spell.incantation || spell.chant),
     })),

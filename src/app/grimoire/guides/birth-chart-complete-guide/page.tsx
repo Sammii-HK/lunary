@@ -115,7 +115,7 @@ export default function BirthChartCompleteGuidePage() {
   const faqSchema = createFAQPageSchema(faqs);
 
   return (
-    <div className='min-h-screen p-4 md:p-8 max-w-4xl mx-auto'>
+    <div className='p-4 md:p-8 max-w-4xl mx-auto'>
       {renderJsonLd(articleSchema)}
       {renderJsonLd(faqSchema)}
       {renderJsonLd(

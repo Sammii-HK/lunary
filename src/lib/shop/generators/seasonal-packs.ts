@@ -89,43 +89,9 @@ function generateSabbatPacks(): ShopProduct[] {
   }));
 }
 
-function generateLunarNewYearPack(): ShopProduct {
-  return {
-    id: 'lunar-new-year-abundance',
-    slug: 'lunar-new-year-abundance-pack',
-    title: 'Lunar New Year Abundance Pack',
-    tagline: 'Welcome prosperity with the new moon.',
-    description:
-      'The Lunar New Year marks a powerful portal for manifestation and fresh starts. This pack combines Eastern wisdom with Western magical practice, offering abundance rituals, prosperity spells, and intention-setting ceremonies timed to the new year moon.',
-    category: 'seasonal' as const,
-    whatInside: [
-      'Lunar New Year history and spiritual significance',
-      'Abundance altar setup guide',
-      'Prosperity spell for the new moon',
-      'Wealth corner blessing ritual',
-      'Intention-setting ceremony',
-      'Year ahead divination spread',
-      'Lucky colour and food correspondences',
-    ],
-    perfectFor: [
-      'Those setting powerful yearly intentions.',
-      'Anyone drawn to abundance and prosperity magic.',
-      'Practitioners who honour lunar cycles in their work.',
-    ],
-    related: [
-      'yule-seasonal-pack',
-      'imbolc-seasonal-pack',
-      'new-moon-manifestation-pack',
-    ],
-    price: PRICE_TIERS.seasonal,
-    gradient: SHOP_GRADIENTS.roseFade, // Rich, abundant energy for prosperity
-  };
-}
-
 export function generateSeasonalPacks(): ShopProduct[] {
   const sabbatPacks = generateSabbatPacks();
-  const lunarNewYear = generateLunarNewYearPack();
-  return [...sabbatPacks, lunarNewYear];
+  return sabbatPacks;
 }
 
 export function getSeasonalPackBySlug(slug: string): ShopProduct | undefined {

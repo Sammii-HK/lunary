@@ -217,15 +217,19 @@ function buildCrystalPage(
 
   let y = PAGE_HEIGHT - MARGIN - 30;
 
-  // Crystal name
-  page.drawText(crystal.name, {
-    x: MARGIN,
-    y,
-    size: FONT_SIZES.h2,
-    font: bold,
-    color: COLORS.stardust,
-  });
-  y -= 25;
+  // Crystal name (wrap if too long)
+  const nameLines = wrapText(crystal.name, bold, FONT_SIZES.h2, CONTENT_WIDTH);
+  for (const line of nameLines) {
+    page.drawText(line, {
+      x: MARGIN,
+      y,
+      size: FONT_SIZES.h2,
+      font: bold,
+      color: COLORS.stardust,
+    });
+    y -= FONT_SIZES.h2 * LINE_HEIGHT;
+  }
+  y -= SPACING.xs;
 
   // Element and Chakras
   const meta = [crystal.element, crystal.chakras.join(', ')]
@@ -245,7 +249,7 @@ function buildCrystalPage(
 
   y = drawDivider(page, y);
 
-  // Properties section
+  // Properties section (horizontal, comma-separated)
   page.drawText('Properties', {
     x: MARGIN,
     y,
@@ -255,16 +259,17 @@ function buildCrystalPage(
   });
   y -= 20;
 
-  for (const prop of crystal.properties.slice(0, 6)) {
-    page.drawText('✦', {
+  // Join properties with commas and wrap if needed
+  const propertiesText = crystal.properties.slice(0, 6).join(', ');
+  const propertiesLines = wrapText(
+    propertiesText,
+    regular,
+    FONT_SIZES.body,
+    CONTENT_WIDTH,
+  );
+  for (const line of propertiesLines) {
+    page.drawText(line, {
       x: MARGIN,
-      y,
-      size: FONT_SIZES.body,
-      font: regular,
-      color: COLORS.galaxyHaze,
-    });
-    page.drawText(prop, {
-      x: MARGIN + 15,
       y,
       size: FONT_SIZES.body,
       font: regular,
@@ -316,48 +321,190 @@ function buildCrystalPage(
     y -= SPACING.md;
   }
 
-  // Affirmation callout
-  if (crystal.affirmation) {
-    const padding = 18;
-    const lines = wrapText(
-      crystal.affirmation,
+  // Cleansing and Charging
+  if (crystal.cleansing || crystal.charging) {
+    y -= SPACING.sm;
+    page.drawText('Cleansing and Charging', {
+      x: MARGIN,
+      y,
+      size: FONT_SIZES.h4,
+      font: bold,
+      color: COLORS.stardust,
+    });
+    y -= 20;
+
+    if (crystal.cleansing) {
+      const cleansingLines = wrapText(
+        `Cleansing: ${crystal.cleansing}`,
+        regular,
+        FONT_SIZES.body,
+        CONTENT_WIDTH - 30,
+      );
+      for (const line of cleansingLines) {
+        page.drawText(line, {
+          x: MARGIN + 15,
+          y,
+          size: FONT_SIZES.body,
+          font: regular,
+          color: COLORS.textMuted,
+        });
+        y -= FONT_SIZES.body * LINE_HEIGHT;
+      }
+    }
+
+    if (crystal.charging) {
+      const chargingLines = wrapText(
+        `Charging: ${crystal.charging}`,
+        regular,
+        FONT_SIZES.body,
+        CONTENT_WIDTH - 30,
+      );
+      for (const line of chargingLines) {
+        page.drawText(line, {
+          x: MARGIN + 15,
+          y,
+          size: FONT_SIZES.body,
+          font: regular,
+          color: COLORS.textMuted,
+        });
+        y -= FONT_SIZES.body * LINE_HEIGHT;
+      }
+    }
+    y -= SPACING.md;
+  }
+
+  // Meditation Practice
+  if (crystal.meditation) {
+    page.drawText('Meditation Practice', {
+      x: MARGIN,
+      y,
+      size: FONT_SIZES.h4,
+      font: bold,
+      color: COLORS.stardust,
+    });
+    y -= 20;
+
+    const meditationLines = wrapText(
+      crystal.meditation,
       regular,
       FONT_SIZES.body,
-      CONTENT_WIDTH - padding * 2 - 15,
+      CONTENT_WIDTH - 30,
     );
-    const boxHeight =
-      lines.length * (FONT_SIZES.body * LINE_HEIGHT) + padding * 2;
-
-    page.drawRectangle({
-      x: MARGIN,
-      y: y - boxHeight,
-      width: CONTENT_WIDTH,
-      height: boxHeight,
-      color: COLORS.backgroundAlt,
-      borderColor: COLORS.border,
-      borderWidth: 0.5,
-    });
-
-    page.drawRectangle({
-      x: MARGIN,
-      y: y - boxHeight,
-      width: 4,
-      height: boxHeight,
-      color: COLORS.galaxyHaze,
-    });
-
-    let textY = y - padding - FONT_SIZES.body;
-    for (const line of lines) {
+    for (const line of meditationLines) {
       page.drawText(line, {
-        x: MARGIN + padding + 8,
-        y: textY,
+        x: MARGIN + 15,
+        y,
         size: FONT_SIZES.body,
         font: regular,
         color: COLORS.textMuted,
       });
-      textY -= FONT_SIZES.body * LINE_HEIGHT;
+      y -= FONT_SIZES.body * LINE_HEIGHT;
     }
+    y -= SPACING.md;
   }
+
+  // Crystal Grid Layout
+  if (crystal.gridLayout) {
+    page.drawText('Crystal Grid Layout', {
+      x: MARGIN,
+      y,
+      size: FONT_SIZES.h4,
+      font: bold,
+      color: COLORS.stardust,
+    });
+    y -= 20;
+
+    const gridLines = wrapText(
+      crystal.gridLayout,
+      regular,
+      FONT_SIZES.body,
+      CONTENT_WIDTH - 30,
+    );
+    for (const line of gridLines) {
+      page.drawText(line, {
+        x: MARGIN + 15,
+        y,
+        size: FONT_SIZES.body,
+        font: regular,
+        color: COLORS.textMuted,
+      });
+      y -= FONT_SIZES.body * LINE_HEIGHT;
+    }
+    y -= SPACING.md;
+  }
+
+  // Ritual Applications
+  if (crystal.ritualApplications && crystal.ritualApplications.length > 0) {
+    page.drawText('Ritual Applications and Spell Correspondences', {
+      x: MARGIN,
+      y,
+      size: FONT_SIZES.h4,
+      font: bold,
+      color: COLORS.stardust,
+    });
+    y -= 20;
+
+    for (const app of crystal.ritualApplications) {
+      page.drawText('✦', {
+        x: MARGIN,
+        y,
+        size: FONT_SIZES.body,
+        font: regular,
+        color: COLORS.galaxyHaze,
+      });
+      const appLines = wrapText(
+        app,
+        regular,
+        FONT_SIZES.body,
+        CONTENT_WIDTH - 30,
+      );
+      for (const line of appLines) {
+        page.drawText(line, {
+          x: MARGIN + 15,
+          y,
+          size: FONT_SIZES.body,
+          font: regular,
+          color: COLORS.textMuted,
+        });
+        y -= FONT_SIZES.body * LINE_HEIGHT;
+      }
+      y -= SPACING.xs;
+    }
+    y -= SPACING.md;
+  }
+
+  // Care Instructions
+  if (crystal.careInstructions) {
+    page.drawText('Care Instructions', {
+      x: MARGIN,
+      y,
+      size: FONT_SIZES.h4,
+      font: bold,
+      color: COLORS.stardust,
+    });
+    y -= 20;
+
+    const careLines = wrapText(
+      crystal.careInstructions,
+      regular,
+      FONT_SIZES.body,
+      CONTENT_WIDTH - 30,
+    );
+    for (const line of careLines) {
+      page.drawText(line, {
+        x: MARGIN + 15,
+        y,
+        size: FONT_SIZES.body,
+        font: regular,
+        color: COLORS.textMuted,
+      });
+      y -= FONT_SIZES.body * LINE_HEIGHT;
+    }
+    y -= SPACING.md;
+  }
+
+  // Note: Ethics and affirmation sections removed from individual crystal pages
+  // They were repetitive and getting cut off. Consider adding them once at the end of the pack if needed.
 
   drawFooter(page, packTitle, pageNum, totalPages, regular);
   return pageNum + 1;

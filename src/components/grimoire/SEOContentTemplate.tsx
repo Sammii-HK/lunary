@@ -87,6 +87,9 @@ export interface SEOContentTemplateProps {
   // FAQs
   faqs?: FAQItem[];
 
+  // Table of Contents
+  tableOfContents?: Array<{ label: string; href: string }>;
+
   // Cosmic Connections (custom component slot)
   cosmicConnections?: React.ReactNode;
 
@@ -141,6 +144,7 @@ export function SEOContentTemplate({
   glyphs,
   examplePlacements,
   faqs,
+  tableOfContents,
   cosmicConnections,
   internalLinks,
   breadcrumbs,
@@ -239,9 +243,27 @@ export function SEOContentTemplate({
         )}
       </header>
 
+      {/* Table of Contents */}
+      {tableOfContents && tableOfContents.length > 0 && (
+        <nav className='bg-zinc-900/50 border border-zinc-800 rounded-xl p-6 mb-12'>
+          <h2 className='text-lg font-medium text-zinc-100 mb-4'>
+            Table of Contents
+          </h2>
+          <ol className='space-y-2 text-zinc-400'>
+            {tableOfContents.map((item, index) => (
+              <li key={index}>
+                <a href={item.href} className='hover:text-lunary-primary-400'>
+                  {item.label}
+                </a>
+              </li>
+            ))}
+          </ol>
+        </nav>
+      )}
+
       {/* What is X? - Featured Snippet Optimization */}
       {whatIs && (
-        <section className='mb-8'>
+        <section id='what-is' className='mb-8'>
           <h2 className='text-2xl font-medium text-zinc-100 mb-3'>
             {whatIs.question}
           </h2>
@@ -270,7 +292,7 @@ export function SEOContentTemplate({
 
       {/* Meaning Section */}
       {meaning && (
-        <section>
+        <section id='meaning'>
           <h2 className='text-2xl font-medium text-zinc-100 mb-4'>Meaning</h2>
           <div className='prose prose-invert max-w-none'>
             <ParsedMarkdown content={meaning} />
@@ -297,7 +319,7 @@ export function SEOContentTemplate({
 
       {/* How to Work With This Energy */}
       {howToWorkWith && howToWorkWith.length > 0 && (
-        <section>
+        <section id='how-to-work'>
           <h2 className='text-2xl font-medium text-zinc-100 mb-4'>
             How to Work With This Energy
           </h2>
@@ -393,7 +415,10 @@ export function SEOContentTemplate({
       {/* Tables */}
       {tables &&
         tables.map((table, tableIndex) => (
-          <section key={tableIndex}>
+          <section
+            key={tableIndex}
+            id={tableIndex === 0 ? 'practices-overview' : undefined}
+          >
             <h2 className='text-2xl font-medium text-zinc-100 mb-4'>
               {table.title}
             </h2>
@@ -454,7 +479,7 @@ export function SEOContentTemplate({
 
       {/* Rituals */}
       {rituals && rituals.length > 0 && (
-        <section>
+        <section id='rituals'>
           <h2 className='text-2xl font-medium text-zinc-100 mb-4'>
             Rituals to Work With This Energy
           </h2>
@@ -477,7 +502,7 @@ export function SEOContentTemplate({
 
       {/* Journal Prompts */}
       {journalPrompts && journalPrompts.length > 0 && (
-        <section>
+        <section id='journal-prompts'>
           <h2 className='text-2xl font-medium text-zinc-100 mb-4'>
             Journal Prompts
           </h2>
@@ -626,7 +651,7 @@ export function SEOContentTemplate({
 
       {/* FAQs */}
       {faqs && faqs.length > 0 && (
-        <section>
+        <section id='faq'>
           <h2 className='text-2xl font-medium text-zinc-100 mb-6'>
             Frequently Asked Questions
           </h2>
@@ -647,7 +672,11 @@ export function SEOContentTemplate({
       )}
 
       {/* Children (custom content) */}
-      {children && <div className='mt-8'>{children}</div>}
+      {children && (
+        <div id='explore-practices' className='mt-8'>
+          {children}
+        </div>
+      )}
 
       {/* E-A-T Credibility Section */}
       {showEAT && (

@@ -202,14 +202,19 @@ function buildSpellPage(
   drawBackground(page);
 
   let y = PAGE_HEIGHT - MARGIN - 30;
-  page.drawText(spell.title, {
-    x: MARGIN,
-    y,
-    size: FONT_SIZES.h2,
-    font: bold,
-    color: COLORS.stardust,
-  });
-  y -= 25;
+  // Spell title (wrap if too long)
+  const titleLines = wrapText(spell.title, bold, FONT_SIZES.h2, CONTENT_WIDTH);
+  for (const line of titleLines) {
+    page.drawText(line, {
+      x: MARGIN,
+      y,
+      size: FONT_SIZES.h2,
+      font: bold,
+      color: COLORS.stardust,
+    });
+    y -= FONT_SIZES.h2 * LINE_HEIGHT;
+  }
+  y -= SPACING.xs;
 
   const meta = [spell.level, spell.duration, spell.moonPhases?.join(', ')]
     .filter(Boolean)
@@ -270,6 +275,74 @@ function buildSpellPage(
         color: COLORS.textMuted,
       });
       y -= FONT_SIZES.body * LINE_HEIGHT;
+
+      // Show substitutions if available
+      if (
+        spell.materialSubstitutions &&
+        spell.materialSubstitutions[mat] &&
+        spell.materialSubstitutions[mat].length > 0
+      ) {
+        const subText = `Substitutes: ${spell.materialSubstitutions[mat].join(', ')}`;
+        const subLines = wrapText(
+          subText,
+          regular,
+          FONT_SIZES.small,
+          CONTENT_WIDTH - 40,
+        );
+        for (const line of subLines) {
+          page.drawText(line, {
+            x: MARGIN + 30,
+            y,
+            size: FONT_SIZES.small,
+            font: regular,
+            color: COLORS.textSoft,
+          });
+          y -= FONT_SIZES.small * LINE_HEIGHT;
+        }
+      }
+    }
+    y -= SPACING.md;
+  }
+
+  // Timing Recommendations
+  if (spell.timing || spell.bestTime) {
+    page.drawText('Timing Recommendations', {
+      x: MARGIN,
+      y,
+      size: FONT_SIZES.h4,
+      font: bold,
+      color: COLORS.stardust,
+    });
+    y -= 20;
+
+    if (spell.timing) {
+      const timingLines = wrapText(
+        spell.timing,
+        regular,
+        FONT_SIZES.body,
+        CONTENT_WIDTH - 30,
+      );
+      for (const line of timingLines) {
+        page.drawText(line, {
+          x: MARGIN + 15,
+          y,
+          size: FONT_SIZES.body,
+          font: regular,
+          color: COLORS.textMuted,
+        });
+        y -= FONT_SIZES.body * LINE_HEIGHT;
+      }
+    }
+
+    if (spell.bestTime) {
+      page.drawText(`Best time: ${spell.bestTime}`, {
+        x: MARGIN + 15,
+        y,
+        size: FONT_SIZES.body,
+        font: regular,
+        color: COLORS.textMuted,
+      });
+      y -= FONT_SIZES.body * LINE_HEIGHT;
     }
     y -= SPACING.md;
   }
@@ -310,6 +383,36 @@ function buildSpellPage(
       y -= SPACING.xs;
     }
     y -= SPACING.sm;
+  }
+
+  // Visualization Guide
+  if (spell.visualization) {
+    page.drawText('Visualization Guide', {
+      x: MARGIN,
+      y,
+      size: FONT_SIZES.h4,
+      font: bold,
+      color: COLORS.stardust,
+    });
+    y -= 20;
+
+    const visLines = wrapText(
+      spell.visualization,
+      regular,
+      FONT_SIZES.body,
+      CONTENT_WIDTH - 30,
+    );
+    for (const line of visLines) {
+      page.drawText(line, {
+        x: MARGIN + 15,
+        y,
+        size: FONT_SIZES.body,
+        font: regular,
+        color: COLORS.textMuted,
+      });
+      y -= FONT_SIZES.body * LINE_HEIGHT;
+    }
+    y -= SPACING.md;
   }
 
   if (spell.incantation) {

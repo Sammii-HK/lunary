@@ -281,7 +281,7 @@ test.describe('SEO - Horoscope Pages', () => {
   test('Horoscope sign page links to grimoire zodiac page', async ({
     page,
   }) => {
-    await page.goto(`${BASE_URL}/horoscope/aries`, {
+    await page.goto(`${BASE_URL}/grimoire/horoscopes/aries/2026/january`, {
       waitUntil: 'domcontentloaded',
     });
     await page.waitForTimeout(1500);
@@ -295,24 +295,18 @@ test.describe('SEO - Horoscope Pages', () => {
 
 test.describe('SEO - Glossary', () => {
   test('Glossary page has working search', async ({ page }) => {
-    await page.goto(`${BASE_URL}/glossary`, { waitUntil: 'domcontentloaded' });
+    await page.goto(`${BASE_URL}/grimoire/glossary`, {
+      waitUntil: 'domcontentloaded',
+    });
     await page.waitForTimeout(1500);
 
     const searchSelectors = [
       'input[type="search"]',
       'input[name="search"]',
       'input[placeholder*="search" i]',
-      'input[placeholder*="filter" i]',
     ];
 
-    let searchInput = null;
-    for (const selector of searchSelectors) {
-      const input = await page.$(selector);
-      if (input) {
-        searchInput = input;
-        break;
-      }
-    }
+    let searchInput = await page.$(searchSelectors.join(', '));
 
     expect.soft(searchInput, 'Glossary should have search input').toBeTruthy();
 
@@ -395,7 +389,7 @@ test.describe('SEO - JSON-LD Validation', () => {
     '/',
     '/grimoire',
     '/grimoire/zodiac/aries',
-    '/horoscope',
+    '/grimoire/horoscopes',
     '/blog',
     '/shop',
   ];
@@ -436,8 +430,9 @@ test.describe('SEO - Robots Meta Validation', () => {
     '/pricing',
     '/grimoire',
     '/grimoire/zodiac/aries',
-    '/horoscope',
+    '/grimoire/horoscopes',
     '/blog',
+    '/shop',
   ];
 
   for (const route of indexableRoutes) {

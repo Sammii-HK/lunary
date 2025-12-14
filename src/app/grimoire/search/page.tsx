@@ -37,6 +37,7 @@ const CATEGORY_ICONS: Record<GrimoireEntry['category'], string> = {
   birthday: '🎂',
   compatibility: '💕',
   glossary: '📖',
+  archetype: '🔮',
 };
 
 const CATEGORY_COLORS: Record<GrimoireEntry['category'], string> = {
@@ -63,6 +64,7 @@ const CATEGORY_COLORS: Record<GrimoireEntry['category'], string> = {
     'bg-lunary-highlight-900 text-lunary-highlight-300 border-lunary-highlight-700',
   glossary:
     'bg-lunary-secondary-900 text-lunary-secondary-300 border-lunary-secondary-700',
+  archetype: 'bg-purple-500/20 text-purple-300 border-purple-500/30',
 };
 
 interface SearchResultCardProps {

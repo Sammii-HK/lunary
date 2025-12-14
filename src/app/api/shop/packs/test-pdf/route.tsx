@@ -132,7 +132,7 @@ export async function GET() {
 
     console.log('✅ Test PDF generated:', pdfBytes.length, 'bytes');
 
-    return new NextResponse(pdfBytes, {
+    return new NextResponse(Buffer.from(pdfBytes), {
       headers: {
         'Content-Type': 'application/pdf',
         'Content-Disposition': 'attachment; filename="test.pdf"',

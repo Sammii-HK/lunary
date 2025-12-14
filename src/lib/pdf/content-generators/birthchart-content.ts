@@ -563,8 +563,238 @@ const HOUSE_MEANINGS: PdfBirthChartSection[] = [
       'Planets here work behind the scenes, often through dreams and intuition.',
   },
 ];
+const SUN_SIGNS: PdfBirthChartSection[] = [
+  {
+    placement: 'What Is Your Sun Sign?',
+    meaning:
+      'Your Sun sign represents your core identity—who you are at your essence. It governs your sense of self, vitality, ego, and life purpose. While your Moon reflects your inner emotional world, your Sun reflects how you consciously express yourself and shine in the world.',
+    traits: [
+      'Represents your core identity and sense of self.',
+      'Governs vitality, confidence, and life force.',
+      'Shows how you express yourself authentically.',
+      'Reflects your life purpose and personal growth path.',
+    ],
+    guidance:
+      'Living in alignment with your Sun sign helps you feel energised and fulfilled. When you feel lost or drained, reconnecting with your Sun qualities restores your sense of purpose.',
+  },
+  {
+    placement: 'Aries Sun',
+    sign: 'Aries',
+    meaning:
+      'You are bold, driven, and instinctively courageous. You thrive when initiating, leading, and forging new paths. Life feels most alive when you are moving forward with passion.',
+    traits: [
+      'Natural leader',
+      'Courageous and assertive',
+      'Action-oriented',
+      'Thrives on challenge',
+      'Independent and pioneering',
+    ],
+    guidance:
+      'Channel your energy into purposeful action. Practice patience and follow-through to ensure your sparks become lasting fires.',
+  },
+  {
+    placement: 'Taurus Sun',
+    sign: 'Taurus',
+    meaning:
+      'You are grounded, steady, and value stability. You build slowly but securely, finding fulfilment through comfort, beauty, and tangible results.',
+    traits: [
+      'Patient and reliable',
+      'Values security and comfort',
+      'Strong sense of self-worth',
+      'Sensual and appreciative of beauty',
+      'Persistent and determined',
+    ],
+    guidance:
+      'Trust your natural pace. Growth does not require force. Flexibility allows your strength to remain supportive rather than rigid.',
+  },
+  {
+    placement: 'Gemini Sun',
+    sign: 'Gemini',
+    meaning:
+      'You are curious, adaptable, and mentally agile. You shine through communication, learning, and connection. Variety keeps your spirit alive.',
+    traits: [
+      'Quick-thinking and expressive',
+      'Adaptable and curious',
+      'Loves learning and sharing ideas',
+      'Social and communicative',
+      'Multifaceted personality',
+    ],
+    guidance:
+      'Focus your attention to avoid scattering your energy. Depth is just as powerful as breadth.',
+  },
+  {
+    placement: 'Cancer Sun',
+    sign: 'Cancer',
+    meaning:
+      'You are nurturing, intuitive, and deeply protective of what matters to you. Your identity is shaped by emotional connection, home, and belonging.',
+    traits: [
+      'Emotionally intelligent',
+      'Protective and caring',
+      'Strong intuition',
+      'Values family and home',
+      'Deeply loyal',
+    ],
+    guidance:
+      'Honour your sensitivity as strength. Balance caring for others with caring for yourself.',
+  },
+  {
+    placement: 'Leo Sun',
+    sign: 'Leo',
+    meaning:
+      'The Sun rules Leo, making this placement powerful and expressive. You are creative, confident, and born to shine. Self-expression is essential to your vitality.',
+    traits: [
+      'Charismatic and confident',
+      'Creative self-expression',
+      'Warm and generous',
+      'Natural performer or leader',
+      'Strong sense of pride',
+    ],
+    guidance:
+      'Lead with heart, not ego. Your light is strongest when it uplifts others as well as yourself.',
+  },
+  {
+    placement: 'Virgo Sun',
+    sign: 'Virgo',
+    meaning:
+      'You are thoughtful, observant, and motivated by improvement. You find purpose through service, skill, and meaningful contribution.',
+    traits: [
+      'Detail-oriented and analytical',
+      'Service-driven',
+      'Practical and grounded',
+      'Desires usefulness',
+      'Refined sense of responsibility',
+    ],
+    guidance:
+      'Release perfectionism. Your worth is not dependent on productivity. Allow space for imperfection and rest.',
+  },
+  {
+    placement: 'Libra Sun',
+    sign: 'Libra',
+    meaning:
+      'You are diplomatic, relational, and guided by balance and fairness. Harmony, beauty, and partnership shape your sense of self.',
+    traits: [
+      'Charming and diplomatic',
+      'Values harmony and justice',
+      'Relationship-oriented',
+      'Aesthetic sensitivity',
+      'Naturally cooperative',
+    ],
+    guidance:
+      'Make decisions based on inner truth, not just external peace. Balance begins within.',
+  },
+  {
+    placement: 'Scorpio Sun',
+    sign: 'Scorpio',
+    meaning:
+      'You are intense, perceptive, and transformative. Your identity is shaped by depth, truth, and emotional honesty.',
+    traits: [
+      'Deeply intuitive',
+      'Emotionally intense',
+      'Transformative presence',
+      'Private and perceptive',
+      'Powerful resilience',
+    ],
+    guidance:
+      'Trust vulnerability as strength. Transformation happens when you allow yourself to be seen.',
+  },
+  {
+    placement: 'Sagittarius Sun',
+    sign: 'Sagittarius',
+    meaning:
+      'You are expansive, optimistic, and driven by meaning. Freedom, exploration, and truth fuel your vitality.',
+    traits: [
+      'Adventurous spirit',
+      'Philosophical mindset',
+      'Optimistic and open-hearted',
+      'Truth-seeking',
+      'Loves growth and expansion',
+    ],
+    guidance:
+      'Ground your vision so it can take form. Wisdom deepens when paired with commitment.',
+  },
+  {
+    placement: 'Capricorn Sun',
+    sign: 'Capricorn',
+    meaning:
+      'You are disciplined, purposeful, and resilient. You build your identity through achievement, responsibility, and long-term vision.',
+    traits: [
+      'Ambitious and focused',
+      'Strong sense of duty',
+      'Strategic thinker',
+      'Resilient and patient',
+      'Values respect and integrity',
+    ],
+    guidance:
+      'Remember that success includes emotional fulfilment. Allow yourself moments of softness and joy.',
+  },
+  {
+    placement: 'Aquarius Sun',
+    sign: 'Aquarius',
+    meaning:
+      'You are innovative, independent, and future-focused. Your identity is shaped by originality, ideals, and collective progress.',
+    traits: [
+      'Independent thinker',
+      'Humanitarian values',
+      'Innovative and unconventional',
+      'Intellectually driven',
+      'Values freedom and authenticity',
+    ],
+    guidance:
+      'Stay connected to your heart as well as your mind. Your ideas have power when they are emotionally grounded.',
+  },
+  {
+    placement: 'Pisces Sun',
+    sign: 'Pisces',
+    meaning:
+      'You are intuitive, compassionate, and spiritually attuned. Your identity is fluid, empathetic, and deeply connected to the unseen.',
+    traits: [
+      'Highly intuitive',
+      'Compassionate and gentle',
+      'Imaginative and creative',
+      'Spiritually sensitive',
+      'Emotionally porous',
+    ],
+    guidance:
+      'Protect your energy with clear boundaries. Your sensitivity is a gift when grounded in self-awareness.',
+  },
+];
 
 export function generateRisingSignContent(): PdfBirthChartPack {
+  const additionalSections: PdfBirthChartSection[] = [
+    {
+      placement: 'How Your Rising Interacts with Sun and Moon',
+      meaning:
+        'Your Big Three—Sun, Moon, and Rising—work together to create your unique astrological profile. Understanding how they interact helps you see the full picture of your personality.',
+      traits: [
+        'Your Rising sign is how you present yourself—your "mask" or first impression.',
+        'Your Sun sign is your core identity—who you are at your essence.',
+        'Your Moon sign is your emotional nature—how you feel and what you need.',
+        'When these align, you may feel more integrated and authentic.',
+        'When they conflict, you may experience inner tension or complexity.',
+      ],
+      guidance:
+        'Notice when you feel most yourself—this is likely when your Rising, Sun, and Moon are in harmony. When you feel conflicted, check which placement is being activated.',
+      integration:
+        'Journal about moments when you feel most authentic versus when you feel like you are wearing a mask. Which placement is dominant in each situation?',
+    },
+    {
+      placement: 'Ascendant Ruler and Its Importance',
+      meaning:
+        'The planet that rules your Rising sign (your Ascendant ruler) is one of the most important planets in your chart. It shows how you express your Rising sign energy and where you focus much of your life energy.',
+      traits: [
+        'Each sign has a ruling planet that governs its energy.',
+        "Your Ascendant ruler's house placement shows where you focus your Rising sign energy.",
+        'The condition of your Ascendant ruler (its sign, aspects, etc.) affects how easily you express your Rising sign.',
+        'A strong Ascendant ruler helps you embody your Rising sign qualities naturally.',
+        'A challenged Ascendant ruler may make it harder to express your Rising sign authentically.',
+      ],
+      guidance:
+        'To find your Ascendant ruler, identify which planet rules your Rising sign (e.g., Aries Rising = Mars ruler, Taurus Rising = Venus ruler). Then find where that planet is placed in your chart—this shows where your Rising energy is most active.',
+      integration:
+        "Research your Ascendant ruler and its placement. How does this planet's energy support or challenge your Rising sign expression?",
+    },
+  ];
+
   return {
     type: 'birthchart',
     slug: 'rising-sign-guide-pack',
@@ -579,11 +809,12 @@ export function generateRisingSignContent(): PdfBirthChartPack {
     ],
     introText:
       'While your Sun sign represents your core identity, your rising sign shapes how you move through the world. This is the sign that was rising on the eastern horizon at your exact moment of birth—which is why your birth time is essential for accuracy.',
-    sections: RISING_SIGNS,
+    sections: [...RISING_SIGNS, ...additionalSections],
     journalPrompts: [
       'How do people tend to describe me when they first meet me?',
       'Does my rising sign description resonate with how I approach new situations?',
       'How does my rising sign energy work with (or against) my Sun sign?',
+      'What is my Ascendant ruler, and how does it influence my Rising sign expression?',
     ],
     closingText:
       'Thank you for exploring your rising sign with Lunary. Understanding your Ascendant adds valuable depth to your astrological portrait. You are not just one sign—you are a complex and beautiful blend of cosmic influences.',
@@ -593,6 +824,22 @@ export function generateRisingSignContent(): PdfBirthChartPack {
 }
 
 export function generateMoonSignContent(): PdfBirthChartPack {
+  const moonRitualsSection: PdfBirthChartSection = {
+    placement: 'Monthly Moon Rituals by Sign',
+    meaning:
+      'Each Moon sign has specific rituals and practices that honour its emotional nature. These rituals help you connect with your Moon energy and meet your emotional needs throughout the lunar cycle.',
+    traits: [
+      'Fire Moon Signs (Aries, Leo, Sagittarius): Rituals involving movement, fire, and active expression.',
+      'Earth Moon Signs (Taurus, Virgo, Capricorn): Rituals involving grounding, nature, and physical comfort.',
+      'Air Moon Signs (Gemini, Libra, Aquarius): Rituals involving communication, social connection, and mental clarity.',
+      'Water Moon Signs (Cancer, Scorpio, Pisces): Rituals involving emotional release, water, and intuitive practices.',
+    ],
+    guidance:
+      "During the New Moon in your Moon sign, set emotional intentions. During the Full Moon in your Moon sign, release what no longer serves your emotional wellbeing. Create a monthly ritual that honours your Moon sign's specific needs—whether that is movement for Fire Moons, grounding for Earth Moons, connection for Air Moons, or emotional release for Water Moons.",
+    integration:
+      'Create a personal Moon ritual based on your Moon sign. Practice it monthly, especially during the New and Full Moons in your Moon sign.',
+  };
+
   return {
     type: 'birthchart',
     slug: 'moon-sign-emotional-blueprint-pack',
@@ -607,11 +854,12 @@ export function generateMoonSignContent(): PdfBirthChartPack {
     ],
     introText:
       'While your Sun sign represents your conscious identity, your Moon sign reveals your unconscious emotional nature. Understanding your Moon helps you honour your deepest needs and navigate your inner world with greater awareness.',
-    sections: MOON_SIGNS,
+    sections: [...MOON_SIGNS, moonRitualsSection],
     journalPrompts: [
       'What do I need to feel emotionally safe and secure?',
       'How do I typically process difficult emotions?',
       'Does my Moon sign description resonate with my inner experience?',
+      'What monthly Moon ritual would best honour my emotional nature?',
     ],
     closingText:
       'Thank you for exploring your Moon sign with Lunary. May this understanding help you honour your emotional needs and navigate your inner world with greater compassion.',
@@ -621,6 +869,23 @@ export function generateMoonSignContent(): PdfBirthChartPack {
 }
 
 export function generateHouseMeaningsContent(): PdfBirthChartPack {
+  const worksheetSection: PdfBirthChartSection = {
+    placement: 'Worksheet: Mapping Your Chart Houses',
+    meaning:
+      'Use this worksheet to map your personal birth chart houses and understand where planetary energies are active in your life.',
+    traits: [
+      'List all 12 houses and note which sign is on the cusp of each house.',
+      'Identify which houses contain planets (these are your most active life areas).',
+      'Note which houses are empty (still important—ruled by the sign on the cusp).',
+      "Identify your house rulers (the planet that rules each house's sign).",
+      'Note which houses are angular (1, 4, 7, 10), succedent (2, 5, 8, 11), or cadent (3, 6, 9, 12).',
+    ],
+    guidance:
+      'Create a chart with 12 sections, one for each house. For each house, write: the sign on the cusp, any planets in that house, the house ruler, and key life themes. This visual map helps you see where energy is concentrated in your chart.',
+    integration:
+      'Complete this worksheet with your birth chart. Notice patterns—are most planets in angular houses (action-oriented) or cadent houses (adaptable)? This reveals your life approach.',
+  };
+
   return {
     type: 'birthchart',
     slug: 'house-meanings-pack',
@@ -635,15 +900,134 @@ export function generateHouseMeaningsContent(): PdfBirthChartPack {
     ],
     introText:
       'Think of your birth chart as a stage. The planets are the actors, the signs are their costumes, and the houses are the scenes where the action takes place. Understanding houses helps you see where in your life each planetary energy expresses itself.',
-    sections: HOUSE_MEANINGS,
+    sections: [...HOUSE_MEANINGS, worksheetSection],
     journalPrompts: [
       'Which houses have planets in my chart, and what does that suggest?',
       'Which life areas feel most active or challenging for me?',
       'How might understanding houses change my approach to transits?',
+      'What patterns do I notice when mapping my houses?',
     ],
     closingText:
-      "Thank you for exploring the houses with Lunary. May this knowledge help you understand where life's themes are playing out in your unique chart.",
+      "Thank you for exploring the houses with Lunary. May this knowledge help you understand where life\'s themes are playing out in your unique chart.",
     optionalAffirmation:
       'I understand the different arenas of my life. Each house offers lessons, and I navigate them all with awareness.',
+  };
+}
+
+export function generateSunSignContent() {
+  return {
+    title: 'Your Sun Sign',
+    sections: [
+      {
+        heading: 'Core Identity',
+        body: 'Your Sun sign represents your core essence, ego, vitality, and sense of purpose. It describes who you are becoming and what fuels your life force.',
+      },
+      {
+        heading: 'Strengths and Expression',
+        body: 'This placement highlights your natural strengths, creative expression, and how you shine when fully aligned with yourself.',
+      },
+      {
+        heading: 'Life Direction',
+        body: 'Your Sun sign points to the themes you are here to embody and the lessons that shape your growth.',
+      },
+    ],
+  };
+}
+
+export function generateBig3Content(): PdfBirthChartPack {
+  const big3Sections: PdfBirthChartSection[] = [
+    {
+      placement: 'How Your Big 3 Work Together',
+      meaning:
+        'Your Sun, Moon, and Rising signs form a trinity that creates your unique astrological identity. Understanding how they interact reveals the complexity and richness of your personality.',
+      traits: [
+        'Sun (Core Identity) + Moon (Emotional Nature) + Rising (Social Mask) = Your Complete Self',
+        'When all three align in element or modality, you may feel more integrated.',
+        'When they conflict, you may experience inner complexity or tension.',
+        'Each placement brings different qualities to your personality.',
+        'The interplay between them creates your unique expression.',
+      ],
+      guidance:
+        'Notice when you feel most yourself—this is likely when all three placements are in harmony. When you feel conflicted, identify which placement is being activated and honour its needs.',
+      integration:
+        'Journal about how your Sun, Moon, and Rising interact. When do they support each other? When do they create tension? How can you honour all three?',
+    },
+    {
+      placement: '144 Big 3 Combination Interpretations',
+      meaning:
+        'With 12 possible signs for each placement (Sun, Moon, Rising), there are 12 × 12 × 12 = 1,728 possible combinations. However, certain patterns emerge that help interpret how your specific Big 3 work together.',
+      traits: [
+        'Element combinations: All Fire (passionate, action-oriented), All Earth (grounded, practical), All Air (intellectual, social), All Water (emotional, intuitive), or Mixed (balanced or complex).',
+        'Modality combinations: All Cardinal (initiating), All Fixed (stable), All Mutable (adaptable), or Mixed (flexible approach).',
+        "Ruler combinations: When your Sun, Moon, and Rising share a ruling planet, that planet's energy is amplified.",
+        'Opposition patterns: When placements oppose each other (e.g., Aries Sun, Libra Rising), you may experience tension or need balance.',
+        'Trine patterns: When placements trine each other (e.g., Fire signs together), energy flows easily.',
+      ],
+      guidance:
+        'While we cannot list all 1,728 combinations, understanding element, modality, and aspect patterns helps you interpret your unique Big 3. Focus on how your specific combination creates your unique expression.',
+      integration:
+        "Identify your Big 3's elements, modalities, and any aspect patterns. How do these patterns create your unique personality blend?",
+    },
+    {
+      placement: 'Integration Worksheet for Your Specific Combo',
+      meaning:
+        'Use this worksheet to deeply understand how your unique Sun, Moon, and Rising combination creates your personality and life experience.',
+      traits: [
+        'Section 1: List your Sun, Moon, and Rising signs with their key qualities.',
+        'Section 2: Identify how they support each other (compatible elements, harmonious aspects).',
+        'Section 3: Identify where they create tension (conflicting needs, opposing energies).',
+        'Section 4: Write how you can honour all three placements in daily life.',
+        'Section 5: Note which placement feels most dominant and which needs more expression.',
+        'Section 6: Create affirmations that honour all three placements.',
+      ],
+      guidance:
+        'Complete this worksheet thoughtfully. There are no right or wrong answers—only deeper understanding of your unique astrological makeup. Revisit it as you grow and change.',
+      integration:
+        'Fill out this worksheet with your specific Big 3 combination. Use it as a reference for understanding yourself and making decisions that honour all parts of your nature.',
+    },
+    {
+      placement: 'Ritual for Honouring Your Big 3',
+      meaning:
+        'Create a personal ritual to honour and integrate your Sun, Moon, and Rising signs. This practice helps you connect with all three parts of your astrological identity.',
+      traits: [
+        'Gather three candles (one for each placement) in colours that represent each sign.',
+        'Set up a sacred space with symbols or items representing your Sun, Moon, and Rising.',
+        "Light each candle while speaking about that placement's qualities.",
+        'Meditate on how all three work together in your life.',
+        'Create an intention that honours all three placements.',
+        'Close by thanking each placement for its gifts.',
+      ],
+      guidance:
+        'Perform this ritual monthly, especially during the New Moon. It helps you stay connected to all parts of your astrological identity and integrate their energies consciously.',
+      integration:
+        'Create and perform this ritual. Notice how it helps you feel more integrated and authentic. Adjust it over time as you deepen your understanding of your Big 3.',
+    },
+  ];
+
+  return {
+    type: 'birthchart',
+    slug: 'big-3-bundle-pack',
+    title: 'Your Big 3 Astrology Blueprint',
+    subtitle: 'Sun, Moon, and Rising',
+    sections: [...SUN_SIGNS, ...MOON_SIGNS, ...RISING_SIGNS, ...big3Sections],
+    moodText:
+      'Your Big Three—Sun, Moon, and Rising—form the foundation of your astrological identity. Understanding how they work together reveals the complexity and beauty of who you are.',
+    perfectFor: [
+      'Those seeking to understand their core astrological identity.',
+      'Anyone curious how their placements interact.',
+      'Those building a foundation for deeper chart study.',
+    ],
+    introText:
+      'Your Sun sign is your core identity, your Moon sign is your emotional nature, and your Rising sign is how you present yourself to the world. Together, they create your unique astrological blueprint.',
+    journalPrompts: [
+      'How do my Sun, Moon, and Rising signs work together?',
+      'Which placement feels most dominant in my daily life?',
+      'How can I honour all three placements more fully?',
+      'What does my Big 3 combination reveal about my life path?',
+    ],
+    closingText:
+      'Thank you for exploring your Big 3 with Lunary. You are not just one sign—you are a beautiful, complex blend of cosmic influences. Honour all parts of yourself.',
+    optionalAffirmation:
+      'I honour my Sun, Moon, and Rising. All parts of my astrological identity are valid and valuable.',
   };
 }

@@ -204,7 +204,7 @@ global.fetch = jest.fn((url, options = {}) => {
     responseData = { status: 'ok' };
   } else if (url.includes('/api/shop/products')) {
     responseData = [];
-  } else if (url.includes('/api/shop/purchase')) {
+  } else if (url.includes('/api/shop/purchases')) {
     responseData = { success: true };
   } else if (url.includes('/api/shop/download')) {
     status = url.includes('test-token') ? 200 : 404;

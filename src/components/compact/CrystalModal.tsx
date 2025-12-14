@@ -2,6 +2,7 @@
 
 import { useMemo, useState, useEffect, useCallback } from 'react';
 import { useUser } from '@/context/UserContext';
+import { useAuthStatus } from '@/components/AuthStatus';
 import Link from 'next/link';
 import { X, Gem, ArrowRight, Sparkles, Lock } from 'lucide-react';
 import { getAstrologicalChart } from '../../../utils/astrology/astrology';
@@ -17,6 +18,7 @@ import dayjs from 'dayjs';
 
 export const CrystalPreview = () => {
   const { user } = useUser();
+  const authStatus = useAuthStatus();
   const subscription = useSubscription();
   const { currentDateTime } = useAstronomyContext();
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -42,13 +44,15 @@ export const CrystalPreview = () => {
   const birthChart = user?.birthChart;
   const userBirthday = user?.birthday;
 
+  // Always compute general crystal for unauthenticated users or users without chart access
   const generalCrystal = useMemo(() => {
-    if (hasChartAccess) return null;
+    // Only show general crystal if user is not authenticated OR doesn't have chart access
+    if (authStatus.isAuthenticated && hasChartAccess) return null;
     return getGeneralCrystalRecommendation(normalizedDate);
-  }, [hasChartAccess, normalizedDate]);
+  }, [authStatus.isAuthenticated, hasChartAccess, normalizedDate]);
 
   const crystalData = useMemo(() => {
-    if (!hasChartAccess) return null;
+    if (!authStatus.isAuthenticated || !hasChartAccess) return null;
     if (!birthChart || !observer) return null;
 
     const currentTransits = getAstrologicalChart(normalizedDate, observer);
@@ -66,15 +70,24 @@ export const CrystalPreview = () => {
       reasons,
       guidance,
     };
-  }, [hasChartAccess, birthChart, observer, normalizedDate, userBirthday]);
+  }, [
+    authStatus.isAuthenticated,
+    hasChartAccess,
+    birthChart,
+    observer,
+    normalizedDate,
+    userBirthday,
+  ]);
 
-  const crystalName = hasChartAccess
-    ? crystalData?.crystal.name
-    : generalCrystal?.name;
+  const crystalName =
+    hasChartAccess && authStatus.isAuthenticated
+      ? crystalData?.crystal.name
+      : generalCrystal?.name;
 
-  const crystalReason = hasChartAccess
-    ? crystalData?.reasons?.join('. ') || crystalData?.guidance
-    : generalCrystal?.reason;
+  const crystalReason =
+    hasChartAccess && authStatus.isAuthenticated
+      ? crystalData?.reasons?.join('. ') || crystalData?.guidance
+      : generalCrystal?.reason;
 
   const closeModal = useCallback(() => setIsModalOpen(false), []);
 
@@ -87,11 +100,33 @@ export const CrystalPreview = () => {
     return () => document.removeEventListener('keydown', handleEsc);
   }, [isModalOpen, closeModal]);
 
-  if (!crystalName) {
+  // Only show loading state if we're actually waiting for authenticated user data
+  if (!crystalName && authStatus.loading && authStatus.isAuthenticated) {
     return (
       <div className='py-3 px-4 bg-lunary-bg border border-zinc-800/50 rounded-md animate-pulse min-h-16'>
         <div className='h-5 w-24 bg-zinc-800 rounded' />
       </div>
+    );
+  }
+
+  // If no crystal name and not loading, show general crystal or upsell
+  if (!crystalName) {
+    // This shouldn't happen if generalCrystal is computed correctly, but provide fallback
+    return (
+      <Link
+        href='/pricing'
+        className='block py-3 px-4 bg-lunary-bg border border-zinc-800/50 rounded-md w-full h-full hover:border-lunary-primary-700/50 transition-colors group min-h-16'
+      >
+        <div className='flex items-center justify-between'>
+          <div className='flex items-center gap-2'>
+            <Gem className='w-4 h-4 text-lunary-accent-200' />
+            <span className='text-sm text-lunary-primary-200'>
+              Unlock personalized crystal guidance
+            </span>
+          </div>
+          <ArrowRight className='w-4 h-4 text-lunary-secondary-200' />
+        </div>
+      </Link>
     );
   }
 

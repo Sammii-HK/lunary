@@ -3,7 +3,7 @@ import {
   getCrystalsByCategory,
   getCrystalsByIntention,
 } from '../../../../constants/grimoire/crystals';
-import { getSpellsByCategory } from '../../../../constants/grimoire/spells';
+import { getSpellsByCategory } from '@/lib/spells/index';
 import {
   generatePackNaming,
   generatePricing,
@@ -158,7 +158,7 @@ async function generateGrimoirePack(
       purpose: spell.purpose,
       difficulty: spell.difficulty,
       duration: spell.duration,
-      materials: spell.materials,
+      ingredients: spell.ingredients,
       steps: spell.steps,
       correspondences: spell.correspondences,
       timing: spell.timing,

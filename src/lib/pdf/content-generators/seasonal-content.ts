@@ -77,7 +77,7 @@ const SABBAT_CORRESPONDENCES: Record<string, PdfCorrespondence[]> = {
     { type: 'Crystals', items: ['Citrine', 'Sunstone', 'Tigers Eye', 'Amber'] },
     {
       type: 'Herbs',
-      items: ["St. John's Wort", 'Lavender', 'Chamomile', 'Sunflower'],
+      items: ["St. John\'s Wort", 'Lavender', 'Chamomile', 'Sunflower'],
     },
     {
       type: 'Themes',
@@ -114,6 +114,7 @@ const SABBAT_CORRESPONDENCES: Record<string, PdfCorrespondence[]> = {
 };
 
 function generateSabbatRituals(sabbat: Sabbat): PdfSeasonalRitual[] {
+  // Detailed ritual templates for Samhain and Yule (keep these as they're more detailed)
   const ritualTemplates: Record<string, PdfSeasonalRitual[]> = {
     Samhain: [
       {
@@ -183,27 +184,377 @@ function generateSabbatRituals(sabbat: Sabbat): PdfSeasonalRitual[] {
           'Carve or write intentions for the coming year onto the log.',
           'Anoint with essential oils of pine, cinnamon, or orange.',
           'Light the log or candle with words of blessing.',
-          "Keep a piece of the ash or save the candle for next year's lighting.",
+          "Keep a piece of the ash or save the candle for next year\'s lighting.",
         ],
       },
     ],
-    // Add more sabbats...
   };
 
-  return (
-    ritualTemplates[sabbat.name] ||
-    sabbat.rituals.map((ritual) => ({
-      title: ritual,
+  // Use detailed templates if available, otherwise convert string rituals from JSON
+  if (ritualTemplates[sabbat.name]) {
+    return ritualTemplates[sabbat.name];
+  }
+
+  // Convert string rituals from sabbat.rituals into proper format
+  if (sabbat.rituals && sabbat.rituals.length > 0) {
+    return sabbat.rituals.map((ritualString, index) => {
+      // Extract title from ritual string (usually the first part before parentheses or colon)
+      const titleMatch = ritualString.match(/^([^(:]+)/);
+      const title = titleMatch
+        ? titleMatch[1].trim()
+        : `${sabbat.name} Ritual ${index + 1}`;
+
+      // Generate meaningful activities based on the ritual name and sabbat themes
+      const activities = generateRitualActivities(ritualString, sabbat);
+
+      return {
+        title,
+        timing: `During ${sabbat.name}`,
+        description: `${ritualString}. This ritual aligns with ${sabbat.name}'s themes of ${sabbat.keywords.slice(0, 2).join(' and ').toLowerCase()}.`,
+        activities,
+      };
+    });
+  }
+
+  // Fallback if no rituals are available
+  return [
+    {
+      title: `${sabbat.name} Celebration`,
       timing: `During ${sabbat.name}`,
-      description: `A traditional ${sabbat.name} ritual practice.`,
+      description: `A traditional ${sabbat.name} ritual practice honoring the themes of ${sabbat.keywords.slice(0, 2).join(' and ').toLowerCase()}.`,
       activities: [
         'Create sacred space according to your tradition.',
         'Set your intentions for this sabbat.',
         'Perform the ritual with presence and focus.',
         'Close with gratitude and grounding.',
       ],
-    }))
+    },
+  ];
+}
+
+function generateRitualActivities(
+  ritualString: string,
+  sabbat: Sabbat,
+): string[] {
+  const activities: string[] = [];
+  const ritualLower = ritualString.toLowerCase();
+
+  // Bread/Baking rituals
+  if (ritualLower.includes('bread') || ritualLower.includes('baking')) {
+    activities.push('Gather your bread-making ingredients with intention.');
+    activities.push(
+      `As you knead the dough, focus on gratitude for ${sabbat.name}'s harvest.`,
+    );
+    activities.push(
+      `Shape the bread into a meaningful form (sun, wheat sheaf, or ${sabbat.symbols[0]?.toLowerCase() || 'sacred symbol'}).`,
+    );
+    activities.push(
+      `While the bread bakes, create a ${sabbat.name} altar with ${sabbat.colors[0]?.toLowerCase() || 'gold'} candles and ${sabbat.herbs.slice(0, 2).join(' and ')}.`,
+    );
+    activities.push(
+      'When the bread is ready, break it with words of blessing and gratitude.',
+    );
+    activities.push(
+      'Share the bread with others or offer a piece to the earth.',
+    );
+    activities.push('Pour a libation (cider, wine, or water) as an offering.');
+    return activities;
+  }
+
+  // Seed/Planting rituals
+  if (
+    ritualLower.includes('seed') ||
+    ritualLower.includes('planting') ||
+    ritualLower.includes('plant')
+  ) {
+    activities.push('Gather seeds that represent your intentions for growth.');
+    activities.push(
+      `Bless the seeds with ${sabbat.herbs[0]?.toLowerCase() || 'sacred'} water or smoke.`,
+    );
+    activities.push('Hold each seed and speak your intention into it.');
+    activities.push(
+      `Plant the seeds in soil, visualising them growing into your desired outcomes.`,
+    );
+    activities.push(
+      `Water them with intention, saying: "As these seeds grow, so too does my ${sabbat.keywords[0]?.toLowerCase() || 'intention'}."`,
+    );
+    activities.push(
+      'Place the planted seeds on your altar or in a sacred space.',
+    );
+    return activities;
+  }
+
+  // Candle/Blessing rituals
+  if (
+    ritualLower.includes('candle') ||
+    ritualLower.includes('blessing') ||
+    ritualLower.includes('dedication')
+  ) {
+    activities.push(
+      `Choose ${sabbat.colors.slice(0, 2).join(' and ').toLowerCase()} candles for this ritual.`,
+    );
+    activities.push(
+      'Cleanse the candles with smoke or by passing them through incense.',
+    );
+    activities.push(
+      `Carve or write your intentions onto the candles using a pin or blessed tool.`,
+    );
+    activities.push(
+      `Anoint the candles with essential oils or ${sabbat.herbs[0]?.toLowerCase() || 'sacred'} oil.`,
+    );
+    activities.push(
+      'Light the candles one by one, speaking your intentions aloud.',
+    );
+    activities.push(
+      `Allow the candles to burn safely, visualising your ${sabbat.keywords[0]?.toLowerCase() || 'intentions'} manifesting.`,
+    );
+    return activities;
+  }
+
+  // Fire rituals
+  if (
+    ritualLower.includes('fire') ||
+    ritualLower.includes('bonfire') ||
+    ritualLower.includes('flame')
+  ) {
+    activities.push(
+      'Prepare a safe fire space (outdoor fire pit, cauldron, or large candle).',
+    );
+    activities.push(
+      'Gather materials for the fire: kindling, wood, or a large candle.',
+    );
+    activities.push(
+      `Write what you wish to release or transform on small pieces of paper using ${sabbat.colors[0]?.toLowerCase() || 'appropriate'} ink.`,
+    );
+    activities.push('Light the fire with words of intention and gratitude.');
+    activities.push('Safely burn each paper, watching the energy transform.');
+    if (sabbat.name === 'Beltane') {
+      activities.push(
+        'Jump over the fire (safely) or pass items through the flame for blessing.',
+      );
+    }
+    activities.push(
+      'When the fire has cooled, scatter the ashes or bury them in the earth.',
+    );
+    return activities;
+  }
+
+  // Feast/Food rituals
+  if (
+    ritualLower.includes('feast') ||
+    ritualLower.includes('dumb supper') ||
+    ritualLower.includes('meal') ||
+    ritualLower.includes('food')
+  ) {
+    activities.push(
+      `Prepare traditional ${sabbat.name} foods: ${sabbat.foods.slice(0, 3).join(', ')}.`,
+    );
+    activities.push(
+      'Set a place at your table for ancestors, spirits, or deities.',
+    );
+    activities.push(
+      `Decorate your table with ${sabbat.colors[0]?.toLowerCase() || 'seasonal'} candles and ${sabbat.herbs[0]?.toLowerCase() || 'sacred'} herbs.`,
+    );
+    activities.push('Before eating, offer a blessing or prayer of gratitude.');
+    activities.push(
+      'Share the meal with intention, honouring the nourishment provided.',
+    );
+    if (ritualLower.includes('dumb supper')) {
+      activities.push(
+        'Eat in silence, allowing space for communication with the departed.',
+      );
+    }
+    activities.push(
+      'Leave a portion of food as an offering before clearing the table.',
+    );
+    return activities;
+  }
+
+  // Meditation/Reflection rituals
+  if (
+    ritualLower.includes('meditation') ||
+    ritualLower.includes('reflection') ||
+    ritualLower.includes('communication')
+  ) {
+    activities.push('Find a quiet space where you will not be disturbed.');
+    activities.push(
+      `Light a ${sabbat.colors[0]?.toLowerCase() || 'white'} candle and place ${sabbat.crystals[0] || 'protective crystals'} nearby.`,
+    );
+    activities.push('Enter a meditative state through deep breathing.');
+    activities.push(
+      `Focus on the themes of ${sabbat.name}: ${sabbat.keywords.slice(0, 3).join(', ')}.`,
+    );
+    if (
+      ritualLower.includes('ancestor') ||
+      ritualLower.includes('communication')
+    ) {
+      activities.push(
+        'Open your heart to receive messages from ancestors or guides.',
+      );
+      activities.push(
+        'Remain receptive to any impressions, feelings, or words that arise.',
+      );
+    }
+    activities.push(
+      'When complete, journal about your experience and any insights received.',
+    );
+    return activities;
+  }
+
+  // Spell/Magic rituals
+  if (
+    ritualLower.includes('spell') ||
+    ritualLower.includes('magic') ||
+    ritualLower.includes('manifestation')
+  ) {
+    activities.push('Gather your ritual tools and correspondences.');
+    activities.push(
+      `Set up your altar with ${sabbat.colors.slice(0, 2).join(' and ').toLowerCase()} candles.`,
+    );
+    activities.push(
+      `Place ${sabbat.crystals.slice(0, 2).join(' and ')} crystals and ${sabbat.herbs.slice(0, 2).join(' and ')} on your altar.`,
+    );
+    activities.push('Cast a circle of protection around your space.');
+    activities.push('State your intention clearly and with conviction.');
+    activities.push(
+      'Perform the spellwork with focused intention and visualisation.',
+    );
+    activities.push('Close the circle and ground your energy.');
+    return activities;
+  }
+
+  // Altar/Honor rituals
+  if (
+    ritualLower.includes('altar') ||
+    ritualLower.includes('honor') ||
+    ritualLower.includes('honour')
+  ) {
+    activities.push(`Choose a dedicated space for your ${sabbat.name} altar.`);
+    activities.push(
+      `Set up the altar with ${sabbat.colors.slice(0, 2).join(' and ').toLowerCase()} candles.`,
+    );
+    activities.push(
+      `Place ${sabbat.crystals.slice(0, 2).join(' and ')} crystals on your altar.`,
+    );
+    activities.push(
+      `Add ${sabbat.herbs.slice(0, 2).join(' and ')} and symbols of ${sabbat.name}.`,
+    );
+    if (ritualLower.includes('ancestor')) {
+      activities.push(
+        'Place photos, mementos, or written names of ancestors you wish to honour.',
+      );
+    }
+    activities.push(
+      'Light candles and speak words of intention or invocation.',
+    );
+    activities.push('Spend time in quiet contemplation at the altar.');
+    return activities;
+  }
+
+  // Offering rituals
+  if (
+    ritualLower.includes('offering') ||
+    ritualLower.includes('offering first') ||
+    ritualLower.includes('libation')
+  ) {
+    activities.push(
+      `Gather offerings: ${sabbat.foods.slice(0, 2).join(', ')}, or other items sacred to ${sabbat.name}.`,
+    );
+    activities.push('Prepare a sacred space outdoors or on your altar.');
+    activities.push(
+      'Hold each offering and infuse it with gratitude and intention.',
+    );
+    activities.push('Place or pour the offerings with words of thanks.');
+    activities.push(
+      'Leave the offerings in place, allowing nature or spirits to receive them.',
+    );
+    activities.push('Spend a moment in gratitude before leaving the space.');
+    return activities;
+  }
+
+  // Invocation rituals
+  if (ritualLower.includes('invocation') || ritualLower.includes('invoke')) {
+    activities.push(
+      `Create a sacred space with ${sabbat.colors[0]?.toLowerCase() || 'appropriate'} candles.`,
+    );
+    activities.push(
+      `Place representations of ${sabbat.deities[0] || 'the divine'} on your altar.`,
+    );
+    activities.push(
+      'Light incense or burn herbs sacred to this deity or energy.',
+    );
+    activities.push(
+      'Speak the invocation aloud, calling upon the energy you seek.',
+    );
+    activities.push(
+      'Spend time in communion, listening for guidance or presence.',
+    );
+    activities.push('Thank the energy or deity before closing the ritual.');
+    return activities;
+  }
+
+  // Purification rituals
+  if (
+    ritualLower.includes('purification') ||
+    ritualLower.includes('cleansing')
+  ) {
+    activities.push(
+      'Gather cleansing tools: sage, palo santo, salt water, or incense.',
+    );
+    activities.push(
+      'Begin by cleansing your space, moving clockwise around the area.',
+    );
+    activities.push(
+      `Use ${sabbat.herbs[0]?.toLowerCase() || 'sacred'} smoke or water to purify yourself.`,
+    );
+    activities.push(
+      'Visualise old energy releasing and new, fresh energy entering.',
+    );
+    activities.push('Speak words of release and renewal.');
+    activities.push(
+      'Complete the cleansing by grounding and setting new intentions.',
+    );
+    return activities;
+  }
+
+  // Gratitude ceremonies
+  if (
+    ritualLower.includes('gratitude') ||
+    ritualLower.includes('thanksgiving')
+  ) {
+    activities.push(
+      'Create a gratitude list or gather items that represent your blessings.',
+    );
+    activities.push(
+      `Set up a ${sabbat.name} altar with ${sabbat.colors[0]?.toLowerCase() || 'gold'} candles.`,
+    );
+    activities.push(
+      'Read each item of gratitude aloud, feeling the appreciation in your heart.',
+    );
+    activities.push('Place items or written gratitudes on your altar.');
+    activities.push('Spend time in reflection on all you have received.');
+    activities.push(
+      'Close with a prayer or affirmation of continued abundance.',
+    );
+    return activities;
+  }
+
+  // Generic fallback for unrecognised ritual types
+  activities.push('Create sacred space by cleansing and setting intentions.');
+  activities.push(
+    `Set up an altar with ${sabbat.colors.slice(0, 2).join(' and ').toLowerCase()} candles.`,
   );
+  activities.push(
+    `Place ${sabbat.crystals.slice(0, 2).join(' and ')} crystals on your altar.`,
+  );
+  activities.push(
+    `Use ${sabbat.herbs.slice(0, 2).join(' and ')} in your ritual.`,
+  );
+  activities.push('Perform the ritual with presence and focused intention.');
+  activities.push('Journal about your experience and any insights received.');
+  activities.push('Close your ritual with gratitude and grounding.');
+
+  return activities;
 }
 
 export function generateSeasonalPackContent(

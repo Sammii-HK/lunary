@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { Search, X } from 'lucide-react';
 import { ShopProduct, ShopCategory, CATEGORY_LABELS } from '@/lib/shop/types';
@@ -33,6 +33,48 @@ export function ShopClient({
   const searchParams = useSearchParams();
   const fromParam = searchParams?.get('from');
   const linkSuffix = fromParam ? `?from=${fromParam}` : '';
+  const [searchResults, setSearchResults] = useState<ShopProduct[] | null>(
+    null,
+  );
+  const [isSearching, setIsSearching] = useState(false);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function run() {
+      const q = searchQuery.trim();
+      if (!q && selectedCategory === 'all') {
+        setSearchResults(null);
+        return;
+      }
+
+      setIsSearching(true);
+
+      const params = new URLSearchParams();
+      if (q) params.set('q', q);
+      if (selectedCategory !== 'all') params.set('category', selectedCategory);
+
+      const res = await fetch(`/api/shop/search?${params.toString()}`);
+      const data = await res.json();
+
+      if (!cancelled) {
+        setSearchResults(data.products ?? []);
+        setIsSearching(false);
+      }
+    }
+
+    run().catch(() => {
+      if (!cancelled) {
+        setSearchResults([]);
+        setIsSearching(false);
+      }
+    });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [searchQuery, selectedCategory]);
+  // const productsPagination = products.slice(0, productsPerPage);
 
   const filteredProducts = useMemo(() => {
     let filtered = products;
@@ -57,6 +99,8 @@ export function ShopClient({
     return filtered;
   }, [products, selectedCategory, searchQuery]);
 
+  const displayProducts = searchResults ?? filteredProducts;
+
   const productCounts = useMemo(() => {
     // Use pre-calculated counts from server if available
     if (allProductCounts) {
@@ -72,6 +116,7 @@ export function ShopClient({
       seasonal: 0,
       astrology: 0,
       birthchart: 0,
+      retrograde: 0,
       bundle: 0,
     };
 
@@ -142,7 +187,9 @@ export function ShopClient({
           />
         </div>
 
-        {filteredProducts.length > 0 ? (
+        {isSearching ? 'Searching...' : 'X results'}
+
+        {displayProducts.length > 0 ? (
           <>
             <h2 className='sr-only'>
               {selectedCategory === 'all'
@@ -150,7 +197,7 @@ export function ShopClient({
                 : CATEGORY_LABELS[selectedCategory]}
             </h2>
             <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6'>
-              {filteredProducts.map((product, index) => (
+              {displayProducts.map((product, index) => (
                 <ProductCard
                   key={product.id}
                   product={product}

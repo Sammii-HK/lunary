@@ -5,20 +5,20 @@ import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { ArrowLeft } from 'lucide-react';
 import { ShopProduct, formatPrice, CATEGORY_LABELS } from '@/lib/shop/types';
+import { Button } from '../ui/button';
 
 interface ProductDetailProps {
   product: ShopProduct;
-  stripePriceId?: string;
 }
 
-export function ProductDetail({ product, stripePriceId }: ProductDetailProps) {
+export function ProductDetail({ product }: ProductDetailProps) {
   const [isPurchasing, setIsPurchasing] = useState(false);
   const searchParams = useSearchParams();
   const fromParam = searchParams?.get('from');
   const linkSuffix = fromParam ? `?from=${fromParam}` : '';
 
   const handlePurchase = async () => {
-    if (!stripePriceId) {
+    if (!product.stripePriceId) {
       alert('This product is coming soon.');
       return;
     }
@@ -26,14 +26,14 @@ export function ProductDetail({ product, stripePriceId }: ProductDetailProps) {
     try {
       setIsPurchasing(true);
 
-      const response = await fetch('/api/shop/purchase', {
+      const response = await fetch('/api/shop/purchases', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
           packId: product.id,
-          stripePriceId,
+          stripePriceId: product.stripePriceId,
         }),
       });
 
@@ -139,11 +139,12 @@ export function ProductDetail({ product, stripePriceId }: ProductDetailProps) {
                   </p>
                 </div>
 
-                <button
+                <Button
                   onClick={handlePurchase}
                   disabled={isPurchasing}
-                  className='w-full sm:w-auto px-8 py-4 rounded-full text-white font-medium transition-all duration-300 disabled:opacity-50'
+                  className='w-full sm:w-auto px-8 py-4 hover:shadow-[0_0_20px_#7B7BE880,0_0_40px_#7B7BE840] text-white font-medium transition-all duration-300 disabled:opacity-50'
                   style={{ background: product.gradient }}
+                  size='lg'
                 >
                   {isPurchasing ? (
                     <span className='flex items-center justify-center gap-2'>
@@ -153,7 +154,7 @@ export function ProductDetail({ product, stripePriceId }: ProductDetailProps) {
                   ) : (
                     'Add to Library'
                   )}
-                </button>
+                </Button>
               </div>
             </div>
           </div>

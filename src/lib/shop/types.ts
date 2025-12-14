@@ -1,3 +1,5 @@
+import { PdfTarotCard, PdfTarotSpread } from '../pdf/schema';
+
 export type ShopCategory =
   | 'spell'
   | 'crystal'
@@ -5,6 +7,7 @@ export type ShopCategory =
   | 'seasonal'
   | 'astrology'
   | 'birthchart'
+  | 'retrograde'
   | 'bundle';
 
 export type ShopProduct = {
@@ -19,12 +22,21 @@ export type ShopProduct = {
   related: string[];
   price: number;
   gradient: string;
-  stripePriceId?: string;
+  stripePriceId?: string | null;
   // SEO fields
   tags?: string[];
   keywords?: string[];
   metaDescription?: string;
   badge?: 'new' | 'seasonal' | 'trending' | 'popular';
+  spreads?: PdfTarotSpread[];
+  cards?: PdfTarotCard[];
+  journalPrompts?: string[];
+  closingText?: string;
+  optionalAffirmation?: string;
+  // Crystal pack specific fields
+  crystalSelectionMethod?: 'intention' | 'zodiac' | 'chakra' | 'custom';
+  selectionValue?: string;
+  customCrystals?: string[];
 };
 
 // Brand Palette:
@@ -155,6 +167,7 @@ export const CATEGORY_LABELS: Record<ShopCategory, string> = {
   astrology: 'Astrology Packs',
   birthchart: 'Birth Chart Packs',
   bundle: 'Bundles',
+  retrograde: 'Retrograde',
 };
 
 export const CATEGORY_GRADIENTS: Record<ShopCategory, string> = {
@@ -165,6 +178,7 @@ export const CATEGORY_GRADIENTS: Record<ShopCategory, string> = {
   astrology: SHOP_GRADIENTS.cometToHaze,
   birthchart: SHOP_GRADIENTS.nebulaSupernovaRose,
   bundle: SHOP_GRADIENTS.fullSpectrum,
+  retrograde: SHOP_GRADIENTS.cometToSupernova,
 };
 
 export function formatPrice(pence: number): string {

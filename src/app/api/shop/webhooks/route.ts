@@ -1,218 +1,218 @@
 import { NextRequest, NextResponse } from 'next/server';
 import Stripe from 'stripe';
 import { headers } from 'next/headers';
+import { sql } from '@vercel/postgres';
+
+export const runtime = 'nodejs';
+export const dynamic = 'force-dynamic';
 
 function getStripe() {
-  if (!process.env.STRIPE_SECRET_KEY) {
-    throw new Error('STRIPE_SECRET_KEY is not set');
-  }
-  return new Stripe(process.env.STRIPE_SECRET_KEY);
+  const key = process.env.STRIPE_SECRET_KEY;
+  if (!key) throw new Error('STRIPE_SECRET_KEY is not set');
+  return new Stripe(key);
 }
 
 function getWebhookSecret() {
-  return process.env.STRIPE_WEBHOOK_SECRET_SHOP;
+  const secret = process.env.STRIPE_WEBHOOK_SECRET_SHOP;
+  if (!secret) throw new Error('STRIPE_WEBHOOK_SECRET_SHOP is not set');
+  return secret;
+}
+
+function isStripeProduct(
+  p: Stripe.Product | Stripe.DeletedProduct,
+): p is Stripe.Product {
+  return (p as Stripe.DeletedProduct).deleted !== true;
+}
+
+type PurchaseRow = {
+  id: string;
+  userId: string;
+  packId: string;
+  packSlug: string | null;
+  stripeSessionId: string;
+  stripePaymentIntentId: string | null;
+  stripeProductId: string;
+  stripePriceId: string;
+  status: 'completed';
+  amount: number;
+  currency: string | null;
+  downloadToken: string;
+  downloadCount: number;
+  maxDownloads: number;
+  expiresAt: string;
+  packName: string;
+  blobUrl: string;
+};
+
+function generateId() {
+  return crypto.randomUUID().replace(/-/g, '');
+}
+
+async function savePurchaseRow(p: PurchaseRow) {
+  const res = await sql`
+    INSERT INTO shop_purchases (
+      id,
+      user_id,
+      pack_id,
+      stripe_session_id,
+      stripe_payment_intent_id,
+      stripe_product_id,
+      stripe_price_id,
+      status,
+      amount,
+      currency,
+      download_token,
+      download_count,
+      max_downloads,
+      expires_at,
+      pack_name,
+      pack_slug,
+      blob_url
+    ) VALUES (
+      ${p.id},
+      ${p.userId},
+      ${p.packId},
+      ${p.stripeSessionId},
+      ${p.stripePaymentIntentId},
+      ${p.stripeProductId},
+      ${p.stripePriceId},
+      ${p.status},
+      ${p.amount},
+      ${p.currency},
+      ${p.downloadToken},
+      ${p.downloadCount},
+      ${p.maxDownloads},
+      ${p.expiresAt},
+      ${p.packName},
+      ${p.packSlug},
+      ${p.blobUrl}
+    )
+    ON CONFLICT (id) DO NOTHING
+    RETURNING id
+  `;
+
+  console.log('✅ DB insert result:', res.rows);
 }
 
 export async function POST(request: NextRequest) {
-  try {
-    const stripe = getStripe();
-    const webhookSecret = getWebhookSecret();
+  const stripe = getStripe();
 
-    const body = await request.text();
-    const headersList = await headers();
-    const signature = headersList.get('stripe-signature');
+  const body = await request.text();
+  const sig = (await headers()).get('stripe-signature');
 
-    if (!signature) {
-      return NextResponse.json(
-        { error: 'No signature found' },
-        { status: 400 },
-      );
-    }
-
-    // Verify webhook signature
-    let event: Stripe.Event;
-    try {
-      if (webhookSecret) {
-        event = stripe.webhooks.constructEvent(body, signature, webhookSecret);
-      } else {
-        // Parse without verification for development
-        event = JSON.parse(body);
-      }
-    } catch (err) {
-      console.error('Webhook signature verification failed:', err);
-      return NextResponse.json({ error: 'Invalid signature' }, { status: 400 });
-    }
-
-    console.log('Received shop webhook event:', event.type);
-
-    // Handle the event
-    switch (event.type) {
-      case 'checkout.session.completed':
-        await handleCheckoutCompleted(
-          event.data.object as Stripe.Checkout.Session,
-        );
-        break;
-
-      case 'payment_intent.succeeded':
-        await handlePaymentSucceeded(event.data.object as Stripe.PaymentIntent);
-        break;
-
-      case 'payment_intent.payment_failed':
-        await handlePaymentFailed(event.data.object as Stripe.PaymentIntent);
-        break;
-
-      case 'invoice.payment_succeeded':
-        // For subscription-based products (if added later)
-        await handleInvoicePaymentSucceeded(
-          event.data.object as Stripe.Invoice,
-        );
-        break;
-
-      default:
-        console.log(`Unhandled shop event type: ${event.type}`);
-    }
-
-    return NextResponse.json({ received: true });
-  } catch (error) {
-    console.error('Shop webhook handler error:', error);
+  if (!sig) {
     return NextResponse.json(
-      { error: 'Webhook handler failed' },
-      { status: 500 },
+      { error: 'Missing stripe-signature' },
+      { status: 400 },
     );
   }
-}
 
-async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
-  console.log('🛒 Checkout completed:', session.id);
-
-  const { packId, userId, downloadToken, purchaseType } =
-    session.metadata || {};
-
-  if (purchaseType !== 'digital_pack') {
-    console.log('Skipping non-digital-pack checkout');
-    return;
-  }
-
-  if (!packId || !downloadToken) {
-    console.error('Missing required metadata in checkout session');
-    return;
-  }
+  let event: Stripe.Event;
 
   try {
-    const stripe = getStripe();
-    // Get product from Stripe to retrieve Blob URL (SSOT)
-    let blobUrl: string | undefined;
-    let packName = 'Digital Pack';
+    event = stripe.webhooks.constructEvent(body, sig, getWebhookSecret());
+  } catch (err) {
+    console.error('❌ Invalid webhook signature', err);
+    return NextResponse.json({ error: 'Invalid signature' }, { status: 400 });
+  }
 
-    if (session.line_items) {
-      const lineItems = await stripe.checkout.sessions.listLineItems(
-        session.id,
-        { expand: ['data.price.product'] },
-      );
+  if (event.type !== 'checkout.session.completed') {
+    return NextResponse.json({ received: true });
+  }
 
-      if (lineItems.data.length > 0) {
-        const price = lineItems.data[0].price;
-        if (price && typeof price.product !== 'string') {
-          const product = price.product as Stripe.Product;
-          packName = product.name;
-          // Get Blob URL from product metadata (SSOT)
-          blobUrl = product.metadata?.blobUrl;
+  const session = event.data.object as Stripe.Checkout.Session;
 
-          console.log('📦 Retrieved pack info from Stripe (SSOT):', {
-            productId: product.id,
-            packName,
-            hasBlobUrl: !!blobUrl,
-          });
-        }
-      }
+  if (session.metadata?.purchaseType !== 'digital_pack') {
+    return NextResponse.json({ received: true });
+  }
+
+  console.log('🛒 Checkout completed:', session.id);
+
+  // Always fetch line items and expand product
+  const lineItems = await stripe.checkout.sessions.listLineItems(session.id, {
+    limit: 100,
+    expand: ['data.price.product'],
+  });
+
+  if (!lineItems.data.length) {
+    console.error('❌ No line items found for session:', session.id);
+    return NextResponse.json({ received: true });
+  }
+
+  for (const li of lineItems.data) {
+    const price = li.price;
+    const prod = price?.product;
+
+    if (!price || !prod) {
+      console.error('❌ Missing price/product on line item:', li.id);
+      continue;
     }
 
-    // Create purchase record in database
-    const purchase = {
-      id: generateRandomId(),
-      userId: userId || 'anonymous',
+    if (typeof prod === 'string') {
+      console.error('❌ Product not expanded:', {
+        lineItemId: li.id,
+        productId: prod,
+      });
+      continue;
+    }
+
+    if (!isStripeProduct(prod)) {
+      console.error('❌ Product deleted:', { productId: (prod as any).id });
+      continue;
+    }
+
+    const blobUrl = prod.metadata?.blobUrl;
+    if (!blobUrl) {
+      console.error('❌ Missing blobUrl in Stripe product metadata:', {
+        productId: prod.id,
+        slug: prod.metadata?.slug,
+      });
+      continue;
+    }
+
+    const userId = session.metadata?.userId || 'anonymous';
+    const packSlug = prod.metadata?.slug || null;
+    const packId = prod.metadata?.packId || packSlug || prod.id;
+
+    const downloadToken =
+      session.metadata?.downloadToken || crypto.randomUUID();
+
+    const row: PurchaseRow = {
+      id: generateId(),
+      userId,
       packId,
+      packSlug,
       stripeSessionId: session.id,
-      stripePaymentIntentId: session.payment_intent as string,
+      stripePaymentIntentId: (session.payment_intent as string) || null,
+      stripeProductId: prod.id,
+      stripePriceId: price.id,
       status: 'completed',
-      amount: session.amount_total || 0,
+      // IMPORTANT: amount_total can be 0 if promo code discounts it fully (this is normal)
+      amount: session.amount_total ?? 0,
+      currency: session.currency ?? null,
       downloadToken,
       downloadCount: 0,
       maxDownloads: 5,
-      expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(), // 30 days
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-      pack: {
-        id: packId,
-        name: packName,
-        downloadUrl: blobUrl, // From Stripe metadata (SSOT)
-      },
+      expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
+      packName: prod.name,
+      blobUrl,
     };
 
-    // In production, save to database
-    console.log('💾 Purchase record created:', {
-      purchaseId: purchase.id,
-      packId,
-      amount: session.amount_total,
-      customerEmail: session.customer_details?.email,
+    console.log('🧪 Attempting DB insert:', {
+      packId: row.packId,
+      token: row.downloadToken.slice(0, 8),
+      amount: row.amount,
     });
 
-    // Send confirmation email (optional)
-    if (session.customer_details?.email) {
-      await sendPurchaseConfirmationEmail(
-        session.customer_details.email,
-        purchase,
-      );
-    }
-  } catch (error) {
-    console.error('Failed to process completed checkout:', error);
-  }
-}
+    await savePurchaseRow(row);
 
-async function handlePaymentSucceeded(paymentIntent: Stripe.PaymentIntent) {
-  console.log('💳 Payment succeeded:', paymentIntent.id);
-
-  // Update purchase status if needed
-  // This is typically handled in checkout.session.completed
-}
-
-async function handlePaymentFailed(paymentIntent: Stripe.PaymentIntent) {
-  console.log('❌ Payment failed:', paymentIntent.id);
-
-  // Handle failed payment - maybe send notification
-  // Update purchase status to 'failed'
-}
-
-async function handleInvoicePaymentSucceeded(invoice: Stripe.Invoice) {
-  console.log('📧 Invoice payment succeeded:', invoice.id);
-
-  // Handle subscription renewals if implemented
-}
-
-async function sendPurchaseConfirmationEmail(email: string, purchase: any) {
-  try {
-    // In production, integrate with your email service (Resend, etc.)
-    console.log(`📧 Would send confirmation email to: ${email}`);
-    console.log('Purchase details:', {
-      id: purchase.id,
-      amount: purchase.amount,
-      downloadToken: purchase.downloadToken,
+    console.log('✅ Purchase saved:', {
+      id: row.id,
+      packId: row.packId,
+      amount: row.amount,
+      token: row.downloadToken.slice(0, 8),
     });
-
-    // Example email content:
-    // - Thank you for your purchase
-    // - Download link with token
-    // - Purchase details
-    // - Support information
-  } catch (error) {
-    console.error('Failed to send confirmation email:', error);
   }
-}
 
-function generateRandomId(): string {
-  const array = new Uint8Array(16);
-  crypto.getRandomValues(array);
-  return Array.from(array, (byte) => byte.toString(16).padStart(2, '0')).join(
-    '',
-  );
+  return NextResponse.json({ received: true });
 }

@@ -6,7 +6,7 @@ import {
   getRelatedProducts,
   getUpsellProducts,
 } from '@/lib/shop/generators';
-import { CATEGORY_LABELS } from '@/lib/shop/types';
+import { CATEGORY_LABELS, ShopProduct } from '@/lib/shop/types';
 import { ProductDetail } from '@/components/shop/ProductDetail';
 import { RelatedProducts } from '@/components/shop/RelatedProducts';
 import { UpsellSidebar } from '@/components/shop/UpsellSidebar';
@@ -15,6 +15,7 @@ import {
   createBreadcrumbSchema,
   renderJsonLd,
 } from '@/lib/schema';
+import { getShopListingBySlugFromStripe } from '@/lib/stripe/catalogue';
 
 interface ProductPageProps {
   params: Promise<{
@@ -107,7 +108,16 @@ export async function generateMetadata({
 
 export default async function ProductPage({ params }: ProductPageProps) {
   const { slug } = await params;
-  const product = getProductBySlug(slug);
+  const stripe = await getShopListingBySlugFromStripe(slug);
+  const local = getProductBySlug(slug);
+
+  const product: ShopProduct | undefined = stripe
+    ? { ...(local ?? stripe), ...stripe } // Stripe overwrites IDs/prices
+    : local;
+
+  if (!product) notFound();
+
+  console.log('product', product);
 
   if (!product) {
     notFound();
@@ -122,9 +132,10 @@ export default async function ProductPage({ params }: ProductPageProps) {
     name: product.title,
     description: product.description,
     price: product.price,
+    stripePriceId: product.stripePriceId || '',
     priceCurrency: 'USD',
     sku: product.slug,
-    features: product.features || [],
+    features: product.whatInside || [],
   });
 
   const breadcrumbSchema = createBreadcrumbSchema([

@@ -53,6 +53,12 @@ const grimoireCategories = [
       'Magical correspondences for elements, colors, herbs, and more',
   },
   {
+    name: 'Witchcraft Practices',
+    url: 'https://lunary.app/grimoire/practices',
+    description:
+      'Complete guide to spells, meditation, divination, shadow work, and more',
+  },
+  {
     name: 'Spells',
     url: 'https://lunary.app/grimoire/spells',
     description: 'Protection, love, prosperity, and healing spells',

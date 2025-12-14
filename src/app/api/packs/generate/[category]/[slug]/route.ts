@@ -12,6 +12,7 @@ import { generateSpellPackContent } from '@/lib/pdf/content-generators/spell-con
 import { generateCrystalPackContent } from '@/lib/pdf/content-generators/crystal-content';
 import { generateTarotPackContent } from '@/lib/pdf/content-generators/tarot-content';
 import { generateSeasonalPackContent } from '@/lib/pdf/content-generators/seasonal-content';
+import { getCardsForPack } from '@/lib/pdf/content-generators/tarot-card-loader';
 import {
   generateZodiacSeasonContent,
   generateSaturnReturnContent,
@@ -21,6 +22,7 @@ import {
   generateRisingSignContent,
   generateMoonSignContent,
   generateHouseMeaningsContent,
+  generateBig3Content,
 } from '@/lib/pdf/content-generators/birthchart-content';
 import { generateRetrogradePackContent } from '@/lib/pdf/content-generators/retrograde-content';
 
@@ -37,6 +39,7 @@ import { generateRetrogradePackPdf } from '@/lib/pdf/templates/RetrogradePackTem
 import { getSpellPackBySlug } from '@/lib/shop/generators/spell-packs';
 import { getCrystalPackBySlug } from '@/lib/shop/generators/crystal-packs';
 import { getTarotPackBySlug } from '@/lib/shop/generators/tarot-packs';
+import { getRetrogradePackBySlug } from '@/lib/shop/generators/retrograde-packs';
 
 import { PDFDocument, PDFFont, PDFImage, StandardFonts } from 'pdf-lib';
 import fontkit from '@pdf-lib/fontkit';
@@ -123,7 +126,7 @@ export async function GET(
             ].includes(t),
           ) || ['manifestation'],
           keywords: shopProduct.keywords || [],
-          perfectFor: shopProduct.perfectFor,
+          perfectFor: shopProduct.perfectFor || [],
         });
         pdfBytes = await generateSpellPackPdf(content, loadFonts, loadLogo);
         break;
@@ -137,15 +140,28 @@ export async function GET(
             { status: 404 },
           );
         }
+        // Use selection method and value from shopProduct, fallback to tags/slug if not available
+        const crystalSelectionMethod =
+          shopProduct.crystalSelectionMethod || 'intention';
+        const selectionValue =
+          shopProduct.selectionValue ||
+          shopProduct.tags?.[0] ||
+          slug.split('-')[0] ||
+          'calm';
         const content = generateCrystalPackContent({
           id: shopProduct.id,
           slug: shopProduct.slug,
           title: shopProduct.title,
           tagline: shopProduct.tagline,
           description: shopProduct.description,
-          crystalSelectionMethod: 'intention',
-          selectionValue: shopProduct.tags?.[0] || 'calm',
-          perfectFor: shopProduct.perfectFor,
+          crystalSelectionMethod: crystalSelectionMethod as
+            | 'intention'
+            | 'zodiac'
+            | 'chakra'
+            | 'custom',
+          selectionValue: selectionValue,
+          customCrystals: shopProduct.customCrystals,
+          perfectFor: shopProduct.perfectFor || [],
         });
         pdfBytes = await generateCrystalPackPdf(content, loadFonts, loadLogo);
         break;
@@ -159,33 +175,101 @@ export async function GET(
             { status: 404 },
           );
         }
-        // We need to extract spreads from somewhere - for now use a basic structure
+        // Load cards based on pack theme
+        const cards = getCardsForPack(slug);
         const content = generateTarotPackContent({
           id: shopProduct.id,
           slug: shopProduct.slug,
           title: shopProduct.title,
           tagline: shopProduct.tagline,
           description: shopProduct.description,
-          spreads: [], // Will be generated with defaults
-          ritual: 'Create sacred space before your reading.',
-          journalPrompts: [
-            'What insights arose from this reading?',
-            'What action am I called to take?',
-          ],
-          perfectFor: shopProduct.perfectFor,
+          spreads:
+            shopProduct.spreads?.map((spread) => ({
+              name: spread.name,
+              description: spread.description,
+              cardCount: spread.cardCount,
+              positions: spread.positions.map((position) => position.name),
+            })) || [],
+          cards: cards,
+          journalPrompts: shopProduct.journalPrompts || [],
+          perfectFor: shopProduct.perfectFor || [],
         });
         pdfBytes = await generateTarotPackPdf(content, loadFonts, loadLogo);
         break;
       }
 
       case 'seasonal': {
-        const sabbatName =
-          slug.replace('-seasonal-pack', '').charAt(0).toUpperCase() +
-          slug.replace('-seasonal-pack', '').slice(1);
-        const content = generateSeasonalPackContent(sabbatName);
-        pdfBytes = await generateSeasonalPackPdf(content, loadFonts, loadLogo);
-        break;
+        const sabbatSlug = slug
+          .replace(/-seasonal-pack$/, '')
+          .replace(/-pack$/, '');
+
+        const sabbatName = sabbatSlug
+          .replace(/-/g, ' ')
+          .replace(/\b\w/g, (c) => c.toUpperCase());
+
+        // const shopProduct = getSeasonalPackBySlug(sabbatName);
+        // if (!shopProduct) {
+        //   return NextResponse.json(
+        //     { error: 'Seasonal pack not found' },
+        //     { status: 404 },
+        //   );
+        // }
+
+        // // Use product data instead of guessing from slug
+        // const content = generateSeasonalPackContent(shopProduct.title);
+        // pdfBytes = await generateSeasonalPackPdf(content, loadFonts, loadLogo);
+        // break;
+
+        try {
+          const content = generateSeasonalPackContent(sabbatName);
+          pdfBytes = await generateSeasonalPackPdf(
+            content,
+            loadFonts,
+            loadLogo,
+          );
+          break;
+        } catch (err) {
+          console.error('Seasonal PDF error input:', {
+            slug,
+            sabbatSlug,
+            sabbatName,
+          });
+          return NextResponse.json(
+            { error: 'Failed seasonal PDF', details: String(err) },
+            { status: 500 },
+          );
+        }
       }
+
+      // case 'astrology': {
+      //   if (slug.includes('saturn-return')) {
+      //     const content = generateSaturnReturnContent();
+      //     pdfBytes = await generateAstrologyPackPdf(
+      //       content,
+      //       loadFonts,
+      //       loadLogo,
+      //     );
+      //   } else if (slug.includes('jupiter')) {
+      //     const content = generateJupiterExpansionContent();
+      //     pdfBytes = await generateAstrologyPackPdf(
+      //       content,
+      //       loadFonts,
+      //       loadLogo,
+      //     );
+      //   } else {
+      //     // Zodiac season pack
+      //     const sign =
+      //       slug.replace('-season-pack', '').charAt(0).toUpperCase() +
+      //       slug.replace('-season-pack', '').slice(1);
+      //     const content = generateZodiacSeasonContent(sign);
+      //     pdfBytes = await generateAstrologyPackPdf(
+      //       content,
+      //       loadFonts,
+      //       loadLogo,
+      //     );
+      //   }
+      //   break;
+      // }
 
       case 'astrology': {
         if (slug.includes('saturn-return')) {
@@ -195,25 +279,27 @@ export async function GET(
             loadFonts,
             loadLogo,
           );
-        } else if (slug.includes('jupiter')) {
+          break;
+        }
+
+        if (slug.includes('jupiter')) {
           const content = generateJupiterExpansionContent();
           pdfBytes = await generateAstrologyPackPdf(
             content,
             loadFonts,
             loadLogo,
           );
-        } else {
-          // Zodiac season pack
-          const sign =
-            slug.replace('-season-pack', '').charAt(0).toUpperCase() +
-            slug.replace('-season-pack', '').slice(1);
-          const content = generateZodiacSeasonContent(sign);
-          pdfBytes = await generateAstrologyPackPdf(
-            content,
-            loadFonts,
-            loadLogo,
-          );
+          break;
         }
+
+        const sign = slug
+          .replace(/-season-pack$/, '')
+          .replace(/-pack$/, '')
+          .replace(/-/g, ' ')
+          .replace(/\b\w/g, (c) => c.toUpperCase());
+
+        const content = generateZodiacSeasonContent(sign);
+        pdfBytes = await generateAstrologyPackPdf(content, loadFonts, loadLogo);
         break;
       }
 
@@ -225,43 +311,72 @@ export async function GET(
             loadFonts,
             loadLogo,
           );
-        } else if (slug.includes('moon')) {
+          break;
+        }
+
+        if (slug.includes('moon')) {
           const content = generateMoonSignContent();
           pdfBytes = await generateBirthChartPackPdf(
             content,
             loadFonts,
             loadLogo,
           );
-        } else if (slug.includes('house')) {
+          break;
+        }
+
+        if (slug.includes('house')) {
           const content = generateHouseMeaningsContent();
           pdfBytes = await generateBirthChartPackPdf(
             content,
             loadFonts,
             loadLogo,
           );
-        } else {
-          return NextResponse.json(
-            { error: 'Birth chart pack not found' },
-            { status: 404 },
-          );
+          break;
         }
-        break;
+
+        if (slug.includes('big-3')) {
+          const content = generateBig3Content();
+          pdfBytes = await generateBirthChartPackPdf(
+            content,
+            loadFonts,
+            loadLogo,
+          );
+          break;
+        }
+
+        return NextResponse.json(
+          { error: 'Birth chart pack not found' },
+          { status: 404 },
+        );
       }
 
       case 'retrograde': {
-        const planet = slug.includes('mercury')
-          ? 'Mercury'
-          : slug.includes('venus')
-            ? 'Venus'
-            : slug.includes('mars')
-              ? 'Mars'
-              : null;
+        const shopProduct = getRetrogradePackBySlug(slug);
+        if (!shopProduct) {
+          return NextResponse.json(
+            { error: 'Retrograde pack not found' },
+            { status: 404 },
+          );
+        }
+
+        // Prefer explicit data on the product if you have it, for example shopProduct.planet
+        const planet =
+          (shopProduct as any).planet ||
+          (slug.includes('mercury')
+            ? 'Mercury'
+            : slug.includes('venus')
+              ? 'Venus'
+              : slug.includes('mars')
+                ? 'Mars'
+                : null);
+
         if (!planet) {
           return NextResponse.json(
             { error: 'Retrograde pack not found' },
             { status: 404 },
           );
         }
+
         const content = generateRetrogradePackContent(planet);
         pdfBytes = await generateRetrogradePackPdf(
           content,
@@ -278,7 +393,7 @@ export async function GET(
         );
     }
 
-    return new Response(pdfBytes, {
+    return new Response(Buffer.from(pdfBytes), {
       headers: {
         'Content-Type': 'application/pdf',
         'Content-Disposition': `attachment; filename="${slug}.pdf"`,

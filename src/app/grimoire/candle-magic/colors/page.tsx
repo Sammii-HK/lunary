@@ -198,7 +198,7 @@ export default function CandleColorsIndexPage() {
               Correspondences
             </Link>
             <Link
-              href='/grimoire/practices'
+              href='/grimoire/spells/fundamentals'
               className='px-4 py-2 rounded-lg bg-zinc-800 text-zinc-300 hover:bg-zinc-700 transition-colors'
             >
               Spellcraft

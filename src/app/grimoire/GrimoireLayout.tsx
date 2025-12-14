@@ -31,7 +31,7 @@ const SIDEBAR_CATEGORIES = [
   {
     name: 'Complete Guides',
     icon: <Sparkles size={14} />,
-    sections: ['guides'],
+    sections: ['guides', 'beginners'],
   },
   {
     name: 'Zodiac & Signs',
@@ -56,6 +56,7 @@ const SIDEBAR_CATEGORIES = [
       'transits',
       'horoscopes',
       'astronomy',
+      'astronomyVsAstrology',
     ],
   },
   {
@@ -87,12 +88,14 @@ const SIDEBAR_CATEGORIES = [
       'candleMagic',
       'correspondences',
       'meditation',
+      'protection',
+      'manifestation',
     ],
   },
   {
     name: 'Self-Discovery',
     icon: <Sparkles size={14} />,
-    sections: ['archetypes'],
+    sections: ['archetypes', 'shadowWork'],
   },
   {
     name: 'Other',
@@ -230,6 +233,11 @@ const GRIMOIRE_FULL_STRUCTURE = [
     icon: <Star className='w-5 h-5' />,
     items: [
       {
+        title: "Beginner's Guide",
+        href: '/grimoire/beginners',
+        description: 'Start your spiritual journey',
+      },
+      {
         title: 'All Guides',
         href: '/grimoire/guides',
         description: 'In-depth pillar content',
@@ -356,6 +364,11 @@ const GRIMOIRE_FULL_STRUCTURE = [
         href: '/grimoire/astronomy',
         description: 'Planets & celestial bodies',
       },
+      {
+        title: 'Astronomy vs Astrology',
+        href: '/grimoire/astronomy-vs-astrology',
+        description: 'Understanding the difference',
+      },
     ],
   },
   {
@@ -374,17 +387,12 @@ const GRIMOIRE_FULL_STRUCTURE = [
       },
       {
         title: 'Moon Signs',
-        href: '/grimoire/moon-signs',
+        href: '/grimoire/moon/moon-signs',
         description: 'Emotional moon placements',
       },
       {
-        title: 'Moon in Signs',
-        href: '/grimoire/moon-signs',
-        description: 'Transit moon positions',
-      },
-      {
         title: 'Moon Rituals',
-        href: '/grimoire/moon-rituals',
+        href: '/grimoire/moon/moon-rituals',
         description: 'Lunar ceremonies',
       },
       {
@@ -537,6 +545,11 @@ const GRIMOIRE_FULL_STRUCTURE = [
         description: 'Witchcraft overview',
       },
       {
+        title: 'Witchcraft Practices',
+        href: '/grimoire/practices',
+        description: 'Complete guide to all practices',
+      },
+      {
         title: 'Witch Types',
         href: '/grimoire/modern-witchcraft/witch-types',
         description: 'Green, Kitchen, Hedge...',
@@ -552,14 +565,24 @@ const GRIMOIRE_FULL_STRUCTURE = [
         description: 'Ethical practice',
       },
       {
+        title: 'Book of Shadows',
+        href: '/grimoire/book-of-shadows',
+        description: 'Create your personal grimoire',
+      },
+      {
         title: 'Spellcraft',
-        href: '/grimoire/spellcraft-fundamentals',
+        href: '/grimoire/spells/fundamentals',
         description: 'Spell basics',
       },
       {
         title: 'Spells',
-        href: '/grimoire/practices',
+        href: '/grimoire/spells',
         description: 'Spell collection',
+      },
+      {
+        title: 'Jar Spells',
+        href: '/grimoire/jar-spells',
+        description: 'Spell jars & witch bottles',
       },
       {
         title: 'Candle Magic',
@@ -590,6 +613,16 @@ const GRIMOIRE_FULL_STRUCTURE = [
         title: 'Grounding',
         href: '/grimoire/meditation/grounding',
         description: 'Grounding exercises',
+      },
+      {
+        title: 'Protection',
+        href: '/grimoire/protection',
+        description: 'Energetic protection & boundaries',
+      },
+      {
+        title: 'Manifestation',
+        href: '/grimoire/manifestation',
+        description: 'Intention setting & creation',
       },
     ],
   },
@@ -662,6 +695,11 @@ const GRIMOIRE_FULL_STRUCTURE = [
         href: '/grimoire/archetypes#alchemist',
         description: 'Transformation',
       },
+      {
+        title: 'Shadow Work',
+        href: '/grimoire/shadow-work',
+        description: 'Healing & integration',
+      },
     ],
   },
   {
@@ -677,6 +715,11 @@ const GRIMOIRE_FULL_STRUCTURE = [
         title: 'Wheel of the Year',
         href: '/grimoire/wheel-of-the-year',
         description: '8 sabbats',
+      },
+      {
+        title: 'Sabbats',
+        href: '/grimoire/sabbats',
+        description: 'Seasonal festivals',
       },
       {
         title: 'Chinese Zodiac',

@@ -1,7 +1,7 @@
 import { MetadataRoute } from 'next';
 import { grimoire } from '@/constants/grimoire';
 import { sectionToSlug } from '@/utils/grimoire';
-import { spells } from '@/constants/spells';
+import spellsJson from '@/data/spells.json';
 import { crystalDatabase } from '@/constants/grimoire/crystals';
 import { runesList } from '@/constants/runes';
 import { chakras } from '@/constants/chakras';
@@ -88,6 +88,12 @@ export default function sitemap(): MetadataRoute.Sitemap {
     },
     {
       url: `${baseUrl}/grimoire/spells`,
+      lastModified: now,
+      changeFrequency: 'monthly' as const,
+      priority: 0.8,
+    },
+    {
+      url: `${baseUrl}/grimoire/practices`,
       lastModified: now,
       changeFrequency: 'monthly' as const,
       priority: 0.8,
@@ -256,12 +262,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
     },
     {
       url: `${baseUrl}/grimoire/modern-witchcraft`,
-      lastModified: now,
-      changeFrequency: 'monthly' as const,
-      priority: 0.7,
-    },
-    {
-      url: `${baseUrl}/grimoire/practices`,
       lastModified: now,
       changeFrequency: 'monthly' as const,
       priority: 0.7,
@@ -618,7 +618,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
   }));
 
   // Add all spell pages
-  const spellRoutes = spells.map((spell) => ({
+  const spellRoutes = spellsJson.map((spell) => ({
     url: `${baseUrl}/grimoire/spells/${spell.id}`,
     lastModified: now,
     changeFrequency: 'monthly' as const,

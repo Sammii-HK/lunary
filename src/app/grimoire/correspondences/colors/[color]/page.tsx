@@ -149,7 +149,7 @@ Understanding ${colorKey.toLowerCase()} color correspondences helps you choose t
         },
         {
           text: 'Spellcraft Fundamentals',
-          href: '/grimoire/spellcraft-fundamentals',
+          href: '/grimoire/spells/fundamentals',
         },
       ]}
       tables={[

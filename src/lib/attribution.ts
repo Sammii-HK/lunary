@@ -139,7 +139,7 @@ export function extractUTMFromURL(): Partial<Attribution> {
       utm.source = 'referral';
     }
     utm.medium = utmMedium || utmSource;
-    utm.campaign = utmCampaign;
+    utm.campaign = utmCampaign || undefined;
   }
 
   return utm;

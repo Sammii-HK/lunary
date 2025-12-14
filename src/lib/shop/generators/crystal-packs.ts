@@ -1120,6 +1120,10 @@ export function generateCrystalPacks(): ShopProduct[] {
     tags: config.tags,
     keywords: config.keywords,
     badge: config.badge,
+    // Include crystal selection data for PDF generation
+    crystalSelectionMethod: config.crystalSelectionMethod,
+    selectionValue: config.selectionValue,
+    customCrystals: config.customCrystals,
   }));
 }
 

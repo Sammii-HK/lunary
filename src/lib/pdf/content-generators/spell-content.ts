@@ -5,7 +5,7 @@
  */
 
 import { PdfSpellPack, PdfSpell } from '../schema';
-import { spellDatabase } from '@/constants/grimoire/spells';
+import { getMaterialsForPdf, spellDatabase } from '@/lib/spells/index';
 
 interface SpellPackConfig {
   id: string;
@@ -70,33 +70,104 @@ function getSpellsForCategory(
 ): PdfSpell[] {
   const matchingSpells = spellDatabase.filter((spell) => {
     const categoryMatch = categories.includes(spell.category);
+    // Fix: use moonPhase (singular) not moonPhases
+    const spellMoonPhases = spell.timing?.moonPhase || [];
     const moonMatch =
       !moonPhases ||
       moonPhases.some(
         (phase) =>
-          spell.timing.moonPhases?.includes(phase) ||
-          spell.timing.moonPhases?.includes('Any'),
+          spellMoonPhases?.includes(phase) || spellMoonPhases?.includes('Any'),
       );
     return categoryMatch || moonMatch;
   });
 
-  return matchingSpells.slice(0, 5).map((spell) => ({
-    id: spell.id,
-    title: spell.title,
-    level:
-      (spell.difficulty as 'beginner' | 'intermediate' | 'advanced') ||
-      'beginner',
-    duration: spell.duration || '15–20 minutes',
-    moonPhases: spell.timing.moonPhases,
-    description: spell.description || spell.purpose || '',
-    materials: (spell.ingredients || spell.materials || []).map((m: any) =>
-      typeof m === 'string'
-        ? polishMaterial(m)
-        : polishMaterial(m.name || String(m)),
-    ),
-    steps: (spell.steps || []).map(polishStepText),
-    incantation: spell.incantation,
-  }));
+  return matchingSpells.slice(0, 5).map((spell) => {
+    // Use the adapter function instead of accessing spell.materials directly
+    const materialsObj = getMaterialsForPdf(spell);
+
+    // Build material substitutions map
+    const materialSubstitutions: Record<string, string[]> = {};
+    materialsObj.essential.forEach((material) => {
+      if (material.substitutes && material.substitutes.length > 0) {
+        materialSubstitutions[material.name] = material.substitutes;
+      }
+    });
+
+    // Build timing recommendations
+    const timingParts: string[] = [];
+    if (spell.timing?.moonPhase && spell.timing.moonPhase.length > 0) {
+      timingParts.push(`Moon phases: ${spell.timing.moonPhase.join(', ')}`);
+    }
+    if (spell.timing?.timeOfDay) {
+      const timeOfDay = spell.timing.timeOfDay as string | string[];
+      const timeOfDayStr =
+        typeof timeOfDay === 'string'
+          ? timeOfDay
+          : Array.isArray(timeOfDay)
+            ? timeOfDay.join(', ')
+            : '';
+      if (timeOfDayStr) {
+        timingParts.push(`Time of day: ${timeOfDayStr}`);
+      }
+    }
+    if (spell.timing?.planetaryDay) {
+      const planetaryDay = spell.timing.planetaryDay as string | string[];
+      if (Array.isArray(planetaryDay) && planetaryDay.length > 0) {
+        timingParts.push(`Planetary days: ${planetaryDay.join(', ')}`);
+      } else if (typeof planetaryDay === 'string') {
+        timingParts.push(`Planetary days: ${planetaryDay}`);
+      }
+    }
+    if (spell.timing?.season) {
+      const season = spell.timing.season as string | string[];
+      if (typeof season === 'string') {
+        timingParts.push(`Season: ${season}`);
+      } else if (Array.isArray(season) && season.length > 0) {
+        timingParts.push(`Season: ${season.join(', ')}`);
+      }
+    }
+    if (spell.timing?.sabbat) {
+      const sabbat = spell.timing.sabbat as string | string[];
+      if (Array.isArray(sabbat) && sabbat.length > 0) {
+        timingParts.push(`Sabbats: ${sabbat.join(', ')}`);
+      } else if (typeof sabbat === 'string') {
+        timingParts.push(`Sabbats: ${sabbat}`);
+      }
+    }
+    const timing = timingParts.length > 0 ? timingParts.join('. ') : undefined;
+    const bestTime = (spell as any).timing?.bestTiming || undefined;
+
+    // Build visualization guide (may not exist on Spell type)
+    const visualization =
+      (spell as any).visualization &&
+      Array.isArray((spell as any).visualization) &&
+      (spell as any).visualization.length > 0
+        ? (spell as any).visualization.join(' ')
+        : undefined;
+
+    return {
+      id: spell.id,
+      title: spell.title,
+      level:
+        (spell.difficulty as 'beginner' | 'intermediate' | 'advanced') ||
+        'beginner',
+      duration: spell.duration || '15–20 minutes',
+      moonPhases: spell.timing?.moonPhase || [],
+      description: spell.description || spell.purpose || '',
+      materials: materialsObj.essential.map((m) => polishMaterial(m.name)),
+      materialSubstitutions:
+        Object.keys(materialSubstitutions).length > 0
+          ? materialSubstitutions
+          : undefined,
+      steps: (spell.steps || []).map(polishStepText),
+      incantation:
+        spell.incantations?.map((incantation) => incantation.text).join('\n') ||
+        undefined,
+      visualization,
+      timing,
+      bestTime,
+    };
+  });
 }
 
 const INTRO_TEMPLATES: Record<string, string> = {

@@ -366,7 +366,7 @@ export const MoonPreview = () => {
             {spells.map((spell) => (
               <Link
                 key={spell.id}
-                href={`/grimoire/practices#${spell.id}`}
+                href={`/grimoire/spells/${spell.id}`}
                 className='block p-2 rounded bg-zinc-800/50 hover:bg-zinc-800 transition-colors'
               >
                 <p className='text-sm text-zinc-200'>{spell.title}</p>

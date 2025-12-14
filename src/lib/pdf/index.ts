@@ -9,4 +9,10 @@ export * from './fonts';
 export * from './components';
 
 // Templates
-export { SpellPackTemplate } from './templates/SpellPackTemplate';
+export { generateSpellPackPdf } from './templates/SpellPackTemplate';
+export { generateCrystalPackPdf } from './templates/CrystalPackTemplate';
+export { generateTarotPackPdf } from './templates/TarotPackTemplate';
+export { generateSeasonalPackPdf } from './templates/SeasonalPackTemplate';
+export { generateAstrologyPackPdf } from './templates/AstrologyPackTemplate';
+export { generateBirthChartPackPdf } from './templates/BirthChartPackTemplate';
+export { generateRetrogradePackPdf } from './templates/RetrogradePackTemplate';

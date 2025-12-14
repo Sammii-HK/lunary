@@ -185,9 +185,9 @@ Understanding ${deityKey.toLowerCase()}'s correspondences helps you honor this d
         },
         {
           text: 'Spellcraft Fundamentals',
-          href: '/grimoire/spellcraft-fundamentals',
+          href: '/grimoire/spells/fundamentals',
         },
-        { text: 'Spells & Rituals', href: '/grimoire/practices' },
+        { text: 'Spells & Rituals', href: '/grimoire/spells' },
         { text: 'Wheel of the Year', href: '/grimoire/wheel-of-the-year' },
       ]}
       tables={[

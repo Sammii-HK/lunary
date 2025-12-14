@@ -50,7 +50,21 @@ async function generatePdfForProduct(
     retrograde: 'retrograde',
   };
 
-  const category = categoryMap[product.category];
+  let category = categoryMap[product.category];
+
+  // Only treat as retrograde when the PRODUCT category is retrograde,
+  // or when it's an astrology product whose slug is exactly the retrograde guide format.
+  const isRetrogradeGuideSlug = /^(mercury|venus|mars)-retrograde-pack$/.test(
+    product.slug,
+  );
+
+  if (
+    product.category === 'retrograde' ||
+    (product.category === 'astrology' && isRetrogradeGuideSlug)
+  ) {
+    category = 'retrograde';
+  }
+
   if (!category) return null;
 
   const url = `${baseUrl}/api/packs/generate/${category}/${product.slug}`;
@@ -58,8 +72,9 @@ async function generatePdfForProduct(
 
   const response = await fetch(url);
   if (!response.ok) {
+    const text = await response.text().catch(() => '');
     throw new Error(
-      `PDF generation failed: ${response.status} ${response.statusText}`,
+      `PDF generation failed: ${response.status} ${response.statusText}${text ? ` — ${text}` : ''}`,
     );
   }
 
@@ -72,12 +87,13 @@ async function uploadToBlob(
   product: ShopProduct,
 ): Promise<string> {
   const blobKey = `shop/packs/${product.category}/${product.slug}.pdf`;
-  console.log(`  ☁️ Uploading to Blob: ${blobKey}`);
+  console.log(`[☁️] Uploading to Blob: ${blobKey}`);
 
   const { url } = await put(blobKey, Buffer.from(pdfBytes), {
     access: 'public',
     addRandomSuffix: false,
     contentType: 'application/pdf',
+    allowOverwrite: true, // Allow re-syncing existing products
   });
 
   return url;
@@ -96,9 +112,44 @@ async function createStripeProduct(
     limit: 1,
   });
 
+  // Generate OG image and upload to Blob for Stripe (needs publicly accessible URL)
+  let imageUrl: string | undefined;
+  try {
+    const ogImageResponse = await fetch(
+      `${baseUrl}/api/shop/og?category=${product.category}&name=${encodeURIComponent(product.title)}`,
+    );
+    if (ogImageResponse.ok) {
+      const imageBuffer = await ogImageResponse.arrayBuffer();
+      const imageBlobKey = `shop/packs/${product.category}/${product.slug}-preview.png`;
+      const { url: uploadedImageUrl } = await put(
+        imageBlobKey,
+        Buffer.from(imageBuffer),
+        {
+          access: 'public',
+          addRandomSuffix: false,
+          contentType: 'image/png',
+          allowOverwrite: true, // Allow re-syncing existing products
+        },
+      );
+      imageUrl = uploadedImageUrl;
+      console.log(`  🖼️ Uploaded preview image to Blob: ${imageUrl}`);
+    }
+  } catch (error) {
+    console.warn(`  ⚠️ Failed to generate/upload preview image:`, error);
+  }
+
   if (existingProducts.data.length > 0) {
     const existing = existingProducts.data[0];
     console.log(`  ⚠️ Product already exists: ${existing.id}`);
+
+    // Always update existing product with latest image
+    if (imageUrl) {
+      await stripe.products.update(existing.id, {
+        images: [imageUrl],
+      });
+      console.log(`  🖼️ Updated existing product with preview image`);
+    }
+
     const prices = await stripe.prices.list({ product: existing.id, limit: 1 });
     return {
       productId: existing.id,
@@ -106,13 +157,11 @@ async function createStripeProduct(
     };
   }
 
-  const ogImageUrl = `${baseUrl}/api/shop/og?category=${product.category}&name=${encodeURIComponent(product.title)}`;
-
   console.log(`  💳 Creating Stripe product: ${product.title}`);
   const stripeProduct = await stripe.products.create({
     name: product.title,
     description: product.description,
-    images: [ogImageUrl],
+    images: imageUrl ? [imageUrl] : [],
     metadata: {
       slug: product.slug,
       category: product.category,
@@ -219,6 +268,7 @@ export async function POST(request: NextRequest) {
     const category = searchParams.get('category');
     const dryRun = searchParams.get('dryRun') === 'true';
     const skipExisting = searchParams.get('skipExisting') !== 'false';
+    const perCategory = parseInt(searchParams.get('perCategory') || '0', 10);
 
     const baseUrl =
       process.env.NEXT_PUBLIC_BASE_URL ||
@@ -235,26 +285,54 @@ export async function POST(request: NextRequest) {
 
     let allProducts: ShopProduct[] = [];
 
-    if (!category || category === 'spell') {
-      allProducts.push(...generateSpellPacks());
-    }
-    if (!category || category === 'crystal') {
-      allProducts.push(...generateCrystalPacks());
-    }
-    if (!category || category === 'tarot') {
-      allProducts.push(...generateTarotPacks());
-    }
-    if (!category || category === 'seasonal') {
-      allProducts.push(...generateSeasonalPacks());
-    }
-    if (!category || category === 'astrology') {
-      allProducts.push(...generateAstrologyPacks());
-    }
-    if (!category || category === 'birthchart') {
-      allProducts.push(...generateBirthChartPacks());
-    }
-    if (!category || category === 'retrograde') {
-      allProducts.push(...generateRetrogradePacks());
+    const pickFirst = (items: ShopProduct[], n: number) =>
+      items.sort((a, b) => a.slug.localeCompare(b.slug)).slice(0, n);
+
+    if (perCategory > 0) {
+      if (!category || category === 'spell') {
+        allProducts.push(...pickFirst(generateSpellPacks(), perCategory));
+      }
+      if (!category || category === 'crystal') {
+        allProducts.push(...pickFirst(generateCrystalPacks(), perCategory));
+      }
+      if (!category || category === 'tarot') {
+        allProducts.push(...pickFirst(generateTarotPacks(), perCategory));
+      }
+      if (!category || category === 'seasonal') {
+        allProducts.push(...pickFirst(generateSeasonalPacks(), perCategory));
+      }
+      if (!category || category === 'astrology') {
+        allProducts.push(...pickFirst(generateAstrologyPacks(), perCategory));
+      }
+      if (!category || category === 'birthchart') {
+        allProducts.push(...pickFirst(generateBirthChartPacks(), perCategory));
+      }
+      if (!category || category === 'retrograde') {
+        allProducts.push(...pickFirst(generateRetrogradePacks(), perCategory));
+      }
+    } else {
+      if (!category || category === 'spell') {
+        allProducts.push(...generateSpellPacks());
+      }
+      if (!category || category === 'crystal') {
+        allProducts.push(...generateCrystalPacks());
+      }
+      if (!category || category === 'tarot') {
+        allProducts.push(...generateTarotPacks());
+      }
+      if (!category || category === 'seasonal') {
+        allProducts.push(...generateSeasonalPacks());
+      }
+      if (!category || category === 'astrology') {
+        allProducts.push(...generateAstrologyPacks());
+      }
+      if (!category || category === 'birthchart') {
+        allProducts.push(...generateBirthChartPacks());
+      }
+      if (!category || category === 'retrograde') {
+        allProducts.push(...generateRetrogradePacks());
+      }
+      console.log(`   Per Category: ${perCategory || 'off'}`);
     }
 
     console.log(`\n📦 Found ${allProducts.length} products to sync`);

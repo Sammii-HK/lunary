@@ -214,14 +214,19 @@ function buildRitualPage(
 
   let y = PAGE_HEIGHT - MARGIN - 30;
 
-  page.drawText(ritual.title, {
-    x: MARGIN,
-    y,
-    size: FONT_SIZES.h2,
-    font: bold,
-    color: COLORS.stardust,
-  });
-  y -= 25;
+  // Ritual title (wrap if too long)
+  const titleLines = wrapText(ritual.title, bold, FONT_SIZES.h2, CONTENT_WIDTH);
+  for (const line of titleLines) {
+    page.drawText(line, {
+      x: MARGIN,
+      y,
+      size: FONT_SIZES.h2,
+      font: bold,
+      color: COLORS.stardust,
+    });
+    y -= FONT_SIZES.h2 * LINE_HEIGHT;
+  }
+  y -= SPACING.xs;
 
   if (ritual.timing) {
     page.drawText(ritual.timing, {

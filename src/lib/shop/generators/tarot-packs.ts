@@ -663,9 +663,38 @@ export function generateTarotPacks(): ShopProduct[] {
     tags: config.tags,
     keywords: config.keywords,
     badge: config.badge,
+    // Include spreads and journalPrompts for PDF generation
+    spreads: config.spreads.map((spread) => ({
+      name: spread.name,
+      description: spread.description,
+      cardCount: spread.cardCount,
+      positions: spread.positions.map((pos, idx) => ({
+        position: idx + 1,
+        name: pos,
+        meaning: `Consider what ${pos.toLowerCase()} reveals about your situation.`,
+      })),
+      bestFor: [
+        'Deep self-reflection',
+        'Understanding patterns',
+        'Gaining clarity',
+      ],
+      journalPrompts: [
+        'What message stands out most from this spread?',
+        'How does this reading connect to my current life situation?',
+        'What action am I being called to take?',
+      ],
+    })),
+    journalPrompts: config.journalPrompts,
   }));
 }
 
 export function getTarotPackBySlug(slug: string): ShopProduct | undefined {
   return generateTarotPacks().find((pack) => pack.slug === slug);
+}
+
+// Helper to get the raw config (for accessing spreads structure in API route)
+export function getTarotPackConfigBySlug(
+  slug: string,
+): TarotPackConfig | undefined {
+  return ALL_TAROT_PACK_CONFIGS.find((config) => config.slug === slug);
 }

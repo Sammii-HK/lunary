@@ -1,4 +1,4 @@
-import { spellDatabase } from '@/constants/grimoire/spells';
+import { spellDatabase } from '@/lib/spells';
 import { ShopProduct, SHOP_GRADIENTS, PRICE_TIERS } from '../types';
 
 interface SpellPackConfig {
@@ -8,13 +8,14 @@ interface SpellPackConfig {
   tagline: string;
   descriptionTemplate: string;
   spellCategories: string[];
-  moonPhases?: string[];
+  moonPhase?: string[];
   keywords: string[];
   perfectFor: string[];
   price: number;
   gradient: string;
   tags?: string[];
   badge?: 'new' | 'seasonal' | 'trending' | 'popular';
+  stripePriceId?: string;
 }
 
 // === CORE SPELL PACKS (8) ===
@@ -27,7 +28,7 @@ const CORE_SPELL_CONFIGS: SpellPackConfig[] = [
     descriptionTemplate:
       'The new moon invites you to dream. This collection gathers manifestation rituals, intention-setting spells, and lunar magic designed to be cast during the dark moon phase. Let the quiet darkness hold your wishes as they begin to take root.',
     spellCategories: ['manifestation'],
-    moonPhases: ['New Moon', 'Waxing Crescent'],
+    moonPhase: ['New Moon', 'Waxing Crescent'],
     keywords: ['manifestation', 'new moon', 'intention', 'beginning'],
     perfectFor: [
       'Those who practise monthly new moon rituals.',
@@ -47,7 +48,7 @@ const CORE_SPELL_CONFIGS: SpellPackConfig[] = [
     descriptionTemplate:
       'When the moon reaches her fullness, she illuminates what no longer serves you. This pack holds rituals for release, completion, and gratitude—spells designed to help you surrender the old and make space for what comes next.',
     spellCategories: ['banishing', 'cleansing'],
-    moonPhases: ['Full Moon', 'Waning Gibbous'],
+    moonPhase: ['Full Moon', 'Waning Gibbous'],
     keywords: ['release', 'full moon', 'letting go', 'completion'],
     perfectFor: [
       'Those who hold monthly full moon ceremonies.',
@@ -477,7 +478,7 @@ const MOON_PHASE_SPELL_CONFIGS: SpellPackConfig[] = [
     descriptionTemplate:
       "Ride the building energy of the waxing moon with spells for growth, attraction, and building toward your goals. This pack harnesses the moon's increasing power for manifestation.",
     spellCategories: ['manifestation'],
-    moonPhases: ['Waxing Crescent', 'First Quarter', 'Waxing Gibbous'],
+    moonPhase: ['Waxing Crescent', 'First Quarter', 'Waxing Gibbous'],
     keywords: ['waxing moon', 'growth', 'building', 'attraction'],
     perfectFor: [
       'Those who practise waxing moon phase rituals.',
@@ -496,7 +497,7 @@ const MOON_PHASE_SPELL_CONFIGS: SpellPackConfig[] = [
     descriptionTemplate:
       'The first quarter moon is a time of decision and action. This pack contains spells for overcoming obstacles, making choices, and pushing through challenges with determination.',
     spellCategories: ['manifestation', 'protection'],
-    moonPhases: ['First Quarter'],
+    moonPhase: ['First Quarter'],
     keywords: ['first quarter', 'action', 'decision', 'obstacles'],
     perfectFor: [
       'Those who practise first quarter moon rituals.',
@@ -515,7 +516,7 @@ const MOON_PHASE_SPELL_CONFIGS: SpellPackConfig[] = [
     descriptionTemplate:
       'Work with the diminishing energy of the waning moon for spells of release, banishing, and letting go. This pack helps you clear what no longer serves as the moon shrinks.',
     spellCategories: ['banishing', 'cleansing'],
-    moonPhases: ['Waning Gibbous', 'Last Quarter', 'Waning Crescent'],
+    moonPhase: ['Waning Gibbous', 'Last Quarter', 'Waning Crescent'],
     keywords: ['waning moon', 'release', 'banishing', 'letting go'],
     perfectFor: [
       'Those who practise waning moon phase rituals.',
@@ -534,7 +535,7 @@ const MOON_PHASE_SPELL_CONFIGS: SpellPackConfig[] = [
     descriptionTemplate:
       'The last quarter moon invites reflection and surrender. This pack contains spells for forgiveness, releasing resentment, and preparing the ground for new beginnings.',
     spellCategories: ['banishing', 'healing'],
-    moonPhases: ['Last Quarter'],
+    moonPhase: ['Last Quarter'],
     keywords: ['last quarter', 'surrender', 'forgiveness', 'reflection'],
     perfectFor: [
       'Those who practise last quarter moon rituals.',
@@ -808,6 +809,35 @@ const OUTER_RETROGRADE_CONFIGS: SpellPackConfig[] = [
   },
 ];
 
+const LUNAR_NEW_YEAR_SPELL_CONFIG: SpellPackConfig[] = [
+  {
+    id: 'lunar-new-year-abundance',
+    slug: 'lunar-new-year-abundance-pack',
+    title: 'Lunar New Year Abundance Pack',
+    tagline: 'Welcome prosperity with the new moon.',
+    descriptionTemplate:
+      'The Lunar New Year marks a powerful portal for manifestation and fresh starts. This pack blends intention-setting, prosperity magic, and new-year renewal rituals timed to the new year moon.',
+    spellCategories: ['manifestation', 'prosperity'], // or manifestation + protection if you prefer
+    moonPhase: ['New Moon', 'Waxing Crescent'],
+    keywords: [
+      'lunar new year',
+      'abundance',
+      'prosperity',
+      'new moon',
+      'renewal',
+    ],
+    perfectFor: [
+      'Those setting powerful yearly intentions.',
+      'Anyone drawn to abundance and prosperity magic.',
+      'Practitioners who honour lunar cycles in their work.',
+    ],
+    price: PRICE_TIERS.seasonal,
+    gradient: SHOP_GRADIENTS.roseFade,
+    tags: ['seasonal', 'abundance', 'prosperity', 'new moon'],
+    badge: 'seasonal',
+  },
+];
+
 // Combine all configs
 const ALL_SPELL_PACK_CONFIGS: SpellPackConfig[] = [
   ...CORE_SPELL_CONFIGS,
@@ -816,19 +846,20 @@ const ALL_SPELL_PACK_CONFIGS: SpellPackConfig[] = [
   ...MOON_PHASE_SPELL_CONFIGS,
   ...EMOTIONAL_SPELL_CONFIGS,
   ...OUTER_RETROGRADE_CONFIGS,
+  ...LUNAR_NEW_YEAR_SPELL_CONFIG,
 ];
 
 function getSpellsForPack(config: SpellPackConfig): string[] {
   const matchingSpells = spellDatabase.filter((spell) => {
     const categoryMatch = config.spellCategories.includes(spell.category);
     const moonMatch =
-      !config.moonPhases ||
-      config.moonPhases.some(
+      !config.moonPhase ||
+      config.moonPhase.some(
         (phase) =>
-          spell.timing.moonPhases?.includes(phase) ||
-          spell.timing.moonPhases?.includes('Any'),
+          spell.timing.moonPhase?.includes(phase) ||
+          spell.timing.moonPhase?.includes('Any'),
       );
-    return categoryMatch || moonMatch;
+    return categoryMatch && moonMatch;
   });
 
   if (matchingSpells.length > 0) {
@@ -854,8 +885,8 @@ function generateWhatInside(config: SpellPackConfig): string[] {
     'Incantations and visualisation guides',
   ];
 
-  if (config.moonPhases) {
-    baseContents.push(`Moon phase timing guide for ${config.moonPhases[0]}`);
+  if (config.moonPhase) {
+    baseContents.push(`Moon phase timing guide for ${config.moonPhase[0]}`);
   }
 
   return baseContents;

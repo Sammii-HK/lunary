@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { wheelOfTheYearSabbats } from '@/constants/sabbats';
-import { getSpellsBySabbat } from '@/constants/spells';
+import { getSpellsBySabbat } from '@/lib/spells/index';
 import dayjs from 'dayjs';
 
 export const WheelOfTheYearWidget = () => {

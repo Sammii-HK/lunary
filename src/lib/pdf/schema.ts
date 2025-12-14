@@ -32,8 +32,12 @@ export interface PdfSpell {
   moonPhases?: string[];
   description: string;
   materials: string[];
+  materialSubstitutions?: Record<string, string[]>;
   steps: string[];
   incantation?: string;
+  visualization?: string;
+  timing?: string;
+  bestTime?: string;
 }
 
 export interface PdfSpellPack {
@@ -64,6 +68,12 @@ export interface PdfCrystal {
   howToUse: string[];
   affirmation?: string;
   cleansing?: string;
+  charging?: string;
+  meditation?: string;
+  gridLayout?: string;
+  ritualApplications?: string[];
+  careInstructions?: string;
+  ethics?: string;
 }
 
 export interface PdfCrystalPack {
@@ -100,6 +110,7 @@ export interface PdfTarotCard {
   uprightMeaning: string;
   reversedMeaning?: string;
   shadowAspect?: string;
+  number?: number;
 }
 
 export interface PdfTarotPack {
@@ -217,6 +228,15 @@ export interface PdfRetrogradeSurvival {
   affirmation?: string;
 }
 
+export interface PdfRetrogradeRitual {
+  title: string;
+  description: string;
+  materials?: string[];
+  steps: string[];
+  timing?: string;
+  affirmation?: string;
+}
+
 export interface PdfRetrogradePack {
   type: 'retrograde';
   slug: string;
@@ -227,6 +247,12 @@ export interface PdfRetrogradePack {
   introText?: string;
   planet: string;
   survivalGuide: PdfRetrogradeSurvival[];
+  rituals?: PdfRetrogradeRitual[];
+  correspondences?: {
+    crystals?: string[];
+    herbs?: string[];
+    colors?: string[];
+  };
   practicalTips?: string[];
   journalPrompts?: string[];
   closingText?: string;
@@ -250,6 +276,10 @@ export type PdfPackUnion =
 export interface PdfPack {
   slug: string;
   title: string;
+  tagline?: string;
+  description?: string;
+  category?: string;
+  introduction?: string;
   subtitle?: string;
   moodText?: string;
   perfectFor?: string[];

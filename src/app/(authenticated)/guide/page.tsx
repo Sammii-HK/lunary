@@ -879,7 +879,7 @@ function BookOfShadowsContent() {
                               }
                               // Fallback: try to find the spell and get its ID
                               const { spellDatabase } =
-                                await import('@/constants/grimoire/spells');
+                                await import('@/lib/spells/index');
                               const spell = spellDatabase.find(
                                 (s) =>
                                   s.title.toLowerCase() ===

@@ -177,7 +177,10 @@ export function GlossaryClient({ terms }: GlossaryClientProps) {
         <div className='relative max-w-md mx-auto'>
           <Search className='absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-500' />
           <Input
-            type='text'
+            type='search'
+            name='search'
+            aria-label='Search terms or definitions...'
+            aria-describedby='search-results'
             placeholder='Search terms or definitions...'
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}

@@ -219,6 +219,7 @@ export function getProductStats(): {
     astrology: 0,
     birthchart: 0,
     bundle: 0,
+    retrograde: 0,
   };
 
   products.forEach((p) => {

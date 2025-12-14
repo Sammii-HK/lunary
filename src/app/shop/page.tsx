@@ -1,78 +1,32 @@
+// app/shop/page.tsx
 import { Metadata } from 'next';
 import { ShopClient } from './ShopClient';
 import {
-  getAllProducts,
   getFeaturedProducts,
   getCurrentSeasonalPack,
 } from '@/lib/shop/generators';
+import { getShopListingsFromStripe } from '@/lib/shop/catalogue';
 
-export const PRODUCTS_PER_PAGE = 12;
+const PRODUCTS_PER_PAGE = 12;
+
+// Optional but recommended so this can ISR instead of re-running constantly
+export const revalidate = 2592000; // 30 days
 
 export const metadata: Metadata = {
   title: 'Digital Ritual Packs & Spell Collections | Lunary Shop',
   description:
-    'Curated packs of rituals, tarot spreads, crystal guides, and cosmic wisdom. Instant digital access to deepen your spiritual practice. 100+ packs for witchcraft, astrology, and moon magic.',
-  keywords: [
-    'ritual packs',
-    'digital witchcraft',
-    'tarot spreads',
-    'crystal guides',
-    'spell packs',
-    'astrology packs',
-    'moon magic',
-    'witchcraft downloads',
-    'spiritual digital products',
-  ],
-  authors: [{ name: 'Lunary' }],
-  creator: 'Lunary',
-  publisher: 'Lunary',
-  openGraph: {
-    title: 'Digital Ritual Packs & Spell Collections | Lunary Shop',
-    description:
-      'Curated packs of rituals, tarot spreads, crystal guides, and cosmic wisdom. Instant digital access.',
-    url: 'https://lunary.app/shop',
-    siteName: 'Lunary',
-    images: [
-      {
-        url: '/api/og/shop',
-        width: 1200,
-        height: 630,
-        alt: 'Lunary Shop - Digital Ritual Packs',
-      },
-    ],
-    locale: 'en_US',
-    type: 'website',
-  },
-  twitter: {
-    card: 'summary_large_image',
-    title: 'Digital Ritual Packs & Spell Collections | Lunary Shop',
-    description:
-      '100+ curated packs of rituals, tarot spreads, crystal guides, and cosmic wisdom.',
-    images: ['/api/og/shop'],
-  },
-  alternates: {
-    canonical: 'https://lunary.app/shop',
-  },
-  robots: {
-    index: true,
-    follow: true,
-    googleBot: {
-      index: true,
-      follow: true,
-      'max-video-preview': -1,
-      'max-image-preview': 'large',
-      'max-snippet': -1,
-    },
-  },
+    'Curated packs of rituals, tarot spreads, crystal guides, and cosmic wisdom. Instant digital access to deepen your spiritual practice.',
 };
 
-export default function ShopPage() {
-  const allProducts = getAllProducts();
-  const totalPages = Math.ceil(allProducts.length / PRODUCTS_PER_PAGE);
-  const products = allProducts.slice(0, PRODUCTS_PER_PAGE);
-  const featuredProduct = getCurrentSeasonalPack() || getFeaturedProducts()[0];
+export default async function ShopPage() {
+  const allProducts = await getShopListingsFromStripe();
 
-  // Calculate counts for all products
+  const totalPages = Math.ceil(allProducts.length / PRODUCTS_PER_PAGE);
+
+  const featuredLocal = getCurrentSeasonalPack() || getFeaturedProducts()[0];
+  const featuredProduct =
+    allProducts.find((p) => p.slug === featuredLocal?.slug) || allProducts[0];
+
   const allProductCounts = {
     all: allProducts.length,
     spell: allProducts.filter((p) => p.category === 'spell').length,
@@ -82,11 +36,12 @@ export default function ShopPage() {
     astrology: allProducts.filter((p) => p.category === 'astrology').length,
     birthchart: allProducts.filter((p) => p.category === 'birthchart').length,
     bundle: allProducts.filter((p) => p.category === 'bundle').length,
+    retrograde: allProducts.filter((p) => p.category === 'retrograde').length,
   } as const;
 
   return (
     <ShopClient
-      products={products}
+      products={allProducts}
       featuredProduct={featuredProduct}
       currentPage={1}
       totalPages={totalPages}

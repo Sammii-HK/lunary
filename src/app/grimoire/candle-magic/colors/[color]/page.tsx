@@ -387,7 +387,7 @@ When working with ${colorData.name.toLowerCase()} candles, focus your intention 
           },
           {
             name: 'Spells & Rituals',
-            href: '/grimoire/practices',
+            href: '/grimoire/spells',
             type: 'Practice',
           },
         ]}
@@ -402,7 +402,7 @@ When working with ${colorData.name.toLowerCase()} candles, focus your intention 
         internalLinks={[
           { text: 'Candle Magic Guide', href: '/grimoire/candle-magic' },
           { text: 'Color Correspondences', href: '/grimoire/correspondences' },
-          { text: 'Spells & Rituals', href: '/grimoire/practices' },
+          { text: 'Spells & Rituals', href: '/grimoire/spells' },
           { text: 'Grimoire Home', href: '/grimoire' },
         ]}
         ctaText='Explore more candle magic'

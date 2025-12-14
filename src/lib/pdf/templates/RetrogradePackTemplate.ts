@@ -15,7 +15,11 @@ import {
   CONTENT_WIDTH,
   SPACING,
 } from '../theme';
-import { PdfRetrogradePack, PdfRetrogradeSurvival } from '../schema';
+import {
+  PdfRetrogradePack,
+  PdfRetrogradeSurvival,
+  PdfRetrogradeRitual,
+} from '../schema';
 
 function drawBackground(page: PDFPage) {
   page.drawRectangle({
@@ -343,6 +347,302 @@ function buildSurvivalPage(
   return pageNum + 1;
 }
 
+function buildRitualPage(
+  pdfDoc: PDFDocument,
+  ritual: PdfRetrogradeRitual,
+  packTitle: string,
+  fonts: { regular: PDFFont; bold: PDFFont },
+  pageNum: number,
+  totalPages: number,
+): number {
+  const { regular, bold } = fonts;
+  const page = pdfDoc.addPage([PAGE_WIDTH, PAGE_HEIGHT]);
+  drawBackground(page);
+
+  let y = PAGE_HEIGHT - MARGIN - 30;
+
+  // Ritual title (wrap if too long)
+  const titleLines = wrapText(ritual.title, bold, FONT_SIZES.h2, CONTENT_WIDTH);
+  for (const line of titleLines) {
+    page.drawText(line, {
+      x: MARGIN,
+      y,
+      size: FONT_SIZES.h2,
+      font: bold,
+      color: COLORS.stardust,
+    });
+    y -= FONT_SIZES.h2 * LINE_HEIGHT;
+  }
+  y -= SPACING.xs;
+
+  if (ritual.timing) {
+    page.drawText(ritual.timing, {
+      x: MARGIN,
+      y,
+      size: FONT_SIZES.small,
+      font: regular,
+      color: COLORS.cosmicRose,
+    });
+    y -= SPACING.sm;
+  }
+
+  y = drawDivider(page, y);
+
+  // Description
+  const descLines = wrapText(
+    ritual.description,
+    regular,
+    FONT_SIZES.body,
+    CONTENT_WIDTH,
+  );
+  for (const line of descLines) {
+    page.drawText(line, {
+      x: MARGIN,
+      y,
+      size: FONT_SIZES.body,
+      font: regular,
+      color: COLORS.textMuted,
+    });
+    y -= FONT_SIZES.body * LINE_HEIGHT;
+  }
+  y -= SPACING.md;
+
+  // Materials
+  if (ritual.materials && ritual.materials.length > 0) {
+    page.drawText('Materials', {
+      x: MARGIN,
+      y,
+      size: FONT_SIZES.h4,
+      font: bold,
+      color: COLORS.stardust,
+    });
+    y -= 20;
+
+    for (const material of ritual.materials) {
+      page.drawText('✦', {
+        x: MARGIN,
+        y,
+        size: FONT_SIZES.body,
+        font: regular,
+        color: COLORS.cosmicRose,
+      });
+      page.drawText(material, {
+        x: MARGIN + 15,
+        y,
+        size: FONT_SIZES.body,
+        font: regular,
+        color: COLORS.textMuted,
+      });
+      y -= FONT_SIZES.body * LINE_HEIGHT;
+    }
+    y -= SPACING.md;
+  }
+
+  // Steps
+  page.drawText('Steps', {
+    x: MARGIN,
+    y,
+    size: FONT_SIZES.h4,
+    font: bold,
+    color: COLORS.stardust,
+  });
+  y -= 20;
+
+  for (let i = 0; i < ritual.steps.length; i++) {
+    page.drawText(`${i + 1}.`, {
+      x: MARGIN,
+      y,
+      size: FONT_SIZES.body,
+      font: bold,
+      color: COLORS.cosmicRose,
+    });
+    const stepLines = wrapText(
+      ritual.steps[i],
+      regular,
+      FONT_SIZES.body,
+      CONTENT_WIDTH - 25,
+    );
+    for (const line of stepLines) {
+      page.drawText(line, {
+        x: MARGIN + 25,
+        y,
+        size: FONT_SIZES.body,
+        font: regular,
+        color: COLORS.textMuted,
+      });
+      y -= FONT_SIZES.body * LINE_HEIGHT;
+    }
+    y -= SPACING.xs;
+  }
+
+  // Affirmation
+  if (ritual.affirmation) {
+    y -= SPACING.sm;
+    const padding = 18;
+    const affLines = wrapText(
+      ritual.affirmation,
+      regular,
+      FONT_SIZES.body,
+      CONTENT_WIDTH - padding * 2 - 15,
+    );
+    const boxHeight =
+      affLines.length * (FONT_SIZES.body * LINE_HEIGHT) + padding * 2;
+
+    page.drawRectangle({
+      x: MARGIN,
+      y: y - boxHeight,
+      width: CONTENT_WIDTH,
+      height: boxHeight,
+      color: COLORS.backgroundAlt,
+      borderColor: COLORS.border,
+      borderWidth: 0.5,
+    });
+    page.drawRectangle({
+      x: MARGIN,
+      y: y - boxHeight,
+      width: 4,
+      height: boxHeight,
+      color: COLORS.cosmicRose,
+    });
+
+    let affTextY = y - padding - FONT_SIZES.body;
+    for (const line of affLines) {
+      page.drawText(line, {
+        x: MARGIN + padding + 8,
+        y: affTextY,
+        size: FONT_SIZES.body,
+        font: regular,
+        color: COLORS.textMuted,
+      });
+      affTextY -= FONT_SIZES.body * LINE_HEIGHT;
+    }
+  }
+
+  drawFooter(page, packTitle, pageNum, totalPages, regular);
+  return pageNum + 1;
+}
+
+function buildCorrespondencesPage(
+  pdfDoc: PDFDocument,
+  correspondences: { crystals?: string[]; herbs?: string[]; colors?: string[] },
+  planet: string,
+  packTitle: string,
+  fonts: { regular: PDFFont; bold: PDFFont },
+  pageNum: number,
+  totalPages: number,
+): number {
+  const { regular, bold } = fonts;
+  const page = pdfDoc.addPage([PAGE_WIDTH, PAGE_HEIGHT]);
+  drawBackground(page);
+
+  let y = PAGE_HEIGHT - MARGIN - 30;
+
+  page.drawText(`${planet} Correspondences`, {
+    x: MARGIN,
+    y,
+    size: FONT_SIZES.h2,
+    font: bold,
+    color: COLORS.stardust,
+  });
+  y -= 25;
+  y = drawDivider(page, y);
+
+  // Crystals
+  if (correspondences.crystals && correspondences.crystals.length > 0) {
+    page.drawText('Crystals', {
+      x: MARGIN,
+      y,
+      size: FONT_SIZES.h4,
+      font: bold,
+      color: COLORS.stardust,
+    });
+    y -= 20;
+
+    for (const crystal of correspondences.crystals) {
+      page.drawText('✦', {
+        x: MARGIN,
+        y,
+        size: FONT_SIZES.body,
+        font: regular,
+        color: COLORS.cosmicRose,
+      });
+      page.drawText(crystal, {
+        x: MARGIN + 15,
+        y,
+        size: FONT_SIZES.body,
+        font: regular,
+        color: COLORS.textMuted,
+      });
+      y -= FONT_SIZES.body * LINE_HEIGHT;
+    }
+    y -= SPACING.md;
+  }
+
+  // Herbs
+  if (correspondences.herbs && correspondences.herbs.length > 0) {
+    page.drawText('Herbs', {
+      x: MARGIN,
+      y,
+      size: FONT_SIZES.h4,
+      font: bold,
+      color: COLORS.stardust,
+    });
+    y -= 20;
+
+    for (const herb of correspondences.herbs) {
+      page.drawText('✦', {
+        x: MARGIN,
+        y,
+        size: FONT_SIZES.body,
+        font: regular,
+        color: COLORS.cosmicRose,
+      });
+      page.drawText(herb, {
+        x: MARGIN + 15,
+        y,
+        size: FONT_SIZES.body,
+        font: regular,
+        color: COLORS.textMuted,
+      });
+      y -= FONT_SIZES.body * LINE_HEIGHT;
+    }
+    y -= SPACING.md;
+  }
+
+  // Colors
+  if (correspondences.colors && correspondences.colors.length > 0) {
+    page.drawText('Colors', {
+      x: MARGIN,
+      y,
+      size: FONT_SIZES.h4,
+      font: bold,
+      color: COLORS.stardust,
+    });
+    y -= 20;
+
+    for (const color of correspondences.colors) {
+      page.drawText('✦', {
+        x: MARGIN,
+        y,
+        size: FONT_SIZES.body,
+        font: regular,
+        color: COLORS.cosmicRose,
+      });
+      page.drawText(color, {
+        x: MARGIN + 15,
+        y,
+        size: FONT_SIZES.body,
+        font: regular,
+        color: COLORS.textMuted,
+      });
+      y -= FONT_SIZES.body * LINE_HEIGHT;
+    }
+  }
+
+  drawFooter(page, packTitle, pageNum, totalPages, regular);
+  return pageNum + 1;
+}
+
 export async function generateRetrogradePackPdf(
   pack: PdfRetrogradePack,
   loadFonts: (
@@ -356,16 +656,48 @@ export async function generateRetrogradePackPdf(
     loadLogo(pdfDoc),
   ]);
 
-  const totalPages = 1 + pack.survivalGuide.length + 1;
+  // Calculate total pages: cover + survival phases + rituals + correspondences + closing
+  const ritualsPages = pack.rituals ? pack.rituals.length : 0;
+  const correspondencesPages = pack.correspondences ? 1 : 0;
+  const totalPages =
+    1 + pack.survivalGuide.length + ritualsPages + correspondencesPages + 1;
   let pageNum = 1;
 
   buildRetrogradeCoverPage(pdfDoc, pack, fonts, logo);
   pageNum++;
 
+  // Survival guide phases
   for (const guide of pack.survivalGuide) {
     pageNum = buildSurvivalPage(
       pdfDoc,
       guide,
+      pack.title,
+      fonts,
+      pageNum,
+      totalPages,
+    );
+  }
+
+  // Rituals
+  if (pack.rituals && pack.rituals.length > 0) {
+    for (const ritual of pack.rituals) {
+      pageNum = buildRitualPage(
+        pdfDoc,
+        ritual,
+        pack.title,
+        fonts,
+        pageNum,
+        totalPages,
+      );
+    }
+  }
+
+  // Correspondences
+  if (pack.correspondences) {
+    pageNum = buildCorrespondencesPage(
+      pdfDoc,
+      pack.correspondences,
+      pack.planet,
       pack.title,
       fonts,
       pageNum,

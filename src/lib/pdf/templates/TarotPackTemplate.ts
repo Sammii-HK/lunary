@@ -15,7 +15,7 @@ import {
   CONTENT_WIDTH,
   SPACING,
 } from '../theme';
-import { PdfTarotPack, PdfTarotSpread } from '../schema';
+import { PdfTarotPack, PdfTarotSpread, PdfTarotCard } from '../schema';
 
 function drawBackground(page: PDFPage) {
   page.drawRectangle({
@@ -216,15 +216,24 @@ function buildSpreadPage(
 
   let y = PAGE_HEIGHT - MARGIN - 30;
 
-  // Spread name
-  page.drawText(spread.name, {
-    x: MARGIN,
-    y,
-    size: FONT_SIZES.h2,
-    font: bold,
-    color: COLORS.stardust,
-  });
-  y -= 25;
+  // Spread name (wrap if too long)
+  const spreadNameLines = wrapText(
+    spread.name,
+    bold,
+    FONT_SIZES.h2,
+    CONTENT_WIDTH,
+  );
+  for (const line of spreadNameLines) {
+    page.drawText(line, {
+      x: MARGIN,
+      y,
+      size: FONT_SIZES.h2,
+      font: bold,
+      color: COLORS.stardust,
+    });
+    y -= FONT_SIZES.h2 * LINE_HEIGHT;
+  }
+  y -= SPACING.xs;
 
   // Card count
   page.drawText(`${spread.cardCount} cards`, {
@@ -338,6 +347,217 @@ function buildSpreadPage(
   return pageNum + 1;
 }
 
+function buildCardPage(
+  pdfDoc: PDFDocument,
+  card: PdfTarotCard,
+  packTitle: string,
+  fonts: { regular: PDFFont; bold: PDFFont },
+  pageNum: number,
+  totalPages: number,
+): number {
+  const { regular, bold } = fonts;
+  const page = pdfDoc.addPage([PAGE_WIDTH, PAGE_HEIGHT]);
+  drawBackground(page);
+
+  let y = PAGE_HEIGHT - MARGIN - 30;
+
+  // Card name
+  page.drawText(card.name, {
+    x: MARGIN,
+    y,
+    size: FONT_SIZES.h2,
+    font: bold,
+    color: COLORS.stardust,
+  });
+  y -= 25;
+
+  // Card number and suit
+  const cardInfo = [
+    card.number !== undefined ? `Card ${card.number}` : null,
+    card.suit || null,
+  ]
+    .filter(Boolean)
+    .join(' · ');
+  if (cardInfo) {
+    page.drawText(cardInfo, {
+      x: MARGIN,
+      y,
+      size: FONT_SIZES.small,
+      font: regular,
+      color: COLORS.cosmicRose,
+    });
+    y -= SPACING.sm;
+  }
+
+  y = drawDivider(page, y);
+
+  // Keywords
+  if (card.keywords && card.keywords.length > 0) {
+    page.drawText('Keywords', {
+      x: MARGIN,
+      y,
+      size: FONT_SIZES.h4,
+      font: bold,
+      color: COLORS.stardust,
+    });
+    y -= 20;
+
+    const keywordsText = card.keywords.join(' · ');
+    const keywordsLines = wrapText(
+      keywordsText,
+      regular,
+      FONT_SIZES.body,
+      CONTENT_WIDTH,
+    );
+    for (const line of keywordsLines) {
+      page.drawText(line, {
+        x: MARGIN,
+        y,
+        size: FONT_SIZES.body,
+        font: regular,
+        color: COLORS.textMuted,
+      });
+      y -= FONT_SIZES.body * LINE_HEIGHT;
+    }
+    y -= SPACING.md;
+  }
+
+  // Upright Meaning
+  if (card.uprightMeaning) {
+    page.drawText('Upright Meaning', {
+      x: MARGIN,
+      y,
+      size: FONT_SIZES.h4,
+      font: bold,
+      color: COLORS.stardust,
+    });
+    y -= 20;
+
+    const uprightLines = wrapText(
+      card.uprightMeaning,
+      regular,
+      FONT_SIZES.body,
+      CONTENT_WIDTH,
+    );
+    for (const line of uprightLines) {
+      page.drawText(line, {
+        x: MARGIN,
+        y,
+        size: FONT_SIZES.body,
+        font: regular,
+        color: COLORS.textMuted,
+      });
+      y -= FONT_SIZES.body * LINE_HEIGHT;
+    }
+    y -= SPACING.md;
+  }
+
+  // Reversed Meaning
+  if (card.reversedMeaning) {
+    page.drawText('Reversed Meaning', {
+      x: MARGIN,
+      y,
+      size: FONT_SIZES.h4,
+      font: bold,
+      color: COLORS.stardust,
+    });
+    y -= 20;
+
+    const reversedLines = wrapText(
+      card.reversedMeaning,
+      regular,
+      FONT_SIZES.body,
+      CONTENT_WIDTH,
+    );
+    for (const line of reversedLines) {
+      page.drawText(line, {
+        x: MARGIN,
+        y,
+        size: FONT_SIZES.body,
+        font: regular,
+        color: COLORS.textMuted,
+      });
+      y -= FONT_SIZES.body * LINE_HEIGHT;
+    }
+  }
+
+  drawFooter(page, packTitle, pageNum, totalPages, regular);
+  return pageNum + 1;
+}
+
+function buildCardsIndexPage(
+  pdfDoc: PDFDocument,
+  cards: PdfTarotCard[],
+  packTitle: string,
+  fonts: { regular: PDFFont; bold: PDFFont },
+  pageNum: number,
+  totalPages: number,
+): number {
+  const { regular, bold } = fonts;
+  const page = pdfDoc.addPage([PAGE_WIDTH, PAGE_HEIGHT]);
+  drawBackground(page);
+
+  let y = PAGE_HEIGHT - MARGIN - 30;
+
+  page.drawText('Tarot Cards', {
+    x: MARGIN,
+    y,
+    size: FONT_SIZES.h2,
+    font: bold,
+    color: COLORS.stardust,
+  });
+  y -= 25;
+
+  page.drawText(`${cards.length} cards`, {
+    x: MARGIN,
+    y,
+    size: FONT_SIZES.small,
+    font: regular,
+    color: COLORS.cosmicRose,
+  });
+  y -= SPACING.sm;
+
+  y = drawDivider(page, y);
+
+  // List all cards
+  for (const card of cards) {
+    const cardName =
+      card.number !== undefined ? `${card.number}. ${card.name}` : card.name;
+
+    page.drawText('✦', {
+      x: MARGIN,
+      y,
+      size: FONT_SIZES.body,
+      font: regular,
+      color: COLORS.cosmicRose,
+    });
+    page.drawText(cardName, {
+      x: MARGIN + 15,
+      y,
+      size: FONT_SIZES.body,
+      font: bold,
+      color: COLORS.stardust,
+    });
+    y -= FONT_SIZES.body * LINE_HEIGHT;
+
+    if (card.keywords && card.keywords.length > 0) {
+      const keywordsText = card.keywords.slice(0, 3).join(' · ');
+      page.drawText(keywordsText, {
+        x: MARGIN + 15,
+        y,
+        size: FONT_SIZES.small,
+        font: regular,
+        color: COLORS.textMuted,
+      });
+      y -= FONT_SIZES.small * LINE_HEIGHT;
+    }
+    y -= SPACING.xs;
+  }
+
+  drawFooter(page, packTitle, pageNum, totalPages, regular);
+  return pageNum + 1;
+}
+
 export async function generateTarotPackPdf(
   pack: PdfTarotPack,
   loadFonts: (
@@ -351,12 +571,16 @@ export async function generateTarotPackPdf(
     loadLogo(pdfDoc),
   ]);
 
-  const totalPages = 1 + pack.spreads.length + 1;
+  // Calculate total pages: cover + spreads + cards index + individual card pages + closing
+  const hasCards = pack.cards && pack.cards.length > 0;
+  const cardsPages = hasCards ? 1 + (pack.cards?.length ?? 0) : 0; // Index + one page per card
+  const totalPages = 1 + pack.spreads.length + cardsPages + 1;
   let pageNum = 1;
 
   buildTarotCoverPage(pdfDoc, pack, fonts, logo);
   pageNum++;
 
+  // Spread pages
   for (const spread of pack.spreads) {
     pageNum = buildSpreadPage(
       pdfDoc,
@@ -366,6 +590,31 @@ export async function generateTarotPackPdf(
       pageNum,
       totalPages,
     );
+  }
+
+  // Cards section
+  if (hasCards && pack.cards) {
+    // Cards index page
+    pageNum = buildCardsIndexPage(
+      pdfDoc,
+      pack.cards,
+      pack.title,
+      fonts,
+      pageNum,
+      totalPages,
+    );
+
+    // Individual card pages
+    for (const card of pack.cards) {
+      pageNum = buildCardPage(
+        pdfDoc,
+        card,
+        pack.title,
+        fonts,
+        pageNum,
+        totalPages,
+      );
+    }
   }
 
   // Closing page

@@ -1,4 +1,4 @@
-import { spells, spellCategories } from '@/constants/spells';
+import { spellDatabase as spells, spellCategories } from '@/lib/spells/index';
 import spellsJson from '@/data/spells.json';
 
 const baseUrl = 'https://lunary.app';
@@ -41,7 +41,6 @@ export async function GET() {
 
   const ritualPages = [
     'moon-rituals',
-    'practices',
     'correspondences',
     'spells',
     'candle-magic',

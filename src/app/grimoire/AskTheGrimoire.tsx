@@ -6,12 +6,13 @@ import { Search, Sparkles } from 'lucide-react';
 import { grimoire, grimoireItems } from '@/constants/grimoire';
 import { stringToKebabCase } from '../../../utils/string';
 import { sectionToSlug } from '@/utils/grimoire';
+import { Spell } from '@/lib/spells/index';
 
 type SearchDataType = {
   runesList: any;
   tarotSuits: any;
   tarotSpreads: any;
-  spells: any;
+  spellDatabase: Spell[];
   correspondencesData: any;
   chakras: any;
   annualFullMoons: any;
@@ -61,7 +62,7 @@ export function AskTheGrimoire({
         const [
           { runesList },
           { tarotSuits, tarotSpreads },
-          { spells },
+          { spellDatabase },
           { correspondencesData },
           { chakras },
           { annualFullMoons },
@@ -76,7 +77,8 @@ export function AskTheGrimoire({
         ] = await Promise.all([
           import('@/constants/runes'),
           import('@/constants/tarot'),
-          import('@/constants/spells'),
+          // import('@/constants/spells'),
+          import('@/lib/spells/index'),
           import('@/constants/grimoire/correspondences'),
           import('@/constants/chakras'),
           import('@/constants/moon/annualFullMoons'),
@@ -93,7 +95,7 @@ export function AskTheGrimoire({
           runesList,
           tarotSuits,
           tarotSpreads,
-          spells,
+          spellDatabase,
           correspondencesData,
           chakras,
           annualFullMoons,
@@ -299,7 +301,7 @@ export function AskTheGrimoire({
       }
     });
 
-    (searchData.spells || []).forEach((spell: any) => {
+    (searchData.spellDatabase || []).forEach((spell: any) => {
       const score = matchesAny(
         spell.title,
         spell.category,

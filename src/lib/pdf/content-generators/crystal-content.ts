@@ -53,6 +53,55 @@ function polishHowToUse(text: string): string {
   return polished.charAt(0).toUpperCase() + polished.slice(1);
 }
 
+function generateGridLayout(crystal: Crystal, theme: string): string {
+  const layouts: Record<string, string> = {
+    anxiety:
+      'Place this crystal at the centre of a circle with other calming stones (amethyst, blue lace agate) around it. This creates a calming grid for anxiety relief.',
+    protection:
+      'Place this crystal at each corner of your space or bed to create a protective grid. Add black tourmaline or obsidian for extra protection.',
+    love: 'Create a heart-shaped grid with this crystal at the centre, surrounded by other heart chakra stones (rose quartz, rhodochrosite).',
+    abundance:
+      'Place this crystal in the centre of a prosperity grid with citrine, pyrite, and green aventurine in a square formation.',
+    grounding:
+      'Create a grounding grid by placing this crystal at your feet during meditation, with other earth stones (hematite, black tourmaline) in a triangle around you.',
+  };
+
+  return (
+    layouts[theme.toLowerCase()] ||
+    `Place ${crystal.name} at the centre of your grid, surrounded by complementary crystals. Arrange them in a pattern that feels right—circle for unity, triangle for power, square for stability.`
+  );
+}
+
+function generateRitualApplications(crystal: Crystal): string[] {
+  const applications: string[] = [];
+
+  if (crystal.workingWith.spellwork) {
+    applications.push(`Spellwork: ${crystal.workingWith.spellwork}`);
+  }
+
+  if (crystal.correspondences.herbs.length > 0) {
+    applications.push(
+      `Use with ${crystal.correspondences.herbs.slice(0, 2).join(' and ')} for enhanced effects.`,
+    );
+  }
+
+  if (crystal.correspondences.incense.length > 0) {
+    applications.push(
+      `Burn ${crystal.correspondences.incense[0]} incense while working with this crystal.`,
+    );
+  }
+
+  if (crystal.moonPhases.length > 0) {
+    applications.push(
+      `Most powerful during ${crystal.moonPhases.slice(0, 2).join(' and ')} moon phases.`,
+    );
+  }
+
+  return applications.length > 0
+    ? applications
+    : ['Use in meditation, spellwork, or carry with you for daily support.'];
+}
+
 function crystalToPdfCrystal(crystal: Crystal, theme: string): PdfCrystal {
   return {
     id: crystal.id,
@@ -70,7 +119,14 @@ function crystalToPdfCrystal(crystal: Crystal, theme: string): PdfCrystal {
       .map(polishHowToUse)
       .slice(0, 4),
     affirmation: generateCrystalAffirmation(crystal, theme),
-    cleansing: crystal.careInstructions.cleansing[0],
+    cleansing: crystal.careInstructions.cleansing.join(' or '),
+    charging: crystal.careInstructions.charging.join(' or '),
+    meditation: crystal.workingWith.meditation || undefined,
+    gridLayout: generateGridLayout(crystal, theme),
+    ritualApplications: generateRitualApplications(crystal),
+    careInstructions: `Cleansing: ${crystal.careInstructions.cleansing.join(', ')}. Charging: ${crystal.careInstructions.charging.join(', ')}. ${crystal.careInstructions.programming ? `Programming: ${crystal.careInstructions.programming}` : ''}`,
+    ethics:
+      'Always source crystals ethically. Respect the earth and the communities where crystals are mined. Cleanse crystals before and after use, especially if sharing them.',
   };
 }
 

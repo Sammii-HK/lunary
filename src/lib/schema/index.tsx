@@ -221,6 +221,7 @@ interface ProductSchemaProps {
   interval?: 'month' | 'year';
   features?: string[];
   sku?: string;
+  stripePriceId?: string;
 }
 
 export function createProductSchema({
@@ -228,6 +229,7 @@ export function createProductSchema({
   description,
   price,
   priceCurrency = 'USD',
+  stripePriceId,
   interval,
   features = [],
   sku,
@@ -241,6 +243,7 @@ export function createProductSchema({
       '@type': 'Brand',
       name: 'Lunary',
     },
+    stripePriceId,
     offers: {
       '@type': 'Offer',
       price: price.toString(),

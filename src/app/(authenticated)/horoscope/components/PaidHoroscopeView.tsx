@@ -700,204 +700,209 @@ export function PaidHoroscopeView({
         </p>
       </div>
 
-      <div className='space-y-6'>
-        {/* Main Daily Reading - Headline + Overview */}
-        <HoroscopeSection title="Today's Horoscope" color='purple'>
-          {horoscope.headline ? (
-            <>
-              {/* Headline */}
-              <h2 className='text-lg font-medium text-zinc-100 mb-3'>
-                {horoscope.headline}
-              </h2>
+      {horoscope && (
+        <div className='space-y-6'>
+          {/* Main Daily Reading - Headline + Overview */}
+          <HoroscopeSection title="Today's Horoscope" color='purple'>
+            {horoscope.headline ? (
+              <>
+                {/* Headline */}
+                <h2 className='text-lg font-medium text-zinc-100 mb-3'>
+                  {horoscope.headline}
+                </h2>
 
-              {/* Overview - the main reading */}
-              <p className='text-sm text-zinc-300 leading-relaxed mb-4'>
-                {horoscope.overview || fullHoroscope}
-              </p>
+                {/* Overview - the main reading */}
+                <p className='text-sm text-zinc-300 leading-relaxed mb-4'>
+                  {horoscope.overview || fullHoroscope}
+                </p>
 
-              {/* Tiny Action anchor */}
-              {horoscope.tinyAction && (
-                <div className='p-3 rounded-lg bg-lunary-primary-950/50 border border-lunary-primary-900/50 mb-4'>
-                  <p className='text-sm text-lunary-primary-300 italic'>
-                    {horoscope.tinyAction}
-                  </p>
+                {/* Tiny Action anchor */}
+                {horoscope.tinyAction && (
+                  <div className='p-3 rounded-lg bg-lunary-primary-950/50 border border-lunary-primary-900/50 mb-4'>
+                    <p className='text-sm text-lunary-primary-300 italic'>
+                      {horoscope.tinyAction}
+                    </p>
+                  </div>
+                )}
+
+                {/* Collapsible "More for today" section */}
+                {horoscope.focusAreas && horoscope.focusAreas.length > 0 && (
+                  <MoreForToday focusAreas={horoscope.focusAreas} />
+                )}
+
+                <div className='pt-3 border-t border-zinc-800/50 space-y-3'>
+                  <div className='flex flex-wrap gap-3 text-xs'>
+                    <Link
+                      href='/horoscope/weekly'
+                      className='text-lunary-primary-400 hover:text-lunary-primary-300 transition-colors'
+                    >
+                      Week ahead →
+                    </Link>
+                  </div>
+                  <ReflectionBox />
                 </div>
-              )}
-
-              {/* Collapsible "More for today" section */}
-              {horoscope.focusAreas && horoscope.focusAreas.length > 0 && (
-                <MoreForToday focusAreas={horoscope.focusAreas} />
-              )}
-
-              <div className='pt-3 border-t border-zinc-800/50 space-y-3'>
-                <div className='flex flex-wrap gap-3 text-xs'>
-                  <Link
-                    href='/horoscope/weekly'
-                    className='text-lunary-primary-400 hover:text-lunary-primary-300 transition-colors'
-                  >
-                    Week ahead →
-                  </Link>
+              </>
+            ) : fullHoroscope ? (
+              <>
+                <p className='text-sm text-zinc-300 leading-relaxed mb-4'>
+                  {fullHoroscope}
+                </p>
+                <div className='pt-3 border-t border-zinc-800/50 space-y-3'>
+                  <div className='flex flex-wrap gap-3 text-xs'>
+                    <Link
+                      href='/horoscope/weekly'
+                      className='text-lunary-primary-400 hover:text-lunary-primary-300 transition-colors'
+                    >
+                      Week ahead →
+                    </Link>
+                  </div>
+                  <ReflectionBox />
                 </div>
-                <ReflectionBox />
+              </>
+            ) : (
+              <div className='space-y-2'>
+                <div className='h-4 bg-zinc-800 rounded animate-pulse' />
+                <div className='h-4 bg-zinc-800 rounded animate-pulse w-5/6' />
+                <div className='h-4 bg-zinc-800 rounded animate-pulse w-4/6' />
               </div>
-            </>
-          ) : fullHoroscope ? (
-            <>
-              <p className='text-sm text-zinc-300 leading-relaxed mb-4'>
-                {fullHoroscope}
+            )}
+          </HoroscopeSection>
+
+          <GuideNudge location='horoscope' />
+
+          {birthChart && currentTransits.length > 0 && (
+            <HoroscopeSection title='Transit Wisdom' color='indigo'>
+              <p className='text-sm text-zinc-400 mb-4'>
+                Today&apos;s most significant transits to your birth chart
               </p>
-              <div className='pt-3 border-t border-zinc-800/50 space-y-3'>
-                <div className='flex flex-wrap gap-3 text-xs'>
-                  <Link
-                    href='/horoscope/weekly'
-                    className='text-lunary-primary-400 hover:text-lunary-primary-300 transition-colors'
-                  >
-                    Week ahead →
-                  </Link>
-                </div>
-                <ReflectionBox />
-              </div>
-            </>
-          ) : (
-            <div className='space-y-2'>
-              <div className='h-4 bg-zinc-800 rounded animate-pulse' />
-              <div className='h-4 bg-zinc-800 rounded animate-pulse w-5/6' />
-              <div className='h-4 bg-zinc-800 rounded animate-pulse w-4/6' />
-            </div>
+              <TransitWisdom
+                birthChart={birthChart}
+                currentTransits={currentTransits}
+                maxItems={3}
+              />
+            </HoroscopeSection>
           )}
-        </HoroscopeSection>
 
-        <GuideNudge location='horoscope' />
+          {birthChart && currentTransits.length > 0 && (
+            <HoroscopeSection
+              title="Today's Aspects to Your Chart"
+              color='zinc'
+            >
+              <p className='text-sm text-zinc-400 mb-4'>
+                How today&apos;s planetary positions align with your birth chart
+              </p>
+              <TodaysAspects
+                birthChart={birthChart}
+                currentTransits={currentTransits}
+              />
+            </HoroscopeSection>
+          )}
 
-        {birthChart && currentTransits.length > 0 && (
-          <HoroscopeSection title='Transit Wisdom' color='indigo'>
-            <p className='text-sm text-zinc-400 mb-4'>
-              Today&apos;s most significant transits to your birth chart
+          <HoroscopeSection title='Cosmic Highlight' color='zinc'>
+            <p className='text-sm text-zinc-300 leading-relaxed mb-4'>
+              {horoscope.cosmicHighlight}
             </p>
-            <TransitWisdom
-              birthChart={birthChart}
-              currentTransits={currentTransits}
-              maxItems={3}
-            />
-          </HoroscopeSection>
-        )}
-
-        {birthChart && currentTransits.length > 0 && (
-          <HoroscopeSection title="Today's Aspects to Your Chart" color='zinc'>
-            <p className='text-sm text-zinc-400 mb-4'>
-              How today&apos;s planetary positions align with your birth chart
-            </p>
-            <TodaysAspects
-              birthChart={birthChart}
-              currentTransits={currentTransits}
-            />
-          </HoroscopeSection>
-        )}
-
-        <HoroscopeSection title='Cosmic Highlight' color='zinc'>
-          <p className='text-sm text-zinc-300 leading-relaxed mb-4'>
-            {horoscope.cosmicHighlight}
-          </p>
-          <div className='grid grid-cols-2 gap-4 pt-3 border-t border-zinc-700/50'>
-            <div className='text-center'>
-              <div className='text-2xl font-light text-emerald-400 mb-1'>
-                {universalDay.number}
-              </div>
-              <div className='text-xs text-zinc-400 uppercase tracking-wide mb-1'>
-                Universal Day
-              </div>
-              <p className='text-xs text-zinc-300'>{universalDay.meaning}</p>
-            </div>
-            {personalDay && (
+            <div className='grid grid-cols-2 gap-4 pt-3 border-t border-zinc-700/50'>
               <div className='text-center'>
-                <div className='text-2xl font-light text-lunary-accent-400 mb-1'>
-                  {personalDay.number}
+                <div className='text-2xl font-light text-emerald-400 mb-1'>
+                  {universalDay.number}
                 </div>
                 <div className='text-xs text-zinc-400 uppercase tracking-wide mb-1'>
-                  Personal Day
+                  Universal Day
                 </div>
-                <p className='text-xs text-zinc-300'>{personalDay.meaning}</p>
+                <p className='text-xs text-zinc-300'>{universalDay.meaning}</p>
               </div>
-            )}
-          </div>
-        </HoroscopeSection>
-
-        <HoroscopeSection title='Personal Transit Impact' color='zinc'>
-          <p className='text-sm text-zinc-400 mb-4'>
-            How upcoming transits specifically affect your birth chart
-          </p>
-          <div className='space-y-3 max-h-96 overflow-y-auto'>
-            {personalTransitImpacts.length > 0 ? (
-              personalTransitImpacts.map((impact, index) => (
-                <PersonalTransitImpactCard key={index} impact={impact} />
-              ))
-            ) : (
-              <p className='text-zinc-400 text-center py-4 text-sm'>
-                No significant personal transits in the next 30 days
-              </p>
-            )}
-          </div>
-        </HoroscopeSection>
-
-        {!userBirthday && (
-          <HoroscopeSection title='Complete Your Profile' color='amber'>
-            <p className='text-sm text-zinc-300 mb-4 leading-relaxed'>
-              Add your birthday to get more personalized and accurate
-              astrological insights.
-            </p>
-            <Link
-              href='/profile'
-              className='inline-block rounded-lg border border-lunary-accent-700 bg-lunary-accent-950 hover:bg-lunary-accent-900 text-lunary-accent-300 px-4 py-2 text-sm font-medium transition-colors'
-            >
-              Update Profile
-            </Link>
-          </HoroscopeSection>
-        )}
-
-        {solarReturnData && (
-          <HoroscopeSection title='Solar Return Insights' color='amber'>
-            <div className='space-y-3 pt-3'>
-              <div className='flex justify-between items-center'>
-                <span className='text-sm text-zinc-300'>
-                  Next Solar Return:
-                </span>
-                <span className='text-sm font-medium text-zinc-100'>
-                  {solarReturnData.nextSolarReturn.format('MMM DD, YYYY')}
-                  <span className='text-xs text-zinc-400 ml-2'>
-                    ({solarReturnData.daysTillReturn} days)
-                  </span>
-                </span>
-              </div>
-              <div className='flex justify-between items-center'>
-                <span className='text-sm text-zinc-300'>Personal Year:</span>
-                <span className='text-sm font-medium text-zinc-100'>
-                  {solarReturnData.personalYear}
-                </span>
-              </div>
-              <p className='text-sm text-zinc-300 leading-relaxed'>
-                {solarReturnData.insights}
-              </p>
-              <div>
-                <h4 className='text-xs font-medium text-zinc-400 mb-2 uppercase tracking-wide'>
-                  Year Themes
-                </h4>
-                <div className='flex flex-wrap gap-2'>
-                  {solarReturnData.themes.map((theme, index) => (
-                    <span
-                      key={index}
-                      className='px-2 py-1 rounded border border-lunary-accent-700 bg-lunary-accent-950 text-xs text-zinc-300'
-                    >
-                      {theme}
-                    </span>
-                  ))}
+              {personalDay && (
+                <div className='text-center'>
+                  <div className='text-2xl font-light text-lunary-accent-400 mb-1'>
+                    {personalDay.number}
+                  </div>
+                  <div className='text-xs text-zinc-400 uppercase tracking-wide mb-1'>
+                    Personal Day
+                  </div>
+                  <p className='text-xs text-zinc-300'>{personalDay.meaning}</p>
                 </div>
-              </div>
+              )}
             </div>
           </HoroscopeSection>
-        )}
 
-        <PremiumPathway variant='transits' className='mt-6' />
-      </div>
+          <HoroscopeSection title='Personal Transit Impact' color='zinc'>
+            <p className='text-sm text-zinc-400 mb-4'>
+              How upcoming transits specifically affect your birth chart
+            </p>
+            <div className='space-y-3 max-h-96 overflow-y-auto'>
+              {personalTransitImpacts.length > 0 ? (
+                personalTransitImpacts.map((impact, index) => (
+                  <PersonalTransitImpactCard key={index} impact={impact} />
+                ))
+              ) : (
+                <p className='text-zinc-400 text-center py-4 text-sm'>
+                  No significant personal transits in the next 30 days
+                </p>
+              )}
+            </div>
+          </HoroscopeSection>
+
+          {!userBirthday && (
+            <HoroscopeSection title='Complete Your Profile' color='amber'>
+              <p className='text-sm text-zinc-300 mb-4 leading-relaxed'>
+                Add your birthday to get more personalized and accurate
+                astrological insights.
+              </p>
+              <Link
+                href='/profile'
+                className='inline-block rounded-lg border border-lunary-accent-700 bg-lunary-accent-950 hover:bg-lunary-accent-900 text-lunary-accent-300 px-4 py-2 text-sm font-medium transition-colors'
+              >
+                Update Profile
+              </Link>
+            </HoroscopeSection>
+          )}
+
+          {solarReturnData && (
+            <HoroscopeSection title='Solar Return Insights' color='amber'>
+              <div className='space-y-3 pt-3'>
+                <div className='flex justify-between items-center'>
+                  <span className='text-sm text-zinc-300'>
+                    Next Solar Return:
+                  </span>
+                  <span className='text-sm font-medium text-zinc-100'>
+                    {solarReturnData.nextSolarReturn.format('MMM DD, YYYY')}
+                    <span className='text-xs text-zinc-400 ml-2'>
+                      ({solarReturnData.daysTillReturn} days)
+                    </span>
+                  </span>
+                </div>
+                <div className='flex justify-between items-center'>
+                  <span className='text-sm text-zinc-300'>Personal Year:</span>
+                  <span className='text-sm font-medium text-zinc-100'>
+                    {solarReturnData.personalYear}
+                  </span>
+                </div>
+                <p className='text-sm text-zinc-300 leading-relaxed'>
+                  {solarReturnData.insights}
+                </p>
+                <div>
+                  <h4 className='text-xs font-medium text-zinc-400 mb-2 uppercase tracking-wide'>
+                    Year Themes
+                  </h4>
+                  <div className='flex flex-wrap gap-2'>
+                    {solarReturnData.themes.map((theme, index) => (
+                      <span
+                        key={index}
+                        className='px-2 py-1 rounded border border-lunary-accent-700 bg-lunary-accent-950 text-xs text-zinc-300'
+                      >
+                        {theme}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </HoroscopeSection>
+          )}
+
+          <PremiumPathway variant='transits' className='mt-6' />
+        </div>
+      )}
     </div>
   );
 }

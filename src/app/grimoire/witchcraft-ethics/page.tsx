@@ -104,7 +104,7 @@ Both paths are valid. Solitary practice offers freedom and flexibility. Coven pr
         { text: 'Witchcraft Tools', href: '/grimoire/witchcraft-tools' },
         {
           text: 'Spellcraft Fundamentals',
-          href: '/grimoire/spellcraft-fundamentals',
+          href: '/grimoire/spells/fundamentals',
         },
       ]}
     />

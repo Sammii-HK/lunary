@@ -367,7 +367,7 @@ Remember that witch types are not exclusive—many practitioners blend multiple 
           },
           {
             name: 'Spellcraft',
-            href: '/grimoire/spellcraft-fundamentals',
+            href: '/grimoire/spells/fundamentals',
             type: 'Practice',
           },
         ]}
@@ -387,7 +387,7 @@ Remember that witch types are not exclusive—many practitioners blend multiple 
           { text: 'Witchcraft Tools', href: '/grimoire/witchcraft-tools' },
           {
             text: 'Spellcraft Fundamentals',
-            href: '/grimoire/spellcraft-fundamentals',
+            href: '/grimoire/spells/fundamentals',
           },
           { text: 'Grimoire Home', href: '/grimoire' },
         ]}

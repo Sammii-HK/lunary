@@ -1,10 +1,7 @@
+// src/app/grimoire/spells/page.tsx
+
 import { Metadata } from 'next';
-import { spellCategories as grimoireSpellCategories } from '@/constants/grimoire/spells';
-import {
-  spellCategories as constantsSpellCategories,
-  spells as constantsSpells,
-} from '@/constants/spells';
-import spellsJson from '@/data/spells.json';
+import { spellCategories, spellDatabase } from '@/lib/spells';
 import { SEOContentTemplate } from '@/components/grimoire/SEOContentTemplate';
 import { createItemListSchema, renderJsonLd } from '@/lib/schema';
 import { SpellsClient } from './SpellsClient';
@@ -54,6 +51,8 @@ export const metadata: Metadata = {
   },
 };
 
+const PAGE_SIZE = 10;
+
 // Spell type for the client component
 interface SpellForClient {
   id: string;
@@ -75,14 +74,9 @@ interface SpellForClient {
   };
 }
 
-// Combine spells from JSON and constants, avoiding duplicates
-function getAllSpells(): SpellForClient[] {
-  const jsonSpellIds = new Set(spellsJson.map((s: { id: string }) => s.id));
-  const constantsSpellsFiltered = constantsSpells.filter(
-    (s: { id: string }) => !jsonSpellIds.has(s.id),
-  );
-
-  return [...spellsJson, ...constantsSpellsFiltered].map((spell) => ({
+// Convert your normalised spell shape into what the list UI needs
+function toClientSpell(spell: any): SpellForClient {
+  return {
     id: spell.id || '',
     title: spell.title || '',
     category: spell.category || '',
@@ -94,49 +88,88 @@ function getAllSpells(): SpellForClient[] {
     purpose: spell.purpose || spell.description || '',
     timing: spell.timing,
     correspondences: spell.correspondences,
-  }));
+  };
 }
 
-// Merge categories from both sources
 function getAllCategories() {
   const merged: Record<
     string,
     { name: string; description: string; icon: string }
   > = {};
 
-  // Add from constants/spells.ts
-  Object.entries(constantsSpellCategories).forEach(([key, cat]) => {
+  Object.entries(spellCategories).forEach(([key, cat]: any) => {
     merged[key] = {
       name: cat.name,
       description: cat.description,
-      icon: cat.icon,
+      icon: cat.icon ?? '✨',
     };
-  });
-
-  // Add from constants/grimoire/spells.ts (may override)
-  Object.entries(grimoireSpellCategories).forEach(([key, cat]) => {
-    if (!merged[key]) {
-      merged[key] = {
-        name: cat.name,
-        description: cat.description,
-        icon: '✨', // Default icon if not present
-      };
-    }
   });
 
   return merged;
 }
 
-export default function SpellsIndexPage() {
-  const allSpells = getAllSpells();
+// Global category counts for ALL spells (not just the current page)
+function getGlobalCategoryCounts(allSpells: SpellForClient[]) {
+  const counts: Record<string, number> = { all: allSpells.length };
+
+  for (const s of allSpells) {
+    if (!s?.category) continue;
+    counts[s.category] = (counts[s.category] || 0) + 1;
+  }
+
+  return counts;
+}
+
+export default async function SpellsIndexPage({
+  searchParams,
+}: {
+  searchParams?: Promise<{
+    q?: string;
+    category?: string;
+    difficulty?: string;
+  }>;
+}) {
+  const sp = (await searchParams) ?? {};
+
+  const initialQuery = sp.q ?? '';
+  const initialCategory = sp.category ?? 'all';
+  const initialDifficulty = sp.difficulty ?? 'all';
+  const allSpells: SpellForClient[] = spellDatabase.map(toClientSpell);
   const allCategories = getAllCategories();
+
+  // filter globally (this is the key change)
+  const filteredAll = allSpells.filter((s) => {
+    const matchesQ =
+      !sp.q ||
+      s.title.toLowerCase().includes(sp.q) ||
+      s.description.toLowerCase().includes(sp.q) ||
+      s.purpose.toLowerCase().includes(sp.q) ||
+      s.category.toLowerCase().includes(sp.q) ||
+      (s.subcategory ? s.subcategory.toLowerCase().includes(sp.q) : false);
+
+    const matchesCategory =
+      initialCategory === 'all' ? true : s.category === initialCategory;
+    const matchesDifficulty =
+      initialDifficulty === 'all' ? true : s.difficulty === initialDifficulty;
+
+    return matchesQ && matchesCategory && matchesDifficulty;
+  });
+
+  const totalCount = filteredAll.length;
+  const totalPages = Math.max(1, Math.ceil(totalCount / PAGE_SIZE));
+  const currentPage = 1;
+
+  const spellsForPage = filteredAll.slice(0, PAGE_SIZE);
+
+  // counts should match the filtered result set (so they feel correct during search)
+  const categoryCounts = getGlobalCategoryCounts(filteredAll);
 
   const spellListSchema = createItemListSchema({
     name: 'Spell Collection',
     description:
       'Curated collection of spells for protection, love, prosperity, healing, moon magic, shadow work, and magical practice.',
     url: 'https://lunary.app/grimoire/spells',
-    items: allSpells.slice(0, 30).map((spell) => ({
+    items: spellsForPage.map((spell) => ({
       name: spell.title,
       url: `https://lunary.app/grimoire/spells/${spell.id}`,
       description: spell.description,
@@ -146,6 +179,7 @@ export default function SpellsIndexPage() {
   return (
     <>
       {renderJsonLd(spellListSchema)}
+
       <SEOContentTemplate
         title='Spells & Rituals Library'
         h1='Spells & Rituals'
@@ -186,7 +220,7 @@ export default function SpellsIndexPage() {
           {
             question: 'Are spells safe for beginners?',
             answer:
-              'Yes! Start with beginner-level spells that focus on protection, self-love, and personal growth. Avoid any spells that attempt to control others or involve advanced techniques until you have more experience. Always read through a spell completely before beginning.',
+              'Yes. Start with beginner-level spells that focus on protection, self-love, and personal growth. Avoid any spells that attempt to control others or involve advanced techniques until you have more experience. Always read through a spell completely before beginning.',
           },
         ]}
         relatedItems={[
@@ -212,7 +246,19 @@ export default function SpellsIndexPage() {
           },
         ]}
       >
-        <SpellsClient spells={allSpells} categories={allCategories} />
+        <SpellsClient
+          spells={spellsForPage}
+          totalCount={totalCount}
+          currentPage={currentPage}
+          totalPages={totalPages}
+          pageSize={PAGE_SIZE}
+          basePath='/grimoire/spells'
+          categories={allCategories}
+          categoryCounts={categoryCounts}
+          initialQuery={initialQuery}
+          initialCategory={initialCategory}
+          initialDifficulty={initialDifficulty}
+        />
       </SEOContentTemplate>
     </>
   );

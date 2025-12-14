@@ -140,9 +140,9 @@ Understanding planetary days helps you time your spellwork for maximum effective
         },
         {
           text: 'Spellcraft Fundamentals',
-          href: '/grimoire/spellcraft-fundamentals',
+          href: '/grimoire/spells/fundamentals',
         },
-        { text: 'Spells & Rituals', href: '/grimoire/practices' },
+        { text: 'Spells & Rituals', href: '/grimoire/spells' },
         { text: 'Astronomy & Astrology', href: '/grimoire/astronomy' },
       ]}
       tables={[
