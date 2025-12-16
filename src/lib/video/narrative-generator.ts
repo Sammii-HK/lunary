@@ -308,13 +308,125 @@ Return ONLY the voiceover script text, no markdown, no formatting, just natural 
   }
 }
 
+export async function generateMediumFormNarrative(
+  weeklyData: WeeklyCosmicData,
+): Promise<string> {
+  const openai = getOpenAI();
+
+  // Format data for medium-form - include more transits to support multiple images
+  const planetaryHighlights = weeklyData.planetaryHighlights
+    .slice(0, 5) // Include up to 5 for multiple images
+    .map(
+      (h) =>
+        `- ${h.planet} ${h.event === 'enters-sign' && h.details.toSign ? `enters ${h.details.toSign}` : h.event.replace(/-/g, ' ')} on ${h.date.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}: ${h.description}`,
+    )
+    .join('\n');
+
+  const aspects = weeklyData.majorAspects.slice(0, 4); // Include up to 4 for multiple images
+  const aspectsInfo =
+    aspects.length > 0
+      ? aspects
+          .map(
+            (a) =>
+              `- ${a.planetA} ${a.aspect} ${a.planetB} on ${a.date.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}: ${a.energy}`,
+          )
+          .join('\n')
+      : 'None';
+
+  const moonPhases =
+    weeklyData.moonPhases.length > 0
+      ? weeklyData.moonPhases
+          .slice(0, 2)
+          .map(
+            (m) =>
+              `- ${m.phase} moon in ${m.sign} on ${m.date.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}: ${m.energy}`,
+          )
+          .join('\n')
+      : 'No major moon phases this week';
+
+  const weekRange = `${weeklyData.weekStart.toLocaleDateString('en-US', { month: 'long', day: 'numeric' })} - ${weeklyData.weekEnd.toLocaleDateString('en-US', { month: 'long', day: 'numeric' })}`;
+
+  const prompt = `Create a MEDIUM voiceover script (30-60 seconds, ~75-150 words) for a social media video recap about the weekly cosmic forecast for ${weekRange}.
+
+This should be a TIGHT, PUNCHY RECAP that covers:
+- Opening (3-5 seconds): Direct, engaging hook - jump straight into the cosmic energy, no waffle
+- Planetary highlights (15-20 seconds): Mention multiple key planetary movements concisely - each movement should be mentioned separately
+- Major aspects (15-20 seconds): Mention multiple important cosmic alignments - each aspect should be mentioned separately
+- Moon phases (10-15 seconds): Always include moon phases - this is Lunary, moon phases are core
+- Closing (3-5 seconds): Brief ending - "For more information, check out the full blog at Lunary" (natural, informative, not salesy)
+
+CRITICAL REQUIREMENTS FOR KEYWORD MATCHING:
+- You MUST use the EXACT planet names, sign names, aspect types, and moon phase names from the data below
+- For planetary movements: Use the exact format "[Planet] enters [Sign]" or "[Planet] [event]" exactly as shown in the data
+- For aspects: Use the exact format "[PlanetA] [aspect type] [PlanetB]" - use exact aspect names like "trine", "square", "conjunction", "opposition"
+- For moon phases: Use the exact phase name like "New Moon", "Full Moon", "Waxing Crescent", etc. and the exact sign name
+- This ensures accurate image generation - the script must match the data structure exactly
+
+Requirements:
+- Educational and informative tone - NOT conversational, NOT casual phrases like "tap into these cosmic vibes"
+- Authoritative and insightful - focus on explaining cosmic events and their significance
+- Keep it punchy and engaging for social media (Reels/TikTok/YouTube Shorts)
+- Flow naturally when spoken
+- Target 75-150 words total (30-60 seconds at 2.5 words/second)
+- Always include moon phases section (this is Lunary - moon-focused app)
+- Be concise but informative
+- NO casual/conversational language, NO "tap into", NO "vibes" - be educational
+- Intro should be direct and informative - jump straight into the cosmic events
+- Outro should mention "For more information, check out the full blog at Lunary" - informative, not salesy
+
+Weekly Data:
+
+Title: ${weeklyData.title}
+Subtitle: ${weeklyData.subtitle}
+
+Top Planetary Highlights (use EXACT planet names and sign names):
+${planetaryHighlights || 'None this week'}
+
+Major Aspects (use EXACT planet names and aspect types like "trine", "square", "conjunction", "opposition"):
+${aspectsInfo}
+
+Moon Phases (use EXACT phase names like "New Moon", "Full Moon", "Waxing Crescent", etc. and EXACT sign names):
+${moonPhases}
+
+Return ONLY the voiceover script text, no markdown, no formatting, just natural spoken text. Keep it to 75-150 words. Use the EXACT keywords from the data above.`;
+
+  try {
+    const completion = await openai.chat.completions.create({
+      model: 'gpt-4o-mini',
+      messages: [
+        {
+          role: 'system',
+          content:
+            'You are an authoritative astrological educator creating educational voiceover scripts for social media videos. Write in an informative, educational tone - NOT conversational or casual. Avoid phrases like "tap into", "vibes", or casual language. Focus on explaining cosmic events, planetary movements, and their astrological significance in an educational manner. Make it engaging but authoritative. This is Lunary - a moon-focused astrology app. Moon phases are core to the brand and MUST always be included in every script. Outro should mention "For more information, check out the full blog at Lunary" - informative, not salesy. CRITICAL: You MUST use the EXACT planet names, sign names, aspect types (trine, square, conjunction, opposition), and moon phase names (New Moon, Full Moon, etc.) from the provided data to ensure accurate image generation.',
+        },
+        {
+          role: 'user',
+          content: prompt,
+        },
+      ],
+      temperature: 0.8,
+      max_tokens: 300,
+    });
+
+    const generatedScript = completion.choices[0]?.message?.content?.trim();
+    if (!generatedScript) {
+      throw new Error('Failed to generate medium-form narrative');
+    }
+
+    return generatedScript;
+  } catch (error) {
+    console.error('Error generating medium-form narrative:', error);
+    throw error;
+  }
+}
+
 /**
  * Generate social media post content to accompany a video
  * Gently guides people to the site/blog if they want to learn more
  */
 export async function generateVideoPostContent(
   weeklyData: WeeklyCosmicData,
-  videoType: 'short' | 'long',
+  videoType: 'short' | 'medium' | 'long',
   blogSlug?: string,
 ): Promise<string> {
   const openai = getOpenAI();
@@ -1198,6 +1310,309 @@ export function segmentScriptIntoItems(
         : 'moon-phase-fallback',
       exactMoonPhase: fallbackMoonPhase || undefined,
     });
+  }
+
+  return items;
+}
+
+/**
+ * Split a medium-form script into item-based segments (optimized for 30-60s)
+ * Creates segments for: intro, each planetary movement mentioned, each aspect mentioned, moon phases, conclusion
+ * Each unique transit gets its own segment and image
+ */
+export function segmentScriptIntoMediumItems(
+  script: string,
+  weeklyData: WeeklyCosmicData,
+): ScriptItem[] {
+  const wordsPerSecond = 2.5;
+  let currentTime = 0;
+
+  // Split script into sentences
+  const sentences = script.split(/[.!?]+/).filter((s) => s.trim().length > 0);
+
+  if (sentences.length === 0) {
+    return [
+      {
+        topic: 'intro',
+        text: script,
+        startTime: 0,
+        endTime: script.split(/\s+/).length / wordsPerSecond,
+        item: 'intro',
+      },
+    ];
+  }
+
+  const minItemDuration = 4; // Minimum 4 seconds per item for medium form
+  const usedExactItems = new Set<string>();
+  const items: ScriptItem[] = [];
+
+  // Track moon phases (always included, but only once)
+  let hasMoonPhase = false;
+
+  // Get top moon phase for fallback
+  const topMoonPhase =
+    weeklyData.moonPhases.length > 0 ? weeklyData.moonPhases[0] : null;
+
+  let currentTopic: ScriptTopic['topic'] = 'intro';
+  let currentItemText: string[] = [];
+  let itemStartTime = 0;
+  let currentItem: string | null = 'intro';
+  let currentExactPlanet: PlanetaryHighlight | null = null;
+  let currentExactAspect: MajorAspect | null = null;
+  let currentExactMoonPhase: MoonPhaseEvent | null = null;
+  let isFirstSegment = true;
+
+  for (const sentence of sentences) {
+    const lowerSentence = sentence.toLowerCase();
+    const words = sentence.trim().split(/\s+/).length;
+    const duration = words / wordsPerSecond;
+
+    // Check for conclusion
+    if (
+      lowerSentence.includes('conclusion') ||
+      lowerSentence.includes('wrap up') ||
+      lowerSentence.includes('visit lunary') ||
+      lowerSentence.includes('lunary.app') ||
+      lowerSentence.includes('full blog') ||
+      lowerSentence.includes('check out') ||
+      lowerSentence.includes('for more information') ||
+      lowerSentence.includes('dive deeper') ||
+      lowerSentence.includes('birth chart')
+    ) {
+      // Save current item
+      if (currentItem && currentItemText.length > 0) {
+        const itemDuration = currentTime - itemStartTime;
+        if (itemDuration >= minItemDuration || items.length === 0) {
+          items.push({
+            topic: currentTopic,
+            text: currentItemText.join('. '),
+            startTime: itemStartTime,
+            endTime: currentTime,
+            item: currentItem,
+            exactPlanet: currentExactPlanet || undefined,
+            exactAspect: currentExactAspect || undefined,
+            exactMoonPhase: currentExactMoonPhase || undefined,
+          });
+        }
+      }
+      // Start conclusion
+      currentTopic = 'conclusion';
+      currentItem = 'conclusion';
+      currentItemText = [sentence.trim()];
+      itemStartTime = currentTime;
+      currentExactPlanet = null;
+      currentExactAspect = null;
+      currentExactMoonPhase = null;
+      isFirstSegment = false;
+      currentTime += duration;
+      continue;
+    }
+
+    // Try to extract exact items - prioritize moon phases, then top planet, then top aspect
+    let exactPlanet: PlanetaryHighlight | null = null;
+    let exactAspect: MajorAspect | null = null;
+    let exactMoonPhase: MoonPhaseEvent | null = null;
+    let detectedTopic: ScriptTopic['topic'] | null = null;
+    let detectedItem: string | null = null;
+
+    // Priority 1: Moon Phase (always include if not already included)
+    if (!hasMoonPhase) {
+      exactMoonPhase = extractMoonPhase(sentence, weeklyData);
+      if (exactMoonPhase) {
+        const itemKey = `moon-${exactMoonPhase.phase}-${exactMoonPhase.sign}`;
+        if (!usedExactItems.has(itemKey)) {
+          detectedTopic = 'moon_phases';
+          detectedItem = itemKey;
+          usedExactItems.add(itemKey);
+          hasMoonPhase = true;
+        }
+      } else if (
+        lowerSentence.includes('moon') ||
+        lowerSentence.includes('lunar') ||
+        lowerSentence.includes('phase') ||
+        lowerSentence.includes('no major moon phases')
+      ) {
+        // Create moon phase segment even if no exact match - image will show "No Major Changes" if needed
+        if (topMoonPhase) {
+          detectedTopic = 'moon_phases';
+          detectedItem = `moon-${topMoonPhase.phase}-${topMoonPhase.sign}`;
+          exactMoonPhase = topMoonPhase;
+        } else {
+          // No moon phases in data - create segment with undefined exactMoonPhase
+          // Image generator will show "No Major Changes"
+          detectedTopic = 'moon_phases';
+          detectedItem = 'moon-phase-no-match';
+          exactMoonPhase = null;
+        }
+        hasMoonPhase = true;
+      }
+    }
+
+    // Priority 2: Extract ANY planetary movement mentioned (create segment for each unique one)
+    if (!detectedTopic) {
+      exactPlanet = extractPlanetMovement(sentence, weeklyData);
+      if (exactPlanet) {
+        const itemKey = `planet-${exactPlanet.planet}-${exactPlanet.event}`;
+        // Only create segment if this specific planet/event hasn't been used yet
+        if (!usedExactItems.has(itemKey)) {
+          detectedTopic = 'planetary_highlights';
+          detectedItem = itemKey;
+          usedExactItems.add(itemKey);
+        }
+      }
+    }
+
+    // Priority 3: Extract ANY aspect mentioned (create segment for each unique one)
+    if (!detectedTopic) {
+      exactAspect = extractAspect(sentence, weeklyData);
+      if (exactAspect) {
+        const itemKey = `aspect-${exactAspect.planetA}-${exactAspect.aspect}-${exactAspect.planetB}`;
+        // Only create segment if this specific aspect hasn't been used yet
+        if (!usedExactItems.has(itemKey)) {
+          detectedTopic = 'aspects';
+          detectedItem = itemKey;
+          usedExactItems.add(itemKey);
+        }
+      }
+    }
+
+    // Only create new segment if exact item found
+    if (detectedItem && detectedTopic) {
+      // Save previous item if exists
+      if (currentItem && currentItemText.length > 0) {
+        const itemDuration = currentTime - itemStartTime;
+        if (itemDuration >= minItemDuration || items.length === 0) {
+          items.push({
+            topic: currentTopic,
+            text: currentItemText.join('. '),
+            startTime: itemStartTime,
+            endTime: currentTime,
+            item: currentItem,
+            exactPlanet: currentExactPlanet || undefined,
+            exactAspect: currentExactAspect || undefined,
+            exactMoonPhase: currentExactMoonPhase || undefined,
+          });
+        }
+      }
+      // Start new segment with exact item
+      currentTopic = detectedTopic;
+      currentItem = detectedItem;
+      currentExactPlanet = exactPlanet;
+      currentExactAspect = exactAspect;
+      currentExactMoonPhase = exactMoonPhase;
+      currentItemText = [sentence.trim()];
+      itemStartTime = currentTime;
+      isFirstSegment = false;
+    } else {
+      // Continue current item (no exact match found)
+      currentItemText.push(sentence.trim());
+    }
+
+    currentTime += duration;
+  }
+
+  // Add final item
+  if (currentItemText.length > 0) {
+    const itemDuration = currentTime - itemStartTime;
+    if (itemDuration >= minItemDuration || items.length === 0) {
+      items.push({
+        topic: currentTopic,
+        text: currentItemText.join('. '),
+        startTime: itemStartTime,
+        endTime: currentTime,
+        item: currentItem || 'intro',
+        exactPlanet: currentExactPlanet || undefined,
+        exactAspect: currentExactAspect || undefined,
+        exactMoonPhase: currentExactMoonPhase || undefined,
+      });
+    }
+  }
+
+  // Ensure we have at least one item
+  if (items.length === 0) {
+    return [
+      {
+        topic: 'intro',
+        text: script,
+        startTime: 0,
+        endTime: currentTime || script.split(/\s+/).length / wordsPerSecond,
+        item: 'intro',
+      },
+    ];
+  }
+
+  // Ensure moon phases are present (critical for Lunary)
+  const hasMoonPhases = items.some((i) => i.topic === 'moon_phases');
+  if (!hasMoonPhases) {
+    // Insert moon phase segment before conclusion or at end
+    const conclusionIndex = items.findIndex((i) => i.topic === 'conclusion');
+    const insertIndex = conclusionIndex >= 0 ? conclusionIndex : items.length;
+    const insertTime =
+      insertIndex > 0
+        ? items[insertIndex - 1].endTime
+        : items[0]?.startTime || 0;
+
+    if (topMoonPhase) {
+      const moonPhaseText = `The moon phases this week include ${topMoonPhase.phase} moon in ${topMoonPhase.sign}.`;
+      const moonPhaseDuration =
+        moonPhaseText.split(/\s+/).length / wordsPerSecond;
+
+      items.splice(insertIndex, 0, {
+        topic: 'moon_phases',
+        text: moonPhaseText,
+        startTime: insertTime,
+        endTime: insertTime + moonPhaseDuration,
+        item: `moon-${topMoonPhase.phase}-${topMoonPhase.sign}`,
+        exactMoonPhase: topMoonPhase,
+      });
+    } else {
+      // No moon phases in data - create segment that will show "No Major Changes"
+      const moonPhaseText = 'This week there are no major moon phase changes.';
+      const moonPhaseDuration =
+        moonPhaseText.split(/\s+/).length / wordsPerSecond;
+
+      items.splice(insertIndex, 0, {
+        topic: 'moon_phases',
+        text: moonPhaseText,
+        startTime: insertTime,
+        endTime: insertTime + moonPhaseDuration,
+        item: 'moon-phase-no-match',
+        exactMoonPhase: undefined,
+      });
+    }
+  }
+
+  // Ensure conclusion is present - check if last item mentions lunary/blog
+  const hasConclusion = items.some((i) => i.topic === 'conclusion');
+  if (!hasConclusion && items.length > 0) {
+    const lastItem = items[items.length - 1];
+    const lastText = lastItem.text.toLowerCase();
+    // If last item mentions lunary or blog, mark it as conclusion
+    if (
+      lastText.includes('lunary') ||
+      lastText.includes('blog') ||
+      lastText.includes('for more information') ||
+      lastText.includes('check out')
+    ) {
+      lastItem.topic = 'conclusion';
+      lastItem.item = 'conclusion';
+    } else {
+      // Otherwise, check if we should add a conclusion segment
+      // This shouldn't happen with the new prompt, but just in case
+      const conclusionText =
+        'For more information, check out the full blog at Lunary.';
+      const conclusionDuration =
+        conclusionText.split(/\s+/).length / wordsPerSecond;
+      const conclusionStart = lastItem.endTime;
+
+      items.push({
+        topic: 'conclusion',
+        text: conclusionText,
+        startTime: conclusionStart,
+        endTime: conclusionStart + conclusionDuration,
+        item: 'conclusion',
+      });
+    }
   }
 
   return items;

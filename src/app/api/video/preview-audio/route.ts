@@ -6,6 +6,7 @@ import { generateVoiceoverScriptFromWeeklyData } from '@/lib/video/composition';
 import {
   generateNarrativeFromWeeklyData,
   generateShortFormNarrative,
+  generateMediumFormNarrative,
 } from '@/lib/video/narrative-generator';
 
 export const runtime = 'nodejs';
@@ -16,9 +17,9 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const { type, week, blogContent } = body;
 
-    if (!type || (type !== 'short' && type !== 'long')) {
+    if (!type || (type !== 'short' && type !== 'medium' && type !== 'long')) {
       return NextResponse.json(
-        { error: 'Invalid type. Must be "short" or "long"' },
+        { error: 'Invalid type. Must be "short", "medium", or "long"' },
         { status: 400 },
       );
     }
@@ -53,6 +54,38 @@ export async function POST(request: NextRequest) {
       } catch (error) {
         console.warn(
           'Failed to generate OpenAI short-form, falling back:',
+          error,
+        );
+        script = generateVoiceoverScriptFromWeeklyData(weeklyData, 'short');
+      }
+    } else if (type === 'medium') {
+      if (week === undefined) {
+        return NextResponse.json(
+          { error: 'Week number is required for medium-form videos' },
+          { status: 400 },
+        );
+      }
+
+      // Get weekly content
+      const now = new Date();
+      const targetDate = new Date(
+        now.getTime() + week * 7 * 24 * 60 * 60 * 1000,
+      );
+      const dayOfWeek = targetDate.getDay();
+      const daysToMonday = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
+      const weekStart = new Date(
+        targetDate.getTime() - daysToMonday * 24 * 60 * 60 * 1000,
+      );
+      weekStart.setHours(0, 0, 0, 0);
+
+      const weeklyData = await generateWeeklyContent(weekStart);
+
+      // Use OpenAI for medium-form
+      try {
+        script = await generateMediumFormNarrative(weeklyData);
+      } catch (error) {
+        console.warn(
+          'Failed to generate OpenAI medium-form, falling back:',
           error,
         );
         script = generateVoiceoverScriptFromWeeklyData(weeklyData, 'short');

@@ -7,17 +7,26 @@ import { generateVoiceoverScriptFromWeeklyData } from '@/lib/video/composition';
 import {
   generateNarrativeFromWeeklyData,
   generateShortFormNarrative,
+  generateMediumFormNarrative,
   generateVideoPostContent,
   segmentScriptIntoItems,
+  segmentScriptIntoMediumItems,
 } from '@/lib/video/narrative-generator';
 import { generateTopicImages } from '@/lib/video/image-generator';
 import { generateWeeklyContent } from '../../../../../utils/blog/weeklyContentGenerator';
+
+// Version for cache invalidation - increment when prompts change
+const SCRIPT_VERSION = {
+  short: 'v2',
+  medium: 'v4', // Updated for educational tone and outro changes
+  long: 'v2',
+};
 
 export const runtime = 'nodejs';
 export const maxDuration = 300; // 5 minutes for video generation
 
 interface GenerateVideoRequest {
-  type: 'short' | 'long';
+  type: 'short' | 'medium' | 'long';
   week?: number;
   blogContent?: {
     title: string;
@@ -45,14 +54,155 @@ function getWeekDates(weekOffset: number): string {
   return `${formatDate(weekStart)} - ${formatDate(weekEnd)}`;
 }
 
+/**
+ * Schedule video to appropriate platforms based on type
+ * - Short form: Instagram Stories (scheduled)
+ * - Medium form: TikTok, Instagram Reels, YouTube Shorts (posted immediately)
+ * - Long form: YouTube (already handled via upload route)
+ */
+async function scheduleVideoToPlatforms(
+  videoUrl: string,
+  videoType: 'short' | 'medium' | 'long',
+  title: string,
+  description: string,
+  baseUrl: string,
+): Promise<void> {
+  const apiKey = process.env.SUCCULENT_SECRET_KEY;
+  const accountGroupId = process.env.SUCCULENT_ACCOUNT_GROUP_ID;
+
+  if (!apiKey || !accountGroupId) {
+    console.warn('Succulent API not configured, skipping video scheduling');
+    return;
+  }
+
+  const succulentApiUrl = 'https://app.succulent.social/api/posts';
+  const dateStr = new Date().toISOString().split('T')[0];
+  const now = new Date();
+
+  if (videoType === 'short') {
+    // Short form: Schedule to Instagram Stories
+    const scheduledDate = new Date(now);
+    scheduledDate.setHours(10, 0, 0, 0);
+    if (scheduledDate < now) {
+      scheduledDate.setHours(now.getHours() + 1, 0, 0, 0);
+    }
+
+    const storyPost = {
+      accountGroupId,
+      name: `Lunary Short - ${dateStr}`,
+      content: description,
+      platforms: ['instagram'],
+      scheduledDate: scheduledDate.toISOString(),
+      media: [{ type: 'video' as const, url: videoUrl, alt: title }],
+      instagramOptions: { stories: true },
+    };
+
+    try {
+      const response = await fetch(succulentApiUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-API-Key': apiKey,
+        },
+        body: JSON.stringify(storyPost),
+      });
+
+      if (response.ok) {
+        console.log(
+          `✅ Scheduled short-form video to Instagram Stories for ${scheduledDate.toISOString()}`,
+        );
+      } else {
+        const error = await response.text();
+        console.error(
+          `❌ Failed to schedule short-form video: ${response.status} ${error}`,
+        );
+      }
+    } catch (error) {
+      console.error('Error scheduling short-form video:', error);
+    }
+  } else if (videoType === 'medium') {
+    // Medium form: Post immediately to TikTok, Instagram Reels, YouTube Shorts
+    const currentTime = new Date().toISOString();
+
+    // TikTok - post immediately (omit scheduledDate)
+    const tiktokPost = {
+      accountGroupId,
+      name: `Lunary Medium - TikTok - ${dateStr}`,
+      content: description,
+      platforms: ['tiktok'],
+      media: [{ type: 'video' as const, url: videoUrl, alt: title }],
+    };
+
+    // Instagram Reels - post immediately
+    const reelPost = {
+      accountGroupId,
+      name: `Lunary Medium - Instagram Reel - ${dateStr}`,
+      content: description,
+      platforms: ['instagram'],
+      media: [{ type: 'video' as const, url: videoUrl, alt: title }],
+      instagramOptions: { type: 'reel' as const },
+    };
+
+    // Post to TikTok
+    try {
+      const tiktokResponse = await fetch(succulentApiUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-API-Key': apiKey,
+        },
+        body: JSON.stringify(tiktokPost),
+      });
+
+      if (tiktokResponse.ok) {
+        console.log('✅ Posted medium-form video to TikTok');
+      } else {
+        const error = await tiktokResponse.text();
+        console.error(
+          `❌ Failed to post to TikTok: ${tiktokResponse.status} ${error}`,
+        );
+      }
+    } catch (error) {
+      console.error('Error posting to TikTok:', error);
+    }
+
+    // Post to Instagram Reels
+    try {
+      const reelResponse = await fetch(succulentApiUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-API-Key': apiKey,
+        },
+        body: JSON.stringify(reelPost),
+      });
+
+      if (reelResponse.ok) {
+        console.log('✅ Posted medium-form video to Instagram Reels');
+      } else {
+        const error = await reelResponse.text();
+        console.error(
+          `❌ Failed to post to Instagram Reels: ${reelResponse.status} ${error}`,
+        );
+      }
+    } catch (error) {
+      console.error('Error posting to Instagram Reels:', error);
+    }
+
+    // YouTube Shorts - handled via upload route (post immediately by omitting publishDate)
+    // This is already handled in the YouTube upload route
+  }
+  // Long form videos are already handled via YouTube upload route
+}
+
 export async function POST(request: NextRequest) {
   try {
     const body: GenerateVideoRequest = await request.json();
     const { type, week, blogContent } = body;
 
-    if (!type || (type !== 'short' && type !== 'long')) {
+    if (!type || (type !== 'short' && type !== 'medium' && type !== 'long')) {
       return NextResponse.json(
-        { error: 'Invalid type. Must be "short" or "long"' },
+        { error: 'Invalid type. Must be "short", "medium", or "long"' },
         { status: 400 },
       );
     }
@@ -84,6 +234,22 @@ export async function POST(request: NextRequest) {
       videoFormat = 'story';
       title = `Week of ${weekRange}`;
       description = 'Your weekly cosmic forecast from Lunary';
+    } else if (type === 'medium') {
+      // Medium-form video: use story format (vertical for Reels/TikTok/YouTube Shorts)
+      if (week === undefined) {
+        return NextResponse.json(
+          { error: 'Week number is required for medium-form videos' },
+          { status: 400 },
+        );
+      }
+
+      weekNumber = week;
+      const weekRange = getWeekDates(week);
+      videoFormat = 'story';
+      title = `Weekly Cosmic Recap - Week of ${weekRange}`;
+      description = 'Your quick weekly cosmic forecast recap from Lunary';
+      // imageUrl will be set based on weekly data after we generate it
+      imageUrl = ''; // Temporary, will be set later
     } else {
       // Long-form video: use YouTube format
       // Can use blogContent if provided, otherwise will use weekly data
@@ -114,7 +280,7 @@ export async function POST(request: NextRequest) {
     let weekKey: string | null = null;
 
     if (type === 'short') {
-      // Short-form: cache by week number
+      // Short-form: cache by week number + version
       if (week === undefined) {
         return NextResponse.json(
           { error: 'Week number is required for short-form videos' },
@@ -122,8 +288,9 @@ export async function POST(request: NextRequest) {
         );
       }
       weekKey = `week-${week}`;
-      scriptCacheKey = `scripts/short/${weekKey}.txt`;
-      audioCacheKey = `audio/short/${weekKey}.mp3`;
+      const version = SCRIPT_VERSION.short;
+      scriptCacheKey = `scripts/short/${version}/${weekKey}.txt`;
+      audioCacheKey = `audio/short/${version}/${weekKey}.mp3`;
 
       // Get weekly content data for short-form
       const now = new Date();
@@ -138,11 +305,39 @@ export async function POST(request: NextRequest) {
       weekStart.setHours(0, 0, 0, 0);
 
       weeklyData = await generateWeeklyContent(weekStart);
+    } else if (type === 'medium') {
+      // Medium-form: cache by week number + version
+      if (week === undefined) {
+        return NextResponse.json(
+          { error: 'Week number is required for medium-form videos' },
+          { status: 400 },
+        );
+      }
+      weekKey = `week-${week}`;
+      const version = SCRIPT_VERSION.medium;
+      scriptCacheKey = `scripts/medium/${version}/${weekKey}.txt`;
+      audioCacheKey = `audio/medium/${version}/${weekKey}.mp3`;
+
+      // Get weekly content data for medium-form
+      const now = new Date();
+      const targetDate = new Date(
+        now.getTime() + week * 7 * 24 * 60 * 60 * 1000,
+      );
+      const dayOfWeek = targetDate.getDay();
+      const daysToMonday = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
+      const weekStart = new Date(
+        targetDate.getTime() - daysToMonday * 24 * 60 * 60 * 1000,
+      );
+      weekStart.setHours(0, 0, 0, 0);
+
+      weeklyData = await generateWeeklyContent(weekStart);
+      console.log('✅ Generated weeklyData for medium-form video');
     } else {
-      // Long-form: cache by blog slug or week number
+      // Long-form: cache by blog slug or week number + version
       weekKey = blogSlug ? `blog-${blogSlug}` : `week-${weekNumber || 0}`;
-      scriptCacheKey = `scripts/long/${weekKey}.txt`;
-      audioCacheKey = `audio/long/${weekKey}.mp3`;
+      const version = SCRIPT_VERSION.long;
+      scriptCacheKey = `scripts/long/${version}/${weekKey}.txt`;
+      audioCacheKey = `audio/long/${version}/${weekKey}.mp3`;
 
       // Long-form: ALWAYS get weekly content (required for topic images)
       try {
@@ -205,6 +400,25 @@ export async function POST(request: NextRequest) {
           );
           // Fallback to structured script
           script = generateVoiceoverScriptFromWeeklyData(weeklyData!, 'short');
+        }
+      } else if (type === 'medium') {
+        // Use OpenAI to generate medium-form narrative
+        if (weeklyData) {
+          try {
+            script = await generateMediumFormNarrative(weeklyData);
+            console.log(
+              `✅ Generated medium-form narrative: ${script.split(/\s+/).length} words`,
+            );
+          } catch (error) {
+            console.warn(
+              'Failed to generate OpenAI medium-form narrative, falling back:',
+              error,
+            );
+            // Fallback to structured script
+            script = generateVoiceoverScriptFromWeeklyData(weeklyData, 'short');
+          }
+        } else {
+          throw new Error('Weekly data is required for medium-form videos');
         }
       } else {
         // Long-form: Use OpenAI to generate a natural narrative from weekly data
@@ -434,11 +648,14 @@ export async function POST(request: NextRequest) {
     console.log(`🎬 Composing video (${videoFormat})...`);
     let videoBuffer: Buffer;
 
-    // For long-form videos, segment script into items and generate topic images
-    if (type === 'long' && weeklyData) {
+    // For medium-form and long-form videos, segment script into items and generate topic images
+    if ((type === 'medium' || type === 'long') && weeklyData) {
       try {
         console.log(`📝 Segmenting script into items...`);
-        const items = segmentScriptIntoItems(script, weeklyData);
+        const items =
+          type === 'medium'
+            ? segmentScriptIntoMediumItems(script, weeklyData)
+            : segmentScriptIntoItems(script, weeklyData);
         console.log(
           `📸 Generated ${items.length} item segments: ${items.map((t) => `${t.topic}${t.item ? ` (${t.item})` : ''}`).join(', ')}`,
         );
@@ -469,6 +686,7 @@ export async function POST(request: NextRequest) {
           scaledItems,
           weeklyData,
           baseUrl,
+          videoFormat,
         );
 
         console.log(`✅ Generated ${topicImages.length} topic images`);
@@ -639,6 +857,13 @@ export async function POST(request: NextRequest) {
     const videoRecord = result.rows[0];
 
     console.log(`✅ Video generated and stored: ${videoUrl}`);
+
+    // Schedule video to platforms (fire and forget - don't block response)
+    scheduleVideoToPlatforms(videoUrl, type, title, description, baseUrl).catch(
+      (err) => {
+        console.error('Failed to schedule video to platforms:', err);
+      },
+    );
 
     return NextResponse.json({
       success: true,

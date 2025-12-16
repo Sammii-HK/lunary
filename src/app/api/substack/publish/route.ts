@@ -106,6 +106,45 @@ export async function POST(request: NextRequest) {
           console.error('Failed to generate short-form video:', err);
         });
 
+      // Generate medium-form video (30-60s recap)
+      fetch(`${baseUrl}/api/video/generate`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          type: 'medium',
+          week: weekOffset,
+        }),
+      })
+        .then(async (res) => {
+          if (res.ok) {
+            const videoData = await res.json();
+            // Upload medium-form to YouTube Shorts (post immediately)
+            if (videoData.video?.id) {
+              await fetch(`${baseUrl}/api/youtube/upload`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  videoUrl: videoData.video.url,
+                  videoId: videoData.video.id,
+                  title: `Weekly Cosmic Recap - Week of ${weeklyData.weekStart.toLocaleDateString()}`,
+                  description:
+                    'Your quick weekly cosmic forecast recap from Lunary',
+                  type: 'short', // YouTube Shorts format
+                  // Omit publishDate to post immediately
+                }),
+              }).catch((err) => {
+                console.error(
+                  'Failed to upload medium-form video to YouTube Shorts:',
+                  err,
+                );
+              });
+            }
+          }
+        })
+        .catch((err) => {
+          console.error('Failed to generate medium-form video:', err);
+        });
+
       // Generate long-form video
       const blogContent = {
         title: `Weekly Cosmic Forecast - Week of ${weeklyData.weekStart.toLocaleDateString()}`,

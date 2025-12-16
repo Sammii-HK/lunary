@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 
 interface Video {
   id: string;
-  type: 'short' | 'long';
+  type: 'short' | 'medium' | 'long';
   video_url: string;
   audio_url: string | null;
   thumbnail_url: string | null;
@@ -27,11 +27,15 @@ export default function SocialPreviewPage() {
   const [videos, setVideos] = useState<Video[]>([]);
   const [videosLoading, setVideosLoading] = useState(true);
   const [videoFilter, setVideoFilter] = useState<{
-    type?: 'short' | 'long';
+    type?: 'short' | 'medium' | 'long';
     status?: 'pending' | 'uploaded' | 'failed';
   }>({});
   const [longFormAudioUrl, setLongFormAudioUrl] = useState<string | null>(null);
   const [previewingLongForm, setPreviewingLongForm] = useState(false);
+  const [mediumFormAudioUrl, setMediumFormAudioUrl] = useState<string | null>(
+    null,
+  );
+  const [previewingMediumForm, setPreviewingMediumForm] = useState(false);
   const [selectedVideo, setSelectedVideo] = useState<Video | null>(null);
   const [generatingVideo, setGeneratingVideo] = useState(false);
   const [videoGenerationError, setVideoGenerationError] = useState<
@@ -141,6 +145,35 @@ export default function SocialPreviewPage() {
     }
   };
 
+  const previewMediumFormAudio = async () => {
+    setPreviewingMediumForm(true);
+    setError(null);
+    setMediumFormAudioUrl(null);
+    try {
+      const response = await fetch('/api/video/preview-audio', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          type: 'medium',
+          week: week,
+        }),
+      });
+
+      if (!response.ok) {
+        const err = await response.json();
+        throw new Error(err.error || 'Failed to generate audio preview');
+      }
+
+      const blob = await response.blob();
+      const url = URL.createObjectURL(blob);
+      setMediumFormAudioUrl(url);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to preview audio');
+    } finally {
+      setPreviewingMediumForm(false);
+    }
+  };
+
   const generateShortVideo = async () => {
     setGeneratingVideo(true);
     setVideoGenerationError(null);
@@ -163,6 +196,50 @@ export default function SocialPreviewPage() {
       const data = await response.json();
       setVideoGenerationSuccess(
         `✅ Short-form video generated! ${data.video?.id ? 'Video ID: ' + data.video.id : ''}`,
+      );
+
+      // Refresh videos list
+      const params = new URLSearchParams();
+      if (videoFilter.type) params.set('type', videoFilter.type);
+      if (videoFilter.status) params.set('status', videoFilter.status);
+      const videosResponse = await fetch(
+        `/api/videos/list?${params.toString()}`,
+      );
+      if (videosResponse.ok) {
+        const videosData = await videosResponse.json();
+        setVideos(videosData.videos || []);
+      }
+    } catch (err) {
+      setVideoGenerationError(
+        err instanceof Error ? err.message : 'Failed to generate video',
+      );
+    } finally {
+      setGeneratingVideo(false);
+    }
+  };
+
+  const generateMediumVideo = async () => {
+    setGeneratingVideo(true);
+    setVideoGenerationError(null);
+    setVideoGenerationSuccess(null);
+    try {
+      const response = await fetch('/api/video/generate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          type: 'medium',
+          week: week,
+        }),
+      });
+
+      if (!response.ok) {
+        const err = await response.json();
+        throw new Error(err.error || 'Failed to generate video');
+      }
+
+      const data = await response.json();
+      setVideoGenerationSuccess(
+        `✅ Medium-form video generated! ${data.video?.id ? 'Video ID: ' + data.video.id : ''}`,
       );
 
       // Refresh videos list
@@ -322,6 +399,36 @@ export default function SocialPreviewPage() {
         </div>
       </div>
 
+      {/* Medium-Form Audio Preview */}
+      <div className='mt-8 bg-zinc-900 p-6 rounded'>
+        <h2 className='text-xl text-white mb-4'>
+          Medium-Form Video Audio Preview (30-60s Recap)
+        </h2>
+        <p className='text-zinc-400 mb-4'>
+          Preview the voiceover audio for medium-form videos (30-60 second
+          recap). Perfect for Reels, TikTok, and YouTube Shorts. Includes top
+          planetary highlights, major aspects, moon phases, and best days.
+        </p>
+        <button
+          onClick={previewMediumFormAudio}
+          disabled={previewingMediumForm}
+          className='bg-lunary-primary-600 hover:bg-lunary-primary-700 disabled:opacity-50 text-white px-4 py-2 rounded font-medium transition-colors mb-4'
+        >
+          {previewingMediumForm
+            ? 'Generating...'
+            : '🎧 Preview Medium-Form Audio'}
+        </button>
+        {mediumFormAudioUrl && (
+          <div className='mt-4'>
+            <audio controls src={mediumFormAudioUrl} className='w-full' />
+            <p className='text-zinc-400 text-sm mt-2'>
+              Preview the audio above. If it sounds good, you can generate the
+              full video.
+            </p>
+          </div>
+        )}
+      </div>
+
       {/* Long-Form Audio Preview */}
       <div className='mt-8 bg-zinc-900 p-6 rounded'>
         <h2 className='text-xl text-white mb-4'>
@@ -355,17 +462,25 @@ export default function SocialPreviewPage() {
       <div className='mt-8 bg-zinc-900 p-6 rounded'>
         <h2 className='text-xl text-white mb-4'>Generate Videos</h2>
         <p className='text-zinc-400 mb-4'>
-          Generate short-form or long-form videos. Videos are stored for 7 days
-          and can be uploaded to YouTube.
+          Generate short-form, medium-form, or long-form videos. Videos are
+          stored for 7 days and can be uploaded to YouTube.
         </p>
 
-        <div className='flex gap-4 mb-4'>
+        <div className='flex gap-4 mb-4 flex-wrap'>
           <button
             onClick={generateShortVideo}
             disabled={generatingVideo}
             className='bg-lunary-primary-600 hover:bg-lunary-primary-700 disabled:opacity-50 text-white px-6 py-3 rounded font-medium transition-colors'
           >
             {generatingVideo ? 'Generating...' : '🎬 Generate Short Video'}
+          </button>
+
+          <button
+            onClick={generateMediumVideo}
+            disabled={generatingVideo}
+            className='bg-lunary-primary-600 hover:bg-lunary-primary-700 disabled:opacity-50 text-white px-6 py-3 rounded font-medium transition-colors'
+          >
+            {generatingVideo ? 'Generating...' : '🎬 Generate Medium Video'}
           </button>
 
           <button
@@ -403,13 +518,14 @@ export default function SocialPreviewPage() {
             onChange={(e) =>
               setVideoFilter({
                 ...videoFilter,
-                type: e.target.value as 'short' | 'long' | undefined,
+                type: e.target.value as 'short' | 'medium' | 'long' | undefined,
               })
             }
             className='bg-zinc-800 text-white p-2 rounded'
           >
             <option value=''>All Types</option>
             <option value='short'>Short</option>
+            <option value='medium'>Medium</option>
             <option value='long'>Long</option>
           </select>
           <select
@@ -452,8 +568,12 @@ export default function SocialPreviewPage() {
                         {video.title || `${video.type} video`}
                       </h3>
                       <p className='text-zinc-400 text-sm'>
-                        {video.type === 'short' ? 'Short-form' : 'Long-form'} •{' '}
-                        {video.status}
+                        {video.type === 'short'
+                          ? 'Short-form'
+                          : video.type === 'medium'
+                            ? 'Medium-form'
+                            : 'Long-form'}{' '}
+                        • {video.status}
                       </p>
                     </div>
                     <span

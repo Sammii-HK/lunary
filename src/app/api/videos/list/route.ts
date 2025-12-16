@@ -6,7 +6,7 @@ export const runtime = 'nodejs';
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
-    const type = searchParams.get('type'); // 'short' | 'long'
+    const type = searchParams.get('type'); // 'short' | 'medium' | 'long'
     const status = searchParams.get('status'); // 'pending' | 'uploaded' | 'failed'
     const limit = parseInt(searchParams.get('limit') || '50', 10);
 
