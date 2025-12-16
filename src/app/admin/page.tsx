@@ -619,6 +619,14 @@ export default function AdminDashboard() {
       category: 'content',
       status: 'new',
     },
+    {
+      title: 'Social Preview',
+      description: 'Preview social media images and videos (7-day retention)',
+      href: '/admin/social-preview',
+      icon: <Play className='h-5 w-5' />,
+      category: 'content',
+      status: 'active',
+    },
   ];
 
   // Section 3: Shop & Assets

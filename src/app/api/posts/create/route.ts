@@ -123,6 +123,77 @@ export async function POST(req: NextRequest) {
 
     const result = await githubResponse.json();
 
+    // If published, generate videos asynchronously (don't block response)
+    if (status === 'publish') {
+      // Generate videos in background (fire and forget)
+      const baseUrl =
+        process.env.NODE_ENV === 'production'
+          ? 'https://lunary.app'
+          : 'http://localhost:3000';
+
+      // Generate short-form video
+      fetch(`${baseUrl}/api/video/generate`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          type: 'short',
+          week: 0, // Current week
+          blogContent: {
+            title,
+            description,
+            body,
+            slug,
+          },
+        }),
+      }).catch((err) => {
+        console.error('Failed to generate short-form video:', err);
+      });
+
+      // Generate long-form video
+      fetch(`${baseUrl}/api/video/generate`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          type: 'long',
+          blogContent: {
+            title,
+            description,
+            body,
+            slug,
+          },
+        }),
+      })
+        .then(async (res) => {
+          if (res.ok) {
+            const videoData = await res.json();
+            // Upload to YouTube
+            if (videoData.video?.id) {
+              await fetch(`${baseUrl}/api/youtube/upload`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  videoUrl: videoData.video.url,
+                  videoId: videoData.video.id,
+                  title,
+                  description,
+                  type: 'long',
+                  tags: tags,
+                  publishDate: new Date(date).toISOString(),
+                }),
+              }).catch((err) => {
+                console.error(
+                  'Failed to upload long-form video to YouTube:',
+                  err,
+                );
+              });
+            }
+          }
+        })
+        .catch((err) => {
+          console.error('Failed to generate long-form video:', err);
+        });
+    }
+
     return NextResponse.json({
       ok: true,
       path,

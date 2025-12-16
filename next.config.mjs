@@ -12,32 +12,36 @@ const withBundleAnalyzer =
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   webpack: (config, { isServer, nextRuntime, dev }) => {
-    // Exclude Playwright from bundling (server-only, Node.js runtime)
+    // Exclude Playwright and ffmpeg-static from bundling (server-only, Node.js runtime)
     if (isServer) {
       config.externals = config.externals || [];
-      const playwrightExternals = {
+      const serverExternals = {
         playwright: 'commonjs playwright',
         'playwright-core': 'commonjs playwright-core',
         chromium: 'commonjs chromium',
+        'ffmpeg-static': 'commonjs ffmpeg-static',
+        'fluent-ffmpeg': 'commonjs fluent-ffmpeg',
       };
 
       // Handle both array and function externals
       if (Array.isArray(config.externals)) {
-        config.externals.push(playwrightExternals);
+        config.externals.push(serverExternals);
       } else if (typeof config.externals === 'function') {
         const originalExternals = config.externals;
         config.externals = (context, request, callback) => {
           if (
             request === 'playwright' ||
             request === 'playwright-core' ||
-            request === 'chromium'
+            request === 'chromium' ||
+            request === 'ffmpeg-static' ||
+            request === 'fluent-ffmpeg'
           ) {
             return callback(null, `commonjs ${request}`);
           }
           return originalExternals(context, request, callback);
         };
       } else {
-        config.externals = [config.externals, playwrightExternals];
+        config.externals = [config.externals, serverExternals];
       }
     }
 
@@ -99,6 +103,19 @@ const nextConfig = {
       type: 'webassembly/async',
       resourceQuery: { not: [/module/] },
     });
+
+    // Ignore binary files from ffmpeg-static (prevent Next.js/Turbopack from trying to parse them)
+    if (isServer) {
+      // Add as noParse to prevent webpack from parsing the binary
+      if (!config.module.noParse) {
+        config.module.noParse = [];
+      }
+      if (Array.isArray(config.module.noParse)) {
+        config.module.noParse.push(/ffmpeg-static.*\/ffmpeg$/);
+      } else {
+        config.module.noParse = [config.module.noParse, /ffmpeg-static.*\/ffmpeg$/];
+      }
+    }
 
     // Client-side polyfills for Jazz
     if (!isServer) {

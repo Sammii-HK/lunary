@@ -1,9 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import {
-  generateVoiceover,
-  checkQuota,
-  MYSTICAL_VOICES,
-} from '@/lib/tts/elevenlabs';
+import { generateVoiceover, getAvailableVoices } from '@/lib/tts';
+import { checkQuota, MYSTICAL_VOICES } from '@/lib/tts/elevenlabs'; // Deprecated but kept for compatibility
 
 export const dynamic = 'force-dynamic';
 
@@ -22,7 +19,9 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const audioBuffer = await generateVoiceover(text, { voiceId });
+    const audioBuffer = await generateVoiceover(text, {
+      voiceName: voiceId || 'nova', // Map voiceId to voiceName
+    });
 
     return new NextResponse(audioBuffer, {
       headers: {
@@ -45,36 +44,39 @@ export async function POST(request: NextRequest) {
 }
 
 export async function GET() {
-  const apiKey = process.env.ELEVENLABS_API_KEY;
+  const apiKey = process.env.OPENAI_API_KEY;
 
   if (!apiKey) {
     return NextResponse.json({
       configured: false,
-      message: 'ELEVENLABS_API_KEY not set. Add it to environment variables.',
+      message: 'OPENAI_API_KEY not set. Add it to environment variables.',
     });
   }
 
   try {
-    const quota = await checkQuota();
+    const voices = await getAvailableVoices();
+    const quota = await checkQuota(); // Returns mock data for OpenAI
 
     return NextResponse.json({
       configured: true,
-      voices: MYSTICAL_VOICES,
+      voices: voices.length > 0 ? voices : MYSTICAL_VOICES, // Use new voices if available
       quota: {
         used: quota.character_count,
         limit: quota.character_limit,
         remaining: quota.remaining,
-        percentUsed: Math.round(
-          (quota.character_count / quota.character_limit) * 100,
-        ),
+        percentUsed:
+          quota.character_limit === Infinity
+            ? 0
+            : Math.round((quota.character_count / quota.character_limit) * 100),
       },
+      provider: 'openai',
     });
   } catch {
     return NextResponse.json({
       configured: true,
       voices: MYSTICAL_VOICES,
-      message:
-        'API key configured. Quota info not available (limited permissions).',
+      message: 'API key configured. Using OpenAI TTS (pay-as-you-go pricing).',
+      provider: 'openai',
     });
   }
 }

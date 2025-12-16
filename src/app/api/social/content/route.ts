@@ -3,7 +3,7 @@ import {
   generateVoiceoverScript,
   estimateVoiceoverDuration,
 } from '@/lib/video/composition';
-import { estimateCharacterCost } from '@/lib/tts/elevenlabs';
+import { estimateCharacterCost } from '@/lib/tts/elevenlabs'; // Deprecated but kept for compatibility
 
 export const dynamic = 'force-dynamic';
 

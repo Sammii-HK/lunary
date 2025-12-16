@@ -1,0 +1,669 @@
+import { NextRequest, NextResponse } from 'next/server';
+import { put } from '@vercel/blob';
+import { sql } from '@vercel/postgres';
+import { composeVideo } from '@/lib/video/compose-video';
+import { generateVoiceover } from '@/lib/tts';
+import { generateVoiceoverScriptFromWeeklyData } from '@/lib/video/composition';
+import {
+  generateNarrativeFromWeeklyData,
+  generateShortFormNarrative,
+  generateVideoPostContent,
+  segmentScriptIntoItems,
+} from '@/lib/video/narrative-generator';
+import { generateTopicImages } from '@/lib/video/image-generator';
+import { generateWeeklyContent } from '../../../../../utils/blog/weeklyContentGenerator';
+
+export const runtime = 'nodejs';
+export const maxDuration = 300; // 5 minutes for video generation
+
+interface GenerateVideoRequest {
+  type: 'short' | 'long';
+  week?: number;
+  blogContent?: {
+    title: string;
+    description?: string;
+    body?: string;
+    slug?: string;
+  };
+}
+
+function getWeekDates(weekOffset: number): string {
+  const now = new Date();
+  const targetDate = new Date(
+    now.getTime() + weekOffset * 7 * 24 * 60 * 60 * 1000,
+  );
+
+  const dayOfWeek = targetDate.getDay();
+  const daysToMonday = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
+  const weekStart = new Date(
+    targetDate.getTime() - daysToMonday * 24 * 60 * 60 * 1000,
+  );
+  const weekEnd = new Date(weekStart.getTime() + 6 * 24 * 60 * 60 * 1000);
+
+  const formatDate = (d: Date) =>
+    d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+  return `${formatDate(weekStart)} - ${formatDate(weekEnd)}`;
+}
+
+export async function POST(request: NextRequest) {
+  try {
+    const body: GenerateVideoRequest = await request.json();
+    const { type, week, blogContent } = body;
+
+    if (!type || (type !== 'short' && type !== 'long')) {
+      return NextResponse.json(
+        { error: 'Invalid type. Must be "short" or "long"' },
+        { status: 400 },
+      );
+    }
+
+    const baseUrl =
+      process.env.NODE_ENV === 'production'
+        ? 'https://lunary.app'
+        : `${request.nextUrl.protocol}//${request.nextUrl.host}`;
+
+    let imageUrl: string;
+    let videoFormat: 'story' | 'square' | 'landscape' | 'youtube';
+    let title: string;
+    let description: string;
+    let weekNumber: number | null = null;
+    let blogSlug: string | null = null;
+
+    if (type === 'short') {
+      // Short-form video: use story format
+      if (week === undefined) {
+        return NextResponse.json(
+          { error: 'Week number is required for short-form videos' },
+          { status: 400 },
+        );
+      }
+
+      weekNumber = week;
+      const weekRange = getWeekDates(week);
+      imageUrl = `${baseUrl}/api/social/images?week=${week}&format=story`;
+      videoFormat = 'story';
+      title = `Week of ${weekRange}`;
+      description = 'Your weekly cosmic forecast from Lunary';
+    } else {
+      // Long-form video: use YouTube format
+      // Can use blogContent if provided, otherwise will use weekly data
+      if (blogContent) {
+        blogSlug = blogContent.slug || null;
+        imageUrl = `${baseUrl}/api/social/images?format=youtube&title=${encodeURIComponent(blogContent.title)}${blogContent.description ? `&subtitle=${encodeURIComponent(blogContent.description)}` : ''}`;
+        videoFormat = 'youtube';
+        title = blogContent.title;
+        description = blogContent.description || '';
+      } else {
+        // Use weekly data for long-form (will be set in script generation section)
+        videoFormat = 'youtube';
+        title = 'Weekly Cosmic Forecast';
+        description = 'Your comprehensive weekly cosmic forecast from Lunary';
+        // imageUrl will be set based on weekly data after we generate it
+        imageUrl = ''; // Temporary, will be set later
+      }
+    }
+
+    // Generate or retrieve voiceover script (cached by week/blog)
+    let script: string | undefined;
+    let weeklyData: Awaited<ReturnType<typeof generateWeeklyContent>> | null =
+      null;
+
+    // Determine cache key for script and audio
+    let scriptCacheKey: string | null = null;
+    let audioCacheKey: string | null = null;
+    let weekKey: string | null = null;
+
+    if (type === 'short') {
+      // Short-form: cache by week number
+      if (week === undefined) {
+        return NextResponse.json(
+          { error: 'Week number is required for short-form videos' },
+          { status: 400 },
+        );
+      }
+      weekKey = `week-${week}`;
+      scriptCacheKey = `scripts/short/${weekKey}.txt`;
+      audioCacheKey = `audio/short/${weekKey}.mp3`;
+
+      // Get weekly content data for short-form
+      const now = new Date();
+      const targetDate = new Date(
+        now.getTime() + week * 7 * 24 * 60 * 60 * 1000,
+      );
+      const dayOfWeek = targetDate.getDay();
+      const daysToMonday = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
+      const weekStart = new Date(
+        targetDate.getTime() - daysToMonday * 24 * 60 * 60 * 1000,
+      );
+      weekStart.setHours(0, 0, 0, 0);
+
+      weeklyData = await generateWeeklyContent(weekStart);
+    } else {
+      // Long-form: cache by blog slug or week number
+      weekKey = blogSlug ? `blog-${blogSlug}` : `week-${weekNumber || 0}`;
+      scriptCacheKey = `scripts/long/${weekKey}.txt`;
+      audioCacheKey = `audio/long/${weekKey}.mp3`;
+
+      // Long-form: ALWAYS get weekly content (required for topic images)
+      try {
+        const now = new Date();
+        const dayOfWeek = now.getDay();
+        const daysToMonday = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
+        const weekStart = new Date(
+          now.getTime() - daysToMonday * 24 * 60 * 60 * 1000,
+        );
+        weekStart.setHours(0, 0, 0, 0);
+        weeklyData = await generateWeeklyContent(weekStart);
+        console.log('✅ Generated weeklyData for long-form video');
+      } catch (error) {
+        console.error(
+          '❌ Failed to generate weekly content for long-form video:',
+          error,
+        );
+        // Don't continue without weeklyData - it's required for topic images
+        throw new Error(
+          `Failed to generate weekly content for long-form video. Weekly data is required for topic-based images. Error: ${error instanceof Error ? error.message : 'Unknown error'}`,
+        );
+      }
+
+      // Set imageUrl for long-form if not already set
+      if ((!imageUrl || imageUrl === '') && weeklyData) {
+        imageUrl = `${baseUrl}/api/social/images?format=youtube&title=${encodeURIComponent(weeklyData.title)}&subtitle=${encodeURIComponent(weeklyData.subtitle || '')}`;
+      }
+    }
+
+    // Step 1: Check for cached script
+    const { head } = await import('@vercel/blob');
+    try {
+      const existingScript = await head(scriptCacheKey!);
+      if (existingScript) {
+        const scriptResponse = await fetch(existingScript.url);
+        if (scriptResponse.ok) {
+          script = await scriptResponse.text();
+          console.log(`♻️ Reusing cached script for ${weekKey}`);
+        }
+      }
+    } catch (error) {
+      console.log(
+        `ℹ️ No cached script found for ${weekKey}, will generate new`,
+      );
+    }
+
+    // Step 2: Generate script if not cached
+    if (!script) {
+      if (type === 'short') {
+        // Use OpenAI to generate short-form narrative
+        try {
+          script = await generateShortFormNarrative(weeklyData!);
+          console.log(
+            `✅ Generated short-form narrative: ${script.split(/\s+/).length} words`,
+          );
+        } catch (error) {
+          console.warn(
+            'Failed to generate OpenAI short-form narrative, falling back:',
+            error,
+          );
+          // Fallback to structured script
+          script = generateVoiceoverScriptFromWeeklyData(weeklyData!, 'short');
+        }
+      } else {
+        // Long-form: Use OpenAI to generate a natural narrative from weekly data
+        if (weeklyData) {
+          try {
+            script = await generateNarrativeFromWeeklyData(weeklyData);
+            console.log(
+              `✅ Generated narrative script: ${script.split(/\s+/).length} words`,
+            );
+          } catch (error) {
+            console.warn(
+              'Failed to generate OpenAI narrative, falling back to structured script:',
+              error,
+            );
+            // Fallback to structured script
+            script = generateVoiceoverScriptFromWeeklyData(weeklyData, 'long');
+          }
+        } else {
+          // Fallback: Use blog content but format it properly
+          const blogText = blogContent!.body || blogContent!.description || '';
+
+          if (!blogText || blogText.length < 100) {
+            throw new Error(
+              'Blog content is too short for long-form video. Need at least 100 characters.',
+            );
+          }
+
+          // Remove HTML, format for voiceover
+          let formattedText = blogText
+            .replace(/<[^>]*>/g, '') // Remove HTML
+            .replace(/\n{3,}/g, '\n\n') // Normalize line breaks
+            .replace(/#{1,6}\s+/g, '') // Remove markdown headers
+            .replace(/\*\*(.*?)\*\*/g, '$1') // Remove bold
+            .replace(/\*(.*?)\*/g, '$1') // Remove italic
+            .replace(/\[([^\]]+)\]\([^\)]+\)/g, '$1') // Remove links
+            .replace(/```[\s\S]*?```/g, '') // Remove code blocks
+            .replace(/`[^`]+`/g, ''); // Remove inline code
+
+          // Split into sentences and clean up - keep more for long-form
+          const sentences = formattedText
+            .split(/[.!?]+/)
+            .map((s) => s.trim())
+            .filter((s) => s.length > 10 && s.length < 500) // Filter out too short or too long
+            .slice(0, 200); // Keep up to 200 sentences for 5-15 minute video
+
+          if (sentences.length < 20) {
+            throw new Error(
+              `Blog content too short: only ${sentences.length} sentences. Need at least 20 sentences for long-form video.`,
+            );
+          }
+
+          script = `${blogContent!.title}. ${sentences.join('. ')}`;
+        }
+      }
+
+      // Cache the script
+      try {
+        await put(scriptCacheKey!, script, {
+          access: 'public',
+          addRandomSuffix: false,
+          contentType: 'text/plain',
+        });
+        console.log(`✅ Cached script for ${weekKey}`);
+      } catch (error) {
+        console.warn('Failed to cache script:', error);
+        // Continue even if caching fails
+      }
+
+      // Validate script length
+      if (type === 'long') {
+        const wordCount = script.split(/\s+/).length;
+        if (wordCount < 500) {
+          console.warn(
+            `Long-form script is short: ${wordCount} words. Expected 1200-2000 for 5-8 minute video.`,
+          );
+        } else {
+          console.log(
+            `Long-form script generated: ${wordCount} words (~${Math.round(wordCount / 2.5 / 60)} minutes)`,
+          );
+        }
+      }
+    }
+
+    // Step 3: Check for cached audio (by week/blog, not script hash)
+    let audioUrl: string | null = null;
+    let audioBuffer: ArrayBuffer | null = null;
+
+    // Method 1: Check Vercel Blob first (most reliable)
+    try {
+      const existingAudio = await head(audioCacheKey!);
+      if (existingAudio) {
+        const audioResponse = await fetch(existingAudio.url);
+        if (audioResponse.ok) {
+          audioBuffer = await audioResponse.arrayBuffer();
+          audioUrl = existingAudio.url;
+          console.log(
+            `♻️ Reusing cached audio from Blob for ${weekKey}: ${audioUrl}`,
+          );
+        }
+      }
+    } catch (blobError) {
+      console.log(
+        `ℹ️ No cached audio found in Blob for ${weekKey}, checking database...`,
+      );
+    }
+
+    // Method 2: If Blob check didn't find it, check database
+    if (!audioUrl || !audioBuffer) {
+      let existingAudio;
+      try {
+        if (type === 'short' && weekNumber !== null) {
+          existingAudio = await sql`
+            SELECT audio_url FROM videos 
+            WHERE audio_url IS NOT NULL 
+            AND type = ${type}
+            AND week_number = ${weekNumber}
+            ORDER BY created_at DESC
+            LIMIT 1
+          `;
+        } else if (type === 'long' && blogSlug) {
+          existingAudio = await sql`
+            SELECT audio_url FROM videos 
+            WHERE audio_url IS NOT NULL 
+            AND type = ${type}
+            AND blog_slug = ${blogSlug}
+            ORDER BY created_at DESC
+            LIMIT 1
+          `;
+        } else {
+          existingAudio = { rows: [] };
+        }
+      } catch (error: any) {
+        if (error?.code === '42703' || error?.message?.includes('audio_url')) {
+          console.log(
+            'ℹ️ audio_url column not found, will check Blob or generate new',
+          );
+          existingAudio = { rows: [] };
+        } else {
+          throw error;
+        }
+      }
+
+      if (existingAudio.rows.length > 0 && existingAudio.rows[0].audio_url) {
+        try {
+          const audioResponse = await fetch(existingAudio.rows[0].audio_url);
+          if (audioResponse.ok) {
+            audioBuffer = await audioResponse.arrayBuffer();
+            audioUrl = existingAudio.rows[0].audio_url;
+            console.log(
+              `♻️ Reusing cached audio from database for ${weekKey}: ${audioUrl}`,
+            );
+          }
+        } catch (error) {
+          console.warn('Failed to fetch cached audio from database:', error);
+        }
+      }
+    }
+
+    // Method 3: Generate new audio only if not found in Blob or database
+    if (!audioUrl || !audioBuffer) {
+      console.log(
+        `🎙️ Generating new audio for ${type} video (not found in cache for ${weekKey})...`,
+      );
+      audioBuffer = await generateVoiceover(script, {
+        voiceName: 'nova', // British female voice
+        model: 'tts-1-hd', // High quality
+        speed: 1.0,
+      });
+
+      // Upload audio to Vercel Blob with week/blog key
+      const { url } = await put(audioCacheKey!, audioBuffer, {
+        access: 'public',
+        addRandomSuffix: false,
+        contentType: 'audio/mpeg',
+      });
+      audioUrl = url;
+      console.log(`✅ Audio generated and cached for ${weekKey}: ${audioUrl}`);
+    }
+
+    // Ensure audioBuffer is assigned
+    if (!audioBuffer) {
+      throw new Error('Failed to generate or retrieve audio buffer');
+    }
+
+    // Get actual audio duration for timestamp scaling
+    // We need to write audio to temp file to get duration
+    const { writeFile, unlink } = await import('fs/promises');
+    const { join } = await import('path');
+    const { tmpdir } = await import('os');
+    const tempDir = tmpdir();
+    const audioTimestamp = Date.now();
+    const tempAudioPath = join(tempDir, `audio-${audioTimestamp}.mp3`);
+    let actualAudioDuration: number | null = null;
+
+    try {
+      await writeFile(tempAudioPath, Buffer.from(audioBuffer));
+      // Use ffprobe to get duration (same as compose-video.ts does)
+      const ffmpeg = (await import('fluent-ffmpeg')).default;
+      actualAudioDuration = await new Promise<number>((resolve, reject) => {
+        ffmpeg.ffprobe(tempAudioPath, (err, metadata) => {
+          if (err) {
+            console.warn('Could not get audio duration:', err);
+            resolve(null as any);
+          } else {
+            resolve(metadata.format.duration || (null as any));
+          }
+        });
+      });
+      await unlink(tempAudioPath).catch(() => {});
+    } catch (error) {
+      console.warn(
+        'Failed to get audio duration, will use estimated timestamps:',
+        error,
+      );
+    }
+
+    // Ensure imageUrl is set before composing video
+    if (!imageUrl || imageUrl === '') {
+      if (weeklyData) {
+        imageUrl = `${baseUrl}/api/social/images?format=youtube&title=${encodeURIComponent(weeklyData.title)}&subtitle=${encodeURIComponent(weeklyData.subtitle || '')}`;
+      } else {
+        throw new Error('No image URL available for video composition');
+      }
+    }
+
+    // Compose video (image + audio)
+    console.log(`🎬 Composing video (${videoFormat})...`);
+    let videoBuffer: Buffer;
+
+    // For long-form videos, segment script into items and generate topic images
+    if (type === 'long' && weeklyData) {
+      try {
+        console.log(`📝 Segmenting script into items...`);
+        const items = segmentScriptIntoItems(script, weeklyData);
+        console.log(
+          `📸 Generated ${items.length} item segments: ${items.map((t) => `${t.topic}${t.item ? ` (${t.item})` : ''}`).join(', ')}`,
+        );
+
+        if (items.length === 0) {
+          throw new Error('No items found in script');
+        }
+
+        // Scale timestamps proportionally to match actual audio duration
+        let scaledItems = items;
+        if (actualAudioDuration && actualAudioDuration > 0) {
+          const estimatedDuration = items[items.length - 1]?.endTime || 0;
+          if (estimatedDuration > 0) {
+            const scaleFactor = actualAudioDuration / estimatedDuration;
+            console.log(
+              `⏱️ Scaling timestamps: estimated=${estimatedDuration.toFixed(2)}s, actual=${actualAudioDuration.toFixed(2)}s, factor=${scaleFactor.toFixed(3)}`,
+            );
+            scaledItems = items.map((item) => ({
+              ...item,
+              startTime: item.startTime * scaleFactor,
+              endTime: item.endTime * scaleFactor,
+            }));
+          }
+        }
+
+        console.log(`🎨 Generating images for ${scaledItems.length} items...`);
+        const topicImages = await generateTopicImages(
+          scaledItems,
+          weeklyData,
+          baseUrl,
+        );
+
+        console.log(`✅ Generated ${topicImages.length} topic images`);
+
+        // Compose video with multiple images
+        videoBuffer = await composeVideo({
+          images: topicImages.map((img) => ({
+            url: img.imageUrl,
+            startTime: img.startTime,
+            endTime: img.endTime,
+          })),
+          audioBuffer,
+          format: videoFormat,
+        });
+        console.log(`✅ Video composed with ${topicImages.length} images`);
+      } catch (error) {
+        console.error(
+          '❌ Failed to generate topic-based images:',
+          error instanceof Error ? error.message : error,
+          error instanceof Error ? error.stack : '',
+        );
+        // Don't silently fall back - throw the error so we can see what's wrong
+        throw new Error(
+          `Failed to generate topic-based images for long-form video: ${error instanceof Error ? error.message : 'Unknown error'}. This is required for long-form videos.`,
+        );
+      }
+    } else {
+      // Short-form or fallback: single image
+      if (!imageUrl) {
+        throw new Error('No image URL available for video composition');
+      }
+      videoBuffer = await composeVideo({
+        imageUrl,
+        audioBuffer,
+        format: videoFormat,
+      });
+    }
+
+    // Upload to Vercel Blob
+    const timestamp = Date.now();
+    const blobKey =
+      type === 'short'
+        ? `videos/shorts/week-${week}-${timestamp}.mp4`
+        : `videos/long-form/${blogSlug || 'blog'}-${timestamp}.mp4`;
+
+    console.log(`☁️ Uploading video to Blob: ${blobKey}`);
+    const { url: videoUrl } = await put(blobKey, videoBuffer, {
+      access: 'public',
+      addRandomSuffix: false,
+      contentType: 'video/mp4',
+    });
+
+    // Generate post content for social media
+    let postContent: string | null = null;
+    try {
+      // Get weekly data for post content generation
+      let weeklyDataForPost: Awaited<
+        ReturnType<typeof generateWeeklyContent>
+      > | null = null;
+      if (type === 'short' && week !== undefined) {
+        const now = new Date();
+        const targetDate = new Date(
+          now.getTime() + week * 7 * 24 * 60 * 60 * 1000,
+        );
+        const dayOfWeek = targetDate.getDay();
+        const daysToMonday = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
+        const weekStart = new Date(
+          targetDate.getTime() - daysToMonday * 24 * 60 * 60 * 1000,
+        );
+        weekStart.setHours(0, 0, 0, 0);
+        weeklyDataForPost = await generateWeeklyContent(weekStart);
+      } else if (type === 'long') {
+        const now = new Date();
+        const dayOfWeek = now.getDay();
+        const daysToMonday = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
+        const weekStart = new Date(
+          now.getTime() - daysToMonday * 24 * 60 * 60 * 1000,
+        );
+        weekStart.setHours(0, 0, 0, 0);
+        weeklyDataForPost = await generateWeeklyContent(weekStart);
+      }
+
+      if (weeklyDataForPost) {
+        postContent = await generateVideoPostContent(
+          weeklyDataForPost,
+          type,
+          blogSlug || undefined,
+        );
+        console.log(`✅ Generated post content for ${type} video`);
+      }
+    } catch (error) {
+      console.warn('Failed to generate post content:', error);
+      // Continue without post content - it's optional
+    }
+
+    // Store in database
+    const expiresAt = new Date();
+    expiresAt.setDate(expiresAt.getDate() + 7); // 7 days from now
+
+    // Try to insert with audio_url, fallback if column doesn't exist
+    let result;
+    try {
+      result = await sql`
+        INSERT INTO videos (
+          type,
+          video_url,
+          audio_url,
+          title,
+          description,
+          post_content,
+          week_number,
+          blog_slug,
+          status,
+          created_at,
+          expires_at
+        ) VALUES (
+          ${type},
+          ${videoUrl},
+          ${audioUrl},
+          ${title},
+          ${description || null},
+          ${postContent || null},
+          ${weekNumber},
+          ${blogSlug},
+          'pending',
+          NOW(),
+          ${expiresAt.toISOString()}
+        )
+        RETURNING id, video_url, created_at, expires_at
+      `;
+    } catch (error: any) {
+      // If audio_url column doesn't exist, insert without it
+      if (error?.code === '42703' || error?.message?.includes('audio_url')) {
+        console.warn(
+          'audio_url column not found, inserting without it. Run database migration.',
+        );
+        result = await sql`
+          INSERT INTO videos (
+            type,
+            video_url,
+            title,
+            description,
+            post_content,
+            week_number,
+            blog_slug,
+            status,
+            created_at,
+            expires_at
+          ) VALUES (
+            ${type},
+            ${videoUrl},
+            ${title},
+            ${description || null},
+            ${postContent || null},
+            ${weekNumber},
+            ${blogSlug},
+            'pending',
+            NOW(),
+            ${expiresAt.toISOString()}
+          )
+          RETURNING id, video_url, created_at, expires_at
+        `;
+      } else {
+        throw error;
+      }
+    }
+
+    const videoRecord = result.rows[0];
+
+    console.log(`✅ Video generated and stored: ${videoUrl}`);
+
+    return NextResponse.json({
+      success: true,
+      video: {
+        id: videoRecord.id,
+        url: videoUrl,
+        type,
+        title,
+        description,
+        postContent,
+        weekNumber,
+        blogSlug,
+        createdAt: videoRecord.created_at,
+        expiresAt: videoRecord.expires_at,
+      },
+    });
+  } catch (error) {
+    console.error('Video generation error:', error);
+    return NextResponse.json(
+      {
+        error: 'Failed to generate video',
+        message:
+          error instanceof Error ? error.message : 'Unknown error occurred',
+      },
+      { status: 500 },
+    );
+  }
+}

@@ -17,7 +17,7 @@ interface SucculentPostData {
   platforms: string[];
   scheduledDate: string;
   media: Array<{
-    type: 'image';
+    type: 'image' | 'video';
     url: string;
     alt: string;
   }>;
@@ -78,6 +78,9 @@ export async function GET(request: NextRequest) {
 
     console.log('[weekly-substack-social] Starting weekly publish...');
 
+    // Declare shortFormVideoUrl in broader scope for use in social posts section
+    let shortFormVideoUrl: string | null = null;
+
     // Step 1: Publish to Substack (current week, offset 0)
     try {
       // Get week start (Monday of current week)
@@ -98,6 +101,102 @@ export async function GET(request: NextRequest) {
         free: substackResults.free.success,
         paid: substackResults.paid.success,
       });
+
+      // Generate videos after successful Substack publishing
+      if (substackResults.free.success || substackResults.paid.success) {
+        try {
+          console.log('[weekly-substack-social] Generating videos...');
+          const videoResponse = await fetch(`${baseUrl}/api/video/generate`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              type: 'short',
+              week: 0,
+            }),
+          });
+
+          if (videoResponse.ok) {
+            const videoData = await videoResponse.json();
+            shortFormVideoUrl = videoData.video?.url || null;
+            console.log(
+              '[weekly-substack-social] Short-form video generated:',
+              shortFormVideoUrl,
+            );
+
+            // Upload to YouTube Shorts
+            if (shortFormVideoUrl) {
+              fetch(`${baseUrl}/api/youtube/upload`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  videoUrl: shortFormVideoUrl,
+                  videoId: videoData.video?.id,
+                  title: `Week of ${weeklyData.weekStart.toLocaleDateString()}`,
+                  description: 'Your weekly cosmic forecast from Lunary',
+                  type: 'short',
+                  publishDate: weekStart.toISOString(),
+                }),
+              }).catch((err) => {
+                console.error(
+                  '[weekly-substack-social] Failed to upload to YouTube Shorts:',
+                  err,
+                );
+              });
+            }
+
+            // Generate and upload long-form video
+            const blogContent = {
+              title: `Weekly Cosmic Forecast - Week of ${weeklyData.weekStart.toLocaleDateString()}`,
+              description: freePost.subtitle || paidPost.subtitle || '',
+              body: freePost.content || paidPost.content || '',
+            };
+
+            fetch(`${baseUrl}/api/video/generate`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                type: 'long',
+                blogContent,
+              }),
+            })
+              .then(async (res) => {
+                if (res.ok) {
+                  const longVideoData = await res.json();
+                  if (longVideoData.video?.id) {
+                    await fetch(`${baseUrl}/api/youtube/upload`, {
+                      method: 'POST',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({
+                        videoUrl: longVideoData.video.url,
+                        videoId: longVideoData.video.id,
+                        title: blogContent.title,
+                        description: blogContent.description,
+                        type: 'long',
+                        publishDate: weekStart.toISOString(),
+                      }),
+                    }).catch((err) => {
+                      console.error(
+                        '[weekly-substack-social] Failed to upload long-form to YouTube:',
+                        err,
+                      );
+                    });
+                  }
+                }
+              })
+              .catch((err) => {
+                console.error(
+                  '[weekly-substack-social] Failed to generate long-form video:',
+                  err,
+                );
+              });
+          }
+        } catch (error) {
+          console.error(
+            '[weekly-substack-social] Video generation error:',
+            error,
+          );
+        }
+      }
     } catch (error) {
       console.error('[weekly-substack-social] Substack error:', error);
       results.substack = {
@@ -280,6 +379,46 @@ export async function GET(request: NextRequest) {
         twitterPost,
         linkedinPost,
       ];
+
+      // Add video posts if short-form video was generated
+      if (shortFormVideoUrl) {
+        // Instagram Reel
+        const reelTime = new Date(postTime);
+        reelTime.setMinutes(reelTime.getMinutes() + 60);
+        const igReelPost: SucculentPostData = {
+          accountGroupId,
+          name: `Lunary Weekly - Instagram Reel - ${dateStr}`,
+          content: getCaption('medium', true),
+          platforms: ['instagram'],
+          scheduledDate: reelTime.toISOString(),
+          media: [
+            {
+              type: 'video',
+              url: shortFormVideoUrl,
+              alt: content.captions.short,
+            },
+          ],
+          instagramOptions: { type: 'reel' },
+        };
+
+        // TikTok Video
+        const tiktokVideoPost: SucculentPostData = {
+          accountGroupId,
+          name: `Lunary Weekly - TikTok Video - ${dateStr}`,
+          content: getCaption('short', true),
+          platforms: ['tiktok'],
+          scheduledDate: reelTime.toISOString(),
+          media: [
+            {
+              type: 'video',
+              url: shortFormVideoUrl,
+              alt: content.captions.short,
+            },
+          ],
+        };
+
+        allPosts.push(igReelPost, tiktokVideoPost);
+      }
 
       for (const post of allPosts) {
         try {

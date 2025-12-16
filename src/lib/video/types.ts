@@ -3,7 +3,7 @@ export interface VideoConfig {
   subtitle?: string;
   weekRange?: string;
   moonPhase?: string;
-  format: 'story' | 'square' | 'landscape';
+  format: 'story' | 'square' | 'landscape' | 'youtube';
   duration: number;
   voiceoverText?: string;
 }
@@ -27,6 +27,7 @@ export const VIDEO_DIMENSIONS = {
   story: { width: 1080, height: 1920, fps: 30 },
   square: { width: 1080, height: 1080, fps: 30 },
   landscape: { width: 1920, height: 1080, fps: 30 },
+  youtube: { width: 1920, height: 1080, fps: 30 },
 } as const;
 
 export const BRAND_COLORS = {

@@ -58,6 +58,99 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Generate videos asynchronously after successful publishing
+    const baseUrl =
+      process.env.NODE_ENV === 'production'
+        ? 'https://lunary.app'
+        : 'http://localhost:3000';
+
+    // Generate short-form video for current week
+    if (
+      (publishFree && results.free.success) ||
+      (publishPaid && results.paid.success)
+    ) {
+      fetch(`${baseUrl}/api/video/generate`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          type: 'short',
+          week: weekOffset,
+        }),
+      })
+        .then(async (res) => {
+          if (res.ok) {
+            const videoData = await res.json();
+            // Upload short-form to YouTube Shorts
+            if (videoData.video?.id) {
+              await fetch(`${baseUrl}/api/youtube/upload`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  videoUrl: videoData.video.url,
+                  videoId: videoData.video.id,
+                  title: `Week of ${weeklyData.weekStart.toLocaleDateString()}`,
+                  description: 'Your weekly cosmic forecast from Lunary',
+                  type: 'short',
+                  publishDate: new Date(weeklyData.weekStart).toISOString(),
+                }),
+              }).catch((err) => {
+                console.error(
+                  'Failed to upload short-form video to YouTube:',
+                  err,
+                );
+              });
+            }
+          }
+        })
+        .catch((err) => {
+          console.error('Failed to generate short-form video:', err);
+        });
+
+      // Generate long-form video
+      const blogContent = {
+        title: `Weekly Cosmic Forecast - Week of ${weeklyData.weekStart.toLocaleDateString()}`,
+        description: freePost.subtitle || paidPost.subtitle || '',
+        body: freePost.content || paidPost.content || '',
+      };
+
+      fetch(`${baseUrl}/api/video/generate`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          type: 'long',
+          blogContent,
+        }),
+      })
+        .then(async (res) => {
+          if (res.ok) {
+            const videoData = await res.json();
+            // Upload long-form to YouTube
+            if (videoData.video?.id) {
+              await fetch(`${baseUrl}/api/youtube/upload`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  videoUrl: videoData.video.url,
+                  videoId: videoData.video.id,
+                  title: blogContent.title,
+                  description: blogContent.description,
+                  type: 'long',
+                  publishDate: new Date(weeklyData.weekStart).toISOString(),
+                }),
+              }).catch((err) => {
+                console.error(
+                  'Failed to upload long-form video to YouTube:',
+                  err,
+                );
+              });
+            }
+          }
+        })
+        .catch((err) => {
+          console.error('Failed to generate long-form video:', err);
+        });
+    }
+
     return NextResponse.json({
       success: true,
       results,
