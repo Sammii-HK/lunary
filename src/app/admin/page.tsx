@@ -37,6 +37,7 @@ import {
   Send,
   Eye,
   Play,
+  Video,
   ChevronDown,
   ChevronUp,
 } from 'lucide-react';
@@ -594,6 +595,14 @@ export default function AdminDashboard() {
       description: 'Generate and approve social media posts',
       href: '/admin/social-posts',
       icon: <Send className='h-5 w-5' />,
+      category: 'content',
+      status: 'new',
+    },
+    {
+      title: 'Video Scripts',
+      description: 'TikTok & YouTube scripts with cover images',
+      href: '/admin/video-scripts',
+      icon: <Video className='h-5 w-5' />,
       category: 'content',
       status: 'new',
     },

@@ -100,6 +100,8 @@ async function generateThematicWeeklyPosts(
     await import('@/lib/social/weekly-themes');
   const { getEducationalImageUrl } =
     await import('@/lib/social/educational-images');
+  const { generateAndSaveWeeklyScripts } =
+    await import('@/lib/social/video-script-generator');
 
   // Calculate week dates
   let startDate: Date;
@@ -289,6 +291,21 @@ async function generateThematicWeeklyPosts(
   // Record theme usage for rotation tracking
   await recordThemeUsage(sql, currentTheme.id);
 
+  // Generate video scripts for this week
+  let videoScriptsGenerated = false;
+  try {
+    const videoScripts = await generateAndSaveWeeklyScripts(
+      weekStartDate,
+      themeIndex,
+    );
+    videoScriptsGenerated = true;
+    console.log(
+      `🎬 [VIDEO] Generated ${videoScripts.tiktokScripts.length} TikTok + 1 YouTube scripts`,
+    );
+  } catch (videoError) {
+    console.error('Failed to generate video scripts:', videoError);
+  }
+
   return NextResponse.json({
     success: true,
     message: `Generated ${savedPostIds.length} thematic posts for the week`,
@@ -303,6 +320,7 @@ async function generateThematicWeeklyPosts(
     })),
     posts: allGeneratedPosts,
     savedIds: savedPostIds,
+    videoScriptsGenerated,
   });
 }
 

@@ -359,6 +359,7 @@ export function OGSymbol({
 export interface OGCategoryLabelProps {
   label: string;
   color?: string;
+  size?: number;
 }
 
 /**
@@ -367,12 +368,13 @@ export interface OGCategoryLabelProps {
 export function OGCategoryLabel({
   label,
   color = 'rgba(255, 255, 255, 0.5)',
+  size = 22,
 }: OGCategoryLabelProps) {
   return (
     <div
       style={{
         display: 'flex',
-        fontSize: '22px',
+        fontSize: `${size}px`,
         fontWeight: '400',
         color,
         textAlign: 'center',
@@ -388,6 +390,7 @@ export function OGCategoryLabel({
 export interface OGAttributeLineProps {
   text: string;
   color?: string;
+  size?: number;
 }
 
 /**
@@ -396,12 +399,13 @@ export interface OGAttributeLineProps {
 export function OGAttributeLine({
   text,
   color = 'rgba(255, 255, 255, 0.6)',
+  size = 24,
 }: OGAttributeLineProps) {
   return (
     <div
       style={{
         display: 'flex',
-        fontSize: '24px',
+        fontSize: `${size}px`,
         fontWeight: '300',
         color,
         textAlign: 'center',

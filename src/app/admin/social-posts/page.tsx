@@ -30,7 +30,9 @@ import {
   ExternalLink,
   Download,
   Edit2,
+  Video,
 } from 'lucide-react';
+import Link from 'next/link';
 import { getDefaultPostingTime } from '@/utils/posting-times';
 
 type TabType = 'generate' | 'approve';
@@ -506,14 +508,25 @@ export default function SocialPostsPage() {
   return (
     <div className='min-h-screen bg-zinc-950 text-zinc-100 p-6'>
       <div className='max-w-6xl mx-auto space-y-6'>
-        <div>
-          <h1 className='text-3xl font-bold mb-2 flex items-center gap-2'>
-            <Sparkles className='h-8 w-8 text-lunary-primary-400' />
-            Social Media Manager
-          </h1>
-          <p className='text-zinc-400'>
-            Generate and manage social media posts
-          </p>
+        <div className='flex items-start justify-between'>
+          <div>
+            <h1 className='text-3xl font-bold mb-2 flex items-center gap-2'>
+              <Sparkles className='h-8 w-8 text-lunary-primary-400' />
+              Social Media Manager
+            </h1>
+            <p className='text-zinc-400'>
+              Generate and manage social media posts
+            </p>
+          </div>
+          <Link href='/admin/video-scripts'>
+            <Button
+              variant='outline'
+              className='border-pink-500/30 text-pink-400 hover:bg-pink-500/10 hover:text-pink-300'
+            >
+              <Video className='w-4 h-4 mr-2' />
+              Video Scripts
+            </Button>
+          </Link>
         </div>
 
         {/* Tab Navigation */}

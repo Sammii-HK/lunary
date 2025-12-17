@@ -137,7 +137,38 @@ export async function GET(request: NextRequest): Promise<Response> {
     const formatParam = searchParams.get('format') || 'square';
     const format = (formatParam as Format) || 'square';
 
-    const sizes = getThematicSizes(format as OGImageSize);
+    // Cover image presets for video thumbnails
+    // 'tiktok', 'youtube', or 'true' (defaults to tiktok)
+    const coverType = searchParams.get('cover');
+    const isCoverImage =
+      coverType === 'true' || coverType === 'tiktok' || coverType === 'youtube';
+
+    // Cover size presets - larger, bolder text for thumbnail legibility
+    const coverSizePresets = {
+      tiktok: {
+        symbolSize: 246,
+        titleSize: 123,
+        subtitleSize: 78,
+        attributeSize: 64,
+        labelSize: 56,
+      },
+      youtube: {
+        symbolSize: 62,
+        titleSize: 31,
+        subtitleSize: 24,
+        attributeSize: 18,
+        labelSize: 16,
+      },
+    };
+
+    // Get base sizes, then override for cover images
+    const baseSizes = getThematicSizes(format as OGImageSize);
+    const coverPreset =
+      coverType === 'youtube'
+        ? coverSizePresets.youtube
+        : coverSizePresets.tiktok;
+
+    const sizes = isCoverImage ? { ...baseSizes, ...coverPreset } : baseSizes;
 
     // Try to get data from dynamic loader first
     const dynamicData = await getOgData(category, slug);
@@ -277,6 +308,7 @@ export async function GET(request: NextRequest): Promise<Response> {
           <OGCategoryLabel
             label={categoryLabel}
             color={themeData.subtleTextColor}
+            size={sizes.labelSize}
           />
         </div>
 
@@ -324,12 +356,15 @@ export async function GET(request: NextRequest): Promise<Response> {
             style={{
               display: 'flex',
               fontSize: `${sizes.titleSize}px`,
-              fontWeight: '500',
+              fontWeight: '700',
               color: themeData.textColor,
               textAlign: 'center',
               letterSpacing: '0.05em',
               textTransform: 'uppercase',
               fontFamily: 'Roboto Mono',
+              textShadow: isCoverImage
+                ? '0 4px 30px rgba(0,0,0,0.7), 0 2px 10px rgba(0,0,0,0.5)'
+                : '0 2px 20px rgba(0,0,0,0.5)',
             }}
           >
             {title}
@@ -340,6 +375,7 @@ export async function GET(request: NextRequest): Promise<Response> {
             <OGAttributeLine
               text={attributeText}
               color={themeData.subtleTextColor}
+              size={sizes.attributeSize}
             />
           )}
         </OGContentCenter>
