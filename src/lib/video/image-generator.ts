@@ -427,7 +427,8 @@ export async function generateTopicImages(
         // Always set title and subtitle - ensure moon phase image is always created
         if (moonPhase && moonPhase.phase) {
           moonTitle = moonPhase.phase;
-          subtitle = 'Moon phases';
+          // Include zodiac sign in subtitle if available
+          subtitle = moonPhase.sign ? `in ${moonPhase.sign}` : 'Moon phases';
         } else {
           // No moon phase found - use "No Major Changes"
           moonTitle = 'No Major Changes';
@@ -443,6 +444,45 @@ export async function generateTopicImages(
           imageKey = `moon-${moonTitle}-${usedIndices.moonPhases.size}`;
         }
         imageUrl = `${baseUrl}/api/social/images?format=${format}&title=${encodeURIComponent(moonTitle)}&subtitle=${encodeURIComponent(subtitle)}`;
+        break;
+      }
+      case 'seasonal_events': {
+        // Solstices, equinoxes, and cross-quarter days
+        let eventTitle = 'Seasonal Event';
+        let eventSubtitle = 'Cosmic Alignment';
+
+        // Check if topic has exactSeasonalEvent (ScriptItem type)
+        const seasonalEventRef =
+          'exactSeasonalEvent' in topic ? topic.exactSeasonalEvent : undefined;
+
+        if (seasonalEventRef) {
+          eventTitle = seasonalEventRef.name;
+          // Set subtitle based on event type
+          if (seasonalEventRef.type === 'solstice') {
+            eventSubtitle = seasonalEventRef.name
+              .toLowerCase()
+              .includes('winter')
+              ? 'Shortest Day of the Year'
+              : 'Longest Day of the Year';
+          } else if (seasonalEventRef.type === 'equinox') {
+            eventSubtitle = 'Day and Night in Balance';
+          } else {
+            eventSubtitle = 'Sacred Time';
+          }
+        } else if (
+          weeklyData.seasonalEvents &&
+          weeklyData.seasonalEvents.length > 0
+        ) {
+          const event = weeklyData.seasonalEvents[0];
+          eventTitle = event.name;
+          eventSubtitle = event.significance || 'Cosmic Alignment';
+        }
+
+        imageKey = `seasonal-${eventTitle}`;
+        if (usedImageKeys.has(imageKey)) {
+          imageKey = `seasonal-${eventTitle}-${images.filter((i) => i.topic === 'seasonal_events').length}`;
+        }
+        imageUrl = `${baseUrl}/api/social/images?format=${format}&title=${encodeURIComponent(eventTitle)}&subtitle=${encodeURIComponent(eventSubtitle)}`;
         break;
       }
       case 'best_days':
@@ -468,7 +508,7 @@ export async function generateTopicImages(
         const conclusionTitle = conclusionTitles[titleIndex];
 
         imageKey = 'conclusion';
-        imageUrl = `${baseUrl}/api/social/images?format=${format}&title=${encodeURIComponent(conclusionTitle)}&subtitle=${encodeURIComponent('Lunary')}`;
+        imageUrl = `${baseUrl}/api/social/images?format=${format}&title=${encodeURIComponent(conclusionTitle)}`;
         break;
       }
       default:

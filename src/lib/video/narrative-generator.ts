@@ -18,6 +18,102 @@ function getOpenAI() {
 }
 
 /**
+ * Select daily events from the week, prioritizing planetary highlights over aspects
+ * Reuses the significance ordering system from weeklyContentGenerator
+ */
+function selectDailyEvents(
+  highlights: PlanetaryHighlight[],
+  aspects: MajorAspect[],
+  weekStart: Date,
+  weekEnd: Date,
+  maxPerDay: number = 2,
+): Array<{
+  item: PlanetaryHighlight | MajorAspect;
+  type: 'planetary' | 'aspect';
+  date: Date;
+}> {
+  const significanceOrder = { extraordinary: 4, high: 3, medium: 2, low: 1 };
+  const selectedEvents: Array<{
+    item: PlanetaryHighlight | MajorAspect;
+    type: 'planetary' | 'aspect';
+    date: Date;
+  }> = [];
+
+  // Iterate through each day of the week
+  const currentDate = new Date(weekStart);
+  currentDate.setHours(12, 0, 0, 0); // Set to noon to avoid timezone issues
+
+  while (currentDate <= weekEnd) {
+    const dateKey = currentDate.toISOString().split('T')[0]; // YYYY-MM-DD
+
+    // Find all planetary highlights for this day
+    const dayHighlights = highlights.filter((h) => {
+      // Normalize both dates to noon to avoid timezone issues
+      const hDate = new Date(h.date);
+      hDate.setHours(12, 0, 0, 0);
+      const highlightDateKey = hDate.toISOString().split('T')[0];
+      return highlightDateKey === dateKey;
+    });
+
+    if (dayHighlights.length > 0) {
+      // Sort by significance (same as weeklyContentGenerator)
+      dayHighlights.sort((a, b) => {
+        const sigDiff =
+          significanceOrder[b.significance] - significanceOrder[a.significance];
+        if (sigDiff !== 0) return sigDiff;
+        // If same significance, prioritize retrograde changes over sign ingresses
+        if (a.event.includes('retrograde') && !b.event.includes('retrograde'))
+          return -1;
+        if (b.event.includes('retrograde') && !a.event.includes('retrograde'))
+          return 1;
+        return a.date.getTime() - b.date.getTime();
+      });
+
+      // Take top maxPerDay highlights
+      dayHighlights.slice(0, maxPerDay).forEach((highlight) => {
+        selectedEvents.push({
+          item: highlight,
+          type: 'planetary',
+          date: highlight.date,
+        });
+      });
+    } else {
+      // No highlights for this day, find aspects
+      const dayAspects = aspects.filter((a) => {
+        // Normalize both dates to noon to avoid timezone issues
+        const aDate = new Date(a.date);
+        aDate.setHours(12, 0, 0, 0);
+        const aspectDateKey = aDate.toISOString().split('T')[0];
+        return aspectDateKey === dateKey;
+      });
+
+      if (dayAspects.length > 0) {
+        // Sort by significance (same as weeklyContentGenerator)
+        dayAspects.sort((a, b) => {
+          const sigDiff =
+            significanceOrder[b.significance] -
+            significanceOrder[a.significance];
+          if (sigDiff !== 0) return sigDiff;
+          return a.date.getTime() - b.date.getTime();
+        });
+
+        // Take the most significant aspect
+        selectedEvents.push({
+          item: dayAspects[0],
+          type: 'aspect',
+          date: dayAspects[0].date,
+        });
+      }
+    }
+
+    // Move to next day
+    currentDate.setDate(currentDate.getDate() + 1);
+  }
+
+  return selectedEvents;
+}
+
+/**
  * Generate a narrative voiceover script from weekly blog content using OpenAI
  * This creates a natural, flowing narrative from the structured weekly data
  */
@@ -26,9 +122,33 @@ export async function generateNarrativeFromWeeklyData(
 ): Promise<string> {
   const openai = getOpenAI();
 
+  // Select daily events (1-2 planetary highlights per day, or most significant aspect if none)
+  const dailyEvents = selectDailyEvents(
+    weeklyData.planetaryHighlights,
+    weeklyData.majorAspects,
+    weeklyData.weekStart,
+    weeklyData.weekEnd,
+    2, // max 2 planetary highlights per day
+  );
+
+  console.log(
+    `📅 Selected ${dailyEvents.length} daily events across the week:`,
+    dailyEvents.map(
+      (e) =>
+        `${e.type} on ${e.date.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}`,
+    ),
+  );
+
+  // Separate planetary highlights and aspects for formatting
+  const selectedPlanetaryHighlights = dailyEvents
+    .filter((e) => e.type === 'planetary')
+    .map((e) => e.item as PlanetaryHighlight);
+  const selectedAspects = dailyEvents
+    .filter((e) => e.type === 'aspect')
+    .map((e) => e.item as MajorAspect);
+
   // Format the weekly data into a structured prompt
-  const planetaryHighlights = weeklyData.planetaryHighlights
-    .slice(0, 5)
+  const planetaryHighlights = selectedPlanetaryHighlights
     .map(
       (h) =>
         `- ${h.planet} ${h.event === 'enters-sign' && h.details.toSign ? `enters ${h.details.toSign}` : h.event.replace(/-/g, ' ')} on ${h.date.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })} (${h.significance} significance): ${h.description}`,
@@ -42,8 +162,7 @@ export async function generateNarrativeFromWeeklyData(
     )
     .join('\n');
 
-  const aspects = weeklyData.majorAspects
-    .slice(0, 5)
+  const aspects = selectedAspects
     .map(
       (a) =>
         `- ${a.planetA} ${a.aspect} ${a.planetB} on ${a.date.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}: ${a.energy}`,
@@ -70,6 +189,17 @@ export async function generateNarrativeFromWeeklyData(
     moonPhases = `- ${currentMoonPhase} moon in ${moonSign} on ${weeklyData.weekStart.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}`;
   }
 
+  // Format seasonal events (solstices, equinoxes) - IMPORTANT for dedicated section
+  const seasonalEvents =
+    weeklyData.seasonalEvents && weeklyData.seasonalEvents.length > 0
+      ? weeklyData.seasonalEvents
+          .map(
+            (e) =>
+              `- ${e.name} on ${e.date.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}: ${e.significance} (Energy: ${e.energy})`,
+          )
+          .join('\n')
+      : null;
+
   const weekRange = `${weeklyData.weekStart.toLocaleDateString('en-US', { month: 'long', day: 'numeric' })} - ${weeklyData.weekEnd.toLocaleDateString('en-US', { month: 'long', day: 'numeric' })}`;
 
   const prompt = `Create a natural, flowing voiceover script (5-8 minutes, 1200-2000 words) for a YouTube video about the weekly cosmic forecast for ${weekRange}.
@@ -78,18 +208,38 @@ CRITICAL: You MUST follow this EXACT structure in this EXACT order. Each section
 
 [OPENING - 30-60 seconds]
 Start with: "The interplay between [key planets from aspects] creates a unique energetic signature for this week, offering both challenges and opportunities for growth." Then introduce the week's theme and major events.
+${seasonalEvents ? `\n[SEASONAL EVENT - 45-60 seconds]\nThis week includes a significant seasonal event. Cover concisely:\n- What this event means astronomically (longest/shortest day, equal day/night)\n- The energetic significance and how it shifts the cosmic energy\n- Intention setting: What intentions align with this energy?\nKeep it focused on astrology and cosmic alignment - no history, no rituals, no cultural traditions.` : ''}
 
 [MAJOR PLANETARY MOVEMENTS - 2-3 minutes]
-Cover all planetary highlights in order. Discuss each planet's movement, what sign it enters, and the significance. Use the format: "This week brings several major planetary movements. [Planet 1] enters [Sign] on [Date], bringing [energy]. [Planet 2] [action] on [Date], creating [effect]."
+Cover all planetary highlights in order. For EACH planet entering a new sign, explain IN DEPTH:
+- What the planet represents (e.g., "The Sun represents our core identity, vitality, and life force")
+- What the sign represents (e.g., "Capricorn is the sign of ambition, structure, and long-term goals")
+- What it MEANS when this planet is in this sign (e.g., "Sun in Capricorn shifts our focus toward achievement, discipline, and building lasting foundations")
+- How this energy affects different areas of life
+- How long this transit lasts and what to expect
 
 [COSMIC ALIGNMENTS - 2-3 minutes]
-Cover all major aspects. Discuss the alignments between planets, their dates, and the energy they create. Use the format: "The cosmic alignments this week include [Aspect 1] between [Planet A] and [Planet B] on [Date], creating [energy]. [Aspect 2] brings [effect]."
+Cover ALL major aspects in this section (do not mix with planetary movements). For EACH aspect:
+- ALWAYS include the DATE: "On [day], [Planet] [aspect] [Planet]..."
+- Use EXACT aspect words: "square" (not "squaring"), "trine" (not "trine with"), "opposition" (not "opposing")
+- What each planet represents
+- What the aspect type means (trine = harmony, square = tension, opposition = polarity)
+- How these energies combine and what opportunities/challenges this creates
+- Practical advice for working with this energy
+
+IMPORTANT: Keep all cosmic alignments TOGETHER in this section. Do not alternate between planetary movements and aspects.
 
 [BEST DAYS FOR - 1-2 minutes]
 Cover the best days for different activities. Use the format: "The best days this week for [activity 1] are [dates], when [reason]. For [activity 2], [dates] are ideal because [reason]."
 
 [MOON PHASES - 1-2 minutes - MANDATORY]
-This section MUST be included. Cover all moon phases. If no major moon phases occur this week, discuss the current moon phase and its influence. Use the format: "The moon phases this week include [Phase] Moon in [Sign] on [Date], bringing [energy]. This lunar influence affects [areas of life]." Even if the Moon Phases data shows 'No major moon phases this week', you MUST still include a moon phases section discussing the current lunar energy.
+This section MUST be included. For EACH moon phase, explain IN DEPTH:
+- The phase name and what it represents in the lunar cycle
+- What sign the Moon is in and what that sign represents emotionally
+- What "Moon in [Sign]" MEANS - how it colors our emotional landscape, intuition, and inner world
+- Practical guidance: What activities are supported? What should we avoid?
+- Intention-setting guidance for this lunar energy (what intentions align with this phase)
+Even if no major moon phases occur, discuss the current moon phase and its influence.
 
 [CONCLUSION - 30-60 seconds]
 End with: "As we navigate this week's cosmic energy, remember that these planetary movements and alignments offer both challenges and opportunities. To dive deeper into your personal cosmic forecast and understand how these energies affect your birth chart, visit Lunary.app."
@@ -109,8 +259,9 @@ ${retrogradeInfo || 'No retrograde changes this week'}
 Major Aspects:
 ${aspects || 'No major aspects this week'}
 
-Moon Phases (MANDATORY - always include this section):
+Moon Phases (MANDATORY - always include this section, explain what Moon in each sign MEANS):
 ${moonPhases}
+${seasonalEvents ? `\nSeasonal Events (IMPORTANT - give this its own dedicated section with in-depth explanation):\n${seasonalEvents}` : ''}
 
 Best Days:
 ${
@@ -234,78 +385,53 @@ Return ONLY the voiceover script text, no markdown, no formatting, no section he
 }
 
 /**
- * Generate a short-form voiceover script (15-30 seconds) using OpenAI
- * Uses the intro portion of the narrative before "breaking it down"
+ * Generate a short-form voiceover script (10-15 seconds)
+ * Simple list of cosmic events - no AI needed
  */
-export async function generateShortFormNarrative(
+export function generateShortFormNarrative(
   weeklyData: WeeklyCosmicData,
-): Promise<string> {
-  const openai = getOpenAI();
+): string {
+  // Select daily events (1 per day) and take top 3-4 overall
+  const dailyEvents = selectDailyEvents(
+    weeklyData.planetaryHighlights,
+    weeklyData.majorAspects,
+    weeklyData.weekStart,
+    weeklyData.weekEnd,
+    1, // max 1 event per day for short form
+  );
 
-  // Same data formatting as long-form, but focus on top highlights
-  const planetaryHighlights = weeklyData.planetaryHighlights
-    .slice(0, 3) // Top 3 for short-form
-    .map(
-      (h) =>
-        `- ${h.planet} ${h.event === 'enters-sign' && h.details.toSign ? `enters ${h.details.toSign}` : h.event.replace(/-/g, ' ')} on ${h.date.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })} (${h.significance} significance): ${h.description}`,
-    )
-    .join('\n');
+  // Build list of cosmic events for quick overview
+  const events: string[] = [];
 
-  const topAspect = weeklyData.majorAspects[0];
-  const aspectInfo = topAspect
-    ? `- ${topAspect.planetA} ${topAspect.aspect} ${topAspect.planetB} on ${topAspect.date.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}: ${topAspect.energy}`
-    : 'None';
-
-  const weekRange = `${weeklyData.weekStart.toLocaleDateString('en-US', { month: 'long', day: 'numeric' })} - ${weeklyData.weekEnd.toLocaleDateString('en-US', { month: 'long', day: 'numeric' })}`;
-
-  const prompt = `Create a SHORT voiceover script (15-30 seconds, ~50-75 words) for a social media video about the weekly cosmic forecast for ${weekRange}.
-
-This should be the INTRO portion only - the opening that sets the stage. It should:
-- Start with "This week with the significant..." or similar engaging opening
-- Mention the most important planetary alignment or major event
-- Include the energetic signature: "The interplay between [key planets] creates a unique energetic signature for this week, offering both challenges and opportunities for growth."
-- Be mystical, engaging, and flow naturally
-- End with a call to action: "To find out more, read the full blog on Lunary" or similar
-- DO NOT go into details or "break it down" - this is just the intro hook
-
-Weekly Data:
-
-Title: ${weeklyData.title}
-Subtitle: ${weeklyData.subtitle}
-
-Top Planetary Highlights:
-${planetaryHighlights || 'None this week'}
-
-Most Important Aspect:
-${aspectInfo}
-
-Return ONLY the voiceover script text, no markdown, no formatting, just natural spoken text. Keep it to 50-75 words maximum.`;
-
-  try {
-    const completion = await openai.chat.completions.create({
-      model: 'gpt-4o-mini',
-      messages: [
-        {
-          role: 'system',
-          content:
-            'You are a cosmic storyteller creating engaging, mystical voiceover scripts for astrology videos. Write in a natural, conversational tone that flows smoothly when spoken aloud. For short-form, create an engaging hook that captures the essence of the week.',
-        },
-        { role: 'user', content: prompt },
-      ],
-      max_tokens: 200,
-      temperature: 0.8,
-    });
-
-    const script = completion.choices[0]?.message?.content || '';
-    if (!script || script.trim().length === 0) {
-      throw new Error('OpenAI returned an empty script');
-    }
-
-    return script.trim();
-  } catch (error) {
-    console.error('Failed to generate short-form narrative:', error);
-    throw error;
+  // Add seasonal events first (most important)
+  if (weeklyData.seasonalEvents?.length) {
+    events.push(weeklyData.seasonalEvents[0].name);
   }
+
+  // Add selected daily events (planetary highlights and aspects)
+  dailyEvents.slice(0, 3).forEach((e) => {
+    if (e.type === 'planetary') {
+      const h = e.item as PlanetaryHighlight;
+      if (h.event === 'enters-sign' && h.details.toSign) {
+        events.push(`${h.planet} enters ${h.details.toSign}`);
+      }
+    } else {
+      const a = e.item as MajorAspect;
+      events.push(`${a.planetA} ${a.aspect} ${a.planetB}`);
+    }
+  });
+
+  // Add moon phase
+  if (weeklyData.moonPhases?.length) {
+    events.push(`${weeklyData.moonPhases[0].phase} Moon`);
+  }
+
+  const eventList = events.slice(0, 4).join(', ');
+
+  // Generate a simple script that just lists the events
+  const script = `This week in the cosmos: ${eventList}. Read the full forecast on Lunary.`;
+
+  return script;
 }
 
 export async function generateMediumFormNarrative(
@@ -313,19 +439,34 @@ export async function generateMediumFormNarrative(
 ): Promise<string> {
   const openai = getOpenAI();
 
-  // Format data for medium-form - include more transits to support multiple images
-  const planetaryHighlights = weeklyData.planetaryHighlights
-    .slice(0, 5) // Include up to 5 for multiple images
+  // Select daily events (1 planetary highlight per day, or most significant aspect if none)
+  const dailyEvents = selectDailyEvents(
+    weeklyData.planetaryHighlights,
+    weeklyData.majorAspects,
+    weeklyData.weekStart,
+    weeklyData.weekEnd,
+    1, // max 1 planetary highlight per day for medium form
+  );
+
+  // Separate planetary highlights and aspects for formatting
+  const selectedPlanetaryHighlights = dailyEvents
+    .filter((e) => e.type === 'planetary')
+    .map((e) => e.item as PlanetaryHighlight);
+  const selectedAspects = dailyEvents
+    .filter((e) => e.type === 'aspect')
+    .map((e) => e.item as MajorAspect);
+
+  // Format data for medium-form
+  const planetaryHighlights = selectedPlanetaryHighlights
     .map(
       (h) =>
         `- ${h.planet} ${h.event === 'enters-sign' && h.details.toSign ? `enters ${h.details.toSign}` : h.event.replace(/-/g, ' ')} on ${h.date.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}: ${h.description}`,
     )
     .join('\n');
 
-  const aspects = weeklyData.majorAspects.slice(0, 4); // Include up to 4 for multiple images
   const aspectsInfo =
-    aspects.length > 0
-      ? aspects
+    selectedAspects.length > 0
+      ? selectedAspects
           .map(
             (a) =>
               `- ${a.planetA} ${a.aspect} ${a.planetB} on ${a.date.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}: ${a.energy}`,
@@ -344,51 +485,42 @@ export async function generateMediumFormNarrative(
           .join('\n')
       : 'No major moon phases this week';
 
+  // Include seasonal events (solstices, equinoxes) - these are significant!
+  const seasonalEvents =
+    weeklyData.seasonalEvents && weeklyData.seasonalEvents.length > 0
+      ? weeklyData.seasonalEvents
+          .map(
+            (e) =>
+              `- ${e.name} on ${e.date.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}: ${e.significance} - ${e.energy}`,
+          )
+          .join('\n')
+      : null;
+
   const weekRange = `${weeklyData.weekStart.toLocaleDateString('en-US', { month: 'long', day: 'numeric' })} - ${weeklyData.weekEnd.toLocaleDateString('en-US', { month: 'long', day: 'numeric' })}`;
 
   const prompt = `Create a MEDIUM voiceover script (30-60 seconds, ~75-150 words) for a social media video recap about the weekly cosmic forecast for ${weekRange}.
 
-This should be a TIGHT, PUNCHY RECAP that covers:
-- Opening (3-5 seconds): Direct, engaging hook - jump straight into the cosmic energy, no waffle
-- Planetary highlights (15-20 seconds): Mention multiple key planetary movements concisely - each movement should be mentioned separately
-- Major aspects (15-20 seconds): Mention multiple important cosmic alignments - each aspect should be mentioned separately
-- Moon phases (10-15 seconds): Always include moon phases - this is Lunary, moon phases are core
-- Closing (3-5 seconds): Brief ending - "For more information, check out the full blog at Lunary" (natural, informative, not salesy)
+Structure:
+1. Opening (3-5 seconds): Jump straight into the cosmic energy
+2. Planetary highlights: For each transit, say "[Planet] enters [Sign]" then ONE sentence about its meaning
+3. Aspects: For EACH aspect, you MUST say "[PlanetA] [aspect] [PlanetB]" - e.g., "Venus square Saturn brings tension to relationships"
+4. Moon phases: Say the exact phase name and sign
+5. Closing: "For more information, check out the full blog at Lunary"
+${seasonalEvents ? `6. IMPORTANT: Mention the ${weeklyData.seasonalEvents?.[0]?.name} prominently!` : ''}
 
-CRITICAL REQUIREMENTS FOR KEYWORD MATCHING:
-- You MUST use the EXACT planet names, sign names, aspect types, and moon phase names from the data below
-- For planetary movements: Use the exact format "[Planet] enters [Sign]" or "[Planet] [event]" exactly as shown in the data
-- For aspects: Use the exact format "[PlanetA] [aspect type] [PlanetB]" - use exact aspect names like "trine", "square", "conjunction", "opposition"
-- For moon phases: Use the exact phase name like "New Moon", "Full Moon", "Waxing Crescent", etc. and the exact sign name
-- This ensures accurate image generation - the script must match the data structure exactly
+CRITICAL - EXACT WORDING FOR ASPECTS:
+When mentioning aspects, you MUST use this EXACT format: "[Planet1] [aspect] [Planet2]"
+- Say "Venus square Saturn" NOT "Venus faces challenges with Saturn"
+- Say "Mars trine Jupiter" NOT "Mars and Jupiter align harmoniously"
+- Say "Mercury opposition Uranus" NOT "Mercury and Uranus oppose each other"
+The aspect word (square, trine, opposition, conjunction, sextile) MUST appear between the two planet names!
 
-Requirements:
-- Educational and informative tone - NOT conversational, NOT casual phrases like "tap into these cosmic vibes"
-- Authoritative and insightful - focus on explaining cosmic events and their significance
-- Keep it punchy and engaging for social media (Reels/TikTok/YouTube Shorts)
-- Flow naturally when spoken
-- Target 75-150 words total (30-60 seconds at 2.5 words/second)
-- Always include moon phases section (this is Lunary - moon-focused app)
-- Be concise but informative
-- NO casual/conversational language, NO "tap into", NO "vibes" - be educational
-- Intro should be direct and informative - jump straight into the cosmic events
-- Outro should mention "For more information, check out the full blog at Lunary" - informative, not salesy
-
-Weekly Data:
-
-Title: ${weeklyData.title}
-Subtitle: ${weeklyData.subtitle}
-
-Top Planetary Highlights (use EXACT planet names and sign names):
+Data to use (use EXACT wording):
 ${planetaryHighlights || 'None this week'}
-
-Major Aspects (use EXACT planet names and aspect types like "trine", "square", "conjunction", "opposition"):
 ${aspectsInfo}
-
-Moon Phases (use EXACT phase names like "New Moon", "Full Moon", "Waxing Crescent", etc. and EXACT sign names):
 ${moonPhases}
 
-Return ONLY the voiceover script text, no markdown, no formatting, just natural spoken text. Keep it to 75-150 words. Use the EXACT keywords from the data above.`;
+Return ONLY the voiceover script. Use EXACT planet and aspect names from above.`;
 
   try {
     const completion = await openai.chat.completions.create({
@@ -397,7 +529,7 @@ Return ONLY the voiceover script text, no markdown, no formatting, just natural 
         {
           role: 'system',
           content:
-            'You are an authoritative astrological educator creating educational voiceover scripts for social media videos. Write in an informative, educational tone - NOT conversational or casual. Avoid phrases like "tap into", "vibes", or casual language. Focus on explaining cosmic events, planetary movements, and their astrological significance in an educational manner. Make it engaging but authoritative. This is Lunary - a moon-focused astrology app. Moon phases are core to the brand and MUST always be included in every script. Outro should mention "For more information, check out the full blog at Lunary" - informative, not salesy. CRITICAL: You MUST use the EXACT planet names, sign names, aspect types (trine, square, conjunction, opposition), and moon phase names (New Moon, Full Moon, etc.) from the provided data to ensure accurate image generation.',
+            'You create educational astrology voiceovers. CRITICAL: For aspects, ALWAYS say "[Planet1] [aspect] [Planet2]" - e.g., "Venus square Saturn" NOT "Venus faces challenges". The aspect word MUST appear between planet names. Be authoritative, not casual.',
         },
         {
           role: 'user',
@@ -432,27 +564,33 @@ export async function generateVideoPostContent(
   const openai = getOpenAI();
 
   const weekRange = `${weeklyData.weekStart.toLocaleDateString('en-US', { month: 'long', day: 'numeric' })} - ${weeklyData.weekEnd.toLocaleDateString('en-US', { month: 'long', day: 'numeric' })}`;
-  const blogUrl = blogSlug
-    ? `https://lunary.app/blog/${blogSlug}`
-    : 'https://lunary.app';
 
-  const prompt = `Create a social media post caption to accompany a ${videoType === 'short' ? 'short-form' : 'long-form'} video about the weekly cosmic forecast for ${weekRange}.
+  // Different prompt based on video type
+  const typeDescription =
+    videoType === 'short'
+      ? 'short-form'
+      : videoType === 'medium'
+        ? 'medium-form (30-60 second recap)'
+        : 'long-form';
+
+  const prompt = `Create a social media post caption to accompany a ${typeDescription} video about the weekly cosmic forecast for ${weekRange}.
 
 The post should:
 - Be engaging and natural, not salesy
-- Gently guide people to read the full blog on Lunary if they want to learn more
-- Include a link to ${blogUrl}
+- Mention that the full blog is available on Lunary (but DO NOT include a link or URL)
+- Say something like "check out the full blog on Lunary" or "read more on the Lunary blog" - never write out the full URL
 - Be appropriate for Instagram, TikTok, and other platforms
 - Be 2-4 sentences, concise but inviting
 - Match the mystical but accessible tone of Lunary
 - For short-form: Be brief and hook-focused
+- For medium-form: Be informative, highlight key cosmic events
 - For long-form: Can be slightly longer, more informative
 
 Weekly Data:
 Title: ${weeklyData.title}
 Subtitle: ${weeklyData.subtitle}
 
-Return ONLY the post content text, no markdown, no formatting, just the caption text.`;
+Return ONLY the post content text, no markdown, no formatting, just the caption text. Do NOT include any URLs or links. Do NOT use any emojis.`;
 
   try {
     const completion = await openai.chat.completions.create({
@@ -461,7 +599,7 @@ Return ONLY the post content text, no markdown, no formatting, just the caption 
         {
           role: 'system',
           content:
-            'You are a social media content creator for Lunary, a cosmic astrology app. Create engaging, natural captions that guide people to learn more without being pushy or salesy. Write in a mystical but accessible tone.',
+            'You are a social media content creator for Lunary, a cosmic astrology app. Create engaging, natural captions that guide people to learn more without being pushy or salesy. Write in a mystical but accessible tone. DO NOT use any emojis - keep the text clean and professional.',
         },
         { role: 'user', content: prompt },
       ],
@@ -477,8 +615,8 @@ Return ONLY the post content text, no markdown, no formatting, just the caption 
     return postContent.trim();
   } catch (error) {
     console.error('Failed to generate video post content:', error);
-    // Fallback to a simple post content
-    return `Your cosmic forecast for the week of ${weekRange}. To read the full blog and dive deeper into this week's cosmic energy, visit ${blogUrl}`;
+    // Fallback to a simple post content - no URLs
+    return `Your cosmic forecast for the week of ${weekRange}. For more details, check out the full blog on Lunary.`;
   }
 }
 
@@ -489,6 +627,7 @@ export interface ScriptTopic {
     | 'retrogrades'
     | 'aspects'
     | 'moon_phases'
+    | 'seasonal_events'
     | 'best_days'
     | 'conclusion';
   text: string;
@@ -502,6 +641,7 @@ export interface ScriptItem extends ScriptTopic {
   exactPlanet?: PlanetaryHighlight; // Exact planet movement reference
   exactAspect?: MajorAspect; // Exact aspect reference
   exactMoonPhase?: MoonPhaseEvent; // Exact moon phase reference
+  exactSeasonalEvent?: { name: string; type: string; date: Date }; // Exact seasonal event reference
 }
 
 /**
@@ -845,15 +985,33 @@ function extractAspect(
     'pluto',
   ];
 
-  const aspects = [
-    'conjunction',
-    'conjunct',
-    'trine',
-    'square',
-    'opposition',
-    'opposite',
-    'sextile',
-  ];
+  // Include variations of aspect words
+  const aspectVariations: { [key: string]: string } = {
+    conjunction: 'conjunction',
+    conjunct: 'conjunction',
+    conjoins: 'conjunction',
+    trine: 'trine',
+    trines: 'trine',
+    trining: 'trine',
+    'trine with': 'trine',
+    'trine to': 'trine',
+    square: 'square',
+    squares: 'square',
+    squaring: 'square',
+    'square with': 'square',
+    'square to': 'square',
+    opposition: 'opposition',
+    opposite: 'opposition',
+    opposes: 'opposition',
+    opposing: 'opposition',
+    sextile: 'sextile',
+    sextiles: 'sextile',
+    sextiling: 'sextile',
+    'sextile with': 'sextile',
+    'sextile to': 'sextile',
+  };
+
+  const aspects = Object.keys(aspectVariations);
 
   // Try to match "PlanetA aspect PlanetB" pattern with strict word order
   for (const planetA of planets) {
@@ -864,10 +1022,8 @@ function extractAspect(
       const aspectIndex = lowerSentence.indexOf(aspect);
       if (aspectIndex === -1 || aspectIndex <= planetAIndex) continue;
 
-      // Normalize aspect name
-      let normalizedAspect = aspect;
-      if (aspect === 'conjunct') normalizedAspect = 'conjunction';
-      if (aspect === 'opposite') normalizedAspect = 'opposition';
+      // Normalize aspect name using the mapping
+      const normalizedAspect = aspectVariations[aspect];
 
       // Look for PlanetB after the aspect
       for (const planetB of planets) {
@@ -1025,9 +1181,9 @@ function extractMoonPhase(
 export function segmentScriptIntoItems(
   script: string,
   weeklyData: WeeklyCosmicData,
+  wordsPerSecond: number = 2.5, // Can be overridden with actual audio rate
 ): ScriptItem[] {
   const items: ScriptItem[] = [];
-  const wordsPerSecond = 2.5; // Average speaking rate
   let currentTime = 0;
 
   // Split script into sentences
@@ -1048,6 +1204,7 @@ export function segmentScriptIntoItems(
 
   const minItemDuration = 2; // Minimum 2 seconds per item
   const usedExactItems = new Set<string>(); // Track used exact items to avoid duplicates
+  // For long-form, we allow multiple segments of same type (e.g., multiple planet transits)
 
   // Planet and aspect names for checking best_days assignment
   const planets = [
@@ -1065,11 +1222,20 @@ export function segmentScriptIntoItems(
   const aspects = [
     'conjunction',
     'conjunct',
+    'conjoins',
     'trine',
+    'trines',
+    'trining',
     'square',
+    'squares',
+    'squaring',
     'opposition',
     'opposite',
+    'opposes',
+    'opposing',
     'sextile',
+    'sextiles',
+    'sextiling',
   ];
 
   // Start with intro - it stays intro unless exact item found
@@ -1080,6 +1246,11 @@ export function segmentScriptIntoItems(
   let currentExactPlanet: PlanetaryHighlight | null = null;
   let currentExactAspect: MajorAspect | null = null;
   let currentExactMoonPhase: MoonPhaseEvent | null = null;
+  let currentExactSeasonalEvent: {
+    name: string;
+    type: string;
+    date: Date;
+  } | null = null;
   let isFirstSegment = true; // Track if we're still in intro
 
   for (const sentence of sentences) {
@@ -1133,6 +1304,7 @@ export function segmentScriptIntoItems(
     let detectedItem: string | null = null;
 
     // Priority 1: Try to extract exact moon phase (critical for Lunary)
+    // Allow multiple moon segments if different phases are mentioned
     exactMoonPhase = extractMoonPhase(sentence, weeklyData);
     if (exactMoonPhase) {
       const itemKey = `moon-${exactMoonPhase.phase}-${exactMoonPhase.sign}`;
@@ -1160,55 +1332,160 @@ export function segmentScriptIntoItems(
         lowerSentence.includes('no major moon phases') ||
         (!hasPlanetMention && !hasAspectMention)
       ) {
-        detectedTopic = 'moon_phases';
-        detectedItem = 'moon-phase-no-match';
-        // exactMoonPhase remains undefined - image generator will show "No Major Changes"
+        // Use the first moon phase from weeklyData if available (only if not already used)
+        const fallbackMoon =
+          weeklyData.moonPhases.length > 0 ? weeklyData.moonPhases[0] : null;
+        const moonKey = fallbackMoon
+          ? `moon-${fallbackMoon.phase}-${fallbackMoon.sign}`
+          : 'moon-phase-no-match';
+        if (!usedExactItems.has(moonKey)) {
+          if (fallbackMoon) {
+            detectedTopic = 'moon_phases';
+            detectedItem = moonKey;
+            exactMoonPhase = fallbackMoon;
+          } else {
+            detectedTopic = 'moon_phases';
+            detectedItem = moonKey;
+            // exactMoonPhase remains undefined - image generator will show "No Major Changes"
+          }
+          usedExactItems.add(moonKey);
+        }
       }
     }
+
+    // Priority 1.5: Seasonal Events (solstice, equinox) - give them dedicated segments
+    if (!detectedTopic) {
+      if (
+        lowerSentence.includes('solstice') ||
+        lowerSentence.includes('equinox') ||
+        lowerSentence.includes('winter solstice') ||
+        lowerSentence.includes('summer solstice') ||
+        lowerSentence.includes('spring equinox') ||
+        lowerSentence.includes('fall equinox') ||
+        lowerSentence.includes('autumn equinox') ||
+        lowerSentence.includes('shortest day') ||
+        lowerSentence.includes('longest day') ||
+        lowerSentence.includes('imbolc') ||
+        lowerSentence.includes('beltane') ||
+        lowerSentence.includes('lughnasadh') ||
+        lowerSentence.includes('samhain')
+      ) {
+        const seasonalEvent =
+          weeklyData.seasonalEvents && weeklyData.seasonalEvents.length > 0
+            ? weeklyData.seasonalEvents[0]
+            : null;
+        if (seasonalEvent) {
+          const itemKey = `seasonal-${seasonalEvent.name}`;
+          if (!usedExactItems.has(itemKey)) {
+            detectedTopic = 'seasonal_events';
+            detectedItem = itemKey;
+            usedExactItems.add(itemKey);
+            currentExactSeasonalEvent = {
+              name: seasonalEvent.name,
+              type: seasonalEvent.type,
+              date: seasonalEvent.date,
+            };
+          }
+        }
+      }
+    }
+
     // Priority 2: Try to extract exact aspect
     if (!detectedTopic) {
       exactAspect = extractAspect(sentence, weeklyData);
       if (exactAspect) {
-        const itemKey = `aspect-${exactAspect.planetA}-${exactAspect.aspect}-${exactAspect.planetB}`;
+        // Include date to prevent duplicates of same aspect on different days
+        const dateKey = exactAspect.date.toISOString().split('T')[0]; // YYYY-MM-DD
+        const itemKey = `aspect-${exactAspect.planetA}-${exactAspect.aspect}-${exactAspect.planetB}-${dateKey}`;
         if (!usedExactItems.has(itemKey)) {
           detectedTopic = 'aspects';
           detectedItem = itemKey;
           usedExactItems.add(itemKey);
         }
       }
-      // Priority 3: Try to extract exact planet movement
+      // Fallback: keyword-based aspect detection for long-form
       else {
-        exactPlanet = extractPlanetMovement(sentence, weeklyData);
-        if (exactPlanet) {
-          const itemKey = `planet-${exactPlanet.planet}-${exactPlanet.event}`;
+        const hasAspectWord = aspects.some((a) => lowerSentence.includes(a));
+        const mentionedPlanets = planets.filter((p) =>
+          lowerSentence.includes(p),
+        );
+        // If sentence has an aspect word and 2+ planets, create an aspect segment
+        if (hasAspectWord && mentionedPlanets.length >= 2) {
+          const aspectWord =
+            aspects.find((a) => lowerSentence.includes(a)) || 'aspect';
+          const itemKey = `aspect-${mentionedPlanets[0]}-${aspectWord}-${mentionedPlanets[1]}`;
+          if (!usedExactItems.has(itemKey)) {
+            detectedTopic = 'aspects';
+            detectedItem = itemKey;
+            usedExactItems.add(itemKey);
+            // Try to find matching aspect in weeklyData
+            exactAspect =
+              weeklyData.majorAspects.find(
+                (a) =>
+                  a.planetA.toLowerCase() === mentionedPlanets[0] ||
+                  a.planetB.toLowerCase() === mentionedPlanets[0],
+              ) || null;
+          }
+        }
+      }
+    }
+
+    // Priority 3: Try to extract exact planet movement
+    if (!detectedTopic) {
+      exactPlanet = extractPlanetMovement(sentence, weeklyData);
+      if (exactPlanet) {
+        // Include date to prevent duplicates of same planet/event on different days
+        const dateKey = exactPlanet.date.toISOString().split('T')[0]; // YYYY-MM-DD
+        const itemKey = `planet-${exactPlanet.planet}-${exactPlanet.event}-${dateKey}`;
+        if (!usedExactItems.has(itemKey)) {
+          detectedTopic = 'planetary_highlights';
+          detectedItem = itemKey;
+          usedExactItems.add(itemKey);
+        }
+      }
+      // Fallback: keyword-based planet detection for long-form
+      else {
+        const mentionedPlanet = planets.find(
+          (p) => p !== 'moon' && lowerSentence.includes(p),
+        );
+        const hasMovementWord =
+          lowerSentence.includes('enters') ||
+          lowerSentence.includes('moves into') ||
+          lowerSentence.includes('shifts') ||
+          lowerSentence.includes('transit');
+        if (mentionedPlanet && hasMovementWord) {
+          const itemKey = `planet-${mentionedPlanet}-movement`;
           if (!usedExactItems.has(itemKey)) {
             detectedTopic = 'planetary_highlights';
             detectedItem = itemKey;
             usedExactItems.add(itemKey);
+            // Try to find matching planet in weeklyData
+            exactPlanet =
+              weeklyData.planetaryHighlights.find(
+                (h) => h.planet.toLowerCase() === mentionedPlanet,
+              ) || null;
           }
         }
-        // Priority 4: Check for best days - only if no exact item found AND keywords are clear
-        else if (
-          !isFirstSegment && // Don't assign best_days to intro
-          (lowerSentence.includes('best days') ||
-            lowerSentence.includes('best for') ||
-            (lowerSentence.includes('ideal') &&
-              (lowerSentence.includes('timing') ||
-                lowerSentence.includes('day') ||
-                lowerSentence.includes('date'))))
-        ) {
-          // Only assign best_days if we're sure - check that no planets/aspects mentioned
-          const hasPlanetMention = planets.some((p) =>
-            lowerSentence.includes(p),
-          );
-          const hasAspectMention = aspects.some((a) =>
-            lowerSentence.includes(a),
-          );
-          if (!hasPlanetMention && !hasAspectMention) {
-            detectedTopic = 'best_days';
-            detectedItem = 'best-days';
-          }
-        }
+      }
+    }
+
+    // Priority 4: Check for best days - only if no exact item found AND keywords are clear
+    if (
+      !detectedTopic &&
+      !isFirstSegment && // Don't assign best_days to intro
+      (lowerSentence.includes('best days') ||
+        lowerSentence.includes('best for') ||
+        (lowerSentence.includes('ideal') &&
+          (lowerSentence.includes('timing') ||
+            lowerSentence.includes('day') ||
+            lowerSentence.includes('date'))))
+    ) {
+      // Only assign best_days if we're sure - check that no planets/aspects mentioned
+      const hasPlanetMention = planets.some((p) => lowerSentence.includes(p));
+      const hasAspectMention = aspects.some((a) => lowerSentence.includes(a));
+      if (!hasPlanetMention && !hasAspectMention) {
+        detectedTopic = 'best_days';
+        detectedItem = 'best-days';
       }
     }
 
@@ -1227,6 +1504,7 @@ export function segmentScriptIntoItems(
             exactPlanet: currentExactPlanet || undefined,
             exactAspect: currentExactAspect || undefined,
             exactMoonPhase: currentExactMoonPhase || undefined,
+            exactSeasonalEvent: currentExactSeasonalEvent || undefined,
           });
         }
       }
@@ -1236,6 +1514,10 @@ export function segmentScriptIntoItems(
       currentExactPlanet = exactPlanet;
       currentExactAspect = exactAspect;
       currentExactMoonPhase = exactMoonPhase;
+      // Reset seasonal event unless we're starting a seasonal segment
+      if (detectedTopic !== 'seasonal_events') {
+        currentExactSeasonalEvent = null;
+      }
       currentItemText = [sentence.trim()];
       itemStartTime = currentTime;
       isFirstSegment = false;
@@ -1260,6 +1542,7 @@ export function segmentScriptIntoItems(
         exactPlanet: currentExactPlanet || undefined,
         exactAspect: currentExactAspect || undefined,
         exactMoonPhase: currentExactMoonPhase || undefined,
+        exactSeasonalEvent: currentExactSeasonalEvent || undefined,
       });
     }
   }
@@ -1323,8 +1606,8 @@ export function segmentScriptIntoItems(
 export function segmentScriptIntoMediumItems(
   script: string,
   weeklyData: WeeklyCosmicData,
+  wordsPerSecond: number = 2.5, // Can be overridden with actual audio rate
 ): ScriptItem[] {
-  const wordsPerSecond = 2.5;
   let currentTime = 0;
 
   // Split script into sentences
@@ -1348,10 +1631,17 @@ export function segmentScriptIntoMediumItems(
 
   // Track moon phases (always included, but only once)
   let hasMoonPhase = false;
+  let hasSeasonalEvent = false;
 
   // Get top moon phase for fallback
   const topMoonPhase =
     weeklyData.moonPhases.length > 0 ? weeklyData.moonPhases[0] : null;
+
+  // Get seasonal events
+  const seasonalEvent =
+    weeklyData.seasonalEvents && weeklyData.seasonalEvents.length > 0
+      ? weeklyData.seasonalEvents[0]
+      : null;
 
   let currentTopic: ScriptTopic['topic'] = 'intro';
   let currentItemText: string[] = [];
@@ -1360,6 +1650,11 @@ export function segmentScriptIntoMediumItems(
   let currentExactPlanet: PlanetaryHighlight | null = null;
   let currentExactAspect: MajorAspect | null = null;
   let currentExactMoonPhase: MoonPhaseEvent | null = null;
+  let currentExactSeasonalEvent: {
+    name: string;
+    type: string;
+    date: Date;
+  } | null = null;
   let isFirstSegment = true;
 
   for (const sentence of sentences) {
@@ -1448,11 +1743,39 @@ export function segmentScriptIntoMediumItems(
       }
     }
 
+    // Priority 1.5: Seasonal Events (solstice, equinox - very important!)
+    if (!detectedTopic && !hasSeasonalEvent && seasonalEvent) {
+      if (
+        lowerSentence.includes('solstice') ||
+        lowerSentence.includes('equinox') ||
+        lowerSentence.includes('winter solstice') ||
+        lowerSentence.includes('summer solstice') ||
+        lowerSentence.includes('spring equinox') ||
+        lowerSentence.includes('fall equinox') ||
+        lowerSentence.includes('autumn equinox') ||
+        lowerSentence.includes('imbolc') ||
+        lowerSentence.includes('beltane') ||
+        lowerSentence.includes('lughnasadh') ||
+        lowerSentence.includes('samhain')
+      ) {
+        detectedTopic = 'seasonal_events';
+        detectedItem = `seasonal-${seasonalEvent.name}`;
+        currentExactSeasonalEvent = {
+          name: seasonalEvent.name,
+          type: seasonalEvent.type,
+          date: seasonalEvent.date,
+        };
+        hasSeasonalEvent = true;
+      }
+    }
+
     // Priority 2: Extract ANY planetary movement mentioned (create segment for each unique one)
     if (!detectedTopic) {
       exactPlanet = extractPlanetMovement(sentence, weeklyData);
       if (exactPlanet) {
-        const itemKey = `planet-${exactPlanet.planet}-${exactPlanet.event}`;
+        // Include date to prevent duplicates of same planet/event on different days
+        const dateKey = exactPlanet.date.toISOString().split('T')[0]; // YYYY-MM-DD
+        const itemKey = `planet-${exactPlanet.planet}-${exactPlanet.event}-${dateKey}`;
         // Only create segment if this specific planet/event hasn't been used yet
         if (!usedExactItems.has(itemKey)) {
           detectedTopic = 'planetary_highlights';
@@ -1466,7 +1789,9 @@ export function segmentScriptIntoMediumItems(
     if (!detectedTopic) {
       exactAspect = extractAspect(sentence, weeklyData);
       if (exactAspect) {
-        const itemKey = `aspect-${exactAspect.planetA}-${exactAspect.aspect}-${exactAspect.planetB}`;
+        // Include date to prevent duplicates of same aspect on different days
+        const dateKey = exactAspect.date.toISOString().split('T')[0]; // YYYY-MM-DD
+        const itemKey = `aspect-${exactAspect.planetA}-${exactAspect.aspect}-${exactAspect.planetB}-${dateKey}`;
         // Only create segment if this specific aspect hasn't been used yet
         if (!usedExactItems.has(itemKey)) {
           detectedTopic = 'aspects';
@@ -1491,6 +1816,7 @@ export function segmentScriptIntoMediumItems(
             exactPlanet: currentExactPlanet || undefined,
             exactAspect: currentExactAspect || undefined,
             exactMoonPhase: currentExactMoonPhase || undefined,
+            exactSeasonalEvent: currentExactSeasonalEvent || undefined,
           });
         }
       }
@@ -1500,6 +1826,10 @@ export function segmentScriptIntoMediumItems(
       currentExactPlanet = exactPlanet;
       currentExactAspect = exactAspect;
       currentExactMoonPhase = exactMoonPhase;
+      // Keep seasonal event if it was just detected, otherwise reset
+      if (detectedTopic !== 'seasonal_events') {
+        currentExactSeasonalEvent = null;
+      }
       currentItemText = [sentence.trim()];
       itemStartTime = currentTime;
       isFirstSegment = false;
@@ -1524,6 +1854,7 @@ export function segmentScriptIntoMediumItems(
         exactPlanet: currentExactPlanet || undefined,
         exactAspect: currentExactAspect || undefined,
         exactMoonPhase: currentExactMoonPhase || undefined,
+        exactSeasonalEvent: currentExactSeasonalEvent || undefined,
       });
     }
   }

@@ -14,6 +14,21 @@ export class OpenAITTSProvider implements TTSProvider {
   }
 
   /**
+   * Preprocess text to help TTS with pronunciation of astrological terms
+   * Fixes stuttering issues with duplicate words
+   */
+  private preprocessTextForTTS(text: string): string {
+    // Remove duplicate consecutive words (TTS stuttering fix)
+    // e.g., "Sagitta-Sagittarius" or "the the" -> single word
+    let processed = text.replace(/\b(\w+)[-\s]+\1\b/gi, '$1');
+
+    // Clean up any double spaces
+    processed = processed.replace(/\s+/g, ' ');
+
+    return processed;
+  }
+
+  /**
    * Split text into chunks that fit within OpenAI TTS character limit (4096)
    * Tries to split at sentence boundaries to avoid cutting mid-sentence
    */
@@ -83,16 +98,19 @@ export class OpenAITTSProvider implements TTSProvider {
     const voice = 'nova'; // Always use British female voice
     const model = options.model || 'tts-1-hd'; // High quality by default
 
+    // Preprocess text to help with pronunciation
+    const processedText = this.preprocessTextForTTS(text);
+
     console.log(
       `🎙️ Generating voiceover with voice: ${voice} (British female)`,
     );
 
     // Check if text exceeds character limit
-    if (text.length > 4096) {
+    if (processedText.length > 4096) {
       console.log(
-        `📝 Text is ${text.length} characters, splitting into chunks...`,
+        `📝 Text is ${processedText.length} characters, splitting into chunks...`,
       );
-      const chunks = this.splitTextIntoChunks(text, 3500);
+      const chunks = this.splitTextIntoChunks(processedText, 3500);
       console.log(`📦 Split into ${chunks.length} chunks`);
 
       // Generate audio for each chunk
@@ -133,8 +151,8 @@ export class OpenAITTSProvider implements TTSProvider {
     const response = await this.client.audio.speech.create({
       model,
       voice: voice as any,
-      input: text,
-      speed: options.speed || 1.0,
+      input: processedText,
+      speed: options.speed || 1.1,
     });
 
     return await response.arrayBuffer();

@@ -44,8 +44,49 @@ export default function SocialPreviewPage() {
   const [videoGenerationSuccess, setVideoGenerationSuccess] = useState<
     string | null
   >(null);
+  const [postingVideoId, setPostingVideoId] = useState<string | null>(null);
+  const [postingResults, setPostingResults] = useState<{
+    [videoId: string]: {
+      tiktok?: { success: boolean; error?: string };
+      instagram?: { success: boolean; error?: string };
+      youtube?: { success: boolean; error?: string };
+    };
+  }>({});
 
   const formats = ['story', 'square', 'portrait', 'landscape'] as const;
+
+  const postToPlatforms = async (
+    videoId: string,
+    platforms: ('tiktok' | 'instagram' | 'youtube')[],
+  ) => {
+    setPostingVideoId(videoId);
+    try {
+      const response = await fetch('/api/video/post-to-platforms', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ videoId, platforms }),
+      });
+
+      const data = await response.json();
+      if (data.results) {
+        setPostingResults((prev) => ({
+          ...prev,
+          [videoId]: data.results,
+        }));
+      }
+
+      // Refresh videos list after posting
+      if (data.success) {
+        setTimeout(() => {
+          window.location.reload();
+        }, 2000);
+      }
+    } catch (error) {
+      console.error('Failed to post to platforms:', error);
+    } finally {
+      setPostingVideoId(null);
+    }
+  };
 
   // Fetch videos from database
   useEffect(() => {
@@ -661,6 +702,107 @@ export default function SocialPreviewPage() {
                       >
                         Retry Upload
                       </button>
+                    )}
+                  </div>
+
+                  {/* Post to Platforms */}
+                  <div className='mt-3 pt-3 border-t border-zinc-700'>
+                    <p className='text-zinc-400 text-xs mb-2'>
+                      Post to platforms:
+                    </p>
+                    <div className='flex gap-2 flex-wrap'>
+                      <button
+                        onClick={() => postToPlatforms(video.id, ['tiktok'])}
+                        disabled={postingVideoId === video.id}
+                        className='bg-zinc-700 hover:bg-zinc-600 disabled:opacity-50 text-white px-3 py-1 rounded text-xs transition-colors'
+                      >
+                        {postingVideoId === video.id ? 'Posting...' : 'TikTok'}
+                      </button>
+                      <button
+                        onClick={() => postToPlatforms(video.id, ['instagram'])}
+                        disabled={postingVideoId === video.id}
+                        className='bg-zinc-700 hover:bg-zinc-600 disabled:opacity-50 text-white px-3 py-1 rounded text-xs transition-colors'
+                      >
+                        {postingVideoId === video.id
+                          ? 'Posting...'
+                          : video.type === 'short'
+                            ? 'IG Story'
+                            : 'IG Reel'}
+                      </button>
+                      <button
+                        onClick={() => postToPlatforms(video.id, ['youtube'])}
+                        disabled={postingVideoId === video.id}
+                        className='bg-zinc-700 hover:bg-zinc-600 disabled:opacity-50 text-white px-3 py-1 rounded text-xs transition-colors'
+                      >
+                        {postingVideoId === video.id
+                          ? 'Posting...'
+                          : video.type === 'long'
+                            ? 'YouTube'
+                            : 'YT Shorts'}
+                      </button>
+                      <button
+                        onClick={() =>
+                          postToPlatforms(video.id, [
+                            'tiktok',
+                            'instagram',
+                            'youtube',
+                          ])
+                        }
+                        disabled={postingVideoId === video.id}
+                        className='bg-lunary-primary-600 hover:bg-lunary-primary-700 disabled:opacity-50 text-white px-3 py-1 rounded text-xs transition-colors'
+                      >
+                        {postingVideoId === video.id
+                          ? 'Posting...'
+                          : 'All Platforms'}
+                      </button>
+                    </div>
+
+                    {/* Show posting results */}
+                    {postingResults[video.id] && (
+                      <div className='mt-2 text-xs space-y-1'>
+                        {postingResults[video.id].tiktok && (
+                          <div
+                            className={
+                              postingResults[video.id].tiktok?.success
+                                ? 'text-green-400'
+                                : 'text-red-400'
+                            }
+                          >
+                            TikTok:{' '}
+                            {postingResults[video.id].tiktok?.success
+                              ? '✓ Posted'
+                              : `✗ ${postingResults[video.id].tiktok?.error}`}
+                          </div>
+                        )}
+                        {postingResults[video.id].instagram && (
+                          <div
+                            className={
+                              postingResults[video.id].instagram?.success
+                                ? 'text-green-400'
+                                : 'text-red-400'
+                            }
+                          >
+                            Instagram:{' '}
+                            {postingResults[video.id].instagram?.success
+                              ? '✓ Posted'
+                              : `✗ ${postingResults[video.id].instagram?.error}`}
+                          </div>
+                        )}
+                        {postingResults[video.id].youtube && (
+                          <div
+                            className={
+                              postingResults[video.id].youtube?.success
+                                ? 'text-green-400'
+                                : 'text-red-400'
+                            }
+                          >
+                            YouTube:{' '}
+                            {postingResults[video.id].youtube?.success
+                              ? '✓ Uploaded'
+                              : `✗ ${postingResults[video.id].youtube?.error}`}
+                          </div>
+                        )}
+                      </div>
                     )}
                   </div>
                 </div>

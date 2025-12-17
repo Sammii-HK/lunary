@@ -319,7 +319,11 @@ export async function composeVideo(
       const imagePath = join(tempDir, `image-${timestamp}.png`);
       await writeFile(imagePath, imageBuffer);
 
-      // Create FFmpeg command
+      console.log(
+        `🎵 Creating single-image video with audio duration: ${audioDuration.toFixed(2)}s`,
+      );
+
+      // Create FFmpeg command with explicit duration
       await new Promise<void>((resolve, reject) => {
         ffmpeg()
           .input(imagePath)
@@ -336,7 +340,8 @@ export async function composeVideo(
             '192k',
             '-pix_fmt',
             'yuv420p',
-            '-shortest',
+            '-t',
+            audioDuration.toFixed(2), // Explicit duration limit
             '-s',
             `${dimensions.width}x${dimensions.height}`,
           ])

@@ -17,9 +17,9 @@ import { generateWeeklyContent } from '../../../../../utils/blog/weeklyContentGe
 
 // Version for cache invalidation - increment when prompts change
 const SCRIPT_VERSION = {
-  short: 'v2',
-  medium: 'v4', // Updated for educational tone and outro changes
-  long: 'v2',
+  short: 'v11', // v5: fixed moon phase detection using MoonPhase angle + seasonal events
+  medium: 'v13', // v9: explains what Sun in X means, seasonal events
+  long: 'v10', // v7: dedicated solstice section, in-depth Sun/Moon meanings, intention setting
 };
 
 export const runtime = 'nodejs';
@@ -246,8 +246,9 @@ export async function POST(request: NextRequest) {
       weekNumber = week;
       const weekRange = getWeekDates(week);
       videoFormat = 'story';
-      title = `Weekly Cosmic Recap - Week of ${weekRange}`;
-      description = 'Your quick weekly cosmic forecast recap from Lunary';
+      // Title will be set from weeklyData.title after generation
+      title = `Weekly Cosmic Forecast - Week of ${weekRange}`;
+      description = 'Your quick weekly cosmic forecast from Lunary';
       // imageUrl will be set based on weekly data after we generate it
       imageUrl = ''; // Temporary, will be set later
     } else {
@@ -332,6 +333,11 @@ export async function POST(request: NextRequest) {
 
       weeklyData = await generateWeeklyContent(weekStart);
       console.log('✅ Generated weeklyData for medium-form video');
+
+      // Update title to use the weekly data title (same as intro slide)
+      if (weeklyData?.title) {
+        title = weeklyData.title;
+      }
     } else {
       // Long-form: cache by blog slug or week number + version
       weekKey = blogSlug ? `blog-${blogSlug}` : `week-${weekNumber || 0}`;
@@ -525,67 +531,18 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Method 2: If Blob check didn't find it, check database
-    if (!audioUrl || !audioBuffer) {
-      let existingAudio;
-      try {
-        if (type === 'short' && weekNumber !== null) {
-          existingAudio = await sql`
-            SELECT audio_url FROM videos 
-            WHERE audio_url IS NOT NULL 
-            AND type = ${type}
-            AND week_number = ${weekNumber}
-            ORDER BY created_at DESC
-            LIMIT 1
-          `;
-        } else if (type === 'long' && blogSlug) {
-          existingAudio = await sql`
-            SELECT audio_url FROM videos 
-            WHERE audio_url IS NOT NULL 
-            AND type = ${type}
-            AND blog_slug = ${blogSlug}
-            ORDER BY created_at DESC
-            LIMIT 1
-          `;
-        } else {
-          existingAudio = { rows: [] };
-        }
-      } catch (error: any) {
-        if (error?.code === '42703' || error?.message?.includes('audio_url')) {
-          console.log(
-            'ℹ️ audio_url column not found, will check Blob or generate new',
-          );
-          existingAudio = { rows: [] };
-        } else {
-          throw error;
-        }
-      }
-
-      if (existingAudio.rows.length > 0 && existingAudio.rows[0].audio_url) {
-        try {
-          const audioResponse = await fetch(existingAudio.rows[0].audio_url);
-          if (audioResponse.ok) {
-            audioBuffer = await audioResponse.arrayBuffer();
-            audioUrl = existingAudio.rows[0].audio_url;
-            console.log(
-              `♻️ Reusing cached audio from database for ${weekKey}: ${audioUrl}`,
-            );
-          }
-        } catch (error) {
-          console.warn('Failed to fetch cached audio from database:', error);
-        }
-      }
-    }
-
-    // Method 3: Generate new audio only if not found in Blob or database
+    // Generate new audio if not found in Blob cache
+    // Note: Database lookup removed - was causing stale audio to be reused when versions changed
     if (!audioUrl || !audioBuffer) {
       console.log(
         `🎙️ Generating new audio for ${type} video (not found in cache for ${weekKey})...`,
       );
+      // Medium form uses slightly faster speed for more engaging content
+      const ttsSpeed = type === 'medium' ? 1.1 : 1.0;
       audioBuffer = await generateVoiceover(script, {
         voiceName: 'nova', // British female voice
         model: 'tts-1-hd', // High quality
-        speed: 1.0,
+        speed: ttsSpeed,
       });
 
       // Upload audio to Vercel Blob with week/blog key
@@ -652,10 +609,27 @@ export async function POST(request: NextRequest) {
     if ((type === 'medium' || type === 'long') && weeklyData) {
       try {
         console.log(`📝 Segmenting script into items...`);
+
+        // Calculate ACTUAL words per second from generated audio
+        let actualWordsPerSecond = 2.5; // Default fallback
+        if (actualAudioDuration && actualAudioDuration > 0) {
+          const totalWords = script.split(/\s+/).length;
+          actualWordsPerSecond = totalWords / actualAudioDuration;
+
+          console.log(
+            `⏱️ Audio: ${actualAudioDuration.toFixed(2)}s, ${totalWords} words = ${actualWordsPerSecond.toFixed(2)} wps`,
+          );
+        }
+
         const items =
           type === 'medium'
-            ? segmentScriptIntoMediumItems(script, weeklyData)
-            : segmentScriptIntoItems(script, weeklyData);
+            ? segmentScriptIntoMediumItems(
+                script,
+                weeklyData,
+                actualWordsPerSecond,
+              )
+            : segmentScriptIntoItems(script, weeklyData, actualWordsPerSecond);
+
         console.log(
           `📸 Generated ${items.length} item segments: ${items.map((t) => `${t.topic}${t.item ? ` (${t.item})` : ''}`).join(', ')}`,
         );
@@ -664,22 +638,8 @@ export async function POST(request: NextRequest) {
           throw new Error('No items found in script');
         }
 
-        // Scale timestamps proportionally to match actual audio duration
-        let scaledItems = items;
-        if (actualAudioDuration && actualAudioDuration > 0) {
-          const estimatedDuration = items[items.length - 1]?.endTime || 0;
-          if (estimatedDuration > 0) {
-            const scaleFactor = actualAudioDuration / estimatedDuration;
-            console.log(
-              `⏱️ Scaling timestamps: estimated=${estimatedDuration.toFixed(2)}s, actual=${actualAudioDuration.toFixed(2)}s, factor=${scaleFactor.toFixed(3)}`,
-            );
-            scaledItems = items.map((item) => ({
-              ...item,
-              startTime: item.startTime * scaleFactor,
-              endTime: item.endTime * scaleFactor,
-            }));
-          }
-        }
+        // No proportional scaling needed - timestamps are already accurate based on actual audio
+        const scaledItems = items;
 
         console.log(`🎨 Generating images for ${scaledItems.length} items...`);
         const topicImages = await generateTopicImages(
@@ -758,7 +718,8 @@ export async function POST(request: NextRequest) {
         );
         weekStart.setHours(0, 0, 0, 0);
         weeklyDataForPost = await generateWeeklyContent(weekStart);
-      } else if (type === 'long') {
+      } else if (type === 'medium' || type === 'long') {
+        // Medium and long form both use current week
         const now = new Date();
         const dayOfWeek = now.getDay();
         const daysToMonday = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
@@ -859,11 +820,17 @@ export async function POST(request: NextRequest) {
     console.log(`✅ Video generated and stored: ${videoUrl}`);
 
     // Schedule video to platforms (fire and forget - don't block response)
-    scheduleVideoToPlatforms(videoUrl, type, title, description, baseUrl).catch(
-      (err) => {
-        console.error('Failed to schedule video to platforms:', err);
-      },
-    );
+    // Use postContent for social media posts if available, otherwise fall back to description
+    const socialPostContent = postContent || description;
+    scheduleVideoToPlatforms(
+      videoUrl,
+      type,
+      title,
+      socialPostContent,
+      baseUrl,
+    ).catch((err) => {
+      console.error('Failed to schedule video to platforms:', err);
+    });
 
     return NextResponse.json({
       success: true,
