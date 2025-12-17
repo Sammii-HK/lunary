@@ -23,6 +23,7 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const text =
       searchParams.get('text') || 'Your personalized cosmic guidance';
+    const interpretation = searchParams.get('interpretation') || null;
     // Extract author from quote if it contains attribution (e.g., "quote text" - Author Name)
     let author = searchParams.get('author') || 'Lunary';
     let quoteText = text;
@@ -114,6 +115,23 @@ export async function GET(request: NextRequest) {
           >
             — {author}
           </div>
+          {interpretation && (
+            <div
+              style={{
+                fontSize: 28,
+                fontWeight: 400,
+                lineHeight: 1.4,
+                marginTop: '50px',
+                color: '#c4b5fd',
+                opacity: 0.85,
+                maxWidth: '850px',
+                display: 'flex',
+                textAlign: 'center',
+              }}
+            >
+              {interpretation}
+            </div>
+          )}
         </div>
         <div
           style={{

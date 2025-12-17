@@ -89,6 +89,7 @@ export default function SocialPostsPage() {
   const [bulkActionLoading, setBulkActionLoading] = useState<string | null>(
     null,
   );
+  const [useThematicMode, setUseThematicMode] = useState(true);
 
   useEffect(() => {
     loadPendingPosts();
@@ -693,6 +694,23 @@ export default function SocialPostsPage() {
                       </>
                     )}
                   </Button>
+                  {/* Thematic Mode Toggle */}
+                  <div className='flex items-center gap-2 p-3 bg-zinc-800/50 rounded-lg border border-zinc-700'>
+                    <input
+                      type='checkbox'
+                      id='thematic-mode'
+                      checked={useThematicMode}
+                      onChange={(e) => setUseThematicMode(e.target.checked)}
+                      className='w-4 h-4 rounded border-zinc-600 bg-zinc-700 text-lunary-primary-500 focus:ring-lunary-primary-500'
+                    />
+                    <label
+                      htmlFor='thematic-mode'
+                      className='text-sm text-zinc-300 cursor-pointer'
+                    >
+                      Use thematic content (weekly themes with daily facets)
+                    </label>
+                  </div>
+
                   <div className='grid grid-cols-2 gap-3'>
                     <Button
                       onClick={async () => {
@@ -703,13 +721,19 @@ export default function SocialPostsPage() {
                             {
                               method: 'POST',
                               headers: { 'Content-Type': 'application/json' },
-                              body: JSON.stringify({ currentWeek: true }),
+                              body: JSON.stringify({
+                                currentWeek: true,
+                                mode: useThematicMode ? 'thematic' : 'legacy',
+                              }),
                             },
                           );
                           const data = await response.json();
                           if (data.success) {
+                            const themeInfo = data.theme
+                              ? ` Theme: ${data.theme}`
+                              : '';
                             alert(
-                              `Generated ${data.savedIds.length} posts for the current week!`,
+                              `Generated ${data.savedIds.length} posts for the current week!${themeInfo}`,
                             );
                             loadPendingPosts();
                             setActiveTab('approve');
@@ -738,13 +762,19 @@ export default function SocialPostsPage() {
                             {
                               method: 'POST',
                               headers: { 'Content-Type': 'application/json' },
-                              body: JSON.stringify({ currentWeek: false }),
+                              body: JSON.stringify({
+                                currentWeek: false,
+                                mode: useThematicMode ? 'thematic' : 'legacy',
+                              }),
                             },
                           );
                           const data = await response.json();
                           if (data.success) {
+                            const themeInfo = data.theme
+                              ? ` Theme: ${data.theme}`
+                              : '';
                             alert(
-                              `Generated ${data.savedIds.length} posts for next week!`,
+                              `Generated ${data.savedIds.length} posts for next week!${themeInfo}`,
                             );
                             loadPendingPosts();
                             setActiveTab('approve');

@@ -84,15 +84,243 @@ const AI_CONTEXT = getAIContext();
 const POSTING_STRATEGY = getPostingStrategy();
 const COMPETITOR_CONTEXT = getCompetitorContext();
 
+/**
+ * Generate weekly posts using the thematic content system
+ * This is the new educational-first approach with weekly themes and daily facets
+ */
+async function generateThematicWeeklyPosts(
+  request: NextRequest,
+  weekStart: string | null,
+  currentWeek: boolean,
+): Promise<NextResponse> {
+  const { sql } = await import('@vercel/postgres');
+  const { generateThematicPostsForWeek, getNextThemeIndex, recordThemeUsage } =
+    await import('@/lib/social/thematic-generator');
+  const { categoryThemes, getWeeklyContentPlan } =
+    await import('@/lib/social/weekly-themes');
+  const { getEducationalImageUrl } =
+    await import('@/lib/social/educational-images');
+
+  // Calculate week dates
+  let startDate: Date;
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  if (currentWeek) {
+    startDate = new Date(today);
+  } else if (weekStart) {
+    startDate = new Date(weekStart);
+  } else {
+    startDate = new Date();
+    startDate.setDate(startDate.getDate() + 7);
+  }
+
+  // Find Monday of that week
+  const dayOfWeek = startDate.getDay();
+  const daysToMonday = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
+  const weekStartDate = new Date(startDate);
+  weekStartDate.setDate(startDate.getDate() - daysToMonday);
+  weekStartDate.setHours(0, 0, 0, 0);
+
+  const weekEndDate = new Date(weekStartDate);
+  weekEndDate.setDate(weekEndDate.getDate() + 6);
+  weekEndDate.setHours(23, 59, 59, 999);
+
+  console.log(
+    `📅 [THEMATIC] Generating posts for week: ${weekStartDate.toLocaleDateString()} - ${weekEndDate.toLocaleDateString()}`,
+  );
+
+  // Ensure tables exist
+  try {
+    await sql`
+      CREATE TABLE IF NOT EXISTS social_posts (
+        id SERIAL PRIMARY KEY,
+        content TEXT NOT NULL,
+        platform TEXT NOT NULL,
+        post_type TEXT NOT NULL,
+        topic TEXT,
+        scheduled_date TIMESTAMP WITH TIME ZONE,
+        status TEXT NOT NULL DEFAULT 'pending',
+        rejection_feedback TEXT,
+        image_url TEXT,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+        updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+      )
+    `;
+
+    await sql`
+      CREATE TABLE IF NOT EXISTS content_rotation (
+        id SERIAL PRIMARY KEY,
+        rotation_type TEXT NOT NULL,
+        item_id TEXT NOT NULL,
+        last_used_at TIMESTAMP WITH TIME ZONE,
+        use_count INTEGER DEFAULT 0,
+        UNIQUE(rotation_type, item_id)
+      )
+    `;
+  } catch (tableError) {
+    console.warn('Table creation check failed:', tableError);
+  }
+
+  // Get next theme index (tracks rotation to prevent repeats)
+  const themeIndex = await getNextThemeIndex(sql);
+  const currentTheme = categoryThemes[themeIndex % categoryThemes.length];
+  console.log(
+    `📚 [THEMATIC] Using theme: ${currentTheme.name} (index ${themeIndex})`,
+  );
+
+  // Get weekly content plan (handles sabbat detection automatically)
+  const weekPlan = getWeeklyContentPlan(weekStartDate, themeIndex);
+  console.log(
+    `📋 [THEMATIC] Week plan:`,
+    weekPlan.map(
+      (d) => `${d.dayName}: ${d.isSabbat ? '🌙 ' : ''}${d.facet.title}`,
+    ),
+  );
+
+  // Generate all posts for the week
+  const posts = generateThematicPostsForWeek(weekStartDate, themeIndex);
+  console.log(`📝 [THEMATIC] Generated ${posts.length} posts`);
+
+  // For currentWeek, filter out past days
+  const todayDayOfWeek = today.getDay();
+  const todayOffset = todayDayOfWeek === 0 ? 6 : todayDayOfWeek - 1;
+  const filteredPosts = currentWeek
+    ? posts.filter((post) => {
+        const postDayOfWeek = post.scheduledDate.getDay();
+        const postDayOffset = postDayOfWeek === 0 ? 6 : postDayOfWeek - 1;
+        return postDayOffset >= todayOffset;
+      })
+    : posts;
+
+  console.log(
+    `📝 [THEMATIC] ${filteredPosts.length} posts after filtering (${posts.length} total)`,
+  );
+
+  // Use production URL for stored image URLs
+  const baseUrl = process.env.VERCEL
+    ? 'https://lunary.app'
+    : 'http://localhost:3000';
+
+  // Platform optimal posting times
+  const platformOptimalHours: Record<string, number[]> = {
+    instagram: [11, 13, 19],
+    linkedin: [8, 12, 17],
+    pinterest: [12, 20, 21],
+    twitter: [9, 12, 17],
+    bluesky: [9, 12, 17],
+  };
+
+  // Save posts to database
+  const savedPostIds: string[] = [];
+  const allGeneratedPosts: Array<{
+    content: string;
+    platform: string;
+    postType: string;
+    topic: string;
+    day: string;
+    dayOffset: number;
+    hour: number;
+  }> = [];
+
+  for (const post of filteredPosts) {
+    // Get optimal hour for this platform
+    const hours = platformOptimalHours[post.platform] || [12];
+    const hour = hours[Math.floor(Math.random() * hours.length)];
+
+    // Set the time
+    const scheduledDate = new Date(post.scheduledDate);
+    scheduledDate.setHours(hour, 0, 0, 0);
+
+    // Generate image URL for platforms that support images
+    const platformsWithImages = ['instagram', 'pinterest', 'linkedin'];
+    let imageUrl: string | null = null;
+
+    if (platformsWithImages.includes(post.platform)) {
+      // Use thematic image endpoint with category and slug
+      try {
+        const { getThematicImageUrl } =
+          await import('@/lib/social/educational-images');
+        imageUrl = getThematicImageUrl(
+          post.category,
+          post.topic,
+          baseUrl,
+          post.platform,
+          post.slug,
+        );
+      } catch (error) {
+        console.warn('Failed to generate thematic image:', error);
+      }
+    }
+
+    try {
+      const result = await sql`
+        INSERT INTO social_posts (content, platform, post_type, topic, status, image_url, scheduled_date, created_at)
+        VALUES (${post.content}, ${post.platform}, ${post.postType}, ${post.topic}, 'pending', ${imageUrl}, ${scheduledDate.toISOString()}, NOW())
+        RETURNING id
+      `;
+      savedPostIds.push(result.rows[0].id);
+
+      const dayOfWeek = scheduledDate.getDay();
+      const dayOffset = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
+
+      allGeneratedPosts.push({
+        content: post.content,
+        platform: post.platform,
+        postType: post.postType,
+        topic: post.topic,
+        day: [
+          'Sunday',
+          'Monday',
+          'Tuesday',
+          'Wednesday',
+          'Thursday',
+          'Friday',
+          'Saturday',
+        ][dayOfWeek],
+        dayOffset,
+        hour,
+      });
+    } catch (dbError) {
+      console.error('Error saving thematic post to database:', dbError);
+    }
+  }
+
+  // Record theme usage for rotation tracking
+  await recordThemeUsage(sql, currentTheme.id);
+
+  return NextResponse.json({
+    success: true,
+    message: `Generated ${savedPostIds.length} thematic posts for the week`,
+    mode: 'thematic',
+    theme: currentTheme.name,
+    weekRange: `${weekStartDate.toLocaleDateString()} - ${weekEndDate.toLocaleDateString()}`,
+    weekPlan: weekPlan.map((d) => ({
+      day: d.dayName,
+      theme: d.theme.name,
+      facet: d.facet.title,
+      isSabbat: d.isSabbat,
+    })),
+    posts: allGeneratedPosts,
+    savedIds: savedPostIds,
+  });
+}
+
 export async function POST(request: NextRequest) {
   try {
-    const { weekStart, currentWeek } = await request.json();
+    const { weekStart, currentWeek, mode = 'thematic' } = await request.json();
 
     console.log('📥 Generate weekly posts request:', {
       weekStart,
       currentWeek,
       currentWeekType: typeof currentWeek,
+      mode,
     });
+
+    // If thematic mode, use the new thematic generator
+    if (mode === 'thematic') {
+      return await generateThematicWeeklyPosts(request, weekStart, currentWeek);
+    }
 
     // Trim whitespace from API key (common issue with .env files)
     const apiKey = process.env.OPENAI_API_KEY?.trim();
@@ -485,56 +713,84 @@ export async function POST(request: NextRequest) {
       subreddit?: string;
     }> = [];
 
+    // Import educational generator for Grimoire-based content
+    const { generateEducationalPost: genEduPost } =
+      await import('@/lib/social/educational-generator');
+
     for (const postPlan of filteredPosts) {
-      const platformGuidelines: Record<string, string> = {
-        instagram:
-          '125-150 chars optimal. Engaging, visual-focused. Use line breaks for readability. Hashtags: 5-10 relevant ones.',
-        twitter:
-          '280 chars max. Concise, punchy. Use hashtags sparingly (1-2 max). Thread-friendly format.',
-        facebook:
-          '200-300 chars optimal. Community-focused, conversational. Can be longer-form.',
-        linkedin:
-          'Professional tone, 150-300 chars. Focus on value and insights. Less emojis, more substance.',
-        pinterest:
-          'Descriptive, keyword-rich. 100-200 chars. Focus on visual appeal and searchability.',
-        reddit:
-          'Educational or community-focused. No self-promotion unless subreddit allows. Natural discussion tone.',
-        tiktok:
-          'Short, catchy, hook-focused. 100-150 chars. Trend-aware and engaging.',
-      };
+      let postContent: string | null = null;
 
-      const postTypeGuidelines: Record<string, string> = {
-        feature:
-          'Highlight a specific feature naturally. Show value, not just features.',
-        benefit: 'Focus on user benefits and outcomes. What do users gain?',
-        educational:
-          'Teach something about astrology or astronomy. Be informative and valuable.',
-        inspirational: 'Cosmic wisdom and guidance. Uplifting and empowering.',
-        behind_scenes: 'How the app works. Show the real astronomy behind it.',
-        promotional:
-          'Highlight free trial, pricing, or special offers. Clear but not pushy.',
-        user_story:
-          'Show real value through user perspective. Authentic and relatable.',
-      };
+      // For educational posts (80%+ of content), use REAL Grimoire data
+      if (postPlan.postType === 'educational' || Math.random() < 0.8) {
+        try {
+          const eduPost = await genEduPost(postPlan.platform, 'mixed');
+          if (eduPost) {
+            postContent = eduPost.content;
+            console.log(
+              `📚 Generated educational post from Grimoire for ${postPlan.platform}: ${eduPost.grimoireSnippet.title}`,
+            );
+          }
+        } catch (error) {
+          console.warn(
+            'Failed to generate educational post, falling back to AI:',
+            error,
+          );
+        }
+      }
 
-      // Reddit-specific guidelines
-      let redditGuidelines = '';
-      if (postPlan.platform === 'reddit' && postPlan.subreddit) {
-        const { getSubredditByName } =
-          await import('@/config/reddit-subreddits');
-        const subredditInfo = getSubredditByName(postPlan.subreddit);
-        if (subredditInfo) {
-          redditGuidelines = `\n\nREDDIT SUBREDDIT: r/${postPlan.subreddit}
+      // Fallback to AI generation for non-educational posts or if educational failed
+      if (!postContent) {
+        const platformGuidelines: Record<string, string> = {
+          instagram:
+            '125-150 chars optimal. Engaging, visual-focused. Use line breaks for readability. Hashtags: 5-10 relevant ones.',
+          twitter:
+            '280 chars max. Concise, punchy. Use hashtags sparingly (1-2 max). Thread-friendly format.',
+          facebook:
+            '200-300 chars optimal. Community-focused, conversational. Can be longer-form.',
+          linkedin:
+            'Professional tone, 150-300 chars. Focus on value and insights. Less emojis, more substance.',
+          pinterest:
+            'Descriptive, keyword-rich. 100-200 chars. Focus on visual appeal and searchability.',
+          reddit:
+            'Educational or community-focused. No self-promotion unless subreddit allows. Natural discussion tone.',
+          tiktok:
+            'Short, catchy, hook-focused. 100-150 chars. Trend-aware and engaging.',
+        };
+
+        const postTypeGuidelines: Record<string, string> = {
+          feature:
+            'Highlight a specific feature naturally. Show value, not just features.',
+          benefit: 'Focus on user benefits and outcomes. What do users gain?',
+          educational:
+            'Teach something about astrology or astronomy. Be informative and valuable.',
+          inspirational:
+            'Cosmic wisdom and guidance. Uplifting and empowering.',
+          behind_scenes:
+            'How the app works. Show the real astronomy behind it.',
+          promotional:
+            'Highlight free trial, pricing, or special offers. Clear but not pushy.',
+          user_story:
+            'Show real value through user perspective. Authentic and relatable.',
+        };
+
+        // Reddit-specific guidelines
+        let redditGuidelines = '';
+        if (postPlan.platform === 'reddit' && postPlan.subreddit) {
+          const { getSubredditByName } =
+            await import('@/config/reddit-subreddits');
+          const subredditInfo = getSubredditByName(postPlan.subreddit);
+          if (subredditInfo) {
+            redditGuidelines = `\n\nREDDIT SUBREDDIT: r/${postPlan.subreddit}
 - Description: ${subredditInfo.description}
 - Content Type: ${subredditInfo.contentType}
 - Allows Self-Promotion: ${subredditInfo.allowsSelfPromotion ? 'YES' : 'NO'}
 - Notes: ${subredditInfo.notes || 'None'}
 
 CRITICAL: ${subredditInfo.allowsSelfPromotion ? 'You can mention Lunary and include links/CTAs.' : 'DO NOT mention Lunary, app name, or include any links/CTAs. Focus purely on educational value or community discussion that relates to the topic.'}`;
+          }
         }
-      }
 
-      const prompt = `Generate 1 social media post for Lunary.
+        const prompt = `Generate 1 social media post for Lunary.
 
 Platform: ${postPlan.platform}
 Type: ${postPlan.postType}
@@ -551,38 +807,40 @@ ${redditGuidelines}
 Requirements:
 - Use sentence case (capitalize first letter of sentences)
 - Focus on the topic: ${postPlan.topic}
-${postPlan.platform === 'reddit' && !postPlan.subreddit?.includes('astrologyreadings') ? '- DO NOT mention Lunary, app name, or include any links/CTAs. Focus purely on educational value or community discussion.' : '- Clearly explain what Lunary DOES (birth chart generation, personalized horoscopes, tarot, grimoire)'}
-${postPlan.platform === 'reddit' && !postPlan.subreddit?.includes('astrologyreadings') ? '- Focus purely on educational value, cosmic insights, or community discussion' : '- Highlight specific USPs: personalized to exact birth chart, real astronomical calculations, free trial'}
-- Be concrete about features, not just poetic about astrology
+${postPlan.platform === 'reddit' && !postPlan.subreddit?.includes('astrologyreadings') ? '- DO NOT mention Lunary, app name, or include any links/CTAs. Focus purely on educational value or community discussion.' : ''}
+- Be concrete and educational - teach something valuable
 - Natural and conversational but informative
-${postPlan.platform === 'reddit' && !postPlan.subreddit?.includes('astrologyreadings') ? '- Community-focused, helpful, educational tone' : '- Conversion-focused but not salesy'}
+${postPlan.platform === 'reddit' && !postPlan.subreddit?.includes('astrologyreadings') ? '- Community-focused, helpful, educational tone' : '- Educational authority positioning - build trust through depth'}
 - Keep within platform character limits
-- Include emojis sparingly (🌙 ✨ 🔮) - ${postPlan.platform === 'linkedin' ? 'minimal emojis' : 'use naturally'}
-${postPlan.platform === 'reddit' && !postPlan.subreddit?.includes('astrologyreadings') ? '- NO CTAs, NO links, NO self-promotion' : postPlan.postType === 'promotional' ? '- Include clear but natural CTA' : '- No explicit CTA needed'}
+- NO emojis for Twitter/Bluesky, minimal emojis for other platforms
+- NO direct links in content
+${postPlan.platform === 'reddit' && !postPlan.subreddit?.includes('astrologyreadings') ? '- NO CTAs, NO links, NO self-promotion' : '- No explicit CTA needed'}
 - Match the day's energy (${postPlan.day})
 - Vary content from other posts - be unique and fresh
+- Position Lunary as a library/reference authority, not a product
 
 Return JSON: {"posts": ["Post content"]}`;
 
-      const completion = await openai.chat.completions.create({
-        model: 'gpt-4o-mini',
-        messages: [
-          {
-            role: 'system',
-            content: `${SOCIAL_CONTEXT}\n\n${AI_CONTEXT}\n\n${COMPETITOR_CONTEXT}\n\n${POSTING_STRATEGY}${feedbackContext}\n\nYou are a social media marketing expert for Lunary. Follow the Lunary Orbit strategy. Emphasize what Lunary does best - focus on strengths and unique value, not competitor comparisons. Create natural, engaging posts that convert. Return only valid JSON.`,
-          },
-          { role: 'user', content: prompt },
-        ],
-        response_format: { type: 'json_object' },
-        max_tokens: 300,
-        temperature: 0.8,
-      });
+        const completion = await openai.chat.completions.create({
+          model: 'gpt-4o-mini',
+          messages: [
+            {
+              role: 'system',
+              content: `${SOCIAL_CONTEXT}\n\n${AI_CONTEXT}\n\n${COMPETITOR_CONTEXT}\n\n${POSTING_STRATEGY}${feedbackContext}\n\nYou are a social media marketing expert for Lunary. Create natural, engaging educational posts. Position Lunary as a library/reference authority. NEVER mention pricing, trials, or "free". NO direct links in content. Return only valid JSON.`,
+            },
+            { role: 'user', content: prompt },
+          ],
+          response_format: { type: 'json_object' },
+          max_tokens: 300,
+          temperature: 0.8,
+        });
 
-      const result = JSON.parse(
-        completion.choices[0]?.message?.content || '{}',
-      );
-      const posts = result.posts || result.post || [];
-      const postContent = Array.isArray(posts) ? posts[0] : posts;
+        const result = JSON.parse(
+          completion.choices[0]?.message?.content || '{}',
+        );
+        const posts = result.posts || result.post || [];
+        postContent = Array.isArray(posts) ? posts[0] : posts;
+      }
 
       if (postContent) {
         allGeneratedPosts.push({
@@ -606,12 +864,78 @@ Return JSON: {"posts": ["Post content"]}`;
       : 'http://localhost:3000';
 
     // Save all posts to database with image URLs
-    // Use quote pool for Instagram posts (quotes are stored and reused, not regenerated each time)
-    const { generateCatchyQuote, getQuoteImageUrl, getQuotePoolStats } =
-      await import('@/lib/social/quote-generator');
+    // Use quote pool and educational images for all image-supporting platforms
+    const {
+      generateCatchyQuote,
+      getQuoteImageUrl,
+      getQuotePoolStats,
+      getQuoteWithInterpretation,
+    } = await import('@/lib/social/quote-generator');
+    const {
+      generateEducationalPost,
+      generateWeeklySabbatPosts,
+      getUpcomingSabbats,
+    } = await import('@/lib/social/educational-generator');
+    const { getEducationalImageUrl } =
+      await import('@/lib/social/educational-images');
 
     const quoteStatsBefore = await getQuotePoolStats();
     console.log('📊 Quote pool before generation:', quoteStatsBefore);
+
+    // Check for upcoming sabbats in the week and add special sabbat posts
+    const upcomingSabbats = getUpcomingSabbats(7);
+    if (upcomingSabbats.length > 0) {
+      console.log(
+        '🌙 Found upcoming sabbats:',
+        upcomingSabbats.map(
+          (s) => `${s.name} on ${s.date.toLocaleDateString()}`,
+        ),
+      );
+
+      // Generate sabbat posts for each platform that supports long-form content
+      const sabbatPlatforms = [
+        'instagram',
+        'facebook',
+        'linkedin',
+        'pinterest',
+      ];
+      for (const sabbat of upcomingSabbats) {
+        for (const platform of sabbatPlatforms) {
+          const sabbatPost = await generateEducationalPost(
+            platform,
+            'seasonal',
+          );
+          if (sabbatPost) {
+            // Find the day offset for this sabbat
+            const sabbatDayOfWeek = sabbat.date.getDay();
+            const sabbatDayOffset =
+              sabbatDayOfWeek === 0 ? 6 : sabbatDayOfWeek - 1;
+
+            allGeneratedPosts.push({
+              content: sabbatPost.content,
+              platform,
+              postType: 'educational',
+              topic: sabbat.name,
+              day: [
+                'Sunday',
+                'Monday',
+                'Tuesday',
+                'Wednesday',
+                'Thursday',
+                'Friday',
+                'Saturday',
+              ][sabbatDayOfWeek],
+              dayOffset: sabbatDayOffset,
+              hour: 12, // Noon for sabbat posts
+              subreddit: undefined,
+            });
+            console.log(
+              `✨ Added ${sabbat.name} post for ${platform} scheduled for ${sabbat.date.toLocaleDateString()}`,
+            );
+          }
+        }
+      }
+    }
 
     const savedPostIds: string[] = [];
     for (let i = 0; i < allGeneratedPosts.length; i++) {
@@ -623,17 +947,81 @@ Return JSON: {"posts": ["Post content"]}`;
       postDate.setDate(weekStartDate.getDate() + post.dayOffset);
       postDate.setHours(post.hour, 0, 0, 0); // Use the optimal hour for this platform
 
-      // Generate quotes for platforms that need images
+      // All platforms that accept images
       const platformsNeedingImages = [
         'instagram',
         'pinterest',
         'reddit',
         'tiktok',
+        'twitter',
+        'facebook',
+        'linkedin',
       ];
-      const quote = platformsNeedingImages.includes(post.platform)
-        ? await generateCatchyQuote(post.content, post.postType)
-        : '';
-      const imageUrl = quote ? getQuoteImageUrl(quote, baseUrl) : null;
+      // Generate images for platforms that support them
+      let imageUrl: string | null = null;
+
+      if (platformsNeedingImages.includes(post.platform)) {
+        // For educational posts, use Grimoire educational images
+        if (post.postType === 'educational') {
+          try {
+            const educationalPost = await generateEducationalPost(
+              post.platform,
+              'mixed',
+            );
+            if (educationalPost?.grimoireSnippet) {
+              imageUrl = getEducationalImageUrl(
+                educationalPost.grimoireSnippet,
+                baseUrl,
+                post.platform,
+              );
+            }
+          } catch (error) {
+            console.warn(
+              'Failed to generate educational image, falling back to quote:',
+              error,
+            );
+          }
+        }
+
+        // For quote posts or fallback, use quote images with interpretation
+        if (!imageUrl) {
+          try {
+            const quoteWithInterp = await getQuoteWithInterpretation(
+              post.content,
+              post.postType,
+            );
+            if (quoteWithInterp) {
+              if (quoteWithInterp.interpretation) {
+                imageUrl = `${baseUrl}/api/og/social-quote?text=${encodeURIComponent(quoteWithInterp.quote)}&interpretation=${encodeURIComponent(quoteWithInterp.interpretation)}${quoteWithInterp.author ? `&author=${encodeURIComponent(quoteWithInterp.author)}` : ''}`;
+              } else {
+                imageUrl = getQuoteImageUrl(
+                  quoteWithInterp.author
+                    ? `${quoteWithInterp.quote} - ${quoteWithInterp.author}`
+                    : quoteWithInterp.quote,
+                  baseUrl,
+                );
+              }
+            } else {
+              // Fallback to simple quote
+              const quote = await generateCatchyQuote(
+                post.content,
+                post.postType,
+              );
+              imageUrl = quote ? getQuoteImageUrl(quote, baseUrl) : null;
+            }
+          } catch (error) {
+            console.warn(
+              'Failed to generate quote with interpretation, using simple quote:',
+              error,
+            );
+            const quote = await generateCatchyQuote(
+              post.content,
+              post.postType,
+            );
+            imageUrl = quote ? getQuoteImageUrl(quote, baseUrl) : null;
+          }
+        }
+      }
 
       try {
         const result = await sql`

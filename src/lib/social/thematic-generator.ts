@@ -1,0 +1,525 @@
+/**
+ * Thematic Content Generator
+ *
+ * Generates long-form and short-form educational content from weekly themes.
+ * Uses real Grimoire data - no AI generation for the core content.
+ */
+
+import {
+  type WeeklyTheme,
+  type SabbatTheme,
+  type DailyFacet,
+  generateHashtags,
+  getWeeklyContentPlan,
+  categoryThemes,
+} from './weekly-themes';
+import { searchGrimoireForTopic } from './grimoire-content';
+
+// Import data sources
+import zodiacSigns from '@/data/zodiac-signs.json';
+import tarotCards from '@/data/tarot-cards.json';
+import crystals from '@/data/crystals.json';
+import numerology from '@/data/numerology.json';
+import chakras from '@/data/chakras.json';
+import sabbats from '@/data/sabbats.json';
+import planetaryBodies from '@/data/planetary-bodies.json';
+import correspondences from '@/data/correspondences.json';
+
+export interface ThematicContent {
+  longForm: string;
+  shortForm: string;
+  hashtags: {
+    domain: string;
+    topic: string;
+    brand: string;
+  };
+  theme: WeeklyTheme | SabbatTheme;
+  facet: DailyFacet;
+  date: Date;
+}
+
+export interface LongFormContent {
+  title: string;
+  body: string;
+  attribution: string;
+}
+
+/**
+ * Platform configuration for hashtag usage
+ */
+const platformHashtagConfig: Record<
+  string,
+  { useHashtags: boolean; count: number }
+> = {
+  instagram: { useHashtags: true, count: 3 },
+  pinterest: { useHashtags: true, count: 3 },
+  tiktok: { useHashtags: true, count: 2 },
+  facebook: { useHashtags: false, count: 0 },
+  linkedin: { useHashtags: false, count: 0 },
+  twitter: { useHashtags: false, count: 0 },
+  bluesky: { useHashtags: false, count: 0 },
+  threads: { useHashtags: false, count: 0 },
+  reddit: { useHashtags: false, count: 0 },
+};
+
+/**
+ * Get rich content data for a facet from Grimoire sources
+ */
+function getGrimoireDataForFacet(
+  facet: DailyFacet,
+): Record<string, any> | null {
+  const slug = facet.grimoireSlug;
+
+  // Try zodiac signs
+  if (slug.includes('zodiac/')) {
+    const sign = slug.split('/').pop();
+    if (sign && zodiacSigns[sign as keyof typeof zodiacSigns]) {
+      return zodiacSigns[sign as keyof typeof zodiacSigns];
+    }
+  }
+
+  // Try planets
+  if (slug.includes('planets/')) {
+    const planet = slug.split('/').pop();
+    if (planet && planetaryBodies[planet as keyof typeof planetaryBodies]) {
+      return planetaryBodies[planet as keyof typeof planetaryBodies];
+    }
+  }
+
+  // Try chakras
+  if (slug.includes('chakras/')) {
+    const chakra = slug.split('/').pop();
+    if (chakra && chakras[chakra as keyof typeof chakras]) {
+      return chakras[chakra as keyof typeof chakras];
+    }
+  }
+
+  // Try crystals
+  if (slug.includes('crystals/')) {
+    const crystalId = slug.split('/').pop();
+    const crystal = (crystals as any[]).find(
+      (c) =>
+        c.id === crystalId || c.name.toLowerCase() === crystalId?.toLowerCase(),
+    );
+    if (crystal) return crystal;
+  }
+
+  // Try tarot
+  if (slug.includes('tarot/')) {
+    const cardSlug = slug.split('/').pop();
+    if (cardSlug) {
+      const cardKey = cardSlug
+        .split('-')
+        .map((word, i) =>
+          i === 0
+            ? word.toLowerCase()
+            : word.charAt(0).toUpperCase() + word.slice(1).toLowerCase(),
+        )
+        .join('');
+      const card =
+        tarotCards.majorArcana[cardKey as keyof typeof tarotCards.majorArcana];
+      if (card) return card;
+    }
+  }
+
+  // Try sabbats
+  if (slug.includes('wheel-of-the-year/')) {
+    const sabbatName = slug.split('/').pop();
+    const sabbat = (sabbats as any[]).find(
+      (s) => s.name.toLowerCase() === sabbatName?.toLowerCase(),
+    );
+    if (sabbat) return sabbat;
+  }
+
+  // Try numerology
+  if (slug.includes('numerology') || slug.includes('angel-numbers')) {
+    const match = slug.match(/(\d+)/);
+    if (match) {
+      const num = match[1];
+      const angelNum =
+        numerology.angelNumbers[num as keyof typeof numerology.angelNumbers];
+      if (angelNum) return angelNum;
+    }
+  }
+
+  // Try correspondences/elements
+  if (slug.includes('correspondences/elements')) {
+    const element = slug.split('/').pop();
+    if (element) {
+      const elementData =
+        correspondences.elements[
+          element as keyof typeof correspondences.elements
+        ];
+      if (elementData) return { ...elementData, name: element };
+    }
+  }
+
+  // Fallback: try Grimoire search
+  const snippets = searchGrimoireForTopic(facet.title, 1);
+  if (snippets.length > 0 && snippets[0].fullContent) {
+    return snippets[0].fullContent;
+  }
+
+  return null;
+}
+
+/**
+ * Generate long-form educational content (300-500 words)
+ * Calm, authoritative, encyclopedic tone
+ */
+export function generateLongFormContent(
+  facet: DailyFacet,
+  theme: WeeklyTheme | SabbatTheme,
+): LongFormContent {
+  const data = getGrimoireDataForFacet(facet);
+
+  let title = facet.title;
+  let body = '';
+
+  if (data) {
+    // Build structured content from real data
+
+    // Opening definition/explanation
+    if (data.description) {
+      body += data.description + '\n\n';
+    } else if (data.mysticalProperties) {
+      body += data.mysticalProperties + '\n\n';
+    } else if (data.information) {
+      body += data.information + '\n\n';
+    }
+
+    // Key attributes section
+    const attributes: string[] = [];
+
+    if (data.element) attributes.push(`Element: ${data.element}`);
+    if (data.modality) attributes.push(`Modality: ${data.modality}`);
+    if (data.rulingPlanet) attributes.push(`Ruler: ${data.rulingPlanet}`);
+    if (data.planet) attributes.push(`Planet: ${data.planet}`);
+    if (data.symbol) attributes.push(`Symbol: ${data.symbol}`);
+    if (data.color) attributes.push(`Color: ${data.color}`);
+    if (data.sanskritName) attributes.push(`Sanskrit: ${data.sanskritName}`);
+    if (data.location) attributes.push(`Location: ${data.location}`);
+    if (data.number !== undefined) attributes.push(`Number: ${data.number}`);
+    if (data.zodiacSign) attributes.push(`Sign: ${data.zodiacSign}`);
+
+    if (attributes.length > 0) {
+      body += attributes.join('\n') + '\n\n';
+    }
+
+    // Deeper interpretation
+    if (data.uprightMeaning) {
+      body += 'When expressed positively: ' + data.uprightMeaning + '\n\n';
+    }
+
+    if (data.reversedMeaning) {
+      body +=
+        'When blocked or imbalanced: ' +
+        data.reversedMeaning.split('.').slice(0, 2).join('.') +
+        '.\n\n';
+    }
+
+    if (data.spiritualMeaning) {
+      body += data.spiritualMeaning + '\n\n';
+    }
+
+    if (data.loveTrait || data.loveMeaning) {
+      body +=
+        'In relationships: ' + (data.loveTrait || data.loveMeaning) + '\n\n';
+    }
+
+    if (data.careerTrait || data.careerMeaning) {
+      body +=
+        'In work and purpose: ' +
+        (data.careerTrait || data.careerMeaning) +
+        '\n\n';
+    }
+
+    // Practical application
+    if (data.healingPractices && data.healingPractices.length > 0) {
+      body +=
+        'Practices for balance: ' +
+        data.healingPractices.slice(0, 4).join(', ') +
+        '.\n\n';
+    }
+
+    if (data.traditions && data.traditions.length > 0) {
+      body +=
+        'Traditional observances: ' +
+        data.traditions.slice(0, 3).join(', ') +
+        '.\n\n';
+    }
+
+    if (data.magicalUses && data.magicalUses.length > 0) {
+      body +=
+        'Magical applications: ' +
+        data.magicalUses.slice(0, 3).join(', ') +
+        '.\n\n';
+    }
+
+    // Reflective closing
+    if (data.affirmation) {
+      body += '"' + data.affirmation + '"';
+    }
+  } else {
+    // Fallback: use facet focus as body
+    body = facet.focus;
+  }
+
+  // Clean up extra whitespace
+  body = body.trim().replace(/\n{3,}/g, '\n\n');
+
+  return {
+    title,
+    body,
+    attribution: "From Lunary's Grimoire",
+  };
+}
+
+/**
+ * Generate short-form content (1-2 sentences)
+ * Encyclopedic, stands alone, no questions or CTAs
+ */
+export function generateShortFormContent(facet: DailyFacet): string {
+  // Use the pre-defined short-form hook from the facet
+  return facet.shortFormHook;
+}
+
+/**
+ * Format long-form content for a specific platform
+ */
+export function formatLongFormForPlatform(
+  content: LongFormContent,
+  hashtags: { domain: string; topic: string; brand: string },
+  platform: string,
+): string {
+  const config = platformHashtagConfig[platform] || {
+    useHashtags: false,
+    count: 0,
+  };
+
+  let formatted = `${content.title}\n\n${content.body}`;
+
+  // Add attribution
+  formatted += `\n\n${content.attribution}`;
+
+  // Add hashtags if platform supports them
+  if (config.useHashtags && config.count > 0) {
+    const tags = [hashtags.domain, hashtags.topic, hashtags.brand].slice(
+      0,
+      config.count,
+    );
+    formatted += '\n\n' + tags.join(' ');
+  }
+
+  return formatted;
+}
+
+/**
+ * Format short-form content for a specific platform
+ */
+export function formatShortFormForPlatform(
+  content: string,
+  platform: string,
+): string {
+  // Short-form has no hashtags on any platform
+  return content;
+}
+
+/**
+ * Generate all content for a single day
+ */
+export function generateDayContent(
+  date: Date,
+  theme: WeeklyTheme | SabbatTheme,
+  facet: DailyFacet,
+): ThematicContent {
+  const longFormData = generateLongFormContent(facet, theme);
+  const shortForm = generateShortFormContent(facet);
+  const hashtags = generateHashtags(theme, facet);
+
+  return {
+    longForm: `${longFormData.title}\n\n${longFormData.body}\n\n${longFormData.attribution}`,
+    shortForm,
+    hashtags,
+    theme,
+    facet,
+    date,
+  };
+}
+
+/**
+ * Generate content for an entire week
+ */
+export function generateWeekContent(
+  weekStartDate: Date,
+  currentThemeIndex: number = 0,
+): ThematicContent[] {
+  const plan = getWeeklyContentPlan(weekStartDate, currentThemeIndex);
+
+  return plan.map(({ date, theme, facet }) =>
+    generateDayContent(date, theme, facet),
+  );
+}
+
+/**
+ * Get posts ready for database insertion
+ */
+export interface ThematicPost {
+  content: string;
+  platform: string;
+  postType: 'educational';
+  topic: string;
+  scheduledDate: Date;
+  hashtags: string;
+  category: string;
+  slug: string;
+}
+
+export function generateThematicPostsForWeek(
+  weekStartDate: Date,
+  currentThemeIndex: number = 0,
+): ThematicPost[] {
+  const weekContent = generateWeekContent(weekStartDate, currentThemeIndex);
+  const posts: ThematicPost[] = [];
+
+  // Long-form platforms (educational depth, images)
+  const longFormPlatforms = [
+    'instagram',
+    'linkedin',
+    'pinterest',
+    'facebook',
+    'tiktok',
+  ];
+  // Short-form platforms (1-2 sentences, no hashtags)
+  const shortFormPlatforms = ['twitter', 'bluesky', 'threads'];
+
+  for (const dayContent of weekContent) {
+    // Long-form posts
+    for (const platform of longFormPlatforms) {
+      const longFormData = generateLongFormContent(
+        dayContent.facet,
+        dayContent.theme,
+      );
+      const formattedContent = formatLongFormForPlatform(
+        longFormData,
+        dayContent.hashtags,
+        platform,
+      );
+
+      posts.push({
+        content: formattedContent,
+        platform,
+        postType: 'educational',
+        topic: dayContent.facet.title,
+        scheduledDate: dayContent.date,
+        hashtags: `${dayContent.hashtags.domain} ${dayContent.hashtags.topic} ${dayContent.hashtags.brand}`,
+        category: dayContent.theme.category,
+        slug:
+          dayContent.facet.grimoireSlug.split('/').pop() ||
+          dayContent.facet.title.toLowerCase().replace(/\s+/g, '-'),
+      });
+    }
+
+    // Short-form posts
+    for (const platform of shortFormPlatforms) {
+      const formattedContent = formatShortFormForPlatform(
+        dayContent.shortForm,
+        platform,
+      );
+
+      posts.push({
+        content: formattedContent,
+        platform,
+        postType: 'educational',
+        topic: dayContent.facet.title,
+        scheduledDate: dayContent.date,
+        hashtags: '', // No hashtags for short-form platforms
+        category: dayContent.theme.category,
+        slug:
+          dayContent.facet.grimoireSlug.split('/').pop() ||
+          dayContent.facet.title.toLowerCase().replace(/\s+/g, '-'),
+      });
+    }
+  }
+
+  return posts;
+}
+
+/**
+ * Track theme rotation to prevent repeats
+ */
+export async function getNextThemeIndex(sql: any): Promise<number> {
+  try {
+    // Ensure rotation table exists
+    await sql`
+      CREATE TABLE IF NOT EXISTS content_rotation (
+        id SERIAL PRIMARY KEY,
+        rotation_type TEXT NOT NULL,
+        item_id TEXT NOT NULL,
+        last_used_at TIMESTAMP WITH TIME ZONE,
+        use_count INTEGER DEFAULT 0,
+        UNIQUE(rotation_type, item_id)
+      )
+    `;
+
+    // Get all theme usage
+    const result = await sql`
+      SELECT item_id, use_count, last_used_at
+      FROM content_rotation
+      WHERE rotation_type = 'theme'
+      ORDER BY use_count ASC, last_used_at ASC NULLS FIRST
+    `;
+
+    // If no records, start with first theme
+    if (result.rows.length === 0) {
+      return 0;
+    }
+
+    // Find themes not yet used
+    const usedThemeIds = new Set(result.rows.map((r: any) => r.item_id));
+    for (let i = 0; i < categoryThemes.length; i++) {
+      if (!usedThemeIds.has(categoryThemes[i].id)) {
+        return i;
+      }
+    }
+
+    // All themes used at least once - find lowest use count
+    const lowestUseCount = result.rows[0].use_count;
+    const candidateIds = result.rows
+      .filter((r: any) => r.use_count === lowestUseCount)
+      .map((r: any) => r.item_id);
+
+    // Return index of first candidate
+    for (let i = 0; i < categoryThemes.length; i++) {
+      if (candidateIds.includes(categoryThemes[i].id)) {
+        return i;
+      }
+    }
+
+    return 0;
+  } catch (error) {
+    console.warn('Failed to get theme index from rotation table:', error);
+    return 0;
+  }
+}
+
+/**
+ * Record theme usage
+ */
+export async function recordThemeUsage(
+  sql: any,
+  themeId: string,
+): Promise<void> {
+  try {
+    await sql`
+      INSERT INTO content_rotation (rotation_type, item_id, last_used_at, use_count)
+      VALUES ('theme', ${themeId}, NOW(), 1)
+      ON CONFLICT (rotation_type, item_id)
+      DO UPDATE SET
+        last_used_at = NOW(),
+        use_count = content_rotation.use_count + 1
+    `;
+  } catch (error) {
+    console.warn('Failed to record theme usage:', error);
+  }
+}

@@ -1,8 +1,9 @@
 export type ContentArchetype =
-  | 'founder'
-  | 'educational'
+  // | 'founder'
+  // | 'educational'
+  | 'educational_authority'
   | 'cosmic_insight'
-  | 'feature_deep_dive'
+  // | 'feature_deep_dive'
   | 'user_transformation';
 
 export interface ArchetypeConfig {
@@ -16,49 +17,49 @@ export interface ArchetypeConfig {
 }
 
 export const CONTENT_ARCHETYPES: Record<ContentArchetype, ArchetypeConfig> = {
-  founder: {
-    name: 'Founder/Indie Dev Journey',
-    description:
-      'Vulnerable, authentic behind-the-scenes content about building Lunary',
-    tone: 'Reflective, honest, personal',
-    guidelines: [
-      'Share real challenges and learnings from building the app',
-      'Be vulnerable about the journey - failures, pivots, discoveries',
-      'Connect personal growth to the product vision',
-      'Use "I" statements - this is YOUR story',
-      'No selling - let authenticity build trust',
-    ],
-    examplePosts: [
-      "Building an astrology app taught me that most 'horoscopes' are just recycled generic text. I spent 6 months learning real astronomy so Lunary could calculate actual planetary positions. The difference is everything.",
-      "I used to think astrology was just sun signs. Then I learned about houses, aspects, transits. Your birth chart is a complete map of the sky the moment you were born. That's what I wanted Lunary to show people.",
-      'The hardest part of building Lunary was realizing accuracy matters more than features. I deleted 3 months of work to rebuild the astronomical calculations from scratch.',
-      "Why I built an AI that remembers your conversations: astrology isn't one-size-fits-all. Your chart is unique. Your questions deserve context. That's why Lunary's AI actually remembers what you've discussed.",
-      "Something I learned building Lunary: people don't want predictions. They want understanding. Why am I feeling this way? What's influencing my energy? That's what birth charts reveal.",
-    ],
-    ctaStyle: 'none',
-  },
+  // founder: {
+  //   name: 'Founder/Indie Dev Journey',
+  //   description:
+  //     'Vulnerable, authentic behind-the-scenes content about building Lunary',
+  //   tone: 'Reflective, honest, personal',
+  //   guidelines: [
+  //     'Share real challenges and learnings from building the app',
+  //     'Be vulnerable about the journey - failures, pivots, discoveries',
+  //     'Connect personal growth to the product vision',
+  //     'Use "I" statements - this is YOUR story',
+  //     'No selling - let authenticity build trust',
+  //   ],
+  //   examplePosts: [
+  //     "Building an astrology app taught me that most 'horoscopes' are just recycled generic text. I spent 6 months learning real astronomy so Lunary could calculate actual planetary positions. The difference is everything.",
+  //     "I used to think astrology was just sun signs. Then I learned about houses, aspects, transits. Your birth chart is a complete map of the sky the moment you were born. That's what I wanted Lunary to show people.",
+  //     'The hardest part of building Lunary was realizing accuracy matters more than features. I deleted 3 months of work to rebuild the astronomical calculations from scratch.',
+  //     "Why I built an AI that remembers your conversations: astrology isn't one-size-fits-all. Your chart is unique. Your questions deserve context. That's why Lunary's AI actually remembers what you've discussed.",
+  //     "Something I learned building Lunary: people don't want predictions. They want understanding. Why am I feeling this way? What's influencing my energy? That's what birth charts reveal.",
+  //   ],
+  //   ctaStyle: 'none',
+  // },
 
-  educational: {
-    name: 'Educational Content',
-    description:
-      'Teach astronomy facts and explain how astrological concepts actually work',
-    tone: 'Curious, informative, accessible',
-    guidelines: [
-      "Explain ONE concept clearly - don't overwhelm",
-      'Use "did you know" style hooks when appropriate',
-      'Connect astronomical facts to personal meaning',
-      'Avoid jargon - explain terms simply',
-      'Make complex topics feel approachable',
-    ],
-    examplePosts: [
-      'Your birth chart has 12 houses. Each one represents a different area of life - career, relationships, home, creativity. When planets move through these houses, they activate different themes for YOU specifically.',
-      "The difference between your sun sign and rising sign: your sun is your core identity. Your rising is how others perceive you. They're often completely different signs.",
-      "Mercury retrograde isn't actually moving backwards. It's an optical illusion from Earth's perspective. But the energy shift during these periods? That's real astronomical geometry at work.",
-      "Tarot patterns reveal more than single cards. When the same cards keep appearing across readings, they're highlighting recurring themes in your life. Tracking this over time shows your growth.",
-      "Your moon sign shapes your emotional world. It's calculated from the moon's exact position when you were born. Most people don't know theirs - but it explains so much about how you process feelings.",
-    ],
-    ctaStyle: 'none',
-  },
+  // educational: {
+  //   name: 'Educational Content',
+  //   description:
+  //     'Teach astronomy facts and explain how astrological concepts actually work',
+  //   tone: 'Curious, informative, accessible',
+  //   guidelines: [
+  //     "Explain ONE concept clearly - don't overwhelm",
+  //     'Use "did you know" style hooks when appropriate',
+  //     'Connect astronomical facts to personal meaning',
+  //     'Avoid jargon - explain terms simply',
+  //     'Make complex topics feel approachable',
+  //   ],
+  //   examplePosts: [
+  //     'Your birth chart has 12 houses. Each one represents a different area of life - career, relationships, home, creativity. When planets move through these houses, they activate different themes for YOU specifically.',
+  //     "The difference between your sun sign and rising sign: your sun is your core identity. Your rising is how others perceive you. They're often completely different signs.",
+  //     "Mercury retrograde isn't actually moving backwards. It's an optical illusion from Earth's perspective. But the energy shift during these periods? That's real astronomical geometry at work.",
+  //     "Tarot patterns reveal more than single cards. When the same cards keep appearing across readings, they're highlighting recurring themes in your life. Tracking this over time shows your growth.",
+  //     "Your moon sign shapes your emotional world. It's calculated from the moon's exact position when you were born. Most people don't know theirs - but it explains so much about how you process feelings.",
+  //   ],
+  //   ctaStyle: 'none',
+  // },
 
   cosmic_insight: {
     name: 'Cosmic Insight',
@@ -82,34 +83,34 @@ export const CONTENT_ARCHETYPES: Record<ContentArchetype, ArchetypeConfig> = {
     ctaStyle: 'none',
   },
 
-  feature_deep_dive: {
-    name: 'Feature Deep-Dive',
-    description:
-      'Explain ONE specific unique feature in depth - show what makes it special',
-    tone: 'Enthusiastic, specific, demonstrative',
-    guidelines: [
-      'Focus on ONE feature per post - go deep, not wide',
-      'Explain WHAT it does and WHY it matters',
-      'Show the value through specific examples',
-      "Highlight features competitors don't have",
-      'Soft CTA only - "discover at lunary.app" style',
-    ],
-    uniqueFeatures: [
-      'AI chat with memory - remembers your past conversations and builds context over time',
-      'Tarot pattern analysis - tracks which cards appear frequently and identifies recurring themes',
-      'Personal transits - shows which houses are being activated in YOUR chart specifically',
-      '500+ page digital grimoire - spells, rituals, crystals, correspondences all in one place',
-      'Birth chart houses - see exactly which areas of life each transit affects for you',
-    ],
-    examplePosts: [
-      "Most AI chatbots forget you exist between sessions. Lunary's AI remembers your birth chart, your past questions, your recurring themes. Ask about your career today, and it knows you asked about Saturn transits last week.",
-      "Tarot apps show you a card. Lunary shows you patterns. Which cards keep appearing? What themes are recurring? Over 30 days, the patterns tell a story single readings can't.",
-      "Generic transit forecasts say 'Mars is in Aries.' Personal transits say 'Mars is activating your 7th house - relationships and partnerships are energized.' The difference is YOUR birth chart.",
-      '500+ pages of grimoire content. Moon phases, crystal properties, spell correspondences, ritual guides. Not scattered across the internet - organized, searchable, always accessible.',
-      "Your birth chart has 12 houses. Lunary shows you exactly which house each planet is transiting. When Jupiter enters your 10th house, you'll know your career is expanding. That specificity changes everything.",
-    ],
-    ctaStyle: 'soft',
-  },
+  // feature_deep_dive: {
+  //   name: 'Feature Deep-Dive',
+  //   description:
+  //     'Explain ONE specific unique feature in depth - show what makes it special',
+  //   tone: 'Enthusiastic, specific, demonstrative',
+  //   guidelines: [
+  //     'Focus on ONE feature per post - go deep, not wide',
+  //     'Explain WHAT it does and WHY it matters',
+  //     'Show the value through specific examples',
+  //     "Highlight features competitors don't have",
+  //     'Soft CTA only - "discover at lunary.app" style',
+  //   ],
+  //   uniqueFeatures: [
+  //     'AI chat with memory - remembers your past conversations and builds context over time',
+  //     'Tarot pattern analysis - tracks which cards appear frequently and identifies recurring themes',
+  //     'Personal transits - shows which houses are being activated in YOUR chart specifically',
+  //     '500+ page digital grimoire - spells, rituals, crystals, correspondences all in one place',
+  //     'Birth chart houses - see exactly which areas of life each transit affects for you',
+  //   ],
+  //   examplePosts: [
+  //     "Most AI chatbots forget you exist between sessions. Lunary's AI remembers your birth chart, your past questions, your recurring themes. Ask about your career today, and it knows you asked about Saturn transits last week.",
+  //     "Tarot apps show you a card. Lunary shows you patterns. Which cards keep appearing? What themes are recurring? Over 30 days, the patterns tell a story single readings can't.",
+  //     "Generic transit forecasts say 'Mars is in Aries.' Personal transits say 'Mars is activating your 7th house - relationships and partnerships are energized.' The difference is YOUR birth chart.",
+  //     '500+ pages of grimoire content. Moon phases, crystal properties, spell correspondences, ritual guides. Not scattered across the internet - organized, searchable, always accessible.',
+  //     "Your birth chart has 12 houses. Lunary shows you exactly which house each planet is transiting. When Jupiter enters your 10th house, you'll know your career is expanding. That specificity changes everything.",
+  //   ],
+  //   ctaStyle: 'soft',
+  // },
 
   user_transformation: {
     name: 'User Transformation',
@@ -131,6 +132,30 @@ export const CONTENT_ARCHETYPES: Record<ContentArchetype, ArchetypeConfig> = {
       "The grimoire isn't just information - it's a practice. Finding the right crystal for your mood. The right ritual for the moon phase. The right correspondence for your intention. It becomes part of your daily rhythm.",
     ],
     ctaStyle: 'soft',
+  },
+
+  educational_authority: {
+    name: 'Educational Authority',
+    description:
+      'Deep educational content from Grimoire that positions Lunary as a topical authority and library',
+    tone: 'Authoritative, informative, accessible',
+    guidelines: [
+      'Draw from Grimoire content - use actual knowledge from the library',
+      'Teach something specific and valuable - not generic',
+      'Show depth and expertise without being academic',
+      'Guide to Grimoire for deeper learning - "Explore this in Lunary\'s Grimoire: lunary.app/grimoire/[slug]"',
+      'No upsells, no pricing, no urgency - just education',
+      'Position Lunary as a reference/library, not a product',
+      'Make complex topics accessible but not shallow',
+    ],
+    examplePosts: [
+      "Your rising sign (ascendant) is the zodiac sign rising on the eastern horizon at your exact birth moment. It's calculated from your birth time and location, that's why it's different from your sun sign. Your rising sign shapes how others perceive you and your first impressions. Explore this in Lunary's Grimoire",
+      "Mercury retrograde isn't the planet moving backward - it's an optical illusion from Earth's perspective. But the energy shift during these periods is real astronomical geometry at work. When Mercury appears to slow and reverse, it's time to review, reflect, and reconsider. Explore this in Lunary's Grimoire",
+      "The 12 astrological houses divide your birth chart into life areas. The 1st house is identity, the 7th is partnerships, the 10th is career. When planets transit through these houses, they activate those specific themes in YOUR life. Explore this in Lunary's Grimoire",
+      "A trine aspect occurs when planets are 120 degrees apart - creating natural harmony and flow. It's one of the most favorable aspects, indicating talents and blessings. But trines can also create complacency if not actively developed. Explore this in Lunary's Grimoire",
+      "Amethyst is a powerful spiritual stone connected to the crown chakra and Pisces energy. It enhances intuition, calms the mind, and connects you to higher wisdom. Many use it for meditation and dream work. Explore this in Lunary's Grimoire",
+    ],
+    ctaStyle: 'none',
   },
 };
 
@@ -156,10 +181,11 @@ CTA STYLE: ${config.ctaStyle === 'none' ? 'No CTA - pure value content' : config
 
 export function getRandomArchetype(): ContentArchetype {
   const archetypes: ContentArchetype[] = [
-    'founder',
-    'educational',
+    // 'founder',
+    // 'educational',
+    'educational_authority',
     'cosmic_insight',
-    'feature_deep_dive',
+    // 'feature_deep_dive',
     'user_transformation',
   ];
   return archetypes[Math.floor(Math.random() * archetypes.length)];
@@ -167,11 +193,12 @@ export function getRandomArchetype(): ContentArchetype {
 
 export function getWeightedArchetype(): ContentArchetype {
   const weights: Record<ContentArchetype, number> = {
-    founder: 15,
-    educational: 25,
-    cosmic_insight: 25,
-    feature_deep_dive: 20,
-    user_transformation: 15,
+    // founder: 5,
+    // educational: 15,
+    educational_authority: 50, // Prioritize Grimoire-based educational content
+    cosmic_insight: 15,
+    // feature_deep_dive: 10,
+    user_transformation: 5,
   };
 
   const total = Object.values(weights).reduce((a, b) => a + b, 0);
@@ -185,20 +212,20 @@ export function getWeightedArchetype(): ContentArchetype {
     }
   }
 
-  return 'educational';
+  return 'educational_authority';
 }
 
 export function mapPostTypeToArchetype(
   postType: string,
 ): ContentArchetype | null {
   const mapping: Record<string, ContentArchetype> = {
-    feature: 'feature_deep_dive',
+    // feature: 'feature_deep_dive',
     benefit: 'user_transformation',
-    educational: 'educational',
+    educational: 'educational_authority', // Default educational posts to authority style
     inspirational: 'cosmic_insight',
-    behind_scenes: 'founder',
-    promotional: 'feature_deep_dive',
-    user_story: 'user_transformation',
+    // behind_scenes: 'founder',
+    // promotional: 'feature_deep_dive',
+    // user_story: 'user_transformation',
   };
 
   return mapping[postType] || null;

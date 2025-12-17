@@ -316,8 +316,94 @@ export async function generateCatchyQuote(
     : snippet + '...';
 }
 
+export interface QuoteWithInterpretation {
+  quote: string;
+  interpretation: string;
+  author: string | null;
+}
+
+/**
+ * Generate interpretation for a quote
+ */
+export async function generateQuoteInterpretation(
+  quote: string,
+  author: string | null,
+): Promise<string> {
+  try {
+    const prompt = `Generate a gentle, authoritative interpretation (2-3 sentences) for this quote:
+
+Quote: "${quote}"
+${author ? `Author: ${author}` : ''}
+
+Requirements:
+- Show authority and depth - demonstrate understanding
+- Be gentle and accessible, not academic
+- Connect the quote to cosmic/spiritual wisdom naturally
+- Optionally mention: "This wisdom is woven through Lunary's Grimoire" or "Explore this in Lunary's Grimoire" - but only if contextually relevant
+- No urgency, no benefit stacking, no "download now"
+- Position Lunary as a library/reference, not a product
+- 2-3 sentences maximum
+
+Return ONLY the interpretation text, no markdown, no quotes.`;
+
+    const completion = await getOpenAI().chat.completions.create({
+      model: 'gpt-4o-mini',
+      messages: [
+        {
+          role: 'system',
+          content:
+            'You are a wise interpreter of cosmic and spiritual quotes. Your interpretations show authority and guide people gently to deeper learning. You position Lunary as a reference library, not a product.',
+        },
+        { role: 'user', content: prompt },
+      ],
+      max_tokens: 200,
+      temperature: 0.7,
+    });
+
+    return completion.choices[0]?.message?.content?.trim() || '';
+  } catch (error) {
+    console.error('Failed to generate quote interpretation:', error);
+    return '';
+  }
+}
+
+/**
+ * Get quote with interpretation
+ */
+export async function getQuoteWithInterpretation(
+  postContent: string,
+  postType: string,
+): Promise<QuoteWithInterpretation | null> {
+  try {
+    const quote = await generateCatchyQuote(postContent, postType);
+    if (!quote) {
+      return null;
+    }
+
+    const { quoteText, author } = parseQuoteAndAuthor(quote);
+    const interpretation = await generateQuoteInterpretation(quoteText, author);
+
+    return {
+      quote: quoteText,
+      interpretation,
+      author,
+    };
+  } catch (error) {
+    console.error('Failed to get quote with interpretation:', error);
+    return null;
+  }
+}
+
 export function getQuoteImageUrl(quote: string, baseUrl: string): string {
   return `${baseUrl}/api/og/social-quote?text=${encodeURIComponent(quote)}`;
+}
+
+export function getQuoteWithInterpretationImageUrl(
+  quote: string,
+  interpretation: string,
+  baseUrl: string,
+): string {
+  return `${baseUrl}/api/og/social-quote?text=${encodeURIComponent(quote)}&interpretation=${encodeURIComponent(interpretation)}`;
 }
 
 export async function getQuotePoolStats(): Promise<{
