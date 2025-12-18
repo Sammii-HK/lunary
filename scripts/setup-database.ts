@@ -1013,9 +1013,11 @@ async function setupDatabase() {
     await sql`
       CREATE TABLE IF NOT EXISTS videos (
         id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-        type VARCHAR(20) NOT NULL, -- 'short' | 'long'
+        type VARCHAR(20) NOT NULL, -- 'short' | 'medium' | 'long'
         video_url TEXT NOT NULL,
         thumbnail_url TEXT,
+        audio_url TEXT, -- URL to the audio file
+        script TEXT, -- Voiceover script for closed captions
         title TEXT,
         description TEXT,
         post_content TEXT, -- Social media post content to accompany the video
@@ -1050,6 +1052,15 @@ async function setupDatabase() {
     } catch (error) {
       // Column might already exist, that's okay
       console.log('ℹ️  audio_url column already exists or error adding it');
+    }
+
+    // Add script column if it doesn't exist (migration for existing databases)
+    try {
+      await sql`ALTER TABLE videos ADD COLUMN IF NOT EXISTS script TEXT`;
+      console.log('✅ Videos table script column added/verified');
+    } catch (error) {
+      // Column might already exist, that's okay
+      console.log('ℹ️  script column already exists or error adding it');
     }
 
     // Add updated_at column if it doesn't exist (migration for existing databases)

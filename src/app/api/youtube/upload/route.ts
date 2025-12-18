@@ -4,6 +4,7 @@ import {
   uploadShort,
   uploadLongForm,
   scheduleVideo,
+  uploadCaptions,
   type YouTubeVideoMetadata,
 } from '@/lib/youtube/client';
 
@@ -73,6 +74,29 @@ export async function POST(request: NextRequest) {
     }
 
     console.log(`✅ Video uploaded to YouTube: ${result.videoId}`);
+
+    // Upload captions if script is available
+    if (videoId) {
+      try {
+        const videoResult = await sql`
+          SELECT script FROM videos WHERE id = ${videoId}
+        `;
+
+        if (videoResult.rows.length > 0 && videoResult.rows[0].script) {
+          const script = videoResult.rows[0].script;
+          console.log(`📝 Uploading captions for video ${result.videoId}...`);
+          await uploadCaptions(result.videoId, script);
+          console.log(`✅ Captions uploaded for video ${result.videoId}`);
+        } else {
+          console.log(
+            `ℹ️ No script found for video ${videoId}, skipping captions`,
+          );
+        }
+      } catch (captionError) {
+        console.warn('⚠️ Failed to upload captions:', captionError);
+        // Don't fail the upload if captions fail
+      }
+    }
 
     // If scheduled, update the video to be scheduled
     if (publishDate) {

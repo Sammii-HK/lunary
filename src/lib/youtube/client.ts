@@ -221,3 +221,87 @@ export async function uploadLongForm(
     isShort: false,
   });
 }
+
+/**
+ * Upload closed captions/subtitles to a YouTube video
+ * @param videoId The YouTube video ID
+ * @param scriptText The script text to use as captions
+ * @param languageCode Language code (default: 'en')
+ */
+export async function uploadCaptions(
+  videoId: string,
+  scriptText: string,
+  languageCode: string = 'en',
+): Promise<void> {
+  const youtube = getYouTubeClient();
+
+  try {
+    // Convert script text to SRT format (SubRip Subtitle format)
+    // Split into sentences and create basic timing (rough estimate)
+    const sentences = scriptText
+      .split(/[.!?]+/)
+      .map((s) => s.trim())
+      .filter((s) => s.length > 0);
+
+    if (sentences.length === 0) {
+      console.warn('⚠️ No sentences found in script, skipping captions');
+      return;
+    }
+
+    // Estimate timing: ~2.5 words per second (average speaking rate)
+    let currentTime = 0;
+    const srtLines: string[] = [];
+
+    for (let i = 0; i < sentences.length; i++) {
+      const sentence = sentences[i];
+      const wordCount = sentence.split(/\s+/).length;
+      const duration = Math.max(1, wordCount / 2.5); // At least 1 second
+
+      const startTime = formatSRTTime(currentTime);
+      const endTime = formatSRTTime(currentTime + duration);
+
+      srtLines.push(`${i + 1}`);
+      srtLines.push(`${startTime} --> ${endTime}`);
+      srtLines.push(sentence);
+      srtLines.push(''); // Empty line between entries
+
+      currentTime += duration;
+    }
+
+    const srtContent = srtLines.join('\n');
+
+    // Upload captions as SRT format
+    await youtube.captions.insert({
+      part: ['snippet'],
+      requestBody: {
+        snippet: {
+          videoId: videoId,
+          language: languageCode,
+          name: 'English',
+        },
+      },
+      media: {
+        body: Readable.from(Buffer.from(srtContent, 'utf-8')),
+        mimeType: 'text/plain',
+      },
+    });
+
+    console.log(`✅ Captions uploaded for video ${videoId}`);
+  } catch (error: any) {
+    console.error('YouTube caption upload error:', error);
+    // Don't throw - captions are optional, video upload should still succeed
+    console.warn('⚠️ Failed to upload captions, but video upload succeeded');
+  }
+}
+
+/**
+ * Format time in SRT format (HH:MM:SS,mmm)
+ */
+function formatSRTTime(seconds: number): string {
+  const hours = Math.floor(seconds / 3600);
+  const minutes = Math.floor((seconds % 3600) / 60);
+  const secs = Math.floor(seconds % 60);
+  const milliseconds = Math.floor((seconds % 1) * 1000);
+
+  return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(secs).padStart(2, '0')},${String(milliseconds).padStart(3, '0')}`;
+}

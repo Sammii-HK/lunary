@@ -753,7 +753,7 @@ export async function POST(request: NextRequest) {
     const expiresAt = new Date();
     expiresAt.setDate(expiresAt.getDate() + 7); // 7 days from now
 
-    // Try to insert with audio_url, fallback if column doesn't exist
+    // Try to insert with audio_url and script, fallback if columns don't exist
     let result;
     try {
       result = await sql`
@@ -761,6 +761,7 @@ export async function POST(request: NextRequest) {
           type,
           video_url,
           audio_url,
+          script,
           title,
           description,
           post_content,
@@ -773,6 +774,7 @@ export async function POST(request: NextRequest) {
           ${type},
           ${videoUrl},
           ${audioUrl},
+          ${script || null},
           ${title},
           ${description || null},
           ${postContent || null},
@@ -785,37 +787,80 @@ export async function POST(request: NextRequest) {
         RETURNING id, video_url, created_at, expires_at
       `;
     } catch (error: any) {
-      // If audio_url column doesn't exist, insert without it
-      if (error?.code === '42703' || error?.message?.includes('audio_url')) {
+      // If audio_url or script column doesn't exist, try without them
+      if (
+        error?.code === '42703' ||
+        error?.message?.includes('audio_url') ||
+        error?.message?.includes('script')
+      ) {
         console.warn(
-          'audio_url column not found, inserting without it. Run database migration.',
+          'audio_url or script column not found, inserting without them. Run database migration.',
         );
-        result = await sql`
-          INSERT INTO videos (
-            type,
-            video_url,
-            title,
-            description,
-            post_content,
-            week_number,
-            blog_slug,
-            status,
-            created_at,
-            expires_at
-          ) VALUES (
-            ${type},
-            ${videoUrl},
-            ${title},
-            ${description || null},
-            ${postContent || null},
-            ${weekNumber},
-            ${blogSlug},
-            'pending',
-            NOW(),
-            ${expiresAt.toISOString()}
-          )
-          RETURNING id, video_url, created_at, expires_at
-        `;
+        try {
+          result = await sql`
+            INSERT INTO videos (
+              type,
+              video_url,
+              audio_url,
+              title,
+              description,
+              post_content,
+              week_number,
+              blog_slug,
+              status,
+              created_at,
+              expires_at
+            ) VALUES (
+              ${type},
+              ${videoUrl},
+              ${audioUrl},
+              ${title},
+              ${description || null},
+              ${postContent || null},
+              ${weekNumber},
+              ${blogSlug},
+              'pending',
+              NOW(),
+              ${expiresAt.toISOString()}
+            )
+            RETURNING id, video_url, created_at, expires_at
+          `;
+        } catch (error2: any) {
+          // If still fails, insert without audio_url
+          if (
+            error2?.code === '42703' ||
+            error2?.message?.includes('audio_url')
+          ) {
+            result = await sql`
+              INSERT INTO videos (
+                type,
+                video_url,
+                title,
+                description,
+                post_content,
+                week_number,
+                blog_slug,
+                status,
+                created_at,
+                expires_at
+              ) VALUES (
+                ${type},
+                ${videoUrl},
+                ${title},
+                ${description || null},
+                ${postContent || null},
+                ${weekNumber},
+                ${blogSlug},
+                'pending',
+                NOW(),
+                ${expiresAt.toISOString()}
+              )
+              RETURNING id, video_url, created_at, expires_at
+            `;
+          } else {
+            throw error2;
+          }
+        }
       } else {
         throw error;
       }
