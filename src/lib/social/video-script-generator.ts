@@ -2,9 +2,10 @@
  * Video Script Generator
  *
  * Generates TikTok (60-90s) and YouTube (5-7min) scripts from weekly themes.
- * Scripts are educational, informative, and not conversational.
+ * Scripts are complete, flowing narratives that can be read naturally.
  */
 
+import OpenAI from 'openai';
 import {
   type WeeklyTheme,
   type DailyFacet,
@@ -19,6 +20,14 @@ import numerology from '@/data/numerology.json';
 import chakras from '@/data/chakras.json';
 import sabbats from '@/data/sabbats.json';
 import planetaryBodies from '@/data/planetary-bodies.json';
+
+function getOpenAI(): OpenAI {
+  const apiKey = process.env.OPENAI_API_KEY?.trim();
+  if (!apiKey) {
+    throw new Error('OPENAI_API_KEY is not configured');
+  }
+  return new OpenAI({ apiKey });
+}
 
 // ============================================================================
 // TYPES
@@ -339,58 +348,27 @@ function estimateDuration(wordCount: number): string {
 // TIKTOK SCRIPT GENERATOR (60-90 seconds, ~150-200 words)
 // ============================================================================
 
-export function generateTikTokScript(
+export async function generateTikTokScript(
   facet: DailyFacet,
   theme: WeeklyTheme,
   scheduledDate: Date,
   partNumber: number = 1,
   baseUrl: string = '',
-): VideoScript {
+): Promise<VideoScript> {
   const grimoireData = getGrimoireDataForFacet(facet);
 
-  // Build sections based on available data
-  const sections: ScriptSection[] = [];
-
-  // HOOK (5s, ~15 words)
-  const hookContent = buildTikTokHook(facet, theme, grimoireData);
-  sections.push({
-    name: 'Hook',
-    duration: '5 seconds',
-    content: hookContent,
-  });
-
-  // TOPIC INTRODUCTION (10s, ~25 words)
-  const introContent = buildTikTokIntro(facet, theme, grimoireData);
-  sections.push({
-    name: 'Topic Introduction',
-    duration: '10 seconds',
-    content: introContent,
-  });
-
-  // CORE CONTENT (50-60s, ~100-120 words)
-  const coreContent = buildTikTokCore(facet, theme, grimoireData);
-  sections.push({
-    name: 'Core Content',
-    duration: '50-60 seconds',
-    content: coreContent,
-  });
-
-  // TAKEAWAY (10s, ~25 words) - includes series callback with part number
-  const takeawayContent = buildTikTokTakeaway(
+  // Generate complete, flowing script using AI
+  const fullScript = await generateTikTokScriptContent(
     facet,
     theme,
     grimoireData,
     partNumber,
   );
-  sections.push({
-    name: 'Takeaway',
-    duration: '10 seconds',
-    content: takeawayContent,
-  });
 
-  // Combine into full script
-  const fullScript = sections.map((s) => s.content).join('\n\n');
   const wordCount = countWords(fullScript);
+
+  // Parse script into sections for metadata (but keep full script as main content)
+  const sections = parseScriptIntoSections(fullScript, 'tiktok');
 
   // Generate TikTok-specific metadata and cover image
   const metadata = generateTikTokMetadata(facet, theme, partNumber);
@@ -416,6 +394,183 @@ export function generateTikTokScript(
     coverImageUrl,
     partNumber,
   };
+}
+
+/**
+ * Generate complete TikTok script using AI
+ * Creates a flowing 60-90 second narrative (150-200 words)
+ */
+async function generateTikTokScriptContent(
+  facet: DailyFacet,
+  theme: WeeklyTheme,
+  grimoireData: Record<string, any> | null,
+  partNumber: number,
+): Promise<string> {
+  const openai = getOpenAI();
+
+  // Build context from Grimoire data
+  let dataContext = '';
+  if (grimoireData) {
+    if (grimoireData.description) {
+      dataContext += `Description: ${grimoireData.description}\n`;
+    }
+    if (grimoireData.element) {
+      dataContext += `Element: ${grimoireData.element}\n`;
+    }
+    if (grimoireData.ruler || grimoireData.rulingPlanet) {
+      dataContext += `Ruled by: ${grimoireData.ruler || grimoireData.rulingPlanet}\n`;
+    }
+    if (grimoireData.modality) {
+      dataContext += `Modality: ${grimoireData.modality}\n`;
+    }
+    if (grimoireData.keywords && Array.isArray(grimoireData.keywords)) {
+      dataContext += `Key themes: ${grimoireData.keywords.join(', ')}\n`;
+    }
+    if (grimoireData.meaning || grimoireData.mysticalProperties) {
+      dataContext += `Meaning: ${grimoireData.meaning || grimoireData.mysticalProperties}\n`;
+    }
+    if (grimoireData.strengths && Array.isArray(grimoireData.strengths)) {
+      dataContext += `Strengths: ${grimoireData.strengths.join(', ')}\n`;
+    }
+    if (grimoireData.affirmation) {
+      dataContext += `Affirmation: ${grimoireData.affirmation}\n`;
+    }
+  }
+
+  const prompt = `Create a complete, flowing TikTok video script (60-90 seconds, 150-200 words) about ${facet.title} as part of a weekly series on ${theme.name}.
+
+This is Part ${partNumber} of 3 in the series. The script should be:
+- Complete and flowing - written as a natural narrative that can be read aloud smoothly
+- Educational and informative, not conversational
+- Structured with a strong opening hook, clear explanation, and memorable takeaway
+- Include a callback to the series: "Part ${partNumber} of 3: ${facet.title}. This week's theme: ${theme.name}."
+
+Topic: ${facet.title}
+Focus: ${facet.focus}
+${dataContext ? `\nGrimoire Data:\n${dataContext}` : ''}
+
+Return ONLY the complete script text. No section headers, no markdown, no formatting. Just natural, flowing text that can be read as a complete narrative.`;
+
+  try {
+    const completion = await openai.chat.completions.create({
+      model: 'gpt-4o-mini',
+      messages: [
+        {
+          role: 'system',
+          content:
+            'You are an educational content creator writing complete, flowing video scripts. Write in a natural, authoritative tone that flows smoothly when read aloud. The script must be complete and coherent - not fragmented or broken up. Make it educational and informative.',
+        },
+        { role: 'user', content: prompt },
+      ],
+      max_tokens: 400,
+      temperature: 0.7,
+    });
+
+    let script = completion.choices[0]?.message?.content || '';
+    if (!script || script.trim().length === 0) {
+      throw new Error('OpenAI returned empty script');
+    }
+
+    script = script.trim();
+
+    // Ensure series callback is included
+    if (!script.includes(`Part ${partNumber}`)) {
+      script += `\n\nPart ${partNumber} of 3: ${facet.title}. This week's theme: ${theme.name}.`;
+    }
+
+    return script;
+  } catch (error) {
+    console.error('Failed to generate TikTok script with AI:', error);
+    // Fallback to structured script
+    return generateTikTokScriptFallback(facet, theme, grimoireData, partNumber);
+  }
+}
+
+/**
+ * Fallback: Generate structured script if AI fails
+ */
+function generateTikTokScriptFallback(
+  facet: DailyFacet,
+  theme: WeeklyTheme,
+  grimoireData: Record<string, any> | null,
+  partNumber: number,
+): string {
+  const hook = buildTikTokHook(facet, theme, grimoireData);
+  const intro = buildTikTokIntro(facet, theme, grimoireData);
+  const core = buildTikTokCore(facet, theme, grimoireData);
+  const takeaway = buildTikTokTakeaway(facet, theme, grimoireData, partNumber);
+
+  // Join with smooth transitions
+  return `${hook} ${intro} ${core} ${takeaway}`;
+}
+
+/**
+ * Parse a complete script into sections for metadata
+ * This is just for display - the fullScript is the main content
+ */
+function parseScriptIntoSections(
+  script: string,
+  type: 'tiktok' | 'youtube',
+): ScriptSection[] {
+  // For TikTok: simple parsing into hook, intro, core, takeaway
+  if (type === 'tiktok') {
+    const sentences = script.split(/[.!?]+/).filter((s) => s.trim().length > 0);
+    const totalWords = countWords(script);
+    const wordsPerSecond = 2.5;
+
+    if (sentences.length < 4) {
+      return [
+        {
+          name: 'Complete Script',
+          duration: estimateDuration(totalWords),
+          content: script,
+        },
+      ];
+    }
+
+    // Roughly divide into sections
+    const hookEnd = Math.ceil(sentences.length * 0.1);
+    const introEnd = Math.ceil(sentences.length * 0.3);
+    const coreEnd = Math.ceil(sentences.length * 0.85);
+
+    const hook = sentences.slice(0, hookEnd).join('. ') + '.';
+    const intro = sentences.slice(hookEnd, introEnd).join('. ') + '.';
+    const core = sentences.slice(introEnd, coreEnd).join('. ') + '.';
+    const takeaway = sentences.slice(coreEnd).join('. ') + '.';
+
+    return [
+      { name: 'Hook', duration: '5 seconds', content: hook },
+      { name: 'Topic Introduction', duration: '10 seconds', content: intro },
+      { name: 'Core Content', duration: '50-60 seconds', content: core },
+      { name: 'Takeaway', duration: '10 seconds', content: takeaway },
+    ];
+  }
+
+  // For YouTube: parse by natural breaks
+  const paragraphs = script.split(/\n\n+/).filter((p) => p.trim().length > 0);
+  const sections: ScriptSection[] = [];
+  let currentTime = 0;
+  const wordsPerSecond = 2.5;
+
+  for (const para of paragraphs) {
+    const wordCount = countWords(para);
+    const duration = wordCount / wordsPerSecond;
+    sections.push({
+      name: 'Section',
+      duration: `${Math.round(duration)} seconds`,
+      content: para.trim(),
+    });
+  }
+
+  return sections.length > 0
+    ? sections
+    : [
+        {
+          name: 'Complete Script',
+          duration: estimateDuration(countWords(script)),
+          content: script,
+        },
+      ];
 }
 
 function buildTikTokHook(
@@ -601,73 +756,25 @@ function generateYouTubeCoverUrl(
 // YOUTUBE SCRIPT GENERATOR (5-7 minutes, ~800-1000 words)
 // ============================================================================
 
-export function generateYouTubeScript(
+export async function generateYouTubeScript(
   theme: WeeklyTheme,
   facets: DailyFacet[],
   weekStartDate: Date,
   baseUrl: string = '',
-): VideoScript {
-  const sections: ScriptSection[] = [];
-
+): Promise<VideoScript> {
   // Gather all Grimoire data for the week's facets
   const allData = facets.map((f) => ({
     facet: f,
     data: getGrimoireDataForFacet(f),
   }));
 
-  // INTRO HOOK (30s, ~70 words)
-  sections.push({
-    name: 'Introduction',
-    duration: '30 seconds',
-    content: buildYouTubeIntro(theme, allData),
-  });
+  // Generate complete, flowing script using AI
+  const fullScript = await generateYouTubeScriptContent(theme, facets, allData);
 
-  // TOPIC OVERVIEW (45s, ~100 words)
-  sections.push({
-    name: 'Topic Overview',
-    duration: '45 seconds',
-    content: buildYouTubeOverview(theme, facets),
-  });
-
-  // SECTION 1: FOUNDATIONS (90s, ~200 words)
-  sections.push({
-    name: 'Section 1: Foundations',
-    duration: '90 seconds',
-    content: buildYouTubeFoundations(theme, allData.slice(0, 3)),
-  });
-
-  // SECTION 2: DEEPER MEANING (90s, ~200 words)
-  sections.push({
-    name: 'Section 2: Deeper Meaning',
-    duration: '90 seconds',
-    content: buildYouTubeDeeperMeaning(theme, allData.slice(2, 5)),
-  });
-
-  // SECTION 3: PRACTICAL APPLICATION (90s, ~200 words)
-  sections.push({
-    name: 'Section 3: Practical Application',
-    duration: '90 seconds',
-    content: buildYouTubePractical(theme, allData.slice(4, 7)),
-  });
-
-  // SUMMARY (30s, ~70 words)
-  sections.push({
-    name: 'Summary',
-    duration: '30 seconds',
-    content: buildYouTubeSummary(theme, facets),
-  });
-
-  // OUTRO (15s, ~35 words)
-  sections.push({
-    name: 'Outro',
-    duration: '15 seconds',
-    content: buildYouTubeOutro(theme),
-  });
-
-  const fullScript = sections
-    .map((s) => `[${s.name}]\n${s.content}`)
-    .join('\n\n---\n\n');
   const wordCount = countWords(fullScript);
+
+  // Parse script into sections for metadata (but keep full script as main content)
+  const sections = parseScriptIntoSections(fullScript, 'youtube');
 
   // Generate YouTube thumbnail
   const coverImageUrl = generateYouTubeCoverUrl(theme, baseUrl);
@@ -685,6 +792,126 @@ export function generateYouTubeScript(
     status: 'draft',
     coverImageUrl,
   };
+}
+
+/**
+ * Generate complete YouTube script using AI
+ * Creates a flowing 5-7 minute narrative (800-1000 words)
+ */
+async function generateYouTubeScriptContent(
+  theme: WeeklyTheme,
+  facets: DailyFacet[],
+  allData: Array<{ facet: DailyFacet; data: Record<string, any> | null }>,
+): Promise<string> {
+  const openai = getOpenAI();
+
+  // Build comprehensive context from all facets
+  const facetContexts = allData.map(({ facet, data }, index) => {
+    let context = `Day ${index + 1}: ${facet.title}\nFocus: ${facet.focus}\n`;
+    if (data) {
+      if (data.description) context += `Description: ${data.description}\n`;
+      if (data.element) context += `Element: ${data.element}\n`;
+      if (data.ruler || data.rulingPlanet) {
+        context += `Ruled by: ${data.ruler || data.rulingPlanet}\n`;
+      }
+      if (data.modality) context += `Modality: ${data.modality}\n`;
+      if (data.keywords && Array.isArray(data.keywords)) {
+        context += `Key themes: ${data.keywords.join(', ')}\n`;
+      }
+      if (data.meaning || data.mysticalProperties) {
+        context += `Meaning: ${data.meaning || data.mysticalProperties}\n`;
+      }
+      if (data.mysticalProperties) {
+        context += `Mystical properties: ${data.mysticalProperties}\n`;
+      }
+      if (data.healingPractices && Array.isArray(data.healingPractices)) {
+        context += `Healing practices: ${data.healingPractices.join(', ')}\n`;
+      }
+    }
+    return context;
+  });
+
+  const prompt = `Create a complete, flowing YouTube video script (5-7 minutes, 800-1000 words) for a weekly deep dive on ${theme.name}.
+
+The script should be:
+- Complete and flowing - written as a natural narrative that can be read aloud smoothly from start to finish
+- Educational and informative, not conversational
+- Structured with: introduction, topic overview, foundations, deeper meaning, practical application, summary, and outro
+- All sections should flow naturally into each other with smooth transitions
+- Cover all the facets listed below, building understanding progressively
+
+Theme: ${theme.name}
+Category: ${theme.category}
+Description: ${theme.description}
+
+Facets to cover:
+${facetContexts.join('\n---\n')}
+
+Return ONLY the complete script text. No section headers like "[Introduction]" or "[Section 1]". No markdown, no formatting. Just natural, flowing paragraphs that form a complete narrative. Write it as if you're speaking directly to the viewer - smooth, connected, and complete.`;
+
+  try {
+    const completion = await openai.chat.completions.create({
+      model: 'gpt-4o-mini',
+      messages: [
+        {
+          role: 'system',
+          content:
+            'You are an educational content creator writing complete, flowing video scripts. Write in a natural, authoritative tone that flows smoothly when read aloud. The script must be complete and coherent - all sections must flow naturally into each other with smooth transitions. Make it educational and informative. Write as a continuous narrative, not fragmented sections.',
+        },
+        { role: 'user', content: prompt },
+      ],
+      max_tokens: 2000,
+      temperature: 0.7,
+    });
+
+    let script = completion.choices[0]?.message?.content || '';
+    if (!script || script.trim().length === 0) {
+      throw new Error('OpenAI returned empty script');
+    }
+
+    script = script.trim();
+
+    // Clean up any section markers that might have been added
+    script = script
+      .replace(/\[.*?\]/g, '') // Remove [Section] markers
+      .replace(/\n\n---\n\n/g, '\n\n') // Remove section dividers
+      .replace(/\n{3,}/g, '\n\n') // Normalize multiple newlines
+      .trim();
+
+    // Ensure outro is included
+    if (
+      !script.toLowerCase().includes('lunary') &&
+      !script.toLowerCase().includes('until next time')
+    ) {
+      script += `\n\nFor deeper exploration of ${theme.name.toLowerCase()} and related topics, the Lunary Grimoire offers comprehensive reference material. It is freely available for those who wish to continue their study. Until next time.`;
+    }
+
+    return script;
+  } catch (error) {
+    console.error('Failed to generate YouTube script with AI:', error);
+    // Fallback to structured script
+    return generateYouTubeScriptFallback(theme, facets, allData);
+  }
+}
+
+/**
+ * Fallback: Generate structured script if AI fails
+ */
+function generateYouTubeScriptFallback(
+  theme: WeeklyTheme,
+  facets: DailyFacet[],
+  allData: Array<{ facet: DailyFacet; data: Record<string, any> | null }>,
+): string {
+  const intro = buildYouTubeIntro(theme, allData);
+  const overview = buildYouTubeOverview(theme, facets);
+  const foundations = buildYouTubeFoundations(theme, allData.slice(0, 3));
+  const deeperMeaning = buildYouTubeDeeperMeaning(theme, allData.slice(2, 5));
+  const practical = buildYouTubePractical(theme, allData.slice(4, 7));
+  const summary = buildYouTubeSummary(theme, facets);
+  const outro = buildYouTubeOutro(theme);
+
+  // Join with smooth transitions
+  return `${intro}\n\n${overview}\n\n${foundations}\n\n${deeperMeaning}\n\n${practical}\n\n${summary}\n\n${outro}`;
 }
 
 function buildYouTubeIntro(
@@ -838,11 +1065,11 @@ function buildYouTubeOutro(theme: WeeklyTheme): string {
  * Generate all video scripts for a week
  * Returns 3 TikTok scripts (Mon, Wed, Fri) and 1 YouTube script (Sunday)
  */
-export function generateWeeklyVideoScripts(
+export async function generateWeeklyVideoScripts(
   weekStartDate: Date,
   themeIndex: number = 0,
   baseUrl: string = '',
-): WeeklyVideoScripts {
+): Promise<WeeklyVideoScripts> {
   // Get the theme for this week
   const theme = categoryThemes[themeIndex % categoryThemes.length];
   const facets = theme.facets;
@@ -850,18 +1077,26 @@ export function generateWeeklyVideoScripts(
   // Generate TikTok scripts for Monday, Wednesday, Friday
   // Part numbers: 1/3, 2/3, 3/3
   const tiktokDays = [0, 2, 4]; // Mon, Wed, Fri (facets 0, 2, 4)
-  const tiktokScripts: VideoScript[] = tiktokDays.map((dayOffset, index) => {
-    const facet = facets[dayOffset] || facets[0];
-    const scriptDate = new Date(weekStartDate);
-    scriptDate.setDate(scriptDate.getDate() + dayOffset);
-    const partNumber = index + 1; // 1, 2, 3
-    return generateTikTokScript(facet, theme, scriptDate, partNumber, baseUrl);
-  });
+  const tiktokScripts: VideoScript[] = await Promise.all(
+    tiktokDays.map(async (dayOffset, index) => {
+      const facet = facets[dayOffset] || facets[0];
+      const scriptDate = new Date(weekStartDate);
+      scriptDate.setDate(scriptDate.getDate() + dayOffset);
+      const partNumber = index + 1; // 1, 2, 3
+      return await generateTikTokScript(
+        facet,
+        theme,
+        scriptDate,
+        partNumber,
+        baseUrl,
+      );
+    }),
+  );
 
   // Generate YouTube script for Sunday (covers the full week's theme)
   const youtubeDate = new Date(weekStartDate);
   youtubeDate.setDate(youtubeDate.getDate() + 6); // Sunday
-  const youtubeScript = generateYouTubeScript(
+  const youtubeScript = await generateYouTubeScript(
     theme,
     facets,
     youtubeDate,
@@ -886,7 +1121,7 @@ export async function generateAndSaveWeeklyScripts(
 ): Promise<WeeklyVideoScripts> {
   await ensureVideoScriptsTable();
 
-  const scripts = generateWeeklyVideoScripts(
+  const scripts = await generateWeeklyVideoScripts(
     weekStartDate,
     themeIndex,
     baseUrl,

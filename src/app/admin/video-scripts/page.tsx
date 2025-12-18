@@ -650,20 +650,49 @@ function TikTokExpandedContent({
         </div>
       )}
 
-      {/* Script Sections */}
-      {script.sections.map((section, idx) => (
-        <div key={idx} className='space-y-2'>
-          <div className='flex items-center gap-2'>
-            <span className='text-sm font-medium text-violet-400'>
-              [{section.name}]
-            </span>
-            <span className='text-xs text-slate-500'>{section.duration}</span>
-          </div>
-          <p className='text-slate-300 text-sm leading-relaxed whitespace-pre-wrap'>
-            {section.content}
-          </p>
+      {/* Complete Script */}
+      <div className='space-y-2'>
+        <div className='flex items-center gap-2'>
+          <span className='text-sm font-medium text-violet-400'>
+            Complete Script
+          </span>
+          <span className='text-xs text-slate-500'>
+            {script.estimatedDuration} • {script.wordCount} words
+          </span>
         </div>
-      ))}
+        <p className='text-slate-300 text-sm leading-relaxed whitespace-pre-wrap'>
+          {script.fullScript}
+        </p>
+      </div>
+
+      {/* Section Breakdown (for reference) */}
+      {script.sections.length > 1 && (
+        <details className='mt-4'>
+          <summary className='text-sm font-medium text-slate-400 cursor-pointer hover:text-slate-300'>
+            Section Breakdown (for reference)
+          </summary>
+          <div className='mt-2 space-y-3'>
+            {script.sections.map((section, idx) => (
+              <div
+                key={idx}
+                className='space-y-1 pl-4 border-l-2 border-slate-700'
+              >
+                <div className='flex items-center gap-2'>
+                  <span className='text-xs font-medium text-violet-400'>
+                    {section.name}
+                  </span>
+                  <span className='text-xs text-slate-500'>
+                    {section.duration}
+                  </span>
+                </div>
+                <p className='text-slate-400 text-xs leading-relaxed whitespace-pre-wrap'>
+                  {section.content}
+                </p>
+              </div>
+            ))}
+          </div>
+        </details>
+      )}
 
       {/* Actions */}
       <div className='flex items-center justify-between pt-4 border-t border-slate-700/50'>
