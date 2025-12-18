@@ -15,10 +15,13 @@ config({ path: '.env.local' });
 import { google } from 'googleapis';
 import * as readline from 'readline';
 
-// Default to YouTube scopes, but can be overridden via environment variable
+// Default scopes: YouTube, Google Sheets, and Search Console
+// Can be overridden via environment variable GOOGLE_SCOPES
 const DEFAULT_SCOPES = [
   'https://www.googleapis.com/auth/youtube.upload',
   'https://www.googleapis.com/auth/youtube',
+  'https://www.googleapis.com/auth/spreadsheets', // Google Sheets API
+  'https://www.googleapis.com/auth/webmasters.readonly', // Google Search Console API
 ];
 
 // Allow override for Search Console or other services

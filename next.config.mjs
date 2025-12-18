@@ -113,7 +113,10 @@ const nextConfig = {
       if (Array.isArray(config.module.noParse)) {
         config.module.noParse.push(/ffmpeg-static.*\/ffmpeg$/);
       } else {
-        config.module.noParse = [config.module.noParse, /ffmpeg-static.*\/ffmpeg$/];
+        config.module.noParse = [
+          config.module.noParse,
+          /ffmpeg-static.*\/ffmpeg$/,
+        ];
       }
     }
 

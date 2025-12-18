@@ -1165,7 +1165,7 @@ async function runWeeklyTasks(request: NextRequest) {
         priority: weeklyTemplate.priority,
         url: weeklyTemplate.url,
         fields: weeklyFields,
-        category: 'analytics',
+        category: 'general',
         dedupeKey: `weekly-digest-${new Date().toISOString().split('T')[0]}`,
       });
       console.log(
