@@ -160,7 +160,7 @@ Wood carries the living essence of the tree long after harvest. Each species has
           },
           {
             name: 'Planets',
-            href: '/grimoire/planets',
+            href: '/grimoire/astronomy/planets',
             type: 'Astrology',
           },
           {
@@ -178,8 +178,8 @@ Wood carries the living essence of the tree long after harvest. Each species has
             text: 'Herb Correspondences',
             href: '/grimoire/correspondences/herbs',
           },
-          { text: 'Sabbats', href: '/grimoire/sabbats' },
-          { text: 'Moon Phases', href: '/grimoire/moon-phases' },
+          { text: 'Sabbats', href: '/grimoire/wheel-of-the-year' },
+          { text: 'Moon Phases', href: '/grimoire/moon/phases' },
         ]}
         ctaText='Want personalized wood recommendations for your practice?'
         ctaHref='/pricing'

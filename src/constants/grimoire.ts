@@ -355,7 +355,7 @@ export const customContentHrefs: Record<string, Record<string, string>> = {
     'Rising Sign': '/grimoire/rising-sign',
     Synastry: '/grimoire/synastry',
     'Lunar Nodes': '/grimoire/lunar-nodes',
-    Retrogrades: '/grimoire/retrogrades',
+    Retrogrades: '/grimoire/astronomy/retrogrades',
   },
   // Houses
   houses: {
@@ -421,7 +421,7 @@ export const customContentHrefs: Record<string, Record<string, string>> = {
   modernWitchcraft: {
     'Witch Types': '/grimoire/modern-witchcraft/witch-types',
     Tools: '/grimoire/modern-witchcraft/tools',
-    Ethics: '/grimoire/witchcraft-ethics',
+    Ethics: '/grimoire/modern-witchcraft/ethics',
     'Book of Shadows': '/grimoire/book-of-shadows',
   },
   // Practices
@@ -441,9 +441,9 @@ export const customContentHrefs: Record<string, Record<string, string>> = {
   // Candle Magic
   candleMagic: {
     'Color Meanings': '/grimoire/candle-magic/colors',
-    Anointing: '/grimoire/anointing-candles',
-    'Altar Lighting': '/grimoire/lighting-candles-on-altar',
-    'Color Incantations': '/grimoire/incantations-by-candle-color',
+    Anointing: '/grimoire/candle-magic/anointing',
+    'Altar Lighting': '/grimoire/candle-magic/altar-lighting',
+    'Color Incantations': '/grimoire/candle-magic/incantations',
   },
   // Correspondences
   correspondences: {
@@ -496,6 +496,6 @@ export const customContentHrefs: Record<string, Record<string, string>> = {
   },
   // Wheel of the Year
   wheelOfTheYear: {
-    Sabbats: '/grimoire/sabbats',
+    Sabbats: '/grimoire/wheel-of-the-year',
   },
 };

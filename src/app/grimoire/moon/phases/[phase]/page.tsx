@@ -261,7 +261,7 @@ During the ${phaseName} Moon, the energy is focused on ${phaseData.keywords.join
         ]}
         internalLinks={[
           { text: "View Today's Moon Phase", href: '/horoscope' },
-          { text: 'Explore Moon Rituals', href: '/grimoire/moon-rituals' },
+          { text: 'Explore Moon Rituals', href: '/grimoire/moon/rituals' },
           { text: 'Calculate Birth Chart', href: '/birth-chart' },
           { text: 'Grimoire Home', href: '/grimoire' },
         ]}

@@ -364,7 +364,10 @@ The practice involves following specific steps that guide you into a meditative 
       ]}
       internalLinks={[
         { text: 'Meditation & Mindfulness', href: '/grimoire/meditation' },
-        { text: 'Breathwork Techniques', href: '/grimoire/breathwork' },
+        {
+          text: 'Breathwork Techniques',
+          href: '/grimoire/meditation/breathwork',
+        },
         {
           text: 'Spellcraft Fundamentals',
           href: '/grimoire/spells/fundamentals',

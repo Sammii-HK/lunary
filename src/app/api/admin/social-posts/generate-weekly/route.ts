@@ -180,6 +180,10 @@ async function generateThematicWeeklyPosts(
     ),
   );
 
+  let videoScriptContext:
+    | import('@/lib/social/thematic-generator').VideoScriptContext
+    | undefined = undefined;
+
   // Generate all posts for the week (with video script context if available)
   const posts = generateThematicPostsForWeek(
     weekStartDate,
@@ -314,9 +318,6 @@ async function generateThematicWeeklyPosts(
   }
 
   // Extract YouTube script sections for social post content
-  let videoScriptContext:
-    | import('@/lib/social/thematic-generator').VideoScriptContext
-    | undefined = undefined;
   if (videoScripts?.youtubeScript) {
     const youtubeScript = videoScripts.youtubeScript;
     const sections = youtubeScript.sections || [];

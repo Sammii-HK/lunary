@@ -226,7 +226,7 @@ const BirthChart = () => {
             return (
               <Link
                 key={planet.name}
-                href={`/grimoire/planets/${planetSlug}`}
+                href={`/grimoire/astronomy/planets/${planetSlug}`}
                 className='block rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4 hover:bg-zinc-900/50 hover:border-lunary-primary-600 transition-all group'
               >
                 <div className='flex items-start gap-3 mb-3'>
@@ -422,7 +422,7 @@ const BirthChart = () => {
         </p>
         <div className='space-y-3'>
           <Link
-            href='/grimoire/retrogrades/mercury'
+            href='/grimoire/astronomy/retrogrades/mercury'
             className='block rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4 hover:bg-zinc-900/50 hover:border-lunary-primary-600 transition-all group'
           >
             <h3 className='text-lg font-medium text-zinc-100 mb-2 group-hover:text-lunary-primary-400 transition-colors'>
@@ -439,7 +439,7 @@ const BirthChart = () => {
             </p>
           </Link>
           <Link
-            href='/grimoire/retrogrades/venus'
+            href='/grimoire/astronomy/retrogrades/venus'
             className='block rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4 hover:bg-zinc-900/50 hover:border-lunary-primary-600 transition-all group'
           >
             <h3 className='text-lg font-medium text-zinc-100 mb-2 group-hover:text-lunary-primary-400 transition-colors'>
@@ -456,7 +456,7 @@ const BirthChart = () => {
             </p>
           </Link>
           <Link
-            href='/grimoire/retrogrades/mars'
+            href='/grimoire/astronomy/retrogrades/mars'
             className='block rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4 hover:bg-zinc-900/50 hover:border-lunary-primary-600 transition-all group'
           >
             <h3 className='text-lg font-medium text-zinc-100 mb-2 group-hover:text-lunary-primary-400 transition-colors'>

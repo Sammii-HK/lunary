@@ -138,7 +138,10 @@ Understanding ${woodKey.toLowerCase()} wood's correspondences helps you choose t
           text: 'Magical Correspondences',
           href: '/grimoire/correspondences',
         },
-        { text: 'Witchcraft Tools', href: '/grimoire/witchcraft-tools' },
+        {
+          text: 'Witchcraft Tools',
+          href: '/grimoire/modern-witchcraft/tools-guide',
+        },
         {
           text: 'Spellcraft Fundamentals',
           href: '/grimoire/spells/fundamentals',

@@ -96,7 +96,7 @@ const ModernWitchcraft = () => {
       <section id='tools' className='space-y-6'>
         <div>
           <Link
-            href='/grimoire/witchcraft-tools'
+            href='/grimoire/modern-witchcraft/tools-guide'
             className='block text-xl font-medium text-zinc-100 mb-2 hover:text-lunary-primary-400 transition-colors'
           >
             Essential Witch Tools
@@ -188,7 +188,7 @@ const ModernWitchcraft = () => {
       <section id='ethics' className='space-y-6'>
         <div>
           <Link
-            href='/grimoire/witchcraft-ethics'
+            href='/grimoire/modern-witchcraft/ethics'
             className='block text-xl font-medium text-zinc-100 mb-2 hover:text-lunary-primary-400 transition-colors'
           >
             Witchcraft Ethics

@@ -244,7 +244,7 @@ ${spreadData.instructions.length > 0 ? `Instructions: ${spreadData.instructions.
         internalLinks={[
           { text: 'Get a Tarot Reading', href: '/tarot' },
           { text: 'Tarot Guide', href: '/grimoire/tarot' },
-          { text: 'All Tarot Spreads', href: '/grimoire/tarot-spreads' },
+          { text: 'All Tarot Spreads', href: '/grimoire/tarot/spreads' },
           { text: 'Grimoire Home', href: '/grimoire' },
         ]}
         ctaText={`Try a ${spreadData.name} reading`}

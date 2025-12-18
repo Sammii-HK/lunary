@@ -154,7 +154,7 @@ Not all magical herbs are safe for consumption or skin contact. Always research 
           },
           {
             name: 'Planets',
-            href: '/grimoire/planets',
+            href: '/grimoire/astronomy/planets',
             type: 'Astrology',
           },
           {
@@ -168,8 +168,8 @@ Not all magical herbs are safe for consumption or skin contact. Always research 
             text: 'Correspondences Overview',
             href: '/grimoire/correspondences',
           },
-          { text: 'Moon Phases', href: '/grimoire/moon-phases' },
-          { text: 'Sabbats', href: '/grimoire/sabbats' },
+          { text: 'Moon Phases', href: '/grimoire/moon/phases' },
+          { text: 'Sabbats', href: '/grimoire/wheel-of-the-year' },
           { text: 'Crystals', href: '/grimoire/crystals' },
         ]}
         ctaText='Want personalized herbal recommendations for your practice?'

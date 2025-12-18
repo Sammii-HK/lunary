@@ -219,7 +219,7 @@ const CandleMagic = () => {
       <section id='anointing' className='space-y-6'>
         <div>
           <Link
-            href='/grimoire/anointing-candles'
+            href='/grimoire/candle-magic/anointing'
             className='block text-xl font-medium text-zinc-100 mb-2 hover:text-lunary-primary-400 transition-colors'
           >
             Anointing Candles with Oils
@@ -351,7 +351,7 @@ const CandleMagic = () => {
       <section id='altar-lighting' className='space-y-6'>
         <div>
           <Link
-            href='/grimoire/lighting-candles-on-altar'
+            href='/grimoire/candle-magic/altar-lighting'
             className='block text-xl font-medium text-zinc-100 mb-2 hover:text-lunary-primary-400 transition-colors'
           >
             Lighting Candles on Your Altar
@@ -458,7 +458,7 @@ const CandleMagic = () => {
       <section id='color-incantations' className='space-y-6'>
         <div>
           <Link
-            href='/grimoire/incantations-by-candle-color'
+            href='/grimoire/candle-magic/incantations'
             className='block text-xl font-medium text-zinc-100 mb-2 hover:text-lunary-primary-400 transition-colors'
           >
             Incantations by Candle Color
@@ -673,7 +673,7 @@ const CandleMagic = () => {
             Herbs & Oils
           </Link>
           <Link
-            href='/grimoire/moon-rituals'
+            href='/grimoire/moon/rituals'
             className='block rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-3 hover:border-lunary-primary-700 hover:bg-zinc-900/50 transition-all text-sm text-zinc-300 hover:text-lunary-primary-300'
           >
             Moon Rituals

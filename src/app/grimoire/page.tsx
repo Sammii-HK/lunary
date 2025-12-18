@@ -78,10 +78,7 @@ const GrimoireHome = () => {
     <div className='h-full w-full'>
       {renderJsonLd(grimoireListSchema)}
       {renderJsonLd(
-        createBreadcrumbSchema([
-          { name: 'Grimoire', url: '/grimoire' },
-          { name: 'Page.tsx', url: '/grimoire/page.tsx' },
-        ]),
+        createBreadcrumbSchema([{ name: 'Grimoire', url: '/grimoire' }]),
       )}
       <GrimoireLayout />
     </div>

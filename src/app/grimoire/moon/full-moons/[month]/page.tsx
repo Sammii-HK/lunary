@@ -169,7 +169,7 @@ Understanding the ${moonData.name}'s energy helps you plan meaningful rituals an
         ]}
         relatedItems={[
           { name: 'Moon Guide', href: '/grimoire/moon', type: 'Guide' },
-          { name: 'Moon Phases', href: '/grimoire/moon-phases', type: 'Guide' },
+          { name: 'Moon Phases', href: '/grimoire/moon/phases', type: 'Guide' },
           { name: 'Horoscope', href: '/horoscope', type: 'Daily Reading' },
         ]}
         breadcrumbs={[
@@ -183,7 +183,7 @@ Understanding the ${moonData.name}'s energy helps you plan meaningful rituals an
         internalLinks={[
           { text: "View Today's Moon Phase", href: '/horoscope' },
           { text: 'All Moon Phases', href: '/grimoire/moon' },
-          { text: 'Moon Rituals', href: '/grimoire/moon-rituals' },
+          { text: 'Moon Rituals', href: '/grimoire/moon/rituals' },
           { text: 'Grimoire Home', href: '/grimoire' },
         ]}
         ctaText={`Want personalized full moon insights?`}

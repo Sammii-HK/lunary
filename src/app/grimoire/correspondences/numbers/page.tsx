@@ -189,7 +189,7 @@ Numbers above 9 carry the energy of their reduced digit. 13 (1+3=4) has 4 energy
           },
           { text: 'Numerology Guide', href: '/grimoire/numerology' },
           { text: 'Angel Numbers', href: '/grimoire/angel-numbers' },
-          { text: 'Planets', href: '/grimoire/planets' },
+          { text: 'Planets', href: '/grimoire/astronomy/planets' },
         ]}
         ctaText='Want personalized number insights based on your birth chart?'
         ctaHref='/pricing'

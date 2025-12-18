@@ -107,14 +107,14 @@ export default function EventsIndexPage() {
         relatedItems={[
           {
             name: 'Retrogrades',
-            href: '/grimoire/retrogrades',
+            href: '/grimoire/astronomy/retrogrades',
             type: 'topic',
           },
           { name: 'Eclipses', href: '/grimoire/eclipses', type: 'topic' },
           { name: 'Transits', href: '/grimoire/transits', type: 'topic' },
           {
             name: 'Moon Rituals',
-            href: '/grimoire/moon-rituals',
+            href: '/grimoire/moon/rituals',
             type: 'guide',
           },
         ]}
@@ -181,7 +181,7 @@ export default function EventsIndexPage() {
             </Link>
 
             <Link
-              href='/grimoire/moon-rituals'
+              href='/grimoire/moon/rituals'
               className='group p-4 rounded-lg border border-lunary-secondary-700 bg-lunary-secondary-950 hover:bg-lunary-secondary-900 transition-colors'
             >
               <h3 className='font-medium text-zinc-100 group-hover:text-lunary-secondary-300 mb-1'>

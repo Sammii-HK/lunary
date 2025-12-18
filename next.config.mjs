@@ -421,6 +421,12 @@ const nextConfig = {
         destination: '/blog/week/week-:week-:year',
         permanent: true,
       },
+      // Moon calendar year pages -> Grimoire moon year pages
+      {
+        source: '/moon-calendar/:year(\\d{4})',
+        destination: '/grimoire/moon/:year',
+        permanent: true,
+      },
       // ========================================
       // GRIMOIRE CONSOLIDATION REDIRECTS
       // Phase 1: Deleted duplicate index pages

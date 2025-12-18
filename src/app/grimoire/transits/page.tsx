@@ -47,6 +47,17 @@ export const metadata: Metadata = {
     images: ['/api/og/grimoire/transits'],
   },
   alternates: { canonical: 'https://lunary.app/grimoire/transits' },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      'max-video-preview': -1,
+      'max-image-preview': 'large',
+      'max-snippet': -1,
+    },
+  },
 };
 
 const years = [2025, 2026, 2027, 2028, 2029, 2030];

@@ -416,7 +416,11 @@ ${methodData.tools.map((t) => `• ${t}`).join('\n')}`}
           'How can I deepen my scrying practice?',
         ]}
         relatedItems={[
-          { name: 'Scrying Guide', href: '/grimoire/scrying', type: 'Guide' },
+          {
+            name: 'Scrying Guide',
+            href: '/grimoire/divination/scrying',
+            type: 'Guide',
+          },
           { name: 'Divination', href: '/grimoire/divination', type: 'Guide' },
           {
             name: 'Meditation',

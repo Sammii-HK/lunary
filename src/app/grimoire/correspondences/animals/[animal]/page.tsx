@@ -142,11 +142,11 @@ Understanding ${animalKey.toLowerCase()}'s correspondences helps you interpret w
           text: 'Magical Correspondences',
           href: '/grimoire/correspondences',
         },
-        { text: 'Reading Omens', href: '/grimoire/reading-omens' },
+        { text: 'Reading Omens', href: '/grimoire/divination/omen-reading' },
         { text: 'Divination Methods', href: '/grimoire/divination' },
         {
           text: 'Dream Interpretation',
-          href: '/grimoire/dream-interpretation',
+          href: '/grimoire/divination/dream-interpretation',
         },
       ]}
       tables={[

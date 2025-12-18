@@ -163,7 +163,7 @@ Banishing, protection, boundaries, endings, long-term goals. Use black candles.
         relatedItems={[
           {
             name: 'Planets',
-            href: '/grimoire/planets',
+            href: '/grimoire/astronomy/planets',
             type: 'Astrology',
           },
           {
@@ -178,7 +178,7 @@ Banishing, protection, boundaries, endings, long-term goals. Use black candles.
           },
           {
             name: 'Moon Phases',
-            href: '/grimoire/moon-phases',
+            href: '/grimoire/moon/phases',
             type: 'Guide',
           },
           {
@@ -192,8 +192,8 @@ Banishing, protection, boundaries, endings, long-term goals. Use black candles.
             text: 'Correspondences Overview',
             href: '/grimoire/correspondences',
           },
-          { text: 'Planets', href: '/grimoire/planets' },
-          { text: 'Moon Phases', href: '/grimoire/moon-phases' },
+          { text: 'Planets', href: '/grimoire/astronomy/planets' },
+          { text: 'Moon Phases', href: '/grimoire/moon/phases' },
           { text: 'Candle Magic', href: '/grimoire/candle-magic' },
         ]}
         ctaText='Want personalized timing for your magic based on your birth chart?'

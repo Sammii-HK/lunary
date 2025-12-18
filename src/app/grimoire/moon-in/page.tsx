@@ -171,7 +171,7 @@ Each sign has optimal magical uses. Check the current Moon sign before important
         relatedItems={[
           {
             name: 'Moon Phases',
-            href: '/grimoire/moon-phases',
+            href: '/grimoire/moon/phases',
             type: 'Moon',
           },
           {
@@ -181,7 +181,7 @@ Each sign has optimal magical uses. Check the current Moon sign before important
           },
           {
             name: 'Full Moon Names',
-            href: '/grimoire/full-moons',
+            href: '/grimoire/moon/full-moons',
             type: 'Moon',
           },
           {
@@ -193,7 +193,7 @@ Each sign has optimal magical uses. Check the current Moon sign before important
         internalLinks={[
           { text: 'Current Moon Sign', href: '/moon' },
           { text: 'Zodiac Signs', href: '/grimoire/zodiac' },
-          { text: 'Moon Phases', href: '/grimoire/moon-phases' },
+          { text: 'Moon Phases', href: '/grimoire/moon/phases' },
           { text: 'Birth Chart', href: '/birth-chart' },
         ]}
         ctaText='Want personalized Moon sign insights?'
