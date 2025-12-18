@@ -180,6 +180,9 @@ export async function POST(req: NextRequest) {
             const videoData = await res.json();
             // Upload to YouTube
             if (videoData.video?.id) {
+              // Use postContent (which includes hashtags) if available, otherwise use description
+              const youtubeDescription =
+                videoData.video.postContent || description;
               await fetch(`${baseUrl}/api/youtube/upload`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -187,7 +190,7 @@ export async function POST(req: NextRequest) {
                   videoUrl: videoData.video.url,
                   videoId: videoData.video.id,
                   title,
-                  description,
+                  description: youtubeDescription,
                   type: 'long',
                   tags: tags,
                   publishDate: new Date(date).toISOString(),

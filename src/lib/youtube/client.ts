@@ -1,4 +1,6 @@
 import { google } from 'googleapis';
+import { Readable } from 'stream';
+import { sendDiscordNotification } from '@/lib/discord';
 
 const YOUTUBE_SCOPES = [
   'https://www.googleapis.com/auth/youtube.upload',
@@ -31,8 +33,20 @@ function getYouTubeClient() {
   }
 
   const oauth2Client = new google.auth.OAuth2(clientId, clientSecret);
+
+  // Set credentials with refresh token
+  // The OAuth2 client will automatically refresh the access token when needed
   oauth2Client.setCredentials({
     refresh_token: refreshToken,
+  });
+
+  // Add error handler for token refresh failures
+  oauth2Client.on('tokens', (tokens) => {
+    if (tokens.refresh_token) {
+      // If a new refresh token is provided, it should be saved
+      // (though Google typically only provides this on first authorization)
+      console.log('YouTube OAuth: New refresh token received');
+    }
   });
 
   return google.youtube({
@@ -72,12 +86,15 @@ export async function uploadVideo(
   }
 
   try {
+    // Convert Buffer to stream (YouTube API requires a stream)
+    const videoStream = Readable.from(videoBuffer);
+
     // Upload video
     const response = await youtube.videos.insert({
       part: ['snippet', 'status'],
       requestBody: videoMetadata,
       media: {
-        body: videoBuffer,
+        body: videoStream,
         mimeType: 'video/mp4',
       },
     });
@@ -92,6 +109,25 @@ export async function uploadVideo(
     return { videoId, url };
   } catch (error: any) {
     console.error('YouTube upload error:', error);
+
+    // Provide helpful error message for invalid_grant (expired refresh token)
+    if (error.message?.includes('invalid_grant') || error.code === 400) {
+      const errorMessage = `YouTube OAuth authentication failed: The refresh token has expired or is invalid. Please regenerate it by running: npx tsx scripts/regenerate-google-token.ts (make sure to use YouTube scopes: ${YOUTUBE_SCOPES.join(', ')})`;
+
+      // Send Discord notification for urgent OAuth errors
+      await sendDiscordNotification({
+        category: 'urgent',
+        title: '🚨 YouTube OAuth Token Expired',
+        description: errorMessage,
+        color: 'error',
+        minPriority: 'high',
+      }).catch((discordError) => {
+        console.error('Failed to send Discord notification:', discordError);
+      });
+
+      throw new Error(errorMessage);
+    }
+
     throw new Error(
       `Failed to upload video to YouTube: ${error.message || 'Unknown error'}`,
     );

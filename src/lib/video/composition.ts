@@ -240,7 +240,7 @@ export function generateVoiceoverScriptFromWeeklyData(
     }
 
     parts.push(
-      'For your personalized horoscope and daily guidance, visit Lunary dot app',
+      'For your personalized horoscope and daily guidance, visit Lunary',
     );
 
     return parts.join('. ');

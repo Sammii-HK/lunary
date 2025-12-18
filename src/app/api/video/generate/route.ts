@@ -18,8 +18,8 @@ import { generateWeeklyContent } from '../../../../../utils/blog/weeklyContentGe
 // Version for cache invalidation - increment when prompts change
 const SCRIPT_VERSION = {
   short: 'v11', // v5: fixed moon phase detection using MoonPhase angle + seasonal events
-  medium: 'v13', // v9: explains what Sun in X means, seasonal events
-  long: 'v10', // v7: dedicated solstice section, in-depth Sun/Moon meanings, intention setting
+  medium: 'v16', // v9: explains what Sun in X means, seasonal events
+  long: 'v14', // v7: dedicated solstice section, in-depth Sun/Moon meanings, intention setting
 };
 
 export const runtime = 'nodejs';
@@ -537,8 +537,8 @@ export async function POST(request: NextRequest) {
       console.log(
         `🎙️ Generating new audio for ${type} video (not found in cache for ${weekKey})...`,
       );
-      // Medium form uses slightly faster speed for more engaging content
-      const ttsSpeed = type === 'medium' ? 1.1 : 1.0;
+      // const ttsSpeed = type === 'medium' ? 1.1 : 1.0;
+      const ttsSpeed = 1.1;
       audioBuffer = await generateVoiceover(script, {
         voiceName: 'nova', // British female voice
         model: 'tts-1-hd', // High quality
@@ -737,6 +737,12 @@ export async function POST(request: NextRequest) {
           blogSlug || undefined,
         );
         console.log(`✅ Generated post content for ${type} video`);
+
+        // For long-form videos, also update description to include hashtags
+        // (postContent includes hashtags, so use it for description if not already set from blogContent)
+        if (type === 'long' && !blogContent) {
+          description = postContent;
+        }
       }
     } catch (error) {
       console.warn('Failed to generate post content:', error);

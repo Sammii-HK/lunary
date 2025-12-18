@@ -1024,6 +1024,7 @@ async function setupDatabase() {
         status VARCHAR(20) DEFAULT 'pending', -- 'pending' | 'uploaded' | 'failed'
         youtube_video_id TEXT,
         created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+        updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
         expires_at TIMESTAMP WITH TIME ZONE DEFAULT (NOW() + INTERVAL '7 days')
       )
     `;
@@ -1049,6 +1050,15 @@ async function setupDatabase() {
     } catch (error) {
       // Column might already exist, that's okay
       console.log('ℹ️  audio_url column already exists or error adding it');
+    }
+
+    // Add updated_at column if it doesn't exist (migration for existing databases)
+    try {
+      await sql`ALTER TABLE videos ADD COLUMN IF NOT EXISTS updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()`;
+      console.log('✅ Videos table updated_at column added/verified');
+    } catch (error) {
+      // Column might already exist, that's okay
+      console.log('ℹ️  updated_at column already exists or error adding it');
     }
 
     console.log('✅ Videos table created');

@@ -53,6 +53,7 @@ export async function POST(request: NextRequest) {
     const apiKey = process.env.SUCCULENT_SECRET_KEY;
     const accountGroupId = process.env.SUCCULENT_ACCOUNT_GROUP_ID;
     const succulentApiUrl = 'https://app.succulent.social/api/posts';
+    const dateStr = new Date().toISOString().split('T')[0];
 
     // Post to TikTok
     if (platforms.includes('tiktok')) {
@@ -65,9 +66,11 @@ export async function POST(request: NextRequest) {
         try {
           const tiktokPost = {
             accountGroupId,
+            name: `Lunary ${videoType} - TikTok - ${dateStr}`,
             content: postContent,
-            mediaUrls: [videoUrl],
             platforms: ['tiktok'],
+            media: [{ type: 'video' as const, url: videoUrl, alt: title }],
+            publishImmediately: true,
           };
 
           const response = await fetch(succulentApiUrl, {
@@ -99,7 +102,7 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Post to Instagram Reels
+    // Post to Instagram Reels/Stories
     if (platforms.includes('instagram')) {
       if (!apiKey || !accountGroupId) {
         results.instagram = {
@@ -110,12 +113,15 @@ export async function POST(request: NextRequest) {
         try {
           const instagramPost = {
             accountGroupId,
+            name: `Lunary ${videoType} - Instagram ${videoType === 'short' ? 'Story' : 'Reel'} - ${dateStr}`,
             content: postContent,
-            mediaUrls: [videoUrl],
             platforms: ['instagram'],
-            // For short form, use stories; for medium/long, use reels
+            media: [{ type: 'video' as const, url: videoUrl, alt: title }],
             instagramOptions:
-              videoType === 'short' ? { stories: true } : { reels: true },
+              videoType === 'short'
+                ? { stories: true }
+                : { type: 'reel' as const },
+            publishImmediately: true,
           };
 
           const response = await fetch(succulentApiUrl, {

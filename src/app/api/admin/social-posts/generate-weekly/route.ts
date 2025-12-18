@@ -180,8 +180,12 @@ async function generateThematicWeeklyPosts(
     ),
   );
 
-  // Generate all posts for the week
-  const posts = generateThematicPostsForWeek(weekStartDate, themeIndex);
+  // Generate all posts for the week (with video script context if available)
+  const posts = generateThematicPostsForWeek(
+    weekStartDate,
+    themeIndex,
+    videoScriptContext,
+  );
   console.log(`📝 [THEMATIC] Generated ${posts.length} posts`);
 
   // For currentWeek, filter out past days
@@ -291,10 +295,13 @@ async function generateThematicWeeklyPosts(
   // Record theme usage for rotation tracking
   await recordThemeUsage(sql, currentTheme.id);
 
-  // Generate video scripts for this week
+  // Generate video scripts for this week (before posts so we can use script data)
+  let videoScripts: Awaited<
+    ReturnType<typeof generateAndSaveWeeklyScripts>
+  > | null = null;
   let videoScriptsGenerated = false;
   try {
-    const videoScripts = await generateAndSaveWeeklyScripts(
+    videoScripts = await generateAndSaveWeeklyScripts(
       weekStartDate,
       themeIndex,
     );
@@ -304,6 +311,34 @@ async function generateThematicWeeklyPosts(
     );
   } catch (videoError) {
     console.error('Failed to generate video scripts:', videoError);
+  }
+
+  // Extract YouTube script sections for social post content
+  let videoScriptContext:
+    | import('@/lib/social/thematic-generator').VideoScriptContext
+    | undefined = undefined;
+  if (videoScripts?.youtubeScript) {
+    const youtubeScript = videoScripts.youtubeScript;
+    const sections = youtubeScript.sections || [];
+    videoScriptContext = {
+      intro: sections.find((s) => s.name.toLowerCase().includes('introduction'))
+        ?.content,
+      overview: sections.find((s) => s.name.toLowerCase().includes('overview'))
+        ?.content,
+      foundations: sections.find((s) =>
+        s.name.toLowerCase().includes('foundation'),
+      )?.content,
+      deeperMeaning: sections.find((s) =>
+        s.name.toLowerCase().includes('deeper'),
+      )?.content,
+      practical: sections.find((s) =>
+        s.name.toLowerCase().includes('practical'),
+      )?.content,
+      summary: sections.find((s) => s.name.toLowerCase().includes('summary'))
+        ?.content,
+      themeName: currentTheme.name,
+      facetTitles: weekPlan.map((d) => d.facet.title),
+    };
   }
 
   return NextResponse.json({

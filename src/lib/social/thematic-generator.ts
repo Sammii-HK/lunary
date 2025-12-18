@@ -44,6 +44,17 @@ export interface LongFormContent {
   attribution: string;
 }
 
+export interface VideoScriptContext {
+  intro?: string;
+  overview?: string;
+  foundations?: string;
+  deeperMeaning?: string;
+  practical?: string;
+  summary?: string;
+  themeName: string;
+  facetTitles: string[];
+}
+
 /**
  * Platform configuration for hashtag usage
  */
@@ -164,13 +175,136 @@ function getGrimoireDataForFacet(
 }
 
 /**
+ * Generate long-form content based on video script
+ * Creates a readable summary that mirrors the video narrative with searchable keywords
+ */
+export function generateVideoBasedLongFormContent(
+  facet: DailyFacet,
+  theme: WeeklyTheme | SabbatTheme,
+  videoScript: VideoScriptContext,
+): LongFormContent {
+  const data = getGrimoireDataForFacet(facet);
+  let title = facet.title;
+  let body = '';
+
+  // Intro: Brief mention of week's theme
+  if (videoScript.intro) {
+    // Convert spoken language to written form
+    const introText = videoScript.intro
+      .replace(/Today, we explore/g, 'This week explores')
+      .replace(/Today we explore/g, 'This week explores')
+      .replace(/we explore/g, 'we explore')
+      .replace(/\.$/, '');
+    body += `${introText}.\n\n`;
+  }
+
+  // Overview: Topics covered
+  if (videoScript.overview) {
+    const overviewText = videoScript.overview
+      .replace(/This deep dive covers/g, 'This exploration covers')
+      .replace(/We begin with/g, 'Beginning with')
+      .replace(/we begin with/g, 'beginning with');
+    body += `${overviewText}\n\n`;
+  }
+
+  // Foundations: Core concepts (focus on this facet if mentioned)
+  if (videoScript.foundations) {
+    // Extract sentences related to this facet's topic
+    const facetKeywords = facet.title.toLowerCase().split(' ');
+    const foundationSentences = videoScript.foundations
+      .split(/[.!?]+/)
+      .filter((s) => {
+        const lower = s.toLowerCase();
+        return facetKeywords.some((kw) => lower.includes(kw));
+      });
+
+    if (foundationSentences.length > 0) {
+      body += foundationSentences.slice(0, 2).join('. ') + '.\n\n';
+    } else if (data?.description) {
+      // Fallback to Grimoire data if facet not in foundations
+      body += data.description.split('.').slice(0, 2).join('.') + '.\n\n';
+    }
+  }
+
+  // Deeper Meaning: Symbolic/interpretive layers
+  if (videoScript.deeperMeaning) {
+    const deeperSentences = videoScript.deeperMeaning
+      .split(/[.!?]+/)
+      .filter((s) => s.trim().length > 0)
+      .slice(0, 2);
+    if (deeperSentences.length > 0) {
+      body += deeperSentences.join('. ') + '.\n\n';
+    }
+  } else if (data?.mysticalProperties || data?.meaning) {
+    body += (data.mysticalProperties || data.meaning) + '\n\n';
+  }
+
+  // Practical Application: How to use/apply
+  if (videoScript.practical) {
+    const practicalSentences = videoScript.practical
+      .split(/[.!?]+/)
+      .filter((s) => s.trim().length > 0)
+      .slice(0, 2);
+    if (practicalSentences.length > 0) {
+      body += practicalSentences.join('. ') + '.\n\n';
+    }
+  } else if (data?.healingPractices && data.healingPractices.length > 0) {
+    body +=
+      'Practical applications: ' +
+      data.healingPractices.slice(0, 3).join(', ') +
+      '.\n\n';
+  }
+
+  // Summary: Key takeaways
+  if (videoScript.summary) {
+    const summaryText = videoScript.summary
+      .replace(/To summarize:/g, 'In summary,')
+      .replace(/we have explored/g, 'this covers');
+    body += summaryText + '\n\n';
+  }
+
+  // Add searchable keywords from Grimoire data
+  const keywords: string[] = [];
+  if (data?.keywords && Array.isArray(data.keywords)) {
+    keywords.push(...data.keywords.slice(0, 3));
+  }
+  if (data?.element) keywords.push(data.element);
+  if (data?.rulingPlanet || data?.ruler) {
+    keywords.push(data.rulingPlanet || data.ruler);
+  }
+
+  // Integrate keywords naturally if not already mentioned
+  if (
+    keywords.length > 0 &&
+    !body.toLowerCase().includes(keywords[0].toLowerCase())
+  ) {
+    body += `Key concepts include ${keywords.slice(0, 2).join(' and ')}.\n\n`;
+  }
+
+  // Clean up extra whitespace
+  body = body.trim().replace(/\n{3,}/g, '\n\n');
+
+  return {
+    title,
+    body,
+    attribution: "From Lunary's Grimoire",
+  };
+}
+
+/**
  * Generate long-form educational content (300-500 words)
  * Calm, authoritative, encyclopedic tone
+ * Optionally uses video script context if provided
  */
 export function generateLongFormContent(
   facet: DailyFacet,
   theme: WeeklyTheme | SabbatTheme,
+  videoScript?: VideoScriptContext,
 ): LongFormContent {
+  // Use video script if provided
+  if (videoScript) {
+    return generateVideoBasedLongFormContent(facet, theme, videoScript);
+  }
   const data = getGrimoireDataForFacet(facet);
 
   let title = facet.title;
@@ -332,8 +466,9 @@ export function generateDayContent(
   date: Date,
   theme: WeeklyTheme | SabbatTheme,
   facet: DailyFacet,
+  videoScript?: VideoScriptContext,
 ): ThematicContent {
-  const longFormData = generateLongFormContent(facet, theme);
+  const longFormData = generateLongFormContent(facet, theme, videoScript);
   const shortForm = generateShortFormContent(facet);
   const hashtags = generateHashtags(theme, facet);
 
@@ -353,11 +488,12 @@ export function generateDayContent(
 export function generateWeekContent(
   weekStartDate: Date,
   currentThemeIndex: number = 0,
+  videoScript?: VideoScriptContext,
 ): ThematicContent[] {
   const plan = getWeeklyContentPlan(weekStartDate, currentThemeIndex);
 
   return plan.map(({ date, theme, facet }) =>
-    generateDayContent(date, theme, facet),
+    generateDayContent(date, theme, facet, videoScript),
   );
 }
 
@@ -378,8 +514,13 @@ export interface ThematicPost {
 export function generateThematicPostsForWeek(
   weekStartDate: Date,
   currentThemeIndex: number = 0,
+  videoScript?: VideoScriptContext,
 ): ThematicPost[] {
-  const weekContent = generateWeekContent(weekStartDate, currentThemeIndex);
+  const weekContent = generateWeekContent(
+    weekStartDate,
+    currentThemeIndex,
+    videoScript,
+  );
   const posts: ThematicPost[] = [];
 
   // Long-form platforms (educational depth, images)

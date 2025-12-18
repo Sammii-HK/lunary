@@ -500,13 +500,13 @@ export async function generateMediumFormNarrative(
 
   const prompt = `Create a MEDIUM voiceover script (30-60 seconds, ~75-150 words) for a social media video recap about the weekly cosmic forecast for ${weekRange}.
 
-Structure:
+Structure (MUST follow this EXACT order):
 1. Opening (3-5 seconds): Jump straight into the cosmic energy
-2. Planetary highlights: For each transit, say "[Planet] enters [Sign]" then ONE sentence about its meaning
-3. Aspects: For EACH aspect, you MUST say "[PlanetA] [aspect] [PlanetB]" - e.g., "Venus square Saturn brings tension to relationships"
-4. Moon phases: Say the exact phase name and sign
-5. Closing: "For more information, check out the full blog at Lunary"
-${seasonalEvents ? `6. IMPORTANT: Mention the ${weeklyData.seasonalEvents?.[0]?.name} prominently!` : ''}
+${seasonalEvents ? `2. Seasonal Event (5-8 seconds): Mention the ${weeklyData.seasonalEvents?.[0]?.name} prominently! Explain what it means briefly.` : ''}
+${seasonalEvents ? `3. Planetary highlights: For each transit, say "[Planet] enters [Sign]" then ONE sentence about its meaning` : `2. Planetary highlights: For each transit, say "[Planet] enters [Sign]" then ONE sentence about its meaning`}
+${seasonalEvents ? `4. Aspects: For EACH aspect, you MUST say "[PlanetA] [aspect] [PlanetB]" - e.g., "Venus square Saturn brings tension to relationships"` : `3. Aspects: For EACH aspect, you MUST say "[PlanetA] [aspect] [PlanetB]" - e.g., "Venus square Saturn brings tension to relationships"`}
+${seasonalEvents ? `5. Moon phases: Say the exact phase name and sign` : `4. Moon phases: Say the exact phase name and sign`}
+${seasonalEvents ? `6. Closing: "For more information, check out the full blog at Lunary"` : `5. Closing: "For more information, check out the full blog at Lunary"`}
 
 CRITICAL - EXACT WORDING FOR ASPECTS:
 When mentioning aspects, you MUST use this EXACT format: "[Planet1] [aspect] [Planet2]"
@@ -516,6 +516,7 @@ When mentioning aspects, you MUST use this EXACT format: "[Planet1] [aspect] [Pl
 The aspect word (square, trine, opposition, conjunction, sextile) MUST appear between the two planet names!
 
 Data to use (use EXACT wording):
+${seasonalEvents ? `Seasonal Events (IMPORTANT - mention early in script):\n${seasonalEvents}\n` : ''}
 ${planetaryHighlights || 'None this week'}
 ${aspectsInfo}
 ${moonPhases}
@@ -550,6 +551,89 @@ Return ONLY the voiceover script. Use EXACT planet and aspect names from above.`
     console.error('Error generating medium-form narrative:', error);
     throw error;
   }
+}
+
+/**
+ * Generate hashtags for video posts based on weekly data
+ * Returns exactly 3 topically relevant hashtags focusing on:
+ * 1. Seasonal events (solstice/equinox)
+ * 2. Moon phase
+ * 3. Major planetary movement (Sun entering a sign, or other significant transit)
+ */
+function generateVideoHashtags(
+  weeklyData: WeeklyCosmicData,
+  videoType: 'short' | 'medium' | 'long',
+): string {
+  const hashtags: string[] = [];
+
+  // Priority 1: Seasonal events (solstice, equinox)
+  if (weeklyData.seasonalEvents && weeklyData.seasonalEvents.length > 0) {
+    const event = weeklyData.seasonalEvents[0];
+    const eventName = event.name
+      .toLowerCase()
+      .replace(/[^a-z0-9\s]/g, '')
+      .replace(/\s+/g, '');
+    if (eventName) {
+      hashtags.push(`#${eventName}`);
+    }
+  }
+
+  // Priority 2: Moon phase (core to Lunary brand)
+  if (weeklyData.moonPhases.length > 0) {
+    const moonPhase = weeklyData.moonPhases[0];
+    const phaseName = moonPhase.phase
+      .toLowerCase()
+      .replace(/[^a-z0-9\s]/g, '')
+      .replace(/\s+/g, '');
+    if (phaseName) {
+      hashtags.push(`#${phaseName}`);
+    }
+  }
+
+  // Priority 3: Major planetary movement - prioritize Sun entering a sign
+  // If Sun is entering a sign, use that; otherwise use the first significant planetary highlight
+  const sunEnteringSign = weeklyData.planetaryHighlights.find(
+    (h) =>
+      h.planet.toLowerCase() === 'sun' &&
+      h.event === 'enters-sign' &&
+      h.details?.toSign,
+  );
+
+  if (sunEnteringSign && sunEnteringSign.details?.toSign) {
+    const sign = sunEnteringSign.details.toSign.toLowerCase().trim();
+    if (sign) {
+      hashtags.push(`#${sign}`);
+    }
+  } else {
+    // Fallback: use first significant planetary highlight
+    const significantHighlight = weeklyData.planetaryHighlights.find(
+      (h) =>
+        h.event === 'enters-sign' &&
+        h.details?.toSign &&
+        (h.significance === 'extraordinary' || h.significance === 'high'),
+    );
+    if (significantHighlight && significantHighlight.details?.toSign) {
+      const sign = significantHighlight.details.toSign.toLowerCase().trim();
+      if (sign) {
+        hashtags.push(`#${sign}`);
+      }
+    } else if (weeklyData.planetaryHighlights.length > 0) {
+      // Last resort: use first planetary highlight
+      const firstHighlight = weeklyData.planetaryHighlights[0];
+      if (firstHighlight.details?.toSign) {
+        const sign = firstHighlight.details.toSign.toLowerCase().trim();
+        if (sign) {
+          hashtags.push(`#${sign}`);
+        }
+      }
+    }
+  }
+
+  // Ensure we have exactly 3 hashtags (fill with brand if needed, but prioritize topical)
+  // Remove duplicates and limit to 3
+  const uniqueHashtags = Array.from(new Set(hashtags)).slice(0, 3);
+
+  return uniqueHashtags.join(' ');
 }
 
 /**
@@ -590,7 +674,7 @@ Weekly Data:
 Title: ${weeklyData.title}
 Subtitle: ${weeklyData.subtitle}
 
-Return ONLY the post content text, no markdown, no formatting, just the caption text. Do NOT include any URLs or links. Do NOT use any emojis.`;
+Return ONLY the post content text, no markdown, no formatting, just the caption text. Do NOT include any URLs or links. Do NOT use any emojis. Do NOT include hashtags - they will be added separately.`;
 
   try {
     const completion = await openai.chat.completions.create({
@@ -599,7 +683,7 @@ Return ONLY the post content text, no markdown, no formatting, just the caption 
         {
           role: 'system',
           content:
-            'You are a social media content creator for Lunary, a cosmic astrology app. Create engaging, natural captions that guide people to learn more without being pushy or salesy. Write in a mystical but accessible tone. DO NOT use any emojis - keep the text clean and professional.',
+            'You are a social media content creator for Lunary, a cosmic astrology app. Create engaging, natural captions that guide people to learn more without being pushy or salesy. Write in a mystical but accessible tone. DO NOT use any emojis - keep the text clean and professional. DO NOT include hashtags.',
         },
         { role: 'user', content: prompt },
       ],
@@ -607,16 +691,28 @@ Return ONLY the post content text, no markdown, no formatting, just the caption 
       temperature: 0.8,
     });
 
-    const postContent = completion.choices[0]?.message?.content || '';
+    let postContent = completion.choices[0]?.message?.content || '';
     if (!postContent || postContent.trim().length === 0) {
       throw new Error('OpenAI returned empty post content');
     }
 
-    return postContent.trim();
+    postContent = postContent.trim();
+
+    // Add hashtags for all video types (short, medium, and long-form)
+    const hashtags = generateVideoHashtags(weeklyData, videoType);
+    postContent = `${postContent}\n\n${hashtags}`;
+
+    return postContent;
   } catch (error) {
     console.error('Failed to generate video post content:', error);
     // Fallback to a simple post content - no URLs
-    return `Your cosmic forecast for the week of ${weekRange}. For more details, check out the full blog on Lunary.`;
+    let fallbackContent = `Your cosmic forecast for the week of ${weekRange}. For more details, check out the full blog on Lunary.`;
+
+    // Add hashtags for all video types (short, medium, and long-form)
+    const hashtags = generateVideoHashtags(weeklyData, videoType);
+    fallbackContent = `${fallbackContent}\n\n${hashtags}`;
+
+    return fallbackContent;
   }
 }
 
@@ -839,13 +935,175 @@ export function segmentScriptIntoTopics(
 }
 
 /**
+ * Extract day of week from sentence
+ */
+function extractDayOfWeek(sentence: string): string | null {
+  const days = [
+    'monday',
+    'tuesday',
+    'wednesday',
+    'thursday',
+    'friday',
+    'saturday',
+    'sunday',
+  ];
+  const lower = sentence.toLowerCase();
+  for (const day of days) {
+    if (lower.includes(day)) return day;
+  }
+  return null;
+}
+
+/**
+ * Get date for a day of week within the week
+ */
+function getDateForDayOfWeek(weekStart: Date, dayName: string): Date {
+  const dayIndex = [
+    'sunday',
+    'monday',
+    'tuesday',
+    'wednesday',
+    'thursday',
+    'friday',
+    'saturday',
+  ].indexOf(dayName.toLowerCase());
+  const weekStartDay = weekStart.getDay();
+  const daysToAdd = (dayIndex - weekStartDay + 7) % 7;
+  const targetDate = new Date(weekStart);
+  targetDate.setDate(weekStart.getDate() + daysToAdd);
+  return targetDate;
+}
+
+/**
+ * Check if we're still in intro phase
+ * Intro phase ends when we detect specific events (planets, aspects, moon phases)
+ * or section markers. Overview phrases without events stay in intro.
+ */
+function isIntroPhase(
+  sentence: string,
+  isFirstSegment: boolean,
+  hasDetectedEvent: boolean,
+): boolean {
+  const lower = sentence.toLowerCase();
+
+  // Always intro if it's the first segment
+  if (isFirstSegment) return true;
+
+  // If we've already detected a specific event in a previous sentence, we're past intro
+  if (hasDetectedEvent) {
+    return false;
+  }
+
+  // Section markers indicate we've left intro
+  const sectionMarkers = [
+    'section 1',
+    'section 2',
+    'section 3',
+    'foundations',
+    'deeper meaning',
+    'practical application',
+    'moving beyond',
+    'how does this',
+    'to summarize',
+  ];
+
+  if (sectionMarkers.some((marker) => lower.includes(marker))) {
+    return false;
+  }
+
+  // Specific day + event pattern indicates content section
+  const dayPattern =
+    /\b(monday|tuesday|wednesday|thursday|friday|saturday|sunday)\b.*\b(enters|conjunct|trine|square|opposition|retrograde|stations)\b/i;
+  if (dayPattern.test(sentence)) {
+    return false;
+  }
+
+  // Check for specific events (planets, aspects, moon phases) - these indicate content
+  const planets = [
+    'sun',
+    'moon',
+    'mercury',
+    'venus',
+    'mars',
+    'jupiter',
+    'saturn',
+    'uranus',
+    'neptune',
+    'pluto',
+  ];
+  const aspects = [
+    'conjunction',
+    'conjunct',
+    'trine',
+    'square',
+    'opposition',
+    'sextile',
+  ];
+  const moonPhases = [
+    'new moon',
+    'full moon',
+    'waxing',
+    'waning',
+    'first quarter',
+    'last quarter',
+  ];
+
+  // If sentence mentions a planet with an event word, we're past intro
+  const hasPlanetWithEvent = planets.some(
+    (planet) =>
+      lower.includes(planet) &&
+      (lower.includes('enters') ||
+        lower.includes('retrograde') ||
+        lower.includes('direct') ||
+        lower.includes('stations') ||
+        aspects.some((aspect) => lower.includes(aspect))),
+  );
+
+  // If sentence mentions an aspect between planets, we're past intro
+  const hasAspect = aspects.some((aspect) => {
+    if (!lower.includes(aspect)) return false;
+    // Check if at least one planet is mentioned
+    return planets.some((planet) => lower.includes(planet));
+  });
+
+  // If sentence mentions a moon phase, we're past intro
+  const hasMoonPhase = moonPhases.some((phase) => lower.includes(phase));
+
+  if (hasPlanetWithEvent || hasAspect || hasMoonPhase) {
+    return false;
+  }
+
+  // Overview phrases should stay in intro (unless they have specific events)
+  const overviewPhrases = [
+    'explore cosmic alignments',
+    'best days',
+    'this week',
+    'overview',
+    'we examine',
+    'we explore',
+    "let's explore",
+  ];
+
+  // If it's just an overview phrase without specific events, stay in intro
+  if (overviewPhrases.some((phrase) => lower.includes(phrase))) {
+    // Check if it also has specific event details
+    const hasSpecificEvent = hasPlanetWithEvent || hasAspect || hasMoonPhase;
+    return !hasSpecificEvent;
+  }
+
+  return false; // Default to content phase if unclear
+}
+
+/**
  * Extract exact planet movement from sentence
  * Matches patterns like "Sun enters Capricorn", "Mars stations retrograde", etc.
  * Uses strict word order matching to avoid false positives
+ * Optionally filters by targetDate to match events on specific days
  */
 function extractPlanetMovement(
   sentence: string,
   weeklyData: WeeklyCosmicData,
+  targetDate?: Date,
 ): PlanetaryHighlight | null {
   const lowerSentence = sentence.toLowerCase();
 
@@ -884,35 +1142,62 @@ function extractPlanetMovement(
     const planetIndex = lowerSentence.indexOf(planet);
     if (planetIndex === -1) continue;
 
-    // Check for "enters Sign" pattern - planet must come before "enters" which comes before sign
+    // Check for enter keywords first (including future tense and progressive forms)
+    const enterKeywords = [
+      'enters',
+      'enter',
+      'entering',
+      'will enter',
+      'entered',
+      'moves into',
+      'moving into',
+      'moves to',
+      'moving to',
+      'transits into',
+      'transiting into',
+      'transits',
+      'transiting',
+    ];
+
+    let keywordIndex = -1;
+    let keyword = '';
+    for (const kw of enterKeywords) {
+      const idx = lowerSentence.indexOf(kw, planetIndex);
+      if (idx > planetIndex && (keywordIndex === -1 || idx < keywordIndex)) {
+        keywordIndex = idx;
+        keyword = kw;
+      }
+    }
+
+    if (keywordIndex === -1) continue;
+
+    // Now look for signs after the keyword (allow words in between like "on Monday", "the sign of", etc.)
     for (const sign of signs) {
-      const signIndex = lowerSentence.indexOf(sign);
+      const signIndex = lowerSentence.indexOf(sign, keywordIndex);
       if (signIndex === -1) continue;
 
-      // Check for enter keywords between planet and sign
-      const enterKeywords = [
-        'enters',
-        'enter',
-        'moves into',
-        'moves to',
-        'transits into',
-      ];
-      for (const keyword of enterKeywords) {
-        const keywordIndex = lowerSentence.indexOf(keyword);
-        if (
-          keywordIndex > planetIndex &&
-          keywordIndex < signIndex &&
-          signIndex - keywordIndex < 50 // Reasonable proximity check
-        ) {
-          // Find exact match in weeklyData
-          const match = weeklyData.planetaryHighlights.find(
-            (h) =>
-              h.planet.toLowerCase() === planet &&
-              h.event === 'enters-sign' &&
-              h.details?.toSign?.toLowerCase() === sign,
-          );
-          if (match) return match;
+      // Allow up to 100 characters between keyword and sign to handle "enters on Monday Capricorn" patterns
+      if (signIndex - keywordIndex < 100) {
+        // Find exact match in weeklyData
+        let matches = weeklyData.planetaryHighlights.filter(
+          (h) =>
+            h.planet.toLowerCase() === planet &&
+            h.event === 'enters-sign' &&
+            h.details?.toSign?.toLowerCase() === sign,
+        );
+
+        // If targetDate is provided, filter to only events on that date
+        if (targetDate) {
+          const targetDateKey = targetDate.toISOString().split('T')[0];
+          matches = matches.filter((h) => {
+            const hDate = new Date(h.date);
+            hDate.setHours(12, 0, 0, 0);
+            const hDateKey = hDate.toISOString().split('T')[0];
+            return hDateKey === targetDateKey;
+          });
         }
+
+        if (matches.length > 0) return matches[0];
       }
     }
 
@@ -927,12 +1212,24 @@ function extractPlanetMovement(
           keywordIndex < retrogradeIndex &&
           retrogradeIndex - keywordIndex < 20
         ) {
-          const match = weeklyData.planetaryHighlights.find(
+          let matches = weeklyData.planetaryHighlights.filter(
             (h) =>
               h.planet.toLowerCase() === planet &&
               h.event === 'goes-retrograde',
           );
-          if (match) return match;
+
+          // If targetDate is provided, filter to only events on that date
+          if (targetDate) {
+            const targetDateKey = targetDate.toISOString().split('T')[0];
+            matches = matches.filter((h) => {
+              const hDate = new Date(h.date);
+              hDate.setHours(12, 0, 0, 0);
+              const hDateKey = hDate.toISOString().split('T')[0];
+              return hDateKey === targetDateKey;
+            });
+          }
+
+          if (matches.length > 0) return matches[0];
         }
       }
     }
@@ -948,11 +1245,23 @@ function extractPlanetMovement(
           keywordIndex < directIndex &&
           directIndex - keywordIndex < 20
         ) {
-          const match = weeklyData.planetaryHighlights.find(
+          let matches = weeklyData.planetaryHighlights.filter(
             (h) =>
               h.planet.toLowerCase() === planet && h.event === 'goes-direct',
           );
-          if (match) return match;
+
+          // If targetDate is provided, filter to only events on that date
+          if (targetDate) {
+            const targetDateKey = targetDate.toISOString().split('T')[0];
+            matches = matches.filter((h) => {
+              const hDate = new Date(h.date);
+              hDate.setHours(12, 0, 0, 0);
+              const hDateKey = hDate.toISOString().split('T')[0];
+              return hDateKey === targetDateKey;
+            });
+          }
+
+          if (matches.length > 0) return matches[0];
         }
       }
     }
@@ -965,10 +1274,12 @@ function extractPlanetMovement(
  * Extract exact aspect from sentence
  * Matches patterns like "Venus trine Jupiter", "Mars square Saturn", etc.
  * Uses strict word order matching to avoid false positives
+ * Optionally filters by targetDate to match aspects on specific days
  */
 function extractAspect(
   sentence: string,
   weeklyData: WeeklyCosmicData,
+  targetDate?: Date,
 ): MajorAspect | null {
   const lowerSentence = sentence.toLowerCase();
 
@@ -1014,43 +1325,70 @@ function extractAspect(
   const aspects = Object.keys(aspectVariations);
 
   // Try to match "PlanetA aspect PlanetB" pattern with strict word order
+  // Also handles "the PlanetA aspect PlanetB" pattern and "on [date], the PlanetA aspect PlanetB"
   for (const planetA of planets) {
-    const planetAIndex = lowerSentence.indexOf(planetA);
+    // Try to find planetA, including after "the"
+    let planetAIndex = lowerSentence.indexOf(planetA);
     if (planetAIndex === -1) continue;
 
+    // Search for aspect starting from after the planet
     for (const aspect of aspects) {
-      const aspectIndex = lowerSentence.indexOf(aspect);
+      const aspectIndex = lowerSentence.indexOf(aspect, planetAIndex);
       if (aspectIndex === -1 || aspectIndex <= planetAIndex) continue;
 
       // Normalize aspect name using the mapping
       const normalizedAspect = aspectVariations[aspect];
 
-      // Look for PlanetB after the aspect
+      // Look for PlanetB after the aspect (allow more space for dates/words)
       for (const planetB of planets) {
         if (planetB === planetA) continue;
 
         const planetBIndex = lowerSentence.indexOf(planetB, aspectIndex);
         if (
           planetBIndex > aspectIndex &&
-          planetBIndex - aspectIndex < 30 // Reasonable proximity
+          planetBIndex - aspectIndex < 100 // Increased proximity to handle dates like "on Tuesday Dec 16, the Mercury opposition Uranus"
         ) {
           // Find exact match in weeklyData (PlanetA aspect PlanetB)
-          const match = weeklyData.majorAspects.find(
+          let matches = weeklyData.majorAspects.filter(
             (a) =>
               a.planetA.toLowerCase() === planetA &&
               a.planetB.toLowerCase() === planetB &&
               a.aspect.toLowerCase() === normalizedAspect,
           );
-          if (match) return match;
+
+          // If targetDate is provided, filter to only aspects on that date
+          if (targetDate) {
+            const targetDateKey = targetDate.toISOString().split('T')[0];
+            matches = matches.filter((a) => {
+              const aDate = new Date(a.date);
+              aDate.setHours(12, 0, 0, 0);
+              const aDateKey = aDate.toISOString().split('T')[0];
+              return aDateKey === targetDateKey;
+            });
+          }
+
+          if (matches.length > 0) return matches[0];
 
           // Try reverse order (PlanetB aspect PlanetA)
-          const reverseMatch = weeklyData.majorAspects.find(
+          let reverseMatches = weeklyData.majorAspects.filter(
             (a) =>
               a.planetA.toLowerCase() === planetB &&
               a.planetB.toLowerCase() === planetA &&
               a.aspect.toLowerCase() === normalizedAspect,
           );
-          if (reverseMatch) return reverseMatch;
+
+          // If targetDate is provided, filter to only aspects on that date
+          if (targetDate) {
+            const targetDateKey = targetDate.toISOString().split('T')[0];
+            reverseMatches = reverseMatches.filter((a) => {
+              const aDate = new Date(a.date);
+              aDate.setHours(12, 0, 0, 0);
+              const aDateKey = aDate.toISOString().split('T')[0];
+              return aDateKey === targetDateKey;
+            });
+          }
+
+          if (reverseMatches.length > 0) return reverseMatches[0];
         }
       }
     }
@@ -1141,12 +1479,27 @@ function extractMoonPhase(
     const phaseIndex = lowerSentence.indexOf(phase);
     if (phaseIndex === -1) continue;
 
-    // Try to match with sign: "Full Moon in Leo" - phase must come before "in" before sign
+    // Try to match with sign: "Full Moon in Leo" or "New Moon in Sagittarius"
+    // Look for " in " after the phase, but also handle cases without "in"
     const inIndex = lowerSentence.indexOf(' in ', phaseIndex);
-    if (inIndex > phaseIndex && inIndex - phaseIndex < 30) {
+    if (inIndex > phaseIndex && inIndex - phaseIndex < 50) {
+      // Found " in " - look for sign after it
       for (const sign of signs) {
         const signIndex = lowerSentence.indexOf(sign, inIndex);
-        if (signIndex > inIndex && signIndex - inIndex < 20) {
+        if (signIndex > inIndex && signIndex - inIndex < 30) {
+          const match = weeklyData.moonPhases.find(
+            (m) =>
+              m.phase.toLowerCase() === phase && m.sign.toLowerCase() === sign,
+          );
+          if (match) return match;
+        }
+      }
+    } else {
+      // No " in " found, but check if sign is mentioned nearby (within 50 chars)
+      for (const sign of signs) {
+        const signIndex = lowerSentence.indexOf(sign, phaseIndex);
+        if (signIndex > phaseIndex && signIndex - phaseIndex < 50) {
+          // Sign found near phase - try to match
           const match = weeklyData.moonPhases.find(
             (m) =>
               m.phase.toLowerCase() === phase && m.sign.toLowerCase() === sign,
@@ -1252,13 +1605,15 @@ export function segmentScriptIntoItems(
     date: Date;
   } | null = null;
   let isFirstSegment = true; // Track if we're still in intro
+  let isIntroPhaseFlag = true; // Track intro phase to prevent event segmentation
+  let hasDetectedEvent = false; // Track if we've detected any specific event
 
   for (const sentence of sentences) {
     const lowerSentence = sentence.toLowerCase();
     const words = sentence.trim().split(/\s+/).length;
     const duration = words / wordsPerSecond;
 
-    // Check for conclusion first (highest priority)
+    // Check for conclusion first (highest priority) - always check this
     if (
       lowerSentence.includes('conclusion') ||
       lowerSentence.includes('wrap up') ||
@@ -1293,8 +1648,18 @@ export function segmentScriptIntoItems(
       currentExactMoonPhase = null;
       isFirstSegment = false;
       currentTime += duration;
+      isIntroPhaseFlag = false; // Conclusion ends intro phase
       continue;
     }
+
+    // Check if we're still in intro phase
+    isIntroPhaseFlag = isIntroPhase(sentence, isFirstSegment, hasDetectedEvent);
+
+    // Extract day-of-week if mentioned
+    const dayOfWeek = extractDayOfWeek(sentence);
+    const targetDate = dayOfWeek
+      ? getDateForDayOfWeek(weeklyData.weekStart, dayOfWeek)
+      : undefined;
 
     // Try to extract exact items - ONLY create segment if exact match found
     let exactPlanet: PlanetaryHighlight | null = null;
@@ -1302,6 +1667,42 @@ export function segmentScriptIntoItems(
     let exactMoonPhase: MoonPhaseEvent | null = null;
     let detectedTopic: ScriptTopic['topic'] | null = null;
     let detectedItem: string | null = null;
+
+    // During intro phase, still check for events - if found, exit intro phase
+    // But don't create segments for overview phrases without events
+    if (isIntroPhaseFlag) {
+      // Check if this sentence has actual events (not just overview)
+      const hasActualEvent =
+        extractPlanetMovement(sentence, weeklyData, targetDate) !== null ||
+        extractAspect(sentence, weeklyData, targetDate) !== null ||
+        extractMoonPhase(sentence, weeklyData) !== null;
+
+      if (!hasActualEvent) {
+        // No actual event, stay in intro and accumulate text
+        currentItemText.push(sentence.trim());
+        currentTime += duration;
+        continue;
+      } else {
+        // Found an actual event - exit intro phase and process it
+        isIntroPhaseFlag = false;
+        // Save the intro segment before processing the event
+        if (currentItemText.length > 0) {
+          const itemDuration = currentTime - itemStartTime;
+          if (itemDuration >= minItemDuration || items.length === 0) {
+            items.push({
+              topic: 'intro',
+              text: currentItemText.join('. '),
+              startTime: itemStartTime,
+              endTime: currentTime,
+              item: 'intro',
+            });
+          }
+          // Reset for new segment
+          currentItemText = [];
+          itemStartTime = currentTime;
+        }
+      }
+    }
 
     // Priority 1: Try to extract exact moon phase (critical for Lunary)
     // Allow multiple moon segments if different phases are mentioned
@@ -1324,13 +1725,80 @@ export function segmentScriptIntoItems(
       // Check that we're not in a context that should be another topic
       const hasPlanetMention = planets.some((p) => lowerSentence.includes(p));
       const hasAspectMention = aspects.some((a) => lowerSentence.includes(a));
+
+      // Try to find moon phase and sign mentioned in sentence even if extraction failed
+      const moonPhases = [
+        'new moon',
+        'waxing crescent',
+        'first quarter',
+        'waxing gibbous',
+        'full moon',
+        'waning gibbous',
+        'last quarter',
+        'waning crescent',
+      ];
+      const signs = [
+        'aries',
+        'taurus',
+        'gemini',
+        'cancer',
+        'leo',
+        'virgo',
+        'libra',
+        'scorpio',
+        'sagittarius',
+        'capricorn',
+        'aquarius',
+        'pisces',
+      ];
+
+      let foundPhase: string | null = null;
+      let foundSign: string | null = null;
+
+      // Try to find phase mentioned
+      for (const phase of moonPhases) {
+        if (lowerSentence.includes(phase)) {
+          foundPhase = phase;
+          break;
+        }
+      }
+
+      // Try to find sign mentioned (especially if phase was found)
+      for (const sign of signs) {
+        if (lowerSentence.includes(sign)) {
+          foundSign = sign;
+          break;
+        }
+      }
+
+      // If we found both phase and sign, try to match in weeklyData
+      if (foundPhase && foundSign) {
+        const match = weeklyData.moonPhases.find(
+          (m) =>
+            m.phase.toLowerCase() === foundPhase &&
+            m.sign.toLowerCase() === foundSign,
+        );
+        if (match) {
+          const itemKey = `moon-${match.phase}-${match.sign}`;
+          if (!usedExactItems.has(itemKey)) {
+            detectedTopic = 'moon_phases';
+            detectedItem = itemKey;
+            exactMoonPhase = match;
+            usedExactItems.add(itemKey);
+          }
+        }
+      }
+
       // Create moon phase segment if:
       // 1. Explicitly mentions "moon phase" or "no major moon phases", OR
-      // 2. Mentions moon/lunar/phase without strong planet/aspect context
+      // 2. Mentions moon/lunar/phase without strong planet/aspect context, OR
+      // 3. Found a phase mentioned (even if no exact match)
       if (
-        lowerSentence.includes('moon phase') ||
-        lowerSentence.includes('no major moon phases') ||
-        (!hasPlanetMention && !hasAspectMention)
+        !detectedTopic &&
+        (lowerSentence.includes('moon phase') ||
+          lowerSentence.includes('no major moon phases') ||
+          foundPhase ||
+          (!hasPlanetMention && !hasAspectMention))
       ) {
         // Use the first moon phase from weeklyData if available (only if not already used)
         const fallbackMoon =
@@ -1392,7 +1860,7 @@ export function segmentScriptIntoItems(
 
     // Priority 2: Try to extract exact aspect
     if (!detectedTopic) {
-      exactAspect = extractAspect(sentence, weeklyData);
+      exactAspect = extractAspect(sentence, weeklyData, targetDate);
       if (exactAspect) {
         // Include date to prevent duplicates of same aspect on different days
         const dateKey = exactAspect.date.toISOString().split('T')[0]; // YYYY-MM-DD
@@ -1404,6 +1872,7 @@ export function segmentScriptIntoItems(
         }
       }
       // Fallback: keyword-based aspect detection for long-form
+      // Try to find planet + aspect + planet combination even if exact match fails
       else {
         const hasAspectWord = aspects.some((a) => lowerSentence.includes(a));
         const mentionedPlanets = planets.filter((p) =>
@@ -1413,18 +1882,62 @@ export function segmentScriptIntoItems(
         if (hasAspectWord && mentionedPlanets.length >= 2) {
           const aspectWord =
             aspects.find((a) => lowerSentence.includes(a)) || 'aspect';
-          const itemKey = `aspect-${mentionedPlanets[0]}-${aspectWord}-${mentionedPlanets[1]}`;
+          const aspectVariations: { [key: string]: string } = {
+            conjunction: 'conjunction',
+            conjunct: 'conjunction',
+            conjoins: 'conjunction',
+            trine: 'trine',
+            trines: 'trine',
+            trining: 'trine',
+            'trine with': 'trine',
+            'trine to': 'trine',
+            square: 'square',
+            squares: 'square',
+            squaring: 'square',
+            'square with': 'square',
+            'square to': 'square',
+            opposition: 'opposition',
+            opposite: 'opposition',
+            opposes: 'opposition',
+            opposing: 'opposition',
+            sextile: 'sextile',
+            sextiles: 'sextile',
+            sextiling: 'sextile',
+            'sextile with': 'sextile',
+            'sextile to': 'sextile',
+          };
+          const normalizedAspect = aspectVariations[aspectWord] || aspectWord;
+
+          // Try to find exact match with both planets and aspect
+          exactAspect =
+            weeklyData.majorAspects.find(
+              (a) =>
+                ((a.planetA.toLowerCase() === mentionedPlanets[0] &&
+                  a.planetB.toLowerCase() === mentionedPlanets[1]) ||
+                  (a.planetA.toLowerCase() === mentionedPlanets[1] &&
+                    a.planetB.toLowerCase() === mentionedPlanets[0])) &&
+                a.aspect.toLowerCase() === normalizedAspect,
+            ) || null;
+
+          const dateKey = exactAspect
+            ? exactAspect.date.toISOString().split('T')[0]
+            : 'unknown';
+          const itemKey = `aspect-${mentionedPlanets[0]}-${normalizedAspect}-${mentionedPlanets[1]}-${dateKey}`;
           if (!usedExactItems.has(itemKey)) {
             detectedTopic = 'aspects';
             detectedItem = itemKey;
             usedExactItems.add(itemKey);
-            // Try to find matching aspect in weeklyData
-            exactAspect =
-              weeklyData.majorAspects.find(
-                (a) =>
-                  a.planetA.toLowerCase() === mentionedPlanets[0] ||
-                  a.planetB.toLowerCase() === mentionedPlanets[0],
-              ) || null;
+            // If still no exact aspect, try to find any match for these planets
+            if (!exactAspect) {
+              exactAspect =
+                weeklyData.majorAspects.find(
+                  (a) =>
+                    (a.planetA.toLowerCase() === mentionedPlanets[0] &&
+                      a.planetB.toLowerCase() === mentionedPlanets[1]) ||
+                    (a.planetA.toLowerCase() === mentionedPlanets[1] &&
+                      a.planetB.toLowerCase() === mentionedPlanets[0]),
+                ) || null;
+            }
           }
         }
       }
@@ -1432,7 +1945,7 @@ export function segmentScriptIntoItems(
 
     // Priority 3: Try to extract exact planet movement
     if (!detectedTopic) {
-      exactPlanet = extractPlanetMovement(sentence, weeklyData);
+      exactPlanet = extractPlanetMovement(sentence, weeklyData, targetDate);
       if (exactPlanet) {
         // Include date to prevent duplicates of same planet/event on different days
         const dateKey = exactPlanet.date.toISOString().split('T')[0]; // YYYY-MM-DD
@@ -1444,48 +1957,150 @@ export function segmentScriptIntoItems(
         }
       }
       // Fallback: keyword-based planet detection for long-form
+      // Try to find planet + sign combination even if exact match fails
       else {
-        const mentionedPlanet = planets.find(
-          (p) => p !== 'moon' && lowerSentence.includes(p),
-        );
+        const mentionedPlanet = planets.find((p) => lowerSentence.includes(p));
         const hasMovementWord =
           lowerSentence.includes('enters') ||
+          lowerSentence.includes('enter') ||
+          lowerSentence.includes('entering') ||
           lowerSentence.includes('moves into') ||
+          lowerSentence.includes('moving into') ||
           lowerSentence.includes('shifts') ||
-          lowerSentence.includes('transit');
+          lowerSentence.includes('transit') ||
+          lowerSentence.includes('transiting');
+
         if (mentionedPlanet && hasMovementWord) {
-          const itemKey = `planet-${mentionedPlanet}-movement`;
-          if (!usedExactItems.has(itemKey)) {
-            detectedTopic = 'planetary_highlights';
-            detectedItem = itemKey;
-            usedExactItems.add(itemKey);
-            // Try to find matching planet in weeklyData
+          // Try to find a sign mentioned in the sentence
+          const signs = [
+            'aries',
+            'taurus',
+            'gemini',
+            'cancer',
+            'leo',
+            'virgo',
+            'libra',
+            'scorpio',
+            'sagittarius',
+            'capricorn',
+            'aquarius',
+            'pisces',
+          ];
+          const mentionedSign = signs.find((s) => lowerSentence.includes(s));
+
+          if (mentionedSign) {
+            // Try to find exact match with this sign
             exactPlanet =
               weeklyData.planetaryHighlights.find(
-                (h) => h.planet.toLowerCase() === mentionedPlanet,
+                (h) =>
+                  h.planet.toLowerCase() === mentionedPlanet &&
+                  h.event === 'enters-sign' &&
+                  h.details?.toSign?.toLowerCase() === mentionedSign,
               ) || null;
+          }
+
+          // Create segment even if exact match not found (will use fallback image)
+          // Always create segment if we have planet + movement word + sign
+          if (mentionedSign) {
+            const dateKey = exactPlanet
+              ? exactPlanet.date.toISOString().split('T')[0]
+              : 'unknown';
+            const itemKey = `planet-${mentionedPlanet}-enters-sign-${mentionedSign}-${dateKey}`;
+            if (!usedExactItems.has(itemKey)) {
+              detectedTopic = 'planetary_highlights';
+              detectedItem = itemKey;
+              usedExactItems.add(itemKey);
+              // If still no exact planet, try to find any match for this planet
+              if (!exactPlanet) {
+                exactPlanet =
+                  weeklyData.planetaryHighlights.find(
+                    (h) =>
+                      h.planet.toLowerCase() === mentionedPlanet &&
+                      h.event === 'enters-sign',
+                  ) || null;
+              }
+            }
+          } else {
+            // No sign found, but still create segment for planet movement
+            const itemKey = `planet-${mentionedPlanet}-movement`;
+            if (!usedExactItems.has(itemKey)) {
+              detectedTopic = 'planetary_highlights';
+              detectedItem = itemKey;
+              usedExactItems.add(itemKey);
+              // Try to find any match for this planet
+              exactPlanet =
+                weeklyData.planetaryHighlights.find(
+                  (h) => h.planet.toLowerCase() === mentionedPlanet,
+                ) || null;
+            }
           }
         }
       }
     }
 
-    // Priority 4: Check for best days - only if no exact item found AND keywords are clear
+    // Priority 4: Check for best days - improved detection with more keywords
+    // BUT: Skip if it's an overview phrase (like "let's explore cosmic alignments")
     if (
       !detectedTopic &&
       !isFirstSegment && // Don't assign best_days to intro
+      !isIntroPhaseFlag && // Don't assign during intro phase
       (lowerSentence.includes('best days') ||
         lowerSentence.includes('best for') ||
+        lowerSentence.includes('best day') ||
+        lowerSentence.includes('optimal') ||
+        lowerSentence.includes('favorable') ||
+        lowerSentence.includes('ideal timing') ||
+        lowerSentence.includes('ideal day') ||
+        lowerSentence.includes('ideal date') ||
+        lowerSentence.includes('ideal for') ||
         (lowerSentence.includes('ideal') &&
           (lowerSentence.includes('timing') ||
             lowerSentence.includes('day') ||
-            lowerSentence.includes('date'))))
+            lowerSentence.includes('date') ||
+            lowerSentence.includes('time'))) ||
+        lowerSentence.includes('when to') ||
+        lowerSentence.includes('timing for') ||
+        lowerSentence.includes('favorable days') ||
+        lowerSentence.includes('optimal days'))
     ) {
-      // Only assign best_days if we're sure - check that no planets/aspects mentioned
-      const hasPlanetMention = planets.some((p) => lowerSentence.includes(p));
-      const hasAspectMention = aspects.some((a) => lowerSentence.includes(a));
-      if (!hasPlanetMention && !hasAspectMention) {
-        detectedTopic = 'best_days';
-        detectedItem = 'best-days';
+      // Skip overview phrases that shouldn't create segments
+      const overviewPhrases = [
+        'explore cosmic alignments',
+        "let's explore",
+        'we explore',
+        'we examine',
+        'this week',
+      ];
+      const isOverviewPhrase = overviewPhrases.some((phrase) =>
+        lowerSentence.includes(phrase),
+      );
+
+      if (!isOverviewPhrase) {
+        // Only assign best_days if we're sure - check that no planets/aspects mentioned
+        const hasPlanetMention = planets.some((p) => lowerSentence.includes(p));
+        const hasAspectMention = aspects.some((a) => lowerSentence.includes(a));
+        // Also check for moon/phase mentions that might be moon_phases topic
+        const hasMoonMention =
+          lowerSentence.includes('moon') ||
+          lowerSentence.includes('lunar') ||
+          lowerSentence.includes('phase');
+        // Allow best_days even if planets are mentioned if it's clearly about best days
+        // (e.g., "best days for [activity] when [planet] is in [sign]")
+        const isBestDaysContext =
+          lowerSentence.includes('best days') ||
+          lowerSentence.includes('best for') ||
+          lowerSentence.includes('best day') ||
+          (lowerSentence.includes('ideal') &&
+            (lowerSentence.includes('day') ||
+              lowerSentence.includes('timing')));
+
+        if (
+          (!hasPlanetMention && !hasAspectMention && !hasMoonMention) ||
+          (isBestDaysContext && !hasAspectMention && !hasMoonMention)
+        ) {
+          detectedTopic = 'best_days';
+          detectedItem = 'best-days';
+        }
       }
     }
 
@@ -1494,7 +2109,13 @@ export function segmentScriptIntoItems(
       // Save previous item if exists
       if (currentItem && currentItemText.length > 0) {
         const itemDuration = currentTime - itemStartTime;
-        if (itemDuration >= minItemDuration || items.length === 0) {
+        // Always save previous item if we have a detected event (to ensure every event gets its own segment)
+        // OR if it meets minimum duration OR it's the first item
+        if (
+          itemDuration >= minItemDuration ||
+          items.length === 0 ||
+          detectedItem !== 'intro'
+        ) {
           items.push({
             topic: currentTopic,
             text: currentItemText.join('. '),
@@ -1521,6 +2142,7 @@ export function segmentScriptIntoItems(
       currentItemText = [sentence.trim()];
       itemStartTime = currentTime;
       isFirstSegment = false;
+      hasDetectedEvent = true; // Mark that we've detected an event
     } else {
       // Continue current item - don't change topic/item if no exact match
       currentItemText.push(sentence.trim());
@@ -1801,12 +2423,81 @@ export function segmentScriptIntoMediumItems(
       }
     }
 
+    // Priority 4: Check for best days - improved detection with more keywords
+    if (
+      !detectedTopic &&
+      !isFirstSegment && // Don't assign best_days to intro
+      (lowerSentence.includes('best days') ||
+        lowerSentence.includes('best for') ||
+        lowerSentence.includes('optimal') ||
+        lowerSentence.includes('favorable') ||
+        lowerSentence.includes('ideal timing') ||
+        lowerSentence.includes('ideal day') ||
+        lowerSentence.includes('ideal date') ||
+        (lowerSentence.includes('ideal') &&
+          (lowerSentence.includes('timing') ||
+            lowerSentence.includes('day') ||
+            lowerSentence.includes('date') ||
+            lowerSentence.includes('time'))) ||
+        lowerSentence.includes('when to') ||
+        lowerSentence.includes('timing for'))
+    ) {
+      // Only assign best_days if we're sure - check that no planets/aspects mentioned
+      const planets = [
+        'sun',
+        'moon',
+        'mercury',
+        'venus',
+        'mars',
+        'jupiter',
+        'saturn',
+        'uranus',
+        'neptune',
+        'pluto',
+      ];
+      const aspects = [
+        'conjunction',
+        'conjunct',
+        'conjoins',
+        'trine',
+        'trines',
+        'trining',
+        'square',
+        'squares',
+        'squaring',
+        'opposition',
+        'opposite',
+        'opposes',
+        'opposing',
+        'sextile',
+        'sextiles',
+        'sextiling',
+      ];
+      const hasPlanetMention = planets.some((p) => lowerSentence.includes(p));
+      const hasAspectMention = aspects.some((a) => lowerSentence.includes(a));
+      // Also check for moon/phase mentions that might be moon_phases topic
+      const hasMoonMention =
+        lowerSentence.includes('moon') ||
+        lowerSentence.includes('lunar') ||
+        lowerSentence.includes('phase');
+      if (!hasPlanetMention && !hasAspectMention && !hasMoonMention) {
+        detectedTopic = 'best_days';
+        detectedItem = 'best-days';
+      }
+    }
+
     // Only create new segment if exact item found
     if (detectedItem && detectedTopic) {
       // Save previous item if exists
       if (currentItem && currentItemText.length > 0) {
         const itemDuration = currentTime - itemStartTime;
-        if (itemDuration >= minItemDuration || items.length === 0) {
+        // Always save previous item if we have a detected event (to ensure every event gets its own segment)
+        // OR if it meets minimum duration OR it's the first item
+        if (
+          itemDuration >= minItemDuration ||
+          items.length === 0 ||
+          detectedItem !== 'intro'
+        ) {
           items.push({
             topic: currentTopic,
             text: currentItemText.join('. '),
