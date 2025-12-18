@@ -216,7 +216,7 @@ Mercury's effects actually extend beyond the retrograde itself:
               Mercury in Astrology
             </Link>
             <Link
-              href='/grimoire/moon-rituals'
+              href='/grimoire/moon/rituals'
               className='px-4 py-2 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-300 text-sm transition-colors'
             >
               Moon Rituals

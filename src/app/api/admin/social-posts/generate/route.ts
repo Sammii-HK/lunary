@@ -387,12 +387,14 @@ You are creating authentic social media content for Lunary, a cosmic astrology a
 CRITICAL RULES:
 1. NEVER mention pricing, trials, or "free" - just focus on value
 2. Prioritize authenticity over conversion - build trust through genuine content
-3. Vary your content style - rotate between founder stories, education, cosmic insights, and feature deep-dives
-4. 80% of posts should be pure value with no CTA at all
-5. Match the example posts in quality and tone for the given archetype
-6. Each post must feel unique - different hooks, structures, and angles
-7. Be specific about unique features: AI memory, tarot patterns, personal transits, grimoire
-8. Sound human - vulnerable, curious, or educational. Never salesy or generic.
+3. **80% MINIMUM of posts must be educational content** - use Grimoire knowledge as foundation
+4. Educational posts should guide to Grimoire: "Explore this in Lunary's Grimoire: lunary.app/grimoire/[slug]" - no pricing, no urgency
+5. Thought leader quotes (15% of posts) should include gentle interpretation showing authority
+6. Soft product mentions (5% max) - contextual only: "This idea is woven through Lunary's Grimoire" - position as place, not pitch
+7. Match the example posts in quality and tone for the given archetype
+8. Each post must feel unique - different hooks, structures, and angles
+9. Sound human - vulnerable, curious, or educational. Never salesy or generic.
+10. Position Lunary as a library/reference authority, not a product
 
 Return only valid JSON.`,
         },
@@ -418,23 +420,98 @@ Return only valid JSON.`,
       ? 'https://lunary.app'
       : 'http://localhost:3000';
 
-    // Use quote pool for Instagram posts (quotes are stored and reused)
-    const { generateCatchyQuote, getQuoteImageUrl } =
-      await import('@/lib/social/quote-generator');
+    // Use quote pool and educational images for all image-supporting platforms
+    const {
+      generateCatchyQuote,
+      getQuoteImageUrl,
+      getQuoteWithInterpretation,
+    } = await import('@/lib/social/quote-generator');
+    const { generateEducationalPost } =
+      await import('@/lib/social/educational-generator');
+    const { getEducationalImageUrl } =
+      await import('@/lib/social/educational-images');
 
     // Calculate scheduled_date based on weekOffset
     const now = new Date();
     const scheduledDate = new Date(now);
     scheduledDate.setDate(now.getDate() + weekOffset * 7);
 
-    const platformsNeedingImages = ['instagram', 'pinterest', 'reddit'];
+    // All platforms that accept images
+    const platformsNeedingImages = [
+      'instagram',
+      'pinterest',
+      'reddit',
+      'twitter',
+      'facebook',
+      'linkedin',
+      'tiktok',
+    ];
 
     for (const postContent of postsArray) {
-      // Generate catchy quote for platforms that need images
-      const quote = platformsNeedingImages.includes(platform)
-        ? await generateCatchyQuote(postContent, postType || 'benefit')
-        : '';
-      const imageUrl = quote ? getQuoteImageUrl(quote, baseUrl) : null;
+      let imageUrl: string | null = null;
+
+      if (platformsNeedingImages.includes(platform)) {
+        // For educational posts, use Grimoire educational images
+        if (postType === 'educational') {
+          try {
+            const educationalPost = await generateEducationalPost(
+              platform,
+              'mixed',
+            );
+            if (educationalPost?.grimoireSnippet) {
+              imageUrl = getEducationalImageUrl(
+                educationalPost.grimoireSnippet,
+                baseUrl,
+                platform,
+              );
+            }
+          } catch (error) {
+            console.warn(
+              'Failed to generate educational image, falling back to quote:',
+              error,
+            );
+          }
+        }
+
+        // For quote posts or fallback, use quote images with interpretation
+        if (!imageUrl) {
+          try {
+            const quoteWithInterp = await getQuoteWithInterpretation(
+              postContent,
+              postType || 'benefit',
+            );
+            if (quoteWithInterp) {
+              if (quoteWithInterp.interpretation) {
+                imageUrl = `${baseUrl}/api/og/social-quote?text=${encodeURIComponent(quoteWithInterp.quote)}&interpretation=${encodeURIComponent(quoteWithInterp.interpretation)}${quoteWithInterp.author ? `&author=${encodeURIComponent(quoteWithInterp.author)}` : ''}`;
+              } else {
+                imageUrl = getQuoteImageUrl(
+                  quoteWithInterp.author
+                    ? `${quoteWithInterp.quote} - ${quoteWithInterp.author}`
+                    : quoteWithInterp.quote,
+                  baseUrl,
+                );
+              }
+            } else {
+              // Fallback to simple quote
+              const quote = await generateCatchyQuote(
+                postContent,
+                postType || 'benefit',
+              );
+              imageUrl = quote ? getQuoteImageUrl(quote, baseUrl) : null;
+            }
+          } catch (error) {
+            console.warn(
+              'Failed to generate quote with interpretation, using simple quote:',
+              error,
+            );
+            const quote = await generateCatchyQuote(
+              postContent,
+              postType || 'benefit',
+            );
+            imageUrl = quote ? getQuoteImageUrl(quote, baseUrl) : null;
+          }
+        }
+      }
       try {
         const insertResult = await sql`
           INSERT INTO social_posts (content, platform, post_type, topic, status, image_url, scheduled_date, created_at)

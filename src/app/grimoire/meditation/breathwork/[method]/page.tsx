@@ -223,7 +223,7 @@ The recommended practice duration is ${methodData.duration}, though even a few m
         relatedItems={[
           {
             name: 'Breathwork Guide',
-            href: '/grimoire/breathwork',
+            href: '/grimoire/meditation/breathwork',
             type: 'Guide',
           },
           { name: 'Meditation', href: '/grimoire/meditation', type: 'Guide' },
@@ -251,7 +251,7 @@ The recommended practice duration is ${methodData.duration}, though even a few m
           { text: 'Grimoire Home', href: '/grimoire' },
         ]}
         ctaText='Explore more breathwork techniques'
-        ctaHref='/grimoire/breathwork'
+        ctaHref='/grimoire/meditation/breathwork'
         faqs={faqs}
       />
     </div>

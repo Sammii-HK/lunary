@@ -27,6 +27,17 @@ export const metadata: Metadata = {
     'planets in houses',
   ],
   alternates: { canonical: 'https://lunary.app/grimoire/houses' },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      'max-video-preview': -1,
+      'max-image-preview': 'large',
+      'max-snippet': -1,
+    },
+  },
   openGraph: {
     title: 'The 12 Astrological Houses: Meanings & Themes Explained | Lunary',
     description:

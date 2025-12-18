@@ -1430,13 +1430,13 @@ export default function sitemap(): MetadataRoute.Sitemap {
       priority: 0.7,
     },
     {
-      url: `${baseUrl}/grimoire/sabbats`,
+      url: `${baseUrl}/grimoire/wheel-of-the-year`,
       lastModified: now,
       changeFrequency: 'monthly' as const,
       priority: 0.7,
     },
     {
-      url: `${baseUrl}/grimoire/witchcraft-tools`,
+      url: `${baseUrl}/grimoire/modern-witchcraft/tools-guide`,
       lastModified: now,
       changeFrequency: 'monthly' as const,
       priority: 0.7,

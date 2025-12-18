@@ -271,7 +271,7 @@ While traditional tools like the ${toolData.name} are valued in many practices, 
         relatedItems={[
           {
             name: 'Witchcraft Tools',
-            href: '/grimoire/witchcraft-tools',
+            href: '/grimoire/modern-witchcraft/tools-guide',
             type: 'Guide',
           },
           {
@@ -300,7 +300,7 @@ While traditional tools like the ${toolData.name} are valued in many practices, 
           { text: 'Grimoire Home', href: '/grimoire' },
         ]}
         ctaText='Explore more witchcraft tools'
-        ctaHref='/grimoire/witchcraft-tools'
+        ctaHref='/grimoire/modern-witchcraft/tools-guide'
         faqs={faqs}
       />
     </div>

@@ -216,7 +216,7 @@ export function GrimoireSearch({
             type: 'planet',
             title: `Planet - ${planet.name}`,
             section: 'astronomy',
-            href: `/grimoire/planets/${stringToKebabCase(key)}`,
+            href: `/grimoire/astronomy/planets/${stringToKebabCase(key)}`,
           });
         }
       },
@@ -228,7 +228,7 @@ export function GrimoireSearch({
           type: 'sabbat',
           title: `Sabbat - ${sabbat.name}`,
           section: 'wheel-of-the-year',
-          href: `/grimoire/sabbats/${stringToKebabCase(sabbat.name)}`,
+          href: `/grimoire/wheel-of-the-year/${stringToKebabCase(sabbat.name)}`,
         });
       }
     });
@@ -303,7 +303,7 @@ export function GrimoireSearch({
           type: 'spread',
           title: `Tarot Spread - ${spread.name}`,
           section: 'tarot',
-          href: `/grimoire/tarot-spreads/${spread.slug}`,
+          href: `/grimoire/tarot/spreads/${spread.slug}`,
           match: spread.description?.slice(0, 80),
         });
       }
@@ -722,7 +722,7 @@ export function GrimoireSearch({
           type: 'astrology',
           title: `${planet.charAt(0).toUpperCase() + planet.slice(1)} Retrograde`,
           section: 'retrogrades',
-          href: `/grimoire/retrogrades/${planet}`,
+          href: `/grimoire/astronomy/retrogrades/${planet}`,
         });
       }
     });

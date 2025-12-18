@@ -37,6 +37,7 @@ import {
   Send,
   Eye,
   Play,
+  Video,
   ChevronDown,
   ChevronUp,
 } from 'lucide-react';
@@ -598,6 +599,14 @@ export default function AdminDashboard() {
       status: 'new',
     },
     {
+      title: 'Video Scripts',
+      description: 'TikTok & YouTube scripts with cover images',
+      href: '/admin/video-scripts',
+      icon: <Video className='h-5 w-5' />,
+      category: 'content',
+      status: 'new',
+    },
+    {
       title: 'Blog & Newsletter',
       description: 'Manage blog posts and email newsletters',
       href: '/admin/blog-manager',
@@ -618,6 +627,14 @@ export default function AdminDashboard() {
       icon: <Sparkles className='h-5 w-5' />,
       category: 'content',
       status: 'new',
+    },
+    {
+      title: 'Social Preview',
+      description: 'Preview social media images and videos (7-day retention)',
+      href: '/admin/social-preview',
+      icon: <Play className='h-5 w-5' />,
+      category: 'content',
+      status: 'active',
     },
   ];
 

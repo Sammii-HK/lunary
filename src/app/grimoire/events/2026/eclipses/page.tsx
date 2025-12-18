@@ -135,7 +135,7 @@ The 2026 eclipses continue shifting the lunar nodes through new signs, activatin
         },
         {
           name: 'Moon Rituals',
-          href: '/grimoire/moon-rituals',
+          href: '/grimoire/moon/rituals',
           type: 'Ritual',
         },
         {

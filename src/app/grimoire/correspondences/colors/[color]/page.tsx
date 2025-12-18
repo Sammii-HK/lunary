@@ -145,7 +145,7 @@ Understanding ${colorKey.toLowerCase()} color correspondences helps you choose t
         { text: 'Candle Magic', href: '/grimoire/candle-magic' },
         {
           text: 'Incantations by Candle Color',
-          href: '/grimoire/incantations-by-candle-color',
+          href: '/grimoire/candle-magic/incantations',
         },
         {
           text: 'Spellcraft Fundamentals',

@@ -6,6 +6,7 @@ import {
   GeoVector,
   Ecliptic,
   Illumination,
+  MoonPhase,
 } from 'astronomy-engine';
 import {
   crystalDatabase,
@@ -797,48 +798,71 @@ async function calculateMoonPhases(
   const phases: MoonPhaseEvent[] = [];
   const currentDate = new Date(weekStart);
 
-  // Check every 12 hours for moon phase changes
-  const checkInterval = 12 * 60 * 60 * 1000;
+  // Check every 6 hours for better moon phase detection (was 12 hours, too coarse)
+  const checkInterval = 6 * 60 * 60 * 1000;
 
-  let lastPhase: number | null = null;
+  let lastMajorPhase: string | null = null;
+
+  // Named moons by month (used for full moon display)
+  const moonNames: { [key: number]: string } = {
+    1: 'Wolf Moon',
+    2: 'Snow Moon',
+    3: 'Worm Moon',
+    4: 'Pink Moon',
+    5: 'Flower Moon',
+    6: 'Strawberry Moon',
+    7: 'Buck Moon',
+    8: 'Sturgeon Moon',
+    9: 'Harvest Moon',
+    10: 'Hunter Moon',
+    11: 'Beaver Moon',
+    12: 'Cold Moon',
+  };
 
   while (currentDate <= weekEnd) {
+    // Use MoonPhase which returns phase angle in degrees (0-360)
+    // 0° = New Moon, 90° = First Quarter, 180° = Full Moon, 270° = Third Quarter
+    const moonPhaseAngle = MoonPhase(currentDate);
     const astroTime = new AstroTime(currentDate);
     const illumination = Illumination(Body.Moon, astroTime);
-    const phase = illumination.phase_fraction; // 0-1 range (0 = New Moon, 0.5 = Full Moon, 1 = New Moon)
+    const illuminationPercent = illumination.phase_fraction * 100;
 
-    // Determine phase name
+    // Determine phase name and if it's significant (same logic as getAccurateMoonPhase)
     let phaseName = '';
-    if (phase < 0.03 || phase > 0.97) {
+    let isMajorPhase = false;
+
+    // Check for exact major phases using phase angle (±5° window)
+    const isNewMoon = moonPhaseAngle >= 355 || moonPhaseAngle <= 5;
+    const isFirstQuarter = moonPhaseAngle >= 85 && moonPhaseAngle <= 95;
+    const isFullMoon = moonPhaseAngle >= 175 && moonPhaseAngle <= 185;
+    const isThirdQuarter = moonPhaseAngle >= 265 && moonPhaseAngle <= 275;
+
+    if (isNewMoon) {
       phaseName = 'New Moon';
-    } else if (phase < 0.22) {
-      phaseName = 'Waxing Crescent';
-    } else if (phase < 0.28) {
+      isMajorPhase = true;
+    } else if (isFirstQuarter) {
       phaseName = 'First Quarter';
-    } else if (phase < 0.47) {
-      phaseName = 'Waxing Gibbous';
-    } else if (phase < 0.53) {
-      phaseName = 'Full Moon';
-    } else if (phase < 0.72) {
-      phaseName = 'Waning Gibbous';
-    } else if (phase < 0.78) {
+      isMajorPhase = true;
+    } else if (isFullMoon) {
+      // Use named moon for full moons
+      const month = currentDate.getMonth() + 1;
+      phaseName = moonNames[month] || 'Full Moon';
+      isMajorPhase = true;
+    } else if (isThirdQuarter) {
       phaseName = 'Last Quarter';
+      isMajorPhase = true;
+    } else if (moonPhaseAngle > 5 && moonPhaseAngle < 85) {
+      phaseName = 'Waxing Crescent';
+    } else if (moonPhaseAngle > 95 && moonPhaseAngle < 175) {
+      phaseName = 'Waxing Gibbous';
+    } else if (moonPhaseAngle > 185 && moonPhaseAngle < 265) {
+      phaseName = 'Waning Gibbous';
     } else {
       phaseName = 'Waning Crescent';
     }
 
-    // Check if phase changed significantly (for New Moon, First Quarter, Full Moon, Last Quarter)
-    const isMajorPhase =
-      phase < 0.05 ||
-      (phase > 0.22 && phase < 0.28) ||
-      (phase > 0.47 && phase < 0.53) ||
-      (phase > 0.72 && phase < 0.78);
-
-    // Track major phases - include first phase if it's a major phase, or if phase changed significantly
-    if (
-      isMajorPhase &&
-      (lastPhase === null || Math.abs(phase - lastPhase) > 0.1)
-    ) {
+    // Only add if it's a major phase AND we haven't already added this phase
+    if (isMajorPhase && phaseName !== lastMajorPhase) {
       const positions = getRealPlanetaryPositions(currentDate);
       const moonSign = positions.Moon?.sign || 'Unknown';
 
@@ -854,9 +878,10 @@ async function calculateMoonPhases(
         guidance: getMoonPhaseGuidance(phaseName, moonSign),
         ritualSuggestions: getMoonPhaseRituals(phaseName),
       });
+
+      lastMajorPhase = phaseName;
     }
 
-    lastPhase = phase;
     currentDate.setTime(currentDate.getTime() + checkInterval);
   }
 

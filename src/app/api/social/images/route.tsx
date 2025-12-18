@@ -23,6 +23,7 @@ const FORMATS = {
   square: { width: 1080, height: 1080, label: 'Instagram Feed' },
   portrait: { width: 1080, height: 1350, label: 'Instagram Feed (4:5)' },
   story: { width: 1080, height: 1920, label: 'Stories/TikTok/Reels' },
+  youtube: { width: 1920, height: 1080, label: 'YouTube (16:9)' },
 } as const;
 
 type Format = keyof typeof FORMATS;
@@ -31,15 +32,24 @@ function getResponsiveSizes(format: Format) {
   const isStory = format === 'story';
   const isSquare = format === 'square';
   const isPortrait = format === 'portrait';
+  const isYouTube = format === 'youtube';
 
   return {
-    titleSize: isStory ? 64 : isSquare ? 52 : isPortrait ? 48 : 44,
-    subtitleSize: isStory ? 32 : isSquare ? 28 : 24,
-    weekSize: isStory ? 26 : isSquare ? 22 : 20,
-    emojiSize: isStory ? 100 : isSquare ? 80 : 70,
-    brandSize: isStory ? 24 : 20,
-    padding: isStory ? 80 : 60,
-    brandMargin: isStory ? 80 : 50,
+    titleSize: isYouTube
+      ? 96
+      : isStory
+        ? 64
+        : isSquare
+          ? 52
+          : isPortrait
+            ? 48
+            : 44,
+    subtitleSize: isYouTube ? 48 : isStory ? 32 : isSquare ? 28 : 24,
+    weekSize: isYouTube ? 36 : isStory ? 26 : isSquare ? 22 : 20,
+    emojiSize: isYouTube ? 140 : isStory ? 100 : isSquare ? 80 : 70,
+    brandSize: isYouTube ? 32 : isStory ? 24 : 20,
+    padding: isYouTube ? 100 : isStory ? 80 : 60,
+    brandMargin: isYouTube ? 100 : isStory ? 80 : 50,
   };
 }
 
@@ -186,10 +196,10 @@ export async function GET(request: NextRequest) {
           maxWidth: '90%',
         }}
       >
-        {/* Moon icon */}
+        {/* Moon icon - always use full moon for branding consistency */}
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
-          src={`${baseUrl}/icons/moon-phases/${moonPhasePng}.png`}
+          src={`${baseUrl}/icons/moon-phases/full-moon.png`}
           alt='Moon phase'
           width={sizes.emojiSize + 40}
           height={sizes.emojiSize + 40}
@@ -246,45 +256,19 @@ export async function GET(request: NextRequest) {
           </div>
         )}
 
-        {/* Brand pill */}
+        {/* Brand text - no pill styling */}
         <div
           style={{
             marginTop: sizes.brandMargin,
-            padding: '14px 32px',
-            background: `linear-gradient(135deg, ${BRAND_COLORS.purple600} 0%, ${BRAND_COLORS.pink600} 100%)`,
-            borderRadius: 50,
+            fontSize: sizes.brandSize + 4,
+            fontWeight: 700,
+            color: BRAND_COLORS.purple300,
+            letterSpacing: '0.05em',
             display: 'flex',
-            alignItems: 'center',
-            gap: 10,
-            boxShadow: `0 4px 20px ${BRAND_COLORS.purple600}40`,
           }}
         >
-          <div
-            style={{
-              fontSize: sizes.brandSize,
-              fontWeight: 700,
-              color: BRAND_COLORS.white,
-              letterSpacing: '0.1em',
-              display: 'flex',
-            }}
-          >
-            ✨ LUNARY
-          </div>
+          lunary.app
         </div>
-      </div>
-
-      {/* Bottom URL */}
-      <div
-        style={{
-          position: 'absolute',
-          bottom: format === 'story' ? 60 : 30,
-          fontSize: 16,
-          color: BRAND_COLORS.zinc400,
-          display: 'flex',
-          letterSpacing: '0.02em',
-        }}
-      >
-        lunary.app
       </div>
     </div>,
     {

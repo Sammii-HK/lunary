@@ -45,7 +45,7 @@ const transitCategories = [
     title: 'Retrogrades',
     description:
       'Mercury, Venus, Mars, Jupiter, Saturn retrograde dates and meanings for 2025-2030.',
-    href: '/grimoire/retrogrades',
+    href: '/grimoire/astronomy/retrogrades',
     icon: RotateCcw,
     color: 'lunary-primary',
   },

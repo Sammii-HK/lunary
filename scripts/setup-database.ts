@@ -1009,9 +1009,74 @@ async function setupDatabase() {
 
     console.log('✅ User attribution table created');
 
+    // Create videos table for video generation and storage
+    await sql`
+      CREATE TABLE IF NOT EXISTS videos (
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        type VARCHAR(20) NOT NULL, -- 'short' | 'medium' | 'long'
+        video_url TEXT NOT NULL,
+        thumbnail_url TEXT,
+        audio_url TEXT, -- URL to the audio file
+        script TEXT, -- Voiceover script for closed captions
+        title TEXT,
+        description TEXT,
+        post_content TEXT, -- Social media post content to accompany the video
+        week_number INTEGER,
+        blog_slug TEXT,
+        status VARCHAR(20) DEFAULT 'pending', -- 'pending' | 'uploaded' | 'failed'
+        youtube_video_id TEXT,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+        updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+        expires_at TIMESTAMP WITH TIME ZONE DEFAULT (NOW() + INTERVAL '7 days')
+      )
+    `;
+
+    await sql`CREATE INDEX IF NOT EXISTS idx_videos_created_at ON videos(created_at DESC)`;
+    await sql`CREATE INDEX IF NOT EXISTS idx_videos_type_week ON videos(type, week_number)`;
+    await sql`CREATE INDEX IF NOT EXISTS idx_videos_status ON videos(status)`;
+    await sql`CREATE INDEX IF NOT EXISTS idx_videos_expires_at ON videos(expires_at)`;
+
+    // Add post_content column if it doesn't exist (migration for existing databases)
+    try {
+      await sql`ALTER TABLE videos ADD COLUMN IF NOT EXISTS post_content TEXT`;
+      console.log('✅ Videos table post_content column added/verified');
+    } catch (error) {
+      // Column might already exist, that's okay
+      console.log('ℹ️  post_content column already exists or error adding it');
+    }
+
+    // Add audio_url column if it doesn't exist (migration for existing databases)
+    try {
+      await sql`ALTER TABLE videos ADD COLUMN IF NOT EXISTS audio_url TEXT`;
+      console.log('✅ Videos table audio_url column added/verified');
+    } catch (error) {
+      // Column might already exist, that's okay
+      console.log('ℹ️  audio_url column already exists or error adding it');
+    }
+
+    // Add script column if it doesn't exist (migration for existing databases)
+    try {
+      await sql`ALTER TABLE videos ADD COLUMN IF NOT EXISTS script TEXT`;
+      console.log('✅ Videos table script column added/verified');
+    } catch (error) {
+      // Column might already exist, that's okay
+      console.log('ℹ️  script column already exists or error adding it');
+    }
+
+    // Add updated_at column if it doesn't exist (migration for existing databases)
+    try {
+      await sql`ALTER TABLE videos ADD COLUMN IF NOT EXISTS updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()`;
+      console.log('✅ Videos table updated_at column added/verified');
+    } catch (error) {
+      // Column might already exist, that's okay
+      console.log('ℹ️  updated_at column already exists or error adding it');
+    }
+
+    console.log('✅ Videos table created');
+
     console.log('✅ Database setup complete!');
     console.log(
-      '📊 Database ready for push subscriptions, conversion tracking, social posts, subscriptions, tarot readings, AI threads, user profiles, shop data, notes, API keys, consent, email preferences, and user attribution',
+      '📊 Database ready for push subscriptions, conversion tracking, social posts, subscriptions, tarot readings, AI threads, user profiles, shop data, notes, API keys, consent, email preferences, user attribution, and videos',
     );
   } catch (error) {
     console.error('❌ Database setup failed:', error);

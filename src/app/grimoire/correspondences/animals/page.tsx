@@ -222,7 +222,7 @@ Animals connected to **Earth**: Grounding, abundance, stability`}
           },
           { text: 'Elements', href: '/grimoire/correspondences/elements' },
           { text: 'Meditation', href: '/grimoire/meditation' },
-          { text: 'Moon Phases', href: '/grimoire/moon-phases' },
+          { text: 'Moon Phases', href: '/grimoire/moon/phases' },
         ]}
         ctaText='Want personalized spirit animal insights?'
         ctaHref='/pricing'

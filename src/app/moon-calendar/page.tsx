@@ -48,7 +48,7 @@ export default function MoonCalendarHubPage() {
     url: 'https://lunary.app/moon-calendar',
     items: years.map((y) => ({
       name: `Moon Calendar ${y.year}`,
-      url: `https://lunary.app/moon-calendar/${y.year}`,
+      url: `https://lunary.app/grimoire/moon/${y.year}`,
       description: y.description,
     })),
   });
@@ -122,7 +122,7 @@ export default function MoonCalendarHubPage() {
             {years.map((y) => (
               <Link
                 key={y.year}
-                href={`/moon-calendar/${y.year}`}
+                href={`/grimoire/moon/${y.year}`}
                 className='group p-6 rounded-xl border border-zinc-800 bg-zinc-900/50 hover:border-lunary-secondary-600 transition-all'
               >
                 <div className='flex items-center justify-between mb-2'>

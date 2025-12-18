@@ -15,10 +15,15 @@ config({ path: '.env.local' });
 import { google } from 'googleapis';
 import * as readline from 'readline';
 
-const SCOPES = [
-  'https://www.googleapis.com/auth/webmasters.readonly',
-  'https://www.googleapis.com/auth/webmasters',
+// Default to YouTube scopes, but can be overridden via environment variable
+const DEFAULT_SCOPES = [
+  'https://www.googleapis.com/auth/youtube.upload',
+  'https://www.googleapis.com/auth/youtube',
 ];
+
+// Allow override for Search Console or other services
+const SCOPES =
+  process.env.GOOGLE_SCOPES?.split(',').map((s) => s.trim()) || DEFAULT_SCOPES;
 
 async function main() {
   const clientId = process.env.GOOGLE_CLIENT_ID;
@@ -44,12 +49,13 @@ async function main() {
   });
 
   console.log('\n🔑 Google OAuth2 Token Regeneration\n');
+  console.log(`Scopes: ${SCOPES.join(', ')}\n`);
   console.log('1. Open this URL in your browser:\n');
   console.log(`   ${authUrl}\n`);
   console.log('2. Authorize the app');
   console.log('3. After redirect, copy the "code" parameter from the URL\n');
   console.log(
-    '   Example: http://localhost:3000/...?code=4/0XXXXX <- copy this part\n',
+    '   Example: http://localhost/...?code=4/0XXXXX <- copy this part\n',
   );
 
   const rl = readline.createInterface({

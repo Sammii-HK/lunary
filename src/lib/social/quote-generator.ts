@@ -47,7 +47,7 @@ function parseQuoteAndAuthor(fullQuote: string): {
 
 export async function generateQuoteBatch(): Promise<StoredQuote[]> {
   try {
-    const quotePrompt = `Generate 5 unique, catchy, standalone quote options for social media image cards. IMPORTANT: Prioritize famous quotes and cosmic wisdom over brand quotes.
+    const quotePrompt = `Generate 5 unique, catchy, standalone quote options for social media image cards. IMPORTANT: Prioritize famous quotes from thought leaders across all cosmic, mystical, and spiritual topics. Build a diverse roster of quotes.
 
 Requirements for quotes:
 - Each quote should be standalone and shareable (works without context)
@@ -57,12 +57,13 @@ Requirements for quotes:
 - Natural and authentic, not salesy
 - Use sentence case
 
-QUOTE DISTRIBUTION (IMPORTANT):
-- At least 3 out of 5 quotes should be inspired by or adapted from famous scientists, astronomers, astrologers, and philosophers
-- Only 1-2 quotes should be Lunary brand quotes
-- Mix the order - don't put all Lunary quotes first
+QUOTE DISTRIBUTION (CRITICAL):
+- Generate 4-5 quotes from thought leaders (scientists, astronomers, astrologers, philosophers, business leaders, mystics, poets, etc.)
+- Only 0-1 quote should be a Lunary brand quote (preferably 0)
+- Rotate through different categories: stars/cosmos, moon, tarot, astrology, numerology, philosophy, mysticism
+- Mix the order - vary categories and sources
 
-Famous Quotes to Inspire From (adapt these themes or create similar style):
+Famous Quotes to Inspire From - Stars & Cosmos:
 - "We are made of star-stuff" - Carl Sagan
 - "The cosmos is within us" - Carl Sagan
 - "Look up at the stars and not down at your feet" - Stephen Hawking
@@ -71,19 +72,62 @@ Famous Quotes to Inspire From (adapt these themes or create similar style):
 - "The universe is not only stranger than we imagine, it is stranger than we can imagine" - J.B.S. Haldane
 - "In the cosmos, there are no absolute up or down" - Stephen Hawking
 - "The cosmos is all that is or ever was or ever will be" - Carl Sagan
-- "The universe is a pretty big place. If it's just us, seems like an awful waste of space." - Carl Sagan
-- "Somewhere, something incredible is waiting to be known." - Carl Sagan
-- "The cosmos is within us. We are made of star-stuff. We are a way for the universe to know itself." - Carl Sagan
-- "The stars are the land-marks of the universe." - Sir John Herschel
-- "Astronomy compels the soul to look upward and leads us from this world to another." - Plato
+- "Somewhere, something incredible is waiting to be known" - Carl Sagan
+- "The stars are the land-marks of the universe" - Sir John Herschel
+- "Astronomy compels the soul to look upward and leads us from this world to another" - Plato
+- "The universe is a pretty big place. If it's just us, seems like an awful waste of space" - Carl Sagan
 
-Lunary Brand Quotes (use sparingly - only 1-2 max):
+Moon & Lunar Wisdom:
+- "The moon is a loyal companion" - Tahereh Mafi
+- "The moon lives in the lining of your skin" - Pablo Neruda
+- "The moon does not fight. It attacks no one. It does not worry. It does not try to crush others" - Deng Ming-Dao
+- "We are all like the bright moon, we still have our darker side" - Kahlil Gibran
+- "The moon is a friend for the lonesome to talk to" - Carl Sandburg
+- "The moon, like a flower in heaven's high bower, with silent delight sits and smiles on the night" - William Blake
+
+Tarot & Divination:
+- "The tarot is a mirror that reflects back to us what we already know" - Unknown
+- "Tarot cards are like keys to the doors of your subconscious" - Unknown
+- "The cards are a tool, but the wisdom comes from within" - Unknown
+- "Tarot is a language that speaks to the soul" - Unknown
+- "In the cards, we find the story of our own becoming" - Unknown
+
+Astrology & Birth Charts:
+- "Millionaires don't use astrology; billionaires do" - J.P. Morgan
+- "Astrology is a language. If you understand this language, the sky speaks to you" - Dane Rudhyar
+- "Astrology is just a finger pointing at reality" - Steven Forrest
+- "The stars incline us, they do not bind us" - Traditional
+- "Your birth chart is a map of your soul's journey" - Unknown
+- "Astrology is astronomy brought down to earth and applied to the affairs of men" - Ralph Waldo Emerson
+
+Numerology:
+- "Numbers are the universal language offered by the deity to humans as confirmation of the truth" - Pythagoras
+- "Numbers rule the universe" - Pythagoras
+- "Everything is number" - Pythagoras
+- "The universe is written in the language of mathematics" - Galileo Galilei
+- "Numbers have a way of taking a man by the hand and leading him down the path of reason" - Pythagoras
+
+Philosophical Cosmic Wisdom:
+- "The cosmos is within us. We are made of star-stuff. We are a way for the universe to know itself" - Carl Sagan
+- "We are not human beings having a spiritual experience. We are spiritual beings having a human experience" - Pierre Teilhard de Chardin
+- "The universe is not only stranger than we imagine, it is stranger than we can imagine" - J.B.S. Haldane
+- "As above, so below; as within, so without" - Hermes Trismegistus
+- "The cosmos is a living being" - Plato
+- "In the cosmos, there are no absolute up or down" - Stephen Hawking
+
+Mystical & Spiritual Insights:
+- "The soul always knows what to do to heal itself. The challenge is to silence the mind" - Caroline Myss
+- "Magic is believing in yourself. If you can do that, you can make anything happen" - Johann Wolfgang von Goethe
+- "The universe is full of magical things patiently waiting for our wits to grow sharper" - Eden Phillpotts
+- "We are all connected; to each other, biologically. To the earth, chemically. To the rest of the universe, atomically" - Neil deGrasse Tyson
+
+Lunary Brand Quotes (use only if absolutely necessary - 0-1 max):
 - "Discover the universe within you, one star at a time" - Lunary
 - "Your birth chart is your cosmic blueprint" - Lunary
 - "The stars remember when you were born" - Lunary
 
 Return JSON with quotes in this format: {"quotes": ["Quote 1 - Author Name", "Quote 2 - Author Name", "Quote 3 - Author Name", "Quote 4 - Author Name", "Quote 5 - Author Name"]}
-Include attribution like "- Author Name" or "- Lunary" at the end of each quote.`;
+Include attribution like "- Author Name" or "- Lunary" at the end of each quote. Prioritize thought leaders from diverse categories.`;
 
     const quoteCompletion = await getOpenAI().chat.completions.create({
       model: 'gpt-4o-mini',
@@ -91,7 +135,7 @@ Include attribution like "- Author Name" or "- Lunary" at the end of each quote.
         {
           role: 'system',
           content:
-            'You are a quote curator for social media. Your job is to find and adapt profound, cosmic quotes from famous scientists, astronomers, astrologers, and philosophers. Prioritize famous quotes (Carl Sagan, Stephen Hawking, Plato, etc.) over brand quotes. Create quotes that are shareable, inspiring, and cosmic. Mix famous quotes with occasional brand quotes. Return only valid JSON.',
+            'You are a quote curator for social media specializing in cosmic, mystical, and spiritual wisdom. Your job is to find and adapt profound quotes from thought leaders across diverse categories: scientists, astronomers, astrologers, philosophers, business leaders, mystics, tarot readers, numerologists, and poets. Prioritize famous quotes from thought leaders (Carl Sagan, Stephen Hawking, J.P. Morgan, Plato, Pythagoras, etc.) over brand quotes. Create quotes that are shareable, inspiring, and cover topics like stars, cosmos, moon, tarot, astrology, numerology, and mystical wisdom. Generate 4-5 thought leader quotes per batch, with 0-1 brand quotes maximum. Rotate through different categories for variety. Return only valid JSON.',
         },
         { role: 'user', content: quotePrompt },
       ],
@@ -272,8 +316,94 @@ export async function generateCatchyQuote(
     : snippet + '...';
 }
 
+export interface QuoteWithInterpretation {
+  quote: string;
+  interpretation: string;
+  author: string | null;
+}
+
+/**
+ * Generate interpretation for a quote
+ */
+export async function generateQuoteInterpretation(
+  quote: string,
+  author: string | null,
+): Promise<string> {
+  try {
+    const prompt = `Generate a gentle, authoritative interpretation (2-3 sentences) for this quote:
+
+Quote: "${quote}"
+${author ? `Author: ${author}` : ''}
+
+Requirements:
+- Show authority and depth - demonstrate understanding
+- Be gentle and accessible, not academic
+- Connect the quote to cosmic/spiritual wisdom naturally
+- Optionally mention: "This wisdom is woven through Lunary's Grimoire" or "Explore this in Lunary's Grimoire" - but only if contextually relevant
+- No urgency, no benefit stacking, no "download now"
+- Position Lunary as a library/reference, not a product
+- 2-3 sentences maximum
+
+Return ONLY the interpretation text, no markdown, no quotes.`;
+
+    const completion = await getOpenAI().chat.completions.create({
+      model: 'gpt-4o-mini',
+      messages: [
+        {
+          role: 'system',
+          content:
+            'You are a wise interpreter of cosmic and spiritual quotes. Your interpretations show authority and guide people gently to deeper learning. You position Lunary as a reference library, not a product.',
+        },
+        { role: 'user', content: prompt },
+      ],
+      max_tokens: 200,
+      temperature: 0.7,
+    });
+
+    return completion.choices[0]?.message?.content?.trim() || '';
+  } catch (error) {
+    console.error('Failed to generate quote interpretation:', error);
+    return '';
+  }
+}
+
+/**
+ * Get quote with interpretation
+ */
+export async function getQuoteWithInterpretation(
+  postContent: string,
+  postType: string,
+): Promise<QuoteWithInterpretation | null> {
+  try {
+    const quote = await generateCatchyQuote(postContent, postType);
+    if (!quote) {
+      return null;
+    }
+
+    const { quoteText, author } = parseQuoteAndAuthor(quote);
+    const interpretation = await generateQuoteInterpretation(quoteText, author);
+
+    return {
+      quote: quoteText,
+      interpretation,
+      author,
+    };
+  } catch (error) {
+    console.error('Failed to get quote with interpretation:', error);
+    return null;
+  }
+}
+
 export function getQuoteImageUrl(quote: string, baseUrl: string): string {
   return `${baseUrl}/api/og/social-quote?text=${encodeURIComponent(quote)}`;
+}
+
+export function getQuoteWithInterpretationImageUrl(
+  quote: string,
+  interpretation: string,
+  baseUrl: string,
+): string {
+  return `${baseUrl}/api/og/social-quote?text=${encodeURIComponent(quote)}&interpretation=${encodeURIComponent(interpretation)}`;
 }
 
 export async function getQuotePoolStats(): Promise<{

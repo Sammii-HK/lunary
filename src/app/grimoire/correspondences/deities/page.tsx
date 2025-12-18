@@ -158,12 +158,12 @@ While eclectic practice is valid, be aware that some traditions are closed or re
           },
           {
             name: 'Sabbats',
-            href: '/grimoire/sabbats',
+            href: '/grimoire/wheel-of-the-year',
             type: 'Guide',
           },
           {
             name: 'Moon Phases',
-            href: '/grimoire/moon-phases',
+            href: '/grimoire/moon/phases',
             type: 'Guide',
           },
           {
@@ -177,8 +177,8 @@ While eclectic practice is valid, be aware that some traditions are closed or re
             text: 'Correspondences Overview',
             href: '/grimoire/correspondences',
           },
-          { text: 'Sabbats', href: '/grimoire/sabbats' },
-          { text: 'Moon Phases', href: '/grimoire/moon-phases' },
+          { text: 'Sabbats', href: '/grimoire/wheel-of-the-year' },
+          { text: 'Moon Phases', href: '/grimoire/moon/phases' },
           { text: 'Candle Magic', href: '/grimoire/candle-magic' },
         ]}
         ctaText='Want personalized deity recommendations based on your chart?'

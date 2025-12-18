@@ -233,7 +233,7 @@ Eclipses come in pairs or clusters called "eclipse seasons." In 2025, we have tw
           <h2 className='text-2xl font-medium text-zinc-100'>Related Topics</h2>
           <div className='flex flex-wrap gap-3'>
             <Link
-              href='/grimoire/moon-rituals'
+              href='/grimoire/moon/rituals'
               className='px-4 py-2 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-300 text-sm transition-colors'
             >
               Moon Rituals

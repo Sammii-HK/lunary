@@ -1,12 +1,6 @@
 import { NextRequest } from 'next/server';
-import {
-  loadGoogleFont,
-  getRealPlanetaryPositions,
-  getAccurateMoonPhase,
-  generateDayGuidanceSummary,
-  calculateRealAspects,
-  checkSeasonalEvents,
-} from '../../../../../utils/astrology/cosmic-og';
+import { loadGoogleFont } from '../../../../../utils/astrology/cosmic-og';
+import { getGeneralHoroscope } from '../../../../../utils/astrology/generalHoroscope';
 import {
   OGWrapper,
   OGHeader,
@@ -35,36 +29,7 @@ export async function GET(request: NextRequest) {
 
   let horoscopeSnippet: string;
   try {
-    const positions = getRealPlanetaryPositions(targetDate);
-    const moonPhase = getAccurateMoonPhase(targetDate);
-    const aspects = calculateRealAspects(positions);
-    const seasonalEvents = checkSeasonalEvents(positions);
-
-    const allEvents: any[] = [];
-    if (moonPhase.isSignificant) {
-      allEvents.push({
-        name: moonPhase.name,
-        energy: moonPhase.energy,
-        priority: 10,
-        type: 'moon',
-      });
-    }
-    allEvents.push(...aspects.slice(0, 2));
-    allEvents.push(...seasonalEvents);
-    if (allEvents.length === 0) {
-      allEvents.push({
-        name: 'Cosmic Flow',
-        energy: 'Universal Harmony',
-        priority: 1,
-        type: 'general',
-      });
-    }
-
-    horoscopeSnippet = generateDayGuidanceSummary(
-      allEvents.slice(0, 3),
-      positions,
-      moonPhase,
-    );
+    horoscopeSnippet = getGeneralHoroscope(targetDate).reading;
   } catch (error) {
     console.error('Error generating horoscope:', error);
     horoscopeSnippet =

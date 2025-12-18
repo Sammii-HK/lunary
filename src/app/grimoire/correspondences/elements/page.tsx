@@ -221,8 +221,8 @@ To incorporate elements into your practice, consider:
             href: '/grimoire/correspondences',
           },
           { text: 'Zodiac Signs', href: '/grimoire/zodiac' },
-          { text: 'Moon Phases', href: '/grimoire/moon-phases' },
-          { text: 'Sabbats', href: '/grimoire/sabbats' },
+          { text: 'Moon Phases', href: '/grimoire/moon/phases' },
+          { text: 'Sabbats', href: '/grimoire/wheel-of-the-year' },
         ]}
         ctaText='Want personalized elemental insights based on your birth chart?'
         ctaHref='/pricing'

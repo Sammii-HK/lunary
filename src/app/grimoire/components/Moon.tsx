@@ -24,13 +24,13 @@ const MOON_SECTIONS = [
   {
     title: 'Moon Signs',
     description: 'How the Moon in each zodiac sign affects emotions',
-    href: '/grimoire/moon-signs',
+    href: '/grimoire/moon/signs',
     icon: <Star className='w-6 h-6' />,
   },
   {
     title: 'Moon Rituals',
     description: 'Ceremonies and practices for lunar cycles',
-    href: '/grimoire/moon-rituals',
+    href: '/grimoire/moon/rituals',
     icon: <Sparkles className='w-6 h-6' />,
   },
   {
@@ -117,7 +117,7 @@ const Moon = () => {
             return (
               <Link
                 key={phase}
-                href={`/grimoire/moon-phases/${phaseSlug}`}
+                href={`/grimoire/moon/phases/${phaseSlug}`}
                 className='block rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-3 hover:bg-zinc-900/50 hover:border-lunary-primary-600 transition-all group text-center'
               >
                 <span className='text-2xl block mb-1'>

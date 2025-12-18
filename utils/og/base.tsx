@@ -258,12 +258,13 @@ export function OGSubtitle({
   );
 }
 
-export type OGImageSize = 'square' | 'landscape' | 'portrait';
+export type OGImageSize = 'square' | 'landscape' | 'portrait' | 'story';
 
 const imageSizes: Record<OGImageSize, { width: number; height: number }> = {
   square: { width: 1200, height: 1200 },
   landscape: { width: 1200, height: 630 },
   portrait: { width: 630, height: 1200 },
+  story: { width: 1080, height: 1920 },
 };
 
 export interface CreateOGResponseOptions {
@@ -315,4 +316,189 @@ export function formatOGDate(date: Date): string {
     month: '2-digit',
     year: 'numeric',
   });
+}
+
+// ============================================================================
+// THEMATIC COMPONENTS
+// ============================================================================
+
+export interface OGSymbolProps {
+  symbol: string;
+  size?: number;
+  color?: string;
+  glowColor?: string;
+}
+
+/**
+ * Large centered symbol with optional glow effect
+ */
+export function OGSymbol({
+  symbol,
+  size = 120,
+  color = 'white',
+  glowColor,
+}: OGSymbolProps) {
+  return (
+    <div
+      style={{
+        display: 'flex',
+        fontSize: `${size}px`,
+        color,
+        textAlign: 'center',
+        lineHeight: 1,
+        textShadow: glowColor
+          ? `0 0 40px ${glowColor}, 0 0 80px ${glowColor}`
+          : 'none',
+      }}
+    >
+      {symbol}
+    </div>
+  );
+}
+
+export interface OGCategoryLabelProps {
+  label: string;
+  color?: string;
+  size?: number;
+}
+
+/**
+ * Subtle category label at top of image
+ */
+export function OGCategoryLabel({
+  label,
+  color = 'rgba(255, 255, 255, 0.5)',
+  size = 22,
+}: OGCategoryLabelProps) {
+  return (
+    <div
+      style={{
+        display: 'flex',
+        fontSize: `${size}px`,
+        fontWeight: '400',
+        color,
+        textAlign: 'center',
+        letterSpacing: '0.2em',
+        textTransform: 'uppercase',
+      }}
+    >
+      {label}
+    </div>
+  );
+}
+
+export interface OGAttributeLineProps {
+  text: string;
+  color?: string;
+  size?: number;
+}
+
+/**
+ * Subtle attribute line below title (e.g., "Cardinal Fire • Mars")
+ */
+export function OGAttributeLine({
+  text,
+  color = 'rgba(255, 255, 255, 0.6)',
+  size = 24,
+}: OGAttributeLineProps) {
+  return (
+    <div
+      style={{
+        display: 'flex',
+        fontSize: `${size}px`,
+        fontWeight: '300',
+        color,
+        textAlign: 'center',
+        letterSpacing: '0.1em',
+        marginTop: '20px',
+      }}
+    >
+      {text}
+    </div>
+  );
+}
+
+export interface OGMinimalFooterProps {
+  opacity?: number;
+}
+
+/**
+ * Minimal, subtle footer with just lunary.app watermark
+ */
+export function OGMinimalFooter({ opacity = 0.4 }: OGMinimalFooterProps) {
+  return (
+    <div
+      style={{
+        display: 'flex',
+        fontSize: '18px',
+        fontWeight: '300',
+        color: `rgba(255, 255, 255, ${opacity})`,
+        letterSpacing: '0.1em',
+        marginBottom: '30px',
+      }}
+    >
+      lunary.app
+    </div>
+  );
+}
+
+export interface ThematicOGTheme {
+  gradient: string;
+  accentColor: string;
+  textColor: string;
+  subtleTextColor: string;
+}
+
+/**
+ * Create an OG theme from thematic parameters
+ */
+export function createThematicTheme(theme: ThematicOGTheme): OGTheme {
+  return {
+    background: theme.gradient,
+    textColor: theme.textColor,
+    accentColor: theme.accentColor,
+  };
+}
+
+// Responsive sizing for different formats
+export function getThematicSizes(format: OGImageSize) {
+  switch (format) {
+    case 'story':
+      return {
+        symbolSize: 140,
+        titleSize: 72,
+        subtitleSize: 32,
+        attributeSize: 26,
+        labelSize: 24,
+        padding: '80px 60px',
+      };
+    case 'square':
+      return {
+        symbolSize: 120,
+        titleSize: 64,
+        subtitleSize: 28,
+        attributeSize: 24,
+        labelSize: 22,
+        padding: '60px 50px',
+      };
+    case 'portrait':
+      return {
+        symbolSize: 100,
+        titleSize: 56,
+        subtitleSize: 24,
+        attributeSize: 20,
+        labelSize: 20,
+        padding: '50px 40px',
+      };
+    case 'landscape':
+    default:
+      return {
+        symbolSize: 80,
+        titleSize: 52,
+        subtitleSize: 24,
+        attributeSize: 20,
+        labelSize: 18,
+        padding: '40px 60px',
+      };
+  }
 }

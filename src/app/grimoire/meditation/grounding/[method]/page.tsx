@@ -236,7 +236,7 @@ The practice typically takes ${methodData.duration}, making it accessible for da
           },
           {
             name: 'Breathwork',
-            href: '/grimoire/breathwork',
+            href: '/grimoire/meditation/breathwork',
             type: 'Practice',
           },
           { name: 'Chakras', href: '/grimoire/chakras', type: 'Guide' },
@@ -251,7 +251,7 @@ The practice typically takes ${methodData.duration}, making it accessible for da
         ]}
         internalLinks={[
           { text: 'Meditation Guide', href: '/grimoire/meditation' },
-          { text: 'Breathwork', href: '/grimoire/breathwork' },
+          { text: 'Breathwork', href: '/grimoire/meditation/breathwork' },
           { text: 'Root Chakra', href: '/grimoire/chakras/root' },
           { text: 'Grimoire Home', href: '/grimoire' },
         ]}

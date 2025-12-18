@@ -109,8 +109,8 @@ Understanding these phases and aligning your practice with them creates powerful
           },
         ]}
         internalLinks={[
-          { text: 'Moon Rituals', href: '/grimoire/moon-rituals' },
-          { text: 'Moon Signs', href: '/grimoire/moon-signs' },
+          { text: 'Moon Rituals', href: '/grimoire/moon/rituals' },
+          { text: 'Moon Signs', href: '/grimoire/moon/signs' },
           { text: 'Spells & Rituals', href: '/grimoire/spells' },
           { text: 'Birth Chart', href: '/grimoire/birth-chart' },
         ]}

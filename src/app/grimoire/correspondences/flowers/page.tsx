@@ -151,7 +151,7 @@ Flowers represent the peak expression of a plant's energy — they are designed 
           },
           {
             name: 'Moon Phases',
-            href: '/grimoire/moon-phases',
+            href: '/grimoire/moon/phases',
             type: 'Guide',
           },
           {
@@ -169,8 +169,8 @@ Flowers represent the peak expression of a plant's energy — they are designed 
             text: 'Herb Correspondences',
             href: '/grimoire/correspondences/herbs',
           },
-          { text: 'Moon Phases', href: '/grimoire/moon-phases' },
-          { text: 'Sabbats', href: '/grimoire/sabbats' },
+          { text: 'Moon Phases', href: '/grimoire/moon/phases' },
+          { text: 'Sabbats', href: '/grimoire/wheel-of-the-year' },
         ]}
         ctaText='Want personalized flower recommendations for your practice?'
         ctaHref='/pricing'

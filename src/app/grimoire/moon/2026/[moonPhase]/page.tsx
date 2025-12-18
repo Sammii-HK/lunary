@@ -735,7 +735,7 @@ export default async function MoonPhase2026Page({
         },
         {
           name: 'Moon Rituals',
-          href: '/grimoire/moon-rituals',
+          href: '/grimoire/moon/rituals',
           type: 'Ritual',
         },
         {
@@ -745,7 +745,7 @@ export default async function MoonPhase2026Page({
         },
         {
           name: data.type === 'full' ? 'Full Moon Rituals' : 'New Moon Rituals',
-          href: '/grimoire/moon-rituals',
+          href: '/grimoire/moon/rituals',
           type: 'Ritual',
         },
       ]}

@@ -21,16 +21,16 @@ const termMappings: Record<string, string> = {
   pisces: '/grimoire/zodiac/pisces',
 
   // Planets
-  sun: '/grimoire/planets/sun',
-  moon: '/grimoire/planets/moon',
-  mercury: '/grimoire/planets/mercury',
-  venus: '/grimoire/planets/venus',
-  mars: '/grimoire/planets/mars',
-  jupiter: '/grimoire/planets/jupiter',
-  saturn: '/grimoire/planets/saturn',
-  uranus: '/grimoire/planets/uranus',
-  neptune: '/grimoire/planets/neptune',
-  pluto: '/grimoire/planets/pluto',
+  sun: '/grimoire/astronomy/planets/sun',
+  moon: '/grimoire/astronomy/planets/moon',
+  mercury: '/grimoire/astronomy/planets/mercury',
+  venus: '/grimoire/astronomy/planets/venus',
+  mars: '/grimoire/astronomy/planets/mars',
+  jupiter: '/grimoire/astronomy/planets/jupiter',
+  saturn: '/grimoire/astronomy/planets/saturn',
+  uranus: '/grimoire/astronomy/planets/uranus',
+  neptune: '/grimoire/astronomy/planets/neptune',
+  pluto: '/grimoire/astronomy/planets/pluto',
 
   // Houses
   'first house': '/grimoire/houses/overview/first',
@@ -71,10 +71,10 @@ const termMappings: Record<string, string> = {
   'moon in pisces': '/grimoire/moon-in/pisces',
 
   // Retrogrades
-  'mercury retrograde': '/grimoire/retrogrades/mercury',
-  'venus retrograde': '/grimoire/retrogrades/venus',
-  'mars retrograde': '/grimoire/retrogrades/mars',
-  retrograde: '/grimoire/retrogrades',
+  'mercury retrograde': '/grimoire/astronomy/retrogrades/mercury',
+  'venus retrograde': '/grimoire/astronomy/retrogrades/venus',
+  'mars retrograde': '/grimoire/astronomy/retrogrades/mars',
+  retrograde: '/grimoire/astronomy/retrogrades',
 
   // Eclipses
   'solar eclipse': '/grimoire/eclipses/solar',

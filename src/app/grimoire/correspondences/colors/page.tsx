@@ -184,7 +184,7 @@ Colors affect us psychologically and energetically. In magic, we harness these e
           },
           {
             name: 'Planets',
-            href: '/grimoire/planets',
+            href: '/grimoire/astronomy/planets',
             type: 'Astrology',
           },
         ]}
@@ -194,7 +194,7 @@ Colors affect us psychologically and energetically. In magic, we harness these e
             href: '/grimoire/correspondences',
           },
           { text: 'Candle Magic', href: '/grimoire/candle-magic' },
-          { text: 'Moon Phases', href: '/grimoire/moon-phases' },
+          { text: 'Moon Phases', href: '/grimoire/moon/phases' },
           { text: 'Crystals', href: '/grimoire/crystals' },
         ]}
         ctaText='Want personalized color recommendations for your practice?'

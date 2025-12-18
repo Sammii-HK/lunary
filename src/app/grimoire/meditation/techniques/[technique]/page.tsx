@@ -255,7 +255,7 @@ This technique is suitable for practitioners of all levels, though beginners may
           },
           {
             name: 'Breathwork',
-            href: '/grimoire/breathwork',
+            href: '/grimoire/meditation/breathwork',
             type: 'Practice',
           },
           { name: 'Chakras', href: '/grimoire/chakras', type: 'Guide' },
@@ -270,7 +270,10 @@ This technique is suitable for practitioners of all levels, though beginners may
         ]}
         internalLinks={[
           { text: 'Meditation Guide', href: '/grimoire/meditation' },
-          { text: 'Breathwork Techniques', href: '/grimoire/breathwork' },
+          {
+            text: 'Breathwork Techniques',
+            href: '/grimoire/meditation/breathwork',
+          },
           { text: 'Chakra Balancing', href: '/grimoire/chakras' },
           { text: 'Grimoire Home', href: '/grimoire' },
         ]}

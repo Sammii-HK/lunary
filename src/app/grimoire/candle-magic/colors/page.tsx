@@ -186,7 +186,7 @@ export default function CandleColorsIndexPage() {
               Candle Magic
             </Link>
             <Link
-              href='/grimoire/anointing-candles'
+              href='/grimoire/candle-magic/anointing'
               className='px-4 py-2 rounded-lg bg-zinc-800 text-zinc-300 hover:bg-zinc-700 transition-colors'
             >
               Anointing Candles

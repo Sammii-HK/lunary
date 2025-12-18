@@ -64,7 +64,7 @@ export default function TarotIndexPage() {
       })),
       ...Object.entries(tarotSuits).map(([key, suit]) => ({
         name: suit.name,
-        url: `https://lunary.app/grimoire/tarot-suits/${key}`,
+        url: `https://lunary.app/grimoire/tarot/suits/${key}`,
         description: suit.qualities,
       })),
     ],
@@ -166,7 +166,7 @@ export default function TarotIndexPage() {
               {Object.entries(tarotSuits).map(([key, suit]) => (
                 <Link
                   key={key}
-                  href={`/grimoire/tarot-suits/${key}`}
+                  href={`/grimoire/tarot/suits/${key}`}
                   className='group rounded-xl border border-zinc-800 bg-zinc-900/30 p-5 hover:bg-zinc-900/50 hover:border-violet-700/50 transition-all'
                 >
                   <h3 className='text-lg font-medium text-zinc-100 group-hover:text-violet-300 transition-colors mb-2'>

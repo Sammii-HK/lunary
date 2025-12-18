@@ -30,7 +30,9 @@ import {
   ExternalLink,
   Download,
   Edit2,
+  Video,
 } from 'lucide-react';
+import Link from 'next/link';
 import { getDefaultPostingTime } from '@/utils/posting-times';
 
 type TabType = 'generate' | 'approve';
@@ -89,6 +91,7 @@ export default function SocialPostsPage() {
   const [bulkActionLoading, setBulkActionLoading] = useState<string | null>(
     null,
   );
+  const [useThematicMode, setUseThematicMode] = useState(true);
 
   useEffect(() => {
     loadPendingPosts();
@@ -505,14 +508,25 @@ export default function SocialPostsPage() {
   return (
     <div className='min-h-screen bg-zinc-950 text-zinc-100 p-6'>
       <div className='max-w-6xl mx-auto space-y-6'>
-        <div>
-          <h1 className='text-3xl font-bold mb-2 flex items-center gap-2'>
-            <Sparkles className='h-8 w-8 text-lunary-primary-400' />
-            Social Media Manager
-          </h1>
-          <p className='text-zinc-400'>
-            Generate and manage social media posts
-          </p>
+        <div className='flex items-start justify-between'>
+          <div>
+            <h1 className='text-3xl font-bold mb-2 flex items-center gap-2'>
+              <Sparkles className='h-8 w-8 text-lunary-primary-400' />
+              Social Media Manager
+            </h1>
+            <p className='text-zinc-400'>
+              Generate and manage social media posts
+            </p>
+          </div>
+          <Link href='/admin/video-scripts'>
+            <Button
+              variant='outline'
+              className='border-pink-500/30 text-pink-400 hover:bg-pink-500/10 hover:text-pink-300'
+            >
+              <Video className='w-4 h-4 mr-2' />
+              Video Scripts
+            </Button>
+          </Link>
         </div>
 
         {/* Tab Navigation */}
@@ -693,6 +707,23 @@ export default function SocialPostsPage() {
                       </>
                     )}
                   </Button>
+                  {/* Thematic Mode Toggle */}
+                  <div className='flex items-center gap-2 p-3 bg-zinc-800/50 rounded-lg border border-zinc-700'>
+                    <input
+                      type='checkbox'
+                      id='thematic-mode'
+                      checked={useThematicMode}
+                      onChange={(e) => setUseThematicMode(e.target.checked)}
+                      className='w-4 h-4 rounded border-zinc-600 bg-zinc-700 text-lunary-primary-500 focus:ring-lunary-primary-500'
+                    />
+                    <label
+                      htmlFor='thematic-mode'
+                      className='text-sm text-zinc-300 cursor-pointer'
+                    >
+                      Use thematic content (weekly themes with daily facets)
+                    </label>
+                  </div>
+
                   <div className='grid grid-cols-2 gap-3'>
                     <Button
                       onClick={async () => {
@@ -703,13 +734,19 @@ export default function SocialPostsPage() {
                             {
                               method: 'POST',
                               headers: { 'Content-Type': 'application/json' },
-                              body: JSON.stringify({ currentWeek: true }),
+                              body: JSON.stringify({
+                                currentWeek: true,
+                                mode: useThematicMode ? 'thematic' : 'legacy',
+                              }),
                             },
                           );
                           const data = await response.json();
                           if (data.success) {
+                            const themeInfo = data.theme
+                              ? ` Theme: ${data.theme}`
+                              : '';
                             alert(
-                              `Generated ${data.savedIds.length} posts for the current week!`,
+                              `Generated ${data.savedIds.length} posts for the current week!${themeInfo}`,
                             );
                             loadPendingPosts();
                             setActiveTab('approve');
@@ -738,13 +775,19 @@ export default function SocialPostsPage() {
                             {
                               method: 'POST',
                               headers: { 'Content-Type': 'application/json' },
-                              body: JSON.stringify({ currentWeek: false }),
+                              body: JSON.stringify({
+                                currentWeek: false,
+                                mode: useThematicMode ? 'thematic' : 'legacy',
+                              }),
                             },
                           );
                           const data = await response.json();
                           if (data.success) {
+                            const themeInfo = data.theme
+                              ? ` Theme: ${data.theme}`
+                              : '';
                             alert(
-                              `Generated ${data.savedIds.length} posts for next week!`,
+                              `Generated ${data.savedIds.length} posts for next week!${themeInfo}`,
                             );
                             loadPendingPosts();
                             setActiveTab('approve');

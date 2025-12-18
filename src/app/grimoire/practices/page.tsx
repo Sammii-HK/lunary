@@ -370,7 +370,10 @@ Remember that practices are not exclusive - you can work with multiple types sim
           { text: 'Candle Magic', href: '/grimoire/candle-magic' },
           { text: 'Moon Rituals', href: '/grimoire/moon/rituals' },
           { text: 'Book of Shadows', href: '/grimoire/book-of-shadows' },
-          { text: 'Witchcraft Ethics', href: '/grimoire/witchcraft-ethics' },
+          {
+            text: 'Witchcraft Ethics',
+            href: '/grimoire/modern-witchcraft/ethics',
+          },
           {
             text: 'Witch Types',
             href: '/grimoire/modern-witchcraft/witch-types',

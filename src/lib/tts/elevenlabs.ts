@@ -20,62 +20,38 @@ const DEFAULT_VOICE_SETTINGS: VoiceSettings = {
   use_speaker_boost: true,
 };
 
-const MYSTICAL_VOICES = [
-  {
-    id: 'EXAVITQu4vr4xnSDxMaL',
-    name: 'Bella',
-    description: 'Soft, calm female voice',
-  },
-  {
-    id: 'pNInz6obpgDQGcFmaJgB',
-    name: 'Adam',
-    description: 'Deep, warm male voice',
-  },
-  {
-    id: 'ThT5KcBeYPX3keUQqHPh',
-    name: 'Dorothy',
-    description: 'Gentle, soothing female voice',
-  },
-];
+// Faster, clearer voice settings - optimized for both short and long form
+const MYSTICAL_VOICE_SETTINGS: VoiceSettings = {
+  stability: 0.8, // Higher = more consistent, faster pace
+  similarity_boost: 0.85, // Higher = clearer, more natural
+  style: 0.6, // Slightly higher = less breathy, more energetic
+  use_speaker_boost: true, // Enabled for clarity and faster pace
+};
+
+// DEPRECATED: Old voice list removed - use OpenAI voices instead
+
+// DEPRECATED: Use src/lib/tts/index.ts instead
+// This file is kept for backward compatibility only
+import { generateVoiceover as generateVoiceoverNew } from './index';
 
 export async function generateVoiceover(
   text: string,
   options: {
     voiceId?: string;
     settings?: Partial<VoiceSettings>;
+    useMysticalSettings?: boolean;
   } = {},
 ): Promise<ArrayBuffer> {
-  const apiKey = process.env.ELEVENLABS_API_KEY;
+  console.warn('⚠️ Using deprecated ElevenLabs TTS. Migrating to OpenAI TTS.');
 
-  if (!apiKey) {
-    throw new Error('ELEVENLABS_API_KEY is not configured');
-  }
+  // Map old options to new format
+  const newOptions = {
+    voiceName: 'nova', // Default to British female (similar to Alice)
+    model: 'tts-1-hd', // High quality
+    speed: 1.0,
+  };
 
-  const voiceId = options.voiceId || MYSTICAL_VOICES[0].id;
-  const settings = { ...DEFAULT_VOICE_SETTINGS, ...options.settings };
-
-  const response = await fetch(
-    `${ELEVENLABS_API_URL}/text-to-speech/${voiceId}`,
-    {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'xi-api-key': apiKey,
-      },
-      body: JSON.stringify({
-        text,
-        model_id: 'eleven_flash_v2_5',
-        voice_settings: settings,
-      }),
-    },
-  );
-
-  if (!response.ok) {
-    const error = await response.text();
-    throw new Error(`ElevenLabs API error: ${response.status} - ${error}`);
-  }
-
-  return response.arrayBuffer();
+  return generateVoiceoverNew(text, newOptions);
 }
 
 export async function getAvailableVoices(): Promise<ElevenLabsVoice[]> {
@@ -99,37 +75,48 @@ export async function getAvailableVoices(): Promise<ElevenLabsVoice[]> {
   return data.voices;
 }
 
+// DEPRECATED: Stub functions for backward compatibility
 export async function checkQuota(): Promise<{
   character_count: number;
   character_limit: number;
   remaining: number;
 }> {
-  const apiKey = process.env.ELEVENLABS_API_KEY;
-
-  if (!apiKey) {
-    throw new Error('ELEVENLABS_API_KEY is not configured');
-  }
-
-  const response = await fetch(`${ELEVENLABS_API_URL}/user/subscription`, {
-    headers: {
-      'xi-api-key': apiKey,
-    },
-  });
-
-  if (!response.ok) {
-    throw new Error(`Failed to check quota: ${response.status}`);
-  }
-
-  const data = await response.json();
+  console.warn(
+    '⚠️ checkQuota is deprecated. OpenAI TTS uses pay-as-you-go pricing.',
+  );
+  // Return mock data - OpenAI doesn't have a quota system like ElevenLabs
   return {
-    character_count: data.character_count,
-    character_limit: data.character_limit,
-    remaining: data.character_limit - data.character_count,
+    character_count: 0,
+    character_limit: Infinity,
+    remaining: Infinity,
   };
 }
 
 export function estimateCharacterCost(text: string): number {
+  // OpenAI TTS: $15 per 1M characters (tts-1) or $30 per 1M characters (tts-1-hd)
   return text.length;
 }
 
-export { MYSTICAL_VOICES };
+// DEPRECATED: Map to OpenAI voices
+export const MYSTICAL_VOICES = [
+  {
+    id: 'nova',
+    name: 'Nova',
+    description: 'British female voice - clear and natural (OpenAI)',
+  },
+  {
+    id: 'onyx',
+    name: 'Onyx',
+    description: 'British male voice - deep and clear (OpenAI)',
+  },
+  {
+    id: 'shimmer',
+    name: 'Shimmer',
+    description: 'Female voice - natural (OpenAI)',
+  },
+  {
+    id: 'alloy',
+    name: 'Alloy',
+    description: 'Neutral voice - versatile (OpenAI)',
+  },
+];

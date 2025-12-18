@@ -562,26 +562,42 @@ async function runDailyPosts(dateStr: string) {
   const posts = [
     {
       name: dateStr,
-      content: postContent,
-      platforms: ['reddit', 'pinterest', 'tiktok', 'facebook', 'linkedin'],
-      imageUrls: [`${productionUrl}/api/og/cosmic/${dateStr}`],
+      content: `${postContent}\n\n${platformHashtags.instagram}`,
+      platforms: [
+        'reddit',
+        'pinterest',
+        'tiktok',
+        'facebook',
+        'linkedin',
+        'instagram',
+      ],
+      imageUrls: [
+        `${productionUrl}/api/og/cosmic/${dateStr}`,
+        `${productionUrl}/api/og/crystal?date=${dateStr}`,
+        `${productionUrl}/api/og/tarot?date=${dateStr}`,
+        `${productionUrl}/api/og/moon?date=${dateStr}`,
+        `${productionUrl}/api/og/horoscope?date=${dateStr}`,
+      ],
       alt: `${cosmicContent.primaryEvent.name} - ${cosmicContent.primaryEvent.energy}. Daily cosmic guidance from lunary.app.`,
       scheduledDate: new Date(scheduleBase.getTime()).toISOString(),
       redditOptions: {
         title: redditTitle,
         subreddit: subreddit.name,
       },
+      pinterestOptions: {
+        boardId: process.env.SUCCULENT_PINTEREST_BOARD_ID,
+      },
       variants: {
-        instagram: {
-          content: `${postContent}\n\n${platformHashtags.instagram}`,
-          media: [
-            `${productionUrl}/api/og/cosmic/${dateStr}`,
-            `${productionUrl}/api/og/crystal?date=${dateStr}`,
-            `${productionUrl}/api/og/tarot?date=${dateStr}`,
-            `${productionUrl}/api/og/moon?date=${dateStr}`,
-            `${productionUrl}/api/og/horoscope?date=${dateStr}`,
-          ],
-        },
+        // instagram: {
+        //   content: `${postContent}\n\n${platformHashtags.instagram}`,
+        //   media: [
+        //     `${productionUrl}/api/og/cosmic/${dateStr}`,
+        //     `${productionUrl}/api/og/crystal?date=${dateStr}`,
+        //     `${productionUrl}/api/og/tarot?date=${dateStr}`,
+        //     `${productionUrl}/api/og/moon?date=${dateStr}`,
+        //     `${productionUrl}/api/og/horoscope?date=${dateStr}`,
+        //   ],
+        // },
         x: {
           content: `${generateCosmicPost(cosmicContent).snippetShort.replace(/\n/g, ' ')} ${platformHashtags.twitter}`,
           media: [

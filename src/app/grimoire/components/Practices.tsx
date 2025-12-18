@@ -235,7 +235,7 @@ const Practices = () => {
             Magical Correspondences
           </Link>
           <Link
-            href='/grimoire/witchcraft-ethics'
+            href='/grimoire/modern-witchcraft/ethics'
             className='block rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-3 hover:border-lunary-primary-700 hover:bg-zinc-900/50 transition-all text-sm text-zinc-300 hover:text-lunary-primary-300'
           >
             Witchcraft Ethics

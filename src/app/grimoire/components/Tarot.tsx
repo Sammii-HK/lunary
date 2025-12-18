@@ -82,7 +82,7 @@ const Tarot = () => {
             return (
               <Link
                 key={spread}
-                href={`/grimoire/tarot-spreads/${spreadSlug}`}
+                href={`/grimoire/tarot/spreads/${spreadSlug}`}
                 className='block rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4 hover:bg-zinc-900/50 hover:border-lunary-primary-600 transition-all group'
               >
                 <h3 className='text-lg font-medium text-zinc-100 mb-2 group-hover:text-lunary-primary-400 transition-colors'>
@@ -171,7 +171,7 @@ const Tarot = () => {
             return (
               <Link
                 key={suit}
-                href={`/grimoire/tarot-suits/${suitSlug}`}
+                href={`/grimoire/tarot/suits/${suitSlug}`}
                 className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4 hover:bg-zinc-900/50 hover:border-lunary-primary-600 transition-all group'
               >
                 <h3 className='text-lg font-medium text-zinc-100 mb-2 group-hover:text-lunary-primary-400 transition-colors'>

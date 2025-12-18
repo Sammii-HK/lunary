@@ -208,7 +208,7 @@ Area: ${houseData.area}`}
           },
           {
             name: houseData.rulingPlanet,
-            href: `/grimoire/planets/${houseData.rulingPlanet.toLowerCase()}`,
+            href: `/grimoire/astronomy/planets/${houseData.rulingPlanet.toLowerCase()}`,
             type: 'Planet',
           },
         ]}

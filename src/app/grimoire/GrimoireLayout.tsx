@@ -346,7 +346,7 @@ const GRIMOIRE_FULL_STRUCTURE = [
       },
       {
         title: 'Retrogrades',
-        href: '/grimoire/retrogrades',
+        href: '/grimoire/astronomy/retrogrades',
         description: 'Retrograde planets',
       },
       {
@@ -423,7 +423,7 @@ const GRIMOIRE_FULL_STRUCTURE = [
       },
       {
         title: 'Minor Arcana',
-        href: '/grimoire/tarot-suits/wands',
+        href: '/grimoire/tarot/suits/wands',
         description: '56 minor cards',
       },
       {
@@ -561,7 +561,7 @@ const GRIMOIRE_FULL_STRUCTURE = [
       },
       {
         title: 'Witchcraft Ethics',
-        href: '/grimoire/witchcraft-ethics',
+        href: '/grimoire/modern-witchcraft/ethics',
         description: 'Ethical practice',
       },
       {
@@ -718,7 +718,7 @@ const GRIMOIRE_FULL_STRUCTURE = [
       },
       {
         title: 'Sabbats',
-        href: '/grimoire/sabbats',
+        href: '/grimoire/wheel-of-the-year',
         description: 'Seasonal festivals',
       },
       {

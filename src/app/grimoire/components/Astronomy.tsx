@@ -64,7 +64,7 @@ const AstronomyItems = ({ type }: { type: string }) => {
           const linkPath =
             type === 'Zodiac'
               ? `/grimoire/zodiac/${itemSlug}`
-              : `/grimoire/planets/${itemSlug}`;
+              : `/grimoire/astronomy/planets/${itemSlug}`;
           return (
             <Link
               key={item.toLowerCase()}
