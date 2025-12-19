@@ -12,6 +12,16 @@ import {
 const TIMEZONE = 'Europe/London';
 
 /**
+ * Helper to build IN clause for arrays in @vercel/postgres
+ * Since template literals don't support arrays, we use unnest with array literal
+ */
+function buildArrayInClause(column: string, values: string[]): string {
+  if (values.length === 0) return 'FALSE';
+  const arrayLiteral = `{${values.map((v) => `"${v.replace(/"/g, '\\"')}"`).join(',')}}`;
+  return `${column} = ANY(SELECT unnest(${arrayLiteral}::text[]))`;
+}
+
+/**
  * Convert a date to a specific timezone (returns date string in that timezone)
  */
 function toTimezone(date: Date, timezone: string): Date {
@@ -312,14 +322,27 @@ async function calculateActivation(
       signupAt.getTime() + 24 * 60 * 60 * 1000,
     );
 
-    const activated = await sql`
-      SELECT COUNT(*) as count
-      FROM conversion_events
-      WHERE user_id = ${user.user_id}
-        AND event_type = ANY(${activationEvents})
-        AND created_at >= ${formatTimestamp(signupAt)}
-        AND created_at <= ${formatTimestamp(activationDeadline)}
-    `;
+    // Build OR conditions for activation events
+    const eventConditions = activationEvents
+      .map((e, i) =>
+        i === 0 ? `event_type = $${i + 2}` : ` OR event_type = $${i + 2}`,
+      )
+      .join('');
+
+    const activated = await sql.query(
+      `SELECT COUNT(*) as count
+       FROM conversion_events
+       WHERE user_id = $1
+         AND (${eventConditions})
+         AND created_at >= $${activationEvents.length + 2}
+         AND created_at <= $${activationEvents.length + 3}`,
+      [
+        user.user_id,
+        ...activationEvents,
+        formatTimestamp(signupAt),
+        formatTimestamp(activationDeadline),
+      ],
+    );
 
     if (parseInt(activated.rows[0]?.count || '0') > 0) {
       activatedCount++;
@@ -424,7 +447,7 @@ async function calculateEngagement(
     const wauResult = await sql`
       SELECT COUNT(DISTINCT user_id) as count
       FROM conversion_events
-      WHERE event_type = ANY(${meaningfulEvents})
+      WHERE ${buildArrayInClause('event_type', meaningfulEvents) as any}
         AND created_at >= ${weekStart}
         AND created_at <= ${weekEnd}
     `;
@@ -482,8 +505,8 @@ async function calculateRetention(
   const w1ActiveResult = await sql`
     SELECT COUNT(DISTINCT user_id) as count
     FROM conversion_events
-    WHERE user_id = ANY(${newUserIds})
-      AND event_type = ANY(${meaningfulEvents})
+    WHERE ${buildArrayInClause('user_id', newUserIds) as any}
+      AND ${buildArrayInClause('event_type', meaningfulEvents) as any}
       AND created_at >= ${formatTimestamp(nextWeekStart)}
       AND created_at <= ${formatTimestamp(nextWeekEnd)}
   `;
@@ -499,8 +522,8 @@ async function calculateRetention(
   const w4ActiveResult = await sql`
     SELECT COUNT(DISTINCT user_id) as count
     FROM conversion_events
-    WHERE user_id = ANY(${newUserIds})
-      AND event_type = ANY(${meaningfulEvents})
+    WHERE ${buildArrayInClause('user_id', newUserIds) as any}
+      AND ${buildArrayInClause('event_type', meaningfulEvents) as any}
       AND created_at >= ${formatTimestamp(w4WeekStart)}
       AND created_at <= ${formatTimestamp(w4WeekEnd)}
   `;
@@ -696,7 +719,7 @@ async function calculateFeatureUsage(
       const result = await sql`
         SELECT COUNT(DISTINCT user_id) as count
         FROM conversion_events
-        WHERE event_type = ANY(${events})
+        WHERE ${buildArrayInClause('event_type', events) as any}
           AND created_at >= ${weekStart}
           AND created_at <= ${weekEnd}
       `;
@@ -876,14 +899,14 @@ export async function calculateFeatureUsageWeekly(
         sql`
           SELECT COUNT(DISTINCT user_id) as count
           FROM conversion_events
-          WHERE event_type = ANY(${events})
+          WHERE ${buildArrayInClause('event_type', events) as any}
             AND created_at >= ${weekStartFormatted}
             AND created_at <= ${weekEndFormatted}
         `,
         sql`
           SELECT COUNT(*) as count
           FROM conversion_events
-          WHERE event_type = ANY(${events})
+          WHERE ${buildArrayInClause('event_type', events) as any}
             AND created_at >= ${weekStartFormatted}
             AND created_at <= ${weekEndFormatted}
         `,

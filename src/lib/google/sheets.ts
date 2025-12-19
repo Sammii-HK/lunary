@@ -63,7 +63,7 @@ export async function getOrCreateSheet(
     );
 
     if (existingSheet?.properties?.sheetId !== undefined) {
-      return existingSheet.properties.sheetId;
+      return existingSheet.properties.sheetId as number;
     }
 
     // Create new sheet
@@ -88,7 +88,7 @@ export async function getOrCreateSheet(
       throw new Error(`Failed to create sheet: ${sheetName}`);
     }
 
-    return newSheetId;
+    return newSheetId as number;
   } catch (error: any) {
     console.error(`[Sheets] Error getting/creating sheet ${sheetName}:`, error);
     throw new Error(

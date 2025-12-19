@@ -72,11 +72,23 @@ function createEventKeyFromPayload(payload: NotificationPayload): string {
 }
 
 export async function POST(request: NextRequest) {
+  let payloadForError: NotificationPayload | undefined;
   try {
     // Configure VAPID keys when actually needed (not at module load time)
     ensureVapidConfigured();
 
-    const { payload }: { payload: NotificationPayload } = await request.json();
+    const { payload: requestPayload }: { payload: NotificationPayload } =
+      await request.json();
+
+    if (!requestPayload) {
+      return NextResponse.json(
+        { error: 'Payload is required' },
+        { status: 400 },
+      );
+    }
+
+    const payload: NotificationPayload = requestPayload;
+    payloadForError = payload;
 
     const today = new Date().toISOString().split('T')[0];
     const eventKey = createEventKeyFromPayload(payload);
@@ -297,21 +309,45 @@ export async function POST(request: NextRequest) {
 
         return { success: true, endpoint: sub.endpoint };
       } catch (error) {
+        const errorObj = error as any;
+        const statusCode = errorObj?.statusCode;
+        const errorMessage =
+          error instanceof Error ? error.message : 'Unknown error';
+        const endpointPreview = sub.endpoint.substring(0, 50);
+
+        // Enhanced error logging
         console.error(
-          `Failed to send to ${sub.endpoint.substring(0, 50)}...`,
-          error,
+          `❌ Failed to send notification to ${endpointPreview}...`,
+          {
+            endpoint: endpointPreview,
+            userId: sub.user_id || 'anonymous',
+            statusCode,
+            error: errorMessage,
+            errorType: errorObj?.name || 'Unknown',
+            notificationType,
+            timestamp: new Date().toISOString(),
+          },
         );
 
         // If subscription is invalid, mark as inactive
-        if (
-          error instanceof Error &&
-          (error.message.includes('410') ||
-            error.message.includes('invalid') ||
-            error.message.includes('expired'))
-        ) {
+        const isExpired =
+          statusCode === 410 ||
+          statusCode === 404 ||
+          errorMessage.includes('410') ||
+          errorMessage.includes('404') ||
+          errorMessage.includes('invalid') ||
+          errorMessage.includes('expired') ||
+          errorMessage.includes('unsubscribed') ||
+          errorMessage.includes('Gone') ||
+          errorMessage.includes('Not Found');
+
+        if (isExpired) {
+          console.log(
+            `🔄 Marking subscription as inactive due to ${statusCode || 'expired'}: ${endpointPreview}...`,
+          );
           await sql`
             UPDATE push_subscriptions 
-            SET is_active = false 
+            SET is_active = false, updated_at = NOW()
             WHERE endpoint = ${sub.endpoint}
           `;
         }
@@ -319,7 +355,8 @@ export async function POST(request: NextRequest) {
         return {
           success: false,
           endpoint: sub.endpoint,
-          error: error instanceof Error ? error.message : 'Unknown error',
+          error: errorMessage,
+          statusCode,
         };
       }
     });
@@ -427,9 +464,22 @@ export async function POST(request: NextRequest) {
       payload: notificationData,
     });
   } catch (error) {
-    console.error('Error sending notifications:', error);
+    const errorMessage =
+      error instanceof Error ? error.message : 'Unknown error';
+    console.error('❌ Error sending notifications:', {
+      error: errorMessage,
+      errorType: error instanceof Error ? error.name : 'Unknown',
+      payloadType: payloadForError?.type,
+      hasVapidKeys: !!(
+        process.env.VAPID_PUBLIC_KEY && process.env.VAPID_PRIVATE_KEY
+      ),
+      timestamp: new Date().toISOString(),
+    });
     return NextResponse.json(
-      { error: 'Failed to send notifications' },
+      {
+        error: 'Failed to send notifications',
+        details: errorMessage,
+      },
       { status: 500 },
     );
   }
