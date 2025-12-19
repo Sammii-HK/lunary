@@ -1421,41 +1421,77 @@ function generateBestDaysGuidance(
     }
   });
 
-  // Generate reasons
+  // Deduplicate dates by converting to date strings and back
+  const deduplicateDates = (dates: Date[]): Date[] => {
+    const uniqueDateStrings = Array.from(
+      new Set(dates.map((d) => d.toISOString().split('T')[0])),
+    );
+    return uniqueDateStrings
+      .map((ds) => new Date(ds))
+      .sort((a, b) => a.getTime() - b.getTime());
+  };
+
+  // Deduplicate all date arrays first
+  const uniqueLoveDates = deduplicateDates(loveDates);
+  const uniqueProsperityDates = deduplicateDates(prosperityDates);
+  const uniqueHealingDates = deduplicateDates(healingDates);
+  const uniqueProtectionDates = deduplicateDates(protectionDates);
+  const uniqueManifestationDates = deduplicateDates(manifestationDates);
+  const uniqueCleansingDates = deduplicateDates(cleansingDates);
+
+  // Generate reasons using deduplicated counts
   const reasons = {
     love:
-      loveDates.length > 0
-        ? `Venus energy and favorable aspects support romantic connections on ${loveDates.length} day${loveDates.length > 1 ? 's' : ''}`
+      uniqueLoveDates.length > 0
+        ? `Venus energy and favorable aspects support romantic connections on ${uniqueLoveDates.length} day${uniqueLoveDates.length > 1 ? 's' : ''}`
         : 'Venus aspects favor romantic connections',
     prosperity:
-      prosperityDates.length > 0
-        ? `Jupiter energy supports abundance work on ${prosperityDates.length} day${prosperityDates.length > 1 ? 's' : ''}`
+      uniqueProsperityDates.length > 0
+        ? `Jupiter energy supports abundance work on ${uniqueProsperityDates.length} day${uniqueProsperityDates.length > 1 ? 's' : ''}`
         : 'Jupiter energy supports abundance work',
     healing:
-      healingDates.length > 0
-        ? `Moon phases support healing rituals on ${healingDates.length} day${healingDates.length > 1 ? 's' : ''}`
+      uniqueHealingDates.length > 0
+        ? `Moon phases support healing rituals on ${uniqueHealingDates.length} day${uniqueHealingDates.length > 1 ? 's' : ''}`
         : 'Moon phases support healing rituals',
     protection:
-      protectionDates.length > 0
-        ? `Mars energy strengthens protective work on ${protectionDates.length} day${protectionDates.length > 1 ? 's' : ''}`
+      uniqueProtectionDates.length > 0
+        ? `Mars energy strengthens protective work on ${uniqueProtectionDates.length} day${uniqueProtectionDates.length > 1 ? 's' : ''}`
         : 'Mars energy strengthens protective work',
     manifestation:
-      manifestationDates.length > 0
-        ? `New moon energy perfect for intention setting on ${manifestationDates.length} day${manifestationDates.length > 1 ? 's' : ''}`
+      uniqueManifestationDates.length > 0
+        ? `New moon energy perfect for intention setting on ${uniqueManifestationDates.length} day${uniqueManifestationDates.length > 1 ? 's' : ''}`
         : 'New moon energy perfect for intention setting',
     cleansing:
-      cleansingDates.length > 0
-        ? `Waning moon supports release and clearing on ${cleansingDates.length} day${cleansingDates.length > 1 ? 's' : ''}`
+      uniqueCleansingDates.length > 0
+        ? `Waning moon supports release and clearing on ${uniqueCleansingDates.length} day${uniqueCleansingDates.length > 1 ? 's' : ''}`
         : 'Waning moon supports release and clearing',
   };
 
   return {
-    love: { dates: loveDates, reason: reasons.love },
-    prosperity: { dates: prosperityDates, reason: reasons.prosperity },
-    healing: { dates: healingDates, reason: reasons.healing },
-    protection: { dates: protectionDates, reason: reasons.protection },
-    manifestation: { dates: manifestationDates, reason: reasons.manifestation },
-    cleansing: { dates: cleansingDates, reason: reasons.cleansing },
+    love: {
+      dates: uniqueLoveDates,
+      reason: reasons.love,
+    },
+    prosperity: {
+      dates: uniqueProsperityDates,
+      reason: reasons.prosperity,
+    },
+    healing: {
+      dates: uniqueHealingDates,
+      reason: reasons.healing,
+    },
+    protection: {
+      dates: uniqueProtectionDates,
+      reason: reasons.protection,
+    },
+    manifestation: {
+      dates: uniqueManifestationDates,
+      reason: reasons.manifestation,
+    },
+    cleansing: {
+      dates: uniqueCleansingDates,
+      reason: reasons.cleansing,
+    },
   };
 }
 
@@ -1836,16 +1872,53 @@ function generateWeeklySummary(
   aspects: MajorAspect[],
   moonPhases: MoonPhaseEvent[],
 ): string {
-  const totalEvents = highlights.length + aspects.length + moonPhases.length;
+  // Build summary from actual events, avoiding placeholder text
+  const summaryParts: string[] = [];
 
-  return `This week brings ${totalEvents} significant cosmic events that will influence our collective and personal energy. ${
-    highlights.length > 0
-      ? `Key planetary movements include ${highlights
-          .slice(0, 2)
-          .map((h) => `${h.planet} ${h.event.replace('-', ' ')}`)
-          .join(' and ')}.`
-      : ''
-  } The week offers opportunities for ${getWeeklyThemes(highlights, aspects).join(', ')}.`;
+  // Add notable planetary movements (only if we have highlights with proper descriptions)
+  if (highlights.length > 0) {
+    const notableHighlights = highlights
+      .slice(0, 2)
+      .map((h) => {
+        if (h.event === 'enters-sign' && h.details?.toSign) {
+          return `${h.planet} enters ${h.details.toSign}`;
+        } else if (h.event === 'goes-retrograde') {
+          return `${h.planet} stations retrograde`;
+        } else if (h.event === 'goes-direct') {
+          return `${h.planet} stations direct`;
+        } else {
+          return `${h.planet} ${h.event.replace('-', ' ')}`;
+        }
+      })
+      .filter((text) => !text.includes('enters sign')); // Filter out placeholder text
+
+    if (notableHighlights.length > 0) {
+      if (notableHighlights.length === 1) {
+        summaryParts.push(
+          `Notable planetary movements include ${notableHighlights[0]}.`,
+        );
+      } else {
+        summaryParts.push(
+          `Notable planetary movements include ${notableHighlights.join(' and ')}.`,
+        );
+      }
+    }
+  }
+
+  // Add themes if available
+  const themes = getWeeklyThemes(highlights, aspects);
+  if (themes.length > 0) {
+    summaryParts.push(
+      `The week offers opportunities for ${themes.join(', ')}.`,
+    );
+  }
+
+  // Fallback if no meaningful content
+  if (summaryParts.length === 0) {
+    return 'This week brings cosmic shifts and opportunities for growth and reflection.';
+  }
+
+  return summaryParts.join(' ');
 }
 
 function getWeeklyThemes(

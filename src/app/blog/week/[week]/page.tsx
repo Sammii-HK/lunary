@@ -148,6 +148,26 @@ function getFirstSentences(text: string, maxSentences = 2): string {
   return sentences.join(' ').trim();
 }
 
+// Generate generic fallback description for aspects when energy/guidance are missing
+// Keep descriptions minimal, factual, and safe - no invented outcomes
+function getAspectDescriptionFallback(
+  aspectType: string,
+  planetA: string,
+  planetB: string,
+): string {
+  const aspectKeywords: Record<string, string> = {
+    conjunction: 'alignment and focus',
+    opposition: 'balance and integration',
+    trine: 'harmony and flow',
+    square: 'tension and growth',
+    sextile: 'opportunity and support',
+  };
+
+  const keyword = aspectKeywords[aspectType] || 'cosmic influence';
+
+  return `This ${aspectType} between ${planetA} and ${planetB} highlights themes of ${keyword}. Notice where this shows up in your conversations and choices.`;
+}
+
 async function getBlogData(weekInfo: WeekInfo) {
   const cacheKey = weekInfo.slug;
 
@@ -241,11 +261,26 @@ export default async function BlogPostPage({
     );
     const blogData = await getBlogData(weekInfo);
     console.log('[BlogPostPage] Blog data fetched, processing dates...');
-    const displayedHighlights =
-      blogData.planetaryHighlights?.slice(
-        0,
-        BLOG_SECTION_LIMITS.planetaryHighlights,
-      ) || [];
+
+    // Validate and clean data - remove placeholder strings
+    const cleanedHighlights = (blogData.planetaryHighlights || []).filter(
+      (h: any) => {
+        // Filter out highlights with placeholder descriptions
+        if (h.description && h.description.includes('enters sign')) {
+          return false;
+        }
+        // Ensure event descriptions are valid
+        if (h.event === 'enters-sign' && !h.details?.toSign) {
+          return false;
+        }
+        return true;
+      },
+    );
+
+    const displayedHighlights = cleanedHighlights.slice(
+      0,
+      BLOG_SECTION_LIMITS.planetaryHighlights,
+    );
     const displayedRetrogrades =
       blogData.retrogradeChanges?.slice(
         0,
@@ -267,24 +302,72 @@ export default async function BlogPostPage({
       )
       .slice(0, BLOG_SECTION_LIMITS.bestDays);
 
-    const summaryIntroParts = [
-      displayedHighlights.length
-        ? `${displayedHighlights.length} major planetary shift${displayedHighlights.length > 1 ? 's' : ''}`
-        : null,
-      displayedRetrogrades.length
-        ? `${displayedRetrogrades.length} retrograde moment${displayedRetrogrades.length > 1 ? 's' : ''}`
-        : null,
-      displayedMoonPhases.length
-        ? `${displayedMoonPhases.length} lunar phase${displayedMoonPhases.length > 1 ? 's' : ''}`
-        : null,
-    ].filter(Boolean);
+    // Build intro from actual displayed events only - never invent data
+    const eventList: string[] = [];
 
-    const curatedSummaryIntro = summaryIntroParts.length
-      ? `Top ${summaryIntroParts.join(', ')} guide this week.`
-      : '';
-    const baseSummary =
+    // Extract valid planetary highlights (only if they have proper details)
+    displayedHighlights.forEach((h: any) => {
+      if (h.event === 'enters-sign' && h.details?.toSign) {
+        eventList.push(`${h.planet} enters ${h.details.toSign}`);
+      } else if (h.event === 'goes-retrograde' && h.details?.sign) {
+        eventList.push(`${h.planet} stations retrograde`);
+      } else if (h.event === 'goes-direct' && h.details?.sign) {
+        eventList.push(`${h.planet} stations direct`);
+      }
+    });
+
+    // Build summary intro - only state what's present
+    let curatedSummaryIntro = '';
+    if (displayedHighlights.length > 0 || displayedRetrogrades.length > 0) {
+      const parts: string[] = [];
+      if (displayedHighlights.length > 0) {
+        parts.push(
+          displayedHighlights.length === 1
+            ? 'a major planetary shift'
+            : `${displayedHighlights.length} major planetary shifts`,
+        );
+      }
+      if (displayedRetrogrades.length > 0) {
+        parts.push(
+          displayedRetrogrades.length === 1
+            ? 'a retrograde change'
+            : `${displayedRetrogrades.length} retrograde changes`,
+        );
+      }
+
+      if (parts.length > 0) {
+        if (parts.length === 1) {
+          curatedSummaryIntro = `This week features ${parts[0]}.`;
+        } else {
+          curatedSummaryIntro = `This week features ${parts[0]} and ${parts[1]}.`;
+        }
+
+        // Add specific events if we have valid ones
+        if (eventList.length > 0 && eventList.length <= 2) {
+          curatedSummaryIntro += ` Notable shifts include ${eventList.join(' and ')}.`;
+        }
+      }
+    }
+
+    // Clean base summary - remove placeholder patterns
+    let baseSummary =
       getFirstSentences(blogData.summary, 2) ||
       'Weekly cosmic insights and guidance.';
+
+    // Remove placeholder patterns from summary
+    baseSummary = baseSummary
+      .replace(
+        /This week brings \d+ significant cosmic events that will influence our collective and personal energy\.\s*/gi,
+        '',
+      )
+      .replace(/Key planetary movements include Sun enters sign\./gi, '')
+      .replace(
+        /Key planetary movements include/gi,
+        'Notable planetary movements include',
+      )
+      .replace(/enters sign/gi, '') // Remove any remaining placeholder text
+      .trim();
+
     const summaryText = [curatedSummaryIntro, baseSummary]
       .filter(Boolean)
       .join(' ');
@@ -636,7 +719,12 @@ export default async function BlogPostPage({
                         <div className='flex flex-wrap gap-2'>
                           {crystal.chakra && (
                             <Badge variant='outline' className='text-xs'>
-                              {crystal.chakra} Chakra
+                              {crystal.chakra === 'All Chakras' ||
+                              crystal.chakra === 'Alls Chakra'
+                                ? 'All Chakras'
+                                : crystal.chakra.endsWith(' Chakra')
+                                  ? crystal.chakra
+                                  : `${crystal.chakra} Chakra`}
                             </Badge>
                           )}
                           {crystal.intention && (
@@ -695,7 +783,28 @@ export default async function BlogPostPage({
                                 },
                               )}
                         </p>
-                        <p>{aspect.description}</p>
+                        {aspect.description ? (
+                          <p>{aspect.description}</p>
+                        ) : aspect.energy || aspect.guidance ? (
+                          <div>
+                            {aspect.energy && (
+                              <p className='mb-2'>{aspect.energy}</p>
+                            )}
+                            {aspect.guidance && (
+                              <p className='text-sm text-muted-foreground'>
+                                {aspect.guidance}
+                              </p>
+                            )}
+                          </div>
+                        ) : (
+                          <p className='text-sm text-muted-foreground'>
+                            {getAspectDescriptionFallback(
+                              aspect.aspect,
+                              aspect.planetA,
+                              aspect.planetB,
+                            )}
+                          </p>
+                        )}
                       </CardContent>
                     </Card>
                   );
@@ -708,38 +817,82 @@ export default async function BlogPostPage({
             <section className='space-y-6'>
               <h2 className='text-3xl font-bold'>Best Days For</h2>
               <div className='grid gap-4 md:grid-cols-2'>
-                {bestDaysEntries.map(([category, days]: [string, any]) => (
-                  <Card key={category}>
-                    <CardHeader>
-                      <CardTitle className='text-lg capitalize'>
-                        {category.replace(/([A-Z])/g, ' $1').trim()}
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <p className='text-sm mb-2'>
-                        {days.dates
-                          .map((d: any) => {
-                            const date = d instanceof Date ? d : new Date(d);
-                            if (isNaN(date.getTime())) {
-                              return '';
-                            }
-                            return date.toLocaleDateString('en-US', {
-                              weekday: 'long',
-                              month: 'long',
-                              day: 'numeric',
-                            });
-                          })
-                          .filter(Boolean)
-                          .join(', ')}
-                      </p>
-                      {days?.reason && (
-                        <p className='text-xs text-muted-foreground italic'>
-                          {days.reason}
+                {bestDaysEntries.map(([category, days]: [string, any]) => {
+                  // Deduplicate dates by converting to date strings and back
+                  const uniqueDates = Array.from(
+                    new Set(
+                      days.dates
+                        .map((d: any) => {
+                          const date = d instanceof Date ? d : new Date(d);
+                          if (isNaN(date.getTime())) return null;
+                          return date.toISOString().split('T')[0]; // Use YYYY-MM-DD for deduplication
+                        })
+                        .filter(Boolean),
+                    ),
+                  )
+                    .map((dateStr: string) => new Date(dateStr))
+                    .sort((a, b) => a.getTime() - b.getTime());
+
+                  // Format dates for display
+                  const formattedDates = uniqueDates.map((date) =>
+                    date.toLocaleDateString('en-US', {
+                      weekday: 'long',
+                      month: 'long',
+                      day: 'numeric',
+                    }),
+                  );
+
+                  // Collapse long lists (show first 5-7, then "and X more")
+                  const maxVisible = 7;
+                  const displayDates =
+                    formattedDates.length > maxVisible
+                      ? [
+                          ...formattedDates.slice(0, maxVisible),
+                          `and ${formattedDates.length - maxVisible} more`,
+                        ]
+                      : formattedDates;
+
+                  // Update reason to match deduplicated count - use non-numeric if uncertain
+                  const uniqueCount = uniqueDates.length;
+                  let reason = days.reason || '';
+                  if (reason && uniqueCount > 0) {
+                    // Replace numeric counts with actual deduplicated count
+                    if (/\d+ day/.test(reason)) {
+                      reason = reason.replace(
+                        /\d+ day/,
+                        `${uniqueCount} day${uniqueCount !== 1 ? 's' : ''}`,
+                      );
+                    }
+                  } else if (!reason && uniqueCount > 0) {
+                    // Fallback if no reason provided
+                    reason = `Several days this week support ${category
+                      .replace(/([A-Z])/g, ' $1')
+                      .trim()
+                      .toLowerCase()}.`;
+                  }
+
+                  return (
+                    <Card key={category}>
+                      <CardHeader>
+                        <CardTitle className='text-lg capitalize'>
+                          {category.replace(/([A-Z])/g, ' $1').trim()}
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <p className='text-sm mb-2'>
+                          {displayDates.length > 0
+                            ? displayDates.join(', ')
+                            : 'No specific dates this week'}
                         </p>
-                      )}
-                    </CardContent>
-                  </Card>
-                ))}
+                        {reason && (
+                          <p className='text-xs text-muted-foreground italic'>
+                            {reason}
+                          </p>
+                        )}
+                      </CardContent>
+                    </Card>
+                  );
+                })}
               </div>
             </section>
           )}
