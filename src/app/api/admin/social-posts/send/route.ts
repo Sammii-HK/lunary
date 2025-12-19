@@ -110,6 +110,8 @@ export async function POST(request: NextRequest) {
       'pinterest',
       'reddit',
       'tiktok',
+      'bluesky',
+      'threads',
     ];
     if (!validPlatforms.includes(platformStr)) {
       return NextResponse.json(
@@ -183,6 +185,14 @@ export async function POST(request: NextRequest) {
       postData.pinterestOptions = {
         boardId: pinterestBoardId,
         boardName: pinterestBoardName,
+      };
+    }
+
+    // Add TikTok-specific options if platform is TikTok
+    // TikTok supports image posts, but may need explicit options
+    if (platformStr === 'tiktok' && mediaArray.length > 0) {
+      postData.tiktokOptions = {
+        type: 'post',
       };
     }
 

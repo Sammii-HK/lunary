@@ -19,10 +19,18 @@ const BRAND_COLORS = {
 };
 
 const FORMATS = {
-  landscape: { width: 1200, height: 630, label: 'Twitter/LinkedIn/Facebook' },
-  square: { width: 1080, height: 1080, label: 'Instagram Feed' },
+  landscape: {
+    width: 1200,
+    height: 630,
+    label: 'Twitter/X/LinkedIn/Bluesky/Facebook (1.91:1)',
+  },
+  square: { width: 1080, height: 1080, label: 'Instagram/Threads (1:1)' },
   portrait: { width: 1080, height: 1350, label: 'Instagram Feed (4:5)' },
-  story: { width: 1080, height: 1920, label: 'Stories/TikTok/Reels' },
+  story: {
+    width: 1080,
+    height: 1920,
+    label: 'Stories/TikTok/Reels (9:16)',
+  },
   youtube: { width: 1920, height: 1080, label: 'YouTube (16:9)' },
 } as const;
 

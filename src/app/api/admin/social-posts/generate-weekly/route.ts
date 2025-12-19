@@ -243,7 +243,17 @@ async function generateThematicWeeklyPosts(
     scheduledDate.setHours(hour, 0, 0, 0);
 
     // Generate image URL for platforms that support images
-    const platformsWithImages = ['instagram', 'pinterest', 'linkedin'];
+    // All major platforms now get images with recommended sizes
+    const platformsWithImages = [
+      'instagram',
+      'pinterest',
+      'linkedin',
+      'twitter',
+      'tiktok',
+      'bluesky',
+      'threads',
+      'facebook',
+    ];
     let imageUrl: string | null = null;
 
     if (platformsWithImages.includes(post.platform)) {
