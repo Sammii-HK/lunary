@@ -493,11 +493,10 @@ export const getTarotPatternAnalysis = async ({
     const { getTarotCard } = await import('../../../utils/tarot/tarot');
     const dayjs = (await import('dayjs')).default;
 
-    // Use dayjs for date formatting - EXACTLY like the tarot page does
-    const currentDate = dayjs(now);
-
-    // Generate today's daily card using the EXACT same format as tarot page
-    const todayStr = currentDate.format('YYYY-MM-DD');
+    // Use UTC date formatting - EXACTLY like improvedTarot.tsx does (toISOString().split('T')[0])
+    // This ensures consistent date calculation across server and client
+    const todayStr = now.toISOString().split('T')[0];
+    const currentDate = dayjs(todayStr);
     const dailyCard = getTarotCard(`daily-${todayStr}`, userName, userBirthday);
     const daily: TarotCard = {
       name: dailyCard.name,
