@@ -148,6 +148,20 @@ function getFirstSentences(text: string, maxSentences = 2): string {
   return sentences.join(' ').trim();
 }
 
+// Helper to check if a string is a placeholder
+function isPlaceholder(str: string | null | undefined): boolean {
+  if (!str || typeof str !== 'string') return true;
+  const lower = str.toLowerCase().trim();
+  return (
+    lower === '' ||
+    lower === 'tbd' ||
+    lower === 'unknown' ||
+    lower.includes('enters sign') ||
+    lower.includes('sun enters sign') ||
+    /enters\s+\[?placeholder\]?/i.test(lower)
+  );
+}
+
 // Generate generic fallback description for aspects when energy/guidance are missing
 // Keep descriptions minimal, factual, and safe - no invented outcomes
 function getAspectDescriptionFallback(
@@ -155,12 +169,13 @@ function getAspectDescriptionFallback(
   planetA: string,
   planetB: string,
 ): string {
+  // Map aspect types to neutral keywords (no promises, no hype)
   const aspectKeywords: Record<string, string> = {
-    conjunction: 'alignment and focus',
-    opposition: 'balance and integration',
-    trine: 'harmony and flow',
-    square: 'tension and growth',
-    sextile: 'opportunity and support',
+    conjunction: 'focus and amplification',
+    opposition: 'tension and adjustment',
+    trine: 'support and ease',
+    square: 'tension and adjustment',
+    sextile: 'support and ease',
   };
 
   const keyword = aspectKeywords[aspectType] || 'cosmic influence';
@@ -262,15 +277,23 @@ export default async function BlogPostPage({
     const blogData = await getBlogData(weekInfo);
     console.log('[BlogPostPage] Blog data fetched, processing dates...');
 
-    // Validate and clean data - remove placeholder strings
+    // Validate and clean data - remove placeholder strings (case-insensitive, pattern-based)
     const cleanedHighlights = (blogData.planetaryHighlights || []).filter(
       (h: any) => {
         // Filter out highlights with placeholder descriptions
-        if (h.description && h.description.includes('enters sign')) {
+        if (isPlaceholder(h.description)) {
+          return false;
+        }
+        // Filter out placeholder planet/event names
+        if (isPlaceholder(h.planet) || isPlaceholder(h.event)) {
           return false;
         }
         // Ensure event descriptions are valid
         if (h.event === 'enters-sign' && !h.details?.toSign) {
+          return false;
+        }
+        // Filter out if toSign is a placeholder
+        if (h.details?.toSign && isPlaceholder(h.details.toSign)) {
           return false;
         }
         return true;
@@ -819,17 +842,18 @@ export default async function BlogPostPage({
               <div className='grid gap-4 md:grid-cols-2'>
                 {bestDaysEntries.map(([category, days]: [string, any]) => {
                   // Deduplicate dates by converting to date strings and back
-                  const uniqueDates = Array.from(
-                    new Set(
-                      days.dates
-                        .map((d: any) => {
-                          const date = d instanceof Date ? d : new Date(d);
-                          if (isNaN(date.getTime())) return null;
-                          return date.toISOString().split('T')[0]; // Use YYYY-MM-DD for deduplication
-                        })
-                        .filter(Boolean),
-                    ),
-                  )
+                  const dateStrings = days.dates
+                    .map((d: any) => {
+                      const date = d instanceof Date ? d : new Date(d);
+                      if (isNaN(date.getTime())) return null;
+                      return date.toISOString().split('T')[0]; // Use YYYY-MM-DD for deduplication
+                    })
+                    .filter((ds: string | null): ds is string => ds !== null);
+
+                  const uniqueDateStrings = Array.from(
+                    new Set(dateStrings),
+                  ) as string[];
+                  const uniqueDates = uniqueDateStrings
                     .map((dateStr: string) => new Date(dateStr))
                     .sort((a, b) => a.getTime() - b.getTime());
 
@@ -852,11 +876,13 @@ export default async function BlogPostPage({
                         ]
                       : formattedDates;
 
-                  // Update reason to match deduplicated count - use non-numeric if uncertain
-                  const uniqueCount = uniqueDates.length;
+                  // Update reason to match deduplicated count - MUST use same array as rendering
+                  // Rule: count must come from the same uniqueDates array used for display
+                  const uniqueCount = uniqueDates.length; // This is the source of truth
                   let reason = days.reason || '';
+
                   if (reason && uniqueCount > 0) {
-                    // Replace numeric counts with actual deduplicated count
+                    // Replace numeric counts with actual deduplicated count from same array
                     if (/\d+ day/.test(reason)) {
                       reason = reason.replace(
                         /\d+ day/,
@@ -864,11 +890,13 @@ export default async function BlogPostPage({
                       );
                     }
                   } else if (!reason && uniqueCount > 0) {
-                    // Fallback if no reason provided
-                    reason = `Several days this week support ${category
-                      .replace(/([A-Z])/g, ' $1')
-                      .trim()
-                      .toLowerCase()}.`;
+                    // Fallback if no reason provided - use non-numeric if count uncertain
+                    if (uniqueCount > 0) {
+                      reason = `Several days this week support ${category
+                        .replace(/([A-Z])/g, ' $1')
+                        .trim()
+                        .toLowerCase()}.`;
+                    }
                   }
 
                   return (
@@ -878,8 +906,8 @@ export default async function BlogPostPage({
                           {category.replace(/([A-Z])/g, ' $1').trim()}
                         </CardTitle>
                       </CardHeader>
-                      <CardContent>
-                        <p className='text-sm mb-2'>
+                      <CardContent className='space-y-2'>
+                        <p className='text-sm'>
                           {displayDates.length > 0
                             ? displayDates.join(', ')
                             : 'No specific dates this week'}
