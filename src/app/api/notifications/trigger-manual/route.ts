@@ -3,7 +3,6 @@ import {
   sendUnifiedNotification,
   NotificationEvent,
 } from '@/lib/notifications/unified-service';
-import { getGlobalCosmicData } from '@/lib/cosmic-snapshot/global-cache';
 
 export const dynamic = 'force-dynamic';
 
@@ -16,16 +15,29 @@ export async function POST(request: NextRequest) {
   try {
     const { eventType, force } = await request.json();
 
-    // Get today's cosmic data
-    const today = new Date().toISOString().split('T')[0];
-    const cosmicData = await getGlobalCosmicData(today);
+    // Get today's cosmic data from the cosmic-post API
+    const todayDate = new Date();
+    const today = todayDate.toISOString().split('T')[0];
+    const baseUrl =
+      process.env.NODE_ENV === 'production'
+        ? 'https://lunary.app'
+        : 'http://localhost:3000';
 
-    if (!cosmicData) {
+    const cosmicResponse = await fetch(
+      `${baseUrl}/api/og/cosmic-post/${today}`,
+      {
+        headers: { 'User-Agent': 'Lunary-Manual-Notification/1.0' },
+      },
+    );
+
+    if (!cosmicResponse.ok) {
       return NextResponse.json(
-        { error: 'Failed to fetch cosmic data' },
+        { error: `Failed to fetch cosmic data: ${cosmicResponse.status}` },
         { status: 500 },
       );
     }
+
+    const cosmicData = await cosmicResponse.json();
 
     // Determine which event to send
     let event: NotificationEvent | null = null;

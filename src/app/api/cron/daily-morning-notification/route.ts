@@ -25,13 +25,14 @@ export async function GET(request: NextRequest) {
       }
     }
 
-    const today = new Date().toISOString().split('T')[0];
+    const todayDate = new Date();
+    const today = todayDate.toISOString().split('T')[0];
     const checkTime = new Date().toISOString();
 
     console.log('🌅 Daily morning notification check started at:', checkTime);
 
     // Get today's cosmic data
-    const cosmicData = await getGlobalCosmicData(today);
+    const cosmicData = await getGlobalCosmicData(todayDate);
 
     if (!cosmicData) {
       const baseUrl =
