@@ -180,12 +180,23 @@ function mapStripeSubscription(
       ? 'active' // Keep as active if it's set to cancel but hasn't ended yet
       : mapStatus(sub.status);
   const price = sub.items.data[0]?.price;
-  const planType =
-    sub.metadata?.plan_id ||
-    price?.metadata?.plan_id ||
-    (price?.recurring?.interval === 'year'
-      ? 'lunary_plus_ai_annual'
-      : 'lunary_plus');
+
+  // Determine plan type with multi-currency support
+  let planType = sub.metadata?.plan_id || price?.metadata?.plan_id || null;
+
+  // Try price ID mapping if metadata not found (supports multi-currency)
+  if (!planType && price?.id) {
+    const { getPlanIdFromPriceId } = require('../../../../../utils/pricing');
+    planType = getPlanIdFromPriceId(price.id);
+  }
+
+  // Fallback to interval-based mapping
+  if (!planType) {
+    planType =
+      price?.recurring?.interval === 'year'
+        ? 'lunary_plus_ai_annual'
+        : 'lunary_plus';
+  }
 
   return {
     user_id: userId,
