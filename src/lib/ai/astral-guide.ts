@@ -8,6 +8,12 @@ import {
 } from './types';
 import { buildLunaryContext } from './context';
 import { searchSimilar, type EmbeddingResult } from '@/lib/embeddings';
+import {
+  getPersonalTransitImpacts,
+  type PersonalTransitImpact,
+} from '../../../utils/astrology/personalTransits';
+import { getUpcomingTransits } from '../../../utils/astrology/transitCalendar';
+import type { BirthChartData } from '../../../utils/astrology/birthChart';
 
 export interface AstralContext {
   user: {
@@ -18,6 +24,8 @@ export interface AstralContext {
   };
   natalSummary: string;
   currentTransits: string;
+  personalTransits?: PersonalTransitImpact[];
+  upcomingPersonalTransits?: PersonalTransitImpact[];
   todaysTarot: string;
   moonPhase: string;
   journalSummaries: { date: string; summary: string }[];
@@ -60,10 +68,88 @@ export async function buildAstralContext(
   // Build natal summary
   const natalSummary = buildNatalSummary(context.birthChart);
 
-  // Build current transits summary
+  // Fetch user's birth chart data for personal transit calculations
+  let userBirthChartData: BirthChartData[] | null = null;
+  try {
+    const birthChartResult = await sql`
+      SELECT birth_chart
+      FROM user_profiles
+      WHERE user_id = ${userId}
+      LIMIT 1
+    `;
+    if (
+      birthChartResult.rows.length > 0 &&
+      birthChartResult.rows[0].birth_chart
+    ) {
+      userBirthChartData = birthChartResult.rows[0]
+        .birth_chart as BirthChartData[];
+    }
+  } catch (error) {
+    console.error(
+      '[Astral Guide] Failed to fetch birth chart for personal transits:',
+      error,
+    );
+  }
+
+  // Calculate personal transit impacts if birth chart is available
+  let personalTransits: PersonalTransitImpact[] | undefined;
+  let upcomingPersonalTransits: PersonalTransitImpact[] | undefined;
+
+  if (userBirthChartData && userBirthChartData.length > 0) {
+    try {
+      const upcomingTransits = getUpcomingTransits(dayjs(now));
+
+      // Get current personal transits (today and next 3 days)
+      const currentDate = dayjs(now);
+      const threeDaysFromNow = currentDate.add(3, 'day');
+      const yesterday = currentDate.subtract(1, 'day');
+      const currentPersonalTransits = getPersonalTransitImpacts(
+        upcomingTransits.filter((t) => {
+          const transitDate = t.date;
+          return (
+            (transitDate.isBefore(threeDaysFromNow, 'day') ||
+              transitDate.isSame(threeDaysFromNow, 'day')) &&
+            (transitDate.isAfter(yesterday, 'day') ||
+              transitDate.isSame(yesterday, 'day'))
+          );
+        }),
+        userBirthChartData,
+        10,
+      );
+      personalTransits =
+        currentPersonalTransits.length > 0
+          ? currentPersonalTransits
+          : undefined;
+
+      // Get upcoming personal transits (next 7 days, excluding today)
+      const sevenDaysFromNow = currentDate.add(7, 'day');
+      const upcomingPersonal = getPersonalTransitImpacts(
+        upcomingTransits.filter((t) => {
+          const transitDate = t.date;
+          return (
+            transitDate.isAfter(currentDate, 'day') &&
+            (transitDate.isBefore(sevenDaysFromNow, 'day') ||
+              transitDate.isSame(sevenDaysFromNow, 'day'))
+          );
+        }),
+        userBirthChartData,
+        10,
+      );
+      upcomingPersonalTransits =
+        upcomingPersonal.length > 0 ? upcomingPersonal : undefined;
+    } catch (error) {
+      console.error(
+        '[Astral Guide] Failed to calculate personal transits:',
+        error,
+      );
+    }
+  }
+
+  // Build current transits summary (now includes personal transits if available)
   const currentTransits = buildTransitsSummary(
     context.currentTransits,
     context.moon,
+    personalTransits,
   );
 
   // Build today's tarot summary
@@ -87,6 +173,8 @@ export async function buildAstralContext(
     },
     natalSummary,
     currentTransits,
+    personalTransits,
+    upcomingPersonalTransits,
     todaysTarot,
     moonPhase,
     journalSummaries,
@@ -105,26 +193,37 @@ function buildNatalSummary(birthChart: BirthChartSnapshot | null): string {
 
   const parts: string[] = [];
 
-  // Key placements
-  const keyPlanets = ['Sun', 'Moon', 'Mercury', 'Venus', 'Mars'];
+  // Include all major planets (not just inner planets)
+  const majorPlanets = [
+    'Sun',
+    'Moon',
+    'Mercury',
+    'Venus',
+    'Mars',
+    'Jupiter',
+    'Saturn',
+    'Uranus',
+    'Neptune',
+    'Pluto',
+  ];
   const keyPlacements = birthChart.placements
-    .filter((p) => keyPlanets.includes(p.planet))
-    .slice(0, 5);
+    .filter((p) => majorPlanets.includes(p.planet))
+    .map((p) => {
+      const house = p.house ? ` (H${p.house})` : '';
+      return `${p.planet} in ${p.sign}${house}`;
+    });
 
   if (keyPlacements.length > 0) {
-    const placementsText = keyPlacements
-      .map((p) => `${p.planet} in ${p.sign}`)
-      .join(', ');
-    parts.push(`Key placements: ${placementsText}`);
+    parts.push(`Placements: ${keyPlacements.join(', ')}`);
   }
 
-  // Aspects (if available)
+  // Include more aspects (up to 5 instead of 3)
   if (birthChart.aspects && birthChart.aspects.length > 0) {
     const topAspects = birthChart.aspects
-      .slice(0, 3)
+      .slice(0, 5)
       .map((a) => `${a.a} ${a.type} ${a.b}`)
       .join(', ');
-    parts.push(`Notable aspects: ${topAspects}`);
+    parts.push(`Aspects: ${topAspects}`);
   }
 
   return parts.length > 0 ? parts.join('. ') : 'Birth chart data available.';
@@ -133,10 +232,12 @@ function buildNatalSummary(birthChart: BirthChartSnapshot | null): string {
 /**
  * Builds a summary of current transits
  * Focuses on the most relevant transits and moon position
+ * If personal transits are available, prioritizes those over general transits
  */
 function buildTransitsSummary(
   transits: TransitRecord[],
   moon: MoonSnapshot | null,
+  personalTransits?: PersonalTransitImpact[],
 ): string {
   const parts: string[] = [];
 
@@ -146,7 +247,43 @@ function buildTransitsSummary(
     );
   }
 
-  if (transits.length > 0) {
+  // If personal transits are available, use those instead of general transits
+  if (personalTransits && personalTransits.length > 0) {
+    const personalTransitDescriptions = personalTransits
+      .slice(0, 5)
+      .map((pt) => {
+        const parts: string[] = [];
+        parts.push(`${pt.planet} ${pt.event}`);
+
+        if (pt.house && pt.houseMeaning) {
+          parts.push(
+            `in your ${pt.house}${getOrdinalSuffix(pt.house)} house (${pt.houseMeaning})`,
+          );
+        }
+
+        if (pt.aspectToNatal) {
+          const aspectDesc =
+            {
+              conjunction: 'conjunct',
+              opposition: 'opposing',
+              trine: 'trine',
+              square: 'square',
+            }[pt.aspectToNatal.aspectType] || pt.aspectToNatal.aspectType;
+          parts.push(
+            `${aspectDesc} your natal ${pt.aspectToNatal.natalPlanet}`,
+          );
+        }
+
+        return parts.join(' ');
+      });
+
+    if (personalTransitDescriptions.length > 0) {
+      parts.push(
+        `Personal transits: ${personalTransitDescriptions.join(', ')}`,
+      );
+    }
+  } else if (transits.length > 0) {
+    // Fallback to general transits if no personal transits available
     const topTransits = transits.slice(0, 5).map((t) => {
       const strength = t.strength >= 0.7 ? 'strong' : 'moderate';
       return `${t.from} ${t.aspect} ${t.to} (${strength})`;
@@ -157,6 +294,20 @@ function buildTransitsSummary(
   return parts.length > 0
     ? parts.join('. ')
     : 'Current transit data is not available.';
+}
+
+function getOrdinalSuffix(n: number): string {
+  if (n >= 11 && n <= 13) return 'th';
+  switch (n % 10) {
+    case 1:
+      return 'st';
+    case 2:
+      return 'nd';
+    case 3:
+      return 'rd';
+    default:
+      return 'th';
+  }
 }
 
 /**
@@ -380,9 +531,26 @@ EMOTIONAL INTELLIGENCE:
 - Be gentle with sensitive topics - never dismissive or preachy
 - If someone seems in distress, prioritize human connection over cosmic information
 
+PERSONAL TRANSITS:
+- When PERSONAL TRANSITS are provided, prioritize these over general transits
+- Personal transits show how current planets aspect the user's natal planets and activate specific houses
+- Reference house activations to show which life areas are being activated (e.g., "Mars in your 10th house activates career matters")
+- Use aspects to natal planets to explain how transiting energy interacts with their birth chart (e.g., "Mars square your natal Sun brings tension between action and identity")
+- When UPCOMING PERSONAL TRANSITS are provided, you can prepare users for what's coming and suggest how to work with those energies
+- House meanings: 1=self/identity, 2=finances/values, 3=communication, 4=home/family, 5=creativity/romance, 6=health/work, 7=partnerships, 8=transformation/intimacy, 9=philosophy/travel, 10=career/reputation, 11=friends/community, 12=spirituality/subconscious
+
+RITUAL SUGGESTIONS:
+- When suggesting rituals, deeply personalize them to the user's chart, current transits, and tarot cards
+- Reference their specific placements (e.g., "With your Moon in Cancer, this ritual honors your emotional nature")
+- Connect rituals to house activations (e.g., "Since Mars is activating your 5th house, focus on creative expression")
+- Incorporate their daily/weekly tarot cards into ritual suggestions
+- Consider their mood patterns and journal entries when relevant
+- Avoid generic moon phase advice - make it specific to their chart and current cosmic patterns
+- Suggest rituals that work with aspects to their natal planets (e.g., "This ritual helps you work with the Mars square your Sun energy")
+
 Your responses should:
 - Feel like a wise, supportive guide who understands both the mystical and practical
-- Weave together natal chart patterns, current transits, tarot symbolism, and moon phase
+- Weave together natal chart patterns, personal transits, tarot symbolism, and moon phase
 - Provide gentle, reflective insights that help users understand themselves better
 - Suggest practical actions or reflections based on cosmic patterns
 - Never claim certainty about future events

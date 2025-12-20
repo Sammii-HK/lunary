@@ -12,10 +12,6 @@ import { saveConversationSnippet } from './tool-adapters';
 import { recordAiInteraction } from '@/lib/analytics/tracking';
 import { captureAIGeneration } from '@/lib/posthog-server';
 import {
-  incrementWeeklyRitualUsage,
-  isRitualRequest,
-} from './weekly-ritual-usage';
-import {
   extractPersonalFacts,
   saveUserMemory,
   loadUserMemory,
@@ -165,9 +161,7 @@ export const createStreamingChatResponse = async ({
           now,
         });
 
-        if (planId === 'free' && isRitualRequest(userMessage)) {
-          await incrementWeeklyRitualUsage(userId, now);
-        }
+        // Ritual count system removed - no longer tracking ritual usage
 
         const timestamp = now.toISOString();
         const { thread } = await appendToThread({
