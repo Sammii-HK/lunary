@@ -41,6 +41,7 @@ import {
   extractMoodTags,
   extractCardReferences,
 } from '@/lib/journal/extract-moments';
+import { DailyThread } from '@/components/daily-thread/DailyThread';
 
 interface CollectionFolder {
   id: number;
@@ -748,7 +749,7 @@ function BookOfShadowsContent() {
 
           <main className='flex flex-1 flex-col items-center justify-center gap-6'>
             <div className='rounded-3xl border border-zinc-800/60 bg-zinc-950/60 backdrop-blur p-8 md:p-12 text-center max-w-lg'>
-              <h2 className='text-2xl font-light text-zinc-50 mb-4'>
+              <h2 className='text-2xl font-light text-zinc-50 mb-1'>
                 Sign in to access your Astral Guide
               </h2>
               <p className='text-sm text-zinc-400 mb-6 md:text-base'>
@@ -827,12 +828,17 @@ function BookOfShadowsContent() {
         </header>
 
         <div className='flex min-h-0 flex-1 flex-col gap-2'>
+          <div className='pt-3 md:pt-6'>
+            <div className='mx-auto max-w-2xl w-full'>
+              <DailyThread />
+            </div>
+          </div>
           <section className='flex min-h-0 flex-1 flex-col overflow-hidden rounded-xl border border-zinc-800/60 bg-zinc-950/60'>
             <div
               ref={messagesContainerRef}
               className='min-h-0 flex-1 overflow-y-auto px-3 py-4 md:px-6 md:py-6'
             >
-              <div className='mx-auto flex max-w-2xl flex-col gap-3 md:gap-6'>
+              <div className='mx-auto flex max-w-2xl flex-col gap-3 md:gap-6 w-full'>
                 {isLoadingHistory ? (
                   <div className='rounded-2xl border border-dashed border-zinc-700/60 bg-zinc-900/40 px-4 py-6 text-center text-sm text-zinc-400 md:px-8 md:py-10 md:text-base'>
                     Loading your conversation...
@@ -1026,6 +1032,25 @@ function BookOfShadowsContent() {
                   <CopilotQuickActions
                     onActionClick={(prompt) => sendMessage(prompt)}
                     disabled={isStreaming}
+                    onDailyThreadAction={async (type) => {
+                      // Trigger a refresh of the daily thread to show the generated module
+                      const dailyThreadElement = document.querySelector(
+                        '[data-daily-thread]',
+                      );
+                      if (dailyThreadElement) {
+                        // Dispatch a custom event to refresh
+                        window.dispatchEvent(
+                          new CustomEvent('refresh-daily-thread', {
+                            detail: { type },
+                          }),
+                        );
+                      } else {
+                        // Fallback: send a message to the AI
+                        sendMessage(
+                          `Show me a ${type === 'memory' ? 'memory from my past entries' : type === 'reflection' ? 'reflection prompt' : 'pattern insight'}`,
+                        );
+                      }
+                    }}
                   />
                 </div>
               )}

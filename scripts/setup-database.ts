@@ -1132,6 +1132,42 @@ async function setupDatabase() {
 
     console.log('✅ Videos table created');
 
+    // Daily thread modules table
+    await sql`
+      CREATE TABLE IF NOT EXISTS daily_thread_modules (
+        id SERIAL PRIMARY KEY,
+        user_id TEXT NOT NULL,
+        date DATE NOT NULL,
+        modules_json JSONB NOT NULL,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+        updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+        UNIQUE(user_id, date)
+      )
+    `;
+
+    await sql`CREATE INDEX IF NOT EXISTS idx_daily_thread_modules_user_date ON daily_thread_modules(user_id, date DESC)`;
+
+    await sql`
+      CREATE OR REPLACE FUNCTION update_daily_thread_modules_updated_at()
+      RETURNS TRIGGER AS $$
+      BEGIN
+          NEW.updated_at = NOW();
+          RETURN NEW;
+      END;
+      $$ language 'plpgsql'
+    `;
+
+    await sql`DROP TRIGGER IF EXISTS update_daily_thread_modules_updated_at ON daily_thread_modules`;
+
+    await sql`
+      CREATE TRIGGER update_daily_thread_modules_updated_at
+          BEFORE UPDATE ON daily_thread_modules
+          FOR EACH ROW
+          EXECUTE FUNCTION update_daily_thread_modules_updated_at()
+    `;
+
+    console.log('✅ Daily thread modules table created');
+
     console.log('✅ Database setup complete!');
     console.log(
       '📊 Database ready for push subscriptions, conversion tracking, social posts, subscriptions, tarot readings, AI threads, user profiles, shop data, notes, API keys, consent, email preferences, user attribution, and videos',
