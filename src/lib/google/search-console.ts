@@ -55,8 +55,18 @@ function getSearchConsoleClient() {
     );
   }
 
-  const oauth2Client = new google.auth.OAuth2(clientId, clientSecret);
+  const oauth2Client = new google.auth.OAuth2(
+    clientId,
+    clientSecret,
+    'http://localhost', // Redirect URI must match what was used during token generation
+  );
 
+  // Set credentials with refresh token
+  // Note: The refresh token must have been generated with the Search Console scope
+  // If you get 403 errors, regenerate the token using: npx tsx scripts/regenerate-google-token.ts
+  // Important: The refresh token already contains the scopes it was generated with.
+  // You cannot modify scopes after token generation - if scopes are missing,
+  // you must regenerate the token using: npx tsx scripts/regenerate-google-token.ts
   oauth2Client.setCredentials({
     refresh_token: refreshToken,
   });
@@ -152,11 +162,24 @@ export async function getSearchConsoleData(
 
     if (googleError.code === 401 || googleError.response?.status === 401) {
       throw new Error(
-        'Google Search Console: Invalid or expired credentials. Refresh token may need regeneration.',
+        'Google Search Console: Invalid or expired credentials. Refresh token may need regeneration. ' +
+          'Run "npx tsx scripts/regenerate-google-token.ts" to regenerate the token.',
       );
     }
 
     if (googleError.code === 403 || googleError.response?.status === 403) {
+      // Check if it's a scope issue
+      const errorMessage = googleError.message || '';
+      if (
+        errorMessage.includes('insufficient authentication scopes') ||
+        errorMessage.includes('insufficient authentication')
+      ) {
+        throw new Error(
+          `Google Search Console: Insufficient authentication scopes. Your refresh token was generated without Search Console access. ` +
+            `To fix: Run "npx tsx scripts/regenerate-google-token.ts" to regenerate the token with Search Console scope included. ` +
+            `Then update GOOGLE_REFRESH_TOKEN in your environment variables.`,
+        );
+      }
       throw new Error(
         `Google Search Console: Permission denied for property "${propertyUrl}". Verify the property exists and you have access.`,
       );

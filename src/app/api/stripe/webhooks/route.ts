@@ -34,6 +34,15 @@ function getPlanTypeFromSubscription(
     return price.metadata.plan_id;
   }
 
+  // Try price ID mapping (supports multi-currency)
+  if (price?.id) {
+    const { getPlanIdFromPriceId } = require('../../../../../utils/pricing');
+    const planId = getPlanIdFromPriceId(price.id);
+    if (planId) {
+      return planId;
+    }
+  }
+
   // Fallback to interval-based mapping
   const interval = price?.recurring?.interval;
   if (interval === 'year') return 'lunary_plus_ai_annual';

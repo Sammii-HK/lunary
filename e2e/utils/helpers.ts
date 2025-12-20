@@ -118,6 +118,27 @@ export async function fillBirthData(
 
 export async function signUp(page: Page, email: string, password: string) {
   console.log(`   → Starting sign up for ${email}`);
+
+  // For test users (test@test.lunary.app), try to sign in first to reuse existing account
+  if (email.includes('@test.lunary.app') && email === 'test@test.lunary.app') {
+    console.log(`   → Test user detected, attempting to sign in first...`);
+    try {
+      await signIn(page, email, password);
+      // Check if sign in was successful by looking for redirect away from /auth
+      await page.waitForTimeout(2000);
+      const currentUrl = page.url();
+      if (!currentUrl.includes('/auth')) {
+        console.log(
+          `   → Successfully signed in to existing test user account`,
+        );
+        return;
+      }
+    } catch (error) {
+      console.log(`   → Sign in failed, will create new account: ${error}`);
+      // Continue to sign up flow
+    }
+  }
+
   // Jazz + Better Auth requires UI-based auth (client-side Jazz initialization)
   const response = await page.goto('/auth', {
     waitUntil: 'domcontentloaded',

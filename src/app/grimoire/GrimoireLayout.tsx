@@ -773,7 +773,7 @@ function GrimoireIndexPage() {
               <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3'>
                 {category.items.map((item) => (
                   <Link
-                    key={item.href}
+                    key={`${category.name}-${item.title}`}
                     href={item.href}
                     prefetch={true}
                     className='group rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4 hover:bg-zinc-900/50 hover:border-lunary-primary-600 transition-all'

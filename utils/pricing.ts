@@ -219,6 +219,27 @@ export function normalizePlanType(planType: string | undefined): string {
 }
 
 export function getPlanIdFromPriceId(priceId: string): string | null {
+  // First, check the comprehensive price mapping (supports all currencies)
+  try {
+    const { STRIPE_PRICE_MAPPING } = require('./stripe-prices');
+    for (const [planId, currencies] of Object.entries(STRIPE_PRICE_MAPPING)) {
+      for (const currencyData of Object.values(
+        currencies as Record<string, { priceId: string }>,
+      )) {
+        if (currencyData.priceId === priceId) {
+          return planId;
+        }
+      }
+    }
+  } catch (error) {
+    // If stripe-prices module not available, continue to env var fallback
+    console.warn(
+      'Failed to load STRIPE_PRICE_MAPPING, falling back to env vars:',
+      error,
+    );
+  }
+
+  // Fallback to env vars for backwards compatibility
   const envVars: Record<string, string> = {};
 
   if (process.env.NEXT_PUBLIC_STRIPE_LUNARY_PLUS_PRICE_ID) {

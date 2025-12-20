@@ -36,6 +36,7 @@ interface SuccessMetricsData {
   monthly_recurring_revenue: MetricData;
   annual_recurring_revenue: MetricData;
   active_subscriptions: MetricData;
+  arpu?: MetricData;
   trial_conversion_rate: MetricData;
   ai_chat_messages: MetricData;
   substack_subscribers: MetricData;
@@ -128,6 +129,19 @@ export function SuccessMetrics({ data, loading }: SuccessMetricsProps) {
       target: null,
       format: (v: number) => v.toLocaleString(),
     },
+    ...(data.arpu
+      ? [
+          {
+            label: 'ARPU',
+            value: data.arpu.value,
+            trend: data.arpu.trend,
+            change: data.arpu.change,
+            target: null,
+            format: (v: number) =>
+              `$${v.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
+          },
+        ]
+      : []),
     {
       label: 'Trial Conversion Rate',
       value: data.trial_conversion_rate.value,

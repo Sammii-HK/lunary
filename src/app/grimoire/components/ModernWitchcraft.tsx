@@ -77,7 +77,7 @@ const ModernWitchcraft = () => {
             return (
               <Link
                 key={witch.name}
-                href={`/grimoire/witches/${witchSlug}`}
+                href={`/grimoire/modern-witchcraft/famous-witches/${witchSlug}`}
                 className='block rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4 hover:bg-zinc-900/50 hover:border-lunary-primary-600 transition-all group'
               >
                 <h3 className='text-lg font-medium text-lunary-primary-300 mb-2 group-hover:text-lunary-primary-200 transition-colors'>

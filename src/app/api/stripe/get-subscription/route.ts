@@ -51,7 +51,22 @@ export async function POST(request: NextRequest) {
       `;
 
       if (result.rows.length > 0) {
-        return formatResponse(result.rows[0], forceRefresh);
+        const dbRow = result.rows[0];
+        // If status is 'cancelled' or forceRefresh is true, verify with Stripe
+        // to get accurate cancel_at_period_end status
+        if (forceRefresh || dbRow.status === 'cancelled') {
+          const stripeCustomerId = dbRow.stripe_customer_id;
+          if (stripeCustomerId) {
+            const stripeData = await checkStripeForSubscription(
+              stripeCustomerId,
+              userId,
+            );
+            if (stripeData) {
+              return formatResponse(stripeData, forceRefresh);
+            }
+          }
+        }
+        return formatResponse(dbRow, forceRefresh);
       }
     }
 
@@ -158,14 +173,30 @@ function mapStripeSubscription(
   customerId: string,
   userId?: string,
 ) {
-  const status = mapStatus(sub.status);
+  // If subscription is set to cancel at period end but status is still 'active',
+  // keep it as 'active' (not 'cancelled')
+  const status =
+    sub.cancel_at_period_end && sub.status === 'active'
+      ? 'active' // Keep as active if it's set to cancel but hasn't ended yet
+      : mapStatus(sub.status);
   const price = sub.items.data[0]?.price;
-  const planType =
-    sub.metadata?.plan_id ||
-    price?.metadata?.plan_id ||
-    (price?.recurring?.interval === 'year'
-      ? 'lunary_plus_ai_annual'
-      : 'lunary_plus');
+
+  // Determine plan type with multi-currency support
+  let planType = sub.metadata?.plan_id || price?.metadata?.plan_id || null;
+
+  // Try price ID mapping if metadata not found (supports multi-currency)
+  if (!planType && price?.id) {
+    const { getPlanIdFromPriceId } = require('../../../../../utils/pricing');
+    planType = getPlanIdFromPriceId(price.id);
+  }
+
+  // Fallback to interval-based mapping
+  if (!planType) {
+    planType =
+      price?.recurring?.interval === 'year'
+        ? 'lunary_plus_ai_annual'
+        : 'lunary_plus';
+  }
 
   return {
     user_id: userId,
@@ -173,6 +204,7 @@ function mapStripeSubscription(
     stripe_subscription_id: sub.id,
     status,
     plan_type: planType,
+    cancel_at_period_end: sub.cancel_at_period_end || false,
     trial_ends_at: sub.trial_end
       ? new Date(sub.trial_end * 1000).toISOString()
       : null,
@@ -202,6 +234,10 @@ function formatResponse(sub: any, forceRefresh?: boolean) {
     ? { 'Cache-Control': 'no-cache, no-store, must-revalidate' }
     : { 'Cache-Control': 'private, s-maxage=300, stale-while-revalidate=600' };
 
+  // cancel_at_period_end might not be in DB, default to false
+  const cancelAtPeriodEnd =
+    sub.cancel_at_period_end !== undefined ? sub.cancel_at_period_end : false;
+
   return NextResponse.json(
     {
       success: true,
@@ -212,7 +248,11 @@ function formatResponse(sub: any, forceRefresh?: boolean) {
         customer: sub.stripe_customer_id,
         plan: sub.plan_type,
         planName: sub.plan_type,
+        cancelAtPeriodEnd,
         current_period_end: sub.current_period_end
+          ? Math.floor(new Date(sub.current_period_end).getTime() / 1000)
+          : null,
+        currentPeriodEnd: sub.current_period_end
           ? Math.floor(new Date(sub.current_period_end).getTime() / 1000)
           : null,
         trial_end: sub.trial_ends_at

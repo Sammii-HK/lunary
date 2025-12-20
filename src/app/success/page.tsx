@@ -136,8 +136,10 @@ export default function SuccessPage() {
     return (
       <div className='min-h-screen bg-black text-white flex items-center justify-center'>
         <div className='text-center'>
-          <div className='animate-spin rounded-full h-12 w-12 border-b-2 border-white mx-auto mb-4'></div>
-          <p className='text-lg'>Confirming your subscription...</p>
+          <div className='animate-spin rounded-full h-12 w-12 border-b-2 border-lunary-accent mx-auto mb-4'></div>
+          <p className='text-lg text-lunary-accent-300'>
+            Confirming your subscription...
+          </p>
         </div>
       </div>
     );
@@ -170,9 +172,9 @@ export default function SuccessPage() {
     <div className='min-h-screen bg-black text-white'>
       <div className='max-w-4xl mx-auto px-6 py-16'>
         <div className='text-center mb-12'>
-          <div className='w-16 h-16 bg-lunary-success rounded-full flex items-center justify-center mx-auto mb-6'>
+          <div className='w-20 h-20 bg-gradient-to-br from-lunary-accent to-lunary-highlight rounded-full flex items-center justify-center mx-auto mb-6 shadow-[0_0_30px_rgba(199,125,255,0.4)]'>
             <svg
-              className='w-8 h-8 text-white'
+              className='w-10 h-10 text-white'
               fill='none'
               stroke='currentColor'
               viewBox='0 0 24 24'
@@ -180,17 +182,17 @@ export default function SuccessPage() {
               <path
                 strokeLinecap='round'
                 strokeLinejoin='round'
-                strokeWidth={2}
+                strokeWidth={2.5}
                 d='M5 13l4 4L19 7'
               />
             </svg>
           </div>
 
-          <h1 className='text-4xl font-light mb-4'>
+          <h1 className='text-5xl font-light mb-4 bg-gradient-to-r from-lunary-accent to-lunary-highlight bg-clip-text text-transparent'>
             Welcome to your cosmic journey
           </h1>
 
-          <p className='text-xl text-gray-400 mb-8'>
+          <p className='text-xl text-lunary-accent-300 mb-8'>
             {isTrialActive
               ? 'Your free trial has started successfully!'
               : 'Your subscription is now active!'}
@@ -198,14 +200,16 @@ export default function SuccessPage() {
         </div>
 
         {session && (
-          <div className='bg-gray-900 rounded-lg p-8 mb-8'>
-            <h2 className='text-2xl font-light mb-6'>Subscription Details</h2>
+          <div className='bg-gradient-to-br from-lunary-primary-950/50 to-lunary-accent-950/30 rounded-xl p-8 mb-8 border border-lunary-primary-800/30'>
+            <h2 className='text-2xl font-light mb-6 text-lunary-accent-200'>
+              Subscription Details
+            </h2>
 
             {synced && (
-              <div className='mb-4 p-3 rounded-lg bg-gray-800 border border-gray-700'>
+              <div className='mb-6 p-4 rounded-lg bg-lunary-success/10 border border-lunary-success/30'>
                 <div className='flex items-center gap-3'>
-                  <div className='w-4 h-4 bg-lunary-success rounded-full'></div>
-                  <span className='text-sm text-lunary-success'>
+                  <div className='w-3 h-3 bg-lunary-success rounded-full animate-pulse'></div>
+                  <span className='text-sm text-lunary-success font-medium'>
                     Subscription synced to your profile
                   </span>
                 </div>
@@ -213,28 +217,30 @@ export default function SuccessPage() {
             )}
 
             <div className='grid gap-4 text-sm'>
-              <div className='flex justify-between'>
-                <span className='text-gray-400'>Email:</span>
-                <span>{session.customer_email}</span>
+              <div className='flex justify-between py-2 border-b border-lunary-primary-900/50'>
+                <span className='text-lunary-accent-400'>Email:</span>
+                <span className='text-white'>{session.customer_email}</span>
               </div>
 
-              <div className='flex justify-between'>
-                <span className='text-gray-400'>Status:</span>
-                <span className='capitalize'>
+              <div className='flex justify-between py-2 border-b border-lunary-primary-900/50'>
+                <span className='text-lunary-accent-400'>Status:</span>
+                <span className='capitalize text-lunary-highlight font-medium'>
                   {session.subscription.status}
                 </span>
               </div>
 
               {isTrialActive && session.subscription.trial_end && (
-                <div className='flex justify-between'>
-                  <span className='text-gray-400'>Trial ends:</span>
-                  <span>{formatDate(session.subscription.trial_end)}</span>
+                <div className='flex justify-between py-2 border-b border-lunary-primary-900/50'>
+                  <span className='text-lunary-accent-400'>Trial ends:</span>
+                  <span className='text-white'>
+                    {formatDate(session.subscription.trial_end)}
+                  </span>
                 </div>
               )}
 
-              <div className='flex justify-between'>
-                <span className='text-gray-400'>Next billing:</span>
-                <span>
+              <div className='flex justify-between py-2'>
+                <span className='text-lunary-accent-400'>Next billing:</span>
+                <span className='text-white'>
                   {formatDate(session.subscription.current_period_end)}
                 </span>
               </div>
@@ -242,52 +248,58 @@ export default function SuccessPage() {
           </div>
         )}
 
-        <div className='bg-gray-900 rounded-lg p-8 mb-8'>
-          <h2 className='text-2xl font-light mb-6'>
+        <div className='bg-gradient-to-br from-lunary-primary-950/50 to-lunary-accent-950/30 rounded-xl p-8 mb-8 border border-lunary-primary-800/30'>
+          <h2 className='text-2xl font-light mb-6 text-lunary-accent-200'>
             What&apos;s unlocked for you:
           </h2>
 
           <div className='grid md:grid-cols-2 gap-6'>
-            <div className='space-y-4'>
-              <div className='flex items-start gap-3'>
-                <div className='w-2 h-2 bg-white rounded-full mt-2 flex-shrink-0'></div>
+            <div className='space-y-5'>
+              <div className='flex items-start gap-4 group'>
+                <div className='w-2.5 h-2.5 bg-gradient-to-br from-lunary-accent to-lunary-highlight rounded-full mt-2 flex-shrink-0 group-hover:scale-125 transition-transform shadow-[0_0_8px_rgba(199,125,255,0.6)]'></div>
                 <div>
-                  <h3 className='font-medium mb-1'>Complete Birth Chart</h3>
-                  <p className='text-sm text-gray-400'>
+                  <h3 className='font-medium mb-1.5 text-lunary-accent-200 group-hover:text-lunary-accent transition-colors'>
+                    Complete Birth Chart
+                  </h3>
+                  <p className='text-sm text-lunary-accent-400/80'>
                     Detailed planetary positions, aspects, and cosmic patterns
                   </p>
                 </div>
               </div>
 
-              <div className='flex items-start gap-3'>
-                <div className='w-2 h-2 bg-white rounded-full mt-2 flex-shrink-0'></div>
+              <div className='flex items-start gap-4 group'>
+                <div className='w-2.5 h-2.5 bg-gradient-to-br from-lunary-accent to-lunary-highlight rounded-full mt-2 flex-shrink-0 group-hover:scale-125 transition-transform shadow-[0_0_8px_rgba(199,125,255,0.6)]'></div>
                 <div>
-                  <h3 className='font-medium mb-1'>
+                  <h3 className='font-medium mb-1.5 text-lunary-accent-200 group-hover:text-lunary-accent transition-colors'>
                     Daily Personalized Horoscope
                   </h3>
-                  <p className='text-sm text-gray-400'>
+                  <p className='text-sm text-lunary-accent-400/80'>
                     Cosmic guidance tailored to your unique chart
                   </p>
                 </div>
               </div>
             </div>
 
-            <div className='space-y-4'>
-              <div className='flex items-start gap-3'>
-                <div className='w-2 h-2 bg-white rounded-full mt-2 flex-shrink-0'></div>
+            <div className='space-y-5'>
+              <div className='flex items-start gap-4 group'>
+                <div className='w-2.5 h-2.5 bg-gradient-to-br from-lunary-accent to-lunary-highlight rounded-full mt-2 flex-shrink-0 group-hover:scale-125 transition-transform shadow-[0_0_8px_rgba(199,125,255,0.6)]'></div>
                 <div>
-                  <h3 className='font-medium mb-1'>Crystal Recommendations</h3>
-                  <p className='text-sm text-gray-400'>
+                  <h3 className='font-medium mb-1.5 text-lunary-accent-200 group-hover:text-lunary-accent transition-colors'>
+                    Crystal Recommendations
+                  </h3>
+                  <p className='text-sm text-lunary-accent-400/80'>
                     Daily crystal guidance based on your energy
                   </p>
                 </div>
               </div>
 
-              <div className='flex items-start gap-3'>
-                <div className='w-2 h-2 bg-white rounded-full mt-2 flex-shrink-0'></div>
+              <div className='flex items-start gap-4 group'>
+                <div className='w-2.5 h-2.5 bg-gradient-to-br from-lunary-accent to-lunary-highlight rounded-full mt-2 flex-shrink-0 group-hover:scale-125 transition-transform shadow-[0_0_8px_rgba(199,125,255,0.6)]'></div>
                 <div>
-                  <h3 className='font-medium mb-1'>Tarot Pattern Analysis</h3>
-                  <p className='text-sm text-gray-400'>
+                  <h3 className='font-medium mb-1.5 text-lunary-accent-200 group-hover:text-lunary-accent transition-colors'>
+                    Tarot Pattern Analysis
+                  </h3>
+                  <p className='text-sm text-lunary-accent-400/80'>
                     Deep insights into your cosmic trends
                   </p>
                 </div>
@@ -296,28 +308,25 @@ export default function SuccessPage() {
           </div>
         </div>
 
-        <div className='text-center space-y-4 flex flex-wrap justify-center gap-4'>
-          <Button
-            variant='lunary-white'
-            size='lg'
-            className='rounded-full'
-            asChild
-          >
+        <div className='flex flex-wrap justify-center items-center gap-4'>
+          <Button variant='lunary' size='lg' asChild>
             <Link href='/profile'>Complete Your Profile</Link>
           </Button>
 
-          <Button variant='lunary' size='lg' asChild>
+          <Button variant='lunary-soft' size='lg' asChild>
             <Link href='/'>Explore Your Cosmic Dashboard</Link>
           </Button>
         </div>
 
         {isTrialActive && (
           <div className='mt-12 text-center'>
-            <p className='text-sm text-gray-400'>
+            <p className='text-sm text-lunary-accent-400'>
               Enjoying your trial? Your subscription will automatically continue
               after the trial period.
               <br />
-              You can manage your subscription anytime from your profile.
+              <span className='text-lunary-accent-300'>
+                You can manage your subscription anytime from your profile.
+              </span>
             </p>
           </div>
         )}

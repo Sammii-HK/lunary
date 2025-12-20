@@ -66,7 +66,7 @@ export function SearchConsoleMetrics({
   const { performance, topQueries, topPages } = data;
 
   return (
-    <div className='grid gap-6 lg:grid-cols-2'>
+    <div className='grid grid-cols-1 gap-6 lg:grid-cols-2'>
       <Card className='border-zinc-800/30 bg-zinc-900/10'>
         <CardHeader>
           <div className='flex items-center gap-2'>
@@ -80,7 +80,7 @@ export function SearchConsoleMetrics({
           </CardDescription>
         </CardHeader>
         <CardContent className='space-y-4'>
-          <div className='grid grid-cols-2 gap-4'>
+          <div className='grid grid-cols-1 gap-4 sm:grid-cols-2'>
             <div className='rounded-xl border border-zinc-800 bg-zinc-900/40 p-3'>
               <div className='text-xs text-zinc-400'>Total Clicks</div>
               <div className='mt-1 text-xl font-light text-white'>
@@ -155,7 +155,7 @@ export function SearchConsoleMetrics({
         </CardContent>
       </Card>
 
-      <Card className='border-zinc-800/30 bg-zinc-900/10 lg:col-span-2'>
+      <Card className='border-zinc-800/30 bg-zinc-900/10 col-span-1 lg:col-span-2'>
         <CardHeader>
           <div className='flex items-center gap-2'>
             <ExternalLink className='h-4 w-4 text-lunary-primary-400/70' />

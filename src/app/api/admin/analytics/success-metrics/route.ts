@@ -7,7 +7,10 @@ import {
   resolveDateRange,
 } from '@/lib/analytics/date-range';
 import { getSearchConsoleData } from '@/lib/google/search-console';
-import { getPostHogActiveUsers } from '@/lib/posthog-server';
+import {
+  getPostHogActiveUsers,
+  getPostHogActiveUsersTrends,
+} from '@/lib/posthog-server';
 
 // Test user exclusion patterns
 const TEST_EMAIL_PATTERN = '%@test.lunary.app';
@@ -38,12 +41,59 @@ export async function GET(request: NextRequest) {
     let weeklyReturningChange = 0;
 
     try {
+      // Get current period data
       const posthogData = await getPostHogActiveUsers();
       if (posthogData) {
         dau = posthogData.dau;
         weeklyReturning = posthogData.wau;
-        dauTrend = 'stable';
-        weeklyReturningTrend = 'stable';
+      }
+
+      // Get previous period data for comparison
+      try {
+        const prevTrends = await getPostHogActiveUsersTrends(
+          prevRangeStart,
+          prevRangeEnd,
+          'day',
+        );
+        const currentTrends = await getPostHogActiveUsersTrends(
+          range.start,
+          range.end,
+          'day',
+        );
+
+        if (prevTrends.length > 0 && currentTrends.length > 0) {
+          // Use the last value from each period
+          const prevDau = prevTrends[prevTrends.length - 1]?.dau || 0;
+          const prevWau = prevTrends[prevTrends.length - 1]?.wau || 0;
+          const currentDau =
+            currentTrends[currentTrends.length - 1]?.dau || dau;
+          const currentWau =
+            currentTrends[currentTrends.length - 1]?.wau || weeklyReturning;
+
+          // Calculate trends
+          dauChange =
+            prevDau > 0 ? ((currentDau - prevDau) / prevDau) * 100 : 0;
+          dauTrend = dauChange > 1 ? 'up' : dauChange < -1 ? 'down' : 'stable';
+
+          weeklyReturningChange =
+            prevWau > 0 ? ((currentWau - prevWau) / prevWau) * 100 : 0;
+          weeklyReturningTrend =
+            weeklyReturningChange > 1
+              ? 'up'
+              : weeklyReturningChange < -1
+                ? 'down'
+                : 'stable';
+
+          // Update values to use the trend data if available
+          dau = currentDau;
+          weeklyReturning = currentWau;
+        }
+      } catch (trendError) {
+        console.warn(
+          '[success-metrics] Failed to fetch trends for comparison:',
+          trendError,
+        );
+        // Fall back to current snapshot without trends
       }
     } catch (error) {
       console.warn('[success-metrics] PostHog API error:', error);
@@ -226,6 +276,14 @@ export async function GET(request: NextRequest) {
         : activeSubscriptions > 0
           ? 100
           : 0;
+
+    // 6e. ARPU (Average Revenue Per User)
+    const arpu = payingSubscriptions > 0 ? mrr / payingSubscriptions : 0;
+    const prevArpu =
+      prevActiveSubscriptions > 0 ? prevMrr / prevActiveSubscriptions : 0;
+    const arpuTrend =
+      arpu > prevArpu ? 'up' : arpu < prevArpu ? 'down' : 'stable';
+    const arpuChange = prevArpu > 0 ? ((arpu - prevArpu) / prevArpu) * 100 : 0;
 
     // 6d. Trial Conversion Rate (trial_started → trial_converted)
     const trialStartedResult = await sql`
@@ -429,6 +487,12 @@ export async function GET(request: NextRequest) {
         value: activeSubscriptions,
         trend: activeSubscriptionsTrend,
         change: Number(activeSubscriptionsChange.toFixed(1)),
+        target: null,
+      },
+      arpu: {
+        value: Number(arpu.toFixed(2)),
+        trend: arpuTrend,
+        change: Number(arpuChange.toFixed(1)),
         target: null,
       },
       trial_conversion_rate: {

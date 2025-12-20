@@ -585,6 +585,64 @@ async function setupDatabase() {
 
     console.log('✅ User notes table created');
 
+    // Create legacy_fallback_usage table
+    await sql`
+      CREATE TABLE IF NOT EXISTS legacy_fallback_usage (
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        user_id TEXT,
+        user_email TEXT,
+        used_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+        migrated BOOLEAN DEFAULT false,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+      )
+    `;
+
+    await sql`CREATE INDEX IF NOT EXISTS idx_legacy_fallback_usage_used_at ON legacy_fallback_usage(used_at DESC)`;
+    await sql`CREATE INDEX IF NOT EXISTS idx_legacy_fallback_usage_user_id ON legacy_fallback_usage(user_id)`;
+    await sql`CREATE INDEX IF NOT EXISTS idx_legacy_fallback_usage_user_email ON legacy_fallback_usage(user_email)`;
+
+    console.log('✅ Legacy fallback usage table created');
+
+    // Create jazz_migration_status table
+    await sql`
+      CREATE TABLE IF NOT EXISTS jazz_migration_status (
+        user_id TEXT PRIMARY KEY,
+        migrated_at TIMESTAMP WITH TIME ZONE,
+        migration_status TEXT NOT NULL DEFAULT 'pending',
+        last_sync_at TIMESTAMP WITH TIME ZONE,
+        jazz_account_id TEXT,
+        error_message TEXT,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+        updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+      )
+    `;
+
+    await sql`CREATE INDEX IF NOT EXISTS idx_jazz_migration_status_status ON jazz_migration_status(migration_status)`;
+    await sql`CREATE INDEX IF NOT EXISTS idx_jazz_migration_status_jazz_account_id ON jazz_migration_status(jazz_account_id)`;
+
+    await sql`
+      CREATE OR REPLACE FUNCTION update_jazz_migration_status_updated_at()
+      RETURNS TRIGGER AS $$
+      BEGIN
+          NEW.updated_at = NOW();
+          RETURN NEW;
+      END;
+      $$ language 'plpgsql'
+    `;
+
+    await sql`
+      DROP TRIGGER IF EXISTS update_jazz_migration_status_updated_at ON jazz_migration_status
+    `;
+
+    await sql`
+      CREATE TRIGGER update_jazz_migration_status_updated_at
+          BEFORE UPDATE ON jazz_migration_status
+          FOR EACH ROW
+          EXECUTE FUNCTION update_jazz_migration_status_updated_at()
+    `;
+
+    console.log('✅ Jazz migration status table created');
+
     await sql`
       CREATE TABLE IF NOT EXISTS journal_patterns (
         id SERIAL PRIMARY KEY,

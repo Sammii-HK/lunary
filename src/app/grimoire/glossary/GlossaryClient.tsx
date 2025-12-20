@@ -48,7 +48,7 @@ const GRIMOIRE_PAGE_LINKS: Record<string, string> = {
   ic: '/grimoire/houses/overview/4',
   ascendant: '/grimoire/houses/overview/1',
   descendant: '/grimoire/houses/overview/7',
-  'saturn-return': '/grimoire/astronomy/retrogrades/saturn',
+  'saturn-return': '/grimoire/transits',
   synastry: '/grimoire/compatibility',
   zodiac: '/grimoire/zodiac',
   element: '/grimoire/zodiac',
