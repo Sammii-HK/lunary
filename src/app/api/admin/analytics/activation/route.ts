@@ -43,9 +43,16 @@ export async function GET(request: NextRequest) {
       });
     }
 
+    // Helper to convert array to PostgreSQL text array literal
+    const toTextArrayLiteral = (values: string[]): string | null => {
+      if (values.length === 0) return null;
+      return `{${values.map((v) => `"${String(v).replace(/\\/g, '\\\\').replace(/"/g, '\\"')}"`).join(',')}}`;
+    };
+
     // Check which users activated within 24h
     let activatedCount = 0;
     const activationBreakdown: Record<string, number> = {};
+    const activationEventsArray = toTextArrayLiteral(ACTIVATION_EVENTS)!;
 
     for (const signup of signups) {
       const signupAt = new Date(signup.signup_at);
@@ -54,7 +61,6 @@ export async function GET(request: NextRequest) {
       );
 
       // Check if user completed any activation event within 24h
-      const activationEventsArray = `{${ACTIVATION_EVENTS.map((e) => `"${e.replace(/"/g, '\\"')}"`).join(',')}}`;
       const activatedResult = await sql`
         SELECT event_type, COUNT(*) as count
         FROM conversion_events
@@ -80,7 +86,6 @@ export async function GET(request: NextRequest) {
       signups.length > 0 ? (activatedCount / signups.length) * 100 : 0;
 
     // Calculate daily breakdown for trends
-    const activationEventsArray = `{${ACTIVATION_EVENTS.map((e) => `"${e.replace(/"/g, '\\"')}"`).join(',')}}`;
     const dailyBreakdown = await sql`
       WITH signups_by_day AS (
         SELECT 
