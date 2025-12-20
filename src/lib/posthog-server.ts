@@ -105,7 +105,7 @@ export async function shutdownPostHog(): Promise<void> {
 const POSTHOG_API_HOST =
   process.env.NEXT_PUBLIC_POSTHOG_HOST || 'https://eu.i.posthog.com';
 
-async function queryPostHogAPI<T>(
+export async function queryPostHogAPI<T>(
   endpoint: string,
   options?: RequestInit,
 ): Promise<T | null> {

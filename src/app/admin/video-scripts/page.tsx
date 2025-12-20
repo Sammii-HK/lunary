@@ -39,6 +39,7 @@ interface ScriptSection {
 interface TikTokMetadata {
   theme: string;
   title: string;
+  series: string;
   summary: string;
 }
 
@@ -58,6 +59,7 @@ interface VideoScript {
   metadata?: TikTokMetadata;
   coverImageUrl?: string;
   partNumber?: number;
+  writtenPostContent?: string;
 }
 
 interface WeekGroup {
@@ -75,6 +77,8 @@ export default function VideoScriptsPage() {
   const [copiedId, setCopiedId] = useState<number | null>(null);
   const [statusUpdating, setStatusUpdating] = useState<number | null>(null);
   const [hideCompleted, setHideCompleted] = useState(true);
+  const [generatingPost, setGeneratingPost] = useState<number | null>(null);
+  const [postCopied, setPostCopied] = useState<number | null>(null);
 
   useEffect(() => {
     loadScripts();
@@ -157,6 +161,41 @@ export default function VideoScriptsPage() {
       setTimeout(() => setCopiedId(null), 2000);
     } catch (error) {
       console.error('Failed to copy:', error);
+    }
+  };
+
+  const generateWrittenPost = async (scriptId: number) => {
+    try {
+      setGeneratingPost(scriptId);
+      const response = await fetch(
+        `/api/admin/video-scripts/${scriptId}/generate-post`,
+        {
+          method: 'POST',
+        },
+      );
+      const data = await response.json();
+      if (data.success) {
+        // Reload scripts to get updated content
+        await loadScripts();
+      } else {
+        alert(`Failed to generate: ${data.error}`);
+      }
+    } catch (error) {
+      console.error('Failed to generate written post:', error);
+      alert('Failed to generate written post');
+    } finally {
+      setGeneratingPost(null);
+    }
+  };
+
+  const copyPostContent = async (script: VideoScript) => {
+    if (!script.writtenPostContent) return;
+    try {
+      await navigator.clipboard.writeText(script.writtenPostContent);
+      setPostCopied(script.id);
+      setTimeout(() => setPostCopied(null), 2000);
+    } catch (error) {
+      console.error('Failed to copy post:', error);
     }
   };
 
@@ -373,6 +412,10 @@ export default function VideoScriptsPage() {
                       formatDate={formatDate}
                       getStatusBadge={getStatusBadge}
                       getPlatformIcon={getPlatformIcon}
+                      onGeneratePost={() => generateWrittenPost(script.id)}
+                      onCopyPost={() => copyPostContent(script)}
+                      generatingPost={generatingPost === script.id}
+                      postCopied={postCopied === script.id}
                     />
                   ))}
 
@@ -396,6 +439,10 @@ export default function VideoScriptsPage() {
                       formatDate={formatDate}
                       getStatusBadge={getStatusBadge}
                       getPlatformIcon={getPlatformIcon}
+                      onGeneratePost={() => generateWrittenPost(script.id)}
+                      onCopyPost={() => copyPostContent(script)}
+                      generatingPost={generatingPost === script.id}
+                      postCopied={postCopied === script.id}
                     />
                   ))}
                 </CardContent>
@@ -419,6 +466,10 @@ function ScriptCard({
   formatDate,
   getStatusBadge,
   getPlatformIcon,
+  onGeneratePost,
+  onCopyPost,
+  generatingPost,
+  postCopied,
 }: {
   script: VideoScript;
   expanded: boolean;
@@ -434,6 +485,10 @@ function ScriptCard({
     onStatusChange?: (status: 'draft' | 'approved' | 'used') => void,
   ) => React.ReactNode;
   getPlatformIcon: (platform: string) => React.ReactNode;
+  onGeneratePost: () => void;
+  onCopyPost: () => void;
+  generatingPost: boolean;
+  postCopied: boolean;
 }) {
   return (
     <div className='border border-slate-700/50 rounded-lg overflow-hidden'>
@@ -480,6 +535,10 @@ function ScriptCard({
           onStatusChange={onStatusChange}
           copied={copied}
           updating={updating}
+          onGeneratePost={onGeneratePost}
+          onCopyPost={onCopyPost}
+          generatingPost={generatingPost}
+          postCopied={postCopied}
         />
       )}
     </div>
@@ -493,12 +552,20 @@ function TikTokExpandedContent({
   onStatusChange,
   copied,
   updating,
+  onGeneratePost,
+  onCopyPost,
+  generatingPost,
+  postCopied,
 }: {
   script: VideoScript;
   onCopy: () => void;
   onStatusChange: (status: 'draft' | 'approved' | 'used') => void;
   copied: boolean;
   updating: boolean;
+  onGeneratePost: () => void;
+  onCopyPost: () => void;
+  generatingPost: boolean;
+  postCopied: boolean;
 }) {
   const [metadataCopied, setMetadataCopied] = useState(false);
   const [imageCopied, setImageCopied] = useState(false);
@@ -650,20 +717,104 @@ function TikTokExpandedContent({
         </div>
       )}
 
-      {/* Script Sections */}
-      {script.sections.map((section, idx) => (
-        <div key={idx} className='space-y-2'>
+      {/* Written Post Content */}
+      <div className='space-y-2 pb-4 border-b border-slate-700/50'>
+        <div className='flex items-center justify-between'>
           <div className='flex items-center gap-2'>
-            <span className='text-sm font-medium text-violet-400'>
-              [{section.name}]
+            <span className='text-sm font-medium text-emerald-400 flex items-center gap-2'>
+              <FileText className='w-4 h-4' />
+              Written Post Content
             </span>
-            <span className='text-xs text-slate-500'>{section.duration}</span>
           </div>
-          <p className='text-slate-300 text-sm leading-relaxed whitespace-pre-wrap'>
-            {section.content}
-          </p>
+          <div className='flex gap-2'>
+            {!script.writtenPostContent && (
+              <Button
+                size='sm'
+                variant='outline'
+                onClick={onGeneratePost}
+                disabled={generatingPost}
+                className='border-emerald-700 text-emerald-300 hover:bg-emerald-800/20'
+              >
+                {generatingPost ? (
+                  <Loader2 className='w-3 h-3 mr-1 animate-spin' />
+                ) : (
+                  <Sparkles className='w-3 h-3 mr-1' />
+                )}
+                Generate
+              </Button>
+            )}
+            {script.writtenPostContent && (
+              <Button
+                size='sm'
+                variant='ghost'
+                onClick={onCopyPost}
+                className='h-7 text-xs text-slate-400 hover:text-white'
+              >
+                {postCopied ? (
+                  <Check className='w-3 h-3 mr-1 text-green-500' />
+                ) : (
+                  <Copy className='w-3 h-3 mr-1' />
+                )}
+                {postCopied ? 'Copied' : 'Copy'}
+              </Button>
+            )}
+          </div>
         </div>
-      ))}
+        {script.writtenPostContent ? (
+          <p className='text-slate-300 text-sm leading-relaxed whitespace-pre-wrap bg-slate-800/30 rounded-lg p-3 border border-slate-700/50'>
+            {script.writtenPostContent}
+          </p>
+        ) : (
+          <p className='text-slate-500 text-sm italic'>
+            No written post content generated yet. Click Generate to create
+            social media post content for this video.
+          </p>
+        )}
+      </div>
+
+      {/* Complete Script */}
+      <div className='space-y-2'>
+        <div className='flex items-center gap-2'>
+          <span className='text-sm font-medium text-violet-400'>
+            Complete Script
+          </span>
+          <span className='text-xs text-slate-500'>
+            {script.estimatedDuration} • {script.wordCount} words
+          </span>
+        </div>
+        <p className='text-slate-300 text-sm leading-relaxed whitespace-pre-wrap'>
+          {script.fullScript}
+        </p>
+      </div>
+
+      {/* Section Breakdown (for reference) */}
+      {script.sections.length > 1 && (
+        <details className='mt-4'>
+          <summary className='text-sm font-medium text-slate-400 cursor-pointer hover:text-slate-300'>
+            Section Breakdown (for reference)
+          </summary>
+          <div className='mt-2 space-y-3'>
+            {script.sections.map((section, idx) => (
+              <div
+                key={idx}
+                className='space-y-1 pl-4 border-l-2 border-slate-700'
+              >
+                <div className='flex items-center gap-2'>
+                  <span className='text-xs font-medium text-violet-400'>
+                    {section.name}
+                  </span>
+                  <span className='text-xs text-slate-500'>
+                    {section.duration}
+                  </span>
+                </div>
+                <p className='text-slate-400 text-xs leading-relaxed whitespace-pre-wrap'>
+                  {section.content}
+                </p>
+              </div>
+            ))}
+          </div>
+        </details>
+      )}
 
       {/* Actions */}
       <div className='flex items-center justify-between pt-4 border-t border-slate-700/50'>

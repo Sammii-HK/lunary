@@ -1,46 +1,31 @@
-# Comprehensive KPI Spreadsheet Setup Guide
+# KPI Spreadsheet Setup Guide (DEPRECATED)
 
-## Overview
+## ⚠️ This approach has been replaced
 
-This guide shows you how to set up 10 separate Google Sheets that automatically populate with comprehensive analytics data from Lunary's analytics API.
+This guide described the old Google Apps Script approach, which has been **replaced by the server-side implementation**.
 
-## API Endpoint
+**Please use the new setup guide instead**: [`docs/analytics-sheet.md`](./analytics-sheet.md)
 
-**URL**: `https://lunary.app/api/analytics/summary`  
-**Method**: GET  
-**Authentication**: Bearer token (set `ANALYTICS_API_SECRET` in environment variables)
+The new server-side approach:
 
-## Setting Up the API Secret
+- ✅ Runs automatically via cron (no manual Apps Script setup)
+- ✅ Writes directly from the server (more reliable)
+- ✅ Uses OAuth2 authentication (same as YouTube API)
+- ✅ Provides clean, investor-grade weekly metrics
+- ✅ Supports backfilling historical data
 
-### Step 1: Generate a Secure Secret
+## Migration Notes
 
-```bash
-# Using Node.js
-node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
+If you were using the old Apps Script approach:
 
-# Or using OpenSSL
-openssl rand -hex 32
-```
+1. The new system uses different sheet tabs (README, Weekly_KPIs, Funnel_Week, Feature_Usage_Weekly)
+2. Old data can remain in the sheet for reference
+3. New weekly data will be written to the new tabs automatically
+4. You can backfill historical weeks using the `/api/admin/analytics/backfill` endpoint
 
-### Step 2: Add Secret to Vercel
+---
 
-1. Go to Vercel project → Settings → Environment Variables
-2. Add: `ANALYTICS_API_SECRET` = `<your-generated-secret>`
-3. Save and redeploy
-
-### Step 3: Create Your Google Sheet
-
-1. Create a new Google Sheet
-2. Name it "Lunary KPI Dashboard" or similar
-3. The script will automatically create all 10 sheets + history sheet
-
-### Step 4: Add the Script
-
-1. In your Google Sheet, go to **Extensions** → **Apps Script**
-2. Delete any boilerplate code
-3. Paste the complete script below
-
-## Complete Google Apps Script
+## Old Google Apps Script (for reference only)
 
 ```javascript
 const ANALYTICS_URL = 'https://lunary.app/api/analytics/summary';
@@ -557,11 +542,9 @@ Cost tracking: AI tokens, costs per user, infrastructure costs
 
 Comprehensive daily snapshot of all key metrics for historical analysis
 
-## Notes
+## Notes (Old Approach - Deprecated)
 
-- Some metrics may return `null` or `0` if data isn't available (e.g., CAC, infrastructure costs, SEO data)
-- Cohort retention builds up over time as users sign up
-- SEO metrics require Google Search Console API integration
-- Infrastructure costs may need manual input or Vercel API integration
-- The script automatically creates all sheets if they don't exist
-- Each sheet appends a new row daily (except CohortRetention which updates existing rows)
+- ⚠️ **This Apps Script approach is deprecated**
+- ✅ See [`docs/analytics-sheet.md`](./analytics-sheet.md) for the new server-side implementation
+- Old data can remain in sheets for historical reference
+- The new server-side approach provides cleaner, investor-grade weekly metrics

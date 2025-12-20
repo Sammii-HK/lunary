@@ -1020,35 +1020,32 @@ export default function SocialPostsPage() {
                     </CardHeader>
                     <CardContent>
                       <div className='space-y-4'>
-                        {post.imageUrl &&
-                          ['instagram', 'pinterest', 'reddit'].includes(
-                            post.platform,
-                          ) && (
-                            <div className='relative w-full max-w-md mx-auto'>
-                              <Image
-                                src={post.imageUrl}
-                                alt='Post image'
-                                width={800}
-                                height={800}
-                                className='w-full rounded-lg border border-zinc-700 cursor-pointer hover:opacity-90'
+                        {post.imageUrl && (
+                          <div className='relative w-full max-w-md mx-auto'>
+                            <Image
+                              src={post.imageUrl}
+                              alt='Post image'
+                              width={800}
+                              height={800}
+                              className='w-full rounded-lg border border-zinc-700 cursor-pointer hover:opacity-90'
+                              onClick={() =>
+                                window.open(post.imageUrl, '_blank')
+                              }
+                              unoptimized
+                            />
+                            <div className='absolute top-2 right-2 flex gap-2'>
+                              <button
                                 onClick={() =>
-                                  window.open(post.imageUrl, '_blank')
+                                  handleDownloadImage(post.imageUrl!)
                                 }
-                                unoptimized
-                              />
-                              <div className='absolute top-2 right-2 flex gap-2'>
-                                <button
-                                  onClick={() =>
-                                    handleDownloadImage(post.imageUrl!)
-                                  }
-                                  className='bg-black/70 hover:bg-black/90 text-white px-2 py-1 rounded text-xs flex items-center gap-1'
-                                >
-                                  <Download className='h-3 w-3' />
-                                  Save
-                                </button>
-                              </div>
+                                className='bg-black/70 hover:bg-black/90 text-white px-2 py-1 rounded text-xs flex items-center gap-1'
+                              >
+                                <Download className='h-3 w-3' />
+                                Save
+                              </button>
                             </div>
-                          )}
+                          </div>
+                        )}
 
                         <div className='p-4 bg-zinc-800/50 rounded-lg border border-zinc-700'>
                           {editingPost === post.id ? (

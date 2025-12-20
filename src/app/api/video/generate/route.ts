@@ -14,6 +14,7 @@ import {
 } from '@/lib/video/narrative-generator';
 import { generateTopicImages } from '@/lib/video/image-generator';
 import { generateWeeklyContent } from '../../../../../utils/blog/weeklyContentGenerator';
+import { sendDiscordNotification } from '@/lib/discord';
 
 // Version for cache invalidation - increment when prompts change
 const SCRIPT_VERSION = {
@@ -869,6 +870,43 @@ export async function POST(request: NextRequest) {
     const videoRecord = result.rows[0];
 
     console.log(`✅ Video generated and stored: ${videoUrl}`);
+
+    // Send Discord notification with video details for manual backup
+    sendDiscordNotification({
+      title: `🎥 Video Generated: ${title}`,
+      description: `New ${type}-form video created. Download link below if Succulent fails.`,
+      url: videoUrl,
+      fields: [
+        {
+          name: '📹 Video URL (Blob)',
+          value: videoUrl,
+          inline: false,
+        },
+        {
+          name: '📝 Title',
+          value: title || 'No title',
+          inline: true,
+        },
+        {
+          name: '📊 Type',
+          value: type,
+          inline: true,
+        },
+        {
+          name: '📱 Post Content',
+          value:
+            postContent && postContent.length > 1024
+              ? postContent.substring(0, 1021) + '...'
+              : postContent || description || 'No post content',
+          inline: false,
+        },
+      ],
+      color: 'success',
+      category: 'todo',
+      dedupeKey: `video-generated-${videoRecord.id}`,
+    }).catch((err) => {
+      console.error('Failed to send Discord notification:', err);
+    });
 
     // Schedule video to platforms (fire and forget - don't block response)
     // Use postContent for social media posts if available, otherwise fall back to description

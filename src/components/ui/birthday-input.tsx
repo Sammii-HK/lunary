@@ -93,23 +93,45 @@ export function BirthdayInput({
     }
   }, [value, format, touched]);
 
+  const formatInputValue = useCallback((raw: string): string => {
+    // Remove all non-digits to get just the numbers
+    const digitsOnly = raw.replace(/\D/g, '');
+
+    // If empty, return empty
+    if (!digitsOnly) return '';
+
+    // Limit to 8 digits (for date)
+    const limitedDigits = digitsOnly.slice(0, 8);
+
+    // Auto-format with slashes
+    // This works for both MDY and DMY since the structure is the same (XX/XX/XXXX)
+    if (limitedDigits.length <= 2) {
+      return limitedDigits;
+    } else if (limitedDigits.length <= 4) {
+      return `${limitedDigits.slice(0, 2)}/${limitedDigits.slice(2)}`;
+    } else {
+      return `${limitedDigits.slice(0, 2)}/${limitedDigits.slice(2, 4)}/${limitedDigits.slice(4, 8)}`;
+    }
+  }, []);
+
   const handleChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
       const raw = e.target.value;
-      setInputValue(raw);
+      const formatted = formatInputValue(raw);
+      setInputValue(formatted);
       setTouched(true);
       setError(null);
 
       const digitsOnly = raw.replace(/\D/g, '');
       if (digitsOnly.length >= 8) {
-        const parsed = parseFlexibleDate(raw, format);
+        const parsed = parseFlexibleDate(formatted, format);
         if (parsed) {
           onChange(parsed);
           setError(null);
         }
       }
     },
-    [format, onChange],
+    [format, onChange, formatInputValue],
   );
 
   const handleBlur = useCallback(() => {
@@ -142,7 +164,7 @@ export function BirthdayInput({
     <div className='w-full'>
       <input
         type='text'
-        inputMode='numeric'
+        inputMode='text'
         id={id}
         name={name}
         value={inputValue}
@@ -152,6 +174,7 @@ export function BirthdayInput({
         disabled={disabled}
         placeholder={placeholder}
         autoComplete='bday'
+        maxLength={10}
         className={cn(
           'w-full px-4 py-3 bg-zinc-800 border rounded-lg text-white placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-lunary-primary focus:border-transparent transition-colors',
           error ? 'border-red-500' : 'border-zinc-700',

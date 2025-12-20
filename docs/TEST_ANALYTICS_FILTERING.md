@@ -30,9 +30,13 @@ This will:
 3. Compare subscriptions with/without filtering
 4. Show you the difference
 
-## Google Apps Script Update
+## Google Apps Script Update (Deprecated)
 
-**Yes, running your Apps Script again WILL correct the numbers!**
+⚠️ **Note**: The Google Apps Script approach has been replaced by the server-side implementation. See [`docs/analytics-sheet.md`](./analytics-sheet.md) for the new approach.
+
+**If you're still using the old Apps Script:**
+
+Yes, running your Apps Script again WILL correct the numbers!
 
 The Apps Script fetches fresh data from the API endpoint each time it runs. Since we've updated the endpoint to exclude test users, the next run will:
 
@@ -75,7 +79,7 @@ All sheets will get new rows with filtered data:
 
 ## Verification Checklist
 
-- [ ] Run Apps Script and check new row appears
+- [ ] Run Apps Script and check new row appears (or use new server-side pipeline)
 - [ ] Compare DAU before/after (should be lower if test users existed)
 - [ ] Check subscription counts (should exclude test subscriptions)
 - [ ] Verify conversion rates look more realistic

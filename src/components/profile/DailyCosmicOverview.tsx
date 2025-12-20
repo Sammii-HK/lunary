@@ -8,6 +8,9 @@ import { hasBirthChartAccess } from '../../../utils/pricing';
 import { Star } from 'lucide-react';
 import { getTarotCard } from '../../../utils/tarot/tarot';
 import dayjs from 'dayjs';
+import utc from 'dayjs/plugin/utc';
+
+dayjs.extend(utc);
 
 interface DailyCosmicOverviewProps {
   className?: string;
@@ -26,7 +29,8 @@ export function DailyCosmicOverview({
   const userBirthday = user?.birthday;
 
   const cosmicOverview = useMemo(() => {
-    const dateStr = dayjs().format('YYYY-MM-DD');
+    // Use UTC date to match tarot card generation (consistent with improvedTarot.tsx)
+    const dateStr = dayjs().utc().format('YYYY-MM-DD');
 
     let dailyCard = null;
     if (userName && userBirthday) {

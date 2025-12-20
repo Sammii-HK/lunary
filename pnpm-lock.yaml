@@ -17,6 +17,9 @@ importers:
       '@astrodraw/astrochart':
         specifier: ^3.0.2
         version: 3.0.2
+      '@date-fns/tz':
+        specifier: ^1.4.1
+        version: 1.4.1
       '@getbrevo/brevo':
         specifier: ^3.0.1
         version: 3.0.1

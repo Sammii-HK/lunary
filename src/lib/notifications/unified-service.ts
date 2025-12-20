@@ -18,12 +18,38 @@ function ensureVapidConfigured() {
   const privateKey = process.env.VAPID_PRIVATE_KEY;
 
   if (!publicKey || !privateKey) {
-    throw new Error(
-      'VAPID keys not configured. Please set VAPID_PUBLIC_KEY and VAPID_PRIVATE_KEY in your environment variables.',
+    const missingKeys = [];
+    if (!publicKey) missingKeys.push('VAPID_PUBLIC_KEY');
+    if (!privateKey) missingKeys.push('VAPID_PRIVATE_KEY');
+
+    const errorMsg = `VAPID keys not configured. Missing: ${missingKeys.join(', ')}. Please set VAPID_PUBLIC_KEY and VAPID_PRIVATE_KEY in your environment variables.`;
+    console.error('❌ VAPID Configuration Error:', {
+      missingKeys,
+      publicKeyConfigured: !!publicKey,
+      privateKeyConfigured: !!privateKey,
+      publicKeyLength: publicKey?.length || 0,
+      privateKeyLength: privateKey?.length || 0,
+    });
+    throw new Error(errorMsg);
+  }
+
+  // Validate key format
+  if (publicKey.length < 80) {
+    console.warn(
+      `⚠️ VAPID public key appears invalid (length: ${publicKey.length}, expected 80+)`,
     );
   }
 
-  webpush.setVapidDetails('mailto:info@lunary.app', publicKey, privateKey);
+  try {
+    webpush.setVapidDetails('mailto:info@lunary.app', publicKey, privateKey);
+  } catch (error) {
+    console.error('❌ Failed to configure VAPID details:', {
+      error: error instanceof Error ? error.message : 'Unknown error',
+      publicKeyLength: publicKey.length,
+      privateKeyLength: privateKey.length,
+    });
+    throw error;
+  }
 }
 
 export interface NotificationEvent {
@@ -651,25 +677,46 @@ export async function sendUnifiedNotification(
 
         return { success: true, endpoint: sub.endpoint };
       } catch (error) {
+        const errorObj = error as any;
+        const statusCode = errorObj?.statusCode;
+        const errorMessage =
+          error instanceof Error ? error.message : 'Unknown error';
+        const endpointPreview = sub.endpoint.substring(0, 50);
+
+        // Enhanced error logging with VAPID and subscription details
         console.error(
-          `Failed to send to ${sub.endpoint.substring(0, 50)}...`,
-          error,
+          `❌ Failed to send notification to ${endpointPreview}...`,
+          {
+            endpoint: endpointPreview,
+            userId: sub.user_id || 'anonymous',
+            statusCode,
+            error: errorMessage,
+            errorType: errorObj?.name || 'Unknown',
+            hasVapidKeys: !!(
+              process.env.VAPID_PUBLIC_KEY && process.env.VAPID_PRIVATE_KEY
+            ),
+            timestamp: new Date().toISOString(),
+          },
         );
 
-        const errorObj = error as any;
         const isExpired =
-          errorObj?.statusCode === 410 ||
-          errorObj?.statusCode === 404 ||
-          errorObj?.message?.includes('410') ||
-          errorObj?.message?.includes('404') ||
-          errorObj?.message?.includes('invalid') ||
-          errorObj?.message?.includes('expired') ||
-          errorObj?.message?.includes('unsubscribed');
+          statusCode === 410 ||
+          statusCode === 404 ||
+          errorMessage.includes('410') ||
+          errorMessage.includes('404') ||
+          errorMessage.includes('invalid') ||
+          errorMessage.includes('expired') ||
+          errorMessage.includes('unsubscribed') ||
+          errorMessage.includes('Gone') ||
+          errorMessage.includes('Not Found');
 
         if (isExpired) {
+          console.log(
+            `🔄 Marking subscription as inactive due to ${statusCode || 'expired'}: ${endpointPreview}...`,
+          );
           await sql`
             UPDATE push_subscriptions 
-            SET is_active = false 
+            SET is_active = false, updated_at = NOW()
             WHERE endpoint = ${sub.endpoint}
           `;
         }
@@ -677,7 +724,8 @@ export async function sendUnifiedNotification(
         return {
           success: false,
           endpoint: sub.endpoint,
-          error: error instanceof Error ? error.message : 'Unknown error',
+          error: errorMessage,
+          statusCode,
         };
       }
     });
@@ -709,13 +757,24 @@ export async function sendUnifiedNotification(
       eventKey,
     };
   } catch (error) {
-    console.error('Error sending unified notification:', error);
+    const errorMessage =
+      error instanceof Error ? error.message : 'Unknown error';
+    console.error('❌ Error sending unified notification:', {
+      error: errorMessage,
+      eventType: event?.type,
+      eventName: event?.name,
+      errorType: error instanceof Error ? error.name : 'Unknown',
+      hasVapidKeys: !!(
+        process.env.VAPID_PUBLIC_KEY && process.env.VAPID_PRIVATE_KEY
+      ),
+      timestamp: new Date().toISOString(),
+    });
     return {
       success: false,
       recipientCount: 0,
       successful: 0,
       failed: 0,
-      error: error instanceof Error ? error.message : 'Unknown error',
+      error: errorMessage,
     };
   }
 }

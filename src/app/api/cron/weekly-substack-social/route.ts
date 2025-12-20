@@ -229,6 +229,7 @@ export async function GET(request: NextRequest) {
       const scheduledPosts: any[] = [];
 
       // Helper to get caption based on platformOptions config
+      // Use exactly 3 hashtags for all platforms
       const getCaption = (
         captionType: 'short' | 'medium' | 'long',
         includeHashtags = false,
@@ -236,7 +237,9 @@ export async function GET(request: NextRequest) {
         const caption =
           content.captions[captionType] || content.captions.medium;
         if (includeHashtags && content.hashtags) {
-          return `${caption}\n\n${content.hashtags.slice(0, 5).join(' ')}`;
+          // Use exactly 3 hashtags for all platforms
+          const threeHashtags = content.hashtags.slice(0, 3).join(' ');
+          return `${caption}\n\n${threeHashtags}`;
         }
         return caption;
       };
@@ -338,11 +341,11 @@ export async function GET(request: NextRequest) {
         facebookOptions: { type: 'story' },
       };
 
-      // 6. Twitter/X (landscape) - uses short caption
+      // 6. Twitter/X (landscape 1200x675) - uses short caption with hashtags
       const twitterPost: SucculentPostData = {
         accountGroupId,
         name: `Lunary Weekly - Twitter - ${dateStr}`,
-        content: getCaption('short'),
+        content: getCaption('short', true),
         platforms: ['twitter'],
         scheduledDate: postTime.toISOString(),
         media: [
@@ -354,17 +357,49 @@ export async function GET(request: NextRequest) {
         ],
       };
 
-      // 7. LinkedIn (landscape) - uses long caption
+      // 7. LinkedIn (landscape 1200x627) - uses long caption with hashtags
       const linkedinPost: SucculentPostData = {
         accountGroupId,
         name: `Lunary Weekly - LinkedIn - ${dateStr}`,
-        content: getCaption('long'),
+        content: getCaption('long', true),
         platforms: ['linkedin'],
         scheduledDate: fbPostTime.toISOString(),
         media: [
           {
             type: 'image',
             url: `${baseUrl}/api/social/images?week=0&format=landscape`,
+            alt: content.captions.short,
+          },
+        ],
+      };
+
+      // 8. Bluesky (landscape 1200x630) - uses short caption with hashtags
+      const blueskyPost: SucculentPostData = {
+        accountGroupId,
+        name: `Lunary Weekly - Bluesky - ${dateStr}`,
+        content: getCaption('short', true),
+        platforms: ['bluesky'],
+        scheduledDate: postTime.toISOString(),
+        media: [
+          {
+            type: 'image',
+            url: `${baseUrl}/api/social/images?week=0&format=landscape`,
+            alt: content.captions.short,
+          },
+        ],
+      };
+
+      // 9. Threads (square 1080x1080) - uses medium caption with hashtags
+      const threadsPost: SucculentPostData = {
+        accountGroupId,
+        name: `Lunary Weekly - Threads - ${dateStr}`,
+        content: getCaption('medium', true),
+        platforms: ['threads'],
+        scheduledDate: postTime.toISOString(),
+        media: [
+          {
+            type: 'image',
+            url: `${baseUrl}/api/social/images?week=0&format=square`,
             alt: content.captions.short,
           },
         ],
@@ -378,6 +413,8 @@ export async function GET(request: NextRequest) {
         fbStoryPost,
         twitterPost,
         linkedinPost,
+        blueskyPost,
+        threadsPost,
       ];
 
       // Add video posts if short-form video was generated

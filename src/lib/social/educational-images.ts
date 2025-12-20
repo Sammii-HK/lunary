@@ -16,17 +16,23 @@ export interface EducationalImageConfig {
 
 /**
  * Get platform-appropriate image format
+ * Uses recommended sizes for each platform:
+ * - Landscape (1200x630): Twitter/X, LinkedIn, Bluesky, Facebook
+ * - Square (1080x1080): Instagram, Threads, Pinterest
+ * - Portrait (1080x1350): Instagram Feed (4:5)
+ * - Story (1080x1920): TikTok, Stories, Reels
  */
 export function getPlatformImageFormat(platform: string): ImageFormat {
   const formatMap: Record<string, ImageFormat> = {
-    instagram: 'square',
-    twitter: 'landscape',
-    facebook: 'landscape',
-    linkedin: 'landscape',
-    pinterest: 'square',
-    tiktok: 'story',
-    reddit: 'landscape',
-    bluesky: 'landscape',
+    instagram: 'square', // 1080x1080 for feed
+    twitter: 'landscape', // 1200x630 (1.91:1)
+    facebook: 'landscape', // 1200x630
+    linkedin: 'landscape', // 1200x627 (1.91:1)
+    pinterest: 'square', // 1080x1080
+    tiktok: 'story', // 1080x1920 (9:16)
+    reddit: 'landscape', // 1200x630
+    bluesky: 'landscape', // 1200x630
+    threads: 'square', // 1080x1080 (1:1)
   };
 
   return formatMap[platform.toLowerCase()] || 'landscape';

@@ -57,6 +57,7 @@ export interface VideoScriptContext {
 
 /**
  * Platform configuration for hashtag usage
+ * All platforms now use exactly 3 hashtags
  */
 const platformHashtagConfig: Record<
   string,
@@ -64,13 +65,13 @@ const platformHashtagConfig: Record<
 > = {
   instagram: { useHashtags: true, count: 3 },
   pinterest: { useHashtags: true, count: 3 },
-  tiktok: { useHashtags: true, count: 2 },
-  facebook: { useHashtags: false, count: 0 },
-  linkedin: { useHashtags: false, count: 0 },
-  twitter: { useHashtags: false, count: 0 },
-  bluesky: { useHashtags: false, count: 0 },
-  threads: { useHashtags: false, count: 0 },
-  reddit: { useHashtags: false, count: 0 },
+  tiktok: { useHashtags: true, count: 3 },
+  facebook: { useHashtags: true, count: 3 },
+  linkedin: { useHashtags: true, count: 3 },
+  twitter: { useHashtags: true, count: 3 },
+  bluesky: { useHashtags: true, count: 3 },
+  threads: { useHashtags: true, count: 3 },
+  reddit: { useHashtags: true, count: 3 },
 };
 
 /**
@@ -450,13 +451,30 @@ export function formatLongFormForPlatform(
 
 /**
  * Format short-form content for a specific platform
+ * Now includes hashtags (3) for all platforms
  */
 export function formatShortFormForPlatform(
   content: string,
   platform: string,
+  hashtags?: { domain: string; topic: string; brand: string },
 ): string {
-  // Short-form has no hashtags on any platform
-  return content;
+  const config = platformHashtagConfig[platform] || {
+    useHashtags: true,
+    count: 3,
+  };
+
+  let formatted = content;
+
+  // Add hashtags if platform supports them and hashtags are provided
+  if (config.useHashtags && config.count > 0 && hashtags) {
+    const tags = [hashtags.domain, hashtags.topic, hashtags.brand].slice(
+      0,
+      config.count,
+    );
+    formatted += '\n\n' + tags.join(' ');
+  }
+
+  return formatted;
 }
 
 /**
@@ -531,7 +549,7 @@ export function generateThematicPostsForWeek(
     'facebook',
     'tiktok',
   ];
-  // Short-form platforms (1-2 sentences, no hashtags)
+  // Short-form platforms (1-2 sentences, with hashtags and images)
   const shortFormPlatforms = ['twitter', 'bluesky', 'threads'];
 
   for (const dayContent of weekContent) {
@@ -561,11 +579,12 @@ export function generateThematicPostsForWeek(
       });
     }
 
-    // Short-form posts
+    // Short-form posts (now with hashtags and images)
     for (const platform of shortFormPlatforms) {
       const formattedContent = formatShortFormForPlatform(
         dayContent.shortForm,
         platform,
+        dayContent.hashtags,
       );
 
       posts.push({
@@ -574,7 +593,7 @@ export function generateThematicPostsForWeek(
         postType: 'educational',
         topic: dayContent.facet.title,
         scheduledDate: dayContent.date,
-        hashtags: '', // No hashtags for short-form platforms
+        hashtags: `${dayContent.hashtags.domain} ${dayContent.hashtags.topic} ${dayContent.hashtags.brand}`,
         category: dayContent.theme.category,
         slug:
           dayContent.facet.grimoireSlug.split('/').pop() ||
