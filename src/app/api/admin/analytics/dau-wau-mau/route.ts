@@ -2,13 +2,23 @@ import { NextRequest, NextResponse } from 'next/server';
 import {
   getPostHogActiveUsers,
   getPostHogRetention,
+  getPostHogActiveUsersTrends,
 } from '@/lib/posthog-server';
+import { resolveDateRange } from '@/lib/analytics/date-range';
 
 export async function GET(request: NextRequest) {
   try {
-    const [posthogData, retentionData] = await Promise.all([
+    const { searchParams } = new URL(request.url);
+    const granularity = (searchParams.get('granularity') || 'day') as
+      | 'day'
+      | 'week'
+      | 'month';
+    const range = resolveDateRange(searchParams, 30);
+
+    const [posthogData, retentionData, trendsData] = await Promise.all([
       getPostHogActiveUsers(),
       getPostHogRetention(),
+      getPostHogActiveUsersTrends(range.start, range.end, granularity),
     ]);
 
     if (!posthogData) {
@@ -37,9 +47,12 @@ export async function GET(request: NextRequest) {
         }
       : { day_1: 0, day_7: 0, day_30: 0 };
 
-    const churnRate = retentionData
-      ? Number((100 - retentionData.day30).toFixed(2))
-      : null;
+    // Churn rate: only calculate if we have valid day 30 retention data
+    // Churn = users who didn't return = 100 - retention
+    const churnRate =
+      retentionData && retentionData.day30 > 0
+        ? Number((100 - retentionData.day30).toFixed(2))
+        : null;
 
     const returningUsers =
       posthogData.wau > 0 && posthogData.dau > 0
@@ -53,7 +66,7 @@ export async function GET(request: NextRequest) {
       returning_users: returningUsers,
       retention,
       churn_rate: churnRate,
-      trends: [],
+      trends: trendsData || [],
       source: 'posthog',
     });
   } catch (error) {

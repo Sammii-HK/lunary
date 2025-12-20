@@ -53,6 +53,56 @@ export async function GET(request: NextRequest) {
       ? Number(avgDaysToConvertRaw.toFixed(2))
       : 0;
 
+    // Enhanced time to conversion breakdown
+    const timeToTrialResult = await sql`
+      SELECT 
+        AVG(EXTRACT(EPOCH FROM (t2.created_at - t1.created_at)) / 86400) as avg_days
+      FROM conversion_events t1
+      JOIN conversion_events t2 ON t1.user_id = t2.user_id
+      WHERE t1.event_type = 'signup'
+        AND t2.event_type = 'trial_started'
+        AND t2.created_at > t1.created_at
+        AND t1.created_at >= ${formatTimestamp(range.start)}
+        AND t1.created_at <= ${formatTimestamp(range.end)}
+        AND (t1.user_email IS NULL OR (t1.user_email NOT LIKE ${TEST_EMAIL_PATTERN} AND t1.user_email != ${TEST_EMAIL_EXACT}))
+    `;
+    const avgDaysToTrial = Number(timeToTrialResult.rows[0]?.avg_days || 0);
+
+    const timeToPaidResult = await sql`
+      SELECT 
+        AVG(EXTRACT(EPOCH FROM (t2.created_at - t1.created_at)) / 86400) as avg_days
+      FROM conversion_events t1
+      JOIN conversion_events t2 ON t1.user_id = t2.user_id
+      WHERE t1.event_type = 'trial_started'
+        AND t2.event_type IN ('trial_converted', 'subscription_started')
+        AND t2.created_at > t1.created_at
+        AND t1.created_at >= ${formatTimestamp(range.start)}
+        AND t1.created_at <= ${formatTimestamp(range.end)}
+        AND (t1.user_email IS NULL OR (t1.user_email NOT LIKE ${TEST_EMAIL_PATTERN} AND t1.user_email != ${TEST_EMAIL_EXACT}))
+    `;
+    const avgDaysToPaid = Number(timeToPaidResult.rows[0]?.avg_days || 0);
+
+    // Conversion velocity by cohort (weekly)
+    const velocityByCohortResult = await sql`
+      SELECT 
+        DATE_TRUNC('week', t1.created_at) as cohort_week,
+        AVG(EXTRACT(EPOCH FROM (t2.created_at - t1.created_at)) / 86400) as avg_days
+      FROM conversion_events t1
+      JOIN conversion_events t2 ON t1.user_id = t2.user_id
+      WHERE t1.event_type = 'signup'
+        AND t2.event_type IN ('trial_converted', 'subscription_started')
+        AND t2.created_at > t1.created_at
+        AND t1.created_at >= ${formatTimestamp(range.start)}
+        AND t1.created_at <= ${formatTimestamp(range.end)}
+        AND (t1.user_email IS NULL OR (t1.user_email NOT LIKE ${TEST_EMAIL_PATTERN} AND t1.user_email != ${TEST_EMAIL_EXACT}))
+      GROUP BY DATE_TRUNC('week', t1.created_at)
+      ORDER BY cohort_week DESC
+    `;
+    const velocityByCohort = velocityByCohortResult.rows.map((row) => ({
+      cohort: row.cohort_week,
+      avgDays: Number(row.avg_days || 0),
+    }));
+
     const trialConversionsResult = await sql`
       SELECT COUNT(*) AS count
       FROM analytics_conversions
@@ -173,6 +223,9 @@ export async function GET(request: NextRequest) {
       conversion_rate: conversionRate,
       trial_conversion_rate: trialConversionRate,
       avg_days_to_convert: avgDaysToConvert,
+      avg_days_to_trial: Number(avgDaysToTrial.toFixed(2)),
+      avg_days_to_paid: Number(avgDaysToPaid.toFixed(2)),
+      velocity_by_cohort: velocityByCohort,
       trigger_breakdown: triggerBreakdown,
       funnel: {
         free_users: freeUsers,

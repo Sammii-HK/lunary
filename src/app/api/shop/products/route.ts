@@ -3,6 +3,7 @@ import Stripe from 'stripe';
 import { getAllProducts, getProductBySlug } from '@/lib/shop/generators';
 
 export const runtime = 'nodejs';
+export const dynamic = 'force-dynamic';
 export const revalidate = 300;
 
 function getStripe() {
@@ -52,7 +53,7 @@ async function getStripeProductMappings(): Promise<StripeProductMapping> {
 
 export async function GET(request: NextRequest) {
   try {
-    const { searchParams } = new URL(request.url);
+    const { searchParams } = request.nextUrl;
     const category = searchParams.get('category');
     const slug = searchParams.get('slug');
 

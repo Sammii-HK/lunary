@@ -105,6 +105,15 @@ export async function shutdownPostHog(): Promise<void> {
 const POSTHOG_API_HOST =
   process.env.NEXT_PUBLIC_POSTHOG_HOST || 'https://eu.i.posthog.com';
 
+// Helper to build test user filter for PostHog queries
+// Note: This filters by person properties.email if available
+// PostHog may not always have email in person properties, so this is best-effort
+function getTestUserFilter(): string {
+  // Filter out test users by email pattern if email property exists
+  // We use a WHERE clause that checks if email doesn't match test pattern
+  return `AND (properties.email IS NULL OR properties.email NOT LIKE '%@test.lunary.app')`;
+}
+
 export async function queryPostHogAPI<T>(
   endpoint: string,
   options?: RequestInit,
@@ -156,6 +165,192 @@ export interface PostHogActiveUsers {
   mau: number;
 }
 
+export interface PostHogActiveUsersTrend {
+  date: string;
+  dau: number;
+  wau: number;
+  mau: number;
+}
+
+export async function getPostHogActiveUsersTrends(
+  startDate: Date,
+  endDate: Date,
+  granularity: 'day' | 'week' | 'month' = 'day',
+): Promise<PostHogActiveUsersTrend[]> {
+  // Determine date truncation based on granularity
+  let dateTrunc: string;
+  switch (granularity) {
+    case 'week':
+      dateTrunc = 'toMonday(toDate(timestamp))';
+      break;
+    case 'month':
+      dateTrunc = 'toStartOfMonth(toDate(timestamp))';
+      break;
+    default:
+      dateTrunc = 'toDate(timestamp)';
+  }
+
+  // For rolling windows, we need data from before startDate
+  // Query 30 days before start for MAU calculation
+  const extendedStart = new Date(startDate);
+  extendedStart.setDate(extendedStart.getDate() - 30);
+  const extendedStartTimestamp = Math.floor(extendedStart.getTime() / 1000);
+  const endTimestamp = Math.floor(endDate.getTime() / 1000);
+
+  // Query daily unique users - this gives us DAU directly
+  const testUserFilter = getTestUserFilter();
+  const dailyQuery = `
+    SELECT 
+      ${dateTrunc} as date,
+      count(DISTINCT person_id) as unique_users
+    FROM events 
+    WHERE event = '$pageview'
+      AND timestamp >= ${extendedStartTimestamp}
+      AND timestamp <= ${endTimestamp}
+      ${testUserFilter}
+    GROUP BY date
+    ORDER BY date ASC
+  `;
+
+  const dailyResult = await queryPostHogAPI<{
+    results: Array<Array<string | number>>;
+  }>('/query/', {
+    method: 'POST',
+    body: JSON.stringify({
+      query: {
+        kind: 'HogQLQuery',
+        query: dailyQuery,
+      },
+    }),
+  });
+
+  if (!dailyResult?.results || dailyResult.results.length === 0) {
+    return [];
+  }
+
+  // Build a map of date -> Set of person_ids for that date
+  // We need the actual person_ids to calculate rolling windows
+  const personIdsByDateQuery = `
+    SELECT 
+      ${dateTrunc} as date,
+      person_id
+    FROM events 
+    WHERE event = '$pageview'
+      AND timestamp >= ${extendedStartTimestamp}
+      AND timestamp <= ${endTimestamp}
+      ${testUserFilter}
+  `;
+
+  const personIdsResult = await queryPostHogAPI<{
+    results: Array<Array<string | number>>;
+  }>('/query/', {
+    method: 'POST',
+    body: JSON.stringify({
+      query: {
+        kind: 'HogQLQuery',
+        query: personIdsByDateQuery,
+      },
+    }),
+  });
+
+  // Build map: date -> Set<person_id>
+  const usersByDate = new Map<string, Set<string>>();
+  if (personIdsResult?.results) {
+    personIdsResult.results.forEach((row) => {
+      const date = String(row[0]);
+      const personId = String(row[1]);
+      if (!usersByDate.has(date)) {
+        usersByDate.set(date, new Set());
+      }
+      usersByDate.get(date)!.add(personId);
+    });
+  }
+
+  // Generate all dates in the requested range
+  const trends: PostHogActiveUsersTrend[] = [];
+  const currentDate = new Date(startDate);
+
+  while (currentDate <= endDate) {
+    let dateStr: string;
+    if (granularity === 'week') {
+      // Get Monday of the week
+      const monday = new Date(currentDate);
+      const day = monday.getDay();
+      const diff = monday.getDate() - day + (day === 0 ? -6 : 1);
+      monday.setDate(diff);
+      dateStr = monday.toISOString().split('T')[0];
+    } else if (granularity === 'month') {
+      // Get first day of month
+      const firstDay = new Date(
+        currentDate.getFullYear(),
+        currentDate.getMonth(),
+        1,
+      );
+      dateStr = firstDay.toISOString().split('T')[0];
+    } else {
+      dateStr = currentDate.toISOString().split('T')[0];
+    }
+
+    // DAU: unique users on this date
+    const dau = usersByDate.get(dateStr)?.size || 0;
+
+    // WAU: unique users in last 7 days (including this date)
+    const wauUsers = new Set<string>();
+    const wauStart = new Date(currentDate);
+    wauStart.setDate(wauStart.getDate() - 6);
+    for (
+      let d = new Date(wauStart);
+      d <= currentDate;
+      d.setDate(d.getDate() + 1)
+    ) {
+      const dStr = d.toISOString().split('T')[0];
+      const users = usersByDate.get(dStr);
+      if (users) {
+        users.forEach((id) => wauUsers.add(id));
+      }
+    }
+    const wau = wauUsers.size;
+
+    // MAU: unique users in last 30 days (including this date)
+    const mauUsers = new Set<string>();
+    const mauStart = new Date(currentDate);
+    mauStart.setDate(mauStart.getDate() - 29);
+    for (
+      let d = new Date(mauStart);
+      d <= currentDate;
+      d.setDate(d.getDate() + 1)
+    ) {
+      const dStr = d.toISOString().split('T')[0];
+      const users = usersByDate.get(dStr);
+      if (users) {
+        users.forEach((id) => mauUsers.add(id));
+      }
+    }
+    const mau = mauUsers.size;
+
+    // Only add if we haven't seen this date (for week/month granularity)
+    if (!trends.find((t) => t.date === dateStr)) {
+      trends.push({
+        date: dateStr,
+        dau,
+        wau,
+        mau,
+      });
+    }
+
+    // Move to next period
+    if (granularity === 'week') {
+      currentDate.setDate(currentDate.getDate() + 7);
+    } else if (granularity === 'month') {
+      currentDate.setMonth(currentDate.getMonth() + 1);
+    } else {
+      currentDate.setDate(currentDate.getDate() + 1);
+    }
+  }
+
+  return trends;
+}
+
 export async function getPostHogActiveUsers(): Promise<PostHogActiveUsers | null> {
   const today = new Date();
   const todayStr = today.toISOString().split('T')[0];
@@ -169,13 +364,14 @@ export async function getPostHogActiveUsers(): Promise<PostHogActiveUsers | null
   const monthAgoStr = monthAgo.toISOString().split('T')[0];
 
   // Use HogQL Query API instead of Insights API (Personal API Keys don't support Insights)
+  const testUserFilter = getTestUserFilter();
   const [dauResult, wauResult, mauResult] = await Promise.all([
     queryPostHogAPI<{ results: Array<Array<number>> }>('/query/', {
       method: 'POST',
       body: JSON.stringify({
         query: {
           kind: 'HogQLQuery',
-          query: `SELECT count(DISTINCT person_id) FROM events WHERE event = '$pageview' AND timestamp >= today()`,
+          query: `SELECT count(DISTINCT person_id) FROM events WHERE event = '$pageview' AND timestamp >= today() ${testUserFilter}`,
         },
       }),
     }),
@@ -184,7 +380,7 @@ export async function getPostHogActiveUsers(): Promise<PostHogActiveUsers | null
       body: JSON.stringify({
         query: {
           kind: 'HogQLQuery',
-          query: `SELECT count(DISTINCT person_id) FROM events WHERE event = '$pageview' AND timestamp >= now() - INTERVAL 7 DAY`,
+          query: `SELECT count(DISTINCT person_id) FROM events WHERE event = '$pageview' AND timestamp >= now() - INTERVAL 7 DAY ${testUserFilter}`,
         },
       }),
     }),
@@ -193,7 +389,7 @@ export async function getPostHogActiveUsers(): Promise<PostHogActiveUsers | null
       body: JSON.stringify({
         query: {
           kind: 'HogQLQuery',
-          query: `SELECT count(DISTINCT person_id) FROM events WHERE event = '$pageview' AND timestamp >= now() - INTERVAL 30 DAY`,
+          query: `SELECT count(DISTINCT person_id) FROM events WHERE event = '$pageview' AND timestamp >= now() - INTERVAL 30 DAY ${testUserFilter}`,
         },
       }),
     }),
@@ -223,6 +419,21 @@ export async function getPostHogAIMetrics(
   daysBack: number = 30,
 ): Promise<PostHogAIMetrics | null> {
   // Use HogQL Query API instead of Insights API
+  const testUserFilter = getTestUserFilter();
+  const queryString = `
+    SELECT 
+      count(*) as total_generations,
+      count(DISTINCT person_id) as unique_users,
+      sum(toFloat64OrNull(properties['$ai_input_tokens'])) as input_tokens,
+      sum(toFloat64OrNull(properties['$ai_output_tokens'])) as output_tokens,
+      sum(toFloat64OrNull(properties['$ai_total_cost_usd'])) as total_cost,
+      avg(toFloat64OrNull(properties['$ai_latency'])) as avg_latency
+    FROM events 
+    WHERE event = '$ai_generation' 
+      AND timestamp >= now() - INTERVAL ${daysBack} DAY
+      ${testUserFilter}
+  `;
+
   const result = await queryPostHogAPI<{ results: Array<Array<number>> }>(
     '/query/',
     {
@@ -230,18 +441,7 @@ export async function getPostHogAIMetrics(
       body: JSON.stringify({
         query: {
           kind: 'HogQLQuery',
-          query: `
-            SELECT 
-              count(*) as total_generations,
-              count(DISTINCT person_id) as unique_users,
-              sum(toFloat64OrNull(properties['$ai_input_tokens'])) as input_tokens,
-              sum(toFloat64OrNull(properties['$ai_output_tokens'])) as output_tokens,
-              sum(toFloat64OrNull(properties['$ai_total_cost_usd'])) as total_cost,
-              avg(toFloat64OrNull(properties['$ai_latency'])) as avg_latency
-            FROM events 
-            WHERE event = '$ai_generation' 
-              AND timestamp >= now() - INTERVAL ${daysBack} DAY
-          `,
+          query: queryString,
         },
       }),
     },
@@ -269,9 +469,14 @@ export interface PostHogRetention {
 }
 
 export async function getPostHogRetention(): Promise<PostHogRetention | null> {
-  // Retention is complex to calculate with HogQL, use simplified version
-  // This calculates what % of users from N days ago returned today
+  // Retention calculation using rolling windows:
+  // Day 1: Users who first visited 1-2 days ago and returned in the last 1 day
+  // Day 7: Users who first visited 7-14 days ago and returned in the last 7 days
+  // Day 30: Users who first visited 30-60 days ago and returned in the last 30 days
+
+  const testUserFilter = getTestUserFilter();
   const [day1Result, day7Result, day30Result] = await Promise.all([
+    // Day 1 retention: users who first visited 1-2 days ago and returned today/yesterday
     queryPostHogAPI<{ results: Array<Array<number>> }>('/query/', {
       method: 'POST',
       body: JSON.stringify({
@@ -281,8 +486,10 @@ export async function getPostHogRetention(): Promise<PostHogRetention | null> {
             WITH first_seen AS (
               SELECT person_id, min(timestamp) as first_visit
               FROM events WHERE event = '$pageview'
+              ${testUserFilter}
               GROUP BY person_id
-              HAVING first_visit >= now() - INTERVAL 2 DAY AND first_visit < now() - INTERVAL 1 DAY
+              HAVING toDate(first_visit) >= today() - INTERVAL 2 DAY 
+                AND toDate(first_visit) < today() - INTERVAL 1 DAY
             )
             SELECT 
               count(DISTINCT fs.person_id) as cohort_size,
@@ -290,11 +497,14 @@ export async function getPostHogRetention(): Promise<PostHogRetention | null> {
             FROM first_seen fs
             LEFT JOIN events e ON fs.person_id = e.person_id 
               AND e.event = '$pageview' 
-              AND e.timestamp >= now() - INTERVAL 1 DAY
+              AND toDate(e.timestamp) >= today() - INTERVAL 1 DAY
+              AND e.timestamp > fs.first_visit
+              ${testUserFilter}
           `,
         },
       }),
     }),
+    // Day 7 retention: users who first visited 7-14 days ago and returned in last 7 days
     queryPostHogAPI<{ results: Array<Array<number>> }>('/query/', {
       method: 'POST',
       body: JSON.stringify({
@@ -304,8 +514,10 @@ export async function getPostHogRetention(): Promise<PostHogRetention | null> {
             WITH first_seen AS (
               SELECT person_id, min(timestamp) as first_visit
               FROM events WHERE event = '$pageview'
+              ${testUserFilter}
               GROUP BY person_id
-              HAVING first_visit >= now() - INTERVAL 14 DAY AND first_visit < now() - INTERVAL 7 DAY
+              HAVING toDate(first_visit) >= today() - INTERVAL 14 DAY 
+                AND toDate(first_visit) < today() - INTERVAL 7 DAY
             )
             SELECT 
               count(DISTINCT fs.person_id) as cohort_size,
@@ -314,10 +526,13 @@ export async function getPostHogRetention(): Promise<PostHogRetention | null> {
             LEFT JOIN events e ON fs.person_id = e.person_id 
               AND e.event = '$pageview' 
               AND e.timestamp >= now() - INTERVAL 7 DAY
+              AND e.timestamp > fs.first_visit
+              ${testUserFilter}
           `,
         },
       }),
     }),
+    // Day 30 retention: users who first visited 30-60 days ago and returned in last 30 days
     queryPostHogAPI<{ results: Array<Array<number>> }>('/query/', {
       method: 'POST',
       body: JSON.stringify({
@@ -327,8 +542,10 @@ export async function getPostHogRetention(): Promise<PostHogRetention | null> {
             WITH first_seen AS (
               SELECT person_id, min(timestamp) as first_visit
               FROM events WHERE event = '$pageview'
+              ${testUserFilter}
               GROUP BY person_id
-              HAVING first_visit >= now() - INTERVAL 60 DAY AND first_visit < now() - INTERVAL 30 DAY
+              HAVING toDate(first_visit) >= today() - INTERVAL 60 DAY 
+                AND toDate(first_visit) < today() - INTERVAL 30 DAY
             )
             SELECT 
               count(DISTINCT fs.person_id) as cohort_size,
@@ -337,6 +554,8 @@ export async function getPostHogRetention(): Promise<PostHogRetention | null> {
             LEFT JOIN events e ON fs.person_id = e.person_id 
               AND e.event = '$pageview' 
               AND e.timestamp >= now() - INTERVAL 30 DAY
+              AND e.timestamp > fs.first_visit
+              ${testUserFilter}
           `,
         },
       }),
@@ -344,15 +563,25 @@ export async function getPostHogRetention(): Promise<PostHogRetention | null> {
   ]);
 
   const calcRetention = (result: { results: Array<Array<number>> } | null) => {
-    if (!result?.results?.[0]) return 0;
+    if (!result?.results?.[0]) return null;
     const [cohortSize, returned] = result.results[0];
-    return cohortSize > 0 ? (returned / cohortSize) * 100 : 0;
+    if (cohortSize === 0) return null; // No cohort data available
+    return (returned / cohortSize) * 100;
   };
 
+  const day1 = calcRetention(day1Result);
+  const day7 = calcRetention(day7Result);
+  const day30 = calcRetention(day30Result);
+
+  // Return null if no data available, otherwise return the values
+  if (day1 === null && day7 === null && day30 === null) {
+    return null;
+  }
+
   return {
-    day1: calcRetention(day1Result),
-    day7: calcRetention(day7Result),
-    day30: calcRetention(day30Result),
+    day1: day1 ?? 0,
+    day7: day7 ?? 0,
+    day30: day30 ?? 0,
   };
 }
 
@@ -419,6 +648,7 @@ export interface PostHogFeatureUsageItem {
   uniqueUsers: number;
   totalEvents: number;
   avgPerUser: number;
+  adoptionRate?: number;
   trend: 'up' | 'down' | 'stable';
 }
 
@@ -429,6 +659,24 @@ export interface PostHogFeatureUsage {
     features: Record<string, number>;
   }>;
 }
+
+export interface PostHogSignupTrend {
+  date: string;
+  signups: number;
+}
+
+// Human-readable feature names mapping
+const FEATURE_NAMES: Record<string, string> = {
+  birth_chart_viewed: 'Birth Chart',
+  tarot_viewed: 'Tarot Reading',
+  horoscope_viewed: 'Horoscope',
+  crystal_recommendations_viewed: 'Crystal Recommendations',
+  personalized_tarot_viewed: 'Personalized Tarot',
+  personalized_horoscope_viewed: 'Personalized Horoscope',
+  pricing_page_viewed: 'Pricing Page',
+  upgrade_clicked: 'Upgrade Clicked',
+  $pageview: 'Page Views',
+};
 
 export async function getPostHogFeatureUsage(
   daysBack: number = 7,
@@ -446,6 +694,8 @@ export async function getPostHogFeatureUsage(
   ];
 
   // Use HogQL to get feature usage stats
+  const testUserFilter = getTestUserFilter();
+  const featureEventsList = featureEvents.map((e) => `'${e}'`).join(', ');
   const result = await queryPostHogAPI<{
     results: Array<Array<string | number>>;
   }>('/query/', {
@@ -459,8 +709,9 @@ export async function getPostHogFeatureUsage(
             count(*) as total_events,
             count(DISTINCT person_id) as unique_users
           FROM events 
-          WHERE event IN (${featureEvents.map((e) => `'${e}'`).join(', ')})
+          WHERE event IN (${featureEventsList})
             AND timestamp >= now() - INTERVAL ${daysBack} DAY
+            ${testUserFilter}
           GROUP BY event
           ORDER BY total_events DESC
         `,
@@ -472,20 +723,54 @@ export async function getPostHogFeatureUsage(
     return null;
   }
 
-  const features: PostHogFeatureUsageItem[] = result.results.map((row) => {
-    const feature = String(row[0]);
-    const totalEvents = Number(row[1]) || 0;
-    const uniqueUsers = Number(row[2]) || 0;
-    const avgPerUser = uniqueUsers > 0 ? totalEvents / uniqueUsers : 0;
+  // Get total active users for adoption rate calculation
+  const totalActiveUsersQuery = `
+    SELECT count(DISTINCT person_id) 
+    FROM events 
+    WHERE event = '$pageview'
+      AND timestamp >= now() - INTERVAL ${daysBack} DAY
+      ${testUserFilter}
+  `;
 
-    return {
-      feature,
-      uniqueUsers,
-      totalEvents,
-      avgPerUser: Number(avgPerUser.toFixed(2)),
-      trend: 'stable' as const,
-    };
+  const totalActiveUsersResult = await queryPostHogAPI<{
+    results: Array<Array<number>>;
+  }>('/query/', {
+    method: 'POST',
+    body: JSON.stringify({
+      query: {
+        kind: 'HogQLQuery',
+        query: totalActiveUsersQuery,
+      },
+    }),
   });
+
+  const totalActiveUsers = totalActiveUsersResult?.results?.[0]?.[0] || 0;
+
+  const features: PostHogFeatureUsageItem[] = result.results
+    .map((row) => {
+      const feature = String(row[0]);
+      const totalEvents = Number(row[1]) || 0;
+      const uniqueUsers = Number(row[2]) || 0;
+      const avgPerUser = uniqueUsers > 0 ? totalEvents / uniqueUsers : 0;
+      const adoptionRate =
+        totalActiveUsers > 0 ? (uniqueUsers / totalActiveUsers) * 100 : 0;
+
+      return {
+        feature,
+        uniqueUsers,
+        totalEvents,
+        avgPerUser: Number(avgPerUser.toFixed(2)),
+        adoptionRate: Number(adoptionRate.toFixed(2)),
+        trend: 'stable' as const,
+      };
+    })
+    // Sort by total events, but prioritize meaningful features over $pageview
+    .sort((a, b) => {
+      // Put $pageview at the end
+      if (a.feature === '$pageview' && b.feature !== '$pageview') return 1;
+      if (b.feature === '$pageview' && a.feature !== '$pageview') return -1;
+      return b.totalEvents - a.totalEvents;
+    });
 
   // Get daily breakdown for heatmap
   const heatmapResult = await queryPostHogAPI<{
@@ -501,8 +786,9 @@ export async function getPostHogFeatureUsage(
             event,
             count(*) as count
           FROM events 
-          WHERE event IN (${featureEvents.map((e) => `'${e}'`).join(', ')})
+          WHERE event IN (${featureEventsList})
             AND timestamp >= now() - INTERVAL ${daysBack} DAY
+            ${testUserFilter}
           GROUP BY date, event
           ORDER BY date ASC
         `,
@@ -528,4 +814,61 @@ export async function getPostHogFeatureUsage(
   }
 
   return { features, heatmap };
+}
+
+export async function getPostHogSignupTrends(
+  startDate: Date,
+  endDate: Date,
+  granularity: 'day' | 'week' | 'month' = 'day',
+): Promise<PostHogSignupTrend[]> {
+  // Determine date truncation based on granularity
+  let dateTrunc: string;
+  switch (granularity) {
+    case 'week':
+      dateTrunc = 'toMonday(toDate(timestamp))';
+      break;
+    case 'month':
+      dateTrunc = 'toStartOfMonth(toDate(timestamp))';
+      break;
+    default:
+      dateTrunc = 'toDate(timestamp)';
+  }
+
+  const startTimestamp = Math.floor(startDate.getTime() / 1000);
+  const endTimestamp = Math.floor(endDate.getTime() / 1000);
+  const testUserFilter = getTestUserFilter();
+
+  const query = `
+    SELECT 
+      ${dateTrunc} as date,
+      count(DISTINCT person_id) as signups
+    FROM events 
+    WHERE event = '$identify'
+      AND timestamp >= ${startTimestamp}
+      AND timestamp <= ${endTimestamp}
+      ${testUserFilter}
+    GROUP BY date
+    ORDER BY date ASC
+  `;
+
+  const result = await queryPostHogAPI<{
+    results: Array<Array<string | number>>;
+  }>('/query/', {
+    method: 'POST',
+    body: JSON.stringify({
+      query: {
+        kind: 'HogQLQuery',
+        query: query,
+      },
+    }),
+  });
+
+  if (!result?.results) {
+    return [];
+  }
+
+  return result.results.map((row) => ({
+    date: String(row[0]),
+    signups: Number(row[1]) || 0,
+  }));
 }

@@ -192,10 +192,15 @@ export default function SubscriptionManagement({
     );
   }
 
+  // Subscription is active if status is 'active' or 'trialing'
+  // Even if cancel_at_period_end is true, the subscription is still active until period ends
   const isActiveSubscription =
     displaySubscription.status === 'active' ||
     displaySubscription.status === 'trialing';
-  const customerIdToUse = customerId || stripeSubscription?.customerId;
+  const customerIdToUse =
+    customerId ||
+    stripeSubscription?.customerId ||
+    stripeSubscription?.customer;
 
   return (
     <div className='border border-stone-800 rounded-md p-4 w-full'>
@@ -304,17 +309,21 @@ export default function SubscriptionManagement({
         </div>
       )}
 
-      {isActiveSubscription && customerIdToUse && (
-        <button
-          onClick={handleBillingPortal}
-          disabled={loading === 'portal'}
-          className='w-full flex items-center justify-center gap-2 bg-lunary-secondary hover:bg-lunary-secondary-400 disabled:bg-zinc-600 disabled:cursor-not-allowed text-white py-2 px-3 rounded-md transition-colors text-sm'
-        >
-          <Settings size={14} />
-          {loading === 'portal' ? 'Opening...' : 'Manage Subscription'}
-          <ExternalLink size={12} />
-        </button>
-      )}
+      {/* Show billing portal button for active subscriptions, even if set to cancel at period end */}
+      {/* Also show for cancelled subscriptions that might still have access until period ends */}
+      {(isActiveSubscription ||
+        (displaySubscription.status === 'cancelled' && customerIdToUse)) &&
+        customerIdToUse && (
+          <button
+            onClick={handleBillingPortal}
+            disabled={loading === 'portal'}
+            className='w-full flex items-center justify-center gap-2 bg-lunary-secondary hover:bg-lunary-secondary-400 disabled:bg-zinc-600 disabled:cursor-not-allowed text-white py-2 px-3 rounded-md transition-colors text-sm'
+          >
+            <Settings size={14} />
+            {loading === 'portal' ? 'Opening...' : 'Manage Subscription'}
+            <ExternalLink size={12} />
+          </button>
+        )}
     </div>
   );
 }

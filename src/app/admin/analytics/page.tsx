@@ -151,6 +151,15 @@ export default function AnalyticsPage() {
   const [successMetrics, setSuccessMetrics] = useState<any | null>(null);
   const [discordAnalytics, setDiscordAnalytics] = useState<any | null>(null);
   const [searchConsoleData, setSearchConsoleData] = useState<any | null>(null);
+  const [userGrowth, setUserGrowth] = useState<any | null>(null);
+  const [activation, setActivation] = useState<any | null>(null);
+  const [subscriptionLifecycle, setSubscriptionLifecycle] = useState<
+    any | null
+  >(null);
+  const [planBreakdown, setPlanBreakdown] = useState<any | null>(null);
+  const [apiCosts, setApiCosts] = useState<any | null>(null);
+  const [cohorts, setCohorts] = useState<any | null>(null);
+  const [userSegments, setUserSegments] = useState<any | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -170,6 +179,13 @@ export default function AnalyticsPage() {
         successMetricsRes,
         discordRes,
         searchConsoleRes,
+        userGrowthRes,
+        activationRes,
+        subscriptionLifecycleRes,
+        planBreakdownRes,
+        apiCostsRes,
+        cohortsRes,
+        userSegmentsRes,
       ] = await Promise.all([
         fetch(
           `/api/admin/analytics/dau-wau-mau?${queryParams}&granularity=${granularity}`,
@@ -181,6 +197,15 @@ export default function AnalyticsPage() {
         fetch(`/api/admin/analytics/success-metrics?${queryParams}`),
         fetch(`/api/analytics/discord-interactions?range=7d`),
         fetch(`/api/admin/analytics/search-console?${queryParams}`),
+        fetch(
+          `/api/admin/analytics/user-growth?${queryParams}&granularity=${granularity}`,
+        ),
+        fetch(`/api/admin/analytics/activation?${queryParams}`),
+        fetch(`/api/admin/analytics/subscription-lifecycle?${queryParams}`),
+        fetch(`/api/admin/analytics/plan-breakdown?${queryParams}`),
+        fetch(`/api/admin/analytics/api-costs?${queryParams}`),
+        fetch(`/api/admin/analytics/cohorts?${queryParams}&type=week&weeks=12`),
+        fetch(`/api/admin/analytics/user-segments?${queryParams}`),
       ]);
 
       const errors: string[] = [];
@@ -235,6 +260,34 @@ export default function AnalyticsPage() {
         if (searchData.success) {
           setSearchConsoleData(searchData.data);
         }
+      }
+
+      if (userGrowthRes.ok) {
+        setUserGrowth(await userGrowthRes.json());
+      }
+
+      if (activationRes.ok) {
+        setActivation(await activationRes.json());
+      }
+
+      if (subscriptionLifecycleRes.ok) {
+        setSubscriptionLifecycle(await subscriptionLifecycleRes.json());
+      }
+
+      if (planBreakdownRes.ok) {
+        setPlanBreakdown(await planBreakdownRes.json());
+      }
+
+      if (apiCostsRes.ok) {
+        setApiCosts(await apiCostsRes.json());
+      }
+
+      if (cohortsRes.ok) {
+        setCohorts(await cohortsRes.json());
+      }
+
+      if (userSegmentsRes.ok) {
+        setUserSegments(await userSegmentsRes.json());
       }
 
       if (errors.length > 0) {
@@ -343,9 +396,19 @@ export default function AnalyticsPage() {
   const heatmapData = useMemo(() => {
     if (!featureUsage) return [];
     const recent = featureUsage.heatmap.slice(-7);
-    const topFeatures = featureUsage.features
-      .slice(0, 5)
-      .map((feature) => feature.feature);
+    // Get top 5 features, excluding $pageview or putting it last
+    const meaningfulFeatures = featureUsage.features.filter(
+      (f) => f.feature !== '$pageview',
+    );
+    const topFeatures = [
+      ...meaningfulFeatures.slice(0, 4).map((f) => f.feature),
+      // Include $pageview only if we have space
+      ...(meaningfulFeatures.length < 5
+        ? featureUsage.features
+            .filter((f) => f.feature === '$pageview')
+            .map((f) => f.feature)
+        : []),
+    ];
 
     return recent.map((row) => {
       const entries = topFeatures.map((feature) => ({
@@ -548,7 +611,7 @@ export default function AnalyticsPage() {
         </section>
       )}
 
-      <section className='grid gap-3 md:grid-cols-2 xl:grid-cols-3'>
+      <section className='grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-3'>
         {overviewCards.map((card) => (
           <MetricsCard
             key={card.title}
@@ -561,7 +624,7 @@ export default function AnalyticsPage() {
         ))}
       </section>
 
-      <section className='grid gap-6 lg:grid-cols-2'>
+      <section className='grid grid-cols-1 gap-6 lg:grid-cols-2'>
         <Card className='border-zinc-800/30 bg-zinc-900/10'>
           <CardHeader>
             <CardTitle>Active User Trends</CardTitle>
@@ -573,21 +636,30 @@ export default function AnalyticsPage() {
             <MultiLineChart data={activity?.trends ?? []} />
             <div className='mt-4 flex flex-wrap items-center gap-4 border-t border-zinc-800 pt-4'>
               <div className='flex items-center gap-2'>
-                <div className='h-3 w-3 rounded-full bg-lunary-primary-400/80' />
+                <div
+                  className='h-3 w-3 rounded-full'
+                  style={{ backgroundColor: 'rgba(196,181,253,0.8)' }}
+                />
                 <span className='text-xs text-zinc-400'>
                   <span className='font-medium text-zinc-300'>DAU</span> - Daily
                   Active Users
                 </span>
               </div>
               <div className='flex items-center gap-2'>
-                <div className='h-2 w-2 rounded-full bg-lunary-primary' />
+                <div
+                  className='h-2 w-2 rounded-full'
+                  style={{ backgroundColor: 'rgba(129,140,248,0.9)' }}
+                />
                 <span className='text-xs text-zinc-400'>
                   <span className='font-medium text-zinc-300'>WAU</span> -
                   Weekly Active Users
                 </span>
               </div>
               <div className='flex items-center gap-2'>
-                <div className='h-2 w-2 rounded-full bg-lunary-secondary' />
+                <div
+                  className='h-2 w-2 rounded-full'
+                  style={{ backgroundColor: 'rgba(56,189,248,0.9)' }}
+                />
                 <span className='text-xs text-zinc-400'>
                   <span className='font-medium text-zinc-300'>MAU</span> -
                   Monthly Active Users
@@ -607,7 +679,7 @@ export default function AnalyticsPage() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <div className='grid gap-4 md:grid-cols-2'>
+            <div className='grid grid-cols-1 gap-4 md:grid-cols-2'>
               <RetentionCard
                 label='Day 1'
                 value={activity?.retention.day_1 ?? 0}
@@ -630,7 +702,7 @@ export default function AnalyticsPage() {
         </Card>
       </section>
 
-      <section className='grid gap-6 lg:grid-cols-2'>
+      <section className='grid grid-cols-1 gap-6 lg:grid-cols-2'>
         <Card className='border-zinc-800/30 bg-zinc-900/10'>
           <CardHeader>
             <CardTitle className='text-base font-medium'>
@@ -696,7 +768,7 @@ export default function AnalyticsPage() {
         </Card>
       </section>
 
-      <section className='grid gap-6 lg:grid-cols-2'>
+      <section className='grid grid-cols-1 gap-6 lg:grid-cols-2'>
         <Card className='border-zinc-800/30 bg-zinc-900/10'>
           <CardHeader>
             <CardTitle className='text-base font-medium'>
@@ -726,7 +798,7 @@ export default function AnalyticsPage() {
         </Card>
       </section>
 
-      <section className='grid gap-6 lg:grid-cols-2'>
+      <section className='grid grid-cols-1 gap-6 lg:grid-cols-2'>
         <Card className='border-zinc-800/30 bg-zinc-900/10'>
           <CardHeader>
             <CardTitle className='text-base font-medium'>
@@ -737,7 +809,7 @@ export default function AnalyticsPage() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <div className='grid gap-4 md:grid-cols-2'>
+            <div className='grid grid-cols-1 gap-4 md:grid-cols-2'>
               {notificationTypes.map((type) => (
                 <div
                   key={type.key}
@@ -777,7 +849,7 @@ export default function AnalyticsPage() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <div className='grid gap-4 md:grid-cols-2'>
+            <div className='grid grid-cols-1 gap-4 md:grid-cols-2'>
               <MiniStat
                 label='Total Sessions'
                 value={aiMetrics?.total_sessions ?? 0}
@@ -939,6 +1011,478 @@ export default function AnalyticsPage() {
           </CardContent>
         </Card>
       </section>
+
+      {userGrowth && (
+        <section>
+          <Card className='border-zinc-800/30 bg-zinc-900/10'>
+            <CardHeader>
+              <CardTitle className='text-base font-medium'>
+                User Growth Trends
+              </CardTitle>
+              <CardDescription className='text-xs text-zinc-400'>
+                New signups over time
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className='space-y-4'>
+                <div className='grid gap-4 grid-cols-1 lg:grid-cols-3'>
+                  <MetricsCard
+                    title='Total Signups'
+                    value={userGrowth.totalSignups.toLocaleString()}
+                    subtitle='New users in this period'
+                  />
+                  <MetricsCard
+                    title='Growth Rate'
+                    value={`${userGrowth.growthRate > 0 ? '+' : ''}${userGrowth.growthRate.toFixed(1)}%`}
+                    subtitle='Period-over-period change'
+                    trend={
+                      userGrowth.growthRate > 0
+                        ? 'up'
+                        : userGrowth.growthRate < 0
+                          ? 'down'
+                          : 'stable'
+                    }
+                    change={Math.abs(userGrowth.growthRate)}
+                  />
+                  {userGrowth.avgDailySignups !== undefined && (
+                    <MetricsCard
+                      title='Avg Daily Signups'
+                      value={userGrowth.avgDailySignups.toFixed(1)}
+                      subtitle='Average per day'
+                    />
+                  )}
+                </div>
+                {userGrowth.trends && userGrowth.trends.length > 0 && (
+                  <div>
+                    <MultiLineChart
+                      data={userGrowth.trends.map((t: any) => ({
+                        date: t.date,
+                        dau: t.signups,
+                        wau: 0,
+                        mau: 0,
+                      }))}
+                    />
+                    <div className='mt-4 flex flex-wrap items-center gap-4 border-t border-zinc-800 pt-4'>
+                      <div className='flex items-center gap-2'>
+                        <div
+                          className='h-3 w-3 rounded-full'
+                          style={{ backgroundColor: 'rgba(196,181,253,0.8)' }}
+                        />
+                        <span className='text-xs text-zinc-400'>
+                          <span className='font-medium text-zinc-300'>
+                            Signups
+                          </span>{' '}
+                          - New user registrations
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+        </section>
+      )}
+
+      {activation && (
+        <section>
+          <Card className='border-zinc-800/30 bg-zinc-900/10'>
+            <CardHeader>
+              <CardTitle className='text-base font-medium'>
+                Activation Rate
+              </CardTitle>
+              <CardDescription className='text-xs text-zinc-400'>
+                Users who complete meaningful actions within 24h of signup
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className='space-y-4'>
+                <div className='grid gap-4 grid-cols-1 lg:grid-cols-3'>
+                  <MetricsCard
+                    title='Activation Rate'
+                    value={`${activation.activationRate.toFixed(2)}%`}
+                    subtitle={`${activation.activatedUsers} of ${activation.totalSignups} users activated`}
+                  />
+                  <MetricsCard
+                    title='Activated Users'
+                    value={activation.activatedUsers.toLocaleString()}
+                    subtitle='Users who completed key actions within 24h'
+                  />
+                  <MetricsCard
+                    title='Total Signups'
+                    value={activation.totalSignups.toLocaleString()}
+                    subtitle='New users in this period'
+                  />
+                </div>
+                {activation.activationBreakdown &&
+                  Object.keys(activation.activationBreakdown).length > 0 && (
+                    <div className='mt-6'>
+                      <h4 className='text-sm font-medium mb-3 text-zinc-300'>
+                        Activation by Feature
+                      </h4>
+                      <div className='grid gap-3 grid-cols-1 md:grid-cols-2 lg:grid-cols-3'>
+                        {Object.entries(activation.activationBreakdown).map(
+                          ([feature, count]: [string, any]) => (
+                            <div
+                              key={feature}
+                              className='rounded-lg border border-zinc-800/30 bg-zinc-900/5 p-3'
+                            >
+                              <div className='text-xs text-zinc-400 mb-1'>
+                                {feature
+                                  .replace(/_/g, ' ')
+                                  .replace(/\b\w/g, (c) => c.toUpperCase())}
+                              </div>
+                              <div className='text-lg font-semibold text-white'>
+                                {count}
+                              </div>
+                              <div className='text-xs text-zinc-500 mt-1'>
+                                users activated
+                              </div>
+                            </div>
+                          ),
+                        )}
+                      </div>
+                    </div>
+                  )}
+              </div>
+            </CardContent>
+          </Card>
+        </section>
+      )}
+
+      {subscriptionLifecycle && (
+        <section>
+          <Card className='border-zinc-800/30 bg-zinc-900/10'>
+            <CardHeader>
+              <CardTitle className='text-base font-medium'>
+                Subscription Lifecycle
+              </CardTitle>
+              <CardDescription className='text-xs text-zinc-400'>
+                Subscription states and churn trends
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className='space-y-4'>
+                <div className='grid gap-4 grid-cols-2 lg:grid-cols-4'>
+                  {Object.entries(subscriptionLifecycle.states || {}).map(
+                    ([status, count]: [string, any]) => (
+                      <MetricsCard
+                        key={status}
+                        title={
+                          status.charAt(0).toUpperCase() +
+                          status.slice(1).replace(/_/g, ' ')
+                        }
+                        value={count.toLocaleString()}
+                        subtitle={`${status} subscriptions`}
+                      />
+                    ),
+                  )}
+                </div>
+                <div className='grid gap-4 grid-cols-1 lg:grid-cols-2'>
+                  <MetricsCard
+                    title='Avg Subscription Duration'
+                    value={`${subscriptionLifecycle.avgDurationDays.toFixed(1)} days`}
+                    subtitle='Average time users stay subscribed'
+                  />
+                  {subscriptionLifecycle.churnRate !== undefined && (
+                    <MetricsCard
+                      title='Churn Rate'
+                      value={`${subscriptionLifecycle.churnRate.toFixed(2)}%`}
+                      subtitle='Cancellations in this period'
+                      trend={
+                        subscriptionLifecycle.churnRate > 10 ? 'down' : 'stable'
+                      }
+                    />
+                  )}
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </section>
+      )}
+
+      {planBreakdown && (
+        <section>
+          <Card className='border-zinc-800/30 bg-zinc-900/10'>
+            <CardHeader>
+              <CardTitle className='text-base font-medium'>
+                Plan Breakdown
+              </CardTitle>
+              <CardDescription className='text-xs text-zinc-400'>
+                MRR contribution by plan type
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className='space-y-4'>
+                <div className='grid gap-4 grid-cols-1 lg:grid-cols-2'>
+                  {planBreakdown.planBreakdown?.map((plan: any) => (
+                    <div
+                      key={plan.plan}
+                      className='border border-zinc-800 rounded-lg p-4'
+                    >
+                      <div className='flex items-center justify-between mb-2'>
+                        <span className='font-medium'>{plan.plan}</span>
+                        <span className='text-sm text-zinc-400'>
+                          {plan.percentage.toFixed(1)}%
+                        </span>
+                      </div>
+                      <div className='space-y-1 text-sm'>
+                        <div className='flex justify-between'>
+                          <span className='text-zinc-400'>Subscriptions:</span>
+                          <span>{plan.count}</span>
+                        </div>
+                        <div className='flex justify-between'>
+                          <span className='text-zinc-400'>MRR:</span>
+                          <span>${plan.mrr.toFixed(2)}</span>
+                        </div>
+                        <div className='flex justify-between'>
+                          <span className='text-zinc-400'>Active:</span>
+                          <span>{plan.active}</span>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </section>
+      )}
+
+      {apiCosts && (
+        <section>
+          <Card className='border-zinc-800/30 bg-zinc-900/10'>
+            <CardHeader>
+              <CardTitle className='text-base font-medium'>
+                API Costs vs Revenue
+              </CardTitle>
+              <CardDescription className='text-xs text-zinc-400'>
+                AI generation costs and efficiency metrics
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className='space-y-4'>
+                <div className='grid gap-4 grid-cols-1 lg:grid-cols-3'>
+                  <MetricsCard
+                    title='Total API Costs'
+                    value={`$${apiCosts.totalCost.toFixed(2)}`}
+                    subtitle='AI generation costs this period'
+                  />
+                  <MetricsCard
+                    title='Cost per User'
+                    value={`$${apiCosts.costPerUser.toFixed(2)}`}
+                    subtitle={`${apiCosts.uniqueUsers.toLocaleString()} unique users`}
+                  />
+                  <MetricsCard
+                    title='Revenue/Cost Ratio'
+                    value={apiCosts.revenueCostRatio.toFixed(2)}
+                    subtitle={
+                      apiCosts.revenueCostRatio > 1
+                        ? 'Profitable'
+                        : 'Below break-even'
+                    }
+                    trend={apiCosts.revenueCostRatio > 1 ? 'up' : 'down'}
+                  />
+                </div>
+                <div className='grid gap-4 grid-cols-1 lg:grid-cols-3'>
+                  <MetricsCard
+                    title='Total Generations'
+                    value={apiCosts.totalGenerations.toLocaleString()}
+                    subtitle='AI requests processed'
+                  />
+                  <MetricsCard
+                    title='Unique Users'
+                    value={apiCosts.uniqueUsers.toLocaleString()}
+                    subtitle='Users who used AI features'
+                  />
+                  <MetricsCard
+                    title='Cost per Session'
+                    value={`$${apiCosts.costPerSession.toFixed(4)}`}
+                    subtitle='Average cost per AI generation'
+                  />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </section>
+      )}
+
+      {cohorts && cohorts.cohorts && cohorts.cohorts.length > 0 && (
+        <section>
+          <Card className='border-zinc-800/30 bg-zinc-900/10'>
+            <CardHeader>
+              <CardTitle className='text-base font-medium'>
+                Cohort Retention Analysis
+              </CardTitle>
+              <CardDescription className='text-xs text-zinc-400'>
+                Retention by signup cohort
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className='mb-4 text-xs text-zinc-400'>
+                Shows what % of users from each signup week/month returned after
+                1, 7, and 30 days
+              </div>
+              <div className='overflow-x-auto'>
+                <table className='w-full text-left text-sm'>
+                  <thead>
+                    <tr className='border-b border-zinc-800'>
+                      <th className='pb-3 text-xs font-medium text-zinc-400'>
+                        Cohort Week
+                      </th>
+                      <th className='pb-3 text-xs font-medium text-zinc-400 text-right'>
+                        Cohort Size
+                      </th>
+                      <th className='pb-3 text-xs font-medium text-zinc-400 text-right'>
+                        Day 1 Retention
+                      </th>
+                      <th className='pb-3 text-xs font-medium text-zinc-400 text-right'>
+                        Day 7 Retention
+                      </th>
+                      <th className='pb-3 text-xs font-medium text-zinc-400 text-right'>
+                        Day 30 Retention
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {cohorts.cohorts.map((cohort: any, idx: number) => {
+                      const formatDate = (dateStr: string) => {
+                        const date = new Date(dateStr);
+                        return date.toLocaleDateString('en-US', {
+                          month: 'short',
+                          day: 'numeric',
+                          year: 'numeric',
+                        });
+                      };
+                      return (
+                        <tr
+                          key={idx}
+                          className='border-b border-zinc-800/50 hover:bg-zinc-900/20'
+                        >
+                          <td className='py-3 text-zinc-300 font-medium'>
+                            {formatDate(cohort.cohort)}
+                          </td>
+                          <td className='py-3 text-zinc-300 text-right'>
+                            {cohort.day0.toLocaleString()}
+                          </td>
+                          <td
+                            className={`py-3 text-right font-medium ${
+                              cohort.day1 > 0
+                                ? 'text-lunary-success-300'
+                                : 'text-zinc-500'
+                            }`}
+                          >
+                            {cohort.day1.toFixed(1)}%
+                          </td>
+                          <td
+                            className={`py-3 text-right font-medium ${
+                              cohort.day7 > 0
+                                ? 'text-lunary-success-300'
+                                : 'text-zinc-500'
+                            }`}
+                          >
+                            {cohort.day7.toFixed(1)}%
+                          </td>
+                          <td
+                            className={`py-3 text-right font-medium ${
+                              cohort.day30 > 0
+                                ? 'text-lunary-success-300'
+                                : 'text-zinc-500'
+                            }`}
+                          >
+                            {cohort.day30.toFixed(1)}%
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+              {cohorts.cohorts.every(
+                (c: any) => c.day1 === 0 && c.day7 === 0 && c.day30 === 0,
+              ) && (
+                <div className='mt-4 rounded-lg border border-zinc-800/30 bg-zinc-900/10 p-3 text-xs text-zinc-400'>
+                  <strong>Note:</strong> Retention metrics require users to
+                  return after their signup date. If all values are 0%, it means
+                  users haven't returned yet or the time windows haven't
+                  elapsed.
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </section>
+      )}
+
+      {userSegments && (
+        <section>
+          <Card className='border-zinc-800/30 bg-zinc-900/10'>
+            <CardHeader>
+              <CardTitle className='text-base font-medium'>
+                Free vs Paid User Engagement
+              </CardTitle>
+              <CardDescription className='text-xs text-zinc-400'>
+                Engagement comparison by user segment
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className='grid gap-6 grid-cols-1 lg:grid-cols-2'>
+                <div className='rounded-lg border border-zinc-800/30 bg-zinc-900/5 p-4'>
+                  <h4 className='text-sm font-semibold mb-4 text-zinc-300'>
+                    Free Users
+                  </h4>
+                  <div className='space-y-3'>
+                    <MetricsCard
+                      title='Total Users'
+                      value={(
+                        userSegments.free?.totalUsers || 0
+                      ).toLocaleString()}
+                      subtitle='Free tier users'
+                    />
+                    <MetricsCard
+                      title='Daily Active Users'
+                      value={(userSegments.free?.dau || 0).toLocaleString()}
+                      subtitle='Active in the last 24 hours'
+                    />
+                    <MetricsCard
+                      title='Avg Events per User'
+                      value={(
+                        userSegments.free?.engagement?.avgEventsPerUser || 0
+                      ).toFixed(2)}
+                      subtitle='Average engagement level'
+                    />
+                  </div>
+                </div>
+                <div className='rounded-lg border border-zinc-800/30 bg-zinc-900/5 p-4'>
+                  <h4 className='text-sm font-semibold mb-4 text-zinc-300'>
+                    Paid Users
+                  </h4>
+                  <div className='space-y-3'>
+                    <MetricsCard
+                      title='Total Users'
+                      value={(
+                        userSegments.paid?.totalUsers || 0
+                      ).toLocaleString()}
+                      subtitle='Active paid subscribers'
+                    />
+                    <MetricsCard
+                      title='Daily Active Users'
+                      value={(userSegments.paid?.dau || 0).toLocaleString()}
+                      subtitle='Active in the last 24 hours'
+                    />
+                    <MetricsCard
+                      title='Avg Events per User'
+                      value={(
+                        userSegments.paid?.engagement?.avgEventsPerUser || 0
+                      ).toFixed(2)}
+                      subtitle='Average engagement level'
+                    />
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </section>
+      )}
     </div>
   );
 }
@@ -1108,11 +1652,19 @@ function HeatmapGrid({
         <thead>
           <tr>
             <th className='pb-2'>Date</th>
-            {featureKeys.map((feature) => (
-              <th key={feature} className='pb-2 capitalize'>
-                {feature}
-              </th>
-            ))}
+            {featureKeys.map((feature) => {
+              const featureName =
+                feature === '$pageview'
+                  ? 'Page Views'
+                  : feature
+                      .replace(/_/g, ' ')
+                      .replace(/\b\w/g, (c) => c.toUpperCase());
+              return (
+                <th key={feature} className='pb-2'>
+                  {featureName}
+                </th>
+              );
+            })}
           </tr>
         </thead>
         <tbody>
