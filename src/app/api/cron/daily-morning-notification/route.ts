@@ -3,7 +3,6 @@ import {
   sendUnifiedNotification,
   NotificationEvent,
 } from '@/lib/notifications/unified-service';
-import { getGlobalCosmicData } from '@/lib/cosmic-snapshot/global-cache';
 
 export const dynamic = 'force-dynamic';
 
@@ -31,31 +30,25 @@ export async function GET(request: NextRequest) {
 
     console.log('🌅 Daily morning notification check started at:', checkTime);
 
-    // Get today's cosmic data
-    const cosmicData = await getGlobalCosmicData(todayDate);
+    // Get today's cosmic data from the cosmic-post API endpoint
+    // This endpoint returns the correct structure with primaryEvent and allEvents
+    const baseUrl =
+      process.env.NODE_ENV === 'production'
+        ? 'https://lunary.app'
+        : 'http://localhost:3000';
 
-    if (!cosmicData) {
-      const baseUrl =
-        process.env.NODE_ENV === 'production'
-          ? 'https://lunary.app'
-          : 'http://localhost:3000';
+    const cosmicResponse = await fetch(
+      `${baseUrl}/api/og/cosmic-post/${today}`,
+      {
+        headers: { 'User-Agent': 'Lunary-Morning-Notification/1.0' },
+      },
+    );
 
-      const cosmicResponse = await fetch(
-        `${baseUrl}/api/og/cosmic-post/${today}`,
-        {
-          headers: { 'User-Agent': 'Lunary-Morning-Notification/1.0' },
-        },
-      );
-
-      if (!cosmicResponse.ok) {
-        throw new Error(
-          `Failed to fetch cosmic data: ${cosmicResponse.status}`,
-        );
-      }
-
-      const fetchedData = await cosmicResponse.json();
-      Object.assign(cosmicData || {}, fetchedData);
+    if (!cosmicResponse.ok) {
+      throw new Error(`Failed to fetch cosmic data: ${cosmicResponse.status}`);
     }
+
+    const cosmicData = await cosmicResponse.json();
 
     // Get notification-worthy events
     const notificationEvents = getNotificationWorthyEvents(cosmicData);
