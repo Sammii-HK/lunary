@@ -40,8 +40,9 @@ export interface ScriptSection {
 }
 
 export interface TikTokMetadata {
-  theme: string; // Uppercase category e.g. "ASTROLOGY"
-  title: string; // Facet title with part number e.g. "The Four Elements · 1/3"
+  theme: string; // Uppercase category e.g. "PLANETS"
+  title: string; // Facet title e.g. "The Sun"
+  series: string; // Series part e.g. "Part 1 of 3"
   summary: string; // Short description from facet focus
 }
 
@@ -62,6 +63,7 @@ export interface VideoScript {
   metadata?: TikTokMetadata;
   coverImageUrl?: string;
   partNumber?: number; // 1, 2, or 3
+  writtenPostContent?: string; // Social media post content for this video
 }
 
 export interface WeeklyVideoScripts {
@@ -116,6 +118,7 @@ export async function ensureVideoScriptsTable(): Promise<void> {
     await sql`ALTER TABLE video_scripts ADD COLUMN IF NOT EXISTS metadata JSONB`;
     await sql`ALTER TABLE video_scripts ADD COLUMN IF NOT EXISTS cover_image_url TEXT`;
     await sql`ALTER TABLE video_scripts ADD COLUMN IF NOT EXISTS part_number INTEGER`;
+    await sql`ALTER TABLE video_scripts ADD COLUMN IF NOT EXISTS written_post_content TEXT`;
   } catch {
     // Columns may already exist
   }
@@ -128,7 +131,7 @@ export async function saveVideoScript(script: VideoScript): Promise<number> {
     INSERT INTO video_scripts (
       theme_id, theme_name, facet_title, platform, sections,
       full_script, word_count, estimated_duration, scheduled_date, status,
-      metadata, cover_image_url, part_number
+      metadata, cover_image_url, part_number, written_post_content
     )
     VALUES (
       ${script.themeId},
@@ -143,7 +146,8 @@ export async function saveVideoScript(script: VideoScript): Promise<number> {
       ${script.status},
       ${script.metadata ? JSON.stringify(script.metadata) : null},
       ${script.coverImageUrl || null},
-      ${script.partNumber || null}
+      ${script.partNumber || null},
+      ${script.writtenPostContent || null}
     )
     RETURNING id
   `;
@@ -221,6 +225,7 @@ export async function getVideoScripts(filters?: {
     metadata: row.metadata || undefined,
     coverImageUrl: row.cover_image_url || undefined,
     partNumber: row.part_number || undefined,
+    writtenPostContent: row.written_post_content || undefined,
   }));
 }
 
@@ -233,6 +238,19 @@ export async function updateVideoScriptStatus(
   await sql`
     UPDATE video_scripts
     SET status = ${status}, updated_at = NOW()
+    WHERE id = ${id}
+  `;
+}
+
+export async function updateVideoScriptWrittenPost(
+  id: number,
+  writtenPostContent: string,
+): Promise<void> {
+  const { sql } = await import('@vercel/postgres');
+
+  await sql`
+    UPDATE video_scripts
+    SET written_post_content = ${writtenPostContent}, updated_at = NOW()
     WHERE id = ${id}
   `;
 }
@@ -709,7 +727,8 @@ function generateTikTokMetadata(
 
   return {
     theme: themeDisplayMap[theme.category] || theme.category.toUpperCase(),
-    title: `${facet.title} · ${partNumber}/3`,
+    title: facet.title,
+    series: `Part ${partNumber} of 3`,
     summary: facet.focus,
   };
 }
