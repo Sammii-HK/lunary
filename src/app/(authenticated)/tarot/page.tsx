@@ -938,6 +938,42 @@ const TarotReadings = () => {
     );
   }
 
+  // Check if user has chart access but is missing birthday
+  if (hasChartAccess && !userBirthday) {
+    return (
+      <div className='min-h-screen flex items-center justify-center p-4'>
+        <div className='text-center max-w-md space-y-6'>
+          <div className='space-y-2'>
+            <h2 className='text-2xl font-light text-zinc-100'>
+              Complete Your Profile
+            </h2>
+            <p className='text-sm text-zinc-400 leading-relaxed'>
+              To get personalized tarot readings, we need your birthday to
+              calculate your cosmic signature.
+            </p>
+          </div>
+          <div className='rounded-lg border border-lunary-primary-700 bg-zinc-900/50 p-6 space-y-4'>
+            <div className='space-y-2'>
+              <h3 className='text-lg font-medium text-zinc-100'>
+                Add Your Birthday
+              </h3>
+              <p className='text-sm text-zinc-300 leading-relaxed'>
+                Your birthday helps us personalize your tarot readings and
+                provide more accurate cosmic insights.
+              </p>
+            </div>
+            <Link
+              href='/profile'
+              className='inline-flex items-center justify-center w-full py-3 px-4 rounded-lg bg-lunary-primary-900/20 border border-lunary-primary-700 text-lunary-primary-300 font-medium hover:bg-lunary-primary-900/30 transition-colors'
+            >
+              Go to Profile
+            </Link>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   if (!personalizedReading) {
     return (
       <div className='min-h-screen flex items-center justify-center'>
