@@ -514,6 +514,24 @@ export async function POST(request: NextRequest) {
 
     console.log('✅ User notes table created');
 
+    // Create legacy_fallback_usage table
+    await sql`
+      CREATE TABLE IF NOT EXISTS legacy_fallback_usage (
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        user_id TEXT,
+        user_email TEXT,
+        used_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+        migrated BOOLEAN DEFAULT false,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+      )
+    `;
+
+    await sql`CREATE INDEX IF NOT EXISTS idx_legacy_fallback_usage_used_at ON legacy_fallback_usage(used_at DESC)`;
+    await sql`CREATE INDEX IF NOT EXISTS idx_legacy_fallback_usage_user_id ON legacy_fallback_usage(user_id)`;
+    await sql`CREATE INDEX IF NOT EXISTS idx_legacy_fallback_usage_user_email ON legacy_fallback_usage(user_email)`;
+
+    console.log('✅ Legacy fallback usage table created');
+
     // Create jazz_migration_status table
     await sql`
       CREATE TABLE IF NOT EXISTS jazz_migration_status (
@@ -738,7 +756,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       success: true,
       message:
-        'Database setup complete (push subscriptions, social posts, subscriptions, tarot_readings, ai_threads, ai_usage, user_sessions, user_profiles, shop_packs, shop_purchases, user_notes, jazz_migration_status, ritual_message_events, user_streaks, email_events, api_keys, grimoire_embeddings)',
+        'Database setup complete (push subscriptions, social posts, subscriptions, tarot_readings, ai_threads, ai_usage, user_sessions, user_profiles, shop_packs, shop_purchases, user_notes, jazz_migration_status, legacy_fallback_usage, ritual_message_events, user_streaks, email_events, api_keys, grimoire_embeddings)',
       timestamp: new Date().toISOString(),
     });
   } catch (error) {

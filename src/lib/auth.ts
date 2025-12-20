@@ -67,6 +67,20 @@ async function migrateJazzUserToPostgres(
         );
         console.log(`✅ Password hash updated for ${jazzUser.email}`);
       }
+
+      // Update migration status if not already set
+      await pool.query(
+        `INSERT INTO jazz_migration_status (user_id, migration_status, migrated_at, jazz_account_id)
+         VALUES ($1, 'completed', COALESCE((SELECT "createdAt" FROM "user" WHERE id = $1), NOW()), $2)
+         ON CONFLICT (user_id) DO UPDATE SET
+           migration_status = 'completed',
+           migrated_at = COALESCE(jazz_migration_status.migrated_at, NOW()),
+           jazz_account_id = COALESCE(EXCLUDED.jazz_account_id, jazz_migration_status.jazz_account_id),
+           updated_at = NOW()
+         WHERE jazz_migration_status.migration_status != 'completed'`,
+        [existing.rows[0].id, jazzUser.id],
+      );
+
       return;
     }
 
@@ -125,8 +139,44 @@ async function migrateJazzUserToPostgres(
     } else {
       console.log(`⚠️ Account migrated but no password hash available`);
     }
+
+    // Track migration status
+    await pool.query(
+      `INSERT INTO jazz_migration_status (user_id, migration_status, migrated_at, jazz_account_id)
+       VALUES ($1, 'completed', NOW(), $2)
+       ON CONFLICT (user_id) DO UPDATE SET
+         migration_status = 'completed',
+         migrated_at = COALESCE(jazz_migration_status.migrated_at, NOW()),
+         jazz_account_id = COALESCE(EXCLUDED.jazz_account_id, jazz_migration_status.jazz_account_id),
+         updated_at = NOW()`,
+      [jazzUser.id, jazzUser.id],
+    );
+
+    console.log(`✅ Migration status tracked for ${jazzUser.email}`);
   } catch (error) {
     console.error('❌ Failed to migrate user from 💩 to Postgres:', error);
+
+    // Try to record failed migration status
+    try {
+      const pool = getPostgresPool();
+      if (pool && jazzUser?.id) {
+        await pool.query(
+          `INSERT INTO jazz_migration_status (user_id, migration_status, error_message)
+           VALUES ($1, 'failed', $2)
+           ON CONFLICT (user_id) DO UPDATE SET
+             migration_status = 'failed',
+             error_message = EXCLUDED.error_message,
+             updated_at = NOW()`,
+          [
+            jazzUser.id,
+            error instanceof Error ? error.message : 'Unknown error',
+          ],
+        );
+      }
+    } catch (statusError) {
+      // Ignore errors when recording migration status
+      console.error('Failed to record migration status:', statusError);
+    }
   }
 }
 
@@ -528,6 +578,37 @@ export const auth = new Proxy({} as ReturnType<typeof betterAuth>, {
               errorBody?.code === 'INVALID_EMAIL_OR_PASSWORD';
 
             if (isAuthError) {
+              // Log legacy fallback usage for monitoring
+              console.log(
+                `[LEGACY_FALLBACK] User attempted login via legacy system - checking for migration...`,
+              );
+
+              // Track legacy fallback usage in database
+              try {
+                const clonedForEmail = request.clone();
+                const bodyText = await clonedForEmail.text();
+                const bodyJson = JSON.parse(bodyText);
+                const email = bodyJson?.email || null;
+
+                if (email) {
+                  const trackingPool = getPostgresPool();
+                  if (trackingPool) {
+                    await trackingPool.query(
+                      `INSERT INTO legacy_fallback_usage (user_email, used_at)
+                       VALUES ($1, NOW())
+                       ON CONFLICT DO NOTHING`,
+                      [email],
+                    );
+                  }
+                }
+              } catch (trackError) {
+                // Don't fail auth if tracking fails
+                console.warn(
+                  'Failed to track legacy fallback usage:',
+                  trackError,
+                );
+              }
+
               // Clone request to extract password before Jazz consumes it
               let plainPassword: string | null = null;
               try {
@@ -558,6 +639,28 @@ export const auth = new Proxy({} as ReturnType<typeof betterAuth>, {
                       data.session,
                       passwordHash || undefined,
                     );
+
+                    // Mark this usage as migrated
+                    if (data.user?.email) {
+                      try {
+                        const trackingPool = getPostgresPool();
+                        if (trackingPool) {
+                          await trackingPool.query(
+                            `UPDATE legacy_fallback_usage 
+                             SET user_id = $1, migrated = true 
+                             WHERE user_email = $2 AND migrated = false
+                             ORDER BY used_at DESC LIMIT 1`,
+                            [data.user.id, data.user.email],
+                          );
+                        }
+                      } catch (updateError) {
+                        // Don't fail if update fails
+                        console.warn(
+                          'Failed to update legacy fallback usage:',
+                          updateError,
+                        );
+                      }
+                    }
                   }
                 } catch {
                   // Response might not be JSON, that's fine
