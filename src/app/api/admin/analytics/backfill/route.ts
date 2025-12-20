@@ -44,6 +44,9 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    const safeStartDateStr = String(startDateStr).replace(/[\r\n]/g, '');
+    const safeEndDateStr = String(endDateStr).replace(/[\r\n]/g, '');
+
     const startDate = new Date(startDateStr);
     const endDate = new Date(endDateStr);
 
@@ -63,6 +66,7 @@ export async function POST(request: NextRequest) {
 
     console.log(
       `[Backfill] Starting backfill from ${startDateStr} to ${endDateStr}`,
+      `[Backfill] Starting backfill from ${safeStartDateStr} to ${safeEndDateStr}`,
     );
 
     // Generate all weeks between start and end dates
