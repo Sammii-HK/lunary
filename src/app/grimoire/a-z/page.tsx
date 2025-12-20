@@ -153,7 +153,7 @@ const topics = [
     items: [
       { name: 'Sagittarius', url: '/grimoire/zodiac/sagittarius' },
       { name: 'Saturn', url: '/grimoire/astronomy/planets/saturn' },
-      { name: 'Saturn Return', url: '/grimoire/astronomy/retrogrades/saturn' },
+      { name: 'Saturn Return', url: '/grimoire/transits' },
       { name: 'Scorpio', url: '/grimoire/zodiac/scorpio' },
       { name: 'Sextile', url: '/grimoire/aspects/types/sextile' },
       { name: 'Spells', url: '/grimoire/spells' },

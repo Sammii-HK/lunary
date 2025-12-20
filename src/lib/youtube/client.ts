@@ -81,8 +81,8 @@ export async function uploadVideo(
 
   // For YouTube Shorts, add #Shorts to title and description
   if (metadata.isShort) {
-    videoMetadata.snippet.title = `#Shorts ${videoMetadata.snippet.title}`;
-    videoMetadata.snippet.description = `#Shorts\n\n${videoMetadata.snippet.description}`;
+    videoMetadata.snippet.title = `${videoMetadata.snippet.title}`;
+    videoMetadata.snippet.description = `${videoMetadata.snippet.description}\n\n#shorts`;
   }
 
   try {
