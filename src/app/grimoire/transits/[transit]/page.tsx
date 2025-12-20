@@ -57,6 +57,29 @@ export default async function TransitPage({
     (t) => t.id !== transitId,
   );
 
+  const faqs = [
+    {
+      question: `What is ${transit.title}?`,
+      answer: `${transit.title} is a ${transit.transitType.toLowerCase()} transit occurring in ${transit.year}. ${transit.description.slice(0, 100)}...`,
+    },
+    {
+      question: `When does ${transit.title} occur?`,
+      answer: `${transit.title} occurs ${transit.dates}.`,
+    },
+    {
+      question: `Which signs are most affected by ${transit.title}?`,
+      answer: `${transit.signs.join(', ')} ${transit.signs.length > 1 ? 'are' : 'is'} most directly impacted by this transit.`,
+    },
+    {
+      question: `What should I do during ${transit.title}?`,
+      answer: `During ${transit.title}, focus on ${transit.doList.slice(0, 2).join(' and ').toLowerCase()}.`,
+    },
+    {
+      question: `What should I avoid during ${transit.title}?`,
+      answer: `During ${transit.title}, avoid ${transit.avoidList.slice(0, 2).join(' and ').toLowerCase()}.`,
+    },
+  ];
+
   return (
     <SEOContentTemplate
       title={transit.title}
@@ -139,6 +162,7 @@ ${transit.avoidList.map((a) => `- ${a}`).join('\n')}
       ctaText='See how this transit affects your chart'
       ctaHref='/horoscope'
       sources={[{ name: 'Ephemeris calculations' }]}
+      faqs={faqs}
     >
       {sameYearTransits.length > 0 && (
         <div className='mt-8'>

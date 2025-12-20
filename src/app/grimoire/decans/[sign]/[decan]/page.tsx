@@ -83,6 +83,29 @@ export default async function DecanPage({
   const symbol = SIGN_SYMBOLS[sign as ZodiacSign];
   const decanName = decan === 1 ? 'First' : decan === 2 ? 'Second' : 'Third';
 
+  const faqs = [
+    {
+      question: `What is the ${decanName} Decan of ${signName}?`,
+      answer: `The ${decanName} Decan of ${signName} spans ${data.degrees} (${data.dateRange}). While the primary ruler is ${data.ruler}, this decan is co-ruled by ${data.subruler}.`,
+    },
+    {
+      question: `What are ${decanName} Decan ${signName} traits?`,
+      answer: `${decanName} Decan ${signName}s tend to be ${data.traits.slice(0, 4).join(', ').toLowerCase()}.`,
+    },
+    {
+      question: `What tarot card is associated with ${decanName} Decan ${signName}?`,
+      answer: `The ${data.tarotCard} is associated with the ${decanName} Decan of ${signName}, reflecting its themes and energy.`,
+    },
+    {
+      question: `What are the strengths of ${decanName} Decan ${signName}?`,
+      answer: `${decanName} Decan ${signName} strengths include ${data.strengths.slice(0, 3).join(', ').toLowerCase()}.`,
+    },
+    {
+      question: `How does ${data.subruler} influence ${decanName} Decan ${signName}?`,
+      answer: `${data.subruler} as the sub-ruler adds unique qualities to ${decanName} Decan ${signName}s, including ${data.strengths.slice(0, 2).join(' and ').toLowerCase()}.`,
+    },
+  ];
+
   return (
     <SEOContentTemplate
       title={`${decanName} Decan of ${signName}`}
@@ -157,6 +180,7 @@ The ${data.tarotCard} is associated with this decan, reflecting its themes and e
       ctaText='Discover your decan placement'
       ctaHref='/birth-chart'
       sources={[{ name: 'Traditional decan system' }]}
+      faqs={faqs}
     >
       <div className='mt-8'>
         <h3 className='text-lg font-medium mb-4'>{signName} Decans</h3>

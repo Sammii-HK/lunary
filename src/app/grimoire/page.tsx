@@ -1,9 +1,39 @@
+import { Metadata } from 'next';
+
 import GrimoireLayout from './GrimoireLayout';
 import {
   createItemListSchema,
   renderJsonLd,
   createBreadcrumbSchema,
 } from '@/lib/schema';
+
+export const metadata: Metadata = {
+  title:
+    'Lunary Grimoire - Complete Digital Grimoire | Astrology, Tarot, Crystals',
+  description:
+    'Complete digital grimoire with 500+ articles on tarot, crystals, astrology, moon phases, spells, and magical practice.',
+  keywords: [
+    'grimoire',
+    'astrology',
+    'tarot',
+    'crystals',
+    'moon phases',
+    'spells',
+    'witchcraft',
+    'numerology',
+    'birth chart',
+  ],
+  openGraph: {
+    title: 'Lunary Grimoire - Complete Digital Grimoire',
+    description:
+      'Complete digital grimoire with 500+ articles on tarot, crystals, astrology, moon phases, spells, and magical practice.',
+    url: 'https://lunary.app/grimoire',
+    siteName: 'Lunary',
+  },
+  alternates: {
+    canonical: 'https://lunary.app/grimoire',
+  },
+};
 
 const grimoireCategories = [
   {

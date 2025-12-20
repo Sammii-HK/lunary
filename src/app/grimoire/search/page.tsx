@@ -21,6 +21,9 @@ export const metadata: Metadata = {
       'Search our cosmic knowledge base for astrology, tarot, crystals, and rituals.',
     images: ['/icons/og-grimoire.png'],
   },
+  alternates: {
+    canonical: 'https://lunary.app/grimoire/search',
+  },
 };
 
 const CATEGORY_ICONS: Record<GrimoireEntry['category'], string> = {

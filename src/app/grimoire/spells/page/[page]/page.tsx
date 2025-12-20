@@ -6,6 +6,19 @@ import SpellsClient from '../../SpellsClient';
 
 const PAGE_SIZE = 10;
 
+/**
+ * NOTE: This route intentionally does NOT use generateStaticParams because:
+ * 1. Pagination depends on search/filter query params (q, category, difficulty)
+ * 2. The total number of pages varies based on active filters
+ * 3. Static generation would require generating all possible filter combinations
+ * 4. The route is dynamic and handles filtering server-side
+ *
+ * The route is still SEO-friendly with:
+ * - Proper canonical URLs
+ * - Robots meta tags (index: true, follow: true)
+ * - Proper metadata for each page
+ */
+
 function toClientSpell(spell: any) {
   return {
     id: spell.id || '',

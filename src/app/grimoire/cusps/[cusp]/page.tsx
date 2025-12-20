@@ -66,6 +66,29 @@ export default async function CuspPage({
 
   const data = getCuspData(cusp as CuspId);
 
+  const faqs = [
+    {
+      question: `What is the ${data.sign1}-${data.sign2} cusp?`,
+      answer: `The ${data.sign1}-${data.sign2} cusp, known as the ${data.name}, occurs between ${data.dates}. Those born on this cusp blend ${data.sign1}'s ${data.element1} energy with ${data.sign2}'s ${data.element2} qualities.`,
+    },
+    {
+      question: `What are ${data.name} personality traits?`,
+      answer: `People born on the ${data.name} cusp tend to be ${data.traits.slice(0, 4).join(', ').toLowerCase()}.`,
+    },
+    {
+      question: `What are the strengths of ${data.name} cusp?`,
+      answer: `${data.name} cusp strengths include ${data.strengths.slice(0, 3).join(', ').toLowerCase()}.`,
+    },
+    {
+      question: `What are the challenges for ${data.name} cusp?`,
+      answer: `${data.name} cusp challenges include ${data.challenges.slice(0, 3).join(', ').toLowerCase()}.`,
+    },
+    {
+      question: `Who is ${data.name} cusp compatible with?`,
+      answer: `${data.name} cusp is most compatible with ${data.compatibility.slice(0, 3).join(', ')}.`,
+    },
+  ];
+
   return (
     <SEOContentTemplate
       title={`${data.sign1}-${data.sign2} Cusp: The ${data.name}`}
@@ -154,6 +177,7 @@ ${data.celebrities.join(', ')}
       ctaText="Discover if you're a cusp baby"
       ctaHref='/birth-chart'
       sources={[{ name: 'Cusp astrology interpretations' }]}
+      faqs={faqs}
     >
       <div className='mt-8'>
         <h3 className='text-lg font-medium mb-4'>All Zodiac Cusps</h3>
