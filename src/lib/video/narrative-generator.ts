@@ -560,6 +560,133 @@ Return ONLY the voiceover script. Use EXACT planet and aspect names from above.`
  * 2. Moon phase
  * 3. Major planetary movement (Sun entering a sign, or other significant transit)
  */
+/**
+ * Threads hashtag categories for better discovery
+ */
+const threadsHashtagCategories = {
+  moon: ['#moonmagic', '#astrologythreads'],
+  tarot: ['#tarotcommunity', '#tarotcards'],
+  planetary: ['#astrologythreads', '#planetarytransits'],
+  seasonal: ['#witchythreads', '#wheeloftheyear'],
+  default: ['#astrologythreads'],
+};
+
+/**
+ * Generate Threads-specific categorizing hashtags (1-3 hashtags)
+ * First hashtag is always a categorizing one for Threads discovery
+ */
+function generateThreadsHashtags(weeklyData: WeeklyCosmicData): string {
+  const hashtags: string[] = [];
+
+  // Determine content type to select appropriate categorizing hashtag
+  let contentType: 'moon' | 'tarot' | 'planetary' | 'seasonal' | 'default' =
+    'default';
+
+  // Priority 1: Seasonal events (solstice, equinox, sabbats)
+  if (weeklyData.seasonalEvents && weeklyData.seasonalEvents.length > 0) {
+    contentType = 'seasonal';
+    hashtags.push(threadsHashtagCategories.seasonal[0]); // #witchythreads
+  }
+  // Priority 2: Moon phase (core to Lunary brand)
+  else if (weeklyData.moonPhases.length > 0) {
+    contentType = 'moon';
+    hashtags.push(threadsHashtagCategories.moon[0]); // #moonmagic
+  }
+  // Priority 3: Planetary/transit content
+  else if (
+    weeklyData.planetaryHighlights.length > 0 ||
+    weeklyData.majorAspects.length > 0
+  ) {
+    contentType = 'planetary';
+    hashtags.push(threadsHashtagCategories.planetary[0]); // #astrologythreads
+  }
+  // Default: general astrology
+  else {
+    hashtags.push(threadsHashtagCategories.default[0]); // #astrologythreads
+  }
+
+  // Add 1-2 more hashtags from existing generateVideoHashtags logic
+  // Get base hashtags (without categorizing ones)
+  const baseHashtags: string[] = [];
+
+  // Add moon phase hashtag if not already using moon category
+  if (contentType !== 'moon' && weeklyData.moonPhases.length > 0) {
+    const moonPhase = weeklyData.moonPhases[0];
+    const phaseName = moonPhase.phase
+      .toLowerCase()
+      .replace(/[^a-z0-9\s]/g, '')
+      .replace(/\s+/g, '');
+    if (phaseName) {
+      baseHashtags.push(`#${phaseName}`);
+    }
+  }
+
+  // Add planetary highlight hashtag
+  const sunEnteringSign = weeklyData.planetaryHighlights.find(
+    (h) =>
+      h.planet.toLowerCase() === 'sun' &&
+      h.event === 'enters-sign' &&
+      h.details?.toSign,
+  );
+
+  if (sunEnteringSign && sunEnteringSign.details?.toSign) {
+    const sign = sunEnteringSign.details.toSign.toLowerCase().trim();
+    if (sign) {
+      baseHashtags.push(`#${sign}`);
+    }
+  } else if (weeklyData.planetaryHighlights.length > 0) {
+    const firstHighlight = weeklyData.planetaryHighlights[0];
+    if (firstHighlight.details?.toSign) {
+      const sign = firstHighlight.details.toSign.toLowerCase().trim();
+      if (sign) {
+        baseHashtags.push(`#${sign}`);
+      }
+    }
+  }
+
+  // Add seasonal event hashtag if not already using seasonal category
+  if (
+    contentType !== 'seasonal' &&
+    weeklyData.seasonalEvents &&
+    weeklyData.seasonalEvents.length > 0
+  ) {
+    const event = weeklyData.seasonalEvents[0];
+    const eventName = event.name
+      .toLowerCase()
+      .replace(/[^a-z0-9\s]/g, '')
+      .replace(/\s+/g, '');
+    if (eventName) {
+      baseHashtags.push(`#${eventName}`);
+    }
+  }
+
+  // Add base hashtags (avoid duplicates)
+  for (const tag of baseHashtags) {
+    if (hashtags.length >= 3) break;
+    if (!hashtags.some((h) => h.toLowerCase() === tag.toLowerCase())) {
+      hashtags.push(tag);
+    }
+  }
+
+  // Fill remaining slots with relevant fallback hashtags
+  const fallbackHashtags = [
+    '#astrology',
+    '#cosmicforecast',
+    '#planetarytransits',
+    '#lunarmagic',
+  ];
+
+  for (const fallback of fallbackHashtags) {
+    if (hashtags.length >= 3) break;
+    if (!hashtags.some((tag) => tag.toLowerCase() === fallback.toLowerCase())) {
+      hashtags.push(fallback);
+    }
+  }
+
+  // Return 1-3 hashtags (Threads prefers fewer)
+  return hashtags.slice(0, 3).join(' ');
+}
+
 function generateVideoHashtags(
   weeklyData: WeeklyCosmicData,
   videoType: 'short' | 'medium' | 'long',
@@ -578,14 +705,17 @@ function generateVideoHashtags(
     }
   }
 
-  // Priority 2: Moon phase (core to Lunary brand)
+  // Priority 2: Moon phase (core to Lunary brand) - use categorizing hashtag
   if (weeklyData.moonPhases.length > 0) {
+    // Use categorizing hashtag for moon content
+    hashtags.push('#moonmagic');
+    // Also add specific moon phase
     const moonPhase = weeklyData.moonPhases[0];
     const phaseName = moonPhase.phase
       .toLowerCase()
       .replace(/[^a-z0-9\s]/g, '')
       .replace(/\s+/g, '');
-    if (phaseName) {
+    if (phaseName && !hashtags.includes(`#${phaseName}`)) {
       hashtags.push(`#${phaseName}`);
     }
   }
@@ -633,13 +763,13 @@ function generateVideoHashtags(
   // Remove duplicates first
   const uniqueHashtags = Array.from(new Set(hashtags));
 
-  // Fill remaining slots with relevant fallback hashtags
+  // Fill remaining slots with relevant categorizing fallback hashtags
   const fallbackHashtags = [
-    '#astrology',
+    '#astrologythreads', // Categorizing hashtag for planetary content
+    '#planetarytransits', // Categorizing hashtag for transits
     '#cosmicforecast',
     '#weeklyhoroscope',
-    '#planetarytransits',
-    '#moonmagic',
+    '#lunarmagic', // Categorizing hashtag for moon content
     '#astrologyinsights',
   ];
 
@@ -659,6 +789,88 @@ function generateVideoHashtags(
 }
 
 /**
+ * Format content for Threads by front-loading keywords in the first sentence
+ * Threads algorithm heavily weights the first line for discovery
+ */
+function formatContentForThreads(
+  content: string,
+  weeklyData: WeeklyCosmicData,
+): string {
+  // Determine the primary content type to front-load appropriate keywords
+  let keywordPrefix = '';
+
+  // Priority 1: Moon phase content
+  if (weeklyData.moonPhases.length > 0) {
+    const moonPhase = weeklyData.moonPhases[0];
+    const phaseName = moonPhase.phase.toLowerCase();
+    if (phaseName.includes('new')) {
+      keywordPrefix = "today's new moon";
+    } else if (phaseName.includes('full')) {
+      keywordPrefix = "today's full moon";
+    } else if (phaseName.includes('quarter')) {
+      keywordPrefix = "this week's moon phase";
+    } else {
+      keywordPrefix = "this week's lunar energy";
+    }
+  }
+  // Priority 2: Seasonal events
+  else if (weeklyData.seasonalEvents && weeklyData.seasonalEvents.length > 0) {
+    const event = weeklyData.seasonalEvents[0];
+    const eventName = event.name.toLowerCase();
+    if (eventName.includes('solstice')) {
+      keywordPrefix = 'this season';
+    } else if (eventName.includes('equinox')) {
+      keywordPrefix = 'this season';
+    } else {
+      keywordPrefix = 'the wheel of the year';
+    }
+  }
+  // Priority 3: Planetary/transit content
+  else if (
+    weeklyData.planetaryHighlights.length > 0 ||
+    weeklyData.majorAspects.length > 0
+  ) {
+    keywordPrefix = "this week's astrology";
+  }
+  // Default
+  else {
+    keywordPrefix = "this week's cosmic forecast";
+  }
+
+  // Check if content already starts with a keyword-rich phrase
+  const contentLower = content.toLowerCase();
+  const hasKeywordStart =
+    contentLower.startsWith("today's") ||
+    contentLower.startsWith("this week's") ||
+    contentLower.startsWith('this season') ||
+    contentLower.startsWith('the wheel');
+
+  if (hasKeywordStart) {
+    // Content already has keyword-rich start, return as-is
+    return content;
+  }
+
+  // Rewrite first sentence to front-load keywords
+  // Find the first sentence (ends with period, exclamation, or question mark)
+  const firstSentenceMatch = content.match(/^[^.!?]+[.!?]/);
+  if (firstSentenceMatch) {
+    const firstSentence = firstSentenceMatch[0];
+    const restOfContent = content.substring(firstSentence.length).trim();
+
+    // Create new first sentence with front-loaded keyword
+    const newFirstSentence = `${keywordPrefix} ${firstSentence
+      .toLowerCase()
+      .replace(/^[a-z]/, (char) => char.toUpperCase())}`;
+
+    // Combine with rest of content
+    return `${newFirstSentence} ${restOfContent}`.trim();
+  }
+
+  // If no sentence boundary found, prepend keyword prefix
+  return `${keywordPrefix} ${content}`.trim();
+}
+
+/**
  * Generate social media post content to accompany a video
  * Gently guides people to the site/blog if they want to learn more
  */
@@ -666,6 +878,7 @@ export async function generateVideoPostContent(
   weeklyData: WeeklyCosmicData,
   videoType: 'short' | 'medium' | 'long',
   blogSlug?: string,
+  platform?: 'threads' | 'default',
 ): Promise<string> {
   const openai = getOpenAI();
 
@@ -758,9 +971,17 @@ Return ONLY the post content text, no markdown, no formatting, just the caption 
 
     postContent = postContent.trim();
 
-    // Add hashtags for all video types (short, medium, and long-form)
-    const hashtags = generateVideoHashtags(weeklyData, videoType);
-    postContent = `${postContent}\n\n${hashtags}`;
+    // Format content for Threads if platform is specified
+    if (platform === 'threads') {
+      postContent = formatContentForThreads(postContent, weeklyData);
+      // Use Threads-specific hashtags (1-3 categorizing hashtags)
+      const hashtags = generateThreadsHashtags(weeklyData);
+      postContent = `${postContent}\n\n${hashtags}`;
+    } else {
+      // Add hashtags for all other platforms (3 hashtags)
+      const hashtags = generateVideoHashtags(weeklyData, videoType);
+      postContent = `${postContent}\n\n${hashtags}`;
+    }
 
     return postContent;
   } catch (error) {
@@ -768,9 +989,17 @@ Return ONLY the post content text, no markdown, no formatting, just the caption 
     // Fallback to a simple post content - no URLs
     let fallbackContent = `Your cosmic forecast for the week of ${weekRange}. For more details, check out the full blog on Lunary.`;
 
-    // Add hashtags for all video types (short, medium, and long-form)
-    const hashtags = generateVideoHashtags(weeklyData, videoType);
-    fallbackContent = `${fallbackContent}\n\n${hashtags}`;
+    // Format content for Threads if platform is specified
+    if (platform === 'threads') {
+      fallbackContent = formatContentForThreads(fallbackContent, weeklyData);
+      // Use Threads-specific hashtags (1-3 categorizing hashtags)
+      const hashtags = generateThreadsHashtags(weeklyData);
+      fallbackContent = `${fallbackContent}\n\n${hashtags}`;
+    } else {
+      // Add hashtags for all other platforms (3 hashtags)
+      const hashtags = generateVideoHashtags(weeklyData, videoType);
+      fallbackContent = `${fallbackContent}\n\n${hashtags}`;
+    }
 
     return fallbackContent;
   }

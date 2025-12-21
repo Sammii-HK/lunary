@@ -90,6 +90,8 @@ async function scheduleVideoToPlatforms(
   description: string,
   baseUrl: string,
   postContent?: string | null,
+  weeklyData?: any,
+  blogSlug?: string,
 ): Promise<void> {
   const apiKey = process.env.SUCCULENT_SECRET_KEY;
   const accountGroupId = process.env.SUCCULENT_ACCOUNT_GROUP_ID;
@@ -136,11 +138,37 @@ async function scheduleVideoToPlatforms(
       instagramOptions: { type: 'reel' as const },
     };
 
-    // Threads
+    // Threads - generate Threads-specific content with categorizing hashtags
+    let threadsContent = content;
+    if (weeklyData) {
+      try {
+        const { generateVideoPostContent } =
+          await import('@/lib/video/narrative-generator');
+        threadsContent = await generateVideoPostContent(
+          weeklyData,
+          videoType,
+          blogSlug,
+          'threads',
+        );
+        // Truncate to 300 characters for Threads
+        threadsContent = truncateContent(threadsContent, 300);
+      } catch (error) {
+        console.warn(
+          'Failed to generate Threads-specific content, using default:',
+          error,
+        );
+        // Fallback: use regular content but ensure it's truncated
+        threadsContent = truncateContent(content, 300);
+      }
+    } else {
+      // No weeklyData available, use regular content truncated
+      threadsContent = truncateContent(content, 300);
+    }
+
     const threadsPost = {
       accountGroupId,
       name: `Lunary Short - Threads - ${dateStr}`,
-      content: content,
+      content: threadsContent,
       platforms: ['threads'],
       scheduledDate: scheduledDate.toISOString(),
       media: [{ type: 'video' as const, url: videoUrl, alt: title }],
@@ -1170,6 +1198,7 @@ export async function POST(request: NextRequest) {
 
     // Schedule video to platforms (fire and forget - don't block response)
     // Use postContent for social media posts if available, otherwise fall back to description
+    // Pass weeklyData and blogSlug for Threads-specific formatting
     scheduleVideoToPlatforms(
       videoUrl,
       type,
@@ -1177,6 +1206,8 @@ export async function POST(request: NextRequest) {
       description,
       baseUrl,
       postContent,
+      weeklyData || null,
+      blogSlug || undefined,
     ).catch((err) => {
       console.error('Failed to schedule video to platforms:', err);
     });
