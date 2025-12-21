@@ -17,7 +17,9 @@ const TIMEZONE = 'Europe/London';
  */
 function buildArrayInClause(column: string, values: string[]): string {
   if (values.length === 0) return 'FALSE';
-  const arrayLiteral = `{${values.map((v) => `"${v.replace(/"/g, '\\"')}"`).join(',')}}`;
+  const arrayLiteral = `{${values
+    .map((v) => `"${v.replace(/\\/g, '\\\\').replace(/"/g, '\\"')}"`)
+    .join(',')}}`;
   return `${column} = ANY(SELECT unnest(${arrayLiteral}::text[]))`;
 }
 

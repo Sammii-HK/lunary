@@ -88,7 +88,7 @@ export async function GET(request: NextRequest) {
       'cosmic_pulse_opened',
       'moon_circle_opened',
     ];
-    const activityEventsArray = `{${ACTIVITY_EVENTS.map((e) => `"${e.replace(/"/g, '\\"')}"`).join(',')}}`;
+    const activityEventsArray = toTextArrayLiteral(ACTIVITY_EVENTS)!;
 
     for (const cohort of cohorts) {
       const cohortStartDate = cohort.startDate;

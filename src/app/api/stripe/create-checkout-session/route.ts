@@ -9,6 +9,14 @@ function getStripe(secretKey?: string) {
   return new Stripe(key);
 }
 
+function sanitizeForLog(value: unknown): string {
+  if (typeof value !== 'string') {
+    return String(value);
+  }
+  // Remove newline and carriage return characters to prevent log injection
+  return value.replace(/[\r\n]/g, '');
+}
+
 async function findCustomerAccount(customerId: string): Promise<Stripe | null> {
   // Try new account first
   const newStripe = getStripe();
@@ -24,7 +32,9 @@ async function findCustomerAccount(customerId: string): Promise<Stripe | null> {
     const legacyStripe = getStripe(process.env.STRIPE_SECRET_KEY_LEGACY);
     try {
       await legacyStripe.customers.retrieve(customerId);
-      console.log(`[checkout] Using legacy Stripe for ${customerId}`);
+      console.log(
+        `[checkout] Using legacy Stripe for ${sanitizeForLog(customerId)}`,
+      );
       return legacyStripe;
     } catch {
       // Not in legacy either
@@ -43,8 +53,9 @@ async function findPriceAccount(priceId: string): Promise<Stripe | null> {
     if (price.active) {
       return newStripe;
     } else {
+      const safePriceId = sanitizeForLog(priceId);
       console.warn(
-        `Price ${priceId} exists but is inactive in primary account`,
+        `Price ${safePriceId} exists but is inactive in primary account`,
       );
     }
   } catch (error: any) {
@@ -61,11 +72,13 @@ async function findPriceAccount(priceId: string): Promise<Stripe | null> {
       const price = await legacyStripe.prices.retrieve(priceId);
       // Check if price is active
       if (price.active) {
-        console.log(`[checkout] Using legacy Stripe for price ${priceId}`);
+        const safePriceId = sanitizeForLog(priceId);
+        console.log(`[checkout] Using legacy Stripe for price ${safePriceId}`);
         return legacyStripe;
       } else {
+        const safePriceId = sanitizeForLog(priceId);
         console.warn(
-          `Price ${priceId} exists but is inactive in legacy account`,
+          `Price ${safePriceId} exists but is inactive in legacy account`,
         );
       }
     } catch (error: any) {
@@ -132,8 +145,9 @@ export async function POST(request: NextRequest) {
     let priceStripe = await findPriceAccount(priceId);
     if (!priceStripe) {
       // Try to find an equivalent price from the mapping (e.g., if GBP price missing, use USD)
+      const safePriceId = sanitizeForLog(priceId);
       console.warn(
-        `Price ${priceId} not found in Stripe. Attempting to find equivalent price...`,
+        `Price ${safePriceId} not found in Stripe. Attempting to find equivalent price...`,
       );
       try {
         const { STRIPE_PRICE_MAPPING } =
@@ -155,7 +169,7 @@ export async function POST(request: NextRequest) {
               if (usdPrice) {
                 equivalentPriceId = usdPrice.priceId;
                 console.log(
-                  `Found equivalent USD price ${equivalentPriceId} for plan ${planId}`,
+                  `Found equivalent USD price ${sanitizeForLog(equivalentPriceId)} for plan ${sanitizeForLog(planId)}`,
                 );
                 break;
               }
@@ -166,18 +180,18 @@ export async function POST(request: NextRequest) {
 
         if (equivalentPriceId && foundPlanId) {
           console.log(
-            `Attempting to use equivalent USD price ${equivalentPriceId} for plan ${foundPlanId}`,
+            `Attempting to use equivalent USD price ${sanitizeForLog(equivalentPriceId)} for plan ${sanitizeForLog(foundPlanId)}`,
           );
           // Try the equivalent price
           priceStripe = await findPriceAccount(equivalentPriceId);
           if (priceStripe) {
             console.log(
-              `✅ Successfully using equivalent price ${equivalentPriceId} instead of ${priceId}`,
+              `✅ Successfully using equivalent price ${sanitizeForLog(equivalentPriceId)} instead of ${sanitizeForLog(priceId)}`,
             );
             priceId = equivalentPriceId;
           } else {
             console.error(
-              `❌ Equivalent USD price ${equivalentPriceId} also not found in Stripe. Attempting to find any active price for plan ${foundPlanId}...`,
+              `❌ Equivalent USD price ${sanitizeForLog(equivalentPriceId)} also not found in Stripe. Attempting to find any active price for plan ${sanitizeForLog(foundPlanId)}...`,
             );
             // Last resort: try to find ANY active price for this plan in Stripe
             try {
@@ -201,7 +215,7 @@ export async function POST(request: NextRequest) {
                   // Use the first active price we find
                   const activePrice = prices.data[0];
                   console.log(
-                    `✅ Found active price ${activePrice.id} for plan ${foundPlanId} in Stripe`,
+                    `✅ Found active price ${sanitizeForLog(activePrice.id)} for plan ${sanitizeForLog(foundPlanId)} in Stripe`,
                   );
                   priceId = activePrice.id;
                   priceStripe = primaryStripe;
@@ -225,7 +239,7 @@ export async function POST(request: NextRequest) {
                       if (legacyPrices.data.length > 0) {
                         const activePrice = legacyPrices.data[0];
                         console.log(
-                          `✅ Found active price ${activePrice.id} for plan ${foundPlanId} in legacy Stripe`,
+                          `✅ Found active price ${sanitizeForLog(activePrice.id)} for plan ${sanitizeForLog(foundPlanId)} in legacy Stripe`,
                         );
                         priceId = activePrice.id;
                         priceStripe = legacyStripe;
@@ -236,10 +250,12 @@ export async function POST(request: NextRequest) {
               }
 
               if (!priceStripe) {
+                const safePriceId = sanitizeForLog(priceId);
+                const safePlanId = sanitizeForLog(foundPlanId);
                 return NextResponse.json(
                   {
                     error: 'Price not found',
-                    details: `Price ${priceId} and no active prices found for plan ${foundPlanId} in any Stripe account. Please run 'npm run generate-price-mapping' to update price mappings or create missing prices in Stripe.`,
+                    details: `Price ${safePriceId} and no active prices found for plan ${safePlanId} in any Stripe account. Please run 'npm run generate-price-mapping' to update price mappings or create missing prices in Stripe.`,
                   },
                   { status: 404 },
                 );
@@ -249,33 +265,36 @@ export async function POST(request: NextRequest) {
                 'Error searching for prices in Stripe:',
                 searchError,
               );
+              const safePriceId = sanitizeForLog(priceId);
               return NextResponse.json(
                 {
                   error: 'Price not found',
-                  details: `Price ${priceId} not found and could not search for alternatives. Please contact support.`,
+                  details: `Price ${safePriceId} not found and could not search for alternatives. Please contact support.`,
                 },
                 { status: 404 },
               );
             }
           }
         } else {
+          const safePriceId = sanitizeForLog(priceId);
           console.error(
-            `❌ Could not find plan for price ${priceId} or no USD equivalent available`,
+            `❌ Could not find plan for price ${safePriceId} or no USD equivalent available`,
           );
           return NextResponse.json(
             {
               error: 'Price not found',
-              details: `Price ${priceId} not found in any Stripe account and no equivalent price available. Please contact support.`,
+              details: `Price ${safePriceId} not found in any Stripe account and no equivalent price available. Please contact support.`,
             },
             { status: 404 },
           );
         }
       } catch (mappingError) {
         console.error('Error finding equivalent price:', mappingError);
+        const safePriceId = sanitizeForLog(priceId);
         return NextResponse.json(
           {
             error: 'Price not found',
-            details: `Price ${priceId} not found in any Stripe account. Please contact support.`,
+            details: `Price ${safePriceId} not found in any Stripe account. Please contact support.`,
           },
           { status: 404 },
         );
@@ -291,7 +310,6 @@ export async function POST(request: NextRequest) {
 
     // Use the same Stripe account for checkout session
     const checkoutStripe = priceStripe;
-    stripe = priceStripe; // For backwards compatibility with rest of function
 
     // Fetch trial period from Stripe product/price metadata
     const trialDays = await getTrialPeriodForPrice(priceId, priceStripe);
@@ -423,8 +441,9 @@ export async function POST(request: NextRequest) {
         }
       } else {
         // Customer doesn't exist in price account, don't use it
+        const safeCustomerId = sanitizeForLog(customerId);
         console.warn(
-          `Customer ${customerId} not found in price account, creating new customer`,
+          `Customer ${safeCustomerId} not found in price account, creating new customer`,
         );
         // Fall through to create new customer with userId in metadata
         if (userId) {
