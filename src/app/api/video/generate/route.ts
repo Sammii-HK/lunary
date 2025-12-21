@@ -583,42 +583,69 @@ export async function POST(request: NextRequest) {
         imageUrl = `${baseUrl}/api/social/images?format=story&title=${encodeURIComponent(weeklyData.title)}&subtitle=${encodeURIComponent(weeklyData.subtitle || '')}`;
       }
     } else {
-      // Long-form: cache by blog slug or week number + version
-      weekKey = blogSlug ? `blog-${blogSlug}` : `week-${weekNumber || 0}`;
+      // Long-form: cache by blog slug or week number of year + version
+      // First calculate weekStart to get the actual week number of the year
+      const now = new Date();
+      let weekStart: Date;
+
+      if (week !== undefined) {
+        // Use the week parameter if provided (for manual generation)
+        // weekOffset represents weeks from current week's Monday
+        const currentDayOfWeek = now.getDay();
+        const daysToCurrentMonday =
+          currentDayOfWeek === 0 ? 6 : currentDayOfWeek - 1;
+        const currentWeekMonday = new Date(now);
+        currentWeekMonday.setDate(now.getDate() - daysToCurrentMonday);
+        currentWeekMonday.setHours(0, 0, 0, 0);
+
+        // Calculate the target week's Monday
+        weekStart = new Date(currentWeekMonday);
+        weekStart.setDate(currentWeekMonday.getDate() + week * 7);
+        console.log(
+          `📅 Long-form video: Using week parameter ${week}, weekStart=${weekStart.toISOString()}, currentWeekMonday=${currentWeekMonday.toISOString()}`,
+        );
+      } else {
+        // Default to current week if no week parameter
+        const dayOfWeek = now.getDay();
+        const daysToMonday = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
+        weekStart = new Date(
+          now.getTime() - daysToMonday * 24 * 60 * 60 * 1000,
+        );
+        console.log(
+          `📅 Long-form video: No week parameter provided, using current week, weekStart=${weekStart.toISOString()}`,
+        );
+      }
+
+      weekStart.setHours(0, 0, 0, 0);
+
+      // Calculate actual week number of the year (1-53)
+      const yearStart = new Date(weekStart.getFullYear(), 0, 1);
+      const daysSinceYearStart = Math.floor(
+        (weekStart.getTime() - yearStart.getTime()) / (24 * 60 * 60 * 1000),
+      );
+      const weekOfYear = Math.floor(daysSinceYearStart / 7) + 1;
+      const year = weekStart.getFullYear();
+
+      // Use actual week number of year in cache key (e.g., "2025-w50")
+      if (blogSlug) {
+        weekKey = `blog-${blogSlug}-${year}-w${weekOfYear}`;
+      } else {
+        weekKey = `${year}-w${weekOfYear}`;
+      }
       const version = SCRIPT_VERSION.long;
       scriptCacheKey = `scripts/long/${version}/${weekKey}.txt`;
       audioCacheKey = `audio/long/${version}/${weekKey}.mp3`;
 
+      console.log(
+        `🔑 Long-form cache key: ${weekKey} (weekOfYear=${weekOfYear}, year=${year}, week=${week}, blogSlug=${blogSlug || 'none'})`,
+      );
+
       // Long-form: ALWAYS get weekly content (required for topic images)
       try {
-        const now = new Date();
-        let weekStart: Date;
-
-        if (week !== undefined) {
-          // Use the week parameter if provided (for manual generation)
-          // weekOffset represents weeks from current week's Monday
-          const currentDayOfWeek = now.getDay();
-          const daysToCurrentMonday =
-            currentDayOfWeek === 0 ? 6 : currentDayOfWeek - 1;
-          const currentWeekMonday = new Date(now);
-          currentWeekMonday.setDate(now.getDate() - daysToCurrentMonday);
-          currentWeekMonday.setHours(0, 0, 0, 0);
-
-          // Calculate the target week's Monday
-          weekStart = new Date(currentWeekMonday);
-          weekStart.setDate(currentWeekMonday.getDate() + week * 7);
-        } else {
-          // Default to current week if no week parameter
-          const dayOfWeek = now.getDay();
-          const daysToMonday = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
-          weekStart = new Date(
-            now.getTime() - daysToMonday * 24 * 60 * 60 * 1000,
-          );
-        }
-
-        weekStart.setHours(0, 0, 0, 0);
         weeklyData = await generateWeeklyContent(weekStart);
-        console.log('✅ Generated weeklyData for long-form video');
+        console.log(
+          `✅ Generated weeklyData for long-form video: weekStart=${weeklyData.weekStart.toISOString()}, title="${weeklyData.title}", subtitle="${weeklyData.subtitle}"`,
+        );
       } catch (error) {
         console.error(
           '❌ Failed to generate weekly content for long-form video:',
@@ -650,13 +677,100 @@ export async function POST(request: NextRequest) {
 
     // Step 1: Check for cached script
     const { head } = await import('@vercel/blob');
+    let cachedScriptValid = false;
     try {
       const existingScript = await head(scriptCacheKey!);
       if (existingScript) {
         const scriptResponse = await fetch(existingScript.url);
         if (scriptResponse.ok) {
           script = await scriptResponse.text();
-          console.log(`♻️ Reusing cached script for ${weekKey}`);
+
+          // Validate cached script matches current week's data (for long-form videos)
+          if (type === 'long' && weeklyData) {
+            // Check if script contains key identifiers from current week
+            const weekTitle = weeklyData.title || '';
+            const weekSubtitle = weeklyData.subtitle || '';
+            const scriptLower = script.toLowerCase();
+
+            // Extract date from subtitle (e.g., "Week of December 22, 2025")
+            const dateMatch = weekSubtitle.match(
+              /week of ([^,]+),?\s*(\d{4})/i,
+            );
+            const expectedDateStr = dateMatch
+              ? `${dateMatch[1]} ${dateMatch[2]}`.toLowerCase()
+              : '';
+
+            // Also extract month and day for more flexible matching
+            const monthDayMatch = weekSubtitle.match(
+              /(january|february|march|april|may|june|july|august|september|october|november|december)\s+(\d{1,2})/i,
+            );
+            const monthDayStr = monthDayMatch
+              ? `${monthDayMatch[1]} ${monthDayMatch[2]}`.toLowerCase()
+              : '';
+
+            // Check if script mentions the current week's key events
+            const hasTitleMatch =
+              weekTitle &&
+              scriptLower.includes(weekTitle.toLowerCase().substring(0, 20));
+            const hasDateMatch =
+              expectedDateStr && scriptLower.includes(expectedDateStr);
+            const hasMonthDayMatch =
+              monthDayStr && scriptLower.includes(monthDayStr);
+
+            // Check for major planetary events from current week
+            const hasPlanetaryMatch = weeklyData.planetaryHighlights?.some(
+              (highlight) => {
+                const planetName = highlight.planet?.toLowerCase() || '';
+                const eventName = highlight.event?.toLowerCase() || '';
+                return (
+                  (planetName && scriptLower.includes(planetName)) ||
+                  (eventName && scriptLower.includes(eventName))
+                );
+              },
+            );
+
+            // Check for moon phases from current week
+            const hasMoonPhaseMatch = weeklyData.moonPhases?.some((phase) => {
+              const phaseName = phase.phase?.toLowerCase() || '';
+              return phaseName && scriptLower.includes(phaseName);
+            });
+
+            // Validate: script should contain at least one key identifier
+            cachedScriptValid =
+              hasTitleMatch ||
+              hasDateMatch ||
+              hasMonthDayMatch ||
+              hasPlanetaryMatch ||
+              hasMoonPhaseMatch;
+
+            if (!cachedScriptValid) {
+              console.warn(
+                `⚠️ Cached script for ${weekKey} doesn't match current week's data. Regenerating...`,
+                {
+                  weekTitle: weekTitle.substring(0, 30),
+                  weekSubtitle: weekSubtitle.substring(0, 30),
+                  expectedDateStr,
+                  monthDayStr,
+                  hasTitleMatch,
+                  hasDateMatch,
+                  hasMonthDayMatch,
+                  hasPlanetaryMatch,
+                  hasMoonPhaseMatch,
+                  scriptPreview: script.substring(0, 200),
+                },
+              );
+              script = undefined; // Force regeneration
+            } else {
+              console.log(`♻️ Reusing validated cached script for ${weekKey}`, {
+                weekTitle: weekTitle.substring(0, 30),
+                weekSubtitle: weekSubtitle.substring(0, 30),
+              });
+            }
+          } else {
+            // For short/medium form, just use the cached script
+            console.log(`♻️ Reusing cached script for ${weekKey}`);
+            cachedScriptValid = true;
+          }
         }
       }
     } catch (error) {
