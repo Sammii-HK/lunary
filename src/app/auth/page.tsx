@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useRef } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { AuthComponent } from '@/components/Auth';
 import { useAuthStatus } from '@/components/AuthStatus';
 import { MarketingFooter } from '@/components/MarketingFooter';
@@ -23,6 +24,8 @@ function isTestMode(): boolean {
 export default function AuthPage() {
   const authState = useAuthStatus();
   const redirectExecuted = useRef(false);
+  const searchParams = useSearchParams();
+  const defaultToSignUp = searchParams.get('signup') === 'true';
 
   useEffect(() => {
     // Skip redirect logic in Playwright e2e test mode
@@ -65,7 +68,7 @@ export default function AuthPage() {
             <p className='text-zinc-400'>Your Personal Cosmic Journey</p>
           </div>
 
-          <AuthComponent />
+          <AuthComponent defaultToSignUp={defaultToSignUp} />
         </div>
       </div>
       <div className='mt-auto'>

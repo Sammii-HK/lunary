@@ -32,7 +32,7 @@ export default function WelcomePage() {
   return (
     <main className='min-h-screen bg-zinc-950 text-zinc-50 flex flex-col'>
       {/* Section 1: Hero */}
-      <section className='relative px-4 md:px-6 pt-20 pb-10 md:pt-28 md:pb-16 bg-zinc-950'>
+      <section className='relative px-4 md:px-6 mt-10 pb-10 md:pt-28 md:pb-16 bg-zinc-950'>
         <div className='max-w-3xl mx-auto text-center space-y-6'>
           <p className='text-xs uppercase tracking-[0.2em] text-zinc-400'>
             A calm AI companion for cosmic self understanding
@@ -46,17 +46,20 @@ export default function WelcomePage() {
             Understand your emotions and patterns with insight that helps you
             move through your day with clarity.
           </p>
-          <div className='flex flex-col sm:flex-row gap-6 justify-center items-center pt-2'>
+          <div className='flex flex-col sm:flex-row gap-4 justify-center items-center pt-2 pb-6'>
             <Button variant='lunary' asChild>
               <Link href='/pricing'>Start free trial</Link>
             </Button>
-            <a
-              href='#how-it-works'
-              className='text-sm text-zinc-400 hover:text-zinc-200 transition-colors'
-            >
-              See how it works
-            </a>
+            <Button variant='lunary-soft' asChild>
+              <Link href='/auth?signup=true'>Sign up for free</Link>
+            </Button>
           </div>
+          <a
+            href='#how-it-works'
+            className='text-sm text-zinc-400 hover:text-zinc-200 transition-colors'
+          >
+            See how it works
+          </a>
           <p className='text-sm text-zinc-400'>Free to begin. No commitment.</p>
         </div>
 
@@ -567,9 +570,12 @@ export default function WelcomePage() {
             Begin your free trial and let Lunary translate the sky into clarity
             and personal meaning.
           </p>
-          <div className='pt-2'>
+          <div className='pt-2 flex flex-col sm:flex-row gap-4 justify-center items-center'>
             <Button variant='lunary' asChild>
               <Link href='/pricing'>Start free trial</Link>
+            </Button>
+            <Button variant='lunary-soft' asChild>
+              <Link href='/auth?signup=true'>Sign up for free</Link>
             </Button>
           </div>
         </div>
