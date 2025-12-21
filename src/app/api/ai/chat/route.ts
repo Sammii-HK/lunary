@@ -21,13 +21,13 @@ import { detectAssistCommand, runAssistCommand } from '@/lib/ai/assist';
 import { buildReflectionPrompt } from '@/lib/ai/reflection';
 import { buildPromptSections } from '@/lib/ai/prompt';
 import {
-  getWeeklyRitualUsage,
   incrementWeeklyRitualUsage,
   isRitualRequest,
 } from '@/lib/ai/weekly-ritual-usage';
 import { recordAiInteraction } from '@/lib/analytics/tracking';
 import { captureAIGeneration } from '@/lib/posthog-server';
 import { retrieveGrimoireContext } from '@/lib/ai/astral-guide';
+import { sql } from '@vercel/postgres';
 
 type ChatRequest = {
   message?: string;
@@ -137,24 +137,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    if (planId === 'free' && isRitualRequest(userMessage)) {
-      const weeklyUsage = await getWeeklyRitualUsage(user.id, now);
-      if (weeklyUsage.used >= weeklyUsage.limit) {
-        return jsonResponse(
-          {
-            error:
-              "You've used your free weekly AI ritual/reading. Upgrade to Lunary+ AI for unlimited access.",
-            message:
-              "You've used your free weekly AI ritual/reading. Upgrade to Lunary+ AI for unlimited access.",
-            limitExceeded: true,
-            used: weeklyUsage.used,
-            limit: weeklyUsage.limit,
-            upgradeUrl: '/pricing',
-          },
-          429,
-        );
-      }
-    }
+    // Ritual count system removed - no longer limiting ritual requests
 
     const { historyLimit, includeMood } =
       CONTEXT_RULES[planId] ?? CONTEXT_RULES.free;
@@ -383,9 +366,88 @@ export async function POST(request: NextRequest) {
       }
     }
 
+    // Calculate personal transits if user has birth chart
+    let personalTransits: any[] | undefined;
+    let upcomingPersonalTransits: any[] | undefined;
+
+    if (userWithBirthday.birthday) {
+      try {
+        const { getPersonalTransitImpacts } =
+          await import('../../../../../utils/astrology/personalTransits');
+        const { getUpcomingTransits } =
+          await import('../../../../../utils/astrology/transitCalendar');
+        const dayjs = (await import('dayjs')).default;
+
+        // Fetch user's birth chart from database
+        const birthChartResult = await sql`
+          SELECT birth_chart
+          FROM user_profiles
+          WHERE user_id = ${user.id}
+          LIMIT 1
+        `;
+
+        if (
+          birthChartResult.rows.length > 0 &&
+          birthChartResult.rows[0].birth_chart
+        ) {
+          const userBirthChartData = birthChartResult.rows[0].birth_chart;
+          const upcomingTransits = getUpcomingTransits(dayjs(now));
+
+          // Current personal transits (today and next 3 days)
+          const currentDate = dayjs(now);
+          const threeDaysFromNow = currentDate.add(3, 'day');
+          const yesterday = currentDate.subtract(1, 'day');
+          const currentPersonal = getPersonalTransitImpacts(
+            upcomingTransits.filter((t: any) => {
+              const transitDate = t.date;
+              return (
+                (transitDate.isBefore(threeDaysFromNow, 'day') ||
+                  transitDate.isSame(threeDaysFromNow, 'day')) &&
+                (transitDate.isAfter(yesterday, 'day') ||
+                  transitDate.isSame(yesterday, 'day'))
+              );
+            }),
+            userBirthChartData,
+            10,
+          );
+          personalTransits =
+            currentPersonal.length > 0 ? currentPersonal : undefined;
+
+          // Upcoming personal transits (next 7 days)
+          const sevenDaysFromNow = currentDate.add(7, 'day');
+          const upcomingPersonal = getPersonalTransitImpacts(
+            upcomingTransits.filter((t: any) => {
+              const transitDate = t.date;
+              return (
+                transitDate.isAfter(currentDate, 'day') &&
+                (transitDate.isBefore(sevenDaysFromNow, 'day') ||
+                  transitDate.isSame(sevenDaysFromNow, 'day'))
+              );
+            }),
+            userBirthChartData,
+            10,
+          );
+          upcomingPersonalTransits =
+            upcomingPersonal.length > 0 ? upcomingPersonal : undefined;
+        }
+      } catch (error) {
+        console.error(
+          '[AI Chat] Failed to calculate personal transits:',
+          error,
+        );
+      }
+    }
+
+    // Add personal transits to context for prompt building
+    const contextWithPersonalTransits = {
+      ...context,
+      personalTransits,
+      upcomingPersonalTransits,
+    };
+
     // Build prompt sections with grimoire data if available
     const promptSections = buildPromptSections({
-      context,
+      context: contextWithPersonalTransits,
       memorySnippets,
       userMessage: userMessage,
       grimoireData,
@@ -395,7 +457,7 @@ export async function POST(request: NextRequest) {
     let composed;
     try {
       composed = await composeAssistantReply({
-        context,
+        context: contextWithPersonalTransits,
         userMessage: userMessage,
         memorySnippets,
         threadId: body.threadId,
@@ -433,9 +495,7 @@ export async function POST(request: NextRequest) {
       return jsonResponse({ error: usageResult.message }, 429);
     }
 
-    if (planId === 'free' && isRitualRequest(userMessage)) {
-      await incrementWeeklyRitualUsage(user.id, now);
-    }
+    // Ritual count system removed - no longer tracking ritual usage
 
     const timestamp = now.toISOString();
     const { thread } = await appendToThread({

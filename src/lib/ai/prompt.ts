@@ -225,11 +225,47 @@ const describeContext = (
     parts.push(moonInfo);
   }
 
-  // Transits - include more transits for comprehensive context
-  // For weekly overviews, include more transits
-  if (context.currentTransits && context.currentTransits.length > 0) {
+  // Personal transits - prioritize these over general transits
+  // Check if we have personal transit data in the context (from astral guide)
+  const personalTransits = (context as any).personalTransits;
+  const upcomingPersonalTransits = (context as any).upcomingPersonalTransits;
+
+  if (personalTransits && personalTransits.length > 0) {
+    const personalTransitDescriptions = personalTransits
+      .slice(0, 8)
+      .map((pt: any) => {
+        const parts: string[] = [];
+        parts.push(`${pt.planet} ${pt.event}`);
+
+        if (pt.house && pt.houseMeaning) {
+          parts.push(`H${pt.house} (${pt.houseMeaning})`);
+        }
+
+        if (pt.aspectToNatal) {
+          const aspectSymbols: Record<string, string> = {
+            conjunction: '☌',
+            opposition: '☍',
+            trine: '△',
+            square: '□',
+          };
+          const aspectDesc =
+            aspectSymbols[pt.aspectToNatal.aspectType] ||
+            pt.aspectToNatal.aspectType;
+          parts.push(`${aspectDesc} natal ${pt.aspectToNatal.natalPlanet}`);
+        }
+
+        if (pt.personalImpact) {
+          parts.push(`→ ${pt.personalImpact}`);
+        }
+
+        return parts.join(' ');
+      });
+
+    parts.push(`PERSONAL TRANSITS: ${personalTransitDescriptions.join(' | ')}`);
+  } else if (context.currentTransits && context.currentTransits.length > 0) {
+    // Fallback to general transits if no personal transits available
     const topTransits = context.currentTransits
-      .slice(0, 8) // Increased to 8 for weekly overviews
+      .slice(0, 8)
       .map((t) => {
         const applying = t.applying ? ' (applying)' : '';
         const strength = t.strength ? ` strength:${t.strength.toFixed(2)}` : '';
@@ -237,6 +273,40 @@ const describeContext = (
       })
       .join(', ');
     parts.push(`TRANSITS: ${topTransits}`);
+  }
+
+  // Upcoming personal transits (next 7 days)
+  if (upcomingPersonalTransits && upcomingPersonalTransits.length > 0) {
+    const upcomingDescriptions = upcomingPersonalTransits
+      .slice(0, 5)
+      .map((pt: any) => {
+        const parts: string[] = [];
+        const dateStr = pt.date.format('MMM D');
+        parts.push(`${dateStr}: ${pt.planet} ${pt.event}`);
+
+        if (pt.house && pt.houseMeaning) {
+          parts.push(`H${pt.house}`);
+        }
+
+        if (pt.aspectToNatal) {
+          const aspectSymbols: Record<string, string> = {
+            conjunction: '☌',
+            opposition: '☍',
+            trine: '△',
+            square: '□',
+          };
+          const aspectDesc =
+            aspectSymbols[pt.aspectToNatal.aspectType] ||
+            pt.aspectToNatal.aspectType;
+          parts.push(`${aspectDesc} natal ${pt.aspectToNatal.natalPlanet}`);
+        }
+
+        return parts.join(' ');
+      });
+
+    parts.push(
+      `UPCOMING PERSONAL TRANSITS (next 7 days): ${upcomingDescriptions.join(' | ')}`,
+    );
   }
 
   // Birth chart - include more placements for better personalization
@@ -263,8 +333,13 @@ const describeContext = (
       parts.push(`BIRTH CHART: ${keyPlacements.join(', ')}`);
     }
 
-    // Add transit house positions if we have transits
-    if (context.currentTransits && context.currentTransits.length > 0) {
+    // Transit house positions are now included in PERSONAL TRANSITS section above
+    // Only add general transit houses if we don't have personal transits
+    if (
+      !personalTransits &&
+      context.currentTransits &&
+      context.currentTransits.length > 0
+    ) {
       const ascendant = context.birthChart.placements.find(
         (p) =>
           p.planet === 'Ascendant' ||
@@ -371,24 +446,37 @@ If no SAVED SPREAD found in context above, say "I don't see a saved spread to in
 
   if (
     content.includes('ritual') &&
-    (content.includes('moon') || content.includes('tonight'))
+    (content.includes('moon') ||
+      content.includes('tonight') ||
+      content.includes('give me a ritual') ||
+      content.includes('ritual generator'))
   ) {
-    return `\n\nMODE: Ritual Suggestion
-WORD LIMIT: 80-100 words. Brief and actionable.
+    return `\n\nMODE: Personalized Ritual Suggestion
+WORD LIMIT: 100-120 words. Deeply personalized and actionable.
+
+CRITICAL - Personalize the ritual to the user's specific chart and current cosmic patterns:
+1. Reference their birth chart placements (especially Moon, Sun, Rising signs)
+2. Connect to current PERSONAL TRANSITS - which houses are activated? Which natal planets are being aspected?
+3. Incorporate their daily/weekly tarot cards if available
+4. Consider their mood patterns and journal entries if relevant
+5. Make it specific to their chart, not generic moon phase advice
 
 Format:
-"**[Ritual Name]** - aligned with [Moon Phase] in [Sign]
+"**[Ritual Name]** - personalized for [their specific chart/transit activation]
+
+**Why this ritual now**: [Connect to their specific personal transit, house activation, or chart placement]
 
 **You'll need**: [2-3 simple items]
 
 **Steps**:
-1. [Brief step]
+1. [Brief step that references their chart/transit]
 2. [Brief step]
 3. [Brief step]
 
-**Intention**: [One sentence]"
+**Intention**: [One sentence connecting to their current cosmic patterns]"
 
-Keep it simple - users can click the ritual name for full details in the Grimoire.
+Example: "With Mars activating your 5th house and square your natal Sun, this ritual helps channel creative fire..."
+
 ALWAYS complete your sentences - never cut off mid-thought.`;
   }
 

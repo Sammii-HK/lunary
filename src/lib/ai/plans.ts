@@ -6,13 +6,8 @@ export const AI_PLANS: Record<AiPlanId, AiPlan> = {
     name: 'Free',
     priceGBP: 0,
     dailyMessageLimit: 3,
-    weeklyRitualLimit: 1,
     memoryTurns: 0,
-    features: [
-      'Basic Q&A',
-      'Astrology primer responses',
-      '1 free AI ritual/reading per week',
-    ],
+    features: ['Basic Q&A', 'Astrology primer responses'],
   },
   lunary_plus: {
     id: 'lunary_plus',

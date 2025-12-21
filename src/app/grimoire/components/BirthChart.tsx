@@ -72,7 +72,7 @@ const BirthChart = () => {
       keywords: 'Action, drive, competition',
       inBirthChart:
         'How you take action, assert yourself, and pursue desires. Your energy, drive, and passion.',
-      inTransits: 'Motivation, conflict, assertiveness, sexual energy',
+      inTransits: 'Motivation, conflict, assertiveness, sensual energy',
       characteristics: 'Will, courage, aggression, physical drive',
       retrograde:
         'Every 2 years, 2-3 months. Internal work, suppressed anger, re-evaluating goals. Avoid starting new projects.',

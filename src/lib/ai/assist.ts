@@ -1,5 +1,4 @@
 import { LunaryContext, TransitRecord } from './types';
-import { getRecommendedSpells } from '@/lib/spells/index';
 
 export type AssistCommand =
   | { type: 'summarise_week' }
@@ -195,46 +194,11 @@ const transitFeelings = (context: LunaryContext): string => {
   return `With ${descriptions.join(' and ')}, you might notice shifts in how you process emotions, make decisions, or connect with others.`;
 };
 
-const ritualGeneration = (context: LunaryContext): string => {
-  const moon = context.moon;
-  if (!moon) {
-    return 'The Moon invites you to create a simple ritual of intention and presence.';
-  }
-
-  try {
-    const moonPhaseLabel = moon.phase || 'New Moon';
-    const recommendedSpells = getRecommendedSpells(moonPhaseLabel as any);
-
-    if (recommendedSpells.length > 0) {
-      const spellNames = recommendedSpells
-        .slice(0, 3)
-        .map((s) => s.title)
-        .join(', ');
-      return `Tonight's ${moon.phase} in ${moon.sign} aligns with ${moonPhaseLabel} energy. Consider these rituals: ${spellNames}. These practices honour this lunar moment and support your intentions.`;
-    }
-  } catch (error) {
-    console.error('Error getting recommended spells:', error);
-  }
-
-  const phase = moon.phase.toLowerCase();
-  const sign = moon.sign.toLowerCase();
-
-  const phaseGuidance: Record<string, string> = {
-    'new moon': 'Set intentions and plant seeds for new beginnings',
-    'waxing crescent': 'Nurture your intentions with gentle action',
-    'first quarter': 'Take decisive steps toward your goals',
-    'waxing gibbous': 'Refine and adjust your path',
-    'full moon': 'Release what no longer serves and celebrate growth',
-    'waning gibbous': 'Share wisdom and gratitude',
-    'last quarter': 'Reflect and prepare for renewal',
-    'waning crescent': 'Rest and restore before the next cycle',
-  };
-
-  const guidance =
-    phaseGuidance[phase] ||
-    `Work with the ${phase} energy in ${sign} to align your practice`;
-
-  return `Tonight's ${moon.phase} in ${moon.sign} invites you to ${guidance}. Consider a ritual that honours this lunar moment.`;
+const ritualGeneration = (_context: LunaryContext): string | null => {
+  // Return null to let the AI generate personalized rituals based on the full context
+  // The AI will use the user's birth chart, personal transits, tarot cards, and mood
+  // to create deeply personalized ritual suggestions
+  return null;
 };
 
 const weeklyOverview = (_context: LunaryContext): string | null => {

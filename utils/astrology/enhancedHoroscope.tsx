@@ -369,7 +369,7 @@ const getPlanetHouseInsight = (planet: string, house: number): string => {
       5: 'passion and creativity rise while romance heats up',
       6: 'you focus strongly on work and health routines',
       7: 'you may experience conflict or passion in relationships',
-      8: 'deep sexual energy activates and shared finances come into focus',
+      8: 'deep transformative energy activates and shared finances come into focus',
       9: 'you feel driven to explore, travel, or study',
       10: 'your ambition drives you toward visible career achievements',
       11: 'your social life becomes active and you may take leadership in groups',

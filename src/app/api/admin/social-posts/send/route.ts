@@ -124,11 +124,57 @@ export async function POST(request: NextRequest) {
     }
 
     // Build media array - ensure URLs use canonical lunary.app (non-www) domain
-    const mediaArray = actualImageUrl
+    // For TikTok, ensure images are in story format (9:16), not square (1:1)
+    let imageUrlForPlatform = actualImageUrl
+      ? String(actualImageUrl).trim()
+      : null;
+
+    // Convert square images to story format for TikTok
+    if (platformStr === 'tiktok' && imageUrlForPlatform) {
+      try {
+        // Handle both absolute and relative URLs
+        let url: URL;
+        if (
+          imageUrlForPlatform.startsWith('http://') ||
+          imageUrlForPlatform.startsWith('https://')
+        ) {
+          url = new URL(imageUrlForPlatform);
+        } else {
+          // Relative URL - use baseUrl
+          url = new URL(imageUrlForPlatform, baseUrl);
+        }
+
+        const currentFormat = url.searchParams.get('format');
+
+        // If format is square or not specified, change to story
+        // TikTok requires story format (9:16), not square (1:1)
+        if (!currentFormat || currentFormat === 'square') {
+          url.searchParams.set('format', 'story');
+          imageUrlForPlatform = url.toString();
+          console.log(
+            `📐 Converted TikTok image from ${currentFormat || 'default'} to story format`,
+          );
+        }
+      } catch (error) {
+        // If URL parsing fails, try to append format parameter
+        console.warn(
+          'Failed to parse image URL for TikTok format conversion:',
+          error,
+        );
+        // If URL doesn't have format param, add it
+        if (!imageUrlForPlatform.includes('format=')) {
+          const separator = imageUrlForPlatform.includes('?') ? '&' : '?';
+          imageUrlForPlatform = `${imageUrlForPlatform}${separator}format=story`;
+          console.log('📐 Added story format parameter to TikTok image URL');
+        }
+      }
+    }
+
+    const mediaArray = imageUrlForPlatform
       ? [
           {
             type: 'image' as const,
-            url: String(actualImageUrl).trim(),
+            url: imageUrlForPlatform,
             alt: `Lunary cosmic insight - ${scheduleDate.toLocaleDateString()}`,
           },
         ]

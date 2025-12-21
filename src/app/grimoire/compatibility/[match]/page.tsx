@@ -11,6 +11,7 @@ import {
   createArticleSchema,
   renderJsonLd,
   createBreadcrumbSchema,
+  createFAQPageSchema,
 } from '@/lib/schema';
 import { createGrimoireMetadata } from '@/lib/grimoire-metadata';
 
@@ -59,7 +60,7 @@ export async function generateMetadata({ params }: PageProps) {
 
   const content = generateCompatibilityContent(parsed.sign1, parsed.sign2);
 
-  return createGrimoireMetadata({
+  const metadata = createGrimoireMetadata({
     title: `${content.title} - Lunary`,
     description: content.description,
     keywords: content.keywords,
@@ -67,6 +68,14 @@ export async function generateMetadata({ params }: PageProps) {
     ogImagePath: '/api/og/grimoire/compatibility',
     ogImageAlt: content.title,
   });
+
+  return {
+    ...metadata,
+    alternates: {
+      ...metadata.alternates,
+      canonical: `https://lunary.app/grimoire/compatibility/${match}`,
+    },
+  };
 }
 
 function ScoreBar({ score, label }: { score: number; label: string }) {
@@ -114,14 +123,40 @@ export default async function CompatibilityPage({ params }: PageProps) {
     dateModified: new Date().toISOString().split('T')[0],
   });
 
+  const faqs = [
+    {
+      question: `What is ${content.sign1} and ${content.sign2} compatibility?`,
+      answer: `${content.sign1} and ${content.sign2} have a ${content.overallScore}/10 compatibility score. ${content.description.slice(0, 100)}...`,
+    },
+    {
+      question: `How compatible are ${content.sign1} and ${content.sign2} in love?`,
+      answer: `${content.sign1} and ${content.sign2} have a ${content.loveScore}/10 love compatibility. ${content.strengths.slice(0, 1).join(' ')}`,
+    },
+    {
+      question: `Are ${content.sign1} and ${content.sign2} good friends?`,
+      answer: `${content.sign1} and ${content.sign2} have a ${content.friendshipScore}/10 friendship compatibility.`,
+    },
+    {
+      question: `Can ${content.sign1} and ${content.sign2} work well together?`,
+      answer: `${content.sign1} and ${content.sign2} have a ${content.workScore}/10 work compatibility.`,
+    },
+    {
+      question: `What are the main challenges for ${content.sign1} and ${content.sign2}?`,
+      answer: `The main challenges include ${content.challenges.slice(0, 2).join(' and ').toLowerCase()}.`,
+    },
+  ];
+
   // Get other compatibility matches for sign1
   const sign1Matches = Object.keys(signDescriptions)
     .filter((s) => s !== parsed.sign1 && s !== parsed.sign2)
     .slice(0, 4);
 
+  const faqSchema = createFAQPageSchema(faqs);
+
   return (
     <div className='min-h-screen bg-zinc-950 text-zinc-100'>
       {renderJsonLd(articleSchema)}
+      {renderJsonLd(faqSchema)}
       {renderJsonLd(
         createBreadcrumbSchema([
           { name: 'Grimoire', url: '/grimoire' },
@@ -311,6 +346,26 @@ export default async function CompatibilityPage({ params }: PageProps) {
               </span>
             </div>
           </Link>
+        </section>
+
+        {/* FAQs */}
+        <section id='faq' className='mb-12 pt-8 border-t border-zinc-800'>
+          <h2 className='text-2xl font-medium text-zinc-100 mb-6'>
+            Frequently Asked Questions
+          </h2>
+          <div className='space-y-4'>
+            {faqs.map((faq, index) => (
+              <div
+                key={index}
+                className='bg-zinc-900/50 border border-zinc-800/50 rounded-lg p-6'
+              >
+                <h3 className='text-lg font-medium text-zinc-100 mb-2'>
+                  {faq.question}
+                </h3>
+                <p className='text-zinc-300 leading-relaxed'>{faq.answer}</p>
+              </div>
+            ))}
+          </div>
         </section>
 
         {/* Birth Chart CTA */}

@@ -484,8 +484,9 @@ async function createMoonCircle(dateStr: string, force: boolean = false) {
           inline: true,
         },
       ],
-      url: `${baseUrl}/moon-circles?date=${dateStr}`,
+      url: `${baseUrl}/admin/notifications`,
       color: 'success',
+      category: 'general',
       footer: `Created at ${new Date().toISOString()}`,
     });
 

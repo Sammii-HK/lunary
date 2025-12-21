@@ -1747,16 +1747,16 @@
       "context": "href='/grimoire/meditation/breathwork'"
     },
     {
-      "url": "/grimoire/witches/${witchSlug}",
+      "url": "/grimoire/modern-witchcraft/famous-witches/${witchSlug}",
       "file": "/Users/sammii/development/lunary/src/app/grimoire/components/ModernWitchcraft.tsx",
       "line": 80,
-      "context": "href={`/grimoire/witches/${witchSlug}`}"
+      "context": "href={`/grimoire/modern-witchcraft/famous-witches/${witchSlug}`}"
     },
     {
-      "url": "/grimoire/witches/${witchSlug}",
+      "url": "/grimoire/modern-witchcraft/famous-witches/${witchSlug}",
       "file": "/Users/sammii/development/lunary/src/app/grimoire/components/ModernWitchcraft.tsx",
       "line": 80,
-      "context": "href={`/grimoire/witches/${witchSlug}`}"
+      "context": "href={`/grimoire/modern-witchcraft/famous-witches/${witchSlug}`}"
     },
     {
       "url": "/grimoire/modern-witchcraft/tools-guide",
@@ -6246,8 +6246,7 @@
     "/grimoire/guides/${guide.slug}",
     "/grimoire/moon/${year}/full-moon-${moon.month.toLowerCase()}",
     "/grimoire/moon/${year}/new-moon-${moon.month.toLowerCase()}",
-    "/grimoire/tarot/${card.name.toLowerCase().replace(/ /g, '-')}",
-    "/grimoire/witches/${witchSlug}"
+    "/grimoire/tarot/${card.name.toLowerCase().replace(/ /g, '-')}"
   ],
   "orphanedRoutes": [
     "/grimoire",
@@ -6409,18 +6408,6 @@
     "/grimoire/zodiac/[sign]"
   ],
   "brokenLinks": [
-    {
-      "url": "/grimoire/witches/${witchSlug}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/components/ModernWitchcraft.tsx",
-      "line": 80,
-      "context": "href={`/grimoire/witches/${witchSlug}`}"
-    },
-    {
-      "url": "/grimoire/witches/${witchSlug}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/components/ModernWitchcraft.tsx",
-      "line": 80,
-      "context": "href={`/grimoire/witches/${witchSlug}`}"
-    },
     {
       "url": "/grimoire/crystals/${crystal.name.toLowerCase().replace(/ /g, '-')}",
       "file": "/Users/sammii/development/lunary/src/app/grimoire/guides/crystal-healing-guide/page.tsx",

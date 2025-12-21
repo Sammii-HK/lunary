@@ -314,6 +314,7 @@ export default function SocialPreviewPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           type: 'long',
+          week: week, // Use selected week from dropdown
           // The endpoint will use weekly data if blogContent is not provided
         }),
       });
@@ -361,11 +362,13 @@ export default function SocialPreviewPage() {
           onChange={(e) => setWeek(parseInt(e.target.value))}
           className='bg-zinc-800 text-white p-2 rounded'
         >
-          {[0, -1, -2, -3, -4].map((w) => (
+          {[1, 0, -1, -2, -3, -4].map((w) => (
             <option key={w} value={w}>
               {w === 0
                 ? 'This week'
-                : `${Math.abs(w)} week${Math.abs(w) > 1 ? 's' : ''} ago`}
+                : w === 1
+                  ? 'Next week'
+                  : `${Math.abs(w)} week${Math.abs(w) > 1 ? 's' : ''} ago`}
             </option>
           ))}
         </select>

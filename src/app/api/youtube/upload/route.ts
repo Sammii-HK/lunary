@@ -5,6 +5,7 @@ import {
   uploadLongForm,
   scheduleVideo,
   uploadCaptions,
+  addVideoToPlaylist,
   type YouTubeVideoMetadata,
 } from '@/lib/youtube/client';
 
@@ -102,6 +103,40 @@ export async function POST(request: NextRequest) {
     if (publishDate) {
       await scheduleVideo(result.videoId, new Date(publishDate));
       console.log(`📅 Video scheduled for: ${publishDate}`);
+    }
+
+    // Add video to appropriate playlist
+    try {
+      if (type === 'short') {
+        // Short and medium-form videos go to Shorts playlist
+        const shortsPlaylistId = process.env.YOUTUBE_SHORTS_PLAYLIST_ID;
+        if (shortsPlaylistId) {
+          console.log(
+            `📋 Adding ${type} video to Shorts playlist: ${shortsPlaylistId}`,
+          );
+          await addVideoToPlaylist(result.videoId, shortsPlaylistId);
+        } else {
+          console.warn(
+            '⚠️ YOUTUBE_SHORTS_PLAYLIST_ID not set, skipping playlist addition',
+          );
+        }
+      } else {
+        // Long-form videos go to long-form playlist
+        const longFormPlaylistId = process.env.YOUTUBE_LONG_FORM_PLAYLIST_ID;
+        if (longFormPlaylistId) {
+          console.log(
+            `📋 Adding ${type} video to long-form playlist: ${longFormPlaylistId}`,
+          );
+          await addVideoToPlaylist(result.videoId, longFormPlaylistId);
+        } else {
+          console.warn(
+            '⚠️ YOUTUBE_LONG_FORM_PLAYLIST_ID not set, skipping playlist addition',
+          );
+        }
+      }
+    } catch (playlistError) {
+      console.warn('⚠️ Failed to add video to playlist:', playlistError);
+      // Don't fail the upload if playlist addition fails
     }
 
     // Update database record if videoId provided

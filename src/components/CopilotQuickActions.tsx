@@ -8,6 +8,9 @@ import {
   PenTool,
   Cloud,
   Layers,
+  Clock,
+  Lightbulb,
+  Brain,
 } from 'lucide-react';
 
 interface QuickAction {
@@ -65,25 +68,91 @@ const quickActions: QuickAction[] = [
 interface CopilotQuickActionsProps {
   onActionClick: (prompt: string) => void;
   disabled?: boolean;
+  onDailyThreadAction?: (type: 'memory' | 'reflection' | 'pattern') => void;
 }
 
 export function CopilotQuickActions({
   onActionClick,
   disabled = false,
+  onDailyThreadAction,
 }: CopilotQuickActionsProps) {
+  const handleDailyThreadAction = async (
+    type: 'memory' | 'reflection' | 'pattern',
+  ) => {
+    if (onDailyThreadAction) {
+      onDailyThreadAction(type);
+      return;
+    }
+
+    // Fallback: fetch module and show it
+    try {
+      const response = await fetch(
+        `/api/astral-chat/daily-thread?type=${type}&forceRefresh=true`,
+      );
+      const data = await response.json();
+      if (data.modules && data.modules.length > 0) {
+        const dailyModule = data.modules[0];
+        // Create a message from the module
+        const message = `${dailyModule.title}: ${dailyModule.body}`;
+        onActionClick(message);
+      }
+    } catch (error) {
+      console.error(
+        '[CopilotQuickActions] Error fetching daily thread module:',
+        error,
+      );
+    }
+  };
+
+  const dailyThreadActions = [
+    {
+      id: 'memory',
+      label: 'Show me a memory',
+      icon: <Clock className='w-4 h-4' />,
+      onClick: () => handleDailyThreadAction('memory'),
+    },
+    {
+      id: 'reflection',
+      label: 'Give me a prompt',
+      icon: <Lightbulb className='w-4 h-4' />,
+      onClick: () => handleDailyThreadAction('reflection'),
+    },
+    {
+      id: 'pattern',
+      label: 'Show pattern insight',
+      icon: <Brain className='w-4 h-4' />,
+      onClick: () => handleDailyThreadAction('pattern'),
+    },
+  ];
+
   return (
-    <div className='flex flex-wrap gap-2 mb-4'>
-      {quickActions.map((action) => (
-        <button
-          key={action.id}
-          onClick={() => onActionClick(action.prompt)}
-          disabled={disabled}
-          className='inline-flex items-center gap-2 rounded-lg border border-zinc-700/60 bg-zinc-900/40 px-3 py-2 text-xs text-zinc-300 transition hover:bg-zinc-800/60 hover:border-lunary-primary/40 disabled:opacity-50 disabled:cursor-not-allowed'
-        >
-          {action.icon}
-          <span>{action.label}</span>
-        </button>
-      ))}
+    <div className='space-y-3 mb-4'>
+      <div className='flex flex-wrap gap-2'>
+        {quickActions.map((action) => (
+          <button
+            key={action.id}
+            onClick={() => onActionClick(action.prompt)}
+            disabled={disabled}
+            className='inline-flex items-center gap-2 rounded-lg border border-zinc-700/60 bg-zinc-900/40 px-3 py-2 text-xs text-zinc-300 transition hover:bg-zinc-800/60 hover:border-lunary-primary/40 disabled:opacity-50 disabled:cursor-not-allowed'
+          >
+            {action.icon}
+            <span>{action.label}</span>
+          </button>
+        ))}
+      </div>
+      <div className='flex flex-wrap gap-2 pt-2 border-t border-zinc-800/50'>
+        {dailyThreadActions.map((action) => (
+          <button
+            key={action.id}
+            onClick={action.onClick}
+            disabled={disabled}
+            className='inline-flex items-center gap-2 rounded-lg border border-zinc-700/60 bg-zinc-900/40 px-3 py-2 text-xs text-zinc-300 transition hover:bg-zinc-800/60 hover:border-lunary-primary/40 disabled:opacity-50 disabled:cursor-not-allowed'
+          >
+            {action.icon}
+            <span>{action.label}</span>
+          </button>
+        ))}
+      </div>
     </div>
   );
 }

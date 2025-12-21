@@ -129,7 +129,11 @@ test.describe('SEO - Grimoire Pages', () => {
       await page.goto(`${BASE_URL}${route.path}`, {
         waitUntil: 'domcontentloaded',
       });
-      await page.waitForTimeout(1500);
+      // Wait for network idle and additional time for dynamic content
+      await page
+        .waitForLoadState('networkidle', { timeout: 10000 })
+        .catch(() => {});
+      await page.waitForTimeout(3000);
 
       const canonicalHref = await page.getAttribute(
         'link[rel="canonical"]',
@@ -182,7 +186,7 @@ test.describe('SEO - Grimoire Pages', () => {
     await page.goto(`${BASE_URL}/grimoire/crystals/amethyst`, {
       waitUntil: 'domcontentloaded',
     });
-    await page.waitForTimeout(1500);
+    await page.waitForTimeout(3000);
 
     const bodyText = (await page.textContent('body'))?.toLowerCase() || '';
     expect

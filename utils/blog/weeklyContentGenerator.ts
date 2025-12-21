@@ -245,7 +245,12 @@ export async function generateWeeklyContent(
 
   // Generate title and summary
   const title = generateWeeklyTitle(weekStart, planetaryHighlights, moonPhases);
-  const subtitle = generateWeeklySubtitle(majorAspects, retrogradeChanges);
+  const subtitle = generateWeeklySubtitle(
+    majorAspects,
+    retrogradeChanges,
+    planetaryHighlights,
+    moonPhases,
+  );
   const summary = generateWeeklySummary(
     planetaryHighlights,
     majorAspects,
@@ -1852,19 +1857,39 @@ function generateWeeklyTitle(
 function generateWeeklySubtitle(
   majorAspects: MajorAspect[],
   retrogradeChanges: RetrogradeChange[],
+  highlights: PlanetaryHighlight[],
+  moonPhases: MoonPhaseEvent[],
 ): string {
-  const events = [...majorAspects, ...retrogradeChanges];
-  const significantEvents = events.filter(
-    (e) =>
-      ('significance' in e && e.significance === 'high') ||
-      ('planet' in e && ['Mercury', 'Venus', 'Mars'].includes(e.planet)),
-  );
+  // Find the most significant event for the subtitle
+  const majorEvent =
+    highlights.find((h) => h.significance === 'extraordinary') ||
+    highlights.find((h) => h.significance === 'high') ||
+    highlights.find((h) => h.event === 'goes-retrograde') ||
+    highlights.find((h) => h.event === 'enters-sign') ||
+    moonPhases[0];
 
-  if (significantEvents.length > 0) {
-    return `${significantEvents.length} major planetary shifts shape this week's energy`;
+  if (majorEvent && 'planet' in majorEvent) {
+    // Format the event name properly
+    let eventText = '';
+    if (majorEvent.event === 'enters-sign') {
+      const sign = majorEvent.details.toSign || 'sign';
+      eventText = `enters ${sign}`;
+    } else if (majorEvent.event === 'goes-retrograde') {
+      eventText = 'goes retrograde';
+    } else if (majorEvent.event === 'goes-direct') {
+      eventText = 'goes direct';
+    } else {
+      eventText = majorEvent.event.replace('-', ' ');
+    }
+    return `${majorEvent.planet} ${eventText}`;
   }
 
-  return 'Navigate the week ahead with cosmic wisdom and planetary guidance';
+  // Fallback to first moon phase if available
+  if (moonPhases.length > 0) {
+    return moonPhases[0].phase;
+  }
+
+  return 'Cosmic Currents';
 }
 
 function generateWeeklySummary(

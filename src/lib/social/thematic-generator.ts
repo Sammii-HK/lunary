@@ -571,7 +571,7 @@ export function generateThematicPostsForWeek(
         postType: 'educational',
         topic: dayContent.facet.title,
         scheduledDate: dayContent.date,
-        hashtags: `${dayContent.hashtags.domain} ${dayContent.hashtags.topic} ${dayContent.hashtags.brand}`,
+        hashtags: `${dayContent.hashtags.domain} ${dayContent.hashtags.topic}`,
         category: dayContent.theme.category,
         slug:
           dayContent.facet.grimoireSlug.split('/').pop() ||
@@ -593,7 +593,7 @@ export function generateThematicPostsForWeek(
         postType: 'educational',
         topic: dayContent.facet.title,
         scheduledDate: dayContent.date,
-        hashtags: `${dayContent.hashtags.domain} ${dayContent.hashtags.topic} ${dayContent.hashtags.brand}`,
+        hashtags: `${dayContent.hashtags.domain} ${dayContent.hashtags.topic}`,
         category: dayContent.theme.category,
         slug:
           dayContent.facet.grimoireSlug.split('/').pop() ||

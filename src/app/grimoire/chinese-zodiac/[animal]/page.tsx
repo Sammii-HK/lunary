@@ -62,6 +62,29 @@ export default async function ChineseZodiacAnimalPage({
   const nextAnimal =
     animalIndex < 11 ? CHINESE_ANIMALS[animalIndex + 1] : CHINESE_ANIMALS[0];
 
+  const faqs = [
+    {
+      question: `What are ${data.displayName} personality traits?`,
+      answer: `${data.displayName} people are known for being ${data.traits.slice(0, 4).join(', ')}. They are ${data.yinYang} ${data.element} signs in Chinese astrology.`,
+    },
+    {
+      question: `Which years are ${data.displayName} years?`,
+      answer: `${data.displayName} years include ${data.years.slice(0, 5).join(', ')}, and more. The cycle repeats every 12 years.`,
+    },
+    {
+      question: `Who is ${data.displayName} compatible with?`,
+      answer: `${data.displayName} is most compatible with ${data.compatibleWith.map((a) => CHINESE_ZODIAC_DATA[a].displayName).join(', ')}.`,
+    },
+    {
+      question: `What are ${data.displayName} lucky numbers?`,
+      answer: `${data.displayName} lucky numbers are ${data.luckyNumbers.join(', ')}.`,
+    },
+    {
+      question: `What element is ${data.displayName}?`,
+      answer: `${data.displayName} is a ${data.element} element sign, which influences their ${data.yinYang} nature.`,
+    },
+  ];
+
   // Entity schema for Knowledge Graph
   const chineseZodiacSchema = createCosmicEntitySchema({
     name: `${data.displayName} Chinese Zodiac`,
@@ -180,6 +203,7 @@ Notable people born in ${data.displayName} years include ${data.famousPeople.joi
           { name: 'Traditional Chinese Astrology' },
           { name: 'Chinese zodiac calendar calculations' },
         ]}
+        faqs={faqs}
       >
         <div className='mt-8 flex justify-between text-sm'>
           <Link
