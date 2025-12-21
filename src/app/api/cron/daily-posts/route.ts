@@ -573,6 +573,11 @@ async function runDailyPosts(dateStr: string) {
       pinterestOptions: {
         boardId: process.env.SUCCULENT_PINTEREST_BOARD_ID,
       },
+      tiktokOptions: {
+        type: 'post',
+        autoAddMusic: true,
+        visibility: 'public',
+      },
       variants: {
         // instagram: {
         //   content: `${postContent}\n\n${platformHashtags.instagram}`,

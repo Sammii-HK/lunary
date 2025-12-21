@@ -346,6 +346,10 @@ async function scheduleVideoToPlatforms(
       content: content,
       platforms: ['tiktok'],
       media: [{ type: 'video' as const, url: videoUrl, alt: title }],
+      tiktokOptions: {
+        visibility: 'public',
+        isAiGenerated: true,
+      },
     };
 
     // Instagram Reels - post immediately
