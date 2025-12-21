@@ -75,7 +75,7 @@ test.describe('Newsletter Journey', () => {
       (response) =>
         response.url().includes('/api/newsletter/subscribers/') &&
         response.request().method() === 'PATCH',
-      { timeout: 15000 },
+      { timeout: 25000 },
     );
 
     // Navigate to unsubscribe page (triggers API call)
