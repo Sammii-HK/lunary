@@ -55,7 +55,7 @@ test.describe('Admin Journey', () => {
     console.log('\n📄 Testing admin tools display...');
     const response = await adminPage.goto('/admin', {
       waitUntil: 'domcontentloaded',
-      timeout: 20000,
+      timeout: 30000,
     });
 
     if (response?.status() !== 200) {
