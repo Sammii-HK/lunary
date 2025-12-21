@@ -2,6 +2,7 @@
 
 import { useMemo } from 'react';
 import { useUser } from '@/context/UserContext';
+import { useAuthStatus } from '@/components/AuthStatus';
 import { useAstronomyContext } from '@/context/AstronomyContext';
 import Link from 'next/link';
 import { ArrowRight, Lock, Layers } from 'lucide-react';
@@ -17,6 +18,7 @@ dayjs.extend(dayOfYear);
 
 export const DailyCardPreview = () => {
   const { user } = useUser();
+  const authStatus = useAuthStatus();
   const subscription = useSubscription();
   const { currentDate } = useAstronomyContext();
   const userName = user?.name;
@@ -27,12 +29,16 @@ export const DailyCardPreview = () => {
     subscription.plan,
   );
 
+  // Birth chart is free but requires account - check authentication
+  const canAccessPersonalized =
+    authStatus.isAuthenticated && hasChartAccess && userName && userBirthday;
+
   const dailyCard = useMemo(() => {
     const dateStr = currentDate || dayjs().utc().format('YYYY-MM-DD');
     const selectedDay = dayjs(dateStr);
 
-    if (hasChartAccess && userName && userBirthday) {
-      const card = getTarotCard(`daily-${dateStr}`, userName, userBirthday);
+    if (canAccessPersonalized) {
+      const card = getTarotCard(`daily-${dateStr}`, userName!, userBirthday!);
       return {
         name: card.name,
         keywords: card.keywords?.slice(0, 3) || [],
@@ -50,7 +56,7 @@ export const DailyCardPreview = () => {
       information: card.information || '',
       isPersonalized: false,
     };
-  }, [hasChartAccess, userName, userBirthday, currentDate]);
+  }, [canAccessPersonalized, userName, userBirthday, currentDate]);
 
   if (!dailyCard.isPersonalized) {
     return (
@@ -77,10 +83,20 @@ export const DailyCardPreview = () => {
                 {dailyCard.information}
               </p>
             )}
-            <div className='flex items-center gap-1.5 mt-2 text-xs text-lunary-primary-200 group-hover:text-lunary-primary-100'>
+            <Link
+              href={
+                authStatus.isAuthenticated ? '/pricing' : '/auth?signup=true'
+              }
+              onClick={(e) => e.stopPropagation()}
+              className='flex items-center gap-1.5 mt-2 text-xs text-lunary-primary-200 hover:text-lunary-primary-100 transition-colors'
+            >
               <Lock className='w-3 h-3' />
-              <span>Unlock personalized tarot</span>
-            </div>
+              <span>
+                {authStatus.isAuthenticated
+                  ? 'Upgrade to get personalized tarot'
+                  : 'Sign up to get personalized tarot'}
+              </span>
+            </Link>
           </div>
           <ArrowRight className='w-4 h-4 text-zinc-600 group-hover:text-lunary-accent-300 transition-colors flex-shrink-0 mt-1' />
         </div>

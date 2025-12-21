@@ -79,15 +79,17 @@ export const CrystalPreview = () => {
     userBirthday,
   ]);
 
-  const crystalName =
-    hasChartAccess && authStatus.isAuthenticated
-      ? crystalData?.crystal.name
-      : generalCrystal?.name;
+  // Birth chart is free but requires account - check authentication
+  const canAccessPersonalized =
+    authStatus.isAuthenticated && hasChartAccess && birthChart && userBirthday;
 
-  const crystalReason =
-    hasChartAccess && authStatus.isAuthenticated
-      ? crystalData?.reasons?.join('. ') || crystalData?.guidance
-      : generalCrystal?.reason;
+  const crystalName = canAccessPersonalized
+    ? crystalData?.crystal.name
+    : generalCrystal?.name;
+
+  const crystalReason = canAccessPersonalized
+    ? crystalData?.reasons?.join('. ') || crystalData?.guidance
+    : generalCrystal?.reason;
 
   const closeModal = useCallback(() => setIsModalOpen(false), []);
 
@@ -145,7 +147,7 @@ export const CrystalPreview = () => {
                   {crystalName}
                 </span>
               </div>
-              {hasChartAccess && (
+              {canAccessPersonalized && (
                 <span className='text-xs bg-zinc-800/50 text-lunary-primary-200 px-1.5 py-0.5 rounded'>
                   For you
                 </span>
@@ -154,11 +156,21 @@ export const CrystalPreview = () => {
             <p className='text-xs text-zinc-400 line-clamp-2'>
               {crystalReason}
             </p>
-            {!hasChartAccess && (
-              <div className='flex items-center gap-1.5 mt-2 text-xs text-lunary-primary-200 group-hover:text-lunary-primary-100'>
+            {!canAccessPersonalized && (
+              <Link
+                href={
+                  authStatus.isAuthenticated ? '/pricing' : '/auth?signup=true'
+                }
+                onClick={(e) => e.stopPropagation()}
+                className='flex items-center gap-1.5 mt-2 text-xs text-lunary-primary-200 hover:text-lunary-primary-100 transition-colors'
+              >
                 <Lock className='w-3 h-3' />
-                <span>Unlock personalized crystal</span>
-              </div>
+                <span>
+                  {authStatus.isAuthenticated
+                    ? 'Unlock personalized recommendations'
+                    : `Sign up for personalized recommendations`}
+                </span>
+              </Link>
             )}
           </div>
           <ArrowRight className='w-4 h-4 text-zinc-600 group-hover:text-lunary-accent-200 transition-colors flex-shrink-0 mt-1' />
@@ -188,7 +200,7 @@ export const CrystalPreview = () => {
               <h2 className='text-xl font-semibold text-white mb-1'>
                 {crystalName}
               </h2>
-              {hasChartAccess && (
+              {canAccessPersonalized && (
                 <p className='text-xs text-lunary-accent'>
                   Personalized for your chart
                 </p>
@@ -200,7 +212,7 @@ export const CrystalPreview = () => {
                 <h3 className='text-xs font-medium text-zinc-400 uppercase tracking-wide mb-2'>
                   Why this crystal today
                 </h3>
-                {hasChartAccess && crystalData?.reasons ? (
+                {canAccessPersonalized && crystalData?.reasons ? (
                   <ul className='space-y-1.5'>
                     {crystalData.reasons.map((reason, idx) => (
                       <li
@@ -239,14 +251,20 @@ export const CrystalPreview = () => {
                 </>
               )}
 
-              {!hasChartAccess && (
+              {!canAccessPersonalized && (
                 <Link
-                  href='/pricing'
+                  href={
+                    authStatus.isAuthenticated
+                      ? '/pricing'
+                      : '/auth?signup=true'
+                  }
                   className='flex items-center justify-center gap-2 w-full py-3 bg-gradient-to-r from-lunary-primary to-lunary-highlight rounded-lg text-white font-medium hover:from-lunary-primary-400 hover:to-lunary-highlight-400 transition-all'
                   onClick={() => setIsModalOpen(false)}
                 >
                   <Sparkles className='w-4 h-4' />
-                  Get personalized crystals
+                  {authStatus.isAuthenticated
+                    ? 'Get personalized crystals'
+                    : `Get personalized ${crystalName}`}
                 </Link>
               )}
 

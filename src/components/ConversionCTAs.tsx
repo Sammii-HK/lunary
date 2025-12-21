@@ -7,21 +7,30 @@ import { useAuthStatus } from './AuthStatus';
 import { conversionTracking } from '@/lib/analytics';
 import { ArrowRight, Sparkles } from 'lucide-react';
 import { Button } from './ui/button';
+import {
+  getFeatureButtonText,
+  getFeatureLinkText,
+  getFeatureHref,
+} from '@/utils/messaging';
 
 interface ConversionCTAProps {
   featureName?: string;
+  feature?: string; // Feature key to check if it's free or paid
   variant?: 'button' | 'link' | 'inline';
   size?: 'sm' | 'md' | 'lg';
   className?: string;
   showIcon?: boolean;
+  hasRequiredData?: boolean; // e.g., has birthday for birth chart features
 }
 
 export function ConversionCTA({
   featureName,
+  feature,
   variant = 'button',
   size = 'md',
   className = '',
   showIcon = true,
+  hasRequiredData,
 }: ConversionCTAProps) {
   const subscription = useSubscription();
   const authState = useAuthStatus();
@@ -33,16 +42,25 @@ export function ConversionCTA({
   };
 
   const getButtonText = () => {
-    if (!authState.isAuthenticated) return 'Sign In to Unlock';
-    if (isTrialActive) return 'Continue Trial';
-    if (isSubscribed) return 'Manage Subscription';
-    return 'Upgrade now';
+    return getFeatureButtonText(
+      feature,
+      authState.isAuthenticated,
+      isSubscribed,
+      isTrialActive,
+      hasRequiredData,
+    );
   };
 
   const getLinkText = () => {
-    if (!authState.isAuthenticated) return 'Sign in to unlock';
-    if (isTrialActive) return 'Continue your trial';
-    return 'Upgrade to unlock';
+    const baseText = getFeatureLinkText(
+      feature,
+      authState.isAuthenticated,
+      isSubscribed,
+      isTrialActive,
+      hasRequiredData,
+    );
+    // Replace [feature] placeholder if present
+    return baseText.replace('[feature]', featureName || 'this feature');
   };
 
   const sizeClasses = {
@@ -51,10 +69,16 @@ export function ConversionCTA({
     lg: 'text-base px-6 py-3',
   };
 
+  const href = getFeatureHref(
+    feature,
+    authState.isAuthenticated,
+    hasRequiredData,
+  );
+
   if (variant === 'link') {
     return (
       <Link
-        href={authState.isAuthenticated ? '/pricing' : '/auth'}
+        href={href}
         onClick={handleClick}
         className={`inline-flex items-center gap-1.5 text-lunary-secondary hover:text-white transition-colors ${sizeClasses[size]} ${className}`}
       >
@@ -67,7 +91,7 @@ export function ConversionCTA({
   if (variant === 'inline') {
     return (
       <Link
-        href={authState.isAuthenticated ? '/pricing' : '/auth'}
+        href={href}
         onClick={handleClick}
         className={`inline-flex items-center gap-2 text-lunary-secondary hover:text-white transition-colors ${className}`}
       >
@@ -87,7 +111,7 @@ export function ConversionCTA({
       onClick={handleClick}
       asChild
     >
-      <Link href={authState.isAuthenticated ? '/pricing' : '/auth'}>
+      <Link href={href}>
         {showIcon && <Sparkles className='w-4 h-4' />}
         <span>{getButtonText()}</span>
       </Link>

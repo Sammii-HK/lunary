@@ -4,9 +4,9 @@ import { getGeneralHoroscope } from '../../../../../utils/astrology/generalHoros
 import { getUpcomingTransits } from '../../../../../utils/astrology/transitCalendar';
 import { HoroscopeSection } from './HoroscopeSection';
 import { FeaturePreview } from './FeaturePreview';
-import { TransitCard } from './TransitCard';
 import { SmartTrialButton } from '@/components/SmartTrialButton';
 import { Sparkles, ChevronRight, Lock } from 'lucide-react';
+import { TransitCard } from './TransitCard';
 
 const getDailyNumerology = (
   date: dayjs.Dayjs,
@@ -50,11 +50,11 @@ export function FreeHoroscopeView() {
   const today = dayjs();
   const universalDay = getDailyNumerology(today);
 
-  // Filter transits for today
-  const todaysTransits = upcomingTransits.filter((transit) => {
-    const transitDate = dayjs(transit.date);
-    return transitDate.isSame(today, 'day');
-  });
+  // // Filter transits for today
+  // const todaysTransits = upcomingTransits.filter((transit) => {
+  //   const transitDate = dayjs(transit.date);
+  //   return transitDate.isSame(today, 'day');
+  // });
 
   return (
     <div className='h-full space-y-6 p-4 overflow-auto'>
@@ -80,6 +80,46 @@ export function FreeHoroscopeView() {
           </Link>
         </div>
       </div>
+
+      <HoroscopeSection title="Today's Transits" color='zinc'>
+        {upcomingTransits.length > 0 ? (
+          <>
+            <p className='text-sm text-zinc-400 mb-4'>
+              Upcoming planetary events happening in the next 30 days affecting
+              everyone
+            </p>
+            <div className='space-y-3 max-h-96 overflow-y-auto'>
+              {upcomingTransits.map((transit, index) => (
+                <TransitCard key={index} transit={transit} />
+              ))}
+            </div>
+            <div className='mt-4 pt-4 border-t border-zinc-800/50'>
+              <p className='text-xs text-zinc-400 mb-3'>
+                See how these transits specifically affect your birth chart with
+                personalized insights
+              </p>
+              <div className='w-full flex justify-center'>
+                <SmartTrialButton />
+              </div>
+            </div>
+          </>
+        ) : (
+          <>
+            <p className='text-sm text-zinc-400 mb-4'>
+              No major transits happening today. Check upcoming transits below
+              or unlock personalized transit insights for your birth chart.
+            </p>
+            <div className='mt-4 pt-4 border-t border-zinc-800/50'>
+              <p className='text-xs text-zinc-400 mb-3'>
+                Get personalized transit insights based on your birth chart
+              </p>
+              <div className='w-full flex justify-center'>
+                <SmartTrialButton />
+              </div>
+            </div>
+          </>
+        )}
+      </HoroscopeSection>
 
       <div className='space-y-6'>
         <HoroscopeSection title="Today's Horoscope" color='purple'>
@@ -111,51 +151,23 @@ export function FreeHoroscopeView() {
                 Personal Day
               </div>
               <p className='text-xs text-zinc-500 mb-3'>
-                Unlock your Personal Day number with a birth chart
+                Sign up for free to get your Personal Day number with a birth
+                chart
               </p>
-              <SmartTrialButton />
+              {/* <SmartTrialButton
+                feature='birth_chart'
+                hasRequiredData={false}
+                size='xs'
+                className='max-w-10'
+              /> */}
             </div>
           </div>
-        </HoroscopeSection>
-
-        <HoroscopeSection title="Today's Transits" color='zinc'>
-          {todaysTransits.length > 0 ? (
-            <>
-              <p className='text-sm text-zinc-400 mb-4'>
-                Planetary events happening today affecting everyone
-              </p>
-              <div className='space-y-3'>
-                {todaysTransits.map((transit, index) => (
-                  <TransitCard key={index} transit={transit} />
-                ))}
-              </div>
-              <div className='mt-4 pt-4 border-t border-zinc-800/50'>
-                <p className='text-xs text-zinc-400 mb-3'>
-                  See how these transits specifically affect your birth chart
-                  with personalized insights
-                </p>
-                <SmartTrialButton />
-              </div>
-            </>
-          ) : (
-            <>
-              <p className='text-sm text-zinc-400 mb-4'>
-                No major transits happening today. Check upcoming transits below
-                or unlock personalized transit insights for your birth chart.
-              </p>
-              <div className='mt-4 pt-4 border-t border-zinc-800/50'>
-                <p className='text-xs text-zinc-400 mb-3'>
-                  Get personalized transit insights based on your birth chart
-                </p>
-                <SmartTrialButton />
-              </div>
-            </>
-          )}
         </HoroscopeSection>
 
         <FeaturePreview
           title='Personal Insight'
           description='Get insights specifically tailored to your birth chart and cosmic profile'
+          feature='personalized_horoscope'
           icon={
             <Sparkles
               className='w-8 h-8 text-lunary-accent-400 mx-auto'
@@ -177,6 +189,7 @@ export function FreeHoroscopeView() {
         <FeaturePreview
           title='Solar Return Insights'
           description='Discover your personal year themes and birthday insights'
+          feature='solar_return'
           blurredContent={
             <div className='rounded-lg border border-lunary-accent-700 bg-lunary-accent-950 p-6 opacity-60'>
               <div className='space-y-3'>
@@ -204,7 +217,7 @@ export function FreeHoroscopeView() {
           }
         />
 
-        <HoroscopeSection title='Cosmic Calendar' color='zinc'>
+        {/* <HoroscopeSection title='Cosmic Calendar' color='zinc'>
           <p className='text-sm text-zinc-400 mb-4'>
             Upcoming planetary events and moon phases affecting everyone
           </p>
@@ -218,9 +231,9 @@ export function FreeHoroscopeView() {
               </p>
             )}
           </div>
-        </HoroscopeSection>
+        </HoroscopeSection> */}
 
-        <HoroscopeSection
+        {/* <HoroscopeSection
           title='Unlock Your Complete Cosmic Profile'
           color='purple'
         >
@@ -236,7 +249,7 @@ export function FreeHoroscopeView() {
             <li>• Complete cosmic profile features</li>
           </ul>
           <SmartTrialButton />
-        </HoroscopeSection>
+        </HoroscopeSection> */}
       </div>
     </div>
   );

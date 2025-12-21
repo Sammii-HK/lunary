@@ -2,6 +2,7 @@
 
 import { useMemo, useState, useEffect } from 'react';
 import { useUser } from '@/context/UserContext';
+import { useAuthStatus } from '@/components/AuthStatus';
 import { useAstronomyContext } from '@/context/AstronomyContext';
 import Link from 'next/link';
 import { Sparkles, ArrowRight, Lock } from 'lucide-react';
@@ -17,6 +18,7 @@ import {
 
 export const DailyInsightCard = () => {
   const { user } = useUser();
+  const authStatus = useAuthStatus();
   const subscription = useSubscription();
   const { currentDate } = useAstronomyContext();
   const userName = user?.name;
@@ -29,8 +31,12 @@ export const DailyInsightCard = () => {
     subscription.plan,
   );
 
+  // Birth chart is free but requires account - check authentication
+  const canAccessPersonalized =
+    authStatus.isAuthenticated && hasChartAccess && userBirthday && birthChart;
+
   useEffect(() => {
-    if (!hasChartAccess) return;
+    if (!canAccessPersonalized) return;
 
     async function loadTheme() {
       try {
@@ -74,16 +80,16 @@ export const DailyInsightCard = () => {
     }
 
     loadTheme();
-  }, [hasChartAccess]);
+  }, [canAccessPersonalized]);
 
   const insight = useMemo(() => {
     const selectedDate = currentDate ? new Date(currentDate) : new Date();
 
-    if (hasChartAccess && userBirthday && birthChart) {
+    if (canAccessPersonalized) {
       const horoscope = getEnhancedPersonalizedHoroscope(
-        userBirthday,
+        userBirthday!,
         userName || undefined,
-        { birthday: userBirthday, birthChart },
+        { birthday: userBirthday!, birthChart: birthChart! },
         selectedDate,
       );
       return {
@@ -98,7 +104,7 @@ export const DailyInsightCard = () => {
       text: firstSentence,
       isPersonalized: false,
     };
-  }, [hasChartAccess, userBirthday, userName, birthChart, currentDate]);
+  }, [canAccessPersonalized, userBirthday, userName, birthChart, currentDate]);
 
   if (!insight.isPersonalized) {
     return (
@@ -117,10 +123,20 @@ export const DailyInsightCard = () => {
             <p className='text-sm text-zinc-300 leading-relaxed'>
               {insight.text}
             </p>
-            <div className='flex items-center gap-1.5 mt-2 text-xs text-lunary-primary-200 group-hover:text-lunary-primary-100'>
+            <Link
+              href={
+                authStatus.isAuthenticated ? '/pricing' : '/auth?signup=true'
+              }
+              onClick={(e) => e.stopPropagation()}
+              className='flex items-center gap-1.5 mt-2 text-xs text-lunary-primary-200 hover:text-lunary-primary-100 transition-colors'
+            >
               <Lock className='w-3 h-3' />
-              <span>Unlock readings based on your full birth chart</span>
-            </div>
+              <span>
+                {authStatus.isAuthenticated
+                  ? 'Upgrade to get personalized readings based on your full birth chart'
+                  : 'Sign up to get readings based on your full birth chart'}
+              </span>
+            </Link>
           </div>
           <ArrowRight className='w-4 h-4 text-zinc-600 group-hover:text-lunary-primary-300 transition-colors flex-shrink-0 mt-1' />
         </div>

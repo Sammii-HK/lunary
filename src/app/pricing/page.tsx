@@ -189,13 +189,18 @@ export default function PricingPage() {
     createProductSchema({
       name: 'Lunary Free',
       description:
-        'Get a feel for your cosmic rhythm with basic astrology features.',
+        'Access your birth chart, moon phases, general horoscopes, tarot cards, and cosmic knowledge base.',
       price: 0,
       priceCurrency: 'USD',
       features: [
-        'Daily moon phases',
+        'Your personal birth chart',
+        'Daily moon phases & basic insights',
         'General tarot card of the day',
-        'Basic grimoire access',
+        '2 tarot spreads per month',
+        'Basic lunar calendar',
+        'General daily horoscope',
+        'Access to grimoire knowledge',
+        '1 free AI ritual/reading per week',
       ],
       sku: 'lunary_free',
     }),
@@ -267,8 +272,9 @@ export default function PricingPage() {
             </h1>
 
             <p className='text-lg text-zinc-400 max-w-xl mx-auto leading-relaxed'>
-              Personalized astrology based on your exact birth chart. No generic
-              horoscopes.
+              Start with free access to your birth chart, moon phases, and
+              cosmic insights. Upgrade for personalized readings based on your
+              exact birth chart.
             </p>
           </div>
         </section>
@@ -420,10 +426,16 @@ export default function PricingPage() {
                       <div className='mt-auto'>
                         {plan.id === 'free' && subscriptionStatus === 'free' ? (
                           <Link
-                            href='/'
+                            href={
+                              authState.isAuthenticated
+                                ? '/app'
+                                : '/auth?signup=true'
+                            }
                             className='w-full block text-center py-3 rounded-xl border border-zinc-800 text-zinc-400 text-sm font-medium hover:bg-zinc-800/50 transition-colors'
                           >
-                            Current Plan
+                            {authState.isAuthenticated
+                              ? 'Current Plan'
+                              : 'Sign up for free'}
                           </Link>
                         ) : (subscriptionStatus === 'active' ||
                             subscriptionStatus === 'trial') &&
@@ -445,7 +457,11 @@ export default function PricingPage() {
                                 return;
                               }
                               if (isFree) {
-                                window.location.href = '/profile';
+                                if (authState.isAuthenticated) {
+                                  window.location.href = '/profile';
+                                } else {
+                                  window.location.href = '/auth?signup=true';
+                                }
                                 return;
                               }
                               handleSubscribe(priceId, plan.id);
@@ -463,7 +479,11 @@ export default function PricingPage() {
                                 Loading...
                               </span>
                             ) : isFree ? (
-                              'Get Started'
+                              authState.isAuthenticated ? (
+                                'Get Started'
+                              ) : (
+                                'Sign up for free'
+                              )
                             ) : (
                               'Start Free Trial'
                             )}

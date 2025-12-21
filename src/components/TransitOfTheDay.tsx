@@ -155,7 +155,7 @@ export const TransitOfTheDay = () => {
 
     return (
       <Link
-        href='/pricing'
+        href='/horoscope'
         className='block py-3 px-4 bg-lunary-bg border border-zinc-800/50 rounded-md w-full h-full hover:border-lunary-primary-700/50 transition-colors group'
       >
         <div className='flex items-start justify-between gap-3'>
@@ -181,10 +181,14 @@ export const TransitOfTheDay = () => {
             <p className='text-xs text-zinc-400 line-clamp-2 mb-2'>
               {generalTransit.description}
             </p>
-            <div className='flex items-center gap-1.5 text-xs text-lunary-primary-200 group-hover:text-lunary-primary-100'>
+            <Link
+              href='/pricing'
+              onClick={(e) => e.stopPropagation()}
+              className='flex items-center gap-1.5 text-xs text-lunary-primary-200 hover:text-lunary-primary-100 transition-colors'
+            >
               <Lock className='w-3 h-3' />
-              <span>Unlock personal transit insights</span>
-            </div>
+              <span>Sign up to get personal transit insights</span>
+            </Link>
           </div>
           <ArrowRight className='w-4 h-4 text-zinc-600 group-hover:text-lunary-secondary-200 transition-colors flex-shrink-0 mt-1' />
         </div>

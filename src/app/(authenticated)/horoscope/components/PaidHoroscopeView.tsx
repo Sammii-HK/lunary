@@ -642,8 +642,17 @@ export function PaidHoroscopeView({
     ? getSolarReturnInsights(userBirthday)
     : null;
   const upcomingTransits = getUpcomingTransits();
+  // Filter out moon phases for personal transits (they're universal, not personal)
+  // Prioritize planetary transits that actually affect the birth chart
+  const nonLunarTransits = upcomingTransits.filter(
+    (transit) => transit.type !== 'lunar_phase',
+  );
   const personalTransitImpacts = birthChart
-    ? getPersonalTransitImpacts(upcomingTransits, birthChart, 10)
+    ? getPersonalTransitImpacts(
+        nonLunarTransits.length > 0 ? nonLunarTransits : upcomingTransits,
+        birthChart,
+        15, // Increased limit to get more diverse planets
+      )
     : [];
 
   useEffect(() => {
@@ -696,7 +705,7 @@ export function PaidHoroscopeView({
           {userName ? `${userName}'s Horoscope` : 'Your Horoscope'}
         </h1>
         <p className='text-sm text-zinc-400'>
-          Personalized guidance based on your birth chart
+          Personalised guidance based on your birth chart
         </p>
       </div>
 
@@ -823,7 +832,7 @@ export function PaidHoroscopeView({
                   <p className='text-xs text-zinc-300'>{personalDay.meaning}</p>
                 </div>
               ) : (
-                <div className='text-center border border-zinc-700/50 rounded-lg p-4 bg-zinc-900/30'>
+                <div className='text-center border border-zinc-700/50 rounded-lg p-2 bg-zinc-900/30'>
                   <div className='flex items-center justify-center mb-2'>
                     <Lock className='w-4 h-4 text-zinc-500 mr-1' />
                     <div className='text-2xl font-light text-zinc-500 mb-1'>
@@ -834,7 +843,7 @@ export function PaidHoroscopeView({
                     Personal Day
                   </div>
                   <p className='text-xs text-zinc-500 mb-3'>
-                    Add your birthday to unlock your Personal Day number
+                    Add your birthday to get your Personal Day number
                   </p>
                   <Link
                     href='/settings'

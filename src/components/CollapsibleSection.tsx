@@ -26,9 +26,13 @@ export function CollapsibleSection({
         className='flex w-full items-center justify-between rounded-lg border border-zinc-800/50 bg-zinc-900/30 px-4 py-3 text-left transition-colors hover:bg-zinc-900/50'
       >
         {typeof title === 'string' ? (
-          <h2 className='text-lg font-medium text-zinc-100'>{title}</h2>
+          <h2 className='text-md md:text-lg font-medium text-zinc-100'>
+            {title}
+          </h2>
         ) : (
-          <div className='text-lg font-medium text-zinc-100'>{title}</div>
+          <div className='text-md md:text-lg font-medium text-zinc-100'>
+            {title}
+          </div>
         )}
         {isCollapsed ? (
           <ChevronDown className='w-5 h-5 text-zinc-400' />

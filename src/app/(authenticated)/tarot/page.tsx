@@ -28,6 +28,7 @@ import {
   TarotSpreadExperience,
 } from '@/components/tarot/TarotSpreadExperience';
 import type { TarotPlan } from '@/constants/tarotSpreads';
+import { FeaturePreview } from '../horoscope/components/FeaturePreview';
 import { HoroscopeSection } from '../horoscope/components/HoroscopeSection';
 import { cn } from '@/lib/utils';
 import { GuideNudge } from '@/components/GuideNudge';
@@ -36,6 +37,7 @@ import { TarotRitualForPatterns } from '@/components/tarot/TarotRitualForPattern
 import { TarotReflectionPrompts } from '@/components/tarot/TarotReflectionPrompts';
 import { PremiumPathway } from '@/components/PremiumPathway';
 import Link from 'next/link';
+import { Button } from '@/components/ui/button';
 
 const SUIT_ELEMENTS: Record<string, string> = {
   Cups: 'Water',
@@ -587,7 +589,7 @@ const TarotReadings = () => {
             <h1 className='text-2xl md:text-3xl font-light text-zinc-100 mb-2'>
               Your Tarot Readings
             </h1>
-            <p className='text-sm text-zinc-400'>
+            <p className='text-xs md:text-sm text-zinc-400'>
               General cosmic guidance based on universal energies
             </p>
           </div>
@@ -596,7 +598,7 @@ const TarotReadings = () => {
             <h3 className='text-lg font-medium text-zinc-100 mb-2'>
               Unable to load tarot reading
             </h3>
-            <p className='text-sm text-zinc-300 mb-4 leading-relaxed'>
+            <p className='text-xs md:text-sm text-zinc-300 mb-4 leading-relaxed'>
               We're having trouble loading your tarot reading. Please try
               refreshing the page, or unlock personalized readings with a birth
               chart.
@@ -608,9 +610,9 @@ const TarotReadings = () => {
             <h3 className='text-lg font-medium text-zinc-100 mb-2'>
               Unlock Personal Tarot Readings
             </h3>
-            <p className='text-sm text-zinc-300 mb-4 leading-relaxed'>
-              Get readings based on YOUR name and birthday, plus discover your
-              personal tarot patterns and card trends over time.
+            <p className='text-xs md:text-sm text-zinc-300 mb-4 leading-relaxed'>
+              Get personalized readings, plus discover your personal tarot
+              patterns and card trends over time.
             </p>
             <ul className='text-xs text-zinc-400 space-y-2 mb-4'>
               <li className='flex items-start gap-2'>
@@ -654,13 +656,13 @@ const TarotReadings = () => {
           <h1 className='text-2xl md:text-3xl font-light text-zinc-100 mb-2'>
             Your Tarot Readings
           </h1>
-          <p className='text-sm text-zinc-400'>
+          <p className='text-xs md:text-sm text-zinc-400'>
             General cosmic guidance based on universal energies
           </p>
         </div>
 
         <div className='flex gap-3'>
-          <button
+          <Button
             onClick={() => {
               const spreadsSection = document.getElementById(
                 'tarot-spreads-section-free',
@@ -669,25 +671,26 @@ const TarotReadings = () => {
                 spreadsSection.scrollIntoView({ behavior: 'smooth' });
               }
             }}
-            className='flex-1 py-3 px-4 rounded-lg bg-lunary-primary-900/20 border border-lunary-primary-700 text-lunary-primary-300 font-medium hover:bg-lunary-primary-900/30 transition-colors'
+            variant='lunary'
+            className='w-full'
           >
-            Do a Reading
-          </button>
+            Pull a Tarot Spread Reading
+          </Button>
         </div>
 
         <div className='space-y-6'>
           <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-6 space-y-6'>
-            <h2 className='text-xl font-medium text-zinc-100'>
+            <h2 className='text-md md:text-xl font-medium text-zinc-100'>
               Your Cosmic Reading
             </h2>
 
             <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
               <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/50 p-4'>
-                <h3 className='text-sm font-medium text-zinc-400 mb-2'>
+                <h3 className='text-xs md:text-sm font-medium text-zinc-400 mb-2'>
                   Daily Card
                 </h3>
                 <p
-                  className='text-lg font-medium text-zinc-100 mb-1 cursor-pointer hover:text-lunary-primary-300 transition-colors'
+                  className='text-md md:text-lg font-medium text-zinc-100 mb-1 cursor-pointer hover:text-lunary-primary-300 transition-colors'
                   onClick={() => {
                     const card = getTarotCardByName(generalTarot.daily.name);
                     if (card) setSelectedCard(card);
@@ -695,7 +698,7 @@ const TarotReadings = () => {
                 >
                   {generalTarot.daily.name}
                 </p>
-                <p className='text-sm text-zinc-400'>
+                <p className='text-xs md:text-sm text-zinc-400'>
                   {generalTarot.daily.keywords.slice(0, 2).join(', ')}
                 </p>
 
@@ -729,7 +732,7 @@ const TarotReadings = () => {
               </div>
 
               <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/50 p-4'>
-                <h3 className='text-sm font-medium text-zinc-400 mb-2'>
+                <h3 className='text-xs md:text-sm font-medium text-zinc-400 mb-2'>
                   Weekly Card
                 </h3>
                 <p
@@ -741,7 +744,7 @@ const TarotReadings = () => {
                 >
                   {generalTarot.weekly.name}
                 </p>
-                <p className='text-sm text-zinc-400'>
+                <p className='text-xs md:text-sm text-zinc-400'>
                   {generalTarot.weekly.keywords.slice(0, 2).join(', ')}
                 </p>
               </div>
@@ -749,28 +752,28 @@ const TarotReadings = () => {
 
             <div className='space-y-4 pt-4 border-t border-zinc-800/50'>
               <div className='rounded-lg border border-lunary-primary-700 bg-zinc-900/50 p-4'>
-                <h3 className='text-sm font-medium text-lunary-primary-300/90 mb-2'>
+                <h3 className='text-xs md:text-sm font-medium text-lunary-primary-300/90 mb-2'>
                   Daily Message
                 </h3>
-                <p className='text-sm text-zinc-300 leading-relaxed'>
+                <p className='text-xs md:text-sm text-zinc-300 leading-relaxed'>
                   {generalTarot.guidance.dailyMessage}
                 </p>
               </div>
 
               <div className='rounded-lg border border-lunary-secondary-800 bg-zinc-900/50 p-4'>
-                <h3 className='text-sm font-medium text-lunary-primary-300 mb-2'>
+                <h3 className='text-xs md:text-sm font-medium text-lunary-primary-300 mb-2'>
                   Weekly Energy
                 </h3>
-                <p className='text-sm text-zinc-300 leading-relaxed'>
+                <p className='text-xs md:text-sm text-zinc-300 leading-relaxed'>
                   {generalTarot.guidance.weeklyMessage}
                 </p>
               </div>
 
               <div className='rounded-lg border border-lunary-success-800 bg-zinc-900 p-4'>
-                <h3 className='text-sm font-medium text-lunary-success-300 mb-2'>
+                <h3 className='text-xs md:text-sm font-medium text-lunary-success-300 mb-2'>
                   Key Guidance
                 </h3>
-                <ul className='text-sm text-zinc-300 space-y-2'>
+                <ul className='text-xs md:text-sm text-zinc-300 space-y-2'>
                   {generalTarot.guidance.actionPoints.map((point, index) => (
                     <li key={index} className='flex items-start gap-2'>
                       <Check
@@ -785,90 +788,90 @@ const TarotReadings = () => {
             </div>
           </div>
 
-          {subscription.hasAccess('tarot_patterns') && (
-            <HoroscopeSection
-              title={`Your ${timeFrame}-Day Tarot Patterns`}
-              color='zinc'
-            >
-              <AdvancedPatterns
-                basicPatterns={undefined}
-                selectedView={30}
-                isMultidimensionalMode={false}
-                onMultidimensionalModeChange={() => {}}
-              />
-            </HoroscopeSection>
-          )}
+          {subscription.hasAccess('tarot_patterns') &&
+            hasChartAccess &&
+            personalizedReading?.trendAnalysis && (
+              <HoroscopeSection
+                title={`Your ${timeFrame}-Day Tarot Patterns`}
+                color='zinc'
+              >
+                <AdvancedPatterns
+                  basicPatterns={personalizedReading.trendAnalysis}
+                  selectedView={30}
+                  isMultidimensionalMode={false}
+                  onMultidimensionalModeChange={() => {}}
+                />
+              </HoroscopeSection>
+            )}
 
-          <div className='rounded-lg border border-lunary-primary-700 bg-zinc-900/50 p-6'>
-            <h3 className='text-lg font-medium text-zinc-100 mb-2'>
-              Unlock Personal Tarot Patterns
-            </h3>
-            <p className='text-sm text-zinc-300 mb-4 leading-relaxed'>
-              Get readings based on YOUR name and birthday, plus discover your
-              personal tarot patterns and card trends over time.
-            </p>
-            <ul className='text-xs text-zinc-400 space-y-2 mb-4'>
-              <li className='flex items-start gap-2'>
-                <Check
-                  className='w-3 h-3 text-lunary-primary-400/80 mt-0.5 flex-shrink-0'
-                  strokeWidth={2}
-                />
-                <span>Cards chosen specifically for you</span>
-              </li>
-              <li className='flex items-start gap-2'>
-                <Check
-                  className='w-3 h-3 text-lunary-primary-400/80 mt-0.5 flex-shrink-0'
-                  strokeWidth={2}
-                />
-                <span>30-90 day pattern analysis</span>
-              </li>
-              <li className='flex items-start gap-2'>
-                <Check
-                  className='w-3 h-3 text-lunary-primary-400/80 mt-0.5 flex-shrink-0'
-                  strokeWidth={2}
-                />
-                <span>Personal card frequency tracking</span>
-              </li>
-              <li className='flex items-start gap-2'>
-                <Check
-                  className='w-3 h-3 text-lunary-primary-400/80 mt-0.5 flex-shrink-0'
-                  strokeWidth={2}
-                />
-                <span>Suit and number pattern insights</span>
-              </li>
-            </ul>
-            <SmartTrialButton />
-          </div>
+          <FeaturePreview
+            title='Personal Tarot Patterns'
+            description='Plus discover your personal patterns and trends over time.'
+            feature='tarot_patterns'
+            icon={
+              <Sparkles
+                className='w-8 h-8 text-lunary-accent-400 mx-auto'
+                strokeWidth={1.5}
+              />
+            }
+            blurredContent={
+              <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-6 opacity-60 min-h-[200px] max-h-[200px]'>
+                <div className='grid grid-cols-2 gap-4'>
+                  <div className='space-y-2'>
+                    <div className='h-24 bg-zinc-800/50 rounded-lg flex items-center justify-center'>
+                      <span className='text-xs text-zinc-500'>
+                        Pattern Chart
+                      </span>
+                    </div>
+                    <p className='text-xs text-zinc-400 text-center'>
+                      Card Frequency
+                    </p>
+                  </div>
+                  <div className='space-y-2'>
+                    <div className='h-24 bg-zinc-800/50 rounded-lg flex items-center justify-center'>
+                      <span className='text-xs text-zinc-500'>Trends</span>
+                    </div>
+                    <p className='text-xs text-zinc-400 text-center'>
+                      Suit Analysis
+                    </p>
+                  </div>
+                </div>
+              </div>
+            }
+          />
 
           <div id='tarot-spreads-section-free'>
             <CollapsibleSection title='Tarot Spreads' defaultCollapsed={false}>
               {!authStatus.isAuthenticated ? (
-                <div className='relative overflow-hidden'>
-                  <div className='filter blur-sm pointer-events-none'>
-                    <TarotSpreadExperience
-                      userId={undefined}
-                      userName={undefined}
-                      subscriptionPlan={tarotPlan}
-                      onCardPreview={(card) => setSelectedCard(card)}
+                <FeaturePreview
+                  title='Guided Tarot Spreads'
+                  description='Choose a spread, draw cards instantly, and save your insights.'
+                  feature='tarot_patterns'
+                  icon={
+                    <Sparkles
+                      className='w-8 h-8 text-lunary-accent-400 mx-auto'
+                      strokeWidth={1.5}
                     />
-                  </div>
-                  <div className='absolute inset-0 flex items-center justify-center rounded-lg bg-zinc-900/90'>
-                    <div className='text-center p-6 max-w-sm'>
-                      <Sparkles
-                        className='w-8 h-8 text-lunary-primary-400/80 mx-auto mb-3'
-                        strokeWidth={1.5}
-                      />
-                      <h3 className='text-lg font-medium text-zinc-100 mb-2'>
-                        Guided Tarot Spreads
-                      </h3>
-                      <p className='text-sm text-zinc-400 mb-4 leading-relaxed'>
-                        Choose a spread, draw cards instantly, and save your
-                        insights. Sign in to unlock this feature.
-                      </p>
-                      <SmartTrialButton />
+                  }
+                  blurredContent={
+                    <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-6 opacity-60'>
+                      <div className='grid grid-cols-2 gap-4'>
+                        <div className='space-y-2'>
+                          <div className='h-32 bg-zinc-800/50 rounded-lg'></div>
+                          <p className='text-xs text-zinc-400 text-center'>
+                            Three Card Spread
+                          </p>
+                        </div>
+                        <div className='space-y-2'>
+                          <div className='h-32 bg-zinc-800/50 rounded-lg'></div>
+                          <p className='text-xs text-zinc-400 text-center'>
+                            Celtic Cross
+                          </p>
+                        </div>
+                      </div>
                     </div>
-                  </div>
-                </div>
+                  }
+                />
               ) : (
                 <TarotSpreadExperience
                   userId={userId}
@@ -880,60 +883,43 @@ const TarotReadings = () => {
             </CollapsibleSection>
           </div>
 
-          <div>
-            <div className='flex justify-between items-center mb-4'>
-              <h2 className='text-xl font-medium text-zinc-100'>
-                Recent Daily Cards
-              </h2>
-              <div className='px-3 py-1 rounded-full border border-lunary-primary-700 bg-lunary-primary-900/10'>
-                <span className='text-xs font-medium text-lunary-primary-300/90'>
-                  Personalised Feature
-                </span>
-              </div>
-            </div>
-            <div className='relative overflow-hidden'>
-              <div className='filter blur-sm pointer-events-none'>
-                {[...Array(7)].map((_, index) => (
-                  <div
-                    key={index}
-                    className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4 mb-3 opacity-60'
-                  >
-                    <div className='flex justify-between items-center'>
-                      <span className='font-medium text-zinc-100'>●●●●●●●</span>
-                      <div className='text-right'>
-                        <p className='font-medium text-zinc-100'>●●●●●●●</p>
-                        <p className='text-sm text-zinc-400'>●●●●●●●●●</p>
+          <FeaturePreview
+            title='Card History'
+            description='Track your personal tarot journey with 7+ days of card history'
+            feature='tarot_patterns'
+            icon={
+              <Sparkles
+                className='w-8 h-8 text-lunary-accent-400 mx-auto'
+                strokeWidth={1.5}
+              />
+            }
+            blurredContent={
+              <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-6 opacity-60 min-h-[200px] max-h-[200px] overflow-hidden'>
+                <div className='space-y-3'>
+                  {[...Array(3)].map((_, index) => (
+                    <div
+                      key={index}
+                      className='flex items-center gap-3 p-3 bg-zinc-800/50 rounded-lg'
+                    >
+                      <div className='w-12 h-16 bg-zinc-700/50 rounded flex-shrink-0'></div>
+                      <div className='flex-1'>
+                        <div className='h-4 bg-zinc-700/50 rounded mb-2 w-3/4'></div>
+                        <div className='h-3 bg-zinc-700/30 rounded w-1/2'></div>
                       </div>
                     </div>
-                  </div>
-                ))}
-              </div>
-              <div className='absolute inset-0 flex items-center justify-center rounded-lg bg-zinc-900/90'>
-                <div className='text-center p-6 max-w-sm'>
-                  <Sparkles
-                    className='w-8 h-8 text-lunary-primary-400/80 mx-auto mb-3'
-                    strokeWidth={1.5}
-                  />
-                  <h3 className='text-lg font-medium text-zinc-100 mb-2'>
-                    Card History
-                  </h3>
-                  <p className='text-sm text-zinc-400 mb-4 leading-relaxed'>
-                    Track your personal tarot journey with 7+ days of card
-                    history
-                  </p>
-                  <SmartTrialButton />
+                  ))}
                 </div>
               </div>
-            </div>
-          </div>
+            }
+          />
         </div>
-        <UpgradePrompt
+        {/* <UpgradePrompt
           variant='card'
           featureName='personalized_tarot'
           title='Unlock Personalized Tarot Readings'
           description='Get tarot readings based on your name and birthday, plus discover your personal tarot patterns'
           className='w-full mx-auto'
-        />
+        /> */}
       </div>
     );
   }
@@ -947,7 +933,7 @@ const TarotReadings = () => {
             <h2 className='text-2xl font-light text-zinc-100'>
               Complete Your Profile
             </h2>
-            <p className='text-sm text-zinc-400 leading-relaxed'>
+            <p className='text-xs md:text-sm text-zinc-400 leading-relaxed'>
               To get personalized tarot readings, we need your birthday to
               calculate your cosmic signature.
             </p>
@@ -957,7 +943,7 @@ const TarotReadings = () => {
               <h3 className='text-lg font-medium text-zinc-100'>
                 Add Your Birthday
               </h3>
-              <p className='text-sm text-zinc-300 leading-relaxed'>
+              <p className='text-xs md:text-sm text-zinc-300 leading-relaxed'>
                 Your birthday helps us personalize your tarot readings and
                 provide more accurate cosmic insights.
               </p>
@@ -991,13 +977,13 @@ const TarotReadings = () => {
         <h1 className='text-2xl md:text-3xl font-light text-zinc-100 mb-2'>
           {userName ? `${userName}'s Tarot Readings` : 'Your Tarot Readings'}
         </h1>
-        <p className='text-sm text-zinc-400'>
+        <p className='text-xs md:text-sm text-zinc-400'>
           Personalized guidance based on your cosmic signature
         </p>
       </div>
 
       <div className='flex gap-3'>
-        <button
+        <Button
           onClick={() => {
             const spreadsSection = document.getElementById(
               'tarot-spreads-section',
@@ -1006,17 +992,18 @@ const TarotReadings = () => {
               spreadsSection.scrollIntoView({ behavior: 'smooth' });
             }
           }}
-          className='flex-1 py-3 px-4 rounded-lg bg-lunary-primary-900/20 border border-lunary-primary-700 text-lunary-primary-300 font-medium hover:bg-lunary-primary-900/30 transition-colors'
+          className='w-full'
+          variant='lunary'
         >
           Do a Reading
-        </button>
+        </Button>
       </div>
 
       <div className='space-y-6'>
         <HoroscopeSection title='Daily & Weekly Cards' color='purple'>
           <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
             <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/50 p-4'>
-              <h3 className='text-sm font-medium text-zinc-400 mb-2'>
+              <h3 className='text-xs md:text-sm font-medium text-zinc-400 mb-2'>
                 Daily Card
               </h3>
               <p
@@ -1030,7 +1017,7 @@ const TarotReadings = () => {
               >
                 {personalizedReading.daily.name}
               </p>
-              <p className='text-sm text-zinc-400'>
+              <p className='text-xs md:text-sm text-zinc-400'>
                 {personalizedReading.daily.keywords.slice(0, 2).join(', ')}
               </p>
 
@@ -1064,7 +1051,7 @@ const TarotReadings = () => {
             </div>
 
             <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/50 p-4'>
-              <h3 className='text-sm font-medium text-zinc-400 mb-2'>
+              <h3 className='text-xs md:text-sm font-medium text-zinc-400 mb-2'>
                 Weekly Card
               </h3>
               <p
@@ -1078,7 +1065,7 @@ const TarotReadings = () => {
               >
                 {personalizedReading.weekly.name}
               </p>
-              <p className='text-sm text-zinc-400'>
+              <p className='text-xs md:text-sm text-zinc-400'>
                 {personalizedReading.weekly.keywords.slice(0, 2).join(', ')}
               </p>
             </div>
@@ -1088,28 +1075,28 @@ const TarotReadings = () => {
         <HoroscopeSection title='Guidance Highlights' color='zinc'>
           <div className='space-y-4'>
             <div className='rounded-lg border border-lunary-primary-700 bg-zinc-900/50 p-4'>
-              <h3 className='text-sm font-medium text-lunary-primary-300/90 mb-2'>
+              <h3 className='text-xs md:text-sm font-medium text-lunary-primary-300/90 mb-2'>
                 Daily Message
               </h3>
-              <p className='text-sm text-zinc-300 leading-relaxed'>
+              <p className='text-xs md:text-sm text-zinc-300 leading-relaxed'>
                 {personalizedReading.guidance.dailyMessage}
               </p>
             </div>
 
             <div className='rounded-lg border border-lunary-primary-800 bg-lunary-primary-950 p-4'>
-              <h3 className='text-sm font-medium text-lunary-primary-300 mb-2'>
+              <h3 className='text-xs md:text-sm font-medium text-lunary-primary-300 mb-2'>
                 Weekly Energy
               </h3>
-              <p className='text-sm text-zinc-300 leading-relaxed'>
+              <p className='text-xs md:text-sm text-zinc-300 leading-relaxed'>
                 {personalizedReading.guidance.weeklyMessage}
               </p>
             </div>
 
             <div className='rounded-lg border border-lunary-success-800 bg-lunary-success-950 p-4'>
-              <h3 className='text-sm font-medium text-lunary-success-300 mb-2'>
+              <h3 className='text-xs md:text-sm font-medium text-lunary-success-300 mb-2'>
                 Key Guidance
               </h3>
-              <ul className='text-sm text-zinc-300 space-y-2'>
+              <ul className='text-xs md:text-sm text-zinc-300 space-y-2'>
                 {personalizedReading.guidance.actionPoints.map(
                   (point, index) => (
                     <li key={index} className='flex items-start gap-2'>

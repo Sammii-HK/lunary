@@ -20,7 +20,9 @@ export function HoroscopeSection({
 }: HoroscopeSectionProps) {
   return (
     <div className={`rounded-lg border ${colorClasses[color]} p-6`}>
-      <h2 className='text-lg font-medium text-zinc-100 mb-3'>{title}</h2>
+      <h2 className='text-md md:text-lg font-medium text-zinc-100 mb-3'>
+        {title}
+      </h2>
       {children}
     </div>
   );
