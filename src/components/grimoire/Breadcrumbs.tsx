@@ -56,28 +56,30 @@ export function Breadcrumbs({
   return (
     <>
       <nav
-        className='flex items-center gap-2 text-sm text-zinc-400 mb-6'
+        className='flex items-center gap-1.5 md:gap-2 text-xs md:text-sm text-zinc-400 mb-6 flex-wrap'
         aria-label='Breadcrumb'
       >
         <Link
           href={resolvedHomeHref}
-          className='hover:text-lunary-primary-400 transition-colors flex items-center gap-1'
+          className='hover:text-lunary-primary-400 transition-colors flex items-center gap-1 flex-shrink-0'
         >
-          <Home className='w-4 h-4' />
+          <Home className='w-3.5 h-3.5 md:w-4 md:h-4' />
           <span className='sr-only'>Home</span>
         </Link>
         {items.map((item, index) => (
           <span
             key={item.href || item.label}
-            className='flex items-center gap-2'
+            className='flex items-center gap-1.5 md:gap-2 flex-shrink-0'
           >
-            <ChevronRight className='w-4 h-4 text-zinc-600' />
+            <ChevronRight className='w-3.5 h-3.5 md:w-4 md:h-4 text-zinc-600 flex-shrink-0' />
             {index === items.length - 1 || !item.href ? (
-              <span className='text-zinc-300 font-medium'>{item.label}</span>
+              <span className='text-zinc-300 font-medium truncate max-w-[120px] md:max-w-none'>
+                {item.label}
+              </span>
             ) : (
               <Link
                 href={item.href}
-                className='hover:text-lunary-primary-400 transition-colors'
+                className='hover:text-lunary-primary-400 transition-colors truncate max-w-[120px] md:max-w-none'
               >
                 {item.label}
               </Link>
