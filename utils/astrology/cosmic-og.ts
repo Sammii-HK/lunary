@@ -440,7 +440,11 @@ export function checkSeasonalEvents(positions: any): Array<any> {
   const sunLongitude = positions.Sun.longitude;
   const events: Array<any> = [];
 
+  // Log solar longitude for debugging
+  console.log(`🌍 Solar longitude: ${sunLongitude.toFixed(2)}°`);
+
   // Exact seasonal markers (within 1 degree)
+  // Spring Equinox: 0° (or 360°)
   if (Math.abs(sunLongitude - 0) < 1 || Math.abs(sunLongitude - 360) < 1) {
     events.push({
       name: 'Spring Equinox',
@@ -472,6 +476,9 @@ export function checkSeasonalEvents(positions: any): Array<any> {
       detail: 'Solar longitude 180° - Autumn begins',
     });
   } else if (Math.abs(sunLongitude - 270) < 1) {
+    console.log(
+      `❄️ Winter Solstice detected! Solar longitude: ${sunLongitude.toFixed(2)}°`,
+    );
     events.push({
       name: 'Winter Solstice',
       energy: 'Inner Light & Renewal',
@@ -481,6 +488,12 @@ export function checkSeasonalEvents(positions: any): Array<any> {
       description: 'Longest night of the year',
       detail: 'Solar longitude 270° - Return of the light',
     });
+  }
+
+  if (events.length > 0) {
+    console.log(
+      `🌍 Seasonal events detected: ${events.map((e) => e.name).join(', ')}`,
+    );
   }
 
   return events;

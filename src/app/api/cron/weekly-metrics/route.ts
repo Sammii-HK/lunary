@@ -280,11 +280,16 @@ async function updateReadmeTab(spreadsheetId: string): Promise<void> {
 }
 
 /**
- * Send Discord notification with weekly metrics summary
+ * Send Discord notification with comprehensive weekly metrics summary
  */
 async function sendWeeklyMetricsNotification(
   metrics: Awaited<ReturnType<typeof calculateWeeklyMetrics>>,
 ): Promise<void> {
+  const baseUrl =
+    process.env.NODE_ENV === 'production'
+      ? 'https://lunary.app'
+      : 'http://localhost:3000';
+
   const sheetUrl = SHEETS_ID
     ? `https://docs.google.com/spreadsheets/d/${SHEETS_ID}`
     : null;
@@ -294,6 +299,104 @@ async function sendWeeklyMetricsNotification(
     .map((f) => `${f.feature}: ${f.distinctUsers}`)
     .join(', ');
 
+  // Fetch additional analytics data for comprehensive notification
+  const weekStart = metrics.weekStartDate;
+  const weekEnd = metrics.weekEndDate;
+  const queryParams = `start_date=${weekStart}&end_date=${weekEnd}`;
+
+  let additionalData: {
+    dau?: number;
+    mau?: number;
+    aiEngagement?: any;
+    conversions?: any;
+    notifications?: any;
+    featureUsage?: any;
+    successMetrics?: any;
+    userGrowth?: any;
+    activation?: any;
+    subscriptionLifecycle?: any;
+    planBreakdown?: any;
+    apiCosts?: any;
+  } = {};
+
+  try {
+    // Fetch key analytics in parallel (with timeout to avoid blocking)
+    const analyticsPromises = [
+      fetch(
+        `${baseUrl}/api/admin/analytics/dau-wau-mau?${queryParams}&granularity=week`,
+      )
+        .then((r) => (r.ok ? r.json() : null))
+        .catch(() => null),
+      fetch(`${baseUrl}/api/admin/analytics/ai-engagement?${queryParams}`)
+        .then((r) => (r.ok ? r.json() : null))
+        .catch(() => null),
+      fetch(`${baseUrl}/api/admin/analytics/conversions?${queryParams}`)
+        .then((r) => (r.ok ? r.json() : null))
+        .catch(() => null),
+      fetch(`${baseUrl}/api/admin/analytics/notifications?${queryParams}`)
+        .then((r) => (r.ok ? r.json() : null))
+        .catch(() => null),
+      fetch(`${baseUrl}/api/admin/analytics/feature-usage?${queryParams}`)
+        .then((r) => (r.ok ? r.json() : null))
+        .catch(() => null),
+      fetch(`${baseUrl}/api/admin/analytics/success-metrics?${queryParams}`)
+        .then((r) => (r.ok ? r.json() : null))
+        .catch(() => null),
+      fetch(
+        `${baseUrl}/api/admin/analytics/user-growth?${queryParams}&granularity=week`,
+      )
+        .then((r) => (r.ok ? r.json() : null))
+        .catch(() => null),
+      fetch(`${baseUrl}/api/admin/analytics/activation?${queryParams}`)
+        .then((r) => (r.ok ? r.json() : null))
+        .catch(() => null),
+      fetch(
+        `${baseUrl}/api/admin/analytics/subscription-lifecycle?${queryParams}`,
+      )
+        .then((r) => (r.ok ? r.json() : null))
+        .catch(() => null),
+      fetch(`${baseUrl}/api/admin/analytics/plan-breakdown?${queryParams}`)
+        .then((r) => (r.ok ? r.json() : null))
+        .catch(() => null),
+      fetch(`${baseUrl}/api/admin/analytics/api-costs?${queryParams}`)
+        .then((r) => (r.ok ? r.json() : null))
+        .catch(() => null),
+    ];
+
+    const results = await Promise.allSettled(analyticsPromises);
+    const [
+      activityData,
+      aiData,
+      conversionsData,
+      notificationsData,
+      featureUsageData,
+      successMetricsData,
+      userGrowthData,
+      activationData,
+      subscriptionLifecycleData,
+      planBreakdownData,
+      apiCostsData,
+    ] = results.map((r) => (r.status === 'fulfilled' ? r.value : null));
+
+    additionalData = {
+      dau: activityData?.dau,
+      mau: activityData?.mau,
+      aiEngagement: aiData,
+      conversions: conversionsData,
+      notifications: notificationsData,
+      featureUsage: featureUsageData,
+      successMetrics: successMetricsData,
+      userGrowth: userGrowthData,
+      activation: activationData,
+      subscriptionLifecycle: subscriptionLifecycleData,
+      planBreakdown: planBreakdownData,
+      apiCosts: apiCostsData,
+    };
+  } catch (error) {
+    console.warn('Failed to fetch additional analytics data:', error);
+    // Continue with basic metrics if additional data fetch fails
+  }
+
   const fields = [
     {
       name: 'Week',
@@ -301,31 +404,127 @@ async function sendWeeklyMetricsNotification(
       inline: false,
     },
     {
-      name: 'Key Metrics',
-      value: `WAU: ${metrics.wau}\nNew Users: ${metrics.newUsers}\nActivation Rate: ${metrics.activationRate.toFixed(1)}%`,
+      name: 'User Activity',
+      value: `DAU: ${additionalData.dau || 'N/A'}\nWAU: ${metrics.wau}\nMAU: ${additionalData.mau || 'N/A'}\nNew Users: ${metrics.newUsers}`,
       inline: true,
     },
     {
-      name: 'Growth',
-      value: `New Trials: ${metrics.newTrials}\nNew Paying: ${metrics.newPayingSubscribers}\nChurn Rate: ${metrics.churnRateWeek.toFixed(1)}%`,
+      name: 'Growth & Revenue',
+      value: `New Trials: ${metrics.newTrials}\nNew Paying: ${metrics.newPayingSubscribers}\nChurn: ${metrics.churnRateWeek.toFixed(1)}%\nMRR: $${metrics.mrrEndOfWeek.toFixed(2)}`,
       inline: true,
     },
     {
-      name: 'Revenue',
-      value: `Gross: $${metrics.grossRevenueWeek.toFixed(2)}\nMRR: $${metrics.mrrEndOfWeek.toFixed(2)}\nARR Run Rate: $${metrics.arrRunRateEndOfWeek.toFixed(2)}`,
-      inline: true,
-    },
-    {
-      name: 'Top Features',
-      value: topFeatures || 'No data',
-      inline: false,
-    },
-    {
-      name: 'Data Quality',
-      value: `Completeness: ${metrics.dataCompletenessScore}%`,
+      name: 'Engagement',
+      value: `Activation: ${metrics.activationRate.toFixed(1)}%\nGross Revenue: $${metrics.grossRevenueWeek.toFixed(2)}\nARR Run Rate: $${metrics.arrRunRateEndOfWeek.toFixed(2)}`,
       inline: true,
     },
   ];
+
+  // Add AI engagement if available
+  if (additionalData.aiEngagement) {
+    const ai = additionalData.aiEngagement;
+    fields.push({
+      name: 'AI Engagement',
+      value: `Sessions: ${ai.total_sessions || 0}\nUnique Users: ${ai.unique_users || 0}\nAvg Tokens: ${ai.avg_tokens_per_user?.toFixed(0) || 0}\nCompletion: ${ai.completion_rate?.toFixed(1) || 0}%`,
+      inline: true,
+    });
+  }
+
+  // Add conversions if available
+  if (additionalData.conversions) {
+    const conv = additionalData.conversions;
+    fields.push({
+      name: 'Conversions',
+      value: `Total: ${conv.total_conversions || 0}\nRate: ${conv.conversion_rate?.toFixed(1) || 0}%\nTrial Rate: ${conv.trial_conversion_rate?.toFixed(1) || 0}%\nAvg Days: ${conv.avg_days_to_convert?.toFixed(1) || 'N/A'}`,
+      inline: true,
+    });
+  }
+
+  // Add notifications if available
+  if (additionalData.notifications) {
+    const notif = additionalData.notifications;
+    const cosmicPulse = notif.cosmic_pulse || {};
+    fields.push({
+      name: 'Notifications',
+      value: `Cosmic Pulse Sent: ${cosmicPulse.sent || 0}\nOpen Rate: ${cosmicPulse.open_rate?.toFixed(1) || 0}%\nCTR: ${cosmicPulse.click_through_rate?.toFixed(1) || 0}%`,
+      inline: true,
+    });
+  }
+
+  // Add feature usage if available
+  if (
+    additionalData.featureUsage &&
+    additionalData.featureUsage.features?.length > 0
+  ) {
+    const topFeature = additionalData.featureUsage.features[0];
+    fields.push({
+      name: 'Top Feature',
+      value: `${topFeature.feature}: ${topFeature.users} users\n(${topFeature.percentage?.toFixed(1) || 0}% of active users)`,
+      inline: true,
+    });
+  }
+
+  // Add success metrics if available
+  if (additionalData.successMetrics) {
+    const success = additionalData.successMetrics;
+    fields.push({
+      name: 'Success Metrics',
+      value: `Weekly Return: ${success.weeklyReturning || 0}\nEngagement Score: ${success.engagementScore?.toFixed(1) || 0}\nHealth Score: ${success.healthScore?.toFixed(1) || 0}`,
+      inline: true,
+    });
+  }
+
+  // Add subscription lifecycle if available
+  if (additionalData.subscriptionLifecycle) {
+    const lifecycle = additionalData.subscriptionLifecycle;
+    fields.push({
+      name: 'Subscription Lifecycle',
+      value: `Active: ${lifecycle.activeSubscribers || 0}\nTrials: ${lifecycle.trialSubscribers || 0}\nChurned: ${lifecycle.churnedThisWeek || 0}`,
+      inline: true,
+    });
+  }
+
+  // Add plan breakdown if available
+  if (additionalData.planBreakdown) {
+    const plans = additionalData.planBreakdown;
+    const planSummary = Object.entries(plans)
+      .slice(0, 3)
+      .map(([plan, count]: [string, any]) => `${plan}: ${count}`)
+      .join('\n');
+    if (planSummary) {
+      fields.push({
+        name: 'Plan Breakdown',
+        value: planSummary,
+        inline: true,
+      });
+    }
+  }
+
+  // Add API costs if available
+  if (additionalData.apiCosts) {
+    const costs = additionalData.apiCosts;
+    fields.push({
+      name: 'API Costs',
+      value: `Total: $${costs.totalCost?.toFixed(2) || 0}\nOpenAI: $${costs.openaiCost?.toFixed(2) || 0}\nAnthropic: $${costs.anthropicCost?.toFixed(2) || 0}`,
+      inline: true,
+    });
+  }
+
+  // Add top features from metrics
+  if (topFeatures) {
+    fields.push({
+      name: 'Top Features (by Users)',
+      value: topFeatures,
+      inline: false,
+    });
+  }
+
+  // Add data quality
+  fields.push({
+    name: 'Data Quality',
+    value: `Completeness: ${metrics.dataCompletenessScore}%`,
+    inline: true,
+  });
 
   if (sheetUrl) {
     fields.push({
@@ -336,12 +535,12 @@ async function sendWeeklyMetricsNotification(
   }
 
   await sendDiscordAdminNotification({
-    title: '📊 Weekly Metrics Digest',
-    message: `Weekly metrics for ${metrics.isoWeek} have been calculated and written to Google Sheets.`,
-    url: sheetUrl || undefined,
+    title: '📊 Weekly Analytics Digest',
+    message: `Comprehensive weekly metrics for ${metrics.isoWeek} have been calculated. View full analytics dashboard for detailed insights.`,
+    url: `${baseUrl}/admin/analytics`,
     fields,
     priority: 'normal',
-    category: 'general',
+    category: 'analytics',
     dedupeKey: `weekly-metrics-${metrics.isoWeek}`,
   });
 }

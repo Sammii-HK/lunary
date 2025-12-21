@@ -629,11 +629,33 @@ function generateVideoHashtags(
     }
   }
 
-  // Ensure we have exactly 3 hashtags (fill with brand if needed, but prioritize topical)
-  // Remove duplicates and limit to 3
-  const uniqueHashtags = Array.from(new Set(hashtags)).slice(0, 3);
+  // Ensure we have exactly 3 hashtags - add fallbacks if needed
+  // Remove duplicates first
+  const uniqueHashtags = Array.from(new Set(hashtags));
 
-  return uniqueHashtags.join(' ');
+  // Fill remaining slots with relevant fallback hashtags
+  const fallbackHashtags = [
+    '#astrology',
+    '#cosmicforecast',
+    '#weeklyhoroscope',
+    '#planetarytransits',
+    '#moonmagic',
+    '#astrologyinsights',
+  ];
+
+  for (const fallback of fallbackHashtags) {
+    if (uniqueHashtags.length >= 3) break;
+    if (
+      !uniqueHashtags.some(
+        (tag) => tag.toLowerCase() === fallback.toLowerCase(),
+      )
+    ) {
+      uniqueHashtags.push(fallback);
+    }
+  }
+
+  // Return exactly 3 hashtags
+  return uniqueHashtags.slice(0, 3).join(' ');
 }
 
 /**
@@ -657,22 +679,60 @@ export async function generateVideoPostContent(
         ? 'medium-form (30-60 second recap)'
         : 'long-form';
 
+  // Build event overview from planetary highlights and major aspects
+  const eventOverview = [];
+
+  // Add top 3 planetary highlights
+  if (weeklyData.planetaryHighlights.length > 0) {
+    const topHighlights = weeklyData.planetaryHighlights.slice(0, 3);
+    eventOverview.push(
+      ...topHighlights.map((h) => {
+        let eventText = '';
+        if (h.event === 'enters-sign') {
+          eventText = `${h.planet} enters ${h.details.toSign || 'sign'}`;
+        } else if (h.event === 'goes-retrograde') {
+          eventText = `${h.planet} goes retrograde`;
+        } else {
+          eventText = `${h.planet} ${h.event.replace('-', ' ')}`;
+        }
+        return eventText;
+      }),
+    );
+  }
+
+  // Add top 2 major aspects
+  if (weeklyData.majorAspects.length > 0) {
+    const topAspects = weeklyData.majorAspects.slice(0, 2);
+    eventOverview.push(
+      ...topAspects.map((a) => `${a.planetA} ${a.aspect} ${a.planetB}`),
+    );
+  }
+
+  // Add moon phases
+  if (weeklyData.moonPhases.length > 0) {
+    eventOverview.push(
+      ...weeklyData.moonPhases.slice(0, 2).map((m) => m.phase),
+    );
+  }
+
   const prompt = `Create a social media post caption to accompany a ${typeDescription} video about the weekly cosmic forecast for ${weekRange}.
 
 The post should:
 - Be engaging and natural, not salesy
+- Give a brief overview of the key cosmic events happening this week
 - Mention that the full blog is available on Lunary (but DO NOT include a link or URL)
 - Say something like "check out the full blog on Lunary" or "read more on the Lunary blog" - never write out the full URL
 - Be appropriate for Instagram, TikTok, and other platforms
-- Be 2-4 sentences, concise but inviting
+- Be 3-5 sentences, informative and inviting
 - Match the mystical but accessible tone of Lunary
 - For short-form: Be brief and hook-focused
-- For medium-form: Be informative, highlight key cosmic events
-- For long-form: Can be slightly longer, more informative
+- For medium-form: Be informative, highlight key cosmic events mentioned in the video
+- For long-form: Can be slightly longer, more comprehensive overview
 
 Weekly Data:
 Title: ${weeklyData.title}
 Subtitle: ${weeklyData.subtitle}
+Key Events: ${eventOverview.length > 0 ? eventOverview.join(', ') : 'Various cosmic shifts'}
 
 Return ONLY the post content text, no markdown, no formatting, just the caption text. Do NOT include any URLs or links. Do NOT use any emojis. Do NOT include hashtags - they will be added separately.`;
 

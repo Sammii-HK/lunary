@@ -56,8 +56,30 @@ function getWeekDates(weekOffset: number): string {
 }
 
 /**
+ * Truncate content to fit platform character limits
+ * Attempts to truncate at word boundaries when possible
+ */
+function truncateContent(content: string, maxLength: number): string {
+  if (content.length <= maxLength) {
+    return content;
+  }
+
+  // Try to truncate at word boundary
+  const truncated = content.substring(0, maxLength - 3);
+  const lastSpace = truncated.lastIndexOf(' ');
+
+  if (lastSpace > maxLength * 0.8) {
+    // If we can find a space reasonably close to the limit, use it
+    return truncated.substring(0, lastSpace) + '...';
+  }
+
+  // Otherwise, just truncate and add ellipsis
+  return truncated + '...';
+}
+
+/**
  * Schedule video to appropriate platforms based on type
- * - Short form: Instagram Stories (scheduled)
+ * - Short form: Instagram Stories, Instagram Reels, Threads, Twitter/X, Bluesky (scheduled)
  * - Medium form: TikTok, Instagram Reels, YouTube Shorts (posted immediately)
  * - Long form: YouTube (already handled via upload route)
  */
@@ -67,6 +89,7 @@ async function scheduleVideoToPlatforms(
   title: string,
   description: string,
   baseUrl: string,
+  postContent?: string | null,
 ): Promise<void> {
   const apiKey = process.env.SUCCULENT_SECRET_KEY;
   const accountGroupId = process.env.SUCCULENT_ACCOUNT_GROUP_ID;
@@ -81,23 +104,74 @@ async function scheduleVideoToPlatforms(
   const now = new Date();
 
   if (videoType === 'short') {
-    // Short form: Schedule to Instagram Stories
+    // Short form: Schedule to Instagram Stories, Instagram Reels, Threads, Twitter/X, and Bluesky
+    // Use postContent if available (generated from weekly data), otherwise fall back to description
+    const content = postContent || description;
+
     const scheduledDate = new Date(now);
     scheduledDate.setHours(10, 0, 0, 0);
     if (scheduledDate < now) {
       scheduledDate.setHours(now.getHours() + 1, 0, 0, 0);
     }
 
+    // Instagram Stories
     const storyPost = {
       accountGroupId,
-      name: `Lunary Short - ${dateStr}`,
-      content: description,
+      name: `Lunary Short - Instagram Stories - ${dateStr}`,
+      content: content,
       platforms: ['instagram'],
       scheduledDate: scheduledDate.toISOString(),
       media: [{ type: 'video' as const, url: videoUrl, alt: title }],
       instagramOptions: { stories: true },
     };
 
+    // Instagram Reels
+    const reelPost = {
+      accountGroupId,
+      name: `Lunary Short - Instagram Reel - ${dateStr}`,
+      content: content,
+      platforms: ['instagram'],
+      scheduledDate: scheduledDate.toISOString(),
+      media: [{ type: 'video' as const, url: videoUrl, alt: title }],
+      instagramOptions: { type: 'reel' as const },
+    };
+
+    // Threads
+    const threadsPost = {
+      accountGroupId,
+      name: `Lunary Short - Threads - ${dateStr}`,
+      content: content,
+      platforms: ['threads'],
+      scheduledDate: scheduledDate.toISOString(),
+      media: [{ type: 'video' as const, url: videoUrl, alt: title }],
+    };
+
+    // Twitter/X - 280 character limit
+    const twitterContent = content.replace(/\n/g, ' '); // Twitter doesn't support line breaks well
+    const twitterPost = {
+      accountGroupId,
+      name: `Lunary Short - Twitter - ${dateStr}`,
+      content: truncateContent(twitterContent, 280),
+      platforms: ['twitter'],
+      scheduledDate: scheduledDate.toISOString(),
+      media: [{ type: 'video' as const, url: videoUrl, alt: title }],
+      twitterOptions: {
+        thread: false,
+        threadNumber: false,
+      },
+    };
+
+    // Bluesky - 300 character limit
+    const blueskyPost = {
+      accountGroupId,
+      name: `Lunary Short - Bluesky - ${dateStr}`,
+      content: truncateContent(content, 300),
+      platforms: ['bluesky'],
+      scheduledDate: scheduledDate.toISOString(),
+      media: [{ type: 'video' as const, url: videoUrl, alt: title }],
+    };
+
+    // Post to Instagram Stories
     try {
       const response = await fetch(succulentApiUrl, {
         method: 'POST',
@@ -115,21 +189,133 @@ async function scheduleVideoToPlatforms(
       } else {
         const error = await response.text();
         console.error(
-          `❌ Failed to schedule short-form video: ${response.status} ${error}`,
+          `❌ Failed to schedule short-form video to Instagram Stories: ${response.status} ${error}`,
         );
       }
     } catch (error) {
-      console.error('Error scheduling short-form video:', error);
+      console.error(
+        'Error scheduling short-form video to Instagram Stories:',
+        error,
+      );
+    }
+
+    // Post to Instagram Reels
+    try {
+      const response = await fetch(succulentApiUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-API-Key': apiKey,
+        },
+        body: JSON.stringify(reelPost),
+      });
+
+      if (response.ok) {
+        console.log(
+          `✅ Scheduled short-form video to Instagram Reels for ${scheduledDate.toISOString()}`,
+        );
+      } else {
+        const error = await response.text();
+        console.error(
+          `❌ Failed to schedule short-form video to Instagram Reels: ${response.status} ${error}`,
+        );
+      }
+    } catch (error) {
+      console.error(
+        'Error scheduling short-form video to Instagram Reels:',
+        error,
+      );
+    }
+
+    // Post to Threads
+    try {
+      const response = await fetch(succulentApiUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-API-Key': apiKey,
+        },
+        body: JSON.stringify(threadsPost),
+      });
+
+      if (response.ok) {
+        console.log(
+          `✅ Scheduled short-form video to Threads for ${scheduledDate.toISOString()}`,
+        );
+      } else {
+        const error = await response.text();
+        console.error(
+          `❌ Failed to schedule short-form video to Threads: ${response.status} ${error}`,
+        );
+      }
+    } catch (error) {
+      console.error('Error scheduling short-form video to Threads:', error);
+    }
+
+    // Post to Twitter/X
+    try {
+      const response = await fetch(succulentApiUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-API-Key': apiKey,
+        },
+        body: JSON.stringify(twitterPost),
+      });
+
+      if (response.ok) {
+        console.log(
+          `✅ Scheduled short-form video to Twitter/X for ${scheduledDate.toISOString()}`,
+        );
+      } else {
+        const error = await response.text();
+        console.error(
+          `❌ Failed to schedule short-form video to Twitter/X: ${response.status} ${error}`,
+        );
+      }
+    } catch (error) {
+      console.error('Error scheduling short-form video to Twitter/X:', error);
+    }
+
+    // Post to Bluesky (if it supports videos)
+    try {
+      const response = await fetch(succulentApiUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-API-Key': apiKey,
+        },
+        body: JSON.stringify(blueskyPost),
+      });
+
+      if (response.ok) {
+        console.log(
+          `✅ Scheduled short-form video to Bluesky for ${scheduledDate.toISOString()}`,
+        );
+      } else {
+        const error = await response.text();
+        // Log as warning since Bluesky may not support videos yet
+        console.warn(
+          `⚠️ Failed to schedule short-form video to Bluesky (may not support videos): ${response.status} ${error}`,
+        );
+      }
+    } catch (error) {
+      console.warn(
+        'Error scheduling short-form video to Bluesky (may not support videos):',
+        error,
+      );
     }
   } else if (videoType === 'medium') {
     // Medium form: Post immediately to TikTok, Instagram Reels, YouTube Shorts
+    // Use postContent if available (generated from weekly data), otherwise fall back to description
+    const content = postContent || description;
     const currentTime = new Date().toISOString();
 
     // TikTok - post immediately (omit scheduledDate)
     const tiktokPost = {
       accountGroupId,
       name: `Lunary Medium - TikTok - ${dateStr}`,
-      content: description,
+      content: content,
       platforms: ['tiktok'],
       media: [{ type: 'video' as const, url: videoUrl, alt: title }],
     };
@@ -138,7 +324,7 @@ async function scheduleVideoToPlatforms(
     const reelPost = {
       accountGroupId,
       name: `Lunary Medium - Instagram Reel - ${dateStr}`,
-      content: description,
+      content: content,
       platforms: ['instagram'],
       media: [{ type: 'video' as const, url: videoUrl, alt: title }],
       instagramOptions: { type: 'reel' as const },
@@ -257,10 +443,13 @@ export async function POST(request: NextRequest) {
       // Can use blogContent if provided, otherwise will use weekly data
       if (blogContent) {
         blogSlug = blogContent.slug || null;
-        imageUrl = `${baseUrl}/api/social/images?format=youtube&title=${encodeURIComponent(blogContent.title)}${blogContent.description ? `&subtitle=${encodeURIComponent(blogContent.description)}` : ''}`;
         videoFormat = 'youtube';
         title = blogContent.title;
+        // Description will be set from weeklyData.subtitle after we generate it
+        // This ensures it has the correct date
         description = blogContent.description || '';
+        // imageUrl will be set from weeklyData after generation to ensure correct subtitle with date
+        imageUrl = ''; // Temporary, will be set later
       } else {
         // Use weekly data for long-form (will be set in script generation section)
         videoFormat = 'youtube';
@@ -295,15 +484,19 @@ export async function POST(request: NextRequest) {
       audioCacheKey = `audio/short/${version}/${weekKey}.mp3`;
 
       // Get weekly content data for short-form
+      // weekOffset represents weeks from current week's Monday
+      // week=0 = current week, week=1 = next week, etc.
       const now = new Date();
-      const targetDate = new Date(
-        now.getTime() + week * 7 * 24 * 60 * 60 * 1000,
-      );
-      const dayOfWeek = targetDate.getDay();
-      const daysToMonday = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
-      const weekStart = new Date(
-        targetDate.getTime() - daysToMonday * 24 * 60 * 60 * 1000,
-      );
+      const currentDayOfWeek = now.getDay();
+      const daysToCurrentMonday =
+        currentDayOfWeek === 0 ? 6 : currentDayOfWeek - 1;
+      const currentWeekMonday = new Date(now);
+      currentWeekMonday.setDate(now.getDate() - daysToCurrentMonday);
+      currentWeekMonday.setHours(0, 0, 0, 0);
+
+      // Calculate the target week's Monday
+      const weekStart = new Date(currentWeekMonday);
+      weekStart.setDate(currentWeekMonday.getDate() + week * 7);
       weekStart.setHours(0, 0, 0, 0);
 
       weeklyData = await generateWeeklyContent(weekStart);
@@ -321,23 +514,41 @@ export async function POST(request: NextRequest) {
       audioCacheKey = `audio/medium/${version}/${weekKey}.mp3`;
 
       // Get weekly content data for medium-form
+      // weekOffset represents weeks from current week's Monday
+      // week=0 = current week, week=1 = next week, etc.
       const now = new Date();
-      const targetDate = new Date(
-        now.getTime() + week * 7 * 24 * 60 * 60 * 1000,
-      );
-      const dayOfWeek = targetDate.getDay();
-      const daysToMonday = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
-      const weekStart = new Date(
-        targetDate.getTime() - daysToMonday * 24 * 60 * 60 * 1000,
-      );
+      const currentDayOfWeek = now.getDay();
+      const daysToCurrentMonday =
+        currentDayOfWeek === 0 ? 6 : currentDayOfWeek - 1;
+      const currentWeekMonday = new Date(now);
+      currentWeekMonday.setDate(now.getDate() - daysToCurrentMonday);
+      currentWeekMonday.setHours(0, 0, 0, 0);
+
+      // Calculate the target week's Monday
+      const weekStart = new Date(currentWeekMonday);
+      weekStart.setDate(currentWeekMonday.getDate() + week * 7);
       weekStart.setHours(0, 0, 0, 0);
 
-      weeklyData = await generateWeeklyContent(weekStart);
-      console.log('✅ Generated weeklyData for medium-form video');
+      console.log(
+        `[Medium Video] Generating for week offset ${week}: currentWeekMonday=${currentWeekMonday.toISOString()}, weekStart=${weekStart.toISOString()}`,
+      );
 
-      // Update title to use the weekly data title (same as intro slide)
+      weeklyData = await generateWeeklyContent(weekStart);
+      console.log(
+        `✅ Generated weeklyData for medium-form video: weekStart=${weeklyData.weekStart.toISOString()}, title="${weeklyData.title}", subtitle="${weeklyData.subtitle}"`,
+      );
+
+      // Update title and description to use the weekly data (same as intro slide)
       if (weeklyData?.title) {
         title = weeklyData.title;
+      }
+      if (weeklyData?.subtitle) {
+        description = weeklyData.subtitle;
+      }
+
+      // Set imageUrl from weekly data
+      if (weeklyData) {
+        imageUrl = `${baseUrl}/api/social/images?format=story&title=${encodeURIComponent(weeklyData.title)}&subtitle=${encodeURIComponent(weeklyData.subtitle || '')}`;
       }
     } else {
       // Long-form: cache by blog slug or week number + version
@@ -349,11 +560,30 @@ export async function POST(request: NextRequest) {
       // Long-form: ALWAYS get weekly content (required for topic images)
       try {
         const now = new Date();
-        const dayOfWeek = now.getDay();
-        const daysToMonday = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
-        const weekStart = new Date(
-          now.getTime() - daysToMonday * 24 * 60 * 60 * 1000,
-        );
+        let weekStart: Date;
+
+        if (week !== undefined) {
+          // Use the week parameter if provided (for manual generation)
+          // weekOffset represents weeks from current week's Monday
+          const currentDayOfWeek = now.getDay();
+          const daysToCurrentMonday =
+            currentDayOfWeek === 0 ? 6 : currentDayOfWeek - 1;
+          const currentWeekMonday = new Date(now);
+          currentWeekMonday.setDate(now.getDate() - daysToCurrentMonday);
+          currentWeekMonday.setHours(0, 0, 0, 0);
+
+          // Calculate the target week's Monday
+          weekStart = new Date(currentWeekMonday);
+          weekStart.setDate(currentWeekMonday.getDate() + week * 7);
+        } else {
+          // Default to current week if no week parameter
+          const dayOfWeek = now.getDay();
+          const daysToMonday = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
+          weekStart = new Date(
+            now.getTime() - daysToMonday * 24 * 60 * 60 * 1000,
+          );
+        }
+
         weekStart.setHours(0, 0, 0, 0);
         weeklyData = await generateWeeklyContent(weekStart);
         console.log('✅ Generated weeklyData for long-form video');
@@ -368,9 +598,21 @@ export async function POST(request: NextRequest) {
         );
       }
 
-      // Set imageUrl for long-form if not already set
-      if ((!imageUrl || imageUrl === '') && weeklyData) {
+      // Set imageUrl and description for long-form from weeklyData
+      // This ensures both title and subtitle have the correct date
+      if (weeklyData) {
+        // Use weeklyData.title and subtitle for image (ensures correct date)
         imageUrl = `${baseUrl}/api/social/images?format=youtube&title=${encodeURIComponent(weeklyData.title)}&subtitle=${encodeURIComponent(weeklyData.subtitle || '')}`;
+
+        // Update description to use weeklyData.subtitle if blogContent.description is empty or generic
+        // This ensures the subtitle/description has the correct date
+        if (
+          !blogContent ||
+          !blogContent.description ||
+          blogContent.description === ''
+        ) {
+          description = weeklyData.subtitle || description;
+        }
       }
     }
 
@@ -719,16 +961,34 @@ export async function POST(request: NextRequest) {
         );
         weekStart.setHours(0, 0, 0, 0);
         weeklyDataForPost = await generateWeeklyContent(weekStart);
-      } else if (type === 'medium' || type === 'long') {
-        // Medium and long form both use current week
-        const now = new Date();
-        const dayOfWeek = now.getDay();
-        const daysToMonday = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
-        const weekStart = new Date(
-          now.getTime() - daysToMonday * 24 * 60 * 60 * 1000,
-        );
-        weekStart.setHours(0, 0, 0, 0);
-        weeklyDataForPost = await generateWeeklyContent(weekStart);
+      } else if (type === 'medium') {
+        // Medium form: use the same week as the video (already calculated above)
+        if (week !== undefined && weeklyData) {
+          weeklyDataForPost = weeklyData;
+        } else {
+          const now = new Date();
+          const dayOfWeek = now.getDay();
+          const daysToMonday = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
+          const weekStart = new Date(
+            now.getTime() - daysToMonday * 24 * 60 * 60 * 1000,
+          );
+          weekStart.setHours(0, 0, 0, 0);
+          weeklyDataForPost = await generateWeeklyContent(weekStart);
+        }
+      } else if (type === 'long') {
+        // Long form: use the same week as the video (already calculated above)
+        if (weeklyData) {
+          weeklyDataForPost = weeklyData;
+        } else {
+          const now = new Date();
+          const dayOfWeek = now.getDay();
+          const daysToMonday = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
+          const weekStart = new Date(
+            now.getTime() - daysToMonday * 24 * 60 * 60 * 1000,
+          );
+          weekStart.setHours(0, 0, 0, 0);
+          weeklyDataForPost = await generateWeeklyContent(weekStart);
+        }
       }
 
       if (weeklyDataForPost) {
@@ -910,13 +1170,13 @@ export async function POST(request: NextRequest) {
 
     // Schedule video to platforms (fire and forget - don't block response)
     // Use postContent for social media posts if available, otherwise fall back to description
-    const socialPostContent = postContent || description;
     scheduleVideoToPlatforms(
       videoUrl,
       type,
       title,
-      socialPostContent,
+      description,
       baseUrl,
+      postContent,
     ).catch((err) => {
       console.error('Failed to schedule video to platforms:', err);
     });

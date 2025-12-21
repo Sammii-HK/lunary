@@ -85,6 +85,8 @@
     "clear-cache": "bash scripts/clear-all-cache.sh",
     "discord:register": "tsx scripts/register-discord-commands.ts",
     "backfill:moon-circle": "tsx scripts/backfill-moon-circle.ts",
+    "delete:moon-circle": "tsx scripts/delete-moon-circle.ts",
+    "run:cron": "tsx scripts/run-cron.ts",
     "check": "pnpm lint && pnpm test && pnpm build",
     "legacy:audit": "tsx tools/remove-legacy-framework.ts",
     "legacy:purge": "tsx tools/remove-legacy-framework.ts --delete-scripts --execute"

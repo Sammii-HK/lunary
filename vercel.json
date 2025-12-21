@@ -25,7 +25,11 @@
     },
     {
       "path": "/api/cron/daily-posts",
-      "schedule": "0 14 * * *"
+      "schedule": "0 8 * * *"
+    },
+    {
+      "path": "/api/cron/weekly-content",
+      "schedule": "0 8 * * 0"
     },
     {
       "path": "/api/cron/weekly-metrics",
@@ -34,6 +38,10 @@
     {
       "path": "/api/cron/weekly-cosmic-report",
       "schedule": "0 10 * * 0"
+    },
+    {
+      "path": "/api/cron/check-notification-failures",
+      "schedule": "0 9 * * *"
     }
   ]
 }

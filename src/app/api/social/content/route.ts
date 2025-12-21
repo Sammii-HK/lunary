@@ -94,7 +94,6 @@ export async function GET(request: NextRequest) {
       '#zodiac',
       '#cosmicforecast',
       '#weeklyhoroscope',
-      '#lunary',
       '#stargazing',
       '#celestial',
     ],

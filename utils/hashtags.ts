@@ -5,7 +5,8 @@ export type Platform =
   | 'linkedin'
   | 'facebook'
   | 'pinterest'
-  | 'reddit';
+  | 'bluesky'
+  | 'threads';
 
 export interface CosmicContext {
   moonPhase?: string;
@@ -134,13 +135,14 @@ const retrogradeHashtags: Record<string, string[]> = {
 };
 
 const platformLimits: Record<Platform, number> = {
-  instagram: 12,
+  instagram: 3,
   tiktok: 5,
   twitter: 2,
-  linkedin: 5,
+  linkedin: 3,
   facebook: 2,
   pinterest: 0,
-  reddit: 0,
+  bluesky: 3,
+  threads: 3,
 };
 
 const brandHashtag = '#LunaryApp';
@@ -272,7 +274,8 @@ export function getAllPlatformHashtags(
     'linkedin',
     'facebook',
     'pinterest',
-    'reddit',
+    'bluesky',
+    'threads',
   ];
 
   const result = {} as Record<Platform, string>;

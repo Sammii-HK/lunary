@@ -929,10 +929,23 @@ export function generateHashtags(
     .replace(/\s+/g, '');
   const topic = `#${topicBase}`;
 
+  // Third hashtag based on category (for variety, not brand)
+  const categoryThirdHashtags: Record<string, string> = {
+    zodiac: '#cosmic',
+    tarot: '#divination',
+    lunar: '#moonmagic',
+    planetary: '#astrology',
+    sabbat: '#witchcraft',
+    numerology: '#spirituality',
+    crystals: '#crystalhealing',
+    chakras: '#spirituality',
+  };
+  const thirdHashtag = categoryThirdHashtags[theme.category] || '#spirituality';
+
   return {
     domain,
     topic,
-    brand: '#lunary',
+    brand: thirdHashtag, // Reusing brand field for third hashtag (not actually brand)
   };
 }
 

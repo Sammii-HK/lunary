@@ -21,8 +21,6 @@ import {
   generateCatchyQuote,
   getQuoteImageUrl,
 } from '@/lib/social/quote-generator';
-import { sendDailyInsightNotification } from '@/lib/notifications/tiered-service';
-import { getGlobalCosmicData } from '@/lib/cosmic-snapshot/global-cache';
 import { generateMoonCircle } from '@/lib/moon-circles/generator';
 import { generateWeeklyReport } from '@/lib/cosmic-snapshot/reports';
 import {
@@ -355,20 +353,8 @@ export async function GET(request: NextRequest) {
       };
     }
 
-    // WEEKLY TASKS (Sundays)
-    if (dayOfWeek === 0) {
-      console.log('📅 Sunday detected - running weekly tasks...');
-      try {
-        const weeklyResult = await runWeeklyTasks(request);
-        cronResults.weeklyContent = weeklyResult;
-      } catch (error) {
-        console.error('❌ Weekly tasks failed:', error);
-        cronResults.weeklyContent = {
-          success: false,
-          error: error instanceof Error ? error.message : 'Unknown error',
-        };
-      }
-    }
+    // WEEKLY TASKS - Now handled by separate /api/cron/weekly-content cron at 8 AM UTC on Sundays
+    // Removed to avoid duplication - weekly content generation runs in the morning via dedicated cron
 
     // MONTHLY TASKS (15th of each month)
     if (dayOfMonth === 15) {
@@ -529,7 +515,7 @@ async function runDailyPosts(dateStr: string) {
   const cosmicContent = await cosmicResponse.json();
 
   // Calculate proper scheduling times
-  // Cron runs at 2 PM UTC the day before, schedule posts starting at 12 PM UTC next day
+  // Cron runs at 8 AM UTC, schedule posts for 12 PM UTC on target date
   const scheduleBase = new Date(dateStr + 'T12:00:00Z'); // Start at 12 PM UTC on target date
 
   // Always post to our own subreddit r/lunary_insights
@@ -564,7 +550,7 @@ async function runDailyPosts(dateStr: string) {
       name: dateStr,
       content: `${postContent}\n\n${platformHashtags.instagram}`,
       platforms: [
-        'reddit',
+        'threads',
         'pinterest',
         'tiktok',
         'facebook',
@@ -576,14 +562,14 @@ async function runDailyPosts(dateStr: string) {
         `${productionUrl}/api/og/crystal?date=${dateStr}`,
         `${productionUrl}/api/og/tarot?date=${dateStr}`,
         `${productionUrl}/api/og/moon?date=${dateStr}`,
-        `${productionUrl}/api/og/horoscope?date=${dateStr}`,
+        // `${productionUrl}/api/og/horoscope?date=${dateStr}`,
       ],
       alt: `${cosmicContent.primaryEvent.name} - ${cosmicContent.primaryEvent.energy}. Daily cosmic guidance from lunary.app.`,
       scheduledDate: new Date(scheduleBase.getTime()).toISOString(),
-      redditOptions: {
-        title: redditTitle,
-        subreddit: subreddit.name,
-      },
+      // redditOptions: {
+      //   title: redditTitle,
+      //   subreddit: subreddit.name,
+      // },
       pinterestOptions: {
         boardId: process.env.SUCCULENT_PINTEREST_BOARD_ID,
       },
@@ -603,7 +589,9 @@ async function runDailyPosts(dateStr: string) {
           media: [
             `${productionUrl}/api/og/cosmic/${dateStr}/landscape`,
             `${productionUrl}/api/og/crystal?date=${dateStr}&size=landscape`,
-            `${productionUrl}/api/og/horoscope?date=${dateStr}&size=landscape`,
+            `${productionUrl}/api/og/tarot?date=${dateStr}&size=landscape`,
+            `${productionUrl}/api/og/moon?date=${dateStr}&size=landscape`,
+            // `${productionUrl}/api/og/horoscope?date=${dateStr}&size=landscape`,
           ],
           twitterOptions: {
             thread: false,
@@ -611,13 +599,13 @@ async function runDailyPosts(dateStr: string) {
           },
         },
         bluesky: {
-          content: generateCosmicPost(cosmicContent).snippetShort,
+          content: `${generateCosmicPost(cosmicContent).snippetShort} ${platformHashtags.bluesky}`,
           media: [
-            `${productionUrl}/api/og/cosmic/${dateStr}`,
-            `${productionUrl}/api/og/crystal?date=${dateStr}`,
-            `${productionUrl}/api/og/tarot?date=${dateStr}`,
-            `${productionUrl}/api/og/moon?date=${dateStr}`,
-            `${productionUrl}/api/og/horoscope?date=${dateStr}`,
+            `${productionUrl}/api/og/cosmic/${dateStr}/landscape`,
+            `${productionUrl}/api/og/crystal?date=${dateStr}&size=landscape`,
+            `${productionUrl}/api/og/tarot?date=${dateStr}&size=landscape`,
+            `${productionUrl}/api/og/moon?date=${dateStr}&size=landscape`,
+            // `${productionUrl}/api/og/horoscope?date=${dateStr}&size=landscape`,
           ],
         },
         tiktok: {
@@ -681,7 +669,7 @@ async function runDailyPosts(dateStr: string) {
           alt: post.alt,
         })),
         variants: post.variants,
-        redditOptions: post.redditOptions,
+        // redditOptions: post.redditOptions,
       };
 
       if (pinterestOptions) {
@@ -831,7 +819,7 @@ async function runDailyPosts(dateStr: string) {
         title: dailyPreview.title,
         message: dailyPreview.message,
         priority: dailyPreview.priority,
-        url: dailyPreview.url,
+        url: `${productionUrl}/admin/social-posts`,
         category: 'general',
         dedupeKey: `daily-preview-${dateStr}`,
       });
@@ -851,7 +839,7 @@ async function runDailyPosts(dateStr: string) {
         },
         {
           name: 'Platforms',
-          value: 'X, Bluesky, Instagram, Reddit, Pinterest',
+          value: 'X, Bluesky, Instagram, Threads, TikTok, Pinterest',
           inline: true,
         },
       ];
@@ -860,7 +848,7 @@ async function runDailyPosts(dateStr: string) {
         title: successTemplate.title,
         message: successTemplate.message,
         priority: successTemplate.priority,
-        url: successTemplate.url,
+        url: `${productionUrl}/admin/social-posts`,
         fields: successFields,
         category: 'general',
         dedupeKey: `daily-posts-success-${dateStr}`,
@@ -890,7 +878,7 @@ async function runDailyPosts(dateStr: string) {
         title: failureTemplate.title,
         message: failureTemplate.message,
         priority: failureTemplate.priority,
-        url: failureTemplate.url,
+        url: `${productionUrl}/admin/cron-monitor`,
         fields: failureFields,
         category: 'urgent',
         dedupeKey: `daily-posts-failure-${dateStr}`,
@@ -1163,9 +1151,9 @@ async function runWeeklyTasks(request: NextRequest) {
         title: weeklyTemplate.title,
         message: weeklyTemplate.message,
         priority: weeklyTemplate.priority,
-        url: weeklyTemplate.url,
+        url: `${baseUrl}/admin/social-posts`,
         fields: weeklyFields,
-        category: 'general',
+        category: 'todo',
         dedupeKey: `weekly-digest-${new Date().toISOString().split('T')[0]}`,
       });
       console.log(
@@ -1655,8 +1643,28 @@ async function runNotificationCheck(dateStr: string) {
 
     const cosmicData = await cosmicResponse.json();
 
+    // Log seasonal events in cosmic data
+    console.log(
+      '🌍 Cosmic data seasonal events:',
+      cosmicData.seasonalEvents?.length || 0,
+      cosmicData.seasonalEvents,
+    );
+    console.log(
+      '🌍 Primary event:',
+      cosmicData.primaryEvent?.name,
+      'priority:',
+      cosmicData.primaryEvent?.priority,
+    );
+
     // Check if there are notification-worthy events
     const notificationEvents = getNotificationWorthyEvents(cosmicData);
+
+    console.log(
+      `🔔 Notification-worthy events found: ${notificationEvents.length}`,
+      notificationEvents.map(
+        (e) => `${e.name} (${e.type}, priority ${e.priority})`,
+      ),
+    );
 
     if (notificationEvents.length === 0) {
       console.log('📭 No notification-worthy events today');
@@ -2148,11 +2156,14 @@ function getNotificationWorthyEvents(cosmicData: any) {
 
   // Add seasonal events
   if (cosmicData.seasonalEvents && Array.isArray(cosmicData.seasonalEvents)) {
+    console.log(
+      `🌍 Adding ${cosmicData.seasonalEvents.length} seasonal events to allEvents`,
+    );
     allEvents.push(
       ...cosmicData.seasonalEvents.map((event: any) => ({
         ...event,
         type: event.type || 'seasonal',
-        priority: event.priority || 8,
+        priority: event.priority || 9, // Seasonal events should be priority 9
       })),
     );
   }
@@ -2218,8 +2229,8 @@ function isEventNotificationWorthy(event: any): boolean {
     return significantPhases.some((phase) => event.name.includes(phase));
   }
 
-  // Seasonal events (equinoxes, solstices, sabbats)
-  if (event.priority === 8) return true;
+  // Seasonal events (equinoxes, solstices, sabbats) - priority 9
+  if (event.type === 'seasonal' && event.priority >= 8) return true;
 
   // Major aspects involving outer planets
   if (event.type === 'aspect' && event.priority >= 7) {
@@ -2650,29 +2661,14 @@ async function runConsolidatedNotifications(
   const results: Record<string, any> = {};
   const now = new Date();
 
-  // 1. Daily Insight Notification (was daily-insight-notification cron)
-  try {
-    console.log('📨 Sending daily insight notifications...');
-    let cosmicData = null;
-    try {
-      cosmicData = await getGlobalCosmicData(now);
-    } catch (error) {
-      console.error('Failed to fetch cosmic data for insights:', error);
-    }
-    const insightResult = await sendDailyInsightNotification(cosmicData);
-    results.dailyInsight = {
-      success: insightResult.success,
-      sent: insightResult.successful,
-      failed: insightResult.failed,
-    };
-    console.log(`✅ Daily insight: ${insightResult.successful} sent`);
-  } catch (error) {
-    console.error('❌ Daily insight notification failed:', error);
-    results.dailyInsight = {
-      success: false,
-      error: error instanceof Error ? error.message : 'Unknown',
-    };
-  }
+  // 1. Daily Insight Notification - MOVED TO MORNING (8 AM UTC)
+  // This is now handled by daily-morning-notification cron
+  // Skipping here to avoid duplicate notifications
+  results.dailyInsight = {
+    skipped: true,
+    message:
+      'Daily insight notification now runs at 8 AM UTC via daily-morning-notification cron',
+  };
 
   // 2. Daily Cosmic Event Notification (was daily-cosmic-event cron)
   try {
@@ -2688,8 +2684,15 @@ async function runConsolidatedNotifications(
 
     if (alreadySentEvent.rows.length === 0) {
       const positions = getRealPlanetaryPositions(now);
+      console.log(
+        `🌍 Checking seasonal events - Sun longitude: ${positions.Sun?.longitude}°`,
+      );
       const moonPhase = getAccurateMoonPhase(now);
       const seasonalEvents = checkSeasonalEvents(positions);
+      console.log(
+        `🌍 Seasonal events found: ${seasonalEvents.length}`,
+        seasonalEvents,
+      );
       const aspects = calculateRealAspects(positions);
       const retrogradeEvents = checkRetrogradeEvents(positions);
 
@@ -2751,13 +2754,18 @@ async function runConsolidatedNotifications(
       }
 
       // Check for seasonal events
+      console.log(
+        `🌍 Seasonal events detected: ${seasonalEvents.length}`,
+        seasonalEvents.map((e) => `${e.name} (priority ${e.priority})`),
+      );
       for (const event of seasonalEvents) {
         allCosmicEvents.push({
           name: event.name,
-          description: 'Seasonal energy shift brings new themes.',
-          priority: event.priority || 8,
+          description:
+            event.description || 'Seasonal energy shift brings new themes.',
+          priority: event.priority || 9, // Seasonal events should be priority 9
           type: 'seasonal',
-          emoji: '🌿',
+          emoji: event.emoji || '🌿',
         });
       }
 

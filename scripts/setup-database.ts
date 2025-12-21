@@ -92,6 +92,39 @@ async function setupDatabase() {
 
     console.log('✅ Push subscriptions table created');
 
+    // Create the notification_sent_events table
+    await sql`
+      CREATE TABLE IF NOT EXISTS notification_sent_events (
+        id SERIAL PRIMARY KEY,
+        date DATE NOT NULL,
+        event_key TEXT NOT NULL,
+        event_type TEXT NOT NULL,
+        event_name TEXT NOT NULL,
+        event_priority INTEGER NOT NULL,
+        sent_by TEXT NOT NULL,
+        sent_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+        UNIQUE(date, event_key)
+      )
+    `;
+
+    // Create indexes for notification_sent_events
+    await sql`CREATE INDEX IF NOT EXISTS idx_notification_sent_events_date ON notification_sent_events(date)`;
+    await sql`CREATE INDEX IF NOT EXISTS idx_notification_sent_events_event_key ON notification_sent_events(event_key)`;
+    await sql`CREATE INDEX IF NOT EXISTS idx_notification_sent_events_sent_at ON notification_sent_events(sent_at)`;
+
+    // Create cleanup function for old notification events
+    await sql`
+      CREATE OR REPLACE FUNCTION cleanup_old_notification_events()
+      RETURNS void AS $$
+      BEGIN
+        DELETE FROM notification_sent_events
+        WHERE date < CURRENT_DATE - INTERVAL '1 day';
+      END;
+      $$ LANGUAGE plpgsql
+    `;
+
+    console.log('✅ Notification sent events table created');
+
     // Create the conversion_events table
     await sql`
       CREATE TABLE IF NOT EXISTS conversion_events (

@@ -51,6 +51,26 @@ export async function generateTopicImages(
   // Track used image titles/subtitles to prevent duplicates
   const usedImageKeys = new Set<string>();
 
+  // Calculate week offset once for all images (based on weeklyData.weekStart)
+  // This ensures all images show the correct date range
+  const now = new Date();
+  now.setHours(0, 0, 0, 0);
+  const weekStartDate = new Date(weeklyData.weekStart);
+  weekStartDate.setHours(0, 0, 0, 0);
+
+  // Calculate the Monday of the current week for comparison
+  const currentDayOfWeek = now.getDay();
+  const daysToCurrentMonday = currentDayOfWeek === 0 ? 6 : currentDayOfWeek - 1;
+  const currentWeekMonday = new Date(now);
+  currentWeekMonday.setDate(now.getDate() - daysToCurrentMonday);
+
+  // Calculate weeks difference
+  const weeksDiff = Math.round(
+    (weekStartDate.getTime() - currentWeekMonday.getTime()) /
+      (1000 * 60 * 60 * 24 * 7),
+  );
+  const weekOffset = weeksDiff;
+
   for (const topic of topics) {
     let imageUrl: string;
     let imageKey: string;
@@ -58,7 +78,22 @@ export async function generateTopicImages(
     switch (topic.topic) {
       case 'intro':
         imageKey = `intro-${weeklyData.title}`;
-        imageUrl = `${baseUrl}/api/social/images?format=${format}&title=${encodeURIComponent(weeklyData.title)}&subtitle=${encodeURIComponent(weeklyData.subtitle || '')}`;
+        // For intro slide: swap title and subtitle format
+        // Title becomes "Week of [date], [year]" and subtitle becomes the event name
+        const weekOf = weeklyData.weekStart.toLocaleDateString('en-US', {
+          month: 'long',
+          day: 'numeric',
+        });
+        const year = weeklyData.weekStart.getFullYear();
+        const introTitle = `Week of ${weekOf}, ${year}`;
+        const introSubtitle = weeklyData.subtitle || '';
+
+        // Log for debugging
+        console.log(
+          `[Intro Image] Week: ${weeklyData.weekStart.toISOString()}, Title: ${introTitle}, Subtitle: ${introSubtitle}, weekOffset: ${weekOffset}`,
+        );
+
+        imageUrl = `${baseUrl}/api/social/images?format=${format}&title=${encodeURIComponent(introTitle)}&subtitle=${encodeURIComponent(introSubtitle)}&week=${weekOffset}`;
         break;
       case 'planetary_highlights': {
         let planet: PlanetaryHighlight | null = null;
@@ -148,7 +183,7 @@ export async function generateTopicImages(
           // Add a unique suffix
           imageKey = `planetary-${planetTitle}-${usedIndices.planetaryHighlights.size}`;
         }
-        imageUrl = `${baseUrl}/api/social/images?format=${format}&title=${encodeURIComponent(planetTitle)}&subtitle=${encodeURIComponent(subtitle)}`;
+        imageUrl = `${baseUrl}/api/social/images?format=${format}&title=${encodeURIComponent(planetTitle)}&subtitle=${encodeURIComponent(subtitle)}&week=${weekOffset}`;
         break;
       }
       case 'retrogrades': {
@@ -195,7 +230,7 @@ export async function generateTopicImages(
         if (usedImageKeys.has(imageKey)) {
           imageKey = `retrograde-${retroTitle}-${usedIndices.retrogrades.size}`;
         }
-        imageUrl = `${baseUrl}/api/social/images?format=${format}&title=${encodeURIComponent(retroTitle)}&subtitle=${encodeURIComponent(subtitle)}`;
+        imageUrl = `${baseUrl}/api/social/images?format=${format}&title=${encodeURIComponent(retroTitle)}&subtitle=${encodeURIComponent(subtitle)}&week=${weekOffset}`;
         break;
       }
       case 'aspects': {
@@ -325,7 +360,7 @@ export async function generateTopicImages(
         if (usedImageKeys.has(imageKey)) {
           imageKey = `aspect-${aspectTitle}-${usedIndices.aspects.size}`;
         }
-        imageUrl = `${baseUrl}/api/social/images?format=${format}&title=${encodeURIComponent(aspectTitle)}&subtitle=${encodeURIComponent(subtitle)}`;
+        imageUrl = `${baseUrl}/api/social/images?format=${format}&title=${encodeURIComponent(aspectTitle)}&subtitle=${encodeURIComponent(subtitle)}&week=${weekOffset}`;
         break;
       }
       case 'moon_phases': {
@@ -443,7 +478,7 @@ export async function generateTopicImages(
         if (usedImageKeys.has(imageKey)) {
           imageKey = `moon-${moonTitle}-${usedIndices.moonPhases.size}`;
         }
-        imageUrl = `${baseUrl}/api/social/images?format=${format}&title=${encodeURIComponent(moonTitle)}&subtitle=${encodeURIComponent(subtitle)}`;
+        imageUrl = `${baseUrl}/api/social/images?format=${format}&title=${encodeURIComponent(moonTitle)}&subtitle=${encodeURIComponent(subtitle)}&week=${weekOffset}`;
         break;
       }
       case 'seasonal_events': {
@@ -482,7 +517,7 @@ export async function generateTopicImages(
         if (usedImageKeys.has(imageKey)) {
           imageKey = `seasonal-${eventTitle}-${images.filter((i) => i.topic === 'seasonal_events').length}`;
         }
-        imageUrl = `${baseUrl}/api/social/images?format=${format}&title=${encodeURIComponent(eventTitle)}&subtitle=${encodeURIComponent(eventSubtitle)}`;
+        imageUrl = `${baseUrl}/api/social/images?format=${format}&title=${encodeURIComponent(eventTitle)}&subtitle=${encodeURIComponent(eventSubtitle)}&week=${weekOffset}`;
         break;
       }
       case 'best_days':
@@ -490,7 +525,7 @@ export async function generateTopicImages(
         if (usedImageKeys.has(imageKey)) {
           imageKey = `best-days-${images.filter((i) => i.topic === 'best_days').length}`;
         }
-        imageUrl = `${baseUrl}/api/social/images?format=${format}&title=${encodeURIComponent('Best Days This Week')}&subtitle=${encodeURIComponent('Optimal timing for your activities')}`;
+        imageUrl = `${baseUrl}/api/social/images?format=${format}&title=${encodeURIComponent('Best Days This Week')}&subtitle=${encodeURIComponent('Optimal timing for your activities')}&week=${weekOffset}`;
         break;
       case 'conclusion': {
         // Use engaging conclusion titles (same as long form)
@@ -508,7 +543,7 @@ export async function generateTopicImages(
         const conclusionTitle = conclusionTitles[titleIndex];
 
         imageKey = 'conclusion';
-        imageUrl = `${baseUrl}/api/social/images?format=${format}&title=${encodeURIComponent(conclusionTitle)}`;
+        imageUrl = `${baseUrl}/api/social/images?format=${format}&title=${encodeURIComponent(conclusionTitle)}&week=${weekOffset}`;
         break;
       }
       default:
@@ -517,7 +552,7 @@ export async function generateTopicImages(
         const words = topic.text.split(/\s+/).slice(0, 5).join(' ');
         const title =
           words.length > 30 ? words.substring(0, 30) + '...' : words;
-        imageUrl = `${baseUrl}/api/social/images?format=${format}&title=${encodeURIComponent(title)}&subtitle=${encodeURIComponent('Cosmic insights')}`;
+        imageUrl = `${baseUrl}/api/social/images?format=${format}&title=${encodeURIComponent(title)}&subtitle=${encodeURIComponent('Cosmic insights')}&week=${weekOffset}`;
     }
 
     // Mark this image key as used
@@ -526,7 +561,7 @@ export async function generateTopicImages(
     // Ensure moon phase images are always created (safeguard)
     if (topic.topic === 'moon_phases' && !imageUrl) {
       console.warn('⚠️ Moon phase image URL not set, creating fallback image');
-      imageUrl = `${baseUrl}/api/social/images?format=${format}&title=${encodeURIComponent('No Major Changes')}&subtitle=${encodeURIComponent('Moon phases')}`;
+      imageUrl = `${baseUrl}/api/social/images?format=${format}&title=${encodeURIComponent('No Major Changes')}&subtitle=${encodeURIComponent('Moon phases')}&week=${weekOffset}`;
       imageKey = 'moon-fallback';
     }
 

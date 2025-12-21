@@ -230,23 +230,18 @@ export const NotificationTemplates = {
         : 'http://localhost:3000';
 
     return {
-      title: '✅ Cron Job Completed',
-      message: `<b>Daily Posts Scheduled Successfully</b>
+      title: '✅ Daily Posts Generated Successfully',
+      message: `<b>Daily Posts Generated Successfully</b>
 
 📊 <b>Results:</b> ${summary.successful}/${summary.total} posts
 📈 <b>Success Rate:</b> ${summary.successRate}
 
-📱 <b>Platforms:</b> X, Bluesky, Instagram, Reddit, Pinterest
+📱 <b>Platforms:</b> X, Bluesky, Instagram, Threads, TikTok, Pinterest
 
-⏰ <b>Schedule:</b>
-• 12:00 PM UTC - Main Cosmic
-• 3:00 PM UTC - Daily Crystal  
-• 6:00 PM UTC - Daily Tarot
-• 9:00 PM UTC - Moon Phase
-• 12:00 AM UTC - Daily Horoscope
+⏰ <b>Scheduled:</b> 12:00 PM UTC
 
-<i>Tap to view detailed results</i>`,
-      url: `${baseUrl}/admin/cron-monitor`,
+<i>Posts generated in the morning, ready for review and approval</i>`,
+      url: `${baseUrl}/admin/social-posts`,
       priority: 'normal' as const,
       sound: 'cosmic',
       icon: `${baseUrl}/icons/icon-192x192.png`,
@@ -306,21 +301,21 @@ export const NotificationTemplates = {
       : '';
 
     return {
-      title: '👀 Daily Posts Ready',
-      message: `<b>${postCount} posts scheduled for ${new Date(date).toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}</b>
+      title: '👀 Daily Posts Ready for Review',
+      message: `<b>${postCount} posts generated for ${new Date(date).toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}</b>
 
-🌟 <b>Today's Cosmic Event:</b> ${cosmicEvent?.name || 'Cosmic Flow'}
+🌟 <b>Cosmic Event:</b> ${cosmicEvent?.name || 'Cosmic Flow'}
 ✨ <b>Energy:</b> ${cosmicEvent?.energy || 'Universal Harmony'}
 ${contentSnippet ? `\n📝 <b>Post Content:</b> ${contentSnippet}` : ''}
 
 📸 <b>Images Generated:</b>
 ${imageUrls.map((url, i) => `• ${['Cosmic', 'Crystal', 'Tarot', 'Moon', 'Horoscope'][i] || `Image ${i + 1}`}`).join('\n')}
 
-📱 <b>Platforms:</b> X, Bluesky, Instagram, Reddit, Pinterest
-⏰ <b>Schedule:</b> 12:00 PM UTC
+📱 <b>Platforms:</b> X, Bluesky, Instagram, Threads, TikTok, Pinterest
+⏰ <b>First Post Scheduled:</b> 12:00 PM UTC
 
-<i>Tap to preview all images and content</i>`,
-      url: `${baseUrl}/admin/daily-posts-preview?date=${date}`,
+<i>Generated in the morning - ready for review and approval</i>`,
+      url: `${baseUrl}/admin/social-posts`,
       priority: 'normal' as const,
       image: imageUrls[0],
       images: imageUrls,
@@ -375,7 +370,7 @@ ${imageUrls.map((url, i) => `• ${['Cosmic', 'Crystal', 'Tarot', 'Moon', 'Horos
       message += `\n📝 <b>Content:</b> ${contentSnippet}\n`;
     }
 
-    message += `\n📱 <b>Platforms:</b> X, Bluesky, Instagram, Reddit, Pinterest`;
+    message += `\n📱 <b>Platforms:</b> X, Bluesky, Instagram, Threads, TikTok, Pinterest`;
     message += `\n⏰ <b>Scheduled:</b> 12:00 PM UTC`;
     message += `\n\n<i>Tap to preview</i>`;
 

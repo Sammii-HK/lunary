@@ -271,6 +271,7 @@ export async function uploadCaptions(
     const srtContent = srtLines.join('\n');
 
     // Upload captions as SRT format
+    // YouTube API accepts SRT files with application/x-subrip MIME type
     await youtube.captions.insert({
       part: ['snippet'],
       requestBody: {
@@ -282,7 +283,7 @@ export async function uploadCaptions(
       },
       media: {
         body: Readable.from(Buffer.from(srtContent, 'utf-8')),
-        mimeType: 'text/plain',
+        mimeType: 'application/x-subrip', // Proper MIME type for SRT files
       },
     });
 
@@ -304,4 +305,39 @@ function formatSRTTime(seconds: number): string {
   const milliseconds = Math.floor((seconds % 1) * 1000);
 
   return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(secs).padStart(2, '0')},${String(milliseconds).padStart(3, '0')}`;
+}
+
+/**
+ * Add a video to a YouTube playlist
+ * @param videoId The YouTube video ID
+ * @param playlistId The YouTube playlist ID
+ */
+export async function addVideoToPlaylist(
+  videoId: string,
+  playlistId: string,
+): Promise<void> {
+  const youtube = getYouTubeClient();
+
+  try {
+    await youtube.playlistItems.insert({
+      part: ['snippet'],
+      requestBody: {
+        snippet: {
+          playlistId: playlistId,
+          resourceId: {
+            kind: 'youtube#video',
+            videoId: videoId,
+          },
+        },
+      },
+    });
+
+    console.log(`✅ Video ${videoId} added to playlist ${playlistId}`);
+  } catch (error: any) {
+    console.error('YouTube playlist add error:', error);
+    // Don't throw - playlist addition is optional, video upload should still succeed
+    console.warn(
+      `⚠️ Failed to add video ${videoId} to playlist ${playlistId}, but video upload succeeded`,
+    );
+  }
 }
