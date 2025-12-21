@@ -50,10 +50,20 @@ const getMoonPhase = (date: Date): 'New Moon' | 'Full Moon' | null => {
   const astroTime = new AstroTime(date);
   const moonIllumination = Illumination(Body.Moon, astroTime);
   const moonPhaseAngle = MoonPhase(date);
+  const illuminationPercent = moonIllumination.phase_fraction * 100;
 
-  if (moonPhaseAngle >= 355 || moonPhaseAngle <= 5) {
+  // Check phase angle first (exact peak detection)
+  const isExactNewMoon = moonPhaseAngle >= 355 || moonPhaseAngle <= 5;
+  const isExactFullMoon = moonPhaseAngle >= 175 && moonPhaseAngle <= 185;
+
+  // Use illumination percentage as fallback for more reliable detection
+  // This ensures we catch new/full moons even if the cron runs at a different time than the peak
+  const isNewMoonByIllumination = illuminationPercent <= 3;
+  const isFullMoonByIllumination = illuminationPercent >= 97;
+
+  if (isExactNewMoon || isNewMoonByIllumination) {
     return 'New Moon';
-  } else if (moonPhaseAngle >= 175 && moonPhaseAngle <= 185) {
+  } else if (isExactFullMoon || isFullMoonByIllumination) {
     return 'Full Moon';
   }
 
