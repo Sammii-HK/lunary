@@ -4,7 +4,7 @@ import { useUser } from '@/context/UserContext';
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import dynamic from 'next/dynamic';
-import { HelpCircle, Stars, Layers, X, Hash } from 'lucide-react';
+import { HelpCircle, Stars, Layers, Hash, X } from 'lucide-react';
 import { generateBirthChart } from '../../../../utils/astrology/birthChart';
 import { useSubscription } from '../../../hooks/useSubscription';
 import {
@@ -616,43 +616,6 @@ export default function ProfilePage() {
         </div>
       </div>
 
-      {authState.isAuthenticated && !isEditing && (
-        <div className='w-full max-w-3xl space-y-4'>
-          <div className='rounded-xl border border-zinc-700 bg-zinc-900/70 p-4 shadow-lg'>
-            <h2 className='text-sm font-medium text-zinc-400 uppercase tracking-wide mb-3'>
-              Your Journey
-            </h2>
-            <div className='grid grid-cols-2 gap-3'>
-              <StreakDisplay />
-              <RitualTracker />
-            </div>
-            <Paywall feature='monthly_insights'>
-              <div className='mt-3 pt-3 border-t border-zinc-800'>
-                <button
-                  onClick={() =>
-                    document
-                      .getElementById('monthly-insights')
-                      ?.scrollIntoView({ behavior: 'smooth' })
-                  }
-                  className='text-sm text-lunary-accent hover:text-lunary-accent-300 transition-colors'
-                >
-                  View Monthly Insights →
-                </button>
-              </div>
-            </Paywall>
-          </div>
-          <Paywall feature='monthly_insights'>
-            <div id='monthly-insights'>
-              <MonthlyInsights />
-            </div>
-          </Paywall>
-          <DailyCosmicOverview className='mt-4' />
-          <LifeThemesCard className='mt-4' />
-          <GuideNudge location='profile' />
-          <PremiumPathway variant='guide' className='mt-4' />
-        </div>
-      )}
-
       {authState.isAuthenticated &&
         !isEditing &&
         birthday &&
@@ -735,80 +698,6 @@ export default function ProfilePage() {
             </div>
           </>
         )}
-      {authState.isAuthenticated && !isEditing && (
-        <div className='w-full max-w-3xl space-y-3'>
-          <h2 className='text-lg font-semibold text-white'>Settings</h2>
-          {settingsSections.map((section) => {
-            const open = isSettingsSectionOpen(section.id);
-            return (
-              <div
-                key={section.id}
-                className='rounded-xl border border-zinc-700 bg-zinc-900/70 shadow-lg'
-              >
-                <button
-                  onClick={() => toggleSettingsSection(section.id)}
-                  className='flex w-full items-center justify-between gap-3 px-4 py-3 text-left text-sm font-medium text-white transition-colors hover:bg-zinc-800/80'
-                >
-                  <div>
-                    <p>{section.title}</p>
-                    {section.description && (
-                      <p className='text-xs font-normal text-zinc-400'>
-                        {section.description}
-                      </p>
-                    )}
-                  </div>
-                  <span className='text-lg font-semibold text-lunary-accent-200'>
-                    {open ? '-' : '+'}
-                  </span>
-                </button>
-                {open && (
-                  <div className='border-t border-zinc-700/60 px-4 py-4 text-sm text-zinc-200'>
-                    {section.content}
-                  </div>
-                )}
-              </div>
-            );
-          })}
-        </div>
-      )}
-
-      {authState.isAuthenticated && (
-        <div className='w-full max-w-3xl space-y-6'>
-          <SubscriptionManagement
-            customerId={user?.stripeCustomerId || undefined}
-            subscriptionId={subscription.subscriptionId}
-          />
-        </div>
-      )}
-
-      <div className='w-full max-w-3xl'>
-        <div className='text-center text-sm text-zinc-400'>
-          <p>
-            Your cosmic profile information is stored securely and encrypted.
-            This includes your personal tarot card and birth chart data, which
-            create a personalized spiritual experience with custom readings and
-            insights.
-          </p>
-        </div>
-
-        <div className='flex flex-col items-center gap-2 text-sm'>
-          <span className='text-zinc-400'>Looking for more?</span>
-          <div className='flex flex-wrap justify-center gap-3'>
-            <Link
-              href='/shop'
-              className='rounded-full border border-zinc-700/70 px-4 py-1.5 text-zinc-300 transition hover:border-lunary-primary-600 hover:text-lunary-accent-200'
-            >
-              Browse Shop
-            </Link>
-            <a
-              href='/blog'
-              className='rounded-full border border-zinc-700/70 px-4 py-1.5 text-zinc-300 transition hover:border-lunary-primary-600 hover:text-lunary-accent-200'
-            >
-              Read the Blog
-            </a>
-          </div>
-        </div>
-      </div>
 
       {/* Personal Card Modal */}
       {showPersonalCardModal &&
@@ -879,6 +768,121 @@ export default function ProfilePage() {
             </div>
           );
         })()}
+
+      <DailyCosmicOverview className='mt-4' />
+      <LifeThemesCard className='mt-4' />
+      <GuideNudge location='profile' />
+
+      {authState.isAuthenticated && !isEditing && (
+        <div className='w-full max-w-3xl space-y-3'>
+          <h2 className='text-md text-uppercase font-semibold text-white/50'>
+            Settings
+          </h2>
+          {settingsSections.map((section) => {
+            const open = isSettingsSectionOpen(section.id);
+            return (
+              <div
+                key={section.id}
+                className='rounded-xl border border-zinc-700 bg-zinc-900/70 shadow-lg'
+              >
+                <button
+                  onClick={() => toggleSettingsSection(section.id)}
+                  className='flex w-full items-center justify-between gap-3 px-4 py-3 text-left text-sm font-medium text-white transition-colors hover:bg-zinc-800/80'
+                >
+                  <div>
+                    <p>{section.title}</p>
+                    {section.description && (
+                      <p className='text-xs font-normal text-zinc-400'>
+                        {section.description}
+                      </p>
+                    )}
+                  </div>
+                  <span className='text-lg font-semibold text-lunary-accent-200'>
+                    {open ? '-' : '+'}
+                  </span>
+                </button>
+                {open && (
+                  <div className='border-t border-zinc-700/60 px-4 py-4 text-sm text-zinc-200'>
+                    {section.content}
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      )}
+
+      {authState.isAuthenticated && !isEditing && (
+        <div className='w-full max-w-3xl space-y-4'>
+          <div className='rounded-xl border border-zinc-700 bg-zinc-900/70 p-4 shadow-lg'>
+            <h2 className='text-sm font-medium text-zinc-400 uppercase tracking-wide mb-3'>
+              Your Journey
+            </h2>
+            <div className='grid grid-cols-1 gap-3'>
+              <StreakDisplay />
+              {/* <RitualTracker /> */}
+            </div>
+            <Paywall feature='monthly_insights'>
+              <div className='mt-3 pt-3 border-t border-zinc-800'>
+                <button
+                  onClick={() =>
+                    document
+                      .getElementById('monthly-insights')
+                      ?.scrollIntoView({ behavior: 'smooth' })
+                  }
+                  className='text-sm text-lunary-accent hover:text-lunary-accent-300 transition-colors'
+                >
+                  View Monthly Insights →
+                </button>
+              </div>
+            </Paywall>
+          </div>
+          <Paywall feature='monthly_insights'>
+            <div id='monthly-insights'>
+              <MonthlyInsights />
+            </div>
+          </Paywall>
+          <PremiumPathway variant='guide' className='mt-4' />
+        </div>
+      )}
+
+      {authState.isAuthenticated && (
+        <div className='w-full max-w-3xl space-y-6'>
+          <SubscriptionManagement
+            customerId={user?.stripeCustomerId || undefined}
+            subscriptionId={subscription.subscriptionId}
+          />
+        </div>
+      )}
+
+      <div className='w-full max-w-3xl'>
+        <div className='text-center text-sm text-zinc-400'>
+          <p>
+            Your cosmic profile information is stored securely and encrypted.
+            This includes your personal tarot card and birth chart data, which
+            create a personalized spiritual experience with custom readings and
+            insights.
+          </p>
+        </div>
+
+        <div className='flex flex-col items-center gap-2 text-sm'>
+          <span className='text-zinc-400'>Looking for more?</span>
+          <div className='flex flex-wrap justify-center gap-3'>
+            <Link
+              href='/shop'
+              className='rounded-full border border-zinc-700/70 px-4 py-1.5 text-zinc-300 transition hover:border-lunary-primary-600 hover:text-lunary-accent-200'
+            >
+              Browse Shop
+            </Link>
+            <a
+              href='/blog'
+              className='rounded-full border border-zinc-700/70 px-4 py-1.5 text-zinc-300 transition hover:border-lunary-primary-600 hover:text-lunary-accent-200'
+            >
+              Read the Blog
+            </a>
+          </div>
+        </div>
+      </div>
 
       {/* Auth Modal */}
       {showAuthModal && (
@@ -996,7 +1000,7 @@ export default function ProfilePage() {
         </div>
       )}
 
-      <div className='mt-12 pt-8 border-t border-zinc-800/50'>
+      <div className='pt-3 border-t border-zinc-800/50'>
         <div className='flex justify-center'>
           <Link
             href='/help'

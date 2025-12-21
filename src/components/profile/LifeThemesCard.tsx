@@ -131,7 +131,7 @@ export function LifeThemesCard({ className = '' }: LifeThemesCardProps) {
 
   return (
     <div
-      className={`rounded-xl border border-zinc-800/60 bg-zinc-950/60 p-4 ${className}`}
+      className={`rounded-xl border border-zinc-800/60 bg-zinc-950/60 p-4 ${className} max-w-full`}
     >
       <div className='flex items-center gap-2 mb-3'>
         <Sparkles className='w-4 h-4 text-lunary-primary-400' />
