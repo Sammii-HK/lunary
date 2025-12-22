@@ -129,12 +129,12 @@ function normaliseKey(value?: string) {
   return (value ?? '').trim().toLowerCase();
 }
 
-export function elementGlyph(elementLabel?: string) {
+function elementGlyph(elementLabel?: string) {
   const key = normaliseKey(elementLabel) as keyof typeof elementAstro;
   return elementAstro[key];
 }
 
-export function modalityGlyph(modalityLabel?: string) {
+function modalityGlyph(modalityLabel?: string) {
   const key = normaliseKey(modalityLabel) as keyof typeof modalityAstro;
   return modalityAstro[key];
 }
