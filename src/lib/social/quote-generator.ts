@@ -1,5 +1,6 @@
 import OpenAI from 'openai';
 import { sql } from '@vercel/postgres';
+import type { ImageFormat } from '@/lib/social/educational-images';
 
 // Lazy initialization to avoid build-time errors when API key is not available
 let openai: OpenAI | null = null;
@@ -23,6 +24,12 @@ export interface StoredQuote {
   usedAt: Date | null;
   useCount: number;
   createdAt: Date;
+}
+
+export interface QuoteImageOptions {
+  format?: ImageFormat;
+  interpretation?: string;
+  author?: string;
 }
 
 function parseQuoteAndAuthor(fullQuote: string): {
@@ -394,16 +401,38 @@ export async function getQuoteWithInterpretation(
   }
 }
 
-export function getQuoteImageUrl(quote: string, baseUrl: string): string {
-  return `${baseUrl}/api/og/social-quote?text=${encodeURIComponent(quote)}`;
+export function getQuoteImageUrl(
+  quote: string,
+  baseUrl: string,
+  options?: QuoteImageOptions,
+): string {
+  const params = new URLSearchParams({
+    text: quote,
+  });
+
+  if (options?.interpretation) {
+    params.set('interpretation', options.interpretation);
+  }
+  if (options?.author) {
+    params.set('author', options.author);
+  }
+  if (options?.format) {
+    params.set('format', options.format);
+  }
+
+  return `${baseUrl}/api/og/social-quote?${params.toString()}`;
 }
 
 export function getQuoteWithInterpretationImageUrl(
   quote: string,
   interpretation: string,
   baseUrl: string,
+  options?: Omit<QuoteImageOptions, 'interpretation'>,
 ): string {
-  return `${baseUrl}/api/og/social-quote?text=${encodeURIComponent(quote)}&interpretation=${encodeURIComponent(interpretation)}`;
+  return getQuoteImageUrl(quote, baseUrl, {
+    ...options,
+    interpretation,
+  });
 }
 
 export async function getQuotePoolStats(): Promise<{

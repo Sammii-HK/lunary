@@ -940,7 +940,7 @@ Return JSON: {"posts": ["Post content"]}`;
       generateWeeklySabbatPosts,
       getUpcomingSabbats,
     } = await import('@/lib/social/educational-generator');
-    const { getEducationalImageUrl } =
+    const { getEducationalImageUrl, getPlatformImageFormat } =
       await import('@/lib/social/educational-images');
 
     const quoteStatsBefore = await getQuotePoolStats();
@@ -1025,6 +1025,7 @@ Return JSON: {"posts": ["Post content"]}`;
       let imageUrl: string | null = null;
 
       if (platformsNeedingImages.includes(post.platform)) {
+        const platformFormat = getPlatformImageFormat(post.platform);
         // For educational posts, use Grimoire educational images
         if (post.postType === 'educational') {
           try {
@@ -1055,23 +1056,20 @@ Return JSON: {"posts": ["Post content"]}`;
               post.postType,
             );
             if (quoteWithInterp) {
-              if (quoteWithInterp.interpretation) {
-                imageUrl = `${baseUrl}/api/og/social-quote?text=${encodeURIComponent(quoteWithInterp.quote)}&interpretation=${encodeURIComponent(quoteWithInterp.interpretation)}${quoteWithInterp.author ? `&author=${encodeURIComponent(quoteWithInterp.author)}` : ''}`;
-              } else {
-                imageUrl = getQuoteImageUrl(
-                  quoteWithInterp.author
-                    ? `${quoteWithInterp.quote} - ${quoteWithInterp.author}`
-                    : quoteWithInterp.quote,
-                  baseUrl,
-                );
-              }
+              imageUrl = getQuoteImageUrl(quoteWithInterp.quote, baseUrl, {
+                format: platformFormat,
+                interpretation: quoteWithInterp.interpretation || undefined,
+                author: quoteWithInterp.author || undefined,
+              });
             } else {
               // Fallback to simple quote
               const quote = await generateCatchyQuote(
                 post.content,
                 post.postType,
               );
-              imageUrl = quote ? getQuoteImageUrl(quote, baseUrl) : null;
+              imageUrl = quote
+                ? getQuoteImageUrl(quote, baseUrl, { format: platformFormat })
+                : null;
             }
           } catch (error) {
             console.warn(
@@ -1082,7 +1080,9 @@ Return JSON: {"posts": ["Post content"]}`;
               post.content,
               post.postType,
             );
-            imageUrl = quote ? getQuoteImageUrl(quote, baseUrl) : null;
+            imageUrl = quote
+              ? getQuoteImageUrl(quote, baseUrl, { format: platformFormat })
+              : null;
           }
         }
       }
