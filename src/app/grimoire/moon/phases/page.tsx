@@ -1,8 +1,12 @@
 import { Metadata } from 'next';
 import Link from 'next/link';
+import { MoonPhaseIcon } from '@/components/MoonPhaseIcon';
 import { SEOContentTemplate } from '@/components/grimoire/SEOContentTemplate';
 import { createItemListSchema, renderJsonLd } from '@/lib/schema';
-import { monthlyMoonPhases } from '../../../../../utils/moon/monthlyPhases';
+import {
+  monthlyMoonPhases,
+  MonthlyMoonPhaseKey,
+} from '../../../../../utils/moon/monthlyPhases';
 import { stringToKebabCase } from '../../../../../utils/string';
 
 export const metadata: Metadata = {
@@ -138,29 +142,9 @@ export default function MoonPhasesIndexPage() {
               'Moon phases are the different appearances of the moon as seen from Earth during its 29.5-day orbital cycle. As the moon orbits Earth, the angle between the Sun, Earth, and Moon changes, creating 8 distinct phases from New Moon to Full Moon and back. Each phase carries unique energetic qualities that practitioners use to time their magical and spiritual work.',
           }}
           tldr='New Moon: new beginnings. Waxing phases: growth and building. Full Moon: peak energy and manifestation. Waning phases: release and banishing. Work with the lunar cycle to align your magic with cosmic rhythms.'
-          meaning={`The lunar cycle has been observed and utilized by humans for thousands of years. Every culture has recognized the moon's influence on tides, agriculture, fertility, and human behavior.
+          meaning={`The lunar cycle has been observed and utilized by humans for thousands of years. Every 29.5-day orbit brings eight distinct phases—New Moon, Waxing Crescent, First Quarter, Waxing Gibbous, Full Moon, Waning Gibbous, Last Quarter, and Waning Crescent—each carrying its own tone for intention, action, celebration, release, and rest.
 
-**The 8 Moon Phases:**
-
-**New Moon (🌑)**: Complete darkness. Time for new beginnings, setting intentions, introspection, and rest. Plant seeds for what you want to grow.
-
-**Waxing Crescent (🌒)**: First sliver of light. Time to set intentions into motion, gather resources, and plan. Energy begins building.
-
-**First Quarter (🌓)**: Half-illuminated, growing. Time for decisive action, overcoming obstacles, and commitment. Face challenges head-on.
-
-**Waxing Gibbous (🌔)**: Nearly full. Time to refine, adjust, and prepare for manifestation. Build anticipation and gratitude.
-
-**Full Moon (🌕)**: Complete illumination. Peak energy for manifestation, celebration, divination, and charging tools. Everything is heightened.
-
-**Waning Gibbous (🌖)**: Just past full. Time to share, teach, and give thanks. Begin introspection about what to release.
-
-**Last Quarter (🌗)**: Half-illuminated, decreasing. Time for release, forgiveness, and clearing. Let go of what no longer serves.
-
-**Waning Crescent (🌘)**: Final sliver. Time for rest, surrender, and preparation for the new cycle. Deep introspection and healing.
-
-**Working with Lunar Energy:**
-
-The key principle is simple: as the moon grows (waxing), work on growing things. As the moon shrinks (waning), work on releasing things. The New and Full Moons are powerful turning points.`}
+As the moon waxes, lean into building, attracting, and grateful manifestation work. As it wanes, focus on releasing, clearing, and resting. These cards and the sections below help you map the lunar rhythm and plan rituals, spells, and self-care in sync with each moment of the cycle.`}
           howToWorkWith={[
             'Track the current moon phase using a lunar calendar or app',
             'Set intentions at the New Moon for what you want to manifest',
@@ -233,7 +217,12 @@ The key principle is simple: as the moon grows (waxing), work on growing things.
                   className='group rounded-xl border border-zinc-800 bg-zinc-900/30 p-5 hover:bg-zinc-900/50 hover:border-zinc-600 transition-all'
                 >
                   <div className='flex items-center gap-4 mb-3'>
-                    <span className='text-3xl'>{phase.symbol}</span>
+                    <div className='w-16 h-16 rounded-2xl bg-zinc-950/60 flex items-center justify-center'>
+                      <MoonPhaseIcon
+                        phase={key as MonthlyMoonPhaseKey}
+                        size={44}
+                      />
+                    </div>
                     <h3 className='text-lg font-medium text-zinc-100 group-hover:text-zinc-200 transition-colors'>
                       {phaseDisplayNames[key]}
                     </h3>

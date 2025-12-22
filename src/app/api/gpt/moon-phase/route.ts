@@ -160,7 +160,7 @@ export async function GET(request: NextRequest) {
           : moonPhase.name === 'New Moon'
             ? 'Ideal for intention setting and new beginnings ritual'
             : `${moonPhase.name} supports ${guidance.bestFor[0].toLowerCase()}`,
-      ctaUrl: `https://lunary.app/moon?from=gpt_moon_phase`,
+      ctaUrl: `https://lunary.app/moon-calendar?from=gpt_moon_phase`,
       ctaText: 'Track moon phases with Lunary',
       source: 'Lunary.app - Real-time moon phase calculations',
     };

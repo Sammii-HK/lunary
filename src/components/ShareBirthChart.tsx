@@ -4,6 +4,7 @@ import { useState, useCallback } from 'react';
 import Image from 'next/image';
 import { Share2, X, Download, Copy, Check, Loader2, Link2 } from 'lucide-react';
 import { BirthChartData } from '../../utils/astrology/birthChart';
+import { bodiesSymbols } from '@/constants/symbols';
 
 interface ShareBirthChartProps {
   birthChart: BirthChartData[];
@@ -112,6 +113,27 @@ export function ShareBirthChart({
   const dominantModality = getModalityCounts(birthChart);
   const insight = getChartInsight(birthChart);
 
+  const placementsForOg = birthChart.map((p) => ({
+    body: p.body,
+    sign: p.sign,
+    degree: p.degree,
+    minute: p.minute,
+    eclipticLongitude: p.eclipticLongitude,
+    retrograde: p.retrograde,
+    house: p.house,
+  }));
+
+  const placementsParam = JSON.stringify(placementsForOg);
+
+  // const housesForOg = birthChart.map((p) => ({
+  //   body: p.body,
+  //   eclipticLongitude: p.eclipticLongitude,
+  //   retrograde: !!p.retrograde,
+  //   sign: p.sign, // optional, but fine
+  // }));
+
+  // const housesParam = encodeURIComponent(JSON.stringify(housesForOg));
+
   const shareUrl = (() => {
     if (typeof window === 'undefined') return '';
     const url = new URL('/share/birth-chart', window.location.origin);
@@ -139,6 +161,8 @@ export function ShareBirthChart({
         element: dominantElement,
         modality: dominantModality,
         insight: insight.substring(0, 160),
+        placements: placementsParam,
+        // houses: housesParam,
       });
 
       const ogImageUrl = `/api/og/share/birth-chart?${ogParams.toString()}`;
@@ -162,6 +186,7 @@ export function ShareBirthChart({
     dominantElement,
     dominantModality,
     insight,
+    placementsParam,
   ]);
 
   const handleOpen = async () => {
@@ -183,7 +208,7 @@ export function ShareBirthChart({
         await navigator.share({
           files: [file],
           title: `${firstName ? `${firstName}'s` : 'My'} Birth Chart`,
-          text: `☀️ ${sun?.sign} Sun · 🌙 ${moon?.sign} Moon · ⬆️ ${rising?.sign} Rising`,
+          text: `${bodiesSymbols.sun} ${sun?.sign} Sun · ${bodiesSymbols.moon} ${moon?.sign} Moon · ${bodiesSymbols.ascendant} ${rising?.sign} Rising`,
         });
       } catch (err) {
         if ((err as Error).name !== 'AbortError') {
@@ -224,7 +249,7 @@ export function ShareBirthChart({
     typeof navigator.canShare === 'function';
 
   return (
-    <>
+    <div className='flex flex-col items-center justify-center'>
       <button
         onClick={handleOpen}
         className='inline-flex items-center gap-2 rounded-full border border-lunary-primary-700 bg-lunary-primary-900/10 px-4 py-2 text-xs font-medium text-lunary-primary-200 hover:text-lunary-primary-100 hover:bg-lunary-primary-900/20 transition-colors'
@@ -235,7 +260,7 @@ export function ShareBirthChart({
 
       {isOpen && (
         <div className='fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 z-50'>
-          <div className='bg-zinc-900 border border-zinc-700 rounded-xl max-w-lg w-full max-h-[90vh] overflow-y-auto relative'>
+          <div className='flex flex-col bg-zinc-900 border border-zinc-700 rounded-xl max-w-lg w-full max-h-[90vh] overflow-y-auto relative'>
             <button
               onClick={() => setIsOpen(false)}
               className='absolute top-4 right-4 text-zinc-400 hover:text-white transition-colors z-10'
@@ -243,7 +268,7 @@ export function ShareBirthChart({
               <X className='w-5 h-5' />
             </button>
 
-            <div className='p-6'>
+            <div className='flex flex-col p-6'>
               <h2 className='text-lg font-medium text-white mb-4'>
                 Share Your Birth Chart
               </h2>
@@ -258,7 +283,7 @@ export function ShareBirthChart({
               )}
 
               {error && (
-                <div className='text-center py-8'>
+                <div className='flex flex-col text-center py-8'>
                   <p className='text-red-400 mb-4'>{error}</p>
                   <button
                     onClick={generateCard}
@@ -271,7 +296,7 @@ export function ShareBirthChart({
 
               {!loading && !error && imageBlob && (
                 <>
-                  <div className='mb-6 rounded-lg overflow-hidden border border-zinc-700'>
+                  <div className='flex flex-col mb-6 rounded-lg overflow-hidden border border-zinc-700'>
                     <Image
                       src={URL.createObjectURL(imageBlob)}
                       alt='Your Birth Chart'
@@ -282,13 +307,13 @@ export function ShareBirthChart({
                     />
                   </div>
 
-                  <div className='space-y-3'>
+                  <div className='flex flex-col space-y-3'>
                     {/* Share as Image */}
-                    <div className='space-y-2'>
+                    <div className='flex flex-col space-y-2'>
                       <p className='text-xs text-zinc-400 uppercase tracking-wider'>
                         Share as Image
                       </p>
-                      <div className='flex gap-2'>
+                      <div className='flex flex-col gap-2'>
                         {canNativeShare && (
                           <button
                             onClick={handleShare}
@@ -309,7 +334,7 @@ export function ShareBirthChart({
                     </div>
 
                     {/* Share Link */}
-                    <div className='space-y-2'>
+                    <div className='flex flex-col space-y-2'>
                       <p className='text-xs text-zinc-400 uppercase tracking-wider'>
                         Share as Link
                       </p>
@@ -336,7 +361,7 @@ export function ShareBirthChart({
                     </div>
 
                     {/* Social Share */}
-                    <div className='flex gap-3 pt-2'>
+                    <div className='flex flex-col gap-3 pt-2'>
                       <a
                         href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(`Check out my birth chart! ☀️ ${sun?.sign} Sun · 🌙 ${moon?.sign} Moon · ⬆️ ${rising?.sign} Rising`)}&url=${encodeURIComponent(shareUrl)}`}
                         target='_blank'
@@ -396,6 +421,6 @@ export function ShareBirthChart({
           </div>
         </div>
       )}
-    </>
+    </div>
   );
 }

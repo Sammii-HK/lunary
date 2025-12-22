@@ -12,6 +12,8 @@ import { Breadcrumbs } from '@/components/grimoire/Breadcrumbs';
 import { CosmicConnections } from '@/components/grimoire/CosmicConnections';
 import { CosmicConnectionSection } from '@/lib/cosmicConnectionsConfig';
 import { Button } from '@/components/ui/button';
+import { MoonPhaseIcon } from '@/components/MoonPhaseIcon';
+import { MonthlyMoonPhaseKey } from '../../../../../utils/moon/monthlyPhases';
 
 export const metadata: Metadata = {
   title: 'Moon Rituals: Complete Guide to Lunar Magic - Lunary',
@@ -331,8 +333,13 @@ export default function MoonRitualsPage() {
         </h2>
 
         <div className='bg-zinc-900/50 border border-zinc-800 rounded-xl p-6 mb-6'>
-          <div className='flex items-center gap-3 mb-4'>
-            <span className='text-3xl'>🌑</span>
+          <div className='flex items-center gap-4 mb-4'>
+            <div className='w-12 h-12 rounded-2xl bg-zinc-950/60 flex items-center justify-center'>
+              <MoonPhaseIcon
+                phase={'newMoon' as MonthlyMoonPhaseKey}
+                size={40}
+              />
+            </div>
             <div>
               <h3 className='text-xl font-medium text-zinc-100'>
                 New Moon Energy
@@ -646,7 +653,7 @@ export default function MoonRitualsPage() {
         </p>
         <div className='flex flex-col sm:flex-row gap-4 justify-center'>
           <Button asChild variant='lunary-solid' size='lg'>
-            <Link href='/moon'>Today&apos;s Moon Phase</Link>
+            <Link href='/app'>Today&apos;s Moon Phase</Link>
           </Button>
           <Button asChild variant='outline' size='lg'>
             <Link href='/grimoire/guides/moon-phases-guide'>

@@ -57,7 +57,7 @@ function extractLinks(filePath: string, content: string): LinkInfo[] {
       let match;
       while ((match = pattern.exec(line)) !== null) {
         const url = match[1];
-        if (url.startsWith(GRIMOIRE_BASE)) {
+        if (url.startsWith(GRIMOIRE_BASE) && !url.includes('${')) {
           links.push({
             url,
             file: filePath,

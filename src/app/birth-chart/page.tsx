@@ -1095,9 +1095,10 @@ const BirthChartPage = () => {
             </h1>
             <div className='bg-gradient-to-r from-lunary-primary-900/30 to-lunary-rose-900/30 rounded-lg p-6 border border-lunary-primary-700 mb-6'>
               <p className='text-zinc-300 mb-4'>
-                Unlock your complete cosmic blueprint with a detailed birth
-                chart analysis. Discover your planetary positions, aspects, and
-                the deeper meaning behind your astrological profile.
+                Sign up for a free account and unlock your complete cosmic
+                blueprint with a detailed birth chart analysis. Discover your
+                planetary positions, aspects, and the deeper meaning behind your
+                astrological profile.
               </p>
               <ul className='text-sm text-zinc-400 space-y-2 mb-6 text-left'>
                 <li>✨ Complete planetary positions at your birth</li>
@@ -1106,7 +1107,7 @@ const BirthChartPage = () => {
                 <li>🎯 Personality insights and guidance</li>
               </ul>
             </div>
-            <SmartTrialButton size='lg' />
+            <SmartTrialButton feature='birth_chart' size='lg' />
           </div>
         </div>
         <UpgradePrompt
@@ -1129,7 +1130,7 @@ const BirthChartPage = () => {
           </h1>
           <p className='text-zinc-300 mb-6'>
             To generate your personalized birth chart, you need to provide your
-            birthday in your profile.
+            birthday on your profile.
           </p>
           <Link
             href='/profile'
@@ -1174,7 +1175,7 @@ const BirthChartPage = () => {
           <p className='text-sm text-zinc-400 mb-3'>
             Learn more about your cosmic blueprint:
           </p>
-          <div className='flex flex-wrap gap-2'>
+          <div className='flex flex-wrap gap-3'>
             <Link
               href='/grimoire/birth-chart'
               className='text-xs px-3 py-1.5 bg-lunary-primary-900/30 text-lunary-primary-300 border border-lunary-primary-700/50 rounded-full hover:bg-lunary-primary-900/50 transition-colors'
@@ -1199,6 +1200,15 @@ const BirthChartPage = () => {
             >
               Zodiac Signs
             </Link>
+            {birthChartData && (
+              <div className='flex flex-col items-center gap-3'>
+                <ShareBirthChart
+                  birthChart={birthChartData}
+                  userName={userName}
+                  userBirthday={userBirthday}
+                />
+              </div>
+            )}
           </div>
         </nav>
 

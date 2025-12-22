@@ -281,6 +281,49 @@ export const correspondencesData = {
       affirmation:
         "I am grounded in Earth's abundance, stable and secure as I manifest my dreams into reality.",
     },
+    Spirit: {
+      colors: ['White', 'Violet', 'Silver', 'Gold'],
+      crystals: ['Clear Quartz', 'Selenite', 'Amethyst', 'Labradorite'],
+      herbs: ['Frankincense', 'Myrrh', 'Mugwort', 'White Sage'],
+      planets: ['Neptune', 'Pluto'],
+      days: ['Saturday', 'Sunday'],
+      zodiacSigns: ['Pisces', 'Sagittarius', 'Aquarius'],
+      numbers: [0, 7, 22],
+      animals: ['Owl', 'Raven', 'Phoenix'],
+      directions: 'Center',
+      seasons: 'All Seasons',
+      timeOfDay: 'Twilight',
+      description:
+        'Spirit, or Akasha, is the unifying element that connects every other force. It governs divine inspiration, the void of creative potential, and the spark of consciousness that animates spellwork.',
+      qualities: [
+        'Transcendent',
+        'Intuitive',
+        'Visionary',
+        'Connected',
+        'Illuminating',
+        'Timeless',
+        'Mystical',
+        'Sacred',
+      ],
+      magicalUses: [
+        'Connecting with ancestors and guides',
+        'Dreamwork and intuition boosting',
+        'Visioning and channeling rituals',
+        'Creating sacred space before ceremonies',
+        'Shadow work and integration',
+        'Amplifying clarity and divine guidance',
+        'Spirit-led creativity',
+        'Ritual communication with higher selves',
+      ],
+      rituals: [
+        'Akashic journaling under moonlight',
+        'Incense offerings of frankincense and myrrh',
+        'Opening and closing sacred space with bells or chanting',
+        'Meditation with clear quartz and selenite',
+      ],
+      affirmation:
+        'I surrender to the wisdom of Spirit, allowing divine guidance to weave through every aspect of my practice.',
+    },
   },
   colors: {
     Red: {

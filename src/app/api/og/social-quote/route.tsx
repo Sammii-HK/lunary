@@ -18,12 +18,36 @@ async function loadRobotoFont(request: Request) {
   return robotoFontP;
 }
 
+type Format = 'square' | 'landscape' | 'portrait' | 'story';
+
+const FORMAT_SIZES: Record<Format, { width: number; height: number }> = {
+  square: { width: 1080, height: 1080 },
+  landscape: { width: 1200, height: 630 },
+  portrait: { width: 1080, height: 1350 },
+  story: { width: 1080, height: 1920 },
+};
+
+const DEFAULT_FORMAT: Format = 'square';
+
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
     const text =
       searchParams.get('text') || 'Your personalized cosmic guidance';
     const interpretation = searchParams.get('interpretation') || null;
+    const rawFormat = (
+      searchParams.get('format') || DEFAULT_FORMAT
+    ).toLowerCase();
+    const allowedFormats: Format[] = [
+      'square',
+      'landscape',
+      'portrait',
+      'story',
+    ];
+    const format = allowedFormats.includes(rawFormat as Format)
+      ? (rawFormat as Format)
+      : DEFAULT_FORMAT;
+    const { width, height } = FORMAT_SIZES[format];
     // Extract author from quote if it contains attribution (e.g., "quote text" - Author Name)
     let author = searchParams.get('author') || 'Lunary';
     let quoteText = text;
@@ -65,7 +89,7 @@ export async function GET(request: NextRequest) {
       ) % gradients.length;
     const background = gradients[gradientIndex];
 
-    // Instagram square format (1080x1080 is optimal)
+    // Render the quote in the requested format (square by default)
     return new ImageResponse(
       <div
         style={{
@@ -76,7 +100,12 @@ export async function GET(request: NextRequest) {
           alignItems: 'center',
           justifyContent: 'center',
           background,
-          padding: '80px',
+          padding:
+            format === 'landscape'
+              ? '60px 120px'
+              : format === 'story'
+                ? '60px 80px'
+                : '80px',
           fontFamily: fontData ? 'Roboto Mono' : 'system-ui',
           position: 'relative',
         }}
@@ -89,12 +118,12 @@ export async function GET(request: NextRequest) {
             justifyContent: 'center',
             textAlign: 'center',
             color: 'white',
-            maxWidth: '900px',
+            maxWidth: format === 'story' ? '760px' : '900px',
           }}
         >
           <div
             style={{
-              fontSize: 48,
+              fontSize: format === 'story' ? 56 : 48,
               fontWeight: 600,
               lineHeight: 1.3,
               marginBottom: '40px',
@@ -106,7 +135,7 @@ export async function GET(request: NextRequest) {
           </div>
           <div
             style={{
-              fontSize: 36,
+              fontSize: format === 'story' ? 38 : 36,
               color: '#a78bfa',
               opacity: 0.9,
               marginTop: '20px',
@@ -118,13 +147,13 @@ export async function GET(request: NextRequest) {
           {interpretation && (
             <div
               style={{
-                fontSize: 28,
+                fontSize: format === 'story' ? 32 : 28,
                 fontWeight: 400,
                 lineHeight: 1.4,
                 marginTop: '50px',
                 color: '#c4b5fd',
                 opacity: 0.85,
-                maxWidth: '850px',
+                maxWidth: format === 'story' ? '680px' : '850px',
                 display: 'flex',
                 textAlign: 'center',
               }}
@@ -146,8 +175,8 @@ export async function GET(request: NextRequest) {
         </div>
       </div>,
       {
-        width: 1080,
-        height: 1080,
+        width,
+        height,
         fonts: fontData
           ? [
               {

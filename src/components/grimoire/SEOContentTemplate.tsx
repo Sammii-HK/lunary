@@ -111,6 +111,9 @@ export interface SEOContentTemplateProps {
   entityId?: string;
   entityName?: string;
 
+  // Hero slot (e.g., moon phase preview)
+  heroContent?: React.ReactNode;
+
   // Children (for custom content)
   children?: React.ReactNode;
 }
@@ -154,6 +157,7 @@ export function SEOContentTemplate({
   sources,
   entityId,
   entityName,
+  heroContent,
   children,
 }: SEOContentTemplateProps) {
   // Auto-generate breadcrumbs from URL if not provided
@@ -232,6 +236,7 @@ export function SEOContentTemplate({
 
       {/* Breadcrumbs - auto-generated from URL if not provided */}
       {autoBreadcrumbs.length > 0 && <Breadcrumbs items={autoBreadcrumbs} />}
+      {heroContent && <div className='mb-8'>{heroContent}</div>}
 
       {/* H1 */}
       <header className='mb-8'>

@@ -351,7 +351,7 @@ export default function MoonPhasesGuidePage() {
         </p>
         <div className='flex flex-wrap gap-4'>
           <Button asChild variant='lunary-solid' size='lg'>
-            <Link href='/moon'>Today&apos;s Moon Phase</Link>
+            <Link href='/app'>Today&apos;s Moon Phase</Link>
           </Button>
           <Button asChild variant='outline' size='lg'>
             <Link href='#eight-phases'>Explore the Phases</Link>
@@ -1017,7 +1017,7 @@ export default function MoonPhasesGuidePage() {
         </p>
         <div className='flex flex-col sm:flex-row gap-4 justify-center'>
           <Link
-            href='/moon'
+            href='/grimoire/moon'
             className='px-8 py-3 bg-lunary-primary-600 hover:bg-lunary-primary-700 text-white rounded-lg font-medium transition-colors'
           >
             Today&apos;s Moon Phase

@@ -332,7 +332,7 @@ export default function ManifestationPage() {
 
         <div className='mt-4'>
           <Link
-            href='/moon'
+            href='/grimoire/moon'
             className='text-lunary-primary-400 hover:text-lunary-primary-300'
           >
             Check current moon phase →
@@ -467,7 +467,7 @@ export default function ManifestationPage() {
         </p>
         <div className='flex flex-wrap gap-4 justify-center'>
           <Link
-            href='/moon'
+            href='/grimoire/moon'
             className='px-6 py-3 bg-lunary-primary-600 hover:bg-lunary-primary-700 text-white rounded-lg font-medium transition-colors'
           >
             Today&apos;s Moon Phase

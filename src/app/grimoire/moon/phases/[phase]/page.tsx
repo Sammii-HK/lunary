@@ -1,8 +1,12 @@
 import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
+import { MoonPhaseHero } from '@/components/MoonPhaseHero';
 import { SEOContentTemplate } from '@/components/grimoire/SEOContentTemplate';
 import { CosmicConnections } from '@/components/grimoire/CosmicConnections';
-import { monthlyMoonPhases } from '../../../../../../utils/moon/monthlyPhases';
+import {
+  monthlyMoonPhases,
+  MonthlyMoonPhaseKey,
+} from '../../../../../../utils/moon/monthlyPhases';
 import { stringToKebabCase } from '../../../../../../utils/string';
 import { createCosmicEntitySchema, renderJsonLd } from '@/lib/schema';
 
@@ -210,6 +214,15 @@ export default async function MoonPhasePage({
     ],
   });
 
+  const heroContent = (
+    <MoonPhaseHero
+      phaseKey={phaseKey as MonthlyMoonPhaseKey}
+      displayName={displayName}
+      phaseName={phaseName}
+      keywords={phaseData.keywords}
+    />
+  );
+
   return (
     <div className='p-4 md:p-6 lg:p-8 xl:p-10 min-h-full'>
       {renderJsonLd(moonPhaseSchema)}
@@ -224,16 +237,20 @@ export default async function MoonPhasePage({
           `${phaseName} rituals`,
         ]}
         canonicalUrl={`https://lunary.app/grimoire/moon/phases/${phase}`}
-        intro={`The ${phaseName} Moon, represented by ${phaseData.symbol}, is a key phase in the lunar cycle. ${phaseData.information}`}
-        tldr={`The ${phaseName} Moon (${phaseData.symbol}) represents ${phaseData.keywords.join(', ').toLowerCase()}.`}
+        heroContent={heroContent}
+        intro={`The ${phaseName} Moon is a key phase in the lunar cycle. ${phaseData.information}`}
+        tldr={`The ${phaseName} Moon represents ${phaseData.keywords
+          .join(', ')
+          .toLowerCase()}.`}
         meaning={`The ${phaseName} Moon is one of the eight phases in the lunar cycle, each representing different energies and opportunities for magical and spiritual work.
 
 ${phaseData.information}
 
 The lunar cycle moves through these phases approximately every 29.5 days, creating a rhythm that influences our emotions, energy levels, and spiritual practices. Understanding the ${phaseName} Moon helps you align your activities and intentions with the natural lunar rhythm.
 
-During the ${phaseName} Moon, the energy is focused on ${phaseData.keywords.join(', ').toLowerCase()}. This makes it an ideal time for specific types of work, whether that's setting intentions, taking action, celebrating achievements, or releasing what no longer serves.`}
-        glyphs={[phaseData.symbol]}
+During the ${phaseName} Moon, the energy is focused on ${phaseData.keywords
+          .join(', ')
+          .toLowerCase()}. This makes it an ideal time for specific types of work, whether that's setting intentions, taking action, celebrating achievements, or releasing what no longer serves.`}
         emotionalThemes={phaseData.keywords}
         howToWorkWith={[
           `Align your activities with ${phaseName} energy`,

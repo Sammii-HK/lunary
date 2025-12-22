@@ -101,7 +101,18 @@ const elementIcons: Record<string, React.ReactNode> = {
 };
 
 export default function ElementsIndexPage() {
-  const elements = Object.entries(correspondencesData.elements);
+  const classicalElementKeys = ['Fire', 'Water', 'Air', 'Earth'] as const;
+  type ClassicalElementKey = (typeof classicalElementKeys)[number];
+  const elements = classicalElementKeys
+    .map((key) => [key, correspondencesData.elements[key]] as const)
+    .filter(
+      (
+        entry,
+      ): entry is readonly [
+        ClassicalElementKey,
+        NonNullable<(typeof correspondencesData.elements)[ClassicalElementKey]>,
+      ] => Boolean(entry[1]),
+    );
 
   return (
     <div className='p-4 md:p-6 lg:p-8 xl:p-10 min-h-full'>
