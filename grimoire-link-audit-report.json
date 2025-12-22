@@ -1,45 +1,9 @@
 {
   "links": [
     {
-      "url": "/grimoire/zodiac/${sign}",
-      "file": "/Users/sammii/development/lunary/src/app/(authenticated)/horoscope/today/[sign]/page.tsx",
-      "line": 211,
-      "context": "href={`/grimoire/zodiac/${sign}`}"
-    },
-    {
-      "url": "/grimoire/zodiac/${sign}",
-      "file": "/Users/sammii/development/lunary/src/app/(authenticated)/horoscope/today/[sign]/page.tsx",
-      "line": 211,
-      "context": "href={`/grimoire/zodiac/${sign}`}"
-    },
-    {
-      "url": "/grimoire/zodiac/${sign}",
-      "file": "/Users/sammii/development/lunary/src/app/(authenticated)/horoscope/weekly/[sign]/page.tsx",
-      "line": 221,
-      "context": "href={`/grimoire/zodiac/${sign}`}"
-    },
-    {
-      "url": "/grimoire/zodiac/${sign}",
-      "file": "/Users/sammii/development/lunary/src/app/(authenticated)/horoscope/weekly/[sign]/page.tsx",
-      "line": 221,
-      "context": "href={`/grimoire/zodiac/${sign}`}"
-    },
-    {
-      "url": "/grimoire/life-path/${lifePathNumber}",
-      "file": "/Users/sammii/development/lunary/src/app/(authenticated)/profile/page.tsx",
-      "line": 712,
-      "context": "href={`/grimoire/life-path/${lifePathNumber}`}"
-    },
-    {
-      "url": "/grimoire/life-path/${lifePathNumber}",
-      "file": "/Users/sammii/development/lunary/src/app/(authenticated)/profile/page.tsx",
-      "line": 712,
-      "context": "href={`/grimoire/life-path/${lifePathNumber}`}"
-    },
-    {
       "url": "/grimoire/moon",
       "file": "/Users/sammii/development/lunary/src/app/(authenticated)/tarot/page.tsx",
-      "line": 1317,
+      "line": 1304,
       "context": "href='/grimoire/moon'"
     },
     {
@@ -109,18 +73,6 @@
       "context": "{ name: 'Astrological Houses', url: '/grimoire/houses' },"
     },
     {
-      "url": "/grimoire/houses/overview/${house.number}",
-      "file": "/Users/sammii/development/lunary/src/app/birth-chart/example/page.tsx",
-      "line": 229,
-      "context": "href={`/grimoire/houses/overview/${house.number}`}"
-    },
-    {
-      "url": "/grimoire/houses/overview/${house.number}",
-      "file": "/Users/sammii/development/lunary/src/app/birth-chart/example/page.tsx",
-      "line": 229,
-      "context": "href={`/grimoire/houses/overview/${house.number}`}"
-    },
-    {
       "url": "/grimoire/zodiac",
       "file": "/Users/sammii/development/lunary/src/app/birth-chart/example/page.tsx",
       "line": 252,
@@ -147,25 +99,25 @@
     {
       "url": "/grimoire/birth-chart",
       "file": "/Users/sammii/development/lunary/src/app/birth-chart/page.tsx",
-      "line": 1179,
+      "line": 1180,
       "context": "href='/grimoire/birth-chart'"
     },
     {
       "url": "/grimoire/astronomy/planets",
       "file": "/Users/sammii/development/lunary/src/app/birth-chart/page.tsx",
-      "line": 1185,
+      "line": 1186,
       "context": "href='/grimoire/astronomy/planets'"
     },
     {
       "url": "/grimoire/houses/overview/first",
       "file": "/Users/sammii/development/lunary/src/app/birth-chart/page.tsx",
-      "line": 1191,
+      "line": 1192,
       "context": "href='/grimoire/houses/overview/first'"
     },
     {
       "url": "/grimoire/zodiac",
       "file": "/Users/sammii/development/lunary/src/app/birth-chart/page.tsx",
-      "line": 1197,
+      "line": 1198,
       "context": "href='/grimoire/zodiac'"
     },
     {
@@ -227,18 +179,6 @@
       "file": "/Users/sammii/development/lunary/src/app/comparison/best-personalized-astrology-apps/page.tsx",
       "line": 561,
       "context": "href='/grimoire/zodiac'"
-    },
-    {
-      "url": "/grimoire/${slug}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/GrimoireLayout.tsx",
-      "line": 954,
-      "context": "const href = `/grimoire/${slug}`;"
-    },
-    {
-      "url": "/grimoire/${section}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/[section]/page.tsx",
-      "line": 303,
-      "context": "{ name: sectionData?.title || section, url: `/grimoire/${section}` },"
     },
     {
       "url": "/grimoire/zodiac/aquarius",
@@ -607,94 +547,10 @@
       "context": "href='/grimoire/beginners'"
     },
     {
-      "url": "/grimoire/angel-numbers/${number}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/angel-numbers/[number]/page.tsx",
-      "line": 38,
-      "context": "url: `/grimoire/angel-numbers/${number}`,"
-    },
-    {
-      "url": "/grimoire/angel-numbers/${number}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/angel-numbers/[number]/page.tsx",
-      "line": 83,
-      "context": "url: `/grimoire/angel-numbers/${number}`,"
-    },
-    {
-      "url": "/grimoire/angel-numbers/${num}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/angel-numbers/page.tsx",
-      "line": 212,
-      "context": "href={`/grimoire/angel-numbers/${num}`}"
-    },
-    {
-      "url": "/grimoire/angel-numbers/${num}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/angel-numbers/page.tsx",
-      "line": 212,
-      "context": "href={`/grimoire/angel-numbers/${num}`}"
-    },
-    {
-      "url": "/grimoire/angel-numbers/${num}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/angel-numbers/page.tsx",
-      "line": 242,
-      "context": "href={`/grimoire/angel-numbers/${num}`}"
-    },
-    {
-      "url": "/grimoire/angel-numbers/${num}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/angel-numbers/page.tsx",
-      "line": 242,
-      "context": "href={`/grimoire/angel-numbers/${num}`}"
-    },
-    {
-      "url": "/grimoire/aspects/${planet1}/${a}/${planet2}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/aspects/[planet1]/[aspect]/[planet2]/page.tsx",
-      "line": 177,
-      "context": "href={`/grimoire/aspects/${planet1}/${a}/${planet2}`}"
-    },
-    {
-      "url": "/grimoire/aspects/${planet1}/${a}/${planet2}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/aspects/[planet1]/[aspect]/[planet2]/page.tsx",
-      "line": 177,
-      "context": "href={`/grimoire/aspects/${planet1}/${a}/${planet2}`}"
-    },
-    {
       "url": "/grimoire/aspects",
       "file": "/Users/sammii/development/lunary/src/app/grimoire/aspects/[planet1]/[aspect]/page.tsx",
       "line": 106,
       "context": "{ name: 'Aspects', url: '/grimoire/aspects' },"
-    },
-    {
-      "url": "/grimoire/aspects/${planet1}/${aspect}/${planet2}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/aspects/[planet1]/[aspect]/page.tsx",
-      "line": 137,
-      "context": "href={`/grimoire/aspects/${planet1}/${aspect}/${planet2}`}"
-    },
-    {
-      "url": "/grimoire/aspects/${planet1}/${aspect}/${planet2}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/aspects/[planet1]/[aspect]/page.tsx",
-      "line": 137,
-      "context": "href={`/grimoire/aspects/${planet1}/${aspect}/${planet2}`}"
-    },
-    {
-      "url": "/grimoire/aspects/${planet1}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/aspects/[planet1]/[aspect]/page.tsx",
-      "line": 163,
-      "context": "href={`/grimoire/aspects/${planet1}`}"
-    },
-    {
-      "url": "/grimoire/aspects/${planet1}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/aspects/[planet1]/[aspect]/page.tsx",
-      "line": 163,
-      "context": "href={`/grimoire/aspects/${planet1}`}"
-    },
-    {
-      "url": "/grimoire/aspects/types/${aspect}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/aspects/[planet1]/[aspect]/page.tsx",
-      "line": 169,
-      "context": "href={`/grimoire/aspects/types/${aspect}`}"
-    },
-    {
-      "url": "/grimoire/aspects/types/${aspect}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/aspects/[planet1]/[aspect]/page.tsx",
-      "line": 169,
-      "context": "href={`/grimoire/aspects/types/${aspect}`}"
     },
     {
       "url": "/grimoire/aspects",
@@ -707,18 +563,6 @@
       "file": "/Users/sammii/development/lunary/src/app/grimoire/aspects/[planet1]/page.tsx",
       "line": 77,
       "context": "{ name: 'Aspects', url: '/grimoire/aspects' },"
-    },
-    {
-      "url": "/grimoire/aspects/${planet1}/${aspect}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/aspects/[planet1]/page.tsx",
-      "line": 116,
-      "context": "href={`/grimoire/aspects/${planet1}/${aspect}`}"
-    },
-    {
-      "url": "/grimoire/aspects/${planet1}/${aspect}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/aspects/[planet1]/page.tsx",
-      "line": 116,
-      "context": "href={`/grimoire/aspects/${planet1}/${aspect}`}"
     },
     {
       "url": "/grimoire/aspects",
@@ -745,24 +589,6 @@
       "context": "{ name: 'Aspects', url: '/grimoire/aspects' },"
     },
     {
-      "url": "/grimoire/aspects/${planet}/conjunct/${PLANETS.find((p) => p !== planet) || 'moon'}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/aspects/page.tsx",
-      "line": 139,
-      "context": "href={`/grimoire/aspects/${planet}/conjunct/${PLANETS.find((p) => p !== planet) || 'moon'}`}"
-    },
-    {
-      "url": "/grimoire/aspects/${planet}/conjunct/${PLANETS.find((p) => p !== planet) || 'moon'}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/aspects/page.tsx",
-      "line": 139,
-      "context": "href={`/grimoire/aspects/${planet}/conjunct/${PLANETS.find((p) => p !== planet) || 'moon'}`}"
-    },
-    {
-      "url": "/grimoire/aspects/types/${aspect}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/aspects/types/[aspect]/page.tsx",
-      "line": 126,
-      "context": "url: `/grimoire/aspects/types/${aspect}`,"
-    },
-    {
       "url": "/grimoire/aspects",
       "file": "/Users/sammii/development/lunary/src/app/grimoire/aspects/types/page.tsx",
       "line": 85,
@@ -773,18 +599,6 @@
       "file": "/Users/sammii/development/lunary/src/app/grimoire/aspects/types/page.tsx",
       "line": 86,
       "context": "{ name: 'Types', url: '/grimoire/aspects/types' },"
-    },
-    {
-      "url": "/grimoire/aspects/types/${aspect.slug}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/aspects/types/page.tsx",
-      "line": 124,
-      "context": "href={`/grimoire/aspects/types/${aspect.slug}`}"
-    },
-    {
-      "url": "/grimoire/aspects/types/${aspect.slug}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/aspects/types/page.tsx",
-      "line": 124,
-      "context": "href={`/grimoire/aspects/types/${aspect.slug}`}"
     },
     {
       "url": "/grimoire/aspects",
@@ -805,24 +619,6 @@
       "context": "href='/grimoire/houses'"
     },
     {
-      "url": "/grimoire/astronomy/planets/${planet}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/astronomy/planets/page.tsx",
-      "line": 119,
-      "context": "href={`/grimoire/astronomy/planets/${planet}`}"
-    },
-    {
-      "url": "/grimoire/astronomy/planets/${planet}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/astronomy/planets/page.tsx",
-      "line": 119,
-      "context": "href={`/grimoire/astronomy/planets/${planet}`}"
-    },
-    {
-      "url": "/grimoire/astronomy/retrogrades/${planet}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/astronomy/retrogrades/[planet]/page.tsx",
-      "line": 117,
-      "context": "url: `/grimoire/astronomy/retrogrades/${planet}`,"
-    },
-    {
       "url": "/grimoire/astronomy",
       "file": "/Users/sammii/development/lunary/src/app/grimoire/astronomy/retrogrades/page.tsx",
       "line": 123,
@@ -833,18 +629,6 @@
       "file": "/Users/sammii/development/lunary/src/app/grimoire/astronomy/retrogrades/page.tsx",
       "line": 124,
       "context": "{ name: 'Retrogrades', url: '/grimoire/astronomy/retrogrades' },"
-    },
-    {
-      "url": "/grimoire/astronomy/retrogrades/${retrograde.slug}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/astronomy/retrogrades/page.tsx",
-      "line": 173,
-      "context": "href={`/grimoire/astronomy/retrogrades/${retrograde.slug}`}"
-    },
-    {
-      "url": "/grimoire/astronomy/retrogrades/${retrograde.slug}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/astronomy/retrogrades/page.tsx",
-      "line": 173,
-      "context": "href={`/grimoire/astronomy/retrogrades/${retrograde.slug}`}"
     },
     {
       "url": "/grimoire/transits",
@@ -911,18 +695,6 @@
       "file": "/Users/sammii/development/lunary/src/app/grimoire/beginners/page.tsx",
       "line": 346,
       "context": "href='/grimoire/zodiac'"
-    },
-    {
-      "url": "/grimoire/zodiac/${sign.name.toLowerCase()}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/beginners/page.tsx",
-      "line": 407,
-      "context": "href={`/grimoire/zodiac/${sign.name.toLowerCase()}`}"
-    },
-    {
-      "url": "/grimoire/zodiac/${sign.name.toLowerCase()}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/beginners/page.tsx",
-      "line": 407,
-      "context": "href={`/grimoire/zodiac/${sign.name.toLowerCase()}`}"
     },
     {
       "url": "/grimoire/astronomy/planets",
@@ -1015,18 +787,6 @@
       "context": "{ name: 'Houses', url: '/grimoire/birth-chart/houses' },"
     },
     {
-      "url": "/grimoire/birth-chart/houses/${houseSlugMap[house.number]}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/birth-chart/houses/page.tsx",
-      "line": 102,
-      "context": "href={`/grimoire/birth-chart/houses/${houseSlugMap[house.number]}`}"
-    },
-    {
-      "url": "/grimoire/birth-chart/houses/${houseSlugMap[house.number]}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/birth-chart/houses/page.tsx",
-      "line": 102,
-      "context": "href={`/grimoire/birth-chart/houses/${houseSlugMap[house.number]}`}"
-    },
-    {
       "url": "/grimoire/birth-chart",
       "file": "/Users/sammii/development/lunary/src/app/grimoire/birth-chart/houses/page.tsx",
       "line": 123,
@@ -1039,58 +799,10 @@
       "context": "href='/grimoire/houses'"
     },
     {
-      "url": "/grimoire/birthday/${prevDay}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/birthday/[date]/page.tsx",
-      "line": 215,
-      "context": "href={`/grimoire/birthday/${prevDay}`}"
-    },
-    {
-      "url": "/grimoire/birthday/${prevDay}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/birthday/[date]/page.tsx",
-      "line": 215,
-      "context": "href={`/grimoire/birthday/${prevDay}`}"
-    },
-    {
-      "url": "/grimoire/birthday/${nextDay}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/birthday/[date]/page.tsx",
-      "line": 225,
-      "context": "href={`/grimoire/birthday/${nextDay}`}"
-    },
-    {
-      "url": "/grimoire/birthday/${nextDay}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/birthday/[date]/page.tsx",
-      "line": 225,
-      "context": "href={`/grimoire/birthday/${nextDay}`}"
-    },
-    {
       "url": "/grimoire/birthday",
       "file": "/Users/sammii/development/lunary/src/app/grimoire/birthday/page.tsx",
       "line": 64,
       "context": "{ name: 'Birthday', url: '/grimoire/birthday' },"
-    },
-    {
-      "url": "/grimoire/zodiac/${zodiac.sign.toLowerCase()}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/birthday/page.tsx",
-      "line": 89,
-      "context": "href={`/grimoire/zodiac/${zodiac.sign.toLowerCase()}`}"
-    },
-    {
-      "url": "/grimoire/zodiac/${zodiac.sign.toLowerCase()}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/birthday/page.tsx",
-      "line": 89,
-      "context": "href={`/grimoire/zodiac/${zodiac.sign.toLowerCase()}`}"
-    },
-    {
-      "url": "/grimoire/birthday/${name.toLowerCase()}-${day}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/birthday/page.tsx",
-      "line": 142,
-      "context": "href={`/grimoire/birthday/${name.toLowerCase()}-${day}`}"
-    },
-    {
-      "url": "/grimoire/birthday/${name.toLowerCase()}-${day}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/birthday/page.tsx",
-      "line": 142,
-      "context": "href={`/grimoire/birthday/${name.toLowerCase()}-${day}`}"
     },
     {
       "url": "/grimoire/book-of-shadows",
@@ -1115,18 +827,6 @@
       "file": "/Users/sammii/development/lunary/src/app/grimoire/candle-magic/colors/page.tsx",
       "line": 111,
       "context": "{ name: 'Colors', url: '/grimoire/candle-magic/colors' },"
-    },
-    {
-      "url": "/grimoire/candle-magic/colors/${color.slug}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/candle-magic/colors/page.tsx",
-      "line": 158,
-      "context": "href={`/grimoire/candle-magic/colors/${color.slug}`}"
-    },
-    {
-      "url": "/grimoire/candle-magic/colors/${color.slug}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/candle-magic/colors/page.tsx",
-      "line": 158,
-      "context": "href={`/grimoire/candle-magic/colors/${color.slug}`}"
     },
     {
       "url": "/grimoire/candle-magic",
@@ -1183,123 +883,27 @@
       "context": "href='/grimoire/spells'"
     },
     {
-      "url": "/grimoire/chakras/${chakra}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/chakras/[chakra]/page.tsx",
-      "line": 44,
-      "context": "url: `/grimoire/chakras/${chakra}`,"
-    },
-    {
-      "url": "/grimoire/chakras/${chakra}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/chakras/[chakra]/page.tsx",
-      "line": 93,
-      "context": "url: `/grimoire/chakras/${chakra}`,"
-    },
-    {
-      "url": "/grimoire/crystals/${stringToKebabCase(crystal)}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/chakras/[chakra]/page.tsx",
-      "line": 106,
-      "context": "url: `/grimoire/crystals/${stringToKebabCase(crystal)}`,"
-    },
-    {
-      "url": "/grimoire/chinese-zodiac/${animal}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/chinese-zodiac/[animal]/page.tsx",
-      "line": 69,
-      "context": "url: `/grimoire/chinese-zodiac/${animal}`,"
-    },
-    {
-      "url": "/grimoire/chinese-zodiac/${prevAnimal}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/chinese-zodiac/[animal]/page.tsx",
-      "line": 186,
-      "context": "href={`/grimoire/chinese-zodiac/${prevAnimal}`}"
-    },
-    {
-      "url": "/grimoire/chinese-zodiac/${prevAnimal}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/chinese-zodiac/[animal]/page.tsx",
-      "line": 186,
-      "context": "href={`/grimoire/chinese-zodiac/${prevAnimal}`}"
-    },
-    {
-      "url": "/grimoire/chinese-zodiac/${nextAnimal}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/chinese-zodiac/[animal]/page.tsx",
-      "line": 193,
-      "context": "href={`/grimoire/chinese-zodiac/${nextAnimal}`}"
-    },
-    {
-      "url": "/grimoire/chinese-zodiac/${nextAnimal}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/chinese-zodiac/[animal]/page.tsx",
-      "line": 193,
-      "context": "href={`/grimoire/chinese-zodiac/${nextAnimal}`}"
-    },
-    {
-      "url": "/grimoire/chinese-zodiac/${a}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/chinese-zodiac/[animal]/page.tsx",
-      "line": 205,
-      "context": "href={`/grimoire/chinese-zodiac/${a}`}"
-    },
-    {
-      "url": "/grimoire/chinese-zodiac/${a}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/chinese-zodiac/[animal]/page.tsx",
-      "line": 205,
-      "context": "href={`/grimoire/chinese-zodiac/${a}`}"
-    },
-    {
       "url": "/grimoire/chinese-zodiac",
       "file": "/Users/sammii/development/lunary/src/app/grimoire/chinese-zodiac/page.tsx",
       "line": 62,
       "context": "{ name: 'Chinese Zodiac', url: '/grimoire/chinese-zodiac' },"
     },
     {
-      "url": "/grimoire/chinese-zodiac/${currentYearData.animal}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/chinese-zodiac/page.tsx",
-      "line": 100,
-      "context": "href={`/grimoire/chinese-zodiac/${currentYearData.animal}`}"
-    },
-    {
-      "url": "/grimoire/chinese-zodiac/${currentYearData.animal}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/chinese-zodiac/page.tsx",
-      "line": 100,
-      "context": "href={`/grimoire/chinese-zodiac/${currentYearData.animal}`}"
-    },
-    {
-      "url": "/grimoire/chinese-zodiac/${animal}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/chinese-zodiac/page.tsx",
-      "line": 118,
-      "context": "href={`/grimoire/chinese-zodiac/${animal}`}"
-    },
-    {
-      "url": "/grimoire/chinese-zodiac/${animal}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/chinese-zodiac/page.tsx",
-      "line": 118,
-      "context": "href={`/grimoire/chinese-zodiac/${animal}`}"
-    },
-    {
       "url": "/grimoire/compatibility",
       "file": "/Users/sammii/development/lunary/src/app/grimoire/compatibility/[match]/page.tsx",
-      "line": 128,
+      "line": 163,
       "context": "{ name: 'Compatibility', url: '/grimoire/compatibility' },"
     },
     {
       "url": "/grimoire/compatibility",
       "file": "/Users/sammii/development/lunary/src/app/grimoire/compatibility/[match]/page.tsx",
-      "line": 139,
+      "line": 174,
       "context": "<Link href='/grimoire/compatibility' className='hover:text-zinc-300'>"
-    },
-    {
-      "url": "/grimoire/compatibility/${slug}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/compatibility/[match]/page.tsx",
-      "line": 283,
-      "context": "href={`/grimoire/compatibility/${slug}`}"
-    },
-    {
-      "url": "/grimoire/compatibility/${slug}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/compatibility/[match]/page.tsx",
-      "line": 283,
-      "context": "href={`/grimoire/compatibility/${slug}`}"
     },
     {
       "url": "/grimoire/synastry/generate",
       "file": "/Users/sammii/development/lunary/src/app/grimoire/compatibility/[match]/page.tsx",
-      "line": 296,
+      "line": 331,
       "context": "href='/grimoire/synastry/generate'"
     },
     {
@@ -1307,18 +911,6 @@
       "file": "/Users/sammii/development/lunary/src/app/grimoire/compatibility/page.tsx",
       "line": 81,
       "context": "{ name: 'Compatibility', url: '/grimoire/compatibility' },"
-    },
-    {
-      "url": "/grimoire/compatibility/${slug}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/compatibility/page.tsx",
-      "line": 157,
-      "context": "href={`/grimoire/compatibility/${slug}`}"
-    },
-    {
-      "url": "/grimoire/compatibility/${slug}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/compatibility/page.tsx",
-      "line": 157,
-      "context": "href={`/grimoire/compatibility/${slug}`}"
     },
     {
       "url": "/grimoire/synastry/generate",
@@ -1331,30 +923,6 @@
       "file": "/Users/sammii/development/lunary/src/app/grimoire/components/BirthChart.tsx",
       "line": 194,
       "context": "href='/grimoire/guides/birth-chart-complete-guide'"
-    },
-    {
-      "url": "/grimoire/astronomy/planets/${planetSlug}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/components/BirthChart.tsx",
-      "line": 229,
-      "context": "href={`/grimoire/astronomy/planets/${planetSlug}`}"
-    },
-    {
-      "url": "/grimoire/astronomy/planets/${planetSlug}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/components/BirthChart.tsx",
-      "line": 229,
-      "context": "href={`/grimoire/astronomy/planets/${planetSlug}`}"
-    },
-    {
-      "url": "/grimoire/houses/overview/${houseSlug}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/components/BirthChart.tsx",
-      "line": 324,
-      "context": "href={`/grimoire/houses/overview/${houseSlug}`}"
-    },
-    {
-      "url": "/grimoire/houses/overview/${houseSlug}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/components/BirthChart.tsx",
-      "line": 324,
-      "context": "href={`/grimoire/houses/overview/${houseSlug}`}"
     },
     {
       "url": "/grimoire/aspects/types/conjunction",
@@ -1507,114 +1075,6 @@
       "context": "href='/grimoire/correspondences/colors'"
     },
     {
-      "url": "/grimoire/chakras/${chakraSlug}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/components/Chakras.tsx",
-      "line": 24,
-      "context": "href={`/grimoire/chakras/${chakraSlug}`}"
-    },
-    {
-      "url": "/grimoire/chakras/${chakraSlug}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/components/Chakras.tsx",
-      "line": 24,
-      "context": "href={`/grimoire/chakras/${chakraSlug}`}"
-    },
-    {
-      "url": "/grimoire/correspondences/colors/${colorSlug}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/components/Correspondences.tsx",
-      "line": 83,
-      "context": "href={`/grimoire/correspondences/colors/${colorSlug}`}"
-    },
-    {
-      "url": "/grimoire/correspondences/colors/${colorSlug}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/components/Correspondences.tsx",
-      "line": 83,
-      "context": "href={`/grimoire/correspondences/colors/${colorSlug}`}"
-    },
-    {
-      "url": "/grimoire/correspondences/deities/${pantheonSlug}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/components/Correspondences.tsx",
-      "line": 144,
-      "context": "href={`/grimoire/correspondences/deities/${pantheonSlug}`}"
-    },
-    {
-      "url": "/grimoire/correspondences/deities/${pantheonSlug}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/components/Correspondences.tsx",
-      "line": 144,
-      "context": "href={`/grimoire/correspondences/deities/${pantheonSlug}`}"
-    },
-    {
-      "url": "/grimoire/correspondences/deities/${pantheonSlug}/${deitySlug}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/components/Correspondences.tsx",
-      "line": 155,
-      "context": "href={`/grimoire/correspondences/deities/${pantheonSlug}/${deitySlug}`}"
-    },
-    {
-      "url": "/grimoire/correspondences/deities/${pantheonSlug}/${deitySlug}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/components/Correspondences.tsx",
-      "line": 155,
-      "context": "href={`/grimoire/correspondences/deities/${pantheonSlug}/${deitySlug}`}"
-    },
-    {
-      "url": "/grimoire/correspondences/flowers/${flowerSlug}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/components/Correspondences.tsx",
-      "line": 184,
-      "context": "href={`/grimoire/correspondences/flowers/${flowerSlug}`}"
-    },
-    {
-      "url": "/grimoire/correspondences/flowers/${flowerSlug}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/components/Correspondences.tsx",
-      "line": 184,
-      "context": "href={`/grimoire/correspondences/flowers/${flowerSlug}`}"
-    },
-    {
-      "url": "/grimoire/correspondences/numbers/${numSlug}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/components/Correspondences.tsx",
-      "line": 215,
-      "context": "href={`/grimoire/correspondences/numbers/${numSlug}`}"
-    },
-    {
-      "url": "/grimoire/correspondences/numbers/${numSlug}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/components/Correspondences.tsx",
-      "line": 215,
-      "context": "href={`/grimoire/correspondences/numbers/${numSlug}`}"
-    },
-    {
-      "url": "/grimoire/correspondences/wood/${woodSlug}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/components/Correspondences.tsx",
-      "line": 246,
-      "context": "href={`/grimoire/correspondences/wood/${woodSlug}`}"
-    },
-    {
-      "url": "/grimoire/correspondences/wood/${woodSlug}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/components/Correspondences.tsx",
-      "line": 246,
-      "context": "href={`/grimoire/correspondences/wood/${woodSlug}`}"
-    },
-    {
-      "url": "/grimoire/correspondences/herbs/${herbSlug}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/components/Correspondences.tsx",
-      "line": 277,
-      "context": "href={`/grimoire/correspondences/herbs/${herbSlug}`}"
-    },
-    {
-      "url": "/grimoire/correspondences/herbs/${herbSlug}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/components/Correspondences.tsx",
-      "line": 277,
-      "context": "href={`/grimoire/correspondences/herbs/${herbSlug}`}"
-    },
-    {
-      "url": "/grimoire/correspondences/animals/${animalSlug}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/components/Correspondences.tsx",
-      "line": 308,
-      "context": "href={`/grimoire/correspondences/animals/${animalSlug}`}"
-    },
-    {
-      "url": "/grimoire/correspondences/animals/${animalSlug}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/components/Correspondences.tsx",
-      "line": 308,
-      "context": "href={`/grimoire/correspondences/animals/${animalSlug}`}"
-    },
-    {
       "url": "/grimoire/candle-magic/colors",
       "file": "/Users/sammii/development/lunary/src/app/grimoire/components/Correspondences.tsx",
       "line": 788,
@@ -1655,18 +1115,6 @@
       "file": "/Users/sammii/development/lunary/src/app/grimoire/components/Crystals.tsx",
       "line": 76,
       "context": "href='/grimoire/guides/crystal-healing-guide'"
-    },
-    {
-      "url": "/grimoire/crystals/${crystalSlug}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/components/Crystals.tsx",
-      "line": 135,
-      "context": "href={`/grimoire/crystals/${crystalSlug}`}"
-    },
-    {
-      "url": "/grimoire/crystals/${crystalSlug}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/components/Crystals.tsx",
-      "line": 135,
-      "context": "href={`/grimoire/crystals/${crystalSlug}`}"
     },
     {
       "url": "/grimoire/spells",
@@ -1729,34 +1177,10 @@
       "context": "href='/grimoire/divination/omen-reading'"
     },
     {
-      "url": "/grimoire/meditation/${techniqueSlug}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/components/Meditation.tsx",
-      "line": 82,
-      "context": "href={`/grimoire/meditation/${techniqueSlug}`}"
-    },
-    {
-      "url": "/grimoire/meditation/${techniqueSlug}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/components/Meditation.tsx",
-      "line": 82,
-      "context": "href={`/grimoire/meditation/${techniqueSlug}`}"
-    },
-    {
       "url": "/grimoire/meditation/breathwork",
       "file": "/Users/sammii/development/lunary/src/app/grimoire/components/Meditation.tsx",
       "line": 105,
       "context": "href='/grimoire/meditation/breathwork'"
-    },
-    {
-      "url": "/grimoire/modern-witchcraft/famous-witches/${witchSlug}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/components/ModernWitchcraft.tsx",
-      "line": 80,
-      "context": "href={`/grimoire/modern-witchcraft/famous-witches/${witchSlug}`}"
-    },
-    {
-      "url": "/grimoire/modern-witchcraft/famous-witches/${witchSlug}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/components/ModernWitchcraft.tsx",
-      "line": 80,
-      "context": "href={`/grimoire/modern-witchcraft/famous-witches/${witchSlug}`}"
     },
     {
       "url": "/grimoire/modern-witchcraft/tools-guide",
@@ -1781,30 +1205,6 @@
       "file": "/Users/sammii/development/lunary/src/app/grimoire/components/Moon.tsx",
       "line": 67,
       "context": "href='/grimoire/guides/moon-phases-guide'"
-    },
-    {
-      "url": "/grimoire/moon/phases/${phaseSlug}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/components/Moon.tsx",
-      "line": 120,
-      "context": "href={`/grimoire/moon/phases/${phaseSlug}`}"
-    },
-    {
-      "url": "/grimoire/moon/phases/${phaseSlug}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/components/Moon.tsx",
-      "line": 120,
-      "context": "href={`/grimoire/moon/phases/${phaseSlug}`}"
-    },
-    {
-      "url": "/grimoire/moon/full-moons/${monthSlug}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/components/Moon.tsx",
-      "line": 146,
-      "context": "href={`/grimoire/moon/full-moons/${monthSlug}`}"
-    },
-    {
-      "url": "/grimoire/moon/full-moons/${monthSlug}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/components/Moon.tsx",
-      "line": 146,
-      "context": "href={`/grimoire/moon/full-moons/${monthSlug}`}"
     },
     {
       "url": "/grimoire/beginners",
@@ -1849,46 +1249,10 @@
       "context": "href='/grimoire/modern-witchcraft/tools'"
     },
     {
-      "url": "/grimoire/runes/${runeSlug}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/components/Runes.tsx",
-      "line": 24,
-      "context": "href={`/grimoire/runes/${runeSlug}`}"
-    },
-    {
-      "url": "/grimoire/runes/${runeSlug}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/components/Runes.tsx",
-      "line": 24,
-      "context": "href={`/grimoire/runes/${runeSlug}`}"
-    },
-    {
       "url": "/grimoire/guides/tarot-complete-guide",
       "file": "/Users/sammii/development/lunary/src/app/grimoire/components/Tarot.tsx",
       "line": 50,
       "context": "href='/grimoire/guides/tarot-complete-guide'"
-    },
-    {
-      "url": "/grimoire/tarot/spreads/${spreadSlug}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/components/Tarot.tsx",
-      "line": 85,
-      "context": "href={`/grimoire/tarot/spreads/${spreadSlug}`}"
-    },
-    {
-      "url": "/grimoire/tarot/spreads/${spreadSlug}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/components/Tarot.tsx",
-      "line": 85,
-      "context": "href={`/grimoire/tarot/spreads/${spreadSlug}`}"
-    },
-    {
-      "url": "/grimoire/tarot/suits/${suitSlug}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/components/Tarot.tsx",
-      "line": 174,
-      "context": "href={`/grimoire/tarot/suits/${suitSlug}`}"
-    },
-    {
-      "url": "/grimoire/tarot/suits/${suitSlug}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/components/Tarot.tsx",
-      "line": 174,
-      "context": "href={`/grimoire/tarot/suits/${suitSlug}`}"
     },
     {
       "url": "/grimoire/reversed-cards-guide",
@@ -1939,150 +1303,6 @@
       "context": "href='/grimoire/runes'"
     },
     {
-      "url": "/grimoire/wheel-of-the-year/${sabbatSlug}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/components/WheelOfTheYear.tsx",
-      "line": 23,
-      "context": "href={`/grimoire/wheel-of-the-year/${sabbatSlug}`}"
-    },
-    {
-      "url": "/grimoire/wheel-of-the-year/${sabbatSlug}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/components/WheelOfTheYear.tsx",
-      "line": 23,
-      "context": "href={`/grimoire/wheel-of-the-year/${sabbatSlug}`}"
-    },
-    {
-      "url": "/grimoire/correspondences/animals/${animal.slug}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/correspondences/animals/page.tsx",
-      "line": 243,
-      "context": "href={`/grimoire/correspondences/animals/${animal.slug}`}"
-    },
-    {
-      "url": "/grimoire/correspondences/animals/${animal.slug}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/correspondences/animals/page.tsx",
-      "line": 243,
-      "context": "href={`/grimoire/correspondences/animals/${animal.slug}`}"
-    },
-    {
-      "url": "/grimoire/correspondences/colors/${stringToKebabCase(name)}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/correspondences/colors/page.tsx",
-      "line": 216,
-      "context": "href={`/grimoire/correspondences/colors/${stringToKebabCase(name)}`}"
-    },
-    {
-      "url": "/grimoire/correspondences/colors/${stringToKebabCase(name)}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/correspondences/colors/page.tsx",
-      "line": 216,
-      "context": "href={`/grimoire/correspondences/colors/${stringToKebabCase(name)}`}"
-    },
-    {
-      "url": "/grimoire/correspondences/days/${stringToKebabCase(name)}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/correspondences/days/page.tsx",
-      "line": 215,
-      "context": "href={`/grimoire/correspondences/days/${stringToKebabCase(name)}`}"
-    },
-    {
-      "url": "/grimoire/correspondences/days/${stringToKebabCase(name)}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/correspondences/days/page.tsx",
-      "line": 215,
-      "context": "href={`/grimoire/correspondences/days/${stringToKebabCase(name)}`}"
-    },
-    {
-      "url": "/grimoire/correspondences/deities/${pantheon}/${deitySlug}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/correspondences/deities/[pantheon]/page.tsx",
-      "line": 164,
-      "context": "href={`/grimoire/correspondences/deities/${pantheon}/${deitySlug}`}"
-    },
-    {
-      "url": "/grimoire/correspondences/deities/${pantheon}/${deitySlug}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/correspondences/deities/[pantheon]/page.tsx",
-      "line": 164,
-      "context": "href={`/grimoire/correspondences/deities/${pantheon}/${deitySlug}`}"
-    },
-    {
-      "url": "/grimoire/correspondences/deities/${stringToKebabCase(pantheon)}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/correspondences/deities/page.tsx",
-      "line": 200,
-      "context": "href={`/grimoire/correspondences/deities/${stringToKebabCase(pantheon)}`}"
-    },
-    {
-      "url": "/grimoire/correspondences/deities/${stringToKebabCase(pantheon)}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/correspondences/deities/page.tsx",
-      "line": 200,
-      "context": "href={`/grimoire/correspondences/deities/${stringToKebabCase(pantheon)}`}"
-    },
-    {
-      "url": "/grimoire/correspondences/deities/${stringToKebabCase(pantheon)}/${stringToKebabCase(deity)}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/correspondences/deities/page.tsx",
-      "line": 216,
-      "context": "href={`/grimoire/correspondences/deities/${stringToKebabCase(pantheon)}/${stringToKebabCase(deity)}`}"
-    },
-    {
-      "url": "/grimoire/correspondences/deities/${stringToKebabCase(pantheon)}/${stringToKebabCase(deity)}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/correspondences/deities/page.tsx",
-      "line": 216,
-      "context": "href={`/grimoire/correspondences/deities/${stringToKebabCase(pantheon)}/${stringToKebabCase(deity)}`}"
-    },
-    {
-      "url": "/grimoire/correspondences/deities/${stringToKebabCase(pantheon)}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/correspondences/deities/page.tsx",
-      "line": 224,
-      "context": "href={`/grimoire/correspondences/deities/${stringToKebabCase(pantheon)}`}"
-    },
-    {
-      "url": "/grimoire/correspondences/deities/${stringToKebabCase(pantheon)}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/correspondences/deities/page.tsx",
-      "line": 224,
-      "context": "href={`/grimoire/correspondences/deities/${stringToKebabCase(pantheon)}`}"
-    },
-    {
-      "url": "/grimoire/correspondences/elements/${stringToKebabCase(name)}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/correspondences/elements/page.tsx",
-      "line": 239,
-      "context": "href={`/grimoire/correspondences/elements/${stringToKebabCase(name)}`}"
-    },
-    {
-      "url": "/grimoire/correspondences/elements/${stringToKebabCase(name)}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/correspondences/elements/page.tsx",
-      "line": 239,
-      "context": "href={`/grimoire/correspondences/elements/${stringToKebabCase(name)}`}"
-    },
-    {
-      "url": "/grimoire/correspondences/flowers/${stringToKebabCase(name)}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/correspondences/flowers/page.tsx",
-      "line": 191,
-      "context": "href={`/grimoire/correspondences/flowers/${stringToKebabCase(name)}`}"
-    },
-    {
-      "url": "/grimoire/correspondences/flowers/${stringToKebabCase(name)}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/correspondences/flowers/page.tsx",
-      "line": 191,
-      "context": "href={`/grimoire/correspondences/flowers/${stringToKebabCase(name)}`}"
-    },
-    {
-      "url": "/grimoire/correspondences/herbs/${stringToKebabCase(name)}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/correspondences/herbs/page.tsx",
-      "line": 191,
-      "context": "href={`/grimoire/correspondences/herbs/${stringToKebabCase(name)}`}"
-    },
-    {
-      "url": "/grimoire/correspondences/herbs/${stringToKebabCase(name)}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/correspondences/herbs/page.tsx",
-      "line": 191,
-      "context": "href={`/grimoire/correspondences/herbs/${stringToKebabCase(name)}`}"
-    },
-    {
-      "url": "/grimoire/correspondences/numbers/${num}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/correspondences/numbers/page.tsx",
-      "line": 210,
-      "context": "href={`/grimoire/correspondences/numbers/${num}`}"
-    },
-    {
-      "url": "/grimoire/correspondences/numbers/${num}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/correspondences/numbers/page.tsx",
-      "line": 210,
-      "context": "href={`/grimoire/correspondences/numbers/${num}`}"
-    },
-    {
       "url": "/grimoire/correspondences",
       "file": "/Users/sammii/development/lunary/src/app/grimoire/correspondences/page.tsx",
       "line": 100,
@@ -2113,58 +1333,46 @@
       "context": "href='/grimoire/correspondences/elements/earth'"
     },
     {
+      "url": "/grimoire/correspondences/elements/spirit",
+      "file": "/Users/sammii/development/lunary/src/app/grimoire/correspondences/page.tsx",
+      "line": 332,
+      "context": "href='/grimoire/correspondences/elements/spirit'"
+    },
+    {
       "url": "/grimoire/candle-magic/colors",
       "file": "/Users/sammii/development/lunary/src/app/grimoire/correspondences/page.tsx",
-      "line": 407,
+      "line": 413,
       "context": "href='/grimoire/candle-magic/colors'"
     },
     {
       "url": "/grimoire/correspondences/herbs",
       "file": "/Users/sammii/development/lunary/src/app/grimoire/correspondences/page.tsx",
-      "line": 452,
+      "line": 458,
       "context": "href='/grimoire/correspondences/herbs'"
     },
     {
       "url": "/grimoire/crystals",
       "file": "/Users/sammii/development/lunary/src/app/grimoire/correspondences/page.tsx",
-      "line": 483,
+      "line": 489,
       "context": "href='/grimoire/crystals'"
     },
     {
       "url": "/grimoire/correspondences/elements",
       "file": "/Users/sammii/development/lunary/src/app/grimoire/correspondences/page.tsx",
-      "line": 561,
+      "line": 567,
       "context": "href='/grimoire/correspondences/elements'"
     },
     {
       "url": "/grimoire/crystals",
       "file": "/Users/sammii/development/lunary/src/app/grimoire/correspondences/page.tsx",
-      "line": 567,
+      "line": 573,
       "context": "href='/grimoire/crystals'"
     },
     {
       "url": "/grimoire/correspondences/herbs",
       "file": "/Users/sammii/development/lunary/src/app/grimoire/correspondences/page.tsx",
-      "line": 573,
+      "line": 579,
       "context": "href='/grimoire/correspondences/herbs'"
-    },
-    {
-      "url": "/grimoire/correspondences/wood/${stringToKebabCase(name)}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/correspondences/wood/page.tsx",
-      "line": 200,
-      "context": "href={`/grimoire/correspondences/wood/${stringToKebabCase(name)}`}"
-    },
-    {
-      "url": "/grimoire/correspondences/wood/${stringToKebabCase(name)}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/correspondences/wood/page.tsx",
-      "line": 200,
-      "context": "href={`/grimoire/correspondences/wood/${stringToKebabCase(name)}`}"
-    },
-    {
-      "url": "/grimoire/crystals/${crystal}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/crystals/[crystal]/page.tsx",
-      "line": 44,
-      "context": "url: `/grimoire/crystals/${crystal}`,"
     },
     {
       "url": "/grimoire/crystals",
@@ -2197,46 +1405,10 @@
       "context": "href='/grimoire/crystals/black-tourmaline'"
     },
     {
-      "url": "/grimoire/cusps/${c.id}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/cusps/[cusp]/page.tsx",
-      "line": 164,
-      "context": "href={`/grimoire/cusps/${c.id}`}"
-    },
-    {
-      "url": "/grimoire/cusps/${c.id}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/cusps/[cusp]/page.tsx",
-      "line": 164,
-      "context": "href={`/grimoire/cusps/${c.id}`}"
-    },
-    {
       "url": "/grimoire/cusps",
       "file": "/Users/sammii/development/lunary/src/app/grimoire/cusps/page.tsx",
       "line": 80,
       "context": "{ name: 'Cusps', url: '/grimoire/cusps' },"
-    },
-    {
-      "url": "/grimoire/cusps/${cusp.id}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/cusps/page.tsx",
-      "line": 101,
-      "context": "href={`/grimoire/cusps/${cusp.id}`}"
-    },
-    {
-      "url": "/grimoire/cusps/${cusp.id}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/cusps/page.tsx",
-      "line": 101,
-      "context": "href={`/grimoire/cusps/${cusp.id}`}"
-    },
-    {
-      "url": "/grimoire/decans/${sign}/${d}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/decans/[sign]/[decan]/page.tsx",
-      "line": 167,
-      "context": "href={`/grimoire/decans/${sign}/${d}`}"
-    },
-    {
-      "url": "/grimoire/decans/${sign}/${d}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/decans/[sign]/[decan]/page.tsx",
-      "line": 167,
-      "context": "href={`/grimoire/decans/${sign}/${d}`}"
     },
     {
       "url": "/grimoire/decans",
@@ -2245,34 +1417,10 @@
       "context": "{ name: 'Decans', url: '/grimoire/decans' },"
     },
     {
-      "url": "/grimoire/decans/${sign}/${decan.number}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/decans/[sign]/page.tsx",
-      "line": 113,
-      "context": "href={`/grimoire/decans/${sign}/${decan.number}`}"
-    },
-    {
-      "url": "/grimoire/decans/${sign}/${decan.number}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/decans/[sign]/page.tsx",
-      "line": 113,
-      "context": "href={`/grimoire/decans/${sign}/${decan.number}`}"
-    },
-    {
       "url": "/grimoire/decans",
       "file": "/Users/sammii/development/lunary/src/app/grimoire/decans/[sign]/page.tsx",
       "line": 151,
       "context": "href='/grimoire/decans'"
-    },
-    {
-      "url": "/grimoire/zodiac/${sign}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/decans/[sign]/page.tsx",
-      "line": 157,
-      "context": "href={`/grimoire/zodiac/${sign}`}"
-    },
-    {
-      "url": "/grimoire/zodiac/${sign}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/decans/[sign]/page.tsx",
-      "line": 157,
-      "context": "href={`/grimoire/zodiac/${sign}`}"
     },
     {
       "url": "/grimoire/zodiac",
@@ -2285,18 +1433,6 @@
       "file": "/Users/sammii/development/lunary/src/app/grimoire/decans/page.tsx",
       "line": 82,
       "context": "{ name: 'Decans', url: '/grimoire/decans' },"
-    },
-    {
-      "url": "/grimoire/decans/${sign}/${d}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/decans/page.tsx",
-      "line": 120,
-      "context": "href={`/grimoire/decans/${sign}/${d}`}"
-    },
-    {
-      "url": "/grimoire/decans/${sign}/${d}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/decans/page.tsx",
-      "line": 120,
-      "context": "href={`/grimoire/decans/${sign}/${d}`}"
     },
     {
       "url": "/grimoire/divination",
@@ -2329,18 +1465,6 @@
       "context": "href='/grimoire/tarot'"
     },
     {
-      "url": "/grimoire/divination/scrying/${method.slug}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/divination/scrying/page.tsx",
-      "line": 258,
-      "context": "href={`/grimoire/divination/scrying/${method.slug}`}"
-    },
-    {
-      "url": "/grimoire/divination/scrying/${method.slug}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/divination/scrying/page.tsx",
-      "line": 258,
-      "context": "href={`/grimoire/divination/scrying/${method.slug}`}"
-    },
-    {
       "url": "/grimoire/numerology",
       "file": "/Users/sammii/development/lunary/src/app/grimoire/double-hours/page.tsx",
       "line": 82,
@@ -2351,36 +1475,6 @@
       "file": "/Users/sammii/development/lunary/src/app/grimoire/double-hours/page.tsx",
       "line": 83,
       "context": "{ name: 'Double Hours', url: '/grimoire/double-hours' },"
-    },
-    {
-      "url": "/grimoire/double-hours/${time.replace(':', '-')}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/double-hours/page.tsx",
-      "line": 133,
-      "context": "href={`/grimoire/double-hours/${time.replace(':', '-')}`}"
-    },
-    {
-      "url": "/grimoire/double-hours/${time.replace(':', '-')}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/double-hours/page.tsx",
-      "line": 133,
-      "context": "href={`/grimoire/double-hours/${time.replace(':', '-')}`}"
-    },
-    {
-      "url": "/grimoire/eclipses/${type}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/eclipses/[type]/page.tsx",
-      "line": 117,
-      "context": "url: `/grimoire/eclipses/${type}`,"
-    },
-    {
-      "url": "/grimoire/eclipses/${eclipse.slug}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/eclipses/page.tsx",
-      "line": 143,
-      "context": "href={`/grimoire/eclipses/${eclipse.slug}`}"
-    },
-    {
-      "url": "/grimoire/eclipses/${eclipse.slug}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/eclipses/page.tsx",
-      "line": 143,
-      "context": "href={`/grimoire/eclipses/${eclipse.slug}`}"
     },
     {
       "url": "/grimoire/moon/rituals",
@@ -2425,36 +1519,6 @@
       "context": "href='/grimoire/zodiac/virgo'"
     },
     {
-      "url": "/grimoire/events",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/events/2025/page.tsx",
-      "line": 132,
-      "context": "{ name: 'Events', url: '/grimoire/events' },"
-    },
-    {
-      "url": "/grimoire/events/2025",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/events/2025/page.tsx",
-      "line": 133,
-      "context": "{ name: '2025', url: '/grimoire/events/2025' },"
-    },
-    {
-      "url": "/grimoire/moon/rituals",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/events/2025/page.tsx",
-      "line": 250,
-      "context": "href='/grimoire/moon/rituals'"
-    },
-    {
-      "url": "/grimoire/astronomy",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/events/2025/page.tsx",
-      "line": 256,
-      "context": "href='/grimoire/astronomy'"
-    },
-    {
-      "url": "/grimoire/tarot",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/events/2025/page.tsx",
-      "line": 262,
-      "context": "href='/grimoire/tarot'"
-    },
-    {
       "url": "/grimoire/astronomy/planets/venus",
       "file": "/Users/sammii/development/lunary/src/app/grimoire/events/2025/venus-retrograde/page.tsx",
       "line": 204,
@@ -2477,18 +1541,6 @@
       "file": "/Users/sammii/development/lunary/src/app/grimoire/events/2025/venus-retrograde/page.tsx",
       "line": 222,
       "context": "href='/grimoire/zodiac/libra'"
-    },
-    {
-      "url": "/grimoire/events",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/events/2026/page.tsx",
-      "line": 57,
-      "context": "{ name: 'Events', url: '/grimoire/events' },"
-    },
-    {
-      "url": "/grimoire/events/2026",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/events/2026/page.tsx",
-      "line": 58,
-      "context": "{ name: '2026', url: '/grimoire/events/2026' },"
     },
     {
       "url": "/grimoire/events/2025",
@@ -2543,18 +1595,6 @@
       "file": "/Users/sammii/development/lunary/src/app/grimoire/guides/birth-chart-complete-guide/page.tsx",
       "line": 139,
       "context": "href='/grimoire/birth-chart'"
-    },
-    {
-      "url": "/grimoire/zodiac/${sign.toLowerCase()}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/guides/birth-chart-complete-guide/page.tsx",
-      "line": 497,
-      "context": "href={`/grimoire/zodiac/${sign.toLowerCase()}`}"
-    },
-    {
-      "url": "/grimoire/zodiac/${sign.toLowerCase()}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/guides/birth-chart-complete-guide/page.tsx",
-      "line": 497,
-      "context": "href={`/grimoire/zodiac/${sign.toLowerCase()}`}"
     },
     {
       "url": "/grimoire/lunar-nodes",
@@ -2623,18 +1663,6 @@
       "context": "<Link href='/grimoire/crystals'>Explore Crystal Library</Link>"
     },
     {
-      "url": "/grimoire/crystals/${crystal.name.toLowerCase().replace(/ /g, '-')}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/guides/crystal-healing-guide/page.tsx",
-      "line": 457,
-      "context": "href={`/grimoire/crystals/${crystal.name.toLowerCase().replace(/ /g, '-')}`}"
-    },
-    {
-      "url": "/grimoire/crystals/${crystal.name.toLowerCase().replace(/ /g, '-')}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/guides/crystal-healing-guide/page.tsx",
-      "line": 457,
-      "context": "href={`/grimoire/crystals/${crystal.name.toLowerCase().replace(/ /g, '-')}`}"
-    },
-    {
       "url": "/grimoire/crystals",
       "file": "/Users/sammii/development/lunary/src/app/grimoire/guides/crystal-healing-guide/page.tsx",
       "line": 906,
@@ -2659,16 +1687,10 @@
       "context": "<Link href='/grimoire/moon' className='hover:text-lunary-primary-400'>"
     },
     {
-      "url": "/grimoire/moon/full-moon-names#${moon.month.toLowerCase()}",
+      "url": "/grimoire/moon",
       "file": "/Users/sammii/development/lunary/src/app/grimoire/guides/moon-phases-guide/page.tsx",
-      "line": 550,
-      "context": "href={`/grimoire/moon/full-moon-names#${moon.month.toLowerCase()}`}"
-    },
-    {
-      "url": "/grimoire/moon/full-moon-names#${moon.month.toLowerCase()}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/guides/moon-phases-guide/page.tsx",
-      "line": 550,
-      "context": "href={`/grimoire/moon/full-moon-names#${moon.month.toLowerCase()}`}"
+      "line": 354,
+      "context": "<Link href='/grimoire/moon'>Today&apos;s Moon Phase</Link>"
     },
     {
       "url": "/grimoire/moon/rituals",
@@ -2709,20 +1731,14 @@
     {
       "url": "/grimoire/moon",
       "file": "/Users/sammii/development/lunary/src/app/grimoire/guides/moon-phases-guide/page.tsx",
-      "line": 1026,
+      "line": 1020,
       "context": "href='/grimoire/moon'"
     },
     {
-      "url": "/grimoire/guides/${guide.slug}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/guides/page.tsx",
-      "line": 190,
-      "context": "href={`/grimoire/guides/${guide.slug}`}"
-    },
-    {
-      "url": "/grimoire/guides/${guide.slug}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/guides/page.tsx",
-      "line": 190,
-      "context": "href={`/grimoire/guides/${guide.slug}`}"
+      "url": "/grimoire/moon",
+      "file": "/Users/sammii/development/lunary/src/app/grimoire/guides/moon-phases-guide/page.tsx",
+      "line": 1026,
+      "context": "href='/grimoire/moon'"
     },
     {
       "url": "/grimoire/guides",
@@ -2743,58 +1759,10 @@
       "context": "<Link href='/grimoire/tarot' className='hover:text-lunary-primary-400'>"
     },
     {
-      "url": "/grimoire/tarot/${card.name.toLowerCase().replace(/ /g, '-')}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/guides/tarot-complete-guide/page.tsx",
-      "line": 518,
-      "context": "href={`/grimoire/tarot/${card.name.toLowerCase().replace(/ /g, '-')}`}"
-    },
-    {
-      "url": "/grimoire/tarot/${card.name.toLowerCase().replace(/ /g, '-')}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/guides/tarot-complete-guide/page.tsx",
-      "line": 518,
-      "context": "href={`/grimoire/tarot/${card.name.toLowerCase().replace(/ /g, '-')}`}"
-    },
-    {
       "url": "/grimoire/tarot",
       "file": "/Users/sammii/development/lunary/src/app/grimoire/guides/tarot-complete-guide/page.tsx",
       "line": 841,
       "context": "href='/grimoire/tarot'"
-    },
-    {
-      "url": "/grimoire/horoscopes/${sign}/${year}/${prevMonth}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/horoscopes/[sign]/[year]/[month]/page.tsx",
-      "line": 227,
-      "context": "href={`/grimoire/horoscopes/${sign}/${year}/${prevMonth}`}"
-    },
-    {
-      "url": "/grimoire/horoscopes/${sign}/${year}/${prevMonth}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/horoscopes/[sign]/[year]/[month]/page.tsx",
-      "line": 227,
-      "context": "href={`/grimoire/horoscopes/${sign}/${year}/${prevMonth}`}"
-    },
-    {
-      "url": "/grimoire/horoscopes/${sign}/${year}/${nextMonth}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/horoscopes/[sign]/[year]/[month]/page.tsx",
-      "line": 237,
-      "context": "href={`/grimoire/horoscopes/${sign}/${year}/${nextMonth}`}"
-    },
-    {
-      "url": "/grimoire/horoscopes/${sign}/${year}/${nextMonth}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/horoscopes/[sign]/[year]/[month]/page.tsx",
-      "line": 237,
-      "context": "href={`/grimoire/horoscopes/${sign}/${year}/${nextMonth}`}"
-    },
-    {
-      "url": "/grimoire/horoscopes/${s}/${year}/${month}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/horoscopes/[sign]/[year]/[month]/page.tsx",
-      "line": 250,
-      "context": "href={`/grimoire/horoscopes/${s}/${year}/${month}`}"
-    },
-    {
-      "url": "/grimoire/horoscopes/${s}/${year}/${month}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/horoscopes/[sign]/[year]/[month]/page.tsx",
-      "line": 250,
-      "context": "href={`/grimoire/horoscopes/${s}/${year}/${month}`}"
     },
     {
       "url": "/grimoire/horoscopes",
@@ -2809,54 +1777,6 @@
       "context": "<Link href='/grimoire/horoscopes' className='hover:text-zinc-300'>"
     },
     {
-      "url": "/grimoire/horoscopes/${sign}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/horoscopes/[sign]/[year]/page.tsx",
-      "line": 106,
-      "context": "href={`/grimoire/horoscopes/${sign}`}"
-    },
-    {
-      "url": "/grimoire/horoscopes/${sign}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/horoscopes/[sign]/[year]/page.tsx",
-      "line": 106,
-      "context": "href={`/grimoire/horoscopes/${sign}`}"
-    },
-    {
-      "url": "/grimoire/horoscopes/${sign}/${year}/${month}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/horoscopes/[sign]/[year]/page.tsx",
-      "line": 133,
-      "context": "href={`/grimoire/horoscopes/${sign}/${year}/${month}`}"
-    },
-    {
-      "url": "/grimoire/horoscopes/${sign}/${year}/${month}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/horoscopes/[sign]/[year]/page.tsx",
-      "line": 133,
-      "context": "href={`/grimoire/horoscopes/${sign}/${year}/${month}`}"
-    },
-    {
-      "url": "/grimoire/horoscopes/${sign}/${y}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/horoscopes/[sign]/[year]/page.tsx",
-      "line": 152,
-      "context": "href={`/grimoire/horoscopes/${sign}/${y}`}"
-    },
-    {
-      "url": "/grimoire/horoscopes/${sign}/${y}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/horoscopes/[sign]/[year]/page.tsx",
-      "line": 152,
-      "context": "href={`/grimoire/horoscopes/${sign}/${y}`}"
-    },
-    {
-      "url": "/grimoire/horoscopes/${s}/${year}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/horoscopes/[sign]/[year]/page.tsx",
-      "line": 169,
-      "context": "href={`/grimoire/horoscopes/${s}/${year}`}"
-    },
-    {
-      "url": "/grimoire/horoscopes/${s}/${year}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/horoscopes/[sign]/[year]/page.tsx",
-      "line": 169,
-      "context": "href={`/grimoire/horoscopes/${s}/${year}`}"
-    },
-    {
       "url": "/grimoire/horoscopes",
       "file": "/Users/sammii/development/lunary/src/app/grimoire/horoscopes/[sign]/page.tsx",
       "line": 79,
@@ -2869,64 +1789,16 @@
       "context": "<Link href='/grimoire/horoscopes' className='hover:text-zinc-300'>"
     },
     {
-      "url": "/grimoire/horoscopes/${sign}/${year}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/horoscopes/[sign]/page.tsx",
-      "line": 116,
-      "context": "href={`/grimoire/horoscopes/${sign}/${year}`}"
-    },
-    {
-      "url": "/grimoire/horoscopes/${sign}/${year}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/horoscopes/[sign]/page.tsx",
-      "line": 116,
-      "context": "href={`/grimoire/horoscopes/${sign}/${year}`}"
-    },
-    {
-      "url": "/grimoire/horoscopes/${s}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/horoscopes/[sign]/page.tsx",
-      "line": 138,
-      "context": "href={`/grimoire/horoscopes/${s}`}"
-    },
-    {
-      "url": "/grimoire/horoscopes/${s}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/horoscopes/[sign]/page.tsx",
-      "line": 138,
-      "context": "href={`/grimoire/horoscopes/${s}`}"
-    },
-    {
       "url": "/grimoire/horoscopes",
       "file": "/Users/sammii/development/lunary/src/app/grimoire/horoscopes/page.tsx",
       "line": 77,
       "context": "{ name: 'Horoscopes', url: '/grimoire/horoscopes' },"
     },
     {
-      "url": "/grimoire/houses/${planet}/${h}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/houses/[planet]/[house]/page.tsx",
-      "line": 169,
-      "context": "href={`/grimoire/houses/${planet}/${h}`}"
-    },
-    {
-      "url": "/grimoire/houses/${planet}/${h}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/houses/[planet]/[house]/page.tsx",
-      "line": 169,
-      "context": "href={`/grimoire/houses/${planet}/${h}`}"
-    },
-    {
       "url": "/grimoire/houses",
       "file": "/Users/sammii/development/lunary/src/app/grimoire/houses/[planet]/page.tsx",
       "line": 70,
       "context": "{ name: 'Houses', url: '/grimoire/houses' },"
-    },
-    {
-      "url": "/grimoire/houses/${planet}/${house}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/houses/[planet]/page.tsx",
-      "line": 109,
-      "context": "href={`/grimoire/houses/${planet}/${house}`}"
-    },
-    {
-      "url": "/grimoire/houses/${planet}/${house}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/houses/[planet]/page.tsx",
-      "line": 109,
-      "context": "href={`/grimoire/houses/${planet}/${house}`}"
     },
     {
       "url": "/grimoire/houses",
@@ -2941,12 +1813,6 @@
       "context": "href='/grimoire/astronomy/planets'"
     },
     {
-      "url": "/grimoire/houses/overview/${house}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/houses/overview/[house]/page.tsx",
-      "line": 148,
-      "context": "url: `/grimoire/houses/overview/${house}`,"
-    },
-    {
       "url": "/grimoire/houses",
       "file": "/Users/sammii/development/lunary/src/app/grimoire/houses/overview/page.tsx",
       "line": 135,
@@ -2957,18 +1823,6 @@
       "file": "/Users/sammii/development/lunary/src/app/grimoire/houses/overview/page.tsx",
       "line": 136,
       "context": "{ name: 'Overview', url: '/grimoire/houses/overview' },"
-    },
-    {
-      "url": "/grimoire/houses/overview/${house.slug}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/houses/overview/page.tsx",
-      "line": 174,
-      "context": "href={`/grimoire/houses/overview/${house.slug}`}"
-    },
-    {
-      "url": "/grimoire/houses/overview/${house.slug}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/houses/overview/page.tsx",
-      "line": 174,
-      "context": "href={`/grimoire/houses/overview/${house.slug}`}"
     },
     {
       "url": "/grimoire/houses",
@@ -2995,18 +1849,6 @@
       "context": "{ name: 'Houses', url: '/grimoire/houses' },"
     },
     {
-      "url": "/grimoire/houses/${planet}/1",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/houses/page.tsx",
-      "line": 132,
-      "context": "href={`/grimoire/houses/${planet}/1`}"
-    },
-    {
-      "url": "/grimoire/houses/${planet}/1",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/houses/page.tsx",
-      "line": 132,
-      "context": "href={`/grimoire/houses/${planet}/1`}"
-    },
-    {
       "url": "/grimoire/jar-spells",
       "file": "/Users/sammii/development/lunary/src/app/grimoire/jar-spells/page.tsx",
       "line": 134,
@@ -3019,52 +1861,10 @@
       "context": "href='/grimoire/correspondences'"
     },
     {
-      "url": "/grimoire/life-path/${number}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/life-path/[number]/page.tsx",
-      "line": 83,
-      "context": "url: `/grimoire/life-path/${number}`,"
-    },
-    {
-      "url": "/grimoire/life-path/${num}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/life-path/page.tsx",
-      "line": 211,
-      "context": "href={`/grimoire/life-path/${num}`}"
-    },
-    {
-      "url": "/grimoire/life-path/${num}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/life-path/page.tsx",
-      "line": 211,
-      "context": "href={`/grimoire/life-path/${num}`}"
-    },
-    {
-      "url": "/grimoire/life-path/${num}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/life-path/page.tsx",
-      "line": 240,
-      "context": "href={`/grimoire/life-path/${num}`}"
-    },
-    {
-      "url": "/grimoire/life-path/${num}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/life-path/page.tsx",
-      "line": 240,
-      "context": "href={`/grimoire/life-path/${num}`}"
-    },
-    {
       "url": "/grimoire/lunar-nodes",
       "file": "/Users/sammii/development/lunary/src/app/grimoire/lunar-nodes/page.tsx",
       "line": 88,
       "context": "{ name: 'Lunar Nodes', url: '/grimoire/lunar-nodes' },"
-    },
-    {
-      "url": "/grimoire/lunar-nodes/${node.slug}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/lunar-nodes/page.tsx",
-      "line": 140,
-      "context": "href={`/grimoire/lunar-nodes/${node.slug}`}"
-    },
-    {
-      "url": "/grimoire/lunar-nodes/${node.slug}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/lunar-nodes/page.tsx",
-      "line": 140,
-      "context": "href={`/grimoire/lunar-nodes/${node.slug}`}"
     },
     {
       "url": "/grimoire/birth-chart",
@@ -3097,22 +1897,22 @@
       "context": "{ name: 'Manifestation', url: '/grimoire/manifestation' },"
     },
     {
+      "url": "/grimoire/moon",
+      "file": "/Users/sammii/development/lunary/src/app/grimoire/manifestation/page.tsx",
+      "line": 335,
+      "context": "href='/grimoire/moon'"
+    },
+    {
+      "url": "/grimoire/moon",
+      "file": "/Users/sammii/development/lunary/src/app/grimoire/manifestation/page.tsx",
+      "line": 470,
+      "context": "href='/grimoire/moon'"
+    },
+    {
       "url": "/grimoire/moon/rituals",
       "file": "/Users/sammii/development/lunary/src/app/grimoire/manifestation/page.tsx",
       "line": 476,
       "context": "href='/grimoire/moon/rituals'"
-    },
-    {
-      "url": "/grimoire/meditation/breathwork/${technique.slug}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/meditation/breathwork/page.tsx",
-      "line": 286,
-      "context": "href={`/grimoire/meditation/breathwork/${technique.slug}`}"
-    },
-    {
-      "url": "/grimoire/meditation/breathwork/${technique.slug}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/meditation/breathwork/page.tsx",
-      "line": 286,
-      "context": "href={`/grimoire/meditation/breathwork/${technique.slug}`}"
     },
     {
       "url": "/grimoire/meditation",
@@ -3125,18 +1925,6 @@
       "file": "/Users/sammii/development/lunary/src/app/grimoire/meditation/grounding/page.tsx",
       "line": 82,
       "context": "{ name: 'Grounding', url: '/grimoire/meditation/grounding' },"
-    },
-    {
-      "url": "/grimoire/meditation/grounding/${technique.slug}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/meditation/grounding/page.tsx",
-      "line": 130,
-      "context": "href={`/grimoire/meditation/grounding/${technique.slug}`}"
-    },
-    {
-      "url": "/grimoire/meditation/grounding/${technique.slug}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/meditation/grounding/page.tsx",
-      "line": 130,
-      "context": "href={`/grimoire/meditation/grounding/${technique.slug}`}"
     },
     {
       "url": "/grimoire/meditation",
@@ -3187,18 +1975,6 @@
       "context": "{ name: 'Techniques', url: '/grimoire/meditation/techniques' },"
     },
     {
-      "url": "/grimoire/meditation/techniques/${technique.slug}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/meditation/techniques/page.tsx",
-      "line": 142,
-      "context": "href={`/grimoire/meditation/techniques/${technique.slug}`}"
-    },
-    {
-      "url": "/grimoire/meditation/techniques/${technique.slug}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/meditation/techniques/page.tsx",
-      "line": 142,
-      "context": "href={`/grimoire/meditation/techniques/${technique.slug}`}"
-    },
-    {
       "url": "/grimoire/meditation",
       "file": "/Users/sammii/development/lunary/src/app/grimoire/meditation/techniques/page.tsx",
       "line": 169,
@@ -3223,12 +1999,6 @@
       "context": "href='/grimoire/chakras'"
     },
     {
-      "url": "/grimoire/mirror-hours/${time}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/mirror-hours/[time]/page.tsx",
-      "line": 95,
-      "context": "url: `/grimoire/mirror-hours/${time}`,"
-    },
-    {
       "url": "/grimoire/numerology",
       "file": "/Users/sammii/development/lunary/src/app/grimoire/mirror-hours/page.tsx",
       "line": 82,
@@ -3241,18 +2011,6 @@
       "context": "{ name: 'Mirror Hours', url: '/grimoire/mirror-hours' },"
     },
     {
-      "url": "/grimoire/mirror-hours/${time.replace(':', '-')}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/mirror-hours/page.tsx",
-      "line": 131,
-      "context": "href={`/grimoire/mirror-hours/${time.replace(':', '-')}`}"
-    },
-    {
-      "url": "/grimoire/mirror-hours/${time.replace(':', '-')}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/mirror-hours/page.tsx",
-      "line": 131,
-      "context": "href={`/grimoire/mirror-hours/${time.replace(':', '-')}`}"
-    },
-    {
       "url": "/grimoire/modern-witchcraft",
       "file": "/Users/sammii/development/lunary/src/app/grimoire/modern-witchcraft/famous-witches/page.tsx",
       "line": 75,
@@ -3263,18 +2021,6 @@
       "file": "/Users/sammii/development/lunary/src/app/grimoire/modern-witchcraft/famous-witches/page.tsx",
       "line": 78,
       "context": "url: '/grimoire/modern-witchcraft/famous-witches',"
-    },
-    {
-      "url": "/grimoire/modern-witchcraft/famous-witches/${witch.slug}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/modern-witchcraft/famous-witches/page.tsx",
-      "line": 120,
-      "context": "href={`/grimoire/modern-witchcraft/famous-witches/${witch.slug}`}"
-    },
-    {
-      "url": "/grimoire/modern-witchcraft/famous-witches/${witch.slug}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/modern-witchcraft/famous-witches/page.tsx",
-      "line": 120,
-      "context": "href={`/grimoire/modern-witchcraft/famous-witches/${witch.slug}`}"
     },
     {
       "url": "/grimoire/modern-witchcraft",
@@ -3379,18 +2125,6 @@
       "context": "{ name: 'Tools', url: '/grimoire/modern-witchcraft/tools' },"
     },
     {
-      "url": "/grimoire/modern-witchcraft/tools/${tool.slug}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/modern-witchcraft/tools/page.tsx",
-      "line": 170,
-      "context": "href={`/grimoire/modern-witchcraft/tools/${tool.slug}`}"
-    },
-    {
-      "url": "/grimoire/modern-witchcraft/tools/${tool.slug}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/modern-witchcraft/tools/page.tsx",
-      "line": 170,
-      "context": "href={`/grimoire/modern-witchcraft/tools/${tool.slug}`}"
-    },
-    {
       "url": "/grimoire/modern-witchcraft",
       "file": "/Users/sammii/development/lunary/src/app/grimoire/modern-witchcraft/tools/page.tsx",
       "line": 195,
@@ -3457,18 +2191,6 @@
       "context": "{ name: 'Witch Types', url: '/grimoire/modern-witchcraft/witch-types' },"
     },
     {
-      "url": "/grimoire/modern-witchcraft/witch-types/${witch.slug}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/modern-witchcraft/witch-types/page.tsx",
-      "line": 172,
-      "context": "href={`/grimoire/modern-witchcraft/witch-types/${witch.slug}`}"
-    },
-    {
-      "url": "/grimoire/modern-witchcraft/witch-types/${witch.slug}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/modern-witchcraft/witch-types/page.tsx",
-      "line": 172,
-      "context": "href={`/grimoire/modern-witchcraft/witch-types/${witch.slug}`}"
-    },
-    {
       "url": "/grimoire/modern-witchcraft",
       "file": "/Users/sammii/development/lunary/src/app/grimoire/modern-witchcraft/witch-types/page.tsx",
       "line": 216,
@@ -3493,96 +2215,6 @@
       "context": "href='/grimoire/spells/fundamentals'"
     },
     {
-      "url": "/grimoire/moon",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/moon/2026/page.tsx",
-      "line": 80,
-      "context": "{ name: 'Moon', url: '/grimoire/moon' },"
-    },
-    {
-      "url": "/grimoire/moon/2026",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/moon/2026/page.tsx",
-      "line": 81,
-      "context": "{ name: '2026', url: '/grimoire/moon/2026' },"
-    },
-    {
-      "url": "/grimoire/moon/2026/full-moon-${moon.month.toLowerCase()}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/moon/2026/page.tsx",
-      "line": 118,
-      "context": "href={`/grimoire/moon/2026/full-moon-${moon.month.toLowerCase()}`}"
-    },
-    {
-      "url": "/grimoire/moon/2026/full-moon-${moon.month.toLowerCase()}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/moon/2026/page.tsx",
-      "line": 118,
-      "context": "href={`/grimoire/moon/2026/full-moon-${moon.month.toLowerCase()}`}"
-    },
-    {
-      "url": "/grimoire/moon/2026/new-moon-${moon.month.toLowerCase()}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/moon/2026/page.tsx",
-      "line": 147,
-      "context": "href={`/grimoire/moon/2026/new-moon-${moon.month.toLowerCase()}`}"
-    },
-    {
-      "url": "/grimoire/moon/2026/new-moon-${moon.month.toLowerCase()}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/moon/2026/page.tsx",
-      "line": 147,
-      "context": "href={`/grimoire/moon/2026/new-moon-${moon.month.toLowerCase()}`}"
-    },
-    {
-      "url": "/grimoire/moon/${year}/full-moon-${moon.month.toLowerCase()}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/moon/[year]/page.tsx",
-      "line": 251,
-      "context": "href={`/grimoire/moon/${year}/full-moon-${moon.month.toLowerCase()}`}"
-    },
-    {
-      "url": "/grimoire/moon/${year}/full-moon-${moon.month.toLowerCase()}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/moon/[year]/page.tsx",
-      "line": 251,
-      "context": "href={`/grimoire/moon/${year}/full-moon-${moon.month.toLowerCase()}`}"
-    },
-    {
-      "url": "/grimoire/moon/${year}/new-moon-${moon.month.toLowerCase()}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/moon/[year]/page.tsx",
-      "line": 280,
-      "context": "href={`/grimoire/moon/${year}/new-moon-${moon.month.toLowerCase()}`}"
-    },
-    {
-      "url": "/grimoire/moon/${year}/new-moon-${moon.month.toLowerCase()}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/moon/[year]/page.tsx",
-      "line": 280,
-      "context": "href={`/grimoire/moon/${year}/new-moon-${moon.month.toLowerCase()}`}"
-    },
-    {
-      "url": "/grimoire/moon/full-moons/${stringToKebabCase(month)}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/moon/full-moons/page.tsx",
-      "line": 231,
-      "context": "href={`/grimoire/moon/full-moons/${stringToKebabCase(month)}`}"
-    },
-    {
-      "url": "/grimoire/moon/full-moons/${stringToKebabCase(month)}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/moon/full-moons/page.tsx",
-      "line": 231,
-      "context": "href={`/grimoire/moon/full-moons/${stringToKebabCase(month)}`}"
-    },
-    {
-      "url": "/grimoire/moon/phases/${phase}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/moon/phases/[phase]/page.tsx",
-      "line": 202,
-      "context": "url: `/grimoire/moon/phases/${phase}`,"
-    },
-    {
-      "url": "/grimoire/moon/phases/${stringToKebabCase(key)}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/moon/phases/page.tsx",
-      "line": 232,
-      "context": "href={`/grimoire/moon/phases/${stringToKebabCase(key)}`}"
-    },
-    {
-      "url": "/grimoire/moon/phases/${stringToKebabCase(key)}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/moon/phases/page.tsx",
-      "line": 232,
-      "context": "href={`/grimoire/moon/phases/${stringToKebabCase(key)}`}"
-    },
-    {
       "url": "/grimoire/crystals",
       "file": "/Users/sammii/development/lunary/src/app/grimoire/moon/rituals/page.tsx",
       "line": 553,
@@ -3601,82 +2233,16 @@
       "context": "href='/grimoire/tarot'"
     },
     {
+      "url": "/grimoire/moon",
+      "file": "/Users/sammii/development/lunary/src/app/grimoire/moon/rituals/page.tsx",
+      "line": 649,
+      "context": "<Link href='/grimoire/moon'>Today&apos;s Moon Phase</Link>"
+    },
+    {
       "url": "/grimoire/guides/moon-phases-guide",
       "file": "/Users/sammii/development/lunary/src/app/grimoire/moon/rituals/page.tsx",
       "line": 652,
       "context": "<Link href='/grimoire/guides/moon-phases-guide'>"
-    },
-    {
-      "url": "/grimoire/moon-in/${stringToKebabCase(key)}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/moon-in/page.tsx",
-      "line": 215,
-      "context": "href={`/grimoire/moon-in/${stringToKebabCase(key)}`}"
-    },
-    {
-      "url": "/grimoire/moon-in/${stringToKebabCase(key)}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/moon-in/page.tsx",
-      "line": 215,
-      "context": "href={`/grimoire/moon-in/${stringToKebabCase(key)}`}"
-    },
-    {
-      "url": "/grimoire/numerology/core-numbers/${number}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/numerology/core-numbers/page.tsx",
-      "line": 209,
-      "context": "href={`/grimoire/numerology/core-numbers/${number}`}"
-    },
-    {
-      "url": "/grimoire/numerology/core-numbers/${number}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/numerology/core-numbers/page.tsx",
-      "line": 209,
-      "context": "href={`/grimoire/numerology/core-numbers/${number}`}"
-    },
-    {
-      "url": "/grimoire/numerology/expression/${number}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/numerology/expression/page.tsx",
-      "line": 217,
-      "context": "href={`/grimoire/numerology/expression/${number}`}"
-    },
-    {
-      "url": "/grimoire/numerology/expression/${number}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/numerology/expression/page.tsx",
-      "line": 217,
-      "context": "href={`/grimoire/numerology/expression/${number}`}"
-    },
-    {
-      "url": "/grimoire/numerology/expression/${number}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/numerology/expression/page.tsx",
-      "line": 254,
-      "context": "href={`/grimoire/numerology/expression/${number}`}"
-    },
-    {
-      "url": "/grimoire/numerology/expression/${number}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/numerology/expression/page.tsx",
-      "line": 254,
-      "context": "href={`/grimoire/numerology/expression/${number}`}"
-    },
-    {
-      "url": "/grimoire/numerology/karmic-debt/${number}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/numerology/karmic-debt/page.tsx",
-      "line": 208,
-      "context": "href={`/grimoire/numerology/karmic-debt/${number}`}"
-    },
-    {
-      "url": "/grimoire/numerology/karmic-debt/${number}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/numerology/karmic-debt/page.tsx",
-      "line": 208,
-      "context": "href={`/grimoire/numerology/karmic-debt/${number}`}"
-    },
-    {
-      "url": "/grimoire/numerology/master-numbers/${number}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/numerology/master-numbers/page.tsx",
-      "line": 226,
-      "context": "href={`/grimoire/numerology/master-numbers/${number}`}"
-    },
-    {
-      "url": "/grimoire/numerology/master-numbers/${number}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/numerology/master-numbers/page.tsx",
-      "line": 226,
-      "context": "href={`/grimoire/numerology/master-numbers/${number}`}"
     },
     {
       "url": "/grimoire/numerology",
@@ -3685,52 +2251,16 @@
       "context": "{ name: 'Numerology', url: '/grimoire/numerology' },"
     },
     {
-      "url": "/grimoire/numerology/year/${currentYear}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/numerology/page.tsx",
-      "line": 208,
-      "context": "href={`/grimoire/numerology/year/${currentYear}`}"
-    },
-    {
-      "url": "/grimoire/numerology/year/${currentYear}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/numerology/page.tsx",
-      "line": 208,
-      "context": "href={`/grimoire/numerology/year/${currentYear}`}"
-    },
-    {
       "url": "/grimoire/angel-numbers",
       "file": "/Users/sammii/development/lunary/src/app/grimoire/numerology/page.tsx",
       "line": 215,
       "context": "<Link href='/grimoire/angel-numbers' className='group block'>"
     },
     {
-      "url": "/grimoire/angel-numbers/${num}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/numerology/page.tsx",
-      "line": 232,
-      "context": "href={`/grimoire/angel-numbers/${num}`}"
-    },
-    {
-      "url": "/grimoire/angel-numbers/${num}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/numerology/page.tsx",
-      "line": 232,
-      "context": "href={`/grimoire/angel-numbers/${num}`}"
-    },
-    {
       "url": "/grimoire/life-path",
       "file": "/Users/sammii/development/lunary/src/app/grimoire/numerology/page.tsx",
       "line": 245,
       "context": "<Link href='/grimoire/life-path' className='group block'>"
-    },
-    {
-      "url": "/grimoire/life-path/${num}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/numerology/page.tsx",
-      "line": 262,
-      "context": "href={`/grimoire/life-path/${num}`}"
-    },
-    {
-      "url": "/grimoire/life-path/${num}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/numerology/page.tsx",
-      "line": 262,
-      "context": "href={`/grimoire/life-path/${num}`}"
     },
     {
       "url": "/grimoire/numerology/core-numbers",
@@ -3745,34 +2275,10 @@
       "context": "<Link href='/grimoire/numerology/expression' className='group'>"
     },
     {
-      "url": "/grimoire/numerology/expression/${num}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/numerology/page.tsx",
-      "line": 306,
-      "context": "href={`/grimoire/numerology/expression/${num}`}"
-    },
-    {
-      "url": "/grimoire/numerology/expression/${num}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/numerology/page.tsx",
-      "line": 306,
-      "context": "href={`/grimoire/numerology/expression/${num}`}"
-    },
-    {
       "url": "/grimoire/numerology/soul-urge",
       "file": "/Users/sammii/development/lunary/src/app/grimoire/numerology/page.tsx",
       "line": 315,
       "context": "<Link href='/grimoire/numerology/soul-urge' className='group'>"
-    },
-    {
-      "url": "/grimoire/numerology/soul-urge/${num}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/numerology/page.tsx",
-      "line": 333,
-      "context": "href={`/grimoire/numerology/soul-urge/${num}`}"
-    },
-    {
-      "url": "/grimoire/numerology/soul-urge/${num}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/numerology/page.tsx",
-      "line": 333,
-      "context": "href={`/grimoire/numerology/soul-urge/${num}`}"
     },
     {
       "url": "/grimoire/numerology/karmic-debt",
@@ -3781,64 +2287,16 @@
       "context": "<Link href='/grimoire/numerology/karmic-debt' className='group'>"
     },
     {
-      "url": "/grimoire/numerology/karmic-debt/${num}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/numerology/page.tsx",
-      "line": 357,
-      "context": "href={`/grimoire/numerology/karmic-debt/${num}`}"
-    },
-    {
-      "url": "/grimoire/numerology/karmic-debt/${num}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/numerology/page.tsx",
-      "line": 357,
-      "context": "href={`/grimoire/numerology/karmic-debt/${num}`}"
-    },
-    {
       "url": "/grimoire/mirror-hours",
       "file": "/Users/sammii/development/lunary/src/app/grimoire/numerology/page.tsx",
       "line": 374,
       "context": "<Link href='/grimoire/mirror-hours' className='group'>"
     },
     {
-      "url": "/grimoire/mirror-hours/${time.replace(':', '-')}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/numerology/page.tsx",
-      "line": 389,
-      "context": "href={`/grimoire/mirror-hours/${time.replace(':', '-')}`}"
-    },
-    {
-      "url": "/grimoire/mirror-hours/${time.replace(':', '-')}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/numerology/page.tsx",
-      "line": 389,
-      "context": "href={`/grimoire/mirror-hours/${time.replace(':', '-')}`}"
-    },
-    {
       "url": "/grimoire/double-hours",
       "file": "/Users/sammii/development/lunary/src/app/grimoire/numerology/page.tsx",
       "line": 398,
       "context": "<Link href='/grimoire/double-hours' className='group'>"
-    },
-    {
-      "url": "/grimoire/double-hours/${time.replace(':', '-')}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/numerology/page.tsx",
-      "line": 413,
-      "context": "href={`/grimoire/double-hours/${time.replace(':', '-')}`}"
-    },
-    {
-      "url": "/grimoire/double-hours/${time.replace(':', '-')}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/numerology/page.tsx",
-      "line": 413,
-      "context": "href={`/grimoire/double-hours/${time.replace(':', '-')}`}"
-    },
-    {
-      "url": "/grimoire/numerology/year/${year}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/numerology/page.tsx",
-      "line": 457,
-      "context": "href={`/grimoire/numerology/year/${year}`}"
-    },
-    {
-      "url": "/grimoire/numerology/year/${year}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/numerology/page.tsx",
-      "line": 457,
-      "context": "href={`/grimoire/numerology/year/${year}`}"
     },
     {
       "url": "/grimoire/numerology",
@@ -3851,18 +2309,6 @@
       "file": "/Users/sammii/development/lunary/src/app/grimoire/numerology/planetary-days/page.tsx",
       "line": 95,
       "context": "{ name: 'Planetary Days', url: '/grimoire/numerology/planetary-days' },"
-    },
-    {
-      "url": "/grimoire/numerology/planetary-days/${day.day}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/numerology/planetary-days/page.tsx",
-      "line": 143,
-      "context": "href={`/grimoire/numerology/planetary-days/${day.day}`}"
-    },
-    {
-      "url": "/grimoire/numerology/planetary-days/${day.day}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/numerology/planetary-days/page.tsx",
-      "line": 143,
-      "context": "href={`/grimoire/numerology/planetary-days/${day.day}`}"
     },
     {
       "url": "/grimoire/correspondences",
@@ -3889,42 +2335,6 @@
       "context": "href='/grimoire/astronomy'"
     },
     {
-      "url": "/grimoire/numerology/soul-urge/${number}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/numerology/soul-urge/page.tsx",
-      "line": 207,
-      "context": "href={`/grimoire/numerology/soul-urge/${number}`}"
-    },
-    {
-      "url": "/grimoire/numerology/soul-urge/${number}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/numerology/soul-urge/page.tsx",
-      "line": 207,
-      "context": "href={`/grimoire/numerology/soul-urge/${number}`}"
-    },
-    {
-      "url": "/grimoire/numerology/soul-urge/${number}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/numerology/soul-urge/page.tsx",
-      "line": 244,
-      "context": "href={`/grimoire/numerology/soul-urge/${number}`}"
-    },
-    {
-      "url": "/grimoire/numerology/soul-urge/${number}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/numerology/soul-urge/page.tsx",
-      "line": 244,
-      "context": "href={`/grimoire/numerology/soul-urge/${number}`}"
-    },
-    {
-      "url": "/grimoire/numerology/year/${y}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/numerology/year/[year]/page.tsx",
-      "line": 178,
-      "context": "href={`/grimoire/numerology/year/${y}`}"
-    },
-    {
-      "url": "/grimoire/numerology/year/${y}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/numerology/year/[year]/page.tsx",
-      "line": 178,
-      "context": "href={`/grimoire/numerology/year/${y}`}"
-    },
-    {
       "url": "/grimoire/numerology",
       "file": "/Users/sammii/development/lunary/src/app/grimoire/numerology/year/page.tsx",
       "line": 83,
@@ -3935,18 +2345,6 @@
       "file": "/Users/sammii/development/lunary/src/app/grimoire/numerology/year/page.tsx",
       "line": 84,
       "context": "{ name: 'Year', url: '/grimoire/numerology/year' },"
-    },
-    {
-      "url": "/grimoire/numerology/year/${year.number}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/numerology/year/page.tsx",
-      "line": 128,
-      "context": "href={`/grimoire/numerology/year/${year.number}`}"
-    },
-    {
-      "url": "/grimoire/numerology/year/${year.number}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/numerology/year/page.tsx",
-      "line": 128,
-      "context": "href={`/grimoire/numerology/year/${year.number}`}"
     },
     {
       "url": "/grimoire/numerology",
@@ -3979,30 +2377,6 @@
       "context": "{ name: 'Placements', url: '/grimoire/placements' },"
     },
     {
-      "url": "/grimoire/astronomy/planets/${parsed.planet}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/placements/[placement]/page.tsx",
-      "line": 252,
-      "context": "href={`/grimoire/astronomy/planets/${parsed.planet}`}"
-    },
-    {
-      "url": "/grimoire/astronomy/planets/${parsed.planet}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/placements/[placement]/page.tsx",
-      "line": 252,
-      "context": "href={`/grimoire/astronomy/planets/${parsed.planet}`}"
-    },
-    {
-      "url": "/grimoire/zodiac/${parsed.sign}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/placements/[placement]/page.tsx",
-      "line": 262,
-      "context": "href={`/grimoire/zodiac/${parsed.sign}`}"
-    },
-    {
-      "url": "/grimoire/zodiac/${parsed.sign}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/placements/[placement]/page.tsx",
-      "line": 262,
-      "context": "href={`/grimoire/zodiac/${parsed.sign}`}"
-    },
-    {
       "url": "/grimoire/houses/overview",
       "file": "/Users/sammii/development/lunary/src/app/grimoire/placements/[placement]/page.tsx",
       "line": 270,
@@ -4027,58 +2401,10 @@
       "context": "href='/grimoire/placements'"
     },
     {
-      "url": "/grimoire/placements/${p.slug}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/placements/[placement]/page.tsx",
-      "line": 318,
-      "context": "href={`/grimoire/placements/${p.slug}`}"
-    },
-    {
-      "url": "/grimoire/placements/${p.slug}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/placements/[placement]/page.tsx",
-      "line": 318,
-      "context": "href={`/grimoire/placements/${p.slug}`}"
-    },
-    {
-      "url": "/grimoire/placements/${p.slug}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/placements/[placement]/page.tsx",
-      "line": 334,
-      "context": "href={`/grimoire/placements/${p.slug}`}"
-    },
-    {
-      "url": "/grimoire/placements/${p.slug}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/placements/[placement]/page.tsx",
-      "line": 334,
-      "context": "href={`/grimoire/placements/${p.slug}`}"
-    },
-    {
       "url": "/grimoire/placements",
       "file": "/Users/sammii/development/lunary/src/app/grimoire/placements/page.tsx",
       "line": 101,
       "context": "{ name: 'Placements', url: '/grimoire/placements' },"
-    },
-    {
-      "url": "/grimoire/placements/${planetKey}-in-${signKey}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/placements/page.tsx",
-      "line": 179,
-      "context": "href={`/grimoire/placements/${planetKey}-in-${signKey}`}"
-    },
-    {
-      "url": "/grimoire/placements/${planetKey}-in-${signKey}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/placements/page.tsx",
-      "line": 179,
-      "context": "href={`/grimoire/placements/${planetKey}-in-${signKey}`}"
-    },
-    {
-      "url": "/grimoire/zodiac/${signKey}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/placements/page.tsx",
-      "line": 210,
-      "context": "href={`/grimoire/zodiac/${signKey}`}"
-    },
-    {
-      "url": "/grimoire/zodiac/${signKey}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/placements/page.tsx",
-      "line": 210,
-      "context": "href={`/grimoire/zodiac/${signKey}`}"
     },
     {
       "url": "/grimoire/protection",
@@ -4117,18 +2443,6 @@
       "context": "href='/grimoire/tarot/spreads'"
     },
     {
-      "url": "/grimoire/runes/${rune}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/runes/[rune]/page.tsx",
-      "line": 43,
-      "context": "url: `/grimoire/runes/${rune}`,"
-    },
-    {
-      "url": "/grimoire/runes/${rune}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/runes/[rune]/page.tsx",
-      "line": 92,
-      "context": "url: `/grimoire/runes/${rune}`,"
-    },
-    {
       "url": "/grimoire/runes",
       "file": "/Users/sammii/development/lunary/src/app/grimoire/runes/page.tsx",
       "line": 112,
@@ -4141,88 +2455,16 @@
       "context": "{ name: 'Sabbats', url: '/grimoire/sabbats' },"
     },
     {
-      "url": "/grimoire/sabbats/${stringToKebabCase(sabbat.name.split(' ')[0])}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/sabbats/page.tsx",
-      "line": 139,
-      "context": "href={`/grimoire/sabbats/${stringToKebabCase(sabbat.name.split(' ')[0])}`}"
-    },
-    {
-      "url": "/grimoire/sabbats/${stringToKebabCase(sabbat.name.split(' ')[0])}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/sabbats/page.tsx",
-      "line": 139,
-      "context": "href={`/grimoire/sabbats/${stringToKebabCase(sabbat.name.split(' ')[0])}`}"
-    },
-    {
-      "url": "/grimoire/${entry.slug}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/search/page.tsx",
-      "line": 77,
-      "context": "href={`/grimoire/${entry.slug}`}"
-    },
-    {
-      "url": "/grimoire/${entry.slug}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/search/page.tsx",
-      "line": 77,
-      "context": "href={`/grimoire/${entry.slug}`}"
-    },
-    {
       "url": "/grimoire/search",
       "file": "/Users/sammii/development/lunary/src/app/grimoire/search/page.tsx",
-      "line": 143,
+      "line": 146,
       "context": "{ name: 'Search', url: '/grimoire/search' },"
-    },
-    {
-      "url": "/grimoire/${category === 'planet' ? 'astronomy' : category === 'concept' ? '' : category}${category === 'concept' ? '' : ''}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/search/page.tsx",
-      "line": 204,
-      "context": "href={`/grimoire/${category === 'planet' ? 'astronomy' : category === 'concept' ? '' : category}${category === 'concept' ? '' : ''}`}"
-    },
-    {
-      "url": "/grimoire/${category === 'planet' ? 'astronomy' : category === 'concept' ? '' : category}${category === 'concept' ? '' : ''}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/search/page.tsx",
-      "line": 204,
-      "context": "href={`/grimoire/${category === 'planet' ? 'astronomy' : category === 'concept' ? '' : category}${category === 'concept' ? '' : ''}`}"
-    },
-    {
-      "url": "/grimoire/seasons/${year}/${prevSeason.sign}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/seasons/[year]/[season]/page.tsx",
-      "line": 176,
-      "context": "href={`/grimoire/seasons/${year}/${prevSeason.sign}`}"
-    },
-    {
-      "url": "/grimoire/seasons/${year}/${prevSeason.sign}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/seasons/[year]/[season]/page.tsx",
-      "line": 176,
-      "context": "href={`/grimoire/seasons/${year}/${prevSeason.sign}`}"
-    },
-    {
-      "url": "/grimoire/seasons/${year}/${nextSeason.sign}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/seasons/[year]/[season]/page.tsx",
-      "line": 182,
-      "context": "href={`/grimoire/seasons/${year}/${nextSeason.sign}`}"
-    },
-    {
-      "url": "/grimoire/seasons/${year}/${nextSeason.sign}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/seasons/[year]/[season]/page.tsx",
-      "line": 182,
-      "context": "href={`/grimoire/seasons/${year}/${nextSeason.sign}`}"
     },
     {
       "url": "/grimoire/seasons",
       "file": "/Users/sammii/development/lunary/src/app/grimoire/seasons/[year]/page.tsx",
       "line": 136,
       "context": "{ name: 'Seasons', url: '/grimoire/seasons' },"
-    },
-    {
-      "url": "/grimoire/seasons/${year}/${season.slug}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/seasons/[year]/page.tsx",
-      "line": 172,
-      "context": "href={`/grimoire/seasons/${year}/${season.slug}`}"
-    },
-    {
-      "url": "/grimoire/seasons/${year}/${season.slug}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/seasons/[year]/page.tsx",
-      "line": 172,
-      "context": "href={`/grimoire/seasons/${year}/${season.slug}`}"
     },
     {
       "url": "/grimoire/seasons",
@@ -4249,46 +2491,10 @@
       "context": "{ name: 'Seasons', url: '/grimoire/seasons' },"
     },
     {
-      "url": "/grimoire/seasons/${year}/${s.sign}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/seasons/page.tsx",
-      "line": 101,
-      "context": "href={`/grimoire/seasons/${year}/${s.sign}`}"
-    },
-    {
-      "url": "/grimoire/seasons/${year}/${s.sign}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/seasons/page.tsx",
-      "line": 101,
-      "context": "href={`/grimoire/seasons/${year}/${s.sign}`}"
-    },
-    {
       "url": "/grimoire/shadow-work",
       "file": "/Users/sammii/development/lunary/src/app/grimoire/shadow-work/page.tsx",
       "line": 92,
       "context": "{ name: 'Shadow Work', url: '/grimoire/shadow-work' },"
-    },
-    {
-      "url": "/grimoire/spells/${spell.id}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/spells/SpellsClient.tsx",
-      "line": 375,
-      "context": "href={`/grimoire/spells/${spell.id}`}"
-    },
-    {
-      "url": "/grimoire/spells/${spell.id}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/spells/SpellsClient.tsx",
-      "line": 375,
-      "context": "href={`/grimoire/spells/${spell.id}`}"
-    },
-    {
-      "url": "/grimoire/moon/phases/${stringToKebabCase(phase)}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/spells/[spellId]/page.tsx",
-      "line": 229,
-      "context": "href={`/grimoire/moon/phases/${stringToKebabCase(phase)}`}"
-    },
-    {
-      "url": "/grimoire/moon/phases/${stringToKebabCase(phase)}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/spells/[spellId]/page.tsx",
-      "line": 229,
-      "context": "href={`/grimoire/moon/phases/${stringToKebabCase(phase)}`}"
     },
     {
       "url": "/grimoire/correspondences/elements",
@@ -4307,30 +2513,6 @@
       "file": "/Users/sammii/development/lunary/src/app/grimoire/spells/[spellId]/page.tsx",
       "line": 370,
       "context": "href='/grimoire/correspondences/colors'"
-    },
-    {
-      "url": "/grimoire/crystals/${stringToKebabCase(crystal)}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/spells/[spellId]/page.tsx",
-      "line": 386,
-      "context": "href={`/grimoire/crystals/${stringToKebabCase(crystal)}`}"
-    },
-    {
-      "url": "/grimoire/crystals/${stringToKebabCase(crystal)}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/spells/[spellId]/page.tsx",
-      "line": 386,
-      "context": "href={`/grimoire/crystals/${stringToKebabCase(crystal)}`}"
-    },
-    {
-      "url": "/grimoire/astronomy/planets/${planet.toLowerCase()}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/spells/[spellId]/page.tsx",
-      "line": 402,
-      "context": "href={`/grimoire/astronomy/planets/${planet.toLowerCase()}`}"
-    },
-    {
-      "url": "/grimoire/astronomy/planets/${planet.toLowerCase()}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/spells/[spellId]/page.tsx",
-      "line": 402,
-      "context": "href={`/grimoire/astronomy/planets/${planet.toLowerCase()}`}"
     },
     {
       "url": "/grimoire/spells",
@@ -4423,46 +2605,10 @@
       "context": "href='/grimoire/synastry'"
     },
     {
-      "url": "/grimoire/tarot/${stringToKebabCase(card.name)}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/tarot/page.tsx",
-      "line": 145,
-      "context": "href={`/grimoire/tarot/${stringToKebabCase(card.name)}`}"
-    },
-    {
-      "url": "/grimoire/tarot/${stringToKebabCase(card.name)}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/tarot/page.tsx",
-      "line": 145,
-      "context": "href={`/grimoire/tarot/${stringToKebabCase(card.name)}`}"
-    },
-    {
-      "url": "/grimoire/tarot/suits/${key}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/tarot/page.tsx",
-      "line": 169,
-      "context": "href={`/grimoire/tarot/suits/${key}`}"
-    },
-    {
-      "url": "/grimoire/tarot/suits/${key}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/tarot/page.tsx",
-      "line": 169,
-      "context": "href={`/grimoire/tarot/suits/${key}`}"
-    },
-    {
       "url": "/grimoire/tarot/spreads",
       "file": "/Users/sammii/development/lunary/src/app/grimoire/tarot/page.tsx",
       "line": 193,
       "context": "href='/grimoire/tarot/spreads'"
-    },
-    {
-      "url": "/grimoire/tarot/spreads/${stringToKebabCase(spread.slug)}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/tarot/spreads/page.tsx",
-      "line": 215,
-      "context": "href={`/grimoire/tarot/spreads/${stringToKebabCase(spread.slug)}`}"
-    },
-    {
-      "url": "/grimoire/tarot/spreads/${stringToKebabCase(spread.slug)}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/tarot/spreads/page.tsx",
-      "line": 215,
-      "context": "href={`/grimoire/tarot/spreads/${stringToKebabCase(spread.slug)}`}"
     },
     {
       "url": "/grimoire/tarot",
@@ -4475,30 +2621,6 @@
       "file": "/Users/sammii/development/lunary/src/app/grimoire/tarot/suits/page.tsx",
       "line": 125,
       "context": "{ name: 'Suits', url: '/grimoire/tarot/suits' },"
-    },
-    {
-      "url": "/grimoire/tarot/suits/${key}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/tarot/suits/page.tsx",
-      "line": 168,
-      "context": "href={`/grimoire/tarot/suits/${key}`}"
-    },
-    {
-      "url": "/grimoire/tarot/suits/${key}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/tarot/suits/page.tsx",
-      "line": 168,
-      "context": "href={`/grimoire/tarot/suits/${key}`}"
-    },
-    {
-      "url": "/grimoire/tarot/suits/${key}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/tarot/suits/page.tsx",
-      "line": 194,
-      "context": "href={`/grimoire/tarot/suits/${key}`}"
-    },
-    {
-      "url": "/grimoire/tarot/suits/${key}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/tarot/suits/page.tsx",
-      "line": 194,
-      "context": "href={`/grimoire/tarot/suits/${key}`}"
     },
     {
       "url": "/grimoire/tarot",
@@ -4519,46 +2641,10 @@
       "context": "href='/grimoire/reversed-cards-guide'"
     },
     {
-      "url": "/grimoire/transits/${t.id}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/transits/[transit]/page.tsx",
-      "line": 152,
-      "context": "href={`/grimoire/transits/${t.id}`}"
-    },
-    {
-      "url": "/grimoire/transits/${t.id}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/transits/[transit]/page.tsx",
-      "line": 152,
-      "context": "href={`/grimoire/transits/${t.id}`}"
-    },
-    {
       "url": "/grimoire/transits",
       "file": "/Users/sammii/development/lunary/src/app/grimoire/transits/page.tsx",
       "line": 84,
       "context": "{ name: 'Transits', url: '/grimoire/transits' },"
-    },
-    {
-      "url": "/grimoire/transits/${transit.id}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/transits/page.tsx",
-      "line": 129,
-      "context": "href={`/grimoire/transits/${transit.id}`}"
-    },
-    {
-      "url": "/grimoire/transits/${transit.id}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/transits/page.tsx",
-      "line": 129,
-      "context": "href={`/grimoire/transits/${transit.id}`}"
-    },
-    {
-      "url": "/grimoire/wheel-of-the-year/${sabbat}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/wheel-of-the-year/[sabbat]/page.tsx",
-      "line": 39,
-      "context": "url: `/grimoire/wheel-of-the-year/${sabbat}`,"
-    },
-    {
-      "url": "/grimoire/wheel-of-the-year/${sabbat}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/wheel-of-the-year/[sabbat]/page.tsx",
-      "line": 87,
-      "context": "url: `/grimoire/wheel-of-the-year/${sabbat}`,"
     },
     {
       "url": "/grimoire/wheel-of-the-year",
@@ -4621,88 +2707,16 @@
       "context": "href='/grimoire/wheel-of-the-year/mabon'"
     },
     {
-      "url": "/grimoire/zodiac/${stringToKebabCase(key)}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/zodiac/page.tsx",
-      "line": 122,
-      "context": "href={`/grimoire/zodiac/${stringToKebabCase(key)}`}"
-    },
-    {
-      "url": "/grimoire/zodiac/${stringToKebabCase(key)}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/zodiac/page.tsx",
-      "line": 122,
-      "context": "href={`/grimoire/zodiac/${stringToKebabCase(key)}`}"
-    },
-    {
-      "url": "/grimoire/moon/${y.year}",
-      "file": "/Users/sammii/development/lunary/src/app/moon-calendar/page.tsx",
-      "line": 125,
-      "context": "href={`/grimoire/moon/${y.year}`}"
-    },
-    {
-      "url": "/grimoire/moon/${y.year}",
-      "file": "/Users/sammii/development/lunary/src/app/moon-calendar/page.tsx",
-      "line": 125,
-      "context": "href={`/grimoire/moon/${y.year}`}"
-    },
-    {
       "url": "/grimoire/guides/moon-phases-guide",
       "file": "/Users/sammii/development/lunary/src/app/moon-calendar/page.tsx",
       "line": 149,
       "context": "href='/grimoire/guides/moon-phases-guide'"
     },
     {
-      "url": "/grimoire/transits#year-${year}",
-      "file": "/Users/sammii/development/lunary/src/app/transits/page.tsx",
-      "line": 176,
-      "context": "href={`/grimoire/transits#year-${year}`}"
-    },
-    {
-      "url": "/grimoire/transits#year-${year}",
-      "file": "/Users/sammii/development/lunary/src/app/transits/page.tsx",
-      "line": 176,
-      "context": "href={`/grimoire/transits#year-${year}`}"
-    },
-    {
-      "url": "/grimoire/compatibility/${slug}",
-      "file": "/Users/sammii/development/lunary/src/components/CompatibilityMatrix.tsx",
-      "line": 68,
-      "context": "href={`/grimoire/compatibility/${slug}`}"
-    },
-    {
-      "url": "/grimoire/compatibility/${slug}",
-      "file": "/Users/sammii/development/lunary/src/components/CompatibilityMatrix.tsx",
-      "line": 68,
-      "context": "href={`/grimoire/compatibility/${slug}`}"
-    },
-    {
-      "url": "/grimoire/tarot/${cardSlug}",
-      "file": "/Users/sammii/development/lunary/src/components/TarotCard.tsx",
-      "line": 21,
-      "context": "href={`/grimoire/tarot/${cardSlug}`}"
-    },
-    {
-      "url": "/grimoire/tarot/${cardSlug}",
-      "file": "/Users/sammii/development/lunary/src/components/TarotCard.tsx",
-      "line": 21,
-      "context": "href={`/grimoire/tarot/${cardSlug}`}"
-    },
-    {
       "url": "/grimoire/crystals",
       "file": "/Users/sammii/development/lunary/src/components/compact/CrystalModal.tsx",
-      "line": 254,
+      "line": 272,
       "context": "href='/grimoire/crystals'"
-    },
-    {
-      "url": "/grimoire/spells/${spell.id}",
-      "file": "/Users/sammii/development/lunary/src/components/compact/MoonPreview.tsx",
-      "line": 369,
-      "context": "href={`/grimoire/spells/${spell.id}`}"
-    },
-    {
-      "url": "/grimoire/spells/${spell.id}",
-      "file": "/Users/sammii/development/lunary/src/components/compact/MoonPreview.tsx",
-      "line": 369,
-      "context": "href={`/grimoire/spells/${spell.id}`}"
     },
     {
       "url": "/grimoire/moon",
@@ -4741,142 +2755,52 @@
       "context": "href='/grimoire/zodiac'"
     },
     {
-      "url": "/grimoire/${results[selectedIndex].slug}",
-      "file": "/Users/sammii/development/lunary/src/components/grimoire/AskTheGrimoire.tsx",
-      "line": 187,
-      "context": "window.location.href = `/grimoire/${results[selectedIndex].slug}`;"
-    },
-    {
-      "url": "/grimoire/${result.slug}",
-      "file": "/Users/sammii/development/lunary/src/components/grimoire/AskTheGrimoire.tsx",
-      "line": 364,
-      "context": "href={`/grimoire/${result.slug}`}"
-    },
-    {
-      "url": "/grimoire/${result.slug}",
-      "file": "/Users/sammii/development/lunary/src/components/grimoire/AskTheGrimoire.tsx",
-      "line": 364,
-      "context": "href={`/grimoire/${result.slug}`}"
-    },
-    {
-      "url": "/grimoire/search?q=${encodeURIComponent(query)}",
-      "file": "/Users/sammii/development/lunary/src/components/grimoire/AskTheGrimoire.tsx",
-      "line": 416,
-      "context": "href={`/grimoire/search?q=${encodeURIComponent(query)}`}"
-    },
-    {
-      "url": "/grimoire/search?q=${encodeURIComponent(query)}",
-      "file": "/Users/sammii/development/lunary/src/components/grimoire/AskTheGrimoire.tsx",
-      "line": 416,
-      "context": "href={`/grimoire/search?q=${encodeURIComponent(query)}`}"
-    },
-    {
-      "url": "/grimoire/zodiac/${sign.toLowerCase()}",
-      "file": "/Users/sammii/development/lunary/src/components/grimoire/SEOContentTemplate.tsx",
-      "line": 349,
-      "context": "href={`/grimoire/zodiac/${sign.toLowerCase()}`}"
-    },
-    {
-      "url": "/grimoire/zodiac/${sign.toLowerCase()}",
-      "file": "/Users/sammii/development/lunary/src/components/grimoire/SEOContentTemplate.tsx",
-      "line": 349,
-      "context": "href={`/grimoire/zodiac/${sign.toLowerCase()}`}"
-    },
-    {
       "url": "/grimoire/zodiac",
       "file": "/Users/sammii/development/lunary/src/components/grimoire/SEOContentTemplate.tsx",
-      "line": 602,
+      "line": 625,
       "context": "href='/grimoire/zodiac'"
     },
     {
       "url": "/grimoire/astronomy/planets",
       "file": "/Users/sammii/development/lunary/src/components/grimoire/SEOContentTemplate.tsx",
-      "line": 608,
+      "line": 631,
       "context": "href='/grimoire/astronomy/planets'"
     },
     {
       "url": "/grimoire/tarot",
       "file": "/Users/sammii/development/lunary/src/components/grimoire/SEOContentTemplate.tsx",
-      "line": 614,
+      "line": 637,
       "context": "href='/grimoire/tarot'"
     },
     {
       "url": "/grimoire/crystals",
       "file": "/Users/sammii/development/lunary/src/components/grimoire/SEOContentTemplate.tsx",
-      "line": 620,
+      "line": 643,
       "context": "href='/grimoire/crystals'"
     },
     {
       "url": "/grimoire/moon/phases",
       "file": "/Users/sammii/development/lunary/src/components/grimoire/SEOContentTemplate.tsx",
-      "line": 626,
+      "line": 649,
       "context": "href='/grimoire/moon/phases'"
     },
     {
       "url": "/grimoire/houses/overview/first",
       "file": "/Users/sammii/development/lunary/src/components/grimoire/SEOContentTemplate.tsx",
-      "line": 632,
+      "line": 655,
       "context": "href='/grimoire/houses/overview/first'"
     },
     {
       "url": "/grimoire/spells",
       "file": "/Users/sammii/development/lunary/src/components/grimoire/SEOContentTemplate.tsx",
-      "line": 638,
+      "line": 661,
       "context": "href='/grimoire/spells'"
     },
     {
-      "url": "/grimoire/zodiac/${sign.toLowerCase()}",
-      "file": "/Users/sammii/development/lunary/src/constants/entity-relationships.ts",
-      "line": 398,
-      "context": "url: `/grimoire/zodiac/${sign.toLowerCase()}`,"
-    },
-    {
-      "url": "/grimoire/crystals/${crystal.toLowerCase().replace(/\\s+/g, ",
-      "file": "/Users/sammii/development/lunary/src/constants/entity-relationships.ts",
-      "line": 414,
-      "context": "url: `/grimoire/crystals/${crystal.toLowerCase().replace(/\\s+/g, '-')}`,"
-    },
-    {
-      "url": "/grimoire/correspondences/elements/${planetData.element.toLowerCase()}",
-      "file": "/Users/sammii/development/lunary/src/constants/entity-relationships.ts",
-      "line": 422,
-      "context": "url: `/grimoire/correspondences/elements/${planetData.element.toLowerCase()}`,"
-    },
-    {
-      "url": "/grimoire/chakras/${planetData.chakra.toLowerCase().replace(/\\s+/g, ",
-      "file": "/Users/sammii/development/lunary/src/constants/entity-relationships.ts",
-      "line": 429,
-      "context": "url: `/grimoire/chakras/${planetData.chakra.toLowerCase().replace(/\\s+/g, '-')}`,"
-    },
-    {
-      "url": "/grimoire/correspondences/days/${planetData.day.toLowerCase()}",
-      "file": "/Users/sammii/development/lunary/src/constants/entity-relationships.ts",
-      "line": 436,
-      "context": "url: `/grimoire/correspondences/days/${planetData.day.toLowerCase()}`,"
-    },
-    {
-      "url": "/grimoire/astronomy/planets/${zodiacData.rulingPlanet.toLowerCase()}",
-      "file": "/Users/sammii/development/lunary/src/constants/entity-relationships.ts",
-      "line": 448,
-      "context": "url: `/grimoire/astronomy/planets/${zodiacData.rulingPlanet.toLowerCase()}`,"
-    },
-    {
-      "url": "/grimoire/crystals/${crystal.toLowerCase().replace(/\\s+/g, ",
-      "file": "/Users/sammii/development/lunary/src/constants/entity-relationships.ts",
-      "line": 463,
-      "context": "url: `/grimoire/crystals/${crystal.toLowerCase().replace(/\\s+/g, '-')}`,"
-    },
-    {
-      "url": "/grimoire/correspondences/elements/${zodiacData.element.toLowerCase()}",
-      "file": "/Users/sammii/development/lunary/src/constants/entity-relationships.ts",
-      "line": 471,
-      "context": "url: `/grimoire/correspondences/elements/${zodiacData.element.toLowerCase()}`,"
-    },
-    {
-      "url": "/grimoire/chakras/${zodiacData.chakra.toLowerCase().replace(/\\s+/g, ",
-      "file": "/Users/sammii/development/lunary/src/constants/entity-relationships.ts",
-      "line": 478,
-      "context": "url: `/grimoire/chakras/${zodiacData.chakra.toLowerCase().replace(/\\s+/g, '-')}`,"
+      "url": "/grimoire/moon",
+      "file": "/Users/sammii/development/lunary/src/components/growth/TarotCrossInsights.tsx",
+      "line": 64,
+      "context": "href='/grimoire/moon'"
     }
   ],
   "routes": [
@@ -5292,11 +3216,6 @@
       "file": "/Users/sammii/development/lunary/src/app/grimoire/events/2025/mercury-retrograde/page.tsx"
     },
     {
-      "path": "/grimoire/events/2025",
-      "type": "static",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/events/2025/page.tsx"
-    },
-    {
       "path": "/grimoire/events/2025/venus-retrograde",
       "type": "static",
       "file": "/Users/sammii/development/lunary/src/app/grimoire/events/2025/venus-retrograde/page.tsx"
@@ -5312,14 +3231,15 @@
       "file": "/Users/sammii/development/lunary/src/app/grimoire/events/2026/mercury-retrograde/page.tsx"
     },
     {
-      "path": "/grimoire/events/2026",
-      "type": "static",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/events/2026/page.tsx"
-    },
-    {
       "path": "/grimoire/events/2026/venus-retrograde",
       "type": "static",
       "file": "/Users/sammii/development/lunary/src/app/grimoire/events/2026/venus-retrograde/page.tsx"
+    },
+    {
+      "path": "/grimoire/events/[year]",
+      "type": "dynamic",
+      "params": ["year"],
+      "file": "/Users/sammii/development/lunary/src/app/grimoire/events/[year]/page.tsx"
     },
     {
       "path": "/grimoire/events",
@@ -5547,11 +3467,6 @@
       "type": "dynamic",
       "params": ["moonPhase"],
       "file": "/Users/sammii/development/lunary/src/app/grimoire/moon/2026/[moonPhase]/page.tsx"
-    },
-    {
-      "path": "/grimoire/moon/2026",
-      "type": "static",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/moon/2026/page.tsx"
     },
     {
       "path": "/grimoire/moon/[year]",
@@ -6038,6 +3953,11 @@
       "file": "/Users/sammii/development/lunary/src/app/grimoire/eclipses/[type]/page.tsx"
     },
     {
+      "path": "/grimoire/events/:year",
+      "type": "generateStaticParams",
+      "file": "/Users/sammii/development/lunary/src/app/grimoire/events/[year]/page.tsx"
+    },
+    {
       "path": "/grimoire/horoscopes/:sign/:year/:month",
       "type": "generateStaticParams",
       "file": "/Users/sammii/development/lunary/src/app/grimoire/horoscopes/[sign]/[year]/[month]/page.tsx"
@@ -6238,16 +4158,7 @@
       "file": "/Users/sammii/development/lunary/src/app/grimoire/zodiac/[sign]/page.tsx"
     }
   ],
-  "missingRoutes": [
-    "/grimoire/chakras/${planetData.chakra.toLowerCase().replace(/\\s+/g, ",
-    "/grimoire/chakras/${zodiacData.chakra.toLowerCase().replace(/\\s+/g, ",
-    "/grimoire/crystals/${crystal.name.toLowerCase().replace(/ /g, '-')}",
-    "/grimoire/crystals/${crystal.toLowerCase().replace(/\\s+/g, ",
-    "/grimoire/guides/${guide.slug}",
-    "/grimoire/moon/${year}/full-moon-${moon.month.toLowerCase()}",
-    "/grimoire/moon/${year}/new-moon-${moon.month.toLowerCase()}",
-    "/grimoire/tarot/${card.name.toLowerCase().replace(/ /g, '-')}"
-  ],
+  "missingRoutes": [],
   "orphanedRoutes": [
     "/grimoire",
     "/grimoire/:section",
@@ -6321,6 +4232,8 @@
     "/grimoire/events/2026/eclipses",
     "/grimoire/events/2026/mercury-retrograde",
     "/grimoire/events/2026/venus-retrograde",
+    "/grimoire/events/:year",
+    "/grimoire/events/[year]",
     "/grimoire/horoscopes/:sign",
     "/grimoire/horoscopes/:sign/:year",
     "/grimoire/horoscopes/:sign/:year/:month",
@@ -6407,90 +4320,5 @@
     "/grimoire/zodiac/:sign",
     "/grimoire/zodiac/[sign]"
   ],
-  "brokenLinks": [
-    {
-      "url": "/grimoire/crystals/${crystal.name.toLowerCase().replace(/ /g, '-')}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/guides/crystal-healing-guide/page.tsx",
-      "line": 457,
-      "context": "href={`/grimoire/crystals/${crystal.name.toLowerCase().replace(/ /g, '-')}`}"
-    },
-    {
-      "url": "/grimoire/crystals/${crystal.name.toLowerCase().replace(/ /g, '-')}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/guides/crystal-healing-guide/page.tsx",
-      "line": 457,
-      "context": "href={`/grimoire/crystals/${crystal.name.toLowerCase().replace(/ /g, '-')}`}"
-    },
-    {
-      "url": "/grimoire/guides/${guide.slug}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/guides/page.tsx",
-      "line": 190,
-      "context": "href={`/grimoire/guides/${guide.slug}`}"
-    },
-    {
-      "url": "/grimoire/guides/${guide.slug}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/guides/page.tsx",
-      "line": 190,
-      "context": "href={`/grimoire/guides/${guide.slug}`}"
-    },
-    {
-      "url": "/grimoire/tarot/${card.name.toLowerCase().replace(/ /g, '-')}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/guides/tarot-complete-guide/page.tsx",
-      "line": 518,
-      "context": "href={`/grimoire/tarot/${card.name.toLowerCase().replace(/ /g, '-')}`}"
-    },
-    {
-      "url": "/grimoire/tarot/${card.name.toLowerCase().replace(/ /g, '-')}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/guides/tarot-complete-guide/page.tsx",
-      "line": 518,
-      "context": "href={`/grimoire/tarot/${card.name.toLowerCase().replace(/ /g, '-')}`}"
-    },
-    {
-      "url": "/grimoire/moon/${year}/full-moon-${moon.month.toLowerCase()}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/moon/[year]/page.tsx",
-      "line": 251,
-      "context": "href={`/grimoire/moon/${year}/full-moon-${moon.month.toLowerCase()}`}"
-    },
-    {
-      "url": "/grimoire/moon/${year}/full-moon-${moon.month.toLowerCase()}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/moon/[year]/page.tsx",
-      "line": 251,
-      "context": "href={`/grimoire/moon/${year}/full-moon-${moon.month.toLowerCase()}`}"
-    },
-    {
-      "url": "/grimoire/moon/${year}/new-moon-${moon.month.toLowerCase()}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/moon/[year]/page.tsx",
-      "line": 280,
-      "context": "href={`/grimoire/moon/${year}/new-moon-${moon.month.toLowerCase()}`}"
-    },
-    {
-      "url": "/grimoire/moon/${year}/new-moon-${moon.month.toLowerCase()}",
-      "file": "/Users/sammii/development/lunary/src/app/grimoire/moon/[year]/page.tsx",
-      "line": 280,
-      "context": "href={`/grimoire/moon/${year}/new-moon-${moon.month.toLowerCase()}`}"
-    },
-    {
-      "url": "/grimoire/crystals/${crystal.toLowerCase().replace(/\\s+/g, ",
-      "file": "/Users/sammii/development/lunary/src/constants/entity-relationships.ts",
-      "line": 414,
-      "context": "url: `/grimoire/crystals/${crystal.toLowerCase().replace(/\\s+/g, '-')}`,"
-    },
-    {
-      "url": "/grimoire/crystals/${crystal.toLowerCase().replace(/\\s+/g, ",
-      "file": "/Users/sammii/development/lunary/src/constants/entity-relationships.ts",
-      "line": 463,
-      "context": "url: `/grimoire/crystals/${crystal.toLowerCase().replace(/\\s+/g, '-')}`,"
-    },
-    {
-      "url": "/grimoire/chakras/${planetData.chakra.toLowerCase().replace(/\\s+/g, ",
-      "file": "/Users/sammii/development/lunary/src/constants/entity-relationships.ts",
-      "line": 429,
-      "context": "url: `/grimoire/chakras/${planetData.chakra.toLowerCase().replace(/\\s+/g, '-')}`,"
-    },
-    {
-      "url": "/grimoire/chakras/${zodiacData.chakra.toLowerCase().replace(/\\s+/g, ",
-      "file": "/Users/sammii/development/lunary/src/constants/entity-relationships.ts",
-      "line": 478,
-      "context": "url: `/grimoire/chakras/${zodiacData.chakra.toLowerCase().replace(/\\s+/g, '-')}`,"
-    }
-  ]
+  "brokenLinks": []
 }
