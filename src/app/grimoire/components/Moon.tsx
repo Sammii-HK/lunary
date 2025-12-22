@@ -1,9 +1,12 @@
 'use client';
 
 import Link from 'next/link';
+import { MoonPhaseIcon } from '@/components/MoonPhaseIcon';
 import { annualFullMoons } from '@/constants/moon/annualFullMoons';
-import { monthlyMoonPhases } from '../../../../utils/moon/monthlyPhases';
-import { MoonPhase } from '../../../../utils/moon/moonPhases';
+import {
+  monthlyMoonPhases,
+  MonthlyMoonPhaseKey,
+} from '../../../../utils/moon/monthlyPhases';
 import { months } from '../../../../utils/months';
 import { stringToKebabCase } from '../../../../utils/string';
 import { Moon as MoonIcon, Sun, Sparkles, Calendar, Star } from 'lucide-react';
@@ -112,7 +115,7 @@ const Moon = () => {
       <section className='space-y-4'>
         <h2 className='text-xl font-medium text-zinc-100'>All Moon Phases</h2>
         <div className='grid grid-cols-2 md:grid-cols-4 gap-3'>
-          {moonPhases.map((phase: string) => {
+          {moonPhases.map((phase) => {
             const phaseSlug = stringToKebabCase(phase);
             return (
               <Link
@@ -120,9 +123,14 @@ const Moon = () => {
                 href={`/grimoire/moon/phases/${phaseSlug}`}
                 className='block rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-3 hover:bg-zinc-900/50 hover:border-lunary-primary-600 transition-all group text-center'
               >
-                <span className='text-2xl block mb-1'>
-                  {monthlyMoonPhases[phase as MoonPhase].symbol}
-                </span>
+                <div className='flex justify-center mb-1'>
+                  <div className='w-12 h-12 rounded-full bg-zinc-950/60 flex items-center justify-center'>
+                    <MoonPhaseIcon
+                      phase={phase as MonthlyMoonPhaseKey}
+                      size={32}
+                    />
+                  </div>
+                </div>
                 <span className='text-sm text-zinc-300 group-hover:text-lunary-primary-300 transition-colors'>
                   {phase}
                 </span>
