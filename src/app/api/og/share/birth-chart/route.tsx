@@ -95,7 +95,38 @@ type ElementType = (typeof ELEMENT_ORDER)[number];
 const MODALITY_ORDER = ['Cardinal', 'Fixed', 'Mutable'] as const;
 type ModalityType = (typeof MODALITY_ORDER)[number];
 
-const SIGN_TO_ELEMENT: Record<string, ElementType> = {
+const SIGN_KEYS = [
+  'aries',
+  'taurus',
+  'gemini',
+  'cancer',
+  'leo',
+  'virgo',
+  'libra',
+  'scorpio',
+  'sagittarius',
+  'capricorn',
+  'aquarius',
+  'pisces',
+] as const;
+type SignKey = (typeof SIGN_KEYS)[number];
+
+const SIGN_LABELS: Record<SignKey, string> = {
+  aries: 'Aries',
+  taurus: 'Taurus',
+  gemini: 'Gemini',
+  cancer: 'Cancer',
+  leo: 'Leo',
+  virgo: 'Virgo',
+  libra: 'Libra',
+  scorpio: 'Scorpio',
+  sagittarius: 'Sagittarius',
+  capricorn: 'Capricorn',
+  aquarius: 'Aquarius',
+  pisces: 'Pisces',
+};
+
+const SIGN_TO_ELEMENT: Record<SignKey, ElementType> = {
   aries: 'Fire',
   taurus: 'Earth',
   gemini: 'Air',
@@ -110,7 +141,7 @@ const SIGN_TO_ELEMENT: Record<string, ElementType> = {
   pisces: 'Water',
 };
 
-const SIGN_TO_MODALITY: Record<string, ModalityType> = {
+const SIGN_TO_MODALITY: Record<SignKey, ModalityType> = {
   aries: 'Cardinal',
   taurus: 'Fixed',
   gemini: 'Mutable',
@@ -127,6 +158,14 @@ const SIGN_TO_MODALITY: Record<string, ModalityType> = {
 
 function normaliseKey(value?: string) {
   return (value ?? '').trim().toLowerCase();
+}
+
+function normalizeSignKey(value?: string): SignKey | undefined {
+  const normalized = normaliseKey(value);
+  if (!normalized) return undefined;
+  return SIGN_KEYS.includes(normalized as SignKey)
+    ? (normalized as SignKey)
+    : undefined;
 }
 
 function elementGlyph(elementLabel?: string) {
@@ -246,19 +285,30 @@ export async function GET(request: NextRequest) {
     {} as Record<ModalityType, number>,
   );
 
-  const signCounts: Record<string, number> = {};
+  const signCounts: Record<SignKey, number> = SIGN_KEYS.reduce(
+    (acc, sign) => {
+      acc[sign] = 0;
+      return acc;
+    },
+    {} as Record<SignKey, number>,
+  );
   const houseCounts: Record<number, number> = {};
 
   birthChart.forEach((planet) => {
-    const normalizedSign = planet.sign?.toLowerCase() ?? '';
-    const elementLabel = SIGN_TO_ELEMENT[normalizedSign];
-    if (elementLabel) elementCounts[elementLabel] += 1;
+    const normalizedSign = normalizeSignKey(planet.sign);
 
-    const modalityLabel = SIGN_TO_MODALITY[normalizedSign];
-    if (modalityLabel) modalityCounts[modalityLabel] += 1;
+    if (normalizedSign) {
+      const elementLabel = SIGN_TO_ELEMENT[normalizedSign];
+      if (elementLabel) {
+        elementCounts[elementLabel] += 1;
+      }
 
-    if (planet.sign) {
-      signCounts[planet.sign] = (signCounts[planet.sign] ?? 0) + 1;
+      const modalityLabel = SIGN_TO_MODALITY[normalizedSign];
+      if (modalityLabel) {
+        modalityCounts[modalityLabel] += 1;
+      }
+
+      signCounts[normalizedSign] += 1;
     }
 
     if (
@@ -285,7 +335,11 @@ export async function GET(request: NextRequest) {
     .join(' · ');
 
   const retrogradeCount = birthChart.filter((p) => p.retrograde).length;
-  const uniqueSigns = new Set(birthChart.map((p) => p.sign)).size;
+  const uniqueSigns = new Set(
+    birthChart
+      .map((planet) => normalizeSignKey(planet.sign))
+      .filter((key): key is SignKey => Boolean(key)),
+  ).size;
 
   const sortedHouseEntries = Object.entries(houseCounts).sort(
     (a, b) => b[1] - a[1],
@@ -301,9 +355,14 @@ export async function GET(request: NextRequest) {
     (a, b) => b[1] - a[1],
   );
   const primarySignEntry = sortedSignEntries[0];
-  const signFocusText = primarySignEntry
-    ? `${primarySignEntry[0]} focus · ${primarySignEntry[1]} placements`
-    : 'Sign focus shaping';
+  let signFocusText = 'Sign focus shaping';
+  if (primarySignEntry) {
+    const primarySignKey = primarySignEntry[0] as SignKey;
+    const signLabel = SIGN_LABELS[primarySignKey];
+    if (signLabel) {
+      signFocusText = `${signLabel} focus · ${primarySignEntry[1]} placements`;
+    }
+  }
 
   const insightText =
     insight ?? 'A balanced cosmic profile with diverse energies.';
@@ -638,14 +697,6 @@ export async function GET(request: NextRequest) {
                 alignItems: 'center',
               }}
             >
-              <span
-                style={{
-                  width: 8,
-                  height: 8,
-                  borderRadius: 999,
-                  background: '#fff',
-                }}
-              />
               <span
                 style={{
                   fontSize: 16,

@@ -203,7 +203,7 @@ export function ChartWheelOg({
               left: toPixel(x),
               top: toPixel(y),
               transform: 'translate(-50%, -50%)',
-              fontSize: 9,
+              fontSize: 18,
               color: '#52525b',
               display: 'flex',
             }}
@@ -222,7 +222,7 @@ export function ChartWheelOg({
             top: toPixel(y),
             transform: 'translate(-50%, -50%)',
             fontFamily: 'Astronomicon',
-            fontSize: 12,
+            fontSize: 32,
             color: '#71717a',
             display: 'flex',
           }}
@@ -252,7 +252,8 @@ export function ChartWheelOg({
                 top: toPixel(y),
                 transform: 'translate(-50%, -50%)',
                 fontFamily: 'Astronomicon',
-                fontSize: isAngle || isPoint ? 12 : 14,
+                // fontSize: isAngle || isPoint ? 12 : 14,
+                fontSize: 28,
                 color,
                 display: 'flex',
               }}
@@ -270,7 +271,7 @@ export function ChartWheelOg({
           top: toPixel(0),
           transform: 'translate(-50%, -50%)',
           fontFamily: 'Astronomicon',
-          fontSize: 10,
+          fontSize: 21,
           color: '#C77DFF',
           display: 'flex',
         }}
