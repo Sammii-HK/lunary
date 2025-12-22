@@ -17,10 +17,7 @@ import {
   generateTrialExpiredEmailHTML,
   generateTrialExpiredEmailText,
 } from '@/lib/email-templates/trial-expired';
-import {
-  generateCatchyQuote,
-  getQuoteImageUrl,
-} from '@/lib/social/quote-generator';
+import { generateCatchyQuote } from '@/lib/social/quote-generator';
 import { generateMoonCircle } from '@/lib/moon-circles/generator';
 import { generateWeeklyReport } from '@/lib/cosmic-snapshot/reports';
 import {
@@ -529,7 +526,6 @@ async function runDailyPosts(dateStr: string) {
 
   // Generate AI quote for Pinterest/TikTok using shared utility
   const quote = await generateCatchyQuote(postContent, 'cosmic');
-  const quoteImageUrl = getQuoteImageUrl(quote, productionUrl);
 
   // Build cosmic context for dynamic hashtags
   const cosmicContext: CosmicContext = {
@@ -549,14 +545,7 @@ async function runDailyPosts(dateStr: string) {
     {
       name: dateStr,
       content: `${postContent}\n\n${platformHashtags.instagram}`,
-      platforms: [
-        'threads',
-        'pinterest',
-        'tiktok',
-        'facebook',
-        'linkedin',
-        'instagram',
-      ],
+      platforms: ['threads', 'pinterest', 'facebook', 'instagram'],
       imageUrls: [
         `${productionUrl}/api/og/cosmic/${dateStr}`,
         `${productionUrl}/api/og/crystal?date=${dateStr}`,
@@ -589,6 +578,16 @@ async function runDailyPosts(dateStr: string) {
         //     `${productionUrl}/api/og/horoscope?date=${dateStr}`,
         //   ],
         // },
+        tiktok: {
+          content: `${generateCosmicPost(cosmicContent).snippetShort} ${platformHashtags.tiktok}`,
+          media: [
+            `${productionUrl}/api/og/cosmic/${dateStr}/portrait`,
+            `${productionUrl}/api/og/crystal?date=${dateStr}&size=portrait`,
+            `${productionUrl}/api/og/tarot?date=${dateStr}&size=portrait`,
+            `${productionUrl}/api/og/moon?date=${dateStr}&size=portrait`,
+            // `${productionUrl}/api/og/horoscope?date=${dateStr}&size=landscape`,
+          ],
+        },
         x: {
           content: `${generateCosmicPost(cosmicContent).snippetShort.replace(/\n/g, ' ')} ${platformHashtags.twitter}`,
           media: [
@@ -613,11 +612,15 @@ async function runDailyPosts(dateStr: string) {
             // `${productionUrl}/api/og/horoscope?date=${dateStr}&size=landscape`,
           ],
         },
-        tiktok: {
-          content: `${generateCosmicPost(cosmicContent).snippetShort} ${platformHashtags.tiktok}`,
-        },
         linkedin: {
           content: `${postContent}\n\n${platformHashtags.linkedin}`,
+          media: [
+            `${productionUrl}/api/og/cosmic/${dateStr}/landscape`,
+            `${productionUrl}/api/og/crystal?date=${dateStr}&size=landscape`,
+            `${productionUrl}/api/og/tarot?date=${dateStr}&size=landscape`,
+            `${productionUrl}/api/og/moon?date=${dateStr}&size=landscape`,
+            // `${productionUrl}/api/og/horoscope?date=${dateStr}&size=landscape`,
+          ],
         },
         facebook: {
           content: platformHashtags.facebook

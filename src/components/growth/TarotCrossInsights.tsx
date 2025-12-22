@@ -61,7 +61,7 @@ export function TarotCrossInsights({
         </Link>
 
         <Link
-          href='/moon'
+          href='/grimoire/moon'
           className='group flex items-center gap-3 p-3 rounded-xl border border-zinc-800/50 bg-zinc-900/40 hover:border-lunary-primary-700/50 hover:bg-zinc-900/60 transition-all'
         >
           <div className='shrink-0 w-8 h-8 rounded-full bg-zinc-800/50 flex items-center justify-center group-hover:bg-lunary-primary-900/30 transition-colors'>

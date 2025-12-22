@@ -279,7 +279,7 @@ export default function CorrespondencesPage() {
           systems. Each element governs specific qualities and types of magic.
         </p>
 
-        <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
+        <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4'>
           <Link
             href='/grimoire/correspondences/elements/fire'
             className='p-5 rounded-xl border border-zinc-800 bg-zinc-900/30 hover:border-orange-600 transition-colors'
@@ -328,16 +328,22 @@ export default function CorrespondencesPage() {
               Direction: North | Season: Winter | Tools: Pentacle, salt
             </p>
           </Link>
-        </div>
-
-        <div className='mt-4 p-4 rounded-xl border border-violet-800 bg-violet-900/10'>
-          <h4 className='font-medium text-violet-300 mb-2'>
-            ✨ Spirit (Akasha)
-          </h4>
-          <p className='text-zinc-400 text-sm'>
-            The fifth element that unites all others. Represents the divine,
-            consciousness, and the void from which all emerges.
-          </p>
+          <Link
+            href='/grimoire/correspondences/elements/spirit'
+            className='p-5 rounded-xl border border-zinc-800 bg-violet-900/30 hover:border-violet-400 transition-colors'
+          >
+            <h3 className='font-medium text-violet-300 mb-2'>
+              ✨ Spirit (Akasha)
+            </h3>
+            <p className='text-zinc-400 text-sm mb-2'>
+              The timeless connective force, divine consciousness, and sacred
+              presence in every spell
+            </p>
+            <p className='text-zinc-500 text-xs'>
+              Direction: Center | Season: All Seasons | Tools: Bell, altar,
+              incense
+            </p>
+          </Link>
         </div>
       </section>
 

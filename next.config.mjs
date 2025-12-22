@@ -430,6 +430,11 @@ const nextConfig = {
         destination: '/grimoire/moon/:year',
         permanent: true,
       },
+      {
+        source: '/moon',
+        destination: '/grimoire/moon',
+        permanent: true,
+      },
       // ========================================
       // GRIMOIRE CONSOLIDATION REDIRECTS
       // Phase 1: Deleted duplicate index pages

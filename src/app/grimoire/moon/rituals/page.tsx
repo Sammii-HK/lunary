@@ -646,7 +646,7 @@ export default function MoonRitualsPage() {
         </p>
         <div className='flex flex-col sm:flex-row gap-4 justify-center'>
           <Button asChild variant='lunary-solid' size='lg'>
-            <Link href='/moon'>Today&apos;s Moon Phase</Link>
+            <Link href='/app'>Today&apos;s Moon Phase</Link>
           </Button>
           <Button asChild variant='outline' size='lg'>
             <Link href='/grimoire/guides/moon-phases-guide'>
