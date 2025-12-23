@@ -18,6 +18,7 @@ import { MarketingFooter } from '@/components/MarketingFooter';
 import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import { Metadata } from 'next';
+import { NewsletterSignupForm } from '@/components/NewsletterSignupForm';
 
 export const metadata: Metadata = {
   title: 'Lunary: Personal Astrology App | Birth Chart, Horoscopes & Tarot',
@@ -667,6 +668,20 @@ export default function WelcomePage() {
               <Link href='/auth?signup=true'>Sign up for free</Link>
             </Button>
           </div>
+        </div>
+      </section>
+
+      {/* Section 12: Newsletter */}
+      <section className='py-12 md:py-20 px-4 md:px-6'>
+        <div className='max-w-4xl mx-auto'>
+          <NewsletterSignupForm
+            source='welcome_page'
+            headline='Weekly cosmic recap, delivered'
+            description='A calm weekly digest of the most meaningful sky events, written for people who want clarity without noise.'
+            ctaLabel='Join the newsletter'
+            successMessage='Check your inbox to confirm your subscription.'
+            align='center'
+          />
         </div>
       </section>
 
