@@ -529,6 +529,7 @@ function BookOfShadowsContent() {
   ]);
   const [input, setInput] = useState('');
   const [showAuthModal, setShowAuthModal] = useState(false);
+  const [authMode, setAuthMode] = useState<'signIn' | 'signUp'>('signIn');
   const [promptHandled, setPromptHandled] = useState<string | null>(null);
   const [isAssistExpanded, setIsAssistExpanded] = useState(false);
   const lastSendTimeRef = useRef<number>(0);
@@ -539,6 +540,28 @@ function BookOfShadowsContent() {
   const isScrollingRef = useRef<boolean>(false);
   const promptSentRef = useRef(false);
   const prevLoadingRef = useRef(true);
+
+  useEffect(() => {
+    const handleJournalEvent = (event: Event) => {
+      const detail = (event as CustomEvent<{ prompt?: string }>).detail;
+      setIsJournalMode(true);
+      if (detail?.prompt) {
+        setInput(detail.prompt);
+      }
+      setIsAssistExpanded(false);
+      requestAnimationFrame(() => {
+        const inputElement = document.getElementById('book-of-shadows-message');
+        if (inputElement instanceof HTMLTextAreaElement) {
+          inputElement.focus();
+        }
+      });
+    };
+
+    window.addEventListener('astral-chat:journal', handleJournalEvent);
+    return () => {
+      window.removeEventListener('astral-chat:journal', handleJournalEvent);
+    };
+  }, [setInput, setIsAssistExpanded, setIsJournalMode]);
 
   // Calculate total content length to detect content changes during streaming
   const totalContentLength = messages.reduce(
@@ -756,12 +779,27 @@ function BookOfShadowsContent() {
                 Your Astral Guide is a personal space for your astro–tarot
                 journey. Sign in to begin your conversation with Lunary.
               </p>
-              <Button
-                onClick={() => setShowAuthModal(true)}
-                className='inline-flex items-center gap-2 rounded-xl bg-lunary-primary-600 px-6 py-2 text-sm font-medium text-white transition hover:bg-lunary-primary-500'
-              >
-                Sign In
-              </Button>
+              <div className='flex flex-col items-center gap-2 sm:flex-row sm:justify-center'>
+                <Button
+                  onClick={() => {
+                    setAuthMode('signIn');
+                    setShowAuthModal(true);
+                  }}
+                  className='inline-flex items-center gap-2 rounded-xl bg-lunary-primary-600 px-6 py-2 text-sm font-medium text-white transition hover:bg-lunary-primary-500'
+                >
+                  Sign In
+                </Button>
+                <Button
+                  variant='outline'
+                  onClick={() => {
+                    setAuthMode('signUp');
+                    setShowAuthModal(true);
+                  }}
+                  className='inline-flex items-center gap-2 rounded-xl px-6 py-2 text-sm font-medium'
+                >
+                  Create Account
+                </Button>
+              </div>
             </div>
           </main>
 
@@ -788,6 +826,8 @@ function BookOfShadowsContent() {
                   </svg>
                 </button>
                 <AuthComponent
+                  key={authMode}
+                  defaultToSignUp={authMode === 'signUp'}
                   onSuccess={() => {
                     setShowAuthModal(false);
                   }}
