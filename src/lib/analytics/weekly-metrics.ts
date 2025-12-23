@@ -12,15 +12,13 @@ import {
 const TIMEZONE = 'Europe/London';
 
 /**
- * Helper to build IN clause for arrays in @vercel/postgres
- * Since template literals don't support arrays, we use unnest with array literal
+ * Helper to build a PostgreSQL text array literal safely.
  */
-function buildArrayInClause(column: string, values: string[]): string {
-  if (values.length === 0) return 'FALSE';
-  const arrayLiteral = `{${values
-    .map((v) => `"${v.replace(/\\/g, '\\\\').replace(/"/g, '\\"')}"`)
+function toTextArrayLiteral(values: string[]): string | null {
+  if (values.length === 0) return null;
+  return `{${values
+    .map((v) => `"${String(v).replace(/\\/g, '\\\\').replace(/"/g, '\\"')}"`)
     .join(',')}}`;
-  return `${column} = ANY(SELECT unnest(${arrayLiteral}::text[]))`;
 }
 
 /**
@@ -386,6 +384,7 @@ async function calculateEngagement(
     'trial_converted',
     'subscription_started',
   ];
+  const meaningfulEventsArray = toTextArrayLiteral(meaningfulEvents)!;
 
   // Get WAU from PostHog
   const posthog = getPostHogServer();
@@ -449,7 +448,7 @@ async function calculateEngagement(
     const wauResult = await sql`
       SELECT COUNT(DISTINCT user_id) as count
       FROM conversion_events
-      WHERE ${buildArrayInClause('event_type', meaningfulEvents) as any}
+      WHERE event_type = ANY(SELECT unnest(${meaningfulEventsArray}::text[]))
         AND created_at >= ${weekStart}
         AND created_at <= ${weekEnd}
     `;
@@ -503,12 +502,14 @@ async function calculateRetention(
     'ritual_view',
     'moon_phase_view',
   ];
+  const newUserIdsArray = toTextArrayLiteral(newUserIds)!;
+  const retentionEventsArray = toTextArrayLiteral(meaningfulEvents)!;
 
   const w1ActiveResult = await sql`
     SELECT COUNT(DISTINCT user_id) as count
     FROM conversion_events
-    WHERE ${buildArrayInClause('user_id', newUserIds) as any}
-      AND ${buildArrayInClause('event_type', meaningfulEvents) as any}
+    WHERE user_id = ANY(SELECT unnest(${newUserIdsArray}::text[]))
+      AND event_type = ANY(SELECT unnest(${retentionEventsArray}::text[]))
       AND created_at >= ${formatTimestamp(nextWeekStart)}
       AND created_at <= ${formatTimestamp(nextWeekEnd)}
   `;
@@ -524,8 +525,8 @@ async function calculateRetention(
   const w4ActiveResult = await sql`
     SELECT COUNT(DISTINCT user_id) as count
     FROM conversion_events
-    WHERE ${buildArrayInClause('user_id', newUserIds) as any}
-      AND ${buildArrayInClause('event_type', meaningfulEvents) as any}
+    WHERE user_id = ANY(SELECT unnest(${newUserIdsArray}::text[]))
+      AND event_type = ANY(SELECT unnest(${retentionEventsArray}::text[]))
       AND created_at >= ${formatTimestamp(w4WeekStart)}
       AND created_at <= ${formatTimestamp(w4WeekEnd)}
   `;
@@ -718,10 +719,11 @@ async function calculateFeatureUsage(
 
   const featureUsage = await Promise.all(
     featureEvents.map(async ({ events, feature }) => {
+      const eventsArrayLiteral = toTextArrayLiteral(events)!;
       const result = await sql`
         SELECT COUNT(DISTINCT user_id) as count
         FROM conversion_events
-        WHERE ${buildArrayInClause('event_type', events) as any}
+        WHERE event_type = ANY(SELECT unnest(${eventsArrayLiteral}::text[]))
           AND created_at >= ${weekStart}
           AND created_at <= ${weekEnd}
       `;
@@ -897,18 +899,19 @@ export async function calculateFeatureUsageWeekly(
 
   const results = await Promise.all(
     featureEvents.map(async ({ events, feature }) => {
+      const eventsArrayLiteral = toTextArrayLiteral(events)!;
       const [usersResult, eventsResult] = await Promise.all([
         sql`
           SELECT COUNT(DISTINCT user_id) as count
           FROM conversion_events
-          WHERE ${buildArrayInClause('event_type', events) as any}
+          WHERE event_type = ANY(SELECT unnest(${eventsArrayLiteral}::text[]))
             AND created_at >= ${weekStartFormatted}
             AND created_at <= ${weekEndFormatted}
         `,
         sql`
           SELECT COUNT(*) as count
           FROM conversion_events
-          WHERE ${buildArrayInClause('event_type', events) as any}
+          WHERE event_type = ANY(SELECT unnest(${eventsArrayLiteral}::text[]))
             AND created_at >= ${weekStartFormatted}
             AND created_at <= ${weekEndFormatted}
         `,
