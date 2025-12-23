@@ -73,6 +73,12 @@ export function OnboardingFlow({
   const onboardingSeenKey = user?.id
     ? `lunary_onboarding_seen_${user.id}`
     : 'lunary_onboarding_seen';
+  const onboardingCooldownKey = user?.id
+    ? `lunary_onboarding_cooldown_${user.id}`
+    : 'lunary_onboarding_cooldown';
+  const onboardingSessionKey = user?.id
+    ? `lunary_onboarding_session_${user.id}`
+    : 'lunary_onboarding_session';
   const isSubscribedOrTrial =
     simulateSubscribed ||
     subscription.isSubscribed ||
@@ -191,10 +197,29 @@ export function OnboardingFlow({
     }
 
     if (authState.isAuthenticated && !authState.loading && needsBirthDetails) {
+      if (typeof window !== 'undefined') {
+        const hasSeenThisSession = sessionStorage.getItem(onboardingSessionKey);
+        if (hasSeenThisSession) {
+          return;
+        }
+        const lastDismissedAt = localStorage.getItem(onboardingCooldownKey);
+        if (lastDismissedAt) {
+          const dismissedAt = Number(lastDismissedAt);
+          if (Number.isFinite(dismissedAt)) {
+            const oneDayMs = 24 * 60 * 60 * 1000;
+            if (Date.now() - dismissedAt < oneDayMs) {
+              return;
+            }
+          }
+        }
+      }
       // Check if user has seen onboarding before
       const hasSeenOnboarding = localStorage.getItem(onboardingSeenKey);
       if (!hasSeenOnboarding) {
         setShowOnboarding(true);
+        if (typeof window !== 'undefined') {
+          sessionStorage.setItem(onboardingSessionKey, 'true');
+        }
       }
     }
   }, [
@@ -203,6 +228,8 @@ export function OnboardingFlow({
     user?.birthday,
     forceOpen,
     onboardingSeenKey,
+    onboardingCooldownKey,
+    onboardingSessionKey,
     previewMode,
     previewStep,
   ]);
@@ -322,6 +349,9 @@ export function OnboardingFlow({
       localStorage.setItem(onboardingSeenKey, 'true');
     }
     setShowSkipWarning(false);
+    if (typeof window !== 'undefined') {
+      sessionStorage.setItem(onboardingSessionKey, 'true');
+    }
     setCurrentStep('complete');
   };
 
@@ -343,11 +373,23 @@ export function OnboardingFlow({
     if (!previewMode) {
       localStorage.setItem(onboardingSeenKey, 'true');
     }
+    if (typeof window !== 'undefined') {
+      sessionStorage.setItem(onboardingSessionKey, 'true');
+    }
     setShowOnboarding(false);
     if (!previewMode) {
       // User already has subscription, send them to personalized content
       router.push('/book-of-shadows');
     }
+  };
+
+  const handleDismiss = () => {
+    if (typeof window !== 'undefined') {
+      sessionStorage.setItem(onboardingSessionKey, 'true');
+      localStorage.setItem(onboardingCooldownKey, String(Date.now()));
+    }
+    setShowSkipWarning(false);
+    setShowOnboarding(false);
   };
 
   const handleNext = async () => {
@@ -371,9 +413,9 @@ export function OnboardingFlow({
     <div className='fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4'>
       <div className='relative bg-zinc-900 border border-zinc-700 rounded-lg p-6 md:p-8 max-w-lg w-full shadow-xl max-h-[90vh] overflow-y-auto'>
         <button
-          onClick={handleSkip}
+          onClick={handleDismiss}
           className='absolute top-4 right-4 min-h-[48px] min-w-[48px] flex items-center justify-center text-zinc-400 hover:text-white transition-colors'
-          aria-label='Skip onboarding'
+          aria-label='Close onboarding'
         >
           <X className='w-5 h-5' />
         </button>
