@@ -146,11 +146,11 @@ export const getYearAnalysis = async (
   try {
     await sql`
       INSERT INTO year_analysis (user_id, year, analysis_data, last_reading_date, updated_at)
-      VALUES (${userId}, ${year}, ${JSON.stringify(analysis)}::jsonb, ${null}, NOW())
+      VALUES (${userId}, ${year}, ${JSON.stringify(analysis)}::jsonb, NULL, NOW())
       ON CONFLICT (user_id, year)
       DO UPDATE SET
         analysis_data = ${JSON.stringify(analysis)}::jsonb,
-        last_reading_date = ${null},
+        last_reading_date = NULL,
         updated_at = NOW()
     `;
   } catch (error: any) {
