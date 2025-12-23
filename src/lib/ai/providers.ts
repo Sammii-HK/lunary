@@ -470,6 +470,7 @@ export type TarotPatternAnalysisParams = {
   userId: string;
   userName?: string;
   userBirthday?: string;
+  timeZone?: string;
   now?: Date;
 };
 
@@ -477,6 +478,7 @@ export const getTarotPatternAnalysis = async ({
   userId,
   userName,
   userBirthday,
+  timeZone = 'Europe/London',
   now = new Date(),
 }: TarotPatternAnalysisParams): Promise<{
   daily: TarotCard | null;
@@ -491,12 +493,15 @@ export const getTarotPatternAnalysis = async ({
   try {
     // Import getTarotCard and dayjs - MUST match exactly how tarot page generates cards
     const { getTarotCard } = await import('../../../utils/tarot/tarot');
-    const dayjs = (await import('dayjs')).default;
+    const {
+      getDailySeedDateStrings,
+      getDateStringInTimeZone,
+      getWeeklySeedForDate,
+    } = await import('../../../utils/tarot/seed-date');
 
     // Use UTC date formatting - EXACTLY like improvedTarot.tsx does (toISOString().split('T')[0])
     // This ensures consistent date calculation across server and client
-    const todayStr = now.toISOString().split('T')[0];
-    const currentDate = dayjs(todayStr);
+    const todayStr = getDateStringInTimeZone(now, timeZone);
     const dailyCard = getTarotCard(`daily-${todayStr}`, userName, userBirthday);
     const daily: TarotCard = {
       name: dailyCard.name,
@@ -505,18 +510,7 @@ export const getTarotPatternAnalysis = async ({
     };
 
     // Generate weekly card - MUST match improvedTarot.tsx exactly
-    const jsDate = currentDate.toDate();
-    const weekStartDate = new Date(jsDate);
-    weekStartDate.setDate(jsDate.getDate() - jsDate.getDay()); // Sunday start
-    const weekStartYear = weekStartDate.getFullYear();
-    const weekStartMonth = weekStartDate.getMonth() + 1;
-    const weekStartDay = weekStartDate.getDate();
-    const dayOfYear = Math.floor(
-      (weekStartDate.getTime() - new Date(weekStartYear, 0, 0).getTime()) /
-        86400000,
-    );
-    const weekNumber = Math.floor(dayOfYear / 7);
-    const weeklySeed = `weekly-${weekStartYear}-W${weekNumber}-${weekStartMonth}-${weekStartDay}`;
+    const weeklySeed = getWeeklySeedForDate(now, timeZone);
     const weeklyCard = getTarotCard(weeklySeed, userName, userBirthday);
     const weekly: TarotCard = {
       name: weeklyCard.name,
@@ -531,14 +525,17 @@ export const getTarotPatternAnalysis = async ({
       card: TarotCard;
     }> = [];
 
-    // Match tarot page: for (let i = 1; i < 8; i++) { currentDate.subtract(i, 'day') }
-    for (let i = 1; i < 8; i++) {
-      const day = currentDate.subtract(i, 'day');
-      const dateStr = day.format('YYYY-MM-DD');
+    const recentDates = getDailySeedDateStrings(now, timeZone, 7, false);
+    for (const dateStr of recentDates) {
       const card = getTarotCard(`daily-${dateStr}`, userName, userBirthday);
+      const dayName = new Intl.DateTimeFormat('en-US', {
+        weekday: 'long',
+        timeZone,
+      }).format(new Date(`${dateStr}T00:00:00Z`));
+
       recentDailyCards.push({
         date: dateStr,
-        day: day.format('dddd'), // Full day name like "Monday"
+        day: dayName,
         card: {
           name: card.name,
           keywords: card.keywords || [],

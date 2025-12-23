@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation';
 
 interface ModuleCardProps {
   module: DailyThreadModule;
-  onAction: (action: DailyThreadModule['actions'][0]) => void;
+  onAction: (action: DailyThreadModule['actions'][0], moduleId: string) => void;
 }
 
 export function ModuleCard({ module, onAction }: ModuleCardProps) {
@@ -14,7 +14,7 @@ export function ModuleCard({ module, onAction }: ModuleCardProps) {
 
   const handleAction = async (action: DailyThreadModule['actions'][0]) => {
     if (action.intent === 'dismiss') {
-      onAction(action);
+      onAction(action, module.id);
       return;
     }
 
@@ -23,10 +23,23 @@ export function ModuleCard({ module, onAction }: ModuleCardProps) {
       return;
     }
 
-    if (action.intent === 'journal' && action.payload?.prompt) {
-      router.push(
-        `/journal?prompt=${encodeURIComponent(action.payload.prompt)}`,
-      );
+    if (action.intent === 'journal') {
+      const prompt = action.payload?.prompt;
+      const inputElement =
+        typeof document !== 'undefined'
+          ? document.getElementById('book-of-shadows-message')
+          : null;
+      if (inputElement) {
+        window.dispatchEvent(
+          new CustomEvent('astral-chat:journal', {
+            detail: { prompt },
+          }),
+        );
+        return;
+      }
+
+      const query = prompt ? `?prompt=${encodeURIComponent(prompt)}` : '';
+      router.push(`/book-of-shadows${query}`);
       return;
     }
 
@@ -50,7 +63,7 @@ export function ModuleCard({ module, onAction }: ModuleCardProps) {
       console.error('[ModuleCard] Error handling action:', error);
     }
 
-    onAction(action);
+    onAction(action, module.id);
   };
 
   return (
