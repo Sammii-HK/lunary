@@ -826,7 +826,6 @@ function BookOfShadowsContent() {
                   </svg>
                 </button>
                 <AuthComponent
-                  key={authMode}
                   defaultToSignUp={authMode === 'signUp'}
                   onSuccess={() => {
                     setShowAuthModal(false);

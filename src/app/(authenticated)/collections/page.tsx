@@ -212,7 +212,6 @@ function CollectionsPageContent() {
                   ×
                 </button>
                 <AuthComponent
-                  key={authMode}
                   defaultToSignUp={authMode === 'signUp'}
                   onSuccess={() => {
                     setShowAuthModal(false);

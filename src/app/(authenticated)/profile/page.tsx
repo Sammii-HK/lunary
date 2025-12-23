@@ -911,7 +911,6 @@ export default function ProfilePage() {
             </button>
 
             <AuthComponent
-              key={authMode}
               defaultToSignUp={authMode === 'signUp'}
               onSuccess={() => {
                 console.log('🎉 Auth success callback triggered');
