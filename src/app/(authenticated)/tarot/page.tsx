@@ -1115,6 +1115,22 @@ const TarotReadings = () => {
 
         <GuideNudge location='tarot' className='mb-2' />
 
+        {subscription.hasAccess('tarot_patterns') &&
+          personalizedReading?.trendAnalysis && (
+            <div className='space-y-3'>
+              <TarotSeasonReading
+                trendAnalysis={personalizedReading.trendAnalysis}
+                period={timeFrame as 7 | 14 | 30 | 90 | 180 | 365}
+              />
+              <TarotRitualForPatterns
+                trendAnalysis={personalizedReading.trendAnalysis}
+              />
+              <TarotReflectionPrompts
+                trendAnalysis={personalizedReading.trendAnalysis}
+              />
+            </div>
+          )}
+
         {subscription.hasAccess('tarot_patterns') && (
           <HoroscopeSection
             title={
@@ -1261,22 +1277,6 @@ const TarotReadings = () => {
             />
           </HoroscopeSection>
         )}
-
-        {subscription.hasAccess('tarot_patterns') &&
-          personalizedReading?.trendAnalysis && (
-            <div className='space-y-3'>
-              <TarotSeasonReading
-                trendAnalysis={personalizedReading.trendAnalysis}
-                period={timeFrame as 7 | 14 | 30 | 90 | 180 | 365}
-              />
-              <TarotRitualForPatterns
-                trendAnalysis={personalizedReading.trendAnalysis}
-              />
-              <TarotReflectionPrompts
-                trendAnalysis={personalizedReading.trendAnalysis}
-              />
-            </div>
-          )}
 
         <div id='tarot-spreads-section'>
           <CollapsibleSection title='Tarot Spreads' defaultCollapsed={false}>

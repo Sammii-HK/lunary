@@ -17,7 +17,7 @@
     },
     {
       "path": "/api/cron/daily-cosmic-pulse",
-      "schedule": "0 8 * * *"
+      "schedule": "0 10 * * *"
     },
     {
       "path": "/api/cron/moon-circles",
@@ -42,6 +42,10 @@
     {
       "path": "/api/cron/check-notification-failures",
       "schedule": "0 9 * * *"
+    },
+    {
+      "path": "/api/cron/yearly-tarot-analysis",
+      "schedule": "15 0 1 1 *"
     }
   ]
 }
