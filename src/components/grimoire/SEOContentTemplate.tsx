@@ -116,6 +116,9 @@ export interface SEOContentTemplateProps {
 
   // Children (for custom content)
   children?: React.ReactNode;
+
+  // Children placement within the template
+  childrenPosition?: 'after-description' | 'after-faqs';
 }
 
 export function SEOContentTemplate({
@@ -159,6 +162,7 @@ export function SEOContentTemplate({
   entityName,
   heroContent,
   children,
+  childrenPosition = 'after-faqs',
 }: SEOContentTemplateProps) {
   // Auto-generate breadcrumbs from URL if not provided
   const autoBreadcrumbs = useMemo(() => {
@@ -249,6 +253,13 @@ export function SEOContentTemplate({
           </p>
         )}
       </header>
+
+      {/* Children (custom content) - optional placement */}
+      {childrenPosition === 'after-description' && children && (
+        <div id='explore-practices' className='mt-8'>
+          {children}
+        </div>
+      )}
 
       {/* Table of Contents */}
       {tableOfContents && tableOfContents.length > 0 && (
@@ -702,7 +713,7 @@ export function SEOContentTemplate({
       )}
 
       {/* Children (custom content) */}
-      {children && (
+      {childrenPosition === 'after-faqs' && children && (
         <div id='explore-practices' className='mt-8'>
           {children}
         </div>
