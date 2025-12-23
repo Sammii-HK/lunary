@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect } from 'react';
+import Link from 'next/link';
 import dynamic from 'next/dynamic';
 import { useUser } from '@/context/UserContext';
 import { useAuthStatus } from '@/components/AuthStatus';
@@ -147,7 +148,13 @@ export default function AppDashboard() {
             {greeting()}
             {firstName && (
               <>
-                , <span className='text-lunary-accent'>{firstName}</span>
+                ,{' '}
+                <Link
+                  href='/profile'
+                  className='text-lunary-accent hover:text-lunary-accent-300 transition-colors'
+                >
+                  {firstName}
+                </Link>
               </>
             )}
           </p>
