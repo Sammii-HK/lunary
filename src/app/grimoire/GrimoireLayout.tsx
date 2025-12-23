@@ -311,6 +311,11 @@ const GRIMOIRE_FULL_STRUCTURE = [
     icon: <Compass className='w-5 h-5' />,
     items: [
       {
+        title: 'Astrology Overview',
+        href: '/grimoire/astrology',
+        description: 'All astrology topics',
+      },
+      {
         title: 'Birth Chart',
         href: '/grimoire/birth-chart',
         description: 'Your natal chart guide',

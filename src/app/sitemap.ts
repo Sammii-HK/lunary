@@ -75,6 +75,12 @@ export default function sitemap(): MetadataRoute.Sitemap {
     },
     // Grimoire Section Index Pages
     {
+      url: `${baseUrl}/grimoire/astrology`,
+      lastModified: now,
+      changeFrequency: 'monthly' as const,
+      priority: 0.8,
+    },
+    {
       url: `${baseUrl}/grimoire/tarot`,
       lastModified: now,
       changeFrequency: 'monthly' as const,
