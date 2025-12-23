@@ -28,6 +28,7 @@ async function generateResponse(
   const { searchParams } = new URL(request.url);
   // Support both path parameter and query parameter for backward compatibility
   const dateFromQuery = searchParams.get('date');
+  const excludeParam = searchParams.get('exclude');
   const dateToUse = dateParam || dateFromQuery;
 
   let targetDate: Date;
@@ -86,9 +87,28 @@ async function generateResponse(
     });
   }
 
+  const excludedNames = new Set(
+    (excludeParam ? excludeParam.split(',') : [])
+      .map((value) => decodeURIComponent(value).trim().toLowerCase())
+      .filter(Boolean),
+  );
+
+  const candidateEvents =
+    excludedNames.size > 0
+      ? allEvents.filter((event) => {
+          const name = String(event.name || '')
+            .trim()
+            .toLowerCase();
+          return !excludedNames.has(name);
+        })
+      : allEvents;
+
+  const prioritizedEvents =
+    candidateEvents.length > 0 ? candidateEvents : allEvents;
+
   // Sort by priority and select primary event
-  allEvents.sort((a, b) => b.priority - a.priority);
-  const primaryEvent = allEvents[0];
+  prioritizedEvents.sort((a, b) => b.priority - a.priority);
+  const primaryEvent = prioritizedEvents[0];
 
   // Generate content with requested structure
   const highlights = [];
@@ -153,7 +173,7 @@ async function generateResponse(
   }
 
   // THIRD & FOURTH: Secondary events with brief constellation info and angular separations
-  const secondaryEvents = allEvents.slice(1, 3);
+  const secondaryEvents = prioritizedEvents.slice(1, 3);
   secondaryEvents.forEach((event) => {
     if (event.type === 'ingress') {
       highlights.push(
@@ -192,7 +212,7 @@ async function generateResponse(
 
   // Generate guidance that summarizes ALL the day's events
   const horoscopeSnippet = generateDayGuidanceSummary(
-    allEvents.slice(0, 3),
+    prioritizedEvents.slice(0, 3),
     positions,
     moonPhase,
   );
@@ -361,8 +381,9 @@ export async function GET(
   const { date: dateParam } = await params;
   const { searchParams } = new URL(request.url);
   const dateFromQuery = searchParams.get('date');
+  const excludeParam = searchParams.get('exclude');
   const dateToUse = dateParam || dateFromQuery;
-  const cacheKey = `cosmic-post-${dateToUse || 'today'}`;
+  const cacheKey = `cosmic-post-${dateToUse || 'today'}-${excludeParam || 'none'}`;
 
   // Request deduplication - if same date is being processed, reuse the promise
   if (pendingRequests.has(cacheKey)) {

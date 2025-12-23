@@ -138,6 +138,35 @@ export async function GET(request: NextRequest) {
     const tomorrowDate = new Date(now);
     tomorrowDate.setUTCDate(tomorrowDate.getUTCDate() + 1);
     const targetDateStr = tomorrowDate.toISOString().split('T')[0];
+    const dailyPostsKey = `daily-posts-${targetDateStr}`;
+
+    try {
+      const gateResult = await sql`
+        INSERT INTO notification_sent_events (date, event_key, event_type, event_name, event_priority, sent_by)
+        VALUES (${targetDateStr}::date, ${dailyPostsKey}, 'daily_posts', 'Daily Posts', 1, 'cron')
+        ON CONFLICT (date, event_key) DO NOTHING
+        RETURNING id
+      `;
+
+      if (gateResult.rows.length === 0) {
+        console.log(
+          `⚠️ Daily posts already generated for ${targetDateStr}, skipping duplicate execution`,
+        );
+        return NextResponse.json({
+          success: false,
+          message: `Already executed for target date (${targetDateStr})`,
+          skipped: true,
+        });
+      }
+    } catch (error: any) {
+      if (error?.code === '42P01') {
+        console.warn(
+          'notification_sent_events table missing; proceeding without DB dedupe',
+        );
+      } else {
+        throw error;
+      }
+    }
 
     // Atomic check-and-set: Prevent duplicate execution for the same target date
     // This works better in serverless than separate checks
@@ -473,8 +502,32 @@ async function runDailyPosts(dateStr: string) {
   const productionUrl = 'https://lunary.app';
 
   // Fetch dynamic content for all post types
+  let excludeEvents: string[] = [];
+  try {
+    const recentEvents = await sql`
+      SELECT event_name
+      FROM notification_sent_events
+      WHERE event_type = 'daily_cosmic_post'
+        AND date < ${dateStr}::date
+      ORDER BY date DESC
+      LIMIT 5
+    `;
+    excludeEvents = recentEvents.rows
+      .map((row) => row.event_name)
+      .filter(Boolean);
+  } catch (error: any) {
+    if (error?.code !== '42P01') {
+      console.error('Failed to load recent cosmic events:', error);
+    }
+  }
+
+  const excludeParam =
+    excludeEvents.length > 0
+      ? `?exclude=${encodeURIComponent(excludeEvents.join(','))}`
+      : '';
+
   const [cosmicResponse] = await Promise.all([
-    fetch(`${productionUrl}/api/og/cosmic-post/${dateStr}`, {
+    fetch(`${productionUrl}/api/og/cosmic-post/${dateStr}${excludeParam}`, {
       headers: { 'User-Agent': 'Lunary-Cron/1.0' },
     }),
   ]);
@@ -792,6 +845,27 @@ async function runDailyPosts(dateStr: string) {
     failed: errorCount,
     successRate: `${Math.round((successCount / posts.length) * 100)}%`,
   };
+
+  if (successCount > 0 && cosmicContent?.primaryEvent?.name) {
+    try {
+      await sql`
+        INSERT INTO notification_sent_events (date, event_key, event_type, event_name, event_priority, sent_by)
+        VALUES (
+          ${dateStr}::date,
+          ${`daily-cosmic-post-${dateStr}`},
+          'daily_cosmic_post',
+          ${cosmicContent.primaryEvent.name},
+          ${cosmicContent.primaryEvent.priority || 1},
+          'cron'
+        )
+        ON CONFLICT (date, event_key) DO NOTHING
+      `;
+    } catch (error: any) {
+      if (error?.code !== '42P01') {
+        console.error('Failed to record daily cosmic post event:', error);
+      }
+    }
+  }
 
   // Send rich push notifications with cosmic data and images
   try {

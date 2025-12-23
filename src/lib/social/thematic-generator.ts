@@ -521,12 +521,45 @@ export function generateWeekContent(
 export interface ThematicPost {
   content: string;
   platform: string;
-  postType: 'educational';
+  postType: 'educational' | 'closing_ritual';
   topic: string;
   scheduledDate: Date;
   hashtags: string;
   category: string;
   slug: string;
+}
+
+type ClosingRitualStyle = 'long' | 'short';
+
+const CLOSING_RITUAL_HASHTAGS = '#closingritual #sundaypause #lunarbreath';
+
+function getClosingThemeDescriptor(
+  themeName?: string,
+  shortForm?: boolean,
+): string {
+  if (!themeName) {
+    return shortForm
+      ? 'Let the night soften this pause.'
+      : 'Let the night keep you steady as you close the week.';
+  }
+
+  const normalized = themeName.toLowerCase();
+  return shortForm
+    ? `Let ${normalized} soften this pause.`
+    : `This week's ${normalized} energy invites a slow, conscious ending.`;
+}
+
+function buildClosingRitualContent(
+  themeName: string | undefined,
+  style: ClosingRitualStyle,
+): string {
+  const descriptor = getClosingThemeDescriptor(themeName, style === 'short');
+
+  if (style === 'long') {
+    return `Sunday closing ritual • Pause with the twilight, breathe slowly, and release what no longer serves. ${descriptor} Keep returning to the stars for steadying breath.`;
+  }
+
+  return `Sunday closing ritual: breathe slow, release, rest. ${descriptor}`;
 }
 
 export function generateThematicPostsForWeek(
@@ -598,6 +631,32 @@ export function generateThematicPostsForWeek(
         slug:
           dayContent.facet.grimoireSlug.split('/').pop() ||
           dayContent.facet.title.toLowerCase().replace(/\s+/g, '-'),
+      });
+    }
+  }
+
+  if (weekContent.length > 0) {
+    const closingRitualDate = new Date(weekStartDate);
+    closingRitualDate.setDate(closingRitualDate.getDate() - 1);
+    closingRitualDate.setHours(20, 0, 0, 0);
+    const closingThemeName = weekContent[0]?.theme?.name;
+    const closingPlatforms = Array.from(
+      new Set([...longFormPlatforms, ...shortFormPlatforms]),
+    );
+
+    for (const platform of closingPlatforms) {
+      const style: ClosingRitualStyle = longFormPlatforms.includes(platform)
+        ? 'long'
+        : 'short';
+      posts.push({
+        content: buildClosingRitualContent(closingThemeName, style),
+        platform,
+        postType: 'closing_ritual',
+        topic: 'closing ritual',
+        scheduledDate: new Date(closingRitualDate),
+        hashtags: CLOSING_RITUAL_HASHTAGS,
+        category: 'ritual',
+        slug: 'closing-ritual',
       });
     }
   }
