@@ -3,6 +3,7 @@ import {
   getRealPlanetaryPositions,
   getAccurateMoonPhase,
 } from '../../../../../utils/astrology/cosmic-og';
+import { requireGptAuth } from '@/lib/gptAuth';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -234,6 +235,9 @@ function getMood(moonPhase: string): string {
 }
 
 export async function GET(request: NextRequest) {
+  const unauthorized = requireGptAuth(request);
+  if (unauthorized) return unauthorized;
+
   try {
     const { searchParams } = new URL(request.url);
     const signParam = searchParams.get('sign')?.toLowerCase();

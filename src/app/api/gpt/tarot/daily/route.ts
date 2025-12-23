@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { requireGptAuth } from '@/lib/gptAuth';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -161,6 +162,9 @@ function generateMessage(
 }
 
 export async function POST(request: NextRequest) {
+  const unauthorized = requireGptAuth(request);
+  if (unauthorized) return unauthorized;
+
   try {
     const body = await request.json();
     const { focus, mood } = body;
