@@ -1,5 +1,6 @@
 import { Metadata } from 'next';
 import Link from 'next/link';
+import { MarketingFooter } from '@/components/MarketingFooter';
 
 export const metadata: Metadata = {
   title: 'Editorial Guidelines - Lunary Content Standards',
@@ -81,77 +82,80 @@ We respect intellectual traditions and avoid appropriation. When drawing from sp
 
 export default function EditorialGuidelinesPage() {
   return (
-    <div className='min-h-screen bg-zinc-950 text-zinc-100'>
-      <div className='max-w-4xl mx-auto px-4 py-12'>
-        <nav className='flex items-center gap-2 text-sm text-zinc-400 mb-8'>
-          <Link href='/' className='hover:text-zinc-300'>
-            Home
-          </Link>
-          <span>/</span>
-          <Link href='/about' className='hover:text-zinc-300'>
-            About
-          </Link>
-          <span>/</span>
-          <span className='text-zinc-400'>Editorial Guidelines</span>
-        </nav>
+    <>
+      <div className='min-h-screen bg-zinc-950 text-zinc-100 flex flex-col'>
+        <div className='flex-1 max-w-4xl mx-auto px-4 py-12'>
+          <nav className='flex items-center gap-2 text-sm text-zinc-400 mb-8'>
+            <Link href='/' className='hover:text-zinc-300'>
+              Home
+            </Link>
+            <span>/</span>
+            <Link href='/about' className='hover:text-zinc-300'>
+              About
+            </Link>
+            <span>/</span>
+            <span className='text-zinc-400'>Editorial Guidelines</span>
+          </nav>
 
-        <header className='mb-12'>
-          <h1 className='text-4xl md:text-5xl font-light mb-4'>
-            Editorial Guidelines
-          </h1>
-          <p className='text-xl text-zinc-400 leading-relaxed'>
-            Our commitment to creating trustworthy, valuable content for the
-            spiritual wellness community.
-          </p>
-        </header>
+          <header className='mb-12'>
+            <h1 className='text-4xl md:text-5xl font-light mb-4'>
+              Editorial Guidelines
+            </h1>
+            <p className='text-xl text-zinc-400 leading-relaxed'>
+              Our commitment to creating trustworthy, valuable content for the
+              spiritual wellness community.
+            </p>
+          </header>
 
-        <div className='space-y-8'>
-          {sections.map((section, index) => (
-            <section
-              key={index}
-              className='p-6 rounded-xl border border-zinc-800 bg-zinc-900/30'
+          <div className='space-y-8'>
+            {sections.map((section, index) => (
+              <section
+                key={index}
+                className='p-6 rounded-xl border border-zinc-800 bg-zinc-900/30'
+              >
+                <h2 className='text-xl font-medium mb-4 text-lunary-primary-300'>
+                  {section.title}
+                </h2>
+                <div className='text-zinc-300 whitespace-pre-line leading-relaxed'>
+                  {section.content}
+                </div>
+              </section>
+            ))}
+          </div>
+
+          <section className='mt-12 p-6 rounded-xl border border-lunary-primary-700 bg-gradient-to-r from-lunary-primary-900/20 to-lunary-rose-900/20'>
+            <h2 className='text-xl font-medium text-lunary-primary-300 mb-2'>
+              Questions or Corrections?
+            </h2>
+            <p className='text-zinc-300 mb-4'>
+              We welcome feedback on our content. If you spot an error or have
+              suggestions for improvement, please let us know.
+            </p>
+            <a
+              href='mailto:hello@lunary.app'
+              className='text-lunary-primary-400 hover:text-lunary-primary-300 transition-colors'
             >
-              <h2 className='text-xl font-medium mb-4 text-lunary-primary-300'>
-                {section.title}
-              </h2>
-              <div className='text-zinc-300 whitespace-pre-line leading-relaxed'>
-                {section.content}
-              </div>
-            </section>
-          ))}
-        </div>
+              hello@lunary.app
+            </a>
+          </section>
 
-        <section className='mt-12 p-6 rounded-xl border border-lunary-primary-700 bg-gradient-to-r from-lunary-primary-900/20 to-lunary-rose-900/20'>
-          <h2 className='text-xl font-medium text-lunary-primary-300 mb-2'>
-            Questions or Corrections?
-          </h2>
-          <p className='text-zinc-300 mb-4'>
-            We welcome feedback on our content. If you spot an error or have
-            suggestions for improvement, please let us know.
-          </p>
-          <a
-            href='mailto:hello@lunary.app'
-            className='text-lunary-primary-400 hover:text-lunary-primary-300 transition-colors'
-          >
-            hello@lunary.app
-          </a>
-        </section>
-
-        <div className='mt-8 flex gap-4'>
-          <Link
-            href='/about/sammii'
-            className='text-zinc-400 hover:text-zinc-300 text-sm'
-          >
-            ← About the Founder
-          </Link>
-          <Link
-            href='/about/methodology'
-            className='text-zinc-400 hover:text-zinc-300 text-sm'
-          >
-            Technical Methodology →
-          </Link>
+          <div className='mt-8 flex gap-4'>
+            <Link
+              href='/about/sammii'
+              className='text-zinc-400 hover:text-zinc-300 text-sm'
+            >
+              ← About the Founder
+            </Link>
+            <Link
+              href='/about/methodology'
+              className='text-zinc-400 hover:text-zinc-300 text-sm'
+            >
+              Technical Methodology →
+            </Link>
+          </div>
         </div>
+        <MarketingFooter />
       </div>
-    </div>
+    </>
   );
 }

@@ -2,6 +2,7 @@ import { Metadata } from 'next';
 import Link from 'next/link';
 import { Code, Zap, Moon, Star, Sparkles, Key } from 'lucide-react';
 import { renderJsonLd } from '@/lib/schema';
+import { MarketingFooter } from '@/components/MarketingFooter';
 
 export const metadata: Metadata = {
   title: 'Lunary API - Astrology & Moon Phase Data for Developers',
@@ -254,8 +255,8 @@ export default function DevelopersPage() {
   return (
     <>
       {renderJsonLd(structuredData)}
-      <div className='min-h-screen bg-zinc-950 text-zinc-100'>
-        <div className='max-w-4xl mx-auto px-4 py-12'>
+      <div className='min-h-screen bg-zinc-950 text-zinc-100 flex flex-col'>
+        <div className='flex-1 max-w-4xl mx-auto px-4 py-12'>
           {/* Header */}
           <div className='mb-12'>
             <div className='flex items-center gap-3 mb-4'>
@@ -534,6 +535,7 @@ export default function DevelopersPage() {
             </p>
           </div>
         </div>
+        <MarketingFooter />
       </div>
     </>
   );

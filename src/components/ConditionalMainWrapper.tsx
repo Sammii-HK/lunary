@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { usePathname, useSearchParams } from 'next/navigation';
 import { cn } from '@/lib/utils';
 
@@ -15,9 +15,23 @@ export function ConditionalMainWrapper({
   const searchParams = useSearchParams();
   const [showMarketingNav, setShowMarketingNav] = useState(false);
   const [showAppNav, setShowAppNav] = useState(false);
+  const navOverride = searchParams?.get('nav');
+  const mainRef = useRef<HTMLElement | null>(null);
 
   useEffect(() => {
     if (typeof window === 'undefined' || !pathname) return;
+
+    if (navOverride === 'marketing') {
+      setShowMarketingNav(true);
+      setShowAppNav(false);
+      return;
+    }
+
+    if (navOverride === 'app') {
+      setShowMarketingNav(false);
+      setShowAppNav(true);
+      return;
+    }
 
     // Define core marketing pages (always show marketing nav)
     const coreMarketingRoutes = [
@@ -26,11 +40,19 @@ export function ConditionalMainWrapper({
       '/help',
       '/auth',
       '/comparison',
+      '/product',
+      '/resources',
+      '/about',
+      '/legal',
       '/privacy',
       '/terms',
       '/cookies',
       '/refund',
       '/accessibility',
+      '/acceptable-use',
+      '/referral-terms',
+      '/api-terms',
+      '/dmca',
       '/trademark',
       '/press-kit',
       '/developers',
@@ -68,7 +90,7 @@ export function ConditionalMainWrapper({
     ];
 
     // Pages that can show app nav if coming from app
-    const contextualPages = ['/blog', '/pricing', ...explorePages];
+    const contextualPages = ['/blog', '/pricing', '/grimoire', ...explorePages];
     const isContextualPage = contextualPages.some(
       (page) => pathname === page || pathname.startsWith(`${page}/`),
     );
@@ -121,9 +143,12 @@ export function ConditionalMainWrapper({
       : false;
 
     // Check if current page is a contextual page (blog/pricing/shop)
-    const isContextualPageCheck = ['/blog', '/pricing', '/shop'].some(
-      (page) => pathname === page || pathname.startsWith(`${page}/`),
-    );
+    const isContextualPageCheck = [
+      '/blog',
+      '/pricing',
+      '/shop',
+      '/grimoire',
+    ].some((page) => pathname === page || pathname.startsWith(`${page}/`));
 
     let cameFromApp: boolean;
     if (isContextualPageCheck) {
@@ -151,17 +176,25 @@ export function ConditionalMainWrapper({
 
     setShowMarketingNav(marketingNav);
     setShowAppNav(appNav);
-  }, [pathname, searchParams]);
+  }, [pathname, searchParams, navOverride]);
+
+  useEffect(() => {
+    if (!mainRef.current) return;
+    mainRef.current.scrollTo({ top: 0, left: 0, behavior: 'auto' });
+  }, [pathname]);
 
   // Marketing nav (64px h-16) + Beta banner (36px) = 100px total
   // App nav is 48px mobile, 64px desktop
   return (
     <main
+      ref={mainRef}
       className={cn(
         'flex flex-col w-full overflow-y-auto',
         showMarketingNav && 'pt-[100px] h-screen',
         showAppNav && 'pb-14 md:pb-16 h-screen',
         !showMarketingNav && !showAppNav && 'h-screen',
+        showMarketingNav && 'scroll-pt-[100px]',
+        showAppNav && 'scroll-pt-16',
       )}
     >
       {children}

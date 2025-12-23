@@ -14,6 +14,7 @@ import {
   ChevronRight,
   NotebookPen,
 } from 'lucide-react';
+import { MarketingFooterGate } from '@/components/MarketingFooterGate';
 
 export const metadata = {
   title: 'Explore | Lunary',
@@ -29,6 +30,13 @@ type ExploreItem = {
   description: string;
   icon: React.ComponentType<{ className?: string }>;
   featured?: boolean;
+};
+
+const withNavParam = (href: string) => {
+  const [path, query] = href.split('?');
+  const params = new URLSearchParams(query || '');
+  params.set('nav', 'app');
+  return `${path}?${params.toString()}`;
 };
 
 const exploreItems: ExploreItem[] = [
@@ -120,37 +128,40 @@ export default function ExplorePage() {
   const other = exploreItems.filter((item) => !item.featured);
 
   return (
-    <div className='h-full overflow-auto p-4'>
-      <div className='max-w-2xl mx-auto space-y-6'>
-        <header className='pt-4 pb-2'>
-          <h1 className='text-2xl font-light text-zinc-100'>Explore</h1>
-          <p className='text-sm text-zinc-400'>
-            Discover all Lunary features and resources
-          </p>
-        </header>
+    <div className='min-h-screen flex flex-col'>
+      <div className='flex-1 p-4'>
+        <div className='max-w-2xl mx-auto space-y-6'>
+          <header className='pt-4 pb-2'>
+            <h1 className='text-2xl font-light text-zinc-100'>Explore</h1>
+            <p className='text-sm text-zinc-400'>
+              Discover all Lunary features and resources
+            </p>
+          </header>
 
-        <section>
-          <h2 className='text-xs font-medium text-zinc-400 uppercase tracking-wide mb-3'>
-            Your Space
-          </h2>
-          <div className='space-y-2'>
-            {featured.map((item) => (
-              <ExploreLink key={item.href} item={item} />
-            ))}
-          </div>
-        </section>
+          <section>
+            <h2 className='text-xs font-medium text-zinc-400 uppercase tracking-wide mb-3'>
+              Your Space
+            </h2>
+            <div className='space-y-2'>
+              {featured.map((item) => (
+                <ExploreLink key={item.href} item={item} />
+              ))}
+            </div>
+          </section>
 
-        <section>
-          <h2 className='text-xs font-medium text-zinc-400 uppercase tracking-wide mb-3'>
-            Resources
-          </h2>
-          <div className='grid grid-cols-2 gap-2'>
-            {other.map((item) => (
-              <ExploreLinkCompact key={item.href} item={item} />
-            ))}
-          </div>
-        </section>
+          <section>
+            <h2 className='text-xs font-medium text-zinc-400 uppercase tracking-wide mb-3'>
+              Resources
+            </h2>
+            <div className='grid grid-cols-2 gap-2'>
+              {other.map((item) => (
+                <ExploreLinkCompact key={item.href} item={item} />
+              ))}
+            </div>
+          </section>
+        </div>
       </div>
+      <MarketingFooterGate />
     </div>
   );
 }
@@ -159,7 +170,7 @@ function ExploreLink({ item }: { item: ExploreItem }) {
   const Icon = item.icon;
   return (
     <Link
-      href={item.href}
+      href={withNavParam(item.href)}
       className='flex items-center gap-4 p-4 rounded-lg border border-zinc-800 bg-zinc-900/50 hover:border-lunary-primary-600 hover:bg-zinc-900 transition-colors group'
     >
       <div className='p-2 rounded-lg bg-lunary-primary-900/10 text-lunary-primary-400'>
@@ -180,7 +191,7 @@ function ExploreLinkCompact({ item }: { item: ExploreItem }) {
   const Icon = item.icon;
   return (
     <Link
-      href={item.href}
+      href={withNavParam(item.href)}
       className='flex items-center gap-3 p-3 rounded-lg border border-zinc-800/50 hover:border-zinc-700 hover:bg-zinc-900/50 transition-colors group'
     >
       <Icon className='w-4 h-4 text-zinc-400 group-hover:text-lunary-primary-400 transition-colors' />

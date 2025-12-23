@@ -7,6 +7,7 @@ import { stringToKebabCase } from '../../../utils/string';
 import { sectionToSlug, slugToSection } from '@/utils/grimoire';
 import { useState, useEffect, useTransition, useRef } from 'react';
 import dynamic from 'next/dynamic';
+import { MarketingFooterGate } from '@/components/MarketingFooterGate';
 import {
   ChevronRightIcon,
   Menu,
@@ -1075,6 +1076,7 @@ export default function GrimoireLayout({
             <div className='max-w-7xl mx-auto'>
               {GrimoireContent[currentSection as keyof typeof GrimoireContent]}
               <ExploreGrimoire />
+              <MarketingFooterGate />
             </div>
           </div>
         ) : (
@@ -1082,6 +1084,7 @@ export default function GrimoireLayout({
             <GrimoireIndexPage />
             <div className='max-w-7xl mx-auto px-4'>
               <ExploreGrimoire />
+              <MarketingFooterGate />
             </div>
           </div>
         )}

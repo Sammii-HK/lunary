@@ -1,6 +1,7 @@
 import { Metadata } from 'next';
 import Link from 'next/link';
 import { createFAQPageSchema, renderJsonLd } from '@/lib/schema';
+import { MarketingFooter } from '@/components/MarketingFooter';
 
 export const metadata: Metadata = {
   title: 'Methodology - How Lunary Calculates Charts & Transits',
@@ -116,97 +117,100 @@ export default function MethodologyPage() {
   );
 
   return (
-    <div className='min-h-screen bg-zinc-950 text-zinc-100'>
-      {renderJsonLd(faqSchema)}
-      <div className='max-w-4xl mx-auto px-4 py-12'>
-        <nav className='flex items-center gap-2 text-sm text-zinc-400 mb-8'>
-          <Link href='/' className='hover:text-zinc-300'>
-            Home
-          </Link>
-          <span>/</span>
-          <Link href='/about' className='hover:text-zinc-300'>
-            About
-          </Link>
-          <span>/</span>
-          <span className='text-zinc-400'>Methodology</span>
-        </nav>
+    <>
+      <div className='min-h-screen bg-zinc-950 text-zinc-100 flex flex-col'>
+        {renderJsonLd(faqSchema)}
+        <div className='flex-1 max-w-4xl mx-auto px-4 py-12'>
+          <nav className='flex items-center gap-2 text-sm text-zinc-400 mb-8'>
+            <Link href='/' className='hover:text-zinc-300'>
+              Home
+            </Link>
+            <span>/</span>
+            <Link href='/about' className='hover:text-zinc-300'>
+              About
+            </Link>
+            <span>/</span>
+            <span className='text-zinc-400'>Methodology</span>
+          </nav>
 
-        <header className='mb-12'>
-          <h1 className='text-4xl md:text-5xl font-light mb-4'>
-            Technical Methodology
-          </h1>
-          <p className='text-xl text-zinc-400 leading-relaxed'>
-            How Lunary achieves astronomy-grade accuracy in astrological
-            calculations.
-          </p>
-        </header>
+          <header className='mb-12'>
+            <h1 className='text-4xl md:text-5xl font-light mb-4'>
+              Technical Methodology
+            </h1>
+            <p className='text-xl text-zinc-400 leading-relaxed'>
+              How Lunary achieves astronomy-grade accuracy in astrological
+              calculations.
+            </p>
+          </header>
 
-        <div className='space-y-8'>
-          {sections.map((section, index) => (
-            <section
-              key={index}
-              className='p-6 rounded-xl border border-zinc-800 bg-zinc-900/30'
-            >
-              <h2 className='text-xl font-medium mb-4 text-lunary-primary-300'>
-                {section.title}
-              </h2>
-              <div className='text-zinc-300 whitespace-pre-line leading-relaxed'>
-                {section.content}
-              </div>
-            </section>
-          ))}
-        </div>
-
-        <section className='mt-12'>
-          <h2 className='text-2xl font-light mb-6'>
-            Frequently Asked Questions
-          </h2>
-          <div className='space-y-4'>
-            {faqs.map((faq, index) => (
-              <div
+          <div className='space-y-8'>
+            {sections.map((section, index) => (
+              <section
                 key={index}
                 className='p-6 rounded-xl border border-zinc-800 bg-zinc-900/30'
               >
-                <h3 className='text-lg font-medium mb-2 text-zinc-100'>
-                  {faq.question}
-                </h3>
-                <p className='text-zinc-400'>{faq.answer}</p>
-              </div>
+                <h2 className='text-xl font-medium mb-4 text-lunary-primary-300'>
+                  {section.title}
+                </h2>
+                <div className='text-zinc-300 whitespace-pre-line leading-relaxed'>
+                  {section.content}
+                </div>
+              </section>
             ))}
           </div>
-        </section>
 
-        <section className='mt-12 p-6 rounded-xl border border-lunary-primary-700 bg-gradient-to-r from-lunary-primary-900/20 to-lunary-rose-900/20'>
-          <h2 className='text-xl font-medium text-lunary-primary-300 mb-2'>
-            See It In Action
-          </h2>
-          <p className='text-zinc-300 mb-4'>
-            Generate your own birth chart and experience our precision-first
-            approach to astrology.
-          </p>
-          <Link
-            href='/birth-chart'
-            className='inline-flex px-6 py-3 rounded-lg bg-lunary-primary-900/30 hover:bg-lunary-primary-900/50 border border-lunary-primary-700 text-lunary-primary-300 font-medium transition-colors'
-          >
-            Calculate Your Birth Chart
-          </Link>
-        </section>
+          <section className='mt-12'>
+            <h2 className='text-2xl font-light mb-6'>
+              Frequently Asked Questions
+            </h2>
+            <div className='space-y-4'>
+              {faqs.map((faq, index) => (
+                <div
+                  key={index}
+                  className='p-6 rounded-xl border border-zinc-800 bg-zinc-900/30'
+                >
+                  <h3 className='text-lg font-medium mb-2 text-zinc-100'>
+                    {faq.question}
+                  </h3>
+                  <p className='text-zinc-400'>{faq.answer}</p>
+                </div>
+              ))}
+            </div>
+          </section>
 
-        <div className='mt-8 flex gap-4'>
-          <Link
-            href='/about/editorial-guidelines'
-            className='text-zinc-400 hover:text-zinc-300 text-sm'
-          >
-            ← Editorial Guidelines
-          </Link>
-          <Link
-            href='/grimoire/glossary'
-            className='text-zinc-400 hover:text-zinc-300 text-sm'
-          >
-            Astrology Glossary →
-          </Link>
+          <section className='mt-12 p-6 rounded-xl border border-lunary-primary-700 bg-gradient-to-r from-lunary-primary-900/20 to-lunary-rose-900/20'>
+            <h2 className='text-xl font-medium text-lunary-primary-300 mb-2'>
+              See It In Action
+            </h2>
+            <p className='text-zinc-300 mb-4'>
+              Generate your own birth chart and experience our precision-first
+              approach to astrology.
+            </p>
+            <Link
+              href='/birth-chart'
+              className='inline-flex px-6 py-3 rounded-lg bg-lunary-primary-900/30 hover:bg-lunary-primary-900/50 border border-lunary-primary-700 text-lunary-primary-300 font-medium transition-colors'
+            >
+              Calculate Your Birth Chart
+            </Link>
+          </section>
+
+          <div className='mt-8 flex gap-4'>
+            <Link
+              href='/about/editorial-guidelines'
+              className='text-zinc-400 hover:text-zinc-300 text-sm'
+            >
+              ← Editorial Guidelines
+            </Link>
+            <Link
+              href='/grimoire/glossary'
+              className='text-zinc-400 hover:text-zinc-300 text-sm'
+            >
+              Astrology Glossary →
+            </Link>
+          </div>
         </div>
+        <MarketingFooter />
       </div>
-    </div>
+    </>
   );
 }
