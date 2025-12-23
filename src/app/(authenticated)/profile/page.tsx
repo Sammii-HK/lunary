@@ -135,6 +135,7 @@ export default function ProfilePage() {
   const [isEditing, setIsEditing] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [showAuthModal, setShowAuthModal] = useState(false);
+  const [authMode, setAuthMode] = useState<'signIn' | 'signUp'>('signIn');
   const [openSettingsSections, setOpenSettingsSections] = useState<string[]>(
     [],
   );
@@ -588,12 +589,26 @@ export default function ProfilePage() {
                 <p className='text-sm text-zinc-400'>
                   Sign in to save your profile and unlock cosmic insights
                 </p>
-                <button
-                  onClick={() => setShowAuthModal(true)}
-                  className='rounded-md bg-lunary-primary px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-lunary-primary-400'
-                >
-                  Sign In or Create Account
-                </button>
+                <div className='flex flex-col items-center gap-2 sm:flex-row sm:justify-center'>
+                  <button
+                    onClick={() => {
+                      setAuthMode('signIn');
+                      setShowAuthModal(true);
+                    }}
+                    className='rounded-md bg-lunary-primary px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-lunary-primary-400'
+                  >
+                    Sign In
+                  </button>
+                  <button
+                    onClick={() => {
+                      setAuthMode('signUp');
+                      setShowAuthModal(true);
+                    }}
+                    className='rounded-md border border-lunary-primary-700 px-4 py-2 text-sm font-medium text-lunary-accent-200 transition-colors hover:border-lunary-primary-500 hover:text-lunary-accent-100'
+                  >
+                    Create Account
+                  </button>
+                </div>
               </div>
             ) : !canCollectBirthdayData ? (
               <div className='space-y-3 rounded-md border-2 border-dashed border-lunary-primary-700 bg-gradient-to-r from-lunary-primary-900/20 to-lunary-highlight-900/20 py-4 text-center'>
@@ -895,17 +910,8 @@ export default function ProfilePage() {
               ✕
             </button>
 
-            <div className='text-center mb-6'>
-              <h3 className='text-xl font-bold text-white mb-2'>
-                Create Your Account
-              </h3>
-              <p className='text-zinc-300 text-sm'>
-                Sign up to save your profile. Upgrade to premium after creating
-                your account.
-              </p>
-            </div>
-
             <AuthComponent
+              defaultToSignUp={authMode === 'signUp'}
               onSuccess={() => {
                 console.log('🎉 Auth success callback triggered');
                 setShowAuthModal(false);

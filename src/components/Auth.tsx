@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { betterAuthClient } from '@/lib/auth-client';
 import { useAuthStatus, invalidateAuthCache } from './AuthStatus';
 import { SignOutButton } from './SignOutButton';
@@ -16,6 +16,8 @@ interface AuthFormData {
   password: string;
   name?: string;
 }
+
+let cachedAuthFormData: AuthFormData | null = null;
 
 interface AuthComponentProps {
   onSuccess?: () => void;
@@ -36,13 +38,20 @@ export function AuthComponent({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
-  const [formData, setFormData] = useState<AuthFormData>({
-    email: '',
-    password: '',
-    name: '',
-  });
+  const [formData, setFormData] = useState<AuthFormData>(
+    () =>
+      cachedAuthFormData || {
+        email: '',
+        password: '',
+        name: '',
+      },
+  );
 
   const { refreshAuth, ...authState } = useAuthStatus();
+
+  useEffect(() => {
+    cachedAuthFormData = formData;
+  }, [formData]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -87,6 +96,7 @@ export function AuthComponent({
             'If that email exists in our system, we just sent a reset link. Check your inbox.',
         );
         setMode('signIn');
+        cachedAuthFormData = null;
         setFormData({ email: '', password: '', name: '' });
         return;
       }
@@ -133,6 +143,7 @@ export function AuthComponent({
         }
 
         setSuccess('Account created successfully! You are now signed in.');
+        cachedAuthFormData = null;
         setFormData({ email: '', password: '', name: '' });
 
         await new Promise((resolve) => setTimeout(resolve, 500));
@@ -195,6 +206,7 @@ export function AuthComponent({
         }
 
         setSuccess('Signed in successfully!');
+        cachedAuthFormData = null;
         setFormData({ email: '', password: '', name: '' });
 
         await new Promise((resolve) => setTimeout(resolve, 500));
@@ -434,7 +446,6 @@ export function AuthComponent({
               setMode('signIn');
               setError(null);
               setSuccess(null);
-              setFormData({ email: '', password: '', name: '' });
             }}
             className='text-lunary-accent hover:text-lunary-accent-300 text-sm font-medium transition-colors'
           >
@@ -446,7 +457,6 @@ export function AuthComponent({
               setMode(isSignUp ? 'signIn' : 'signUp');
               setError(null);
               setSuccess(null);
-              setFormData({ email: '', password: '', name: '' });
             }}
             className='text-lunary-accent hover:text-lunary-accent-300 text-sm font-medium transition-colors'
           >

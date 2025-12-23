@@ -40,7 +40,10 @@ export function QuickActions({
     }
   };
 
-  const handleModuleAction = (action: DailyThreadModule['actions'][0]) => {
+  const handleModuleAction = (
+    action: DailyThreadModule['actions'][0],
+    _moduleId: string,
+  ) => {
     if (action.intent === 'dismiss') {
       setGeneratedModule(null);
     }

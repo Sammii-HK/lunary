@@ -42,6 +42,11 @@ const grimoireCategories = [
     description: 'Explore all 12 zodiac signs and their meanings',
   },
   {
+    name: 'Astrology',
+    url: 'https://lunary.app/grimoire/astrology',
+    description: 'Birth charts, houses, aspects, and timing',
+  },
+  {
     name: 'Tarot Cards',
     url: 'https://lunary.app/grimoire/tarot',
     description: 'Complete guide to all 78 tarot cards',

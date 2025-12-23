@@ -84,7 +84,7 @@ export async function POST(request: NextRequest) {
         // Redirect to journal creation with prompt
         return NextResponse.json({
           success: true,
-          redirect: `/journal?prompt=${encodeURIComponent(prompt)}`,
+          redirect: `/book-of-shadows?prompt=${encodeURIComponent(prompt)}`,
         });
 
       case 'ritual':

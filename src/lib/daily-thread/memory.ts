@@ -153,7 +153,7 @@ export async function generateMemoryModule(
               {
                 label: 'Open past entry',
                 intent: 'view' as const,
-                href: `/journal?entry=${journalResult.rows[0].id}`,
+                href: `/book-of-shadows/journal?entry=${journalResult.rows[0].id}`,
               },
             ]
           : []),

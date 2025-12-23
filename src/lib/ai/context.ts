@@ -48,6 +48,7 @@ export type LunaryContextDependencies = {
     userName?: string;
     userBirthday?: string;
     now?: Date;
+    timeZone?: string;
   }) => Promise<{
     daily: TarotCard | null;
     weekly: TarotCard | null;
@@ -218,6 +219,7 @@ export const buildLunaryContext = async ({
         userId,
         userName: displayName,
         userBirthday,
+        timeZone: tz,
         now,
       })
       .catch((error) => {

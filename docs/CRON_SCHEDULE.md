@@ -46,8 +46,10 @@
 
 1. **Daily Insight Notification** (8 AM UTC) - Rotates between tarot, energy theme, and insight
    - Location: `src/app/api/cron/daily-morning-notification/route.ts`
-2. **Daily Cosmic Event Notification** (2 PM UTC) - Sends if there's a significant cosmic event
-3. **Moon Circle Creation** (2 PM UTC) - Creates moon circles on new/full moon days
+2. **Daily Cosmic Pulse** (10 AM UTC) - Sends the personalized cosmic pulse email/push for users who have birthdays on file
+   - Location: `src/app/api/cron/daily-cosmic-pulse/route.ts`
+3. **Daily Cosmic Event Notification** (2 PM UTC) - Sends if there's a significant cosmic event
+4. **Moon Circle Creation** (2 PM UTC) - Creates moon circles on new/full moon days
 
 **Location:**
 
@@ -84,6 +86,17 @@ If daily notifications aren't working, check:
      -H "Authorization: Bearer $CRON_SECRET"
    ```
 
+## Yearly Tarot Analysis
+
+**When:** Every **Jan 1 at 12:15 AM UTC**
+
+**What happens:**
+
+- Computes year-over-year tarot analysis for the previous year and the new year
+- Stores results in `year_analysis` for reuse
+
+**Location:** `src/app/api/cron/yearly-tarot-analysis/route.ts`
+
 ## All Cron Jobs Schedule
 
 | Job                        | Schedule     | Time (UTC)         | Description                                           |
@@ -91,12 +104,13 @@ If daily notifications aren't working, check:
 | Process Deletions          | `0 2 * * *`  | 2:00 AM            | Cleanup tasks                                         |
 | Update Cosmic Data         | `0 6 * * *`  | 6:00 AM            | Update global cosmic snapshot                         |
 | Daily Morning Notification | `0 8 * * *`  | 8:00 AM            | **Daily insight notification** (tarot/energy/insight) |
-| Daily Cosmic Pulse         | `0 8 * * *`  | 8:00 AM            | Daily cosmic pulse                                    |
+| Daily Cosmic Pulse         | `0 10 * * *` | 10:00 AM           | Daily cosmic pulse                                    |
 | **Daily Posts**            | `0 8 * * *`  | **8:00 AM**        | **Daily posts generated (ready for review)**          |
 | **Weekly Content**         | `0 8 * * 0`  | **8:00 AM Sunday** | **Weekly blog, newsletter, Substack, social posts**   |
 | Moon Circles               | `0 10 * * *` | 10:00 AM           | Create moon circles (new/full moons)                  |
 | Weekly Cosmic Report       | `0 10 * * 0` | 10:00 AM Sunday    | Weekly report generation                              |
 | Weekly Metrics             | `0 2 * * 1`  | 2:00 AM Monday     | Weekly analytics                                      |
+| Yearly Tarot Analysis      | `15 0 1 1 *` | 12:15 AM Jan 1     | Cache year-over-year tarot analysis                   |
 
 ## Cloudflare Worker Schedule
 

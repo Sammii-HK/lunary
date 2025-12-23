@@ -71,8 +71,7 @@ const assetGroups: PressAssetGroup[] = [
   },
   {
     title: 'Founder Assets',
-    description:
-      'Portraits, headshots, and bio-ready materials for Sammii H-K.',
+    description: 'Portraits, headshots, and bio-ready materials for Sammii.',
     assets: [
       {
         name: 'Founder Portrait',

@@ -1,6 +1,7 @@
 import { Metadata } from 'next';
 import Link from 'next/link';
 import { MarketingFooter } from '@/components/MarketingFooter';
+import { MarketingBreadcrumbs } from '@/components/MarketingBreadcrumbs';
 
 export const metadata: Metadata = {
   title: 'Acceptable Use Policy | Lunary',
@@ -15,6 +16,7 @@ export default function AcceptableUsePolicyPage() {
   return (
     <div className='min-h-screen bg-zinc-950 text-zinc-100 flex flex-col pt-16'>
       <main className='max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12'>
+        <MarketingBreadcrumbs />
         <div className='mb-8'>
           <h1 className='text-4xl font-semibold text-white mb-4'>
             Acceptable Use Policy

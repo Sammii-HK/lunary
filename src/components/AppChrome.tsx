@@ -20,6 +20,7 @@ export function AppChrome() {
   const _authState = useAuthStatus();
   const [isAdminHost, setIsAdminHost] = useState(false);
   const [cameFromApp, setCameFromApp] = useState(false);
+  const navOverride = searchParams?.get('nav');
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -60,6 +61,18 @@ export function AppChrome() {
       (page) => pathname === page || pathname.startsWith(`${page}/`),
     );
 
+    if (navOverride === 'marketing') {
+      sessionStorage.removeItem(NAV_CONTEXT_KEY);
+      setCameFromApp(false);
+      return;
+    }
+
+    if (navOverride === 'app') {
+      sessionStorage.setItem(NAV_CONTEXT_KEY, 'app');
+      setCameFromApp(true);
+      return;
+    }
+
     // If currently on an app page, store in sessionStorage
     if (isCurrentAppPage) {
       sessionStorage.setItem(NAV_CONTEXT_KEY, 'app');
@@ -90,9 +103,12 @@ export function AppChrome() {
       : false;
 
     // Check if current page is a contextual page (blog/pricing/shop)
-    const isContextualPageCheck = ['/blog', '/pricing', '/shop'].some(
-      (page) => pathname === page || pathname.startsWith(`${page}/`),
-    );
+    const isContextualPageCheck = [
+      '/blog',
+      '/pricing',
+      '/shop',
+      '/grimoire',
+    ].some((page) => pathname === page || pathname.startsWith(`${page}/`));
 
     if (isContextualPageCheck) {
       // For contextual pages, be strict: ONLY show app nav with explicit signal
@@ -112,7 +128,7 @@ export function AppChrome() {
           referrerIsAppPage,
       );
     }
-  }, [pathname, searchParams]);
+  }, [pathname, searchParams, navOverride]);
 
   const isAdminSurface = isAdminHost || pathname?.startsWith('/admin');
 
@@ -139,11 +155,19 @@ export function AppChrome() {
     '/help',
     '/auth',
     '/comparison',
+    '/product',
+    '/resources',
+    '/about',
+    '/legal',
     '/privacy',
     '/terms',
     '/cookies',
     '/refund',
     '/accessibility',
+    '/acceptable-use',
+    '/referral-terms',
+    '/api-terms',
+    '/dmca',
     '/trademark',
     '/press-kit',
     '/developers',
@@ -166,7 +190,7 @@ export function AppChrome() {
   ];
 
   // Pages that can show app nav if coming from app: blog, pricing, explore pages
-  const contextualPages = ['/blog', '/pricing', ...explorePages];
+  const contextualPages = ['/blog', '/pricing', '/grimoire', ...explorePages];
   const isContextualPage = contextualPages.some(
     (page) => pathname === page || pathname?.startsWith(`${page}/`),
   );
@@ -181,12 +205,19 @@ export function AppChrome() {
 
   // Marketing nav: core marketing pages OR contextual pages without app context
   const showMarketingNav =
-    (isCoreMarketingRoute || (isContextualPage && !cameFromApp)) &&
+    (navOverride === 'marketing' ||
+      isCoreMarketingRoute ||
+      (isContextualPage && !cameFromApp)) &&
+    navOverride !== 'app' &&
     !isAdminSurface;
 
   // App nav: actual app pages OR contextual pages with app context
   const showAppNav =
-    (isActuallyAppPage || (isContextualPage && cameFromApp)) && !isAdminSurface;
+    (navOverride === 'app' ||
+      isActuallyAppPage ||
+      (isContextualPage && cameFromApp)) &&
+    navOverride !== 'marketing' &&
+    !isAdminSurface;
 
   return (
     <>

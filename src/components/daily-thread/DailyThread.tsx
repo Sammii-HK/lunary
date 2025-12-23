@@ -66,12 +66,23 @@ export function DailyThread({ className }: DailyThreadProps) {
     localStorage.setItem('daily-thread-collapsed', String(!newState));
   };
 
-  const handleAction = (action: DailyThreadModule['actions'][0]) => {
+  const handleAction = (
+    action: DailyThreadModule['actions'][0],
+    moduleId: string,
+  ) => {
     // Handle dismiss action
     if (action.intent === 'dismiss') {
-      // Could remove module from local state or mark as dismissed
-      // For now, just log it
-      console.log('[DailyThread] Module dismissed');
+      setModules((prev) => prev.filter((module) => module.id !== moduleId));
+      fetch('/api/astral-chat/daily-thread/action', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'dismiss',
+          moduleId,
+        }),
+      }).catch((error) => {
+        console.error('[DailyThread] Failed to dismiss module:', error);
+      });
     }
   };
 

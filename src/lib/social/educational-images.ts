@@ -63,6 +63,8 @@ function mapToThematicCategory(category: string): string {
     planetary: 'planetary',
     planets: 'planetary',
     astronomy: 'planetary',
+    ritual: 'lunar',
+    closing: 'lunar',
   };
 
   return categoryMap[category.toLowerCase()] || category.toLowerCase();

@@ -8,6 +8,7 @@ import { FreeHoroscopeView } from './components/FreeHoroscopeView';
 import { PaidHoroscopeView } from './components/PaidHoroscopeView';
 import { conversionTracking } from '@/lib/analytics';
 import { useEffect } from 'react';
+import { MarketingFooterGate } from '@/components/MarketingFooterGate';
 
 export default function HoroscopePage() {
   const { user, loading } = useUser();
@@ -58,14 +59,26 @@ export default function HoroscopePage() {
   // Otherwise, continue to render content
 
   if (!hasChartAccess) {
-    return <FreeHoroscopeView />;
+    return (
+      <div className='min-h-screen flex flex-col'>
+        <div className='flex-1'>
+          <FreeHoroscopeView />
+        </div>
+        <MarketingFooterGate />
+      </div>
+    );
   }
 
   return (
-    <PaidHoroscopeView
-      userBirthday={user?.birthday}
-      userName={user?.name}
-      profile={{ birthday: user?.birthday, birthChart: user?.birthChart }}
-    />
+    <div className='min-h-screen flex flex-col'>
+      <div className='flex-1'>
+        <PaidHoroscopeView
+          userBirthday={user?.birthday}
+          userName={user?.name}
+          profile={{ birthday: user?.birthday, birthChart: user?.birthChart }}
+        />
+      </div>
+      <MarketingFooterGate />
+    </div>
   );
 }

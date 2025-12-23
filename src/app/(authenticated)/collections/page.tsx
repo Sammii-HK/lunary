@@ -46,6 +46,7 @@ function CollectionsPageContent() {
   const [selectedFolder, setSelectedFolder] = useState<number | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [showAuthModal, setShowAuthModal] = useState(false);
+  const [authMode, setAuthMode] = useState<'signIn' | 'signUp'>('signIn');
   const [showFolderManagement, setShowFolderManagement] = useState(false);
   const [deletingFolderId, setDeletingFolderId] = useState<number | null>(null);
   const [selectedCollection, setSelectedCollection] =
@@ -181,9 +182,25 @@ function CollectionsPageContent() {
               Save your favorite insights, rituals, and cosmic guidance in one
               place.
             </p>
-            <Button onClick={() => setShowAuthModal(true)}>
-              Sign In to Access Collections
-            </Button>
+            <div className='flex flex-col items-center gap-2 sm:flex-row sm:justify-center'>
+              <Button
+                onClick={() => {
+                  setAuthMode('signIn');
+                  setShowAuthModal(true);
+                }}
+              >
+                Sign In
+              </Button>
+              <Button
+                variant='outline'
+                onClick={() => {
+                  setAuthMode('signUp');
+                  setShowAuthModal(true);
+                }}
+              >
+                Create Account
+              </Button>
+            </div>
           </div>
           {showAuthModal && (
             <div className='fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4'>
@@ -195,6 +212,7 @@ function CollectionsPageContent() {
                   ×
                 </button>
                 <AuthComponent
+                  defaultToSignUp={authMode === 'signUp'}
                   onSuccess={() => {
                     setShowAuthModal(false);
                   }}

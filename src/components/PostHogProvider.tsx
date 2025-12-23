@@ -47,6 +47,10 @@ function PostHogProviderContent({ children }: { children: React.ReactNode }) {
   const posthogRef = useRef<any>(null);
   const [posthogAvailable, setPosthogAvailable] = useState(false);
   const [hasConsent, setHasConsent] = useState<boolean | null>(null);
+  const isAdminPath = pathname?.startsWith('/admin') ?? false;
+  const isAdminHost =
+    typeof window !== 'undefined' &&
+    window.location.hostname.startsWith('admin.');
 
   useEffect(() => {
     const checkConsent = () => {
@@ -78,6 +82,7 @@ function PostHogProviderContent({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
+    if (isAdminPath || isAdminHost) return;
     if (hasConsent !== true) return;
 
     const posthogKey = process.env.NEXT_PUBLIC_POSTHOG_KEY;
@@ -170,6 +175,7 @@ function PostHogProviderContent({ children }: { children: React.ReactNode }) {
   }, [hasConsent]);
 
   useEffect(() => {
+    if (isAdminPath || isAdminHost) return;
     if (!posthogAvailable || !posthogRef.current || !initializedRef.current) {
       return;
     }

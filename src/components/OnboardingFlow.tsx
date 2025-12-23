@@ -1,9 +1,10 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { ReactNode, useState, useEffect } from 'react';
 import { useUser } from '@/context/UserContext';
 import { useAuthStatus } from './AuthStatus';
 import { useSubscription } from '@/hooks/useSubscription';
+import { PRICING_PLANS, normalizePlanType } from '../../utils/pricing';
 import {
   X,
   Sparkles,
@@ -14,26 +15,50 @@ import {
   Brain,
   Heart,
   Zap,
+  ChevronDown,
 } from 'lucide-react';
+import Image from 'next/image';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { generateBirthChart } from '../../utils/astrology/birthChart';
 import { conversionTracking } from '@/lib/analytics';
 import { OnboardingFeatureTour } from './OnboardingFeatureTour';
 import { BirthdayInput } from './ui/birthday-input';
+import { PlanId } from '../../utils/stripe-prices';
 
-export function OnboardingFlow() {
-  const { user, updateProfile, refetch } = useUser();
+interface OnboardingFlowProps {
+  overridePlanId?:
+    | 'free'
+    | 'lunary_plus'
+    | 'lunary_plus_ai'
+    | 'lunary_plus_ai_annual';
+  forceOpen?: boolean;
+  simulateSubscribed?: boolean;
+  previewMode?: boolean;
+  previewHeader?: ReactNode;
+  previewStep?:
+    | 'welcome'
+    | 'birthday'
+    | 'intention'
+    | 'feature_tour'
+    | 'complete';
+}
+
+export function OnboardingFlow({
+  overridePlanId,
+  forceOpen = false,
+  simulateSubscribed = false,
+  previewMode = false,
+  previewHeader,
+  previewStep,
+}: OnboardingFlowProps = {}) {
+  const { user, refetch } = useUser();
   const authState = useAuthStatus();
   const subscription = useSubscription();
   const router = useRouter();
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [currentStep, setCurrentStep] = useState<
-    | 'welcome'
-    | 'birthday'
-    | 'intention'
-    | 'feature_tour'
-    | 'ai_preview'
-    | 'complete'
+    'welcome' | 'birthday' | 'intention' | 'feature_tour' | 'complete'
   >('welcome');
   const [completedSteps, setCompletedSteps] = useState<string[]>([]);
   const [birthday, setBirthday] = useState('');
@@ -43,26 +68,131 @@ export function OnboardingFlow() {
     null,
   );
   const [saving, setSaving] = useState(false);
-  const [birthChartPreview, setBirthChartPreview] = useState<any>(null);
+  const [showOptionalDetails, setShowOptionalDetails] = useState(false);
+  const [showSkipWarning, setShowSkipWarning] = useState(false);
+  const onboardingSeenKey = user?.id
+    ? `lunary_onboarding_seen_${user.id}`
+    : 'lunary_onboarding_seen';
+  const isSubscribedOrTrial =
+    simulateSubscribed ||
+    subscription.isSubscribed ||
+    subscription.isTrialActive;
+  const normalizedPlan =
+    overridePlanId || normalizePlanType(subscription.planName || 'free');
+  const activePlan =
+    PRICING_PLANS.find((plan) => plan.id === normalizedPlan) ||
+    PRICING_PLANS[0];
+  const stepOrder: Array<
+    'welcome' | 'birthday' | 'intention' | 'feature_tour' | 'complete'
+  > = ['welcome', 'birthday', 'intention', 'feature_tour', 'complete'];
+  const moonPhases = [
+    {
+      label: 'New Moon',
+      src: '/icons/moon-phases/new-moon.svg',
+    },
+    {
+      label: 'Waxing Crescent',
+      src: '/icons/moon-phases/waxing-cresent-moon.svg',
+    },
+    {
+      label: 'Half Moon',
+      src: '/icons/moon-phases/first-quarter.svg',
+    },
+    {
+      label: 'Waxing Gibbous',
+      src: '/icons/moon-phases/waxing-gibbous-moon.svg',
+    },
+    {
+      label: 'Full Moon',
+      src: '/icons/moon-phases/full-moon.svg',
+    },
+  ];
+  const basePlanHighlights = [
+    'Complete birth chart analysis + personal transits',
+    'Personalized daily horoscopes and tarot guidance',
+    'Moon Circles for new + full moons',
+    'Ritual generator, collections, and monthly insights',
+    'Personalized crystal recommendations + cosmic state',
+  ];
+
+  const planHighlights = (() => {
+    if (!isSubscribedOrTrial) {
+      return [
+        {
+          title: 'Included with your account',
+          items: [
+            'Your personal birth chart overview and key placements',
+            'Daily moon phase insights + general horoscope',
+            'Tarot card of the day + basic lunar calendar',
+            'Grimoire library for astrology, tarot, and rituals',
+            'Weekly AI ritual or reading to get started',
+          ],
+        },
+      ];
+    }
+
+    if (normalizedPlan === 'lunary_plus') {
+      return [{ title: 'Lunary+ includes', items: basePlanHighlights }];
+    }
+
+    if (normalizedPlan === 'lunary_plus_ai') {
+      return [
+        { title: 'Everything in Lunary+', items: basePlanHighlights },
+        {
+          title: 'Plus AI guidance',
+          items: [
+            'Unlimited AI chat with your cosmic companion',
+            'Personalized weekly reports + deeper readings',
+            'Advanced pattern analysis + downloadable PDFs',
+            'AI ritual generation + saved chat threads',
+          ],
+        },
+      ];
+    }
+
+    return [
+      { title: 'Everything in Lunary+', items: basePlanHighlights },
+      {
+        title: 'Everything in Lunary+ AI',
+        items: [
+          'Unlimited AI chat with your cosmic companion',
+          'Personalized weekly reports + deeper readings',
+          'Advanced pattern analysis + downloadable PDFs',
+          'AI ritual generation + saved chat threads',
+        ],
+      },
+      {
+        title: 'Annual extras',
+        items: [
+          'Unlimited tarot spreads + annual deep dives',
+          'Yearly forecast + extended timeline analysis',
+          'Calendar download + unlimited collections',
+          'Priority support + premium annual benefits',
+        ],
+      },
+    ];
+  })();
 
   useEffect(() => {
-    // Only show onboarding for authenticated subscribers who haven't added birth details
+    // Show onboarding for authenticated users who haven't added birth details
     // Conditions:
     // 1. User is logged in
-    // 2. User has a subscription (active or trial)
-    // 3. User has NOT added their birthday yet
-    const hasSubscription =
-      subscription.isSubscribed || subscription.isTrialActive;
+    // 2. User has NOT added their birthday yet
     const needsBirthDetails = !user?.birthday;
 
-    if (
-      authState.isAuthenticated &&
-      !authState.loading &&
-      hasSubscription &&
-      needsBirthDetails
-    ) {
+    if (forceOpen && previewMode) {
+      setShowOnboarding(true);
+      return;
+    }
+
+    if (forceOpen && !authState.loading && authState.isAuthenticated) {
+      setShowOnboarding(true);
+      return;
+    }
+
+    if (authState.isAuthenticated && !authState.loading && needsBirthDetails) {
       // Check if user has seen onboarding before
-      const hasSeenOnboarding = localStorage.getItem('lunary_onboarding_seen');
+      const hasSeenOnboarding = localStorage.getItem(onboardingSeenKey);
       if (!hasSeenOnboarding) {
         setShowOnboarding(true);
       }
@@ -71,15 +201,27 @@ export function OnboardingFlow() {
     authState.isAuthenticated,
     authState.loading,
     user?.birthday,
-    subscription.isSubscribed,
-    subscription.isTrialActive,
+    forceOpen,
+    onboardingSeenKey,
+    previewMode,
+    previewStep,
   ]);
+
+  useEffect(() => {
+    if (previewMode && previewStep) {
+      setCurrentStep(previewStep);
+    }
+  }, [previewMode, previewStep]);
 
   const handleSaveBirthday = async () => {
     if (!birthday) return;
 
     setSaving(true);
     try {
+      if (previewMode) {
+        setCurrentStep('intention');
+        return;
+      }
       // Save to Postgres
       await fetch('/api/profile', {
         method: 'PUT',
@@ -107,7 +249,6 @@ export function OnboardingFlow() {
             credentials: 'include',
             body: JSON.stringify({ birthChart }),
           });
-          setBirthChartPreview(birthChart);
           console.log('✅ Birth chart generated and saved to Postgres');
         }
       } catch (chartError) {
@@ -151,6 +292,9 @@ export function OnboardingFlow() {
     skipped: boolean = false,
   ) => {
     try {
+      if (previewMode) {
+        return;
+      }
       const newCompletedSteps = [...completedSteps, step];
       setCompletedSteps(newCompletedSteps);
 
@@ -169,9 +313,16 @@ export function OnboardingFlow() {
   };
 
   const handleSkip = async () => {
+    setShowSkipWarning(true);
+  };
+
+  const handleConfirmSkip = async () => {
     await trackStepCompletion(currentStep, true);
-    localStorage.setItem('lunary_onboarding_seen', 'true');
-    setShowOnboarding(false);
+    if (!previewMode) {
+      localStorage.setItem(onboardingSeenKey, 'true');
+    }
+    setShowSkipWarning(false);
+    setCurrentStep('complete');
   };
 
   const handleStepSkip = async () => {
@@ -183,18 +334,20 @@ export function OnboardingFlow() {
     } else if (currentStep === 'intention') {
       setCurrentStep('feature_tour');
     } else if (currentStep === 'feature_tour') {
-      setCurrentStep('ai_preview');
-    } else {
-      handleComplete();
+      setCurrentStep('complete');
     }
   };
 
   const handleComplete = async () => {
     await trackStepCompletion(currentStep, false);
-    localStorage.setItem('lunary_onboarding_seen', 'true');
+    if (!previewMode) {
+      localStorage.setItem(onboardingSeenKey, 'true');
+    }
     setShowOnboarding(false);
-    // User already has subscription, send them to personalized content
-    router.push('/book-of-shadows');
+    if (!previewMode) {
+      // User already has subscription, send them to personalized content
+      router.push('/book-of-shadows');
+    }
   };
 
   const handleNext = async () => {
@@ -205,8 +358,6 @@ export function OnboardingFlow() {
       setCurrentStep('intention');
     } else if (currentStep === 'intention') {
       setCurrentStep('feature_tour');
-    } else if (currentStep === 'feature_tour') {
-      setCurrentStep('ai_preview');
     } else {
       handleComplete();
     }
@@ -227,64 +378,144 @@ export function OnboardingFlow() {
           <X className='w-5 h-5' />
         </button>
 
+        {showSkipWarning && (
+          <div className='absolute inset-0 z-10 flex items-center justify-center rounded-lg bg-black/70 p-4'>
+            <div className='w-full max-w-sm rounded-lg border border-zinc-800 bg-zinc-950 p-4 text-left shadow-lg'>
+              <div className='flex items-start justify-between gap-4'>
+                <div>
+                  <h3 className='text-sm font-semibold text-white mb-2'>
+                    Skip setup?
+                  </h3>
+                  <p className='text-xs text-zinc-300'>
+                    Personalised insights and your birth chart won&apos;t be
+                    available until you add your birthday in your profile.
+                  </p>
+                </div>
+                <button
+                  onClick={() => setShowSkipWarning(false)}
+                  className='text-zinc-400 hover:text-white'
+                  aria-label='Cancel'
+                >
+                  <X className='h-4 w-4' />
+                </button>
+              </div>
+
+              <div className='mt-4 flex flex-col gap-2'>
+                <button
+                  onClick={() => setShowSkipWarning(false)}
+                  className='w-full rounded-lg border border-zinc-700 px-3 py-2 text-xs font-medium text-zinc-200 hover:border-zinc-500'
+                >
+                  Continue
+                </button>
+                <button
+                  onClick={() => {
+                    if (!previewMode) {
+                      router.push('/profile');
+                    }
+                    setShowSkipWarning(false);
+                  }}
+                  className='w-full rounded-lg bg-lunary-primary px-3 py-2 text-xs font-medium text-white hover:bg-lunary-primary-400'
+                >
+                  Go to profile
+                </button>
+                <button
+                  onClick={handleConfirmSkip}
+                  className='w-full rounded-lg text-xs text-zinc-400 hover:text-zinc-200'
+                >
+                  Skip for now
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {previewHeader && (
+          <div className='mb-4 rounded-lg border border-zinc-800 bg-zinc-950/60 p-3'>
+            {previewHeader}
+          </div>
+        )}
+
+        <div className='mb-6 flex items-center justify-center gap-2'>
+          {stepOrder.map((step, index) => {
+            const phase = moonPhases[index];
+            const isActive = step === currentStep;
+            return (
+              <div
+                key={step}
+                className={`flex h-6 w-6 items-center justify-center rounded-full border border-zinc-700 bg-zinc-900/60 ${isActive ? 'ring-2 ring-lunary-primary-500' : ''}`}
+                aria-label={phase.label}
+                title={phase.label}
+              >
+                <Image
+                  src={phase.src}
+                  alt={phase.label}
+                  width={16}
+                  height={16}
+                />
+              </div>
+            );
+          })}
+        </div>
+
         {currentStep === 'welcome' && (
           <div className='space-y-6'>
             <div className='text-center'>
-              <div className='inline-flex items-center justify-center w-16 h-16 rounded-full bg-lunary-primary-900 mb-4'>
-                <Sparkles className='w-8 h-8 text-lunary-accent-300' />
+              <div className='inline-flex items-center justify-center w-16 h-16 mb-2'>
+                <Image
+                  src='/icons/moon-phases/full-moon.svg'
+                  alt='Full Moon'
+                  width={64}
+                  height={64}
+                  priority
+                />
               </div>
-              <h2 className='text-2xl font-bold text-white mb-2'>
-                Welcome to your Book of Shadows
+              <h2 className='text-base font-semibold text-white mb-2 md:text-lg'>
+                Welcome to Lunary
               </h2>
-              <p className='text-zinc-300'>
-                Share a few details so Lunary can gather the sky around your
-                words.
+              <p className='text-sm text-zinc-300'>
+                We&apos;ll build your birth chart and tailor your daily guidance
+                in just a moment.
               </p>
             </div>
 
             <div className='space-y-4'>
-              <div className='flex items-start gap-4 p-4 bg-zinc-800/50 rounded-lg'>
-                <div className='flex-shrink-0 w-10 h-10 rounded-full bg-lunary-primary-900 flex items-center justify-center'>
-                  <Calendar className='w-5 h-5 text-lunary-accent-300' />
-                </div>
-                <div>
-                  <h3 className='text-white font-medium mb-1'>
-                    Your Birth Chart
+              <div className='p-4 bg-gradient-to-br from-lunary-primary-900/20 to-lunary-highlight-900/20 rounded-lg border border-lunary-primary-800'>
+                <div className='flex items-center justify-between mb-2'>
+                  <h3 className='text-sm font-semibold text-white flex items-center gap-2'>
+                    <Sparkles className='w-4 h-4 text-lunary-accent-300' />
+                    {isSubscribedOrTrial
+                      ? `You’ve unlocked ${activePlan.name}`
+                      : 'What’s waiting for you'}
                   </h3>
-                  <p className='text-zinc-400 text-sm'>
-                    Discover your unique planetary positions and cosmic
-                    blueprint
-                  </p>
+                  {isSubscribedOrTrial && (
+                    <span className='text-[10px] uppercase tracking-wide text-lunary-accent-200/80'>
+                      Premium unlocked
+                    </span>
+                  )}
                 </div>
-              </div>
-
-              <div className='flex items-start gap-4 p-4 bg-zinc-800/50 rounded-lg'>
-                <div className='flex-shrink-0 w-10 h-10 rounded-full bg-lunary-primary-900 flex items-center justify-center'>
-                  <Star className='w-5 h-5 text-lunary-accent-300' />
-                </div>
-                <div>
-                  <h3 className='text-white font-medium mb-1'>
-                    Personalized Horoscopes
-                  </h3>
-                  <p className='text-zinc-400 text-sm'>
-                    Daily insights tailored to your exact birth chart
-                  </p>
-                </div>
-              </div>
-
-              <div className='flex items-start gap-4 p-4 bg-zinc-800/50 rounded-lg'>
-                <div className='flex-shrink-0 w-10 h-10 rounded-full bg-lunary-primary-900 flex items-center justify-center'>
-                  <NotebookPen className='w-5 h-5 text-lunary-accent-300' />
-                </div>
-                <div>
-                  <h3 className='text-white font-medium mb-1'>
-                    Conversational Book of Shadows
-                  </h3>
-                  <p className='text-zinc-400 text-sm'>
-                    Chat with Lunary&apos;s calm companion for reflective
-                    guidance, grounded in your birth chart, tarot pulls, and the
-                    current moon.
-                  </p>
+                <p className='text-xs text-zinc-300 mb-3'>
+                  {isSubscribedOrTrial
+                    ? 'Thanks for joining. Here’s everything now available in your plan.'
+                    : 'Here’s what you can explore right away with a free account.'}
+                </p>
+                <div className='space-y-3 text-xs text-zinc-300'>
+                  {planHighlights.map((section) => (
+                    <div key={section.title} className='space-y-2'>
+                      <div className='text-[11px] font-semibold uppercase tracking-wide text-zinc-400'>
+                        {section.title}
+                      </div>
+                      <ul className='space-y-2'>
+                        {section.items.map((feature) => (
+                          <li key={feature} className='flex items-start gap-2'>
+                            <span className='text-lunary-accent-300 mt-0.5'>
+                              •
+                            </span>
+                            <span>{feature}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  ))}
                 </div>
               </div>
             </div>
@@ -309,7 +540,7 @@ export function OnboardingFlow() {
         {currentStep === 'birthday' && (
           <div className='space-y-6'>
             <div className='text-center'>
-              <h2 className='text-2xl font-bold text-white mb-2'>
+              <h2 className='text-base font-semibold text-white mb-2 md:text-lg'>
                 When Were You Born?
               </h2>
               <p className='text-zinc-300 text-sm'>
@@ -318,6 +549,51 @@ export function OnboardingFlow() {
             </div>
 
             <div className='space-y-4'>
+              <div className='grid gap-3'>
+                <div className='flex items-start gap-3 rounded-lg bg-zinc-800/50 p-3'>
+                  <div className='flex-shrink-0 w-9 h-9 rounded-full bg-lunary-primary-900 flex items-center justify-center'>
+                    <Calendar className='w-4 h-4 text-lunary-accent-300' />
+                  </div>
+                  <div>
+                    <h3 className='text-xs font-semibold text-white mb-1'>
+                      Your Birth Chart
+                    </h3>
+                    <p className='text-xs text-zinc-400'>
+                      Discover your unique planetary positions and cosmic
+                      blueprint.
+                    </p>
+                  </div>
+                </div>
+
+                <div className='flex items-start gap-3 rounded-lg bg-zinc-800/50 p-3'>
+                  <div className='flex-shrink-0 w-9 h-9 rounded-full bg-lunary-primary-900 flex items-center justify-center'>
+                    <Star className='w-4 h-4 text-lunary-accent-300' />
+                  </div>
+                  <div>
+                    <h3 className='text-xs font-semibold text-white mb-1'>
+                      Daily Guidance
+                    </h3>
+                    <p className='text-xs text-zinc-400'>
+                      Insights aligned to your chart and today&apos;s sky.
+                    </p>
+                  </div>
+                </div>
+
+                <div className='flex items-start gap-3 rounded-lg bg-zinc-800/50 p-3'>
+                  <div className='flex-shrink-0 w-9 h-9 rounded-full bg-lunary-primary-900 flex items-center justify-center'>
+                    <NotebookPen className='w-4 h-4 text-lunary-accent-300' />
+                  </div>
+                  <div>
+                    <h3 className='text-xs font-semibold text-white mb-1'>
+                      Tarot + Rituals
+                    </h3>
+                    <p className='text-xs text-zinc-400'>
+                      Daily tarot guidance and ritual prompts to reflect.
+                    </p>
+                  </div>
+                </div>
+              </div>
+
               <div>
                 <label className='block text-sm font-medium text-zinc-300 mb-2'>
                   Birthday *
@@ -325,37 +601,55 @@ export function OnboardingFlow() {
                 <BirthdayInput value={birthday} onChange={setBirthday} />
               </div>
 
-              <div>
-                <label className='block text-sm font-medium text-zinc-300 mb-2'>
-                  Birth Time (optional)
-                </label>
-                <input
-                  type='time'
-                  value={birthTime}
-                  onChange={(e) => setBirthTime(e.target.value)}
-                  className='w-full px-4 py-3 bg-zinc-800 border border-zinc-700 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-lunary-primary'
+              <button
+                type='button'
+                onClick={() => setShowOptionalDetails((prev) => !prev)}
+                className='flex w-full items-center justify-between rounded-lg border border-zinc-700 bg-zinc-900/40 px-4 py-3 text-xs text-zinc-300 transition hover:border-zinc-600'
+              >
+                <span>
+                  Optional: add birth time &amp; location for accuracy
+                </span>
+                <ChevronDown
+                  className={`h-4 w-4 text-zinc-400 transition-transform ${showOptionalDetails ? 'rotate-180' : ''}`}
                 />
-                <p className='text-xs text-zinc-400 mt-1'>
-                  More precise time = more accurate chart
-                </p>
-              </div>
+              </button>
 
-              <div>
-                <label className='block text-sm font-medium text-zinc-300 mb-2'>
-                  Birth Location (optional)
-                </label>
-                <input
-                  type='text'
-                  value={birthLocation}
-                  onChange={(e) => setBirthLocation(e.target.value)}
-                  placeholder='City, Country'
-                  className='w-full px-4 py-3 bg-zinc-800 border border-zinc-700 rounded-lg text-white placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-lunary-primary'
-                />
-              </div>
+              {showOptionalDetails && (
+                <div className='space-y-4 rounded-lg border border-zinc-700 bg-zinc-900/40 p-4'>
+                  <div>
+                    <label className='block text-sm font-medium text-zinc-300 mb-2'>
+                      Birth Time (optional)
+                    </label>
+                    <input
+                      type='time'
+                      value={birthTime}
+                      onChange={(e) => setBirthTime(e.target.value)}
+                      className='w-full px-4 py-3 bg-zinc-800 border border-zinc-700 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-lunary-primary'
+                    />
+                    <p className='text-xs text-zinc-400 mt-1'>
+                      More precise time = more accurate chart
+                    </p>
+                  </div>
+
+                  <div>
+                    <label className='block text-sm font-medium text-zinc-300 mb-2'>
+                      Birth Location (optional)
+                    </label>
+                    <input
+                      type='text'
+                      value={birthLocation}
+                      onChange={(e) => setBirthLocation(e.target.value)}
+                      placeholder='City, Country'
+                      className='w-full px-4 py-3 bg-zinc-800 border border-zinc-700 rounded-lg text-white placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-lunary-primary'
+                    />
+                  </div>
+                </div>
+              )}
 
               <p className='text-xs text-zinc-400'>
                 We use this to calculate your exact birth chart and planetary
-                positions
+                positions. Add birth time and location for the most accurate
+                chart.
               </p>
             </div>
 
@@ -388,7 +682,7 @@ export function OnboardingFlow() {
         {currentStep === 'intention' && (
           <div className='space-y-6'>
             <div className='text-center'>
-              <h2 className='text-2xl font-bold text-white mb-2'>
+              <h2 className='text-base font-semibold text-white mb-2 md:text-lg'>
                 What brings you here?
               </h2>
               <p className='text-zinc-300 text-sm'>
@@ -472,113 +766,73 @@ export function OnboardingFlow() {
 
         {currentStep === 'feature_tour' && (
           <OnboardingFeatureTour
-            onComplete={handleNext}
+            onComplete={() => setCurrentStep('complete')}
             onSkip={handleStepSkip}
+            planId={normalizedPlan as PlanId}
+            isSubscribed={isSubscribedOrTrial}
           />
-        )}
-
-        {currentStep === 'ai_preview' && (
-          <div className='space-y-6'>
-            <div className='text-center'>
-              <h2 className='text-2xl font-bold text-white mb-2'>
-                Your Cosmic Profile
-              </h2>
-              <p className='text-zinc-300 text-sm'>
-                Here&apos;s what we&apos;ve unlocked for you
-              </p>
-            </div>
-
-            {birthChartPreview && birthChartPreview.length > 0 && (
-              <div className='p-4 bg-zinc-800/50 rounded-lg border border-zinc-700'>
-                <h3 className='text-sm font-medium text-white mb-2'>
-                  Your Birth Chart Preview
-                </h3>
-                <div className='space-y-2 text-xs text-zinc-300'>
-                  {birthChartPreview
-                    .slice(0, 3)
-                    .map((planet: any, idx: number) => (
-                      <div key={idx} className='flex justify-between'>
-                        <span>{planet.body}</span>
-                        <span className='text-lunary-accent-300'>
-                          {planet.sign}
-                        </span>
-                      </div>
-                    ))}
-                  {birthChartPreview.length > 3 && (
-                    <div className='text-zinc-400 text-xs'>
-                      +{birthChartPreview.length - 3} more planets
-                    </div>
-                  )}
-                </div>
-              </div>
-            )}
-
-            <div className='p-4 bg-gradient-to-br from-lunary-primary-900/20 to-lunary-highlight-900/20 rounded-lg border border-lunary-primary-800'>
-              <h3 className='text-sm font-medium text-white mb-2 flex items-center gap-2'>
-                <Sparkles className='w-4 h-4 text-lunary-accent-300' />
-                What&apos;s Now Available to You
-              </h3>
-              <ul className='space-y-2 text-xs text-zinc-300'>
-                <li className='flex items-start gap-2'>
-                  <span className='text-lunary-accent-300 mt-0.5'>•</span>
-                  <span>
-                    Unlimited conversations with your cosmic companion
-                  </span>
-                </li>
-                <li className='flex items-start gap-2'>
-                  <span className='text-lunary-accent-300 mt-0.5'>•</span>
-                  <span>
-                    Personalized insights based on your exact birth chart
-                  </span>
-                </li>
-                <li className='flex items-start gap-2'>
-                  <span className='text-lunary-accent-300 mt-0.5'>•</span>
-                  <span>Ritual suggestions aligned with current transits</span>
-                </li>
-                <li className='flex items-start gap-2'>
-                  <span className='text-lunary-accent-300 mt-0.5'>•</span>
-                  <span>Deeper tarot interpretations and cosmic guidance</span>
-                </li>
-              </ul>
-            </div>
-
-            <div className='pt-4 space-y-3'>
-              <button
-                onClick={handleComplete}
-                className='w-full bg-gradient-to-r from-lunary-primary to-lunary-highlight hover:from-lunary-primary-400 hover:to-lunary-highlight-400 text-white py-3 px-6 rounded-lg font-medium transition-all'
-              >
-                Start Exploring
-              </button>
-              <button
-                onClick={() => setCurrentStep('intention')}
-                className='w-full text-zinc-400 hover:text-zinc-300 text-sm transition-colors'
-              >
-                Back
-              </button>
-            </div>
-          </div>
         )}
 
         {currentStep === 'complete' && (
           <div className='space-y-6 text-center'>
-            <div className='inline-flex items-center justify-center w-16 h-16 rounded-full bg-lunary-success-900 mb-4'>
-              <Star className='w-8 h-8 text-lunary-success-300' />
+            <div className='inline-flex items-center justify-center w-16 h-16 mb-4'>
+              <Image
+                src='/icons/moon-phases/full-moon.svg'
+                alt='Full Moon'
+                width={64}
+                height={64}
+              />
             </div>
-            <h2 className='text-2xl font-bold text-white mb-2'>
-              You&apos;re All Set!
+            <h2 className='text-base font-semibold text-white mb-2 md:text-lg'>
+              Where would you like to go?
             </h2>
-            <p className='text-zinc-300 mb-6'>
-              Your personalized cosmic experience is ready. Explore your birth
-              chart, daily horoscopes, and more.
+            <p className='text-zinc-300 mb-6 text-sm'>
+              Jump into your daily overview or explore a specific area.
             </p>
 
-            <div className='pt-4'>
-              <button
+            <div className='grid gap-3 text-left sm:grid-cols-2'>
+              <Link
+                href='/app'
                 onClick={handleComplete}
-                className='w-full bg-gradient-to-r from-lunary-primary to-lunary-highlight hover:from-lunary-primary-400 hover:to-lunary-highlight-400 text-white py-3 px-6 rounded-lg font-medium transition-all'
+                className='rounded-lg border border-zinc-800 bg-zinc-900/60 px-4 py-3 text-sm text-white transition hover:border-lunary-primary-700'
               >
-                Open Book of Shadows
-              </button>
+                Daily overview
+              </Link>
+              <Link
+                href='/tarot'
+                onClick={handleComplete}
+                className='rounded-lg border border-zinc-800 bg-zinc-900/60 px-4 py-3 text-sm text-white transition hover:border-lunary-primary-700'
+              >
+                Tarot
+              </Link>
+              <Link
+                href='/horoscope'
+                onClick={handleComplete}
+                className='rounded-lg border border-zinc-800 bg-zinc-900/60 px-4 py-3 text-sm text-white transition hover:border-lunary-primary-700'
+              >
+                Horoscope
+              </Link>
+              <Link
+                href='/profile'
+                onClick={handleComplete}
+                className='rounded-lg border border-zinc-800 bg-zinc-900/60 px-4 py-3 text-sm text-white transition hover:border-lunary-primary-700'
+              >
+                Profile
+              </Link>
+              <Link
+                href='/birth-chart'
+                onClick={handleComplete}
+                className='rounded-lg border border-zinc-800 bg-zinc-900/60 px-4 py-3 text-sm text-white transition hover:border-lunary-primary-700'
+              >
+                Birth chart
+              </Link>
+              <Link
+                href='/grimoire'
+                onClick={handleComplete}
+                className='rounded-lg border border-zinc-800 bg-zinc-900/60 px-4 py-3 text-sm text-white transition hover:border-lunary-primary-700'
+              >
+                Grimoire
+              </Link>
             </div>
           </div>
         )}

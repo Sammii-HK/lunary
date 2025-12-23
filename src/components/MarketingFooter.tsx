@@ -5,6 +5,7 @@ import {
 } from '@/constants/socialHandles';
 import { Logo } from './Logo';
 import { CookieSettingsButton } from './CookieConsent';
+import { marketingFooterSections } from '@/constants/marketing/footerSections';
 
 export function MarketingFooter() {
   const socialLinks = [
@@ -111,123 +112,26 @@ export function MarketingFooter() {
 
         {/* Links Grid - 3 columns */}
         <div className='grid grid-cols-2 md:grid-cols-3 gap-6 mb-8'>
-          {/* Product */}
-          <nav className='space-y-2'>
-            <h3 className='text-xs font-medium text-zinc-400 uppercase tracking-wider mb-3'>
-              Product
-            </h3>
-            <Link
-              href='/pricing'
-              className='block text-sm text-zinc-400 hover:text-zinc-200 transition-colors'
-            >
-              Pricing
-            </Link>
-            <Link
-              href='/grimoire'
-              className='block text-sm text-zinc-400 hover:text-zinc-200 transition-colors'
-            >
-              Grimoire
-            </Link>
-            <Link
-              href='/horoscope'
-              className='block text-sm text-zinc-400 hover:text-zinc-200 transition-colors'
-            >
-              Horoscopes
-            </Link>
-            <Link
-              href='/blog'
-              className='block text-sm text-zinc-400 hover:text-zinc-200 transition-colors'
-            >
-              Blog
-            </Link>
-            <Link
-              href='/developers'
-              className='block text-sm text-zinc-400 hover:text-zinc-200 transition-colors'
-            >
-              Developers
-            </Link>
-            <Link
-              href='/explore'
-              className='block text-sm text-zinc-400 hover:text-zinc-200 transition-colors'
-            >
-              Explore Features
-            </Link>
-          </nav>
-
-          {/* Resources */}
-          <nav className='space-y-2'>
-            <h3 className='text-xs font-medium text-zinc-400 uppercase tracking-wider mb-3'>
-              Resources
-            </h3>
-            <Link
-              href='/help'
-              className='block text-sm text-zinc-400 hover:text-zinc-200 transition-colors'
-            >
-              Help Center
-            </Link>
-            <Link
-              href='/comparison'
-              className='block text-sm text-zinc-400 hover:text-zinc-200 transition-colors'
-            >
-              Compare Apps
-            </Link>
-            <Link
-              href='/press-kit'
-              className='block text-sm text-zinc-400 hover:text-zinc-200 transition-colors'
-            >
-              Press Kit
-            </Link>
-            <Link
-              href='/about/sammii'
-              className='block text-sm text-zinc-400 hover:text-zinc-200 transition-colors'
-            >
-              About the Founder
-            </Link>
-            <Link
-              href='/about/editorial-guidelines'
-              className='block text-sm text-zinc-400 hover:text-zinc-200 transition-colors'
-            >
-              Editorial Guidelines
-            </Link>
-            <Link
-              href='/about/methodology'
-              className='block text-sm text-zinc-400 hover:text-zinc-200 transition-colors'
-            >
-              Methodology
-            </Link>
-          </nav>
-
-          {/* Legal */}
-          <nav className='space-y-2'>
-            <h3 className='text-xs font-medium text-zinc-400 uppercase tracking-wider mb-3'>
-              Legal
-            </h3>
-            <Link
-              href='/privacy'
-              className='block text-sm text-zinc-400 hover:text-zinc-200 transition-colors'
-            >
-              Privacy
-            </Link>
-            <Link
-              href='/terms'
-              className='block text-sm text-zinc-400 hover:text-zinc-200 transition-colors'
-            >
-              Terms
-            </Link>
-            <Link
-              href='/cookies'
-              className='block text-sm text-zinc-400 hover:text-zinc-200 transition-colors'
-            >
-              Cookies
-            </Link>
-            <Link
-              href='/refund'
-              className='block text-sm text-zinc-400 hover:text-zinc-200 transition-colors'
-            >
-              Refunds
-            </Link>
-            <CookieSettingsButton />
-          </nav>
+          {marketingFooterSections.map((section) => (
+            <nav key={section.key} className='space-y-2'>
+              <Link
+                href={section.href}
+                className='text-xs font-medium text-zinc-400 uppercase tracking-wider mb-3 inline-flex hover:text-zinc-200 transition-colors'
+              >
+                {section.label}
+              </Link>
+              {section.items.map((item) => (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className='block text-sm text-zinc-400 hover:text-zinc-200 transition-colors'
+                >
+                  {item.title}
+                </Link>
+              ))}
+              {section.includeCookieSettings && <CookieSettingsButton />}
+            </nav>
+          ))}
         </div>
 
         {/* Copyright */}

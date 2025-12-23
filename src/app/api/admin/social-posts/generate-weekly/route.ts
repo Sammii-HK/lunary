@@ -236,7 +236,7 @@ async function generateThematicWeeklyPosts(
   for (const post of filteredPosts) {
     // Get optimal hour for this platform
     const hours = platformOptimalHours[post.platform] || [12];
-    const hour = hours[Math.floor(Math.random() * hours.length)];
+    const hour = post.postType === 'closing_ritual' ? 20 : hours[0];
 
     // Set the time
     const scheduledDate = new Date(post.scheduledDate);

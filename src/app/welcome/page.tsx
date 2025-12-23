@@ -366,7 +366,96 @@ export default function WelcomePage() {
         </div>
       </section>
 
-      {/* Section 6: How It Works */}
+      {/* Section 6: Learn & Explore */}
+      <section className='py-12 md:py-20 px-4 md:px-6 bg-zinc-900/30'>
+        <div className='max-w-5xl mx-auto'>
+          <div className='text-center space-y-4 mb-10 md:mb-14'>
+            <h2 className='text-2xl md:text-3xl font-light text-zinc-100'>
+              Learn & explore the cosmos
+            </h2>
+            <p className='text-base md:text-lg text-zinc-400 leading-relaxed max-w-2xl mx-auto'>
+              Astrology goes deeper than daily horoscopes. Lunary gives you
+              access to a growing library of clear, grounded knowledge so you
+              can understand the patterns shaping your life.
+            </p>
+          </div>
+          <div className='grid md:grid-cols-2 gap-6 md:gap-8'>
+            <div className='rounded-2xl border border-zinc-800/60 bg-zinc-900/40 p-5 md:p-6 space-y-3'>
+              <h3 className='text-lg font-medium text-zinc-100'>
+                Astrology, explained properly
+              </h3>
+              <p className='text-sm text-zinc-400 leading-relaxed'>
+                Explore planets, houses, aspects, and transits with clarity.
+                Learn how the sky works and how it connects to lived experience,
+                without vague predictions or fear-based language.
+              </p>
+              <Link
+                href='/grimoire/astrology'
+                className='text-sm text-lunary-primary-300 hover:text-lunary-primary-200 transition-colors'
+              >
+                Explore astrology in the Grimoire →
+              </Link>
+            </div>
+            <div className='rounded-2xl border border-zinc-800/60 bg-zinc-900/40 p-5 md:p-6 space-y-3'>
+              <h3 className='text-lg font-medium text-zinc-100'>
+                Tarot beyond single-card pulls
+              </h3>
+              <p className='text-sm text-zinc-400 leading-relaxed'>
+                Understand archetypes, symbolism, and recurring themes across
+                time. Tarot becomes meaningful when you see the patterns, not
+                just the card of the day.
+              </p>
+              <Link
+                href='/grimoire/tarot'
+                className='text-sm text-lunary-primary-300 hover:text-lunary-primary-200 transition-colors'
+              >
+                Explore tarot in the Grimoire →
+              </Link>
+            </div>
+            <div className='rounded-2xl border border-zinc-800/60 bg-zinc-900/40 p-5 md:p-6 space-y-3'>
+              <h3 className='text-lg font-medium text-zinc-100'>
+                Moon phases & ritual timing
+              </h3>
+              <p className='text-sm text-zinc-400 leading-relaxed'>
+                Learn how lunar cycles influence reflection, release, and
+                intention. From new moons to eclipses, timing becomes intuitive
+                rather than overwhelming.
+              </p>
+              <Link
+                href='/grimoire/moon'
+                className='text-sm text-lunary-primary-300 hover:text-lunary-primary-200 transition-colors'
+              >
+                Explore moon phases in the Grimoire →
+              </Link>
+            </div>
+            <div className='rounded-2xl border border-zinc-800/60 bg-zinc-900/40 p-5 md:p-6 space-y-3'>
+              <h3 className='text-lg font-medium text-zinc-100'>
+                Crystals, runes & symbolic systems
+              </h3>
+              <p className='text-sm text-zinc-400 leading-relaxed'>
+                Discover how different symbolic systems connect through meaning
+                and correspondence, presented with clarity and respect rather
+                than superstition.
+              </p>
+              <Link
+                href='/grimoire/correspondences'
+                className='text-sm text-lunary-primary-300 hover:text-lunary-primary-200 transition-colors'
+              >
+                Explore correspondences in the Grimoire →
+              </Link>
+            </div>
+          </div>
+          <div className='text-center mt-10 md:mt-14'>
+            <p className='text-sm md:text-base text-zinc-400 leading-relaxed max-w-2xl mx-auto'>
+              Learning gives context. Lunary turns that understanding into
+              personalised insight by connecting everything to your birth chart,
+              patterns, and ongoing journey.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      {/* Section 7: How It Works */}
       <section
         id='how-it-works'
         className='py-12 md:py-20 px-4 md:px-6 bg-zinc-900/30 scroll-mt-16'
@@ -433,7 +522,7 @@ export default function WelcomePage() {
         </div>
       </section>
 
-      {/* Section 7: Comparison */}
+      {/* Section 8: Comparison */}
       <section className='py-12 md:py-20 px-4 md:px-6'>
         <div className='max-w-3xl mx-auto'>
           <div className='grid md:grid-cols-2 gap-4 md:gap-6'>
@@ -528,7 +617,7 @@ export default function WelcomePage() {
         </div>
       </section>
 
-      {/* Section 8: Pricing Teaser */}
+      {/* Section 9: Pricing Teaser */}
       <section className='py-12 md:py-20 px-4 md:px-6 bg-zinc-900/30'>
         <div className='max-w-2xl mx-auto text-center space-y-5'>
           <h2 className='text-2xl md:text-3xl font-light text-zinc-100'>
@@ -546,7 +635,7 @@ export default function WelcomePage() {
         </div>
       </section>
 
-      {/* Section 9: Why Lunary Feels Different */}
+      {/* Section 10: Why Lunary Feels Different */}
       <section className='py-12 md:py-16 px-4 md:px-6'>
         <div className='max-w-2xl mx-auto text-center space-y-4'>
           <h3 className='text-lg md:text-xl font-medium text-zinc-200'>
@@ -560,7 +649,7 @@ export default function WelcomePage() {
         </div>
       </section>
 
-      {/* Section 10: Final CTA */}
+      {/* Section 11: Final CTA */}
       <section className='py-12 md:py-20 px-4 md:px-6 bg-zinc-900/20'>
         <div className='max-w-2xl mx-auto text-center space-y-5'>
           <h2 className='text-2xl md:text-3xl font-light text-zinc-100'>

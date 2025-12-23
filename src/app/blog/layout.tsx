@@ -1,4 +1,5 @@
 import { BlogTracker } from './BlogTracker';
+import { MarketingFooter } from '@/components/MarketingFooter';
 
 export default function BlogLayout({
   children,
@@ -9,6 +10,7 @@ export default function BlogLayout({
     <>
       <BlogTracker />
       {children}
+      <MarketingFooter />
     </>
   );
 }
