@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { sql } from '@vercel/postgres';
+import { addBrevoNewsletterContact } from '@/lib/brevo';
 
 // GET: List all subscribers
 export async function GET(request: NextRequest) {
@@ -138,6 +139,17 @@ export async function POST(request: NextRequest) {
     `;
 
     const subscriber = result.rows[0];
+
+    if (subscriber.is_verified || shouldAutoVerify) {
+      try {
+        await addBrevoNewsletterContact(
+          subscriber.email,
+          source || 'newsletter_signup',
+        );
+      } catch (brevoError) {
+        console.error('Brevo newsletter sync failed:', brevoError);
+      }
+    }
 
     // Send verification email if not already verified and not auto-verified
     if (

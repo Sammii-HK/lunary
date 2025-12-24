@@ -1,10 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { searchGrimoireIndex } from '@/constants/seo/grimoire-search-index';
+import { requireGptAuth } from '@/lib/gptAuth';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
 export async function GET(request: NextRequest) {
+  const unauthorized = requireGptAuth(request);
+  if (unauthorized) return unauthorized;
+
   try {
     const { searchParams } = new URL(request.url);
     const query = searchParams.get('q');

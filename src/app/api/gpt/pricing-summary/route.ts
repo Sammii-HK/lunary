@@ -1,10 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { requireGptAuth } from '@/lib/gptAuth';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 export const revalidate = 86400;
 
 export async function GET(request: NextRequest) {
+  const unauthorized = requireGptAuth(request);
+  if (unauthorized) return unauthorized;
+
   try {
     const response = {
       plans: [

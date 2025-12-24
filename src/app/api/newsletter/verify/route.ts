@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { sql } from '@vercel/postgres';
+import { addBrevoNewsletterContact } from '@/lib/brevo';
 
 export async function GET(request: NextRequest) {
   try {
@@ -50,6 +51,12 @@ export async function GET(request: NextRequest) {
       WHERE email = ${email.toLowerCase()}
       AND verification_token = ${token}
     `;
+
+    try {
+      await addBrevoNewsletterContact(email.toLowerCase(), 'newsletter_verify');
+    } catch (brevoError) {
+      console.error('Brevo newsletter sync failed:', brevoError);
+    }
 
     return NextResponse.redirect(
       new URL('/newsletter/verify?success=true', request.url),

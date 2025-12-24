@@ -1,10 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { angelNumbers } from '@/constants/grimoire/numerology-data';
+import { requireGptAuth } from '@/lib/gptAuth';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
 export async function GET(request: NextRequest) {
+  const unauthorized = requireGptAuth(request);
+  if (unauthorized) return unauthorized;
+
   try {
     const { searchParams } = new URL(request.url);
     const number = searchParams.get('number')?.trim();

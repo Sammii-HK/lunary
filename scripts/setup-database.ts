@@ -877,6 +877,36 @@ async function setupDatabase() {
 
     console.log('✅ Grimoire embeddings table created');
 
+    // Create gpt_bridge_logs table
+    await sql`
+      CREATE TABLE IF NOT EXISTS gpt_bridge_logs (
+        id TEXT PRIMARY KEY DEFAULT gen_random_uuid(),
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+        route TEXT NOT NULL,
+        seed_raw TEXT NOT NULL,
+        seed_normalized TEXT NOT NULL,
+        types_requested JSONB NOT NULL,
+        "limit" INTEGER NOT NULL,
+        result_count INTEGER NOT NULL,
+        curated_count INTEGER NOT NULL,
+        alias_hit BOOLEAN NOT NULL,
+        search_count INTEGER NOT NULL,
+        top_slugs JSONB NOT NULL,
+        timing_ms INTEGER NOT NULL,
+        cache_status TEXT,
+        level TEXT NOT NULL,
+        message TEXT NOT NULL,
+        error_name TEXT,
+        error_message TEXT
+      )
+    `;
+
+    await sql`CREATE INDEX IF NOT EXISTS idx_gpt_bridge_logs_created_at ON gpt_bridge_logs(created_at DESC)`;
+    await sql`CREATE INDEX IF NOT EXISTS idx_gpt_bridge_logs_seed_normalized ON gpt_bridge_logs(seed_normalized)`;
+    await sql`CREATE INDEX IF NOT EXISTS idx_gpt_bridge_logs_level ON gpt_bridge_logs(level)`;
+
+    console.log('✅ GPT bridge logs table created');
+
     // Create refund_requests table
     await sql`
       CREATE TABLE IF NOT EXISTS refund_requests (

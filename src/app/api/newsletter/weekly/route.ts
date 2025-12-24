@@ -3,6 +3,11 @@ import {
   generateWeeklyContent,
   WeeklyCosmicData,
 } from '../../../../../utils/blog/weeklyContentGenerator';
+import {
+  generateWeeklyNewsletterHTML,
+  generateWeeklyNewsletterText,
+} from '@/lib/email-templates/weekly-newsletter';
+import { sendDiscordAdminNotification } from '@/lib/discord';
 
 export const dynamic = 'force-dynamic';
 
@@ -46,6 +51,29 @@ export async function POST(request: NextRequest) {
         testEmail,
         weeklyData,
       );
+
+      const hasFailures =
+        emailResult.recipients === 0 || (emailResult.failed ?? 0) > 0;
+
+      if (!testEmail && hasFailures) {
+        await sendDiscordAdminNotification({
+          title: 'Weekly newsletter delivery issue',
+          message: `Newsletter send completed with issues. Recipients: ${emailResult.recipients}. Failed: ${emailResult.failed ?? 0}.`,
+          priority: 'high',
+          category: 'urgent',
+          dedupeKey: `weekly-newsletter-failed-${weeklyData.year}-${weeklyData.weekNumber}`,
+          fields: [
+            {
+              name: 'Subject',
+              value: newsletter.subject,
+            },
+            {
+              name: 'Week',
+              value: `Week ${weeklyData.weekNumber}, ${weeklyData.year}`,
+            },
+          ],
+        });
+      }
 
       return NextResponse.json({
         success: true,
@@ -97,6 +125,17 @@ export async function POST(request: NextRequest) {
       message: errorMessage,
       stack: errorStack,
     });
+    try {
+      await sendDiscordAdminNotification({
+        title: 'Weekly newsletter failed',
+        message: `Newsletter generation or send failed. Error: ${errorMessage}`,
+        priority: 'emergency',
+        category: 'urgent',
+        dedupeKey: `weekly-newsletter-error-${new Date().toISOString().slice(0, 10)}`,
+      });
+    } catch (discordError) {
+      console.error('Failed to send Discord urgent alert:', discordError);
+    }
     return NextResponse.json(
       {
         success: false,
@@ -138,349 +177,18 @@ function generateNewsletterHTML(
   const weekRange = `${data.weekStart.toLocaleDateString('en-US', { month: 'long', day: 'numeric' })} - ${data.weekEnd.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}`;
 
   const subject = customSubject || `${data.title} | ${weekRange}`;
-
-  const html = `
-<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>${subject}</title>
-    <style>
-        body { 
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; 
-            line-height: 1.6; 
-            color: #2d3748; 
-            max-width: 600px; 
-            margin: 0 auto; 
-            padding: 20px; 
-            background-color: #f7fafc;
-        }
-        .container { 
-            background: white; 
-            border-radius: 12px; 
-            padding: 40px; 
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-        }
-        .header { 
-            text-align: center; 
-            border-bottom: 3px solid #667eea; 
-            padding-bottom: 20px; 
-            margin-bottom: 30px; 
-        }
-        h1 { 
-            color: #2d3748; 
-            margin: 0; 
-            font-size: 28px; 
-            font-weight: 700; 
-        }
-        .subtitle { 
-            color: #718096; 
-            font-size: 16px; 
-            margin: 10px 0; 
-            font-style: italic; 
-        }
-        .week-range { 
-            color: #a0aec0; 
-            font-size: 14px; 
-            margin: 5px 0; 
-        }
-        h2 { 
-            color: #4a5568; 
-            font-size: 22px; 
-            margin: 30px 0 15px 0; 
-            border-left: 4px solid #667eea; 
-            padding-left: 15px; 
-        }
-        h3 { 
-            color: #718096; 
-            font-size: 18px; 
-            margin: 20px 0 10px 0; 
-        }
-        .event { 
-            background: #f8f9fa; 
-            padding: 15px; 
-            border-radius: 8px; 
-            margin: 15px 0; 
-            border-left: 4px solid #38b2ac; 
-        }
-        .date { 
-            font-weight: 600; 
-            color: #2d3748; 
-        }
-        .significance { 
-            display: inline-block; 
-            background: #e6fffa; 
-            color: #234e52; 
-            padding: 2px 8px; 
-            border-radius: 4px; 
-            font-size: 12px; 
-            font-weight: 600; 
-            text-transform: uppercase; 
-            margin: 5px 0; 
-        }
-        .guidance { 
-            background: #e6fffa; 
-            padding: 15px; 
-            border-radius: 8px; 
-            border-left: 4px solid #38b2ac; 
-            margin: 10px 0; 
-        }
-        .crystal-day { 
-            display: flex; 
-            align-items: center; 
-            padding: 10px; 
-            background: #f8f9fa; 
-            border-radius: 6px; 
-            margin: 8px 0; 
-        }
-        .crystal-name { 
-            font-weight: 600; 
-            color: #553c9a; 
-            margin-right: 10px; 
-        }
-        .footer { 
-            text-align: center; 
-            margin-top: 40px; 
-            padding-top: 20px; 
-            border-top: 1px solid #e2e8f0; 
-            color: #718096; 
-            font-size: 14px; 
-        }
-        .cta { 
-            text-align: center; 
-            margin: 30px 0; 
-        }
-        .cta a { 
-            background: #667eea; 
-            color: white; 
-            padding: 12px 24px; 
-            border-radius: 8px; 
-            text-decoration: none; 
-            font-weight: 600; 
-        }
-        .emoji { 
-            font-size: 1.2em; 
-            margin-right: 8px; 
-        }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <div class="header">
-            <img src="https://lunary.app/logo.png" alt="Lunary" style="max-width: 120px; height: auto; margin: 0 auto 20px; display: block;" />
-            <h1>${data.title}</h1>
-            <div class="subtitle">${data.subtitle}</div>
-            <div class="week-range">Week of ${weekRange}</div>
-        </div>
-
-        <div style="margin: 20px 0; font-size: 16px; line-height: 1.7;">
-            ${data.summary}
-        </div>
-
-        ${
-          data.planetaryHighlights.length > 0
-            ? `
-        <h2><span class="emoji">🌟</span>Major Planetary Movements</h2>
-        ${data.planetaryHighlights
-          .map(
-            (highlight: any) => `
-        <div class="event">
-            <div class="date">${highlight.date.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}</div>
-            <h3>${highlight.planet} ${highlight.event.replace('-', ' ')}</h3>
-            <div class="significance">${highlight.significance} significance</div>
-            <p>${highlight.description}</p>
-        </div>
-        `,
-          )
-          .join('')}
-        `
-            : ''
-        }
-
-        ${
-          data.retrogradeChanges.length > 0
-            ? `
-        <h2><span class="emoji">♻️</span>Retrograde Activity</h2>
-        ${data.retrogradeChanges
-          .map(
-            (change: any) => `
-        <div class="event">
-            <div class="date">${change.date.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}</div>
-            <h3>${change.planet} ${change.action === 'begins' ? 'Stations Retrograde' : 'Stations Direct'}</h3>
-            <p><strong>In ${change.sign}:</strong> ${change.significance}</p>
-            <div class="guidance">
-                <strong>Guidance:</strong> ${change.guidance}
-            </div>
-        </div>
-        `,
-          )
-          .join('')}
-        `
-            : ''
-        }
-
-        ${
-          data.moonPhases.length > 0
-            ? `
-        <h2><span class="emoji">🌙</span>Lunar Phases</h2>
-        ${data.moonPhases
-          .map(
-            (phase: any) => `
-        <div class="event">
-            <div class="date">${phase.date.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })} at ${phase.time}</div>
-            <h3>${phase.phase} in ${phase.sign}</h3>
-            <p><strong>Energy:</strong> ${phase.energy}</p>
-            <div class="guidance">${phase.guidance}</div>
-            ${
-              phase.ritualSuggestions.length > 0
-                ? `
-            <div style="margin-top: 10px;">
-                <strong>Ritual Ideas:</strong>
-                <ul>${phase.ritualSuggestions.map((suggestion: string) => `<li>${suggestion}</li>`).join('')}</ul>
-            </div>
-            `
-                : ''
-            }
-        </div>
-        `,
-          )
-          .join('')}
-        `
-            : ''
-        }
-
-        <h2><span class="emoji">💎</span>Weekly Crystal Companions</h2>
-        <div>
-            ${data.crystalRecommendations
-              .map(
-                (crystal: any) => `
-            <div class="crystal-day">
-                <span class="crystal-name">${crystal.crystal}</span>
-                <span>${crystal.date.toLocaleDateString('en-US', { weekday: 'long' })}: ${crystal.reason}</span>
-            </div>
-            `,
-              )
-              .join('')}
-        </div>
-
-        <h2><span class="emoji">📅</span>Best Days For...</h2>
-        <div>
-            ${Object.entries(data.bestDaysFor)
-              .map(
-                ([activity, guidance]: [string, any]) => `
-            <div style="margin: 10px 0;">
-                <strong>${activity.charAt(0).toUpperCase() + activity.slice(1)}:</strong> 
-                ${(guidance as any).dates.map((d: Date) => d.toLocaleDateString('en-US', { weekday: 'short', month: 'numeric', day: 'numeric' })).join(', ')} 
-                <br><em>${(guidance as any).reason}</em>
-            </div>
-            `,
-              )
-              .join('')}
-        </div>
-
-        <div class="cta">
-            <a href="https://lunary.app">Get Your Personalized Cosmic Guidance</a>
-        </div>
-
-        <div class="footer">
-            <p>Generated with cosmic intelligence by Lunary</p>
-            <p>Visit <a href="https://lunary.app">lunary.app</a> for daily updates and personalized guidance</p>
-            <p style="margin-top: 20px; padding-top: 20px; border-top: 1px solid #e5e7eb;">
-                <a href="{{UNSUBSCRIBE_URL}}">Unsubscribe</a> | 
-                <a href="https://lunary.app/profile">Manage Preferences</a>
-            </p>
-        </div>
-    </div>
-</body>
-</html>`;
-
-  // Generate plain text version (without unsubscribe URL - will be added per email)
-  const text = generateTextNewsletter(data);
+  const html = generateWeeklyNewsletterHTML(data, subject);
+  const text = generateWeeklyNewsletterText(data, subject);
 
   return { subject, html, text };
 }
 
 function generateTextNewsletter(
   data: WeeklyCosmicData,
+  subject: string,
   unsubscribeUrl?: string,
 ): string {
-  const weekRange = `${data.weekStart.toLocaleDateString('en-US', { month: 'long', day: 'numeric' })} - ${data.weekEnd.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}`;
-
-  return `
-${data.title}
-${data.subtitle}
-Week of ${weekRange}
-
-${data.summary}
-
-MAJOR PLANETARY MOVEMENTS
-========================
-${data.planetaryHighlights
-  .map(
-    (highlight: any) =>
-      `${highlight.date.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}: ${highlight.planet} ${highlight.event.replace('-', ' ')}
-${highlight.description}
-Significance: ${highlight.significance}
-`,
-  )
-  .join('\n')}
-
-RETROGRADE ACTIVITY
-==================
-${data.retrogradeChanges
-  .map(
-    (change: any) =>
-      `${change.date.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}: ${change.planet} ${change.action === 'begins' ? 'stations retrograde' : 'stations direct'} in ${change.sign}
-${change.significance}
-Guidance: ${change.guidance}
-`,
-  )
-  .join('\n')}
-
-LUNAR PHASES
-============
-${data.moonPhases
-  .map(
-    (phase: any) =>
-      `${phase.date.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })} at ${phase.time}: ${phase.phase} in ${phase.sign}
-Energy: ${phase.energy}
-Guidance: ${phase.guidance}
-`,
-  )
-  .join('\n')}
-
-WEEKLY CRYSTAL COMPANIONS
-========================
-${data.crystalRecommendations
-  .map(
-    (crystal: any) =>
-      `${crystal.date.toLocaleDateString('en-US', { weekday: 'long' })}: ${crystal.crystal}
-${crystal.reason}
-Usage: ${crystal.usage}
-`,
-  )
-  .join('\n')}
-
-BEST DAYS FOR...
-===============
-${Object.entries(data.bestDaysFor)
-  .map(
-    ([activity, guidance]: [string, any]) =>
-      `${activity.toUpperCase()}: ${(guidance as any).dates.map((d: Date) => d.toLocaleDateString('en-US', { weekday: 'short', month: 'numeric', day: 'numeric' })).join(', ')}
-${(guidance as any).reason}
-`,
-  )
-  .join('\n')}
-
----
-Generated with cosmic intelligence by Lunary
-Visit lunary.app for daily updates and personalized guidance
-
----
-${unsubscribeUrl ? `Unsubscribe: ${unsubscribeUrl}` : 'Unsubscribe: https://lunary.app/unsubscribe'}
-Manage Preferences: https://lunary.app/profile
-`.trim();
+  return generateWeeklyNewsletterText(data, subject, unsubscribeUrl);
 }
 
 async function sendNewsletter(
@@ -514,7 +222,7 @@ async function sendNewsletter(
         unsubscribeUrl,
       );
       const personalizedText = weeklyData
-        ? generateTextNewsletter(weeklyData, unsubscribeUrl)
+        ? generateTextNewsletter(weeklyData, newsletter.subject, unsubscribeUrl)
         : newsletter.text;
 
       await sendEmail({
@@ -589,7 +297,8 @@ async function sendNewsletter(
         unsubscribeUrl,
       );
       const personalizedText = generateTextNewsletter(
-        JSON.parse(JSON.stringify(weeklyData)),
+        weeklyData,
+        newsletter.subject,
         unsubscribeUrl,
       );
 

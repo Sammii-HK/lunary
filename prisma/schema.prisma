@@ -79,3 +79,28 @@ model ApiKey {
   @@map("api_keys")
 }
 
+model GptBridgeLog {
+  id             String   @id @default(cuid())
+  createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  route          String
+  seedRaw        String   @map("seed_raw")
+  seedNormalized String   @map("seed_normalized")
+  typesRequested Json     @map("types_requested")
+  limit          Int
+  resultCount    Int      @map("result_count")
+  curatedCount   Int      @map("curated_count")
+  aliasHit       Boolean  @map("alias_hit")
+  searchCount    Int      @map("search_count")
+  topSlugs       Json     @map("top_slugs")
+  timingMs       Int      @map("timing_ms")
+  cacheStatus    String?  @map("cache_status")
+  level          String
+  message        String
+  errorName      String?  @map("error_name")
+  errorMessage   String?  @map("error_message")
+
+  @@index([createdAt], name: "idx_gpt_bridge_logs_created_at")
+  @@index([seedNormalized], name: "idx_gpt_bridge_logs_seed_normalized")
+  @@index([level], name: "idx_gpt_bridge_logs_level")
+  @@map("gpt_bridge_logs")
+}

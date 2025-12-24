@@ -1,10 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { crystalDatabase } from '@/constants/grimoire/crystals';
+import { requireGptAuth } from '@/lib/gptAuth';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
 export async function GET(request: NextRequest) {
+  const unauthorized = requireGptAuth(request);
+  if (unauthorized) return unauthorized;
+
   try {
     const { searchParams } = new URL(request.url);
     const name = searchParams.get('name')?.toLowerCase().trim();
