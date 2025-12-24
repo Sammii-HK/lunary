@@ -1768,6 +1768,23 @@ export const GRIMOIRE_SEARCH_INDEX: GrimoireEntry[] = [
     ],
   },
   {
+    slug: 'crystals/rose-quartz',
+    title: 'Rose Quartz',
+    category: 'crystal',
+    keywords: [
+      'rose quartz',
+      'love',
+      'heart chakra',
+      'self love',
+      'relationships',
+      'gentle healing',
+      'compassion',
+    ],
+    summary:
+      'Rose Quartz is the heart stone, known for softening emotions, restoring trust, and supporting self-love.',
+    relatedSlugs: ['zodiac/taurus', 'zodiac/libra', 'crystals/clear-quartz'],
+  },
+  {
     slug: 'crystals/citrine',
     title: 'Citrine',
     category: 'crystal',
@@ -2115,6 +2132,22 @@ export const GRIMOIRE_SEARCH_INDEX: GrimoireEntry[] = [
     ],
     summary: 'Past life gifts, comfort zones, and patterns to release.',
     relatedSlugs: ['glossary#north-node', 'glossary#lunar-nodes'],
+  },
+  {
+    slug: 'glossary#lunar-nodes',
+    title: 'Lunar Nodes',
+    category: 'glossary',
+    keywords: [
+      'lunar nodes',
+      'nodes',
+      'north node',
+      'south node',
+      'destiny',
+      'karma',
+    ],
+    summary:
+      'The North and South Nodes describe your growth direction and past patterns across the chart.',
+    relatedSlugs: ['glossary#north-node', 'glossary#south-node'],
   },
   {
     slug: 'glossary#chiron',

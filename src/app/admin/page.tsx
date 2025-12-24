@@ -578,6 +578,14 @@ export default function AdminDashboard() {
       category: 'monitoring',
       status: 'active',
     },
+    {
+      title: 'GPT Bridge',
+      description: 'Review Grimoire bridge performance and zero-result rate',
+      href: '/admin/gpt-bridge',
+      icon: <Sparkles className='h-5 w-5' />,
+      category: 'monitoring',
+      status: 'new',
+    },
   ];
 
   // Section 2: Content
