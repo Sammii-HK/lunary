@@ -52,7 +52,7 @@ export function OnboardingFlow({
   previewHeader,
   previewStep,
 }: OnboardingFlowProps = {}) {
-  const { user, refetch } = useUser();
+  const { user, refetch, loading: userLoading } = useUser();
   const authState = useAuthStatus();
   const subscription = useSubscription();
   const router = useRouter();
@@ -180,6 +180,11 @@ export function OnboardingFlow({
       return;
     }
 
+    if (user?.birthday) {
+      setOnboardingStatus({ loading: false, completed: true });
+      return;
+    }
+
     let cancelled = false;
 
     const fetchOnboardingStatus = async () => {
@@ -213,7 +218,7 @@ export function OnboardingFlow({
     return () => {
       cancelled = true;
     };
-  }, [authState.isAuthenticated, user?.id, previewMode]);
+  }, [authState.isAuthenticated, user?.id, user?.birthday, previewMode]);
 
   useEffect(() => {
     const needsBirthDetails = !user?.birthday;
@@ -231,6 +236,7 @@ export function OnboardingFlow({
     if (
       authState.isAuthenticated &&
       !authState.loading &&
+      !userLoading &&
       !onboardingStatus.loading &&
       needsBirthDetails &&
       !onboardingStatus.completed
@@ -246,6 +252,7 @@ export function OnboardingFlow({
     onboardingStatus.completed,
     onboardingStatus.loading,
     user?.birthday,
+    userLoading,
     forceOpen,
     previewMode,
     previewStep,
@@ -365,11 +372,14 @@ export function OnboardingFlow({
     setShowSkipWarning(true);
   };
 
-  const handleConfirmSkip = async () => {
+  const handleConfirmSkip = async (redirectPath?: string) => {
     await trackStepCompletion('complete', true);
     resolveOnboarding();
     setShowSkipWarning(false);
     setCurrentStep('complete');
+    if (redirectPath && !previewMode) {
+      router.push(redirectPath);
+    }
   };
 
   const handleStepSkip = async () => {
@@ -452,18 +462,13 @@ export function OnboardingFlow({
                   Continue
                 </button>
                 <button
-                  onClick={() => {
-                    if (!previewMode) {
-                      router.push('/profile');
-                    }
-                    setShowSkipWarning(false);
-                  }}
+                  onClick={() => handleConfirmSkip('/profile')}
                   className='w-full rounded-lg bg-lunary-primary px-3 py-2 text-xs font-medium text-white hover:bg-lunary-primary-400'
                 >
                   Go to profile
                 </button>
                 <button
-                  onClick={handleConfirmSkip}
+                  onClick={() => handleConfirmSkip()}
                   className='w-full rounded-lg text-xs text-zinc-400 hover:text-zinc-200'
                 >
                   Skip for now
