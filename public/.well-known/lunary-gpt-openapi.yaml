@@ -108,6 +108,730 @@ components:
           type: string
       additionalProperties: false
 
+    GrimoireEntryResponse:
+      type: object
+      required: [ok, resultCount, matchType, suggestions]
+      properties:
+        ok:
+          type: boolean
+        resultCount:
+          type: integer
+        matchType:
+          type: string
+        resolvedSlug:
+          type: string
+        entry:
+          type: object
+          properties:
+            slug:
+              type: string
+            title:
+              type: string
+            summary:
+              type: string
+            category:
+              type: string
+            keywords:
+              type: array
+              items:
+                type: string
+            relatedSlugs:
+              type: array
+              items:
+                type: string
+            url:
+              type: string
+        suggestions:
+          type: array
+          items:
+            type: string
+      additionalProperties: false
+
+    GrimoireEntryRequest:
+      type: object
+      properties:
+        slug:
+          type: string
+        seed:
+          type: string
+        q:
+          type: string
+      additionalProperties: false
+
+    AngelNumberResponse:
+      type: object
+      required:
+        [
+          number,
+          name,
+          meaning,
+          description,
+          message,
+          spiritualMeaning,
+          loveMeaning,
+          careerMeaning,
+          keywords,
+          url,
+          ctaUrl,
+          ctaText,
+          source,
+        ]
+      properties:
+        number:
+          type: string
+        name:
+          type: string
+        meaning:
+          type: string
+        description:
+          type: string
+        message:
+          type: string
+        spiritualMeaning:
+          type: string
+        loveMeaning:
+          type: string
+        careerMeaning:
+          type: string
+        keywords:
+          type: array
+          items:
+            type: string
+        url:
+          type: string
+        ctaUrl:
+          type: string
+        ctaText:
+          type: string
+        source:
+          type: string
+      additionalProperties: false
+
+    BirthChartSummaryRequest:
+      type: object
+      required: [birthDate]
+      properties:
+        birthDate:
+          type: string
+          format: date
+        birthTime:
+          type: string
+          pattern: '^\d{2}:\d{2}$'
+        birthLocation:
+          type: string
+      additionalProperties: false
+
+    BirthChartSummaryResponse:
+      type: object
+      required:
+        [
+          sun,
+          moon,
+          rising,
+          summary,
+          themes,
+          limitationsNote,
+          ctaUrl,
+          ctaText,
+          source,
+        ]
+      properties:
+        sun:
+          type: object
+          required: [sign, house]
+          properties:
+            sign:
+              type: string
+            house:
+              type: integer
+        moon:
+          type: object
+          required: [sign, house]
+          properties:
+            sign:
+              type: string
+            house:
+              type: integer
+        rising:
+          type: object
+          required: [sign]
+          properties:
+            sign:
+              type: string
+        summary:
+          type: string
+        themes:
+          type: array
+          items:
+            type: string
+        limitationsNote:
+          type: string
+        ctaUrl:
+          type: string
+        ctaText:
+          type: string
+        source:
+          type: string
+      additionalProperties: false
+
+    CompatibilityResponse:
+      type: object
+      required:
+        [
+          sign1,
+          sign2,
+          compatibilityScore,
+          compatibilityLevel,
+          summary,
+          elements,
+          modalities,
+          strengths,
+          challenges,
+          advice,
+          ctaUrl,
+          ctaText,
+          source,
+        ]
+      properties:
+        sign1:
+          type: string
+        sign2:
+          type: string
+        compatibilityScore:
+          type: integer
+        compatibilityLevel:
+          type: string
+        summary:
+          type: string
+        elements:
+          type: object
+          required: [sign1, sign2]
+          properties:
+            sign1:
+              type: string
+            sign2:
+              type: string
+        modalities:
+          type: object
+          required: [sign1, sign2]
+          properties:
+            sign1:
+              type: string
+            sign2:
+              type: string
+        strengths:
+          type: array
+          items:
+            type: string
+        challenges:
+          type: array
+          items:
+            type: string
+        advice:
+          type: string
+        ctaUrl:
+          type: string
+        ctaText:
+          type: string
+        source:
+          type: string
+      additionalProperties: false
+
+    CosmicTodayResponse:
+      type: object
+      required:
+        [
+          date,
+          headline,
+          summary,
+          moonPhase,
+          sunSign,
+          keyTransits,
+          ctaUrl,
+          ctaText,
+          source,
+        ]
+      properties:
+        date:
+          type: string
+          format: date
+        headline:
+          type: string
+        summary:
+          type: string
+        moonPhase:
+          type: object
+          required: [name, emoji, sign, illumination]
+          properties:
+            name:
+              type: string
+            emoji:
+              type: string
+            sign:
+              type: string
+            illumination:
+              type: integer
+        sunSign:
+          type: string
+        keyTransits:
+          type: array
+          items:
+            type: object
+            required: [label, impact, intensity]
+            properties:
+              label:
+                type: string
+              impact:
+                type: string
+              intensity:
+                type: number
+                format: float
+        ctaUrl:
+          type: string
+        ctaText:
+          type: string
+        source:
+          type: string
+      additionalProperties: false
+
+    CrystalResponse:
+      type: object
+      required:
+        [
+          name,
+          description,
+          properties,
+          metaphysicalProperties,
+          chakras,
+          elements,
+          zodiacSigns,
+          planets,
+          colors,
+          rarity,
+          workingWith,
+          careInstructions,
+          combinations,
+          correspondences,
+          url,
+          ctaUrl,
+          ctaText,
+          source,
+        ]
+      properties:
+        name:
+          type: string
+        alternativeNames:
+          type: array
+          items:
+            type: string
+        description:
+          type: string
+        properties:
+          type: array
+          items:
+            type: string
+        metaphysicalProperties:
+          type: array
+          items:
+            type: string
+        chakras:
+          type: array
+          items:
+            type: string
+        elements:
+          type: array
+          items:
+            type: string
+        zodiacSigns:
+          type: array
+          items:
+            type: string
+        planets:
+          type: array
+          items:
+            type: string
+        colors:
+          type: array
+          items:
+            type: string
+        rarity:
+          type: string
+        workingWith:
+          type: array
+          items:
+            type: string
+        careInstructions:
+          type: array
+          items:
+            type: string
+        combinations:
+          type: array
+          items:
+            type: string
+        correspondences:
+          type: array
+          items:
+            type: string
+        url:
+          type: string
+        ctaUrl:
+          type: string
+        ctaText:
+          type: string
+        source:
+          type: string
+      additionalProperties: false
+
+    CrystalCatalogResponse:
+      type: object
+      required: [message, availableCrystals, totalCount, source]
+      properties:
+        message:
+          type: string
+        availableCrystals:
+          type: array
+          items:
+            type: object
+            required: [id, name, properties, chakras]
+            properties:
+              id:
+                type: string
+              name:
+                type: string
+              properties:
+                type: array
+                items:
+                  type: string
+              chakras:
+                type: array
+                items:
+                  type: string
+        totalCount:
+          type: integer
+        source:
+          type: string
+      additionalProperties: false
+
+    HoroscopeResponse:
+      type: object
+      required:
+        [
+          sign,
+          date,
+          type,
+          horoscope,
+          mood,
+          luckyNumber,
+          luckyColor,
+          compatibility,
+          moonPhase,
+          element,
+          ctaUrl,
+          ctaText,
+          source,
+        ]
+      properties:
+        sign:
+          type: string
+        date:
+          type: string
+          format: date
+        type:
+          type: string
+          enum: [daily, weekly]
+        horoscope:
+          type: string
+        mood:
+          type: string
+        luckyNumber:
+          type: integer
+        luckyColor:
+          type: string
+        compatibility:
+          type: string
+        moonPhase:
+          type: string
+        element:
+          type: string
+        ctaUrl:
+          type: string
+        ctaText:
+          type: string
+        source:
+          type: string
+      additionalProperties: false
+
+    MoonPhaseResponse:
+      type: object
+      required:
+        [
+          date,
+          phase,
+          moonSign,
+          energy,
+          bestFor,
+          avoid,
+          ritualSuggestion,
+          ctaUrl,
+          ctaText,
+          source,
+        ]
+      properties:
+        date:
+          type: string
+          format: date
+        phase:
+          type: object
+          required: [name, emoji, illumination, illuminationPercent]
+          properties:
+            name:
+              type: string
+            emoji:
+              type: string
+            illumination:
+              type: integer
+            illuminationPercent:
+              type: string
+        moonSign:
+          type: string
+        energy:
+          type: string
+        bestFor:
+          type: array
+          items:
+            type: string
+        avoid:
+          type: array
+          items:
+            type: string
+        ritualSuggestion:
+          type: string
+        ctaUrl:
+          type: string
+        ctaText:
+          type: string
+        source:
+          type: string
+      additionalProperties: false
+
+    PricingPlan:
+      type: object
+      required:
+        [name, price, priceCurrency, features, limitations, ctaUrl, ctaLabel]
+      properties:
+        name:
+          type: string
+        price:
+          type: number
+        priceCurrency:
+          type: string
+        interval:
+          type: string
+          nullable: true
+        savings:
+          type: string
+        features:
+          type: array
+          items:
+            type: string
+        limitations:
+          type: array
+          items:
+            type: string
+        ctaUrl:
+          type: string
+        ctaLabel:
+          type: string
+
+    PricingSummaryResponse:
+      type: object
+      required: [plans, trialInfo, lastUpdated, ctaUrl, ctaText]
+      properties:
+        plans:
+          type: array
+          items:
+            $ref: '#/components/schemas/PricingPlan'
+        trialInfo:
+          type: object
+          required: [available, durationDays, creditCardRequired, note]
+          properties:
+            available:
+              type: boolean
+            durationDays:
+              type: integer
+            creditCardRequired:
+              type: boolean
+            note:
+              type: string
+        lastUpdated:
+          type: string
+          format: date
+        ctaUrl:
+          type: string
+        ctaText:
+          type: string
+      additionalProperties: false
+
+    RetrogradeInfo:
+      type: object
+      required: [planet, isRetrograde, meaning, advice]
+      properties:
+        planet:
+          type: string
+        isRetrograde:
+          type: boolean
+        meaning:
+          type: string
+        advice:
+          type: string
+
+    RetrogradeResponse:
+      type: object
+      required:
+        [
+          date,
+          summary,
+          activeRetrogrades,
+          allPlanets,
+          generalAdvice,
+          ctaUrl,
+          ctaText,
+          source,
+        ]
+      properties:
+        date:
+          type: string
+          format: date
+        summary:
+          type: string
+        activeRetrogrades:
+          type: array
+          items:
+            type: object
+            required: [planet, meaning, advice]
+            properties:
+              planet:
+                type: string
+              meaning:
+                type: string
+              advice:
+                type: string
+        allPlanets:
+          type: array
+          items:
+            $ref: '#/components/schemas/RetrogradeInfo'
+        generalAdvice:
+          type: string
+        ctaUrl:
+          type: string
+        ctaText:
+          type: string
+        source:
+          type: string
+      additionalProperties: false
+
+    RitualSuggestRequest:
+      type: object
+      required: [intent]
+      properties:
+        intent:
+          type: string
+        experienceLevel:
+          type: string
+          enum: [beginner, intermediate, advanced]
+        context:
+          type: object
+          properties:
+            moonPhase:
+              type: string
+      additionalProperties: false
+
+    RitualSuggestResponse:
+      type: object
+      required:
+        [
+          title,
+          summary,
+          steps,
+          durationMinutes,
+          tools,
+          intent,
+          ctaUrl,
+          ctaText,
+          source,
+        ]
+      properties:
+        title:
+          type: string
+        summary:
+          type: string
+        steps:
+          type: array
+          items:
+            type: string
+        durationMinutes:
+          type: integer
+        tools:
+          type: array
+          items:
+            type: string
+        bestMoonPhases:
+          type: array
+          items:
+            type: string
+        intent:
+          type: string
+        ctaUrl:
+          type: string
+        ctaText:
+          type: string
+        source:
+          type: string
+      additionalProperties: false
+
+    TarotDailyRequest:
+      type: object
+      properties:
+        focus:
+          type: string
+          enum: [career, love, growth]
+        mood:
+          type: string
+      additionalProperties: false
+
+    TarotDailyResponse:
+      type: object
+      required:
+        [card, message, spreadType, interpretation, ctaUrl, ctaText, source]
+      properties:
+        card:
+          type: object
+          required: [name, arcana, upright, keywords]
+          properties:
+            name:
+              type: string
+            arcana:
+              type: string
+            upright:
+              type: boolean
+            keywords:
+              type: array
+              items:
+                type: string
+        message:
+          type: string
+        spreadType:
+          type: string
+        interpretation:
+          type: string
+        ctaUrl:
+          type: string
+        ctaText:
+          type: string
+        source:
+          type: string
+      additionalProperties: false
+
 paths:
   /gpt/grimoire/search:
     get:
@@ -180,6 +904,407 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Unauthorised
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /gpt/grimoire/entry:
+    get:
+      operationId: grimoireEntryGet
+      summary: Resolve a Grimoire slug or seed
+      description: Returns the canonical Lunary Grimoire entry that best matches the provided slug, seed, or query.
+      parameters:
+        - name: slug
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: seed
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: q
+          in: query
+          required: false
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Resolution result
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GrimoireEntryResponse'
+        '401':
+          description: Unauthorised
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    post:
+      operationId: grimoireEntryPost
+      summary: Resolve a Grimoire slug or seed
+      description: POST variant that accepts a JSON body with slug, seed, or q.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GrimoireEntryRequest'
+      responses:
+        '200':
+          description: Resolution result
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GrimoireEntryResponse'
+        '401':
+          description: Unauthorised
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /gpt/angel-number:
+    get:
+      operationId: angelNumber
+      summary: Retrieve the meaning of an angel number
+      parameters:
+        - name: number
+          in: query
+          required: false
+          description: Angel number digits such as 111, 222, etc.
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Angel number information or guidance for missing number
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/AngelNumberResponse'
+                  - type: object
+                    required: [message, availableNumbers, examples, source]
+                    properties:
+                      message:
+                        type: string
+                      availableNumbers:
+                        type: array
+                        items:
+                          type: string
+                      examples:
+                        type: array
+                        items:
+                          type: string
+                      source:
+                        type: string
+        '404':
+          description: Angel number not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Unauthorised
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /gpt/birth-chart-summary:
+    post:
+      operationId: birthChartSummary
+      summary: Generate a short birth chart summary
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BirthChartSummaryRequest'
+      responses:
+        '200':
+          description: Birth chart overview
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BirthChartSummaryResponse'
+        '400':
+          description: Missing or invalid birth data
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Unauthorised
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /gpt/compatibility:
+    get:
+      operationId: compatibility
+      summary: Calculate zodiac compatibility
+      parameters:
+        - name: sign1
+          in: query
+          required: true
+          schema:
+            type: string
+            description: First zodiac sign (e.g. aries)
+        - name: sign2
+          in: query
+          required: true
+          schema:
+            type: string
+            description: Second zodiac sign (e.g. sagittarius)
+      responses:
+        '200':
+          description: Compatibility report
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CompatibilityResponse'
+        '400':
+          description: Missing or invalid signs
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Unauthorised
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /gpt/cosmic-today:
+    get:
+      operationId: cosmicToday
+      summary: Get today’s cosmic weather snapshot
+      parameters:
+        - name: date
+          in: query
+          required: false
+          description: ISO date (YYYY-MM-DD) to override today
+          schema:
+            type: string
+            format: date
+      responses:
+        '200':
+          description: Cosmic weather summary
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CosmicTodayResponse'
+        '401':
+          description: Unauthorised
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /gpt/crystal:
+    get:
+      operationId: crystal
+      summary: Retrieve details for a specific crystal
+      parameters:
+        - name: name
+          in: query
+          required: false
+          description: Crystal ID or name (e.g. amethyst). If omitted, returns an index overview.
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Crystal detail or catalog overview
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/CrystalResponse'
+                  - $ref: '#/components/schemas/CrystalCatalogResponse'
+        '404':
+          description: Crystal not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Unauthorised
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /gpt/horoscope:
+    get:
+      operationId: horoscope
+      summary: Generate a daily or weekly horoscope
+      parameters:
+        - name: sign
+          in: query
+          required: true
+          description: Zodiac sign (aries, taurus, etc.)
+          schema:
+            type: string
+        - name: type
+          in: query
+          required: false
+          description: Horoscope cadence
+          schema:
+            type: string
+            enum: [daily, weekly]
+            default: daily
+        - name: date
+          in: query
+          required: false
+          description: ISO date (YYYY-MM-DD) override
+          schema:
+            type: string
+            format: date
+      responses:
+        '200':
+          description: Horoscope result
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HoroscopeResponse'
+        '400':
+          description: Missing or invalid sign
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Unauthorised
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /gpt/moon-phase:
+    get:
+      operationId: moonPhase
+      summary: Get the current or specific date moon phase
+      parameters:
+        - name: date
+          in: query
+          required: false
+          description: ISO date (YYYY-MM-DD) override
+          schema:
+            type: string
+            format: date
+      responses:
+        '200':
+          description: Moon phase guidance
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MoonPhaseResponse'
+        '401':
+          description: Unauthorised
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /gpt/pricing-summary:
+    get:
+      operationId: pricingSummary
+      summary: Retrieve Lunary pricing information
+      responses:
+        '200':
+          description: Pricing summary
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PricingSummaryResponse'
+        '401':
+          description: Unauthorised
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /gpt/retrograde:
+    get:
+      operationId: retrogradeStatus
+      summary: Check which planets are retrograde
+      parameters:
+        - name: date
+          in: query
+          required: false
+          description: ISO date (YYYY-MM-DD) override
+          schema:
+            type: string
+            format: date
+      responses:
+        '200':
+          description: Retrograde overview
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RetrogradeResponse'
+        '401':
+          description: Unauthorised
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /gpt/ritual/suggest:
+    post:
+      operationId: ritualSuggest
+      summary: Suggest a ritual for a given intent
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RitualSuggestRequest'
+      responses:
+        '200':
+          description: Ritual suggestion
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RitualSuggestResponse'
+        '400':
+          description: Missing intent
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Unauthorised
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /gpt/tarot/daily:
+    post:
+      operationId: tarotDaily
+      summary: Draw a daily Major Arcana tarot card
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TarotDailyRequest'
+      responses:
+        '200':
+          description: Tarot card result
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TarotDailyResponse'
         '401':
           description: Unauthorised
           content:
