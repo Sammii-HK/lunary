@@ -1,6 +1,6 @@
 'use client';
 
-import { ReactNode, useState, useEffect, useMemo } from 'react';
+import { ReactNode, useState, useEffect } from 'react';
 import { useUser } from '@/context/UserContext';
 import { useAuthStatus } from './AuthStatus';
 import { useSubscription } from '@/hooks/useSubscription';
@@ -70,30 +70,10 @@ export function OnboardingFlow({
   const [saving, setSaving] = useState(false);
   const [showOptionalDetails, setShowOptionalDetails] = useState(false);
   const [showSkipWarning, setShowSkipWarning] = useState(false);
-  const [signupTriggerActive, setSignupTriggerActive] = useState(false);
-  const {
-    seenKey: onboardingSeenKey,
-    triggerKey: onboardingTriggerKey,
-    baseTriggerKey: baseOnboardingTriggerKey,
-    cooldownKey: onboardingCooldownKey,
-    sessionKey: onboardingSessionKey,
-  } = useMemo(() => {
-    const hasUser = !!user?.id;
-    const userSuffix = hasUser ? `_${user.id}` : '';
-    return {
-      seenKey: `lunary_onboarding_seen${userSuffix}`,
-      triggerKey: hasUser
-        ? `lunary_onboarding_trigger_${user?.id}`
-        : 'lunary_onboarding_trigger',
-      baseTriggerKey: 'lunary_onboarding_trigger',
-      cooldownKey: hasUser
-        ? `lunary_onboarding_cooldown_${user?.id}`
-        : 'lunary_onboarding_cooldown',
-      sessionKey: hasUser
-        ? `lunary_onboarding_session_${user?.id}`
-        : 'lunary_onboarding_session',
-    };
-  }, [user?.id]);
+  const [onboardingStatus, setOnboardingStatus] = useState({
+    loading: true,
+    completed: false,
+  });
   const isSubscribedOrTrial =
     simulateSubscribed ||
     subscription.isSubscribed ||
@@ -195,32 +175,45 @@ export function OnboardingFlow({
   })();
 
   useEffect(() => {
-    if (typeof window === 'undefined') return;
-
-    try {
-      const userSpecificTrigger = localStorage.getItem(onboardingTriggerKey);
-      const fallbackTrigger =
-        onboardingTriggerKey === baseOnboardingTriggerKey
-          ? null
-          : localStorage.getItem(baseOnboardingTriggerKey);
-
-      if (
-        fallbackTrigger === 'true' &&
-        onboardingTriggerKey !== baseOnboardingTriggerKey &&
-        userSpecificTrigger !== 'true'
-      ) {
-        localStorage.setItem(onboardingTriggerKey, 'true');
-        localStorage.removeItem(baseOnboardingTriggerKey);
-      }
-
-      setSignupTriggerActive(
-        userSpecificTrigger === 'true' || fallbackTrigger === 'true',
-      );
-    } catch (error) {
-      console.error('[Onboarding] Failed to read signup trigger flag:', error);
-      setSignupTriggerActive(false);
+    if (!authState.isAuthenticated || !user?.id || previewMode) {
+      setOnboardingStatus({ loading: false, completed: true });
+      return;
     }
-  }, [onboardingTriggerKey, baseOnboardingTriggerKey]);
+
+    let cancelled = false;
+
+    const fetchOnboardingStatus = async () => {
+      try {
+        setOnboardingStatus((prev) => ({ ...prev, loading: true }));
+        const response = await fetch('/api/onboarding/complete', {
+          credentials: 'include',
+        });
+
+        if (!response.ok) {
+          throw new Error('Failed to load onboarding status');
+        }
+
+        const data = await response.json();
+        if (!cancelled) {
+          setOnboardingStatus({
+            loading: false,
+            completed: !!data.completed || !!data.skipped,
+          });
+        }
+      } catch (error) {
+        if (!cancelled) {
+          console.error('[Onboarding] Failed to load status:', error);
+          setOnboardingStatus({ loading: false, completed: false });
+        }
+      }
+    };
+
+    fetchOnboardingStatus();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [authState.isAuthenticated, user?.id, previewMode]);
 
   useEffect(() => {
     const needsBirthDetails = !user?.birthday;
@@ -238,69 +231,29 @@ export function OnboardingFlow({
     if (
       authState.isAuthenticated &&
       !authState.loading &&
+      !onboardingStatus.loading &&
       needsBirthDetails &&
-      signupTriggerActive
+      !onboardingStatus.completed
     ) {
-      if (typeof window !== 'undefined') {
-        const hasSeenThisSession = sessionStorage.getItem(onboardingSessionKey);
-        if (hasSeenThisSession) {
-          setShowOnboarding(false);
-          return;
-        }
-        const lastDismissedAt = localStorage.getItem(onboardingCooldownKey);
-        if (lastDismissedAt) {
-          const dismissedAt = Number(lastDismissedAt);
-          if (Number.isFinite(dismissedAt)) {
-            const oneDayMs = 24 * 60 * 60 * 1000;
-            if (Date.now() - dismissedAt < oneDayMs) {
-              setShowOnboarding(false);
-              return;
-            }
-          }
-        }
-      }
-
-      const hasSeenOnboarding =
-        typeof window === 'undefined'
-          ? 'true'
-          : localStorage.getItem(onboardingSeenKey);
-      if (!hasSeenOnboarding) {
-        setShowOnboarding(true);
-        if (typeof window !== 'undefined') {
-          sessionStorage.setItem(onboardingSessionKey, 'true');
-        }
-        return;
-      }
+      setShowOnboarding(true);
+      return;
     }
 
     setShowOnboarding(false);
   }, [
     authState.isAuthenticated,
     authState.loading,
+    onboardingStatus.completed,
+    onboardingStatus.loading,
     user?.birthday,
     forceOpen,
-    onboardingSeenKey,
-    onboardingCooldownKey,
-    onboardingSessionKey,
     previewMode,
     previewStep,
-    signupTriggerActive,
   ]);
-  const persistOnboardingCompletion = () => {
-    if (previewMode || typeof window === 'undefined') {
-      return;
-    }
 
-    try {
-      localStorage.setItem(onboardingSeenKey, 'true');
-      localStorage.removeItem(onboardingTriggerKey);
-      localStorage.removeItem(baseOnboardingTriggerKey);
-      sessionStorage.setItem(onboardingSessionKey, 'true');
-    } catch (error) {
-      console.error('[Onboarding] Failed to persist onboarding state:', error);
-    }
-
-    setSignupTriggerActive(false);
+  const resolveOnboarding = () => {
+    setOnboardingStatus({ loading: false, completed: true });
+    setShowOnboarding(false);
   };
 
   useEffect(() => {
@@ -413,8 +366,8 @@ export function OnboardingFlow({
   };
 
   const handleConfirmSkip = async () => {
-    await trackStepCompletion(currentStep, true);
-    persistOnboardingCompletion();
+    await trackStepCompletion('complete', true);
+    resolveOnboarding();
     setShowSkipWarning(false);
     setCurrentStep('complete');
   };
@@ -434,21 +387,11 @@ export function OnboardingFlow({
 
   const handleComplete = async () => {
     await trackStepCompletion(currentStep, false);
-    persistOnboardingCompletion();
-    setShowOnboarding(false);
+    resolveOnboarding();
     if (!previewMode) {
       // User already has subscription, send them to personalized content
       router.push('/book-of-shadows');
     }
-  };
-
-  const handleDismiss = () => {
-    if (!previewMode && typeof window !== 'undefined') {
-      sessionStorage.setItem(onboardingSessionKey, 'true');
-      localStorage.setItem(onboardingCooldownKey, String(Date.now()));
-    }
-    setShowSkipWarning(false);
-    setShowOnboarding(false);
   };
 
   const handleNext = async () => {
@@ -472,9 +415,9 @@ export function OnboardingFlow({
     <div className='fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4'>
       <div className='relative bg-zinc-900 border border-zinc-700 rounded-lg p-6 md:p-8 max-w-lg w-full shadow-xl max-h-[90vh] overflow-y-auto'>
         <button
-          onClick={handleDismiss}
+          onClick={handleSkip}
           className='absolute top-4 right-4 min-h-[48px] min-w-[48px] flex items-center justify-center text-zinc-400 hover:text-white transition-colors'
-          aria-label='Close onboarding'
+          aria-label='Skip onboarding'
         >
           <X className='w-5 h-5' />
         </button>

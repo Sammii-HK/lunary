@@ -16,7 +16,10 @@ export async function POST(request: NextRequest) {
       DO UPDATE SET
         steps_completed = ${JSON.stringify(stepsCompleted || [])}::TEXT[],
         skipped = ${skipped || false},
-        completed_at = CASE WHEN ${skipped || false} THEN onboarding_completion.completed_at ELSE NOW() END,
+        completed_at = CASE
+          WHEN ${skipped || false} THEN COALESCE(onboarding_completion.completed_at, NOW())
+          ELSE NOW()
+        END,
         updated_at = NOW()
     `;
 
@@ -51,7 +54,7 @@ export async function GET(request: NextRequest) {
 
     const row = result.rows[0];
     return NextResponse.json({
-      completed: !!row.completed_at,
+      completed: !!row.completed_at || !!row.skipped,
       stepsCompleted: row.steps_completed || [],
       skipped: row.skipped || false,
     });
