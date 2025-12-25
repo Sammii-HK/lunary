@@ -70,9 +70,14 @@ export function OnboardingFlow({
   const [saving, setSaving] = useState(false);
   const [showOptionalDetails, setShowOptionalDetails] = useState(false);
   const [showSkipWarning, setShowSkipWarning] = useState(false);
+  const [signupTriggerActive, setSignupTriggerActive] = useState(false);
   const onboardingSeenKey = user?.id
     ? `lunary_onboarding_seen_${user.id}`
     : 'lunary_onboarding_seen';
+  const baseOnboardingTriggerKey = 'lunary_onboarding_trigger';
+  const onboardingTriggerKey = user?.id
+    ? `${baseOnboardingTriggerKey}_${user.id}`
+    : baseOnboardingTriggerKey;
   const isSubscribedOrTrial =
     simulateSubscribed ||
     subscription.isSubscribed ||
@@ -174,29 +179,60 @@ export function OnboardingFlow({
   })();
 
   useEffect(() => {
+    if (typeof window === 'undefined') return;
+
+    try {
+      const userSpecificTrigger = localStorage.getItem(onboardingTriggerKey);
+      const fallbackTrigger =
+        onboardingTriggerKey === baseOnboardingTriggerKey
+          ? null
+          : localStorage.getItem(baseOnboardingTriggerKey);
+
+      if (
+        fallbackTrigger === 'true' &&
+        onboardingTriggerKey !== baseOnboardingTriggerKey &&
+        userSpecificTrigger !== 'true'
+      ) {
+        localStorage.setItem(onboardingTriggerKey, 'true');
+        localStorage.removeItem(baseOnboardingTriggerKey);
+      }
+
+      setSignupTriggerActive(
+        userSpecificTrigger === 'true' || fallbackTrigger === 'true',
+      );
+    } catch (error) {
+      console.error('[Onboarding] Failed to read signup trigger flag:', error);
+      setSignupTriggerActive(false);
+    }
+  }, [onboardingTriggerKey, baseOnboardingTriggerKey]);
+
+  useEffect(() => {
+    const needsBirthDetails = !user?.birthday;
+    let shouldShow = false;
+
     // Show onboarding for authenticated users who haven't added birth details
     // Conditions:
     // 1. User is logged in
     // 2. User has NOT added their birthday yet
-    const needsBirthDetails = !user?.birthday;
 
     if (forceOpen && previewMode) {
-      setShowOnboarding(true);
-      return;
+      shouldShow = true;
+    } else if (forceOpen && !authState.loading && authState.isAuthenticated) {
+      shouldShow = true;
+    } else if (
+      authState.isAuthenticated &&
+      !authState.loading &&
+      needsBirthDetails &&
+      signupTriggerActive
+    ) {
+      const hasSeenOnboarding =
+        typeof window === 'undefined'
+          ? 'true'
+          : localStorage.getItem(onboardingSeenKey);
+      shouldShow = !hasSeenOnboarding;
     }
 
-    if (forceOpen && !authState.loading && authState.isAuthenticated) {
-      setShowOnboarding(true);
-      return;
-    }
-
-    if (authState.isAuthenticated && !authState.loading && needsBirthDetails) {
-      // Check if user has seen onboarding before
-      const hasSeenOnboarding = localStorage.getItem(onboardingSeenKey);
-      if (!hasSeenOnboarding) {
-        setShowOnboarding(true);
-      }
-    }
+    setShowOnboarding(shouldShow);
   }, [
     authState.isAuthenticated,
     authState.loading,
@@ -205,7 +241,23 @@ export function OnboardingFlow({
     onboardingSeenKey,
     previewMode,
     previewStep,
+    signupTriggerActive,
   ]);
+  const persistOnboardingCompletion = () => {
+    if (previewMode || typeof window === 'undefined') {
+      return;
+    }
+
+    try {
+      localStorage.setItem(onboardingSeenKey, 'true');
+      localStorage.removeItem(onboardingTriggerKey);
+      localStorage.removeItem(baseOnboardingTriggerKey);
+    } catch (error) {
+      console.error('[Onboarding] Failed to persist onboarding state:', error);
+    }
+
+    setSignupTriggerActive(false);
+  };
 
   useEffect(() => {
     if (previewMode && previewStep) {
@@ -318,9 +370,7 @@ export function OnboardingFlow({
 
   const handleConfirmSkip = async () => {
     await trackStepCompletion(currentStep, true);
-    if (!previewMode) {
-      localStorage.setItem(onboardingSeenKey, 'true');
-    }
+    persistOnboardingCompletion();
     setShowSkipWarning(false);
     setCurrentStep('complete');
   };
@@ -340,9 +390,7 @@ export function OnboardingFlow({
 
   const handleComplete = async () => {
     await trackStepCompletion(currentStep, false);
-    if (!previewMode) {
-      localStorage.setItem(onboardingSeenKey, 'true');
-    }
+    persistOnboardingCompletion();
     setShowOnboarding(false);
     if (!previewMode) {
       // User already has subscription, send them to personalized content

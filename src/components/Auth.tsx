@@ -122,6 +122,22 @@ export function AuthComponent({
 
           conversionTracking.signup(user.id, formData.email);
 
+          if (typeof window !== 'undefined') {
+            try {
+              const triggerKey = 'lunary_onboarding_trigger';
+              localStorage.setItem(triggerKey, 'true');
+              if (user.id) {
+                localStorage.setItem(`${triggerKey}_${user.id}`, 'true');
+                localStorage.removeItem(`lunary_onboarding_seen_${user.id}`);
+              }
+            } catch (storageError) {
+              console.warn(
+                '[Auth] Failed to update onboarding trigger flag:',
+                storageError,
+              );
+            }
+          }
+
           captureEvent('signup_completed', {
             user_id: user.id,
             ...attributionData,
