@@ -70,15 +70,10 @@ export function OnboardingFlow({
   const [saving, setSaving] = useState(false);
   const [showOptionalDetails, setShowOptionalDetails] = useState(false);
   const [showSkipWarning, setShowSkipWarning] = useState(false);
-  const onboardingSeenKey = user?.id
-    ? `lunary_onboarding_seen_${user.id}`
-    : 'lunary_onboarding_seen';
-  const onboardingCooldownKey = user?.id
-    ? `lunary_onboarding_cooldown_${user.id}`
-    : 'lunary_onboarding_cooldown';
-  const onboardingSessionKey = user?.id
-    ? `lunary_onboarding_session_${user.id}`
-    : 'lunary_onboarding_session';
+  const [onboardingStatus, setOnboardingStatus] = useState({
+    loading: true,
+    completed: false,
+  });
   const isSubscribedOrTrial =
     simulateSubscribed ||
     subscription.isSubscribed ||
@@ -180,10 +175,47 @@ export function OnboardingFlow({
   })();
 
   useEffect(() => {
-    // Show onboarding for authenticated users who haven't added birth details
-    // Conditions:
-    // 1. User is logged in
-    // 2. User has NOT added their birthday yet
+    if (!authState.isAuthenticated || !user?.id || previewMode) {
+      setOnboardingStatus({ loading: false, completed: true });
+      return;
+    }
+
+    let cancelled = false;
+
+    const fetchOnboardingStatus = async () => {
+      try {
+        setOnboardingStatus((prev) => ({ ...prev, loading: true }));
+        const response = await fetch('/api/onboarding/complete', {
+          credentials: 'include',
+        });
+
+        if (!response.ok) {
+          throw new Error('Failed to load onboarding status');
+        }
+
+        const data = await response.json();
+        if (!cancelled) {
+          setOnboardingStatus({
+            loading: false,
+            completed: !!data.completed || !!data.skipped,
+          });
+        }
+      } catch (error) {
+        if (!cancelled) {
+          console.error('[Onboarding] Failed to load status:', error);
+          setOnboardingStatus({ loading: false, completed: false });
+        }
+      }
+    };
+
+    fetchOnboardingStatus();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [authState.isAuthenticated, user?.id, previewMode]);
+
+  useEffect(() => {
     const needsBirthDetails = !user?.birthday;
 
     if (forceOpen && previewMode) {
@@ -196,43 +228,33 @@ export function OnboardingFlow({
       return;
     }
 
-    if (authState.isAuthenticated && !authState.loading && needsBirthDetails) {
-      if (typeof window !== 'undefined') {
-        const hasSeenThisSession = sessionStorage.getItem(onboardingSessionKey);
-        if (hasSeenThisSession) {
-          return;
-        }
-        const lastDismissedAt = localStorage.getItem(onboardingCooldownKey);
-        if (lastDismissedAt) {
-          const dismissedAt = Number(lastDismissedAt);
-          if (Number.isFinite(dismissedAt)) {
-            const oneDayMs = 24 * 60 * 60 * 1000;
-            if (Date.now() - dismissedAt < oneDayMs) {
-              return;
-            }
-          }
-        }
-      }
-      // Check if user has seen onboarding before
-      const hasSeenOnboarding = localStorage.getItem(onboardingSeenKey);
-      if (!hasSeenOnboarding) {
-        setShowOnboarding(true);
-        if (typeof window !== 'undefined') {
-          sessionStorage.setItem(onboardingSessionKey, 'true');
-        }
-      }
+    if (
+      authState.isAuthenticated &&
+      !authState.loading &&
+      !onboardingStatus.loading &&
+      needsBirthDetails &&
+      !onboardingStatus.completed
+    ) {
+      setShowOnboarding(true);
+      return;
     }
+
+    setShowOnboarding(false);
   }, [
     authState.isAuthenticated,
     authState.loading,
+    onboardingStatus.completed,
+    onboardingStatus.loading,
     user?.birthday,
     forceOpen,
-    onboardingSeenKey,
-    onboardingCooldownKey,
-    onboardingSessionKey,
     previewMode,
     previewStep,
   ]);
+
+  const resolveOnboarding = () => {
+    setOnboardingStatus({ loading: false, completed: true });
+    setShowOnboarding(false);
+  };
 
   useEffect(() => {
     if (previewMode && previewStep) {
@@ -344,14 +366,9 @@ export function OnboardingFlow({
   };
 
   const handleConfirmSkip = async () => {
-    await trackStepCompletion(currentStep, true);
-    if (!previewMode) {
-      localStorage.setItem(onboardingSeenKey, 'true');
-    }
+    await trackStepCompletion('complete', true);
+    resolveOnboarding();
     setShowSkipWarning(false);
-    if (typeof window !== 'undefined') {
-      sessionStorage.setItem(onboardingSessionKey, 'true');
-    }
     setCurrentStep('complete');
   };
 
@@ -370,26 +387,11 @@ export function OnboardingFlow({
 
   const handleComplete = async () => {
     await trackStepCompletion(currentStep, false);
-    if (!previewMode) {
-      localStorage.setItem(onboardingSeenKey, 'true');
-    }
-    if (typeof window !== 'undefined') {
-      sessionStorage.setItem(onboardingSessionKey, 'true');
-    }
-    setShowOnboarding(false);
+    resolveOnboarding();
     if (!previewMode) {
       // User already has subscription, send them to personalized content
       router.push('/book-of-shadows');
     }
-  };
-
-  const handleDismiss = () => {
-    if (typeof window !== 'undefined') {
-      sessionStorage.setItem(onboardingSessionKey, 'true');
-      localStorage.setItem(onboardingCooldownKey, String(Date.now()));
-    }
-    setShowSkipWarning(false);
-    setShowOnboarding(false);
   };
 
   const handleNext = async () => {
@@ -413,9 +415,9 @@ export function OnboardingFlow({
     <div className='fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4'>
       <div className='relative bg-zinc-900 border border-zinc-700 rounded-lg p-6 md:p-8 max-w-lg w-full shadow-xl max-h-[90vh] overflow-y-auto'>
         <button
-          onClick={handleDismiss}
+          onClick={handleSkip}
           className='absolute top-4 right-4 min-h-[48px] min-w-[48px] flex items-center justify-center text-zinc-400 hover:text-white transition-colors'
-          aria-label='Close onboarding'
+          aria-label='Skip onboarding'
         >
           <X className='w-5 h-5' />
         </button>

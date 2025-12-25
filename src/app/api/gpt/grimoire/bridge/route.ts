@@ -1,7 +1,11 @@
 import { randomUUID } from 'crypto';
 import { NextRequest, NextResponse } from 'next/server';
-import { requireGptAuth } from '@/lib/gptAuth';
+import { requireGptAuthJson } from '@/lib/gptAuth';
 import { resolveGrimoireBridgeWithMeta } from '@/lib/grimoire/bridge-resolver';
+import {
+  getGrimoireEntryBySlug,
+  resolveGrimoireSlug,
+} from '@/lib/grimoire/slug';
 import { logDiscordGptEvent } from '@/lib/observability/discord-logger';
 import { writeGptBridgeLog } from '@/lib/observability/gpt-bridge-log';
 
@@ -12,26 +16,65 @@ const CACHE_HEADERS = {
   'Cache-Control': 'public, s-maxage=86400, stale-while-revalidate=604800',
 };
 
+type BridgePayload = {
+  seed?: string;
+  slug?: string;
+  q?: string;
+  types?: string;
+  limit?: number;
+};
+
+async function getBridgePayload(request: NextRequest): Promise<BridgePayload> {
+  if (request.method !== 'POST') return {};
+
+  try {
+    const body = (await request.json()) as BridgePayload;
+    return body ?? {};
+  } catch {
+    return {};
+  }
+}
+
 export async function GET(request: NextRequest) {
-  const unauthorized = requireGptAuth(request);
+  const unauthorized = requireGptAuthJson(request);
   if (unauthorized) return unauthorized;
 
   try {
     const { searchParams } = new URL(request.url);
     const requestId = request.headers.get('x-request-id') || randomUUID();
-    const seed = searchParams.get('seed')?.trim() || '';
-    const typesRaw = searchParams.get('types');
-    const limitParam = searchParams.get('limit');
+    const payload = await getBridgePayload(request);
+    const seedRaw =
+      searchParams.get('seed') ??
+      searchParams.get('slug') ??
+      searchParams.get('q') ??
+      payload.seed ??
+      payload.slug ??
+      payload.q ??
+      '';
+    const seed = seedRaw.trim();
+    const typesRaw = searchParams.get('types') ?? payload.types;
+    const limitParam =
+      searchParams.get('limit') ?? payload.limit?.toString() ?? null;
     const limit =
       limitParam && Number.isFinite(Number(limitParam))
         ? Math.min(10, Math.max(1, Number(limitParam)))
         : 5;
 
-    if (!seed || seed.length < 2) {
-      return NextResponse.json(
-        { error: 'seed is required (min 2 characters)' },
-        { status: 400 },
-      );
+    const resolution = resolveGrimoireSlug(seed);
+
+    if (!seed || seed.length < 2 || !resolution.slug) {
+      return NextResponse.json({
+        ok: true,
+        seed,
+        typesRequested: [],
+        resultCount: 0,
+        matchType: 'none',
+        suggestions: resolution.suggestions ?? [],
+        links: [],
+        ctaUrl: 'https://lunary.app/grimoire/search?from=gpt_grimoire_bridge',
+        ctaText: 'Explore the complete Lunary Grimoire',
+        source: 'Lunary.app - Digital Grimoire with 500+ pages',
+      });
     }
 
     const typesRequested = typesRaw
@@ -41,8 +84,11 @@ export async function GET(request: NextRequest) {
           .filter(Boolean)
       : [];
 
+    const resolvedEntry = getGrimoireEntryBySlug(resolution.slug);
+    const bridgeSeed = resolvedEntry?.title ?? seed;
+
     const { result, meta } = resolveGrimoireBridgeWithMeta({
-      seed,
+      seed: bridgeSeed,
       types: typesRequested,
       limit,
     });
@@ -85,7 +131,16 @@ export async function GET(request: NextRequest) {
       cache: 'miss',
     });
 
-    return NextResponse.json(result, { headers: CACHE_HEADERS });
+    return NextResponse.json(
+      {
+        ...result,
+        ok: true,
+        matchType: resolution.matchType,
+        resolvedSlug: resolution.slug,
+        suggestions: resolution.suggestions ?? [],
+      },
+      { headers: CACHE_HEADERS },
+    );
   } catch (error) {
     console.error('GPT grimoire/bridge error:', error);
     const requestId = request.headers.get('x-request-id') || randomUUID();
@@ -135,11 +190,16 @@ export async function GET(request: NextRequest) {
       },
       cache: 'miss',
     });
-    return NextResponse.json(
-      { error: 'Failed to bridge grimoire' },
-      { status: 500 },
-    );
+    return NextResponse.json({
+      ok: false,
+      error: 'internal_error',
+      message: 'Failed to bridge grimoire.',
+    });
   }
+}
+
+export async function POST(request: NextRequest) {
+  return GET(request);
 }
 
 // curl -H "Authorization: Bearer $LUNARY_GPT_SECRET" "http://localhost:3000/api/gpt/grimoire/bridge?seed=venus"

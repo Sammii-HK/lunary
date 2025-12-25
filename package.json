@@ -88,6 +88,7 @@
     "delete:moon-circle": "tsx scripts/delete-moon-circle.ts",
     "run:cron": "tsx scripts/run-cron.ts",
     "audit:grimoire-built": "tsx scripts/audit-grimoire-links-built.ts",
+    "grimoire:index": "tsx scripts/build-grimoire-search-index.ts",
     "check": "pnpm lint && pnpm test && pnpm build",
     "legacy:audit": "tsx tools/remove-legacy-framework.ts",
     "legacy:purge": "tsx tools/remove-legacy-framework.ts --delete-scripts --execute"

@@ -1,9 +1,9 @@
-openapi: 3.1.0
+openapi: 3.1.1
 
 info:
   title: Lunary GPT API
   version: 1.0.0
-  description: Internal Lunary API for astrology, tarot, rituals, and grimoire knowledge. Lunary-only data.
+  description: Private Lunary endpoints for Custom GPTs. Provides Grimoire search and symbolic cross-system bridging using Lunary’s internal knowledge base.
 
 servers:
   - url: https://lunary.app/api
@@ -16,213 +16,173 @@ components:
     bearerAuth:
       type: http
       scheme: bearer
-      bearerFormat: LUNARY_GPT_SECRET
+      description: 'Send Authorization: Bearer <LUNARY_GPT_SECRET>'
 
   schemas:
-    Error:
+    ErrorResponse:
       type: object
+      required: [error]
       properties:
         error:
           type: string
-      required: [error]
+      additionalProperties: false
 
-    GrimoireEntry:
+    GrimoireSearchResult:
       type: object
+      required: [slug, title, summary, url, category]
       properties:
-        id:
-          type: string
-        type:
+        slug:
           type: string
         title:
           type: string
         summary:
           type: string
-        keyPoints:
+        url:
+          type: string
+        category:
+          type: string
+      additionalProperties: false
+
+    GrimoireSearchResponse:
+      type: object
+      required: [query, resultCount, results, ctaUrl, ctaText, source]
+      properties:
+        query:
+          type: string
+        resultCount:
+          type: integer
+        results:
           type: array
           items:
-            type: string
-        canonicalUrl:
+            $ref: '#/components/schemas/GrimoireSearchResult'
+        ctaUrl:
           type: string
-      required: [id, type, title, canonicalUrl]
+        ctaText:
+          type: string
+        source:
+          type: string
+      additionalProperties: false
 
-    BridgeResult:
+    GrimoireLink:
       type: object
+      required: [type, title, slug, url, summary]
       properties:
         type:
           type: string
+          description: Normalized type (tarot, crystal, zodiac, planet, glossary, ritual, etc.)
         title:
           type: string
-        canonicalUrl:
+        slug:
+          type: string
+        url:
+          type: string
+        summary:
           type: string
         reason:
           type: string
-      required: [type, title]
+          description: Why this entry is related to the seed concept
+      additionalProperties: false
+
+    GrimoireBridgeResponse:
+      type: object
+      required:
+        [seed, typesRequested, resultCount, links, ctaUrl, ctaText, source]
+      properties:
+        seed:
+          type: string
+        typesRequested:
+          type: array
+          items:
+            type: string
+        resultCount:
+          type: integer
+        links:
+          type: array
+          items:
+            $ref: '#/components/schemas/GrimoireLink'
+        ctaUrl:
+          type: string
+        ctaText:
+          type: string
+        source:
+          type: string
+      additionalProperties: false
 
 paths:
-  /gpt/grimoire/entry:
+  /gpt/grimoire/search:
     get:
-      operationId: getGrimoireEntry
-      summary: Get a canonical grimoire entry
+      operationId: grimoireSearch
+      summary: Search the Lunary Grimoire
+      description: Searches Lunary’s internal Grimoire index and returns canonical entries.
       parameters:
-        - name: idOrSlug
+        - name: q
           in: query
           required: true
           schema:
             type: string
+            minLength: 2
       responses:
         '200':
-          description: Grimoire entry
+          description: Search results
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/GrimoireEntry'
+                $ref: '#/components/schemas/GrimoireSearchResponse'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
         '401':
-          description: Unauthorized
-        '500':
-          description: Server error
+          description: Unauthorised
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
 
   /gpt/grimoire/bridge:
-    post:
-      operationId: bridgeGrimoireConcept
-      summary: Cross-reference a concept across systems
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                seed:
-                  type: string
-                types:
-                  type: array
-                  items:
-                    type: string
-              required: [seed]
+    get:
+      operationId: grimoireBridge
+      summary: Bridge a concept across symbolic systems
+      description: Returns related Lunary Grimoire entries using semantic resolution, aliasing, and scoring.
+      parameters:
+        - name: seed
+          in: query
+          required: true
+          schema:
+            type: string
+            minLength: 2
+        - name: types
+          in: query
+          required: false
+          description: Comma-separated type filter (e.g. tarot,crystal,zodiac)
+          schema:
+            type: string
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 10
+            default: 5
       responses:
         '200':
-          description: Cross-system links
+          description: Bridge results
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  links:
-                    type: array
-                    items:
-                      $ref: '#/components/schemas/BridgeResult'
-        '401':
-          description: Unauthorized
-        '500':
-          description: Server error
-
-  /gpt/ritual/recommend:
-    post:
-      operationId: recommendRitual
-      summary: Recommend rituals by intention
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                intention:
-                  type: string
-                timeAvailableMinutes:
-                  type: integer
-                constraints:
-                  type: array
-                  items:
-                    type: string
-              required: [intention]
-      responses:
-        '200':
-          description: Ritual recommendations
+                $ref: '#/components/schemas/GrimoireBridgeResponse'
+        '400':
+          description: Bad request
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  results:
-                    type: array
-                    items:
-                      type: object
-                      properties:
-                        title:
-                          type: string
-                        canonicalUrl:
-                          type: string
+                $ref: '#/components/schemas/ErrorResponse'
         '401':
-          description: Unauthorized
-        '500':
-          description: Server error
-
-  /gpt/journal/prompts:
-    post:
-      operationId: journalPrompts
-      summary: Generate reflective journal prompts
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                theme:
-                  type: string
-                limit:
-                  type: integer
-      responses:
-        '200':
-          description: Journal prompts
+          description: Unauthorised
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  prompts:
-                    type: array
-                    items:
-                      type: string
-        '401':
-          description: Unauthorized
-        '500':
-          description: Server error
-
-  /gpt/learn/snippet:
-    post:
-      operationId: learnSnippet
-      summary: Short educational snippet for social or UI
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                theme:
-                  type: string
-                type:
-                  type: string
-              required: [theme]
-      responses:
-        '200':
-          description: Educational snippet
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  snippet:
-                    type: string
-                  keyPoints:
-                    type: array
-                    items:
-                      type: string
-                  canonicalUrl:
-                    type: string
-        '401':
-          description: Unauthorized
-        '500':
-          description: Server error
+                $ref: '#/components/schemas/ErrorResponse'

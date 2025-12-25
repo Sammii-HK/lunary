@@ -25,3 +25,28 @@ export function requireGptAuth(req: Request): Response | null {
 
   return null;
 }
+
+export function requireGptAuthJson(req: Request): Response | null {
+  const secret = process.env.LUNARY_GPT_SECRET;
+
+  if (!secret) {
+    return NextResponse.json({
+      ok: false,
+      error: 'auth_misconfigured',
+      message: 'LUNARY_GPT_SECRET is not set on the server.',
+    });
+  }
+
+  const authHeader = req.headers.get('authorization');
+  const expected = `Bearer ${secret}`;
+
+  if (!authHeader || authHeader !== expected) {
+    return NextResponse.json({
+      ok: false,
+      error: 'unauthorized',
+      message: 'Invalid or missing GPT secret.',
+    });
+  }
+
+  return null;
+}
