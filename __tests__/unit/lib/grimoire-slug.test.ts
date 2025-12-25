@@ -8,11 +8,11 @@ describe('resolveGrimoireSlug', () => {
     expect(result.matchType).toBe('exact');
   });
 
-  it('handles casing and whitespace via title match', () => {
+  it('maps planet names despite casing/spacing noise', () => {
     const result = resolveGrimoireSlug('  VeNuS  ');
 
     expect(result.slug).toBe('astronomy/planets/venus');
-    expect(result.matchType).toBe('title');
+    expect(result.matchType).toBe('keyword');
   });
 
   it('resolves alias matches', () => {

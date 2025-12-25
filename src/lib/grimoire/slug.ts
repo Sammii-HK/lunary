@@ -38,6 +38,17 @@ const ALIAS_MAP: Record<string, string> = {
   'mercury-retrograde': 'events/2025/mercury-retrograde',
 };
 
+const planetSlugMap = new Map<string, GrimoireEntry>();
+GRIMOIRE_SEARCH_INDEX.forEach((entry) => {
+  if (entry.slug.startsWith('astronomy/planets/')) {
+    const slugParts = entry.slug.split('/');
+    const planetKey = slugParts[slugParts.length - 1];
+    if (planetKey) {
+      planetSlugMap.set(normaliseSeed(planetKey), entry);
+    }
+  }
+});
+
 export function normaliseSeed(seed: string): string {
   const [rawBase, ...rest] = seed.split('#');
   const base = rawBase
@@ -150,21 +161,43 @@ function findBestKeywordMatch(normalisedSeed: string): GrimoireEntry | null {
   return bestEntry;
 }
 
-function titleMatchRank(entry: GrimoireEntry): number {
-  if (entry.slug.startsWith('glossary#')) return 3;
-  if (entry.slug.includes('#')) return 2;
-  return 1;
+function titleMatchRank(entry: GrimoireEntry, exactMatch: boolean): number {
+  const slug = entry.slug;
+  if (slug.includes('/planets/') && !slug.includes('/retrogrades/')) return 0;
+  if (!exactMatch && slug.startsWith('glossary#')) return 5;
+  if (slug.includes('/retrogrades/')) return 4;
+  if (slug.includes('#')) return 3;
+  return exactMatch ? 1 : 2;
 }
 
 function findBestTitleMatch(normalisedSeed: string): GrimoireEntry | null {
-  const matches = GRIMOIRE_SEARCH_INDEX.filter(
+  const exactMatches = GRIMOIRE_SEARCH_INDEX.filter(
     (entry) => normaliseSeed(entry.title) === normalisedSeed,
   );
 
-  if (matches.length === 0) return null;
+  if (exactMatches.length > 0) {
+    return exactMatches.sort((a, b) => {
+      const rankDiff = titleMatchRank(a, true) - titleMatchRank(b, true);
+      if (rankDiff !== 0) return rankDiff;
+      return a.slug.localeCompare(b.slug);
+    })[0]!;
+  }
 
-  return matches.sort((a, b) => {
-    const rankDiff = titleMatchRank(a) - titleMatchRank(b);
+  const partialMatches = GRIMOIRE_SEARCH_INDEX.filter((entry) => {
+    const normalisedTitle = normaliseSeed(entry.title);
+    return (
+      normalisedSeed &&
+      normalisedTitle !== normalisedSeed &&
+      normalisedTitle.includes(normalisedSeed)
+    );
+  });
+
+  if (partialMatches.length === 0) {
+    return null;
+  }
+
+  return partialMatches.sort((a, b) => {
+    const rankDiff = titleMatchRank(a, false) - titleMatchRank(b, false);
     if (rankDiff !== 0) return rankDiff;
     return a.slug.localeCompare(b.slug);
   })[0]!;
@@ -253,6 +286,15 @@ export function resolveGrimoireSlug(seed: string): ResolveGrimoireSlugResult {
     return {
       slug: aliasSlug,
       matchType: 'alias',
+      suggestions: buildSuggestions(normalisedSeed),
+    };
+  }
+
+  const planetSlugEntry = planetSlugMap.get(normalisedSeed);
+  if (planetSlugEntry) {
+    return {
+      slug: planetSlugEntry.slug,
+      matchType: 'keyword',
       suggestions: buildSuggestions(normalisedSeed),
     };
   }
