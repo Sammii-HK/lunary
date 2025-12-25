@@ -91,24 +91,34 @@ export const requestLocation = (): Promise<LocationData> => {
   });
 };
 
+const LOCATIONIQ_CLIENT_KEY =
+  process.env.NEXT_PUBLIC_LOCATIONIQ_API_KEY ||
+  process.env.LOCATIONIQ_API_KEY ||
+  '';
+const LOCATIONIQ_BASE_URL =
+  process.env.NEXT_PUBLIC_LOCATIONIQ_BASE_URL ||
+  process.env.LOCATIONIQ_BASE_URL ||
+  'https://us1.locationiq.com/v1';
+
 const reverseGeocode = async (
   lat: number,
   lng: number,
 ): Promise<Partial<LocationData>> => {
+  if (!LOCATIONIQ_CLIENT_KEY) {
+    console.warn(
+      '[LocationIQ] Missing NEXT_PUBLIC_LOCATIONIQ_API_KEY. Reverse geocoding disabled.',
+    );
+    return {};
+  }
+
   try {
-    // Use OpenStreetMap Nominatim API for reverse geocoding
     const response = await fetch(
-      `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&addressdetails=1&accept-language=en`,
-      {
-        headers: {
-          'User-Agent': 'Lunary-Astrology-App/1.0',
-        },
-      },
+      `${LOCATIONIQ_BASE_URL}/reverse?key=${LOCATIONIQ_CLIENT_KEY}&lat=${lat}&lon=${lng}&format=json&addressdetails=1&accept-language=en`,
     );
 
     if (response.ok) {
       const data = await response.json();
-      const address = data.address || {};
+      const address = data.address || data;
 
       const city =
         address.city ||
@@ -127,7 +137,7 @@ const reverseGeocode = async (
       };
     }
   } catch (error) {
-    console.warn('Reverse geocoding failed:', error);
+    console.warn('Reverse geocoding via LocationIQ failed:', error);
   }
 
   // Fallback to just timezone

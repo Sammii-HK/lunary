@@ -139,9 +139,23 @@ function getHouseForPlanet(longitude: number, houses: HouseCusp[]): number {
   return 1;
 }
 
+const locationCache = new Map<
+  string,
+  { latitude: number; longitude: number }
+>();
+
+const LOCATIONIQ_API_KEY =
+  process.env.LOCATIONIQ_API_KEY ||
+  process.env.NEXT_PUBLIC_LOCATIONIQ_API_KEY ||
+  '';
+const LOCATIONIQ_BASE_URL =
+  process.env.LOCATIONIQ_BASE_URL || 'https://us1.locationiq.com/v1';
+
 async function parseLocationToCoordinates(
   location: string,
 ): Promise<{ latitude: number; longitude: number } | null> {
+  if (!location?.trim()) return null;
+
   const coordMatch = location.match(/^(-?\d+\.?\d*),\s*(-?\d+\.?\d*)$/);
   if (coordMatch) {
     return {
@@ -149,6 +163,42 @@ async function parseLocationToCoordinates(
       longitude: parseFloat(coordMatch[2]),
     };
   }
+
+  const normalizedLocation = location.trim().toLowerCase();
+  if (locationCache.has(normalizedLocation)) {
+    return locationCache.get(normalizedLocation)!;
+  }
+
+  if (!LOCATIONIQ_API_KEY) {
+    console.warn(
+      '[LocationIQ] Missing API key. Set LOCATIONIQ_API_KEY (server) or NEXT_PUBLIC_LOCATIONIQ_API_KEY.',
+    );
+    return null;
+  }
+
+  try {
+    const response = await fetch(
+      `${LOCATIONIQ_BASE_URL}/search?key=${LOCATIONIQ_API_KEY}&format=json&limit=1&q=${encodeURIComponent(location)}`,
+    );
+
+    if (!response.ok) {
+      console.warn('LocationIQ geocoding failed', response.status);
+      return null;
+    }
+
+    const data = await response.json();
+    if (Array.isArray(data) && data.length > 0) {
+      const result = {
+        latitude: parseFloat(data[0].lat),
+        longitude: parseFloat(data[0].lon),
+      };
+      locationCache.set(normalizedLocation, result);
+      return result;
+    }
+  } catch (error) {
+    console.warn('Failed to geocode birth location via LocationIQ', error);
+  }
+
   return null;
 }
 
