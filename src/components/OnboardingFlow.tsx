@@ -1,6 +1,6 @@
 'use client';
 
-import { ReactNode, useState, useEffect } from 'react';
+import { ReactNode, useState, useEffect, useMemo } from 'react';
 import { useUser } from '@/context/UserContext';
 import { useAuthStatus } from './AuthStatus';
 import { useSubscription } from '@/hooks/useSubscription';
@@ -71,13 +71,29 @@ export function OnboardingFlow({
   const [showOptionalDetails, setShowOptionalDetails] = useState(false);
   const [showSkipWarning, setShowSkipWarning] = useState(false);
   const [signupTriggerActive, setSignupTriggerActive] = useState(false);
-  const onboardingSeenKey = user?.id
-    ? `lunary_onboarding_seen_${user.id}`
-    : 'lunary_onboarding_seen';
-  const baseOnboardingTriggerKey = 'lunary_onboarding_trigger';
-  const onboardingTriggerKey = user?.id
-    ? `${baseOnboardingTriggerKey}_${user.id}`
-    : baseOnboardingTriggerKey;
+  const {
+    seenKey: onboardingSeenKey,
+    triggerKey: onboardingTriggerKey,
+    baseTriggerKey: baseOnboardingTriggerKey,
+    cooldownKey: onboardingCooldownKey,
+    sessionKey: onboardingSessionKey,
+  } = useMemo(() => {
+    const hasUser = !!user?.id;
+    const userSuffix = hasUser ? `_${user.id}` : '';
+    return {
+      seenKey: `lunary_onboarding_seen${userSuffix}`,
+      triggerKey: hasUser
+        ? `lunary_onboarding_trigger_${user?.id}`
+        : 'lunary_onboarding_trigger',
+      baseTriggerKey: 'lunary_onboarding_trigger',
+      cooldownKey: hasUser
+        ? `lunary_onboarding_cooldown_${user?.id}`
+        : 'lunary_onboarding_cooldown',
+      sessionKey: hasUser
+        ? `lunary_onboarding_session_${user?.id}`
+        : 'lunary_onboarding_session',
+    };
+  }, [user?.id]);
   const isSubscribedOrTrial =
     simulateSubscribed ||
     subscription.isSubscribed ||
@@ -208,37 +224,64 @@ export function OnboardingFlow({
 
   useEffect(() => {
     const needsBirthDetails = !user?.birthday;
-    let shouldShow = false;
-
-    // Show onboarding for authenticated users who haven't added birth details
-    // Conditions:
-    // 1. User is logged in
-    // 2. User has NOT added their birthday yet
 
     if (forceOpen && previewMode) {
-      shouldShow = true;
-    } else if (forceOpen && !authState.loading && authState.isAuthenticated) {
-      shouldShow = true;
-    } else if (
+      setShowOnboarding(true);
+      return;
+    }
+
+    if (forceOpen && !authState.loading && authState.isAuthenticated) {
+      setShowOnboarding(true);
+      return;
+    }
+
+    if (
       authState.isAuthenticated &&
       !authState.loading &&
       needsBirthDetails &&
       signupTriggerActive
     ) {
+      if (typeof window !== 'undefined') {
+        const hasSeenThisSession = sessionStorage.getItem(onboardingSessionKey);
+        if (hasSeenThisSession) {
+          setShowOnboarding(false);
+          return;
+        }
+        const lastDismissedAt = localStorage.getItem(onboardingCooldownKey);
+        if (lastDismissedAt) {
+          const dismissedAt = Number(lastDismissedAt);
+          if (Number.isFinite(dismissedAt)) {
+            const oneDayMs = 24 * 60 * 60 * 1000;
+            if (Date.now() - dismissedAt < oneDayMs) {
+              setShowOnboarding(false);
+              return;
+            }
+          }
+        }
+      }
+
       const hasSeenOnboarding =
         typeof window === 'undefined'
           ? 'true'
           : localStorage.getItem(onboardingSeenKey);
-      shouldShow = !hasSeenOnboarding;
+      if (!hasSeenOnboarding) {
+        setShowOnboarding(true);
+        if (typeof window !== 'undefined') {
+          sessionStorage.setItem(onboardingSessionKey, 'true');
+        }
+        return;
+      }
     }
 
-    setShowOnboarding(shouldShow);
+    setShowOnboarding(false);
   }, [
     authState.isAuthenticated,
     authState.loading,
     user?.birthday,
     forceOpen,
     onboardingSeenKey,
+    onboardingCooldownKey,
+    onboardingSessionKey,
     previewMode,
     previewStep,
     signupTriggerActive,
@@ -252,6 +295,7 @@ export function OnboardingFlow({
       localStorage.setItem(onboardingSeenKey, 'true');
       localStorage.removeItem(onboardingTriggerKey);
       localStorage.removeItem(baseOnboardingTriggerKey);
+      sessionStorage.setItem(onboardingSessionKey, 'true');
     } catch (error) {
       console.error('[Onboarding] Failed to persist onboarding state:', error);
     }
@@ -398,6 +442,15 @@ export function OnboardingFlow({
     }
   };
 
+  const handleDismiss = () => {
+    if (!previewMode && typeof window !== 'undefined') {
+      sessionStorage.setItem(onboardingSessionKey, 'true');
+      localStorage.setItem(onboardingCooldownKey, String(Date.now()));
+    }
+    setShowSkipWarning(false);
+    setShowOnboarding(false);
+  };
+
   const handleNext = async () => {
     await trackStepCompletion(currentStep, false);
     if (currentStep === 'welcome') {
@@ -419,9 +472,9 @@ export function OnboardingFlow({
     <div className='fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4'>
       <div className='relative bg-zinc-900 border border-zinc-700 rounded-lg p-6 md:p-8 max-w-lg w-full shadow-xl max-h-[90vh] overflow-y-auto'>
         <button
-          onClick={handleSkip}
+          onClick={handleDismiss}
           className='absolute top-4 right-4 min-h-[48px] min-w-[48px] flex items-center justify-center text-zinc-400 hover:text-white transition-colors'
-          aria-label='Skip onboarding'
+          aria-label='Close onboarding'
         >
           <X className='w-5 h-5' />
         </button>
