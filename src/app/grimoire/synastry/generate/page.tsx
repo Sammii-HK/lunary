@@ -48,15 +48,8 @@ function PersonForm({
   onUseMyChart?: () => void;
   hasUserChart?: boolean;
 }) {
-  const breadcrumbItems = [
-    { name: 'Grimoire', url: '/grimoire' },
-    { name: 'Synastry', url: '/grimoire/synastry' },
-    { name: 'Generate', url: '/grimoire/synastry/generate' },
-  ];
-
   return (
     <div className='p-4 rounded-lg border border-zinc-800 bg-zinc-900/50'>
-      <GrimoireBreadcrumbs items={breadcrumbItems} />
       <div className='flex items-center justify-between mb-4'>
         <h3 className='text-lg font-medium text-zinc-100'>{label}</h3>
         {hasUserChart && onUseMyChart && (
@@ -177,6 +170,11 @@ function CompatibilityScore({ score }: { score: number }) {
 }
 
 export default function SynastryGeneratorPage() {
+  const breadcrumbItems = [
+    { name: 'Grimoire', url: '/grimoire' },
+    { name: 'Synastry', url: '/grimoire/synastry' },
+    { name: 'Generate', url: '/grimoire/synastry/generate' },
+  ];
   const { user } = useUser();
   const subscription = useSubscription();
   const hasAccess = hasBirthChartAccess(subscription.status, subscription.plan);
@@ -266,17 +264,7 @@ export default function SynastryGeneratorPage() {
     return (
       <div className='min-h-screen bg-zinc-950 text-zinc-100'>
         <div className='max-w-2xl mx-auto px-4 py-12'>
-          <nav className='text-sm text-zinc-400 mb-8'>
-            <Link href='/grimoire' className='hover:text-zinc-300'>
-              Grimoire
-            </Link>
-            <span className='mx-2'>/</span>
-            <Link href='/grimoire/synastry' className='hover:text-zinc-300'>
-              Synastry
-            </Link>
-            <span className='mx-2'>/</span>
-            <span className='text-zinc-300'>Generate</span>
-          </nav>
+          <GrimoireBreadcrumbs items={breadcrumbItems} />
 
           <div className='text-center py-12'>
             <Lock className='w-16 h-16 text-lunary-primary-400 mx-auto mb-6' />
@@ -303,17 +291,7 @@ export default function SynastryGeneratorPage() {
   return (
     <div className='min-h-screen bg-zinc-950 text-zinc-100'>
       <div className='max-w-4xl mx-auto px-4 py-12'>
-        <nav className='text-sm text-zinc-400 mb-8'>
-          <Link href='/grimoire' className='hover:text-zinc-300'>
-            Grimoire
-          </Link>
-          <span className='mx-2'>/</span>
-          <Link href='/grimoire/synastry' className='hover:text-zinc-300'>
-            Synastry
-          </Link>
-          <span className='mx-2'>/</span>
-          <span className='text-zinc-300'>Generate</span>
-        </nav>
+        <GrimoireBreadcrumbs items={breadcrumbItems} />
 
         <header className='mb-8 text-center'>
           <Heart className='w-12 h-12 text-lunary-rose mx-auto mb-4' />

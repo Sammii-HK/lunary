@@ -364,14 +364,6 @@ export default function ArchetypesGuidePage() {
       {renderJsonLd(articleSchema)}
       <GrimoireBreadcrumbs items={breadcrumbItems} />
 
-      <nav className='text-sm text-zinc-400 mb-8'>
-        <Link href='/grimoire' className='hover:text-lunary-primary-400'>
-          Grimoire
-        </Link>
-        <span className='mx-2'>→</span>
-        <span className='text-zinc-300'>Archetypes</span>
-      </nav>
-
       <header className='mb-12'>
         <h1 className='text-4xl md:text-5xl font-light text-zinc-100 mb-6'>
           The 12 Lunary Archetypes
