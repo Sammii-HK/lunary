@@ -19,12 +19,15 @@ interface BreadcrumbsProps {
   homeHref?: string;
   /** Force marketing home (/) regardless of auth */
   forceMarketingHome?: boolean;
+  /** Render schema - if false, no schema will be rendered */
+  renderSchema?: boolean;
 }
 
 export function Breadcrumbs({
   items,
   homeHref,
   forceMarketingHome = false,
+  renderSchema = false,
 }: BreadcrumbsProps) {
   const { isAuthenticated } = useAuthStatus();
 

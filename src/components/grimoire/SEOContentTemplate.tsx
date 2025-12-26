@@ -1,7 +1,4 @@
-'use client';
-
-import React, { useMemo } from 'react';
-import Link from 'next/link';
+import React from 'react';
 import { Breadcrumbs, BreadcrumbItem } from './Breadcrumbs';
 import {
   createArticleSchema,
@@ -11,6 +8,7 @@ import {
   renderJsonLd,
 } from '@/lib/schema';
 import { ParsedMarkdown } from '@/utils/markdown';
+import { NavParamLink } from '@/components/NavParamLink';
 
 /**
  * Format a URL segment into a human-readable label
@@ -165,12 +163,10 @@ export function SEOContentTemplate({
   childrenPosition = 'after-faqs',
 }: SEOContentTemplateProps) {
   // Auto-generate breadcrumbs from URL if not provided
-  const autoBreadcrumbs = useMemo(() => {
-    if (breadcrumbs && breadcrumbs.length > 0) {
-      return breadcrumbs;
-    }
-    return generateBreadcrumbsFromUrl(canonicalUrl);
-  }, [canonicalUrl, breadcrumbs]);
+  const autoBreadcrumbs =
+    breadcrumbs && breadcrumbs.length > 0
+      ? breadcrumbs
+      : generateBreadcrumbsFromUrl(canonicalUrl);
 
   const faqSchema = faqs ? createFAQPageSchema(faqs) : null;
 
@@ -219,15 +215,17 @@ export function SEOContentTemplate({
     caption: articleImageAlt,
   });
 
-  const breadcrumbSchema = useMemo(() => {
-    if (autoBreadcrumbs.length === 0) return null;
-    return createBreadcrumbSchema(
-      autoBreadcrumbs.map((crumb) => ({
-        name: crumb.label,
-        url: crumb.href || '',
-      })),
-    );
-  }, [autoBreadcrumbs]);
+  const breadcrumbSchema =
+    autoBreadcrumbs.length === 0
+      ? null
+      : createBreadcrumbSchema(
+          autoBreadcrumbs.map((crumb) => ({
+            name: crumb.label,
+            url: crumb.href
+              ? new URL(crumb.href, canonicalUrl).toString()
+              : canonicalUrl,
+          })),
+        );
 
   return (
     <article className='max-w-4xl mx-auto space-y-8 p-4 sm:p-6 overflow-x-hidden'>
@@ -239,12 +237,14 @@ export function SEOContentTemplate({
       {renderJsonLd(breadcrumbSchema)}
 
       {/* Breadcrumbs - auto-generated from URL if not provided */}
-      {autoBreadcrumbs.length > 0 && <Breadcrumbs items={autoBreadcrumbs} />}
+      {autoBreadcrumbs.length > 0 && (
+        <Breadcrumbs items={autoBreadcrumbs} renderSchema={false} />
+      )}
       {heroContent && <div className='mb-8'>{heroContent}</div>}
 
       {/* H1 */}
       <header className='mb-8'>
-        <h1 className='text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-light text-zinc-100 mb-4 break-words'>
+        <h1 className='text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-light text-zinc-100 mb-4 break-words'>
           {h1}
         </h1>
         {description && (
@@ -285,7 +285,7 @@ export function SEOContentTemplate({
       {/* What is X? - Featured Snippet Optimization */}
       {whatIs && (
         <section id='what-is' className='mb-8'>
-          <h2 className='text-md md:text-2xl  font-medium text-zinc-100 mb-3 break-words'>
+          <h2 className='text-md md:text-2xl font-medium text-zinc-100 mb-3 break-words'>
             {whatIs.question}
           </h2>
           <p className='what-is-answer text-zinc-300 leading-relaxed break-words'>
@@ -316,7 +316,7 @@ export function SEOContentTemplate({
       {/* Meaning Section */}
       {meaning && (
         <section id='meaning' className='overflow-x-hidden'>
-          <h2 className='text-md md:text-2xl  font-medium text-zinc-100 mb-4 break-words'>
+          <h2 className='text-md md:text-2xl font-medium text-zinc-100 mb-4 break-words'>
             Meaning
           </h2>
           <div className='prose prose-invert max-w-none break-words'>
@@ -328,7 +328,7 @@ export function SEOContentTemplate({
       {/* Emotional Themes */}
       {emotionalThemes && emotionalThemes.length > 0 && (
         <section className='overflow-x-hidden'>
-          <h2 className='text-md md:text-2xl  font-medium text-zinc-100 mb-4 break-words'>
+          <h2 className='text-md md:text-2xl font-medium text-zinc-100 mb-4 break-words'>
             Emotional Themes
           </h2>
           <ul className='space-y-2'>
@@ -348,7 +348,7 @@ export function SEOContentTemplate({
       {/* How to Work With This Energy */}
       {howToWorkWith && howToWorkWith.length > 0 && (
         <section id='how-to-work' className='overflow-x-hidden'>
-          <h2 className='text-md md:text-2xl  font-medium text-zinc-100 mb-4 break-words'>
+          <h2 className='text-md md:text-2xl font-medium text-zinc-100 mb-4 break-words'>
             How to Work With This Energy
           </h2>
           <div className='space-y-3'>
@@ -369,18 +369,18 @@ export function SEOContentTemplate({
       {/* Signs Most Affected */}
       {signsMostAffected && signsMostAffected.length > 0 && (
         <section className='overflow-x-hidden'>
-          <h2 className='text-md md:text-2xl  font-medium text-zinc-100 mb-4 break-words'>
+          <h2 className='text-md md:text-2xl font-medium text-zinc-100 mb-4 break-words'>
             Signs Most Affected
           </h2>
           <div className='flex flex-wrap gap-2'>
             {signsMostAffected.map((sign, index) => (
-              <Link
+              <NavParamLink
                 key={index}
                 href={`/grimoire/zodiac/${sign.toLowerCase()}`}
                 className='px-3 sm:px-4 py-2 bg-zinc-800/50 border border-zinc-700 rounded-lg text-zinc-300 hover:bg-zinc-700 hover:text-lunary-accent-300 transition-colors text-sm sm:text-base whitespace-nowrap'
               >
                 {sign}
-              </Link>
+              </NavParamLink>
             ))}
           </div>
         </section>
@@ -389,7 +389,7 @@ export function SEOContentTemplate({
       {/* Glyphs */}
       {glyphs && glyphs.length > 0 && (
         <section className='overflow-x-hidden'>
-          <h2 className='text-md md:text-2xl  font-medium text-zinc-100 mb-4 break-words'>
+          <h2 className='text-md md:text-2xl font-medium text-zinc-100 mb-4 break-words'>
             Symbols
           </h2>
           <div className='flex flex-wrap gap-4 text-3xl sm:text-4xl'>
@@ -405,7 +405,7 @@ export function SEOContentTemplate({
       {/* Symbolism */}
       {symbolism && (
         <section className='overflow-x-hidden'>
-          <h2 className='text-md md:text-2xl  font-medium text-zinc-100 mb-4 break-words'>
+          <h2 className='text-md md:text-2xl font-medium text-zinc-100 mb-4 break-words'>
             Symbolism Breakdown
           </h2>
           <div className='prose prose-invert max-w-none break-words'>
@@ -419,7 +419,7 @@ export function SEOContentTemplate({
       {/* Numerology */}
       {numerology && (
         <section className='overflow-x-hidden'>
-          <h2 className='text-md md:text-2xl  font-medium text-zinc-100 mb-4 break-words'>
+          <h2 className='text-md md:text-2xl font-medium text-zinc-100 mb-4 break-words'>
             Numerology & Astrology Correspondences
           </h2>
           <div className='prose prose-invert max-w-none break-words'>
@@ -433,7 +433,7 @@ export function SEOContentTemplate({
       {/* Astrology Correspondences */}
       {astrologyCorrespondences && (
         <section className='overflow-x-hidden'>
-          <h2 className='text-md md:text-2xl  font-medium text-zinc-100 mb-4 break-words'>
+          <h2 className='text-md md:text-2xl font-medium text-zinc-100 mb-4 break-words'>
             Astrological Correspondences
           </h2>
           <div className='prose prose-invert max-w-none break-words'>
@@ -494,7 +494,7 @@ export function SEOContentTemplate({
       {/* Example Placements */}
       {examplePlacements && examplePlacements.length > 0 && (
         <section className='overflow-x-hidden'>
-          <h2 className='text-md md:text-2xl  font-medium text-zinc-100 mb-4 break-words'>
+          <h2 className='text-md md:text-2xl font-medium text-zinc-100 mb-4 break-words'>
             Example Chart Placements
           </h2>
           <div className='space-y-3'>
@@ -515,7 +515,7 @@ export function SEOContentTemplate({
       {/* Rituals */}
       {rituals && rituals.length > 0 && (
         <section id='rituals' className='overflow-x-hidden'>
-          <h2 className='text-md md:text-2xl  font-medium text-zinc-100 mb-4 break-words'>
+          <h2 className='text-md md:text-2xl font-medium text-zinc-100 mb-4 break-words'>
             Rituals to Work With This Energy
           </h2>
           <div className='space-y-4'>
@@ -538,7 +538,7 @@ export function SEOContentTemplate({
       {/* Journal Prompts */}
       {journalPrompts && journalPrompts.length > 0 && (
         <section id='journal-prompts' className='overflow-x-hidden'>
-          <h2 className='text-md md:text-2xl  font-medium text-zinc-100 mb-4 break-words'>
+          <h2 className='text-md md:text-2xl font-medium text-zinc-100 mb-4 break-words'>
             Journal Prompts
           </h2>
           <div className='space-y-3'>
@@ -559,12 +559,12 @@ export function SEOContentTemplate({
       {/* Related Items */}
       {relatedItems && relatedItems.length > 0 && (
         <section className='overflow-x-hidden'>
-          <h2 className='text-md md:text-2xl  font-medium text-zinc-100 mb-4 break-words'>
+          <h2 className='text-md md:text-2xl font-medium text-zinc-100 mb-4 break-words'>
             Related Topics
           </h2>
           <div className='grid grid-cols-1 md:grid-cols-2 gap-3'>
             {relatedItems.map((item, index) => (
-              <Link
+              <NavParamLink
                 key={index}
                 href={item.href}
                 className='block p-4 bg-zinc-900/50 border border-zinc-800/50 rounded-lg hover:bg-zinc-800/50 hover:border-lunary-primary-600 transition-colors w-full overflow-x-hidden'
@@ -577,7 +577,7 @@ export function SEOContentTemplate({
                     {item.type}
                   </span>
                 </div>
-              </Link>
+              </NavParamLink>
             ))}
           </div>
         </section>
@@ -586,18 +586,18 @@ export function SEOContentTemplate({
       {/* Internal Links */}
       {internalLinks && internalLinks.length > 0 && (
         <section className='overflow-x-hidden'>
-          <h2 className='text-md md:text-2xl  font-medium text-zinc-100 mb-4 break-words'>
+          <h2 className='text-md md:text-2xl font-medium text-zinc-100 mb-4 break-words'>
             Explore More
           </h2>
           <div className='flex flex-wrap gap-3'>
             {internalLinks.map((link, index) => (
-              <Link
+              <NavParamLink
                 key={index}
                 href={link.href}
                 className='px-3 sm:px-4 py-2 bg-zinc-800/50 border border-zinc-700 rounded-lg text-zinc-300 hover:bg-zinc-700 hover:text-lunary-accent-300 transition-colors text-sm sm:text-base break-words'
               >
                 {link.text}
-              </Link>
+              </NavParamLink>
             ))}
           </div>
         </section>
@@ -606,15 +606,15 @@ export function SEOContentTemplate({
       {/* CTA */}
       {ctaText && ctaHref && (
         <section className='bg-gradient-to-r from-lunary-primary-900/30 to-lunary-highlight-900/30 border border-lunary-primary-700 rounded-lg p-6 sm:p-8 text-center overflow-x-hidden'>
-          <h2 className='text-md md:text-2xl  font-medium text-zinc-100 mb-3 break-words'>
+          <h2 className='text-md md:text-2xl font-medium text-zinc-100 mb-3 break-words'>
             {ctaText}
           </h2>
-          <Link
+          <NavParamLink
             href={ctaHref}
             className='inline-block px-5 sm:px-6 py-2 sm:py-3 bg-lunary-primary hover:bg-lunary-primary-400 text-white rounded-lg font-medium transition-colors text-sm sm:text-base'
           >
             Get Started
-          </Link>
+          </NavParamLink>
         </section>
       )}
 
@@ -631,67 +631,67 @@ export function SEOContentTemplate({
           astrological wisdom.
         </p>
         <div className='grid grid-cols-2 md:grid-cols-3 gap-2'>
-          <Link
+          <NavParamLink
             href='/birth-chart'
             className='px-3 py-2 text-sm bg-zinc-900/50 border border-zinc-800/50 rounded-lg text-zinc-300 hover:bg-zinc-800/50 hover:border-lunary-primary-600 transition-colors text-center'
           >
             Birth Chart
-          </Link>
-          <Link
+          </NavParamLink>
+          <NavParamLink
             href='/grimoire/zodiac'
             className='px-3 py-2 text-sm bg-zinc-900/50 border border-zinc-800/50 rounded-lg text-zinc-300 hover:bg-zinc-800/50 hover:border-lunary-primary-600 transition-colors text-center'
           >
             Zodiac Signs
-          </Link>
-          <Link
+          </NavParamLink>
+          <NavParamLink
             href='/grimoire/astronomy/planets'
             className='px-3 py-2 text-sm bg-zinc-900/50 border border-zinc-800/50 rounded-lg text-zinc-300 hover:bg-zinc-800/50 hover:border-lunary-primary-600 transition-colors text-center'
           >
             Planets
-          </Link>
-          <Link
+          </NavParamLink>
+          <NavParamLink
             href='/grimoire/tarot'
             className='px-3 py-2 text-sm bg-zinc-900/50 border border-zinc-800/50 rounded-lg text-zinc-300 hover:bg-zinc-800/50 hover:border-lunary-primary-600 transition-colors text-center'
           >
             Tarot
-          </Link>
-          <Link
+          </NavParamLink>
+          <NavParamLink
             href='/grimoire/crystals'
             className='px-3 py-2 text-sm bg-zinc-900/50 border border-zinc-800/50 rounded-lg text-zinc-300 hover:bg-zinc-800/50 hover:border-lunary-primary-600 transition-colors text-center'
           >
             Crystals
-          </Link>
-          <Link
+          </NavParamLink>
+          <NavParamLink
             href='/grimoire/moon/phases'
             className='px-3 py-2 text-sm bg-zinc-900/50 border border-zinc-800/50 rounded-lg text-zinc-300 hover:bg-zinc-800/50 hover:border-lunary-primary-600 transition-colors text-center'
           >
             Moon Phases
-          </Link>
-          <Link
+          </NavParamLink>
+          <NavParamLink
             href='/grimoire/houses/overview/first'
             className='px-3 py-2 text-sm bg-zinc-900/50 border border-zinc-800/50 rounded-lg text-zinc-300 hover:bg-zinc-800/50 hover:border-lunary-primary-600 transition-colors text-center'
           >
             Houses
-          </Link>
-          <Link
+          </NavParamLink>
+          <NavParamLink
             href='/grimoire/spells'
             className='px-3 py-2 text-sm bg-zinc-900/50 border border-zinc-800/50 rounded-lg text-zinc-300 hover:bg-zinc-800/50 hover:border-lunary-primary-600 transition-colors text-center'
           >
             Spells
-          </Link>
-          <Link
+          </NavParamLink>
+          <NavParamLink
             href='/horoscope'
             className='px-3 py-2 text-sm bg-zinc-900/50 border border-zinc-800/50 rounded-lg text-zinc-300 hover:bg-zinc-800/50 hover:border-lunary-primary-600 transition-colors text-center'
           >
             Horoscopes
-          </Link>
+          </NavParamLink>
         </div>
       </section>
 
       {/* FAQs */}
       {faqs && faqs.length > 0 && (
         <section id='faq' className='overflow-x-hidden'>
-          <h2 className='text-md md:text-2xl  font-medium text-zinc-100 mb-6 break-words'>
+          <h2 className='text-md md:text-2xl font-medium text-zinc-100 mb-6 break-words'>
             Frequently Asked Questions
           </h2>
           <div className='space-y-4'>

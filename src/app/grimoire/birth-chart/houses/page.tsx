@@ -2,8 +2,8 @@ import { Metadata } from 'next';
 import Link from 'next/link';
 import { ExploreGrimoire } from '@/components/grimoire/ExploreGrimoire';
 import { Compass } from 'lucide-react';
+import { GrimoireBreadcrumbs } from '@/components/grimoire/GrimoireBreadcrumbs';
 
-import { createBreadcrumbSchema, renderJsonLd } from '@/lib/schema';
 const houses = [
   { number: 1, name: 'First House', theme: 'Self & Identity' },
   { number: 2, name: 'Second House', theme: 'Resources & Values' },
@@ -60,15 +60,15 @@ export const metadata: Metadata = {
 };
 
 export default function BirthChartHousesIndexPage() {
-  const breadcrumbSchema = createBreadcrumbSchema([
+  const breadcrumbItems = [
     { name: 'Grimoire', url: '/grimoire' },
     { name: 'Birth Chart', url: '/grimoire/birth-chart' },
     { name: 'Houses', url: '/grimoire/birth-chart/houses' },
-  ]);
+  ];
 
   return (
     <div className='p-4 md:p-6 lg:p-8 xl:p-10 min-h-full'>
-      {renderJsonLd(breadcrumbSchema)}
+      <GrimoireBreadcrumbs items={breadcrumbItems} />
       <div className='max-w-5xl mx-auto'>
         <div className='text-center mb-12'>
           <div className='flex justify-center mb-4'>

@@ -24,8 +24,8 @@ import {
   Lock,
 } from 'lucide-react';
 import { SmartTrialButton } from '@/components/SmartTrialButton';
+import { GrimoireBreadcrumbs } from '@/components/grimoire/GrimoireBreadcrumbs';
 
-import { createBreadcrumbSchema, renderJsonLd } from '@/lib/schema';
 interface PersonData {
   name: string;
   birthDate: string;
@@ -48,15 +48,15 @@ function PersonForm({
   onUseMyChart?: () => void;
   hasUserChart?: boolean;
 }) {
-  const breadcrumbSchema = createBreadcrumbSchema([
+  const breadcrumbItems = [
     { name: 'Grimoire', url: '/grimoire' },
     { name: 'Synastry', url: '/grimoire/synastry' },
     { name: 'Generate', url: '/grimoire/synastry/generate' },
-  ]);
+  ];
 
   return (
     <div className='p-4 rounded-lg border border-zinc-800 bg-zinc-900/50'>
-      {renderJsonLd(breadcrumbSchema)}
+      <GrimoireBreadcrumbs items={breadcrumbItems} />
       <div className='flex items-center justify-between mb-4'>
         <h3 className='text-lg font-medium text-zinc-100'>{label}</h3>
         {hasUserChart && onUseMyChart && (
