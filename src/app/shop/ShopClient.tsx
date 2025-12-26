@@ -129,12 +129,12 @@ export function ShopClient({
 
   return (
     <div className='min-h-screen bg-lunary-bg'>
-      <div className='container mx-auto px-4 py-12 max-w-7xl'>
+      <div className='container mx-auto px-4 py-8 md:py-12 max-w-7xl'>
         <header className='text-center mb-12'>
-          <h1 className='text-4xl md:text-5xl font-light text-white mb-4'>
+          <h1 className='text-2xl md:text-5xl font-light text-white mb-4'>
             Digital Shop
           </h1>
-          <p className='text-lg text-white/60 max-w-2xl mx-auto'>
+          <p className='text-base md:text-lg text-white/60 max-w-2xl mx-auto'>
             Curated packs of rituals, guides, and cosmic wisdom to deepen your
             practice. Instant access, beautifully crafted, forever yours.
           </p>

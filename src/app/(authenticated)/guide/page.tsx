@@ -770,7 +770,7 @@ function BookOfShadowsContent() {
             </p> */}
           </header>
 
-          <main className='flex flex-1 flex-col items-center justify-center gap-6'>
+          <div className='flex flex-1 flex-col items-center justify-center gap-6'>
             <div className='rounded-3xl border border-zinc-800/60 bg-zinc-950/60 backdrop-blur p-8 md:p-12 text-center max-w-lg'>
               <h2 className='text-2xl font-light text-zinc-50 mb-1'>
                 Sign in to access your Astral Guide
@@ -801,7 +801,7 @@ function BookOfShadowsContent() {
                 </Button>
               </div>
             </div>
-          </main>
+          </div>
 
           {showAuthModal && (
             <div className='fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4'>

@@ -63,7 +63,9 @@ export default function AuthPage() {
           <div className='text-center mb-8'>
             <div className='flex items-center justify-center gap-3 mb-2'>
               <Logo size={48} />
-              <h1 className='text-4xl font-bold text-lunary-accent'>Lunary</h1>
+              <h1 className='text-3xl md:text-4xl font-bold text-lunary-accent'>
+                Lunary
+              </h1>
             </div>
             <p className='text-zinc-400'>Your Personal Cosmic Journey</p>
           </div>

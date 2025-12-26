@@ -7,6 +7,10 @@ const config: Config = {
   ],
   theme: {
     extend: {
+      screens: {
+        // Custom breakpoint so marketing nav switches to "desktop" around ~900px.
+        marketing: '900px',
+      },
       colors: {
         lunary: {
           // Backgrounds

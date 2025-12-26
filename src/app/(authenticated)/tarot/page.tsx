@@ -680,7 +680,7 @@ const TarotReadings = () => {
 
         <div className='space-y-6'>
           <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-6 space-y-6'>
-            <h2 className='text-md md:text-xl font-medium text-zinc-100'>
+            <h2 className='text-lg md:text-xl font-medium text-zinc-100'>
               Your Cosmic Reading
             </h2>
 
@@ -690,7 +690,7 @@ const TarotReadings = () => {
                   Daily Card
                 </h3>
                 <p
-                  className='text-md md:text-lg font-medium text-zinc-100 mb-1 cursor-pointer hover:text-lunary-primary-300 transition-colors'
+                  className='text-base md:text-lg font-medium text-zinc-100 mb-1 cursor-pointer hover:text-lunary-primary-300 transition-colors'
                   onClick={() => {
                     const card = getTarotCardByName(generalTarot.daily.name);
                     if (card) setSelectedCard(card);

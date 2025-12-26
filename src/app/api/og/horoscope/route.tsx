@@ -7,6 +7,7 @@ import {
   OGContentCenter,
   OGFooter,
   createOGResponse,
+  OGImageSize,
   formatOGDate,
 } from '../../../../../utils/og/base';
 
@@ -16,6 +17,21 @@ export const revalidate = 86400;
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
   const dateParam = searchParams.get('date');
+  const signParam = searchParams.get('sign');
+  const monthParam = searchParams.get('month');
+  const yearParam = searchParams.get('year');
+  const sizeParam = searchParams.get('size');
+  const showDateParam = searchParams.get('showDate');
+
+  const allowedSizes: OGImageSize[] = [
+    'square',
+    'landscape',
+    'portrait',
+    'story',
+  ];
+  const size: OGImageSize = allowedSizes.includes(sizeParam as OGImageSize)
+    ? (sizeParam as OGImageSize)
+    : 'landscape';
 
   let targetDate: Date;
   if (dateParam) {
@@ -25,15 +41,22 @@ export async function GET(request: NextRequest) {
     targetDate = new Date(todayStr + 'T12:00:00Z');
   }
 
-  const formattedDate = formatOGDate(targetDate);
+  const showDate = showDateParam === 'true' || Boolean(dateParam);
+  const formattedDate = showDate ? formatOGDate(targetDate) : undefined;
 
   let horoscopeSnippet: string;
-  try {
-    horoscopeSnippet = getGeneralHoroscope(targetDate).reading;
-  } catch (error) {
-    console.error('Error generating horoscope:', error);
+  const isMonthly = Boolean(signParam && monthParam && yearParam && !dateParam);
+  if (isMonthly) {
     horoscopeSnippet =
-      "Trust your inner wisdom and embrace today's cosmic possibilities";
+      'Monthly horoscope preview • Open Lunary for the full reading';
+  } else {
+    try {
+      horoscopeSnippet = getGeneralHoroscope(targetDate).reading;
+    } catch (error) {
+      console.error('Error generating horoscope:', error);
+      horoscopeSnippet =
+        "Trust your inner wisdom and embrace today's cosmic possibilities";
+    }
   }
 
   const dayVariation =
@@ -48,9 +71,15 @@ export async function GET(request: NextRequest) {
 
   const robotoFont = await loadGoogleFont(request);
 
+  const headlineParts = [
+    signParam ? `${signParam} Horoscope` : 'Daily Horoscope',
+    yearParam && monthParam ? `${monthParam}/${yearParam}` : null,
+  ].filter(Boolean);
+  const headline = headlineParts.join(' • ');
+
   return createOGResponse(
     <OGWrapper theme={{ background: themes[dayVariation] }}>
-      <OGHeader title='Daily Guidance' fontSize={24} />
+      <OGHeader title={headline} fontSize={24} />
 
       <OGContentCenter>
         <div
@@ -71,7 +100,7 @@ export async function GET(request: NextRequest) {
       <OGFooter date={formattedDate} />
     </OGWrapper>,
     {
-      size: 'square',
+      size,
       fonts: robotoFont
         ? [{ name: 'Roboto Mono', data: robotoFont, style: 'normal' as const }]
         : [],

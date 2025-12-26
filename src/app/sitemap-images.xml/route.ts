@@ -29,7 +29,7 @@ function generateImageEntries(): ImageEntry[] {
     const signName = sign.charAt(0).toUpperCase() + sign.slice(1);
     entries.push({
       pageUrl: `/grimoire/zodiac/${sign}`,
-      imageUrl: `${BASE_URL}/api/og/cosmic?title=${encodeURIComponent(signName)}`,
+      imageUrl: `${BASE_URL}/api/og/thematic?category=zodiac&slug=${encodeURIComponent(sign)}&title=${encodeURIComponent(signName)}&format=landscape`,
       caption: `${signName} Zodiac Sign - Lunary Astrology Guide`,
       title: `${signName} Zodiac Sign`,
     });
@@ -39,7 +39,7 @@ function generateImageEntries(): ImageEntry[] {
     const planetName = planet.charAt(0).toUpperCase() + planet.slice(1);
     entries.push({
       pageUrl: `/grimoire/astronomy/planets/${planet}`,
-      imageUrl: `${BASE_URL}/api/og/cosmic?title=${encodeURIComponent(planetName)}`,
+      imageUrl: `${BASE_URL}/api/og/thematic?category=planetary&slug=${encodeURIComponent(planet)}&title=${encodeURIComponent(planetName)}&format=landscape`,
       caption: `${planetName} in Astrology - Lunary Guide`,
       title: `${planetName} in Astrology`,
     });
@@ -74,7 +74,7 @@ function generateImageEntries(): ImageEntry[] {
     const slug = card.toLowerCase().replace(/\s+/g, '-');
     entries.push({
       pageUrl: `/grimoire/tarot/${slug}`,
-      imageUrl: `${BASE_URL}/api/og/cosmic?title=${encodeURIComponent(card)}`,
+      imageUrl: `${BASE_URL}/api/og/thematic?category=tarot&slug=${encodeURIComponent(slug)}&title=${encodeURIComponent(card)}&format=landscape`,
       caption: `${card} Tarot Card Meaning - Lunary`,
       title: card,
     });
@@ -98,7 +98,7 @@ function generateImageEntries(): ImageEntry[] {
       const slug = fullName.toLowerCase().replace(/\s+/g, '-');
       entries.push({
         pageUrl: `/grimoire/tarot/${slug}`,
-        imageUrl: `${BASE_URL}/api/og/cosmic?title=${encodeURIComponent(fullName)}`,
+        imageUrl: `${BASE_URL}/api/og/thematic?category=tarot&slug=${encodeURIComponent(slug)}&title=${encodeURIComponent(fullName)}&format=landscape`,
         caption: `${fullName} Tarot Card Meaning - Lunary`,
         title: fullName,
       });
@@ -109,7 +109,7 @@ function generateImageEntries(): ImageEntry[] {
     const slug = crystal.name.toLowerCase().replace(/\s+/g, '-');
     entries.push({
       pageUrl: `/grimoire/crystals/${slug}`,
-      imageUrl: `${BASE_URL}/api/og/cosmic?title=${encodeURIComponent(crystal.name)}`,
+      imageUrl: `${BASE_URL}/api/og/thematic?category=crystals&slug=${encodeURIComponent(slug)}&title=${encodeURIComponent(crystal.name)}&format=landscape`,
       caption: `${crystal.name} Crystal Meaning & Properties - Lunary`,
       title: crystal.name,
     });

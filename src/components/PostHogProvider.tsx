@@ -162,7 +162,7 @@ function PostHogProviderContent({ children }: { children: React.ReactNode }) {
         }
       });
     });
-  }, [hasConsent]);
+  }, [hasConsent, isAdminHost, isAdminPath]);
 
   useEffect(() => {
     if (hasConsent === false && posthogRef.current && initializedRef.current) {
@@ -201,7 +201,7 @@ function PostHogProviderContent({ children }: { children: React.ReactNode }) {
         console.error('[PostHog] Failed to capture pageview:', error);
       }
     }
-  }, [pathname, searchParams, posthogAvailable]);
+  }, [pathname, searchParams, posthogAvailable, isAdminHost, isAdminPath]);
 
   return <>{children}</>;
 }

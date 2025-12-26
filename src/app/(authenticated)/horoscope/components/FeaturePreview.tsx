@@ -21,11 +21,11 @@ export function FeaturePreview({
   return (
     <div>
       <div className='flex justify-between items-center mb-4'>
-        <h2 className='text-md md:text-lg font-medium text-zinc-100'>
+        <h2 className='text-base md:text-lg font-medium text-zinc-100'>
           {title}
         </h2>
         <div className='px-3 rounded-lg border border-lunary-primary-700 bg-lunary-primary-950 flex items-center justify-center'>
-          <span className='text-[8px] font-medium text-lunary-accent-300 no-wrap'>
+          <span className='text-[8px] font-medium text-lunary-accent-300 whitespace-nowrap'>
             Personalised Feature
           </span>
         </div>

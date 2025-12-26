@@ -56,15 +56,15 @@ export default function MoonCalendarHubPage() {
   return (
     <div className='min-h-screen bg-zinc-950 text-zinc-100'>
       {renderJsonLd(itemListSchema)}
-      <div className='max-w-5xl mx-auto px-4 py-12'>
+      <div className='max-w-5xl mx-auto px-4 py-8 md:py-12'>
         <Breadcrumbs items={[{ label: 'Moon Calendar' }]} />
 
         <header className='mb-12'>
           <div className='flex items-center gap-4 mb-4'>
             <Moon className='w-10 h-10 text-lunary-secondary-400' />
-            <h1 className='text-4xl md:text-5xl font-light'>Moon Calendar</h1>
+            <h1 className='text-2xl md:text-5xl font-light'>Moon Calendar</h1>
           </div>
-          <p className='text-xl text-zinc-400 leading-relaxed max-w-3xl'>
+          <p className='text-base md:text-xl text-zinc-400 leading-relaxed max-w-3xl'>
             Track the lunar cycle with complete moon phase calendars from 2025
             through 2030. Know when every new moon, full moon, and quarter phase
             occurs to align your intentions with lunar energy.

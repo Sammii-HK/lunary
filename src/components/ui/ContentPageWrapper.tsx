@@ -38,16 +38,16 @@ export function ContentPageWrapper({
   maxWidth = '4xl',
   showFooter = true,
   className = '',
-  padding = 'px-4 py-12',
+  padding = 'px-4 py-8 md:py-12',
   background = 'bg-zinc-950',
 }: ContentPageWrapperProps) {
   return (
     <div className={`min-h-screen ${background} text-zinc-100 flex flex-col`}>
-      <main
+      <div
         className={`${maxWidthClasses[maxWidth]} mx-auto ${padding} ${className}`}
       >
         {children}
-      </main>
+      </div>
       {showFooter && (
         <div className='mt-auto'>
           <MarketingFooter />

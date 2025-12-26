@@ -442,7 +442,7 @@ export default function BookOfShadowsPage() {
         </div>
       </header>
 
-      <main className='px-4 py-6'>
+      <div className='px-4 py-6'>
         {activeTab === 'journal' && (
           <div className='space-y-4'>
             <LifeThemeBanner className='mb-2' />
@@ -584,7 +584,7 @@ export default function BookOfShadowsPage() {
             <PremiumPathway variant='shadow' className='mt-6' />
           </div>
         )}
-      </main>
+      </div>
     </div>
   );
 }

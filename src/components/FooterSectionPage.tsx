@@ -24,7 +24,9 @@ export function FooterSectionPage({
       <MarketingBreadcrumbs />
 
       <header className='space-y-3'>
-        <h1 className='text-3xl font-semibold text-white'>{title}</h1>
+        <h1 className='text-2xl md:text-3xl font-semibold text-white'>
+          {title}
+        </h1>
         {description && (
           <p className='text-zinc-300 max-w-2xl'>{description}</p>
         )}

@@ -6,6 +6,7 @@ import {
   OGContentCenter,
   createOGResponse,
 } from '../../../../../../utils/og/base';
+import { createSectionGradient } from '../../../../../../utils/og/gradients';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -147,6 +148,66 @@ const sectionData: Record<
     subtitle: 'North Node • South Node • Destiny',
     color: '#6366f1',
   },
+  astrology: {
+    title: 'Astrology',
+    emoji: '✨',
+    subtitle: 'Signs • Houses • Aspects',
+    color: '#a855f7',
+  },
+  astronomy: {
+    title: 'Astronomy',
+    emoji: '🔭',
+    subtitle: 'Planets • Retrogrades • Sky Events',
+    color: '#3b82f6',
+  },
+  compatibility: {
+    title: 'Compatibility',
+    emoji: '💞',
+    subtitle: 'Synastry • Matches • Love',
+    color: '#ec4899',
+  },
+  transits: {
+    title: 'Transits',
+    emoji: '🌌',
+    subtitle: 'Current Sky • Timing • Meaning',
+    color: '#6366f1',
+  },
+  placements: {
+    title: 'Placements',
+    emoji: '📍',
+    subtitle: 'Planets in Signs • Interpretations',
+    color: '#10b981',
+  },
+  cusps: {
+    title: 'Cusps',
+    emoji: '⚡',
+    subtitle: 'Zodiac Edges • Blended Energies',
+    color: '#f59e0b',
+  },
+  guides: {
+    title: 'Guides',
+    emoji: '📚',
+    subtitle: 'Beginner-Friendly • Step by Step',
+    color: '#8b5cf6',
+  },
+  practices: {
+    title: 'Practices',
+    emoji: '🧿',
+    subtitle: 'Rituals • Tools • Daily Work',
+    color: '#14b8a6',
+  },
+  spells: {
+    title: 'Spells',
+    emoji: '🪄',
+    subtitle: 'Intentions • Timing • Recipes',
+    color: '#f97316',
+  },
+  synastry: {
+    title: 'Synastry',
+    emoji: '💫',
+    subtitle: 'Relationship Astrology • Dynamics',
+    color: '#6366f1',
+  },
 };
 
 const defaultSection = {
@@ -170,7 +231,7 @@ export async function GET(
     console.error('Failed to load font:', error);
   }
 
-  const background = `linear-gradient(135deg, #0f172a 0%, #1e293b 30%, ${data.color}40 70%, #1e1b2e 100%)`;
+  const background = createSectionGradient(data.color);
 
   return createOGResponse(
     <OGWrapper theme={{ background }}>

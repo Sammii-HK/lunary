@@ -123,14 +123,14 @@ export default function TransitsHubPage() {
     <div className='min-h-screen bg-zinc-950 text-zinc-100'>
       {renderJsonLd(itemListSchema)}
       {renderJsonLd(faqSchema)}
-      <div className='max-w-5xl mx-auto px-4 py-12'>
+      <div className='max-w-5xl mx-auto px-4 py-8 md:py-12'>
         <Breadcrumbs items={[{ label: 'Transits' }]} />
 
         <header className='mb-12'>
-          <h1 className='text-4xl md:text-5xl font-light mb-4'>
+          <h1 className='text-2xl md:text-5xl font-light mb-4'>
             Astrological Transit Calendar
           </h1>
-          <p className='text-xl text-zinc-400 leading-relaxed max-w-3xl'>
+          <p className='text-base md:text-xl text-zinc-400 leading-relaxed max-w-3xl'>
             Track every major cosmic event from 2025-2030. Retrogrades,
             eclipses, moon phases, planetary ingresses—all dates freely
             available to help you plan with cosmic awareness.
