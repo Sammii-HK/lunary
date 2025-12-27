@@ -1,6 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { sql } from '@vercel/postgres';
 import { getPostHogSignupTrends } from '@/lib/posthog-server';
-import { resolveDateRange } from '@/lib/analytics/date-range';
+import { resolveDateRange, formatTimestamp } from '@/lib/analytics/date-range';
+
+const TEST_EMAIL_PATTERN = '%@test.lunary.app';
+const TEST_EMAIL_EXACT = 'test@test.lunary.app';
 
 export async function GET(request: NextRequest) {
   try {
@@ -11,11 +15,16 @@ export async function GET(request: NextRequest) {
       | 'month';
     const range = resolveDateRange(searchParams, 30);
 
-    const trends = await getPostHogSignupTrends(
+    const posthogTrends = await getPostHogSignupTrends(
       range.start,
       range.end,
       granularity,
     );
+
+    const trends =
+      posthogTrends.length > 0
+        ? posthogTrends
+        : await getSignupTrendsFromDb(range.start, range.end, granularity);
 
     // Calculate growth rate
     let growthRate = 0;
@@ -36,7 +45,7 @@ export async function GET(request: NextRequest) {
       trends,
       growthRate: Number(growthRate.toFixed(2)),
       totalSignups: trends.reduce((sum, t) => sum + t.signups, 0),
-      source: 'posthog',
+      source: posthogTrends.length > 0 ? 'posthog' : 'conversion_events',
     });
   } catch (error) {
     console.error('[analytics/user-growth] Failed to load metrics', error);
@@ -50,4 +59,44 @@ export async function GET(request: NextRequest) {
       { status: 500 },
     );
   }
+}
+
+async function getSignupTrendsFromDb(
+  startDate: Date,
+  endDate: Date,
+  granularity: 'day' | 'week' | 'month',
+) {
+  const dateTrunc =
+    granularity === 'week'
+      ? "DATE_TRUNC('week', created_at)"
+      : granularity === 'month'
+        ? "DATE_TRUNC('month', created_at)"
+        : 'DATE(created_at)';
+
+  const result = await sql.query(
+    `
+      SELECT ${dateTrunc} as date, COUNT(DISTINCT user_id) as signups
+      FROM conversion_events
+      WHERE event_type = 'signup'
+        AND created_at >= $1
+        AND created_at <= $2
+        AND (user_email IS NULL OR (user_email NOT LIKE $3 AND user_email != $4))
+      GROUP BY ${dateTrunc}
+      ORDER BY date ASC
+    `,
+    [
+      formatTimestamp(startDate),
+      formatTimestamp(endDate),
+      TEST_EMAIL_PATTERN,
+      TEST_EMAIL_EXACT,
+    ],
+  );
+
+  return result.rows.map((row) => ({
+    date:
+      row.date instanceof Date
+        ? row.date.toISOString().split('T')[0]
+        : String(row.date),
+    signups: Number(row.signups || 0),
+  }));
 }

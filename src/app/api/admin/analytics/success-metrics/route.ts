@@ -112,10 +112,15 @@ export async function GET(request: NextRequest) {
       SELECT COUNT(*) AS total_conversions
       FROM analytics_conversions
       WHERE created_at BETWEEN ${formatTimestamp(range.start)} AND ${formatTimestamp(range.end)}
-        AND user_id NOT IN (
-          SELECT DISTINCT user_id FROM subscriptions WHERE user_email LIKE ${TEST_EMAIL_PATTERN} OR user_email = ${TEST_EMAIL_EXACT}
-          UNION
-          SELECT DISTINCT user_id FROM conversion_events WHERE user_email LIKE ${TEST_EMAIL_PATTERN} OR user_email = ${TEST_EMAIL_EXACT}
+        AND NOT EXISTS (
+          SELECT 1 FROM subscriptions s
+          WHERE s.user_id = analytics_conversions.user_id
+            AND (s.user_email LIKE ${TEST_EMAIL_PATTERN} OR s.user_email = ${TEST_EMAIL_EXACT})
+        )
+        AND NOT EXISTS (
+          SELECT 1 FROM conversion_events ce
+          WHERE ce.user_id = analytics_conversions.user_id
+            AND (ce.user_email LIKE ${TEST_EMAIL_PATTERN} OR ce.user_email = ${TEST_EMAIL_EXACT})
         )
     `;
     const totalConversions = Number(
@@ -131,10 +136,15 @@ export async function GET(request: NextRequest) {
       SELECT COUNT(*) AS total_conversions
       FROM analytics_conversions
       WHERE created_at BETWEEN ${formatTimestamp(prevRangeStart)} AND ${formatTimestamp(prevRangeEnd)}
-        AND user_id NOT IN (
-          SELECT DISTINCT user_id FROM subscriptions WHERE user_email LIKE ${TEST_EMAIL_PATTERN} OR user_email = ${TEST_EMAIL_EXACT}
-          UNION
-          SELECT DISTINCT user_id FROM conversion_events WHERE user_email LIKE ${TEST_EMAIL_PATTERN} OR user_email = ${TEST_EMAIL_EXACT}
+        AND NOT EXISTS (
+          SELECT 1 FROM subscriptions s
+          WHERE s.user_id = analytics_conversions.user_id
+            AND (s.user_email LIKE ${TEST_EMAIL_PATTERN} OR s.user_email = ${TEST_EMAIL_EXACT})
+        )
+        AND NOT EXISTS (
+          SELECT 1 FROM conversion_events ce
+          WHERE ce.user_id = analytics_conversions.user_id
+            AND (ce.user_email LIKE ${TEST_EMAIL_PATTERN} OR ce.user_email = ${TEST_EMAIL_EXACT})
         )
     `;
     const prevTotalConversions = Number(
@@ -367,10 +377,15 @@ export async function GET(request: NextRequest) {
       WHERE completed_at IS NOT NULL
         AND completed_at BETWEEN ${formatTimestamp(range.start)} AND ${formatTimestamp(range.end)}
         AND message_count > 0
-        AND user_id NOT IN (
-          SELECT DISTINCT user_id FROM subscriptions WHERE user_email LIKE ${TEST_EMAIL_PATTERN} OR user_email = ${TEST_EMAIL_EXACT}
-          UNION
-          SELECT DISTINCT user_id FROM conversion_events WHERE user_email LIKE ${TEST_EMAIL_PATTERN} OR user_email = ${TEST_EMAIL_EXACT}
+        AND NOT EXISTS (
+          SELECT 1 FROM subscriptions s
+          WHERE s.user_id = analytics_ai_usage.user_id
+            AND (s.user_email LIKE ${TEST_EMAIL_PATTERN} OR s.user_email = ${TEST_EMAIL_EXACT})
+        )
+        AND NOT EXISTS (
+          SELECT 1 FROM conversion_events ce
+          WHERE ce.user_id = analytics_ai_usage.user_id
+            AND (ce.user_email LIKE ${TEST_EMAIL_PATTERN} OR ce.user_email = ${TEST_EMAIL_EXACT})
         )
     `;
     const aiMessages = Number(aiMessagesResult.rows[0]?.total_messages || 0);
@@ -383,10 +398,15 @@ export async function GET(request: NextRequest) {
       WHERE completed_at IS NOT NULL
         AND completed_at BETWEEN ${formatTimestamp(prevRangeStart)} AND ${formatTimestamp(prevRangeEnd)}
         AND message_count > 0
-        AND user_id NOT IN (
-          SELECT DISTINCT user_id FROM subscriptions WHERE user_email LIKE ${TEST_EMAIL_PATTERN} OR user_email = ${TEST_EMAIL_EXACT}
-          UNION
-          SELECT DISTINCT user_id FROM conversion_events WHERE user_email LIKE ${TEST_EMAIL_PATTERN} OR user_email = ${TEST_EMAIL_EXACT}
+        AND NOT EXISTS (
+          SELECT 1 FROM subscriptions s
+          WHERE s.user_id = analytics_ai_usage.user_id
+            AND (s.user_email LIKE ${TEST_EMAIL_PATTERN} OR s.user_email = ${TEST_EMAIL_EXACT})
+        )
+        AND NOT EXISTS (
+          SELECT 1 FROM conversion_events ce
+          WHERE ce.user_id = analytics_ai_usage.user_id
+            AND (ce.user_email LIKE ${TEST_EMAIL_PATTERN} OR ce.user_email = ${TEST_EMAIL_EXACT})
         )
     `;
     const prevAiMessages = Number(

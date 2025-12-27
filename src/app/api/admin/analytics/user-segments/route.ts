@@ -58,7 +58,14 @@ export async function GET(request: NextRequest) {
           )
             AND created_at >= ${formatTimestamp(range.start)}
             AND created_at <= ${formatTimestamp(range.end)}
-            AND event_type IN ('app_open', 'tarot_pull', 'grimoire_save', 'birth_chart_viewed', 'horoscope_viewed')
+            AND event_type IN (
+              'horoscope_viewed',
+              'tarot_viewed',
+              'birth_chart_viewed',
+              'personalized_tarot_viewed',
+              'personalized_horoscope_viewed',
+              'crystal_recommendations_viewed'
+            )
         `
         : { rows: [{ dau: 0, active_days: 0, total_events: 0 }] };
 
@@ -76,7 +83,14 @@ export async function GET(request: NextRequest) {
           )
             AND created_at >= ${formatTimestamp(range.start)}
             AND created_at <= ${formatTimestamp(range.end)}
-            AND event_type IN ('app_open', 'tarot_pull', 'grimoire_save', 'birth_chart_viewed', 'horoscope_viewed')
+            AND event_type IN (
+              'horoscope_viewed',
+              'tarot_viewed',
+              'birth_chart_viewed',
+              'personalized_tarot_viewed',
+              'personalized_horoscope_viewed',
+              'crystal_recommendations_viewed'
+            )
         `
         : { rows: [{ dau: 0, active_days: 0, total_events: 0 }] };
 
@@ -116,7 +130,14 @@ export async function GET(request: NextRequest) {
           )
             AND created_at >= ${formatTimestamp(range.start)}
             AND created_at <= ${formatTimestamp(range.end)}
-            AND event_type IN ('tarot_pull', 'grimoire_save', 'birth_chart_viewed', 'horoscope_viewed', 'personalized_tarot_viewed', 'personalized_horoscope_viewed')
+            AND event_type IN (
+              'tarot_viewed',
+              'birth_chart_viewed',
+              'horoscope_viewed',
+              'personalized_tarot_viewed',
+              'personalized_horoscope_viewed',
+              'crystal_recommendations_viewed'
+            )
           GROUP BY event_type
           ORDER BY count DESC
         `
@@ -135,7 +156,14 @@ export async function GET(request: NextRequest) {
           )
             AND created_at >= ${formatTimestamp(range.start)}
             AND created_at <= ${formatTimestamp(range.end)}
-            AND event_type IN ('tarot_pull', 'grimoire_save', 'birth_chart_viewed', 'horoscope_viewed', 'personalized_tarot_viewed', 'personalized_horoscope_viewed')
+            AND event_type IN (
+              'tarot_viewed',
+              'birth_chart_viewed',
+              'horoscope_viewed',
+              'personalized_tarot_viewed',
+              'personalized_horoscope_viewed',
+              'crystal_recommendations_viewed'
+            )
           GROUP BY event_type
           ORDER BY count DESC
         `

@@ -313,17 +313,19 @@ export const STRIPE_PRICE_MAPPING = {
 
 export type PlanId = keyof typeof STRIPE_PRICE_MAPPING;
 export type Currency = string;
+type PriceEntry = { priceId: string; amount: number; currency: string };
 
 export function getPriceForCurrency(
   planId: PlanId,
   currency: Currency = 'USD',
 ): { priceId: string; amount: number; currency: string } | null {
-  const planPrices = STRIPE_PRICE_MAPPING[planId];
+  const planPrices = STRIPE_PRICE_MAPPING[planId] as Record<string, PriceEntry>;
   if (!planPrices) return null;
 
   // Try exact match first
-  if (planPrices[currency.toUpperCase()]) {
-    return planPrices[currency.toUpperCase()];
+  const currencyKey = currency.toUpperCase();
+  if (planPrices[currencyKey]) {
+    return planPrices[currencyKey];
   }
 
   // Fallback to USD

@@ -67,9 +67,15 @@ export async function GET(request: NextRequest) {
       FROM analytics_ai_usage
       WHERE created_at >= ${formatTimestamp(range.start)}
         AND created_at <= ${formatTimestamp(range.end)}
-        AND user_id NOT IN (
-          SELECT DISTINCT user_id FROM subscriptions WHERE user_email LIKE ${TEST_EMAIL_PATTERN} OR user_email = ${TEST_EMAIL_EXACT}
-          UNION SELECT DISTINCT user_id FROM conversion_events WHERE user_email LIKE ${TEST_EMAIL_PATTERN} OR user_email = ${TEST_EMAIL_EXACT}
+        AND NOT EXISTS (
+          SELECT 1 FROM subscriptions s
+          WHERE s.user_id = analytics_ai_usage.user_id
+            AND (s.user_email LIKE ${TEST_EMAIL_PATTERN} OR s.user_email = ${TEST_EMAIL_EXACT})
+        )
+        AND NOT EXISTS (
+          SELECT 1 FROM conversion_events ce
+          WHERE ce.user_id = analytics_ai_usage.user_id
+            AND (ce.user_email LIKE ${TEST_EMAIL_PATTERN} OR ce.user_email = ${TEST_EMAIL_EXACT})
         )
       GROUP BY DATE(created_at)
       ORDER BY date ASC
