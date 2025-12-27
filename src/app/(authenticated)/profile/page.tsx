@@ -5,7 +5,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import dynamic from 'next/dynamic';
 import { HelpCircle, Stars, Layers, Hash, X } from 'lucide-react';
-import { generateBirthChart } from '../../../../utils/astrology/birthChart';
+import { createBirthChart } from '../../../../utils/astrology/birthChartService';
 import { useSubscription } from '../../../hooks/useSubscription';
 import {
   canCollectBirthday,
@@ -186,11 +186,13 @@ export default function ProfilePage() {
         if (profileBirthday && !user.hasBirthChart) {
           (async () => {
             console.log('[Profile] Auto-generating missing birth chart...');
-            const birthChart = await generateBirthChart(
-              profileBirthday,
-              profileBirthTime || undefined,
-              profileBirthLocation || undefined,
-            );
+            const birthChart = await createBirthChart({
+              birthDate: profileBirthday,
+              birthTime: profileBirthTime || undefined,
+              birthLocation: profileBirthLocation || undefined,
+              fallbackTimezone:
+                Intl.DateTimeFormat().resolvedOptions().timeZone || undefined,
+            });
             await fetch('/api/profile/birth-chart', {
               method: 'PUT',
               headers: { 'Content-Type': 'application/json' },
@@ -258,11 +260,13 @@ export default function ProfilePage() {
 
         if (shouldRegenerateChart) {
           console.log('Generating birth chart...');
-          const birthChart = await generateBirthChart(
-            birthday,
-            birthTime || undefined,
-            birthLocation || undefined,
-          );
+          const birthChart = await createBirthChart({
+            birthDate: birthday,
+            birthTime: birthTime || undefined,
+            birthLocation: birthLocation || undefined,
+            fallbackTimezone:
+              Intl.DateTimeFormat().resolvedOptions().timeZone || undefined,
+          });
 
           await fetch('/api/profile/birth-chart', {
             method: 'PUT',

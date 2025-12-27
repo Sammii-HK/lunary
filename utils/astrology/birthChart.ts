@@ -4,7 +4,23 @@ import {
   getZodiacSign,
   formatDegree,
 } from './astrology';
-import { Observer, AstroTime, Horizon } from 'astronomy-engine';
+import {
+  Observer,
+  AstroTime,
+  SiderealTime,
+  e_tilt,
+  Body,
+  GeoVector,
+  HelioVector,
+  Ecliptic,
+  EclipticGeoMoon,
+  SearchMoonNode,
+  NextMoonNode,
+  NodeEventKind,
+  SearchLunarApsis,
+  NextLunarApsis,
+  ApsisKind,
+} from 'astronomy-engine';
 import dayjs from 'dayjs';
 
 export type BirthChartData = {
@@ -35,28 +51,140 @@ function calculateMeanLunarNode(date: Date): number {
   const T = (jd - 2451545.0) / 36525;
   let omega =
     125.04452 - 1934.136261 * T + 0.0020708 * T * T + (T * T * T) / 450000;
-  omega = omega % 360;
-  if (omega < 0) omega += 360;
-  return omega;
+  return normalizeDegrees(omega);
+}
+
+function calculateTrueLunarNode(
+  date: Date,
+  kind: NodeEventKind = NodeEventKind.Ascending,
+): number {
+  const targetTime = new AstroTime(date);
+  const searchStart = new Date(date.getTime() - 20 * 24 * 60 * 60 * 1000);
+  let node = SearchMoonNode(new AstroTime(searchStart));
+  let prevMatch: null | ReturnType<typeof SearchMoonNode> = null;
+  let nextMatch: null | ReturnType<typeof SearchMoonNode> = null;
+
+  for (let i = 0; i < 12; i += 1) {
+    if (node.kind === kind) {
+      if (node.time.ut <= targetTime.ut) {
+        prevMatch = node;
+      } else {
+        nextMatch = node;
+        break;
+      }
+    }
+    node = NextMoonNode(node);
+  }
+
+  const chosen = (() => {
+    if (prevMatch && nextMatch) {
+      const prevDelta = Math.abs(prevMatch.time.ut - targetTime.ut);
+      const nextDelta = Math.abs(nextMatch.time.ut - targetTime.ut);
+      return prevDelta <= nextDelta ? prevMatch : nextMatch;
+    }
+    return prevMatch || nextMatch;
+  })();
+
+  if (!chosen) {
+    return calculateMeanLunarNode(date);
+  }
+
+  const moonEcliptic = EclipticGeoMoon(chosen.time);
+  return normalizeDegrees(moonEcliptic.lon);
 }
 
 function calculateChiron(date: Date): number {
   const jd = getJulianDay(date);
-  const T = (jd - 2451545.0) / 36525;
-  const meanAnomaly = 209.35 + (1.8509 * (jd - 2451545.0)) / 365.25;
-  let longitude = 173.75 + (1.18538 * (jd - 2451545.0)) / 365.25;
-  longitude = longitude % 360;
-  if (longitude < 0) longitude += 360;
-  return longitude;
+  const elements = {
+    epochJd: 2461000.5,
+    a: 13.69219896172984,
+    e: 0.3789792342846475,
+    i: 6.926003536565557,
+    om: 209.2984204899107,
+    w: 339.2537417045351,
+    m: 212.8397717853335,
+    n: 0.01945334424082164,
+  };
+
+  const d = jd - elements.epochJd;
+  const meanAnomaly = normalizeDegrees(elements.m + elements.n * d);
+  const meanAnomalyRad = (meanAnomaly * Math.PI) / 180;
+  const eccentricAnomaly = solveKepler(meanAnomalyRad, elements.e);
+  const trueAnomaly =
+    2 *
+    Math.atan2(
+      Math.sqrt(1 + elements.e) * Math.sin(eccentricAnomaly / 2),
+      Math.sqrt(1 - elements.e) * Math.cos(eccentricAnomaly / 2),
+    );
+  const radius = elements.a * (1 - elements.e * Math.cos(eccentricAnomaly));
+
+  const nodeRad = (elements.om * Math.PI) / 180;
+  const inclRad = (elements.i * Math.PI) / 180;
+  const argRad = (elements.w * Math.PI) / 180;
+  const argTrue = argRad + trueAnomaly;
+
+  const xh =
+    radius *
+    (Math.cos(nodeRad) * Math.cos(argTrue) -
+      Math.sin(nodeRad) * Math.sin(argTrue) * Math.cos(inclRad));
+  const yh =
+    radius *
+    (Math.sin(nodeRad) * Math.cos(argTrue) +
+      Math.cos(nodeRad) * Math.sin(argTrue) * Math.cos(inclRad));
+  const zh = radius * Math.sin(argTrue) * Math.sin(inclRad);
+
+  const earth = getEarthHeliocentricEcliptic(date);
+  const xg = xh - earth.x;
+  const yg = yh - earth.y;
+  const zg = zh - earth.z;
+
+  const longitude = Math.atan2(yg, xg);
+  return normalizeDegrees((longitude * 180) / Math.PI);
 }
 
 function calculateMeanLilith(date: Date): number {
   const jd = getJulianDay(date);
   const T = (jd - 2451545.0) / 36525;
-  let lilith = 83.353243 + 40.68923 * (jd - 2451545.0);
-  lilith = lilith % 360;
-  if (lilith < 0) lilith += 360;
-  return lilith;
+  let lilith =
+    83.3532465 + 4069.0137287 * T - 0.01032 * T * T - (T * T * T) / 80000;
+  return normalizeDegrees(lilith);
+}
+
+function calculateTrueLilith(date: Date): number {
+  const targetTime = new AstroTime(date);
+  const searchStart = new Date(date.getTime() - 35 * 24 * 60 * 60 * 1000);
+  let apsis = SearchLunarApsis(new AstroTime(searchStart));
+  let prevApogee = null as null | ReturnType<typeof SearchLunarApsis>;
+  let nextApogee = null as null | ReturnType<typeof SearchLunarApsis>;
+
+  for (let i = 0; i < 6; i += 1) {
+    if (apsis.kind === ApsisKind.Apocenter) {
+      if (apsis.time.ut <= targetTime.ut) {
+        prevApogee = apsis;
+      } else {
+        nextApogee = apsis;
+        break;
+      }
+    }
+    apsis = NextLunarApsis(apsis);
+  }
+
+  const chosen = (() => {
+    if (prevApogee && nextApogee) {
+      const prevDelta = Math.abs(prevApogee.time.ut - targetTime.ut);
+      const nextDelta = Math.abs(nextApogee.time.ut - targetTime.ut);
+      return prevDelta <= nextDelta ? prevApogee : nextApogee;
+    }
+    return prevApogee || nextApogee;
+  })();
+
+  if (!chosen) {
+    return calculateMeanLilith(date);
+  }
+
+  const moonVector = GeoVector(Body.Moon, chosen.time, true);
+  const moonEcliptic = Ecliptic(moonVector);
+  return normalizeDegrees(moonEcliptic.elon);
 }
 
 function getJulianDay(date: Date): number {
@@ -87,13 +215,117 @@ function getJulianDay(date: Date): number {
   );
 }
 
+function normalizeDegrees(degrees: number): number {
+  return ((degrees % 360) + 360) % 360;
+}
+
+function isRetrograde(current: number, previous: number): boolean {
+  const forwardMotion = normalizeDegrees(current - previous);
+  return forwardMotion > 180;
+}
+
+function solveKepler(meanAnomaly: number, eccentricity: number): number {
+  let E = meanAnomaly;
+  for (let i = 0; i < 8; i += 1) {
+    const delta =
+      (E - eccentricity * Math.sin(E) - meanAnomaly) /
+      (1 - eccentricity * Math.cos(E));
+    E -= delta;
+    if (Math.abs(delta) < 1e-8) break;
+  }
+  return E;
+}
+
+function getEarthHeliocentricEcliptic(date: Date): {
+  x: number;
+  y: number;
+  z: number;
+} {
+  const time = new AstroTime(date);
+  const earthVector = HelioVector(Body.Earth, time);
+  const earthEcliptic = Ecliptic(earthVector);
+  const distance = earthVector.Length();
+  return rectFromLonLatDist(earthEcliptic.elon, earthEcliptic.elat, distance);
+}
+
+function rectFromLonLatDist(
+  lonDeg: number,
+  latDeg: number,
+  distance: number,
+): { x: number; y: number; z: number } {
+  const lonRad = (lonDeg * Math.PI) / 180;
+  const latRad = (latDeg * Math.PI) / 180;
+  const cosLat = Math.cos(latRad);
+  return {
+    x: distance * cosLat * Math.cos(lonRad),
+    y: distance * cosLat * Math.sin(lonRad),
+    z: distance * Math.sin(latRad),
+  };
+}
+
 function calculateMidheaven(lstDeg: number, obliquity: number): number {
   const lstRad = (lstDeg * Math.PI) / 180;
   const oblRad = (obliquity * Math.PI) / 180;
   let mc = Math.atan2(Math.sin(lstRad), Math.cos(lstRad) * Math.cos(oblRad));
   mc = (mc * 180) / Math.PI;
-  if (mc < 0) mc += 360;
-  return mc;
+  return normalizeDegrees(mc);
+}
+
+function calculateAscendant(
+  lstDeg: number,
+  latitude: number,
+  obliquity: number,
+): number {
+  const lstRad = (lstDeg * Math.PI) / 180;
+  const latRad = (latitude * Math.PI) / 180;
+  const oblRad = (obliquity * Math.PI) / 180;
+  const numerator = -Math.cos(lstRad);
+  const denominator =
+    Math.sin(lstRad) * Math.cos(oblRad) + Math.tan(latRad) * Math.sin(oblRad);
+  let asc = Math.atan2(numerator, denominator);
+  if (asc < 0) asc += 2 * Math.PI;
+  return normalizeDegrees((asc * 180) / Math.PI + 180);
+}
+
+function getTimeZoneOffsetMs(date: Date, timeZone: string): number {
+  const dtf = new Intl.DateTimeFormat('en-US', {
+    timeZone,
+    hour12: false,
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+  });
+  const parts = dtf.formatToParts(date);
+  const values = Object.fromEntries(
+    parts
+      .filter((part) => part.type !== 'literal')
+      .map((part) => [part.type, part.value]),
+  );
+  const formattedUtc = Date.UTC(
+    Number(values.year),
+    Number(values.month) - 1,
+    Number(values.day),
+    Number(values.hour),
+    Number(values.minute),
+    Number(values.second),
+  );
+  return formattedUtc - date.getTime();
+}
+
+function toUtcFromTimeZone(
+  year: number,
+  month: number,
+  day: number,
+  hour: number,
+  minute: number,
+  timeZone: string,
+): Date {
+  const utcGuess = new Date(Date.UTC(year, month - 1, day, hour, minute, 0));
+  const offsetMs = getTimeZoneOffsetMs(utcGuess, timeZone);
+  return new Date(utcGuess.getTime() - offsetMs);
 }
 
 function calculateWholeSigHouses(ascendantLongitude: number): HouseCusp[] {
@@ -156,10 +388,34 @@ export const generateBirthChart = async (
   birthDate: string,
   birthTime?: string,
   birthLocation?: string,
+  birthTimezone?: string,
   observer?: Observer,
 ): Promise<BirthChartData[]> => {
   let birthDateTime: Date;
-  if (birthTime) {
+  if (birthTimezone) {
+    const [year, month, day] = birthDate.split('-').map(Number);
+    let hours = 12;
+    let minutes = 0;
+    if (birthTime) {
+      const [h, m] = birthTime.split(':').map(Number);
+      hours = h;
+      minutes = m || 0;
+    }
+    try {
+      birthDateTime = toUtcFromTimeZone(
+        year,
+        month,
+        day,
+        hours,
+        minutes,
+        birthTimezone,
+      );
+    } catch {
+      birthDateTime = birthTime
+        ? dayjs(`${birthDate} ${birthTime}`).toDate()
+        : dayjs(`${birthDate} 12:00`).toDate();
+    }
+  } else if (birthTime) {
     birthDateTime = dayjs(`${birthDate} ${birthTime}`).toDate();
   } else {
     birthDateTime = dayjs(`${birthDate} 12:00`).toDate();
@@ -196,29 +452,16 @@ export const generateBirthChart = async (
 
   try {
     const astroTime = new AstroTime(birthDateTime);
-    const horizon = Horizon(astroTime, finalObserver, 0, 0, 'normal');
-
-    const siderealTime = horizon.ra;
-    const localSiderealTime = siderealTime + finalObserver.longitude / 15;
-
-    const obliquity = 23.4393;
-    const latRad = (finalObserver.latitude * Math.PI) / 180;
-    const lstRad = (localSiderealTime * 15 * Math.PI) / 180;
-
-    const tanAsc =
-      Math.cos(lstRad) /
-      (Math.cos(latRad) * Math.tan((obliquity * Math.PI) / 180) +
-        Math.sin(latRad) * Math.sin(lstRad));
-    let ascendantLongitude = Math.atan(tanAsc);
-
-    if (Math.cos(lstRad) < 0) {
-      ascendantLongitude += Math.PI;
-    }
-    if (ascendantLongitude < 0) {
-      ascendantLongitude += 2 * Math.PI;
-    }
-
-    ascendantLongitudeDeg = (ascendantLongitude * 180) / Math.PI;
+    const obliquity = e_tilt(astroTime).tobl;
+    let localSiderealTime =
+      SiderealTime(astroTime) + finalObserver.longitude / 15;
+    localSiderealTime = ((localSiderealTime % 24) + 24) % 24;
+    const lstDeg = localSiderealTime * 15;
+    ascendantLongitudeDeg = calculateAscendant(
+      lstDeg,
+      finalObserver.latitude,
+      obliquity,
+    );
     const ascendantSign = getZodiacSign(ascendantLongitudeDeg);
     const ascendantFormatted = formatDegree(ascendantLongitudeDeg);
 
@@ -231,7 +474,6 @@ export const generateBirthChart = async (
       retrograde: false,
     });
 
-    const lstDeg = localSiderealTime * 15;
     const mcLongitude = calculateMidheaven(lstDeg, obliquity);
     const mcSign = getZodiacSign(mcLongitude);
     const mcFormatted = formatDegree(mcLongitude);
@@ -249,9 +491,16 @@ export const generateBirthChart = async (
   }
 
   try {
-    const northNodeLong = calculateMeanLunarNode(birthDateTime);
+    const northNodeLong = calculateTrueLunarNode(
+      birthDateTime,
+      NodeEventKind.Ascending,
+    );
     const northNodeSign = getZodiacSign(northNodeLong);
     const northNodeFormatted = formatDegree(northNodeLong);
+    const northNodePrevLong = calculateTrueLunarNode(
+      new Date(birthDateTime.getTime() - 24 * 60 * 60 * 1000),
+      NodeEventKind.Ascending,
+    );
 
     birthChartData.push({
       body: 'North Node',
@@ -259,12 +508,19 @@ export const generateBirthChart = async (
       degree: northNodeFormatted.degree,
       minute: northNodeFormatted.minute,
       eclipticLongitude: northNodeLong,
-      retrograde: true,
+      retrograde: isRetrograde(northNodeLong, northNodePrevLong),
     });
 
-    const southNodeLong = (northNodeLong + 180) % 360;
+    const southNodeLong = calculateTrueLunarNode(
+      birthDateTime,
+      NodeEventKind.Descending,
+    );
     const southNodeSign = getZodiacSign(southNodeLong);
     const southNodeFormatted = formatDegree(southNodeLong);
+    const southNodePrevLong = calculateTrueLunarNode(
+      new Date(birthDateTime.getTime() - 24 * 60 * 60 * 1000),
+      NodeEventKind.Descending,
+    );
 
     birthChartData.push({
       body: 'South Node',
@@ -272,7 +528,7 @@ export const generateBirthChart = async (
       degree: southNodeFormatted.degree,
       minute: southNodeFormatted.minute,
       eclipticLongitude: southNodeLong,
-      retrograde: true,
+      retrograde: isRetrograde(southNodeLong, southNodePrevLong),
     });
   } catch {
     // If node calculations fail, continue without them
@@ -282,6 +538,9 @@ export const generateBirthChart = async (
     const chironLong = calculateChiron(birthDateTime);
     const chironSign = getZodiacSign(chironLong);
     const chironFormatted = formatDegree(chironLong);
+    const chironPrevLong = calculateChiron(
+      new Date(birthDateTime.getTime() - 24 * 60 * 60 * 1000),
+    );
 
     birthChartData.push({
       body: 'Chiron',
@@ -289,16 +548,19 @@ export const generateBirthChart = async (
       degree: chironFormatted.degree,
       minute: chironFormatted.minute,
       eclipticLongitude: chironLong,
-      retrograde: false,
+      retrograde: isRetrograde(chironLong, chironPrevLong),
     });
   } catch {
     // If Chiron calculation fails, continue without it
   }
 
   try {
-    const lilithLong = calculateMeanLilith(birthDateTime);
+    const lilithLong = calculateTrueLilith(birthDateTime);
     const lilithSign = getZodiacSign(lilithLong);
     const lilithFormatted = formatDegree(lilithLong);
+    const lilithPrevLong = calculateTrueLilith(
+      new Date(birthDateTime.getTime() - 24 * 60 * 60 * 1000),
+    );
 
     birthChartData.push({
       body: 'Lilith',
@@ -306,7 +568,7 @@ export const generateBirthChart = async (
       degree: lilithFormatted.degree,
       minute: lilithFormatted.minute,
       eclipticLongitude: lilithLong,
-      retrograde: false,
+      retrograde: isRetrograde(lilithLong, lilithPrevLong),
     });
   } catch {
     // If Lilith calculation fails, continue without it
@@ -319,12 +581,14 @@ export const generateBirthChartWithHouses = async (
   birthDate: string,
   birthTime?: string,
   birthLocation?: string,
+  birthTimezone?: string,
   observer?: Observer,
 ): Promise<BirthChartResult> => {
   const planets = await generateBirthChart(
     birthDate,
     birthTime,
     birthLocation,
+    birthTimezone,
     observer,
   );
 

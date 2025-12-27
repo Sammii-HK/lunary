@@ -6,10 +6,8 @@ import { ExploreGrimoire } from '@/components/grimoire/ExploreGrimoire';
 import { useUser } from '@/context/UserContext';
 import { useSubscription } from '@/hooks/useSubscription';
 import { hasBirthChartAccess } from '../../../../../utils/pricing';
-import {
-  generateBirthChart,
-  BirthChartData,
-} from '../../../../../utils/astrology/birthChart';
+import { BirthChartData } from '../../../../../utils/astrology/birthChart';
+import { createBirthChart } from '../../../../../utils/astrology/birthChartService';
 import {
   calculateSynastry,
   SynastryResult,
@@ -227,19 +225,23 @@ export default function SynastryGeneratorPage() {
       if (useMyChartA && user?.birthChart) {
         chartA = user.birthChart;
       } else {
-        chartA = await generateBirthChart(
-          personA.birthDate,
-          personA.birthTime || undefined,
-          personA.birthLocation || undefined,
-        );
+        chartA = await createBirthChart({
+          birthDate: personA.birthDate,
+          birthTime: personA.birthTime || undefined,
+          birthLocation: personA.birthLocation || undefined,
+          fallbackTimezone:
+            Intl.DateTimeFormat().resolvedOptions().timeZone || undefined,
+        });
       }
 
       // Get chart B
-      chartB = await generateBirthChart(
-        personB.birthDate,
-        personB.birthTime || undefined,
-        personB.birthLocation || undefined,
-      );
+      chartB = await createBirthChart({
+        birthDate: personB.birthDate,
+        birthTime: personB.birthTime || undefined,
+        birthLocation: personB.birthLocation || undefined,
+        fallbackTimezone:
+          Intl.DateTimeFormat().resolvedOptions().timeZone || undefined,
+      });
 
       // Calculate synastry
       const synastryResult = calculateSynastry(

@@ -91,12 +91,97 @@ export const requestLocation = (): Promise<LocationData> => {
   });
 };
 
+export const parseCoordinates = (
+  location: string,
+): { latitude: number; longitude: number } | null => {
+  const coordMatch = location.match(/^(-?\d+\.?\d*),\s*(-?\d+\.?\d*)$/);
+  if (!coordMatch) return null;
+  return {
+    latitude: parseFloat(coordMatch[1]),
+    longitude: parseFloat(coordMatch[2]),
+  };
+};
+
+export const geocodeLocation = async (
+  location: string,
+): Promise<Pick<LocationData, 'latitude' | 'longitude'> | null> => {
+  if (!location) return null;
+
+  const coords = parseCoordinates(location);
+  if (coords) return coords;
+
+  try {
+    const response = await fetch(
+      `/api/location/geocode?q=${encodeURIComponent(location)}`,
+    );
+
+    if (response.ok) {
+      const data = (await response.json()) as {
+        latitude?: number;
+        longitude?: number;
+      };
+      if (
+        typeof data.latitude === 'number' &&
+        typeof data.longitude === 'number'
+      ) {
+        return { latitude: data.latitude, longitude: data.longitude };
+      }
+    }
+  } catch {
+    // Fall back below
+  }
+
+  try {
+    const response = await fetch(
+      `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(
+        location,
+      )}&limit=1&addressdetails=0&accept-language=en`,
+    );
+
+    if (!response.ok) {
+      return null;
+    }
+
+    const data = (await response.json()) as Array<{
+      lat: string;
+      lon: string;
+    }>;
+
+    const first = data[0];
+    if (!first?.lat || !first?.lon) return null;
+
+    return {
+      latitude: parseFloat(first.lat),
+      longitude: parseFloat(first.lon),
+    };
+  } catch {
+    return null;
+  }
+};
+
 const reverseGeocode = async (
   lat: number,
   lng: number,
 ): Promise<Partial<LocationData>> => {
   try {
-    // Use OpenStreetMap Nominatim API for reverse geocoding
+    const response = await fetch(`/api/location/reverse?lat=${lat}&lon=${lng}`);
+
+    if (response.ok) {
+      const data = await response.json();
+      if (data?.city || data?.country || data?.timezone) {
+        return {
+          city: data.city,
+          country: data.country,
+          timezone: data.timezone,
+        };
+      }
+    }
+  } catch (error) {
+    console.warn('Reverse geocoding failed:', error);
+  }
+
+  try {
+    // Fallback to OpenStreetMap Nominatim API for reverse geocoding
     const response = await fetch(
       `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&addressdetails=1&accept-language=en`,
       {
@@ -127,7 +212,7 @@ const reverseGeocode = async (
       };
     }
   } catch (error) {
-    console.warn('Reverse geocoding failed:', error);
+    console.warn('Reverse geocoding fallback failed:', error);
   }
 
   // Fallback to just timezone

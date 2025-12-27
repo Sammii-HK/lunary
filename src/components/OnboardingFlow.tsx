@@ -20,7 +20,7 @@ import {
 import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { generateBirthChart } from '../../utils/astrology/birthChart';
+import { createBirthChart } from '../../utils/astrology/birthChartService';
 import { conversionTracking } from '@/lib/analytics';
 import { OnboardingFeatureTour } from './OnboardingFeatureTour';
 import { BirthdayInput } from './ui/birthday-input';
@@ -286,11 +286,13 @@ export function OnboardingFlow({
 
       // Generate birth chart immediately after birthday is saved
       try {
-        const birthChart = await generateBirthChart(
-          birthday,
-          birthTime || undefined,
-          birthLocation || undefined,
-        );
+        const birthChart = await createBirthChart({
+          birthDate: birthday,
+          birthTime: birthTime || undefined,
+          birthLocation: birthLocation || undefined,
+          fallbackTimezone:
+            Intl.DateTimeFormat().resolvedOptions().timeZone || undefined,
+        });
         if (birthChart) {
           await fetch('/api/profile/birth-chart', {
             method: 'PUT',

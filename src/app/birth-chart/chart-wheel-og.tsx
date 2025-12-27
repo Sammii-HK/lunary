@@ -263,21 +263,6 @@ export function ChartWheelOg({
           );
         },
       )}
-
-      <div
-        style={{
-          position: 'absolute',
-          left: toPixel(125),
-          top: toPixel(0),
-          transform: 'translate(-50%, -50%)',
-          fontFamily: 'Astronomicon',
-          fontSize: 21,
-          color: '#C77DFF',
-          display: 'flex',
-        }}
-      >
-        AC
-      </div>
     </div>
   );
 }

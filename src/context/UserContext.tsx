@@ -6,9 +6,11 @@ import {
   useState,
   useEffect,
   useCallback,
+  useRef,
   ReactNode,
 } from 'react';
 import { useAuthStatus } from '@/components/AuthStatus';
+import { createBirthChartWithMetadata } from 'utils/astrology/birthChartService';
 
 export interface BirthChartPlacement {
   body: string;
@@ -34,6 +36,9 @@ export interface UserLocation {
   city?: string;
   country?: string;
   timezone?: string;
+  birthTime?: string;
+  birthLocation?: string;
+  birthTimezone?: string;
 }
 
 export interface UserData {
@@ -74,6 +79,8 @@ export function UserProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<UserData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
+  const birthChartRefreshRef = useRef(false);
+  const BIRTH_CHART_VERSION = 3;
 
   const fetchUserData = useCallback(async () => {
     if (!isAuthenticated || !userId) {
@@ -140,6 +147,69 @@ export function UserProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     fetchUserData();
   }, [fetchUserData]);
+
+  useEffect(() => {
+    const refreshBirthChart = async () => {
+      if (!user || birthChartRefreshRef.current) return;
+
+      const location = (user.location || {}) as Record<string, any>;
+      const birthLocation = location?.birthLocation;
+      const birthTimezone = location?.birthTimezone;
+      const birthTime = location?.birthTime;
+      const birthChartVersion = location?.birthChartVersion;
+
+      if (!user.birthday || !user.birthChart?.length) return;
+      if (!birthLocation) return;
+
+      const needsVersionUpdate = birthChartVersion !== BIRTH_CHART_VERSION;
+      const needsTimezoneUpdate = !birthTimezone;
+
+      if (!needsVersionUpdate && !needsTimezoneUpdate) return;
+
+      birthChartRefreshRef.current = true;
+      try {
+        const { birthChart, timezone, timezoneSource } =
+          await createBirthChartWithMetadata({
+            birthDate: user.birthday,
+            birthTime: birthTime || undefined,
+            birthLocation,
+            fallbackTimezone:
+              Intl.DateTimeFormat().resolvedOptions().timeZone || undefined,
+          });
+
+        const resolvedTimezone =
+          timezoneSource === 'location' ? timezone : birthTimezone;
+
+        await fetch('/api/profile/birth-chart', {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
+          body: JSON.stringify({ birthChart }),
+        });
+
+        await fetch('/api/profile', {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
+          body: JSON.stringify({
+            location: {
+              ...location,
+              birthTimezone: resolvedTimezone,
+              birthChartVersion: BIRTH_CHART_VERSION,
+            },
+          }),
+        });
+
+        await fetchUserData();
+      } catch (err) {
+        console.warn('Failed to refresh birth chart:', err);
+      } finally {
+        birthChartRefreshRef.current = false;
+      }
+    };
+
+    refreshBirthChart();
+  }, [user, fetchUserData]);
 
   const updateProfile = useCallback(
     async (
