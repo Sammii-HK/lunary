@@ -409,9 +409,14 @@ export async function composeVideo(
       );
 
       const zoomFilter = `zoompan=z='if(eq(on,0),1.0,min(zoom+0.00003,1.06))':x='iw/2-(iw/zoom/2)':y='ih/2-(ih/zoom/2)':d=1:fps=30:s=${dimensions.width}x${dimensions.height}`;
-      const videoFilter = subtitleFilter
-        ? `${zoomFilter},${subtitleFilter}`
-        : zoomFilter;
+      const gradientBlendFilter =
+        `split=2[base][alt];` +
+        `[base]hue=h=0:s=1.03[base];` +
+        `[alt]hue=h=18:s=1.06[alt];` +
+        `[base][alt]blend=all_expr='A*(1-(0.5+0.5*sin(2*3.1415926*N/360)))+B*(0.5+0.5*sin(2*3.1415926*N/360))'`;
+      const videoFilter = [zoomFilter, gradientBlendFilter, subtitleFilter]
+        .filter(Boolean)
+        .join(',');
 
       // Create FFmpeg command with explicit duration
       await new Promise<void>((resolve, reject) => {
