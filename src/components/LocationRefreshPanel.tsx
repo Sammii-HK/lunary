@@ -5,23 +5,16 @@ import { MapPin, RotateCcw, CheckCircle, XCircle } from 'lucide-react';
 import { useLocation } from '../hooks/useLocation';
 import { formatLocation } from '../../utils/location';
 
-type LocationRefreshProps = {
+type LocationRefreshPanelProps = {
   variant?: 'card' | 'settings';
 };
 
-export default function LocationRefresh({
+export default function LocationRefreshPanel({
   variant = 'card',
-}: LocationRefreshProps) {
+}: LocationRefreshPanelProps) {
   const { location, requestLocation, loading, error, isLoggedIn } =
     useLocation();
   const [showSuccess, setShowSuccess] = useState(false);
-  const formatCoordinate = (value: unknown, digits: number) => {
-    if (typeof value !== 'number' || !Number.isFinite(value)) return null;
-    return new Intl.NumberFormat('en-US', {
-      minimumFractionDigits: digits,
-      maximumFractionDigits: digits,
-    }).format(value);
-  };
 
   if (!isLoggedIn) return null;
 
@@ -31,6 +24,14 @@ export default function LocationRefresh({
       setShowSuccess(true);
       setTimeout(() => setShowSuccess(false), 3000);
     }
+  };
+
+  const formatCoordinate = (value: unknown, digits: number) => {
+    if (typeof value !== 'number' || !Number.isFinite(value)) return null;
+    return new Intl.NumberFormat('en-US', {
+      minimumFractionDigits: digits,
+      maximumFractionDigits: digits,
+    }).format(value);
   };
 
   const containerClasses =
@@ -148,7 +149,7 @@ export default function LocationRefresh({
         <div className={infoTextClasses}>
           <p>
             Your location is used to calculate accurate rise/set times and
-            astronomical data. It's saved to your profile and synced across
+            astronomical data. It&apos;s saved to your profile and synced across
             devices.
           </p>
         </div>

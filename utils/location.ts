@@ -210,5 +210,17 @@ export const formatLocation = (location: LocationData): string => {
   if (location.city) {
     return location.city;
   }
-  return `${location.latitude.toFixed(2)}, ${location.longitude.toFixed(2)}`;
+  const formatCoord = (value: unknown) => {
+    if (typeof value !== 'number' || !Number.isFinite(value)) return null;
+    return new Intl.NumberFormat('en-US', {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    }).format(value);
+  };
+  const latText = formatCoord(location.latitude);
+  const lonText = formatCoord(location.longitude);
+  if (latText && lonText) {
+    return `${latText}, ${lonText}`;
+  }
+  return 'Location pending update';
 };
