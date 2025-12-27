@@ -131,32 +131,7 @@ export const geocodeLocation = async (
     // Fall back below
   }
 
-  try {
-    const response = await fetch(
-      `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(
-        location,
-      )}&limit=1&addressdetails=0&accept-language=en`,
-    );
-
-    if (!response.ok) {
-      return null;
-    }
-
-    const data = (await response.json()) as Array<{
-      lat: string;
-      lon: string;
-    }>;
-
-    const first = data[0];
-    if (!first?.lat || !first?.lon) return null;
-
-    return {
-      latitude: parseFloat(first.lat),
-      longitude: parseFloat(first.lon),
-    };
-  } catch {
-    return null;
-  }
+  return null;
 };
 
 const reverseGeocode = async (
@@ -178,41 +153,6 @@ const reverseGeocode = async (
     }
   } catch (error) {
     console.warn('Reverse geocoding failed:', error);
-  }
-
-  try {
-    // Fallback to OpenStreetMap Nominatim API for reverse geocoding
-    const response = await fetch(
-      `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&addressdetails=1&accept-language=en`,
-      {
-        headers: {
-          'User-Agent': 'Lunary-Astrology-App/1.0',
-        },
-      },
-    );
-
-    if (response.ok) {
-      const data = await response.json();
-      const address = data.address || {};
-
-      const city =
-        address.city ||
-        address.town ||
-        address.village ||
-        address.suburb ||
-        address.neighbourhood;
-      const country = address.country;
-
-      const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-
-      return {
-        city,
-        country,
-        timezone,
-      };
-    }
-  } catch (error) {
-    console.warn('Reverse geocoding fallback failed:', error);
   }
 
   // Fallback to just timezone

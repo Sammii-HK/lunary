@@ -91,7 +91,10 @@ export async function GET(request: NextRequest) {
     for (const planet of planetsToCheck) {
       const pos = positions[planet as keyof typeof positions];
       if (pos) {
-        const isRetro = pos.isRetrograde || false;
+        const isRetro =
+          typeof pos.isRetrograde === 'boolean'
+            ? pos.isRetrograde
+            : Boolean(pos.retrograde);
         const info = RETROGRADE_MEANINGS[planet];
         retrogrades.push({
           planet: planet.charAt(0).toUpperCase() + planet.slice(1),
