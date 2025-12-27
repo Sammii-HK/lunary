@@ -68,9 +68,9 @@ const platformHashtagConfig: Record<
   tiktok: { useHashtags: true, count: 3 },
   facebook: { useHashtags: true, count: 3 },
   linkedin: { useHashtags: true, count: 3 },
-  twitter: { useHashtags: true, count: 3 },
+  twitter: { useHashtags: true, count: 2 },
   bluesky: { useHashtags: true, count: 3 },
-  threads: { useHashtags: true, count: 3 },
+  threads: { useHashtags: false, count: 0 },
   reddit: { useHashtags: true, count: 3 },
 };
 
