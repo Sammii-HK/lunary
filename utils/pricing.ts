@@ -35,7 +35,7 @@ export const PRICING_PLANS: PricingPlan[] = [
     description: 'Rituals, Moon Circles & personalized guidance',
     price: 4.99,
     interval: 'month',
-    stripePriceId: process.env.NEXT_PUBLIC_STRIPE_LUNARY_PLUS_PRICE_ID || '',
+    stripePriceId: '',
     features: [
       'Complete birth chart analysis',
       'Personalized daily horoscopes',
@@ -59,7 +59,7 @@ export const PRICING_PLANS: PricingPlan[] = [
     description: 'Everything in Lunary+ plus unlimited AI guidance',
     price: 8.99,
     interval: 'month',
-    stripePriceId: process.env.NEXT_PUBLIC_STRIPE_LUNARY_PLUS_AI_PRICE_ID || '',
+    stripePriceId: '',
     features: [
       'Everything in Lunary+',
       'Unlimited AI chat (Lunary Copilot)',
@@ -78,8 +78,7 @@ export const PRICING_PLANS: PricingPlan[] = [
     description: 'Full year of cosmic wisdom with AI',
     price: 89.99,
     interval: 'year',
-    stripePriceId:
-      process.env.NEXT_PUBLIC_STRIPE_LUNARY_PLUS_AI_ANNUAL_PRICE_ID || '',
+    stripePriceId: '',
     savings: 'Save 17%',
     features: [
       'Everything in Lunary+ AI',
