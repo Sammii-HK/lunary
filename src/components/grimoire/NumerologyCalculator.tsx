@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useMemo } from 'react';
-import Link from 'next/link';
+import { NavParamLink } from '@/components/NavParamLink';
 import { ArrowRight } from 'lucide-react';
 import {
   calculateSoulUrge,
@@ -211,7 +211,7 @@ export function NumerologyCalculator({ type }: NumerologyCalculatorProps) {
             </div>
           )}
 
-          <Link
+          <NavParamLink
             href={resultUrl}
             className='flex items-center justify-center gap-2 w-full px-4 py-3 bg-zinc-800 hover:bg-zinc-700 text-zinc-100 rounded-lg transition-colors'
           >
@@ -224,7 +224,7 @@ export function NumerologyCalculator({ type }: NumerologyCalculatorProps) {
                   .join(' ')}{' '}
             {result.result}
             <ArrowRight className='w-4 h-4' />
-          </Link>
+          </NavParamLink>
         </div>
       )}
     </div>

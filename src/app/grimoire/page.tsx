@@ -2,7 +2,6 @@ import { Metadata } from 'next';
 
 import GrimoireLayout from './GrimoireLayout';
 import { createItemListSchema, renderJsonLd } from '@/lib/schema';
-import { GrimoireBreadcrumbs } from '@/components/grimoire/GrimoireBreadcrumbs';
 
 export const metadata: Metadata = {
   title:
@@ -110,7 +109,6 @@ const GrimoireHome = () => {
   return (
     <div className='h-full w-full'>
       {renderJsonLd(grimoireListSchema)}
-      <GrimoireBreadcrumbs items={breadcrumbItems} />
       <GrimoireLayout />
     </div>
   );
