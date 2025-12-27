@@ -84,8 +84,8 @@ export default async function SignHoroscopePage({
         </nav>
 
         <header className='mb-12 text-center'>
-          <span className='text-6xl mb-4 block'>{symbol}</span>
-          <h1 className='text-4xl md:text-5xl font-light text-zinc-100 mb-4'>
+          <span className='text-4xl md:text-6xl mb-4 block'>{symbol}</span>
+          <h1 className='text-2xl md:text-5xl font-light text-zinc-100 mb-4'>
             {signName} Horoscopes
           </h1>
           <p className='text-lg text-zinc-400'>
@@ -94,7 +94,7 @@ export default async function SignHoroscopePage({
         </header>
 
         <section className='mb-12'>
-          <h2 className='text-2xl font-medium text-zinc-100 mb-6'>
+          <h2 className='text-xl md:text-2xl font-medium text-zinc-100 mb-6'>
             Select a Year
           </h2>
           <div className='grid grid-cols-2 md:grid-cols-3 gap-4'>

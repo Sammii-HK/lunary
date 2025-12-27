@@ -417,8 +417,12 @@ export async function POST(request: NextRequest) {
       // Check if customer exists in the same account as the price
       let customerExistsInPriceAccount = false;
       try {
-        await checkoutStripe.customers.retrieve(customerId);
-        customerExistsInPriceAccount = true;
+        const customer = await checkoutStripe.customers.retrieve(customerId);
+        const isDeleted =
+          typeof customer === 'object' &&
+          'deleted' in customer &&
+          customer.deleted;
+        customerExistsInPriceAccount = !isDeleted;
       } catch {
         // Customer doesn't exist in price account
       }
@@ -435,6 +439,10 @@ export async function POST(request: NextRequest) {
               },
             });
           } catch (error) {
+            const stripeError = error as Stripe.StripeRawError;
+            if (stripeError?.code === 'resource_missing') {
+              delete sessionConfig.customer;
+            }
             console.warn('Failed to update customer metadata:', error);
             // Continue anyway - metadata update failure shouldn't block checkout
           }

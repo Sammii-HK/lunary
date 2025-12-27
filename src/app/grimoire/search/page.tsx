@@ -1,7 +1,7 @@
 import { Metadata } from 'next';
 import Link from 'next/link';
 import { Suspense } from 'react';
-import { BookOpen, Sparkles, ArrowRight, Home } from 'lucide-react';
+import { BookOpen, Sparkles, ArrowRight } from 'lucide-react';
 import {
   searchGrimoireIndex,
   GRIMOIRE_SEARCH_INDEX,
@@ -9,8 +9,8 @@ import {
 } from '@/constants/seo/grimoire-search-index';
 import { AskTheGrimoire } from '@/components/grimoire/AskTheGrimoire';
 import { ExploreGrimoire } from '@/components/grimoire/ExploreGrimoire';
+import { GrimoireBreadcrumbs } from '@/components/grimoire/GrimoireBreadcrumbs';
 
-import { createBreadcrumbSchema, renderJsonLd } from '@/lib/schema';
 export const metadata: Metadata = {
   title: 'Search the Grimoire | Lunary',
   description:
@@ -141,14 +141,14 @@ function SearchContent({ query }: { query: string }) {
 
   const isDefaultView = !query;
 
-  const breadcrumbSchema = createBreadcrumbSchema([
+  const breadcrumbItems = [
     { name: 'Grimoire', url: '/grimoire' },
     { name: 'Search', url: '/grimoire/search' },
-  ]);
+  ];
 
   return (
     <div className='space-y-6'>
-      {renderJsonLd(breadcrumbSchema)}
+      <GrimoireBreadcrumbs items={breadcrumbItems} />
       {/* Results Header */}
       <div className='flex items-center justify-between'>
         <div className='flex items-center gap-2 text-lunary-primary-300/70'>
@@ -243,23 +243,6 @@ export default async function GrimoireSearchPage({
       {/* Header */}
       <div className='border-b border-lunary-primary-700'>
         <div className='max-w-4xl mx-auto px-4 py-6'>
-          {/* Breadcrumb */}
-          <nav className='flex items-center gap-2 text-sm text-lunary-primary-300/60 mb-6'>
-            <Link
-              href='/'
-              className='flex items-center gap-1 hover:text-lunary-primary-300'
-            >
-              <Home className='h-4 w-4' />
-              <span>Home</span>
-            </Link>
-            <span>/</span>
-            <Link href='/grimoire' className='hover:text-lunary-primary-300'>
-              Grimoire
-            </Link>
-            <span>/</span>
-            <span className='text-lunary-primary-300'>Search</span>
-          </nav>
-
           {/* Title */}
           <div className='flex items-center gap-3 mb-6'>
             <BookOpen className='h-8 w-8 text-lunary-primary-400' />

@@ -14,6 +14,7 @@ import {
   OGFooter,
   createOGResponse,
   defaultThemes,
+  OGImageSize,
 } from '../../../../../utils/og/base';
 
 dayjs.extend(dayOfYear);
@@ -94,15 +95,29 @@ function getTarotOGProperties(cardName: string): {
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
   const dateParam = searchParams.get('date');
+  const cardParam = searchParams.get('card');
+  const sizeParam = searchParams.get('size');
+  const showDateParam = searchParams.get('showDate');
+
+  const allowedSizes: OGImageSize[] = [
+    'square',
+    'landscape',
+    'portrait',
+    'story',
+  ];
+  const size: OGImageSize = allowedSizes.includes(sizeParam as OGImageSize)
+    ? (sizeParam as OGImageSize)
+    : 'landscape';
 
   const targetDate = dateParam || new Date().toISOString().split('T')[0];
   const dateObj = dayjs(targetDate).utc();
   const dayOfYearUtc = dateObj.dayOfYear();
   const dailySeed = `cosmic-${dateObj.format('YYYY-MM-DD')}-${dayOfYearUtc}-energy`;
-  const tarotCard = getTarotCard(dailySeed);
+  const tarotCard = cardParam ? { name: cardParam } : getTarotCard(dailySeed);
 
   const card = getTarotOGProperties(tarotCard.name);
-  const formattedDate = dateObj.format('DD/MM/YYYY');
+  const showDate = showDateParam === 'true' || Boolean(dateParam);
+  const formattedDate = showDate ? dateObj.format('DD/MM/YYYY') : undefined;
   const theme = defaultThemes.tarot(card.color);
 
   const robotoFont = await loadGoogleFont(request);
@@ -119,7 +134,7 @@ export async function GET(request: NextRequest) {
       <OGFooter date={formattedDate} />
     </OGWrapper>,
     {
-      size: 'square',
+      size,
       fonts: robotoFont
         ? [{ name: 'Roboto Mono', data: robotoFont, style: 'normal' as const }]
         : [],

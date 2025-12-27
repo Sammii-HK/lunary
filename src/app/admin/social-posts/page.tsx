@@ -45,6 +45,7 @@ interface PendingPost {
   topic?: string;
   scheduledDate?: string;
   imageUrl?: string;
+  videoUrl?: string;
   createdAt: string;
   status: 'pending' | 'approved' | 'rejected' | 'sent';
 }
@@ -271,6 +272,7 @@ export default function SocialPostsPage() {
           platform: post.platform,
           scheduledDate: post.scheduledDate,
           imageUrl: post.imageUrl,
+          videoUrl: post.videoUrl,
           postType: post.postType,
         }),
       });
@@ -334,6 +336,7 @@ export default function SocialPostsPage() {
             platform: post.platform,
             scheduledDate: post.scheduledDate,
             imageUrl: post.imageUrl,
+            videoUrl: post.videoUrl,
             postType: post.postType,
           }),
         });
@@ -1020,6 +1023,26 @@ export default function SocialPostsPage() {
                     </CardHeader>
                     <CardContent>
                       <div className='space-y-4'>
+                        {post.videoUrl && (
+                          <div className='relative w-full max-w-md mx-auto'>
+                            <video
+                              src={post.videoUrl}
+                              controls
+                              className='w-full rounded-lg border border-zinc-700 bg-black'
+                            />
+                            <div className='absolute top-2 right-2 flex gap-2'>
+                              <button
+                                onClick={() =>
+                                  window.open(post.videoUrl, '_blank')
+                                }
+                                className='bg-black/70 hover:bg-black/90 text-white px-2 py-1 rounded text-xs flex items-center gap-1'
+                              >
+                                <ExternalLink className='h-3 w-3' />
+                                Open
+                              </button>
+                            </div>
+                          </div>
+                        )}
                         {post.imageUrl && (
                           <div className='relative w-full max-w-md mx-auto'>
                             <Image

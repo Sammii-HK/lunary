@@ -4,8 +4,15 @@ import { selectSubredditForPostType } from '@/config/reddit-subreddits';
 
 export async function POST(request: NextRequest) {
   try {
-    const { postId, content, platform, scheduledDate, imageUrl, postType } =
-      await request.json();
+    const {
+      postId,
+      content,
+      platform,
+      scheduledDate,
+      imageUrl,
+      videoUrl,
+      postType,
+    } = await request.json();
 
     if (!postId || !platform) {
       return NextResponse.json(
@@ -19,7 +26,7 @@ export async function POST(request: NextRequest) {
 
     // Get post data from database (including any edits)
     const postDataFromDb = await sql`
-      SELECT content, post_type, scheduled_date, image_url
+      SELECT content, post_type, scheduled_date, image_url, video_url
       FROM social_posts WHERE id = ${postId}
     `;
 
@@ -37,6 +44,7 @@ export async function POST(request: NextRequest) {
     const actualScheduledDate =
       scheduledDate || postDataFromDb.rows[0].scheduled_date;
     const actualImageUrl = imageUrl || postDataFromDb.rows[0].image_url;
+    const actualVideoUrl = videoUrl || postDataFromDb.rows[0].video_url;
 
     if (!actualContent || actualContent.trim() === '') {
       return NextResponse.json(
@@ -123,6 +131,10 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    const videoPlatforms = ['instagram', 'tiktok', 'threads'];
+    const shouldUseVideo =
+      actualVideoUrl && videoPlatforms.includes(platformStr);
+
     // Build media array - ensure URLs use canonical lunary.app (non-www) domain
     // For TikTok, ensure images are in story format (9:16), not square (1:1)
     let imageUrlForPlatform = actualImageUrl
@@ -130,7 +142,7 @@ export async function POST(request: NextRequest) {
       : null;
 
     // Convert square images to story format for TikTok
-    if (platformStr === 'tiktok' && imageUrlForPlatform) {
+    if (!shouldUseVideo && platformStr === 'tiktok' && imageUrlForPlatform) {
       try {
         // Handle both absolute and relative URLs
         let url: URL;
@@ -170,15 +182,46 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    const mediaArray = imageUrlForPlatform
+    // Use story format for Instagram Reel cover images
+    if (shouldUseVideo && platformStr === 'instagram' && imageUrlForPlatform) {
+      try {
+        let url: URL;
+        if (
+          imageUrlForPlatform.startsWith('http://') ||
+          imageUrlForPlatform.startsWith('https://')
+        ) {
+          url = new URL(imageUrlForPlatform);
+        } else {
+          url = new URL(imageUrlForPlatform, baseUrl);
+        }
+
+        url.searchParams.set('format', 'story');
+        imageUrlForPlatform = url.toString();
+      } catch (error) {
+        if (!imageUrlForPlatform.includes('format=')) {
+          const separator = imageUrlForPlatform.includes('?') ? '&' : '?';
+          imageUrlForPlatform = `${imageUrlForPlatform}${separator}format=story`;
+        }
+      }
+    }
+
+    const mediaArray = shouldUseVideo
       ? [
           {
-            type: 'image' as const,
-            url: imageUrlForPlatform,
+            type: 'video' as const,
+            url: String(actualVideoUrl).trim(),
             alt: `Lunary cosmic insight - ${scheduleDate.toLocaleDateString()}`,
           },
         ]
-      : [];
+      : imageUrlForPlatform
+        ? [
+            {
+              type: 'image' as const,
+              url: imageUrlForPlatform,
+              alt: `Lunary cosmic insight - ${scheduleDate.toLocaleDateString()}`,
+            },
+          ]
+        : [];
 
     // Pinterest requires media - validate before proceeding
     if (platformStr === 'pinterest' && mediaArray.length === 0) {
@@ -239,6 +282,16 @@ export async function POST(request: NextRequest) {
     if (platformStr === 'tiktok' && mediaArray.length > 0) {
       postData.tiktokOptions = {
         type: 'post',
+        ...(shouldUseVideo && imageUrlForPlatform
+          ? { coverUrl: imageUrlForPlatform }
+          : {}),
+      };
+    }
+
+    if (platformStr === 'instagram' && shouldUseVideo) {
+      postData.instagramOptions = {
+        type: 'reel',
+        ...(imageUrlForPlatform ? { coverUrl: imageUrlForPlatform } : {}),
       };
     }
 

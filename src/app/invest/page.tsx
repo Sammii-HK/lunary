@@ -23,7 +23,7 @@ export const metadata: Metadata = {
 
 export default function InvestPage() {
   return (
-    <main className='min-h-screen bg-zinc-950 text-zinc-50 flex flex-col'>
+    <div className='min-h-screen bg-zinc-950 text-zinc-50 flex flex-col'>
       <div className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-16 lg:py-20 flex-1'>
         {/* Hero Section */}
         <section className='text-center mb-16 md:mb-20 lg:mb-24 space-y-6'>
@@ -584,6 +584,6 @@ export default function InvestPage() {
       <div className='mt-auto'>
         <MarketingFooter />
       </div>
-    </main>
+    </div>
   );
 }

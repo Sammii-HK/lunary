@@ -268,6 +268,12 @@ export async function POST(request: NextRequest) {
               const youtubeDescription =
                 videoData.video.postContent || blogContent.description;
 
+              const longFormPublishDate = new Date(weeklyData.weekStart);
+              longFormPublishDate.setUTCDate(
+                longFormPublishDate.getUTCDate() + 2,
+              );
+              longFormPublishDate.setUTCHours(20, 0, 0, 0);
+
               await fetch(`${baseUrl}/api/youtube/upload`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -277,7 +283,7 @@ export async function POST(request: NextRequest) {
                   title: blogContent.title,
                   description: youtubeDescription,
                   type: 'long',
-                  publishDate: new Date(weeklyData.weekStart).toISOString(),
+                  publishDate: longFormPublishDate.toISOString(),
                 }),
               })
                 .then(() => {

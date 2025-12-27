@@ -44,7 +44,7 @@ function polarFromLongitude(
   radius: number,
 ) {
   const adjustedLong = (longitude - ascendantAngle + 360) % 360;
-  const angle = (270 - adjustedLong + 360) % 360;
+  const angle = (360 - adjustedLong) % 360;
   const radian = (angle * Math.PI) / 180;
   return {
     angle,
@@ -310,19 +310,6 @@ export function ChartWheelSvg({
           );
         },
       )}
-
-      {/* AC marker */}
-      <text
-        x='125'
-        y='0'
-        textAnchor='middle'
-        dominantBaseline='central'
-        fontSize='10'
-        fill={colours.angle}
-        style={{ fontFamily: fontFamilySymbols }}
-      >
-        AC
-      </text>
     </svg>
   );
 }

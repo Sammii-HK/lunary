@@ -28,13 +28,23 @@ export const metadata: Metadata = {
     url: 'https://lunary.app/developers',
     siteName: 'Lunary',
     type: 'website',
-    images: ['/api/og/cosmic?title=Lunary%20API%20for%20Developers'],
+    images: [
+      {
+        url: '/api/og/educational/developers?label=Developers&title=Lunary%20API%20for%20Developers&subtitle=Moon%20phases%20%E2%80%A2%20Birth%20charts%20%E2%80%A2%20Transits&path=%2Fdevelopers&format=landscape',
+        width: 1200,
+        height: 630,
+        alt: 'Lunary API for Developers',
+      },
+    ],
   },
   twitter: {
     card: 'summary_large_image',
     title: 'Lunary API - Astrology & Moon Phase Data for Developers',
     description:
       'Free API for moon phases, planetary transits, and horoscope data.',
+    images: [
+      '/api/og/educational/developers?label=Developers&title=Lunary%20API%20for%20Developers&subtitle=Moon%20phases%20%E2%80%A2%20Birth%20charts%20%E2%80%A2%20Transits&path=%2Fdevelopers&format=landscape',
+    ],
   },
   alternates: {
     canonical: 'https://lunary.app/developers',

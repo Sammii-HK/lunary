@@ -66,7 +66,7 @@ export const BirthChart = ({
     return birthChart.map((planet) => {
       const adjustedLong =
         (planet.eclipticLongitude - ascendantAngle + 360) % 360;
-      const angle = (270 - adjustedLong + 360) % 360;
+      const angle = (360 - adjustedLong) % 360;
       const radian = (angle * Math.PI) / 180;
 
       const radius = 65;
@@ -103,7 +103,7 @@ export const BirthChart = ({
       const signStart = index * 30;
       const signMid = signStart + 15;
       const adjustedMid = (signMid - ascendantAngle + 360) % 360;
-      const angle = (270 - adjustedMid + 360) % 360;
+      const angle = (360 - adjustedMid) % 360;
       const radian = (angle * Math.PI) / 180;
       const radius = 100;
       const x = Math.cos(radian) * radius;
@@ -118,7 +118,7 @@ export const BirthChart = ({
       return houses.map((house) => {
         const adjustedLong =
           (house.eclipticLongitude - ascendantAngle + 360) % 360;
-        const angle = (270 - adjustedLong + 360) % 360;
+        const angle = (360 - adjustedLong) % 360;
         const radian = (angle * Math.PI) / 180;
         return { ...house, adjustedLong, angle, radian };
       });
@@ -126,7 +126,7 @@ export const BirthChart = ({
     return Array.from({ length: 12 }, (_, i) => {
       const houseStart = i * 30;
       const adjustedLong = houseStart;
-      const angle = (270 - adjustedLong + 360) % 360;
+      const angle = (360 - adjustedLong) % 360;
       const radian = (angle * Math.PI) / 180;
       return {
         house: i + 1,
@@ -242,7 +242,7 @@ export const BirthChart = ({
           {Array.from({ length: 12 }, (_, i) => {
             const signStart = i * 30;
             const adjustedStart = (signStart - ascendantAngle + 360) % 360;
-            const angle = (270 - adjustedStart + 360) % 360;
+            const angle = (360 - adjustedStart) % 360;
             const radian = (angle * Math.PI) / 180;
             const x1 = Math.cos(radian) * 85;
             const y1 = Math.sin(radian) * 85;
@@ -315,17 +315,6 @@ export const BirthChart = ({
               );
             },
           )}
-
-          <text
-            x='125'
-            y='0'
-            textAnchor='middle'
-            dominantBaseline='central'
-            className='fill-lunary-accent font-astro'
-            fontSize='10'
-          >
-            AC
-          </text>
         </svg>
       </div>
 

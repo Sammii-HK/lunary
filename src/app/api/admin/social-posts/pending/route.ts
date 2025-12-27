@@ -13,6 +13,7 @@ export async function GET(request: NextRequest) {
         scheduled_date as "scheduledDate",
         status,
         image_url as "imageUrl",
+        video_url as "videoUrl",
         created_at as "createdAt"
       FROM social_posts
       WHERE status IN ('pending', 'approved')

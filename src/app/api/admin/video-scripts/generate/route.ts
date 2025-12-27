@@ -54,7 +54,7 @@ export async function POST(request: Request) {
 
     return NextResponse.json({
       success: true,
-      message: `Generated ${scripts.tiktokScripts.length} TikTok scripts and 1 YouTube script`,
+      message: `Generated ${scripts.tiktokScripts.length} daily shorts and 1 YouTube script`,
       theme: scripts.theme.name,
       weekStartDate: weekStartDate.toISOString(),
       scripts: {
@@ -99,8 +99,10 @@ async function sendScriptsToDiscord(
 
   // Format TikTok scripts summary
   const tiktokSummary = scripts.tiktokScripts
-    .map((s, i) => {
-      const day = ['Mon', 'Wed', 'Fri'][i];
+    .map((s) => {
+      const day = s.scheduledDate.toLocaleDateString('en-US', {
+        weekday: 'short',
+      });
       return `**${day}**: ${s.facetTitle} (${s.estimatedDuration})`;
     })
     .join('\n');
@@ -110,10 +112,10 @@ async function sendScriptsToDiscord(
 
   const message = `**Weekly Theme**: ${scripts.theme.name}
 
-**TikTok Scripts (60-90s)**:
+**Daily Shorts (30-45s)**:
 ${tiktokSummary}
 
-**YouTube Script (5-7min)**:
+**YouTube Script (3-4min)**:
 ${youtubeSummary}
 
 View full scripts in the admin dashboard.`;

@@ -37,10 +37,15 @@ export async function GET(request: NextRequest) {
             range.end,
           )}
             AND notification_type = ${notificationType}
-            AND user_id NOT IN (
-              SELECT DISTINCT user_id FROM subscriptions WHERE user_email LIKE ${TEST_EMAIL_PATTERN} OR user_email = ${TEST_EMAIL_EXACT}
-              UNION
-              SELECT DISTINCT user_id FROM conversion_events WHERE user_email LIKE ${TEST_EMAIL_PATTERN} OR user_email = ${TEST_EMAIL_EXACT}
+            AND NOT EXISTS (
+              SELECT 1 FROM subscriptions s
+              WHERE s.user_id = analytics_notification_events.user_id
+                AND (s.user_email LIKE ${TEST_EMAIL_PATTERN} OR s.user_email = ${TEST_EMAIL_EXACT})
+            )
+            AND NOT EXISTS (
+              SELECT 1 FROM conversion_events ce
+              WHERE ce.user_id = analytics_notification_events.user_id
+                AND (ce.user_email LIKE ${TEST_EMAIL_PATTERN} OR ce.user_email = ${TEST_EMAIL_EXACT})
             )
           GROUP BY notification_type
         `
@@ -55,10 +60,15 @@ export async function GET(request: NextRequest) {
           WHERE created_at BETWEEN ${formatTimestamp(range.start)} AND ${formatTimestamp(
             range.end,
           )}
-            AND user_id NOT IN (
-              SELECT DISTINCT user_id FROM subscriptions WHERE user_email LIKE ${TEST_EMAIL_PATTERN} OR user_email = ${TEST_EMAIL_EXACT}
-              UNION
-              SELECT DISTINCT user_id FROM conversion_events WHERE user_email LIKE ${TEST_EMAIL_PATTERN} OR user_email = ${TEST_EMAIL_EXACT}
+            AND NOT EXISTS (
+              SELECT 1 FROM subscriptions s
+              WHERE s.user_id = analytics_notification_events.user_id
+                AND (s.user_email LIKE ${TEST_EMAIL_PATTERN} OR s.user_email = ${TEST_EMAIL_EXACT})
+            )
+            AND NOT EXISTS (
+              SELECT 1 FROM conversion_events ce
+              WHERE ce.user_id = analytics_notification_events.user_id
+                AND (ce.user_email LIKE ${TEST_EMAIL_PATTERN} OR ce.user_email = ${TEST_EMAIL_EXACT})
             )
           GROUP BY notification_type
         `;

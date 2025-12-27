@@ -15,10 +15,10 @@ export default function CookiePolicyPage() {
 
   return (
     <div className='min-h-screen bg-zinc-950 text-zinc-100 flex flex-col pt-16'>
-      <main className='max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12'>
+      <div className='max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12'>
         <MarketingBreadcrumbs />
         <div className='mb-8'>
-          <h1 className='text-4xl font-semibold text-white mb-4'>
+          <h1 className='text-2xl md:text-4xl font-semibold text-white mb-4'>
             Cookie Policy
           </h1>
           <p className='text-sm text-zinc-400'>Last Updated: {lastUpdated}</p>
@@ -385,7 +385,7 @@ export default function CookiePolicyPage() {
             </div>
           </section>
         </div>
-      </main>
+      </div>
       <div className='mt-auto'>
         <MarketingFooter />
       </div>

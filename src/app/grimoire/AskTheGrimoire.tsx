@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useMemo, useEffect, useTransition, useRef } from 'react';
-import Link from 'next/link';
+import { NavParamLink } from '@/components/NavParamLink';
 import { Search, Sparkles } from 'lucide-react';
 import { grimoire, grimoireItems } from '@/constants/grimoire';
 import { stringToKebabCase } from '../../../utils/string';
@@ -952,7 +952,7 @@ export function AskTheGrimoire({
           <div className='absolute top-full left-0 right-0 mt-2 bg-zinc-900 border border-zinc-700 rounded-md shadow-lg max-h-96 overflow-y-auto z-50'>
             <div className='p-2 md:p-3 space-y-1'>
               {searchResults.map((result, index) => (
-                <Link
+                <NavParamLink
                   key={index}
                   href={result.href}
                   onClick={() => {
@@ -980,7 +980,7 @@ export function AskTheGrimoire({
                       </div>
                     </div>
                   </div>
-                </Link>
+                </NavParamLink>
               ))}
             </div>
           </div>
@@ -995,13 +995,13 @@ export function AskTheGrimoire({
             <p className='text-zinc-400 text-sm mb-3'>
               No grimoire pages found for "{searchQuery}"
             </p>
-            <Link
+            <NavParamLink
               href='/guide'
               className='inline-flex items-center gap-1.5 text-sm text-lunary-primary-400 hover:text-lunary-primary-300 transition-colors'
             >
               <Sparkles className='w-4 h-4' />
               Ask the Astral Guide for a personalized answer
-            </Link>
+            </NavParamLink>
           </div>
         )}
     </div>

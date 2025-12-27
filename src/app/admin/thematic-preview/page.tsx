@@ -341,7 +341,8 @@ export default function ThematicPreviewPage() {
 
   // Reset selected item when category changes
   useEffect(() => {
-    setSelectedItem(items[0] || null);
+    const nextItems = sampleItems[selectedCategory] || [];
+    setSelectedItem(nextItems[0] || null);
   }, [selectedCategory]);
 
   const getImageUrl = (

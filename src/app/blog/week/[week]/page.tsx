@@ -1246,7 +1246,7 @@ export async function generateMetadata({
   })}`;
 
   const url = `https://lunary.app/blog/week/${weekInfo.slug}`;
-  const ogImage = `https://lunary.app/api/og/cosmic?date=${weekStart.toISOString().split('T')[0]}`;
+  const ogImage = `https://lunary.app/api/og/educational/blog?title=${encodeURIComponent(blogData.title)}&subtitle=${encodeURIComponent(`Week of ${weekRange}`)}&format=landscape`;
 
   const keywords = [
     'astrology',

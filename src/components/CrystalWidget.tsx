@@ -240,7 +240,7 @@ export const CrystalWidget = () => {
         </div>
 
         <div className='text-center mb-3'>
-          <div className='text-md font-semibold text-white'>
+          <div className='text-base font-semibold text-white'>
             {recommendedCrystal.name}
           </div>
           <div className='text-xs text-zinc-400 mb-2'>

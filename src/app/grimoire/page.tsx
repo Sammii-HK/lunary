@@ -1,11 +1,7 @@
 import { Metadata } from 'next';
 
 import GrimoireLayout from './GrimoireLayout';
-import {
-  createItemListSchema,
-  renderJsonLd,
-  createBreadcrumbSchema,
-} from '@/lib/schema';
+import { createItemListSchema, renderJsonLd } from '@/lib/schema';
 
 export const metadata: Metadata = {
   title:
@@ -108,13 +104,11 @@ const GrimoireHome = () => {
     url: 'https://lunary.app/grimoire',
     items: grimoireCategories,
   });
+  const breadcrumbItems = [{ name: 'Grimoire', url: '/grimoire' }];
 
   return (
     <div className='h-full w-full'>
       {renderJsonLd(grimoireListSchema)}
-      {renderJsonLd(
-        createBreadcrumbSchema([{ name: 'Grimoire', url: '/grimoire' }]),
-      )}
       <GrimoireLayout />
     </div>
   );

@@ -2,7 +2,7 @@ import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import { ExploreGrimoire } from '@/components/grimoire/ExploreGrimoire';
-import { createBreadcrumbSchema, renderJsonLd } from '@/lib/schema';
+
 import {
   ZODIAC_SIGNS,
   MONTHS,
@@ -12,6 +12,7 @@ import {
   MONTH_DISPLAY_NAMES,
   ZodiacSign,
 } from '@/constants/seo/monthly-horoscope';
+import { GrimoireBreadcrumbs } from '@/components/grimoire/GrimoireBreadcrumbs';
 
 const AVAILABLE_YEARS = [2025, 2026, 2027, 2028, 2029, 2030];
 
@@ -84,34 +85,15 @@ export default async function YearHoroscopePage({
   const symbol = SIGN_SYMBOLS[signKey];
   const element = SIGN_ELEMENTS[signKey];
 
-  const breadcrumbSchema = createBreadcrumbSchema([
+  const breadcrumbItems = [
     { name: 'Grimoire', url: '/grimoire' },
     { name: 'Horoscopes', url: '/grimoire/horoscopes' },
-  ]);
+  ];
 
   return (
     <div className='min-h-screen bg-zinc-950 text-zinc-100'>
-      {renderJsonLd(breadcrumbSchema)}
+      <GrimoireBreadcrumbs items={breadcrumbItems} />
       <div className='max-w-4xl mx-auto px-4 py-12'>
-        <nav className='text-sm text-zinc-400 mb-8'>
-          <Link href='/grimoire' className='hover:text-zinc-300'>
-            Grimoire
-          </Link>
-          <span className='mx-2'>/</span>
-          <Link href='/grimoire/horoscopes' className='hover:text-zinc-300'>
-            Horoscopes
-          </Link>
-          <span className='mx-2'>/</span>
-          <Link
-            href={`/grimoire/horoscopes/${sign}`}
-            className='hover:text-zinc-300'
-          >
-            {signName}
-          </Link>
-          <span className='mx-2'>/</span>
-          <span className='text-zinc-300'>{year}</span>
-        </nav>
-
         <header className='mb-12 text-center'>
           <span className='text-6xl mb-4 block'>{symbol}</span>
           <h1 className='text-4xl md:text-5xl font-light text-zinc-100 mb-4'>

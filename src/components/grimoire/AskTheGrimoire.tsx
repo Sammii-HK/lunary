@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useCallback, useRef, useEffect } from 'react';
-import Link from 'next/link';
+import { NavParamLink } from '@/components/NavParamLink';
 import {
   Search,
   BookOpen,
@@ -359,7 +359,7 @@ export function AskTheGrimoire({
 
           <div className='max-h-[400px] overflow-y-auto'>
             {results.map((result, index) => (
-              <Link
+              <NavParamLink
                 key={result.slug}
                 href={`/grimoire/${result.slug}`}
                 data-index={index}
@@ -406,13 +406,13 @@ export function AskTheGrimoire({
                 </div>
 
                 <ArrowRight className='h-4 w-4 text-lunary-accent-700 flex-shrink-0 mt-1' />
-              </Link>
+              </NavParamLink>
             ))}
           </div>
 
           {/* Footer */}
           <div className='p-3 border-t border-lunary-primary-800 bg-lunary-primary-950'>
-            <Link
+            <NavParamLink
               href={`/grimoire/search?q=${encodeURIComponent(query)}`}
               className='
                 flex items-center justify-center gap-2
@@ -423,7 +423,7 @@ export function AskTheGrimoire({
             >
               <BookOpen className='h-4 w-4' />
               <span>View all results for &quot;{query}&quot;</span>
-            </Link>
+            </NavParamLink>
           </div>
         </div>
       )}

@@ -8,7 +8,7 @@ import {
   createHowToSchema,
   renderJsonLd,
 } from '@/lib/schema';
-import { Breadcrumbs } from '@/components/grimoire/Breadcrumbs';
+import { GrimoireBreadcrumbs } from '@/components/grimoire/GrimoireBreadcrumbs';
 import { CosmicConnections } from '@/components/grimoire/CosmicConnections';
 import { CosmicConnectionSection } from '@/lib/cosmicConnectionsConfig';
 import { Button } from '@/components/ui/button';
@@ -145,6 +145,11 @@ export default function MoonRitualsPage() {
       },
     ],
   });
+  const breadcrumbItems = [
+    { name: 'Grimoire', url: '/grimoire' },
+    { name: 'Moon', url: '/grimoire/moon' },
+    { name: 'Rituals', url: '/grimoire/moon/rituals' },
+  ];
 
   return (
     <div className='p-4 md:p-8 max-w-4xl mx-auto'>
@@ -152,14 +157,7 @@ export default function MoonRitualsPage() {
       {renderJsonLd(faqSchema)}
       {renderJsonLd(newMoonRitualSchema)}
       {renderJsonLd(fullMoonRitualSchema)}
-
-      <Breadcrumbs
-        items={[
-          { label: 'Grimoire', href: '/grimoire' },
-          { label: 'Moon', href: '/grimoire/moon' },
-          { label: 'Rituals' },
-        ]}
-      />
+      <GrimoireBreadcrumbs items={breadcrumbItems} />
 
       <header className='mb-12'>
         <h1 className='text-4xl md:text-5xl font-light text-zinc-100 mb-6'>

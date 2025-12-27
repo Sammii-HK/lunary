@@ -317,7 +317,11 @@ export default function AnalyticsPage() {
         ['Activity', 'Returning Users', String(activity.returning_users ?? 0)],
         ['Activity', 'WAU', String(activity.wau)],
         ['Activity', 'MAU', String(activity.mau)],
-        ['Activity', 'Churn Rate', `${activity.churn_rate.toFixed(2)}%`],
+        [
+          'Activity',
+          'Churn Rate',
+          `${Number(activity.churn_rate ?? 0).toFixed(2)}%`,
+        ],
       );
     }
 
@@ -358,12 +362,14 @@ export default function AnalyticsPage() {
         [
           'Notifications',
           'Overall Open Rate',
-          `${notifications.overall_open_rate.toFixed(2)}%`,
+          `${Number(notifications.overall_open_rate ?? 0).toFixed(2)}%`,
         ],
         [
           'Notifications',
           'Overall CTR',
-          `${notifications.overall_click_through_rate.toFixed(2)}%`,
+          `${Number(notifications.overall_click_through_rate ?? 0).toFixed(
+            2,
+          )}%`,
         ],
       );
     }
@@ -759,7 +765,9 @@ export default function AnalyticsPage() {
                   <div className='h-2 w-full rounded-full bg-zinc-800'>
                     <div
                       className='h-2 rounded-full bg-gradient-to-r from-lunary-primary-400 to-lunary-highlight-500'
-                      style={{ width: `${trigger.percentage.toFixed(2)}%` }}
+                      style={{
+                        width: `${Number(trigger.percentage ?? 0).toFixed(2)}%`,
+                      }}
                     />
                   </div>
                 </div>
@@ -826,11 +834,15 @@ export default function AnalyticsPage() {
                     </div>
                     <div className='flex items-center justify-between text-zinc-400'>
                       <span>Open rate</span>
-                      <span>{type.data.open_rate.toFixed(1)}%</span>
+                      <span>
+                        {Number(type.data.open_rate ?? 0).toFixed(1)}%
+                      </span>
                     </div>
                     <div className='flex items-center justify-between text-zinc-400'>
                       <span>CTR</span>
-                      <span>{type.data.click_through_rate.toFixed(1)}%</span>
+                      <span>
+                        {Number(type.data.click_through_rate ?? 0).toFixed(1)}%
+                      </span>
                     </div>
                   </div>
                 </div>
@@ -1223,7 +1235,7 @@ export default function AnalyticsPage() {
                       <div className='flex items-center justify-between mb-2'>
                         <span className='font-medium'>{plan.plan}</span>
                         <span className='text-sm text-zinc-400'>
-                          {plan.percentage.toFixed(1)}%
+                          {Number(plan.percentage ?? 0).toFixed(1)}%
                         </span>
                       </div>
                       <div className='space-y-1 text-sm'>
@@ -1233,7 +1245,7 @@ export default function AnalyticsPage() {
                         </div>
                         <div className='flex justify-between'>
                           <span className='text-zinc-400'>MRR:</span>
-                          <span>${plan.mrr.toFixed(2)}</span>
+                          <span>${Number(plan.mrr ?? 0).toFixed(2)}</span>
                         </div>
                         <div className='flex justify-between'>
                           <span className='text-zinc-400'>Active:</span>
@@ -1372,7 +1384,7 @@ export default function AnalyticsPage() {
                                 : 'text-zinc-500'
                             }`}
                           >
-                            {cohort.day1.toFixed(1)}%
+                            {Number(cohort.day1 ?? 0).toFixed(1)}%
                           </td>
                           <td
                             className={`py-3 text-right font-medium ${
@@ -1381,7 +1393,7 @@ export default function AnalyticsPage() {
                                 : 'text-zinc-500'
                             }`}
                           >
-                            {cohort.day7.toFixed(1)}%
+                            {Number(cohort.day7 ?? 0).toFixed(1)}%
                           </td>
                           <td
                             className={`py-3 text-right font-medium ${
@@ -1390,7 +1402,7 @@ export default function AnalyticsPage() {
                                 : 'text-zinc-500'
                             }`}
                           >
-                            {cohort.day30.toFixed(1)}%
+                            {Number(cohort.day30 ?? 0).toFixed(1)}%
                           </td>
                         </tr>
                       );
@@ -1600,7 +1612,7 @@ function ModeBreakdown({ modes }: { modes: AiMode[] }) {
     );
   }
 
-  const max = Math.max(...modes.map((mode) => mode.percentage), 1);
+  const max = Math.max(...modes.map((mode) => Number(mode.percentage ?? 0)), 1);
 
   return (
     <div className='space-y-3'>
@@ -1608,13 +1620,13 @@ function ModeBreakdown({ modes }: { modes: AiMode[] }) {
         <div key={mode.mode}>
           <div className='flex items-center justify-between text-sm text-zinc-400'>
             <span className='capitalize'>{mode.mode || 'general'}</span>
-            <span>{mode.percentage.toFixed(1)}%</span>
+            <span>{Number(mode.percentage ?? 0).toFixed(1)}%</span>
           </div>
           <div className='h-2 rounded-full bg-zinc-800'>
             <div
               className='h-2 rounded-full bg-gradient-to-r from-sky-400 to-lunary-primary-500'
               style={{
-                width: `${(mode.percentage / max) * 100}%`,
+                width: `${(Number(mode.percentage ?? 0) / max) * 100}%`,
               }}
             />
           </div>

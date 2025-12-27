@@ -79,6 +79,12 @@ export default function VideoScriptsPage() {
   const [hideCompleted, setHideCompleted] = useState(true);
   const [generatingPost, setGeneratingPost] = useState<number | null>(null);
   const [postCopied, setPostCopied] = useState<number | null>(null);
+  const [generatingVideosWeek, setGeneratingVideosWeek] = useState<
+    string | null
+  >(null);
+  const [generatingVideoScriptId, setGeneratingVideoScriptId] = useState<
+    number | null
+  >(null);
 
   useEffect(() => {
     loadScripts();
@@ -118,6 +124,28 @@ export default function VideoScriptsPage() {
       alert('Failed to generate scripts');
     } finally {
       setGenerating(false);
+    }
+  };
+
+  const generateVideosForWeek = async (weekStart: string) => {
+    try {
+      setGeneratingVideosWeek(weekStart);
+      const response = await fetch('/api/admin/video-scripts/generate-videos', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ weekStart }),
+      });
+      const data = await response.json();
+      if (!data.success) {
+        alert(data.error || data.message || 'Failed to generate videos');
+      } else {
+        alert(`Generated ${data.generated} videos for the week.`);
+      }
+    } catch (error) {
+      console.error('Failed to generate videos:', error);
+      alert('Failed to generate videos');
+    } finally {
+      setGeneratingVideosWeek(null);
     }
   };
 
@@ -185,6 +213,29 @@ export default function VideoScriptsPage() {
       alert('Failed to generate written post');
     } finally {
       setGeneratingPost(null);
+    }
+  };
+
+  const generateVideoForScript = async (scriptId: number) => {
+    try {
+      setGeneratingVideoScriptId(scriptId);
+      const response = await fetch(
+        `/api/admin/video-scripts/${scriptId}/generate-video`,
+        {
+          method: 'POST',
+        },
+      );
+      const data = await response.json();
+      if (!data.success) {
+        alert(data.error || 'Failed to generate video');
+      } else {
+        alert('Video generated and scheduled for YouTube Shorts.');
+      }
+    } catch (error) {
+      console.error('Failed to generate video:', error);
+      alert('Failed to generate video');
+    } finally {
+      setGeneratingVideoScriptId(null);
     }
   };
 
@@ -379,15 +430,30 @@ export default function VideoScriptsPage() {
                         Theme: {group.theme}
                       </CardDescription>
                     </div>
-                    <div className='flex gap-2 text-sm text-slate-400'>
-                      <span className='flex items-center gap-1'>
-                        <Video className='w-4 h-4 text-pink-500' />
-                        {filteredTiktok.length} TikTok
-                      </span>
-                      <span className='flex items-center gap-1'>
-                        <Youtube className='w-4 h-4 text-red-500' />
-                        {filteredYoutube.length} YouTube
-                      </span>
+                    <div className='flex items-center gap-3'>
+                      <Button
+                        onClick={() => generateVideosForWeek(group.weekStart)}
+                        disabled={generatingVideosWeek === group.weekStart}
+                        variant='outline'
+                        className='border-slate-700 text-slate-300 hover:bg-slate-800'
+                      >
+                        {generatingVideosWeek === group.weekStart ? (
+                          <Loader2 className='w-4 h-4 mr-2 animate-spin' />
+                        ) : (
+                          <PlayCircle className='w-4 h-4 mr-2' />
+                        )}
+                        Generate Videos
+                      </Button>
+                      <div className='flex gap-2 text-sm text-slate-400'>
+                        <span className='flex items-center gap-1'>
+                          <Video className='w-4 h-4 text-pink-500' />
+                          {filteredTiktok.length} TikTok
+                        </span>
+                        <span className='flex items-center gap-1'>
+                          <Youtube className='w-4 h-4 text-red-500' />
+                          {filteredYoutube.length} YouTube
+                        </span>
+                      </div>
                     </div>
                   </div>
                 </CardHeader>
@@ -414,7 +480,9 @@ export default function VideoScriptsPage() {
                       getPlatformIcon={getPlatformIcon}
                       onGeneratePost={() => generateWrittenPost(script.id)}
                       onCopyPost={() => copyPostContent(script)}
+                      onGenerateVideo={() => generateVideoForScript(script.id)}
                       generatingPost={generatingPost === script.id}
+                      generatingVideo={generatingVideoScriptId === script.id}
                       postCopied={postCopied === script.id}
                     />
                   ))}
@@ -441,7 +509,9 @@ export default function VideoScriptsPage() {
                       getPlatformIcon={getPlatformIcon}
                       onGeneratePost={() => generateWrittenPost(script.id)}
                       onCopyPost={() => copyPostContent(script)}
+                      onGenerateVideo={() => generateVideoForScript(script.id)}
                       generatingPost={generatingPost === script.id}
+                      generatingVideo={generatingVideoScriptId === script.id}
                       postCopied={postCopied === script.id}
                     />
                   ))}
@@ -468,7 +538,9 @@ function ScriptCard({
   getPlatformIcon,
   onGeneratePost,
   onCopyPost,
+  onGenerateVideo,
   generatingPost,
+  generatingVideo,
   postCopied,
 }: {
   script: VideoScript;
@@ -487,7 +559,9 @@ function ScriptCard({
   getPlatformIcon: (platform: string) => React.ReactNode;
   onGeneratePost: () => void;
   onCopyPost: () => void;
+  onGenerateVideo: () => void;
   generatingPost: boolean;
+  generatingVideo: boolean;
   postCopied: boolean;
 }) {
   return (
@@ -537,7 +611,9 @@ function ScriptCard({
           updating={updating}
           onGeneratePost={onGeneratePost}
           onCopyPost={onCopyPost}
+          onGenerateVideo={onGenerateVideo}
           generatingPost={generatingPost}
+          generatingVideo={generatingVideo}
           postCopied={postCopied}
         />
       )}
@@ -554,7 +630,9 @@ function TikTokExpandedContent({
   updating,
   onGeneratePost,
   onCopyPost,
+  onGenerateVideo,
   generatingPost,
+  generatingVideo,
   postCopied,
 }: {
   script: VideoScript;
@@ -564,7 +642,9 @@ function TikTokExpandedContent({
   updating: boolean;
   onGeneratePost: () => void;
   onCopyPost: () => void;
+  onGenerateVideo: () => void;
   generatingPost: boolean;
+  generatingVideo: boolean;
   postCopied: boolean;
 }) {
   const [metadataCopied, setMetadataCopied] = useState(false);
@@ -727,6 +807,20 @@ function TikTokExpandedContent({
             </span>
           </div>
           <div className='flex gap-2'>
+            <Button
+              size='sm'
+              variant='outline'
+              onClick={onGenerateVideo}
+              disabled={generatingVideo}
+              className='border-slate-600 text-slate-300 hover:bg-slate-800/50'
+            >
+              {generatingVideo ? (
+                <Loader2 className='w-3 h-3 mr-1 animate-spin' />
+              ) : (
+                <PlayCircle className='w-3 h-3 mr-1' />
+              )}
+              Video
+            </Button>
             {!script.writtenPostContent && (
               <Button
                 size='sm'

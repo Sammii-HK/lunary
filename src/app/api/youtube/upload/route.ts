@@ -20,6 +20,7 @@ interface UploadVideoRequest {
   type: 'short' | 'long';
   tags?: string[];
   publishDate?: string; // ISO 8601 date string
+  script?: string; // Optional script for captions
 }
 
 export async function POST(request: NextRequest) {
@@ -32,8 +33,16 @@ export async function POST(request: NextRequest) {
         { status: 400 },
       );
     }
-    const { videoUrl, videoId, title, description, type, tags, publishDate } =
-      body;
+    const {
+      videoUrl,
+      videoId,
+      title,
+      description,
+      type,
+      tags,
+      publishDate,
+      script,
+    } = body;
 
     if (!videoUrl || !title || !description || !type) {
       return NextResponse.json(
@@ -77,18 +86,24 @@ export async function POST(request: NextRequest) {
     console.log(`✅ Video uploaded to YouTube: ${result.videoId}`);
 
     // Upload captions if script is available
-    if (videoId) {
+    if (script || videoId) {
       try {
-        const videoResult = await sql`
-          SELECT script FROM videos WHERE id = ${videoId}
-        `;
+        let scriptForCaptions = script?.trim() || '';
 
-        if (videoResult.rows.length > 0 && videoResult.rows[0].script) {
-          const script = videoResult.rows[0].script;
+        if (!scriptForCaptions && videoId) {
+          const videoResult = await sql`
+            SELECT script FROM videos WHERE id = ${videoId}
+          `;
+          if (videoResult.rows.length > 0 && videoResult.rows[0].script) {
+            scriptForCaptions = videoResult.rows[0].script;
+          }
+        }
+
+        if (scriptForCaptions) {
           console.log(`📝 Uploading captions for video ${result.videoId}...`);
-          await uploadCaptions(result.videoId, script);
+          await uploadCaptions(result.videoId, scriptForCaptions);
           console.log(`✅ Captions uploaded for video ${result.videoId}`);
-        } else {
+        } else if (videoId) {
           console.log(
             `ℹ️ No script found for video ${videoId}, skipping captions`,
           );
@@ -109,7 +124,9 @@ export async function POST(request: NextRequest) {
     try {
       if (type === 'short') {
         // Short and medium-form videos go to Shorts playlist
-        const shortsPlaylistId = process.env.YOUTUBE_SHORTS_PLAYLIST_ID;
+        const shortsPlaylistId =
+          process.env.YOUTUBE_WEEKLY_SERIES_PLAYLIST_ID ||
+          process.env.YOUTUBE_SHORTS_PLAYLIST_ID;
         if (shortsPlaylistId) {
           console.log(
             `📋 Adding ${type} video to Shorts playlist: ${shortsPlaylistId}`,
@@ -121,8 +138,10 @@ export async function POST(request: NextRequest) {
           );
         }
       } else {
-        // Long-form videos go to long-form playlist
-        const longFormPlaylistId = process.env.YOUTUBE_LONG_FORM_PLAYLIST_ID;
+        // Long-form videos go to weekly series playlist if set, otherwise long-form playlist
+        const longFormPlaylistId =
+          process.env.YOUTUBE_WEEKLY_SERIES_PLAYLIST_ID ||
+          process.env.YOUTUBE_LONG_FORM_PLAYLIST_ID;
         if (longFormPlaylistId) {
           console.log(
             `📋 Adding ${type} video to long-form playlist: ${longFormPlaylistId}`,

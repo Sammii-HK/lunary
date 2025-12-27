@@ -30,6 +30,7 @@ import {
   needsRunicFont,
   usesMoonImages,
 } from '../../../../../utils/og/grimoire-og-data';
+import { createSubtleGradient } from '../../../../../utils/og/gradients';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -201,22 +202,18 @@ export async function GET(request: NextRequest): Promise<Response> {
       runicFont = await loadRunicFont();
     }
 
-    // Helper to convert gradient tuple to CSS string
-    const gradientToString = (g: [string, string]): string =>
-      `linear-gradient(to bottom, ${g[0]}, ${g[1]})`;
-
     // Get theme - prefer dynamic data if available
     let themeData;
     if (dynamicData?.gradient) {
       themeData = {
-        gradient: gradientToString(dynamicData.gradient),
+        gradient: createSubtleGradient(dynamicData.gradient),
         accentColor: dynamicData.color || '#A78BFA',
         textColor: '#F1F5F9',
         subtleTextColor: 'rgba(148, 163, 184, 0.6)',
       };
     } else if (dynamicData?.color) {
       themeData = {
-        gradient: gradientToString(['#1e293b', '#0f172a']),
+        gradient: createSubtleGradient(['#1e293b', '#0f172a']),
         accentColor: dynamicData.color,
         textColor: '#F1F5F9',
         subtleTextColor: 'rgba(148, 163, 184, 0.6)',

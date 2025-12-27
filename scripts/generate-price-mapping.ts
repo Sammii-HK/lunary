@@ -14,15 +14,11 @@ if (!process.env.STRIPE_SECRET_KEY) {
 function getStripe(secretKey?: string) {
   const key = secretKey || process.env.STRIPE_SECRET_KEY;
   if (!key) return null;
-  return new Stripe(key, {
-    apiVersion: '2024-11-20.acacia',
-  });
+  return new Stripe(key);
 }
 
 const primaryStripe = getStripe();
-const legacyStripe = process.env.STRIPE_SECRET_KEY_LEGACY
-  ? getStripe(process.env.STRIPE_SECRET_KEY_LEGACY)
-  : null;
+const legacyStripe = null;
 
 interface PriceMapping {
   [planId: string]: {
@@ -38,9 +34,7 @@ async function generatePriceMapping(): Promise<PriceMapping> {
   const mapping: PriceMapping = {};
 
   console.log('🔍 Fetching all prices from Stripe...\n');
-  console.log(
-    `📊 Checking primary account${legacyStripe ? ' and legacy account' : ''}\n`,
-  );
+  console.log(`📊 Checking primary account only\n`);
 
   for (const plan of PRICING_PLANS) {
     if (plan.id === 'free') continue;
@@ -50,10 +44,7 @@ async function generatePriceMapping(): Promise<PriceMapping> {
     mapping[plan.id] = {};
 
     // Try primary account first
-    const accounts = [
-      { name: 'primary', stripe: primaryStripe },
-      ...(legacyStripe ? [{ name: 'legacy', stripe: legacyStripe }] : []),
-    ];
+    const accounts = [{ name: 'primary', stripe: primaryStripe }];
 
     for (const account of accounts) {
       console.log(`   🔍 Checking ${account.name} account...`);
@@ -62,7 +53,7 @@ async function generatePriceMapping(): Promise<PriceMapping> {
       const searchQuery = `name:'${plan.name}' AND metadata['plan_id']:'${plan.id}'`;
       let products;
       try {
-        products = await account.stripe.products.search({
+        products = await account.stripe?.products.search({
           query: searchQuery,
           limit: 1,
         });
@@ -87,7 +78,7 @@ async function generatePriceMapping(): Promise<PriceMapping> {
       // Get all prices for this product
       let prices;
       try {
-        prices = await account.stripe.prices.list({
+        prices = await account.stripe?.prices.list({
           product: product.id,
           active: true,
           limit: 100,

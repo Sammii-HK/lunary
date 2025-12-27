@@ -54,6 +54,9 @@ export async function GET(
     const formatParam = searchParams.get('format') || 'landscape';
     const format = (formatParam as Format) || 'landscape';
     const part = searchParams.get('part');
+    const label = searchParams.get('label'); // top label override
+    const learnPath = searchParams.get('path'); // e.g. /developers
+    const hideLearnMore = searchParams.get('hideLearnMore') === 'true';
 
     const dimensions = FORMATS[format] || FORMATS.landscape;
     const sizes = getResponsiveSizes(format);
@@ -65,7 +68,14 @@ export async function GET(
       console.error('Failed to load font:', error);
     }
 
-    const background = `linear-gradient(135deg, #0f172a 0%, #1e293b 30%, ${BRAND_COLORS.purple500}40 70%, #1e1b2e 100%)`;
+    // Darker background for legibility (especially on bright displays)
+    const background =
+      'linear-gradient(135deg, #0b1220 0%, #0f172a 35%, #312e81 80%, #0b1220 100%)';
+
+    const topLabel = label || (part ? `Part ${part}` : 'Grimoire');
+    const learnMoreText = learnPath
+      ? `Learn more: lunary.app${learnPath}`
+      : `Learn more: lunary.app/grimoire/${topic}`;
 
     return createOGResponse(
       <OGWrapper theme={{ background }}>
@@ -87,7 +97,7 @@ export async function GET(
               textTransform: 'uppercase',
             }}
           >
-            {part ? `Part ${part}` : 'Grimoire'}
+            {topLabel}
           </div>
         </div>
 
@@ -102,6 +112,7 @@ export async function GET(
               display: 'flex',
               marginTop: '20px',
               maxWidth: '90%',
+              textShadow: '0 2px 18px rgba(0,0,0,0.65)',
             }}
           >
             {title}
@@ -117,23 +128,27 @@ export async function GET(
                 display: 'flex',
                 marginTop: '30px',
                 maxWidth: '85%',
+                textShadow: '0 2px 16px rgba(0,0,0,0.6)',
               }}
             >
               {subtitle}
             </div>
           )}
-          <div
-            style={{
-              fontSize: sizes.keyPointSize,
-              fontWeight: '300',
-              color: 'rgba(255,255,255,0.6)',
-              textAlign: 'center',
-              display: 'flex',
-              marginTop: '40px',
-            }}
-          >
-            Learn more: lunary.app/grimoire/{topic}
-          </div>
+          {!hideLearnMore && (
+            <div
+              style={{
+                fontSize: sizes.keyPointSize,
+                fontWeight: '300',
+                color: 'rgba(255,255,255,0.7)',
+                textAlign: 'center',
+                display: 'flex',
+                marginTop: '40px',
+                textShadow: '0 2px 14px rgba(0,0,0,0.6)',
+              }}
+            >
+              {learnMoreText}
+            </div>
+          )}
         </OGContentCenter>
 
         <OGFooter />

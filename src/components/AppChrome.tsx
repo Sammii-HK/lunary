@@ -17,7 +17,7 @@ const NAV_CONTEXT_KEY = 'lunary_nav_context';
 export function AppChrome() {
   const pathname = usePathname();
   const searchParams = useSearchParams();
-  const _authState = useAuthStatus();
+  const authState = useAuthStatus();
   const [isAdminHost, setIsAdminHost] = useState(false);
   const [cameFromApp, setCameFromApp] = useState(false);
   const navOverride = searchParams?.get('nav');
@@ -50,7 +50,6 @@ export function AppChrome() {
       '/horoscope',
       '/birth-chart',
       '/book-of-shadows',
-      '/grimoire',
       '/profile',
       '/cosmic-state',
       '/cosmic-report-generator',
@@ -218,6 +217,60 @@ export function AppChrome() {
       (isContextualPage && cameFromApp)) &&
     navOverride !== 'marketing' &&
     !isAdminSurface;
+
+  const showBetaBanner = !authState.loading && !authState.isAuthenticated;
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+
+    const setNavOffset = () => {
+      let offsetPx = 0;
+
+      if (showMarketingNav) {
+        const nodes = Array.from(
+          document.querySelectorAll<HTMLElement>('[data-global-nav]'),
+        ).filter((el) => {
+          const styles = window.getComputedStyle(el);
+          return styles.display !== 'none' && styles.visibility !== 'hidden';
+        });
+
+        // Use the max bottom edge instead of summing heights.
+        // Summing can over-count if elements overlap (e.g. banner height differs from hardcoded navbar top).
+        for (const el of nodes) {
+          const rect = el.getBoundingClientRect();
+          offsetPx = Math.max(offsetPx, rect.bottom);
+        }
+      }
+
+      document.documentElement.style.setProperty(
+        '--global-nav-offset',
+        `${Math.round(offsetPx)}px`,
+      );
+    };
+
+    // Run once now and again after layout settles (fonts/hydration).
+    setNavOffset();
+    const raf = window.requestAnimationFrame(setNavOffset);
+
+    const resizeObserver =
+      typeof window.ResizeObserver === 'function'
+        ? new ResizeObserver(() => setNavOffset())
+        : null;
+
+    if (resizeObserver) {
+      document
+        .querySelectorAll<HTMLElement>('[data-global-nav]')
+        .forEach((el) => resizeObserver.observe(el));
+    }
+
+    window.addEventListener('resize', setNavOffset);
+
+    return () => {
+      window.cancelAnimationFrame(raf);
+      resizeObserver?.disconnect();
+      window.removeEventListener('resize', setNavOffset);
+    };
+  }, [showMarketingNav, showAppNav, showBetaBanner]);
 
   return (
     <>

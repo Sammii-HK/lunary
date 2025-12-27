@@ -5,7 +5,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import dynamic from 'next/dynamic';
 import { HelpCircle, Stars, Layers, Hash, X } from 'lucide-react';
-import { generateBirthChart } from '../../../../utils/astrology/birthChart';
+import { createBirthChart } from '../../../../utils/astrology/birthChartService';
 import { useSubscription } from '../../../hooks/useSubscription';
 import {
   canCollectBirthday,
@@ -17,6 +17,8 @@ import { conversionTracking } from '@/lib/analytics';
 import { BirthdayInput } from '@/components/ui/birthday-input';
 import { calculateLifePathNumber } from '../../../../utils/personalization';
 import { useModal } from '@/hooks/useModal';
+import { Heading } from '@/components/ui/Heading';
+import { SectionTitle } from '@/components/ui/SectionTitle';
 
 const SkeletonCard = () => (
   <div className='h-32 bg-zinc-800 animate-pulse rounded-xl' />
@@ -184,11 +186,13 @@ export default function ProfilePage() {
         if (profileBirthday && !user.hasBirthChart) {
           (async () => {
             console.log('[Profile] Auto-generating missing birth chart...');
-            const birthChart = await generateBirthChart(
-              profileBirthday,
-              profileBirthTime || undefined,
-              profileBirthLocation || undefined,
-            );
+            const birthChart = await createBirthChart({
+              birthDate: profileBirthday,
+              birthTime: profileBirthTime || undefined,
+              birthLocation: profileBirthLocation || undefined,
+              fallbackTimezone:
+                Intl.DateTimeFormat().resolvedOptions().timeZone || undefined,
+            });
             await fetch('/api/profile/birth-chart', {
               method: 'PUT',
               headers: { 'Content-Type': 'application/json' },
@@ -256,11 +260,13 @@ export default function ProfilePage() {
 
         if (shouldRegenerateChart) {
           console.log('Generating birth chart...');
-          const birthChart = await generateBirthChart(
-            birthday,
-            birthTime || undefined,
-            birthLocation || undefined,
-          );
+          const birthChart = await createBirthChart({
+            birthDate: birthday,
+            birthTime: birthTime || undefined,
+            birthLocation: birthLocation || undefined,
+            fallbackTimezone:
+              Intl.DateTimeFormat().resolvedOptions().timeZone || undefined,
+          });
 
           await fetch('/api/profile/birth-chart', {
             method: 'PUT',
@@ -401,9 +407,9 @@ export default function ProfilePage() {
   return (
     <div className='flex flex-col items-center gap-6 p-4'>
       <div className='flex items-center justify-between w-full max-w-3xl'>
-        <h1 className='text-2xl font-bold text-white text-center md:text-left'>
+        <Heading as='h1' variant='h1' className='text-center md:text-left'>
           Your Profile
-        </h1>
+        </Heading>
       </div>
 
       <div className='w-full max-w-3xl'>
@@ -637,9 +643,9 @@ export default function ProfilePage() {
         hasBirthChartAccessData && (
           <>
             <div className='w-full max-w-3xl'>
-              <h2 className='text-sm font-medium text-zinc-400 uppercase tracking-wide mb-3'>
+              <SectionTitle as='h2' className='mb-3'>
                 Cosmic Profile
-              </h2>
+              </SectionTitle>
               <div className='grid grid-cols-1 sm:grid-cols-2 gap-3'>
                 <Link
                   href='/birth-chart'
@@ -790,9 +796,7 @@ export default function ProfilePage() {
 
       {authState.isAuthenticated && !isEditing && (
         <div className='w-full max-w-3xl space-y-3'>
-          <h2 className='text-md text-uppercase font-semibold text-white/50'>
-            Settings
-          </h2>
+          <SectionTitle as='h2'>Settings</SectionTitle>
           {settingsSections.map((section) => {
             const open = isSettingsSectionOpen(section.id);
             return (
@@ -830,9 +834,9 @@ export default function ProfilePage() {
       {authState.isAuthenticated && !isEditing && (
         <div className='w-full max-w-3xl space-y-4'>
           <div className='rounded-xl border border-zinc-700 bg-zinc-900/70 p-4 shadow-lg'>
-            <h2 className='text-sm font-medium text-zinc-400 uppercase tracking-wide mb-3'>
+            <SectionTitle as='h2' className='mb-3'>
               Your Journey
-            </h2>
+            </SectionTitle>
             <div className='grid grid-cols-1 gap-3'>
               <StreakDisplay />
               {/* <RitualTracker /> */}

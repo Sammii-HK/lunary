@@ -716,6 +716,22 @@ export async function getOgData(
         return await loadZodiac(slug);
       case 'crystals':
         return await loadCrystal(slug);
+      case 'tarot': {
+        const normalizedSlug = slug.toLowerCase();
+        if (normalizedSlug.includes('wands')) {
+          return await loadTarotSuit('wands', slug);
+        }
+        if (normalizedSlug.includes('cups')) {
+          return await loadTarotSuit('cups', slug);
+        }
+        if (normalizedSlug.includes('swords')) {
+          return await loadTarotSuit('swords', slug);
+        }
+        if (normalizedSlug.includes('pentacles')) {
+          return await loadTarotSuit('pentacles', slug);
+        }
+        return await loadTarotMajor(slug);
+      }
       case 'tarot-major':
         return await loadTarotMajor(slug);
       case 'tarot-wands':

@@ -683,7 +683,7 @@ export function PaidHoroscopeView({
   // Show loading skeleton while fetching
   if (isLoading) {
     return (
-      <div className='h-full space-y-6 p-4 overflow-auto'>
+      <div className='h-full space-y-6 p-4 pb-16 md:pb-20 overflow-auto'>
         <div className='pt-6'>
           <div className='h-8 bg-zinc-800 rounded animate-pulse w-48 mb-2' />
           <div className='h-4 bg-zinc-800 rounded animate-pulse w-64' />
@@ -697,7 +697,7 @@ export function PaidHoroscopeView({
   }
 
   return (
-    <div className='h-full space-y-6 p-4 overflow-auto'>
+    <div className='h-full space-y-6 p-4 pb-16 md:pb-20 overflow-auto'>
       <StreakBanner location='horoscope' className='mb-2' />
 
       <div className='pt-6'>

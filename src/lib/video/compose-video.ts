@@ -1,6 +1,14 @@
 import ffmpeg from 'fluent-ffmpeg';
 import { VIDEO_DIMENSIONS } from './types';
-import { writeFile, unlink, readFile, chmod, access } from 'fs/promises';
+import {
+  writeFile,
+  unlink,
+  readFile,
+  chmod,
+  access,
+  mkdtemp,
+  rm,
+} from 'fs/promises';
 import { readFileSync } from 'fs';
 import { join, dirname } from 'path';
 import { tmpdir } from 'os';
@@ -51,7 +59,7 @@ async function getFfmpegPath(): Promise<string> {
     );
   }
 
-  const tempDir = tmpdir();
+  const tempDir = await mkdtemp(join(tmpdir(), 'lunary-video-'));
   const tempFfmpegPath = join(tempDir, `ffmpeg-${Date.now()}`);
 
   try {
@@ -111,6 +119,7 @@ export interface ComposeVideoOptions {
   audioBuffer: ArrayBuffer;
   format: 'story' | 'square' | 'landscape' | 'youtube';
   outputFilename?: string;
+  subtitlesText?: string;
 }
 
 /**
@@ -129,6 +138,7 @@ export async function composeVideo(
     audioBuffer,
     format,
     outputFilename = 'output.mp4',
+    subtitlesText,
   } = options;
 
   const dimensions = VIDEO_DIMENSIONS[format] || VIDEO_DIMENSIONS.landscape;
@@ -136,14 +146,97 @@ export async function composeVideo(
   const timestamp = Date.now();
   const audioPath = join(tempDir, `audio-${timestamp}.mp3`);
   const outputPath = join(tempDir, outputFilename);
+  const subtitlesPath = join(tempDir, `subtitles-${timestamp}.srt`);
+
+  const escapeFilterPath = (inputPath: string) =>
+    inputPath.replace(/\\/g, '\\\\').replace(/:/g, '\\:').replace(/'/g, "\\'");
+
+  const formatSrtTime = (seconds: number) => {
+    const hours = Math.floor(seconds / 3600);
+    const minutes = Math.floor((seconds % 3600) / 60);
+    const secs = Math.floor(seconds % 60);
+    const milliseconds = Math.floor((seconds % 1) * 1000);
+    return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(secs).padStart(2, '0')},${String(milliseconds).padStart(3, '0')}`;
+  };
+
+  const buildSrt = (
+    text: string,
+    audioDuration: number,
+    wordsPerSecond: number = 2.6,
+  ): string => {
+    const clean = text.replace(/\s+/g, ' ').trim();
+    if (!clean) return '';
+
+    const words = clean.split(' ');
+    const lines: string[] = [];
+
+    const maxWordsPerLine = 10;
+    const maxWordsPerCaption = 14;
+    let index = 0;
+    let startTime = 0.15;
+    const chunks: Array<{ words: string[]; text: string }> = [];
+
+    while (index < words.length) {
+      const chunkWords = words.slice(index, index + maxWordsPerCaption);
+      const line1 = chunkWords.slice(0, maxWordsPerLine).join(' ');
+      const line2 = chunkWords.slice(maxWordsPerLine).join(' ');
+      chunks.push({
+        words: chunkWords,
+        text: line2 ? `${line1}\n${line2}` : line1,
+      });
+      index += chunkWords.length;
+    }
+
+    const totalWords = chunks.reduce((sum, c) => sum + c.words.length, 0);
+    const usableDuration = Math.max(audioDuration - 0.3, 1);
+
+    for (let i = 0; i < chunks.length; i++) {
+      const chunk = chunks[i];
+      const share = totalWords
+        ? chunk.words.length / totalWords
+        : 1 / chunks.length;
+      const duration = Math.max(
+        1.2,
+        share * usableDuration * (wordsPerSecond / 2.6),
+      );
+      const endTime =
+        i === chunks.length - 1 ? audioDuration - 0.05 : startTime + duration;
+
+      lines.push(`${lines.length / 4 + 1}`);
+      lines.push(`${formatSrtTime(startTime)} --> ${formatSrtTime(endTime)}`);
+      lines.push(chunk.text);
+      lines.push('');
+
+      startTime = endTime + 0.05;
+    }
+
+    return lines.join('\n').trim() + '\n';
+  };
 
   try {
     // Write audio to temp file
     await writeFile(audioPath, Buffer.from(audioBuffer));
 
+    let subtitleFilter: string | null = null;
+
     // Get actual audio duration
     const audioDuration = await getAudioDuration(audioPath);
     console.log(`🎵 Audio duration: ${audioDuration.toFixed(2)} seconds`);
+
+    if (subtitlesText) {
+      const srtContent = buildSrt(subtitlesText, audioDuration);
+      if (srtContent) {
+        await writeFile(subtitlesPath, srtContent);
+        const fontsDir = join(process.cwd(), 'public', 'fonts');
+        const safeMargin = format === 'story' ? 33 : 90;
+        const fontSize = format === 'story' ? 11 : 12;
+        const escapedSubPath = escapeFilterPath(subtitlesPath);
+        const escapedFontsDir = escapeFilterPath(fontsDir);
+        subtitleFilter =
+          `subtitles='${escapedSubPath}':original_size=${dimensions.width}x${dimensions.height}:fontsdir='${escapedFontsDir}':force_style=` +
+          `'FontName=RobotoMono-Regular,FontSize=${fontSize},PrimaryColour=&HFFFFFF&,BackColour=&H7A000000&,BorderStyle=4,Outline=4,Shadow=0,MarginV=${safeMargin},MarginL=40,MarginR=40,Alignment=2'`;
+      }
+    }
 
     if (images && images.length > 1) {
       // Multiple images: download and create temp files
@@ -323,6 +416,16 @@ export async function composeVideo(
         `🎵 Creating single-image video with audio duration: ${audioDuration.toFixed(2)}s`,
       );
 
+      const zoomFilter = `zoompan=z='if(eq(on,0),1.0,min(zoom+0.00003,1.06))':x='iw/2-(iw/zoom/2)':y='ih/2-(ih/zoom/2)':d=1:fps=30:s=${dimensions.width}x${dimensions.height}`;
+      const gradientBlendFilter =
+        `split=2[base][alt];` +
+        `[base]hue=h=0:s=1.03[base];` +
+        `[alt]hue=h=18:s=1.06[alt];` +
+        `[base][alt]blend=all_expr='A*(1-(0.5+0.5*sin(2*3.1415926*N/360)))+B*(0.5+0.5*sin(2*3.1415926*N/360))'`;
+      const videoFilter = [zoomFilter, gradientBlendFilter, subtitleFilter]
+        .filter(Boolean)
+        .join(',');
+
       // Create FFmpeg command with explicit duration
       await new Promise<void>((resolve, reject) => {
         ffmpeg()
@@ -334,6 +437,10 @@ export async function composeVideo(
             'libx264',
             '-tune',
             'stillimage',
+            '-vf',
+            videoFilter,
+            '-r',
+            '30',
             '-c:a',
             'aac',
             '-b:a',
@@ -342,8 +449,6 @@ export async function composeVideo(
             'yuv420p',
             '-t',
             audioDuration.toFixed(2), // Explicit duration limit
-            '-s',
-            `${dimensions.width}x${dimensions.height}`,
           ])
           .output(outputPath)
           .on('start', (commandLine) => {
@@ -371,27 +476,18 @@ export async function composeVideo(
           })
           .run();
       });
-
-      // Cleanup image temp file
-      await unlink(imagePath).catch(() => {});
     }
 
     // Read output file
     const videoBuffer = await readFile(outputPath);
 
-    // Cleanup
-    await unlink(audioPath).catch(() => {});
-    await unlink(outputPath).catch(() => {});
-
     return videoBuffer;
   } catch (error) {
-    // Cleanup on error
-    await unlink(audioPath).catch(() => {});
-    await unlink(outputPath).catch(() => {});
-
     console.error('Video composition error:', error);
     throw new Error(
       `Failed to compose video: ${error instanceof Error ? error.message : 'Unknown error'}`,
     );
+  } finally {
+    await rm(tempDir, { recursive: true, force: true }).catch(() => {});
   }
 }

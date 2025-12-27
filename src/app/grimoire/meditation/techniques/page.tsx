@@ -2,8 +2,8 @@ import { Metadata } from 'next';
 import Link from 'next/link';
 import { ExploreGrimoire } from '@/components/grimoire/ExploreGrimoire';
 import { Brain } from 'lucide-react';
+import { GrimoireBreadcrumbs } from '@/components/grimoire/GrimoireBreadcrumbs';
 
-import { createBreadcrumbSchema, renderJsonLd } from '@/lib/schema';
 const meditationTechniques = [
   {
     slug: 'guided-meditation',
@@ -89,15 +89,15 @@ export const metadata: Metadata = {
 };
 
 export default function MeditationTechniquesIndexPage() {
-  const breadcrumbSchema = createBreadcrumbSchema([
+  const breadcrumbItems = [
     { name: 'Grimoire', url: '/grimoire' },
     { name: 'Meditation', url: '/grimoire/meditation' },
     { name: 'Techniques', url: '/grimoire/meditation/techniques' },
-  ]);
+  ];
 
   return (
     <div className='p-4 md:p-6 lg:p-8 xl:p-10 min-h-full'>
-      {renderJsonLd(breadcrumbSchema)}
+      <GrimoireBreadcrumbs items={breadcrumbItems} />
       <div className='max-w-5xl mx-auto'>
         {/* Header */}
         <div className='text-center mb-12'>

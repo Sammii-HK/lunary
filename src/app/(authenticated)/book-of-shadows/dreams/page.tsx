@@ -132,7 +132,7 @@ export default function DreamsPage() {
         </div>
       </header>
 
-      <main className='px-4 py-6'>
+      <div className='px-4 py-6'>
         {entries.length === 0 ? (
           <div className='text-center py-16'>
             <Moon className='w-12 h-12 text-zinc-700 mx-auto mb-4' />
@@ -165,7 +165,7 @@ export default function DreamsPage() {
             ))}
           </div>
         )}
-      </main>
+      </div>
     </div>
   );
 }

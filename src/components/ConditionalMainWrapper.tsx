@@ -170,9 +170,10 @@ export function ConditionalMainWrapper({
       (isCoreMarketingRoute || (isContextualPage && !cameFromApp)) &&
       !pathname.startsWith('/admin');
     // App nav: actual app pages OR contextual pages with app context
-    const appNav =
-      (isActuallyAppPage || (isContextualPage && cameFromApp)) &&
-      !pathname.startsWith('/admin');
+    // const appNav =
+    //   (isActuallyAppPage || (isContextualPage && cameFromApp)) &&
+    //   !pathname.startsWith('/admin');
+    const appNav = searchParams?.get('nav') === 'app';
 
     setShowMarketingNav(marketingNav);
     setShowAppNav(appNav);
@@ -188,13 +189,15 @@ export function ConditionalMainWrapper({
   return (
     <main
       ref={mainRef}
+      style={{
+        paddingTop: 'var(--global-nav-offset, 0px)',
+        scrollPaddingTop: 'var(--global-nav-offset, 0px)',
+      }}
       className={cn(
-        'flex flex-col w-full overflow-y-auto',
-        showMarketingNav && 'pt-[100px] h-screen',
-        showAppNav && 'pb-14 md:pb-16 h-screen',
+        'flex flex-col w-full overflow-y-auto h-full',
+        showAppNav && 'pb-14 md:pb-15 h-screen',
+        // !showMarketingNav && 'pb-14 md:pb-16 h-screen',
         !showMarketingNav && !showAppNav && 'h-screen',
-        showMarketingNav && 'scroll-pt-[100px]',
-        showAppNav && 'scroll-pt-16',
       )}
     >
       {children}

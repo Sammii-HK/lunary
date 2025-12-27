@@ -91,53 +91,68 @@ export const requestLocation = (): Promise<LocationData> => {
   });
 };
 
-const LOCATIONIQ_CLIENT_KEY =
-  process.env.NEXT_PUBLIC_LOCATIONIQ_API_KEY ||
-  process.env.LOCATIONIQ_API_KEY ||
-  '';
-const LOCATIONIQ_BASE_URL =
-  process.env.NEXT_PUBLIC_LOCATIONIQ_BASE_URL ||
-  process.env.LOCATIONIQ_BASE_URL ||
-  'https://us1.locationiq.com/v1';
+export const parseCoordinates = (
+  location: string,
+): { latitude: number; longitude: number } | null => {
+  const coordMatch = location.match(/^(-?\d+\.?\d*),\s*(-?\d+\.?\d*)$/);
+  if (!coordMatch) return null;
+  return {
+    latitude: parseFloat(coordMatch[1]),
+    longitude: parseFloat(coordMatch[2]),
+  };
+};
+
+export const geocodeLocation = async (
+  location: string,
+): Promise<Pick<LocationData, 'latitude' | 'longitude'> | null> => {
+  if (!location) return null;
+
+  const coords = parseCoordinates(location);
+  if (coords) return coords;
+
+  try {
+    const response = await fetch(
+      `/api/location/geocode?q=${encodeURIComponent(location)}`,
+    );
+
+    if (response.ok) {
+      const data = (await response.json()) as {
+        latitude?: number;
+        longitude?: number;
+      };
+      if (
+        typeof data.latitude === 'number' &&
+        typeof data.longitude === 'number'
+      ) {
+        return { latitude: data.latitude, longitude: data.longitude };
+      }
+    }
+  } catch {
+    // Fall back below
+  }
+
+  return null;
+};
 
 const reverseGeocode = async (
   lat: number,
   lng: number,
 ): Promise<Partial<LocationData>> => {
-  if (!LOCATIONIQ_CLIENT_KEY) {
-    console.warn(
-      '[LocationIQ] Missing NEXT_PUBLIC_LOCATIONIQ_API_KEY. Reverse geocoding disabled.',
-    );
-    return {};
-  }
-
   try {
-    const response = await fetch(
-      `${LOCATIONIQ_BASE_URL}/reverse?key=${LOCATIONIQ_CLIENT_KEY}&lat=${lat}&lon=${lng}&format=json&addressdetails=1&accept-language=en`,
-    );
+    const response = await fetch(`/api/location/reverse?lat=${lat}&lon=${lng}`);
 
     if (response.ok) {
       const data = await response.json();
-      const address = data.address || data;
-
-      const city =
-        address.city ||
-        address.town ||
-        address.village ||
-        address.suburb ||
-        address.neighbourhood;
-      const country = address.country;
-
-      const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-
-      return {
-        city,
-        country,
-        timezone,
-      };
+      if (data?.city || data?.country || data?.timezone) {
+        return {
+          city: data.city,
+          country: data.country,
+          timezone: data.timezone,
+        };
+      }
     }
   } catch (error) {
-    console.warn('Reverse geocoding via LocationIQ failed:', error);
+    console.warn('Reverse geocoding failed:', error);
   }
 
   // Fallback to just timezone

@@ -112,7 +112,7 @@ export const ExploreMenu = () => {
       </button>
 
       {isOpen && (
-        <div className='absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-56 rounded-lg border border-zinc-800 bg-zinc-950 shadow-xl z-50'>
+        <div className='absolute bottom-full mb-2 z-50 rounded-lg border border-zinc-800 bg-zinc-950 shadow-xl left-2 right-2 w-auto sm:left-1/2 sm:right-auto sm:-translate-x-1/2 sm:w-56'>
           <div className='p-2 space-y-1'>
             {exploreItems.map((item) => {
               const ItemIcon = item.icon;

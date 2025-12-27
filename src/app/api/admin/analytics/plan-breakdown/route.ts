@@ -25,14 +25,40 @@ export async function GET(request: NextRequest) {
       ORDER BY mrr_contribution DESC
     `;
 
-    const planBreakdown = planBreakdownResult.rows.map((row) => ({
-      plan: row.plan_type as string,
-      count: Number(row.count || 0),
-      mrr: Number(row.mrr_contribution || 0),
-      active: Number(row.active_count || 0),
-      trial: Number(row.trial_count || 0),
-      cancelled: Number(row.cancelled_count || 0),
-    }));
+    type PlanAggregate = {
+      plan: string;
+      count: number;
+      mrr: number;
+      active: number;
+      trial: number;
+      cancelled: number;
+    };
+
+    const planBreakdownMap = planBreakdownResult.rows.reduce<
+      Map<string, PlanAggregate>
+    >((acc, row) => {
+      const rawPlan = (row.plan_type as string) || 'unknown';
+      const normalizedPlan = rawPlan === 'monthly' ? 'free' : rawPlan;
+      const existing = acc.get(normalizedPlan) || {
+        plan: normalizedPlan,
+        count: 0,
+        mrr: 0,
+        active: 0,
+        trial: 0,
+        cancelled: 0,
+      };
+      existing.count += Number(row.count || 0);
+      existing.mrr += Number(row.mrr_contribution || 0);
+      existing.active += Number(row.active_count || 0);
+      existing.trial += Number(row.trial_count || 0);
+      existing.cancelled += Number(row.cancelled_count || 0);
+      acc.set(normalizedPlan, existing);
+      return acc;
+    }, new Map<string, PlanAggregate>());
+
+    const planBreakdown = Array.from(planBreakdownMap.values()).sort(
+      (a, b) => b.mrr - a.mrr,
+    );
 
     const totalMrr = planBreakdown.reduce((sum, p) => sum + p.mrr, 0);
     const planDistribution = planBreakdown.map((plan) => ({

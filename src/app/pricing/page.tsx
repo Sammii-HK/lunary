@@ -265,13 +265,13 @@ export default function PricingPage() {
               </div>
             ) : null}
 
-            <h1 className='text-4xl md:text-6xl font-light tracking-tight mb-6'>
+            <h1 className='text-2xl md:text-6xl font-light tracking-tight mb-6'>
               Your cosmic journey
               <br />
               <span className='text-lunary-accent-300'>starts here</span>
             </h1>
 
-            <p className='text-lg text-zinc-400 max-w-xl mx-auto leading-relaxed'>
+            <p className='text-base md:text-lg text-zinc-400 max-w-xl mx-auto leading-relaxed'>
               Start with free access to your birth chart, moon phases, and
               cosmic insights. Upgrade for personalized readings based on your
               exact birth chart.

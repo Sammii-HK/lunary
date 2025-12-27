@@ -102,7 +102,7 @@ export function ParsedMarkdown({
       elements.push(
         <h2
           key={`h2-${index}`}
-          className='text-2xl font-medium text-zinc-100 mt-8 mb-4'
+          className='text-xl md:text-2xl font-medium text-zinc-100 mt-8 mb-4'
         >
           {parseInlineMarkdown(text)}
         </h2>,
@@ -117,7 +117,7 @@ export function ParsedMarkdown({
       elements.push(
         <h3
           key={`h3-${index}`}
-          className='text-xl font-medium text-zinc-200 mt-6 mb-3'
+          className='text-lg md:text-xl font-medium text-zinc-200 mt-6 mb-3'
         >
           {parseInlineMarkdown(text)}
         </h3>,
@@ -132,7 +132,7 @@ export function ParsedMarkdown({
       elements.push(
         <h4
           key={`h4-${index}`}
-          className='text-lg font-medium text-zinc-200 mt-4 mb-2'
+          className='text-base md:text-lg font-medium text-zinc-200 mt-4 mb-2'
         >
           {parseInlineMarkdown(text)}
         </h4>,

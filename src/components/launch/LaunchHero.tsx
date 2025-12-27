@@ -29,7 +29,7 @@ export function LaunchHero({
   stats = defaultStats,
 }: LaunchHeroProps) {
   return (
-    <section className='relative overflow-hidden rounded-3xl bg-gradient-to-br from-zinc-900 via-indigo-950 to-black p-10 shadow-2xl'>
+    <section className='relative overflow-hidden rounded-3xl bg-gradient-to-br from-zinc-900 via-indigo-950 to-black p-6 md:p-10 shadow-2xl'>
       <div className='pointer-events-none absolute inset-0 opacity-40'>
         <div className='absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(147,51,234,0.25),_transparent_60%)]' />
         <div className='absolute inset-0 bg-[radial-gradient(circle_at_bottom,_rgba(59,130,246,0.15),_transparent_50%)]' />
@@ -41,10 +41,12 @@ export function LaunchHero({
             <Sparkles className='h-4 w-4' />
             Official Launch Sequence · 2025
           </span>
-          <h1 className='text-4xl font-bold leading-tight text-white sm:text-5xl lg:text-6xl'>
+          <h1 className='text-3xl font-bold leading-tight text-white sm:text-4xl md:text-5xl lg:text-6xl'>
             {title}
           </h1>
-          <p className='text-lg text-zinc-200 sm:text-xl'>{subtitle}</p>
+          <p className='text-base text-zinc-200 sm:text-lg md:text-xl'>
+            {subtitle}
+          </p>
 
           <div className='flex flex-wrap gap-4'>
             <Link
@@ -67,7 +69,7 @@ export function LaunchHero({
                 key={stat.label}
                 className='rounded-2xl border border-white/10 bg-black/40 p-4 text-center'
               >
-                <p className='text-2xl font-semibold text-white'>
+                <p className='text-xl md:text-2xl font-semibold text-white'>
                   {stat.value}
                 </p>
                 <p className='text-xs uppercase tracking-widest text-zinc-400'>
@@ -85,7 +87,7 @@ export function LaunchHero({
               <p className='text-sm uppercase tracking-[0.3em] text-lunary-primary-200'>
                 Powered by Astronomy Engine
               </p>
-              <h3 className='text-2xl font-semibold text-white'>
+              <h3 className='text-xl md:text-2xl font-semibold text-white'>
                 Real stars. Real-time transits.
               </h3>
               <p className='text-sm text-zinc-300'>
@@ -98,14 +100,18 @@ export function LaunchHero({
                   <p className='text-xs uppercase tracking-[0.3em] text-zinc-400'>
                     Next moon ritual
                   </p>
-                  <p className='mt-2 text-lg text-white'>Full Moon in Virgo</p>
+                  <p className='mt-2 text-base md:text-lg text-white'>
+                    Full Moon in Virgo
+                  </p>
                   <p className='text-xs text-zinc-400'>In 3 days 14h</p>
                 </div>
                 <div className='rounded-2xl border border-white/10 bg-white/5 p-4'>
                   <p className='text-xs uppercase tracking-[0.3em] text-zinc-400'>
                     Cosmic pulse
                   </p>
-                  <p className='mt-2 text-lg text-white'>88% aligned</p>
+                  <p className='mt-2 text-base md:text-lg text-white'>
+                    88% aligned
+                  </p>
                   <p className='text-xs text-zinc-400'>
                     High creativity window
                   </p>

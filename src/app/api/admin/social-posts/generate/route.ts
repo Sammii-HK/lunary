@@ -180,6 +180,7 @@ export async function POST(request: NextRequest) {
           status TEXT NOT NULL DEFAULT 'pending',
           rejection_feedback TEXT,
           image_url TEXT,
+          video_url TEXT,
           created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
           updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
         )
@@ -243,6 +244,20 @@ export async function POST(request: NextRequest) {
         }
       } catch (alterError) {
         console.warn('Could not add image_url column:', alterError);
+      }
+
+      // Add video_url column if it doesn't exist (for existing tables)
+      try {
+        const columnExists = await sql`
+          SELECT column_name 
+          FROM information_schema.columns 
+          WHERE table_name='social_posts' AND column_name='video_url'
+        `;
+        if (columnExists.rows.length === 0) {
+          await sql`ALTER TABLE social_posts ADD COLUMN video_url TEXT`;
+        }
+      } catch (alterError) {
+        console.warn('Could not add video_url column:', alterError);
       }
     } catch (tableError) {
       console.warn(

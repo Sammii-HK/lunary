@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useSearchParams } from 'next/navigation';
 
 export type MarketingBreadcrumbItem = {
   label: string;
@@ -71,6 +71,24 @@ export function MarketingBreadcrumbs({
   labelOverrides,
 }: MarketingBreadcrumbsProps) {
   const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const navOverride = searchParams?.get('nav');
+  const fromParam = searchParams?.get('from');
+  const appendNavParams = (href?: string) => {
+    if (!href) return undefined;
+    if (!navOverride && !fromParam) return href;
+
+    const baseUrl = new URL(href, 'https://lunary.app');
+    if (navOverride && !baseUrl.searchParams.get('nav')) {
+      baseUrl.searchParams.set('nav', navOverride);
+    }
+    if (fromParam && !baseUrl.searchParams.get('from')) {
+      baseUrl.searchParams.set('from', fromParam);
+    }
+
+    const query = baseUrl.searchParams.toString();
+    return `${baseUrl.pathname}${query ? `?${query}` : ''}${baseUrl.hash}`;
+  };
   const resolvedItems =
     items ||
     (pathname
@@ -88,9 +106,10 @@ export function MarketingBreadcrumbs({
     <nav className='text-sm text-zinc-400 mb-6'>
       {resolvedItems.map((item, index) => {
         const isLast = index === resolvedItems.length - 1;
-        const content = item.href ? (
+        const resolvedHref = appendNavParams(item.href);
+        const content = resolvedHref ? (
           <Link
-            href={item.href}
+            href={resolvedHref}
             className='hover:text-zinc-200 transition-colors'
           >
             {item.label}

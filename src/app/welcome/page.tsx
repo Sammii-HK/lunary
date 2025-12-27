@@ -31,7 +31,7 @@ export const metadata: Metadata = {
 
 export default function WelcomePage() {
   return (
-    <main className='min-h-screen bg-zinc-950 text-zinc-50 flex flex-col'>
+    <div className='min-h-screen bg-zinc-950 text-zinc-50 flex flex-col'>
       {/* Section 1: Hero */}
       <section className='relative px-4 md:px-6 mt-10 pb-10 md:pt-28 md:pb-16 bg-zinc-950'>
         <div className='max-w-3xl mx-auto text-center space-y-6'>
@@ -689,6 +689,6 @@ export default function WelcomePage() {
       <div className='mt-auto'>
         <MarketingFooter />
       </div>
-    </main>
+    </div>
   );
 }

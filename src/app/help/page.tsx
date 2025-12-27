@@ -38,13 +38,13 @@ export default function HelpPage() {
 
   return (
     <div className='min-h-screen bg-zinc-950 text-zinc-100 flex flex-col pt-16'>
-      <main className='max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12'>
+      <div className='max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12'>
         <MarketingBreadcrumbs />
         <div className='text-center mb-12'>
-          <h1 className='text-4xl font-semibold text-white mb-4'>
+          <h1 className='text-2xl md:text-4xl font-semibold text-white mb-4'>
             Help & Support
           </h1>
-          <p className='text-lg text-zinc-400'>
+          <p className='text-base md:text-lg text-zinc-400'>
             Find answers to common questions or get in touch with our support
             team
           </p>
@@ -123,7 +123,7 @@ export default function HelpPage() {
             Contact Support
           </a>
         </section>
-      </main>
+      </div>
       <div className='mt-auto'>
         <MarketingFooter />
       </div>

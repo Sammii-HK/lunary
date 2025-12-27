@@ -82,7 +82,7 @@ export default function TodayHoroscopeIndexPage() {
 
         <header className='mb-12'>
           <p className='text-lunary-primary-400 mb-2'>{today}</p>
-          <h1 className='text-4xl md:text-5xl font-light mb-4'>
+          <h1 className='text-2xl md:text-5xl font-light mb-4'>
             Today's Horoscope
           </h1>
           <p className='text-xl text-zinc-400 leading-relaxed'>

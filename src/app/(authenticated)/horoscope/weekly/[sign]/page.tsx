@@ -84,9 +84,14 @@ async function getHoroscope(sign: string): Promise<string | null> {
       process.env.NEXT_PUBLIC_BASE_URL ||
       process.env.NEXT_PUBLIC_APP_URL ||
       'https://lunary.app';
+    const gptSecret = process.env.LUNARY_GPT_SECRET;
+    const headers: Record<string, string> = {};
+    if (gptSecret) {
+      headers.authorization = `Bearer ${gptSecret}`;
+    }
     const response = await fetch(
       `${baseUrl}/api/gpt/horoscope?sign=${sign}&type=weekly`,
-      { next: { revalidate: 604800 } },
+      { next: { revalidate: 604800 }, headers },
     );
     if (!response.ok) return null;
     const data = await response.json();
@@ -148,8 +153,8 @@ export default async function WeeklyHoroscopePage({
         />
 
         <header className='mb-8 text-center'>
-          <div className='text-5xl mb-4'>{signData.symbol}</div>
-          <h1 className='text-4xl md:text-5xl font-light mb-2'>
+          <div className='text-4xl md:text-5xl mb-4'>{signData.symbol}</div>
+          <h1 className='text-2xl md:text-5xl font-light mb-2'>
             {signData.name} Weekly Horoscope
           </h1>
           <p className='text-lunary-primary-400 flex items-center justify-center gap-2'>

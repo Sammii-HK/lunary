@@ -73,10 +73,12 @@ export function ComparisonPageTemplate({ data }: { data: ComparisonData }) {
         featuresCompared={featuresCompared}
         conclusion={conclusion}
       />
-      <div className='max-w-4xl mx-auto px-4 py-12'>
+      <div className='max-w-4xl mx-auto px-4 py-8 md:py-12'>
         <div className='mb-8'>
-          <h1 className='text-4xl font-light text-zinc-100 mb-4'>{tagline}</h1>
-          <p className='text-lg text-zinc-400'>{subtitle}</p>
+          <h1 className='text-2xl md:text-4xl font-light text-zinc-100 mb-4'>
+            {tagline}
+          </h1>
+          <p className='text-base md:text-lg text-zinc-400'>{subtitle}</p>
         </div>
 
         <div className='mb-8 p-6 rounded-lg border border-lunary-primary-700 bg-lunary-primary-900/10'>
@@ -88,20 +90,20 @@ export function ComparisonPageTemplate({ data }: { data: ComparisonData }) {
         </div>
 
         <section className='mb-12'>
-          <h2 className='text-2xl font-medium text-zinc-100 mb-6'>
+          <h2 className='text-xl md:text-2xl font-medium text-zinc-100 mb-6'>
             Feature Comparison
           </h2>
           <div className='overflow-x-auto'>
             <table className='w-full border-collapse border border-zinc-800'>
               <thead>
                 <tr className='bg-zinc-900'>
-                  <th className='border border-zinc-800 p-4 text-left text-zinc-200'>
+                  <th className='border border-zinc-800 p-3 md:p-4 text-left text-zinc-200'>
                     Feature
                   </th>
-                  <th className='border border-zinc-800 p-4 text-center text-lunary-primary-300 font-medium'>
+                  <th className='border border-zinc-800 p-3 md:p-4 text-center text-lunary-primary-300 font-medium'>
                     Lunary
                   </th>
-                  <th className='border border-zinc-800 p-4 text-center text-zinc-300'>
+                  <th className='border border-zinc-800 p-3 md:p-4 text-center text-zinc-300'>
                     {competitorName}
                   </th>
                 </tr>
@@ -114,7 +116,7 @@ export function ComparisonPageTemplate({ data }: { data: ComparisonData }) {
                       index % 2 === 0 ? 'bg-zinc-900/50' : 'bg-zinc-900/30'
                     }
                   >
-                    <td className='border border-zinc-800 p-4 text-zinc-300'>
+                    <td className='border border-zinc-800 p-3 md:p-4 text-zinc-300'>
                       <strong className='text-zinc-100'>{feature.name}</strong>
                       {feature.description && (
                         <>
@@ -125,10 +127,10 @@ export function ComparisonPageTemplate({ data }: { data: ComparisonData }) {
                         </>
                       )}
                     </td>
-                    <td className='border border-zinc-800 p-4 text-center'>
+                    <td className='border border-zinc-800 p-3 md:p-4 text-center'>
                       <FeatureCell value={feature.lunary} />
                     </td>
-                    <td className='border border-zinc-800 p-4 text-center'>
+                    <td className='border border-zinc-800 p-3 md:p-4 text-center'>
                       <FeatureCell value={feature.competitor} />
                     </td>
                   </tr>
@@ -139,7 +141,7 @@ export function ComparisonPageTemplate({ data }: { data: ComparisonData }) {
         </section>
 
         <section className='mb-12'>
-          <h2 className='text-2xl font-medium text-zinc-100 mb-6'>
+          <h2 className='text-xl md:text-2xl font-medium text-zinc-100 mb-6'>
             Why Choose Lunary?
           </h2>
           <div className='rounded-lg border border-lunary-primary-700 bg-lunary-primary-900/10 p-6'>
@@ -162,7 +164,7 @@ export function ComparisonPageTemplate({ data }: { data: ComparisonData }) {
         </section>
 
         <section className='mb-12'>
-          <h2 className='text-2xl font-medium text-zinc-100 mb-6'>
+          <h2 className='text-xl md:text-2xl font-medium text-zinc-100 mb-6'>
             When {competitorName} Might Be Better
           </h2>
           <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-6'>
@@ -173,7 +175,7 @@ export function ComparisonPageTemplate({ data }: { data: ComparisonData }) {
         </section>
 
         <section className='mb-12'>
-          <h2 className='text-2xl font-medium text-zinc-100 mb-6'>
+          <h2 className='text-xl md:text-2xl font-medium text-zinc-100 mb-6'>
             Conclusion
           </h2>
           <div className='rounded-lg border border-lunary-primary-700 bg-lunary-primary-900/10 p-6'>
@@ -186,7 +188,7 @@ export function ComparisonPageTemplate({ data }: { data: ComparisonData }) {
         <section className='text-center mb-12'>
           <Link
             href='/pricing'
-            className='inline-flex items-center gap-2 px-8 py-4 rounded-lg bg-lunary-primary-900/20 hover:bg-lunary-primary-900/30 border border-lunary-primary-700 text-lunary-primary-300 font-medium text-lg transition-colors'
+            className='inline-flex items-center gap-2 px-6 py-3 md:px-8 md:py-4 rounded-lg bg-lunary-primary-900/20 hover:bg-lunary-primary-900/30 border border-lunary-primary-700 text-lunary-primary-300 font-medium text-base md:text-lg transition-colors'
           >
             Start Your Free Trial
             <ArrowRight className='h-5 w-5' />
@@ -194,7 +196,7 @@ export function ComparisonPageTemplate({ data }: { data: ComparisonData }) {
         </section>
 
         <section className='mb-12'>
-          <h2 className='text-2xl font-medium text-zinc-100 mb-6'>
+          <h2 className='text-xl md:text-2xl font-medium text-zinc-100 mb-6'>
             Explore the Lunary Grimoire
           </h2>
           <p className='text-sm text-zinc-400 mb-6'>

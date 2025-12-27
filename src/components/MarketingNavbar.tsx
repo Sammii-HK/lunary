@@ -17,7 +17,8 @@ export function MarketingNavbar() {
 
   return (
     <nav
-      className={`fixed left-0 right-0 z-50 border-b-2 border-zinc-800 bg-zinc-950/95 backdrop-blur-md shadow-lg ${showBetaBanner ? 'top-[56px] md:top-[36px]' : 'top-0'}`}
+      data-global-nav
+      className={`fixed left-0 right-0 z-50 border-b-2 border-zinc-800 bg-zinc-950/95 backdrop-blur-md shadow-lg ${showBetaBanner ? 'top-[32px]' : 'top-0'}`}
     >
       <div className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8'>
         <div className='flex justify-between items-center h-16'>
@@ -31,7 +32,7 @@ export function MarketingNavbar() {
           </Link>
 
           {/* Navigation Links - Desktop */}
-          <div className='hidden sm:flex items-center gap-2'>
+          <div className='hidden marketing:flex items-center gap-2'>
             <Link
               href='/grimoire'
               className='text-sm text-zinc-400 hover:text-zinc-200 transition-colors px-3 py-3 min-h-12 flex items-center'
@@ -71,7 +72,7 @@ export function MarketingNavbar() {
           </div>
 
           {/* Auth Buttons - Desktop */}
-          <div className='hidden sm:flex items-center gap-3'>
+          <div className='hidden marketing:flex items-center gap-3'>
             {authState.isAuthenticated ? (
               <Button variant='outline' size='sm' asChild>
                 <Link href='/app'>Open App</Link>
@@ -97,7 +98,7 @@ export function MarketingNavbar() {
           {/* Mobile Menu Button */}
           <button
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className='sm:hidden p-2 text-zinc-400 hover:text-zinc-100 transition-colors'
+            className='marketing:hidden p-2 text-zinc-400 hover:text-zinc-100 transition-colors'
             aria-label='Toggle menu'
           >
             {mobileMenuOpen ? (
@@ -111,7 +112,7 @@ export function MarketingNavbar() {
 
       {/* Mobile Menu */}
       {mobileMenuOpen && (
-        <div className='sm:hidden border-t-2 border-zinc-800/50 bg-lunary-primary-950 bg-opacity-30 backdrop-opacity-30 backdrop-blur-xl shadow-lg'>
+        <div className='marketing:hidden border-t-2 border-zinc-800/50 bg-lunary-primary-950 bg-opacity-30 backdrop-opacity-30 backdrop-blur-xl shadow-lg'>
           <div className='px-4 py-6 space-y-6'>
             {/* Navigation Links */}
             <div className='space-y-2'>

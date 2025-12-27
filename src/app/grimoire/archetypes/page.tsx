@@ -2,14 +2,11 @@ export const revalidate = 86400;
 
 import { Metadata } from 'next';
 import Link from 'next/link';
-import {
-  createArticleSchema,
-  createBreadcrumbSchema,
-  renderJsonLd,
-} from '@/lib/schema';
+import { createArticleSchema, renderJsonLd } from '@/lib/schema';
 import { CosmicConnections } from '@/components/grimoire/CosmicConnections';
 import { CosmicConnectionSection } from '@/lib/cosmicConnectionsConfig';
 import { Button } from '@/components/ui/button';
+import { GrimoireBreadcrumbs } from '@/components/grimoire/GrimoireBreadcrumbs';
 
 export const metadata: Metadata = {
   title: 'The 12 Lunary Archetypes: A Guide to Your Inner Patterns - Lunary',
@@ -357,23 +354,15 @@ export default function ArchetypesGuidePage() {
     section: 'Archetypes',
   });
 
-  const breadcrumbSchema = createBreadcrumbSchema([
+  const breadcrumbItems = [
     { name: 'Grimoire', url: 'https://lunary.app/grimoire' },
     { name: 'Archetypes', url: 'https://lunary.app/grimoire/archetypes' },
-  ]);
+  ];
 
   return (
     <div className='p-4 md:p-8 max-w-4xl mx-auto'>
       {renderJsonLd(articleSchema)}
-      {renderJsonLd(breadcrumbSchema)}
-
-      <nav className='text-sm text-zinc-400 mb-8'>
-        <Link href='/grimoire' className='hover:text-lunary-primary-400'>
-          Grimoire
-        </Link>
-        <span className='mx-2'>→</span>
-        <span className='text-zinc-300'>Archetypes</span>
-      </nav>
+      <GrimoireBreadcrumbs items={breadcrumbItems} />
 
       <header className='mb-12'>
         <h1 className='text-4xl md:text-5xl font-light text-zinc-100 mb-6'>
