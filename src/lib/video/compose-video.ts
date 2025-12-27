@@ -1,6 +1,14 @@
 import ffmpeg from 'fluent-ffmpeg';
 import { VIDEO_DIMENSIONS } from './types';
-import { writeFile, unlink, readFile, chmod, access } from 'fs/promises';
+import {
+  writeFile,
+  unlink,
+  readFile,
+  chmod,
+  access,
+  mkdtemp,
+  rm,
+} from 'fs/promises';
 import { readFileSync } from 'fs';
 import { join, dirname } from 'path';
 import { tmpdir } from 'os';
@@ -51,7 +59,7 @@ async function getFfmpegPath(): Promise<string> {
     );
   }
 
-  const tempDir = tmpdir();
+  const tempDir = await mkdtemp(join(tmpdir(), 'lunary-video-'));
   const tempFfmpegPath = join(tempDir, `ffmpeg-${Date.now()}`);
 
   try {
@@ -468,28 +476,18 @@ export async function composeVideo(
           })
           .run();
       });
-
-      // Cleanup image temp file
-      await unlink(imagePath).catch(() => {});
-      await unlink(subtitlesPath).catch(() => {});
     }
 
     // Read output file
     const videoBuffer = await readFile(outputPath);
 
-    // Cleanup
-    await unlink(audioPath).catch(() => {});
-    await unlink(outputPath).catch(() => {});
-
     return videoBuffer;
   } catch (error) {
-    // Cleanup on error
-    await unlink(audioPath).catch(() => {});
-    await unlink(outputPath).catch(() => {});
-
     console.error('Video composition error:', error);
     throw new Error(
       `Failed to compose video: ${error instanceof Error ? error.message : 'Unknown error'}`,
     );
+  } finally {
+    await rm(tempDir, { recursive: true, force: true }).catch(() => {});
   }
 }
