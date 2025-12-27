@@ -36,6 +36,7 @@ import { TarotSeasonReading } from '@/components/tarot/TarotSeasonReading';
 import { TarotRitualForPatterns } from '@/components/tarot/TarotRitualForPatterns';
 import { TarotReflectionPrompts } from '@/components/tarot/TarotReflectionPrompts';
 import { PremiumPathway } from '@/components/PremiumPathway';
+import { RecurringThemesCard } from '@/components/RecurringThemesCard';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 
@@ -503,6 +504,30 @@ const TarotReadings = () => {
     }
   }, [personalizedReading, shareOrigin, shareDate, firstName, truncate]);
 
+  const recurringThemeItems = useMemo(() => {
+    const trends = personalizedReading?.trendAnalysis;
+    if (!trends) return [];
+
+    const themes = trends.dominantThemes ?? [];
+    const cards = trends.frequentCards ?? [];
+
+    if (themes.length === 0 && cards.length === 0) return [];
+
+    const themeItems = themes.slice(0, 3).map((theme, index) => ({
+      label: theme,
+      detail: cards[index]?.name
+        ? `${cards[index].name} showing up often`
+        : undefined,
+    }));
+
+    if (themeItems.length > 0) return themeItems;
+
+    return cards.slice(0, 3).map((card) => ({
+      label: card.name,
+      detail: typeof card.count === 'number' ? `Seen ${card.count} times` : '',
+    }));
+  }, [personalizedReading]);
+
   const handleShareClick = useCallback(
     async ({
       id,
@@ -795,6 +820,11 @@ const TarotReadings = () => {
                 title={`Your ${timeFrame}-Day Tarot Patterns`}
                 color='zinc'
               >
+                <RecurringThemesCard
+                  className='mb-6'
+                  subtitle={`Based on your last ${timeFrame} days of readings`}
+                  items={recurringThemeItems}
+                />
                 <AdvancedPatterns
                   basicPatterns={personalizedReading.trendAnalysis}
                   selectedView={30}

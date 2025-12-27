@@ -1105,7 +1105,7 @@ function BookOfShadowsContent() {
                 attemptSend();
               }
             }}
-            className='shrink-0 relative flex items-center'
+            className='shrink-0 relative flex items-center mb-16 md:mb-20'
           >
             <label htmlFor='book-of-shadows-message' className='sr-only'>
               {isJournalMode ? 'Write a journal entry' : 'Share with Lunary'}
@@ -1121,7 +1121,7 @@ function BookOfShadowsContent() {
                   ? 'Write a journal entry...'
                   : "Write your heart's question…"
               }
-              className={`w-full resize-none rounded-xl border bg-zinc-900/60 pl-3 pr-12 py-2.5 text-sm text-zinc-100 placeholder:text-zinc-400 focus:outline-none focus:ring-2 ${
+              className={`w-full min-h-16 md:min-h-8 resize-none rounded-xl border bg-zinc-900/60 pl-3 pr-12 py-2.5 text-sm text-zinc-100 placeholder:text-zinc-400 focus:outline-none focus:ring-2 ${
                 isJournalMode
                   ? 'border-lunary-primary-600/50 focus:border-lunary-primary focus:ring-lunary-primary-700'
                   : 'border-zinc-700/60 focus:border-lunary-primary focus:ring-lunary-primary-800'
@@ -1164,7 +1164,7 @@ export default function BookOfShadowsPage() {
     <Suspense
       fallback={
         <div className='min-h-screen w-full bg-gradient-to-b from-zinc-950 via-zinc-900 to-zinc-950 text-zinc-100'>
-          <div className='mx-auto flex min-h-screen w-full max-w-3xl flex-col items-center justify-center px-4 py-6 md:py-10'>
+          <div className='mx-auto flex w-full max-w-3xl flex-col items-center justify-center px-4 py-6 md:py-10'>
             <div className='text-zinc-400'>Loading...</div>
           </div>
         </div>

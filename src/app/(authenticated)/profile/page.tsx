@@ -4,7 +4,7 @@ import { useUser } from '@/context/UserContext';
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import dynamic from 'next/dynamic';
-import { HelpCircle, Stars, Layers, Hash, X } from 'lucide-react';
+import { HelpCircle, Stars, Layers, Hash, X, Calendar } from 'lucide-react';
 import { createBirthChart } from '../../../../utils/astrology/birthChartService';
 import { useSubscription } from '../../../hooks/useSubscription';
 import {
@@ -16,6 +16,7 @@ import { useAuthStatus } from '@/components/AuthStatus';
 import { conversionTracking } from '@/lib/analytics';
 import { BirthdayInput } from '@/components/ui/birthday-input';
 import { calculateLifePathNumber } from '../../../../utils/personalization';
+import { calculatePersonalYear } from '@/lib/numerology';
 import { useModal } from '@/hooks/useModal';
 import { Heading } from '@/components/ui/Heading';
 import { SectionTitle } from '@/components/ui/SectionTitle';
@@ -711,6 +712,32 @@ export default function ProfilePage() {
                           </p>
                         </div>
                         <Hash className='w-6 h-6 text-lunary-secondary' />
+                      </div>
+                    </Link>
+                  );
+                })()}
+
+                {(() => {
+                  const currentYear = new Date().getFullYear();
+                  const personalYear = calculatePersonalYear(
+                    birthday,
+                    currentYear,
+                  ).result;
+                  return (
+                    <Link
+                      href={`/grimoire/numerology/year/${personalYear}`}
+                      className='group rounded-xl border border-zinc-700 bg-zinc-900/70 p-4 shadow-lg hover:border-lunary-primary-600 transition-colors'
+                    >
+                      <div className='flex items-center justify-between'>
+                        <div>
+                          <h3 className='text-lg font-medium text-white group-hover:text-lunary-primary-300 transition-colors'>
+                            Personal Year {personalYear}
+                          </h3>
+                          <p className='text-xs text-zinc-400'>
+                            Based on your birth date, not the universal year
+                          </p>
+                        </div>
+                        <Calendar className='w-6 h-6 text-lunary-primary-400' />
                       </div>
                     </Link>
                   );

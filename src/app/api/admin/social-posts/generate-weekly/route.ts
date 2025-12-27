@@ -224,6 +224,7 @@ async function generateThematicWeeklyPosts(
     linkedin: [8, 12, 17],
     pinterest: [12, 20, 21],
     twitter: [9, 12, 17],
+    threads: [10, 15, 20],
     bluesky: [9, 12, 17],
   };
 
@@ -381,7 +382,7 @@ async function generateThematicWeeklyPosts(
           .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
           .join('');
 
-      const videoPlatforms = ['instagram', 'tiktok', 'threads'];
+      const videoPlatforms = ['instagram', 'tiktok', 'twitter'];
       const dayInfoByDate = new Map<
         string,
         { facetTitle: string; category: string; slug: string }
