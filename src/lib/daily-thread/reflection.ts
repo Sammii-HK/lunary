@@ -1,5 +1,6 @@
 import { buildAstralContext } from '@/lib/ai/astral-guide';
 import { DailyThreadModule, UserLevel } from './types';
+import { cleanMoonPhaseText, extractMoonPhaseName } from './moon-phase';
 
 /**
  * Generate a reflection prompt module based on current transits, moon phase, and recent themes
@@ -21,7 +22,8 @@ export async function generateReflectionModule(
     );
 
     // Extract key information
-    const moonPhase = astralContext.moonPhase;
+    const moonPhase = cleanMoonPhaseText(astralContext.moonPhase);
+    const moonPhaseName = extractMoonPhaseName(astralContext.moonPhase);
     const currentTransits = astralContext.currentTransits;
     const personalTransits = astralContext.personalTransits;
     const recentThemes = astralContext.journalSummaries
@@ -100,9 +102,7 @@ export async function generateReflectionModule(
       level: userLevel,
       title,
       body: prompt,
-      meta: {
-        // Don't duplicate prompt in meta.question - it's already in body
-      },
+      meta: moonPhaseName ? { moonPhase: moonPhaseName } : undefined,
       actions: [
         {
           label: 'Start journal',

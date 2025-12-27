@@ -1,6 +1,7 @@
 import { sql } from '@vercel/postgres';
 import dayjs from 'dayjs';
 import { DailyThreadModule } from './types';
+import { extractMoonPhaseName } from './moon-phase';
 
 /**
  * Generate a memory module showing past journal entries or tarot pulls from the same date
@@ -145,7 +146,7 @@ export async function generateMemoryModule(
         relativeTime,
         journalSnippet: journalSnippet || undefined,
         tarotCard: tarotCard || undefined,
-        moonPhase,
+        moonPhase: extractMoonPhaseName(moonPhase || undefined) || undefined,
       },
       actions: [
         ...(journalResult.rows.length > 0

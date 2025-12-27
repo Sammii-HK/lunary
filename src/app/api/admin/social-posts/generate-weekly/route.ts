@@ -223,7 +223,8 @@ async function generateThematicWeeklyPosts(
     instagram: [11, 13, 19],
     linkedin: [8, 12, 17],
     pinterest: [12, 20, 21],
-    twitter: [9, 12, 17],
+    twitter: [16, 20],
+    threads: [15, 20],
     bluesky: [9, 12, 17],
   };
 
@@ -381,7 +382,8 @@ async function generateThematicWeeklyPosts(
           .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
           .join('');
 
-      const videoPlatforms = ['instagram', 'tiktok', 'threads'];
+      const videoPlatforms = ['instagram', 'tiktok', 'twitter', 'threads'];
+      const splitVideoPlatforms = ['twitter', 'threads'];
       const dayInfoByDate = new Map<
         string,
         { facetTitle: string; category: string; slug: string }
@@ -471,14 +473,31 @@ async function generateThematicWeeklyPosts(
         });
 
         for (const platform of videoPlatforms) {
-          await sql`
-            UPDATE social_posts
-            SET video_url = ${videoUrl}
-            WHERE platform = ${platform}
-              AND post_type = 'educational'
-              AND topic = ${dayInfo.facetTitle}
-              AND scheduled_date::date = ${dateKey}
-          `;
+          const videoHours = platformOptimalHours[platform] || [20];
+          const videoHour = videoHours[videoHours.length - 1] || 20;
+          const videoScheduledDate = new Date(`${dateKey}T00:00:00.000Z`);
+          videoScheduledDate.setUTCHours(videoHour, 0, 0, 0);
+
+          if (splitVideoPlatforms.includes(platform)) {
+            const contentKey = `${dateKey}|${dayInfo.facetTitle}`;
+            const postContent =
+              postContentByKey.get(contentKey) ||
+              script.writtenPostContent ||
+              `This is part ${partNumber} of ${totalParts} in our weekly theme series: ${currentTheme.name}.`;
+            await sql`
+              INSERT INTO social_posts (content, platform, post_type, topic, status, image_url, video_url, scheduled_date, created_at)
+              VALUES (${postContent}, ${platform}, 'video', ${dayInfo.facetTitle}, 'pending', ${null}, ${videoUrl}, ${videoScheduledDate.toISOString()}, NOW())
+            `;
+          } else {
+            await sql`
+              UPDATE social_posts
+              SET video_url = ${videoUrl}
+              WHERE platform = ${platform}
+                AND post_type = 'educational'
+                AND topic = ${dayInfo.facetTitle}
+                AND scheduled_date::date = ${dateKey}
+            `;
+          }
         }
 
         try {

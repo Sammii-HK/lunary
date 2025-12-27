@@ -109,8 +109,12 @@ export function TarotReflectionPrompts({
   const subscription = useSubscription();
   const isPremium = hasBirthChartAccess(subscription.status, subscription.plan);
   const [isExpanded, setIsExpanded] = useState(false);
-  const [savingPrompt, setSavingPrompt] = useState<number | null>(null);
-  const [savedPrompts, setSavedPrompts] = useState<Set<number>>(new Set());
+  const [savingPrompt, setSavingPrompt] = useState<string | null>(null);
+  const [savedPrompts, setSavedPrompts] = useState<Set<string>>(new Set());
+  const [activePromptIndex, setActivePromptIndex] = useState<number | null>(
+    null,
+  );
+  const [drafts, setDrafts] = useState<Record<string, string>>({});
 
   const prompts = useMemo(() => {
     if (!trendAnalysis) return DEFAULT_PROMPTS.slice(0, isPremium ? 5 : 1);
@@ -133,8 +137,9 @@ export function TarotReflectionPrompts({
       : selectedPrompts.slice(0, 1);
   }, [trendAnalysis, isPremium]);
 
-  const handleSaveToJournal = async (prompt: string, index: number) => {
-    setSavingPrompt(index);
+  const handleSaveToJournal = async (prompt: string, reflection: string) => {
+    if (!reflection.trim()) return;
+    setSavingPrompt(prompt);
 
     try {
       const response = await fetch('/api/journal', {
@@ -142,7 +147,7 @@ export function TarotReflectionPrompts({
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
         body: JSON.stringify({
-          content: `Reflection prompt: ${prompt}\n\n[Write your reflection here...]`,
+          content: `Reflection prompt: ${prompt}\n\n${reflection.trim()}`,
           moodTags: ['reflection'],
           cardReferences: [],
           source: 'tarot-prompt',
@@ -150,7 +155,13 @@ export function TarotReflectionPrompts({
       });
 
       if (response.ok) {
-        setSavedPrompts((prev) => new Set([...prev, index]));
+        setSavedPrompts((prev) => new Set([...prev, prompt]));
+        setActivePromptIndex(null);
+        setDrafts((prev) => {
+          const next = { ...prev };
+          delete next[prompt];
+          return next;
+        });
       }
     } catch (error) {
       console.error('[TarotReflectionPrompts] Failed to save:', error);
@@ -191,8 +202,8 @@ export function TarotReflectionPrompts({
       {isExpanded && (
         <div className='px-4 pb-4 space-y-3'>
           {prompts.map((prompt, i) => {
-            const isSaved = savedPrompts.has(i);
-            const isSaving = savingPrompt === i;
+            const isSaved = savedPrompts.has(prompt);
+            const isSaving = savingPrompt === prompt;
 
             return (
               <div
@@ -201,24 +212,67 @@ export function TarotReflectionPrompts({
               >
                 <p className='text-sm text-zinc-300 mb-2'>{prompt}</p>
                 {isPremium && (
-                  <button
-                    onClick={() => handleSaveToJournal(prompt, i)}
-                    disabled={isSaved || isSaving}
-                    className={`inline-flex items-center gap-1.5 text-xs font-medium transition-colors ${
-                      isSaved
-                        ? 'text-lunary-success-400'
-                        : 'text-lunary-accent-400 hover:text-lunary-accent-300'
-                    }`}
-                  >
-                    {isSaving ? (
-                      <Loader2 className='w-3 h-3 animate-spin' />
-                    ) : isSaved ? (
-                      <Check className='w-3 h-3' />
+                  <div className='space-y-2'>
+                    {activePromptIndex === i && !isSaved ? (
+                      <>
+                        <textarea
+                          value={drafts[prompt] ?? ''}
+                          onChange={(e) =>
+                            setDrafts((prev) => ({
+                              ...prev,
+                              [prompt]: e.target.value,
+                            }))
+                          }
+                          rows={3}
+                          placeholder='Write your reflection...'
+                          className='w-full bg-zinc-900/60 border border-zinc-700/60 rounded-md p-2 text-xs text-zinc-200 placeholder-zinc-500 focus:outline-none focus:border-lunary-primary-700 resize-none'
+                          disabled={isSaving}
+                        />
+                        <div className='flex items-center gap-2'>
+                          <button
+                            onClick={() =>
+                              handleSaveToJournal(prompt, drafts[prompt] ?? '')
+                            }
+                            disabled={!drafts[prompt]?.trim() || isSaving}
+                            className='inline-flex items-center gap-1.5 text-xs font-medium text-lunary-accent-300 hover:text-lunary-accent-200 transition-colors disabled:opacity-50'
+                          >
+                            {isSaving ? (
+                              <Loader2 className='w-3 h-3 animate-spin' />
+                            ) : (
+                              <BookOpen className='w-3 h-3' />
+                            )}
+                            Save reflection
+                          </button>
+                          <button
+                            onClick={() => setActivePromptIndex(null)}
+                            disabled={isSaving}
+                            className='text-xs text-zinc-500 hover:text-zinc-300 transition-colors'
+                          >
+                            Cancel
+                          </button>
+                        </div>
+                      </>
                     ) : (
-                      <BookOpen className='w-3 h-3' />
+                      <button
+                        onClick={() => setActivePromptIndex(i)}
+                        disabled={isSaved || isSaving}
+                        className={`inline-flex items-center gap-1.5 text-xs font-medium transition-colors ${
+                          isSaved
+                            ? 'text-lunary-success-400'
+                            : 'text-lunary-accent-400 hover:text-lunary-accent-300'
+                        }`}
+                      >
+                        {isSaving ? (
+                          <Loader2 className='w-3 h-3 animate-spin' />
+                        ) : isSaved ? (
+                          <Check className='w-3 h-3' />
+                        ) : (
+                          <BookOpen className='w-3 h-3' />
+                        )}
+                        {isSaved ? 'Saved' : 'Write reflection'}
+                      </button>
                     )}
-                    {isSaved ? 'Saved' : 'Save to Book of Shadows'}
-                  </button>
+                  </div>
                 )}
               </div>
             );

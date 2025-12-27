@@ -36,6 +36,7 @@ import { TarotSeasonReading } from '@/components/tarot/TarotSeasonReading';
 import { TarotRitualForPatterns } from '@/components/tarot/TarotRitualForPatterns';
 import { TarotReflectionPrompts } from '@/components/tarot/TarotReflectionPrompts';
 import { PremiumPathway } from '@/components/PremiumPathway';
+import { RecurringThemesCard } from '@/components/RecurringThemesCard';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 
@@ -503,6 +504,30 @@ const TarotReadings = () => {
     }
   }, [personalizedReading, shareOrigin, shareDate, firstName, truncate]);
 
+  const recurringThemeItems = useMemo(() => {
+    const trends = personalizedReading?.trendAnalysis;
+    if (!trends) return [];
+
+    const themes = trends.dominantThemes ?? [];
+    const cards = trends.frequentCards ?? [];
+
+    if (themes.length === 0 && cards.length === 0) return [];
+
+    const themeItems = themes.slice(0, 3).map((theme, index) => ({
+      label: theme,
+      detail: cards[index]?.name
+        ? `${cards[index].name} showing up often`
+        : undefined,
+    }));
+
+    if (themeItems.length > 0) return themeItems;
+
+    return cards.slice(0, 3).map((card) => ({
+      label: card.name,
+      detail: typeof card.count === 'number' ? `Seen ${card.count} times` : '',
+    }));
+  }, [personalizedReading]);
+
   const handleShareClick = useCallback(
     async ({
       id,
@@ -651,7 +676,7 @@ const TarotReadings = () => {
     }
 
     return (
-      <div className='h-full space-y-6 p-4 overflow-auto'>
+      <div className='h-full space-y-6 p-4 overflow-auto mb-10'>
         <div className='pt-6'>
           <h1 className='text-2xl md:text-3xl font-light text-zinc-100 mb-2'>
             Your Tarot Readings
@@ -795,6 +820,11 @@ const TarotReadings = () => {
                 title={`Your ${timeFrame}-Day Tarot Patterns`}
                 color='zinc'
               >
+                <RecurringThemesCard
+                  className='mb-6'
+                  subtitle={`Based on your last ${timeFrame} days of readings`}
+                  items={recurringThemeItems}
+                />
                 <AdvancedPatterns
                   basicPatterns={personalizedReading.trendAnalysis}
                   selectedView={30}
@@ -927,7 +957,7 @@ const TarotReadings = () => {
   // Check if user has chart access but is missing birthday
   if (hasChartAccess && !userBirthday) {
     return (
-      <div className='min-h-screen flex items-center justify-center p-4'>
+      <div className='min-h-screen flex items-center justify-center p-4 mb-10'>
         <div className='text-center max-w-md space-y-6'>
           <div className='space-y-2'>
             <h2 className='text-2xl font-light text-zinc-100'>
@@ -972,7 +1002,7 @@ const TarotReadings = () => {
   }
 
   return (
-    <div className='h-full space-y-6 p-4 overflow-auto'>
+    <div className='h-full space-y-6 p-4 overflow-auto mb-12'>
       <div className='pt-6'>
         <h1 className='text-2xl md:text-3xl font-light text-zinc-100 mb-2'>
           {userName ? `${userName}'s Tarot Readings` : 'Your Tarot Readings'}

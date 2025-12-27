@@ -376,10 +376,7 @@ const locationCache = new Map<
   { latitude: number; longitude: number }
 >();
 
-const LOCATIONIQ_API_KEY =
-  process.env.LOCATIONIQ_API_KEY ||
-  process.env.NEXT_PUBLIC_LOCATIONIQ_API_KEY ||
-  '';
+const LOCATIONIQ_API_KEY = process.env.LOCATIONIQ_API_KEY || '';
 const LOCATIONIQ_BASE_URL =
   process.env.LOCATIONIQ_BASE_URL || 'https://us1.locationiq.com/v1';
 
@@ -403,7 +400,7 @@ async function parseLocationToCoordinates(
 
   if (!LOCATIONIQ_API_KEY) {
     console.warn(
-      '[LocationIQ] Missing API key. Set LOCATIONIQ_API_KEY (server) or NEXT_PUBLIC_LOCATIONIQ_API_KEY.',
+      '[LocationIQ] Missing API key. Set LOCATIONIQ_API_KEY (server only).',
     );
     return null;
   }

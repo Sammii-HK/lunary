@@ -4,7 +4,7 @@ import { useUser } from '@/context/UserContext';
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import dynamic from 'next/dynamic';
-import { HelpCircle, Stars, Layers, Hash, X } from 'lucide-react';
+import { HelpCircle, Stars, Layers, Hash, X, Calendar } from 'lucide-react';
 import { createBirthChart } from '../../../../utils/astrology/birthChartService';
 import { useSubscription } from '../../../hooks/useSubscription';
 import {
@@ -16,9 +16,11 @@ import { useAuthStatus } from '@/components/AuthStatus';
 import { conversionTracking } from '@/lib/analytics';
 import { BirthdayInput } from '@/components/ui/birthday-input';
 import { calculateLifePathNumber } from '../../../../utils/personalization';
+import { calculatePersonalYear } from '@/lib/numerology';
 import { useModal } from '@/hooks/useModal';
 import { Heading } from '@/components/ui/Heading';
 import { SectionTitle } from '@/components/ui/SectionTitle';
+import { Button } from '@/components/ui/button';
 
 const SkeletonCard = () => (
   <div className='h-32 bg-zinc-800 animate-pulse rounded-xl' />
@@ -29,7 +31,7 @@ const SubscriptionManagement = dynamic(
   { loading: () => <SkeletonCard /> },
 );
 const LocationRefresh = dynamic(
-  () => import('../../../components/LocationRefresh'),
+  () => import('../../../components/LocationRefreshPanel'),
   { ssr: false },
 );
 const NotificationSettings = dynamic(
@@ -413,7 +415,7 @@ export default function ProfilePage() {
       </div>
 
       <div className='w-full max-w-3xl'>
-        <div className='rounded-xl border border-zinc-700/70 bg-zinc-800/90 p-4 shadow-lg sm:p-5'>
+        <div className='rounded-xl border border-zinc-700/70 bg-lunary-bg-deep/90 p-4 shadow-lg sm:p-5'>
           <div className='space-y-4'>
             {canEditProfile && isEditing ? (
               <>
@@ -539,20 +541,18 @@ export default function ProfilePage() {
                 </div>
                 <div className='flex items-center gap-2'>
                   {canEditProfile && (
-                    <button
+                    <Button
                       onClick={() => setIsEditing(true)}
-                      className='rounded-full bg-lunary-primary px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-lunary-primary-400'
+                      variant='lunary'
+                      size='sm'
                     >
                       Edit details
-                    </button>
+                    </Button>
                   )}
                   {authState.isAuthenticated && (
-                    <button
-                      onClick={handleSignOut}
-                      className='rounded-full border border-zinc-600 px-4 py-2 text-sm font-medium text-zinc-200 transition-colors hover:border-zinc-500 hover:text-white'
-                    >
+                    <Button onClick={handleSignOut} variant='outline' size='sm'>
                       Sign out
-                    </button>
+                    </Button>
                   )}
                 </div>
               </div>
@@ -715,6 +715,32 @@ export default function ProfilePage() {
                     </Link>
                   );
                 })()}
+
+                {(() => {
+                  const currentYear = new Date().getFullYear();
+                  const personalYear = calculatePersonalYear(
+                    birthday,
+                    currentYear,
+                  ).result;
+                  return (
+                    <Link
+                      href={`/grimoire/numerology/year/${personalYear}`}
+                      className='group rounded-xl border border-zinc-700 bg-zinc-900/70 p-4 shadow-lg hover:border-lunary-primary-600 transition-colors'
+                    >
+                      <div className='flex items-center justify-between'>
+                        <div>
+                          <h3 className='text-lg font-medium text-white group-hover:text-lunary-primary-300 transition-colors'>
+                            Personal Year {personalYear}
+                          </h3>
+                          <p className='text-xs text-zinc-400'>
+                            Based on your birth date, not the universal year
+                          </p>
+                        </div>
+                        <Calendar className='w-6 h-6 text-lunary-primary-400' />
+                      </div>
+                    </Link>
+                  );
+                })()}
               </div>
             </div>
           </>
@@ -790,9 +816,11 @@ export default function ProfilePage() {
           );
         })()}
 
-      <DailyCosmicOverview className='mt-4' />
-      <LifeThemesCard className='mt-4' />
-      <GuideNudge location='profile' />
+      <div className='w-full max-w-3xl space-y-4'>
+        <DailyCosmicOverview className='w-full' />
+        <LifeThemesCard className='w-full' />
+        <GuideNudge location='profile' className='w-full' />
+      </div>
 
       {authState.isAuthenticated && !isEditing && (
         <div className='w-full max-w-3xl space-y-3'>

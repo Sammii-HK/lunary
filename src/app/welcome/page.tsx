@@ -39,17 +39,15 @@ export default function WelcomePage() {
             A calm AI companion for cosmic self understanding
           </p>
           <h1 className='text-3xl md:text-4xl lg:text-5xl font-light text-zinc-100 leading-tight tracking-tight'>
-            Personalised astrology for clarity and self understanding
+            Personal astrology that actually understands you
           </h1>
           <p className='text-base md:text-lg text-zinc-400 leading-relaxed max-w-2xl mx-auto'>
-            Lunary brings together your birth chart, today's sky, tarot and
-            lunar cycles to give you calm and personal daily guidance.
-            Understand your emotions and patterns with insight that helps you
-            move through your day with clarity.
+            Built from your full birth chart, real astronomy, tarot and lunar
+            cycles. Designed to support emotional clarity, not predictions.
           </p>
           <div className='flex flex-col sm:flex-row gap-4 justify-center items-center pt-2 pb-6'>
             <Button variant='lunary' asChild>
-              <Link href='/pricing'>Start free trial</Link>
+              <Link href='/pricing'>Start your free trial</Link>
             </Button>
             <Button variant='lunary-soft' asChild>
               <Link href='/auth?signup=true'>Sign up for free</Link>
@@ -61,7 +59,9 @@ export default function WelcomePage() {
           >
             See how it works
           </a>
-          <p className='text-sm text-zinc-400'>Free to begin. No commitment.</p>
+          <p className='text-sm text-zinc-400'>
+            No card required. Takes under 2 minutes.
+          </p>
         </div>
 
         {/* Hero Screenshot */}
@@ -81,19 +81,51 @@ export default function WelcomePage() {
         </div>
       </section>
 
-      {/* Section 2: Social Proof Strip */}
+      {/* Section 2: Problem Recognition */}
+      <section className='py-12 md:py-16 px-4 md:px-6 border-t border-zinc-800/30'>
+        <div className='max-w-4xl mx-auto text-center space-y-6'>
+          <h2 className='text-2xl md:text-3xl font-light text-zinc-100'>
+            Why most astrology apps never quite land
+          </h2>
+          <div className='max-w-2xl mx-auto text-left md:text-center'>
+            <ul className='space-y-2 text-sm md:text-base text-zinc-400'>
+              <li>They reduce you to a sun sign.</li>
+              <li>They repeat generic predictions.</li>
+              <li>
+                They tell you what will happen instead of helping you understand
+                yourself.
+              </li>
+            </ul>
+          </div>
+          <div className='pt-2'>
+            <Button variant='lunary' asChild>
+              <Link href='/pricing'>Begin your personalised chart</Link>
+            </Button>
+          </div>
+        </div>
+      </section>
+
+      {/* Section 3: Social Proof Strip */}
       <section className='border-t border-zinc-800/30 py-6 md:py-8'>
         <div className='max-w-4xl mx-auto px-4 md:px-6 text-center'>
           <p className='text-base md:text-lg text-zinc-300 font-light'>
             A calm alternative to noisy horoscope apps
           </p>
+          <p className='text-sm text-zinc-400 mt-2 max-w-2xl mx-auto'>
+            Lunary is not about predictions, fear, or telling you what will
+            happen. It is about understanding patterns, cycles, and emotional
+            themes so you can move through life with clarity.
+          </p>
           <p className='text-sm text-zinc-400 mt-1.5'>
             Built for people who want depth, not drama.
+          </p>
+          <p className='text-xs text-zinc-500 mt-2'>
+            Thousands of charts analysed. Zero fear-based predictions.
           </p>
         </div>
       </section>
 
-      {/* Section 3: Differentiator Block */}
+      {/* Section 4: Differentiator Block */}
       <section className='py-12 md:py-20 px-4 md:px-6'>
         <div className='max-w-4xl mx-auto text-center space-y-5'>
           <h2 className='text-2xl md:text-3xl lg:text-4xl font-light text-zinc-100 leading-tight'>
@@ -111,7 +143,44 @@ export default function WelcomePage() {
         </div>
       </section>
 
-      {/* Section 4: Three Pillars */}
+      {/* Section 5: Who Lunary Is For */}
+      <section className='py-12 md:py-20 px-4 md:px-6 bg-zinc-900/30'>
+        <div className='max-w-5xl mx-auto'>
+          <div className='text-center space-y-4 mb-10 md:mb-12'>
+            <h2 className='text-2xl md:text-3xl font-light text-zinc-100'>
+              Who Lunary is for
+            </h2>
+            <p className='text-base md:text-lg text-zinc-400 leading-relaxed max-w-2xl mx-auto'>
+              Designed for people who want personal astrology that feels
+              grounded, gentle and useful.
+            </p>
+          </div>
+          <div className='grid md:grid-cols-2 gap-6 md:gap-8'>
+            <div className='rounded-2xl border border-zinc-800/60 bg-zinc-900/40 p-5 md:p-6'>
+              <p className='text-sm md:text-base text-zinc-300'>
+                People who want astrology grounded in real astronomy
+              </p>
+            </div>
+            <div className='rounded-2xl border border-zinc-800/60 bg-zinc-900/40 p-5 md:p-6'>
+              <p className='text-sm md:text-base text-zinc-300'>
+                People tired of generic horoscopes
+              </p>
+            </div>
+            <div className='rounded-2xl border border-zinc-800/60 bg-zinc-900/40 p-5 md:p-6'>
+              <p className='text-sm md:text-base text-zinc-300'>
+                People building a reflective daily practice
+              </p>
+            </div>
+            <div className='rounded-2xl border border-zinc-800/60 bg-zinc-900/40 p-5 md:p-6'>
+              <p className='text-sm md:text-base text-zinc-300'>
+                People who journal, explore tarot, and track emotional patterns
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Section 6: Three Pillars */}
       <section className='py-12 md:py-20 px-4 md:px-6 bg-zinc-900/30'>
         <div className='max-w-5xl mx-auto'>
           <div className='grid md:grid-cols-3 gap-8 md:gap-10'>
@@ -126,6 +195,10 @@ export default function WelcomePage() {
               <p className='text-sm text-zinc-400 leading-relaxed'>
                 Every insight starts with the actual planetary positions and
                 your precise chart.
+              </p>
+              <p className='text-xs text-zinc-500 leading-relaxed'>
+                Every insight is generated from precise astronomical
+                calculations and interpreted through your unique birth chart.
               </p>
             </div>
             <div className='text-center space-y-3'>
@@ -158,7 +231,7 @@ export default function WelcomePage() {
         </div>
       </section>
 
-      {/* Section 5: Feature Spotlights */}
+      {/* Section 7: Feature Spotlights */}
       <section className='py-12 md:py-20 px-4 md:px-6'>
         <div className='max-w-5xl mx-auto space-y-12 md:space-y-20'>
           {/* Feature 1: Daily Cosmic Dashboard */}
@@ -172,12 +245,13 @@ export default function WelcomePage() {
                 Daily Cosmic Dashboard
               </h3>
               <p className='text-base text-zinc-300'>
-                Your whole sky, interpreted for you
+                Wake up knowing why today feels the way it does
               </p>
-              <p className='text-sm text-zinc-400 leading-relaxed'>
-                Today's transits, moon phase, tarot card and crystal, all
-                personalised to your birth chart and current themes.
-              </p>
+              <ul className='text-sm text-zinc-400 leading-relaxed space-y-1'>
+                <li>Today's transits connected to your birth chart</li>
+                <li>One tarot card that reflects your emotional climate</li>
+                <li>A crystal focus that supports your current phase</li>
+              </ul>
             </div>
             <div className='space-y-2'>
               <div className='py-3 px-4 border border-zinc-800 rounded-lg'>
@@ -260,10 +334,10 @@ export default function WelcomePage() {
                 Astral Guide Chat
               </h3>
               <p className='text-base text-zinc-300'>
-                Ask anything and receive personalised insight
+                Ask a question and leave with clarity
               </p>
               <p className='text-sm text-zinc-400 leading-relaxed'>
-                Ask about your emotions, energy, creativity or relationships.
+                Talk through emotions, energy, creativity or relationships.
                 Lunary responds with context from your chart and the current
                 sky.
               </p>
@@ -281,7 +355,7 @@ export default function WelcomePage() {
                 Living Book of Shadows
               </h3>
               <p className='text-base text-zinc-300'>
-                Your reflections and patterns connected
+                See the patterns that keep repeating
               </p>
               <p className='text-sm text-zinc-400 leading-relaxed'>
                 Record your insights and moods in one place. Lunary highlights
@@ -357,7 +431,7 @@ export default function WelcomePage() {
                 Tarot and Transit Patterns
               </h3>
               <p className='text-base text-zinc-300'>
-                See the themes shaping your life
+                Notice the themes shaping your life
               </p>
               <p className='text-sm text-zinc-400 leading-relaxed'>
                 Understand repeating cycles and ongoing lessons with clarity.
@@ -367,7 +441,15 @@ export default function WelcomePage() {
         </div>
       </section>
 
-      {/* Section 6: Learn & Explore */}
+      <section className='py-6 md:py-10 px-4 md:px-6'>
+        <div className='max-w-3xl mx-auto text-center'>
+          <Button variant='lunary' asChild>
+            <Link href='/pricing'>Create your cosmic dashboard</Link>
+          </Button>
+        </div>
+      </section>
+
+      {/* Section 8: Learn & Explore */}
       <section className='py-12 md:py-20 px-4 md:px-6 bg-zinc-900/30'>
         <div className='max-w-5xl mx-auto'>
           <div className='text-center space-y-4 mb-10 md:mb-14'>
@@ -456,7 +538,7 @@ export default function WelcomePage() {
         </div>
       </section>
 
-      {/* Section 7: How It Works */}
+      {/* Section 9: How It Works */}
       <section
         id='how-it-works'
         className='py-12 md:py-20 px-4 md:px-6 bg-zinc-900/30 scroll-mt-16'
@@ -523,7 +605,7 @@ export default function WelcomePage() {
         </div>
       </section>
 
-      {/* Section 8: Comparison */}
+      {/* Section 10: Comparison */}
       <section className='py-12 md:py-20 px-4 md:px-6'>
         <div className='max-w-3xl mx-auto'>
           <div className='grid md:grid-cols-2 gap-4 md:gap-6'>
@@ -618,16 +700,83 @@ export default function WelcomePage() {
         </div>
       </section>
 
-      {/* Section 9: Pricing Teaser */}
+      {/* Section 11: Pricing Teaser */}
       <section className='py-12 md:py-20 px-4 md:px-6 bg-zinc-900/30'>
         <div className='max-w-2xl mx-auto text-center space-y-5'>
-          <h2 className='text-2xl md:text-3xl font-light text-zinc-100'>
-            Choose the depth that feels right for you
-          </h2>
-          <p className='text-base md:text-lg text-zinc-400 leading-relaxed'>
-            Explore Lunary for free. Upgrade only if you want deeper
-            interpretations and guided rituals.
+          <p className='text-sm text-zinc-400'>
+            Lunary is free to begin. <br /> You only upgrade if you want deeper,
+            more personalised insight.
           </p>
+          <h2 className='text-2xl md:text-3xl font-light text-zinc-100'>
+            What’s included
+          </h2>
+          <div className='grid md:grid-cols-2 gap-4 text-left text-sm text-zinc-400'>
+            <div className='rounded-2xl border border-zinc-800/60 bg-zinc-900/40 p-4'>
+              <p className='text-xs uppercase tracking-[0.2em] text-zinc-500'>
+                Free includes
+              </p>
+              <ul className='mt-2 space-y-3'>
+                <li>
+                  <p className='text-sm text-zinc-200'>
+                    Your complete birth chart
+                  </p>
+                  <p className='text-xs text-zinc-500'>
+                    See your core placements and foundational themes.
+                  </p>
+                </li>
+                <li>
+                  <p className='text-sm text-zinc-200'>
+                    Daily cosmic dashboard
+                  </p>
+                  <p className='text-xs text-zinc-500'>
+                    Today's transits, moon phase, tarot and crystal,
+                    personalised to your chart.
+                  </p>
+                </li>
+                <li>
+                  <p className='text-sm text-zinc-200'>Astral guide chat</p>
+                  <p className='text-xs text-zinc-500'>
+                    Ask questions and receive context-aware insight based on
+                    your chart and the current sky.
+                  </p>
+                </li>
+              </ul>
+            </div>
+            <div className='rounded-2xl border border-zinc-800/60 bg-zinc-900/40 p-4'>
+              <p className='text-xs uppercase tracking-[0.2em] text-zinc-500'>
+                Unlock deeper personal insight
+              </p>
+              <ul className='mt-2 space-y-3'>
+                <li>
+                  <p className='text-sm text-zinc-200'>
+                    Personalised interpretations, not generic meanings
+                  </p>
+                  <p className='text-xs text-zinc-500'>
+                    Transits, tarot and lunar cycles interpreted through your
+                    placements and ongoing themes.
+                  </p>
+                </li>
+                <li>
+                  <p className='text-sm text-zinc-200'>
+                    Guided rituals aligned to your chart and timing
+                  </p>
+                  <p className='text-xs text-zinc-500'>
+                    Practices shaped around your current transits and lunar
+                    phases.
+                  </p>
+                </li>
+                <li>
+                  <p className='text-sm text-zinc-200'>
+                    Pattern tracking across time
+                  </p>
+                  <p className='text-xs text-zinc-500'>
+                    See recurring emotional themes, cycles, and lessons as they
+                    unfold.
+                  </p>
+                </li>
+              </ul>
+            </div>
+          </div>
           <div className='pt-2'>
             <Button variant='outline' asChild>
               <Link href='/pricing'>View plans</Link>
@@ -636,7 +785,7 @@ export default function WelcomePage() {
         </div>
       </section>
 
-      {/* Section 10: Why Lunary Feels Different */}
+      {/* Section 12: Why Lunary Feels Different */}
       <section className='py-12 md:py-16 px-4 md:px-6'>
         <div className='max-w-2xl mx-auto text-center space-y-4'>
           <h3 className='text-lg md:text-xl font-medium text-zinc-200'>
@@ -650,19 +799,18 @@ export default function WelcomePage() {
         </div>
       </section>
 
-      {/* Section 11: Final CTA */}
+      {/* Section 13: Final CTA */}
       <section className='py-12 md:py-20 px-4 md:px-6 bg-zinc-900/20'>
         <div className='max-w-2xl mx-auto text-center space-y-5'>
           <h2 className='text-2xl md:text-3xl font-light text-zinc-100'>
-            Ready to understand yourself more deeply
+            Understanding yourself changes everything.
           </h2>
           <p className='text-base md:text-lg text-zinc-400 leading-relaxed'>
-            Begin your free trial and let Lunary translate the sky into clarity
-            and personal meaning.
+            Lunary is here to walk that with you.
           </p>
           <div className='pt-2 flex flex-col sm:flex-row gap-4 justify-center items-center'>
             <Button variant='lunary' asChild>
-              <Link href='/pricing'>Start free trial</Link>
+              <Link href='/pricing'>Begin your free trial</Link>
             </Button>
             <Button variant='lunary-soft' asChild>
               <Link href='/auth?signup=true'>Sign up for free</Link>
@@ -671,7 +819,7 @@ export default function WelcomePage() {
         </div>
       </section>
 
-      {/* Section 12: Newsletter */}
+      {/* Section 14: Newsletter */}
       <section className='py-12 md:py-20 px-4 md:px-6'>
         <div className='max-w-4xl mx-auto'>
           <NewsletterSignupForm
