@@ -124,6 +124,8 @@ export async function POST(request: NextRequest) {
         scheduled_date TIMESTAMP WITH TIME ZONE,
         status TEXT NOT NULL DEFAULT 'pending',
         rejection_feedback TEXT,
+        image_url TEXT,
+        video_url TEXT,
         created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
         updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
       )

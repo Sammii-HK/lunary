@@ -79,6 +79,8 @@ export function getThematicImageUrl(
   baseUrl: string,
   platform: string,
   slug?: string,
+  subtitle?: string,
+  cover?: 'tiktok' | 'youtube' | 'true',
 ): string {
   const format = getPlatformImageFormat(platform);
   const thematicCategory = mapToThematicCategory(category);
@@ -94,6 +96,14 @@ export function getThematicImageUrl(
     format,
     slug: normalizedSlug,
   });
+
+  if (subtitle) {
+    params.set('subtitle', subtitle);
+  }
+
+  if (cover) {
+    params.set('cover', cover);
+  }
 
   if (symbol) {
     params.set('symbol', symbol);

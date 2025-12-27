@@ -140,7 +140,7 @@ export const tarotSuitSymbols: Record<string, string> = {
   cups: '🜄', // Water alchemical symbol
   swords: '🜁', // Air alchemical symbol
   pentacles: '🜃', // Earth alchemical symbol
-  major: '✧',
+  major: '*',
 };
 
 export const tarotMajorSymbols: Record<string, string> = {

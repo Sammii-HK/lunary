@@ -163,6 +163,12 @@ export async function GET(request: NextRequest) {
                 if (res.ok) {
                   const longVideoData = await res.json();
                   if (longVideoData.video?.id) {
+                    const longFormPublishDate = new Date(weekStart);
+                    longFormPublishDate.setUTCDate(
+                      longFormPublishDate.getUTCDate() + 2,
+                    );
+                    longFormPublishDate.setUTCHours(20, 0, 0, 0);
+
                     await fetch(`${baseUrl}/api/youtube/upload`, {
                       method: 'POST',
                       headers: { 'Content-Type': 'application/json' },
@@ -172,7 +178,7 @@ export async function GET(request: NextRequest) {
                         title: blogContent.title,
                         description: blogContent.description,
                         type: 'long',
-                        publishDate: weekStart.toISOString(),
+                        publishDate: longFormPublishDate.toISOString(),
                       }),
                     }).catch((err) => {
                       console.error(
