@@ -46,6 +46,17 @@ interface PendingPost {
   scheduledDate?: string;
   imageUrl?: string;
   videoUrl?: string;
+  weekTheme?: string;
+  weekStart?: string;
+  videoScriptId?: number;
+  videoScript?: string;
+  videoScriptPlatform?: string;
+  videoThemeName?: string;
+  videoPartNumber?: number;
+  videoCoverImageUrl?: string;
+  videoJobStatus?: string;
+  videoJobAttempts?: number;
+  videoJobError?: string;
   createdAt: string;
   status: 'pending' | 'approved' | 'rejected' | 'sent';
 }
@@ -93,10 +104,258 @@ export default function SocialPostsPage() {
     null,
   );
   const [useThematicMode, setUseThematicMode] = useState(true);
+  const [replaceExisting, setReplaceExisting] = useState(false);
+  const [videosOnly, setVideosOnly] = useState(false);
+  const [videoJobFeedback, setVideoJobFeedback] = useState<string | null>(null);
 
   useEffect(() => {
     loadPendingPosts();
   }, []);
+
+  const getWeekStartForOffset = (offset: number): string => {
+    const now = new Date();
+    const day = now.getDay();
+    const diff = now.getDate() - day + (day === 0 ? -6 : 1);
+    const monday = new Date(now);
+    monday.setDate(diff);
+    monday.setHours(0, 0, 0, 0);
+    monday.setDate(monday.getDate() + offset * 7);
+    return monday.toISOString();
+  };
+
+  const handleGenerateWeekly = async (weekOffset: number) => {
+    setLoading(true);
+    try {
+      if (videosOnly) {
+        const response = await fetch(
+          '/api/admin/video-scripts/generate-videos',
+          {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              weekStart: getWeekStartForOffset(weekOffset),
+            }),
+          },
+        );
+        const data = await response.json();
+        if (!data.success) {
+          alert(data.error || data.message || 'Failed to generate videos');
+        } else {
+          alert(`Generated ${data.generated} videos for the week.`);
+        }
+      } else {
+        const response = await fetch(
+          '/api/admin/social-posts/generate-weekly',
+          {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              currentWeek: weekOffset === 0,
+              weekStart:
+                weekOffset === 0 ? null : getWeekStartForOffset(weekOffset),
+              mode: useThematicMode ? 'thematic' : 'legacy',
+              replaceExisting,
+            }),
+          },
+        );
+        const data = await response.json();
+        if (data.success) {
+          const themeInfo = data.theme ? ` Theme: ${data.theme}` : '';
+          alert(
+            `Generated ${data.savedIds.length} posts for the week!${themeInfo}`,
+          );
+          loadPendingPosts();
+          setActiveTab('approve');
+        } else {
+          alert(`Failed: ${data.error}`);
+        }
+      }
+    } catch (error) {
+      alert(
+        videosOnly ? 'Failed to generate videos' : 'Failed to generate posts',
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const resolveQueueWeekStart = (): string => {
+    const firstPending = pendingPosts.find((post) => post.scheduledDate);
+    if (!firstPending?.scheduledDate) {
+      return getWeekStartForOffset(0);
+    }
+    const date = new Date(firstPending.scheduledDate);
+    const day = date.getDay();
+    const diff = date.getDate() - day + (day === 0 ? -6 : 1);
+    date.setDate(diff);
+    date.setHours(0, 0, 0, 0);
+    return date.toISOString();
+  };
+
+  const resolveQueueWeekTheme = (): string | null => {
+    const counts = new Map<string, number>();
+    for (const post of pendingPosts) {
+      if (!post.weekTheme) continue;
+      counts.set(post.weekTheme, (counts.get(post.weekTheme) || 0) + 1);
+    }
+    let bestTheme: string | null = null;
+    let bestCount = 0;
+    for (const [theme, count] of counts.entries()) {
+      if (count > bestCount) {
+        bestTheme = theme;
+        bestCount = count;
+      }
+    }
+    return bestTheme;
+  };
+
+  const handleRefreshImages = async () => {
+    setLoading(true);
+    try {
+      const response = await fetch('/api/admin/social-posts/refresh-images', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          weekStart: resolveQueueWeekStart(),
+          fixNaN: true,
+        }),
+      });
+      const data = await response.json();
+      if (!data.success) {
+        alert(data.error || 'Failed to refresh post images');
+      } else {
+        alert(`Refreshed ${data.updated} post images.`);
+        loadPendingPosts();
+      }
+    } catch (error) {
+      alert('Failed to refresh post images');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleRefreshVideoCovers = async () => {
+    setLoading(true);
+    try {
+      const response = await fetch('/api/admin/video-scripts/refresh-covers', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          weekStart: resolveQueueWeekStart(),
+        }),
+      });
+      const data = await response.json();
+      if (!data.success) {
+        alert(data.error || 'Failed to refresh video covers');
+      } else {
+        alert(`Refreshed ${data.updated} video covers.`);
+      }
+    } catch (error) {
+      alert('Failed to refresh video covers');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleRequeueVideos = async () => {
+    if (
+      !confirm(
+        'Requeue videos for the approval queue week? This will only rebuild missing videos and will not re-generate existing ones.',
+      )
+    ) {
+      return;
+    }
+    setLoading(true);
+    try {
+      const weekTheme = resolveQueueWeekTheme();
+      const response = await fetch('/api/admin/video-scripts/requeue-videos', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          weekStart: resolveQueueWeekStart(),
+          forceThemeName: weekTheme,
+        }),
+      });
+      const data = await response.json();
+      if (!data.success) {
+        alert(data.error || 'Failed to requeue videos');
+      } else {
+        await handleProcessVideoJobs();
+        alert('Video jobs requeued. The worker has been triggered.');
+        loadPendingPosts();
+      }
+    } catch (error) {
+      alert('Failed to requeue videos');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleProcessVideoJobs = async (force = false) => {
+    setLoading(true);
+    setVideoJobFeedback(null);
+    try {
+      const response = await fetch(
+        `/api/admin/video-jobs/process?limit=1${force ? '&force=true' : ''}`,
+        {
+          method: 'POST',
+        },
+      );
+      const data = await response.json();
+      if (!data.success) {
+        alert(data.error || 'Failed to process video jobs');
+      } else {
+        const processed = data.processed ?? 0;
+        setVideoJobFeedback(
+          processed > 0
+            ? `Processed ${processed} video job${processed > 1 ? 's' : ''}.`
+            : 'No queued video jobs found.',
+        );
+        loadPendingPosts();
+      }
+    } catch (error) {
+      alert('Failed to process video jobs');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleForceRebuildVideos = async () => {
+    if (
+      !confirm(
+        'Force rebuild videos for the approval queue week? This regenerates the video files using the existing scripts.',
+      )
+    ) {
+      return;
+    }
+    setLoading(true);
+    try {
+      const weekTheme = resolveQueueWeekTheme();
+      const response = await fetch('/api/admin/video-scripts/requeue-videos', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          weekStart: resolveQueueWeekStart(),
+          forceRebuild: true,
+          forceThemeName: weekTheme,
+        }),
+      });
+      const data = await response.json();
+      if (!data.success) {
+        alert(data.error || 'Failed to force rebuild videos');
+      } else {
+        await handleProcessVideoJobs(true);
+        alert(
+          'Video jobs requeued for rebuild. The worker has been triggered.',
+        );
+        loadPendingPosts();
+      }
+    } catch (error) {
+      alert('Failed to force rebuild videos');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const loadPendingPosts = async () => {
     try {
@@ -507,6 +766,21 @@ export default function SocialPostsPage() {
   const approvedCount = pendingPosts.filter(
     (p) => p.status === 'approved',
   ).length;
+  const queuedVideoCount = pendingPosts.filter(
+    (p) =>
+      (p.postType === 'video' || p.postType === 'educational') &&
+      p.videoJobStatus === 'pending',
+  ).length;
+  const processingVideoCount = pendingPosts.filter(
+    (p) =>
+      (p.postType === 'video' || p.postType === 'educational') &&
+      p.videoJobStatus === 'processing',
+  ).length;
+  const failedVideoCount = pendingPosts.filter(
+    (p) =>
+      (p.postType === 'video' || p.postType === 'educational') &&
+      p.videoJobStatus === 'failed',
+  ).length;
 
   return (
     <div className='min-h-screen bg-zinc-950 text-zinc-100 p-6'>
@@ -726,42 +1000,40 @@ export default function SocialPostsPage() {
                       Use thematic content (weekly themes with daily facets)
                     </label>
                   </div>
+                  <div className='flex items-center gap-2 p-3 bg-zinc-800/50 rounded-lg border border-zinc-700'>
+                    <input
+                      type='checkbox'
+                      id='replace-existing'
+                      checked={replaceExisting}
+                      onChange={(e) => setReplaceExisting(e.target.checked)}
+                      className='w-4 h-4 rounded border-zinc-600 bg-zinc-700 text-lunary-primary-500 focus:ring-lunary-primary-500'
+                    />
+                    <label
+                      htmlFor='replace-existing'
+                      className='text-sm text-zinc-300 cursor-pointer'
+                    >
+                      Replace existing pending + approved posts for that week
+                    </label>
+                  </div>
+                  <div className='flex items-center gap-2 p-3 bg-zinc-800/50 rounded-lg border border-zinc-700'>
+                    <input
+                      type='checkbox'
+                      id='videos-only'
+                      checked={videosOnly}
+                      onChange={(e) => setVideosOnly(e.target.checked)}
+                      className='w-4 h-4 rounded border-zinc-600 bg-zinc-700 text-lunary-primary-500 focus:ring-lunary-primary-500'
+                    />
+                    <label
+                      htmlFor='videos-only'
+                      className='text-sm text-zinc-300 cursor-pointer'
+                    >
+                      Generate videos only (skip post regeneration)
+                    </label>
+                  </div>
 
-                  <div className='grid grid-cols-2 gap-3'>
+                  <div className='grid grid-cols-3 gap-3'>
                     <Button
-                      onClick={async () => {
-                        setLoading(true);
-                        try {
-                          const response = await fetch(
-                            '/api/admin/social-posts/generate-weekly',
-                            {
-                              method: 'POST',
-                              headers: { 'Content-Type': 'application/json' },
-                              body: JSON.stringify({
-                                currentWeek: true,
-                                mode: useThematicMode ? 'thematic' : 'legacy',
-                              }),
-                            },
-                          );
-                          const data = await response.json();
-                          if (data.success) {
-                            const themeInfo = data.theme
-                              ? ` Theme: ${data.theme}`
-                              : '';
-                            alert(
-                              `Generated ${data.savedIds.length} posts for the current week!${themeInfo}`,
-                            );
-                            loadPendingPosts();
-                            setActiveTab('approve');
-                          } else {
-                            alert(`Failed: ${data.error}`);
-                          }
-                        } catch (error) {
-                          alert('Failed to generate weekly posts');
-                        } finally {
-                          setLoading(false);
-                        }
-                      }}
+                      onClick={() => handleGenerateWeekly(0)}
                       disabled={loading}
                       variant='outline'
                       className='border-lunary-success-700 text-lunary-success hover:bg-lunary-success-950'
@@ -770,45 +1042,22 @@ export default function SocialPostsPage() {
                       Current Week
                     </Button>
                     <Button
-                      onClick={async () => {
-                        setLoading(true);
-                        try {
-                          const response = await fetch(
-                            '/api/admin/social-posts/generate-weekly',
-                            {
-                              method: 'POST',
-                              headers: { 'Content-Type': 'application/json' },
-                              body: JSON.stringify({
-                                currentWeek: false,
-                                mode: useThematicMode ? 'thematic' : 'legacy',
-                              }),
-                            },
-                          );
-                          const data = await response.json();
-                          if (data.success) {
-                            const themeInfo = data.theme
-                              ? ` Theme: ${data.theme}`
-                              : '';
-                            alert(
-                              `Generated ${data.savedIds.length} posts for next week!${themeInfo}`,
-                            );
-                            loadPendingPosts();
-                            setActiveTab('approve');
-                          } else {
-                            alert(`Failed: ${data.error}`);
-                          }
-                        } catch (error) {
-                          alert('Failed to generate weekly posts');
-                        } finally {
-                          setLoading(false);
-                        }
-                      }}
+                      onClick={() => handleGenerateWeekly(1)}
                       disabled={loading}
                       variant='outline'
                       className='border-lunary-primary-600 text-lunary-primary-400 hover:bg-lunary-primary-900/10'
                     >
                       <Calendar className='h-4 w-4 mr-2' />
                       Next Week
+                    </Button>
+                    <Button
+                      onClick={() => handleGenerateWeekly(2)}
+                      disabled={loading}
+                      variant='outline'
+                      className='border-lunary-secondary-600 text-lunary-secondary-400 hover:bg-lunary-secondary-900/10'
+                    >
+                      <Calendar className='h-4 w-4 mr-2' />
+                      Week After Next
                     </Button>
                   </div>
                 </div>
@@ -885,8 +1134,69 @@ export default function SocialPostsPage() {
                   </div>
                   <div className='text-xs text-zinc-400'>Approved</div>
                 </div>
+                {(queuedVideoCount > 0 ||
+                  processingVideoCount > 0 ||
+                  failedVideoCount > 0) && (
+                  <div className='flex gap-2 items-center text-xs text-zinc-300'>
+                    {queuedVideoCount > 0 && (
+                      <Badge className='bg-zinc-800 text-zinc-200 border-zinc-600'>
+                        {queuedVideoCount} queued
+                      </Badge>
+                    )}
+                    {processingVideoCount > 0 && (
+                      <Badge className='bg-lunary-primary-900/30 text-lunary-primary-300 border-lunary-primary-700'>
+                        {processingVideoCount} processing
+                      </Badge>
+                    )}
+                    {failedVideoCount > 0 && (
+                      <Badge className='bg-lunary-error-900/30 text-lunary-error border-lunary-error-700'>
+                        {failedVideoCount} failed
+                      </Badge>
+                    )}
+                  </div>
+                )}
               </div>
               <div className='flex gap-3'>
+                <Button
+                  onClick={handleRefreshImages}
+                  disabled={loading}
+                  variant='outline'
+                  className='border-zinc-700 text-zinc-300 hover:bg-zinc-800'
+                >
+                  Refresh Post Images (Queue Week)
+                </Button>
+                <Button
+                  onClick={handleRefreshVideoCovers}
+                  disabled={loading}
+                  variant='outline'
+                  className='border-zinc-700 text-zinc-300 hover:bg-zinc-800'
+                >
+                  Refresh Video Covers (Queue Week)
+                </Button>
+                <Button
+                  onClick={handleRequeueVideos}
+                  disabled={loading}
+                  variant='outline'
+                  className='border-zinc-700 text-zinc-300 hover:bg-zinc-800'
+                >
+                  Requeue Videos (Queue Week)
+                </Button>
+                <Button
+                  onClick={handleForceRebuildVideos}
+                  disabled={loading}
+                  variant='outline'
+                  className='border-zinc-700 text-zinc-300 hover:bg-zinc-800'
+                >
+                  Force Rebuild Videos (Queue Week)
+                </Button>
+                <Button
+                  onClick={handleProcessVideoJobs}
+                  disabled={loading}
+                  variant='outline'
+                  className='border-zinc-700 text-zinc-300 hover:bg-zinc-800'
+                >
+                  Process Video Jobs Now
+                </Button>
                 {pendingCount > 0 && (
                   <>
                     <Button
@@ -938,6 +1248,14 @@ export default function SocialPostsPage() {
                 )}
               </div>
             </div>
+
+            {videoJobFeedback && (
+              <Card className='bg-zinc-900 border-zinc-800'>
+                <CardContent className='py-3 text-sm text-zinc-300'>
+                  {videoJobFeedback}
+                </CardContent>
+              </Card>
+            )}
 
             {sendAllProgress && (
               <Card className='bg-zinc-900 border-zinc-800'>
@@ -1006,6 +1324,11 @@ export default function SocialPostsPage() {
                             <Badge className='bg-lunary-primary-900/20 text-lunary-primary-400 border-lunary-primary-700 capitalize'>
                               {post.postType}
                             </Badge>
+                            {!post.videoUrl && post.videoJobStatus && (
+                              <Badge className='bg-zinc-800 text-zinc-200 border-zinc-600 capitalize'>
+                                Video {post.videoJobStatus}
+                              </Badge>
+                            )}
                           </div>
                           <CardDescription className='text-zinc-400'>
                             {post.platform === 'reddit' && (
@@ -1014,6 +1337,9 @@ export default function SocialPostsPage() {
                               </span>
                             )}
                             {post.topic && `Topic: ${post.topic} • `}
+                            {post.weekStart &&
+                              `Week of ${new Date(post.weekStart).toLocaleDateString()} • `}
+                            {post.weekTheme && `Theme: ${post.weekTheme} • `}
                             Created: {new Date(post.createdAt).toLocaleString()}
                             {post.scheduledDate &&
                               ` • Scheduled: ${new Date(post.scheduledDate).toLocaleString()}`}
@@ -1043,6 +1369,26 @@ export default function SocialPostsPage() {
                             </div>
                           </div>
                         )}
+                        {post.videoScript && (
+                          <details className='bg-zinc-800/50 rounded-lg border border-zinc-700 p-3'>
+                            <summary className='cursor-pointer text-sm text-zinc-300 flex items-center gap-2'>
+                              <FileText className='h-4 w-4' />
+                              Video script
+                              {post.videoPartNumber
+                                ? ` • Part ${post.videoPartNumber}`
+                                : ''}
+                            </summary>
+                            <p className='mt-3 text-zinc-200 whitespace-pre-wrap text-sm'>
+                              {post.videoScript}
+                            </p>
+                          </details>
+                        )}
+                        {post.videoJobStatus === 'failed' &&
+                          post.videoJobError && (
+                            <div className='text-sm text-lunary-error'>
+                              Video job failed: {post.videoJobError}
+                            </div>
+                          )}
                         {post.imageUrl && (
                           <div className='relative w-full max-w-md mx-auto'>
                             <Image

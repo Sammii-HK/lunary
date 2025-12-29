@@ -1,6 +1,21 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { sql } from '@vercel/postgres';
 
+type YouTubeUploadResult = {
+  success: boolean;
+  videoId?: string;
+  error?: string;
+};
+
+function getWeekStart(date: Date): Date {
+  const d = new Date(date);
+  const day = d.getDay();
+  const diff = d.getDate() - day + (day === 0 ? -6 : 1);
+  d.setDate(diff);
+  d.setHours(0, 0, 0, 0);
+  return d;
+}
+
 export async function POST(request: NextRequest) {
   try {
     const { postId, action, feedback, editedContent, improvementNotes } =
@@ -36,6 +51,22 @@ export async function POST(request: NextRequest) {
       await sql`
         ALTER TABLE social_posts 
         ADD COLUMN IF NOT EXISTS improvement_notes TEXT
+      `;
+    } catch (alterError) {
+      // Column might already exist, that's fine
+    }
+    try {
+      await sql`
+        ALTER TABLE social_posts 
+        ADD COLUMN IF NOT EXISTS youtube_video_id TEXT
+      `;
+    } catch (alterError) {
+      // Column might already exist, that's fine
+    }
+    try {
+      await sql`
+        ALTER TABLE social_posts 
+        ADD COLUMN IF NOT EXISTS quote_id INTEGER
       `;
     } catch (alterError) {
       // Column might already exist, that's fine
@@ -106,6 +137,179 @@ export async function POST(request: NextRequest) {
           SET status = ${status}, updated_at = NOW()
           WHERE id = ${postId}
         `;
+      }
+
+      const postResult = await sql`
+        SELECT id, content, platform, post_type, topic, scheduled_date, video_url, week_theme, week_start, youtube_video_id, quote_id
+        FROM social_posts
+        WHERE id = ${postId}
+      `;
+
+      const post = postResult.rows[0];
+      const videoPlatforms = ['instagram', 'tiktok', 'threads', 'twitter'];
+
+      if (
+        post?.video_url &&
+        videoPlatforms.includes(String(post.platform || '').toLowerCase())
+      ) {
+        const dateValue = post.scheduled_date
+          ? new Date(post.scheduled_date)
+          : null;
+        const dateKey = dateValue
+          ? dateValue.toISOString().split('T')[0]
+          : null;
+
+        if (dateKey) {
+          await sql`
+            CREATE TABLE IF NOT EXISTS youtube_uploads (
+              id SERIAL PRIMARY KEY,
+              topic TEXT NOT NULL,
+              scheduled_date DATE NOT NULL,
+              video_url TEXT NOT NULL,
+              youtube_video_id TEXT,
+              status TEXT NOT NULL DEFAULT 'pending',
+              error TEXT,
+              created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+              UNIQUE(topic, scheduled_date)
+            )
+          `;
+
+          const existing = await sql`
+            SELECT youtube_video_id, status
+            FROM youtube_uploads
+            WHERE topic = ${post.topic}
+              AND scheduled_date = ${dateKey}
+            LIMIT 1
+          `;
+
+          if (!existing.rows.length) {
+            const scriptResult = await sql`
+              SELECT full_script, part_number, theme_name
+              FROM video_scripts
+              WHERE platform = 'tiktok'
+                AND scheduled_date = ${dateKey}
+                AND facet_title = ${post.topic}
+              ORDER BY id DESC
+              LIMIT 1
+            `;
+
+            const script = scriptResult.rows[0]?.full_script || '';
+            const partNumber = scriptResult.rows[0]?.part_number || 1;
+            const themeName =
+              scriptResult.rows[0]?.theme_name || post.week_theme || 'Lunary';
+
+            const weekStart = getWeekStart(dateValue);
+            const weekEnd = new Date(weekStart);
+            weekEnd.setDate(weekEnd.getDate() + 6);
+
+            const countResult = await sql`
+              SELECT COUNT(*)::int AS count
+              FROM video_scripts
+              WHERE platform = 'tiktok'
+                AND scheduled_date >= ${weekStart.toISOString().split('T')[0]}
+                AND scheduled_date <= ${weekEnd.toISOString().split('T')[0]}
+            `;
+            const totalParts = countResult.rows[0]?.count || 7;
+
+            const youtubeTitleBase = `Weekly Theme: ${themeName} • Part ${partNumber} of ${totalParts} — ${post.topic}`;
+            const youtubeTitle =
+              youtubeTitleBase.length > 90
+                ? youtubeTitleBase.substring(0, 87) + '...'
+                : youtubeTitleBase;
+            const youtubeDescription = `${post.content}\n\nFrom Lunary's Grimoire — explore deeper rituals, meanings, and correspondences inside the full Grimoire.\n\n#Lunary #Grimoire`;
+
+            const publishDate = (() => {
+              if (!dateValue) {
+                return new Date(`${dateKey}T20:00:00.000Z`).toISOString();
+              }
+              if (
+                dateValue.getUTCHours() === 0 &&
+                dateValue.getUTCMinutes() === 0 &&
+                dateValue.getUTCSeconds() === 0
+              ) {
+                return new Date(`${dateKey}T20:00:00.000Z`).toISOString();
+              }
+              return dateValue.toISOString();
+            })();
+
+            const baseUrl = process.env.VERCEL
+              ? 'https://lunary.app'
+              : 'http://localhost:3000';
+
+            let uploadResult: YouTubeUploadResult = { success: false };
+            try {
+              const response = await fetch(`${baseUrl}/api/youtube/upload`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  videoUrl: post.video_url,
+                  title: youtubeTitle,
+                  description: youtubeDescription,
+                  type: 'short',
+                  script,
+                  publishDate,
+                }),
+              });
+              const data = await response.json().catch(() => ({}));
+              if (response.ok) {
+                uploadResult = { success: true, videoId: data.videoId };
+              } else {
+                uploadResult = {
+                  success: false,
+                  error: data?.message || data?.error || 'Upload failed',
+                };
+              }
+            } catch (uploadError) {
+              uploadResult = {
+                success: false,
+                error:
+                  uploadError instanceof Error
+                    ? uploadError.message
+                    : 'Unknown error',
+              };
+            }
+
+            await sql`
+              INSERT INTO youtube_uploads (topic, scheduled_date, video_url, youtube_video_id, status, error)
+              VALUES (
+                ${post.topic},
+                ${dateKey},
+                ${post.video_url},
+                ${uploadResult.videoId || null},
+                ${uploadResult.success ? 'uploaded' : 'failed'},
+                ${uploadResult.success ? null : uploadResult.error || null}
+              )
+              ON CONFLICT (topic, scheduled_date)
+              DO UPDATE SET
+                youtube_video_id = EXCLUDED.youtube_video_id,
+                status = EXCLUDED.status,
+                error = EXCLUDED.error
+            `;
+
+            if (uploadResult.videoId) {
+              await sql`
+                UPDATE social_posts
+                SET youtube_video_id = ${uploadResult.videoId}
+                WHERE topic = ${post.topic}
+                  AND scheduled_date::date = ${dateKey}
+                  AND youtube_video_id IS NULL
+              `;
+            }
+          }
+        }
+      }
+
+      if (post?.post_type === 'closing_ritual' && post.quote_id) {
+        try {
+          await sql`
+            UPDATE social_quotes
+            SET status = 'used', used_at = NOW(), use_count = use_count + 1
+            WHERE id = ${post.quote_id}
+              AND status = 'available'
+          `;
+        } catch (quoteError) {
+          console.warn('Failed to mark quote as used:', quoteError);
+        }
       }
     } else {
       await sql`

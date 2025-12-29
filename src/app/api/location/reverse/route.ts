@@ -24,10 +24,12 @@ export async function GET(request: NextRequest) {
     );
 
     if (!response.ok) {
-      return NextResponse.json(
-        { error: 'LocationIQ reverse failed' },
-        { status: response.status },
-      );
+      return NextResponse.json({
+        city: null,
+        country: null,
+        timezone: null,
+        error: 'LocationIQ reverse failed',
+      });
     }
 
     const data = (await response.json()) as {
@@ -51,14 +53,16 @@ export async function GET(request: NextRequest) {
       address.neighbourhood;
 
     return NextResponse.json({
-      city,
-      country: address.country,
-      timezone: data.timezone,
+      city: city || null,
+      country: address.country || null,
+      timezone: data.timezone || null,
     });
   } catch (error) {
-    return NextResponse.json(
-      { error: 'LocationIQ reverse error' },
-      { status: 500 },
-    );
+    return NextResponse.json({
+      city: null,
+      country: null,
+      timezone: null,
+      error: 'LocationIQ reverse error',
+    });
   }
 }

@@ -352,16 +352,24 @@ export async function getPostHogActiveUsersTrends(
 }
 
 export async function getPostHogActiveUsers(): Promise<PostHogActiveUsers | null> {
-  const today = new Date();
-  const todayStr = today.toISOString().split('T')[0];
+  const now = new Date();
+  const startOfTodayUtc = new Date(
+    Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()),
+  );
+  const endOfTodayUtc = new Date(startOfTodayUtc);
+  endOfTodayUtc.setUTCDate(endOfTodayUtc.getUTCDate() + 1);
+  const start7Utc = new Date(startOfTodayUtc);
+  start7Utc.setUTCDate(start7Utc.getUTCDate() - 7);
+  const start30Utc = new Date(startOfTodayUtc);
+  start30Utc.setUTCDate(start30Utc.getUTCDate() - 30);
 
-  const weekAgo = new Date(today);
-  weekAgo.setDate(weekAgo.getDate() - 7);
-  const weekAgoStr = weekAgo.toISOString().split('T')[0];
+  const formatDateTime = (date: Date) =>
+    date.toISOString().slice(0, 19).replace('T', ' ');
 
-  const monthAgo = new Date(today);
-  monthAgo.setDate(monthAgo.getDate() - 30);
-  const monthAgoStr = monthAgo.toISOString().split('T')[0];
+  const todayStart = formatDateTime(startOfTodayUtc);
+  const todayEnd = formatDateTime(endOfTodayUtc);
+  const weekStart = formatDateTime(start7Utc);
+  const monthStart = formatDateTime(start30Utc);
 
   // Use HogQL Query API instead of Insights API (Personal API Keys don't support Insights)
   const testUserFilter = getTestUserFilter();
@@ -371,7 +379,7 @@ export async function getPostHogActiveUsers(): Promise<PostHogActiveUsers | null
       body: JSON.stringify({
         query: {
           kind: 'HogQLQuery',
-          query: `SELECT count(DISTINCT person_id) FROM events WHERE event = '$pageview' AND timestamp >= today() ${testUserFilter}`,
+          query: `SELECT count(DISTINCT person_id) FROM events WHERE event = '$pageview' AND timestamp >= toDateTime('${todayStart}') AND timestamp < toDateTime('${todayEnd}') ${testUserFilter}`,
         },
       }),
     }),
@@ -380,7 +388,7 @@ export async function getPostHogActiveUsers(): Promise<PostHogActiveUsers | null
       body: JSON.stringify({
         query: {
           kind: 'HogQLQuery',
-          query: `SELECT count(DISTINCT person_id) FROM events WHERE event = '$pageview' AND timestamp >= now() - INTERVAL 7 DAY ${testUserFilter}`,
+          query: `SELECT count(DISTINCT person_id) FROM events WHERE event = '$pageview' AND timestamp >= toDateTime('${weekStart}') AND timestamp < toDateTime('${todayEnd}') ${testUserFilter}`,
         },
       }),
     }),
@@ -389,7 +397,7 @@ export async function getPostHogActiveUsers(): Promise<PostHogActiveUsers | null
       body: JSON.stringify({
         query: {
           kind: 'HogQLQuery',
-          query: `SELECT count(DISTINCT person_id) FROM events WHERE event = '$pageview' AND timestamp >= now() - INTERVAL 30 DAY ${testUserFilter}`,
+          query: `SELECT count(DISTINCT person_id) FROM events WHERE event = '$pageview' AND timestamp >= toDateTime('${monthStart}') AND timestamp < toDateTime('${todayEnd}') ${testUserFilter}`,
         },
       }),
     }),
@@ -399,10 +407,26 @@ export async function getPostHogActiveUsers(): Promise<PostHogActiveUsers | null
     return null;
   }
 
+  const dau = Number(dauResult.results?.[0]?.[0] || 0);
+  const wau = Number(wauResult.results?.[0]?.[0] || 0);
+  const mau = Number(mauResult.results?.[0]?.[0] || 0);
+
+  if (wau < dau || mau < wau) {
+    console.warn('[PostHog] Active user window mismatch', {
+      dau,
+      wau,
+      mau,
+      todayStart,
+      todayEnd,
+      weekStart,
+      monthStart,
+    });
+  }
+
   return {
-    dau: dauResult.results?.[0]?.[0] || 0,
-    wau: wauResult.results?.[0]?.[0] || 0,
-    mau: mauResult.results?.[0]?.[0] || 0,
+    dau,
+    wau: Math.max(wau, dau),
+    mau: Math.max(mau, Math.max(wau, dau)),
   };
 }
 
@@ -424,10 +448,10 @@ export async function getPostHogAIMetrics(
     SELECT 
       count(*) as total_generations,
       count(DISTINCT person_id) as unique_users,
-      sum(toFloat64OrNull(properties['$ai_input_tokens'])) as input_tokens,
-      sum(toFloat64OrNull(properties['$ai_output_tokens'])) as output_tokens,
-      sum(toFloat64OrNull(properties['$ai_total_cost_usd'])) as total_cost,
-      avg(toFloat64OrNull(properties['$ai_latency'])) as avg_latency
+      sum(toFloatOrDefault(properties['$ai_input_tokens'], 0.0)) as input_tokens,
+      sum(toFloatOrDefault(properties['$ai_output_tokens'], 0.0)) as output_tokens,
+      sum(toFloatOrDefault(properties['$ai_total_cost_usd'], 0.0)) as total_cost,
+      avg(toFloatOrDefault(properties['$ai_latency'], 0.0)) as avg_latency
     FROM events 
     WHERE event = '$ai_generation' 
       AND timestamp >= now() - INTERVAL ${daysBack} DAY

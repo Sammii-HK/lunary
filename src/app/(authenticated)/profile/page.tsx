@@ -16,6 +16,7 @@ import { useAuthStatus } from '@/components/AuthStatus';
 import { conversionTracking } from '@/lib/analytics';
 import { BirthdayInput } from '@/components/ui/birthday-input';
 import { calculateLifePathNumber } from '../../../../utils/personalization';
+import { geocodeLocation } from '../../../../utils/location';
 import { calculatePersonalYear } from '@/lib/numerology';
 import { useModal } from '@/hooks/useModal';
 import { Heading } from '@/components/ui/Heading';
@@ -136,6 +137,9 @@ export default function ProfilePage() {
   const [birthday, setBirthday] = useState('');
   const [birthTime, setBirthTime] = useState('');
   const [birthLocation, setBirthLocation] = useState('');
+  const [showBirthLocationHint, setShowBirthLocationHint] = useState(false);
+  const [isCheckingBirthLocation, setIsCheckingBirthLocation] = useState(false);
+  const lastBirthLocationCheck = useRef<string | null>(null);
   const [isEditing, setIsEditing] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [showAuthModal, setShowAuthModal] = useState(false);
@@ -230,6 +234,22 @@ export default function ProfilePage() {
 
   const handleSave = async () => {
     try {
+      const trimmedBirthLocation = birthLocation.trim();
+      if (trimmedBirthLocation) {
+        if (lastBirthLocationCheck.current !== trimmedBirthLocation) {
+          setIsCheckingBirthLocation(true);
+          lastBirthLocationCheck.current = trimmedBirthLocation;
+          const coords = await geocodeLocation(trimmedBirthLocation);
+          setShowBirthLocationHint(!coords);
+          setIsCheckingBirthLocation(false);
+          if (!coords) {
+            return;
+          }
+        } else if (showBirthLocationHint) {
+          return;
+        }
+      }
+
       // Save basic profile to Postgres (including birthTime and birthLocation in location object)
       const profileResponse = await fetch('/api/profile', {
         method: 'PUT',
@@ -475,10 +495,34 @@ export default function ProfilePage() {
                       <input
                         type='text'
                         value={birthLocation}
-                        onChange={(e) => setBirthLocation(e.target.value)}
+                        onChange={(e) => {
+                          setBirthLocation(e.target.value);
+                          setShowBirthLocationHint(false);
+                        }}
+                        onBlur={async () => {
+                          const trimmed = birthLocation.trim();
+                          if (!trimmed) return;
+                          if (lastBirthLocationCheck.current === trimmed)
+                            return;
+                          setIsCheckingBirthLocation(true);
+                          lastBirthLocationCheck.current = trimmed;
+                          const coords = await geocodeLocation(trimmed);
+                          setShowBirthLocationHint(!coords);
+                          setIsCheckingBirthLocation(false);
+                        }}
                         className='w-full rounded-md border border-zinc-600 bg-zinc-700 px-3 py-2 text-sm text-white placeholder-zinc-400 focus:outline-none focus:ring-2 focus:ring-lunary-primary'
                         placeholder='e.g., London, UK or 51.4769, 0.0005'
                       />
+                      {isCheckingBirthLocation && (
+                        <p className='text-xs text-zinc-500'>
+                          Checking location...
+                        </p>
+                      )}
+                      {showBirthLocationHint && !isCheckingBirthLocation && (
+                        <p className='text-xs text-zinc-500'>
+                          Tip: use a city name if your location is not found.
+                        </p>
+                      )}
                     </div>
                   </div>
                   <p className='text-xs text-zinc-400 sm:text-sm'>

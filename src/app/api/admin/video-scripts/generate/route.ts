@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { sql } from '@vercel/postgres';
 import {
   generateAndSaveWeeklyScripts,
   type WeeklyVideoScripts,
@@ -35,12 +36,36 @@ export async function POST(request: Request) {
     // Determine theme index
     let currentThemeIndex = themeIndex;
     if (currentThemeIndex === undefined) {
-      // Auto-rotate based on week number
-      const startOfYear = new Date(now.getFullYear(), 0, 1);
-      const weekNumber = Math.floor(
-        (now.getTime() - startOfYear.getTime()) / (7 * 24 * 60 * 60 * 1000),
-      );
-      currentThemeIndex = weekNumber % categoryThemes.length;
+      // Prefer the most recent weekly theme used by the cron to keep scripts aligned
+      try {
+        const result = await sql`
+          SELECT item_id
+          FROM content_rotation
+          WHERE rotation_type = 'theme'
+          ORDER BY last_used_at DESC NULLS LAST
+          LIMIT 1
+        `;
+        const lastThemeId = result.rows[0]?.item_id as string | undefined;
+        if (lastThemeId) {
+          const matchedIndex = categoryThemes.findIndex(
+            (theme) => theme.id === lastThemeId,
+          );
+          if (matchedIndex >= 0) {
+            currentThemeIndex = matchedIndex;
+          }
+        }
+      } catch (error) {
+        console.warn('Failed to read latest theme rotation:', error);
+      }
+
+      if (currentThemeIndex === undefined) {
+        // Fallback: auto-rotate based on week number
+        const startOfYear = new Date(now.getFullYear(), 0, 1);
+        const weekNumber = Math.floor(
+          (now.getTime() - startOfYear.getTime()) / (7 * 24 * 60 * 60 * 1000),
+        );
+        currentThemeIndex = weekNumber % categoryThemes.length;
+      }
     }
 
     // Generate and save scripts

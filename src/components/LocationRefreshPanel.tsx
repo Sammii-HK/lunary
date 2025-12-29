@@ -101,9 +101,14 @@ export default function LocationRefreshPanel({
                 const lonText = formatCoordinate(location.longitude, 4);
                 if (!latText || !lonText) {
                   return (
-                    <p className={coordinatesClasses}>
-                      Location pending update
-                    </p>
+                    <div className='space-y-1'>
+                      <p className={coordinatesClasses}>
+                        Location pending update
+                      </p>
+                      <p className={descriptionClasses}>
+                        Tip: enable location access in your browser settings.
+                      </p>
+                    </div>
                   );
                 }
                 return (

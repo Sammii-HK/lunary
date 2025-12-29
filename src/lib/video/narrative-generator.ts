@@ -239,6 +239,7 @@ This section MUST be included. For EACH moon phase, explain IN DEPTH:
 - What "Moon in [Sign]" MEANS - how it colors our emotional landscape, intuition, and inner world
 - Practical guidance: What activities are supported? What should we avoid?
 - Intention-setting guidance for this lunar energy (what intentions align with this phase)
+IMPORTANT: Named full moons (e.g., "Wolf Moon", "Snow Moon") are FULL MOONS. Always describe their energy as Full Moon energy even when a name is used.
 Even if no major moon phases occur, discuss the current moon phase and its influence.
 
 [CONCLUSION - 30-60 seconds]
@@ -507,6 +508,7 @@ ${seasonalEvents ? `3. Planetary highlights: For each transit, say "[Planet] ent
 ${seasonalEvents ? `4. Aspects: For EACH aspect, you MUST say "[PlanetA] [aspect] [PlanetB]" - e.g., "Venus square Saturn brings tension to relationships"` : `3. Aspects: For EACH aspect, you MUST say "[PlanetA] [aspect] [PlanetB]" - e.g., "Venus square Saturn brings tension to relationships"`}
 ${seasonalEvents ? `5. Moon phases: Say the exact phase name and sign` : `4. Moon phases: Say the exact phase name and sign`}
 ${seasonalEvents ? `6. Closing: "For more information, check out the full blog at Lunary"` : `5. Closing: "For more information, check out the full blog at Lunary"`}
+IMPORTANT: Named full moons (e.g., "Wolf Moon", "Snow Moon") are FULL MOONS. Always describe their energy as Full Moon energy even when a name is used.
 
 CRITICAL - EXACT WORDING FOR ASPECTS:
 When mentioning aspects, you MUST use this EXACT format: "[Planet1] [aspect] [Planet2]"
@@ -970,6 +972,13 @@ Return ONLY the post content text, no markdown, no formatting, just the caption 
     }
 
     postContent = postContent.trim();
+    const sentenceCount = postContent.split(/[.!?]+/).filter(Boolean).length;
+    if (postContent.length < 80 || sentenceCount < 2) {
+      const weekTitle = weeklyData.title || 'This week';
+      const weekSubtitle =
+        weeklyData.subtitle || 'A fresh set of cosmic shifts is here.';
+      postContent = `${weekTitle}. ${weekSubtitle} Read more on the Lunary blog for the full forecast.`;
+    }
 
     // Format content for Threads if platform is specified
     if (platform === 'threads') {

@@ -64,9 +64,12 @@ export async function POST(
 
     const theme = categoryThemes.find((t) => t.name === script.themeName);
     const { category, slug } = getFacetInfo(theme, script.facetTitle);
+    const safeSlug = slug.replace(/[^a-zA-Z0-9-_]/g, '-');
 
     const totalParts = theme?.facets.length || 7;
-    const partNumber = script.partNumber || 1;
+    const partNumber = Number.isFinite(script.partNumber)
+      ? script.partNumber
+      : 1;
     const partLabel = `Part ${partNumber} of ${totalParts}`;
     const imageUrl = getThematicImageUrl(
       category,
@@ -89,11 +92,11 @@ export async function POST(
       imageUrl,
       audioBuffer,
       format: 'story',
-      outputFilename: `short-${slug}-${dateKey}.mp4`,
+      outputFilename: `short-${safeSlug}-${dateKey}.mp4`,
       subtitlesText: script.fullScript,
     });
 
-    const blobKey = `videos/shorts/daily/manual-${dateKey}-${slug}-${Date.now()}.mp4`;
+    const blobKey = `videos/shorts/daily/manual-${dateKey}-${safeSlug}-${Date.now()}.mp4`;
     const { url: videoUrl } = await put(blobKey, videoBuffer, {
       access: 'public',
       contentType: 'video/mp4',
@@ -145,30 +148,6 @@ export async function POST(
       }
       return dateValue.toISOString();
     })();
-
-    const youtubeTitleBase = `Weekly Theme: ${theme?.name || script.themeName} • Part ${partNumber} of ${totalParts} — ${script.facetTitle}`;
-    const youtubeTitle =
-      youtubeTitleBase.length > 90
-        ? youtubeTitleBase.substring(0, 87) + '...'
-        : youtubeTitleBase;
-    const postContent =
-      scheduleResult.rows[0]?.content ||
-      script.writtenPostContent ||
-      `This is part ${partNumber} of ${totalParts} in our weekly theme series: ${theme?.name || script.themeName}.`;
-    const youtubeDescription = `${postContent}\n\nFrom Lunary's Grimoire — explore deeper rituals, meanings, and correspondences inside the full Grimoire.\n\n#Lunary #Grimoire`;
-
-    await fetch(`${baseUrl}/api/youtube/upload`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        videoUrl,
-        title: youtubeTitle,
-        description: youtubeDescription,
-        type: 'short',
-        script: script.fullScript,
-        publishDate,
-      }),
-    });
 
     return NextResponse.json({
       success: true,

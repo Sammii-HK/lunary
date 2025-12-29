@@ -13,7 +13,10 @@ import {
   getWeeklyContentPlan,
   categoryThemes,
 } from './weekly-themes';
-import { searchGrimoireForTopic } from './grimoire-content';
+import {
+  searchGrimoireForTopic,
+  getGrimoireSnippetBySlug,
+} from './grimoire-content';
 
 // Import data sources
 import zodiacSigns from '@/data/zodiac-signs.json';
@@ -81,6 +84,35 @@ function getGrimoireDataForFacet(
   facet: DailyFacet,
 ): Record<string, any> | null {
   const slug = facet.grimoireSlug;
+  const normalizedSlug = slug.includes('#') ? slug.replace('#', '/') : slug;
+
+  if (slug.includes('birth-chart/houses')) {
+    const housesSnippet =
+      getGrimoireSnippetBySlug('houses') ||
+      getGrimoireSnippetBySlug('birth-chart/houses');
+    if (housesSnippet) {
+      const fullContent = housesSnippet.fullContent || {};
+      return {
+        ...fullContent,
+        description: fullContent.description || housesSnippet.summary,
+        title: housesSnippet.title,
+        keywords: fullContent.keywords || housesSnippet.keyPoints,
+      };
+    }
+  }
+
+  const exactSnippet =
+    getGrimoireSnippetBySlug(normalizedSlug) ||
+    getGrimoireSnippetBySlug(slug.split('#')[0]);
+  if (exactSnippet) {
+    const fullContent = exactSnippet.fullContent || {};
+    return {
+      ...fullContent,
+      description: fullContent.description || exactSnippet.summary,
+      title: exactSnippet.title,
+      keywords: fullContent.keywords || exactSnippet.keyPoints,
+    };
+  }
 
   // Try zodiac signs
   if (slug.includes('zodiac/')) {
@@ -156,13 +188,25 @@ function getGrimoireDataForFacet(
 
   // Try correspondences/elements
   if (slug.includes('correspondences/elements')) {
-    const element = slug.split('/').pop();
-    if (element) {
-      const elementData =
-        correspondences.elements[
-          element as keyof typeof correspondences.elements
-        ];
-      if (elementData) return { ...elementData, name: element };
+    const elementKey = slug.split('/').pop() || '';
+    const elementData =
+      correspondences.elements[
+        elementKey as keyof typeof correspondences.elements
+      ];
+    if (elementData) {
+      return { ...elementData, name: elementKey };
+    }
+
+    const elementEntries = Object.entries(correspondences.elements);
+    if (elementEntries.length > 0) {
+      const elementDescriptions = elementEntries
+        .map(([name, data]) => `${name}: ${data.description}`)
+        .join('\n\n');
+      return {
+        description:
+          'The four classical elements are the foundation of astrological and magical correspondences. Each element carries a distinct temperament and set of associations.',
+        details: elementDescriptions,
+      };
     }
   }
 
@@ -357,6 +401,10 @@ export function generateLongFormContent(
       body += data.spiritualMeaning + '\n\n';
     }
 
+    if (data.details) {
+      body += data.details + '\n\n';
+    }
+
     if (data.loveTrait || data.loveMeaning) {
       body +=
         'In relationships: ' + (data.loveTrait || data.loveMeaning) + '\n\n';
@@ -400,6 +448,18 @@ export function generateLongFormContent(
     body = facet.focus;
   }
 
+  // Ensure educational depth for sparse facets (glossary entries, etc.)
+  if (body.trim().length < 220) {
+    const expansions: string[] = [];
+    if (facet.focus) {
+      expansions.push(facet.focus);
+    }
+    if (facet.shortFormHook) {
+      expansions.push(facet.shortFormHook);
+    }
+    body = [body, ...expansions].filter(Boolean).join('\n\n');
+  }
+
   // Clean up extra whitespace
   body = body.trim().replace(/\n{3,}/g, '\n\n');
 
@@ -432,7 +492,22 @@ export function formatLongFormForPlatform(
     count: 0,
   };
 
-  let formatted = `${content.title}\n\n${content.body}`;
+  const cleanedBody = content.body
+    .split('\n')
+    .map((line) => line.trim())
+    .filter(
+      (line) =>
+        line.length > 0 &&
+        !line.toLowerCase().includes("lunary's grimoire") &&
+        !(
+          line.toLowerCase().includes('explore') &&
+          line.toLowerCase().includes('grimoire')
+        ) &&
+        !line.toLowerCase().includes('grimoire'),
+    )
+    .join('\n');
+
+  let formatted = cleanedBody.trim();
 
   // Add attribution
   formatted += `\n\n${content.attribution}`;
