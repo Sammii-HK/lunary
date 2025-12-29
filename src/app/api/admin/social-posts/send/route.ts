@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { sql } from '@vercel/postgres';
 import { selectSubredditForPostType } from '@/config/reddit-subreddits';
+import { categoryThemes } from '@/lib/social/weekly-themes';
+import { recordThemeUsage } from '@/lib/social/thematic-generator';
 
 export async function POST(request: NextRequest) {
   try {
@@ -26,7 +28,7 @@ export async function POST(request: NextRequest) {
 
     // Get post data from database (including any edits)
     const postDataFromDb = await sql`
-      SELECT content, post_type, scheduled_date, image_url, video_url
+      SELECT content, post_type, scheduled_date, image_url, video_url, week_theme, week_start
       FROM social_posts WHERE id = ${postId}
     `;
 
@@ -359,6 +361,50 @@ export async function POST(request: NextRequest) {
         SET status = 'sent', updated_at = NOW()
         WHERE id = ${postId}
       `;
+
+      const weekTheme = postDataFromDb.rows[0]?.week_theme as
+        | string
+        | undefined;
+      const weekStart = postDataFromDb.rows[0]?.week_start as
+        | string
+        | undefined;
+
+      if (weekTheme && weekStart) {
+        try {
+          await sql`
+            CREATE TABLE IF NOT EXISTS theme_publications (
+              id SERIAL PRIMARY KEY,
+              week_start DATE NOT NULL,
+              theme_name TEXT NOT NULL,
+              created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+              UNIQUE(week_start, theme_name)
+            )
+          `;
+
+          const insertResult = await sql`
+            INSERT INTO theme_publications (week_start, theme_name)
+            VALUES (${weekStart}, ${weekTheme})
+            ON CONFLICT (week_start, theme_name) DO NOTHING
+            RETURNING id
+          `;
+
+          if (insertResult.rows.length > 0) {
+            const matchedTheme = categoryThemes.find(
+              (theme) => theme.name === weekTheme,
+            );
+            if (matchedTheme) {
+              await recordThemeUsage(sql, matchedTheme.id);
+            } else {
+              console.warn(
+                'Theme name not found for rotation tracking:',
+                weekTheme,
+              );
+            }
+          }
+        } catch (themeError) {
+          console.warn('Failed to record theme publication:', themeError);
+        }
+      }
 
       return NextResponse.json({
         success: true,

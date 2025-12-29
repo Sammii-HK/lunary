@@ -55,6 +55,30 @@ function getWeekDates(weekOffset: number): string {
   return `${formatDate(weekStart)} - ${formatDate(weekEnd)}`;
 }
 
+function getWeekStartFromOffset(weekOffset: number): Date {
+  const now = new Date();
+  const currentDayOfWeek = now.getDay();
+  const daysToCurrentMonday = currentDayOfWeek === 0 ? 6 : currentDayOfWeek - 1;
+  const currentWeekMonday = new Date(now);
+  currentWeekMonday.setDate(now.getDate() - daysToCurrentMonday);
+  currentWeekMonday.setHours(0, 0, 0, 0);
+
+  const weekStart = new Date(currentWeekMonday);
+  weekStart.setDate(currentWeekMonday.getDate() + weekOffset * 7);
+  weekStart.setHours(0, 0, 0, 0);
+
+  return weekStart;
+}
+
+function getWeekOfYear(weekStart: Date): { year: number; weekOfYear: number } {
+  const yearStart = new Date(weekStart.getFullYear(), 0, 1);
+  const daysSinceYearStart = Math.floor(
+    (weekStart.getTime() - yearStart.getTime()) / (24 * 60 * 60 * 1000),
+  );
+  const weekOfYear = Math.floor(daysSinceYearStart / 7) + 1;
+  return { year: weekStart.getFullYear(), weekOfYear };
+}
+
 /**
  * Truncate content to fit platform character limits
  * Attempts to truncate at word boundaries when possible
@@ -510,7 +534,9 @@ export async function POST(request: NextRequest) {
           { status: 400 },
         );
       }
-      weekKey = `week-${week}`;
+      const weekStart = getWeekStartFromOffset(week);
+      const { year, weekOfYear } = getWeekOfYear(weekStart);
+      weekKey = `${year}-w${weekOfYear}`;
       const version = SCRIPT_VERSION.short;
       scriptCacheKey = `scripts/short/${version}/${weekKey}.txt`;
       audioCacheKey = `audio/short/${version}/${weekKey}.mp3`;
@@ -518,19 +544,6 @@ export async function POST(request: NextRequest) {
       // Get weekly content data for short-form
       // weekOffset represents weeks from current week's Monday
       // week=0 = current week, week=1 = next week, etc.
-      const now = new Date();
-      const currentDayOfWeek = now.getDay();
-      const daysToCurrentMonday =
-        currentDayOfWeek === 0 ? 6 : currentDayOfWeek - 1;
-      const currentWeekMonday = new Date(now);
-      currentWeekMonday.setDate(now.getDate() - daysToCurrentMonday);
-      currentWeekMonday.setHours(0, 0, 0, 0);
-
-      // Calculate the target week's Monday
-      const weekStart = new Date(currentWeekMonday);
-      weekStart.setDate(currentWeekMonday.getDate() + week * 7);
-      weekStart.setHours(0, 0, 0, 0);
-
       weeklyData = await generateWeeklyContent(weekStart);
     } else if (type === 'medium') {
       // Medium-form: cache by week number + version
@@ -540,7 +553,9 @@ export async function POST(request: NextRequest) {
           { status: 400 },
         );
       }
-      weekKey = `week-${week}`;
+      const weekStart = getWeekStartFromOffset(week);
+      const { year, weekOfYear } = getWeekOfYear(weekStart);
+      weekKey = `${year}-w${weekOfYear}`;
       const version = SCRIPT_VERSION.medium;
       scriptCacheKey = `scripts/medium/${version}/${weekKey}.txt`;
       audioCacheKey = `audio/medium/${version}/${weekKey}.mp3`;
@@ -548,21 +563,8 @@ export async function POST(request: NextRequest) {
       // Get weekly content data for medium-form
       // weekOffset represents weeks from current week's Monday
       // week=0 = current week, week=1 = next week, etc.
-      const now = new Date();
-      const currentDayOfWeek = now.getDay();
-      const daysToCurrentMonday =
-        currentDayOfWeek === 0 ? 6 : currentDayOfWeek - 1;
-      const currentWeekMonday = new Date(now);
-      currentWeekMonday.setDate(now.getDate() - daysToCurrentMonday);
-      currentWeekMonday.setHours(0, 0, 0, 0);
-
-      // Calculate the target week's Monday
-      const weekStart = new Date(currentWeekMonday);
-      weekStart.setDate(currentWeekMonday.getDate() + week * 7);
-      weekStart.setHours(0, 0, 0, 0);
-
       console.log(
-        `[Medium Video] Generating for week offset ${week}: currentWeekMonday=${currentWeekMonday.toISOString()}, weekStart=${weekStart.toISOString()}`,
+        `[Medium Video] Generating for week offset ${week}: weekStart=${weekStart.toISOString()}`,
       );
 
       weeklyData = await generateWeeklyContent(weekStart);

@@ -229,6 +229,13 @@ function buildLongPost(
 ): string {
   const parts: string[] = [];
   const useEmoji = config.useEmojis && config.emojiFrequency !== 'none';
+  const softLimit = Math.min(config.maxChars * 0.85, config.maxChars - 40);
+  const canAddMore = () => parts.join('').length < softLimit;
+  const appendSection = (text?: string) => {
+    if (!text || !canAddMore()) return;
+    parts.push(text);
+    parts.push('');
+  };
 
   // Title - with emoji prefix only for zodiac, runes, sabbats
   if (useEmoji) {
@@ -258,6 +265,18 @@ function buildLongPost(
 
   // Additional educational depth based on content type
   const fc = snippet.fullContent;
+  const keyPointSource = snippet.keyPoints?.filter(Boolean) || [];
+  const keyPoints =
+    fc?.keywords && fc.keywords.length > 0
+      ? fc.keywords
+      : keyPointSource.length > 0
+        ? keyPointSource
+        : [];
+
+  if (keyPoints.length > 0 && canAddMore()) {
+    appendSection(`Key themes: ${keyPoints.slice(0, 4).join(', ')}.`);
+  }
+
   if (fc) {
     // Element/Planet info
     if (fc.element && fc.planet) {
@@ -268,79 +287,73 @@ function buildLongPost(
     }
 
     // Spiritual meaning
-    if (fc.spiritualMeaning) {
-      parts.push(fc.spiritualMeaning);
-      parts.push('');
-    }
+    appendSection(fc.spiritualMeaning);
 
     // Upright meaning (tarot/runes)
-    if (fc.uprightMeaning) {
-      parts.push('When upright: ' + fc.uprightMeaning);
-      parts.push('');
-    }
+    appendSection(
+      fc.uprightMeaning ? `When upright: ${fc.uprightMeaning}` : undefined,
+    );
 
     // Reversed meaning (tarot/runes)
-    if (fc.reversedMeaning && parts.join('').length < config.maxChars * 0.7) {
-      parts.push('When reversed: ' + fc.reversedMeaning);
-      parts.push('');
+    if (fc.reversedMeaning && canAddMore()) {
+      appendSection(`When reversed: ${fc.reversedMeaning}`);
     }
 
     // Metaphysical properties (crystals)
-    if (fc.metaphysicalProperties) {
-      parts.push(fc.metaphysicalProperties);
-      parts.push('');
-    }
+    appendSection(fc.metaphysicalProperties);
 
     // Historical context
-    if (fc.history && parts.join('').length < config.maxChars * 0.7) {
-      parts.push(fc.history);
-      parts.push('');
-    }
+    appendSection(fc.history);
 
     // Love meaning
-    if (fc.loveTrait && parts.join('').length < config.maxChars * 0.8) {
-      parts.push('In love and relationships: ' + fc.loveTrait);
-      parts.push('');
-    }
+    appendSection(
+      fc.loveTrait ? `In love and relationships: ${fc.loveTrait}` : undefined,
+    );
 
     // Career meaning
-    if (fc.careerTrait && parts.join('').length < config.maxChars * 0.85) {
-      parts.push('In career: ' + fc.careerTrait);
-      parts.push('');
-    }
+    appendSection(fc.careerTrait ? `In career: ${fc.careerTrait}` : undefined);
 
     // Healing practices (chakras)
     if (fc.healingPractices && fc.healingPractices.length > 0) {
-      parts.push(
+      appendSection(
         'Healing practices: ' +
           fc.healingPractices.slice(0, 4).join(', ') +
           '.',
       );
-      parts.push('');
     }
 
     // Traditions (sabbats)
     if (fc.traditions && fc.traditions.length > 0) {
-      parts.push(
+      appendSection(
         'Traditional practices: ' + fc.traditions.slice(0, 3).join(', ') + '.',
       );
-      parts.push('');
     }
 
     // Magical uses
-    if (
-      fc.magicalUses &&
-      fc.magicalUses.length > 0 &&
-      parts.join('').length < config.maxChars * 0.85
-    ) {
-      parts.push(
+    if (fc.magicalUses && fc.magicalUses.length > 0 && canAddMore()) {
+      appendSection(
         'Magical uses: ' + fc.magicalUses.slice(0, 3).join(', ') + '.',
       );
-      parts.push('');
+    }
+
+    if (fc.symbolism && canAddMore()) {
+      appendSection(`Symbolism: ${fc.symbolism}`);
+    }
+
+    if (fc.colors && fc.colors.length > 0 && canAddMore()) {
+      appendSection(`Associated colors: ${fc.colors.slice(0, 4).join(', ')}.`);
+    }
+
+    if (fc.herbs && fc.herbs.length > 0 && canAddMore()) {
+      appendSection(`Herbs: ${fc.herbs.slice(0, 4).join(', ')}.`);
+    }
+
+    if (fc.rituals && fc.rituals.length > 0 && canAddMore()) {
+      appendSection(`Rituals: ${fc.rituals.slice(0, 3).join(', ')}.`);
     }
 
     // Affirmation at the end
-    if (fc.affirmation) {
+    if (fc.affirmation && canAddMore()) {
       parts.push(`"${fc.affirmation}"`);
     }
   }

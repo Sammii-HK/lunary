@@ -142,11 +142,11 @@ export async function composeVideo(
   } = options;
 
   const dimensions = VIDEO_DIMENSIONS[format] || VIDEO_DIMENSIONS.landscape;
-  const tempDir = tmpdir();
+  const workDir = await mkdtemp(join(tmpdir(), 'lunary-video-'));
   const timestamp = Date.now();
-  const audioPath = join(tempDir, `audio-${timestamp}.mp3`);
-  const outputPath = join(tempDir, outputFilename);
-  const subtitlesPath = join(tempDir, `subtitles-${timestamp}.srt`);
+  const audioPath = join(workDir, `audio-${timestamp}.mp3`);
+  const outputPath = join(workDir, outputFilename);
+  const subtitlesPath = join(workDir, `subtitles-${timestamp}.srt`);
 
   const escapeFilterPath = (inputPath: string) =>
     inputPath.replace(/\\/g, '\\\\').replace(/:/g, '\\:').replace(/'/g, "\\'");
@@ -249,7 +249,7 @@ export async function composeVideo(
           );
         }
         const imageBuffer = Buffer.from(await imageResponse.arrayBuffer());
-        const imagePath = join(tempDir, `image-${i}-${timestamp}.png`);
+        const imagePath = join(workDir, `image-${i}-${timestamp}.png`);
         await writeFile(imagePath, imageBuffer);
         imagePaths.push(imagePath);
       }
@@ -409,7 +409,7 @@ export async function composeVideo(
         );
       }
       const imageBuffer = Buffer.from(await imageResponse.arrayBuffer());
-      const imagePath = join(tempDir, `image-${timestamp}.png`);
+      const imagePath = join(workDir, `image-${timestamp}.png`);
       await writeFile(imagePath, imageBuffer);
 
       console.log(
@@ -488,6 +488,6 @@ export async function composeVideo(
       `Failed to compose video: ${error instanceof Error ? error.message : 'Unknown error'}`,
     );
   } finally {
-    await rm(tempDir, { recursive: true, force: true }).catch(() => {});
+    await rm(workDir, { recursive: true, force: true }).catch(() => {});
   }
 }

@@ -36,7 +36,11 @@ export async function GET(request: NextRequest) {
 
     const first = data[0];
     if (!first?.lat || !first?.lon) {
-      return NextResponse.json({ error: 'No results' }, { status: 404 });
+      return NextResponse.json({
+        latitude: null,
+        longitude: null,
+        error: 'No results',
+      });
     }
 
     return NextResponse.json({

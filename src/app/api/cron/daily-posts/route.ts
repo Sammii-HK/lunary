@@ -687,6 +687,7 @@ async function runDailyPosts(dateStr: string) {
   // Send posts to Succulent
   const succulentApiUrl = 'https://app.succulent.social/api/posts';
   const apiKey = process.env.SUCCULENT_SECRET_KEY;
+  const accountGroupId = process.env.SUCCULENT_ACCOUNT_GROUP_ID;
   const postResults: any[] = [];
 
   // Helper function to format readable date
@@ -705,81 +706,149 @@ async function runDailyPosts(dateStr: string) {
     return `${formattedDate} at ${formattedTime}`;
   };
 
-  for (const post of posts) {
-    try {
-      const readableDate = formatReadableDate(dateStr, post.scheduledDate);
+  const missingConfig: string[] = [];
+  if (!apiKey) missingConfig.push('SUCCULENT_SECRET_KEY');
+  if (!accountGroupId) missingConfig.push('SUCCULENT_ACCOUNT_GROUP_ID');
 
-      // Add Pinterest options if Pinterest is in platforms
-      const pinterestOptions = post.platforms.includes('pinterest')
-        ? {
-            boardId:
-              process.env.SUCCULENT_PINTEREST_BOARD_ID || 'lunaryapp/lunary',
-            boardName: process.env.SUCCULENT_PINTEREST_BOARD_NAME || 'Lunary',
-          }
-        : undefined;
-
-      const postData: any = {
-        accountGroupId: process.env.SUCCULENT_ACCOUNT_GROUP_ID,
-        name: post.name || `Cosmic Post - ${readableDate}`,
-        content: post.content,
+  if (missingConfig.length > 0) {
+    const configError = `Missing required scheduler config: ${missingConfig.join(', ')}`;
+    for (const post of posts) {
+      postResults.push({
+        name: post.name,
         platforms: post.platforms,
+        status: 'error',
+        error: configError,
         scheduledDate: post.scheduledDate,
-        media: (post.imageUrls || []).map((imageUrl: string) => ({
-          type: 'image',
-          url: imageUrl,
-          alt: post.alt,
-        })),
-        variants: post.variants,
-        // redditOptions: post.redditOptions,
-      };
-
-      if (pinterestOptions) {
-        postData.pinterestOptions = pinterestOptions;
-      }
-
-      const response = await fetch(succulentApiUrl, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-API-Key': apiKey || '',
-        },
-        body: JSON.stringify(postData),
       });
+    }
+  } else {
+    for (const post of posts) {
+      try {
+        const readableDate = formatReadableDate(dateStr, post.scheduledDate);
 
-      const result = await response.json();
+        // Add Pinterest options if Pinterest is in platforms
+        const pinterestOptions = post.platforms.includes('pinterest')
+          ? {
+              boardId:
+                process.env.SUCCULENT_PINTEREST_BOARD_ID || 'lunaryapp/lunary',
+              boardName: process.env.SUCCULENT_PINTEREST_BOARD_NAME || 'Lunary',
+            }
+          : undefined;
 
-      if (response.ok) {
-        console.log(`✅ ${post.name} post scheduled successfully`);
-        postResults.push({
-          name: post.name,
+        const postData: any = {
+          accountGroupId,
+          name: post.name || `Cosmic Post - ${readableDate}`,
+          content: post.content,
           platforms: post.platforms,
-          status: 'success',
-          postId: result.data?.postId || result.postId || result.id,
           scheduledDate: post.scheduledDate,
-        });
-      } else {
-        const errorDetails = {
-          postName: post.name,
-          platforms: post.platforms,
-          status: response.status,
-          statusText: response.statusText,
-          error: result.error || result.message || `HTTP ${response.status}`,
-          responseBody: JSON.stringify(result).substring(0, 500),
+          media: (post.imageUrls || []).map((imageUrl: string) => ({
+            type: 'image',
+            url: imageUrl,
+            alt: post.alt,
+          })),
+          variants: post.variants,
+          // redditOptions: post.redditOptions,
         };
 
-        console.error(`❌ ${post.name} post failed:`, result);
+        if (pinterestOptions) {
+          postData.pinterestOptions = pinterestOptions;
+        }
 
-        // Log individual post failures
+        const response = await fetch(succulentApiUrl, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-API-Key': apiKey || '',
+          },
+          body: JSON.stringify(postData),
+        });
+
+        const responseText = await response.text();
+        let result: any = {};
+        if (responseText) {
+          try {
+            result = JSON.parse(responseText);
+          } catch {
+            result = { raw: responseText };
+          }
+        }
+
+        if (response.ok) {
+          console.log(`✅ ${post.name} post scheduled successfully`);
+          postResults.push({
+            name: post.name,
+            platforms: post.platforms,
+            status: 'success',
+            postId: result.data?.postId || result.postId || result.id,
+            scheduledDate: post.scheduledDate,
+          });
+        } else {
+          const errorMessage =
+            result.error ||
+            result.message ||
+            result.raw ||
+            `HTTP ${response.status}`;
+          const errorDetails = {
+            postName: post.name,
+            platforms: post.platforms,
+            status: response.status,
+            statusText: response.statusText,
+            error: errorMessage,
+            responseBody: responseText.substring(0, 500),
+          };
+
+          console.error(`❌ ${post.name} post failed:`, result);
+
+          // Log individual post failures
+          try {
+            const { logActivity } = await import('@/lib/admin-activity');
+            await logActivity({
+              activityType: 'content_creation',
+              activityCategory: 'content',
+              status: 'failed',
+              message: `Failed to schedule post "${post.name}" for ${dateStr}`,
+              metadata: errorDetails,
+              errorMessage,
+            });
+          } catch (logError) {
+            console.error('Failed to log post error:', logError);
+          }
+
+          postResults.push({
+            name: post.name,
+            platforms: post.platforms,
+            status: 'error',
+            error: errorMessage,
+            statusCode: response.status,
+            statusText: response.statusText,
+            scheduledDate: post.scheduledDate,
+          });
+        }
+
+        await new Promise((resolve) => setTimeout(resolve, 1000));
+      } catch (error) {
+        const errorMessage =
+          error instanceof Error ? error.message : 'Unknown error';
+        const errorStack = error instanceof Error ? error.stack : undefined;
+
+        console.error(`❌ ${post.name} post error:`, error);
+
+        // Log individual post errors
         try {
           const { logActivity } = await import('@/lib/admin-activity');
           await logActivity({
             activityType: 'content_creation',
             activityCategory: 'content',
             status: 'failed',
-            message: `Failed to schedule post "${post.name}" for ${dateStr}`,
-            metadata: errorDetails,
-            errorMessage:
-              result.error || result.message || `HTTP ${response.status}`,
+            message: `Error scheduling post "${post.name}" for ${dateStr}`,
+            metadata: {
+              postName: post.name,
+              platforms: post.platforms,
+              errorType:
+                error instanceof Error ? error.constructor.name : 'Unknown',
+              errorStack,
+            },
+            errorMessage,
           });
         } catch (logError) {
           console.error('Failed to log post error:', logError);
@@ -789,46 +858,9 @@ async function runDailyPosts(dateStr: string) {
           name: post.name,
           platforms: post.platforms,
           status: 'error',
-          error: result.error || result.message || `HTTP ${response.status}`,
-          scheduledDate: post.scheduledDate,
+          error: errorMessage,
         });
       }
-
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-    } catch (error) {
-      const errorMessage =
-        error instanceof Error ? error.message : 'Unknown error';
-      const errorStack = error instanceof Error ? error.stack : undefined;
-
-      console.error(`❌ ${post.name} post error:`, error);
-
-      // Log individual post errors
-      try {
-        const { logActivity } = await import('@/lib/admin-activity');
-        await logActivity({
-          activityType: 'content_creation',
-          activityCategory: 'content',
-          status: 'failed',
-          message: `Error scheduling post "${post.name}" for ${dateStr}`,
-          metadata: {
-            postName: post.name,
-            platforms: post.platforms,
-            errorType:
-              error instanceof Error ? error.constructor.name : 'Unknown',
-            errorStack,
-          },
-          errorMessage,
-        });
-      } catch (logError) {
-        console.error('Failed to log post error:', logError);
-      }
-
-      postResults.push({
-        name: post.name,
-        platforms: post.platforms,
-        status: 'error',
-        error: errorMessage,
-      });
     }
   }
 
@@ -936,8 +968,12 @@ async function runDailyPosts(dateStr: string) {
         dedupeKey: `daily-posts-success-${dateStr}`,
       });
     } else {
+      const firstError = failedPosts[0]?.error;
+      const failureSummary = firstError
+        ? `All daily posts failed to schedule: ${firstError}`
+        : 'All daily posts failed to schedule';
       const failureTemplate = NotificationTemplates.cronFailure(
-        'All daily posts failed to schedule',
+        failureSummary,
         failedPosts,
       );
       const failureFields = [

@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
   ArrowLeft,
   Send,
@@ -21,6 +22,7 @@ import {
   Download,
   Copy,
 } from 'lucide-react';
+import { VideoManager } from '../social-preview/video-manager';
 
 interface SubstackPost {
   title: string;
@@ -372,581 +374,611 @@ export default function SubstackManagerPage() {
           )}
         </div>
 
-        <div className='grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6'>
-          <Card className='bg-zinc-900 border-zinc-800'>
-            <CardHeader>
-              <CardTitle className='flex items-center gap-2'>
-                <Calendar className='h-5 w-5' />
-                Single Week
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className='space-y-4'>
-                <div>
-                  <label className='block text-sm font-medium mb-2'>
-                    Select Week
-                  </label>
-                  <select
-                    value={weekOffset}
-                    onChange={(e) => setWeekOffset(parseInt(e.target.value))}
-                    className='w-full bg-zinc-800 border-zinc-700 rounded px-3 py-2 text-sm'
-                  >
-                    {weekOptions.map((opt) => (
-                      <option key={opt.offset} value={opt.offset}>
-                        {opt.offset === 0
-                          ? `This Week (${opt.label})`
-                          : opt.offset > 0
-                            ? `+${opt.offset} weeks (${opt.label})`
-                            : `${opt.offset} weeks (${opt.label})`}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-                <Button
-                  onClick={loadPreview}
-                  disabled={loading === 'preview'}
-                  className='w-full'
-                  variant='outline'
-                >
-                  {loading === 'preview' ? (
-                    <>
-                      <Loader2 className='mr-2 h-4 w-4 animate-spin' />
-                      Loading...
-                    </>
-                  ) : (
-                    <>
-                      <Eye className='mr-2 h-4 w-4' />
-                      Preview Posts
-                    </>
-                  )}
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className='bg-zinc-900 border-zinc-800'>
-            <CardHeader>
-              <CardTitle className='flex items-center gap-2'>
-                <Send className='h-5 w-5' />
-                Publish Selected Week
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className='space-y-2'>
-                <Button
-                  onClick={() => publishPosts('both')}
-                  disabled={!!loading || !preview}
-                  className='w-full'
-                  variant='default'
-                >
-                  {loading === 'publish-both' ? (
-                    <>
-                      <Loader2 className='mr-2 h-4 w-4 animate-spin' />
-                      Publishing...
-                    </>
-                  ) : (
-                    <>
-                      <Send className='mr-2 h-4 w-4' />
-                      Publish Both
-                    </>
-                  )}
-                </Button>
-                <div className='grid grid-cols-2 gap-2'>
-                  <Button
-                    onClick={() => publishPosts('free')}
-                    disabled={!!loading || !preview}
-                    variant='outline'
-                    size='sm'
-                  >
-                    {loading === 'publish-free' ? (
-                      <Loader2 className='h-4 w-4 animate-spin' />
-                    ) : (
-                      'Free Only'
-                    )}
-                  </Button>
-                  <Button
-                    onClick={() => publishPosts('paid')}
-                    disabled={!!loading || !preview}
-                    variant='outline'
-                    size='sm'
-                  >
-                    {loading === 'publish-paid' ? (
-                      <Loader2 className='h-4 w-4 animate-spin' />
-                    ) : (
-                      'Paid Only'
-                    )}
-                  </Button>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className='bg-zinc-900 border-zinc-800'>
-            <CardHeader>
-              <CardTitle>Publishing Status</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className='space-y-2'>
-                {publishResults.free && (
-                  <div className='flex items-center justify-between'>
-                    <span className='text-sm'>Free Post</span>
-                    {publishResults.free.success ? (
-                      <div className='flex items-center gap-2'>
-                        <CheckCircle className='h-4 w-4 text-lunary-success' />
-                        {publishResults.free.postUrl && (
-                          <a
-                            href={publishResults.free.postUrl}
-                            target='_blank'
-                            rel='noopener noreferrer'
-                            className='text-lunary-secondary hover:underline'
-                          >
-                            <ExternalLink className='h-3 w-3' />
-                          </a>
-                        )}
-                      </div>
-                    ) : (
-                      <div className='flex items-center gap-2'>
-                        <XCircle className='h-4 w-4 text-red-500' />
-                        <span className='text-xs text-lunary-error'>
-                          {publishResults.free.error?.substring(0, 30)}
-                        </span>
-                      </div>
-                    )}
-                  </div>
-                )}
-                {publishResults.paid && (
-                  <div className='flex items-center justify-between'>
-                    <span className='text-sm'>Paid Post</span>
-                    {publishResults.paid.success ? (
-                      <div className='flex items-center gap-2'>
-                        <CheckCircle className='h-4 w-4 text-lunary-success' />
-                        {publishResults.paid.postUrl && (
-                          <a
-                            href={publishResults.paid.postUrl}
-                            target='_blank'
-                            rel='noopener noreferrer'
-                            className='text-lunary-secondary hover:underline'
-                          >
-                            <ExternalLink className='h-3 w-3' />
-                          </a>
-                        )}
-                      </div>
-                    ) : (
-                      <div className='flex items-center gap-2'>
-                        <XCircle className='h-4 w-4 text-red-500' />
-                        <span className='text-xs text-lunary-error'>
-                          {publishResults.paid.error?.substring(0, 30)}
-                        </span>
-                      </div>
-                    )}
-                  </div>
-                )}
-                {!publishResults.free && !publishResults.paid && (
-                  <p className='text-sm text-zinc-400'>
-                    No posts published yet
-                  </p>
-                )}
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-
-        <Card className='bg-zinc-900 border-zinc-800 mb-6'>
-          <CardHeader>
-            <CardTitle className='flex items-center gap-2'>
-              <History className='h-5 w-5' />
-              Batch Backfill
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className='space-y-4'>
-              <div className='flex items-center gap-2 p-3 bg-lunary-accent-950 border border-lunary-accent-900 rounded-lg'>
-                <AlertCircle className='h-5 w-5 text-lunary-accent flex-shrink-0' />
-                <p className='text-sm text-lunary-accent-200'>
-                  Backfill publishes multiple weeks at once. Start with a small
-                  range (1-2 weeks) to test before doing a larger backfill.
-                </p>
-              </div>
-
-              <div className='grid grid-cols-2 gap-4'>
-                <div>
-                  <label className='block text-sm font-medium mb-2'>
-                    Oldest Week (publish first)
-                  </label>
-                  <select
-                    value={backfillRange.end}
-                    onChange={(e) =>
-                      setBackfillRange({
-                        ...backfillRange,
-                        end: parseInt(e.target.value),
-                      })
-                    }
-                    className='w-full bg-zinc-800 border-zinc-700 rounded px-3 py-2 text-sm'
-                  >
-                    {weekOptions
-                      .filter((opt) => opt.offset < 0)
-                      .map((opt) => (
-                        <option key={opt.offset} value={opt.offset}>
-                          {opt.label}
-                        </option>
-                      ))}
-                  </select>
-                </div>
-                <div>
-                  <label className='block text-sm font-medium mb-2'>
-                    Newest Week (publish last)
-                  </label>
-                  <select
-                    value={backfillRange.start}
-                    onChange={(e) =>
-                      setBackfillRange({
-                        ...backfillRange,
-                        start: parseInt(e.target.value),
-                      })
-                    }
-                    className='w-full bg-zinc-800 border-zinc-700 rounded px-3 py-2 text-sm'
-                  >
-                    {weekOptions
-                      .filter(
-                        (opt) =>
-                          opt.offset < 0 && opt.offset >= backfillRange.end,
-                      )
-                      .map((opt) => (
-                        <option key={opt.offset} value={opt.offset}>
-                          {opt.label}
-                        </option>
-                      ))}
-                  </select>
-                </div>
-              </div>
-
-              <div className='flex items-center justify-between'>
-                <p className='text-sm text-zinc-400'>
-                  {Math.abs(backfillRange.start - backfillRange.end) + 1} weeks
-                  selected (
-                  {(Math.abs(backfillRange.start - backfillRange.end) + 1) * 2}{' '}
-                  posts)
-                </p>
-                <Button
-                  onClick={runBackfill}
-                  disabled={!!loading}
-                  variant='default'
-                >
-                  {loading === 'backfill' ? (
-                    <>
-                      <Loader2 className='mr-2 h-4 w-4 animate-spin' />
-                      {backfillProgress
-                        ? `${backfillProgress.current}/${backfillProgress.total}`
-                        : 'Processing...'}
-                    </>
-                  ) : (
-                    <>
-                      <History className='mr-2 h-4 w-4' />
-                      Start Backfill
-                    </>
-                  )}
-                </Button>
-              </div>
-
-              {backfillResults.length > 0 && (
-                <div className='mt-4 space-y-2 max-h-64 overflow-y-auto'>
-                  <p className='text-sm font-medium text-zinc-300'>
-                    Backfill Results:
-                  </p>
-                  {backfillResults.map((result, idx) => (
-                    <div
-                      key={idx}
-                      className='flex items-center justify-between p-2 bg-zinc-800 rounded text-sm'
-                    >
-                      <span className='text-zinc-300'>
-                        {new Date(result.weekStart).toLocaleDateString(
-                          'en-US',
-                          {
-                            month: 'short',
-                            day: 'numeric',
-                          },
-                        )}
-                      </span>
-                      <div className='flex items-center gap-3'>
-                        <span className='flex items-center gap-1'>
-                          Free:
-                          {result.free.success ? (
-                            <CheckCircle className='h-4 w-4 text-lunary-success' />
-                          ) : (
-                            <XCircle className='h-4 w-4 text-red-500' />
-                          )}
-                        </span>
-                        <span className='flex items-center gap-1'>
-                          Paid:
-                          {result.paid.success ? (
-                            <CheckCircle className='h-4 w-4 text-lunary-success' />
-                          ) : (
-                            <XCircle className='h-4 w-4 text-red-500' />
-                          )}
-                        </span>
-                      </div>
+        <Tabs defaultValue='publishing' className='space-y-6'>
+          <TabsList className='bg-zinc-900 border border-zinc-800'>
+            <TabsTrigger value='publishing'>Publishing</TabsTrigger>
+            <TabsTrigger value='videos'>Videos</TabsTrigger>
+          </TabsList>
+          <TabsContent value='publishing' className='space-y-6'>
+            <div className='grid grid-cols-1 lg:grid-cols-3 gap-6'>
+              <Card className='bg-zinc-900 border-zinc-800'>
+                <CardHeader>
+                  <CardTitle className='flex items-center gap-2'>
+                    <Calendar className='h-5 w-5' />
+                    Single Week
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className='space-y-4'>
+                    <div>
+                      <label className='block text-sm font-medium mb-2'>
+                        Select Week
+                      </label>
+                      <select
+                        value={weekOffset}
+                        onChange={(e) =>
+                          setWeekOffset(parseInt(e.target.value))
+                        }
+                        className='w-full bg-zinc-800 border-zinc-700 rounded px-3 py-2 text-sm'
+                      >
+                        {weekOptions.map((opt) => (
+                          <option key={opt.offset} value={opt.offset}>
+                            {opt.offset === 0
+                              ? `This Week (${opt.label})`
+                              : opt.offset > 0
+                                ? `+${opt.offset} weeks (${opt.label})`
+                                : `${opt.offset} weeks (${opt.label})`}
+                          </option>
+                        ))}
+                      </select>
                     </div>
-                  ))}
-                </div>
-              )}
-            </div>
-          </CardContent>
-        </Card>
+                    <Button
+                      onClick={loadPreview}
+                      disabled={loading === 'preview'}
+                      className='w-full'
+                      variant='outline'
+                    >
+                      {loading === 'preview' ? (
+                        <>
+                          <Loader2 className='mr-2 h-4 w-4 animate-spin' />
+                          Loading...
+                        </>
+                      ) : (
+                        <>
+                          <Eye className='mr-2 h-4 w-4' />
+                          Preview Posts
+                        </>
+                      )}
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
 
-        <Card className='bg-zinc-900 border-zinc-800 mb-6'>
-          <CardHeader>
-            <CardTitle className='flex items-center gap-2'>
-              <Share2 className='h-5 w-5' />
-              Social Media Content
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className='space-y-4'>
-              <div className='flex items-center justify-between'>
-                <p className='text-sm text-zinc-400'>
-                  Generate images and captions for the selected week
-                </p>
-                <Button
-                  onClick={generateSocialContent}
-                  disabled={!!loading}
-                  variant='outline'
-                >
-                  {loading === 'social' ? (
-                    <>
-                      <Loader2 className='mr-2 h-4 w-4 animate-spin' />
-                      Generating...
-                    </>
-                  ) : (
-                    <>
-                      <ImageIcon className='mr-2 h-4 w-4' />
-                      Generate Content
-                    </>
-                  )}
-                </Button>
-              </div>
+              <Card className='bg-zinc-900 border-zinc-800'>
+                <CardHeader>
+                  <CardTitle className='flex items-center gap-2'>
+                    <Send className='h-5 w-5' />
+                    Publish Selected Week
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className='space-y-2'>
+                    <Button
+                      onClick={() => publishPosts('both')}
+                      disabled={!!loading || !preview}
+                      className='w-full'
+                      variant='default'
+                    >
+                      {loading === 'publish-both' ? (
+                        <>
+                          <Loader2 className='mr-2 h-4 w-4 animate-spin' />
+                          Publishing...
+                        </>
+                      ) : (
+                        <>
+                          <Send className='mr-2 h-4 w-4' />
+                          Publish Both
+                        </>
+                      )}
+                    </Button>
+                    <div className='grid grid-cols-2 gap-2'>
+                      <Button
+                        onClick={() => publishPosts('free')}
+                        disabled={!!loading || !preview}
+                        variant='outline'
+                        size='sm'
+                      >
+                        {loading === 'publish-free' ? (
+                          <Loader2 className='h-4 w-4 animate-spin' />
+                        ) : (
+                          'Free Only'
+                        )}
+                      </Button>
+                      <Button
+                        onClick={() => publishPosts('paid')}
+                        disabled={!!loading || !preview}
+                        variant='outline'
+                        size='sm'
+                      >
+                        {loading === 'publish-paid' ? (
+                          <Loader2 className='h-4 w-4 animate-spin' />
+                        ) : (
+                          'Paid Only'
+                        )}
+                      </Button>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
 
-              {socialContent && (
-                <div className='space-y-6'>
-                  <div>
-                    <p className='text-sm font-medium mb-3'>Images</p>
-                    <div className='grid grid-cols-2 md:grid-cols-4 gap-3'>
-                      {Object.entries(socialContent.images).map(
-                        ([format, url]) => (
-                          <div key={format} className='space-y-2'>
-                            <div className='aspect-square bg-zinc-800 rounded overflow-hidden'>
-                              {/* eslint-disable-next-line @next/next/no-img-element */}
-                              <img
-                                src={url}
-                                alt={`${format} format preview`}
-                                className='w-full h-full object-cover'
-                              />
-                            </div>
-                            <div className='flex items-center justify-between'>
-                              <span className='text-xs text-zinc-400 capitalize'>
-                                {format}
-                              </span>
+              <Card className='bg-zinc-900 border-zinc-800'>
+                <CardHeader>
+                  <CardTitle>Publishing Status</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className='space-y-2'>
+                    {publishResults.free && (
+                      <div className='flex items-center justify-between'>
+                        <span className='text-sm'>Free Post</span>
+                        {publishResults.free.success ? (
+                          <div className='flex items-center gap-2'>
+                            <CheckCircle className='h-4 w-4 text-lunary-success' />
+                            {publishResults.free.postUrl && (
                               <a
-                                href={url}
-                                download={`lunary-${format}.png`}
-                                className='text-lunary-primary-400 hover:text-lunary-primary-300'
+                                href={publishResults.free.postUrl}
+                                target='_blank'
+                                rel='noopener noreferrer'
+                                className='text-lunary-secondary hover:underline'
                               >
-                                <Download className='h-4 w-4' />
+                                <ExternalLink className='h-3 w-3' />
                               </a>
-                            </div>
+                            )}
                           </div>
-                        ),
-                      )}
-                    </div>
-                  </div>
-
-                  <div>
-                    <p className='text-sm font-medium mb-3'>Captions</p>
-                    <div className='space-y-3'>
-                      {Object.entries(socialContent.captions).map(
-                        ([length, caption]) => (
-                          <div key={length} className='bg-zinc-800 rounded p-3'>
-                            <div className='flex items-center justify-between mb-2'>
-                              <span className='text-xs text-zinc-400 capitalize'>
-                                {length}
-                              </span>
-                              <button
-                                onClick={() => copyToClipboard(caption)}
-                                className='text-lunary-primary-400 hover:text-lunary-primary-300'
+                        ) : (
+                          <div className='flex items-center gap-2'>
+                            <XCircle className='h-4 w-4 text-red-500' />
+                            <span className='text-xs text-lunary-error'>
+                              {publishResults.free.error?.substring(0, 30)}
+                            </span>
+                          </div>
+                        )}
+                      </div>
+                    )}
+                    {publishResults.paid && (
+                      <div className='flex items-center justify-between'>
+                        <span className='text-sm'>Paid Post</span>
+                        {publishResults.paid.success ? (
+                          <div className='flex items-center gap-2'>
+                            <CheckCircle className='h-4 w-4 text-lunary-success' />
+                            {publishResults.paid.postUrl && (
+                              <a
+                                href={publishResults.paid.postUrl}
+                                target='_blank'
+                                rel='noopener noreferrer'
+                                className='text-lunary-secondary hover:underline'
                               >
-                                <Copy className='h-4 w-4' />
-                              </button>
-                            </div>
-                            <p className='text-sm text-zinc-300'>{caption}</p>
+                                <ExternalLink className='h-3 w-3' />
+                              </a>
+                            )}
                           </div>
-                        ),
-                      )}
+                        ) : (
+                          <div className='flex items-center gap-2'>
+                            <XCircle className='h-4 w-4 text-red-500' />
+                            <span className='text-xs text-lunary-error'>
+                              {publishResults.paid.error?.substring(0, 30)}
+                            </span>
+                          </div>
+                        )}
+                      </div>
+                    )}
+                    {!publishResults.free && !publishResults.paid && (
+                      <p className='text-sm text-zinc-400'>
+                        No posts published yet
+                      </p>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+
+            <Card className='bg-zinc-900 border-zinc-800'>
+              <CardHeader>
+                <CardTitle className='flex items-center gap-2'>
+                  <History className='h-5 w-5' />
+                  Batch Backfill
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className='space-y-4'>
+                  <div className='flex items-center gap-2 p-3 bg-lunary-accent-950 border border-lunary-accent-900 rounded-lg'>
+                    <AlertCircle className='h-5 w-5 text-lunary-accent flex-shrink-0' />
+                    <p className='text-sm text-lunary-accent-200'>
+                      Backfill publishes multiple weeks at once. Start with a
+                      small range (1-2 weeks) to test before doing a larger
+                      backfill.
+                    </p>
+                  </div>
+
+                  <div className='grid grid-cols-2 gap-4'>
+                    <div>
+                      <label className='block text-sm font-medium mb-2'>
+                        Oldest Week (publish first)
+                      </label>
+                      <select
+                        value={backfillRange.end}
+                        onChange={(e) =>
+                          setBackfillRange({
+                            ...backfillRange,
+                            end: parseInt(e.target.value),
+                          })
+                        }
+                        className='w-full bg-zinc-800 border-zinc-700 rounded px-3 py-2 text-sm'
+                      >
+                        {weekOptions
+                          .filter((opt) => opt.offset < 0)
+                          .map((opt) => (
+                            <option key={opt.offset} value={opt.offset}>
+                              {opt.label}
+                            </option>
+                          ))}
+                      </select>
+                    </div>
+                    <div>
+                      <label className='block text-sm font-medium mb-2'>
+                        Newest Week (publish last)
+                      </label>
+                      <select
+                        value={backfillRange.start}
+                        onChange={(e) =>
+                          setBackfillRange({
+                            ...backfillRange,
+                            start: parseInt(e.target.value),
+                          })
+                        }
+                        className='w-full bg-zinc-800 border-zinc-700 rounded px-3 py-2 text-sm'
+                      >
+                        {weekOptions
+                          .filter(
+                            (opt) =>
+                              opt.offset < 0 && opt.offset >= backfillRange.end,
+                          )
+                          .map((opt) => (
+                            <option key={opt.offset} value={opt.offset}>
+                              {opt.label}
+                            </option>
+                          ))}
+                      </select>
                     </div>
                   </div>
 
-                  <div>
-                    <p className='text-sm font-medium mb-2'>Hashtags</p>
-                    <div className='flex flex-wrap gap-2'>
-                      {socialContent.hashtags.map((tag) => (
-                        <span
-                          key={tag}
-                          className='text-xs bg-lunary-primary-900/20 text-lunary-primary-300 px-2 py-1 rounded'
+                  <div className='flex items-center justify-between'>
+                    <p className='text-sm text-zinc-400'>
+                      {Math.abs(backfillRange.start - backfillRange.end) + 1}{' '}
+                      weeks selected (
+                      {(Math.abs(backfillRange.start - backfillRange.end) + 1) *
+                        2}{' '}
+                      posts)
+                    </p>
+                    <Button
+                      onClick={runBackfill}
+                      disabled={!!loading}
+                      variant='default'
+                    >
+                      {loading === 'backfill' ? (
+                        <>
+                          <Loader2 className='mr-2 h-4 w-4 animate-spin' />
+                          {backfillProgress
+                            ? `${backfillProgress.current}/${backfillProgress.total}`
+                            : 'Processing...'}
+                        </>
+                      ) : (
+                        <>
+                          <History className='mr-2 h-4 w-4' />
+                          Start Backfill
+                        </>
+                      )}
+                    </Button>
+                  </div>
+
+                  {backfillResults.length > 0 && (
+                    <div className='mt-4 space-y-2 max-h-64 overflow-y-auto'>
+                      <p className='text-sm font-medium text-zinc-300'>
+                        Backfill Results:
+                      </p>
+                      {backfillResults.map((result, idx) => (
+                        <div
+                          key={idx}
+                          className='flex items-center justify-between p-2 bg-zinc-800 rounded text-sm'
                         >
-                          {tag}
-                        </span>
+                          <span className='text-zinc-300'>
+                            {new Date(result.weekStart).toLocaleDateString(
+                              'en-US',
+                              {
+                                month: 'short',
+                                day: 'numeric',
+                              },
+                            )}
+                          </span>
+                          <div className='flex items-center gap-3'>
+                            <span className='flex items-center gap-1'>
+                              Free:
+                              {result.free.success ? (
+                                <CheckCircle className='h-4 w-4 text-lunary-success' />
+                              ) : (
+                                <XCircle className='h-4 w-4 text-red-500' />
+                              )}
+                            </span>
+                            <span className='flex items-center gap-1'>
+                              Paid:
+                              {result.paid.success ? (
+                                <CheckCircle className='h-4 w-4 text-lunary-success' />
+                              ) : (
+                                <XCircle className='h-4 w-4 text-red-500' />
+                              )}
+                            </span>
+                          </div>
+                        </div>
                       ))}
                     </div>
-                    <button
-                      onClick={() =>
-                        copyToClipboard(socialContent.hashtags.join(' '))
-                      }
-                      className='text-xs text-lunary-primary-400 hover:text-lunary-primary-300 mt-2'
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className='bg-zinc-900 border-zinc-800 mb-6'>
+              <CardHeader>
+                <CardTitle className='flex items-center gap-2'>
+                  <Share2 className='h-5 w-5' />
+                  Social Media Content
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className='space-y-4'>
+                  <div className='flex items-center justify-between'>
+                    <p className='text-sm text-zinc-400'>
+                      Generate images and captions for the selected week
+                    </p>
+                    <Button
+                      onClick={generateSocialContent}
+                      disabled={!!loading}
+                      variant='outline'
                     >
-                      Copy all hashtags
-                    </button>
+                      {loading === 'social' ? (
+                        <>
+                          <Loader2 className='mr-2 h-4 w-4 animate-spin' />
+                          Generating...
+                        </>
+                      ) : (
+                        <>
+                          <ImageIcon className='mr-2 h-4 w-4' />
+                          Generate Content
+                        </>
+                      )}
+                    </Button>
                   </div>
 
-                  <div>
-                    <p className='text-sm font-medium mb-3'>
-                      Platform-Ready Captions
-                    </p>
-                    <div className='grid grid-cols-1 md:grid-cols-2 gap-3'>
-                      {Object.entries(socialContent.platforms).map(
-                        ([platform, content]) => (
-                          <div
-                            key={platform}
-                            className='bg-zinc-800 rounded p-3'
-                          >
-                            <div className='flex items-center justify-between mb-2'>
-                              <span className='text-sm font-medium capitalize'>
-                                {platform}
-                              </span>
-                            </div>
-                            {Object.entries(content).map(([type, text]) => (
-                              <div key={type} className='mb-2'>
+                  {socialContent && (
+                    <div className='space-y-6'>
+                      <div>
+                        <p className='text-sm font-medium mb-3'>Images</p>
+                        <div className='grid grid-cols-2 md:grid-cols-4 gap-3'>
+                          {Object.entries(socialContent.images).map(
+                            ([format, url]) => (
+                              <div key={format} className='space-y-2'>
+                                <div className='aspect-square bg-zinc-800 rounded overflow-hidden'>
+                                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                                  <img
+                                    src={url}
+                                    alt={`${format} format preview`}
+                                    className='w-full h-full object-cover'
+                                  />
+                                </div>
                                 <div className='flex items-center justify-between'>
                                   <span className='text-xs text-zinc-400 capitalize'>
-                                    {type}
+                                    {format}
                                   </span>
-                                  <button
-                                    onClick={() => copyToClipboard(text)}
+                                  <a
+                                    href={url}
+                                    download={`lunary-${format}.png`}
                                     className='text-lunary-primary-400 hover:text-lunary-primary-300'
                                   >
-                                    <Copy className='h-3 w-3' />
+                                    <Download className='h-4 w-4' />
+                                  </a>
+                                </div>
+                              </div>
+                            ),
+                          )}
+                        </div>
+                      </div>
+
+                      <div>
+                        <p className='text-sm font-medium mb-3'>Captions</p>
+                        <div className='space-y-3'>
+                          {Object.entries(socialContent.captions).map(
+                            ([length, caption]) => (
+                              <div
+                                key={length}
+                                className='bg-zinc-800 rounded p-3'
+                              >
+                                <div className='flex items-center justify-between mb-2'>
+                                  <span className='text-xs text-zinc-400 capitalize'>
+                                    {length}
+                                  </span>
+                                  <button
+                                    onClick={() => copyToClipboard(caption)}
+                                    className='text-lunary-primary-400 hover:text-lunary-primary-300'
+                                  >
+                                    <Copy className='h-4 w-4' />
                                   </button>
                                 </div>
-                                <p className='text-xs text-zinc-400 mt-1 line-clamp-2'>
-                                  {text}
+                                <p className='text-sm text-zinc-300'>
+                                  {caption}
                                 </p>
                               </div>
-                            ))}
-                          </div>
-                        ),
-                      )}
+                            ),
+                          )}
+                        </div>
+                      </div>
+
+                      <div>
+                        <p className='text-sm font-medium mb-2'>Hashtags</p>
+                        <div className='flex flex-wrap gap-2'>
+                          {socialContent.hashtags.map((tag) => (
+                            <span
+                              key={tag}
+                              className='text-xs bg-lunary-primary-900/20 text-lunary-primary-300 px-2 py-1 rounded'
+                            >
+                              {tag}
+                            </span>
+                          ))}
+                        </div>
+                        <button
+                          onClick={() =>
+                            copyToClipboard(socialContent.hashtags.join(' '))
+                          }
+                          className='text-xs text-lunary-primary-400 hover:text-lunary-primary-300 mt-2'
+                        >
+                          Copy all hashtags
+                        </button>
+                      </div>
+
+                      <div>
+                        <p className='text-sm font-medium mb-3'>
+                          Platform-Ready Captions
+                        </p>
+                        <div className='grid grid-cols-1 md:grid-cols-2 gap-3'>
+                          {Object.entries(socialContent.platforms).map(
+                            ([platform, content]) => (
+                              <div
+                                key={platform}
+                                className='bg-zinc-800 rounded p-3'
+                              >
+                                <div className='flex items-center justify-between mb-2'>
+                                  <span className='text-sm font-medium capitalize'>
+                                    {platform}
+                                  </span>
+                                </div>
+                                {Object.entries(content).map(([type, text]) => (
+                                  <div key={type} className='mb-2'>
+                                    <div className='flex items-center justify-between'>
+                                      <span className='text-xs text-zinc-400 capitalize'>
+                                        {type}
+                                      </span>
+                                      <button
+                                        onClick={() => copyToClipboard(text)}
+                                        className='text-lunary-primary-400 hover:text-lunary-primary-300'
+                                      >
+                                        <Copy className='h-3 w-3' />
+                                      </button>
+                                    </div>
+                                    <p className='text-xs text-zinc-400 mt-1 line-clamp-2'>
+                                      {text}
+                                    </p>
+                                  </div>
+                                ))}
+                              </div>
+                            ),
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+
+            {preview && (
+              <div className='grid grid-cols-1 lg:grid-cols-2 gap-6'>
+                <Card className='bg-zinc-900 border-zinc-800'>
+                  <CardHeader>
+                    <CardTitle className='flex items-center justify-between'>
+                      <span>Free Post Preview</span>
+                      <Badge variant='outline'>Free</Badge>
+                    </CardTitle>
+                    <p className='text-sm text-zinc-400'>
+                      {preview.metadata.freeWordCount} words
+                    </p>
+                  </CardHeader>
+                  <CardContent>
+                    <div className='space-y-4'>
+                      <div>
+                        <h3 className='font-semibold mb-1'>
+                          {preview.free.title}
+                        </h3>
+                        {preview.free.subtitle && (
+                          <p className='text-sm text-zinc-400 italic'>
+                            {preview.free.subtitle}
+                          </p>
+                        )}
+                      </div>
+                      <div className='bg-zinc-950 rounded p-4 max-h-96 overflow-y-auto'>
+                        <pre className='text-xs whitespace-pre-wrap font-mono'>
+                          {preview.free.content.substring(0, 1000)}
+                          {preview.free.content.length > 1000 && '...'}
+                        </pre>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <Card className='bg-zinc-900 border-zinc-800'>
+                  <CardHeader>
+                    <CardTitle className='flex items-center justify-between'>
+                      <span>Paid Post Preview</span>
+                      <Badge variant='default'>$3/month</Badge>
+                    </CardTitle>
+                    <p className='text-sm text-zinc-400'>
+                      {preview.metadata.paidWordCount} words
+                    </p>
+                  </CardHeader>
+                  <CardContent>
+                    <div className='space-y-4'>
+                      <div>
+                        <h3 className='font-semibold mb-1'>
+                          {preview.paid.title}
+                        </h3>
+                        {preview.paid.subtitle && (
+                          <p className='text-sm text-zinc-400 italic'>
+                            {preview.paid.subtitle}
+                          </p>
+                        )}
+                      </div>
+                      <div className='bg-zinc-950 rounded p-4 max-h-96 overflow-y-auto'>
+                        <pre className='text-xs whitespace-pre-wrap font-mono'>
+                          {preview.paid.content.substring(0, 1000)}
+                          {preview.paid.content.length > 1000 && '...'}
+                        </pre>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+            )}
+
+            {preview && (
+              <Card className='bg-zinc-900 border-zinc-800'>
+                <CardHeader>
+                  <CardTitle>Week Metadata</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className='grid grid-cols-2 md:grid-cols-4 gap-4 text-sm'>
+                    <div>
+                      <p className='text-zinc-400'>Week Start</p>
+                      <p className='font-medium'>
+                        {new Date(
+                          preview.metadata.weekStart,
+                        ).toLocaleDateString()}
+                      </p>
+                    </div>
+                    <div>
+                      <p className='text-zinc-400'>Week End</p>
+                      <p className='font-medium'>
+                        {new Date(
+                          preview.metadata.weekEnd,
+                        ).toLocaleDateString()}
+                      </p>
+                    </div>
+                    <div>
+                      <p className='text-zinc-400'>Week Number</p>
+                      <p className='font-medium'>
+                        {preview.metadata.weekNumber}
+                      </p>
+                    </div>
+                    <div>
+                      <p className='text-zinc-400'>Year</p>
+                      <p className='font-medium'>
+                        {new Date(preview.metadata.weekStart).getFullYear()}
+                      </p>
                     </div>
                   </div>
-                </div>
-              )}
-            </div>
-          </CardContent>
-        </Card>
-
-        {preview && (
-          <div className='grid grid-cols-1 lg:grid-cols-2 gap-6'>
-            <Card className='bg-zinc-900 border-zinc-800'>
-              <CardHeader>
-                <CardTitle className='flex items-center justify-between'>
-                  <span>Free Post Preview</span>
-                  <Badge variant='outline'>Free</Badge>
-                </CardTitle>
-                <p className='text-sm text-zinc-400'>
-                  {preview.metadata.freeWordCount} words
-                </p>
-              </CardHeader>
-              <CardContent>
-                <div className='space-y-4'>
-                  <div>
-                    <h3 className='font-semibold mb-1'>{preview.free.title}</h3>
-                    {preview.free.subtitle && (
-                      <p className='text-sm text-zinc-400 italic'>
-                        {preview.free.subtitle}
-                      </p>
-                    )}
-                  </div>
-                  <div className='bg-zinc-950 rounded p-4 max-h-96 overflow-y-auto'>
-                    <pre className='text-xs whitespace-pre-wrap font-mono'>
-                      {preview.free.content.substring(0, 1000)}
-                      {preview.free.content.length > 1000 && '...'}
-                    </pre>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card className='bg-zinc-900 border-zinc-800'>
-              <CardHeader>
-                <CardTitle className='flex items-center justify-between'>
-                  <span>Paid Post Preview</span>
-                  <Badge variant='default'>$3/month</Badge>
-                </CardTitle>
-                <p className='text-sm text-zinc-400'>
-                  {preview.metadata.paidWordCount} words
-                </p>
-              </CardHeader>
-              <CardContent>
-                <div className='space-y-4'>
-                  <div>
-                    <h3 className='font-semibold mb-1'>{preview.paid.title}</h3>
-                    {preview.paid.subtitle && (
-                      <p className='text-sm text-zinc-400 italic'>
-                        {preview.paid.subtitle}
-                      </p>
-                    )}
-                  </div>
-                  <div className='bg-zinc-950 rounded p-4 max-h-96 overflow-y-auto'>
-                    <pre className='text-xs whitespace-pre-wrap font-mono'>
-                      {preview.paid.content.substring(0, 1000)}
-                      {preview.paid.content.length > 1000 && '...'}
-                    </pre>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        )}
-
-        {preview && (
-          <Card className='bg-zinc-900 border-zinc-800 mt-6'>
-            <CardHeader>
-              <CardTitle>Week Metadata</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className='grid grid-cols-2 md:grid-cols-4 gap-4 text-sm'>
-                <div>
-                  <p className='text-zinc-400'>Week Start</p>
-                  <p className='font-medium'>
-                    {new Date(preview.metadata.weekStart).toLocaleDateString()}
-                  </p>
-                </div>
-                <div>
-                  <p className='text-zinc-400'>Week End</p>
-                  <p className='font-medium'>
-                    {new Date(preview.metadata.weekEnd).toLocaleDateString()}
-                  </p>
-                </div>
-                <div>
-                  <p className='text-zinc-400'>Week Number</p>
-                  <p className='font-medium'>{preview.metadata.weekNumber}</p>
-                </div>
-                <div>
-                  <p className='text-zinc-400'>Year</p>
-                  <p className='font-medium'>
-                    {new Date(preview.metadata.weekStart).getFullYear()}
-                  </p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        )}
+                </CardContent>
+              </Card>
+            )}
+          </TabsContent>
+          <TabsContent value='videos'>
+            <VideoManager weekOffset={weekOffset} />
+          </TabsContent>
+        </Tabs>
       </div>
     </div>
   );

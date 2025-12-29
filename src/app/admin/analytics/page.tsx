@@ -31,6 +31,7 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 type ActivityTrend = {
   date: string;
@@ -425,7 +426,24 @@ export default function AnalyticsPage() {
     });
   }, [featureUsage]);
 
-  type OverviewCard = {
+  const formatCurrency = (value?: number) =>
+    typeof value === 'number'
+      ? `$${value.toLocaleString(undefined, {
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 2,
+        })}`
+      : '—';
+
+  const formatPercent = (value?: number, digits = 1) =>
+    typeof value === 'number' ? `${value.toFixed(digits)}%` : '—';
+
+  const activeSubscribers =
+    successMetrics?.active_subscriptions?.value ??
+    conversions?.funnel.paid_users ??
+    subscriptionLifecycle?.states?.active ??
+    0;
+
+  type PrimaryCard = {
     title: string;
     value: string | number;
     subtitle?: string;
@@ -433,55 +451,51 @@ export default function AnalyticsPage() {
     trend?: 'up' | 'down' | 'stable';
   };
 
-  const overviewCards: OverviewCard[] = [
+  const primaryCards: PrimaryCard[] = [
     {
-      title: 'Daily Active Users',
-      value: activity?.dau ?? 0,
-      subtitle: 'Users active yesterday',
+      title: 'Monthly Recurring Revenue',
+      value: formatCurrency(successMetrics?.monthly_recurring_revenue?.value),
+      subtitle: 'MRR this period',
     },
     {
-      title: 'Returning Users',
-      value: activity?.returning_users ?? 0,
-      subtitle: `${
-        activity?.dau
-          ? Math.round(((activity.returning_users ?? 0) / activity.dau) * 100)
-          : 0
-      }% of DAU`,
+      title: 'Annual Recurring Revenue',
+      value: formatCurrency(successMetrics?.annual_recurring_revenue?.value),
+      subtitle: 'ARR run-rate',
     },
     {
-      title: 'Weekly Active Users',
-      value: activity?.wau ?? 0,
-      subtitle: 'Unique users in last 7 days',
+      title: 'Active Subscribers',
+      value: activeSubscribers,
+      subtitle: 'Paid subscriptions',
+    },
+    {
+      title: 'Conversion Rate',
+      value: formatPercent(conversions?.conversion_rate, 1),
+      subtitle: 'Free → Paid',
+    },
+    {
+      title: 'Activation Rate',
+      value: formatPercent(activation?.activationRate, 2),
+      subtitle: 'Activated within 24h',
+    },
+    {
+      title: 'Growth Rate',
+      value: formatPercent(userGrowth?.growthRate, 1),
+      subtitle: 'Signups period-over-period',
     },
     {
       title: 'Monthly Active Users',
       value: activity?.mau ?? 0,
-      subtitle: 'Unique users in last 30 days',
+      subtitle: 'PostHog active users (30d)',
     },
     {
-      title: 'Conversion Rate',
-      value: conversions ? `${conversions.conversion_rate.toFixed(1)}%` : '—',
-      subtitle: 'Free → Paid',
-      change: conversions?.trial_conversion_rate,
-      trend:
-        (conversions?.trial_conversion_rate ?? 0) >=
-        (conversions?.conversion_rate ?? 0)
-          ? 'up'
-          : 'down',
+      title: 'Weekly Active Users',
+      value: activity?.wau ?? 0,
+      subtitle: 'PostHog active users (7d)',
     },
     {
-      title: 'AI Engagement',
-      value: aiMetrics?.avg_sessions_per_user
-        ? aiMetrics.avg_sessions_per_user.toFixed(2)
-        : '—',
-      subtitle: 'Avg sessions per engaged user',
-    },
-    {
-      title: 'Notification Open Rate',
-      value: notifications
-        ? `${notifications.overall_open_rate.toFixed(1)}%`
-        : '—',
-      subtitle: 'Across all notification types',
+      title: 'Daily Active Users',
+      value: activity?.dau ?? 0,
+      subtitle: 'PostHog active users (24h)',
     },
   ];
 
@@ -532,11 +546,10 @@ export default function AnalyticsPage() {
             Analytics
           </div>
           <h1 className='text-2xl font-light tracking-tight text-white md:text-3xl'>
-            Engagement & Growth
+            Investor Analytics
           </h1>
           <p className='text-sm text-zinc-400'>
-            Monitor active usage, AI engagement, conversions, and feature
-            adoption
+            Focused snapshot of traction, revenue, and conversion health.
           </p>
         </div>
 
@@ -601,900 +614,952 @@ export default function AnalyticsPage() {
         </div>
       )}
 
-      <section>
-        <SuccessMetrics
-          data={successMetrics}
-          loading={loading && !successMetrics}
-        />
-      </section>
+      <Tabs defaultValue='snapshot' className='space-y-10'>
+        <TabsList className='w-full flex-wrap justify-start gap-2 rounded-xl border border-zinc-800/40 bg-zinc-900/20 p-1'>
+          <TabsTrigger value='snapshot' className='text-xs'>
+            Investor Snapshot
+          </TabsTrigger>
+          <TabsTrigger value='details' className='text-xs'>
+            Operational Detail
+          </TabsTrigger>
+        </TabsList>
 
-      {searchConsoleData && (
-        <section>
-          <SearchConsoleMetrics
-            data={searchConsoleData}
-            loading={loading && !searchConsoleData}
-          />
-        </section>
-      )}
-
-      <section className='grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-3'>
-        {overviewCards.map((card) => (
-          <MetricsCard
-            key={card.title}
-            title={card.title}
-            value={card.value}
-            change={card.change}
-            trend={card.trend}
-            subtitle={card.subtitle}
-          />
-        ))}
-      </section>
-
-      <section className='grid grid-cols-1 gap-6 lg:grid-cols-2'>
-        <Card className='border-zinc-800/30 bg-zinc-900/10'>
-          <CardHeader>
-            <CardTitle>Active User Trends</CardTitle>
-            <CardDescription>
-              DAU, WAU, and MAU trends ({granularity})
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <MultiLineChart data={activity?.trends ?? []} />
-            <div className='mt-4 flex flex-wrap items-center gap-4 border-t border-zinc-800 pt-4'>
-              <div className='flex items-center gap-2'>
-                <div
-                  className='h-3 w-3 rounded-full'
-                  style={{ backgroundColor: 'rgba(196,181,253,0.8)' }}
-                />
-                <span className='text-xs text-zinc-400'>
-                  <span className='font-medium text-zinc-300'>DAU</span> - Daily
-                  Active Users
-                </span>
-              </div>
-              <div className='flex items-center gap-2'>
-                <div
-                  className='h-2 w-2 rounded-full'
-                  style={{ backgroundColor: 'rgba(129,140,248,0.9)' }}
-                />
-                <span className='text-xs text-zinc-400'>
-                  <span className='font-medium text-zinc-300'>WAU</span> -
-                  Weekly Active Users
-                </span>
-              </div>
-              <div className='flex items-center gap-2'>
-                <div
-                  className='h-2 w-2 rounded-full'
-                  style={{ backgroundColor: 'rgba(56,189,248,0.9)' }}
-                />
-                <span className='text-xs text-zinc-400'>
-                  <span className='font-medium text-zinc-300'>MAU</span> -
-                  Monthly Active Users
-                </span>
-              </div>
+        <TabsContent value='snapshot' className='space-y-10'>
+          <section className='space-y-3'>
+            <div>
+              <h2 className='text-sm font-medium text-zinc-200'>
+                Primary KPIs
+              </h2>
+              <p className='text-xs text-zinc-500'>
+                The highest-signal metrics for traction, revenue, and
+                conversion.
+              </p>
             </div>
-          </CardContent>
-        </Card>
-
-        <Card className='border-zinc-800/30 bg-zinc-900/10'>
-          <CardHeader>
-            <CardTitle className='text-base font-medium'>
-              Retention & Churn
-            </CardTitle>
-            <CardDescription className='text-xs text-zinc-400'>
-              Cohort retention ({startDate} → {endDate})
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className='grid grid-cols-1 gap-4 md:grid-cols-2'>
-              <RetentionCard
-                label='Day 1'
-                value={activity?.retention.day_1 ?? 0}
-              />
-              <RetentionCard
-                label='Day 7'
-                value={activity?.retention.day_7 ?? 0}
-              />
-              <RetentionCard
-                label='Day 30'
-                value={activity?.retention.day_30 ?? 0}
-              />
-              <RetentionCard
-                label='Churn'
-                value={activity?.churn_rate ?? 0}
-                variant='negative'
-              />
+            <div className='grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-3'>
+              {primaryCards.map((card) => (
+                <MetricsCard
+                  key={card.title}
+                  title={card.title}
+                  value={card.value}
+                  change={card.change}
+                  trend={card.trend}
+                  subtitle={card.subtitle}
+                />
+              ))}
             </div>
-          </CardContent>
-        </Card>
-      </section>
+          </section>
 
-      <section className='grid grid-cols-1 gap-6 lg:grid-cols-2'>
-        <Card className='border-zinc-800/30 bg-zinc-900/10'>
-          <CardHeader>
-            <CardTitle className='text-base font-medium'>
-              Conversion Funnel
-            </CardTitle>
-            <CardDescription className='text-xs text-zinc-400'>
-              Free → Trial → Paid
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <ConversionFunnel
-              stages={[
-                {
-                  label: 'Free Users',
-                  value: conversions?.funnel.free_users ?? 0,
-                  subtitle: 'Total active free accounts',
-                },
-                {
-                  label: 'Trial Users',
-                  value: conversions?.funnel.trial_users ?? 0,
-                  subtitle: 'Currently in trial',
-                },
-                {
-                  label: 'Paid Users',
-                  value: conversions?.funnel.paid_users ?? 0,
-                  subtitle: 'Active paid subscriptions',
-                },
-              ]}
-              dropOffPoints={conversions?.funnel.drop_off_points}
-            />
-          </CardContent>
-        </Card>
-
-        <Card className='border-zinc-800/30 bg-zinc-900/10'>
-          <CardHeader>
-            <CardTitle className='text-base font-medium'>
-              Trigger Features
-            </CardTitle>
-            <CardDescription className='text-xs text-zinc-400'>
-              Top conversion drivers
-            </CardDescription>
-          </CardHeader>
-          <CardContent className='space-y-4'>
-            {(conversions?.trigger_breakdown ?? [])
-              .slice(0, 5)
-              .map((trigger) => (
-                <div key={trigger.feature} className='space-y-2'>
-                  <div className='flex items-center justify-between text-sm text-zinc-400'>
-                    <span className='capitalize'>
-                      {trigger.feature || 'Other'}
+          <section className='grid grid-cols-1 gap-6 lg:grid-cols-2'>
+            <Card className='border-zinc-800/30 bg-zinc-900/10'>
+              <CardHeader>
+                <CardTitle>Active User Trends</CardTitle>
+                <CardDescription>
+                  DAU, WAU, and MAU trends ({granularity})
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <MultiLineChart data={activity?.trends ?? []} />
+                <div className='mt-4 flex flex-wrap items-center gap-4 border-t border-zinc-800 pt-4'>
+                  <div className='flex items-center gap-2'>
+                    <div
+                      className='h-3 w-3 rounded-full'
+                      style={{ backgroundColor: 'rgba(196,181,253,0.8)' }}
+                    />
+                    <span className='text-xs text-zinc-400'>
+                      <span className='font-medium text-zinc-300'>DAU</span> -
+                      Daily Active Users
                     </span>
-                    <span>{trigger.count.toLocaleString()}</span>
                   </div>
-                  <div className='h-2 w-full rounded-full bg-zinc-800'>
+                  <div className='flex items-center gap-2'>
                     <div
-                      className='h-2 rounded-full bg-gradient-to-r from-lunary-primary-400 to-lunary-highlight-500'
-                      style={{
-                        width: `${Number(trigger.percentage ?? 0).toFixed(2)}%`,
-                      }}
+                      className='h-2 w-2 rounded-full'
+                      style={{ backgroundColor: 'rgba(129,140,248,0.9)' }}
                     />
+                    <span className='text-xs text-zinc-400'>
+                      <span className='font-medium text-zinc-300'>WAU</span> -
+                      Weekly Active Users
+                    </span>
                   </div>
-                </div>
-              ))}
-          </CardContent>
-        </Card>
-      </section>
-
-      <section className='grid grid-cols-1 gap-6 lg:grid-cols-2'>
-        <Card className='border-zinc-800/30 bg-zinc-900/10'>
-          <CardHeader>
-            <CardTitle className='text-base font-medium'>
-              AI Mode Breakdown
-            </CardTitle>
-            <CardDescription className='text-xs text-zinc-400'>
-              Usage by mode
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <ModeBreakdown modes={aiMetrics?.mode_breakdown ?? []} />
-          </CardContent>
-        </Card>
-
-        <Card className='border-zinc-800/30 bg-zinc-900/10'>
-          <CardHeader>
-            <CardTitle className='text-base font-medium'>
-              Feature Usage Heatmap
-            </CardTitle>
-            <CardDescription className='text-xs text-zinc-400'>
-              Past 7 days activity
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <HeatmapGrid data={heatmapData} />
-          </CardContent>
-        </Card>
-      </section>
-
-      <section className='grid grid-cols-1 gap-6 lg:grid-cols-2'>
-        <Card className='border-zinc-800/30 bg-zinc-900/10'>
-          <CardHeader>
-            <CardTitle className='text-base font-medium'>
-              Notification Health
-            </CardTitle>
-            <CardDescription className='text-xs text-zinc-400'>
-              Open rates by channel
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className='grid grid-cols-1 gap-4 md:grid-cols-2'>
-              {notificationTypes.map((type) => (
-                <div
-                  key={type.key}
-                  className='rounded-2xl border border-zinc-800 bg-zinc-900/40 p-4'
-                >
-                  <div className='flex items-center gap-2 text-sm font-medium text-zinc-300'>
-                    <Bell className='h-4 w-4 text-lunary-primary-300' />
-                    {type.label}
-                  </div>
-                  <div className='mt-3 grid gap-2 text-sm'>
-                    <div className='flex items-center justify-between text-zinc-400'>
-                      <span>Sent</span>
-                      <span>{type.data.sent.toLocaleString()}</span>
-                    </div>
-                    <div className='flex items-center justify-between text-zinc-400'>
-                      <span>Open rate</span>
-                      <span>
-                        {Number(type.data.open_rate ?? 0).toFixed(1)}%
-                      </span>
-                    </div>
-                    <div className='flex items-center justify-between text-zinc-400'>
-                      <span>CTR</span>
-                      <span>
-                        {Number(type.data.click_through_rate ?? 0).toFixed(1)}%
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className='border-zinc-800/30 bg-zinc-900/10'>
-          <CardHeader>
-            <CardTitle className='text-base font-medium'>
-              AI Usage Summary
-            </CardTitle>
-            <CardDescription className='text-xs text-zinc-400'>
-              Engagement metrics
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className='grid grid-cols-1 gap-4 md:grid-cols-2'>
-              <MiniStat
-                label='Total Sessions'
-                value={aiMetrics?.total_sessions ?? 0}
-                icon={<Sparkles className='h-5 w-5 text-lunary-primary-300' />}
-              />
-              <MiniStat
-                label='Unique Users'
-                value={aiMetrics?.unique_users ?? 0}
-                icon={<Activity className='h-5 w-5 text-lunary-success-300' />}
-              />
-              <MiniStat
-                label='Tokens / User'
-                value={
-                  aiMetrics ? aiMetrics.avg_tokens_per_user.toFixed(0) : '—'
-                }
-                icon={<Target className='h-5 w-5 text-lunary-secondary-300' />}
-              />
-              <MiniStat
-                label='Completion Rate'
-                value={
-                  aiMetrics ? `${aiMetrics.completion_rate.toFixed(1)}%` : '—'
-                }
-                icon={<Sparkles className='h-5 w-5 text-lunary-accent-300' />}
-              />
-            </div>
-          </CardContent>
-        </Card>
-      </section>
-
-      <section>
-        <Card className='border-zinc-800/30 bg-zinc-900/10'>
-          <CardHeader>
-            <CardTitle className='text-base font-medium'>
-              Page-Level Heatmaps
-            </CardTitle>
-            <CardDescription className='text-xs text-zinc-400'>
-              User interaction patterns
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <PostHogHeatmap />
-          </CardContent>
-        </Card>
-      </section>
-
-      {discordAnalytics && (
-        <section className='grid gap-6 lg:grid-cols-2'>
-          <Card className='border-zinc-800/30 bg-zinc-900/10'>
-            <CardHeader>
-              <CardTitle className='text-base font-medium'>
-                Discord Bot Engagement
-              </CardTitle>
-              <CardDescription className='text-xs text-zinc-400'>
-                Command usage and interactions (last 7 days)
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className='grid gap-4 md:grid-cols-2'>
-                <MiniStat
-                  label='Total Commands'
-                  value={discordAnalytics.stats?.funnel?.totalCommands ?? 0}
-                  icon={
-                    <Activity className='h-5 w-5 text-lunary-primary-300' />
-                  }
-                />
-                <MiniStat
-                  label='Button Clicks'
-                  value={discordAnalytics.stats?.funnel?.buttonClicks ?? 0}
-                  icon={<Target className='h-5 w-5 text-lunary-success-300' />}
-                />
-                <MiniStat
-                  label='Click-Through Rate'
-                  value={
-                    discordAnalytics.stats?.funnel?.clickThroughRate
-                      ? `${discordAnalytics.stats.funnel.clickThroughRate}%`
-                      : '—'
-                  }
-                  icon={
-                    <Sparkles className='h-5 w-5 text-lunary-secondary-300' />
-                  }
-                />
-                <MiniStat
-                  label='Accounts Linked'
-                  value={discordAnalytics.stats?.funnel?.accountsLinked ?? 0}
-                  icon={<Bell className='h-5 w-5 text-lunary-accent-300' />}
-                />
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className='border-zinc-800/30 bg-zinc-900/10'>
-            <CardHeader>
-              <CardTitle className='text-base font-medium'>
-                Top Discord Commands
-              </CardTitle>
-              <CardDescription className='text-xs text-zinc-400'>
-                Most popular bot interactions
-              </CardDescription>
-            </CardHeader>
-            <CardContent className='space-y-4'>
-              {(discordAnalytics.stats?.commands ?? [])
-                .slice(0, 5)
-                .map((cmd: any) => (
-                  <div key={cmd.command_name} className='space-y-2'>
-                    <div className='flex items-center justify-between text-sm text-zinc-400'>
-                      <span className='capitalize'>
-                        {cmd.command_name || 'Unknown'}
-                      </span>
-                      <span>{cmd.total_uses.toLocaleString()}</span>
-                    </div>
-                    <div className='h-2 w-full rounded-full bg-zinc-800'>
-                      <div
-                        className='h-2 rounded-full bg-gradient-to-r from-lunary-primary-400 to-lunary-highlight-500'
-                        style={{
-                          width: `${
-                            discordAnalytics.stats?.commands?.[0]?.total_uses >
-                            0
-                              ? (
-                                  (cmd.total_uses /
-                                    discordAnalytics.stats.commands[0]
-                                      .total_uses) *
-                                  100
-                                ).toFixed(2)
-                              : 0
-                          }%`,
-                        }}
-                      />
-                    </div>
-                    <div className='flex items-center justify-between text-xs text-zinc-400'>
-                      <span>{cmd.unique_users} users</span>
-                      <span>{cmd.linked_users} linked</span>
-                    </div>
-                  </div>
-                ))}
-              {(!discordAnalytics.stats?.commands ||
-                discordAnalytics.stats.commands.length === 0) && (
-                <div className='text-sm text-zinc-400'>
-                  No Discord interactions yet
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        </section>
-      )}
-
-      <section>
-        <Card className='border-zinc-800/30 bg-zinc-900/10'>
-          <CardHeader>
-            <CardTitle className='text-base font-medium'>
-              SEO & Attribution
-            </CardTitle>
-            <CardDescription className='text-xs text-zinc-400'>
-              First-touch attribution tracking for organic and marketing
-              channels
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <AttributionMetrics startDate={startDate} endDate={endDate} />
-          </CardContent>
-        </Card>
-      </section>
-
-      {userGrowth && (
-        <section>
-          <Card className='border-zinc-800/30 bg-zinc-900/10'>
-            <CardHeader>
-              <CardTitle className='text-base font-medium'>
-                User Growth Trends
-              </CardTitle>
-              <CardDescription className='text-xs text-zinc-400'>
-                New signups over time
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className='space-y-4'>
-                <div className='grid gap-4 grid-cols-1 lg:grid-cols-3'>
-                  <MetricsCard
-                    title='Total Signups'
-                    value={userGrowth.totalSignups.toLocaleString()}
-                    subtitle='New users in this period'
-                  />
-                  <MetricsCard
-                    title='Growth Rate'
-                    value={`${userGrowth.growthRate > 0 ? '+' : ''}${userGrowth.growthRate.toFixed(1)}%`}
-                    subtitle='Period-over-period change'
-                    trend={
-                      userGrowth.growthRate > 0
-                        ? 'up'
-                        : userGrowth.growthRate < 0
-                          ? 'down'
-                          : 'stable'
-                    }
-                    change={Math.abs(userGrowth.growthRate)}
-                  />
-                  {userGrowth.avgDailySignups !== undefined && (
-                    <MetricsCard
-                      title='Avg Daily Signups'
-                      value={userGrowth.avgDailySignups.toFixed(1)}
-                      subtitle='Average per day'
+                  <div className='flex items-center gap-2'>
+                    <div
+                      className='h-2 w-2 rounded-full'
+                      style={{ backgroundColor: 'rgba(56,189,248,0.9)' }}
                     />
-                  )}
-                </div>
-                {userGrowth.trends && userGrowth.trends.length > 0 && (
-                  <div>
-                    <MultiLineChart
-                      data={userGrowth.trends.map((t: any) => ({
-                        date: t.date,
-                        dau: t.signups,
-                        wau: 0,
-                        mau: 0,
-                      }))}
-                    />
-                    <div className='mt-4 flex flex-wrap items-center gap-4 border-t border-zinc-800 pt-4'>
-                      <div className='flex items-center gap-2'>
-                        <div
-                          className='h-3 w-3 rounded-full'
-                          style={{ backgroundColor: 'rgba(196,181,253,0.8)' }}
-                        />
-                        <span className='text-xs text-zinc-400'>
-                          <span className='font-medium text-zinc-300'>
-                            Signups
-                          </span>{' '}
-                          - New user registrations
-                        </span>
-                      </div>
-                    </div>
+                    <span className='text-xs text-zinc-400'>
+                      <span className='font-medium text-zinc-300'>MAU</span> -
+                      Monthly Active Users
+                    </span>
                   </div>
-                )}
-              </div>
-            </CardContent>
-          </Card>
-        </section>
-      )}
-
-      {activation && (
-        <section>
-          <Card className='border-zinc-800/30 bg-zinc-900/10'>
-            <CardHeader>
-              <CardTitle className='text-base font-medium'>
-                Activation Rate
-              </CardTitle>
-              <CardDescription className='text-xs text-zinc-400'>
-                Users who complete meaningful actions within 24h of signup
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className='space-y-4'>
-                <div className='grid gap-4 grid-cols-1 lg:grid-cols-3'>
-                  <MetricsCard
-                    title='Activation Rate'
-                    value={`${activation.activationRate.toFixed(2)}%`}
-                    subtitle={`${activation.activatedUsers} of ${activation.totalSignups} users activated`}
-                  />
-                  <MetricsCard
-                    title='Activated Users'
-                    value={activation.activatedUsers.toLocaleString()}
-                    subtitle='Users who completed key actions within 24h'
-                  />
-                  <MetricsCard
-                    title='Total Signups'
-                    value={activation.totalSignups.toLocaleString()}
-                    subtitle='New users in this period'
-                  />
                 </div>
-                {activation.activationBreakdown &&
-                  Object.keys(activation.activationBreakdown).length > 0 && (
-                    <div className='mt-6'>
-                      <h4 className='text-sm font-medium mb-3 text-zinc-300'>
-                        Activation by Feature
-                      </h4>
-                      <div className='grid gap-3 grid-cols-1 md:grid-cols-2 lg:grid-cols-3'>
-                        {Object.entries(activation.activationBreakdown).map(
-                          ([feature, count]: [string, any]) => (
-                            <div
-                              key={feature}
-                              className='rounded-lg border border-zinc-800/30 bg-zinc-900/5 p-3'
-                            >
-                              <div className='text-xs text-zinc-400 mb-1'>
-                                {feature
-                                  .replace(/_/g, ' ')
-                                  .replace(/\b\w/g, (c) => c.toUpperCase())}
-                              </div>
-                              <div className='text-lg font-semibold text-white'>
-                                {count}
-                              </div>
-                              <div className='text-xs text-zinc-500 mt-1'>
-                                users activated
-                              </div>
-                            </div>
-                          ),
-                        )}
-                      </div>
-                    </div>
-                  )}
-              </div>
-            </CardContent>
-          </Card>
-        </section>
-      )}
+              </CardContent>
+            </Card>
 
-      {subscriptionLifecycle && (
-        <section>
-          <Card className='border-zinc-800/30 bg-zinc-900/10'>
-            <CardHeader>
-              <CardTitle className='text-base font-medium'>
-                Subscription Lifecycle
-              </CardTitle>
-              <CardDescription className='text-xs text-zinc-400'>
-                Subscription states and churn trends
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className='space-y-4'>
-                <div className='grid gap-4 grid-cols-2 lg:grid-cols-4'>
-                  {Object.entries(subscriptionLifecycle.states || {}).map(
-                    ([status, count]: [string, any]) => (
+            {userGrowth && (
+              <Card className='border-zinc-800/30 bg-zinc-900/10'>
+                <CardHeader>
+                  <CardTitle className='text-base font-medium'>
+                    User Growth Trends
+                  </CardTitle>
+                  <CardDescription className='text-xs text-zinc-400'>
+                    New signups over time
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className='space-y-4'>
+                    <div className='grid gap-4 grid-cols-1 lg:grid-cols-3'>
                       <MetricsCard
-                        key={status}
-                        title={
-                          status.charAt(0).toUpperCase() +
-                          status.slice(1).replace(/_/g, ' ')
-                        }
-                        value={count.toLocaleString()}
-                        subtitle={`${status} subscriptions`}
+                        title='Total Signups'
+                        value={userGrowth.totalSignups.toLocaleString()}
+                        subtitle='New users in this period'
                       />
-                    ),
-                  )}
-                </div>
-                <div className='grid gap-4 grid-cols-1 lg:grid-cols-2'>
-                  <MetricsCard
-                    title='Avg Subscription Duration'
-                    value={`${subscriptionLifecycle.avgDurationDays.toFixed(1)} days`}
-                    subtitle='Average time users stay subscribed'
-                  />
-                  {subscriptionLifecycle.churnRate !== undefined && (
-                    <MetricsCard
-                      title='Churn Rate'
-                      value={`${subscriptionLifecycle.churnRate.toFixed(2)}%`}
-                      subtitle='Cancellations in this period'
-                      trend={
-                        subscriptionLifecycle.churnRate > 10 ? 'down' : 'stable'
-                      }
-                    />
-                  )}
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </section>
-      )}
-
-      {planBreakdown && (
-        <section>
-          <Card className='border-zinc-800/30 bg-zinc-900/10'>
-            <CardHeader>
-              <CardTitle className='text-base font-medium'>
-                Plan Breakdown
-              </CardTitle>
-              <CardDescription className='text-xs text-zinc-400'>
-                MRR contribution by plan type
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className='space-y-4'>
-                <div className='grid gap-4 grid-cols-1 lg:grid-cols-2'>
-                  {planBreakdown.planBreakdown?.map((plan: any) => (
-                    <div
-                      key={plan.plan}
-                      className='border border-zinc-800 rounded-lg p-4'
-                    >
-                      <div className='flex items-center justify-between mb-2'>
-                        <span className='font-medium'>{plan.plan}</span>
-                        <span className='text-sm text-zinc-400'>
-                          {Number(plan.percentage ?? 0).toFixed(1)}%
-                        </span>
+                      <MetricsCard
+                        title='Growth Rate'
+                        value={`${userGrowth.growthRate > 0 ? '+' : ''}${userGrowth.growthRate.toFixed(1)}%`}
+                        subtitle='Period-over-period change'
+                        trend={
+                          userGrowth.growthRate > 0
+                            ? 'up'
+                            : userGrowth.growthRate < 0
+                              ? 'down'
+                              : 'stable'
+                        }
+                        change={Math.abs(userGrowth.growthRate)}
+                      />
+                      {userGrowth.avgDailySignups !== undefined && (
+                        <MetricsCard
+                          title='Avg Daily Signups'
+                          value={userGrowth.avgDailySignups.toFixed(1)}
+                          subtitle='Average per day'
+                        />
+                      )}
+                    </div>
+                    {userGrowth.trends && userGrowth.trends.length > 0 && (
+                      <div>
+                        <MultiLineChart
+                          data={userGrowth.trends.map((t: any) => ({
+                            date: t.date,
+                            dau: t.signups,
+                            wau: 0,
+                            mau: 0,
+                          }))}
+                        />
+                        <div className='mt-4 flex flex-wrap items-center gap-4 border-t border-zinc-800 pt-4'>
+                          <div className='flex items-center gap-2'>
+                            <div
+                              className='h-3 w-3 rounded-full'
+                              style={{
+                                backgroundColor: 'rgba(196,181,253,0.8)',
+                              }}
+                            />
+                            <span className='text-xs text-zinc-400'>
+                              <span className='font-medium text-zinc-300'>
+                                Signups
+                              </span>{' '}
+                              - New user registrations
+                            </span>
+                          </div>
+                        </div>
                       </div>
-                      <div className='space-y-1 text-sm'>
-                        <div className='flex justify-between'>
-                          <span className='text-zinc-400'>Subscriptions:</span>
-                          <span>{plan.count}</span>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+          </section>
+
+          <section className='grid grid-cols-1 gap-6 lg:grid-cols-2'>
+            <Card className='border-zinc-800/30 bg-zinc-900/10'>
+              <CardHeader>
+                <CardTitle className='text-base font-medium'>
+                  Retention & Churn
+                </CardTitle>
+                <CardDescription className='text-xs text-zinc-400'>
+                  Cohort retention ({startDate} → {endDate})
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className='grid grid-cols-1 gap-4 md:grid-cols-2'>
+                  <RetentionCard
+                    label='Day 1'
+                    value={activity?.retention.day_1 ?? 0}
+                  />
+                  <RetentionCard
+                    label='Day 7'
+                    value={activity?.retention.day_7 ?? 0}
+                  />
+                  <RetentionCard
+                    label='Day 30'
+                    value={activity?.retention.day_30 ?? 0}
+                  />
+                  <RetentionCard
+                    label='Churn'
+                    value={activity?.churn_rate ?? 0}
+                    variant='negative'
+                  />
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className='border-zinc-800/30 bg-zinc-900/10'>
+              <CardHeader>
+                <CardTitle className='text-base font-medium'>
+                  Conversion Funnel
+                </CardTitle>
+                <CardDescription className='text-xs text-zinc-400'>
+                  Free → Trial → Paid
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <ConversionFunnel
+                  stages={[
+                    {
+                      label: 'Free Users',
+                      value: conversions?.funnel.free_users ?? 0,
+                      subtitle: 'Total active free accounts',
+                    },
+                    {
+                      label: 'Trial Users',
+                      value: conversions?.funnel.trial_users ?? 0,
+                      subtitle: 'Currently in trial',
+                    },
+                    {
+                      label: 'Paid Users',
+                      value: conversions?.funnel.paid_users ?? 0,
+                      subtitle: 'Active paid subscriptions',
+                    },
+                  ]}
+                  dropOffPoints={conversions?.funnel.drop_off_points}
+                />
+              </CardContent>
+            </Card>
+          </section>
+
+          {activation && (
+            <section>
+              <Card className='border-zinc-800/30 bg-zinc-900/10'>
+                <CardHeader>
+                  <CardTitle className='text-base font-medium'>
+                    Activation Rate
+                  </CardTitle>
+                  <CardDescription className='text-xs text-zinc-400'>
+                    Users who complete meaningful actions within 24h of signup
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className='space-y-4'>
+                    <div className='grid gap-4 grid-cols-1 lg:grid-cols-3'>
+                      <MetricsCard
+                        title='Activation Rate'
+                        value={`${activation.activationRate.toFixed(2)}%`}
+                        subtitle={`${activation.activatedUsers} of ${activation.totalSignups} users activated`}
+                      />
+                      <MetricsCard
+                        title='Activated Users'
+                        value={activation.activatedUsers.toLocaleString()}
+                        subtitle='Users who completed key actions within 24h'
+                      />
+                      <MetricsCard
+                        title='Total Signups'
+                        value={activation.totalSignups.toLocaleString()}
+                        subtitle='New users in this period'
+                      />
+                    </div>
+                    {activation.activationBreakdown &&
+                      Object.keys(activation.activationBreakdown).length >
+                        0 && (
+                        <div className='mt-6'>
+                          <h4 className='text-sm font-medium mb-3 text-zinc-300'>
+                            Activation by Feature
+                          </h4>
+                          <div className='grid gap-3 grid-cols-1 md:grid-cols-2 lg:grid-cols-3'>
+                            {Object.entries(activation.activationBreakdown).map(
+                              ([feature, count]: [string, any]) => (
+                                <div
+                                  key={feature}
+                                  className='rounded-lg border border-zinc-800/30 bg-zinc-900/5 p-3'
+                                >
+                                  <div className='text-xs text-zinc-400 mb-1'>
+                                    {feature
+                                      .replace(/_/g, ' ')
+                                      .replace(/\b\w/g, (c) => c.toUpperCase())}
+                                  </div>
+                                  <div className='text-lg font-semibold text-white'>
+                                    {count}
+                                  </div>
+                                  <div className='text-xs text-zinc-500 mt-1'>
+                                    users activated
+                                  </div>
+                                </div>
+                              ),
+                            )}
+                          </div>
                         </div>
-                        <div className='flex justify-between'>
-                          <span className='text-zinc-400'>MRR:</span>
-                          <span>${Number(plan.mrr ?? 0).toFixed(2)}</span>
+                      )}
+                  </div>
+                </CardContent>
+              </Card>
+            </section>
+          )}
+
+          {subscriptionLifecycle && (
+            <section>
+              <Card className='border-zinc-800/30 bg-zinc-900/10'>
+                <CardHeader>
+                  <CardTitle className='text-base font-medium'>
+                    Subscription Lifecycle
+                  </CardTitle>
+                  <CardDescription className='text-xs text-zinc-400'>
+                    Subscription states and churn trends
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className='space-y-4'>
+                    <div className='grid gap-4 grid-cols-2 lg:grid-cols-4'>
+                      {Object.entries(subscriptionLifecycle.states || {}).map(
+                        ([status, count]: [string, any]) => (
+                          <MetricsCard
+                            key={status}
+                            title={
+                              status.charAt(0).toUpperCase() +
+                              status.slice(1).replace(/_/g, ' ')
+                            }
+                            value={count.toLocaleString()}
+                            subtitle={`${status} subscriptions`}
+                          />
+                        ),
+                      )}
+                    </div>
+                    <div className='grid gap-4 grid-cols-1 lg:grid-cols-2'>
+                      <MetricsCard
+                        title='Avg Subscription Duration'
+                        value={`${subscriptionLifecycle.avgDurationDays.toFixed(1)} days`}
+                        subtitle='Average time users stay subscribed'
+                      />
+                      {subscriptionLifecycle.churnRate !== undefined && (
+                        <MetricsCard
+                          title='Churn Rate'
+                          value={`${subscriptionLifecycle.churnRate.toFixed(2)}%`}
+                          subtitle='Cancellations in this period'
+                          trend={
+                            subscriptionLifecycle.churnRate > 10
+                              ? 'down'
+                              : 'stable'
+                          }
+                        />
+                      )}
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </section>
+          )}
+
+          {planBreakdown && (
+            <section>
+              <Card className='border-zinc-800/30 bg-zinc-900/10'>
+                <CardHeader>
+                  <CardTitle className='text-base font-medium'>
+                    Plan Breakdown
+                  </CardTitle>
+                  <CardDescription className='text-xs text-zinc-400'>
+                    MRR contribution by plan type
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className='space-y-4'>
+                    <div className='grid gap-4 grid-cols-1 lg:grid-cols-2'>
+                      {planBreakdown.planBreakdown?.map((plan: any) => (
+                        <div
+                          key={plan.plan}
+                          className='border border-zinc-800 rounded-lg p-4'
+                        >
+                          <div className='flex items-center justify-between mb-2'>
+                            <span className='font-medium'>{plan.plan}</span>
+                            <span className='text-sm text-zinc-400'>
+                              {Number(plan.percentage ?? 0).toFixed(1)}%
+                            </span>
+                          </div>
+                          <div className='space-y-1 text-sm'>
+                            <div className='flex justify-between'>
+                              <span className='text-zinc-400'>
+                                Subscriptions:
+                              </span>
+                              <span>{plan.count}</span>
+                            </div>
+                            <div className='flex justify-between'>
+                              <span className='text-zinc-400'>MRR:</span>
+                              <span>${Number(plan.mrr ?? 0).toFixed(2)}</span>
+                            </div>
+                            <div className='flex justify-between'>
+                              <span className='text-zinc-400'>Active:</span>
+                              <span>{plan.active}</span>
+                            </div>
+                          </div>
                         </div>
-                        <div className='flex justify-between'>
-                          <span className='text-zinc-400'>Active:</span>
-                          <span>{plan.active}</span>
+                      ))}
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </section>
+          )}
+
+          {apiCosts && (
+            <section>
+              <Card className='border-zinc-800/30 bg-zinc-900/10'>
+                <CardHeader>
+                  <CardTitle className='text-base font-medium'>
+                    API Costs vs Revenue
+                  </CardTitle>
+                  <CardDescription className='text-xs text-zinc-400'>
+                    AI generation costs and efficiency metrics
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className='space-y-4'>
+                    <div className='grid gap-4 grid-cols-1 lg:grid-cols-3'>
+                      <MetricsCard
+                        title='Total API Costs'
+                        value={`$${apiCosts.totalCost.toFixed(2)}`}
+                        subtitle='AI generation costs this period'
+                      />
+                      <MetricsCard
+                        title='Cost per User'
+                        value={`$${apiCosts.costPerUser.toFixed(2)}`}
+                        subtitle={`${apiCosts.uniqueUsers.toLocaleString()} unique users`}
+                      />
+                      <MetricsCard
+                        title='Revenue/Cost Ratio'
+                        value={apiCosts.revenueCostRatio.toFixed(2)}
+                        subtitle={
+                          apiCosts.revenueCostRatio > 1
+                            ? 'Profitable'
+                            : 'Below break-even'
+                        }
+                        trend={apiCosts.revenueCostRatio > 1 ? 'up' : 'down'}
+                      />
+                    </div>
+                    <div className='grid gap-4 grid-cols-1 lg:grid-cols-3'>
+                      <MetricsCard
+                        title='Total Generations'
+                        value={apiCosts.totalGenerations.toLocaleString()}
+                        subtitle='AI requests processed'
+                      />
+                      <MetricsCard
+                        title='Unique Users'
+                        value={apiCosts.uniqueUsers.toLocaleString()}
+                        subtitle='Users who used AI features'
+                      />
+                      <MetricsCard
+                        title='Cost per Session'
+                        value={`$${apiCosts.costPerSession.toFixed(4)}`}
+                        subtitle='Average cost per AI generation'
+                      />
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </section>
+          )}
+        </TabsContent>
+
+        <TabsContent value='details' className='space-y-10'>
+          <section>
+            <SuccessMetrics
+              data={successMetrics}
+              loading={loading && !successMetrics}
+            />
+          </section>
+
+          {searchConsoleData && (
+            <section>
+              <SearchConsoleMetrics
+                data={searchConsoleData}
+                loading={loading && !searchConsoleData}
+              />
+            </section>
+          )}
+
+          <section className='grid grid-cols-1 gap-6 lg:grid-cols-2'>
+            <Card className='border-zinc-800/30 bg-zinc-900/10'>
+              <CardHeader>
+                <CardTitle className='text-base font-medium'>
+                  Trigger Features
+                </CardTitle>
+                <CardDescription className='text-xs text-zinc-400'>
+                  Top conversion drivers
+                </CardDescription>
+              </CardHeader>
+              <CardContent className='space-y-4'>
+                {(conversions?.trigger_breakdown ?? [])
+                  .slice(0, 5)
+                  .map((trigger) => (
+                    <div key={trigger.feature} className='space-y-2'>
+                      <div className='flex items-center justify-between text-sm text-zinc-400'>
+                        <span className='capitalize'>
+                          {trigger.feature || 'Other'}
+                        </span>
+                        <span>{trigger.count.toLocaleString()}</span>
+                      </div>
+                      <div className='h-2 w-full rounded-full bg-zinc-800'>
+                        <div
+                          className='h-2 rounded-full bg-gradient-to-r from-lunary-primary-400 to-lunary-highlight-500'
+                          style={{
+                            width: `${Number(trigger.percentage ?? 0).toFixed(2)}%`,
+                          }}
+                        />
+                      </div>
+                    </div>
+                  ))}
+              </CardContent>
+            </Card>
+
+            <Card className='border-zinc-800/30 bg-zinc-900/10'>
+              <CardHeader>
+                <CardTitle className='text-base font-medium'>
+                  AI Mode Breakdown
+                </CardTitle>
+                <CardDescription className='text-xs text-zinc-400'>
+                  Usage by mode
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <ModeBreakdown modes={aiMetrics?.mode_breakdown ?? []} />
+              </CardContent>
+            </Card>
+          </section>
+
+          <section className='grid grid-cols-1 gap-6 lg:grid-cols-2'>
+            <Card className='border-zinc-800/30 bg-zinc-900/10'>
+              <CardHeader>
+                <CardTitle className='text-base font-medium'>
+                  Feature Usage Heatmap
+                </CardTitle>
+                <CardDescription className='text-xs text-zinc-400'>
+                  Past 7 days activity
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <HeatmapGrid data={heatmapData} />
+              </CardContent>
+            </Card>
+
+            <Card className='border-zinc-800/30 bg-zinc-900/10'>
+              <CardHeader>
+                <CardTitle className='text-base font-medium'>
+                  Notification Health
+                </CardTitle>
+                <CardDescription className='text-xs text-zinc-400'>
+                  Open rates by channel
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className='grid grid-cols-1 gap-4 md:grid-cols-2'>
+                  {notificationTypes.map((type) => (
+                    <div
+                      key={type.key}
+                      className='rounded-2xl border border-zinc-800 bg-zinc-900/40 p-4'
+                    >
+                      <div className='flex items-center gap-2 text-sm font-medium text-zinc-300'>
+                        <Bell className='h-4 w-4 text-lunary-primary-300' />
+                        {type.label}
+                      </div>
+                      <div className='mt-3 grid gap-2 text-sm'>
+                        <div className='flex items-center justify-between text-zinc-400'>
+                          <span>Sent</span>
+                          <span>{type.data.sent.toLocaleString()}</span>
+                        </div>
+                        <div className='flex items-center justify-between text-zinc-400'>
+                          <span>Open rate</span>
+                          <span>
+                            {Number(type.data.open_rate ?? 0).toFixed(1)}%
+                          </span>
+                        </div>
+                        <div className='flex items-center justify-between text-zinc-400'>
+                          <span>CTR</span>
+                          <span>
+                            {Number(type.data.click_through_rate ?? 0).toFixed(
+                              1,
+                            )}
+                            %
+                          </span>
                         </div>
                       </div>
                     </div>
                   ))}
                 </div>
-              </div>
-            </CardContent>
-          </Card>
-        </section>
-      )}
+              </CardContent>
+            </Card>
+          </section>
 
-      {apiCosts && (
-        <section>
-          <Card className='border-zinc-800/30 bg-zinc-900/10'>
-            <CardHeader>
-              <CardTitle className='text-base font-medium'>
-                API Costs vs Revenue
-              </CardTitle>
-              <CardDescription className='text-xs text-zinc-400'>
-                AI generation costs and efficiency metrics
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className='space-y-4'>
-                <div className='grid gap-4 grid-cols-1 lg:grid-cols-3'>
-                  <MetricsCard
-                    title='Total API Costs'
-                    value={`$${apiCosts.totalCost.toFixed(2)}`}
-                    subtitle='AI generation costs this period'
-                  />
-                  <MetricsCard
-                    title='Cost per User'
-                    value={`$${apiCosts.costPerUser.toFixed(2)}`}
-                    subtitle={`${apiCosts.uniqueUsers.toLocaleString()} unique users`}
-                  />
-                  <MetricsCard
-                    title='Revenue/Cost Ratio'
-                    value={apiCosts.revenueCostRatio.toFixed(2)}
-                    subtitle={
-                      apiCosts.revenueCostRatio > 1
-                        ? 'Profitable'
-                        : 'Below break-even'
+          <section className='grid grid-cols-1 gap-6 lg:grid-cols-2'>
+            <Card className='border-zinc-800/30 bg-zinc-900/10'>
+              <CardHeader>
+                <CardTitle className='text-base font-medium'>
+                  AI Usage Summary
+                </CardTitle>
+                <CardDescription className='text-xs text-zinc-400'>
+                  Engagement metrics
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className='grid grid-cols-1 gap-4 md:grid-cols-2'>
+                  <MiniStat
+                    label='Total Sessions'
+                    value={aiMetrics?.total_sessions ?? 0}
+                    icon={
+                      <Sparkles className='h-5 w-5 text-lunary-primary-300' />
                     }
-                    trend={apiCosts.revenueCostRatio > 1 ? 'up' : 'down'}
+                  />
+                  <MiniStat
+                    label='Unique Users'
+                    value={aiMetrics?.unique_users ?? 0}
+                    icon={
+                      <Activity className='h-5 w-5 text-lunary-success-300' />
+                    }
+                  />
+                  <MiniStat
+                    label='Tokens / User'
+                    value={
+                      aiMetrics ? aiMetrics.avg_tokens_per_user.toFixed(0) : '—'
+                    }
+                    icon={
+                      <Target className='h-5 w-5 text-lunary-secondary-300' />
+                    }
+                  />
+                  <MiniStat
+                    label='Completion Rate'
+                    value={
+                      aiMetrics
+                        ? `${aiMetrics.completion_rate.toFixed(1)}%`
+                        : '—'
+                    }
+                    icon={
+                      <Sparkles className='h-5 w-5 text-lunary-accent-300' />
+                    }
                   />
                 </div>
-                <div className='grid gap-4 grid-cols-1 lg:grid-cols-3'>
-                  <MetricsCard
-                    title='Total Generations'
-                    value={apiCosts.totalGenerations.toLocaleString()}
-                    subtitle='AI requests processed'
-                  />
-                  <MetricsCard
-                    title='Unique Users'
-                    value={apiCosts.uniqueUsers.toLocaleString()}
-                    subtitle='Users who used AI features'
-                  />
-                  <MetricsCard
-                    title='Cost per Session'
-                    value={`$${apiCosts.costPerSession.toFixed(4)}`}
-                    subtitle='Average cost per AI generation'
-                  />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </section>
-      )}
+              </CardContent>
+            </Card>
 
-      {cohorts && cohorts.cohorts && cohorts.cohorts.length > 0 && (
-        <section>
-          <Card className='border-zinc-800/30 bg-zinc-900/10'>
-            <CardHeader>
-              <CardTitle className='text-base font-medium'>
-                Cohort Retention Analysis
-              </CardTitle>
-              <CardDescription className='text-xs text-zinc-400'>
-                Retention by signup cohort
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className='mb-4 text-xs text-zinc-400'>
-                Shows what % of users from each signup week/month returned after
-                1, 7, and 30 days
-              </div>
-              <div className='overflow-x-auto'>
-                <table className='w-full text-left text-sm'>
-                  <thead>
-                    <tr className='border-b border-zinc-800'>
-                      <th className='pb-3 text-xs font-medium text-zinc-400'>
-                        Cohort Week
-                      </th>
-                      <th className='pb-3 text-xs font-medium text-zinc-400 text-right'>
-                        Cohort Size
-                      </th>
-                      <th className='pb-3 text-xs font-medium text-zinc-400 text-right'>
-                        Day 1 Retention
-                      </th>
-                      <th className='pb-3 text-xs font-medium text-zinc-400 text-right'>
-                        Day 7 Retention
-                      </th>
-                      <th className='pb-3 text-xs font-medium text-zinc-400 text-right'>
-                        Day 30 Retention
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {cohorts.cohorts.map((cohort: any, idx: number) => {
-                      const formatDate = (dateStr: string) => {
-                        const date = new Date(dateStr);
-                        return date.toLocaleDateString('en-US', {
-                          month: 'short',
-                          day: 'numeric',
-                          year: 'numeric',
-                        });
-                      };
-                      return (
-                        <tr
-                          key={idx}
-                          className='border-b border-zinc-800/50 hover:bg-zinc-900/20'
-                        >
-                          <td className='py-3 text-zinc-300 font-medium'>
-                            {formatDate(cohort.cohort)}
-                          </td>
-                          <td className='py-3 text-zinc-300 text-right'>
-                            {cohort.day0.toLocaleString()}
-                          </td>
-                          <td
-                            className={`py-3 text-right font-medium ${
-                              cohort.day1 > 0
-                                ? 'text-lunary-success-300'
-                                : 'text-zinc-500'
-                            }`}
-                          >
-                            {Number(cohort.day1 ?? 0).toFixed(1)}%
-                          </td>
-                          <td
-                            className={`py-3 text-right font-medium ${
-                              cohort.day7 > 0
-                                ? 'text-lunary-success-300'
-                                : 'text-zinc-500'
-                            }`}
-                          >
-                            {Number(cohort.day7 ?? 0).toFixed(1)}%
-                          </td>
-                          <td
-                            className={`py-3 text-right font-medium ${
-                              cohort.day30 > 0
-                                ? 'text-lunary-success-300'
-                                : 'text-zinc-500'
-                            }`}
-                          >
-                            {Number(cohort.day30 ?? 0).toFixed(1)}%
-                          </td>
+            <Card className='border-zinc-800/30 bg-zinc-900/10'>
+              <CardHeader>
+                <CardTitle className='text-base font-medium'>
+                  Page-Level Heatmaps
+                </CardTitle>
+                <CardDescription className='text-xs text-zinc-400'>
+                  User interaction patterns
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <PostHogHeatmap />
+              </CardContent>
+            </Card>
+          </section>
+
+          {discordAnalytics && (
+            <section className='grid gap-6 lg:grid-cols-2'>
+              <Card className='border-zinc-800/30 bg-zinc-900/10'>
+                <CardHeader>
+                  <CardTitle className='text-base font-medium'>
+                    Discord Bot Engagement
+                  </CardTitle>
+                  <CardDescription className='text-xs text-zinc-400'>
+                    Command usage and interactions (last 7 days)
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className='grid gap-4 md:grid-cols-2'>
+                    <MiniStat
+                      label='Total Commands'
+                      value={discordAnalytics.stats?.funnel?.totalCommands ?? 0}
+                      icon={
+                        <Activity className='h-5 w-5 text-lunary-primary-300' />
+                      }
+                    />
+                    <MiniStat
+                      label='Button Clicks'
+                      value={discordAnalytics.stats?.funnel?.buttonClicks ?? 0}
+                      icon={
+                        <Target className='h-5 w-5 text-lunary-success-300' />
+                      }
+                    />
+                    <MiniStat
+                      label='Click-Through Rate'
+                      value={
+                        discordAnalytics.stats?.funnel?.clickThroughRate
+                          ? `${discordAnalytics.stats.funnel.clickThroughRate}%`
+                          : '—'
+                      }
+                      icon={
+                        <Sparkles className='h-5 w-5 text-lunary-secondary-300' />
+                      }
+                    />
+                    <MiniStat
+                      label='Accounts Linked'
+                      value={
+                        discordAnalytics.stats?.funnel?.accountsLinked ?? 0
+                      }
+                      icon={<Bell className='h-5 w-5 text-lunary-accent-300' />}
+                    />
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className='border-zinc-800/30 bg-zinc-900/10'>
+                <CardHeader>
+                  <CardTitle className='text-base font-medium'>
+                    Top Discord Commands
+                  </CardTitle>
+                  <CardDescription className='text-xs text-zinc-400'>
+                    Most popular bot interactions
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className='space-y-4'>
+                  {(discordAnalytics.stats?.commands ?? [])
+                    .slice(0, 5)
+                    .map((cmd: any) => (
+                      <div key={cmd.command_name} className='space-y-2'>
+                        <div className='flex items-center justify-between text-sm text-zinc-400'>
+                          <span className='capitalize'>
+                            {cmd.command_name || 'Unknown'}
+                          </span>
+                          <span>{cmd.total_uses.toLocaleString()}</span>
+                        </div>
+                        <div className='h-2 w-full rounded-full bg-zinc-800'>
+                          <div
+                            className='h-2 rounded-full bg-gradient-to-r from-lunary-primary-400 to-lunary-highlight-500'
+                            style={{
+                              width: `${
+                                discordAnalytics.stats?.commands?.[0]
+                                  ?.total_uses > 0
+                                  ? (
+                                      (cmd.total_uses /
+                                        discordAnalytics.stats.commands[0]
+                                          .total_uses) *
+                                      100
+                                    ).toFixed(2)
+                                  : 0
+                              }%`,
+                            }}
+                          />
+                        </div>
+                        <div className='flex items-center justify-between text-xs text-zinc-400'>
+                          <span>{cmd.unique_users} users</span>
+                          <span>{cmd.linked_users} linked</span>
+                        </div>
+                      </div>
+                    ))}
+                  {(!discordAnalytics.stats?.commands ||
+                    discordAnalytics.stats.commands.length === 0) && (
+                    <div className='text-sm text-zinc-400'>
+                      No Discord interactions yet
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            </section>
+          )}
+
+          <section>
+            <Card className='border-zinc-800/30 bg-zinc-900/10'>
+              <CardHeader>
+                <CardTitle className='text-base font-medium'>
+                  SEO & Attribution
+                </CardTitle>
+                <CardDescription className='text-xs text-zinc-400'>
+                  First-touch attribution tracking for organic and marketing
+                  channels
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <AttributionMetrics startDate={startDate} endDate={endDate} />
+              </CardContent>
+            </Card>
+          </section>
+
+          {cohorts && cohorts.cohorts && cohorts.cohorts.length > 0 && (
+            <section>
+              <Card className='border-zinc-800/30 bg-zinc-900/10'>
+                <CardHeader>
+                  <CardTitle className='text-base font-medium'>
+                    Cohort Retention Analysis
+                  </CardTitle>
+                  <CardDescription className='text-xs text-zinc-400'>
+                    Retention by signup cohort
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className='mb-4 text-xs text-zinc-400'>
+                    Shows what % of users from each signup week/month returned
+                    after 1, 7, and 30 days
+                  </div>
+                  <div className='overflow-x-auto'>
+                    <table className='w-full text-left text-sm'>
+                      <thead>
+                        <tr className='border-b border-zinc-800'>
+                          <th className='pb-3 text-xs font-medium text-zinc-400'>
+                            Cohort Week
+                          </th>
+                          <th className='pb-3 text-xs font-medium text-zinc-400 text-right'>
+                            Cohort Size
+                          </th>
+                          <th className='pb-3 text-xs font-medium text-zinc-400 text-right'>
+                            Day 1 Retention
+                          </th>
+                          <th className='pb-3 text-xs font-medium text-zinc-400 text-right'>
+                            Day 7 Retention
+                          </th>
+                          <th className='pb-3 text-xs font-medium text-zinc-400 text-right'>
+                            Day 30 Retention
+                          </th>
                         </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
-              </div>
-              {cohorts.cohorts.every(
-                (c: any) => c.day1 === 0 && c.day7 === 0 && c.day30 === 0,
-              ) && (
-                <div className='mt-4 rounded-lg border border-zinc-800/30 bg-zinc-900/10 p-3 text-xs text-zinc-400'>
-                  <strong>Note:</strong> Retention metrics require users to
-                  return after their signup date. If all values are 0%, it means
-                  users haven't returned yet or the time windows haven't
-                  elapsed.
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        </section>
-      )}
+                      </thead>
+                      <tbody>
+                        {cohorts.cohorts.map((cohort: any, idx: number) => {
+                          const formatDate = (dateStr: string) => {
+                            const date = new Date(dateStr);
+                            return date.toLocaleDateString('en-US', {
+                              month: 'short',
+                              day: 'numeric',
+                              year: 'numeric',
+                            });
+                          };
+                          return (
+                            <tr
+                              key={idx}
+                              className='border-b border-zinc-800/50 hover:bg-zinc-900/20'
+                            >
+                              <td className='py-3 text-zinc-300 font-medium'>
+                                {formatDate(cohort.cohort)}
+                              </td>
+                              <td className='py-3 text-zinc-300 text-right'>
+                                {cohort.day0.toLocaleString()}
+                              </td>
+                              <td
+                                className={`py-3 text-right font-medium ${
+                                  cohort.day1 > 0
+                                    ? 'text-lunary-success-300'
+                                    : 'text-zinc-500'
+                                }`}
+                              >
+                                {Number(cohort.day1 ?? 0).toFixed(1)}%
+                              </td>
+                              <td
+                                className={`py-3 text-right font-medium ${
+                                  cohort.day7 > 0
+                                    ? 'text-lunary-success-300'
+                                    : 'text-zinc-500'
+                                }`}
+                              >
+                                {Number(cohort.day7 ?? 0).toFixed(1)}%
+                              </td>
+                              <td
+                                className={`py-3 text-right font-medium ${
+                                  cohort.day30 > 0
+                                    ? 'text-lunary-success-300'
+                                    : 'text-zinc-500'
+                                }`}
+                              >
+                                {Number(cohort.day30 ?? 0).toFixed(1)}%
+                              </td>
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                    </table>
+                  </div>
+                  {cohorts.cohorts.every(
+                    (c: any) => c.day1 === 0 && c.day7 === 0 && c.day30 === 0,
+                  ) && (
+                    <div className='mt-4 rounded-lg border border-zinc-800/30 bg-zinc-900/10 p-3 text-xs text-zinc-400'>
+                      <strong>Note:</strong> Retention metrics require users to
+                      return after their signup date. If all values are 0%, it
+                      means users haven&apos;t returned yet or the time windows
+                      haven&apos;t elapsed.
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            </section>
+          )}
 
-      {userSegments && (
-        <section>
-          <Card className='border-zinc-800/30 bg-zinc-900/10'>
-            <CardHeader>
-              <CardTitle className='text-base font-medium'>
-                Free vs Paid User Engagement
-              </CardTitle>
-              <CardDescription className='text-xs text-zinc-400'>
-                Engagement comparison by user segment
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className='grid gap-6 grid-cols-1 lg:grid-cols-2'>
-                <div className='rounded-lg border border-zinc-800/30 bg-zinc-900/5 p-4'>
-                  <h4 className='text-sm font-semibold mb-4 text-zinc-300'>
-                    Free Users
-                  </h4>
-                  <div className='space-y-3'>
-                    <MetricsCard
-                      title='Total Users'
-                      value={(
-                        userSegments.free?.totalUsers || 0
-                      ).toLocaleString()}
-                      subtitle='Free tier users'
-                    />
-                    <MetricsCard
-                      title='Daily Active Users'
-                      value={(userSegments.free?.dau || 0).toLocaleString()}
-                      subtitle='Active in the last 24 hours'
-                    />
-                    <MetricsCard
-                      title='Avg Events per User'
-                      value={(
-                        userSegments.free?.engagement?.avgEventsPerUser || 0
-                      ).toFixed(2)}
-                      subtitle='Average engagement level'
-                    />
+          {userSegments && (
+            <section>
+              <Card className='border-zinc-800/30 bg-zinc-900/10'>
+                <CardHeader>
+                  <CardTitle className='text-base font-medium'>
+                    Free vs Paid User Engagement
+                  </CardTitle>
+                  <CardDescription className='text-xs text-zinc-400'>
+                    Engagement comparison by user segment (event-based)
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className='mb-4 text-xs text-zinc-500'>
+                    Uses app event activity in the selected date range. This is
+                    a different source than PostHog DAU/WAU.
                   </div>
-                </div>
-                <div className='rounded-lg border border-zinc-800/30 bg-zinc-900/5 p-4'>
-                  <h4 className='text-sm font-semibold mb-4 text-zinc-300'>
-                    Paid Users
-                  </h4>
-                  <div className='space-y-3'>
-                    <MetricsCard
-                      title='Total Users'
-                      value={(
-                        userSegments.paid?.totalUsers || 0
-                      ).toLocaleString()}
-                      subtitle='Active paid subscribers'
-                    />
-                    <MetricsCard
-                      title='Daily Active Users'
-                      value={(userSegments.paid?.dau || 0).toLocaleString()}
-                      subtitle='Active in the last 24 hours'
-                    />
-                    <MetricsCard
-                      title='Avg Events per User'
-                      value={(
-                        userSegments.paid?.engagement?.avgEventsPerUser || 0
-                      ).toFixed(2)}
-                      subtitle='Average engagement level'
-                    />
+                  <div className='grid gap-6 grid-cols-1 lg:grid-cols-2'>
+                    <div className='rounded-lg border border-zinc-800/30 bg-zinc-900/5 p-4'>
+                      <h4 className='text-sm font-semibold mb-4 text-zinc-300'>
+                        Free Users
+                      </h4>
+                      <div className='space-y-3'>
+                        <MetricsCard
+                          title='Total Users'
+                          value={(
+                            userSegments.free?.totalUsers || 0
+                          ).toLocaleString()}
+                          subtitle='Free tier users'
+                        />
+                        <MetricsCard
+                          title='Active Users (events)'
+                          value={(userSegments.free?.dau || 0).toLocaleString()}
+                          subtitle='Active via app events in range'
+                        />
+                        <MetricsCard
+                          title='Avg Events per User'
+                          value={(
+                            userSegments.free?.engagement?.avgEventsPerUser || 0
+                          ).toFixed(2)}
+                          subtitle='Average engagement level'
+                        />
+                      </div>
+                    </div>
+                    <div className='rounded-lg border border-zinc-800/30 bg-zinc-900/5 p-4'>
+                      <h4 className='text-sm font-semibold mb-4 text-zinc-300'>
+                        Paid Users
+                      </h4>
+                      <div className='space-y-3'>
+                        <MetricsCard
+                          title='Total Users'
+                          value={(
+                            userSegments.paid?.totalUsers || 0
+                          ).toLocaleString()}
+                          subtitle='Active paid subscribers'
+                        />
+                        <MetricsCard
+                          title='Active Users (events)'
+                          value={(userSegments.paid?.dau || 0).toLocaleString()}
+                          subtitle='Active via app events in range'
+                        />
+                        <MetricsCard
+                          title='Avg Events per User'
+                          value={(
+                            userSegments.paid?.engagement?.avgEventsPerUser || 0
+                          ).toFixed(2)}
+                          subtitle='Average engagement level'
+                        />
+                      </div>
+                    </div>
                   </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </section>
-      )}
+                </CardContent>
+              </Card>
+            </section>
+          )}
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }

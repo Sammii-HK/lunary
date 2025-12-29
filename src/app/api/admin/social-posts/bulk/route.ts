@@ -13,17 +13,35 @@ export async function POST(request: NextRequest) {
     }
 
     if (action === 'approve_all') {
-      const result = await sql`
-        UPDATE social_posts
-        SET status = 'approved', updated_at = NOW()
+      const pendingResult = await sql`
+        SELECT id
+        FROM social_posts
         WHERE status = 'pending'
-        RETURNING id
       `;
+
+      const baseUrl = process.env.VERCEL
+        ? 'https://lunary.app'
+        : 'http://localhost:3000';
+
+      for (const row of pendingResult.rows) {
+        try {
+          await fetch(`${baseUrl}/api/admin/social-posts/approve`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              postId: row.id,
+              action: 'approve',
+            }),
+          });
+        } catch (error) {
+          console.warn('Failed to approve post during bulk approval:', row.id);
+        }
+      }
 
       return NextResponse.json({
         success: true,
-        message: `Approved ${result.rows.length} posts`,
-        count: result.rows.length,
+        message: `Approved ${pendingResult.rows.length} posts`,
+        count: pendingResult.rows.length,
       });
     }
 
@@ -32,6 +50,19 @@ export async function POST(request: NextRequest) {
         DELETE FROM social_posts
         WHERE status = 'pending'
         RETURNING id
+      `;
+      await sql`
+        DELETE FROM video_jobs vj
+        WHERE vj.status IN ('pending', 'failed')
+          AND NOT EXISTS (
+            SELECT 1
+            FROM video_scripts vs
+            JOIN social_posts sp
+              ON sp.topic = vs.facet_title
+             AND sp.scheduled_date::date = vs.scheduled_date
+             AND sp.week_theme = vs.theme_name
+            WHERE vs.id = vj.script_id
+          )
       `;
 
       return NextResponse.json({
