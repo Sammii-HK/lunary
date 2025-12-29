@@ -116,13 +116,13 @@ export async function getUsersWithTierInfo(): Promise<
       // Use proper array parameterization with unnest for safety
       // This ensures proper SQL escaping and prevents injection
       const subResults = await sql`
-        SELECT user_id, status, plan
+        SELECT user_id, status, plan_type
         FROM subscriptions
         WHERE user_id = ANY(SELECT unnest(${userIdsArray}::text[]))
       `;
       subscriptionStatuses = subResults.rows.reduce(
         (acc, row) => {
-          acc[row.user_id] = { status: row.status, plan: row.plan };
+          acc[row.user_id] = { status: row.status, plan: row.plan_type };
           return acc;
         },
         {} as Record<string, { status: string; plan: string }>,
