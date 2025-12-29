@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import Image from 'next/image';
 import {
   Card,
@@ -61,6 +61,18 @@ interface PendingPost {
   status: 'pending' | 'approved' | 'rejected' | 'sent';
 }
 
+type PostGroup = {
+  key: string;
+  dateKey: string;
+  postType: string;
+  topic?: string;
+  weekTheme?: string;
+  weekStart?: string;
+  scheduledDate?: string;
+  posts: PendingPost[];
+  basePost: PendingPost;
+};
+
 export default function SocialPostsPage() {
   const [activeTab, setActiveTab] = useState<TabType>('approve');
   const [loading, setLoading] = useState(false);
@@ -107,10 +119,91 @@ export default function SocialPostsPage() {
   const [replaceExisting, setReplaceExisting] = useState(false);
   const [videosOnly, setVideosOnly] = useState(false);
   const [videoJobFeedback, setVideoJobFeedback] = useState<string | null>(null);
+  const [activeVariantByGroup, setActiveVariantByGroup] = useState<
+    Record<string, string>
+  >({});
 
   useEffect(() => {
     loadPendingPosts();
   }, []);
+
+  const platformOrder = [
+    'instagram',
+    'tiktok',
+    'twitter',
+    'x',
+    'bluesky',
+    'threads',
+    'facebook',
+    'linkedin',
+    'pinterest',
+    'reddit',
+  ];
+
+  const getDateKey = (post: PendingPost) => {
+    const raw = post.scheduledDate || post.createdAt;
+    return raw ? raw.split('T')[0] : 'unscheduled';
+  };
+
+  const groupedPosts = useMemo<PostGroup[]>(() => {
+    const groups = new Map<string, PostGroup>();
+
+    for (const post of pendingPosts) {
+      const dateKey = getDateKey(post);
+      const keyParts = [
+        dateKey,
+        post.postType || 'post',
+        post.topic || 'general',
+        post.weekTheme || 'theme',
+      ];
+      const key = keyParts.join('::');
+
+      if (!groups.has(key)) {
+        groups.set(key, {
+          key,
+          dateKey,
+          postType: post.postType,
+          topic: post.topic,
+          weekTheme: post.weekTheme,
+          weekStart: post.weekStart,
+          scheduledDate: post.scheduledDate,
+          posts: [],
+          basePost: post,
+        });
+      }
+
+      groups.get(key)!.posts.push(post);
+    }
+
+    const sortedGroups = Array.from(groups.values()).map((group) => {
+      const sortedPosts = group.posts.slice().sort((a, b) => {
+        const aIdx = platformOrder.indexOf(a.platform);
+        const bIdx = platformOrder.indexOf(b.platform);
+        const aOrder = aIdx === -1 ? platformOrder.length : aIdx;
+        const bOrder = bIdx === -1 ? platformOrder.length : bIdx;
+        return aOrder - bOrder;
+      });
+
+      const basePost =
+        sortedPosts.find((post) => post.videoUrl) ||
+        sortedPosts.find((post) => post.imageUrl) ||
+        sortedPosts[0];
+
+      return {
+        ...group,
+        posts: sortedPosts,
+        basePost,
+        scheduledDate: group.scheduledDate || basePost.scheduledDate,
+      };
+    });
+
+    return sortedGroups.sort((a, b) => {
+      if (a.dateKey === b.dateKey) {
+        return a.postType.localeCompare(b.postType);
+      }
+      return a.dateKey.localeCompare(b.dateKey);
+    });
+  }, [pendingPosts]);
 
   const getWeekStartForOffset = (offset: number): string => {
     const now = new Date();
@@ -720,37 +813,6 @@ export default function SocialPostsPage() {
     }
   };
 
-  const getStatusBadge = (status: string) => {
-    switch (status) {
-      case 'pending':
-        return (
-          <Badge className='bg-lunary-accent-900 text-lunary-accent border-lunary-accent-700'>
-            Pending
-          </Badge>
-        );
-      case 'approved':
-        return (
-          <Badge className='bg-lunary-success-900 text-lunary-success border-lunary-success-800'>
-            Approved
-          </Badge>
-        );
-      case 'rejected':
-        return (
-          <Badge className='bg-lunary-error-900 text-lunary-error border-lunary-error-800'>
-            Rejected
-          </Badge>
-        );
-      case 'sent':
-        return (
-          <Badge className='bg-lunary-secondary-900 text-lunary-secondary border-lunary-secondary-800'>
-            Sent
-          </Badge>
-        );
-      default:
-        return null;
-    }
-  };
-
   const platformIcons: Record<string, React.ReactNode> = {
     instagram: <Instagram className='h-4 w-4' />,
     twitter: <Twitter className='h-4 w-4' />,
@@ -1158,94 +1220,13 @@ export default function SocialPostsPage() {
               </div>
               <div className='flex gap-3'>
                 <Button
-                  onClick={handleRefreshImages}
+                  onClick={() => handleProcessVideoJobs()}
                   disabled={loading}
                   variant='outline'
                   className='border-zinc-700 text-zinc-300 hover:bg-zinc-800'
                 >
-                  Refresh Post Images (Queue Week)
+                  Process videos
                 </Button>
-                <Button
-                  onClick={handleRefreshVideoCovers}
-                  disabled={loading}
-                  variant='outline'
-                  className='border-zinc-700 text-zinc-300 hover:bg-zinc-800'
-                >
-                  Refresh Video Covers (Queue Week)
-                </Button>
-                <Button
-                  onClick={handleRequeueVideos}
-                  disabled={loading}
-                  variant='outline'
-                  className='border-zinc-700 text-zinc-300 hover:bg-zinc-800'
-                >
-                  Requeue Videos (Queue Week)
-                </Button>
-                <Button
-                  onClick={handleForceRebuildVideos}
-                  disabled={loading}
-                  variant='outline'
-                  className='border-zinc-700 text-zinc-300 hover:bg-zinc-800'
-                >
-                  Force Rebuild Videos (Queue Week)
-                </Button>
-                <Button
-                  onClick={handleProcessVideoJobs}
-                  disabled={loading}
-                  variant='outline'
-                  className='border-zinc-700 text-zinc-300 hover:bg-zinc-800'
-                >
-                  Process Video Jobs Now
-                </Button>
-                {pendingCount > 0 && (
-                  <>
-                    <Button
-                      onClick={() => handleBulkAction('approve_all')}
-                      disabled={bulkActionLoading !== null}
-                      variant='outline'
-                      className='border-lunary-success-600 text-lunary-success hover:bg-lunary-success-400/20'
-                    >
-                      {bulkActionLoading === 'approve_all' ? (
-                        <Loader2 className='h-4 w-4 mr-2 animate-spin' />
-                      ) : (
-                        <Check className='h-4 w-4 mr-2' />
-                      )}
-                      Approve All
-                    </Button>
-                    <Button
-                      onClick={() => handleBulkAction('clear_all')}
-                      disabled={bulkActionLoading !== null}
-                      variant='outline'
-                      className='border-lunary-error-600 text-lunary-error hover:bg-lunary-error-400/20'
-                    >
-                      {bulkActionLoading === 'clear_all' ? (
-                        <Loader2 className='h-4 w-4 mr-2 animate-spin' />
-                      ) : (
-                        <X className='h-4 w-4 mr-2' />
-                      )}
-                      Clear All
-                    </Button>
-                  </>
-                )}
-                {approvedCount > 0 && (
-                  <Button
-                    onClick={handleSendAllApproved}
-                    disabled={sendingAll}
-                    className='bg-lunary-primary-600 hover:bg-lunary-primary-700 text-white'
-                  >
-                    {sendingAll ? (
-                      <>
-                        <Loader2 className='h-4 w-4 mr-2 animate-spin' />
-                        Sending...
-                      </>
-                    ) : (
-                      <>
-                        <Send className='h-4 w-4 mr-2' />
-                        Send All ({approvedCount})
-                      </>
-                    )}
-                  </Button>
-                )}
               </div>
             </div>
 
@@ -1303,246 +1284,478 @@ export default function SocialPostsPage() {
               </Card>
             ) : (
               <div className='space-y-4'>
-                {pendingPosts.map((post) => (
-                  <Card
-                    key={post.id}
-                    className='bg-zinc-900 border-zinc-800 hover:border-zinc-700 transition-colors'
-                  >
-                    <CardHeader>
-                      <div className='flex items-start justify-between'>
-                        <div className='flex-1'>
-                          <div className='flex items-center gap-3 mb-2'>
-                            <CardTitle className='text-lg capitalize'>
-                              {post.platform}
-                            </CardTitle>
-                            {post.platform === 'reddit' && (
-                              <Badge className='bg-lunary-rose-900 text-lunary-rose border-lunary-rose-700'>
-                                r/lunary_insights
-                              </Badge>
-                            )}
-                            {getStatusBadge(post.status)}
-                            <Badge className='bg-lunary-primary-900/20 text-lunary-primary-400 border-lunary-primary-700 capitalize'>
-                              {post.postType}
-                            </Badge>
-                            {!post.videoUrl && post.videoJobStatus && (
-                              <Badge className='bg-zinc-800 text-zinc-200 border-zinc-600 capitalize'>
-                                Video {post.videoJobStatus}
-                              </Badge>
-                            )}
-                          </div>
-                          <CardDescription className='text-zinc-400'>
-                            {post.platform === 'reddit' && (
-                              <span className='text-lunary-rose font-medium'>
-                                r/lunary_insights •{' '}
-                              </span>
-                            )}
-                            {post.topic && `Topic: ${post.topic} • `}
-                            {post.weekStart &&
-                              `Week of ${new Date(post.weekStart).toLocaleDateString()} • `}
-                            {post.weekTheme && `Theme: ${post.weekTheme} • `}
-                            Created: {new Date(post.createdAt).toLocaleString()}
-                            {post.scheduledDate &&
-                              ` • Scheduled: ${new Date(post.scheduledDate).toLocaleString()}`}
-                          </CardDescription>
-                        </div>
-                      </div>
-                    </CardHeader>
-                    <CardContent>
-                      <div className='space-y-4'>
-                        {post.videoUrl && (
-                          <div className='relative w-full max-w-md mx-auto'>
-                            <video
-                              src={post.videoUrl}
-                              controls
-                              className='w-full rounded-lg border border-zinc-700 bg-black'
-                            />
-                            <div className='absolute top-2 right-2 flex gap-2'>
-                              <button
-                                onClick={() =>
-                                  window.open(post.videoUrl, '_blank')
-                                }
-                                className='bg-black/70 hover:bg-black/90 text-white px-2 py-1 rounded text-xs flex items-center gap-1'
-                              >
-                                <ExternalLink className='h-3 w-3' />
-                                Open
-                              </button>
-                            </div>
-                          </div>
-                        )}
-                        {post.videoScript && (
-                          <details className='bg-zinc-800/50 rounded-lg border border-zinc-700 p-3'>
-                            <summary className='cursor-pointer text-sm text-zinc-300 flex items-center gap-2'>
-                              <FileText className='h-4 w-4' />
-                              Video script
-                              {post.videoPartNumber
-                                ? ` • Part ${post.videoPartNumber}`
-                                : ''}
-                            </summary>
-                            <p className='mt-3 text-zinc-200 whitespace-pre-wrap text-sm'>
-                              {post.videoScript}
-                            </p>
-                          </details>
-                        )}
-                        {post.videoJobStatus === 'failed' &&
-                          post.videoJobError && (
-                            <div className='text-sm text-lunary-error'>
-                              Video job failed: {post.videoJobError}
-                            </div>
-                          )}
-                        {post.imageUrl && (
-                          <div className='relative w-full max-w-md mx-auto'>
-                            <Image
-                              src={post.imageUrl}
-                              alt='Post image'
-                              width={800}
-                              height={800}
-                              className='w-full rounded-lg border border-zinc-700 cursor-pointer hover:opacity-90'
-                              onClick={() =>
-                                window.open(post.imageUrl, '_blank')
-                              }
-                              unoptimized
-                            />
-                            <div className='absolute top-2 right-2 flex gap-2'>
-                              <button
-                                onClick={() =>
-                                  handleDownloadImage(post.imageUrl!)
-                                }
-                                className='bg-black/70 hover:bg-black/90 text-white px-2 py-1 rounded text-xs flex items-center gap-1'
-                              >
-                                <Download className='h-3 w-3' />
-                                Save
-                              </button>
-                            </div>
-                          </div>
-                        )}
+                {groupedPosts.map((group) => {
+                  const activePlatform =
+                    activeVariantByGroup[group.key] || group.posts[0]?.platform;
+                  const activePost =
+                    group.posts.find((p) => p.platform === activePlatform) ||
+                    group.posts[0];
+                  const basePost = group.basePost;
+                  const activeOverridesBase =
+                    activePost &&
+                    (activePost.content !== basePost.content ||
+                      activePost.imageUrl !== basePost.imageUrl ||
+                      activePost.videoUrl !== basePost.videoUrl);
+                  const pendingVariants = group.posts.filter(
+                    (p) => p.status === 'pending',
+                  ).length;
+                  const approvedVariants = group.posts.filter(
+                    (p) => p.status === 'approved',
+                  ).length;
+                  const dateLabel =
+                    group.dateKey === 'unscheduled'
+                      ? 'Unscheduled'
+                      : new Date(group.dateKey).toLocaleDateString('en-US', {
+                          weekday: 'long',
+                          month: 'short',
+                          day: 'numeric',
+                        });
 
-                        <div className='p-4 bg-zinc-800/50 rounded-lg border border-zinc-700'>
-                          {editingPost === post.id ? (
-                            <div className='space-y-3'>
-                              <textarea
-                                value={editedContent[post.id] || post.content}
-                                onChange={(e) =>
-                                  setEditedContent({
-                                    ...editedContent,
-                                    [post.id]: e.target.value,
-                                  })
-                                }
-                                className='w-full bg-zinc-900 text-zinc-200 rounded-lg p-3 border border-zinc-600 focus:border-lunary-secondary focus:outline-none resize-y min-h-[120px]'
+                  return (
+                    <Card
+                      key={group.key}
+                      className='bg-zinc-900 border-zinc-800 hover:border-zinc-700 transition-colors'
+                    >
+                      <CardHeader>
+                        <div className='flex items-start justify-between'>
+                          <div className='flex-1'>
+                            <div className='flex items-center gap-3 mb-2 flex-wrap'>
+                              <CardTitle className='text-lg'>
+                                {dateLabel}
+                              </CardTitle>
+                              <Badge className='bg-lunary-primary-900/20 text-lunary-primary-400 border-lunary-primary-700 capitalize'>
+                                {group.postType}
+                              </Badge>
+                              {group.topic && (
+                                <Badge className='bg-zinc-800 text-zinc-200 border-zinc-600'>
+                                  {group.topic}
+                                </Badge>
+                              )}
+                              {group.weekTheme && (
+                                <Badge className='bg-zinc-800 text-zinc-200 border-zinc-600'>
+                                  {group.weekTheme}
+                                </Badge>
+                              )}
+                              <Badge className='bg-zinc-900 text-zinc-300 border-zinc-700 capitalize'>
+                                Base: {basePost.platform}
+                              </Badge>
+                              {pendingVariants > 0 && (
+                                <Badge className='bg-lunary-accent-900 text-lunary-accent border-lunary-accent-700 text-xs'>
+                                  {pendingVariants} pending
+                                </Badge>
+                              )}
+                              {approvedVariants > 0 && (
+                                <Badge className='bg-lunary-success-900/30 text-lunary-success border-lunary-success-700 text-xs'>
+                                  {approvedVariants} approved
+                                </Badge>
+                              )}
+                            </div>
+                            <CardDescription className='text-zinc-400'>
+                              {group.weekStart &&
+                                `Week of ${new Date(group.weekStart).toLocaleDateString()} • `}
+                              Created:{' '}
+                              {new Date(basePost.createdAt).toLocaleString()}
+                              {group.scheduledDate &&
+                                ` • Scheduled: ${new Date(group.scheduledDate).toLocaleString()}`}
+                            </CardDescription>
+                          </div>
+                        </div>
+                      </CardHeader>
+                      <CardContent>
+                        <div className='space-y-4'>
+                          {basePost.videoUrl && (
+                            <div className='relative w-full max-w-md mx-auto'>
+                              <video
+                                src={basePost.videoUrl}
+                                controls
+                                className='w-full rounded-lg border border-zinc-700 bg-black'
                               />
-                              <div className='flex gap-2'>
-                                <Button
-                                  onClick={() => {
-                                    setEditingPost(null);
-                                    setEditedContent({
-                                      ...editedContent,
-                                      [post.id]: post.content,
-                                    });
-                                  }}
-                                  variant='outline'
-                                  className='flex-1'
+                              <div className='absolute top-2 right-2 flex gap-2'>
+                                <button
+                                  onClick={() =>
+                                    window.open(basePost.videoUrl, '_blank')
+                                  }
+                                  className='bg-black/70 hover:bg-black/90 text-white px-2 py-1 rounded text-xs flex items-center gap-1'
                                 >
-                                  Cancel
-                                </Button>
-                                <Button
-                                  onClick={() => handleApprove(post.id)}
-                                  className='flex-1 bg-lunary-success-600 hover:bg-lunary-success-700 text-white'
-                                >
-                                  <Check className='h-4 w-4 mr-2' />
-                                  Approve Edits
-                                </Button>
+                                  <ExternalLink className='h-3 w-3' />
+                                  Open
+                                </button>
                               </div>
                             </div>
-                          ) : (
-                            <p className='text-zinc-200 whitespace-pre-wrap'>
-                              {post.content}
-                            </p>
                           )}
-                        </div>
-
-                        {post.status === 'pending' &&
-                          editingPost !== post.id && (
-                            <div className='flex gap-3'>
-                              <Button
-                                onClick={() => handleApprove(post.id)}
-                                className='flex-1 bg-lunary-success-600 hover:bg-lunary-success-700 text-white'
-                              >
-                                <Check className='h-4 w-4 mr-2' />
-                                Approve
-                              </Button>
-                              <Button
-                                onClick={() => handleEditPost(post)}
-                                variant='outline'
-                                className='border-lunary-accent-700 text-lunary-accent hover:bg-lunary-accent-950'
-                              >
-                                <Edit2 className='h-4 w-4 mr-2' />
-                                Edit
-                              </Button>
-                              <Button
-                                onClick={() => handleOpenInApp(post)}
-                                variant='outline'
-                                className='border-lunary-secondary-700 text-lunary-secondary hover:bg-lunary-secondary-950'
-                              >
-                                <ExternalLink className='h-4 w-4 mr-2' />
-                                Preview
-                              </Button>
-                              <Button
-                                onClick={() => handleReject(post.id)}
-                                disabled={rejectingPostId === post.id}
-                                variant='outline'
-                                className='flex-1 border-lunary-error-700 text-lunary-error hover:bg-lunary-error-950'
-                              >
-                                {rejectingPostId === post.id ? (
-                                  <Loader2 className='h-4 w-4 mr-2 animate-spin' />
-                                ) : (
-                                  <X className='h-4 w-4 mr-2' />
-                                )}
-                                Reject
-                              </Button>
+                          {basePost.videoScript && (
+                            <details className='bg-zinc-800/50 rounded-lg border border-zinc-700 p-3'>
+                              <summary className='cursor-pointer text-sm text-zinc-300 flex items-center gap-2'>
+                                <FileText className='h-4 w-4' />
+                                Base video script
+                                {basePost.videoPartNumber
+                                  ? ` • Part ${basePost.videoPartNumber}`
+                                  : ''}
+                              </summary>
+                              <p className='mt-3 text-zinc-200 whitespace-pre-wrap text-sm'>
+                                {basePost.videoScript}
+                              </p>
+                            </details>
+                          )}
+                          {basePost.imageUrl && (
+                            <div className='relative w-full max-w-md mx-auto'>
+                              <Image
+                                src={basePost.imageUrl}
+                                alt='Post image'
+                                width={800}
+                                height={800}
+                                className='w-full rounded-lg border border-zinc-700 cursor-pointer hover:opacity-90'
+                                onClick={() =>
+                                  window.open(basePost.imageUrl, '_blank')
+                                }
+                                unoptimized
+                              />
+                              <div className='absolute top-2 right-2 flex gap-2'>
+                                <button
+                                  onClick={() =>
+                                    handleDownloadImage(basePost.imageUrl || '')
+                                  }
+                                  className='bg-black/70 hover:bg-black/90 text-white px-2 py-1 rounded text-xs flex items-center gap-1'
+                                >
+                                  <Download className='h-3 w-3' />
+                                  Save
+                                </button>
+                              </div>
                             </div>
                           )}
 
-                        {post.status === 'approved' && (
-                          <div className='flex gap-3'>
-                            <Button
-                              onClick={() => handleSendToSucculent(post)}
-                              disabled={sending === post.id}
-                              className='flex-1 bg-lunary-primary-600 hover:bg-lunary-primary-700 text-white'
-                            >
-                              {sending === post.id ? (
-                                <Loader2 className='h-4 w-4 mr-2 animate-spin' />
+                          <div className='p-4 bg-zinc-800/50 rounded-lg border border-zinc-700'>
+                            <div className='flex items-center justify-between mb-3'>
+                              <div className='flex items-center gap-2'>
+                                <span className='text-xs text-zinc-400 uppercase tracking-wide'>
+                                  Base content
+                                </span>
+                                <Badge className='bg-zinc-900 text-zinc-300 border-zinc-700 capitalize'>
+                                  {basePost.platform}
+                                </Badge>
+                              </div>
+                            </div>
+                            <p className='text-zinc-200 whitespace-pre-wrap'>
+                              {basePost.content}
+                            </p>
+                          </div>
+
+                          <div className='flex flex-wrap gap-2'>
+                            {group.posts.map((variant) => {
+                              const isActive =
+                                variant.platform === activePlatform;
+                              return (
+                                <button
+                                  key={`${group.key}-${variant.platform}`}
+                                  onClick={() =>
+                                    setActiveVariantByGroup({
+                                      ...activeVariantByGroup,
+                                      [group.key]: variant.platform,
+                                    })
+                                  }
+                                  className={`px-3 py-1 rounded-full text-xs font-medium border transition-colors capitalize ${
+                                    isActive
+                                      ? 'bg-lunary-primary-900/60 text-lunary-primary-200 border-lunary-primary-500'
+                                      : 'bg-zinc-900 text-zinc-400 border-zinc-800 hover:text-zinc-200'
+                                  }`}
+                                >
+                                  {variant.platform}
+                                </button>
+                              );
+                            })}
+                          </div>
+
+                          {activePost && (
+                            <>
+                              {activeOverridesBase ? (
+                                <Badge className='bg-lunary-secondary-900/30 text-lunary-secondary border-lunary-secondary-700 w-fit'>
+                                  Overrides base
+                                </Badge>
                               ) : (
-                                <Send className='h-4 w-4 mr-2' />
+                                <Badge className='bg-zinc-900 text-zinc-300 border-zinc-700 w-fit'>
+                                  Matches base
+                                </Badge>
                               )}
-                              Send to Succulent
-                            </Button>
-                            <Button
-                              onClick={() => handleOpenInApp(post)}
-                              variant='outline'
-                              className='border-lunary-secondary-700 text-lunary-secondary hover:bg-lunary-secondary-950'
-                            >
-                              <ExternalLink className='h-4 w-4 mr-2' />
-                              Open in App
-                            </Button>
-                          </div>
-                        )}
 
-                        {post.status === 'sent' && (
-                          <div className='flex items-center gap-2 text-lunary-success'>
-                            <CheckCircle className='h-5 w-5' />
-                            <span>Sent to Succulent</span>
-                          </div>
-                        )}
+                              {activePost.platform === 'reddit' && (
+                                <Badge className='bg-lunary-rose-900 text-lunary-rose border-lunary-rose-700 w-fit'>
+                                  r/lunary_insights
+                                </Badge>
+                              )}
 
-                        {post.status === 'rejected' && (
-                          <div className='flex items-center gap-2 text-lunary-error'>
-                            <XCircle className='h-5 w-5' />
-                            <span>Rejected</span>
-                          </div>
-                        )}
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
+                              {!activePost.videoUrl &&
+                                activePost.videoJobStatus && (
+                                  <Badge className='bg-zinc-800 text-zinc-200 border-zinc-600 capitalize w-fit'>
+                                    Video {activePost.videoJobStatus}
+                                  </Badge>
+                                )}
+
+                              {activePost.videoJobStatus === 'failed' &&
+                                activePost.videoJobError && (
+                                  <div className='text-sm text-lunary-error'>
+                                    Video job failed: {activePost.videoJobError}
+                                  </div>
+                                )}
+
+                              {activePost.videoUrl && (
+                                <div className='relative w-full max-w-md mx-auto'>
+                                  <video
+                                    src={activePost.videoUrl}
+                                    controls
+                                    className='w-full rounded-lg border border-zinc-700 bg-black'
+                                  />
+                                  <div className='absolute top-2 right-2 flex gap-2'>
+                                    <button
+                                      onClick={() =>
+                                        window.open(
+                                          activePost.videoUrl,
+                                          '_blank',
+                                        )
+                                      }
+                                      className='bg-black/70 hover:bg-black/90 text-white px-2 py-1 rounded text-xs flex items-center gap-1'
+                                    >
+                                      <ExternalLink className='h-3 w-3' />
+                                      Open
+                                    </button>
+                                  </div>
+                                </div>
+                              )}
+
+                              {activePost.imageUrl &&
+                                activePost.imageUrl !== basePost.imageUrl && (
+                                  <div className='relative w-full max-w-md mx-auto'>
+                                    <Image
+                                      src={activePost.imageUrl}
+                                      alt='Post image'
+                                      width={800}
+                                      height={800}
+                                      className='w-full rounded-lg border border-zinc-700 cursor-pointer hover:opacity-90'
+                                      onClick={() =>
+                                        window.open(
+                                          activePost.imageUrl,
+                                          '_blank',
+                                        )
+                                      }
+                                      unoptimized
+                                    />
+                                    <div className='absolute top-2 right-2 flex gap-2'>
+                                      <button
+                                        onClick={() =>
+                                          handleDownloadImage(
+                                            activePost.imageUrl || '',
+                                          )
+                                        }
+                                        className='bg-black/70 hover:bg-black/90 text-white px-2 py-1 rounded text-xs flex items-center gap-1'
+                                      >
+                                        <Download className='h-3 w-3' />
+                                        Save
+                                      </button>
+                                    </div>
+                                  </div>
+                                )}
+
+                              <div className='p-4 bg-zinc-800/50 rounded-lg border border-zinc-700'>
+                                {editingPost === activePost.id ? (
+                                  <div className='space-y-3'>
+                                    <textarea
+                                      value={
+                                        editedContent[activePost.id] ||
+                                        activePost.content
+                                      }
+                                      onChange={(e) =>
+                                        setEditedContent({
+                                          ...editedContent,
+                                          [activePost.id]: e.target.value,
+                                        })
+                                      }
+                                      className='w-full bg-zinc-900 text-zinc-200 rounded-lg p-3 border border-zinc-600 focus:border-lunary-secondary focus:outline-none resize-y min-h-[120px]'
+                                    />
+                                    <div className='flex gap-2'>
+                                      <Button
+                                        onClick={() => {
+                                          setEditingPost(null);
+                                          setEditedContent({
+                                            ...editedContent,
+                                            [activePost.id]: activePost.content,
+                                          });
+                                        }}
+                                        variant='outline'
+                                        className='flex-1'
+                                      >
+                                        Cancel
+                                      </Button>
+                                      <Button
+                                        onClick={() =>
+                                          handleApprove(activePost.id)
+                                        }
+                                        className='flex-1 bg-lunary-success-600 hover:bg-lunary-success-700 text-white'
+                                      >
+                                        <Check className='h-4 w-4 mr-2' />
+                                        Approve Edits
+                                      </Button>
+                                    </div>
+                                  </div>
+                                ) : (
+                                  <p className='text-zinc-200 whitespace-pre-wrap'>
+                                    {activePost.content}
+                                  </p>
+                                )}
+                              </div>
+
+                              {editingSchedule === activePost.id ? (
+                                <div className='flex flex-wrap items-center gap-2'>
+                                  <input
+                                    type='date'
+                                    value={scheduleDate}
+                                    onChange={(e) =>
+                                      setScheduleDate(e.target.value)
+                                    }
+                                    className='px-3 py-2 bg-zinc-900 border border-zinc-700 rounded-lg text-sm text-white'
+                                  />
+                                  <input
+                                    type='time'
+                                    value={scheduleTime}
+                                    onChange={(e) =>
+                                      setScheduleTime(e.target.value)
+                                    }
+                                    className='px-3 py-2 bg-zinc-900 border border-zinc-700 rounded-lg text-sm text-white'
+                                  />
+                                  <Button
+                                    onClick={() =>
+                                      handleSaveSchedule(activePost.id)
+                                    }
+                                    disabled={
+                                      updatingSchedule === activePost.id
+                                    }
+                                    className='bg-lunary-primary-600 hover:bg-lunary-primary-700 text-white'
+                                  >
+                                    {updatingSchedule === activePost.id ? (
+                                      <Loader2 className='h-4 w-4 mr-2 animate-spin' />
+                                    ) : (
+                                      <Check className='h-4 w-4 mr-2' />
+                                    )}
+                                    Save Schedule
+                                  </Button>
+                                  <Button
+                                    onClick={() => setEditingSchedule(null)}
+                                    variant='outline'
+                                    className='border-zinc-700 text-zinc-300 hover:bg-zinc-800'
+                                  >
+                                    Cancel
+                                  </Button>
+                                </div>
+                              ) : (
+                                <div>
+                                  <Button
+                                    onClick={() =>
+                                      handleEditSchedule(activePost)
+                                    }
+                                    variant='outline'
+                                    className='border-zinc-700 text-zinc-300 hover:bg-zinc-800'
+                                  >
+                                    <Calendar className='h-4 w-4 mr-2' />
+                                    Edit Schedule
+                                  </Button>
+                                </div>
+                              )}
+
+                              {activePost.status === 'pending' &&
+                                editingPost !== activePost.id && (
+                                  <div className='flex gap-3'>
+                                    <Button
+                                      onClick={() =>
+                                        handleApprove(activePost.id)
+                                      }
+                                      className='flex-1 bg-lunary-success-600 hover:bg-lunary-success-700 text-white'
+                                    >
+                                      <Check className='h-4 w-4 mr-2' />
+                                      Approve
+                                    </Button>
+                                    <Button
+                                      onClick={() => handleEditPost(activePost)}
+                                      variant='outline'
+                                      className='border-lunary-accent-700 text-lunary-accent hover:bg-lunary-accent-950'
+                                    >
+                                      <Edit2 className='h-4 w-4 mr-2' />
+                                      Edit
+                                    </Button>
+                                    <Button
+                                      onClick={() =>
+                                        handleOpenInApp(activePost)
+                                      }
+                                      variant='outline'
+                                      className='border-lunary-secondary-700 text-lunary-secondary hover:bg-lunary-secondary-950'
+                                    >
+                                      <ExternalLink className='h-4 w-4 mr-2' />
+                                      Preview
+                                    </Button>
+                                    <Button
+                                      onClick={() =>
+                                        handleReject(activePost.id)
+                                      }
+                                      disabled={
+                                        rejectingPostId === activePost.id
+                                      }
+                                      variant='outline'
+                                      className='flex-1 border-lunary-error-700 text-lunary-error hover:bg-lunary-error-950'
+                                    >
+                                      {rejectingPostId === activePost.id ? (
+                                        <Loader2 className='h-4 w-4 mr-2 animate-spin' />
+                                      ) : (
+                                        <X className='h-4 w-4 mr-2' />
+                                      )}
+                                      Reject
+                                    </Button>
+                                  </div>
+                                )}
+
+                              {activePost.status === 'approved' && (
+                                <div className='flex gap-3'>
+                                  <Button
+                                    onClick={() =>
+                                      handleSendToSucculent(activePost)
+                                    }
+                                    disabled={sending === activePost.id}
+                                    className='flex-1 bg-lunary-primary-600 hover:bg-lunary-primary-700 text-white'
+                                  >
+                                    {sending === activePost.id ? (
+                                      <Loader2 className='h-4 w-4 mr-2 animate-spin' />
+                                    ) : (
+                                      <Send className='h-4 w-4 mr-2' />
+                                    )}
+                                    Send to Succulent
+                                  </Button>
+                                  <Button
+                                    onClick={() => handleOpenInApp(activePost)}
+                                    variant='outline'
+                                    className='border-lunary-secondary-700 text-lunary-secondary hover:bg-lunary-secondary-950'
+                                  >
+                                    <ExternalLink className='h-4 w-4 mr-2' />
+                                    Open in App
+                                  </Button>
+                                </div>
+                              )}
+
+                              {activePost.status === 'sent' && (
+                                <div className='flex items-center gap-2 text-lunary-success'>
+                                  <CheckCircle className='h-5 w-5' />
+                                  <span>Sent to Succulent</span>
+                                </div>
+                              )}
+
+                              {activePost.status === 'rejected' && (
+                                <div className='flex items-center gap-2 text-lunary-error'>
+                                  <XCircle className='h-5 w-5' />
+                                  <span>Rejected</span>
+                                </div>
+                              )}
+                            </>
+                          )}
+                        </div>
+                      </CardContent>
+                    </Card>
+                  );
+                })}
               </div>
             )}
           </div>

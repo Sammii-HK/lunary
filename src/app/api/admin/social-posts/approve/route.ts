@@ -198,7 +198,7 @@ export async function POST(request: NextRequest) {
             const themeName =
               scriptResult.rows[0]?.theme_name || post.week_theme || 'Lunary';
 
-            const weekStart = getWeekStart(dateValue);
+            const weekStart = getWeekStart(dateValue as Date);
             const weekEnd = new Date(weekStart);
             weekEnd.setDate(weekEnd.getDate() + 6);
 

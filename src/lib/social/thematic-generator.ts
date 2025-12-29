@@ -602,6 +602,7 @@ export interface ThematicPost {
   hashtags: string;
   category: string;
   slug: string;
+  dayOffset: number;
 }
 
 type ClosingRitualStyle = 'long' | 'short';
@@ -681,6 +682,8 @@ export function generateThematicPostsForWeek(
         scheduledDate: dayContent.date,
         hashtags: `${dayContent.hashtags.domain} ${dayContent.hashtags.topic}`,
         category: dayContent.theme.category,
+        dayOffset:
+          dayContent.date.getDay() === 0 ? 6 : dayContent.date.getDay() - 1,
         slug:
           dayContent.facet.grimoireSlug.split('/').pop() ||
           dayContent.facet.title.toLowerCase().replace(/\s+/g, '-'),
@@ -703,6 +706,8 @@ export function generateThematicPostsForWeek(
         scheduledDate: dayContent.date,
         hashtags: `${dayContent.hashtags.domain} ${dayContent.hashtags.topic}`,
         category: dayContent.theme.category,
+        dayOffset:
+          dayContent.date.getDay() === 0 ? 6 : dayContent.date.getDay() - 1,
         slug:
           dayContent.facet.grimoireSlug.split('/').pop() ||
           dayContent.facet.title.toLowerCase().replace(/\s+/g, '-'),
@@ -712,7 +717,7 @@ export function generateThematicPostsForWeek(
 
   if (weekContent.length > 0) {
     const closingRitualDate = new Date(weekStartDate);
-    closingRitualDate.setDate(closingRitualDate.getDate() - 1);
+    closingRitualDate.setDate(closingRitualDate.getDate() + 6);
     closingRitualDate.setHours(20, 0, 0, 0);
     const closingThemeName = weekContent[0]?.theme?.name;
     const closingPlatforms = Array.from(
@@ -731,6 +736,7 @@ export function generateThematicPostsForWeek(
         scheduledDate: new Date(closingRitualDate),
         hashtags: CLOSING_RITUAL_HASHTAGS,
         category: 'ritual',
+        dayOffset: 6,
         slug: 'closing-ritual',
       });
     }

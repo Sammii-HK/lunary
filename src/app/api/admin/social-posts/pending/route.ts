@@ -32,6 +32,8 @@ export async function GET(request: NextRequest) {
     try {
       await sql`ALTER TABLE social_posts ADD COLUMN IF NOT EXISTS week_theme TEXT`;
       await sql`ALTER TABLE social_posts ADD COLUMN IF NOT EXISTS week_start DATE`;
+      await sql`ALTER TABLE social_posts ADD COLUMN IF NOT EXISTS base_group_key TEXT`;
+      await sql`ALTER TABLE social_posts ADD COLUMN IF NOT EXISTS base_post_id INTEGER`;
       await ensureVideoScriptsTable();
       await ensureVideoJobsTable();
     } catch (tableError) {

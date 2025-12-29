@@ -5,7 +5,7 @@ import { composeVideo } from '@/lib/video/compose-video';
 import { generateVoiceover } from '@/lib/tts';
 import { getThematicImageUrl } from '@/lib/social/educational-images';
 import { buildVideoCaption } from '@/lib/social/video-captions';
-import { categoryThemes } from '@/lib/social/weekly-themes';
+import { categoryThemes, generateHashtags } from '@/lib/social/weekly-themes';
 import { createHash } from 'crypto';
 
 export const runtime = 'nodejs';
@@ -40,6 +40,62 @@ function getAudioCacheKey(
     : '100';
   return `audio/shorts/${voiceName}-${model}-s${speedKey}-${hash}.mp3`;
 }
+
+function normalizeLineBreaks(text: string) {
+  return text.replace(/\\n/g, '\n').replace(/\\r/g, '\r');
+}
+
+function trimToMax(text: string, maxChars: number, addEllipsis = true) {
+  if (text.length <= maxChars) return text;
+
+  const sentences = text.match(/[^.!?]+[.!?]+|[^.!?]+$/g) || [text];
+  let output = '';
+  for (const sentence of sentences) {
+    const candidate = output ? `${output} ${sentence.trim()}` : sentence.trim();
+    if (candidate.length > maxChars) break;
+    output = candidate;
+  }
+
+  if (!output) {
+    let snippet = text.slice(0, Math.max(0, maxChars - 3)).trim();
+    const lastSpace = snippet.lastIndexOf(' ');
+    if (lastSpace > 40) {
+      snippet = snippet.slice(0, lastSpace).trim();
+    }
+    output = snippet;
+  }
+
+  const suffix = addEllipsis ? '...' : '';
+  if (output.length > maxChars - suffix.length) {
+    output = output.slice(0, maxChars - suffix.length).trim();
+  }
+
+  if (addEllipsis && output.length < text.length) {
+    return `${output}...`;
+  }
+
+  return output;
+}
+
+function toTextArrayLiteral(values: string[]): string {
+  return `{${values
+    .map(
+      (value) =>
+        `"${String(value).replace(/\\/g, '\\\\').replace(/"/g, '\\"')}"`,
+    )
+    .join(',')}}`;
+}
+
+const videoHashtagConfig: Record<
+  string,
+  { useHashtags: boolean; count: number }
+> = {
+  instagram: { useHashtags: true, count: 3 },
+  tiktok: { useHashtags: true, count: 3 },
+  twitter: { useHashtags: true, count: 2 },
+  threads: { useHashtags: false, count: 0 },
+  youtube: { useHashtags: true, count: 3 },
+};
 
 async function ensureVideoJobsTable() {
   await sql`
@@ -292,21 +348,59 @@ export async function POST(request: NextRequest) {
             'twitter',
             'youtube',
           ];
+          const shortPlatformSet = new Set(['twitter']);
           const scheduledDate = new Date(script.scheduled_date);
-          const postContent = buildVideoCaption({
-            themeName: postWeekTheme || themeName || undefined,
-            facetTitle: script.facet_title,
-            partNumber,
-            totalParts,
-            scriptText: script.full_script || script.written_post_content,
-          });
+          const baseVideoCaption = normalizeLineBreaks(
+            buildVideoCaption({
+              themeName: postWeekTheme || themeName || undefined,
+              facetTitle: script.facet_title,
+              partNumber,
+              totalParts,
+              scriptText: script.full_script || script.written_post_content,
+            }),
+          );
+          const tagsByPlatform = new Map<string, string>();
+          if (theme && facet) {
+            const tags = generateHashtags(theme, facet);
+            for (const platform of shortVideoPlatforms) {
+              const config = videoHashtagConfig[platform] || {
+                useHashtags: false,
+                count: 0,
+              };
+              if (!config.useHashtags || config.count <= 0) {
+                tagsByPlatform.set(platform, '');
+                continue;
+              }
+              tagsByPlatform.set(
+                platform,
+                [tags.domain, tags.topic, tags.brand]
+                  .slice(0, config.count)
+                  .join(' '),
+              );
+            }
+          }
+          const buildCaptionForPlatform = (platform: string) => {
+            const tags = tagsByPlatform.get(platform) || '';
+            const isShort = shortPlatformSet.has(platform);
+            if (!isShort) {
+              return tags ? `${baseVideoCaption}\n\n${tags}` : baseVideoCaption;
+            }
+            if (!tags) {
+              return trimToMax(baseVideoCaption, 180, true);
+            }
+            const reserved = tags.length + 2;
+            const bodyLimit = Math.max(80, 180 - reserved);
+            const trimmedBody = trimToMax(baseVideoCaption, bodyLimit, true);
+            return `${trimmedBody}\n\n${tags}`;
+          };
 
+          const shortPlatformsArray = toTextArrayLiteral(shortVideoPlatforms);
           const existingPlatformsResult = await sql`
             SELECT platform
             FROM social_posts
             WHERE topic = ${script.facet_title}
               AND scheduled_date::date = ${dateKey}
-              AND platform = ANY(${shortVideoPlatforms}::text[])
+              AND platform = ANY(SELECT unnest(${shortPlatformsArray}::text[]))
               AND post_type = 'video'
           `;
           const existingPlatforms = new Set(
@@ -330,7 +424,7 @@ export async function POST(request: NextRequest) {
                 created_at
               )
               VALUES (
-                ${postContent},
+                ${buildCaptionForPlatform(platform)},
                 ${platform},
                 'video',
                 ${script.facet_title},

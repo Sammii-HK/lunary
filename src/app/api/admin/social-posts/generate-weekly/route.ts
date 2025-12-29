@@ -99,7 +99,7 @@ async function generateThematicWeeklyPosts(
   const { sql } = await import('@vercel/postgres');
   const { generateThematicPostsForWeek, getNextThemeIndex, recordThemeUsage } =
     await import('@/lib/social/thematic-generator');
-  const { categoryThemes, getWeeklyContentPlan } =
+  const { categoryThemes, getWeeklyContentPlan, generateHashtags } =
     await import('@/lib/social/weekly-themes');
   const { buildVideoCaption } = await import('@/lib/social/video-captions');
   const { getEducationalImageUrl } =
@@ -185,6 +185,8 @@ async function generateThematicWeeklyPosts(
     await sql`ALTER TABLE social_posts ADD COLUMN IF NOT EXISTS quote_id INTEGER`;
     await sql`ALTER TABLE social_posts ADD COLUMN IF NOT EXISTS quote_text TEXT`;
     await sql`ALTER TABLE social_posts ADD COLUMN IF NOT EXISTS quote_author TEXT`;
+    await sql`ALTER TABLE social_posts ADD COLUMN IF NOT EXISTS base_group_key TEXT`;
+    await sql`ALTER TABLE social_posts ADD COLUMN IF NOT EXISTS base_post_id INTEGER`;
 
     await sql`
       CREATE TABLE IF NOT EXISTS content_rotation (
@@ -351,7 +353,11 @@ async function generateThematicWeeklyPosts(
     return filtered.map((s) => s.trim()).join(' ');
   };
 
-  const trimToMax = (text: string, maxChars: number): string => {
+  const trimToMax = (
+    text: string,
+    maxChars: number,
+    addEllipsis = true,
+  ): string => {
     if (text.length <= maxChars) return text;
 
     const sentences = text.match(/[^.!?]+[.!?]+|[^.!?]+$/g) || [text];
@@ -374,11 +380,16 @@ async function generateThematicWeeklyPosts(
       output = snippet;
     }
 
-    if (output.length > maxChars - 3) {
-      output = output.slice(0, maxChars - 3).trim();
+    const suffix = addEllipsis ? '...' : '';
+    if (output.length > maxChars - suffix.length) {
+      output = output.slice(0, maxChars - suffix.length).trim();
     }
 
-    return output.length < text.length ? `${output}...` : output;
+    if (addEllipsis && output.length < text.length) {
+      return `${output}...`;
+    }
+
+    return output;
   };
 
   const buildPostVariant = (
@@ -386,6 +397,7 @@ async function generateThematicWeeklyPosts(
     maxChars: number,
     hashtags: string,
     hashtagCount: number,
+    addEllipsis = true,
   ): string => {
     const tags = hashtags ? hashtags.split(' ') : [];
     const hashtagText =
@@ -394,12 +406,60 @@ async function generateThematicWeeklyPosts(
     const reserved =
       attribution.length + (hashtagText ? hashtagText.length + 2 : 0) + 2;
     const bodyLimit = Math.max(80, maxChars - reserved);
-    const trimmedBody = trimToMax(body, bodyLimit);
+    const trimmedBody = trimToMax(body, bodyLimit, addEllipsis);
     let content = `${trimmedBody}\n\n${attribution}`;
     if (hashtagText) {
       content += `\n\n${hashtagText}`;
     }
     return content;
+  };
+
+  const normalizeLineBreaks = (text: string) =>
+    text.replace(/\\n/g, '\n').replace(/\\r/g, '\r');
+
+  const videoHashtagConfig: Record<
+    string,
+    { useHashtags: boolean; count: number }
+  > = {
+    instagram: { useHashtags: true, count: 3 },
+    tiktok: { useHashtags: true, count: 3 },
+    twitter: { useHashtags: true, count: 2 },
+    threads: { useHashtags: false, count: 0 },
+    youtube: { useHashtags: true, count: 3 },
+  };
+
+  const buildVideoHashtags = (
+    platform: string,
+    theme: (typeof categoryThemes)[number],
+    facetTitle: string,
+  ) => {
+    const config = videoHashtagConfig[platform] || {
+      useHashtags: false,
+      count: 0,
+    };
+    if (!config.useHashtags || config.count <= 0) {
+      return '';
+    }
+    const facet = theme.facets.find(
+      (candidate) => candidate.title === facetTitle,
+    );
+    if (!facet) {
+      return '';
+    }
+    const tags = generateHashtags(theme, facet);
+    return [tags.domain, tags.topic, tags.brand]
+      .slice(0, config.count)
+      .join(' ');
+  };
+
+  const buildGroupKey = (
+    dateKey: string,
+    postType: string,
+    topic: string | null | undefined,
+    themeName: string,
+  ) => {
+    const safeTopic = (topic || '').trim() || 'general';
+    return `${dateKey}|${postType}|${safeTopic}|${themeName}`;
   };
 
   const dedupeScriptsByDate = (
@@ -560,13 +620,25 @@ async function generateThematicWeeklyPosts(
   for (const post of filteredPosts) {
     const dateKey = post.scheduledDate.toISOString().split('T')[0];
     const contentKey = `${dateKey}|${post.topic}`;
+    const baseGroupKey = buildGroupKey(
+      dateKey,
+      post.postType,
+      post.topic,
+      currentTheme.name,
+    );
     let postContent = post.content;
     const scriptBase = scriptPostBaseByDate.get(dateKey);
     if (scriptBase && post.postType === 'educational') {
       if (shortPostPlatforms.has(post.platform)) {
-        postContent = buildPostVariant(scriptBase, 180, post.hashtags, 2);
+        postContent = buildPostVariant(scriptBase, 180, post.hashtags, 2, true);
       } else {
-        postContent = buildPostVariant(scriptBase, 2200, post.hashtags, 3);
+        postContent = buildPostVariant(
+          scriptBase,
+          2200,
+          post.hashtags,
+          3,
+          false,
+        );
       }
     }
 
@@ -645,8 +717,8 @@ async function generateThematicWeeklyPosts(
 
     try {
       const result = await sql`
-        INSERT INTO social_posts (content, platform, post_type, topic, status, image_url, scheduled_date, week_theme, week_start, quote_id, quote_text, quote_author, created_at)
-        VALUES (${postContent}, ${post.platform}, ${post.postType}, ${post.topic}, 'pending', ${imageUrl}, ${scheduledDate.toISOString()}, ${currentTheme.name}, ${weekStartDate.toISOString().split('T')[0]}, ${post.postType === 'closing_ritual' ? closingRitualQuote?.id || null : null}, ${post.postType === 'closing_ritual' ? closingRitualQuote?.text || null : null}, ${post.postType === 'closing_ritual' ? closingRitualQuote?.author || null : null}, NOW())
+        INSERT INTO social_posts (content, platform, post_type, topic, status, image_url, scheduled_date, week_theme, week_start, quote_id, quote_text, quote_author, base_group_key, created_at)
+        VALUES (${postContent}, ${post.platform}, ${post.postType}, ${post.topic}, 'pending', ${imageUrl}, ${scheduledDate.toISOString()}, ${currentTheme.name}, ${weekStartDate.toISOString().split('T')[0]}, ${post.postType === 'closing_ritual' ? closingRitualQuote?.id || null : null}, ${post.postType === 'closing_ritual' ? closingRitualQuote?.text || null : null}, ${post.postType === 'closing_ritual' ? closingRitualQuote?.author || null : null}, ${baseGroupKey}, NOW())
         RETURNING id
       `;
       savedPostIds.push(result.rows[0].id);
@@ -716,6 +788,7 @@ async function generateThematicWeeklyPosts(
         'threads',
         'youtube',
       ];
+      const shortVideoPlatforms = new Set(['twitter']);
       const dayInfoByDate = new Map<
         string,
         { facetTitle: string; category: string; slug: string }
@@ -773,24 +846,52 @@ async function generateThematicWeeklyPosts(
           const existingVideoKey = `${dateKey}|${dayInfo.facetTitle}`;
           const existingVideoUrl = existingVideoByKey.get(existingVideoKey);
 
-          const videoCaption = buildVideoCaption({
-            themeName: currentTheme.name,
-            facetTitle: dayInfo.facetTitle,
-            partNumber,
-            totalParts,
-            scriptText: script.fullScript || script.writtenPostContent,
-          });
+          const baseVideoCaption = normalizeLineBreaks(
+            buildVideoCaption({
+              themeName: currentTheme.name,
+              facetTitle: dayInfo.facetTitle,
+              partNumber,
+              totalParts,
+              scriptText: script.fullScript || script.writtenPostContent,
+            }),
+          );
+
+          const buildVideoCaptionForPlatform = (platform: string) => {
+            const tags = buildVideoHashtags(
+              platform,
+              currentTheme,
+              dayInfo.facetTitle,
+            );
+            const isShort = shortVideoPlatforms.has(platform);
+            if (!isShort) {
+              return tags ? `${baseVideoCaption}\n\n${tags}` : baseVideoCaption;
+            }
+            if (!tags) {
+              return trimToMax(baseVideoCaption, 180, true);
+            }
+            const reserved = tags.length + 2;
+            const bodyLimit = Math.max(80, 180 - reserved);
+            const trimmedBody = trimToMax(baseVideoCaption, bodyLimit, true);
+            return `${trimmedBody}\n\n${tags}`;
+          };
 
           for (const platform of videoPlatforms) {
             const videoHours = platformOptimalHours[platform] || [20];
             const videoHour = videoHours[videoHours.length - 1] || 20;
             const videoScheduledDate = new Date(`${dateKey}T00:00:00.000Z`);
             videoScheduledDate.setUTCHours(videoHour, 0, 0, 0);
+            const baseGroupKey = buildGroupKey(
+              dateKey,
+              'video',
+              dayInfo.facetTitle,
+              currentTheme.name,
+            );
+            const videoCaption = buildVideoCaptionForPlatform(platform);
 
             const imageUrl: string | null = null;
             await sql`
-              INSERT INTO social_posts (content, platform, post_type, topic, status, image_url, video_url, scheduled_date, week_theme, week_start, created_at)
-              SELECT ${videoCaption}, ${platform}, 'video', ${dayInfo.facetTitle}, 'pending', ${imageUrl}, ${existingVideoUrl || null}, ${videoScheduledDate.toISOString()}, ${currentTheme.name}, ${weekStartDate.toISOString().split('T')[0]}, NOW()
+              INSERT INTO social_posts (content, platform, post_type, topic, status, image_url, video_url, scheduled_date, week_theme, week_start, base_group_key, created_at)
+              SELECT ${videoCaption}, ${platform}, 'video', ${dayInfo.facetTitle}, 'pending', ${imageUrl}, ${existingVideoUrl || null}, ${videoScheduledDate.toISOString()}, ${currentTheme.name}, ${weekStartDate.toISOString().split('T')[0]}, ${baseGroupKey}, NOW()
               WHERE NOT EXISTS (
                 SELECT 1 FROM social_posts
                 WHERE platform = ${platform}
@@ -854,7 +955,8 @@ async function generateThematicWeeklyPosts(
           GROUP BY facet_title, scheduled_date, theme_name
         )
         INSERT INTO video_jobs (script_id, week_start, date_key, topic, status, created_at, updated_at)
-        SELECT vs.id,
+        SELECT DISTINCT ON (vs.id)
+               vs.id,
                ${weekStartKey},
                vs.scheduled_date,
                vs.facet_title,
@@ -878,6 +980,25 @@ async function generateThematicWeeklyPosts(
     } catch (queueError) {
       console.error('Failed to queue video jobs after generation:', queueError);
     }
+  }
+
+  try {
+    await sql`
+      WITH grouped AS (
+        SELECT base_group_key, MIN(id) AS base_id
+        FROM social_posts
+        WHERE week_start = ${weekStartKey}
+          AND week_theme = ${currentTheme.name}
+          AND base_group_key IS NOT NULL
+        GROUP BY base_group_key
+      )
+      UPDATE social_posts sp
+      SET base_post_id = grouped.base_id
+      FROM grouped
+      WHERE sp.base_group_key = grouped.base_group_key
+    `;
+  } catch (groupError) {
+    console.warn('Failed to set base post ids:', groupError);
   }
 
   return NextResponse.json({
@@ -1176,6 +1297,8 @@ export async function POST(request: NextRequest) {
         `;
         if (columnExists.rows.length === 0) {
           await sql`ALTER TABLE social_posts ADD COLUMN quote_author TEXT`;
+          await sql`ALTER TABLE social_posts ADD COLUMN base_group_key TEXT`;
+          await sql`ALTER TABLE social_posts ADD COLUMN base_post_id INTEGER`;
         }
       } catch (alterError) {
         console.warn('Could not add quote_author column:', alterError);
