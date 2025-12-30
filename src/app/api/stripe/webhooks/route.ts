@@ -77,6 +77,7 @@ function extractDiscountInfo(subscription: Stripe.Subscription) {
       discountPercent: 0,
       monthlyAmountDue: interval === 'year' ? unitAmount / 12 : unitAmount,
       couponId: null,
+      discountEndsAt: null,
     };
   }
 
@@ -87,6 +88,7 @@ function extractDiscountInfo(subscription: Stripe.Subscription) {
       discountPercent: 0,
       monthlyAmountDue: 0,
       couponId: null,
+      discountEndsAt: null,
     };
   }
 
@@ -104,11 +106,30 @@ function extractDiscountInfo(subscription: Stripe.Subscription) {
     );
   }
 
+  let discountEndsAt = discount.end
+    ? new Date(discount.end * 1000).toISOString()
+    : null;
+  if (
+    !discountEndsAt &&
+    discount.coupon.duration === 'repeating' &&
+    discount.coupon.duration_in_months
+  ) {
+    const startTimestamp = discount.start || subscription.start_date;
+    if (startTimestamp) {
+      const endDate = new Date(startTimestamp * 1000);
+      endDate.setUTCMonth(
+        endDate.getUTCMonth() + discount.coupon.duration_in_months,
+      );
+      discountEndsAt = endDate.toISOString();
+    }
+  }
+
   return {
     hasDiscount: true,
     discountPercent: discount.coupon.percent_off || 0,
     monthlyAmountDue: monthlyAmount,
     couponId: discount.coupon.id,
+    discountEndsAt,
   };
 }
 
@@ -167,6 +188,12 @@ async function handleSubscriptionChange(
   const status = mapStripeStatus(subscription.status);
   const planType = getPlanTypeFromSubscription(subscription);
   const discountInfo = extractDiscountInfo(subscription);
+  const promoCodeRaw =
+    subscription.metadata?.promoCode || subscription.metadata?.discountCode;
+  const promoCode =
+    typeof promoCodeRaw === 'string' && promoCodeRaw.trim().length > 0
+      ? promoCodeRaw.trim().toUpperCase()
+      : null;
 
   // Get userId from customer or subscription metadata
   let userId = subscription.metadata?.userId || null;
@@ -212,13 +239,15 @@ async function handleSubscriptionChange(
           user_id, user_email, status, plan_type,
           stripe_customer_id, stripe_subscription_id,
           trial_ends_at, current_period_end,
-          has_discount, discount_percent, monthly_amount_due, coupon_id
+          has_discount, discount_percent, monthly_amount_due, coupon_id,
+          promo_code, discount_ends_at
         ) VALUES (
           ${userId}, ${userEmail}, ${status}, ${planType},
           ${customerId}, ${subscription.id},
           ${trialEndsAt}, ${currentPeriodEnd},
           ${discountInfo.hasDiscount}, ${discountInfo.discountPercent || null},
-          ${discountInfo.monthlyAmountDue || null}, ${discountInfo.couponId || null}
+          ${discountInfo.monthlyAmountDue || null}, ${discountInfo.couponId || null},
+          ${promoCode}, ${discountInfo.discountEndsAt || null}
         )
         ON CONFLICT (user_id) DO UPDATE SET
           status = EXCLUDED.status,
@@ -231,6 +260,8 @@ async function handleSubscriptionChange(
           discount_percent = EXCLUDED.discount_percent,
           monthly_amount_due = EXCLUDED.monthly_amount_due,
           coupon_id = EXCLUDED.coupon_id,
+          promo_code = EXCLUDED.promo_code,
+          discount_ends_at = EXCLUDED.discount_ends_at,
           user_email = COALESCE(EXCLUDED.user_email, subscriptions.user_email),
           updated_at = NOW()
       `;

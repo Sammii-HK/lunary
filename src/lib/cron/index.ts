@@ -5,6 +5,10 @@ import {
   generateTrialReminderEmailHTML,
   generateTrialReminderEmailText,
 } from '@/lib/email-templates/trial-nurture';
+import {
+  generatePromoEndingEmailHTML,
+  generatePromoEndingEmailText,
+} from '@/lib/email-templates/promo-ending';
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || '');
 
@@ -18,6 +22,15 @@ export interface TrialReminderResult {
   sent: {
     threeDayReminders: number;
     oneDayReminders: number;
+    total: number;
+  };
+  errors?: string[];
+}
+
+export interface PromoEndingReminderResult {
+  sent: {
+    thirtyDayReminders: number;
+    sevenDayReminders: number;
     total: number;
   };
   errors?: string[];
@@ -246,6 +259,124 @@ export async function sendTrialReminders(): Promise<TrialReminderResult> {
       oneDayReminders: sent1Day,
       total: sent3Day + sent1Day,
     },
+    errors: errors.length > 0 ? errors : undefined,
+  };
+}
+
+export async function sendPromoEndingReminders(): Promise<PromoEndingReminderResult> {
+  const promoCode = 'FULLORBIT';
+  const reminderDays = [
+    { label: 'thirtyDayReminders', days: 30 },
+    { label: 'sevenDayReminders', days: 7 },
+  ] as const;
+
+  const sent = {
+    thirtyDayReminders: 0,
+    sevenDayReminders: 0,
+    total: 0,
+  };
+  const errors: string[] = [];
+
+  const dateFormatter = new Intl.DateTimeFormat('en-GB', {
+    day: '2-digit',
+    month: 'short',
+    year: 'numeric',
+  });
+
+  for (const reminder of reminderDays) {
+    const targetDate = new Date();
+    targetDate.setUTCDate(targetDate.getUTCDate() + reminder.days);
+    const targetDateKey = targetDate.toISOString().split('T')[0];
+
+    const rows = await sql`
+      SELECT DISTINCT
+        s.user_id,
+        s.user_email as email,
+        s.user_name as name,
+        s.discount_ends_at
+      FROM subscriptions s
+      WHERE s.promo_code = ${promoCode}
+      AND s.discount_ends_at::date = ${targetDateKey}
+      AND s.user_email IS NOT NULL
+    `;
+
+    for (const user of rows.rows) {
+      const emailType = `promo-ending-${promoCode}-${reminder.days}d`;
+      try {
+        const existing = await sql`
+          SELECT 1 FROM email_events
+          WHERE user_id = ${user.user_id}
+          AND email_type = ${emailType}
+        `;
+
+        if (existing.rowCount && existing.rowCount > 0) {
+          continue;
+        }
+
+        const endDate = new Date(user.discount_ends_at);
+        const endDateLabel = Number.isNaN(endDate.getTime())
+          ? ''
+          : dateFormatter.format(endDate);
+
+        const html = await generatePromoEndingEmailHTML(
+          user.name || 'there',
+          reminder.days,
+          endDateLabel,
+          promoCode,
+          user.email,
+        );
+        const text = generatePromoEndingEmailText(
+          user.name || 'there',
+          reminder.days,
+          endDateLabel,
+          promoCode,
+          user.email,
+        );
+
+        await sendEmail({
+          to: user.email,
+          subject: `Your free period ends in ${reminder.days} days - Lunary`,
+          html,
+          text,
+          tracking: {
+            userId: user.user_id,
+            notificationType: 'promo_ending',
+            notificationId: `promo-ending-${promoCode}-${reminder.days}-${user.user_id}`,
+            utm: {
+              source: 'email',
+              medium: 'lifecycle',
+              campaign: 'promo_ending',
+              content: `${reminder.days}_day`,
+            },
+          },
+        });
+
+        await sql`
+          INSERT INTO email_events (user_id, email_type, metadata)
+          VALUES (
+            ${user.user_id},
+            ${emailType},
+            ${JSON.stringify({
+              promoCode,
+              daysRemaining: reminder.days,
+              endsAt: user.discount_ends_at,
+            })}
+          )
+          ON CONFLICT (user_id, email_type) DO NOTHING
+        `;
+
+        sent[reminder.label] += 1;
+        sent.total += 1;
+      } catch (error) {
+        errors.push(
+          `Failed to send promo ending reminder to ${user.email}: ${error instanceof Error ? error.message : 'Unknown error'}`,
+        );
+      }
+    }
+  }
+
+  return {
+    sent,
     errors: errors.length > 0 ? errors : undefined,
   };
 }
