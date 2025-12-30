@@ -1,5 +1,3 @@
-'use client';
-
 import dayjs from 'dayjs';
 import { getAstrologicalChart, AstroChartInformation } from './astrology';
 import { Observer } from 'astronomy-engine';
