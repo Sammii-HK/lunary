@@ -322,8 +322,8 @@ export function getPriceForCurrency(
   if (!planPrices) return null;
 
   // Try exact match first
-  if (planPrices[currency.toUpperCase()]) {
-    return planPrices[currency.toUpperCase()];
+  if (planPrices[currency.toUpperCase() as keyof typeof planPrices]) {
+    return planPrices[currency.toUpperCase() as keyof typeof planPrices];
   }
 
   // Fallback to USD
