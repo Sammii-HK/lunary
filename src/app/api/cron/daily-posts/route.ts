@@ -45,6 +45,7 @@ export async function GET(request: NextRequest) {
   try {
     const url = new URL(request.url);
     const force = url.searchParams.get('force') === 'true';
+    const overrideDate = url.searchParams.get('date');
     // Verify cron request
     // Vercel cron jobs send x-vercel-cron header, allow those
     // Check both lowercase and any case variations
@@ -137,9 +138,14 @@ export async function GET(request: NextRequest) {
 
     // Calculate target date: create posts for tomorrow (run the day before at 2 PM)
     const now = new Date();
-    const tomorrowDate = new Date(now);
-    tomorrowDate.setUTCDate(tomorrowDate.getUTCDate() + 1);
-    const targetDateStr = tomorrowDate.toISOString().split('T')[0];
+    const targetDateStr = (() => {
+      if (overrideDate && /^\d{4}-\d{2}-\d{2}$/.test(overrideDate)) {
+        return overrideDate;
+      }
+      const tomorrowDate = new Date(now);
+      tomorrowDate.setUTCDate(tomorrowDate.getUTCDate() + 1);
+      return tomorrowDate.toISOString().split('T')[0];
+    })();
     const dailyPostsKey = `daily-posts-${targetDateStr}`;
 
     if (!force) {
@@ -604,12 +610,12 @@ async function runDailyPosts(dateStr: string) {
     {
       name: dateStr,
       content: `${postContent}\n\n${platformHashtags.instagram}`,
-      platforms: ['threads', 'pinterest', 'facebook', 'instagram'],
+      platforms: ['pinterest', 'facebook', 'instagram'],
       imageUrls: [
-        `${productionUrl}/api/og/cosmic/${dateStr}`,
-        `${productionUrl}/api/og/crystal?date=${dateStr}`,
-        `${productionUrl}/api/og/tarot?date=${dateStr}`,
-        `${productionUrl}/api/og/moon?date=${dateStr}`,
+        `${productionUrl}/api/og/cosmic/${dateStr}/story`,
+        `${productionUrl}/api/og/crystal?date=${dateStr}&size=story`,
+        `${productionUrl}/api/og/tarot?date=${dateStr}&size=story`,
+        `${productionUrl}/api/og/moon?date=${dateStr}&size=story`,
         // `${productionUrl}/api/og/horoscope?date=${dateStr}`,
       ],
       alt: `${cosmicContent.primaryEvent.name} - ${cosmicContent.primaryEvent.energy}. Daily cosmic guidance from lunary.app.`,
@@ -637,17 +643,27 @@ async function runDailyPosts(dateStr: string) {
         //     `${productionUrl}/api/og/horoscope?date=${dateStr}`,
         //   ],
         // },
+        threads: {
+          content: `${postContent}`,
+          media: [
+            `${productionUrl}/api/og/cosmic/${dateStr}/landscape`,
+            `${productionUrl}/api/og/crystal?date=${dateStr}&size=landscape`,
+            `${productionUrl}/api/og/tarot?date=${dateStr}&size=landscape`,
+            `${productionUrl}/api/og/moon?date=${dateStr}&size=landscape`,
+            // `${productionUrl}/api/og/horoscope?date=${dateStr}&size=portrait`,
+          ],
+        },
         tiktok: {
           content: `${generateCosmicPost(cosmicContent).snippetShort} ${platformHashtags.tiktok}`,
           media: [
-            `${productionUrl}/api/og/cosmic/${dateStr}/portrait`,
-            `${productionUrl}/api/og/crystal?date=${dateStr}&size=portrait`,
-            `${productionUrl}/api/og/tarot?date=${dateStr}&size=portrait`,
-            `${productionUrl}/api/og/moon?date=${dateStr}&size=portrait`,
+            `${productionUrl}/api/og/cosmic/${dateStr}/story`,
+            `${productionUrl}/api/og/crystal?date=${dateStr}&size=story`,
+            `${productionUrl}/api/og/tarot?date=${dateStr}&size=story`,
+            `${productionUrl}/api/og/moon?date=${dateStr}&size=story`,
             // `${productionUrl}/api/og/horoscope?date=${dateStr}&size=landscape`,
           ],
         },
-        x: {
+        twitter: {
           content: `${generateCosmicPost(cosmicContent).snippetShort.replace(/\n/g, ' ')} ${platformHashtags.twitter}`,
           media: [
             `${productionUrl}/api/og/cosmic/${dateStr}/landscape`,
@@ -1981,30 +1997,30 @@ async function runNotificationCheck(dateStr: string) {
       const threeDayReminders = await sql`
         SELECT DISTINCT
           s.user_id,
-          s.email as email,
+          s.user_email as email,
           s.user_name as name,
           s.trial_ends_at,
-          s.plan
+          s.plan_type as plan
         FROM subscriptions s
         WHERE s.status = 'trial'
         AND s.trial_ends_at::date = ${formatDate(threeDaysFromNow)}
         AND (s.trial_reminder_3d_sent = false OR s.trial_reminder_3d_sent IS NULL)
-        AND s.email IS NOT NULL
+        AND s.user_email IS NOT NULL
       `;
 
       // Get trials ending in 1 day (final reminder)
       const oneDayReminders = await sql`
         SELECT DISTINCT
           s.user_id,
-          s.email as email,
+          s.user_email as email,
           s.user_name as name,
           s.trial_ends_at,
-          s.plan
+          s.plan_type as plan
         FROM subscriptions s
         WHERE s.status = 'trial'
         AND s.trial_ends_at::date = ${formatDate(oneDayFromNow)}
         AND (s.trial_reminder_1d_sent = false OR s.trial_reminder_1d_sent IS NULL)
-        AND s.email IS NOT NULL
+        AND s.user_email IS NOT NULL
       `;
 
       let sent3Day = 0;
@@ -2127,14 +2143,14 @@ async function runNotificationCheck(dateStr: string) {
       const expiredTrials = await sql`
         SELECT DISTINCT
           s.user_id,
-          s.email as email,
+          s.user_email as email,
           s.user_name as name,
           s.trial_ends_at
         FROM subscriptions s
         WHERE s.status = 'trial'
         AND s.trial_ends_at::date = ${formatDate(yesterday)}
         AND (s.trial_expired_email_sent = false OR s.trial_expired_email_sent IS NULL)
-        AND s.email IS NOT NULL
+        AND s.user_email IS NOT NULL
       `;
 
       let sentExpired = 0;

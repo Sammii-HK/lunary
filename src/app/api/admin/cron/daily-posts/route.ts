@@ -7,6 +7,7 @@ export async function POST(request: NextRequest) {
   try {
     const body = await request.json().catch(() => ({}));
     const force = Boolean(body?.force);
+    const date = typeof body?.date === 'string' ? body.date : undefined;
     const cronSecret = process.env.CRON_SECRET;
 
     if (!cronSecret) {
@@ -17,7 +18,10 @@ export async function POST(request: NextRequest) {
     }
 
     const baseUrl = getImageBaseUrl();
-    const endpoint = `${baseUrl}/api/cron/daily-posts${force ? '?force=true' : ''}`;
+    const query = new URLSearchParams();
+    if (force) query.set('force', 'true');
+    if (date) query.set('date', date);
+    const endpoint = `${baseUrl}/api/cron/daily-posts${query.toString() ? `?${query.toString()}` : ''}`;
 
     const response = await fetch(endpoint, {
       method: 'GET',

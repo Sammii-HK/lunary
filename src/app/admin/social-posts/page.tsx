@@ -757,7 +757,7 @@ export default function SocialPostsPage() {
     }, 2000);
   };
 
-  const triggerDailyCron = async (force = false) => {
+  const triggerDailyCron = async (force = false, date?: string) => {
     const confirmMessage = force
       ? 'Force run daily cron now? This bypasses the duplicate execution guard.'
       : 'Run daily cron now?';
@@ -768,7 +768,7 @@ export default function SocialPostsPage() {
       const response = await fetch('/api/admin/cron/daily-posts', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ force }),
+        body: JSON.stringify({ force, date }),
       });
       const data = await response.json();
       if (data.success) {
@@ -1281,6 +1281,19 @@ export default function SocialPostsPage() {
                   className='border-zinc-700 text-zinc-300 hover:bg-zinc-800'
                 >
                   {dailyCronRunning ? 'Running cron...' : 'Run daily cron'}
+                </Button>
+                <Button
+                  onClick={() =>
+                    triggerDailyCron(
+                      false,
+                      new Date().toISOString().split('T')[0],
+                    )
+                  }
+                  disabled={loading || dailyCronRunning}
+                  variant='outline'
+                  className='border-zinc-700 text-zinc-300 hover:bg-zinc-800'
+                >
+                  Run for today
                 </Button>
                 <Button
                   onClick={() => triggerDailyCron(true)}
