@@ -10,6 +10,21 @@ function getStripe(secretKey?: string) {
   return new Stripe(key);
 }
 
+async function findCustomerByEmail(email: string): Promise<string | null> {
+  const stripe = getStripe();
+  if (!stripe) return null;
+  try {
+    const customers = await stripe.customers.list({
+      email,
+      limit: 1,
+    });
+    return customers.data[0]?.id || null;
+  } catch (error) {
+    console.warn('Failed to lookup Stripe customer by email:', error);
+    return null;
+  }
+}
+
 export async function POST(request: NextRequest) {
   try {
     let body;
@@ -54,18 +69,42 @@ export async function POST(request: NextRequest) {
         const dbRow = result.rows[0];
         // If status is 'cancelled' or forceRefresh is true, verify with Stripe
         // to get accurate cancel_at_period_end status
-        if (forceRefresh || dbRow.status === 'cancelled') {
-          const stripeCustomerId = dbRow.stripe_customer_id;
-          if (stripeCustomerId) {
-            const stripeData = await checkStripeForSubscription(
-              stripeCustomerId,
-              userId,
-            );
-            if (stripeData) {
-              return formatResponse(stripeData, forceRefresh);
+        let stripeCustomerId = dbRow.stripe_customer_id;
+        if (!stripeCustomerId && dbRow.user_email) {
+          const foundCustomerId = await findCustomerByEmail(dbRow.user_email);
+          if (foundCustomerId) {
+            stripeCustomerId = foundCustomerId;
+            if (userId) {
+              try {
+                await sql`
+                  UPDATE subscriptions
+                  SET stripe_customer_id = ${stripeCustomerId}, updated_at = NOW()
+                  WHERE user_id = ${userId}
+                `;
+              } catch (error) {
+                console.error('Failed to persist Stripe customer ID:', error);
+              }
             }
           }
         }
+
+        if (
+          (forceRefresh || dbRow.status === 'cancelled') &&
+          stripeCustomerId
+        ) {
+          const stripeData = await checkStripeForSubscription(
+            stripeCustomerId,
+            userId,
+          );
+          if (stripeData) {
+            return formatResponse(stripeData, forceRefresh);
+          }
+        }
+
+        if (stripeCustomerId) {
+          dbRow.stripe_customer_id = stripeCustomerId;
+        }
+
         return formatResponse(dbRow, forceRefresh);
       }
     }
