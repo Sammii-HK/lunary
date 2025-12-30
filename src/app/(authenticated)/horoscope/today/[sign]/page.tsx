@@ -4,6 +4,7 @@ import { notFound } from 'next/navigation';
 import { ArrowLeft, ArrowRight, Calendar } from 'lucide-react';
 import { renderJsonLd } from '@/lib/schema';
 import { Breadcrumbs } from '@/components/grimoire/Breadcrumbs';
+import { MONTHS, MONTH_DISPLAY_NAMES } from '@/constants/seo/monthly-horoscope';
 
 export const revalidate = 86400;
 
@@ -103,6 +104,11 @@ export default async function DailyHoroscopePage({
   const prevSign = signs[(signIndex - 1 + 12) % 12];
   const nextSign = signs[(signIndex + 1) % 12];
 
+  const currentDate = new Date();
+  const currentMonth = MONTHS[currentDate.getMonth()];
+  const currentMonthName = MONTH_DISPLAY_NAMES[currentMonth];
+  const currentYear = currentDate.getFullYear();
+
   const horoscope = await getHoroscope(sign);
 
   const today = new Date().toLocaleDateString('en-US', {
@@ -179,6 +185,30 @@ export default async function DailyHoroscopePage({
           </div>
         </article>
 
+        <section className='mb-12 grid gap-4 md:grid-cols-3'>
+          <div className='rounded-lg border border-zinc-800 bg-zinc-900/40 p-5'>
+            <h2 className='text-lg font-medium text-zinc-100 mb-2'>Love</h2>
+            <p className='text-sm text-zinc-400'>
+              Keep love simple today. {signData.name} benefits from honest
+              signals and gentle pacing.
+            </p>
+          </div>
+          <div className='rounded-lg border border-zinc-800 bg-zinc-900/40 p-5'>
+            <h2 className='text-lg font-medium text-zinc-100 mb-2'>Career</h2>
+            <p className='text-sm text-zinc-400'>
+              Focus on one visible task. Small wins build momentum for
+              {signData.name}.
+            </p>
+          </div>
+          <div className='rounded-lg border border-zinc-800 bg-zinc-900/40 p-5'>
+            <h2 className='text-lg font-medium text-zinc-100 mb-2'>Year</h2>
+            <p className='text-sm text-zinc-400'>
+              Today&apos;s choices set a tone. Stay aligned with what you want
+              to be known for this year.
+            </p>
+          </div>
+        </section>
+
         <nav className='flex items-center justify-between mb-12'>
           <Link
             href={`/horoscope/today/${prevSign.name.toLowerCase()}`}
@@ -213,12 +243,12 @@ export default async function DailyHoroscopePage({
             </p>
           </Link>
           <Link
-            href={`/grimoire/zodiac/${sign}`}
+            href={`/horoscope/${sign}/${currentYear}/${currentMonth}`}
             className='p-6 rounded-xl border border-zinc-800 bg-zinc-900/30 hover:border-lunary-primary-600 transition-colors'
           >
-            <h3 className='font-medium mb-1'>About {signData.name}</h3>
+            <h3 className='font-medium mb-1'>Monthly Forecast</h3>
             <p className='text-zinc-400 text-sm'>
-              Deep dive into {signData.name} traits and characteristics.
+              Full {signData.name} outlook for {currentMonthName} {currentYear}.
             </p>
           </Link>
         </section>

@@ -104,6 +104,32 @@ export default async function YearHoroscopePage({
           </p>
         </header>
 
+        <section className='mb-12 grid gap-4 md:grid-cols-3'>
+          <div className='rounded-lg border border-zinc-800 bg-zinc-900/40 p-5'>
+            <h2 className='text-lg font-medium text-zinc-100 mb-2'>Love</h2>
+            <p className='text-sm text-zinc-400'>
+              {year} invites {signName} to build love through{' '}
+              {element.toLowerCase()} consistency. Lead with honesty, and let
+              relationships deepen through shared routines.
+            </p>
+          </div>
+          <div className='rounded-lg border border-zinc-800 bg-zinc-900/40 p-5'>
+            <h2 className='text-lg font-medium text-zinc-100 mb-2'>Career</h2>
+            <p className='text-sm text-zinc-400'>
+              Your ruler, {ruler}, highlights long-term momentum. Focus on
+              steady growth, visible wins, and a clearer public direction.
+            </p>
+          </div>
+          <div className='rounded-lg border border-zinc-800 bg-zinc-900/40 p-5'>
+            <h2 className='text-lg font-medium text-zinc-100 mb-2'>Year</h2>
+            <p className='text-sm text-zinc-400'>
+              This year is about aligning your monthly choices with a single
+              through-line. Let {signName} set the tone for what you want to be
+              known for.
+            </p>
+          </div>
+        </section>
+
         <section className='mb-12'>
           <h2 className='text-2xl font-medium text-zinc-100 mb-6'>
             Select a Month
