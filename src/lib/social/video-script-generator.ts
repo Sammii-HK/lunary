@@ -374,6 +374,8 @@ export async function generateTikTokScript(
   totalParts: number = 3,
   baseUrl: string = '',
 ): Promise<VideoScript> {
+  const safePartNumber = Number.isFinite(partNumber) ? partNumber : 1;
+  const safeTotalParts = Number.isFinite(totalParts) ? totalParts : 7;
   const grimoireData = getGrimoireDataForFacet(facet);
 
   // Generate complete, flowing script using AI
@@ -381,8 +383,8 @@ export async function generateTikTokScript(
     facet,
     theme,
     grimoireData,
-    partNumber,
-    totalParts,
+    safePartNumber,
+    safeTotalParts,
   );
 
   const wordCount = countWords(fullScript);
@@ -391,13 +393,18 @@ export async function generateTikTokScript(
   const sections = parseScriptIntoSections(fullScript, 'tiktok');
 
   // Generate TikTok-specific metadata and cover image
-  const metadata = generateTikTokMetadata(facet, theme, partNumber, totalParts);
+  const metadata = generateTikTokMetadata(
+    facet,
+    theme,
+    safePartNumber,
+    safeTotalParts,
+  );
   const coverImageUrl = generateCoverImageUrl(
     facet,
     theme,
-    partNumber,
+    safePartNumber,
     baseUrl,
-    totalParts,
+    safeTotalParts,
   );
 
   return {
@@ -413,7 +420,7 @@ export async function generateTikTokScript(
     status: 'draft',
     metadata,
     coverImageUrl,
-    partNumber,
+    partNumber: safePartNumber,
   };
 }
 
@@ -459,14 +466,15 @@ async function generateTikTokScriptContent(
     }
   }
 
-  const prompt = `Create a complete, flowing TikTok video script (30-45 seconds, 70-110 words) about ${facet.title} as part of a weekly series on ${theme.name}.
+  const prompt = `Create a complete, flowing TikTok video script (30-45 seconds, 70-110 words) about ${facet.title} as part of a daily series.
 
 This is Part ${partNumber} of ${totalParts} in the series. The script should be:
 - Complete and flowing - written as a natural narrative that can be read aloud smoothly
 - Educational and informative, not conversational
-- Part 1 includes a brief introduction to the weekly theme. Parts 2+ should not repeat the theme intro.
+- Part 1 may include a brief series context. Parts 2+ should not repeat the intro.
 - Structured with a strong opening hook, clear explanation, and memorable takeaway
-- Include a callback to the series in every part: "Part ${partNumber} of ${totalParts}: ${facet.title}. This week's theme: ${theme.name}."
+- Include a callback to the series in every part: "Part ${partNumber} of ${totalParts}: ${facet.title}."
+- Do NOT mention "next week" or "this week's theme."
 
 Topic: ${facet.title}
 Focus: ${facet.focus}
@@ -498,7 +506,7 @@ Return ONLY the complete script text. No section headers, no markdown, no format
 
     // Ensure series callback is included
     if (!script.includes(`Part ${partNumber}`)) {
-      script += `\n\nPart ${partNumber} of ${totalParts}: ${facet.title}. This week's theme: ${theme.name}.`;
+      script += `\n\nPart ${partNumber} of ${totalParts}: ${facet.title}.`;
     }
 
     return script;
@@ -768,10 +776,14 @@ function generateCoverImageUrl(
   baseUrl: string = '',
   totalParts: number,
 ): string {
+  const safePartNumber = Number.isFinite(partNumber) ? partNumber : 1;
+  const safeTotalParts = Number.isFinite(totalParts) ? totalParts : 7;
   const slug =
     facet.grimoireSlug.split('/').pop() ||
     facet.title.toLowerCase().replace(/\s+/g, '-');
-  const subtitle = encodeURIComponent(`Part ${partNumber} of ${totalParts}`);
+  const subtitle = encodeURIComponent(
+    `Part ${safePartNumber} of ${safeTotalParts}`,
+  );
   const title = encodeURIComponent(facet.title);
 
   // cover=tiktok triggers larger text sizes for TikTok thumbnail legibility

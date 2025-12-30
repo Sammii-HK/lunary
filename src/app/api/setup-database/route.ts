@@ -126,6 +126,11 @@ export async function POST(request: NextRequest) {
         rejection_feedback TEXT,
         image_url TEXT,
         video_url TEXT,
+        week_theme TEXT,
+        week_start DATE,
+        quote_id INTEGER,
+        quote_text TEXT,
+        quote_author TEXT,
         created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
         updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
       )
@@ -135,6 +140,14 @@ export async function POST(request: NextRequest) {
     await sql`CREATE INDEX IF NOT EXISTS idx_social_posts_platform ON social_posts(platform)`;
     await sql`CREATE INDEX IF NOT EXISTS idx_social_posts_created_at ON social_posts(created_at)`;
     await sql`CREATE INDEX IF NOT EXISTS idx_social_posts_scheduled_date ON social_posts(scheduled_date)`;
+
+    await sql`ALTER TABLE social_posts ADD COLUMN IF NOT EXISTS week_theme TEXT`;
+    await sql`ALTER TABLE social_posts ADD COLUMN IF NOT EXISTS week_start DATE`;
+    await sql`ALTER TABLE social_posts ADD COLUMN IF NOT EXISTS quote_id INTEGER`;
+    await sql`ALTER TABLE social_posts ADD COLUMN IF NOT EXISTS quote_text TEXT`;
+    await sql`ALTER TABLE social_posts ADD COLUMN IF NOT EXISTS quote_author TEXT`;
+    await sql`ALTER TABLE social_posts ADD COLUMN IF NOT EXISTS base_group_key TEXT`;
+    await sql`ALTER TABLE social_posts ADD COLUMN IF NOT EXISTS base_post_id INTEGER`;
 
     await sql`
       CREATE OR REPLACE FUNCTION update_social_posts_updated_at()
@@ -155,6 +168,64 @@ export async function POST(request: NextRequest) {
       BEFORE UPDATE ON social_posts
       FOR EACH ROW
       EXECUTE FUNCTION update_social_posts_updated_at()
+    `;
+
+    await sql`
+      CREATE TABLE IF NOT EXISTS video_scripts (
+        id SERIAL PRIMARY KEY,
+        theme_id TEXT NOT NULL,
+        theme_name TEXT NOT NULL,
+        facet_title TEXT NOT NULL,
+        platform TEXT NOT NULL,
+        sections JSONB NOT NULL,
+        full_script TEXT NOT NULL,
+        word_count INTEGER NOT NULL,
+        estimated_duration TEXT NOT NULL,
+        scheduled_date DATE NOT NULL,
+        status TEXT NOT NULL DEFAULT 'draft',
+        metadata JSONB,
+        cover_image_url TEXT,
+        part_number INTEGER,
+        written_post_content TEXT,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+        updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+      )
+    `;
+
+    await sql`
+      CREATE INDEX IF NOT EXISTS idx_video_scripts_platform
+      ON video_scripts(platform)
+    `;
+    await sql`
+      CREATE INDEX IF NOT EXISTS idx_video_scripts_status
+      ON video_scripts(status)
+    `;
+    await sql`
+      CREATE INDEX IF NOT EXISTS idx_video_scripts_scheduled
+      ON video_scripts(scheduled_date)
+    `;
+
+    await sql`
+      CREATE TABLE IF NOT EXISTS video_jobs (
+        id SERIAL PRIMARY KEY,
+        script_id INTEGER NOT NULL,
+        week_start DATE,
+        date_key DATE,
+        topic TEXT,
+        status TEXT NOT NULL DEFAULT 'pending',
+        attempts INTEGER NOT NULL DEFAULT 0,
+        last_error TEXT,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+        updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+      )
+    `;
+    await sql`
+      CREATE UNIQUE INDEX IF NOT EXISTS idx_video_jobs_script_id
+      ON video_jobs(script_id)
+    `;
+    await sql`
+      CREATE UNIQUE INDEX IF NOT EXISTS idx_video_jobs_week_topic
+      ON video_jobs(week_start, date_key, topic)
     `;
 
     // Create the subscriptions table
@@ -183,6 +254,14 @@ export async function POST(request: NextRequest) {
         
         -- Period information
         current_period_end TIMESTAMP WITH TIME ZONE,
+
+        -- Discount tracking
+        has_discount BOOLEAN DEFAULT false,
+        discount_percent DECIMAL(5,2),
+        monthly_amount_due DECIMAL(10,2),
+        coupon_id TEXT,
+        promo_code TEXT,
+        discount_ends_at TIMESTAMP WITH TIME ZONE,
         
         -- Timestamps
         created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
@@ -208,6 +287,36 @@ export async function POST(request: NextRequest) {
         IF NOT EXISTS (SELECT 1 FROM information_schema.columns 
                        WHERE table_name = 'subscriptions' AND column_name = 'user_name') THEN
           ALTER TABLE subscriptions ADD COLUMN user_name TEXT;
+        END IF;
+      END $$;
+    `;
+
+    await sql`
+      DO $$ 
+      BEGIN
+        IF NOT EXISTS (SELECT 1 FROM information_schema.columns 
+                       WHERE table_name = 'subscriptions' AND column_name = 'has_discount') THEN
+          ALTER TABLE subscriptions ADD COLUMN has_discount BOOLEAN DEFAULT false;
+        END IF;
+        IF NOT EXISTS (SELECT 1 FROM information_schema.columns 
+                       WHERE table_name = 'subscriptions' AND column_name = 'discount_percent') THEN
+          ALTER TABLE subscriptions ADD COLUMN discount_percent DECIMAL(5,2);
+        END IF;
+        IF NOT EXISTS (SELECT 1 FROM information_schema.columns 
+                       WHERE table_name = 'subscriptions' AND column_name = 'monthly_amount_due') THEN
+          ALTER TABLE subscriptions ADD COLUMN monthly_amount_due DECIMAL(10,2);
+        END IF;
+        IF NOT EXISTS (SELECT 1 FROM information_schema.columns 
+                       WHERE table_name = 'subscriptions' AND column_name = 'coupon_id') THEN
+          ALTER TABLE subscriptions ADD COLUMN coupon_id TEXT;
+        END IF;
+        IF NOT EXISTS (SELECT 1 FROM information_schema.columns 
+                       WHERE table_name = 'subscriptions' AND column_name = 'promo_code') THEN
+          ALTER TABLE subscriptions ADD COLUMN promo_code TEXT;
+        END IF;
+        IF NOT EXISTS (SELECT 1 FROM information_schema.columns 
+                       WHERE table_name = 'subscriptions' AND column_name = 'discount_ends_at') THEN
+          ALTER TABLE subscriptions ADD COLUMN discount_ends_at TIMESTAMP WITH TIME ZONE;
         END IF;
       END $$;
     `;

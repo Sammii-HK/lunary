@@ -38,7 +38,10 @@ export async function POST(request: NextRequest) {
     const video = videoResult.rows[0];
     const videoUrl = video.video_url;
     const title = video.title || 'Weekly Cosmic Forecast';
-    const description = video.description || 'Your cosmic forecast from Lunary';
+    const description =
+      video.post_content ||
+      video.description ||
+      'Your cosmic forecast from Lunary';
     const postContent =
       video.post_content ||
       `${title}\n\n${description}\n\n#astrology #cosmicforecast #lunary`;

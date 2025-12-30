@@ -87,6 +87,18 @@ export default function sitemap(): MetadataRoute.Sitemap {
       priority: 0.8,
     },
     {
+      url: `${baseUrl}/grimoire/tarot/yes-or-no`,
+      lastModified: now,
+      changeFrequency: 'monthly' as const,
+      priority: 0.7,
+    },
+    {
+      url: `${baseUrl}/grimoire/tarot/yes-or-no/love-timeframe`,
+      lastModified: now,
+      changeFrequency: 'monthly' as const,
+      priority: 0.7,
+    },
+    {
       url: `${baseUrl}/grimoire/zodiac`,
       lastModified: now,
       changeFrequency: 'monthly' as const,

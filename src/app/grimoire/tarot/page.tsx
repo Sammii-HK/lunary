@@ -112,8 +112,18 @@ export default function TarotIndexPage() {
         ]}
         relatedItems={[
           {
+            name: 'Yes or No Tarot',
+            href: '/grimoire/tarot/yes-or-no',
+            type: 'guide',
+          },
+          {
             name: 'Tarot Spreads',
             href: '/grimoire/tarot/spreads',
+            type: 'guide',
+          },
+          {
+            name: 'Tarot Suits',
+            href: '/grimoire/tarot/suits',
             type: 'guide',
           },
           {
@@ -179,6 +189,12 @@ export default function TarotIndexPage() {
                 </Link>
               ))}
             </div>
+            <Link
+              href='/grimoire/tarot/suits'
+              className='inline-block mt-5 text-sm text-violet-300 hover:text-violet-200 transition-colors'
+            >
+              Explore the full tarot suits guide →
+            </Link>
           </section>
 
           <section>

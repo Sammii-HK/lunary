@@ -849,9 +849,10 @@ async function calculateMoonPhases(
       phaseName = 'First Quarter';
       isMajorPhase = true;
     } else if (isFullMoon) {
-      // Use named moon for full moons
+      // Use named moon for full moons, but keep "Full Moon" in the label
       const month = currentDate.getMonth() + 1;
-      phaseName = moonNames[month] || 'Full Moon';
+      const namedMoon = moonNames[month];
+      phaseName = namedMoon ? `${namedMoon} (Full Moon)` : 'Full Moon';
       isMajorPhase = true;
     } else if (isThirdQuarter) {
       phaseName = 'Last Quarter';
@@ -893,7 +894,22 @@ async function calculateMoonPhases(
   return phases;
 }
 
+function normalizeMoonPhaseName(phase: string): string {
+  const lower = phase.toLowerCase();
+  if (lower.includes('new moon')) return 'New Moon';
+  if (lower.includes('full moon')) return 'Full Moon';
+  if (lower.includes('first quarter')) return 'First Quarter';
+  if (lower.includes('last quarter') || lower.includes('third quarter'))
+    return 'Last Quarter';
+  if (lower.includes('waxing crescent')) return 'Waxing Crescent';
+  if (lower.includes('waxing gibbous')) return 'Waxing Gibbous';
+  if (lower.includes('waning gibbous')) return 'Waning Gibbous';
+  if (lower.includes('waning crescent')) return 'Waning Crescent';
+  return phase;
+}
+
 function getMoonPhaseEnergy(phase: string, sign: string): string {
+  const normalizedPhase = normalizeMoonPhaseName(phase);
   const phaseEnergies: { [key: string]: string } = {
     'New Moon': 'beginnings and intention setting',
     'Waxing Crescent': 'growth and building momentum',
@@ -905,10 +921,11 @@ function getMoonPhaseEnergy(phase: string, sign: string): string {
     'Waning Crescent': 'rest and preparation',
   };
 
-  return `The ${phase} in ${sign} brings energy for ${phaseEnergies[phase] || 'cosmic alignment'}`;
+  return `The ${phase} in ${sign} brings energy for ${phaseEnergies[normalizedPhase] || 'cosmic alignment'}`;
 }
 
 function getMoonPhaseGuidance(phase: string, sign: string): string {
+  const normalizedPhase = normalizeMoonPhaseName(phase);
   const guidance: { [key: string]: string } = {
     'New Moon': `Set intentions aligned with ${sign} energy. Plant seeds for new beginnings.`,
     'Waxing Crescent': `Take action on your New Moon intentions. Build momentum steadily.`,
@@ -920,10 +937,13 @@ function getMoonPhaseGuidance(phase: string, sign: string): string {
     'Waning Crescent': `Rest and prepare for the next cycle. Trust the process.`,
   };
 
-  return guidance[phase] || `Work with the ${phase} energy in ${sign}.`;
+  return (
+    guidance[normalizedPhase] || `Work with the ${phase} energy in ${sign}.`
+  );
 }
 
 function getMoonPhaseRituals(phase: string): string[] {
+  const normalizedPhase = normalizeMoonPhaseName(phase);
   const rituals: { [key: string]: string[] } = {
     'New Moon': [
       'Write intentions',
@@ -975,7 +995,13 @@ function getMoonPhaseRituals(phase: string): string[] {
     ],
   };
 
-  return rituals[phase] || ['Meditation', 'Journaling', 'Nature connection'];
+  return (
+    rituals[normalizedPhase] || [
+      'Meditation',
+      'Journaling',
+      'Nature connection',
+    ]
+  );
 }
 
 async function checkSeasonalEvents(

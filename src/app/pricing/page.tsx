@@ -29,6 +29,8 @@ import { FAQStructuredData } from '@/components/FAQStructuredData';
 import { conversionTracking } from '@/lib/analytics';
 import { MarketingFooter } from '@/components/MarketingFooter';
 import { createProductSchema, renderJsonLd } from '@/lib/schema';
+import { AuthComponent } from '@/components/Auth';
+import { useModal } from '@/hooks/useModal';
 
 export default function PricingPage() {
   const { user } = useUser();
@@ -43,6 +45,20 @@ export default function PricingPage() {
   const [billingCycle, setBillingCycle] = useState<'monthly' | 'annual'>(
     'monthly',
   );
+  const [showAuthModal, setShowAuthModal] = useState(false);
+  const [pendingCheckout, setPendingCheckout] = useState<{
+    priceId: string;
+    planId: string;
+  } | null>(null);
+
+  useModal({
+    isOpen: showAuthModal,
+    onClose: () => {
+      setShowAuthModal(false);
+      setPendingCheckout(null);
+    },
+    closeOnClickOutside: false,
+  });
 
   const togglePlanExpanded = (planId: string) => {
     setExpandedPlans((prev) => {
@@ -127,7 +143,7 @@ export default function PricingPage() {
       ? [freePlan, plusPlan, aiPlan].filter(Boolean)
       : [freePlan, plusPlan, annualPlan].filter(Boolean);
 
-  const handleSubscribe = async (priceId: string, planId: string) => {
+  const startCheckout = async (priceId: string, planId: string) => {
     if (!priceId) return;
 
     setLoading(planId);
@@ -160,6 +176,27 @@ export default function PricingPage() {
     } finally {
       setLoading(null);
     }
+  };
+
+  const handleSubscribe = async (priceId: string, planId: string) => {
+    if (!authState.isAuthenticated) {
+      setPendingCheckout({ priceId, planId });
+      setShowAuthModal(true);
+      return;
+    }
+
+    await startCheckout(priceId, planId);
+  };
+
+  const handleAuthSuccess = async () => {
+    const pending = pendingCheckout;
+    setShowAuthModal(false);
+    setPendingCheckout(null);
+    if (!pending) {
+      return;
+    }
+
+    await startCheckout(pending.priceId, pending.planId);
   };
 
   const faqs = [
@@ -633,6 +670,37 @@ export default function PricingPage() {
           <MarketingFooter />
         </div>
       </div>
+
+      {showAuthModal && (
+        <div className='fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50'>
+          <div className='bg-zinc-900 rounded-lg p-4 sm:p-6 w-full max-w-md relative mx-4 sm:mx-0'>
+            <button
+              onClick={() => {
+                setShowAuthModal(false);
+                setPendingCheckout(null);
+              }}
+              className='absolute top-2 right-2 sm:top-4 sm:right-4 text-zinc-400 hover:text-white text-xl'
+            >
+              ×
+            </button>
+
+            <div className='text-center mb-4 sm:mb-6'>
+              <h3 className='text-lg sm:text-xl font-bold text-white mb-2'>
+                Create your account
+              </h3>
+              <p className='text-zinc-300 text-xs sm:text-sm'>
+                Sign up to continue to checkout and start your free trial.
+              </p>
+            </div>
+
+            <AuthComponent
+              compact={false}
+              defaultToSignUp={true}
+              onSuccess={handleAuthSuccess}
+            />
+          </div>
+        </div>
+      )}
     </>
   );
 }

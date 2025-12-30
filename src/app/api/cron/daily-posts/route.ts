@@ -43,6 +43,9 @@ const executionTracker = new Map<string, boolean>();
 
 export async function GET(request: NextRequest) {
   try {
+    const url = new URL(request.url);
+    const force = url.searchParams.get('force') === 'true';
+    const overrideDate = url.searchParams.get('date');
     // Verify cron request
     // Vercel cron jobs send x-vercel-cron header, allow those
     // Check both lowercase and any case variations
@@ -135,42 +138,49 @@ export async function GET(request: NextRequest) {
 
     // Calculate target date: create posts for tomorrow (run the day before at 2 PM)
     const now = new Date();
-    const tomorrowDate = new Date(now);
-    tomorrowDate.setUTCDate(tomorrowDate.getUTCDate() + 1);
-    const targetDateStr = tomorrowDate.toISOString().split('T')[0];
+    const targetDateStr = (() => {
+      if (overrideDate && /^\d{4}-\d{2}-\d{2}$/.test(overrideDate)) {
+        return overrideDate;
+      }
+      const tomorrowDate = new Date(now);
+      tomorrowDate.setUTCDate(tomorrowDate.getUTCDate() + 1);
+      return tomorrowDate.toISOString().split('T')[0];
+    })();
     const dailyPostsKey = `daily-posts-${targetDateStr}`;
 
-    try {
-      const gateResult = await sql`
-        INSERT INTO notification_sent_events (date, event_key, event_type, event_name, event_priority, sent_by)
-        VALUES (${targetDateStr}::date, ${dailyPostsKey}, 'daily_posts', 'Daily Posts', 1, 'cron')
-        ON CONFLICT (date, event_key) DO NOTHING
-        RETURNING id
-      `;
+    if (!force) {
+      try {
+        const gateResult = await sql`
+          INSERT INTO notification_sent_events (date, event_key, event_type, event_name, event_priority, sent_by)
+          VALUES (${targetDateStr}::date, ${dailyPostsKey}, 'daily_posts', 'Daily Posts', 1, 'cron')
+          ON CONFLICT (date, event_key) DO NOTHING
+          RETURNING id
+        `;
 
-      if (gateResult.rows.length === 0) {
-        console.log(
-          `⚠️ Daily posts already generated for ${targetDateStr}, skipping duplicate execution`,
-        );
-        return NextResponse.json({
-          success: false,
-          message: `Already executed for target date (${targetDateStr})`,
-          skipped: true,
-        });
-      }
-    } catch (error: any) {
-      if (error?.code === '42P01') {
-        console.warn(
-          'notification_sent_events table missing; proceeding without DB dedupe',
-        );
-      } else {
-        throw error;
+        if (gateResult.rows.length === 0) {
+          console.log(
+            `⚠️ Daily posts already generated for ${targetDateStr}, skipping duplicate execution`,
+          );
+          return NextResponse.json({
+            success: false,
+            message: `Already executed for target date (${targetDateStr})`,
+            skipped: true,
+          });
+        }
+      } catch (error: any) {
+        if (error?.code === '42P01') {
+          console.warn(
+            'notification_sent_events table missing; proceeding without DB dedupe',
+          );
+        } else {
+          throw error;
+        }
       }
     }
 
     // Atomic check-and-set: Prevent duplicate execution for the same target date
     // This works better in serverless than separate checks
-    if (executionTracker.has(targetDateStr)) {
+    if (!force && executionTracker.has(targetDateStr)) {
       console.log(
         `⚠️ Cron already executed for target date (${targetDateStr}), skipping duplicate execution`,
       );
@@ -182,7 +192,9 @@ export async function GET(request: NextRequest) {
     }
 
     // Immediately mark as executing for this target date (atomic operation)
-    executionTracker.set(targetDateStr, true);
+    if (!force) {
+      executionTracker.set(targetDateStr, true);
+    }
 
     // Clean up old entries (keep only last 7 days to prevent memory leak)
     const cutoffDate = new Date();
@@ -598,12 +610,12 @@ async function runDailyPosts(dateStr: string) {
     {
       name: dateStr,
       content: `${postContent}\n\n${platformHashtags.instagram}`,
-      platforms: ['threads', 'pinterest', 'facebook', 'instagram'],
+      platforms: ['pinterest', 'facebook', 'instagram'],
       imageUrls: [
-        `${productionUrl}/api/og/cosmic/${dateStr}`,
-        `${productionUrl}/api/og/crystal?date=${dateStr}`,
-        `${productionUrl}/api/og/tarot?date=${dateStr}`,
-        `${productionUrl}/api/og/moon?date=${dateStr}`,
+        `${productionUrl}/api/og/cosmic/${dateStr}/story`,
+        `${productionUrl}/api/og/crystal?date=${dateStr}&size=story`,
+        `${productionUrl}/api/og/tarot?date=${dateStr}&size=story`,
+        `${productionUrl}/api/og/moon?date=${dateStr}&size=story`,
         // `${productionUrl}/api/og/horoscope?date=${dateStr}`,
       ],
       alt: `${cosmicContent.primaryEvent.name} - ${cosmicContent.primaryEvent.energy}. Daily cosmic guidance from lunary.app.`,
@@ -631,17 +643,27 @@ async function runDailyPosts(dateStr: string) {
         //     `${productionUrl}/api/og/horoscope?date=${dateStr}`,
         //   ],
         // },
+        threads: {
+          content: `${postContent}`,
+          media: [
+            `${productionUrl}/api/og/cosmic/${dateStr}/landscape`,
+            `${productionUrl}/api/og/crystal?date=${dateStr}&size=landscape`,
+            `${productionUrl}/api/og/tarot?date=${dateStr}&size=landscape`,
+            `${productionUrl}/api/og/moon?date=${dateStr}&size=landscape`,
+            // `${productionUrl}/api/og/horoscope?date=${dateStr}&size=portrait`,
+          ],
+        },
         tiktok: {
           content: `${generateCosmicPost(cosmicContent).snippetShort} ${platformHashtags.tiktok}`,
           media: [
-            `${productionUrl}/api/og/cosmic/${dateStr}/portrait`,
-            `${productionUrl}/api/og/crystal?date=${dateStr}&size=portrait`,
-            `${productionUrl}/api/og/tarot?date=${dateStr}&size=portrait`,
-            `${productionUrl}/api/og/moon?date=${dateStr}&size=portrait`,
+            `${productionUrl}/api/og/cosmic/${dateStr}/story`,
+            `${productionUrl}/api/og/crystal?date=${dateStr}&size=story`,
+            `${productionUrl}/api/og/tarot?date=${dateStr}&size=story`,
+            `${productionUrl}/api/og/moon?date=${dateStr}&size=story`,
             // `${productionUrl}/api/og/horoscope?date=${dateStr}&size=landscape`,
           ],
         },
-        x: {
+        twitter: {
           content: `${generateCosmicPost(cosmicContent).snippetShort.replace(/\n/g, ' ')} ${platformHashtags.twitter}`,
           media: [
             `${productionUrl}/api/og/cosmic/${dateStr}/landscape`,
@@ -687,6 +709,7 @@ async function runDailyPosts(dateStr: string) {
   // Send posts to Succulent
   const succulentApiUrl = 'https://app.succulent.social/api/posts';
   const apiKey = process.env.SUCCULENT_SECRET_KEY;
+  const accountGroupId = process.env.SUCCULENT_ACCOUNT_GROUP_ID;
   const postResults: any[] = [];
 
   // Helper function to format readable date
@@ -705,81 +728,149 @@ async function runDailyPosts(dateStr: string) {
     return `${formattedDate} at ${formattedTime}`;
   };
 
-  for (const post of posts) {
-    try {
-      const readableDate = formatReadableDate(dateStr, post.scheduledDate);
+  const missingConfig: string[] = [];
+  if (!apiKey) missingConfig.push('SUCCULENT_SECRET_KEY');
+  if (!accountGroupId) missingConfig.push('SUCCULENT_ACCOUNT_GROUP_ID');
 
-      // Add Pinterest options if Pinterest is in platforms
-      const pinterestOptions = post.platforms.includes('pinterest')
-        ? {
-            boardId:
-              process.env.SUCCULENT_PINTEREST_BOARD_ID || 'lunaryapp/lunary',
-            boardName: process.env.SUCCULENT_PINTEREST_BOARD_NAME || 'Lunary',
-          }
-        : undefined;
-
-      const postData: any = {
-        accountGroupId: process.env.SUCCULENT_ACCOUNT_GROUP_ID,
-        name: post.name || `Cosmic Post - ${readableDate}`,
-        content: post.content,
+  if (missingConfig.length > 0) {
+    const configError = `Missing required scheduler config: ${missingConfig.join(', ')}`;
+    for (const post of posts) {
+      postResults.push({
+        name: post.name,
         platforms: post.platforms,
+        status: 'error',
+        error: configError,
         scheduledDate: post.scheduledDate,
-        media: (post.imageUrls || []).map((imageUrl: string) => ({
-          type: 'image',
-          url: imageUrl,
-          alt: post.alt,
-        })),
-        variants: post.variants,
-        // redditOptions: post.redditOptions,
-      };
-
-      if (pinterestOptions) {
-        postData.pinterestOptions = pinterestOptions;
-      }
-
-      const response = await fetch(succulentApiUrl, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-API-Key': apiKey || '',
-        },
-        body: JSON.stringify(postData),
       });
+    }
+  } else {
+    for (const post of posts) {
+      try {
+        const readableDate = formatReadableDate(dateStr, post.scheduledDate);
 
-      const result = await response.json();
+        // Add Pinterest options if Pinterest is in platforms
+        const pinterestOptions = post.platforms.includes('pinterest')
+          ? {
+              boardId:
+                process.env.SUCCULENT_PINTEREST_BOARD_ID || 'lunaryapp/lunary',
+              boardName: process.env.SUCCULENT_PINTEREST_BOARD_NAME || 'Lunary',
+            }
+          : undefined;
 
-      if (response.ok) {
-        console.log(`✅ ${post.name} post scheduled successfully`);
-        postResults.push({
-          name: post.name,
+        const postData: any = {
+          accountGroupId,
+          name: post.name || `Cosmic Post - ${readableDate}`,
+          content: post.content,
           platforms: post.platforms,
-          status: 'success',
-          postId: result.data?.postId || result.postId || result.id,
           scheduledDate: post.scheduledDate,
-        });
-      } else {
-        const errorDetails = {
-          postName: post.name,
-          platforms: post.platforms,
-          status: response.status,
-          statusText: response.statusText,
-          error: result.error || result.message || `HTTP ${response.status}`,
-          responseBody: JSON.stringify(result).substring(0, 500),
+          media: (post.imageUrls || []).map((imageUrl: string) => ({
+            type: 'image',
+            url: imageUrl,
+            alt: post.alt,
+          })),
+          variants: post.variants,
+          // redditOptions: post.redditOptions,
         };
 
-        console.error(`❌ ${post.name} post failed:`, result);
+        if (pinterestOptions) {
+          postData.pinterestOptions = pinterestOptions;
+        }
 
-        // Log individual post failures
+        const response = await fetch(succulentApiUrl, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-API-Key': apiKey || '',
+          },
+          body: JSON.stringify(postData),
+        });
+
+        const responseText = await response.text();
+        let result: any = {};
+        if (responseText) {
+          try {
+            result = JSON.parse(responseText);
+          } catch {
+            result = { raw: responseText };
+          }
+        }
+
+        if (response.ok) {
+          console.log(`✅ ${post.name} post scheduled successfully`);
+          postResults.push({
+            name: post.name,
+            platforms: post.platforms,
+            status: 'success',
+            postId: result.data?.postId || result.postId || result.id,
+            scheduledDate: post.scheduledDate,
+          });
+        } else {
+          const errorMessage =
+            result.error ||
+            result.message ||
+            result.raw ||
+            `HTTP ${response.status}`;
+          const errorDetails = {
+            postName: post.name,
+            platforms: post.platforms,
+            status: response.status,
+            statusText: response.statusText,
+            error: errorMessage,
+            responseBody: responseText.substring(0, 500),
+          };
+
+          console.error(`❌ ${post.name} post failed:`, result);
+
+          // Log individual post failures
+          try {
+            const { logActivity } = await import('@/lib/admin-activity');
+            await logActivity({
+              activityType: 'content_creation',
+              activityCategory: 'content',
+              status: 'failed',
+              message: `Failed to schedule post "${post.name}" for ${dateStr}`,
+              metadata: errorDetails,
+              errorMessage,
+            });
+          } catch (logError) {
+            console.error('Failed to log post error:', logError);
+          }
+
+          postResults.push({
+            name: post.name,
+            platforms: post.platforms,
+            status: 'error',
+            error: errorMessage,
+            statusCode: response.status,
+            statusText: response.statusText,
+            scheduledDate: post.scheduledDate,
+          });
+        }
+
+        await new Promise((resolve) => setTimeout(resolve, 1000));
+      } catch (error) {
+        const errorMessage =
+          error instanceof Error ? error.message : 'Unknown error';
+        const errorStack = error instanceof Error ? error.stack : undefined;
+
+        console.error(`❌ ${post.name} post error:`, error);
+
+        // Log individual post errors
         try {
           const { logActivity } = await import('@/lib/admin-activity');
           await logActivity({
             activityType: 'content_creation',
             activityCategory: 'content',
             status: 'failed',
-            message: `Failed to schedule post "${post.name}" for ${dateStr}`,
-            metadata: errorDetails,
-            errorMessage:
-              result.error || result.message || `HTTP ${response.status}`,
+            message: `Error scheduling post "${post.name}" for ${dateStr}`,
+            metadata: {
+              postName: post.name,
+              platforms: post.platforms,
+              errorType:
+                error instanceof Error ? error.constructor.name : 'Unknown',
+              errorStack,
+            },
+            errorMessage,
           });
         } catch (logError) {
           console.error('Failed to log post error:', logError);
@@ -789,46 +880,9 @@ async function runDailyPosts(dateStr: string) {
           name: post.name,
           platforms: post.platforms,
           status: 'error',
-          error: result.error || result.message || `HTTP ${response.status}`,
-          scheduledDate: post.scheduledDate,
+          error: errorMessage,
         });
       }
-
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-    } catch (error) {
-      const errorMessage =
-        error instanceof Error ? error.message : 'Unknown error';
-      const errorStack = error instanceof Error ? error.stack : undefined;
-
-      console.error(`❌ ${post.name} post error:`, error);
-
-      // Log individual post errors
-      try {
-        const { logActivity } = await import('@/lib/admin-activity');
-        await logActivity({
-          activityType: 'content_creation',
-          activityCategory: 'content',
-          status: 'failed',
-          message: `Error scheduling post "${post.name}" for ${dateStr}`,
-          metadata: {
-            postName: post.name,
-            platforms: post.platforms,
-            errorType:
-              error instanceof Error ? error.constructor.name : 'Unknown',
-            errorStack,
-          },
-          errorMessage,
-        });
-      } catch (logError) {
-        console.error('Failed to log post error:', logError);
-      }
-
-      postResults.push({
-        name: post.name,
-        platforms: post.platforms,
-        status: 'error',
-        error: errorMessage,
-      });
     }
   }
 
@@ -936,8 +990,12 @@ async function runDailyPosts(dateStr: string) {
         dedupeKey: `daily-posts-success-${dateStr}`,
       });
     } else {
+      const firstError = failedPosts[0]?.error;
+      const failureSummary = firstError
+        ? `All daily posts failed to schedule: ${firstError}`
+        : 'All daily posts failed to schedule';
       const failureTemplate = NotificationTemplates.cronFailure(
-        'All daily posts failed to schedule',
+        failureSummary,
         failedPosts,
       );
       const failureFields = [
@@ -1939,30 +1997,30 @@ async function runNotificationCheck(dateStr: string) {
       const threeDayReminders = await sql`
         SELECT DISTINCT
           s.user_id,
-          s.email as email,
+          s.user_email as email,
           s.user_name as name,
           s.trial_ends_at,
-          s.plan_type
+          s.plan_type as plan
         FROM subscriptions s
         WHERE s.status = 'trial'
         AND s.trial_ends_at::date = ${formatDate(threeDaysFromNow)}
         AND (s.trial_reminder_3d_sent = false OR s.trial_reminder_3d_sent IS NULL)
-        AND s.email IS NOT NULL
+        AND s.user_email IS NOT NULL
       `;
 
       // Get trials ending in 1 day (final reminder)
       const oneDayReminders = await sql`
         SELECT DISTINCT
           s.user_id,
-          s.email as email,
+          s.user_email as email,
           s.user_name as name,
           s.trial_ends_at,
-          s.plan_type
+          s.plan_type as plan
         FROM subscriptions s
         WHERE s.status = 'trial'
         AND s.trial_ends_at::date = ${formatDate(oneDayFromNow)}
         AND (s.trial_reminder_1d_sent = false OR s.trial_reminder_1d_sent IS NULL)
-        AND s.email IS NOT NULL
+        AND s.user_email IS NOT NULL
       `;
 
       let sent3Day = 0;
@@ -2085,14 +2143,14 @@ async function runNotificationCheck(dateStr: string) {
       const expiredTrials = await sql`
         SELECT DISTINCT
           s.user_id,
-          s.email as email,
+          s.user_email as email,
           s.user_name as name,
           s.trial_ends_at
         FROM subscriptions s
         WHERE s.status = 'trial'
         AND s.trial_ends_at::date = ${formatDate(yesterday)}
         AND (s.trial_expired_email_sent = false OR s.trial_expired_email_sent IS NULL)
-        AND s.email IS NOT NULL
+        AND s.user_email IS NOT NULL
       `;
 
       let sentExpired = 0;

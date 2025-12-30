@@ -193,6 +193,234 @@ export const angelNumbers = {
       'Career-wise, 1212 indicates spiritual alignment with your work. Your career is supporting your spiritual growth.',
     keywords: ['Growth', 'Ascension', 'Spiritual', 'Consciousness'],
   },
+  '1111': {
+    number: '1111',
+    name: '1111 Angel Number',
+    meaning: 'Awakening & Alignment',
+    description:
+      '1111 is a powerful wake-up call signaling alignment with your path and a new level of awareness. It marks a moment to get clear and move forward.',
+    message:
+      'You are in alignment. Wake up to what matters and take the next right step with confidence.',
+    spiritualMeaning:
+      '1111 represents spiritual awakening and alignment with your higher path. It encourages clarity and conscious intention.',
+    loveMeaning:
+      'In love, 1111 signals alignment and honesty. It invites a fresh start or a deeper level of truth in relationships.',
+    careerMeaning:
+      'Career-wise, 1111 indicates a clear opening. Focus your energy and act on the opportunity in front of you.',
+    keywords: ['Awakening', 'Alignment', 'Clarity', 'Manifestation'],
+  },
+  '2222': {
+    number: '2222',
+    name: '2222 Angel Number',
+    meaning: 'Stability & Trust',
+    description:
+      '2222 emphasizes patience, balance, and steady progress. It is a reminder that the work you are doing is building something lasting.',
+    message:
+      'Stay steady. Trust the timing and keep building what matters most.',
+    spiritualMeaning:
+      '2222 represents harmony and long-term stability. It encourages trust in the unfolding process.',
+    loveMeaning:
+      'In love, 2222 supports commitment and balance. Nurture what is already working.',
+    careerMeaning:
+      'Career-wise, 2222 signals steady growth. Partnerships and consistent effort are favored.',
+    keywords: ['Stability', 'Trust', 'Balance', 'Patience'],
+  },
+  '3333': {
+    number: '3333',
+    name: '3333 Angel Number',
+    meaning: 'Expression & Support',
+    description:
+      '3333 amplifies creativity and communication. It suggests support around you and invites you to express your ideas clearly.',
+    message: 'Your voice matters. Share your ideas and let creativity lead.',
+    spiritualMeaning:
+      '3333 represents spiritual support and expressive energy. It encourages open communication and growth.',
+    loveMeaning:
+      'In love, 3333 highlights honest communication and joyful connection.',
+    careerMeaning:
+      'Career-wise, 3333 favors creative projects, collaboration, and visibility.',
+    keywords: ['Expression', 'Support', 'Creativity', 'Communication'],
+  },
+  '4444': {
+    number: '4444',
+    name: '4444 Angel Number',
+    meaning: 'Protection & Foundation',
+    description:
+      '4444 reinforces strong foundations and protection. It is a signal to stay grounded and keep your structure steady.',
+    message:
+      'You are supported. Build on solid ground and keep your focus steady.',
+    spiritualMeaning:
+      '4444 represents protection and stability. It encourages grounded action and reliable routines.',
+    loveMeaning:
+      'In love, 4444 points to security, trust, and steady commitment.',
+    careerMeaning:
+      'Career-wise, 4444 signals disciplined progress and long-term stability.',
+    keywords: ['Protection', 'Foundation', 'Stability', 'Grounding'],
+  },
+  '5555': {
+    number: '5555',
+    name: '5555 Angel Number',
+    meaning: 'Major Change & Freedom',
+    description:
+      '5555 signals a major shift. It asks you to release what is outdated and move toward freedom and growth.',
+    message: 'Change is here. Let go of the old and move with momentum.',
+    spiritualMeaning:
+      '5555 represents transformation and expansion. It encourages flexibility and courageous change.',
+    loveMeaning:
+      'In love, 5555 suggests shifts in dynamics and a chance to reset patterns.',
+    careerMeaning:
+      'Career-wise, 5555 indicates a pivot, new opportunities, or a change in direction.',
+    keywords: ['Change', 'Freedom', 'Transformation', 'Momentum'],
+  },
+  '7777': {
+    number: '7777',
+    name: '7777 Angel Number',
+    meaning: 'Spiritual Mastery & Inner Wisdom',
+    description:
+      '7777 is a deep spiritual number tied to inner wisdom, study, and alignment with your higher path.',
+    message: 'Trust your inner knowing. You are being guided toward mastery.',
+    spiritualMeaning:
+      '7777 represents spiritual depth, insight, and intuitive guidance. It supports inner alignment.',
+    loveMeaning:
+      'In love, 7777 emphasizes soulful connection and emotional depth.',
+    careerMeaning:
+      'Career-wise, 7777 points to purpose-driven work and meaningful growth.',
+    keywords: ['Wisdom', 'Insight', 'Alignment', 'Spiritual'],
+  },
+  '8888': {
+    number: '8888',
+    name: '8888 Angel Number',
+    meaning: 'Abundance & Power',
+    description:
+      '8888 highlights abundance, resource flow, and leadership. It signals momentum around results and rewards.',
+    message:
+      'Prosperity is building. Lead with integrity and manage your resources well.',
+    spiritualMeaning:
+      '8888 represents expansive energy and abundance. It encourages responsibility and balance with power.',
+    loveMeaning:
+      'In love, 8888 suggests stability, shared goals, and secure partnership.',
+    careerMeaning:
+      'Career-wise, 8888 indicates financial growth, recognition, and leadership opportunities.',
+    keywords: ['Abundance', 'Power', 'Prosperity', 'Leadership'],
+  },
+  '9999': {
+    number: '9999',
+    name: '9999 Angel Number',
+    meaning: 'Completion & Legacy',
+    description:
+      '9999 marks the end of a major cycle and invites you to release the old and step into a more meaningful path.',
+    message: 'Close the loop with grace. A new chapter opens when you let go.',
+    spiritualMeaning:
+      '9999 represents completion, release, and service to a higher purpose.',
+    loveMeaning:
+      'In love, 9999 suggests closure of old patterns and a more compassionate approach forward.',
+    careerMeaning:
+      'Career-wise, 9999 indicates finishing a chapter and moving toward work with deeper purpose.',
+    keywords: ['Completion', 'Legacy', 'Release', 'Purpose'],
+  },
+  '1313': {
+    number: '1313',
+    name: '1313 Angel Number',
+    meaning: 'Transformation & Growth',
+    description:
+      '1313 signals growth through change. It encourages you to rebuild with courage and keep moving forward.',
+    message:
+      'Transform what is no longer working. Growth follows brave action.',
+    spiritualMeaning:
+      '1313 represents transformation and steady evolution. It supports resilience and renewal.',
+    loveMeaning:
+      'In love, 1313 suggests clearing old patterns and creating something stronger.',
+    careerMeaning:
+      'Career-wise, 1313 favors strategic change and rebuilding with intention.',
+    keywords: ['Transformation', 'Growth', 'Resilience', 'Renewal'],
+  },
+  '1414': {
+    number: '1414',
+    name: '1414 Angel Number',
+    meaning: 'Discipline & Focus',
+    description:
+      '1414 reinforces structure and steady focus. It asks you to simplify and commit to your priorities.',
+    message: 'Focus your energy. Consistency creates results.',
+    spiritualMeaning:
+      '1414 represents grounded discipline and clear intention. It supports practical alignment.',
+    loveMeaning: 'In love, 1414 points to stability and healthy boundaries.',
+    careerMeaning:
+      'Career-wise, 1414 highlights systems, routines, and steady progress.',
+    keywords: ['Discipline', 'Focus', 'Structure', 'Stability'],
+  },
+  '1515': {
+    number: '1515',
+    name: '1515 Angel Number',
+    meaning: 'Change & Choice',
+    description:
+      '1515 is a number of decisive change. It reminds you that your choices shape the next chapter.',
+    message:
+      'Choose the direction that feels aligned. Momentum follows your decision.',
+    spiritualMeaning:
+      '1515 represents conscious change and aligned decision-making.',
+    loveMeaning: 'In love, 1515 invites a reset and more honest choices.',
+    careerMeaning:
+      'Career-wise, 1515 indicates a shift in direction and the need to choose wisely.',
+    keywords: ['Change', 'Choice', 'Alignment', 'Momentum'],
+  },
+  '1717': {
+    number: '1717',
+    name: '1717 Angel Number',
+    meaning: 'Confidence & Success',
+    description:
+      '1717 boosts self-trust and visibility. It signals that your efforts are being noticed.',
+    message:
+      'Trust yourself. Step forward and claim the progress you have earned.',
+    spiritualMeaning:
+      '1717 represents confidence and alignment with your path. It supports courageous action.',
+    loveMeaning:
+      'In love, 1717 highlights self-respect and clear communication.',
+    careerMeaning:
+      'Career-wise, 1717 indicates recognition, growth, and forward momentum.',
+    keywords: ['Confidence', 'Success', 'Momentum', 'Self-trust'],
+  },
+  '1818': {
+    number: '1818',
+    name: '1818 Angel Number',
+    meaning: 'Power & Prosperity',
+    description:
+      '1818 signals leadership and material progress. It encourages bold, grounded action.',
+    message: 'Step into leadership. Prosperity follows aligned effort.',
+    spiritualMeaning:
+      '1818 represents grounded power and responsible expansion.',
+    loveMeaning: 'In love, 1818 supports stability and shared ambitions.',
+    careerMeaning:
+      'Career-wise, 1818 points to advancement, influence, and material growth.',
+    keywords: ['Power', 'Prosperity', 'Leadership', 'Growth'],
+  },
+  '1919': {
+    number: '1919',
+    name: '1919 Angel Number',
+    meaning: 'Closure & Renewal',
+    description:
+      '1919 signals the end of a chapter and a new start. It asks you to release what is finished.',
+    message: 'Close what is complete. A fresh path opens when you let go.',
+    spiritualMeaning: '1919 represents closure, renewal, and forward movement.',
+    loveMeaning:
+      'In love, 1919 suggests releasing old patterns and making space for healthier connection.',
+    careerMeaning:
+      'Career-wise, 1919 indicates finishing a cycle and moving toward a new direction.',
+    keywords: ['Closure', 'Renewal', 'Release', 'New Path'],
+  },
+  '2020': {
+    number: '2020',
+    name: '2020 Angel Number',
+    meaning: 'Balance & Vision',
+    description:
+      '2020 emphasizes balance and long-term vision. It invites you to see clearly and act with intention.',
+    message:
+      'Find balance and keep your vision steady. The next step will be clear.',
+    spiritualMeaning:
+      '2020 represents perspective, patience, and alignment with your long view.',
+    loveMeaning: 'In love, 2020 highlights harmony and shared direction.',
+    careerMeaning:
+      'Career-wise, 2020 suggests strategic focus and steady planning.',
+    keywords: ['Balance', 'Vision', 'Alignment', 'Perspective'],
+  },
 };
 
 export const lifePathNumbers = {

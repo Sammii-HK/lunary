@@ -80,6 +80,8 @@ export function UserProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
   const birthChartRefreshRef = useRef(false);
+  const birthChartRefreshAttemptRef = useRef<number>(0);
+  const [hasLoadedOnce, setHasLoadedOnce] = useState(false);
   const BIRTH_CHART_VERSION = 3;
 
   const fetchUserData = useCallback(async () => {
@@ -90,7 +92,9 @@ export function UserProvider({ children }: { children: ReactNode }) {
     }
 
     try {
-      setLoading(true);
+      if (!hasLoadedOnce) {
+        setLoading(true);
+      }
       setError(null);
 
       const response = await fetch('/api/profile', {
@@ -127,6 +131,9 @@ export function UserProvider({ children }: { children: ReactNode }) {
         hasPersonalCard: !!personalCard,
         isPaid: ['active', 'trial', 'trialing'].includes(status),
       });
+      if (!hasLoadedOnce) {
+        setHasLoadedOnce(true);
+      }
     } catch (err) {
       console.error('Error fetching user data:', err);
       setError(err instanceof Error ? err : new Error('Unknown error'));
@@ -139,10 +146,15 @@ export function UserProvider({ children }: { children: ReactNode }) {
         hasPersonalCard: false,
         isPaid: false,
       });
+      if (!hasLoadedOnce) {
+        setHasLoadedOnce(true);
+      }
     } finally {
-      setLoading(false);
+      if (!hasLoadedOnce) {
+        setLoading(false);
+      }
     }
-  }, [isAuthenticated, userId, userEmail, userName]);
+  }, [isAuthenticated, userId, userEmail, userName, hasLoadedOnce]);
 
   useEffect(() => {
     fetchUserData();
@@ -151,6 +163,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     const refreshBirthChart = async () => {
       if (!user || birthChartRefreshRef.current) return;
+      if (birthChartRefreshAttemptRef.current > 0) return;
 
       const location = (user.location || {}) as Record<string, any>;
       const birthLocation = location?.birthLocation;
@@ -167,6 +180,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
       if (!needsVersionUpdate && !needsTimezoneUpdate) return;
 
       birthChartRefreshRef.current = true;
+      birthChartRefreshAttemptRef.current = Date.now();
       try {
         const { birthChart, timezone, timezoneSource } =
           await createBirthChartWithMetadata({

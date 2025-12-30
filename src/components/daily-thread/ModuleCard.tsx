@@ -3,14 +3,33 @@
 import { DailyThreadModule } from '@/lib/daily-thread/types';
 import { Button } from '@/components/ui/button';
 import { useRouter } from 'next/navigation';
+import Image from 'next/image';
 
 interface ModuleCardProps {
   module: DailyThreadModule;
   onAction: (action: DailyThreadModule['actions'][0], moduleId: string) => void;
 }
 
+const getMoonPhaseImage = (moonPhase?: string) => {
+  if (!moonPhase) return null;
+  const normalized = moonPhase.toLowerCase();
+  const map: Array<[string, string]> = [
+    ['new moon', 'new-moon.svg'],
+    ['waxing crescent', 'waxing-cresent-moon.svg'],
+    ['first quarter', 'first-quarter.svg'],
+    ['waxing gibbous', 'waxing-gibbous-moon.svg'],
+    ['full moon', 'full-moon.svg'],
+    ['waning gibbous', 'waning-gibbous-moon.svg'],
+    ['last quarter', 'last-quarter.svg'],
+    ['waning crescent', 'waning-cresent-moon.svg'],
+  ];
+  const match = map.find(([phase]) => normalized.includes(phase));
+  return match ? `/icons/moon-phases/${match[1]}` : null;
+};
+
 export function ModuleCard({ module, onAction }: ModuleCardProps) {
   const router = useRouter();
+  const moonPhaseImage = getMoonPhaseImage(module.meta?.moonPhase);
 
   const handleAction = async (action: DailyThreadModule['actions'][0]) => {
     if (action.intent === 'dismiss') {
@@ -68,13 +87,26 @@ export function ModuleCard({ module, onAction }: ModuleCardProps) {
 
   return (
     <div className='flex-shrink-0 w-full rounded-lg border border-lunary-primary-700 bg-zinc-950/60 p-3 sm:p-4 space-y-2 sm:space-y-3 shadow-sm'>
-      <div>
-        <h3 className='text-xs sm:text-sm font-medium text-zinc-100 mb-1'>
-          {module.title}
-        </h3>
-        <p className='text-xs sm:text-sm text-zinc-400 leading-relaxed'>
-          {module.body}
-        </p>
+      <div className='flex items-start justify-between gap-3'>
+        <div className='flex-1'>
+          <h3 className='text-xs sm:text-sm font-medium text-zinc-100 mb-1'>
+            {module.title}
+          </h3>
+          <p className='text-xs sm:text-sm text-zinc-400 leading-relaxed'>
+            {module.body}
+          </p>
+        </div>
+        {moonPhaseImage && (
+          <div className='flex-shrink-0'>
+            <Image
+              src={moonPhaseImage}
+              alt={module.meta?.moonPhase || 'Moon phase'}
+              width={40}
+              height={40}
+              className='opacity-90'
+            />
+          </div>
+        )}
       </div>
 
       {module.meta && (

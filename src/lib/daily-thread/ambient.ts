@@ -1,5 +1,6 @@
 import { buildAstralContext } from '@/lib/ai/astral-guide';
 import { DailyThreadModule } from './types';
+import { cleanMoonPhaseText, extractMoonPhaseName } from './moon-phase';
 
 /**
  * Generate an ambient module for level 0 users (moon phase, neutral transit)
@@ -18,7 +19,8 @@ export async function generateAmbientModule(
       date,
     );
 
-    const moonPhase = astralContext.moonPhase;
+    const moonPhase = cleanMoonPhaseText(astralContext.moonPhase);
+    const moonPhaseName = extractMoonPhaseName(astralContext.moonPhase);
     if (!moonPhase) {
       return null;
     }
@@ -31,9 +33,7 @@ export async function generateAmbientModule(
       level: 0,
       title: 'Lunar energy',
       body: `The moon is in ${moonPhase.toLowerCase()}. This lunar phase invites gentle awareness and reflection.`,
-      meta: {
-        moonPhase,
-      },
+      meta: moonPhaseName ? { moonPhase: moonPhaseName } : undefined,
       actions: [
         {
           label: 'Learn more',

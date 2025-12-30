@@ -7,7 +7,6 @@ import {
   generateCosmicPulseEmailText,
 } from '@/lib/cosmic-pulse/email-template';
 import { sendEmail } from '@/lib/email';
-import { trackConversion } from '@/lib/analytics';
 
 function ensureVapidConfigured() {
   const publicKey = process.env.VAPID_PUBLIC_KEY;
@@ -20,6 +19,26 @@ function ensureVapidConfigured() {
   }
 
   webpush.setVapidDetails('mailto:info@lunary.app', publicKey, privateKey);
+}
+
+async function trackConversionServer(
+  baseUrl: string,
+  payload: {
+    event: string;
+    userId?: string;
+    userEmail?: string;
+    metadata?: Record<string, unknown>;
+  },
+) {
+  try {
+    await fetch(`${baseUrl}/api/analytics/conversion`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
+  } catch (error) {
+    console.error('Failed to track conversion:', error);
+  }
 }
 
 export async function GET(request: NextRequest) {
@@ -269,7 +288,8 @@ export async function GET(request: NextRequest) {
 
               emailsSent++;
 
-              await trackConversion('cosmic_pulse_opened', {
+              await trackConversionServer(baseUrl, {
+                event: 'cosmic_pulse_opened',
                 userId,
                 userEmail,
                 metadata: {
@@ -287,7 +307,8 @@ export async function GET(request: NextRequest) {
             }
           }
 
-          await trackConversion('cosmic_pulse_sent', {
+          await trackConversionServer(baseUrl, {
+            event: 'cosmic_pulse_sent',
             userId,
             userEmail,
             metadata: {

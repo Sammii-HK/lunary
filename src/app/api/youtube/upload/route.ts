@@ -125,8 +125,8 @@ export async function POST(request: NextRequest) {
       if (type === 'short') {
         // Short and medium-form videos go to Shorts playlist
         const shortsPlaylistId =
-          process.env.YOUTUBE_WEEKLY_SERIES_PLAYLIST_ID ||
-          process.env.YOUTUBE_SHORTS_PLAYLIST_ID;
+          process.env.YOUTUBE_SHORTS_PLAYLIST_ID ||
+          process.env.YOUTUBE_WEEKLY_SERIES_PLAYLIST_ID;
         if (shortsPlaylistId) {
           console.log(
             `📋 Adding ${type} video to Shorts playlist: ${shortsPlaylistId}`,

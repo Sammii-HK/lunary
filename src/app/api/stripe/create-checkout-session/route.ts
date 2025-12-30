@@ -269,6 +269,7 @@ export async function POST(request: NextRequest) {
     const sessionConfig: Stripe.Checkout.SessionCreateParams = {
       mode: 'subscription',
       payment_method_types: ['card'],
+      payment_method_collection: 'if_required',
       line_items: [
         {
           price: priceId,
@@ -288,21 +289,38 @@ export async function POST(request: NextRequest) {
 
     // Apply promo/discount code if provided
     const { discountCode, promoCode, referralCode } = requestBody;
+    const normalizedPromoCode =
+      typeof promoCode === 'string' && promoCode.trim().length > 0
+        ? promoCode.trim().toUpperCase()
+        : null;
+    const normalizedDiscountCode =
+      typeof discountCode === 'string' && discountCode.trim().length > 0
+        ? discountCode.trim().toUpperCase()
+        : null;
+
+    if (normalizedPromoCode) {
+      metadata.promoCode = normalizedPromoCode;
+    }
+
+    if (normalizedDiscountCode) {
+      metadata.discountCode = normalizedDiscountCode;
+    }
 
     // Handle promo codes (Stripe promotion codes) - use same account as price
     if (promoCode) {
       try {
+        const promoLookupCode = normalizedPromoCode || promoCode;
         const promoCodes = await checkoutStripe.promotionCodes.list({
-          code: promoCode,
+          code: promoLookupCode,
           active: true,
         });
 
         if (promoCodes.data.length > 0) {
           const promoCodeObj = promoCodes.data[0];
           sessionConfig.discounts = [{ promotion_code: promoCodeObj.id }];
-          console.log(`✅ Applied promo code: ${promoCode}`);
+          console.log(`✅ Applied promo code: ${promoLookupCode}`);
         } else {
-          console.warn(`⚠️ Promo code not found: ${promoCode}`);
+          console.warn(`⚠️ Promo code not found: ${promoLookupCode}`);
         }
       } catch (error) {
         console.error('Failed to apply promo code:', error);
@@ -313,8 +331,9 @@ export async function POST(request: NextRequest) {
     // Handle discount codes (for trial expired users) - use same account as price
     if (discountCode && !promoCode) {
       try {
+        const discountLookupCode = normalizedDiscountCode || discountCode;
         const promotionCodes = await checkoutStripe.promotionCodes.list({
-          code: discountCode,
+          code: discountLookupCode,
           limit: 1,
         });
         if (promotionCodes.data.length > 0) {

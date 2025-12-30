@@ -15,6 +15,13 @@ export default function LocationRefresh({
   const { location, requestLocation, loading, error, isLoggedIn } =
     useLocation();
   const [showSuccess, setShowSuccess] = useState(false);
+  const formatCoordinate = (value: unknown, digits: number) => {
+    if (typeof value !== 'number' || !Number.isFinite(value)) return null;
+    return new Intl.NumberFormat('en-US', {
+      minimumFractionDigits: digits,
+      maximumFractionDigits: digits,
+    }).format(value);
+  };
 
   if (!isLoggedIn) return null;
 
@@ -88,10 +95,27 @@ export default function LocationRefresh({
           <label className={labelClasses}>Current Location</label>
           {location ? (
             <>
-              <p className={coordinatesClasses}>
-                {location.latitude.toFixed(4)}, {location.longitude.toFixed(4)}
-              </p>
-              <p className={descriptionClasses}>{formatLocation(location)}</p>
+              {(() => {
+                const latText = formatCoordinate(location.latitude, 4);
+                const lonText = formatCoordinate(location.longitude, 4);
+                if (!latText || !lonText) {
+                  return (
+                    <p className={coordinatesClasses}>
+                      Location pending update
+                    </p>
+                  );
+                }
+                return (
+                  <>
+                    <p className={coordinatesClasses}>
+                      {latText}, {lonText}
+                    </p>
+                    <p className={descriptionClasses}>
+                      {formatLocation(location)}
+                    </p>
+                  </>
+                );
+              })()}
             </>
           ) : (
             <p className={coordinatesClasses}>No location set</p>

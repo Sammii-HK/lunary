@@ -6,6 +6,7 @@ import { BookOpen, Plus, Sparkles, ArrowLeft, Moon, Star } from 'lucide-react';
 import { useAuthStatus } from '@/components/AuthStatus';
 import { JournalEntry } from '@/app/api/journal/route';
 import { JournalPattern } from '@/lib/journal/pattern-analyzer';
+import { RecurringThemesCard } from '@/components/RecurringThemesCard';
 
 interface PatternCardProps {
   pattern: JournalPattern;
@@ -241,6 +242,17 @@ export default function JournalPage() {
             <Plus className='w-5 h-5' />
             Add Reflection
           </button>
+        )}
+
+        {patterns.length > 0 && (
+          <RecurringThemesCard
+            title='Recurring themes'
+            subtitle='Signals emerging from your recent reflections'
+            items={patterns.slice(0, 3).map((pattern) => ({
+              label: pattern.title,
+              detail: pattern.description,
+            }))}
+          />
         )}
 
         {patterns.length > 0 && (

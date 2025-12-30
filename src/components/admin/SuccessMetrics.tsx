@@ -61,20 +61,22 @@ export function SuccessMetrics({ data, loading }: SuccessMetricsProps) {
 
   const metrics = [
     {
-      label: 'Daily Active Users',
+      label: 'Daily Active Users (PostHog)',
       value: data.daily_active_users.value,
       trend: data.daily_active_users.trend,
       change: data.daily_active_users.change,
       target: null,
       format: (v: number) => v.toLocaleString(),
+      subtitle: 'Source: PostHog active users',
     },
     {
-      label: 'Weekly Returning Users',
+      label: 'Weekly Active Users (PostHog)',
       value: data.weekly_returning_users.value,
       trend: data.weekly_returning_users.trend,
       change: data.weekly_returning_users.change,
       target: null,
       format: (v: number) => v.toLocaleString(),
+      subtitle: 'Source: PostHog active users',
     },
     {
       label: 'Conversion Rate',
