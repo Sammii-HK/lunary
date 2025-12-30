@@ -9,6 +9,7 @@ import {
   SIGN_DISPLAY_NAMES,
   SIGN_SYMBOLS,
   SIGN_ELEMENTS,
+  SIGN_RULERS,
   MONTH_DISPLAY_NAMES,
   ZodiacSign,
 } from '@/constants/seo/monthly-horoscope';
@@ -84,6 +85,7 @@ export default async function YearHoroscopePage({
   const signName = SIGN_DISPLAY_NAMES[signKey];
   const symbol = SIGN_SYMBOLS[signKey];
   const element = SIGN_ELEMENTS[signKey];
+  const ruler = SIGN_RULERS[signKey];
 
   const breadcrumbItems = [
     { name: 'Grimoire', url: '/grimoire' },
