@@ -43,6 +43,8 @@ const executionTracker = new Map<string, boolean>();
 
 export async function GET(request: NextRequest) {
   try {
+    const url = new URL(request.url);
+    const force = url.searchParams.get('force') === 'true';
     // Verify cron request
     // Vercel cron jobs send x-vercel-cron header, allow those
     // Check both lowercase and any case variations
@@ -140,37 +142,39 @@ export async function GET(request: NextRequest) {
     const targetDateStr = tomorrowDate.toISOString().split('T')[0];
     const dailyPostsKey = `daily-posts-${targetDateStr}`;
 
-    try {
-      const gateResult = await sql`
-        INSERT INTO notification_sent_events (date, event_key, event_type, event_name, event_priority, sent_by)
-        VALUES (${targetDateStr}::date, ${dailyPostsKey}, 'daily_posts', 'Daily Posts', 1, 'cron')
-        ON CONFLICT (date, event_key) DO NOTHING
-        RETURNING id
-      `;
+    if (!force) {
+      try {
+        const gateResult = await sql`
+          INSERT INTO notification_sent_events (date, event_key, event_type, event_name, event_priority, sent_by)
+          VALUES (${targetDateStr}::date, ${dailyPostsKey}, 'daily_posts', 'Daily Posts', 1, 'cron')
+          ON CONFLICT (date, event_key) DO NOTHING
+          RETURNING id
+        `;
 
-      if (gateResult.rows.length === 0) {
-        console.log(
-          `⚠️ Daily posts already generated for ${targetDateStr}, skipping duplicate execution`,
-        );
-        return NextResponse.json({
-          success: false,
-          message: `Already executed for target date (${targetDateStr})`,
-          skipped: true,
-        });
-      }
-    } catch (error: any) {
-      if (error?.code === '42P01') {
-        console.warn(
-          'notification_sent_events table missing; proceeding without DB dedupe',
-        );
-      } else {
-        throw error;
+        if (gateResult.rows.length === 0) {
+          console.log(
+            `⚠️ Daily posts already generated for ${targetDateStr}, skipping duplicate execution`,
+          );
+          return NextResponse.json({
+            success: false,
+            message: `Already executed for target date (${targetDateStr})`,
+            skipped: true,
+          });
+        }
+      } catch (error: any) {
+        if (error?.code === '42P01') {
+          console.warn(
+            'notification_sent_events table missing; proceeding without DB dedupe',
+          );
+        } else {
+          throw error;
+        }
       }
     }
 
     // Atomic check-and-set: Prevent duplicate execution for the same target date
     // This works better in serverless than separate checks
-    if (executionTracker.has(targetDateStr)) {
+    if (!force && executionTracker.has(targetDateStr)) {
       console.log(
         `⚠️ Cron already executed for target date (${targetDateStr}), skipping duplicate execution`,
       );
@@ -182,7 +186,9 @@ export async function GET(request: NextRequest) {
     }
 
     // Immediately mark as executing for this target date (atomic operation)
-    executionTracker.set(targetDateStr, true);
+    if (!force) {
+      executionTracker.set(targetDateStr, true);
+    }
 
     // Clean up old entries (keep only last 7 days to prevent memory leak)
     const cutoffDate = new Date();

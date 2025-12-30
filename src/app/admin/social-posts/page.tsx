@@ -120,6 +120,8 @@ export default function SocialPostsPage() {
   const [useThematicMode, setUseThematicMode] = useState(true);
   const [replaceExisting, setReplaceExisting] = useState(false);
   const [videosOnly, setVideosOnly] = useState(false);
+  const [dailyCronRunning, setDailyCronRunning] = useState(false);
+  const [dailyCronForceRunning, setDailyCronForceRunning] = useState(false);
   const [videoJobFeedback, setVideoJobFeedback] = useState<string | null>(null);
   const [activeVariantByGroup, setActiveVariantByGroup] = useState<
     Record<string, string>
@@ -755,6 +757,36 @@ export default function SocialPostsPage() {
     }, 2000);
   };
 
+  const triggerDailyCron = async (force = false) => {
+    const confirmMessage = force
+      ? 'Force run daily cron now? This bypasses the duplicate execution guard.'
+      : 'Run daily cron now?';
+    if (!confirm(confirmMessage)) return;
+
+    force ? setDailyCronForceRunning(true) : setDailyCronRunning(true);
+    try {
+      const response = await fetch('/api/admin/cron/daily-posts', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ force }),
+      });
+      const data = await response.json();
+      if (data.success) {
+        alert('Daily cron completed.');
+      } else if (data.skipped) {
+        alert(data.message || 'Daily cron skipped.');
+      } else {
+        alert(
+          `Daily cron failed: ${data.error || data.message || 'Unknown error'}`,
+        );
+      }
+    } catch (error) {
+      alert('Daily cron failed.');
+    } finally {
+      force ? setDailyCronForceRunning(false) : setDailyCronRunning(false);
+    }
+  };
+
   const handleOpenInApp = async (post: PendingPost) => {
     try {
       const response = await fetch('/api/admin/social-posts/open-app', {
@@ -1242,6 +1274,22 @@ export default function SocialPostsPage() {
                 )}
               </div>
               <div className='flex gap-3'>
+                <Button
+                  onClick={() => triggerDailyCron()}
+                  disabled={loading || dailyCronRunning}
+                  variant='outline'
+                  className='border-zinc-700 text-zinc-300 hover:bg-zinc-800'
+                >
+                  {dailyCronRunning ? 'Running cron...' : 'Run daily cron'}
+                </Button>
+                <Button
+                  onClick={() => triggerDailyCron(true)}
+                  disabled={loading || dailyCronForceRunning}
+                  variant='outline'
+                  className='border-lunary-error-700 text-lunary-error hover:bg-lunary-error-900/20'
+                >
+                  {dailyCronForceRunning ? 'Forcing...' : 'Force daily cron'}
+                </Button>
                 <Button
                   onClick={() => handleBulkAction('approve_all')}
                   disabled={loading || bulkActionLoading === 'approve_all'}

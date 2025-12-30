@@ -97,7 +97,9 @@
     "security:codeql": "codeql database analyze codeql-db javascript-security-and-quality --format=sarif-latest --output=codeql-results.sarif",
     "security:osv": "osv-scanner --lockfile=pnpm-lock.yaml",
     "security:audit": "pnpm audit",
-    "security:all": "pnpm security:semgrep && pnpm security:codeql:db && pnpm security:codeql && pnpm security:osv && pnpm security:audit"
+    "security:all": "pnpm security:semgrep && pnpm security:codeql:db && pnpm security:codeql && pnpm security:osv && pnpm security:audit",
+    "cron:daily": "curl -sS -H \"Authorization: Bearer $CRON_SECRET\" \"http://localhost:3000/api/cron/daily-posts\"",
+    "cron:daily:force": "curl -sS -H \"Authorization: Bearer $CRON_SECRET\" \"http://localhost:3000/api/cron/daily-posts?force=true\""
   },
   "lint-staged": {
     "*.{ts,tsx,js,jsx}": [

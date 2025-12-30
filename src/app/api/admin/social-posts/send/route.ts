@@ -312,8 +312,8 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const platformSet = new Set<string>();
-    const variants: Record<string, { content: string; media: any[] }> = {};
+    const basePlatforms = new Set<string>();
+    const variants: Record<string, { content: string; media?: string[] }> = {};
     let pinterestOptions: PlatformPayload['pinterestOptions'];
     let tiktokOptions: PlatformPayload['tiktokOptions'];
     let instagramOptions: PlatformPayload['instagramOptions'];
@@ -332,8 +332,6 @@ export async function POST(request: NextRequest) {
           { status: 400 },
         );
       }
-
-      platformSet.add(payload.platform);
 
       if (payload.pinterestOptions) {
         pinterestOptions = payload.pinterestOptions;
@@ -357,12 +355,20 @@ export async function POST(request: NextRequest) {
       if (differs) {
         variants[payload.platform] = {
           content: payload.content,
-          media: payload.media,
+          ...(payload.media.length > 0
+            ? { media: payload.media.map((item) => item.url) }
+            : {}),
         };
+      } else {
+        basePlatforms.add(payload.platform);
       }
     }
 
-    if (platformSet.has('pinterest') && basePayload.media.length === 0) {
+    if (basePlatforms.size === 0) {
+      basePlatforms.add(basePayload.platform);
+    }
+
+    if (basePlatforms.has('pinterest') && basePayload.media.length === 0) {
       return NextResponse.json(
         {
           success: false,
@@ -378,7 +384,7 @@ export async function POST(request: NextRequest) {
       accountGroupId: accountGroupIdStr,
       name: `Lunary Post - ${readableDate}`,
       content: basePayload.content,
-      platforms: Array.from(platformSet),
+      platforms: Array.from(basePlatforms),
       scheduledDate: scheduleDate.toISOString(),
       media: basePayload.media,
     };

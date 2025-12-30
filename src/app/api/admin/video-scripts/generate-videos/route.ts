@@ -216,17 +216,48 @@ export async function POST(request: NextRequest) {
           ],
         );
 
-        const youtubeTitleBase = `Weekly Theme: ${theme?.name || themeName || 'Lunary'} • Part ${partNumber} of ${totalParts} — ${script.facetTitle}`;
-        const youtubeTitle =
-          youtubeTitleBase.length > 90
-            ? youtubeTitleBase.substring(0, 87) + '...'
-            : youtubeTitleBase;
+        const toHashtag = (value: string): string | null => {
+          const words = value
+            .replace(/[^a-z0-9]+/gi, ' ')
+            .trim()
+            .split(/\s+/)
+            .filter(Boolean);
+          if (words.length === 0) return null;
+          const tag = words
+            .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+            .join('');
+          return tag ? `#${tag}` : null;
+        };
+
+        const resolvedThemeName = theme?.name || themeName || 'Lunary';
+        const themeTag = toHashtag(resolvedThemeName);
+        const topicTag = toHashtag(script.facetTitle);
+        const titleTags = ['#astrology', themeTag, '#universe']
+          .filter(Boolean)
+          .join(' ');
+        const titleBase = `${resolvedThemeName} • Part ${partNumber} of ${totalParts} — ${script.facetTitle}`;
+        const titleSuffix = titleTags ? ` ${titleTags}` : '';
+        const maxTitleLength = 100;
+        let trimmedBase = titleBase;
+        if (trimmedBase.length + titleSuffix.length > maxTitleLength) {
+          trimmedBase = trimmedBase
+            .substring(0, maxTitleLength - titleSuffix.length - 1)
+            .replace(/[—•\s]+$/g, '')
+            .trim();
+        }
+        const youtubeTitle = `${trimmedBase}${titleSuffix}`.trim();
         const contentKey = `${dateKey}|${script.facetTitle}`;
         const postContent =
           postContentByKey.get(contentKey) ||
           script.writtenPostContent ||
           `This is part ${partNumber} of ${totalParts} in our weekly theme series: ${theme?.name || themeName || 'Lunary'}.`;
-        const youtubeDescription = `${postContent}\n\nFrom Lunary's Grimoire — explore deeper rituals, meanings, and correspondences inside the full Grimoire.\n\n#Lunary #Grimoire`;
+        const descriptionTags = Array.from(
+          new Set(['#Lunary', '#astrology', '#universe', themeTag, topicTag]),
+        )
+          .filter(Boolean)
+          .join(' ');
+        const youtubeDescription =
+          `${postContent}\n\n${descriptionTags}`.trim();
         void youtubeTitle;
         void youtubeDescription;
 
