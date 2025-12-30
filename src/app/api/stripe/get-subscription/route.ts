@@ -95,6 +95,7 @@ export async function POST(request: NextRequest) {
           const stripeData = await checkStripeForSubscription(
             stripeCustomerId,
             userId,
+            dbRow.user_email || undefined,
           );
           if (stripeData) {
             return formatResponse(stripeData, forceRefresh);
@@ -136,6 +137,7 @@ export async function POST(request: NextRequest) {
 async function checkStripeForSubscription(
   customerId: string,
   userId?: string,
+  userEmail?: string,
 ): Promise<any | null> {
   let stripe = getStripe();
   if (!stripe) return null;
@@ -153,7 +155,26 @@ async function checkStripeForSubscription(
       subscription = subs.data[0];
     }
   } catch {
-    // Keep the default Stripe instance; let subscription remain null
+    // Keep going; fallback below may find customer by email
+  }
+
+  if (!subscription && userEmail) {
+    const resolvedCustomerId = await findCustomerByEmail(userEmail);
+    if (resolvedCustomerId && resolvedCustomerId !== customerId) {
+      try {
+        const subs = await stripe.subscriptions.list({
+          customer: resolvedCustomerId,
+          status: 'all',
+          limit: 1,
+        });
+        if (subs.data.length > 0) {
+          subscription = subs.data[0];
+          customerId = resolvedCustomerId;
+        }
+      } catch {
+        // still null
+      }
+    }
   }
 
   if (!subscription) return null;
