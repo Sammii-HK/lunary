@@ -335,6 +335,7 @@ export async function POST(request: NextRequest) {
     const sessionConfig: Stripe.Checkout.SessionCreateParams = {
       mode: 'subscription',
       payment_method_types: ['card'],
+      payment_method_collection: 'if_required',
       line_items: [
         {
           price: priceId,
