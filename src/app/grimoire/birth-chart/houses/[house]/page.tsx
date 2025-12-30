@@ -144,6 +144,37 @@ export default async function BirthChartHousePage({
         : house === '3'
           ? '3rd'
           : `${house}th`;
+  const extraHouseNotes =
+    house === '10'
+      ? `\n\nThe ${ordinal} House is strongly tied to career, reputation, and life direction. It relates to the Midheaven (MC) and shows how you want to be seen for your work in the world.`
+      : house === '11'
+        ? `\n\nThe ${ordinal} House highlights community, collaboration, and long-term goals. It shows the kind of networks that support your future.`
+        : house === '12'
+          ? `\n\nThe ${ordinal} House governs solitude, subconscious patterns, and spiritual restoration. It often asks for quiet reflection before major decisions.`
+          : '';
+
+  const isUpperHouses = ['10', '11', '12'].includes(house);
+  const extraInternalLinks = isUpperHouses
+    ? [
+        { text: 'Rising Sign (Ascendant)', href: '/grimoire/rising-sign' },
+        { text: 'Planets in Astrology', href: '/grimoire/astronomy/planets' },
+        { text: 'Birth Chart Guide', href: '/grimoire/birth-chart' },
+        { text: 'Astrology Placements', href: '/grimoire/placements' },
+        { text: 'Life Path', href: '/grimoire/life-path' },
+      ]
+    : [];
+
+  const extraRelatedItems = isUpperHouses
+    ? [
+        { name: 'Rising Sign', href: '/grimoire/rising-sign', type: 'Guide' },
+        {
+          name: 'Planets in Astrology',
+          href: '/grimoire/astronomy/planets',
+          type: 'Guide',
+        },
+        { name: 'Life Path', href: '/grimoire/life-path', type: 'Guide' },
+      ]
+    : [];
 
   const faqs = [
     {
