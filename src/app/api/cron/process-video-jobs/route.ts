@@ -6,6 +6,7 @@ import { generateVoiceover } from '@/lib/tts';
 import { getThematicImageUrl } from '@/lib/social/educational-images';
 import { buildVideoCaption } from '@/lib/social/video-captions';
 import { categoryThemes, generateHashtags } from '@/lib/social/weekly-themes';
+import { getImageBaseUrl } from '@/lib/urls';
 import { createHash } from 'crypto';
 
 export const runtime = 'nodejs';
@@ -173,9 +174,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ success: true, processed: 0 });
     }
 
-    const baseUrl = process.env.VERCEL
-      ? 'https://lunary.app'
-      : 'http://localhost:3000';
+    const baseUrl = getImageBaseUrl();
     let processed = 0;
     const errors: Array<{ jobId: number; error: string }> = [];
 
@@ -409,6 +408,7 @@ export async function POST(request: NextRequest) {
 
           for (const platform of shortVideoPlatforms) {
             if (existingPlatforms.has(platform)) continue;
+            const imageUrl: string | null = null;
             await sql`
               INSERT INTO social_posts (
                 content,
@@ -429,7 +429,7 @@ export async function POST(request: NextRequest) {
                 'video',
                 ${script.facet_title},
                 'pending',
-                ${null},
+                ${imageUrl},
                 ${videoUrl},
                 ${scheduledDate.toISOString()},
                 ${postWeekTheme || themeName || null},

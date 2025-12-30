@@ -10,6 +10,7 @@ import {
 } from '@/lib/social/weekly-themes';
 import { getVideoScripts } from '@/lib/social/video-script-generator';
 import { getThematicImageUrl } from '@/lib/social/educational-images';
+import { getImageBaseUrl } from '@/lib/urls';
 
 export const runtime = 'nodejs';
 
@@ -49,9 +50,7 @@ export async function POST(
       );
     }
 
-    const baseUrl = process.env.VERCEL
-      ? 'https://lunary.app'
-      : 'http://localhost:3000';
+    const baseUrl = getImageBaseUrl();
 
     const scripts = await getVideoScripts();
     const script = scripts.find((s) => s.id === scriptId);

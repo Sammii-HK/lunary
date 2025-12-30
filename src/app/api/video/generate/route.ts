@@ -563,8 +563,9 @@ export async function POST(request: NextRequest) {
       // Get weekly content data for medium-form
       // weekOffset represents weeks from current week's Monday
       // week=0 = current week, week=1 = next week, etc.
+      const safeWeekForLog = String(week).replace(/[\r\n]/g, '');
       console.log(
-        `[Medium Video] Generating for week offset ${week}: weekStart=${weekStart.toISOString()}`,
+        `[Medium Video] Generating for week offset ${safeWeekForLog}: weekStart=${weekStart.toISOString()}`,
       );
 
       weeklyData = await generateWeeklyContent(weekStart);

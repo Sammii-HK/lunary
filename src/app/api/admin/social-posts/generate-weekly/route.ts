@@ -5,6 +5,7 @@ import {
   PLATFORM_POSTING_TIMES,
   getDefaultPostingTime,
 } from '@/utils/posting-times';
+import { getImageBaseUrl } from '@/lib/urls';
 
 export const runtime = 'nodejs';
 
@@ -299,9 +300,7 @@ async function generateThematicWeeklyPosts(
   );
 
   // Use production URL for stored image URLs
-  const baseUrl = process.env.VERCEL
-    ? 'https://lunary.app'
-    : 'http://localhost:3000';
+  const baseUrl = getImageBaseUrl();
 
   // Platform optimal posting times
   const platformOptimalHours: Record<string, number[]> = {
@@ -888,10 +887,9 @@ async function generateThematicWeeklyPosts(
             );
             const videoCaption = buildVideoCaptionForPlatform(platform);
 
-            const imageUrl: string | null = null;
             await sql`
               INSERT INTO social_posts (content, platform, post_type, topic, status, image_url, video_url, scheduled_date, week_theme, week_start, base_group_key, created_at)
-              SELECT ${videoCaption}, ${platform}, 'video', ${dayInfo.facetTitle}, 'pending', ${imageUrl}, ${existingVideoUrl || null}, ${videoScheduledDate.toISOString()}, ${currentTheme.name}, ${weekStartDate.toISOString().split('T')[0]}, ${baseGroupKey}, NOW()
+              SELECT ${videoCaption}, ${platform}, 'video', ${dayInfo.facetTitle}, 'pending', ${null}, ${existingVideoUrl || null}, ${videoScheduledDate.toISOString()}, ${currentTheme.name}, ${weekStartDate.toISOString().split('T')[0]}, ${baseGroupKey}, NOW()
               WHERE NOT EXISTS (
                 SELECT 1 FROM social_posts
                 WHERE platform = ${platform}
@@ -1671,9 +1669,7 @@ Return JSON: {"posts": ["Post content"]}`;
     // Generate OG image URLs for Instagram posts
     // Always use production URL for stored image URLs (they get saved to DB and used later)
     // Use production URL on any Vercel deployment (VERCEL env var is set on all Vercel deployments)
-    const baseUrl = process.env.VERCEL
-      ? 'https://lunary.app'
-      : 'http://localhost:3000';
+    const baseUrl = getImageBaseUrl();
 
     // Save all posts to database with image URLs
     // Use quote pool and educational images for all image-supporting platforms

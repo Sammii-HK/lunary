@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { sql } from '@vercel/postgres';
 import { getThematicImageUrl } from '@/lib/social/educational-images';
 import { categoryThemes } from '@/lib/social/weekly-themes';
+import { getImageBaseUrl } from '@/lib/urls';
 
 export const runtime = 'nodejs';
 
@@ -20,9 +21,7 @@ export async function POST(request: NextRequest) {
     const weekStartParam = body?.weekStart as string | undefined;
     const weekOffset = Number(body?.weekOffset ?? 0);
 
-    const baseUrl = process.env.VERCEL
-      ? 'https://lunary.app'
-      : 'http://localhost:3000';
+    const baseUrl = getImageBaseUrl();
 
     const baseDate = weekStartParam ? new Date(weekStartParam) : new Date();
     const weekStart = getWeekStart(baseDate);

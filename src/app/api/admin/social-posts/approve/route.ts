@@ -236,7 +236,7 @@ export async function POST(request: NextRequest) {
               ? 'https://lunary.app'
               : 'http://localhost:3000';
 
-            let uploadResult: YouTubeUploadResult = { success: false };
+            let uploadResult: YouTubeUploadResult;
             try {
               const response = await fetch(`${baseUrl}/api/youtube/upload`, {
                 method: 'POST',

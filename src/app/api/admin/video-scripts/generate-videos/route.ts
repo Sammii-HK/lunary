@@ -5,6 +5,7 @@ import {
   ensureVideoScriptsTable,
   getVideoScripts,
 } from '@/lib/social/video-script-generator';
+import { getImageBaseUrl } from '@/lib/urls';
 
 export const runtime = 'nodejs';
 
@@ -73,9 +74,7 @@ export async function POST(request: NextRequest) {
     const body = await request.json().catch(() => ({}));
     const weekStartParam = body?.weekStart as string | undefined;
 
-    const baseUrl = process.env.VERCEL
-      ? 'https://lunary.app'
-      : 'http://localhost:3000';
+    const baseUrl = getImageBaseUrl();
 
     const weekStart = weekStartParam
       ? getWeekStart(new Date(weekStartParam))

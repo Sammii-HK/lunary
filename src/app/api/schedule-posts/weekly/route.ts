@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { getImageBaseUrl } from '@/lib/urls';
 
 interface PostContent {
   date: string;
@@ -36,9 +37,7 @@ export async function POST(request: NextRequest) {
 
     // Get the base URL for the application (dev vs prod)
     // Use production URL on any Vercel deployment
-    const baseUrl = process.env.VERCEL
-      ? 'https://lunary.app'
-      : 'http://localhost:3000';
+    const baseUrl = getImageBaseUrl();
 
     console.log('🔑 Weekly scheduler environment check:', {
       hasApiKey: !!apiKey,

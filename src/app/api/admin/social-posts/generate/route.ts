@@ -8,6 +8,7 @@ import {
   mapPostTypeToArchetype,
   type ContentArchetype,
 } from '@/lib/social/content-archetypes';
+import { getImageBaseUrl } from '@/lib/urls';
 
 let cachedSocialContext: string | null = null;
 let cachedAIContext: string | null = null;
@@ -431,9 +432,7 @@ Return only valid JSON.`,
 
     // Generate OG image URL for Instagram posts
     // Use production URL on any Vercel deployment (VERCEL env var is set on all Vercel deployments)
-    const baseUrl = process.env.VERCEL
-      ? 'https://lunary.app'
-      : 'http://localhost:3000';
+    const baseUrl = getImageBaseUrl();
 
     // Use quote pool and educational images for all image-supporting platforms
     const {

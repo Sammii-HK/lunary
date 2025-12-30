@@ -53,6 +53,8 @@ export async function GET(request: NextRequest) {
         sp.video_url as "videoUrl",
         sp.week_theme as "weekTheme",
         sp.week_start as "weekStart",
+        sp.base_group_key as "baseGroupKey",
+        sp.base_post_id as "basePostId",
         sp.created_at as "createdAt",
         vs.id as "videoScriptId",
         vs.full_script as "videoScript",

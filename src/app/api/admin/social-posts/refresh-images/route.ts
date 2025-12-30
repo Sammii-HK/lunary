@@ -8,6 +8,7 @@ import {
   categoryThemes,
   getWeeklyContentPlan,
 } from '@/lib/social/weekly-themes';
+import { getImageBaseUrl } from '@/lib/urls';
 
 export const runtime = 'nodejs';
 
@@ -27,9 +28,7 @@ export async function POST(request: NextRequest) {
     const weekOffset = Number(body?.weekOffset ?? 0);
     const fixNaN = Boolean(body?.fixNaN);
 
-    const baseUrl = process.env.VERCEL
-      ? 'https://lunary.app'
-      : 'http://localhost:3000';
+    const baseUrl = getImageBaseUrl();
 
     const baseDate = weekStartParam ? new Date(weekStartParam) : new Date();
     const weekStart = getWeekStart(baseDate);
