@@ -1,3 +1,5 @@
+import { getPriceForCurrency, type PlanId } from './stripe-prices';
+
 export type PricingPlan = {
   id: string;
   name: string;
@@ -97,6 +99,17 @@ export const FREE_TRIAL_DAYS = {
   monthly: 7,
   yearly: 14,
 };
+
+function resolvePriceId(planId: PlanId, currency: string): string | null {
+  const normalizedCurrency = currency.toUpperCase();
+  const price = getPriceForCurrency(planId, normalizedCurrency);
+  if (price?.priceId) {
+    return price.priceId;
+  }
+
+  const fallbackPrice = getPriceForCurrency(planId, 'USD');
+  return fallbackPrice?.priceId || null;
+}
 
 export const FEATURE_ACCESS = {
   free: [
@@ -238,27 +251,7 @@ export function getPlanIdFromPriceId(priceId: string): string | null {
     );
   }
 
-  // Fallback to env vars for backwards compatibility
-  const envVars: Record<string, string> = {};
-
-  if (process.env.NEXT_PUBLIC_STRIPE_LUNARY_PLUS_PRICE_ID) {
-    envVars[process.env.NEXT_PUBLIC_STRIPE_LUNARY_PLUS_PRICE_ID] =
-      'lunary_plus';
-  }
-  if (process.env.NEXT_PUBLIC_STRIPE_LUNARY_PLUS_AI_PRICE_ID) {
-    envVars[process.env.NEXT_PUBLIC_STRIPE_LUNARY_PLUS_AI_PRICE_ID] =
-      'lunary_plus_ai';
-  }
-  if (process.env.NEXT_PUBLIC_STRIPE_LUNARY_PLUS_AI_ANNUAL_PRICE_ID) {
-    envVars[process.env.NEXT_PUBLIC_STRIPE_LUNARY_PLUS_AI_ANNUAL_PRICE_ID] =
-      'lunary_plus_ai_annual';
-  }
-  // Legacy Cosmic Guide monthly price still maps to Lunary+ access
-  if (process.env.NEXT_PUBLIC_STRIPE_MONTHLY_PRICE_ID) {
-    envVars[process.env.NEXT_PUBLIC_STRIPE_MONTHLY_PRICE_ID] = 'lunary_plus';
-  }
-
-  return envVars[priceId] || null;
+  return null;
 }
 
 export function hasFeatureAccess(
@@ -372,11 +365,12 @@ export function isTrialExpired(trialEndsAt: string | undefined): boolean {
 }
 
 // Dynamic function to get pricing plans with actual trial periods from Stripe
-export async function getPricingPlansWithStripeData(): Promise<PricingPlan[]> {
+export async function getPricingPlansWithStripeData(
+  currency: string = 'USD',
+): Promise<PricingPlan[]> {
   try {
-    // Fetch trial periods from Stripe for our price IDs
-    const monthlyPriceId = process.env.NEXT_PUBLIC_STRIPE_MONTHLY_PRICE_ID;
-    const yearlyPriceId = process.env.NEXT_PUBLIC_STRIPE_YEARLY_PRICE_ID;
+    const monthlyPriceId = resolvePriceId('lunary_plus', currency);
+    const yearlyPriceId = resolvePriceId('lunary_plus_ai_annual', currency);
 
     let monthlyTrialDays = 7; // fallback
     let yearlyTrialDays = 14; // fallback
@@ -444,13 +438,15 @@ export async function getPricingPlansWithStripeData(): Promise<PricingPlan[]> {
 }
 
 // Update the FREE_TRIAL_DAYS to be dynamic
-export async function getTrialDaysFromStripe(): Promise<{
+export async function getTrialDaysFromStripe(
+  currency: string = 'USD',
+): Promise<{
   monthly: number;
   yearly: number;
 }> {
   try {
-    const monthlyPriceId = process.env.NEXT_PUBLIC_STRIPE_MONTHLY_PRICE_ID;
-    const yearlyPriceId = process.env.NEXT_PUBLIC_STRIPE_YEARLY_PRICE_ID;
+    const monthlyPriceId = resolvePriceId('lunary_plus', currency);
+    const yearlyPriceId = resolvePriceId('lunary_plus_ai_annual', currency);
 
     const promises = [];
 

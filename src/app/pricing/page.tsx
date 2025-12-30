@@ -75,7 +75,7 @@ export default function PricingPage() {
   useEffect(() => {
     async function loadPricingPlans() {
       try {
-        const dynamicPlans = await getPricingPlansWithStripeData();
+        const dynamicPlans = await getPricingPlansWithStripeData(currency);
         setPricingPlans(dynamicPlans);
       } catch (error) {
         console.error('Error loading dynamic pricing plans:', error);
@@ -91,7 +91,7 @@ export default function PricingPage() {
     }
 
     loadPricingPlans();
-  }, []);
+  }, [currency]);
 
   const subscriptionStatus = subscription.status || 'free';
   const trialDaysRemaining = subscription.trialDaysRemaining;

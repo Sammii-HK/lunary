@@ -128,7 +128,7 @@ export async function getGlobalCosmicData(
       }
 
       const freshData = await buildGlobalCosmicData(date);
-      await saveGlobalCosmicData(date, freshData);
+      await saveGlobalCosmicData(date, freshData, { revalidateTags: false });
       return freshData;
     },
     [cacheKey],
@@ -144,8 +144,10 @@ export async function getGlobalCosmicData(
 export async function saveGlobalCosmicData(
   date: Date = new Date(),
   data: GlobalCosmicData,
+  options?: { revalidateTags?: boolean },
 ): Promise<void> {
   const dateStr = date.toISOString().split('T')[0];
+  const shouldRevalidate = options?.revalidateTags ?? true;
 
   await sql`
     INSERT INTO global_cosmic_data (data_date, moon_phase, planetary_positions, general_transits, updated_at)
@@ -158,6 +160,8 @@ export async function saveGlobalCosmicData(
       updated_at = NOW()
   `;
 
-  revalidateTag('cosmic-global');
-  revalidateTag(`cosmic-global-${dateStr}`);
+  if (shouldRevalidate) {
+    revalidateTag('cosmic-global');
+    revalidateTag(`cosmic-global-${dateStr}`);
+  }
 }
