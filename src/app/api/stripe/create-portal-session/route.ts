@@ -19,18 +19,6 @@ async function findCustomerAccount(customerId: string): Promise<Stripe> {
     // Not in new account
   }
 
-  // Try legacy account if configured
-  if (process.env.STRIPE_SECRET_KEY_LEGACY) {
-    const legacyStripe = getStripe(process.env.STRIPE_SECRET_KEY_LEGACY);
-    try {
-      await legacyStripe.customers.retrieve(customerId);
-      console.log(`[portal] Using legacy Stripe for ${customerId}`);
-      return legacyStripe;
-    } catch {
-      // Not in legacy either
-    }
-  }
-
   return newStripe;
 }
 

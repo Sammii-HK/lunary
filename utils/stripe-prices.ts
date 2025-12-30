@@ -1,6 +1,6 @@
 // Auto-generated price mapping from Stripe
 // Run: npm run generate-price-mapping
-// Last updated: 2025-12-27T15:12:56.879Z
+// Last updated: 2025-12-30T21:37:28.577Z
 
 export const STRIPE_PRICE_MAPPING = {
   lunary_plus: {
@@ -313,19 +313,17 @@ export const STRIPE_PRICE_MAPPING = {
 
 export type PlanId = keyof typeof STRIPE_PRICE_MAPPING;
 export type Currency = string;
-type PriceEntry = { priceId: string; amount: number; currency: string };
 
 export function getPriceForCurrency(
   planId: PlanId,
   currency: Currency = 'USD',
 ): { priceId: string; amount: number; currency: string } | null {
-  const planPrices = STRIPE_PRICE_MAPPING[planId] as Record<string, PriceEntry>;
+  const planPrices = STRIPE_PRICE_MAPPING[planId];
   if (!planPrices) return null;
 
   // Try exact match first
-  const currencyKey = currency.toUpperCase();
-  if (planPrices[currencyKey]) {
-    return planPrices[currencyKey];
+  if (planPrices[currency.toUpperCase()]) {
+    return planPrices[currency.toUpperCase()];
   }
 
   // Fallback to USD

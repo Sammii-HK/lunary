@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import Stripe from 'stripe';
+import { getPlanIdFromPriceId } from '../../../../../utils/pricing';
 
 function getStripe(secretKey?: string) {
   const key = secretKey || process.env.STRIPE_SECRET_KEY;
@@ -27,20 +28,6 @@ async function findCustomerAccount(customerId: string): Promise<Stripe | null> {
     // Not in new account
   }
 
-  // Try legacy account if configured
-  if (process.env.STRIPE_SECRET_KEY_LEGACY) {
-    const legacyStripe = getStripe(process.env.STRIPE_SECRET_KEY_LEGACY);
-    try {
-      await legacyStripe.customers.retrieve(customerId);
-      console.log(
-        `[checkout] Using legacy Stripe for ${sanitizeForLog(customerId)}`,
-      );
-      return legacyStripe;
-    } catch {
-      // Not in legacy either
-    }
-  }
-
   return null; // Customer doesn't exist in either account
 }
 
@@ -65,31 +52,7 @@ async function findPriceAccount(priceId: string): Promise<Stripe | null> {
     }
   }
 
-  // Try legacy account if configured
-  if (process.env.STRIPE_SECRET_KEY_LEGACY) {
-    const legacyStripe = getStripe(process.env.STRIPE_SECRET_KEY_LEGACY);
-    try {
-      const price = await legacyStripe.prices.retrieve(priceId);
-      // Check if price is active
-      if (price.active) {
-        const safePriceId = sanitizeForLog(priceId);
-        console.log(`[checkout] Using legacy Stripe for price ${safePriceId}`);
-        return legacyStripe;
-      } else {
-        const safePriceId = sanitizeForLog(priceId);
-        console.warn(
-          `Price ${safePriceId} exists but is inactive in legacy account`,
-        );
-      }
-    } catch (error: any) {
-      // Log the error for debugging
-      if (error?.code !== 'resource_missing') {
-        console.warn(`Error checking price in legacy account:`, error?.message);
-      }
-    }
-  }
-
-  return null; // Price doesn't exist or is inactive in either account
+  return null; // Price doesn't exist or is inactive in account
 }
 
 // Helper function to get trial period from Stripe product/price metadata
@@ -219,33 +182,6 @@ export async function POST(request: NextRequest) {
                   );
                   priceId = activePrice.id;
                   priceStripe = primaryStripe;
-                } else {
-                  // Try legacy account
-                  if (process.env.STRIPE_SECRET_KEY_LEGACY) {
-                    const legacyStripe = getStripe(
-                      process.env.STRIPE_SECRET_KEY_LEGACY,
-                    );
-                    const legacyProducts = await legacyStripe.products.search({
-                      query: `metadata['plan_id']:'${foundPlanId}'`,
-                      limit: 1,
-                    });
-                    if (legacyProducts.data.length > 0) {
-                      const legacyProduct = legacyProducts.data[0];
-                      const legacyPrices = await legacyStripe.prices.list({
-                        product: legacyProduct.id,
-                        active: true,
-                        limit: 10,
-                      });
-                      if (legacyPrices.data.length > 0) {
-                        const activePrice = legacyPrices.data[0];
-                        console.log(
-                          `✅ Found active price ${sanitizeForLog(activePrice.id)} for plan ${sanitizeForLog(foundPlanId)} in legacy Stripe`,
-                        );
-                        priceId = activePrice.id;
-                        priceStripe = legacyStripe;
-                      }
-                    }
-                  }
                 }
               }
 
@@ -318,9 +254,7 @@ export async function POST(request: NextRequest) {
     const planId =
       product.metadata?.plan_id ||
       price.metadata?.plan_id ||
-      (await import('../../../../../utils/pricing')).getPlanIdFromPriceId(
-        priceId,
-      ) ||
+      getPlanIdFromPriceId(priceId) ||
       (isMonthly ? 'lunary_plus' : 'lunary_plus_ai_annual');
 
     const metadata: Record<string, string> = {
@@ -376,7 +310,7 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Handle discount codes (for trial expired users - legacy) - use same account as price
+    // Handle discount codes (for trial expired users) - use same account as price
     if (discountCode && !promoCode) {
       try {
         const promotionCodes = await checkoutStripe.promotionCodes.list({

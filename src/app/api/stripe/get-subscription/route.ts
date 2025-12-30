@@ -114,24 +114,7 @@ async function checkStripeForSubscription(
       subscription = subs.data[0];
     }
   } catch {
-    // Try legacy account
-    if (process.env.STRIPE_SECRET_KEY_LEGACY) {
-      stripe = getStripe(process.env.STRIPE_SECRET_KEY_LEGACY);
-      if (stripe) {
-        try {
-          const subs = await stripe.subscriptions.list({
-            customer: customerId,
-            status: 'all',
-            limit: 1,
-          });
-          if (subs.data.length > 0) {
-            subscription = subs.data[0];
-          }
-        } catch {
-          // No subscription found
-        }
-      }
-    }
+    // Keep the default Stripe instance; let subscription remain null
   }
 
   if (!subscription) return null;
