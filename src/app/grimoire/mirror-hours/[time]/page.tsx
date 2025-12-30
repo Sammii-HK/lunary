@@ -86,6 +86,16 @@ export default async function MirrorHourPage({
       question: `What is the spiritual meaning of ${hourData.time}?`,
       answer: hourData.spiritualMeaning,
     },
+    {
+      question: 'Do I need exact birth time to interpret mirror hours?',
+      answer:
+        'No. Mirror hours are moment-based synchronicities, not birth chart placements. You can interpret them without exact birth time.',
+    },
+    {
+      question: "What if I don't know my birth time?",
+      answer:
+        'You can still use mirror hours as guidance. If you want deeper chart-based insight, an approximate time can help, but it is not required.',
+    },
   ];
 
   // Entity schema for Knowledge Graph
@@ -131,7 +141,9 @@ ${hourData.message}
 
 **In Love:** ${hourData.loveMeaning}
 
-**In Career:** ${hourData.careerMeaning}`}
+**In Career:** ${hourData.careerMeaning}
+
+**Why You Keep Seeing ${hourData.time}:** This mirror hour shows up when the themes of ${hourData.meaning.toLowerCase()} need your attention. It is a nudge to notice the moment and make a small, aligned choice today.`}
         emotionalThemes={hourData.keywords}
         howToWorkWith={[
           `When you see ${hourData.time}, pause and take a breath`,
@@ -139,6 +151,11 @@ ${hourData.message}
           `Consider the message: ${hourData.meaning.toLowerCase()}`,
           'Keep a journal of when you see this mirror hour',
           'Express gratitude for the angelic guidance',
+        ]}
+        rituals={[
+          'Light a candle for two minutes and set one clear intention.',
+          `Write one sentence about how ${hourData.meaning.toLowerCase()} can guide your next choice.`,
+          'Take one small action today that matches the message.',
         ]}
         journalPrompts={[
           `What was I thinking about when I saw ${hourData.time}?`,
@@ -154,13 +171,18 @@ ${hourData.message}
           },
           {
             name: 'Angel Numbers',
-            href: '/grimoire/numerology',
+            href: '/grimoire/angel-numbers',
             type: 'Guide',
           },
           {
-            name: 'Double Hours',
-            href: '/grimoire/numerology',
+            name: 'Moon Phases',
+            href: '/grimoire/moon/phases',
             type: 'Guide',
+          },
+          {
+            name: 'Daily Tarot',
+            href: '/tarot',
+            type: 'Reading',
           },
         ]}
         breadcrumbs={[
@@ -174,7 +196,9 @@ ${hourData.message}
         ]}
         internalLinks={[
           { text: 'Explore Numerology', href: '/grimoire/numerology' },
-          { text: 'Angel Numbers', href: '/grimoire/numerology' },
+          { text: 'Angel Numbers', href: '/grimoire/angel-numbers' },
+          { text: 'Moon Phases', href: '/grimoire/moon/phases' },
+          { text: 'Tarot Card of the Day', href: '/tarot' },
           { text: 'Grimoire Home', href: '/grimoire' },
         ]}
         ctaText='Want personalized numerology insights?'

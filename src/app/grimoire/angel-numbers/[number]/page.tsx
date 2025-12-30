@@ -53,6 +53,41 @@ export default async function AngelNumberPage({
     notFound();
   }
 
+  const meaningExtras = `
+## Why do you keep seeing ${numberData.number}?
+
+Seeing ${numberData.number} repeatedly is a signal to pay attention. It often shows up when you are moving through a transition or being nudged to notice your timing, habits, or direction. The repetition itself is the message: you are meant to be aware right now, not later.
+
+## When does ${numberData.number} usually appear?
+
+${numberData.number} tends to appear:
+- during change or fresh starts
+- before a decision that sets a new direction
+- during emotional or spiritual shifts that need your attention
+
+## Is ${numberData.number} a yes or no sign?
+
+Generally yes, but not as a prediction. Think of ${numberData.number} as alignment: it is a green light to move forward if the choice feels honest and grounded.
+
+## ${numberData.number} in love
+
+### If you're single
+${numberData.number} highlights ${numberData.meaning.toLowerCase()}. Be open to a new connection that feels aligned, not forced.
+
+### If you're in a relationship
+Lean into ${numberData.meaning.toLowerCase()} together. Small resets and honest check-ins bring you back into alignment.
+
+### If you're thinking about someone
+Check your motives and timing. If it feels aligned, take a simple, direct step.
+
+## What to do when you see ${numberData.number}
+
+- Pause for a beat
+- Notice what you were just thinking about
+- Take one aligned action today
+- Journal a quick prompt: "What shift is ready for me now?"
+`;
+
   const faqs = [
     {
       question: `What does ${numberData.number} mean?`,
@@ -116,7 +151,7 @@ When ${numberData.number} appears repeatedly in your life - on clocks, license p
 
 The appearance of ${numberData.number} is not a coincidence. It's a synchronicity, a meaningful coincidence that carries spiritual significance. Your angels use these numbers to communicate because they're a universal language that transcends barriers.
 
-Understanding what ${numberData.number} means helps you interpret the message your angels are sending and take appropriate action in your life.`}
+Understanding what ${numberData.number} means helps you interpret the message your angels are sending and take appropriate action in your life.${meaningExtras}`}
         emotionalThemes={numberData.keywords}
         howToWorkWith={[
           `Pay attention when you see ${numberData.number}`,
