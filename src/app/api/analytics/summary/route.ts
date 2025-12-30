@@ -672,26 +672,26 @@ export async function GET(request: NextRequest) {
       WITH new_paid_users AS (
         SELECT DISTINCT
           ce.user_id,
-          s.plan,
+          s.plan_type,
           CASE
-            WHEN s.plan = 'monthly' OR s.plan = 'lunary_plus' THEN 4.99
-            WHEN s.plan = 'lunary_plus_ai' THEN 8.99
-            WHEN s.plan = 'yearly' OR s.plan = 'lunary_plus_ai_annual' THEN 89.99 / 12
+            WHEN s.plan_type = 'monthly' OR s.plan_type = 'lunary_plus' THEN 4.99
+            WHEN s.plan_type = 'lunary_plus_ai' THEN 8.99
+            WHEN s.plan_type = 'yearly' OR s.plan_type = 'lunary_plus_ai_annual' THEN 89.99 / 12
             ELSE 0
           END AS mrr_contribution
-        FROM conversion_events ce
-        INNER JOIN subscriptions s ON s.user_id = ce.user_id
-        WHERE ce.event_type = 'signup'
-          AND ce.created_at >= ${thirtyDaysAgoTimestamp}
-          AND s.status = 'active'
-          AND (ce.user_email IS NULL OR (ce.user_email NOT LIKE ${TEST_EMAIL_PATTERN} AND ce.user_email != ${TEST_EMAIL_EXACT} ))
-          AND (s.email IS NULL OR (s.email NOT LIKE ${TEST_EMAIL_PATTERN} AND s.email != ${TEST_EMAIL_EXACT} ))
-      )
-      SELECT
-        COUNT(DISTINCT user_id) AS new_paid_users,
-        SUM(mrr_contribution) AS new_user_revenue
-      FROM new_paid_users
-    `;
+      FROM conversion_events ce
+      INNER JOIN subscriptions s ON s.user_id = ce.user_id
+      WHERE ce.event_type = 'signup'
+        AND ce.created_at >= ${thirtyDaysAgoTimestamp}
+        AND s.status = 'active'
+        AND (ce.user_email IS NULL OR (ce.user_email NOT LIKE ${TEST_EMAIL_PATTERN} AND ce.user_email != ${TEST_EMAIL_EXACT} ))
+        AND (s.email IS NULL OR (s.email NOT LIKE ${TEST_EMAIL_PATTERN} AND s.email != ${TEST_EMAIL_EXACT} ))
+    )
+    SELECT
+      COUNT(DISTINCT user_id) AS new_paid_users,
+      SUM(mrr_contribution) AS new_user_revenue
+    FROM new_paid_users
+  `;
     const newPaidUsers = Number(arpnuResult.rows[0]?.new_paid_users || 0);
     const newUserRevenue = Number(arpnuResult.rows[0]?.new_user_revenue || 0);
     const arpnu = newPaidUsers > 0 ? newUserRevenue / newPaidUsers : 0;

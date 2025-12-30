@@ -1942,7 +1942,7 @@ async function runNotificationCheck(dateStr: string) {
           s.email as email,
           s.user_name as name,
           s.trial_ends_at,
-          s.plan
+          s.plan_type
         FROM subscriptions s
         WHERE s.status = 'trial'
         AND s.trial_ends_at::date = ${formatDate(threeDaysFromNow)}
@@ -1957,7 +1957,7 @@ async function runNotificationCheck(dateStr: string) {
           s.email as email,
           s.user_name as name,
           s.trial_ends_at,
-          s.plan
+          s.plan_type
         FROM subscriptions s
         WHERE s.status = 'trial'
         AND s.trial_ends_at::date = ${formatDate(oneDayFromNow)}
