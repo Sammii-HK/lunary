@@ -886,10 +886,11 @@ async function generateThematicWeeklyPosts(
               currentTheme.name,
             );
             const videoCaption = buildVideoCaptionForPlatform(platform);
+            const imageUrl: string | null = null;
 
             await sql`
               INSERT INTO social_posts (content, platform, post_type, topic, status, image_url, video_url, scheduled_date, week_theme, week_start, base_group_key, created_at)
-              SELECT ${videoCaption}, ${platform}, 'video', ${dayInfo.facetTitle}, 'pending', ${null}, ${existingVideoUrl || null}, ${videoScheduledDate.toISOString()}, ${currentTheme.name}, ${weekStartDate.toISOString().split('T')[0]}, ${baseGroupKey}, NOW()
+              SELECT ${videoCaption}, ${platform}, 'video', ${dayInfo.facetTitle}, 'pending', ${imageUrl}, ${existingVideoUrl || null}, ${videoScheduledDate.toISOString()}, ${currentTheme.name}, ${weekStartDate.toISOString().split('T')[0]}, ${baseGroupKey}, NOW()
               WHERE NOT EXISTS (
                 SELECT 1 FROM social_posts
                 WHERE platform = ${platform}

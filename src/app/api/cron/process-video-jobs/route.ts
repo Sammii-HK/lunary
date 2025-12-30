@@ -429,7 +429,7 @@ export async function POST(request: NextRequest) {
                 'video',
                 ${script.facet_title},
                 'pending',
-                ${imageUrl},
+                ${imageUrl ?? null},
                 ${videoUrl},
                 ${scheduledDate.toISOString()},
                 ${postWeekTheme || themeName || null},
