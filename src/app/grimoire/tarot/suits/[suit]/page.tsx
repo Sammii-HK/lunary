@@ -1,6 +1,7 @@
 import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { SEOContentTemplate } from '@/components/grimoire/SEOContentTemplate';
+import { TarotCard } from '@/components/TarotCard';
 import { tarotSuits } from '@/constants/tarot';
 import { tarotCards } from '../../../../../../utils/tarot/tarot-cards';
 import { stringToKebabCase } from '../../../../../../utils/string';
@@ -77,7 +78,11 @@ export default async function TarotSuitPage({
   const suitData = tarotSuits[suitKey as keyof typeof tarotSuits];
   const suitCards =
     tarotCards.minorArcana[suitKey as keyof typeof tarotCards.minorArcana];
-  const cards = Object.values(suitCards);
+  const cards = Object.values(suitCards) as Array<{
+    name: string;
+    keywords: string[];
+    information: string;
+  }>;
 
   const meaning = `The ${suitData.name} suit is one of the four Minor Arcana suits in the tarot deck, representing the ${suitData.element.toLowerCase()} element. ${suitData.name} cards focus on ${suitData.qualities.toLowerCase()}.
 
@@ -131,6 +136,7 @@ When ${suitData.name} cards appear in a reading, they bring attention to ${suitD
         stringToKebabCase(suitData.name),
       ]}
       canonicalUrl={`https://lunary.app/grimoire/tarot/suits/${suit}`}
+      childrenPosition='after-description'
       intro={`The ${suitData.name} suit is one of the four Minor Arcana suits in the tarot deck, representing the ${suitData.element.toLowerCase()} element. This comprehensive guide covers everything you need to know about ${suitData.name} cards, their meanings, and how to interpret them in tarot readings.`}
       meaning={meaning}
       howToWorkWith={howToWorkWith}
@@ -168,6 +174,31 @@ When ${suitData.name} cards appear in a reading, they bring attention to ${suitD
           ],
         },
       ]}
-    />
+    >
+      <section aria-labelledby='suit-card-list'>
+        <div className='flex items-baseline justify-between gap-4 flex-wrap'>
+          <h2
+            id='suit-card-list'
+            className='text-xl md:text-2xl font-medium text-zinc-100'
+          >
+            {suitData.name} Cards
+          </h2>
+          <p className='text-sm text-zinc-400'>
+            {cards.length} cards in this suit
+          </p>
+        </div>
+        <div className='grid gap-4 sm:grid-cols-2 mt-4'>
+          {cards.map((card) => (
+            <TarotCard
+              key={card.name}
+              name={card.name}
+              keywords={card.keywords}
+              information={card.information}
+              variant='minor'
+            />
+          ))}
+        </div>
+      </section>
+    </SEOContentTemplate>
   );
 }

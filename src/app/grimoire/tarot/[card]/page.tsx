@@ -6,6 +6,7 @@ import { tarotSuits } from '@/constants/tarot';
 import { stringToKebabCase } from '../../../../../utils/string';
 import { createGrimoireMetadata } from '@/lib/grimoire-metadata';
 import { createTarotCardSchema, renderJsonLd } from '@/lib/schema';
+import { getTarotYesNo } from '@/utils/tarot/yes-no';
 
 // Helper to find card by slug
 function findCardBySlug(slug: string) {
@@ -139,6 +140,13 @@ export default async function TarotCardPage({
     cardDetails.careerMeaning ||
     `In career readings, ${cardData.card.name} indicates ${cardData.card.keywords[0]?.toLowerCase() || 'work-related themes'}. Consider how the card's energy applies to your professional life.`;
 
+  const yesNo = getTarotYesNo({
+    name: cardData.card.name,
+    type: cardData.type as 'major' | 'minor',
+    suit: cardData.suit,
+    keywords: cardData.card.keywords,
+  });
+
   // Generate related cards (simplified)
   const relatedCards: Array<{ name: string; href: string; type: string }> = [];
 
@@ -225,6 +233,10 @@ export default async function TarotCardPage({
       question: `Is ${cardData.card.name} a positive or negative card?`,
       answer: `${cardData.card.name} can be interpreted as ${cardData.card.keywords.some((k) => ['love', 'success', 'joy', 'harmony'].includes(k.toLowerCase())) ? 'generally positive' : 'neutral or challenging depending on context'}. The meaning depends on the question and surrounding cards.`,
     },
+    {
+      question: `Is ${cardData.card.name} yes or no?`,
+      answer: `Upright: ${yesNo.upright.answer} — ${yesNo.upright.reason} Reversed: ${yesNo.reversed.answer} — ${yesNo.reversed.reason} Best used for simple questions.`,
+    },
     ...(cardDetails.affirmation
       ? [
           {
@@ -253,6 +265,24 @@ export default async function TarotCardPage({
     arcana: cardData.type as 'major' | 'minor',
     suit: suitInfo?.name,
   });
+
+  const breadcrumbs = [
+    { label: 'Grimoire', href: '/grimoire' },
+    { label: 'Tarot', href: '/grimoire/tarot' },
+    ...(cardData.suit && suitInfo
+      ? [
+          { label: 'Suits', href: '/grimoire/tarot/suits' },
+          {
+            label: suitInfo.name,
+            href: `/grimoire/tarot/suits/${cardData.suit}`,
+          },
+        ]
+      : []),
+    {
+      label: cardData.card.name,
+      href: `/grimoire/tarot/${card}`,
+    },
+  ];
 
   return (
     <div className='p-4 md:p-6 lg:p-8 xl:p-10 min-h-full'>
@@ -284,6 +314,12 @@ ${uprightMeaning}
 ## Reversed Meaning
 
 ${reversedMeaning}
+
+## Yes or No Guidance
+
+Upright: ${yesNo.upright.answer} — ${yesNo.upright.reason}
+Reversed: ${yesNo.reversed.answer} — ${yesNo.reversed.reason}
+Best used for simple questions.
 
 When ${cardData.card.name} appears in a reading, it brings attention to ${cardData.card.keywords.join(', ').toLowerCase()}. The card's position, surrounding cards, and your question all influence how this energy manifests in your situation.`}
         symbolism={
@@ -341,6 +377,11 @@ Mystical Properties: ${suitInfo.mysticalProperties}`
         relatedItems={[
           ...relatedCards,
           {
+            name: 'Yes or No Tarot',
+            href: '/grimoire/tarot/yes-or-no',
+            type: 'Guide',
+          },
+          {
             name: 'Tarot Guide',
             href: '/grimoire/tarot',
             type: 'Guide',
@@ -351,18 +392,12 @@ Mystical Properties: ${suitInfo.mysticalProperties}`
             type: 'Reading',
           },
         ]}
-        breadcrumbs={[
-          { label: 'Grimoire', href: '/grimoire' },
-          { label: 'Tarot', href: '/grimoire/tarot' },
-          {
-            label: cardData.card.name,
-            href: `/grimoire/tarot/${card}`,
-          },
-        ]}
+        breadcrumbs={breadcrumbs}
         internalLinks={[
           { text: 'Get Daily Tarot Reading', href: '/tarot' },
           { text: 'Explore All Tarot Cards', href: '/grimoire/tarot' },
           { text: 'Learn Tarot Spreads', href: '/grimoire/tarot/spreads' },
+          { text: 'Yes or No Tarot Guide', href: '/grimoire/tarot/yes-or-no' },
           { text: 'Grimoire Home', href: '/grimoire' },
         ]}
         ctaText={`Want a personalized interpretation of ${cardData.card.name}?`}
