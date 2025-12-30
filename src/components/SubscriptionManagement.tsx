@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useSubscription } from '../hooks/useSubscription';
+import { useUser } from '@/context/UserContext';
 import { Button } from '@/components/ui/button';
 import { Settings, ExternalLink, RefreshCw } from 'lucide-react';
 import Link from 'next/link';
@@ -29,6 +30,7 @@ export default function SubscriptionManagement({
   customerId,
   subscriptionId,
 }: SubscriptionManagementProps) {
+  const { user } = useUser();
   const subscription = useSubscription();
   const [loading, setLoading] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -136,11 +138,6 @@ export default function SubscriptionManagement({
       stripeSubscription?.customer ||
       stripeSubscription?.customerId;
 
-    if (!customerIdToUse) {
-      setError('Customer ID not found. Please contact support.');
-      return;
-    }
-
     setLoading('portal');
     setError(null);
 
@@ -151,7 +148,9 @@ export default function SubscriptionManagement({
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          customerId: customerIdToUse,
+          customerId: customerIdToUse || undefined,
+          userId: user?.id,
+          userEmail: user?.email,
         }),
       });
 
