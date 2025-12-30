@@ -7,11 +7,12 @@ import {
   PeopleAlsoAsk,
   RISING_SIGN_PAA,
 } from '@/components/grimoire/PeopleAlsoAsk';
+import { RisingSignCalculator } from './RisingSignCalculator';
 
 export const metadata: Metadata = {
-  title: 'Rising Sign Calculator: Find Your Ascendant Sign - Lunary',
+  title: 'Rising Sign Calculator (Ascendant) | Free & Accurate | Lunary',
   description:
-    'Learn about your rising sign (Ascendant), how it differs from your Sun sign, and how it influences your personality, appearance, and first impressions. Discover how to calculate your rising sign and understand its meaning.',
+    'Calculate your rising sign (Ascendant) with your birth date, exact time, and location. Learn what your Ascendant means and how it shapes first impressions.',
   keywords: [
     'rising sign',
     'ascendant',
@@ -23,16 +24,16 @@ export const metadata: Metadata = {
     'rising sign calculator',
   ],
   openGraph: {
-    title: 'Rising Sign Calculator: Find Your Ascendant Sign - Lunary',
+    title: 'Rising Sign Calculator (Ascendant) | Free & Accurate | Lunary',
     description:
-      'Learn about your rising sign (Ascendant), how it differs from your Sun sign, and how it influences your personality and appearance.',
+      'Calculate your rising sign (Ascendant) with your birth date, exact time, and location.',
     type: 'article',
   },
   twitter: {
     card: 'summary',
-    title: 'Rising Sign Calculator: Find Your Ascendant Sign - Lunary',
+    title: 'Rising Sign Calculator (Ascendant) | Free & Accurate | Lunary',
     description:
-      'Learn about your rising sign (Ascendant), how it differs from your Sun sign, and how it influences your personality.',
+      'Calculate your rising sign (Ascendant) with your birth date, exact time, and location.',
   },
   alternates: {
     canonical: 'https://lunary.app/grimoire/rising-sign',
@@ -51,9 +52,9 @@ export default function RisingSignPage() {
     <>
       {renderJsonLd(qaSchema)}
       <SEOContentTemplate
-        title='Rising Sign Calculator: Find Your Ascendant Sign - Lunary'
-        h1='Rising Sign (Ascendant)'
-        description='Learn about your rising sign (Ascendant), how it differs from your Sun sign, and how it influences your personality, appearance, and first impressions. Discover how to calculate your rising sign.'
+        title='Rising Sign Calculator (Ascendant) | Free & Accurate | Lunary'
+        h1='Rising Sign Calculator (Ascendant)'
+        description='Enter your birth date, exact time, and location to calculate your Ascendant. Your rising sign shapes first impressions and how you move through the world.'
         keywords={[
           'rising sign',
           'ascendant',
@@ -63,8 +64,10 @@ export default function RisingSignPage() {
           'rising sign vs sun sign',
         ]}
         canonicalUrl='https://lunary.app/grimoire/rising-sign'
-        intro='Your rising sign, also called the Ascendant, is the zodiac sign that was rising on the eastern horizon at your exact moment of birth. It represents your outer personality, how others see you, and your approach to life. Understanding your rising sign helps you understand how you present yourself to the world and how others perceive you.'
-        meaning={`The rising sign changes approximately every 2 hours, making it the most time-sensitive part of your chart. It's calculated using your exact birth time (most important), birth location (latitude/longitude), and birth date.
+        intro='Your rising sign, also called the Ascendant, is the zodiac sign that was rising on the eastern horizon at your exact moment of birth. It represents your outer personality, how others see you, and your approach to life. Your rising sign sets the tone of your entire chart.'
+        meaning={`#### How to calculate your rising sign (ascendant)
+
+The rising sign changes approximately every 2 hours, making it the most time-sensitive part of your chart. It's calculated using your exact birth time (most important), birth location (latitude/longitude), and birth date.
 
 **What Is the Rising Sign?**
 The rising sign is the zodiac sign on the eastern horizon at your moment of birth. It represents your outer personality, first impressions, and how you navigate new situations. While your Sun sign shows your core identity, your Rising sign shows how you present yourself to the world.
@@ -100,27 +103,31 @@ Think of it this way: Your Sun sign is your true self, while your Rising sign is
         ]}
         faqs={[
           {
-            question: 'What is a rising sign (Ascendant)?',
+            question: 'What is a rising sign?',
             answer:
-              'Your rising sign is the zodiac sign that was rising on the eastern horizon at your exact time of birth. It represents your outer personality, how others see you, and your approach to life. It changes approximately every 2 hours, making it the most time-sensitive part of your chart.',
+              'Your rising sign (Ascendant) is the zodiac sign that was rising on the eastern horizon at your exact time of birth. It shapes your first impressions, outward style, and how others see you.',
           },
           {
-            question: 'How do I find my rising sign?',
-            answer: `You need your exact birth time, birth date, and birth location. Use an online birth chart calculator or astrology software. The more accurate your birth time, the more precise your rising sign will be. If you don't know your exact birth time, you can use noon as a placeholder, but your rising sign may be inaccurate.`,
+            question: 'Why does birth time matter?',
+            answer:
+              'The Ascendant changes roughly every two hours, so even small time differences can shift your rising sign and house placements.',
           },
           {
-            question: 'Is rising sign more important than Sun sign?',
+            question: 'Can my rising sign change?',
             answer:
-              'Neither is more important—they serve different purposes. Your Sun sign represents your core identity and ego, while your Rising sign represents your outer personality and first impressions. Both are essential parts of your astrological profile.',
+              'Your rising sign does not change once you are born. It changes across the day, which is why your birth time determines the correct sign.',
           },
         ]}
         internalLinks={[
-          { text: 'Birth Chart', href: '/grimoire/birth-chart' },
+          { text: 'Birth Chart Calculator', href: '/birth-chart' },
+          { text: 'Birth Chart Guide', href: '/grimoire/birth-chart' },
           { text: 'Transits', href: '/grimoire/transits' },
           { text: 'Synastry', href: '/grimoire/synastry' },
           { text: 'Astronomy & Astrology', href: '/grimoire/astronomy' },
         ]}
+        childrenPosition='after-description'
       >
+        <RisingSignCalculator />
         <PeopleAlsoAsk questions={RISING_SIGN_PAA} />
       </SEOContentTemplate>
     </>

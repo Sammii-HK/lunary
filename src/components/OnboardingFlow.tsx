@@ -1,6 +1,6 @@
 'use client';
 
-import { ReactNode, useState, useEffect } from 'react';
+import { ReactNode, useState, useEffect, useCallback } from 'react';
 import { useUser } from '@/context/UserContext';
 import { useAuthStatus } from './AuthStatus';
 import { useSubscription } from '@/hooks/useSubscription';
@@ -25,6 +25,10 @@ import { conversionTracking } from '@/lib/analytics';
 import { OnboardingFeatureTour } from './OnboardingFeatureTour';
 import { BirthdayInput } from './ui/birthday-input';
 import { PlanId } from '../../utils/stripe-prices';
+import {
+  clearOnboardingPrefill,
+  getOnboardingPrefill,
+} from '@/lib/onboarding/prefill';
 
 interface OnboardingFlowProps {
   overridePlanId?:
@@ -70,6 +74,8 @@ export function OnboardingFlow({
   const [saving, setSaving] = useState(false);
   const [showOptionalDetails, setShowOptionalDetails] = useState(false);
   const [showSkipWarning, setShowSkipWarning] = useState(false);
+  const [prefillLoaded, setPrefillLoaded] = useState(false);
+  const [autoSavePrefill, setAutoSavePrefill] = useState(false);
   const [onboardingStatus, setOnboardingStatus] = useState({
     loading: true,
     completed: false,
@@ -269,7 +275,35 @@ export function OnboardingFlow({
     }
   }, [previewMode, previewStep]);
 
-  const handleSaveBirthday = async () => {
+  useEffect(() => {
+    if (!showOnboarding || prefillLoaded || previewMode) {
+      return;
+    }
+
+    const prefill = getOnboardingPrefill();
+    if (prefill) {
+      if (prefill.birthday) {
+        setBirthday(prefill.birthday);
+      }
+      if (prefill.birthTime) {
+        setBirthTime(prefill.birthTime);
+      }
+      if (prefill.birthLocation) {
+        setBirthLocation(prefill.birthLocation);
+      }
+      if (prefill.birthTime || prefill.birthLocation) {
+        setShowOptionalDetails(true);
+      }
+      if (prefill.autoAdvance && prefill.birthday) {
+        setCurrentStep('birthday');
+        setAutoSavePrefill(true);
+      }
+      clearOnboardingPrefill();
+    }
+    setPrefillLoaded(true);
+  }, [showOnboarding, prefillLoaded, previewMode]);
+
+  const handleSaveBirthday = useCallback(async () => {
     if (!birthday) return;
 
     setSaving(true);
@@ -343,7 +377,28 @@ export function OnboardingFlow({
     } finally {
       setSaving(false);
     }
-  };
+  }, [
+    authState.user?.email,
+    authState.user?.name,
+    birthday,
+    birthLocation,
+    birthTime,
+    previewMode,
+    refetch,
+    user?.id,
+  ]);
+
+  useEffect(() => {
+    if (!autoSavePrefill || currentStep !== 'birthday' || saving) {
+      return;
+    }
+    if (!birthday) {
+      setAutoSavePrefill(false);
+      return;
+    }
+    void handleSaveBirthday();
+    setAutoSavePrefill(false);
+  }, [autoSavePrefill, birthday, currentStep, handleSaveBirthday, saving]);
 
   const trackStepCompletion = async (
     step: string,
