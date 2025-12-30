@@ -211,12 +211,49 @@ export async function POST(request: NextRequest) {
             `;
             const totalParts = countResult.rows[0]?.count || 7;
 
-            const youtubeTitleBase = `Weekly Theme: ${themeName} • Part ${partNumber} of ${totalParts} — ${post.topic}`;
-            const youtubeTitle =
-              youtubeTitleBase.length > 90
-                ? youtubeTitleBase.substring(0, 87) + '...'
-                : youtubeTitleBase;
-            const youtubeDescription = `${post.content}\n\nFrom Lunary's Grimoire — explore deeper rituals, meanings, and correspondences inside the full Grimoire.\n\n#Lunary #Grimoire`;
+            const toHashtag = (value: string): string | null => {
+              const words = value
+                .replace(/[^a-z0-9]+/gi, ' ')
+                .trim()
+                .split(/\s+/)
+                .filter(Boolean);
+              if (words.length === 0) return null;
+              const tag = words
+                .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+                .join('');
+              return tag ? `#${tag}` : null;
+            };
+
+            const themeTag = toHashtag(themeName);
+            const topicTag = post.topic ? toHashtag(post.topic) : null;
+            const titleTags = ['#astrology', themeTag, '#universe']
+              .filter(Boolean)
+              .join(' ');
+            const titleBase = `${themeName} • Part ${partNumber} of ${totalParts} — ${post.topic}`;
+            const titleSuffix = titleTags ? ` ${titleTags}` : '';
+            const maxTitleLength = 100;
+            let trimmedBase = titleBase;
+            if (trimmedBase.length + titleSuffix.length > maxTitleLength) {
+              trimmedBase = trimmedBase
+                .substring(0, maxTitleLength - titleSuffix.length - 1)
+                .replace(/[—•\s]+$/g, '')
+                .trim();
+            }
+            const youtubeTitle = `${trimmedBase}${titleSuffix}`.trim();
+
+            const descriptionTags = Array.from(
+              new Set([
+                '#Lunary',
+                '#astrology',
+                '#universe',
+                themeTag,
+                topicTag,
+              ]),
+            )
+              .filter(Boolean)
+              .join(' ');
+            const youtubeDescription =
+              `${post.content}\n\n${descriptionTags}`.trim();
 
             const publishDate = (() => {
               if (!dateValue) {
@@ -236,7 +273,7 @@ export async function POST(request: NextRequest) {
               ? 'https://lunary.app'
               : 'http://localhost:3000';
 
-            let uploadResult: YouTubeUploadResult = { success: false };
+            let uploadResult: YouTubeUploadResult;
             try {
               const response = await fetch(`${baseUrl}/api/youtube/upload`, {
                 method: 'POST',

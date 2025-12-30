@@ -254,6 +254,14 @@ export async function POST(request: NextRequest) {
         
         -- Period information
         current_period_end TIMESTAMP WITH TIME ZONE,
+
+        -- Discount tracking
+        has_discount BOOLEAN DEFAULT false,
+        discount_percent DECIMAL(5,2),
+        monthly_amount_due DECIMAL(10,2),
+        coupon_id TEXT,
+        promo_code TEXT,
+        discount_ends_at TIMESTAMP WITH TIME ZONE,
         
         -- Timestamps
         created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
@@ -279,6 +287,36 @@ export async function POST(request: NextRequest) {
         IF NOT EXISTS (SELECT 1 FROM information_schema.columns 
                        WHERE table_name = 'subscriptions' AND column_name = 'user_name') THEN
           ALTER TABLE subscriptions ADD COLUMN user_name TEXT;
+        END IF;
+      END $$;
+    `;
+
+    await sql`
+      DO $$ 
+      BEGIN
+        IF NOT EXISTS (SELECT 1 FROM information_schema.columns 
+                       WHERE table_name = 'subscriptions' AND column_name = 'has_discount') THEN
+          ALTER TABLE subscriptions ADD COLUMN has_discount BOOLEAN DEFAULT false;
+        END IF;
+        IF NOT EXISTS (SELECT 1 FROM information_schema.columns 
+                       WHERE table_name = 'subscriptions' AND column_name = 'discount_percent') THEN
+          ALTER TABLE subscriptions ADD COLUMN discount_percent DECIMAL(5,2);
+        END IF;
+        IF NOT EXISTS (SELECT 1 FROM information_schema.columns 
+                       WHERE table_name = 'subscriptions' AND column_name = 'monthly_amount_due') THEN
+          ALTER TABLE subscriptions ADD COLUMN monthly_amount_due DECIMAL(10,2);
+        END IF;
+        IF NOT EXISTS (SELECT 1 FROM information_schema.columns 
+                       WHERE table_name = 'subscriptions' AND column_name = 'coupon_id') THEN
+          ALTER TABLE subscriptions ADD COLUMN coupon_id TEXT;
+        END IF;
+        IF NOT EXISTS (SELECT 1 FROM information_schema.columns 
+                       WHERE table_name = 'subscriptions' AND column_name = 'promo_code') THEN
+          ALTER TABLE subscriptions ADD COLUMN promo_code TEXT;
+        END IF;
+        IF NOT EXISTS (SELECT 1 FROM information_schema.columns 
+                       WHERE table_name = 'subscriptions' AND column_name = 'discount_ends_at') THEN
+          ALTER TABLE subscriptions ADD COLUMN discount_ends_at TIMESTAMP WITH TIME ZONE;
         END IF;
       END $$;
     `;

@@ -62,29 +62,49 @@ const faqs = [
   {
     question: 'What are angel numbers?',
     answer:
-      'Angel numbers are repeating number sequences (like 111, 222, 333) believed to carry divine guidance from angels, spirit guides, or the universe. When you repeatedly notice certain numbers on clocks, receipts, license plates, or elsewhere, many believe this is a form of spiritual communication.',
+      'Angel numbers are repeating number sequences (like 111, 222, 333) that many people treat as spiritual nudges. The deeper meanings live on each number page.',
   },
   {
     question: 'Why do I keep seeing repeating numbers?',
     answer:
-      "Seeing repeating numbers often indicates you're in alignment with spiritual energy and your guides are trying to communicate. Pay attention to what you were thinking or feeling when you noticed the number — this context often reveals the message's meaning for you.",
-  },
-  {
-    question: 'What does 111 mean spiritually?',
-    answer:
-      '111 is a powerful manifestation number signaling new beginnings and that your thoughts are manifesting quickly. It encourages you to focus on what you want (not what you fear) as your intentions are being amplified by the universe.',
-  },
-  {
-    question: 'What does seeing 444 mean?',
-    answer:
-      '444 is a sign of protection and encouragement from your angels. It indicates you are on the right path and surrounded by divine support. This number often appears during challenging times as reassurance that you are not alone.',
+      'Repetition is the signal. Note when it appears, how you feel, and then open the specific number page for the full meaning.',
   },
   {
     question: 'How should I respond when I see an angel number?',
     answer:
-      'When you see an angel number, pause and notice what you were thinking. Thank your guides for the message. Reflect on how the meaning applies to your current situation. Many people also journal about their angel number sightings to track patterns.',
+      'Pause, notice the moment, and follow the number to its page for the full interpretation.',
   },
 ];
+
+const numberTeasers: Record<string, string> = {
+  '000': 'A reset, a clean slate, and open potential.',
+  '111': 'A spark of clarity and a fresh start.',
+  '222': 'Reassurance, patience, and trust in unfolding timing.',
+  '333': 'Support around you and a creative lift.',
+  '444': 'Grounding energy and steady protection.',
+  '555': 'A shift in motion and freedom to move.',
+  '666': 'A gentle course correction back to center.',
+  '777': 'Inner knowing, spiritual alignment, and luck.',
+  '888': 'Momentum, reward, and abundance in flow.',
+  '999': 'Closure, release, and the next chapter.',
+  '1010': 'Alignment, momentum, stepping into the next chapter.',
+  '1212': 'Trust your timing and move with faith.',
+  '1111': 'Awakening, alignment, and the next clear step.',
+  '2222': 'Steady balance and trust in the long view.',
+  '3333': 'Creative momentum and support around you.',
+  '4444': 'Grounded protection and solid foundations.',
+  '5555': 'A bold shift and freedom to move.',
+  '7777': 'Inner wisdom, study, and spiritual depth.',
+  '8888': 'Abundance, leadership, and results landing.',
+  '9999': 'Completion, release, and the next chapter.',
+  '1313': 'Growth through change and rebuilding stronger.',
+  '1414': 'Focus, structure, and steady priorities.',
+  '1515': 'Decisive change and aligned choices.',
+  '1717': 'Self-trust, recognition, and forward motion.',
+  '1818': 'Leadership, progress, and material momentum.',
+  '1919': 'Closing a cycle and opening a new one.',
+  '2020': 'Clear perspective and balanced direction.',
+};
 
 export default function AngelNumbersIndexPage() {
   const numbers = Object.keys(angelNumbers).sort(
@@ -115,47 +135,14 @@ export default function AngelNumbersIndexPage() {
         whatIs={{
           question: 'What are Angel Numbers?',
           answer:
-            'Angel numbers are sequences of repeating numbers (like 111, 222, 333) that many believe carry divine messages from angels, spirit guides, or the universe. When you repeatedly notice these number patterns on clocks, license plates, receipts, or elsewhere, it may be a sign that spiritual forces are trying to communicate guidance, reassurance, or warnings.',
+            'Angel numbers are repeating number sequences (like 111, 222, 333) that many people read as spiritual nudges. The hub is a map - click a number to read its full meaning.',
         }}
-        tldr='Angel numbers are repeating number sequences carrying spiritual messages. Common ones include 111 (manifestation), 222 (balance), 333 (guidance), 444 (protection), and 555 (change). Notice when and where you see them for context.'
-        meaning={`Angel numbers have been recognized across cultures and spiritual traditions as a form of divine communication. The practice of interpreting these numbers draws from numerology, where each digit carries specific vibrational meaning.
-
-**How Angel Numbers Work:**
-
-The universe communicates through synchronicity — meaningful coincidences that catch our attention. When you repeatedly see a number sequence, it's believed to be:
-
-1. **A sign you're aligned** with spiritual energy
-2. **Guidance** for your current situation
-3. **Confirmation** you're on the right path
-4. **A warning** to pay attention
-
-**The Most Common Angel Numbers:**
-
-- **111** - New beginnings, manifestation, thoughts becoming reality
-- **222** - Balance, harmony, partnerships, trust the process
-- **333** - Ascended masters present, creative expression, growth
-- **444** - Protection, stability, angels are with you
-- **555** - Major change coming, transformation, freedom
-- **666** - Refocus on balance, don't be too materialistic
-- **777** - Spiritual awakening, luck, divine alignment
-- **888** - Abundance, prosperity, karma returning
-- **999** - Completion, ending cycles, humanitarian purpose
-
-**How to Work with Angel Numbers:**
-
-When you see an angel number, pause and take note of:
-- What you were thinking about
-- How you were feeling
-- What's happening in your life
-- The context (time, place, situation)
-
-This information helps you understand the specific message for you.`}
+        tldr='Angel numbers are repeating sequences. Click a number below to get the full meaning, including love, work, and spiritual themes.'
+        meaning={`Angel numbers are repeating sequences that stand out in daily life. The meaning lives on each number page, where you can explore the deeper themes for that specific sequence.`}
         howToWorkWith={[
-          'Stay aware and notice when numbers appear repeatedly',
-          'Note what you were thinking or feeling when you saw the number',
-          'Look up the general meaning of the angel number',
-          'Apply the meaning to your specific life situation',
-          'Thank your guides and trust the message',
+          'Notice the number when it repeats',
+          'Check the timing and your emotional state',
+          'Open the number page for the full meaning',
         ]}
         relatedItems={[
           {
@@ -200,8 +187,7 @@ This information helps you understand the specific message for you.`}
           </h2>
           <p className='text-zinc-400 mb-6'>
             Triple numbers (111, 222, 333, etc.) are the most commonly
-            recognized angel numbers. Each carries powerful spiritual
-            significance.
+            recognized angel numbers. Click a number to see its full meaning.
           </p>
           <div className='grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-5 gap-4'>
             {tripleNumbers.map((num) => {
@@ -215,11 +201,9 @@ This information helps you understand the specific message for you.`}
                   <span className='text-2xl font-light text-lunary-primary-400 group-hover:text-lunary-primary-300 transition-colors'>
                     {num}
                   </span>
-                  {data?.meaning && (
-                    <p className='text-xs text-zinc-400 mt-2 line-clamp-1'>
-                      {data.meaning.split(' & ')[0]}
-                    </p>
-                  )}
+                  <p className='text-xs text-zinc-400 mt-2 line-clamp-2'>
+                    {numberTeasers[num] || data?.meaning}
+                  </p>
                 </Link>
               );
             })}
@@ -233,27 +217,53 @@ This information helps you understand the specific message for you.`}
             </h2>
             <p className='text-zinc-400 mb-6'>
               Beyond triple numbers, other repeating sequences also carry
-              spiritual messages.
+              spiritual messages. Click a number to see its full meaning.
             </p>
             <div className='grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-6 gap-3'>
-              {otherNumbers.map((num) => (
-                <Link
-                  key={num}
-                  href={`/grimoire/angel-numbers/${num}`}
-                  className='group rounded-lg border border-zinc-800 bg-zinc-900/30 p-4 hover:bg-zinc-900/50 hover:border-lunary-accent-600 transition-all text-center'
-                >
-                  <span className='text-xl font-light text-zinc-100 group-hover:text-lunary-accent-300 transition-colors'>
-                    {num}
-                  </span>
-                </Link>
-              ))}
+              {otherNumbers.map((num) => {
+                const data = angelNumbers[num as keyof typeof angelNumbers];
+                return (
+                  <Link
+                    key={num}
+                    href={`/grimoire/angel-numbers/${num}`}
+                    className='group rounded-lg border border-zinc-800 bg-zinc-900/30 p-4 hover:bg-zinc-900/50 hover:border-lunary-accent-600 transition-all text-center'
+                  >
+                    <span className='text-xl font-light text-zinc-100 group-hover:text-lunary-accent-300 transition-colors'>
+                      {num}
+                    </span>
+                    <p className='text-[11px] text-zinc-400 mt-2 line-clamp-2'>
+                      {numberTeasers[num] || data?.meaning}
+                    </p>
+                  </Link>
+                );
+              })}
             </div>
           </section>
         )}
 
+        <section className='mb-8 bg-zinc-900/50 border border-zinc-800 rounded-xl p-6'>
+          <h2 className='text-xl font-medium text-zinc-100 mb-4'>
+            Why you're seeing this number
+          </h2>
+          <ul className='space-y-2 text-zinc-400 text-sm'>
+            <li className='flex items-center gap-2'>
+              <span className='text-lunary-primary-400'>•</span>
+              Repetition - the number keeps showing up to get your attention.
+            </li>
+            <li className='flex items-center gap-2'>
+              <span className='text-lunary-primary-400'>•</span>
+              Timing - it appears near a decision or change.
+            </li>
+            <li className='flex items-center gap-2'>
+              <span className='text-lunary-primary-400'>•</span>
+              Emotional state - it mirrors what you are processing.
+            </li>
+          </ul>
+        </section>
+
         <section className='mb-12 bg-zinc-900/50 border border-zinc-800 rounded-xl p-6'>
           <h2 className='text-xl font-medium text-zinc-100 mb-4'>
-            Where to Look for Angel Numbers
+            Where to look for angel numbers
           </h2>
           <div className='grid md:grid-cols-2 gap-4'>
             <ul className='space-y-2 text-zinc-400'>
@@ -263,11 +273,7 @@ This information helps you understand the specific message for you.`}
               </li>
               <li className='flex items-center gap-2'>
                 <span className='text-lunary-primary-400'>•</span>
-                License plates on vehicles
-              </li>
-              <li className='flex items-center gap-2'>
-                <span className='text-lunary-primary-400'>•</span>
-                Receipts and transaction totals
+                License plates and receipts
               </li>
               <li className='flex items-center gap-2'>
                 <span className='text-lunary-primary-400'>•</span>
@@ -277,75 +283,36 @@ This information helps you understand the specific message for you.`}
             <ul className='space-y-2 text-zinc-400'>
               <li className='flex items-center gap-2'>
                 <span className='text-lunary-primary-400'>•</span>
-                Page numbers in books
+                Page numbers and social metrics
               </li>
               <li className='flex items-center gap-2'>
                 <span className='text-lunary-primary-400'>•</span>
-                Social media metrics
+                Ticket, seat, or order numbers
               </li>
               <li className='flex items-center gap-2'>
                 <span className='text-lunary-primary-400'>•</span>
-                Flight or seat numbers
-              </li>
-              <li className='flex items-center gap-2'>
-                <span className='text-lunary-primary-400'>•</span>
-                Dreams and visions
+                Dreams and inner nudges
               </li>
             </ul>
           </div>
         </section>
 
-        <section className='mb-12 bg-gradient-to-r from-lunary-primary-900/20 to-lunary-accent-900/20 border border-lunary-primary-800 rounded-xl p-6'>
-          <h2 className='text-xl font-medium text-zinc-100 mb-4'>
-            Quick Reference: Common Angel Number Meanings
-          </h2>
-          <div className='grid grid-cols-2 md:grid-cols-3 gap-4 text-sm'>
-            <div>
-              <span className='font-medium text-lunary-primary-300'>111</span>
-              <span className='text-zinc-400'>
-                {' '}
-                — Manifestation, new starts
+        <section className='mb-8'>
+          <p className='text-sm text-zinc-400'>
+            Looking for a deeper meaning? Each angel number has its own page
+            exploring love, work, and spiritual themes:{' '}
+            {numbers.map((num, index) => (
+              <span key={num}>
+                <Link
+                  href={`/grimoire/angel-numbers/${num}`}
+                  className='text-lunary-primary-300 hover:text-lunary-primary-200'
+                >
+                  {num}
+                </Link>
+                {index < numbers.length - 1 ? ', ' : '.'}
               </span>
-            </div>
-            <div>
-              <span className='font-medium text-lunary-primary-300'>222</span>
-              <span className='text-zinc-400'> — Balance, trust, patience</span>
-            </div>
-            <div>
-              <span className='font-medium text-lunary-primary-300'>333</span>
-              <span className='text-zinc-400'>
-                {' '}
-                — Divine guidance, creativity
-              </span>
-            </div>
-            <div>
-              <span className='font-medium text-lunary-primary-300'>444</span>
-              <span className='text-zinc-400'> — Protection, foundation</span>
-            </div>
-            <div>
-              <span className='font-medium text-lunary-primary-300'>555</span>
-              <span className='text-zinc-400'> — Major change, freedom</span>
-            </div>
-            <div>
-              <span className='font-medium text-lunary-primary-300'>666</span>
-              <span className='text-zinc-400'> — Balance, refocus</span>
-            </div>
-            <div>
-              <span className='font-medium text-lunary-primary-300'>777</span>
-              <span className='text-zinc-400'>
-                {' '}
-                — Luck, spiritual awakening
-              </span>
-            </div>
-            <div>
-              <span className='font-medium text-lunary-primary-300'>888</span>
-              <span className='text-zinc-400'> — Abundance, prosperity</span>
-            </div>
-            <div>
-              <span className='font-medium text-lunary-primary-300'>999</span>
-              <span className='text-zinc-400'> — Completion, endings</span>
-            </div>
-          </div>
+            ))}
+          </p>
         </section>
       </SEOContentTemplate>
     </div>

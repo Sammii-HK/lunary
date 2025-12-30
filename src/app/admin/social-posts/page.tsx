@@ -48,6 +48,8 @@ interface PendingPost {
   videoUrl?: string;
   weekTheme?: string;
   weekStart?: string;
+  baseGroupKey?: string;
+  basePostId?: number;
   videoScriptId?: number;
   videoScript?: string;
   videoScriptPlatform?: string;
@@ -118,6 +120,8 @@ export default function SocialPostsPage() {
   const [useThematicMode, setUseThematicMode] = useState(true);
   const [replaceExisting, setReplaceExisting] = useState(false);
   const [videosOnly, setVideosOnly] = useState(false);
+  const [dailyCronRunning, setDailyCronRunning] = useState(false);
+  const [dailyCronForceRunning, setDailyCronForceRunning] = useState(false);
   const [videoJobFeedback, setVideoJobFeedback] = useState<string | null>(null);
   const [activeVariantByGroup, setActiveVariantByGroup] = useState<
     Record<string, string>
@@ -651,9 +655,30 @@ export default function SocialPostsPage() {
       return;
     }
 
+    const groupMap = new Map<string, PendingPost[]>();
+    for (const post of approvedPosts) {
+      const key = post.baseGroupKey || post.id;
+      const group = groupMap.get(key);
+      if (group) {
+        group.push(post);
+      } else {
+        groupMap.set(key, [post]);
+      }
+    }
+
+    const postsToSend: PendingPost[] = [];
+    for (const group of groupMap.values()) {
+      const basePostId = group[0]?.basePostId;
+      const basePost =
+        typeof basePostId === 'number'
+          ? group.find((post) => Number(post.id) === basePostId)
+          : undefined;
+      postsToSend.push(basePost || group[0]);
+    }
+
     if (
       !confirm(
-        `Send ${approvedPosts.length} approved post${approvedPosts.length > 1 ? 's' : ''} to Succulent?`,
+        `Send ${postsToSend.length} grouped post${postsToSend.length > 1 ? 's' : ''} (${approvedPosts.length} approved variants) to Succulent?`,
       )
     )
       return;
@@ -661,7 +686,7 @@ export default function SocialPostsPage() {
     setSendingAll(true);
     setSendAllProgress({
       current: 0,
-      total: approvedPosts.length,
+      total: postsToSend.length,
       success: 0,
       failed: 0,
     });
@@ -669,11 +694,11 @@ export default function SocialPostsPage() {
     let successCount = 0;
     let failedCount = 0;
 
-    for (let i = 0; i < approvedPosts.length; i++) {
-      const post = approvedPosts[i];
+    for (let i = 0; i < postsToSend.length; i++) {
+      const post = postsToSend[i];
       setSendAllProgress({
         current: i + 1,
-        total: approvedPosts.length,
+        total: postsToSend.length,
         success: successCount,
         failed: failedCount,
       });
@@ -703,14 +728,14 @@ export default function SocialPostsPage() {
         failedCount++;
       }
 
-      if (i < approvedPosts.length - 1) {
+      if (i < postsToSend.length - 1) {
         await new Promise((resolve) => setTimeout(resolve, 500));
       }
     }
 
     setSendAllProgress({
-      current: approvedPosts.length,
-      total: approvedPosts.length,
+      current: postsToSend.length,
+      total: postsToSend.length,
       success: successCount,
       failed: failedCount,
     });
@@ -730,6 +755,36 @@ export default function SocialPostsPage() {
       setSendingAll(false);
       setSendAllProgress(null);
     }, 2000);
+  };
+
+  const triggerDailyCron = async (force = false, date?: string) => {
+    const confirmMessage = force
+      ? 'Force run daily cron now? This bypasses the duplicate execution guard.'
+      : 'Run daily cron now?';
+    if (!confirm(confirmMessage)) return;
+
+    force ? setDailyCronForceRunning(true) : setDailyCronRunning(true);
+    try {
+      const response = await fetch('/api/admin/cron/daily-posts', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ force, date }),
+      });
+      const data = await response.json();
+      if (data.success) {
+        alert('Daily cron completed.');
+      } else if (data.skipped) {
+        alert(data.message || 'Daily cron skipped.');
+      } else {
+        alert(
+          `Daily cron failed: ${data.error || data.message || 'Unknown error'}`,
+        );
+      }
+    } catch (error) {
+      alert('Daily cron failed.');
+    } finally {
+      force ? setDailyCronForceRunning(false) : setDailyCronRunning(false);
+    }
   };
 
   const handleOpenInApp = async (post: PendingPost) => {
@@ -1219,6 +1274,62 @@ export default function SocialPostsPage() {
                 )}
               </div>
               <div className='flex gap-3'>
+                <Button
+                  onClick={() => triggerDailyCron()}
+                  disabled={loading || dailyCronRunning}
+                  variant='outline'
+                  className='border-zinc-700 text-zinc-300 hover:bg-zinc-800'
+                >
+                  {dailyCronRunning ? 'Running cron...' : 'Run daily cron'}
+                </Button>
+                <Button
+                  onClick={() =>
+                    triggerDailyCron(
+                      false,
+                      new Date().toISOString().split('T')[0],
+                    )
+                  }
+                  disabled={loading || dailyCronRunning}
+                  variant='outline'
+                  className='border-zinc-700 text-zinc-300 hover:bg-zinc-800'
+                >
+                  Run for today
+                </Button>
+                <Button
+                  onClick={() => triggerDailyCron(true)}
+                  disabled={loading || dailyCronForceRunning}
+                  variant='outline'
+                  className='border-lunary-error-700 text-lunary-error hover:bg-lunary-error-900/20'
+                >
+                  {dailyCronForceRunning ? 'Forcing...' : 'Force daily cron'}
+                </Button>
+                <Button
+                  onClick={() => handleBulkAction('approve_all')}
+                  disabled={loading || bulkActionLoading === 'approve_all'}
+                  className='bg-lunary-primary-600 hover:bg-lunary-primary-700 text-white'
+                >
+                  {bulkActionLoading === 'approve_all'
+                    ? 'Approving...'
+                    : 'Approve all'}
+                </Button>
+                <Button
+                  onClick={() => handleBulkAction('clear_all')}
+                  disabled={loading || bulkActionLoading === 'clear_all'}
+                  variant='outline'
+                  className='border-zinc-700 text-zinc-300 hover:bg-zinc-800'
+                >
+                  {bulkActionLoading === 'clear_all'
+                    ? 'Clearing...'
+                    : 'Clear all'}
+                </Button>
+                <Button
+                  onClick={handleSendAllApproved}
+                  disabled={loading || sendingAll}
+                  variant='outline'
+                  className='border-lunary-primary-600 text-lunary-primary-300 hover:bg-lunary-primary-900/30'
+                >
+                  {sendingAll ? 'Scheduling...' : 'Schedule approved'}
+                </Button>
                 <Button
                   onClick={() => handleProcessVideoJobs()}
                   disabled={loading}

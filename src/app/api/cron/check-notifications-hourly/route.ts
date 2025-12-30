@@ -7,7 +7,11 @@ import {
   sendUnifiedNotification,
   NotificationEvent,
 } from '@/lib/notifications/unified-service';
-import { processAccountDeletions, sendTrialReminders } from '@/lib/cron';
+import {
+  processAccountDeletions,
+  sendPromoEndingReminders,
+  sendTrialReminders,
+} from '@/lib/cron';
 
 // This is the SINGLE cron job for Vercel Pro tier
 // It runs every hour and handles all scheduled tasks directly (no fetch calls)
@@ -51,6 +55,15 @@ export async function GET(request: NextRequest) {
         scheduledTasks.push(`trial-reminders (${result.sent.total} sent)`);
       } catch (e) {
         console.error('Failed to run trial-reminders:', e);
+      }
+
+      try {
+        const result = await sendPromoEndingReminders();
+        scheduledTasks.push(
+          `promo-ending-reminders (${result.sent.total} sent)`,
+        );
+      } catch (e) {
+        console.error('Failed to run promo-ending-reminders:', e);
       }
     }
 

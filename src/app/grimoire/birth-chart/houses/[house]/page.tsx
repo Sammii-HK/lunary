@@ -49,6 +49,38 @@ export async function generateMetadata({
         : house === '3'
           ? '3rd'
           : `${house}th`;
+
+  const extraHouseNotes =
+    house === '10'
+      ? `\n\nThe ${ordinal} House is strongly tied to career, reputation, and life direction. It relates to the Midheaven (MC) and shows how you want to be seen for your work in the world.`
+      : house === '11'
+        ? `\n\nThe ${ordinal} House highlights community, collaboration, and long-term goals. It shows the kind of networks that support your future.`
+        : house === '12'
+          ? `\n\nThe ${ordinal} House governs solitude, subconscious patterns, and spiritual restoration. It often asks for quiet reflection before major decisions.`
+          : '';
+
+  const isUpperHouses = ['10', '11', '12'].includes(house);
+  const extraInternalLinks = isUpperHouses
+    ? [
+        { text: 'Rising Sign (Ascendant)', href: '/grimoire/rising-sign' },
+        { text: 'Planets in Astrology', href: '/grimoire/astronomy/planets' },
+        { text: 'Birth Chart Guide', href: '/grimoire/birth-chart' },
+        { text: 'Astrology Placements', href: '/grimoire/placements' },
+        { text: 'Life Path', href: '/grimoire/life-path' },
+      ]
+    : [];
+
+  const extraRelatedItems = isUpperHouses
+    ? [
+        { name: 'Rising Sign', href: '/grimoire/rising-sign', type: 'Guide' },
+        {
+          name: 'Planets in Astrology',
+          href: '/grimoire/astronomy/planets',
+          type: 'Guide',
+        },
+        { name: 'Life Path', href: '/grimoire/life-path', type: 'Guide' },
+      ]
+    : [];
   const title = `${ordinal} House in Astrology: ${houseData.keywords[0]} & More - Lunary`;
   const description = `Learn about the ${ordinal} House in your birth chart. Discover how the ${houseData.name} influences ${houseData.area.toLowerCase()} and what planets mean in this house.`;
 
@@ -112,6 +144,37 @@ export default async function BirthChartHousePage({
         : house === '3'
           ? '3rd'
           : `${house}th`;
+  const extraHouseNotes =
+    house === '10'
+      ? `\n\nThe ${ordinal} House is strongly tied to career, reputation, and life direction. It relates to the Midheaven (MC) and shows how you want to be seen for your work in the world.`
+      : house === '11'
+        ? `\n\nThe ${ordinal} House highlights community, collaboration, and long-term goals. It shows the kind of networks that support your future.`
+        : house === '12'
+          ? `\n\nThe ${ordinal} House governs solitude, subconscious patterns, and spiritual restoration. It often asks for quiet reflection before major decisions.`
+          : '';
+
+  const isUpperHouses = ['10', '11', '12'].includes(house);
+  const extraInternalLinks = isUpperHouses
+    ? [
+        { text: 'Rising Sign (Ascendant)', href: '/grimoire/rising-sign' },
+        { text: 'Planets in Astrology', href: '/grimoire/astronomy/planets' },
+        { text: 'Birth Chart Guide', href: '/grimoire/birth-chart' },
+        { text: 'Astrology Placements', href: '/grimoire/placements' },
+        { text: 'Life Path', href: '/grimoire/life-path' },
+      ]
+    : [];
+
+  const extraRelatedItems = isUpperHouses
+    ? [
+        { name: 'Rising Sign', href: '/grimoire/rising-sign', type: 'Guide' },
+        {
+          name: 'Planets in Astrology',
+          href: '/grimoire/astronomy/planets',
+          type: 'Guide',
+        },
+        { name: 'Life Path', href: '/grimoire/life-path', type: 'Guide' },
+      ]
+    : [];
 
   const faqs = [
     {
@@ -158,7 +221,7 @@ ${houseData.themes.map((t) => `- ${t}`).join('\n')}
 
 Planets placed in your ${ordinal} House will express their energy through these themes. For example, if you have Venus in the ${ordinal} House, you'll experience Venusian themes of love, beauty, and value through the lens of ${houseData.area.toLowerCase()}.
 
-Understanding your ${ordinal} House helps you navigate its life areas more consciously. The sign on your ${ordinal} House cusp (starting point) also influences how you approach these themes.`}
+Understanding your ${ordinal} House helps you navigate its life areas more consciously. The sign on your ${ordinal} House cusp (starting point) also influences how you approach these themes.${extraHouseNotes}`}
         glyphs={[houseData.symbol]}
         emotionalThemes={houseData.keywords}
         howToWorkWith={[
@@ -200,6 +263,7 @@ Understanding your ${ordinal} House helps you navigate its life areas more consc
             href: `/grimoire/zodiac/${houseData.rulingSign.toLowerCase()}`,
             type: 'Sign',
           },
+          ...extraRelatedItems,
         ]}
         breadcrumbs={[
           { label: 'Grimoire', href: '/grimoire' },
@@ -213,6 +277,7 @@ Understanding your ${ordinal} House helps you navigate its life areas more consc
           { text: 'Birth Chart Guide', href: '/grimoire/birth-chart' },
           { text: 'Get Your Birth Chart', href: '/birth-chart' },
           { text: 'Zodiac Signs', href: '/grimoire/zodiac' },
+          ...extraInternalLinks,
           { text: 'Grimoire Home', href: '/grimoire' },
         ]}
         ctaText='Calculate your birth chart'

@@ -167,6 +167,18 @@ The ${theme.luckyDays.join(', ')} of ${monthName} carry especially favorable ene
 ### Power Color
 
 Wearing or surrounding yourself with ${theme.powerColor} can help align your energy with the month's cosmic currents.
+
+### Love
+
+In love, ${signName} benefits from focusing on ${theme.opportunities}. Keep communication soft and steady while navigating ${theme.challenges}. Small acts of care build momentum this month.
+
+### Career
+
+Career energy centers on ${theme.focus}. Prioritize what is most visible and measurable, and use your ${element.toLowerCase()} strengths to move toward ${theme.opportunities}.
+
+### Year Ahead
+
+${monthName} sets the tone for ${year}. Use this month to lay foundations that support your bigger goals, especially around ${theme.focus} and ${theme.opportunities}.
       `}
       emotionalThemes={[
         `Focus: ${theme.focus}`,
@@ -220,6 +232,42 @@ Wearing or surrounding yourself with ${theme.powerColor} can help align your ene
         { name: 'Traditional astrological interpretations' },
       ]}
     >
+      <div className='mt-6 rounded-xl border border-zinc-800 bg-zinc-900/40 p-5'>
+        <h2 className='text-lg font-medium text-zinc-100 mb-2'>
+          Daily + Weekly {signName} horoscopes
+        </h2>
+        <p className='text-sm text-zinc-400 mb-4'>
+          Jump to today&apos;s or this week&apos;s guidance for {signName}, or
+          browse all signs.
+        </p>
+        <div className='flex flex-wrap gap-3'>
+          <Link
+            href={`/horoscope/today/${sign}`}
+            className='px-4 py-2 rounded-lg bg-lunary-primary-900/20 border border-lunary-primary-700 text-lunary-primary-300 text-sm hover:bg-lunary-primary-900/30 transition-colors'
+          >
+            Today&apos;s {signName}
+          </Link>
+          <Link
+            href={`/horoscope/weekly/${sign}`}
+            className='px-4 py-2 rounded-lg bg-zinc-800/50 border border-zinc-700 text-zinc-300 text-sm hover:bg-zinc-800 transition-colors'
+          >
+            This Week&apos;s {signName}
+          </Link>
+          <Link
+            href='/horoscope/today'
+            className='px-4 py-2 rounded-lg bg-zinc-800/50 border border-zinc-700 text-zinc-300 text-sm hover:bg-zinc-800 transition-colors'
+          >
+            All Daily
+          </Link>
+          <Link
+            href='/horoscope/weekly'
+            className='px-4 py-2 rounded-lg bg-zinc-800/50 border border-zinc-700 text-zinc-300 text-sm hover:bg-zinc-800 transition-colors'
+          >
+            All Weekly
+          </Link>
+        </div>
+      </div>
+
       <div className='mt-8 flex justify-between text-sm'>
         <div className='space-x-4'>
           {prevMonth && (

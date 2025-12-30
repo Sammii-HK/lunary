@@ -3,6 +3,181 @@ import { sql } from '@vercel/postgres';
 import { selectSubredditForPostType } from '@/config/reddit-subreddits';
 import { categoryThemes } from '@/lib/social/weekly-themes';
 import { recordThemeUsage } from '@/lib/social/thematic-generator';
+import { getImageBaseUrl } from '@/lib/urls';
+
+type DbPostRow = {
+  id: number;
+  content: string;
+  platform: string;
+  post_type: string;
+  scheduled_date: string | null;
+  image_url: string | null;
+  video_url: string | null;
+  week_theme: string | null;
+  week_start: string | null;
+  status: 'pending' | 'approved' | 'rejected' | 'sent';
+  base_group_key: string | null;
+  base_post_id: number | null;
+};
+
+type PlatformPayload = {
+  platform: string;
+  content: string;
+  media: Array<{ type: 'image' | 'video'; url: string; alt: string }>;
+  reddit?: { title?: string; subreddit?: string };
+  pinterestOptions?: { boardId: string; boardName: string };
+  tiktokOptions?: { type: string; coverUrl?: string };
+  instagramOptions?: { type: string; coverUrl?: string };
+};
+
+const videoPlatforms = ['instagram', 'tiktok', 'threads'];
+const validPlatforms = [
+  'twitter',
+  'x',
+  'instagram',
+  'facebook',
+  'linkedin',
+  'pinterest',
+  'reddit',
+  'tiktok',
+  'bluesky',
+  'threads',
+  'youtube',
+];
+
+const toPlatformStr = (platform: string) =>
+  String(platform).toLowerCase().trim();
+
+const formatMediaKey = (media: PlatformPayload['media']) =>
+  media.map((item) => `${item.type}:${item.url}`).join('|');
+
+const formatReadableDate = (scheduleDate: Date) => {
+  const formattedDate = scheduleDate.toLocaleDateString('en-US', {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+  });
+  const formattedTime = scheduleDate.toLocaleTimeString('en-US', {
+    hour: 'numeric',
+    minute: '2-digit',
+    hour12: true,
+  });
+  return `${formattedDate} at ${formattedTime}`;
+};
+
+const buildPlatformPayload = (
+  post: DbPostRow,
+  scheduleDate: Date,
+  baseUrl: string,
+): PlatformPayload => {
+  const platformStr = toPlatformStr(post.platform);
+  const content = String(post.content || '').trim();
+  const shouldUseVideo = post.video_url && videoPlatforms.includes(platformStr);
+  const scheduleLabel = `Lunary cosmic insight - ${scheduleDate.toLocaleDateString()}`;
+
+  let imageUrlForPlatform = post.image_url ? String(post.image_url).trim() : '';
+  if (imageUrlForPlatform) {
+    try {
+      if (
+        !imageUrlForPlatform.startsWith('http://') &&
+        !imageUrlForPlatform.startsWith('https://')
+      ) {
+        imageUrlForPlatform = new URL(imageUrlForPlatform, baseUrl).toString();
+      }
+    } catch (error) {
+      console.warn('Failed to normalize image URL:', error);
+    }
+  }
+
+  if (!shouldUseVideo && platformStr === 'tiktok' && imageUrlForPlatform) {
+    try {
+      const url = new URL(imageUrlForPlatform);
+      const currentFormat = url.searchParams.get('format');
+      if (!currentFormat || currentFormat === 'square') {
+        url.searchParams.set('format', 'story');
+        imageUrlForPlatform = url.toString();
+      }
+    } catch (error) {
+      if (!imageUrlForPlatform.includes('format=')) {
+        const separator = imageUrlForPlatform.includes('?') ? '&' : '?';
+        imageUrlForPlatform = `${imageUrlForPlatform}${separator}format=story`;
+      }
+    }
+  }
+
+  if (shouldUseVideo && platformStr === 'instagram' && imageUrlForPlatform) {
+    try {
+      const url = new URL(imageUrlForPlatform);
+      url.searchParams.set('format', 'story');
+      imageUrlForPlatform = url.toString();
+    } catch (error) {
+      if (!imageUrlForPlatform.includes('format=')) {
+        const separator = imageUrlForPlatform.includes('?') ? '&' : '?';
+        imageUrlForPlatform = `${imageUrlForPlatform}${separator}format=story`;
+      }
+    }
+  }
+
+  const media: PlatformPayload['media'] = shouldUseVideo
+    ? [
+        {
+          type: 'video',
+          url: String(post.video_url || '').trim(),
+          alt: scheduleLabel,
+        },
+      ]
+    : imageUrlForPlatform
+      ? [
+          {
+            type: 'image',
+            url: imageUrlForPlatform,
+            alt: scheduleLabel,
+          },
+        ]
+      : [];
+
+  const payload: PlatformPayload = {
+    platform: platformStr,
+    content,
+    media,
+  };
+
+  if (platformStr === 'reddit') {
+    const selectedSubreddit = selectSubredditForPostType(post.post_type);
+    const redditTitle =
+      content.match(/^[^.!?]+[.!?]/)?.[0] ||
+      content.substring(0, 100).replace(/\n/g, ' ').trim();
+    payload.reddit = {
+      title: redditTitle,
+      subreddit: selectedSubreddit.name,
+    };
+  }
+
+  if (platformStr === 'pinterest') {
+    payload.pinterestOptions = {
+      boardId: process.env.SUCCULENT_PINTEREST_BOARD_ID || 'lunaryapp/lunary',
+      boardName: process.env.SUCCULENT_PINTEREST_BOARD_NAME || 'Lunary',
+    };
+  }
+
+  if (platformStr === 'tiktok' && media.length > 0) {
+    payload.tiktokOptions = {
+      type: 'post',
+      ...(shouldUseVideo && imageUrlForPlatform
+        ? { coverUrl: imageUrlForPlatform }
+        : {}),
+    };
+  }
+
+  if (platformStr === 'instagram' && shouldUseVideo) {
+    payload.instagramOptions = {
+      type: 'reel',
+      ...(imageUrlForPlatform ? { coverUrl: imageUrlForPlatform } : {}),
+    };
+  }
+
+  return payload;
+};
 
 export async function POST(request: NextRequest) {
   try {
@@ -28,7 +203,7 @@ export async function POST(request: NextRequest) {
 
     // Get post data from database (including any edits)
     const postDataFromDb = await sql`
-      SELECT content, post_type, scheduled_date, image_url, video_url, week_theme, week_start
+      SELECT id, content, post_type, scheduled_date, image_url, video_url, week_theme, week_start, platform, status, base_group_key, base_post_id
       FROM social_posts WHERE id = ${postId}
     `;
 
@@ -40,13 +215,9 @@ export async function POST(request: NextRequest) {
     }
 
     // Use content from request if provided, otherwise use from DB (which may have been edited)
-    const actualContent = content || postDataFromDb.rows[0].content;
-    const actualPostType =
-      postType || postDataFromDb.rows[0].post_type || 'benefit';
-    const actualScheduledDate =
-      scheduledDate || postDataFromDb.rows[0].scheduled_date;
-    const actualImageUrl = imageUrl || postDataFromDb.rows[0].image_url;
-    const actualVideoUrl = videoUrl || postDataFromDb.rows[0].video_url;
+    const primaryPost = postDataFromDb.rows[0] as DbPostRow;
+    const actualContent = content || primaryPost.content;
+    const actualScheduledDate = scheduledDate || primaryPost.scheduled_date;
 
     if (!actualContent || actualContent.trim() === '') {
       return NextResponse.json(
@@ -65,12 +236,16 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Use production URL on any Vercel deployment
-    const baseUrl = process.env.VERCEL
-      ? 'https://lunary.app'
-      : 'http://localhost:3000';
+    const baseUrl = getImageBaseUrl();
 
-    const platforms = [platform];
+    // Ensure accountGroupId is a string
+    const accountGroupIdStr = String(accountGroupId).trim();
+    if (!accountGroupIdStr) {
+      return NextResponse.json(
+        { success: false, error: 'Invalid accountGroupId' },
+        { status: 500 },
+      );
+    }
 
     // Parse scheduled date
     let scheduleDate: Date;
@@ -87,149 +262,113 @@ export async function POST(request: NextRequest) {
       scheduleDate = new Date(Date.now() + 15 * 60 * 1000);
     }
 
-    // Select appropriate Reddit subreddit if platform is Reddit
-    let redditData: { title?: string; subreddit?: string } | undefined;
-    if (platform === 'reddit') {
-      const selectedSubreddit = selectSubredditForPostType(actualPostType);
-      // Generate a Reddit-friendly title from content (first sentence or first 100 chars)
-      const redditTitle =
-        actualContent.match(/^[^.!?]+[.!?]/)?.[0] ||
-        actualContent.substring(0, 100).replace(/\n/g, ' ').trim();
-      redditData = {
-        title: redditTitle,
-        subreddit: selectedSubreddit.name,
-      };
+    const groupKey = primaryPost.base_group_key;
+    let groupPosts: DbPostRow[] = [primaryPost];
+    if (groupKey) {
+      const groupResult = await sql`
+        SELECT id, content, post_type, scheduled_date, image_url, video_url, week_theme, week_start, platform, status, base_group_key, base_post_id
+        FROM social_posts
+        WHERE base_group_key = ${groupKey}
+      `;
+      groupPosts = groupResult.rows as DbPostRow[];
     }
 
-    // Ensure accountGroupId is a string
-    const accountGroupIdStr = String(accountGroupId).trim();
-    if (!accountGroupIdStr) {
-      return NextResponse.json(
-        { success: false, error: 'Invalid accountGroupId' },
-        { status: 500 },
-      );
-    }
+    const approvedGroupPosts = groupPosts.filter(
+      (post) => post.status === 'approved',
+    );
+    const postsToSend =
+      approvedGroupPosts.length > 0 ? approvedGroupPosts : [primaryPost];
 
-    // Validate platform is a valid string
-    const platformStr = String(platform).toLowerCase().trim();
-    const validPlatforms = [
-      'twitter',
-      'instagram',
-      'facebook',
-      'linkedin',
-      'pinterest',
-      'reddit',
-      'tiktok',
-      'bluesky',
-      'threads',
-    ];
-    if (!validPlatforms.includes(platformStr)) {
+    const basePostId = primaryPost.base_post_id;
+    const basePost =
+      typeof basePostId === 'number'
+        ? postsToSend.find((post) => post.id === basePostId)
+        : undefined;
+    const fallbackBasePost = postsToSend.find((post) => {
+      const payload = buildPlatformPayload(post, scheduleDate, baseUrl);
+      return payload.media.length > 0;
+    });
+    const selectedBasePost = basePost || fallbackBasePost || postsToSend[0];
+
+    const basePayload = buildPlatformPayload(
+      selectedBasePost,
+      scheduleDate,
+      baseUrl,
+    );
+    if (!validPlatforms.includes(basePayload.platform)) {
       return NextResponse.json(
         {
           success: false,
-          error: `Invalid platform: ${platform}. Must be one of: ${validPlatforms.join(', ')}`,
+          error: `Invalid platform: ${basePayload.platform}. Must be one of: ${validPlatforms.join(', ')}`,
         },
         { status: 400 },
       );
     }
 
-    const videoPlatforms = ['instagram', 'tiktok', 'threads'];
-    const shouldUseVideo =
-      actualVideoUrl && videoPlatforms.includes(platformStr);
-
-    // Build media array - ensure URLs use canonical lunary.app (non-www) domain
-    // For TikTok, ensure images are in story format (9:16), not square (1:1)
-    let imageUrlForPlatform = actualImageUrl
-      ? String(actualImageUrl).trim()
-      : null;
-
-    // Convert square images to story format for TikTok
-    if (!shouldUseVideo && platformStr === 'tiktok' && imageUrlForPlatform) {
-      try {
-        // Handle both absolute and relative URLs
-        let url: URL;
-        if (
-          imageUrlForPlatform.startsWith('http://') ||
-          imageUrlForPlatform.startsWith('https://')
-        ) {
-          url = new URL(imageUrlForPlatform);
-        } else {
-          // Relative URL - use baseUrl
-          url = new URL(imageUrlForPlatform, baseUrl);
-        }
-
-        const currentFormat = url.searchParams.get('format');
-
-        // If format is square or not specified, change to story
-        // TikTok requires story format (9:16), not square (1:1)
-        if (!currentFormat || currentFormat === 'square') {
-          url.searchParams.set('format', 'story');
-          imageUrlForPlatform = url.toString();
-          console.log(
-            `📐 Converted TikTok image from ${currentFormat || 'default'} to story format`,
-          );
-        }
-      } catch (error) {
-        // If URL parsing fails, try to append format parameter
-        console.warn(
-          'Failed to parse image URL for TikTok format conversion:',
-          error,
-        );
-        // If URL doesn't have format param, add it
-        if (!imageUrlForPlatform.includes('format=')) {
-          const separator = imageUrlForPlatform.includes('?') ? '&' : '?';
-          imageUrlForPlatform = `${imageUrlForPlatform}${separator}format=story`;
-          console.log('📐 Added story format parameter to TikTok image URL');
-        }
-      }
-    }
-
-    // Use story format for Instagram Reel cover images
-    if (shouldUseVideo && platformStr === 'instagram' && imageUrlForPlatform) {
-      try {
-        let url: URL;
-        if (
-          imageUrlForPlatform.startsWith('http://') ||
-          imageUrlForPlatform.startsWith('https://')
-        ) {
-          url = new URL(imageUrlForPlatform);
-        } else {
-          url = new URL(imageUrlForPlatform, baseUrl);
-        }
-
-        url.searchParams.set('format', 'story');
-        imageUrlForPlatform = url.toString();
-      } catch (error) {
-        if (!imageUrlForPlatform.includes('format=')) {
-          const separator = imageUrlForPlatform.includes('?') ? '&' : '?';
-          imageUrlForPlatform = `${imageUrlForPlatform}${separator}format=story`;
-        }
-      }
-    }
-
-    const mediaArray = shouldUseVideo
-      ? [
-          {
-            type: 'video' as const,
-            url: String(actualVideoUrl).trim(),
-            alt: `Lunary cosmic insight - ${scheduleDate.toLocaleDateString()}`,
-          },
-        ]
-      : imageUrlForPlatform
-        ? [
-            {
-              type: 'image' as const,
-              url: imageUrlForPlatform,
-              alt: `Lunary cosmic insight - ${scheduleDate.toLocaleDateString()}`,
-            },
-          ]
-        : [];
-
-    // Pinterest requires media - validate before proceeding
-    if (platformStr === 'pinterest' && mediaArray.length === 0) {
-      console.warn(
-        '⚠️ Pinterest requires media but none provided. Skipping Pinterest.',
+    if (!basePayload.content) {
+      return NextResponse.json(
+        { success: false, error: 'Post content is empty' },
+        { status: 400 },
       );
+    }
+
+    const basePlatforms = new Set<string>();
+    const variants: Record<string, { content: string; media?: string[] }> = {};
+    let pinterestOptions: PlatformPayload['pinterestOptions'];
+    let tiktokOptions: PlatformPayload['tiktokOptions'];
+    let instagramOptions: PlatformPayload['instagramOptions'];
+    let redditData: PlatformPayload['reddit'];
+
+    const baseMediaKey = formatMediaKey(basePayload.media);
+
+    for (const post of postsToSend) {
+      const payload = buildPlatformPayload(post, scheduleDate, baseUrl);
+      if (!validPlatforms.includes(payload.platform)) {
+        return NextResponse.json(
+          {
+            success: false,
+            error: `Invalid platform: ${payload.platform}. Must be one of: ${validPlatforms.join(', ')}`,
+          },
+          { status: 400 },
+        );
+      }
+
+      if (payload.pinterestOptions) {
+        pinterestOptions = payload.pinterestOptions;
+      }
+      if (payload.tiktokOptions) {
+        tiktokOptions = payload.tiktokOptions;
+      }
+      if (payload.instagramOptions) {
+        instagramOptions = payload.instagramOptions;
+      }
+      if (payload.reddit) {
+        redditData = payload.reddit;
+      }
+
+      const mediaKey = formatMediaKey(payload.media);
+      const differs =
+        payload.platform !== basePayload.platform ||
+        payload.content !== basePayload.content ||
+        mediaKey !== baseMediaKey;
+
+      if (differs) {
+        variants[payload.platform] = {
+          content: payload.content,
+          ...(payload.media.length > 0
+            ? { media: payload.media.map((item) => item.url) }
+            : {}),
+        };
+      } else {
+        basePlatforms.add(payload.platform);
+      }
+    }
+
+    if (basePlatforms.size === 0) {
+      basePlatforms.add(basePayload.platform);
+    }
+
+    if (basePlatforms.has('pinterest') && basePayload.media.length === 0) {
       return NextResponse.json(
         {
           success: false,
@@ -240,61 +379,34 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Format date for readable title (e.g., "Nov 23, 2025 at 2:00 PM")
-    const formattedDate = scheduleDate.toLocaleDateString('en-US', {
-      month: 'short',
-      day: 'numeric',
-      year: 'numeric',
-    });
-    const formattedTime = scheduleDate.toLocaleTimeString('en-US', {
-      hour: 'numeric',
-      minute: '2-digit',
-      hour12: true,
-    });
-    const readableDate = `${formattedDate} at ${formattedTime}`;
-
+    const readableDate = formatReadableDate(scheduleDate);
     const postData: any = {
       accountGroupId: accountGroupIdStr,
-      name: `Lunary ${platformStr.charAt(0).toUpperCase() + platformStr.slice(1)} Post - ${readableDate}`,
-      content: actualContent.trim(),
-      platforms: [platformStr],
+      name: `Lunary Post - ${readableDate}`,
+      content: basePayload.content,
+      platforms: Array.from(basePlatforms),
       scheduledDate: scheduleDate.toISOString(),
-      media: mediaArray,
+      media: basePayload.media,
     };
 
-    // Add Reddit-specific data if platform is Reddit
+    if (Object.keys(variants).length > 0) {
+      postData.variants = variants;
+    }
+
     if (redditData) {
       postData.reddit = redditData;
     }
 
-    // Add Pinterest-specific options if platform is Pinterest
-    if (platformStr === 'pinterest') {
-      const pinterestBoardId =
-        process.env.SUCCULENT_PINTEREST_BOARD_ID || 'lunaryapp/lunary';
-      const pinterestBoardName =
-        process.env.SUCCULENT_PINTEREST_BOARD_NAME || 'Lunary';
-      postData.pinterestOptions = {
-        boardId: pinterestBoardId,
-        boardName: pinterestBoardName,
-      };
+    if (pinterestOptions) {
+      postData.pinterestOptions = pinterestOptions;
     }
 
-    // Add TikTok-specific options if platform is TikTok
-    // TikTok supports image posts, but may need explicit options
-    if (platformStr === 'tiktok' && mediaArray.length > 0) {
-      postData.tiktokOptions = {
-        type: 'post',
-        ...(shouldUseVideo && imageUrlForPlatform
-          ? { coverUrl: imageUrlForPlatform }
-          : {}),
-      };
+    if (tiktokOptions) {
+      postData.tiktokOptions = tiktokOptions;
     }
 
-    if (platformStr === 'instagram' && shouldUseVideo) {
-      postData.instagramOptions = {
-        type: 'reel',
-        ...(imageUrlForPlatform ? { coverUrl: imageUrlForPlatform } : {}),
-      };
+    if (instagramOptions) {
+      postData.instagramOptions = instagramOptions;
     }
 
     const succulentApiUrl = 'https://app.succulent.social/api/posts';
@@ -356,18 +468,23 @@ export async function POST(request: NextRequest) {
     });
 
     if (response.ok) {
-      await sql`
-        UPDATE social_posts
-        SET status = 'sent', updated_at = NOW()
-        WHERE id = ${postId}
-      `;
+      if (groupKey && approvedGroupPosts.length > 0) {
+        await sql`
+          UPDATE social_posts
+          SET status = 'sent', updated_at = NOW()
+          WHERE base_group_key = ${groupKey}
+            AND status = 'approved'
+        `;
+      } else {
+        await sql`
+          UPDATE social_posts
+          SET status = 'sent', updated_at = NOW()
+          WHERE id = ${postId}
+        `;
+      }
 
-      const weekTheme = postDataFromDb.rows[0]?.week_theme as
-        | string
-        | undefined;
-      const weekStart = postDataFromDb.rows[0]?.week_start as
-        | string
-        | undefined;
+      const weekTheme = selectedBasePost?.week_theme as string | undefined;
+      const weekStart = selectedBasePost?.week_start as string | undefined;
 
       if (weekTheme && weekStart) {
         try {
