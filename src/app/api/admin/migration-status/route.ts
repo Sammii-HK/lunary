@@ -5,7 +5,6 @@ import { headers } from 'next/headers';
 
 // Test accounts to exclude from migration checks
 const TEST_ACCOUNT_PATTERNS = [
-  'kellow.sammii@gmail.com',
   'samhaylock@aol.com',
   'softly.becoming.studio@gmail.com',
 ];

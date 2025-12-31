@@ -40,9 +40,11 @@ export default function SubscriptionManagement({
   const displaySubscription = stripeSubscription ||
     subscription || { status: 'free', isSubscribed: false };
 
-  const fetchStripeSubscription = async (forceRefresh = false) => {
+  const fetchStripeSubscription = async (
+    forceRefresh = false,
+  ): Promise<StripeSubscription | null> => {
     const customerIdToUse = customerId || subscription.customerId;
-    if (!customerIdToUse) return;
+    if (!customerIdToUse) return null;
 
     try {
       // Add cache-busting query parameter and headers when force refresh
@@ -70,11 +72,14 @@ export default function SubscriptionManagement({
         const data = await response.json();
         if (data.subscription) {
           setStripeSubscription(data.subscription);
+          return data.subscription;
         }
       }
+      return null;
     } catch (error) {
       console.error('Error fetching Stripe subscription:', error);
       setError('Failed to refresh subscription. Please try again.');
+      return null;
     }
   };
 
@@ -133,13 +138,38 @@ export default function SubscriptionManagement({
   };
 
   const handleBillingPortal = async () => {
+    setError(null);
+
+    let refreshedSubscription: StripeSubscription | null = null;
+
+    try {
+      setLoading('refresh');
+      refreshedSubscription = await fetchStripeSubscription(true);
+    } catch (err) {
+      setError(
+        'Unable to refresh subscription before opening the billing portal. Please try again.',
+      );
+      console.error('Billing portal refresh error:', err);
+      setLoading(null);
+      return;
+    } finally {
+      setLoading(null);
+    }
+
     let customerIdToUse =
       customerId ||
+      refreshedSubscription?.customer ||
+      refreshedSubscription?.customerId ||
       stripeSubscription?.customer ||
-      stripeSubscription?.customerId;
+      stripeSubscription?.customerId ||
+      subscription.customerId;
+
+    if (!customerIdToUse) {
+      setError('Unable to determine customer ID for the billing portal.');
+      return;
+    }
 
     setLoading('portal');
-    setError(null);
 
     try {
       const response = await fetch('/api/stripe/create-portal-session', {
@@ -147,6 +177,7 @@ export default function SubscriptionManagement({
         headers: {
           'Content-Type': 'application/json',
         },
+        credentials: 'include',
         body: JSON.stringify({
           customerId: customerIdToUse || undefined,
           userId: user?.id,

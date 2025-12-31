@@ -31,7 +31,7 @@ export function ShopClient({
   >('all');
   const [searchQuery, setSearchQuery] = useState('');
   const searchParams = useSearchParams();
-  const fromParam = searchParams?.get('from');
+  const fromParam = searchParams.get('from');
   const linkSuffix = fromParam ? `?from=${fromParam}` : '';
   const [searchResults, setSearchResults] = useState<ShopProduct[] | null>(
     null,

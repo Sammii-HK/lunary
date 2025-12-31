@@ -1,6 +1,7 @@
 import { startWorker } from 'jazz-tools/worker';
 import type { Loaded } from 'jazz-tools';
 import { MyAppAccount } from '../../../schema';
+import { sql } from '@vercel/postgres';
 
 type WorkerInstance = Awaited<
   ReturnType<typeof startWorker<typeof MyAppAccount>>
@@ -65,6 +66,35 @@ async function getWorker(): Promise<Loaded<typeof MyAppAccount> | null> {
   }
 }
 
+async function getLegacyAccountId(userId: string): Promise<string | null> {
+  if (!process.env.POSTGRES_URL) {
+    return null;
+  }
+
+  try {
+    const result = await sql`
+      SELECT jazz_account_id
+      FROM jazz_migration_status
+      WHERE user_id = ${userId}
+      LIMIT 1
+    `;
+    const accountId = result.rows[0]?.jazz_account_id;
+    return typeof accountId === 'string' && accountId.length > 0
+      ? accountId
+      : null;
+  } catch (error: any) {
+    if (error?.code === '42P01') {
+      console.warn('[jazz/server] jazz_migration_status table missing');
+      return null;
+    }
+    console.error('[jazz/server] Failed to query migration status', {
+      userId,
+      error: error instanceof Error ? error.message : String(error),
+    });
+    return null;
+  }
+}
+
 export async function loadJazzProfile(userId: string) {
   console.log('[jazz/server] loadJazzProfile called for userId:', userId);
   try {
@@ -75,11 +105,43 @@ export async function loadJazzProfile(userId: string) {
       return null;
     }
     console.log('[jazz/server] Worker obtained, loading account...');
+    const loadAccount = async (accountId: string) =>
+      MyAppAccount.load(accountId, {
+        loadAs: worker,
+        resolve: { profile: true },
+      });
 
-    const account = await MyAppAccount.load(userId, {
-      loadAs: worker,
-      resolve: { profile: true },
-    });
+    let account: Loaded<typeof MyAppAccount> | null = null;
+    const legacyAccountId = await getLegacyAccountId(userId);
+    const looksLikeUuid = /^[0-9a-f]{8}-/i.test(userId);
+
+    if (legacyAccountId && legacyAccountId !== userId) {
+      console.warn('[jazz/server] Using legacy account id', {
+        userId,
+        legacyAccountId,
+      });
+      account = await loadAccount(legacyAccountId);
+    } else if (looksLikeUuid) {
+      console.warn(
+        '[jazz/server] Skipping legacy load for uuid without mapping',
+        { userId },
+      );
+      return null;
+    } else {
+      try {
+        account = await loadAccount(userId);
+      } catch (error: any) {
+        const message =
+          error instanceof Error ? error.message : String(error || '');
+        const isInvalidId =
+          typeof message === 'string' &&
+          message.toLowerCase().includes('invalid');
+        if (isInvalidId) {
+          throw error;
+        }
+        throw error;
+      }
+    }
 
     console.log('[jazz/server] Account loaded:', {
       hasAccount: !!account,
