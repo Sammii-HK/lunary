@@ -247,6 +247,7 @@ export async function POST(request: NextRequest) {
         trial_reminder_3d_sent BOOLEAN DEFAULT false,
         trial_reminder_1d_sent BOOLEAN DEFAULT false,
         trial_expired_email_sent BOOLEAN DEFAULT false,
+        trial_used BOOLEAN NOT NULL DEFAULT false,
         
         -- Stripe integration
         stripe_customer_id TEXT,
@@ -287,6 +288,10 @@ export async function POST(request: NextRequest) {
         IF NOT EXISTS (SELECT 1 FROM information_schema.columns 
                        WHERE table_name = 'subscriptions' AND column_name = 'user_name') THEN
           ALTER TABLE subscriptions ADD COLUMN user_name TEXT;
+        END IF;
+        IF NOT EXISTS (SELECT 1 FROM information_schema.columns 
+                       WHERE table_name = 'subscriptions' AND column_name = 'trial_used') THEN
+          ALTER TABLE subscriptions ADD COLUMN trial_used BOOLEAN NOT NULL DEFAULT false;
         END IF;
       END $$;
     `;

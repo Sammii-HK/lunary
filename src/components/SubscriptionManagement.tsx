@@ -34,6 +34,9 @@ export default function SubscriptionManagement({
   const subscription = useSubscription();
   const [loading, setLoading] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [latestCustomerId, setLatestCustomerId] = useState<string | null>(
+    customerId || subscription.customerId || null,
+  );
   const [stripeSubscription, setStripeSubscription] =
     useState<StripeSubscription | null>(null);
 
@@ -44,7 +47,6 @@ export default function SubscriptionManagement({
     forceRefresh = false,
   ): Promise<StripeSubscription | null> => {
     const customerIdToUse = customerId || subscription.customerId;
-    if (!customerIdToUse) return null;
 
     try {
       // Add cache-busting query parameter and headers when force refresh
@@ -64,6 +66,8 @@ export default function SubscriptionManagement({
         body: JSON.stringify({
           customerId: customerIdToUse,
           forceRefresh,
+          userId: user?.id,
+          userEmail: user?.email,
         }),
         cache: 'no-store',
       });
@@ -72,6 +76,12 @@ export default function SubscriptionManagement({
         const data = await response.json();
         if (data.subscription) {
           setStripeSubscription(data.subscription);
+          if (
+            data.subscription.customerId &&
+            data.subscription.customerId !== latestCustomerId
+          ) {
+            setLatestCustomerId(data.subscription.customerId);
+          }
           return data.subscription;
         }
       }
@@ -84,9 +94,12 @@ export default function SubscriptionManagement({
   };
 
   useEffect(() => {
+    if (!user?.id && !customerId && !subscription.customerId) {
+      return;
+    }
     fetchStripeSubscription();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [customerId, subscription.customerId]);
+  }, [customerId, subscription.customerId, user?.id]);
 
   const handleRefresh = async () => {
     setLoading('refresh');
@@ -162,7 +175,8 @@ export default function SubscriptionManagement({
       refreshedSubscription?.customerId ||
       stripeSubscription?.customer ||
       stripeSubscription?.customerId ||
-      subscription.customerId;
+      subscription.customerId ||
+      latestCustomerId;
 
     if (!customerIdToUse) {
       setError('Unable to determine customer ID for the billing portal.');
@@ -226,11 +240,13 @@ export default function SubscriptionManagement({
   // Even if cancel_at_period_end is true, the subscription is still active until period ends
   const isActiveSubscription =
     displaySubscription.status === 'active' ||
-    displaySubscription.status === 'trialing';
+    displaySubscription.status === 'trialing' ||
+    displaySubscription.status === 'trial';
   const customerIdToUse =
     customerId ||
     stripeSubscription?.customerId ||
-    stripeSubscription?.customer;
+    stripeSubscription?.customer ||
+    latestCustomerId;
 
   return (
     <div className='border border-stone-800 rounded-md p-4 w-full'>
