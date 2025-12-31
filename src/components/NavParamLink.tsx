@@ -2,7 +2,7 @@
 
 import React, { useMemo } from 'react';
 import Link from 'next/link';
-import { useSearchParams } from 'next/navigation';
+import { useSafeSearchParams } from '@/lib/safeSearchParams';
 
 type NavParamLinkProps = React.ComponentProps<typeof Link> & {
   preserveNavParams?: boolean;
@@ -13,7 +13,7 @@ export function NavParamLink({
   preserveNavParams = true,
   ...rest
 }: NavParamLinkProps) {
-  const searchParams = useSearchParams();
+  const searchParams = useSafeSearchParams();
   const navOverride = searchParams?.get('nav');
   const fromParam = searchParams?.get('from');
 

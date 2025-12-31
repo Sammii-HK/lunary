@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { useSearchParams } from 'next/navigation';
+import { useSafeSearchParams } from '@/lib/safeSearchParams';
 import { ShopProduct, formatPrice, CATEGORY_LABELS } from '@/lib/shop/types';
 
 interface RelatedProductsProps {
@@ -9,7 +9,7 @@ interface RelatedProductsProps {
 }
 
 export function RelatedProducts({ products }: RelatedProductsProps) {
-  const searchParams = useSearchParams();
+  const searchParams = useSafeSearchParams();
   const fromParam = searchParams?.get('from');
   const linkSuffix = fromParam ? `?from=${fromParam}` : '';
 

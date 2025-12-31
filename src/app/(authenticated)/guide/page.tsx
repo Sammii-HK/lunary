@@ -9,7 +9,7 @@ import React, {
   useState,
   Suspense,
 } from 'react';
-import { useSearchParams } from 'next/navigation';
+import { useSafeSearchParams } from '@/lib/safeSearchParams';
 import {
   ArrowUp,
   ChevronDown,
@@ -321,7 +321,7 @@ const MessageBubble = ({
 
 function BookOfShadowsContent() {
   const authState = useAuthStatus();
-  const searchParams = useSearchParams();
+  const searchParams = useSafeSearchParams();
   const { user } = useUser();
   const userBirthday = user?.birthday;
   const userName = user?.name?.split(' ')[0];

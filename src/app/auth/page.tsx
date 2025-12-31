@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useRef } from 'react';
-import { useSearchParams } from 'next/navigation';
+import { useSafeSearchParams } from '@/lib/safeSearchParams';
 import { AuthComponent } from '@/components/Auth';
 import { useAuthStatus } from '@/components/AuthStatus';
 import { MarketingFooter } from '@/components/MarketingFooter';
@@ -24,7 +24,7 @@ function isTestMode(): boolean {
 export default function AuthPage() {
   const authState = useAuthStatus();
   const redirectExecuted = useRef(false);
-  const searchParams = useSearchParams();
+  const searchParams = useSafeSearchParams();
   const defaultToSignUp = searchParams.get('signup') === 'true';
 
   useEffect(() => {

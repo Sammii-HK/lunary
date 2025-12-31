@@ -1,11 +1,11 @@
 'use client';
 
-import { useSearchParams } from 'next/navigation';
+import { useSafeSearchParams } from '@/lib/safeSearchParams';
 import { CheckCircle, XCircle, Mail } from 'lucide-react';
 import Link from 'next/link';
 
 export default function NewsletterVerifyPage() {
-  const searchParams = useSearchParams();
+  const searchParams = useSafeSearchParams();
   const success = searchParams.get('success') === 'true';
   const error = searchParams.get('error');
   const alreadyVerified = searchParams.get('already_verified') === 'true';

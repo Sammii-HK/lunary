@@ -1,11 +1,11 @@
 'use client';
 
 import { useState, useEffect, useCallback, Suspense } from 'react';
-import { useSearchParams } from 'next/navigation';
+import { useSafeSearchParams } from '@/lib/safeSearchParams';
 import { Mail, CheckCircle, XCircle, Send } from 'lucide-react';
 
 function UnsubscribeContent() {
-  const searchParams = useSearchParams();
+  const searchParams = useSafeSearchParams();
   const emailFromUrl = searchParams.get('email');
   const [email, setEmail] = useState(emailFromUrl || '');
   const [status, setStatus] = useState<

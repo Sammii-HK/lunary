@@ -15,7 +15,7 @@ import { useAuthStatus } from './AuthStatus';
 const NAV_CONTEXT_KEY = 'lunary_nav_context';
 
 export function AppChrome() {
-  const pathname = usePathname();
+  const pathname = usePathname() || '';
   const searchParams = useSearchParams();
   const authState = useAuthStatus();
   const [isAdminHost, setIsAdminHost] = useState(false);

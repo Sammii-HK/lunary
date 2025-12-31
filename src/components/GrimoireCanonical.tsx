@@ -1,10 +1,10 @@
 'use client';
 
 import { useEffect } from 'react';
-import { useSearchParams } from 'next/navigation';
+import { useSafeSearchParams } from '@/lib/safeSearchParams';
 
 export function GrimoireCanonical() {
-  const searchParams = useSearchParams();
+  const searchParams = useSafeSearchParams();
   const hasQueryParams = searchParams && searchParams.size > 0;
 
   useEffect(() => {

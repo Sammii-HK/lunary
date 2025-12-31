@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useMemo, useEffect } from 'react';
-import { useSearchParams } from 'next/navigation';
+import { useSafeSearchParams } from '@/lib/safeSearchParams';
 import { Search, X } from 'lucide-react';
 import { ShopProduct, ShopCategory, CATEGORY_LABELS } from '@/lib/shop/types';
 import { ProductCard } from '@/components/shop/ProductCard';
@@ -30,7 +30,7 @@ export function ShopClient({
     ShopCategory | 'all'
   >('all');
   const [searchQuery, setSearchQuery] = useState('');
-  const searchParams = useSearchParams();
+  const searchParams = useSafeSearchParams();
   const fromParam = searchParams.get('from');
   const linkSuffix = fromParam ? `?from=${fromParam}` : '';
   const [searchResults, setSearchResults] = useState<ShopProduct[] | null>(

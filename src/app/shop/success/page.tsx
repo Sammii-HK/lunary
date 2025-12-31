@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useSearchParams } from 'next/navigation';
+import { useSafeSearchParams } from '@/lib/safeSearchParams';
 import Link from 'next/link';
 import { Logo } from '@/components/Logo';
 import { Button } from '@/components/ui/button';
@@ -42,7 +42,7 @@ async function safeReadResponse(response: Response) {
 }
 
 export default function ShopSuccessPage() {
-  const searchParams = useSearchParams();
+  const searchParams = useSafeSearchParams();
   const [purchaseDetails, setPurchaseDetails] =
     useState<PurchaseDetails | null>(null);
   const [loading, setLoading] = useState(true);

@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { useSearchParams } from 'next/navigation';
+import { useSafeSearchParams } from '@/lib/safeSearchParams';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
@@ -16,7 +16,7 @@ export function Pagination({
   totalPages,
   basePath = '/shop/page',
 }: PaginationProps) {
-  const searchParams = useSearchParams();
+  const searchParams = useSafeSearchParams();
   const fromParam = searchParams?.get('from');
   const linkSuffix = fromParam ? `?from=${fromParam}` : '';
 

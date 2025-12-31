@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { useSearchParams } from 'next/navigation';
+import { useSafeSearchParams } from '@/lib/safeSearchParams';
 import { ArrowLeft } from 'lucide-react';
 import { ShopProduct, formatPrice, CATEGORY_LABELS } from '@/lib/shop/types';
 import { Button } from '../ui/button';
@@ -13,7 +13,7 @@ interface ProductDetailProps {
 
 export function ProductDetail({ product }: ProductDetailProps) {
   const [isPurchasing, setIsPurchasing] = useState(false);
-  const searchParams = useSearchParams();
+  const searchParams = useSafeSearchParams();
   const fromParam = searchParams?.get('from');
   const linkSuffix = fromParam ? `?from=${fromParam}` : '';
 

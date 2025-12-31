@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useSearchParams } from 'next/navigation';
+import { useSafeSearchParams } from '@/lib/safeSearchParams';
 import Link from 'next/link';
 import { conversionTracking } from '@/lib/analytics';
 import { Button } from '@/components/ui/button';
@@ -28,7 +28,7 @@ interface CheckoutSession {
 }
 
 export default function SuccessPage() {
-  const searchParams = useSearchParams();
+  const searchParams = useSafeSearchParams();
   const [session, setSession] = useState<CheckoutSession | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);

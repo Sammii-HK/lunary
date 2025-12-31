@@ -1,11 +1,12 @@
 'use client';
 
 import { useEffect, useMemo, useState, Suspense } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useRouter } from 'next/navigation';
+import { useSafeSearchParams } from '@/lib/safeSearchParams';
 
 function ResetPasswordContent() {
   const router = useRouter();
-  const searchParams = useSearchParams();
+  const searchParams = useSafeSearchParams();
   const tokenFromQuery = searchParams.get('token') ?? '';
   const errorFromQuery = searchParams.get('error') ?? '';
 

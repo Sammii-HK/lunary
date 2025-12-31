@@ -30,7 +30,7 @@ export function useConversionTracking() {
       userEmail: authState.user?.email,
       planType: subscription.plan,
       trialDaysRemaining: subscription.trialDaysRemaining,
-      pagePath: pathname,
+      pagePath: pathname || '',
       ...data,
     };
 

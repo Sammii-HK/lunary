@@ -1,12 +1,12 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useSearchParams } from 'next/navigation';
+import { useSafeSearchParams } from '@/lib/safeSearchParams';
 import Link from 'next/link';
 import { betterAuthClient } from '@/lib/auth-client';
 
 export default function VerifyEmailPage() {
-  const searchParams = useSearchParams();
+  const searchParams = useSafeSearchParams();
   const [status, setStatus] = useState<
     'verifying' | 'success' | 'error' | 'expired'
   >('verifying');
