@@ -17,6 +17,16 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const { planType = 'monthly' } = body;
 
+    const existing = await sql`
+      SELECT trial_used FROM subscriptions WHERE user_id = ${user.id} LIMIT 1
+    `;
+    if (existing.rows[0]?.trial_used) {
+      return NextResponse.json(
+        { error: 'Trial already used for this account' },
+        { status: 403 },
+      );
+    }
+
     let trialDays: number;
     try {
       const trialData = await getTrialDaysFromStripe();
@@ -33,15 +43,16 @@ export async function POST(request: NextRequest) {
 
     await sql`
       INSERT INTO subscriptions (
-        user_id, user_email, status, plan_type, trial_ends_at
+        user_id, user_email, status, plan_type, trial_ends_at, trial_used
       )
       VALUES (
-        ${user.id}, ${user.email || null}, 'trial', ${planType}, ${trialEndsAt}
+        ${user.id}, ${user.email || null}, 'trial', ${planType}, ${trialEndsAt}, true
       )
       ON CONFLICT (user_id) DO UPDATE SET
         status = 'trial',
         plan_type = EXCLUDED.plan_type,
         trial_ends_at = EXCLUDED.trial_ends_at,
+        trial_used = true,
         updated_at = NOW()
     `;
 

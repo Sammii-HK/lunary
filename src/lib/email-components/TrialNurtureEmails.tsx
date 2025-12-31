@@ -336,14 +336,24 @@ export function TrialReminderEmail({
             </Text>
 
             <Section style={{ textAlign: 'center' as const, margin: '30px 0' }}>
-              <CTAButton href={`${baseUrl}/pricing`}>
-                Continue Your Journey →
+              <CTAButton href={`${baseUrl}/profile?source=trial-reminder`}>
+                Add Payment Method to Secure Access →
               </CTAButton>
             </Section>
 
+            <Text style={{ fontWeight: '600' }}>
+              After your trial ends you will revert to the free plan, and the
+              following premium tools will disappear:
+            </Text>
+            <Text style={{ margin: '15px 0' }}>
+              • 🎯 Personalized birth chart interpretations <br />
+              • 🔮 Daily tarot + horoscope guides tailored to you
+              <br />• ✨ AI-powered rituals, grimoire deep dives, and transit
+              alerts
+            </Text>
             <Text>
-              No commitment - cancel anytime. Your subscription will only start
-              after your trial ends.
+              Lock in your Lunary+ access today and keep all the insights, no
+              payment will be taken until the trial expires.
             </Text>
           </Section>
 
@@ -790,9 +800,14 @@ Continue your cosmic journey with unlimited access to:
 - 🌙 Transit calendars and cosmic guidance
 - 📚 Complete digital grimoire
 
-Continue your journey: ${baseUrl}/pricing
+Continue your journey: ${baseUrl}/profile?source=trial-reminder
 
-No commitment - cancel anytime. Your subscription will only start after your trial ends.
+After your trial ends, you automatically switch back to the free tier and lose:
+- 🎯 personalized birth chart interpretations
+- 🔮 your tailored tarot + horoscope guidance
+- ✨ AI rituals, grimoire deep dives, and transit alerts
+
+Add a payment method now so the plan continues seamlessly after the trial.
 
 ---
 Unsubscribe: ${unsubscribeUrl}
