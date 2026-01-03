@@ -94,12 +94,81 @@ export const requestLocation = (): Promise<LocationData> => {
 export const parseCoordinates = (
   location: string,
 ): { latitude: number; longitude: number } | null => {
-  const coordMatch = location.match(/^(-?\d+\.?\d*),\s*(-?\d+\.?\d*)$/);
-  if (!coordMatch) return null;
-  return {
-    latitude: parseFloat(coordMatch[1]),
-    longitude: parseFloat(coordMatch[2]),
+  const trimmed = location.trim();
+  if (!trimmed) return null;
+
+  const parseCoordinateToken = (token: string): number | null => {
+    const value = token.trim();
+    if (!value) return null;
+
+    const decimalHemisphereMatch = value.match(
+      /^(-?\d+(?:\.\d+)?)\s*([NSEW])$/i,
+    );
+    if (decimalHemisphereMatch) {
+      const numeric = Number.parseFloat(decimalHemisphereMatch[1]);
+      if (!Number.isFinite(numeric)) return null;
+      const hemisphere = decimalHemisphereMatch[2].toUpperCase();
+      const magnitude = Math.abs(numeric);
+      return hemisphere === 'S' || hemisphere === 'W' ? -magnitude : magnitude;
+    }
+
+    const dmsMatch = value.match(
+      /^(\d{1,3})\s*(?:\u00b0|\u00ba)\s*(\d{1,2})?\s*(?:'|\u2032)?\s*(\d{1,2}(?:\.\d+)?)?\s*(?:\"|\u2033)?\s*([NSEW])$/i,
+    );
+    if (dmsMatch) {
+      const degrees = Number.parseFloat(dmsMatch[1]);
+      const minutes = dmsMatch[2] ? Number.parseFloat(dmsMatch[2]) : 0;
+      const seconds = dmsMatch[3] ? Number.parseFloat(dmsMatch[3]) : 0;
+      if (![degrees, minutes, seconds].every(Number.isFinite)) return null;
+      const hemisphere = dmsMatch[4].toUpperCase();
+      const magnitude = degrees + minutes / 60 + seconds / 3600;
+      return hemisphere === 'S' || hemisphere === 'W' ? -magnitude : magnitude;
+    }
+
+    return null;
   };
+
+  const decimalPairMatch = trimmed.match(
+    /^(-?\d+(?:\.\d+)?)\s*,\s*(-?\d+(?:\.\d+)?)$/,
+  );
+  if (decimalPairMatch) {
+    return {
+      latitude: Number.parseFloat(decimalPairMatch[1]),
+      longitude: Number.parseFloat(decimalPairMatch[2]),
+    };
+  }
+
+  const decimalPairSpaceMatch = trimmed.match(
+    /^(-?\d+(?:\.\d+)?)\s+(-?\d+(?:\.\d+)?)$/,
+  );
+  if (decimalPairSpaceMatch) {
+    return {
+      latitude: Number.parseFloat(decimalPairSpaceMatch[1]),
+      longitude: Number.parseFloat(decimalPairSpaceMatch[2]),
+    };
+  }
+
+  if (trimmed.includes(',')) {
+    const [latToken, lonToken] = trimmed.split(',', 2);
+    const latitude = parseCoordinateToken(latToken);
+    const longitude = parseCoordinateToken(lonToken);
+    if (latitude !== null && longitude !== null) {
+      return { latitude, longitude };
+    }
+  }
+
+  const directionalTokens = trimmed.match(
+    /(?:[0-9.\s\u00b0\u00ba'"\u2032\u2033]+[NSEW])/gi,
+  );
+  if (directionalTokens && directionalTokens.length >= 2) {
+    const latitude = parseCoordinateToken(directionalTokens[0]);
+    const longitude = parseCoordinateToken(directionalTokens[1]);
+    if (latitude !== null && longitude !== null) {
+      return { latitude, longitude };
+    }
+  }
+
+  return null;
 };
 
 export const geocodeLocation = async (

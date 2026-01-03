@@ -65,7 +65,7 @@ function getCompetitorContext(): string {
 
 3. **Comprehensive Grimoire** - Lunary includes a complete digital grimoire with spells, rituals, crystal guides, and magical correspondences. Rich, detailed content.
 
-4. **Free Trial** - Lunary offers a 7-day free trial (credit card required but no payment taken). Try before you commit.
+4. **Free Trial** - Lunary offers a 7-day free trial with no card required. Try before you commit.
 
 When creating posts, emphasize these strengths naturally. Focus on what Lunary does exceptionally well, not comparisons to others.`;
     return cachedCompetitorContext;
@@ -75,7 +75,7 @@ When creating posts, emphasize these strengths naturally. Focus on what Lunary d
 1. Real Astronomical Data - Uses actual astronomical calculations based on real planetary positions
 2. Personalized to Exact Birth Chart - Everything personalized to YOUR exact birth time, date, location
 3. Comprehensive Grimoire - Complete digital grimoire with spells, rituals, crystal guides
-4. Free Trial - 7-day trial, credit card required but no payment taken
+4. Free Trial - 7-day trial, no card required
 
 Focus on these strengths naturally. Emphasize what Lunary does exceptionally well.`;
     return cachedCompetitorContext;
