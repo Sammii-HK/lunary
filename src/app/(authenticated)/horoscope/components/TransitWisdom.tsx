@@ -274,7 +274,8 @@ export function TransitWisdom({
   currentTransits,
   maxItems = 3,
 }: TransitWisdomProps) {
-  const { isSubscribed } = useSubscription();
+  const { hasAccess } = useSubscription();
+  const canViewPremium = hasAccess('transit_calendar');
 
   if (!birthChart || !currentTransits || birthChart.length === 0) {
     return null;
@@ -297,7 +298,11 @@ export function TransitWisdom({
   return (
     <div className='space-y-3'>
       {details.map((detail) => (
-        <TransitCard key={detail.id} detail={detail} isPremium={isSubscribed} />
+        <TransitCard
+          key={detail.id}
+          detail={detail}
+          isPremium={canViewPremium}
+        />
       ))}
     </div>
   );
