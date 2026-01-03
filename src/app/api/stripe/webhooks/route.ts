@@ -240,14 +240,14 @@ async function handleSubscriptionChange(
           stripe_customer_id, stripe_subscription_id,
           trial_ends_at, current_period_end,
           has_discount, discount_percent, monthly_amount_due, coupon_id,
-          promo_code, discount_ends_at
+          promo_code, discount_ends_at, trial_used
         ) VALUES (
           ${userId}, ${userEmail}, ${status}, ${planType},
           ${customerId}, ${subscription.id},
           ${trialEndsAt}, ${currentPeriodEnd},
           ${discountInfo.hasDiscount}, ${discountInfo.discountPercent || null},
           ${discountInfo.monthlyAmountDue || null}, ${discountInfo.couponId || null},
-          ${promoCode}, ${discountInfo.discountEndsAt || null}
+          ${promoCode}, ${discountInfo.discountEndsAt || null}, true
         )
         ON CONFLICT (user_id) DO UPDATE SET
           status = EXCLUDED.status,
@@ -263,10 +263,25 @@ async function handleSubscriptionChange(
           promo_code = EXCLUDED.promo_code,
           discount_ends_at = EXCLUDED.discount_ends_at,
           user_email = COALESCE(EXCLUDED.user_email, subscriptions.user_email),
+          trial_used = true,
           updated_at = NOW()
       `;
     } catch (error) {
       console.error('DB write failed:', error);
+    }
+  }
+
+  if (userId && customerId) {
+    try {
+      await sql`
+        INSERT INTO user_profiles (user_id, stripe_customer_id)
+        VALUES (${userId}, ${customerId})
+        ON CONFLICT (user_id) DO UPDATE SET
+          stripe_customer_id = EXCLUDED.stripe_customer_id,
+          updated_at = NOW()
+      `;
+    } catch (error) {
+      console.error('Failed to sync Stripe customer to profile:', error);
     }
   }
 

@@ -4,6 +4,7 @@ import dayjs from 'dayjs';
 import { getAstrologicalChart, AstroChartInformation } from './astrology';
 import { constellations } from '../constellations';
 import { Observer } from 'astronomy-engine';
+import { parseIsoDateOnly } from '@/lib/date-only';
 
 type HoroscopeReading = {
   sunSign: string;
@@ -18,7 +19,12 @@ export const getPersonalizedHoroscope = (
   userName?: string,
 ): HoroscopeReading => {
   const today = dayjs();
-  const birthDate = userBirthday ? dayjs(userBirthday) : null;
+  const parsedBirthDate = userBirthday ? parseIsoDateOnly(userBirthday) : null;
+  const birthDate = parsedBirthDate
+    ? dayjs(parsedBirthDate)
+    : userBirthday
+      ? dayjs(userBirthday)
+      : null;
 
   // Default observer (can be enhanced with user location later)
   const observer = new Observer(51.4769, 0.0005, 0);

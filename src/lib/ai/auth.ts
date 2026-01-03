@@ -30,6 +30,40 @@ const extractPrimaryLocale = (locale?: string | null): string => {
 
 const DEFAULT_TIMEZONE = 'Europe/London';
 
+const isTestMode = (() => {
+  if (process.env.VERCEL_ENV === 'production') return false;
+  if (process.env.NODE_ENV === 'production') return false;
+  if (process.env.NODE_ENV === 'test') return true;
+  if (process.env.PLAYWRIGHT_TEST_BASE_URL !== undefined) return true;
+  if (process.env.CI === 'true' && process.env.VERCEL_ENV !== 'production') {
+    return true;
+  }
+  return false;
+})();
+
+const getTestUser = (request: NextRequest): AuthenticatedUser => {
+  const headerUserId = request.headers.get('x-test-user-id');
+  const headerEmail = request.headers.get('x-test-user-email');
+  const headerPlan = request.headers.get('x-test-plan');
+  const headerTimezone = request.headers.get('x-test-timezone');
+  const headerLocale = request.headers.get('x-test-locale');
+  const headerBirthday = request.headers.get('x-test-birthday');
+
+  const fallbackPlan = normalizePlanType(
+    headerPlan || process.env.TEST_PLAN || 'free',
+  );
+
+  return {
+    id: headerUserId || process.env.TEST_USER_ID || 'test-user',
+    email: headerEmail || process.env.TEST_USER_EMAIL || 'test@lunary.local',
+    displayName: 'Test User',
+    timezone: headerTimezone || DEFAULT_TIMEZONE,
+    locale: extractPrimaryLocale(headerLocale || 'en-GB'),
+    plan: fallbackPlan && fallbackPlan !== 'free' ? fallbackPlan : undefined,
+    birthday: headerBirthday || undefined,
+  };
+};
+
 export const requireUser = async (
   request: NextRequest,
 ): Promise<AuthenticatedUser> => {
@@ -64,6 +98,10 @@ export const requireUser = async (
       sessionResponse?.session?.user;
 
     if (!user?.id) {
+      if (isTestMode) {
+        return getTestUser(request);
+      }
+
       console.error('[AI Auth] No user found in session', {
         origin,
         hasCookie: !!cookieHeader,

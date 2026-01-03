@@ -655,6 +655,10 @@ export const generateBirthChartWithHouses = async (
   };
 };
 
+export const __test__ = {
+  toUtcFromTimeZone,
+};
+
 export const hasBirthChart = (
   birthChart: BirthChartData[] | null | undefined,
 ): boolean => {

@@ -269,7 +269,16 @@ async function grantReferralReward(userId: string): Promise<void> {
     }
 
     await sql`
-      INSERT INTO subscriptions (user_id, status, plan_type, trial_ends_at, current_period_end, user_email, user_name)
+      INSERT INTO subscriptions (
+        user_id,
+        status,
+        plan_type,
+        trial_ends_at,
+        current_period_end,
+        user_email,
+        user_name,
+        trial_used
+      )
       VALUES (
         ${userId},
         'trial',
@@ -277,12 +286,14 @@ async function grantReferralReward(userId: string): Promise<void> {
         NOW() + INTERVAL '30 days',
         NOW() + INTERVAL '30 days',
         NULL,
-        NULL
+        NULL,
+        true
       )
       ON CONFLICT (user_id) DO UPDATE SET
         status = 'trial',
         trial_ends_at = NOW() + INTERVAL '30 days',
         current_period_end = NOW() + INTERVAL '30 days',
+        trial_used = true,
         updated_at = NOW()
     `;
   } catch (error) {

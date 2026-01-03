@@ -23,6 +23,7 @@ interface SucculentPostData {
     url: string;
     alt: string;
   }>;
+  variants?: Record<string, { content: string; media?: string[] }>;
 }
 
 export async function POST(request: NextRequest) {
@@ -94,12 +95,9 @@ export async function POST(request: NextRequest) {
 
       const cosmicContent: PostContent = await cosmicResponse.json();
 
-      // Format the social media post
-      const socialContent = formatCosmicPost(cosmicContent, dateStr);
-
       // Schedule post for 1 PM local time on the target date
       const scheduledDateTime = new Date(currentDate);
-      scheduledDateTime.setHours(13, 0, 0, 0); // 1 PM
+      scheduledDateTime.setHours(8, 0, 0, 0); // 8 AM UTC
 
       // Format readable date
       const formattedDate = scheduledDateTime.toLocaleDateString('en-US', {
@@ -115,28 +113,74 @@ export async function POST(request: NextRequest) {
       const readableDate = `${formattedDate} at ${formattedTime}`;
 
       // Ensure image URL uses the correct base URL
-      const imageUrl = `${baseUrl}/api/og/cosmic/${dateStr}`;
+      const storyImageUrl = `${baseUrl}/api/og/cosmic/${dateStr}/story`;
+      const landscapeImageUrl = `${baseUrl}/api/og/cosmic/${dateStr}/landscape`;
+      const altText = `${cosmicContent.primaryEvent.name} - ${cosmicContent.primaryEvent.energy}. Daily cosmic guidance and astronomical insights.`;
+
+      const baseContent = formatCosmicPost(cosmicContent, dateStr);
+      const twitterContent = formatWeeklyTwitterContent(cosmicContent, dateStr);
+      const linkedinContent = formatWeeklyLinkedInContent(
+        cosmicContent,
+        dateStr,
+      );
+
+      const variants: Record<string, { content: string; media?: string[] }> =
+        {};
+      const twitterVariantContent = twitterContent.trim();
+      const linkedinVariantContent = linkedinContent.trim();
+      const landscapeMediaUrls = [landscapeImageUrl];
+
+      const variantEntries: Array<{
+        platform: string;
+        content: string;
+      }> = [
+        { platform: 'facebook', content: baseContent },
+        {
+          platform: 'x',
+          content: twitterVariantContent || baseContent,
+        },
+        {
+          platform: 'threads',
+          content: twitterVariantContent || baseContent,
+        },
+        {
+          platform: 'linkedin',
+          content: linkedinVariantContent || baseContent,
+        },
+      ];
+
+      for (const entry of variantEntries) {
+        variants[entry.platform] = {
+          content: entry.content,
+          media: landscapeMediaUrls,
+        };
+      }
 
       const postData: SucculentPostData = {
         accountGroupId,
         name: `Cosmic Post - ${readableDate}`,
-        content: socialContent,
-        platforms: ['instagram', 'x', 'facebook', 'linkedin'],
+        content: baseContent,
+        platforms: ['instagram', 'tiktok'],
         scheduledDate: scheduledDateTime.toISOString(),
         media: [
           {
             type: 'image',
-            url: imageUrl,
-            alt: `${cosmicContent.primaryEvent.name} - ${cosmicContent.primaryEvent.energy}. Daily cosmic guidance and astronomical insights.`,
+            url: storyImageUrl,
+            alt: altText,
           },
         ],
       };
 
+      if (Object.keys(variants).length > 0) {
+        postData.variants = variants;
+      }
+
       console.log(`📅 Weekly post prepared for ${dateStr}:`, {
-        contentLength: postData.content.length,
+        contentLength: baseContent.length,
         imageUrl: postData.media[0].url,
         scheduledDate: postData.scheduledDate,
-        scheduledTime: '7:00 AM',
+        scheduledTime: '8:00 AM',
+        variantPlatforms: Object.keys(variants),
       });
 
       posts.push(postData);
@@ -206,13 +250,13 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      message: `Scheduled ${successCount} posts for week of ${weekStart} - ${weekEndStr} at 7:00 AM daily`,
+      message: `Scheduled ${successCount} posts for week of ${weekStart} - ${weekEndStr} at 1:00 PM daily`,
       summary: {
         totalPosts: posts.length,
         successful: successCount,
         failed: errorCount,
         period: `${weekStart} - ${weekEndStr}`,
-        scheduleTime: '7:00 AM',
+        scheduleTime: '1:00 PM',
       },
       results,
     });
@@ -229,47 +273,98 @@ export async function POST(request: NextRequest) {
   }
 }
 
-function getDailyHashtags(date: string): string {
-  const themes = [
-    ['#tarot', '#dailytarot', '#tarotreading', '#divination'],
-    ['#horoscope', '#astrology', '#zodiac', '#planetary'],
-    ['#mooncycles', '#moonphases', '#lunar', '#celestial'],
-  ];
-
-  const seed = new Date(date).getDate();
-  return themes.map((theme, i) => theme[(seed + i) % theme.length]).join(' ');
-}
-
 function formatCosmicPost(content: PostContent, date: string): string {
-  console.log('📝 Formatting cosmic post with content:', {
+  console.log('📝 Formatting weekly cosmic post with content:', {
     primaryEvent: content.primaryEvent,
     highlightsCount: content.highlights?.length || 0,
     hasHoroscopeSnippet: !!content.horoscopeSnippet,
     hasCallToAction: !!content.callToAction,
   });
 
-  // Get daily hashtags
-  const hashtags = getDailyHashtags(date);
+  const sections = [
+    content.highlights?.[0],
+    content.horoscopeSnippet,
+    content.callToAction,
+    getWeeklyHashtags(date),
+  ]
+    .map((section) => section?.trim())
+    .filter(Boolean);
 
-  // Create concise social media content for Twitter's 280 char limit
-  const post = [
-    content.highlights.slice(0, 1)[0], // Just the first highlight point
-    '',
-    'Daily cosmic guidance at lunary.app',
-    '',
-    hashtags,
-  ].join('\n');
+  const post = sections.join('\n\n');
 
   console.log('📝 Formatted post length:', post.length, 'characters');
-
-  // Warn if over Twitter limit
   if (post.length > 280) {
     console.warn(
-      '⚠️ Post exceeds Twitter character limit:',
+      '⚠️ Weekly post exceeds Twitter character limit:',
       post.length,
       'chars',
     );
   }
 
   return post;
+}
+
+function formatWeeklyTwitterContent(
+  content: PostContent,
+  date: string,
+): string {
+  const baseText = [content.highlights?.[0], content.callToAction]
+    .map((value) => value?.trim())
+    .filter(Boolean)
+    .join(' — ');
+
+  const hashtags = getWeeklyHashtags(date)
+    .split(' ')
+    .filter(Boolean)
+    .slice(0, 3)
+    .join(' ');
+
+  const normalized = baseText.replace(/\s+/g, ' ').trim();
+  const hashtagSegment = hashtags ? ` ${hashtags}` : '';
+  const maxLength =
+    280 - (hashtagSegment.length > 0 ? hashtagSegment.length : 0);
+  const truncated =
+    normalized.length > maxLength && maxLength > 1
+      ? `${normalized.slice(0, maxLength - 1)}…`
+      : normalized;
+
+  return `${truncated}${hashtagSegment}`.trim();
+}
+
+function formatWeeklyLinkedInContent(
+  content: PostContent,
+  date: string,
+): string {
+  const formattedDate = new Date(date).toLocaleDateString('en-US', {
+    month: 'short',
+    day: 'numeric',
+  });
+
+  const sections = [
+    `Weekly cosmic forecast for ${formattedDate}`,
+    content.primaryEvent
+      ? `Primary event: ${content.primaryEvent.name} — ${content.primaryEvent.energy}`
+      : undefined,
+    content.horoscopeSnippet,
+    content.highlights?.[0],
+    content.callToAction,
+    getWeeklyHashtags(date),
+  ]
+    .map((section) => section?.trim())
+    .filter(Boolean);
+
+  return sections.join('\n\n');
+}
+
+function getWeeklyHashtags(date: string): string {
+  const themes = [
+    ['#weeklyhoroscope', '#astroforecast', '#weeklyastro'],
+    ['#lunaryweekly', '#cosmicforecast', '#celestialguide'],
+    ['#astroinsights', '#starguidance', '#moonmagic'],
+  ];
+
+  const seed = new Date(date).getDate();
+  return themes
+    .map((theme, index) => theme[(seed + index) % theme.length])
+    .join(' ');
 }

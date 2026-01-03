@@ -20,7 +20,7 @@ import {
 import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { createBirthChart } from '../../utils/astrology/birthChartService';
+import { createBirthChartWithMetadata } from '../../utils/astrology/birthChartService';
 import { conversionTracking } from '@/lib/analytics';
 import { OnboardingFeatureTour } from './OnboardingFeatureTour';
 import { BirthdayInput } from './ui/birthday-input';
@@ -312,12 +312,22 @@ export function OnboardingFlow({
         setCurrentStep('intention');
         return;
       }
+      const existingLocation = (user as any)?.location || {};
+      const locationPayload =
+        birthTime || birthLocation
+          ? {
+              ...existingLocation,
+              ...(birthTime ? { birthTime } : {}),
+              ...(birthLocation ? { birthLocation } : {}),
+            }
+          : undefined;
+
       // Save to Postgres
       await fetch('/api/profile', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
-        body: JSON.stringify({ birthday }),
+        body: JSON.stringify({ birthday, location: locationPayload }),
       });
 
       // Track birth data submission
@@ -327,13 +337,14 @@ export function OnboardingFlow({
 
       // Generate birth chart immediately after birthday is saved
       try {
-        const birthChart = await createBirthChart({
-          birthDate: birthday,
-          birthTime: birthTime || undefined,
-          birthLocation: birthLocation || undefined,
-          fallbackTimezone:
-            Intl.DateTimeFormat().resolvedOptions().timeZone || undefined,
-        });
+        const { birthChart, timezone, timezoneSource } =
+          await createBirthChartWithMetadata({
+            birthDate: birthday,
+            birthTime: birthTime || undefined,
+            birthLocation: birthLocation || undefined,
+            fallbackTimezone:
+              Intl.DateTimeFormat().resolvedOptions().timeZone || undefined,
+          });
         if (birthChart) {
           await fetch('/api/profile/birth-chart', {
             method: 'PUT',
@@ -341,6 +352,26 @@ export function OnboardingFlow({
             credentials: 'include',
             body: JSON.stringify({ birthChart }),
           });
+          if (
+            birthLocation &&
+            timezoneSource === 'location' &&
+            timezone &&
+            timezone !== existingLocation?.birthTimezone
+          ) {
+            await fetch('/api/profile', {
+              method: 'PUT',
+              headers: { 'Content-Type': 'application/json' },
+              credentials: 'include',
+              body: JSON.stringify({
+                location: {
+                  ...existingLocation,
+                  ...(birthTime ? { birthTime } : {}),
+                  birthLocation,
+                  birthTimezone: timezone,
+                },
+              }),
+            });
+          }
           console.log('✅ Birth chart generated and saved to Postgres');
         }
       } catch (chartError) {
@@ -386,6 +417,7 @@ export function OnboardingFlow({
     previewMode,
     refetch,
     user?.id,
+    user,
   ]);
 
   useEffect(() => {

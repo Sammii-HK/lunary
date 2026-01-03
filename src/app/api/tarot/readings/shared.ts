@@ -149,7 +149,8 @@ export const getSubscription = async (
                   stripe_customer_id,
                   stripe_subscription_id,
                   trial_ends_at,
-                  current_period_end
+                  current_period_end,
+                  trial_used
                 ) VALUES (
                   ${userId},
                   ${userEmail},
@@ -158,7 +159,8 @@ export const getSubscription = async (
                   ${customerId},
                   ${stripeSub.id},
                   ${trialEndsAt},
-                  ${currentPeriodEnd}
+                  ${currentPeriodEnd},
+                  true
                 )
                 ON CONFLICT (user_id) DO UPDATE SET
                   status = EXCLUDED.status,
@@ -168,6 +170,7 @@ export const getSubscription = async (
                   trial_ends_at = EXCLUDED.trial_ends_at,
                   current_period_end = EXCLUDED.current_period_end,
                   user_email = COALESCE(EXCLUDED.user_email, subscriptions.user_email),
+                  trial_used = true,
                   updated_at = NOW()
               `;
               console.log(
