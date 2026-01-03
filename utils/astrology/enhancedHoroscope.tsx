@@ -3,6 +3,7 @@ import dayOfYear from 'dayjs/plugin/dayOfYear';
 import { getAstrologicalChart, AstroChartInformation } from './astrology';
 import { Observer } from 'astronomy-engine';
 import { getBirthChartFromProfile } from './birthChart';
+import { parseIsoDateOnly } from '@/lib/date-only';
 
 dayjs.extend(dayOfYear);
 
@@ -1455,7 +1456,12 @@ export const getEnhancedPersonalizedHoroscope = (
   selectedDate?: Date,
 ): EnhancedHoroscopeReading => {
   const today = selectedDate ? dayjs(selectedDate) : dayjs();
-  const birthDate = userBirthday ? dayjs(userBirthday) : null;
+  const parsedBirthDate = userBirthday ? parseIsoDateOnly(userBirthday) : null;
+  const birthDate = parsedBirthDate
+    ? dayjs(parsedBirthDate)
+    : userBirthday
+      ? dayjs(userBirthday)
+      : null;
 
   // Default observer
   const observer = new Observer(51.4769, 0.0005, 0);

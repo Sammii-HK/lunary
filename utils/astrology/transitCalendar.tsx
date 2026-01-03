@@ -1,6 +1,7 @@
 import dayjs from 'dayjs';
 import { getAstrologicalChart, AstroChartInformation } from './astrology';
 import { Observer } from 'astronomy-engine';
+import { parseIsoDateOnly } from '@/lib/date-only';
 
 export type TransitEvent = {
   date: dayjs.Dayjs;
@@ -239,7 +240,8 @@ export const getSolarReturnInsights = (
   insights: string;
   themes: string[];
 } => {
-  const birth = dayjs(birthDate);
+  const parsedBirthDate = parseIsoDateOnly(birthDate);
+  const birth = parsedBirthDate ? dayjs(parsedBirthDate) : dayjs(birthDate);
   const currentYear = currentDate.year();
 
   // Calculate next solar return (when Sun returns to natal position)

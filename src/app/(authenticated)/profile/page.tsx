@@ -22,6 +22,7 @@ import { useModal } from '@/hooks/useModal';
 import { Heading } from '@/components/ui/Heading';
 import { SectionTitle } from '@/components/ui/SectionTitle';
 import { Button } from '@/components/ui/button';
+import { formatIsoDateOnly } from '@/lib/date-only';
 
 const SkeletonCard = () => (
   <div className='h-32 bg-zinc-800 animate-pulse rounded-xl' />
@@ -379,7 +380,7 @@ export default function ProfilePage() {
   const isNamePlaceholder = !name;
 
   const birthdayDisplay = birthday
-    ? new Date(birthday).toLocaleDateString()
+    ? formatIsoDateOnly(birthday)
     : canCollectBirthdayData
       ? 'Add your birthday'
       : authState.isAuthenticated

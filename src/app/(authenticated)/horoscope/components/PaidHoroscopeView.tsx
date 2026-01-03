@@ -21,6 +21,7 @@ import { GuideNudge } from '@/components/GuideNudge';
 import { StreakBanner } from '@/components/StreakBanner';
 import { ReflectionBox } from '@/components/horoscope/ReflectionBox';
 import { PremiumPathway } from '@/components/PremiumPathway';
+import { parseIsoDateOnly } from '@/lib/date-only';
 
 interface PaidHoroscopeViewProps {
   userBirthday?: string;
@@ -480,7 +481,8 @@ const getPersonalDayNumber = (
   birthdate: string,
   currentDate: dayjs.Dayjs,
 ): { number: number; meaning: string } => {
-  const birth = dayjs(birthdate);
+  const parsedBirthDate = parseIsoDateOnly(birthdate);
+  const birth = parsedBirthDate ? dayjs(parsedBirthDate) : dayjs(birthdate);
   const birthMonth = birth.month() + 1;
   const birthDay = birth.date();
   const currentYear = currentDate.year();

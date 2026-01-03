@@ -3,6 +3,7 @@
 import { getTarotCard } from './tarot';
 import { tarotCards } from './tarot-cards';
 import dayjs from 'dayjs';
+import { parseIsoDateOnly } from '@/lib/date-only';
 
 export type PersonalCardData = {
   name: string;
@@ -16,13 +17,16 @@ export const calculatePersonalCard = (
   userBirthday: string,
   userName?: string,
 ): PersonalCardData => {
-  const birthDate = dayjs(userBirthday);
+  const parsedBirthDate = parseIsoDateOnly(userBirthday);
+  const birthDate = parsedBirthDate
+    ? dayjs(parsedBirthDate)
+    : dayjs(userBirthday);
   const seed = `${userName || 'seeker'}-${birthDate.year()}-${birthDate.month()}-${birthDate.date()}-personal`;
 
   const card = getTarotCard(seed, userName, userBirthday);
   const cardDetails = getCardDetails(card);
 
-  const reason = `Your personal card is determined by your birth date (${dayjs(userBirthday).format('MMMM D, YYYY')}) and reflects your core spiritual essence and life path energy.`;
+  const reason = `Your personal card is determined by your birth date (${birthDate.format('MMMM D, YYYY')}) and reflects your core spiritual essence and life path energy.`;
 
   return {
     name: card.name,
