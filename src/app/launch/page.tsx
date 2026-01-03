@@ -7,11 +7,11 @@ import { LaunchSignupForm } from '@/components/launch/LaunchSignupForm';
 import { SocialShareButtons } from '@/components/SocialShareButtons';
 
 export const metadata: Metadata = {
-  title: 'Lunary AI Launch Campaign',
+  title: 'Lunary Launch Campaign',
   description:
-    'Lunary AI is launching on Product Hunt with real astronomical data, AI guidance, and a full press kit. Join the waitlist for launch-day perks.',
+    'Lunary is launching on Product Hunt with real astronomical data, optional Astral Guide chat, and a full press kit. Join the waitlist for launch-day perks.',
   openGraph: {
-    title: 'Lunary AI Launch Campaign',
+    title: 'Lunary Launch Campaign',
     description:
       'Discover the launch roadmap, Product Hunt plans, press kit, and cosmic report generator.',
     url: 'https://lunary.app/launch',
@@ -20,13 +20,13 @@ export const metadata: Metadata = {
         url: '/api/og/cosmic',
         width: 1200,
         height: 630,
-        alt: 'Lunary AI Launch',
+        alt: 'Lunary Launch',
       },
     ],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Lunary AI Launch Campaign',
+    title: 'Lunary Launch Campaign',
     description:
       'Countdown, Product Hunt prep, press kit, and cosmic launch activations in one place.',
     images: ['/api/og/cosmic'],
@@ -63,7 +63,7 @@ const timeline = [
 const testimonials = [
   {
     quote:
-      'Lunary’s beta saved me hours creating moon rituals for my membership. Real data + AI prompts are unmatched.',
+      'Lunary’s beta saved me hours creating moon rituals for my membership. Real data + Astral Guide prompts are unmatched.',
     author: 'Mara — Ritual Host',
   },
   {
@@ -180,7 +180,7 @@ export default function LaunchPage() {
           <div className='mt-6'>
             <SocialShareButtons
               url='https://lunary.app/launch'
-              title='Join me in launching Lunary AI on Product Hunt! 🚀✨'
+              title='Join me in launching Lunary on Product Hunt! 🚀✨'
             />
           </div>
         </div>

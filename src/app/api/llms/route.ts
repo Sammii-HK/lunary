@@ -55,7 +55,7 @@ export async function GET() {
 
     const llmsContent = `# Lunary - lunary.app
 
-> A calm AI companion for cosmic self understanding. Personalised astrology based on real astronomical data.
+> A calm companion for cosmic self understanding. Personalised astrology based on real astronomical data.
 
 ## About
 

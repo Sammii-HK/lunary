@@ -8,7 +8,7 @@ import { MarketingFooter } from '@/components/MarketingFooter';
 export const metadata: Metadata = {
   title: 'Sammii - Founder of Lunary | About the Creator',
   description:
-    'Meet Sammii, the founder and solo developer behind Lunary. Designer, engineer, and creator of the AI-powered spiritual intelligence platform combining astrology, tarot, and modern technology.',
+    'Meet Sammii, the founder and solo developer behind Lunary. Designer, engineer, and creator of the astronomy-based spiritual intelligence platform with optional AI chat.',
   openGraph: {
     title: 'Sammii - Founder of Lunary',
     description:
@@ -73,7 +73,7 @@ export default function AuthorPage() {
       url: 'https://lunary.app',
     },
     description:
-      'Designer, engineer, and solo founder of Lunary. Creator of the Lunary AI architecture, design system, brand, and complete product.',
+      'Designer, engineer, and solo founder of Lunary. Creator of the astrology engine, Astral Guide chat, design system, brand, and complete product.',
     sameAs: socialLinks.map((s) => s.url),
   };
 
@@ -126,15 +126,15 @@ export default function AuthorPage() {
               </p>
               <p className='text-zinc-300 leading-relaxed mb-4'>
                 Designer, engineer, and solo founder of Lunary. Creator of the
-                entire Lunary ecosystem—from the AI architecture and design
-                system to the brand identity and complete product
-                implementation.
+                entire Lunary ecosystem—from the astrology engine and optional
+                Astral Guide chat to the design system, brand identity, and
+                complete product implementation.
               </p>
               <p className='text-zinc-400 leading-relaxed'>
                 With a background in high-performance SaaS platforms and
                 creative technology, Sammii brings together ancient symbolic
-                systems and modern AI to create meaningful digital experiences
-                for spiritual exploration.
+                systems and modern product design to create meaningful digital
+                experiences for spiritual exploration.
               </p>
             </div>
           </div>

@@ -23,7 +23,7 @@ import { NewsletterSignupForm } from '@/components/NewsletterSignupForm';
 export const metadata: Metadata = {
   title: 'Lunary: Personal Astrology App | Birth Chart, Horoscopes & Tarot',
   description:
-    'Your personal astrology companion. Daily horoscopes, birth chart analysis, tarot readings & moon phases based on real astronomy. AI-powered insights from your natal chart. Free to start.',
+    'Your personal astrology companion. Daily horoscopes, birth chart analysis, tarot readings & moon phases based on real astronomy. Optional Astral Guide chat for deeper insight. Free to start.',
   alternates: {
     canonical: 'https://lunary.app',
   },
@@ -36,14 +36,19 @@ export default function WelcomePage() {
       <section className='relative px-4 md:px-6 mt-10 pb-10 md:pt-28 md:pb-16 bg-zinc-950'>
         <div className='max-w-3xl mx-auto text-center space-y-6'>
           <p className='text-xs uppercase tracking-[0.2em] text-zinc-400'>
-            A calm AI companion for cosmic self understanding
+            Personal astrology grounded in real astronomy
           </p>
           <h1 className='text-3xl md:text-4xl lg:text-5xl font-light text-zinc-100 leading-tight tracking-tight'>
             Personal astrology that actually understands you
           </h1>
           <p className='text-base md:text-lg text-zinc-400 leading-relaxed max-w-2xl mx-auto'>
             Built from your full birth chart, real astronomy, tarot and lunar
-            cycles. Designed to support emotional clarity, not predictions.
+            cycles. Designed to support emotional clarity, not prediction.
+          </p>
+          <p className='text-xs text-zinc-500'>
+            Chart calculations are based on real astronomy. The Astral Guide
+            chat uses AI to help interpret your chart, patterns and the current
+            sky.
           </p>
           <div className='flex flex-col sm:flex-row gap-4 justify-center items-center pt-2 pb-6'>
             <Button variant='lunary' asChild>
@@ -340,6 +345,10 @@ export default function WelcomePage() {
                 Talk through emotions, energy, creativity or relationships.
                 Lunary responds with context from your chart and the current
                 sky.
+              </p>
+              <p className='text-xs text-zinc-500'>
+                Optional AI chat grounded in your chart. Your chart itself is
+                always astronomy-based.
               </p>
             </div>
           </div>

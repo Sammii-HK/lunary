@@ -33,7 +33,7 @@ export async function generateMetadata(): Promise<Metadata> {
     metadataBase: new URL('https://lunary.app'),
     title: 'Lunary',
     description:
-      'Your Lunar Diary - Astrology based on real astronomical data. Personalized birth chart analysis, daily horoscopes, tarot readings, moon phases, and cosmic guidance. Free 7-day trial - credit card required but no payment taken.',
+      'Your Lunar Diary - Astrology based on real astronomical data. Personalized birth chart analysis, daily horoscopes, tarot readings, moon phases, and cosmic guidance. Free 7-day trial - no card required.',
     manifest: PWA_MANIFEST_URL,
     keywords: [
       'astrology',

@@ -24,7 +24,7 @@ const VARIANT_COPY: Record<
   themes: {
     title: 'Discover Your Life Themes',
     description:
-      'See the deeper patterns in your journey with AI-powered theme analysis and guidance.',
+      'See the deeper patterns in your journey with chart-based theme analysis and guidance.',
   },
   shadow: {
     title: 'Explore Your Archetypes',
@@ -39,7 +39,7 @@ const VARIANT_COPY: Record<
   guide: {
     title: 'Unlimited Astral Guide',
     description:
-      'Get unlimited AI-powered cosmic guidance personalized to your chart and journey.',
+      'Get unlimited Astral Guide chat grounded in your chart and journey.',
   },
 };
 

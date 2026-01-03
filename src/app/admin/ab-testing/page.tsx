@@ -160,7 +160,7 @@ export default function ABTestingPage() {
           <div>
             <h1 className='text-3xl font-bold mb-2'>A/B Testing Analytics</h1>
             <p className='text-zinc-400'>
-              Analyze conversion experiments and get AI-powered insights
+              Analyze conversion experiments and get AI-assisted insights
             </p>
           </div>
           {autoSuggestions.length > 0 && (

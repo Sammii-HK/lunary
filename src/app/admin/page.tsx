@@ -564,7 +564,7 @@ export default function AdminDashboard() {
     },
     {
       title: 'A/B Testing',
-      description: 'Analyze experiments with AI-powered insights',
+      description: 'Analyze experiments with AI-assisted insights',
       href: '/admin/ab-testing',
       icon: <Sparkles className='h-5 w-5' />,
       category: 'monitoring',

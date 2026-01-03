@@ -104,7 +104,7 @@ function buildReportData({
 
   return {
     title: `Cosmic ${reportType.charAt(0).toUpperCase() + reportType.slice(1)} Report`,
-    subtitle: 'Generated with real astronomical data + Lunary AI rituals.',
+    subtitle: 'Generated with real astronomical data + Lunary rituals.',
     reportType,
     generatedFor,
     dateRange,

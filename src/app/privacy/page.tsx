@@ -235,7 +235,7 @@ export default function PrivacyPolicyPage() {
               5. Lunary GPT and AI Features
             </h2>
             <p className='text-zinc-300 leading-relaxed mb-4'>
-              Lunary offers AI-powered features including Lunary GPT, an
+              Lunary offers AI-assisted features including Lunary GPT, an
               optional AI assistant. When you interact with our AI features:
             </p>
 
@@ -355,7 +355,7 @@ export default function PrivacyPolicyPage() {
                 <strong>Vercel:</strong> Website hosting and infrastructure
               </li>
               <li>
-                <strong>OpenAI:</strong> AI-powered features
+                <strong>OpenAI:</strong> AI-assisted features
               </li>
               <li>
                 <strong>Resend:</strong> Transactional email delivery

@@ -6,7 +6,7 @@ import { MarketingBreadcrumbs } from '@/components/MarketingBreadcrumbs';
 export const metadata: Metadata = {
   title: 'Terms of Service | Lunary',
   description:
-    'Read the terms and conditions governing your use of Lunary, the AI-powered astrology platform.',
+    'Read the terms and conditions governing your use of Lunary, the astronomy-based astrology platform with optional AI chat.',
   robots: 'index, follow',
 };
 

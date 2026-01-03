@@ -365,8 +365,7 @@ export default function BestPersonalizedAstrologyAppsPage() {
                   <div className='flex items-center gap-2'>
                     <Check className='h-4 w-4 text-lunary-success' />
                     <span className='text-sm text-zinc-300'>
-                      7-day free trial - credit card required but no payment
-                      taken
+                      7-day free trial - no card required during the trial
                     </span>
                   </div>
                   <div className='flex items-center gap-2'>
@@ -437,7 +436,7 @@ export default function BestPersonalizedAstrologyAppsPage() {
               <div className='flex items-center gap-2'>
                 <Check className='h-4 w-4 text-lunary-success' />
                 <span className='text-sm text-zinc-300'>
-                  AI-powered insights
+                  AI-assisted insights
                 </span>
               </div>
               <div className='flex items-center gap-2'>
@@ -491,8 +490,8 @@ export default function BestPersonalizedAstrologyAppsPage() {
               </li>
             </ol>
             <p className='text-sm text-zinc-300 leading-relaxed mt-4'>
-              Plus, Lunary offers a transparent 7-day free trial with no payment
-              taken during the trial period, making it easy to try risk-free.
+              Plus, Lunary offers a transparent 7-day free trial with no card
+              required, making it easy to try risk-free.
             </p>
           </div>
         </section>

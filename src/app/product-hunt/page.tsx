@@ -6,11 +6,11 @@ import { LaunchSignupForm } from '@/components/launch/LaunchSignupForm';
 import { SocialShareButtons } from '@/components/SocialShareButtons';
 
 export const metadata: Metadata = {
-  title: 'Lunary AI · Product Hunt Launch',
+  title: 'Lunary · Product Hunt Launch',
   description:
-    'Lunary AI blends astronomy data with AI rituals. Explore the Product Hunt launch plan, maker story, testimonials, and launch reminders.',
+    'Lunary blends astronomy data with optional Astral Guide chat. Explore the Product Hunt launch plan, maker story, testimonials, and launch reminders.',
   openGraph: {
-    title: 'Lunary AI on Product Hunt',
+    title: 'Lunary on Product Hunt',
     description:
       'Join the launch squad, preview screenshots, and get notified on drop day.',
     url: 'https://lunary.app/product-hunt',
@@ -19,22 +19,22 @@ export const metadata: Metadata = {
         url: '/api/og/cosmic',
         width: 1200,
         height: 630,
-        alt: 'Lunary AI Product Hunt Launch',
+        alt: 'Lunary Product Hunt Launch',
       },
     ],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Lunary AI · Product Hunt Launch',
+    title: 'Lunary · Product Hunt Launch',
     description:
-      'AI + Astronomy for personalized cosmic guidance. Launching soon on PH.',
+      'Astronomy-based astrology with optional Astral Guide chat. Launching soon on PH.',
     images: ['/api/og/cosmic'],
   },
 };
 
 const features = [
   'Real astronomical calculations (not generic horoscopes)',
-  'AI-powered personalized insights + rituals',
+  'Astral Guide chat for deeper questions (optional)',
   'Daily cosmic pulse notifications with energy scores',
   'Moon Circles and grimoire library for every lunation',
   'Cosmic Report Generator with shareable PDFs',
@@ -66,13 +66,13 @@ export default function ProductHuntPage() {
           Product Hunt · Coming Soon
         </p>
         <h1 className='text-4xl font-semibold'>
-          Lunary AI — Personalized Astrology Powered by Real Astronomical Data
+          Lunary — Personalized Astrology Powered by Real Astronomical Data
         </h1>
         <p className='text-lg text-zinc-200'>
-          AI meets astronomy for personalized cosmic guidance. We combine
-          NASA-grade ephemeris with AI rituals, tarot archetypes, and mood
-          intelligence so you can plan launches, rituals, and creative sprints
-          with confidence.
+          Astronomy-based astrology with optional Astral Guide chat for deeper
+          guidance. We combine NASA-grade ephemeris with tarot archetypes and
+          mood intelligence so you can plan launches, rituals, and creative
+          sprints with confidence.
         </p>
         <div className='flex flex-wrap gap-3 text-sm text-lunary-rose-100'>
           {features.map((feature) => (
@@ -148,7 +148,7 @@ export default function ProductHuntPage() {
         </p>
         <SocialShareButtons
           url='https://lunary.app/product-hunt'
-          title='Lunary AI is launching on Product Hunt — AI + Astronomy for personalized cosmic guidance.'
+          title='Lunary is launching on Product Hunt — Astronomy-based astrology with optional Astral Guide chat.'
         />
         <Link
           href='https://www.producthunt.com/'

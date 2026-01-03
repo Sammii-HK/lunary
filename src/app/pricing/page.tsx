@@ -205,7 +205,12 @@ export default function PricingPage() {
     {
       question: "What's included in the free trial?",
       answer:
-        'Full access to all personalized features including birth chart analysis, daily horoscopes, and AI chat. Credit card required but no payment taken during trial.',
+        'Full access to all personalized features including birth chart analysis, daily horoscopes, and Astral Guide chat. No card required during the trial.',
+    },
+    {
+      question: 'Is Lunary AI-led?',
+      answer:
+        'No. Charts and timings come from real astronomical data. AI is used only in the Astral Guide chat to interpret your chart, patterns, and the current sky.',
     },
     {
       question: 'Can I cancel anytime?',
@@ -239,13 +244,14 @@ export default function PricingPage() {
         'Basic lunar calendar',
         'General daily horoscope',
         'Access to grimoire knowledge',
-        '1 free AI ritual/reading per week',
+        '1 Astral Guide insight per week',
       ],
       sku: 'lunary_free',
     }),
     createProductSchema({
       name: 'Lunary+',
-      description: 'Personalized astrology based on your exact birth chart.',
+      description:
+        'Personalized astrology based on your exact birth chart and real astronomical data.',
       price: 4.99,
       priceCurrency: 'USD',
       interval: 'month',
@@ -260,13 +266,14 @@ export default function PricingPage() {
     }),
     createProductSchema({
       name: 'Lunary+ AI',
-      description: 'Unlimited AI guidance based on your birth chart.',
+      description:
+        'Astral Guide chat for deeper questions, grounded in your birth chart.',
       price: 7.99,
       priceCurrency: 'USD',
       interval: 'month',
       features: [
         'Everything in Lunary+',
-        'Unlimited AI chat',
+        'Unlimited Astral Guide chat',
         'Weekly cosmic reports',
         'Downloadable PDFs',
         'Advanced pattern analysis',
@@ -313,7 +320,8 @@ export default function PricingPage() {
             <p className='text-base md:text-lg text-zinc-400 max-w-xl mx-auto leading-relaxed'>
               Start with free access to your birth chart, moon phases, and
               cosmic insights. Upgrade for personalized readings based on your
-              exact birth chart.
+              exact birth chart. Astronomy powers the charts—AI only appears in
+              Astral Guide chat.
             </p>
           </div>
         </section>
@@ -600,8 +608,9 @@ export default function PricingPage() {
                     Lunary+ AI includes everything above, plus:
                   </h3>
                   <p className='text-sm text-zinc-400'>
-                    Unlimited AI chat, weekly reports, downloadable PDFs, and
-                    advanced pattern analysis
+                    Astral Guide chat for deeper questions, weekly reports,
+                    downloadable PDFs, and advanced pattern analysis. Charts
+                    remain astronomy-based.
                   </p>
                 </div>
                 <Button variant='lunary' className='flex-shrink-0' asChild>

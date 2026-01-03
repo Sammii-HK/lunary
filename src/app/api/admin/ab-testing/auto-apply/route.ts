@@ -242,10 +242,9 @@ async function generateCodeChanges(
   > = {
     pricing_cta: {
       file: 'src/app/pricing/page.tsx',
-      variantA:
-        "'Start your free trial - credit card required but no payment taken. Cancel anytime.'",
+      variantA: "'Start your free trial - no card required. Cancel anytime.'",
       variantB:
-        "'Unlock your cosmic blueprint. Start free trial - credit card required but no payment taken.'",
+        "'Unlock your cosmic blueprint. Start free trial - no card required.'",
       description: 'Update pricing page CTA text to winning variant',
     },
   };

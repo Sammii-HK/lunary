@@ -1,7 +1,7 @@
 'use client';
 
 import { useUser } from '@/context/UserContext';
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import Link from 'next/link';
 import dynamic from 'next/dynamic';
 import { HelpCircle, Stars, Layers, Hash, X, Calendar } from 'lucide-react';
@@ -16,7 +16,7 @@ import { useAuthStatus } from '@/components/AuthStatus';
 import { conversionTracking } from '@/lib/analytics';
 import { BirthdayInput } from '@/components/ui/birthday-input';
 import { calculateLifePathNumber } from '../../../../utils/personalization';
-import { geocodeLocation } from '../../../../utils/location';
+import { geocodeLocation, parseCoordinates } from '../../../../utils/location';
 import { calculatePersonalYear } from '@/lib/numerology';
 import { useModal } from '@/hooks/useModal';
 import { Heading } from '@/components/ui/Heading';
@@ -138,9 +138,29 @@ export default function ProfilePage() {
   const [birthday, setBirthday] = useState('');
   const [birthTime, setBirthTime] = useState('');
   const [birthLocation, setBirthLocation] = useState('');
+  const [locationSuggestions, setLocationSuggestions] = useState<
+    Array<{
+      label: string;
+      latitude: number;
+      longitude: number;
+      city?: string;
+      region?: string;
+      country?: string;
+    }>
+  >([]);
+  const [isLoadingLocationSuggestions, setIsLoadingLocationSuggestions] =
+    useState(false);
+  const [showLocationSuggestions, setShowLocationSuggestions] = useState(false);
+  const [locationSuggestionError, setLocationSuggestionError] = useState<
+    string | null
+  >(null);
   const [showBirthLocationHint, setShowBirthLocationHint] = useState(false);
   const [isCheckingBirthLocation, setIsCheckingBirthLocation] = useState(false);
   const lastBirthLocationCheck = useRef<string | null>(null);
+  const locationSuggestionsAbortRef = useRef<AbortController | null>(null);
+  const lastLocationQueryRef = useRef<string | null>(null);
+  const locationSuggestionBlurTimeoutRef = useRef<number | null>(null);
+  const lastLocationSelectionRef = useRef<string | null>(null);
   const [isEditing, setIsEditing] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [showAuthModal, setShowAuthModal] = useState(false);
@@ -172,6 +192,33 @@ export default function ProfilePage() {
     onClose: () => setShowAuthModal(false),
     closeOnClickOutside: false,
   });
+
+  const cancelLocationSuggestionBlur = useCallback(() => {
+    if (locationSuggestionBlurTimeoutRef.current !== null) {
+      window.clearTimeout(locationSuggestionBlurTimeoutRef.current);
+      locationSuggestionBlurTimeoutRef.current = null;
+    }
+  }, []);
+
+  const scheduleCloseLocationSuggestions = useCallback(() => {
+    cancelLocationSuggestionBlur();
+    locationSuggestionBlurTimeoutRef.current = window.setTimeout(() => {
+      setShowLocationSuggestions(false);
+    }, 150);
+  }, [cancelLocationSuggestionBlur]);
+
+  const handleLocationSuggestionSelect = useCallback(
+    (suggestion: { label: string }) => {
+      cancelLocationSuggestionBlur();
+      setBirthLocation(suggestion.label);
+      lastLocationQueryRef.current = suggestion.label;
+      lastLocationSelectionRef.current = suggestion.label;
+      setShowLocationSuggestions(false);
+      setLocationSuggestions([]);
+      setShowBirthLocationHint(false);
+    },
+    [cancelLocationSuggestionBlur],
+  );
 
   // Load existing profile data when component mounts
   useEffect(() => {
@@ -247,6 +294,78 @@ export default function ProfilePage() {
       setIsEditing(false);
     }
   }, [user]);
+
+  useEffect(() => {
+    if (!isEditing) {
+      setShowLocationSuggestions(false);
+      return;
+    }
+    const query = birthLocation.trim();
+    if (
+      query.length < 3 ||
+      parseCoordinates(query) ||
+      query === lastLocationSelectionRef.current
+    ) {
+      setShowLocationSuggestions(false);
+      setLocationSuggestions([]);
+      setLocationSuggestionError(null);
+      return;
+    }
+
+    if (lastLocationQueryRef.current === query && locationSuggestions.length) {
+      return;
+    }
+
+    const timeout = window.setTimeout(async () => {
+      if (locationSuggestionsAbortRef.current) {
+        locationSuggestionsAbortRef.current.abort();
+      }
+      const controller = new AbortController();
+      locationSuggestionsAbortRef.current = controller;
+      lastLocationQueryRef.current = query;
+
+      setIsLoadingLocationSuggestions(true);
+      setLocationSuggestionError(null);
+
+      try {
+        const response = await fetch(
+          `/api/location/suggest?q=${encodeURIComponent(query)}`,
+          { signal: controller.signal },
+        );
+
+        if (!response.ok) {
+          throw new Error('Location suggestions unavailable');
+        }
+
+        const data = (await response.json()) as {
+          results?: Array<{
+            label: string;
+            latitude: number;
+            longitude: number;
+            city?: string;
+            region?: string;
+            country?: string;
+          }>;
+        };
+
+        const results = Array.isArray(data.results) ? data.results : [];
+        setLocationSuggestions(results);
+        setShowLocationSuggestions(true);
+      } catch (error) {
+        if ((error as Error).name !== 'AbortError') {
+          setLocationSuggestionError('Could not load suggestions');
+          setLocationSuggestions([]);
+          setShowLocationSuggestions(true);
+        }
+      } finally {
+        setIsLoadingLocationSuggestions(false);
+      }
+    }, 400);
+
+    return () => {
+      window.clearTimeout(timeout);
+    };
+  }, [birthLocation, isEditing, locationSuggestions.length]);
 
   useEffect(() => {
     if (!canEditProfile && isEditing) {
@@ -543,27 +662,73 @@ export default function ProfilePage() {
                           City, Country or coordinates
                         </span>
                       </label>
-                      <input
-                        type='text'
-                        value={birthLocation}
-                        onChange={(e) => {
-                          setBirthLocation(e.target.value);
-                          setShowBirthLocationHint(false);
-                        }}
-                        onBlur={async () => {
-                          const trimmed = birthLocation.trim();
-                          if (!trimmed) return;
-                          if (lastBirthLocationCheck.current === trimmed)
-                            return;
-                          setIsCheckingBirthLocation(true);
-                          lastBirthLocationCheck.current = trimmed;
-                          const coords = await geocodeLocation(trimmed);
-                          setShowBirthLocationHint(!coords);
-                          setIsCheckingBirthLocation(false);
-                        }}
-                        className='w-full rounded-md border border-zinc-600 bg-zinc-700 px-3 py-2 text-sm text-white placeholder-zinc-400 focus:outline-none focus:ring-2 focus:ring-lunary-primary'
-                        placeholder='e.g., London, UK or 51.4769, 0.0005'
-                      />
+                      <div className='relative'>
+                        <input
+                          type='text'
+                          value={birthLocation}
+                          onChange={(e) => {
+                            setBirthLocation(e.target.value);
+                            setShowBirthLocationHint(false);
+                            setLocationSuggestionError(null);
+                            lastLocationQueryRef.current = null;
+                            lastLocationSelectionRef.current = null;
+                          }}
+                          onFocus={cancelLocationSuggestionBlur}
+                          onBlur={async () => {
+                            scheduleCloseLocationSuggestions();
+                            const trimmed = birthLocation.trim();
+                            if (!trimmed) return;
+                            if (lastBirthLocationCheck.current === trimmed)
+                              return;
+                            setIsCheckingBirthLocation(true);
+                            lastBirthLocationCheck.current = trimmed;
+                            const coords = await geocodeLocation(trimmed);
+                            setShowBirthLocationHint(!coords);
+                            setIsCheckingBirthLocation(false);
+                          }}
+                          className='w-full rounded-md border border-zinc-600 bg-zinc-700 px-3 py-2 text-sm text-white placeholder-zinc-400 focus:outline-none focus:ring-2 focus:ring-lunary-primary'
+                          placeholder='e.g., London, UK or 51.4769, 0.0005'
+                        />
+                        {showLocationSuggestions && (
+                          <div className='absolute z-20 mt-2 w-full rounded-lg border border-zinc-700 bg-zinc-900 shadow-xl'>
+                            {isLoadingLocationSuggestions ? (
+                              <div className='px-4 py-3 text-xs text-zinc-400'>
+                                Loading suggestions...
+                              </div>
+                            ) : locationSuggestionError ? (
+                              <div className='px-4 py-3 text-xs text-zinc-400'>
+                                {locationSuggestionError}
+                              </div>
+                            ) : locationSuggestions.length === 0 ? (
+                              <div className='px-4 py-3 text-xs text-zinc-400'>
+                                No matches found. Try adding a country or use
+                                coordinates.
+                              </div>
+                            ) : (
+                              <ul className='max-h-56 overflow-y-auto py-1 text-sm text-zinc-200'>
+                                {locationSuggestions.map((suggestion) => (
+                                  <li key={suggestion.label}>
+                                    <button
+                                      type='button'
+                                      onMouseDown={(event) =>
+                                        event.preventDefault()
+                                      }
+                                      onClick={() =>
+                                        handleLocationSuggestionSelect(
+                                          suggestion,
+                                        )
+                                      }
+                                      className='w-full px-4 py-2 text-left hover:bg-zinc-800/70 transition-colors'
+                                    >
+                                      {suggestion.label}
+                                    </button>
+                                  </li>
+                                ))}
+                              </ul>
+                            )}
+                          </div>
+                        )}
+                      </div>
                       {isCheckingBirthLocation && (
                         <p className='text-xs text-zinc-500'>
                           Checking location...
