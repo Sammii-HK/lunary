@@ -214,10 +214,18 @@ global.fetch = jest.fn((url, options = {}) => {
   if (
     nativeFetch &&
     typeof url === 'string' &&
-    url.startsWith('https://us1.locationiq.com') &&
     process.env.RUN_LOCATIONIQ_TESTS
   ) {
-    return nativeFetch(url, options);
+    try {
+      const parsedUrl = new URL(url);
+      const isHttps = parsedUrl.protocol === 'https:';
+      const isAllowedHost = parsedUrl.hostname === 'us1.locationiq.com';
+      if (isHttps && isAllowedHost) {
+        return nativeFetch(url, options);
+      }
+    } catch {
+      // Invalid URL; fall through to mocked behavior.
+    }
   }
 
   const method = options.method || 'GET';

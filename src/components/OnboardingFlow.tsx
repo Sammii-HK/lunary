@@ -533,7 +533,6 @@ export function OnboardingFlow({
     birthTime,
     previewMode,
     refetch,
-    user?.id,
     user,
   ]);
 

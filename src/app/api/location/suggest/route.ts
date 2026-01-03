@@ -62,34 +62,34 @@ export async function GET(request: NextRequest) {
       };
     }>;
 
-    const results: LocationSuggestion[] = data
-      .map((item) => {
-        if (!item.lat || !item.lon) return null;
-        const address = item.address || {};
-        const city =
-          address.city ||
-          address.town ||
-          address.village ||
-          address.suburb ||
-          address.hamlet ||
-          address.neighbourhood;
-        const region = address.state || address.region || address.county;
-        const country = address.country;
-        const label =
-          [city, region, country].filter(Boolean).join(', ') ||
-          item.display_name ||
-          'Unknown location';
+    const results = data.flatMap((item): LocationSuggestion[] => {
+      if (!item.lat || !item.lon) return [];
+      const address = item.address || {};
+      const city =
+        address.city ||
+        address.town ||
+        address.village ||
+        address.suburb ||
+        address.hamlet ||
+        address.neighbourhood;
+      const region = address.state || address.region || address.county;
+      const country = address.country;
+      const label =
+        [city, region, country].filter(Boolean).join(', ') ||
+        item.display_name ||
+        'Unknown location';
 
-        return {
+      return [
+        {
           label,
           latitude: Number.parseFloat(item.lat),
           longitude: Number.parseFloat(item.lon),
           city,
           region,
           country,
-        };
-      })
-      .filter((item): item is LocationSuggestion => Boolean(item));
+        },
+      ];
+    });
 
     return NextResponse.json({ results });
   } catch (error) {
