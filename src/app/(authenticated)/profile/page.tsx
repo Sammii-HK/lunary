@@ -5,7 +5,7 @@ import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import dynamic from 'next/dynamic';
 import { HelpCircle, Stars, Layers, Hash, X, Calendar } from 'lucide-react';
-import { createBirthChart } from '../../../../utils/astrology/birthChartService';
+import { createBirthChartWithMetadata } from '../../../../utils/astrology/birthChartService';
 import { useSubscription } from '../../../hooks/useSubscription';
 import {
   canCollectBirthday,
@@ -193,19 +193,40 @@ export default function ProfilePage() {
         if (profileBirthday && !user.hasBirthChart) {
           (async () => {
             console.log('[Profile] Auto-generating missing birth chart...');
-            const birthChart = await createBirthChart({
-              birthDate: profileBirthday,
-              birthTime: profileBirthTime || undefined,
-              birthLocation: profileBirthLocation || undefined,
-              fallbackTimezone:
-                Intl.DateTimeFormat().resolvedOptions().timeZone || undefined,
-            });
+            const { birthChart, timezone, timezoneSource } =
+              await createBirthChartWithMetadata({
+                birthDate: profileBirthday,
+                birthTime: profileBirthTime || undefined,
+                birthLocation: profileBirthLocation || undefined,
+                fallbackTimezone:
+                  Intl.DateTimeFormat().resolvedOptions().timeZone || undefined,
+              });
             await fetch('/api/profile/birth-chart', {
               method: 'PUT',
               headers: { 'Content-Type': 'application/json' },
               credentials: 'include',
               body: JSON.stringify({ birthChart }),
             });
+
+            if (
+              profileBirthLocation &&
+              timezoneSource === 'location' &&
+              timezone
+            ) {
+              await fetch('/api/profile', {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                credentials: 'include',
+                body: JSON.stringify({
+                  location: {
+                    ...location,
+                    birthTime: profileBirthTime || undefined,
+                    birthLocation: profileBirthLocation || undefined,
+                    birthTimezone: timezone,
+                  },
+                }),
+              });
+            }
             console.log('[Profile] Birth chart generated and saved!');
             // Refetch user data
             if (typeof window !== 'undefined') {
@@ -252,6 +273,16 @@ export default function ProfilePage() {
       }
 
       // Save basic profile to Postgres (including birthTime and birthLocation in location object)
+      const existingLocation = (user as any)?.location || {};
+      const locationPayload =
+        birthTime || birthLocation
+          ? {
+              ...existingLocation,
+              ...(birthTime ? { birthTime } : {}),
+              ...(birthLocation ? { birthLocation } : {}),
+            }
+          : undefined;
+
       const profileResponse = await fetch('/api/profile', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
@@ -259,10 +290,7 @@ export default function ProfilePage() {
         body: JSON.stringify({
           name,
           birthday,
-          location:
-            birthTime || birthLocation
-              ? { birthTime, birthLocation }
-              : undefined,
+          location: locationPayload,
         }),
       });
 
@@ -283,13 +311,14 @@ export default function ProfilePage() {
 
         if (shouldRegenerateChart) {
           console.log('Generating birth chart...');
-          const birthChart = await createBirthChart({
-            birthDate: birthday,
-            birthTime: birthTime || undefined,
-            birthLocation: birthLocation || undefined,
-            fallbackTimezone:
-              Intl.DateTimeFormat().resolvedOptions().timeZone || undefined,
-          });
+          const { birthChart, timezone, timezoneSource } =
+            await createBirthChartWithMetadata({
+              birthDate: birthday,
+              birthTime: birthTime || undefined,
+              birthLocation: birthLocation || undefined,
+              fallbackTimezone:
+                Intl.DateTimeFormat().resolvedOptions().timeZone || undefined,
+            });
 
           await fetch('/api/profile/birth-chart', {
             method: 'PUT',
@@ -297,6 +326,27 @@ export default function ProfilePage() {
             credentials: 'include',
             body: JSON.stringify({ birthChart }),
           });
+
+          if (
+            birthLocation &&
+            timezoneSource === 'location' &&
+            timezone &&
+            timezone !== existingLocation?.birthTimezone
+          ) {
+            await fetch('/api/profile', {
+              method: 'PUT',
+              headers: { 'Content-Type': 'application/json' },
+              credentials: 'include',
+              body: JSON.stringify({
+                location: {
+                  ...existingLocation,
+                  ...(birthTime ? { birthTime } : {}),
+                  birthLocation,
+                  birthTimezone: timezone,
+                },
+              }),
+            });
+          }
         }
 
         if (!hasExistingPersonalCard) {

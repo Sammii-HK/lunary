@@ -48,7 +48,7 @@ function resolveProjectPath(filePath: string) {
 function getFileLastModified(filePath: string): Date | null {
   const resolvedPath = resolveProjectPath(filePath);
   if (lastModifiedCache.has(resolvedPath)) {
-    return lastModifiedCache.get(resolvedPath);
+    return lastModifiedCache.get(resolvedPath) ?? null;
   }
 
   try {
@@ -92,7 +92,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
 
   type RouteConfig = {
     path: string;
-    changeFrequency?: MetadataRoute.SitemapEntry['changeFrequency'];
+    changeFrequency?: MetadataRoute.Sitemap[number]['changeFrequency'];
     priority?: number;
     sourceFiles?: string[];
     lastModified?: Date;
@@ -117,7 +117,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     priority = 0.6,
     sourceFiles,
     lastModified,
-  }: RouteConfig): MetadataRoute.SitemapEntry => ({
+  }: RouteConfig): MetadataRoute.Sitemap[number] => ({
     url: normalizePath(path),
     lastModified: lastModified ?? getLastModifiedFromPaths(sourceFiles) ?? now,
     changeFrequency,

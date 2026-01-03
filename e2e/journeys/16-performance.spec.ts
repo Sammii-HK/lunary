@@ -73,14 +73,18 @@ test.describe('Performance', () => {
   });
 
   test('should have efficient API calls', async ({ authenticatedPage }) => {
-    await authenticatedPage.goto('/horoscope', { waitUntil: 'networkidle' });
+    await authenticatedPage.goto('/horoscope', {
+      waitUntil: 'domcontentloaded',
+    });
 
     // Verify page loaded successfully
     const currentUrl = authenticatedPage.url();
     expect(currentUrl).toContain('/horoscope');
 
     // Check that content is visible (indicates successful load)
-    await expect(authenticatedPage.locator('body')).toBeVisible({
+    await expect(
+      authenticatedPage.getByRole('heading', { name: /horoscope/i }).first(),
+    ).toBeVisible({
       timeout: 5000,
     });
   });
