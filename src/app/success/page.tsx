@@ -41,12 +41,19 @@ export default function SuccessPage() {
       if (!session?.subscription || synced) return;
 
       try {
-        if (session.customer_id) {
+        if (session.customer_id || session.customer_email) {
           await fetch('/api/profile', {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
             credentials: 'include',
-            body: JSON.stringify({ stripeCustomerId: session.customer_id }),
+            body: JSON.stringify({
+              stripeCustomerId: session.customer_id,
+              stripeSubscriptionId: session.subscription?.id,
+              userEmail:
+                session.customer_email && session.customer_email !== 'Unknown'
+                  ? session.customer_email
+                  : undefined,
+            }),
           });
         }
 

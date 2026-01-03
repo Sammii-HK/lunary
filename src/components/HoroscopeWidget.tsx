@@ -11,6 +11,7 @@ import { hasBirthChartAccess, hasDateAccess } from '../../utils/pricing';
 import { useAstronomyContext } from '../context/AstronomyContext';
 import { Paywall } from './Paywall';
 import dayjs from 'dayjs';
+import { parseIsoDateOnly } from '@/lib/date-only';
 import Link from 'next/link';
 
 const generatePersonalizedHoroscope = (
@@ -561,7 +562,8 @@ const getPersonalDayNumber = (
   currentDate: dayjs.Dayjs,
 ): { number: number; meaning: string } => {
   // Personal Day = Birth Month + Birth Day + Current Year + Current Month + Current Day
-  const birth = dayjs(birthdate);
+  const parsedBirthDate = parseIsoDateOnly(birthdate);
+  const birth = parsedBirthDate ? dayjs(parsedBirthDate) : dayjs(birthdate);
   const birthMonth = birth.month() + 1;
   const birthDay = birth.date();
   const currentYear = currentDate.year();

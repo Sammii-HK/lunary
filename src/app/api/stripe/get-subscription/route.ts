@@ -188,11 +188,11 @@ async function checkStripeForSubscription(
         INSERT INTO subscriptions (
           user_id, status, plan_type,
           stripe_customer_id, stripe_subscription_id,
-          trial_ends_at, current_period_end
+          trial_ends_at, current_period_end, trial_used
         ) VALUES (
           ${userId}, ${mapped.status}, ${mapped.plan_type},
           ${customerId}, ${mapped.stripe_subscription_id},
-          ${mapped.trial_ends_at}, ${mapped.current_period_end}
+          ${mapped.trial_ends_at}, ${mapped.current_period_end}, true
         )
         ON CONFLICT (user_id) DO UPDATE SET
           status = EXCLUDED.status,
@@ -201,8 +201,9 @@ async function checkStripeForSubscription(
           stripe_subscription_id = EXCLUDED.stripe_subscription_id,
           trial_ends_at = EXCLUDED.trial_ends_at,
           current_period_end = EXCLUDED.current_period_end,
+          trial_used = true,
           updated_at = NOW()
-      `;
+    `;
     } catch (error) {
       console.error('Failed to cache subscription:', error);
     }

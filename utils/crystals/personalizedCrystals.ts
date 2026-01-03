@@ -1,4 +1,5 @@
 import { BirthChartData } from '../astrology/birthChart';
+import { parseIsoDateOnly } from '@/lib/date-only';
 
 // Lightweight personalized crystal index (~11KB) with all 109 crystals
 import crystalIndex from '@/data/crystal-personalized.json';
@@ -234,9 +235,11 @@ export const getDailyInfluences = (
 
   let birthdayBoost = false;
   if (userBirthday) {
-    const birthday = new Date(userBirthday);
-    birthdayBoost =
-      birthday.getMonth() === month && birthday.getDate() === dayOfMonth;
+    const birthday = parseIsoDateOnly(userBirthday) ?? new Date(userBirthday);
+    if (!isNaN(birthday.getTime())) {
+      birthdayBoost =
+        birthday.getMonth() === month && birthday.getDate() === dayOfMonth;
+    }
   }
 
   return {

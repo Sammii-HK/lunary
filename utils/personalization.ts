@@ -2,6 +2,7 @@ import seed from 'seed-random';
 import dayjs from 'dayjs';
 import { zodiacSigns } from './zodiac/zodiac';
 import { runesList } from '@/constants/runes';
+import { parseIsoDateOnly } from '@/lib/date-only';
 import type { BirthChartData } from './astrology/birthChart';
 
 export type UserProfileForPersonalization = {
@@ -57,7 +58,8 @@ function personalDayNumber(
   date: Date = new Date(),
 ): number {
   if (!birthdayIso) return 5;
-  const birth = dayjs(birthdayIso);
+  const birthDate = parseIsoDateOnly(birthdayIso);
+  const birth = birthDate ? dayjs(birthDate) : dayjs(birthdayIso);
   const current = dayjs(date);
   let sum =
     birth.month() +

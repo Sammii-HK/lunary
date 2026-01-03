@@ -35,6 +35,10 @@ function handleLegacyGrimoireRedirects(pathname: string): string | null {
 
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
+  const normalizedPathname =
+    pathname.endsWith('/') && pathname !== '/'
+      ? pathname.slice(0, -1)
+      : pathname;
   const hostname =
     request.headers.get('host')?.split(':')[0].toLowerCase() ?? '';
 
@@ -46,12 +50,28 @@ export function middleware(request: NextRequest) {
 
   if (!isProductionDomain) {
     // Only handle essential redirects for legacy URLs
-    const legacyRedirect = handleLegacyGrimoireRedirects(pathname);
+    if (normalizedPathname === '/$' || normalizedPathname === '/%24') {
+      return NextResponse.redirect(new URL('/', request.url), 301);
+    }
+
+    if (
+      normalizedPathname === '/grimoire/guides/birth-chart-complete-guide-0'
+    ) {
+      return NextResponse.redirect(
+        new URL('/grimoire/guides/birth-chart-complete-guide', request.url),
+        301,
+      );
+    }
+
+    const legacyRedirect = handleLegacyGrimoireRedirects(normalizedPathname);
     if (legacyRedirect) {
       return NextResponse.redirect(new URL(legacyRedirect, request.url), 301);
     }
 
-    if (pathname === '/grimoire' && request.nextUrl.searchParams.has('item')) {
+    if (
+      normalizedPathname === '/grimoire' &&
+      request.nextUrl.searchParams.has('item')
+    ) {
       const item = request.nextUrl.searchParams.get('item');
       if (item) {
         const slug = camelToKebab(item);
@@ -59,7 +79,9 @@ export function middleware(request: NextRequest) {
       }
     }
 
-    const blogWeekMatch = pathname.match(/^\/blog\/week\/(\d+)-(\d{4})$/);
+    const blogWeekMatch = normalizedPathname.match(
+      /^\/blog\/week\/(\d+)-(\d{4})$/,
+    );
     if (blogWeekMatch) {
       return NextResponse.redirect(
         new URL(
@@ -96,28 +118,43 @@ export function middleware(request: NextRequest) {
   if (isAdminSubdomain) {
     // Rewrite admin subdomain requests to /admin path
     if (
-      !pathname.startsWith('/admin') &&
-      !pathname.startsWith('/auth') &&
-      !pathname.startsWith('/api')
+      !normalizedPathname.startsWith('/admin') &&
+      !normalizedPathname.startsWith('/auth') &&
+      !normalizedPathname.startsWith('/api')
     ) {
       const url = request.nextUrl.clone();
-      url.pathname = pathname === '/' ? '/admin' : `/admin${pathname}`;
+      url.pathname =
+        normalizedPathname === '/' ? '/admin' : `/admin${normalizedPathname}`;
       return NextResponse.rewrite(url);
     }
   } else {
     // Block /admin access on main domain
-    if (pathname.startsWith('/admin')) {
+    if (normalizedPathname.startsWith('/admin')) {
       return NextResponse.redirect(new URL('/', request.url));
     }
   }
 
   // Legacy URL redirects
-  const legacyRedirect = handleLegacyGrimoireRedirects(pathname);
+  if (normalizedPathname === '/$' || normalizedPathname === '/%24') {
+    return NextResponse.redirect(new URL('/', request.url), 301);
+  }
+
+  if (normalizedPathname === '/grimoire/guides/birth-chart-complete-guide-0') {
+    return NextResponse.redirect(
+      new URL('/grimoire/guides/birth-chart-complete-guide', request.url),
+      301,
+    );
+  }
+
+  const legacyRedirect = handleLegacyGrimoireRedirects(normalizedPathname);
   if (legacyRedirect) {
     return NextResponse.redirect(new URL(legacyRedirect, request.url), 301);
   }
 
-  if (pathname === '/grimoire' && request.nextUrl.searchParams.has('item')) {
+  if (
+    normalizedPathname === '/grimoire' &&
+    request.nextUrl.searchParams.has('item')
+  ) {
     const item = request.nextUrl.searchParams.get('item');
     if (item) {
       const slug = camelToKebab(item);
@@ -125,7 +162,9 @@ export function middleware(request: NextRequest) {
     }
   }
 
-  const blogWeekMatch = pathname.match(/^\/blog\/week\/(\d+)-(\d{4})$/);
+  const blogWeekMatch = normalizedPathname.match(
+    /^\/blog\/week\/(\d+)-(\d{4})$/,
+  );
   if (blogWeekMatch) {
     return NextResponse.redirect(
       new URL(

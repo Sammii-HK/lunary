@@ -155,6 +155,7 @@ export default function PricingPage() {
     try {
       const storedReferralCode = localStorage.getItem('lunary_referral_code');
       const currentUserId = authState.user?.id || user?.id;
+      const currentUserEmail = user?.email || authState.user?.email;
 
       const { sessionId } = await createCheckoutSession(
         priceId,
@@ -162,6 +163,7 @@ export default function PricingPage() {
         storedReferralCode || undefined,
         undefined,
         currentUserId,
+        currentUserEmail,
       );
 
       const stripe = await loadStripe(

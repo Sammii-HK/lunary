@@ -153,21 +153,39 @@ export async function PUT(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { name, birthday, birthChart, personalCard, location } = body;
+    const {
+      name,
+      birthday,
+      birthChart,
+      personalCard,
+      location,
+      stripeCustomerId,
+      stripeSubscriptionId,
+      userEmail,
+    } = body;
 
     // Encrypt sensitive PII data
     const encryptedName = name ? encrypt(name) : null;
     const encryptedBirthday = birthday ? encrypt(birthday) : null;
 
     const result = await sql`
-      INSERT INTO user_profiles (user_id, name, birthday, birth_chart, personal_card, location)
+      INSERT INTO user_profiles (
+        user_id,
+        name,
+        birthday,
+        birth_chart,
+        personal_card,
+        location,
+        stripe_customer_id
+      )
       VALUES (
         ${user.id}, 
         ${encryptedName}, 
         ${encryptedBirthday},
         ${birthChart ? JSON.stringify(birthChart) : null}::jsonb,
         ${personalCard ? JSON.stringify(personalCard) : null}::jsonb,
-        ${location ? JSON.stringify(location) : null}::jsonb
+        ${location ? JSON.stringify(location) : null}::jsonb,
+        ${stripeCustomerId || null}
       )
       ON CONFLICT (user_id) DO UPDATE SET
         name = COALESCE(EXCLUDED.name, user_profiles.name),
@@ -175,11 +193,47 @@ export async function PUT(request: NextRequest) {
         birth_chart = COALESCE(EXCLUDED.birth_chart, user_profiles.birth_chart),
         personal_card = COALESCE(EXCLUDED.personal_card, user_profiles.personal_card),
         location = COALESCE(EXCLUDED.location, user_profiles.location),
+        stripe_customer_id = COALESCE(EXCLUDED.stripe_customer_id, user_profiles.stripe_customer_id),
         updated_at = NOW()
       RETURNING *
     `;
 
     const profile = result.rows[0];
+
+    if (stripeCustomerId || stripeSubscriptionId || userEmail) {
+      try {
+        await sql`
+          INSERT INTO subscriptions (
+            user_id,
+            user_email,
+            status,
+            plan_type,
+            stripe_customer_id,
+            stripe_subscription_id
+          ) VALUES (
+            ${user.id},
+            ${userEmail || null},
+            'free',
+            'free',
+            ${stripeCustomerId || null},
+            ${stripeSubscriptionId || null}
+          )
+          ON CONFLICT (user_id) DO UPDATE SET
+            stripe_customer_id = COALESCE(
+              EXCLUDED.stripe_customer_id,
+              subscriptions.stripe_customer_id
+            ),
+            stripe_subscription_id = COALESCE(
+              EXCLUDED.stripe_subscription_id,
+              subscriptions.stripe_subscription_id
+            ),
+            user_email = COALESCE(EXCLUDED.user_email, subscriptions.user_email),
+            updated_at = NOW()
+        `;
+      } catch (error) {
+        console.error('Failed to persist Stripe identifiers:', error);
+      }
+    }
 
     return NextResponse.json({
       profile: {

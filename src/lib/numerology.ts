@@ -1,6 +1,8 @@
 // Numerology calculation functions
 // Pythagorean numerology system
 
+import { parseIsoDateOnly } from '@/lib/date-only';
+
 const PYTHAGOREAN: Record<string, number> = {
   A: 1,
   B: 2,
@@ -138,7 +140,7 @@ export function calculateLifePath(birthDate: Date | string): CalculationResult {
   let date: Date;
 
   if (typeof birthDate === 'string') {
-    date = new Date(birthDate);
+    date = parseIsoDateOnly(birthDate) ?? new Date(birthDate);
   } else {
     date = birthDate;
   }
@@ -199,7 +201,7 @@ export function calculatePersonalYear(
   let date: Date;
 
   if (typeof birthDate === 'string') {
-    date = new Date(birthDate);
+    date = parseIsoDateOnly(birthDate) ?? new Date(birthDate);
   } else {
     date = birthDate;
   }

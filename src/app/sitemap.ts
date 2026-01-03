@@ -1,4 +1,6 @@
 import { MetadataRoute } from 'next';
+import { statSync } from 'node:fs';
+import { resolve as resolvePath } from 'node:path';
 import { grimoire } from '@/constants/grimoire';
 import { sectionToSlug } from '@/utils/grimoire';
 import spellsJson from '@/data/spells.json';
@@ -36,554 +38,486 @@ import { stringToKebabCase } from '../../utils/string';
 import dayjs from 'dayjs';
 import { getAllProducts } from '@/lib/shop/generators';
 
+const PROJECT_ROOT = process.cwd();
+const lastModifiedCache = new Map<string, Date | null>();
+
+function resolveProjectPath(filePath: string) {
+  return resolvePath(PROJECT_ROOT, filePath);
+}
+
+function getFileLastModified(filePath: string): Date | null {
+  const resolvedPath = resolveProjectPath(filePath);
+  if (lastModifiedCache.has(resolvedPath)) {
+    return lastModifiedCache.get(resolvedPath) ?? null;
+  }
+
+  try {
+    const stats = statSync(resolvedPath);
+    const date = stats.mtime;
+    lastModifiedCache.set(resolvedPath, date);
+    return date;
+  } catch {
+    lastModifiedCache.set(resolvedPath, null);
+    return null;
+  }
+}
+
+function getLastModifiedFromPaths(paths?: string[]): Date | null {
+  if (!paths?.length) {
+    return null;
+  }
+
+  const dates = paths
+    .map(getFileLastModified)
+    .filter((entry): entry is Date => Boolean(entry))
+    .map((date) => date.getTime());
+
+  if (!dates.length) {
+    return null;
+  }
+
+  return new Date(Math.max(...dates));
+}
+
 export default function sitemap(): MetadataRoute.Sitemap {
   // Use canonical domain (non-www)
   const baseUrl = 'https://lunary.app';
-  const now = new Date();
+  const now =
+    getLastModifiedFromPaths([
+      'src/app',
+      'src/constants',
+      'src/lib',
+      'src/data',
+    ]) ?? new Date();
 
-  // Static routes - ordered by priority
-  const routes = [
+  type RouteConfig = {
+    path: string;
+    changeFrequency?: MetadataRoute.Sitemap[number]['changeFrequency'];
+    priority?: number;
+    sourceFiles?: string[];
+    lastModified?: Date;
+  };
+
+  const normalizePath = (path: string) => {
+    if (path.startsWith('http://') || path.startsWith('https://')) {
+      return path;
+    }
+
+    const trimmed = path.replace(/^\/+/, '').replace(/\/+$/, '');
+    if (!trimmed) {
+      return baseUrl;
+    }
+
+    return `${baseUrl}/${trimmed}`;
+  };
+
+  const createRouteEntry = ({
+    path,
+    changeFrequency = 'monthly',
+    priority = 0.6,
+    sourceFiles,
+    lastModified,
+  }: RouteConfig): MetadataRoute.Sitemap[number] => ({
+    url: normalizePath(path),
+    lastModified: lastModified ?? getLastModifiedFromPaths(sourceFiles) ?? now,
+    changeFrequency,
+    priority,
+  });
+
+  const staticPageSources: Record<string, string[]> = {
+    '': ['src/app/page.tsx'],
+    pricing: ['src/app/pricing/page.tsx'],
+    'comparison/best-personalized-astrology-apps': [
+      'src/app/comparison/best-personalized-astrology-apps/page.tsx',
+    ],
+    blog: ['src/app/blog/page.tsx'],
+    grimoire: ['src/app/grimoire/page.tsx'],
+    'grimoire/astrology': ['src/app/grimoire/astrology/page.tsx'],
+    'grimoire/tarot': ['src/app/grimoire/tarot/page.tsx'],
+    'grimoire/tarot/yes-or-no': ['src/app/grimoire/tarot/yes-or-no/page.tsx'],
+    'grimoire/tarot/yes-or-no/love-timeframe': [
+      'src/app/grimoire/tarot/yes-or-no/love-timeframe/page.tsx',
+    ],
+    'grimoire/zodiac': ['src/app/grimoire/zodiac/page.tsx'],
+    'grimoire/spells': ['src/app/grimoire/spells/page.tsx'],
+    'grimoire/practices': ['src/app/grimoire/practices/page.tsx'],
+    'grimoire/events': ['src/app/grimoire/events/page.tsx'],
+    'grimoire/events/2025': ['src/app/grimoire/events/page.tsx'],
+    'grimoire/guides': ['src/app/grimoire/guides/page.tsx'],
+    'grimoire/compatibility': ['src/app/grimoire/compatibility/page.tsx'],
+    'grimoire/eclipses': ['src/app/grimoire/eclipses/page.tsx'],
+    'grimoire/houses': ['src/app/grimoire/houses/page.tsx'],
+    'grimoire/aspects': ['src/app/grimoire/aspects/page.tsx'],
+    'grimoire/numerology': ['src/app/grimoire/numerology/page.tsx'],
+    'grimoire/astronomy/retrogrades': [
+      'src/app/grimoire/astronomy/retrogrades/page.tsx',
+    ],
+    'grimoire/lunar-nodes': ['src/app/grimoire/lunar-nodes/page.tsx'],
+    'grimoire/transits': ['src/app/grimoire/transits/page.tsx'],
+    'grimoire/moon': ['src/app/grimoire/moon/page.tsx'],
+    'grimoire/crystals': ['src/app/grimoire/crystals/page.tsx'],
+    'grimoire/runes': ['src/app/grimoire/runes/page.tsx'],
+    'grimoire/candle-magic': ['src/app/grimoire/candle-magic/page.tsx'],
+    'grimoire/correspondences': ['src/app/grimoire/correspondences/page.tsx'],
+    'grimoire/horoscopes': ['src/app/grimoire/horoscopes/page.tsx'],
+    'grimoire/decans': ['src/app/grimoire/decans/page.tsx'],
+    'grimoire/cusps': ['src/app/grimoire/cusps/page.tsx'],
+    'grimoire/seasons': ['src/app/grimoire/seasons/page.tsx'],
+    'grimoire/placements': ['src/app/grimoire/placements/page.tsx'],
+    'grimoire/birthday': ['src/app/grimoire/birthday/page.tsx'],
+    'grimoire/chinese-zodiac': ['src/app/grimoire/chinese-zodiac/page.tsx'],
+    'grimoire/wheel-of-the-year': [
+      'src/app/grimoire/wheel-of-the-year/page.tsx',
+    ],
+    'grimoire/chakras': ['src/app/grimoire/chakras/page.tsx'],
+    'grimoire/divination': ['src/app/grimoire/divination/page.tsx'],
+    'grimoire/meditation': ['src/app/grimoire/meditation/page.tsx'],
+    'grimoire/modern-witchcraft': [
+      'src/app/grimoire/modern-witchcraft/page.tsx',
+    ],
+    shop: ['src/app/shop/page.tsx'],
+    comparison: ['src/app/comparison/page.tsx'],
+    horoscope: ['src/app/horoscope/page.tsx'],
+    tarot: ['src/app/tarot/page.tsx'],
+    'birth-chart': ['src/app/birth-chart/page.tsx'],
+    guide: ['src/app/guide/page.tsx'],
+    help: ['src/app/help/page.tsx'],
+    'press-kit': ['src/app/press-kit/page.tsx'],
+    privacy: ['src/app/privacy/page.tsx'],
+    terms: ['src/app/terms/page.tsx'],
+    cookies: ['src/app/cookies/page.tsx'],
+    refund: ['src/app/refund/page.tsx'],
+    'acceptable-use': ['src/app/acceptable-use/page.tsx'],
+    accessibility: ['src/app/accessibility/page.tsx'],
+    'api-terms': ['src/app/api-terms/page.tsx'],
+    'referral-terms': ['src/app/referral-terms/page.tsx'],
+    dmca: ['src/app/dmca/page.tsx'],
+    trademark: ['src/app/trademark/page.tsx'],
+    'building-lunary': ['src/app/building-lunary/page.tsx'],
+    'moon-circles': ['src/app/moon-circles/page.tsx'],
+    launch: ['src/app/launch/page.tsx'],
+    'product-hunt': ['src/app/product-hunt/page.tsx'],
+    'cosmic-report-generator': ['src/app/cosmic-report-generator/page.tsx'],
+    'comparison/lunary-vs-costar': [
+      'src/app/comparison/lunary-vs-costar/page.tsx',
+    ],
+    'comparison/lunary-vs-pattern': [
+      'src/app/comparison/lunary-vs-pattern/page.tsx',
+    ],
+    'comparison/lunary-vs-moonly': [
+      'src/app/comparison/lunary-vs-moonly/page.tsx',
+    ],
+    'comparison/lunary-vs-lunar-guide': [
+      'src/app/comparison/lunary-vs-lunar-guide/page.tsx',
+    ],
+    'comparison/lunary-vs-arcarae': [
+      'src/app/comparison/lunary-vs-arcarae/page.tsx',
+    ],
+    'comparison/personalized-vs-generic-astrology': [
+      'src/app/comparison/personalized-vs-generic-astrology/page.tsx',
+    ],
+    'grimoire/card-combinations': [
+      'src/app/grimoire/card-combinations/page.tsx',
+    ],
+    'grimoire/moon/signs': ['src/app/grimoire/moon/signs/page.tsx'],
+    'grimoire/reversed-cards-guide': [
+      'src/app/grimoire/reversed-cards-guide/page.tsx',
+    ],
+    'grimoire/spells/fundamentals': [
+      'src/app/grimoire/spells/fundamentals/page.tsx',
+    ],
+    'grimoire/guides/birth-chart-complete-guide': [
+      'src/app/grimoire/guides/birth-chart-complete-guide/page.tsx',
+    ],
+    'grimoire/guides/tarot-complete-guide': [
+      'src/app/grimoire/guides/tarot-complete-guide/page.tsx',
+    ],
+    'grimoire/guides/crystal-healing-guide': [
+      'src/app/grimoire/guides/crystal-healing-guide/page.tsx',
+    ],
+    'grimoire/guides/moon-phases-guide': [
+      'src/app/grimoire/guides/moon-phases-guide/page.tsx',
+    ],
+    'grimoire/glossary': ['src/app/grimoire/glossary/page.tsx'],
+    transits: ['src/app/transits/page.tsx'],
+    'moon-calendar': ['src/app/moon-calendar/page.tsx'],
+    'horoscope/today': ['src/app/horoscope/today/page.tsx'],
+    'horoscope/weekly': ['src/app/horoscope/weekly/page.tsx'],
+    'about/sammii': ['src/app/about/sammii/page.tsx'],
+    'about/editorial-guidelines': [
+      'src/app/about/editorial-guidelines/page.tsx',
+    ],
+    'about/methodology': ['src/app/about/methodology/page.tsx'],
+    'birth-chart/example': ['src/app/birth-chart/example/page.tsx'],
+    'grimoire/a-z': ['src/app/grimoire/a-z/page.tsx'],
+    'grimoire/beginners': ['src/app/grimoire/beginners/page.tsx'],
+    'grimoire/astronomy-vs-astrology': [
+      'src/app/grimoire/astronomy-vs-astrology/page.tsx',
+    ],
+  };
+
+  const staticPageMeta: RouteConfig[] = [
+    { path: '', changeFrequency: 'daily', priority: 1 },
+    { path: 'pricing', changeFrequency: 'monthly', priority: 0.9 },
     {
-      url: baseUrl,
-      lastModified: now,
-      changeFrequency: 'daily' as const,
-      priority: 1.0,
+      path: 'comparison/best-personalized-astrology-apps',
+      changeFrequency: 'monthly',
+      priority: 0.9,
+    },
+    { path: 'blog', changeFrequency: 'weekly', priority: 0.8 },
+    { path: 'grimoire', changeFrequency: 'monthly', priority: 0.8 },
+    { path: 'grimoire/astrology', changeFrequency: 'monthly', priority: 0.8 },
+    { path: 'grimoire/tarot', changeFrequency: 'monthly', priority: 0.8 },
+    {
+      path: 'grimoire/tarot/yes-or-no',
+      changeFrequency: 'monthly',
+      priority: 0.7,
     },
     {
-      url: `${baseUrl}/pricing`,
-      lastModified: now,
-      changeFrequency: 'monthly' as const,
+      path: 'grimoire/tarot/yes-or-no/love-timeframe',
+      changeFrequency: 'monthly',
+      priority: 0.7,
+    },
+    { path: 'grimoire/zodiac', changeFrequency: 'monthly', priority: 0.8 },
+    { path: 'grimoire/spells', changeFrequency: 'monthly', priority: 0.8 },
+    { path: 'grimoire/practices', changeFrequency: 'monthly', priority: 0.8 },
+    { path: 'grimoire/events', changeFrequency: 'monthly', priority: 0.8 },
+    { path: 'grimoire/events/2025', changeFrequency: 'monthly', priority: 0.8 },
+    { path: 'grimoire/guides', changeFrequency: 'monthly', priority: 0.8 },
+    {
+      path: 'grimoire/compatibility',
+      changeFrequency: 'monthly',
+      priority: 0.8,
+    },
+    { path: 'grimoire/eclipses', changeFrequency: 'monthly', priority: 0.8 },
+    { path: 'grimoire/houses', changeFrequency: 'monthly', priority: 0.8 },
+    { path: 'grimoire/aspects', changeFrequency: 'monthly', priority: 0.8 },
+    { path: 'grimoire/numerology', changeFrequency: 'monthly', priority: 0.8 },
+    {
+      path: 'grimoire/astronomy/retrogrades',
+      changeFrequency: 'monthly',
+      priority: 0.8,
+    },
+    { path: 'grimoire/lunar-nodes', changeFrequency: 'monthly', priority: 0.8 },
+    { path: 'grimoire/transits', changeFrequency: 'monthly', priority: 0.8 },
+    { path: 'grimoire/moon', changeFrequency: 'monthly', priority: 0.8 },
+    { path: 'grimoire/crystals', changeFrequency: 'monthly', priority: 0.8 },
+    { path: 'grimoire/runes', changeFrequency: 'monthly', priority: 0.8 },
+    {
+      path: 'grimoire/candle-magic',
+      changeFrequency: 'monthly',
+      priority: 0.8,
+    },
+    {
+      path: 'grimoire/correspondences',
+      changeFrequency: 'monthly',
+      priority: 0.8,
+    },
+    {
+      path: 'grimoire/horoscopes',
+      changeFrequency: 'daily',
+      priority: 0.8,
+    },
+    { path: 'grimoire/decans', changeFrequency: 'monthly', priority: 0.7 },
+    { path: 'grimoire/cusps', changeFrequency: 'monthly', priority: 0.7 },
+    { path: 'grimoire/seasons', changeFrequency: 'monthly', priority: 0.7 },
+    {
+      path: 'grimoire/placements',
+      changeFrequency: 'monthly',
+      priority: 0.7,
+    },
+    { path: 'grimoire/birthday', changeFrequency: 'monthly', priority: 0.7 },
+    {
+      path: 'grimoire/chinese-zodiac',
+      changeFrequency: 'monthly',
+      priority: 0.7,
+    },
+    {
+      path: 'grimoire/wheel-of-the-year',
+      changeFrequency: 'monthly',
+      priority: 0.7,
+    },
+    { path: 'grimoire/chakras', changeFrequency: 'monthly', priority: 0.7 },
+    { path: 'grimoire/divination', changeFrequency: 'monthly', priority: 0.7 },
+    { path: 'grimoire/meditation', changeFrequency: 'monthly', priority: 0.7 },
+    {
+      path: 'grimoire/modern-witchcraft',
+      changeFrequency: 'monthly',
+      priority: 0.7,
+    },
+    { path: 'shop', changeFrequency: 'daily', priority: 0.8 },
+    { path: 'comparison', changeFrequency: 'monthly', priority: 0.8 },
+    { path: 'horoscope', changeFrequency: 'daily', priority: 0.7 },
+    { path: 'tarot', changeFrequency: 'daily', priority: 0.7 },
+    { path: 'birth-chart', changeFrequency: 'monthly', priority: 0.7 },
+    { path: 'guide', changeFrequency: 'monthly', priority: 0.7 },
+    { path: 'help', changeFrequency: 'monthly', priority: 0.7 },
+    { path: 'press-kit', changeFrequency: 'monthly', priority: 0.6 },
+    { path: 'privacy', changeFrequency: 'monthly', priority: 0.5 },
+    { path: 'terms', changeFrequency: 'monthly', priority: 0.5 },
+    { path: 'cookies', changeFrequency: 'monthly', priority: 0.4 },
+    { path: 'refund', changeFrequency: 'monthly', priority: 0.4 },
+    {
+      path: 'acceptable-use',
+      changeFrequency: 'monthly',
+      priority: 0.4,
+    },
+    {
+      path: 'accessibility',
+      changeFrequency: 'monthly',
+      priority: 0.4,
+    },
+    {
+      path: 'api-terms',
+      changeFrequency: 'monthly',
+      priority: 0.4,
+    },
+    {
+      path: 'referral-terms',
+      changeFrequency: 'monthly',
+      priority: 0.4,
+    },
+    { path: 'dmca', changeFrequency: 'monthly', priority: 0.4 },
+    { path: 'trademark', changeFrequency: 'monthly', priority: 0.4 },
+    {
+      path: 'building-lunary',
+      changeFrequency: 'weekly',
+      priority: 0.6,
+    },
+    { path: 'moon-circles', changeFrequency: 'daily', priority: 0.7 },
+    { path: 'launch', changeFrequency: 'monthly', priority: 0.7 },
+    { path: 'product-hunt', changeFrequency: 'monthly', priority: 0.7 },
+    {
+      path: 'cosmic-report-generator',
+      changeFrequency: 'monthly',
+      priority: 0.7,
+    },
+    {
+      path: 'comparison/lunary-vs-costar',
+      changeFrequency: 'monthly',
+      priority: 0.8,
+    },
+    {
+      path: 'comparison/lunary-vs-pattern',
+      changeFrequency: 'monthly',
+      priority: 0.8,
+    },
+    {
+      path: 'comparison/lunary-vs-moonly',
+      changeFrequency: 'monthly',
+      priority: 0.8,
+    },
+    {
+      path: 'comparison/lunary-vs-lunar-guide',
+      changeFrequency: 'monthly',
+      priority: 0.8,
+    },
+    {
+      path: 'comparison/lunary-vs-arcarae',
+      changeFrequency: 'monthly',
+      priority: 0.8,
+    },
+    {
+      path: 'comparison/personalized-vs-generic-astrology',
+      changeFrequency: 'monthly',
+      priority: 0.8,
+    },
+    {
+      path: 'grimoire/card-combinations',
+      changeFrequency: 'monthly',
+      priority: 0.6,
+    },
+    { path: 'grimoire/moon/signs', changeFrequency: 'monthly', priority: 0.6 },
+    {
+      path: 'grimoire/reversed-cards-guide',
+      changeFrequency: 'monthly',
+      priority: 0.6,
+    },
+    {
+      path: 'grimoire/spells/fundamentals',
+      changeFrequency: 'monthly',
+      priority: 0.6,
+    },
+    {
+      path: 'grimoire/guides/birth-chart-complete-guide',
+      changeFrequency: 'monthly',
       priority: 0.9,
     },
     {
-      url: `${baseUrl}/comparison/best-personalized-astrology-apps`,
-      lastModified: now,
-      changeFrequency: 'monthly' as const,
+      path: 'grimoire/guides/tarot-complete-guide',
+      changeFrequency: 'monthly',
       priority: 0.9,
     },
     {
-      url: `${baseUrl}/blog`,
-      lastModified: now,
-      changeFrequency: 'weekly' as const,
-      priority: 0.8,
-    },
-    {
-      url: `${baseUrl}/grimoire`,
-      lastModified: now,
-      changeFrequency: 'monthly' as const,
-      priority: 0.8,
-    },
-    // Grimoire Section Index Pages
-    {
-      url: `${baseUrl}/grimoire/astrology`,
-      lastModified: now,
-      changeFrequency: 'monthly' as const,
-      priority: 0.8,
-    },
-    {
-      url: `${baseUrl}/grimoire/tarot`,
-      lastModified: now,
-      changeFrequency: 'monthly' as const,
-      priority: 0.8,
-    },
-    {
-      url: `${baseUrl}/grimoire/tarot/yes-or-no`,
-      lastModified: now,
-      changeFrequency: 'monthly' as const,
-      priority: 0.7,
-    },
-    {
-      url: `${baseUrl}/grimoire/tarot/yes-or-no/love-timeframe`,
-      lastModified: now,
-      changeFrequency: 'monthly' as const,
-      priority: 0.7,
-    },
-    {
-      url: `${baseUrl}/grimoire/zodiac`,
-      lastModified: now,
-      changeFrequency: 'monthly' as const,
-      priority: 0.8,
-    },
-    {
-      url: `${baseUrl}/grimoire/spells`,
-      lastModified: now,
-      changeFrequency: 'monthly' as const,
-      priority: 0.8,
-    },
-    {
-      url: `${baseUrl}/grimoire/practices`,
-      lastModified: now,
-      changeFrequency: 'monthly' as const,
-      priority: 0.8,
-    },
-    {
-      url: `${baseUrl}/grimoire/events`,
-      lastModified: now,
-      changeFrequency: 'monthly' as const,
-      priority: 0.8,
-    },
-    {
-      url: `${baseUrl}/grimoire/events/2025`,
-      lastModified: now,
-      changeFrequency: 'monthly' as const,
-      priority: 0.8,
-    },
-    {
-      url: `${baseUrl}/grimoire/guides`,
-      lastModified: now,
-      changeFrequency: 'monthly' as const,
-      priority: 0.8,
-    },
-    {
-      url: `${baseUrl}/grimoire/compatibility`,
-      lastModified: now,
-      changeFrequency: 'monthly' as const,
-      priority: 0.8,
-    },
-    {
-      url: `${baseUrl}/grimoire/eclipses`,
-      lastModified: now,
-      changeFrequency: 'monthly' as const,
-      priority: 0.8,
-    },
-    {
-      url: `${baseUrl}/grimoire/houses`,
-      lastModified: now,
-      changeFrequency: 'monthly' as const,
-      priority: 0.8,
-    },
-    {
-      url: `${baseUrl}/grimoire/aspects`,
-      lastModified: now,
-      changeFrequency: 'monthly' as const,
-      priority: 0.8,
-    },
-    {
-      url: `${baseUrl}/grimoire/numerology`,
-      lastModified: now,
-      changeFrequency: 'monthly' as const,
-      priority: 0.8,
-    },
-    {
-      url: `${baseUrl}/grimoire/astronomy/retrogrades`,
-      lastModified: now,
-      changeFrequency: 'monthly' as const,
-      priority: 0.8,
-    },
-    {
-      url: `${baseUrl}/grimoire/lunar-nodes`,
-      lastModified: now,
-      changeFrequency: 'monthly' as const,
-      priority: 0.8,
-    },
-    {
-      url: `${baseUrl}/grimoire/transits`,
-      lastModified: now,
-      changeFrequency: 'monthly' as const,
-      priority: 0.8,
-    },
-    {
-      url: `${baseUrl}/grimoire/moon`,
-      lastModified: now,
-      changeFrequency: 'monthly' as const,
-      priority: 0.8,
-    },
-    {
-      url: `${baseUrl}/grimoire/crystals`,
-      lastModified: now,
-      changeFrequency: 'monthly' as const,
-      priority: 0.8,
-    },
-    {
-      url: `${baseUrl}/grimoire/runes`,
-      lastModified: now,
-      changeFrequency: 'monthly' as const,
-      priority: 0.8,
-    },
-    {
-      url: `${baseUrl}/grimoire/candle-magic`,
-      lastModified: now,
-      changeFrequency: 'monthly' as const,
-      priority: 0.8,
-    },
-    {
-      url: `${baseUrl}/grimoire/correspondences`,
-      lastModified: now,
-      changeFrequency: 'monthly' as const,
-      priority: 0.8,
-    },
-    {
-      url: `${baseUrl}/grimoire/horoscopes`,
-      lastModified: now,
-      changeFrequency: 'daily' as const,
-      priority: 0.8,
-    },
-    {
-      url: `${baseUrl}/grimoire/decans`,
-      lastModified: now,
-      changeFrequency: 'monthly' as const,
-      priority: 0.7,
-    },
-    {
-      url: `${baseUrl}/grimoire/cusps`,
-      lastModified: now,
-      changeFrequency: 'monthly' as const,
-      priority: 0.7,
-    },
-    {
-      url: `${baseUrl}/grimoire/seasons`,
-      lastModified: now,
-      changeFrequency: 'monthly' as const,
-      priority: 0.7,
-    },
-    {
-      url: `${baseUrl}/grimoire/placements`,
-      lastModified: now,
-      changeFrequency: 'monthly' as const,
-      priority: 0.7,
-    },
-    {
-      url: `${baseUrl}/grimoire/birthday`,
-      lastModified: now,
-      changeFrequency: 'monthly' as const,
-      priority: 0.7,
-    },
-    {
-      url: `${baseUrl}/grimoire/chinese-zodiac`,
-      lastModified: now,
-      changeFrequency: 'monthly' as const,
-      priority: 0.7,
-    },
-    {
-      url: `${baseUrl}/grimoire/wheel-of-the-year`,
-      lastModified: now,
-      changeFrequency: 'monthly' as const,
-      priority: 0.7,
-    },
-    {
-      url: `${baseUrl}/grimoire/chakras`,
-      lastModified: now,
-      changeFrequency: 'monthly' as const,
-      priority: 0.7,
-    },
-    {
-      url: `${baseUrl}/grimoire/divination`,
-      lastModified: now,
-      changeFrequency: 'monthly' as const,
-      priority: 0.7,
-    },
-    {
-      url: `${baseUrl}/grimoire/meditation`,
-      lastModified: now,
-      changeFrequency: 'monthly' as const,
-      priority: 0.7,
-    },
-    {
-      url: `${baseUrl}/grimoire/modern-witchcraft`,
-      lastModified: now,
-      changeFrequency: 'monthly' as const,
-      priority: 0.7,
-    },
-    {
-      url: `${baseUrl}/shop`,
-      lastModified: now,
-      changeFrequency: 'daily' as const,
-      priority: 0.8,
-    },
-    {
-      url: `${baseUrl}/comparison`,
-      lastModified: now,
-      changeFrequency: 'monthly' as const,
-      priority: 0.8,
-    },
-    {
-      url: `${baseUrl}/horoscope`,
-      lastModified: now,
-      changeFrequency: 'daily' as const,
-      priority: 0.7,
-    },
-    {
-      url: `${baseUrl}/tarot`,
-      lastModified: now,
-      changeFrequency: 'daily' as const,
-      priority: 0.7,
-    },
-    {
-      url: `${baseUrl}/birth-chart`,
-      lastModified: now,
-      changeFrequency: 'monthly' as const,
-      priority: 0.7,
-    },
-    {
-      url: `${baseUrl}/guide`,
-      lastModified: now,
-      changeFrequency: 'monthly' as const,
-      priority: 0.7,
-    },
-    {
-      url: `${baseUrl}/help`,
-      lastModified: now,
-      changeFrequency: 'monthly' as const,
-      priority: 0.7,
-    },
-    {
-      url: `${baseUrl}/press-kit`,
-      lastModified: now,
-      changeFrequency: 'monthly' as const,
-      priority: 0.6,
-    },
-    {
-      url: `${baseUrl}/privacy`,
-      lastModified: now,
-      changeFrequency: 'monthly' as const,
-      priority: 0.5,
-    },
-    {
-      url: `${baseUrl}/terms`,
-      lastModified: now,
-      changeFrequency: 'monthly' as const,
-      priority: 0.5,
-    },
-    {
-      url: `${baseUrl}/cookies`,
-      lastModified: now,
-      changeFrequency: 'monthly' as const,
-      priority: 0.4,
-    },
-    {
-      url: `${baseUrl}/refund`,
-      lastModified: now,
-      changeFrequency: 'monthly' as const,
-      priority: 0.4,
-    },
-    {
-      url: `${baseUrl}/acceptable-use`,
-      lastModified: now,
-      changeFrequency: 'monthly' as const,
-      priority: 0.4,
-    },
-    {
-      url: `${baseUrl}/accessibility`,
-      lastModified: now,
-      changeFrequency: 'monthly' as const,
-      priority: 0.4,
-    },
-    {
-      url: `${baseUrl}/api-terms`,
-      lastModified: now,
-      changeFrequency: 'monthly' as const,
-      priority: 0.4,
-    },
-    {
-      url: `${baseUrl}/referral-terms`,
-      lastModified: now,
-      changeFrequency: 'monthly' as const,
-      priority: 0.4,
-    },
-    {
-      url: `${baseUrl}/dmca`,
-      lastModified: now,
-      changeFrequency: 'monthly' as const,
-      priority: 0.4,
-    },
-    {
-      url: `${baseUrl}/trademark`,
-      lastModified: now,
-      changeFrequency: 'monthly' as const,
-      priority: 0.4,
-    },
-    {
-      url: `${baseUrl}/building-lunary`,
-      lastModified: now,
-      changeFrequency: 'weekly' as const,
-      priority: 0.6,
-    },
-    {
-      url: `${baseUrl}/moon-circles`,
-      lastModified: now,
-      changeFrequency: 'daily' as const,
-      priority: 0.7,
-    },
-    {
-      url: `${baseUrl}/launch`,
-      lastModified: now,
-      changeFrequency: 'monthly' as const,
-      priority: 0.7,
-    },
-    {
-      url: `${baseUrl}/product-hunt`,
-      lastModified: now,
-      changeFrequency: 'monthly' as const,
-      priority: 0.7,
-    },
-    {
-      url: `${baseUrl}/cosmic-report-generator`,
-      lastModified: now,
-      changeFrequency: 'monthly' as const,
-      priority: 0.7,
-    },
-    {
-      url: `${baseUrl}/comparison/lunary-vs-costar`,
-      lastModified: now,
-      changeFrequency: 'monthly' as const,
-      priority: 0.8,
-    },
-    {
-      url: `${baseUrl}/comparison/lunary-vs-pattern`,
-      lastModified: now,
-      changeFrequency: 'monthly' as const,
-      priority: 0.8,
-    },
-    {
-      url: `${baseUrl}/comparison/lunary-vs-moonly`,
-      lastModified: now,
-      changeFrequency: 'monthly' as const,
-      priority: 0.8,
-    },
-    {
-      url: `${baseUrl}/comparison/lunary-vs-lunar-guide`,
-      lastModified: now,
-      changeFrequency: 'monthly' as const,
-      priority: 0.8,
-    },
-    {
-      url: `${baseUrl}/comparison/lunary-vs-arcarae`,
-      lastModified: now,
-      changeFrequency: 'monthly' as const,
-      priority: 0.8,
-    },
-    {
-      url: `${baseUrl}/comparison/personalized-vs-generic-astrology`,
-      lastModified: now,
-      changeFrequency: 'monthly' as const,
-      priority: 0.8,
-    },
-    {
-      url: `${baseUrl}/grimoire/card-combinations`,
-      lastModified: now,
-      changeFrequency: 'monthly' as const,
-      priority: 0.6,
-    },
-    {
-      url: `${baseUrl}/grimoire/moon/signs`,
-      lastModified: now,
-      changeFrequency: 'monthly' as const,
-      priority: 0.6,
-    },
-    {
-      url: `${baseUrl}/grimoire/reversed-cards-guide`,
-      lastModified: now,
-      changeFrequency: 'monthly' as const,
-      priority: 0.6,
-    },
-    {
-      url: `${baseUrl}/grimoire/spells/fundamentals`,
-      lastModified: now,
-      changeFrequency: 'monthly' as const,
-      priority: 0.6,
-    },
-    // Pillar pages - high priority guides
-    {
-      url: `${baseUrl}/grimoire/guides/birth-chart-complete-guide`,
-      lastModified: now,
-      changeFrequency: 'monthly' as const,
+      path: 'grimoire/guides/crystal-healing-guide',
+      changeFrequency: 'monthly',
       priority: 0.9,
     },
     {
-      url: `${baseUrl}/grimoire/guides/tarot-complete-guide`,
-      lastModified: now,
-      changeFrequency: 'monthly' as const,
+      path: 'grimoire/guides/moon-phases-guide',
+      changeFrequency: 'monthly',
       priority: 0.9,
     },
+    { path: 'grimoire/glossary', changeFrequency: 'monthly', priority: 0.7 },
+    { path: 'transits', changeFrequency: 'weekly', priority: 0.8 },
     {
-      url: `${baseUrl}/grimoire/guides/crystal-healing-guide`,
-      lastModified: now,
-      changeFrequency: 'monthly' as const,
-      priority: 0.9,
-    },
-    {
-      url: `${baseUrl}/grimoire/guides/moon-phases-guide`,
-      lastModified: now,
-      changeFrequency: 'monthly' as const,
-      priority: 0.9,
-    },
-    // Glossary index (single page with all terms inline)
-    {
-      url: `${baseUrl}/grimoire/glossary`,
-      lastModified: now,
-      changeFrequency: 'monthly' as const,
-      priority: 0.7,
-    },
-    // New hub pages
-    {
-      url: `${baseUrl}/transits`,
-      lastModified: now,
-      changeFrequency: 'weekly' as const,
+      path: 'moon-calendar',
+      changeFrequency: 'monthly',
       priority: 0.8,
     },
     {
-      url: `${baseUrl}/moon-calendar`,
-      lastModified: now,
-      changeFrequency: 'monthly' as const,
+      path: 'horoscope/today',
+      changeFrequency: 'daily',
       priority: 0.8,
     },
     {
-      url: `${baseUrl}/horoscope/today`,
-      lastModified: now,
-      changeFrequency: 'daily' as const,
+      path: 'horoscope/weekly',
+      changeFrequency: 'weekly',
       priority: 0.8,
     },
     {
-      url: `${baseUrl}/horoscope/weekly`,
-      lastModified: now,
-      changeFrequency: 'weekly' as const,
-      priority: 0.8,
-    },
-    // E-E-A-T pages
-    {
-      url: `${baseUrl}/about/sammii`,
-      lastModified: now,
-      changeFrequency: 'monthly' as const,
+      path: 'about/sammii',
+      changeFrequency: 'monthly',
       priority: 0.7,
     },
     {
-      url: `${baseUrl}/about/editorial-guidelines`,
-      lastModified: now,
-      changeFrequency: 'monthly' as const,
+      path: 'about/editorial-guidelines',
+      changeFrequency: 'monthly',
       priority: 0.6,
     },
     {
-      url: `${baseUrl}/about/methodology`,
-      lastModified: now,
-      changeFrequency: 'monthly' as const,
+      path: 'about/methodology',
+      changeFrequency: 'monthly',
       priority: 0.6,
     },
-    // Topical authority pages
     {
-      url: `${baseUrl}/birth-chart/example`,
-      lastModified: now,
-      changeFrequency: 'monthly' as const,
+      path: 'birth-chart/example',
+      changeFrequency: 'monthly',
       priority: 0.7,
     },
     {
-      url: `${baseUrl}/grimoire/a-z`,
-      lastModified: now,
-      changeFrequency: 'monthly' as const,
+      path: 'grimoire/a-z',
+      changeFrequency: 'monthly',
       priority: 0.7,
     },
     {
-      url: `${baseUrl}/grimoire/beginners`,
-      lastModified: now,
-      changeFrequency: 'monthly' as const,
+      path: 'grimoire/beginners',
+      changeFrequency: 'monthly',
       priority: 0.8,
     },
     {
-      url: `${baseUrl}/grimoire/astronomy-vs-astrology`,
-      lastModified: now,
-      changeFrequency: 'monthly' as const,
+      path: 'grimoire/astronomy-vs-astrology',
+      changeFrequency: 'monthly',
       priority: 0.7,
     },
   ];
+
+  const staticPageConfigs = staticPageMeta.map((entry) => ({
+    ...entry,
+    sourceFiles: staticPageSources[entry.path],
+  }));
+
+  const routes = staticPageConfigs.map(createRouteEntry);
 
   // Generate all blog week posts (from start of 2025 to current week)
   const blogRoutes: MetadataRoute.Sitemap = [];
@@ -1322,200 +1256,36 @@ export default function sitemap(): MetadataRoute.Sitemap {
   }));
 
   // Add static grimoire pages (cleaned up - removed old URLs now handled by redirects)
-  const additionalGrimoirePages = [
-    // Divination hub pages (canonical locations)
-    {
-      url: `${baseUrl}/grimoire/divination/scrying`,
-      lastModified: now,
-      changeFrequency: 'monthly' as const,
-      priority: 0.7,
-    },
-    {
-      url: `${baseUrl}/grimoire/divination/dream-interpretation`,
-      lastModified: now,
-      changeFrequency: 'monthly' as const,
-      priority: 0.7,
-    },
-    {
-      url: `${baseUrl}/grimoire/divination/pendulum`,
-      lastModified: now,
-      changeFrequency: 'monthly' as const,
-      priority: 0.7,
-    },
-    {
-      url: `${baseUrl}/grimoire/divination/omen-reading`,
-      lastModified: now,
-      changeFrequency: 'monthly' as const,
-      priority: 0.7,
-    },
-    // Moon hub pages (canonical locations)
-    {
-      url: `${baseUrl}/grimoire/moon/phases`,
-      lastModified: now,
-      changeFrequency: 'monthly' as const,
-      priority: 0.8,
-    },
-    {
-      url: `${baseUrl}/grimoire/moon/full-moons`,
-      lastModified: now,
-      changeFrequency: 'monthly' as const,
-      priority: 0.8,
-    },
-    // Astronomy hub pages (canonical locations)
-    {
-      url: `${baseUrl}/grimoire/astronomy/planets`,
-      lastModified: now,
-      changeFrequency: 'monthly' as const,
-      priority: 0.8,
-    },
-    // Meditation hub pages (canonical locations)
-    {
-      url: `${baseUrl}/grimoire/meditation/breathwork`,
-      lastModified: now,
-      changeFrequency: 'monthly' as const,
-      priority: 0.7,
-    },
-    // Tarot hub pages (canonical locations)
-    {
-      url: `${baseUrl}/grimoire/tarot/spreads`,
-      lastModified: now,
-      changeFrequency: 'monthly' as const,
-      priority: 0.8,
-    },
-    // Other pages that still exist at top level
-    {
-      url: `${baseUrl}/grimoire/rising-sign`,
-      lastModified: now,
-      changeFrequency: 'monthly' as const,
-      priority: 0.7,
-    },
-    {
-      url: `${baseUrl}/grimoire/candle-magic/incantations`,
-      lastModified: now,
-      changeFrequency: 'monthly' as const,
-      priority: 0.6,
-    },
-    {
-      url: `${baseUrl}/grimoire/candle-magic/altar-lighting`,
-      lastModified: now,
-      changeFrequency: 'monthly' as const,
-      priority: 0.6,
-    },
-    {
-      url: `${baseUrl}/grimoire/modern-witchcraft/ethics`,
-      lastModified: now,
-      changeFrequency: 'monthly' as const,
-      priority: 0.6,
-    },
-    {
-      url: `${baseUrl}/grimoire/candle-magic/anointing`,
-      lastModified: now,
-      changeFrequency: 'monthly' as const,
-      priority: 0.6,
-    },
-    {
-      url: `${baseUrl}/grimoire/modern-witchcraft/tools-guide`,
-      lastModified: now,
-      changeFrequency: 'monthly' as const,
-      priority: 0.6,
-    },
-    {
-      url: `${baseUrl}/grimoire/synastry`,
-      lastModified: now,
-      changeFrequency: 'monthly' as const,
-      priority: 0.7,
-    },
-    {
-      url: `${baseUrl}/grimoire/numerology/year`,
-      lastModified: now,
-      changeFrequency: 'monthly' as const,
-      priority: 0.7,
-    },
-    {
-      url: `${baseUrl}/grimoire/modern-witchcraft/famous-witches`,
-      lastModified: now,
-      changeFrequency: 'monthly' as const,
-      priority: 0.6,
-    },
-    {
-      url: `${baseUrl}/grimoire/tarot/suits`,
-      lastModified: now,
-      changeFrequency: 'monthly' as const,
-      priority: 0.7,
-    },
-    {
-      url: `${baseUrl}/grimoire/jar-spells`,
-      lastModified: now,
-      changeFrequency: 'monthly' as const,
-      priority: 0.7,
-    },
-    {
-      url: `${baseUrl}/grimoire/book-of-shadows`,
-      lastModified: now,
-      changeFrequency: 'monthly' as const,
-      priority: 0.7,
-    },
-    {
-      url: `${baseUrl}/grimoire/wheel-of-the-year`,
-      lastModified: now,
-      changeFrequency: 'monthly' as const,
-      priority: 0.7,
-    },
-    {
-      url: `${baseUrl}/grimoire/modern-witchcraft/tools-guide`,
-      lastModified: now,
-      changeFrequency: 'monthly' as const,
-      priority: 0.7,
-    },
-    {
-      url: `${baseUrl}/grimoire/shadow-work`,
-      lastModified: now,
-      changeFrequency: 'monthly' as const,
-      priority: 0.7,
-    },
-    {
-      url: `${baseUrl}/grimoire/sabbats`,
-      lastModified: now,
-      changeFrequency: 'monthly' as const,
-      priority: 0.7,
-    },
-    {
-      url: `${baseUrl}/grimoire/protection`,
-      lastModified: now,
-      changeFrequency: 'monthly' as const,
-      priority: 0.7,
-    },
-    {
-      url: `${baseUrl}/grimoire/manifestation`,
-      lastModified: now,
-      changeFrequency: 'monthly' as const,
-      priority: 0.7,
-    },
-    {
-      url: `${baseUrl}/grimoire/archetypes`,
-      lastModified: now,
-      changeFrequency: 'monthly' as const,
-      priority: 0.7,
-    },
-    {
-      url: `${baseUrl}/grimoire/moon/rituals`,
-      lastModified: now,
-      changeFrequency: 'monthly' as const,
-      priority: 0.7,
-    },
-    {
-      url: `${baseUrl}/grimoire/witchcraft-ethics`,
-      lastModified: now,
-      changeFrequency: 'monthly' as const,
-      priority: 0.7,
-    },
-    {
-      url: `${baseUrl}/grimoire/witchcraft-tools`,
-      lastModified: now,
-      changeFrequency: 'monthly' as const,
-      priority: 0.7,
-    },
+  const additionalGrimoirePageConfigs: RouteConfig[] = [
+    { path: 'grimoire/divination/scrying', priority: 0.7 },
+    { path: 'grimoire/divination/dream-interpretation', priority: 0.7 },
+    { path: 'grimoire/divination/pendulum', priority: 0.7 },
+    { path: 'grimoire/divination/omen-reading', priority: 0.7 },
+    { path: 'grimoire/astronomy/planets', priority: 0.8 },
+    { path: 'grimoire/rising-sign', priority: 0.7 },
+    { path: 'grimoire/candle-magic/incantations', priority: 0.6 },
+    { path: 'grimoire/candle-magic/altar-lighting', priority: 0.6 },
+    { path: 'grimoire/modern-witchcraft/ethics', priority: 0.6 },
+    { path: 'grimoire/candle-magic/anointing', priority: 0.6 },
+    { path: 'grimoire/modern-witchcraft/tools-guide', priority: 0.7 },
+    { path: 'grimoire/synastry', priority: 0.7 },
+    { path: 'grimoire/numerology/year', priority: 0.7 },
+    { path: 'grimoire/modern-witchcraft/famous-witches', priority: 0.6 },
+    { path: 'grimoire/tarot/suits', priority: 0.7 },
+    { path: 'grimoire/jar-spells', priority: 0.7 },
+    { path: 'grimoire/book-of-shadows', priority: 0.7 },
+    { path: 'grimoire/shadow-work', priority: 0.7 },
+    { path: 'grimoire/sabbats', priority: 0.7 },
+    { path: 'grimoire/protection', priority: 0.7 },
+    { path: 'grimoire/manifestation', priority: 0.7 },
+    { path: 'grimoire/archetypes', priority: 0.7 },
+    { path: 'grimoire/moon/rituals', priority: 0.7 },
+    { path: 'grimoire/witchcraft-ethics', priority: 0.7 },
+    { path: 'grimoire/witchcraft-tools', priority: 0.7 },
   ];
+
+  const additionalGrimoirePages =
+    additionalGrimoirePageConfigs.map(createRouteEntry);
 
   // Add events year pages (dynamic route generates 2025-2030)
   const eventsYearRoutes = [2025, 2026, 2027, 2028, 2029, 2030].map((year) => ({
@@ -1597,7 +1367,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     }),
   );
 
-  return [
+  const allRoutes: MetadataRoute.Sitemap = [
     ...routes,
     ...blogRoutes,
     ...blogPaginationRoutes,
@@ -1670,4 +1440,19 @@ export default function sitemap(): MetadataRoute.Sitemap {
     ...shopProductRoutes,
     ...shopPaginationRoutes,
   ];
+
+  return dedupeRoutes(allRoutes);
+}
+
+// Keep first occurrence per URL so Search Console sees a single canonical entry.
+function dedupeRoutes(entries: MetadataRoute.Sitemap): MetadataRoute.Sitemap {
+  const seen = new Set<string>();
+  return entries.filter((entry) => {
+    if (seen.has(entry.url)) {
+      return false;
+    }
+
+    seen.add(entry.url);
+    return true;
+  });
 }
