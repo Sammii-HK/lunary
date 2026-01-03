@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import Stripe from 'stripe';
+import { sql } from '@vercel/postgres';
 import { getPlanIdFromPriceId } from '../../../../../utils/pricing';
 
 function getStripe(secretKey?: string) {
@@ -55,6 +56,84 @@ async function findPriceAccount(priceId: string): Promise<Stripe | null> {
   return null; // Price doesn't exist or is inactive in account
 }
 
+type StoredCustomer = {
+  customerId: string | null;
+  email: string | null;
+};
+
+async function getStoredCustomerForUser(
+  userId: string,
+): Promise<StoredCustomer | null> {
+  try {
+    const subscriptionResult = await sql`
+      SELECT stripe_customer_id, user_email
+      FROM subscriptions
+      WHERE user_id = ${userId}
+      LIMIT 1
+    `;
+
+    if (subscriptionResult.rows.length > 0) {
+      return {
+        customerId: subscriptionResult.rows[0].stripe_customer_id || null,
+        email: subscriptionResult.rows[0].user_email || null,
+      };
+    }
+
+    const profileResult = await sql`
+      SELECT stripe_customer_id
+      FROM user_profiles
+      WHERE user_id = ${userId}
+      LIMIT 1
+    `;
+
+    if (profileResult.rows.length > 0) {
+      return {
+        customerId: profileResult.rows[0].stripe_customer_id || null,
+        email: null,
+      };
+    }
+  } catch (error) {
+    console.warn('Failed to lookup stored Stripe customer:', error);
+  }
+
+  return null;
+}
+
+async function findCustomerIdByEmail(
+  stripe: Stripe,
+  email: string,
+  userId?: string,
+): Promise<string | null> {
+  try {
+    const customers = await stripe.customers.list({
+      email,
+      limit: 10,
+    });
+
+    if (customers.data.length === 0) {
+      return null;
+    }
+
+    if (userId) {
+      const match = customers.data.find(
+        (customer) => customer.metadata?.userId === userId,
+      );
+      if (match?.id) {
+        return match.id;
+      }
+    }
+
+    if (customers.data.length === 1) {
+      return customers.data[0].id;
+    }
+
+    return customers.data[0]?.id || null;
+  } catch (error) {
+    console.warn('Failed to lookup Stripe customer by email:', error);
+    return null;
+  }
+}
+
 // Helper function to get trial period from Stripe product/price metadata
 async function getTrialPeriodForPrice(
   priceId: string,
@@ -91,7 +170,24 @@ export async function POST(request: NextRequest) {
     let stripe = getStripe();
     const requestBody = await request.json();
     priceId = requestBody.priceId;
-    const { customerId, userId } = requestBody;
+    const {
+      customerId: requestedCustomerId,
+      userId,
+      userEmail,
+      discountCode,
+      promoCode,
+      referralCode,
+    } = requestBody;
+
+    let resolvedCustomerId =
+      typeof requestedCustomerId === 'string' &&
+      requestedCustomerId.trim().length > 0
+        ? requestedCustomerId.trim()
+        : null;
+    let resolvedEmail =
+      typeof userEmail === 'string' && userEmail.trim().length > 0
+        ? userEmail.trim()
+        : null;
 
     if (!priceId) {
       return NextResponse.json(
@@ -247,8 +343,42 @@ export async function POST(request: NextRequest) {
     // Use the same Stripe account for checkout session
     const checkoutStripe = priceStripe;
 
+    if (!resolvedCustomerId && typeof userId === 'string') {
+      const storedCustomer = await getStoredCustomerForUser(userId);
+      if (storedCustomer?.customerId) {
+        resolvedCustomerId = storedCustomer.customerId;
+      }
+      if (!resolvedEmail && storedCustomer?.email) {
+        resolvedEmail = storedCustomer.email;
+      }
+    }
+
+    if (!resolvedCustomerId && resolvedEmail) {
+      const foundCustomerId = await findCustomerIdByEmail(
+        checkoutStripe,
+        resolvedEmail,
+        typeof userId === 'string' ? userId : undefined,
+      );
+      if (foundCustomerId) {
+        resolvedCustomerId = foundCustomerId;
+      }
+    }
+
+    const normalizedPromoCode =
+      typeof promoCode === 'string' && promoCode.trim().length > 0
+        ? promoCode.trim().toUpperCase()
+        : null;
+    const normalizedDiscountCode =
+      typeof discountCode === 'string' && discountCode.trim().length > 0
+        ? discountCode.trim().toUpperCase()
+        : null;
+    const skipTrialFromCoupon =
+      Boolean(normalizedPromoCode) || Boolean(normalizedDiscountCode);
+
     // Fetch trial period from Stripe product/price metadata
-    const trialDays = await getTrialPeriodForPrice(priceId, priceStripe);
+    const trialDays = skipTrialFromCoupon
+      ? 0
+      : await getTrialPeriodForPrice(priceId, priceStripe);
 
     // Get plan_id from product metadata, price metadata, or price ID mapping
     const planId =
@@ -264,6 +394,10 @@ export async function POST(request: NextRequest) {
 
     if (typeof userId === 'string' && userId.trim().length > 0) {
       metadata.userId = userId;
+    }
+
+    if (skipTrialFromCoupon) {
+      metadata.skipTrialReason = normalizedPromoCode ? 'promo' : 'discount';
     }
 
     const sessionConfig: Stripe.Checkout.SessionCreateParams = {
@@ -288,15 +422,6 @@ export async function POST(request: NextRequest) {
     };
 
     // Apply promo/discount code if provided
-    const { discountCode, promoCode, referralCode } = requestBody;
-    const normalizedPromoCode =
-      typeof promoCode === 'string' && promoCode.trim().length > 0
-        ? promoCode.trim().toUpperCase()
-        : null;
-    const normalizedDiscountCode =
-      typeof discountCode === 'string' && discountCode.trim().length > 0
-        ? discountCode.trim().toUpperCase()
-        : null;
 
     if (normalizedPromoCode) {
       metadata.promoCode = normalizedPromoCode;
@@ -366,11 +491,12 @@ export async function POST(request: NextRequest) {
     }
 
     // If we have a customer ID, verify it exists in the SAME account as the price
-    if (customerId) {
+    if (resolvedCustomerId) {
       // Check if customer exists in the same account as the price
       let customerExistsInPriceAccount = false;
       try {
-        const customer = await checkoutStripe.customers.retrieve(customerId);
+        const customer =
+          await checkoutStripe.customers.retrieve(resolvedCustomerId);
         const isDeleted =
           typeof customer === 'object' &&
           'deleted' in customer &&
@@ -382,11 +508,11 @@ export async function POST(request: NextRequest) {
 
       if (customerExistsInPriceAccount) {
         // Customer exists in same account as price, use it
-        sessionConfig.customer = customerId;
+        sessionConfig.customer = resolvedCustomerId;
         // Update customer metadata with userId if provided
         if (userId) {
           try {
-            await checkoutStripe.customers.update(customerId, {
+            await checkoutStripe.customers.update(resolvedCustomerId, {
               metadata: {
                 userId: userId,
               },
@@ -402,7 +528,7 @@ export async function POST(request: NextRequest) {
         }
       } else {
         // Customer doesn't exist in price account, don't use it
-        const safeCustomerId = sanitizeForLog(customerId);
+        const safeCustomerId = sanitizeForLog(resolvedCustomerId);
         console.warn(
           `Customer ${safeCustomerId} not found in price account, creating new customer`,
         );
@@ -414,9 +540,15 @@ export async function POST(request: NextRequest) {
     } else if (userId) {
       // If no customer ID but we have userId, store it in customer metadata
       // Stripe will create the customer, and we'll update metadata via webhook
-      sessionConfig.customer_email = undefined; // Let Stripe collect email
+      if (resolvedEmail) {
+        sessionConfig.customer_email = resolvedEmail;
+      } else {
+        sessionConfig.customer_email = undefined; // Let Stripe collect email
+      }
       // Store userId in session metadata so webhook can update customer
       metadata.userId = userId;
+    } else if (resolvedEmail) {
+      sessionConfig.customer_email = resolvedEmail;
     }
     // Note: For subscription mode, Stripe automatically creates customers
     // so we don't need to set customer_creation
