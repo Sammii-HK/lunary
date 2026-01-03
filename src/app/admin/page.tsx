@@ -40,6 +40,7 @@ import {
   Video,
   ChevronDown,
   ChevronUp,
+  RefreshCw,
 } from 'lucide-react';
 
 interface AdminTool {
@@ -698,6 +699,14 @@ export default function AdminDashboard() {
       // eslint-disable-next-line jsx-a11y/alt-text
       icon: <Image className='h-5 w-5' />,
       category: 'tools',
+    },
+    {
+      title: 'Subscription Sync',
+      description: 'Reconcile Stripe subscriptions for a user',
+      href: '/admin/subscription-sync',
+      icon: <RefreshCw className='h-5 w-5' />,
+      category: 'tools',
+      status: 'new',
     },
     {
       title: 'Social Preview',

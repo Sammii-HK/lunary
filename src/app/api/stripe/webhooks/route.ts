@@ -214,6 +214,46 @@ async function handleSubscriptionChange(
     console.error('Failed to get customer:', error);
   }
 
+  // Fallback: match userId by Stripe customer id stored in our DB
+  if (!userId && customerId) {
+    try {
+      const subscriptionMatch = await sql`
+        SELECT user_id FROM subscriptions
+        WHERE stripe_customer_id = ${customerId}
+        LIMIT 1
+      `;
+      userId = subscriptionMatch.rows[0]?.user_id || null;
+    } catch (error) {
+      console.error('Failed to match user by subscription customer id:', error);
+    }
+  }
+
+  if (!userId && customerId) {
+    try {
+      const profileMatch = await sql`
+        SELECT user_id FROM user_profiles
+        WHERE stripe_customer_id = ${customerId}
+        LIMIT 1
+      `;
+      userId = profileMatch.rows[0]?.user_id || null;
+    } catch (error) {
+      console.error('Failed to match user by profile customer id:', error);
+    }
+  }
+
+  if (!userId && userEmail) {
+    try {
+      const emailMatch = await sql`
+        SELECT user_id FROM subscriptions
+        WHERE LOWER(user_email) = LOWER(${userEmail})
+        LIMIT 1
+      `;
+      userId = emailMatch.rows[0]?.user_id || null;
+    } catch (error) {
+      console.error('Failed to match user by email:', error);
+    }
+  }
+
   // Process referral on new subscriptions
   if (isNew && subscription.metadata?.referralCode && userId) {
     try {
@@ -282,6 +322,16 @@ async function handleSubscriptionChange(
       `;
     } catch (error) {
       console.error('Failed to sync Stripe customer to profile:', error);
+    }
+  }
+
+  if (userId && customerId) {
+    try {
+      await stripe.customers.update(customerId, {
+        metadata: { userId },
+      });
+    } catch (error) {
+      console.error('Failed to backfill customer metadata:', error);
     }
   }
 
