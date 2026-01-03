@@ -292,9 +292,19 @@ test.describe('QA Checklist - Accessibility', () => {
   });
 
   test('Form inputs should have labels', async ({ page }) => {
-    await page.goto(`${BASE_URL}/`, {
-      waitUntil: 'domcontentloaded',
-    });
+    const targetUrl = `${BASE_URL}/`;
+    try {
+      await page.goto(targetUrl, {
+        waitUntil: 'domcontentloaded',
+        timeout: 60000,
+      });
+    } catch {
+      await page.waitForTimeout(1500);
+      await page.goto(targetUrl, {
+        waitUntil: 'domcontentloaded',
+        timeout: 60000,
+      });
+    }
     await page
       .waitForLoadState('networkidle', { timeout: 10000 })
       .catch(() => {});

@@ -7,11 +7,11 @@ import WelcomePage from './welcome/page';
 export const metadata: Metadata = {
   title: 'Lunary: Personal Astrology App | Birth Chart, Horoscopes & Tarot',
   description:
-    'Your personal astrology companion. Daily horoscopes, birth chart analysis, tarot readings & moon phases based on real astronomy. AI-powered insights from your natal chart. Free to start.',
+    'Your personal astrology companion. Daily horoscopes, birth chart analysis, tarot readings & moon phases based on real astronomy. Optional Astral Guide chat for deeper insight. Free to start.',
   keywords: [
     'personalised astrology app',
     'birth chart astrology',
-    'AI astrology',
+    'astronomy-based astrology',
     'tarot and astrology app',
     'moon phase astrology',
     'daily astrology based on birth chart',

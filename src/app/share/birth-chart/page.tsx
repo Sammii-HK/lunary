@@ -360,7 +360,7 @@ export default async function ShareBirthChartPage({
 
             <p className='mt-4 text-xs text-zinc-400'>
               Free account includes birth chart, daily insights, and more. No
-              credit card required.
+              card required.
             </p>
           </div>
         </div>

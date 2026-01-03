@@ -223,7 +223,7 @@ export async function GET(request: NextRequest) {
 
         const pushNotification = {
           title: `🌙 Daily Cosmic Pulse: ${cosmicPulse.moonEnergy}`,
-          body: `${cosmicPulse.mainTransit} - Tap to ask Lunary AI`,
+          body: `${cosmicPulse.mainTransit} - Tap to ask Astral Guide`,
           icon: '/icons/icon-192x192.png',
           badge: '/icons/icon-72x72.png',
           vibrate: [200, 100, 200],
@@ -238,7 +238,7 @@ export async function GET(request: NextRequest) {
           actions: [
             {
               action: 'view',
-              title: 'Ask Lunary AI',
+              title: 'Ask Astral Guide',
               icon: '/icons/icon-72x72.png',
             },
           ],

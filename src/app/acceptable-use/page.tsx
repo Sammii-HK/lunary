@@ -147,7 +147,7 @@ export default function AcceptableUsePolicyPage() {
               2. AI Chat and Content Guidelines
             </h2>
             <p className='text-zinc-300 leading-relaxed mb-4'>
-              When using our AI-powered features (including Lunary GPT and chat
+              When using our AI-assisted features (including Lunary GPT and chat
               functionalities), you agree to:
             </p>
             <ul className='list-disc pl-6 text-zinc-300 space-y-2'>

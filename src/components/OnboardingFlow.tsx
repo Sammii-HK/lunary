@@ -1,6 +1,6 @@
 'use client';
 
-import { ReactNode, useState, useEffect, useCallback } from 'react';
+import { ReactNode, useState, useEffect, useCallback, useRef } from 'react';
 import { useUser } from '@/context/UserContext';
 import { useAuthStatus } from './AuthStatus';
 import { useSubscription } from '@/hooks/useSubscription';
@@ -29,6 +29,7 @@ import {
   clearOnboardingPrefill,
   getOnboardingPrefill,
 } from '@/lib/onboarding/prefill';
+import { parseCoordinates } from '../../utils/location';
 
 interface OnboardingFlowProps {
   overridePlanId?:
@@ -47,6 +48,15 @@ interface OnboardingFlowProps {
     | 'feature_tour'
     | 'complete';
 }
+
+type LocationSuggestion = {
+  label: string;
+  latitude: number;
+  longitude: number;
+  city?: string;
+  region?: string;
+  country?: string;
+};
 
 export function OnboardingFlow({
   overridePlanId,
@@ -68,6 +78,15 @@ export function OnboardingFlow({
   const [birthday, setBirthday] = useState('');
   const [birthTime, setBirthTime] = useState('');
   const [birthLocation, setBirthLocation] = useState('');
+  const [locationSuggestions, setLocationSuggestions] = useState<
+    LocationSuggestion[]
+  >([]);
+  const [isLoadingLocationSuggestions, setIsLoadingLocationSuggestions] =
+    useState(false);
+  const [showLocationSuggestions, setShowLocationSuggestions] = useState(false);
+  const [locationSuggestionError, setLocationSuggestionError] = useState<
+    string | null
+  >(null);
   const [selectedIntention, setSelectedIntention] = useState<string | null>(
     null,
   );
@@ -76,6 +95,10 @@ export function OnboardingFlow({
   const [showSkipWarning, setShowSkipWarning] = useState(false);
   const [prefillLoaded, setPrefillLoaded] = useState(false);
   const [autoSavePrefill, setAutoSavePrefill] = useState(false);
+  const locationSuggestionsAbortRef = useRef<AbortController | null>(null);
+  const lastLocationQueryRef = useRef<string | null>(null);
+  const locationSuggestionBlurTimeoutRef = useRef<number | null>(null);
+  const lastLocationSelectionRef = useRef<string | null>(null);
   const [onboardingStatus, setOnboardingStatus] = useState({
     loading: true,
     completed: false,
@@ -303,6 +326,100 @@ export function OnboardingFlow({
     setPrefillLoaded(true);
   }, [showOnboarding, prefillLoaded, previewMode]);
 
+  const cancelLocationSuggestionBlur = useCallback(() => {
+    if (locationSuggestionBlurTimeoutRef.current !== null) {
+      window.clearTimeout(locationSuggestionBlurTimeoutRef.current);
+      locationSuggestionBlurTimeoutRef.current = null;
+    }
+  }, []);
+
+  const scheduleCloseLocationSuggestions = useCallback(() => {
+    cancelLocationSuggestionBlur();
+    locationSuggestionBlurTimeoutRef.current = window.setTimeout(() => {
+      setShowLocationSuggestions(false);
+    }, 150);
+  }, [cancelLocationSuggestionBlur]);
+
+  const handleLocationSuggestionSelect = useCallback(
+    (suggestion: LocationSuggestion) => {
+      cancelLocationSuggestionBlur();
+      setBirthLocation(suggestion.label);
+      lastLocationQueryRef.current = suggestion.label;
+      lastLocationSelectionRef.current = suggestion.label;
+      setShowLocationSuggestions(false);
+      setLocationSuggestions([]);
+    },
+    [cancelLocationSuggestionBlur],
+  );
+
+  useEffect(() => {
+    if (!showOptionalDetails) {
+      setShowLocationSuggestions(false);
+      setLocationSuggestions([]);
+      setLocationSuggestionError(null);
+      return;
+    }
+
+    const query = birthLocation.trim();
+    if (
+      query.length < 3 ||
+      parseCoordinates(query) ||
+      query === lastLocationSelectionRef.current
+    ) {
+      setShowLocationSuggestions(false);
+      setLocationSuggestions([]);
+      setLocationSuggestionError(null);
+      return;
+    }
+
+    if (lastLocationQueryRef.current === query && locationSuggestions.length) {
+      return;
+    }
+
+    const timeout = window.setTimeout(async () => {
+      if (locationSuggestionsAbortRef.current) {
+        locationSuggestionsAbortRef.current.abort();
+      }
+      const controller = new AbortController();
+      locationSuggestionsAbortRef.current = controller;
+      lastLocationQueryRef.current = query;
+
+      setIsLoadingLocationSuggestions(true);
+      setLocationSuggestionError(null);
+
+      try {
+        const response = await fetch(
+          `/api/location/suggest?q=${encodeURIComponent(query)}`,
+          { signal: controller.signal },
+        );
+
+        if (!response.ok) {
+          throw new Error('Location suggestions unavailable');
+        }
+
+        const data = (await response.json()) as {
+          results?: LocationSuggestion[];
+        };
+
+        const results = Array.isArray(data.results) ? data.results : [];
+        setLocationSuggestions(results);
+        setShowLocationSuggestions(true);
+      } catch (error) {
+        if ((error as Error).name !== 'AbortError') {
+          setLocationSuggestionError('Could not load suggestions');
+          setLocationSuggestions([]);
+          setShowLocationSuggestions(true);
+        }
+      } finally {
+        setIsLoadingLocationSuggestions(false);
+      }
+    }, 400);
+
+    return () => {
+      window.clearTimeout(timeout);
+    };
+  }, [birthLocation, locationSuggestions.length, showOptionalDetails]);
+
   const handleSaveBirthday = useCallback(async () => {
     if (!birthday) return;
 
@@ -416,7 +533,6 @@ export function OnboardingFlow({
     birthTime,
     previewMode,
     refetch,
-    user?.id,
     user,
   ]);
 
@@ -773,13 +889,59 @@ export function OnboardingFlow({
                     <label className='block text-sm font-medium text-zinc-300 mb-2'>
                       Birth Location (optional)
                     </label>
-                    <input
-                      type='text'
-                      value={birthLocation}
-                      onChange={(e) => setBirthLocation(e.target.value)}
-                      placeholder='City, Country'
-                      className='w-full px-4 py-3 bg-zinc-800 border border-zinc-700 rounded-lg text-white placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-lunary-primary'
-                    />
+                    <div className='relative'>
+                      <input
+                        type='text'
+                        value={birthLocation}
+                        onChange={(e) => {
+                          setBirthLocation(e.target.value);
+                          setLocationSuggestionError(null);
+                          lastLocationQueryRef.current = null;
+                          lastLocationSelectionRef.current = null;
+                        }}
+                        onFocus={cancelLocationSuggestionBlur}
+                        onBlur={scheduleCloseLocationSuggestions}
+                        placeholder='City, Country or coordinates'
+                        className='w-full px-4 py-3 bg-zinc-800 border border-zinc-700 rounded-lg text-white placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-lunary-primary'
+                      />
+                      {showLocationSuggestions && (
+                        <div className='absolute z-20 mt-2 w-full rounded-lg border border-zinc-700 bg-zinc-900 shadow-xl'>
+                          {isLoadingLocationSuggestions ? (
+                            <div className='px-4 py-3 text-xs text-zinc-400'>
+                              Loading suggestions...
+                            </div>
+                          ) : locationSuggestionError ? (
+                            <div className='px-4 py-3 text-xs text-zinc-400'>
+                              {locationSuggestionError}
+                            </div>
+                          ) : locationSuggestions.length === 0 ? (
+                            <div className='px-4 py-3 text-xs text-zinc-400'>
+                              No matches found. Try adding a country or use
+                              coordinates.
+                            </div>
+                          ) : (
+                            <ul className='max-h-56 overflow-y-auto py-1 text-sm text-zinc-200'>
+                              {locationSuggestions.map((suggestion) => (
+                                <li key={suggestion.label}>
+                                  <button
+                                    type='button'
+                                    onMouseDown={(event) =>
+                                      event.preventDefault()
+                                    }
+                                    onClick={() =>
+                                      handleLocationSuggestionSelect(suggestion)
+                                    }
+                                    className='w-full px-4 py-2 text-left hover:bg-zinc-800/70 transition-colors'
+                                  >
+                                    {suggestion.label}
+                                  </button>
+                                </li>
+                              ))}
+                            </ul>
+                          )}
+                        </div>
+                      )}
+                    </div>
                   </div>
                 </div>
               )}

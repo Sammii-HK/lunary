@@ -34,11 +34,11 @@ const defaultFeatures: Feature[] = [
     tag: 'Verified',
   },
   {
-    title: 'AI-Personalized Guidance',
+    title: 'Astral Guide Chat (Optional)',
     description:
-      'Adaptive AI blends your chart, rituals, and journaling patterns into bespoke insights.',
+      'Optional AI chat grounded in your chart and the current sky for deeper questions.',
     icon: Sparkles,
-    tag: 'New',
+    tag: 'Optional',
   },
   {
     title: 'Daily Cosmic Pulse',

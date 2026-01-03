@@ -124,7 +124,7 @@ export default function AIConversionPage() {
             </CardHeader>
             <CardContent className='space-y-4'>
               <p className='text-sm text-zinc-400'>
-                AI-powered analysis of your conversion funnel
+                AI-assisted analysis of your conversion funnel
               </p>
               <button
                 onClick={() =>

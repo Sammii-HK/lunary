@@ -103,8 +103,8 @@ export default function ComparisonHubPage() {
                     Lunary vs Lunar Guide
                   </h3>
                   <p className='text-sm text-zinc-400'>
-                    Real astronomical calculations vs AI-powered insights. See
-                    which approach provides more accurate birth charts.
+                    Real astronomical calculations vs automated text insights.
+                    See which approach provides more accurate birth charts.
                   </p>
                 </div>
                 <ArrowRight className='h-5 w-5 text-zinc-400 group-hover:text-lunary-primary-300 transition-colors ml-4 flex-shrink-0' />
@@ -227,8 +227,7 @@ export default function ComparisonHubPage() {
                 Free Trial
               </h3>
               <p className='text-sm text-zinc-300 leading-relaxed'>
-                Try Lunary free for 7 days - credit card required but no payment
-                taken during trial.
+                Try Lunary free for 7 days - no card required during the trial.
               </p>
             </div>
           </div>

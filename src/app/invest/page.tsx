@@ -31,7 +31,8 @@ export default function InvestPage() {
             Lunary — Pre-Seed Raise
           </h1>
           <p className='text-lg md:text-xl lg:text-2xl text-zinc-400 max-w-3xl mx-auto leading-relaxed'>
-            The AI-powered spiritual intelligence platform
+            The astronomy-based spiritual intelligence platform with optional AI
+            chat
           </p>
           <p className='text-base md:text-lg text-zinc-300 max-w-4xl mx-auto leading-relaxed'>
             Lunary is raising a{' '}
@@ -53,7 +54,7 @@ export default function InvestPage() {
             What is Lunary?
           </h2>
           <p className='text-base md:text-lg text-zinc-400 leading-relaxed max-w-4xl'>
-            Lunary is a personalised spiritual AI platform built for the{' '}
+            Lunary is a personalised spiritual platform built for the{' '}
             <span className='font-medium text-zinc-300'>1.2B+ people</span> who
             use astrology, tarot, rituals, moon cycles, crystals, journaling, or
             symbolic systems to understand their inner world.
@@ -74,7 +75,7 @@ export default function InvestPage() {
                 </li>
                 <li className='flex items-start'>
                   <span className='mr-3 text-lunary-primary-400'>•</span>
-                  <span>Crystal index + AI identification</span>
+                  <span>Crystal index + image identification</span>
                 </li>
                 <li className='flex items-start'>
                   <span className='mr-3 text-lunary-primary-400'>•</span>
@@ -98,7 +99,7 @@ export default function InvestPage() {
                 </li>
                 <li className='flex items-start'>
                   <span className='mr-3 text-lunary-primary-400'>•</span>
-                  <span>AI astral guide</span>
+                  <span>Astral Guide chat (optional)</span>
                 </li>
                 <li className='flex items-start'>
                   <span className='mr-3 text-lunary-primary-400'>•</span>
@@ -117,8 +118,8 @@ export default function InvestPage() {
           </div>
           <p className='text-base md:text-lg text-zinc-300 leading-relaxed max-w-4xl mt-6 font-medium'>
             It is the first{' '}
-            <span className='text-lunary-primary-300'>symbolic OS</span> powered
-            by AI.
+            <span className='text-lunary-primary-300'>symbolic OS</span> built
+            on real astronomy with optional AI guidance.
           </p>
         </section>
 

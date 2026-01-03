@@ -62,8 +62,9 @@ export default function TrademarkPage() {
                 <strong>Product Names:</strong> Lunary GPT, Lunary API
               </li>
               <li>
-                <strong>Taglines:</strong> &quot;Your AI-powered astral
-                guide&quot;
+                <strong>Taglines:</strong> &quot;Your astronomy-based astral
+                guide&quot; (current), &quot;Your AI-powered astral guide&quot;
+                (legacy)
               </li>
               <li>
                 <strong>Visual Identity:</strong> Our distinctive color palette,

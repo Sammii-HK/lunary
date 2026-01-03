@@ -7,9 +7,15 @@ jest.mock('@vercel/postgres', () => ({
 
 describe('Notification Preferences API', () => {
   const mockSql = require('@vercel/postgres').sql;
+  let consoleErrorSpy: jest.SpyInstance;
 
   beforeEach(() => {
     jest.clearAllMocks();
+    consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+  });
+
+  afterEach(() => {
+    consoleErrorSpy.mockRestore();
   });
 
   it('GET returns 400 when neither endpoint nor userId provided', async () => {

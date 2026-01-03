@@ -22,8 +22,8 @@ const defaultStats = [
 ];
 
 export function LaunchHero({
-  title = 'Lunary AI: Your Personalized Cosmic Companion',
-  subtitle = 'AI-powered astrology meets real astronomical data. Grounded in NASA-grade ephemeris, guided by modern mystics.',
+  title = 'Lunary: Your Personalized Cosmic Companion',
+  subtitle = 'Astronomy-based astrology with optional Astral Guide chat for deeper insight.',
   ctaPrimary = { label: 'Start Your Cosmic Journey', href: '/auth' },
   ctaSecondary = { label: 'Explore the Launch Plan', href: '#timeline' },
   stats = defaultStats,
@@ -91,7 +91,7 @@ export function LaunchHero({
                 Real stars. Real-time transits.
               </h3>
               <p className='text-sm text-zinc-300'>
-                Lunary AI synchronizes NASA data, tarot archetypes, and mood
+                Lunary synchronizes NASA data, tarot archetypes, and mood
                 journaling to deliver a daily cosmic companion that feels human.
               </p>
 

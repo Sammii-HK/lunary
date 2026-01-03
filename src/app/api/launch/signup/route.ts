@@ -23,7 +23,7 @@ function buildConfirmationEmail({
   email: string;
   source: string;
 }) {
-  const headline = 'You are on the Lunary AI launch list ✨';
+  const headline = 'You are on the Lunary launch list ✨';
   const body = `
     <p>Thank you for joining from <strong>${source.replace('_', ' ')}</strong>.</p>
     <p>What happens next:</p>
@@ -47,7 +47,7 @@ function buildConfirmationEmail({
     `,
     text: `${headline}
 
-You are confirmed for launch updates from Lunary AI.
+You are confirmed for launch updates from Lunary.
 - Product Hunt reminder
 - Exclusive cosmic report template
 - TikTok live build invite

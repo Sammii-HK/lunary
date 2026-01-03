@@ -37,6 +37,13 @@ export async function GET(request: NextRequest) {
       AND s.trial_ends_at::date = ${threeDaysFromNow.toISOString().split('T')[0]}
       AND (s.trial_reminder_3d_sent = false OR s.trial_reminder_3d_sent IS NULL)
       AND s.user_email IS NOT NULL
+      AND NOT (
+        s.has_discount = true
+        AND (
+          COALESCE(s.discount_percent, 0) >= 100
+          OR (s.monthly_amount_due IS NOT NULL AND s.monthly_amount_due <= 0)
+        )
+      )
     `;
 
     // Get trials ending in 1 day (final reminder)
@@ -52,6 +59,13 @@ export async function GET(request: NextRequest) {
       AND s.trial_ends_at::date = ${oneDayFromNow.toISOString().split('T')[0]}
       AND (s.trial_reminder_1d_sent = false OR s.trial_reminder_1d_sent IS NULL)
       AND s.user_email IS NOT NULL
+      AND NOT (
+        s.has_discount = true
+        AND (
+          COALESCE(s.discount_percent, 0) >= 100
+          OR (s.monthly_amount_due IS NOT NULL AND s.monthly_amount_due <= 0)
+        )
+      )
     `;
 
     let sent3Day = 0;

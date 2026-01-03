@@ -5,11 +5,11 @@ import { PressKitAssets } from '@/components/press-kit/PressKitAssets';
 import { MarketingFooter } from '@/components/MarketingFooter';
 
 export const metadata: Metadata = {
-  title: 'Lunary Press Kit - The AI-powered Spiritual Intelligence Platform',
+  title: 'Lunary Press Kit - Astronomy-Based Spiritual Platform',
   description:
     'Official Lunary press kit with brand assets, product information, founder details, and resources for media, investors, and partners.',
   openGraph: {
-    title: 'Lunary Press Kit - The AI-powered Spiritual Intelligence Platform',
+    title: 'Lunary Press Kit - Astronomy-Based Spiritual Platform',
     description:
       "Brand assets, product overview, founder bio, and press resources for Lunary - building the world's first Symbolic Intelligence OS.",
     url: 'https://lunary.app/press-kit',
@@ -24,7 +24,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Lunary Press Kit - The AI-powered Spiritual Intelligence Platform',
+    title: 'Lunary Press Kit - Astronomy-Based Spiritual Platform',
     description:
       'Download logos, product screenshots, brand assets, and press materials.',
     images: ['/api/og/cosmic'],
@@ -48,11 +48,11 @@ const brandColors = [
 ];
 
 const coreFeatures = [
-  'AI Astral Companion (ChatGPT-powered)',
+  'Astral Guide chat (optional AI)',
   'Daily personalised horoscopes',
   'Weekly cosmic forecast',
   'Tarot analysis + card meanings',
-  'Crystal Index + AI crystal identification',
+  'Crystal Index + identification tools',
   'Ritual Generator (intent-based)',
   'Book of Shadows (journaling engine)',
   'Emotional reflection insights',
@@ -86,9 +86,9 @@ const differentiators = [
       'Lunary offers the most comprehensive symbolic library in the category: Astrology, tarot, moon phases, numerology, crystals, rituals, journaling, seasonal events, emotional mapping.',
   },
   {
-    title: 'AI Personalisation',
+    title: 'Personalization',
     description:
-      "Your birth chart, emotions, tarot patterns, and cycles all inform the AI's responses.",
+      'Your birth chart, emotions, tarot patterns, and cycles inform every insight, with optional Astral Guide chat.',
   },
   {
     title: 'Shareability Engine',
@@ -102,14 +102,14 @@ const differentiators = [
   {
     title: 'Crystal Index',
     description:
-      'A standalone product & acquisition channel: AI-based crystal identification, complete crystal database, spiritual meaning, healing uses, metaphysical properties, image recognition + descriptive search.',
+      'A standalone product & acquisition channel: crystal identification tools, complete crystal database, spiritual meaning, healing uses, metaphysical properties, image recognition + descriptive search.',
   },
 ];
 
 const pressQuotes = [
   {
     quote:
-      'A beautifully crafted AI-powered spiritual app reinventing modern astrology.',
+      'A beautifully crafted, astronomy-based spiritual app reinventing modern astrology.',
     attribution: 'Tech publication',
   },
   {
@@ -133,7 +133,7 @@ export default function PressKitPage() {
             </p>
             <h1 className='text-4xl font-semibold'>Lunary Press Kit</h1>
             <p className='text-lg font-semibold text-lunary-primary-200'>
-              The AI-powered Spiritual Intelligence Platform
+              The astronomy-based spiritual platform
             </p>
             <p className='text-lg text-zinc-200'>
               Welcome to the official Lunary press kit. Below you'll find
@@ -144,8 +144,8 @@ export default function PressKitPage() {
               Lunary is building the world's first{' '}
               <strong>Symbolic Intelligence OS</strong> — combining astrology,
               tarot, crystal identification, rituals, and emotional insight with
-              AI to help users understand themselves more deeply through ancient
-              systems and modern technology.
+              optional Astral Guide chat to help users understand themselves
+              more deeply through ancient systems and modern technology.
             </p>
           </section>
 
@@ -223,10 +223,11 @@ export default function PressKitPage() {
               <h2 className='text-2xl font-semibold mb-4'>Product Overview</h2>
             </div>
             <p className='text-lg text-zinc-200'>
-              Lunary is a modern spiritual intelligence platform powered by AI.
-              It merges symbolic systems—astrology, tarot, numerology, rituals,
-              moon cycles, crystals—with machine learning, enabling personalised
-              insight, cosmic guidance, and emotional reflection.
+              Lunary is a modern spiritual intelligence platform grounded in
+              real astronomical calculations. It brings together astrology,
+              tarot, numerology, rituals, moon cycles, and crystals, with AI
+              used only in the Astral Guide chat to interpret charts, patterns,
+              and the current sky in a clear, reflective way.
             </p>
             <div>
               <h3 className='text-xl font-semibold mb-3'>Core features:</h3>
@@ -307,9 +308,10 @@ export default function PressKitPage() {
               <h2 className='text-2xl font-semibold mb-4'>About Lunary</h2>
             </div>
             <blockquote className='border-l-4 border-lunary-primary-400 pl-4 text-lg text-zinc-200 italic'>
-              Lunary is the AI-powered spiritual intelligence platform that
+              Lunary is the astronomy-based spiritual intelligence platform that
               blends astronomy-grade accuracy with personalised astrology,
-              tarot, and ritual guidance. Available on web and app.
+              tarot, ritual guidance, and optional AI chat. Available on web and
+              app.
             </blockquote>
             <p className='text-sm text-zinc-400'>
               Use the above paragraph for press coverage and media mentions.
@@ -452,8 +454,8 @@ export default function PressKitPage() {
               <p className='text-lg font-semibold text-white mb-2'>Sammii</p>
               <p className='text-sm text-zinc-300 mb-4'>
                 Designer, engineer, and solo founder of Lunary. Creator of the
-                Lunary AI architecture, design system, brand, and complete
-                product.
+                astrology engine, Astral Guide chat, design system, brand, and
+                complete product.
               </p>
               <div className='mb-4'>
                 <p className='text-sm font-semibold text-zinc-200 mb-2'>

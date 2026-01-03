@@ -16,7 +16,7 @@ export const PRICING_PLANS: PricingPlan[] = [
   {
     id: 'free',
     name: 'Cosmic Explorer',
-    description: 'Discover your celestial nature',
+    description: 'Explore your chart and the cosmic basics',
     price: 0,
     interval: 'month',
     stripePriceId: '', // No Stripe for free plan
@@ -28,13 +28,13 @@ export const PRICING_PLANS: PricingPlan[] = [
       'Basic lunar calendar',
       'General daily horoscope',
       'Access to grimoire knowledge',
-      '1 free AI ritual/reading per week',
+      '1 Astral Guide insight per week',
     ],
   },
   {
     id: 'lunary_plus',
     name: 'Lunary+',
-    description: 'Rituals, Moon Circles & personalized guidance',
+    description: 'Personalized guidance from your exact birth chart',
     price: 4.99,
     interval: 'month',
     stripePriceId: '',
@@ -58,15 +58,15 @@ export const PRICING_PLANS: PricingPlan[] = [
   {
     id: 'lunary_plus_ai',
     name: 'Lunary+ AI',
-    description: 'Everything in Lunary+ plus unlimited AI guidance',
+    description: 'Everything in Lunary+ plus Astral Guide chat',
     price: 8.99,
     interval: 'month',
     stripePriceId: '',
     features: [
       'Everything in Lunary+',
-      'Unlimited AI chat (Lunary Copilot)',
+      'Unlimited Astral Guide chat (AI)',
       'Personalized weekly reports',
-      'AI ritual & reading generation',
+      'Astral Guide ritual prompts (AI)',
       'Deeper tarot interpretations',
       'Advanced pattern analysis',
       'Downloadable PDF reports',
@@ -77,7 +77,7 @@ export const PRICING_PLANS: PricingPlan[] = [
   {
     id: 'lunary_plus_ai_annual',
     name: 'Lunary+ AI Annual',
-    description: 'Full year of cosmic wisdom with AI',
+    description: 'Full year of Lunary+ with Astral Guide chat',
     price: 89.99,
     interval: 'year',
     stripePriceId: '',

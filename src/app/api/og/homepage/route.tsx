@@ -102,7 +102,7 @@ export async function GET(): Promise<Response> {
               display: 'flex',
             }}
           >
-            A calm AI companion for cosmic self understanding
+            Personal astrology grounded in real astronomy
           </div>
 
           <div

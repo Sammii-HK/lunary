@@ -1,5 +1,6 @@
 import '@testing-library/jest-dom';
 import { TextEncoder, TextDecoder } from 'util';
+import dotenv from 'dotenv';
 
 // Set default environment variables for tests
 if (!process.env.BETTER_AUTH_SECRET) {
@@ -13,186 +14,220 @@ if (!process.env.STRIPE_SECRET_KEY) {
 global.TextEncoder = TextEncoder;
 global.TextDecoder = TextDecoder;
 
-global.ResizeObserver = class ResizeObserver {
-  observe() {}
-  unobserve() {}
-  disconnect() {}
-};
+dotenv.config({ path: '.env.local' });
+dotenv.config({ path: '.env' });
 
-Object.defineProperty(window, 'matchMedia', {
-  writable: true,
-  value: jest.fn().mockImplementation((query) => ({
-    matches: false,
-    media: query,
-    onchange: null,
-    addListener: jest.fn(),
-    removeListener: jest.fn(),
-    addEventListener: jest.fn(),
-    removeEventListener: jest.fn(),
-    dispatchEvent: jest.fn(),
-  })),
-});
+if (typeof global.clearImmediate !== 'function') {
+  global.clearImmediate = (handle) => clearTimeout(handle);
+}
 
-Object.defineProperty(window, 'scrollTo', {
-  writable: true,
-  value: jest.fn(),
-});
+if (typeof window !== 'undefined') {
+  global.ResizeObserver = class ResizeObserver {
+    observe() {}
+    unobserve() {}
+    disconnect() {}
+  };
 
-Object.defineProperty(navigator, 'geolocation', {
-  writable: true,
-  value: {
-    getCurrentPosition: jest.fn(),
-    watchPosition: jest.fn(),
-    clearWatch: jest.fn(),
-  },
-});
+  Object.defineProperty(window, 'matchMedia', {
+    writable: true,
+    value: jest.fn().mockImplementation((query) => ({
+      matches: false,
+      media: query,
+      onchange: null,
+      addListener: jest.fn(),
+      removeListener: jest.fn(),
+      addEventListener: jest.fn(),
+      removeEventListener: jest.fn(),
+      dispatchEvent: jest.fn(),
+    })),
+  });
 
-Object.defineProperty(navigator, 'serviceWorker', {
-  writable: true,
-  value: {
-    register: jest.fn(() => Promise.resolve()),
-    ready: Promise.resolve(),
-    controller: null,
-  },
-});
+  Object.defineProperty(window, 'scrollTo', {
+    writable: true,
+    value: jest.fn(),
+  });
 
-Object.defineProperty(navigator, 'clipboard', {
-  writable: true,
-  value: {
-    writeText: jest.fn(() => Promise.resolve()),
-    readText: jest.fn(() => Promise.resolve('')),
-  },
-});
+  Object.defineProperty(navigator, 'geolocation', {
+    writable: true,
+    value: {
+      getCurrentPosition: jest.fn(),
+      watchPosition: jest.fn(),
+      clearWatch: jest.fn(),
+    },
+  });
 
-global.Request = class Request {
-  constructor(input, init = {}) {
-    const url = typeof input === 'string' ? input : input.url;
-    Object.defineProperty(this, 'url', {
-      value: url,
-      writable: false,
-      enumerable: true,
-      configurable: false,
-    });
-    this.method = init.method || 'GET';
-    this.headers = new Headers(init.headers);
-    this.body = init.body;
-  }
-};
+  Object.defineProperty(navigator, 'serviceWorker', {
+    writable: true,
+    value: {
+      register: jest.fn(() => Promise.resolve()),
+      ready: Promise.resolve(),
+      controller: null,
+    },
+  });
 
-global.Response = class Response {
-  constructor(body, init = {}) {
-    this._body = body || '';
-    this.status = init.status || 200;
-    this.statusText = init.statusText || 'OK';
-    this.headers = new Headers(init.headers);
-    this.ok = this.status >= 200 && this.status < 300;
-  }
+  Object.defineProperty(navigator, 'clipboard', {
+    writable: true,
+    configurable: true,
+    value: {
+      writeText: jest.fn(() => Promise.resolve()),
+      readText: jest.fn(() => Promise.resolve('')),
+    },
+  });
+}
 
-  async json() {
-    if (!this._body || this._body === '') {
-      return null;
-    }
-    return typeof this._body === 'string' ? JSON.parse(this._body) : this._body;
-  }
-
-  async text() {
-    if (!this._body) {
-      return '';
-    }
-    return typeof this._body === 'string'
-      ? this._body
-      : JSON.stringify(this._body);
-  }
-
-  clone() {
-    return new Response(this._body, {
-      status: this.status,
-      statusText: this.statusText,
-      headers: this.headers,
-    });
-  }
-
-  static json(data, init = {}) {
-    return new Response(JSON.stringify(data), {
-      ...init,
-      headers: {
-        'Content-Type': 'application/json',
-        ...init.headers,
-      },
-    });
-  }
-};
-
-global.NextResponse = class NextResponse extends Response {
-  constructor(body, init = {}) {
-    super(body, init);
-  }
-
-  static json(data, init = {}) {
-    const body = JSON.stringify(data);
-    const response = new NextResponse(body, {
-      status: init.status || 200,
-      headers: {
-        'Content-Type': 'application/json',
-        ...init.headers,
-      },
-    });
-    return response;
-  }
-};
-
-global.Headers = class Headers {
-  constructor(init = {}) {
-    this._headers = {};
-    if (init instanceof Headers) {
-      init.forEach((value, key) => {
-        this._headers[key.toLowerCase()] = value;
+if (typeof window !== 'undefined') {
+  global.Request = class Request {
+    constructor(input, init = {}) {
+      const url = typeof input === 'string' ? input : input.url;
+      Object.defineProperty(this, 'url', {
+        value: url,
+        writable: false,
+        enumerable: true,
+        configurable: false,
       });
-    } else if (init) {
-      Object.entries(init).forEach(([key, value]) => {
-        this._headers[key.toLowerCase()] = value;
+      this.method = init.method || 'GET';
+      this.headers = new Headers(init.headers);
+      this.body = init.body;
+    }
+  };
+
+  global.Response = class Response {
+    constructor(body, init = {}) {
+      this._body = body || '';
+      this.status = init.status || 200;
+      this.statusText = init.statusText || 'OK';
+      this.headers = new Headers(init.headers);
+      this.ok = this.status >= 200 && this.status < 300;
+    }
+
+    async json() {
+      if (!this._body || this._body === '') {
+        return null;
+      }
+      return typeof this._body === 'string'
+        ? JSON.parse(this._body)
+        : this._body;
+    }
+
+    async text() {
+      if (!this._body) {
+        return '';
+      }
+      return typeof this._body === 'string'
+        ? this._body
+        : JSON.stringify(this._body);
+    }
+
+    clone() {
+      return new Response(this._body, {
+        status: this.status,
+        statusText: this.statusText,
+        headers: this.headers,
       });
     }
-  }
 
-  get(name) {
-    return this._headers[name.toLowerCase()] || null;
-  }
+    static json(data, init = {}) {
+      return new Response(JSON.stringify(data), {
+        ...init,
+        headers: {
+          'Content-Type': 'application/json',
+          ...init.headers,
+        },
+      });
+    }
+  };
 
-  set(name, value) {
-    this._headers[name.toLowerCase()] = value;
-  }
+  global.NextResponse = class NextResponse extends Response {
+    constructor(body, init = {}) {
+      super(body, init);
+    }
 
-  has(name) {
-    return name.toLowerCase() in this._headers;
-  }
+    static json(data, init = {}) {
+      const body = JSON.stringify(data);
+      const response = new NextResponse(body, {
+        status: init.status || 200,
+        headers: {
+          'Content-Type': 'application/json',
+          ...init.headers,
+        },
+      });
+      return response;
+    }
+  };
 
-  forEach(callback) {
-    Object.entries(this._headers).forEach(([key, value]) => {
-      callback(value, key);
-    });
-  }
+  global.Headers = class Headers {
+    constructor(init = {}) {
+      this._headers = {};
+      if (init instanceof Headers) {
+        init.forEach((value, key) => {
+          this._headers[key.toLowerCase()] = value;
+        });
+      } else if (init) {
+        Object.entries(init).forEach(([key, value]) => {
+          this._headers[key.toLowerCase()] = value;
+        });
+      }
+    }
 
-  entries() {
-    return Object.entries(this._headers)
-      .map(([key, value]) => [key, value])
-      [Symbol.iterator]();
-  }
+    get(name) {
+      return this._headers[name.toLowerCase()] || null;
+    }
 
-  [Symbol.iterator]() {
-    return Object.entries(this._headers)[Symbol.iterator]();
-  }
+    set(name, value) {
+      this._headers[name.toLowerCase()] = value;
+    }
 
-  keys() {
-    return Object.keys(this._headers);
-  }
+    has(name) {
+      return name.toLowerCase() in this._headers;
+    }
 
-  values() {
-    return Object.values(this._headers);
-  }
-};
+    forEach(callback) {
+      Object.entries(this._headers).forEach(([key, value]) => {
+        callback(value, key);
+      });
+    }
+
+    entries() {
+      return Object.entries(this._headers)
+        .map(([key, value]) => [key, value])
+        [Symbol.iterator]();
+    }
+
+    [Symbol.iterator]() {
+      return Object.entries(this._headers)[Symbol.iterator]();
+    }
+
+    keys() {
+      return Object.keys(this._headers);
+    }
+
+    values() {
+      return Object.values(this._headers);
+    }
+  };
+}
+
+const { fetch: undiciFetch } = require('undici');
+const nativeFetch = global.fetch || undiciFetch;
 
 global.fetch = jest.fn((url, options = {}) => {
+  if (
+    nativeFetch &&
+    typeof url === 'string' &&
+    process.env.RUN_LOCATIONIQ_TESTS
+  ) {
+    try {
+      const parsedUrl = new URL(url);
+      const isHttps = parsedUrl.protocol === 'https:';
+      const isAllowedHost = parsedUrl.hostname === 'us1.locationiq.com';
+      if (isHttps && isAllowedHost) {
+        return nativeFetch(url, options);
+      }
+    } catch {
+      // Invalid URL; fall through to mocked behavior.
+    }
+  }
+
   const method = options.method || 'GET';
   const headers = options.headers || {};
   const cookieHeader = headers.Cookie || headers.cookie || '';
