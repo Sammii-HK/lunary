@@ -17,6 +17,7 @@ export const revalidate = 3600; // Cache for 1 hour - base OG image updates hour
 
 // Request deduplication
 const pendingRequests = new Map<string, Promise<Response>>();
+type Format = 'square' | 'portrait' | 'landscape' | 'story';
 
 function getZodiacSign(longitude: number): string {
   const signs = [
@@ -56,24 +57,104 @@ async function generateImage(req: NextRequest): Promise<Response> {
   if (!astronomiconFont)
     throw new Error('Astronomicon font load returned null');
 
+  const { searchParams } = new URL(req.url);
+  const rawFormat = (
+    searchParams.get('format') ||
+    searchParams.get('size') ||
+    'square'
+  ).toLowerCase();
+  const allowedFormats: Format[] = ['square', 'portrait', 'landscape', 'story'];
+  const format = allowedFormats.includes(rawFormat as Format)
+    ? (rawFormat as Format)
+    : 'square';
+
   const today = new Date();
   const targetDate = new Date(
     `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}T12:00:00Z`,
   );
 
-  const style = {
-    titleSize: 32,
-    planetNameSize: 42,
-    symbolSize: 222,
-    aspectSize: 42,
-    constellationSize: 28,
-    zodiacSymbolSize: 72,
-    energySize: 36,
-    dateSize: 28,
-    footerSize: 28,
-    titlePadding: '100px',
-    itemSpacing: '200px',
+  const sizes: Record<
+    Format,
+    { width: number; height: number; padding: string }
+  > = {
+    square: { width: 1200, height: 1200, padding: '60px 40px' },
+    portrait: { width: 1080, height: 1920, padding: '80px 60px' },
+    landscape: { width: 1920, height: 1080, padding: '40px 80px' },
+    story: { width: 1080, height: 1920, padding: '80px 60px' },
   };
+
+  const responsive: Record<
+    Format,
+    {
+      titleSize: number;
+      planetNameSize: number;
+      symbolSize: number;
+      aspectSize: number;
+      constellationSize: number;
+      zodiacSymbolSize: number;
+      energySize: number;
+      dateSize: number;
+      footerSize: number;
+      titlePadding: string;
+      itemSpacing: string;
+    }
+  > = {
+    square: {
+      titleSize: 32,
+      planetNameSize: 42,
+      symbolSize: 222,
+      aspectSize: 42,
+      constellationSize: 28,
+      zodiacSymbolSize: 72,
+      energySize: 36,
+      dateSize: 28,
+      footerSize: 28,
+      titlePadding: '100px',
+      itemSpacing: '200px',
+    },
+    portrait: {
+      titleSize: 48,
+      planetNameSize: 52,
+      symbolSize: 280,
+      aspectSize: 52,
+      constellationSize: 36,
+      zodiacSymbolSize: 88,
+      energySize: 44,
+      dateSize: 36,
+      footerSize: 36,
+      titlePadding: '120px',
+      itemSpacing: '160px',
+    },
+    landscape: {
+      titleSize: 36,
+      planetNameSize: 52,
+      symbolSize: 250,
+      aspectSize: 36,
+      constellationSize: 48,
+      zodiacSymbolSize: 80,
+      energySize: 52,
+      dateSize: 50,
+      footerSize: 36,
+      titlePadding: '60px',
+      itemSpacing: '120px',
+    },
+    story: {
+      titleSize: 48,
+      planetNameSize: 52,
+      symbolSize: 280,
+      aspectSize: 52,
+      constellationSize: 36,
+      zodiacSymbolSize: 88,
+      energySize: 44,
+      dateSize: 36,
+      footerSize: 36,
+      titlePadding: '120px',
+      itemSpacing: '160px',
+    },
+  };
+
+  const style = responsive[format] || responsive.square;
+  const imageSize = sizes[format] || sizes.square;
 
   const positions = getRealPlanetaryPositions(targetDate);
   const moonPhase = getAccurateMoonPhase(targetDate);
@@ -133,7 +214,7 @@ async function generateImage(req: NextRequest): Promise<Response> {
         background: theme.background,
         fontFamily: 'Roboto Mono',
         color: 'white',
-        padding: '60px 40px',
+        padding: imageSize.padding,
         justifyContent: 'space-between',
       }}
     >
@@ -434,8 +515,8 @@ async function generateImage(req: NextRequest): Promise<Response> {
       </div>
     </div>,
     {
-      width: 1200,
-      height: 630,
+      width: imageSize.width,
+      height: imageSize.height,
       fonts: [
         {
           name: 'Astronomicon',
@@ -458,7 +539,17 @@ async function generateImage(req: NextRequest): Promise<Response> {
 }
 
 export async function GET(req: NextRequest): Promise<Response> {
-  const cacheKey = 'cosmic-og-base';
+  const { searchParams } = new URL(req.url);
+  const rawFormat = (
+    searchParams.get('format') ||
+    searchParams.get('size') ||
+    'square'
+  ).toLowerCase();
+  const allowedFormats: Format[] = ['square', 'portrait', 'landscape', 'story'];
+  const format = allowedFormats.includes(rawFormat as Format)
+    ? (rawFormat as Format)
+    : 'square';
+  const cacheKey = `cosmic-og-base-${format}`;
 
   if (pendingRequests.has(cacheKey)) {
     return pendingRequests.get(cacheKey)!;

@@ -36,6 +36,10 @@ import {
   getAllPlatformHashtags,
   CosmicContext,
 } from '../../../../../utils/hashtags';
+import {
+  getPlatformImageFormat,
+  type ImageFormat,
+} from '@/lib/social/educational-images';
 
 // Track if cron is already running to prevent duplicate execution
 // Using a Map to track by date for better serverless resilience
@@ -604,20 +608,31 @@ async function runDailyPosts(dateStr: string) {
 
   // Generate platform-optimized hashtags
   const platformHashtags = getAllPlatformHashtags(dateStr, cosmicContext);
+  const getCosmicFormat = (platform: string): ImageFormat =>
+    getPlatformImageFormat(platform === 'x' ? 'twitter' : platform);
+  const buildCosmicMediaUrls = (format: ImageFormat) => [
+    `${productionUrl}/api/og/cosmic/${dateStr}?format=${format}`,
+    `${productionUrl}/api/og/crystal?date=${dateStr}&size=${format}`,
+    `${productionUrl}/api/og/tarot?date=${dateStr}&size=${format}`,
+    `${productionUrl}/api/og/moon?date=${dateStr}&size=${format}`,
+    // `${productionUrl}/api/og/horoscope?date=${dateStr}`,
+  ];
+
+  const instagramContent = `${postContent}\n\n${platformHashtags.instagram}`;
+  const pinterestContent = platformHashtags.pinterest
+    ? `${postContent}\n\n${platformHashtags.pinterest}`
+    : postContent;
+  const facebookContent = platformHashtags.facebook
+    ? `${postContent}\n\n${platformHashtags.facebook}`
+    : postContent;
 
   // Generate posts with dynamic content
   const posts = [
     {
       name: `Cosmic Post - ${new Date(dateStr).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}`,
-      content: `${postContent}\n\n${platformHashtags.instagram}`,
+      content: instagramContent,
       platforms: ['pinterest', 'facebook', 'instagram'],
-      imageUrls: [
-        `${productionUrl}/api/og/cosmic/${dateStr}/story`,
-        `${productionUrl}/api/og/crystal?date=${dateStr}&size=story`,
-        `${productionUrl}/api/og/tarot?date=${dateStr}&size=story`,
-        `${productionUrl}/api/og/moon?date=${dateStr}&size=story`,
-        // `${productionUrl}/api/og/horoscope?date=${dateStr}`,
-      ],
+      imageUrls: buildCosmicMediaUrls(getCosmicFormat('instagram')),
       alt: `${cosmicContent.primaryEvent.name} - ${cosmicContent.primaryEvent.energy}. Daily cosmic guidance from lunary.app.`,
       scheduledDate: new Date(scheduleBase.getTime()).toISOString(),
       // redditOptions: {
@@ -633,45 +648,25 @@ async function runDailyPosts(dateStr: string) {
         visibility: 'public',
       },
       variants: {
-        // instagram: {
-        //   content: `${postContent}\n\n${platformHashtags.instagram}`,
-        //   media: [
-        //     `${productionUrl}/api/og/cosmic/${dateStr}`,
-        //     `${productionUrl}/api/og/crystal?date=${dateStr}`,
-        //     `${productionUrl}/api/og/tarot?date=${dateStr}`,
-        //     `${productionUrl}/api/og/moon?date=${dateStr}`,
-        //     `${productionUrl}/api/og/horoscope?date=${dateStr}`,
-        //   ],
-        // },
+        pinterest: {
+          content: pinterestContent,
+          media: buildCosmicMediaUrls(getCosmicFormat('pinterest')),
+        },
+        facebook: {
+          content: facebookContent,
+          media: buildCosmicMediaUrls(getCosmicFormat('facebook')),
+        },
         threads: {
           content: `${postContent}`,
-          media: [
-            `${productionUrl}/api/og/cosmic/${dateStr}/landscape`,
-            `${productionUrl}/api/og/crystal?date=${dateStr}&size=landscape`,
-            `${productionUrl}/api/og/tarot?date=${dateStr}&size=landscape`,
-            `${productionUrl}/api/og/moon?date=${dateStr}&size=landscape`,
-            // `${productionUrl}/api/og/horoscope?date=${dateStr}&size=portrait`,
-          ],
+          media: buildCosmicMediaUrls(getCosmicFormat('threads')),
         },
         tiktok: {
           content: `${generateCosmicPost(cosmicContent).snippetShort} ${platformHashtags.tiktok}`,
-          media: [
-            `${productionUrl}/api/og/cosmic/${dateStr}/story`,
-            `${productionUrl}/api/og/crystal?date=${dateStr}&size=story`,
-            `${productionUrl}/api/og/tarot?date=${dateStr}&size=story`,
-            `${productionUrl}/api/og/moon?date=${dateStr}&size=story`,
-            // `${productionUrl}/api/og/horoscope?date=${dateStr}&size=landscape`,
-          ],
+          media: buildCosmicMediaUrls(getCosmicFormat('tiktok')),
         },
         twitter: {
           content: `${generateCosmicPost(cosmicContent).snippetShort.replace(/\n/g, ' ')} ${platformHashtags.twitter}`,
-          media: [
-            `${productionUrl}/api/og/cosmic/${dateStr}/landscape`,
-            `${productionUrl}/api/og/crystal?date=${dateStr}&size=landscape`,
-            `${productionUrl}/api/og/tarot?date=${dateStr}&size=landscape`,
-            `${productionUrl}/api/og/moon?date=${dateStr}&size=landscape`,
-            // `${productionUrl}/api/og/horoscope?date=${dateStr}&size=landscape`,
-          ],
+          media: buildCosmicMediaUrls(getCosmicFormat('twitter')),
           twitterOptions: {
             thread: false,
             threadNumber: false,
@@ -679,28 +674,11 @@ async function runDailyPosts(dateStr: string) {
         },
         bluesky: {
           content: `${generateCosmicPost(cosmicContent).snippetShort} ${platformHashtags.bluesky}`,
-          media: [
-            `${productionUrl}/api/og/cosmic/${dateStr}/landscape`,
-            `${productionUrl}/api/og/crystal?date=${dateStr}&size=landscape`,
-            `${productionUrl}/api/og/tarot?date=${dateStr}&size=landscape`,
-            `${productionUrl}/api/og/moon?date=${dateStr}&size=landscape`,
-            // `${productionUrl}/api/og/horoscope?date=${dateStr}&size=landscape`,
-          ],
+          media: buildCosmicMediaUrls(getCosmicFormat('bluesky')),
         },
         linkedin: {
           content: `${postContent}\n\n${platformHashtags.linkedin}`,
-          media: [
-            `${productionUrl}/api/og/cosmic/${dateStr}/landscape`,
-            `${productionUrl}/api/og/crystal?date=${dateStr}&size=landscape`,
-            `${productionUrl}/api/og/tarot?date=${dateStr}&size=landscape`,
-            `${productionUrl}/api/og/moon?date=${dateStr}&size=landscape`,
-            // `${productionUrl}/api/og/horoscope?date=${dateStr}&size=landscape`,
-          ],
-        },
-        facebook: {
-          content: platformHashtags.facebook
-            ? `${postContent}\n\n${platformHashtags.facebook}`
-            : postContent,
+          media: buildCosmicMediaUrls(getCosmicFormat('linkedin')),
         },
       },
     },
