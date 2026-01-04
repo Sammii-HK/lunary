@@ -542,30 +542,40 @@ export default function SocialPostsPage() {
     setEditingPost(post.id);
   };
 
-  const handleApprove = async (postId: string) => {
+  const getGroupPostIds = (postId: string) => {
+    const group = groupedPosts.find((entry) =>
+      entry.posts.some((post) => post.id === postId),
+    );
+    return group ? group.posts.map((post) => post.id) : [postId];
+  };
+
+  const handleApprove = async (post: PendingPost) => {
+    const groupPostIds = getGroupPostIds(post.id);
     try {
-      const edited = editedContent[postId];
-      const notes = improvementNotes[postId];
+      const edited = editedContent[post.id];
+      const notes = improvementNotes[post.id];
       const hasEdits =
-        edited && edited !== pendingPosts.find((p) => p.id === postId)?.content;
+        edited &&
+        edited !== pendingPosts.find((p) => p.id === post.id)?.content;
       const hasNotes = notes && notes.trim() !== '';
 
       const response = await fetch('/api/admin/social-posts/approve', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          postId,
+          postId: post.id,
           action: 'approve',
           editedContent: hasEdits ? edited : undefined,
           improvementNotes: hasNotes ? notes : undefined,
+          groupPostIds,
         }),
       });
 
       const data = await response.json();
       if (data.success) {
         setEditingPost(null);
-        setEditedContent({ ...editedContent, [postId]: '' });
-        setImprovementNotes({ ...improvementNotes, [postId]: '' });
+        setEditedContent({ ...editedContent, [post.id]: '' });
+        setImprovementNotes({ ...improvementNotes, [post.id]: '' });
         loadPendingPosts();
       } else {
         alert(`Failed to approve: ${data.error}`);
@@ -617,6 +627,7 @@ export default function SocialPostsPage() {
   };
 
   const handleSendToSucculent = async (post: PendingPost) => {
+    const groupPostIds = getGroupPostIds(post.id);
     setSending(post.id);
     try {
       const response = await fetch('/api/admin/social-posts/send', {
@@ -630,6 +641,7 @@ export default function SocialPostsPage() {
           imageUrl: post.imageUrl,
           videoUrl: post.videoUrl,
           postType: post.postType,
+          groupPostIds,
         }),
       });
 
@@ -650,31 +662,25 @@ export default function SocialPostsPage() {
 
   const handleSendAllApproved = async () => {
     const approvedPosts = pendingPosts.filter((p) => p.status === 'approved');
-    if (approvedPosts.length === 0) {
+    const approvedGroups = groupedPosts.filter((group) =>
+      group.posts.some((post) => post.status === 'approved'),
+    );
+    if (approvedGroups.length === 0) {
       alert('No approved posts to send');
       return;
     }
 
-    const groupMap = new Map<string, PendingPost[]>();
-    for (const post of approvedPosts) {
-      const key = post.baseGroupKey || post.id;
-      const group = groupMap.get(key);
-      if (group) {
-        group.push(post);
-      } else {
-        groupMap.set(key, [post]);
-      }
-    }
-
-    const postsToSend: PendingPost[] = [];
-    for (const group of groupMap.values()) {
-      const basePostId = group[0]?.basePostId;
+    const postsToSend = approvedGroups.map((group) => {
+      const basePostId = group.posts[0]?.basePostId;
       const basePost =
         typeof basePostId === 'number'
-          ? group.find((post) => Number(post.id) === basePostId)
+          ? group.posts.find((post) => Number(post.id) === basePostId)
           : undefined;
-      postsToSend.push(basePost || group[0]);
-    }
+      return {
+        post: basePost || group.basePost || group.posts[0],
+        groupPostIds: group.posts.map((post) => post.id),
+      };
+    });
 
     if (
       !confirm(
@@ -695,7 +701,7 @@ export default function SocialPostsPage() {
     let failedCount = 0;
 
     for (let i = 0; i < postsToSend.length; i++) {
-      const post = postsToSend[i];
+      const { post, groupPostIds } = postsToSend[i];
       setSendAllProgress({
         current: i + 1,
         total: postsToSend.length,
@@ -715,6 +721,7 @@ export default function SocialPostsPage() {
             imageUrl: post.imageUrl,
             videoUrl: post.videoUrl,
             postType: post.postType,
+            groupPostIds,
           }),
         });
 
@@ -884,19 +891,13 @@ export default function SocialPostsPage() {
     (p) => p.status === 'approved',
   ).length;
   const queuedVideoCount = pendingPosts.filter(
-    (p) =>
-      (p.postType === 'video' || p.postType === 'educational') &&
-      p.videoJobStatus === 'pending',
+    (p) => p.postType === 'video' && p.videoJobStatus === 'pending',
   ).length;
   const processingVideoCount = pendingPosts.filter(
-    (p) =>
-      (p.postType === 'video' || p.postType === 'educational') &&
-      p.videoJobStatus === 'processing',
+    (p) => p.postType === 'video' && p.videoJobStatus === 'processing',
   ).length;
   const failedVideoCount = pendingPosts.filter(
-    (p) =>
-      (p.postType === 'video' || p.postType === 'educational') &&
-      p.videoJobStatus === 'failed',
+    (p) => p.postType === 'video' && p.videoJobStatus === 'failed',
   ).length;
 
   return (
@@ -1494,20 +1495,21 @@ export default function SocialPostsPage() {
                               </div>
                             </div>
                           )}
-                          {basePost.videoScript && (
-                            <details className='bg-zinc-800/50 rounded-lg border border-zinc-700 p-3'>
-                              <summary className='cursor-pointer text-sm text-zinc-300 flex items-center gap-2'>
-                                <FileText className='h-4 w-4' />
-                                Base video script
-                                {basePost.videoPartNumber
-                                  ? ` • Part ${basePost.videoPartNumber}`
-                                  : ''}
-                              </summary>
-                              <p className='mt-3 text-zinc-200 whitespace-pre-wrap text-sm'>
-                                {basePost.videoScript}
-                              </p>
-                            </details>
-                          )}
+                          {basePost.postType === 'video' &&
+                            basePost.videoScript && (
+                              <details className='bg-zinc-800/50 rounded-lg border border-zinc-700 p-3'>
+                                <summary className='cursor-pointer text-sm text-zinc-300 flex items-center gap-2'>
+                                  <FileText className='h-4 w-4' />
+                                  Base video script
+                                  {basePost.videoPartNumber
+                                    ? ` • Part ${basePost.videoPartNumber}`
+                                    : ''}
+                                </summary>
+                                <p className='mt-3 text-zinc-200 whitespace-pre-wrap text-sm'>
+                                  {basePost.videoScript}
+                                </p>
+                              </details>
+                            )}
                           {basePost.imageUrl && (
                             <div className='relative w-full max-w-md mx-auto'>
                               <Image
@@ -1594,14 +1596,16 @@ export default function SocialPostsPage() {
                                 </Badge>
                               )}
 
-                              {!activePost.videoUrl &&
+                              {activePost.postType === 'video' &&
+                                !activePost.videoUrl &&
                                 activePost.videoJobStatus && (
                                   <Badge className='bg-zinc-800 text-zinc-200 border-zinc-600 capitalize w-fit'>
                                     Video {activePost.videoJobStatus}
                                   </Badge>
                                 )}
 
-                              {activePost.videoJobStatus === 'failed' &&
+                              {activePost.postType === 'video' &&
+                                activePost.videoJobStatus === 'failed' &&
                                 activePost.videoJobError && (
                                   <div className='text-sm text-lunary-error'>
                                     Video job failed: {activePost.videoJobError}
@@ -1697,7 +1701,7 @@ export default function SocialPostsPage() {
                                       </Button>
                                       <Button
                                         onClick={() =>
-                                          handleApprove(activePost.id)
+                                          handleApprove(activePost)
                                         }
                                         className='flex-1 bg-lunary-success-600 hover:bg-lunary-success-700 text-white'
                                       >
@@ -1774,9 +1778,7 @@ export default function SocialPostsPage() {
                                 editingPost !== activePost.id && (
                                   <div className='flex gap-3'>
                                     <Button
-                                      onClick={() =>
-                                        handleApprove(activePost.id)
-                                      }
+                                      onClick={() => handleApprove(activePost)}
                                       className='flex-1 bg-lunary-success-600 hover:bg-lunary-success-700 text-white'
                                     >
                                       <Check className='h-4 w-4 mr-2' />

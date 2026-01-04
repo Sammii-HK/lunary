@@ -18,8 +18,14 @@ function getWeekStart(date: Date): Date {
 
 export async function POST(request: NextRequest) {
   try {
-    const { postId, action, feedback, editedContent, improvementNotes } =
-      await request.json();
+    const {
+      postId,
+      action,
+      feedback,
+      editedContent,
+      improvementNotes,
+      groupPostIds,
+    } = await request.json();
 
     if (!postId || !action) {
       return NextResponse.json(
@@ -72,6 +78,19 @@ export async function POST(request: NextRequest) {
       // Column might already exist, that's fine
     }
 
+    const parsedPostId = Number(postId);
+    if (!Number.isFinite(parsedPostId)) {
+      return NextResponse.json(
+        { success: false, error: 'Invalid postId' },
+        { status: 400 },
+      );
+    }
+    const groupIds = Array.isArray(groupPostIds)
+      ? groupPostIds
+          .map((id: unknown) => Number(id))
+          .filter((id: number) => Number.isFinite(id))
+      : [];
+
     if (action === 'reject') {
       const trimmedFeedback = feedback?.trim();
       if (trimmedFeedback) {
@@ -83,11 +102,11 @@ export async function POST(request: NextRequest) {
         await sql`
           UPDATE social_posts
           SET status = ${status}, rejection_feedback = ${trimmedFeedback}, updated_at = NOW()
-          WHERE id = ${postId}
+          WHERE id = ${parsedPostId}
         `;
         // Verify it was saved
         const verify = await sql`
-          SELECT rejection_feedback FROM social_posts WHERE id = ${postId}
+          SELECT rejection_feedback FROM social_posts WHERE id = ${parsedPostId}
         `;
         console.log('✅ Rejection feedback saved:', {
           postId,
@@ -99,10 +118,14 @@ export async function POST(request: NextRequest) {
         await sql`
           UPDATE social_posts
           SET status = ${status}, updated_at = NOW()
-          WHERE id = ${postId}
+          WHERE id = ${parsedPostId}
         `;
       }
     } else if (action === 'approve') {
+      const idsToUpdate =
+        groupIds.length > 0
+          ? Array.from(new Set([...groupIds, parsedPostId]))
+          : [parsedPostId];
       // Save edited content and improvement notes if provided
       if (editedContent) {
         if (improvementNotes) {
@@ -112,7 +135,7 @@ export async function POST(request: NextRequest) {
                 content = ${editedContent},
                 improvement_notes = ${improvementNotes},
                 updated_at = NOW()
-            WHERE id = ${postId}
+            WHERE id = ${parsedPostId}
           `;
         } else {
           await sql`
@@ -120,7 +143,7 @@ export async function POST(request: NextRequest) {
             SET status = ${status}, 
                 content = ${editedContent},
                 updated_at = NOW()
-            WHERE id = ${postId}
+            WHERE id = ${parsedPostId}
           `;
         }
       } else if (improvementNotes) {
@@ -129,26 +152,38 @@ export async function POST(request: NextRequest) {
           SET status = ${status}, 
               improvement_notes = ${improvementNotes},
               updated_at = NOW()
-          WHERE id = ${postId}
+          WHERE id = ${parsedPostId}
         `;
       } else {
         await sql`
           UPDATE social_posts
           SET status = ${status}, updated_at = NOW()
-          WHERE id = ${postId}
+          WHERE id = ANY(${idsToUpdate})
         `;
+      }
+
+      if (editedContent || improvementNotes) {
+        const remainingIds = idsToUpdate.filter((id) => id !== parsedPostId);
+        if (remainingIds.length > 0) {
+          await sql`
+            UPDATE social_posts
+            SET status = ${status}, updated_at = NOW()
+            WHERE id = ANY(${remainingIds})
+          `;
+        }
       }
 
       const postResult = await sql`
         SELECT id, content, platform, post_type, topic, scheduled_date, video_url, week_theme, week_start, youtube_video_id, quote_id
         FROM social_posts
-        WHERE id = ${postId}
+        WHERE id = ${parsedPostId}
       `;
 
       const post = postResult.rows[0];
       const videoPlatforms = ['instagram', 'tiktok', 'threads', 'twitter'];
 
       if (
+        post?.post_type === 'video' &&
         post?.video_url &&
         videoPlatforms.includes(String(post.platform || '').toLowerCase())
       ) {

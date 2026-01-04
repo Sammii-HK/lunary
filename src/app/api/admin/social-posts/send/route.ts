@@ -72,7 +72,10 @@ const buildPlatformPayload = (
 ): PlatformPayload => {
   const platformStr = toPlatformStr(post.platform);
   const content = String(post.content || '').trim();
-  const shouldUseVideo = post.video_url && videoPlatforms.includes(platformStr);
+  const shouldUseVideo =
+    post.post_type === 'video' &&
+    post.video_url &&
+    videoPlatforms.includes(platformStr);
   const scheduleLabel = `Lunary cosmic insight - ${scheduleDate.toLocaleDateString()}`;
 
   let imageUrlForPlatform = post.image_url ? String(post.image_url).trim() : '';
@@ -189,6 +192,7 @@ export async function POST(request: NextRequest) {
       imageUrl,
       videoUrl,
       postType,
+      groupPostIds,
     } = await request.json();
 
     if (!postId || !platform) {
@@ -262,9 +266,21 @@ export async function POST(request: NextRequest) {
       scheduleDate = new Date(Date.now() + 15 * 60 * 1000);
     }
 
+    const groupIds = Array.isArray(groupPostIds)
+      ? groupPostIds
+          .map((id: unknown) => Number(id))
+          .filter((id: number) => Number.isFinite(id))
+      : [];
     const groupKey = primaryPost.base_group_key;
     let groupPosts: DbPostRow[] = [primaryPost];
-    if (groupKey) {
+    if (groupIds.length > 0) {
+      const groupResult = await sql`
+        SELECT id, content, post_type, scheduled_date, image_url, video_url, week_theme, week_start, platform, status, base_group_key, base_post_id
+        FROM social_posts
+        WHERE id = ANY(${groupIds})
+      `;
+      groupPosts = groupResult.rows as DbPostRow[];
+    } else if (groupKey) {
       const groupResult = await sql`
         SELECT id, content, post_type, scheduled_date, image_url, video_url, week_theme, week_start, platform, status, base_group_key, base_post_id
         FROM social_posts
