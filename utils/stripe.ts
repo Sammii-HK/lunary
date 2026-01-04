@@ -28,10 +28,16 @@ export async function createCheckoutSession(
   });
 
   if (!response.ok) {
-    throw new Error('Failed to create checkout session');
+    const error = await response.json().catch(() => ({}));
+    throw new Error(error?.error || 'Failed to create checkout session');
   }
 
-  return response.json();
+  return response.json() as Promise<{
+    sessionId?: string;
+    url?: string;
+    portalUrl?: string;
+    reason?: string;
+  }>;
 }
 
 export async function createCustomerPortalSession(customerId: string) {
