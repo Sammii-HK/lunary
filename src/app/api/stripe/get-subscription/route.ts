@@ -70,15 +70,18 @@ export async function POST(request: NextRequest) {
         // If status is 'cancelled' or forceRefresh is true, verify with Stripe
         // to get accurate cancel_at_period_end status
         let stripeCustomerId = dbRow.stripe_customer_id;
-        if (!stripeCustomerId && dbRow.user_email) {
-          const foundCustomerId = await findCustomerByEmail(dbRow.user_email);
+        const emailForLookup = dbRow.user_email || userEmail;
+        if (!stripeCustomerId && emailForLookup) {
+          const foundCustomerId = await findCustomerByEmail(emailForLookup);
           if (foundCustomerId) {
             stripeCustomerId = foundCustomerId;
             if (userId) {
               try {
                 await sql`
                   UPDATE subscriptions
-                  SET stripe_customer_id = ${stripeCustomerId}, updated_at = NOW()
+                  SET stripe_customer_id = ${stripeCustomerId},
+                      user_email = COALESCE(user_email, ${emailForLookup}),
+                      updated_at = NOW()
                   WHERE user_id = ${userId}
                 `;
               } catch (error) {
@@ -95,7 +98,7 @@ export async function POST(request: NextRequest) {
           const stripeData = await checkStripeForSubscription(
             stripeCustomerId,
             userId,
-            dbRow.user_email || undefined,
+            emailForLookup || undefined,
           );
           if (stripeData) {
             return formatResponse(stripeData, forceRefresh);
