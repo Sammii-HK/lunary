@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getImageBaseUrl } from '@/lib/urls';
+import { getPlatformImageFormat } from '@/lib/social/educational-images';
 
 interface PostContent {
   date: string;
@@ -23,6 +24,7 @@ interface SucculentPostData {
     url: string;
     alt: string;
   }>;
+  variants?: Record<string, { content: string; media?: string[] }>;
 }
 
 export async function POST(request: NextRequest) {
@@ -119,7 +121,10 @@ export async function POST(request: NextRequest) {
       const readableDate = `${formattedDate} at ${formattedTime}`;
 
       // Ensure image URL uses the correct base URL
-      const imageUrl = `${baseUrl}/api/og/cosmic/${dateStr}`;
+      const getCosmicFormat = (platform: string) =>
+        getPlatformImageFormat(platform === 'x' ? 'twitter' : platform);
+      const buildCosmicImageUrl = (platform: string) =>
+        `${baseUrl}/api/og/cosmic/${dateStr}?format=${getCosmicFormat(platform)}`;
 
       const postData: SucculentPostData = {
         accountGroupId,
@@ -130,10 +135,24 @@ export async function POST(request: NextRequest) {
         media: [
           {
             type: 'image',
-            url: imageUrl,
+            url: buildCosmicImageUrl('instagram'),
             alt: `${cosmicContent.primaryEvent.name} - ${cosmicContent.primaryEvent.energy}. Daily cosmic guidance and astronomical insights.`,
           },
         ],
+        variants: {
+          x: {
+            content: socialContent,
+            media: [buildCosmicImageUrl('twitter')],
+          },
+          facebook: {
+            content: socialContent,
+            media: [buildCosmicImageUrl('facebook')],
+          },
+          linkedin: {
+            content: socialContent,
+            media: [buildCosmicImageUrl('linkedin')],
+          },
+        },
       };
 
       console.log(`📅 Post prepared for ${dateStr}:`, {

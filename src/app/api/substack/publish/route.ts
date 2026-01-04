@@ -168,7 +168,7 @@ export async function POST(request: NextRequest) {
           sendVideoFailureNotification();
         });
 
-      // Generate medium-form video (30-60s recap)
+      // Generate medium-form video (30-60s forecast)
       console.log(`🎬 Generating medium-form video for week ${weekOffset}...`);
       fetch(`${baseUrl}/api/video/generate`, {
         method: 'POST',
@@ -191,7 +191,7 @@ export async function POST(request: NextRequest) {
               // Use generated postContent if available, otherwise fall back to default
               const youtubeDescription =
                 videoData.video.postContent ||
-                'Your quick weekly cosmic forecast recap from Lunary';
+                'Your quick weekly cosmic forecast from Lunary';
 
               await fetch(`${baseUrl}/api/youtube/upload`, {
                 method: 'POST',
@@ -199,7 +199,7 @@ export async function POST(request: NextRequest) {
                 body: JSON.stringify({
                   videoUrl: videoData.video.url,
                   videoId: videoData.video.id,
-                  title: `Weekly Cosmic Recap - Week of ${weeklyData.weekStart.toLocaleDateString()}`,
+                  title: `Weekly Cosmic Forecast - Week of ${weeklyData.weekStart.toLocaleDateString()}`,
                   description: youtubeDescription,
                   type: 'short', // YouTube Shorts format
                   // Omit publishDate to post immediately

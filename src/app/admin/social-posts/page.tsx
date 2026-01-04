@@ -75,6 +75,11 @@ type PostGroup = {
   basePost: PendingPost;
 };
 
+const normalizeMediaUrl = (value?: string | null) => {
+  if (!value) return '';
+  return value.split('#')[0]?.split('?')[0]?.trim() || '';
+};
+
 export default function SocialPostsPage() {
   const [activeTab, setActiveTab] = useState<TabType>('approve');
   const [loading, setLoading] = useState(false);
@@ -120,9 +125,11 @@ export default function SocialPostsPage() {
   const [useThematicMode, setUseThematicMode] = useState(true);
   const [replaceExisting, setReplaceExisting] = useState(false);
   const [videosOnly, setVideosOnly] = useState(false);
-  const [dailyCronRunning, setDailyCronRunning] = useState(false);
-  const [dailyCronForceRunning, setDailyCronForceRunning] = useState(false);
   const [videoJobFeedback, setVideoJobFeedback] = useState<string | null>(null);
+  const [requeueingFailed, setRequeueingFailed] = useState(false);
+  const [requeueingProcessing, setRequeueingProcessing] = useState(false);
+  const [processingAllVideos, setProcessingAllVideos] = useState(false);
+  const [processingVideo, setProcessingVideo] = useState(false);
   const [activeVariantByGroup, setActiveVariantByGroup] = useState<
     Record<string, string>
   >({});
@@ -389,7 +396,7 @@ export default function SocialPostsPage() {
   };
 
   const handleProcessVideoJobs = async (force = false) => {
-    setLoading(true);
+    setProcessingVideo(true);
     setVideoJobFeedback(null);
     try {
       const response = await fetch(
@@ -413,7 +420,54 @@ export default function SocialPostsPage() {
     } catch (error) {
       alert('Failed to process video jobs');
     } finally {
-      setLoading(false);
+      setProcessingVideo(false);
+    }
+  };
+
+  const handleProcessAllVideoJobs = async () => {
+    if (!confirm('Process all queued video jobs sequentially?')) return;
+    setProcessingAllVideos(true);
+    setVideoJobFeedback(null);
+    let processedTotal = 0;
+    let loops = 0;
+
+    try {
+      while (true) {
+        loops += 1;
+        const response = await fetch('/api/admin/video-jobs/process?limit=1', {
+          method: 'POST',
+        });
+        const data = await response.json();
+        if (!data.success) {
+          alert(data.error || 'Failed to process video jobs');
+          break;
+        }
+
+        const processed = data.processed ?? 0;
+        if (processed === 0) break;
+
+        processedTotal += processed;
+        setVideoJobFeedback(
+          `Processed ${processedTotal} video job${processedTotal > 1 ? 's' : ''}...`,
+        );
+
+        if (loops >= 25) {
+          alert('Stopped after 25 jobs. Run again if more remain.');
+          break;
+        }
+
+        await new Promise((resolve) => setTimeout(resolve, 1500));
+      }
+    } catch (error) {
+      alert('Failed to process video jobs');
+    } finally {
+      setProcessingAllVideos(false);
+      setVideoJobFeedback(
+        processedTotal > 0
+          ? `Processed ${processedTotal} video job${processedTotal > 1 ? 's' : ''}.`
+          : 'No queued video jobs found.',
+      );
+      loadPendingPosts();
     }
   };
 
@@ -451,6 +505,52 @@ export default function SocialPostsPage() {
       alert('Failed to force rebuild videos');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleRequeueFailedVideos = async () => {
+    if (!confirm('Requeue failed video jobs?')) return;
+    setRequeueingFailed(true);
+    try {
+      const response = await fetch('/api/admin/video-jobs/requeue-failed', {
+        method: 'POST',
+      });
+      const data = await response.json();
+      if (data.success) {
+        alert(
+          `Requeued ${data.requeued} failed job${data.requeued === 1 ? '' : 's'}.`,
+        );
+        loadPendingPosts();
+      } else {
+        alert(data.error || 'Failed to requeue failed jobs.');
+      }
+    } catch (error) {
+      alert('Failed to requeue failed jobs.');
+    } finally {
+      setRequeueingFailed(false);
+    }
+  };
+
+  const handleRequeueProcessingVideos = async () => {
+    if (!confirm('Requeue stuck processing video jobs?')) return;
+    setRequeueingProcessing(true);
+    try {
+      const response = await fetch('/api/admin/video-jobs/requeue-processing', {
+        method: 'POST',
+      });
+      const data = await response.json();
+      if (data.success) {
+        alert(
+          `Requeued ${data.requeued} processing job${data.requeued === 1 ? '' : 's'}.`,
+        );
+        loadPendingPosts();
+      } else {
+        alert(data.error || 'Failed to requeue processing jobs.');
+      }
+    } catch (error) {
+      alert('Failed to requeue processing jobs.');
+    } finally {
+      setRequeueingProcessing(false);
     }
   };
 
@@ -764,33 +864,33 @@ export default function SocialPostsPage() {
     }, 2000);
   };
 
-  const triggerDailyCron = async (force = false, date?: string) => {
-    const confirmMessage = force
-      ? 'Force run daily cron now? This bypasses the duplicate execution guard.'
-      : 'Run daily cron now?';
-    if (!confirm(confirmMessage)) return;
+  const handleGenerateDailyCosmicPost = async () => {
+    const dateInput = prompt(
+      'Generate daily cosmic post for which date? (YYYY-MM-DD, leave blank for tomorrow)',
+    );
+    if (dateInput === null) return;
 
-    force ? setDailyCronForceRunning(true) : setDailyCronRunning(true);
+    const date = dateInput.trim();
+    setLoading(true);
     try {
-      const response = await fetch('/api/admin/cron/daily-posts', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ force, date }),
-      });
+      const response = await fetch(
+        '/api/admin/social-posts/generate-daily-cosmic',
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ date: date || undefined }),
+        },
+      );
       const data = await response.json();
       if (data.success) {
-        alert('Daily cron completed.');
-      } else if (data.skipped) {
-        alert(data.message || 'Daily cron skipped.');
+        alert(data.message || 'Daily cosmic post scheduled.');
       } else {
-        alert(
-          `Daily cron failed: ${data.error || data.message || 'Unknown error'}`,
-        );
+        alert(data.error || data.message || 'Failed to schedule daily post.');
       }
     } catch (error) {
-      alert('Daily cron failed.');
+      alert('Failed to schedule daily post.');
     } finally {
-      force ? setDailyCronForceRunning(false) : setDailyCronRunning(false);
+      setLoading(false);
     }
   };
 
@@ -1178,6 +1278,14 @@ export default function SocialPostsPage() {
                       Week After Next
                     </Button>
                   </div>
+                  <Button
+                    onClick={handleGenerateDailyCosmicPost}
+                    disabled={loading}
+                    variant='outline'
+                    className='border-zinc-700 text-zinc-300 hover:bg-zinc-800'
+                  >
+                    Generate daily cosmic post
+                  </Button>
                 </div>
               </CardContent>
             </Card>
@@ -1262,48 +1370,37 @@ export default function SocialPostsPage() {
                       </Badge>
                     )}
                     {processingVideoCount > 0 && (
-                      <Badge className='bg-lunary-primary-900/30 text-lunary-primary-300 border-lunary-primary-700'>
-                        {processingVideoCount} processing
-                      </Badge>
+                      <button
+                        type='button'
+                        onClick={handleRequeueProcessingVideos}
+                        disabled={requeueingProcessing}
+                        className='disabled:cursor-not-allowed'
+                      >
+                        <Badge className='bg-lunary-primary-900/30 text-lunary-primary-300 border-lunary-primary-700'>
+                          {requeueingProcessing
+                            ? 'Requeuing...'
+                            : `${processingVideoCount} processing`}
+                        </Badge>
+                      </button>
                     )}
                     {failedVideoCount > 0 && (
-                      <Badge className='bg-lunary-error-900/30 text-lunary-error border-lunary-error-700'>
-                        {failedVideoCount} failed
-                      </Badge>
+                      <button
+                        type='button'
+                        onClick={handleRequeueFailedVideos}
+                        disabled={requeueingFailed}
+                        className='disabled:cursor-not-allowed'
+                      >
+                        <Badge className='bg-lunary-error-900/30 text-lunary-error border-lunary-error-700'>
+                          {requeueingFailed
+                            ? 'Requeuing...'
+                            : `${failedVideoCount} failed`}
+                        </Badge>
+                      </button>
                     )}
                   </div>
                 )}
               </div>
               <div className='flex gap-3'>
-                <Button
-                  onClick={() => triggerDailyCron()}
-                  disabled={loading || dailyCronRunning}
-                  variant='outline'
-                  className='border-zinc-700 text-zinc-300 hover:bg-zinc-800'
-                >
-                  {dailyCronRunning ? 'Running cron...' : 'Run daily cron'}
-                </Button>
-                <Button
-                  onClick={() =>
-                    triggerDailyCron(
-                      false,
-                      new Date().toISOString().split('T')[0],
-                    )
-                  }
-                  disabled={loading || dailyCronRunning}
-                  variant='outline'
-                  className='border-zinc-700 text-zinc-300 hover:bg-zinc-800'
-                >
-                  Run for today
-                </Button>
-                <Button
-                  onClick={() => triggerDailyCron(true)}
-                  disabled={loading || dailyCronForceRunning}
-                  variant='outline'
-                  className='border-lunary-error-700 text-lunary-error hover:bg-lunary-error-900/20'
-                >
-                  {dailyCronForceRunning ? 'Forcing...' : 'Force daily cron'}
-                </Button>
                 <Button
                   onClick={() => handleBulkAction('approve_all')}
                   disabled={loading || bulkActionLoading === 'approve_all'}
@@ -1333,11 +1430,26 @@ export default function SocialPostsPage() {
                 </Button>
                 <Button
                   onClick={() => handleProcessVideoJobs()}
-                  disabled={loading}
+                  disabled={processingVideo || processingAllVideos}
                   variant='outline'
                   className='border-zinc-700 text-zinc-300 hover:bg-zinc-800'
                 >
-                  Process videos
+                  {processingVideo ? (
+                    <>
+                      <Loader2 className='h-4 w-4 mr-2 animate-spin' />
+                      Processing...
+                    </>
+                  ) : (
+                    'Process videos'
+                  )}
+                </Button>
+                <Button
+                  onClick={handleProcessAllVideoJobs}
+                  disabled={loading || processingAllVideos}
+                  variant='outline'
+                  className='border-zinc-700 text-zinc-300 hover:bg-zinc-800'
+                >
+                  {processingAllVideos ? 'Processing...' : 'Process all videos'}
                 </Button>
               </div>
             </div>
@@ -1403,6 +1515,13 @@ export default function SocialPostsPage() {
                     group.posts.find((p) => p.platform === activePlatform) ||
                     group.posts[0];
                   const basePost = group.basePost;
+                  const baseVideoUrl = basePost.videoUrl?.trim() || '';
+                  const activeVideoUrl = activePost.videoUrl?.trim() || '';
+                  const showActiveVideo =
+                    Boolean(activeVideoUrl) &&
+                    (normalizeMediaUrl(activeVideoUrl) !==
+                      normalizeMediaUrl(baseVideoUrl) ||
+                      !baseVideoUrl);
                   const activeOverridesBase =
                     activePost &&
                     (activePost.content !== basePost.content ||
@@ -1475,17 +1594,17 @@ export default function SocialPostsPage() {
                       </CardHeader>
                       <CardContent>
                         <div className='space-y-4'>
-                          {basePost.videoUrl && (
+                          {baseVideoUrl && (
                             <div className='relative w-full max-w-md mx-auto'>
                               <video
-                                src={basePost.videoUrl}
+                                src={baseVideoUrl}
                                 controls
                                 className='w-full rounded-lg border border-zinc-700 bg-black'
                               />
                               <div className='absolute top-2 right-2 flex gap-2'>
                                 <button
                                   onClick={() =>
-                                    window.open(basePost.videoUrl, '_blank')
+                                    window.open(baseVideoUrl, '_blank')
                                   }
                                   className='bg-black/70 hover:bg-black/90 text-white px-2 py-1 rounded text-xs flex items-center gap-1'
                                 >
@@ -1612,20 +1731,17 @@ export default function SocialPostsPage() {
                                   </div>
                                 )}
 
-                              {activePost.videoUrl && (
+                              {showActiveVideo && (
                                 <div className='relative w-full max-w-md mx-auto'>
                                   <video
-                                    src={activePost.videoUrl}
+                                    src={activeVideoUrl}
                                     controls
                                     className='w-full rounded-lg border border-zinc-700 bg-black'
                                   />
                                   <div className='absolute top-2 right-2 flex gap-2'>
                                     <button
                                       onClick={() =>
-                                        window.open(
-                                          activePost.videoUrl,
-                                          '_blank',
-                                        )
+                                        window.open(activeVideoUrl, '_blank')
                                       }
                                       className='bg-black/70 hover:bg-black/90 text-white px-2 py-1 rounded text-xs flex items-center gap-1'
                                     >

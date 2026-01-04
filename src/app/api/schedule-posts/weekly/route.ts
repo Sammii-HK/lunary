@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getImageBaseUrl } from '@/lib/urls';
+import { getPlatformImageFormat } from '@/lib/social/educational-images';
 
 interface PostContent {
   date: string;
@@ -113,8 +114,11 @@ export async function POST(request: NextRequest) {
       const readableDate = `${formattedDate} at ${formattedTime}`;
 
       // Ensure image URL uses the correct base URL
-      const storyImageUrl = `${baseUrl}/api/og/cosmic/${dateStr}/story`;
-      const landscapeImageUrl = `${baseUrl}/api/og/cosmic/${dateStr}/landscape`;
+      const getCosmicFormat = (platform: string) =>
+        getPlatformImageFormat(platform === 'x' ? 'twitter' : platform);
+      const buildCosmicImageUrl = (platform: string) =>
+        `${baseUrl}/api/og/cosmic/${dateStr}?format=${getCosmicFormat(platform)}`;
+      const storyImageUrl = buildCosmicImageUrl('instagram');
       const altText = `${cosmicContent.primaryEvent.name} - ${cosmicContent.primaryEvent.energy}. Daily cosmic guidance and astronomical insights.`;
 
       const baseContent = formatCosmicPost(cosmicContent, dateStr);
@@ -128,8 +132,6 @@ export async function POST(request: NextRequest) {
         {};
       const twitterVariantContent = twitterContent.trim();
       const linkedinVariantContent = linkedinContent.trim();
-      const landscapeMediaUrls = [landscapeImageUrl];
-
       const variantEntries: Array<{
         platform: string;
         content: string;
@@ -150,9 +152,10 @@ export async function POST(request: NextRequest) {
       ];
 
       for (const entry of variantEntries) {
+        const platformMediaUrls = [buildCosmicImageUrl(entry.platform)];
         variants[entry.platform] = {
           content: entry.content,
-          media: landscapeMediaUrls,
+          media: platformMediaUrls,
         };
       }
 

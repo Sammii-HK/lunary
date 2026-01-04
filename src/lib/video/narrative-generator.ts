@@ -767,7 +767,7 @@ function generateVideoHashtags(
 
   // Fill remaining slots with relevant categorizing fallback hashtags
   const fallbackHashtags = [
-    '#astrologythreads', // Categorizing hashtag for planetary content
+    '#astroinsights',
     '#planetarytransits', // Categorizing hashtag for transits
     '#cosmicforecast',
     '#weeklyhoroscope',
@@ -983,8 +983,8 @@ Return ONLY the post content text, no markdown, no formatting, just the caption 
     // Format content for Threads if platform is specified
     if (platform === 'threads') {
       postContent = formatContentForThreads(postContent, weeklyData);
-      // Use Threads-specific hashtags (1-3 categorizing hashtags)
-      const hashtags = generateThreadsHashtags(weeklyData);
+      // Use the standard video hashtags (avoid Threads-specific categorizing tags)
+      const hashtags = generateVideoHashtags(weeklyData, videoType);
       postContent = `${postContent}\n\n${hashtags}`;
     } else {
       // Add hashtags for all other platforms (3 hashtags)
@@ -1001,8 +1001,8 @@ Return ONLY the post content text, no markdown, no formatting, just the caption 
     // Format content for Threads if platform is specified
     if (platform === 'threads') {
       fallbackContent = formatContentForThreads(fallbackContent, weeklyData);
-      // Use Threads-specific hashtags (1-3 categorizing hashtags)
-      const hashtags = generateThreadsHashtags(weeklyData);
+      // Use the standard video hashtags (avoid Threads-specific categorizing tags)
+      const hashtags = generateVideoHashtags(weeklyData, videoType);
       fallbackContent = `${fallbackContent}\n\n${hashtags}`;
     } else {
       // Add hashtags for all other platforms (3 hashtags)

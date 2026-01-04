@@ -27,6 +27,9 @@ export type PlatformPayload = {
 };
 
 export const videoPlatforms = ['instagram', 'tiktok', 'threads'];
+const noMediaVariantMode: Record<string, 'noImage' | 'mediaNull'> = {
+  bluesky: 'noImage',
+};
 export const validPlatforms = [
   'twitter',
   'x',
@@ -67,7 +70,10 @@ export const buildPlatformPayload = (
 ): PlatformPayload => {
   const platformStr = toPlatformStr(post.platform);
   const content = String(post.content || '').trim();
-  const shouldUseVideo = post.video_url && videoPlatforms.includes(platformStr);
+  const shouldUseVideo =
+    post.post_type === 'video' &&
+    post.video_url &&
+    videoPlatforms.includes(platformStr);
   const scheduleLabel = `Lunary cosmic insight - ${scheduleDate.toLocaleDateString()}`;
 
   let imageUrlForPlatform = post.image_url ? String(post.image_url).trim() : '';
@@ -202,8 +208,11 @@ export const buildSucculentPostPayload = ({
     baseUrl,
   );
 
-  const basePlatforms = new Set<string>();
-  const variants: Record<string, { content: string; media?: string[] }> = {};
+  const platformsToSend = new Set<string>();
+  const variants: Record<
+    string,
+    { content: string; media?: string[] | null; noImage?: boolean }
+  > = {};
   let pinterestOptions: PlatformPayload['pinterestOptions'];
   let tiktokOptions: PlatformPayload['tiktokOptions'];
   let instagramOptions: PlatformPayload['instagramOptions'];
@@ -233,27 +242,43 @@ export const buildSucculentPostPayload = ({
       payload.content !== basePayload.content ||
       mediaKey !== baseMediaKey;
 
-    if (differs) {
-      variants[payload.platform] = {
+    const dropMediaMode = noMediaVariantMode[payload.platform];
+    const removeMedia = Boolean(dropMediaMode) && basePayload.media.length > 0;
+
+    platformsToSend.add(payload.platform);
+
+    if (differs || removeMedia) {
+      const variant: {
+        content: string;
+        media?: string[] | null;
+        noImage?: boolean;
+      } = {
         content: payload.content,
-        ...(payload.media.length > 0
-          ? { media: payload.media.map((item) => item.url) }
-          : {}),
       };
-    } else {
-      basePlatforms.add(payload.platform);
+
+      if (removeMedia) {
+        if (dropMediaMode === 'noImage') {
+          variant.noImage = true;
+        } else if (dropMediaMode === 'mediaNull') {
+          variant.media = null;
+        }
+      } else if (mediaKey !== baseMediaKey && payload.media.length > 0) {
+        variant.media = payload.media.map((item) => item.url);
+      }
+
+      variants[payload.platform] = variant;
     }
   }
 
-  if (basePlatforms.size === 0) {
-    basePlatforms.add(basePayload.platform);
+  if (platformsToSend.size === 0) {
+    platformsToSend.add(basePayload.platform);
   }
 
   const postData: any = {
     accountGroupId,
     name: `Lunary Post - ${formatReadableDate(scheduleDate)}`,
     content: basePayload.content,
-    platforms: Array.from(basePlatforms),
+    platforms: Array.from(platformsToSend),
     scheduledDate: scheduleDate.toISOString(),
     media: basePayload.media,
   };

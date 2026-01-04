@@ -19,8 +19,18 @@ export async function POST(request: NextRequest) {
         headers: cronSecret ? { Authorization: `Bearer ${cronSecret}` } : {},
       },
     );
-    const data = await response.json();
-    if (!data?.success && !data?.error && Array.isArray(data?.errors)) {
+
+    let data: any = null;
+    try {
+      data = await response.json();
+    } catch (parseError) {
+      console.warn(
+        'Video job processor responded without JSON, returning raw status',
+        parseError,
+      );
+    }
+
+    if (data && !data.success && !data.error && Array.isArray(data.errors)) {
       const errorSummary = data.errors
         .map((item: { jobId?: number; error?: string }) => {
           const id = item.jobId ?? 'unknown';
@@ -32,13 +42,41 @@ export async function POST(request: NextRequest) {
         data.error = errorSummary;
       }
     }
-    return NextResponse.json(data, { status: response.status });
+
+    if (data) {
+      return NextResponse.json(data, { status: response.status });
+    }
+
+    return NextResponse.json(
+      {
+        success: true,
+        warning:
+          'Video processor accepted the request; response will arrive asynchronously.',
+      },
+      { status: 202 },
+    );
   } catch (error) {
     console.error('Failed to trigger video job processor:', error);
+    const message = error instanceof Error ? error.message : 'Unknown error';
+    const cause = (error as any)?.cause;
+    const isTimeout =
+      cause?.name === 'HeadersTimeoutError' ||
+      message?.includes('Headers Timeout');
+    if (isTimeout) {
+      return NextResponse.json(
+        {
+          success: true,
+          warning:
+            'Video job processor is still working. Request timed out waiting for a response.',
+        },
+        { status: 202 },
+      );
+    }
+
     return NextResponse.json(
       {
         success: false,
-        error: error instanceof Error ? error.message : 'Unknown error',
+        error: message,
       },
       { status: 500 },
     );

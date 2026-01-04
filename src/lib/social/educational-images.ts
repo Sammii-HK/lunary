@@ -18,13 +18,13 @@ export interface EducationalImageConfig {
  * Get platform-appropriate image format
  * Uses recommended sizes for each platform:
  * - Landscape (1200x630): Twitter/X, LinkedIn, Bluesky, Facebook
- * - Square (1080x1080): Instagram, Threads, Pinterest
- * - Portrait (1080x1350): Instagram Feed (4:5)
+ * - Square (1080x1080): Threads, Pinterest
+ * - Story (1080x1920): Instagram, TikTok, Stories, Reels
  * - Story (1080x1920): TikTok, Stories, Reels
  */
 export function getPlatformImageFormat(platform: string): ImageFormat {
   const formatMap: Record<string, ImageFormat> = {
-    instagram: 'square', // 1080x1080 for feed
+    instagram: 'story', // 1080x1920 (9:16)
     twitter: 'landscape', // 1200x630 (1.91:1)
     facebook: 'landscape', // 1200x630
     linkedin: 'landscape', // 1200x627 (1.91:1)
@@ -81,8 +81,9 @@ export function getThematicImageUrl(
   slug?: string,
   subtitle?: string,
   cover?: 'tiktok' | 'youtube' | 'true',
+  formatOverride?: ImageFormat,
 ): string {
-  const format = getPlatformImageFormat(platform);
+  const format = formatOverride || getPlatformImageFormat(platform);
   const thematicCategory = mapToThematicCategory(category);
   const normalizedSlug = slug || title.toLowerCase().replace(/\s+/g, '-');
 
@@ -120,6 +121,7 @@ export function getEducationalImageUrl(
   snippet: GrimoireSnippet,
   baseUrl: string,
   platform: string,
+  formatOverride?: ImageFormat,
 ): string {
   // Use the new thematic endpoint
   return getThematicImageUrl(
@@ -128,6 +130,9 @@ export function getEducationalImageUrl(
     baseUrl,
     platform,
     snippet.slug,
+    undefined,
+    undefined,
+    formatOverride,
   );
 }
 
