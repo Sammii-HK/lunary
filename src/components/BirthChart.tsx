@@ -8,7 +8,7 @@ import {
   astroPointSymbols,
 } from '@/constants/symbols';
 import classNames from 'classnames';
-import { formatIsoDateOnly } from '@/lib/date-only';
+import { parseIsoDateOnly } from '@/lib/date-only';
 
 const cx = classNames;
 
@@ -151,7 +151,13 @@ export const BirthChart = ({
         </h2>
         {birthDate && (
           <p className='text-zinc-400 text-xs md:text-sm'>
-            {formatIsoDateOnly(birthDate, 'en-US')}
+            {(() => {
+              const parsed = parseIsoDateOnly(birthDate);
+              if (!parsed) return birthDate;
+              return new Intl.DateTimeFormat(undefined, {
+                dateStyle: 'long',
+              }).format(parsed);
+            })()}
           </p>
         )}
       </div>

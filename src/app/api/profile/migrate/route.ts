@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { sql } from '@vercel/postgres';
 import { getCurrentUser } from '@/lib/get-user-session';
 import { encrypt } from '@/lib/encryption';
+import { normalizeIsoDateOnly } from '@/lib/date-only';
 
 export async function GET(request: NextRequest) {
   try {
@@ -58,9 +59,13 @@ export async function POST(request: NextRequest) {
       stripeCustomerId,
     } = body;
 
+    const normalizedBirthday = normalizeIsoDateOnly(birthday);
+
     // Encrypt sensitive PII data
     const encryptedName = name ? encrypt(name) : null;
-    const encryptedBirthday = birthday ? encrypt(birthday) : null;
+    const encryptedBirthday = normalizedBirthday
+      ? encrypt(normalizedBirthday)
+      : null;
 
     await sql`
       INSERT INTO user_profiles (

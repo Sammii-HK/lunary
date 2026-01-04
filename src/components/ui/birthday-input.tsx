@@ -85,6 +85,7 @@ export function BirthdayInput({
     formatDisplayDate(value, format),
   );
   const [error, setError] = useState<string | null>(null);
+  const [warning, setWarning] = useState<string | null>(null);
   const [touched, setTouched] = useState(false);
 
   useEffect(() => {
@@ -121,6 +122,7 @@ export function BirthdayInput({
       setInputValue(formatted);
       setTouched(true);
       setError(null);
+      setWarning(null);
 
       const digitsOnly = raw.replace(/\D/g, '');
       if (digitsOnly.length >= 8) {
@@ -128,6 +130,21 @@ export function BirthdayInput({
         if (parsed) {
           onChange(parsed);
           setError(null);
+          const birthDate = new Date(parsed);
+          const today = new Date();
+          let age = today.getFullYear() - birthDate.getFullYear();
+          const hasHadBirthdayThisYear =
+            today.getMonth() > birthDate.getMonth() ||
+            (today.getMonth() === birthDate.getMonth() &&
+              today.getDate() >= birthDate.getDate());
+          if (!hasHadBirthdayThisYear) {
+            age -= 1;
+          }
+          if (age < 13) {
+            setWarning('Please double-check this birthday (under 13).');
+          } else if (age > 120) {
+            setWarning('Please double-check this birthday (over 120).');
+          }
         }
       }
     },
@@ -145,8 +162,26 @@ export function BirthdayInput({
       onChange(parsed);
       setInputValue(formatDisplayDate(parsed, format));
       setError(null);
+      const birthDate = new Date(parsed);
+      const today = new Date();
+      let age = today.getFullYear() - birthDate.getFullYear();
+      const hasHadBirthdayThisYear =
+        today.getMonth() > birthDate.getMonth() ||
+        (today.getMonth() === birthDate.getMonth() &&
+          today.getDate() >= birthDate.getDate());
+      if (!hasHadBirthdayThisYear) {
+        age -= 1;
+      }
+      if (age < 13) {
+        setWarning('Please double-check this birthday (under 13).');
+      } else if (age > 120) {
+        setWarning('Please double-check this birthday (over 120).');
+      } else {
+        setWarning(null);
+      }
     } else if (inputValue.trim()) {
       setError(`Please enter a valid date (${placeholder})`);
+      setWarning(null);
     }
   }, [inputValue, format, onChange, placeholder]);
 
@@ -183,6 +218,9 @@ export function BirthdayInput({
         )}
       />
       {error && <p className='mt-1 text-xs text-red-400'>{error}</p>}
+      {!error && warning && (
+        <p className='mt-1 text-xs text-amber-300'>{warning}</p>
+      )}
       <p className='mt-1 text-xs text-zinc-400'>Format: {placeholder}</p>
     </div>
   );

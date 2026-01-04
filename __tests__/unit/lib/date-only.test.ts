@@ -1,4 +1,8 @@
-import { formatIsoDateOnly, parseIsoDateOnly } from '@/lib/date-only';
+import {
+  formatIsoDateOnly,
+  parseIsoDateOnly,
+  normalizeIsoDateOnly,
+} from '@/lib/date-only';
 
 describe('date-only helpers', () => {
   it('parses ISO dates without shifting local components', () => {
@@ -22,5 +26,9 @@ describe('date-only helpers', () => {
 
   it('falls back to the input when formatting invalid dates', () => {
     expect(formatIsoDateOnly('not-a-date', 'en-US')).toBe('not-a-date');
+  });
+
+  it('normalizes ISO date-only values from full timestamps', () => {
+    expect(normalizeIsoDateOnly('1993-09-06T00:00:00.000Z')).toBe('1993-09-06');
   });
 });
