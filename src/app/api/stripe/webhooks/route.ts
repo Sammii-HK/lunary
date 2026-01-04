@@ -344,6 +344,16 @@ async function handleSubscriptionChange(
     }
   }
 
+  if (userId && customerId) {
+    try {
+      await stripe.customers.update(customerId, {
+        metadata: { userId },
+      });
+    } catch (error) {
+      console.error('Failed to backfill customer metadata:', error);
+    }
+  }
+
   // Analytics
   if (userId) {
     if (isNew) {
