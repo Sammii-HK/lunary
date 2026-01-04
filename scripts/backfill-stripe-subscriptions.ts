@@ -23,6 +23,13 @@ const SUBSCRIPTION_COLUMNS = [
   'discount_ends_at',
   'trial_used',
 ];
+const UPDATE_CHECK_COLUMNS = [
+  'user_id',
+  'stripe_customer_id',
+  'stripe_subscription_id',
+  'plan_type',
+  'status',
+];
 
 function getStripe() {
   if (!process.env.STRIPE_SECRET_KEY) {
@@ -218,6 +225,45 @@ async function getSubscriptionColumns() {
   return new Set(result.rows.map((row) => row.column_name as string));
 }
 
+function normalizeValue(value: unknown) {
+  if (value === undefined || value === null) return null;
+  if (value instanceof Date) return value.toISOString();
+  return value;
+}
+
+function valuesEqual(a: unknown, b: unknown) {
+  const normalizedA = normalizeValue(a);
+  const normalizedB = normalizeValue(b);
+  if (normalizedA === null && normalizedB === null) return true;
+  return String(normalizedA) === String(normalizedB);
+}
+
+async function getExistingSubscription(userId: string, columns: string[]) {
+  if (columns.length === 0) return null;
+  const query = `
+    SELECT ${columns.join(', ')}
+    FROM subscriptions
+    WHERE user_id = $1
+    LIMIT 1
+  `;
+  const result = await sql.query(query, [userId]);
+  return result.rows[0] || null;
+}
+
+function needsUpdate(
+  existing: Record<string, unknown> | null,
+  payload: Record<string, unknown>,
+  columns: string[],
+) {
+  if (!existing) return true;
+  for (const column of columns) {
+    if (!valuesEqual(existing[column], payload[column])) {
+      return true;
+    }
+  }
+  return false;
+}
+
 function buildSubscriptionUpsert(
   existingColumns: Set<string>,
   data: Record<string, unknown>,
@@ -264,6 +310,7 @@ async function main() {
   let startingAfter: string | undefined;
   let processed = 0;
   let updated = 0;
+  let unchanged = 0;
   let skipped = 0;
   let unresolved = 0;
 
@@ -335,7 +382,7 @@ async function main() {
           ).toISOString()
         : null;
 
-      const payload = {
+      const payload: Record<string, unknown> = {
         user_id: userId,
         user_email: customer.email,
         status,
@@ -353,16 +400,40 @@ async function main() {
         trial_used: true,
       };
 
+      const insertColumns = SUBSCRIPTION_COLUMNS.filter((column) =>
+        subscriptionColumns.has(column),
+      );
+      const updateCheckColumns = UPDATE_CHECK_COLUMNS.filter((column) =>
+        subscriptionColumns.has(column),
+      );
+      const existingRow = await getExistingSubscription(
+        userId,
+        updateCheckColumns,
+      );
+      const shouldUpdate = needsUpdate(
+        existingRow,
+        payload,
+        updateCheckColumns,
+      );
+
       if (dryRun) {
-        console.log(
-          `🧪 ${userId} -> ${subscription.id} (${status}, ${planType})`,
-        );
+        if (shouldUpdate) {
+          console.log(
+            `🧪 ${userId} -> ${subscription.id} (${status}, ${planType})`,
+          );
+        } else {
+          unchanged += 1;
+        }
       } else {
-        const { query, values } = buildSubscriptionUpsert(
-          subscriptionColumns,
-          payload,
-        );
-        await sql.query(query, values);
+        if (shouldUpdate) {
+          const { query, values } = buildSubscriptionUpsert(
+            subscriptionColumns,
+            payload,
+          );
+          await sql.query(query, values);
+        } else {
+          unchanged += 1;
+        }
 
         await sql`
           INSERT INTO user_profiles (user_id, stripe_customer_id)
@@ -385,7 +456,9 @@ async function main() {
         }
       }
 
-      updated += 1;
+      if (shouldUpdate) {
+        updated += 1;
+      }
     }
 
     if (limit && processed >= limit) {
@@ -398,6 +471,7 @@ async function main() {
   console.log('✅ Backfill complete');
   console.log(`Processed: ${processed}`);
   console.log(`Updated: ${updated}`);
+  console.log(`Unchanged: ${unchanged}`);
   console.log(`Skipped: ${skipped}`);
   console.log(`Unresolved: ${unresolved}`);
 

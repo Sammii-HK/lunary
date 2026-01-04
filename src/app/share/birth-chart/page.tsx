@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { Sparkles } from 'lucide-react';
+import { parseIsoDateOnly } from '@/lib/date-only';
 
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? 'https://lunary.app';
 
@@ -193,6 +194,14 @@ export default async function ShareBirthChartPage({
   const insight = truncate(toStringParam(resolvedSearchParams.insight));
   const keywords = parseKeywords(resolvedSearchParams.keywords);
   const date = toStringParam(resolvedSearchParams.date);
+  const formattedDate = (() => {
+    if (!date) return null;
+    const parsed = parseIsoDateOnly(date);
+    if (!parsed) return date;
+    return new Intl.DateTimeFormat('en-US', { dateStyle: 'long' }).format(
+      parsed,
+    );
+  })();
 
   return (
     <div className='min-h-screen w-full bg-gradient-to-br from-zinc-950 via-blue-950 to-indigo-900 text-white'>
@@ -207,8 +216,8 @@ export default async function ShareBirthChartPage({
               : 'Birth Chart Highlights'}
           </h1>
           <p className='mt-2 text-sm text-lunary-secondary-200'>
-            {date
-              ? `Generated for ${new Date(date).toLocaleDateString('en-US')}`
+            {formattedDate
+              ? `Generated for ${formattedDate}`
               : 'Personalized cosmic profile'}
           </p>
 

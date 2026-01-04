@@ -421,6 +421,10 @@ export async function POST(request: NextRequest) {
       allow_promotion_codes: true,
     };
 
+    if (userId) {
+      sessionConfig.client_reference_id = userId;
+    }
+
     // Apply promo/discount code if provided
 
     if (normalizedPromoCode) {

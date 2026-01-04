@@ -7,13 +7,6 @@ const camelToKebab = (str: string) =>
     .replace(/^-/, '');
 
 function handleLegacyGrimoireRedirects(pathname: string): string | null {
-  const tarotSuitMatch = pathname.match(
-    /^\/grimoire\/tarot\/(swords|cups|wands|pentacles)\/([a-zA-Z]+)$/,
-  );
-  if (tarotSuitMatch) {
-    return `/grimoire/tarot/${camelToKebab(tarotSuitMatch[2])}`;
-  }
-
   if (pathname.includes(' ') || pathname.includes('%20')) {
     const decoded = decodeURIComponent(pathname);
     if (decoded.includes(' ')) {

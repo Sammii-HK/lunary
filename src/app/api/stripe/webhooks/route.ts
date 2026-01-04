@@ -169,6 +169,12 @@ export async function POST(request: NextRequest) {
           event.data.object as Stripe.Subscription,
         );
         break;
+
+      case 'checkout.session.completed':
+        await handleCheckoutSessionCompleted(
+          event.data.object as Stripe.Checkout.Session,
+        );
+        break;
     }
 
     return NextResponse.json({ received: true });
@@ -251,6 +257,19 @@ async function handleSubscriptionChange(
       userId = emailMatch.rows[0]?.user_id || null;
     } catch (error) {
       console.error('Failed to match user by email:', error);
+    }
+  }
+
+  if (!userId && userEmail) {
+    try {
+      const userMatch = await sql`
+        SELECT id FROM "user"
+        WHERE LOWER(email) = LOWER(${userEmail})
+        LIMIT 1
+      `;
+      userId = userMatch.rows[0]?.id || null;
+    } catch (error) {
+      console.error('Failed to match user by auth email:', error);
     }
   }
 
@@ -387,6 +406,74 @@ async function handleSubscriptionChange(
       });
     }
   }
+}
+
+async function handleCheckoutSessionCompleted(
+  session: Stripe.Checkout.Session,
+) {
+  if (session.mode !== 'subscription') return;
+
+  const stripe = getStripe();
+  const customerId = session.customer as string | null;
+  const subscriptionId = session.subscription as string | null;
+  if (!customerId || !subscriptionId) return;
+
+  const userIdFromSession =
+    (typeof session.client_reference_id === 'string' &&
+      session.client_reference_id.trim().length > 0 &&
+      session.client_reference_id.trim()) ||
+    (typeof session.metadata?.userId === 'string' &&
+      session.metadata.userId.trim().length > 0 &&
+      session.metadata.userId.trim()) ||
+    null;
+
+  let customer: Stripe.Customer | null = null;
+  try {
+    const fetched = await stripe.customers.retrieve(customerId);
+    if (!('deleted' in fetched)) {
+      customer = fetched;
+    }
+  } catch (error) {
+    console.error('Failed to retrieve checkout customer:', error);
+  }
+
+  if (userIdFromSession && customer) {
+    try {
+      await stripe.customers.update(customerId, {
+        metadata: { ...(customer.metadata || {}), userId: userIdFromSession },
+      });
+    } catch (error) {
+      console.error('Failed to update customer metadata from checkout:', error);
+    }
+  }
+
+  let subscription: Stripe.Subscription | null = null;
+  try {
+    subscription = await stripe.subscriptions.retrieve(subscriptionId);
+  } catch (error) {
+    console.error('Failed to retrieve subscription from checkout:', error);
+  }
+
+  if (!subscription) return;
+
+  if (userIdFromSession && !subscription.metadata?.userId) {
+    try {
+      await stripe.subscriptions.update(subscriptionId, {
+        metadata: {
+          ...(subscription.metadata || {}),
+          userId: userIdFromSession,
+        },
+      });
+      subscription = await stripe.subscriptions.retrieve(subscriptionId);
+    } catch (error) {
+      console.error(
+        'Failed to update subscription metadata from checkout:',
+        error,
+      );
+    }
+  }
+
+  await handleSubscriptionChange(subscription, false);
 }
 
 async function handleSubscriptionDeleted(subscription: Stripe.Subscription) {

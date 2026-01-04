@@ -2,65 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { sql } from '@vercel/postgres';
 import { getCurrentUser } from '@/lib/get-user-session';
 import { encrypt, decrypt } from '@/lib/encryption';
-
-// Migrate data from Jazz if profile is empty/missing
-async function migrateFromJazz(userId: string) {
-  try {
-    const { loadJazzProfile } = await import('@/lib/jazz/server');
-    const jazzProfile = await loadJazzProfile(userId);
-
-    if (!jazzProfile) return null;
-
-    const jazzData = {
-      name: (jazzProfile as any)?.name || null,
-      birthday: (jazzProfile as any)?.birthday || null,
-      birthChart: (jazzProfile as any)?.birthChart || null,
-      personalCard: (jazzProfile as any)?.personalCard || null,
-      location: (jazzProfile as any)?.location || null,
-    };
-
-    // Only save if we have any data
-    if (
-      jazzData.name ||
-      jazzData.birthday ||
-      jazzData.birthChart ||
-      jazzData.personalCard ||
-      jazzData.location
-    ) {
-      // Encrypt sensitive PII data
-      const encryptedName = jazzData.name ? encrypt(jazzData.name) : null;
-      const encryptedBirthday = jazzData.birthday
-        ? encrypt(jazzData.birthday)
-        : null;
-
-      await sql`
-        INSERT INTO user_profiles (user_id, name, birthday, birth_chart, personal_card, location)
-        VALUES (
-          ${userId}, 
-          ${encryptedName}, 
-          ${encryptedBirthday},
-          ${jazzData.birthChart ? JSON.stringify(jazzData.birthChart) : null}::jsonb,
-          ${jazzData.personalCard ? JSON.stringify(jazzData.personalCard) : null}::jsonb,
-          ${jazzData.location ? JSON.stringify(jazzData.location) : null}::jsonb
-        )
-        ON CONFLICT (user_id) DO UPDATE SET
-          name = COALESCE(user_profiles.name, EXCLUDED.name),
-          birthday = COALESCE(user_profiles.birthday, EXCLUDED.birthday),
-          birth_chart = COALESCE(user_profiles.birth_chart, EXCLUDED.birth_chart),
-          personal_card = COALESCE(user_profiles.personal_card, EXCLUDED.personal_card),
-          location = COALESCE(user_profiles.location, EXCLUDED.location),
-          updated_at = NOW()
-      `;
-
-      console.log(`[Profile] Migrated Jazz data for user ${userId}`);
-    }
-
-    return jazzData;
-  } catch (error) {
-    console.error('[Profile] Jazz migration failed:', error);
-    return null;
-  }
-}
+import { normalizeIsoDateOnly } from '@/lib/date-only';
 
 export async function GET(request: NextRequest) {
   try {
@@ -76,19 +18,6 @@ export async function GET(request: NextRequest) {
 
     let profile = profileResult.rows[0] || null;
 
-    // Self-healing: if no profile or missing key data, try Jazz migration
-    if (!profile || (!profile.birthday && !profile.birth_chart)) {
-      const jazzData = await migrateFromJazz(user.id);
-
-      if (jazzData) {
-        // Refetch after migration
-        profileResult = await sql`
-          SELECT * FROM user_profiles WHERE user_id = ${user.id} LIMIT 1
-        `;
-        profile = profileResult.rows[0] || null;
-      }
-    }
-
     // Get subscription from subscriptions table
     const subscriptionResult = await sql`
       SELECT * FROM subscriptions WHERE user_id = ${user.id} LIMIT 1
@@ -97,9 +26,10 @@ export async function GET(request: NextRequest) {
 
     // Decrypt sensitive PII fields (name and birthday are encrypted)
     const decryptedName = profile?.name ? decrypt(profile.name) : null;
-    const decryptedBirthday = profile?.birthday
+    const decryptedBirthdayRaw = profile?.birthday
       ? decrypt(profile.birthday)
       : null;
+    const decryptedBirthday = normalizeIsoDateOnly(decryptedBirthdayRaw);
 
     return NextResponse.json({
       profile: profile
@@ -164,9 +94,13 @@ export async function PUT(request: NextRequest) {
       userEmail,
     } = body;
 
+    const normalizedBirthday = normalizeIsoDateOnly(birthday);
+
     // Encrypt sensitive PII data
     const encryptedName = name ? encrypt(name) : null;
-    const encryptedBirthday = birthday ? encrypt(birthday) : null;
+    const encryptedBirthday = normalizedBirthday
+      ? encrypt(normalizedBirthday)
+      : null;
 
     const result = await sql`
       INSERT INTO user_profiles (

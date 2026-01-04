@@ -44,11 +44,11 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const { userId, customerId, forceRefresh } = body;
+    let { userId, customerId, forceRefresh, userEmail } = body;
 
-    if (!userId && !customerId) {
+    if (!userId && !customerId && !userEmail) {
       return NextResponse.json(
-        { error: 'userId or customerId is required' },
+        { error: 'userId, customerId, or userEmail is required' },
         { status: 400 },
       );
     }
@@ -110,9 +110,20 @@ export async function POST(request: NextRequest) {
       }
     }
 
+    if (!customerId && userEmail) {
+      const foundCustomerId = await findCustomerByEmail(userEmail);
+      if (foundCustomerId) {
+        customerId = foundCustomerId;
+      }
+    }
+
     // Fallback: check Stripe directly (for users not yet in DB)
     if (customerId) {
-      const stripeData = await checkStripeForSubscription(customerId, userId);
+      const stripeData = await checkStripeForSubscription(
+        customerId,
+        userId,
+        userEmail,
+      );
       if (stripeData) {
         return formatResponse(stripeData, forceRefresh);
       }
