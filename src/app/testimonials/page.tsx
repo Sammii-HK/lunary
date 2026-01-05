@@ -1,19 +1,45 @@
-import { Heading } from '@/components/ui/Heading';
-import { prisma } from '@/lib/prisma';
+'use client';
+
+import { useEffect, useState } from 'react';
 import { formatDistanceToNow } from 'date-fns';
 
-const PAGE_LIMIT = 8;
-
-const getFeaturedTestimonials = async () => {
-  return prisma.testimonial.findMany({
-    where: { isPublished: true },
-    orderBy: { createdAt: 'desc' },
-    take: PAGE_LIMIT,
-  });
+type Testimonial = {
+  id: number;
+  name: string;
+  message: string;
+  createdAt: string;
 };
 
-export default async function TestimonialsPage() {
-  const testimonials = await getFeaturedTestimonials();
+export default function TestimonialsPage() {
+  const [testimonials, setTestimonials] = useState<Testimonial[] | null>(null);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    let mounted = true;
+
+    const loadTestimonials = async () => {
+      try {
+        const response = await fetch('/api/testimonials');
+        if (!response.ok) {
+          throw new Error('Unable to load testimonials');
+        }
+
+        const payload = await response.json();
+        if (!mounted) return;
+        setTestimonials(payload.testimonials ?? []);
+      } catch (err) {
+        if (!mounted) return;
+        setError(
+          err instanceof Error ? err.message : 'Unable to load testimonials.',
+        );
+      }
+    };
+
+    loadTestimonials();
+    return () => {
+      mounted = false;
+    };
+  }, []);
 
   return (
     <main className='flex flex-col min-h-screen w-full px-4 py-16'>
@@ -22,9 +48,9 @@ export default async function TestimonialsPage() {
           <p className='text-xs tracking-[0.4em] uppercase text-lunary-accent'>
             Featured Voices
           </p>
-          <Heading as='h1' variant='h1'>
+          <h1 className='text-3xl font-semibold leading-tight text-white md:text-4xl lg:text-5xl'>
             Stories curated from our community.
-          </Heading>
+          </h1>
           <p className='text-base text-zinc-300'>
             These testimonials were handpicked by the Lunary team. They
             highlight how cosmic guidance, rituals, and the app experience
@@ -33,7 +59,16 @@ export default async function TestimonialsPage() {
         </section>
 
         <section className='space-y-6'>
-          {testimonials.length === 0 ? (
+          {error && (
+            <div className='rounded-3xl border border-red-500/40 bg-red-500/10 p-8 text-center text-sm text-red-300'>
+              {error}
+            </div>
+          )}
+          {testimonials === null ? (
+            <div className='rounded-3xl border border-zinc-800/60 bg-zinc-900/60 p-8 text-center text-sm text-zinc-400'>
+              Loading stories…
+            </div>
+          ) : testimonials.length === 0 ? (
             <div className='rounded-3xl border border-zinc-800/60 bg-zinc-900/60 p-8 text-center text-sm text-zinc-400'>
               No featured testimonials yet. Check back soon for fresh stories.
             </div>
