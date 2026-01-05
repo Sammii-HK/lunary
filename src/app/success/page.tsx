@@ -19,6 +19,7 @@ interface CheckoutSession {
     metadata?: {
       planType?: string;
       plan_id?: string;
+      userId?: string;
     };
   };
   metadata?: {

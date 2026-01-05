@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { sql } from '@vercel/postgres';
 
+const toIntArrayLiteral = (values: number[]) =>
+  `{${values.map((value) => Number(value)).join(',')}}`;
+
 type YouTubeUploadResult = {
   success: boolean;
   videoId?: string;
@@ -155,21 +158,23 @@ export async function POST(request: NextRequest) {
           WHERE id = ${parsedPostId}
         `;
       } else {
+        const idsArrayLiteral = toIntArrayLiteral(idsToUpdate);
         await sql`
           UPDATE social_posts
           SET status = ${status}, updated_at = NOW()
-          WHERE id = ANY(${idsToUpdate})
+          WHERE id = ANY(${idsArrayLiteral}::int[])
         `;
       }
 
       if (editedContent || improvementNotes) {
         const remainingIds = idsToUpdate.filter((id) => id !== parsedPostId);
         if (remainingIds.length > 0) {
+          const remainingIdsArrayLiteral = toIntArrayLiteral(remainingIds);
           await sql`
-            UPDATE social_posts
-            SET status = ${status}, updated_at = NOW()
-            WHERE id = ANY(${remainingIds})
-          `;
+          UPDATE social_posts
+          SET status = ${status}, updated_at = NOW()
+          WHERE id = ANY(${remainingIdsArrayLiteral}::int[])
+        `;
         }
       }
 

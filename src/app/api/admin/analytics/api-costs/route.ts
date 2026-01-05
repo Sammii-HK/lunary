@@ -63,7 +63,7 @@ export async function GET(request: NextRequest) {
       SELECT 
         DATE(created_at) as date,
         COUNT(*) as generations,
-        SUM(input_tokens + output_tokens) as total_tokens
+      SUM(token_count) as total_tokens
       FROM analytics_ai_usage
       WHERE created_at >= ${formatTimestamp(range.start)}
         AND created_at <= ${formatTimestamp(range.end)}

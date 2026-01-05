@@ -48,6 +48,9 @@ const validPlatforms = [
   'youtube',
 ];
 
+const toIntArrayLiteral = (values: number[]) =>
+  `{${values.map((value) => Number(value)).join(',')}}`;
+
 const toPlatformStr = (platform: string) =>
   String(platform).toLowerCase().trim();
 
@@ -277,10 +280,11 @@ export async function POST(request: NextRequest) {
     const groupKey = primaryPost.base_group_key;
     let groupPosts: DbPostRow[] = [primaryPost];
     if (groupIds.length > 0) {
+      const groupIdsArrayLiteral = toIntArrayLiteral(groupIds);
       const groupResult = await sql`
         SELECT id, content, post_type, scheduled_date, image_url, video_url, week_theme, week_start, platform, status, base_group_key, base_post_id
         FROM social_posts
-        WHERE id = ANY(${groupIds})
+        WHERE id = ANY(${groupIdsArrayLiteral}::int[])
       `;
       groupPosts = groupResult.rows as DbPostRow[];
     } else if (groupKey) {
