@@ -4,16 +4,9 @@ import { useEffect, useState, lazy, Suspense } from 'react';
 import { Calendar, TrendingUp, Sparkles, BarChart3 } from 'lucide-react';
 import { useAuthStatus } from './AuthStatus';
 import { SharePersonalized } from './SharePersonalized';
+import type { UsagePattern as ChartUsagePattern } from './charts/UsageChart';
 
 const UsageChart = lazy(() => import('./charts/UsageChart'));
-
-interface UsagePattern {
-  date: string;
-  tarotReadings: number;
-  journalEntries: number;
-  aiChats: number;
-  rituals: number;
-}
 
 interface TrendComparison {
   thisMonth: number;
@@ -32,7 +25,7 @@ interface MonthlyInsight {
   journalCount?: number;
   transitImpacts?: Array<{ aspect: string; count: number }>;
   summary?: string;
-  usagePatterns?: UsagePattern[];
+  usagePatterns?: ChartUsagePattern[];
   trends?: {
     tarot: TrendComparison;
     journal: TrendComparison;

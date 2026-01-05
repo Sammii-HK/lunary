@@ -42,6 +42,7 @@ import {
   RefreshCw,
   ShieldCheck,
   Key,
+  Quote,
 } from 'lucide-react';
 
 interface AdminTool {
@@ -746,6 +747,15 @@ export default function AdminDashboard() {
       icon: <Calendar className='h-5 w-5' />,
       category: 'automation',
     },
+    {
+      title: 'Testimonials',
+      description:
+        'Review submissions and feature the ones that make the community shine',
+      href: '/admin/testimonials',
+      icon: <Quote className='h-5 w-5 text-lunary-accent' />,
+      category: 'content',
+      status: 'new',
+    },
   ];
 
   // Section 5: Debug & Testing
@@ -780,7 +790,7 @@ export default function AdminDashboard() {
       title: 'Analytics',
       icon: <Activity className='h-5 w-5 md:h-6 md:w-6' />,
       tools: analyticsTools,
-      color: 'from-orange-600/20 to-orange-600/5',
+      color: 'from-pink-600/20 to-pink-600/5',
       iconColor: 'text-lunary-rose',
       borderColor: 'border-lunary-rose-700',
     },

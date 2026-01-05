@@ -104,3 +104,14 @@ model GptBridgeLog {
   @@index([level], name: "idx_gpt_bridge_logs_level")
   @@map("gpt_bridge_logs")
 }
+
+model Testimonial {
+  id          Int      @id @default(autoincrement())
+  name        String
+  message     String   @db.Text
+  isPublished Boolean  @default(false) @map("is_published")
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  @@map("testimonials")
+  @@index([isPublished], name: "idx_testimonials_is_published")
+}

@@ -1,5 +1,7 @@
 'use client';
 
+'use client';
+
 import {
   LineChart,
   Line,
@@ -10,24 +12,43 @@ import {
   ResponsiveContainer,
 } from 'recharts';
 
-interface UsagePattern {
+export interface UsagePattern {
   date: string;
-  tarotReadings: number;
-  journalEntries: number;
-  aiChats: number;
-  rituals: number;
+  [key: string]: number | string | undefined;
+}
+
+export interface UsageChartSeries {
+  dataKey: string;
+  name: string;
+  stroke: string;
+  strokeWidth?: number;
+  strokeDasharray?: string;
 }
 
 interface UsageChartProps {
   data: UsagePattern[];
+  series?: UsageChartSeries[];
+  height?: number;
 }
 
-export default function UsageChart({ data }: UsageChartProps) {
+const defaultSeries: UsageChartSeries[] = [
+  { dataKey: 'tarotReadings', name: 'Tarot', stroke: '#a855f7' },
+  { dataKey: 'journalEntries', name: 'Journal', stroke: '#ec4899' },
+  { dataKey: 'rituals', name: 'Rituals', stroke: '#f59e0b' },
+];
+
+export default function UsageChart({
+  data,
+  series,
+  height = 192,
+}: UsageChartProps) {
+  const chartSeries = series ?? defaultSeries;
+
   return (
-    <div className='h-48'>
+    <div className='w-full' style={{ height }}>
       <ResponsiveContainer width='100%' height='100%'>
         <LineChart data={data}>
-          <CartesianGrid strokeDasharray='3 3' stroke='#3f3f46' opacity={0.3} />
+          <CartesianGrid strokeDasharray='3 3' stroke='#3f3f46' opacity={0.2} />
           <XAxis
             dataKey='date'
             tick={{ fill: '#a1a1aa', fontSize: 10 }}
@@ -49,30 +70,18 @@ export default function UsageChart({ data }: UsageChartProps) {
               return date.toLocaleDateString();
             }}
           />
-          <Line
-            type='monotone'
-            dataKey='tarotReadings'
-            stroke='#a855f7'
-            strokeWidth={2}
-            dot={false}
-            name='Tarot'
-          />
-          <Line
-            type='monotone'
-            dataKey='journalEntries'
-            stroke='#ec4899'
-            strokeWidth={2}
-            dot={false}
-            name='Journal'
-          />
-          <Line
-            type='monotone'
-            dataKey='rituals'
-            stroke='#f59e0b'
-            strokeWidth={2}
-            dot={false}
-            name='Rituals'
-          />
+          {chartSeries.map((seriesConfig) => (
+            <Line
+              key={seriesConfig.dataKey}
+              type='monotone'
+              dataKey={seriesConfig.dataKey}
+              stroke={seriesConfig.stroke}
+              strokeWidth={seriesConfig.strokeWidth ?? 2}
+              dot={false}
+              strokeDasharray={seriesConfig.strokeDasharray}
+              name={seriesConfig.name}
+            />
+          ))}
         </LineChart>
       </ResponsiveContainer>
     </div>
