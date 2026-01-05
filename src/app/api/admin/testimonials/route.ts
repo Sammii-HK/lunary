@@ -1,26 +1,66 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
+import { sql } from '@vercel/postgres';
 
-const POSTGRES_URL = process.env.POSTGRES_URL;
-
-type Row = {
+type TestimonialRow = {
   id: number;
   name: string;
   message: string;
-  createdAt: Date;
+  isPublished: boolean;
+  createdAt: string;
 };
 
 export async function GET() {
-  if (!POSTGRES_URL) {
-    return NextResponse.json({
-      testimonials: [],
-    });
+  const result = await sql<TestimonialRow>`
+    SELECT
+      id,
+      name,
+      message,
+      is_published AS "isPublished",
+      created_at AS "createdAt"
+    FROM testimonials
+    ORDER BY created_at DESC
+  `;
+
+  return NextResponse.json({ testimonials: result.rows });
+}
+
+export async function PATCH(request: NextRequest) {
+  let payload: { id?: number; isPublished?: boolean };
+
+  try {
+    payload = (await request.json()) as { id?: number; isPublished?: boolean };
+  } catch (error) {
+    return NextResponse.json({ error: 'Invalid JSON body.' }, { status: 400 });
   }
 
-  const { prisma } = await import('@/lib/prisma');
+  const { id, isPublished } = payload;
 
-  const testimonials = await prisma.testimonial.findMany({
-    orderBy: { createdAt: 'desc' },
-  });
+  if (typeof id !== 'number' || typeof isPublished !== 'boolean') {
+    return NextResponse.json(
+      { error: 'Missing or invalid id/isPublished values.' },
+      { status: 400 },
+    );
+  }
 
-  return NextResponse.json({ testimonials });
+  try {
+    const result = await sql<TestimonialRow>`
+      UPDATE testimonials
+      SET is_published = ${isPublished}
+      WHERE id = ${id}
+      RETURNING
+        id,
+        name,
+        message,
+        is_published AS "isPublished",
+        created_at AS "createdAt"
+    `;
+
+    return NextResponse.json({ testimonial: result.rows[0] ?? null });
+  } catch (error) {
+    console.error('[Admin Testimonials] Failed to update', error);
+    return NextResponse.json(
+      { error: 'Unable to update testimonial.' },
+      { status: 500 },
+    );
+  }
 }

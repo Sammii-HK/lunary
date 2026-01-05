@@ -1,9 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server';
-
-import { prisma } from '@/lib/prisma';
+import { sql } from '@vercel/postgres';
 
 const MAX_NAME_LENGTH = 120;
 const MAX_MESSAGE_LENGTH = 1200;
+const FEATURED_LIMIT = 8;
+
+type PublicTestimonialRow = {
+  id: number;
+  name: string;
+  message: string;
+  createdAt: string;
+};
 
 function validateInput(name: string, message: string) {
   if (!name) {
@@ -23,6 +30,22 @@ function validateInput(name: string, message: string) {
   }
 
   return null;
+}
+
+export async function GET() {
+  const result = await sql<PublicTestimonialRow>`
+    SELECT
+      id,
+      name,
+      message,
+      created_at AS "createdAt"
+    FROM testimonials
+    WHERE is_published = true
+    ORDER BY created_at DESC
+    LIMIT ${FEATURED_LIMIT}
+  `;
+
+  return NextResponse.json({ testimonials: result.rows });
 }
 
 export async function POST(request: NextRequest) {
@@ -46,12 +69,10 @@ export async function POST(request: NextRequest) {
   }
 
   try {
-    await prisma.testimonial.create({
-      data: {
-        name,
-        message,
-      },
-    });
+    await sql`
+      INSERT INTO testimonials (name, message)
+      VALUES (${name}, ${message})
+    `;
 
     return NextResponse.json({ success: true });
   } catch (error) {
