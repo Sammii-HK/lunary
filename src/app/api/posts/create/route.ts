@@ -149,7 +149,7 @@ export async function POST(req: NextRequest) {
         console.error('Failed to generate short-form video:', err);
       });
 
-      // Generate medium-form video (30-60s recap)
+      // Generate medium-form video (30-60s forecast)
       fetch(`${baseUrl}/api/video/generate`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },

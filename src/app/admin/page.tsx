@@ -29,7 +29,6 @@ import {
   Wand2,
   Mail,
   Activity,
-  Users,
   FileText,
   Zap,
   Smartphone,
@@ -41,6 +40,9 @@ import {
   ChevronDown,
   ChevronUp,
   RefreshCw,
+  ShieldCheck,
+  Key,
+  Quote,
 } from 'lucide-react';
 
 interface AdminTool {
@@ -162,8 +164,19 @@ export default function AdminDashboard() {
   const [authIssue, setAuthIssue] = useState<AdminAuthIssueState>({
     type: 'none',
   });
-  const [migrationStatus, setMigrationStatus] = useState<any>(null);
-  const [migrationLoading, setMigrationLoading] = useState(false);
+  const [subscriptionDebugPayload, setSubscriptionDebugPayload] = useState({
+    userId: '',
+    customerId: '',
+    userEmail: '',
+    token:
+      process.env.NEXT_PUBLIC_ADMIN_DEBUG_TOKEN ??
+      process.env.NEXT_PUBLIC_ADMIN_TOKEN ??
+      '',
+  });
+  const [subscriptionDebugResult, setSubscriptionDebugResult] =
+    useState<any>(null);
+  const [subscriptionDebugLoading, setSubscriptionDebugLoading] =
+    useState(false);
 
   const handleAuthSuccess = () => {
     setAuthIssue({ type: 'none' });
@@ -545,6 +558,52 @@ export default function AdminDashboard() {
     }
   };
 
+  const handleSubscriptionDebug = async () => {
+    if (
+      !subscriptionDebugPayload.userId &&
+      !subscriptionDebugPayload.userEmail &&
+      !subscriptionDebugPayload.customerId
+    ) {
+      alert('Provide at least one identifier (userId, customerId, or email)');
+      return;
+    }
+
+    setSubscriptionDebugResult(null);
+    setSubscriptionDebugLoading(true);
+
+    try {
+      const headers: Record<string, string> = {
+        'Content-Type': 'application/json',
+      };
+      if (subscriptionDebugPayload.token) {
+        headers.Authorization = `Bearer ${subscriptionDebugPayload.token}`;
+      }
+
+      const response = await fetch('/api/admin/stripe/subscription-debug', {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({
+          userId: subscriptionDebugPayload.userId || undefined,
+          customerId: subscriptionDebugPayload.customerId || undefined,
+          userEmail: subscriptionDebugPayload.userEmail || undefined,
+        }),
+      });
+      const body = await response.json().catch(() => null);
+      setSubscriptionDebugResult({
+        ok: response.ok,
+        status: response.status,
+        body,
+      });
+    } catch (error) {
+      setSubscriptionDebugResult({
+        ok: false,
+        error: error instanceof Error ? error.message : 'Unknown error',
+      });
+    } finally {
+      setSubscriptionDebugLoading(false);
+    }
+  };
+
   // Section 1: Analytics
   const analyticsTools: AdminTool[] = [
     {
@@ -688,6 +747,15 @@ export default function AdminDashboard() {
       icon: <Calendar className='h-5 w-5' />,
       category: 'automation',
     },
+    {
+      title: 'Testimonials',
+      description:
+        'Review submissions and feature the ones that make the community shine',
+      href: '/admin/testimonials',
+      icon: <Quote className='h-5 w-5 text-lunary-accent' />,
+      category: 'content',
+      status: 'new',
+    },
   ];
 
   // Section 5: Debug & Testing
@@ -722,7 +790,7 @@ export default function AdminDashboard() {
       title: 'Analytics',
       icon: <Activity className='h-5 w-5 md:h-6 md:w-6' />,
       tools: analyticsTools,
-      color: 'from-orange-600/20 to-orange-600/5',
+      color: 'from-pink-600/20 to-pink-600/5',
       iconColor: 'text-lunary-rose',
       borderColor: 'border-lunary-rose-700',
     },
@@ -1054,6 +1122,161 @@ export default function AdminDashboard() {
                       published).
                     </p>
                   </div>
+                </CardContent>
+              </Card>
+              <Card className='bg-zinc-900/50 border border-zinc-800'>
+                <CardHeader className='pb-4'>
+                  <CardTitle className='flex items-center gap-2 text-lg md:text-xl text-zinc-400'>
+                    <ShieldCheck className='h-5 w-5' />
+                    Subscription Debug
+                  </CardTitle>
+                  <CardDescription className='text-xs md:text-sm text-zinc-400'>
+                    Force-refresh Stripe status for a user and view the
+                    plan/status.
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
+                    <label className='text-xs text-zinc-400'>
+                      User ID
+                      <input
+                        type='text'
+                        value={subscriptionDebugPayload.userId}
+                        onChange={(e) =>
+                          setSubscriptionDebugPayload({
+                            ...subscriptionDebugPayload,
+                            userId: e.target.value.trim(),
+                          })
+                        }
+                        className='mt-1 w-full bg-zinc-900/70 border border-zinc-700 rounded px-3 py-2 text-sm text-white'
+                      />
+                    </label>
+                    <label className='text-xs text-zinc-400'>
+                      Customer ID
+                      <input
+                        type='text'
+                        value={subscriptionDebugPayload.customerId}
+                        onChange={(e) =>
+                          setSubscriptionDebugPayload({
+                            ...subscriptionDebugPayload,
+                            customerId: e.target.value.trim(),
+                          })
+                        }
+                        className='mt-1 w-full bg-zinc-900/70 border border-zinc-700 rounded px-3 py-2 text-sm text-white'
+                      />
+                    </label>
+                    <label className='text-xs text-zinc-400'>
+                      Email
+                      <input
+                        type='email'
+                        value={subscriptionDebugPayload.userEmail}
+                        onChange={(e) =>
+                          setSubscriptionDebugPayload({
+                            ...subscriptionDebugPayload,
+                            userEmail: e.target.value.trim(),
+                          })
+                        }
+                        className='mt-1 w-full bg-zinc-900/70 border border-zinc-700 rounded px-3 py-2 text-sm text-white'
+                      />
+                    </label>
+                    <label className='text-xs text-zinc-400'>
+                      Debug Token
+                      <div className='flex items-center gap-2 mt-1'>
+                        <input
+                          type='text'
+                          value={subscriptionDebugPayload.token}
+                          onChange={(e) =>
+                            setSubscriptionDebugPayload({
+                              ...subscriptionDebugPayload,
+                              token: e.target.value.trim(),
+                            })
+                          }
+                          className='flex-1 bg-zinc-900/70 border border-zinc-700 rounded px-3 py-2 text-sm text-white'
+                        />
+                        <Key className='h-4 w-4 text-zinc-400' />
+                      </div>
+                    </label>
+                  </div>
+                  <div className='flex flex-wrap gap-3 mt-4'>
+                    <Button
+                      onClick={handleSubscriptionDebug}
+                      disabled={subscriptionDebugLoading}
+                      className='bg-lunary-primary-600 hover:bg-lunary-primary-700 text-white'
+                    >
+                      {subscriptionDebugLoading
+                        ? 'Checking...'
+                        : 'Check subscription'}
+                    </Button>
+                    <Button
+                      onClick={() => setSubscriptionDebugResult(null)}
+                      variant='outline'
+                      className='border-zinc-700 text-zinc-300 hover:bg-zinc-800'
+                    >
+                      Clear result
+                    </Button>
+                  </div>
+                  {subscriptionDebugResult && (
+                    <div
+                      className={`mt-4 p-3 rounded-lg border ${
+                        subscriptionDebugResult.ok
+                          ? 'border-lunary-success bg-lunary-success-950/40'
+                          : 'border-lunary-error bg-lunary-error-950/40'
+                      }`}
+                    >
+                      {subscriptionDebugResult.ok ? (
+                        <>
+                          <p className='text-sm text-lunary-success'>
+                            Success (status {subscriptionDebugResult.status})
+                          </p>
+                          <div className='text-sm text-zinc-200 mt-3 space-y-1'>
+                            <p>
+                              Plan:{' '}
+                              {subscriptionDebugResult.body?.data?.plan ||
+                                subscriptionDebugResult.body?.data?.subscription
+                                  ?.planName ||
+                                'Unknown'}
+                            </p>
+                            <p>
+                              Status:{' '}
+                              {subscriptionDebugResult.body?.data?.subscription
+                                ?.status || 'Unknown'}
+                            </p>
+                            {subscriptionDebugResult.body?.data?.message && (
+                              <p>
+                                Message:{' '}
+                                {subscriptionDebugResult.body.data.message}
+                              </p>
+                            )}
+                          </div>
+                        </>
+                      ) : (
+                        <>
+                          <p className='text-sm text-lunary-error'>
+                            Failed (status{' '}
+                            {subscriptionDebugResult.status || 'unknown'})
+                          </p>
+                          <p className='text-xs text-lunary-error-300 mt-2'>
+                            {subscriptionDebugResult.error ||
+                              subscriptionDebugResult.body?.error ||
+                              subscriptionDebugResult.body?.message ||
+                              'Check console for details.'}
+                          </p>
+                        </>
+                      )}
+                      <details className='mt-3 text-xs text-zinc-400'>
+                        <summary className='cursor-pointer'>
+                          Raw response
+                        </summary>
+                        <pre className='mt-2 max-h-80 overflow-x-auto rounded bg-black/40 p-2 text-xs text-zinc-200'>
+                          {JSON.stringify(
+                            subscriptionDebugResult.body,
+                            null,
+                            2,
+                          )}
+                        </pre>
+                      </details>
+                    </div>
+                  )}
                 </CardContent>
               </Card>
             </div>
@@ -1427,130 +1650,6 @@ export default function AdminDashboard() {
                   </div>
                 </Link>
               </Button>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Auth Migration Progress */}
-        <Card className='mt-6 md:mt-8 lg:mt-10 bg-zinc-900 border-zinc-800'>
-          <CardHeader className='pb-4 md:pb-6'>
-            <CardTitle className='flex items-center gap-2 text-xl md:text-2xl lg:text-3xl'>
-              <Users className='h-5 w-5 md:h-6 md:w-6' />
-              Auth Migration Progress
-            </CardTitle>
-            <CardDescription className='text-sm md:text-base text-zinc-400'>
-              Track user migration from legacy auth to Postgres
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className='space-y-4'>
-              <Button
-                onClick={async () => {
-                  setMigrationLoading(true);
-                  try {
-                    const response = await fetch('/api/admin/migration-status');
-                    const data = await response.json();
-                    setMigrationStatus(data);
-                  } catch (error) {
-                    console.error('Migration status check failed:', error);
-                    setMigrationStatus({ error: 'Failed to check status' });
-                  } finally {
-                    setMigrationLoading(false);
-                  }
-                }}
-                disabled={migrationLoading}
-                variant='outline'
-                className='bg-lunary-primary-600/50 hover:bg-lunary-primary-700/50 border-lunary-primary-600 text-white'
-              >
-                {migrationLoading ? (
-                  <>
-                    <div className='animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2'></div>
-                    Checking...
-                  </>
-                ) : (
-                  <>
-                    <Activity className='h-4 w-4 mr-2' />
-                    Check Migration Status
-                  </>
-                )}
-              </Button>
-
-              {migrationStatus && !migrationStatus.error && (
-                <div className='mt-4 p-4 rounded-lg bg-zinc-800/50 border border-zinc-700/50'>
-                  <div className='grid grid-cols-1 md:grid-cols-2 gap-4 mb-4'>
-                    <div className='p-3 rounded-lg bg-lunary-secondary-950 border border-lunary-secondary-900'>
-                      <p className='text-xs text-lunary-secondary uppercase tracking-wider'>
-                        Postgres Users
-                      </p>
-                      <p className='text-2xl font-bold text-white'>
-                        {migrationStatus.postgres?.count ?? 'N/A'}
-                      </p>
-                    </div>
-                    <div className='p-3 rounded-lg bg-lunary-success-950 border border-lunary-success-900'>
-                      <p className='text-xs text-lunary-success uppercase tracking-wider'>
-                        Recent Signups (30d)
-                      </p>
-                      <p className='text-2xl font-bold text-white'>
-                        {migrationStatus.postgres?.recentSignups ?? 'N/A'}
-                      </p>
-                    </div>
-                  </div>
-
-                  {migrationStatus.legacy?.note && (
-                    <div className='p-3 rounded-lg bg-lunary-primary-900/10 border border-lunary-primary-700 mb-4'>
-                      <p className='text-lunary-primary-400 text-sm'>
-                        {migrationStatus.legacy.note}
-                      </p>
-                    </div>
-                  )}
-
-                  <div className='p-3 rounded-lg bg-zinc-900/50 border border-zinc-700/50'>
-                    <p className='text-sm text-zinc-400'>
-                      <span className='text-lunary-success font-medium'>
-                        Migration method:
-                      </span>{' '}
-                      {migrationStatus.migration?.description}
-                    </p>
-                  </div>
-
-                  {migrationStatus.postgres?.emails?.length > 0 && (
-                    <div className='mt-4'>
-                      <p className='text-sm text-zinc-400 mb-2'>
-                        Recent users (first 20):
-                      </p>
-                      <div className='max-h-32 overflow-y-auto p-3 rounded-lg bg-zinc-900/50 border border-zinc-700/50 text-xs text-zinc-400 font-mono'>
-                        {migrationStatus.postgres.emails.map(
-                          (email: string, i: number) => (
-                            <div key={i}>{email}</div>
-                          ),
-                        )}
-                      </div>
-                    </div>
-                  )}
-
-                  <p className='text-xs text-zinc-400 mt-4'>
-                    Last checked:{' '}
-                    {migrationStatus.checkedAt
-                      ? new Date(migrationStatus.checkedAt).toLocaleString()
-                      : 'Unknown'}
-                  </p>
-                </div>
-              )}
-
-              {migrationStatus?.error && (
-                <div className='p-4 rounded-lg bg-lunary-error-950 border border-lunary-error-800'>
-                  <p className='text-lunary-error'>{migrationStatus.error}</p>
-                  {migrationStatus.details && (
-                    <p className='text-xs text-lunary-error-300 mt-1'>
-                      {migrationStatus.details}
-                    </p>
-                  )}
-                </div>
-              )}
-
-              <p className='text-xs text-zinc-400'>
-                Users migrate automatically on login. No batch migration needed.
-              </p>
             </div>
           </CardContent>
         </Card>

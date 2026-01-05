@@ -16,7 +16,20 @@ interface PlatformResult {
 
 export async function POST(request: NextRequest) {
   try {
-    const body: PostToPlatformsRequest = await request.json();
+    let body: PostToPlatformsRequest;
+    try {
+      body = (await request.json()) as PostToPlatformsRequest;
+    } catch (parseError) {
+      console.error(
+        'Invalid JSON body for video post-to-platforms:',
+        parseError,
+      );
+      return NextResponse.json(
+        { error: 'Invalid request body; expected JSON' },
+        { status: 400 },
+      );
+    }
+
     const { videoId, platforms = ['tiktok', 'instagram', 'youtube'] } = body;
 
     if (!videoId) {
@@ -57,6 +70,13 @@ export async function POST(request: NextRequest) {
     const accountGroupId = process.env.SUCCULENT_ACCOUNT_GROUP_ID;
     const succulentApiUrl = 'https://app.succulent.social/api/posts';
     const dateStr = new Date().toISOString().split('T')[0];
+    const now = new Date();
+    const scheduledDate = new Date(now);
+    scheduledDate.setHours(21, 30, 0, 0);
+    if (scheduledDate < now) {
+      scheduledDate.setDate(scheduledDate.getDate() + 1);
+    }
+    const scheduledDateIso = scheduledDate.toISOString();
 
     // Post to TikTok
     if (platforms.includes('tiktok')) {
@@ -73,7 +93,7 @@ export async function POST(request: NextRequest) {
             content: postContent,
             platforms: ['tiktok'],
             media: [{ type: 'video' as const, url: videoUrl, alt: title }],
-            publishImmediately: true,
+            scheduledDate: scheduledDateIso,
           };
 
           const response = await fetch(succulentApiUrl, {
@@ -124,7 +144,7 @@ export async function POST(request: NextRequest) {
               videoType === 'short'
                 ? { stories: true }
                 : { type: 'reel' as const },
-            publishImmediately: true,
+            scheduledDate: scheduledDateIso,
           };
 
           const response = await fetch(succulentApiUrl, {
@@ -175,6 +195,7 @@ export async function POST(request: NextRequest) {
             title,
             description,
             type: videoType === 'long' ? 'long' : 'short', // medium goes to Shorts
+            publishDate: scheduledDateIso,
           }),
         });
 

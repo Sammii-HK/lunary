@@ -19,11 +19,13 @@ interface CheckoutSession {
     metadata?: {
       planType?: string;
       plan_id?: string;
+      userId?: string;
     };
   };
   metadata?: {
     planType?: string;
     plan_id?: string;
+    userId?: string;
   };
 }
 
@@ -41,6 +43,23 @@ export default function SuccessPage() {
       if (!session?.subscription || synced) return;
 
       try {
+        const userIdFromSession =
+          session.subscription?.metadata?.userId || session.metadata?.userId;
+
+        await fetch('/api/stripe/get-subscription', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            userId: userIdFromSession,
+            customerId: session.customer_id,
+            userEmail:
+              session.customer_email && session.customer_email !== 'Unknown'
+                ? session.customer_email
+                : undefined,
+            forceRefresh: true,
+          }),
+        });
+
         if (session.customer_id || session.customer_email) {
           await fetch('/api/profile', {
             method: 'PUT',

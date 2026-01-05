@@ -14,6 +14,7 @@ export const runtime = 'nodejs'; // Node.js runtime is faster for CPU-intensive 
 export const revalidate = 86400; // Cache for 24 hours - cosmic data for a specific date doesn't change
 
 type Ctx = { params: Promise<{ date: string }> };
+type Format = 'square' | 'portrait' | 'landscape' | 'story';
 
 // Request deduplication - prevent duplicate calculations for simultaneous requests
 const pendingRequests = new Map<string, Promise<Response>>();
@@ -43,8 +44,19 @@ function getZodiacSign(longitude: number): string {
 
 async function generateImage(req: NextRequest, ctx: Ctx): Promise<Response> {
   const { date } = await ctx.params;
+  const { searchParams } = new URL(req.url);
+  const rawFormat = (
+    searchParams.get('format') ||
+    searchParams.get('size') ||
+    'square'
+  ).toLowerCase();
+  const allowedFormats: Format[] = ['square', 'portrait', 'landscape', 'story'];
+  const format = allowedFormats.includes(rawFormat as Format)
+    ? (rawFormat as Format)
+    : 'square';
   const fontData = await loadAstronomiconFont(req);
   if (!fontData) throw new Error('Font load returned null');
+  const robotoFont = await loadGoogleFont(req).catch(() => null);
 
   // const { searchParams } = new URL(request.url);
   // const dateParam = searchParams.get('date');
@@ -53,16 +65,35 @@ async function generateImage(req: NextRequest, ctx: Ctx): Promise<Response> {
   const targetDate = new Date(`${date}T12:00:00Z`);
 
   // Define image dimensions and responsive styles
-  const sizes = {
+  const sizes: Record<
+    Format,
+    { width: number; height: number; padding: string }
+  > = {
     square: { width: 1200, height: 1200, padding: '60px 40px' },
     portrait: { width: 1080, height: 1920, padding: '80px 60px' },
     landscape: { width: 1920, height: 1080, padding: '40px 80px' },
+    story: { width: 1080, height: 1920, padding: '80px 60px' },
   };
 
   // const currentSize = sizes[sizeParam as keyof typeof sizes] || sizes.square;
 
   // Responsive typography and spacing
-  const responsive = {
+  const responsive: Record<
+    Format,
+    {
+      titleSize: number;
+      planetNameSize: number;
+      symbolSize: number;
+      aspectSize: number;
+      constellationSize: number;
+      zodiacSymbolSize: number;
+      energySize: number;
+      dateSize: number;
+      footerSize: number;
+      titlePadding: string;
+      itemSpacing: string;
+    }
+  > = {
     square: {
       titleSize: 32,
       planetNameSize: 42,
@@ -102,10 +133,23 @@ async function generateImage(req: NextRequest, ctx: Ctx): Promise<Response> {
       titlePadding: '60px',
       itemSpacing: '120px',
     },
+    story: {
+      titleSize: 48,
+      planetNameSize: 52,
+      symbolSize: 280,
+      aspectSize: 52,
+      constellationSize: 36,
+      zodiacSymbolSize: 88,
+      energySize: 44,
+      dateSize: 36,
+      footerSize: 36,
+      titlePadding: '120px',
+      itemSpacing: '160px',
+    },
   };
 
-  const style = responsive.square;
-  // responsive[sizeParam as keyof typeof responsive] || responsive.square;
+  const style = responsive[format] || responsive.square;
+  const imageSize = sizes[format] || sizes.square;
 
   // Get REAL astronomical data (SAME AS POST ROUTE)
   const positions = getRealPlanetaryPositions(targetDate);
@@ -243,7 +287,7 @@ async function generateImage(req: NextRequest, ctx: Ctx): Promise<Response> {
         background: theme.background,
         fontFamily: 'Roboto Mono',
         color: 'white',
-        padding: sizes.square.padding,
+        padding: imageSize.padding,
         justifyContent: 'space-between',
       }}
     >
@@ -671,46 +715,37 @@ async function generateImage(req: NextRequest, ctx: Ctx): Promise<Response> {
       </div>
     </div>,
     {
-      width: sizes.square.width,
-      height: sizes.square.height,
-      fonts: await (async () => {
-        const fonts = [];
-
-        try {
-          const astronomiconFont = await loadAstronomiconFont(req);
-          if (astronomiconFont) {
-            fonts.push({
-              name: 'Astronomicon',
-              data: astronomiconFont,
-              style: 'normal' as const,
-            });
-          }
-        } catch (error) {
-          console.error('Failed to load Astronomicon font:', error);
-        }
-
-        try {
-          const robotoFont = await loadGoogleFont(req);
-          if (robotoFont) {
-            fonts.push({
-              name: 'Roboto Mono',
-              data: robotoFont,
-              style: 'normal' as const,
-            });
-          }
-        } catch (error) {
-          console.error('Failed to load Roboto Mono font:', error);
-        }
-
-        return fonts;
-      })(),
+      width: imageSize.width,
+      height: imageSize.height,
+      fonts: [
+        { name: 'Astronomicon', data: fontData, style: 'normal' as const },
+        ...(robotoFont
+          ? [
+              {
+                name: 'Roboto Mono',
+                data: robotoFont,
+                style: 'normal' as const,
+              },
+            ]
+          : []),
+      ],
     },
   );
 }
 
 export async function GET(req: NextRequest, ctx: Ctx): Promise<Response> {
   const { date } = await ctx.params;
-  const cacheKey = `cosmic-og-${date}`;
+  const { searchParams } = new URL(req.url);
+  const rawFormat = (
+    searchParams.get('format') ||
+    searchParams.get('size') ||
+    'square'
+  ).toLowerCase();
+  const allowedFormats: Format[] = ['square', 'portrait', 'landscape', 'story'];
+  const format = allowedFormats.includes(rawFormat as Format)
+    ? (rawFormat as Format)
+    : 'square';
+  const cacheKey = `cosmic-og-${date}-${format}`;
 
   // Request deduplication - if same date is being processed, reuse the promise
   if (pendingRequests.has(cacheKey)) {

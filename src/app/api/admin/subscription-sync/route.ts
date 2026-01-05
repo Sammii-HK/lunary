@@ -339,12 +339,6 @@ export async function POST(request: NextRequest) {
     const status = mapStripeStatus(subscription.status);
     const planType = getPlanTypeFromSubscription(subscription);
     const discountInfo = extractDiscountInfo(subscription);
-    const promoCodeRaw =
-      subscription.metadata?.promoCode || subscription.metadata?.discountCode;
-    const promoCode =
-      typeof promoCodeRaw === 'string' && promoCodeRaw.trim().length > 0
-        ? promoCodeRaw.trim().toUpperCase()
-        : null;
     const trialEndsAt = subscription.trial_end
       ? new Date(subscription.trial_end * 1000).toISOString()
       : null;
@@ -357,8 +351,7 @@ export async function POST(request: NextRequest) {
         user_id, user_email, status, plan_type,
         stripe_customer_id, stripe_subscription_id,
         trial_ends_at, current_period_end,
-        has_discount, discount_percent, monthly_amount_due, coupon_id,
-        promo_code, discount_ends_at, trial_used
+        has_discount, discount_percent, monthly_amount_due, coupon_id
       ) VALUES (
         ${resolvedUserId},
         ${customer.email},
@@ -371,10 +364,7 @@ export async function POST(request: NextRequest) {
         ${discountInfo.hasDiscount},
         ${discountInfo.discountPercent || null},
         ${discountInfo.monthlyAmountDue || null},
-        ${discountInfo.couponId || null},
-        ${promoCode},
-        ${discountInfo.discountEndsAt || null},
-        true
+        ${discountInfo.couponId || null}
       )
       ON CONFLICT (user_id) DO UPDATE SET
         status = EXCLUDED.status,
@@ -387,10 +377,7 @@ export async function POST(request: NextRequest) {
         discount_percent = EXCLUDED.discount_percent,
         monthly_amount_due = EXCLUDED.monthly_amount_due,
         coupon_id = EXCLUDED.coupon_id,
-        promo_code = EXCLUDED.promo_code,
-        discount_ends_at = EXCLUDED.discount_ends_at,
         user_email = COALESCE(EXCLUDED.user_email, subscriptions.user_email),
-        trial_used = true,
         updated_at = NOW()
     `;
 

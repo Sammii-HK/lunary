@@ -86,7 +86,7 @@ export default function SchedulerAdminPage() {
 
       // Get the correct base URL for the image
       const baseUrl = window.location.origin;
-      const imageUrl = `${baseUrl}/api/og/cosmic/${dateStr}`;
+      const imageUrl = `${baseUrl}/api/og/cosmic/${dateStr}?format=square`;
 
       console.log('🖼️ Image URL:', imageUrl);
 

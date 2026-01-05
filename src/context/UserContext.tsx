@@ -81,6 +81,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
   const [error, setError] = useState<Error | null>(null);
   const birthChartRefreshRef = useRef(false);
   const birthChartRefreshAttemptRef = useRef<number>(0);
+  const subscriptionSyncAttemptRef = useRef(false);
   const [hasLoadedOnce, setHasLoadedOnce] = useState(false);
   const BIRTH_CHART_VERSION = 4;
 
@@ -159,6 +160,36 @@ export function UserProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     fetchUserData();
   }, [fetchUserData]);
+
+  useEffect(() => {
+    const syncSubscription = async () => {
+      if (!user || subscriptionSyncAttemptRef.current) return;
+      if (!user.stripeCustomerId) return;
+
+      const status = user.subscriptionStatus || 'free';
+      if (status === 'active' || status === 'trial') return;
+
+      subscriptionSyncAttemptRef.current = true;
+      try {
+        await fetch('/api/stripe/get-subscription', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            userId: user.id,
+            userEmail: user.email,
+            customerId: user.stripeCustomerId,
+            forceRefresh: true,
+          }),
+          cache: 'no-store',
+        });
+        await fetchUserData();
+      } catch (err) {
+        console.warn('Failed to sync subscription state:', err);
+      }
+    };
+
+    syncSubscription();
+  }, [user, fetchUserData]);
 
   useEffect(() => {
     const refreshBirthChart = async () => {

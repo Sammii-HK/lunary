@@ -128,17 +128,16 @@ async function scheduleVideoToPlatforms(
   const succulentApiUrl = 'https://app.succulent.social/api/posts';
   const dateStr = new Date().toISOString().split('T')[0];
   const now = new Date();
+  const scheduledDate = new Date(now);
+  scheduledDate.setHours(21, 30, 0, 0);
+  if (scheduledDate < now) {
+    scheduledDate.setDate(scheduledDate.getDate() + 1);
+  }
 
   if (videoType === 'short') {
     // Short form: Schedule to Instagram Stories, Instagram Reels, Threads, Twitter/X, and Bluesky
     // Use postContent if available (generated from weekly data), otherwise fall back to description
     const content = postContent || description;
-
-    const scheduledDate = new Date(now);
-    scheduledDate.setHours(10, 0, 0, 0);
-    if (scheduledDate < now) {
-      scheduledDate.setHours(now.getHours() + 1, 0, 0, 0);
-    }
 
     // Instagram Stories
     const storyPost = {
@@ -361,8 +360,6 @@ async function scheduleVideoToPlatforms(
     // Medium form: Post immediately to TikTok, Instagram Reels, YouTube Shorts
     // Use postContent if available (generated from weekly data), otherwise fall back to description
     const content = postContent || description;
-    const currentTime = new Date().toISOString();
-
     // TikTok - post immediately (omit scheduledDate)
     const tiktokPost = {
       accountGroupId,
@@ -370,6 +367,7 @@ async function scheduleVideoToPlatforms(
       content: content,
       platforms: ['tiktok'],
       media: [{ type: 'video' as const, url: videoUrl, alt: title }],
+      scheduledDate: scheduledDate.toISOString(),
       tiktokOptions: {
         visibility: 'public',
         isAiGenerated: true,
@@ -383,6 +381,7 @@ async function scheduleVideoToPlatforms(
       content: content,
       platforms: ['instagram'],
       media: [{ type: 'video' as const, url: videoUrl, alt: title }],
+      scheduledDate: scheduledDate.toISOString(),
       instagramOptions: { type: 'reel' as const },
     };
 
@@ -1320,18 +1319,7 @@ export async function POST(request: NextRequest) {
     // Schedule video to platforms (fire and forget - don't block response)
     // Use postContent for social media posts if available, otherwise fall back to description
     // Pass weeklyData and blogSlug for Threads-specific formatting
-    scheduleVideoToPlatforms(
-      videoUrl,
-      type,
-      title,
-      description,
-      baseUrl,
-      postContent,
-      weeklyData || null,
-      blogSlug || undefined,
-    ).catch((err) => {
-      console.error('Failed to schedule video to platforms:', err);
-    });
+    // Videos are generated only. Posting happens via explicit platform buttons.
 
     return NextResponse.json({
       success: true,

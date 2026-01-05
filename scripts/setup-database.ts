@@ -223,6 +223,23 @@ async function setupDatabase() {
     console.log('✅ Social posts table created');
 
     await sql`
+      CREATE TABLE IF NOT EXISTS testimonials (
+        id SERIAL PRIMARY KEY,
+        name TEXT NOT NULL,
+        message TEXT NOT NULL,
+        is_published BOOLEAN NOT NULL DEFAULT FALSE,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+      )
+    `;
+
+    await sql`
+      CREATE INDEX IF NOT EXISTS idx_testimonials_is_published
+      ON testimonials(is_published)
+    `;
+
+    console.log('✅ Testimonials table created');
+
+    await sql`
       CREATE TABLE IF NOT EXISTS video_scripts (
         id SERIAL PRIMARY KEY,
         theme_id TEXT NOT NULL,

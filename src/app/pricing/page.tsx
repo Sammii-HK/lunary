@@ -157,7 +157,7 @@ export default function PricingPage() {
       const currentUserId = authState.user?.id || user?.id;
       const currentUserEmail = user?.email || authState.user?.email;
 
-      const { sessionId } = await createCheckoutSession(
+      const checkout = await createCheckoutSession(
         priceId,
         subscription.customerId,
         storedReferralCode || undefined,
@@ -165,6 +165,16 @@ export default function PricingPage() {
         currentUserId,
         currentUserEmail,
       );
+
+      if (checkout.portalUrl) {
+        window.location.href = checkout.portalUrl;
+        return;
+      }
+
+      const sessionId = checkout.sessionId;
+      if (!sessionId) {
+        throw new Error('Missing sessionId from checkout response');
+      }
 
       const stripe = await loadStripe(
         process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!,

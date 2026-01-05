@@ -106,6 +106,22 @@ export function VideoManager({ weekOffset, className }: VideoManagerProps) {
     return new Date(dateString).toLocaleString();
   };
 
+  const getNextScheduledTimeLabel = () => {
+    const now = new Date();
+    const scheduled = new Date(now);
+    scheduled.setHours(21, 30, 0, 0);
+    if (scheduled < now) {
+      scheduled.setDate(scheduled.getDate() + 1);
+    }
+    return scheduled.toLocaleString(undefined, {
+      weekday: 'short',
+      month: 'short',
+      day: 'numeric',
+      hour: 'numeric',
+      minute: '2-digit',
+    });
+  };
+
   const getExpirationCountdown = (expiresAt: string) => {
     const now = new Date();
     const expires = new Date(expiresAt);
@@ -126,6 +142,7 @@ export function VideoManager({ weekOffset, className }: VideoManagerProps) {
         body: JSON.stringify({
           type,
           week: weekOffset,
+          autoSchedule: false,
         }),
       });
 
@@ -352,6 +369,9 @@ export function VideoManager({ weekOffset, className }: VideoManagerProps) {
                   <div className='mt-3 pt-3 border-t border-zinc-700'>
                     <p className='text-zinc-400 text-xs mb-2'>
                       Post to platforms:
+                    </p>
+                    <p className='text-[11px] text-zinc-500 mb-2'>
+                      Schedules for {getNextScheduledTimeLabel()}
                     </p>
                     <div className='flex gap-2 flex-wrap'>
                       <button

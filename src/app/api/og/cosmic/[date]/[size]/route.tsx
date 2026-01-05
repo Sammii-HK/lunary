@@ -17,6 +17,7 @@ type Ctx = { params: Promise<{ date: string; size: string }> };
 
 export async function GET(req: NextRequest, ctx: Ctx) {
   const { date, size } = await ctx.params;
+  const normalizedSize = size === 'story' ? 'portrait' : size;
   const fontData = await loadAstronomiconFont(req);
   if (!fontData) throw new Error('Font load returned null');
 
@@ -27,6 +28,7 @@ export async function GET(req: NextRequest, ctx: Ctx) {
     square: { width: 1200, height: 1200, padding: '60px 40px' },
     portrait: { width: 1080, height: 1920, padding: '80px 60px' },
     landscape: { width: 1920, height: 1080, padding: '40px 80px' },
+    story: { width: 1080, height: 1920, padding: '80px 60px' },
   };
 
   // const currentSize = sizes[sizeParam as keyof typeof sizes] || sizes.square;
@@ -72,10 +74,24 @@ export async function GET(req: NextRequest, ctx: Ctx) {
       titlePadding: '60px',
       itemSpacing: '120px',
     },
+    story: {
+      titleSize: 48,
+      planetNameSize: 52,
+      symbolSize: 280,
+      aspectSize: 52,
+      constellationSize: 36,
+      zodiacSymbolSize: 88,
+      energySize: 44,
+      dateSize: 36,
+      footerSize: 36,
+      titlePadding: '120px',
+      itemSpacing: '160px',
+    },
   };
 
   const style =
-    responsive[size as keyof typeof responsive] || responsive.square;
+    responsive[normalizedSize as keyof typeof responsive] || responsive.square;
+  const imageSize = sizes[normalizedSize as keyof typeof sizes] || sizes.square;
 
   // Get REAL astronomical data (SAME AS POST ROUTE)
   const positions = getRealPlanetaryPositions(targetDate);
@@ -213,7 +229,7 @@ export async function GET(req: NextRequest, ctx: Ctx) {
         background: theme.background,
         fontFamily: 'Roboto Mono',
         color: 'white',
-        padding: sizes[size as keyof typeof sizes].padding,
+        padding: imageSize.padding,
         justifyContent: 'space-between',
       }}
     >
@@ -641,8 +657,8 @@ export async function GET(req: NextRequest, ctx: Ctx) {
       </div>
     </div>,
     {
-      width: sizes[size as keyof typeof sizes].width,
-      height: sizes[size as keyof typeof sizes].height,
+      width: imageSize.width,
+      height: imageSize.height,
       fonts: await (async () => {
         const fonts = [];
 

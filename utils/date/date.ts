@@ -14,7 +14,9 @@ export const getWrittenDate = (date: Date) => {
             : 'th';
 
   const dateArray = currentDate.split('/');
-  const writtenDate = `${parseInt(dateArray[0])}${nth(parseInt(dateArray[1]))} ${months[parseInt(dateArray[1]) - 1]}`;
+  const day = parseInt(dateArray[0], 10);
+  const monthIndex = parseInt(dateArray[1], 10) - 1;
+  const writtenDate = `${day}${nth(day)} ${months[monthIndex]}`;
 
   return writtenDate;
 };

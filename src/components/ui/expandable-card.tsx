@@ -101,6 +101,7 @@ interface ExpandableCardHeaderProps {
   subtitle?: string;
   badge?: string;
   badgeVariant?: 'default' | 'highlight' | 'warning' | 'danger';
+  action?: ReactNode;
 }
 
 export const ExpandableCardHeader = ({
@@ -109,6 +110,7 @@ export const ExpandableCardHeader = ({
   subtitle,
   badge,
   badgeVariant = 'default',
+  action,
 }: ExpandableCardHeaderProps) => {
   const badgeClasses = {
     default: 'bg-zinc-800/50 text-zinc-400',
@@ -124,16 +126,19 @@ export const ExpandableCardHeader = ({
         <span className='text-sm font-medium text-zinc-200'>{title}</span>
         {subtitle && <span className='text-xs text-zinc-400'>{subtitle}</span>}
       </div>
-      {badge && (
-        <span
-          className={cn(
-            'text-xs px-2 py-0.5 rounded',
-            badgeClasses[badgeVariant],
-          )}
-        >
-          {badge}
-        </span>
-      )}
+      <div className='flex items-center gap-2'>
+        {action}
+        {badge && (
+          <span
+            className={cn(
+              'text-xs px-2 py-0.5 rounded',
+              badgeClasses[badgeVariant],
+            )}
+          >
+            {badge}
+          </span>
+        )}
+      </div>
     </div>
   );
 };

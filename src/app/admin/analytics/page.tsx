@@ -32,6 +32,7 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import UsageChart, { UsageChartSeries } from '@/components/charts/UsageChart';
 
 type ActivityTrend = {
   date: string;
@@ -122,6 +123,25 @@ type FeatureUsageResponse = {
 };
 
 const DEFAULT_RANGE_DAYS = 30;
+const activitySeries: UsageChartSeries[] = [
+  {
+    dataKey: 'dau',
+    name: 'DAU',
+    stroke: 'rgba(196,181,253,0.8)',
+  },
+  {
+    dataKey: 'wau',
+    name: 'WAU',
+    stroke: 'rgba(129,140,248,0.9)',
+    strokeDasharray: '6 4',
+  },
+  {
+    dataKey: 'mau',
+    name: 'MAU',
+    stroke: 'rgba(56,189,248,0.9)',
+    strokeDasharray: '4 2',
+  },
+];
 
 const formatDateInput = (date: Date) => date.toISOString().split('T')[0];
 
@@ -163,6 +183,16 @@ export default function AnalyticsPage() {
   const [userSegments, setUserSegments] = useState<any | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const activityUsageData = useMemo(
+    () =>
+      (activity?.trends ?? []).map((point) => ({
+        date: point.date,
+        dau: point.dau,
+        wau: point.wau,
+        mau: point.mau,
+      })),
+    [activity?.trends],
+  );
 
   const fetchAnalytics = useCallback(async () => {
     setLoading(true);
@@ -658,7 +688,11 @@ export default function AnalyticsPage() {
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <MultiLineChart data={activity?.trends ?? []} />
+                <UsageChart
+                  data={activityUsageData}
+                  series={activitySeries}
+                  height={240}
+                />
                 <div className='mt-4 flex flex-wrap items-center gap-4 border-t border-zinc-800 pt-4'>
                   <div className='flex items-center gap-2'>
                     <div
@@ -735,13 +769,19 @@ export default function AnalyticsPage() {
                     </div>
                     {userGrowth.trends && userGrowth.trends.length > 0 && (
                       <div>
-                        <MultiLineChart
+                        <UsageChart
                           data={userGrowth.trends.map((t: any) => ({
                             date: t.date,
-                            dau: t.signups,
-                            wau: 0,
-                            mau: 0,
+                            signups: t.signups,
                           }))}
+                          series={[
+                            {
+                              dataKey: 'signups',
+                              name: 'Signups',
+                              stroke: 'rgba(249,115,22,0.9)',
+                            },
+                          ]}
+                          height={200}
                         />
                         <div className='mt-4 flex flex-wrap items-center gap-4 border-t border-zinc-800 pt-4'>
                           <div className='flex items-center gap-2'>

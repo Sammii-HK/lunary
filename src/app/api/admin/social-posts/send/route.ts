@@ -31,6 +31,9 @@ type PlatformPayload = {
 };
 
 const videoPlatforms = ['instagram', 'tiktok', 'threads'];
+const noMediaVariantMode: Record<string, 'noImage' | 'mediaNull'> = {
+  bluesky: 'noImage',
+};
 const validPlatforms = [
   'twitter',
   'x',
@@ -44,6 +47,9 @@ const validPlatforms = [
   'threads',
   'youtube',
 ];
+
+const toIntArrayLiteral = (values: number[]) =>
+  `{${values.map((value) => Number(value)).join(',')}}`;
 
 const toPlatformStr = (platform: string) =>
   String(platform).toLowerCase().trim();
@@ -72,7 +78,10 @@ const buildPlatformPayload = (
 ): PlatformPayload => {
   const platformStr = toPlatformStr(post.platform);
   const content = String(post.content || '').trim();
-  const shouldUseVideo = post.video_url && videoPlatforms.includes(platformStr);
+  const shouldUseVideo =
+    post.post_type === 'video' &&
+    post.video_url &&
+    videoPlatforms.includes(platformStr);
   const scheduleLabel = `Lunary cosmic insight - ${scheduleDate.toLocaleDateString()}`;
 
   let imageUrlForPlatform = post.image_url ? String(post.image_url).trim() : '';
@@ -189,6 +198,7 @@ export async function POST(request: NextRequest) {
       imageUrl,
       videoUrl,
       postType,
+      groupPostIds,
     } = await request.json();
 
     if (!postId || !platform) {
@@ -262,9 +272,22 @@ export async function POST(request: NextRequest) {
       scheduleDate = new Date(Date.now() + 15 * 60 * 1000);
     }
 
+    const groupIds = Array.isArray(groupPostIds)
+      ? groupPostIds
+          .map((id: unknown) => Number(id))
+          .filter((id: number) => Number.isFinite(id))
+      : [];
     const groupKey = primaryPost.base_group_key;
     let groupPosts: DbPostRow[] = [primaryPost];
-    if (groupKey) {
+    if (groupIds.length > 0) {
+      const groupIdsArrayLiteral = toIntArrayLiteral(groupIds);
+      const groupResult = await sql`
+        SELECT id, content, post_type, scheduled_date, image_url, video_url, week_theme, week_start, platform, status, base_group_key, base_post_id
+        FROM social_posts
+        WHERE id = ANY(${groupIdsArrayLiteral}::int[])
+      `;
+      groupPosts = groupResult.rows as DbPostRow[];
+    } else if (groupKey) {
       const groupResult = await sql`
         SELECT id, content, post_type, scheduled_date, image_url, video_url, week_theme, week_start, platform, status, base_group_key, base_post_id
         FROM social_posts
@@ -312,8 +335,12 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const basePlatforms = new Set<string>();
-    const variants: Record<string, { content: string; media?: string[] }> = {};
+    const platformsToSend = new Set<string>();
+    let pinterestHasMedia = false;
+    const variants: Record<
+      string,
+      { content: string; media?: string[] | null; noImage?: boolean }
+    > = {};
     let pinterestOptions: PlatformPayload['pinterestOptions'];
     let tiktokOptions: PlatformPayload['tiktokOptions'];
     let instagramOptions: PlatformPayload['instagramOptions'];
@@ -352,23 +379,47 @@ export async function POST(request: NextRequest) {
         payload.content !== basePayload.content ||
         mediaKey !== baseMediaKey;
 
-      if (differs) {
-        variants[payload.platform] = {
+      const dropMediaMode = noMediaVariantMode[payload.platform];
+      const removeMedia =
+        Boolean(dropMediaMode) && basePayload.media.length > 0;
+
+      platformsToSend.add(payload.platform);
+      if (payload.platform === 'pinterest' && payload.media.length > 0) {
+        pinterestHasMedia = true;
+      }
+
+      if (differs || removeMedia) {
+        const variant: {
+          content: string;
+          media?: string[] | null;
+          noImage?: boolean;
+        } = {
           content: payload.content,
-          ...(payload.media.length > 0
-            ? { media: payload.media.map((item) => item.url) }
-            : {}),
         };
-      } else {
-        basePlatforms.add(payload.platform);
+
+        if (removeMedia) {
+          if (dropMediaMode === 'noImage') {
+            variant.noImage = true;
+          } else if (dropMediaMode === 'mediaNull') {
+            variant.media = null;
+          }
+        } else if (mediaKey !== baseMediaKey && payload.media.length > 0) {
+          variant.media = payload.media.map((item) => item.url);
+        }
+
+        variants[payload.platform] = variant;
       }
     }
 
-    if (basePlatforms.size === 0) {
-      basePlatforms.add(basePayload.platform);
+    if (platformsToSend.size === 0) {
+      platformsToSend.add(basePayload.platform);
     }
 
-    if (basePlatforms.has('pinterest') && basePayload.media.length === 0) {
+    if (
+      platformsToSend.has('pinterest') &&
+      basePayload.media.length === 0 &&
+      !pinterestHasMedia
+    ) {
       return NextResponse.json(
         {
           success: false,
@@ -384,7 +435,7 @@ export async function POST(request: NextRequest) {
       accountGroupId: accountGroupIdStr,
       name: `Lunary Post - ${readableDate}`,
       content: basePayload.content,
-      platforms: Array.from(basePlatforms),
+      platforms: Array.from(platformsToSend),
       scheduledDate: scheduleDate.toISOString(),
       media: basePayload.media,
     };

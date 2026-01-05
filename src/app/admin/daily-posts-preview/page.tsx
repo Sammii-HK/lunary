@@ -73,7 +73,7 @@ export default function DailyPostsPreviewPage() {
       {
         name: 'Main Cosmic',
         description: 'Daily cosmic content with astronomical insights',
-        imageUrl: `/api/og/cosmic/${selectedDate}?t=${cacheBuster}`,
+        imageUrl: `/api/og/cosmic/${selectedDate}?format=square&t=${cacheBuster}`,
         platforms: ['X', 'Bluesky', 'Instagram', 'Reddit', 'Pinterest'],
         time: '12:00 PM UTC',
         hashtags: '#cosmic #astrology #daily',
@@ -199,7 +199,7 @@ export default function DailyPostsPreviewPage() {
                   }}
                 >
                   <Image
-                    src={`/api/og/cosmic/${date}?t=${cacheBuster}`}
+                    src={`/api/og/cosmic/${date}?format=square&t=${cacheBuster}`}
                     alt={`Cosmic image for ${date}`}
                     width={200}
                     height={200}

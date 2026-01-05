@@ -75,6 +75,11 @@ type PostGroup = {
   basePost: PendingPost;
 };
 
+const normalizeMediaUrl = (value?: string | null) => {
+  if (!value) return '';
+  return value.split('#')[0]?.split('?')[0]?.trim() || '';
+};
+
 export default function SocialPostsPage() {
   const [activeTab, setActiveTab] = useState<TabType>('approve');
   const [loading, setLoading] = useState(false);
@@ -117,12 +122,17 @@ export default function SocialPostsPage() {
   const [bulkActionLoading, setBulkActionLoading] = useState<string | null>(
     null,
   );
+  const [groupApprovingKey, setGroupApprovingKey] = useState<string | null>(
+    null,
+  );
   const [useThematicMode, setUseThematicMode] = useState(true);
   const [replaceExisting, setReplaceExisting] = useState(false);
   const [videosOnly, setVideosOnly] = useState(false);
-  const [dailyCronRunning, setDailyCronRunning] = useState(false);
-  const [dailyCronForceRunning, setDailyCronForceRunning] = useState(false);
   const [videoJobFeedback, setVideoJobFeedback] = useState<string | null>(null);
+  const [requeueingFailed, setRequeueingFailed] = useState(false);
+  const [requeueingProcessing, setRequeueingProcessing] = useState(false);
+  const [processingAllVideos, setProcessingAllVideos] = useState(false);
+  const [processingVideo, setProcessingVideo] = useState(false);
   const [activeVariantByGroup, setActiveVariantByGroup] = useState<
     Record<string, string>
   >({});
@@ -389,7 +399,7 @@ export default function SocialPostsPage() {
   };
 
   const handleProcessVideoJobs = async (force = false) => {
-    setLoading(true);
+    setProcessingVideo(true);
     setVideoJobFeedback(null);
     try {
       const response = await fetch(
@@ -413,7 +423,54 @@ export default function SocialPostsPage() {
     } catch (error) {
       alert('Failed to process video jobs');
     } finally {
-      setLoading(false);
+      setProcessingVideo(false);
+    }
+  };
+
+  const handleProcessAllVideoJobs = async () => {
+    if (!confirm('Process all queued video jobs sequentially?')) return;
+    setProcessingAllVideos(true);
+    setVideoJobFeedback(null);
+    let processedTotal = 0;
+    let loops = 0;
+
+    try {
+      while (true) {
+        loops += 1;
+        const response = await fetch('/api/admin/video-jobs/process?limit=1', {
+          method: 'POST',
+        });
+        const data = await response.json();
+        if (!data.success) {
+          alert(data.error || 'Failed to process video jobs');
+          break;
+        }
+
+        const processed = data.processed ?? 0;
+        if (processed === 0) break;
+
+        processedTotal += processed;
+        setVideoJobFeedback(
+          `Processed ${processedTotal} video job${processedTotal > 1 ? 's' : ''}...`,
+        );
+
+        if (loops >= 25) {
+          alert('Stopped after 25 jobs. Run again if more remain.');
+          break;
+        }
+
+        await new Promise((resolve) => setTimeout(resolve, 1500));
+      }
+    } catch (error) {
+      alert('Failed to process video jobs');
+    } finally {
+      setProcessingAllVideos(false);
+      setVideoJobFeedback(
+        processedTotal > 0
+          ? `Processed ${processedTotal} video job${processedTotal > 1 ? 's' : ''}.`
+          : 'No queued video jobs found.',
+      );
+      loadPendingPosts();
     }
   };
 
@@ -451,6 +508,52 @@ export default function SocialPostsPage() {
       alert('Failed to force rebuild videos');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleRequeueFailedVideos = async () => {
+    if (!confirm('Requeue failed video jobs?')) return;
+    setRequeueingFailed(true);
+    try {
+      const response = await fetch('/api/admin/video-jobs/requeue-failed', {
+        method: 'POST',
+      });
+      const data = await response.json();
+      if (data.success) {
+        alert(
+          `Requeued ${data.requeued} failed job${data.requeued === 1 ? '' : 's'}.`,
+        );
+        loadPendingPosts();
+      } else {
+        alert(data.error || 'Failed to requeue failed jobs.');
+      }
+    } catch (error) {
+      alert('Failed to requeue failed jobs.');
+    } finally {
+      setRequeueingFailed(false);
+    }
+  };
+
+  const handleRequeueProcessingVideos = async () => {
+    if (!confirm('Requeue stuck processing video jobs?')) return;
+    setRequeueingProcessing(true);
+    try {
+      const response = await fetch('/api/admin/video-jobs/requeue-processing', {
+        method: 'POST',
+      });
+      const data = await response.json();
+      if (data.success) {
+        alert(
+          `Requeued ${data.requeued} processing job${data.requeued === 1 ? '' : 's'}.`,
+        );
+        loadPendingPosts();
+      } else {
+        alert(data.error || 'Failed to requeue processing jobs.');
+      }
+    } catch (error) {
+      alert('Failed to requeue processing jobs.');
+    } finally {
+      setRequeueingProcessing(false);
     }
   };
 
@@ -542,30 +645,40 @@ export default function SocialPostsPage() {
     setEditingPost(post.id);
   };
 
-  const handleApprove = async (postId: string) => {
+  const getGroupPostIds = (postId: string) => {
+    const group = groupedPosts.find((entry) =>
+      entry.posts.some((post) => post.id === postId),
+    );
+    return group ? group.posts.map((post) => post.id) : [postId];
+  };
+
+  const handleApprove = async (post: PendingPost) => {
+    const groupPostIds = getGroupPostIds(post.id);
     try {
-      const edited = editedContent[postId];
-      const notes = improvementNotes[postId];
+      const edited = editedContent[post.id];
+      const notes = improvementNotes[post.id];
       const hasEdits =
-        edited && edited !== pendingPosts.find((p) => p.id === postId)?.content;
+        edited &&
+        edited !== pendingPosts.find((p) => p.id === post.id)?.content;
       const hasNotes = notes && notes.trim() !== '';
 
       const response = await fetch('/api/admin/social-posts/approve', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          postId,
+          postId: post.id,
           action: 'approve',
           editedContent: hasEdits ? edited : undefined,
           improvementNotes: hasNotes ? notes : undefined,
+          groupPostIds,
         }),
       });
 
       const data = await response.json();
       if (data.success) {
         setEditingPost(null);
-        setEditedContent({ ...editedContent, [postId]: '' });
-        setImprovementNotes({ ...improvementNotes, [postId]: '' });
+        setEditedContent({ ...editedContent, [post.id]: '' });
+        setImprovementNotes({ ...improvementNotes, [post.id]: '' });
         loadPendingPosts();
       } else {
         alert(`Failed to approve: ${data.error}`);
@@ -573,6 +686,40 @@ export default function SocialPostsPage() {
     } catch (error) {
       console.error('Error approving post:', error);
       alert('Failed to approve post');
+    }
+  };
+
+  const handleApproveGroup = async (group: PostGroup) => {
+    const pendingVariantIds = group.posts
+      .filter((post) => post.status === 'pending')
+      .map((post) => post.id);
+    if (pendingVariantIds.length === 0) return;
+
+    setGroupApprovingKey(group.key);
+    try {
+      const response = await fetch('/api/admin/social-posts/approve', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          postId: pendingVariantIds[0],
+          action: 'approve',
+          groupPostIds: pendingVariantIds,
+        }),
+      });
+
+      const data = await response.json();
+      if (data.success) {
+        setEditedContent({});
+        setImprovementNotes({});
+        loadPendingPosts();
+      } else {
+        alert(`Failed to approve group: ${data.error}`);
+      }
+    } catch (error) {
+      console.error('Error approving group:', error);
+      alert('Failed to approve group');
+    } finally {
+      setGroupApprovingKey(null);
     }
   };
 
@@ -617,6 +764,7 @@ export default function SocialPostsPage() {
   };
 
   const handleSendToSucculent = async (post: PendingPost) => {
+    const groupPostIds = getGroupPostIds(post.id);
     setSending(post.id);
     try {
       const response = await fetch('/api/admin/social-posts/send', {
@@ -630,6 +778,7 @@ export default function SocialPostsPage() {
           imageUrl: post.imageUrl,
           videoUrl: post.videoUrl,
           postType: post.postType,
+          groupPostIds,
         }),
       });
 
@@ -650,31 +799,25 @@ export default function SocialPostsPage() {
 
   const handleSendAllApproved = async () => {
     const approvedPosts = pendingPosts.filter((p) => p.status === 'approved');
-    if (approvedPosts.length === 0) {
+    const approvedGroups = groupedPosts.filter((group) =>
+      group.posts.some((post) => post.status === 'approved'),
+    );
+    if (approvedGroups.length === 0) {
       alert('No approved posts to send');
       return;
     }
 
-    const groupMap = new Map<string, PendingPost[]>();
-    for (const post of approvedPosts) {
-      const key = post.baseGroupKey || post.id;
-      const group = groupMap.get(key);
-      if (group) {
-        group.push(post);
-      } else {
-        groupMap.set(key, [post]);
-      }
-    }
-
-    const postsToSend: PendingPost[] = [];
-    for (const group of groupMap.values()) {
-      const basePostId = group[0]?.basePostId;
+    const postsToSend = approvedGroups.map((group) => {
+      const basePostId = group.posts[0]?.basePostId;
       const basePost =
         typeof basePostId === 'number'
-          ? group.find((post) => Number(post.id) === basePostId)
+          ? group.posts.find((post) => Number(post.id) === basePostId)
           : undefined;
-      postsToSend.push(basePost || group[0]);
-    }
+      return {
+        post: basePost || group.basePost || group.posts[0],
+        groupPostIds: group.posts.map((post) => post.id),
+      };
+    });
 
     if (
       !confirm(
@@ -695,7 +838,7 @@ export default function SocialPostsPage() {
     let failedCount = 0;
 
     for (let i = 0; i < postsToSend.length; i++) {
-      const post = postsToSend[i];
+      const { post, groupPostIds } = postsToSend[i];
       setSendAllProgress({
         current: i + 1,
         total: postsToSend.length,
@@ -715,6 +858,7 @@ export default function SocialPostsPage() {
             imageUrl: post.imageUrl,
             videoUrl: post.videoUrl,
             postType: post.postType,
+            groupPostIds,
           }),
         });
 
@@ -757,33 +901,33 @@ export default function SocialPostsPage() {
     }, 2000);
   };
 
-  const triggerDailyCron = async (force = false, date?: string) => {
-    const confirmMessage = force
-      ? 'Force run daily cron now? This bypasses the duplicate execution guard.'
-      : 'Run daily cron now?';
-    if (!confirm(confirmMessage)) return;
+  const handleGenerateDailyCosmicPost = async () => {
+    const dateInput = prompt(
+      'Generate daily cosmic post for which date? (YYYY-MM-DD, leave blank for tomorrow)',
+    );
+    if (dateInput === null) return;
 
-    force ? setDailyCronForceRunning(true) : setDailyCronRunning(true);
+    const date = dateInput.trim();
+    setLoading(true);
     try {
-      const response = await fetch('/api/admin/cron/daily-posts', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ force, date }),
-      });
+      const response = await fetch(
+        '/api/admin/social-posts/generate-daily-cosmic',
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ date: date || undefined }),
+        },
+      );
       const data = await response.json();
       if (data.success) {
-        alert('Daily cron completed.');
-      } else if (data.skipped) {
-        alert(data.message || 'Daily cron skipped.');
+        alert(data.message || 'Daily cosmic post scheduled.');
       } else {
-        alert(
-          `Daily cron failed: ${data.error || data.message || 'Unknown error'}`,
-        );
+        alert(data.error || data.message || 'Failed to schedule daily post.');
       }
     } catch (error) {
-      alert('Daily cron failed.');
+      alert('Failed to schedule daily post.');
     } finally {
-      force ? setDailyCronForceRunning(false) : setDailyCronRunning(false);
+      setLoading(false);
     }
   };
 
@@ -884,19 +1028,13 @@ export default function SocialPostsPage() {
     (p) => p.status === 'approved',
   ).length;
   const queuedVideoCount = pendingPosts.filter(
-    (p) =>
-      (p.postType === 'video' || p.postType === 'educational') &&
-      p.videoJobStatus === 'pending',
+    (p) => p.postType === 'video' && p.videoJobStatus === 'pending',
   ).length;
   const processingVideoCount = pendingPosts.filter(
-    (p) =>
-      (p.postType === 'video' || p.postType === 'educational') &&
-      p.videoJobStatus === 'processing',
+    (p) => p.postType === 'video' && p.videoJobStatus === 'processing',
   ).length;
   const failedVideoCount = pendingPosts.filter(
-    (p) =>
-      (p.postType === 'video' || p.postType === 'educational') &&
-      p.videoJobStatus === 'failed',
+    (p) => p.postType === 'video' && p.videoJobStatus === 'failed',
   ).length;
 
   return (
@@ -1177,6 +1315,14 @@ export default function SocialPostsPage() {
                       Week After Next
                     </Button>
                   </div>
+                  <Button
+                    onClick={handleGenerateDailyCosmicPost}
+                    disabled={loading}
+                    variant='outline'
+                    className='border-zinc-700 text-zinc-300 hover:bg-zinc-800'
+                  >
+                    Generate daily cosmic post
+                  </Button>
                 </div>
               </CardContent>
             </Card>
@@ -1261,48 +1407,37 @@ export default function SocialPostsPage() {
                       </Badge>
                     )}
                     {processingVideoCount > 0 && (
-                      <Badge className='bg-lunary-primary-900/30 text-lunary-primary-300 border-lunary-primary-700'>
-                        {processingVideoCount} processing
-                      </Badge>
+                      <button
+                        type='button'
+                        onClick={handleRequeueProcessingVideos}
+                        disabled={requeueingProcessing}
+                        className='disabled:cursor-not-allowed'
+                      >
+                        <Badge className='bg-lunary-primary-900/30 text-lunary-primary-300 border-lunary-primary-700'>
+                          {requeueingProcessing
+                            ? 'Requeuing...'
+                            : `${processingVideoCount} processing`}
+                        </Badge>
+                      </button>
                     )}
                     {failedVideoCount > 0 && (
-                      <Badge className='bg-lunary-error-900/30 text-lunary-error border-lunary-error-700'>
-                        {failedVideoCount} failed
-                      </Badge>
+                      <button
+                        type='button'
+                        onClick={handleRequeueFailedVideos}
+                        disabled={requeueingFailed}
+                        className='disabled:cursor-not-allowed'
+                      >
+                        <Badge className='bg-lunary-error-900/30 text-lunary-error border-lunary-error-700'>
+                          {requeueingFailed
+                            ? 'Requeuing...'
+                            : `${failedVideoCount} failed`}
+                        </Badge>
+                      </button>
                     )}
                   </div>
                 )}
               </div>
               <div className='flex gap-3'>
-                <Button
-                  onClick={() => triggerDailyCron()}
-                  disabled={loading || dailyCronRunning}
-                  variant='outline'
-                  className='border-zinc-700 text-zinc-300 hover:bg-zinc-800'
-                >
-                  {dailyCronRunning ? 'Running cron...' : 'Run daily cron'}
-                </Button>
-                <Button
-                  onClick={() =>
-                    triggerDailyCron(
-                      false,
-                      new Date().toISOString().split('T')[0],
-                    )
-                  }
-                  disabled={loading || dailyCronRunning}
-                  variant='outline'
-                  className='border-zinc-700 text-zinc-300 hover:bg-zinc-800'
-                >
-                  Run for today
-                </Button>
-                <Button
-                  onClick={() => triggerDailyCron(true)}
-                  disabled={loading || dailyCronForceRunning}
-                  variant='outline'
-                  className='border-lunary-error-700 text-lunary-error hover:bg-lunary-error-900/20'
-                >
-                  {dailyCronForceRunning ? 'Forcing...' : 'Force daily cron'}
-                </Button>
                 <Button
                   onClick={() => handleBulkAction('approve_all')}
                   disabled={loading || bulkActionLoading === 'approve_all'}
@@ -1332,11 +1467,26 @@ export default function SocialPostsPage() {
                 </Button>
                 <Button
                   onClick={() => handleProcessVideoJobs()}
-                  disabled={loading}
+                  disabled={processingVideo || processingAllVideos}
                   variant='outline'
                   className='border-zinc-700 text-zinc-300 hover:bg-zinc-800'
                 >
-                  Process videos
+                  {processingVideo ? (
+                    <>
+                      <Loader2 className='h-4 w-4 mr-2 animate-spin' />
+                      Processing...
+                    </>
+                  ) : (
+                    'Process videos'
+                  )}
+                </Button>
+                <Button
+                  onClick={handleProcessAllVideoJobs}
+                  disabled={loading || processingAllVideos}
+                  variant='outline'
+                  className='border-zinc-700 text-zinc-300 hover:bg-zinc-800'
+                >
+                  {processingAllVideos ? 'Processing...' : 'Process all videos'}
                 </Button>
               </div>
             </div>
@@ -1402,6 +1552,13 @@ export default function SocialPostsPage() {
                     group.posts.find((p) => p.platform === activePlatform) ||
                     group.posts[0];
                   const basePost = group.basePost;
+                  const baseVideoUrl = basePost.videoUrl?.trim() || '';
+                  const activeVideoUrl = activePost.videoUrl?.trim() || '';
+                  const showActiveVideo =
+                    Boolean(activeVideoUrl) &&
+                    (normalizeMediaUrl(activeVideoUrl) !==
+                      normalizeMediaUrl(baseVideoUrl) ||
+                      !baseVideoUrl);
                   const activeOverridesBase =
                     activePost &&
                     (activePost.content !== basePost.content ||
@@ -1474,17 +1631,17 @@ export default function SocialPostsPage() {
                       </CardHeader>
                       <CardContent>
                         <div className='space-y-4'>
-                          {basePost.videoUrl && (
+                          {baseVideoUrl && (
                             <div className='relative w-full max-w-md mx-auto'>
                               <video
-                                src={basePost.videoUrl}
+                                src={baseVideoUrl}
                                 controls
                                 className='w-full rounded-lg border border-zinc-700 bg-black'
                               />
                               <div className='absolute top-2 right-2 flex gap-2'>
                                 <button
                                   onClick={() =>
-                                    window.open(basePost.videoUrl, '_blank')
+                                    window.open(baseVideoUrl, '_blank')
                                   }
                                   className='bg-black/70 hover:bg-black/90 text-white px-2 py-1 rounded text-xs flex items-center gap-1'
                                 >
@@ -1494,20 +1651,21 @@ export default function SocialPostsPage() {
                               </div>
                             </div>
                           )}
-                          {basePost.videoScript && (
-                            <details className='bg-zinc-800/50 rounded-lg border border-zinc-700 p-3'>
-                              <summary className='cursor-pointer text-sm text-zinc-300 flex items-center gap-2'>
-                                <FileText className='h-4 w-4' />
-                                Base video script
-                                {basePost.videoPartNumber
-                                  ? ` • Part ${basePost.videoPartNumber}`
-                                  : ''}
-                              </summary>
-                              <p className='mt-3 text-zinc-200 whitespace-pre-wrap text-sm'>
-                                {basePost.videoScript}
-                              </p>
-                            </details>
-                          )}
+                          {basePost.postType === 'video' &&
+                            basePost.videoScript && (
+                              <details className='bg-zinc-800/50 rounded-lg border border-zinc-700 p-3'>
+                                <summary className='cursor-pointer text-sm text-zinc-300 flex items-center gap-2'>
+                                  <FileText className='h-4 w-4' />
+                                  Base video script
+                                  {basePost.videoPartNumber
+                                    ? ` • Part ${basePost.videoPartNumber}`
+                                    : ''}
+                                </summary>
+                                <p className='mt-3 text-zinc-200 whitespace-pre-wrap text-sm'>
+                                  {basePost.videoScript}
+                                </p>
+                              </details>
+                            )}
                           {basePost.imageUrl && (
                             <div className='relative w-full max-w-md mx-auto'>
                               <Image
@@ -1594,34 +1752,33 @@ export default function SocialPostsPage() {
                                 </Badge>
                               )}
 
-                              {!activePost.videoUrl &&
+                              {activePost.postType === 'video' &&
+                                !activePost.videoUrl &&
                                 activePost.videoJobStatus && (
                                   <Badge className='bg-zinc-800 text-zinc-200 border-zinc-600 capitalize w-fit'>
                                     Video {activePost.videoJobStatus}
                                   </Badge>
                                 )}
 
-                              {activePost.videoJobStatus === 'failed' &&
+                              {activePost.postType === 'video' &&
+                                activePost.videoJobStatus === 'failed' &&
                                 activePost.videoJobError && (
                                   <div className='text-sm text-lunary-error'>
                                     Video job failed: {activePost.videoJobError}
                                   </div>
                                 )}
 
-                              {activePost.videoUrl && (
+                              {showActiveVideo && (
                                 <div className='relative w-full max-w-md mx-auto'>
                                   <video
-                                    src={activePost.videoUrl}
+                                    src={activeVideoUrl}
                                     controls
                                     className='w-full rounded-lg border border-zinc-700 bg-black'
                                   />
                                   <div className='absolute top-2 right-2 flex gap-2'>
                                     <button
                                       onClick={() =>
-                                        window.open(
-                                          activePost.videoUrl,
-                                          '_blank',
-                                        )
+                                        window.open(activeVideoUrl, '_blank')
                                       }
                                       className='bg-black/70 hover:bg-black/90 text-white px-2 py-1 rounded text-xs flex items-center gap-1'
                                     >
@@ -1697,7 +1854,7 @@ export default function SocialPostsPage() {
                                       </Button>
                                       <Button
                                         onClick={() =>
-                                          handleApprove(activePost.id)
+                                          handleApprove(activePost)
                                         }
                                         className='flex-1 bg-lunary-success-600 hover:bg-lunary-success-700 text-white'
                                       >
@@ -1772,11 +1929,9 @@ export default function SocialPostsPage() {
 
                               {activePost.status === 'pending' &&
                                 editingPost !== activePost.id && (
-                                  <div className='flex gap-3'>
+                                  <div className='flex flex-wrap gap-3'>
                                     <Button
-                                      onClick={() =>
-                                        handleApprove(activePost.id)
-                                      }
+                                      onClick={() => handleApprove(activePost)}
                                       className='flex-1 bg-lunary-success-600 hover:bg-lunary-success-700 text-white'
                                     >
                                       <Check className='h-4 w-4 mr-2' />
@@ -1817,6 +1972,22 @@ export default function SocialPostsPage() {
                                       )}
                                       Reject
                                     </Button>
+                                    {pendingVariants > 1 && (
+                                      <Button
+                                        onClick={() =>
+                                          handleApproveGroup(group)
+                                        }
+                                        variant='outline'
+                                        className='border-lunary-success-600 text-lunary-success-300 hover:bg-lunary-success-900/30'
+                                        disabled={
+                                          groupApprovingKey === group.key
+                                        }
+                                      >
+                                        {groupApprovingKey === group.key
+                                          ? `Approving ${pendingVariants}...`
+                                          : `Approve ${pendingVariants} pending`}
+                                      </Button>
+                                    )}
                                   </div>
                                 )}
 

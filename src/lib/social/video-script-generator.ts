@@ -468,13 +468,18 @@ async function generateTikTokScriptContent(
 
   const prompt = `Create a complete, flowing TikTok video script (30-45 seconds, 70-110 words) about ${facet.title} as part of a daily series.
 
+Series Theme: ${theme.name}
+Daily topic: ${facet.title} (focus: ${facet.focus})
+
 This is Part ${partNumber} of ${totalParts} in the series. The script should be:
-- Complete and flowing - written as a natural narrative that can be read aloud smoothly
-- Educational and informative, not conversational
-- Part 1 may include a brief series context. Parts 2+ should not repeat the intro.
-- Structured with a strong opening hook, clear explanation, and memorable takeaway
-- Include a callback to the series in every part: "Part ${partNumber} of ${totalParts}: ${facet.title}."
-- Do NOT mention "next week" or "this week's theme."
+  - Complete and flowing - written as a natural narrative that can be read aloud smoothly
+  - Educational and informative, not conversational
+  - Part 1 may include a brief series context. Parts 2+ should not repeat the intro.
+  - Structured with a strong opening hook, clear explanation, and memorable takeaway
+  - Start by reminding viewers which weekly theme we're in (e.g., "Welcome back to our series on ${theme.name}.")
+  - Mention today's focus immediately after the series line (e.g., "Part ${partNumber} of ${totalParts}: ${facet.title}. Today we explore ${facet.focus}.")
+  - Include a callback to the series in every part: "Part ${partNumber} of ${totalParts}: ${facet.title}."
+  - Do NOT mention "next week" or "this week's theme."
 
 Topic: ${facet.title}
 Focus: ${facet.focus}
@@ -660,7 +665,9 @@ function buildTikTokIntro(
   partNumber: number,
 ): string {
   const themeIntro =
-    partNumber === 1 ? `This week's theme is ${theme.name}. ` : '';
+    partNumber === 1
+      ? `Welcome to the ${theme.name} series. `
+      : `Welcome back to our ${theme.name} series. `;
 
   if (data?.description) {
     // Take first sentence or two

@@ -134,6 +134,111 @@ async function findCustomerIdByEmail(
   }
 }
 
+async function findCustomerIdByMetadata(
+  stripe: Stripe,
+  userId: string,
+): Promise<string | null> {
+  try {
+    const result = await stripe.customers.search({
+      query: `metadata['userId']:'${userId}'`,
+      limit: 1,
+    });
+    return result.data[0]?.id || null;
+  } catch (error) {
+    console.warn('Failed to search Stripe customers by metadata:', error);
+    return null;
+  }
+}
+
+async function ensureStripeCustomer(
+  stripe: Stripe,
+  params: {
+    existingCustomerId?: string | null;
+    userId?: string | null;
+    email?: string | null;
+  },
+): Promise<string | null> {
+  const { existingCustomerId, userId, email } = params;
+
+  if (existingCustomerId) {
+    try {
+      const customer = await stripe.customers.retrieve(existingCustomerId);
+      const isDeleted =
+        typeof customer === 'object' &&
+        'deleted' in customer &&
+        customer.deleted;
+      if (!isDeleted) {
+        return existingCustomerId;
+      }
+    } catch {
+      // Fall through to search/create.
+    }
+  }
+
+  if (userId) {
+    const foundByMetadata = await findCustomerIdByMetadata(stripe, userId);
+    if (foundByMetadata) {
+      return foundByMetadata;
+    }
+  }
+
+  if (email) {
+    const foundByEmail = await findCustomerIdByEmail(
+      stripe,
+      email,
+      userId || undefined,
+    );
+    if (foundByEmail) {
+      return foundByEmail;
+    }
+  }
+
+  if (userId || email) {
+    try {
+      const created = await stripe.customers.create({
+        email: email || undefined,
+        metadata: userId ? { userId } : undefined,
+      });
+      return created.id;
+    } catch (error) {
+      console.warn('Failed to create Stripe customer:', error);
+    }
+  }
+
+  return null;
+}
+
+async function persistStripeCustomer(
+  userId: string,
+  customerId: string,
+  email?: string | null,
+) {
+  try {
+    await sql`
+      INSERT INTO subscriptions (user_id, stripe_customer_id, user_email)
+      VALUES (${userId}, ${customerId}, ${email || null})
+      ON CONFLICT (user_id)
+      DO UPDATE SET stripe_customer_id = EXCLUDED.stripe_customer_id,
+                    user_email = COALESCE(EXCLUDED.user_email, subscriptions.user_email),
+                    updated_at = NOW()
+    `;
+  } catch (error) {
+    console.warn('Failed to persist Stripe customer to subscriptions:', error);
+  }
+
+  try {
+    await sql`
+      INSERT INTO user_profiles (user_id, stripe_customer_id)
+      VALUES (${userId}, ${customerId})
+      ON CONFLICT (user_id)
+      DO UPDATE SET stripe_customer_id = EXCLUDED.stripe_customer_id,
+                    updated_at = NOW()
+    `;
+  } catch (error) {
+    console.warn('Failed to persist Stripe customer to user_profiles:', error);
+  }
+}
+
 // Helper function to get trial period from Stripe product/price metadata
 async function getTrialPeriodForPrice(
   priceId: string,
@@ -353,15 +458,13 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    if (!resolvedCustomerId && resolvedEmail) {
-      const foundCustomerId = await findCustomerIdByEmail(
-        checkoutStripe,
-        resolvedEmail,
-        typeof userId === 'string' ? userId : undefined,
-      );
-      if (foundCustomerId) {
-        resolvedCustomerId = foundCustomerId;
-      }
+    const ensuredCustomerId = await ensureStripeCustomer(checkoutStripe, {
+      existingCustomerId: resolvedCustomerId,
+      userId: typeof userId === 'string' ? userId : null,
+      email: resolvedEmail,
+    });
+    if (ensuredCustomerId) {
+      resolvedCustomerId = ensuredCustomerId;
     }
 
     const normalizedPromoCode =
@@ -494,65 +597,54 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // If we have a customer ID, verify it exists in the SAME account as the price
     if (resolvedCustomerId) {
-      // Check if customer exists in the same account as the price
-      let customerExistsInPriceAccount = false;
-      try {
-        const customer =
-          await checkoutStripe.customers.retrieve(resolvedCustomerId);
-        const isDeleted =
-          typeof customer === 'object' &&
-          'deleted' in customer &&
-          customer.deleted;
-        customerExistsInPriceAccount = !isDeleted;
-      } catch {
-        // Customer doesn't exist in price account
-      }
-
-      if (customerExistsInPriceAccount) {
-        // Customer exists in same account as price, use it
-        sessionConfig.customer = resolvedCustomerId;
-        // Update customer metadata with userId if provided
-        if (userId) {
-          try {
-            await checkoutStripe.customers.update(resolvedCustomerId, {
-              metadata: {
-                userId: userId,
-              },
-            });
-          } catch (error) {
-            const stripeError = error as Stripe.StripeRawError;
-            if (stripeError?.code === 'resource_missing') {
-              delete sessionConfig.customer;
-            }
-            console.warn('Failed to update customer metadata:', error);
-            // Continue anyway - metadata update failure shouldn't block checkout
-          }
-        }
-      } else {
-        // Customer doesn't exist in price account, don't use it
-        const safeCustomerId = sanitizeForLog(resolvedCustomerId);
-        console.warn(
-          `Customer ${safeCustomerId} not found in price account, creating new customer`,
-        );
-        // Fall through to create new customer with userId in metadata
-        if (userId) {
-          metadata.userId = userId;
+      sessionConfig.customer = resolvedCustomerId;
+      if (typeof userId === 'string') {
+        await persistStripeCustomer(userId, resolvedCustomerId, resolvedEmail);
+        try {
+          await checkoutStripe.customers.update(resolvedCustomerId, {
+            metadata: {
+              userId: userId,
+            },
+          });
+        } catch (error) {
+          console.warn('Failed to update customer metadata:', error);
         }
       }
-    } else if (userId) {
-      // If no customer ID but we have userId, store it in customer metadata
-      // Stripe will create the customer, and we'll update metadata via webhook
-      if (resolvedEmail) {
-        sessionConfig.customer_email = resolvedEmail;
-      } else {
-        sessionConfig.customer_email = undefined; // Let Stripe collect email
-      }
-      // Store userId in session metadata so webhook can update customer
-      metadata.userId = userId;
     } else if (resolvedEmail) {
       sessionConfig.customer_email = resolvedEmail;
+    }
+
+    if (typeof userId === 'string' && resolvedCustomerId) {
+      try {
+        const existingSubscription = await sql`
+          SELECT status, plan_type, stripe_subscription_id
+          FROM subscriptions
+          WHERE user_id = ${userId}
+          LIMIT 1
+        `;
+        const existing = existingSubscription.rows[0];
+        const hasActiveSubscription =
+          existing &&
+          ['active', 'trial', 'past_due'].includes(existing.status) &&
+          existing.plan_type !== 'free' &&
+          existing.stripe_subscription_id;
+
+        if (hasActiveSubscription) {
+          const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || originFromRequest;
+          const portalSession =
+            await checkoutStripe.billingPortal.sessions.create({
+              customer: resolvedCustomerId,
+              return_url: `${baseUrl}/pricing`,
+            });
+          return NextResponse.json({
+            portalUrl: portalSession.url,
+            reason: 'existing_subscription',
+          });
+        }
+      } catch (error) {
+        console.warn('Failed to check existing subscription:', error);
+      }
     }
     // Note: For subscription mode, Stripe automatically creates customers
     // so we don't need to set customer_creation

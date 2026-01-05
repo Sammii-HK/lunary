@@ -22,12 +22,12 @@ export default function OGDebugPage() {
   const ogTypes = [
     {
       name: 'Cosmic (Square)',
-      url: `/api/og/cosmic/${selectedDate}?t=${cacheKey}`,
+      url: `/api/og/cosmic/${selectedDate}?format=square&t=${cacheKey}`,
       description: 'Daily cosmic content - square format',
     },
     {
       name: 'Cosmic (Landscape)',
-      url: `/api/og/cosmic/${selectedDate}/landscape?t=${cacheKey}`,
+      url: `/api/og/cosmic/${selectedDate}?format=landscape&t=${cacheKey}`,
       description: 'Daily cosmic content - landscape for X/Twitter',
     },
     {
