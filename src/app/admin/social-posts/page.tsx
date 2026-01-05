@@ -122,6 +122,9 @@ export default function SocialPostsPage() {
   const [bulkActionLoading, setBulkActionLoading] = useState<string | null>(
     null,
   );
+  const [groupApprovingKey, setGroupApprovingKey] = useState<string | null>(
+    null,
+  );
   const [useThematicMode, setUseThematicMode] = useState(true);
   const [replaceExisting, setReplaceExisting] = useState(false);
   const [videosOnly, setVideosOnly] = useState(false);
@@ -683,6 +686,40 @@ export default function SocialPostsPage() {
     } catch (error) {
       console.error('Error approving post:', error);
       alert('Failed to approve post');
+    }
+  };
+
+  const handleApproveGroup = async (group: PostGroup) => {
+    const pendingVariantIds = group.posts
+      .filter((post) => post.status === 'pending')
+      .map((post) => post.id);
+    if (pendingVariantIds.length === 0) return;
+
+    setGroupApprovingKey(group.key);
+    try {
+      const response = await fetch('/api/admin/social-posts/approve', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          postId: pendingVariantIds[0],
+          action: 'approve',
+          groupPostIds: pendingVariantIds,
+        }),
+      });
+
+      const data = await response.json();
+      if (data.success) {
+        setEditedContent({});
+        setImprovementNotes({});
+        loadPendingPosts();
+      } else {
+        alert(`Failed to approve group: ${data.error}`);
+      }
+    } catch (error) {
+      console.error('Error approving group:', error);
+      alert('Failed to approve group');
+    } finally {
+      setGroupApprovingKey(null);
     }
   };
 
@@ -1892,7 +1929,7 @@ export default function SocialPostsPage() {
 
                               {activePost.status === 'pending' &&
                                 editingPost !== activePost.id && (
-                                  <div className='flex gap-3'>
+                                  <div className='flex flex-wrap gap-3'>
                                     <Button
                                       onClick={() => handleApprove(activePost)}
                                       className='flex-1 bg-lunary-success-600 hover:bg-lunary-success-700 text-white'
@@ -1935,6 +1972,22 @@ export default function SocialPostsPage() {
                                       )}
                                       Reject
                                     </Button>
+                                    {pendingVariants > 1 && (
+                                      <Button
+                                        onClick={() =>
+                                          handleApproveGroup(group)
+                                        }
+                                        variant='outline'
+                                        className='border-lunary-success-600 text-lunary-success-300 hover:bg-lunary-success-900/30'
+                                        disabled={
+                                          groupApprovingKey === group.key
+                                        }
+                                      >
+                                        {groupApprovingKey === group.key
+                                          ? `Approving ${pendingVariants}...`
+                                          : `Approve ${pendingVariants} pending`}
+                                      </Button>
+                                    )}
                                   </div>
                                 )}
 
