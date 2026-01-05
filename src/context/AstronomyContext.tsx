@@ -50,6 +50,7 @@ export const AstronomyContext = createContext<{
   currentTarotCard: any;
   symbol: string;
   currentDate: string;
+  refreshCosmicData: () => void;
 } | null>(null);
 
 export function useAstronomyContext() {
@@ -76,6 +77,7 @@ export const AstronomyContextProvider = ({
     dayjs(currentDateTime).format('YYYY-MM-DD'),
   );
   const [cosmicData, setCosmicData] = useState<GlobalCosmicData>(null);
+  const [refreshKey, setRefreshKey] = useState(0);
 
   useEffect(() => {
     let isMounted = true;
@@ -94,7 +96,7 @@ export const AstronomyContextProvider = ({
     return () => {
       isMounted = false;
     };
-  }, [currentDate]);
+  }, [currentDate, refreshKey]);
 
   const currentAstrologicalChart = useMemo(() => {
     if (!cosmicData?.planetaryPositions) return [];
@@ -193,6 +195,7 @@ export const AstronomyContextProvider = ({
         currentTarotCard,
         symbol,
         currentDate,
+        refreshCosmicData: () => setRefreshKey((prev) => prev + 1),
       }}
     >
       {children}

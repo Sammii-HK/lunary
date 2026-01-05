@@ -1,7 +1,8 @@
 'use client';
 
-import { useMemo } from 'react';
-import { Telescope } from 'lucide-react';
+import { useMemo, useState } from 'react';
+import { Check, RefreshCw, Telescope } from 'lucide-react';
+import { useLocation } from '@/hooks/useLocation';
 import { useAstronomyContext } from '@/context/AstronomyContext';
 import { bodiesSymbols, zodiacSymbol } from '../../../utils/zodiac/zodiac';
 import {
@@ -154,6 +155,15 @@ const getZodiacSymbol = (sign: string): string => {
 
 export const SkyNowCard = () => {
   const { currentAstrologicalChart } = useAstronomyContext();
+  const {
+    requestLocation,
+    loading: locationLoading,
+    error: locationError,
+  } = useLocation();
+  const [showLocationFeedback, setShowLocationFeedback] = useState(false);
+  const [refreshState, setRefreshState] = useState<
+    'idle' | 'success' | 'error'
+  >('idle');
 
   const planets = useMemo(() => {
     if (!currentAstrologicalChart || currentAstrologicalChart.length === 0) {
@@ -183,6 +193,43 @@ export const SkyNowCard = () => {
           retrogradeCount > 0 ? `${retrogradeCount} Retrograde` : undefined
         }
         badgeVariant={retrogradeCount > 0 ? 'danger' : 'default'}
+        action={
+          <button
+            type='button'
+            onClick={async (event) => {
+              event.stopPropagation();
+              setRefreshState('idle');
+              try {
+                await requestLocation();
+                setRefreshState('success');
+              } catch {
+                setRefreshState('error');
+              } finally {
+                setShowLocationFeedback(true);
+                setTimeout(() => {
+                  setShowLocationFeedback(false);
+                  setRefreshState('idle');
+                }, 2000);
+              }
+            }}
+            aria-label='Refresh location used for Sky Now'
+            title='Refresh my location'
+            className='p-0.5 rounded-full border border-transparent text-zinc-500 hover:text-zinc-300 hover:border-zinc-700 transition-colors relative'
+          >
+            {refreshState === 'success' ? (
+              <Check className='w-3 h-3 text-lunary-success' />
+            ) : (
+              <RefreshCw
+                className={`w-3 h-3 ${locationLoading ? 'animate-spin' : ''}`}
+              />
+            )}
+            {showLocationFeedback && locationError && (
+              <span className='absolute -top-5 left-1/2 -translate-x-1/2 text-[10px] text-zinc-300'>
+                Failed
+              </span>
+            )}
+          </button>
+        }
       />
       <div className='mt-2 space-y-1 w-full'>
         <div className='grid grid-cols-10 w-full text-center'>
