@@ -519,6 +519,43 @@ export async function GET(request: NextRequest) {
   }
 }
 
+type SocialVariantKey =
+  | 'pinterest'
+  | 'facebook'
+  | 'threads'
+  | 'tiktok'
+  | 'twitter'
+  | 'bluesky'
+  | 'linkedin';
+
+type SocialVariant = {
+  content: string;
+  media?: string[] | null;
+  twitterOptions?: {
+    thread: boolean;
+    threadNumber: boolean;
+  };
+};
+
+interface DailySocialPost {
+  name: string;
+  content: string;
+  platforms: string[];
+  imageUrls: string[];
+  alt: string;
+  scheduledDate: string;
+  pinterestOptions?: {
+    boardId?: string;
+  };
+  tiktokOptions?: {
+    type: string;
+    autoAddMusic: boolean;
+    visibility: string;
+  };
+  variants?: Partial<Record<SocialVariantKey, SocialVariant>>;
+  pinterestQuoteSlotId?: number;
+}
+
 // DAILY SOCIAL MEDIA POSTS
 async function runDailyPosts(dateStr: string) {
   console.log('📱 Generating daily social media posts...');
@@ -644,7 +681,7 @@ async function runDailyPosts(dateStr: string) {
     : postContent;
 
   // Generate posts with dynamic content
-  const posts = [
+  const posts: DailySocialPost[] = [
     {
       name: `Cosmic Post - ${new Date(dateStr).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}`,
       content: instagramContent,
