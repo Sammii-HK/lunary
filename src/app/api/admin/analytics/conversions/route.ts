@@ -196,7 +196,7 @@ export async function GET(request: NextRequest) {
     // Get free users count from PostHog MAU
     let freeUsersCount = 0;
     try {
-      const posthogData = await getPostHogActiveUsers();
+      const posthogData = await getPostHogActiveUsers(range.end);
       freeUsersCount = posthogData?.mau || 0;
     } catch {
       freeUsersCount = 0;

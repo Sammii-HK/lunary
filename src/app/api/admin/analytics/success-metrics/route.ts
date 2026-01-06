@@ -42,7 +42,7 @@ export async function GET(request: NextRequest) {
 
     try {
       // Get current period data
-      const posthogData = await getPostHogActiveUsers();
+      const posthogData = await getPostHogActiveUsers(range.end);
       if (posthogData) {
         dau = posthogData.dau;
         weeklyReturning = posthogData.wau;
@@ -99,59 +99,54 @@ export async function GET(request: NextRequest) {
       console.warn('[success-metrics] PostHog API error:', error);
     }
 
-    // 4. Conversion Rate - use MAU from PostHog as base
-    let freeUsers = 0;
-    try {
-      const posthogData = await getPostHogActiveUsers();
-      freeUsers = posthogData?.mau || 0;
-    } catch {
-      freeUsers = 0;
-    }
+    // 4. Conversion Rate - use conversion_events for both numerator and denominator
+    const signupsResult = await sql`
+      SELECT COUNT(DISTINCT user_id) AS total_signups
+      FROM conversion_events
+      WHERE event_type = 'signup'
+        AND created_at BETWEEN ${formatTimestamp(range.start)} AND ${formatTimestamp(range.end)}
+        AND (user_email IS NULL OR (user_email NOT LIKE ${TEST_EMAIL_PATTERN} AND user_email != ${TEST_EMAIL_EXACT}))
+    `;
+    const totalSignups = Number(signupsResult.rows[0]?.total_signups || 0);
 
     const conversionsResult = await sql`
-      SELECT COUNT(*) AS total_conversions
-      FROM analytics_conversions
-      WHERE created_at BETWEEN ${formatTimestamp(range.start)} AND ${formatTimestamp(range.end)}
-        AND NOT EXISTS (
-          SELECT 1 FROM subscriptions s
-          WHERE s.user_id = analytics_conversions.user_id
-            AND (s.user_email LIKE ${TEST_EMAIL_PATTERN} OR s.user_email = ${TEST_EMAIL_EXACT})
-        )
-        AND NOT EXISTS (
-          SELECT 1 FROM conversion_events ce
-          WHERE ce.user_id = analytics_conversions.user_id
-            AND (ce.user_email LIKE ${TEST_EMAIL_PATTERN} OR ce.user_email = ${TEST_EMAIL_EXACT})
-        )
+      SELECT COUNT(DISTINCT user_id) AS total_conversions
+      FROM conversion_events
+      WHERE event_type IN ('trial_converted', 'subscription_started')
+        AND created_at BETWEEN ${formatTimestamp(range.start)} AND ${formatTimestamp(range.end)}
+        AND (user_email IS NULL OR (user_email NOT LIKE ${TEST_EMAIL_PATTERN} AND user_email != ${TEST_EMAIL_EXACT}))
     `;
     const totalConversions = Number(
       conversionsResult.rows[0]?.total_conversions || 0,
     );
     const conversionRate =
-      freeUsers > 0 ? (totalConversions / freeUsers) * 100 : 0;
+      totalSignups > 0 ? (totalConversions / totalSignups) * 100 : 0;
 
-    // Previous period conversion rate for trend (use same base as current period)
-    const prevFreeUsers = freeUsers;
+    const prevSignupsResult = await sql`
+      SELECT COUNT(DISTINCT user_id) AS total_signups
+      FROM conversion_events
+      WHERE event_type = 'signup'
+        AND created_at BETWEEN ${formatTimestamp(prevRangeStart)} AND ${formatTimestamp(prevRangeEnd)}
+        AND (user_email IS NULL OR (user_email NOT LIKE ${TEST_EMAIL_PATTERN} AND user_email != ${TEST_EMAIL_EXACT}))
+    `;
+    const prevTotalSignups = Number(
+      prevSignupsResult.rows[0]?.total_signups || 0,
+    );
 
     const prevConversionsResult = await sql`
-      SELECT COUNT(*) AS total_conversions
-      FROM analytics_conversions
-      WHERE created_at BETWEEN ${formatTimestamp(prevRangeStart)} AND ${formatTimestamp(prevRangeEnd)}
-        AND NOT EXISTS (
-          SELECT 1 FROM subscriptions s
-          WHERE s.user_id = analytics_conversions.user_id
-            AND (s.user_email LIKE ${TEST_EMAIL_PATTERN} OR s.user_email = ${TEST_EMAIL_EXACT})
-        )
-        AND NOT EXISTS (
-          SELECT 1 FROM conversion_events ce
-          WHERE ce.user_id = analytics_conversions.user_id
-            AND (ce.user_email LIKE ${TEST_EMAIL_PATTERN} OR ce.user_email = ${TEST_EMAIL_EXACT})
-        )
+      SELECT COUNT(DISTINCT user_id) AS total_conversions
+      FROM conversion_events
+      WHERE event_type IN ('trial_converted', 'subscription_started')
+        AND created_at BETWEEN ${formatTimestamp(prevRangeStart)} AND ${formatTimestamp(prevRangeEnd)}
+        AND (user_email IS NULL OR (user_email NOT LIKE ${TEST_EMAIL_PATTERN} AND user_email != ${TEST_EMAIL_EXACT}))
     `;
     const prevTotalConversions = Number(
       prevConversionsResult.rows[0]?.total_conversions || 0,
     );
     const prevConversionRate =
-      prevFreeUsers > 0 ? (prevTotalConversions / prevFreeUsers) * 100 : 0;
+      prevTotalSignups > 0
+        ? (prevTotalConversions / prevTotalSignups) * 100
+        : 0;
     const conversionTrend =
       conversionRate > prevConversionRate
         ? 'up'

@@ -4,7 +4,7 @@ import {
   getPostHogRetention,
   getPostHogActiveUsersTrends,
 } from '@/lib/posthog-server';
-import { resolveDateRange } from '@/lib/analytics/date-range';
+import { formatDate, resolveDateRange } from '@/lib/analytics/date-range';
 
 export async function GET(request: NextRequest) {
   try {
@@ -16,7 +16,7 @@ export async function GET(request: NextRequest) {
     const range = resolveDateRange(searchParams, 30);
 
     const [posthogData, retentionData, trendsData] = await Promise.all([
-      getPostHogActiveUsers(),
+      getPostHogActiveUsers(range.end),
       getPostHogRetention(),
       getPostHogActiveUsersTrends(range.start, range.end, granularity),
     ]);
@@ -59,6 +59,28 @@ export async function GET(request: NextRequest) {
         ? Math.round(posthogData.wau - posthogData.dau * 0.5)
         : 0;
 
+    const sortedTrends = [...(trendsData || [])].sort((a, b) =>
+      a.date.localeCompare(b.date),
+    );
+    if (posthogData) {
+      const lastDate = formatDate(range.end);
+      const lastIndex = sortedTrends.findIndex(
+        (trend) => trend.date === lastDate,
+      );
+      const wrappedSummary = {
+        date: lastDate,
+        ...posthogData,
+      };
+      if (lastIndex >= 0) {
+        sortedTrends[lastIndex] = {
+          ...sortedTrends[lastIndex],
+          ...wrappedSummary,
+        };
+      } else {
+        sortedTrends.push(wrappedSummary);
+      }
+    }
+
     return NextResponse.json({
       dau: posthogData.dau,
       wau: posthogData.wau,
@@ -66,7 +88,7 @@ export async function GET(request: NextRequest) {
       returning_users: returningUsers,
       retention,
       churn_rate: churnRate,
-      trends: trendsData || [],
+      trends: sortedTrends,
       source: 'posthog',
     });
   } catch (error) {

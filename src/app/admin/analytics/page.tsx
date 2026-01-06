@@ -183,16 +183,17 @@ export default function AnalyticsPage() {
   const [userSegments, setUserSegments] = useState<any | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const activityUsageData = useMemo(
-    () =>
-      (activity?.trends ?? []).map((point) => ({
-        date: point.date,
-        dau: point.dau,
-        wau: point.wau,
-        mau: point.mau,
-      })),
-    [activity?.trends],
-  );
+  const activityUsageData = useMemo(() => {
+    const data = (activity?.trends ?? []).map((point) => ({
+      date: point.date,
+      dau: point.dau,
+      wau: point.wau,
+      mau: point.mau,
+    }));
+    return data.sort((a, b) =>
+      a.date.localeCompare(b.date, undefined, { numeric: true }),
+    );
+  }, [activity?.trends]);
 
   const fetchAnalytics = useCallback(async () => {
     setLoading(true);
