@@ -17,7 +17,7 @@ type Ctx = { params: Promise<{ date: string; size: string }> };
 
 export async function GET(req: NextRequest, ctx: Ctx) {
   const { date, size } = await ctx.params;
-  const normalizedSize = size === 'story' ? 'portrait' : size;
+  const normalizedSize = size === 'story' ? 'story' : size;
   const fontData = await loadAstronomiconFont(req);
   if (!fontData) throw new Error('Font load returned null');
 
@@ -28,7 +28,7 @@ export async function GET(req: NextRequest, ctx: Ctx) {
     square: { width: 1200, height: 1200, padding: '60px 40px' },
     portrait: { width: 1080, height: 1920, padding: '80px 60px' },
     landscape: { width: 1920, height: 1080, padding: '40px 80px' },
-    story: { width: 1080, height: 1920, padding: '80px 60px' },
+    story: { width: 1080, height: 1920, padding: '100px 80px' },
   };
 
   // const currentSize = sizes[sizeParam as keyof typeof sizes] || sizes.square;
@@ -92,6 +92,21 @@ export async function GET(req: NextRequest, ctx: Ctx) {
   const style =
     responsive[normalizedSize as keyof typeof responsive] || responsive.square;
   const imageSize = sizes[normalizedSize as keyof typeof sizes] || sizes.square;
+  const titleMaxWidth =
+    normalizedSize === 'story'
+      ? '78%'
+      : normalizedSize === 'portrait'
+        ? '82%'
+        : normalizedSize === 'square'
+          ? '88%'
+          : '92%';
+  const titleLetterSpacing = normalizedSize === 'story' ? '0.06em' : '0.1em';
+  const titlePaddingX =
+    normalizedSize === 'story'
+      ? '0 50px'
+      : normalizedSize === 'portrait'
+        ? '0 40px'
+        : '0 20px';
 
   // Get REAL astronomical data (SAME AS POST ROUTE)
   const positions = getRealPlanetaryPositions(targetDate);
@@ -249,9 +264,13 @@ export async function GET(req: NextRequest, ctx: Ctx) {
             fontWeight: '400',
             color: 'white',
             textAlign: 'center',
-            letterSpacing: '0.1em',
+            letterSpacing: titleLetterSpacing,
             fontFamily: 'Roboto Mono',
             display: 'flex',
+            maxWidth: titleMaxWidth,
+            padding: titlePaddingX,
+            lineHeight: '1.2',
+            justifyContent: 'center',
           }}
         >
           {primaryEvent.name}
@@ -367,19 +386,21 @@ export async function GET(req: NextRequest, ctx: Ctx) {
                 marginTop: '-78px',
               }}
             >
-              <div
-                style={{
-                  fontSize: `${style.aspectSize}px`,
-                  fontWeight: '300',
-                  color: 'white',
-                  textAlign: 'center',
-                  textTransform: 'capitalize',
-                  fontFamily: 'Roboto Mono',
-                }}
-              >
-                {(primaryEvent as any).aspect?.replace('-', ' ') ||
-                  'Conjunction'}
-              </div>
+              {normalizedSize !== 'story' && (
+                <div
+                  style={{
+                    fontSize: `${style.aspectSize}px`,
+                    fontWeight: '300',
+                    color: 'white',
+                    textAlign: 'center',
+                    textTransform: 'capitalize',
+                    fontFamily: 'Roboto Mono',
+                  }}
+                >
+                  {(primaryEvent as any).aspect?.replace('-', ' ') ||
+                    'Conjunction'}
+                </div>
+              )}
               <div
                 style={{
                   fontSize: `${style.symbolSize}px`,

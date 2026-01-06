@@ -38,7 +38,7 @@ export async function GET(request: NextRequest) {
       Map<string, PlanAggregate>
     >((acc, row) => {
       const rawPlan = (row.plan_type as string) || 'unknown';
-      const normalizedPlan = rawPlan === 'monthly' ? 'free' : rawPlan;
+      const normalizedPlan = rawPlan;
       const existing = acc.get(normalizedPlan) || {
         plan: normalizedPlan,
         count: 0,

@@ -17,7 +17,15 @@ import {
   generateTrialExpiredEmailHTML,
   generateTrialExpiredEmailText,
 } from '@/lib/email-templates/trial-expired';
-import { generateCatchyQuote } from '@/lib/social/quote-generator';
+import {
+  generateCatchyQuote,
+  getQuoteImageUrl,
+} from '@/lib/social/quote-generator';
+import {
+  ensurePinterestQuoteQueue,
+  getPinterestQuoteForDate,
+  markPinterestQuoteSent,
+} from '@/lib/social/pinterest-queue';
 import { generateMoonCircle } from '@/lib/moon-circles/generator';
 import { generateWeeklyReport } from '@/lib/cosmic-snapshot/reports';
 import {
@@ -511,11 +519,57 @@ export async function GET(request: NextRequest) {
   }
 }
 
+type SocialVariantKey =
+  | 'pinterest'
+  | 'facebook'
+  | 'threads'
+  | 'tiktok'
+  | 'twitter'
+  | 'bluesky'
+  | 'linkedin';
+
+type SocialVariant = {
+  content: string;
+  media?: string[] | null;
+  twitterOptions?: {
+    thread: boolean;
+    threadNumber: boolean;
+  };
+};
+
+interface DailySocialPost {
+  name: string;
+  content: string;
+  platforms: string[];
+  imageUrls: string[];
+  alt: string;
+  scheduledDate: string;
+  pinterestOptions?: {
+    boardId?: string;
+  };
+  tiktokOptions?: {
+    type: string;
+    autoAddMusic: boolean;
+    visibility: string;
+  };
+  variants?: Partial<Record<SocialVariantKey, SocialVariant>>;
+  pinterestQuoteSlotId?: number;
+}
+
 // DAILY SOCIAL MEDIA POSTS
 async function runDailyPosts(dateStr: string) {
   console.log('📱 Generating daily social media posts...');
 
   const productionUrl = 'https://lunary.app';
+
+  try {
+    await ensurePinterestQuoteQueue(dateStr, productionUrl);
+  } catch (queueError) {
+    console.warn(
+      '[DailyPosts] Failed to prepare Pinterest quote queue:',
+      queueError,
+    );
+  }
 
   // Fetch dynamic content for all post types
   let excludeEvents: string[] = [];
@@ -627,7 +681,7 @@ async function runDailyPosts(dateStr: string) {
     : postContent;
 
   // Generate posts with dynamic content
-  const posts = [
+  const posts: DailySocialPost[] = [
     {
       name: `Cosmic Post - ${new Date(dateStr).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}`,
       content: instagramContent,
@@ -683,6 +737,57 @@ async function runDailyPosts(dateStr: string) {
       },
     },
   ];
+
+  const pinterestQuoteSlot = await getPinterestQuoteForDate(dateStr);
+  if (pinterestQuoteSlot) {
+    if (pinterestQuoteSlot.status === 'pending') {
+      const quoteAttribution = pinterestQuoteSlot.quoteAuthor
+        ? ` - ${pinterestQuoteSlot.quoteAuthor}`
+        : '';
+      const quoteFull =
+        `${pinterestQuoteSlot.quoteText}${quoteAttribution}`.trim();
+      const pinterestQuoteContent = platformHashtags.pinterest
+        ? `${quoteFull}\n\n${platformHashtags.pinterest}`
+        : quoteFull;
+      const format = getCosmicFormat('pinterest');
+      const baseImageUrl =
+        pinterestQuoteSlot.imageUrl ??
+        getQuoteImageUrl(pinterestQuoteSlot.quoteText, productionUrl, {
+          author: pinterestQuoteSlot.quoteAuthor || undefined,
+          format,
+        });
+      const imageUrls = baseImageUrl ? [baseImageUrl] : [];
+
+      posts.push({
+        name: `Pinterest Quote • ${new Date(dateStr).toLocaleDateString(
+          'en-US',
+          {
+            month: 'short',
+            day: 'numeric',
+            year: 'numeric',
+          },
+        )}`,
+        content: pinterestQuoteContent,
+        platforms: ['pinterest'],
+        imageUrls,
+        alt: `Pinterest quote for ${dateStr}`,
+        scheduledDate: new Date(scheduleBase.getTime()).toISOString(),
+        variants: {
+          pinterest: {
+            content: pinterestQuoteContent,
+            media: imageUrls,
+          },
+        },
+        pinterestQuoteSlotId: pinterestQuoteSlot.id,
+      });
+    } else {
+      console.log(
+        `[DailyPosts] Pinterest quote for ${dateStr} already marked ${pinterestQuoteSlot.status}`,
+      );
+    }
+  } else {
+    console.warn(`[DailyPosts] No Pinterest quote scheduled for ${dateStr}`);
+  }
 
   // Send posts to Succulent
   const succulentApiUrl = 'https://app.succulent.social/api/posts';
@@ -782,6 +887,9 @@ async function runDailyPosts(dateStr: string) {
             postId: result.data?.postId || result.postId || result.id,
             scheduledDate: post.scheduledDate,
           });
+          if (post.pinterestQuoteSlotId) {
+            await markPinterestQuoteSent(post.pinterestQuoteSlotId);
+          }
         } else {
           const errorMessage =
             result.error ||

@@ -223,6 +223,15 @@ export async function GET(request: NextRequest): Promise<Response> {
     }
     const theme = createThematicTheme(themeData);
 
+    const titleMaxWidth =
+      format === 'story' ? '78%' : format === 'portrait' ? '82%' : '88%';
+    const titlePaddingX =
+      format === 'story'
+        ? '0 50px'
+        : format === 'portrait'
+          ? '0 40px'
+          : '0 30px';
+
     // Get symbol if not provided (and not using images)
     // Use dynamic loader symbol, then fallback to existing symbol lookup
     const displaySymbol =
@@ -362,6 +371,10 @@ export async function GET(request: NextRequest): Promise<Response> {
               textShadow: isCoverImage
                 ? '0 4px 30px rgba(0,0,0,0.7), 0 2px 10px rgba(0,0,0,0.5)'
                 : '0 2px 20px rgba(0,0,0,0.5)',
+              maxWidth: titleMaxWidth,
+              padding: titlePaddingX,
+              lineHeight: '1.1',
+              justifyContent: 'center',
             }}
           >
             {title}

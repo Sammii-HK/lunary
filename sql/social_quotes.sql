@@ -11,11 +11,13 @@ CREATE TABLE IF NOT EXISTS social_quotes (
   
   -- Status workflow
   status TEXT NOT NULL DEFAULT 'available', -- available, used, archived
-  
+
   -- Usage tracking
   used_at TIMESTAMP WITH TIME ZONE,
   use_count INTEGER DEFAULT 0,
-  
+  pinterest_use_count INTEGER DEFAULT 0,
+  pinterest_last_scheduled_at TIMESTAMP WITH TIME ZONE,
+
   -- Metadata
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
@@ -25,6 +27,8 @@ CREATE TABLE IF NOT EXISTS social_quotes (
 CREATE INDEX IF NOT EXISTS idx_social_quotes_status ON social_quotes(status);
 CREATE INDEX IF NOT EXISTS idx_social_quotes_created_at ON social_quotes(created_at);
 CREATE INDEX IF NOT EXISTS idx_social_quotes_use_count ON social_quotes(use_count);
+CREATE INDEX IF NOT EXISTS idx_social_quotes_pinterest_usage ON social_quotes(pinterest_use_count);
+CREATE INDEX IF NOT EXISTS idx_social_quotes_pinterest_last_scheduled ON social_quotes(pinterest_last_scheduled_at);
 
 -- Update timestamp trigger
 CREATE OR REPLACE FUNCTION update_social_quotes_updated_at()
@@ -40,4 +44,3 @@ CREATE TRIGGER update_social_quotes_timestamp
 BEFORE UPDATE ON social_quotes
 FOR EACH ROW
 EXECUTE FUNCTION update_social_quotes_updated_at();
-

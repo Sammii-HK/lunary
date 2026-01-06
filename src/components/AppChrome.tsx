@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { usePathname, useSearchParams } from 'next/navigation';
 import { Navbar } from '@/components/Navbar';
 import { MarketingNavbar } from '@/components/MarketingNavbar';
@@ -10,9 +10,24 @@ import { ExitIntent } from '@/components/ExitIntent';
 import { OnboardingFlow } from '@/components/OnboardingFlow';
 import { ErrorBoundaryWrapper } from '@/components/ErrorBoundaryWrapper';
 import { BetaBanner } from '@/components/BetaBanner';
+import { Button } from '@/components/ui/button';
+import {
+  Modal,
+  ModalBody,
+  ModalFooter,
+  ModalHeader,
+} from '@/components/ui/modal';
+import { TestimonialForm } from '@/components/TestimonialForm';
+import {
+  markTestimonialSubmitted,
+  scheduleTestimonialReask,
+  shouldPromptForTestimonial,
+  TestimonialPromptMeta,
+} from '@/lib/testimonial-prompt';
 import { useAuthStatus } from './AuthStatus';
 
 const NAV_CONTEXT_KEY = 'lunary_nav_context';
+const TESTIMONIAL_PROMPT_KEY = 'lunary-testimonial-prompt';
 
 export function AppChrome() {
   const pathname = usePathname() || '';
@@ -198,6 +213,71 @@ export function AppChrome() {
     (page) => pathname === page || pathname?.startsWith(`${page}/`),
   );
 
+  const [testimonialMeta, setTestimonialMeta] =
+    useState<TestimonialPromptMeta | null>(null);
+  const [testimonialModalOpen, setTestimonialModalOpen] = useState(false);
+
+  const persistTestimonialMeta = useCallback((next: TestimonialPromptMeta) => {
+    if (typeof window === 'undefined') return;
+    window.localStorage.setItem(TESTIMONIAL_PROMPT_KEY, JSON.stringify(next));
+    setTestimonialMeta(next);
+  }, []);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const stored = window.localStorage.getItem(TESTIMONIAL_PROMPT_KEY);
+    if (stored) {
+      try {
+        const parsed: TestimonialPromptMeta = JSON.parse(stored);
+        persistTestimonialMeta(parsed);
+      } catch (error) {
+        const fallbackMeta: TestimonialPromptMeta = {
+          firstSeen: Date.now(),
+          dontAskUntil: 0,
+          submitted: false,
+        };
+        persistTestimonialMeta(fallbackMeta);
+      }
+    } else {
+      const initialMeta: TestimonialPromptMeta = {
+        firstSeen: Date.now(),
+        dontAskUntil: 0,
+        submitted: false,
+      };
+      persistTestimonialMeta(initialMeta);
+    }
+  }, [persistTestimonialMeta]);
+
+  useEffect(() => {
+    if (!testimonialMeta) return;
+    const now = Date.now();
+    if (shouldPromptForTestimonial(testimonialMeta, now)) {
+      setTestimonialModalOpen(true);
+    }
+  }, [testimonialMeta]);
+
+  const handleTestimonialModalClose = () => {
+    if (!testimonialMeta) {
+      setTestimonialModalOpen(false);
+      return;
+    }
+
+    persistTestimonialMeta(
+      scheduleTestimonialReask(testimonialMeta, Date.now()),
+    );
+    setTestimonialModalOpen(false);
+  };
+
+  const handleTestimonialSubmitted = () => {
+    if (!testimonialMeta) {
+      setTestimonialModalOpen(false);
+      return;
+    }
+
+    persistTestimonialMeta(markTestimonialSubmitted(testimonialMeta));
+    setTestimonialModalOpen(false);
+  };
+
   // Actual app pages: in appPages, not a marketing route, not a contextual page
   const isActuallyAppPage =
     isAppPage && !isCoreMarketingRoute && !isContextualPage;
@@ -299,6 +379,36 @@ export function AppChrome() {
           </>
         )}
       </ErrorBoundaryWrapper>
+      <Modal
+        isOpen={testimonialModalOpen}
+        onClose={handleTestimonialModalClose}
+        size='lg'
+      >
+        <ModalHeader>Share your Lunary experience?</ModalHeader>
+        <ModalBody>
+          <p className='text-sm text-zinc-300'>
+            You&apos;ve been engaging with Lunary for about a week—would you
+            mind sharing a quick testimonial while the experience is still
+            fresh?
+          </p>
+          <TestimonialForm
+            helperText='We read every submission and may feature the ones that inspire other cosmic seekers.'
+            submitButtonLabel='Submit Testimonial'
+            onSuccess={handleTestimonialSubmitted}
+            onError={(message) => {
+              console.warn(
+                '[Testimonial Modal] Failed to submit testimonial:',
+                message,
+              );
+            }}
+          />
+        </ModalBody>
+        <ModalFooter>
+          <Button variant='ghost' onClick={handleTestimonialModalClose}>
+            Maybe later
+          </Button>
+        </ModalFooter>
+      </Modal>
     </>
   );
 }

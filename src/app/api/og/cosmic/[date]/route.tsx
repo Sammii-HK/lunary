@@ -72,7 +72,7 @@ async function generateImage(req: NextRequest, ctx: Ctx): Promise<Response> {
     square: { width: 1200, height: 1200, padding: '60px 40px' },
     portrait: { width: 1080, height: 1920, padding: '80px 60px' },
     landscape: { width: 1920, height: 1080, padding: '40px 80px' },
-    story: { width: 1080, height: 1920, padding: '80px 60px' },
+    story: { width: 1080, height: 1920, padding: '100px 80px' },
   };
 
   // const currentSize = sizes[sizeParam as keyof typeof sizes] || sizes.square;
@@ -150,6 +150,17 @@ async function generateImage(req: NextRequest, ctx: Ctx): Promise<Response> {
 
   const style = responsive[format] || responsive.square;
   const imageSize = sizes[format] || sizes.square;
+  const titleMaxWidth =
+    format === 'story'
+      ? '78%'
+      : format === 'portrait'
+        ? '82%'
+        : format === 'square'
+          ? '88%'
+          : '92%';
+  const titleLetterSpacing = format === 'story' ? '0.06em' : '0.1em';
+  const titlePaddingX =
+    format === 'story' ? '0 50px' : format === 'portrait' ? '0 40px' : '0 20px';
 
   // Get REAL astronomical data (SAME AS POST ROUTE)
   const positions = getRealPlanetaryPositions(targetDate);
@@ -307,9 +318,13 @@ async function generateImage(req: NextRequest, ctx: Ctx): Promise<Response> {
             fontWeight: '400',
             color: 'white',
             textAlign: 'center',
-            letterSpacing: '0.1em',
+            letterSpacing: titleLetterSpacing,
             fontFamily: 'Roboto Mono',
             display: 'flex',
+            maxWidth: titleMaxWidth,
+            padding: titlePaddingX,
+            lineHeight: '1.2',
+            justifyContent: 'center',
           }}
         >
           {primaryEvent.name}
@@ -425,19 +440,21 @@ async function generateImage(req: NextRequest, ctx: Ctx): Promise<Response> {
                 marginTop: '-78px',
               }}
             >
-              <div
-                style={{
-                  fontSize: `${style.aspectSize}px`,
-                  fontWeight: '300',
-                  color: 'white',
-                  textAlign: 'center',
-                  textTransform: 'capitalize',
-                  fontFamily: 'Roboto Mono',
-                }}
-              >
-                {(primaryEvent as any).aspect?.replace('-', ' ') ||
-                  'Conjunction'}
-              </div>
+              {format !== 'story' && (
+                <div
+                  style={{
+                    fontSize: `${style.aspectSize}px`,
+                    fontWeight: '300',
+                    color: 'white',
+                    textAlign: 'center',
+                    textTransform: 'capitalize',
+                    fontFamily: 'Roboto Mono',
+                  }}
+                >
+                  {(primaryEvent as any).aspect?.replace('-', ' ') ||
+                    'Conjunction'}
+                </div>
+              )}
               <div
                 style={{
                   fontSize: `${style.symbolSize}px`,

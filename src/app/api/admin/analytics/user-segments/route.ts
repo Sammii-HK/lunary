@@ -170,7 +170,7 @@ export async function GET(request: NextRequest) {
         : { rows: [] };
 
     // Get PostHog data for WAU/MAU comparison
-    const posthogData = await getPostHogActiveUsers();
+    const posthogData = await getPostHogActiveUsers(range.end);
 
     return NextResponse.json({
       free: {

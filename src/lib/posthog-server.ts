@@ -109,9 +109,12 @@ const POSTHOG_API_HOST =
 // Note: This filters by person properties.email if available
 // PostHog may not always have email in person properties, so this is best-effort
 function getTestUserFilter(): string {
-  // Filter out test users by email pattern if email property exists
-  // We use a WHERE clause that checks if email doesn't match test pattern
-  return `AND (properties.email IS NULL OR properties.email NOT LIKE '%@test.lunary.app')`;
+  // Filter out test users by email pattern across event + person properties.
+  return `AND (
+    (properties.email IS NULL OR properties.email NOT LIKE '%@test.lunary.app')
+    AND (person.properties.email IS NULL OR person.properties.email NOT LIKE '%@test.lunary.app')
+    AND (person.properties.$email IS NULL OR person.properties.$email NOT LIKE '%@test.lunary.app')
+  )`;
 }
 
 export async function queryPostHogAPI<T>(
@@ -179,6 +182,7 @@ export async function getPostHogActiveUsersTrends(
 ): Promise<PostHogActiveUsersTrend[]> {
   // Determine date truncation based on granularity
   let dateTrunc: string;
+  const dailyDateTrunc = 'toDate(timestamp)';
   switch (granularity) {
     case 'week':
       dateTrunc = 'toMonday(toDate(timestamp))';
@@ -201,12 +205,12 @@ export async function getPostHogActiveUsersTrends(
   const testUserFilter = getTestUserFilter();
   const dailyQuery = `
     SELECT 
-      ${dateTrunc} as date,
+      ${dailyDateTrunc} as date,
       count(DISTINCT person_id) as unique_users
     FROM events 
     WHERE event = '$pageview'
-      AND timestamp >= ${extendedStartTimestamp}
-      AND timestamp <= ${endTimestamp}
+      AND timestamp >= toDateTime(${extendedStartTimestamp})
+      AND timestamp <= toDateTime(${endTimestamp})
       ${testUserFilter}
     GROUP BY date
     ORDER BY date ASC
@@ -232,12 +236,12 @@ export async function getPostHogActiveUsersTrends(
   // We need the actual person_ids to calculate rolling windows
   const personIdsByDateQuery = `
     SELECT 
-      ${dateTrunc} as date,
+      ${dailyDateTrunc} as date,
       person_id
     FROM events 
     WHERE event = '$pageview'
-      AND timestamp >= ${extendedStartTimestamp}
-      AND timestamp <= ${endTimestamp}
+      AND timestamp >= toDateTime(${extendedStartTimestamp})
+      AND timestamp <= toDateTime(${endTimestamp})
       ${testUserFilter}
   `;
 
@@ -351,10 +355,11 @@ export async function getPostHogActiveUsersTrends(
   return trends;
 }
 
-export async function getPostHogActiveUsers(): Promise<PostHogActiveUsers | null> {
-  const now = new Date();
+export async function getPostHogActiveUsers(
+  asOf: Date = new Date(),
+): Promise<PostHogActiveUsers | null> {
   const startOfTodayUtc = new Date(
-    Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()),
+    Date.UTC(asOf.getUTCFullYear(), asOf.getUTCMonth(), asOf.getUTCDate()),
   );
   const endOfTodayUtc = new Date(startOfTodayUtc);
   endOfTodayUtc.setUTCDate(endOfTodayUtc.getUTCDate() + 1);
@@ -868,8 +873,8 @@ export async function getPostHogSignupTrends(
       count(DISTINCT person_id) as signups
     FROM events 
     WHERE event = '$identify'
-      AND timestamp >= ${startTimestamp}
-      AND timestamp <= ${endTimestamp}
+      AND timestamp >= toDateTime(${startTimestamp})
+      AND timestamp <= toDateTime(${endTimestamp})
       ${testUserFilter}
     GROUP BY date
     ORDER BY date ASC
