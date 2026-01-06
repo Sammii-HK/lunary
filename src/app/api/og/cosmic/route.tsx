@@ -80,7 +80,7 @@ async function generateImage(req: NextRequest): Promise<Response> {
     square: { width: 1200, height: 1200, padding: '60px 40px' },
     portrait: { width: 1080, height: 1920, padding: '80px 60px' },
     landscape: { width: 1920, height: 1080, padding: '40px 80px' },
-    story: { width: 1080, height: 1920, padding: '80px 60px' },
+    story: { width: 1080, height: 1920, padding: '100px 80px' },
   };
 
   const responsive: Record<
