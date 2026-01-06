@@ -397,18 +397,22 @@ async function generateThematicWeeklyPosts(
     hashtags: string,
     hashtagCount: number,
     addEllipsis = true,
+    attribution = "From Lunary's Grimoire",
   ): string => {
     const tags = hashtags ? hashtags.split(' ') : [];
     const hashtagText =
       hashtagCount > 0 ? tags.slice(0, hashtagCount).join(' ') : '';
-    const attribution = "From Lunary's Grimoire";
     const reserved =
-      attribution.length + (hashtagText ? hashtagText.length + 2 : 0) + 2;
+      (attribution ? attribution.length + 2 : 0) +
+      (hashtagText ? hashtagText.length + 2 : 0);
     const bodyLimit = Math.max(80, maxChars - reserved);
     const trimmedBody = trimToMax(body, bodyLimit, addEllipsis);
-    let content = `${trimmedBody}\n\n${attribution}`;
+    let content = trimmedBody;
+    if (attribution) {
+      content += `\n\n${attribution}`;
+    }
     if (hashtagText) {
-      content += `\n\n${hashtagText}`;
+      content += `${attribution ? '\n\n' : '\n\n'}${hashtagText}`;
     }
     return content;
   };
@@ -629,7 +633,15 @@ async function generateThematicWeeklyPosts(
     const scriptBase = scriptPostBaseByDate.get(dateKey);
     if (scriptBase && post.postType === 'educational') {
       if (shortPostPlatforms.has(post.platform)) {
-        postContent = buildPostVariant(scriptBase, 180, post.hashtags, 2, true);
+        const shortLimit = post.platform === 'bluesky' ? 300 : 180;
+        postContent = buildPostVariant(
+          scriptBase,
+          shortLimit,
+          post.hashtags,
+          2,
+          true,
+          post.platform === 'bluesky' ? '' : "From Lunary's Grimoire",
+        );
       } else {
         postContent = buildPostVariant(
           scriptBase,
