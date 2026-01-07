@@ -3,6 +3,7 @@ import { sql } from '@vercel/postgres';
 import { getCurrentUser } from '@/lib/get-user-session';
 import { encrypt, decrypt } from '@/lib/encryption';
 import { normalizeIsoDateOnly } from '@/lib/date-only';
+import { decryptLocation, encryptLocation } from '@/lib/location-encryption';
 
 export async function GET(request: NextRequest) {
   try {
@@ -40,7 +41,7 @@ export async function GET(request: NextRequest) {
             birthday: decryptedBirthday,
             birthChart: profile.birth_chart,
             personalCard: profile.personal_card,
-            location: profile.location,
+            location: decryptLocation(profile.location),
             stripeCustomerId: profile.stripe_customer_id,
             createdAt: profile.created_at,
             updatedAt: profile.updated_at,
@@ -102,6 +103,8 @@ export async function PUT(request: NextRequest) {
       ? encrypt(normalizedBirthday)
       : null;
 
+    const encryptedLocation = location ? encryptLocation(location) : null;
+
     const result = await sql`
       INSERT INTO user_profiles (
         user_id,
@@ -118,7 +121,7 @@ export async function PUT(request: NextRequest) {
         ${encryptedBirthday},
         ${birthChart ? JSON.stringify(birthChart) : null}::jsonb,
         ${personalCard ? JSON.stringify(personalCard) : null}::jsonb,
-        ${location ? JSON.stringify(location) : null}::jsonb,
+        ${encryptedLocation ? JSON.stringify(encryptedLocation) : null}::jsonb,
         ${stripeCustomerId || null}
       )
       ON CONFLICT (user_id) DO UPDATE SET
@@ -177,7 +180,7 @@ export async function PUT(request: NextRequest) {
         birthday: profile.birthday ? decrypt(profile.birthday) : null,
         birthChart: profile.birth_chart,
         personalCard: profile.personal_card,
-        location: profile.location,
+        location: decryptLocation(profile.location),
         stripeCustomerId: profile.stripe_customer_id,
         createdAt: profile.created_at,
         updatedAt: profile.updated_at,

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { sql } from '@vercel/postgres';
 import { getCurrentUser } from '@/lib/get-user-session';
+import { decryptLocation, encryptLocation } from '@/lib/location-encryption';
 
 export async function GET(request: NextRequest) {
   try {
@@ -20,7 +21,7 @@ export async function GET(request: NextRequest) {
     }
 
     return NextResponse.json({
-      location: result.rows[0].location,
+      location: decryptLocation(result.rows[0].location),
     });
   } catch (error) {
     console.error('Error fetching location:', error);
@@ -52,10 +53,11 @@ export async function PUT(request: NextRequest) {
       ...location,
       lastUpdated: new Date().toISOString(),
     };
+    const encryptedLocation = encryptLocation(locationWithTimestamp);
 
     await sql`
       INSERT INTO user_profiles (user_id, location)
-      VALUES (${user.id}, ${JSON.stringify(locationWithTimestamp)}::jsonb)
+      VALUES (${user.id}, ${JSON.stringify(encryptedLocation)}::jsonb)
       ON CONFLICT (user_id) DO UPDATE SET
         location = EXCLUDED.location,
         updated_at = NOW()
