@@ -79,9 +79,11 @@ async function runTestimonialFeedback() {
   const now = new Date();
   const introCutoff = new Date(now.getTime() - INTRO_DELAY_MS);
   const followupCutoff = new Date(now.getTime() - FOLLOWUP_DELAY_MS);
+  const introCutoffISO = introCutoff.toISOString();
+  const followupCutoffISO = followupCutoff.toISOString();
 
-  const introUsers = await getIntroRecipients(introCutoff);
-  const followupUsers = await getFollowupRecipients(followupCutoff);
+  const introUsers = await getIntroRecipients(introCutoffISO);
+  const followupUsers = await getFollowupRecipients(followupCutoffISO);
 
   const introResults = await sendFeedbackEmails('intro', introUsers);
   const followupResults = await sendFeedbackEmails('followup', followupUsers);
@@ -100,13 +102,13 @@ async function runTestimonialFeedback() {
   };
 }
 
-async function getIntroRecipients(cutoff: Date) {
+async function getIntroRecipients(cutoffIso: string) {
   const result = await sql`
     SELECT id, email, name
     FROM "user"
     WHERE email IS NOT NULL
       AND email <> ''
-      AND "createdAt" <= ${cutoff}
+    AND "createdAt" <= ${cutoffIso}
       AND NOT EXISTS (
         SELECT 1
         FROM testimonial_feedback_events events
@@ -119,7 +121,7 @@ async function getIntroRecipients(cutoff: Date) {
   return result.rows as UserRow[];
 }
 
-async function getFollowupRecipients(cutoff: Date) {
+async function getFollowupRecipients(cutoffIso: string) {
   const result = await sql`
     SELECT u.id, u.email, u.name
     FROM testimonial_feedback_events intro
@@ -128,7 +130,7 @@ async function getFollowupRecipients(cutoff: Date) {
       ON followup.user_id = u.id
       AND followup.email_type = 'followup'
     WHERE intro.email_type = 'intro'
-      AND intro.sent_at <= ${cutoff}
+      AND intro.sent_at <= ${cutoffIso}
       AND followup.id IS NULL
     ORDER BY intro.sent_at ASC
     LIMIT ${MAX_EMAILS_PER_RUN}
