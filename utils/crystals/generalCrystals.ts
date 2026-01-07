@@ -132,6 +132,7 @@ export type GeneralCrystalRecommendation = {
   properties: string[];
   guidance: string;
   moonPhaseAlignment: string;
+  alternatives: { name: string; properties: string[] }[];
 };
 
 // Get crystal from index
@@ -256,7 +257,19 @@ export const getGeneralCrystalRecommendation = (
 
   // Select based on day
   const dayOfYear = today.diff(today.startOf('year'), 'day') + 1;
-  const selected = sorted[dayOfYear % sorted.length] || 'Amethyst';
+  const cosmicSeed =
+    dayOfYear + moonPhase.length + dominantElement.length + sorted.length;
+  const selected =
+    sorted[sorted.length ? cosmicSeed % sorted.length : 0] || 'Amethyst';
+
+  const nextCrystalCandidates: string[] = [];
+  for (let offset = 1; offset < Math.min(sorted.length, 4); offset += 1) {
+    const candidate = sorted[(cosmicSeed + offset) % sorted.length];
+    if (candidate && candidate !== selected) {
+      nextCrystalCandidates.push(candidate);
+    }
+  }
+  const uniqueAlternatives = [...new Set(nextCrystalCandidates)].slice(0, 2);
 
   const crystalData = getCrystalFromIndex(selected);
   const properties = crystalData
@@ -274,5 +287,15 @@ export const getGeneralCrystalRecommendation = (
     properties,
     guidance: getCrystalGuidance(selected, moonPhase, dominantElement),
     moonPhaseAlignment: getMoonPhaseGuidance(moonPhase, selected),
+    alternatives: uniqueAlternatives.map((alternative) => {
+      const altData = getCrystalFromIndex(alternative);
+      const altProperties = altData
+        ? decodeList(altData.p, propDecode)
+        : ['balance', 'harmony'];
+      return {
+        name: alternative,
+        properties: altProperties,
+      };
+    }),
   };
 };
