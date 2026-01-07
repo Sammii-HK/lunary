@@ -396,7 +396,19 @@ export const calculateCrystalRecommendation = (
     .sort((a, b) => b[1].score - a[1].score)
     .slice(0, 5);
 
-  const winnerName = sortedCrystals[0][0];
+  const dayOfYear = Math.floor(
+    (today.getTime() - new Date(today.getFullYear(), 0, 0).getTime()) /
+      (1000 * 60 * 60 * 24),
+  );
+  const candidateNames = [...new Set(sortedCrystals.map(([name]) => name))];
+
+  const winnerName =
+    candidateNames.length > 1
+      ? candidateNames[
+          (dayOfYear + candidateNames.length) % candidateNames.length
+        ]
+      : candidateNames[0];
+
   const winner = crystalDatabase.find((c) => c.name === winnerName)!;
   const reasons = scores[winnerName].reasons.slice(0, 4);
 
