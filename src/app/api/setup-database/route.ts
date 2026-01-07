@@ -588,6 +588,49 @@ export async function POST(request: NextRequest) {
           EXECUTE FUNCTION update_user_profiles_updated_at()
     `;
 
+    await sql`
+      CREATE TABLE IF NOT EXISTS testimonial_feedback_events (
+        id SERIAL PRIMARY KEY,
+        user_id TEXT NOT NULL,
+        email_type TEXT NOT NULL,
+        subject TEXT NOT NULL,
+        sent_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+        updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+      )
+    `;
+
+    await sql`
+      CREATE UNIQUE INDEX IF NOT EXISTS idx_testimonial_feedback_user_type
+      ON testimonial_feedback_events(user_id, email_type)
+    `;
+    await sql`
+      CREATE INDEX IF NOT EXISTS idx_testimonial_feedback_sent_at
+      ON testimonial_feedback_events(sent_at)
+    `;
+
+    await sql`
+      CREATE OR REPLACE FUNCTION update_testimonial_feedback_updated_at()
+      RETURNS TRIGGER AS $$
+      BEGIN
+        NEW.updated_at = NOW();
+        RETURN NEW;
+      END;
+      $$ LANGUAGE plpgsql
+    `;
+
+    await sql`
+      DROP TRIGGER IF EXISTS update_testimonial_feedback_timestamp
+      ON testimonial_feedback_events
+    `;
+
+    await sql`
+      CREATE TRIGGER update_testimonial_feedback_timestamp
+      BEFORE UPDATE ON testimonial_feedback_events
+      FOR EACH ROW
+      EXECUTE FUNCTION update_testimonial_feedback_updated_at()
+    `;
+
     console.log('✅ User profiles table created');
 
     // Create shop_packs table
