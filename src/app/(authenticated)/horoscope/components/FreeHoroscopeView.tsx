@@ -1,5 +1,8 @@
+'use client';
+
 import Link from 'next/link';
 import dayjs from 'dayjs';
+import { useState } from 'react';
 import { getGeneralHoroscope } from '../../../../../utils/astrology/generalHoroscope';
 import { getUpcomingTransits } from '../../../../../utils/astrology/transitCalendar';
 import { HoroscopeSection } from './HoroscopeSection';
@@ -7,6 +10,11 @@ import { FeaturePreview } from './FeaturePreview';
 import { SmartTrialButton } from '@/components/SmartTrialButton';
 import { Sparkles, ChevronRight, Lock } from 'lucide-react';
 import { TransitCard } from './TransitCard';
+import { getNumerologyDetail } from '@/lib/numerology/numerologyDetails';
+import {
+  NumerologyInfoModal,
+  type NumerologyModalPayload,
+} from '@/components/grimoire/NumerologyInfoModal';
 
 const getDailyNumerology = (
   date: dayjs.Dayjs,
@@ -49,6 +57,24 @@ export function FreeHoroscopeView() {
   const upcomingTransits = getUpcomingTransits();
   const today = dayjs();
   const universalDay = getDailyNumerology(today);
+  const [numberModal, setNumberModal] = useState<NumerologyModalPayload | null>(
+    null,
+  );
+  const universalDetails = getNumerologyDetail('lifePath', universalDay.number);
+
+  const openUniversalModal = () => {
+    setNumberModal({
+      number: universalDay.number,
+      contextLabel: 'Universal Day',
+      meaning: universalDay.meaning,
+      contextDetail: 'Daily universal numerology energy',
+      energy: universalDetails?.energy,
+      keywords: universalDetails?.keywords,
+      description: universalDetails?.description,
+      sections: universalDetails?.sections,
+      extraNote: universalDetails?.extraNote,
+    });
+  };
 
   // // Filter transits for today
   // const todaysTransits = upcomingTransits.filter((transit) => {
@@ -79,6 +105,42 @@ export function FreeHoroscopeView() {
             Browse weekly horoscopes <ChevronRight className='w-3 h-3' />
           </Link>
         </div>
+      </div>
+
+      <div className='rounded-2xl border border-zinc-800/70 bg-zinc-900/70 p-5 space-y-4'>
+        <p className='text-[11px] font-semibold tracking-[0.3em] uppercase text-zinc-400'>
+          Cosmic Highlight
+        </p>
+        <p className='text-lg font-light text-zinc-100'>
+          {generalHoroscope.generalAdvice}
+        </p>
+        <p className='text-sm text-zinc-300 leading-relaxed'>
+          {generalHoroscope.reading}
+        </p>
+        <div className='mt-1 grid grid-cols-2 gap-3 text-[11px] text-zinc-300'>
+          <button
+            type='button'
+            onClick={openUniversalModal}
+            className='rounded-lg border border-zinc-700 px-3 py-3 uppercase tracking-wide text-center transition hover:border-lunary-primary-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-lunary-primary-400'
+          >
+            <div className='text-2xl font-semibold text-lunary-accent-300'>
+              {universalDay.number}
+            </div>
+            <div className='text-[9px] text-zinc-400'>Universal Day</div>
+            <p className='text-[11px] mt-1'>{universalDay.meaning}</p>
+          </button>
+          <div className='rounded-lg border border-zinc-700 px-3 py-3 uppercase tracking-wide text-center'>
+            <div className='text-2xl font-semibold text-emerald-400'>
+              {generalHoroscope.moonPhase}
+            </div>
+            <div className='text-[9px] text-zinc-400'>Moon Phase</div>
+            <p className='text-[11px] mt-1'>Energy rotates hourly</p>
+          </div>
+        </div>
+        <p className='text-xs text-zinc-400'>
+          This highlight refreshes every sunrise—numerology, moon, and transit
+          info all rebalance daily.
+        </p>
       </div>
 
       <HoroscopeSection title="Today's Transits" color='zinc'>
@@ -251,6 +313,15 @@ export function FreeHoroscopeView() {
           <SmartTrialButton />
         </HoroscopeSection> */}
       </div>
+      <NumerologyInfoModal
+        isOpen={!!numberModal}
+        onClose={() => setNumberModal(null)}
+        number={numberModal?.number ?? 0}
+        contextLabel={numberModal?.contextLabel ?? ''}
+        meaning={numberModal?.meaning ?? ''}
+        energy={numberModal?.energy}
+        keywords={numberModal?.keywords}
+      />
     </div>
   );
 }

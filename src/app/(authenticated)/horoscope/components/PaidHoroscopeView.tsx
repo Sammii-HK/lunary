@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import dayjs from 'dayjs';
-import { ChevronDown, Heart, Briefcase, Sparkles, Lock } from 'lucide-react';
+import { ChevronDown, Heart, Briefcase, Sparkles } from 'lucide-react';
 import { getEnhancedPersonalizedHoroscope } from '../../../../../utils/astrology/enhancedHoroscope';
 import {
   getBirthChartFromProfile,
@@ -22,6 +22,14 @@ import { StreakBanner } from '@/components/StreakBanner';
 import { ReflectionBox } from '@/components/horoscope/ReflectionBox';
 import { PremiumPathway } from '@/components/PremiumPathway';
 import { parseIsoDateOnly } from '@/lib/date-only';
+import {
+  getNumerologyDetail,
+  type NumerologyDetailContext,
+} from '@/lib/numerology/numerologyDetails';
+import {
+  NumerologyInfoModal,
+  type NumerologyModalPayload,
+} from '@/components/grimoire/NumerologyInfoModal';
 
 interface PaidHoroscopeViewProps {
   userBirthday?: string;
@@ -598,6 +606,8 @@ export function PaidHoroscopeView({
   const [currentTransits, setCurrentTransits] = useState<any[]>([]);
   const [horoscope, setHoroscope] = useState<CachedHoroscope | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [numerologyModal, setNumerologyModal] =
+    useState<NumerologyModalPayload | null>(null);
 
   const birthChart = getBirthChartFromProfile(profile);
 
@@ -640,6 +650,27 @@ export function PaidHoroscopeView({
   const personalDay = userBirthday
     ? getPersonalDayNumber(userBirthday, today)
     : null;
+  const openNumerologyModal = (
+    contextLabel: string,
+    number: number,
+    meaning: string,
+    contextDetail?: string,
+    contextType: NumerologyDetailContext = 'lifePath',
+  ) => {
+    const detail = getNumerologyDetail(contextType, number);
+    setNumerologyModal({
+      number,
+      contextLabel,
+      meaning,
+      contextDetail,
+      description: detail?.description,
+      energy: detail?.energy,
+      energyLabel: contextType === 'lifePath' ? 'Daily energy' : undefined,
+      keywords: detail?.keywords,
+      sections: detail?.sections,
+      extraNote: detail?.extraNote,
+    });
+  };
   const solarReturnData = userBirthday
     ? getSolarReturnInsights(userBirthday)
     : null;
@@ -713,7 +744,80 @@ export function PaidHoroscopeView({
 
       {horoscope && (
         <div className='space-y-6'>
-          {/* Main Daily Reading - Headline + Overview */}
+          <div className='rounded-2xl border border-zinc-800/70 bg-gradient-to-br from-zinc-900/70 via-zinc-950/70 to-lunary-primary-950 p-5 space-y-4'>
+            <p className='text-[11px] font-semibold tracking-[0.3em] uppercase text-zinc-400'>
+              Cosmic Highlight
+            </p>
+            <p className='text-2xl font-light text-zinc-100'>
+              {horoscope.cosmicHighlight}
+            </p>
+            <p className='text-sm text-zinc-300 leading-relaxed'>
+              {horoscope.dailyGuidance}
+            </p>
+            <div className='mt-2 grid grid-cols-1 sm:grid-cols-2 gap-3'>
+              <button
+                type='button'
+                onClick={() =>
+                  openNumerologyModal(
+                    'Universal Day',
+                    universalDay.number,
+                    universalDay.meaning,
+                    'Daily universal numerology energy',
+                  )
+                }
+                className='rounded-lg border border-zinc-700 px-4 py-3 bg-zinc-900/40 text-center transition hover:border-lunary-primary-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-lunary-primary-400'
+              >
+                <div className='text-xs uppercase tracking-widest text-zinc-400'>
+                  Universal Day
+                </div>
+                <div className='text-3xl font-semibold text-lunary-accent-300'>
+                  {universalDay.number}
+                </div>
+                <p className='text-[11px] text-zinc-300'>
+                  {universalDay.meaning}
+                </p>
+              </button>
+              {personalDay ? (
+                <button
+                  type='button'
+                  onClick={() =>
+                    openNumerologyModal(
+                      'Personal Day',
+                      personalDay.number,
+                      personalDay.meaning,
+                      'Your personal day numerology focus',
+                    )
+                  }
+                  className='rounded-lg border border-zinc-700 px-4 py-3 bg-zinc-900/40 text-center transition hover:border-emerald-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-300'
+                >
+                  <div className='text-xs uppercase tracking-widest text-zinc-400'>
+                    Personal Day
+                  </div>
+                  <div className='text-3xl font-semibold text-emerald-300'>
+                    {personalDay.number}
+                  </div>
+                  <p className='text-[11px] text-zinc-300'>
+                    {personalDay.meaning}
+                  </p>
+                </button>
+              ) : (
+                <div className='rounded-lg border border-zinc-700 px-4 py-3 bg-zinc-900/40 text-center'>
+                  <div className='text-xs uppercase tracking-widest text-zinc-400'>
+                    Personal Day
+                  </div>
+                  <div className='text-3xl font-semibold text-zinc-500'>?</div>
+                  <p className='text-[11px] text-zinc-500'>
+                    Add your birthday to reveal this daily number.
+                  </p>
+                </div>
+              )}
+            </div>
+            <p className='text-xs text-zinc-400'>
+              Highlight refreshes each sunrise with new numerology, moon, and
+              transit energy—baseline for everything you read today.
+            </p>
+          </div>
+
           <HoroscopeSection title="Today's Horoscope" color='purple'>
             {horoscope.headline ? (
               <>
@@ -809,55 +913,6 @@ export function PaidHoroscopeView({
             </HoroscopeSection>
           )}
 
-          <HoroscopeSection title='Cosmic Highlight' color='zinc'>
-            <p className='text-sm text-zinc-300 leading-relaxed mb-4'>
-              {horoscope.cosmicHighlight}
-            </p>
-            <div className='grid grid-cols-2 gap-4 pt-3 border-t border-zinc-700/50'>
-              <div className='text-center'>
-                <div className='text-2xl font-light text-emerald-400 mb-1'>
-                  {universalDay.number}
-                </div>
-                <div className='text-xs text-zinc-400 uppercase tracking-wide mb-1'>
-                  Universal Day
-                </div>
-                <p className='text-xs text-zinc-300'>{universalDay.meaning}</p>
-              </div>
-              {personalDay ? (
-                <div className='text-center'>
-                  <div className='text-2xl font-light text-lunary-accent-400 mb-1'>
-                    {personalDay.number}
-                  </div>
-                  <div className='text-xs text-zinc-400 uppercase tracking-wide mb-1'>
-                    Personal Day
-                  </div>
-                  <p className='text-xs text-zinc-300'>{personalDay.meaning}</p>
-                </div>
-              ) : (
-                <div className='text-center border border-zinc-700/50 rounded-lg p-2 bg-zinc-900/30'>
-                  <div className='flex items-center justify-center mb-2'>
-                    <Lock className='w-4 h-4 text-zinc-500 mr-1' />
-                    <div className='text-2xl font-light text-zinc-500 mb-1'>
-                      ?
-                    </div>
-                  </div>
-                  <div className='text-xs text-zinc-500 uppercase tracking-wide mb-1'>
-                    Personal Day
-                  </div>
-                  <p className='text-xs text-zinc-500 mb-3'>
-                    Add your birthday to get your Personal Day number
-                  </p>
-                  <Link
-                    href='/settings'
-                    className='inline-block text-xs px-3 py-1.5 bg-lunary-primary-900/20 border border-lunary-primary-700 text-lunary-primary-300 rounded hover:bg-lunary-primary-900/30 transition-colors'
-                  >
-                    Add Birthday
-                  </Link>
-                </div>
-              )}
-            </div>
-          </HoroscopeSection>
-
           <HoroscopeSection title='Personal Transit Impact' color='zinc'>
             <p className='text-sm text-zinc-400 mb-4'>
               How upcoming transits specifically affect your birth chart
@@ -935,6 +990,15 @@ export function PaidHoroscopeView({
           <PremiumPathway variant='transits' className='mt-6' />
         </div>
       )}
+      <NumerologyInfoModal
+        isOpen={!!numerologyModal}
+        onClose={() => setNumerologyModal(null)}
+        number={numerologyModal?.number ?? 0}
+        contextLabel={numerologyModal?.contextLabel ?? ''}
+        meaning={numerologyModal?.meaning ?? ''}
+        energy={numerologyModal?.energy}
+        keywords={numerologyModal?.keywords}
+      />
     </div>
   );
 }
