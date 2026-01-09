@@ -9,6 +9,7 @@ import {
   Trash2,
   ChevronDown,
   ChevronUp,
+  Share2,
 } from 'lucide-react';
 import clsx from 'clsx';
 import {
@@ -17,7 +18,6 @@ import {
   PLAN_RANK,
   TarotPlan,
 } from '@/constants/tarotSpreads';
-import { TarotCard } from '@/components/TarotCard';
 import { UpgradePrompt } from '@/components/UpgradePrompt';
 
 export type SubscriptionStatus =
@@ -41,6 +41,7 @@ export interface TarotSpreadExperienceProps {
     keywords: string[];
     information: string;
   }) => void;
+  onShareReading?: (reading: SpreadReadingRecord) => void;
 }
 
 type SpreadReadingCard = {
@@ -57,7 +58,7 @@ type SpreadReadingCard = {
   insight: string;
 };
 
-type SpreadReadingRecord = {
+export type SpreadReadingRecord = {
   id: string;
   spreadSlug: string;
   spreadName: string;
@@ -145,6 +146,7 @@ export function TarotSpreadExperience({
   subscriptionPlan,
   onRequireUpgrade,
   onCardPreview,
+  onShareReading,
 }: TarotSpreadExperienceProps) {
   const [selectedSpreadSlug, setSelectedSpreadSlug] = useState<string | null>(
     null,
@@ -380,6 +382,18 @@ export function TarotSpreadExperience({
     }
     setSelectedSpreadSlug(slug);
   };
+
+  const handleCardPreview = useCallback(
+    (cardData: SpreadReadingCard['card']) => {
+      if (!onCardPreview) return;
+      onCardPreview({
+        name: cardData.name,
+        keywords: cardData.keywords,
+        information: cardData.information,
+      });
+    },
+    [onCardPreview],
+  );
 
   const handleGenerateReading = async () => {
     if (!selectedSpread) return;
@@ -719,7 +733,7 @@ export function TarotSpreadExperience({
           {currentReading && (
             <div className='space-y-4'>
               <div className='rounded-lg border border-lunary-primary-800 bg-lunary-primary-950 p-4'>
-                <div className='flex items-center justify-between gap-2'>
+                <div className='flex flex-col gap-2 md:flex-row md:items-center md:justify-between'>
                   <div>
                     <p className='text-xs uppercase tracking-wider text-lunary-accent-300/80'>
                       {currentReading?.spreadName}
@@ -728,12 +742,26 @@ export function TarotSpreadExperience({
                       {currentReading?.summary}
                     </h3>
                   </div>
-                  <p className='text-xs text-zinc-400'>
-                    Saved{' '}
-                    {currentReading?.createdAt
-                      ? new Date(currentReading.createdAt).toLocaleDateString()
-                      : ''}
-                  </p>
+                  <div className='flex items-center gap-2'>
+                    {onShareReading && currentReading && (
+                      <button
+                        type='button'
+                        onClick={() => onShareReading(currentReading)}
+                        className='inline-flex items-center gap-2 rounded-md bg-zinc-900/60 px-3 py-1 text-xs font-medium text-lunary-primary-300 transition-colors hover:bg-zinc-900/80'
+                      >
+                        <Share2 className='h-4 w-4' />
+                        Share spread
+                      </button>
+                    )}
+                    <p className='text-xs text-zinc-400'>
+                      Saved{' '}
+                      {currentReading?.createdAt
+                        ? new Date(
+                            currentReading.createdAt,
+                          ).toLocaleDateString()
+                        : ''}
+                    </p>
+                  </div>
                 </div>
                 <div className='mt-3 flex flex-wrap gap-2'>
                   {currentReading?.highlights?.map((highlight) => (
@@ -747,45 +775,47 @@ export function TarotSpreadExperience({
                 </div>
               </div>
 
-              <div className='grid gap-4 md:grid-cols-2'>
+              <div className='grid gap-3 md:grid-cols-2'>
                 {currentReading?.cards?.map((card) => (
-                  <div
+                  <button
                     key={card.positionId}
-                    className='flex h-full flex-col overflow-hidden rounded-lg border border-zinc-800/50 bg-zinc-900/40'
+                    type='button'
+                    onClick={() => handleCardPreview(card.card)}
+                    className='flex flex-col items-start gap-2 rounded-lg border border-zinc-800/50 bg-zinc-900/40 p-3 text-left transition-colors hover:border-lunary-primary-600'
                   >
-                    <div className='border-b border-zinc-800/50 bg-zinc-900/60 px-3 py-2'>
-                      <p className='text-xs uppercase tracking-wide text-zinc-400'>
-                        {card.positionLabel}
-                      </p>
-                      <p className='text-xs text-zinc-400'>
-                        {card.positionPrompt}
-                      </p>
+                    <div className='flex w-full items-center justify-between'>
+                      <div>
+                        <p className='text-xs uppercase tracking-wide text-zinc-400'>
+                          {card.positionLabel}
+                        </p>
+                        <p className='text-xs text-zinc-500'>
+                          {card.positionPrompt}
+                        </p>
+                      </div>
+                      <span className='text-[10px] uppercase tracking-[0.2em] text-zinc-500'>
+                        {card.card.arcana === 'major' ? 'Major' : 'Minor'}
+                      </span>
                     </div>
-                    <div className='flex-1 space-y-3 p-3'>
-                      <button
-                        className='w-full text-left'
-                        onClick={() =>
-                          onCardPreview?.({
-                            name: card.card.name,
-                            keywords: card.card.keywords,
-                            information: card.card.information,
-                          })
-                        }
-                      >
-                        <TarotCard
-                          name={card.card.name}
-                          keywords={card.card.keywords.slice(0, 3)}
-                          information={
-                            card.card.information.slice(0, 140) + '…'
-                          }
-                          variant={
-                            card.card.arcana === 'major' ? 'major' : 'minor'
-                          }
-                        />
-                      </button>
-                      <p className='text-sm text-zinc-300'>{card.insight}</p>
+                    <p className='text-lg font-semibold text-zinc-100'>
+                      {card.card.name}
+                    </p>
+                    <p className='text-sm text-zinc-300 leading-relaxed'>
+                      “{card.insight}”
+                    </p>
+                    <div className='flex flex-wrap gap-1'>
+                      {card.card.keywords.slice(0, 4).map((keyword) => (
+                        <span
+                          key={`${card.positionId}-${keyword}`}
+                          className='text-xs px-2 py-0.5 rounded text-zinc-100 bg-zinc-900 border border-zinc-800'
+                        >
+                          {keyword}
+                        </span>
+                      ))}
                     </div>
-                  </div>
+                    <p className='text-xs text-lunary-primary-300'>
+                      Tap to explore the full meaning
+                    </p>
+                  </button>
                 ))}
               </div>
 

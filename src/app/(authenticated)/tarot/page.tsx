@@ -2,19 +2,26 @@
 
 import dayjs from 'dayjs';
 import { useState, useMemo, useEffect, useCallback } from 'react';
+import Image from 'next/image';
 import { useUser } from '@/context/UserContext';
 import { useAuthStatus } from '@/components/AuthStatus';
 import { SmartTrialButton } from '@/components/SmartTrialButton';
 import { getTarotCard } from '../../../../utils/tarot/tarot';
 import { getImprovedTarotReading } from '../../../../utils/tarot/improvedTarot';
 import { getGeneralTarotReading } from '../../../../utils/tarot/generalTarot';
-import {
-  getMoonPhase,
-  type MoonPhaseLabels,
-} from '../../../../utils/moon/moonPhases';
+import { type MoonPhaseLabels } from '../../../../utils/moon/moonPhases';
 import { useSubscription } from '../../../hooks/useSubscription';
 import { hasBirthChartAccess } from '../../../../utils/pricing';
-import { Check, Sparkles, Share2, Lock, X } from 'lucide-react';
+import {
+  Check,
+  Sparkles,
+  Share2,
+  Lock,
+  X,
+  Download,
+  Copy,
+  Loader2,
+} from 'lucide-react';
 import { AdvancedPatterns } from '@/components/tarot/AdvancedPatterns';
 import { CollapsibleSection } from '@/components/CollapsibleSection';
 import { TarotCardModal } from '@/components/TarotCardModal';
@@ -22,11 +29,11 @@ import { getTarotCardByName } from '@/utils/tarot/getCardByName';
 import { UpgradePrompt } from '@/components/UpgradePrompt';
 import { conversionTracking } from '@/lib/analytics';
 import { useModal } from '@/hooks/useModal';
-import { SocialShareButtons } from '@/components/SocialShareButtons';
 import {
   SubscriptionStatus,
   TarotSpreadExperience,
 } from '@/components/tarot/TarotSpreadExperience';
+import type { SpreadReadingRecord } from '@/components/tarot/TarotSpreadExperience';
 import type { TarotPlan } from '@/constants/tarotSpreads';
 import { FeaturePreview } from '../horoscope/components/FeaturePreview';
 import { HoroscopeSection } from '../horoscope/components/HoroscopeSection';
@@ -155,6 +162,14 @@ const getSolarSeason = (date: dayjs.Dayjs) => {
 
 const sanitizeInsightForParam = (value: string) => value.replace(/\|/g, ' / ');
 
+type TarotShareTarget = {
+  title: string;
+  description?: string;
+  pageUrl: string;
+  ogUrl: string;
+  variant: 'card' | 'spread';
+};
+
 const TarotReadings = () => {
   const { user, loading } = useUser();
   const authStatus = useAuthStatus();
@@ -173,7 +188,11 @@ const TarotReadings = () => {
     : hasBirthChartAccess(subscription.status, subscription.plan);
 
   const [shareOrigin, setShareOrigin] = useState('https://lunary.app');
-  const [sharePopover, setSharePopover] = useState<string | null>(null);
+  const [shareTarget, setShareTarget] = useState<TarotShareTarget | null>(null);
+  const [shareImageBlob, setShareImageBlob] = useState<Blob | null>(null);
+  const [shareLoading, setShareLoading] = useState(false);
+  const [shareError, setShareError] = useState<string | null>(null);
+  const [sharePreviewUrl, setSharePreviewUrl] = useState<string | null>(null);
   const [selectedView, setSelectedView] = useState<number | 'year-over-year'>(
     30,
   );
@@ -243,6 +262,9 @@ const TarotReadings = () => {
     [hasChartAccess, userName, timeFrame, userBirthday],
   );
 
+  const guidanceActionPoints =
+    personalizedReading?.guidance?.actionPoints ?? [];
+
   const truncate = useCallback((value?: string | null, limit = 140) => {
     if (!value) return undefined;
     if (value.length <= limit) return value;
@@ -275,6 +297,71 @@ const TarotReadings = () => {
       return null;
     }
   }, [generalTarot, shareOrigin, shareDate, truncate]);
+
+  const generalWeeklyShare = useMemo(() => {
+    if (!generalTarot) return null;
+
+    try {
+      const url = new URL('/share/tarot', shareOrigin);
+      url.searchParams.set('card', generalTarot.weekly.name);
+      if (generalTarot.weekly.keywords?.length) {
+        url.searchParams.set(
+          'keywords',
+          generalTarot.weekly.keywords.slice(0, 3).join(','),
+        );
+      }
+      url.searchParams.set('timeframe', 'Weekly');
+      url.searchParams.set('date', shareDate);
+      url.searchParams.set('variant', 'weekly');
+
+      const description =
+        generalTarot.guidance?.weeklyMessage ||
+        generalTarot.weekly.keywords?.slice(0, 3).join(', ');
+
+      return {
+        url: url.toString(),
+        title: `Weekly Tarot Card: ${generalTarot.weekly.name}`,
+        text: truncate(description),
+      };
+    } catch (error) {
+      console.error('Failed to build general weekly share URL:', error);
+      return null;
+    }
+  }, [generalTarot, shareOrigin, shareDate, truncate]);
+
+  const personalizedWeeklyShare = useMemo(() => {
+    if (!personalizedReading) return null;
+
+    try {
+      const url = new URL('/share/tarot', shareOrigin);
+      url.searchParams.set('card', personalizedReading.weekly.name);
+      if (personalizedReading.weekly.keywords?.length) {
+        url.searchParams.set(
+          'keywords',
+          personalizedReading.weekly.keywords.slice(0, 3).join(','),
+        );
+      }
+      url.searchParams.set('timeframe', 'Weekly');
+      url.searchParams.set('date', shareDate);
+      url.searchParams.set('variant', 'weekly');
+      if (firstName) {
+        url.searchParams.set('name', firstName);
+      }
+
+      const description =
+        personalizedReading.guidance?.weeklyMessage ||
+        personalizedReading.weekly.keywords?.slice(0, 3).join(', ');
+
+      return {
+        url: url.toString(),
+        title: `${firstName ? `${firstName}'s` : 'My'} Weekly Tarot Card: ${personalizedReading.weekly.name}`,
+        text: truncate(description),
+      };
+    } catch (error) {
+      console.error('Failed to build personalized weekly share URL:', error);
+      return null;
+    }
+  }, [personalizedReading, shareOrigin, shareDate, firstName, truncate]);
 
   useEffect(() => {
     if (personalizedReading && userId) {
@@ -313,6 +400,184 @@ const TarotReadings = () => {
     }
   }, []);
 
+  useEffect(() => {
+    if (!shareImageBlob) {
+      setSharePreviewUrl(null);
+      return;
+    }
+
+    const url = URL.createObjectURL(shareImageBlob);
+    setSharePreviewUrl(url);
+
+    return () => {
+      URL.revokeObjectURL(url);
+      setSharePreviewUrl(null);
+    };
+  }, [shareImageBlob]);
+
+  const buildOgUrlFromShareUrl = useCallback(
+    (shareUrl: string) => {
+      try {
+        const url = new URL(shareUrl);
+        url.pathname = '/api/og/share/tarot';
+        return url.toString();
+      } catch (error) {
+        console.error('Invalid share URL:', shareUrl, error);
+        return `${shareOrigin}/api/og/share/tarot`;
+      }
+    },
+    [shareOrigin],
+  );
+
+  const openShareModal = useCallback(async (target: TarotShareTarget) => {
+    setShareTarget(target);
+    setShareLoading(true);
+    setShareError(null);
+    setShareImageBlob(null);
+
+    try {
+      const response = await fetch(target.ogUrl);
+      if (!response.ok) {
+        throw new Error('Failed to generate image');
+      }
+      const blob = await response.blob();
+      setShareImageBlob(blob);
+    } catch (error) {
+      setShareError(
+        error instanceof Error ? error.message : 'Failed to generate image',
+      );
+    } finally {
+      setShareLoading(false);
+    }
+  }, []);
+
+  const closeShareModal = useCallback(() => {
+    setShareTarget(null);
+    setShareImageBlob(null);
+    setShareError(null);
+    setShareLoading(false);
+    setSharePreviewUrl(null);
+  }, []);
+
+  const handleDownloadShareImage = useCallback(() => {
+    if (!shareImageBlob) return;
+    const url = URL.createObjectURL(shareImageBlob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'lunary-tarot.png';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }, [shareImageBlob]);
+
+  const handleShareImage = useCallback(async () => {
+    if (!shareTarget || !shareImageBlob) return;
+    const file = new File([shareImageBlob], 'lunary-tarot.png', {
+      type: 'image/png',
+    });
+
+    if (
+      typeof navigator !== 'undefined' &&
+      typeof navigator.share === 'function' &&
+      typeof navigator.canShare === 'function' &&
+      navigator.canShare({ files: [file] })
+    ) {
+      try {
+        await navigator.share({
+          files: [file],
+          title: shareTarget.title,
+          text: shareTarget.description,
+        });
+        return;
+      } catch (error) {
+        const isAbort = error instanceof Error && error.name === 'AbortError';
+        if (!isAbort) {
+          console.error('Share failed:', error);
+        }
+      }
+    }
+
+    handleDownloadShareImage();
+  }, [shareTarget, shareImageBlob, handleDownloadShareImage]);
+
+  const handleCopyShareLink = useCallback(async () => {
+    if (!shareTarget || typeof navigator === 'undefined') return;
+    try {
+      await navigator.clipboard.writeText(shareTarget.pageUrl);
+    } catch (error) {
+      console.error('Copy failed:', error);
+    }
+  }, [shareTarget]);
+
+  const handleCardShare = useCallback(
+    (shareData: { url: string; title: string; text?: string }) => {
+      openShareModal({
+        title: shareData.title,
+        description: shareData.text,
+        pageUrl: shareData.url,
+        ogUrl: buildOgUrlFromShareUrl(shareData.url),
+        variant: 'card',
+      });
+    },
+    [buildOgUrlFromShareUrl, openShareModal],
+  );
+
+  const buildSpreadOgUrl = useCallback(
+    (reading: SpreadReadingRecord) => {
+      const url = new URL('/api/og/share/tarot', shareOrigin);
+      url.searchParams.set('variant', 'spread');
+      url.searchParams.set('card', reading.spreadName);
+      if (firstName) {
+        url.searchParams.set('name', firstName);
+      }
+      if (reading.summary) {
+        url.searchParams.set('spreadSummary', reading.summary);
+        url.searchParams.set('text', reading.summary);
+      }
+      const snippet =
+        reading.highlights?.length > 0
+          ? reading.highlights[0]
+          : reading.summary;
+      if (snippet) {
+        url.searchParams.set('spreadSnippet', snippet);
+      }
+
+      const cards = reading.cards.map((card) => ({
+        positionLabel: card.positionLabel,
+        positionPrompt: card.positionPrompt,
+        cardName: card.card.name,
+        keywords: card.card.keywords.slice(0, 4),
+        insight: card.insight,
+      }));
+      url.searchParams.set('spreadCards', JSON.stringify(cards));
+
+      if (reading.highlights?.length) {
+        url.searchParams.set(
+          'keywords',
+          reading.highlights.slice(0, 3).join(','),
+        );
+      }
+      url.searchParams.set('spreadName', reading.spreadName);
+      return url.toString();
+    },
+    [firstName, shareOrigin],
+  );
+
+  const handleShareSpread = useCallback(
+    (reading: SpreadReadingRecord) => {
+      const ogUrl = buildSpreadOgUrl(reading);
+      openShareModal({
+        title: reading.spreadName,
+        description: reading.summary,
+        pageUrl: `${shareOrigin}/tarot`,
+        ogUrl,
+        variant: 'spread',
+      });
+    },
+    [buildSpreadOgUrl, openShareModal, shareOrigin],
+  );
+
   const personalizedDailyShare = useMemo(() => {
     if (!personalizedReading) return null;
 
@@ -349,161 +614,6 @@ const TarotReadings = () => {
     }
   }, [personalizedReading, shareOrigin, shareDate, firstName, truncate]);
 
-  const patternShare = useMemo(() => {
-    const trends = personalizedReading?.trendAnalysis;
-    if (!trends) return null;
-
-    try {
-      const themes = trends.dominantThemes.slice(0, 3);
-      const headline =
-        themes[0] ||
-        trends.frequentCards[0]?.name ||
-        trends.suitPatterns[0]?.suit ||
-        `${trends.timeFrame}-Day Patterns`;
-      const totalCards = trends.timeFrame;
-      const majorPattern = trends.arcanaPatterns.find(
-        (pattern) => pattern.type === 'Major Arcana',
-      );
-      const minorPattern = trends.arcanaPatterns.find(
-        (pattern) => pattern.type === 'Minor Arcana',
-      );
-      const patternLimit =
-        trends.timeFrame >= 90
-          ? 8
-          : trends.timeFrame >= 30
-            ? 6
-            : trends.suitPatterns.length || trends.numberPatterns.length || 4;
-      const suitBlocks = trends.suitPatterns
-        .slice(0, patternLimit)
-        .map((pattern) => ({
-          suit: pattern.suit,
-          count: pattern.count,
-          reading: pattern.reading,
-        }));
-      const numberBlocks = trends.numberPatterns
-        .slice(0, patternLimit)
-        .map((pattern) => ({
-          number: pattern.number,
-          count: pattern.count,
-          reading: pattern.reading,
-          cards: pattern.cards,
-        }));
-      const cardBlocks = trends.frequentCards
-        .slice(0, patternLimit)
-        .map((card) => ({
-          name: card.name,
-          count: card.count,
-          reading: card.reading,
-        }));
-      const topSuitPattern = suitBlocks[0];
-      const elementFocus = topSuitPattern
-        ? SUIT_ELEMENTS[topSuitPattern.suit]
-        : undefined;
-      const topNumberPattern = numberBlocks[0];
-      const frequentCard = cardBlocks[0];
-      const insightPool = [
-        frequentCard?.reading
-          ? `${frequentCard.name}: ${frequentCard.reading}`
-          : undefined,
-        topSuitPattern?.reading,
-        topNumberPattern?.reading,
-        trends.arcanaPatterns[0]?.reading,
-      ]
-        .map((entry) => (entry ? truncate(entry, 160) : undefined))
-        .filter((entry): entry is string => Boolean(entry))
-        .map(sanitizeInsightForParam)
-        .slice(0, 3);
-      const moonPhase = getMoonPhase(new Date());
-      const moonTip = MOON_PHASE_TIPS[moonPhase] || undefined;
-      const solarSeason = getSolarSeason(dayjs());
-      const transitImpact = solarSeason
-        ? `${firstName ? `${firstName}, ` : ''}${solarSeason.sign} season ${solarSeason.message.replace(/\.$/, '')}${elementFocus ? ` and syncs with your ${elementFocus.toLowerCase()} flow.` : '.'}`
-        : undefined;
-      const actionPrompt =
-        personalizedReading?.guidance?.actionPoints?.[0] || undefined;
-
-      const url = new URL('/share/tarot', shareOrigin);
-      url.searchParams.set('card', headline);
-      if (themes.length) {
-        url.searchParams.set('keywords', themes.join(','));
-      }
-      url.searchParams.set('timeframe', `${trends.timeFrame}-Day`);
-      url.searchParams.set('variant', 'pattern');
-      url.searchParams.set('date', shareDate);
-      if (firstName) {
-        url.searchParams.set('name', firstName);
-      }
-      if (totalCards) {
-        url.searchParams.set('total', String(totalCards));
-      }
-      if (typeof majorPattern?.count === 'number') {
-        url.searchParams.set('major', String(majorPattern.count));
-      }
-      if (typeof minorPattern?.count === 'number') {
-        url.searchParams.set('minor', String(minorPattern.count));
-      }
-      if (topSuitPattern) {
-        url.searchParams.set('topSuit', topSuitPattern.suit);
-        url.searchParams.set('topSuitCount', String(topSuitPattern.count));
-        if (topSuitPattern.reading) {
-          url.searchParams.set(
-            'suitInsight',
-            truncate(topSuitPattern.reading, 160) || topSuitPattern.reading,
-          );
-        }
-      }
-      if (elementFocus) {
-        url.searchParams.set('element', elementFocus);
-      }
-      if (insightPool.length) {
-        url.searchParams.set('insights', insightPool.join('|'));
-      }
-      if (moonPhase) {
-        url.searchParams.set('moonPhase', moonPhase);
-      }
-      if (moonTip) {
-        url.searchParams.set('moonTip', moonTip);
-      }
-      if (transitImpact) {
-        url.searchParams.set(
-          'transit',
-          truncate(transitImpact, 180) || transitImpact,
-        );
-      }
-      if (actionPrompt) {
-        url.searchParams.set(
-          'action',
-          truncate(actionPrompt, 140) || actionPrompt,
-        );
-      }
-      if (suitBlocks.length) {
-        url.searchParams.set('suits', JSON.stringify(suitBlocks));
-      }
-      if (numberBlocks.length) {
-        url.searchParams.set('numbers', JSON.stringify(numberBlocks));
-      }
-      if (cardBlocks.length) {
-        url.searchParams.set('cards', JSON.stringify(cardBlocks));
-      }
-
-      const summary =
-        trends.frequentCards[0]?.reading ||
-        trends.suitPatterns[0]?.reading ||
-        trends.arcanaPatterns[0]?.reading ||
-        trends.numberPatterns[0]?.reading ||
-        (themes.length ? `Dominant themes: ${themes.join(', ')}` : undefined);
-
-      return {
-        url: url.toString(),
-        title: `${firstName ? `${firstName}'s` : 'My'} ${trends.timeFrame}-Day Tarot Patterns`,
-        text: truncate(summary),
-      };
-    } catch (error) {
-      console.error('Failed to build tarot pattern share URL:', error);
-      return null;
-    }
-  }, [personalizedReading, shareOrigin, shareDate, firstName, truncate]);
-
   const recurringThemeItems = useMemo(() => {
     const trends = personalizedReading?.trendAnalysis;
     if (!trends) return [];
@@ -527,45 +637,6 @@ const TarotReadings = () => {
       detail: typeof card.count === 'number' ? `Seen ${card.count} times` : '',
     }));
   }, [personalizedReading]);
-
-  const handleShareClick = useCallback(
-    async ({
-      id,
-      title,
-      url,
-      text,
-    }: {
-      id: string;
-      title: string;
-      url: string;
-      text?: string;
-    }) => {
-      const sharePayload = {
-        title,
-        text: text || title,
-        url,
-      };
-
-      if (typeof navigator !== 'undefined' && navigator.share) {
-        try {
-          await navigator.share(sharePayload);
-          setSharePopover(null);
-          return;
-        } catch (error) {
-          if (error instanceof Error && error.name === 'AbortError') {
-            return;
-          }
-          console.error(
-            'Web Share API failed, falling back to share buttons:',
-            error,
-          );
-        }
-      }
-
-      setSharePopover((prev) => (prev === id ? null : id));
-    },
-    [setSharePopover],
-  );
 
   useEffect(() => {
     if (hasChartAccess && personalizedReading && userId) {
@@ -728,30 +799,15 @@ const TarotReadings = () => {
                 </p>
 
                 {generalDailyShare && (
-                  <div className='mt-3'>
+                  <div className='mt-3 flex flex-wrap items-center gap-2'>
                     <button
                       type='button'
-                      onClick={() =>
-                        handleShareClick({
-                          id: 'tarot-general-daily',
-                          title: generalDailyShare.title,
-                          url: generalDailyShare.url,
-                          text: generalDailyShare.text,
-                        })
-                      }
+                      onClick={() => handleCardShare(generalDailyShare)}
                       className='inline-flex items-center gap-2 text-xs font-medium text-lunary-primary-300 hover:text-lunary-primary-100 transition-colors'
                     >
                       <Share2 className='w-4 h-4' />
                       Share daily card
                     </button>
-                    {sharePopover === 'tarot-general-daily' && (
-                      <div className='mt-3'>
-                        <SocialShareButtons
-                          url={generalDailyShare.url}
-                          title={generalDailyShare.title}
-                        />
-                      </div>
-                    )}
                   </div>
                 )}
               </div>
@@ -772,6 +828,18 @@ const TarotReadings = () => {
                 <p className='text-xs md:text-sm text-zinc-400'>
                   {generalTarot.weekly.keywords.slice(0, 2).join(', ')}
                 </p>
+                {generalWeeklyShare && (
+                  <div className='mt-3 flex flex-wrap items-center gap-2'>
+                    <button
+                      type='button'
+                      onClick={() => handleCardShare(generalWeeklyShare)}
+                      className='inline-flex items-center gap-2 text-xs font-medium text-lunary-primary-300 hover:text-lunary-primary-100 transition-colors'
+                    >
+                      <Share2 className='w-4 h-4' />
+                      Share weekly card
+                    </button>
+                  </div>
+                )}
               </div>
             </div>
 
@@ -908,6 +976,7 @@ const TarotReadings = () => {
                   userName={userName}
                   subscriptionPlan={tarotPlan}
                   onCardPreview={(card) => setSelectedCard(card)}
+                  onShareReading={handleShareSpread}
                 />
               )}
             </CollapsibleSection>
@@ -1052,30 +1121,15 @@ const TarotReadings = () => {
               </p>
 
               {personalizedDailyShare && (
-                <div className='mt-3'>
+                <div className='mt-3 flex flex-wrap items-center gap-2'>
                   <button
                     type='button'
-                    onClick={() =>
-                      handleShareClick({
-                        id: 'tarot-personal-daily',
-                        title: personalizedDailyShare.title,
-                        url: personalizedDailyShare.url,
-                        text: personalizedDailyShare.text,
-                      })
-                    }
+                    onClick={() => handleCardShare(personalizedDailyShare)}
                     className='inline-flex items-center gap-2 text-xs font-medium text-lunary-primary-300 hover:text-lunary-primary-100 transition-colors'
                   >
                     <Share2 className='w-4 h-4' />
                     Share daily card
                   </button>
-                  {sharePopover === 'tarot-personal-daily' && (
-                    <div className='mt-3'>
-                      <SocialShareButtons
-                        url={personalizedDailyShare.url}
-                        title={personalizedDailyShare.title}
-                      />
-                    </div>
-                  )}
                 </div>
               )}
             </div>
@@ -1098,45 +1152,35 @@ const TarotReadings = () => {
               <p className='text-xs md:text-sm text-zinc-400'>
                 {personalizedReading.weekly.keywords.slice(0, 2).join(', ')}
               </p>
+              {personalizedWeeklyShare && (
+                <div className='mt-3 flex flex-wrap items-center gap-2'>
+                  <button
+                    type='button'
+                    onClick={() => handleCardShare(personalizedWeeklyShare)}
+                    className='inline-flex items-center gap-2 text-xs font-medium text-lunary-primary-300 hover:text-lunary-primary-100 transition-colors'
+                  >
+                    <Share2 className='w-4 h-4' />
+                    Share weekly card
+                  </button>
+                </div>
+              )}
             </div>
           </div>
-        </HoroscopeSection>
 
-        <HoroscopeSection title='Guidance Highlights' color='zinc'>
-          <div className='space-y-4'>
-            <div className='rounded-lg border border-lunary-primary-700 bg-zinc-900/50 p-4'>
-              <h3 className='text-xs md:text-sm font-medium text-lunary-primary-300/90 mb-2'>
-                Daily Message
-              </h3>
-              <p className='text-xs md:text-sm text-zinc-300 leading-relaxed'>
-                {personalizedReading.guidance.dailyMessage}
-              </p>
-            </div>
-
-            <div className='rounded-lg border border-lunary-primary-800 bg-lunary-primary-950 p-4'>
-              <h3 className='text-xs md:text-sm font-medium text-lunary-primary-300 mb-2'>
-                Weekly Energy
-              </h3>
-              <p className='text-xs md:text-sm text-zinc-300 leading-relaxed'>
-                {personalizedReading.guidance.weeklyMessage}
-              </p>
-            </div>
-
+          <div className='mt-4'>
             <div className='rounded-lg border border-lunary-success-800 bg-lunary-success-950 p-4'>
-              <h3 className='text-xs md:text-sm font-medium text-lunary-success-300 mb-2'>
-                Key Guidance
-              </h3>
-              <ul className='text-xs md:text-sm text-zinc-300 space-y-2'>
-                {personalizedReading.guidance.actionPoints.map(
-                  (point, index) => (
+              <ul className='space-y-2 text-xs text-zinc-300'>
+                {guidanceActionPoints.length > 0 ? (
+                  guidanceActionPoints.slice(-1).map((point, index) => (
                     <li key={index} className='flex items-start gap-2'>
-                      <Check
-                        className='w-4 h-4 text-lunary-success mt-0.5 flex-shrink-0'
-                        strokeWidth={2}
-                      />
                       <span>{point}</span>
                     </li>
-                  ),
+                  ))
+                ) : (
+                  <li className='text-xs text-zinc-400'>
+                    Key insight drives your next move—save a spread to capture
+                    the message.
+                  </li>
                 )}
               </ul>
             </div>
@@ -1162,150 +1206,156 @@ const TarotReadings = () => {
           )}
 
         {subscription.hasAccess('tarot_patterns') && (
-          <HoroscopeSection
-            title={
-              selectedView === 'year-over-year'
-                ? 'Year-over-Year Patterns'
-                : timeFrame === 365
-                  ? '12-Month Patterns'
-                  : timeFrame === 180
-                    ? '6-Month Patterns'
-                    : timeFrame === 90
-                      ? '90-Day Patterns'
-                      : timeFrame === 30
-                        ? '30-Day Patterns'
-                        : timeFrame === 14
-                          ? '14-Day Patterns'
-                          : '7-Day Patterns'
-            }
-            color='zinc'
-          >
-            <div className='mb-4 flex flex-wrap gap-2'>
-              {[7, 14, 30, 90, 180, 365].map((days) => {
-                const needsAdvancedAccess = days === 180 || days === 365;
-                const hasAccess = needsAdvancedAccess
-                  ? subscription.hasAccess('advanced_patterns')
-                  : subscription.hasAccess('tarot_patterns');
-                const isLocked = needsAdvancedAccess && !hasAccess;
+          <CollapsibleSection title='Tarot Patterns' defaultCollapsed={false}>
+            <HoroscopeSection
+              title={
+                selectedView === 'year-over-year'
+                  ? 'Year-over-Year Patterns'
+                  : timeFrame === 365
+                    ? '12-Month Patterns'
+                    : timeFrame === 180
+                      ? '6-Month Patterns'
+                      : timeFrame === 90
+                        ? '90-Day Patterns'
+                        : timeFrame === 30
+                          ? '30-Day Patterns'
+                          : timeFrame === 14
+                            ? '14-Day Patterns'
+                            : '7-Day Patterns'
+              }
+              color='zinc'
+            >
+              <div className='mb-4 flex flex-wrap gap-2'>
+                {[7, 14, 30, 90, 180, 365].map((days) => {
+                  const needsAdvancedAccess = days === 180 || days === 365;
+                  const hasAccess = needsAdvancedAccess
+                    ? subscription.hasAccess('advanced_patterns')
+                    : subscription.hasAccess('tarot_patterns');
+                  const isLocked = needsAdvancedAccess && !hasAccess;
 
-                return (
-                  <button
-                    key={days}
-                    onClick={() => {
-                      if (isLocked) {
-                        setUpgradeFeature('advanced_patterns');
-                        setShowUpgradeModal(true);
-                        return;
+                  return (
+                    <button
+                      key={days}
+                      onClick={() => {
+                        if (isLocked) {
+                          setUpgradeFeature('advanced_patterns');
+                          setShowUpgradeModal(true);
+                          return;
+                        }
+                        setSelectedView(days);
+                      }}
+                      className={cn(
+                        'rounded-full px-3 py-1.5 text-xs font-medium transition-colors relative',
+                        isLocked
+                          ? 'bg-zinc-800/30 text-zinc-600 border border-zinc-700/30 cursor-not-allowed opacity-50'
+                          : selectedView === days
+                            ? 'bg-lunary-primary-900/20 text-lunary-primary-300 border border-lunary-primary-700'
+                            : 'bg-zinc-800/50 text-zinc-400 border border-zinc-700/50 hover:bg-zinc-800/70',
+                      )}
+                      title={
+                        isLocked
+                          ? 'Upgrade to Lunary+ AI Annual to unlock'
+                          : undefined
                       }
-                      setSelectedView(days);
-                    }}
-                    className={cn(
-                      'rounded-full px-3 py-1.5 text-xs font-medium transition-colors relative',
-                      isLocked
-                        ? 'bg-zinc-800/30 text-zinc-600 border border-zinc-700/30 cursor-not-allowed opacity-50'
-                        : selectedView === days
-                          ? 'bg-lunary-primary-900/20 text-lunary-primary-300 border border-lunary-primary-700'
-                          : 'bg-zinc-800/50 text-zinc-400 border border-zinc-700/50 hover:bg-zinc-800/70',
-                    )}
-                    title={
-                      isLocked
-                        ? 'Upgrade to Lunary+ AI Annual to unlock'
-                        : undefined
+                    >
+                      {days === 180
+                        ? '6 months'
+                        : days === 365
+                          ? '12 months'
+                          : `${days} days`}
+                      {isLocked && (
+                        <Lock className='w-3 h-3 absolute -top-1 -right-1 text-zinc-600' />
+                      )}
+                    </button>
+                  );
+                })}
+                <button
+                  onClick={() => {
+                    const hasAccess =
+                      subscription.hasAccess('advanced_patterns');
+                    if (!hasAccess) {
+                      setUpgradeFeature('advanced_patterns');
+                      setShowUpgradeModal(true);
+                      return;
                     }
-                  >
-                    {days === 180
-                      ? '6 months'
-                      : days === 365
-                        ? '12 months'
-                        : `${days} days`}
-                    {isLocked && (
-                      <Lock className='w-3 h-3 absolute -top-1 -right-1 text-zinc-600' />
-                    )}
-                  </button>
-                );
-              })}
-              <button
-                onClick={() => {
-                  const hasAccess = subscription.hasAccess('advanced_patterns');
-                  if (!hasAccess) {
-                    setUpgradeFeature('advanced_patterns');
-                    setShowUpgradeModal(true);
-                    return;
+                    setSelectedView('year-over-year');
+                    setIsMultidimensionalMode(true); // Year-over-year requires advanced mode
+                  }}
+                  className={cn(
+                    'rounded-full px-3 py-1.5 text-xs font-medium transition-colors relative',
+                    !subscription.hasAccess('advanced_patterns')
+                      ? 'bg-zinc-800/30 text-zinc-600 border border-zinc-700/30 cursor-not-allowed opacity-50'
+                      : selectedView === 'year-over-year'
+                        ? 'bg-lunary-primary-900 text-lunary-primary-300 border border-lunary-primary-700'
+                        : 'bg-zinc-800/50 text-zinc-400 border border-zinc-700/50 hover:bg-zinc-800/70',
+                  )}
+                  title={
+                    !subscription.hasAccess('advanced_patterns')
+                      ? 'Upgrade to Lunary+ AI Annual to unlock'
+                      : undefined
                   }
-                  setSelectedView('year-over-year');
-                  setIsMultidimensionalMode(true); // Year-over-year requires advanced mode
-                }}
-                className={cn(
-                  'rounded-full px-3 py-1.5 text-xs font-medium transition-colors relative',
-                  !subscription.hasAccess('advanced_patterns')
-                    ? 'bg-zinc-800/30 text-zinc-600 border border-zinc-700/30 cursor-not-allowed opacity-50'
-                    : selectedView === 'year-over-year'
-                      ? 'bg-lunary-primary-900 text-lunary-primary-300 border border-lunary-primary-700'
-                      : 'bg-zinc-800/50 text-zinc-400 border border-zinc-700/50 hover:bg-zinc-800/70',
-                )}
-                title={
-                  !subscription.hasAccess('advanced_patterns')
-                    ? 'Upgrade to Lunary+ AI Annual to unlock'
+                >
+                  Year-over-Year
+                  {!subscription.hasAccess('advanced_patterns') && (
+                    <Lock className='w-3 h-3 absolute -top-1 -right-1 text-zinc-600' />
+                  )}
+                </button>
+                <button
+                  onClick={() => {
+                    const hasAccess =
+                      subscription.hasAccess('advanced_patterns');
+                    if (!hasAccess) {
+                      setUpgradeFeature('advanced_patterns');
+                      setShowUpgradeModal(true);
+                      return;
+                    }
+                    setIsMultidimensionalMode(!isMultidimensionalMode);
+                  }}
+                  className={cn(
+                    'rounded-full px-3 py-1.5 text-xs font-medium transition-colors relative flex items-center gap-1.5',
+                    !subscription.hasAccess('advanced_patterns')
+                      ? 'bg-zinc-800/30 text-zinc-600 border border-zinc-700/30 cursor-not-allowed opacity-50'
+                      : isMultidimensionalMode
+                        ? 'bg-lunary-primary-900/20 text-lunary-primary-300 border border-lunary-primary-700'
+                        : 'bg-zinc-800/50 text-zinc-400 border border-zinc-700/50 hover:bg-zinc-800/70',
+                  )}
+                  title={
+                    !subscription.hasAccess('advanced_patterns')
+                      ? 'Upgrade to Lunary+ AI Annual to unlock advanced patterns'
+                      : isMultidimensionalMode
+                        ? 'Turn off multidimensional analysis'
+                        : 'Turn on multidimensional analysis'
+                  }
+                >
+                  <Sparkles className='w-3 h-3' />
+                  Advanced
+                  {!subscription.hasAccess('advanced_patterns') && (
+                    <Lock className='w-3 h-3 absolute -top-1 -right-1 text-zinc-600' />
+                  )}
+                </button>
+              </div>
+              <AdvancedPatterns
+                key={`patterns-${selectedView}-${isMultidimensionalMode}`}
+                basicPatterns={
+                  hasChartAccess
+                    ? personalizedReading?.trendAnalysis
                     : undefined
                 }
-              >
-                Year-over-Year
-                {!subscription.hasAccess('advanced_patterns') && (
-                  <Lock className='w-3 h-3 absolute -top-1 -right-1 text-zinc-600' />
-                )}
-              </button>
-              <button
-                onClick={() => {
-                  const hasAccess = subscription.hasAccess('advanced_patterns');
-                  if (!hasAccess) {
-                    setUpgradeFeature('advanced_patterns');
-                    setShowUpgradeModal(true);
-                    return;
-                  }
-                  setIsMultidimensionalMode(!isMultidimensionalMode);
-                }}
-                className={cn(
-                  'rounded-full px-3 py-1.5 text-xs font-medium transition-colors relative flex items-center gap-1.5',
-                  !subscription.hasAccess('advanced_patterns')
-                    ? 'bg-zinc-800/30 text-zinc-600 border border-zinc-700/30 cursor-not-allowed opacity-50'
-                    : isMultidimensionalMode
-                      ? 'bg-lunary-primary-900/20 text-lunary-primary-300 border border-lunary-primary-700'
-                      : 'bg-zinc-800/50 text-zinc-400 border border-zinc-700/50 hover:bg-zinc-800/70',
-                )}
-                title={
-                  !subscription.hasAccess('advanced_patterns')
-                    ? 'Upgrade to Lunary+ AI Annual to unlock advanced patterns'
-                    : isMultidimensionalMode
-                      ? 'Turn off multidimensional analysis'
-                      : 'Turn on multidimensional analysis'
+                selectedView={selectedView}
+                isMultidimensionalMode={isMultidimensionalMode}
+                onMultidimensionalModeChange={setIsMultidimensionalMode}
+                recentReadings={
+                  typeof selectedView === 'number' && selectedView === 7
+                    ? personalizedPreviousReadings
+                    : undefined
                 }
-              >
-                <Sparkles className='w-3 h-3' />
-                Advanced
-                {!subscription.hasAccess('advanced_patterns') && (
-                  <Lock className='w-3 h-3 absolute -top-1 -right-1 text-zinc-600' />
-                )}
-              </button>
-            </div>
-            <AdvancedPatterns
-              key={`patterns-${selectedView}-${isMultidimensionalMode}`}
-              basicPatterns={
-                hasChartAccess ? personalizedReading?.trendAnalysis : undefined
-              }
-              selectedView={selectedView}
-              isMultidimensionalMode={isMultidimensionalMode}
-              onMultidimensionalModeChange={setIsMultidimensionalMode}
-              recentReadings={
-                typeof selectedView === 'number' && selectedView === 7
-                  ? personalizedPreviousReadings
-                  : undefined
-              }
-              onCardClick={(card: { name: string }) => {
-                const tarotCard = getTarotCardByName(card.name);
-                if (tarotCard) setSelectedCard(tarotCard);
-              }}
-            />
-          </HoroscopeSection>
+                onCardClick={(card: { name: string }) => {
+                  const tarotCard = getTarotCardByName(card.name);
+                  if (tarotCard) setSelectedCard(tarotCard);
+                }}
+              />
+            </HoroscopeSection>
+          </CollapsibleSection>
         )}
 
         <div id='tarot-spreads-section'>
@@ -1315,6 +1365,7 @@ const TarotReadings = () => {
               userName={userName}
               subscriptionPlan={tarotPlan}
               onCardPreview={(card) => setSelectedCard(card)}
+              onShareReading={handleShareSpread}
             />
           </CollapsibleSection>
         </div>
@@ -1347,6 +1398,93 @@ const TarotReadings = () => {
         isOpen={!!selectedCard}
         onClose={() => setSelectedCard(null)}
       />
+
+      {shareTarget && (
+        <div
+          className='fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm'
+          aria-modal='true'
+          role='dialog'
+          onClick={closeShareModal}
+        >
+          <div
+            className='relative w-full max-w-md rounded-2xl border border-zinc-800 bg-zinc-900 p-6 text-white shadow-2xl'
+            onClick={(event) => event.stopPropagation()}
+          >
+            <button
+              onClick={closeShareModal}
+              className='absolute right-4 top-4 text-zinc-400 hover:text-zinc-100'
+            >
+              <X className='w-5 h-5' />
+            </button>
+
+            <h2 className='text-lg font-medium text-white'>
+              Share {shareTarget.title}
+            </h2>
+            {shareTarget.description && (
+              <p className='text-xs text-zinc-400'>{shareTarget.description}</p>
+            )}
+
+            {shareLoading && (
+              <div className='flex flex-col items-center justify-center py-8'>
+                <Loader2 className='h-8 w-8 animate-spin text-lunary-primary-400' />
+                <p className='mt-3 text-sm text-zinc-400'>
+                  Generating the share image…
+                </p>
+              </div>
+            )}
+
+            {shareError && (
+              <p className='mt-4 text-sm text-red-400'>{shareError}</p>
+            )}
+
+            {sharePreviewUrl && (
+              <div className='mt-4 overflow-hidden rounded-xl border border-zinc-800'>
+                <Image
+                  src={sharePreviewUrl}
+                  alt={shareTarget.title}
+                  width={1080}
+                  height={600}
+                  className='w-full h-auto'
+                  unoptimized
+                />
+              </div>
+            )}
+
+            <div className='mt-5 space-y-2'>
+              <button
+                type='button'
+                onClick={handleShareImage}
+                disabled={!shareImageBlob || shareLoading}
+                className='flex w-full items-center justify-center gap-2 rounded-lg bg-lunary-primary-600 px-4 py-3 text-sm font-semibold text-white transition hover:bg-lunary-primary-500 disabled:cursor-not-allowed disabled:opacity-60'
+              >
+                <Share2 className='h-4 w-4' />
+                Share image
+              </button>
+              <button
+                type='button'
+                onClick={handleDownloadShareImage}
+                disabled={!shareImageBlob}
+                className='flex w-full items-center justify-center gap-2 rounded-lg border border-zinc-800 px-4 py-3 text-sm font-semibold text-zinc-200 transition hover:border-zinc-700 disabled:cursor-not-allowed disabled:opacity-60'
+              >
+                <Download className='h-4 w-4' />
+                Save image
+              </button>
+              <button
+                type='button'
+                onClick={handleCopyShareLink}
+                className='flex w-full items-center justify-center gap-2 rounded-lg bg-zinc-800 px-4 py-3 text-sm font-semibold text-zinc-200 transition hover:bg-zinc-800/80'
+              >
+                <Copy className='h-4 w-4' />
+                Copy share link
+              </button>
+            </div>
+
+            <p className='mt-4 text-xs text-zinc-500'>
+              Share this cosmic insight anywhere you like.
+            </p>
+          </div>
+        </div>
+      )}
 
       {/* Upgrade Modal */}
       {showUpgradeModal && (
