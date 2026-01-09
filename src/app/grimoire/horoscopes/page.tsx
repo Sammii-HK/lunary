@@ -93,6 +93,64 @@ export default function GrimoireHoroscopesPage() {
             career, health, and more.
           </p>
 
+          <section className='mb-10 grid gap-4 md:grid-cols-3'>
+            <div className='col-span-2 rounded-2xl border border-zinc-800/60 bg-gradient-to-br from-zinc-900/80 to-lunary-primary-950 p-6'>
+              <p className='text-xs uppercase tracking-widest text-zinc-400'>
+                Cosmic Highlight (changes daily)
+              </p>
+              <h2 className='text-2xl font-semibold text-white mt-2'>
+                Moon trines Venus in Libra today, so gentle connections and
+                artistic sparks feel effortless. Tap in to carry calm momentum
+                into your week.
+              </h2>
+              <p className='mt-4 text-sm text-zinc-300 leading-relaxed'>
+                Every sunrise we refresh the highlight with the most current
+                Luna/Venus/Mars angles, new-moon intentions, and transit
+                activations that shift your personal story. This summary is the
+                first pulse of your daily ritual—bookmark it, then dive into
+                your sign below.
+              </p>
+              <div className='mt-5 flex flex-wrap gap-2 text-[11px] uppercase text-zinc-300 tracking-widest'>
+                <span className='rounded-full border border-zinc-700 px-3 py-1'>
+                  Daily transits updated at 00:00 UTC
+                </span>
+                <span className='rounded-full border border-zinc-700 px-3 py-1'>
+                  Moon phase adjustments every 12 hours
+                </span>
+                <span className='rounded-full border border-zinc-700 px-3 py-1'>
+                  Notifications deliver the freshest insights
+                </span>
+              </div>
+            </div>
+            <div className='space-y-3 rounded-2xl border border-zinc-800/60 bg-zinc-900/60 p-5'>
+              <h3 className='text-sm font-semibold tracking-wide text-zinc-300'>
+                Daily Signals
+              </h3>
+              <ul className='space-y-2 text-sm text-zinc-200 leading-relaxed'>
+                <li>
+                  <strong>Daily Vibe:</strong> Horoscopes rotate every dawn so
+                  nothing feels stale. Check back for fresh language that
+                  mirrors new planetary shifts.
+                </li>
+                <li>
+                  <strong>Transit Watch:</strong> Each listed transit is
+                  recalculated as soon as a planet moves, so your action plan
+                  keeps up with Mars, Mercury, and the Moon.
+                </li>
+                <li>
+                  <strong>Moon Focus:</strong> We surface the Moon phase,
+                  polarity energy, and keywords that evolve hourly for each
+                  sign.
+                </li>
+              </ul>
+              <p className='text-xs text-lunary-accent-300'>
+                <Link href='/horoscope' className='inline underline'>
+                  View today's horoscope →
+                </Link>
+              </p>
+            </div>
+          </section>
+
           <div className='mb-12'>
             <h2 className='text-2xl font-light mb-6'>
               {currentMonth.charAt(0).toUpperCase() + currentMonth.slice(1)}{' '}
@@ -130,7 +188,7 @@ export default function GrimoireHoroscopesPage() {
               href='/horoscope'
               className='inline-flex px-6 py-3 rounded-lg bg-lunary-primary-900 hover:bg-lunary-primary-800 border border-lunary-primary-700 text-lunary-accent-300 font-medium transition-colors'
             >
-              Get Your Personalized Horoscope
+              Get your personalised horoscope based on your full birth chart
             </Link>
           </div>
         </div>
