@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import React from 'react';
 
 interface ParsedMarkdownProps {
@@ -13,20 +14,36 @@ function parseInlineMarkdown(text: string): React.ReactNode[] {
   while (remaining.length > 0) {
     const boldMatch = remaining.match(/\*\*(.+?)\*\*/);
     const italicMatch = remaining.match(/(?<!\*)\*([^*]+?)\*(?!\*)/);
+    const linkMatch = remaining.match(/\[([^\]]+)\]\(([^)]+)\)/);
 
-    let nextMatch: { type: 'bold' | 'italic'; match: RegExpMatchArray } | null =
-      null;
+    type MatchType = 'bold' | 'italic' | 'link';
+    let nextMatch: { type: MatchType; match: RegExpMatchArray } | null = null;
 
-    if (boldMatch && italicMatch) {
-      nextMatch =
-        (boldMatch.index ?? Infinity) < (italicMatch.index ?? Infinity)
-          ? { type: 'bold', match: boldMatch }
-          : { type: 'italic', match: italicMatch };
-    } else if (boldMatch) {
-      nextMatch = { type: 'bold', match: boldMatch };
-    } else if (italicMatch) {
-      nextMatch = { type: 'italic', match: italicMatch };
+    const candidates: Array<{ type: MatchType; match: RegExpMatchArray }> = [];
+    if (boldMatch) {
+      candidates.push({ type: 'bold', match: boldMatch });
     }
+    if (italicMatch) {
+      candidates.push({ type: 'italic', match: italicMatch });
+    }
+    if (linkMatch) {
+      candidates.push({ type: 'link', match: linkMatch });
+    }
+
+    if (candidates.length === 0) {
+      result.push(remaining);
+      break;
+    }
+
+    nextMatch = candidates.reduce((acc, candidate) => {
+      if (
+        !acc ||
+        (candidate.match.index ?? Infinity) < (acc.match.index ?? Infinity)
+      ) {
+        return candidate;
+      }
+      return acc;
+    }, null);
 
     if (!nextMatch) {
       result.push(remaining);
@@ -46,15 +63,25 @@ function parseInlineMarkdown(text: string): React.ReactNode[] {
           {match[1]}
         </strong>,
       );
-      remaining = remaining.slice(index + match[0].length);
-    } else {
+    } else if (type === 'italic') {
       result.push(
         <em key={key++} className='italic text-zinc-200'>
           {match[1]}
         </em>,
       );
-      remaining = remaining.slice(index + match[0].length);
+    } else {
+      result.push(
+        <Link
+          key={`link-${key++}`}
+          href={match[2]}
+          className='text-lunary-primary-300 hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-lunary-primary-300'
+        >
+          {match[1]}
+        </Link>,
+      );
     }
+
+    remaining = remaining.slice(index + match[0].length);
   }
 
   return result;

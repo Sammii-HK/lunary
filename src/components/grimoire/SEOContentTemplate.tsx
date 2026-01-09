@@ -116,7 +116,7 @@ export interface SEOContentTemplateProps {
   children?: React.ReactNode;
 
   // Children placement within the template
-  childrenPosition?: 'after-description' | 'after-faqs';
+  childrenPosition?: 'after-description' | 'before-faqs' | 'after-faqs';
 }
 
 export function SEOContentTemplate({
@@ -688,9 +688,16 @@ export function SEOContentTemplate({
         </div>
       </section>
 
+      {/* Optional slot before FAQs */}
+      {childrenPosition === 'before-faqs' && children && (
+        <div id='explore-practices' className='mt-8'>
+          {children}
+        </div>
+      )}
+
       {/* FAQs */}
       {faqs && faqs.length > 0 && (
-        <section id='faq' className='overflow-x-hidden'>
+        <section id='faq' className='overflow-x-hidden sentence'>
           <h2 className='text-md md:text-2xl font-medium text-zinc-100 mb-6 break-words'>
             Frequently Asked Questions
           </h2>
