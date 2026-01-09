@@ -10,57 +10,80 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const cohortType = (searchParams.get('type') || 'week') as 'week' | 'month';
     const weeksBack = parseInt(searchParams.get('weeks') || '12', 10);
+    const startParam = searchParams.get('start_date');
+    const endParam = searchParams.get('end_date');
 
-    // Get cohorts (weekly or monthly)
-    const cohortStart = new Date();
-    cohortStart.setDate(cohortStart.getDate() - weeksBack * 7);
+    const parseDateParam = (value: string | null, fallback: Date): Date => {
+      if (!value) return fallback;
+      const parsed = new Date(`${value}T00:00:00Z`);
+      if (Number.isNaN(parsed.getTime())) return fallback;
+      return parsed;
+    };
 
-    // Use DATE_TRUNC with proper SQL syntax
-    // For week: DATE_TRUNC('week', created_at)
-    // For month: DATE_TRUNC('month', created_at)
-    const cohortsResult =
-      cohortType === 'week'
-        ? await sql`
-          SELECT 
-            DATE_TRUNC('week', created_at) as cohort_start,
-            COUNT(DISTINCT user_id) as cohort_size
-          FROM conversion_events
-          WHERE event_type = 'signup'
-            AND created_at >= ${formatTimestamp(cohortStart)}
-            AND (user_email IS NULL OR (user_email NOT LIKE ${TEST_EMAIL_PATTERN} AND user_email != ${TEST_EMAIL_EXACT}))
-          GROUP BY DATE_TRUNC('week', created_at)
-          ORDER BY cohort_start DESC
-          LIMIT ${weeksBack}
-        `
-        : await sql`
-          SELECT 
-            DATE_TRUNC('month', created_at) as cohort_start,
-            COUNT(DISTINCT user_id) as cohort_size
-          FROM conversion_events
-          WHERE event_type = 'signup'
-            AND created_at >= ${formatTimestamp(cohortStart)}
-            AND (user_email IS NULL OR (user_email NOT LIKE ${TEST_EMAIL_PATTERN} AND user_email != ${TEST_EMAIL_EXACT}))
-          GROUP BY DATE_TRUNC('month', created_at)
-          ORDER BY cohort_start DESC
-          LIMIT ${weeksBack}
-        `;
+    const defaultStart = (() => {
+      const d = new Date();
+      d.setUTCDate(d.getUTCDate() - weeksBack * 7);
+      d.setUTCHours(0, 0, 0, 0);
+      return d;
+    })();
 
-    const cohorts = cohortsResult.rows
-      .map((row) => {
-        const startDate = row.cohort_start;
-        // Handle invalid dates
-        if (!startDate) return null;
-        const date = new Date(startDate);
-        if (isNaN(date.getTime())) return null;
+    const today = new Date();
+    today.setUTCHours(0, 0, 0, 0);
 
-        return {
-          startDate: date,
-          cohortSize: Number(row.cohort_size || 0),
-        };
-      })
-      .filter((c): c is { startDate: Date; cohortSize: number } => c !== null);
+    let rangeStart = parseDateParam(startParam, defaultStart);
+    let rangeEndInclusive = parseDateParam(endParam, today);
 
-    // Calculate retention for each cohort at different time intervals
+    if (rangeEndInclusive < rangeStart) {
+      const temp = rangeStart;
+      rangeStart = rangeEndInclusive;
+      rangeEndInclusive = temp;
+    }
+
+    const rangeEndExclusive = new Date(rangeEndInclusive);
+    rangeEndExclusive.setUTCDate(rangeEndExclusive.getUTCDate() + 1);
+    rangeEndExclusive.setUTCHours(0, 0, 0, 0);
+
+    const alignToPeriodStart = (date: Date) => {
+      const aligned = new Date(date);
+      aligned.setUTCHours(0, 0, 0, 0);
+      if (cohortType === 'week') {
+        const day = aligned.getUTCDay();
+        const distanceToMonday = (day + 6) % 7;
+        aligned.setUTCDate(aligned.getUTCDate() - distanceToMonday);
+      } else {
+        aligned.setUTCDate(1);
+      }
+      return aligned;
+    };
+
+    const periodStarts: Array<{ start: Date; end: Date }> = [];
+    let currentStart = alignToPeriodStart(rangeStart);
+    let addedPeriods = 0;
+
+    const addPeriod = (date: Date) => {
+      const next = new Date(date);
+      if (cohortType === 'week') {
+        next.setUTCDate(next.getUTCDate() + 7);
+      } else {
+        next.setUTCMonth(next.getUTCMonth() + 1);
+      }
+      return next;
+    };
+
+    while (addedPeriods < weeksBack && currentStart < rangeEndExclusive) {
+      const periodEnd = addPeriod(currentStart);
+      if (periodEnd <= rangeStart) {
+        currentStart = periodEnd;
+        continue;
+      }
+      periodStarts.push({
+        start: new Date(currentStart),
+        end: new Date(periodEnd),
+      });
+      currentStart = periodEnd;
+      addedPeriods += 1;
+    }
+
     const retentionMatrix: Array<{
       cohort: string;
       day0: number;
@@ -90,29 +113,23 @@ export async function GET(request: NextRequest) {
     ];
     const activityEventsArray = toTextArrayLiteral(ACTIVITY_EVENTS)!;
 
-    for (const cohort of cohorts) {
-      const cohortStartDate = cohort.startDate;
-      const cohortEndDate = new Date(cohortStartDate);
-      if (cohortType === 'week') {
-        cohortEndDate.setDate(cohortEndDate.getDate() + 7);
-      } else {
-        cohortEndDate.setMonth(cohortEndDate.getMonth() + 1);
-      }
+    for (const period of periodStarts) {
+      const cohortStartDate = period.start;
+      const cohortEndDate = period.end;
 
-      // Get users in this cohort with their signup dates
       const cohortUsersResult = await sql`
-        SELECT DISTINCT user_id, created_at as signup_date
+        SELECT COUNT(DISTINCT user_id) as cohort_size
         FROM conversion_events
         WHERE event_type = 'signup'
-          AND created_at >= ${formatTimestamp(cohortStartDate)}
-          AND created_at < ${formatTimestamp(cohortEndDate)}
+          AND created_at >= ${formatTimestamp(period.start)}
+          AND created_at < ${formatTimestamp(period.end)}
           AND (user_email IS NULL OR (user_email NOT LIKE ${TEST_EMAIL_PATTERN} AND user_email != ${TEST_EMAIL_EXACT}))
       `;
 
-      if (cohortUsersResult.rows.length === 0) continue;
+      const cohortSize = Number(cohortUsersResult.rows[0]?.cohort_size ?? 0);
+      if (cohortSize === 0) continue;
 
-      // Calculate retention based on each user's individual signup date
-      // Day 1 retention: users who returned 1 day after their signup
+      // Calculate retention metrics using the cohort window
       const day1Retained = await sql`
         SELECT COUNT(DISTINCT ce1.user_id) as count
         FROM conversion_events ce1
@@ -154,23 +171,17 @@ export async function GET(request: NextRequest) {
           AND ce2.created_at <= ce1.created_at + INTERVAL '30 days'
       `;
 
+      const formattedStart = period.start.toISOString().split('T')[0];
       const day1Retention =
-        cohort.cohortSize > 0
-          ? (Number(day1Retained.rows[0]?.count || 0) / cohort.cohortSize) * 100
-          : 0;
+        (Number(day1Retained.rows[0]?.count || 0) / cohortSize) * 100;
       const day7Retention =
-        cohort.cohortSize > 0
-          ? (Number(day7Retained.rows[0]?.count || 0) / cohort.cohortSize) * 100
-          : 0;
+        (Number(day7Retained.rows[0]?.count || 0) / cohortSize) * 100;
       const day30Retention =
-        cohort.cohortSize > 0
-          ? (Number(day30Retained.rows[0]?.count || 0) / cohort.cohortSize) *
-            100
-          : 0;
+        (Number(day30Retained.rows[0]?.count || 0) / cohortSize) * 100;
 
       retentionMatrix.push({
-        cohort: cohortStartDate.toISOString().split('T')[0],
-        day0: cohort.cohortSize,
+        cohort: formattedStart,
+        day0: cohortSize,
         day1: Number(day1Retention.toFixed(2)),
         day7: Number(day7Retention.toFixed(2)),
         day30: Number(day30Retention.toFixed(2)),
