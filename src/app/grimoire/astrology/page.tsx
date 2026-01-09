@@ -103,7 +103,7 @@ const astrologyGroups = [
 export const metadata: Metadata = {
   title: 'Astrology Guide: Birth Charts, Houses, Aspects & Transits | Lunary',
   description:
-    'Learn astrology with clarity: birth charts, houses, aspects, placements, transits, and timing. A grounded guide to understanding how the sky connects to lived experience.',
+    'Want to learn how astrology explains you and your timing? This guide lays out birth charts, houses, aspects, placements, and transits so you can read the sky with confidence.',
   keywords: [
     'astrology guide',
     'birth chart',
@@ -165,7 +165,7 @@ export default function AstrologyIndexPage() {
       <SEOContentTemplate
         title='Astrology Guide: Birth Charts, Houses, Aspects & Transits'
         h1='Astrology'
-        description='A grounded guide to astrology fundamentals: birth charts, houses, aspects, placements, and timing.'
+        description='Want to learn how astrology explains you and your timing? This guide lays out birth charts, houses, aspects, placements, and transits so you can read the sky with confidence.'
         keywords={[
           'astrology guide',
           'birth chart',
@@ -189,7 +189,7 @@ export default function AstrologyIndexPage() {
             'Astrology is a symbolic system that maps planetary positions to human experience. A birth chart captures the sky at your birth, and its placements, houses, and aspects describe patterns of personality, timing, and growth.',
         }}
         tldr='Astrology interprets the sky as a map of patterns. Your birth chart shows planetary placements, houses show life areas, and aspects show how energies interact. Transits and retrogrades describe how timing unfolds over time.'
-        intro='Astrology is best understood as a language of patterns rather than a set of fixed predictions. It uses the positions of the Sun, Moon, and planets at a given moment to describe tendencies, themes, and timing. Your birth chart is a snapshot of the sky at the moment you were born. It does not tell you who you must be, but it can explain why certain experiences feel familiar, where your energy naturally flows, and what kinds of lessons repeat over time. When you learn the structure of astrology, you gain a way to name the cycles you already sense in your life. That is why this Grimoire section focuses on clarity: the basics are explained cleanly, and each topic links out to deeper guides so you can build understanding step by step.'
+        intro='Want to understand how astrology maps the sky to your life? This guide walks through birth charts, houses, aspects, placements, and timing so you can name the cycles you already feel and then dive deeper into each topic.'
         meaning='Astrology works through three main building blocks: planets, signs, and houses. Planets describe *what* energy is active, signs describe *how* that energy expresses, and houses describe *where* it shows up in life. A placement such as "Venus in Taurus in the 7th House" is a complete sentence: Venus (love, values) in Taurus (steady, sensual) expressed through the 7th House (relationships).\n\nAspects are the relationships between planets. They show how parts of your chart support, challenge, or intensify each other. A trine indicates ease and flow, a square indicates tension that pushes growth, and an opposition shows polarity that seeks balance. Aspects do not cancel each other out; they describe the way your inner world moves.\n\nTiming comes from transits and cycles. Transits show how the current sky interacts with your birth chart, revealing seasons of change, reflection, or momentum. Retrogrades highlight review periods rather than failure. Lunar nodes point to long-term growth themes, while eclipses and major transits mark turning points. Astrology becomes most helpful when you see these timing layers as context for choices, not a script to follow.\n\nThis page gathers the core topics that make astrology practical: understanding the birth chart, learning houses and aspects, exploring placements, and tracking cycles. Use it as a map to navigate the deeper guides below.'
         howToWorkWith={[
           'Start with your birth chart and identify your Sun, Moon, and Rising placements.',

@@ -317,7 +317,7 @@ export const planetaryBodies: Record<string, Planet> = {
     ],
     rules: [],
     mysticalProperties:
-      'Symbolizes grounding, fertility, and life. In astrology, it is often related to practicality and materialism.',
+      'grounding, fertility, and life. In astrology, it is often related to practicality and materialism.',
     retrogradeEffect:
       'Earth does not go retrograde from our perspective. It represents our grounded, physical experience from which we observe all other planetary movements.',
     transitEffect:
@@ -363,7 +363,7 @@ export const planetaryBodies: Record<string, Planet> = {
     detriment: 'Gemini',
     fall: 'Capricorn',
     mysticalProperties:
-      'Symbolizes growth, expansion, and abundance. Known for bringing luck and wealth.',
+      'growth, expansion, and abundance. Known for bringing luck and wealth.',
     retrogradeEffect:
       'Jupiter retrograde (4 months yearly) turns expansion inward. Philosophical and spiritual growth emphasized over material. Reassess beliefs and where you seek meaning. Inner wisdom develops.',
     transitEffect:
@@ -577,7 +577,7 @@ export const zodiacSigns: Record<string, ZodiacSign> = {
     description:
       'Taurus is the stabilizer of the zodiac, bringing patience, determination, and a love of beauty and comfort. As a Fixed Earth sign ruled by Venus, Taurus values security, sensual pleasures, and the finer things in life. Taurus natives build lasting foundations through steady, persistent effort.',
     mysticalProperties:
-      'Symbolizes reliability, practicality, and determination. Influences matters of finance, comfort, and physical pleasures.',
+      'reliability, practicality, and determination. Influences matters of finance, comfort, and physical pleasures.',
     loveTrait:
       'Taurus loves deeply and loyally, seeking partners who offer security and sensual connection. They express love through physical affection and creating comfortable environments.',
     careerTrait:
@@ -824,7 +824,7 @@ export const zodiacSigns: Record<string, ZodiacSign> = {
     description:
       'Scorpio is the transformer of the zodiac, bringing intensity, depth, and the power of regeneration. As a Fixed Water sign ruled by Pluto, Scorpio represents the hidden depths, psychological insight, and the cycle of death and rebirth. Scorpio natives probe beneath surfaces to discover truth.',
     mysticalProperties:
-      'Symbolizes transformation, mystery, and intensity. Influences themes of sexuality, death, and rebirth.',
+      'transformation, mystery, and intensity. Influences themes of sexuality, death, and rebirth.',
     loveTrait:
       'Scorpio loves with total intensity and devotion. They seek deep, transformative connections and express love through passionate loyalty and emotional depth.',
     careerTrait:
@@ -992,7 +992,7 @@ export const zodiacSigns: Record<string, ZodiacSign> = {
     description:
       'Pisces is the mystic of the zodiac, bringing compassion, creativity, and spiritual depth. As a Mutable Water sign ruled by Neptune, Pisces represents the dissolution of boundaries, artistic inspiration, and connection to the divine. Pisces natives feel deeply and create beauty from their inner visions.',
     mysticalProperties:
-      'Symbolizes empathy, compassion, and intuition. Associated with mysticism, spirituality, and sensitivity.',
+      'empathy, compassion, and intuition. Associated with mysticism, spirituality, and sensitivity.',
     loveTrait:
       'Pisces loves with unconditional compassion and romantic idealism. They seek soulmate connections and express love through artistic gestures and emotional attunement.',
     careerTrait:

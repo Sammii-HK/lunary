@@ -15,19 +15,23 @@ import {
 
 export const metadata: Metadata = {
   title:
-    'Yearly Astrological Transits 2025-2030: Major Planetary Movements | Lunary',
+    'Yearly Astrological Transits 2026-2030 | How Each Year Affects You | Lunary',
   description:
-    'Complete guide to major astrological transits from 2025-2030. Saturn Return, Jupiter transits, Uranus ingresses, and more. Plan ahead with cosmic awareness.',
+    'Plan for career, relationship, and personal shifts with the definitive 2026–2030 transit timeline, including who is affected and how to work with each planet’s energy.',
   keywords: [
     'astrological transits',
     'saturn return',
     'jupiter transit',
     'yearly astrology',
-    '2025 transits',
     '2026 transits',
+    '2027 transits',
+    '2028 transits',
+    '2029 transits',
+    '2030 transits',
+    'uranus transit',
   ],
   openGraph: {
-    title: 'Yearly Astrological Transits 2025-2030 | Lunary',
+    title: 'Yearly Astrological Transits 2026-2030 | Lunary',
     description:
       'Complete guide to major astrological transits. Saturn Return, Jupiter transits, and more.',
     url: 'https://lunary.app/grimoire/transits',
@@ -42,7 +46,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Yearly Astrological Transits 2025-2030 | Lunary',
+    title: 'Yearly Astrological Transits 2026-2030 | Lunary',
     description: 'Complete guide to major astrological transits.',
     images: ['/api/og/grimoire/transits'],
   },
@@ -60,11 +64,11 @@ export const metadata: Metadata = {
   },
 };
 
-const years = [2025, 2026, 2027, 2028, 2029, 2030];
+const years = [2026, 2027, 2028, 2029, 2030];
 
 export default function TransitsIndexPage() {
   const transitsListSchema = createItemListSchema({
-    name: 'Yearly Astrological Transits 2025-2030',
+    name: 'Yearly Astrological Transits 2026-2030',
     description:
       'Complete guide to major astrological transits including Saturn Return, Jupiter transits, and planetary ingresses.',
     url: 'https://lunary.app/grimoire/transits',
@@ -95,10 +99,21 @@ export default function TransitsIndexPage() {
         <h1 className='text-4xl font-light mb-4'>
           Yearly Astrological Transits
         </h1>
-        <p className='text-lg text-zinc-400 mb-8 max-w-3xl'>
-          Major planetary transits shape the collective experience and personal
-          growth opportunities. Explore what the cosmos has in store from 2025
-          through 2030.
+        <p className='text-lg text-zinc-400 mb-6 max-w-3xl'>
+          Every major transit from 2026 through 2030 is summarized here with key
+          dates, planetary themes, and the signs it highlights so you can spot
+          the turning points before they arrive.
+        </p>
+
+        <p className='text-base text-zinc-300 mb-8 max-w-3xl'>
+          Think of each year as a curated list of what to watch for in
+          relationships, career direction, and inner work—tap the cards to
+          access specific feels, do/avoid guidance, and planet-by-planet notes.
+        </p>
+
+        <p className='text-base text-zinc-300 mb-8 max-w-3xl'>
+          Not all transits affect everyone equally. Click a year below to see
+          what themes shape relationships, career, and personal growth.
         </p>
 
         <div className='flex flex-wrap gap-3 mb-8'>
@@ -111,6 +126,23 @@ export default function TransitsIndexPage() {
               {year}
             </a>
           ))}
+        </div>
+
+        <div className='mb-10 p-5 rounded-lg border border-zinc-800 bg-zinc-900/40'>
+          <p className='text-xs font-semibold tracking-[0.4em] uppercase text-lunary-primary-300 mb-2'>
+            How to use this page
+          </p>
+          <p className='text-zinc-300 leading-relaxed mb-3'>
+            Start by picking a year to scan the dates, feelings, and actions for
+            each transit, then use your natal chart to see which houses get
+            stirred.
+          </p>
+          <Link
+            href='/horoscope'
+            className='inline-flex px-4 py-2 rounded-lg bg-lunary-primary-900/20 hover:bg-lunary-primary-900/30 border border-lunary-primary-700 text-lunary-primary-300 transition-colors'
+          >
+            See your personal transit timeline
+          </Link>
         </div>
 
         {years.map((year) => {
@@ -136,7 +168,8 @@ export default function TransitsIndexPage() {
                       {transit.title}
                     </h3>
                     <p className='text-sm text-zinc-400 line-clamp-2'>
-                      {transit.description}
+                      Quick snapshot of dates, standout signs, and practical
+                      steps so you know why to dive into this transit.
                     </p>
                     <div className='flex flex-wrap gap-1 mt-3'>
                       {transit.signs.map((sign) => (
