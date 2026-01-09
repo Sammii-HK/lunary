@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useAuthStatus } from '@/components/AuthStatus';
 import { Button } from '@/components/ui/button';
+import { Switch } from '@/components/ui/switch';
 
 interface BeforeInstallPromptEvent extends Event {
   readonly platforms: string[];
@@ -34,6 +35,9 @@ export function PWAHandler({
   const [showInstallPrompt, setShowInstallPrompt] = useState(false);
   const [isInstalled, setIsInstalled] = useState(false);
   const [isDismissed, setIsDismissed] = useState(false);
+  const [showNotificationPrompt, setShowNotificationPrompt] = useState(false);
+  const [notificationToggle, setNotificationToggle] = useState(false);
+  const [notificationPromptSeen, setNotificationPromptSeen] = useState(false);
 
   // Check if user dismissed the banner within the last 7 days
   useEffect(() => {
@@ -184,6 +188,23 @@ export function PWAHandler({
     };
   }, [deferredPrompt, silent]);
 
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const seen = localStorage.getItem('pwa_notifications_prompted');
+    setNotificationPromptSeen(seen === '1');
+    const toggleValue = localStorage.getItem('pwa_notifications_toggle');
+    setNotificationToggle(toggleValue === '1');
+  }, []);
+
+  useEffect(() => {
+    if (isInstalled && !notificationPromptSeen) {
+      const timer = setTimeout(() => {
+        setShowNotificationPrompt(true);
+      }, 2000);
+      return () => clearTimeout(timer);
+    }
+  }, [isInstalled, notificationPromptSeen]);
+
   const handleInstallClick = async () => {
     // Android/Desktop: Use programmatic install
     if (deferredPrompt) {
@@ -191,25 +212,12 @@ export function PWAHandler({
       const { outcome } = await deferredPrompt.userChoice;
 
       setDeferredPrompt(null);
-      setShowInstallPrompt(false);
+      setShowInstallPrompt(outcome === 'accepted' ? false : true);
       return;
     }
 
     // iOS: Show instructions
-    const isIOS = /iPhone|iPad|iPod/.test(navigator.userAgent);
-    if (isIOS) {
-      const isChrome = /CriOS|Chrome/.test(navigator.userAgent);
-      if (isChrome) {
-        alert(
-          '⚠️ IMPORTANT: Chrome on iOS does NOT support PWAs!\n\nTo install Lunary as a PWA:\n\n1. Open this page in SAFARI (not Chrome)\n2. Wait for the service worker to register (check debug box)\n3. Tap the Share button (square with arrow)\n4. Scroll down and tap "Add to Home Screen"\n5. Tap "Add"\n\nThen open it from your home screen!\n\nChrome on iOS only creates bookmarks, not real PWAs.',
-        );
-      } else {
-        alert(
-          'To install Lunary:\n\n1. Make sure service worker is registered (check debug box in top-right)\n2. Tap the Share button (square with arrow)\n3. Scroll down and tap "Add to Home Screen"\n4. Tap "Add"\n\nThen open it from your home screen!',
-        );
-      }
-      setShowInstallPrompt(false);
-    }
+    setShowInstallPrompt(true);
   };
 
   const handleDismiss = () => {
@@ -219,36 +227,125 @@ export function PWAHandler({
     localStorage.setItem('pwa_banner_dismissed', Date.now().toString());
   };
 
-  const shouldHideBanner =
-    silent ||
-    isInstalled ||
-    isDismissed ||
-    !showInstallPrompt ||
-    authState.loading ||
-    !authState.isAuthenticated;
+  const handleNotificationToggle = async () => {
+    if (typeof window === 'undefined') return;
+    const enable = !notificationToggle;
+    if (enable && 'Notification' in window) {
+      const permission = await Notification.requestPermission();
+      if (permission !== 'granted') {
+        setNotificationToggle(false);
+        localStorage.setItem('pwa_notifications_toggle', '0');
+      } else {
+        setNotificationToggle(true);
+        localStorage.setItem('pwa_notifications_toggle', '1');
+      }
+    } else {
+      setNotificationToggle(false);
+      localStorage.setItem('pwa_notifications_toggle', '0');
+    }
+    setNotificationPromptSeen(true);
+    localStorage.setItem('pwa_notifications_prompted', '1');
+    setShowNotificationPrompt(false);
+  };
 
-  if (shouldHideBanner) {
+  const handleNotificationDismiss = () => {
+    setShowNotificationPrompt(false);
+    setNotificationPromptSeen(true);
+    localStorage.setItem('pwa_notifications_prompted', '1');
+  };
+
+  const showInstallBanner =
+    !silent &&
+    !isInstalled &&
+    !isDismissed &&
+    showInstallPrompt &&
+    !authState.loading &&
+    authState.isAuthenticated;
+
+  const showNotificationsBanner =
+    !silent &&
+    isInstalled &&
+    !notificationPromptSeen &&
+    showNotificationPrompt &&
+    authState.isAuthenticated;
+
+  if (!showInstallBanner && !showNotificationsBanner) {
     return null;
+  }
+
+  const isIOS =
+    typeof window !== 'undefined' &&
+    /iPhone|iPad|iPod/.test(window.navigator.userAgent);
+  const installInstructions = isIOS
+    ? [
+        'Tap the Share button (square with arrow) from Safari.',
+        'Choose "Add to Home Screen".',
+        'Tap "Add" and launch Lunary from your home screen.',
+      ]
+    : [
+        'Open the browser menu (⋮ or ⁝) and tap "Install app".',
+        'Choose "Add to Home screen" or "Install".',
+        'Launch Lunary from your home screen or launcher for a fast, offline-ready experience.',
+      ];
+
+  if (showNotificationsBanner) {
+    return (
+      <div className='fixed bottom-14 md:bottom-16 left-0 right-0 z-40'>
+        <div className='bg-gradient-to-r from-lunary-primary-950/80 via-zinc-950/80 to-lunary-rose-950/80 border-t border-lunary-primary-700/30 px-4 py-4 backdrop-blur-md'>
+          <div className='max-w-4xl mx-auto flex flex-col gap-4 md:flex-row md:items-center md:justify-between'>
+            <div>
+              <h3 className='text-sm font-semibold text-lunary-primary-200'>
+                Stay in the loop
+              </h3>
+              <p className='text-xs text-zinc-400 mt-1'>
+                Enable push alerts so Lunary can share moon phases, retrogrades,
+                and fresh readings right when they happen.
+              </p>
+            </div>
+            <div className='flex items-center gap-3'>
+              <Switch
+                checked={notificationToggle}
+                onCheckedChange={handleNotificationToggle}
+                className='border border-zinc-700 bg-zinc-900'
+              />
+              <Button
+                variant='outline'
+                size='sm'
+                onClick={handleNotificationDismiss}
+              >
+                Later
+              </Button>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
   }
 
   return (
     <div className='fixed bottom-14 md:bottom-16 left-0 right-0 z-40'>
-      <div className='bg-gradient-to-r from-lunary-primary-950/80 via-zinc-950/80 to-lunary-rose-950/80 border-t border-lunary-primary-700/30 px-4 py-3 backdrop-blur-md'>
-        <div className='max-w-4xl mx-auto flex items-center justify-between'>
+      <div className='bg-gradient-to-r from-lunary-primary-950/80 via-zinc-950/80 to-lunary-rose-950/80 border-t border-lunary-primary-700/30 px-4 py-4 backdrop-blur-md'>
+        <div className='max-w-4xl mx-auto flex flex-col gap-3 md:flex-row md:items-start md:justify-between'>
           <div className='flex-1'>
             <h3 className='text-sm font-semibold text-lunary-primary-200'>
               Install Lunary App
             </h3>
-            <p className='text-xs text-zinc-400 mt-0.5'>
-              Get faster access and offline support
+            <p className='text-xs text-zinc-300 mt-0.5'>
+              Instant access, offline reads, and a smoother home-screen
+              experience.
             </p>
+            <ul className='mt-2 space-y-1 text-[11px] text-zinc-400'>
+              {installInstructions.map((instruction) => (
+                <li key={instruction}>• {instruction}</li>
+              ))}
+            </ul>
           </div>
-          <div className='flex gap-3 ml-4'>
+          <div className='flex gap-3 md:ml-4'>
             <Button variant='ghost' size='sm' onClick={handleDismiss}>
-              Later
+              Maybe Later
             </Button>
             <Button variant='lunary' size='sm' onClick={handleInstallClick}>
-              Install
+              {isIOS ? 'Show Steps' : 'Install'}
             </Button>
           </div>
         </div>

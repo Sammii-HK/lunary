@@ -44,6 +44,7 @@ export async function GET(request: NextRequest) {
           OR (s.monthly_amount_due IS NOT NULL AND s.monthly_amount_due <= 0)
         )
       )
+      AND (s.promo_code IS NULL OR s.promo_code != 'FULLORBIT')
     `;
 
     // Get trials ending in 1 day (final reminder)
@@ -66,6 +67,7 @@ export async function GET(request: NextRequest) {
           OR (s.monthly_amount_due IS NOT NULL AND s.monthly_amount_due <= 0)
         )
       )
+      AND (s.promo_code IS NULL OR s.promo_code != 'FULLORBIT')
     `;
 
     let sent3Day = 0;

@@ -89,6 +89,38 @@ export function CancellationWinBackEmail({
 
             <Section
               style={{
+                margin: '30px 0',
+                background: '#f4f4f5',
+                borderRadius: '8px',
+                padding: '20px',
+              }}
+            >
+              <Text style={{ fontWeight: 600, marginBottom: '8px' }}>
+                Before you go, can we learn from you?
+              </Text>
+              <Text style={{ margin: '4px 0' }}>
+                • What could we improve so Lunary feels more helpful?
+              </Text>
+              <Text style={{ margin: '4px 0' }}>
+                • What didn&apos;t feel quite right or felt missing?
+              </Text>
+              <Text style={{ margin: '4px 0' }}>
+                • What would make you excited to return?
+              </Text>
+              <Text style={{ marginTop: '12px', color: '#4338ca' }}>
+                Reply to this email or send your thoughts to{' '}
+                <Link
+                  href='mailto:feedback@lunary.app'
+                  style={{ color: '#4338ca' }}
+                >
+                  feedback@lunary.app
+                </Link>
+                .
+              </Text>
+            </Section>
+
+            <Section
+              style={{
                 background: 'linear-gradient(135deg, #e0e7ff, #c7d2fe)',
                 borderLeft: '4px solid #6366f1',
                 padding: '20px',
@@ -210,6 +242,13 @@ If you ever want to return, we'd love to have you back. Here's a gift for whenev
 Code: GUIDANCE
 Use this code when you're ready to return
 ---
+
+Before you go, can we learn from you?
+- What could we improve so Lunary feels more helpful?
+- What didn't feel quite right or felt missing?
+- What would make you excited to return?
+
+Reply to this email or send your thoughts to feedback@lunary.app.
 
 Your cosmic data is safe with us. If you return, everything will be waiting for you—your birth chart, journal entries, and patterns.
 
