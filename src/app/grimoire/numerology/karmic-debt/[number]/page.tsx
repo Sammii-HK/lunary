@@ -1,6 +1,8 @@
 import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { SEOContentTemplate } from '@/components/grimoire/SEOContentTemplate';
+import { NumerologyProfileCalculator } from '@/components/grimoire/NumerologyProfileCalculator';
+import { KarmicDebtCalculatorExtras } from '@/components/grimoire/KarmicDebtCalculatorExtras';
 import {
   karmicDebtNumbers,
   karmicDebtKeys,
@@ -158,7 +160,12 @@ ${numberData.challenges.map((c) => `- ${c}`).join('\n')}`}
         ctaText='Want personalized numerology insights?'
         ctaHref='/pricing'
         faqs={faqs}
-      />
+        childrenPosition='before-faqs'
+      >
+        <NumerologyProfileCalculator>
+          <KarmicDebtCalculatorExtras />
+        </NumerologyProfileCalculator>
+      </SEOContentTemplate>
     </div>
   );
 }

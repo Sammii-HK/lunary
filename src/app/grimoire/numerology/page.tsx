@@ -78,23 +78,24 @@ const cosmicConnectionsSections: CosmicConnectionSection[] = [
 
 export const metadata: Metadata = {
   title:
-    'Numerology Guide: Angel Numbers, Life Path & Universal Years | Lunary',
+    'Numerology Guide & Calculators: Angel Numbers, Life Path & Universal Years | Lunary',
   description:
-    'Complete numerology guide. Learn about angel numbers (111, 222, 333), life path numbers, universal years, and how numbers influence your life.',
+    'Need to understand how numerology answers who you are and where you are headed? This guide explains the core number types—angel numbers, life path, expression, soul urge, and universal year—and links to calculators for your personal data.',
   keywords: [
     'numerology',
+    'numerology calculator',
     'angel numbers',
     'life path number',
     'universal year',
-    '111 meaning',
-    '222 meaning',
-    '333 meaning',
+    'expression number',
+    'soul urge number',
     'numerology forecast',
   ],
   openGraph: {
-    title: 'Numerology Guide: Angel Numbers, Life Path & Universal Years',
+    title:
+      'Numerology Guide & Calculators: Angel Numbers, Life Path & Universal Years',
     description:
-      'Complete guide to numerology - angel numbers, life path numbers, and universal year meanings.',
+      'Use Lunary’s numerology calculators to explore angel numbers, life path numbers, expression numbers, and universal year themes.',
     url: 'https://lunary.app/grimoire/numerology',
     images: [
       {
@@ -107,9 +108,10 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Numerology Guide: Angel Numbers, Life Path & Universal Years',
+    title:
+      'Numerology Guide & Calculators: Angel Numbers, Life Path & Universal Years',
     description:
-      'Complete guide to numerology - angel numbers, life path numbers, and universal year meanings.',
+      'Use Lunary’s numerology calculators for angel numbers, life path, and universal year readings.',
     images: ['/api/og/grimoire/numerology'],
   },
   alternates: {
@@ -182,9 +184,10 @@ export default function NumerologyIndexPage() {
 
         <h1 className='text-4xl font-light mb-4'>Numerology</h1>
         <p className='text-lg text-zinc-400 mb-8 max-w-3xl'>
-          Numerology is the mystical study of numbers and their influence on
-          human life. Discover angel number meanings, calculate your life path
-          number, and understand how numeric vibrations shape your destiny.
+          Numerology is the mystical study of numbers and the vibrations they
+          carry, revealing your talents, challenges, and timing. Use this hub to
+          uncover angel numbers, calculate your Life Path, Expression, and Soul
+          Urge, and follow the current Universal Year energy.
         </p>
 
         <div className='mb-12 p-6 rounded-lg border border-lunary-primary-700 bg-lunary-primary-900/10'>

@@ -2,6 +2,8 @@ import { Metadata } from 'next';
 import Link from 'next/link';
 import { SEOContentTemplate } from '@/components/grimoire/SEOContentTemplate';
 import { lifePathNumbers } from '@/constants/grimoire/numerology-data';
+import { NumerologyProfileCalculator } from '@/components/grimoire/NumerologyProfileCalculator';
+import { CoreNumbersCalculatorExtras } from '@/components/grimoire/CoreNumbersCalculatorExtras';
 
 const coreNumberKeys = ['1', '2', '3', '4', '5', '6', '7', '8', '9'];
 
@@ -187,10 +189,17 @@ Understanding Core Numbers is essential for interpreting any numerology reading.
           { text: 'Birth Chart', href: '/birth-chart' },
           { text: 'Daily Horoscope', href: '/horoscope' },
         ]}
+        childrenPosition='before-faqs'
         ctaText='Want to understand your complete numerology profile?'
         ctaHref='/pricing'
         faqs={faqs}
       >
+        <section className='mb-12'>
+          <NumerologyProfileCalculator>
+            <CoreNumbersCalculatorExtras />
+          </NumerologyProfileCalculator>
+        </section>
+
         <section className='mb-12'>
           <h2 className='text-2xl font-medium text-zinc-100 mb-6'>
             All Core Numbers

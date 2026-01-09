@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { ExploreGrimoire } from '@/components/grimoire/ExploreGrimoire';
 import { Calendar } from 'lucide-react';
 import { GrimoireBreadcrumbs } from '@/components/grimoire/GrimoireBreadcrumbs';
+import { NumerologyCalculator } from '@/components/grimoire/NumerologyCalculator';
 
 const personalYears = [
   {
@@ -53,20 +54,21 @@ const personalYears = [
 ];
 
 export const metadata: Metadata = {
-  title: 'Personal Year Numbers: Numerology Cycles | Lunary',
+  title: 'Personal Year Number Calculator & Numerology Cycles | Lunary',
   description:
-    'Calculate and understand your Personal Year number. Learn how the 9-year cycle influences your experiences and opportunities each year.',
+    'Calculate your Personal Year number with Lunary’s numerology calculator and discover how the 9-year cycle shapes your experiences and opportunities each year.',
   keywords: [
     'personal year number',
+    'personal year calculator',
     'numerology year',
-    'personal year 1',
+    'year number calculator',
     'numerology cycles',
     'year number meaning',
   ],
   openGraph: {
-    title: 'Personal Year Numbers | Lunary',
+    title: 'Personal Year Number Calculator | Lunary',
     description:
-      'Calculate and understand your Personal Year number and the 9-year numerology cycle.',
+      'Use Lunary’s calculator to reveal your Personal Year number and learn how each numerology cycle affects you.',
     url: 'https://lunary.app/grimoire/numerology/year',
     siteName: 'Lunary',
     locale: 'en_US',
@@ -116,6 +118,10 @@ export default function PersonalYearIndexPage() {
             and make the most of each period.
           </p>
         </div>
+
+        <section className='mb-12'>
+          <NumerologyCalculator type='personal-year' />
+        </section>
 
         <section className='mb-12'>
           <h2 className='text-2xl font-medium text-zinc-100 mb-6'>

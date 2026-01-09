@@ -1,7 +1,7 @@
 import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { SEOContentTemplate } from '@/components/grimoire/SEOContentTemplate';
-import { NumerologyCalculator } from '@/components/grimoire/NumerologyCalculator';
+import { NumerologyProfileCalculator } from '@/components/grimoire/NumerologyProfileCalculator';
 import {
   soulUrgeNumbers,
   soulUrgeKeys,
@@ -170,8 +170,9 @@ ${numberData.inRelationships}`}
         ctaText='Want personalized numerology insights?'
         ctaHref='/pricing'
         faqs={faqs}
+        childrenPosition='before-faqs'
       >
-        <NumerologyCalculator type='soul-urge' />
+        <NumerologyProfileCalculator />
       </SEOContentTemplate>
     </div>
   );
