@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { BirthChartData, HouseCusp } from '../../utils/astrology/birthChart';
 import {
   bodiesSymbols,
@@ -76,6 +76,7 @@ export const BirthChart = ({
   userName,
   birthDate,
 }: BirthChartProps) => {
+  const [hoveredBody, setHoveredBody] = useState<string | null>(null);
   const ascendant = birthChart.find((p) => p.body === 'Ascendant');
   const ascendantAngle = ascendant ? ascendant.eclipticLongitude : 0;
 
@@ -185,9 +186,7 @@ export const BirthChart = ({
         >
           <style>{`
             .planet-node { cursor: pointer; }
-            .planet-glyph { transition: color 0.2s ease; }
-            .chart-wheel-svg:has(.planet-node:hover) .planet-glyph { color: #6b7280 !important; }
-            .chart-wheel-svg:has(.planet-node:hover) .planet-node:hover .planet-glyph { color: #ffffff !important; }
+            .planet-glyph { transition: fill 0.2s ease; }
           `}</style>
           <circle
             cx='0'
@@ -306,16 +305,25 @@ export const BirthChart = ({
             ({ body, x, y, retrograde, sign, degree, minute }) => {
               const isAngle = ANGLES.includes(body);
               const isPoint = POINTS.includes(body);
-              const color = retrograde
+              const baseColor = retrograde
                 ? '#f87171'
                 : isAngle
                   ? '#C77DFF'
                   : isPoint
                     ? '#7B7BE8'
                     : '#ffffff';
-
+              const color = hoveredBody
+                ? body === hoveredBody
+                  ? '#ffffff'
+                  : '#6b7280'
+                : baseColor;
               return (
-                <g key={body} className='planet-node'>
+                <g
+                  key={body}
+                  className='planet-node'
+                  onMouseEnter={() => setHoveredBody(body)}
+                  onMouseLeave={() => setHoveredBody(null)}
+                >
                   <title>
                     {formatPlacementLabel({
                       body,
