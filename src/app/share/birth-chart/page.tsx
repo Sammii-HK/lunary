@@ -1,50 +1,11 @@
 import type { Metadata } from 'next';
-import Link from 'next/link';
-import { Sparkles } from 'lucide-react';
 import { parseIsoDateOnly } from '@/lib/date-only';
+import {
+  ShareBirthChartDisplayData,
+  ShareBirthChartLayout,
+} from './ShareBirthChartLayout';
 
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? 'https://lunary.app';
-
-const signDescriptions: Record<string, { emoji: string; trait: string }> = {
-  Aries: { emoji: '♈', trait: 'bold & pioneering' },
-  Taurus: { emoji: '♉', trait: 'grounded & sensual' },
-  Gemini: { emoji: '♊', trait: 'curious & versatile' },
-  Cancer: { emoji: '♋', trait: 'nurturing & intuitive' },
-  Leo: { emoji: '♌', trait: 'radiant & confident' },
-  Virgo: { emoji: '♍', trait: 'analytical & devoted' },
-  Libra: { emoji: '♎', trait: 'harmonious & artistic' },
-  Scorpio: { emoji: '♏', trait: 'intense & transformative' },
-  Sagittarius: { emoji: '♐', trait: 'adventurous & philosophical' },
-  Capricorn: { emoji: '♑', trait: 'ambitious & disciplined' },
-  Aquarius: { emoji: '♒', trait: 'innovative & independent' },
-  Pisces: { emoji: '♓', trait: 'dreamy & compassionate' },
-};
-
-const elementDescriptions: Record<string, { meaning: string; color: string }> =
-  {
-    Fire: {
-      meaning: 'Passion, action, and enthusiasm drive you',
-      color: 'text-orange-400',
-    },
-    Earth: {
-      meaning: 'Stability, practicality, and reliability ground you',
-      color: 'text-green-400',
-    },
-    Air: {
-      meaning: 'Ideas, communication, and connection inspire you',
-      color: 'text-sky-400',
-    },
-    Water: {
-      meaning: 'Emotion, intuition, and empathy guide you',
-      color: 'text-blue-400',
-    },
-  };
-
-const modalityDescriptions: Record<string, string> = {
-  Cardinal: 'You initiate, lead, and set things in motion',
-  Fixed: 'You persist, stabilize, and see things through',
-  Mutable: 'You adapt, transform, and embrace change',
-};
 
 type ShareBirthChartSearchParams = {
   name?: string | string[];
@@ -203,177 +164,17 @@ export default async function ShareBirthChartPage({
     );
   })();
 
-  return (
-    <div className='min-h-screen w-full bg-gradient-to-br from-zinc-950 via-blue-950 to-indigo-900 text-white'>
-      <div className='mx-auto flex min-h-screen max-w-4xl flex-col items-center px-4 py-16 text-center sm:px-6 lg:px-8'>
-        <div className='w-full rounded-3xl border border-white/10 bg-black/40 p-8 shadow-2xl backdrop-blur'>
-          <p className='text-xs uppercase tracking-[0.35em] text-lunary-secondary-200'>
-            Shared from Lunary
-          </p>
-          <h1 className='mt-6 text-2xl font-light text-white sm:text-3xl'>
-            {name
-              ? `${name}'s Birth Chart Highlights`
-              : 'Birth Chart Highlights'}
-          </h1>
-          <p className='mt-2 text-sm text-lunary-secondary-200'>
-            {formattedDate
-              ? `Generated for ${formattedDate}`
-              : 'Personalized cosmic profile'}
-          </p>
+  const viewData: ShareBirthChartDisplayData = {
+    name,
+    formattedDate,
+    sun,
+    moon,
+    rising,
+    element,
+    modality,
+    insight,
+    keywords,
+  };
 
-          {/* Big Three */}
-          <div className='mt-10 grid gap-4 sm:grid-cols-3'>
-            <div className='rounded-2xl border border-lunary-secondary-700 bg-lunary-secondary-950 p-5 text-left'>
-              <div className='flex items-center justify-between'>
-                <p className='text-[0.7rem] uppercase tracking-[0.3em] text-lunary-secondary-100'>
-                  ☀️ Sun Sign
-                </p>
-                {sun && signDescriptions[sun] && (
-                  <span className='text-xl'>{signDescriptions[sun].emoji}</span>
-                )}
-              </div>
-              <p className='mt-2 text-xl font-light text-white'>{sun ?? '—'}</p>
-              {sun && signDescriptions[sun] && (
-                <p className='mt-1 text-xs text-lunary-secondary-200'>
-                  Core identity: {signDescriptions[sun].trait}
-                </p>
-              )}
-            </div>
-            <div className='rounded-2xl border border-lunary-primary-700 bg-lunary-primary-900/10 p-5 text-left'>
-              <div className='flex items-center justify-between'>
-                <p className='text-[0.7rem] uppercase tracking-[0.3em] text-lunary-primary-100/70'>
-                  🌙 Moon Sign
-                </p>
-                {moon && signDescriptions[moon] && (
-                  <span className='text-xl'>
-                    {signDescriptions[moon].emoji}
-                  </span>
-                )}
-              </div>
-              <p className='mt-2 text-xl font-light text-white'>
-                {moon ?? '—'}
-              </p>
-              {moon && signDescriptions[moon] && (
-                <p className='mt-1 text-xs text-lunary-primary-200'>
-                  Emotional nature: {signDescriptions[moon].trait}
-                </p>
-              )}
-            </div>
-            <div className='rounded-2xl border border-lunary-primary-700 bg-lunary-primary-950 p-5 text-left'>
-              <div className='flex items-center justify-between'>
-                <p className='text-[0.7rem] uppercase tracking-[0.3em] text-lunary-primary-100'>
-                  ⬆️ Rising Sign
-                </p>
-                {rising && signDescriptions[rising] && (
-                  <span className='text-xl'>
-                    {signDescriptions[rising].emoji}
-                  </span>
-                )}
-              </div>
-              <p className='mt-2 text-xl font-light text-white'>
-                {rising ?? '—'}
-              </p>
-              {rising && signDescriptions[rising] && (
-                <p className='mt-1 text-xs text-lunary-primary-200'>
-                  First impression: {signDescriptions[rising].trait}
-                </p>
-              )}
-            </div>
-          </div>
-
-          {/* Element & Modality */}
-          <div className='mt-8 grid gap-4 sm:grid-cols-2'>
-            <div className='rounded-2xl border border-lunary-success-700 bg-lunary-success-950 p-5 text-left'>
-              <p className='text-[0.65rem] uppercase tracking-[0.3em] text-lunary-success-100'>
-                Dominant Element
-              </p>
-              <p
-                className={`mt-2 text-lg font-light ${element && elementDescriptions[element] ? elementDescriptions[element].color : 'text-white'}`}
-              >
-                {element ?? 'Balanced'}
-              </p>
-              {element && elementDescriptions[element] && (
-                <p className='mt-1 text-xs text-lunary-success-200'>
-                  {elementDescriptions[element].meaning}
-                </p>
-              )}
-            </div>
-            <div className='rounded-2xl border border-lunary-accent-700 bg-lunary-accent-950 p-5 text-left'>
-              <p className='text-[0.65rem] uppercase tracking-[0.3em] text-lunary-accent-100'>
-                Core Modality
-              </p>
-              <p className='mt-2 text-lg font-light text-white'>
-                {modality ?? 'Dynamic'}
-              </p>
-              {modality && modalityDescriptions[modality] && (
-                <p className='mt-1 text-xs text-lunary-accent-200'>
-                  {modalityDescriptions[modality]}
-                </p>
-              )}
-            </div>
-          </div>
-
-          {keywords.length > 0 && (
-            <div className='mt-6 flex flex-wrap justify-center gap-2 text-xs text-lunary-secondary-100'>
-              {keywords.map((keyword) => (
-                <span
-                  key={keyword}
-                  className='rounded-full border border-lunary-secondary-600 px-3 py-1'
-                >
-                  {keyword}
-                </span>
-              ))}
-            </div>
-          )}
-
-          {insight && (
-            <div className='mt-8 rounded-2xl border border-white/10 bg-white/5 p-6 text-left'>
-              <p className='text-sm font-semibold text-lunary-secondary-100 uppercase tracking-[0.3em] mb-2'>
-                Signature Insight
-              </p>
-              <p className='text-sm leading-relaxed text-zinc-100/90'>
-                {insight}
-              </p>
-            </div>
-          )}
-
-          {/* CTA Section */}
-          <div className='mt-12 rounded-2xl border border-lunary-primary-700/50 bg-gradient-to-br from-lunary-primary-950/50 to-lunary-secondary-950/50 p-6'>
-            <div className='flex items-center justify-center gap-2 mb-4'>
-              <Sparkles className='w-5 h-5 text-lunary-primary-400' />
-              <h3 className='text-lg font-medium text-white'>
-                Discover Your Complete Cosmic Blueprint
-              </h3>
-            </div>
-            <p className='text-sm text-zinc-300 mb-6'>
-              Create your free birth chart on Lunary and explore your full
-              planetary positions, aspects, patterns, and personalized cosmic
-              guidance—all calculated from real astronomical data.
-            </p>
-
-            <div className='flex flex-col items-center gap-4 sm:flex-row sm:justify-center'>
-              <Link
-                href='/auth?redirect=/birth-chart'
-                className='inline-flex items-center gap-2 rounded-full bg-lunary-primary px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-lunary-primary-800 transition hover:bg-lunary-primary-400'
-              >
-                <Sparkles className='w-4 h-4' />
-                Get Your Free Birth Chart
-              </Link>
-              <Link
-                href='/'
-                className='text-sm font-medium text-lunary-secondary-200 transition hover:text-lunary-secondary-100'
-              >
-                Explore Lunary →
-              </Link>
-            </div>
-
-            <p className='mt-4 text-xs text-zinc-400'>
-              Free account includes birth chart, daily insights, and more. No
-              card required.
-            </p>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
+  return <ShareBirthChartLayout data={viewData} />;
 }

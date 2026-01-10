@@ -38,6 +38,22 @@ function getSymbolForBody(body: string): string {
   return body.charAt(0);
 }
 
+function formatPlacementLabel({
+  body,
+  sign,
+  degree,
+  minute,
+  retrograde,
+}: Pick<BirthChartData, 'body' | 'sign' | 'degree' | 'minute' | 'retrograde'>) {
+  const hasDegree = Number.isFinite(degree) && Number.isFinite(minute);
+  const degreeLabel = hasDegree
+    ? `${Math.floor(degree)}°${String(Math.floor(minute)).padStart(2, '0')}'`
+    : undefined;
+  const signLabel = sign ? ` in ${sign}` : '';
+  const retroLabel = retrograde ? ' ℞' : '';
+  return `${body}${signLabel}${degreeLabel ? ` ${degreeLabel}` : ''}${retroLabel}`;
+}
+
 function polarFromLongitude(
   longitude: number,
   ascendantAngle: number,
@@ -93,6 +109,7 @@ export function ChartWheelSvg({
 }) {
   const ascendant = birthChart.find((p) => p.body === 'Ascendant');
   const ascendantAngle = ascendant?.eclipticLongitude ?? 0;
+  const hoverColor = '#FDE68A';
 
   const chartData = birthChart.map((p) => {
     const pos = polarFromLongitude(p.eclipticLongitude, ascendantAngle, 65);
@@ -154,6 +171,13 @@ export function ChartWheelSvg({
         background: colours.bg,
       }}
     >
+      <style>{`
+        .planet-node { cursor: pointer; }
+        .planet-node .planet-highlight { opacity: 0; }
+        .planet-node:hover .planet-highlight { opacity: 0.2; }
+        .planet-node:hover .planet-line { stroke: ${hoverColor}; opacity: 0.6; }
+        .planet-node:hover .planet-glyph { fill: ${hoverColor}; }
+      `}</style>
       {/* Rings */}
       <circle
         cx='0'
@@ -272,7 +296,7 @@ export function ChartWheelSvg({
 
       {/* Planets + angles + points */}
       {[...mainPlanets, ...angles, ...points].map(
-        ({ body, x, y, retrograde }) => {
+        ({ body, x, y, retrograde, sign, degree, minute }) => {
           const isAngle = ANGLES.includes(body);
           const isPoint = POINTS.includes(body);
 
@@ -285,7 +309,23 @@ export function ChartWheelSvg({
                 : colours.planet;
 
           return (
-            <g key={body}>
+            <g key={body} className='planet-node'>
+              <title>
+                {formatPlacementLabel({
+                  body,
+                  sign,
+                  degree,
+                  minute,
+                  retrograde,
+                })}
+              </title>
+              <circle
+                className='planet-highlight'
+                cx={x}
+                cy={y}
+                r={isAngle || isPoint ? 10 : 9}
+                fill={hoverColor}
+              />
               <line
                 x1='0'
                 y1='0'
@@ -294,6 +334,7 @@ export function ChartWheelSvg({
                 stroke={colour}
                 strokeWidth='0.3'
                 opacity='0.2'
+                className='planet-line'
               />
               <text
                 x={x}
@@ -303,6 +344,7 @@ export function ChartWheelSvg({
                 fontSize={isAngle || isPoint ? '12' : '14'}
                 fill={colour}
                 style={{ fontFamily: fontFamilySymbols }}
+                className='planet-glyph'
               >
                 {getSymbolForBody(body)}
               </text>

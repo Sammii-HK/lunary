@@ -47,6 +47,22 @@ function getSymbolForBody(body: string): string {
   return body.charAt(0);
 }
 
+function formatPlacementLabel({
+  body,
+  sign,
+  degree,
+  minute,
+  retrograde,
+}: Pick<BirthChartData, 'body' | 'sign' | 'degree' | 'minute' | 'retrograde'>) {
+  const hasDegree = Number.isFinite(degree) && Number.isFinite(minute);
+  const degreeLabel = hasDegree
+    ? `${Math.floor(degree)}°${String(Math.floor(minute)).padStart(2, '0')}'`
+    : undefined;
+  const signLabel = sign ? ` in ${sign}` : '';
+  const retroLabel = retrograde ? ' ℞' : '';
+  return `${body}${signLabel}${degreeLabel ? ` ${degreeLabel}` : ''}${retroLabel}`;
+}
+
 type BirthChartProps = {
   birthChart: BirthChartData[];
   houses?: HouseCusp[];
@@ -165,8 +181,14 @@ export const BirthChart = ({
       <div className='relative w-full max-w-[320px] md:max-w-[360px] aspect-square'>
         <svg
           viewBox='-140 -140 280 280'
-          className='w-full h-full border border-zinc-700 rounded-full bg-zinc-900'
+          className='chart-wheel-svg w-full h-full border border-zinc-700 rounded-full bg-zinc-900'
         >
+          <style>{`
+            .planet-node { cursor: pointer; }
+            .planet-glyph { transition: color 0.2s ease; }
+            .chart-wheel-svg:has(.planet-node:hover) .planet-glyph { color: #6b7280 !important; }
+            .chart-wheel-svg:has(.planet-node:hover) .planet-node:hover .planet-glyph { color: #ffffff !important; }
+          `}</style>
           <circle
             cx='0'
             cy='0'
@@ -281,7 +303,7 @@ export const BirthChart = ({
           ))}
 
           {[...mainPlanets, ...angles, ...points].map(
-            ({ body, x, y, retrograde }) => {
+            ({ body, x, y, retrograde, sign, degree, minute }) => {
               const isAngle = ANGLES.includes(body);
               const isPoint = POINTS.includes(body);
               const color = retrograde
@@ -293,7 +315,16 @@ export const BirthChart = ({
                     : '#ffffff';
 
               return (
-                <g key={body}>
+                <g key={body} className='planet-node'>
+                  <title>
+                    {formatPlacementLabel({
+                      body,
+                      sign,
+                      degree,
+                      minute,
+                      retrograde,
+                    })}
+                  </title>
                   <line
                     x1='0'
                     y1='0'
@@ -308,7 +339,7 @@ export const BirthChart = ({
                     y={y}
                     textAnchor='middle'
                     dominantBaseline='central'
-                    className='font-astro'
+                    className='planet-glyph font-astro'
                     fontSize={isAngle || isPoint ? '12' : '14'}
                     fill={color}
                   >
