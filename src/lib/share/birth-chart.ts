@@ -21,11 +21,23 @@ export type ShareBirthChartRecord = ShareBirthChartPayload & {
   createdAt: string;
 };
 
+function secureRandomHex(bytes: number) {
+  const cryptoApi = globalThis.crypto;
+  if (!cryptoApi?.getRandomValues) {
+    throw new Error('Secure randomness unavailable');
+  }
+  const buffer = new Uint8Array(bytes);
+  cryptoApi.getRandomValues(buffer);
+  return Array.from(buffer, (byte) => byte.toString(16).padStart(2, '0')).join(
+    '',
+  );
+}
+
 function createShareId() {
   const uuid =
     typeof globalThis.crypto?.randomUUID === 'function'
       ? globalThis.crypto.randomUUID()
-      : `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+      : secureRandomHex(16);
   return uuid.replace(/-/g, '');
 }
 

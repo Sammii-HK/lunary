@@ -7,9 +7,10 @@ type ShareBirthChartParams = {
 
 export async function GET(
   _request: NextRequest,
-  { params }: { params: ShareBirthChartParams },
+  { params }: { params: Promise<ShareBirthChartParams> },
 ) {
-  const record = await getBirthChartShare(params.shareId);
+  const { shareId } = await params;
+  const record = await getBirthChartShare(shareId);
   if (!record) {
     return NextResponse.json(
       { success: false, error: 'Share not found' },
