@@ -1,12 +1,26 @@
+'use client';
+
 import Link from 'next/link';
 import dayjs from 'dayjs';
+import { useState } from 'react';
 import { getGeneralHoroscope } from '../../../../../utils/astrology/generalHoroscope';
 import { getUpcomingTransits } from '../../../../../utils/astrology/transitCalendar';
 import { HoroscopeSection } from './HoroscopeSection';
 import { FeaturePreview } from './FeaturePreview';
 import { SmartTrialButton } from '@/components/SmartTrialButton';
-import { Sparkles, ChevronRight, Lock } from 'lucide-react';
+import { Share2, Sparkles, ChevronRight, Lock } from 'lucide-react';
 import { TransitCard } from './TransitCard';
+import { getNumerologyDetail } from '@/lib/numerology/numerologyDetails';
+import {
+  buildHoroscopeNumerologyShareUrl,
+  getShareOrigin,
+} from '@/lib/og/horoscopeShare';
+import { useOgShareModal } from '@/hooks/useOgShareModal';
+import { ShareImageModal } from '@/components/og/ShareImageModal';
+import {
+  NumerologyInfoModal,
+  type NumerologyModalPayload,
+} from '@/components/grimoire/NumerologyInfoModal';
 
 const getDailyNumerology = (
   date: dayjs.Dayjs,
@@ -49,6 +63,88 @@ export function FreeHoroscopeView() {
   const upcomingTransits = getUpcomingTransits();
   const today = dayjs();
   const universalDay = getDailyNumerology(today);
+  const [numberModal, setNumberModal] = useState<NumerologyModalPayload | null>(
+    null,
+  );
+  const universalDetails = getNumerologyDetail('lifePath', universalDay.number);
+  const {
+    shareTarget,
+    sharePreviewUrl,
+    shareLoading,
+    shareError,
+    isOpen: isShareModalOpen,
+    openShareModal,
+    closeShareModal,
+    handleShareImage,
+    handleDownloadShareImage,
+    handleCopyShareLink,
+  } = useOgShareModal();
+
+  const getPageUrl = () =>
+    typeof window !== 'undefined'
+      ? window.location.href
+      : `${getShareOrigin()}/horoscope`;
+
+  const handleShareHoroscope = () => {
+    const shareUrl = buildHoroscopeNumerologyShareUrl({
+      shareOrigin: getShareOrigin(),
+      highlightTitle: 'Your Horoscope',
+      highlight: generalHoroscope.generalAdvice,
+      highlightSubtitle: generalHoroscope.reading,
+      variant: 'horoscope',
+      date: today.format('MMMM D, YYYY'),
+      numbers: [
+        {
+          label: 'Universal Day',
+          value: universalDay.number,
+          meaning: universalDay.meaning,
+        },
+      ],
+    });
+    openShareModal({
+      title: 'Your Horoscope',
+      description: generalHoroscope.generalAdvice,
+      pageUrl: getPageUrl(),
+      ogUrl: shareUrl,
+    });
+  };
+
+  const shareNumberTile = (label: string, number: number, meaning?: string) => {
+    const shareUrl = buildHoroscopeNumerologyShareUrl({
+      shareOrigin: getShareOrigin(),
+      highlightTitle: label,
+      highlight: meaning ?? label,
+      variant: 'numerology-card',
+      date: today.format('MMMM D, YYYY'),
+      numbers: [
+        {
+          label,
+          value: number,
+          meaning,
+        },
+      ],
+    });
+    openShareModal({
+      title: label,
+      description: meaning ?? label,
+      pageUrl: getPageUrl(),
+      ogUrl: shareUrl,
+    });
+  };
+
+  const openUniversalModal = () => {
+    setNumberModal({
+      number: universalDay.number,
+      contextLabel: 'Universal Day',
+      meaning: universalDay.meaning,
+      contextDetail: 'Daily universal numerology energy',
+      energy: universalDetails?.energy,
+      keywords: universalDetails?.keywords,
+      description: universalDetails?.description,
+      sections: universalDetails?.sections,
+      extraNote: universalDetails?.extraNote,
+    });
+  };
 
   // // Filter transits for today
   // const todaysTransits = upcomingTransits.filter((transit) => {
@@ -59,12 +155,24 @@ export function FreeHoroscopeView() {
   return (
     <div className='h-full space-y-6 p-4 pb-16 md:pb-20 overflow-auto'>
       <div className='pt-6'>
-        <h1 className='text-2xl md:text-3xl font-light text-zinc-100 mb-2'>
-          Your Horoscope
-        </h1>
-        <p className='text-sm text-zinc-400'>
-          General cosmic guidance based on universal energies
-        </p>
+        <div className='flex flex-wrap items-start justify-between gap-3'>
+          <div>
+            <h1 className='text-2xl md:text-3xl font-light text-zinc-100 mb-2'>
+              Your Horoscope
+            </h1>
+            <p className='text-sm text-zinc-400'>
+              General cosmic guidance based on universal energies
+            </p>
+          </div>
+          <button
+            type='button'
+            onClick={handleShareHoroscope}
+            className='inline-flex items-center gap-2 rounded-full border border-zinc-700 px-4 py-2 text-xs font-semibold uppercase tracking-wide text-zinc-200 transition hover:border-lunary-primary-500 hover:text-white'
+          >
+            <Share2 className='h-4 w-4' />
+            Share highlight
+          </button>
+        </div>
         <div className='flex gap-3 mt-3'>
           <Link
             href='/horoscope/today'
@@ -79,6 +187,60 @@ export function FreeHoroscopeView() {
             Browse weekly horoscopes <ChevronRight className='w-3 h-3' />
           </Link>
         </div>
+      </div>
+
+      <div className='rounded-2xl border border-zinc-800/70 bg-zinc-900/70 p-5 space-y-4'>
+        <p className='text-[11px] font-semibold tracking-[0.3em] uppercase text-zinc-400'>
+          Cosmic Highlight
+        </p>
+        <p className='text-lg font-light text-zinc-100'>
+          {generalHoroscope.generalAdvice}
+        </p>
+        <p className='text-sm text-zinc-300 leading-relaxed'>
+          {generalHoroscope.reading}
+        </p>
+        <div className='mt-1 grid grid-cols-2 gap-3 text-[11px] text-zinc-300'>
+          <div className='relative'>
+            <button
+              type='button'
+              onClick={openUniversalModal}
+              className='rounded-lg border border-zinc-700 px-3 py-3 uppercase tracking-wide text-center transition hover:border-lunary-primary-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-lunary-primary-400 w-full'
+            >
+              <div className='text-2xl font-semibold text-lunary-accent-300'>
+                {universalDay.number}
+              </div>
+              <div className='text-[9px] text-zinc-400'>Universal Day</div>
+              <p className='text-[11px] mt-1'>{universalDay.meaning}</p>
+            </button>
+            <button
+              type='button'
+              onClick={(event) => {
+                event.preventDefault();
+                event.stopPropagation();
+                shareNumberTile(
+                  'Universal Day',
+                  universalDay.number,
+                  universalDay.meaning,
+                );
+              }}
+              className='absolute top-2 right-2 flex h-7 w-7 items-center justify-center rounded-full border border-zinc-700 bg-zinc-950/60 text-zinc-300 transition hover:border-lunary-primary-500 hover:text-white'
+              aria-label='Share Universal Day'
+            >
+              <Share2 className='h-3 w-3' />
+            </button>
+          </div>
+          <div className='rounded-lg border border-zinc-700 px-3 py-3 uppercase tracking-wide text-center'>
+            <div className='text-2xl font-semibold text-emerald-400'>
+              {generalHoroscope.moonPhase}
+            </div>
+            <div className='text-[9px] text-zinc-400'>Moon Phase</div>
+            <p className='text-[11px] mt-1'>Energy rotates hourly</p>
+          </div>
+        </div>
+        <p className='text-xs text-zinc-400'>
+          This highlight refreshes every sunrise—numerology, moon, and transit
+          info all rebalance daily.
+        </p>
       </div>
 
       <HoroscopeSection title="Today's Transits" color='zinc'>
@@ -251,6 +413,26 @@ export function FreeHoroscopeView() {
           <SmartTrialButton />
         </HoroscopeSection> */}
       </div>
+      <NumerologyInfoModal
+        isOpen={!!numberModal}
+        onClose={() => setNumberModal(null)}
+        number={numberModal?.number ?? 0}
+        contextLabel={numberModal?.contextLabel ?? ''}
+        meaning={numberModal?.meaning ?? ''}
+        energy={numberModal?.energy}
+        keywords={numberModal?.keywords}
+      />
+      <ShareImageModal
+        isOpen={isShareModalOpen}
+        target={shareTarget}
+        previewUrl={sharePreviewUrl}
+        loading={shareLoading}
+        error={shareError}
+        onClose={closeShareModal}
+        onShare={handleShareImage}
+        onDownload={handleDownloadShareImage}
+        onCopy={handleCopyShareLink}
+      />
     </div>
   );
 }

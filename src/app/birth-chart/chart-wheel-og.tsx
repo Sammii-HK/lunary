@@ -42,6 +42,22 @@ function getSymbolForBody(body: string): string {
   return body.charAt(0);
 }
 
+function formatPlacementLabel({
+  body,
+  sign,
+  degree,
+  minute,
+  retrograde,
+}: Pick<BirthChartData, 'body' | 'sign' | 'degree' | 'minute' | 'retrograde'>) {
+  const hasDegree = Number.isFinite(degree) && Number.isFinite(minute);
+  const degreeLabel = hasDegree
+    ? `${Math.floor(degree)}°${String(Math.floor(minute)).padStart(2, '0')}'`
+    : undefined;
+  const signLabel = sign ? ` in ${sign}` : '';
+  const retroLabel = retrograde ? ' ℞' : '';
+  return `${body}${signLabel}${degreeLabel ? ` ${degreeLabel}` : ''}${retroLabel}`;
+}
+
 export function ChartWheelOg({
   birthChart,
   houses,
@@ -61,11 +77,13 @@ export function ChartWheelOg({
   const viewBoxSize = 280;
   const scale = size / viewBoxSize;
   const center = size / 2;
+  const hoverColor = '#ffffff';
 
   const toPixel = (value: number) => center + value * scale;
 
   return (
     <div
+      className='chart-wheel'
       style={{
         position: 'relative',
         width: size,
@@ -73,6 +91,19 @@ export function ChartWheelOg({
         display: 'flex',
       }}
     >
+      <style>{`
+        .planet-node { cursor: pointer; z-index: 1; }
+        .planet-node:hover { z-index: 3; }
+        .planet-glyph { transition: color 0.2s ease; }
+        .chart-wheel:has(.planet-node:hover) .planet-glyph { color: #6b7280 !important; }
+        .chart-wheel:has(.planet-node:hover) .planet-node:hover .planet-glyph { color: ${hoverColor} !important; }
+        .planet-tooltip {
+          opacity: 0;
+          transform: translate(-50%, -120%);
+          transition: opacity 0.2s ease;
+        }
+        .planet-node:hover .planet-tooltip { opacity: 1; }
+      `}</style>
       <svg
         viewBox='-140 -140 280 280'
         width={size}
@@ -232,7 +263,7 @@ export function ChartWheelOg({
       ))}
 
       {[...mainPlanets, ...angles, ...points].map(
-        ({ body, x, y, retrograde }) => {
+        ({ body, x, y, retrograde, sign, degree, minute }) => {
           const isAngle = ANGLES.includes(body);
           const isPoint = POINTS.includes(body);
           const color = retrograde
@@ -246,19 +277,61 @@ export function ChartWheelOg({
           return (
             <div
               key={body}
+              className='planet-node'
+              title={formatPlacementLabel({
+                body,
+                sign,
+                degree,
+                minute,
+                retrograde,
+              })}
               style={{
                 position: 'absolute',
                 left: toPixel(x),
                 top: toPixel(y),
                 transform: 'translate(-50%, -50%)',
-                fontFamily: 'Astronomicon',
-                // fontSize: isAngle || isPoint ? 12 : 14,
-                fontSize: 28,
-                color,
                 display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
               }}
             >
-              {getSymbolForBody(body)}
+              <span
+                className='planet-glyph'
+                style={{
+                  fontFamily: 'Astronomicon',
+                  fontSize: 28,
+                  color,
+                  display: 'flex',
+                }}
+              >
+                {getSymbolForBody(body)}
+              </span>
+              <span
+                className='planet-tooltip'
+                style={{
+                  position: 'absolute',
+                  left: '50%',
+                  top: 0,
+                  padding: '6px 10px',
+                  borderRadius: 10,
+                  border: '1px solid rgba(255,255,255,0.3)',
+                  background: 'rgba(8,8,12,0.9)',
+                  color: '#ffffff',
+                  fontSize: 12,
+                  letterSpacing: 0.5,
+                  whiteSpace: 'nowrap',
+                  pointerEvents: 'none',
+                  transition: 'opacity 0.15s ease',
+                }}
+              >
+                {formatPlacementLabel({
+                  body,
+                  sign,
+                  degree,
+                  minute,
+                  retrograde,
+                })}
+              </span>
             </div>
           );
         },

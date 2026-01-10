@@ -1,6 +1,6 @@
 import { notFound } from 'next/navigation';
 import { SEOContentTemplate } from '@/components/grimoire/SEOContentTemplate';
-import { NumerologyCalculator } from '@/components/grimoire/NumerologyCalculator';
+import { NumerologyProfileCalculator } from '@/components/grimoire/NumerologyProfileCalculator';
 import { lifePathNumbers } from '@/constants/grimoire/numerology-data';
 import { createGrimoireMetadata } from '@/lib/grimoire-metadata';
 import { createCosmicEntitySchema, renderJsonLd } from '@/lib/schema';
@@ -180,8 +180,9 @@ Keywords: ${numberData.keywords.join(', ')}`}
         ctaText={`Want to calculate your Life Path Number?`}
         ctaHref='/pricing'
         faqs={faqs}
+        childrenPosition='before-faqs'
       >
-        <NumerologyCalculator type='life-path' />
+        <NumerologyProfileCalculator />
       </SEOContentTemplate>
     </div>
   );

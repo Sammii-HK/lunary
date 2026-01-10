@@ -2,6 +2,8 @@ import { Metadata } from 'next';
 import Link from 'next/link';
 import { SEOContentTemplate } from '@/components/grimoire/SEOContentTemplate';
 import { lifePathNumbers } from '@/constants/grimoire/numerology-data';
+import { NumerologyProfileCalculator } from '@/components/grimoire/NumerologyProfileCalculator';
+import { MasterNumbersCalculatorExtras } from '@/components/grimoire/MasterNumbersCalculatorExtras';
 
 const masterNumberKeys = ['11', '22', '33'];
 
@@ -196,6 +198,7 @@ People with Master Numbers often feel "different" from an early age. They may st
             type: 'Numerology',
           },
         ]}
+        childrenPosition='before-faqs'
         internalLinks={[
           { text: 'Numerology Overview', href: '/grimoire/numerology' },
           { text: 'Life Path Calculator', href: '/grimoire/life-path' },
@@ -206,6 +209,12 @@ People with Master Numbers often feel "different" from an early age. They may st
         ctaHref='/pricing'
         faqs={faqs}
       >
+        <section className='mb-12'>
+          <NumerologyProfileCalculator>
+            <MasterNumbersCalculatorExtras />
+          </NumerologyProfileCalculator>
+        </section>
+
         <section className='mb-12'>
           <h2 className='text-2xl font-medium text-zinc-100 mb-6'>
             The Three Master Numbers

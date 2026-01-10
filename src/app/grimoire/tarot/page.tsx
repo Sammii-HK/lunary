@@ -9,7 +9,7 @@ import { createItemListSchema, renderJsonLd } from '@/lib/schema';
 export const metadata: Metadata = {
   title: 'All 78 Tarot Cards: Major & Minor Arcana Meanings | Lunary',
   description:
-    'Explore all 78 tarot cards with detailed meanings. Learn the Major Arcana, Minor Arcana, and how to read tarot cards for guidance and insight.',
+    'Need a clear reference for every tarot card? This guide lists all 78 cards with concise symbolism and reading prompts so you can interpret spreads confidently.',
   keywords: [
     'tarot cards',
     'tarot meanings',
@@ -76,7 +76,7 @@ export default function TarotIndexPage() {
       <SEOContentTemplate
         title='All 78 Tarot Cards: Major & Minor Arcana Meanings'
         h1='Tarot Cards'
-        description="Explore all 78 tarot cards — 22 Major Arcana representing life's spiritual lessons, and 56 Minor Arcana reflecting daily experiences."
+        description='Need a quick reference for every tarot card meaning? This guide lists all 78 cards, with the Major Arcana showing soul lessons and the Minor Arcana highlighting daily energies so you can read with confidence.'
         keywords={[
           'tarot cards',
           'tarot meanings',
@@ -92,7 +92,7 @@ export default function TarotIndexPage() {
             'Tarot cards are a 78-card divination deck used for spiritual guidance and self-reflection. The deck consists of 22 Major Arcana cards representing significant life events and spiritual lessons, and 56 Minor Arcana cards divided into four suits (Wands, Cups, Swords, Pentacles) that reflect everyday experiences. Each card carries unique symbolism, meanings, and guidance for readings.',
         }}
         tldr='A tarot deck has 78 cards: 22 Major Arcana for big life themes and spiritual lessons, and 56 Minor Arcana across four suits for daily life. Major Arcana = significant events; Minor Arcana = everyday experiences. The suits represent different elements and life areas.'
-        intro="The tarot deck is divided into two main sections: the Major Arcana (22 cards) and the Minor Arcana (56 cards). The Major Arcana represents significant life events and spiritual lessons, while the Minor Arcana covers day-to-day experiences across four suits. Each card carries unique symbolism, meanings, and guidance. Whether you're a beginner or experienced reader, understanding each card deepens your connection to this powerful divination tool."
+        intro='Need to learn what each tarot card means for your readings? This guide walks through the 78 cards, showing how the Major Arcana outlines spiritual lessons and the Minor Arcana reflects day-to-day energies so you can interpret spreads with clarity.'
         faqs={[
           {
             question: 'How many cards are in a tarot deck?',

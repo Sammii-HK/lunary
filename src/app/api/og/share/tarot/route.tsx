@@ -1,6 +1,6 @@
 import { ImageResponse } from 'next/og';
 import { NextRequest } from 'next/server';
-import { SOCIAL_TAGS, getPrimaryHandle } from '@/constants/socialHandles';
+import { getPrimaryHandle } from '@/constants/socialHandles';
 
 export const runtime = 'edge';
 export const revalidate = 60; // Cache for 1 minute – dynamic data but not ultra volatile
@@ -90,6 +90,14 @@ type CardPatternBlock = {
   reading?: string;
 };
 
+type SpreadShareCard = {
+  positionLabel: string;
+  positionPrompt: string;
+  cardName: string;
+  keywords?: string[];
+  insight?: string;
+};
+
 const gradients = [
   {
     background: 'linear-gradient(135deg, #11001c, #4e1a7a)',
@@ -148,6 +156,11 @@ export async function GET(request: NextRequest) {
     parseJsonParam<NumberPatternBlock[]>(searchParams.get('numbers')) ?? [];
   const cardBlocks =
     parseJsonParam<CardPatternBlock[]>(searchParams.get('cards')) ?? [];
+  const spreadName = sanitize(searchParams.get('spreadName'), 48);
+  const spreadSummary = sanitize(searchParams.get('spreadSummary'), 200);
+  const spreadSnippet = sanitize(searchParams.get('spreadSnippet'), 200);
+  const spreadCards =
+    parseJsonParam<SpreadShareCard[]>(searchParams.get('spreadCards')) ?? [];
 
   const baseLabel = (() => {
     if (isPattern) {
@@ -166,7 +179,6 @@ export async function GET(request: NextRequest) {
       : `${baseLabel} Tarot Spotlight`;
   const theme = pickGradient(`${card}-${timeframe}-${name ?? 'general'}`);
   const primaryHandle = getPrimaryHandle(platform);
-  const handleBadges = SOCIAL_TAGS.slice(0, 4);
   const insights = Array.from(
     new Set(
       [suitInsight, ...extraInsights].filter((entry): entry is string =>
@@ -189,33 +201,31 @@ export async function GET(request: NextRequest) {
   ).slice(0, 4);
   const robotoMono = await loadRobotoMono(request);
 
-  const footerHandles = (
-    <div
-      style={{
-        display: 'flex',
-        gap: '12px',
-        flexWrap: 'wrap',
-        fontSize: 20,
-        fontFamily: 'Roboto Mono',
-        justifyContent: 'flex-end',
-        opacity: 0.9,
-      }}
-    >
-      {handleBadges.map((handle) => (
-        <div
-          key={handle.platform}
-          style={{ display: 'flex', gap: '6px', alignItems: 'center' }}
-        >
-          <span style={{ fontSize: 18, opacity: 0.7 }}>
-            {handle.label.replace(' / Twitter', '')}:
-          </span>
-          <span style={{ color: theme.accent }}>{handle.handle}</span>
-        </div>
-      ))}
-    </div>
-  );
+  const logoUrl = new URL(
+    '/icons/moon-phases/full-moon.svg',
+    request.url,
+  ).toString();
 
-  if (isPattern) {
+  const spreadCardsToShow = spreadCards.slice(0, 12);
+  const cleanedSnippet =
+    spreadSnippet?.replace(/^[^:]+:\s*/, '').trim() || undefined;
+
+  if (variant === 'spread' && spreadCardsToShow.length > 0) {
+    const isTwoColumns = spreadCardsToShow.length > 6;
+    const isCompact = spreadCardsToShow.length > 6;
+    const columns = isTwoColumns ? 2 : 1;
+    const cardRows = Math.ceil(spreadCardsToShow.length / columns);
+    const CARD_ROW_HEIGHT = 240;
+    const HEADER_HEIGHT = 280;
+    const FOOTER_HEIGHT = 200;
+    const cardGap = 20;
+    const computedHeight =
+      HEADER_HEIGHT +
+      FOOTER_HEIGHT +
+      cardRows * CARD_ROW_HEIGHT +
+      Math.max(0, cardRows - 1) * cardGap;
+    const imageHeight = Math.min(3200, Math.max(1600, computedHeight));
+
     return new ImageResponse(
       <div
         style={{
@@ -226,544 +236,190 @@ export async function GET(request: NextRequest) {
           justifyContent: 'space-between',
           background: theme.background,
           color: '#ffffff',
-          padding: '60px 80px',
-          gap: '32px',
+          padding: '48px 64px 64px',
+          gap: '26px',
         }}
       >
         <div
           style={{
-            fontFamily: 'Roboto Mono',
-            fontSize: 26,
-            letterSpacing: 6,
-            textTransform: 'uppercase',
-            opacity: 0.75,
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '10px',
           }}
         >
-          Pattern Intelligence · Shared from Lunary
+          <div
+            style={{
+              fontFamily: 'Roboto Mono',
+              fontSize: 56,
+              fontWeight: 600,
+              letterSpacing: 2,
+              lineHeight: 1.1,
+            }}
+          >
+            {spreadName || 'Tarot Spread'}
+          </div>
+          {spreadSummary && (
+            <div
+              style={{
+                fontFamily: 'Roboto Mono',
+                fontSize: 26,
+                opacity: 0.9,
+                lineHeight: 1.4,
+              }}
+            >
+              {spreadSummary}
+            </div>
+          )}
+          {cleanedSnippet && (
+            <div
+              style={{
+                fontFamily: 'Roboto Mono',
+                fontSize: 22,
+                lineHeight: 1.5,
+                opacity: 0.82,
+                maxWidth: '72%',
+              }}
+            >
+              {cleanedSnippet}
+            </div>
+          )}
+        </div>
+
+        <div
+          style={{
+            display: 'flex',
+            flexWrap: 'wrap',
+            alignContent: 'stretch',
+            gap: `${cardGap}px`,
+            justifyContent: 'space-between',
+          }}
+        >
+          {spreadCardsToShow.map((card) => (
+            <div
+              key={`${card.positionLabel}-${card.cardName}`}
+              style={{
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '10px',
+                borderRadius: 24,
+                border: '1px solid rgba(255,255,255,0.15)',
+                padding: '22px 26px',
+                backgroundColor: 'rgba(0,0,0,0.45)',
+                boxShadow: '0 20px 40px rgba(0,0,0,0.35)',
+                flex: columns === 2 ? '1 1 48%' : '1 1 100%',
+                maxWidth: columns === 2 ? '48%' : '100%',
+                minHeight: 220,
+              }}
+            >
+              <div
+                style={{
+                  display: 'flex',
+                  fontFamily: 'Roboto Mono',
+                  fontSize: 13,
+                  letterSpacing: 3,
+                  textTransform: 'uppercase',
+                  opacity: 0.65,
+                }}
+              >
+                {card.positionLabel}
+              </div>
+              {!isCompact && card.positionPrompt && (
+                <div
+                  style={{
+                    display: 'flex',
+                    fontFamily: 'Roboto Mono',
+                    fontSize: 16,
+                    opacity: 0.8,
+                  }}
+                >
+                  {card.positionPrompt}
+                </div>
+              )}
+              <div
+                style={{
+                  display: 'flex',
+                  fontFamily: 'Roboto Mono',
+                  fontSize: 32,
+                  fontWeight: 600,
+                }}
+              >
+                {card.cardName}
+              </div>
+              {!isCompact && card.insight && (
+                <div
+                  style={{
+                    display: 'flex',
+                    fontFamily: 'Roboto Mono',
+                    fontSize: 18,
+                    lineHeight: 1.4,
+                    opacity: 0.9,
+                  }}
+                >
+                  “{card.insight}”
+                </div>
+              )}
+              {card.keywords?.length && (
+                <div
+                  style={{
+                    display: 'flex',
+                    flexWrap: 'wrap',
+                    gap: '8px',
+                  }}
+                >
+                  {card.keywords.slice(0, 4).map((keyword) => (
+                    <span
+                      key={`${card.cardName}-${keyword}`}
+                      style={{
+                        display: 'flex',
+                        fontFamily: 'Roboto Mono',
+                        fontSize: 14,
+                        padding: '3px 10px',
+                        borderRadius: 10,
+                        border: '1px solid rgba(255,255,255,0.3)',
+                        opacity: 0.85,
+                      }}
+                    >
+                      {keyword}
+                    </span>
+                  ))}
+                </div>
+              )}
+            </div>
+          ))}
         </div>
 
         <div
           style={{
             display: 'flex',
             flexDirection: 'column',
-            gap: '28px',
-            flexGrow: 1,
+            alignItems: 'center',
+            fontFamily: 'Roboto Mono',
+            fontSize: 18,
+            opacity: 0.9,
+            gap: '12px',
           }}
         >
-          <div>
-            <div
-              style={{
-                fontFamily: 'Roboto Mono',
-                fontSize: 44,
-                fontWeight: 300,
-                opacity: 0.9,
-              }}
-            >
-              {headline}
-            </div>
-            <div
-              style={{
-                fontFamily: 'Roboto Mono',
-                fontSize: 70,
-                fontWeight: 500,
-                letterSpacing: 6,
-                marginTop: 12,
-              }}
-            >
-              {card}
-            </div>
-          </div>
-
-          {topHighlights.length > 0 && (
-            <div
-              style={{
-                borderRadius: 18,
-                border: '1px solid rgba(255,255,255,0.25)',
-                padding: '18px 22px',
-                backgroundColor: 'rgba(0,0,0,0.25)',
-              }}
-            >
-              <div
-                style={{
-                  fontFamily: 'Roboto Mono',
-                  fontSize: 18,
-                  letterSpacing: 3,
-                  textTransform: 'uppercase',
-                  opacity: 0.7,
-                  marginBottom: 12,
-                }}
-              >
-                Signal Highlights
-              </div>
-              <div
-                style={{
-                  display: 'flex',
-                  flexDirection: 'column',
-                  gap: '10px',
-                  fontFamily: 'Roboto Mono',
-                  fontSize: 22,
-                  lineHeight: 1.4,
-                }}
-              >
-                {topHighlights.map((highlight, index) => (
-                  <div
-                    key={`${highlight}-${index}`}
-                    style={{ display: 'flex', gap: '10px' }}
-                  >
-                    <span style={{ color: theme.accent }}>•</span>
-                    <span>{highlight}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {keywords.length > 0 && (
-            <div
-              style={{
-                display: 'flex',
-                flexWrap: 'wrap',
-                gap: '12px',
-              }}
-            >
-              {keywords.map((keyword) => (
-                <span
-                  key={keyword}
-                  style={{
-                    fontFamily: 'Roboto Mono',
-                    fontSize: 24,
-                    padding: '8px 18px',
-                    borderRadius: '999px',
-                    border: `1px solid ${theme.accent}`,
-                    color: theme.accent,
-                    letterSpacing: 2,
-                  }}
-                >
-                  {keyword}
-                </span>
-              ))}
-            </div>
-          )}
-
-          {(limitedSuitBlocks.length > 0 || limitedNumberBlocks.length > 0) && (
-            <div
-              style={{
-                display: 'flex',
-                flexDirection: 'column',
-                gap: '18px',
-              }}
-            >
-              {limitedSuitBlocks.length > 0 && (
-                <div
-                  style={{
-                    borderRadius: 18,
-                    border: '1px solid rgba(255,255,255,0.15)',
-                    padding: '18px 22px',
-                    backgroundColor: 'rgba(0,0,0,0.2)',
-                  }}
-                >
-                  <div
-                    style={{
-                      fontFamily: 'Roboto Mono',
-                      fontSize: 18,
-                      letterSpacing: 3,
-                      textTransform: 'uppercase',
-                      opacity: 0.7,
-                      marginBottom: 12,
-                    }}
-                  >
-                    Suit Patterns
-                  </div>
-                  <div
-                    style={{
-                      display: 'grid',
-                      gridTemplateColumns:
-                        limitedSuitBlocks.length > 2
-                          ? 'repeat(2, minmax(0,1fr))'
-                          : '1fr',
-                      gap: '12px',
-                    }}
-                  >
-                    {limitedSuitBlocks.map((pattern) => (
-                      <div
-                        key={pattern.suit}
-                        style={{
-                          borderRadius: 14,
-                          border: '1px solid rgba(255,255,255,0.1)',
-                          padding: '14px',
-                          backgroundColor: 'rgba(0,0,0,0.25)',
-                        }}
-                      >
-                        <div
-                          style={{
-                            fontFamily: 'Roboto Mono',
-                            fontSize: 20,
-                            fontWeight: 500,
-                          }}
-                        >
-                          {pattern.suit}
-                          {typeof totalCards === 'number' ? (
-                            <span style={{ fontSize: 16, opacity: 0.7 }}>
-                              {' '}
-                              ({pattern.count}/{totalCards} days)
-                            </span>
-                          ) : (
-                            <span style={{ fontSize: 16, opacity: 0.7 }}>
-                              {' '}
-                              · {pattern.count} pulls
-                            </span>
-                          )}
-                        </div>
-                        {pattern.reading && (
-                          <div
-                            style={{
-                              marginTop: 8,
-                              fontFamily: 'Roboto Mono',
-                              fontSize: 18,
-                              lineHeight: 1.4,
-                              opacity: 0.85,
-                            }}
-                          >
-                            {pattern.reading}
-                          </div>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {limitedNumberBlocks.length > 0 && (
-                <div
-                  style={{
-                    borderRadius: 18,
-                    border: '1px solid rgba(255,255,255,0.15)',
-                    padding: '18px 22px',
-                    backgroundColor: 'rgba(0,0,0,0.2)',
-                  }}
-                >
-                  <div
-                    style={{
-                      fontFamily: 'Roboto Mono',
-                      fontSize: 18,
-                      letterSpacing: 3,
-                      textTransform: 'uppercase',
-                      opacity: 0.7,
-                      marginBottom: 12,
-                    }}
-                  >
-                    Number Patterns
-                  </div>
-                  <div
-                    style={{
-                      display: 'grid',
-                      gridTemplateColumns:
-                        limitedNumberBlocks.length > 2
-                          ? 'repeat(2, minmax(0,1fr))'
-                          : '1fr',
-                      gap: '12px',
-                    }}
-                  >
-                    {limitedNumberBlocks.map((pattern) => (
-                      <div
-                        key={pattern.number}
-                        style={{
-                          borderRadius: 14,
-                          border: '1px solid rgba(255,255,255,0.1)',
-                          padding: '14px',
-                          backgroundColor: 'rgba(0,0,0,0.25)',
-                        }}
-                      >
-                        <div
-                          style={{
-                            fontFamily: 'Roboto Mono',
-                            fontSize: 20,
-                            fontWeight: 500,
-                          }}
-                        >
-                          {pattern.number}s ({pattern.count}{' '}
-                          {pattern.count === 1 ? 'time' : 'times'})
-                        </div>
-                        {pattern.reading && (
-                          <div
-                            style={{
-                              marginTop: 8,
-                              fontFamily: 'Roboto Mono',
-                              fontSize: 18,
-                              lineHeight: 1.4,
-                              opacity: 0.85,
-                            }}
-                          >
-                            {pattern.reading}
-                          </div>
-                        )}
-                        {pattern.cards?.length ? (
-                          <div
-                            style={{
-                              marginTop: 8,
-                              fontFamily: 'Roboto Mono',
-                              fontSize: 16,
-                              opacity: 0.7,
-                            }}
-                          >
-                            Cards: {pattern.cards.join(', ')}
-                          </div>
-                        ) : null}
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-              {limitedCardBlocks.length > 0 && (
-                <div
-                  style={{
-                    borderRadius: 18,
-                    border: '1px solid rgba(255,255,255,0.15)',
-                    padding: '18px 22px',
-                    backgroundColor: 'rgba(0,0,0,0.2)',
-                  }}
-                >
-                  <div
-                    style={{
-                      fontFamily: 'Roboto Mono',
-                      fontSize: 18,
-                      letterSpacing: 3,
-                      textTransform: 'uppercase',
-                      opacity: 0.7,
-                      marginBottom: 12,
-                    }}
-                  >
-                    Card Patterns
-                  </div>
-                  <div
-                    style={{
-                      display: 'grid',
-                      gridTemplateColumns:
-                        limitedCardBlocks.length > 2
-                          ? 'repeat(2, minmax(0,1fr))'
-                          : '1fr',
-                      gap: '12px',
-                    }}
-                  >
-                    {limitedCardBlocks.map((pattern) => (
-                      <div
-                        key={pattern.name}
-                        style={{
-                          borderRadius: 14,
-                          border: '1px solid rgba(255,255,255,0.1)',
-                          padding: '14px',
-                          backgroundColor: 'rgba(0,0,0,0.25)',
-                        }}
-                      >
-                        <div
-                          style={{
-                            fontFamily: 'Roboto Mono',
-                            fontSize: 20,
-                            fontWeight: 500,
-                          }}
-                        >
-                          {pattern.name} ({pattern.count}{' '}
-                          {pattern.count === 1 ? 'time' : 'times'})
-                        </div>
-                        {pattern.reading && (
-                          <div
-                            style={{
-                              marginTop: 8,
-                              fontFamily: 'Roboto Mono',
-                              fontSize: 18,
-                              lineHeight: 1.4,
-                              opacity: 0.85,
-                            }}
-                          >
-                            {pattern.reading}
-                          </div>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </div>
-          )}
-
-          {insights.length > 0 && (
-            <div
-              style={{
-                display: 'grid',
-                gridTemplateColumns:
-                  insights.length > 1 ? 'repeat(2, minmax(0, 1fr))' : '1fr',
-                gap: '16px',
-              }}
-            >
-              {insights.map((insight, index) => (
-                <div
-                  key={`${insight}-${index}`}
-                  style={{
-                    borderRadius: 16,
-                    border: '1px solid rgba(255,255,255,0.2)',
-                    padding: '18px 22px',
-                    fontFamily: 'Roboto Mono',
-                    fontSize: 22,
-                    lineHeight: 1.5,
-                    backgroundColor: 'rgba(0,0,0,0.25)',
-                  }}
-                >
-                  {insight}
-                </div>
-              ))}
-            </div>
-          )}
-
-          {(moonPhase || moonTip || transitImpact) && (
-            <div
-              style={{
-                display: 'grid',
-                gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
-                gap: '18px',
-              }}
-            >
-              {(moonPhase || moonTip) && (
-                <div
-                  style={{
-                    borderRadius: 18,
-                    padding: '20px 24px',
-                    backgroundColor: 'rgba(255,255,255,0.08)',
-                    border: `1px solid ${theme.accent}33`,
-                  }}
-                >
-                  <div
-                    style={{
-                      fontFamily: 'Roboto Mono',
-                      fontSize: 18,
-                      letterSpacing: 3,
-                      textTransform: 'uppercase',
-                      opacity: 0.7,
-                    }}
-                  >
-                    Moon Now
-                  </div>
-                  <div
-                    style={{
-                      fontFamily: 'Roboto Mono',
-                      fontSize: 32,
-                      fontWeight: 500,
-                      marginTop: 8,
-                      color: theme.accent,
-                    }}
-                  >
-                    {moonPhase || 'Lunar vibes'}
-                  </div>
-                  {moonTip && (
-                    <div
-                      style={{
-                        marginTop: 8,
-                        fontFamily: 'Roboto Mono',
-                        fontSize: 20,
-                        lineHeight: 1.5,
-                        opacity: 0.9,
-                      }}
-                    >
-                      {moonTip}
-                    </div>
-                  )}
-                </div>
-              )}
-              {transitImpact && (
-                <div
-                  style={{
-                    borderRadius: 18,
-                    padding: '20px 24px',
-                    backgroundColor: 'rgba(0,0,0,0.35)',
-                    border: '1px solid rgba(255,255,255,0.15)',
-                  }}
-                >
-                  <div
-                    style={{
-                      fontFamily: 'Roboto Mono',
-                      fontSize: 18,
-                      letterSpacing: 3,
-                      textTransform: 'uppercase',
-                      opacity: 0.7,
-                    }}
-                  >
-                    Transit Impact
-                  </div>
-                  <div
-                    style={{
-                      marginTop: 8,
-                      fontFamily: 'Roboto Mono',
-                      fontSize: 20,
-                      lineHeight: 1.5,
-                      opacity: 0.9,
-                    }}
-                  >
-                    {transitImpact}
-                  </div>
-                </div>
-              )}
-            </div>
-          )}
-
-          {actionPrompt && (
-            <div
-              style={{
-                borderRadius: 18,
-                padding: '18px 22px',
-                border: `1px solid ${theme.accent}33`,
-                backgroundColor: 'rgba(0,0,0,0.2)',
-                fontFamily: 'Roboto Mono',
-                fontSize: 24,
-                letterSpacing: 1,
-              }}
-            >
-              {actionPrompt}
-            </div>
-          )}
-        </div>
-
-        <div
-          style={{
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'flex-end',
-          }}
-        >
-          <div
+          <img
+            src={logoUrl}
+            alt='Lunary full moon logo'
+            width={36}
+            height={36}
+            style={{ display: 'flex' }}
+          />
+          <span
             style={{
-              fontFamily: 'Roboto Mono',
-              fontSize: 22,
-              opacity: 0.85,
+              fontSize: 26,
+              letterSpacing: 1.8,
+              fontWeight: 600,
             }}
           >
-            {date || 'Updated moments ago'}
-            <div
-              style={{
-                fontSize: 18,
-                opacity: 0.7,
-                marginTop: 4,
-              }}
-            >
-              Tag {primaryHandle} when you post
-            </div>
-          </div>
-          <div style={{ textAlign: 'right' }}>
-            {footerHandles}
-            <div
-              style={{
-                marginTop: 10,
-                fontFamily: 'Roboto Mono',
-                fontSize: 20,
-                opacity: 0.8,
-              }}
-            >
-              lunary.app/tarot
-            </div>
-          </div>
+            lunary.app/tarot
+          </span>
         </div>
       </div>,
       {
-        width: WIDTH,
-        height: HEIGHT,
+        width: 1200,
+        height: imageHeight,
         fonts: [
           {
             name: 'Roboto Mono',
@@ -790,8 +446,9 @@ export async function GET(request: NextRequest) {
         gap: '24px',
       }}
     >
-      <div
+      {/* <div
         style={{
+          display: 'flex',
           fontFamily: 'Roboto Mono',
           fontSize: 28,
           letterSpacing: 4,
@@ -800,7 +457,7 @@ export async function GET(request: NextRequest) {
         }}
       >
         Shared from Lunary
-      </div>
+      </div> */}
 
       <div
         style={{
@@ -813,6 +470,7 @@ export async function GET(request: NextRequest) {
       >
         <div
           style={{
+            display: 'flex',
             fontFamily: 'Roboto Mono',
             fontSize: 48,
             fontWeight: 300,
@@ -823,6 +481,7 @@ export async function GET(request: NextRequest) {
         </div>
         <div
           style={{
+            display: 'flex',
             fontFamily: 'Roboto Mono',
             fontSize: 80,
             fontWeight: 500,
@@ -835,6 +494,7 @@ export async function GET(request: NextRequest) {
         {keywords.length > 0 && (
           <div
             style={{
+              display: 'flex',
               fontFamily: 'Roboto Mono',
               fontSize: 28,
               opacity: 0.85,
@@ -849,6 +509,7 @@ export async function GET(request: NextRequest) {
         {text && (
           <div
             style={{
+              display: 'flex',
               fontFamily: 'Roboto Mono',
               fontSize: 26,
               lineHeight: 1.6,
@@ -864,47 +525,30 @@ export async function GET(request: NextRequest) {
       <div
         style={{
           display: 'flex',
-          justifyContent: 'space-between',
+          flexDirection: 'column',
           alignItems: 'center',
           fontFamily: 'Roboto Mono',
           fontSize: 24,
           opacity: 0.85,
-          gap: '18px',
+          gap: '12px',
         }}
       >
-        <div>
-          {date || 'Generated just now'}
-          <div
-            style={{
-              fontSize: 18,
-              opacity: 0.7,
-              marginTop: 6,
-            }}
-          >
-            Tag {primaryHandle} when you share
-          </div>
-        </div>
-        <div style={{ textAlign: 'right' }}>
-          <div
-            style={{
-              display: 'flex',
-              gap: '12px',
-              alignItems: 'center',
-              justifyContent: 'flex-end',
-            }}
-          >
-            <span
-              style={{
-                width: '10px',
-                height: '10px',
-                borderRadius: '999px',
-                backgroundColor: theme.accent,
-              }}
-            />
-            <span>lunary.app/tarot</span>
-          </div>
-          <div style={{ marginTop: 12 }}>{footerHandles}</div>
-        </div>
+        <img
+          src={logoUrl}
+          alt='Lunary full moon logo'
+          width={40}
+          height={40}
+          style={{ display: 'flex' }}
+        />
+        <span
+          style={{
+            fontSize: 28,
+            letterSpacing: 1.8,
+            fontWeight: 600,
+          }}
+        >
+          lunary.app/tarot
+        </span>
       </div>
     </div>,
     {

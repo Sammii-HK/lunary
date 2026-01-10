@@ -62,7 +62,7 @@ export async function GET(request: NextRequest) {
 
       // Check if user completed any activation event within 24h
       const activatedResult = await sql`
-        SELECT event_type, COUNT(*) as count
+        SELECT event_type
         FROM conversion_events
         WHERE user_id = ${signup.user_id}
           AND event_type = ANY(SELECT unnest(${activationEventsArray}::text[]))
@@ -74,8 +74,11 @@ export async function GET(request: NextRequest) {
       if (activatedResult.rows.length > 0) {
         activatedCount++;
         // Track which events triggered activation
+        const seenEvents = new Set<string>();
         activatedResult.rows.forEach((row) => {
           const eventType = row.event_type as string;
+          if (!eventType || seenEvents.has(eventType)) return;
+          seenEvents.add(eventType);
           activationBreakdown[eventType] =
             (activationBreakdown[eventType] || 0) + 1;
         });

@@ -1,17 +1,25 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { NavParamLink } from '@/components/NavParamLink';
 import { ArrowRight } from 'lucide-react';
 import {
-  calculateSoulUrge,
   calculateExpression,
   calculateLifePath,
   calculatePersonalYear,
+  calculateSoulUrge,
   getNumberMeaning,
   VOWEL_VALUES,
   type CalculationResult,
 } from '@/lib/numerology';
+import {
+  getNumerologyDetail,
+  type NumerologyDetailContext,
+} from '@/lib/numerology/numerologyDetails';
+import {
+  NumerologyInfoModal,
+  type NumerologyModalPayload,
+} from '@/components/grimoire/NumerologyInfoModal';
 
 type CalculatorType =
   | 'soul-urge'
@@ -70,10 +78,20 @@ const CALCULATOR_CONFIG: Record<
   },
 };
 
+const CONTEXT_MAP: Record<CalculatorType, NumerologyDetailContext> = {
+  'life-path': 'lifePath',
+  'personal-year': 'lifePath',
+  expression: 'expression',
+  'soul-urge': 'soulUrge',
+};
+
 export function NumerologyCalculator({ type }: NumerologyCalculatorProps) {
   const config = CALCULATOR_CONFIG[type];
   const [input, setInput] = useState('');
   const [targetYear, setTargetYear] = useState(new Date().getFullYear());
+  const [numberModal, setNumberModal] = useState<NumerologyModalPayload | null>(
+    null,
+  );
 
   const result: CalculationResult | null = useMemo(() => {
     if (!input || input.length < 2) return null;
@@ -98,6 +116,27 @@ export function NumerologyCalculator({ type }: NumerologyCalculatorProps) {
         result.result,
       )
     : '';
+
+  const detail =
+    result && result.result > 0
+      ? getNumerologyDetail(CONTEXT_MAP[type], result.result)
+      : null;
+
+  const openNumberModal = () => {
+    if (!result || result.result <= 0) return;
+    setNumberModal({
+      number: result.result,
+      contextLabel: config.title,
+      contextDetail: `${config.title} result`,
+      meaning,
+      description: detail?.description,
+      energy: detail?.energy,
+      energyLabel: `${config.title} energy`,
+      keywords: detail?.keywords,
+      sections: detail?.sections,
+      extraNote: detail?.extraNote,
+    });
+  };
 
   const resultUrl =
     result && result.result > 0
@@ -164,11 +203,18 @@ export function NumerologyCalculator({ type }: NumerologyCalculatorProps) {
 
       {result && result.result > 0 && (
         <div className='mt-6 pt-6 border-t border-zinc-700'>
-          <div className='text-center mb-4'>
+          <div className='text-center mb-4 space-y-2'>
             <div className='text-5xl font-light text-lunary-primary-300 mb-2'>
               {result.result}
             </div>
             <div className='text-lg text-zinc-300'>{meaning}</div>
+            <button
+              type='button'
+              onClick={openNumberModal}
+              className='text-xs font-semibold text-lunary-primary-300 uppercase tracking-wide transition hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-lunary-primary-400'
+            >
+              Explain this number
+            </button>
           </div>
 
           <div className='bg-zinc-800/50 rounded-lg p-4 mb-4'>
@@ -227,6 +273,21 @@ export function NumerologyCalculator({ type }: NumerologyCalculatorProps) {
           </NavParamLink>
         </div>
       )}
+
+      <NumerologyInfoModal
+        isOpen={!!numberModal}
+        onClose={() => setNumberModal(null)}
+        number={numberModal?.number ?? 0}
+        contextLabel={numberModal?.contextLabel ?? ''}
+        contextDetail={numberModal?.contextDetail}
+        meaning={numberModal?.meaning ?? ''}
+        description={numberModal?.description}
+        energy={numberModal?.energy}
+        energyLabel={numberModal?.energyLabel}
+        keywords={numberModal?.keywords}
+        sections={numberModal?.sections}
+        extraNote={numberModal?.extraNote}
+      />
     </div>
   );
 }

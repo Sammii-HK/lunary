@@ -2,6 +2,7 @@ import { ChartWheelOg } from '@/app/birth-chart/chart-wheel-og';
 import { ImageResponse } from 'next/og';
 import { NextRequest } from 'next/server';
 import { astroPointSymbols, bodiesSymbols } from '@/constants/symbols';
+import { getBirthChartShare } from '@/lib/share/birth-chart';
 import {
   elementAstro,
   modalityAstro,
@@ -253,16 +254,23 @@ function parsePlacements(raw: string | null): BirthChartData[] {
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
-  const name = sanitize(searchParams.get('name'), 32);
-  const sun = sanitize(searchParams.get('sun'), 16) ?? '—';
-  const moon = sanitize(searchParams.get('moon'), 16) ?? '—';
-  const rising = sanitize(searchParams.get('rising'), 16) ?? '—';
-  const element = sanitize(searchParams.get('element'), 16);
-  const modality = sanitize(searchParams.get('modality'), 16);
-  const insight = sanitize(searchParams.get('insight'), 170);
+  const shareId = searchParams.get('shareId');
+  const shareRecord = shareId ? await getBirthChartShare(shareId) : null;
+  const name = shareRecord?.name ?? sanitize(searchParams.get('name'), 32);
+  const sun = shareRecord?.sun ?? sanitize(searchParams.get('sun'), 16) ?? '—';
+  const moon =
+    shareRecord?.moon ?? sanitize(searchParams.get('moon'), 16) ?? '—';
+  const rising =
+    shareRecord?.rising ?? sanitize(searchParams.get('rising'), 16) ?? '—';
+  const element =
+    shareRecord?.element ?? sanitize(searchParams.get('element'), 16);
+  const modality =
+    shareRecord?.modality ?? sanitize(searchParams.get('modality'), 16);
+  const insight =
+    shareRecord?.insight ?? sanitize(searchParams.get('insight'), 170);
 
   const placements = parsePlacements(searchParams.get('placements'));
-  const birthChart = placements;
+  const birthChart = shareRecord?.placements ?? placements;
 
   const theme =
     (element && gradientsByElement[element]) || gradientsByElement.default;

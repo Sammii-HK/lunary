@@ -175,6 +175,15 @@ export interface PostHogActiveUsersTrend {
   mau: number;
 }
 
+function normalizeDateKey(value: string | number) {
+  const asString = String(value);
+  const parsed = new Date(asString);
+  if (Number.isNaN(parsed.getTime())) {
+    return asString.split('T')[0];
+  }
+  return parsed.toISOString().split('T')[0];
+}
+
 export async function getPostHogActiveUsersTrends(
   startDate: Date,
   endDate: Date,
@@ -201,36 +210,7 @@ export async function getPostHogActiveUsersTrends(
   const extendedStartTimestamp = Math.floor(extendedStart.getTime() / 1000);
   const endTimestamp = Math.floor(endDate.getTime() / 1000);
 
-  // Query daily unique users - this gives us DAU directly
   const testUserFilter = getTestUserFilter();
-  const dailyQuery = `
-    SELECT 
-      ${dailyDateTrunc} as date,
-      count(DISTINCT person_id) as unique_users
-    FROM events 
-    WHERE event = '$pageview'
-      AND timestamp >= toDateTime(${extendedStartTimestamp})
-      AND timestamp <= toDateTime(${endTimestamp})
-      ${testUserFilter}
-    GROUP BY date
-    ORDER BY date ASC
-  `;
-
-  const dailyResult = await queryPostHogAPI<{
-    results: Array<Array<string | number>>;
-  }>('/query/', {
-    method: 'POST',
-    body: JSON.stringify({
-      query: {
-        kind: 'HogQLQuery',
-        query: dailyQuery,
-      },
-    }),
-  });
-
-  if (!dailyResult?.results || dailyResult.results.length === 0) {
-    return [];
-  }
 
   // Build a map of date -> Set of person_ids for that date
   // We need the actual person_ids to calculate rolling windows
@@ -243,6 +223,7 @@ export async function getPostHogActiveUsersTrends(
       AND timestamp >= toDateTime(${extendedStartTimestamp})
       AND timestamp <= toDateTime(${endTimestamp})
       ${testUserFilter}
+    LIMIT 1000000
   `;
 
   const personIdsResult = await queryPostHogAPI<{
@@ -261,7 +242,7 @@ export async function getPostHogActiveUsersTrends(
   const usersByDate = new Map<string, Set<string>>();
   if (personIdsResult?.results) {
     personIdsResult.results.forEach((row) => {
-      const date = String(row[0]);
+      const date = normalizeDateKey(row[0]);
       const personId = String(row[1]);
       if (!usersByDate.has(date)) {
         usersByDate.set(date, new Set());

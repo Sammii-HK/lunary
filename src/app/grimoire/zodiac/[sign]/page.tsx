@@ -97,6 +97,7 @@ export default async function ZodiacSignPage({
   const cardinalSigns = ['Aries', 'Cancer', 'Libra', 'Capricorn'];
   const fixedSigns = ['Taurus', 'Leo', 'Scorpio', 'Aquarius'];
   const mutableSigns = ['Gemini', 'Virgo', 'Sagittarius', 'Pisces'];
+  const mysticalProperties = signData.mysticalProperties.replace(/\.\s*$/, '');
   const quality = cardinalSigns.includes(signData.name)
     ? 'Cardinal'
     : fixedSigns.includes(signData.name)
@@ -114,7 +115,7 @@ export default async function ZodiacSignPage({
     },
     {
       question: `What are ${signData.name} personality traits?`,
-      answer: `${signData.name} is known for ${signData.mysticalProperties.toLowerCase()}. ${signData.name} individuals are typically ${quality.toLowerCase()} in nature, meaning ${qualityDescriptions[quality]}`,
+      answer: `${signData.name} is known for ${mysticalProperties.toLowerCase()}. ${signData.name} individuals are typically ${quality.toLowerCase()} in nature, meaning ${qualityDescriptions[quality]}`,
     },
     {
       question: `What is ${signData.name} compatible with?`,
@@ -183,10 +184,10 @@ export default async function ZodiacSignPage({
         canonicalUrl={`https://lunary.app/grimoire/zodiac/${sign}`}
         whatIs={{
           question: `What is ${signData.name}?`,
-          answer: `${signData.name} is the ${signSlugs.indexOf(signKey) + 1}${signSlugs.indexOf(signKey) === 0 ? 'st' : signSlugs.indexOf(signKey) === 1 ? 'nd' : signSlugs.indexOf(signKey) === 2 ? 'rd' : 'th'} sign of the zodiac, spanning ${signData.dates}. It is a ${signData.element} sign represented by the symbol ${unicodeSymbol}. ${signData.name} individuals are characterized by ${signData.mysticalProperties.toLowerCase()}. As a ${quality.toLowerCase()} sign, ${signData.name} ${quality === 'Cardinal' ? 'initiates action and leads' : quality === 'Fixed' ? 'is stable and persistent' : 'adapts and is flexible'}.`,
+          answer: `${signData.name} is the ${signSlugs.indexOf(signKey) + 1}${signSlugs.indexOf(signKey) === 0 ? 'st' : signSlugs.indexOf(signKey) === 1 ? 'nd' : signSlugs.indexOf(signKey) === 2 ? 'rd' : 'th'} sign of the zodiac, spanning ${signData.dates}. It is a ${signData.element} sign represented by the symbol ${unicodeSymbol}. ${signData.name} individuals are characterized by ${mysticalProperties}. As a ${quality.toLowerCase()} sign, ${signData.name} ${quality === 'Cardinal' ? 'initiates action and leads' : quality === 'Fixed' ? 'is stable and persistent' : 'adapts and is flexible'}.`,
         }}
-        intro={`The ${signData.name} zodiac sign, represented by the symbol ${unicodeSymbol}, is a ${signData.element} sign that governs those born between ${signData.dates}. ${signData.name} is known for ${signData.mysticalProperties.toLowerCase()}.`}
-        tldr={`${signData.name} (${signData.dates}) is a ${signData.element} sign representing ${signData.mysticalProperties.toLowerCase()}.`}
+        intro={`The ${signData.name} zodiac sign, represented by the symbol ${unicodeSymbol}, is a ${signData.element} sign that governs those born between ${signData.dates}. ${signData.name} is known for ${mysticalProperties.toLowerCase()}.`}
+        tldr={`${signData.name} (${signData.dates}) is a ${signData.element} sign representing ${mysticalProperties.toLowerCase()}.`}
         meaning={`${signData.name} is the ${signSlugs.indexOf(signKey) + 1}${signSlugs.indexOf(signKey) === 0 ? 'st' : signSlugs.indexOf(signKey) === 1 ? 'nd' : signSlugs.indexOf(signKey) === 2 ? 'rd' : 'th'} sign of the zodiac, spanning ${signData.dates}. As a ${signData.element} sign, ${signData.name} embodies the qualities of ${elementDescriptions[signData.element].toLowerCase()}
 
 ${signData.mysticalProperties}

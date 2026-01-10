@@ -32,6 +32,7 @@ const PYTHAGOREAN: Record<string, number> = {
   Z: 8,
 };
 
+export const KARMIC_DEBT_NUMBERS = [13, 14, 16, 19];
 const VOWELS = ['A', 'E', 'I', 'O', 'U'];
 const MASTER_NUMBERS = [11, 22, 33];
 
@@ -39,6 +40,8 @@ export interface CalculationResult {
   result: number;
   steps: string[];
   breakdown: string;
+  sum?: number;
+  reductionPath?: number[];
 }
 
 export function reduceToDigit(n: number, keepMaster = true): number {
@@ -53,6 +56,40 @@ export function reduceToDigit(n: number, keepMaster = true): number {
   }
 
   return n;
+}
+
+export function getReductionPath(initial: number, keepMaster = true): number[] {
+  const path = [initial];
+  let current = initial;
+
+  while (current > 9 && !(keepMaster && MASTER_NUMBERS.includes(current))) {
+    const digits = String(current)
+      .split('')
+      .map((digit) => parseInt(digit));
+    const next = digits.reduce((acc, value) => acc + value, 0);
+    path.push(next);
+    current = next;
+  }
+
+  return path;
+}
+
+export function findKarmicDebt(path: number[] = []): number | null {
+  for (const value of path) {
+    if (KARMIC_DEBT_NUMBERS.includes(value)) {
+      return value;
+    }
+  }
+  return null;
+}
+
+export function findMasterNumber(path: number[] = []): number | null {
+  for (const value of path) {
+    if (MASTER_NUMBERS.includes(value)) {
+      return value;
+    }
+  }
+  return null;
 }
 
 export function letterToNumber(letter: string): number {
@@ -70,6 +107,7 @@ export function calculateSoulUrge(fullName: string): CalculationResult {
   const vowelValues = vowels.map((v) => ({ letter: v, value: PYTHAGOREAN[v] }));
   const sum = vowelValues.reduce((acc, v) => acc + v.value, 0);
   const result = reduceToDigit(sum);
+  const reductionPath = getReductionPath(sum);
 
   const steps: string[] = [
     `Full name: ${fullName}`,
@@ -94,6 +132,8 @@ export function calculateSoulUrge(fullName: string): CalculationResult {
     result,
     steps,
     breakdown: vowelValues.map((v) => `${v.letter}=${v.value}`).join(', '),
+    sum,
+    reductionPath,
   };
 }
 
@@ -109,6 +149,7 @@ export function calculateExpression(fullName: string): CalculationResult {
     .map((l) => ({ letter: l, value: PYTHAGOREAN[l] }));
   const sum = letterValues.reduce((acc, l) => acc + l.value, 0);
   const result = reduceToDigit(sum);
+  const reductionPath = getReductionPath(sum);
 
   const steps: string[] = [
     `Full name: ${fullName}`,
@@ -133,6 +174,8 @@ export function calculateExpression(fullName: string): CalculationResult {
     result,
     steps,
     breakdown: letterValues.map((l) => `${l.letter}=${l.value}`).join(', '),
+    sum,
+    reductionPath,
   };
 }
 
@@ -164,6 +207,7 @@ export function calculateLifePath(birthDate: Date | string): CalculationResult {
 
   const sum = monthReduced + dayReduced + yearReduced;
   const result = reduceToDigit(sum);
+  const reductionPath = getReductionPath(sum);
 
   const steps: string[] = [
     `Birth date: ${month}/${day}/${year}`,
@@ -191,6 +235,8 @@ export function calculateLifePath(birthDate: Date | string): CalculationResult {
     result,
     steps,
     breakdown: `${monthReduced} + ${dayReduced} + ${yearReduced}`,
+    sum,
+    reductionPath,
   };
 }
 
@@ -225,6 +271,7 @@ export function calculatePersonalYear(
 
   const sum = monthReduced + dayReduced + yearReduced;
   const result = reduceToDigit(sum, false);
+  const reductionPath = getReductionPath(sum, false);
 
   const steps: string[] = [
     `Birth month/day: ${month}/${day}`,
@@ -251,6 +298,8 @@ export function calculatePersonalYear(
     result,
     steps,
     breakdown: `${monthReduced} + ${dayReduced} + ${yearReduced}`,
+    sum,
+    reductionPath,
   };
 }
 

@@ -6,6 +6,9 @@ interface TarotCardProps {
   keywords: string[];
   information: string;
   variant?: 'major' | 'minor';
+  disableLink?: boolean;
+  className?: string;
+  showInformation?: boolean;
 }
 
 export function TarotCard({
@@ -13,17 +16,22 @@ export function TarotCard({
   keywords,
   information,
   variant = 'major',
+  disableLink = false,
+  className,
+  showInformation = true,
 }: TarotCardProps) {
   const cardSlug = stringToKebabCase(name);
+  const wrapperClass =
+    className ??
+    'block rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4 hover:bg-zinc-900/50 hover:border-lunary-primary/50 transition-all group';
 
-  return (
-    <Link
-      href={`/grimoire/tarot/${cardSlug}`}
-      className='block rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4 hover:bg-zinc-900/50 hover:border-lunary-primary/50 transition-all group'
-    >
+  const cardContent = (
+    <>
       <h3
-        className={`text-lg font-medium mb-2 group-hover:text-lunary-primary-400 transition-colors ${
-          variant === 'major' ? 'text-lunary-primary-300' : 'text-zinc-100'
+        className={`text-lg font-medium mb-2 transition-colors ${
+          variant === 'major'
+            ? 'text-lunary-primary-300 group-hover:text-lunary-primary-400'
+            : 'text-zinc-100 group-hover:text-lunary-primary-400'
         }`}
       >
         {name}
@@ -45,7 +53,19 @@ export function TarotCard({
           ))}
         </div>
       </div>
-      <p className='text-sm text-zinc-300 leading-relaxed'>{information}</p>
+      {showInformation && (
+        <p className='text-sm text-zinc-300 leading-relaxed'>{information}</p>
+      )}
+    </>
+  );
+
+  if (disableLink) {
+    return <div className={wrapperClass}>{cardContent}</div>;
+  }
+
+  return (
+    <Link href={`/grimoire/tarot/${cardSlug}`} className={wrapperClass}>
+      {cardContent}
     </Link>
   );
 }

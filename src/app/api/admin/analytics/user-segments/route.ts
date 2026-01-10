@@ -94,14 +94,23 @@ export async function GET(request: NextRequest) {
         `
         : { rows: [{ dau: 0, active_days: 0, total_events: 0 }] };
 
+    const paidActiveUsers =
+      paidUserIds.length > 0
+        ? Number(paidEngagementResult.rows[0]?.dau || 0)
+        : 0;
+    const freeActiveUsers =
+      freeUserIds.length > 0
+        ? Number(freeEngagementResult.rows[0]?.dau || 0)
+        : 0;
+
     const paidEngagement = {
       dau: Number(paidEngagementResult.rows[0]?.dau || 0),
       activeDays: Number(paidEngagementResult.rows[0]?.active_days || 0),
       totalEvents: Number(paidEngagementResult.rows[0]?.total_events || 0),
       avgEventsPerUser:
-        paidUserIds.length > 0
+        paidActiveUsers > 0
           ? Number(paidEngagementResult.rows[0]?.total_events || 0) /
-            paidUserIds.length
+            paidActiveUsers
           : 0,
     };
 
@@ -110,9 +119,9 @@ export async function GET(request: NextRequest) {
       activeDays: Number(freeEngagementResult.rows[0]?.active_days || 0),
       totalEvents: Number(freeEngagementResult.rows[0]?.total_events || 0),
       avgEventsPerUser:
-        freeUserIds.length > 0
+        freeActiveUsers > 0
           ? Number(freeEngagementResult.rows[0]?.total_events || 0) /
-            freeUserIds.length
+            freeActiveUsers
           : 0,
     };
 

@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { BirthChartData, HouseCusp } from '../../utils/astrology/birthChart';
 import {
   bodiesSymbols,
@@ -47,6 +47,22 @@ function getSymbolForBody(body: string): string {
   return body.charAt(0);
 }
 
+function formatPlacementLabel({
+  body,
+  sign,
+  degree,
+  minute,
+  retrograde,
+}: Pick<BirthChartData, 'body' | 'sign' | 'degree' | 'minute' | 'retrograde'>) {
+  const hasDegree = Number.isFinite(degree) && Number.isFinite(minute);
+  const degreeLabel = hasDegree
+    ? `${Math.floor(degree)}°${String(Math.floor(minute)).padStart(2, '0')}'`
+    : undefined;
+  const signLabel = sign ? ` in ${sign}` : '';
+  const retroLabel = retrograde ? ' ℞' : '';
+  return `${body}${signLabel}${degreeLabel ? ` ${degreeLabel}` : ''}${retroLabel}`;
+}
+
 type BirthChartProps = {
   birthChart: BirthChartData[];
   houses?: HouseCusp[];
@@ -60,6 +76,7 @@ export const BirthChart = ({
   userName,
   birthDate,
 }: BirthChartProps) => {
+  const [hoveredBody, setHoveredBody] = useState<string | null>(null);
   const ascendant = birthChart.find((p) => p.body === 'Ascendant');
   const ascendantAngle = ascendant ? ascendant.eclipticLongitude : 0;
 
@@ -165,8 +182,12 @@ export const BirthChart = ({
       <div className='relative w-full max-w-[320px] md:max-w-[360px] aspect-square'>
         <svg
           viewBox='-140 -140 280 280'
-          className='w-full h-full border border-zinc-700 rounded-full bg-zinc-900'
+          className='chart-wheel-svg w-full h-full border border-zinc-700 rounded-full bg-zinc-900'
         >
+          <style>{`
+            .planet-node { cursor: pointer; }
+            .planet-glyph { transition: fill 0.2s ease; }
+          `}</style>
           <circle
             cx='0'
             cy='0'
@@ -281,19 +302,37 @@ export const BirthChart = ({
           ))}
 
           {[...mainPlanets, ...angles, ...points].map(
-            ({ body, x, y, retrograde }) => {
+            ({ body, x, y, retrograde, sign, degree, minute }) => {
               const isAngle = ANGLES.includes(body);
               const isPoint = POINTS.includes(body);
-              const color = retrograde
+              const baseColor = retrograde
                 ? '#f87171'
                 : isAngle
                   ? '#C77DFF'
                   : isPoint
                     ? '#7B7BE8'
                     : '#ffffff';
-
+              const color = hoveredBody
+                ? body === hoveredBody
+                  ? '#ffffff'
+                  : '#6b7280'
+                : baseColor;
               return (
-                <g key={body}>
+                <g
+                  key={body}
+                  className='planet-node'
+                  onMouseEnter={() => setHoveredBody(body)}
+                  onMouseLeave={() => setHoveredBody(null)}
+                >
+                  <title>
+                    {formatPlacementLabel({
+                      body,
+                      sign,
+                      degree,
+                      minute,
+                      retrograde,
+                    })}
+                  </title>
                   <line
                     x1='0'
                     y1='0'
@@ -308,7 +347,7 @@ export const BirthChart = ({
                     y={y}
                     textAnchor='middle'
                     dominantBaseline='central'
-                    className='font-astro'
+                    className='planet-glyph font-astro'
                     fontSize={isAngle || isPoint ? '12' : '14'}
                     fill={color}
                   >

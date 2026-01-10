@@ -13,7 +13,7 @@ import { mirrorHourKeys } from '@/constants/grimoire/clock-numbers-data';
 export const metadata: Metadata = {
   title: 'Mirror Hours: Meanings of 11:11, 12:21 & More - Lunary',
   description:
-    'Complete guide to mirror hours and their spiritual meanings. Discover what 11:11, 12:21, 01:10 and other mirror times mean when you see them on the clock.',
+    'Wondering why you keep seeing times like 11:11 or 12:21? This guide explains each mirror hour, the spiritual meaning behind the synchronicity, and how to read the message when the clock reflects you back.',
   keywords: [
     'mirror hours',
     '11:11 meaning',
@@ -97,11 +97,10 @@ export default function MirrorHoursIndexPage() {
             Mirror Hours
           </h1>
           <p className='text-lg text-zinc-400 leading-relaxed'>
-            Mirror hours occur when clock digits mirror each other (like 12:21)
-            or match exactly (like 11:11). Many traditions view these
-            synchronicities as messages from the universe, angels, or your
-            higher self. When you notice a mirror hour, pause and consider what
-            you were thinking—the context often reveals the meaning.
+            Mirror hours are clock times where the digits mirror or repeat (like
+            11:11 or 12:21), and they often feel like cosmic nods to your inner
+            experience. When you spot one, pause and take note of your thoughts,
+            because the surrounding context usually reveals the message.
           </p>
         </header>
 

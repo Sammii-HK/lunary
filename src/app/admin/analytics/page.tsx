@@ -950,7 +950,7 @@ export default function AnalyticsPage() {
                     Subscription Lifecycle
                   </CardTitle>
                   <CardDescription className='text-xs text-zinc-400'>
-                    Subscription states and churn trends
+                    Status changes and churn trends ({startDate} → {endDate})
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
@@ -965,7 +965,7 @@ export default function AnalyticsPage() {
                               status.slice(1).replace(/_/g, ' ')
                             }
                             value={count.toLocaleString()}
-                            subtitle={`${status} subscriptions`}
+                            subtitle={`${status} updates`}
                           />
                         ),
                       )}

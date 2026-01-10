@@ -5,6 +5,8 @@ import {
   karmicDebtNumbers,
   karmicDebtKeys,
 } from '@/constants/grimoire/numerology-extended-data';
+import { NumerologyProfileCalculator } from '@/components/grimoire/NumerologyProfileCalculator';
+import { KarmicDebtCalculatorExtras } from '@/components/grimoire/KarmicDebtCalculatorExtras';
 
 export const metadata: Metadata = {
   title: 'Karmic Debt Numbers 13, 14, 16, 19: Meanings & Healing | Lunary',
@@ -180,6 +182,7 @@ Having karmic debt isn't a curse — souls with karmic debt often evolve faster 
             type: 'Guide',
           },
         ]}
+        childrenPosition='before-faqs'
         internalLinks={[
           { text: 'Numerology Overview', href: '/grimoire/numerology' },
           { text: 'Life Path Calculator', href: '/grimoire/life-path' },
@@ -190,6 +193,12 @@ Having karmic debt isn't a curse — souls with karmic debt often evolve faster 
         ctaHref='/pricing'
         faqs={faqs}
       >
+        <section className='mb-12'>
+          <NumerologyProfileCalculator>
+            <KarmicDebtCalculatorExtras />
+          </NumerologyProfileCalculator>
+        </section>
+
         <section className='mb-12'>
           <h2 className='text-2xl font-medium text-zinc-100 mb-6'>
             The Four Karmic Debt Numbers

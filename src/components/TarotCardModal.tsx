@@ -1,8 +1,10 @@
 'use client';
 
+import Link from 'next/link';
 import { X } from 'lucide-react';
 import { TarotCard } from './TarotCard';
 import { useModal } from '@/hooks/useModal';
+import { stringToKebabCase } from '../../utils/string';
 
 interface TarotCardModalProps {
   card: {
@@ -24,6 +26,7 @@ export function TarotCardModal({ card, isOpen, onClose }: TarotCardModalProps) {
   if (!isOpen || !card) return null;
 
   const isMajorArcana = !card.name.includes(' of ');
+  const cardSlug = stringToKebabCase(card.name);
 
   return (
     <div
@@ -47,7 +50,16 @@ export function TarotCardModal({ card, isOpen, onClose }: TarotCardModalProps) {
           keywords={card.keywords}
           information={card.information}
           variant={isMajorArcana ? 'major' : 'minor'}
+          disableLink
         />
+        <div className='mt-4'>
+          <Link
+            href={`/grimoire/tarot/${cardSlug}`}
+            className='text-xs text-lunary-primary-300 hover:text-lunary-primary-200 transition-colors'
+          >
+            Continue to the full {card.name} meaning →
+          </Link>
+        </div>
       </div>
     </div>
   );

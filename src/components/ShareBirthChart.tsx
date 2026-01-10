@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useMemo } from 'react';
 import Image from 'next/image';
 import { Share2, X, Download, Copy, Check, Loader2, Link2 } from 'lucide-react';
 import { BirthChartData } from '../../utils/astrology/birthChart';
@@ -102,6 +102,10 @@ export function ShareBirthChart({
   const [imageBlob, setImageBlob] = useState<Blob | null>(null);
   const [linkCopied, setLinkCopied] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [shareRecord, setShareRecord] = useState<{
+    shareId: string;
+    shareUrl: string;
+  } | null>(null);
 
   const firstName = userName?.trim() ? userName.split(' ')[0] : '';
 
@@ -113,17 +117,19 @@ export function ShareBirthChart({
   const dominantModality = getModalityCounts(birthChart);
   const insight = getChartInsight(birthChart);
 
-  const placementsForOg = birthChart.map((p) => ({
-    body: p.body,
-    sign: p.sign,
-    degree: p.degree,
-    minute: p.minute,
-    eclipticLongitude: p.eclipticLongitude,
-    retrograde: p.retrograde,
-    house: p.house,
-  }));
-
-  const placementsParam = JSON.stringify(placementsForOg);
+  const placementsForOg = useMemo(
+    () =>
+      birthChart.map((p) => ({
+        body: p.body,
+        sign: p.sign,
+        degree: p.degree,
+        minute: p.minute,
+        eclipticLongitude: p.eclipticLongitude,
+        retrograde: p.retrograde,
+        house: p.house,
+      })),
+    [birthChart],
+  );
 
   // const housesForOg = birthChart.map((p) => ({
   //   body: p.body,
@@ -147,46 +153,85 @@ export function ShareBirthChart({
     if (insight) url.searchParams.set('insight', insight);
     return url.toString();
   })();
+  const socialShareUrl = shareRecord?.shareUrl ?? shareUrl;
 
-  const generateCard = useCallback(async () => {
+  const generateCard = useCallback<
+    () => Promise<{ shareId: string; shareUrl: string } | undefined>
+  >(async () => {
     setLoading(true);
     setError(null);
 
     try {
-      const ogParams = new URLSearchParams({
-        name: firstName,
-        sun: sun?.sign || '',
-        moon: moon?.sign || '',
-        rising: rising?.sign || '',
-        element: dominantElement,
-        modality: dominantModality,
-        insight: insight.substring(0, 160),
-        placements: placementsParam,
-        // houses: housesParam,
-      });
+      let currentShareId = shareRecord?.shareId;
+      let currentShareUrl = shareRecord?.shareUrl;
 
-      const ogImageUrl = `/api/og/share/birth-chart?${ogParams.toString()}`;
+      if (!currentShareId || !currentShareUrl) {
+        const response = await fetch('/api/share/birth-chart', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            name: firstName,
+            date: userBirthday,
+            sun: sun?.sign,
+            moon: moon?.sign,
+            rising: rising?.sign,
+            element: dominantElement,
+            modality: dominantModality,
+            insight: insight.substring(0, 160),
+            placements: placementsForOg,
+          }),
+        });
+
+        const data = await response.json().catch(() => ({}));
+        if (!response.ok) {
+          throw new Error(
+            (data as { error?: string }).error || 'Failed to create share link',
+          );
+        }
+
+        if (!data.shareId || !data.shareUrl) {
+          throw new Error('Share API did not return a link');
+        }
+
+        currentShareId = data.shareId;
+        currentShareUrl = data.shareUrl;
+
+        if (!currentShareId || !currentShareUrl) {
+          throw new Error('Share link unavailable');
+        }
+
+        setShareRecord({ shareId: currentShareId, shareUrl: currentShareUrl });
+        setLinkCopied(false);
+      }
+
+      const ogImageUrl = `/api/og/share/birth-chart?shareId=${encodeURIComponent(
+        currentShareId,
+      )}`;
 
       const imageResponse = await fetch(ogImageUrl);
       if (!imageResponse.ok) throw new Error('Failed to generate image');
 
       const blob = await imageResponse.blob();
       setImageBlob(blob);
+      return { shareId: currentShareId, shareUrl: currentShareUrl };
     } catch (err) {
       console.error('Error generating card:', err);
       setError(err instanceof Error ? err.message : 'Failed to generate card');
+      return undefined;
     } finally {
       setLoading(false);
     }
   }, [
     firstName,
+    userBirthday,
     sun,
     moon,
     rising,
     dominantElement,
     dominantModality,
     insight,
-    placementsParam,
+    placementsForOg,
+    shareRecord,
   ]);
 
   const handleOpen = async () => {
@@ -199,16 +244,26 @@ export function ShareBirthChart({
   const handleShare = async () => {
     if (!imageBlob) return;
 
+    let shareInfo: { shareId: string; shareUrl: string } | null = shareRecord;
+    if (!shareInfo) {
+      shareInfo = (await generateCard()) ?? null;
+    }
+    const shareUrlToUse = shareInfo?.shareUrl || shareUrl;
+
     const file = new File([imageBlob], 'my-birth-chart.png', {
       type: 'image/png',
     });
+    const shareText = `${bodiesSymbols.sun} ${sun?.sign} Sun · ${bodiesSymbols.moon} ${moon?.sign} Moon · ${bodiesSymbols.ascendant} ${rising?.sign} Rising`;
+    const shareMessage = shareUrlToUse
+      ? `${shareText}\n${shareUrlToUse}`
+      : shareText;
 
     if (navigator.share && navigator.canShare?.({ files: [file] })) {
       try {
         await navigator.share({
           files: [file],
           title: `${firstName ? `${firstName}'s` : 'My'} Birth Chart`,
-          text: `${bodiesSymbols.sun} ${sun?.sign} Sun · ${bodiesSymbols.moon} ${moon?.sign} Moon · ${bodiesSymbols.ascendant} ${rising?.sign} Rising`,
+          text: shareMessage,
         });
       } catch (err) {
         if ((err as Error).name !== 'AbortError') {
@@ -235,7 +290,15 @@ export function ShareBirthChart({
 
   const handleCopyLink = async () => {
     try {
-      await navigator.clipboard.writeText(shareUrl);
+      let shareInfo: { shareId: string; shareUrl: string } | null = shareRecord;
+      if (!shareInfo) {
+        shareInfo = (await generateCard()) ?? null;
+      }
+      const urlToCopy = shareInfo?.shareUrl ?? shareUrl;
+      if (!urlToCopy) {
+        throw new Error('Share link unavailable');
+      }
+      await navigator.clipboard.writeText(urlToCopy);
       setLinkCopied(true);
       setTimeout(() => setLinkCopied(false), 2000);
     } catch (err) {
@@ -363,7 +426,7 @@ export function ShareBirthChart({
                     {/* Social Share */}
                     <div className='flex flex-col gap-3 pt-2'>
                       <a
-                        href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(`Check out my birth chart! ☀️ ${sun?.sign} Sun · 🌙 ${moon?.sign} Moon · ⬆️ ${rising?.sign} Rising`)}&url=${encodeURIComponent(shareUrl)}`}
+                        href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(`Check out my birth chart! ☀️ ${sun?.sign} Sun · 🌙 ${moon?.sign} Moon · ⬆️ ${rising?.sign} Rising`)}&url=${encodeURIComponent(socialShareUrl)}`}
                         target='_blank'
                         rel='noopener noreferrer'
                         className='flex-1 flex items-center justify-center gap-2 py-2.5 border border-zinc-700 hover:bg-zinc-800 text-zinc-300 rounded-lg transition-colors text-sm'
@@ -378,7 +441,7 @@ export function ShareBirthChart({
                         X
                       </a>
                       <a
-                        href={`https://www.threads.net/intent/post?text=${encodeURIComponent(`Check out my birth chart! ☀️ ${sun?.sign} Sun · 🌙 ${moon?.sign} Moon · ⬆️ ${rising?.sign} Rising ${shareUrl}`)}`}
+                        href={`https://www.threads.net/intent/post?text=${encodeURIComponent(`Check out my birth chart! ☀️ ${sun?.sign} Sun · 🌙 ${moon?.sign} Moon · ⬆️ ${rising?.sign} Rising ${socialShareUrl}`)}`}
                         target='_blank'
                         rel='noopener noreferrer'
                         className='flex-1 flex items-center justify-center gap-2 py-2.5 border border-zinc-700 hover:bg-zinc-800 text-zinc-300 rounded-lg transition-colors text-sm'

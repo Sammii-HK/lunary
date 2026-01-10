@@ -1,3 +1,66 @@
+function sentenceCase(value: string) {
+  if (!value) return value;
+  return value.charAt(0).toUpperCase() + value.slice(1);
+}
+
+function formatSentenceList(items: string[]) {
+  return items.map((item) => sentenceCase(item)).join(', ');
+}
+
+function buildTransitMeaning(transit: {
+  title: string;
+  description: string;
+  dates: string;
+  signs: string[];
+  themes: string[];
+  doList: string[];
+  avoidList: string[];
+}) {
+  return `
+## ${transit.title}
+
+${transit.description}
+
+**Who this is for**  
+${transit.signs.join(', ')} ${transit.signs.length > 1 ? 'are' : 'is'} the placements this transit lands strongest in, and anyone navigating ${transit.themes.join(
+    ', ',
+  )} themes right now will notice the energy shifting toward ${transit.themes[0]} and beyond.
+
+> This transit doesn’t play out the same for everyone. Your rising sign, houses, and natal aspects change how this energy lands.
+
+**Want to know how ${transit.title} affects your chart specifically?**  
+[View your personal transit interpretation →](/horoscope)
+
+### When does this transit occur?
+
+${transit.dates}
+
+### Signs most affected
+
+${transit.signs.join(', ')} ${transit.signs.length > 1 ? 'are' : 'is'} most directly impacted.
+
+### Key themes
+
+${transit.themes.map((t) => `- ${t.charAt(0).toUpperCase() + t.slice(1)}`).join('\n')}
+
+### How this transit may show up for you
+
+Depending on the house this transit activates in your natal chart, you may notice changes around:
+${transit.themes.map((t) => `- ${t}`).join('\n')}
+
+### How it affects you personally
+
+When ${transit.title} crosses your natal sky, these themes can touch relationships, work, and personal rhythm—pay attention to how it lands in your chart. Revisit your [horoscope](/horoscope) for day-by-day timing and the [birth chart guide](/birth-chart) to see which houses and aspects are active so you can plan your next move with confidence.
+
+### What to focus on
+
+${transit.doList.map((d) => `- ${sentenceCase(d)}`).join('\n')}
+
+### What to avoid
+
+${transit.avoidList.map((a) => `- ${sentenceCase(a)}`).join('\n')}
+`;
+}
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import {
@@ -25,8 +88,12 @@ export async function generateMetadata({
   }
 
   return createGrimoireMetadata({
-    title: `${transit.title}: ${transit.transitType} Meaning & Dates | Lunary`,
-    description: `${transit.title} (${transit.dates}). ${transit.description.slice(0, 150)}...`,
+    title: `${transit.title}: ${transit.transitType} | Meaning, Effects & What to Do | Lunary`,
+    description: `${transit.title} (${transit.dates}) lands in ${transit.signs.join(
+      ', ',
+    )} and highlights ${transit.themes.join(
+      ', ',
+    )}—learn how to work with this ${transit.transitType.toLowerCase()} energy.`,
     keywords: [
       transit.title.toLowerCase(),
       transit.transitType.toLowerCase(),
@@ -59,24 +126,38 @@ export default async function TransitPage({
 
   const faqs = [
     {
-      question: `What is ${transit.title}?`,
-      answer: `${transit.title} is a ${transit.transitType.toLowerCase()} transit occurring in ${transit.year}. ${transit.description.slice(0, 100)}...`,
+      question: `What does ${transit.title} mean in astrology?`,
+      answer: `${transit.description} It is a ${transit.transitType.toLowerCase()} moment where ${transit.planet} keeps shifting focus through ${transit.signs.join(
+        ', ',
+      )}.`,
     },
     {
-      question: `When does ${transit.title} occur?`,
+      question: `When is ${transit.title}?`,
       answer: `${transit.title} occurs ${transit.dates}.`,
     },
     {
-      question: `Which signs are most affected by ${transit.title}?`,
-      answer: `${transit.signs.join(', ')} ${transit.signs.length > 1 ? 'are' : 'is'} most directly impacted by this transit.`,
+      question: `Is ${transit.title} good or bad?`,
+      answer: `${transit.title} is considered ${transit.tone.toLowerCase()} How it feels depends on your natal chart and the house it activates.`,
     },
     {
-      question: `What should I do during ${transit.title}?`,
-      answer: `During ${transit.title}, focus on ${transit.doList.slice(0, 2).join(' and ').toLowerCase()}.`,
+      question: `Which zodiac signs feel ${transit.title} the most?`,
+      answer: `${transit.signs.join(', ')} tend to feel this transit most strongly.`,
     },
     {
-      question: `What should I avoid during ${transit.title}?`,
-      answer: `During ${transit.title}, avoid ${transit.avoidList.slice(0, 2).join(' and ').toLowerCase()}.`,
+      question: `How do I work with ${transit.title}?`,
+      answer: `Lean into ${formatSentenceList(transit.doList)} and keep a check on ${formatSentenceList(
+        transit.avoidList,
+      )} so you can stay grounded in this ${transit.tone.toLowerCase()} energy.`,
+    },
+    {
+      question: `How does ${transit.title} affect career or relationships?`,
+      answer: `The ${transit.themes.join(
+        ', ',
+      )} themes can make you reassess ambitions and how you relate to others, so keep conversations open and let practical adjustments guide the way.`,
+    },
+    {
+      question: `How does ${transit.title} affect my personal chart?`,
+      answer: `Your rising sign, house placements, and natal aspects determine how this transit plays out. A personalised reading shows timing and impact.`,
     },
   ];
 
@@ -103,32 +184,10 @@ export default async function TransitPage({
         question: `What is ${transit.title}?`,
         answer: transit.description,
       }}
-      tldr={`${transit.title} (${transit.dates}). Planet: ${transit.planet}. Signs: ${transit.signs.join(', ')}. Key themes: ${transit.themes.join(', ')}.`}
-      meaning={`
-## ${transit.title}
-
-${transit.description}
-
-### When Does This Transit Occur?
-
-${transit.dates}
-
-### Signs Most Affected
-
-${transit.signs.join(', ')} ${transit.signs.length > 1 ? 'are' : 'is'} directly impacted by this transit.
-
-### Key Themes
-
-${transit.themes.map((t) => `- ${t.charAt(0).toUpperCase() + t.slice(1)}`).join('\n')}
-
-### What to Do During This Transit
-
-${transit.doList.map((d) => `- ${d}`).join('\n')}
-
-### What to Avoid
-
-${transit.avoidList.map((a) => `- ${a}`).join('\n')}
-      `}
+      tldr={`${transit.title} (${transit.dates}) is a ${transit.tone.toLowerCase()} ${transit.transitType.toLowerCase()} led by ${transit.planet}. Signs: ${transit.signs.join(
+        ', ',
+      )}. Key themes: ${transit.themes.join(', ')}—expect shifts in focus that feel like ${transit.tone.toLowerCase()} momentum, and ground it by revisiting your chart.`}
+      meaning={buildTransitMeaning(transit)}
       rituals={transit.doList}
       emotionalThemes={transit.themes.map(
         (t) => t.charAt(0).toUpperCase() + t.slice(1),
@@ -159,7 +218,7 @@ ${transit.avoidList.map((a) => `- ${a}`).join('\n')}
           type: 'Zodiac' as const,
         })),
       ]}
-      ctaText='See how this transit affects your chart'
+      ctaText={`See how ${transit.title} affects your chart, timing, and next steps`}
       ctaHref='/horoscope'
       sources={[{ name: 'Ephemeris calculations' }]}
       faqs={faqs}

@@ -1,6 +1,7 @@
 import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { SEOContentTemplate } from '@/components/grimoire/SEOContentTemplate';
+import { NumerologyProfileCalculator } from '@/components/grimoire/NumerologyProfileCalculator';
 import { lifePathNumbers } from '@/constants/grimoire/numerology-data';
 
 const masterNumberKeys = ['11', '22', '33'];
@@ -220,7 +221,10 @@ Keywords: ${numberData.keywords.join(', ')}`}
         ctaText={`Discover if you have a Master Number in your chart`}
         ctaHref='/pricing'
         faqs={faqs}
-      />
+        childrenPosition='before-faqs'
+      >
+        <NumerologyProfileCalculator />
+      </SEOContentTemplate>
     </div>
   );
 }

@@ -439,15 +439,19 @@ function getGlossaryConnections(_term: string): CosmicConnectionSection[] {
 function getHubTransitsConnections(): CosmicConnectionSection[] {
   return [
     {
-      title: 'Related Pages',
+      title: 'Transit Resources',
       links: [
-        { label: 'All Planets', href: '/grimoire/astronomy/planets' },
         {
-          label: 'Birth Chart Guide',
-          href: '/grimoire/guides/birth-chart-complete-guide',
+          label: 'Daily Horoscope & Transit Readings',
+          href: '/horoscope',
         },
-        { label: 'Daily Horoscope', href: '/horoscope' },
-        { label: 'Your Forecast', href: '/forecast' },
+        { label: 'Birth Chart & Houses', href: '/birth-chart' },
+        {
+          label: 'Planets Hub',
+          href: '/grimoire/astronomy/planets',
+        },
+        { label: 'Zodiac Signs', href: '/grimoire/zodiac' },
+        { label: 'Houses Guide', href: '/grimoire/houses' },
       ],
     },
   ];

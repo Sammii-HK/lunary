@@ -197,7 +197,7 @@ export default async function YearHoroscopePage({
             href='/horoscope'
             className='inline-flex px-6 py-3 rounded-lg bg-lunary-primary-900/20 hover:bg-lunary-primary-900/30 border border-lunary-primary-700 text-lunary-primary-300 font-medium transition-colors'
           >
-            Get Personalized Forecast
+            Get your personalised horoscope based on your full birth chart
           </Link>
         </section>
         <ExploreGrimoire />
