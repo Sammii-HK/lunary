@@ -195,6 +195,11 @@ export function ShareBirthChart({
 
         currentShareId = data.shareId;
         currentShareUrl = data.shareUrl;
+
+        if (!currentShareId || !currentShareUrl) {
+          throw new Error('Share link unavailable');
+        }
+
         setShareRecord({ shareId: currentShareId, shareUrl: currentShareUrl });
         setLinkCopied(false);
       }
@@ -239,9 +244,9 @@ export function ShareBirthChart({
   const handleShare = async () => {
     if (!imageBlob) return;
 
-    let shareInfo = shareRecord;
+    let shareInfo: { shareId: string; shareUrl: string } | null = shareRecord;
     if (!shareInfo) {
-      shareInfo = await generateCard();
+      shareInfo = (await generateCard()) ?? null;
     }
     const shareUrlToUse = shareInfo?.shareUrl || shareUrl;
 
@@ -285,9 +290,9 @@ export function ShareBirthChart({
 
   const handleCopyLink = async () => {
     try {
-      let shareInfo = shareRecord;
+      let shareInfo: { shareId: string; shareUrl: string } | null = shareRecord;
       if (!shareInfo) {
-        shareInfo = await generateCard();
+        shareInfo = (await generateCard()) ?? null;
       }
       const urlToCopy = shareInfo?.shareUrl ?? shareUrl;
       if (!urlToCopy) {

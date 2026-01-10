@@ -228,19 +228,19 @@ export function NumerologyProfileCalculator({
   };
 
   const shareAllNumbers = () => {
-    const shareNumbers: NumerologyShareNumber[] = cards
-      .map((card) => {
-        const cardValue = card.result?.result ?? 0;
-        if (!cardValue) return null;
-        return {
+    const shareNumbers: NumerologyShareNumber[] = cards.flatMap((card) => {
+      const cardValue = card.result?.result ?? 0;
+      if (!cardValue) return [];
+      return [
+        {
           label: card.title,
           value: cardValue,
           meaning: card.result
             ? getNumberMeaning(card.id, cardValue)
             : undefined,
-        };
-      })
-      .filter((entry): entry is NumerologyShareNumber => Boolean(entry));
+        },
+      ];
+    });
 
     if (!shareNumbers.length) return;
 

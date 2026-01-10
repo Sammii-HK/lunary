@@ -35,15 +35,12 @@ function parseInlineMarkdown(text: string): React.ReactNode[] {
       break;
     }
 
-    nextMatch = candidates.reduce((acc, candidate) => {
-      if (
-        !acc ||
-        (candidate.match.index ?? Infinity) < (acc.match.index ?? Infinity)
-      ) {
+    nextMatch = candidates.slice(1).reduce((acc, candidate) => {
+      if ((candidate.match.index ?? Infinity) < (acc.match.index ?? Infinity)) {
         return candidate;
       }
       return acc;
-    }, null);
+    }, candidates[0]);
 
     if (!nextMatch) {
       result.push(remaining);

@@ -23,9 +23,9 @@ const buildOgImageUrl = (shareId: string) =>
   `${APP_URL}/api/og/share/birth-chart?shareId=${encodeURIComponent(shareId)}`;
 
 type ShareBirthChartSharePageProps = {
-  params: {
+  params: Promise<{
     shareId: string;
-  };
+  }>;
 };
 
 export async function generateMetadata({
