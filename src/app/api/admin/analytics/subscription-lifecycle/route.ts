@@ -10,13 +10,16 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const range = resolveDateRange(searchParams, 30);
 
-    // Get subscription states breakdown
+    // Use only Stripe-backed subscriptions to avoid legacy/test rows.
     const statesResult = await sql`
       SELECT 
         status,
         COUNT(*) as count
       FROM subscriptions
-      WHERE (user_email IS NULL OR (user_email NOT LIKE ${TEST_EMAIL_PATTERN} AND user_email != ${TEST_EMAIL_EXACT}))
+      WHERE stripe_subscription_id IS NOT NULL
+        AND updated_at >= ${formatTimestamp(range.start)}
+        AND updated_at <= ${formatTimestamp(range.end)}
+        AND (user_email IS NULL OR (user_email NOT LIKE ${TEST_EMAIL_PATTERN} AND user_email != ${TEST_EMAIL_EXACT}))
       GROUP BY status
     `;
 
@@ -31,14 +34,15 @@ export async function GET(request: NextRequest) {
     // Calculate churn rate trends
     const churnTrendsResult = await sql`
       SELECT 
-        DATE(created_at) as date,
+        DATE(updated_at) as date,
         COUNT(*) as churned
-      FROM conversion_events
-      WHERE event_type IN ('subscription_cancelled', 'subscription_ended')
-        AND created_at >= ${formatTimestamp(range.start)}
-        AND created_at <= ${formatTimestamp(range.end)}
+      FROM subscriptions
+      WHERE status IN ('cancelled', 'canceled', 'ended')
+        AND stripe_subscription_id IS NOT NULL
+        AND updated_at >= ${formatTimestamp(range.start)}
+        AND updated_at <= ${formatTimestamp(range.end)}
         AND (user_email IS NULL OR (user_email NOT LIKE ${TEST_EMAIL_PATTERN} AND user_email != ${TEST_EMAIL_EXACT}))
-      GROUP BY DATE(created_at)
+      GROUP BY DATE(updated_at)
       ORDER BY date ASC
     `;
 
@@ -59,6 +63,7 @@ export async function GET(request: NextRequest) {
         ) as avg_days
       FROM subscriptions
       WHERE status IN ('cancelled', 'canceled', 'ended')
+        AND stripe_subscription_id IS NOT NULL
         AND updated_at > created_at
         AND (user_email IS NULL OR (user_email NOT LIKE ${TEST_EMAIL_PATTERN} AND user_email != ${TEST_EMAIL_EXACT}))
     `;
@@ -80,6 +85,12 @@ export async function GET(request: NextRequest) {
         AND ce1.created_at >= ${formatTimestamp(range.start)}
         AND ce1.created_at <= ${formatTimestamp(range.end)}
         AND (ce1.user_email IS NULL OR (ce1.user_email NOT LIKE ${TEST_EMAIL_PATTERN} AND ce1.user_email != ${TEST_EMAIL_EXACT}))
+        AND EXISTS (
+          SELECT 1
+          FROM subscriptions s
+          WHERE s.user_id = ce1.user_id
+            AND s.stripe_subscription_id IS NOT NULL
+        )
       GROUP BY ce1.event_type, ce2.event_type
     `;
 
