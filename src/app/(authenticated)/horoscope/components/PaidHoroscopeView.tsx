@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import dayjs from 'dayjs';
-import { ChevronDown, Heart, Briefcase, Sparkles } from 'lucide-react';
+import { ChevronDown, Heart, Briefcase, Share2, Sparkles } from 'lucide-react';
 import { getEnhancedPersonalizedHoroscope } from '../../../../../utils/astrology/enhancedHoroscope';
 import {
   getBirthChartFromProfile,
@@ -26,6 +26,13 @@ import {
   getNumerologyDetail,
   type NumerologyDetailContext,
 } from '@/lib/numerology/numerologyDetails';
+import {
+  buildHoroscopeNumerologyShareUrl,
+  getShareOrigin,
+  type NumerologyShareNumber,
+} from '@/lib/og/horoscopeShare';
+import { useOgShareModal } from '@/hooks/useOgShareModal';
+import { ShareImageModal } from '@/components/og/ShareImageModal';
 import {
   NumerologyInfoModal,
   type NumerologyModalPayload,
@@ -608,6 +615,18 @@ export function PaidHoroscopeView({
   const [isLoading, setIsLoading] = useState(true);
   const [numerologyModal, setNumerologyModal] =
     useState<NumerologyModalPayload | null>(null);
+  const {
+    shareTarget,
+    sharePreviewUrl,
+    shareLoading,
+    shareError,
+    isOpen: isShareModalOpen,
+    openShareModal,
+    closeShareModal,
+    handleShareImage,
+    handleDownloadShareImage,
+    handleCopyShareLink,
+  } = useOgShareModal();
 
   const birthChart = getBirthChartFromProfile(profile);
 
@@ -669,6 +688,67 @@ export function PaidHoroscopeView({
       keywords: detail?.keywords,
       sections: detail?.sections,
       extraNote: detail?.extraNote,
+    });
+  };
+  const getPageUrl = () =>
+    typeof window !== 'undefined'
+      ? window.location.href
+      : `${getShareOrigin()}/horoscope`;
+
+  const handleShareHoroscope = () => {
+    if (!horoscope) return;
+    const numbers: NumerologyShareNumber[] = [
+      {
+        label: 'Universal Day',
+        value: universalDay.number,
+        meaning: universalDay.meaning,
+      },
+    ];
+    if (personalDay) {
+      numbers.push({
+        label: 'Personal Day',
+        value: personalDay.number,
+        meaning: personalDay.meaning,
+      });
+    }
+    const shareUrl = buildHoroscopeNumerologyShareUrl({
+      shareOrigin: getShareOrigin(),
+      highlightTitle: userName ? `${userName}'s Horoscope` : 'Your Horoscope',
+      highlight: horoscope.cosmicHighlight,
+      highlightSubtitle: horoscope.dailyGuidance,
+      date: dayjs().format('MMMM D, YYYY'),
+      name: userName,
+      variant: 'horoscope',
+      numbers,
+    });
+    openShareModal({
+      title: userName ? `${userName}'s Horoscope` : 'Your Horoscope',
+      description: horoscope.cosmicHighlight,
+      pageUrl: getPageUrl(),
+      ogUrl: shareUrl,
+    });
+  };
+
+  const shareNumberTile = (label: string, number: number, meaning?: string) => {
+    const shareUrl = buildHoroscopeNumerologyShareUrl({
+      shareOrigin: getShareOrigin(),
+      highlightTitle: label,
+      highlight: meaning ?? label,
+      date: dayjs().format('MMMM D, YYYY'),
+      variant: 'numerology-card',
+      numbers: [
+        {
+          label,
+          value: number,
+          meaning,
+        },
+      ],
+    });
+    openShareModal({
+      title: label,
+      description: meaning ?? label,
+      pageUrl: getPageUrl(),
+      ogUrl: shareUrl,
     });
   };
   const solarReturnData = userBirthday
@@ -734,12 +814,25 @@ export function PaidHoroscopeView({
       <StreakBanner location='horoscope' className='mb-2' />
 
       <div className='pt-6'>
-        <h1 className='text-2xl md:text-3xl font-light text-zinc-100 mb-2'>
-          {userName ? `${userName}'s Horoscope` : 'Your Horoscope'}
-        </h1>
-        <p className='text-sm text-zinc-400'>
-          Personalised guidance based on your birth chart
-        </p>
+        <div className='flex flex-wrap items-start justify-between gap-3'>
+          <div>
+            <h1 className='text-2xl md:text-3xl font-light text-zinc-100 mb-2'>
+              {userName ? `${userName}'s Horoscope` : 'Your Horoscope'}
+            </h1>
+            <p className='text-sm text-zinc-400'>
+              Personalised guidance based on your birth chart
+            </p>
+          </div>
+          <button
+            type='button'
+            onClick={handleShareHoroscope}
+            disabled={!horoscope}
+            className='inline-flex items-center gap-2 rounded-full border border-zinc-700 px-4 py-2 text-xs font-semibold tracking-wide uppercase text-zinc-200 transition hover:border-lunary-primary-500 hover:text-white disabled:cursor-not-allowed disabled:opacity-50'
+          >
+            <Share2 className='h-4 w-4' />
+            Share horoscope
+          </button>
+        </div>
       </div>
 
       {horoscope && (
@@ -755,51 +848,87 @@ export function PaidHoroscopeView({
               {horoscope.dailyGuidance}
             </p>
             <div className='mt-2 grid grid-cols-1 sm:grid-cols-2 gap-3'>
-              <button
-                type='button'
-                onClick={() =>
-                  openNumerologyModal(
-                    'Universal Day',
-                    universalDay.number,
-                    universalDay.meaning,
-                    'Daily universal numerology energy',
-                  )
-                }
-                className='rounded-lg border border-zinc-700 px-4 py-3 bg-zinc-900/40 text-center transition hover:border-lunary-primary-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-lunary-primary-400'
-              >
-                <div className='text-xs uppercase tracking-widest text-zinc-400'>
-                  Universal Day
-                </div>
-                <div className='text-3xl font-semibold text-lunary-accent-300'>
-                  {universalDay.number}
-                </div>
-                <p className='text-[11px] text-zinc-300'>
-                  {universalDay.meaning}
-                </p>
-              </button>
-              {personalDay ? (
+              <div className='relative'>
                 <button
                   type='button'
                   onClick={() =>
                     openNumerologyModal(
-                      'Personal Day',
-                      personalDay.number,
-                      personalDay.meaning,
-                      'Your personal day numerology focus',
+                      'Universal Day',
+                      universalDay.number,
+                      universalDay.meaning,
+                      'Daily universal numerology energy',
                     )
                   }
-                  className='rounded-lg border border-zinc-700 px-4 py-3 bg-zinc-900/40 text-center transition hover:border-emerald-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-300'
+                  className='rounded-lg border border-zinc-700 px-4 py-3 bg-zinc-900/40 text-center transition hover:border-lunary-primary-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-lunary-primary-400 w-full'
                 >
                   <div className='text-xs uppercase tracking-widest text-zinc-400'>
-                    Personal Day
+                    Universal Day
                   </div>
-                  <div className='text-3xl font-semibold text-emerald-300'>
-                    {personalDay.number}
+                  <div className='text-3xl font-semibold text-lunary-accent-300'>
+                    {universalDay.number}
                   </div>
                   <p className='text-[11px] text-zinc-300'>
-                    {personalDay.meaning}
+                    {universalDay.meaning}
                   </p>
                 </button>
+                <button
+                  type='button'
+                  onClick={(event) => {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    shareNumberTile(
+                      'Universal Day',
+                      universalDay.number,
+                      universalDay.meaning,
+                    );
+                  }}
+                  className='absolute top-3 right-3 flex h-8 w-8 items-center justify-center rounded-full border border-zinc-700 bg-zinc-950/50 text-zinc-400 transition hover:border-lunary-primary-500 hover:text-white'
+                  aria-label='Share Universal Day'
+                >
+                  <Share2 className='h-4 w-4' />
+                </button>
+              </div>
+              {personalDay ? (
+                <div className='relative'>
+                  <button
+                    type='button'
+                    onClick={() =>
+                      openNumerologyModal(
+                        'Personal Day',
+                        personalDay.number,
+                        personalDay.meaning,
+                        'Your personal day numerology focus',
+                      )
+                    }
+                    className='rounded-lg border border-zinc-700 px-4 py-3 bg-zinc-900/40 text-center transition hover:border-emerald-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-300 w-full'
+                  >
+                    <div className='text-xs uppercase tracking-widest text-zinc-400'>
+                      Personal Day
+                    </div>
+                    <div className='text-3xl font-semibold text-emerald-300'>
+                      {personalDay.number}
+                    </div>
+                    <p className='text-[11px] text-zinc-300'>
+                      {personalDay.meaning}
+                    </p>
+                  </button>
+                  <button
+                    type='button'
+                    onClick={(event) => {
+                      event.preventDefault();
+                      event.stopPropagation();
+                      shareNumberTile(
+                        'Personal Day',
+                        personalDay.number,
+                        personalDay.meaning,
+                      );
+                    }}
+                    className='absolute top-3 right-3 flex h-8 w-8 items-center justify-center rounded-full border border-zinc-700 bg-zinc-950/50 text-zinc-400 transition hover:border-emerald-400 hover:text-white'
+                    aria-label='Share Personal Day'
+                  >
+                    <Share2 className='h-4 w-4' />
+                  </button>
+                </div>
               ) : (
                 <div className='rounded-lg border border-zinc-700 px-4 py-3 bg-zinc-900/40 text-center'>
                   <div className='text-xs uppercase tracking-widest text-zinc-400'>
@@ -998,6 +1127,17 @@ export function PaidHoroscopeView({
         meaning={numerologyModal?.meaning ?? ''}
         energy={numerologyModal?.energy}
         keywords={numerologyModal?.keywords}
+      />
+      <ShareImageModal
+        isOpen={isShareModalOpen}
+        target={shareTarget}
+        previewUrl={sharePreviewUrl}
+        loading={shareLoading}
+        error={shareError}
+        onClose={closeShareModal}
+        onShare={handleShareImage}
+        onDownload={handleDownloadShareImage}
+        onCopy={handleCopyShareLink}
       />
     </div>
   );

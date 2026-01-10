@@ -20,9 +20,17 @@ import {
   type NumerologyDetailContext,
 } from '@/lib/numerology/numerologyDetails';
 import {
+  buildHoroscopeNumerologyShareUrl,
+  getShareOrigin,
+  type NumerologyShareNumber,
+} from '@/lib/og/horoscopeShare';
+import { useOgShareModal } from '@/hooks/useOgShareModal';
+import { ShareImageModal } from '@/components/og/ShareImageModal';
+import {
   NumerologyInfoModal,
   type NumerologyModalPayload,
 } from '@/components/grimoire/NumerologyInfoModal';
+import { Share2 } from 'lucide-react';
 
 interface NumerologyProfileCalculatorProps {
   children?: ReactNode;
@@ -180,6 +188,85 @@ export function NumerologyProfileCalculator({
   const [numberModal, setNumberModal] = useState<NumerologyModalPayload | null>(
     null,
   );
+  const {
+    shareTarget,
+    sharePreviewUrl,
+    shareLoading,
+    shareError,
+    isOpen: isShareModalOpen,
+    openShareModal,
+    closeShareModal,
+    handleShareImage,
+    handleDownloadShareImage,
+    handleCopyShareLink,
+  } = useOgShareModal();
+  const getPageUrl = () =>
+    typeof window !== 'undefined'
+      ? window.location.href
+      : `${getShareOrigin()}/grimoire/numerology`;
+
+  const shareNumber = (label: string, value: number, meaning?: string) => {
+    if (!value) return;
+    const shareUrl = buildHoroscopeNumerologyShareUrl({
+      shareOrigin: getShareOrigin(),
+      highlightTitle: label,
+      highlight: meaning ?? `${label} ${value}`,
+      variant: 'numerology-card',
+      numbers: [{ label, value, meaning }],
+      date: new Date().toLocaleDateString('en-US', {
+        month: 'long',
+        day: 'numeric',
+        year: 'numeric',
+      }),
+    });
+    openShareModal({
+      title: label,
+      description: meaning ?? `${label} ${value}`,
+      pageUrl: getPageUrl(),
+      ogUrl: shareUrl,
+    });
+  };
+
+  const shareAllNumbers = () => {
+    const shareNumbers: NumerologyShareNumber[] = cards
+      .map((card) => {
+        const cardValue = card.result?.result ?? 0;
+        if (!cardValue) return null;
+        return {
+          label: card.title,
+          value: cardValue,
+          meaning: card.result
+            ? getNumberMeaning(card.id, cardValue)
+            : undefined,
+        };
+      })
+      .filter((entry): entry is NumerologyShareNumber => Boolean(entry));
+
+    if (!shareNumbers.length) return;
+
+    const highlight = shareNumbers
+      .map((entry) => `${entry.label} ${entry.value}`)
+      .join(' • ');
+
+    const shareUrl = buildHoroscopeNumerologyShareUrl({
+      shareOrigin: getShareOrigin(),
+      highlightTitle: 'Numerology Snapshot',
+      highlight,
+      variant: 'numerology-profile',
+      numbers: shareNumbers,
+      date: new Date().toLocaleDateString('en-US', {
+        month: 'long',
+        day: 'numeric',
+        year: 'numeric',
+      }),
+    });
+    openShareModal({
+      title: 'Numerology Snapshot',
+      description: highlight,
+      pageUrl: getPageUrl(),
+      ogUrl: shareUrl,
+    });
+  };
 
   return (
     <NumerologyProfileCalculatorContext.Provider value={value}>
@@ -222,6 +309,18 @@ export function NumerologyProfileCalculator({
             </div>
           </div>
         </div>
+        {cards.some((card) => (card.result?.result ?? 0) > 0) && (
+          <div className='flex justify-end'>
+            <button
+              type='button'
+              onClick={shareAllNumbers}
+              className='inline-flex items-center gap-2 rounded-full border border-zinc-700 px-4 py-2 text-sm font-semibold text-zinc-100 transition hover:border-lunary-primary-500 hover:text-white'
+            >
+              <Share2 className='h-4 w-4' />
+              Share all numbers
+            </button>
+          </div>
+        )}
 
         <div className='grid gap-4 md:grid-cols-3'>
           {cards.map((card) => {
@@ -241,19 +340,44 @@ export function NumerologyProfileCalculator({
 
             const cardBody = (
               <div className='w-full'>
-                <div className='text-xs font-semibold uppercase tracking-wide text-zinc-500 mb-2'>
-                  {card.description}
-                </div>
-                <div>
-                  <p className='text-2xl font-light text-zinc-200'>
-                    {card.title}
-                  </p>
-                  <p className='text-5xl font-light text-lunary-primary-300 mt-2'>
-                    {value > 0 ? value : '--'}
-                  </p>
-                  <p className='text-sm text-zinc-400 mt-1'>
-                    {value > 0 ? meaning : card.helper}
-                  </p>
+                <div className='flex items-start justify-between gap-3'>
+                  <div className='space-y-2'>
+                    <div className='text-xs font-semibold uppercase tracking-wide text-zinc-500'>
+                      {card.description}
+                    </div>
+                    <div>
+                      <p className='text-2xl font-light text-zinc-200'>
+                        {card.title}
+                      </p>
+                      <p className='text-5xl font-light text-lunary-primary-300 mt-2'>
+                        {value > 0 ? value : '--'}
+                      </p>
+                      <p className='text-sm text-zinc-400 mt-1'>
+                        {value > 0 ? meaning : card.helper}
+                      </p>
+                    </div>
+                  </div>
+                  {value > 0 && (
+                    <span
+                      role='button'
+                      tabIndex={0}
+                      aria-label={`Share ${card.title}`}
+                      onClick={(event) => {
+                        event.stopPropagation();
+                        shareNumber(card.title, value, meaning);
+                      }}
+                      onKeyDown={(event) => {
+                        if (event.key === 'Enter' || event.key === ' ') {
+                          event.preventDefault();
+                          event.stopPropagation();
+                          shareNumber(card.title, value, meaning);
+                        }
+                      }}
+                      className='flex h-8 w-8 cursor-pointer items-center justify-center rounded-full border border-zinc-700 bg-zinc-900/80 text-zinc-300 transition hover:border-lunary-primary-500 hover:text-white'
+                    >
+                      <Share2 className='h-4 w-4' />
+                    </span>
+                  )}
                 </div>
               </div>
             );
@@ -315,6 +439,17 @@ export function NumerologyProfileCalculator({
         extraNote={numberModal?.extraNote}
         ctaHref={numberModal?.ctaHref}
         ctaLabel={numberModal?.ctaLabel}
+      />
+      <ShareImageModal
+        isOpen={isShareModalOpen}
+        target={shareTarget}
+        previewUrl={sharePreviewUrl}
+        loading={shareLoading}
+        error={shareError}
+        onClose={closeShareModal}
+        onShare={handleShareImage}
+        onDownload={handleDownloadShareImage}
+        onCopy={handleCopyShareLink}
       />
     </NumerologyProfileCalculatorContext.Provider>
   );
