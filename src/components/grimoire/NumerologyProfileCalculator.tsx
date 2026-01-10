@@ -72,14 +72,14 @@ const INPUT_INFO = [
   },
 ];
 
+const STORAGE_KEYS = {
+  fullName: 'numerology-fullName',
+  birthDate: 'numerology-birthDate',
+};
+
 export function NumerologyProfileCalculator({
   children,
 }: NumerologyProfileCalculatorProps) {
-  const STORAGE_KEYS = {
-    fullName: 'numerology-fullName',
-    birthDate: 'numerology-birthDate',
-  };
-
   const [fullName, setFullName] = useState('');
   const [birthDate, setBirthDate] = useState('');
 
