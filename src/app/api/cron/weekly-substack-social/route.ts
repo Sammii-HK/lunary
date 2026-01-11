@@ -16,7 +16,7 @@ interface SucculentPostData {
   content: string;
   platforms: string[];
   scheduledDate: string;
-  media: Array<{
+  media?: Array<{
     type: 'image' | 'video';
     url: string;
     alt: string;
@@ -30,6 +30,26 @@ interface SucculentPostData {
   tiktokOptions?: {
     type: 'post';
   };
+}
+
+function stripMarkdown(input: string) {
+  return input
+    .replace(/\[(.*?)\]\([^)]*\)/g, '$1')
+    .replace(/[*_`>#-]/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+function truncateContent(content: string, maxLength: number) {
+  if (content.length <= maxLength) {
+    return content;
+  }
+  const truncated = content.slice(0, maxLength - 1);
+  const lastSpace = truncated.lastIndexOf(' ');
+  if (lastSpace > maxLength * 0.7) {
+    return `${truncated.slice(0, lastSpace)}…`;
+  }
+  return `${truncated}…`;
 }
 
 export async function GET(request: NextRequest) {
@@ -80,6 +100,10 @@ export async function GET(request: NextRequest) {
 
     // Declare shortFormVideoUrl in broader scope for use in social posts section
     let shortFormVideoUrl: string | null = null;
+    let weeklyData: Awaited<ReturnType<typeof generateWeeklyContent>> | null =
+      null;
+    let freePost: ReturnType<typeof generateFreeSubstackPost> | null = null;
+    let paidPost: ReturnType<typeof generatePaidSubstackPost> | null = null;
 
     // Step 1: Publish to Substack (current week, offset 0)
     try {
@@ -91,9 +115,9 @@ export async function GET(request: NextRequest) {
       );
       weekStart.setHours(0, 0, 0, 0);
 
-      const weeklyData = await generateWeeklyContent(weekStart);
-      const freePost = generateFreeSubstackPost(weeklyData);
-      const paidPost = generatePaidSubstackPost(weeklyData);
+      weeklyData = await generateWeeklyContent(weekStart);
+      freePost = generateFreeSubstackPost(weeklyData);
+      paidPost = generatePaidSubstackPost(weeklyData);
 
       const substackResults = await publishBothTiers(freePost, paidPost);
       results.substack = substackResults;
@@ -257,42 +281,11 @@ export async function GET(request: NextRequest) {
         postTime.setHours(now.getHours() + 1);
       }
 
-      // 1. Instagram Feed Post (portrait 4:5) - uses medium caption
-      const igFeedPost: SucculentPostData = {
-        accountGroupId,
-        name: `Lunary Weekly - Instagram Feed - ${dateStr}`,
-        content: getCaption('medium', true),
-        platforms: ['instagram'],
-        scheduledDate: postTime.toISOString(),
-        media: [
-          {
-            type: 'image',
-            url: `${baseUrl}/api/social/images?week=0&format=portrait`,
-            alt: content.captions.short,
-          },
-        ],
-        instagramOptions: { type: 'post' },
-      };
+      // 1. Instagram is video-only; static posts are skipped here.
 
-      // 2. Instagram Story (story format) - uses short caption
+      // 2. Shared story-style timing anchor
       const storyTime = new Date(postTime);
       storyTime.setMinutes(storyTime.getMinutes() + 30);
-
-      const igStoryPost: SucculentPostData = {
-        accountGroupId,
-        name: `Lunary Weekly - Instagram Story - ${dateStr}`,
-        content: getCaption('short'),
-        platforms: ['instagram'],
-        scheduledDate: storyTime.toISOString(),
-        media: [
-          {
-            type: 'image',
-            url: `${baseUrl}/api/social/images?week=0&format=story`,
-            alt: content.captions.short,
-          },
-        ],
-        instagramOptions: { type: 'story' },
-      };
 
       // 3. TikTok (story format) - uses short caption with hashtags
       const tiktokPost: SucculentPostData = {
@@ -395,25 +388,22 @@ export async function GET(request: NextRequest) {
         ],
       };
 
-      // 9. Threads (square 1080x1080) - uses medium caption with hashtags
+      const threadsScriptSource = freePost?.content || '';
+      const threadsScript = truncateContent(
+        stripMarkdown(threadsScriptSource || content.captions.medium || ''),
+        420,
+      );
+
+      // 9. Threads (text-only) - uses written script
       const threadsPost: SucculentPostData = {
         accountGroupId,
         name: `Lunary Weekly - Threads - ${dateStr}`,
-        content: getCaption('medium', true),
+        content: threadsScript || getCaption('medium', false),
         platforms: ['threads'],
         scheduledDate: postTime.toISOString(),
-        media: [
-          {
-            type: 'image',
-            url: `${baseUrl}/api/social/images?week=0&format=square`,
-            alt: content.captions.short,
-          },
-        ],
       };
 
       const allPosts = [
-        igFeedPost,
-        igStoryPost,
         tiktokPost,
         fbPost,
         fbStoryPost,

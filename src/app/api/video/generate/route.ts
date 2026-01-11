@@ -103,7 +103,7 @@ function truncateContent(content: string, maxLength: number): string {
 
 /**
  * Schedule video to appropriate platforms based on type
- * - Short form: Instagram Stories, Instagram Reels, Threads, Twitter/X, Bluesky (scheduled)
+ * - Short form: Instagram Stories, Instagram Reels, Threads (text-only), Twitter/X, Bluesky (scheduled)
  * - Medium form: TikTok, Instagram Reels, YouTube Shorts (posted immediately)
  * - Long form: YouTube (already handled via upload route)
  */
@@ -194,7 +194,6 @@ async function scheduleVideoToPlatforms(
       content: threadsContent,
       platforms: ['threads'],
       scheduledDate: scheduledDate.toISOString(),
-      media: [{ type: 'video' as const, url: videoUrl, alt: title }],
     };
 
     // Twitter/X - 280 character limit
