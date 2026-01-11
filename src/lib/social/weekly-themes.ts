@@ -931,14 +931,14 @@ export function generateHashtags(
 
   // Third hashtag based on category (for variety, not brand)
   const categoryThirdHashtags: Record<string, string> = {
-    zodiac: '#cosmic',
-    tarot: '#divination',
+    zodiac: '#astrology',
+    tarot: '#tarot',
     lunar: '#moonmagic',
     planetary: '#astrology',
-    sabbat: '#witchcraft',
-    numerology: '#spirituality',
+    sabbat: '#wheeloftheyear',
+    numerology: '#numerology',
     crystals: '#crystalhealing',
-    chakras: '#spirituality',
+    chakras: '#chakras',
   };
   const thirdHashtag = categoryThirdHashtags[theme.category] || '#spirituality';
 

@@ -675,6 +675,14 @@ export default function AdminDashboard() {
       status: 'new',
     },
     {
+      title: 'Content Videos',
+      description: 'Generate weekly long-form videos and manage outputs',
+      href: '/content/videos',
+      icon: <Play className='h-5 w-5' />,
+      category: 'content',
+      status: 'active',
+    },
+    {
       title: 'Blog & Newsletter',
       description: 'Manage blog posts and email newsletters',
       href: '/admin/blog-manager',
