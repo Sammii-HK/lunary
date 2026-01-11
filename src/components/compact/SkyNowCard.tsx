@@ -164,6 +164,21 @@ export const SkyNowCard = () => {
   const [refreshState, setRefreshState] = useState<
     'idle' | 'success' | 'error'
   >('idle');
+  const handleRefreshLocation = async () => {
+    setRefreshState('idle');
+    try {
+      await requestLocation();
+      setRefreshState('success');
+    } catch {
+      setRefreshState('error');
+    } finally {
+      setShowLocationFeedback(true);
+      setTimeout(() => {
+        setShowLocationFeedback(false);
+        setRefreshState('idle');
+      }, 2000);
+    }
+  };
 
   const planets = useMemo(() => {
     if (!currentAstrologicalChart || currentAstrologicalChart.length === 0) {
@@ -194,22 +209,18 @@ export const SkyNowCard = () => {
         }
         badgeVariant={retrogradeCount > 0 ? 'danger' : 'default'}
         action={
-          <button
-            type='button'
+          <div
+            role='button'
+            tabIndex={0}
             onClick={async (event) => {
               event.stopPropagation();
-              setRefreshState('idle');
-              try {
-                await requestLocation();
-                setRefreshState('success');
-              } catch {
-                setRefreshState('error');
-              } finally {
-                setShowLocationFeedback(true);
-                setTimeout(() => {
-                  setShowLocationFeedback(false);
-                  setRefreshState('idle');
-                }, 2000);
+              await handleRefreshLocation();
+            }}
+            onKeyDown={(event) => {
+              if (event.key === 'Enter' || event.key === ' ') {
+                event.preventDefault();
+                event.stopPropagation();
+                void handleRefreshLocation();
               }
             }}
             aria-label='Refresh location used for Sky Now'
@@ -228,7 +239,7 @@ export const SkyNowCard = () => {
                 Failed
               </span>
             )}
-          </button>
+          </div>
         }
       />
       <div className='mt-2 space-y-1 w-full'>
