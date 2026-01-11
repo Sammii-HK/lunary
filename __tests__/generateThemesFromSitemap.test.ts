@@ -12,13 +12,31 @@ const sampleXml = `<?xml version="1.0" encoding="UTF-8"?>
     <loc>https://lunary.app/grimoire/tarot/the-magician</loc>
   </url>
   <url>
+    <loc>https://lunary.app/grimoire/tarot/the-high-priestess</loc>
+  </url>
+  <url>
+    <loc>https://lunary.app/grimoire/tarot/the-empress</loc>
+  </url>
+  <url>
     <loc>https://lunary.app/grimoire/astronomy/planets/mars</loc>
+  </url>
+  <url>
+    <loc>https://lunary.app/grimoire/astronomy/planets/venus</loc>
+  </url>
+  <url>
+    <loc>https://lunary.app/grimoire/astronomy/planets/jupiter</loc>
   </url>
   <url>
     <loc>https://lunary.app/about</loc>
   </url>
   <url>
     <loc>/grimoire/moon/phases/full-moon</loc>
+  </url>
+  <url>
+    <loc>/grimoire/moon/phases/new-moon</loc>
+  </url>
+  <url>
+    <loc>/grimoire/moon/phases/first-quarter</loc>
   </url>
   <url>
     <loc>not-a-url</loc>
@@ -43,14 +61,20 @@ describe('generateThemesFromSitemap', () => {
     const { buckets, themes } = buildThemesFromLocs(locs);
 
     expect(Object.keys(buckets)).toEqual(['astronomy', 'moon', 'tarot']);
-    expect(Object.keys(buckets.tarot.subthemes)).toEqual(['tarot-core']);
+    expect(Object.keys(buckets.tarot.subthemes)).toEqual([
+      'tarot-major-arcana',
+    ]);
     expect(Object.keys(buckets.astronomy.subthemes)).toEqual([
       'astronomy-planets',
     ]);
-    expect(Object.keys(buckets.moon.subthemes)).toEqual(['moon-core']);
+    expect(Object.keys(buckets.moon.subthemes)).toEqual(['moon-phases']);
 
     const themeIds = themes.map((theme) => theme.id);
-    expect(themeIds).toEqual(['astronomy-planets', 'moon-core', 'tarot-core']);
+    expect(themeIds).toEqual([
+      'astronomy-planets',
+      'moon-phases',
+      'tarot-major-arcana',
+    ]);
   });
 
   test('invalid or non-grimoire URLs are skipped', () => {
