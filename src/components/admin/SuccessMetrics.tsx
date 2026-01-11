@@ -76,7 +76,17 @@ export function SuccessMetrics({ data, loading }: SuccessMetricsProps) {
     );
   }
 
-  const metrics = [
+  type MetricDescriptor = {
+    label: string;
+    value: number;
+    trend: Trend;
+    change: number;
+    target?: { min: number; max: number } | null;
+    format: (value: number) => string;
+    subtitle?: string | null;
+  };
+
+  const metrics: MetricDescriptor[] = [
     {
       label: 'Daily Active Users (PostHog)',
       value: data.daily_active_users.value,
@@ -256,10 +266,10 @@ export function SuccessMetrics({ data, loading }: SuccessMetricsProps) {
               label={metric.label}
               value={metric.value}
               formattedValue={metric.format(metric.value)}
-              trend={metric.trend as Trend}
+              trend={metric.trend}
               change={metric.change}
               target={metric.target}
-              subtitle={metric.subtitle}
+              subtitle={metric.subtitle ?? undefined}
             />
           ))}
         </div>
