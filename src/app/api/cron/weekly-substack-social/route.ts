@@ -6,6 +6,7 @@ import {
   generateFreeSubstackPost,
   generatePaidSubstackPost,
 } from '../../../../../utils/substack/contentFormatter';
+import { generateReelHashtags } from '@/lib/video/narrative-generator';
 
 export const runtime = 'nodejs';
 export const maxDuration = 300;
@@ -263,13 +264,16 @@ export async function GET(request: NextRequest) {
       const getCaption = (
         captionType: 'short' | 'medium' | 'long',
         includeHashtags = false,
+        hashtagCount = 3,
+        hashtagsOverride?: string[],
       ) => {
         const caption =
           content.captions[captionType] || content.captions.medium;
         if (includeHashtags && content.hashtags) {
-          // Use exactly 3 hashtags for all platforms
-          const threeHashtags = content.hashtags.slice(0, 3).join(' ');
-          return `${caption}\n\n${threeHashtags}`;
+          const tags = (hashtagsOverride || content.hashtags)
+            .slice(0, hashtagCount)
+            .join(' ');
+          return `${caption}\n\n${tags}`;
         }
         return caption;
       };
@@ -287,21 +291,7 @@ export async function GET(request: NextRequest) {
       const storyTime = new Date(postTime);
       storyTime.setMinutes(storyTime.getMinutes() + 30);
 
-      // 3. TikTok (story format) - uses short caption with hashtags
-      const tiktokPost: SucculentPostData = {
-        accountGroupId,
-        name: `Lunary Weekly - TikTok - ${dateStr}`,
-        content: getCaption('short', true),
-        platforms: ['tiktok'],
-        scheduledDate: storyTime.toISOString(),
-        media: [
-          {
-            type: 'image',
-            url: `${baseUrl}/api/social/images?week=0&format=story`,
-            alt: content.captions.short,
-          },
-        ],
-      };
+      // 3. TikTok static posts are disabled (video-only)
 
       // 4. Facebook Post (landscape) - uses long caption
       const fbPostTime = new Date(postTime);
@@ -404,7 +394,6 @@ export async function GET(request: NextRequest) {
       };
 
       const allPosts = [
-        tiktokPost,
         fbPost,
         fbStoryPost,
         twitterPost,
@@ -412,6 +401,15 @@ export async function GET(request: NextRequest) {
         blueskyPost,
         threadsPost,
       ];
+
+      let reelHashtags: string[] | null = null;
+      if (weeklyData) {
+        try {
+          reelHashtags = await generateReelHashtags(weeklyData);
+        } catch (error) {
+          console.warn('Failed to generate reel hashtags:', error);
+        }
+      }
 
       // Add video posts if short-form video was generated
       if (shortFormVideoUrl) {
@@ -421,7 +419,7 @@ export async function GET(request: NextRequest) {
         const igReelPost: SucculentPostData = {
           accountGroupId,
           name: `Lunary Weekly - Instagram Reel - ${dateStr}`,
-          content: getCaption('medium', true),
+          content: getCaption('medium', true, 5, reelHashtags || undefined),
           platforms: ['instagram'],
           scheduledDate: reelTime.toISOString(),
           media: [
