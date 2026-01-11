@@ -233,7 +233,9 @@ export default function AnalyticsPage() {
           `/api/admin/analytics/user-growth?${queryParams}&granularity=${granularity}`,
         ),
         fetch(`/api/admin/analytics/activation?${queryParams}`),
-        fetch(`/api/admin/analytics/subscription-lifecycle?${queryParams}`),
+        fetch(
+          `/api/admin/analytics/subscription-lifecycle?${queryParams}&stripe=1`,
+        ),
         fetch(`/api/admin/analytics/plan-breakdown?${queryParams}`),
         fetch(`/api/admin/analytics/api-costs?${queryParams}`),
         fetch(`/api/admin/analytics/cohorts?${queryParams}&type=week&weeks=12`),
