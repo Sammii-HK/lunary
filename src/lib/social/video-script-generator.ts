@@ -466,26 +466,40 @@ async function generateTikTokScriptContent(
     }
   }
 
-  const prompt = `Create a complete, flowing TikTok video script (30-45 seconds, 70-110 words) about ${facet.title} as part of a daily series.
+  const prompt = `Create a complete, flowing TikTok video script (30–45 seconds, 70–110 words) about ${facet.title} as part of a daily educational series.
 
 Series Theme: ${theme.name}
 Daily topic: ${facet.title} (focus: ${facet.focus})
 
 This is Part ${partNumber} of ${totalParts} in the series. The script should be:
-  - Complete and flowing - written as a natural narrative that can be read aloud smoothly
-  - Educational and informative, not conversational
-  - Part 1 may include a brief series context. Parts 2+ should not repeat the intro.
-  - Structured with a strong opening hook, clear explanation, and memorable takeaway
-  - Start by reminding viewers which weekly theme we're in (e.g., "Welcome back to our series on ${theme.name}.")
-  - Mention today's focus immediately after the series line (e.g., "Part ${partNumber} of ${totalParts}: ${facet.title}. Today we explore ${facet.focus}.")
-  - Include a callback to the series in every part: "Part ${partNumber} of ${totalParts}: ${facet.title}."
-  - Do NOT mention "next week" or "this week's theme."
+  - Complete and flowing, written as a calm, authoritative narrative that can be read aloud smoothly
+  - Educational and interpretive, not conversational or hype-driven
+  - Designed for viewers seeking understanding, not entertainment
+  - Part 1 may include brief series context. Parts 2+ must not repeat a full introduction
+  - Structured with a strong interpretive opening, clear explanation, and reflective takeaway
+
+Opening requirements:
+  - The first sentence must be an interpretive hook that reframes meaning, challenges a common misconception, or explains why this topic matters in real life
+  - Do NOT use questions unless they clarify meaning (no generic curiosity bait)
+  - Do NOT use “Day”, “Part”, or series framing in the first sentence
+
+Structure requirements:
+  - The second sentence must briefly remind viewers of the weekly theme (e.g., "Welcome back to our series on ${theme.name}.")
+  - Immediately after, reference the series position once: "Part ${partNumber} of ${totalParts}: ${facet.title}."
+  - Clearly explain today’s focus: ${facet.focus}
+  - Maintain a calm, grounded, premium tone throughout
+  - End with a reflective or interpretive takeaway that encourages understanding, not action
+
+Constraints:
+  - Do NOT mention “next week”
+  - Do NOT use overt CTAs (no likes, follows, or app promotion)
+  - Avoid sensational language or emotional exaggeration
 
 Topic: ${facet.title}
 Focus: ${facet.focus}
 ${dataContext ? `\nGrimoire Data:\n${dataContext}` : ''}
 
-Return ONLY the complete script text. No section headers, no markdown, no formatting. Just natural, flowing text that can be read as a complete narrative.`;
+Return ONLY the complete script text. No headings, no markdown, no formatting. The output must read as a single, cohesive spoken narrative.`;
 
   try {
     const completion = await openai.chat.completions.create({
@@ -895,14 +909,31 @@ async function generateYouTubeScriptContent(
     return context;
   });
 
-  const prompt = `Create a complete, flowing YouTube video script (3-4 minutes, 450-650 words) for a weekly deep dive on ${theme.name}.
+  const prompt = `Create a complete, flowing YouTube video script (3–4 minutes, 450–650 words) for a weekly educational deep dive on ${theme.name}.
 
 The script should be:
-- Complete and flowing - written as a natural narrative that can be read aloud smoothly from start to finish
-- Educational and informative, not conversational
-- Structured with: introduction, topic overview, foundations, deeper meaning, practical application, summary, and outro
-- All sections should flow naturally into each other with smooth transitions
-- Cover all the facets listed below, building understanding progressively while staying concise
+- Written as a composed, authoritative narrative that can be read aloud smoothly from start to finish
+- Educational and interpretive, not conversational or casual
+- Designed for viewers seeking depth, clarity, and understanding
+- Structured to flow naturally through: opening context, topic overview, foundational concepts, deeper meaning, practical interpretation, synthesis, and closing reflection
+- Smoothly connected throughout, with no abrupt shifts or segmented feeling
+- Clear, grounded, and premium in tone
+
+Opening guidance:
+- Begin by establishing why this topic matters and what it helps the viewer understand or reframe
+- Avoid generic greetings or channel-style introductions
+- Do not reference “this video” or the act of watching
+
+Content guidance:
+- Build understanding progressively from foundations to deeper insight
+- Use explanation and interpretation, not storytelling or anecdotes
+- Cover all facets listed below, integrating them naturally rather than treating them as separate sections
+- Maintain clarity and pace while staying concise
+
+Closing guidance:
+- End with a reflective synthesis that reinforces meaning and understanding
+- Do not include CTAs, prompts to like/subscribe, or platform references
+- Leave the viewer with a sense of conceptual completion
 
 Theme: ${theme.name}
 Category: ${theme.category}
@@ -911,7 +942,7 @@ Description: ${theme.description}
 Facets to cover:
 ${facetContexts.join('\n---\n')}
 
-Return ONLY the complete script text. No section headers like "[Introduction]" or "[Section 1]". No markdown, no formatting. Just natural, flowing paragraphs that form a complete narrative. Write it as if you're speaking directly to the viewer - smooth, connected, and complete.`;
+Return ONLY the complete script text. No section headers, no labels, no markdown, no formatting. The output should read as a single, cohesive spoken narrative with a calm, confident delivery.`;
 
   try {
     const completion = await openai.chat.completions.create({
