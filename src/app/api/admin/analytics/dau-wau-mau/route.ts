@@ -3,6 +3,10 @@ import {
   getPostHogActiveUsers,
   getPostHogRetention,
   getPostHogActiveUsersTrends,
+  getPostHogProductActiveUsers,
+  getPostHogGrimoireActiveUsers,
+  getPostHogGrimoireOnlyUsers,
+  PRODUCT_FILTER_CONDITION,
 } from '@/lib/posthog-server';
 import { formatDate, resolveDateRange } from '@/lib/analytics/date-range';
 
@@ -15,10 +19,31 @@ export async function GET(request: NextRequest) {
       | 'month';
     const range = resolveDateRange(searchParams, 30);
 
-    const [posthogData, retentionData, trendsData] = await Promise.all([
+    const [
+      posthogData,
+      retentionData,
+      trendsData,
+      productTrendsData,
+      productDau,
+      productWau,
+      productMau,
+      grimoireMau,
+      grimoireOnlyMau,
+    ] = await Promise.all([
       getPostHogActiveUsers(range.end),
       getPostHogRetention(),
       getPostHogActiveUsersTrends(range.start, range.end, granularity),
+      getPostHogActiveUsersTrends(
+        range.start,
+        range.end,
+        granularity,
+        PRODUCT_FILTER_CONDITION,
+      ),
+      getPostHogProductActiveUsers(1),
+      getPostHogProductActiveUsers(7),
+      getPostHogProductActiveUsers(30),
+      getPostHogGrimoireActiveUsers(30),
+      getPostHogGrimoireOnlyUsers(30),
     ]);
 
     if (!posthogData) {
@@ -33,6 +58,12 @@ export async function GET(request: NextRequest) {
           retention: { day_1: 0, day_7: 0, day_30: 0 },
           churn_rate: null,
           trends: [],
+          product_trends: [],
+          product_dau: 0,
+          product_wau: 0,
+          product_mau: 0,
+          content_mau_grimoire: 0,
+          grimoire_only_mau: 0,
           source: 'error',
         },
         { status: 503 },
@@ -81,6 +112,35 @@ export async function GET(request: NextRequest) {
       }
     }
 
+    const sortedProductTrends = [...(productTrendsData || [])].sort((a, b) =>
+      a.date.localeCompare(b.date),
+    );
+
+    if (
+      typeof productDau === 'number' &&
+      typeof productWau === 'number' &&
+      typeof productMau === 'number'
+    ) {
+      const lastDate = formatDate(range.end);
+      const productSummary = {
+        date: lastDate,
+        dau: productDau,
+        wau: productWau,
+        mau: productMau,
+      };
+      const lastProductIndex = sortedProductTrends.findIndex(
+        (trend) => trend.date === lastDate,
+      );
+      if (lastProductIndex >= 0) {
+        sortedProductTrends[lastProductIndex] = {
+          ...sortedProductTrends[lastProductIndex],
+          ...productSummary,
+        };
+      } else {
+        sortedProductTrends.push(productSummary);
+      }
+    }
+
     return NextResponse.json({
       dau: posthogData.dau,
       wau: posthogData.wau,
@@ -89,6 +149,12 @@ export async function GET(request: NextRequest) {
       retention,
       churn_rate: churnRate,
       trends: sortedTrends,
+      product_trends: sortedProductTrends,
+      product_dau: productDau ?? 0,
+      product_wau: productWau ?? 0,
+      product_mau: productMau ?? 0,
+      content_mau_grimoire: grimoireMau ?? 0,
+      grimoire_only_mau: grimoireOnlyMau ?? 0,
       source: 'posthog',
     });
   } catch (error) {

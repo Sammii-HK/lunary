@@ -11,10 +11,29 @@ import {
   getPostHogActiveUsers,
   getPostHogActiveUsersTrends,
 } from '@/lib/posthog-server';
+import { summarizeEntitlements } from '@/lib/metrics/entitlement-metrics';
 
 // Test user exclusion patterns
 const TEST_EMAIL_PATTERN = '%@test.lunary.app';
 const TEST_EMAIL_EXACT = 'test@test.lunary.app';
+const PRODUCT_INTERACTION_EVENTS = [
+  'birth_chart_viewed',
+  'personalized_horoscope_viewed',
+  'personalized_tarot_viewed',
+  'dashboard_viewed',
+  'login',
+];
+
+function escapeForSql(value: string) {
+  return value.replace(/'/g, "''");
+}
+
+function formatSqlArray(values: string[]) {
+  if (values.length === 0) {
+    return 'ARRAY[]::text[]';
+  }
+  return `ARRAY[${values.map((value) => `'${escapeForSql(value)}'`).join(', ')}]`;
+}
 
 export async function GET(request: NextRequest) {
   try {
@@ -203,40 +222,50 @@ export async function GET(request: NextRequest) {
       searchImpressions = -1; // Use -1 to indicate error state
     }
 
-    // 6. Monthly Recurring Revenue (MRR) and Active Subscriptions
-    // MRR uses actual monthly_amount_due from Stripe (accounts for discounts/coupons)
-    // Active subscriptions: status = 'active', 'trial', or 'past_due' (includes coupon/free subscriptions)
-    const activeSubscriptionsResult = await sql`
-      SELECT 
-        COUNT(*) FILTER (WHERE status IN ('active', 'trial', 'past_due') AND plan_type != 'free') AS total_active,
-        COUNT(*) FILTER (WHERE status IN ('active', 'trial', 'past_due') AND plan_type != 'free' AND is_paying = true) AS paying_count,
-        COALESCE(SUM(monthly_amount_due), 0) AS total_mrr
-      FROM subscriptions
-      WHERE status IN ('active', 'trial', 'past_due')
-        AND plan_type IN ('lunary_plus', 'lunary_plus_ai', 'lunary_plus_ai_annual')
+    // 6. Monthly Recurring Revenue (MRR), Active Entitlements, and Subscription Health
+    const perUserSubscriptionsResult = await sql`
+      WITH filtered_subs AS (
+        SELECT *
+        FROM subscriptions
+        WHERE status IN ('active', 'trial', 'past_due')
+          AND (user_email IS NULL OR (user_email NOT LIKE ${TEST_EMAIL_PATTERN} AND user_email != ${TEST_EMAIL_EXACT}))
+          AND user_id IS NOT NULL
+      )
+      SELECT
+        user_id,
+        COUNT(*) AS subscription_count,
+        COALESCE(MAX(monthly_amount_due), 0) AS max_monthly,
+        bool_or(is_paying) AS has_paying
+      FROM filtered_subs
+      GROUP BY user_id
     `;
 
-    const totalActiveSubscriptions = Number(
-      activeSubscriptionsResult.rows[0]?.total_active || 0,
-    );
-    const payingSubscriptions = Number(
-      activeSubscriptionsResult.rows[0]?.paying_count || 0,
-    );
-    const mrr = Number(activeSubscriptionsResult.rows[0]?.total_mrr || 0);
+    const entitlementEntries = perUserSubscriptionsResult.rows.map((row) => ({
+      userId: row.user_id as string,
+      subscriptionCount: Number(row.subscription_count || 0),
+      maxMonthly: Number(row.max_monthly || 0),
+      hasPaying: Boolean(row.has_paying),
+    }));
 
-    // Previous period MRR - use monthly_amount_due for subscriptions active at end of previous period
-    // This is an approximation since we don't have historical snapshots of monthly_amount_due
-    const prevActiveSubscriptionsResult = await sql`
-      SELECT 
-        COUNT(*) FILTER (WHERE status IN ('active', 'trial', 'past_due') AND plan_type != 'free') AS total_active,
-        COALESCE(SUM(monthly_amount_due), 0) AS total_mrr
+    const currentEntitlementStats = summarizeEntitlements(entitlementEntries);
+
+    const activeSubscriptionsCountResult = await sql`
+      SELECT COUNT(*) AS total_active
       FROM subscriptions
       WHERE status IN ('active', 'trial', 'past_due')
-        AND plan_type IN ('lunary_plus', 'lunary_plus_ai', 'lunary_plus_ai_annual')
+        AND (user_email IS NULL OR (user_email NOT LIKE ${TEST_EMAIL_PATTERN} AND user_email != ${TEST_EMAIL_EXACT}))
+    `;
+
+    const prevActiveSubscriptionsResult = await sql`
+      SELECT 
+        COUNT(*) FILTER (WHERE status IN ('active', 'trial', 'past_due')) AS total_active
+      FROM subscriptions
+      WHERE status IN ('active', 'trial', 'past_due')
         AND (
           created_at <= ${formatTimestamp(prevRangeEnd)}
           OR updated_at <= ${formatTimestamp(prevRangeEnd)}
         )
+        AND (user_email IS NULL OR (user_email NOT LIKE ${TEST_EMAIL_PATTERN} AND user_email != ${TEST_EMAIL_EXACT}))
         AND NOT EXISTS (
           SELECT 1 FROM conversion_events ce
           WHERE ce.user_id = subscriptions.user_id
@@ -246,27 +275,62 @@ export async function GET(request: NextRequest) {
         )
     `;
 
+    const previousSubscriptionsResult = await sql`
+      WITH latest_per_user AS (
+        SELECT DISTINCT ON (user_id)
+          user_id,
+          status,
+          monthly_amount_due,
+          is_paying
+        FROM subscriptions
+        WHERE user_id IS NOT NULL
+          AND updated_at <= ${formatTimestamp(prevRangeEnd)}
+          AND (user_email IS NULL OR (user_email NOT LIKE ${TEST_EMAIL_PATTERN} AND user_email != ${TEST_EMAIL_EXACT}))
+        ORDER BY user_id, updated_at DESC
+      )
+      SELECT
+        user_id,
+        1 AS subscription_count,
+        COALESCE(monthly_amount_due, 0) AS max_monthly,
+        is_paying
+      FROM latest_per_user
+      WHERE status IN ('active', 'trial', 'past_due')
+    `;
+
+    const previousEntries = previousSubscriptionsResult.rows.map((row) => ({
+      userId: row.user_id as string,
+      subscriptionCount: Number(row.subscription_count || 0),
+      maxMonthly: Number(row.max_monthly || 0),
+      hasPaying: Boolean(row.is_paying),
+    }));
+
+    const previousEntitlementStats = summarizeEntitlements(previousEntries);
+
+    const activeEntitlements = currentEntitlementStats.activeEntitlements;
+    const duplicateUsers = currentEntitlementStats.duplicateUsers;
+    const duplicateSubscriptionRate =
+      activeEntitlements > 0 ? (duplicateUsers / activeEntitlements) * 100 : 0;
+    const mrr = currentEntitlementStats.dedupedMrr;
+    const payingCustomers = currentEntitlementStats.payingCustomers;
+    const activeSubscriptions = Number(
+      activeSubscriptionsCountResult.rows[0]?.total_active || 0,
+    );
     const prevActiveSubscriptions = Number(
       prevActiveSubscriptionsResult.rows[0]?.total_active || 0,
     );
-    const prevMrr = Number(
-      prevActiveSubscriptionsResult.rows[0]?.total_mrr || 0,
-    );
+    const prevMrr = previousEntitlementStats.dedupedMrr;
+    const startingPayingCustomers = previousEntitlementStats.payingCustomers;
 
     const mrrTrend = mrr > prevMrr ? 'up' : mrr < prevMrr ? 'down' : 'stable';
     const mrrChange =
       prevMrr > 0 ? ((mrr - prevMrr) / prevMrr) * 100 : mrr > 0 ? 100 : 0;
 
-    // 6b. Annual Recurring Revenue (ARR) - MRR * 12
     const arr = mrr * 12;
     const prevArr = prevMrr * 12;
     const arrTrend = arr > prevArr ? 'up' : arr < prevArr ? 'down' : 'stable';
     const arrChange =
       prevArr > 0 ? ((arr - prevArr) / prevArr) * 100 : arr > 0 ? 100 : 0;
 
-    // 6c. Active Subscriptions (all active subscriptions, including coupon/free ones)
-    // This counts all users with active subscriptions regardless of whether they're paying
-    const activeSubscriptions = totalActiveSubscriptions;
     const activeSubscriptionsTrend =
       activeSubscriptions > prevActiveSubscriptions
         ? 'up'
@@ -282,10 +346,9 @@ export async function GET(request: NextRequest) {
           ? 100
           : 0;
 
-    // 6e. ARPU (Average Revenue Per User)
-    const arpu = payingSubscriptions > 0 ? mrr / payingSubscriptions : 0;
+    const arpu = payingCustomers > 0 ? mrr / payingCustomers : 0;
     const prevArpu =
-      prevActiveSubscriptions > 0 ? prevMrr / prevActiveSubscriptions : 0;
+      startingPayingCustomers > 0 ? prevMrr / startingPayingCustomers : 0;
     const arpuTrend =
       arpu > prevArpu ? 'up' : arpu < prevArpu ? 'down' : 'stable';
     const arpuChange = prevArpu > 0 ? ((arpu - prevArpu) / prevArpu) * 100 : 0;
@@ -362,6 +425,68 @@ export async function GET(request: NextRequest) {
         : trialConversionRate > 0
           ? 100
           : 0;
+
+    const subscriptionCancelsResult = await sql`
+      SELECT COUNT(*) AS cancels
+      FROM conversion_events
+      WHERE event_type = 'subscription_cancelled'
+        AND created_at BETWEEN ${formatTimestamp(range.start)} AND ${formatTimestamp(range.end)}
+        AND (user_email IS NULL OR (user_email NOT LIKE ${TEST_EMAIL_PATTERN} AND user_email != ${TEST_EMAIL_EXACT}))
+    `;
+    const subscriptionCancels = Number(
+      subscriptionCancelsResult.rows[0]?.cancels || 0,
+    );
+
+    const churnedCustomersResult = await sql`
+      SELECT COUNT(DISTINCT user_id) AS churned
+      FROM conversion_events
+      WHERE event_type IN ('subscription_cancelled', 'subscription_ended')
+        AND created_at BETWEEN ${formatTimestamp(range.start)} AND ${formatTimestamp(range.end)}
+        AND user_id IS NOT NULL
+        AND (user_email IS NULL OR (user_email NOT LIKE ${TEST_EMAIL_PATTERN} AND user_email != ${TEST_EMAIL_EXACT}))
+    `;
+    const churnedCustomers = Number(
+      churnedCustomersResult.rows[0]?.churned || 0,
+    );
+    const churnRate =
+      startingPayingCustomers > 0
+        ? (churnedCustomers / startingPayingCustomers) * 100
+        : 0;
+
+    const activationEventsArray = formatSqlArray(PRODUCT_INTERACTION_EVENTS);
+    const activationReturnResult = await sql`
+      WITH trial_cohort AS (
+        SELECT user_id, MIN(created_at) AS started_at
+        FROM conversion_events
+        WHERE event_type = 'trial_started'
+          AND created_at BETWEEN ${formatTimestamp(range.start)} AND ${formatTimestamp(range.end)}
+          AND user_id IS NOT NULL
+          AND (user_email IS NULL OR (user_email NOT LIKE ${TEST_EMAIL_PATTERN} AND user_email != ${TEST_EMAIL_EXACT}))
+        GROUP BY user_id
+      )
+      SELECT
+        COUNT(*) AS total_activations,
+        COUNT(*) FILTER (
+          WHERE EXISTS (
+            SELECT 1
+            FROM conversion_events ce
+            WHERE ce.user_id = trial_cohort.user_id
+              AND ce.event_type = ANY(${activationEventsArray})
+              AND ce.created_at >= trial_cohort.started_at
+              AND ce.created_at <= trial_cohort.started_at + INTERVAL '48 hours'
+              AND (ce.user_email IS NULL OR (ce.user_email NOT LIKE ${TEST_EMAIL_PATTERN} AND ce.user_email != ${TEST_EMAIL_EXACT}))
+          )
+        ) AS returning_activations
+      FROM trial_cohort
+    `;
+    const activationTotal = Number(
+      activationReturnResult.rows[0]?.total_activations || 0,
+    );
+    const activationReturning = Number(
+      activationReturnResult.rows[0]?.returning_activations || 0,
+    );
+    const activationToReturnRate =
+      activationTotal > 0 ? (activationReturning / activationTotal) * 100 : 0;
 
     // 7. AI Chat Messages - count total messages from completed sessions
     // Use message_count from sessions that were completed in the date range
@@ -503,6 +628,25 @@ export async function GET(request: NextRequest) {
         trend: activeSubscriptionsTrend,
         change: Number(activeSubscriptionsChange.toFixed(1)),
         target: null,
+      },
+      active_entitlements: {
+        value: activeEntitlements,
+        duplicate_rate: Number(duplicateSubscriptionRate.toFixed(1)),
+        duplicates: duplicateUsers,
+        target: null,
+      },
+      paying_customers: {
+        value: payingCustomers,
+        target: null,
+      },
+      subscription_cancels: subscriptionCancels,
+      churn_rate: Number(churnRate.toFixed(1)),
+      churned_customers: churnedCustomers,
+      starting_paying_customers: startingPayingCustomers,
+      activation_to_return: {
+        value: Number(activationToReturnRate.toFixed(1)),
+        total: activationTotal,
+        returning: activationReturning,
       },
       arpu: {
         value: Number(arpu.toFixed(2)),

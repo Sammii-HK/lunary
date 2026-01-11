@@ -51,8 +51,14 @@ type ActivityResponse = {
     day_7: number;
     day_30: number;
   };
-  churn_rate: number;
+  churn_rate: number | null;
   trends: ActivityTrend[];
+  product_dau: number;
+  product_wau: number;
+  product_mau: number;
+  product_trends: ActivityTrend[];
+  content_mau_grimoire: number;
+  grimoire_only_mau: number;
 };
 
 type AiMode = {
@@ -143,6 +149,27 @@ const activitySeries: UsageChartSeries[] = [
   },
 ];
 
+const productSeries: UsageChartSeries[] = [
+  {
+    dataKey: 'product_dau',
+    name: 'Product DAU',
+    stroke: 'rgba(245,158,11,0.9)',
+    strokeDasharray: '3 3',
+  },
+  {
+    dataKey: 'product_wau',
+    name: 'Product WAU',
+    stroke: 'rgba(16,185,129,0.9)',
+    strokeDasharray: '4 2',
+  },
+  {
+    dataKey: 'product_mau',
+    name: 'Product MAU',
+    stroke: 'rgba(14,165,233,0.9)',
+    strokeDasharray: '5 3',
+  },
+];
+
 const formatDateInput = (date: Date) => date.toISOString().split('T')[0];
 
 export default function AnalyticsPage() {
@@ -159,6 +186,7 @@ export default function AnalyticsPage() {
   const [granularity, setGranularity] = useState<'day' | 'week' | 'month'>(
     'day',
   );
+  const [showProductSeries, setShowProductSeries] = useState(false);
   const [activity, setActivity] = useState<ActivityResponse | null>(null);
   const [aiMetrics, setAiMetrics] = useState<AiResponse | null>(null);
   const [conversions, setConversions] = useState<ConversionResponse | null>(
@@ -184,16 +212,53 @@ export default function AnalyticsPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const activityUsageData = useMemo(() => {
-    const data = (activity?.trends ?? []).map((point) => ({
-      date: point.date,
-      dau: point.dau,
-      wau: point.wau,
-      mau: point.mau,
-    }));
-    return data.sort((a, b) =>
-      a.date.localeCompare(b.date, undefined, { numeric: true }),
+    const overallTrends = activity?.trends ?? [];
+    const productTrends = activity?.product_trends ?? [];
+    const overallMap = new Map(
+      overallTrends.map((trend) => [trend.date, trend]),
     );
-  }, [activity?.trends]);
+    const productMap = new Map(
+      productTrends.map((trend) => [trend.date, trend]),
+    );
+    const dateSet = new Set<string>([
+      ...overallMap.keys(),
+      ...productMap.keys(),
+    ]);
+    const dates = Array.from(dateSet).sort((a, b) =>
+      a.localeCompare(b, undefined, { numeric: true }),
+    );
+
+    return dates.map((date) => {
+      const overall = overallMap.get(date);
+      const product = productMap.get(date);
+      return {
+        date,
+        dau: overall?.dau ?? 0,
+        wau: overall?.wau ?? 0,
+        mau: overall?.mau ?? 0,
+        product_dau: product?.dau ?? 0,
+        product_wau: product?.wau ?? 0,
+        product_mau: product?.mau ?? 0,
+      };
+    });
+  }, [activity?.trends, activity?.product_trends]);
+
+  const productDauToWauRatio =
+    activity?.product_wau && activity.product_wau > 0
+      ? (activity.product_dau / activity.product_wau) * 100
+      : 0;
+  const productWauToMauRatio =
+    activity?.product_mau && activity.product_mau > 0
+      ? (activity.product_wau / activity.product_mau) * 100
+      : 0;
+  const grimoireShareRatio =
+    activity?.mau && activity.mau > 0
+      ? (activity.grimoire_only_mau / activity.mau) * 100
+      : 0;
+
+  const chartSeries = showProductSeries
+    ? [...activitySeries, ...productSeries]
+    : activitySeries;
 
   const fetchAnalytics = useCallback(async () => {
     setLoading(true);
@@ -681,6 +746,111 @@ export default function AnalyticsPage() {
               ))}
             </div>
           </section>
+          <section className='space-y-3'>
+            <Card className='border-zinc-800/30 bg-zinc-900/10'>
+              <CardHeader>
+                <CardTitle className='text-base font-medium'>
+                  Audience Segments
+                </CardTitle>
+                <CardDescription className='text-xs text-zinc-400'>
+                  Compare all traffic, signed-in product usage, and
+                  Grimoire-only reach.
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className='grid gap-4 md:grid-cols-2'>
+                  <div className='space-y-2 rounded-xl border border-zinc-800/60 bg-zinc-950/50 p-4'>
+                    <p className='text-xs uppercase tracking-wider text-zinc-400'>
+                      All Traffic
+                    </p>
+                    <div className='text-sm text-zinc-300'>
+                      <div className='flex items-center justify-between'>
+                        <span>DAU</span>
+                        <span>{(activity?.dau ?? 0).toLocaleString()}</span>
+                      </div>
+                      <div className='flex items-center justify-between'>
+                        <span>WAU</span>
+                        <span>{(activity?.wau ?? 0).toLocaleString()}</span>
+                      </div>
+                      <div className='flex items-center justify-between'>
+                        <span>MAU</span>
+                        <span>{(activity?.mau ?? 0).toLocaleString()}</span>
+                      </div>
+                    </div>
+                  </div>
+                  <div className='space-y-2 rounded-xl border border-zinc-800/60 bg-zinc-950/50 p-4'>
+                    <p className='text-xs uppercase tracking-wider text-zinc-400'>
+                      Product (signed-in)
+                    </p>
+                    <div className='text-sm text-zinc-300'>
+                      <div className='flex items-center justify-between'>
+                        <span>DAU</span>
+                        <span>
+                          {(activity?.product_dau ?? 0).toLocaleString()}
+                        </span>
+                      </div>
+                      <div className='flex items-center justify-between'>
+                        <span>WAU</span>
+                        <span>
+                          {(activity?.product_wau ?? 0).toLocaleString()}
+                        </span>
+                      </div>
+                      <div className='flex items-center justify-between'>
+                        <span>MAU</span>
+                        <span>
+                          {(activity?.product_mau ?? 0).toLocaleString()}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div className='mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2'>
+                  <div className='rounded-xl border border-lime-500/20 bg-lime-500/5 p-4'>
+                    <p className='text-xs uppercase tracking-wider text-lime-300'>
+                      Content MAU (Grimoire)
+                    </p>
+                    <p className='text-2xl font-semibold text-lime-100'>
+                      {(activity?.content_mau_grimoire ?? 0).toLocaleString()}
+                    </p>
+                  </div>
+                  <div className='rounded-xl border border-amber-500/20 bg-amber-500/5 p-4'>
+                    <p className='text-xs uppercase tracking-wider text-amber-300'>
+                      Grimoire-only MAU
+                    </p>
+                    <p className='text-2xl font-semibold text-amber-100'>
+                      {(activity?.grimoire_only_mau ?? 0).toLocaleString()}
+                    </p>
+                  </div>
+                </div>
+                <div className='mt-4 grid grid-cols-1 gap-3 sm:grid-cols-3'>
+                  <div className='rounded-xl border border-zinc-800/60 bg-zinc-950/50 p-3'>
+                    <p className='text-[11px] uppercase tracking-wider text-zinc-500'>
+                      Product DAU/WAU
+                    </p>
+                    <p className='text-xl font-semibold text-white'>
+                      {productDauToWauRatio.toFixed(1)}%
+                    </p>
+                  </div>
+                  <div className='rounded-xl border border-zinc-800/60 bg-zinc-950/50 p-3'>
+                    <p className='text-[11px] uppercase tracking-wider text-zinc-500'>
+                      Product WAU/MAU
+                    </p>
+                    <p className='text-xl font-semibold text-white'>
+                      {productWauToMauRatio.toFixed(1)}%
+                    </p>
+                  </div>
+                  <div className='rounded-xl border border-zinc-800/60 bg-zinc-950/50 p-3'>
+                    <p className='text-[11px] uppercase tracking-wider text-zinc-500'>
+                      Grimoire-only share of MAU
+                    </p>
+                    <p className='text-xl font-semibold text-white'>
+                      {grimoireShareRatio.toFixed(1)}%
+                    </p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </section>
 
           <section className='grid grid-cols-1 gap-6 lg:grid-cols-2'>
             <Card className='border-zinc-800/30 bg-zinc-900/10'>
@@ -693,9 +863,24 @@ export default function AnalyticsPage() {
               <CardContent>
                 <UsageChart
                   data={activityUsageData}
-                  series={activitySeries}
+                  series={chartSeries}
                   height={240}
                 />
+                <div className='mt-3 flex flex-wrap gap-2'>
+                  <Button
+                    variant={showProductSeries ? 'secondary' : 'outline'}
+                    onClick={() => setShowProductSeries((prev) => !prev)}
+                  >
+                    {showProductSeries
+                      ? 'Hide product-only series'
+                      : 'Show product-only series'}
+                  </Button>
+                  <span className='text-xs text-zinc-400'>
+                    {showProductSeries
+                      ? 'Currently overlaying signed-in product activity.'
+                      : 'Toggle to compare signed-in product activity.'}
+                  </span>
+                </div>
                 <div className='mt-4 flex flex-wrap items-center gap-4 border-t border-zinc-800 pt-4'>
                   <div className='flex items-center gap-2'>
                     <div

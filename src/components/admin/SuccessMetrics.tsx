@@ -37,6 +37,23 @@ interface SuccessMetricsData {
   annual_recurring_revenue: MetricData;
   active_subscriptions: MetricData;
   arpu?: MetricData;
+  active_entitlements: {
+    value: number;
+    duplicate_rate: number;
+    duplicates: number;
+  };
+  paying_customers: {
+    value: number;
+  };
+  subscription_cancels: number;
+  churn_rate: number;
+  churned_customers: number;
+  starting_paying_customers: number;
+  activation_to_return: {
+    value: number;
+    total: number;
+    returning: number;
+  };
   trial_conversion_rate: MetricData;
   ai_chat_messages: MetricData;
   substack_subscribers: MetricData;
@@ -131,6 +148,54 @@ export function SuccessMetrics({ data, loading }: SuccessMetricsProps) {
       target: null,
       format: (v: number) => v.toLocaleString(),
     },
+    {
+      label: 'Active Entitlements',
+      value: data.active_entitlements.value,
+      trend: 'stable',
+      change:
+        typeof data.active_entitlements.duplicate_rate === 'number'
+          ? Number(data.active_entitlements.duplicate_rate.toFixed(1))
+          : 0,
+      target: null,
+      format: (v: number) => v.toLocaleString(),
+      subtitle: `${data.active_entitlements.duplicates} duplicate subscriptions`,
+    },
+    {
+      label: 'Paying Customers',
+      value: data.paying_customers.value,
+      trend: 'stable',
+      change: 0,
+      target: null,
+      format: (v: number) => v.toLocaleString(),
+      subtitle: 'Unique paying customers',
+    },
+    {
+      label: 'Subscription Cancels',
+      value: data.subscription_cancels,
+      trend: 'down',
+      change: 0,
+      target: null,
+      format: (v: number) => v.toLocaleString(),
+      subtitle: 'Cancellations logged this period',
+    },
+    {
+      label: 'Churn Rate',
+      value: data.churn_rate,
+      trend: data.churn_rate > 0 ? 'down' : 'stable',
+      change: 0,
+      target: { min: 0, max: 5 },
+      format: (v: number) => `${v.toFixed(1)}%`,
+      subtitle: `${data.churned_customers} churned / ${data.starting_paying_customers} starting`,
+    },
+    {
+      label: 'Activation → Return (48h)',
+      value: data.activation_to_return.value,
+      trend: 'up',
+      change: 0,
+      target: { min: 40, max: 80 },
+      format: (v: number) => `${v.toFixed(1)}%`,
+      subtitle: `${data.activation_to_return.returning}/${data.activation_to_return.total} returned`,
+    },
     ...(data.arpu
       ? [
           {
@@ -191,7 +256,7 @@ export function SuccessMetrics({ data, loading }: SuccessMetricsProps) {
               label={metric.label}
               value={metric.value}
               formattedValue={metric.format(metric.value)}
-              trend={metric.trend}
+              trend={metric.trend as Trend}
               change={metric.change}
               target={metric.target}
               subtitle={metric.subtitle}
