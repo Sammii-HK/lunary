@@ -9,7 +9,7 @@ import {
 } from '@/lib/social/video-script-generator';
 import { categoryThemes } from '@/lib/social/weekly-themes';
 import { getImageBaseUrl } from '@/lib/urls';
-import { generateWeeklyContent } from '../../../../../utils/blog/weeklyContentGenerator';
+import { generateWeeklyContent } from '../../../../../../utils/blog/weeklyContentGenerator';
 import {
   generateReelHashtags,
   generateVideoPostContent,
