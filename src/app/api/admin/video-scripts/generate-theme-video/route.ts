@@ -150,6 +150,8 @@ export async function POST(request: NextRequest) {
     const title = script.facetTitle || `Weekly Deep Dive: ${script.themeName}`;
     const description = `Weekly thematic deep dive: ${script.themeName}.`;
     let postContent: string | null = null;
+    const theme = categoryThemes.find((t) => t.name === script.themeName);
+    const themeCategory = theme?.category;
 
     try {
       const weeklyData = await generateWeeklyContent(weekStart);
@@ -161,8 +163,6 @@ export async function POST(request: NextRequest) {
         themeCategory,
       );
       const caption = stripHashtagLine(baseCaption);
-      const theme = categoryThemes.find((t) => t.name === script.themeName);
-      const themeCategory = theme?.category;
       const hashtags = await generateReelHashtags(weeklyData, themeCategory);
       postContent = `${caption}\n\n${hashtags.join(' ')}`.trim();
     } catch (error) {
