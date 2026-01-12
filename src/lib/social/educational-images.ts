@@ -3,6 +3,7 @@ import {
   getSymbolForContent,
   getAttributeString,
 } from '../../../utils/og/symbols';
+import { capitalizeThematicTitle } from '../../../utils/og/text';
 
 export type ImageFormat = 'square' | 'landscape' | 'portrait' | 'story';
 
@@ -91,9 +92,10 @@ export function getThematicImageUrl(
   const symbol = getSymbolForContent(thematicCategory, normalizedSlug);
 
   // Build URL
+  const formattedTitle = capitalizeThematicTitle(title);
   const params = new URLSearchParams({
     category: thematicCategory,
-    title,
+    title: formattedTitle,
     format,
     slug: normalizedSlug,
   });
