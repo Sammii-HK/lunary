@@ -178,48 +178,94 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Upload to YouTube
+    // Upload to YouTube (long form) or schedule Shorts via Succulent
     if (platforms.includes('youtube')) {
-      try {
-        const baseUrl =
-          process.env.NODE_ENV === 'production'
-            ? 'https://lunary.app'
-            : `${request.nextUrl.protocol}//${request.nextUrl.host}`;
-
-        const youtubeResponse = await fetch(`${baseUrl}/api/youtube/upload`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            videoUrl,
-            videoId,
-            title,
-            description,
-            type: videoType === 'long' ? 'long' : 'short', // medium goes to Shorts
-            publishDate: scheduledDateIso,
-          }),
-        });
-
-        if (youtubeResponse.ok) {
-          results.youtube = { success: true };
-          console.log(`✅ Uploaded video ${videoId} to YouTube`);
-
-          // Update video status to uploaded
-          await sql`
-            UPDATE videos SET status = 'uploaded' WHERE id = ${videoId}
-          `;
-        } else {
-          const error = await youtubeResponse.text();
+      if (videoType !== 'long') {
+        if (!apiKey || !accountGroupId) {
           results.youtube = {
             success: false,
-            error: `${youtubeResponse.status}: ${error}`,
+            error: 'Succulent API not configured',
           };
-          console.error(`❌ Failed to upload to YouTube: ${error}`);
+        } else {
+          try {
+            const youtubeShortPost = {
+              accountGroupId,
+              name: `Lunary ${videoType} - YouTube Short - ${dateStr}`,
+              content: postContent,
+              platforms: ['youtube'],
+              media: [{ type: 'video' as const, url: videoUrl, alt: title }],
+              scheduledDate: scheduledDateIso,
+            };
+
+            const response = await fetch(succulentApiUrl, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'X-API-Key': apiKey,
+              },
+              body: JSON.stringify(youtubeShortPost),
+            });
+
+            if (response.ok) {
+              results.youtube = { success: true };
+              console.log(`✅ Scheduled video ${videoId} to YouTube Shorts`);
+            } else {
+              const error = await response.text();
+              results.youtube = {
+                success: false,
+                error: `${response.status}: ${error}`,
+              };
+              console.error(`❌ Failed to schedule YouTube Shorts: ${error}`);
+            }
+          } catch (error) {
+            results.youtube = {
+              success: false,
+              error: error instanceof Error ? error.message : 'Unknown error',
+            };
+          }
         }
-      } catch (error) {
-        results.youtube = {
-          success: false,
-          error: error instanceof Error ? error.message : 'Unknown error',
-        };
+      } else {
+        try {
+          const baseUrl =
+            process.env.NODE_ENV === 'production'
+              ? 'https://lunary.app'
+              : `${request.nextUrl.protocol}//${request.nextUrl.host}`;
+
+          const youtubeResponse = await fetch(`${baseUrl}/api/youtube/upload`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              videoUrl,
+              videoId,
+              title,
+              description,
+              type: 'long',
+              publishDate: scheduledDateIso,
+            }),
+          });
+
+          if (youtubeResponse.ok) {
+            results.youtube = { success: true };
+            console.log(`✅ Uploaded video ${videoId} to YouTube`);
+
+            // Update video status to uploaded
+            await sql`
+              UPDATE videos SET status = 'uploaded' WHERE id = ${videoId}
+            `;
+          } else {
+            const error = await youtubeResponse.text();
+            results.youtube = {
+              success: false,
+              error: `${youtubeResponse.status}: ${error}`,
+            };
+            console.error(`❌ Failed to upload to YouTube: ${error}`);
+          }
+        } catch (error) {
+          results.youtube = {
+            success: false,
+            error: error instanceof Error ? error.message : 'Unknown error',
+          };
+        }
       }
     }
 

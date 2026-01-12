@@ -158,6 +158,7 @@ export async function POST(request: NextRequest) {
         'long',
         undefined,
         'default',
+        themeCategory,
       );
       const caption = stripHashtagLine(baseCaption);
       const theme = categoryThemes.find((t) => t.name === script.themeName);
@@ -169,6 +170,8 @@ export async function POST(request: NextRequest) {
     }
 
     let result;
+    const audioUrl: string | null = null;
+    const blogSlug: string | null = null;
     try {
       result = await sql`
         INSERT INTO videos (
@@ -187,13 +190,13 @@ export async function POST(request: NextRequest) {
         ) VALUES (
           'long',
           ${videoUrl},
-          ${null},
+          ${audioUrl},
           ${script.fullScript},
           ${title},
           ${description},
           ${postContent},
           ${weekNumber},
-          ${null},
+          ${blogSlug},
           'pending',
           NOW(),
           ${expiresAt.toISOString()}
@@ -225,7 +228,7 @@ export async function POST(request: NextRequest) {
             ${description},
             ${postContent},
             ${weekNumber},
-            ${null},
+            ${blogSlug},
             'pending',
             NOW(),
             ${expiresAt.toISOString()}

@@ -356,7 +356,7 @@ async function scheduleVideoToPlatforms(
       );
     }
   } else if (videoType === 'medium') {
-    // Medium form: Post immediately to TikTok, Instagram Reels, YouTube Shorts
+    // Medium form: Schedule to TikTok, Instagram Reels, YouTube Shorts
     // Use postContent if available (generated from weekly data), otherwise fall back to description
     const content = postContent || description;
     // TikTok - post immediately (omit scheduledDate)
@@ -382,6 +382,15 @@ async function scheduleVideoToPlatforms(
       media: [{ type: 'video' as const, url: videoUrl, alt: title }],
       scheduledDate: scheduledDate.toISOString(),
       instagramOptions: { type: 'reel' as const },
+    };
+
+    const youtubeShortPost = {
+      accountGroupId,
+      name: `Lunary Medium - YouTube Short - ${dateStr}`,
+      content: content,
+      platforms: ['youtube'],
+      media: [{ type: 'video' as const, url: videoUrl, alt: title }],
+      scheduledDate: scheduledDate.toISOString(),
     };
 
     // Post to TikTok
@@ -430,8 +439,28 @@ async function scheduleVideoToPlatforms(
       console.error('Error posting to Instagram Reels:', error);
     }
 
-    // YouTube Shorts - handled via upload route (post immediately by omitting publishDate)
-    // This is already handled in the YouTube upload route
+    // Post to YouTube Shorts via Succulent
+    try {
+      const youtubeResponse = await fetch(succulentApiUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-API-Key': apiKey,
+        },
+        body: JSON.stringify(youtubeShortPost),
+      });
+
+      if (youtubeResponse.ok) {
+        console.log('✅ Scheduled medium-form video to YouTube Shorts');
+      } else {
+        const error = await youtubeResponse.text();
+        console.error(
+          `❌ Failed to schedule YouTube Shorts: ${youtubeResponse.status} ${error}`,
+        );
+      }
+    } catch (error) {
+      console.error('Error scheduling YouTube Shorts:', error);
+    }
   }
   // Long form videos are already handled via YouTube upload route
 }

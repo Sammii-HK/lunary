@@ -523,6 +523,8 @@ Return ONLY the complete script text. No headings, no markdown, no formatting. T
 
     script = script.trim();
 
+    script = ensureTikTokHookFirstSentence(script, facet, theme, grimoireData);
+
     // Ensure series callback is included
     if (!script.includes(`Part ${partNumber}`)) {
       script += `\n\nPart ${partNumber} of ${totalParts}: ${facet.title}.`;
@@ -532,12 +534,17 @@ Return ONLY the complete script text. No headings, no markdown, no formatting. T
   } catch (error) {
     console.error('Failed to generate TikTok script with AI:', error);
     // Fallback to structured script
-    return generateTikTokScriptFallback(
+    return ensureTikTokHookFirstSentence(
+      generateTikTokScriptFallback(
+        facet,
+        theme,
+        grimoireData,
+        partNumber,
+        totalParts,
+      ),
       facet,
       theme,
       grimoireData,
-      partNumber,
-      totalParts,
     );
   }
 }
@@ -565,6 +572,28 @@ function generateTikTokScriptFallback(
 
   // Join with smooth transitions
   return `${hook} ${intro} ${core} ${takeaway}`;
+}
+
+function ensureTikTokHookFirstSentence(
+  text: string,
+  facet: DailyFacet,
+  theme: WeeklyTheme,
+  grimoireData: Record<string, any> | null,
+): string {
+  const trimmed = text.trim();
+  if (!trimmed) return text;
+
+  const firstSentenceMatch = trimmed.match(/^[^.!?]+[.!?]/);
+  if (!firstSentenceMatch) return text;
+
+  const firstSentence = firstSentenceMatch[0].trim();
+  if (!needsHookRewrite(firstSentence)) {
+    return text;
+  }
+
+  const rest = trimmed.slice(firstSentenceMatch[0].length).trim();
+  const hookSentence = buildTikTokHook(facet, theme, grimoireData);
+  return rest ? `${hookSentence} ${rest}` : hookSentence;
 }
 
 /**
@@ -981,11 +1010,15 @@ Return ONLY the complete script text. No section headers, no labels, no markdown
       script += `\n\nFor deeper exploration of ${theme.name.toLowerCase()} and related topics, the Lunary Grimoire offers comprehensive reference material. It is freely available for those who wish to continue their study. Until next time.`;
     }
 
-    return script;
+    const normalizedScript = ensureHookFirstSentence(script, theme);
+    return normalizedScript;
   } catch (error) {
     console.error('Failed to generate YouTube script with AI:', error);
     // Fallback to structured script
-    return generateYouTubeScriptFallback(theme, facets, allData);
+    return ensureHookFirstSentence(
+      generateYouTubeScriptFallback(theme, facets, allData),
+      theme,
+    );
   }
 }
 
@@ -1007,6 +1040,40 @@ function generateYouTubeScriptFallback(
 
   // Join with smooth transitions
   return `${intro}\n\n${overview}\n\n${foundations}\n\n${deeperMeaning}\n\n${practical}\n\n${summary}\n\n${outro}`;
+}
+
+function ensureHookFirstSentence(text: string, theme: WeeklyTheme): string {
+  const trimmed = text.trim();
+  if (!trimmed) return text;
+
+  const firstSentenceMatch = trimmed.match(/^[^.!?]+[.!?]/);
+  if (!firstSentenceMatch) return text;
+
+  const firstSentence = firstSentenceMatch[0].trim();
+  if (!needsHookRewrite(firstSentence)) {
+    return text;
+  }
+
+  const rest = trimmed.slice(firstSentenceMatch[0].length).trim();
+  const hookSentence = buildYouTubeHookSentence(theme);
+  return rest ? `${hookSentence} ${rest}` : hookSentence;
+}
+
+function needsHookRewrite(sentence: string): boolean {
+  return /^(welcome|welcome back|today|hello|hi|now|this|let's)/i.test(
+    sentence,
+  );
+}
+
+function buildYouTubeHookSentence(theme: WeeklyTheme): string {
+  const snippet =
+    theme.description
+      ?.split(/[.!?]/)
+      .find((segment) => segment.trim().length > 0) || theme.name;
+  const normalized = snippet.trim().toLowerCase();
+  const base = normalized.length > 0 ? normalized : theme.name.toLowerCase();
+  const cleanSubject = base.replace(/^\s+|\s+$/g, '');
+  return `Understanding ${cleanSubject} reveals why ${theme.name.toLowerCase()} matters.`;
 }
 
 function buildYouTubeIntro(
