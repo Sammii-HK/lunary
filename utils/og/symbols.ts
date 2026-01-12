@@ -1,3 +1,5 @@
+import { thematicPaletteConfig } from '@/constants/seo/generated-category-themes';
+
 /**
  * Symbol and Color Mappings for Thematic OG Images
  *
@@ -300,11 +302,104 @@ export interface CategoryTheme {
   subtleTextColor: string;
 }
 
+type PaletteMap = typeof thematicPaletteConfig.palettesByTopLevelCategory;
+type PaletteKey = keyof PaletteMap;
+type PaletteEntry = PaletteMap[PaletteKey];
+
+const paletteMap = thematicPaletteConfig.palettesByTopLevelCategory;
+
+const paletteAliases: Record<string, string> = {
+  lunar: 'moon',
+  'wheel-of-the-year': 'wheel-of-the-year',
+  sabbat: 'wheel-of-the-year',
+  sabbats: 'sabbats',
+  planetary: 'astronomy',
+  moon: 'moon',
+  'moon-in': 'moon-in',
+};
+
+function resolvePaletteKey(category: string): PaletteKey | null {
+  if (!category) return null;
+  const normalized = category.toLowerCase();
+  if (Object.prototype.hasOwnProperty.call(paletteMap, normalized)) {
+    return normalized as PaletteKey;
+  }
+  const alias = paletteAliases[normalized];
+  return alias ? (alias as PaletteKey) : null;
+}
+
+function getPaletteEntry(category: string): PaletteEntry | null {
+  const key = resolvePaletteKey(category);
+  if (!key) {
+    return null;
+  }
+  return paletteMap[key] ?? null;
+}
+
+function buildGradientFromPalette(entry: PaletteEntry): string {
+  const [first, second, third] = entry.backgrounds;
+  return `linear-gradient(135deg, ${first} 0%, ${second} 55%, ${third} 100%)`;
+}
+
+export function getPaletteTheme(category: string): CategoryTheme | null {
+  const entry = getPaletteEntry(category);
+  if (!entry) {
+    return null;
+  }
+  return {
+    gradient: buildGradientFromPalette(entry),
+    accentColor: entry.highlight,
+    textColor: thematicPaletteConfig.meta.rules.text,
+    subtleTextColor: 'rgba(255, 255, 255, 0.6)',
+  };
+}
+
+export function getPaletteHighlightColor(category: string): string | null {
+  const entry = getPaletteEntry(category);
+  return entry?.highlight ?? null;
+}
+
+function applyPaletteAccentAdjustments(
+  category: string,
+  theme: CategoryTheme,
+  subCategory?: string,
+): CategoryTheme {
+  if (category === 'zodiac') {
+    const element = subCategory ? zodiacElements[subCategory] : 'fire';
+    const accent = elementColors[element]?.primary || theme.accentColor;
+    return { ...theme, accentColor: accent };
+  }
+
+  if (category === 'chakras') {
+    const chakra = subCategory ? chakraColors[subCategory] : chakraColors.crown;
+    const accent = chakra?.primary || theme.accentColor;
+    return { ...theme, accentColor: accent };
+  }
+
+  if (['sabbat', 'sabbats', 'wheel-of-the-year'].includes(category)) {
+    const sabbat = subCategory ? sabbatColors[subCategory] : sabbatColors.yule;
+    const accent = sabbat?.accent || theme.accentColor;
+    return { ...theme, accentColor: accent };
+  }
+
+  return theme;
+}
+
 export function getCategoryTheme(
   category: string,
   subCategory?: string,
 ): CategoryTheme {
-  switch (category) {
+  const normalizedCategory = (category || '').toLowerCase();
+  const paletteTheme = getPaletteTheme(normalizedCategory);
+  if (paletteTheme) {
+    return applyPaletteAccentAdjustments(
+      normalizedCategory,
+      paletteTheme,
+      subCategory,
+    );
+  }
+
+  switch (normalizedCategory) {
     case 'zodiac': {
       const element = subCategory ? zodiacElements[subCategory] : 'fire';
       const elemColor = elementColors[element] || elementColors.fire;
