@@ -13,7 +13,11 @@ export const CORE_APP_ROUTE_PREFIXES = [
 ];
 
 const escapePrefix = (value: string) =>
-  value.replace(/'/g, "''").replace(/%/g, '\\%').replace(/_/g, '\\_');
+  value
+    .replace(/\\/g, '\\\\')
+    .replace(/'/g, "''")
+    .replace(/%/g, '\\%')
+    .replace(/_/g, '\\_');
 
 export function isCoreAppRoute(pathname?: string | null) {
   if (!pathname) return false;
