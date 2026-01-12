@@ -46,7 +46,8 @@ function parseFlexibleDate(
 
   if (month < 1 || month > 12) return null;
   if (day < 1 || day > 31) return null;
-  if (year < 1900 || year > new Date().getFullYear()) return null;
+  // allow earlier years for older birthdates (temporary override)
+  // if (year < 1900 || year > new Date().getFullYear()) return null;
 
   const daysInMonth = new Date(year, month, 0).getDate();
   if (day > daysInMonth) return null;
