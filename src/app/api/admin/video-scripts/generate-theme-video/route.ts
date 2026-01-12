@@ -10,6 +10,7 @@ import {
 import { categoryThemes } from '@/lib/social/weekly-themes';
 import { getImageBaseUrl } from '@/lib/urls';
 import { generateWeeklyContent } from '../../../../../../utils/blog/weeklyContentGenerator';
+import { capitalizeThematicTitle } from '../../../../../../utils/og/text';
 import {
   generateReelHashtags,
   generateVideoPostContent,
@@ -118,15 +119,16 @@ export async function POST(request: NextRequest) {
     }
 
     const baseUrl = getImageBaseUrl();
+    const formattedThemeName = capitalizeThematicTitle(script.themeName);
     const imageUrl =
       script.coverImageUrl ||
       `${baseUrl}/api/og/thematic?title=${encodeURIComponent(
-        script.themeName,
+        formattedThemeName,
       )}&subtitle=${encodeURIComponent('Weekly Deep Dive')}&format=landscape`;
 
     const audioBuffer = await generateVoiceover(script.fullScript, {
-      voiceName: 'nova',
-      model: 'tts-1-hd',
+      voiceName: 'alloy',
+      model: 'gpt-4o-mini-tts',
       speed: 1.0,
     });
 

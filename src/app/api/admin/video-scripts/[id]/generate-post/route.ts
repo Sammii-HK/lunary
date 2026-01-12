@@ -5,150 +5,28 @@ import {
   updateVideoScriptWrittenPost,
   VideoScript,
 } from '@/lib/social/video-script-generator';
+import { categoryThemes, generateHashtags } from '@/lib/social/weekly-themes';
 
 export const dynamic = 'force-dynamic';
 
-/**
- * Generate 3 significant hashtags for a video script based on video content
- * Similar approach to blog videos: extract from actual content mentioned in the script
- * Priority: 1. Main topic (facet), 2. Key concepts from script, 3. Theme
- */
-async function generateHashtagsForScript(script: VideoScript): Promise<string> {
-  const hashtags: string[] = [];
-  const scriptText = script.fullScript.toLowerCase();
+function buildThematicHashtags(script: VideoScript): string | null {
+  const theme = categoryThemes.find((item) => item.name === script.themeName);
+  if (!theme) return null;
+  const facet =
+    theme.facets.find((item) => item.title === script.facetTitle) ||
+    theme.facets.find(
+      (item) => item.title.toLowerCase() === script.facetTitle.toLowerCase(),
+    );
+  if (!facet) return null;
 
-  // Priority 1: Extract from facet title (the main topic)
-  const facetTitle = script.facetTitle.toLowerCase();
-
-  // Check for planet names in facet title
-  const planets = [
-    'sun',
-    'moon',
-    'mercury',
-    'venus',
-    'mars',
-    'jupiter',
-    'saturn',
-    'uranus',
-    'neptune',
-    'pluto',
-  ];
-  for (const planet of planets) {
-    if (facetTitle.includes(planet)) {
-      hashtags.push(`#${planet}`);
-      break;
-    }
-  }
-
-  // Check for zodiac signs in facet title
-  const signs = [
-    'aries',
-    'taurus',
-    'gemini',
-    'cancer',
-    'leo',
-    'virgo',
-    'libra',
-    'scorpio',
-    'sagittarius',
-    'capricorn',
-    'aquarius',
-    'pisces',
-  ];
-  for (const sign of signs) {
-    if (facetTitle.includes(sign)) {
-      hashtags.push(`#${sign}`);
-      break;
-    }
-  }
-
-  // Priority 2: Extract key concepts from the script content itself
-  // Look for important astrological terms mentioned in the script
-  if (hashtags.length < 3) {
-    // Check for major concepts in the script
-    const keyConcepts = [
-      { term: 'rulership', hashtag: 'planetaryrulership' },
-      { term: 'aspect', hashtag: 'aspects' },
-      { term: 'transit', hashtag: 'transits' },
-      { term: 'house', hashtag: 'astrologicalhouses' },
-      { term: 'element', hashtag: 'elements' },
-      { term: 'modality', hashtag: 'modalities' },
-      { term: 'cardinal', hashtag: 'cardinalsigns' },
-      { term: 'fixed', hashtag: 'fixedsigns' },
-      { term: 'mutable', hashtag: 'mutablesigns' },
-    ];
-
-    for (const concept of keyConcepts) {
-      if (hashtags.length >= 3) break;
-      if (
-        scriptText.includes(concept.term) &&
-        !hashtags.some((tag) => tag.includes(concept.hashtag))
-      ) {
-        hashtags.push(`#${concept.hashtag}`);
-      }
-    }
-  }
-
-  // Priority 3: Extract meaningful keyword from theme name (exclude generic words)
-  if (hashtags.length < 3) {
-    const themeName = script.themeName.toLowerCase();
-
-    // Generic words to exclude from hashtags
-    const genericWords = new Set([
-      'understanding',
-      'exploring',
-      'learning',
-      'discovering',
-      'introduction',
-      'guide',
-      'basics',
-      'fundamentals',
-      'overview',
-      'about',
-      'what',
-      'how',
-      'why',
-      'the',
-      'and',
-      'for',
-      'with',
-      'into',
-    ]);
-
-    // Extract key words from theme (e.g., "Understanding Planetary Rulership" -> "rulership")
-    const themeKeywords = themeName
-      .split(/\s+/)
-      .filter((word) => {
-        const clean = word.replace(/[^a-z0-9]/g, '');
-        return (
-          clean.length > 4 && // Only meaningful words
-          !genericWords.has(clean) // Exclude generic words
-        );
-      })
-      .map((word) => word.replace(/[^a-z0-9]/g, ''))
-      .filter((word) => word.length > 0);
-
-    for (const keyword of themeKeywords) {
-      if (hashtags.length >= 3) break;
-      if (
-        keyword &&
-        !hashtags.some((tag) => tag.toLowerCase().includes(keyword))
-      ) {
-        hashtags.push(`#${keyword}`);
-      }
-    }
-  }
-
-  // Fill remaining slots with general astrology hashtags if needed
-  const generalHashtags = ['#astrology', '#cosmicwisdom', '#spiritualgrowth'];
-  for (const tag of generalHashtags) {
-    if (hashtags.length >= 3) break;
-    if (!hashtags.includes(tag)) {
-      hashtags.push(tag);
-    }
-  }
-
-  return hashtags.slice(0, 3).join(' ');
+  const tags = generateHashtags(theme, facet);
+  const additionalTags = ['#lunary', '#astrology', `#${theme.category}`];
+  const uniqueTags = Array.from(
+    new Set(
+      [tags.domain, tags.topic, tags.brand, ...additionalTags].filter(Boolean),
+    ),
+  );
+  return uniqueTags.slice(0, 5).join(' ');
 }
 
 /**
@@ -186,9 +64,9 @@ function generateFallbackHashtags(script: VideoScript): string {
   }
 
   // Add astrology-related hashtag
-  hashtags.push('#astrology');
+  hashtags.push('#astrology', '#lunary');
 
-  return hashtags.slice(0, 3).join(' ');
+  return hashtags.slice(0, 5).join(' ');
 }
 
 /**
@@ -271,8 +149,9 @@ Return ONLY the post content text, no markdown, no formatting, just the caption 
 
     postContent = postContent.trim();
 
-    // Generate hashtags based on cosmic data for the scheduled date
-    const hashtags = await generateHashtagsForScript(script);
+    // Generate hashtags from the thematic hashtag system
+    const hashtags =
+      buildThematicHashtags(script) || generateFallbackHashtags(script);
 
     // Append hashtags to post content
     const postContentWithHashtags = `${postContent}\n\n${hashtags}`;

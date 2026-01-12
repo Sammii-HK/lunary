@@ -335,10 +335,20 @@ async function generateThematicWeeklyPosts(
 
   const shortPostPlatforms = new Set(['twitter', 'bluesky', 'pinterest']);
 
+  const splitSentencesPreservingDecimals = (text: string): string[] => {
+    const protectedText = text.replace(/(\d)\.(\d)/g, '$1<DECIMAL>$2');
+    const sentences = protectedText.match(/[^.!?]+[.!?]+|[^.!?]+$/g) || [
+      protectedText,
+    ];
+    return sentences.map((sentence) =>
+      sentence.replace(/<DECIMAL>/g, '.').trim(),
+    );
+  };
+
   const cleanScriptForPost = (script: string): string => {
-    const sentences = script
-      .replace(/\s+/g, ' ')
-      .match(/[^.!?]+[.!?]+|[^.!?]+$/g) || [script];
+    const sentences = splitSentencesPreservingDecimals(
+      script.replace(/\s+/g, ' '),
+    );
 
     const filtered = sentences.filter((sentence) => {
       const lower = sentence.toLowerCase();
@@ -359,7 +369,7 @@ async function generateThematicWeeklyPosts(
   ): string => {
     if (text.length <= maxChars) return text;
 
-    const sentences = text.match(/[^.!?]+[.!?]+|[^.!?]+$/g) || [text];
+    const sentences = splitSentencesPreservingDecimals(text);
 
     let output = '';
     for (const sentence of sentences) {
@@ -424,11 +434,11 @@ async function generateThematicWeeklyPosts(
     string,
     { useHashtags: boolean; count: number }
   > = {
-    instagram: { useHashtags: true, count: 3 },
-    tiktok: { useHashtags: true, count: 3 },
-    twitter: { useHashtags: true, count: 2 },
+    instagram: { useHashtags: true, count: 5 },
+    tiktok: { useHashtags: true, count: 5 },
+    twitter: { useHashtags: true, count: 5 },
     threads: { useHashtags: false, count: 0 },
-    youtube: { useHashtags: true, count: 3 },
+    youtube: { useHashtags: true, count: 5 },
   };
 
   const buildVideoHashtags = (
@@ -450,9 +460,11 @@ async function generateThematicWeeklyPosts(
       return '';
     }
     const tags = generateHashtags(theme, facet);
-    return [tags.domain, tags.topic, tags.brand]
-      .slice(0, config.count)
-      .join(' ');
+    const extraTags = ['#lunary', '#cosmicwisdom'];
+    const uniqueTags = Array.from(
+      new Set([tags.domain, tags.topic, tags.brand, ...extraTags]),
+    ).filter(Boolean);
+    return uniqueTags.slice(0, config.count).join(' ');
   };
 
   const buildGroupKey = (
@@ -673,7 +685,6 @@ async function generateThematicWeeklyPosts(
       'twitter',
       'tiktok',
       'bluesky',
-      'threads',
       'facebook',
     ];
     let imageUrl: string | null = null;
@@ -792,14 +803,8 @@ async function generateThematicWeeklyPosts(
       const { getThematicImageUrl } =
         await import('@/lib/social/educational-images');
       const totalParts = videoScripts.tiktokScripts.length;
-      const videoPlatforms = [
-        'instagram',
-        'tiktok',
-        'twitter',
-        'threads',
-        'youtube',
-      ];
-      const shortVideoPlatforms = new Set(['twitter']);
+      const videoPlatforms = ['instagram', 'tiktok', 'youtube'];
+      const shortVideoPlatforms = new Set<string>();
       const dayInfoByDate = new Map<
         string,
         { facetTitle: string; category: string; slug: string }
@@ -1039,7 +1044,7 @@ export async function POST(request: NextRequest) {
       currentWeek,
       mode = 'thematic',
       replaceExisting = false,
-    } = await request.json();
+    } = await request.json().catch(() => ({}));
 
     console.log('📥 Generate weekly posts request:', {
       weekStart,

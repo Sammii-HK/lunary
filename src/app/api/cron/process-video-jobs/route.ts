@@ -3,7 +3,7 @@ import { sql } from '@vercel/postgres';
 import { head, put } from '@vercel/blob';
 import { composeVideo } from '@/lib/video/compose-video';
 import { generateVoiceover } from '@/lib/tts';
-import { getThematicImageUrl } from '@/lib/social/educational-images';
+import { buildThematicVideoComposition } from '@/lib/video/thematic-video';
 import { buildVideoCaption } from '@/lib/social/video-captions';
 import { categoryThemes, generateHashtags } from '@/lib/social/weekly-themes';
 import { getImageBaseUrl } from '@/lib/urls';
@@ -49,10 +49,14 @@ function normalizeLineBreaks(text: string) {
 function trimToMax(text: string, maxChars: number, addEllipsis = true) {
   if (text.length <= maxChars) return text;
 
-  const sentences = text.match(/[^.!?]+[.!?]+|[^.!?]+$/g) || [text];
+  const protectedText = text.replace(/(\d)\.(\d)/g, '$1<DECIMAL>$2');
+  const sentences = protectedText.match(/[^.!?]+[.!?]+|[^.!?]+$/g) || [
+    protectedText,
+  ];
   let output = '';
   for (const sentence of sentences) {
-    const candidate = output ? `${output} ${sentence.trim()}` : sentence.trim();
+    const restored = sentence.replace(/<DECIMAL>/g, '.').trim();
+    const candidate = output ? `${output} ${restored}` : restored;
     if (candidate.length > maxChars) break;
     output = candidate;
   }
@@ -263,24 +267,28 @@ export async function POST(request: NextRequest) {
         const force = url.searchParams.get('force') === 'true';
         let videoUrl = force ? undefined : existingVideoUrl;
         if (!videoUrl) {
-          const partLabel = `Part ${partNumber} of ${totalParts}`;
-          const imageUrl = getThematicImageUrl(
-            category,
-            script.facet_title,
-            baseUrl,
-            'tiktok',
-            slug,
-            partLabel,
-            'tiktok',
-          );
+          const { images, overlays, highlightTerms, highlightColor } =
+            buildThematicVideoComposition({
+              script: script.full_script,
+              facet: facet || {
+                dayIndex: 0,
+                title: script.facet_title,
+                grimoireSlug: slug,
+                focus: script.facet_title,
+                shortFormHook: script.facet_title,
+              },
+              theme,
+              baseUrl,
+              slug,
+            });
 
           if (!script.full_script) {
             throw new Error('Script text missing');
           }
 
-          const voiceName = 'nova';
-          const model = 'tts-1-hd';
-          const speed = 1.1;
+          const voiceName = 'alloy';
+          const model = 'gpt-4o-mini-tts';
+          const speed = 1.0;
           const audioCacheKey = getAudioCacheKey(
             script.full_script,
             voiceName,
@@ -324,11 +332,14 @@ export async function POST(request: NextRequest) {
 
           const safeSlug = slug.replace(/[^a-zA-Z0-9-_]/g, '-');
           const videoBuffer = await composeVideo({
-            imageUrl,
+            images,
             audioBuffer,
             format: 'story',
             outputFilename: `short-${safeSlug}-${dateKey}.mp4`,
             subtitlesText: script.full_script,
+            subtitlesHighlightTerms: highlightTerms,
+            subtitlesHighlightColor: highlightColor,
+            overlays,
           });
 
           const blobKey = `videos/shorts/daily/${dateKey}-${safeSlug}-${Date.now()}.mp4`;
