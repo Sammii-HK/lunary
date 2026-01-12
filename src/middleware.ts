@@ -7,10 +7,60 @@ const camelToKebab = (str: string) =>
     .replace(/^-/, '');
 
 function handleLegacyGrimoireRedirects(pathname: string): string | null {
-  if (pathname.includes(' ') || pathname.includes('%20')) {
-    const decoded = decodeURIComponent(pathname);
-    if (decoded.includes(' ')) {
-      return decoded.replace(/ /g, '-').toLowerCase();
+  if (pathname === '/grimoire/wheel-of-the-year/lammas-or-lughnasadh') {
+    return '/grimoire/wheel-of-the-year/lammas';
+  }
+
+  if (pathname.startsWith('/grimoire/tarot/')) {
+    const tarotPath = pathname.replace(/\/+$/, '');
+    const tarotParts = tarotPath.split('/').filter(Boolean);
+    const suitSet = new Set(['cups', 'wands', 'swords', 'pentacles']);
+    const suitSegment = tarotParts[2];
+    if (tarotParts.length === 3 && suitSegment && suitSet.has(suitSegment)) {
+      const suit = camelToKebab(suitSegment);
+      if (suit) {
+        return `/grimoire/tarot/suits/${suit}`;
+      }
+    }
+    if (tarotParts.length >= 4 && suitSegment && suitSet.has(suitSegment)) {
+      const card = camelToKebab(tarotParts[3] || '');
+      if (card) {
+        return `/grimoire/tarot/${card}`;
+      }
+    }
+  }
+
+  let decodedPath = pathname;
+  if (pathname.includes('%')) {
+    try {
+      decodedPath = decodeURIComponent(pathname);
+    } catch {
+      decodedPath = pathname;
+    }
+  }
+
+  if (decodedPath.includes(' ')) {
+    const normalizedSpaces = decodedPath.replace(/ /g, '-').toLowerCase();
+    if (
+      normalizedSpaces === '/grimoire/wheel-of-the-year/lammas-or-lughnasadh'
+    ) {
+      return '/grimoire/wheel-of-the-year/lammas';
+    }
+    if (normalizedSpaces !== pathname) {
+      return normalizedSpaces;
+    }
+  }
+
+  if (decodedPath.startsWith('/grimoire/')) {
+    const normalizedSegments = decodedPath
+      .replace(/\/+$/, '')
+      .split('/')
+      .map((segment, index) =>
+        index > 1 ? camelToKebab(segment) : segment.toLowerCase(),
+      );
+    const normalizedPath = normalizedSegments.join('/');
+    if (normalizedPath !== pathname) {
+      return normalizedPath;
     }
   }
 
