@@ -8,6 +8,7 @@ import {
   getStoredAttribution,
   getAttributionForTracking,
 } from '@/lib/attribution';
+import { useAuthStatus } from '@/components/AuthStatus';
 
 let posthogModule: any = null;
 let posthogLoaded = false;
@@ -51,6 +52,7 @@ function PostHogProviderContent({ children }: { children: React.ReactNode }) {
   const isAdminHost =
     typeof window !== 'undefined' &&
     window.location.hostname.startsWith('admin.');
+  const authStatus = useAuthStatus();
 
   useEffect(() => {
     const checkConsent = () => {
@@ -176,6 +178,41 @@ function PostHogProviderContent({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     if (isAdminPath || isAdminHost) return;
+    if (
+      !posthogAvailable ||
+      !posthogRef.current ||
+      !initializedRef.current ||
+      typeof authStatus.isAuthenticated !== 'boolean'
+    ) {
+      return;
+    }
+
+    try {
+      posthogRef.current?.register?.({
+        is_authenticated: authStatus.isAuthenticated,
+        isAuthenticated: authStatus.isAuthenticated,
+      });
+      if (authStatus.isAuthenticated && authStatus.user?.id) {
+        posthogRef.current?.identify?.(authStatus.user.id, {
+          is_authenticated: true,
+          isAuthenticated: true,
+        });
+      } else if (!authStatus.isAuthenticated) {
+        posthogRef.current?.reset?.();
+      }
+    } catch (error) {
+      console.error('[PostHog] Failed to sync auth state:', error);
+    }
+  }, [
+    authStatus.isAuthenticated,
+    authStatus.user?.id,
+    posthogAvailable,
+    isAdminHost,
+    isAdminPath,
+  ]);
+
+  useEffect(() => {
+    if (isAdminPath || isAdminHost) return;
     if (!posthogAvailable || !posthogRef.current || !initializedRef.current) {
       return;
     }
@@ -192,16 +229,28 @@ function PostHogProviderContent({ children }: { children: React.ReactNode }) {
 
         posthogRef.current?.capture?.('$pageview', {
           $current_url: url,
+          pathname,
           ...attributionData,
           is_seo_traffic: attribution?.source === 'seo',
           is_grimoire_page: pathname.startsWith('/grimoire'),
           is_blog_page: pathname.startsWith('/blog'),
+          is_authenticated: authStatus.isAuthenticated,
+          isAuthenticated: authStatus.isAuthenticated,
+          auth_user_id: authStatus.user?.id,
         });
       } catch (error) {
         console.error('[PostHog] Failed to capture pageview:', error);
       }
     }
-  }, [pathname, searchParams, posthogAvailable, isAdminHost, isAdminPath]);
+  }, [
+    pathname,
+    searchParams,
+    posthogAvailable,
+    isAdminHost,
+    isAdminPath,
+    authStatus.isAuthenticated,
+    authStatus.user?.id,
+  ]);
 
   return <>{children}</>;
 }

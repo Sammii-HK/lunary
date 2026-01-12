@@ -53,14 +53,25 @@ export const ExpandableCard = ({
 
   return (
     <div
+      data-component='expandable-card'
+      data-version='v2'
       className={cn(
         'bg-lunary-bg border border-zinc-800/50 rounded-md w-full overflow-hidden transition-all relative',
         isExpanded && 'border-lunary-primary-700/50',
         className,
       )}
     >
-      <button
+      <div
+        role='button'
+        tabIndex={0}
+        aria-expanded={isExpanded}
         onClick={handleToggle}
+        onKeyDown={(event) => {
+          if (event.key === 'Enter' || event.key === ' ') {
+            event.preventDefault();
+            handleToggle();
+          }
+        }}
         className={cn(
           'w-full py-3 px-4 text-left hover:bg-zinc-900/50 transition-colors group',
           previewClassName,
@@ -74,7 +85,7 @@ export const ExpandableCard = ({
             <ChevronDown className='w-4 h-4 text-zinc-600 group-hover:text-lunary-accent transition-colors' />
           )}
         </div>
-      </button>
+      </div>
 
       <div
         className={cn(

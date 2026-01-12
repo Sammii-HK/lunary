@@ -146,9 +146,9 @@ export default function RootLayout({
       >
         <StructuredData />
         <Suspense fallback={null}>
-          <PostHogProvider>
-            <ErrorBoundaryWrapper>
-              <AuthStatusProvider>
+          <AuthStatusProvider>
+            <PostHogProvider>
+              <ErrorBoundaryWrapper>
                 <UserProvider>
                   <Suspense
                     fallback={
@@ -168,9 +168,9 @@ export default function RootLayout({
                   </Suspense>
                   <CookieConsent />
                 </UserProvider>
-              </AuthStatusProvider>
-            </ErrorBoundaryWrapper>
-          </PostHogProvider>
+              </ErrorBoundaryWrapper>
+            </PostHogProvider>
+          </AuthStatusProvider>
         </Suspense>
       </body>
     </html>

@@ -662,6 +662,17 @@ async function runDailyPosts(dateStr: string) {
 
   // Generate platform-optimized hashtags
   const platformHashtags = getAllPlatformHashtags(dateStr, cosmicContext);
+  const dailyTransitTextSchedule = new Date(
+    dateStr + 'T13:00:00Z',
+  ).toISOString();
+  const majorTransitBase = new Date(dateStr + 'T16:00:00Z');
+  let majorTransitOffsetMinutes = 0;
+  const getMajorTransitSchedule = () => {
+    const scheduled = new Date(majorTransitBase);
+    scheduled.setMinutes(scheduled.getMinutes() + majorTransitOffsetMinutes);
+    majorTransitOffsetMinutes += 15;
+    return scheduled.toISOString();
+  };
   const getCosmicFormat = (platform: string): ImageFormat =>
     getPlatformImageFormat(platform === 'x' ? 'twitter' : platform);
   const buildCosmicMediaUrls = (format: ImageFormat) => [
@@ -737,6 +748,25 @@ async function runDailyPosts(dateStr: string) {
       },
     },
   ];
+
+  // Add text-first transit and retrograde updates for X, Threads, and Bluesky
+  const retrogradeTextPosts = buildRetrogradeTextPosts({
+    events: cosmicContent.retrogradeEvents ?? [],
+    platformHashtags,
+    getSchedule: getMajorTransitSchedule,
+  });
+
+  const transitSummaryPost = buildTransitSummaryPost({
+    dateStr,
+    cosmicContent,
+    platformHashtags,
+    getSchedule: () => dailyTransitTextSchedule,
+  });
+
+  posts.push(...retrogradeTextPosts);
+  if (transitSummaryPost) {
+    posts.push(transitSummaryPost);
+  }
 
   const pinterestQuoteSlot = await getPinterestQuoteForDate(dateStr);
   if (pinterestQuoteSlot) {
@@ -3251,6 +3281,181 @@ async function runConsolidatedNotifications(
     success: true,
     results,
   };
+}
+
+function addHashtags(text: string, hashtags?: string): string {
+  if (!hashtags || !hashtags.trim()) {
+    return text;
+  }
+  return `${text}\n\n${hashtags.trim()}`;
+}
+
+function buildRetrogradeTextPosts({
+  events,
+  getSchedule,
+  platformHashtags,
+}: {
+  events: Array<any>;
+  getSchedule: () => string;
+  platformHashtags: Record<string, string>;
+}): DailySocialPost[] {
+  const focusMap: Record<string, string> = {
+    Mercury: 'communication and planning',
+    Venus: 'relationships, beauty, and values',
+    Mars: 'how you take action and claim energy',
+    Jupiter: 'growth, belief, and expansion',
+    Saturn: 'structure, responsibility, and long-term goals',
+    Uranus: 'innovation, rebellion, and freedom',
+    Neptune: 'dreams, intuition, and spiritual connection',
+    Pluto: 'transformation, power, and deep renewal',
+  };
+
+  const retrogradeEvents = (events || []).filter(
+    (event) =>
+      event?.planet &&
+      (event.type === 'retrograde_start' || event.type === 'retrograde_end') &&
+      event?.sign,
+  );
+
+  const posts: DailySocialPost[] = [];
+  // const cta = 'Find the full timing details at lunary.app';
+
+  for (const event of retrogradeEvents) {
+    const planet = event.planet;
+    if (!planet) continue;
+
+    const actionLabel =
+      event.type === 'retrograde_start'
+        ? 'stations retrograde'
+        : 'stations direct';
+    const focus = focusMap[planet] || `${planet.toLowerCase()} energy`;
+    const reflectionLine =
+      event.type === 'retrograde_start'
+        ? `Hold space for reflection on ${focus}.`
+        : `Momentum returns to ${focus}.`;
+    const baseMessage = `${planet} ${actionLabel} in ${event.sign}. ${reflectionLine}`;
+
+    const xContent = addHashtags(baseMessage, platformHashtags.twitter);
+    const threadsContent = addHashtags(baseMessage, platformHashtags.threads);
+    const blueskyContent = addHashtags(baseMessage, platformHashtags.bluesky);
+
+    posts.push({
+      name: `Retrograde • ${planet} ${
+        event.type === 'retrograde_start' ? 'Begins' : 'Ends'
+      }`,
+      content: xContent,
+      platforms: ['x'],
+      imageUrls: [],
+      alt: `${planet} retrograde update`,
+      scheduledDate: getSchedule(),
+      variants: {
+        threads: { content: threadsContent },
+        bluesky: { content: blueskyContent },
+        twitter: { content: xContent },
+      },
+    });
+  }
+
+  return posts;
+}
+
+function buildTransitSummaryPost({
+  dateStr,
+  cosmicContent,
+  platformHashtags,
+  getSchedule,
+}: {
+  dateStr: string;
+  cosmicContent: any;
+  platformHashtags: Record<string, string>;
+  getSchedule: () => string;
+}): DailySocialPost | null {
+  const lines: string[] = [];
+  const primaryEvent = cosmicContent.primaryEvent;
+
+  if (primaryEvent?.name) {
+    const energyLine = primaryEvent.energy
+      ? `bringing ${primaryEvent.energy.toLowerCase()} energy.`
+      : 'setting the tone for the day.';
+    lines.push(`${primaryEvent.name} ${energyLine}`);
+  }
+
+  const ingressEvents = Array.isArray(cosmicContent.ingressEvents)
+    ? cosmicContent.ingressEvents
+    : [];
+  ingressEvents.slice(0, 2).forEach((event: any) => {
+    if (event?.planet && event?.sign) {
+      lines.push(`${event.planet} enters ${event.sign} today.`);
+    }
+  });
+
+  const aspectSource = Array.isArray(cosmicContent.dailyAspects)
+    ? cosmicContent.dailyAspects
+    : Array.isArray(cosmicContent.aspectEvents)
+      ? cosmicContent.aspectEvents
+      : [];
+  const aspectLines = aspectSource
+    .filter(
+      (aspect: any) =>
+        aspect?.planetA?.name && aspect?.planetB?.name && aspect.aspect,
+    )
+    .slice(0, 3)
+    .map(formatTransitAspectLine);
+
+  lines.push(...aspectLines);
+
+  if (lines.length === 0) {
+    return null;
+  }
+
+  const header = `Transit snapshot • ${new Date(dateStr).toLocaleDateString(
+    'en-US',
+    {
+      weekday: 'long',
+      month: 'long',
+      day: 'numeric',
+    },
+  )}`;
+  const summaryBody = [
+    header,
+    ...lines,
+    'Track every angle at lunary.app',
+  ].join('\n');
+
+  const xContent = addHashtags(summaryBody, platformHashtags.twitter);
+  const threadsContent = addHashtags(summaryBody, platformHashtags.threads);
+  const blueskyContent = addHashtags(summaryBody, platformHashtags.bluesky);
+
+  return {
+    name: `Transit Snapshot • ${dateStr}`,
+    content: xContent,
+    platforms: ['x'],
+    imageUrls: [],
+    alt: 'Daily transit summary',
+    scheduledDate: getSchedule(),
+    variants: {
+      threads: { content: threadsContent },
+      bluesky: { content: blueskyContent },
+      twitter: { content: xContent },
+    },
+  };
+}
+
+function formatTransitAspectLine(aspect: any): string {
+  const planetA = aspect.planetA?.name || aspect.planetA || 'Planet A';
+  const planetB = aspect.planetB?.name || aspect.planetB || 'Planet B';
+  const aspectLabel = aspect.aspect
+    ? `${aspect.aspect.charAt(0).toUpperCase()}${aspect.aspect.slice(1)}`
+    : 'Aspect';
+  const constellation =
+    aspect.planetA?.constellation && aspect.planetB?.constellation
+      ? `in ${aspect.planetA.constellation}-${aspect.planetB.constellation}`
+      : '';
+  const separation = aspect.separation ? `at ${aspect.separation}°` : '';
+  const parts = [planetA, aspectLabel, planetB];
+  if (constellation) parts.push(constellation);
+  if (separation) parts.push(separation);
+  return `${parts.filter(Boolean).join(' ')}.`;
 }
 
 // Dynamic content generators

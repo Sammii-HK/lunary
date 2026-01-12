@@ -1,8 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server';
 import {
   getPostHogActiveUsers,
-  getPostHogRetention,
   getPostHogActiveUsersTrends,
+  getPostHogAppPageviewUsers,
+  getPostHogGrimoireActiveUsers,
+  getPostHogGrimoireOnlyUsers,
+  getPostHogGrimoirePageviewUsers,
+  getPostHogIdentifyEventCount,
+  getPostHogProductActiveUsers,
+  getPostHogRetention,
+  getPostHogSignedInProductActiveUsers,
+  getPostHogSignedInProductActiveUsersTrends,
+  PRODUCT_USAGE_CONDITION,
 } from '@/lib/posthog-server';
 import { formatDate, resolveDateRange } from '@/lib/analytics/date-range';
 
@@ -15,10 +24,53 @@ export async function GET(request: NextRequest) {
       | 'month';
     const range = resolveDateRange(searchParams, 30);
 
-    const [posthogData, retentionData, trendsData] = await Promise.all([
+    const [
+      posthogData,
+      retentionData,
+      trendsData,
+      productTrendsData,
+      signedInProductTrendsData,
+      productDau,
+      productWau,
+      productMau,
+      signedInProductDau,
+      signedInProductWau,
+      signedInProductMau,
+      grimoireMau,
+      grimoireOnlyMau,
+      appPageviewUsers7d,
+      appPageviewUsers30d,
+      grimoirePageviewUsers7d,
+      grimoirePageviewUsers30d,
+      identifyEvents30d,
+    ] = await Promise.all([
       getPostHogActiveUsers(range.end),
       getPostHogRetention(),
       getPostHogActiveUsersTrends(range.start, range.end, granularity),
+      getPostHogActiveUsersTrends(
+        range.start,
+        range.end,
+        granularity,
+        PRODUCT_USAGE_CONDITION,
+      ),
+      getPostHogSignedInProductActiveUsersTrends(
+        range.start,
+        range.end,
+        granularity,
+      ),
+      getPostHogProductActiveUsers(1),
+      getPostHogProductActiveUsers(7),
+      getPostHogProductActiveUsers(30),
+      getPostHogSignedInProductActiveUsers(1),
+      getPostHogSignedInProductActiveUsers(7),
+      getPostHogSignedInProductActiveUsers(30),
+      getPostHogGrimoireActiveUsers(30),
+      getPostHogGrimoireOnlyUsers(30),
+      getPostHogAppPageviewUsers(7),
+      getPostHogAppPageviewUsers(30),
+      getPostHogGrimoirePageviewUsers(7),
+      getPostHogGrimoirePageviewUsers(30),
+      getPostHogIdentifyEventCount(30),
     ]);
 
     if (!posthogData) {
@@ -33,6 +85,12 @@ export async function GET(request: NextRequest) {
           retention: { day_1: 0, day_7: 0, day_30: 0 },
           churn_rate: null,
           trends: [],
+          product_trends: [],
+          product_dau: 0,
+          product_wau: 0,
+          product_mau: 0,
+          content_mau_grimoire: 0,
+          grimoire_only_mau: 0,
           source: 'error',
         },
         { status: 503 },
@@ -81,6 +139,64 @@ export async function GET(request: NextRequest) {
       }
     }
 
+    const sortedProductTrends = [...(productTrendsData || [])].sort((a, b) =>
+      a.date.localeCompare(b.date),
+    );
+
+    if (
+      typeof productDau === 'number' &&
+      typeof productWau === 'number' &&
+      typeof productMau === 'number'
+    ) {
+      const lastDate = formatDate(range.end);
+      const productSummary = {
+        date: lastDate,
+        dau: productDau,
+        wau: productWau,
+        mau: productMau,
+      };
+      const lastProductIndex = sortedProductTrends.findIndex(
+        (trend) => trend.date === lastDate,
+      );
+      if (lastProductIndex >= 0) {
+        sortedProductTrends[lastProductIndex] = {
+          ...sortedProductTrends[lastProductIndex],
+          ...productSummary,
+        };
+      } else {
+        sortedProductTrends.push(productSummary);
+      }
+    }
+
+    const sortedSignedInProductTrends = [
+      ...(signedInProductTrendsData || []),
+    ].sort((a, b) => a.date.localeCompare(b.date));
+
+    if (
+      typeof signedInProductDau === 'number' &&
+      typeof signedInProductWau === 'number' &&
+      typeof signedInProductMau === 'number'
+    ) {
+      const lastDate = formatDate(range.end);
+      const signedInProductSummary = {
+        date: lastDate,
+        dau: signedInProductDau,
+        wau: signedInProductWau,
+        mau: signedInProductMau,
+      };
+      const lastSignedInIndex = sortedSignedInProductTrends.findIndex(
+        (trend) => trend.date === lastDate,
+      );
+      if (lastSignedInIndex >= 0) {
+        sortedSignedInProductTrends[lastSignedInIndex] = {
+          ...sortedSignedInProductTrends[lastSignedInIndex],
+          ...signedInProductSummary,
+        };
+      } else {
+        sortedSignedInProductTrends.push(signedInProductSummary);
+      }
+    }
+
     return NextResponse.json({
       dau: posthogData.dau,
       wau: posthogData.wau,
@@ -89,6 +205,23 @@ export async function GET(request: NextRequest) {
       retention,
       churn_rate: churnRate,
       trends: sortedTrends,
+      product_trends: sortedProductTrends,
+      signed_in_product_trends: sortedSignedInProductTrends,
+      product_dau: productDau ?? 0,
+      product_wau: productWau ?? 0,
+      product_mau: productMau ?? 0,
+      signed_in_product_dau: signedInProductDau ?? 0,
+      signed_in_product_wau: signedInProductWau ?? 0,
+      signed_in_product_mau: signedInProductMau ?? 0,
+      content_mau_grimoire: grimoireMau ?? 0,
+      grimoire_only_mau: grimoireOnlyMau ?? 0,
+      debug: {
+        app_pageview_users_7d: appPageviewUsers7d ?? 0,
+        app_pageview_users_30d: appPageviewUsers30d ?? 0,
+        grimoire_pageview_users_7d: grimoirePageviewUsers7d ?? 0,
+        grimoire_pageview_users_30d: grimoirePageviewUsers30d ?? 0,
+        identify_events_30d: identifyEvents30d ?? 0,
+      },
       source: 'posthog',
     });
   } catch (error) {

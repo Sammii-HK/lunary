@@ -1,5 +1,8 @@
 import { PostHog } from 'posthog-node';
 
+const POSTHOG_HOST =
+  process.env.NEXT_PUBLIC_POSTHOG_HOST || 'https://eu.i.posthog.com';
+
 let posthogClient: PostHog | null = null;
 
 export function getPostHogServer(): PostHog | null {
@@ -9,7 +12,7 @@ export function getPostHogServer(): PostHog | null {
   if (!apiKey) return null;
 
   posthogClient = new PostHog(apiKey, {
-    host: process.env.NEXT_PUBLIC_POSTHOG_HOST || 'https://us.i.posthog.com',
+    host: POSTHOG_HOST,
     flushAt: 1,
     flushInterval: 0,
   });
@@ -102,9 +105,6 @@ export async function shutdownPostHog(): Promise<void> {
   }
 }
 
-const POSTHOG_API_HOST =
-  process.env.NEXT_PUBLIC_POSTHOG_HOST || 'https://eu.i.posthog.com';
-
 // Helper to build test user filter for PostHog queries
 // Note: This filters by person properties.email if available
 // PostHog may not always have email in person properties, so this is best-effort
@@ -116,6 +116,43 @@ function getTestUserFilter(): string {
     AND (person.properties.$email IS NULL OR person.properties.$email NOT LIKE '%@test.lunary.app')
   )`;
 }
+
+const PRODUCT_EVENT_NAMES = [
+  'birth_chart_viewed',
+  'personalized_horoscope_viewed',
+  'personalized_tarot_viewed',
+  'dashboard_viewed',
+  'login',
+];
+
+const PRODUCT_EVENT_CONDITION = PRODUCT_EVENT_NAMES.map(
+  (event) => `event = '${event}'`,
+).join(' OR ');
+
+const AUTHENTICATED_USER_CONDITION = `
+  (
+    properties.isAuthenticated = true
+    OR properties.is_authenticated = true
+    OR properties.user_id IS NOT NULL
+    OR properties.userId IS NOT NULL
+    OR person.properties.user_id IS NOT NULL
+    OR person.properties.userId IS NOT NULL
+  )
+`;
+
+const POSTHOG_API_HOST = POSTHOG_HOST;
+
+const APP_PAGEVIEW_CONDITION =
+  "(event = '$pageview' AND properties.pathname LIKE '/app%')";
+
+export const PRODUCT_USAGE_CONDITION = `(${PRODUCT_EVENT_CONDITION} OR ${APP_PAGEVIEW_CONDITION})`;
+
+const SIGNED_IN_PRODUCT_USAGE_CONDITION = `(${AUTHENTICATED_USER_CONDITION} AND ${PRODUCT_USAGE_CONDITION})`;
+
+export const PRODUCT_FILTER_CONDITION = SIGNED_IN_PRODUCT_USAGE_CONDITION;
+
+const GRIMOIRE_FILTER_CONDITION =
+  "(event = '$pageview' AND properties.pathname LIKE '/grimoire%')";
 
 export async function queryPostHogAPI<T>(
   endpoint: string,
@@ -162,6 +199,183 @@ export async function queryPostHogAPI<T>(
   }
 }
 
+async function queryDistinctPersonCount(
+  condition: string,
+  daysBack: number,
+): Promise<number> {
+  const testUserFilter = getTestUserFilter();
+  const query = `
+    SELECT count(DISTINCT person_id)
+    FROM events
+    WHERE ${condition}
+      AND timestamp >= now() - INTERVAL ${daysBack} DAY
+      ${testUserFilter}
+  `;
+
+  const result = await queryPostHogAPI<{ results: Array<Array<number>> }>(
+    '/query/',
+    {
+      method: 'POST',
+      body: JSON.stringify({
+        query: {
+          kind: 'HogQLQuery',
+          query,
+        },
+      }),
+    },
+  );
+
+  return Number(result?.results?.[0]?.[0] || 0);
+}
+
+async function queryEventCount(
+  eventName: string,
+  daysBack: number,
+): Promise<number> {
+  const testUserFilter = getTestUserFilter();
+  const escapedEvent = eventName.replace(/'/g, "''");
+  const query = `
+    SELECT count(*)
+    FROM events
+    WHERE event = '${escapedEvent}'
+      AND timestamp >= now() - INTERVAL ${daysBack} DAY
+      ${testUserFilter}
+  `;
+
+  const result = await queryPostHogAPI<{ results: Array<Array<number>> }>(
+    '/query/',
+    {
+      method: 'POST',
+      body: JSON.stringify({
+        query: {
+          kind: 'HogQLQuery',
+          query,
+        },
+      }),
+    },
+  );
+
+  return Number(result?.results?.[0]?.[0] || 0);
+}
+
+export async function getPostHogAppPageviewUsers(
+  daysBack: number = 30,
+): Promise<number | null> {
+  try {
+    return await queryDistinctPersonCount(APP_PAGEVIEW_CONDITION, daysBack);
+  } catch (error) {
+    console.error('[PostHog] App pageview users query failed:', error);
+    return null;
+  }
+}
+
+export async function getPostHogGrimoirePageviewUsers(
+  daysBack: number = 30,
+): Promise<number | null> {
+  try {
+    return await queryDistinctPersonCount(GRIMOIRE_FILTER_CONDITION, daysBack);
+  } catch (error) {
+    console.error('[PostHog] Grimoire pageview users query failed:', error);
+    return null;
+  }
+}
+
+export async function getPostHogIdentifyEventCount(
+  daysBack: number = 30,
+): Promise<number | null> {
+  try {
+    return await queryEventCount('$identify', daysBack);
+  } catch (error) {
+    console.error('[PostHog] Identify event count failed:', error);
+    return null;
+  }
+}
+
+async function queryGrimoireOnlyCount(daysBack: number): Promise<number> {
+  const testUserFilter = getTestUserFilter();
+  const innerQuery = `
+    SELECT DISTINCT person_id
+    FROM events
+    WHERE ${PRODUCT_USAGE_CONDITION}
+      AND timestamp >= now() - INTERVAL ${daysBack} DAY
+      ${testUserFilter}
+  `;
+
+  const outerQuery = `
+    SELECT count(DISTINCT person_id)
+    FROM events
+    WHERE ${GRIMOIRE_FILTER_CONDITION}
+      AND timestamp >= now() - INTERVAL ${daysBack} DAY
+      AND person_id NOT IN (${innerQuery})
+      ${testUserFilter}
+  `;
+
+  const result = await queryPostHogAPI<{ results: Array<Array<number>> }>(
+    '/query/',
+    {
+      method: 'POST',
+      body: JSON.stringify({
+        query: {
+          kind: 'HogQLQuery',
+          query: outerQuery,
+        },
+      }),
+    },
+  );
+
+  return Number(result?.results?.[0]?.[0] || 0);
+}
+
+export async function getPostHogProductActiveUsers(
+  daysBack: number = 30,
+): Promise<number | null> {
+  try {
+    return await queryDistinctPersonCount(PRODUCT_USAGE_CONDITION, daysBack);
+  } catch (error) {
+    console.error('[PostHog] Product active user query failed:', error);
+    return null;
+  }
+}
+
+export async function getPostHogSignedInProductActiveUsers(
+  daysBack: number = 30,
+): Promise<number | null> {
+  try {
+    return await queryDistinctPersonCount(
+      SIGNED_IN_PRODUCT_USAGE_CONDITION,
+      daysBack,
+    );
+  } catch (error) {
+    console.error(
+      '[PostHog] Signed-in product active user query failed:',
+      error,
+    );
+    return null;
+  }
+}
+
+export async function getPostHogGrimoireActiveUsers(
+  daysBack: number = 30,
+): Promise<number | null> {
+  try {
+    return await queryDistinctPersonCount(GRIMOIRE_FILTER_CONDITION, daysBack);
+  } catch (error) {
+    console.error('[PostHog] Grimoire active user query failed:', error);
+    return null;
+  }
+}
+
+export async function getPostHogGrimoireOnlyUsers(
+  daysBack: number = 30,
+): Promise<number | null> {
+  try {
+    return await queryGrimoireOnlyCount(daysBack);
+  } catch (error) {
+    console.error('[PostHog] Grimoire-only user query failed:', error);
+    return null;
+  }
+}
+
 export interface PostHogActiveUsers {
   dau: number;
   wau: number;
@@ -188,6 +402,7 @@ export async function getPostHogActiveUsersTrends(
   startDate: Date,
   endDate: Date,
   granularity: 'day' | 'week' | 'month' = 'day',
+  whereClause?: string,
 ): Promise<PostHogActiveUsersTrend[]> {
   // Determine date truncation based on granularity
   let dateTrunc: string;
@@ -212,6 +427,8 @@ export async function getPostHogActiveUsersTrends(
 
   const testUserFilter = getTestUserFilter();
 
+  const eventFilter = whereClause ? `(${whereClause})` : "event = '$pageview'";
+
   // Build a map of date -> Set of person_ids for that date
   // We need the actual person_ids to calculate rolling windows
   const personIdsByDateQuery = `
@@ -219,7 +436,7 @@ export async function getPostHogActiveUsersTrends(
       ${dailyDateTrunc} as date,
       person_id
     FROM events 
-    WHERE event = '$pageview'
+    WHERE ${eventFilter}
       AND timestamp >= toDateTime(${extendedStartTimestamp})
       AND timestamp <= toDateTime(${endTimestamp})
       ${testUserFilter}
@@ -334,6 +551,19 @@ export async function getPostHogActiveUsersTrends(
   }
 
   return trends;
+}
+
+export async function getPostHogSignedInProductActiveUsersTrends(
+  startDate: Date,
+  endDate: Date,
+  granularity: 'day' | 'week' | 'month' = 'day',
+): Promise<PostHogActiveUsersTrend[]> {
+  return getPostHogActiveUsersTrends(
+    startDate,
+    endDate,
+    granularity,
+    SIGNED_IN_PRODUCT_USAGE_CONDITION,
+  );
 }
 
 export async function getPostHogActiveUsers(

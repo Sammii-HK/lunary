@@ -22,7 +22,6 @@ import {
   Download,
   Copy,
 } from 'lucide-react';
-import { VideoManager } from '../social-preview/video-manager';
 
 interface SubstackPost {
   title: string;
@@ -377,7 +376,6 @@ export default function SubstackManagerPage() {
         <Tabs defaultValue='publishing' className='space-y-6'>
           <TabsList className='bg-zinc-900 border border-zinc-800'>
             <TabsTrigger value='publishing'>Publishing</TabsTrigger>
-            <TabsTrigger value='videos'>Videos</TabsTrigger>
           </TabsList>
           <TabsContent value='publishing' className='space-y-6'>
             <div className='grid grid-cols-1 lg:grid-cols-3 gap-6'>
@@ -974,9 +972,6 @@ export default function SubstackManagerPage() {
                 </CardContent>
               </Card>
             )}
-          </TabsContent>
-          <TabsContent value='videos'>
-            <VideoManager weekOffset={weekOffset} />
           </TabsContent>
         </Tabs>
       </div>

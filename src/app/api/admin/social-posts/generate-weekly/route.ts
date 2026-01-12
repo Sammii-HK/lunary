@@ -1426,7 +1426,6 @@ export async function POST(request: NextRequest) {
 
     // Platform-specific posting days and frequencies
     const platformPlan = {
-      instagram: { days: ['Tuesday', 'Thursday', 'Sunday'], count: 3 },
       twitter: {
         days: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'],
         count: 5,
@@ -1439,8 +1438,8 @@ export async function POST(request: NextRequest) {
         count: 5,
       },
       tiktok: {
-        days: ['Monday', 'Tuesday', 'Wednesday', 'Thursday'],
-        count: 4,
+        days: [],
+        count: 0,
       },
     };
 
@@ -1714,12 +1713,7 @@ Return JSON: {"posts": ["Post content"]}`;
       );
 
       // Generate sabbat posts for each platform that supports long-form content
-      const sabbatPlatforms = [
-        'instagram',
-        'facebook',
-        'linkedin',
-        'pinterest',
-      ];
+      const sabbatPlatforms = ['facebook', 'linkedin', 'pinterest'];
       for (const sabbat of upcomingSabbats) {
         for (const platform of sabbatPlatforms) {
           const sabbatPost = await generateEducationalPost(
@@ -1770,10 +1764,8 @@ Return JSON: {"posts": ["Post content"]}`;
 
       // All platforms that accept images
       const platformsNeedingImages = [
-        'instagram',
         'pinterest',
         'reddit',
-        'tiktok',
         'twitter',
         'facebook',
         'linkedin',

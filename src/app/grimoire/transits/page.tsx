@@ -64,7 +64,87 @@ export const metadata: Metadata = {
   },
 };
 
-const years = [2026, 2027, 2028, 2029, 2030];
+const years = [2025, 2026, 2027, 2028, 2029, 2030, 2033, 2040, 2048];
+
+const SATURN_CYCLE_STEPS = [
+  {
+    label: 'First Square (1st Quarter)',
+    years: '2033–2035 (approx)',
+    ages: '37–39',
+    birthYears: '1984–1987',
+    notes:
+      'The first square calls for a new level of maturity; it is about confronting the friction between ambition and responsibility and supports recalibrating the structures you built in your twenties.',
+  },
+  {
+    label: 'Opposition (Halfway Point)',
+    years: '2040–2041 (approx)',
+    ages: '44–45',
+    birthYears: '1975–1977',
+    notes:
+      'Opposition times spotlight relationships and the way you share power. This is a mirror for what you have built and what you are ready to surrender so the next decade can bloom.',
+  },
+  {
+    label: 'Second Square (3rd Quarter)',
+    years: '2048–2050 (approx)',
+    ages: '52–54',
+    birthYears: '1967–1969',
+    notes:
+      'The second square asks you to integrate earlier lessons, step back from overworking, and make room for wiser, more patient leadership as Saturn prepares for its second return.',
+  },
+  {
+    label: 'Saturn Return (Conjunction)',
+    years: '2025–2030',
+    ages: '28–34',
+    birthYears: '1995–2002',
+    notes:
+      'A full orbit brings Saturn back to its natal place. These years demand accountability, supporting choices that can anchor the next 29 years.',
+  },
+];
+
+// const SATURN_YEARLY_SEQUENCE = [
+//   {
+//     year: 2025,
+//     stage: 'Saturn Return (Conjunction)',
+//     ages: '28–31',
+//     birthYears: '1994–1997',
+//     note: 'The late-90s cohort hits their full return; it mirrors the second return for the late-1960s births.',
+//   },
+//   {
+//     year: 2026,
+//     stage: 'Second Cycle (Square cluster)',
+//     ages: '37–40',
+//     birthYears: '1985–1989',
+//     note: 'Those who returned around 2014–2018 now feel the square—the second cycle check-in before the halfway opposition.',
+//   },
+//   {
+//     year: 2027,
+//     stage: 'Opposition (Halfway)',
+//     ages: '45–49',
+//     birthYears: '1978–1982',
+//     note: 'The halfway opposition asks this cohort to balance shared power, partnerships, and accountability.',
+//   },
+//   {
+//     year: 2028,
+//     stage: 'Second Square',
+//     ages: '52–56',
+//     birthYears: '1971–1975',
+//     note: 'The second square arrives as Saturn prepares for the return; it is about integrating lessons and steadying leadership.',
+//   },
+//   {
+//     year: 2029,
+//     stage: 'Saturn Return (Taurus)',
+//     ages: '28–30',
+//     birthYears: '2000–2001',
+//     note: 'A new Saturn return anchors the 2000 cohort—and Taurus lessons about values and stability.',
+//   },
+//   {
+//     year: 2030,
+//     stage: 'Return Continuation',
+//     ages: '28–30',
+//     birthYears: '2001–2002',
+//     note: 'The return wraps up with more grounding before Saturn shifts into the next chapter.',
+//   },
+// ];
 
 export default function TransitsIndexPage() {
   const transitsListSchema = createItemListSchema({
@@ -143,6 +223,69 @@ export default function TransitsIndexPage() {
           >
             See your personal transit timeline
           </Link>
+        </div>
+        <div className='mb-12 p-5 rounded-2xl border border-lunary-primary-700 bg-lunary-primary-900/10'>
+          <h2 className='text-2xl font-semibold text-lunary-primary-200 mb-3'>
+            The full Saturn cycle you are moving through
+          </h2>
+          <p className='text-zinc-300 mb-6'>
+            Our yearly list highlights the most visible Saturn returns, but
+            Saturn meets you four times between returns. Below is a quick
+            reference for the square, opposition, square again, and the
+            return—each listing the ages and birth years that experience those
+            catalytic moments.
+          </p>
+          {/* <div className='grid gap-3 mb-4 sm:grid-cols-2'>
+            {SATURN_YEARLY_SEQUENCE.map((entry) => (
+              <div
+                key={entry.year}
+                className='p-3 rounded-lg border border-zinc-800 bg-zinc-950/60 text-xs'
+              >
+                <div className='flex items-center justify-between text-[0.55rem] uppercase tracking-[0.3em] text-zinc-500'>
+                  <span>{entry.year}</span>
+                  <span>{entry.stage}</span>
+                </div>
+                <p className='text-xs text-zinc-400 mt-1'>
+                  Ages {entry.ages} · Born {entry.birthYears}
+                </p>
+                <p className='text-xs text-zinc-300 mt-2 leading-relaxed'>
+                  {entry.note}
+                </p>
+              </div>
+            ))}
+          </div> */}
+          <div className='grid gap-4 md:grid-cols-2'>
+            {SATURN_CYCLE_STEPS.map((step) => (
+              <div
+                key={step.label}
+                className='p-4 rounded-xl border border-zinc-800 bg-zinc-950/60'
+              >
+                <p className='text-xs uppercase tracking-[0.3em] text-zinc-500 mb-2'>
+                  {step.label}
+                </p>
+                <div className='flex items-baseline gap-2'>
+                  <span className='text-lg font-semibold text-white'>
+                    {step.years}
+                  </span>
+                  <span className='text-xs text-zinc-400'>
+                    {step.ages} years old
+                  </span>
+                </div>
+                <p className='text-sm text-zinc-400 mt-1'>
+                  Born roughly {step.birthYears}
+                </p>
+                <p className='text-sm text-zinc-300 mt-3 leading-relaxed'>
+                  {step.notes}
+                </p>
+              </div>
+            ))}
+          </div>
+          <p className='text-xs text-zinc-400 mt-4'>
+            These markers list the cohorts currently moving through each Saturn
+            angle. If you were born before the dates shown here, these stages
+            already happened for you, so treat them as collective reference
+            points rather than your current cycle.
+          </p>
         </div>
 
         {years.map((year) => {

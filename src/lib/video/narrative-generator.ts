@@ -202,51 +202,61 @@ export async function generateNarrativeFromWeeklyData(
 
   const weekRange = `${weeklyData.weekStart.toLocaleDateString('en-US', { month: 'long', day: 'numeric' })} - ${weeklyData.weekEnd.toLocaleDateString('en-US', { month: 'long', day: 'numeric' })}`;
 
-  const prompt = `Create a natural, flowing voiceover script (5-8 minutes, 1200-2000 words) for a YouTube video about the weekly cosmic forecast for ${weekRange}.
+  const prompt = `Create a natural, flowing voiceover script (5–8 minutes, approximately 1200–2000 words) for a YouTube video covering the weekly cosmic forecast for ${weekRange}.
 
-CRITICAL: You MUST follow this EXACT structure in this EXACT order. Each section must be present:
+CRITICAL: You MUST follow the structure below IN THIS ORDER. All sections must be present, but the narration should feel continuous and spoken, not segmented or lecture-like. Do not announce sections.
 
-[OPENING - 30-60 seconds]
-Start with: "The interplay between [key planets from aspects] creates a unique energetic signature for this week, offering both challenges and opportunities for growth." Then introduce the week's theme and major events.
-${seasonalEvents ? `\n[SEASONAL EVENT - 45-60 seconds]\nThis week includes a significant seasonal event. Cover concisely:\n- What this event means astronomically (longest/shortest day, equal day/night)\n- The energetic significance and how it shifts the cosmic energy\n- Intention setting: What intentions align with this energy?\nKeep it focused on astrology and cosmic alignment - no history, no rituals, no cultural traditions.` : ''}
+OPENING (30–60 seconds)
+Open by describing how the key planetary aspects this week create an overall energetic tone. Introduce the main theme of the week and briefly name the most important movements or alignments that shape it. The opening should feel grounded, reflective, and orienting rather than promotional.
 
-[MAJOR PLANETARY MOVEMENTS - 2-3 minutes]
-Cover all planetary highlights in order. For EACH planet entering a new sign, explain IN DEPTH:
-- What the planet represents (e.g., "The Sun represents our core identity, vitality, and life force")
-- What the sign represents (e.g., "Capricorn is the sign of ambition, structure, and long-term goals")
-- What it MEANS when this planet is in this sign (e.g., "Sun in Capricorn shifts our focus toward achievement, discipline, and building lasting foundations")
-- How this energy affects different areas of life
-- How long this transit lasts and what to expect
+${
+  seasonalEvents
+    ? `
+SEASONAL EVENT (45–60 seconds)
+This week includes a significant seasonal shift. Explain:
+- What this event represents astronomically
+- How it marks a change in collective energy
+- What kinds of intentions align naturally with this shift
+Keep this focused on astrology and cosmic timing. Do not include history, rituals, or cultural traditions.`
+    : ''
+}
 
-[COSMIC ALIGNMENTS - 2-3 minutes]
-Cover ALL major aspects in this section (do not mix with planetary movements). For EACH aspect:
-- ALWAYS include the DATE: "On [day], [Planet] [aspect] [Planet]..."
-- Use EXACT aspect words: "square" (not "squaring"), "trine" (not "trine with"), "opposition" (not "opposing")
-- What each planet represents
-- What the aspect type means (trine = harmony, square = tension, opposition = polarity)
-- How these energies combine and what opportunities/challenges this creates
-- Practical advice for working with this energy
+MAJOR PLANETARY MOVEMENTS (2–3 minutes)
+Cover all planetary sign changes in order. For EACH planet entering a new sign:
+- Briefly explain what the planet governs (avoid repeating definitions verbatim if multiple planets appear)
+- Explain what the sign represents
+- Describe what this combination emphasizes in lived experience
+- Mention which areas of life are most affected
+- Note how long the transit lasts and what to watch for
+Depth should come from clarity and relevance, not repetition.
 
-IMPORTANT: Keep all cosmic alignments TOGETHER in this section. Do not alternate between planetary movements and aspects.
+COSMIC ALIGNMENTS (2–3 minutes)
+Cover ALL major aspects together in this section. For EACH aspect:
+- Always include the date using this format: "On [day], [Planet] [aspect] [Planet]..."
+- Use EXACT aspect terms: square, trine, opposition, conjunction, sextile
+- Briefly explain what each planet represents
+- Explain what the aspect type signifies energetically
+- Describe how these forces interact
+- Offer grounded, practical guidance for navigating the energy
+Do not interleave this section with planetary movements.
 
-[BEST DAYS FOR - 1-2 minutes]
-Cover the best days for different activities. Use the format: "The best days this week for [activity 1] are [dates], when [reason]. For [activity 2], [dates] are ideal because [reason]."
+BEST DAYS FOR (1–2 minutes)
+Describe the best days for specific activities using natural spoken phrasing. Explain why certain days support certain actions, based on planetary or lunar conditions.
 
-[MOON PHASES - 1-2 minutes - MANDATORY]
-This section MUST be included. For EACH moon phase, explain IN DEPTH:
-- The phase name and what it represents in the lunar cycle
-- What sign the Moon is in and what that sign represents emotionally
-- What "Moon in [Sign]" MEANS - how it colors our emotional landscape, intuition, and inner world
-- Practical guidance: What activities are supported? What should we avoid?
-- Intention-setting guidance for this lunar energy (what intentions align with this phase)
-IMPORTANT: Named full moons (e.g., "Wolf Moon", "Snow Moon") are FULL MOONS. Always describe their energy as Full Moon energy even when a name is used.
-Even if no major moon phases occur, discuss the current moon phase and its influence.
+MOON PHASES (1–2 minutes – MANDATORY)
+For EACH moon phase this week:
+- Name the phase and its role in the lunar cycle
+- Explain the sign the Moon occupies and its emotional tone
+- Describe what "Moon in [Sign]" means for intuition, mood, and inner focus
+- Offer practical guidance for supported actions and things to avoid
+- Include intention-setting aligned with this lunar energy
+Named full moons are FULL MOONS and must be described as such.
+If no major phase occurs, describe the current lunar phase and its influence.
 
-[CONCLUSION - 30-60 seconds]
-End with: "As we navigate this week's cosmic energy, remember that these planetary movements and alignments offer both challenges and opportunities. To dive deeper into your personal cosmic forecast and understand how these energies affect your birth chart, visit Lunary.app."
+CONCLUSION (30–60 seconds)
+Close by summarizing the overall rhythm of the week. Reinforce that astrology offers perspective rather than prediction. End calmly by noting that deeper personal insight comes from understanding how these transits interact with an individual birth chart, and that further context is available on Lunary.
 
 Weekly Data:
-
 Title: ${weeklyData.title}
 Subtitle: ${weeklyData.subtitle}
 Summary: ${weeklyData.summary}
@@ -260,9 +270,10 @@ ${retrogradeInfo || 'No retrograde changes this week'}
 Major Aspects:
 ${aspects || 'No major aspects this week'}
 
-Moon Phases (MANDATORY - always include this section, explain what Moon in each sign MEANS):
+Moon Phases:
 ${moonPhases}
-${seasonalEvents ? `\nSeasonal Events (IMPORTANT - give this its own dedicated section with in-depth explanation):\n${seasonalEvents}` : ''}
+
+${seasonalEvents ? `Seasonal Events:\n${seasonalEvents}` : ''}
 
 Best Days:
 ${
@@ -271,12 +282,12 @@ ${
     .slice(0, 3)
     .map(
       ([activity, data]) =>
-        `- Best for ${activity} on ${data.dates.map((d: Date) => d.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })).join(', ')}: ${data.reason}`,
+        `Best for ${activity} on ${data.dates.map((d: Date) => d.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })).join(', ')}: ${data.reason}`,
     )
     .join('\n') || 'No specific best days highlighted'
 }
 
-Return ONLY the voiceover script text, no markdown, no formatting, no section headers, just natural spoken text following the structure above.`;
+Return ONLY the voiceover script text. No headings, no formatting, no section labels. The tone should be calm, authoritative, and reflective, suitable for a thoughtful YouTube audience.`;
 
   try {
     const completion = await openai.chat.completions.create({
@@ -499,31 +510,79 @@ export async function generateMediumFormNarrative(
 
   const weekRange = `${weeklyData.weekStart.toLocaleDateString('en-US', { month: 'long', day: 'numeric' })} - ${weeklyData.weekEnd.toLocaleDateString('en-US', { month: 'long', day: 'numeric' })}`;
 
-  const prompt = `Create a MEDIUM voiceover script (30-60 seconds, ~75-150 words) for a social media video recap about the weekly cosmic forecast for ${weekRange}.
+  const prompt = `Create a MEDIUM voiceover script (30–60 seconds, approximately 75–150 words) for a social media video recap of the weekly cosmic forecast for ${weekRange}.
 
 Structure (MUST follow this EXACT order):
-1. Opening (3-5 seconds): Jump straight into the cosmic energy
-${seasonalEvents ? `2. Seasonal Event (5-8 seconds): Mention the ${weeklyData.seasonalEvents?.[0]?.name} prominently! Explain what it means briefly.` : ''}
-${seasonalEvents ? `3. Planetary highlights: For each transit, say "[Planet] enters [Sign]" then ONE sentence about its meaning` : `2. Planetary highlights: For each transit, say "[Planet] enters [Sign]" then ONE sentence about its meaning`}
-${seasonalEvents ? `4. Aspects: For EACH aspect, you MUST say "[PlanetA] [aspect] [PlanetB]" - e.g., "Venus square Saturn brings tension to relationships"` : `3. Aspects: For EACH aspect, you MUST say "[PlanetA] [aspect] [PlanetB]" - e.g., "Venus square Saturn brings tension to relationships"`}
-${seasonalEvents ? `5. Moon phases: Say the exact phase name and sign` : `4. Moon phases: Say the exact phase name and sign`}
-${seasonalEvents ? `6. Closing: "For more information, check out the full blog at Lunary"` : `5. Closing: "For more information, check out the full blog at Lunary"`}
-IMPORTANT: Named full moons (e.g., "Wolf Moon", "Snow Moon") are FULL MOONS. Always describe their energy as Full Moon energy even when a name is used.
 
-CRITICAL - EXACT WORDING FOR ASPECTS:
-When mentioning aspects, you MUST use this EXACT format: "[Planet1] [aspect] [Planet2]"
-- Say "Venus square Saturn" NOT "Venus faces challenges with Saturn"
-- Say "Mars trine Jupiter" NOT "Mars and Jupiter align harmoniously"
-- Say "Mercury opposition Uranus" NOT "Mercury and Uranus oppose each other"
-The aspect word (square, trine, opposition, conjunction, sextile) MUST appear between the two planet names!
+1. Opening (3–5 seconds):
+Begin with a grounded statement that frames the overall tone of the week. Do not use metaphors or hype. State the dominant energy clearly.
 
-Data to use (use EXACT wording):
-${seasonalEvents ? `Seasonal Events (IMPORTANT - mention early in script):\n${seasonalEvents}\n` : ''}
+${
+  seasonalEvents
+    ? `2. Seasonal Event (5–8 seconds):
+Mention the ${weeklyData.seasonalEvents?.[0]?.name} prominently. State what this shift marks astrologically and how it sets the tone for the week.`
+    : ''
+}
+
+${
+  seasonalEvents
+    ? `3. Planetary highlights:
+For each transit, say EXACTLY "[Planet] enters [Sign]" followed by ONE clear sentence explaining what areas of life this transit tends to affect.`
+    : `2. Planetary highlights:
+For each transit, say EXACTLY "[Planet] enters [Sign]" followed by ONE clear sentence explaining what areas of life this transit tends to affect.`
+}
+
+${
+  seasonalEvents
+    ? `4. Aspects:
+For EACH aspect, you MUST say "[Planet1] [aspect] [Planet2]" followed by ONE sentence describing the core tension, support, or dynamic created.`
+    : `3. Aspects:
+For EACH aspect, you MUST say "[Planet1] [aspect] [Planet2]" followed by ONE sentence describing the core tension, support, or dynamic created.`
+}
+
+${
+  seasonalEvents
+    ? `5. Moon phases:
+State the exact moon phase name and sign, then ONE sentence describing its emotional or energetic emphasis.`
+    : `4. Moon phases:
+State the exact moon phase name and sign, then ONE sentence describing its emotional or energetic emphasis.`
+}
+
+${
+  seasonalEvents
+    ? `6. Closing:
+End with this exact phrasing, delivered calmly and neutrally:
+"For more context and the full weekly breakdown, you can read the full blog on Lunary."`
+    : `5. Closing:
+End with this exact phrasing, delivered calmly and neutrally:
+"For more context and the full weekly breakdown, you can read the full blog on Lunary."`
+}
+
+IMPORTANT:
+- Named full moons (e.g., "Wolf Moon", "Snow Moon") are FULL MOONS.
+- Always describe their energy as Full Moon energy, even when a name is used.
+
+CRITICAL – EXACT WORDING FOR ASPECTS:
+When mentioning aspects, you MUST use this EXACT format:
+"[Planet1] [aspect] [Planet2]"
+
+Examples:
+- "Venus square Saturn"
+- "Mars trine Jupiter"
+- "Mercury opposition Uranus"
+
+Do NOT rephrase aspect language.
+Do NOT replace aspect terms with descriptive wording.
+The aspect word (square, trine, opposition, conjunction, sextile) MUST appear between the two planet names.
+
+Data to use (use EXACT wording as provided):
+
+${seasonalEvents ? `Seasonal Events (mention early):\n${seasonalEvents}\n` : ''}
 ${planetaryHighlights || 'None this week'}
 ${aspectsInfo}
 ${moonPhases}
 
-Return ONLY the voiceover script. Use EXACT planet and aspect names from above.`;
+Return ONLY the complete voiceover script. No headings, no bullet points, no formatting. Write in a calm, confident broadcast tone.`;
 
   try {
     const completion = await openai.chat.completions.create({
@@ -790,6 +849,116 @@ function generateVideoHashtags(
   return uniqueHashtags.slice(0, 3).join(' ');
 }
 
+const ASTROLOGY_POOL = [
+  '#astrology',
+  '#horoscope',
+  '#zodiac',
+  '#planetarytransits',
+  '#weeklyhoroscope',
+];
+const TAROT_POOL = [
+  '#tarot',
+  '#tarottok',
+  '#tarotreading',
+  '#tarotcommunity',
+  '#tarotmeanings',
+];
+const LUNAR_POOL = [
+  '#moon',
+  '#moonphase',
+  '#newmoon',
+  '#fullmoon',
+  '#moonmagic',
+];
+const NUMEROLOGY_POOL = [
+  '#numerology',
+  '#angelnumbers',
+  '#1111',
+  '#synchronicity',
+  '#spiritualsigns',
+];
+const CRYSTALS_POOL = [
+  '#crystals',
+  '#crystaltok',
+  '#crystalhealing',
+  '#healingcrystals',
+  '#crystalenergy',
+];
+const WITCHCRAFT_POOL = [
+  '#witchtok',
+  '#witchcraft',
+  '#spells',
+  '#ritual',
+  '#modernwitch',
+];
+const SEASONAL_POOL = [
+  '#wheeloftheyear',
+  '#sabbats',
+  '#pagan',
+  '#seasonalritual',
+  '#earthcycles',
+];
+const DIVINATION_POOL = [
+  '#divination',
+  '#pendulum',
+  '#runes',
+  '#scrying',
+  '#spiritualtools',
+];
+const INTENT_POOL = [
+  '#intuition',
+  '#spiritualgrowth',
+  '#innerwork',
+  '#healingjourney',
+  '#selfreflection',
+];
+
+const CATEGORY_HASHTAG_POOLS: Record<string, string[]> = {
+  planetary: ASTROLOGY_POOL,
+  zodiac: ASTROLOGY_POOL,
+  tarot: TAROT_POOL,
+  lunar: LUNAR_POOL,
+  numerology: NUMEROLOGY_POOL,
+  crystals: CRYSTALS_POOL,
+  sabbat: SEASONAL_POOL,
+  chakras: WITCHCRAFT_POOL,
+  spells: WITCHCRAFT_POOL,
+  divination: DIVINATION_POOL,
+};
+
+function pickHashtagPool(category?: string) {
+  if (!category) {
+    return ASTROLOGY_POOL;
+  }
+  const normalized = category.toLowerCase();
+  return CATEGORY_HASHTAG_POOLS[normalized] || ASTROLOGY_POOL;
+}
+
+function deterministicHashtags(
+  weeklyData: WeeklyCosmicData,
+  category?: string,
+): string[] {
+  const pool = pickHashtagPool(category);
+  const poolStart = weeklyData.weekNumber % pool.length;
+  const primary = Array.from({ length: 3 }, (_, index) => {
+    const idx = (poolStart + index) % pool.length;
+    return pool[idx];
+  });
+  const intentStart = (weeklyData.weekNumber + 3) % INTENT_POOL.length;
+  const intent = Array.from({ length: 2 }, (_, index) => {
+    const idx = (intentStart + index) % INTENT_POOL.length;
+    return INTENT_POOL[idx];
+  });
+  return [...primary, ...intent];
+}
+
+export async function generateReelHashtags(
+  weeklyData: WeeklyCosmicData,
+  themeCategory?: string,
+): Promise<string[]> {
+  return deterministicHashtags(weeklyData, themeCategory);
+}
+
 /**
  * Format content for Threads by front-loading keywords in the first sentence
  * Threads algorithm heavily weights the first line for discovery
@@ -932,24 +1101,29 @@ export async function generateVideoPostContent(
 
   const prompt = `Create a social media post caption to accompany a ${typeDescription} video about the weekly cosmic forecast for ${weekRange}.
 
-The post should:
-- Be engaging and natural, not salesy
-- Give a brief overview of the key cosmic events happening this week
-- Mention that the full blog is available on Lunary (but DO NOT include a link or URL)
-- Say something like "check out the full blog on Lunary" or "read more on the Lunary blog" - never write out the full URL
-- Be appropriate for Instagram, TikTok, and other platforms
-- Be 3-5 sentences, informative and inviting
-- Match the mystical but accessible tone of Lunary
-- For short-form: Be brief and hook-focused
-- For medium-form: Be informative, highlight key cosmic events mentioned in the video
-- For long-form: Can be slightly longer, more comprehensive overview
+The caption should:
+- Read like an editorial introduction, not a promotion
+- Be calm, grounded, and informative in tone
+- Avoid hype, sales language, emojis, hashtags, or links
+- Be suitable for Instagram, TikTok, and Threads
+
+Structure guidance:
+- Sentence 1: Open with a clear, compelling insight about the week’s overall energy or theme
+- Sentence 2–3: Briefly highlight the most important cosmic events or shifts happening this week
+- Final sentence: Invite the reader to explore deeper context by mentioning the Lunary blog (e.g. “The full breakdown is available on the Lunary blog” or “You can read the full interpretation on Lunary”)
+- Do NOT include URLs or explicit calls to action
+
+Length guidance:
+- For short-form video captions: concise and insight-led (3 sentences)
+- For medium-form: informative, highlighting key events (3–4 sentences)
+- For long-form: slightly more expansive overview (4–5 sentences)
 
 Weekly Data:
 Title: ${weeklyData.title}
 Subtitle: ${weeklyData.subtitle}
 Key Events: ${eventOverview.length > 0 ? eventOverview.join(', ') : 'Various cosmic shifts'}
 
-Return ONLY the post content text, no markdown, no formatting, just the caption text. Do NOT include any URLs or links. Do NOT use any emojis. Do NOT include hashtags - they will be added separately.`;
+Return ONLY the caption text. No markdown, no formatting, no emojis, no hashtags, no links.`;
 
   try {
     const completion = await openai.chat.completions.create({
