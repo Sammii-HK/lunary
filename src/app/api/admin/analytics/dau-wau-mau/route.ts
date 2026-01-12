@@ -11,6 +11,7 @@ import {
   getPostHogRetention,
   getPostHogSignedInProductActiveUsers,
   getPostHogSignedInProductActiveUsersTrends,
+  getPostHogSignedInProductUsageSummary,
   PRODUCT_USAGE_CONDITION,
 } from '@/lib/posthog-server';
 import { formatDate, resolveDateRange } from '@/lib/analytics/date-range';
@@ -36,6 +37,7 @@ export async function GET(request: NextRequest) {
       signedInProductDau,
       signedInProductWau,
       signedInProductMau,
+      signedInProductUsageSummary,
       grimoireMau,
       grimoireOnlyMau,
       appPageviewUsers7d,
@@ -64,6 +66,7 @@ export async function GET(request: NextRequest) {
       getPostHogSignedInProductActiveUsers(1),
       getPostHogSignedInProductActiveUsers(7),
       getPostHogSignedInProductActiveUsers(30),
+      getPostHogSignedInProductUsageSummary(range.start, range.end),
       getPostHogGrimoireActiveUsers(30),
       getPostHogGrimoireOnlyUsers(30),
       getPostHogAppPageviewUsers(7),
@@ -86,9 +89,16 @@ export async function GET(request: NextRequest) {
           churn_rate: null,
           trends: [],
           product_trends: [],
+          signed_in_product_trends: [],
           product_dau: 0,
           product_wau: 0,
           product_mau: 0,
+          signed_in_product_dau: 0,
+          signed_in_product_wau: 0,
+          signed_in_product_mau: 0,
+          signed_in_product_users: 0,
+          signed_in_product_returning_users: 0,
+          signed_in_product_avg_sessions_per_user: 0,
           content_mau_grimoire: 0,
           grimoire_only_mau: 0,
           source: 'error',
@@ -213,6 +223,11 @@ export async function GET(request: NextRequest) {
       signed_in_product_dau: signedInProductDau ?? 0,
       signed_in_product_wau: signedInProductWau ?? 0,
       signed_in_product_mau: signedInProductMau ?? 0,
+      signed_in_product_users: signedInProductUsageSummary?.users ?? 0,
+      signed_in_product_returning_users:
+        signedInProductUsageSummary?.returningUsers ?? 0,
+      signed_in_product_avg_sessions_per_user:
+        signedInProductUsageSummary?.avgSessionsPerUser ?? 0,
       content_mau_grimoire: grimoireMau ?? 0,
       grimoire_only_mau: grimoireOnlyMau ?? 0,
       debug: {

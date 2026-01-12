@@ -24,17 +24,6 @@ const PRODUCT_INTERACTION_EVENTS = [
   'login',
 ];
 
-function escapeForSql(value: string) {
-  return value.replace(/'/g, "''");
-}
-
-function formatSqlArray(values: string[]) {
-  if (values.length === 0) {
-    return 'ARRAY[]::text[]';
-  }
-  return `ARRAY[${values.map((value) => `'${escapeForSql(value)}'`).join(', ')}]`;
-}
-
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
@@ -453,7 +442,6 @@ export async function GET(request: NextRequest) {
         ? (churnedCustomers / startingPayingCustomers) * 100
         : 0;
 
-    const activationEventsArray = formatSqlArray(PRODUCT_INTERACTION_EVENTS);
     const activationReturnResult = await sql`
       WITH trial_cohort AS (
         SELECT user_id, MIN(created_at) AS started_at
@@ -471,7 +459,7 @@ export async function GET(request: NextRequest) {
             SELECT 1
             FROM conversion_events ce
             WHERE ce.user_id = trial_cohort.user_id
-              AND ce.event_type = ANY(${activationEventsArray})
+              AND ce.event_type = ANY(${PRODUCT_INTERACTION_EVENTS})
               AND ce.created_at >= trial_cohort.started_at
               AND ce.created_at <= trial_cohort.started_at + INTERVAL '48 hours'
               AND (ce.user_email IS NULL OR (ce.user_email NOT LIKE ${TEST_EMAIL_PATTERN} AND ce.user_email != ${TEST_EMAIL_EXACT}))
