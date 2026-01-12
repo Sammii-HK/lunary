@@ -956,11 +956,10 @@ export async function POST(request: NextRequest) {
       console.log(
         `🎙️ Generating new audio for ${type} video (not found in cache for ${weekKey})...`,
       );
-      // const ttsSpeed = type === 'medium' ? 1.1 : 1.0;
-      const ttsSpeed = 1.1;
+      const ttsSpeed = 1.0;
       audioBuffer = await generateVoiceover(script, {
-        voiceName: 'nova', // British female voice
-        model: 'tts-1-hd', // High quality
+        voiceName: 'alloy',
+        model: 'gpt-4o-mini-tts',
         speed: ttsSpeed,
       });
 

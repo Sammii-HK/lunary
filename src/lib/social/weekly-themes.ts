@@ -940,7 +940,25 @@ export function generateHashtags(
     crystals: '#crystalhealing',
     chakras: '#chakras',
   };
-  const thirdHashtag = categoryThirdHashtags[theme.category] || '#spirituality';
+  const fallbackThirdHashtags: Record<string, string[]> = {
+    zodiac: ['#zodiacsigns', '#horoscope'],
+    tarot: ['#tarotreading', '#tarotcards'],
+    lunar: ['#lunarcycle', '#moonmagic'],
+    planetary: ['#planets', '#cosmicwisdom'],
+    sabbat: ['#seasonalrituals', '#paganwheel'],
+    numerology: ['#numbersymbolism', '#numerologyguide'],
+    crystals: ['#crystals', '#healingstones'],
+    chakras: ['#energyhealing', '#chakrawork'],
+  };
+  const baseThird = categoryThirdHashtags[theme.category] || '#spirituality';
+  const used = new Set([domain, topic]);
+  let thirdHashtag = baseThird;
+  if (used.has(baseThird)) {
+    const fallbacks = fallbackThirdHashtags[theme.category] || [
+      '#cosmicwisdom',
+    ];
+    thirdHashtag = fallbacks.find((tag) => !used.has(tag)) || baseThird;
+  }
 
   return {
     domain,
