@@ -7,7 +7,7 @@ export interface TTSProvider {
 export interface TTSOptions {
   voiceName?: string; // Human-readable name (e.g., "nova", "onyx", "shimmer")
   speed?: number; // 0.25 to 4.0
-  model?: string; // Provider-specific model (e.g., "tts-1", "tts-1-hd")
+  model?: string; // Provider-specific model (e.g., "gpt-4o-mini-tts")
 }
 
 export interface TTSVoice {

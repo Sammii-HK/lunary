@@ -651,13 +651,7 @@ export function generateThematicPostsForWeek(
   const posts: ThematicPost[] = [];
 
   // Long-form platforms (educational depth, images)
-  const longFormPlatforms = [
-    'instagram',
-    'linkedin',
-    'pinterest',
-    'facebook',
-    'tiktok',
-  ];
+  const longFormPlatforms = ['linkedin', 'pinterest', 'facebook'];
   // Short-form platforms (1-2 sentences, with hashtags and images)
   const shortFormPlatforms = ['twitter', 'bluesky', 'threads'];
 
