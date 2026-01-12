@@ -172,8 +172,8 @@ export async function POST(request: NextRequest) {
       // Generate new audio
       console.log(`🎙️ Generating new preview audio for ${type}...`);
       audioBuffer = await generateVoiceover(script, {
-        voiceName: 'nova', // British female voice
-        model: 'tts-1-hd', // High quality
+        voiceName: 'alloy',
+        model: 'gpt-4o-mini-tts',
         speed: 1.0,
       });
 

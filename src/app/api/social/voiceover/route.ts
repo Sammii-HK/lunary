@@ -6,7 +6,7 @@ export const dynamic = 'force-dynamic';
 
 export async function POST(request: NextRequest) {
   try {
-    const { text, voiceId } = await request.json();
+    const { text } = await request.json();
 
     if (!text) {
       return NextResponse.json({ error: 'Text is required' }, { status: 400 });
@@ -20,7 +20,8 @@ export async function POST(request: NextRequest) {
     }
 
     const audioBuffer = await generateVoiceover(text, {
-      voiceName: voiceId || 'nova', // Map voiceId to voiceName
+      voiceName: 'alloy',
+      speed: 1.0,
     });
 
     return new NextResponse(audioBuffer, {
