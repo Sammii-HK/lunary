@@ -25,6 +25,39 @@ export async function generateMetadata({
     return {};
   }
 
+  if (yearNum === 2025) {
+    const title =
+      'Major Astrological Events 2025: Eclipses, Retrogrades, Key Dates | Lunary';
+    const description =
+      'Major astrological events 2025 highlights eclipses, retrogrades, and the key transits that shape the year so you can track the dates and their meaning.';
+    return {
+      title,
+      description,
+      keywords: [
+        '2025 astrological events',
+        '2025 eclipses',
+        '2025 retrogrades',
+        '2025 transits',
+        'astrology calendar 2025',
+      ],
+      openGraph: {
+        title,
+        description,
+        url: 'https://lunary.app/grimoire/events/2025',
+        siteName: 'Lunary',
+        images: ['/api/og/cosmic?title=2025%20Cosmic%20Events'],
+      },
+      twitter: {
+        card: 'summary_large_image',
+        title,
+        description,
+      },
+      alternates: {
+        canonical: 'https://lunary.app/grimoire/events/2025',
+      },
+    };
+  }
+
   return {
     title: `${year} Astrological Events Calendar | Lunary`,
     description: `Complete guide to ${year} astrological events including Mercury retrograde dates, Venus retrograde, eclipses, equinoxes, and major planetary transits.`,
@@ -358,6 +391,33 @@ export default async function EventsYearPage({
     notFound();
   }
 
+  const is2025 = yearNum === 2025;
+  const pageTitle = is2025
+    ? 'Major Astrological Events 2025: Eclipses, Retrogrades, Key Dates | Lunary'
+    : `${year} Astrological Events Calendar | Lunary`;
+  const pageH1 = is2025
+    ? 'Major Astrological Events 2025'
+    : `${year} Cosmic Events Calendar`;
+  const pageDescription = is2025
+    ? 'Major astrological events 2025 shows eclipses, retrogrades, and the key transits that shape the year so you can track dates and what each shift means.'
+    : `Complete guide to ${year} astrological events including Mercury retrograde dates, Venus retrograde, eclipses, equinoxes, and major planetary transits.`;
+  const pageIntro = is2025
+    ? 'Major astrological events 2025 gathers the eclipses, retrogrades, and major transits that matter so you can scan the dates and the quick meaning they carry. Each date also notes what to expect so you can plan within the timing instead of reacting to it.'
+    : undefined;
+  const quickLinkItems = is2025
+    ? [
+        {
+          label: 'Mercury retrograde 2025',
+          href: '/grimoire/events/2025/mercury-retrograde',
+        },
+        {
+          label: 'Venus retrograde 2025',
+          href: '/grimoire/events/2025/venus-retrograde',
+        },
+        { label: 'Eclipses 2025', href: '/grimoire/events/2025/eclipses' },
+      ]
+    : [];
+
   const events = await getEventsForYear(yearNum);
   const stats = getSummaryStats(yearNum, events);
 
@@ -411,9 +471,9 @@ While these events affect everyone, their impact on your personal chart is uniqu
 
   return (
     <SEOContentTemplate
-      title={`${year} Astrological Events Calendar | Lunary`}
-      h1={`${year} Cosmic Events Calendar`}
-      description={`Complete guide to ${year} astrological events including Mercury retrograde dates, Venus retrograde, eclipses, equinoxes, and major planetary transits.`}
+      title={pageTitle}
+      h1={pageH1}
+      description={pageDescription}
       keywords={[
         `${year} astrology`,
         `${year} mercury retrograde`,
@@ -435,6 +495,7 @@ While these events affect everyone, their impact on your personal chart is uniqu
         question: `What are the astrological events in ${year}?`,
         answer: `${year} features ${stats.mercuryRetrograde} Mercury retrograde periods, ${stats.venusRetrograde} Venus retrograde, ${stats.eclipses} eclipses, and ${stats.outerPlanetRx} outer planet retrograde periods. This calendar provides complete dates and guidance for navigating all major cosmic events.`,
       }}
+      intro={pageIntro}
       tldr={`${year} Astrological Events: ${stats.mercuryRetrograde} Mercury retrogrades, ${stats.venusRetrograde} Venus retrograde, ${stats.eclipses} eclipses, ${stats.outerPlanetRx} outer planet retrogrades. Use this calendar to plan ahead and align with cosmic energies.`}
       meaning={meaningContent}
       faqs={faqs}
@@ -447,6 +508,25 @@ While these events affect everyone, their impact on your personal chart is uniqu
     >
       {/* Custom content: Events Calendar */}
       <div className='mt-8 space-y-8'>
+        {is2025 && quickLinkItems.length > 0 && (
+          <section className='rounded-2xl border border-zinc-800 bg-zinc-900/50 px-6 py-5'>
+            <h2 className='text-base font-semibold text-zinc-100 mb-3'>
+              Quick links
+            </h2>
+            <div className='flex flex-wrap gap-3'>
+              {quickLinkItems.map((item) => (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className='px-4 py-2 rounded-lg border border-zinc-800 bg-zinc-950 text-sm font-medium text-zinc-200 hover:border-lunary-primary-500 transition-colors'
+                >
+                  {item.label}
+                </Link>
+              ))}
+            </div>
+          </section>
+        )}
+
         {/* Quick Summary */}
         <div className='p-6 rounded-lg border border-lunary-primary-700 bg-lunary-primary-900/10'>
           <h2 className='text-lg font-medium text-lunary-primary-300 mb-4'>
