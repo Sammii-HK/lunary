@@ -13,9 +13,10 @@ function extractFirstSentence(text: string): string {
     .replace(/^\\s*Welcome to Part\\s+\\d+\\s+of\\s+\\d+[:.]?\\s*/i, '')
     .replace(/^\\s*Part\\s+\\d+\\s+of\\s+\\d+[:.]?\\s*/i, '')
     .trim();
-  const match = cleaned.match(/[^.!?]+[.!?]/);
+  const protectedText = cleaned.replace(/(\d)\.(\d)/g, '$1<DECIMAL>$2');
+  const match = protectedText.match(/[^.!?]+[.!?]/);
   if (match && match[0]) {
-    return match[0].trim();
+    return match[0].replace(/<DECIMAL>/g, '.').trim();
   }
   return cleaned.split('\\n')[0]?.trim() || cleaned.slice(0, 160).trim();
 }
