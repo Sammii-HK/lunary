@@ -1,6 +1,7 @@
 import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { SEOContentTemplate } from '@/components/grimoire/SEOContentTemplate';
+import type { FAQItem } from '@/components/grimoire/SEOContentTemplate';
 
 const witchTypes = {
   'green-witch': {
@@ -225,6 +226,52 @@ export async function generateMetadata({
     };
   }
 
+  const isCosmic = type === 'cosmic-witch';
+  if (isCosmic) {
+    const title =
+      'Cosmic Witch Meaning: What It Is, Traits, Practices | Lunary';
+    const description =
+      'Cosmic witch meaning centres on working with celestial energy, astrology, and planetary timing; this guide shares traits, practices, and compatible signs.';
+    return {
+      title,
+      description,
+      keywords: [
+        'cosmic witch',
+        'cosmic witchcraft',
+        'celestial witch',
+        'star witch',
+        'witch types',
+      ],
+      openGraph: {
+        title,
+        description,
+        url: 'https://lunary.app/grimoire/modern-witchcraft/witch-types/cosmic-witch',
+        siteName: 'Lunary',
+        type: 'article',
+      },
+      twitter: {
+        card: 'summary_large_image',
+        title,
+        description,
+      },
+      alternates: {
+        canonical:
+          'https://lunary.app/grimoire/modern-witchcraft/witch-types/cosmic-witch',
+      },
+      robots: {
+        index: true,
+        follow: true,
+        googleBot: {
+          index: true,
+          follow: true,
+          'max-video-preview': -1,
+          'max-image-preview': 'large',
+          'max-snippet': -1,
+        },
+      },
+    };
+  }
+
   const title = `${typeData.name}: Path, Practices & Tools - Lunary`;
   const description = `Discover the ${typeData.name} path. Learn about ${typeData.name.toLowerCase()} practices, tools, and how to know if this witchcraft path is right for you.`;
 
@@ -279,18 +326,88 @@ export default async function WitchTypePage({
     notFound();
   }
 
-  const faqs = [
+  const isCosmic = type === 'cosmic-witch';
+  const pageTitle = isCosmic
+    ? 'Cosmic Witch Meaning: What It Is, Traits, Practices | Lunary'
+    : `${typeData.name} - Lunary`;
+  const pageH1 = isCosmic
+    ? 'Cosmic witch meaning'
+    : `${typeData.name}: Complete Guide`;
+  const pageDescription = isCosmic
+    ? 'Cosmic witch meaning is about working with celestial energy, astrology, and planetary timing—this page explains the traits, practices, and signs that steward that path.'
+    : `Discover the ${typeData.name} path, practices, and tools.`;
+  const pageIntro = isCosmic
+    ? 'Cosmic witch meaning describes a practitioner who leans on astrology, planetary timing, and star lore to guide spells and rituals. This guide lists the traits, practices, and signs that help you embody that celestial path.'
+    : typeData.description;
+  const pageTldr = isCosmic
+    ? 'Cosmic witches gather astrology, planetary rituals, and celestial timing to move purposefully with the sky while drawing on star charts, planetary talismans, and eclipse rituals.'
+    : `The ${typeData.name} focuses on ${typeData.focuses
+        .slice(0, 2)
+        .join(' and ')
+        .toLowerCase()}. Element: ${typeData.element}.`;
+  const pageKeywords = isCosmic
+    ? [
+        'cosmic witch',
+        'cosmic witchcraft',
+        'celestial witch',
+        'star witch',
+        'witchcraft timing',
+      ]
+    : [
+        typeData.name.toLowerCase(),
+        `${typeData.name.toLowerCase()} witchcraft`,
+        'witch types',
+        'witchcraft paths',
+        'modern witchcraft',
+      ];
+
+  const cosmicFaqs: FAQItem[] = [
+    {
+      question: 'What is a cosmic witch?',
+      answer:
+        'Cosmic witch meaning highlights a practitioner who works with celestial energy, astrology, and planetary timing as the foundation of their craft.',
+    },
+    {
+      question: 'What are cosmic witch traits?',
+      answer:
+        'Cosmic witches tend to notice planetary shifts, feel drawn to star lore, and value timing, imagination, and big-picture perspective.',
+    },
+    {
+      question: 'How do you practise cosmic witchcraft?',
+      answer:
+        'Practise cosmic witchcraft by working with star charts, timing rituals for planetary transits, observing eclipses, and using celestial correspondences in spellcraft.',
+    },
+    {
+      question: 'Is a cosmic witch the same as an astrologer?',
+      answer:
+        'Not exactly—a cosmic witch blends astrology into a broader magical practice, while an astrologer focuses on chart interpretation; many cosmic witches practice both.',
+    },
+    {
+      question: 'How do I know if I am a cosmic witch?',
+      answer:
+        'You might be a cosmic witch if you are drawn to astrology, notice planetary shifts, and feel most alive working with celestial timing in your rituals.',
+    },
+  ];
+
+  const defaultFaqs = [
     {
       question: `What is a ${typeData.name}?`,
       answer: typeData.description,
     },
     {
       question: `What does a ${typeData.name} practice?`,
-      answer: `${typeData.name} practitioners focus on ${typeData.focuses.join(', ').toLowerCase()}. Common practices include ${typeData.practices.slice(0, 2).join(' and ').toLowerCase()}.`,
+      answer: `${typeData.name} practitioners focus on ${typeData.focuses
+        .join(', ')
+        .toLowerCase()}. Common practices include ${typeData.practices
+        .slice(0, 2)
+        .join(' and ')
+        .toLowerCase()}.`,
     },
     {
       question: `What tools does a ${typeData.name} use?`,
-      answer: `${typeData.name} tools typically include ${typeData.tools.join(', ').toLowerCase()}.`,
+      answer: `${typeData.name} tools typically include ${typeData.tools
+        .join(', ')
+        .toLowerCase()}.`,
     },
     {
       question: `How do I know if I'm a ${typeData.name}?`,
@@ -298,21 +415,50 @@ export default async function WitchTypePage({
     },
   ];
 
+  const pageFaqList = isCosmic ? cosmicFaqs : defaultFaqs;
+  const pageInternalLinks = isCosmic
+    ? [
+        { text: 'Astrology basics', href: '/grimoire/astrology' },
+        { text: 'Birth chart basics', href: '/grimoire/birth-chart' },
+        {
+          text: 'Moon phases guide',
+          href: '/grimoire/guides/moon-phases-guide',
+        },
+        { text: 'Numerology basics', href: '/grimoire/numerology' },
+        {
+          text: 'Witch Types Hub',
+          href: '/grimoire/modern-witchcraft/witch-types',
+        },
+      ]
+    : [
+        {
+          text: 'Modern Witchcraft Guide',
+          href: '/grimoire/modern-witchcraft',
+        },
+        {
+          text: 'Witchcraft Tools',
+          href: '/grimoire/modern-witchcraft/tools-guide',
+        },
+        {
+          text: 'Spellcraft Fundamentals',
+          href: '/grimoire/spells/fundamentals',
+        },
+        { text: 'Grimoire Home', href: '/grimoire' },
+      ];
+  const internalLinksTitle = isCosmic
+    ? 'Explore related guides'
+    : 'Explore more in the Grimoire';
+
   return (
     <div className='p-4 md:p-6 lg:p-8 xl:p-10 min-h-full'>
       <SEOContentTemplate
-        title={`${typeData.name} - Lunary`}
-        h1={`${typeData.name}: Complete Guide`}
-        description={`Discover the ${typeData.name} path, practices, and tools.`}
-        keywords={[
-          typeData.name.toLowerCase(),
-          'witchcraft',
-          'witch types',
-          'modern witchcraft',
-        ]}
+        title={pageTitle}
+        h1={pageH1}
+        description={pageDescription}
+        keywords={pageKeywords}
         canonicalUrl={`https://lunary.app/grimoire/modern-witchcraft/witch-types/${type}`}
-        intro={typeData.description}
-        tldr={`The ${typeData.name} focuses on ${typeData.focuses.slice(0, 2).join(' and ').toLowerCase()}. Element: ${typeData.element}.`}
+        intro={pageIntro}
+        tldr={pageTldr}
         meaning={`In modern witchcraft, practitioners often identify with specific paths or types that resonate with their interests, abilities, and spiritual calling. The ${typeData.name} is one such path.
 
 ${typeData.description}
@@ -379,24 +525,11 @@ Remember that witch types are not exclusive—many practitioners blend multiple 
             href: `/grimoire/modern-witchcraft/witch-types/${type}`,
           },
         ]}
-        internalLinks={[
-          {
-            text: 'Modern Witchcraft Guide',
-            href: '/grimoire/modern-witchcraft',
-          },
-          {
-            text: 'Witchcraft Tools',
-            href: '/grimoire/modern-witchcraft/tools-guide',
-          },
-          {
-            text: 'Spellcraft Fundamentals',
-            href: '/grimoire/spells/fundamentals',
-          },
-          { text: 'Grimoire Home', href: '/grimoire' },
-        ]}
+        internalLinks={pageInternalLinks}
+        internalLinksTitle={internalLinksTitle}
         ctaText='Explore your witchcraft path'
         ctaHref='/grimoire/modern-witchcraft'
-        faqs={faqs}
+        faqs={pageFaqList}
       />
     </div>
   );

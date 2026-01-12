@@ -93,6 +93,7 @@ export interface SEOContentTemplateProps {
 
   // Internal links
   internalLinks?: Array<{ text: string; href: string }>;
+  internalLinksTitle?: string;
 
   // Breadcrumbs
   breadcrumbs?: BreadcrumbItem[];
@@ -151,6 +152,7 @@ export function SEOContentTemplate({
   tableOfContents,
   cosmicConnections,
   internalLinks,
+  internalLinksTitle = 'Explore More',
   breadcrumbs,
   ctaText,
   ctaHref,
@@ -587,7 +589,7 @@ export function SEOContentTemplate({
       {internalLinks && internalLinks.length > 0 && (
         <section className='overflow-x-hidden'>
           <h2 className='text-md md:text-2xl font-medium text-zinc-100 mb-4 break-words'>
-            Explore More
+            {internalLinksTitle}
           </h2>
           <div className='flex flex-wrap gap-3'>
             {internalLinks.map((link, index) => (
