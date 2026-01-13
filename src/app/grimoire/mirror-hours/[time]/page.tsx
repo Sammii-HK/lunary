@@ -40,7 +40,7 @@ export async function generateMetadata({
       `seeing ${hourData.time}`,
       `${hourData.time} spiritual meaning`,
       'mirror hours',
-      'angel numbers',
+      'clock-based numerology',
     ],
     openGraph: {
       title,
@@ -107,7 +107,7 @@ export default async function MirrorHourPage({
     keywords: [
       `${hourData.time} meaning`,
       'mirror hour',
-      'angel numbers',
+      'clock-based numerology',
       'clock synchronicity',
       'spiritual signs',
     ],
@@ -127,8 +127,12 @@ export default async function MirrorHourPage({
           'mirror hours',
         ]}
         canonicalUrl={`https://lunary.app/grimoire/mirror-hours/${time}`}
-        intro={`${hourData.name} carries the energy of ${hourData.meaning.toLowerCase()}. ${hourData.message}`}
-        tldr={`${hourData.time} means ${hourData.meaning.toLowerCase()}. When you see this mirror hour, ${hourData.message.toLowerCase()}`}
+        intro={`${
+          hourData.time
+        } is a mirror hour associated with ${hourData.meaning}. Mirror hours appear through contrast, reflection, and awareness, often during moments where perspective matters more than action.
+
+When this time appears, it is an invitation to notice what you were thinking or feeling rather than rushing to interpret it.`}
+        tldr={`TL;DR: ${hourData.time} reflects themes of ${hourData.meaning}. It appears as a moment of awareness rather than instruction.`}
         meaning={`Mirror hours are times when the hour and minute digits mirror each other, like ${hourData.time}. These synchronicities are believed to carry messages from your guardian angels and the universe.
 
 ${hourData.spiritualMeaning}
@@ -170,7 +174,7 @@ ${hourData.message}
             type: 'Guide',
           },
           {
-            name: 'Angel Numbers',
+            name: 'Clock-based numerology',
             href: '/grimoire/angel-numbers',
             type: 'Guide',
           },
@@ -196,7 +200,7 @@ ${hourData.message}
         ]}
         internalLinks={[
           { text: 'Explore Numerology', href: '/grimoire/numerology' },
-          { text: 'Angel Numbers', href: '/grimoire/angel-numbers' },
+          { text: 'Clock-based numerology', href: '/grimoire/angel-numbers' },
           { text: 'Moon Phases', href: '/grimoire/moon/phases' },
           { text: 'Tarot Card of the Day', href: '/tarot' },
           { text: 'Grimoire Home', href: '/grimoire' },

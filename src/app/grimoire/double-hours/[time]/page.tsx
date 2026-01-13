@@ -39,7 +39,7 @@ export async function generateMetadata({
       `seeing ${hourData.time}`,
       `${hourData.time} spiritual meaning`,
       'double hours',
-      'angel numbers',
+      'clock-based numerology',
     ],
     openGraph: {
       title,
@@ -100,8 +100,12 @@ export default async function DoubleHourPage({
           'double hours',
         ]}
         canonicalUrl={`https://lunary.app/grimoire/double-hours/${time}`}
-        intro={`${hourData.name} carries the energy of ${hourData.meaning.toLowerCase()}. ${hourData.message}`}
-        tldr={`${hourData.time} means ${hourData.meaning.toLowerCase()}. When you see this double hour, ${hourData.message.toLowerCase()}`}
+        intro={`${
+          hourData.time
+        } is a double hour linked to ${hourData.meaning}. Double hours repeat a number’s energy, amplifying its influence and signalling alignment or momentum.
+
+When you notice this time, it often confirms that you are moving in the right direction.`}
+        tldr={`TL;DR: ${hourData.time} amplifies ${hourData.meaning}. It often appears as confirmation or energetic reinforcement.`}
         meaning={`Double hours are times when the hour and minute are the same number, like ${hourData.time}. These powerful synchronicities are believed to be messages from your guardian angels and the universe, amplifying the energy of the repeated number.
 
 ${hourData.spiritualMeaning}
@@ -136,7 +140,7 @@ ${hourData.message}
             type: 'Guide',
           },
           {
-            name: 'Angel Numbers',
+            name: 'Clock-based numerology',
             href: '/grimoire/numerology',
             type: 'Guide',
           },
@@ -157,7 +161,7 @@ ${hourData.message}
         ]}
         internalLinks={[
           { text: 'Explore Numerology', href: '/grimoire/numerology' },
-          { text: 'Angel Numbers', href: '/grimoire/numerology' },
+          { text: 'Clock-based numerology', href: '/grimoire/numerology' },
           { text: 'Grimoire Home', href: '/grimoire' },
         ]}
         ctaText='Want personalized numerology insights?'

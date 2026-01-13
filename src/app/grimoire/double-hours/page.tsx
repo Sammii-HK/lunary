@@ -21,6 +21,7 @@ export const metadata: Metadata = {
     '10:10 meaning',
     'clock synchronicity',
     'repeating numbers clock',
+    'clock-based numerology',
   ],
   openGraph: {
     title: 'Double Hours: Meanings of 10:10, 12:12, 21:21 & More - Lunary',
@@ -36,17 +37,17 @@ const faqs = [
   {
     question: 'What are double hours?',
     answer:
-      'Double hours are clock times where the hour and minute digits are identical, like 10:10, 12:12, or 21:21. Unlike mirror hours (which show mirrored digits), double hours repeat the same numbers. Many believe seeing these times repeatedly carries spiritual significance.',
+      'Double hours are times where the hour and minute are the same, such as 11:11 or 22:22. They amplify a single number’s energy.',
   },
   {
-    question: 'What does 12:12 mean?',
+    question: 'Why do double hours feel significant?',
     answer:
-      '12:12 is often associated with spiritual awakening, completion of cycles, and cosmic alignment. The number 12 appears frequently in sacred traditions (12 zodiac signs, 12 months). Seeing 12:12 may signal that you are completing a phase and preparing for new growth.',
+      'Because repetition strengthens symbolism. Double hours often show up during alignment, manifestation, or confirmation moments.',
   },
   {
-    question: 'How are double hours different from angel numbers?',
+    question: 'Are double hours the same as mirror hours?',
     answer:
-      'Angel numbers are repeating sequences (111, 444) that can appear anywhere—on receipts, addresses, phone numbers. Double hours specifically refer to clock times. Both are forms of numerical synchronicity and carry similar interpretive frameworks.',
+      'No. Double hours repeat numbers. Mirror hours reverse them. Each system has its own interpretive framework.',
   },
 ];
 
@@ -55,7 +56,7 @@ const cosmicConnectionsSections: CosmicConnectionSection[] = [
     title: 'Numerology',
     links: [
       { label: 'Numerology Hub', href: '/grimoire/numerology' },
-      { label: 'Angel Numbers', href: '/grimoire/angel-numbers' },
+      { label: 'Clock-based numerology', href: '/grimoire/angel-numbers' },
       { label: 'Mirror Hours', href: '/grimoire/mirror-hours' },
       { label: 'Life Path Numbers', href: '/grimoire/life-path' },
     ],
@@ -97,11 +98,11 @@ export default function DoubleHoursIndexPage() {
             Double Hours
           </h1>
           <p className='text-lg text-zinc-400 leading-relaxed'>
-            Double hours occur when the hour matches the minute—10:10, 12:12,
-            21:21, and so on. These repeating patterns are considered powerful
-            synchronicities. When you notice a double hour, take a moment to
-            reflect on your current thoughts and situation—the universe may be
-            affirming your path.
+            Double hours occur when the hour and minute are identical, such as
+            01:01 or 22:22. These times amplify the energy of a single number
+            and are often linked to alignment, confirmation, and momentum. When
+            a double hour repeats in your life, it usually appears during
+            periods of decision, manifestation, or transition.
           </p>
         </header>
 
