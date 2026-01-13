@@ -390,6 +390,37 @@ const nextConfig = {
             key: 'Cache-Control',
             value: 'public, max-age=31536000, immutable',
           },
+          {
+            key: 'X-Robots-Tag',
+            value: 'noindex',
+          },
+        ],
+      },
+      {
+        source: '/press-kit/press-release-template.md',
+        headers: [
+          {
+            key: 'X-Robots-Tag',
+            value: 'noindex',
+          },
+        ],
+      },
+      {
+        source: '/press-kit/founder-bio.pdf',
+        headers: [
+          {
+            key: 'X-Robots-Tag',
+            value: 'noindex',
+          },
+        ],
+      },
+      {
+        source: '/manifest.json',
+        headers: [
+          {
+            key: 'X-Robots-Tag',
+            value: 'noindex',
+          },
         ],
       },
       {
@@ -433,6 +464,11 @@ const nextConfig = {
       {
         source: '/moon',
         destination: '/grimoire/moon',
+        permanent: true,
+      },
+      {
+        source: '/book-of-shadows',
+        destination: '/grimoire/book-of-shadows',
         permanent: true,
       },
       // ========================================
@@ -592,6 +628,11 @@ const nextConfig = {
       {
         source: '/grimoire/retrogrades/:planet',
         destination: '/grimoire/astronomy/retrogrades/:planet',
+        permanent: true,
+      },
+      {
+        source: '/grimoire/astronomy/retrogrades/venus-2',
+        destination: '/grimoire/astronomy/retrogrades/venus',
         permanent: true,
       },
       // ========================================
