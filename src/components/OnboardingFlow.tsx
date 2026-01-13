@@ -91,8 +91,11 @@ export function OnboardingFlow({
     null,
   );
   const [saving, setSaving] = useState(false);
+  const [savingIntention, setSavingIntention] = useState(false);
   const [showOptionalDetails, setShowOptionalDetails] = useState(false);
   const [showSkipWarning, setShowSkipWarning] = useState(false);
+  const [showBirthChartConfirmation, setShowBirthChartConfirmation] =
+    useState(false);
   const [prefillLoaded, setPrefillLoaded] = useState(false);
   const [autoSavePrefill, setAutoSavePrefill] = useState(false);
   const locationSuggestionsAbortRef = useRef<AbortController | null>(null);
@@ -517,6 +520,7 @@ export function OnboardingFlow({
 
       // Refresh user data in context so widgets update immediately
       await refetch();
+      setShowBirthChartConfirmation(true);
 
       setCurrentStep('intention');
     } catch (error) {
@@ -536,6 +540,35 @@ export function OnboardingFlow({
     user,
   ]);
 
+  const saveIntentionSelection = useCallback(async () => {
+    if (!selectedIntention) {
+      return;
+    }
+
+    setSavingIntention(true);
+    try {
+      const response = await fetch('/api/profile', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({
+          intention: selectedIntention,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to save intention');
+      }
+
+      await refetch();
+    } catch (error) {
+      console.error('Failed to save intention:', error);
+      alert('Failed to save your intention. Please try again.');
+    } finally {
+      setSavingIntention(false);
+    }
+  }, [refetch, selectedIntention]);
+
   useEffect(() => {
     if (!autoSavePrefill || currentStep !== 'birthday' || saving) {
       return;
@@ -547,6 +580,12 @@ export function OnboardingFlow({
     void handleSaveBirthday();
     setAutoSavePrefill(false);
   }, [autoSavePrefill, birthday, currentStep, handleSaveBirthday, saving]);
+
+  useEffect(() => {
+    if (currentStep !== 'intention') {
+      setShowBirthChartConfirmation(false);
+    }
+  }, [currentStep]);
 
   const trackStepCompletion = async (
     step: string,
@@ -620,6 +659,18 @@ export function OnboardingFlow({
     } else {
       handleComplete();
     }
+  };
+
+  const handleIntentionContinue = async () => {
+    if (selectedIntention) {
+      conversionTracking.upgradeClicked(
+        'onboarding_intention',
+        selectedIntention,
+      );
+      await saveIntentionSelection();
+    }
+
+    await handleNext();
   };
 
   if (!showOnboarding) {
@@ -798,7 +849,8 @@ export function OnboardingFlow({
                 When Were You Born?
               </h2>
               <p className='text-zinc-300 text-sm'>
-                Your birthday unlocks personalized cosmic insights
+                Your birthday unlocks personalized cosmic insights based on your
+                full birth chart.
               </p>
             </div>
 
@@ -949,7 +1001,7 @@ export function OnboardingFlow({
               <p className='text-xs text-zinc-400'>
                 We use this to calculate your exact birth chart and planetary
                 positions. Add birth time and location for the most accurate
-                chart.
+                chart and daily guidance.
               </p>
             </div>
 
@@ -988,6 +1040,12 @@ export function OnboardingFlow({
               <p className='text-zinc-300 text-sm'>
                 Help us personalize your experience
               </p>
+              {showBirthChartConfirmation && (
+                <p className='text-xs text-lunary-accent-200 mt-1'>
+                  Your birth chart is now set. Lunary uses it to interpret
+                  everything you explore.
+                </p>
+              )}
             </div>
 
             <div className='grid grid-cols-2 gap-3'>
@@ -1033,18 +1091,11 @@ export function OnboardingFlow({
 
             <div className='pt-4 space-y-3'>
               <button
-                onClick={() => {
-                  if (selectedIntention) {
-                    conversionTracking.upgradeClicked(
-                      'onboarding_intention',
-                      selectedIntention,
-                    );
-                  }
-                  handleNext();
-                }}
+                onClick={handleIntentionContinue}
+                disabled={savingIntention}
                 className='w-full bg-gradient-to-r from-lunary-primary to-lunary-highlight hover:from-lunary-primary-400 hover:to-lunary-highlight-400 text-white py-3 px-6 rounded-lg font-medium transition-all'
               >
-                Continue
+                {savingIntention ? 'Saving...' : 'Continue'}
               </button>
               <div className='flex items-center justify-between'>
                 <button

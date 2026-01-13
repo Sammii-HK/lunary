@@ -156,11 +156,14 @@ export default function ProfilePage() {
   >(null);
   const [showBirthLocationHint, setShowBirthLocationHint] = useState(false);
   const [isCheckingBirthLocation, setIsCheckingBirthLocation] = useState(false);
+  const [showBirthChartConfirmation, setShowBirthChartConfirmation] =
+    useState(false);
   const lastBirthLocationCheck = useRef<string | null>(null);
   const locationSuggestionsAbortRef = useRef<AbortController | null>(null);
   const lastLocationQueryRef = useRef<string | null>(null);
   const locationSuggestionBlurTimeoutRef = useRef<number | null>(null);
   const lastLocationSelectionRef = useRef<string | null>(null);
+  const birthChartConfirmationTimeoutRef = useRef<number | null>(null);
   const [isEditing, setIsEditing] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [showAuthModal, setShowAuthModal] = useState(false);
@@ -185,6 +188,14 @@ export default function ProfilePage() {
       setIsLoading(false);
     }
   }, [authState.loading]);
+
+  useEffect(() => {
+    return () => {
+      if (birthChartConfirmationTimeoutRef.current) {
+        window.clearTimeout(birthChartConfirmationTimeoutRef.current);
+      }
+    };
+  }, []);
 
   // ESC key handler for auth modal
   useModal({
@@ -492,6 +503,16 @@ export default function ProfilePage() {
       await refetchUser();
 
       if (birthday) {
+        setShowBirthChartConfirmation(true);
+        if (birthChartConfirmationTimeoutRef.current) {
+          window.clearTimeout(birthChartConfirmationTimeoutRef.current);
+        }
+        birthChartConfirmationTimeoutRef.current = window.setTimeout(() => {
+          setShowBirthChartConfirmation(false);
+        }, 8000);
+      }
+
+      if (birthday) {
         conversionTracking.birthdayEntered(authState.user?.id);
       }
       if (name && birthday) {
@@ -746,6 +767,12 @@ export default function ProfilePage() {
                     horoscopes, and cosmic insights. Adding birth time and
                     location makes your chart more accurate.
                   </p>
+                  {showBirthChartConfirmation && (
+                    <p className='text-xs text-lime-300 font-medium'>
+                      Your birth chart is now set. Lunary uses it to interpret
+                      everything you explore.
+                    </p>
+                  )}
                 </div>
               </>
             ) : (
