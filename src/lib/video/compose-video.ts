@@ -410,7 +410,7 @@ export async function composeVideo(
         const fontsDir = join(process.cwd(), 'public', 'fonts');
         const safeMargin = format === 'story' ? 320 : 90;
         const fontSize = format === 'story' ? 48 : 12;
-        let escapedSubPath = escapeFilterPath(subtitlesPath);
+        let escapedSubPath: string;
         const escapedFontsDir = escapeFilterPath(fontsDir);
 
         subtitlesPath = join(workDir, `subtitles-${timestamp}.ass`);

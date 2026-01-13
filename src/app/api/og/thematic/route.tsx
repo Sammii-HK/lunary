@@ -266,7 +266,9 @@ export async function GET(request: NextRequest): Promise<Response> {
     const baseUrl =
       process.env.NODE_ENV === 'production'
         ? 'https://lunary.app'
-        : `${request.nextUrl.protocol}//${request.nextUrl.host}`;
+        : process.env.NEXT_PUBLIC_BASE_URL ||
+          process.env.APP_BASE_URL ||
+          'http://localhost:3000';
 
     // Build fonts array
     const fonts: Array<{

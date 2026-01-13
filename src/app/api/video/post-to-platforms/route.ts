@@ -14,6 +14,14 @@ interface PlatformResult {
   error?: string;
 }
 
+function sanitizeForLog(value: unknown, maxLength = 200) {
+  const str = String(value ?? '');
+  const sanitized = str.replace(/[\r\n]+/g, ' ');
+  return sanitized.length > maxLength
+    ? `${sanitized.slice(0, maxLength)}…`
+    : sanitized;
+}
+
 export async function POST(request: NextRequest) {
   try {
     let body: PostToPlatformsRequest;
@@ -31,6 +39,7 @@ export async function POST(request: NextRequest) {
     }
 
     const { videoId, platforms = ['tiktok', 'instagram', 'youtube'] } = body;
+    const sanitizedVideoId = sanitizeForLog(videoId);
 
     if (!videoId) {
       return NextResponse.json(
@@ -107,7 +116,7 @@ export async function POST(request: NextRequest) {
 
           if (response.ok) {
             results.tiktok = { success: true };
-            console.log(`✅ Posted video ${videoId} to TikTok`);
+            console.log(`✅ Posted video ${sanitizedVideoId} to TikTok`);
           } else {
             const error = await response.text();
             results.tiktok = {
@@ -159,7 +168,7 @@ export async function POST(request: NextRequest) {
           if (response.ok) {
             results.instagram = { success: true };
             console.log(
-              `✅ Posted video ${videoId} to Instagram ${videoType === 'short' ? 'Stories' : 'Reels'}`,
+              `✅ Posted video ${sanitizedVideoId} to Instagram ${videoType === 'short' ? 'Stories' : 'Reels'}`,
             );
           } else {
             const error = await response.text();
@@ -208,7 +217,9 @@ export async function POST(request: NextRequest) {
 
             if (response.ok) {
               results.youtube = { success: true };
-              console.log(`✅ Scheduled video ${videoId} to YouTube Shorts`);
+              console.log(
+                `✅ Scheduled video ${sanitizedVideoId} to YouTube Shorts`,
+              );
             } else {
               const error = await response.text();
               results.youtube = {
@@ -226,12 +237,7 @@ export async function POST(request: NextRequest) {
         }
       } else {
         try {
-          const baseUrl =
-            process.env.NODE_ENV === 'production'
-              ? 'https://lunary.app'
-              : `${request.nextUrl.protocol}//${request.nextUrl.host}`;
-
-          const youtubeResponse = await fetch(`${baseUrl}/api/youtube/upload`, {
+          const youtubeResponse = await fetch('/api/youtube/upload', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
@@ -246,7 +252,7 @@ export async function POST(request: NextRequest) {
 
           if (youtubeResponse.ok) {
             results.youtube = { success: true };
-            console.log(`✅ Uploaded video ${videoId} to YouTube`);
+            console.log(`✅ Uploaded video ${sanitizedVideoId} to YouTube`);
 
             // Update video status to uploaded
             await sql`

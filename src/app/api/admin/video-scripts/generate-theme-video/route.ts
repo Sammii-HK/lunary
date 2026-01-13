@@ -174,6 +174,8 @@ export async function POST(request: NextRequest) {
     let result;
     const audioUrl: string | null = null;
     const blogSlug: string | null = null;
+    const audioUrlParam = audioUrl ?? null;
+    const blogSlugParam = blogSlug ?? null;
     try {
       result = await sql`
         INSERT INTO videos (
@@ -192,13 +194,13 @@ export async function POST(request: NextRequest) {
         ) VALUES (
           'long',
           ${videoUrl},
-          ${audioUrl},
+          ${audioUrlParam},
           ${script.fullScript},
           ${title},
           ${description},
           ${postContent},
           ${weekNumber},
-          ${blogSlug},
+          ${blogSlugParam},
           'pending',
           NOW(),
           ${expiresAt.toISOString()}
@@ -229,8 +231,8 @@ export async function POST(request: NextRequest) {
             ${title},
             ${description},
             ${postContent},
-            ${weekNumber},
-            ${blogSlug},
+          ${weekNumber},
+          ${blogSlugParam},
             'pending',
             NOW(),
             ${expiresAt.toISOString()}
