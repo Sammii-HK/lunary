@@ -1,0 +1,241 @@
+{
+  "version": 1,
+  "rules": [
+    { "match": "^/grimoire/guides/crystal-healing-guide", "hub": "crystals" },
+    { "match": "^/grimoire/guides/moon-phases-guide", "hub": "moon" },
+    { "match": "^/grimoire/guides/tarot-complete-guide", "hub": "tarot" },
+    {
+      "match": "^/grimoire/guides/birth-chart-complete-guide",
+      "hub": "astrology"
+    },
+    { "match": "^/grimoire/guides/archetypes", "hub": "archetypes" },
+
+    { "match": "^/grimoire/guides/birth-chart", "hub": "personalContext" },
+    { "match": "^/grimoire/guides", "hub": "integratedGuidance" },
+    { "match": "^/grimoire/beginners", "hub": "integratedGuidance" },
+
+    { "match": "^/grimoire/transits", "hub": "transits" },
+    { "match": "^/grimoire/events", "hub": "cosmicTiming" },
+    { "match": "^/grimoire/eclipses", "hub": "cosmicTiming" },
+    { "match": "^/grimoire/retrogrades", "hub": "cosmicTiming" },
+
+    { "match": "^/grimoire/placements", "hub": "personalContext" },
+    { "match": "^/grimoire/synastry", "hub": "personalContext" },
+    { "match": "^/grimoire/houses", "hub": "houses" },
+    { "match": "^/grimoire/astrology", "hub": "astrology" },
+
+    { "match": "^/grimoire/astronomy", "hub": "symbolicSystems" },
+
+    { "match": "^/grimoire/angel-numbers", "hub": "angelNumbers" },
+
+    { "match": "^/grimoire/numerology", "hub": "numerology" },
+    { "match": "^/grimoire/mirror-hours", "hub": "clockNumbers" },
+    { "match": "^/grimoire/double-hours", "hub": "clockNumbers" },
+    { "match": "^/grimoire/life-path", "hub": "learningThroughCycles" },
+
+    { "match": "^/grimoire/practices", "hub": "practiceWithoutDogma" },
+
+    { "match": "^/grimoire/planets", "hub": "planets" },
+    { "match": "^/grimoire/aspects", "hub": "aspects" },
+    { "match": "^/grimoire/horoscopes", "hub": "astrology" },
+    { "match": "^/grimoire/zodiac", "hub": "astrology" },
+
+    { "match": "^/grimoire/tarot", "hub": "tarot" },
+    { "match": "^/grimoire/divination", "hub": "tarot" },
+
+    { "match": "^/grimoire/moon", "hub": "moon" },
+    { "match": "^/grimoire/moon-rituals", "hub": "moon" },
+
+    { "match": "^/grimoire/spells", "hub": "spells" },
+    { "match": "^/grimoire/jar-spells", "hub": "spells" },
+    { "match": "^/grimoire/candle-magic", "hub": "spells" },
+
+    { "match": "^/grimoire/modern-witchcraft", "hub": "practiceWithoutDogma" },
+
+    { "match": "^/grimoire/correspondences", "hub": "modernWitchcraft" },
+
+    { "match": "^/grimoire/crystals", "hub": "crystals" },
+    { "match": "^/grimoire/runes", "hub": "symbolicSystems" },
+    { "match": "^/grimoire/decans", "hub": "astrology" },
+
+    { "match": "^/grimoire/guides", "hub": "guides" },
+    { "match": "^/grimoire/beginners", "hub": "guides" },
+
+    { "match": "^/grimoire$", "hub": "grimoireReference" }
+  ],
+  "copy": {
+    "universal": [
+      "In Lunary, every meaning is interpreted through your full birth chart rather than in isolation.",
+      "How this shows up for you depends on your unique placements, timing, and current transits.",
+      "No symbol has a fixed meaning without chart context, which is why Lunary starts with your full birth chart.",
+      "Your birth chart is the framework, and signing in lets Lunary connect every symbol back to you."
+    ],
+
+    "planets": [
+      "A planet’s influence changes depending on the house it occupies and the aspects it forms in your birth chart.",
+      "In Lunary, planetary meanings are interpreted through your full chart, not as standalone traits.",
+      "This planet expresses differently for each person based on their overall chart structure."
+    ],
+
+    "houses": [
+      "The meaning of a house depends on the planets, signs, and timing activating it in your chart.",
+      "In Lunary, houses are read as living areas of life shaped by your unique birth chart.",
+      "This house carries different weight depending on how your chart is configured."
+    ],
+
+    "aspects": [
+      "Aspects only gain meaning in relation to the rest of your birth chart.",
+      "In Lunary, aspects are interpreted as part of an interconnected chart pattern.",
+      "The same aspect can feel supportive or challenging depending on your full chart context."
+    ],
+
+    "transits": [
+      "Transits are meaningful only in relation to your natal chart.",
+      "In Lunary, transits are read as activations in your chart, so you can see what’s actually being touched for you.",
+      "The impact of a transit depends on what it touches in your birth chart."
+    ],
+
+    "horoscopes": [
+      "Lunary horoscopes are grounded in real planetary movement and personalised through chart context.",
+      "Rather than relying on sun signs alone, interpretations connect back to your full birth chart.",
+      "Timing matters, but how it affects you depends on your chart."
+    ],
+
+    "tarot": [
+      "Tarot messages shift depending on timing, intention, and personal context.",
+      "In Lunary, tarot sits alongside your chart so the message lands in context, not as a generic meaning.",
+      "This card may speak differently depending on where you are in your personal cycle."
+    ],
+
+    "moon": [
+      "Moon phases affect each person differently depending on their natal moon and chart placements.",
+      "In Lunary, lunar phases are interpreted through your birth chart and current transits.",
+      "The same phase can feel grounding or activating depending on your chart."
+    ],
+
+    "numerology": [
+      "Numbers reveal deeper meaning when interpreted alongside personal cycles and your birth chart.",
+      "In Lunary, numerology is read as part of a broader timing system rather than in isolation.",
+      "This number reflects a pattern interacting with your chart and current phase."
+    ],
+
+    "clockNumbers": [
+      "Repeated times act as signals, but their meaning depends on personal context.",
+      "In Lunary, clock-based numerology is interpreted through timing and chart awareness.",
+      "Seeing a time is the prompt. Your birth chart shapes the message."
+    ],
+
+    "angelNumbers": [
+      "Angel numbers are symbolic patterns that gain meaning through repetition and awareness.",
+      "In Lunary, angel numbers are interpreted within the context of your birth chart and current cycle.",
+      "Rather than fixed messages, angel numbers reflect patterns unfolding in your life."
+    ],
+
+    "crystals": [
+      "Crystals land differently depending on what your chart is activating, which is why Lunary ties recommendations to your timing.",
+      "In Lunary, crystal correspondences are contextual rather than prescriptive.",
+      "What supports one person may ground another based on chart balance."
+    ],
+
+    "spells": [
+      "Rituals are most effective when aligned with timing and personal cycles.",
+      "In Lunary, spells are connected to lunar phases and chart awareness.",
+      "Intention becomes clearer when chosen in alignment with your current phase."
+    ],
+
+    "practices": [
+      "Practices work best when they align with your natural rhythm and timing.",
+      "Lunary helps you choose approaches that fit your current cycle.",
+      "The most effective practice is the one that matches where you are now."
+    ],
+
+    "modernWitchcraft": [
+      "Modern witchcraft is shaped by awareness, timing, and personal belief rather than rigid rules.",
+      "In Lunary, modern practice is grounded in astrology, lunar cycles, and personal context.",
+      "Meaning comes from alignment, not labels or aesthetics."
+    ],
+
+    "cosmicTiming": [
+      "Astrology unfolds through timing and planetary motion rather than static traits.",
+      "In Lunary, meaning emerges from real-time cosmic conditions interacting with your chart.",
+      "Understanding when something happens often matters more than what happens."
+    ],
+
+    "personalContext": [
+      "In Lunary, interpretations are shaped by your full birth chart rather than isolated placements.",
+      "Every insight is filtered through personal context, creating depth beyond generic meanings.",
+      "Astrological symbols reveal more when read as part of a complete chart."
+    ],
+
+    "symbolicSystems": [
+      "Symbolic systems communicate through patterns and relationships rather than single meanings.",
+      "Lunary treats astrology, tarot, numerology, and ritual as interconnected languages.",
+      "Meaning deepens when symbols are interpreted together through chart context."
+    ],
+
+    "grimoireReference": [
+      "The Grimoire is designed as a structured reference rather than a scrolling feed.",
+      "Each topic connects back to a wider system of symbols, cycles, and personal context.",
+      "Depth comes from returning to symbols with greater awareness."
+    ],
+
+    "practiceWithoutDogma": [
+      "Spiritual practice evolves through reflection rather than rigid belief.",
+      "Lunary supports exploration without prescribing interpretation.",
+      "Insight grows through timing, awareness, and lived experience."
+    ],
+
+    "integratedGuidance": [
+      "Lunary integrates astrology, tarot, and ritual through a shared interpretive framework.",
+      "Insights connect across systems rather than appearing in isolation.",
+      "Guidance becomes clearer when symbols align across your chart."
+    ],
+
+    "learningThroughCycles": [
+      "Understanding unfolds through repetition and return rather than linear progress.",
+      "Cycles invite reflection, integration, and deeper awareness.",
+      "Each return to a symbol reveals something new."
+    ],
+
+    "archetypes": [
+      "Archetypes describe recurring patterns rather than fixed identities.",
+      "In Lunary, archetypes are interpreted through your birth chart, timing, and lived experience.",
+      "An archetype may rise or recede depending on where you are in your cycle.",
+      "They reflect roles you move through rather than labels you are assigned."
+    ]
+  },
+  "nudges": {
+    "astrology": [
+      {
+        "title": "Make this personal in seconds",
+        "body": "Sign in to see how this connects to your full birth chart, including the houses and planets being activated for you.",
+        "cta": "Unlock your chart context",
+        "href": "/app"
+      }
+    ],
+    "transits": [
+      {
+        "title": "See what this transit touches for you",
+        "body": "Lunary maps transits to your natal placements so you can see what’s being activated, not just what’s happening in the sky.",
+        "cta": "Check your transits",
+        "href": "/app"
+      }
+    ],
+    "personalContext": [
+      {
+        "title": "Get the full chart reading",
+        "body": "Placements only become clear in context. Sign in to see how this interacts with the rest of your chart.",
+        "cta": "View my birth chart",
+        "href": "/app/birth-chart"
+      }
+    ],
+    "horoscopes": [
+      {
+        "title": "Beyond sun sign",
+        "body": "Your chart decides where this lands. Sign in to get a horoscope personalised through your full birth chart.",
+        "cta": "Get my horoscope",
+        "href": "/app"
+      }
+    ]
+  }
+}

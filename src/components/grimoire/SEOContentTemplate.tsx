@@ -9,6 +9,7 @@ import {
 } from '@/lib/schema';
 import { ParsedMarkdown } from '@/utils/markdown';
 import { NavParamLink } from '@/components/NavParamLink';
+import { getContextualCopy } from '@/lib/grimoire/getContextualCopy';
 
 /**
  * Format a URL segment into a human-readable label
@@ -118,6 +119,8 @@ export interface SEOContentTemplateProps {
 
   // Children placement within the template
   childrenPosition?: 'after-description' | 'before-faqs' | 'after-faqs';
+  contextualCopy?: string;
+  contextualCopyVariant?: 'note' | 'callout';
 }
 
 export function SEOContentTemplate({
@@ -163,6 +166,8 @@ export function SEOContentTemplate({
   heroContent,
   children,
   childrenPosition = 'after-faqs',
+  contextualCopy,
+  contextualCopyVariant = 'note',
 }: SEOContentTemplateProps) {
   // Auto-generate breadcrumbs from URL if not provided
   const autoBreadcrumbs =
@@ -229,6 +234,20 @@ export function SEOContentTemplate({
           })),
         );
 
+  const canonicalPathname = (() => {
+    try {
+      return new URL(canonicalUrl).pathname;
+    } catch {
+      return canonicalUrl;
+    }
+  })();
+  const automaticCopy = getContextualCopy(canonicalPathname);
+  const contextualCopySentence = contextualCopy ?? automaticCopy.sentence;
+  const contextualCopyClasses =
+    contextualCopyVariant === 'callout'
+      ? 'bg-gradient-to-r from-lunary-primary-900 to-lunary-highlight-900 border border-transparent text-white'
+      : 'bg-zinc-900/40 border border-zinc-800 text-zinc-200';
+
   return (
     <article className='max-w-4xl mx-auto space-y-8 p-4 sm:p-6 overflow-x-hidden'>
       {/* JSON-LD Schemas */}
@@ -255,13 +274,6 @@ export function SEOContentTemplate({
           </p>
         )}
       </header>
-
-      {/* Children (custom content) - optional placement */}
-      {childrenPosition === 'after-description' && children && (
-        <div id='explore-practices' className='mt-8'>
-          {children}
-        </div>
-      )}
 
       {/* Table of Contents */}
       {tableOfContents && tableOfContents.length > 0 && (
@@ -313,6 +325,21 @@ export function SEOContentTemplate({
             {intro}
           </p>
         </section>
+      )}
+
+      {contextualCopySentence && (
+        <div
+          className={`${contextualCopyClasses} rounded-lg p-4 sm:p-5 text-sm leading-relaxed break-words`}
+        >
+          {contextualCopySentence}
+        </div>
+      )}
+
+      {/* Children (custom content) - optional placement */}
+      {childrenPosition === 'after-description' && children && (
+        <div id='explore-practices' className='mt-8'>
+          {children}
+        </div>
       )}
 
       {/* Meaning Section */}
