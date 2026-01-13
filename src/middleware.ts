@@ -6,216 +6,174 @@ const camelToKebab = (str: string) =>
     .toLowerCase()
     .replace(/^-/, '');
 
-function handleLegacyGrimoireRedirects(pathname: string): string | null {
-  if (pathname === '/grimoire/wheel-of-the-year/lammas-or-lughnasadh') {
+const isProductionHost = (hostname: string) =>
+  hostname === 'lunary.app' ||
+  hostname === 'www.lunary.app' ||
+  hostname.startsWith('admin.');
+
+type NormaliseResult = {
+  pathname: string;
+  changed: boolean;
+};
+
+function normalisePathname(pathname: string): NormaliseResult {
+  const original = pathname;
+  let p = pathname;
+
+  // 1) decode early
+  if (p.includes('%')) {
+    try {
+      p = decodeURIComponent(p);
+    } catch {
+      // leave as-is if invalid encoding
+    }
+  }
+
+  // 2) replace spaces with hyphens
+  if (p.includes(' ')) {
+    p = p.replace(/ /g, '-');
+  }
+
+  // 3) trim trailing slashes (except root)
+  p = p.replace(/\/+$/, '') || '/';
+
+  // 4) normalise /grimoire segments
+  if (p.startsWith('/grimoire/')) {
+    const parts = p.split('/').filter(Boolean); // ['grimoire', ...]
+    const normalisedParts = parts.map((seg, i) => {
+      if (i === 0) return 'grimoire';
+      // keep slug casing predictable + collapse camelCase
+      return camelToKebab(seg).toLowerCase();
+    });
+    p = '/' + normalisedParts.join('/');
+  } else {
+    // outside /grimoire, just lowercase the path (safe for your use-case)
+    // If you have case-sensitive non-grimoire routes, remove this.
+    p = p.toLowerCase();
+  }
+
+  return { pathname: p, changed: p !== original };
+}
+
+function applyLegacyRedirects(pathname: string): string | null {
+  let p = pathname;
+
+  // One-off canonical
+  if (p === '/grimoire/wheel-of-the-year/lammas-or-lughnasadh') {
     return '/grimoire/wheel-of-the-year/lammas';
   }
 
-  if (pathname.startsWith('/grimoire/tarot/')) {
-    const tarotPath = pathname.replace(/\/+$/, '');
-    const tarotParts = tarotPath.split('/').filter(Boolean);
+  // Tarot canonicalisation (run on already-normalised path)
+  if (p.startsWith('/grimoire/tarot/')) {
+    const parts = p.split('/').filter(Boolean); // ['grimoire','tarot',...]
     const suitSet = new Set(['cups', 'wands', 'swords', 'pentacles']);
-    const suitSegment = tarotParts[2];
-    if (tarotParts.length === 3 && suitSegment && suitSet.has(suitSegment)) {
-      const suit = camelToKebab(suitSegment);
-      if (suit) {
-        return `/grimoire/tarot/suits/${suit}`;
-      }
+    const suit = parts[2];
+
+    // /grimoire/tarot/cups -> /grimoire/tarot/suits/cups
+    if (parts.length === 3 && suit && suitSet.has(suit)) {
+      return `/grimoire/tarot/suits/${suit}`;
     }
-    if (tarotParts.length >= 4 && suitSegment && suitSet.has(suitSegment)) {
-      const card = camelToKebab(tarotParts[3] || '');
-      if (card) {
-        return `/grimoire/tarot/${card}`;
-      }
+
+    // /grimoire/tarot/cups/ace-of-cups -> /grimoire/tarot/ace-of-cups
+    if (parts.length >= 4 && suit && suitSet.has(suit)) {
+      const card = parts[3];
+      if (card) return `/grimoire/tarot/${card}`;
     }
   }
 
-  let decodedPath = pathname;
-  if (pathname.includes('%')) {
-    try {
-      decodedPath = decodeURIComponent(pathname);
-    } catch {
-      decodedPath = pathname;
-    }
-  }
-
-  if (decodedPath.includes(' ')) {
-    const normalizedSpaces = decodedPath.replace(/ /g, '-').toLowerCase();
-    if (
-      normalizedSpaces === '/grimoire/wheel-of-the-year/lammas-or-lughnasadh'
-    ) {
-      return '/grimoire/wheel-of-the-year/lammas';
-    }
-    if (normalizedSpaces !== pathname) {
-      return normalizedSpaces;
-    }
-  }
-
-  if (decodedPath.startsWith('/grimoire/')) {
-    const normalizedSegments = decodedPath
-      .replace(/\/+$/, '')
-      .split('/')
-      .map((segment, index) =>
-        index > 1 ? camelToKebab(segment) : segment.toLowerCase(),
-      );
-    const normalizedPath = normalizedSegments.join('/');
-    if (normalizedPath !== pathname) {
-      return normalizedPath;
-    }
-  }
-
-  if (pathname.startsWith('/grimoire/') && /[A-Z]/.test(pathname)) {
-    const segments = pathname.split('/');
-    const kebabSegments = segments.map((segment, index) =>
-      index > 1 && /[A-Z]/.test(segment) ? camelToKebab(segment) : segment,
-    );
-    const newPath = kebabSegments.join('/');
-    if (newPath !== pathname) return newPath;
-  }
-
+  // nothing else to map
   return null;
 }
 
+function buildRedirect(request: NextRequest, pathname: string, status = 301) {
+  return NextResponse.redirect(new URL(pathname, request.url), status);
+}
+
 export function middleware(request: NextRequest) {
-  const { pathname } = request.nextUrl;
-  const normalizedPathname =
-    pathname.endsWith('/') && pathname !== '/'
-      ? pathname.slice(0, -1)
-      : pathname;
+  const { pathname, searchParams } = request.nextUrl;
+
   const hostname =
     request.headers.get('host')?.split(':')[0].toLowerCase() ?? '';
 
-  // FAST PATH: Skip non-production domains immediately
-  const isProductionDomain =
-    hostname === 'lunary.app' ||
-    hostname === 'www.lunary.app' ||
-    hostname.startsWith('admin.');
+  const isProd = isProductionHost(hostname);
 
-  if (!isProductionDomain) {
-    // Only handle essential redirects for legacy URLs
-    if (normalizedPathname === '/$' || normalizedPathname === '/%24') {
-      return NextResponse.redirect(new URL('/', request.url), 301);
-    }
-
-    if (
-      normalizedPathname === '/grimoire/guides/birth-chart-complete-guide-0'
-    ) {
-      return NextResponse.redirect(
-        new URL('/grimoire/guides/birth-chart-complete-guide', request.url),
-        301,
-      );
-    }
-
-    const legacyRedirect = handleLegacyGrimoireRedirects(normalizedPathname);
-    if (legacyRedirect) {
-      return NextResponse.redirect(new URL(legacyRedirect, request.url), 301);
-    }
-
-    if (
-      normalizedPathname === '/grimoire' &&
-      request.nextUrl.searchParams.has('item')
-    ) {
-      const item = request.nextUrl.searchParams.get('item');
-      if (item) {
-        const slug = camelToKebab(item);
-        return NextResponse.redirect(new URL(`/grimoire/${slug}`, request.url));
-      }
-    }
-
-    const blogWeekMatch = normalizedPathname.match(
-      /^\/blog\/week\/(\d+)-(\d{4})$/,
-    );
-    if (blogWeekMatch) {
-      return NextResponse.redirect(
-        new URL(
-          `/blog/week/week-${blogWeekMatch[1]}-${blogWeekMatch[2]}`,
-          request.url,
-        ),
-        301,
-      );
-    }
-
-    return NextResponse.next();
+  // PRODUCTION: www -> apex
+  if (isProd && hostname === 'www.lunary.app') {
+    const url = request.nextUrl.clone();
+    url.hostname = 'lunary.app';
+    url.protocol = 'https:';
+    url.port = '';
+    return NextResponse.redirect(url, 301);
   }
 
-  // PRODUCTION PATH: Handle www redirect
-  if (hostname === 'www.lunary.app') {
-    const redirectUrl = new URL(request.url);
-    redirectUrl.hostname = 'lunary.app';
-    redirectUrl.protocol = 'https:';
-    redirectUrl.port = '';
-    return NextResponse.redirect(redirectUrl, 301);
-  }
-
-  // HTTPS redirect
-  if (request.headers.get('x-forwarded-proto') !== 'https') {
+  // PRODUCTION: force https
+  if (isProd && request.headers.get('x-forwarded-proto') !== 'https') {
     const url = request.nextUrl.clone();
     url.protocol = 'https:';
     url.port = '';
-    return NextResponse.redirect(url);
+    return NextResponse.redirect(url, 301);
   }
 
-  // Admin subdomain handling
+  // Admin subdomain routing
   const isAdminSubdomain = hostname.startsWith('admin.');
 
-  if (isAdminSubdomain) {
-    // Rewrite admin subdomain requests to /admin path
+  if (isProd && isAdminSubdomain) {
     if (
-      !normalizedPathname.startsWith('/admin') &&
-      !normalizedPathname.startsWith('/auth') &&
-      !normalizedPathname.startsWith('/api')
+      !pathname.startsWith('/admin') &&
+      !pathname.startsWith('/auth') &&
+      !pathname.startsWith('/api')
     ) {
       const url = request.nextUrl.clone();
-      url.pathname =
-        normalizedPathname === '/' ? '/admin' : `/admin${normalizedPathname}`;
+      url.pathname = pathname === '/' ? '/admin' : `/admin${pathname}`;
       return NextResponse.rewrite(url);
     }
   } else {
-    // Block /admin access on main domain
-    if (normalizedPathname.startsWith('/admin')) {
-      return NextResponse.redirect(new URL('/', request.url));
+    // Block /admin on non-admin hosts
+    if (pathname.startsWith('/admin')) {
+      return buildRedirect(request, '/', 302);
     }
   }
 
-  // Legacy URL redirects
-  if (normalizedPathname === '/$' || normalizedPathname === '/%24') {
-    return NextResponse.redirect(new URL('/', request.url), 301);
-  }
+  // Normalise once
+  const { pathname: normalisedPath } = normalisePathname(pathname);
 
-  if (normalizedPathname === '/grimoire/guides/birth-chart-complete-guide-0') {
-    return NextResponse.redirect(
-      new URL('/grimoire/guides/birth-chart-complete-guide', request.url),
+  // Legacy special cases
+  if (normalisedPath === '/$') return buildRedirect(request, '/', 301);
+
+  if (normalisedPath === '/grimoire/guides/birth-chart-complete-guide-0') {
+    return buildRedirect(
+      request,
+      '/grimoire/guides/birth-chart-complete-guide',
       301,
     );
   }
 
-  const legacyRedirect = handleLegacyGrimoireRedirects(normalizedPathname);
-  if (legacyRedirect) {
-    return NextResponse.redirect(new URL(legacyRedirect, request.url), 301);
-  }
-
-  if (
-    normalizedPathname === '/grimoire' &&
-    request.nextUrl.searchParams.has('item')
-  ) {
-    const item = request.nextUrl.searchParams.get('item');
+  // Grimoire ?item=foo -> /grimoire/foo
+  if (normalisedPath === '/grimoire' && searchParams.has('item')) {
+    const item = searchParams.get('item');
     if (item) {
-      const slug = camelToKebab(item);
-      return NextResponse.redirect(new URL(`/grimoire/${slug}`, request.url));
+      const slug = camelToKebab(item).toLowerCase();
+      return buildRedirect(request, `/grimoire/${slug}`, 302);
     }
   }
 
-  const blogWeekMatch = normalizedPathname.match(
-    /^\/blog\/week\/(\d+)-(\d{4})$/,
-  );
+  // Blog week legacy
+  const blogWeekMatch = normalisedPath.match(/^\/blog\/week\/(\d+)-(\d{4})$/);
   if (blogWeekMatch) {
-    return NextResponse.redirect(
-      new URL(
-        `/blog/week/week-${blogWeekMatch[1]}-${blogWeekMatch[2]}`,
-        request.url,
-      ),
+    return buildRedirect(
+      request,
+      `/blog/week/week-${blogWeekMatch[1]}-${blogWeekMatch[2]}`,
       301,
     );
+  }
+
+  // Apply legacy mappings after normalisation, so it catches %20, casing, etc.
+  const legacy = applyLegacyRedirects(normalisedPath);
+  const finalPath = legacy ?? normalisedPath;
+
+  // Redirect if anything changed (including normalisation)
+  if (finalPath !== pathname) {
+    return buildRedirect(request, finalPath, 301);
   }
 
   return NextResponse.next();
