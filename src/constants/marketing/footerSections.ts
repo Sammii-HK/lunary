@@ -59,6 +59,11 @@ export const marketingSectionItems: Record<
       description: 'Brand assets, product screenshots, and press info.',
     },
     {
+      title: 'About Lunary',
+      href: '/about/lunary',
+      description: 'Learn about the origin story and purpose of Lunary.',
+    },
+    {
       title: 'About the Founder',
       href: '/about/sammii',
       description: 'Meet the founder and the origin story behind Lunary.',
@@ -122,6 +127,11 @@ export const marketingSectionItems: Record<
     },
   ],
   about: [
+    {
+      title: 'About Lunary',
+      href: '/about/lunary',
+      description: 'Learn about the origin story and purpose of Lunary.',
+    },
     {
       title: 'About the Founder',
       href: '/about/sammii',
