@@ -153,7 +153,7 @@ ${hourData.message}
         breadcrumbs={[
           { label: 'Grimoire', href: '/grimoire' },
           { label: 'Numerology', href: '/grimoire/numerology' },
-          { label: 'Double Hours', href: '/grimoire/numerology' },
+          { label: 'Double Hours', href: '/grimoire/numerology/double-hours' },
           {
             label: hourData.time,
             href: `/grimoire/double-hours/${time}`,

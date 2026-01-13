@@ -5,7 +5,6 @@ import {
   mirrorHours,
   mirrorHourKeys,
 } from '@/constants/grimoire/clock-numbers-data';
-import { createCosmicEntitySchema, renderJsonLd } from '@/lib/schema';
 
 export async function generateStaticParams() {
   return mirrorHourKeys.map((time) => ({
@@ -98,24 +97,8 @@ export default async function MirrorHourPage({
     },
   ];
 
-  // Entity schema for Knowledge Graph
-  const mirrorHourSchema = createCosmicEntitySchema({
-    name: `${hourData.time} Mirror Hour`,
-    description: `${hourData.time} mirror hour meaning: ${hourData.spiritualMeaning.slice(0, 120)}...`,
-    url: `/grimoire/mirror-hours/${time}`,
-    additionalType: 'https://en.wikipedia.org/wiki/Numerology',
-    keywords: [
-      `${hourData.time} meaning`,
-      'mirror hour',
-      'clock-based numerology',
-      'clock synchronicity',
-      'spiritual signs',
-    ],
-  });
-
   return (
     <div className='p-4 md:p-6 lg:p-8 xl:p-10 min-h-full'>
-      {renderJsonLd(mirrorHourSchema)}
       <SEOContentTemplate
         title={`${hourData.time} Mirror Hour - Lunary`}
         h1={`${hourData.time} Mirror Hour: Complete Spiritual Guide`}
@@ -167,6 +150,8 @@ ${hourData.message}
           `What guidance am I receiving from this mirror hour?`,
           `How can I work with ${hourData.time}'s energy today?`,
         ]}
+        entityId={`https://lunary.app/grimoire/mirror-hours/${time}`}
+        entityName={`${hourData.time} Mirror Hour`}
         relatedItems={[
           {
             name: 'Numerology Guide',
@@ -174,7 +159,7 @@ ${hourData.message}
             type: 'Guide',
           },
           {
-            name: 'Clock-based numerology',
+            name: 'Angel Numbers',
             href: '/grimoire/angel-numbers',
             type: 'Guide',
           },
@@ -192,7 +177,7 @@ ${hourData.message}
         breadcrumbs={[
           { label: 'Grimoire', href: '/grimoire' },
           { label: 'Numerology', href: '/grimoire/numerology' },
-          { label: 'Mirror Hours', href: '/grimoire/numerology' },
+          { label: 'Mirror Hours', href: '/grimoire/numerology/mirror-hours' },
           {
             label: hourData.time,
             href: `/grimoire/mirror-hours/${time}`,

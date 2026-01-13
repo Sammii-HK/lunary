@@ -111,11 +111,10 @@ Seeing a mirror hour is a prompt to pause. The meaning is revealed by what you w
 
 Each mirror hour is associated with specific energies and messages. Click any time below to discover its meaning.`}
         faqs={faqs}
-        howToWorkWith={undefined}
         internalLinks={[
           { text: 'Numerology Hub', href: '/grimoire/numerology' },
-          { text: 'Clock-based numerology', href: '/grimoire/angel-numbers' },
           { text: 'Double Hours', href: '/grimoire/double-hours' },
+          { text: 'Angel Numbers', href: '/grimoire/angel-numbers' },
           { text: 'Life Path Numbers', href: '/grimoire/life-path' },
           { text: 'Divination Guide', href: '/grimoire/divination' },
         ]}
@@ -128,9 +127,10 @@ Each mirror hour is associated with specific energies and messages. Click any ti
             sections={cosmicConnectionsSections}
           />
         }
-        children={hubChildren}
         childrenPosition='before-faqs'
-      />
+      >
+        {hubChildren}
+      </SEOContentTemplate>
     </div>
   );
 }
