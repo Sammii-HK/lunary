@@ -9,6 +9,7 @@ CREATE TABLE IF NOT EXISTS user_profiles (
   birth_chart JSONB,
   personal_card JSONB,
   location JSONB,
+  intention TEXT,
   stripe_customer_id TEXT,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
@@ -34,4 +35,3 @@ CREATE TRIGGER update_user_profiles_updated_at
     BEFORE UPDATE ON user_profiles
     FOR EACH ROW
     EXECUTE FUNCTION update_user_profiles_updated_at();
-

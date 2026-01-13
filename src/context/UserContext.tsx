@@ -49,6 +49,7 @@ export interface UserData {
   birthChart?: BirthChartPlacement[];
   personalCard?: PersonalCard;
   location?: UserLocation;
+  intention?: string;
   stripeCustomerId?: string;
   subscriptionStatus?: string;
   subscriptionPlan?: string;
@@ -63,7 +64,9 @@ interface UserContextValue {
   error: Error | null;
   refetch: () => Promise<void>;
   updateProfile: (
-    data: Partial<Pick<UserData, 'name' | 'birthday' | 'location'>>,
+    data: Partial<
+      Pick<UserData, 'name' | 'birthday' | 'location' | 'intention'>
+    >,
   ) => Promise<boolean>;
 }
 
@@ -125,6 +128,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
         birthChart,
         personalCard,
         location: profile?.location || undefined,
+        intention: profile?.intention || undefined,
         stripeCustomerId: subscription?.stripeCustomerId || undefined,
         subscriptionStatus: status,
         subscriptionPlan: subscription?.planType || undefined,
@@ -258,7 +262,9 @@ export function UserProvider({ children }: { children: ReactNode }) {
 
   const updateProfile = useCallback(
     async (
-      data: Partial<Pick<UserData, 'name' | 'birthday' | 'location'>>,
+      data: Partial<
+        Pick<UserData, 'name' | 'birthday' | 'location' | 'intention'>
+      >,
     ): Promise<boolean> => {
       try {
         const response = await fetch('/api/profile', {
@@ -304,6 +310,7 @@ export function useUserProfile() {
     birthChart: user?.birthChart,
     personalCard: user?.personalCard,
     location: user?.location,
+    intention: user?.intention,
     hasBirthChart: user?.hasBirthChart ?? false,
     hasPersonalCard: user?.hasPersonalCard ?? false,
     loading,

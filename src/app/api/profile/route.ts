@@ -43,6 +43,7 @@ export async function GET(request: NextRequest) {
             personalCard: profile.personal_card,
             location: decryptLocation(profile.location),
             stripeCustomerId: profile.stripe_customer_id,
+            intention: profile.intention,
             createdAt: profile.created_at,
             updatedAt: profile.updated_at,
           }
@@ -90,6 +91,7 @@ export async function PUT(request: NextRequest) {
       birthChart,
       personalCard,
       location,
+      intention,
       stripeCustomerId,
       stripeSubscriptionId,
       userEmail,
@@ -113,6 +115,7 @@ export async function PUT(request: NextRequest) {
         birth_chart,
         personal_card,
         location,
+        intention,
         stripe_customer_id
       )
       VALUES (
@@ -122,6 +125,7 @@ export async function PUT(request: NextRequest) {
         ${birthChart ? JSON.stringify(birthChart) : null}::jsonb,
         ${personalCard ? JSON.stringify(personalCard) : null}::jsonb,
         ${encryptedLocation ? JSON.stringify(encryptedLocation) : null}::jsonb,
+        ${intention || null},
         ${stripeCustomerId || null}
       )
       ON CONFLICT (user_id) DO UPDATE SET
@@ -130,6 +134,7 @@ export async function PUT(request: NextRequest) {
         birth_chart = COALESCE(EXCLUDED.birth_chart, user_profiles.birth_chart),
         personal_card = COALESCE(EXCLUDED.personal_card, user_profiles.personal_card),
         location = COALESCE(EXCLUDED.location, user_profiles.location),
+        intention = COALESCE(EXCLUDED.intention, user_profiles.intention),
         stripe_customer_id = COALESCE(EXCLUDED.stripe_customer_id, user_profiles.stripe_customer_id),
         updated_at = NOW()
       RETURNING *
@@ -182,6 +187,7 @@ export async function PUT(request: NextRequest) {
         personalCard: profile.personal_card,
         location: decryptLocation(profile.location),
         stripeCustomerId: profile.stripe_customer_id,
+        intention: profile.intention,
         createdAt: profile.created_at,
         updatedAt: profile.updated_at,
       },

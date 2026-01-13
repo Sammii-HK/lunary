@@ -555,6 +555,7 @@ export async function POST(request: NextRequest) {
         birth_chart JSONB,
         personal_card JSONB,
         location JSONB,
+        intention TEXT,
         stripe_customer_id TEXT,
         created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
         updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
@@ -566,6 +567,7 @@ export async function POST(request: NextRequest) {
     await sql`CREATE INDEX IF NOT EXISTS idx_user_profiles_birth_chart ON user_profiles USING GIN(birth_chart)`;
     await sql`CREATE INDEX IF NOT EXISTS idx_user_profiles_personal_card ON user_profiles USING GIN(personal_card)`;
     await sql`CREATE INDEX IF NOT EXISTS idx_user_profiles_location ON user_profiles USING GIN(location)`;
+    await sql`ALTER TABLE user_profiles ADD COLUMN IF NOT EXISTS intention TEXT`;
 
     await sql`
       CREATE OR REPLACE FUNCTION update_user_profiles_updated_at()
