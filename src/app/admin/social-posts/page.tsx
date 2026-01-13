@@ -133,6 +133,9 @@ export default function SocialPostsPage() {
   const [requeueingProcessing, setRequeueingProcessing] = useState(false);
   const [processingAllVideos, setProcessingAllVideos] = useState(false);
   const [processingVideo, setProcessingVideo] = useState(false);
+  const [generatingVideoId, setGeneratingVideoId] = useState<string | null>(
+    null,
+  );
   const [activeVariantByGroup, setActiveVariantByGroup] = useState<
     Record<string, string>
   >({});
@@ -471,6 +474,31 @@ export default function SocialPostsPage() {
           : 'No queued video jobs found.',
       );
       loadPendingPosts();
+    }
+  };
+
+  const handleGenerateSingleVideo = async (post: PendingPost) => {
+    if (!post.videoScriptId) {
+      alert('No video script available for this post.');
+      return;
+    }
+    setGeneratingVideoId(post.id);
+    try {
+      const response = await fetch(
+        `/api/admin/video-scripts/${post.videoScriptId}/generate-video`,
+        { method: 'POST' },
+      );
+      const data = await response.json();
+      if (!data.success) {
+        alert(data.error || 'Failed to generate video');
+      } else {
+        alert('Video generated. Refreshing approval queue.');
+        loadPendingPosts();
+      }
+    } catch (error) {
+      alert('Failed to generate video');
+    } finally {
+      setGeneratingVideoId(null);
     }
   };
 
@@ -1766,6 +1794,26 @@ export default function SocialPostsPage() {
                                   <div className='text-sm text-lunary-error'>
                                     Video job failed: {activePost.videoJobError}
                                   </div>
+                                )}
+                              {activePost.postType === 'video' &&
+                                activePost.videoScriptId && (
+                                  <Button
+                                    onClick={() =>
+                                      handleGenerateSingleVideo(activePost)
+                                    }
+                                    disabled={
+                                      generatingVideoId === activePost.id
+                                    }
+                                    variant='outline'
+                                    className='border-lunary-secondary-700 text-lunary-secondary hover:bg-lunary-secondary-950'
+                                  >
+                                    {generatingVideoId === activePost.id ? (
+                                      <Loader2 className='h-4 w-4 mr-2 animate-spin' />
+                                    ) : (
+                                      <Video className='h-4 w-4 mr-2' />
+                                    )}
+                                    Generate test video
+                                  </Button>
                                 )}
 
                               {showActiveVideo && (

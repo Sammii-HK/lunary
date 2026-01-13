@@ -50,7 +50,7 @@ export function NumerologyInfoModal({
   contextLabel,
   contextDetail,
   meaning,
-  description,
+  description: modalDescription,
   energy,
   energyLabel,
   keywords,
@@ -83,9 +83,9 @@ export function NumerologyInfoModal({
       <ModalBody>
         <div className='space-y-3'>
           <p className='text-sm text-zinc-200 leading-relaxed'>{meaning}</p>
-          {description && (
+          {modalDescription && (
             <p className='text-sm text-zinc-300 leading-relaxed'>
-              {description}
+              {modalDescription}
             </p>
           )}
           {energy && (

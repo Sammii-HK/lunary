@@ -14,26 +14,21 @@ import {
 } from '@/lib/schema';
 
 export const metadata: Metadata = {
-  title:
-    'Yearly Astrological Transits 2026-2030 | How Each Year Affects You | Lunary',
+  title: 'Astrological Transits: Meaning, How To Read Them, Timing | Lunary',
   description:
-    'Plan for career, relationship, and personal shifts with the definitive 2026–2030 transit timeline, including who is affected and how to work with each planet’s energy.',
+    'Astrological transits track the moving planets and this guide explains their meaning and timing so you can plan the most impactful moments.',
   keywords: [
     'astrological transits',
-    'saturn return',
-    'jupiter transit',
-    'yearly astrology',
-    '2026 transits',
-    '2027 transits',
-    '2028 transits',
-    '2029 transits',
-    '2030 transits',
-    'uranus transit',
+    'transit meaning',
+    'how to read transits',
+    'transit timing',
+    'planetary transits',
+    'saturn return meaning',
   ],
   openGraph: {
-    title: 'Yearly Astrological Transits 2026-2030 | Lunary',
+    title: 'Astrological Transits: Meaning, How To Read Them, Timing | Lunary',
     description:
-      'Complete guide to major astrological transits. Saturn Return, Jupiter transits, and more.',
+      'Understand the meaning and timing of major transits so you can work with planetary timing confidently.',
     url: 'https://lunary.app/grimoire/transits',
     images: [
       {
@@ -46,8 +41,9 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Yearly Astrological Transits 2026-2030 | Lunary',
-    description: 'Complete guide to major astrological transits.',
+    title: 'Astrological Transits: Meaning, How To Read Them, Timing | Lunary',
+    description:
+      'Find out what each transit means and when to move with planetary timing.',
     images: ['/api/og/grimoire/transits'],
   },
   alternates: { canonical: 'https://lunary.app/grimoire/transits' },
@@ -65,6 +61,33 @@ export const metadata: Metadata = {
 };
 
 const years = [2025, 2026, 2027, 2028, 2029, 2030, 2033, 2040, 2048];
+
+const mostSearchedTransits = [
+  {
+    title: 'Saturn Return 2025',
+    description:
+      'Return lessons for the 1995-1996 birth years and the Pisces horizon.',
+    href: '/grimoire/transits/saturn-return-2025',
+  },
+  {
+    title: 'Saturn Return 2026',
+    description:
+      'Pisces → Aries return that launches the late-90s cohort into leadership.',
+    href: '/grimoire/transits/saturn-return-2026',
+  },
+  {
+    title: 'Jupiter in Gemini 2025',
+    description:
+      'Communication, learning, and curiosity expand—ideal for writers and students.',
+    href: '/grimoire/transits/jupiter-gemini-2025',
+  },
+  {
+    title: 'Mercury Retrograde 2025',
+    description:
+      'Mercury Rx periods for the year to help you spot moments for review.',
+    href: '/grimoire/events/2025/mercury-retrograde',
+  },
+];
 
 const SATURN_CYCLE_STEPS = [
   {
@@ -148,9 +171,9 @@ const SATURN_CYCLE_STEPS = [
 
 export default function TransitsIndexPage() {
   const transitsListSchema = createItemListSchema({
-    name: 'Yearly Astrological Transits 2026-2030',
+    name: 'Astrological transits meaning & timing',
     description:
-      'Complete guide to major astrological transits including Saturn Return, Jupiter transits, and planetary ingresses.',
+      'Interpretations for major transits with timing notes so you can read Saturn returns, Jupiter shifts, and planetary ingresses with clarity.',
     url: 'https://lunary.app/grimoire/transits',
     items: YEARLY_TRANSITS.slice(0, 20).map((transit) => ({
       name: transit.title,
@@ -176,13 +199,12 @@ export default function TransitsIndexPage() {
           ]}
         />
 
-        <h1 className='text-4xl font-light mb-4'>
-          Yearly Astrological Transits
-        </h1>
+        <h1 className='text-4xl font-light mb-4'>Astrological transits</h1>
         <p className='text-lg text-zinc-400 mb-6 max-w-3xl'>
-          Every major transit from 2026 through 2030 is summarized here with key
-          dates, planetary themes, and the signs it highlights so you can spot
-          the turning points before they arrive.
+          Astrological transits are the moving planets crossing your natal
+          chart, each one marking a precise timing for change. Lunary explains
+          what every transit means and how to read that timing so you can plan
+          your next move instead of reacting after the fact.
         </p>
 
         <p className='text-base text-zinc-300 mb-8 max-w-3xl'>
@@ -223,6 +245,25 @@ export default function TransitsIndexPage() {
           >
             See your personal transit timeline
           </Link>
+        </div>
+        <div className='mb-10 p-6 rounded-lg border border-zinc-800 bg-zinc-900/50'>
+          <h2 className='text-2xl font-semibold text-lunary-primary-200 mb-4'>
+            Most searched transits
+          </h2>
+          <div className='grid gap-4 md:grid-cols-2'>
+            {mostSearchedTransits.map((transit) => (
+              <Link
+                key={transit.href}
+                href={transit.href}
+                className='group flex flex-col gap-2 p-4 rounded-lg border border-zinc-800 bg-zinc-950/30 hover:border-lunary-primary-500 transition-colors'
+              >
+                <h3 className='text-lg font-semibold text-zinc-100 group-hover:text-lunary-primary-300'>
+                  {transit.title}
+                </h3>
+                <p className='text-sm text-zinc-400'>{transit.description}</p>
+              </Link>
+            ))}
+          </div>
         </div>
         <div className='mb-12 p-5 rounded-2xl border border-lunary-primary-700 bg-lunary-primary-900/10'>
           <h2 className='text-2xl font-semibold text-lunary-primary-200 mb-3'>

@@ -1245,7 +1245,8 @@ export async function generateMetadata({
     year: 'numeric',
   })}`;
 
-  const url = `https://lunary.app/blog/week/${weekInfo.slug}`;
+  const canonicalPath = `/blog/week/${weekInfo.slug}`;
+  const url = `https://lunary.app${canonicalPath}`;
   const ogImage = `https://lunary.app/api/og/educational/blog?title=${encodeURIComponent(blogData.title)}&subtitle=${encodeURIComponent(`Week of ${weekRange}`)}&format=landscape`;
 
   const keywords = [

@@ -10,6 +10,7 @@ import {
 import { categoryThemes } from '@/lib/social/weekly-themes';
 import { getImageBaseUrl } from '@/lib/urls';
 import { generateWeeklyContent } from '../../../../../../utils/blog/weeklyContentGenerator';
+import { capitalizeThematicTitle } from '../../../../../../utils/og/text';
 import {
   generateReelHashtags,
   generateVideoPostContent,
@@ -118,15 +119,16 @@ export async function POST(request: NextRequest) {
     }
 
     const baseUrl = getImageBaseUrl();
+    const formattedThemeName = capitalizeThematicTitle(script.themeName);
     const imageUrl =
       script.coverImageUrl ||
       `${baseUrl}/api/og/thematic?title=${encodeURIComponent(
-        script.themeName,
+        formattedThemeName,
       )}&subtitle=${encodeURIComponent('Weekly Deep Dive')}&format=landscape`;
 
     const audioBuffer = await generateVoiceover(script.fullScript, {
-      voiceName: 'nova',
-      model: 'tts-1-hd',
+      voiceName: 'alloy',
+      model: 'gpt-4o-mini-tts',
       speed: 1.0,
     });
 
@@ -150,6 +152,8 @@ export async function POST(request: NextRequest) {
     const title = script.facetTitle || `Weekly Deep Dive: ${script.themeName}`;
     const description = `Weekly thematic deep dive: ${script.themeName}.`;
     let postContent: string | null = null;
+    const theme = categoryThemes.find((t) => t.name === script.themeName);
+    const themeCategory = theme?.category;
 
     try {
       const weeklyData = await generateWeeklyContent(weekStart);
@@ -158,10 +162,9 @@ export async function POST(request: NextRequest) {
         'long',
         undefined,
         'default',
+        themeCategory,
       );
       const caption = stripHashtagLine(baseCaption);
-      const theme = categoryThemes.find((t) => t.name === script.themeName);
-      const themeCategory = theme?.category;
       const hashtags = await generateReelHashtags(weeklyData, themeCategory);
       postContent = `${caption}\n\n${hashtags.join(' ')}`.trim();
     } catch (error) {
@@ -169,6 +172,10 @@ export async function POST(request: NextRequest) {
     }
 
     let result;
+    const audioUrl: string | null = null;
+    const blogSlug: string | null = null;
+    const audioUrlParam = audioUrl ?? null;
+    const blogSlugParam = blogSlug ?? null;
     try {
       result = await sql`
         INSERT INTO videos (
@@ -187,13 +194,13 @@ export async function POST(request: NextRequest) {
         ) VALUES (
           'long',
           ${videoUrl},
-          ${null},
+          ${audioUrlParam},
           ${script.fullScript},
           ${title},
           ${description},
           ${postContent},
           ${weekNumber},
-          ${null},
+          ${blogSlugParam},
           'pending',
           NOW(),
           ${expiresAt.toISOString()}
@@ -224,8 +231,8 @@ export async function POST(request: NextRequest) {
             ${title},
             ${description},
             ${postContent},
-            ${weekNumber},
-            ${null},
+          ${weekNumber},
+          ${blogSlugParam},
             'pending',
             NOW(),
             ${expiresAt.toISOString()}

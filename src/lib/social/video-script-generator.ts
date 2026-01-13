@@ -20,6 +20,7 @@ import numerology from '@/data/numerology.json';
 import chakras from '@/data/chakras.json';
 import sabbats from '@/data/sabbats.json';
 import planetaryBodies from '@/data/planetary-bodies.json';
+import { capitalizeThematicTitle } from '../../../utils/og/text';
 
 function getOpenAI(): OpenAI {
   const apiKey = process.env.OPENAI_API_KEY?.trim();
@@ -466,40 +467,52 @@ async function generateTikTokScriptContent(
     }
   }
 
-  const prompt = `Create a complete, flowing TikTok video script (30–45 seconds, 70–110 words) about ${facet.title} as part of a daily educational series.
-
-Series Theme: ${theme.name}
+  const prompt = `Create a complete, flowing short-form thematic video script (20–30 seconds, 45–70 words) about ${facet.title}. The video uses a sequence of OG images as frames, so the narration must be tight, structured, and easy to follow.
 Daily topic: ${facet.title} (focus: ${facet.focus})
 
-This is Part ${partNumber} of ${totalParts} in the series. The script should be:
-  - Complete and flowing, written as a calm, authoritative narrative that can be read aloud smoothly
+Tone + delivery:
+  - Short, declarative sentences (max 10–12 words)
+  - Calm, grounded, neutral-warm, confident
   - Educational and interpretive, not conversational or hype-driven
-  - Designed for viewers seeking understanding, not entertainment
-  - Part 1 may include brief series context. Parts 2+ must not repeat a full introduction
-  - Structured with a strong interpretive opening, clear explanation, and reflective takeaway
+  - Written for clean OpenAI TTS delivery: avoid tongue-twisters, avoid long compound sentences
+  - Use natural pauses with line breaks. No em dashes.
 
-Opening requirements:
-  - The first sentence must be an interpretive hook that reframes meaning, challenges a common misconception, or explains why this topic matters in real life
-  - Do NOT use questions unless they clarify meaning (no generic curiosity bait)
-  - Do NOT use “Day”, “Part”, or series framing in the first sentence
+Hook requirements (first 2–3 seconds):
+  - Sentence 1 must be a concrete fact stated plainly
+  - Make it immediately meaningful and specific, not generic
+  - Include the topic name in the first sentence
+  - Keep it punchy (6–10 words if possible)
+  - Avoid vague abstractions and avoid repeating the topic word twice
+  - No questions, no teasers, no bait
 
-Structure requirements:
-  - The second sentence must briefly remind viewers of the weekly theme (e.g., "Welcome back to our series on ${theme.name}.")
-  - Immediately after, reference the series position once: "Part ${partNumber} of ${totalParts}: ${facet.title}."
-  - Clearly explain today’s focus: ${facet.focus}
-  - Maintain a calm, grounded, premium tone throughout
-  - End with a reflective or interpretive takeaway that encourages understanding, not action
+Rhythm + structure:
+  - Follow: hook → context → reflective close
+  - Include exactly ONE sentence that explains the significance
+  - Insert a blank line before the final reflective line
+
+Educational guidance:
+  - Include at least one practical or interpretive sentence about timing, focus, or what it supports
+  - Avoid listing items without explanation
+
+List guidance (only if a list fits the topic):
+  - Keep it short and concrete
+  - Only number items when it adds clarity
+  - Avoid repeating the same idea across items
+
+Ending:
+  - End with a single observational line (not instructional)
 
 Constraints:
   - Do NOT mention “next week”
-  - Do NOT use overt CTAs (no likes, follows, or app promotion)
-  - Avoid sensational language or emotional exaggeration
+  - No CTAs (no likes, follows, app promotion)
+  - Avoid sensational language
+  - Parts 2+ must not include a full intro or welcome back
 
 Topic: ${facet.title}
 Focus: ${facet.focus}
 ${dataContext ? `\nGrimoire Data:\n${dataContext}` : ''}
 
-Return ONLY the complete script text. No headings, no markdown, no formatting. The output must read as a single, cohesive spoken narrative.`;
+Return ONLY the script text. No headings, no markdown. Use line breaks to create pauses.`;
 
   try {
     const completion = await openai.chat.completions.create({
@@ -523,21 +536,41 @@ Return ONLY the complete script text. No headings, no markdown, no formatting. T
 
     script = script.trim();
 
-    // Ensure series callback is included
-    if (!script.includes(`Part ${partNumber}`)) {
-      script += `\n\nPart ${partNumber} of ${totalParts}: ${facet.title}.`;
-    }
+    script = ensureTikTokHookFirstSentence(script, facet, theme, grimoireData);
+    // Theme/part context is handled in OG images, not the script.
+    script = ensureThematicListAndClose(script);
+    script = enforceThematicPacing(script, facet, grimoireData, theme.name);
+
+    // Series/part details are intentionally omitted from scripts.
 
     return script;
   } catch (error) {
     console.error('Failed to generate TikTok script with AI:', error);
     // Fallback to structured script
-    return generateTikTokScriptFallback(
+    return enforceThematicPacing(
+      ensureThematicListAndClose(
+        ensureThemePartSentence(
+          ensureTikTokHookFirstSentence(
+            generateTikTokScriptFallback(
+              facet,
+              theme,
+              grimoireData,
+              partNumber,
+              totalParts,
+            ),
+            facet,
+            theme,
+            grimoireData,
+          ),
+          theme.name,
+          partNumber,
+          totalParts,
+          facet.title,
+        ),
+      ),
       facet,
-      theme,
       grimoireData,
-      partNumber,
-      totalParts,
+      theme.name,
     );
   }
 }
@@ -565,6 +598,253 @@ function generateTikTokScriptFallback(
 
   // Join with smooth transitions
   return `${hook} ${intro} ${core} ${takeaway}`;
+}
+
+function ensureTikTokHookFirstSentence(
+  text: string,
+  facet: DailyFacet,
+  theme: WeeklyTheme,
+  grimoireData: Record<string, any> | null,
+): string {
+  const trimmed = text.trim();
+  if (!trimmed) return text;
+
+  const firstSentenceMatch = trimmed.match(/^[^.!?]+[.!?]/);
+  if (!firstSentenceMatch) return text;
+
+  const desiredHook = buildThematicHookSentence(facet, grimoireData);
+  const rest = trimmed.slice(firstSentenceMatch[0].length).trim();
+  return rest ? `${desiredHook} ${rest}` : desiredHook;
+}
+
+function ensureThemePartSentence(
+  text: string,
+  themeName: string,
+  partNumber: number,
+  totalParts: number,
+  facetTitle: string,
+): string {
+  const combined = `This week: ${themeName}; Part ${partNumber} of ${totalParts}: ${facetTitle}.`;
+  const sentences = splitSentencesPreservingDecimals(text);
+  if (sentences.length === 0) {
+    return combined;
+  }
+
+  const [hook, ...rest] = sentences;
+  const filtered = rest.filter(
+    (sentence) => !/^(this week|part|series theme)/i.test(sentence.trim()),
+  );
+  const reconstructed = [hook, combined, ...filtered];
+  return reconstructed.join(' ');
+}
+
+function splitSentencesPreservingDecimals(text: string): string[] {
+  const protectedText = text.replace(/(\d)\.(\d)/g, '$1<DECIMAL>$2');
+  const sentences =
+    protectedText.match(/[^.!?]+[.!?]/g)?.map((s) => s.trim()) || [];
+  const restored = sentences.map((sentence) =>
+    sentence.replace(/<DECIMAL>/g, '.'),
+  );
+  if (restored.length > 0) {
+    return restored;
+  }
+  const fallback = protectedText.replace(/<DECIMAL>/g, '.').trim();
+  return fallback ? [fallback] : [];
+}
+
+function buildThematicHookSentence(
+  facet: DailyFacet,
+  grimoireData: Record<string, any> | null,
+): string {
+  const title = facet.title;
+  const description =
+    grimoireData?.description ||
+    grimoireData?.meaning ||
+    grimoireData?.mysticalProperties ||
+    '';
+  const descSentence = splitSentencesPreservingDecimals(String(description))[0];
+  const element = grimoireData?.element;
+  const ruler = grimoireData?.ruler || grimoireData?.rulingPlanet;
+  const modality = grimoireData?.modality;
+  const keyword = Array.isArray(grimoireData?.keywords)
+    ? grimoireData.keywords[0]
+    : null;
+
+  const isGeneric = (sentence: string) =>
+    /marks the beginning|is about|is a time|is known for|invites|encourages/i.test(
+      sentence.toLowerCase(),
+    );
+
+  const preferMotion = (sentence: string) =>
+    sentence
+      .replace(/marks the beginning of/gi, 'begins')
+      .replace(/\bis the beginning of\b/gi, 'begins')
+      .replace(/\bmarks the start of\b/gi, 'begins')
+      .replace(/\bis the start of\b/gi, 'begins')
+      .replace(/\bopens the\b/gi, 'opens')
+      .replace(/\bin it begins\b/gi, 'begins')
+      .replace(/\bin it starts\b/gi, 'begins')
+      .replace(/\binitiates\b/gi, 'initiates')
+      .replace(/\bopens\b/gi, 'opens');
+
+  const ensureTitleContext = (sentence: string) => {
+    if (!sentence) return sentence;
+    if (new RegExp(`\\b${title}\\b`, 'i').test(sentence)) {
+      return sentence;
+    }
+    const trimmed = sentence.trim();
+    const lowered = trimmed.charAt(0).toLowerCase() + trimmed.slice(1);
+    return `${title} ${lowered}`;
+  };
+
+  if (descSentence && !isGeneric(descSentence)) {
+    const cleaned = preferMotion(descSentence).replace(/\?+$/, '.').trim();
+    const withContext = ensureTitleContext(cleaned);
+    return withContext.endsWith('.') ? withContext : `${withContext}.`;
+  }
+
+  if (element || ruler || modality) {
+    const parts = [
+      modality ? `${modality} ${element || ''}`.trim() : element,
+      ruler ? `ruled by ${ruler}` : null,
+    ]
+      .filter(Boolean)
+      .join(', ');
+    const sentence = parts
+      ? `${title} is a ${parts}.`
+      : `${title} is defined by its timing and tone.`;
+    return preferMotion(sentence);
+  }
+
+  if (keyword) {
+    return preferMotion(`${title} highlights ${keyword}.`);
+  }
+
+  const fallbackSource =
+    facet.shortFormHook || description || facet.focus || facet.title;
+  const fallbackSentence = splitSentencesPreservingDecimals(
+    String(fallbackSource),
+  )[0];
+  const sentence = preferMotion(String(fallbackSentence || fallbackSource))
+    .replace(/\?+$/, '.')
+    .replace(/\s+/g, ' ')
+    .trim();
+  const withContext = ensureTitleContext(sentence);
+  return withContext.endsWith('.') ? withContext : `${withContext}.`;
+}
+
+function ensureThematicListAndClose(text: string): string {
+  let script = text.trim();
+  if (!script) return text;
+
+  const hasList =
+    /\bFirst\b/i.test(script) &&
+    /\bSecond\b/i.test(script) &&
+    /\bThird\b/i.test(script);
+  if (!hasList) {
+    return script;
+  } else {
+    script = script.replace(/([.!?])\s+(First\b)/i, '$1\n\n$2');
+  }
+
+  return script.trim();
+}
+
+function enforceThematicPacing(
+  text: string,
+  facet: DailyFacet,
+  grimoireData: Record<string, any> | null,
+  themeName?: string,
+): string {
+  const sentences = splitSentencesPreservingDecimals(text);
+  if (sentences.length === 0) {
+    return text;
+  }
+
+  sentences[0] = enforceHookLength(sentences[0], facet, grimoireData);
+
+  const themeLineIndex = sentences.findIndex((sentence) =>
+    /^This week\b/i.test(sentence),
+  );
+  if (themeLineIndex !== -1) {
+    sentences.splice(themeLineIndex, 1);
+  }
+
+  const deduped: string[] = [];
+  const seen = new Set<string>();
+  for (const sentence of sentences) {
+    const key = sentence
+      .toLowerCase()
+      .replace(/[^a-z0-9\s]/g, '')
+      .split(/\s+/)
+      .filter(Boolean)
+      .slice(0, 12)
+      .join(' ');
+    if (!key) continue;
+    if (seen.has(key)) continue;
+    seen.add(key);
+    deduped.push(sentence);
+  }
+
+  const outputLines: string[] = [];
+  deduped.forEach((sentence, index) => {
+    if (index === 0) {
+      outputLines.push(sentence);
+      if (deduped.length > 1) {
+        outputLines.push('');
+      }
+      return;
+    }
+    if (index === 1 && deduped.length > 2) {
+      outputLines.push('');
+    }
+    if (/^First\b/i.test(sentence)) {
+      outputLines.push('');
+      outputLines.push('');
+      outputLines.push('');
+    }
+    if (index === deduped.length - 1 && deduped.length > 1) {
+      outputLines.push('');
+      outputLines.push('');
+      outputLines.push('');
+    }
+    outputLines.push(sentence);
+  });
+
+  return outputLines
+    .join('\n')
+    .replace(/\n{3,}/g, '\n\n')
+    .trim();
+}
+
+function enforceHookLength(
+  sentence: string,
+  facet: DailyFacet,
+  grimoireData: Record<string, any> | null,
+): string {
+  const cleanSentence = sentence.replace(/[.!?]+$/, '').trim();
+  let words = cleanSentence.split(/\s+/).filter(Boolean);
+
+  if (words.length > 10) {
+    words = words.slice(0, 10);
+  } else if (words.length < 6) {
+    const fallbackSource =
+      facet.focus ||
+      grimoireData?.description ||
+      grimoireData?.meaning ||
+      facet.title;
+    const fallbackWords = String(fallbackSource).split(/\s+/).filter(Boolean);
+    for (const word of fallbackWords) {
+      if (words.length >= 6) break;
+      words.push(word.replace(/[.!?]+$/, ''));
+    }
+  }
+
+  const normalised = words
+    .join(' ')
+    .replace(/[,\s]+$/, '')
+    .trim();
+  return normalised.endsWith('.') ? normalised : `${normalised}.`;
 }
 
 /**
@@ -805,7 +1085,7 @@ function generateCoverImageUrl(
   const subtitle = encodeURIComponent(
     `Part ${safePartNumber} of ${safeTotalParts}`,
   );
-  const title = encodeURIComponent(facet.title);
+  const title = encodeURIComponent(capitalizeThematicTitle(facet.title));
 
   // cover=tiktok triggers larger text sizes for TikTok thumbnail legibility
   return `${baseUrl}/api/og/thematic?category=${theme.category}&slug=${slug}&title=${title}&subtitle=${subtitle}&format=story&cover=tiktok`;
@@ -823,7 +1103,7 @@ function generateYouTubeCoverUrl(
   const slug =
     firstFacet?.grimoireSlug.split('/').pop() ||
     theme.name.toLowerCase().replace(/\s+/g, '-');
-  const title = encodeURIComponent(theme.name);
+  const title = encodeURIComponent(capitalizeThematicTitle(theme.name));
   const subtitle = encodeURIComponent('Weekly Deep Dive');
 
   // cover=youtube triggers optimized sizes for YouTube thumbnail (1280x720)
@@ -981,11 +1261,15 @@ Return ONLY the complete script text. No section headers, no labels, no markdown
       script += `\n\nFor deeper exploration of ${theme.name.toLowerCase()} and related topics, the Lunary Grimoire offers comprehensive reference material. It is freely available for those who wish to continue their study. Until next time.`;
     }
 
-    return script;
+    const normalizedScript = ensureHookFirstSentence(script, theme);
+    return normalizedScript;
   } catch (error) {
     console.error('Failed to generate YouTube script with AI:', error);
     // Fallback to structured script
-    return generateYouTubeScriptFallback(theme, facets, allData);
+    return ensureHookFirstSentence(
+      generateYouTubeScriptFallback(theme, facets, allData),
+      theme,
+    );
   }
 }
 
@@ -1007,6 +1291,40 @@ function generateYouTubeScriptFallback(
 
   // Join with smooth transitions
   return `${intro}\n\n${overview}\n\n${foundations}\n\n${deeperMeaning}\n\n${practical}\n\n${summary}\n\n${outro}`;
+}
+
+function ensureHookFirstSentence(text: string, theme: WeeklyTheme): string {
+  const trimmed = text.trim();
+  if (!trimmed) return text;
+
+  const firstSentenceMatch = trimmed.match(/^[^.!?]+[.!?]/);
+  if (!firstSentenceMatch) return text;
+
+  const firstSentence = firstSentenceMatch[0].trim();
+  if (!needsHookRewrite(firstSentence)) {
+    return text;
+  }
+
+  const rest = trimmed.slice(firstSentenceMatch[0].length).trim();
+  const hookSentence = buildYouTubeHookSentence(theme);
+  return rest ? `${hookSentence} ${rest}` : hookSentence;
+}
+
+function needsHookRewrite(sentence: string): boolean {
+  return /^(welcome|welcome back|today|hello|hi|now|this|let's)/i.test(
+    sentence,
+  );
+}
+
+function buildYouTubeHookSentence(theme: WeeklyTheme): string {
+  const snippet =
+    theme.description
+      ?.split(/[.!?]/)
+      .find((segment) => segment.trim().length > 0) || theme.name;
+  const normalized = snippet.trim().toLowerCase();
+  const base = normalized.length > 0 ? normalized : theme.name.toLowerCase();
+  const cleanSubject = base.replace(/^\s+|\s+$/g, '');
+  return `Understanding ${cleanSubject} reveals why ${theme.name.toLowerCase()} matters.`;
 }
 
 function buildYouTubeIntro(

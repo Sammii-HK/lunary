@@ -46,9 +46,8 @@ export async function generateVoiceover(
 
   // Map old options to new format
   const newOptions = {
-    voiceName: 'nova', // Default to British female (similar to Alice)
-    model: 'tts-1-hd', // High quality
-    speed: 1.0,
+    voiceName: 'alloy',
+    model: 'gpt-4o-mini-tts',
   };
 
   return generateVoiceoverNew(text, newOptions);
@@ -93,7 +92,7 @@ export async function checkQuota(): Promise<{
 }
 
 export function estimateCharacterCost(text: string): number {
-  // OpenAI TTS: $15 per 1M characters (tts-1) or $30 per 1M characters (tts-1-hd)
+  // OpenAI TTS: check current pricing for gpt-4o-mini-tts.
   return text.length;
 }
 

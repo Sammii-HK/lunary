@@ -1,4 +1,4 @@
-import { generateVoiceover } from '../tts/elevenlabs';
+import { generateVoiceover } from '@/lib/tts';
 
 const IMAGE_FORMATS = ['landscape', 'square', 'portrait', 'story'] as const;
 
@@ -55,7 +55,10 @@ export async function generateSocialAssets(
   let voiceover: SocialAssets['voiceover'] | undefined;
   if (options.generateVoiceover && content.voiceover?.script) {
     try {
-      const audioBuffer = await generateVoiceover(content.voiceover.script);
+      const audioBuffer = await generateVoiceover(content.voiceover.script, {
+        voiceName: 'alloy',
+        speed: 1.0,
+      });
       const base64 = Buffer.from(audioBuffer).toString('base64');
       voiceover = {
         url: `data:audio/mpeg;base64,${base64}`,

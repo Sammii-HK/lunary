@@ -466,7 +466,7 @@ export function getThematicSizes(format: OGImageSize) {
     case 'story':
       return {
         symbolSize: 140,
-        titleSize: 72,
+        titleSize: 64,
         subtitleSize: 32,
         attributeSize: 26,
         labelSize: 24,

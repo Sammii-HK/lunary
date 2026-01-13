@@ -24,17 +24,6 @@ const PRODUCT_INTERACTION_EVENTS = [
   'login',
 ];
 
-function escapeForSql(value: string) {
-  return value.replace(/'/g, "''");
-}
-
-function formatSqlArray(values: string[]) {
-  if (values.length === 0) {
-    return 'ARRAY[]::text[]';
-  }
-  return `ARRAY[${values.map((value) => `'${escapeForSql(value)}'`).join(', ')}]`;
-}
-
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
@@ -453,32 +442,40 @@ export async function GET(request: NextRequest) {
         ? (churnedCustomers / startingPayingCustomers) * 100
         : 0;
 
-    const activationEventsArray = formatSqlArray(PRODUCT_INTERACTION_EVENTS);
-    const activationReturnResult = await sql`
-      WITH trial_cohort AS (
-        SELECT user_id, MIN(created_at) AS started_at
-        FROM conversion_events
-        WHERE event_type = 'trial_started'
-          AND created_at BETWEEN ${formatTimestamp(range.start)} AND ${formatTimestamp(range.end)}
-          AND user_id IS NOT NULL
-          AND (user_email IS NULL OR (user_email NOT LIKE ${TEST_EMAIL_PATTERN} AND user_email != ${TEST_EMAIL_EXACT}))
-        GROUP BY user_id
-      )
-      SELECT
-        COUNT(*) AS total_activations,
-        COUNT(*) FILTER (
-          WHERE EXISTS (
-            SELECT 1
-            FROM conversion_events ce
-            WHERE ce.user_id = trial_cohort.user_id
-              AND ce.event_type = ANY(${activationEventsArray})
-              AND ce.created_at >= trial_cohort.started_at
-              AND ce.created_at <= trial_cohort.started_at + INTERVAL '48 hours'
-              AND (ce.user_email IS NULL OR (ce.user_email NOT LIKE ${TEST_EMAIL_PATTERN} AND ce.user_email != ${TEST_EMAIL_EXACT}))
-          )
-        ) AS returning_activations
-      FROM trial_cohort
-    `;
+    const activationReturnResult = await sql.query(
+      `
+        WITH trial_cohort AS (
+          SELECT user_id, MIN(created_at) AS started_at
+          FROM conversion_events
+          WHERE event_type = 'trial_started'
+            AND created_at BETWEEN $1 AND $2
+            AND user_id IS NOT NULL
+            AND (user_email IS NULL OR (user_email NOT LIKE $3 AND user_email != $4))
+          GROUP BY user_id
+        )
+        SELECT
+          COUNT(*) AS total_activations,
+          COUNT(*) FILTER (
+            WHERE EXISTS (
+              SELECT 1
+              FROM conversion_events ce
+              WHERE ce.user_id = trial_cohort.user_id
+                AND ce.event_type = ANY($5)
+                AND ce.created_at >= trial_cohort.started_at
+                AND ce.created_at <= trial_cohort.started_at + INTERVAL '48 hours'
+                AND (ce.user_email IS NULL OR (ce.user_email NOT LIKE $3 AND ce.user_email != $4))
+            )
+          ) AS returning_activations
+        FROM trial_cohort
+      `,
+      [
+        formatTimestamp(range.start),
+        formatTimestamp(range.end),
+        TEST_EMAIL_PATTERN,
+        TEST_EMAIL_EXACT,
+        PRODUCT_INTERACTION_EVENTS,
+      ],
+    );
     const activationTotal = Number(
       activationReturnResult.rows[0]?.total_activations || 0,
     );

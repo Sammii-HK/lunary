@@ -6,6 +6,65 @@ import { resolveDateRange, formatTimestamp } from '@/lib/analytics/date-range';
 const TEST_EMAIL_PATTERN = '%@test.lunary.app';
 const TEST_EMAIL_EXACT = 'test@test.lunary.app';
 
+const formatDateKey = (date: Date) => date.toISOString().split('T')[0];
+
+const alignDateToGranularity = (
+  date: Date,
+  granularity: 'day' | 'week' | 'month',
+) => {
+  const aligned = new Date(
+    Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate()),
+  );
+
+  if (granularity === 'week') {
+    const day = aligned.getUTCDay();
+    const diff = (day + 6) % 7;
+    aligned.setUTCDate(aligned.getUTCDate() - diff);
+  } else if (granularity === 'month') {
+    aligned.setUTCDate(1);
+  }
+
+  return aligned;
+};
+
+const buildDateBuckets = (
+  startDate: Date,
+  endDate: Date,
+  granularity: 'day' | 'week' | 'month',
+) => {
+  const buckets: string[] = [];
+  const cursor = alignDateToGranularity(startDate, granularity);
+  const end = new Date(endDate.getTime());
+
+  while (cursor <= end) {
+    buckets.push(formatDateKey(cursor));
+    if (granularity === 'week') {
+      cursor.setUTCDate(cursor.getUTCDate() + 7);
+    } else if (granularity === 'month') {
+      cursor.setUTCMonth(cursor.getUTCMonth() + 1);
+    } else {
+      cursor.setUTCDate(cursor.getUTCDate() + 1);
+    }
+  }
+
+  return buckets;
+};
+
+const fillSignupTrends = (
+  trends: Array<{ date: string; signups: number }>,
+  startDate: Date,
+  endDate: Date,
+  granularity: 'day' | 'week' | 'month',
+) => {
+  const buckets = buildDateBuckets(startDate, endDate, granularity);
+  const lookup = new Map(trends.map((t) => [t.date, t.signups]));
+
+  return buckets.map((date) => ({
+    date,
+    signups: lookup.get(date) ?? 0,
+  }));
+};
+
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
@@ -21,10 +80,40 @@ export async function GET(request: NextRequest) {
       granularity,
     );
 
-    const trends =
-      posthogTrends.length > 0
-        ? posthogTrends
-        : await getSignupTrendsFromDb(range.start, range.end, granularity);
+    const dbTrends = await getSignupTrendsFromDb(
+      range.start,
+      range.end,
+      granularity,
+    );
+    const shouldFallbackToDb = posthogTrends.length === 0;
+
+    const trends = fillSignupTrends(
+      dbTrends,
+      range.start,
+      range.end,
+      granularity,
+    );
+
+    if (!shouldFallbackToDb) {
+      const posthogMap = new Map(
+        posthogTrends.map((trend) => [trend.date, trend.signups]),
+      );
+      const currentBucket = formatDateKey(
+        alignDateToGranularity(range.end, granularity),
+      );
+      const posthogToday = posthogMap.get(currentBucket);
+      if (typeof posthogToday === 'number') {
+        const todayIndex = trends.findIndex(
+          (trend) => trend.date === currentBucket,
+        );
+        if (todayIndex >= 0) {
+          trends[todayIndex] = {
+            ...trends[todayIndex],
+            signups: posthogToday,
+          };
+        }
+      }
+    }
 
     // Calculate growth rate
     let growthRate = 0;
@@ -45,7 +134,7 @@ export async function GET(request: NextRequest) {
       trends,
       growthRate: Number(growthRate.toFixed(2)),
       totalSignups: trends.reduce((sum, t) => sum + t.signups, 0),
-      source: posthogTrends.length > 0 ? 'posthog' : 'conversion_events',
+      source: shouldFallbackToDb ? 'conversion_events' : 'hybrid',
     });
   } catch (error) {
     console.error('[analytics/user-growth] Failed to load metrics', error);

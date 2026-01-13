@@ -1050,6 +1050,7 @@ export async function generateVideoPostContent(
   videoType: 'short' | 'medium' | 'long',
   blogSlug?: string,
   platform?: 'threads' | 'default',
+  themeCategory?: string,
 ): Promise<string> {
   const openai = getOpenAI();
 
@@ -1158,12 +1159,12 @@ Return ONLY the caption text. No markdown, no formatting, no emojis, no hashtags
     if (platform === 'threads') {
       postContent = formatContentForThreads(postContent, weeklyData);
       // Use the standard video hashtags (avoid Threads-specific categorizing tags)
-      const hashtags = generateVideoHashtags(weeklyData, videoType);
-      postContent = `${postContent}\n\n${hashtags}`;
+      const hashtags = await generateReelHashtags(weeklyData, themeCategory);
+      postContent = `${postContent}\n\n${hashtags.join(' ')}`;
     } else {
       // Add hashtags for all other platforms (3 hashtags)
-      const hashtags = generateVideoHashtags(weeklyData, videoType);
-      postContent = `${postContent}\n\n${hashtags}`;
+      const hashtags = await generateReelHashtags(weeklyData, themeCategory);
+      postContent = `${postContent}\n\n${hashtags.join(' ')}`;
     }
 
     return postContent;
@@ -1176,12 +1177,12 @@ Return ONLY the caption text. No markdown, no formatting, no emojis, no hashtags
     if (platform === 'threads') {
       fallbackContent = formatContentForThreads(fallbackContent, weeklyData);
       // Use the standard video hashtags (avoid Threads-specific categorizing tags)
-      const hashtags = generateVideoHashtags(weeklyData, videoType);
-      fallbackContent = `${fallbackContent}\n\n${hashtags}`;
+      const hashtags = await generateReelHashtags(weeklyData, themeCategory);
+      fallbackContent = `${fallbackContent}\n\n${hashtags.join(' ')}`;
     } else {
       // Add hashtags for all other platforms (3 hashtags)
-      const hashtags = generateVideoHashtags(weeklyData, videoType);
-      fallbackContent = `${fallbackContent}\n\n${hashtags}`;
+      const hashtags = await generateReelHashtags(weeklyData, themeCategory);
+      fallbackContent = `${fallbackContent}\n\n${hashtags.join(' ')}`;
     }
 
     return fallbackContent;

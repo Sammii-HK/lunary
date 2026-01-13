@@ -18,12 +18,18 @@ export class OpenAITTSProvider implements TTSProvider {
    * Fixes stuttering issues with duplicate words
    */
   private preprocessTextForTTS(text: string): string {
+    const pauseToken = '__LUNARY_PAUSE__';
+    let processed = text.replace(/\n{2,}/g, ` ${pauseToken} `);
+
     // Remove duplicate consecutive words (TTS stuttering fix)
     // e.g., "Sagitta-Sagittarius" or "the the" -> single word
-    let processed = text.replace(/\b(\w+)[-\s]+\1\b/gi, '$1');
+    processed = processed.replace(/\b(\w+)[-\s]+\1\b/gi, '$1');
 
     // Clean up any double spaces
-    processed = processed.replace(/\s+/g, ' ');
+    processed = processed.replace(/\s+/g, ' ').trim();
+
+    // Re-insert pause markers as ellipses to encourage a natural break.
+    processed = processed.replace(new RegExp(pauseToken, 'g'), '...');
 
     return processed;
   }
@@ -85,25 +91,35 @@ export class OpenAITTSProvider implements TTSProvider {
     text: string,
     options: TTSOptions = {},
   ): Promise<ArrayBuffer> {
-    // Only use 'nova' - British female voice (as per requirements)
-    const requestedVoice = options.voiceName || 'nova';
-
-    // Enforce 'nova' if another voice is requested
-    if (requestedVoice !== 'nova') {
+    // Lock in the Lunary house voice (alloy) with neutral delivery.
+    const requestedVoice = options.voiceName || 'alloy';
+    if (requestedVoice !== 'alloy') {
       console.warn(
-        `Voice '${requestedVoice}' requested, but only 'nova' (British female) is allowed. Using 'nova' instead.`,
+        `Voice '${requestedVoice}' requested, but only 'alloy' is allowed. Using 'alloy' instead.`,
       );
     }
 
-    const voice = 'nova'; // Always use British female voice
-    const model = options.model || 'tts-1-hd'; // High quality by default
+    const voice = 'alloy';
+    const model = 'gpt-4o-mini-tts';
+    const toneInstruction =
+      'Calm, steady, neutral-warm. Avoid emotional emphasis.';
+
+    if (options.model && options.model !== model) {
+      console.warn(
+        `Model '${options.model}' requested, but only '${model}' is allowed. Using '${model}' instead.`,
+      );
+    }
+
+    if (options.speed && options.speed !== 1.0) {
+      console.warn(
+        `Speed '${options.speed}' requested, but default speed is locked. Using default instead.`,
+      );
+    }
 
     // Preprocess text to help with pronunciation
     const processedText = this.preprocessTextForTTS(text);
 
-    console.log(
-      `🎙️ Generating voiceover with voice: ${voice} (British female)`,
-    );
+    console.log(`🎙️ Generating voiceover with voice: ${voice}`);
 
     // Check if text exceeds character limit
     if (processedText.length > 4096) {
@@ -123,7 +139,7 @@ export class OpenAITTSProvider implements TTSProvider {
           model,
           voice: voice as any,
           input: chunks[i],
-          speed: options.speed || 1.0,
+          instructions: toneInstruction,
         });
         audioChunks.push(await chunkAudio.arrayBuffer());
       }
@@ -152,7 +168,7 @@ export class OpenAITTSProvider implements TTSProvider {
       model,
       voice: voice as any,
       input: processedText,
-      speed: options.speed || 1.1,
+      instructions: toneInstruction,
     });
 
     return await response.arrayBuffer();

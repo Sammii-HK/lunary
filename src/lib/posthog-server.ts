@@ -154,6 +154,9 @@ export const PRODUCT_FILTER_CONDITION = SIGNED_IN_PRODUCT_USAGE_CONDITION;
 const GRIMOIRE_FILTER_CONDITION =
   "(event = '$pageview' AND properties.pathname LIKE '/grimoire%')";
 
+const formatDateTime = (date: Date) =>
+  date.toISOString().slice(0, 19).replace('T', ' ');
+
 export async function queryPostHogAPI<T>(
   endpoint: string,
   options?: RequestInit,
@@ -348,6 +351,102 @@ export async function getPostHogSignedInProductActiveUsers(
   } catch (error) {
     console.error(
       '[PostHog] Signed-in product active user query failed:',
+      error,
+    );
+    return null;
+  }
+}
+
+export type SignedInProductUsageSummary = {
+  users: number;
+  returningUsers: number;
+  totalSessions: number;
+  avgSessionsPerUser: number;
+};
+
+export async function getPostHogSignedInProductUsageSummary(
+  startDate: Date,
+  endDate: Date,
+): Promise<SignedInProductUsageSummary | null> {
+  const testUserFilter = getTestUserFilter();
+  const start = formatDateTime(startDate);
+  const end = formatDateTime(endDate);
+  const timeFilter = `timestamp >= toDateTime('${start}') AND timestamp <= toDateTime('${end}')`;
+
+  try {
+    const [usersResult, sessionsResult, returningResult] = await Promise.all([
+      queryPostHogAPI<{ results: Array<Array<number>> }>('/query/', {
+        method: 'POST',
+        body: JSON.stringify({
+          query: {
+            kind: 'HogQLQuery',
+            query: `
+              SELECT count(DISTINCT person_id)
+              FROM events
+              WHERE ${SIGNED_IN_PRODUCT_USAGE_CONDITION}
+                AND ${timeFilter}
+                ${testUserFilter}
+            `,
+          },
+        }),
+      }),
+      queryPostHogAPI<{ results: Array<Array<number>> }>('/query/', {
+        method: 'POST',
+        body: JSON.stringify({
+          query: {
+            kind: 'HogQLQuery',
+            query: `
+              SELECT count(DISTINCT properties.$session_id)
+              FROM events
+              WHERE ${SIGNED_IN_PRODUCT_USAGE_CONDITION}
+                AND ${timeFilter}
+                AND notEmpty(properties.$session_id)
+                ${testUserFilter}
+            `,
+          },
+        }),
+      }),
+      queryPostHogAPI<{ results: Array<Array<number>> }>('/query/', {
+        method: 'POST',
+        body: JSON.stringify({
+          query: {
+            kind: 'HogQLQuery',
+            query: `
+              SELECT count(*)
+              FROM (
+                SELECT person_id, count(DISTINCT properties.$session_id) AS sessions
+                FROM events
+                WHERE ${SIGNED_IN_PRODUCT_USAGE_CONDITION}
+                  AND ${timeFilter}
+                  AND notEmpty(properties.$session_id)
+                  ${testUserFilter}
+                GROUP BY person_id
+              )
+              WHERE sessions > 1
+            `,
+          },
+        }),
+      }),
+    ]);
+
+    if (!usersResult || !sessionsResult || !returningResult) {
+      return null;
+    }
+
+    const users = Number(usersResult.results?.[0]?.[0] || 0);
+    const totalSessions = Number(sessionsResult.results?.[0]?.[0] || 0);
+    const returningUsers = Number(returningResult.results?.[0]?.[0] || 0);
+    const avgSessionsPerUser = users > 0 ? totalSessions / users : 0;
+
+    return {
+      users,
+      returningUsers,
+      totalSessions,
+      avgSessionsPerUser,
+    };
+  } catch (error) {
+    console.error(
+      '[PostHog] Signed-in product usage summary query failed:',
       error,
     );
     return null;
@@ -1108,7 +1207,7 @@ export async function getPostHogSignupTrends(
   }
 
   return result.results.map((row) => ({
-    date: String(row[0]),
+    date: normalizeDateKey(row[0]),
     signups: Number(row[1]) || 0,
   }));
 }

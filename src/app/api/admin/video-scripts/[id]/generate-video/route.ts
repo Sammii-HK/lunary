@@ -9,7 +9,7 @@ import {
   type DailyFacet,
 } from '@/lib/social/weekly-themes';
 import { getVideoScripts } from '@/lib/social/video-script-generator';
-import { getThematicImageUrl } from '@/lib/social/educational-images';
+import { buildThematicVideoComposition } from '@/lib/video/thematic-video';
 import { getImageBaseUrl } from '@/lib/urls';
 
 export const runtime = 'nodejs';
@@ -62,37 +62,43 @@ export async function POST(
     }
 
     const theme = categoryThemes.find((t) => t.name === script.themeName);
-    const { category, slug } = getFacetInfo(theme, script.facetTitle);
+    const { slug, facet: matchedFacet } = getFacetInfo(
+      theme,
+      script.facetTitle,
+    );
     const safeSlug = slug.replace(/[^a-zA-Z0-9-_]/g, '-');
 
-    const totalParts = theme?.facets.length || 7;
-    const partNumber = Number.isFinite(script.partNumber)
-      ? script.partNumber
-      : 1;
-    const partLabel = `Part ${partNumber} of ${totalParts}`;
-    const imageUrl = getThematicImageUrl(
-      category,
-      script.facetTitle,
-      baseUrl,
-      'tiktok',
-      slug,
-      partLabel,
-      'tiktok',
-    );
+    const { images, overlays, highlightTerms, highlightColor } =
+      buildThematicVideoComposition({
+        script: script.fullScript,
+        facet: matchedFacet || {
+          dayIndex: 0,
+          title: script.facetTitle,
+          grimoireSlug: slug,
+          focus: script.facetTitle,
+          shortFormHook: script.facetTitle,
+        },
+        theme,
+        baseUrl,
+        slug,
+      });
 
     const audioBuffer = await generateVoiceover(script.fullScript, {
-      voiceName: 'nova',
-      model: 'tts-1-hd',
-      speed: 1.1,
+      voiceName: 'alloy',
+      model: 'gpt-4o-mini-tts',
+      speed: 1.0,
     });
 
     const dateKey = script.scheduledDate.toISOString().split('T')[0];
     const videoBuffer = await composeVideo({
-      imageUrl,
+      images,
       audioBuffer,
       format: 'story',
       outputFilename: `short-${safeSlug}-${dateKey}.mp4`,
       subtitlesText: script.fullScript,
+      subtitlesHighlightTerms: highlightTerms,
+      subtitlesHighlightColor: highlightColor,
+      overlays,
     });
 
     const blobKey = `videos/shorts/daily/manual-${dateKey}-${safeSlug}-${Date.now()}.mp4`;
@@ -101,7 +107,13 @@ export async function POST(
       contentType: 'video/mp4',
     });
 
-    const videoPlatforms = ['instagram', 'tiktok', 'threads'];
+    const videoPlatforms = [
+      'instagram',
+      'tiktok',
+      'threads',
+      'twitter',
+      'youtube',
+    ];
     try {
       await sql`
         ALTER TABLE social_posts
@@ -117,7 +129,7 @@ export async function POST(
          AND post_type = $3
          AND topic = $4
          AND scheduled_date::date = $5`,
-      [videoUrl, videoPlatforms, 'educational', script.facetTitle, dateKey],
+      [videoUrl, videoPlatforms, 'video', script.facetTitle, dateKey],
     );
 
     const scheduleResult = await sql.query(
@@ -129,7 +141,7 @@ export async function POST(
          AND scheduled_date::date = $4
        ORDER BY scheduled_date ASC
        LIMIT 1`,
-      [videoPlatforms, 'educational', script.facetTitle, dateKey],
+      [videoPlatforms, 'video', script.facetTitle, dateKey],
     );
     const rawPublishDate =
       scheduleResult.rows[0]?.scheduled_date || script.scheduledDate;

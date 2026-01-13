@@ -120,6 +120,15 @@ export interface ComposeVideoOptions {
   format: 'story' | 'square' | 'landscape' | 'youtube';
   outputFilename?: string;
   subtitlesText?: string;
+  subtitlesHighlightTerms?: string[];
+  subtitlesHighlightColor?: string;
+  overlays?: Array<{
+    text: string;
+    startTime: number;
+    endTime: number;
+    style?: 'chapter' | 'stamp' | 'title';
+  }>;
+  backgroundMusicPath?: string | null;
 }
 
 /**
@@ -139,6 +148,10 @@ export async function composeVideo(
     format,
     outputFilename = 'output.mp4',
     subtitlesText,
+    subtitlesHighlightTerms,
+    subtitlesHighlightColor,
+    overlays,
+    backgroundMusicPath,
   } = options;
 
   const dimensions = VIDEO_DIMENSIONS[format] || VIDEO_DIMENSIONS.landscape;
@@ -146,7 +159,7 @@ export async function composeVideo(
   const timestamp = Date.now();
   const audioPath = join(workDir, `audio-${timestamp}.mp3`);
   const outputPath = join(workDir, outputFilename);
-  const subtitlesPath = join(workDir, `subtitles-${timestamp}.srt`);
+  let subtitlesPath = join(workDir, `subtitles-${timestamp}.srt`);
 
   const escapeFilterPath = (inputPath: string) =>
     inputPath.replace(/\\/g, '\\\\').replace(/:/g, '\\:').replace(/'/g, "\\'");
@@ -159,22 +172,25 @@ export async function composeVideo(
     return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(secs).padStart(2, '0')},${String(milliseconds).padStart(3, '0')}`;
   };
 
-  const buildSrt = (
+  const buildSubtitleChunks = (
     text: string,
     audioDuration: number,
     wordsPerSecond: number = 2.6,
-  ): string => {
+  ) => {
     const clean = text.replace(/\s+/g, ' ').trim();
-    if (!clean) return '';
+    if (!clean) return [];
 
     const words = clean.split(' ');
-    const lines: string[] = [];
-
     const maxWordsPerLine = 10;
     const maxWordsPerCaption = 14;
     let index = 0;
     let startTime = 0.15;
-    const chunks: Array<{ words: string[]; text: string }> = [];
+    const chunks: Array<{
+      words: string[];
+      text: string;
+      startTime: number;
+      endTime: number;
+    }> = [];
 
     while (index < words.length) {
       const chunkWords = words.slice(index, index + maxWordsPerCaption);
@@ -183,6 +199,8 @@ export async function composeVideo(
       chunks.push({
         words: chunkWords,
         text: line2 ? `${line1}\n${line2}` : line1,
+        startTime: 0,
+        endTime: 0,
       });
       index += chunkWords.length;
     }
@@ -202,15 +220,154 @@ export async function composeVideo(
       const endTime =
         i === chunks.length - 1 ? audioDuration - 0.05 : startTime + duration;
 
-      lines.push(`${lines.length / 4 + 1}`);
-      lines.push(`${formatSrtTime(startTime)} --> ${formatSrtTime(endTime)}`);
-      lines.push(chunk.text);
-      lines.push('');
-
+      chunk.startTime = startTime;
+      chunk.endTime = endTime;
       startTime = endTime + 0.05;
     }
 
+    return chunks;
+  };
+
+  const buildSrt = (
+    chunks: Array<{ startTime: number; endTime: number; text: string }>,
+  ): string => {
+    const lines: string[] = [];
+    for (let i = 0; i < chunks.length; i++) {
+      const chunk = chunks[i];
+      lines.push(`${i + 1}`);
+      lines.push(
+        `${formatSrtTime(chunk.startTime)} --> ${formatSrtTime(chunk.endTime)}`,
+      );
+      lines.push(chunk.text);
+      lines.push('');
+    }
     return lines.join('\n').trim() + '\n';
+  };
+
+  const formatAssTime = (seconds: number) => {
+    const hours = Math.floor(seconds / 3600);
+    const minutes = Math.floor((seconds % 3600) / 60);
+    const secs = Math.floor(seconds % 60);
+    const centiseconds = Math.floor(((seconds % 1) * 1000) / 10);
+    return `${hours}:${String(minutes).padStart(2, '0')}:${String(secs).padStart(2, '0')}.${String(centiseconds).padStart(2, '0')}`;
+  };
+
+  const escapeAssText = (text: string) =>
+    text.replace(/\\/g, '\\\\').replace(/\n/g, '\\N');
+
+  const highlightAssText = (text: string, terms: string[]) => {
+    if (!terms.length) return text;
+    const startToken = '[[HIGHLIGHT_START]]';
+    const endToken = '[[HIGHLIGHT_END]]';
+    let highlighted = text;
+    for (const term of terms) {
+      if (!term) continue;
+      const escaped = term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      const regex = new RegExp(`\\b${escaped}\\b`, 'gi');
+      highlighted = highlighted.replace(
+        regex,
+        (match) => `${startToken}${match}${endToken}`,
+      );
+    }
+    return highlighted;
+  };
+
+  const hexToAssColor = (hex: string) => {
+    const normalized = (hex || '').replace('#', '').toUpperCase();
+    if (!/^[0-9A-F]{6}$/.test(normalized)) {
+      return '&H5AD7FF&';
+    }
+    const r = normalized.slice(0, 2);
+    const g = normalized.slice(2, 4);
+    const b = normalized.slice(4, 6);
+    return `&H${b}${g}${r}&`;
+  };
+
+  const buildAss = (
+    chunks: Array<{ startTime: number; endTime: number; text: string }>,
+    terms: string[],
+    size: { width: number; height: number },
+    fontSize: number,
+    marginV: number,
+    highlightColor: string,
+  ): string => {
+    const header = [
+      '[Script Info]',
+      'ScriptType: v4.00+',
+      `PlayResX: ${size.width}`,
+      `PlayResY: ${size.height}`,
+      'ScaledBorderAndShadow: yes',
+      '',
+      '[V4+ Styles]',
+      'Format: Name,Fontname,Fontsize,PrimaryColour,SecondaryColour,OutlineColour,BackColour,Bold,Italic,Underline,StrikeOut,ScaleX,ScaleY,Spacing,Angle,BorderStyle,Outline,Shadow,Alignment,MarginL,MarginR,MarginV,Encoding',
+      `Style: Default,RobotoMono-Regular,${fontSize},&H00FFFFFF,&H00FFFFFF,&H00000000,&H00000000,0,0,0,0,100,100,0,0,1,2,0,2,40,40,${marginV},0`,
+      '',
+      '[Events]',
+      'Format: Layer,Start,End,Style,Name,MarginL,MarginR,MarginV,Effect,Text',
+    ];
+
+    const highlightTag = `{\\c${hexToAssColor(highlightColor)}}`;
+    const resetTag = '{\\c&HFFFFFF&}';
+    const lines = chunks.map((chunk) => {
+      const highlighted = highlightAssText(chunk.text, terms);
+      const safeText = escapeAssText(highlighted)
+        .replace(/\[\[HIGHLIGHT_START\]\]/g, highlightTag)
+        .replace(/\[\[HIGHLIGHT_END\]\]/g, resetTag);
+      return `Dialogue: 0,${formatAssTime(chunk.startTime)},${formatAssTime(
+        chunk.endTime,
+      )},Default,,0,0,0,,${safeText}`;
+    });
+
+    return [...header, ...lines].join('\n');
+  };
+
+  const escapeDrawText = (text: string) =>
+    text
+      .replace(/\\/g, '\\\\')
+      .replace(/:/g, '\\:')
+      .replace(/'/g, "\\'")
+      .replace(/%/g, '\\%');
+
+  const buildOverlayFilters = (
+    overlayItems: ComposeVideoOptions['overlays'],
+    size: { width: number; height: number },
+    videoFormat: ComposeVideoOptions['format'],
+  ) => {
+    if (!overlayItems || overlayItems.length === 0) {
+      return null;
+    }
+
+    const fontsDir = join(process.cwd(), 'public', 'fonts');
+    const fontRegular = escapeFilterPath(
+      join(fontsDir, 'RobotoMono-Regular.ttf'),
+    );
+    const baseFontSize =
+      videoFormat === 'story' ? 44 : videoFormat === 'square' ? 34 : 24;
+
+    const filters = overlayItems.map((overlay) => {
+      const style = overlay.style || 'chapter';
+      const fontFile = fontRegular;
+      const fontSize =
+        style === 'title'
+          ? baseFontSize
+          : style === 'stamp'
+            ? baseFontSize - 6
+            : baseFontSize;
+      const text = escapeDrawText(overlay.text);
+      const x =
+        style === 'stamp'
+          ? `w-text_w-48`
+          : style === 'title'
+            ? `(w-text_w)/2`
+            : `(w-text_w)/2`;
+      const y =
+        style === 'stamp' ? `64` : style === 'title' ? `h*0.16` : `h*0.69`;
+      const useBox = style === 'stamp';
+      const boxColor = style === 'stamp' ? '0x000000AA' : '0x00000000';
+      return `drawtext=fontfile='${fontFile}':text='${text}':x=${x}:y=${y}:fontsize=${fontSize}:fontcolor=white:box=${useBox ? 1 : 0}:boxcolor=${boxColor}:boxborderw=12:enable='between(t,${overlay.startTime},${overlay.endTime})'`;
+    });
+
+    return filters.join(',');
   };
 
   try {
@@ -223,18 +380,52 @@ export async function composeVideo(
     const audioDuration = await getAudioDuration(audioPath);
     console.log(`🎵 Audio duration: ${audioDuration.toFixed(2)} seconds`);
 
+    const defaultMusicPath = join(
+      process.cwd(),
+      'public',
+      'audio',
+      'series',
+      'lunary-bed-v1.mp3',
+    );
+    const candidateMusicPath =
+      backgroundMusicPath === null
+        ? null
+        : backgroundMusicPath || defaultMusicPath;
+    let resolvedMusicPath: string | null = null;
+
+    if (candidateMusicPath) {
+      try {
+        await access(candidateMusicPath, constants.F_OK);
+        resolvedMusicPath = candidateMusicPath;
+      } catch {
+        console.warn(
+          `⚠️ Background music not found at ${candidateMusicPath}. Continuing without it.`,
+        );
+      }
+    }
+
     if (subtitlesText) {
-      const srtContent = buildSrt(subtitlesText, audioDuration);
-      if (srtContent) {
-        await writeFile(subtitlesPath, srtContent);
+      const subtitleChunks = buildSubtitleChunks(subtitlesText, audioDuration);
+      if (subtitleChunks.length > 0) {
         const fontsDir = join(process.cwd(), 'public', 'fonts');
-        const safeMargin = format === 'story' ? 33 : 90;
-        const fontSize = format === 'story' ? 11 : 12;
-        const escapedSubPath = escapeFilterPath(subtitlesPath);
+        const safeMargin = format === 'story' ? 320 : 90;
+        const fontSize = format === 'story' ? 48 : 12;
+        let escapedSubPath: string;
         const escapedFontsDir = escapeFilterPath(fontsDir);
-        subtitleFilter =
-          `subtitles='${escapedSubPath}':original_size=${dimensions.width}x${dimensions.height}:fontsdir='${escapedFontsDir}':force_style=` +
-          `'FontName=RobotoMono-Regular,FontSize=${fontSize},PrimaryColour=&HFFFFFF&,BackColour=&H7A000000&,BorderStyle=4,Outline=4,Shadow=0,MarginV=${safeMargin},MarginL=40,MarginR=40,Alignment=2'`;
+
+        subtitlesPath = join(workDir, `subtitles-${timestamp}.ass`);
+        const highlightColorValue = subtitlesHighlightColor || '#5AD7FF';
+        const assContent = buildAss(
+          subtitleChunks,
+          subtitlesHighlightTerms ?? [],
+          dimensions,
+          fontSize,
+          safeMargin,
+          highlightColorValue,
+        );
+        await writeFile(subtitlesPath, assContent);
+        escapedSubPath = escapeFilterPath(subtitlesPath);
+        subtitleFilter = `subtitles='${escapedSubPath}':fontsdir='${escapedFontsDir}'`;
       }
     }
 
@@ -253,6 +444,8 @@ export async function composeVideo(
         await writeFile(imagePath, imageBuffer);
         imagePaths.push(imagePath);
       }
+
+      const crossfadeDuration = 0.7;
 
       // Adjust image durations to match audio duration exactly
       const adjustedImages = [...images];
@@ -304,6 +497,13 @@ export async function composeVideo(
         (sum, img) => sum + (img.endTime - img.startTime),
         0,
       );
+
+      if (adjustedImages.length > 1) {
+        const crossfadeTotal = crossfadeDuration * (adjustedImages.length - 1);
+        adjustedImages[adjustedImages.length - 1].endTime += crossfadeTotal;
+        totalVideoDuration += crossfadeTotal;
+      }
+
       console.log(
         `✅ Final adjusted video duration: ${totalVideoDuration.toFixed(2)} seconds (audio: ${audioDuration.toFixed(2)}s)`,
       );
@@ -318,15 +518,46 @@ export async function composeVideo(
 
       // Add audio input
       command = command.input(audioPath);
+      if (resolvedMusicPath) {
+        command = command
+          .input(resolvedMusicPath)
+          .inputOptions(['-stream_loop', '-1']);
+      }
 
       // Build filter complex for scaling, padding, and concatenation
       const filterParts: string[] = [];
 
+      const colorSteps = [
+        {
+          hue: 0,
+          balance: 'rs=0:gs=0:bs=0',
+          saturation: 1.0,
+          contrast: 1.02,
+        },
+        {
+          hue: 10,
+          balance: 'rs=-0.02:gs=0.01:bs=0.08',
+          saturation: 1.08,
+          contrast: 1.05,
+        },
+        {
+          hue: -10,
+          balance: 'rs=-0.04:gs=0.02:bs=0.14',
+          saturation: 1.1,
+          contrast: 1.08,
+        },
+      ];
+
+      const segmentDurations: number[] = [];
+
       adjustedImages.forEach((img, i) => {
         const duration = img.endTime - img.startTime;
+        segmentDurations.push(duration);
+        const step = colorSteps[i % colorSteps.length];
+        const hueDrift = Math.max(duration, 3).toFixed(2);
         // Scale, pad, and set duration for each image
         filterParts.push(
-          `[${i}:v]scale=${dimensions.width}:${dimensions.height}:force_original_aspect_ratio=decrease,pad=${dimensions.width}:${dimensions.height}:(ow-iw)/2:(oh-ih)/2,setpts=PTS-STARTPTS,fps=30[scaled${i}]`,
+          `[${i}:v]scale=${dimensions.width}:${dimensions.height}:force_original_aspect_ratio=decrease,pad=${dimensions.width}:${dimensions.height}:(ow-iw)/2:(oh-ih)/2,setpts=PTS-STARTPTS,fps=30,colorbalance=${step.balance},hue=h='${step.hue}+6*sin(2*PI*t/${hueDrift})':s=1,eq=saturation=${step.saturation}:contrast=${step.contrast}:brightness=0.01[scaled${i}]`,
         );
         // Trim to exact duration
         filterParts.push(
@@ -334,11 +565,49 @@ export async function composeVideo(
         );
       });
 
-      // Concat all video segments
-      const concatInputs = adjustedImages.map((_, i) => `[v${i}]`).join('');
-      filterParts.push(
-        `${concatInputs}concat=n=${adjustedImages.length}:v=1:a=0[outv]`,
-      );
+      // Crossfade all video segments for smoother transitions
+      let currentLabel = 'v0';
+      let cumulativeTime = segmentDurations[0] || 0;
+      for (let i = 1; i < adjustedImages.length; i++) {
+        const nextLabel = `v${i}`;
+        const outLabel = i === adjustedImages.length - 1 ? 'outv' : `xf${i}`;
+        const offset = Math.max(cumulativeTime - crossfadeDuration, 0);
+        filterParts.push(
+          `[${currentLabel}][${nextLabel}]xfade=transition=fade:duration=${crossfadeDuration}:offset=${offset.toFixed(2)}[${outLabel}]`,
+        );
+        cumulativeTime += segmentDurations[i] - crossfadeDuration;
+        currentLabel = outLabel;
+      }
+
+      const finalVideoLabel =
+        adjustedImages.length > 1
+          ? '[outv]'
+          : `[v${Math.max(adjustedImages.length - 1, 0)}]`;
+      let intermediateLabel = finalVideoLabel;
+      const overlayFilter = buildOverlayFilters(overlays, dimensions, format);
+      if (subtitleFilter) {
+        filterParts.push(`${intermediateLabel}${subtitleFilter}[vsub]`);
+        intermediateLabel = '[vsub]';
+      }
+      if (overlayFilter) {
+        filterParts.push(`${intermediateLabel}${overlayFilter}[vfinal]`);
+        intermediateLabel = '[vfinal]';
+      }
+
+      const finalLabel = intermediateLabel;
+      let audioMap = `${adjustedImages.length}:a`;
+      if (resolvedMusicPath) {
+        const voiceIndex = adjustedImages.length;
+        const musicIndex = adjustedImages.length + 1;
+        filterParts.push(`[${voiceIndex}:a]asetpts=PTS-STARTPTS[voice]`);
+        filterParts.push(
+          `[${musicIndex}:a]loudnorm=I=-23:TP=-2:LRA=7,volume=0.75,afade=t=in:st=0:d=0.5,atrim=duration=${audioDuration}[music]`,
+        );
+        filterParts.push(
+          `[voice][music]amix=inputs=2:duration=first:dropout_transition=0[aout]`,
+        );
+        audioMap = '[aout]';
+      }
 
       const filterComplex = filterParts.join(';');
 
@@ -346,9 +615,9 @@ export async function composeVideo(
         .complexFilter(filterComplex)
         .outputOptions([
           '-map',
-          '[outv]',
+          finalLabel,
           '-map',
-          `${adjustedImages.length}:a`,
+          audioMap,
           '-c:v',
           'libx264',
           '-c:a',
@@ -422,60 +691,130 @@ export async function composeVideo(
         `[base]hue=h=0:s=1.03[base];` +
         `[alt]hue=h=18:s=1.06[alt];` +
         `[base][alt]blend=all_expr='A*(1-(0.5+0.5*sin(2*3.1415926*N/360)))+B*(0.5+0.5*sin(2*3.1415926*N/360))'`;
-      const videoFilter = [zoomFilter, gradientBlendFilter, subtitleFilter]
+      const overlayFilter = buildOverlayFilters(overlays, dimensions, format);
+      const videoFilter = [
+        zoomFilter,
+        gradientBlendFilter,
+        subtitleFilter,
+        overlayFilter,
+      ]
         .filter(Boolean)
         .join(',');
 
-      // Create FFmpeg command with explicit duration
-      await new Promise<void>((resolve, reject) => {
-        ffmpeg()
-          .input(imagePath)
-          .inputOptions(['-loop', '1'])
-          .input(audioPath)
-          .outputOptions([
-            '-c:v',
-            'libx264',
-            '-tune',
-            'stillimage',
-            '-vf',
-            videoFilter,
-            '-r',
-            '30',
-            '-c:a',
-            'aac',
-            '-b:a',
-            '192k',
-            '-pix_fmt',
-            'yuv420p',
-            '-t',
-            audioDuration.toFixed(2), // Explicit duration limit
-          ])
-          .output(outputPath)
-          .on('start', (commandLine) => {
-            console.log(`🎬 FFmpeg command: ${commandLine}`);
-          })
-          .on('progress', (progress) => {
-            if (progress.percent) {
-              console.log(
-                `⏳ FFmpeg progress: ${Math.round(progress.percent)}%`,
+      if (resolvedMusicPath) {
+        const filterParts = [
+          `[0:v]${videoFilter}[vfinal]`,
+          `[1:a]asetpts=PTS-STARTPTS[voice]`,
+          `[2:a]loudnorm=I=-23:TP=-2:LRA=7,volume=0.75,afade=t=in:st=0:d=0.5,atrim=duration=${audioDuration}[music]`,
+          `[voice][music]amix=inputs=2:duration=first:dropout_transition=0[aout]`,
+        ];
+
+        await new Promise<void>((resolve, reject) => {
+          ffmpeg()
+            .input(imagePath)
+            .inputOptions(['-loop', '1'])
+            .input(audioPath)
+            .input(resolvedMusicPath)
+            .inputOptions(['-stream_loop', '-1'])
+            .complexFilter(filterParts.join(';'))
+            .outputOptions([
+              '-map',
+              '[vfinal]',
+              '-map',
+              '[aout]',
+              '-c:v',
+              'libx264',
+              '-tune',
+              'stillimage',
+              '-r',
+              '30',
+              '-c:a',
+              'aac',
+              '-b:a',
+              '192k',
+              '-pix_fmt',
+              'yuv420p',
+              '-t',
+              audioDuration.toFixed(2),
+            ])
+            .output(outputPath)
+            .on('start', (commandLine) => {
+              console.log(`🎬 FFmpeg command: ${commandLine}`);
+            })
+            .on('progress', (progress) => {
+              if (progress.percent) {
+                console.log(
+                  `⏳ FFmpeg progress: ${Math.round(progress.percent)}%`,
+                );
+              }
+            })
+            .on('end', () => {
+              console.log('✅ FFmpeg processing completed');
+              resolve();
+            })
+            .on('error', (err, stdout, stderr) => {
+              console.error('❌ FFmpeg error:', err.message);
+              if (stderr) console.error('FFmpeg stderr:', stderr);
+              reject(
+                new Error(
+                  `FFmpeg failed: ${err.message}. Stderr: ${stderr || 'none'}`,
+                ),
               );
-            }
-          })
-          .on('end', () => {
-            console.log('✅ FFmpeg processing completed');
-            resolve();
-          })
-          .on('error', (err, stdout, stderr) => {
-            console.error('❌ FFmpeg error:', err.message);
-            if (stderr) console.error('FFmpeg stderr:', stderr);
-            reject(
-              new Error(
-                `FFmpeg failed: ${err.message}. Stderr: ${stderr || 'none'}`,
-              ),
-            );
-          })
-          .run();
-      });
+            })
+            .run();
+        });
+      } else {
+        // Create FFmpeg command with explicit duration
+        await new Promise<void>((resolve, reject) => {
+          ffmpeg()
+            .input(imagePath)
+            .inputOptions(['-loop', '1'])
+            .input(audioPath)
+            .outputOptions([
+              '-c:v',
+              'libx264',
+              '-tune',
+              'stillimage',
+              '-vf',
+              videoFilter,
+              '-r',
+              '30',
+              '-c:a',
+              'aac',
+              '-b:a',
+              '192k',
+              '-pix_fmt',
+              'yuv420p',
+              '-t',
+              audioDuration.toFixed(2), // Explicit duration limit
+            ])
+            .output(outputPath)
+            .on('start', (commandLine) => {
+              console.log(`🎬 FFmpeg command: ${commandLine}`);
+            })
+            .on('progress', (progress) => {
+              if (progress.percent) {
+                console.log(
+                  `⏳ FFmpeg progress: ${Math.round(progress.percent)}%`,
+                );
+              }
+            })
+            .on('end', () => {
+              console.log('✅ FFmpeg processing completed');
+              resolve();
+            })
+            .on('error', (err, stdout, stderr) => {
+              console.error('❌ FFmpeg error:', err.message);
+              if (stderr) console.error('FFmpeg stderr:', stderr);
+              reject(
+                new Error(
+                  `FFmpeg failed: ${err.message}. Stderr: ${stderr || 'none'}`,
+                ),
+              );
+            })
+            .run();
+        });
+      }
     }
 
     // Read output file

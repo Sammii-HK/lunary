@@ -31,6 +31,7 @@ import {
   usesMoonImages,
 } from '../../../../../utils/og/grimoire-og-data';
 import { createSubtleGradient } from '../../../../../utils/og/gradients';
+import { capitalizeThematicTitle } from '../../../../../utils/og/text';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -129,6 +130,7 @@ export async function GET(request: NextRequest): Promise<Response> {
     // Required params
     const category = searchParams.get('category') || 'zodiac';
     const title = searchParams.get('title') || 'Educational Content';
+    const formattedTitle = capitalizeThematicTitle(title);
 
     // Optional params
     const symbol = searchParams.get('symbol');
@@ -147,16 +149,16 @@ export async function GET(request: NextRequest): Promise<Response> {
     // Cover size presets - larger, bolder text for thumbnail legibility
     const coverSizePresets = {
       tiktok: {
-        symbolSize: 246,
-        titleSize: 123,
-        subtitleSize: 78,
-        attributeSize: 64,
-        labelSize: 56,
+        symbolSize: 210,
+        titleSize: 52,
+        subtitleSize: 48,
+        attributeSize: 34,
+        labelSize: 40,
       },
       youtube: {
         symbolSize: 62,
         titleSize: 31,
-        subtitleSize: 24,
+        subtitleSize: 78,
         attributeSize: 18,
         labelSize: 16,
       },
@@ -264,7 +266,9 @@ export async function GET(request: NextRequest): Promise<Response> {
     const baseUrl =
       process.env.NODE_ENV === 'production'
         ? 'https://lunary.app'
-        : `${request.nextUrl.protocol}//${request.nextUrl.host}`;
+        : process.env.NEXT_PUBLIC_BASE_URL ||
+          process.env.APP_BASE_URL ||
+          'http://localhost:3000';
 
     // Build fonts array
     const fonts: Array<{
@@ -300,6 +304,8 @@ export async function GET(request: NextRequest): Promise<Response> {
       });
     }
 
+    const contentOffsetY = isCoverImage ? -140 : format === 'story' ? -88 : 0;
+
     return createOGResponse(
       <OGWrapper theme={theme} padding={sizes.padding}>
         {/* Category label at top */}
@@ -320,74 +326,76 @@ export async function GET(request: NextRequest): Promise<Response> {
 
         {/* Main content - shifted down slightly for better visual balance */}
         <OGContentCenter>
-          {/* Moon phase image */}
-          {moonImage && (
-            <div style={{ display: 'flex', marginBottom: '50px' }}>
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src={`${baseUrl}${moonImage}`}
-                width={sizes.symbolSize}
-                height={sizes.symbolSize}
-                alt={title}
-                style={{ opacity: 0.95 }}
-              />
-            </div>
-          )}
+          <div style={{ transform: `translateY(${contentOffsetY}px)` }}>
+            {/* Moon phase image */}
+            {moonImage && (
+              <div style={{ display: 'flex', marginBottom: '50px' }}>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={`${baseUrl}${moonImage}`}
+                  width={sizes.symbolSize}
+                  height={sizes.symbolSize}
+                  alt={formattedTitle}
+                  style={{ opacity: 0.95 }}
+                />
+              </div>
+            )}
 
-          {/* Symbol (Astronomicon for zodiac/planetary, Noto Sans Runic for runes, Roboto for others) */}
-          {displaySymbol && (
+            {/* Symbol (Astronomicon for zodiac/planetary, Noto Sans Runic for runes, Roboto for others) */}
+            {displaySymbol && (
+              <div
+                style={{
+                  display: 'flex',
+                  marginBottom: '50px',
+                  fontFamily: needsAstromicon
+                    ? 'Astronomicon'
+                    : needsRunic
+                      ? 'Noto Sans Runic'
+                      : 'Roboto Mono',
+                  fontSize: `${sizes.symbolSize}px`,
+                  color: themeData.textColor,
+                  textShadow: glowColor
+                    ? `0 0 40px ${glowColor}, 0 0 80px ${glowColor}`
+                    : 'none',
+                  lineHeight: 1,
+                }}
+              >
+                {displaySymbol}
+              </div>
+            )}
+
+            {/* Title */}
             <div
               style={{
                 display: 'flex',
-                marginBottom: '50px',
-                fontFamily: needsAstromicon
-                  ? 'Astronomicon'
-                  : needsRunic
-                    ? 'Noto Sans Runic'
-                    : 'Roboto Mono',
-                fontSize: `${sizes.symbolSize}px`,
+                fontSize: `${sizes.titleSize}px`,
+                fontWeight: '700',
                 color: themeData.textColor,
-                textShadow: glowColor
-                  ? `0 0 40px ${glowColor}, 0 0 80px ${glowColor}`
-                  : 'none',
-                lineHeight: 1,
+                textAlign: 'center',
+                letterSpacing: '0.05em',
+                textTransform: 'none',
+                fontFamily: 'Roboto Mono',
+                textShadow: isCoverImage
+                  ? '0 4px 30px rgba(0,0,0,0.7), 0 2px 10px rgba(0,0,0,0.5)'
+                  : '0 2px 20px rgba(0,0,0,0.5)',
+                maxWidth: titleMaxWidth,
+                padding: titlePaddingX,
+                lineHeight: '1.1',
+                justifyContent: 'center',
               }}
             >
-              {displaySymbol}
+              {formattedTitle}
             </div>
-          )}
 
-          {/* Title */}
-          <div
-            style={{
-              display: 'flex',
-              fontSize: `${sizes.titleSize}px`,
-              fontWeight: '700',
-              color: themeData.textColor,
-              textAlign: 'center',
-              letterSpacing: '0.05em',
-              textTransform: 'uppercase',
-              fontFamily: 'Roboto Mono',
-              textShadow: isCoverImage
-                ? '0 4px 30px rgba(0,0,0,0.7), 0 2px 10px rgba(0,0,0,0.5)'
-                : '0 2px 20px rgba(0,0,0,0.5)',
-              maxWidth: titleMaxWidth,
-              padding: titlePaddingX,
-              lineHeight: '1.1',
-              justifyContent: 'center',
-            }}
-          >
-            {title}
+            {/* Attribute line */}
+            {attributeText && (
+              <OGAttributeLine
+                text={attributeText}
+                color={themeData.subtleTextColor}
+                size={sizes.attributeSize}
+              />
+            )}
           </div>
-
-          {/* Attribute line */}
-          {attributeText && (
-            <OGAttributeLine
-              text={attributeText}
-              color={themeData.subtleTextColor}
-              size={sizes.attributeSize}
-            />
-          )}
         </OGContentCenter>
 
         {/* Minimal footer */}

@@ -57,6 +57,13 @@ type ActivityResponse = {
   product_wau: number;
   product_mau: number;
   product_trends: ActivityTrend[];
+  signed_in_product_dau: number;
+  signed_in_product_wau: number;
+  signed_in_product_mau: number;
+  signed_in_product_trends: ActivityTrend[];
+  signed_in_product_users: number;
+  signed_in_product_returning_users: number;
+  signed_in_product_avg_sessions_per_user: number;
   content_mau_grimoire: number;
   grimoire_only_mau: number;
 };
@@ -151,19 +158,19 @@ const activitySeries: UsageChartSeries[] = [
 
 const productSeries: UsageChartSeries[] = [
   {
-    dataKey: 'product_dau',
+    dataKey: 'signed_in_product_dau',
     name: 'Product DAU',
     stroke: 'rgba(245,158,11,0.9)',
     strokeDasharray: '3 3',
   },
   {
-    dataKey: 'product_wau',
+    dataKey: 'signed_in_product_wau',
     name: 'Product WAU',
     stroke: 'rgba(16,185,129,0.9)',
     strokeDasharray: '4 2',
   },
   {
-    dataKey: 'product_mau',
+    dataKey: 'signed_in_product_mau',
     name: 'Product MAU',
     stroke: 'rgba(14,165,233,0.9)',
     strokeDasharray: '5 3',
@@ -213,7 +220,7 @@ export default function AnalyticsPage() {
   const [error, setError] = useState<string | null>(null);
   const activityUsageData = useMemo(() => {
     const overallTrends = activity?.trends ?? [];
-    const productTrends = activity?.product_trends ?? [];
+    const productTrends = activity?.signed_in_product_trends ?? [];
     const overallMap = new Map(
       overallTrends.map((trend) => [trend.date, trend]),
     );
@@ -236,20 +243,20 @@ export default function AnalyticsPage() {
         dau: overall?.dau ?? 0,
         wau: overall?.wau ?? 0,
         mau: overall?.mau ?? 0,
-        product_dau: product?.dau ?? 0,
-        product_wau: product?.wau ?? 0,
-        product_mau: product?.mau ?? 0,
+        signed_in_product_dau: product?.dau ?? 0,
+        signed_in_product_wau: product?.wau ?? 0,
+        signed_in_product_mau: product?.mau ?? 0,
       };
     });
-  }, [activity?.trends, activity?.product_trends]);
+  }, [activity?.trends, activity?.signed_in_product_trends]);
 
   const productDauToWauRatio =
-    activity?.product_wau && activity.product_wau > 0
-      ? (activity.product_dau / activity.product_wau) * 100
+    activity?.signed_in_product_wau && activity.signed_in_product_wau > 0
+      ? (activity.signed_in_product_dau / activity.signed_in_product_wau) * 100
       : 0;
   const productWauToMauRatio =
-    activity?.product_mau && activity.product_mau > 0
-      ? (activity.product_wau / activity.product_mau) * 100
+    activity?.signed_in_product_mau && activity.signed_in_product_mau > 0
+      ? (activity.signed_in_product_wau / activity.signed_in_product_mau) * 100
       : 0;
   const grimoireShareRatio =
     activity?.mau && activity.mau > 0
@@ -420,6 +427,38 @@ export default function AnalyticsPage() {
           'Activity',
           'Churn Rate',
           `${Number(activity.churn_rate ?? 0).toFixed(2)}%`,
+        ],
+        [
+          'Product Usage',
+          'Product Users (signed-in)',
+          String(activity.signed_in_product_users ?? 0),
+        ],
+        [
+          'Product Usage',
+          'Returning Product Users (signed-in)',
+          String(activity.signed_in_product_returning_users ?? 0),
+        ],
+        [
+          'Product Usage',
+          'Avg Sessions per User (signed-in)',
+          Number(activity.signed_in_product_avg_sessions_per_user ?? 0).toFixed(
+            2,
+          ),
+        ],
+        [
+          'Product Usage',
+          'Product DAU (signed-in)',
+          String(activity.signed_in_product_dau ?? 0),
+        ],
+        [
+          'Product Usage',
+          'Product WAU (signed-in)',
+          String(activity.signed_in_product_wau ?? 0),
+        ],
+        [
+          'Product Usage',
+          'Product MAU (signed-in)',
+          String(activity.signed_in_product_mau ?? 0),
         ],
       );
     }
@@ -754,7 +793,8 @@ export default function AnalyticsPage() {
                 </CardTitle>
                 <CardDescription className='text-xs text-zinc-400'>
                   Compare all traffic, signed-in product usage, and
-                  Grimoire-only reach.
+                  Grimoire-only reach. Product users are signed-in event users,
+                  and Grimoire-only users never trigger a product event.
                 </CardDescription>
               </CardHeader>
               <CardContent>
@@ -786,19 +826,25 @@ export default function AnalyticsPage() {
                       <div className='flex items-center justify-between'>
                         <span>DAU</span>
                         <span>
-                          {(activity?.product_dau ?? 0).toLocaleString()}
+                          {(
+                            activity?.signed_in_product_dau ?? 0
+                          ).toLocaleString()}
                         </span>
                       </div>
                       <div className='flex items-center justify-between'>
                         <span>WAU</span>
                         <span>
-                          {(activity?.product_wau ?? 0).toLocaleString()}
+                          {(
+                            activity?.signed_in_product_wau ?? 0
+                          ).toLocaleString()}
                         </span>
                       </div>
                       <div className='flex items-center justify-between'>
                         <span>MAU</span>
                         <span>
-                          {(activity?.product_mau ?? 0).toLocaleString()}
+                          {(
+                            activity?.signed_in_product_mau ?? 0
+                          ).toLocaleString()}
                         </span>
                       </div>
                     </div>
@@ -807,7 +853,13 @@ export default function AnalyticsPage() {
                 <div className='mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2'>
                   <div className='rounded-xl border border-lime-500/20 bg-lime-500/5 p-4'>
                     <p className='text-xs uppercase tracking-wider text-lime-300'>
-                      Content MAU (Grimoire)
+                      <span
+                        className='normal-case'
+                        title='Includes users who may also use the product.'
+                      >
+                        Content MAU (users who viewed Grimoire content,
+                        including signed-in users)
+                      </span>
                     </p>
                     <p className='text-2xl font-semibold text-lime-100'>
                       {(activity?.content_mau_grimoire ?? 0).toLocaleString()}
@@ -815,7 +867,13 @@ export default function AnalyticsPage() {
                   </div>
                   <div className='rounded-xl border border-amber-500/20 bg-amber-500/5 p-4'>
                     <p className='text-xs uppercase tracking-wider text-amber-300'>
-                      Grimoire-only MAU
+                      <span
+                        className='normal-case'
+                        title='Excludes anyone who interacted with product features.'
+                      >
+                        Grimoire-only MAU (users who viewed Grimoire content and
+                        never triggered a product event)
+                      </span>
                     </p>
                     <p className='text-2xl font-semibold text-amber-100'>
                       {(activity?.grimoire_only_mau ?? 0).toLocaleString()}
@@ -851,6 +909,79 @@ export default function AnalyticsPage() {
               </CardContent>
             </Card>
           </section>
+          <section className='space-y-3'>
+            <Card className='border-zinc-800/30 bg-zinc-900/10'>
+              <CardHeader>
+                <CardTitle className='text-base font-medium'>
+                  Product Usage
+                </CardTitle>
+                <CardDescription className='text-xs text-zinc-400'>
+                  Signed-in product engagement for {startDate} to {endDate}.
+                  Product users are not counted as Grimoire-only.
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className='grid gap-4 md:grid-cols-3'>
+                  <div className='rounded-xl border border-zinc-800/60 bg-zinc-950/50 p-4'>
+                    <p className='text-xs uppercase tracking-wider text-zinc-400'>
+                      Product Users (signed-in)
+                    </p>
+                    <p className='text-2xl font-semibold text-white'>
+                      {(
+                        activity?.signed_in_product_users ?? 0
+                      ).toLocaleString()}
+                    </p>
+                  </div>
+                  <div className='rounded-xl border border-zinc-800/60 bg-zinc-950/50 p-4'>
+                    <p className='text-xs uppercase tracking-wider text-zinc-400'>
+                      Returning Product Users (signed-in)
+                    </p>
+                    <p className='text-2xl font-semibold text-white'>
+                      {(
+                        activity?.signed_in_product_returning_users ?? 0
+                      ).toLocaleString()}
+                    </p>
+                  </div>
+                  <div className='rounded-xl border border-zinc-800/60 bg-zinc-950/50 p-4'>
+                    <p className='text-xs uppercase tracking-wider text-zinc-400'>
+                      Avg Sessions per User (product)
+                    </p>
+                    <p className='text-2xl font-semibold text-white'>
+                      {Number(
+                        activity?.signed_in_product_avg_sessions_per_user ?? 0,
+                      ).toFixed(2)}
+                    </p>
+                  </div>
+                </div>
+                <div className='mt-4 grid grid-cols-1 gap-4 sm:grid-cols-3'>
+                  <div className='rounded-xl border border-zinc-800/60 bg-zinc-950/50 p-3'>
+                    <p className='text-[11px] uppercase tracking-wider text-zinc-500'>
+                      Product DAU
+                    </p>
+                    <p className='text-xl font-semibold text-white'>
+                      {(activity?.signed_in_product_dau ?? 0).toLocaleString()}
+                    </p>
+                  </div>
+                  <div className='rounded-xl border border-zinc-800/60 bg-zinc-950/50 p-3'>
+                    <p className='text-[11px] uppercase tracking-wider text-zinc-500'>
+                      Product WAU
+                    </p>
+                    <p className='text-xl font-semibold text-white'>
+                      {(activity?.signed_in_product_wau ?? 0).toLocaleString()}
+                    </p>
+                  </div>
+                  <div className='rounded-xl border border-zinc-800/60 bg-zinc-950/50 p-3'>
+                    <p className='text-[11px] uppercase tracking-wider text-zinc-500'>
+                      Product MAU
+                    </p>
+                    <p className='text-xl font-semibold text-white'>
+                      {(activity?.signed_in_product_mau ?? 0).toLocaleString()}
+                    </p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </section>
 
           <section className='grid grid-cols-1 gap-6 lg:grid-cols-2'>
             <Card className='border-zinc-800/30 bg-zinc-900/10'>
@@ -872,8 +1003,8 @@ export default function AnalyticsPage() {
                     onClick={() => setShowProductSeries((prev) => !prev)}
                   >
                     {showProductSeries
-                      ? 'Hide product-only series'
-                      : 'Show product-only series'}
+                      ? 'Hide signed-in product series'
+                      : 'Show signed-in product series'}
                   </Button>
                   <span className='text-xs text-zinc-400'>
                     {showProductSeries
