@@ -10,6 +10,7 @@ import {
 import { ParsedMarkdown } from '@/utils/markdown';
 import { NavParamLink } from '@/components/NavParamLink';
 import { getContextualCopy } from '@/lib/grimoire/getContextualCopy';
+import { ExploreGrimoire } from './ExploreGrimoire';
 
 /**
  * Format a URL segment into a human-readable label
@@ -165,7 +166,7 @@ export function SEOContentTemplate({
   entityName,
   heroContent,
   children,
-  childrenPosition = 'after-faqs',
+  childrenPosition = 'before-faqs',
   contextualCopy,
   contextualCopyVariant = 'note',
 }: SEOContentTemplateProps) {
@@ -585,35 +586,8 @@ export function SEOContentTemplate({
         </section>
       )}
 
-      {/* Related Items */}
-      {relatedItems && relatedItems.length > 0 && (
-        <section className='overflow-x-hidden'>
-          <h2 className='text-md md:text-2xl font-medium text-zinc-100 mb-4 break-words'>
-            Related Topics
-          </h2>
-          <div className='grid grid-cols-1 md:grid-cols-2 gap-3'>
-            {relatedItems.map((item, index) => (
-              <NavParamLink
-                key={index}
-                href={item.href}
-                className='block p-4 bg-zinc-900/50 border border-zinc-800/50 rounded-lg hover:bg-zinc-800/50 hover:border-lunary-primary-600 transition-colors w-full overflow-x-hidden'
-              >
-                <div className='flex items-center justify-between gap-2'>
-                  <span className='text-zinc-300 font-medium break-words min-w-0'>
-                    {item.name}
-                  </span>
-                  <span className='text-xs text-zinc-400 uppercase flex-shrink-0'>
-                    {item.type}
-                  </span>
-                </div>
-              </NavParamLink>
-            ))}
-          </div>
-        </section>
-      )}
-
       {/* Internal Links */}
-      {internalLinks && internalLinks.length > 0 && (
+      {/* {internalLinks && internalLinks.length > 0 && (
         <section className='overflow-x-hidden'>
           <h2 className='text-md md:text-2xl font-medium text-zinc-100 mb-4 break-words'>
             {internalLinksTitle}
@@ -630,7 +604,7 @@ export function SEOContentTemplate({
             ))}
           </div>
         </section>
-      )}
+      )} */}
 
       {/* CTA */}
       {ctaText && ctaHref && (
@@ -650,78 +624,31 @@ export function SEOContentTemplate({
       {/* Cosmic Connections */}
       {cosmicConnections}
 
-      {/* Universal Grimoire Exploration - always shown */}
-      <section className='mt-12 pt-8 border-t border-zinc-800 overflow-x-hidden'>
-        <h2 className='text-lg sm:text-xl font-medium text-zinc-100 mb-4 break-words'>
-          Explore the Grimoire
-        </h2>
-        <p className='text-sm text-zinc-400 mb-4 break-words'>
-          Continue your cosmic journey through Lunary&apos;s library of
-          astrological wisdom.
-        </p>
-        <div className='grid grid-cols-2 md:grid-cols-3 gap-2'>
-          <NavParamLink
-            href='/birth-chart'
-            className='px-3 py-2 text-sm bg-zinc-900/50 border border-zinc-800/50 rounded-lg text-zinc-300 hover:bg-zinc-800/50 hover:border-lunary-primary-600 transition-colors text-center'
-          >
-            Birth Chart
-          </NavParamLink>
-          <NavParamLink
-            href='/grimoire/zodiac'
-            className='px-3 py-2 text-sm bg-zinc-900/50 border border-zinc-800/50 rounded-lg text-zinc-300 hover:bg-zinc-800/50 hover:border-lunary-primary-600 transition-colors text-center'
-          >
-            Zodiac Signs
-          </NavParamLink>
-          <NavParamLink
-            href='/grimoire/astronomy/planets'
-            className='px-3 py-2 text-sm bg-zinc-900/50 border border-zinc-800/50 rounded-lg text-zinc-300 hover:bg-zinc-800/50 hover:border-lunary-primary-600 transition-colors text-center'
-          >
-            Planets
-          </NavParamLink>
-          <NavParamLink
-            href='/grimoire/tarot'
-            className='px-3 py-2 text-sm bg-zinc-900/50 border border-zinc-800/50 rounded-lg text-zinc-300 hover:bg-zinc-800/50 hover:border-lunary-primary-600 transition-colors text-center'
-          >
-            Tarot
-          </NavParamLink>
-          <NavParamLink
-            href='/grimoire/crystals'
-            className='px-3 py-2 text-sm bg-zinc-900/50 border border-zinc-800/50 rounded-lg text-zinc-300 hover:bg-zinc-800/50 hover:border-lunary-primary-600 transition-colors text-center'
-          >
-            Crystals
-          </NavParamLink>
-          <NavParamLink
-            href='/grimoire/moon/phases'
-            className='px-3 py-2 text-sm bg-zinc-900/50 border border-zinc-800/50 rounded-lg text-zinc-300 hover:bg-zinc-800/50 hover:border-lunary-primary-600 transition-colors text-center'
-          >
-            Moon Phases
-          </NavParamLink>
-          <NavParamLink
-            href='/grimoire/houses/overview/first'
-            className='px-3 py-2 text-sm bg-zinc-900/50 border border-zinc-800/50 rounded-lg text-zinc-300 hover:bg-zinc-800/50 hover:border-lunary-primary-600 transition-colors text-center'
-          >
-            Houses
-          </NavParamLink>
-          <NavParamLink
-            href='/grimoire/spells'
-            className='px-3 py-2 text-sm bg-zinc-900/50 border border-zinc-800/50 rounded-lg text-zinc-300 hover:bg-zinc-800/50 hover:border-lunary-primary-600 transition-colors text-center'
-          >
-            Spells
-          </NavParamLink>
-          <NavParamLink
-            href='/horoscope'
-            className='px-3 py-2 text-sm bg-zinc-900/50 border border-zinc-800/50 rounded-lg text-zinc-300 hover:bg-zinc-800/50 hover:border-lunary-primary-600 transition-colors text-center'
-          >
-            Horoscopes
-          </NavParamLink>
-        </div>
-      </section>
-
       {/* Optional slot before FAQs */}
       {childrenPosition === 'before-faqs' && children && (
         <div id='explore-practices' className='mt-8'>
           {children}
         </div>
+      )}
+
+      {/* Related Items */}
+      {relatedItems && relatedItems.length > 0 && (
+        <section className='overflow-x-hidden'>
+          <h2 className='text-md md:text-2xl font-medium text-zinc-100 mb-4 break-words'>
+            Related Topics
+          </h2>
+          <div className='flex flex-wrap gap-3'>
+            {relatedItems?.map((item, index) => (
+              <NavParamLink
+                key={index}
+                href={item.href}
+                className='px-3 sm:px-4 py-2 bg-zinc-800/50 border border-zinc-700 rounded-lg text-zinc-300 hover:bg-zinc-700 hover:text-lunary-accent-300 transition-colors text-sm sm:text-base break-words'
+              >
+                {item.name}
+              </NavParamLink>
+            ))}
+          </div>
+        </section>
       )}
 
       {/* FAQs */}
@@ -748,12 +675,8 @@ export function SEOContentTemplate({
         </section>
       )}
 
-      {/* Children (custom content) */}
-      {childrenPosition === 'after-faqs' && children && (
-        <div id='explore-practices' className='mt-8'>
-          {children}
-        </div>
-      )}
+      {/* Universal Grimoire Exploration - always shown */}
+      <ExploreGrimoire />
 
       {/* E-A-T Credibility Section */}
       {showEAT && (
