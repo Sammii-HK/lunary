@@ -1,7 +1,7 @@
 import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
-import { ExploreGrimoire } from '@/components/grimoire/ExploreGrimoire';
+import { SEOContentTemplate } from '@/components/grimoire/SEOContentTemplate';
 
 import {
   ZODIAC_SIGNS,
@@ -11,7 +11,6 @@ import {
   SIGN_RULERS,
   ZodiacSign,
 } from '@/constants/seo/monthly-horoscope';
-import { GrimoireBreadcrumbs } from '@/components/grimoire/GrimoireBreadcrumbs';
 
 const AVAILABLE_YEARS = [2025, 2026, 2027, 2028, 2029, 2030];
 
@@ -75,25 +74,45 @@ export default async function SignHoroscopePage({
   const element = SIGN_ELEMENTS[signKey];
   const ruler = SIGN_RULERS[signKey];
 
-  const breadcrumbItems = [
-    { name: 'Grimoire', url: '/grimoire' },
-    { name: 'Horoscopes', url: '/grimoire/horoscopes' },
-  ];
+  const heroContent = (
+    <div className='text-center space-y-3'>
+      <span className='text-6xl'>{symbol}</span>
+      <p className='text-sm uppercase tracking-[0.3em] text-zinc-400'>
+        {element} Sign • Ruled by {ruler}
+      </p>
+    </div>
+  );
+
+  const birthChartCta = {
+    text: 'Get your personalised horoscope based on your full birth chart',
+    href: '/horoscope',
+  };
 
   return (
     <div className='min-h-screen bg-zinc-950 text-zinc-100'>
-      <GrimoireBreadcrumbs items={breadcrumbItems} />
-      <div className='max-w-4xl mx-auto px-4 py-12'>
-        <header className='mb-12 text-center'>
-          <span className='text-6xl mb-4 block'>{symbol}</span>
-          <h1 className='text-4xl md:text-5xl font-light text-zinc-100 mb-4'>
-            {signName} Horoscopes
-          </h1>
-          <p className='text-lg text-zinc-400'>
-            {element} Sign • Ruled by {ruler}
-          </p>
-        </header>
-
+      <SEOContentTemplate
+        title={`${signName} Horoscopes: Monthly Predictions & Forecasts | Lunary`}
+        h1={`${signName} Horoscopes`}
+        description={`${signName} monthly horoscopes, insights, and yearly forecasts.`}
+        keywords={[
+          `${signName.toLowerCase()} horoscope`,
+          `${signName.toLowerCase()} monthly horoscope`,
+          `${signName.toLowerCase()} forecasts`,
+          'monthly horoscope',
+        ]}
+        canonicalUrl={`https://lunary.app/grimoire/horoscopes/${sign}`}
+        intro={`Select a year to read ${signName} horoscopes written with real planetary context. Each month includes lunations, transits, and practical guidance tailored to ${element.toLowerCase()} energy.`}
+        meaning={`As a ${element} sign ruled by ${ruler}, ${signName} thrives on ${element.toLowerCase()} momentum, persistence, and emotional depth. These horoscopes help you channel your natural strengths into the rituals, relationships, and work that matter most.`}
+        heroContent={heroContent}
+        breadcrumbs={[
+          { label: 'Grimoire', href: '/grimoire' },
+          { label: 'Horoscopes', href: '/grimoire/horoscopes' },
+          { label: signName },
+        ]}
+        ctaText={birthChartCta.text}
+        ctaHref={birthChartCta.href}
+        childrenPosition='after-description'
+      >
         <section className='mb-12'>
           <h2 className='text-2xl font-medium text-zinc-100 mb-6'>
             Select a Year
@@ -132,24 +151,7 @@ export default async function SignHoroscopePage({
             ))}
           </div>
         </section>
-
-        <section className='p-6 rounded-lg border border-lunary-primary-700 bg-lunary-primary-900/10'>
-          <h2 className='text-xl font-medium text-lunary-primary-300 mb-2'>
-            Get Personalized {signName} Insights
-          </h2>
-          <p className='text-zinc-300 mb-4'>
-            Your horoscope is more than your Sun sign. Get personalized insights
-            based on your complete birth chart.
-          </p>
-          <Link
-            href='/horoscope'
-            className='inline-flex px-6 py-3 rounded-lg bg-lunary-primary-900/20 hover:bg-lunary-primary-900/30 border border-lunary-primary-700 text-lunary-primary-300 font-medium transition-colors'
-          >
-            Get your personalised horoscope based on your full birth chart
-          </Link>
-        </section>
-        <ExploreGrimoire />
-      </div>
+      </SEOContentTemplate>
     </div>
   );
 }
