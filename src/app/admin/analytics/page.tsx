@@ -135,11 +135,13 @@ type FeatureUsageResponse = {
   }>;
 };
 
-type IntentionBreakdown = {
+type IntentionBreakdownItem = {
   intention: string;
   count: number;
   percentage: number;
 };
+
+type IntentionBreakdown = IntentionBreakdownItem[];
 
 const DEFAULT_RANGE_DAYS = 30;
 const activitySeries: UsageChartSeries[] = [
@@ -415,7 +417,12 @@ export default function AnalyticsPage() {
 
       if (intentionBreakdownRes.ok) {
         const data = await intentionBreakdownRes.json();
-        setIntentionBreakdown(data?.data ?? null);
+        const breakdown = Array.isArray(data?.data)
+          ? (data.data as IntentionBreakdown)
+          : Array.isArray(data)
+            ? (data as IntentionBreakdown)
+            : null;
+        setIntentionBreakdown(breakdown);
       } else {
         errors.push('Intention breakdown');
       }
