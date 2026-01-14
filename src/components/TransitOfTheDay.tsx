@@ -188,7 +188,7 @@ export const TransitOfTheDay = () => {
               }}
               className='flex items-center gap-1.5 text-xs text-lunary-primary-200 hover:text-lunary-primary-100 transition-colors bg-none border-none p-0 cursor-pointer'
             >
-              Sign up to get personal transit insights
+              Unlock personal transit insights with Lunary+
             </button>
           </div>
           <ArrowRight className='w-4 h-4 text-zinc-600 group-hover:text-lunary-secondary-200 transition-colors flex-shrink-0 mt-1' />

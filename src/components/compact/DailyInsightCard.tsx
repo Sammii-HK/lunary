@@ -154,8 +154,7 @@ export const DailyInsightCard = () => {
               }}
               className='flex items-center gap-1.5 mt-2 text-xs text-lunary-primary-200 hover:text-lunary-primary-100 transition-colors bg-none border-none p-0 cursor-pointer'
             >
-              Unlock personalized readings based on your full birth chart with
-              Lunary+
+              Unlock full-chart readings with Lunary+
             </span>
           </div>
           <ArrowRight className='w-4 h-4 text-zinc-600 group-hover:text-lunary-primary-300 transition-colors flex-shrink-0 mt-1' />
