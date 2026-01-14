@@ -1,7 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Loader2, Lock, Send, Sparkles } from 'lucide-react';
+import { Loader2, Lock as LockIcon, Send, Sparkles } from 'lucide-react';
 import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
@@ -229,7 +229,7 @@ export function ShareInsightForm({
 
       <div className='text-xs text-lunary-accent-100/70'>
         <p className='flex items-center gap-1.5'>
-          <Lock className='h-3.5 w-3.5' />
+          <LockIcon className='h-3.5 w-3.5' />
           Community-ready content only. Moderation keeps things safe.
         </p>
         {message && (

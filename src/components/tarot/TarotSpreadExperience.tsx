@@ -4,7 +4,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import type { ReactNode } from 'react';
 import {
   Loader2,
-  Lock,
+  Lock as LockIcon,
   Sparkles,
   Trash2,
   ChevronDown,
@@ -494,7 +494,7 @@ export function TarotSpreadExperience({
             : 'bg-lunary-primary-950 text-lunary-accent-200',
         )}
       >
-        {isLocked && <Lock className='h-3 w-3' />}
+        {isLocked && <LockIcon className='h-3 w-3' />}
         {PLAN_LABEL[minimumPlan]}
       </span>
     );
@@ -590,7 +590,7 @@ export function TarotSpreadExperience({
                                 {spread.name}
                               </p>
                               {isLocked && (
-                                <Lock className='h-3 w-3 text-zinc-600' />
+                                <LockIcon className='h-3 w-3 text-zinc-600' />
                               )}
                             </div>
                             <p
@@ -627,7 +627,7 @@ export function TarotSpreadExperience({
             {!unlockedSpreads.has(selectedSpread.slug) && (
               <div className='rounded-lg border border-lunary-primary-700 bg-lunary-primary-950 p-4 mb-3'>
                 <div className='flex items-start gap-3'>
-                  <Lock className='h-5 w-5 text-lunary-accent mt-0.5 flex-shrink-0' />
+                  <LockIcon className='h-5 w-5 text-lunary-accent mt-0.5 flex-shrink-0' />
                   <div className='flex-1'>
                     <h4 className='text-sm font-medium text-lunary-accent-200 mb-1'>
                       This spread requires{' '}

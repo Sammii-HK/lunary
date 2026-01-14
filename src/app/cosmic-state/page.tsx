@@ -6,7 +6,14 @@ import { useSubscription } from '@/hooks/useSubscription';
 import { SmartTrialButton } from '@/components/SmartTrialButton';
 import { betterAuthClient } from '@/lib/auth-client';
 import Link from 'next/link';
-import { Lock, Sparkles, Moon, Calendar, TrendingUp, Zap } from 'lucide-react';
+import {
+  Lock as LockIcon,
+  Sparkles,
+  Moon,
+  Calendar,
+  TrendingUp,
+  Zap,
+} from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 export default function CosmicStatePage() {
@@ -418,7 +425,7 @@ export default function CosmicStatePage() {
         {isFreeUser && (
           <div className='bg-gradient-to-r from-lunary-primary-900/50 to-lunary-rose-900/50 border border-lunary-primary-700 rounded-lg p-6 mb-8'>
             <div className='flex items-start gap-4'>
-              <Lock className='w-6 h-6 text-lunary-primary-400 flex-shrink-0 mt-1' />
+              <LockIcon className='w-6 h-6 text-lunary-primary-400 flex-shrink-0 mt-1' />
               <div className='flex-1'>
                 <h2 className='text-xl font-semibold mb-2'>
                   Unlock Your Full Cosmic Profile
@@ -468,7 +475,7 @@ export default function CosmicStatePage() {
                         illuminated
                       </div>
                       <div className='absolute inset-0 flex items-center justify-center'>
-                        <Lock className='w-6 h-6 text-lunary-primary-400' />
+                        <LockIcon className='w-6 h-6 text-lunary-primary-400' />
                       </div>
                     </div>
                   ) : (
@@ -523,7 +530,7 @@ export default function CosmicStatePage() {
                               {transit.from} {transit.aspect} {transit.to}
                             </div>
                             <div className='absolute inset-0 flex items-center justify-center'>
-                              <Lock className='w-5 h-5 text-lunary-primary-400' />
+                              <LockIcon className='w-5 h-5 text-lunary-primary-400' />
                             </div>
                           </div>
                         ))}
@@ -622,7 +629,7 @@ export default function CosmicStatePage() {
                         </div>
                       </div>
                       <div className='absolute inset-0 flex items-center justify-center'>
-                        <Lock className='w-4 h-4 text-lunary-primary-400' />
+                        <LockIcon className='w-4 h-4 text-lunary-primary-400' />
                       </div>
                     </div>
                   )}
@@ -681,7 +688,7 @@ export default function CosmicStatePage() {
                     <div className='blur-sm relative'>
                       <div>{cosmicData.tarot.daily?.name || 'Daily Card'}</div>
                       <div className='absolute inset-0 flex items-center justify-center'>
-                        <Lock className='w-4 h-4 text-lunary-primary-400' />
+                        <LockIcon className='w-4 h-4 text-lunary-primary-400' />
                       </div>
                     </div>
                   ) : (
@@ -730,7 +737,7 @@ export default function CosmicStatePage() {
                           ))}
                       </div>
                       <div className='absolute inset-0 flex items-center justify-center'>
-                        <Lock className='w-4 h-4 text-lunary-primary-400' />
+                        <LockIcon className='w-4 h-4 text-lunary-primary-400' />
                       </div>
                     </div>
                   ) : (

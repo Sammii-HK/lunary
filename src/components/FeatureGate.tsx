@@ -5,7 +5,7 @@ import { useSubscription } from '../hooks/useSubscription';
 import { useAuthStatus } from './AuthStatus';
 import { UpgradePrompt } from './UpgradePrompt';
 import { conversionTracking } from '@/lib/analytics';
-import { Lock } from 'lucide-react';
+import { Lock as LockIcon } from 'lucide-react';
 
 interface FeatureGateProps {
   feature: string;
@@ -75,7 +75,7 @@ export function FeatureGate({
           <div className='opacity-50 pointer-events-none'>{previewContent}</div>
           <div className='absolute inset-0 flex items-center justify-center bg-black/60 backdrop-blur-sm rounded-lg'>
             <div className='text-center p-6 max-w-md'>
-              <Lock className='w-12 h-12 text-lunary-accent mx-auto mb-4' />
+              <LockIcon className='w-12 h-12 text-lunary-accent mx-auto mb-4' />
               <h3 className='text-lg font-medium text-white mb-2'>
                 Unlock Full Access
               </h3>
@@ -93,7 +93,7 @@ export function FeatureGate({
   return (
     <div className={className}>
       <div className='bg-zinc-900 border border-zinc-800 rounded-lg p-6 text-center'>
-        <Lock className='w-10 h-10 text-lunary-accent mx-auto mb-4' />
+        <LockIcon className='w-10 h-10 text-lunary-accent mx-auto mb-4' />
         <h3 className='text-lg font-medium text-white mb-2'>Premium Feature</h3>
         <p className='text-sm text-gray-400 mb-4'>
           This feature requires a subscription
