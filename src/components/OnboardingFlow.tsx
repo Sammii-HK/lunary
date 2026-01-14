@@ -17,7 +17,6 @@ import {
   Zap,
   ChevronDown,
 } from 'lucide-react';
-import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { createBirthChartWithMetadata } from '../../utils/astrology/birthChartService';
@@ -751,11 +750,14 @@ export function OnboardingFlow({
                 aria-label={phase.label}
                 title={phase.label}
               >
-                <Image
+                <img
                   src={phase.src}
                   alt={phase.label}
                   width={16}
                   height={16}
+                  className='h-4 w-4 object-contain'
+                  loading='lazy'
+                  decoding='async'
                 />
               </div>
             );
@@ -766,12 +768,14 @@ export function OnboardingFlow({
           <div className='space-y-6'>
             <div className='text-center'>
               <div className='inline-flex items-center justify-center w-16 h-16 mb-2'>
-                <Image
+                <img
                   src='/icons/moon-phases/full-moon.svg'
                   alt='Full Moon'
                   width={64}
                   height={64}
-                  priority
+                  className='h-16 w-16 object-contain'
+                  loading='eager'
+                  decoding='async'
                 />
               </div>
               <h2 className='text-base font-semibold text-white mb-2 md:text-lg'>
@@ -1127,11 +1131,14 @@ export function OnboardingFlow({
         {currentStep === 'complete' && (
           <div className='space-y-6 text-center'>
             <div className='inline-flex items-center justify-center w-16 h-16 mb-4'>
-              <Image
+              <img
                 src='/icons/moon-phases/full-moon.svg'
                 alt='Full Moon'
                 width={64}
                 height={64}
+                className='h-16 w-16 object-contain'
+                loading='eager'
+                decoding='async'
               />
             </div>
             <h2 className='text-base font-semibold text-white mb-2 md:text-lg'>
