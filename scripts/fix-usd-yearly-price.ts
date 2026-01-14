@@ -10,9 +10,7 @@ if (!process.env.STRIPE_SECRET_KEY) {
   process.exit(1);
 }
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
-  apiVersion: '2024-11-20.acacia',
-});
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
 async function fixUSDPrice() {
   console.log('🔧 Fixing USD yearly price...\n');
@@ -48,7 +46,7 @@ async function fixUSDPrice() {
   }
 
   console.log(
-    `📦 Current USD price: ${oldUSDPrice.id} ($${oldUSDPrice.unit_amount / 100})`,
+    `📦 Current USD price: ${oldUSDPrice.id} ($${oldUSDPrice?.unit_amount ? oldUSDPrice.unit_amount / 100 : 0})`,
   );
 
   // Create new USD price at $89.99

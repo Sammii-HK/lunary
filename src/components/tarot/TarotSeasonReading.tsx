@@ -227,7 +227,7 @@ export function TarotSeasonReading({
             {seasonData.summary}
           </p>
 
-          {isPremium && seasonData.paragraphs.length > 0 && (
+          {hasTarotPatternsAccess && seasonData.paragraphs.length > 0 && (
             <div className='space-y-3'>
               {seasonData.paragraphs.map((paragraph, i) => (
                 <p key={i} className='text-sm text-zinc-300 leading-relaxed'>
@@ -237,7 +237,7 @@ export function TarotSeasonReading({
             </div>
           )}
 
-          {isPremium && seasonData.focusBullets.length > 0 && (
+          {hasTarotPatternsAccess && seasonData.focusBullets.length > 0 && (
             <div className='pt-3 border-t border-zinc-800/50'>
               <p className='text-xs font-medium text-zinc-400 uppercase tracking-wide mb-2'>
                 What to focus on
@@ -256,7 +256,7 @@ export function TarotSeasonReading({
             </div>
           )}
 
-          {!isPremium && (
+          {!hasTarotPatternsAccess && (
             <p className='text-xs text-zinc-500'>
               Upgrade for detailed narrative and focus guidance.
             </p>

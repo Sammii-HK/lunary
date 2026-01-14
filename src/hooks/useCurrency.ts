@@ -95,17 +95,20 @@ export function useCurrency() {
   return currency;
 }
 
-export function formatPrice(amount: number, currency: string): string {
+export function formatPrice(amount: number, currency?: string): string {
+  const safeCurrency = (currency || 'USD').toUpperCase();
+  const hasZeroDecimals = safeCurrency === 'JPY' || safeCurrency === 'HUF';
+
   try {
     return new Intl.NumberFormat(undefined, {
       style: 'currency',
-      currency: currency.toLowerCase(),
-      minimumFractionDigits: currency === 'JPY' || currency === 'HUF' ? 0 : 2,
+      currency: safeCurrency,
+      minimumFractionDigits: hasZeroDecimals ? 0 : 2,
     }).format(amount);
   } catch (error) {
     // Fallback to simple formatting
-    const symbol = getCurrencySymbol(currency);
-    return `${symbol}${amount.toFixed(currency === 'JPY' || currency === 'HUF' ? 0 : 2)}`;
+    const symbol = getCurrencySymbol(safeCurrency);
+    return `${symbol}${amount.toFixed(hasZeroDecimals ? 0 : 2)}`;
   }
 }
 

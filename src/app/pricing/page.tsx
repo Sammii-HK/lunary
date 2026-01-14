@@ -10,8 +10,7 @@ import {
   getPricingPlansWithStripeData,
   type PricingPlan,
 } from '../../../utils/pricing';
-import { createCheckoutSession } from '../../../utils/stripe';
-import { loadStripe } from '@stripe/stripe-js';
+import { createCheckoutSession, getStripePromise } from '../../../utils/stripe';
 import { Check, Sparkles, Star, ChevronDown, ChevronUp } from 'lucide-react';
 import { useSubscription } from '../../hooks/useSubscription';
 import { useAuthStatus } from '@/components/AuthStatus';
@@ -192,12 +191,17 @@ export default function PricingPage() {
         throw new Error('Missing sessionId from checkout response');
       }
 
-      const stripe = await loadStripe(
-        process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!,
-      );
-      if (stripe) {
-        await stripe.redirectToCheckout({ sessionId });
+      const stripePromise = getStripePromise();
+      if (!stripePromise) {
+        throw new Error('Stripe is not configured');
       }
+
+      const stripe = await stripePromise;
+      if (!stripe) {
+        throw new Error('Stripe failed to initialize');
+      }
+
+      await stripe.redirectToCheckout({ sessionId });
     } catch (error) {
       console.error('Error creating checkout session:', error);
       alert('Something went wrong. Please try again.');

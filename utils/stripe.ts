@@ -1,8 +1,22 @@
 import { loadStripe } from '@stripe/stripe-js';
+import type { Stripe } from '@stripe/stripe-js';
 
-export const stripePromise = loadStripe(
-  process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!,
-);
+const STRIPE_PUBLISHABLE_KEY =
+  process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY?.trim();
+
+let managedStripePromise: Promise<Stripe | null> | null = null;
+
+export function getStripePromise(): Promise<Stripe | null> | null {
+  if (!STRIPE_PUBLISHABLE_KEY) {
+    return null;
+  }
+
+  if (!managedStripePromise) {
+    managedStripePromise = loadStripe(STRIPE_PUBLISHABLE_KEY);
+  }
+
+  return managedStripePromise;
+}
 
 export async function createCheckoutSession(
   priceId: string,

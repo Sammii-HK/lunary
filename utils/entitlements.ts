@@ -20,7 +20,7 @@ export type PricingPlan = {
   trialDays?: number;
 };
 
-export const FEATURE_ACCESS = {
+const FEATURE_ACCESS_BASE = {
   free: [
     'moon_phases',
     'general_horoscope',
@@ -114,7 +114,10 @@ export const FEATURE_ACCESS = {
 } as const satisfies Record<PlanKey, readonly string[]>;
 
 export type FeatureKey =
-  (typeof FEATURE_ACCESS)[keyof typeof FEATURE_ACCESS][number];
+  (typeof FEATURE_ACCESS_BASE)[keyof typeof FEATURE_ACCESS_BASE][number];
+
+export const FEATURE_ACCESS: Record<PlanKey, readonly FeatureKey[]> =
+  FEATURE_ACCESS_BASE;
 
 export const FREE_TRIAL_DAYS = {
   monthly: 7,
