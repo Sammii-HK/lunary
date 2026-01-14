@@ -20,7 +20,7 @@ export function FeaturePreview({
 }: FeaturePreviewProps) {
   return (
     <div>
-      <div className='flex justify-between items-center mb-4'>
+      <div className='flex justify-between items-center mb-4 min-h-100'>
         <h2 className='text-base md:text-lg font-medium text-zinc-100'>
           {title}
         </h2>
@@ -31,13 +31,13 @@ export function FeaturePreview({
         </div>
       </div>
       <div className='relative'>
-        <div className='filter blur-sm pointer-events-none rounded-lg overflow-hidden'>
+        <div className='filter blur-sm pointer-events-none rounded-lg overflow-hidden min-h-100'>
           {blurredContent}
         </div>
         <div className='absolute inset-0 flex items-center justify-center rounded-lg bg-zinc-900/90'>
           <div className='text-center p-6 max-w-sm'>
             {icon && <div className='mb-3'>{icon}</div>}
-            <h3 className='text-lg font-medium text-zinc-100 mb-2'>{title}</h3>
+            {/* <h3 className='text-lg font-medium text-zinc-100 mb-2'>{title}</h3> */}
             <p className='text-sm text-zinc-400 mb-4 leading-relaxed'>
               {description}
             </p>

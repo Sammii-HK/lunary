@@ -8,7 +8,7 @@ import { getUpcomingTransits } from '../../../../../utils/astrology/transitCalen
 import { HoroscopeSection } from './HoroscopeSection';
 import { FeaturePreview } from './FeaturePreview';
 import { SmartTrialButton } from '@/components/SmartTrialButton';
-import { Share2, Sparkles, ChevronRight, Lock } from 'lucide-react';
+import { Share2, ChevronRight } from 'lucide-react';
 import { TransitCard } from './TransitCard';
 import { getNumerologyDetail } from '@/lib/numerology/numerologyDetails';
 import {
@@ -21,6 +21,23 @@ import {
   NumerologyInfoModal,
   type NumerologyModalPayload,
 } from '@/components/grimoire/NumerologyInfoModal';
+import { useUser } from '@/context/UserContext';
+import {
+  getPersonalDayNumber,
+  getPersonalYearNumber,
+} from '@/lib/numerology/personalNumbers';
+import { MoonPhaseLabels } from 'utils/moon/moonPhases';
+
+const MOON_PHASE_TIPS: Record<MoonPhaseLabels, string> = {
+  'New Moon': 'Set intentions and script your next chapter.',
+  'Waxing Crescent': 'Feed tiny habits that support the goal.',
+  'First Quarter': 'Take decisive action even if it feels messy.',
+  'Waxing Gibbous': 'Refine, iterate, and double down on momentum.',
+  'Full Moon': 'Celebrate the insight and share it loudly.',
+  'Waning Gibbous': 'Release excess and honor what was learned.',
+  'Last Quarter': 'Audit systems and trim what isn’t aligned.',
+  'Waning Crescent': 'Rest, dream, and let intuition lead the way.',
+};
 
 const getDailyNumerology = (
   date: dayjs.Dayjs,
@@ -62,6 +79,10 @@ export function FreeHoroscopeView() {
   const generalHoroscope = getGeneralHoroscope();
   const upcomingTransits = getUpcomingTransits();
   const today = dayjs();
+  const { user } = useUser();
+  const birthday = user?.birthday;
+  const personalDay = birthday ? getPersonalDayNumber(birthday, today) : null;
+  const personalYear = birthday ? getPersonalYearNumber(birthday, today) : null;
   const universalDay = getDailyNumerology(today);
   const [numberModal, setNumberModal] = useState<NumerologyModalPayload | null>(
     null,
@@ -204,12 +225,14 @@ export function FreeHoroscopeView() {
             <button
               type='button'
               onClick={openUniversalModal}
-              className='rounded-lg border border-zinc-700 px-3 py-3 uppercase tracking-wide text-center transition hover:border-lunary-primary-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-lunary-primary-400 w-full'
+              className='rounded-lg border border-zinc-700 px-3 py-3 capitalize text-center transition hover:border-lunary-primary-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-lunary-primary-400 w-full'
             >
               <div className='text-2xl font-semibold text-lunary-accent-300'>
                 {universalDay.number}
               </div>
-              <div className='text-[9px] text-zinc-400'>Universal Day</div>
+              <div className='text-[9px] text-zinc-400 uppercase tracking-wide'>
+                Universal Day
+              </div>
               <p className='text-[11px] mt-1'>{universalDay.meaning}</p>
             </button>
             <button
@@ -229,12 +252,16 @@ export function FreeHoroscopeView() {
               <Share2 className='h-3 w-3' />
             </button>
           </div>
-          <div className='rounded-lg border border-zinc-700 px-3 py-3 uppercase tracking-wide text-center'>
-            <div className='text-2xl font-semibold text-emerald-400'>
+          <div className='rounded-lg border border-zinc-700 px-3 py-3 capitalize tracking-wide text-center'>
+            <div className='text-md text-semibold md:text-lg mt-1'>
               {generalHoroscope.moonPhase}
             </div>
-            <div className='text-[9px] text-zinc-400'>Moon Phase</div>
-            <p className='text-[11px] mt-1'>Energy rotates hourly</p>
+            <div className='text-[9px] text-zinc-400 uppercase tracking-wide'>
+              Moon Phase
+            </div>
+            <p className='text-[11px] mt-1'>
+              {MOON_PHASE_TIPS[generalHoroscope.moonPhase as MoonPhaseLabels]}
+            </p>
           </div>
         </div>
         <p className='text-xs text-zinc-400'>
@@ -261,7 +288,7 @@ export function FreeHoroscopeView() {
                 personalized insights
               </p>
               <div className='w-full flex justify-center'>
-                <SmartTrialButton />
+                <SmartTrialButton feature='personalized_transit_readings' />
               </div>
             </div>
           </>
@@ -276,7 +303,7 @@ export function FreeHoroscopeView() {
                 Get personalized transit insights based on your birth chart
               </p>
               <div className='w-full flex justify-center'>
-                <SmartTrialButton />
+                <SmartTrialButton feature='personalized_transit_readings' />
               </div>
             </div>
           </>
@@ -284,64 +311,69 @@ export function FreeHoroscopeView() {
       </HoroscopeSection>
 
       <div className='space-y-6'>
-        <HoroscopeSection title="Today's Horoscope" color='purple'>
-          <p className='text-sm text-zinc-300 leading-relaxed'>
-            {generalHoroscope.reading}
-          </p>
-        </HoroscopeSection>
-
-        <HoroscopeSection title='Cosmic Highlight' color='emerald'>
-          <p className='text-sm text-zinc-300 leading-relaxed mb-4'>
-            {generalHoroscope.generalAdvice}
-          </p>
-          <div className='grid grid-cols-2 gap-4 pt-3 border-t border-zinc-700/50'>
-            <div className='text-center'>
-              <div className='text-2xl font-light text-emerald-400 mb-1'>
+        <HoroscopeSection title='Cosmic Highlight' color='indigo'>
+          <div className='grid grid-cols-1 md:grid-cols-2 gap-4 pt-3 border-t border-zinc-700/50'>
+            <div className='text-center my-7'>
+              <div className='text-2xl md:text-3xl font-light text-lunary-accent-200 mb-1'>
                 {universalDay.number}
               </div>
               <div className='text-xs text-zinc-400 uppercase tracking-wide mb-1'>
                 Universal Day
               </div>
               <p className='text-xs text-zinc-300'>{universalDay.meaning}</p>
+              <SmartTrialButton
+                size='sm'
+                className='mx-auto my-8'
+                feature='personal_day_number'
+              />
             </div>
-            <div className='text-center border border-zinc-700/50 rounded-lg p-4 bg-zinc-900/30'>
-              <div className='flex items-center justify-center mb-2'>
-                <Lock className='w-4 h-4 text-zinc-500 mr-1' />
-                <div className='text-2xl font-light text-zinc-500 mb-1'>?</div>
+            <div className='space-y-3'>
+              <div className='rounded-2xl border border-zinc-700/50 bg-zinc-900/30 p-4 text-center'>
+                <div className='text-xs text-zinc-500 uppercase tracking-[0.3em] mb-1'>
+                  Personal Day
+                </div>
+                <div className='text-3xl font-light text-lunary-accent-200'>
+                  {personalDay ? personalDay.number : '—'}
+                </div>
+                <p className='text-xs text-zinc-400 mt-1'>
+                  {personalDay
+                    ? 'Numbers are free. Upgrade for the interpretation.'
+                    : 'Add your birth date to reveal your Personal Day number.'}
+                </p>
               </div>
-              <div className='text-xs text-zinc-500 uppercase tracking-wide mb-1'>
-                Personal Day
+              <div className='rounded-2xl border border-zinc-700/50 bg-zinc-900/30 p-4 text-center'>
+                <div className='text-xs text-zinc-500 uppercase tracking-[0.3em] mb-1'>
+                  Personal Year
+                </div>
+                <div className='text-3xl font-light text-lunary-accent-200'>
+                  {personalYear ? personalYear.number : '—'}
+                </div>
+                <p className='text-xs text-zinc-400 mt-1'>
+                  {personalYear
+                    ? 'Numbers are free. Upgrade for the interpretation.'
+                    : 'Add your birth date to reveal your Personal Year number.'}
+                </p>
               </div>
-              <p className='text-xs text-zinc-500 mb-3'>
-                Sign up for free to get your Personal Day number with a birth
-                chart
-              </p>
-              {/* <SmartTrialButton
-                feature='birth_chart'
-                hasRequiredData={false}
-                size='xs'
-                className='max-w-10'
-              /> */}
             </div>
           </div>
+          <p className='text-xs text-zinc-500 mt-2 text-center'>
+            Personal Day and Personal Year numbers are free. Interpretations
+            unlocked with Lunary+.
+          </p>
         </HoroscopeSection>
 
         <FeaturePreview
           title='Personal Insight'
           description='Get insights specifically tailored to your birth chart and cosmic profile'
           feature='personalized_horoscope'
-          icon={
-            <Sparkles
-              className='w-8 h-8 text-lunary-accent-400 mx-auto'
-              strokeWidth={1.5}
-            />
-          }
           blurredContent={
-            <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-6 opacity-60'>
+            <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-6 opacity-60 h-150'>
               <p className='text-sm text-zinc-300 leading-relaxed'>
                 ●●●●● ●●●●● ●●● ●●●●●●●● ●●●●●●●● ●●● ●●●●●●● ●●●●●●●●● ●●●●●●●
                 ●●● ●●●●●●●●● ●●●●●●●● ●●●●●. ●●●●●● ●●●●●●●● ●●● ●●●●●●●●●
-                ●●●●●●●●● ●●●●●●● ●●●●●●●●● ●●●●●●●● ●●●●●●●● ●●●●●●●●●
+                ●●●●●●●●● ●●●●●●● ●●●●●●●●● ●●●●●●●● ●●●●●●●● ●●●●●●●●● ●●●
+                ●●●●●●●●● ●●●●●●●● ●●●●●. ●●●●●● ●●●●●●●● ●●● ●●●●●●●●● ●●●
+                ●●●●●●●●● ●●●●●●●● ●●●●●. ●●●●●● ●●●●●●●● ●●● ●●●●●●●●●
                 ●●●●●●●●●.
               </p>
             </div>
