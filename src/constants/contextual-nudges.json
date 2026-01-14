@@ -1,0 +1,289 @@
+{
+  "version": 1,
+  "rules": [
+    { "match": "^/grimoire/tarot/spreads$", "hub": "tarotSpreadsIndex" },
+    { "match": "^/grimoire/tarot/spreads/", "hub": "tarotSpreadsDetail" },
+    { "match": "^/tarot/spreads$", "hub": "tarotSpreadsIndex" },
+    { "match": "^/tarot/spreads/", "hub": "tarotSpreadsDetail" },
+    { "match": "^/grimoire/astronomy/planets", "hub": "planets" },
+    { "match": "^/grimoire/planets", "hub": "planets" },
+    { "match": "^/grimoire/houses", "hub": "houses" },
+    { "match": "^/grimoire/aspects", "hub": "aspects" },
+    { "match": "^/grimoire/transits", "hub": "transits" },
+    { "match": "^/grimoire/horoscopes", "hub": "horoscopes" },
+    { "match": "^/grimoire/moon", "hub": "moon" },
+    { "match": "^/grimoire/tarot", "hub": "tarot" },
+    { "match": "^/grimoire/numerology", "hub": "numerology" },
+    { "match": "^/grimoire/double-hours", "hub": "clockNumbers" },
+    { "match": "^/grimoire/mirror-hours", "hub": "clockNumbers" },
+    { "match": "^/grimoire/angel-numbers", "hub": "angelNumbers" },
+    { "match": "^/grimoire/crystals", "hub": "crystals" },
+    { "match": "^/grimoire/spells", "hub": "spells" },
+    { "match": "^/grimoire/rituals", "hub": "spells" },
+    { "match": "^/grimoire/modern-witchcraft", "hub": "modernWitchcraft" },
+    { "match": "^/grimoire/practices", "hub": "practiceWithoutDogma" },
+    { "match": "^/grimoire/correspondences", "hub": "symbolicSystems" },
+    { "match": "^/grimoire/birth-chart", "hub": "personalContext" },
+    { "match": "^/grimoire/events", "hub": "cosmicTiming" },
+    { "match": "^/grimoire/astrology", "hub": "astrology" },
+    { "match": "^/grimoire", "hub": "grimoireReference" }
+  ],
+  "ctaNudges": {
+    "universal": [
+      {
+        "headline": "Make this personal",
+        "subline": "Create your chart so Lunary can interpret everything through your full birth chart and current timing.",
+        "buttonLabel": "Create my chart",
+        "href": "/auth?signup=true",
+        "action": "authOrLink"
+      },
+      {
+        "headline": "Get your real context",
+        "subline": "Sign in to connect this topic to your placements, houses, and transits.",
+        "buttonLabel": "See my context",
+        "href": "/auth?signup=true",
+        "action": "authOrLink"
+      }
+    ],
+
+    "astrology": [
+      {
+        "headline": "See how this actually shows up for you",
+        "subline": "Lunary uses your full birth chart, not just a sun sign, to make this specific.",
+        "buttonLabel": "Personalise with my chart",
+        "href": "/auth?signup=true",
+        "action": "authOrLink"
+      }
+    ],
+
+    "planets": [
+      {
+        "headline": "Find this planet in your chart",
+        "subline": "Sign in to see its house, aspects, and what is activating it right now.",
+        "buttonLabel": "See it in my chart",
+        "href": "/auth?signup=true",
+        "action": "authOrLink"
+      }
+    ],
+
+    "houses": [
+      {
+        "headline": "See what this house means in your life",
+        "subline": "Sign in to map this house to your chart, planets, and current transits.",
+        "buttonLabel": "Check my houses",
+        "href": "/auth?signup=true",
+        "action": "authOrLink"
+      }
+    ],
+
+    "aspects": [
+      {
+        "headline": "Understand the full pattern",
+        "subline": "Sign in to see how this aspect behaves inside your complete chart.",
+        "buttonLabel": "View my aspects",
+        "href": "/auth?signup=true",
+        "action": "authOrLink"
+      }
+    ],
+
+    "transits": [
+      {
+        "headline": "See what this transit is touching for you",
+        "subline": "Sign in to map it to your natal chart and the exact life areas it activates.",
+        "buttonLabel": "Check my transits",
+        "href": "/auth?signup=true",
+        "action": "authOrLink"
+      }
+    ],
+
+    "horoscopes": [
+      {
+        "headline": "Go beyond sun sign",
+        "subline": "Sign in to read this through your full birth chart and today’s transits.",
+        "buttonLabel": "Get my personalised horoscope",
+        "href": "/auth?signup=true",
+        "action": "authOrLink"
+      }
+    ],
+
+    "moon": [
+      {
+        "headline": "Feel this phase in your chart",
+        "subline": "Sign in to see how the Moon is interacting with your natal placements right now.",
+        "buttonLabel": "Personalise the Moon",
+        "href": "/auth?signup=true",
+        "action": "authOrLink"
+      }
+    ],
+
+    "tarot": [
+      {
+        "headline": "Let the cards land in context",
+        "subline": "Sign in to interpret tarot alongside your chart and timing, not as a generic meaning.",
+        "buttonLabel": "Start a reading",
+        "href": "/auth?signup=true",
+        "action": "authOrLink"
+      }
+    ],
+
+    "tarotSpreadsIndex": [
+      {
+        "headline": "Pull a spread inside Lunary",
+        "subline": "Sign in to try a spread with interpretation grounded in your chart and current season.",
+        "buttonLabel": "Pull a spread",
+        "href": "/auth?signup=true",
+        "action": "authOrLink"
+      }
+    ],
+
+    "tarotSpreadsDetail": [
+      {
+        "headline": "Try this spread with your context",
+        "subline": "Sign in to pull this spread in Lunary and connect it back to your birth chart.",
+        "buttonLabel": "Try this spread",
+        "href": "/auth?signup=true",
+        "action": "authOrLink"
+      }
+    ],
+
+    "numerology": [
+      {
+        "headline": "Make this number personal",
+        "subline": "Sign in to interpret it through your current cycle and wider chart context.",
+        "buttonLabel": "Personalise this number",
+        "href": "/auth?signup=true",
+        "action": "authOrLink"
+      }
+    ],
+
+    "clockNumbers": [
+      {
+        "headline": "Turn repetition into clarity",
+        "subline": "Sign in to connect repeating times to your current season and chart context.",
+        "buttonLabel": "Make it personal",
+        "href": "/auth?signup=true",
+        "action": "authOrLink"
+      }
+    ],
+
+    "angelNumbers": [
+      {
+        "headline": "Read the signal, not just the digits",
+        "subline": "Sign in to interpret angel numbers through your cycle and full birth chart context.",
+        "buttonLabel": "Personalise this sign",
+        "href": "/auth?signup=true",
+        "action": "authOrLink"
+      }
+    ],
+
+    "crystals": [
+      {
+        "headline": "Choose what supports your timing",
+        "subline": "Sign in to match crystal support to what your chart is activating right now.",
+        "buttonLabel": "Get my recommendation",
+        "href": "/auth?signup=true",
+        "action": "authOrLink"
+      }
+    ],
+
+    "spells": [
+      {
+        "headline": "Match the ritual to the moment",
+        "subline": "Sign in to align spells with lunar timing and your chart so you are not guessing.",
+        "buttonLabel": "Find the right timing",
+        "href": "/auth?signup=true",
+        "action": "authOrLink"
+      }
+    ],
+
+    "modernWitchcraft": [
+      {
+        "headline": "Ground your practice in timing",
+        "subline": "Sign in to connect correspondences to lunar cycles and your chart context.",
+        "buttonLabel": "Personalise my practice",
+        "href": "/auth?signup=true",
+        "action": "authOrLink"
+      }
+    ],
+
+    "practiceWithoutDogma": [
+      {
+        "headline": "Find what fits your season",
+        "subline": "Sign in to choose practices that match your current cycle and chart context.",
+        "buttonLabel": "Find my next step",
+        "href": "/auth?signup=true",
+        "action": "authOrLink"
+      }
+    ],
+
+    "cosmicTiming": [
+      {
+        "headline": "Make timing usable",
+        "subline": "Sign in to see how real planetary movement interacts with your chart right now.",
+        "buttonLabel": "See my timing",
+        "href": "/auth?signup=true",
+        "action": "authOrLink"
+      }
+    ],
+
+    "personalContext": [
+      {
+        "headline": "This only makes sense in your chart",
+        "subline": "Sign in to see how your placements connect across the whole chart.",
+        "buttonLabel": "View my full context",
+        "href": "/auth?signup=true",
+        "action": "authOrLink"
+      }
+    ],
+
+    "symbolicSystems": [
+      {
+        "headline": "Connect the symbols together",
+        "subline": "Sign in to link this topic across systems through your chart context.",
+        "buttonLabel": "See the pattern",
+        "href": "/auth?signup=true",
+        "action": "authOrLink"
+      }
+    ],
+
+    "integratedGuidance": [
+      {
+        "headline": "Make the Grimoire work for you",
+        "subline": "Sign in once, then Lunary can interpret every topic through your full birth chart.",
+        "buttonLabel": "Start personalised",
+        "href": "/auth?signup=true",
+        "action": "authOrLink"
+      }
+    ],
+
+    "learningThroughCycles": [
+      {
+        "headline": "Track the pattern over time",
+        "subline": "Sign in to revisit this with timing and chart context, not as a one-off meaning.",
+        "buttonLabel": "Start tracking",
+        "href": "/auth?signup=true",
+        "action": "authOrLink"
+      }
+    ],
+
+    "archetypes": [
+      {
+        "headline": "See this archetype in your chart",
+        "subline": "Sign in to explore how this pattern shows up through your placements and timing.",
+        "buttonLabel": "Personalise this archetype",
+        "href": "/auth?signup=true",
+        "action": "authOrLink"
+      }
+    ],
+
+    "grimoireReference": [
+      {
+        "headline": "Turn this library into your system",
+        "subline": "Sign in so every topic can connect back to your chart, timing, and saved context.",
+        "buttonLabel": "Start personalised",
+        "href": "/auth?signup=true",
+        "action": "authOrLink"
+      }
+    ]
+  }
+}

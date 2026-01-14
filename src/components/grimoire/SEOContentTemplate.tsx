@@ -10,7 +10,10 @@ import {
 import { ParsedMarkdown } from '@/utils/markdown';
 import { NavParamLink } from '@/components/NavParamLink';
 import { getContextualCopy } from '@/lib/grimoire/getContextualCopy';
+import { getContextualNudge } from '@/lib/grimoire/getContextualNudge';
+import { ContextualNudgeButton } from '@/components/grimoire/ContextualNudgeButton';
 import { ExploreGrimoire } from './ExploreGrimoire';
+import { Heading } from '../ui/Heading';
 
 /**
  * Format a URL segment into a human-readable label
@@ -103,6 +106,7 @@ export interface SEOContentTemplateProps {
   // CTA
   ctaText?: string;
   ctaHref?: string;
+  disableContextualNudge?: boolean;
 
   // E-A-T Credibility
   showEAT?: boolean;
@@ -160,6 +164,7 @@ export function SEOContentTemplate({
   breadcrumbs,
   ctaText,
   ctaHref,
+  disableContextualNudge = false,
   showEAT = true,
   sources,
   entityId,
@@ -248,6 +253,12 @@ export function SEOContentTemplate({
     contextualCopyVariant === 'callout'
       ? 'bg-gradient-to-r from-lunary-primary-900 to-lunary-highlight-900 border border-transparent text-white'
       : 'bg-zinc-900/40 border border-zinc-800 text-zinc-200';
+  const shouldShowContextualNudge = !disableContextualNudge;
+  const contextualNudge = shouldShowContextualNudge
+    ? getContextualNudge(canonicalPathname)
+    : null;
+  const hasContextualNudge =
+    Boolean(contextualNudge?.headline) && Boolean(contextualNudge?.buttonLabel);
 
   return (
     <article className='max-w-4xl mx-auto space-y-8 p-4 sm:p-6 overflow-x-hidden'>
@@ -606,8 +617,21 @@ export function SEOContentTemplate({
         </section>
       )} */}
 
-      {/* CTA */}
-      {ctaText && ctaHref && (
+      {/* CTA or contextual nudge */}
+      {hasContextualNudge && contextualNudge ? (
+        <section className='bg-gradient-to-r from-lunary-primary-900/30 to-lunary-highlight-900/30 border border-lunary-primary-700 rounded-lg p-6 sm:p-8 text-center overflow-x-hidden'>
+          <Heading
+            variant='h2'
+            className='text-lunary-primary-200 mb-3 break-words'
+          >
+            {contextualNudge.headline}
+          </Heading>
+          <p className='text-sm sm:text-base text-zinc-200 mb-5 leading-relaxed'>
+            {contextualNudge.subline}
+          </p>
+          <ContextualNudgeButton nudge={contextualNudge} />
+        </section>
+      ) : ctaText && ctaHref ? (
         <section className='bg-gradient-to-r from-lunary-primary-900/30 to-lunary-highlight-900/30 border border-lunary-primary-700 rounded-lg p-6 sm:p-8 text-center overflow-x-hidden'>
           <h2 className='text-md md:text-2xl font-medium text-zinc-100 mb-3 break-words'>
             {ctaText}
@@ -619,7 +643,7 @@ export function SEOContentTemplate({
             Get Started
           </NavParamLink>
         </section>
-      )}
+      ) : null}
 
       {/* Cosmic Connections */}
       {cosmicConnections}

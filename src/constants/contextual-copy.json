@@ -203,39 +203,5 @@
       "An archetype may rise or recede depending on where you are in your cycle.",
       "They reflect roles you move through rather than labels you are assigned."
     ]
-  },
-  "nudges": {
-    "astrology": [
-      {
-        "title": "Make this personal in seconds",
-        "body": "Sign in to see how this connects to your full birth chart, including the houses and planets being activated for you.",
-        "cta": "Unlock your chart context",
-        "href": "/app"
-      }
-    ],
-    "transits": [
-      {
-        "title": "See what this transit touches for you",
-        "body": "Lunary maps transits to your natal placements so you can see what’s being activated, not just what’s happening in the sky.",
-        "cta": "Check your transits",
-        "href": "/app"
-      }
-    ],
-    "personalContext": [
-      {
-        "title": "Get the full chart reading",
-        "body": "Placements only become clear in context. Sign in to see how this interacts with the rest of your chart.",
-        "cta": "View my birth chart",
-        "href": "/app/birth-chart"
-      }
-    ],
-    "horoscopes": [
-      {
-        "title": "Beyond sun sign",
-        "body": "Your chart decides where this lands. Sign in to get a horoscope personalised through your full birth chart.",
-        "cta": "Get my horoscope",
-        "href": "/app"
-      }
-    ]
   }
 }
