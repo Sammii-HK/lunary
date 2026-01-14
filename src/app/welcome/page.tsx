@@ -21,9 +21,10 @@ import { Metadata } from 'next';
 import { NewsletterSignupForm } from '@/components/NewsletterSignupForm';
 
 export const metadata: Metadata = {
-  title: 'Lunary: Personal Astrology App | Birth Chart, Horoscopes & Tarot',
+  title:
+    'Lunary | Personal Astrology App with Birth Charts, Tarot & Moon Cycles',
   description:
-    'Your personal astrology companion. Daily horoscopes, birth chart analysis, tarot readings & moon phases based on real astronomy. Optional Astral Guide chat for deeper insight. Free to start.',
+    'Lunary is a personal astrology app grounded in real astronomy. Create your birth chart, explore astrology, tarot, moon phases, and symbolic systems, then unlock deeper personalised insight as your journey evolves.',
   alternates: {
     canonical: 'https://lunary.app',
   },
@@ -33,7 +34,7 @@ export default function WelcomePage() {
   return (
     <div className='min-h-screen bg-zinc-950 text-zinc-50 flex flex-col'>
       {/* Section 1: Hero */}
-      <section className='relative px-4 md:px-6 mt-10 pb-10 md:pt-28 md:pb-16 bg-zinc-950'>
+      <section className='relative px-4 md:px-6 mt-10 pb-10 md:pt-16 md:pb-16 bg-zinc-950'>
         <div className='max-w-3xl mx-auto text-center space-y-6'>
           <p className='text-xs uppercase tracking-[0.2em] text-zinc-400'>
             Personal astrology grounded in real astronomy
@@ -41,39 +42,32 @@ export default function WelcomePage() {
           <h1 className='text-3xl md:text-4xl lg:text-5xl font-light text-zinc-100 leading-tight tracking-tight'>
             Personal astrology that actually understands you
           </h1>
-          <p className='text-base md:text-lg text-zinc-400 leading-relaxed max-w-2xl mx-auto'>
-            Built from your full birth chart, real astronomy, tarot and lunar
-            cycles. Designed to support emotional clarity, not prediction.
-          </p>
-          <p className='text-xs text-zinc-500'>
-            Chart calculations are based on real astronomy. The Astral Guide
-            chat uses AI to help interpret your chart, patterns and the current
-            sky.
+          <p className='text-sm text-zinc-400 leading-relaxed max-w-3xl mx-auto'>
+            Built around your full birth chart, Lunary connects astrology,
+            tarot, lunar cycles, and crystal guidance through real astronomical
+            timing.
           </p>
           <div className='flex flex-col sm:flex-row gap-4 justify-center items-center pt-2 pb-6'>
-            <Button variant='lunary' asChild>
-              <Link href='/pricing'>Start your free trial</Link>
-            </Button>
             <Button variant='lunary-soft' asChild>
-              <Link href='/auth?signup=true'>Sign up for free</Link>
+              <Link href='/auth?signup=true'>Create your birth chart</Link>
+            </Button>
+            <Button variant='lunary' asChild>
+              <Link href='/pricing'>See what Lunary+ unlocks</Link>
             </Button>
           </div>
           <a
             href='#how-it-works'
-            className='text-sm text-zinc-400 hover:text-zinc-200 transition-colors'
+            className='text-sm text-lunary-primary-400 hover:text-lunary-primary-200 transition-colors'
           >
-            See how it works
+            See how Lunary works
           </a>
-          <p className='text-sm text-zinc-400'>
-            No card required. Takes under 2 minutes.
-          </p>
         </div>
 
         {/* Hero Screenshot */}
         <div className='mt-[72px] flex justify-center'>
           <Image
             src='/lunary_hero.png'
-            alt='Lunary app dashboard showing personalized cosmic insights'
+            alt='Lunary app dashboard showing personalised cosmic insights'
             className='w-full max-w-[420px] md:max-w-[380px] h-auto rounded-2xl border border-zinc-700/50'
             width={380}
             height={827}
@@ -84,6 +78,31 @@ export default function WelcomePage() {
             }}
           />
         </div>
+      </section>
+
+      <section className='py-12 md:py-8 leading-relaxed max-w-3xl mx-auto text-center'>
+        <p className='text-xs text-zinc-500 mb-4'>
+          Chart calculations are based on real astronomy.
+          <br />
+          The Astral Guide chat uses AI to help interpret your chart, patterns
+          and the current sky.
+        </p>
+        <p className='text-sm text-zinc-400'>
+          Free access includes your birth chart and Grimoire tools.
+          <br />
+          <span className='text-lunary-primary-200'>
+            Upgrade for personalised interpretation and deeper analysis.
+          </span>
+        </p>
+        <p className='text-sm text-zinc-400 pb-8'>
+          No card required. Takes under 2 minutes.
+        </p>
+        <p className='text-base text-zinc-400 leading-relaxed max-w-3xl mx-auto'>
+          Lunary is designed for reflection rather than prediction. Instead of
+          offering fixed meanings or one-size-fits-all readings, it helps you
+          understand patterns, timing, and cycles as they unfold, so insight can
+          adapt as you do.
+        </p>
       </section>
 
       {/* Section 2: Problem Recognition */}
@@ -104,7 +123,7 @@ export default function WelcomePage() {
           </div>
           <div className='pt-2'>
             <Button variant='lunary' asChild>
-              <Link href='/pricing'>Begin your personalised chart</Link>
+              <Link href='/auth?signup=true'>Start your birth chart</Link>
             </Button>
           </div>
         </div>
@@ -118,15 +137,24 @@ export default function WelcomePage() {
           </p>
           <p className='text-sm text-zinc-400 mt-2 max-w-2xl mx-auto'>
             Lunary is not about predictions, fear, or telling you what will
-            happen. It is about understanding patterns, cycles, and emotional
-            themes so you can move through life with clarity.
+            happen.
+            <br />
+            It is about understanding patterns, cycles, and emotional themes so
+            you can move through life with clarity.
           </p>
-          <p className='text-sm text-zinc-400 mt-1.5'>
+          <p className='text-sm text-zinc-400 mt-5'>
             Built for people who want depth, not drama.
           </p>
           <p className='text-xs text-zinc-500 mt-2'>
-            Thousands of charts analysed. Zero fear-based predictions.
+            Built on precise astronomical calculations. Zero fear-based
+            predictions.
           </p>
+          <Link
+            href='/about/methodology'
+            className='text-xs text-lunary-primary-300 hover:text-lunary-primary-200 transition-colors inline-block mt-2'
+          >
+            Read the methodology
+          </Link>
         </div>
       </section>
 
@@ -450,14 +478,6 @@ export default function WelcomePage() {
         </div>
       </section>
 
-      <section className='py-6 md:py-10 px-4 md:px-6'>
-        <div className='max-w-3xl mx-auto text-center'>
-          <Button variant='lunary' asChild>
-            <Link href='/pricing'>Create your cosmic dashboard</Link>
-          </Button>
-        </div>
-      </section>
-
       {/* Section 8: Learn & Explore */}
       <section className='py-12 md:py-20 px-4 md:px-6 bg-zinc-900/30'>
         <div className='max-w-5xl mx-auto'>
@@ -478,14 +498,13 @@ export default function WelcomePage() {
               </h3>
               <p className='text-sm text-zinc-400 leading-relaxed'>
                 Explore planets, houses, aspects, and transits with clarity.
-                Learn how the sky works and how it connects to lived experience,
-                without vague predictions or fear-based language.
+                Learn how the sky works and how it connects to lived experience.
               </p>
               <Link
                 href='/grimoire/astrology'
                 className='text-sm text-lunary-primary-300 hover:text-lunary-primary-200 transition-colors'
               >
-                Explore astrology in the Grimoire →
+                Explore astrology
               </Link>
             </div>
             <div className='rounded-2xl border border-zinc-800/60 bg-zinc-900/40 p-5 md:p-6 space-y-3'>
@@ -501,7 +520,7 @@ export default function WelcomePage() {
                 href='/grimoire/tarot'
                 className='text-sm text-lunary-primary-300 hover:text-lunary-primary-200 transition-colors'
               >
-                Explore tarot in the Grimoire →
+                Explore tarot
               </Link>
             </div>
             <div className='rounded-2xl border border-zinc-800/60 bg-zinc-900/40 p-5 md:p-6 space-y-3'>
@@ -517,7 +536,7 @@ export default function WelcomePage() {
                 href='/grimoire/moon'
                 className='text-sm text-lunary-primary-300 hover:text-lunary-primary-200 transition-colors'
               >
-                Explore moon phases in the Grimoire →
+                Explore moon phases
               </Link>
             </div>
             <div className='rounded-2xl border border-zinc-800/60 bg-zinc-900/40 p-5 md:p-6 space-y-3'>
@@ -533,15 +552,15 @@ export default function WelcomePage() {
                 href='/grimoire/correspondences'
                 className='text-sm text-lunary-primary-300 hover:text-lunary-primary-200 transition-colors'
               >
-                Explore correspondences in the Grimoire →
+                Explore correspondences
               </Link>
             </div>
           </div>
           <div className='text-center mt-10 md:mt-14'>
             <p className='text-sm md:text-base text-zinc-400 leading-relaxed max-w-2xl mx-auto'>
-              Learning gives context. Lunary turns that understanding into
-              personalised insight by connecting everything to your birth chart,
-              patterns, and ongoing journey.
+              Learning gives context. When you’re ready, Lunary connects that
+              understanding to your birth chart and current timing for deeper
+              personal insight.
             </p>
           </div>
         </div>
@@ -713,8 +732,8 @@ export default function WelcomePage() {
       <section className='py-12 md:py-20 px-4 md:px-6 bg-zinc-900/30'>
         <div className='max-w-2xl mx-auto text-center space-y-5'>
           <p className='text-sm text-zinc-400'>
-            Lunary is free to begin. <br /> You only upgrade if you want deeper,
-            more personalised insight.
+            Free to begin. <br /> Upgrade only if you want deeper,
+            chart-specific insight.
           </p>
           <h2 className='text-2xl md:text-3xl font-light text-zinc-100'>
             What’s included
@@ -743,7 +762,7 @@ export default function WelcomePage() {
                   </p>
                 </li>
                 <li>
-                  <p className='text-sm text-zinc-200'>Astral guide chat</p>
+                  <p className='text-sm text-zinc-200'>Astral Guide chat</p>
                   <p className='text-xs text-zinc-500'>
                     Ask questions and receive context-aware insight based on
                     your chart and the current sky.
@@ -818,11 +837,11 @@ export default function WelcomePage() {
             Lunary is here to walk that with you.
           </p>
           <div className='pt-2 flex flex-col sm:flex-row gap-4 justify-center items-center'>
-            <Button variant='lunary' asChild>
-              <Link href='/pricing'>Begin your free trial</Link>
-            </Button>
             <Button variant='lunary-soft' asChild>
-              <Link href='/auth?signup=true'>Sign up for free</Link>
+              <Link href='/auth?signup=true'>Create your birth chart</Link>
+            </Button>
+            <Button variant='lunary' asChild>
+              <Link href='/pricing'>See what Lunary+ unlocks</Link>
             </Button>
           </div>
         </div>

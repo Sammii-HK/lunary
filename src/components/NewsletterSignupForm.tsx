@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useId, useRef, FormEvent } from 'react';
-import { Mail, Loader2, CheckCircle2, AlertCircle } from 'lucide-react';
+import { Loader2, CheckCircle2, AlertCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -166,13 +166,8 @@ export function NewsletterSignupForm({
             align === 'center' && 'sm:flex-col sm:items-center',
           )}
         >
-          <div className='flex h-11 w-11 items-center justify-center rounded-full bg-lunary-primary-900 text-lunary-accent-200'>
-            <Mail className='h-5 w-5' strokeWidth={1.75} />
-          </div>
           <div className='space-y-2'>
-            <h3 className='text-xl sm:text-2xl font-semibold text-white'>
-              {headline}
-            </h3>
+            <h3 className='text-xl sm:text-2xl text-white'>{headline}</h3>
             <p className='text-sm sm:text-base text-lunary-accent-100/80'>
               {description}
             </p>
