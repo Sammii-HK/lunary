@@ -160,6 +160,10 @@ export default function sitemap(): MetadataRoute.Sitemap {
     'grimoire/candle-magic': ['src/app/grimoire/candle-magic/page.tsx'],
     'grimoire/correspondences': ['src/app/grimoire/correspondences/page.tsx'],
     'grimoire/horoscopes': ['src/app/grimoire/horoscopes/page.tsx'],
+    'grimoire/horoscopes/weekly': [
+      'src/app/grimoire/horoscopes/weekly/page.tsx',
+    ],
+    'grimoire/horoscopes/today': ['src/app/grimoire/horoscopes/today/page.tsx'],
     'grimoire/decans': ['src/app/grimoire/decans/page.tsx'],
     'grimoire/cusps': ['src/app/grimoire/cusps/page.tsx'],
     'grimoire/seasons': ['src/app/grimoire/seasons/page.tsx'],
@@ -315,8 +319,18 @@ export default function sitemap(): MetadataRoute.Sitemap {
     },
     {
       path: 'grimoire/horoscopes',
-      changeFrequency: 'daily',
+      changeFrequency: 'weekly',
       priority: 0.8,
+    },
+    {
+      path: 'grimoire/horoscopes/weekly',
+      changeFrequency: 'daily',
+      priority: 0.7,
+    },
+    {
+      path: 'grimoire/horoscopes/today',
+      changeFrequency: 'daily',
+      priority: 0.7,
     },
     { path: 'grimoire/decans', changeFrequency: 'monthly', priority: 0.7 },
     { path: 'grimoire/cusps', changeFrequency: 'monthly', priority: 0.7 },
