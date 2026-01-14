@@ -116,7 +116,7 @@ export function YearlyForecast() {
       });
       if (!response.ok) {
         if (response.status === 403) {
-          setError('Upgrade to Lunary+ AI Annual to access yearly forecast');
+          setError('Upgrade to Lunary+ Pro Annual to access yearly forecast');
         } else {
           setError('Failed to load yearly forecast');
         }
@@ -208,7 +208,7 @@ export function YearlyForecast() {
                     if (!response.ok) {
                       if (response.status === 403) {
                         setError(
-                          'Calendar export requires Lunary+ AI Annual subscription',
+                          'Calendar export requires Lunary+ Pro Annual subscription',
                         );
                       } else {
                         setError('Failed to download calendar');

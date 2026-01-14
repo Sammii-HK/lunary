@@ -106,7 +106,7 @@ export function OnboardingFeatureTour({
     return [
       { title: 'Everything in Lunary+', items: basePlanHighlights },
       {
-        title: 'Everything in Lunary+ AI',
+        title: 'Everything in Lunary+ Pro',
         items: [
           'Up to 300 messages/day AI chat + extended context memory',
           'Personalized weekly reports + deeper readings',

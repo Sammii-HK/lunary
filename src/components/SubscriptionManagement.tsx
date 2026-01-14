@@ -293,11 +293,11 @@ export default function SubscriptionManagement({
             {(() => {
               const plan =
                 stripeSubscription?.plan || (displaySubscription as any)?.plan;
-              if (plan === 'lunary_plus_ai_annual') return 'Lunary+ AI Annual';
-              if (plan === 'lunary_plus_ai') return 'Lunary+ AI';
+              if (plan === 'lunary_plus_ai_annual') return 'Lunary+ Pro Annual';
+              if (plan === 'lunary_plus_ai') return 'Lunary+ Pro';
               if (plan === 'lunary_plus') return 'Lunary+';
-              if (plan === 'yearly') return 'Lunary+ AI Annual';
-              if (plan === 'monthly') return 'Lunary+ AI';
+              if (plan === 'yearly') return 'Lunary+ Pro Annual';
+              if (plan === 'monthly') return 'Lunary+ Pro';
               return (
                 stripeSubscription?.planName ||
                 (displaySubscription as any)?.planName ||

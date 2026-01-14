@@ -87,7 +87,7 @@ type UsageSnapshot = {
 const PLAN_LABEL: Record<TarotPlan, string> = {
   free: 'Cosmic Explorer',
   monthly: 'Lunary+',
-  yearly: 'Lunary+ AI Annual',
+  yearly: 'Lunary+ Pro Annual',
 };
 
 // Map TarotPlan to actual plan ID for UpgradePrompt

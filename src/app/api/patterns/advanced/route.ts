@@ -719,7 +719,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json(
         {
           error:
-            'Advanced pattern analysis is available for Lunary+ AI subscribers',
+            'Advanced pattern analysis is available for Lunary+ Pro subscribers',
           requiresUpgrade: true,
         },
         { status: 403 },

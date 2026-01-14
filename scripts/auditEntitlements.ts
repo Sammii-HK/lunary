@@ -18,7 +18,7 @@ type ClaimRule = {
 const PRICING_FEATURE_IGNORES = new Set<string>([
   'Everything in Cosmic Explorer',
   'Everything in Lunary+',
-  'Everything in Lunary+ AI',
+  'Everything in Lunary+ Pro',
 ]);
 
 const PRICING_FEATURE_CLAIMS: Record<PlanKey, ClaimRule[]> = {

@@ -380,7 +380,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json(
         {
           error:
-            'Yearly cosmic forecast is available for Lunary+ AI Annual subscribers',
+            'Yearly cosmic forecast is available for Lunary+ Pro Annual subscribers',
           requiresUpgrade: true,
         },
         { status: 403 },

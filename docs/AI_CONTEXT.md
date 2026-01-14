@@ -73,7 +73,7 @@ Benefits for users:
 - AI chat (50 messages per day) with limited context window
 - Memory system (plan-based memory snippets)
 
-**Lunary+ AI Plan ($8.99/month):**
+**Lunary+ Pro Plan ($8.99/month):**
 
 - All Lunary+ features plus:
 - Unlimited AI chat (300 messages per day)
@@ -85,9 +85,9 @@ Benefits for users:
 - Unlimited collections
 - Advanced pattern analysis (deep insights into recurring themes)
 
-**Lunary+ AI Annual Plan ($89.99/year):**
+**Lunary+ Pro Annual Plan ($89.99/year):**
 
-- All Lunary+ AI features plus:
+- All Lunary+ Pro features plus:
 - Unlimited tarot spreads (unlimited custom spreads)
 - Yearly cosmic forecast (comprehensive year-ahead forecast)
 - Data export (export all your cosmic data including tarot readings, chat threads, collections)
@@ -103,7 +103,7 @@ Benefits for users:
 - Conversation thread - single thread per user, last 50 messages retained
 - Memory system - limited context window and memory snippets (plan-based)
 - Quick actions for common queries (cosmic weather, transit feelings, ritual generation)
-- Plan-based limits: Free (3/day), Lunary+ (50/day), Lunary+ AI (300/day)
+- Plan-based limits: Free (3/day), Lunary+ (50/day), Lunary+ Pro (300/day)
 
 **Book of Shadows (Personal Journal):**
 
@@ -125,9 +125,9 @@ Benefits for users:
 
 **Advanced AI Capabilities:**
 
-- Deeper readings (Lunary+ AI) - Extended analysis with journaling & rituals
-- Weekly reports (Lunary+ AI) - Automated weekly cosmic summaries delivered automatically
-- Downloadable reports (Lunary+ AI) - Export insights as PDFs
+- Deeper readings (Lunary+ Pro) - Extended analysis with journaling & rituals
+- Weekly reports (Lunary+ Pro) - Automated weekly cosmic summaries delivered automatically
+- Downloadable reports (Lunary+ Pro) - Export insights as PDFs
 - AI ritual generation - Personalized ritual suggestions based on chart and current cosmic conditions
 - Advanced pattern analysis - Deep insights into recurring themes across readings
 
@@ -264,8 +264,8 @@ Complete in-depth index of all grimoire content (500+ pages of knowledge):
 
 3. **Paid Subscribers** - Full access to personalized features:
    - **Lunary+ (Monthly)**: $4.99/month
-   - **Lunary+ AI (Monthly)**: $8.99/month
-   - **Lunary+ AI Annual (Yearly)**: $89.99/year (Save 17%)
+   - **Lunary+ Pro (Monthly)**: $8.99/month
+   - **Lunary+ Pro Annual (Yearly)**: $89.99/year (Save 17%)
 
 ## Conversion Goals
 
@@ -328,7 +328,7 @@ Tertiary: Reduce churn, increase retention
 - **Transparent Pricing** - Simple, clear pricing
 - **Value Focus** - Emphasize personalization and accuracy
 - **Cancel Anytime** - Low commitment, high value
-- **Plan Names**: Cosmic Explorer (free), Lunary+ (monthly), Lunary+ AI (monthly), Lunary+ AI Annual (yearly)
+- **Plan Names**: Cosmic Explorer (free), Lunary+ (monthly), Lunary+ Pro (monthly), Lunary+ Pro Annual (yearly)
 
 ## Conversion Optimization Priorities
 

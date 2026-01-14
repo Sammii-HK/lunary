@@ -186,7 +186,7 @@ export function OnboardingFlow({
     return [
       { title: 'Everything in Lunary+', items: basePlanHighlights },
       {
-        title: 'Everything in Lunary+ AI',
+        title: 'Everything in Lunary+ Pro',
         items: [
           'Up to 300 messages/day AI chat with your cosmic companion',
           'Personalized weekly reports + deeper readings',

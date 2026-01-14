@@ -1185,7 +1185,7 @@ const TarotReadings = () => {
                       )}
                       title={
                         isLocked
-                          ? 'Upgrade to Lunary+ AI Annual to unlock'
+                          ? 'Upgrade to Lunary+ Pro Annual to unlock'
                           : undefined
                       }
                     >
@@ -1222,7 +1222,7 @@ const TarotReadings = () => {
                   )}
                   title={
                     !subscription.hasAccess('advanced_patterns')
-                      ? 'Upgrade to Lunary+ AI Annual to unlock'
+                      ? 'Upgrade to Lunary+ Pro Annual to unlock'
                       : undefined
                   }
                 >
@@ -1252,7 +1252,7 @@ const TarotReadings = () => {
                   )}
                   title={
                     !subscription.hasAccess('advanced_patterns')
-                      ? 'Upgrade to Lunary+ AI Annual to unlock advanced patterns'
+                      ? 'Upgrade to Lunary+ Pro Annual to unlock advanced patterns'
                       : isMultidimensionalMode
                         ? 'Turn off multidimensional analysis'
                         : 'Turn on multidimensional analysis'
@@ -1479,7 +1479,7 @@ const TarotReadings = () => {
               variant='card'
               featureName={upgradeFeature || 'advanced_patterns'}
               title='Unlock Advanced Patterns'
-              description='Upgrade to Lunary+ AI Annual to access year-over-year comparisons, multi-dimensional analysis, and extended timeline insights.'
+              description='Upgrade to Lunary+ Pro Annual to access year-over-year comparisons, multi-dimensional analysis, and extended timeline insights.'
               requiredPlan='lunary_plus_ai_annual'
             />
           </div>

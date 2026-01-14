@@ -255,12 +255,12 @@ export default function PricingPage() {
     {
       question: 'What makes Lunary different?',
       answer:
-        'Every insight is calculated from your exact birth chart - not generic sun sign horoscopes.',
+        'Every insight is calculated from your exact birth chart - not generic sun sign horoscopes. Astronomy powers the charts - AI only appears in Astral Guide chat.',
     },
     {
       question: 'What are the Astral Guide chat limits?',
       answer:
-        'Astral Guide chat limits are set per plan.\n\nFree accounts include up to 3 messages per day.\n\nLunary+ includes up to 50 messages per day.\n\nLunary+ AI includes up to 300 messages per day.',
+        'Astral Guide chat limits are set per plan.\n\nFree accounts include up to 3 messages per day.\n\nLunary+ includes up to 50 messages per day.\n\nLunary+ Pro includes up to 300 messages per day.',
     },
     {
       question: 'What are “recent messages” and “memory snippets”?',
@@ -323,8 +323,7 @@ export default function PricingPage() {
             <p className='text-base md:text-lg text-zinc-400 max-w-xl mx-auto leading-relaxed'>
               Start with free access to your birth chart, moon phases, and
               general cosmic insights. Upgrade for personalized readings based
-              on your exact birth chart. Astronomy powers the charts—AI only
-              appears in Astral Guide chat.
+              on your exact birth chart.
             </p>
           </div>
         </section>

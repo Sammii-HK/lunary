@@ -100,7 +100,7 @@ export default function WelcomePage() {
               Upgrade for personalised interpretation and deeper analysis.
             </span>
             <br />
-            Personal Day and Personal Year numbers are free; Lunary+ AI unlocks
+            Personal Day and Personal Year numbers are free; Lunary+ Pro unlocks
             the interpretation.
           </p>
           <p className='text-sm text-zinc-400 pb-8'>

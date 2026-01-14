@@ -5,7 +5,7 @@
 ### Tarot Page
 
 - ✅ **Tarot Patterns** - `feature='tarot_patterns'` (Lunary+ required)
-- ✅ **Advanced Patterns** (180-365 days) - `subscription.hasAccess('advanced_patterns')` (Lunary+ AI Annual required)
+- ✅ **Advanced Patterns** (180-365 days) - `subscription.hasAccess('advanced_patterns')` (Lunary+ Pro Annual required)
 - ✅ **Saved Spreads history** - available to authenticated users with plan-based retention
   - Free users: 7-day history window
   - Paid users: 365-day history window

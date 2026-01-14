@@ -59,7 +59,7 @@ Available to all authenticated users:
 - **Personal Day meaning** (`personal_day_meaning`)
 - **Personal Year meaning** (`personal_year_meaning`)
 
-### Lunary+ AI (additional)
+### Lunary+ Pro (additional)
 
 - **Astral Guide chat access** (`unlimited_ai_chat`)
 - **Deeper Readings** (`deeper_readings`)
@@ -69,7 +69,7 @@ Available to all authenticated users:
 - **AI Ritual Generation** (`ai_ritual_generation`)
 - **Advanced Patterns** (`advanced_patterns`)
 
-### Lunary+ AI Annual (additional)
+### Lunary+ Pro Annual (additional)
 
 - **Unlimited Tarot Spreads** (`unlimited_tarot_spreads`)
 - **Yearly Forecast** (`yearly_forecast`)
@@ -89,10 +89,10 @@ Available to all authenticated users:
 - **Astral Guide daily limits** (from `PRICING_PLANS`):
   - Free: 3 messages/day
   - Lunary+: 50 messages/day
-  - Lunary+ AI / Annual: 300 messages/day
+  - Lunary+ Pro / Annual: 300 messages/day
 - **Astral Guide context limits** (from `lib/ai/plans.ts`):
-  - Context history entries: Free 0, Lunary+ 4, Lunary+ AI 8, Annual 8
-  - Memory snippets: Free 0, Lunary+ 2, Lunary+ AI 4, Annual 4
+  - Context history entries: Free 0, Lunary+ 4, Lunary+ Pro 8, Annual 8
+  - Memory snippets: Free 0, Lunary+ 2, Lunary+ Pro 4, Annual 4
 - **Chat history**:
   - One active thread per user
   - History capped at last 50 messages
@@ -131,40 +131,40 @@ Available to all authenticated users:
 
 ## Feature Access Matrix
 
-| Feature key                            | Free | Lunary+ | Lunary+ AI | AI Annual |
-| -------------------------------------- | ---- | ------- | ---------- | --------- |
-| `moon_phases`                          | ✅   | ✅      | ✅         | ✅        |
-| `general_horoscope`                    | ✅   | ✅      | ✅         | ✅        |
-| `general_tarot`                        | ✅   | ✅      | ✅         | ✅        |
-| `general_crystal_recommendations`      | ✅   | ✅      | ✅         | ✅        |
-| `grimoire`                             | ✅   | ✅      | ✅         | ✅        |
-| `lunar_calendar`                       | ✅   | ✅      | ✅         | ✅        |
-| `weekly_ai_ritual`                     | ✅   | ✅      | ✅         | ✅        |
-| `birthday_collection`                  | ✅   | ✅      | ✅         | ✅        |
-| `birth_chart`                          | ✅   | ✅      | ✅         | ✅        |
-| `personal_day_number`                  | ✅   | ✅      | ✅         | ✅        |
-| `personal_year_number`                 | ✅   | ✅      | ✅         | ✅        |
-| `personalized_horoscope`               | ❌   | ✅      | ✅         | ✅        |
-| `personal_tarot`                       | ❌   | ✅      | ✅         | ✅        |
-| `personalized_crystal_recommendations` | ❌   | ✅      | ✅         | ✅        |
-| `personalized_transit_readings`        | ❌   | ✅      | ✅         | ✅        |
-| `transit_calendar`                     | ❌   | ✅      | ✅         | ✅        |
-| `tarot_patterns`                       | ❌   | ✅      | ✅         | ✅        |
-| `solar_return`                         | ❌   | ✅      | ✅         | ✅        |
-| `cosmic_profile`                       | ❌   | ✅      | ✅         | ✅        |
-| `moon_circles`                         | ❌   | ✅      | ✅         | ✅        |
-| `ritual_generator`                     | ❌   | ✅      | ✅         | ✅        |
-| `collections`                          | ❌   | ✅      | ✅         | ✅        |
-| `monthly_insights`                     | ❌   | ✅      | ✅         | ✅        |
-| `personal_day_meaning`                 | ❌   | ✅      | ✅         | ✅        |
-| `personal_year_meaning`                | ❌   | ✅      | ✅         | ✅        |
-| `unlimited_ai_chat`                    | ❌   | ❌      | ✅         | ✅        |
-| `deeper_readings`                      | ❌   | ❌      | ✅         | ✅        |
-| `weekly_reports`                       | ❌   | ❌      | ✅         | ✅        |
-| `saved_chat_threads`                   | ❌   | ❌      | ✅         | ✅        |
-| `downloadable_reports`                 | ❌   | ❌      | ✅         | ✅        |
-| `ai_ritual_generation`                 | ❌   | ❌      | ✅         | ✅        |
-| `advanced_patterns`                    | ❌   | ❌      | ✅         | ✅        |
-| `unlimited_tarot_spreads`              | ❌   | ❌      | ❌         | ✅        |
-| `yearly_forecast`                      | ❌   | ❌      | ❌         | ✅        |
-| `data_export`                          | ❌   | ❌      | ❌         | ✅        |
+| Feature key                            | Free | Lunary+ | Lunary+ Pro | Pro Annual |
+| -------------------------------------- | ---- | ------- | ----------- | ---------- |
+| `moon_phases`                          | ✅   | ✅      | ✅          | ✅         |
+| `general_horoscope`                    | ✅   | ✅      | ✅          | ✅         |
+| `general_tarot`                        | ✅   | ✅      | ✅          | ✅         |
+| `general_crystal_recommendations`      | ✅   | ✅      | ✅          | ✅         |
+| `grimoire`                             | ✅   | ✅      | ✅          | ✅         |
+| `lunar_calendar`                       | ✅   | ✅      | ✅          | ✅         |
+| `weekly_ai_ritual`                     | ✅   | ✅      | ✅          | ✅         |
+| `birthday_collection`                  | ✅   | ✅      | ✅          | ✅         |
+| `birth_chart`                          | ✅   | ✅      | ✅          | ✅         |
+| `personal_day_number`                  | ✅   | ✅      | ✅          | ✅         |
+| `personal_year_number`                 | ✅   | ✅      | ✅          | ✅         |
+| `personalized_horoscope`               | ❌   | ✅      | ✅          | ✅         |
+| `personal_tarot`                       | ❌   | ✅      | ✅          | ✅         |
+| `personalized_crystal_recommendations` | ❌   | ✅      | ✅          | ✅         |
+| `personalized_transit_readings`        | ❌   | ✅      | ✅          | ✅         |
+| `transit_calendar`                     | ❌   | ✅      | ✅          | ✅         |
+| `tarot_patterns`                       | ❌   | ✅      | ✅          | ✅         |
+| `solar_return`                         | ❌   | ✅      | ✅          | ✅         |
+| `cosmic_profile`                       | ❌   | ✅      | ✅          | ✅         |
+| `moon_circles`                         | ❌   | ✅      | ✅          | ✅         |
+| `ritual_generator`                     | ❌   | ✅      | ✅          | ✅         |
+| `collections`                          | ❌   | ✅      | ✅          | ✅         |
+| `monthly_insights`                     | ❌   | ✅      | ✅          | ✅         |
+| `personal_day_meaning`                 | ❌   | ✅      | ✅          | ✅         |
+| `personal_year_meaning`                | ❌   | ✅      | ✅          | ✅         |
+| `unlimited_ai_chat`                    | ❌   | ❌      | ✅          | ✅         |
+| `deeper_readings`                      | ❌   | ❌      | ✅          | ✅         |
+| `weekly_reports`                       | ❌   | ❌      | ✅          | ✅         |
+| `saved_chat_threads`                   | ❌   | ❌      | ✅          | ✅         |
+| `downloadable_reports`                 | ❌   | ❌      | ✅          | ✅         |
+| `ai_ritual_generation`                 | ❌   | ❌      | ✅          | ✅         |
+| `advanced_patterns`                    | ❌   | ❌      | ✅          | ✅         |
+| `unlimited_tarot_spreads`              | ❌   | ❌      | ❌          | ✅         |
+| `yearly_forecast`                      | ❌   | ❌      | ❌          | ✅         |
+| `data_export`                          | ❌   | ❌      | ❌          | ✅         |

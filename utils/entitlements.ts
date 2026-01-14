@@ -197,7 +197,7 @@ export const PRICING_PLANS: PricingPlan[] = [
   {
     id: 'lunary_plus_ai',
     tier: 'ai',
-    name: 'Lunary+ AI',
+    name: 'Lunary+ Pro',
     description: 'Everything in Lunary+ with deeper Astral Guide chat',
     price: 8.99,
     interval: 'month',
@@ -225,7 +225,7 @@ export const PRICING_PLANS: PricingPlan[] = [
   {
     id: 'lunary_plus_ai_annual',
     tier: 'ai_annual',
-    name: 'Lunary+ AI Annual',
+    name: 'Lunary+ Pro Annual',
     description: 'Full year of Lunary+ with Astral Guide chat',
     price: 89.99,
     interval: 'year',
@@ -235,7 +235,7 @@ export const PRICING_PLANS: PricingPlan[] = [
     chatLabel: 'Expanded Astral Guide chat',
     trialDays: FREE_TRIAL_DAYS.yearly,
     features: [
-      'Everything in Lunary+ AI',
+      'Everything in Lunary+ Pro',
       'All tarot spreads unlocked',
       'Unlimited tarot spreads',
       'Yearly cosmic forecast',

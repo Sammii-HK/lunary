@@ -211,7 +211,9 @@ export function AdvancedPatterns({
       );
       if (!response.ok) {
         if (response.status === 403) {
-          setError('Upgrade to Lunary+ AI to access advanced pattern analysis');
+          setError(
+            'Upgrade to Lunary+ Pro to access advanced pattern analysis',
+          );
           // Don't return - allow component to show upgrade UI
         } else {
           setError('Failed to load advanced patterns');
@@ -510,7 +512,7 @@ export function AdvancedPatterns({
                     Advanced Pattern Analysis
                   </h4>
                   <p className='text-xs text-lunary-accent-300 mb-3'>
-                    Upgrade to Lunary+ AI to unlock year-over-year comparisons,
+                    Upgrade to Lunary+ Pro to unlock year-over-year comparisons,
                     multi-dimensional analysis, and extended timeline insights.
                   </p>
                   <UpgradePrompt
@@ -757,7 +759,7 @@ export function AdvancedPatterns({
                     Advanced Pattern Analysis
                   </h4>
                   <p className='text-xs text-lunary-accent-300 mb-3'>
-                    Upgrade to Lunary+ AI to unlock year-over-year comparisons,
+                    Upgrade to Lunary+ Pro to unlock year-over-year comparisons,
                     multi-dimensional analysis, and extended timeline insights.
                   </p>
                   <UpgradePrompt

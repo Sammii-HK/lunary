@@ -51,7 +51,7 @@
 **Implementation**:
 
 - Lunary+ (£4.99/month) - Rituals, Moon Circles, personalized guidance
-- Lunary+ AI (£8.99/month) - Everything in Lunary+ plus unlimited AI
+- Lunary+ Pro (£8.99/month) - Everything in Lunary+ plus unlimited AI
 - Annual (£79.99/year) - Full year with AI, save 26%
 - Feature flags system updated
 - Files: `utils/pricing.ts`, `src/lib/ai/plans.ts`

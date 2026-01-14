@@ -250,7 +250,7 @@ export async function POST(request: NextRequest) {
         {
           success: false,
           message:
-            'Cosmic Report Generator is available for Lunary+ AI subscribers. Upgrade to unlock this feature.',
+            'Cosmic Report Generator is available for Lunary+ Pro subscribers. Upgrade to unlock this feature.',
           requiresUpgrade: true,
         },
         { status: 403 },

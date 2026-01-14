@@ -49,7 +49,7 @@ export async function GET(request: NextRequest) {
           ctaLabel: 'Start free trial',
         },
         {
-          name: 'Lunary+ AI',
+          name: 'Lunary+ Pro',
           price: 8.99,
           priceCurrency: 'USD',
           interval: 'month',
@@ -66,13 +66,13 @@ export async function GET(request: NextRequest) {
           ctaLabel: 'Start free trial',
         },
         {
-          name: 'Lunary+ AI Annual',
+          name: 'Lunary+ Pro Annual',
           price: 89.99,
           priceCurrency: 'USD',
           interval: 'year',
           savings: '17% off monthly price',
           features: [
-            'Everything in Lunary+ AI',
+            'Everything in Lunary+ Pro',
             'Billed annually (saves ~17%)',
             'All features unlocked',
           ],
