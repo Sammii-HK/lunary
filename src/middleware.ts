@@ -128,8 +128,9 @@ export function middleware(request: NextRequest) {
       return NextResponse.rewrite(url);
     }
   } else {
-    // Block /admin on non-admin hosts
-    if (pathname.startsWith('/admin')) {
+    // PRODUCTION ONLY: block /admin on non-admin hosts
+    // Local/dev/staging hosts should be allowed to use /admin directly.
+    if (isProd && pathname.startsWith('/admin')) {
       return buildRedirect(request, '/', 302);
     }
   }

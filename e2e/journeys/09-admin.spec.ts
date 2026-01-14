@@ -17,29 +17,27 @@ test.describe('Admin Journey', () => {
     }
 
     // Wait for React hydration
-    await adminPage.waitForTimeout(3000);
+    await adminPage.waitForTimeout(1500);
 
-    // Wait for admin dashboard content
+    // Ensure we didn't get bounced somewhere unexpected (e.g. homepage).
+    await expect(adminPage).toHaveURL(/\/admin(?:\/|$)/, { timeout: 10000 });
+
+    // Wait for admin dashboard content (keep total wait well below test timeout)
     console.log('   → Looking for admin dashboard content...');
     const adminSelectors = [
       'text=/Admin Dashboard/i',
-      'text=/admin dashboard/i',
-      'text=/Manage your cosmic/i',
       'h1:has-text("Admin")',
-      'text=/Sign in to continue/i',
-      'text=/Checking authorization/i',
+      'text=/admin tools/i',
+      'text=/checking authorization/i',
     ];
 
     let found = false;
     for (const selector of adminSelectors) {
-      try {
-        const element = adminPage.locator(selector).first();
-        await expect(element).toBeVisible({ timeout: 10000 });
+      const element = adminPage.locator(selector).first();
+      if (await element.isVisible({ timeout: 4000 }).catch(() => false)) {
         found = true;
         console.log(`   ✅ Found admin dashboard: ${selector}`);
         break;
-      } catch {
-        continue;
       }
     }
 
