@@ -207,7 +207,7 @@ export default function TransitsIndexPage() {
             'saturn return meaning',
           ]}
           canonicalUrl='https://lunary.app/grimoire/transits'
-          intro='Transits are the moving planets making angles to your natal placements. This hub catalogues their influence, timing, and practical meaning.'
+          intro='Transits are the moving planets making angles to your natal placements. This hub catalogues their influence, timing, and practical meaning. Transits gain meaning through relationship, not isolation.'
           breadcrumbs={[
             { label: 'Grimoire', href: '/grimoire' },
             { label: 'Transits', href: '/grimoire/transits' },
