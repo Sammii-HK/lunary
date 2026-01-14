@@ -4,7 +4,6 @@ import { useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
 import { useUser } from '@/context/UserContext';
 import { SmartTrialButton } from '@/components/SmartTrialButton';
-import { Button } from '@/components/ui/button';
 import { NewsletterSignupForm } from '@/components/NewsletterSignupForm';
 import {
   PRICING_PLANS,
@@ -13,14 +12,7 @@ import {
 } from '../../../utils/pricing';
 import { createCheckoutSession } from '../../../utils/stripe';
 import { loadStripe } from '@stripe/stripe-js';
-import {
-  Check,
-  Sparkles,
-  Star,
-  ArrowRight,
-  ChevronDown,
-  ChevronUp,
-} from 'lucide-react';
+import { Check, Sparkles, Star, ChevronDown, ChevronUp } from 'lucide-react';
 import { useSubscription } from '../../hooks/useSubscription';
 import { useAuthStatus } from '@/components/AuthStatus';
 import { useCurrency, formatPrice } from '../../hooks/useCurrency';
@@ -32,6 +24,27 @@ import { createProductSchema, renderJsonLd } from '@/lib/schema';
 import { AuthComponent } from '@/components/Auth';
 import { useModal } from '@/hooks/useModal';
 
+const formatChatFeature = (plan: PricingPlan): string | undefined => {
+  if (!plan.chatLabel) return undefined;
+  if (typeof plan.chatLimitPerDay === 'number') {
+    return `${plan.chatLabel} (up to ${plan.chatLimitPerDay} messages/day)`;
+  }
+  return plan.chatLabel;
+};
+
+const formatTrialFeature = (plan: PricingPlan): string | undefined => {
+  if (plan.trialDays && plan.trialDays > 0) {
+    return `${plan.trialDays}-day free trial`;
+  }
+  return undefined;
+};
+
+const buildPlanFeatures = (plan: PricingPlan): string[] => {
+  const derived = [formatChatFeature(plan), formatTrialFeature(plan)].filter(
+    Boolean,
+  ) as string[];
+  return [...plan.features, ...derived];
+};
 export default function PricingPage() {
   const { user } = useUser();
   const subscription = useSubscription();
@@ -49,6 +62,7 @@ export default function PricingPage() {
   const [pendingCheckout, setPendingCheckout] = useState<{
     priceId: string;
     planId: string;
+    planInterval: 'month' | 'year';
   } | null>(null);
 
   useModal({
@@ -143,14 +157,16 @@ export default function PricingPage() {
       ? [freePlan, plusPlan, aiPlan].filter(Boolean)
       : [freePlan, plusPlan, annualPlan].filter(Boolean);
 
-  const startCheckout = async (priceId: string, planId: string) => {
+  const startCheckout = async (
+    priceId: string,
+    planId: string,
+    planInterval: 'month' | 'year',
+  ) => {
     if (!priceId) return;
 
     setLoading(planId);
-    conversionTracking.upgradeClicked(
-      planId === 'monthly' ? 'monthly_plan' : 'yearly_plan',
-      '/pricing',
-    );
+    const planLabel = planInterval === 'year' ? 'yearly_plan' : 'monthly_plan';
+    conversionTracking.upgradeClicked(`${planId}-${planLabel}`, '/pricing');
 
     try {
       const storedReferralCode = localStorage.getItem('lunary_referral_code');
@@ -190,14 +206,18 @@ export default function PricingPage() {
     }
   };
 
-  const handleSubscribe = async (priceId: string, planId: string) => {
+  const handleSubscribe = async (
+    priceId: string,
+    planId: string,
+    planInterval: 'month' | 'year',
+  ) => {
     if (!authState.isAuthenticated) {
-      setPendingCheckout({ priceId, planId });
+      setPendingCheckout({ priceId, planId, planInterval });
       setShowAuthModal(true);
       return;
     }
 
-    await startCheckout(priceId, planId);
+    await startCheckout(priceId, planId, planInterval);
   };
 
   const handleAuthSuccess = async () => {
@@ -208,14 +228,14 @@ export default function PricingPage() {
       return;
     }
 
-    await startCheckout(pending.priceId, pending.planId);
+    await startCheckout(pending.priceId, pending.planId, pending.planInterval);
   };
 
   const faqs = [
     {
       question: "What's included in the free trial?",
       answer:
-        'Full access to all personalized features including birth chart analysis, daily horoscopes, and Astral Guide chat. No card required during the trial.',
+        'Full access to personalised features, including complete birth chart analysis and daily horoscopes. Astral Guide chat is included according to the selected plan. No card required to start.',
     },
     {
       question: 'Is Lunary AI-led?',
@@ -237,60 +257,28 @@ export default function PricingPage() {
       answer:
         'Every insight is calculated from your exact birth chart - not generic sun sign horoscopes.',
     },
+    {
+      question: 'Is AI chat unlimited?',
+      answer:
+        'Lunary includes different chat limits depending on your plan.\n\nFree accounts include a small number of messages each day.\n\nLunary+ offers generous daily chat with conversation memory.\n\nLunary+ AI includes effectively unlimited chat for everyday use.',
+    },
   ];
 
-  const productSchemas = [
-    createProductSchema({
-      name: 'Lunary Free',
-      description:
-        'Access your birth chart, moon phases, general horoscopes, tarot cards, and cosmic knowledge base.',
-      price: 0,
-      priceCurrency: 'USD',
-      features: [
-        'Your personal birth chart',
-        'Daily moon phases & basic insights',
-        'General tarot card of the day',
-        '2 tarot spreads per month',
-        'Basic lunar calendar',
-        'General daily horoscope',
-        'Access to grimoire knowledge',
-        '1 Astral Guide insight per week',
-      ],
-      sku: 'lunary_free',
-    }),
-    createProductSchema({
-      name: 'Lunary+',
-      description:
-        'Personalized astrology based on your exact birth chart and real astronomical data.',
-      price: 4.99,
-      priceCurrency: 'USD',
-      interval: 'month',
-      features: [
-        'Complete birth chart analysis',
-        'Personalized daily horoscopes',
-        'Personal transit impacts',
-        'Moon circle rituals',
-        'Crystal recommendations',
-      ],
-      sku: 'lunary_plus',
-    }),
-    createProductSchema({
-      name: 'Lunary+ AI',
-      description:
-        'Astral Guide chat for deeper questions, grounded in your birth chart.',
-      price: 7.99,
-      priceCurrency: 'USD',
-      interval: 'month',
-      features: [
-        'Everything in Lunary+',
-        'Unlimited Astral Guide chat',
-        'Weekly cosmic reports',
-        'Downloadable PDFs',
-        'Advanced pattern analysis',
-      ],
-      sku: 'lunary_plus_ai',
-    }),
-  ];
+  const productSchemas = useMemo(
+    () =>
+      pricingPlans.map((plan) =>
+        createProductSchema({
+          name: plan.name,
+          description: plan.description,
+          price: plan.price,
+          priceCurrency: 'USD',
+          interval: plan.interval,
+          features: buildPlanFeatures(plan),
+          sku: plan.id,
+        }),
+      ),
+    [pricingPlans],
+  );
 
   return (
     <>
@@ -387,9 +375,10 @@ export default function PricingPage() {
                       : plan.id === 'lunary_plus_ai_annual';
                   const isFree = plan.price === 0;
                   const isExpanded = expandedPlans.has(plan.id);
+                  const planFeatures = buildPlanFeatures(plan);
                   const visibleFeatures = isExpanded
-                    ? plan.features
-                    : plan.features.slice(0, 6);
+                    ? planFeatures
+                    : planFeatures.slice(0, 6);
                   const hasMoreFeatures = plan.features.length > 6;
 
                   return (
@@ -415,10 +404,13 @@ export default function PricingPage() {
                         </div>
                       )}
 
-                      <div className='mb-6'>
+                      <div className='mb-3 md:mb-6'>
                         <h3 className='text-lg font-medium text-zinc-100 mb-1'>
                           {plan.name}
                         </h3>
+                        <p className='text-sm text-lunary-200 mb-2'>
+                          {plan.subtitle}
+                        </p>
                         <p className='text-sm text-zinc-400'>
                           {plan.description}
                         </p>
@@ -426,10 +418,12 @@ export default function PricingPage() {
 
                       <div className='mb-6'>
                         {isFree ? (
-                          <div className='text-4xl font-light'>Free</div>
+                          <div className='text-3xl md:text-4xl font-light'>
+                            Free
+                          </div>
                         ) : (
                           <div>
-                            <span className='text-4xl font-light'>
+                            <span className='text-3xl md:text-4xl font-light'>
                               {formatPrice(
                                 plan.displayPrice,
                                 plan.displayCurrency,
@@ -455,9 +449,7 @@ export default function PricingPage() {
                         {visibleFeatures.map((feature: string, i: number) => (
                           <div key={i} className='flex items-start gap-2.5'>
                             <Check className='w-4 h-4 text-zinc-600 mt-0.5 flex-shrink-0' />
-                            <span className='text-sm text-zinc-400'>
-                              {feature}
-                            </span>
+                            <span className='text-zinc-400'>{feature}</span>
                           </div>
                         ))}
                         {hasMoreFeatures && (
@@ -491,8 +483,8 @@ export default function PricingPage() {
                             className='w-full block text-center py-3 rounded-xl border border-zinc-800 text-zinc-400 text-sm font-medium hover:bg-zinc-800/50 transition-colors'
                           >
                             {authState.isAuthenticated
-                              ? 'Current Plan'
-                              : 'Sign up for free'}
+                              ? 'Open app'
+                              : 'Create your birth chart'}
                           </Link>
                         ) : (subscriptionStatus === 'active' ||
                             subscriptionStatus === 'trial') &&
@@ -521,7 +513,7 @@ export default function PricingPage() {
                                 }
                                 return;
                               }
-                              handleSubscribe(priceId, plan.id);
+                              handleSubscribe(priceId, plan.id, plan.interval);
                             }}
                             disabled={loading === plan.id}
                             className={`w-full py-3 rounded-xl text-sm font-medium transition-all ${
@@ -537,12 +529,12 @@ export default function PricingPage() {
                               </span>
                             ) : isFree ? (
                               authState.isAuthenticated ? (
-                                'Get Started'
+                                'Open app'
                               ) : (
-                                'Sign up for free'
+                                'Create your birth chart'
                               )
                             ) : (
-                              'Start Free Trial'
+                              'See what Lunary+ unlocks'
                             )}
                           </button>
                         )}
@@ -554,7 +546,7 @@ export default function PricingPage() {
             )}
 
             <p className='text-center text-xs text-zinc-600 mt-8'>
-              All paid plans include a 7-day free trial. Cancel anytime.
+              All paid plans include a free trial. Cancel anytime.
             </p>
           </div>
         </section>
@@ -610,27 +602,6 @@ export default function PricingPage() {
                 </div>
               ))}
             </div>
-
-            <div className='mt-12 p-6 rounded-2xl bg-gradient-to-r from-lunary-primary-900/40 via-lunary-secondary-900/30 to-lunary-rose-900/40 border border-lunary-primary-700/50'>
-              <div className='flex flex-col md:flex-row items-center justify-between gap-6'>
-                <div>
-                  <h3 className='text-lg font-medium text-zinc-100 mb-2'>
-                    Lunary+ AI includes everything above, plus:
-                  </h3>
-                  <p className='text-sm text-zinc-400'>
-                    Astral Guide chat for deeper questions, weekly reports,
-                    downloadable PDFs, and advanced pattern analysis. Charts
-                    remain astronomy-based.
-                  </p>
-                </div>
-                <Button variant='lunary' className='flex-shrink-0' asChild>
-                  <a href='#pricing-plans'>
-                    Choose Plan
-                    <ArrowRight className='w-4 h-4' />
-                  </a>
-                </Button>
-              </div>
-            </div>
           </div>
         </section>
 
@@ -678,10 +649,11 @@ export default function PricingPage() {
         <section className='relative py-20 border-t border-zinc-800/50'>
           <div className='max-w-2xl mx-auto px-6 text-center'>
             <h2 className='text-3xl md:text-4xl font-light mb-4'>
-              Ready to explore your chart?
+              Ready to get your birth chart?
             </h2>
             <p className='text-zinc-400 mb-8'>
-              Start your free trial today. No payment required.
+              Create your chart for free using your exact birth time and
+              location.
             </p>
             <SmartTrialButton />
           </div>

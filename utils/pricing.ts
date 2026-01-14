@@ -2,6 +2,7 @@ import { getPriceForCurrency, type PlanId } from './stripe-prices';
 
 export type PricingPlan = {
   id: string;
+  tier: 'free' | 'plus' | 'ai' | 'ai_annual';
   name: string;
   description: string;
   price: number;
@@ -10,16 +11,23 @@ export type PricingPlan = {
   features: string[];
   popular?: boolean;
   savings?: string;
+  chatLimitPerDay?: number;
+  chatLabel?: string;
+  trialDays?: number;
 };
 
 export const PRICING_PLANS: PricingPlan[] = [
   {
     id: 'free',
+    tier: 'free',
     name: 'Cosmic Explorer',
-    description: 'Explore your chart and the cosmic basics',
+    description: 'Designed for light daily reflection',
     price: 0,
     interval: 'month',
     stripePriceId: '', // No Stripe for free plan
+    chatLimitPerDay: 3,
+    chatLabel: 'Astral Guide chat',
+    trialDays: 0,
     features: [
       'Your personal birth chart',
       'Daily moon phases & basic insights',
@@ -28,16 +36,19 @@ export const PRICING_PLANS: PricingPlan[] = [
       'Basic lunar calendar',
       'General daily horoscope',
       'Access to grimoire knowledge',
-      '1 Astral Guide insight per week',
     ],
   },
   {
     id: 'lunary_plus',
+    tier: 'plus',
     name: 'Lunary+',
     description: 'Personalized guidance from your exact birth chart',
     price: 4.99,
     interval: 'month',
     stripePriceId: '',
+    chatLimitPerDay: 50,
+    chatLabel: 'Generous daily Astral Guide chat',
+    trialDays: 7,
     features: [
       'Complete birth chart analysis',
       'Personalized daily horoscopes',
@@ -51,37 +62,43 @@ export const PRICING_PLANS: PricingPlan[] = [
       'Monthly cosmic insights',
       'Tarot pattern analysis',
       'Cosmic State (shareable snapshot)',
-      'Collections & saved insights',
-      '7-day free trial',
+      'Limited Collections & saved insights',
     ],
   },
   {
     id: 'lunary_plus_ai',
+    tier: 'ai',
     name: 'Lunary+ AI',
-    description: 'Everything in Lunary+ plus Astral Guide chat',
+    description: 'Everything in Lunary+ with deeper Astral Guide chat',
     price: 8.99,
     interval: 'month',
     stripePriceId: '',
+    chatLimitPerDay: 300,
+    chatLabel: 'Effectively unlimited AI chat',
+    trialDays: 7,
     features: [
       'Everything in Lunary+',
-      'Unlimited Astral Guide chat (AI)',
       'Personalized weekly reports',
       'Astral Guide ritual prompts (AI)',
       'Deeper tarot interpretations',
       'Advanced pattern analysis',
       'Downloadable PDF reports',
       'Saved chat threads',
-      '7-day free trial',
+      'Deeper readings and weekly reports',
     ],
   },
   {
     id: 'lunary_plus_ai_annual',
+    tier: 'ai_annual',
     name: 'Lunary+ AI Annual',
     description: 'Full year of Lunary+ with Astral Guide chat',
     price: 89.99,
     interval: 'year',
     stripePriceId: '',
     savings: 'Save 17%',
+    chatLimitPerDay: 300,
+    chatLabel: 'Effectively unlimited AI chat',
+    trialDays: 14,
     features: [
       'Everything in Lunary+ AI',
       'Unlimited tarot spreads',
@@ -90,7 +107,6 @@ export const PRICING_PLANS: PricingPlan[] = [
       'Calendar download (ICS format)',
       'Unlimited collections & folders',
       'Priority customer support',
-      '14-day free trial',
     ],
   },
 ];
@@ -369,64 +385,46 @@ export async function getPricingPlansWithStripeData(
   currency: string = 'USD',
 ): Promise<PricingPlan[]> {
   try {
-    const monthlyPriceId = resolvePriceId('lunary_plus', currency);
-    const yearlyPriceId = resolvePriceId('lunary_plus_ai_annual', currency);
+    const planConfigs: Array<{
+      id: 'lunary_plus' | 'lunary_plus_ai' | 'lunary_plus_ai_annual';
+      fallback: number;
+    }> = [
+      { id: 'lunary_plus', fallback: 7 },
+      { id: 'lunary_plus_ai', fallback: 7 },
+      { id: 'lunary_plus_ai_annual', fallback: 14 },
+    ];
 
-    let monthlyTrialDays = 7; // fallback
-    let yearlyTrialDays = 14; // fallback
+    const trialOverrides: Record<string, number> = {};
 
-    if (monthlyPriceId) {
-      try {
-        const response = await fetch('/api/stripe/products', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ priceId: monthlyPriceId }),
-        });
-        if (response.ok) {
-          const data = await response.json();
-          monthlyTrialDays = data.trial_period_days || 7;
+    for (const config of planConfigs) {
+      const priceId = resolvePriceId(config.id, currency);
+      let trialDays = config.fallback;
+
+      if (priceId) {
+        try {
+          const response = await fetch('/api/stripe/products', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ priceId }),
+          });
+          if (response.ok) {
+            const data = await response.json();
+            trialDays = data.trial_period_days || config.fallback;
+          }
+        } catch (error) {
+          console.error(`Error fetching trial period for ${config.id}:`, error);
         }
-      } catch (error) {
-        console.error('Error fetching monthly trial period:', error);
       }
+
+      trialOverrides[config.id] = trialDays;
     }
 
-    if (yearlyPriceId) {
-      try {
-        const response = await fetch('/api/stripe/products', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ priceId: yearlyPriceId }),
-        });
-        if (response.ok) {
-          const data = await response.json();
-          yearlyTrialDays = data.trial_period_days || 14;
-        }
-      } catch (error) {
-        console.error('Error fetching yearly trial period:', error);
-      }
-    }
-
-    // Update the pricing plans with actual trial periods
     return PRICING_PLANS.map((plan) => {
-      if (plan.id === 'monthly') {
+      const override = trialOverrides[plan.id];
+      if (override !== undefined) {
         return {
           ...plan,
-          features: plan.features.map((feature) =>
-            feature.includes('day free trial')
-              ? `${monthlyTrialDays}-day free trial`
-              : feature,
-          ),
-        };
-      }
-      if (plan.id === 'lunary_plus_ai_annual') {
-        return {
-          ...plan,
-          features: plan.features.map((feature) =>
-            feature.includes('day free trial')
-              ? `${yearlyTrialDays}-day free trial`
-              : feature,
-          ),
+          trialDays: override,
         };
       }
       return plan;

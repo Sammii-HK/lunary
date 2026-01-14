@@ -173,10 +173,11 @@ export function OnboardingFlow({
         {
           title: 'Plus AI guidance',
           items: [
-            'Unlimited AI chat with your cosmic companion',
+            'Generous daily AI chat with your cosmic companion',
             'Personalized weekly reports + deeper readings',
             'Advanced pattern analysis + downloadable PDFs',
             'AI ritual generation + saved chat threads',
+            'Limited Collections & saved insights',
           ],
         },
       ];
@@ -187,7 +188,7 @@ export function OnboardingFlow({
       {
         title: 'Everything in Lunary+ AI',
         items: [
-          'Unlimited AI chat with your cosmic companion',
+          'Effectively unlimited AI chat with your cosmic companion',
           'Personalized weekly reports + deeper readings',
           'Advanced pattern analysis + downloadable PDFs',
           'AI ritual generation + saved chat threads',
