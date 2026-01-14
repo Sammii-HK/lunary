@@ -168,7 +168,7 @@ export default function CorrespondencesPage() {
 
       {/* Section 1 */}
       <section id='what-are' className='mb-16'>
-        <h2 className='text-3xl font-light text-zinc-100 mb-6'>
+        <h2 className='text-lg md:text-2xl font-light text-zinc-100 mb-6'>
           1. What Are Correspondences?
         </h2>
 
@@ -230,7 +230,7 @@ export default function CorrespondencesPage() {
 
       {/* Section 2 */}
       <section id='how-to-use' className='mb-16'>
-        <h2 className='text-3xl font-light text-zinc-100 mb-6'>
+        <h2 className='text-lg md:text-2xl font-light text-zinc-100 mb-6'>
           2. How to Use Correspondence Tables Wisely
         </h2>
 
@@ -270,7 +270,7 @@ export default function CorrespondencesPage() {
 
       {/* Section 3: Elements */}
       <section id='elements' className='mb-16'>
-        <h2 className='text-3xl font-light text-zinc-100 mb-6'>
+        <h2 className='text-lg md:text-2xl font-light text-zinc-100 mb-6'>
           3. The Four/Five Elements
         </h2>
 
@@ -349,7 +349,7 @@ export default function CorrespondencesPage() {
 
       {/* Section 4: Colors & Days */}
       <section id='colors-days' className='mb-16'>
-        <h2 className='text-3xl font-light text-zinc-100 mb-6'>
+        <h2 className='text-lg md:text-2xl font-light text-zinc-100 mb-6'>
           4. Colours, Days, Numbers
         </h2>
 
@@ -420,7 +420,7 @@ export default function CorrespondencesPage() {
 
       {/* Section 5: Herbs & Crystals */}
       <section id='herbs-crystals' className='mb-16'>
-        <h2 className='text-3xl font-light text-zinc-100 mb-6'>
+        <h2 className='text-lg md:text-2xl font-light text-zinc-100 mb-6'>
           5. Herbs & Crystals
         </h2>
 
@@ -497,7 +497,7 @@ export default function CorrespondencesPage() {
 
       {/* Section 6: Personal Correspondences */}
       <section id='personal' className='mb-16'>
-        <h2 className='text-3xl font-light text-zinc-100 mb-6'>
+        <h2 className='text-lg md:text-2xl font-light text-zinc-100 mb-6'>
           6. Building Your Own Correspondence List
         </h2>
 
@@ -534,7 +534,7 @@ export default function CorrespondencesPage() {
 
       {/* FAQ */}
       <section id='faq' className='mb-16'>
-        <h2 className='text-3xl font-light text-zinc-100 mb-6'>
+        <h2 className='text-lg md:text-2xl font-light text-zinc-100 mb-6'>
           7. Frequently Asked Questions
         </h2>
 
@@ -554,7 +554,7 @@ export default function CorrespondencesPage() {
       </section>
 
       {/* CTA */}
-      <section className='bg-gradient-to-r from-lunary-primary-900/30 to-green-900/30 border border-lunary-primary-700 rounded-xl p-8 text-center mb-12'>
+      <section className='bg-gradient-to-r from-lunary-primary-900/30 to-pink-500/30 border border-lunary-primary-700 rounded-xl p-8 text-center mb-12'>
         <h2 className='text-2xl font-light text-zinc-100 mb-4'>
           Explore Correspondence Tables
         </h2>

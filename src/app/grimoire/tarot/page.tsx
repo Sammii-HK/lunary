@@ -141,7 +141,7 @@ export default function TarotIndexPage() {
       >
         <div className='space-y-12'>
           <section>
-            <h2 className='text-2xl font-medium text-zinc-100 mb-6'>
+            <h2 className='text-lg md:text-xl font-medium text-zinc-100 mb-6'>
               Major Arcana (22 Cards)
             </h2>
             <p className='text-zinc-400 mb-6'>
@@ -165,7 +165,7 @@ export default function TarotIndexPage() {
           </section>
 
           <section>
-            <h2 className='text-2xl font-medium text-zinc-100 mb-6'>
+            <h2 className='text-lg md:text-xl font-medium text-zinc-100 mb-6'>
               Minor Arcana (56 Cards)
             </h2>
             <p className='text-zinc-400 mb-6'>
@@ -189,28 +189,6 @@ export default function TarotIndexPage() {
                 </Link>
               ))}
             </div>
-            <Link
-              href='/grimoire/tarot/suits'
-              className='inline-block mt-5 text-sm text-violet-300 hover:text-violet-200 transition-colors'
-            >
-              Explore the full tarot suits guide →
-            </Link>
-          </section>
-
-          <section>
-            <h2 className='text-2xl font-medium text-zinc-100 mb-6'>
-              Tarot Spreads
-            </h2>
-            <p className='text-zinc-400 mb-4'>
-              Learn different card layouts for readings, from simple 3-card
-              spreads to the comprehensive Celtic Cross.
-            </p>
-            <Link
-              href='/grimoire/tarot/spreads'
-              className='inline-block px-4 py-2 rounded-lg bg-violet-900/30 text-violet-300 hover:bg-violet-900/50 transition-colors'
-            >
-              Explore Tarot Spreads →
-            </Link>
           </section>
         </div>
       </SEOContentTemplate>
