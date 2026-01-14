@@ -27,7 +27,7 @@ export function getFeatureButtonText(
   // If feature is free, just needs account
   if (feature && isFreeFeature(feature)) {
     if (!isAuthenticated) {
-      return 'Sign up for free';
+      return 'Create your birth chart';
     }
     if (!hasRequiredData) {
       return 'Add your details'; // e.g., "Add your birthday"
@@ -37,15 +37,15 @@ export function getFeatureButtonText(
 
   // Paid feature - needs subscription
   if (!isAuthenticated) {
-    return 'Sign up for free'; // They can sign up and get trial
+    return 'Create your birth chart'; // They can sign up and get trial
   }
   if (isTrialActive) {
-    return 'Continue Trial';
+    return 'Open app';
   }
   if (isSubscribed) {
     return 'View';
   }
-  return 'Start Free Trial';
+  return 'See what Lunary+ unlocks';
 }
 
 /**
@@ -71,15 +71,15 @@ export function getFeatureLinkText(
 
   // Paid feature - needs subscription
   if (!isAuthenticated) {
-    return 'Sign up for free';
+    return 'Create your birth chart';
   }
   if (isTrialActive) {
-    return 'Continue your trial';
+    return 'Open app';
   }
   if (isSubscribed) {
-    return 'View';
+    return 'Open app';
   }
-  return 'Upgrade to unlock';
+  return 'See what Lunary+ unlocks';
 }
 
 /**

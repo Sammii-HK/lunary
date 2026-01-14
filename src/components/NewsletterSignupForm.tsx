@@ -205,7 +205,7 @@ export function NewsletterSignupForm({
           </div>
           <Button
             type='submit'
-            variant='lunary-solid'
+            variant='lunary-soft'
             disabled={status === 'loading'}
             className='px-6'
           >

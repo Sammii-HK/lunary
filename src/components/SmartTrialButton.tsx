@@ -40,7 +40,7 @@ export function SmartTrialButton({
     if (feature && isFreeFeature(feature)) {
       if (!authState.isAuthenticated) {
         return {
-          text: 'Sign up for free',
+          text: 'Create your birth chart',
           href: null,
           action: 'modal' as const,
           variant: 'lunary-solid' as const,
@@ -86,7 +86,7 @@ export function SmartTrialButton({
     }
 
     return {
-      text: 'Sign up for free',
+      text: 'Create your birth chart',
       href: null,
       action: 'modal' as const,
       variant: 'lunary-solid' as const,
@@ -141,8 +141,8 @@ export function SmartTrialButton({
             <div className='text-center mb-4 sm:mb-6'>
               <h3 className='text-lg sm:text-xl font-bold text-white mb-2'>
                 {feature && isFreeFeature(feature)
-                  ? 'Sign Up for Free'
-                  : 'Start Your Free Trial'}
+                  ? 'Create your birth chart'
+                  : 'See what Lunary+ unlocks'}
               </h3>
               <p className='text-zinc-300 text-xs sm:text-sm'>
                 {feature && isFreeFeature(feature)
