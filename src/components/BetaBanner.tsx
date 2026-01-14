@@ -1,8 +1,6 @@
 'use client';
 
 import { useAuthStatus } from '@/components/AuthStatus';
-import { X } from 'lucide-react';
-import { Button } from './ui/button';
 
 export function BetaBanner() {
   const authState = useAuthStatus();
@@ -24,16 +22,6 @@ export function BetaBanner() {
         </span>{' '}
         <span className='text-zinc-400'>for 3 months of Lunary+ free</span>
       </p>
-      <Button
-        variant='ghost'
-        size='icon'
-        className='absolute right-1 top-0 md:top-1 w-6 h-6'
-        onClick={() => {
-          localStorage.setItem('betaBannerClosed', 'true');
-        }}
-      >
-        <X className='w-3 h-3' />
-      </Button>
     </div>
   );
 }
