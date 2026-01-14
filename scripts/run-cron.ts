@@ -8,6 +8,7 @@
  *   - weekly-content: Generate weekly blog, newsletter, Substack, and social posts
  *   - daily-morning-notification: Send daily insight notification
  *   - moon-circles: Create moon circles for new/full moons
+ *   - fx-drift: FX drift check and Discord notification
  *
  * Examples:
  *   pnpm run:cron daily-posts
@@ -38,6 +39,7 @@ if (!cronName) {
     '  - daily-morning-notification: Send daily insight notification',
   );
   console.error('  - moon-circles: Create moon circles for new/full moons');
+  console.error('  - fx-drift: FX drift check and Discord notification');
   console.error('');
   console.error('Examples:');
   console.error('  pnpm run:cron daily-posts');
@@ -51,6 +53,7 @@ const cronEndpoints: Record<string, string> = {
   'weekly-content': '/api/cron/weekly-content',
   'daily-morning-notification': '/api/cron/daily-morning-notification',
   'moon-circles': '/api/cron/moon-circles',
+  'fx-drift': '/api/cron/fx-drift',
 };
 
 const endpoint = cronEndpoints[cronName];

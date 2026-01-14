@@ -1,0 +1,54 @@
+name: FX Drift Update
+
+on:
+  schedule:
+    - cron: '0 9 1 * *'
+  workflow_dispatch:
+
+env:
+  NODE_VERSION: '20'
+
+jobs:
+  fx-drift:
+    name: Apply FX Drift + Open PR
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9.15.0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Apply FX drift updates
+        env:
+          STRIPE_SECRET_KEY: ${{ secrets.STRIPE_SECRET_KEY }}
+          FX_RATE_API_URL: ${{ secrets.FX_RATE_API_URL }}
+          FX_RATE_API_KEY: ${{ secrets.FX_RATE_API_KEY }}
+          FX_DRIFT_UPDATE_THRESHOLD: ${{ secrets.FX_DRIFT_UPDATE_THRESHOLD }}
+        run: pnpm fx:resolve --apply --update-map
+
+      - name: Create pull request if mapping changed
+        uses: peter-evans/create-pull-request@v6
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          commit-message: 'chore(pricing): refresh stripe price mapping'
+          title: 'Update Stripe price mapping'
+          body: |
+            ## Summary
+            - Regenerate Stripe price mapping after FX drift auto-apply
+
+            ## Test plan
+            - N/A
+          branch: chore/fx-drift-price-mapping
+          labels: automated

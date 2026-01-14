@@ -54,8 +54,8 @@ function convertToLocalCurrency(usdPrice: number, currency: string): number {
     return Math.max(1, Math.ceil(converted));
   }
 
-  // Minimum 0.99 for yearly plans
-  return Math.max(0.99, priceWith99);
+  // Do not undercut base conversion for yearly pricing
+  return Math.max(converted, priceWith99);
 }
 
 async function updateYearlyPricing(dryRun: boolean) {
