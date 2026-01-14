@@ -2,6 +2,16 @@ import { NextRequest, NextResponse } from 'next/server';
 import { sql } from '@vercel/postgres';
 import { requireUser } from '@/lib/ai/auth';
 
+function toPostgresTextArray(values: string[]): string {
+  if (values.length === 0) {
+    return '{}';
+  }
+  const escaped = values.map(
+    (value) => `"${value.replace(/\\/g, '\\\\').replace(/"/g, '\\"')}"`,
+  );
+  return `{${escaped.join(',')}}`;
+}
+
 export async function POST(request: NextRequest) {
   try {
     const user = await requireUser(request);
@@ -9,15 +19,22 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const { stepsCompleted, skipped } = body;
 
+    const stepsArray = Array.isArray(stepsCompleted)
+      ? stepsCompleted.filter((step) => typeof step === 'string')
+      : [];
+
+    const stepsLiteral = toPostgresTextArray(stepsArray);
+    const skippedFlag = Boolean(skipped);
+
     await sql`
       INSERT INTO onboarding_completion (user_id, steps_completed, skipped, completed_at, updated_at)
-      VALUES (${userId}, ${JSON.stringify(stepsCompleted || [])}::TEXT[], ${skipped || false}, NOW(), NOW())
+      VALUES (${userId}, ${stepsLiteral}::text[], ${skippedFlag}, NOW(), NOW())
       ON CONFLICT (user_id) 
       DO UPDATE SET
-        steps_completed = ${JSON.stringify(stepsCompleted || [])}::TEXT[],
-        skipped = ${skipped || false},
+        steps_completed = ${stepsLiteral}::text[],
+        skipped = ${skippedFlag},
         completed_at = CASE
-          WHEN ${skipped || false} THEN COALESCE(onboarding_completion.completed_at, NOW())
+          WHEN ${skippedFlag} THEN COALESCE(onboarding_completion.completed_at, NOW())
           ELSE NOW()
         END,
         updated_at = NOW()
