@@ -33,6 +33,10 @@ const PRICING_FEATURE_CLAIMS: Record<PlanKey, ClaimRule[]> = {
     { text: '1 tarot spread per month', requiresEntitlement: false },
     { text: 'Basic lunar calendar', features: ['lunar_calendar'] },
     { text: 'General daily horoscope', features: ['general_horoscope'] },
+    {
+      text: 'Astral Guide context memory (no history, no memory snippets)',
+      requiresEntitlement: false,
+    },
     { text: 'Access to grimoire knowledge', features: ['grimoire'] },
     {
       text: 'Book of Shadows journal (3 entries/month)',
@@ -70,6 +74,10 @@ const PRICING_FEATURE_CLAIMS: Record<PlanKey, ClaimRule[]> = {
     },
     { text: 'Monthly cosmic insights', features: ['monthly_insights'] },
     {
+      text: 'Astral Guide context memory (4 recent messages + 2 memory snippets)',
+      requiresEntitlement: false,
+    },
+    {
       text: 'Personal Day & Personal Year interpretations',
       features: ['personal_day_meaning', 'personal_year_meaning'],
     },
@@ -92,7 +100,10 @@ const PRICING_FEATURE_CLAIMS: Record<PlanKey, ClaimRule[]> = {
     { text: 'Deeper tarot interpretations', features: ['deeper_readings'] },
     { text: 'Advanced pattern analysis', features: ['advanced_patterns'] },
     { text: 'Downloadable PDF reports', features: ['downloadable_reports'] },
-    { text: 'Generous saved chat threads', features: ['saved_chat_threads'] },
+    {
+      text: 'Astral Guide context memory (8 recent messages + 4 memory snippets)',
+      requiresEntitlement: false,
+    },
     {
       text: 'Deeper readings and weekly reports',
       features: ['deeper_readings', 'weekly_reports'],
@@ -289,7 +300,11 @@ function extractFeatureUsage(
   const dynamicFeatures: string[] = [];
 
   const visit = (node: ts.Node) => {
-    if (ts.isJsxAttribute(node) && node.name.text === 'feature') {
+    if (
+      ts.isJsxAttribute(node) &&
+      ts.isIdentifier(node.name) &&
+      node.name.text === 'feature'
+    ) {
       if (node.initializer && ts.isJsxExpression(node.initializer)) {
         if (node.initializer.expression) {
           const literal = getLiteralText(node.initializer.expression);

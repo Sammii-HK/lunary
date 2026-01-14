@@ -64,7 +64,7 @@ Available to all authenticated users:
 - **Astral Guide chat access** (`unlimited_ai_chat`)
 - **Deeper Readings** (`deeper_readings`)
 - **Weekly Reports** (`weekly_reports`)
-- **Saved Chat Threads** (`saved_chat_threads`)
+- **Chat continuity** (`saved_chat_threads`) - single thread, last 50 messages
 - **Downloadable Reports** (`downloadable_reports`)
 - **AI Ritual Generation** (`ai_ritual_generation`)
 - **Advanced Patterns** (`advanced_patterns`)
@@ -93,7 +93,7 @@ Available to all authenticated users:
 - **Astral Guide context limits** (from `lib/ai/plans.ts`):
   - Context history entries: Free 0, Lunary+ 4, Lunary+ AI 8, Annual 8
   - Memory snippets: Free 0, Lunary+ 2, Lunary+ AI 4, Annual 4
-- **Saved chat threads**:
+- **Chat history**:
   - One active thread per user
   - History capped at last 50 messages
   - Threads inactive for 90+ days are cleaned up by cron

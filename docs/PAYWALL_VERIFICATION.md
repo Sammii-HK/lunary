@@ -73,7 +73,7 @@
 ### Journal & Chat Limits
 
 - ✅ **Journal entries**: free plans limited to 3 entries per month (enforced in `/api/journal`)
-- ✅ **Saved chat threads**: single thread per user, last 50 messages retained
+- ✅ **Chat history**: single thread per user, last 50 messages retained
 - ✅ **Context limits**: history + memory snippets follow `CONTEXT_RULES` and `MEMORY_SNIPPET_LIMITS`
 - ✅ **Save chat messages**: saving to Collections requires paid (`collections`); no cap enforced
 - ✅ **Collection folders**: no enforced folder limit for paid Collections

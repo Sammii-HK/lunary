@@ -70,8 +70,8 @@ Benefits for users:
 - Moon Circles (guided virtual gatherings during new/full moons)
 - Ritual Generator (AI-powered ritual suggestions)
 - Collections (save tarot readings, horoscopes, insights)
-- AI chat (50 messages per day) with conversation threads
-- Memory system (remembers past conversations)
+- AI chat (50 messages per day) with limited context window
+- Memory system (plan-based memory snippets)
 
 **Lunary+ AI Plan ($8.99/month):**
 
@@ -79,7 +79,7 @@ Benefits for users:
 - Unlimited AI chat (300 messages per day)
 - Deeper readings (extended analysis with journaling & rituals)
 - Weekly reports (automated weekly cosmic summaries)
-- Saved chat threads (save and revisit conversations)
+- Chat history (last 50 messages retained)
 - Downloadable reports (export your insights)
 - AI ritual generation (personalized ritual suggestions)
 - Unlimited collections
@@ -100,8 +100,8 @@ Benefits for users:
 - Personalized astro-tarot companion with context-aware responses
 - Uses user's birth chart, current transits, moon phase, tarot history, and mood data
 - Streaming responses for real-time interaction
-- Conversation threads - save and revisit conversations
-- Memory system - remembers past conversations for personalized responses across sessions
+- Conversation thread - single thread per user, last 50 messages retained
+- Memory system - limited context window and memory snippets (plan-based)
 - Quick actions for common queries (cosmic weather, transit feelings, ritual generation)
 - Plan-based limits: Free (3/day), Lunary+ (50/day), Lunary+ AI (300/day)
 

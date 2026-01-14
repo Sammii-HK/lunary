@@ -176,7 +176,7 @@ export function OnboardingFlow({
             'Up to 300 messages/day AI chat with your cosmic companion',
             'Personalized weekly reports + deeper readings',
             'Advanced pattern analysis + downloadable PDFs',
-            'AI ritual generation + saved chat threads',
+            'AI ritual generation + extended context memory',
             'Collections & saved insights',
           ],
         },
@@ -191,7 +191,7 @@ export function OnboardingFlow({
           'Up to 300 messages/day AI chat with your cosmic companion',
           'Personalized weekly reports + deeper readings',
           'Advanced pattern analysis + downloadable PDFs',
-          'AI ritual generation + saved chat threads',
+          'AI ritual generation + extended context memory',
         ],
       },
       {

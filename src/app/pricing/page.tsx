@@ -262,6 +262,11 @@ export default function PricingPage() {
       answer:
         'Astral Guide chat limits are set per plan.\n\nFree accounts include up to 3 messages per day.\n\nLunary+ includes up to 50 messages per day.\n\nLunary+ AI includes up to 300 messages per day.',
     },
+    {
+      question: 'What are “recent messages” and “memory snippets”?',
+      answer:
+        'Recent messages are the last chat turns included as live context. Memory snippets are short, saved notes about your preferences or recurring themes. Plans vary in how many recent messages and memory snippets are included.',
+    },
   ];
 
   const productSchemas = useMemo(

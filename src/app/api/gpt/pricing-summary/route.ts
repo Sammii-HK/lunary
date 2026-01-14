@@ -55,7 +55,7 @@ export async function GET(request: NextRequest) {
           interval: 'month',
           features: [
             'Everything in Lunary+',
-            'Up to 300 messages/day AI chat and saved threads',
+            'Up to 300 messages/day AI chat + extended context memory',
             'Weekly cosmic reports',
             'Downloadable PDFs',
             'Advanced pattern analysis',

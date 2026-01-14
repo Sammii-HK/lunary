@@ -94,7 +94,7 @@ export function OnboardingFeatureTour({
         {
           title: 'Plus AI guidance',
           items: [
-            'Up to 300 messages/day AI chat + saved threads',
+            'Up to 300 messages/day AI chat + extended context memory',
             'Personalized weekly reports + deeper readings',
             'Advanced pattern analysis + downloadable PDFs',
             'AI ritual generation + deeper guidance',
@@ -108,7 +108,7 @@ export function OnboardingFeatureTour({
       {
         title: 'Everything in Lunary+ AI',
         items: [
-          'Up to 300 messages/day AI chat + saved threads',
+          'Up to 300 messages/day AI chat + extended context memory',
           'Personalized weekly reports + deeper readings',
           'Advanced pattern analysis + downloadable PDFs',
           'AI ritual generation + deeper guidance',
