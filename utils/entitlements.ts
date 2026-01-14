@@ -128,6 +128,10 @@ export const CHAT_LIMITS: Record<PlanKey, number> = {
   lunary_plus_ai_annual: 300,
 };
 
+export const JOURNAL_LIMITS = {
+  freeMonthlyEntries: 3,
+} as const;
+
 export const PRICING_PLANS: PricingPlan[] = [
   {
     id: 'free',
@@ -144,10 +148,13 @@ export const PRICING_PLANS: PricingPlan[] = [
       'Your personal birth chart',
       'Daily moon phases & basic insights',
       'General tarot card of the day',
-      '2 tarot spreads per month',
+      'Limited tarot spreads (free library only)',
+      '1 tarot spread per month',
       'Basic lunar calendar',
       'General daily horoscope',
       'Access to grimoire knowledge',
+      'Book of Shadows journal (3 entries/month)',
+      'Chat history (last 50 messages)',
       'Personal Day number (number only)',
       'Personal Year number (number only)',
     ],
@@ -171,6 +178,7 @@ export const PRICING_PLANS: PricingPlan[] = [
       'Solar Return & birthday insights',
       'Moon Circles (New & Full Moon)',
       'Personal tarot card & guidance',
+      'All tarot spreads unlocked',
       '10 tarot spreads per month',
       'Ritual generator',
       'Personalized crystal recommendations',
@@ -178,7 +186,10 @@ export const PRICING_PLANS: PricingPlan[] = [
       'Personal Day & Personal Year interpretations',
       'Tarot pattern analysis',
       'Cosmic State (shareable snapshot)',
-      'Collections & saved insights',
+      'Book of Shadows journal (no limit)',
+      'Save chat messages to collections (no limit)',
+      'Collections (no limit)',
+      'Collection folders (no limit)',
     ],
   },
   {
@@ -201,8 +212,6 @@ export const PRICING_PLANS: PricingPlan[] = [
       'Downloadable PDF reports',
       'Generous saved chat threads',
       'Deeper readings and weekly reports',
-      'Generous tarot spreads per month',
-      'Collections & saved insights',
     ],
   },
   {
@@ -223,7 +232,6 @@ export const PRICING_PLANS: PricingPlan[] = [
       'Yearly cosmic forecast',
       'Extended timeline analysis (6 & 12-month trends)',
       'Calendar download (ICS format)',
-      'Collections & folders',
       'Priority customer support',
     ],
   },

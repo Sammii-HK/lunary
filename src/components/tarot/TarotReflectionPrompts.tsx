@@ -287,8 +287,8 @@ export function TarotReflectionPrompts({
 
           {!hasTarotPatternsAccess && (
             <p className='text-xs text-zinc-500'>
-              Upgrade for more prompts and the ability to save directly to your
-              journal.
+              Unlock more reflection prompts with Lunary+, plus save prompts
+              into your journal.
             </p>
           )}
         </div>

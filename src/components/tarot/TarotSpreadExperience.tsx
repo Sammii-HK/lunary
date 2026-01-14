@@ -421,8 +421,16 @@ export function TarotSpreadExperience({
       if (response.status === 403) {
         const data = await response.json();
         if (data.code === 'limit_reached') {
+          const limit =
+            typeof data.usage?.monthlyLimit === 'number'
+              ? data.usage.monthlyLimit
+              : null;
+          const limitCopy = limit
+            ? `${limit} saved spreads`
+            : 'your saved spreads';
+          const windowCopy = limit ? 'this month' : 'for this cycle';
           setLimitWarning(
-            'You have used all complimentary spread saves for this cycle. Upgrade to the annual plan for unlimited tarot journaling.',
+            `You have reached ${limitCopy} ${windowCopy}. Upgrade to the annual plan for unlimited tarot spreads.`,
           );
         } else if (data.code === 'spread_locked') {
           setLimitWarning('This spread is reserved for subscribers.');
@@ -526,7 +534,7 @@ export function TarotSpreadExperience({
         {usage && usage.monthlyLimit !== null && (
           <div className='rounded-full border border-lunary-primary-800 bg-lunary-primary-950 px-3 py-1 text-xs text-lunary-accent-200'>
             {usage.monthlyLimit - usage.monthlyUsed} of {usage.monthlyLimit}{' '}
-            complimentary saves remaining
+            saved spreads this month
           </div>
         )}
       </div>
@@ -706,7 +714,9 @@ export function TarotSpreadExperience({
                     <li key={prompt}>• {prompt}</li>
                   ))}
                   {selectedSpread.journalPrompts.length > 2 && (
-                    <li className='text-zinc-400'>+ more once you save</li>
+                    <li className='text-zinc-400'>
+                      + more in the spread guide
+                    </li>
                   )}
                 </ul>
               </div>

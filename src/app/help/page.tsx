@@ -12,7 +12,7 @@ export default function HelpPage() {
     {
       question: 'What is included in the free plan?',
       answer:
-        'The free plan includes daily moon phases, general tarot card of the day, 2 tarot spreads per month, basic lunar calendar, general daily horoscope, access to grimoire knowledge, and 1 free AI ritual/reading per week.',
+        'The free plan includes daily moon phases, general tarot card of the day, 1 tarot spread per month, basic lunar calendar, general daily horoscope, access to grimoire knowledge, and 1 free AI ritual/reading per week.',
     },
     {
       question: 'How do I cancel my subscription?',

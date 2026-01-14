@@ -26,10 +26,19 @@ const PRICING_FEATURE_CLAIMS: Record<PlanKey, ClaimRule[]> = {
     { text: 'Your personal birth chart', features: ['birth_chart'] },
     { text: 'Daily moon phases & basic insights', features: ['moon_phases'] },
     { text: 'General tarot card of the day', features: ['general_tarot'] },
-    { text: '2 tarot spreads per month', requiresEntitlement: false },
+    {
+      text: 'Limited tarot spreads (free library only)',
+      requiresEntitlement: false,
+    },
+    { text: '1 tarot spread per month', requiresEntitlement: false },
     { text: 'Basic lunar calendar', features: ['lunar_calendar'] },
     { text: 'General daily horoscope', features: ['general_horoscope'] },
     { text: 'Access to grimoire knowledge', features: ['grimoire'] },
+    {
+      text: 'Book of Shadows journal (3 entries/month)',
+      requiresEntitlement: false,
+    },
+    { text: 'Chat history (last 50 messages)', requiresEntitlement: false },
     {
       text: 'Personal Day number (number only)',
       features: ['personal_day_number'],
@@ -52,6 +61,7 @@ const PRICING_FEATURE_CLAIMS: Record<PlanKey, ClaimRule[]> = {
     { text: 'Solar Return & birthday insights', features: ['solar_return'] },
     { text: 'Moon Circles (New & Full Moon)', features: ['moon_circles'] },
     { text: 'Personal tarot card & guidance', features: ['personal_tarot'] },
+    { text: 'All tarot spreads unlocked', requiresEntitlement: false },
     { text: '10 tarot spreads per month', requiresEntitlement: false },
     { text: 'Ritual generator', features: ['ritual_generator'] },
     {
@@ -65,7 +75,13 @@ const PRICING_FEATURE_CLAIMS: Record<PlanKey, ClaimRule[]> = {
     },
     { text: 'Tarot pattern analysis', features: ['tarot_patterns'] },
     { text: 'Cosmic State (shareable snapshot)', requiresEntitlement: false },
-    { text: 'Collections & saved insights', features: ['collections'] },
+    { text: 'Book of Shadows journal (no limit)', requiresEntitlement: false },
+    {
+      text: 'Save chat messages to collections (no limit)',
+      features: ['collections'],
+    },
+    { text: 'Collections (no limit)', features: ['collections'] },
+    { text: 'Collection folders (no limit)', features: ['collections'] },
   ],
   lunary_plus_ai: [
     { text: 'Personalized weekly reports', features: ['weekly_reports'] },
@@ -81,10 +97,18 @@ const PRICING_FEATURE_CLAIMS: Record<PlanKey, ClaimRule[]> = {
       text: 'Deeper readings and weekly reports',
       features: ['deeper_readings', 'weekly_reports'],
     },
-    { text: 'Generous tarot spreads per month', requiresEntitlement: false },
-    { text: 'Collections & saved insights', features: ['collections'] },
+    { text: 'All tarot spreads unlocked', requiresEntitlement: false },
+    { text: '10 tarot spreads per month', requiresEntitlement: false },
+    { text: 'Book of Shadows journal (no limit)', requiresEntitlement: false },
+    {
+      text: 'Save chat messages to collections (no limit)',
+      features: ['collections'],
+    },
+    { text: 'Collections (no limit)', features: ['collections'] },
+    { text: 'Collection folders (no limit)', features: ['collections'] },
   ],
   lunary_plus_ai_annual: [
+    { text: 'All tarot spreads unlocked', requiresEntitlement: false },
     { text: 'Unlimited tarot spreads', features: ['unlimited_tarot_spreads'] },
     { text: 'Yearly cosmic forecast', features: ['yearly_forecast'] },
     {
@@ -92,7 +116,12 @@ const PRICING_FEATURE_CLAIMS: Record<PlanKey, ClaimRule[]> = {
       requiresEntitlement: false,
     },
     { text: 'Calendar download (ICS format)', features: ['yearly_forecast'] },
-    { text: 'Collections & folders', features: ['collections'] },
+    { text: 'Book of Shadows journal (no limit)', requiresEntitlement: false },
+    {
+      text: 'Save chat messages to collections (no limit)',
+      features: ['collections'],
+    },
+    { text: 'Collections & folders (no limit)', features: ['collections'] },
     { text: 'Priority customer support', requiresEntitlement: false },
   ],
 };

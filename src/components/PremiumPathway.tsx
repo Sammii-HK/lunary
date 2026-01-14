@@ -51,6 +51,14 @@ const FEATURE_BY_VARIANT: Record<PathwayVariant, FeatureKey> = {
   guide: 'unlimited_ai_chat',
 };
 
+const CTA_BY_VARIANT: Record<PathwayVariant, string> = {
+  tarot: 'Unlock tarot patterns with Lunary+',
+  themes: 'Unlock life themes with Lunary+',
+  shadow: 'Unlock archetype insights with Lunary+',
+  transits: 'Unlock personal transits with Lunary+',
+  guide: 'Unlock Astral Guide chat with Lunary+',
+};
+
 export function PremiumPathway({
   variant,
   className = '',
@@ -68,6 +76,7 @@ export function PremiumPathway({
   }
 
   const copy = VARIANT_COPY[variant];
+  const ctaLabel = CTA_BY_VARIANT[variant];
 
   return (
     <div
@@ -84,7 +93,7 @@ export function PremiumPathway({
             href='/pricing'
             className='inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-lunary-primary-600 hover:bg-lunary-primary-700 text-white transition-colors'
           >
-            Upgrade Now
+            {ctaLabel}
           </Link>
         </div>
       </div>

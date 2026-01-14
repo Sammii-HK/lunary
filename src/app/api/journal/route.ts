@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { sql } from '@vercel/postgres';
 import { requireUser } from '@/lib/ai/auth';
 import { isDreamEntry } from '@/lib/journal/dream-classifier';
+import { JOURNAL_LIMITS, normalizePlanType } from '../../../../utils/pricing';
 
 export interface JournalEntry {
   id: number;
@@ -86,6 +87,41 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const user = await requireUser(request);
+    const subscriptionResult = await sql`
+      SELECT status, plan_type
+      FROM subscriptions
+      WHERE user_id = ${user.id}
+      ORDER BY created_at DESC
+      LIMIT 1
+    `;
+    const subscription = subscriptionResult.rows[0];
+    const rawStatus = subscription?.status || 'free';
+    const subscriptionStatus = rawStatus === 'trialing' ? 'trial' : rawStatus;
+    const planType = normalizePlanType(subscription?.plan_type);
+    const isPaid =
+      subscriptionStatus === 'active' || subscriptionStatus === 'trial';
+
+    if (!isPaid && planType === 'free') {
+      const limit = JOURNAL_LIMITS.freeMonthlyEntries;
+      const entryCountResult = await sql`
+        SELECT COUNT(*)::int as count
+        FROM collections
+        WHERE user_id = ${user.id}
+          AND category IN ('journal', 'dream')
+          AND created_at >= date_trunc('month', NOW())
+      `;
+      const count = Number(entryCountResult.rows[0]?.count ?? 0);
+      if (count >= limit) {
+        return NextResponse.json(
+          {
+            success: false,
+            error: `Free plan limited to ${limit} journal entries per month.`,
+            upgradeRequired: true,
+          },
+          { status: 403 },
+        );
+      }
+    }
     const body = await request.json();
 
     const {

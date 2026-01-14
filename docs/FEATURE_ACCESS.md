@@ -90,7 +90,26 @@ Available to all authenticated users:
   - Free: 3 messages/day
   - Lunary+: 50 messages/day
   - Lunary+ AI / Annual: 300 messages/day
-- **Collections**: free limited to 5; paid plans have no collection limit.
+- **Astral Guide context limits** (from `lib/ai/plans.ts`):
+  - Context history entries: Free 0, Lunary+ 4, Lunary+ AI 8, Annual 8
+  - Memory snippets: Free 0, Lunary+ 2, Lunary+ AI 4, Annual 4
+- **Saved chat threads**:
+  - One active thread per user
+  - History capped at last 50 messages
+  - Threads inactive for 90+ days are cleaned up by cron
+- **Save chat messages**: requires `collections` (paid) to save messages into
+  Collections; no enforced cap for paid plans.
+- **Collections**: saving to collections requires a paid plan (`collections`).
+  Paid plans have no collection cap enforced.
+- **Collection folders**: no enforced folder cap; folders are available with
+  Collections (paid).
+- **Journaling**: Book of Shadows reflections are available to authenticated
+  users via `/api/journal`. Free plans are limited to 3 entries per month.
+- **Tarot spreads**:
+  - Spread access: free users only see spreads with `minimumPlan: 'free'`;
+    monthly/yearly unlock all spreads.
+  - Saved spreads per month: free 1, monthly plans 10, annual unlimited.
+  - Saved spread history: free keeps the current month; paid keeps 365 days.
 - **Trial length**: monthly 7 days, annual 14 days. Use Stripe-backed values
   in copy; avoid hardcoding in UI text.
 

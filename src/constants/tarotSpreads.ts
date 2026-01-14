@@ -533,7 +533,7 @@ export const TAROT_SPREAD_MAP = Object.fromEntries(
   TAROT_SPREADS.map((spread) => [spread.slug, spread]),
 );
 
-export const FREE_PLAN_MONTHLY_READING_LIMIT = 2;
+export const FREE_PLAN_MONTHLY_READING_LIMIT = 1;
 export const MONTHLY_PLAN_MONTHLY_READING_LIMIT = 10;
-export const FREE_PLAN_HISTORY_RETENTION_DAYS = 7;
+export const FREE_PLAN_HISTORY_RETENTION_DAYS = 31;
 export const SUBSCRIBER_HISTORY_RETENTION_DAYS = 365;
