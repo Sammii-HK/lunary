@@ -3,7 +3,7 @@
 import { useUser } from '@/context/UserContext';
 import { useAuthStatus } from '@/components/AuthStatus';
 import { useSubscription } from '../../../hooks/useSubscription';
-import { hasBirthChartAccess } from '../../../../utils/pricing';
+import { hasFeatureAccess } from '../../../../utils/pricing';
 import { FreeHoroscopeView } from './components/FreeHoroscopeView';
 import { PaidHoroscopeView } from './components/PaidHoroscopeView';
 import { conversionTracking } from '@/lib/analytics';
@@ -14,18 +14,22 @@ export default function HoroscopePage() {
   const { user, loading } = useUser();
   const authStatus = useAuthStatus();
   const subscription = useSubscription();
-  // For unauthenticated users, force hasChartAccess to false immediately
+  // For unauthenticated users, force paid horoscope access to false immediately
   // Don't wait for subscription to resolve
-  const hasChartAccess = !authStatus.isAuthenticated
+  const hasPersonalHoroscopeAccess = !authStatus.isAuthenticated
     ? false
-    : hasBirthChartAccess(subscription.status, subscription.plan);
+    : hasFeatureAccess(
+        subscription.status,
+        subscription.plan,
+        'personalized_horoscope',
+      );
 
   useEffect(() => {
-    if (hasChartAccess && user?.id) {
+    if (hasPersonalHoroscopeAccess && user?.id) {
       conversionTracking.horoscopeViewed(user.id);
       conversionTracking.personalizedHoroscopeViewed(user.id);
     }
-  }, [hasChartAccess, user?.id]);
+  }, [hasPersonalHoroscopeAccess, user?.id]);
 
   // Simple sequential loading checks - prioritize unauthenticated users
   if (authStatus.loading) {
@@ -58,7 +62,7 @@ export default function HoroscopePage() {
 
   // Otherwise, continue to render content
 
-  if (!hasChartAccess) {
+  if (!hasPersonalHoroscopeAccess) {
     return (
       <div className='min-h-screen flex flex-col'>
         <div className='flex-1'>

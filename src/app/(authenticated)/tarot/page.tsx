@@ -11,7 +11,7 @@ import { getImprovedTarotReading } from '../../../../utils/tarot/improvedTarot';
 import { getGeneralTarotReading } from '../../../../utils/tarot/generalTarot';
 import { type MoonPhaseLabels } from '../../../../utils/moon/moonPhases';
 import { useSubscription } from '../../../hooks/useSubscription';
-import { hasBirthChartAccess } from '../../../../utils/pricing';
+import { hasFeatureAccess } from '../../../../utils/pricing';
 import {
   Check,
   Sparkles,
@@ -182,11 +182,15 @@ const TarotReadings = () => {
     plan: subscription.plan as TarotPlan,
     status: subscription.status as SubscriptionStatus,
   };
-  // For unauthenticated users, force hasChartAccess to false immediately
+  // For unauthenticated users, force paid tarot access to false immediately
   // Don't wait for subscription to resolve
-  const hasChartAccess = !authStatus.isAuthenticated
+  const hasPersonalTarotAccess = !authStatus.isAuthenticated
     ? false
-    : hasBirthChartAccess(subscription.status, subscription.plan);
+    : hasFeatureAccess(
+        subscription.status,
+        subscription.plan,
+        'personal_tarot',
+      );
 
   const [shareOrigin, setShareOrigin] = useState('https://lunary.app');
   const [shareTarget, setShareTarget] = useState<TarotShareTarget | null>(null);
@@ -216,14 +220,14 @@ const TarotReadings = () => {
 
   // All hooks must be called before any early returns
   const generalTarot = useMemo(() => {
-    if (hasChartAccess) return null;
+    if (hasPersonalTarotAccess) return null;
     try {
       return getGeneralTarotReading();
     } catch (error) {
       console.error('Failed to load general tarot reading:', error);
       return null;
     }
-  }, [hasChartAccess]);
+  }, [hasPersonalTarotAccess]);
 
   const shareDate = useMemo(() => dayjs().format('YYYY-MM-DD'), []);
   const firstName = useMemo(
@@ -232,7 +236,7 @@ const TarotReadings = () => {
   );
 
   const previousReadings = useMemo(() => {
-    if (hasChartAccess) return [];
+    if (hasPersonalTarotAccess) return [];
     const currentDate = dayjs();
     const previousWeek = () => {
       let week = [];
@@ -252,15 +256,15 @@ const TarotReadings = () => {
         card: getTarotCard(seed),
       };
     });
-  }, [hasChartAccess]);
+  }, [hasPersonalTarotAccess]);
 
   const timeFrame = typeof selectedView === 'number' ? selectedView : 30;
   const personalizedReading = useMemo(
     () =>
-      hasChartAccess && userName && userBirthday
+      hasPersonalTarotAccess && userName && userBirthday
         ? getImprovedTarotReading(userName, true, timeFrame, userBirthday)
         : null,
-    [hasChartAccess, userName, timeFrame, userBirthday],
+    [hasPersonalTarotAccess, userName, timeFrame, userBirthday],
   );
 
   const guidanceActionPoints =
@@ -371,7 +375,7 @@ const TarotReadings = () => {
   }, [personalizedReading, userId]);
 
   const personalizedPreviousReadings = useMemo(() => {
-    if (!hasChartAccess || !userName || !userBirthday) return [];
+    if (!hasPersonalTarotAccess || !userName || !userBirthday) return [];
     const currentDate = dayjs();
     const previousWeek = () => {
       let week = [];
@@ -393,7 +397,7 @@ const TarotReadings = () => {
         ),
       };
     });
-  }, [hasChartAccess, userName, userBirthday]);
+  }, [hasPersonalTarotAccess, userName, userBirthday]);
 
   useEffect(() => {
     if (typeof window !== 'undefined' && window.location?.origin) {
@@ -640,10 +644,10 @@ const TarotReadings = () => {
   }, [personalizedReading]);
 
   useEffect(() => {
-    if (hasChartAccess && personalizedReading && userId) {
+    if (hasPersonalTarotAccess && personalizedReading && userId) {
       conversionTracking.tarotViewed(userId);
     }
-  }, [hasChartAccess, personalizedReading, userId]);
+  }, [hasPersonalTarotAccess, personalizedReading, userId]);
 
   // Simple sequential loading checks - prioritize unauthenticated users
   if (authStatus.loading) {
@@ -659,7 +663,7 @@ const TarotReadings = () => {
   }
 
   // If unauthenticated, show content immediately (don't wait for useUser)
-  // hasChartAccess will be false because useSubscription returns status: 'free' when !user
+  // hasPersonalTarotAccess will be false because useSubscription returns status: 'free' when !user
   // generalTarot will be calculated correctly
   // Continue to render content below
 
@@ -677,7 +681,7 @@ const TarotReadings = () => {
 
   // Otherwise, continue to render content
 
-  if (!hasChartAccess) {
+  if (!hasPersonalTarotAccess) {
     // If generalTarot failed to load, show error state with upsell instead of blank page
     if (!generalTarot) {
       return (
@@ -868,7 +872,7 @@ const TarotReadings = () => {
           </div>
 
           {subscription.hasAccess('tarot_patterns') &&
-            hasChartAccess &&
+            hasPersonalTarotAccess &&
             personalizedReading?.trendAnalysis && (
               <HoroscopeSection
                 title={`Your ${timeFrame}-Day Tarot Patterns`}
@@ -951,7 +955,7 @@ const TarotReadings = () => {
   }
 
   // Check if user has chart access but is missing birthday
-  if (hasChartAccess && !userBirthday) {
+  if (hasPersonalTarotAccess && !userBirthday) {
     return (
       <div className='min-h-screen flex items-center justify-center p-4 mb-10'>
         <div className='text-center max-w-md space-y-6'>
@@ -1264,7 +1268,7 @@ const TarotReadings = () => {
               <AdvancedPatterns
                 key={`patterns-${selectedView}-${isMultidimensionalMode}`}
                 basicPatterns={
-                  hasChartAccess
+                  hasPersonalTarotAccess
                     ? personalizedReading?.trendAnalysis
                     : undefined
                 }

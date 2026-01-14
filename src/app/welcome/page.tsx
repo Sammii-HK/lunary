@@ -99,6 +99,9 @@ export default function WelcomePage() {
             <span className='text-lunary-primary-200'>
               Upgrade for personalised interpretation and deeper analysis.
             </span>
+            <br />
+            Personal Day and Personal Year numbers are free; Lunary+ AI unlocks
+            the interpretation.
           </p>
           <p className='text-sm text-zinc-400 pb-8'>
             No card required. Takes under 2 minutes.

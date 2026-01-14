@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { ChevronDown, Sparkles } from 'lucide-react';
 import { useSubscription } from '@/hooks/useSubscription';
-import { hasBirthChartAccess } from '../../../utils/pricing';
+import { hasFeatureAccess } from '../../../utils/pricing';
 import {
   analyzeLifeThemes,
   hasEnoughDataForThemes,
@@ -17,7 +17,11 @@ interface LifeThemesCardProps {
 
 export function LifeThemesCard({ className = '' }: LifeThemesCardProps) {
   const subscription = useSubscription();
-  const isPremium = hasBirthChartAccess(subscription.status, subscription.plan);
+  const hasCosmicProfileAccess = hasFeatureAccess(
+    subscription.status,
+    subscription.plan,
+    'cosmic_profile',
+  );
 
   const [themes, setThemes] = useState<LifeThemeResult[]>([]);
   const [loading, setLoading] = useState(true);
@@ -70,7 +74,7 @@ export function LifeThemesCard({ className = '' }: LifeThemesCardProps) {
         setHasEnoughData(hasEnoughDataForThemes(input));
 
         if (hasEnoughDataForThemes(input)) {
-          const maxThemes = isPremium ? 3 : 1;
+          const maxThemes = hasCosmicProfileAccess ? 3 : 1;
           const analyzedThemes = analyzeLifeThemes(input, maxThemes);
           setThemes(analyzedThemes);
         }
@@ -82,7 +86,7 @@ export function LifeThemesCard({ className = '' }: LifeThemesCardProps) {
     }
 
     loadThemes();
-  }, [isPremium]);
+  }, [hasCosmicProfileAccess]);
 
   if (loading) {
     return (
@@ -173,29 +177,34 @@ export function LifeThemesCard({ className = '' }: LifeThemesCardProps) {
               {isExpanded && (
                 <div className='px-3 pb-3 space-y-3'>
                   <p className='text-sm text-zinc-300 leading-relaxed'>
-                    {isPremium ? theme.longSummary : theme.shortSummary}
+                    {hasCosmicProfileAccess
+                      ? theme.longSummary
+                      : theme.shortSummary}
                   </p>
 
-                  {isPremium && theme.guidanceBullets.length > 0 && (
-                    <div className='space-y-1.5'>
-                      <p className='text-xs font-medium text-zinc-400 uppercase tracking-wide'>
-                        Guidance
-                      </p>
-                      <ul className='space-y-1'>
-                        {theme.guidanceBullets.slice(0, 3).map((bullet, i) => (
-                          <li
-                            key={i}
-                            className='text-xs text-zinc-400 flex items-start gap-2'
-                          >
-                            <span className='text-lunary-primary-400 mt-0.5'>
-                              •
-                            </span>
-                            {bullet}
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  )}
+                  {hasCosmicProfileAccess &&
+                    theme.guidanceBullets.length > 0 && (
+                      <div className='space-y-1.5'>
+                        <p className='text-xs font-medium text-zinc-400 uppercase tracking-wide'>
+                          Guidance
+                        </p>
+                        <ul className='space-y-1'>
+                          {theme.guidanceBullets
+                            .slice(0, 3)
+                            .map((bullet, i) => (
+                              <li
+                                key={i}
+                                className='text-xs text-zinc-400 flex items-start gap-2'
+                              >
+                                <span className='text-lunary-primary-400 mt-0.5'>
+                                  •
+                                </span>
+                                {bullet}
+                              </li>
+                            ))}
+                        </ul>
+                      </div>
+                    )}
 
                   {theme.relatedTags.length > 0 && (
                     <div className='flex flex-wrap gap-1.5'>
@@ -216,7 +225,7 @@ export function LifeThemesCard({ className = '' }: LifeThemesCardProps) {
         })}
       </div>
 
-      {!isPremium && themes.length > 0 && (
+      {!hasCosmicProfileAccess && themes.length > 0 && (
         <p className='text-xs text-zinc-500 mt-3'>
           Upgrade for deeper theme insights and guidance.
         </p>

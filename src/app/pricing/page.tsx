@@ -258,9 +258,9 @@ export default function PricingPage() {
         'Every insight is calculated from your exact birth chart - not generic sun sign horoscopes.',
     },
     {
-      question: 'Is AI chat unlimited?',
+      question: 'What are the Astral Guide chat limits?',
       answer:
-        'Lunary includes different chat limits depending on your plan.\n\nFree accounts include a small number of messages each day.\n\nLunary+ offers generous daily chat with conversation memory.\n\nLunary+ AI includes effectively unlimited chat for everyday use.',
+        'Astral Guide chat limits are set per plan.\n\nFree accounts include up to 3 messages per day.\n\nLunary+ includes up to 50 messages per day.\n\nLunary+ AI includes up to 300 messages per day.',
     },
   ];
 
@@ -317,9 +317,9 @@ export default function PricingPage() {
 
             <p className='text-base md:text-lg text-zinc-400 max-w-xl mx-auto leading-relaxed'>
               Start with free access to your birth chart, moon phases, and
-              cosmic insights. Upgrade for personalized readings based on your
-              exact birth chart. Astronomy powers the charts—AI only appears in
-              Astral Guide chat.
+              general cosmic insights. Upgrade for personalized readings based
+              on your exact birth chart. Astronomy powers the charts—AI only
+              appears in Astral Guide chat.
             </p>
           </div>
         </section>

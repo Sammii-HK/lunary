@@ -324,7 +324,10 @@ export function TrialReminderEmail({
               </strong>
               !
             </Text>
-            <Text>Continue your cosmic journey with unlimited access to:</Text>
+            <Text>
+              Continue your cosmic journey with full access to personalized
+              features (within plan limits):
+            </Text>
             <Text style={{ margin: '15px 0' }}>
               🌟 Personalized birth chart insights
               <br />
@@ -794,7 +797,7 @@ Hi ${userName || 'there'},
 
 Your free trial ends in ${trialDaysRemaining} ${dayLabel}!
 
-Continue your cosmic journey with unlimited access to:
+Continue your cosmic journey with full access to personalized features (within plan limits):
 - 🌟 Personalized birth chart insights
 - 🔮 Daily horoscopes and tarot readings
 - 🌙 Transit calendars and cosmic guidance

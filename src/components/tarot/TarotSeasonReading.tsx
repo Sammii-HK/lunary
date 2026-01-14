@@ -3,7 +3,7 @@
 import { useState, useMemo } from 'react';
 import { ChevronDown, Sparkles } from 'lucide-react';
 import { useSubscription } from '@/hooks/useSubscription';
-import { hasBirthChartAccess } from '../../../utils/pricing';
+import { hasFeatureAccess } from '../../../utils/pricing';
 import type { TrendAnalysis } from '../../../utils/tarot/improvedTarot';
 
 interface TarotSeasonReadingProps {
@@ -173,7 +173,11 @@ export function TarotSeasonReading({
   className = '',
 }: TarotSeasonReadingProps) {
   const subscription = useSubscription();
-  const isPremium = hasBirthChartAccess(subscription.status, subscription.plan);
+  const hasTarotPatternsAccess = hasFeatureAccess(
+    subscription.status,
+    subscription.plan,
+    'tarot_patterns',
+  );
   const [isExpanded, setIsExpanded] = useState(false);
 
   const seasonData = useMemo(() => {
@@ -181,9 +185,9 @@ export function TarotSeasonReading({
 
     return {
       name: generateSeasonName(trendAnalysis),
-      ...generateNarrative(trendAnalysis, period, isPremium),
+      ...generateNarrative(trendAnalysis, period, hasTarotPatternsAccess),
     };
-  }, [trendAnalysis, period, isPremium]);
+  }, [trendAnalysis, period, hasTarotPatternsAccess]);
 
   if (!trendAnalysis || !seasonData) {
     return null;

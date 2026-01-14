@@ -5,7 +5,9 @@ import { useUser } from '@/context/UserContext';
 import {
   hasFeatureAccess,
   FEATURE_ACCESS,
+  getTrialDaysRemaining,
   normalizePlanType,
+  type FeatureKey,
 } from '../../utils/pricing';
 
 export interface SubscriptionStatus {
@@ -15,7 +17,7 @@ export interface SubscriptionStatus {
   plan: 'free' | 'monthly' | 'yearly';
   planName?: string;
   status: 'free' | 'trial' | 'active' | 'cancelled' | 'past_due';
-  hasAccess: (feature: string) => boolean;
+  hasAccess: (feature: FeatureKey) => boolean;
   showUpgradePrompt: boolean;
   customerId?: string;
   subscriptionId?: string;
@@ -48,7 +50,7 @@ export function useSubscription(): SubscriptionStatus {
         trialDaysRemaining: 0,
         plan: 'free' as const,
         status: 'free' as const,
-        hasAccess: (feature: string) =>
+        hasAccess: (feature: FeatureKey) =>
           hasFeatureAccess('free', undefined, feature),
         showUpgradePrompt: true,
         loading: false,
@@ -80,15 +82,19 @@ export function useSubscription(): SubscriptionStatus {
 
     const isTrialActive = status === 'trial';
     const isSubscribed = status === 'active' || status === 'trial';
+    const fallbackTrialDays = planForState === 'yearly' ? 14 : 7;
+    const trialDaysRemaining = isTrialActive
+      ? getTrialDaysRemaining(user.trialEndsAt) || fallbackTrialDays
+      : 0;
 
     return {
       isSubscribed,
       isTrialActive,
-      trialDaysRemaining: isTrialActive ? 7 : 0, // Default, could be calculated from trialEndsAt
+      trialDaysRemaining,
       plan: planForState,
       planName: rawPlan,
       status,
-      hasAccess: (feature: string) => {
+      hasAccess: (feature: FeatureKey) => {
         // If user is paid (active or trial), grant access based on plan
         if (isSubscribed) {
           // Annual plan gets everything

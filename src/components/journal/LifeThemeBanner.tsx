@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { Sparkles } from 'lucide-react';
 import { useSubscription } from '@/hooks/useSubscription';
-import { hasBirthChartAccess } from '../../../utils/pricing';
+import { hasFeatureAccess } from '../../../utils/pricing';
 import {
   analyzeLifeThemes,
   hasEnoughDataForThemes,
@@ -18,7 +18,11 @@ interface LifeThemeBannerProps {
 
 export function LifeThemeBanner({ className = '' }: LifeThemeBannerProps) {
   const subscription = useSubscription();
-  const isPremium = hasBirthChartAccess(subscription.status, subscription.plan);
+  const hasCosmicProfileAccess = hasFeatureAccess(
+    subscription.status,
+    subscription.plan,
+    'cosmic_profile',
+  );
 
   const [primaryTheme, setPrimaryTheme] = useState<LifeThemeResult | null>(
     null,
@@ -116,27 +120,32 @@ export function LifeThemeBanner({ className = '' }: LifeThemeBannerProps) {
         <ModalBody>
           <div className='space-y-4'>
             <p className='text-sm text-zinc-300 leading-relaxed'>
-              {isPremium ? primaryTheme.longSummary : primaryTheme.shortSummary}
+              {hasCosmicProfileAccess
+                ? primaryTheme.longSummary
+                : primaryTheme.shortSummary}
             </p>
 
-            {isPremium && primaryTheme.guidanceBullets.length > 0 && (
-              <div className='space-y-2'>
-                <p className='text-xs font-medium text-zinc-400 uppercase tracking-wide'>
-                  Guidance for this theme
-                </p>
-                <ul className='space-y-2'>
-                  {primaryTheme.guidanceBullets.map((bullet, i) => (
-                    <li
-                      key={i}
-                      className='text-sm text-zinc-300 flex items-start gap-2'
-                    >
-                      <span className='text-lunary-primary-400 mt-0.5'>•</span>
-                      {bullet}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )}
+            {hasCosmicProfileAccess &&
+              primaryTheme.guidanceBullets.length > 0 && (
+                <div className='space-y-2'>
+                  <p className='text-xs font-medium text-zinc-400 uppercase tracking-wide'>
+                    Guidance for this theme
+                  </p>
+                  <ul className='space-y-2'>
+                    {primaryTheme.guidanceBullets.map((bullet, i) => (
+                      <li
+                        key={i}
+                        className='text-sm text-zinc-300 flex items-start gap-2'
+                      >
+                        <span className='text-lunary-primary-400 mt-0.5'>
+                          •
+                        </span>
+                        {bullet}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
 
             {primaryTheme.relatedTags.length > 0 && (
               <div className='flex flex-wrap gap-2 pt-2'>
@@ -151,7 +160,7 @@ export function LifeThemeBanner({ className = '' }: LifeThemeBannerProps) {
               </div>
             )}
 
-            {!isPremium && (
+            {!hasCosmicProfileAccess && (
               <p className='text-xs text-zinc-500 pt-2 border-t border-zinc-800'>
                 Upgrade to unlock deeper insights and personalized guidance for
                 your themes.

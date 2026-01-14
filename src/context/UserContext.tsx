@@ -53,6 +53,7 @@ export interface UserData {
   stripeCustomerId?: string;
   subscriptionStatus?: string;
   subscriptionPlan?: string;
+  trialEndsAt?: string;
   hasBirthChart: boolean;
   hasPersonalCard: boolean;
   isPaid: boolean;
@@ -132,6 +133,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
         stripeCustomerId: subscription?.stripeCustomerId || undefined,
         subscriptionStatus: status,
         subscriptionPlan: subscription?.planType || undefined,
+        trialEndsAt: subscription?.trialEndsAt || undefined,
         hasBirthChart: !!(birthChart && birthChart.length > 0),
         hasPersonalCard: !!personalCard,
         isPaid: ['active', 'trial', 'trialing'].includes(status),

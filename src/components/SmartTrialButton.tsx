@@ -8,12 +8,13 @@ import { AuthComponent } from './Auth';
 import { useModal } from '@/hooks/useModal';
 import { Button } from '@/components/ui/button';
 import { isFreeFeature } from '@/utils/messaging';
+import type { FeatureKey } from '../../utils/pricing';
 import { cn } from '@/lib/utils';
 
 interface SmartTrialButtonProps {
   size?: 'sm' | 'default' | 'lg' | 'xs';
   fullWidth?: boolean;
-  feature?: string; // Feature name to check if it's free or paid
+  feature?: FeatureKey; // Feature name to check if it's free or paid
   hasRequiredData?: boolean; // e.g., has birthday for birth chart features
   className?: string;
 }

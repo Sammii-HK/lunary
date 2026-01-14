@@ -227,7 +227,8 @@ export default function ComparisonHubPage() {
                 Free Trial
               </h3>
               <p className='text-sm text-zinc-300 leading-relaxed'>
-                Try Lunary free for 7 days - no card required during the trial.
+                Try Lunary free with a 7-day monthly or 14-day annual trial - no
+                card required during the trial.
               </p>
             </div>
           </div>

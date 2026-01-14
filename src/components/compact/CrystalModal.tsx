@@ -12,7 +12,7 @@ import {
   getCrystalGuidance,
 } from '../../../utils/crystals/personalizedCrystals';
 import { useSubscription } from '../../hooks/useSubscription';
-import { hasBirthChartAccess } from '../../../utils/pricing';
+import { hasFeatureAccess } from '../../../utils/pricing';
 import { useAstronomyContext } from '../../context/AstronomyContext';
 import dayjs from 'dayjs';
 import { Button } from '../ui/button';
@@ -26,9 +26,10 @@ export const CrystalPreview = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [observer, setObserver] = useState<any>(null);
 
-  const hasChartAccess = hasBirthChartAccess(
+  const hasPersonalizedAccess = hasFeatureAccess(
     subscription.status,
     subscription.plan,
+    'personalized_crystal_recommendations',
   );
 
   const normalizedDate = useMemo(() => {
@@ -64,12 +65,12 @@ export const CrystalPreview = () => {
   // Always compute general crystal for unauthenticated users or users without chart access
   const generalCrystal = useMemo(() => {
     // Only show general crystal if user is not authenticated OR doesn't have chart access
-    if (authStatus.isAuthenticated && hasChartAccess) return null;
+    if (authStatus.isAuthenticated && hasPersonalizedAccess) return null;
     return getGeneralCrystalRecommendation(normalizedDate);
-  }, [authStatus.isAuthenticated, hasChartAccess, normalizedDate]);
+  }, [authStatus.isAuthenticated, hasPersonalizedAccess, normalizedDate]);
 
   const crystalData = useMemo(() => {
-    if (!authStatus.isAuthenticated || !hasChartAccess) return null;
+    if (!authStatus.isAuthenticated || !hasPersonalizedAccess) return null;
     if (!birthChart || !observer) return null;
 
     const currentTransits = getAstrologicalChart(normalizedDate, observer);
@@ -89,16 +90,18 @@ export const CrystalPreview = () => {
     };
   }, [
     authStatus.isAuthenticated,
-    hasChartAccess,
+    hasPersonalizedAccess,
     birthChart,
     observer,
     normalizedDate,
     userBirthday,
   ]);
 
-  // Birth chart is free but requires account - check authentication
   const canAccessPersonalized =
-    authStatus.isAuthenticated && hasChartAccess && birthChart && userBirthday;
+    authStatus.isAuthenticated &&
+    hasPersonalizedAccess &&
+    birthChart &&
+    userBirthday;
 
   const crystalName = canAccessPersonalized
     ? crystalData?.crystal.name

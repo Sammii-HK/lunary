@@ -2,7 +2,7 @@
 import { SmartTrialButton } from './SmartTrialButton';
 import { useAstronomyContext } from '@/context/AstronomyContext';
 import { useSubscription } from '../hooks/useSubscription';
-import { hasBirthChartAccess } from '../../utils/pricing';
+import { hasFeatureAccess } from '../../utils/pricing';
 import { useState, useEffect } from 'react';
 import type { GeneralTarotReading } from '../../utils/tarot/generalTarot';
 
@@ -13,13 +13,14 @@ export const TarotWidget = () => {
     null,
   );
 
-  const hasChartAccess = hasBirthChartAccess(
+  const hasPersonalTarotAccess = hasFeatureAccess(
     subscription.status,
     subscription.plan,
+    'personal_tarot',
   );
 
   useEffect(() => {
-    if (!hasChartAccess && !generalTarot) {
+    if (!hasPersonalTarotAccess && !generalTarot) {
       import('../../utils/tarot/generalTarot')
         .then(({ getGeneralTarotReading }) => {
           setGeneralTarot(getGeneralTarotReading());
@@ -28,10 +29,10 @@ export const TarotWidget = () => {
           console.error('Failed to load tarot reading:', err);
         });
     }
-  }, [hasChartAccess, generalTarot]);
+  }, [hasPersonalTarotAccess, generalTarot]);
 
   // If user doesn't have birth chart access, show general tarot reading
-  if (!hasChartAccess) {
+  if (!hasPersonalTarotAccess) {
     if (!generalTarot) {
       return (
         <div className='p-5 border border-stone-800 rounded-md w-full h-full flex flex-col min-w-0 overflow-hidden min-h-64'>

@@ -7,7 +7,7 @@ export const metadata: Metadata = {
   title:
     'Best Personalized Astrology Apps 2025: Lunary vs Moonly vs Lunar Guide',
   description:
-    'Compare Lunary vs Moonly vs Lunar Guide. See which astrology app uses real astronomical data, offers personalized birth charts, and includes a complete grimoire. Free 7-day trial available.',
+    'Compare Lunary vs Moonly vs Lunar Guide. See which astrology app uses real astronomical data, offers personalized birth charts, and includes a complete grimoire. Free monthly or annual trial available.',
   keywords: [
     'best astrology apps',
     'personalized astrology apps',
@@ -257,7 +257,7 @@ export default function BestPersonalizedAstrologyAppsPage() {
                   </td>
                   <td className='border border-zinc-800 p-4 text-center'>
                     <span className='text-lunary-success font-medium'>
-                      7 days
+                      7 days (monthly) / 14 days (annual)
                     </span>
                     <br />
                     <span className='text-xs text-zinc-400'>

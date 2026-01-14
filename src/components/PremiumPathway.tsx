@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { Sparkles } from 'lucide-react';
 import { useSubscription } from '@/hooks/useSubscription';
-import { hasBirthChartAccess } from '../../utils/pricing';
+import { hasFeatureAccess, type FeatureKey } from '../../utils/pricing';
 
 type PathwayVariant = 'tarot' | 'themes' | 'shadow' | 'transits' | 'guide';
 
@@ -37,10 +37,18 @@ const VARIANT_COPY: Record<
       'See how planetary movements affect your unique birth chart with detailed transit analysis.',
   },
   guide: {
-    title: 'Unlimited Astral Guide',
+    title: 'Expanded Astral Guide',
     description:
-      'Get unlimited Astral Guide chat grounded in your chart and journey.',
+      'Get higher daily chat limits and deeper guidance grounded in your chart.',
   },
+};
+
+const FEATURE_BY_VARIANT: Record<PathwayVariant, FeatureKey> = {
+  tarot: 'tarot_patterns',
+  themes: 'cosmic_profile',
+  shadow: 'cosmic_profile',
+  transits: 'personalized_transit_readings',
+  guide: 'unlimited_ai_chat',
 };
 
 export function PremiumPathway({
@@ -48,9 +56,14 @@ export function PremiumPathway({
   className = '',
 }: PremiumPathwayProps) {
   const subscription = useSubscription();
-  const isPremium = hasBirthChartAccess(subscription.status, subscription.plan);
+  const requiredFeature = FEATURE_BY_VARIANT[variant];
+  const hasAccess = hasFeatureAccess(
+    subscription.status,
+    subscription.plan,
+    requiredFeature,
+  );
 
-  if (isPremium) {
+  if (hasAccess) {
     return null;
   }
 

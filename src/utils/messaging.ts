@@ -5,20 +5,20 @@
  * PAID features (need subscription): personalized_horoscope, personal_tarot, moon_circles, etc.
  */
 
-import { FEATURE_ACCESS } from '../../utils/pricing';
+import { FEATURE_ACCESS, type FeatureKey } from '../../utils/pricing';
 
 /**
  * Check if a feature is free (just requires account) or paid (requires subscription)
  */
-export function isFreeFeature(feature: string): boolean {
-  return FEATURE_ACCESS.free.includes(feature);
+export function isFreeFeature(feature: FeatureKey): boolean {
+  return (FEATURE_ACCESS.free as readonly FeatureKey[]).includes(feature);
 }
 
 /**
  * Get the appropriate button text based on feature type and user state
  */
 export function getFeatureButtonText(
-  feature: string | undefined,
+  feature: FeatureKey | undefined,
   isAuthenticated: boolean,
   isSubscribed: boolean,
   isTrialActive: boolean,
@@ -52,7 +52,7 @@ export function getFeatureButtonText(
  * Get the appropriate link text for features
  */
 export function getFeatureLinkText(
-  feature: string | undefined,
+  feature: FeatureKey | undefined,
   isAuthenticated: boolean,
   isSubscribed: boolean,
   isTrialActive: boolean,
@@ -86,7 +86,7 @@ export function getFeatureLinkText(
  * Get the appropriate href based on feature type and user state
  */
 export function getFeatureHref(
-  feature: string | undefined,
+  feature: FeatureKey | undefined,
   isAuthenticated: boolean,
   hasRequiredData?: boolean,
   customAuthHref?: string,

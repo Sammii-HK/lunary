@@ -422,7 +422,7 @@ export function TarotSpreadExperience({
         const data = await response.json();
         if (data.code === 'limit_reached') {
           setLimitWarning(
-            'You have used all complimentary spread saves for this cycle. Upgrade to unlock unlimited tarot journaling.',
+            'You have used all complimentary spread saves for this cycle. Upgrade to the annual plan for unlimited tarot journaling.',
           );
         } else if (data.code === 'spread_locked') {
           setLimitWarning('This spread is reserved for subscribers.');

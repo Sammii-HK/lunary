@@ -7,7 +7,7 @@ import { BirthChartData } from '../../utils/astrology/birthChart';
 import { getAstrologicalChart } from '../../utils/astrology/astrology';
 import { getGeneralHoroscope } from '../../utils/astrology/generalHoroscope';
 import { useSubscription } from '../hooks/useSubscription';
-import { hasBirthChartAccess, hasDateAccess } from '../../utils/pricing';
+import { hasFeatureAccess, hasDateAccess } from '../../utils/pricing';
 import { useAstronomyContext } from '../context/AstronomyContext';
 import { Paywall } from './Paywall';
 import dayjs from 'dayjs';
@@ -693,9 +693,10 @@ export const HoroscopeWidget = () => {
     };
   });
 
-  const hasChartAccess = hasBirthChartAccess(
+  const hasPersonalHoroscopeAccess = hasFeatureAccess(
     subscription.status,
     subscription.plan,
+    'personalized_horoscope',
   );
 
   // Check date access - show paywall if date is restricted
@@ -716,7 +717,7 @@ export const HoroscopeWidget = () => {
   }
 
   // If user doesn't have birth chart access, show general horoscope
-  if (!hasChartAccess) {
+  if (!hasPersonalHoroscopeAccess) {
     const generalHoroscope = getGeneralHoroscope(normalizedDate);
     return (
       <div className='py-3 px-4 border border-stone-800 rounded-md w-full min-h-64'>

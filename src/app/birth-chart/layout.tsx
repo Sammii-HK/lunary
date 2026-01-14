@@ -3,7 +3,7 @@ import { Metadata } from 'next';
 export const metadata: Metadata = {
   title: 'Birth Chart Analysis - Lunary | Complete Natal Chart Reading',
   description:
-    'Get your complete birth chart analysis with precise planetary positions, houses, aspects, and interpretations. Calculated from your exact birth time, date, and location using real astronomical data. Free 7-day trial.',
+    'Get your complete birth chart analysis with precise planetary positions, houses, aspects, and interpretations. Calculated from your exact birth time, date, and location using real astronomical data. Free monthly or annual trial.',
   keywords: [
     'birth chart',
     'natal chart',

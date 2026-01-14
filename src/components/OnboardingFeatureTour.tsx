@@ -94,7 +94,7 @@ export function OnboardingFeatureTour({
         {
           title: 'Plus AI guidance',
           items: [
-            'Effectively unlimited AI chat + saved threads',
+            'Up to 300 messages/day AI chat + saved threads',
             'Personalized weekly reports + deeper readings',
             'Advanced pattern analysis + downloadable PDFs',
             'AI ritual generation + deeper guidance',
@@ -108,7 +108,7 @@ export function OnboardingFeatureTour({
       {
         title: 'Everything in Lunary+ AI',
         items: [
-          'Effectively unlimited AI chat + saved threads',
+          'Up to 300 messages/day AI chat + saved threads',
           'Personalized weekly reports + deeper readings',
           'Advanced pattern analysis + downloadable PDFs',
           'AI ritual generation + deeper guidance',
@@ -119,7 +119,7 @@ export function OnboardingFeatureTour({
         items: [
           'Unlimited tarot spreads + annual deep dives',
           'Yearly forecast + extended timeline analysis',
-          'Calendar download + unlimited collections',
+          'Calendar download (ICS format)',
           'Priority support + annual benefits',
         ],
       },

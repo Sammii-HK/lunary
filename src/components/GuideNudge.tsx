@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { Sparkles } from 'lucide-react';
 import { useGuideContextHints } from '@/hooks/useGuideContextHints';
 import { useSubscription } from '@/hooks/useSubscription';
-import { hasBirthChartAccess } from '../../utils/pricing';
+import { hasFeatureAccess } from '../../utils/pricing';
 
 type NudgeLocation = 'tarot' | 'horoscope' | 'profile' | 'journal';
 
@@ -16,7 +16,11 @@ interface GuideNudgeProps {
 export function GuideNudge({ location, className = '' }: GuideNudgeProps) {
   const hint = useGuideContextHints(location);
   const subscription = useSubscription();
-  const isPremium = hasBirthChartAccess(subscription.status, subscription.plan);
+  const hasPaidAccess = hasFeatureAccess(
+    subscription.status,
+    subscription.plan,
+    'personalized_horoscope',
+  );
 
   if (!hint) {
     return null;
@@ -33,7 +37,7 @@ export function GuideNudge({ location, className = '' }: GuideNudgeProps) {
           <Sparkles className='w-4 h-4 text-lunary-primary-400' />
         </div>
         <div className='flex-1 min-w-0'>
-          {isPremium ? (
+          {hasPaidAccess ? (
             <>
               <p className='text-sm text-zinc-300 mb-1'>{hint.title}</p>
               <p className='text-xs text-zinc-400 mb-2'>{hint.shortText}</p>
