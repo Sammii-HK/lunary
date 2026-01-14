@@ -4,7 +4,7 @@ import { useMemo } from 'react';
 import { useUser } from '@/context/UserContext';
 import { useAuthStatus } from '@/components/AuthStatus';
 import Link from 'next/link';
-import { Sparkles, ArrowRight, Lock } from 'lucide-react';
+import { Sparkles, ArrowRight } from 'lucide-react';
 import {
   getUpcomingTransits,
   TransitEvent,
@@ -181,14 +181,15 @@ export const TransitOfTheDay = () => {
             <p className='text-xs text-zinc-400 line-clamp-2 mb-2'>
               {generalTransit.description}
             </p>
-            <Link
-              href='/pricing'
-              onClick={(e) => e.stopPropagation()}
-              className='flex items-center gap-1.5 text-xs text-lunary-primary-200 hover:text-lunary-primary-100 transition-colors'
+            <button
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+              }}
+              className='flex items-center gap-1.5 text-xs text-lunary-primary-200 hover:text-lunary-primary-100 transition-colors bg-none border-none p-0 cursor-pointer'
             >
-              <Lock className='w-3 h-3' />
-              <span>Sign up to get personal transit insights</span>
-            </Link>
+              Unlock personal transit insights with Lunary+
+            </button>
           </div>
           <ArrowRight className='w-4 h-4 text-zinc-600 group-hover:text-lunary-secondary-200 transition-colors flex-shrink-0 mt-1' />
         </div>

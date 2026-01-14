@@ -40,10 +40,10 @@ export function SmartTrialButton({
     if (feature && isFreeFeature(feature)) {
       if (!authState.isAuthenticated) {
         return {
-          text: 'Sign up for free',
+          text: 'Create your birth chart',
           href: null,
           action: 'modal' as const,
-          variant: 'lunary-solid' as const,
+          variant: 'lunary-soft' as const,
         };
       }
       if (!hasRequiredData) {
@@ -56,7 +56,7 @@ export function SmartTrialButton({
       }
       // Already has access - shouldn't show button, but handle gracefully
       return {
-        text: 'View',
+        text: 'Open app',
         href: '/app',
         action: 'link' as const,
         variant: 'outline' as const,
@@ -66,8 +66,8 @@ export function SmartTrialButton({
     // Paid feature - needs subscription
     if (isSubscribed) {
       return {
-        text: 'Manage Subscription',
-        href: '/profile',
+        text: 'See what Lunary+ unlocks',
+        href: '/pricing',
         action: 'link' as const,
         variant: 'outline' as const,
       };
@@ -78,18 +78,18 @@ export function SmartTrialButton({
       // So we don't show a button - the paywall shouldn't be there
       // But if it is, link to app
       return {
-        text: isTrialActive ? 'Continue Trial' : 'Start Free Trial',
+        text: isTrialActive ? 'Open app' : 'See what Lunary+ unlocks',
         href: isTrialActive ? '/app' : '/pricing',
         action: 'link' as const,
-        variant: 'lunary-solid' as const,
+        variant: 'lunary-soft' as const,
       };
     }
 
     return {
-      text: 'Sign up for free',
+      text: 'See what Lunary+ unlocks',
       href: null,
       action: 'modal' as const,
-      variant: 'lunary-solid' as const,
+      variant: 'lunary-soft' as const,
     };
   };
 
@@ -141,8 +141,8 @@ export function SmartTrialButton({
             <div className='text-center mb-4 sm:mb-6'>
               <h3 className='text-lg sm:text-xl font-bold text-white mb-2'>
                 {feature && isFreeFeature(feature)
-                  ? 'Sign Up for Free'
-                  : 'Start Your Free Trial'}
+                  ? 'Create your birth chart'
+                  : 'See what Lunary+ unlocks'}
               </h3>
               <p className='text-zinc-300 text-xs sm:text-sm'>
                 {feature && isFreeFeature(feature)

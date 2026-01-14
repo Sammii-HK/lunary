@@ -149,7 +149,7 @@ export default function GuidesIndexPage() {
           answer:
             'Our complete guides are comprehensive, in-depth resources covering major topics in astrology and spiritual practice. Each guide is 5,000-8,000+ words of thoroughly researched content, covering everything from fundamentals to advanced concepts. They serve as your go-to reference for mastering each subject.',
         }}
-        tldr='Four comprehensive guides covering the essentials: Birth Chart (read your cosmic blueprint), Tarot (master all 78 cards), Crystal Healing (properties and uses), and Moon Phases (lunar cycles and rituals). Each 5,000-8,000+ words, beginner to advanced.'
+        tldr='Five comprehensive guides covering the essentials: Birth Chart (read your cosmic blueprint), Tarot (master all 78 cards), Crystal Healing (properties and uses), and Moon Phases (lunar cycles and rituals). Each 5,000-8,000+ words, beginner to advanced.'
         faqs={[
           {
             question: 'Are these guides suitable for beginners?',

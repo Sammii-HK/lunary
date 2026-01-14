@@ -135,6 +135,14 @@ type FeatureUsageResponse = {
   }>;
 };
 
+type IntentionBreakdownItem = {
+  intention: string;
+  count: number;
+  percentage: number;
+};
+
+type IntentionBreakdown = IntentionBreakdownItem[];
+
 const DEFAULT_RANGE_DAYS = 30;
 const activitySeries: UsageChartSeries[] = [
   {
@@ -179,6 +187,13 @@ const productSeries: UsageChartSeries[] = [
 
 const formatDateInput = (date: Date) => date.toISOString().split('T')[0];
 
+const INTENTION_LABELS: Record<string, string> = {
+  clarity: 'Clarity',
+  confidence: 'Confidence',
+  calm: 'Calm',
+  insight: 'Insight',
+};
+
 export default function AnalyticsPage() {
   const today = useMemo(() => new Date(), []);
   const defaultEnd = formatDateInput(today);
@@ -216,6 +231,8 @@ export default function AnalyticsPage() {
   const [apiCosts, setApiCosts] = useState<any | null>(null);
   const [cohorts, setCohorts] = useState<any | null>(null);
   const [userSegments, setUserSegments] = useState<any | null>(null);
+  const [intentionBreakdown, setIntentionBreakdown] =
+    useState<IntentionBreakdown | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const activityUsageData = useMemo(() => {
@@ -290,6 +307,7 @@ export default function AnalyticsPage() {
         apiCostsRes,
         cohortsRes,
         userSegmentsRes,
+        intentionBreakdownRes,
       ] = await Promise.all([
         fetch(
           `/api/admin/analytics/dau-wau-mau?${queryParams}&granularity=${granularity}`,
@@ -312,6 +330,7 @@ export default function AnalyticsPage() {
         fetch(`/api/admin/analytics/api-costs?${queryParams}`),
         fetch(`/api/admin/analytics/cohorts?${queryParams}&type=week&weeks=12`),
         fetch(`/api/admin/analytics/user-segments?${queryParams}`),
+        fetch(`/api/admin/analytics/intention-breakdown?${queryParams}`),
       ]);
 
       const errors: string[] = [];
@@ -394,6 +413,18 @@ export default function AnalyticsPage() {
 
       if (userSegmentsRes.ok) {
         setUserSegments(await userSegmentsRes.json());
+      }
+
+      if (intentionBreakdownRes.ok) {
+        const data = await intentionBreakdownRes.json();
+        const breakdown = Array.isArray(data?.data)
+          ? (data.data as IntentionBreakdown)
+          : Array.isArray(data)
+            ? (data as IntentionBreakdown)
+            : null;
+        setIntentionBreakdown(breakdown);
+      } else {
+        errors.push('Intention breakdown');
       }
 
       if (errors.length > 0) {
@@ -493,6 +524,19 @@ export default function AnalyticsPage() {
           `${conversions.trial_conversion_rate.toFixed(2)}%`,
         ],
       );
+    }
+
+    if (intentionBreakdown && intentionBreakdown.length > 0) {
+      const totalIntentions =
+        intentionBreakdown.reduce((sum, item) => sum + item.count, 0) ?? 0;
+      rows.push(['Onboarding', 'Intentions saved', String(totalIntentions)]);
+      intentionBreakdown.forEach((item) => {
+        rows.push([
+          'Intentions',
+          INTENTION_LABELS[item.intention] ?? item.intention,
+          `${item.count} (${item.percentage.toFixed(2)}%)`,
+        ]);
+      });
     }
 
     if (notifications) {
@@ -1429,6 +1473,52 @@ export default function AnalyticsPage() {
               loading={loading && !successMetrics}
             />
           </section>
+
+          {intentionBreakdown && intentionBreakdown.length > 0 && (
+            <section>
+              <Card className='border-zinc-800/30 bg-zinc-900/10'>
+                <CardHeader>
+                  <CardTitle className='text-base font-medium'>
+                    Onboarding Intentions
+                  </CardTitle>
+                  <CardDescription className='text-xs text-zinc-400'>
+                    Popular intention selections ({startDate} → {endDate})
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className='space-y-4'>
+                  {intentionBreakdown.map((item) => {
+                    const label =
+                      INTENTION_LABELS[item.intention] ||
+                      (item.intention
+                        ? item.intention.charAt(0).toUpperCase() +
+                          item.intention.slice(1)
+                        : 'Other');
+                    return (
+                      <div key={item.intention} className='space-y-2'>
+                        <div className='flex items-center justify-between text-sm text-zinc-300'>
+                          <span>{label}</span>
+                          <span className='font-semibold text-white'>
+                            {item.count.toLocaleString()}
+                          </span>
+                        </div>
+                        <div className='h-2 w-full rounded-full bg-zinc-800'>
+                          <div
+                            className='h-2 rounded-full bg-gradient-to-r from-lunary-primary to-lunary-highlight'
+                            style={{
+                              width: `${Math.min(item.percentage, 100)}%`,
+                            }}
+                          />
+                        </div>
+                        <p className='text-[11px] text-zinc-500'>
+                          {item.percentage.toFixed(2)}% of saved intentions
+                        </p>
+                      </div>
+                    );
+                  })}
+                </CardContent>
+              </Card>
+            </section>
+          )}
 
           {searchConsoleData && (
             <section>

@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { useSubscription } from '@/hooks/useSubscription';
 import { Paywall } from '@/components/Paywall';
 import { UpgradePrompt } from '@/components/UpgradePrompt';
-import { Lock } from 'lucide-react';
+import { Lock as LockIcon } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 type AdvancedPatternAnalysis = {
@@ -504,7 +504,7 @@ export function AdvancedPatterns({
           {error && !analysis && !loading && (
             <div className='rounded-lg border border-lunary-primary-700 bg-lunary-primary-950 p-4 mb-4'>
               <div className='flex items-start gap-3'>
-                <Lock className='h-5 w-5 text-lunary-accent mt-0.5 flex-shrink-0' />
+                <LockIcon className='h-5 w-5 text-lunary-accent mt-0.5 flex-shrink-0' />
                 <div className='flex-1'>
                   <h4 className='text-sm font-medium text-lunary-accent-200 mb-1'>
                     Advanced Pattern Analysis
@@ -751,7 +751,7 @@ export function AdvancedPatterns({
           {error && !analysis && !loading && (
             <div className='rounded-lg border border-lunary-primary-700 bg-lunary-primary-950 p-4 mb-4'>
               <div className='flex items-start gap-3'>
-                <Lock className='h-5 w-5 text-lunary-accent mt-0.5 flex-shrink-0' />
+                <LockIcon className='h-5 w-5 text-lunary-accent mt-0.5 flex-shrink-0' />
                 <div className='flex-1'>
                   <h4 className='text-sm font-medium text-lunary-accent-200 mb-1'>
                     Advanced Pattern Analysis

@@ -94,7 +94,7 @@ export function OnboardingFeatureTour({
         {
           title: 'Plus AI guidance',
           items: [
-            'Unlimited AI chat + saved threads',
+            'Effectively unlimited AI chat + saved threads',
             'Personalized weekly reports + deeper readings',
             'Advanced pattern analysis + downloadable PDFs',
             'AI ritual generation + deeper guidance',
@@ -108,7 +108,7 @@ export function OnboardingFeatureTour({
       {
         title: 'Everything in Lunary+ AI',
         items: [
-          'Unlimited AI chat + saved threads',
+          'Effectively unlimited AI chat + saved threads',
           'Personalized weekly reports + deeper readings',
           'Advanced pattern analysis + downloadable PDFs',
           'AI ritual generation + deeper guidance',

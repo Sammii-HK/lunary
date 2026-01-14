@@ -3,8 +3,8 @@
 import { useMemo, useState, useEffect, useCallback } from 'react';
 import { useUser } from '@/context/UserContext';
 import { useAuthStatus } from '@/components/AuthStatus';
-import Link from 'next/link';
-import { X, Gem, ArrowRight, Sparkles, Lock } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { X, Gem, ArrowRight, Sparkles } from 'lucide-react';
 import { getAstrologicalChart } from '../../../utils/astrology/astrology';
 import { getGeneralCrystalRecommendation } from '../../../utils/crystals/generalCrystals';
 import {
@@ -15,10 +15,12 @@ import { useSubscription } from '../../hooks/useSubscription';
 import { hasBirthChartAccess } from '../../../utils/pricing';
 import { useAstronomyContext } from '../../context/AstronomyContext';
 import dayjs from 'dayjs';
+import { Button } from '../ui/button';
 
 export const CrystalPreview = () => {
   const { user } = useUser();
   const authStatus = useAuthStatus();
+  const router = useRouter();
   const subscription = useSubscription();
   const { currentDateTime } = useAstronomyContext();
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -35,10 +37,25 @@ export const CrystalPreview = () => {
   }, [currentDateTime]);
 
   useEffect(() => {
-    import('astronomy-engine').then((module) => {
-      const { Observer } = module;
-      setObserver(new Observer(51.4769, 0.0005, 0));
-    });
+    // Async initialization to avoid hydration issues
+    const initializeObserver = async () => {
+      try {
+        const astronomyEngine = await import('astronomy-engine');
+        const { Observer } = astronomyEngine;
+        if (Observer) {
+          try {
+            const newObserver = new Observer(51.4769, 0.0005, 0);
+            setObserver(newObserver);
+          } catch (err) {
+            console.warn('Failed to instantiate Observer:', err);
+          }
+        }
+      } catch (err) {
+        console.warn('Failed to import astronomy-engine:', err);
+      }
+    };
+
+    initializeObserver();
   }, []);
 
   const birthChart = user?.birthChart;
@@ -113,11 +130,24 @@ export const CrystalPreview = () => {
 
   // If no crystal name and not loading, show general crystal or upsell
   if (!crystalName) {
-    // This shouldn't happen if generalCrystal is computed correctly, but provide fallback
     return (
-      <Link
-        href='/pricing'
-        className='block py-3 px-4 bg-lunary-bg border border-zinc-800/50 rounded-md w-full h-full hover:border-lunary-primary-700/50 transition-colors group min-h-16'
+      <div
+        onClick={() =>
+          router.push(
+            authStatus.isAuthenticated ? '/pricing' : '/auth?signup=true',
+          )
+        }
+        role='button'
+        tabIndex={0}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            router.push(
+              authStatus.isAuthenticated ? '/pricing' : '/auth?signup=true',
+            );
+          }
+        }}
+        className='block py-3 px-4 bg-lunary-bg border border-zinc-800/50 rounded-md w-full h-full hover:border-lunary-primary-700/50 transition-colors group min-h-16 cursor-pointer'
       >
         <div className='flex items-center justify-between'>
           <div className='flex items-center gap-2'>
@@ -128,18 +158,26 @@ export const CrystalPreview = () => {
           </div>
           <ArrowRight className='w-4 h-4 text-lunary-secondary-200' />
         </div>
-      </Link>
+      </div>
     );
   }
 
   return (
     <>
-      <button
+      <div
+        role='button'
+        tabIndex={0}
         onClick={() => setIsModalOpen(true)}
-        className='w-full h-full py-3 px-4 bg-lunary-bg border border-zinc-800/50 rounded-md hover:border-lunary-primary-700/50 transition-colors group text-left min-h-16'
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            setIsModalOpen(true);
+          }
+        }}
+        className='w-full h-full py-3 px-4 bg-lunary-bg border border-zinc-800/50 rounded-md hover:border-lunary-primary-700/50 transition-colors group text-left min-h-16 cursor-pointer'
       >
-        <div className='flex items-start justify-between gap-3'>
-          <div className='flex-1 min-w-0'>
+        <div className='flex items-start gap-3 h-full'>
+          <div className='flex-1 min-w-0 h-full mt-1 justify-between flex flex-col'>
             <div className='flex items-center justify-between mb-1'>
               <div className='flex items-center gap-2'>
                 <Gem className='w-4 h-4 text-lunary-accent-200' />
@@ -149,7 +187,7 @@ export const CrystalPreview = () => {
               </div>
               {canAccessPersonalized && (
                 <span className='text-xs bg-zinc-800/50 text-lunary-primary-200 px-1.5 py-0.5 rounded'>
-                  For you
+                  Personalized
                 </span>
               )}
             </div>
@@ -157,25 +195,42 @@ export const CrystalPreview = () => {
               {crystalReason}
             </p>
             {!canAccessPersonalized && (
-              <Link
-                href={
-                  authStatus.isAuthenticated ? '/pricing' : '/auth?signup=true'
-                }
-                onClick={(e) => e.stopPropagation()}
-                className='flex items-center gap-1.5 mt-2 text-xs text-lunary-primary-200 hover:text-lunary-primary-100 transition-colors'
+              <span
+                role='button'
+                tabIndex={0}
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  if (router) {
+                    router.push(
+                      authStatus.isAuthenticated
+                        ? '/pricing'
+                        : '/auth?signup=true',
+                    );
+                  }
+                }}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    if (router) {
+                      router.push(
+                        authStatus.isAuthenticated
+                          ? '/pricing'
+                          : '/auth?signup=true',
+                      );
+                    }
+                  }
+                }}
+                className='flex items-center gap-1.5 mt-2 text-xs text-lunary-primary-200 hover:text-lunary-primary-100 transition-colors bg-none border-none p-0 cursor-pointer'
               >
-                <Lock className='w-3 h-3' />
-                <span>
-                  {authStatus.isAuthenticated
-                    ? 'Unlock personalized recommendations'
-                    : `Sign up for personalized recommendations`}
-                </span>
-              </Link>
+                Unlock personalized recommendations with Lunary+
+              </span>
             )}
           </div>
           <ArrowRight className='w-4 h-4 text-zinc-600 group-hover:text-lunary-accent-200 transition-colors flex-shrink-0 mt-1' />
         </div>
-      </button>
+      </div>
 
       {isModalOpen && (
         <div
@@ -252,29 +307,42 @@ export const CrystalPreview = () => {
               )}
 
               {!canAccessPersonalized && (
-                <Link
-                  href={
-                    authStatus.isAuthenticated
-                      ? '/pricing'
-                      : '/auth?signup=true'
-                  }
-                  className='flex items-center justify-center gap-2 w-full py-3 bg-gradient-to-r from-lunary-primary to-lunary-highlight rounded-lg text-white font-medium hover:from-lunary-primary-400 hover:to-lunary-highlight-400 transition-all'
-                  onClick={() => setIsModalOpen(false)}
+                <Button
+                  variant='lunary-soft'
+                  onClick={() => {
+                    if (router) {
+                      router.push(
+                        authStatus.isAuthenticated
+                          ? '/pricing'
+                          : '/auth?signup=true',
+                      );
+                    }
+                  }}
+                  className='text-xs'
                 >
                   <Sparkles className='w-4 h-4' />
-                  {authStatus.isAuthenticated
-                    ? 'Get personalized crystals'
-                    : `Get personalized ${crystalName}`}
-                </Link>
+                  Get personalized recommendations with Lunary+
+                </Button>
               )}
 
-              <Link
-                href='/grimoire/crystals'
-                className='block w-full py-2 text-center text-sm text-lunary-accent hover:text-lunary-accent-300 transition-colors'
-                onClick={() => setIsModalOpen(false)}
+              <span
+                role='button'
+                tabIndex={0}
+                onClick={() => {
+                  router.push('/grimoire/crystals');
+                  setIsModalOpen(false);
+                }}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    router.push('/grimoire/crystals');
+                    setIsModalOpen(false);
+                  }
+                }}
+                className='block w-full py-2 text-center text-sm text-lunary-accent hover:text-lunary-accent-300 transition-colors cursor-pointer'
               >
-                Explore all crystals →
-              </Link>
+                Explore all crystals
+              </span>
             </div>
           </div>
         </div>

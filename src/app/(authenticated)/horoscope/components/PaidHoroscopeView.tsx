@@ -21,7 +21,7 @@ import { GuideNudge } from '@/components/GuideNudge';
 import { StreakBanner } from '@/components/StreakBanner';
 import { ReflectionBox } from '@/components/horoscope/ReflectionBox';
 import { PremiumPathway } from '@/components/PremiumPathway';
-import { parseIsoDateOnly } from '@/lib/date-only';
+import { getPersonalDayNumber } from '@/lib/numerology/personalNumbers';
 import {
   getNumerologyDetail,
   type NumerologyDetailContext,
@@ -489,43 +489,6 @@ const getDailyNumerology = (
   return {
     number: sum,
     meaning: numerologyMeanings[sum] || 'transformative energy',
-  };
-};
-
-const getPersonalDayNumber = (
-  birthdate: string,
-  currentDate: dayjs.Dayjs,
-): { number: number; meaning: string } => {
-  const parsedBirthDate = parseIsoDateOnly(birthdate);
-  const birth = parsedBirthDate ? dayjs(parsedBirthDate) : dayjs(birthdate);
-  const birthMonth = birth.month() + 1;
-  const birthDay = birth.date();
-  const currentYear = currentDate.year();
-  const currentMonth = currentDate.month() + 1;
-  const currentDay = currentDate.date();
-
-  let sum = birthMonth + birthDay + currentYear + currentMonth + currentDay;
-
-  while (sum > 9) {
-    const digits = sum.toString().split('');
-    sum = digits.reduce((acc, digit) => acc + parseInt(digit), 0);
-  }
-
-  const personalDayMeanings: Record<number, string> = {
-    1: 'new beginnings',
-    2: 'cooperation',
-    3: 'creativity',
-    4: 'organization',
-    5: 'change',
-    6: 'service',
-    7: 'reflection',
-    8: 'leadership',
-    9: 'completion',
-  };
-
-  return {
-    number: sum,
-    meaning: personalDayMeanings[sum] || 'personal growth and development',
   };
 };
 

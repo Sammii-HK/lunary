@@ -1,19 +1,21 @@
 import { notFound } from 'next/navigation';
 import { SEOContentTemplate } from '@/components/grimoire/SEOContentTemplate';
-import { tarotSpreads } from '@/constants/tarot';
-import { stringToKebabCase } from '../../../../../../utils/string';
+import {
+  TAROT_SPREADS,
+  TAROT_SPREAD_MAP,
+  type TarotPlan,
+} from '@/constants/tarotSpreads';
 import { createGrimoireMetadata } from '@/lib/grimoire-metadata';
 
-const spreadKeys = Object.keys(tarotSpreads);
-
-// Convert kebab-case slug back to camelCase key
-function kebabToCamel(str: string): string {
-  return str.replace(/-([a-z])/g, (_, letter) => letter.toUpperCase());
-}
+const difficultyLabel: Record<TarotPlan, string> = {
+  free: 'Beginner',
+  monthly: 'Intermediate',
+  yearly: 'Advanced',
+};
 
 export async function generateStaticParams() {
-  return spreadKeys.map((spread) => ({
-    spread: stringToKebabCase(spread),
+  return TAROT_SPREADS.map((spread) => ({
+    spread: spread.slug,
   }));
 }
 
@@ -23,8 +25,7 @@ export async function generateMetadata({
   params: Promise<{ spread: string }>;
 }) {
   const { spread } = await params;
-  const spreadKey = kebabToCamel(spread);
-  const spreadData = tarotSpreads[spreadKey as keyof typeof tarotSpreads];
+  const spreadData = TAROT_SPREAD_MAP[spread];
 
   if (!spreadData) {
     return { title: 'Not Found - Lunary Grimoire' };
@@ -32,7 +33,7 @@ export async function generateMetadata({
 
   return createGrimoireMetadata({
     title: `${spreadData.name}: How to Read & Interpret - Lunary`,
-    description: `Learn the ${spreadData.name} for tarot reading. Discover card positions, interpretations, and tips for accurate readings with this popular tarot spread.`,
+    description: spreadData.description,
     keywords: [
       spreadData.name.toLowerCase(),
       `${spreadData.name.toLowerCase()} tarot`,
@@ -52,134 +53,72 @@ export default async function TarotSpreadPage({
   params: Promise<{ spread: string }>;
 }) {
   const { spread } = await params;
-  // Convert kebab-case URL slug back to camelCase key
-  const spreadKey = kebabToCamel(spread);
-  const spreadData = tarotSpreads[spreadKey as keyof typeof tarotSpreads];
+  const spreadData = TAROT_SPREAD_MAP[spread];
 
   if (!spreadData) {
     notFound();
   }
 
-  const spreadDetails: Record<
-    string,
-    { positions: string[]; bestFor: string[]; difficulty: string }
-  > = {
-    threeCard: {
-      positions: ['Past', 'Present', 'Future'],
-      bestFor: [
-        'Quick answers',
-        'Daily readings',
-        'Simple questions',
-        'Beginners',
-      ],
-      difficulty: 'Beginner',
-    },
-    fiveCard: {
-      positions: ['Past', 'Present', 'Hidden Influences', 'Advice', 'Outcome'],
-      bestFor: [
-        'Detailed insights',
-        'Decision making',
-        'Understanding situations',
-      ],
-      difficulty: 'Beginner-Intermediate',
-    },
-    sevenCard: {
-      positions: [
-        'Past',
-        'Present',
-        'Future',
-        'Advice',
-        'External Influences',
-        'Hopes/Fears',
-        'Outcome',
-      ],
-      bestFor: [
-        'Complex situations',
-        'Relationship questions',
-        'Career decisions',
-      ],
-      difficulty: 'Intermediate',
-    },
-    tenCard: {
-      positions: [
-        'Present',
-        'Challenge',
-        'Past',
-        'Future',
-        'Above',
-        'Below',
-        'Advice',
-        'External',
-        'Hopes/Fears',
-        'Outcome',
-      ],
-      bestFor: [
-        'In-depth analysis',
-        'Major life decisions',
-        'Comprehensive readings',
-      ],
-      difficulty: 'Advanced',
-    },
-    crossSpread: {
-      positions: ['Center', 'Above', 'Below', 'Left', 'Right'],
-      bestFor: [
-        'Balanced perspective',
-        'Understanding dynamics',
-        'Spiritual questions',
-      ],
-      difficulty: 'Intermediate',
-    },
-    yearAhead: {
-      positions: [
-        'January',
-        'February',
-        'March',
-        'April',
-        'May',
-        'June',
-        'July',
-        'August',
-        'September',
-        'October',
-        'November',
-        'December',
-      ],
-      bestFor: ['New Year readings', 'Annual planning', 'Long-term guidance'],
-      difficulty: 'Intermediate',
-    },
-    pastPresentFuture: {
-      positions: ['Past influences', 'Current situation', 'Future potential'],
-      bestFor: [
-        'Understanding timelines',
-        'Quick readings',
-        'General guidance',
-      ],
-      difficulty: 'Beginner',
-    },
-  };
+  const positions = spreadData?.positions ?? [];
+  const bestFor = spreadData?.bestFor ?? [];
+  const difficulty = difficultyLabel[spreadData.minimumPlan] ?? 'Varies';
+  const journalPrompts =
+    spreadData.journalPrompts && spreadData.journalPrompts.length > 0
+      ? spreadData.journalPrompts
+      : ['Reflect on what shifted during the reading.'];
 
-  const details = spreadDetails[spreadKey] || {
-    positions: [],
-    bestFor: [],
-    difficulty: 'Varies',
-  };
+  const samplePositions =
+    positions.length > 0
+      ? positions
+          .slice(0, 3)
+          .map((position, index) => `${index + 1}. ${position.label}`)
+          .join(', ')
+      : '';
+
+  const tables =
+    positions.length > 0
+      ? [
+          {
+            title: `${spreadData.name} Positions`,
+            headers: ['Position', 'Meaning'],
+            rows: positions.map((position) => [
+              position.label,
+              position.prompt || 'Position meaning coming soon.',
+            ]),
+          },
+        ]
+      : [];
+
+  const bestForSentence = bestFor.length
+    ? ` It is best for ${bestFor.join(', ')}.`
+    : '';
+  const intentionSentence = spreadData.intention
+    ? ` ${spreadData.intention}`
+    : '';
+  const meaningCopy = `Tarot spreads provide structure for deeper readings. The ${spreadData.name.toLowerCase()} ${spreadData.description.toLowerCase()}${intentionSentence}${bestForSentence}`;
 
   const faqs = [
     {
       question: `What is the ${spreadData.name}?`,
-      answer: `The ${spreadData.name} ${spreadData.description.toLowerCase()}`,
+      answer: spreadData.description,
     },
     {
-      question: `How many cards are in the ${spreadData.name}?`,
-      answer: `The ${spreadData.name} uses ${details.positions.length} cards, with positions for ${details.positions.slice(0, 3).join(', ')}.`,
+      question: `Who benefits from the ${spreadData.name}?`,
+      answer: bestFor.length
+        ? `This spread is best for ${bestFor.join(', ')}.`
+        : 'This spread adds clarity to any thoughtful tarot reading.',
     },
     {
-      question: `When should I use the ${spreadData.name}?`,
-      answer: `The ${spreadData.name} is best for ${details.bestFor.join(', ').toLowerCase()}.`,
+      question: `How do I lay out the ${spreadData.name}?`,
+      answer: `Shuffle with intention, lay ${spreadData.cardCount} cards, and read each position in order. ${
+        samplePositions
+          ? `Start by focusing on ${samplePositions.toLowerCase()}.`
+          : ''
+      }`,
     },
     {
-      question: `Is the ${spreadData.name} good for beginners?`,
-      answer: `The ${spreadData.name} is rated as ${details.difficulty} difficulty. ${details.difficulty === 'Beginner' ? 'It is an excellent choice for those new to tarot.' : 'It requires some tarot experience for best results.'}`,
+      question: `How difficult is the ${spreadData.name}?`,
+      answer: `${difficulty} level: ${spreadData.estimatedTime} with ${spreadData.cardCount} cards.`,
     },
   ];
 
@@ -188,7 +127,7 @@ export default async function TarotSpreadPage({
       <SEOContentTemplate
         title={`${spreadData.name} - Lunary`}
         h1={`${spreadData.name}: Complete Guide`}
-        description={`Learn the ${spreadData.name} for tarot reading. Discover card positions and interpretations.`}
+        description={spreadData.description}
         keywords={[
           spreadData.name.toLowerCase(),
           `${spreadData.name.toLowerCase()} tarot`,
@@ -196,49 +135,31 @@ export default async function TarotSpreadPage({
           'tarot reading',
         ]}
         canonicalUrl={`https://lunary.app/grimoire/tarot/spreads/${spread}`}
-        intro={`${spreadData.description}`}
-        tldr={`The ${spreadData.name} uses ${details.positions.length} cards and is rated ${details.difficulty} difficulty.`}
-        meaning={`Tarot spreads provide structure for readings, with each position offering specific insights. The ${spreadData.name} is a popular layout used by readers worldwide.
-
-${spreadData.description}
-
-This spread works well for ${details.bestFor.join(', ').toLowerCase()}. The ${details.positions.length} positions each reveal different aspects of your question or situation.
-
-Card positions in the ${spreadData.name}:
-${details.positions.map((pos, i) => `${i + 1}. ${pos}`).join('\n')}
-
-When using this spread, take time to shuffle while focusing on your question. Lay out the cards in order and read them both individually and in relation to each other. The overall story the cards tell is as important as individual meanings.
-
-${spreadData.instructions.length > 0 ? `Instructions: ${spreadData.instructions.join(' ')}` : ''}`}
-        emotionalThemes={['Insight', 'Guidance', 'Clarity', 'Understanding']}
+        intro={spreadData.description}
+        tldr={`The ${spreadData.name} uses ${spreadData.cardCount} cards, takes ${spreadData.estimatedTime}, and is rated ${difficulty}.`}
+        meaning={meaningCopy}
+        emotionalThemes={['Insight', 'Structure', 'Clarity', 'Presence']}
         howToWorkWith={[
-          'Shuffle while focusing on your question',
-          `Lay out ${details.positions.length} cards in order`,
-          'Read each position individually',
-          'Consider card relationships',
-          'Trust your intuition',
+          'Clarify your question or intention before shuffling.',
+          `Lay out the ${spreadData.cardCount} cards in the order described.`,
+          'Read each card in context of its position and surrounding cards.',
+          'Capture your insights in a journal to spot patterns over time.',
         ]}
-        tables={[
-          {
-            title: `${spreadData.name} Positions`,
-            headers: ['Position', 'Meaning'],
-            rows: details.positions.map((pos, i) => [String(i + 1), pos]),
-          },
-        ]}
-        journalPrompts={[
-          'What question am I seeking guidance on?',
-          'How do the cards relate to each other?',
-          'What patterns do I notice in this reading?',
-          'What actions should I take based on this reading?',
-        ]}
+        tables={tables}
+        journalPrompts={journalPrompts}
         relatedItems={[
           { name: 'Tarot Guide', href: '/grimoire/tarot', type: 'Guide' },
-          { name: 'Major Arcana', href: '/grimoire/tarot', type: 'Cards' },
+          {
+            name: 'Tarot Spreads',
+            href: '/grimoire/tarot/spreads',
+            type: 'Guide',
+          },
           { name: 'Tarot Reading', href: '/tarot', type: 'Tool' },
         ]}
         breadcrumbs={[
           { label: 'Grimoire', href: '/grimoire' },
           { label: 'Tarot', href: '/grimoire/tarot' },
+          { label: 'Spreads', href: '/grimoire/tarot/spreads' },
           { label: spreadData.name, href: `/grimoire/tarot/spreads/${spread}` },
         ]}
         internalLinks={[

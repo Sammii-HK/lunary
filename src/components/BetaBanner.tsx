@@ -12,7 +12,7 @@ export function BetaBanner() {
   return (
     <div
       data-global-nav
-      className='bg-zinc-900 border-b border-zinc-800/50 px-4 py-2 fixed top-0 left-0 right-0 z-[60]'
+      className='bg-zinc-900 border-b border-zinc-800/50 px-4 py-1 md:py-2 fixed top-0 left-0 right-0 z-[60]'
     >
       <p className='text-center text-[11px] md:text-sm text-zinc-300'>
         {/* <span className='text-zinc-400'>Beta launch: </span> */}

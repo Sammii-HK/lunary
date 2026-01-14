@@ -359,7 +359,7 @@ export const MoonPreview = () => {
         </div>
       ) : spells.length > 0 ? (
         <div>
-          <h4 className='text-xs font-medium text-lunary-accent uppercase tracking-wide mb-2'>
+          <h4 className='text-xs font-medium text-lunary-accent-300 capitalize tracking-wide mb-2'>
             Recommended Spells
           </h4>
           <div className='space-y-2'>
@@ -381,7 +381,7 @@ export const MoonPreview = () => {
         href='/grimoire/moon'
         className='inline-block text-xs text-lunary-accent hover:text-lunary-accent-300 transition-colors'
       >
-        Learn more about moon phases →
+        Learn more about moon phases
       </Link>
     </div>
   );

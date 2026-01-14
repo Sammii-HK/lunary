@@ -17,7 +17,6 @@ import {
   Zap,
   ChevronDown,
 } from 'lucide-react';
-import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { createBirthChartWithMetadata } from '../../utils/astrology/birthChartService';
@@ -91,8 +90,11 @@ export function OnboardingFlow({
     null,
   );
   const [saving, setSaving] = useState(false);
+  const [savingIntention, setSavingIntention] = useState(false);
   const [showOptionalDetails, setShowOptionalDetails] = useState(false);
   const [showSkipWarning, setShowSkipWarning] = useState(false);
+  const [showBirthChartConfirmation, setShowBirthChartConfirmation] =
+    useState(false);
   const [prefillLoaded, setPrefillLoaded] = useState(false);
   const [autoSavePrefill, setAutoSavePrefill] = useState(false);
   const locationSuggestionsAbortRef = useRef<AbortController | null>(null);
@@ -171,10 +173,11 @@ export function OnboardingFlow({
         {
           title: 'Plus AI guidance',
           items: [
-            'Unlimited AI chat with your cosmic companion',
+            'Generous daily AI chat with your cosmic companion',
             'Personalized weekly reports + deeper readings',
             'Advanced pattern analysis + downloadable PDFs',
             'AI ritual generation + saved chat threads',
+            'Limited Collections & saved insights',
           ],
         },
       ];
@@ -185,7 +188,7 @@ export function OnboardingFlow({
       {
         title: 'Everything in Lunary+ AI',
         items: [
-          'Unlimited AI chat with your cosmic companion',
+          'Effectively unlimited AI chat with your cosmic companion',
           'Personalized weekly reports + deeper readings',
           'Advanced pattern analysis + downloadable PDFs',
           'AI ritual generation + saved chat threads',
@@ -517,6 +520,7 @@ export function OnboardingFlow({
 
       // Refresh user data in context so widgets update immediately
       await refetch();
+      setShowBirthChartConfirmation(true);
 
       setCurrentStep('intention');
     } catch (error) {
@@ -536,6 +540,35 @@ export function OnboardingFlow({
     user,
   ]);
 
+  const saveIntentionSelection = useCallback(async () => {
+    if (!selectedIntention) {
+      return;
+    }
+
+    setSavingIntention(true);
+    try {
+      const response = await fetch('/api/profile', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({
+          intention: selectedIntention,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to save intention');
+      }
+
+      await refetch();
+    } catch (error) {
+      console.error('Failed to save intention:', error);
+      alert('Failed to save your intention. Please try again.');
+    } finally {
+      setSavingIntention(false);
+    }
+  }, [refetch, selectedIntention]);
+
   useEffect(() => {
     if (!autoSavePrefill || currentStep !== 'birthday' || saving) {
       return;
@@ -547,6 +580,12 @@ export function OnboardingFlow({
     void handleSaveBirthday();
     setAutoSavePrefill(false);
   }, [autoSavePrefill, birthday, currentStep, handleSaveBirthday, saving]);
+
+  useEffect(() => {
+    if (currentStep !== 'intention') {
+      setShowBirthChartConfirmation(false);
+    }
+  }, [currentStep]);
 
   const trackStepCompletion = async (
     step: string,
@@ -620,6 +659,18 @@ export function OnboardingFlow({
     } else {
       handleComplete();
     }
+  };
+
+  const handleIntentionContinue = async () => {
+    if (selectedIntention) {
+      conversionTracking.upgradeClicked(
+        'onboarding_intention',
+        selectedIntention,
+      );
+      await saveIntentionSelection();
+    }
+
+    await handleNext();
   };
 
   if (!showOnboarding) {
@@ -700,11 +751,14 @@ export function OnboardingFlow({
                 aria-label={phase.label}
                 title={phase.label}
               >
-                <Image
+                <img
                   src={phase.src}
                   alt={phase.label}
                   width={16}
                   height={16}
+                  className='h-4 w-4 object-contain'
+                  loading='lazy'
+                  decoding='async'
                 />
               </div>
             );
@@ -715,12 +769,14 @@ export function OnboardingFlow({
           <div className='space-y-6'>
             <div className='text-center'>
               <div className='inline-flex items-center justify-center w-16 h-16 mb-2'>
-                <Image
+                <img
                   src='/icons/moon-phases/full-moon.svg'
                   alt='Full Moon'
                   width={64}
                   height={64}
-                  priority
+                  className='h-16 w-16 object-contain'
+                  loading='eager'
+                  decoding='async'
                 />
               </div>
               <h2 className='text-base font-semibold text-white mb-2 md:text-lg'>
@@ -798,7 +854,8 @@ export function OnboardingFlow({
                 When Were You Born?
               </h2>
               <p className='text-zinc-300 text-sm'>
-                Your birthday unlocks personalized cosmic insights
+                Your birthday unlocks personalized cosmic insights based on your
+                full birth chart.
               </p>
             </div>
 
@@ -949,7 +1006,7 @@ export function OnboardingFlow({
               <p className='text-xs text-zinc-400'>
                 We use this to calculate your exact birth chart and planetary
                 positions. Add birth time and location for the most accurate
-                chart.
+                chart and daily guidance.
               </p>
             </div>
 
@@ -988,6 +1045,12 @@ export function OnboardingFlow({
               <p className='text-zinc-300 text-sm'>
                 Help us personalize your experience
               </p>
+              {showBirthChartConfirmation && (
+                <p className='text-xs text-lunary-accent-200 mt-1'>
+                  Your birth chart is now set. Lunary uses it to interpret
+                  everything you explore.
+                </p>
+              )}
             </div>
 
             <div className='grid grid-cols-2 gap-3'>
@@ -1033,18 +1096,11 @@ export function OnboardingFlow({
 
             <div className='pt-4 space-y-3'>
               <button
-                onClick={() => {
-                  if (selectedIntention) {
-                    conversionTracking.upgradeClicked(
-                      'onboarding_intention',
-                      selectedIntention,
-                    );
-                  }
-                  handleNext();
-                }}
+                onClick={handleIntentionContinue}
+                disabled={savingIntention}
                 className='w-full bg-gradient-to-r from-lunary-primary to-lunary-highlight hover:from-lunary-primary-400 hover:to-lunary-highlight-400 text-white py-3 px-6 rounded-lg font-medium transition-all'
               >
-                Continue
+                {savingIntention ? 'Saving...' : 'Continue'}
               </button>
               <div className='flex items-center justify-between'>
                 <button
@@ -1076,11 +1132,14 @@ export function OnboardingFlow({
         {currentStep === 'complete' && (
           <div className='space-y-6 text-center'>
             <div className='inline-flex items-center justify-center w-16 h-16 mb-4'>
-              <Image
+              <img
                 src='/icons/moon-phases/full-moon.svg'
                 alt='Full Moon'
                 width={64}
                 height={64}
+                className='h-16 w-16 object-contain'
+                loading='eager'
+                decoding='async'
               />
             </div>
             <h2 className='text-base font-semibold text-white mb-2 md:text-lg'>

@@ -57,10 +57,12 @@ export function ConditionalMainWrapper({
       '/press-kit',
       '/developers',
       '/pricing',
+      '/about',
     ];
     const isCoreMarketingRoute =
       coreMarketingRoutes.includes(pathname) ||
       pathname.startsWith('/comparison/') ||
+      pathname.startsWith('/about/') ||
       pathname.startsWith('/admin');
 
     // Define app pages

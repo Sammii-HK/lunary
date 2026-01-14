@@ -1,6 +1,6 @@
 import { Metadata } from 'next';
 import Link from 'next/link';
-import { Clock, Star, Lock } from 'lucide-react';
+import { Clock, Star } from 'lucide-react';
 import { TAROT_SPREADS } from '@/constants/tarotSpreads';
 import { SEOContentTemplate } from '@/components/grimoire/SEOContentTemplate';
 import { createItemListSchema, renderJsonLd } from '@/lib/schema';
@@ -105,7 +105,7 @@ export default function TarotSpreadsIndexPage() {
   return (
     <>
       {renderJsonLd(spreadsListSchema)}
-      <div className='p-4 md:p-6 lg:p-8 xl:p-10 min-h-full'>
+      <div className='min-h-full'>
         <SEOContentTemplate
           title='Tarot Spreads | Lunary'
           h1='Tarot Spreads: Complete Reading Guide'
@@ -219,9 +219,6 @@ export default function TarotSpreadsIndexPage() {
                         <h3 className='font-medium text-zinc-100 group-hover:text-violet-300 transition-colors'>
                           {spread.name}
                         </h3>
-                        {spread.minimumPlan !== 'free' && (
-                          <Lock className='w-4 h-4 text-zinc-400' />
-                        )}
                       </div>
                       <p className='text-sm text-zinc-400 mb-3 line-clamp-2'>
                         {spread.description}

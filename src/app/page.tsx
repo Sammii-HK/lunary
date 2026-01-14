@@ -7,7 +7,7 @@ import WelcomePage from './welcome/page';
 export const metadata: Metadata = {
   title: 'Lunary: Personal Astrology App | Birth Chart, Horoscopes & Tarot',
   description:
-    'Your personal astrology companion. Daily horoscopes, birth chart analysis, tarot readings & moon phases based on real astronomy. Optional Astral Guide chat for deeper insight. Free to start.',
+    'A calm astrology companion grounded in real astronomy. Create your birth chart, explore today’s horoscopes, moon phase, tarot and transits, and learn through the Grimoire. Upgrade for personalised insights connected to your chart.',
   keywords: [
     'personalised astrology app',
     'birth chart astrology',
@@ -32,7 +32,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: 'Lunary: Your Personal Astrology Companion',
     description:
-      'Daily guidance based on your birth chart, the sky today and intelligent insight. No generic horoscopes. Only clarity.',
+      'Grounded astrology based on the sky today. Create your birth chart, explore horoscopes, moon phases and tarot, and learn through the Grimoire. Upgrade to connect it all to your chart for personalised insight.',
     url: 'https://lunary.app',
     siteName: 'Lunary',
     images: [
@@ -50,7 +50,7 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: 'Lunary: Your Personal Astrology Companion',
     description:
-      'Daily guidance based on your birth chart, the sky today and intelligent insight. No generic horoscopes. Only clarity.',
+      'Grounded astrology based on the sky today. Create your birth chart, explore horoscopes, moon phases and tarot, and learn through the Grimoire. Upgrade to connect it all to your chart for personalised insight.',
     images: ['/api/og/homepage'],
   },
   robots: {

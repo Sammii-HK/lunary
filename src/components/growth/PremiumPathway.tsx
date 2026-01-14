@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { Sparkles, ChevronRight, Lock } from 'lucide-react';
+import { Sparkles, ChevronRight, Lock as LockIcon } from 'lucide-react';
 import { useSubscription } from '@/hooks/useSubscription';
 
 type PathwayVariant = 'tarot' | 'themes' | 'shadow' | 'transits' | 'guide';
@@ -62,7 +62,7 @@ export function PremiumPathway({
         href='/pricing'
         className={`group inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-lunary-primary-700/30 bg-lunary-primary-950/20 hover:bg-lunary-primary-950/40 transition-colors ${className}`}
       >
-        <Lock className='w-3 h-3 text-lunary-primary-400' />
+        <LockIcon className='w-3 h-3 text-lunary-primary-400' />
         <span className='text-xs text-lunary-primary-300'>
           Unlock with Lunary+
         </span>
@@ -134,7 +134,7 @@ export function LockedFeatureBadge({ className = '' }: { className?: string }) {
     <span
       className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-zinc-800/50 border border-zinc-700/50 text-[10px] text-zinc-500 ${className}`}
     >
-      <Lock className='w-2.5 h-2.5' />
+      <LockIcon className='w-2.5 h-2.5' />
       Premium
     </span>
   );

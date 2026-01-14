@@ -5,7 +5,8 @@ import { useUser } from '@/context/UserContext';
 import { useAuthStatus } from '@/components/AuthStatus';
 import { useAstronomyContext } from '@/context/AstronomyContext';
 import Link from 'next/link';
-import { Sparkles, ArrowRight, Lock } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { Sparkles, ArrowRight } from 'lucide-react';
 import { getGeneralHoroscope } from '../../../utils/astrology/generalHoroscope';
 import { getEnhancedPersonalizedHoroscope } from '../../../utils/astrology/enhancedHoroscope';
 import { useSubscription } from '../../hooks/useSubscription';
@@ -21,6 +22,7 @@ export const DailyInsightCard = () => {
   const authStatus = useAuthStatus();
   const subscription = useSubscription();
   const { currentDate } = useAstronomyContext();
+  const router = useRouter();
   const userName = user?.name;
   const userBirthday = user?.birthday;
   const birthChart = user?.birthChart;
@@ -123,20 +125,37 @@ export const DailyInsightCard = () => {
             <p className='text-sm text-zinc-300 leading-relaxed'>
               {insight.text}
             </p>
-            <Link
-              href={
-                authStatus.isAuthenticated ? '/pricing' : '/auth?signup=true'
-              }
-              onClick={(e) => e.stopPropagation()}
-              className='flex items-center gap-1.5 mt-2 text-xs text-lunary-primary-200 hover:text-lunary-primary-100 transition-colors'
+            <span
+              role='button'
+              tabIndex={0}
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                if (router) {
+                  router.push(
+                    authStatus.isAuthenticated
+                      ? '/pricing'
+                      : '/auth?signup=true',
+                  );
+                }
+              }}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  if (router) {
+                    router.push(
+                      authStatus.isAuthenticated
+                        ? '/pricing'
+                        : '/auth?signup=true',
+                    );
+                  }
+                }
+              }}
+              className='flex items-center gap-1.5 mt-2 text-xs text-lunary-primary-200 hover:text-lunary-primary-100 transition-colors bg-none border-none p-0 cursor-pointer'
             >
-              <Lock className='w-3 h-3' />
-              <span>
-                {authStatus.isAuthenticated
-                  ? 'Upgrade to get personalized readings based on your full birth chart'
-                  : 'Sign up to get readings based on your full birth chart'}
-              </span>
-            </Link>
+              Unlock full-chart readings with Lunary+
+            </span>
           </div>
           <ArrowRight className='w-4 h-4 text-zinc-600 group-hover:text-lunary-primary-300 transition-colors flex-shrink-0 mt-1' />
         </div>

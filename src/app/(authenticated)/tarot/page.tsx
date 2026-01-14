@@ -16,7 +16,7 @@ import {
   Check,
   Sparkles,
   Share2,
-  Lock,
+  Lock as LockIcon,
   X,
   Download,
   Copy,
@@ -34,6 +34,7 @@ import {
   TarotSpreadExperience,
 } from '@/components/tarot/TarotSpreadExperience';
 import type { SpreadReadingRecord } from '@/components/tarot/TarotSpreadExperience';
+import { TAROT_SPREADS } from '@/constants/tarotSpreads';
 import type { TarotPlan } from '@/constants/tarotSpreads';
 import { FeaturePreview } from '../horoscope/components/FeaturePreview';
 import { HoroscopeSection } from '../horoscope/components/HoroscopeSection';
@@ -680,7 +681,7 @@ const TarotReadings = () => {
     // If generalTarot failed to load, show error state with upsell instead of blank page
     if (!generalTarot) {
       return (
-        <div className='h-full space-y-6 p-4 overflow-auto'>
+        <div className='h-full space-y-6 p-4 overflow-auto mb-20'>
           <div className='pt-6'>
             <h1 className='text-2xl md:text-3xl font-light text-zinc-100 mb-2'>
               Your Tarot Readings
@@ -699,7 +700,7 @@ const TarotReadings = () => {
               refreshing the page, or unlock personalized readings with a birth
               chart.
             </p>
-            <SmartTrialButton />
+            <SmartTrialButton feature='tarot_patterns' />
           </div>
 
           <div className='rounded-lg border border-lunary-primary-700 bg-zinc-900/50 p-6'>
@@ -750,34 +751,36 @@ const TarotReadings = () => {
       <div className='h-full space-y-6 p-4 overflow-auto mb-10'>
         <div className='pt-6'>
           <h1 className='text-2xl md:text-3xl font-light text-zinc-100 mb-2'>
-            Your Tarot Readings
+            Today's Tarot Readings
           </h1>
           <p className='text-xs md:text-sm text-zinc-400'>
             General cosmic guidance based on universal energies
           </p>
         </div>
 
-        <div className='flex gap-3'>
-          <Button
-            onClick={() => {
-              const spreadsSection = document.getElementById(
-                'tarot-spreads-section-free',
-              );
-              if (spreadsSection) {
-                spreadsSection.scrollIntoView({ behavior: 'smooth' });
-              }
-            }}
-            variant='lunary'
-            className='w-full'
-          >
-            Pull a Tarot Spread Reading
-          </Button>
-        </div>
+        {authStatus.isAuthenticated && (
+          <div className='flex gap-3'>
+            <Button
+              onClick={() => {
+                const spreadsSection = document.getElementById(
+                  'tarot-spreads-section-free',
+                );
+                if (spreadsSection) {
+                  spreadsSection.scrollIntoView({ behavior: 'smooth' });
+                }
+              }}
+              variant='lunary'
+              className='w-full'
+            >
+              Pull a Tarot Spread Reading
+            </Button>
+          </div>
+        )}
 
         <div className='space-y-6'>
           <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-6 space-y-6'>
             <h2 className='text-lg md:text-xl font-medium text-zinc-100'>
-              Your Cosmic Reading
+              Today's Cosmic Reading
             </h2>
 
             <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
@@ -861,23 +864,6 @@ const TarotReadings = () => {
                   {generalTarot.guidance.weeklyMessage}
                 </p>
               </div>
-
-              <div className='rounded-lg border border-lunary-success-800 bg-zinc-900 p-4'>
-                <h3 className='text-xs md:text-sm font-medium text-lunary-success-300 mb-2'>
-                  Key Guidance
-                </h3>
-                <ul className='text-xs md:text-sm text-zinc-300 space-y-2'>
-                  {generalTarot.guidance.actionPoints.map((point, index) => (
-                    <li key={index} className='flex items-start gap-2'>
-                      <Check
-                        className='w-4 h-4 text-lunary-success mt-0.5 flex-shrink-0'
-                        strokeWidth={2}
-                      />
-                      <span>{point}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
             </div>
           </div>
 
@@ -904,73 +890,51 @@ const TarotReadings = () => {
 
           <FeaturePreview
             title='Personal Tarot Patterns'
-            description='Plus discover your personal patterns and trends over time.'
+            description='Discover your personal patterns and trends over time.'
             feature='tarot_patterns'
-            icon={
-              <Sparkles
-                className='w-8 h-8 text-lunary-accent-400 mx-auto'
-                strokeWidth={1.5}
-              />
-            }
             blurredContent={
-              <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-6 opacity-60 min-h-[200px] max-h-[200px]'>
-                <div className='grid grid-cols-2 gap-4'>
-                  <div className='space-y-2'>
-                    <div className='h-24 bg-zinc-800/50 rounded-lg flex items-center justify-center'>
-                      <span className='text-xs text-zinc-500'>
-                        Pattern Chart
-                      </span>
-                    </div>
-                    <p className='text-xs text-zinc-400 text-center'>
-                      Card Frequency
-                    </p>
-                  </div>
-                  <div className='space-y-2'>
-                    <div className='h-24 bg-zinc-800/50 rounded-lg flex items-center justify-center'>
-                      <span className='text-xs text-zinc-500'>Trends</span>
-                    </div>
-                    <p className='text-xs text-zinc-400 text-center'>
-                      Suit Analysis
-                    </p>
-                  </div>
-                </div>
+              <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-6 opacity-60 h-150'>
+                <p className='text-sm text-zinc-300 leading-relaxed'>
+                  ●●●●● ●●●●● ●●● ●●●●●●●● ●●●●●●●● ●●● ●●●●●●● ●●●●●●●●●
+                  ●●●●●●● ●●● ●●●●●●●●● ●●●●●●●● ●●●●●. ●●●●●● ●●●●●●●● ●●●
+                  ●●●●●●●●● ●●●●●●●●● ●●●●●●● ●●●●●●●●● ●●●●●●●● ●●●●●●●●
+                  ●●●●●●●●● ●●● ●●●●●●●●● ●●●●●●●● ●●●●●. ●●●●●● ●●●●●●●● ●●●
+                  ●●●●●●●●● ●●● ●●●●●●●●● ●●●●●●●● ●●●●●. ●●●●●● ●●●●●●●● ●●●
+                  ●●●●●●●●● ●●●●●●●●●.
+                </p>
               </div>
             }
           />
 
-          <div id='tarot-spreads-section-free'>
-            <CollapsibleSection title='Tarot Spreads' defaultCollapsed={false}>
-              {!authStatus.isAuthenticated ? (
-                <FeaturePreview
-                  title='Guided Tarot Spreads'
-                  description='Choose a spread, draw cards instantly, and save your insights.'
-                  feature='tarot_patterns'
-                  icon={
-                    <Sparkles
-                      className='w-8 h-8 text-lunary-accent-400 mx-auto'
-                      strokeWidth={1.5}
-                    />
-                  }
-                  blurredContent={
-                    <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-6 opacity-60'>
-                      <div className='grid grid-cols-2 gap-4'>
-                        <div className='space-y-2'>
-                          <div className='h-32 bg-zinc-800/50 rounded-lg'></div>
-                          <p className='text-xs text-zinc-400 text-center'>
-                            Three Card Spread
-                          </p>
-                        </div>
-                        <div className='space-y-2'>
-                          <div className='h-32 bg-zinc-800/50 rounded-lg'></div>
-                          <p className='text-xs text-zinc-400 text-center'>
-                            Celtic Cross
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-                  }
-                />
-              ) : (
+          {!authStatus.isAuthenticated && (
+            <FeaturePreview
+              title='Guided Tarot Spreads'
+              description='Choose a spread, draw cards instantly, and save your insights.'
+              feature='tarot_patterns'
+              blurredContent={
+                <div className='rounded-lg border border-lunary-accent-700 bg-lunary-accent-950 p-6 opacity-60'>
+                  <div className='space-y-3'>
+                    <p className='text-sm text-zinc-300 leading-relaxed'>
+                      ●●●● ●●●●● ●●●●●●● ●●●●●●●●● ●●●●●●●●●● ●●● ●●●●●●●●●●
+                      ●●●●●●●●●● ●●●●●●●● ●●●●●●●●●●● ●●●●●●●●● ●●●●●●●●●
+                      ●●●●●●● ●●●●●●●●● ●●●●●●●● ●●●●●●●●.
+                    </p>
+                    <p className='text-sm text-zinc-300 leading-relaxed'>
+                      ●●●● ●●●●● ●●●●●●● ●●●●●●●●● ●●●●●●●●●● ●●● ●●●●●●●●●●
+                      ●●●●●●●●●● ●●●●●●●● ●●●●●●●●●●●.
+                    </p>
+                  </div>
+                </div>
+              }
+            />
+          )}
+
+          {authStatus.isAuthenticated && (
+            <div id='tarot-spreads-section-free'>
+              <CollapsibleSection
+                title='Tarot Spreads'
+                defaultCollapsed={false}
+              >
                 <TarotSpreadExperience
                   userId={userId}
                   userName={userName}
@@ -978,47 +942,10 @@ const TarotReadings = () => {
                   onCardPreview={(card) => setSelectedCard(card)}
                   onShareReading={handleShareSpread}
                 />
-              )}
-            </CollapsibleSection>
-          </div>
-
-          <FeaturePreview
-            title='Card History'
-            description='Track your personal tarot journey with 7+ days of card history'
-            feature='tarot_patterns'
-            icon={
-              <Sparkles
-                className='w-8 h-8 text-lunary-accent-400 mx-auto'
-                strokeWidth={1.5}
-              />
-            }
-            blurredContent={
-              <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-6 opacity-60 min-h-[200px] max-h-[200px] overflow-hidden'>
-                <div className='space-y-3'>
-                  {[...Array(3)].map((_, index) => (
-                    <div
-                      key={index}
-                      className='flex items-center gap-3 p-3 bg-zinc-800/50 rounded-lg'
-                    >
-                      <div className='w-12 h-16 bg-zinc-700/50 rounded flex-shrink-0'></div>
-                      <div className='flex-1'>
-                        <div className='h-4 bg-zinc-700/50 rounded mb-2 w-3/4'></div>
-                        <div className='h-3 bg-zinc-700/30 rounded w-1/2'></div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            }
-          />
+              </CollapsibleSection>
+            </div>
+          )}
         </div>
-        {/* <UpgradePrompt
-          variant='card'
-          featureName='personalized_tarot'
-          title='Unlock Personalized Tarot Readings'
-          description='Get tarot readings based on your name and birthday, plus discover your personal tarot patterns'
-          className='w-full mx-auto'
-        /> */}
       </div>
     );
   }
@@ -1051,7 +978,7 @@ const TarotReadings = () => {
               href='/profile'
               className='inline-flex items-center justify-center w-full py-3 px-4 rounded-lg bg-lunary-primary-900/20 border border-lunary-primary-700 text-lunary-primary-300 font-medium hover:bg-lunary-primary-900/30 transition-colors'
             >
-              Go to Profile
+              Add details to your profile
             </Link>
           </div>
         </div>
@@ -1264,7 +1191,7 @@ const TarotReadings = () => {
                           ? '12 months'
                           : `${days} days`}
                       {isLocked && (
-                        <Lock className='w-3 h-3 absolute -top-1 -right-1 text-zinc-600' />
+                        <LockIcon className='w-3 h-3 absolute -top-1 -right-1 text-zinc-600' />
                       )}
                     </button>
                   );
@@ -1297,7 +1224,7 @@ const TarotReadings = () => {
                 >
                   Year-over-Year
                   {!subscription.hasAccess('advanced_patterns') && (
-                    <Lock className='w-3 h-3 absolute -top-1 -right-1 text-zinc-600' />
+                    <LockIcon className='w-3 h-3 absolute -top-1 -right-1 text-zinc-600' />
                   )}
                 </button>
                 <button
@@ -1330,7 +1257,7 @@ const TarotReadings = () => {
                   <Sparkles className='w-3 h-3' />
                   Advanced
                   {!subscription.hasAccess('advanced_patterns') && (
-                    <Lock className='w-3 h-3 absolute -top-1 -right-1 text-zinc-600' />
+                    <LockIcon className='w-3 h-3 absolute -top-1 -right-1 text-zinc-600' />
                   )}
                 </button>
               </div>
@@ -1367,6 +1294,48 @@ const TarotReadings = () => {
               onCardPreview={(card) => setSelectedCard(card)}
               onShareReading={handleShareSpread}
             />
+            <div className='mt-6 space-y-4 border-t border-zinc-800/40 pt-6'>
+              <div className='flex items-center justify-between gap-4'>
+                <div>
+                  <h3 className='text-lg font-medium text-zinc-100'>
+                    Written Spread Guides
+                  </h3>
+                  <p className='text-xs text-zinc-400'>
+                    Read about each spread before you draw cards.
+                  </p>
+                </div>
+                <Link
+                  href='/grimoire/tarot/spreads'
+                  className='text-xs font-semibold text-lunary-primary-400 transition-colors hover:text-lunary-primary-300'
+                >
+                  View all spread guides →
+                </Link>
+              </div>
+              <div className='grid gap-3 sm:grid-cols-2 lg:grid-cols-3'>
+                {TAROT_SPREADS.map((spread) => (
+                  <Link
+                    key={spread.slug}
+                    href={`/grimoire/tarot/spreads/${spread.slug}`}
+                    className='group flex flex-col gap-2 rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4 transition hover:border-lunary-primary-500 hover:bg-zinc-900/50'
+                    aria-label={`Read the ${spread.name} spread guide`}
+                  >
+                    <div className='text-sm font-semibold text-zinc-100'>
+                      {spread.name}
+                    </div>
+                    <p className='text-xs text-zinc-400 leading-relaxed line-clamp-3'>
+                      {spread.description}
+                    </p>
+                    <div className='mt-auto flex justify-between text-[11px] uppercase tracking-wide text-zinc-500'>
+                      <span>{spread.cardCount} cards</span>
+                      <span>{spread.estimatedTime}</span>
+                    </div>
+                    <span className='text-[10px] uppercase tracking-[0.3em] text-zinc-500'>
+                      {spread.category}
+                    </span>
+                  </Link>
+                ))}
+              </div>
+            </div>
           </CollapsibleSection>
         </div>
 

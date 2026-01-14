@@ -1,7 +1,7 @@
 import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
-import { ExploreGrimoire } from '@/components/grimoire/ExploreGrimoire';
+import { SEOContentTemplate } from '@/components/grimoire/SEOContentTemplate';
 
 import {
   ZODIAC_SIGNS,
@@ -13,7 +13,6 @@ import {
   MONTH_DISPLAY_NAMES,
   ZodiacSign,
 } from '@/constants/seo/monthly-horoscope';
-import { GrimoireBreadcrumbs } from '@/components/grimoire/GrimoireBreadcrumbs';
 
 const AVAILABLE_YEARS = [2025, 2026, 2027, 2028, 2029, 2030];
 
@@ -87,31 +86,46 @@ export default async function YearHoroscopePage({
   const element = SIGN_ELEMENTS[signKey];
   const ruler = SIGN_RULERS[signKey];
 
-  const breadcrumbItems = [
-    { name: 'Grimoire', url: '/grimoire' },
-    { name: 'Horoscopes', url: '/grimoire/horoscopes' },
-  ];
+  const heroContent = (
+    <div className='text-center space-y-3'>
+      <span className='text-6xl'>{symbol}</span>
+      <p className='text-sm uppercase tracking-[0.3em] text-zinc-400'>
+        {element} Sign • Ruled by {ruler}
+      </p>
+    </div>
+  );
 
   return (
     <div className='min-h-screen bg-zinc-950 text-zinc-100'>
-      <GrimoireBreadcrumbs items={breadcrumbItems} />
-      <div className='max-w-4xl mx-auto px-4 py-12'>
-        <header className='mb-12 text-center'>
-          <span className='text-6xl mb-4 block'>{symbol}</span>
-          <h1 className='text-4xl md:text-5xl font-light text-zinc-100 mb-4'>
-            {signName} Horoscope {year}
-          </h1>
-          <p className='text-lg text-zinc-400'>
-            Monthly forecasts for {signName} • {element} Sign
-          </p>
-        </header>
-
+      <SEOContentTemplate
+        title={`${signName} Horoscope ${year}: All Monthly Forecasts | Lunary`}
+        h1={`${signName} Horoscope ${year}`}
+        description={`Full monthly forecast for ${signName} in ${year} including love, career, and personal growth highlights.`}
+        keywords={[
+          `${signName.toLowerCase()} horoscope ${year}`,
+          `${signName.toLowerCase()} ${year}`,
+          `${year} monthly horoscope`,
+        ]}
+        canonicalUrl={`https://lunary.app/grimoire/horoscopes/${sign}/${year}`}
+        intro={`Dive into every month of ${year} with forecasts for ${signName} that weave together the Moon, planetary transits, and practical rituals so you can plan ahead.`}
+        meaning={`This ${year} forecast helps ${signName} timeframe focus. Use slow, deliberate planning infused with ${element.toLowerCase()} energy and the guidance of ${ruler} to own visible progress throughout the year.`}
+        heroContent={heroContent}
+        breadcrumbs={[
+          { label: 'Grimoire', href: '/grimoire' },
+          { label: 'Horoscopes', href: '/grimoire/horoscopes' },
+          { label: signName, href: `/grimoire/horoscopes/${sign}` },
+          { label: `${year}` },
+        ]}
+        ctaText='See your full birth-chart horoscope in the app'
+        ctaHref='/horoscope'
+        childrenPosition='after-description'
+      >
         <section className='mb-12 grid gap-4 md:grid-cols-3'>
           <div className='rounded-lg border border-zinc-800 bg-zinc-900/40 p-5'>
             <h2 className='text-lg font-medium text-zinc-100 mb-2'>Love</h2>
             <p className='text-sm text-zinc-400'>
               {year} invites {signName} to build love through{' '}
-              {element.toLowerCase()} consistency. Lead with honesty, and let
+              {element.toLowerCase()} consistency. Lead with honesty and let
               relationships deepen through shared routines.
             </p>
           </div>
@@ -184,24 +198,7 @@ export default async function YearHoroscopePage({
             ))}
           </div>
         </section>
-
-        <section className='p-6 rounded-lg border border-lunary-primary-700 bg-lunary-primary-900/10'>
-          <h2 className='text-xl font-medium text-lunary-primary-300 mb-2'>
-            Get Your Full {year} Forecast
-          </h2>
-          <p className='text-zinc-300 mb-4'>
-            Want a personalized yearly forecast? Get insights tailored to your
-            complete birth chart, not just your Sun sign.
-          </p>
-          <Link
-            href='/horoscope'
-            className='inline-flex px-6 py-3 rounded-lg bg-lunary-primary-900/20 hover:bg-lunary-primary-900/30 border border-lunary-primary-700 text-lunary-primary-300 font-medium transition-colors'
-          >
-            Get your personalised horoscope based on your full birth chart
-          </Link>
-        </section>
-        <ExploreGrimoire />
-      </div>
+      </SEOContentTemplate>
     </div>
   );
 }

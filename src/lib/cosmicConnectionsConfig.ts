@@ -441,10 +441,6 @@ function getHubTransitsConnections(): CosmicConnectionSection[] {
     {
       title: 'Transit Resources',
       links: [
-        {
-          label: 'Daily Horoscope & Transit Readings',
-          href: '/horoscope',
-        },
         { label: 'Birth Chart & Houses', href: '/birth-chart' },
         {
           label: 'Planets Hub',

@@ -19,7 +19,7 @@ import {
   AlertTriangle,
   Check,
   Star,
-  Lock,
+  Lock as LockIcon,
 } from 'lucide-react';
 import { SmartTrialButton } from '@/components/SmartTrialButton';
 import { GrimoireBreadcrumbs } from '@/components/grimoire/GrimoireBreadcrumbs';
@@ -269,7 +269,7 @@ export default function SynastryGeneratorPage() {
           <GrimoireBreadcrumbs items={breadcrumbItems} />
 
           <div className='text-center py-12'>
-            <Lock className='w-16 h-16 text-lunary-primary-400 mx-auto mb-6' />
+            <LockIcon className='w-16 h-16 text-lunary-primary-400 mx-auto mb-6' />
             <h1 className='text-3xl font-light text-zinc-100 mb-4'>
               Synastry Chart Generator
             </h1>

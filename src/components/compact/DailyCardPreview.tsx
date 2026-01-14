@@ -4,8 +4,9 @@ import { useMemo } from 'react';
 import { useUser } from '@/context/UserContext';
 import { useAuthStatus } from '@/components/AuthStatus';
 import { useAstronomyContext } from '@/context/AstronomyContext';
+import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { ArrowRight, Lock, Layers } from 'lucide-react';
+import { ArrowRight, Layers } from 'lucide-react';
 import { getTarotCard } from '../../../utils/tarot/tarot';
 import { useSubscription } from '../../hooks/useSubscription';
 import { hasBirthChartAccess } from '../../../utils/pricing';
@@ -19,6 +20,7 @@ dayjs.extend(dayOfYear);
 export const DailyCardPreview = () => {
   const { user } = useUser();
   const authStatus = useAuthStatus();
+  const router = useRouter();
   const subscription = useSubscription();
   const { currentDate } = useAstronomyContext();
   const userName = user?.name;
@@ -64,8 +66,8 @@ export const DailyCardPreview = () => {
         href='/tarot'
         className='block py-3 px-4 bg-lunary-bg border border-zinc-800/50 rounded-md hover:border-lunary-primary-700/50 transition-colors group h-full'
       >
-        <div className='flex items-start justify-between gap-3'>
-          <div className='flex-1 min-w-0'>
+        <div className='flex items-start justify-between gap-3 h-full'>
+          <div className='flex-1 min-w-0 h-full justify-between flex flex-col'>
             <div className='flex items-center gap-2 mb-1'>
               <Layers className='w-4 h-4 text-lunary-accent-300' />
               <span className='text-sm font-medium text-zinc-200'>
@@ -83,20 +85,37 @@ export const DailyCardPreview = () => {
                 {dailyCard.information}
               </p>
             )}
-            <Link
-              href={
-                authStatus.isAuthenticated ? '/pricing' : '/auth?signup=true'
-              }
-              onClick={(e) => e.stopPropagation()}
-              className='flex items-center gap-1.5 mt-2 text-xs text-lunary-primary-200 hover:text-lunary-primary-100 transition-colors'
+            <span
+              role='button'
+              tabIndex={0}
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                if (router) {
+                  router.push(
+                    authStatus.isAuthenticated
+                      ? '/pricing'
+                      : '/auth?signup=true',
+                  );
+                }
+              }}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  if (router) {
+                    router.push(
+                      authStatus.isAuthenticated
+                        ? '/pricing'
+                        : '/auth?signup=true',
+                    );
+                  }
+                }
+              }}
+              className='flex items-center gap-1.5 mt-2 text-xs text-lunary-primary-200 hover:text-lunary-primary-100 transition-colors bg-none border-none p-0 cursor-pointer'
             >
-              <Lock className='w-3 h-3' />
-              <span>
-                {authStatus.isAuthenticated
-                  ? 'Upgrade to get personalized tarot'
-                  : 'Sign up to get personalized tarot'}
-              </span>
-            </Link>
+              <span>Unlock personalized tarot with Lunary+</span>
+            </span>
           </div>
           <ArrowRight className='w-4 h-4 text-zinc-600 group-hover:text-lunary-accent-300 transition-colors flex-shrink-0 mt-1' />
         </div>

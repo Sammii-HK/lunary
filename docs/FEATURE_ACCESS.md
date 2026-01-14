@@ -88,7 +88,7 @@ These features require an **active subscription** (Lunary+, Lunary+ AI, or Lunar
 
 ### Lunary+ AI Features (Additional)
 
-- 🔒 **Unlimited AI Chat** - Lunary Copilot with unlimited messages
+- 🔒 **Effectively unlimited AI Chat** - Lunary Copilot with unlimited messages
 - 🔒 **Deeper Readings** - Enhanced tarot interpretations
 - 🔒 **Weekly Reports** - Personalized weekly cosmic reports
 - 🔒 **Saved Chat Threads** - Save and revisit AI conversations

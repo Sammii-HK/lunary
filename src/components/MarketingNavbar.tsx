@@ -18,10 +18,10 @@ export function MarketingNavbar() {
   return (
     <nav
       data-global-nav
-      className={`fixed left-0 right-0 z-50 border-b-2 border-zinc-800 bg-zinc-950/95 backdrop-blur-md shadow-lg ${showBetaBanner ? 'top-[32px]' : 'top-0'}`}
+      className={`fixed left-0 right-0 z-50 border-b-2 border-zinc-800 bg-zinc-950/95 backdrop-blur-md shadow-lg ${!showBetaBanner ? 'top-0' : 'top-[24px] md:top-[32px]'}`}
     >
       <div className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8'>
-        <div className='flex justify-between items-center h-16'>
+        <div className='flex justify-between items-center h-10 md:h-16'>
           {/* Logo */}
           <Link
             href='/'
