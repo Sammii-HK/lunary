@@ -257,7 +257,7 @@ Complete in-depth index of all grimoire content (500+ pages of knowledge):
 
 1. **Free Users (Cosmic Explorer)** - Access to basic features (see Key Features above)
 
-2. **Trial Users** - Free trial with credit card required (no payment taken):
+2. **Trial Users** - No card required during the trial:
    - Monthly plan: 7-day free trial
    - Yearly plan: 14-day free trial
    - Full access to personalized features during trial
@@ -322,7 +322,7 @@ Tertiary: Reduce churn, increase retention
 
 ## Pricing Strategy
 
-- **Free Trial** - Credit card required but no payment taken during trial
+- **Free Trial** - No card required during the trial.
   - Monthly: 7-day free trial
   - Yearly: 14-day free trial
 - **Transparent Pricing** - Simple, clear pricing

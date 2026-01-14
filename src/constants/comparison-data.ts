@@ -86,7 +86,7 @@ export const comparisonData: Record<string, ComparisonData> = {
       {
         title: 'Free Trial with No Payment During Trial',
         description:
-          'Try Lunary free for 7 days. Credit card required but no payment taken during the trial period, making it easy to explore all features risk-free.',
+          'Try Lunary free for 7 days. No card required during the trial, making it easy to explore all features risk-free.',
       },
     ],
     competitorStrengths:
@@ -525,7 +525,7 @@ export const comparisonData: Record<string, ComparisonData> = {
       {
         title: 'Free Trial with No Payment During Trial',
         description:
-          'Try Lunary free for 7 days. Credit card required but no payment taken during the trial period, making it easy to explore all features risk-free.',
+          'Try Lunary free for 7 days. No card required during the trial, making it easy to explore all features risk-free.',
       },
     ],
     competitorStrengths:

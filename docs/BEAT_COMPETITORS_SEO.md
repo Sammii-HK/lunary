@@ -25,33 +25,29 @@ Based on the search results, here's how Lunary can outrank competitors like Moon
 ### 4. **Free Trial** ⭐
 
 - **Competitors:** Many require payment upfront
-- **Lunary:** 7-day free trial - credit card required but no payment taken
-- **SEO Strategy:** Emphasize "free trial", "try free", "no payment during trial"
+- **Lunary:** 7-day free trial - no card required during the trial.
+- **SEO Strategy:** Emphasize "free trial", "try free", "no card required during the trial."
 
 ## 🔍 **Keyword Strategy to Beat Competitors**
 
 ### Target These High-Value Keywords:
 
 1. **"personalized birth chart app"**
-
    - Your advantage: Real astronomical calculations
    - Content: Blog posts, grimoire guides
    - Expected competition: Medium
 
 2. **"astrology app with real astronomy"**
-
    - Your advantage: Unique positioning
    - Content: Landing page, blog posts
    - Expected competition: Low (niche)
 
 3. **"birth chart calculator free trial"**
-
    - Your advantage: Free trial, no credit card
    - Content: Pricing page, homepage
    - Expected competition: Medium
 
 4. **"personalized horoscope based on birth chart"**
-
    - Your advantage: Not generic zodiac signs
    - Content: Horoscope page, blog posts
    - Expected competition: High
