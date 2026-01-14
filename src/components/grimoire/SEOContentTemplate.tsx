@@ -645,9 +645,6 @@ export function SEOContentTemplate({
         </section>
       ) : null}
 
-      {/* Cosmic Connections */}
-      {cosmicConnections}
-
       {/* Optional slot before FAQs */}
       {childrenPosition === 'before-faqs' && children && (
         <div id='explore-practices' className='mt-8'>
@@ -655,8 +652,11 @@ export function SEOContentTemplate({
         </div>
       )}
 
+      {/* Cosmic Connections */}
+      {cosmicConnections}
+
       {/* Related Items */}
-      {relatedItems && relatedItems.length > 0 && (
+      {!cosmicConnections && relatedItems && relatedItems.length > 0 && (
         <section className='overflow-x-hidden'>
           <h2 className='text-md md:text-2xl font-medium text-zinc-100 mb-4 break-words'>
             Related Topics

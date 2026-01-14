@@ -1,4 +1,4 @@
-import { ArrowRight, Sparkles } from 'lucide-react';
+import { Sparkles } from 'lucide-react';
 import {
   getCosmicConnections,
   CosmicConnectionSection,
@@ -55,7 +55,7 @@ export function CosmicConnections({
                   className='flex items-center justify-between gap-2 px-3 py-2 rounded-lg bg-zinc-900/50 border border-zinc-800/50 hover:border-lunary-primary-600 hover:bg-zinc-800/50 transition-colors text-sm'
                 >
                   <span className='text-zinc-300 truncate'>{link.label}</span>
-                  <ArrowRight className='h-3 w-3 text-zinc-500 flex-shrink-0' />
+                  {/* <ArrowRight className='h-3 w-3 text-zinc-500 flex-shrink-0' /> */}
                 </NavParamLink>
               ))}
             </div>

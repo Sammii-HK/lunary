@@ -191,7 +191,7 @@ export default function GrimoireWeeklyHoroscopePage() {
               ))}
             </div>
           </section>
-          <p className='text-xs text-zinc-500'>
+          <p className='text-sm text-zinc-500'>
             Planetary themes evolve through the week; revisit this hub as the
             sky shifts.
           </p>
