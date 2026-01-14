@@ -9,7 +9,7 @@ const GRIMOIRE_LINKS = [
   { href: '/grimoire/moon/phases', label: 'Moon Phases' },
   { href: '/grimoire/houses/overview/first', label: 'Houses' },
   { href: '/grimoire/spells', label: 'Spells' },
-  { href: '/horoscope', label: 'Horoscopes' },
+  { href: '/grimoire/horoscopes', label: 'Horoscopes' },
 ];
 
 export function ExploreGrimoire() {
