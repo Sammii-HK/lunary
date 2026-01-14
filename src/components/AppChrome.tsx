@@ -186,11 +186,13 @@ export function AppChrome() {
     '/press-kit',
     '/developers',
     '/pricing',
+    '/about',
   ];
 
   const isCoreMarketingRoute =
     coreMarketingRoutes.includes(pathname) ||
     pathname?.startsWith('/comparison/') ||
+    pathname?.startsWith('/about/') ||
     pathname?.startsWith('/admin');
 
   // Explore pages: contextual, show app nav if coming from app

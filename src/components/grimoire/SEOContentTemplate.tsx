@@ -261,7 +261,7 @@ export function SEOContentTemplate({
     Boolean(contextualNudge?.headline) && Boolean(contextualNudge?.buttonLabel);
 
   return (
-    <article className='max-w-4xl mx-auto p-4 sm:p-6 overflow-x-hidden'>
+    <article className='max-w-4xl mx-auto overflow-x-hidden py-2 px-4'>
       {/* JSON-LD Schemas */}
       {renderJsonLd(faqSchema)}
       {renderJsonLd(articleSchema)}
@@ -271,9 +271,11 @@ export function SEOContentTemplate({
 
       {/* Breadcrumbs - auto-generated from URL if not provided */}
       {autoBreadcrumbs.length > 0 && (
-        <Breadcrumbs items={autoBreadcrumbs} renderSchema={false} />
+        <div className='mt-2 md:mb-8 md:mt-4'>
+          <Breadcrumbs items={autoBreadcrumbs} renderSchema={false} />
+        </div>
       )}
-      <div className='space-y-8'>
+      <div className='space-y-8 p-2 md:p-4'>
         {heroContent && <div className='mb-8'>{heroContent}</div>}
 
         {/* H1 */}
