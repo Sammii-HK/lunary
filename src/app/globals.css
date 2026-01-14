@@ -40,14 +40,25 @@ html {
   }
 }
 
-body {
-  color: rgb(var(--foreground-rgb));
-  background: linear-gradient(
-      to bottom,
-      transparent,
-      rgb(var(--background-end-rgb))
-    )
-    rgb(var(--background-start-rgb));
+@layer base {
+  body {
+    font-size: 0.875rem;
+    line-height: 1.25rem;
+    color: rgb(var(--foreground-rgb));
+    background: linear-gradient(
+        to bottom,
+        transparent,
+        rgb(var(--background-end-rgb))
+      )
+      rgb(var(--background-start-rgb));
+  }
+
+  @screen md {
+    body {
+      font-size: 0.9rem;
+      line-height: 1.5rem;
+    }
+  }
 }
 
 /* .widget {
@@ -57,6 +68,11 @@ body {
 @layer utilities {
   .text-balance {
     text-wrap: balance;
+  }
+
+  .text-md {
+    font-size: 1rem;
+    line-height: 1.5rem;
   }
 }
 

@@ -38,15 +38,17 @@ export default function WelcomePage() {
   return (
     <>
       {renderJsonLd(structuredData)}
-      <div className='min-h-screen bg-zinc-950 text-zinc-50 flex flex-col'>
+      <div className='min-h-screen bg-zinc-950 text-zinc-50 flex flex-col px-4 md:px-6'>
         {/* Section 1: Hero */}
         <section className='relative px-4 md:px-6 mt-4 pb-10 md:pt-16 md:pb-16 bg-zinc-950'>
           <div className='max-w-3xl mx-auto text-center space-y-6'>
             <p className='text-xs uppercase tracking-[0.2em] text-zinc-400'>
               Personal astrology grounded in real astronomy
             </p>
-            <h1 className='text-2xl md:text-4xl lg:text-5xl font-light text-zinc-100 leading-tight tracking-tight'>
-              Personal astrology that actually understands you
+            <h1 className='text-2xl md:text-3xl lg:text-4xl font-light text-zinc-100'>
+              Personal astrology that
+              <br />
+              actually understands you
             </h1>
             <p className='text-xs md:text-sm text-zinc-400 leading-relaxed max-w-3xl mx-auto'>
               Built around your full birth chart.
@@ -101,7 +103,7 @@ export default function WelcomePage() {
           <p className='text-sm text-zinc-400 pb-8'>
             No card required. Takes under 2 minutes.
           </p>
-          <p className='text-base text-zinc-400 leading-relaxed max-w-3xl mx-auto mt-4'>
+          <p className='text-zinc-400 leading-relaxed max-w-3xl mx-auto mt-4'>
             Lunary is designed for reflection rather than prediction. Instead of
             offering fixed meanings or one-size-fits-all readings, it helps you
             understand patterns, timing, and cycles as they unfold, so insight
@@ -118,11 +120,11 @@ export default function WelcomePage() {
         {/* Section 2: Problem Recognition */}
         <section className='py-12 md:py-16 px-4 md:px-6 border-t border-zinc-800/30'>
           <div className='max-w-4xl mx-auto text-center space-y-6'>
-            <h2 className='text-2xl md:text-2xl md:text-3xl font-light text-zinc-100'>
+            <h2 className='text-2xl md:text-3xl font-light text-zinc-100'>
               Why most astrology apps never quite land
             </h2>
             <div className='max-w-2xl mx-auto text-center md:text-center'>
-              <ul className='space-y-2 text-sm md:text-base text-zinc-400'>
+              <ul className='space-y-2 text-zinc-400'>
                 <li>They reduce you to a sun sign.</li>
                 <li>They repeat generic predictions.</li>
                 <li>
@@ -142,10 +144,10 @@ export default function WelcomePage() {
         {/* Section 3: Social Proof Strip */}
         <section className='border-t border-zinc-800/30 py-6 md:py-8'>
           <div className='max-w-4xl mx-auto px-4 md:px-6 text-center'>
-            <p className='text-base md:text-lg text-zinc-300 font-light'>
+            <p className='text-base md:text-lg text-lunary-primary-100 font-light'>
               A calm alternative to noisy horoscope apps
             </p>
-            <p className='text-sm text-zinc-400 mt-2 max-w-2xl mx-auto'>
+            <p className='text-zinc-400 mt-2 max-w-2xl mx-auto'>
               Lunary is not about predictions, fear, or telling you what will
               happen.
               <br />
@@ -171,14 +173,14 @@ export default function WelcomePage() {
         {/* Section 4: Differentiator Block */}
         <section className='py-12 md:py-20 px-4 md:px-6'>
           <div className='max-w-4xl mx-auto text-center space-y-5'>
-            <h2 className='text-2xl md:text-2xl md:text-3xl lg:text-4xl font-light text-zinc-100 leading-tight'>
+            <h2 className='text-2xl md:text-3xl lg:text-4xl font-light text-zinc-100 leading-tight'>
               Most astrology apps entertain you.
               <br />
               <span className='text-lunary-primary-300/80'>
                 Lunary helps you understand yourself.
               </span>
             </h2>
-            <p className='text-base md:text-lg text-zinc-400 leading-relaxed max-w-2xl mx-auto'>
+            <p className='text-zinc-400 leading-relaxed max-w-2xl mx-auto'>
               Most apps give generic sun sign predictions. Lunary uses your full
               birth chart, real astronomical data and intelligent interpretation
               to offer meaningful insight you can actually use.
@@ -190,32 +192,32 @@ export default function WelcomePage() {
         <section className='py-12 md:py-20 px-4 md:px-6 bg-zinc-900/30'>
           <div className='max-w-5xl mx-auto'>
             <div className='text-center space-y-4 mb-10 md:mb-12'>
-              <h2 className='text-2xl md:text-2xl md:text-3xl font-light text-zinc-100'>
+              <h2 className='text-2xl md:text-3xl font-light text-zinc-100'>
                 Who Lunary is for
               </h2>
-              <p className='text-base md:text-lg text-zinc-400 leading-relaxed max-w-2xl mx-auto'>
+              <p className='md:text-lg text-zinc-400 leading-relaxed max-w-2xl mx-auto'>
                 Designed for people who want personal astrology that feels
                 grounded, gentle and useful.
               </p>
             </div>
-            <div className='grid md:grid-cols-2 gap-6 md:gap-8'>
+            <div className='grid md:grid-cols-2 gap-6 md:gap-8 text-xs md:text-sm'>
               <div className='rounded-2xl border border-zinc-800/60 bg-zinc-900/40 p-5 md:p-6'>
-                <p className='text-sm md:text-base text-zinc-300'>
+                <p className='text-zinc-300'>
                   People who want astrology grounded in real astronomy
                 </p>
               </div>
               <div className='rounded-2xl border border-zinc-800/60 bg-zinc-900/40 p-5 md:p-6'>
-                <p className='text-sm md:text-base text-zinc-300'>
+                <p className='text-zinc-300'>
                   People tired of generic horoscopes
                 </p>
               </div>
               <div className='rounded-2xl border border-zinc-800/60 bg-zinc-900/40 p-5 md:p-6'>
-                <p className='text-sm md:text-base text-zinc-300'>
+                <p className='text-zinc-300'>
                   People building a reflective daily practice
                 </p>
               </div>
               <div className='rounded-2xl border border-zinc-800/60 bg-zinc-900/40 p-5 md:p-6'>
-                <p className='text-sm md:text-base text-zinc-300'>
+                <p className='text-zinc-300'>
                   People who journal, explore tarot, and track emotional
                   patterns
                 </p>
@@ -502,10 +504,10 @@ export default function WelcomePage() {
         <section className='py-12 md:py-20 px-4 md:px-6 bg-zinc-900/30'>
           <div className='max-w-5xl mx-auto'>
             <div className='text-center space-y-4 mb-10 md:mb-14'>
-              <h2 className='text-2xl md:text-2xl md:text-3xl font-light text-zinc-100'>
+              <h2 className='text-2xl md:text-3xl font-light text-zinc-100'>
                 Learn & explore the cosmos
               </h2>
-              <p className='text-base md:text-lg text-zinc-400 leading-relaxed max-w-2xl mx-auto'>
+              <p className='text-zinc-400 leading-relaxed max-w-2xl mx-auto'>
                 New to astrology or already deep in it, you can start here.
                 Lunary’s Grimoire is free to explore, with clear, grounded
                 guides on astrology, tarot, moon phases and symbolism so you can
@@ -517,15 +519,15 @@ export default function WelcomePage() {
                 href='/grimoire/astrology'
                 className='rounded-2xl border border-zinc-800/60 bg-zinc-900/40 p-5 md:p-6 space-y-3'
               >
-                <h3 className='text-lg text-zinc-100'>
+                <h3 className='text-md md:text-lg text-zinc-100'>
                   Astrology, explained properly
                 </h3>
-                <p className='text-sm text-zinc-400 leading-relaxed'>
+                <p className='text-xs text-zinc-400 leading-relaxed'>
                   Explore planets, houses, aspects, and transits with clarity.
                   Learn how the sky works and how it connects to lived
                   experience.
                 </p>
-                <div className='text-sm text-lunary-primary-300 hover:text-lunary-primary-200 transition-colors'>
+                <div className='text-xs text-lunary-primary-300 hover:text-lunary-primary-200 transition-colors'>
                   Explore astrology
                 </div>
               </Link>
@@ -533,15 +535,15 @@ export default function WelcomePage() {
                 href='/grimoire/tarot'
                 className='rounded-2xl border border-zinc-800/60 bg-zinc-900/40 p-5 md:p-6 space-y-3'
               >
-                <h3 className='text-lg text-zinc-100'>
+                <h3 className='text-md md:text-lg text-zinc-100'>
                   Tarot beyond single-card pulls
                 </h3>
-                <p className='text-sm text-zinc-400 leading-relaxed'>
+                <p className='text-xs text-zinc-400 leading-relaxed'>
                   Understand archetypes, symbolism, and recurring themes across
                   time. Tarot becomes meaningful when you see the patterns, not
                   just the card of the day.
                 </p>
-                <div className='text-sm text-lunary-primary-300 hover:text-lunary-primary-200 transition-colors'>
+                <div className='text-xs text-lunary-primary-300 hover:text-lunary-primary-200 transition-colors'>
                   Explore tarot
                 </div>
               </Link>
@@ -549,15 +551,15 @@ export default function WelcomePage() {
                 href='/grimoire/moon'
                 className='rounded-2xl border border-zinc-800/60 bg-zinc-900/40 p-5 md:p-6 space-y-3'
               >
-                <h3 className='text-lg text-zinc-100'>
+                <h3 className='text-md md:text-lg text-zinc-100'>
                   Moon phases & ritual timing
                 </h3>
-                <p className='text-sm text-zinc-400 leading-relaxed'>
+                <p className='text-xs text-zinc-400 leading-relaxed'>
                   Learn how lunar cycles influence reflection, release, and
                   intention. From new moons to eclipses, timing becomes
                   intuitive rather than overwhelming.
                 </p>
-                <div className='text-sm text-lunary-primary-300 hover:text-lunary-primary-200 transition-colors'>
+                <div className='text-xs text-lunary-primary-300 hover:text-lunary-primary-200 transition-colors'>
                   Explore moon phases
                 </div>
               </Link>
@@ -565,15 +567,15 @@ export default function WelcomePage() {
                 href='/grimoire/correspondences'
                 className='rounded-2xl border border-zinc-800/60 bg-zinc-900/40 p-5 md:p-6 space-y-3'
               >
-                <h3 className='text-lg text-zinc-100'>
+                <h3 className='text-md md:text-lg text-zinc-100'>
                   Crystals, runes & symbolic systems
                 </h3>
-                <p className='text-sm text-zinc-400 leading-relaxed'>
+                <p className='text-xs text-zinc-400 leading-relaxed'>
                   Discover how different symbolic systems connect through
                   meaning and correspondence, presented with clarity and respect
                   rather than superstition.
                 </p>
-                <div className='text-sm text-lunary-primary-300 hover:text-lunary-primary-200 transition-colors'>
+                <div className='text-xs text-lunary-primary-300 hover:text-lunary-primary-200 transition-colors'>
                   Explore correspondences
                 </div>
               </Link>
@@ -756,7 +758,7 @@ export default function WelcomePage() {
               Free to begin. <br /> Upgrade only if you want deeper,
               chart-specific insight.
             </p>
-            <h2 className='text-2xl md:text-2xl md:text-3xl font-light text-zinc-100'>
+            <h2 className='text-2xl md:text-3xl font-light text-zinc-100'>
               What’s included
             </h2>
             <div className='grid md:grid-cols-2 gap-4 text-left text-sm text-zinc-400'>
@@ -858,7 +860,7 @@ export default function WelcomePage() {
             <h2 className='text-2xl md:text-3xl font-light text-zinc-100'>
               Understanding yourself changes everything.
             </h2>
-            <p className='text-base md:text-lg text-zinc-400 leading-relaxed'>
+            <p className='text-zinc-400 leading-relaxed'>
               Lunary is here to walk that with you.
             </p>
             <div className='pt-2 flex flex-col sm:flex-row gap-4 justify-center items-center'>
