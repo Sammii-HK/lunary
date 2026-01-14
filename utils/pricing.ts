@@ -36,6 +36,7 @@ export const PRICING_PLANS: PricingPlan[] = [
       'Basic lunar calendar',
       'General daily horoscope',
       'Access to grimoire knowledge',
+      'Personal Day and Personal Year numbers',
     ],
   },
   {
@@ -50,6 +51,7 @@ export const PRICING_PLANS: PricingPlan[] = [
     chatLabel: 'Generous daily Astral Guide chat',
     trialDays: 7,
     features: [
+      'Everything in Cosmic Explorer',
       'Complete birth chart analysis',
       'Personalized daily horoscopes',
       'Personal transit impacts',
@@ -62,7 +64,9 @@ export const PRICING_PLANS: PricingPlan[] = [
       'Monthly cosmic insights',
       'Tarot pattern analysis',
       'Cosmic State (shareable snapshot)',
-      'Limited Collections & saved insights',
+      'Limited collections & saved insights',
+      'Limited tarot spreads per month',
+      'Limited saved chat threads',
     ],
   },
   {
@@ -83,8 +87,10 @@ export const PRICING_PLANS: PricingPlan[] = [
       'Deeper tarot interpretations',
       'Advanced pattern analysis',
       'Downloadable PDF reports',
-      'Saved chat threads',
+      'Generous saved chat threads',
       'Deeper readings and weekly reports',
+      'Generous tarot spreads per month',
+      'Generous collections per month',
     ],
   },
   {
@@ -138,6 +144,8 @@ export const FEATURE_ACCESS = {
     'weekly_ai_ritual',
     'birthday_collection',
     'birth_chart', // Allow free users to view their birth chart (encourage signups & sharing)
+    'personal_day_number',
+    'personal_year_number',
   ],
   lunary_plus: [
     'birth_chart',
@@ -149,10 +157,15 @@ export const FEATURE_ACCESS = {
     'tarot_patterns',
     'solar_return',
     'cosmic_profile',
+    'personalized_transit_readings',
     'moon_circles',
     'ritual_generator',
     'collections',
     'monthly_insights',
+    'personal_day_number',
+    'personal_day_meaning',
+    'personal_year_number',
+    'personal_year_meaning',
   ],
   lunary_plus_ai: [
     'birth_chart',
@@ -164,6 +177,7 @@ export const FEATURE_ACCESS = {
     'tarot_patterns',
     'solar_return',
     'cosmic_profile',
+    'personalized_transit_readings',
     'moon_circles',
     'ritual_generator',
     'unlimited_ai_chat',
@@ -176,6 +190,10 @@ export const FEATURE_ACCESS = {
     'unlimited_collections',
     'advanced_patterns',
     'monthly_insights',
+    'personal_day_number',
+    'personal_day_meaning',
+    'personal_year_number',
+    'personal_year_meaning',
   ],
   lunary_plus_ai_annual: [
     'birth_chart',
@@ -187,6 +205,7 @@ export const FEATURE_ACCESS = {
     'tarot_patterns',
     'solar_return',
     'cosmic_profile',
+    'personalized_transit_readings',
     'moon_circles',
     'ritual_generator',
     'collections',
@@ -202,6 +221,10 @@ export const FEATURE_ACCESS = {
     'yearly_forecast',
     'data_export',
     'monthly_insights',
+    'personal_day_number',
+    'personal_day_meaning',
+    'personal_year_number',
+    'personal_year_meaning',
   ],
 };
 
