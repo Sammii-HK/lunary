@@ -1,4 +1,4 @@
-import { STRIPE_PRICE_MAPPING } from './stripe-prices';
+import { STRIPE_PRICE_MAPPING, type PlanId } from './stripe-prices';
 import { PRICING_PLANS } from './pricing';
 
 export const DEFAULT_FX_URL = 'https://open.er-api.com/v6/latest/USD';
@@ -8,13 +8,22 @@ export const UPDATE_THRESHOLD = 10;
 
 export type FxRates = Record<string, number>;
 
-const MONTHLY_PRO_PLAN_ID = 'lunary_plus_ai';
-const ANNUAL_PRO_PLAN_ID = 'lunary_plus_ai_annual';
+const MONTHLY_PRO_PLAN_ID: PlanId = 'lunary_plus_ai';
+const ANNUAL_PRO_PLAN_ID: PlanId = 'lunary_plus_ai_annual';
 const ANNUAL_MONTHS_EQUIVALENT = 10;
 
+function getPlanCurrencyAmount(
+  planId: PlanId,
+  currency: string,
+): number | undefined {
+  const plan = STRIPE_PRICE_MAPPING[planId];
+  if (!plan) return undefined;
+  const normalizedCurrency = currency.toUpperCase();
+  return plan[normalizedCurrency as keyof typeof plan]?.amount;
+}
+
 function getAnnualAnchorAmount(currency: string): number | undefined {
-  const monthlyAmount =
-    STRIPE_PRICE_MAPPING[MONTHLY_PRO_PLAN_ID]?.[currency]?.amount;
+  const monthlyAmount = getPlanCurrencyAmount(MONTHLY_PRO_PLAN_ID, currency);
   if (!monthlyAmount) return undefined;
   return monthlyAmount * ANNUAL_MONTHS_EQUIVALENT;
 }
@@ -96,14 +105,15 @@ export async function buildFxDriftReport(): Promise<{
   const results: FxDriftResult[] = [];
 
   for (const [planId, prices] of Object.entries(STRIPE_PRICE_MAPPING)) {
+    const typedPlanId = planId as PlanId;
     const usdPrice =
-      planId === ANNUAL_PRO_PLAN_ID
+      typedPlanId === ANNUAL_PRO_PLAN_ID
         ? getAnnualAnchorAmount('USD')
-        : prices['USD']?.amount;
+        : getPlanCurrencyAmount(typedPlanId, 'USD');
     const gbpPrice =
-      planId === ANNUAL_PRO_PLAN_ID
+      typedPlanId === ANNUAL_PRO_PLAN_ID
         ? getAnnualAnchorAmount('GBP')
-        : prices['GBP']?.amount;
+        : getPlanCurrencyAmount(typedPlanId, 'GBP');
     const interval = PRICING_PLANS.find((plan) => plan.id === planId)?.interval;
 
     for (const [currency, price] of Object.entries(prices)) {
@@ -111,7 +121,7 @@ export async function buildFxDriftReport(): Promise<{
       const isAnchorCurrency = ANCHOR_CURRENCIES.includes(
         upperCurrency as (typeof ANCHOR_CURRENCIES)[number],
       );
-      if (isAnchorCurrency && planId !== ANNUAL_PRO_PLAN_ID) {
+      if (isAnchorCurrency && typedPlanId !== ANNUAL_PRO_PLAN_ID) {
         continue;
       }
 

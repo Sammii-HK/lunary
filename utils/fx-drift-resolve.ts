@@ -1,11 +1,11 @@
 import Stripe from 'stripe';
 import { PRICING_PLANS } from './pricing';
-import { STRIPE_PRICE_MAPPING } from './stripe-prices';
+import { STRIPE_PRICE_MAPPING, type PlanId } from './stripe-prices';
 import { buildFxDriftReport, UPDATE_THRESHOLD } from './fx-drift';
 
 const ZERO_DECIMAL_CURRENCIES = new Set(['JPY', 'HUF']);
-const MONTHLY_PRO_PLAN_ID = 'lunary_plus_ai';
-const ANNUAL_PRO_PLAN_ID = 'lunary_plus_ai_annual';
+const MONTHLY_PRO_PLAN_ID: PlanId = 'lunary_plus_ai';
+const ANNUAL_PRO_PLAN_ID: PlanId = 'lunary_plus_ai_annual';
 const ANNUAL_MONTHS_EQUIVALENT = 10;
 
 export type FxResolveOptions = {
@@ -26,17 +26,23 @@ export type FxResolveUpdate = {
 };
 
 function getAnnualAnchorAmount(currency: string): number | undefined {
+  const normalizedCurrency = currency.toUpperCase();
+  const monthlyPlan = STRIPE_PRICE_MAPPING[MONTHLY_PRO_PLAN_ID];
+  if (!monthlyPlan) return undefined;
   const monthlyAmount =
-    STRIPE_PRICE_MAPPING[MONTHLY_PRO_PLAN_ID]?.[currency]?.amount;
+    monthlyPlan[normalizedCurrency as keyof typeof monthlyPlan]?.amount;
   if (!monthlyAmount) return undefined;
   return monthlyAmount * ANNUAL_MONTHS_EQUIVALENT;
 }
 
-function getAnchorAmount(planId: string, currency: string): number | undefined {
+function getAnchorAmount(planId: PlanId, currency: string): number | undefined {
   if (planId === ANNUAL_PRO_PLAN_ID) {
     return getAnnualAnchorAmount(currency);
   }
-  return STRIPE_PRICE_MAPPING[planId]?.[currency]?.amount;
+  const plan = STRIPE_PRICE_MAPPING[planId];
+  if (!plan) return undefined;
+  const normalizedCurrency = currency.toUpperCase();
+  return plan[normalizedCurrency as keyof typeof plan]?.amount;
 }
 
 function roundPriceForCurrency(
@@ -96,7 +102,7 @@ export async function resolveFxDriftUpdates(
   }
 
   const stripe = options.apply
-    ? new Stripe(stripeKey as string, { apiVersion: '2024-11-20.acacia' })
+    ? new Stripe(stripeKey as string, { apiVersion: '2025-08-27.basil' })
     : null;
 
   const mappingUpdates = new Map<
@@ -111,7 +117,10 @@ export async function resolveFxDriftUpdates(
     if (!plan) continue;
 
     const anchorCurrency = result.anchor === 'GBP' ? 'GBP' : 'USD';
-    const anchorAmount = getAnchorAmount(result.planId, anchorCurrency);
+    const anchorAmount = getAnchorAmount(
+      result.planId as PlanId,
+      anchorCurrency,
+    );
     if (!anchorAmount) continue;
 
     const rateUsdToCurrency = rates[result.currency];
@@ -131,8 +140,11 @@ export async function resolveFxDriftUpdates(
       plan.interval === 'year' ? targetAmountRaw : undefined,
     );
 
-    const currentPriceId =
-      STRIPE_PRICE_MAPPING[result.planId]?.[result.currency]?.priceId;
+    const mappingPlan = STRIPE_PRICE_MAPPING[result.planId as PlanId];
+    const currentPriceId = mappingPlan
+      ? mappingPlan[result.currency.toUpperCase() as keyof typeof mappingPlan]
+          ?.priceId
+      : undefined;
 
     const update: FxResolveUpdate = {
       planId: result.planId,
