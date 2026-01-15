@@ -1,6 +1,6 @@
 import { config } from 'dotenv';
 import { resolve } from 'path';
-import { execSync } from 'child_process';
+import { execFileSync } from 'child_process';
 import { resolveFxDriftUpdates } from '../utils/fx-drift-resolve';
 
 config({ path: resolve(process.cwd(), '.env.local') });
@@ -9,11 +9,11 @@ config({ path: resolve(process.cwd(), '.env') });
 const TARGET_FILE = 'utils/stripe-prices.ts';
 
 function run(command: string, args: string[] = []) {
-  return execSync(command, { stdio: 'inherit', args });
+  return execFileSync(command, args, { stdio: 'inherit' });
 }
 
 function runOutput(command: string, args: string[] = []): string {
-  return execSync(command, { encoding: 'utf-8', args }).toString().trim();
+  return execFileSync(command, args, { encoding: 'utf-8' }).toString().trim();
 }
 
 function runOutput(command: string): string {
@@ -61,6 +61,13 @@ async function main() {
     run('gh', [
       'pr',
       'create',
+      '--title',
+      title,
+      '--body',
+      body,
+      '--head',
+      branch,
+    ]);
       '--title',
       title,
       '--body',
