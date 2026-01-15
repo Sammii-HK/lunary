@@ -121,6 +121,10 @@ const PRICING_FEATURE_CLAIMS: Record<PlanKey, ClaimRule[]> = {
   lunary_plus_ai_annual: [
     { text: 'All tarot spreads unlocked', requiresEntitlement: false },
     { text: 'Unlimited tarot spreads', features: ['unlimited_tarot_spreads'] },
+    {
+      text: 'Astral Guide context memory (8 recent messages + 4 memory snippets)',
+      requiresEntitlement: false,
+    },
     { text: 'Yearly cosmic forecast', features: ['yearly_forecast'] },
     {
       text: 'Extended timeline analysis (6 & 12-month trends)',
