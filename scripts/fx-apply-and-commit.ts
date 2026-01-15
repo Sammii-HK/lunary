@@ -8,12 +8,12 @@ config({ path: resolve(process.cwd(), '.env') });
 
 const TARGET_FILE = 'utils/stripe-prices.ts';
 
-function run(command: string) {
-  return execSync(command, { stdio: 'inherit' });
+function run(command: string, args: string[] = []) {
+  return execSync(command, { stdio: 'inherit', args });
 }
 
-function runArgs(command: string, args: string[]) {
-  return execSync(command, { stdio: 'inherit', args });
+function runOutput(command: string, args: string[] = []): string {
+  return execSync(command, { encoding: 'utf-8', args }).toString().trim();
 }
 
 function runOutput(command: string): string {
@@ -34,7 +34,7 @@ async function main() {
   const { pr, message } = parseArgs();
 
   await resolveFxDriftUpdates({
-    apply: true,
+  const status = runOutput('git', ['status', '--porcelain']);
     updateMap: true,
   });
 
@@ -44,11 +44,11 @@ async function main() {
     .some((line) => line.includes(TARGET_FILE));
 
   if (!hasTargetChange) {
-    console.log('No mapping changes to commit.');
-    return;
+  run('git', ['add', TARGET_FILE]);
+  run('git', ['commit', '-m', message]);
   }
 
-  run(`git add ${TARGET_FILE}`);
+    const branch = runOutput('git', ['rev-parse', '--abbrev-ref', 'HEAD']);
   runArgs('git', ['commit', '-m', message]);
 
   if (pr) {
@@ -58,9 +58,16 @@ async function main() {
       '## Summary',
       '- Regenerate Stripe price mapping after FX drift auto-apply',
       '',
-      '## Test plan',
-      '- N/A',
-      '',
+    run('gh', [
+      'pr',
+      'create',
+      '--title',
+      title,
+      '--body',
+      body,
+      '--head',
+      branch,
+    ]);
     ].join('\n');
     runArgs('gh', [
       'pr',
