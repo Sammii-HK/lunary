@@ -1,8 +1,7 @@
 import { Metadata } from 'next';
 import Link from 'next/link';
-import { ExploreGrimoire } from '@/components/grimoire/ExploreGrimoire';
 import { Wand2 } from 'lucide-react';
-import { GrimoireBreadcrumbs } from '@/components/grimoire/GrimoireBreadcrumbs';
+import { SEOContentTemplate } from '@/components/grimoire/SEOContentTemplate';
 
 const historicalWitches = [
   {
@@ -70,33 +69,100 @@ export const metadata: Metadata = {
 };
 
 export default function WitchesIndexPage() {
-  const breadcrumbItems = [
-    { name: 'Grimoire', url: '/grimoire' },
-    { name: 'Modern Witchcraft', url: '/grimoire/modern-witchcraft' },
-    {
-      name: 'Famous Witches',
-      url: '/grimoire/modern-witchcraft/famous-witches',
-    },
+  const tableOfContents = [
+    { label: 'Shaping Modern Witchcraft', href: '#shaping-modern-witchcraft' },
+    { label: 'Shared Themes', href: '#shared-themes' },
+    { label: 'How to Study Their Work', href: '#how-to-study' },
+    { label: 'Historical Figures', href: '#historical-figures' },
+    { label: 'Related Resources', href: '#related-resources' },
   ];
 
-  return (
-    <div className='p-4 md:p-6 lg:p-8 xl:p-10 min-h-full'>
-      <GrimoireBreadcrumbs items={breadcrumbItems} />
-      <div className='max-w-5xl mx-auto'>
-        <div className='text-center mb-12'>
-          <div className='flex justify-center mb-4'>
-            <Wand2 className='w-16 h-16 text-violet-400' />
-          </div>
-          <h1 className='text-3xl md:text-4xl lg:text-5xl font-light text-zinc-100 mb-4'>
-            Famous Witches & Occultists
-          </h1>
-          <p className='text-lg text-zinc-400 max-w-2xl mx-auto'>
-            Explore the lives and contributions of influential figures who
-            shaped modern witchcraft, Wicca, and occult traditions.
-          </p>
-        </div>
+  const heroContent = (
+    <div className='text-center'>
+      <div className='flex justify-center mb-4'>
+        <Wand2 className='w-16 h-16 text-violet-400' />
+      </div>
+      <p className='text-lg text-zinc-400 max-w-3xl mx-auto'>
+        Explore the lives and contributions of influential witches and
+        occultists who shaped modern witchcraft, Wicca, and contemporary magical
+        traditions.
+      </p>
+    </div>
+  );
 
-        <div className='bg-zinc-900/50 border border-zinc-800 rounded-xl p-6 mb-10'>
+  return (
+    <div className='min-h-screen bg-zinc-950 text-zinc-100'>
+      <SEOContentTemplate
+        title={metadata.title as string}
+        h1='Famous Witches & Occultists'
+        description={metadata.description as string}
+        keywords={metadata.keywords as string[]}
+        canonicalUrl={
+          (metadata.alternates?.canonical as string) ??
+          'https://lunary.app/grimoire/modern-witchcraft/famous-witches'
+        }
+        intro='Modern witchcraft is shaped by teachers, writers, and practitioners who preserved ritual knowledge and adapted it for contemporary life.'
+        tldr='These figures shaped modern witchcraft through teachings, books, and communities. Their work is a foundation for many current practices.'
+        meaning={`Studying historical figures helps you understand where modern traditions come from and how they evolved. Some focused on Wicca, others on ceremonial magic, and others on folk practice.
+
+Use their stories as inspiration, not as rigid rules. Modern practice grows when you honor lineage while adapting to your own values.`}
+        howToWorkWith={[
+          'Read one primary source before reading commentary.',
+          'Compare two teachers with different approaches.',
+          'Notice what aligns with your values and what does not.',
+          'Keep a short study journal as you explore their work.',
+        ]}
+        rituals={[
+          'Pick one teacher to study and read a short excerpt.',
+          'Write a paragraph on what you want to learn from their approach.',
+          'Light a candle and reflect on the lineage of your practice.',
+        ]}
+        journalPrompts={[
+          'Which figure resonates most with me and why?',
+          'What part of their practice feels relevant today?',
+          'How do I want to shape my own path?',
+        ]}
+        tables={[
+          {
+            title: 'Legacy Overview',
+            headers: ['Focus', 'Examples'],
+            rows: [
+              ['Wicca', 'Gardner, Valiente'],
+              ['Occult Study', 'Crowley, Buckland'],
+              ['Eco-Spiritual', 'Starhawk'],
+            ],
+          },
+          {
+            title: 'Study Prompts',
+            headers: ['Question', 'Why it helps'],
+            rows: [
+              ['What did they preserve?', 'Clarifies lineage'],
+              ['What did they innovate?', 'Shows evolution'],
+              ['What feels outdated?', 'Keeps practice grounded'],
+            ],
+          },
+        ]}
+        internalLinks={[
+          { text: 'Modern Witchcraft', href: '/grimoire/modern-witchcraft' },
+          { text: 'Book of Shadows', href: '/grimoire/book-of-shadows' },
+          {
+            text: 'Witchcraft Ethics',
+            href: '/grimoire/modern-witchcraft/ethics',
+          },
+          { text: 'Grimoire Home', href: '/grimoire' },
+        ]}
+        tableOfContents={tableOfContents}
+        heroContent={heroContent}
+        breadcrumbs={[
+          { label: 'Grimoire', href: '/grimoire' },
+          { label: 'Modern Witchcraft', href: '/grimoire/modern-witchcraft' },
+          { label: 'Famous Witches' },
+        ]}
+      >
+        <section
+          id='shaping-modern-witchcraft'
+          className='bg-zinc-900/50 border border-zinc-800 rounded-xl p-6 mb-10'
+        >
           <h2 className='text-xl font-medium text-zinc-100 mb-3'>
             Shaping Modern Witchcraft
           </h2>
@@ -107,9 +173,65 @@ export default function WitchesIndexPage() {
             traditions. Understanding their contributions helps us appreciate
             the roots of our practice.
           </p>
-        </div>
+        </section>
 
-        <section className='mb-12'>
+        <section
+          id='shared-themes'
+          className='bg-zinc-900/50 border border-zinc-800 rounded-xl p-6 mb-10'
+        >
+          <h2 className='text-xl font-medium text-zinc-100 mb-3'>
+            Shared Themes Across Their Work
+          </h2>
+          <p className='text-zinc-400 mb-4'>
+            Despite different paths, many of these figures emphasized ritual
+            structure, symbolism, and ethical practice. Most encouraged
+            practitioners to cultivate discipline and personal responsibility,
+            rather than looking for shortcuts.
+          </p>
+          <p className='text-zinc-400'>
+            Another common thread is community. From covens to study circles,
+            these teachers understood that practice deepens when shared with
+            others.
+          </p>
+        </section>
+
+        <section
+          id='how-to-study'
+          className='bg-zinc-900/50 border border-zinc-800 rounded-xl p-6 mb-10'
+        >
+          <h2 className='text-xl font-medium text-zinc-100 mb-3'>
+            How to Study Their Work
+          </h2>
+          <p className='text-zinc-400 mb-4'>
+            Start with one book or lecture, then take notes on the rituals,
+            values, and practices that stand out. Compare at least two voices so
+            you can see where they overlap and where they diverge.
+          </p>
+          <p className='text-zinc-400'>
+            Focus on principles you can test in your own practice. If a ritual
+            does not resonate, document why and move on without guilt.
+          </p>
+        </section>
+
+        <section
+          id='why-their-work-matters'
+          className='bg-zinc-900/50 border border-zinc-800 rounded-xl p-6 mb-10'
+        >
+          <h2 className='text-xl font-medium text-zinc-100 mb-3'>
+            Why Their Work Matters
+          </h2>
+          <p className='text-zinc-400 mb-4'>
+            Many modern practices are shaped by published rituals, oral
+            teachings, and community traditions created by these figures. Their
+            contributions kept traditions alive and accessible.
+          </p>
+          <p className='text-zinc-400'>
+            You can honor the legacy by studying their methods and adapting what
+            fits your values, while letting go of what does not.
+          </p>
+        </section>
+
+        <section id='historical-figures' className='mb-12'>
           <h2 className='text-2xl font-medium text-zinc-100 mb-6'>
             Historical Figures
           </h2>
@@ -132,7 +254,10 @@ export default function WitchesIndexPage() {
           </div>
         </section>
 
-        <div className='border-t border-zinc-800 pt-8'>
+        <section
+          id='related-resources'
+          className='border-t border-zinc-800 pt-8'
+        >
           <h3 className='text-lg font-medium text-zinc-100 mb-4'>
             Related Resources
           </h3>
@@ -162,9 +287,8 @@ export default function WitchesIndexPage() {
               Witchcraft Ethics
             </Link>
           </div>
-        </div>
-        <ExploreGrimoire />
-      </div>
+        </section>
+      </SEOContentTemplate>
     </div>
   );
 }

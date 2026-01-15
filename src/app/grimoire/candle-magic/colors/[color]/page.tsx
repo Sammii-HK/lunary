@@ -1,6 +1,8 @@
 import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { SEOContentTemplate } from '@/components/grimoire/SEOContentTemplate';
+import { CosmicConnections } from '@/components/grimoire/CosmicConnections';
+import { CosmicConnectionSection } from '@/lib/cosmicConnectionsConfig';
 
 const candleColors = {
   red: {
@@ -316,6 +318,112 @@ export default async function CandleColorPage({
     },
   ];
 
+  const tableOfContents = [
+    { label: 'Correspondences', href: '#correspondences' },
+    { label: 'How to Work With It', href: '#how-to' },
+    { label: 'Practice Notes', href: '#practice' },
+    { label: 'FAQs', href: '#faq' },
+  ];
+
+  const cosmicSections: CosmicConnectionSection[] = [
+    {
+      title: 'Candle Practice',
+      links: [
+        { label: 'Candle Magic', href: '/grimoire/candle-magic' },
+        { label: 'Candle Colors', href: '/grimoire/candle-magic/colors' },
+        {
+          label: 'Anointing Candles',
+          href: '/grimoire/candle-magic/anointing',
+        },
+      ],
+    },
+    {
+      title: 'Guides & Tools',
+      links: [
+        { label: 'Correspondences', href: '/grimoire/correspondences' },
+        {
+          label: 'Spellcraft Fundamentals',
+          href: '/grimoire/spells/fundamentals',
+        },
+        { label: 'Jar Spells', href: '/grimoire/jar-spells' },
+      ],
+    },
+  ];
+
+  const sectionContent = (
+    <div className='space-y-10'>
+      <section id='correspondences' className='space-y-3'>
+        <h2 className='text-3xl font-light text-zinc-100'>Correspondences</h2>
+        <div className='grid gap-4 md:grid-cols-2 text-sm text-zinc-300'>
+          {[
+            { label: 'Element', value: colorData.element },
+            { label: 'Planet', value: colorData.planet },
+            { label: 'Chakra', value: colorData.chakra },
+            { label: 'Day', value: colorData.day },
+          ].map((item) => (
+            <article
+              key={item.label}
+              className='rounded-xl border border-zinc-800 bg-zinc-900/30 p-4'
+            >
+              <h3 className='text-lg font-semibold text-zinc-100'>
+                {item.label}
+              </h3>
+              <p className='text-sm text-zinc-300'>{item.value}</p>
+            </article>
+          ))}
+        </div>
+      </section>
+
+      <section id='how-to' className='space-y-3'>
+        <h2 className='text-3xl font-light text-zinc-100'>
+          How to Work With It
+        </h2>
+        <ul className='list-disc list-inside text-sm text-zinc-300 space-y-2'>
+          <li>
+            Light {colorData.name.toLowerCase()} candles on {colorData.day} when
+            possible.
+          </li>
+          <li>
+            Dress with oils that match {colorData.element.toLowerCase()} energy.
+          </li>
+          <li>
+            Visualize the {colorData.meanings[0].toLowerCase()} intention as you
+            speak words.
+          </li>
+          <li>
+            Pair with crystals, journaling, or movement to deepen the ritual.
+          </li>
+        </ul>
+      </section>
+
+      <section id='practice' className='space-y-3'>
+        <h2 className='text-3xl font-light text-zinc-100'>Practice Notes</h2>
+        <p className='text-sm text-zinc-300'>
+          Keep a candle journal noting how each color feels. Experiment with
+          color blends, repeat the corresponding incantations, and observe
+          energetic shifts.
+        </p>
+      </section>
+
+      <section id='faq' className='space-y-3'>
+        <h2 className='text-3xl font-light text-zinc-100'>FAQs</h2>
+        <div className='space-y-3'>
+          {faqs.map((faq) => (
+            <article
+              key={faq.question}
+              className='rounded-xl border border-zinc-800 bg-zinc-900/50 p-4'
+            >
+              <h3 className='text-lg font-semibold text-zinc-100 mb-1'>
+                {faq.question}
+              </h3>
+              <p className='text-sm text-zinc-300'>{faq.answer}</p>
+            </article>
+          ))}
+        </div>
+      </section>
+    </div>
+  );
+
   return (
     <div className='p-4 md:p-6 lg:p-8 xl:p-10 min-h-full'>
       <SEOContentTemplate
@@ -329,7 +437,11 @@ export default async function CandleColorPage({
           'color magic',
         ]}
         canonicalUrl={`https://lunary.app/grimoire/candle-magic/colors/${color}`}
-        intro={`${colorData.name} candles are powerful tools for ${colorData.meanings.slice(0, 2).join(' and ').toLowerCase()} magic. Associated with ${colorData.planet} and the ${colorData.element} element, ${colorData.name.toLowerCase()} candles are essential for ${colorData.uses[0].toLowerCase()}.`}
+        tableOfContents={tableOfContents}
+        intro={`${colorData.name} candles are powerful tools for ${colorData.meanings
+          .slice(0, 2)
+          .join(' and ')
+          .toLowerCase()} magic. Associated with ${colorData.planet} and the ${colorData.element} element, ${colorData.name.toLowerCase()} candles are essential for ${colorData.uses[0].toLowerCase()}.`}
         tldr={`${colorData.name} candles represent ${colorData.meanings[0].toLowerCase()}. Use on ${colorData.day} for ${colorData.uses[0].toLowerCase()}.`}
         meaning={`Candle magic is one of the most accessible and powerful forms of spell work. The color of your candle carries specific vibrations and correspondences that align with different intentions and outcomes.
 
@@ -402,13 +514,29 @@ When working with ${colorData.name.toLowerCase()} candles, focus your intention 
         internalLinks={[
           { text: 'Candle Magic Guide', href: '/grimoire/candle-magic' },
           { text: 'Color Correspondences', href: '/grimoire/correspondences' },
-          { text: 'Spells & Rituals', href: '/grimoire/spells' },
-          { text: 'Grimoire Home', href: '/grimoire' },
+          {
+            text: 'Anointing Candles',
+            href: '/grimoire/candle-magic/anointing',
+          },
+          {
+            text: 'Spellcraft Fundamentals',
+            href: '/grimoire/spells/fundamentals',
+          },
         ]}
-        ctaText='Explore more candle magic'
+        cosmicConnections={
+          <CosmicConnections
+            entityType='hub-candle-magic'
+            entityKey='candle-magic'
+            title='Candle Magic Connections'
+            sections={cosmicSections}
+          />
+        }
+        ctaText='Practice candle magic'
         ctaHref='/grimoire/candle-magic'
         faqs={faqs}
-      />
+      >
+        {sectionContent}
+      </SEOContentTemplate>
     </div>
   );
 }

@@ -87,7 +87,13 @@ export default async function PantheonPage({
 
 Each ${pantheonKey.toLowerCase()} deity has specific domains and correspondences. When working with ${pantheonKey.toLowerCase()} deities, it's important to research their mythology, understand their domains, and honor them respectfully according to ${pantheonKey.toLowerCase()} traditions.
 
-Working with deities brings divine support and ancient wisdom to your practice. Whether you're calling upon specific ${pantheonKey.toLowerCase()} gods or goddesses for guidance, seeking their assistance in spellwork, or building relationships through regular practice, ${pantheonKey.toLowerCase()} deities offer powerful connections to divine energy.`;
+Working with deities brings divine support and ancient wisdom to your practice. Whether you're calling upon specific ${pantheonKey.toLowerCase()} gods or goddesses for guidance, seeking their assistance in spellwork, or building relationships through regular practice, ${pantheonKey.toLowerCase()} deities offer powerful connections to divine energy.
+
+Approach each deity with care, clarity, and consent. Research traditional offerings, prayer styles, and cultural context before you begin. If a tradition is closed or requires initiation, respect those boundaries and focus on open, accessible practices instead.
+
+Building a relationship takes time. Start small with a simple devotional act or written prayer, then observe how the relationship evolves. The key is consistency and sincere intention rather than elaborate tools.
+
+If you are unsure where to begin, focus on one theme in your life—protection, creativity, healing, or wisdom—and explore which ${pantheonKey.toLowerCase()} deity aligns with that theme. This keeps your practice focused and helps you build a clear devotional thread over time.`;
 
   return (
     <SEOContentTemplate
@@ -102,6 +108,7 @@ Working with deities brings divine support and ancient wisdom to your practice. 
       ]}
       canonicalUrl={`https://lunary.app/grimoire/correspondences/deities/${pantheon}`}
       intro={`The ${pantheonKey} pantheon contains powerful deities associated with various domains of life and magic. Understanding ${pantheonKey.toLowerCase()} deities helps you work with divine energy respectfully and effectively.`}
+      tldr={`${pantheonKey} deities represent distinct domains like love, wisdom, protection, and transformation. Research their mythology, offer respectful devotion, and build relationships slowly. Let the deity's traditional symbols and stories guide your ritual approach.`}
       meaning={meaning}
       howToWorkWith={[
         `Research ${pantheonKey.toLowerCase()} mythology and traditions`,
@@ -113,10 +120,50 @@ Working with deities brings divine support and ancient wisdom to your practice. 
         `Build relationships through regular practice`,
         `Respect cultural traditions and practices`,
       ]}
+      tables={[
+        {
+          title: 'Respectful Approach Checklist',
+          headers: ['Step', 'Why It Matters'],
+          rows: [
+            ['Research', 'Learn myths, symbols, and cultural context.'],
+            ['Intention', 'Clarify why you are reaching out.'],
+            ['Offering', 'Choose items aligned with the deity.'],
+            ['Practice', 'Create a consistent devotional rhythm.'],
+            ['Reflection', 'Notice patterns, signs, and outcomes.'],
+          ],
+        },
+        {
+          title: 'Simple Devotional Ideas',
+          headers: ['Type', 'Example'],
+          rows: [
+            ['Offering', 'Fresh water, candle, or seasonal flowers'],
+            ['Prayer', 'A short daily gratitude or request for guidance'],
+            ['Study', 'Read a myth or historical source weekly'],
+            ['Creative Act', 'Write, draw, or craft as devotion'],
+          ],
+        },
+      ]}
+      rituals={[
+        'Light a candle and read a short myth connected to the deity.',
+        'Create a small devotional space with one symbolic item.',
+        'Offer water, incense, or food aligned with tradition.',
+        'Write a personal prayer asking for guidance in one area.',
+      ]}
+      journalPrompts={[
+        `Which ${pantheonKey.toLowerCase()} deity calls to me right now, and why?`,
+        'What domain in my life needs divine support or protection?',
+        'How can I honor this deity without appropriation?',
+        'What signs or synchronicities have I noticed after offerings?',
+      ]}
       faqs={[
         {
           question: `How do I work with ${pantheonKey.toLowerCase()} deities?`,
           answer: `Work with ${pantheonKey.toLowerCase()} deities by researching their mythology, understanding their domains, creating dedicated altars, offering appropriate items, and calling upon them respectfully in ritual. Always research and respect the traditions associated with ${pantheonKey.toLowerCase()} deities.`,
+        },
+        {
+          question: 'How do I know if a deity is reaching out?',
+          answer:
+            'Look for consistent patterns: repeated symbols, dreams, or themes connected to that deity. Confirmation often comes through study—if a symbol keeps appearing, research which deities are linked to it.',
         },
         {
           question: `Do I need to worship ${pantheonKey.toLowerCase()} deities?`,

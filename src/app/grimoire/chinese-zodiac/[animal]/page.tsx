@@ -6,6 +6,8 @@ import {
   ChineseAnimal,
 } from '@/constants/seo/chinese-zodiac';
 import { SEOContentTemplate } from '@/components/grimoire/SEOContentTemplate';
+import { CosmicConnections } from '@/components/grimoire/CosmicConnections';
+import { CosmicConnectionSection } from '@/lib/cosmicConnectionsConfig';
 import { createGrimoireMetadata } from '@/lib/grimoire-metadata';
 import { createCosmicEntitySchema, renderJsonLd } from '@/lib/schema';
 
@@ -39,7 +41,7 @@ export async function generateMetadata({
       'chinese horoscope',
     ],
     url: `https://lunary.app/grimoire/chinese-zodiac/${animal}`,
-    ogImagePath: `/api/og/cosmic?title=${encodeURIComponent(`${data.emoji} Year of the ${data.displayName}`)}`,
+    ogImagePath: `/api/og/thematic?category=chinese-zodiac&slug=${encodeURIComponent(animal)}&title=${encodeURIComponent(`Year of the ${data.displayName}`)}&format=landscape`,
     ogImageAlt: `${data.displayName} Chinese Zodiac`,
   });
 }
@@ -85,6 +87,110 @@ export default async function ChineseZodiacAnimalPage({
     },
   ];
 
+  const tableOfContents = [
+    { label: 'Traits & Strengths', href: '#traits' },
+    { label: 'Compatibility', href: '#compatibility' },
+    { label: 'Lucky Tools', href: '#lucky-tools' },
+    { label: 'How to Work With It', href: '#how-to-work-with-it' },
+    { label: 'Relationship Notes', href: '#relationship-notes' },
+    { label: 'FAQ', href: '#faq' },
+  ];
+
+  const traitSection = (
+    <section id='traits' className='space-y-3'>
+      <h2 className='text-3xl font-light text-zinc-100'>Traits & Strengths</h2>
+      <div className='grid gap-4 md:grid-cols-2 text-sm text-zinc-300'>
+        <article className='rounded-xl border border-zinc-800 bg-zinc-900/30 p-4'>
+          <h3 className='text-lg font-semibold text-zinc-100 mb-2'>
+            Strengths
+          </h3>
+          <p>{data.strengths.join(', ')}</p>
+        </article>
+        <article className='rounded-xl border border-zinc-800 bg-zinc-900/30 p-4'>
+          <h3 className='text-lg font-semibold text-zinc-100 mb-2'>
+            Areas to Grow
+          </h3>
+          <p>{data.weaknesses.join(', ')}</p>
+        </article>
+      </div>
+    </section>
+  );
+
+  const compatibilitySection = (
+    <section id='compatibility' className='space-y-3'>
+      <h2 className='text-3xl font-light text-zinc-100'>
+        Compatibility & Elements
+      </h2>
+      <div className='grid md:grid-cols-2 gap-4'>
+        <article className='rounded-xl border border-zinc-800 bg-zinc-900/30 p-4 text-sm text-zinc-300'>
+          <h3 className='text-lg font-semibold text-zinc-100 mb-2'>
+            Best Matches
+          </h3>
+          <p>
+            {data.compatibleWith
+              .map((a) => CHINESE_ZODIAC_DATA[a].displayName)
+              .join(', ')}
+          </p>
+        </article>
+        <article className='rounded-xl border border-zinc-800 bg-zinc-900/30 p-4 text-sm text-zinc-300'>
+          <h3 className='text-lg font-semibold text-zinc-100 mb-2'>
+            Challenging Matches
+          </h3>
+          <p>
+            {data.incompatibleWith
+              .map((a) => CHINESE_ZODIAC_DATA[a].displayName)
+              .join(', ')}
+          </p>
+        </article>
+      </div>
+    </section>
+  );
+
+  const luckySection = (
+    <section id='lucky-tools' className='space-y-3'>
+      <h2 className='text-3xl font-light text-zinc-100'>Lucky Tools</h2>
+      <div className='grid sm:grid-cols-3 gap-4 text-sm text-zinc-300'>
+        <article className='rounded-xl border border-zinc-800 bg-zinc-900/30 p-4'>
+          <h3 className='text-lg font-semibold text-zinc-100 mb-2'>
+            Lucky Numbers
+          </h3>
+          <p>{data.luckyNumbers.join(', ')}</p>
+        </article>
+        <article className='rounded-xl border border-zinc-800 bg-zinc-900/30 p-4'>
+          <h3 className='text-lg font-semibold text-zinc-100 mb-2'>
+            Lucky Colors
+          </h3>
+          <p>{data.luckyColors.join(' or ')}</p>
+        </article>
+        <article className='rounded-xl border border-zinc-800 bg-zinc-900/30 p-4'>
+          <h3 className='text-lg font-semibold text-zinc-100 mb-2'>
+            Lucky Flowers
+          </h3>
+          <p>{data.luckyFlowers.join(' or ')}</p>
+        </article>
+      </div>
+    </section>
+  );
+
+  const cosmicSections: CosmicConnectionSection[] = [
+    {
+      title: 'Chinese Zodiac Resources',
+      links: [
+        { label: 'Chinese Zodiac Overview', href: '/grimoire/chinese-zodiac' },
+        { label: 'Compatibility', href: '/grimoire/compatibility' },
+        { label: 'Horoscopes', href: '/grimoire/horoscopes' },
+      ],
+    },
+    {
+      title: 'Magical Tools',
+      links: [
+        { label: 'Numerology', href: '/grimoire/numerology' },
+        { label: 'Chakras', href: '/grimoire/chakras' },
+        { label: 'Crystals', href: '/grimoire/crystals' },
+      ],
+    },
+  ];
+
   // Entity schema for Knowledge Graph
   const chineseZodiacSchema = createCosmicEntitySchema({
     name: `${data.displayName} Chinese Zodiac`,
@@ -114,6 +220,7 @@ export default async function ChineseZodiacAnimalPage({
           data.displayName,
         ]}
         canonicalUrl={`https://lunary.app/grimoire/chinese-zodiac/${animal}`}
+        intro={`The ${data.displayName} is a ${data.yinYang} ${data.element} sign in Chinese astrology. This guide covers traits, strengths, growth edges, lucky tools, and compatibility patterns—plus how to work with ${data.displayName} energy in daily life.`}
         datePublished='2025-01-01'
         dateModified='2025-12-06'
         articleSection='Chinese Zodiac'
@@ -185,6 +292,7 @@ Notable people born in ${data.displayName} years include ${data.famousPeople.joi
             ],
           },
         ]}
+        tableOfContents={tableOfContents}
         relatedItems={[
           ...data.compatibleWith.slice(0, 2).map((a) => ({
             name: `${CHINESE_ZODIAC_DATA[a].displayName} Chinese Zodiac`,
@@ -199,12 +307,71 @@ Notable people born in ${data.displayName} years include ${data.famousPeople.joi
         ]}
         ctaText='Discover your complete Chinese astrology profile'
         ctaHref='/birth-chart'
+        internalLinks={[
+          { text: 'Chinese Zodiac Overview', href: '/grimoire/chinese-zodiac' },
+          { text: 'Compatibility', href: '/grimoire/compatibility' },
+          { text: 'Horoscopes', href: '/grimoire/horoscopes' },
+        ]}
+        cosmicConnections={
+          <CosmicConnections
+            entityType='hub-zodiac'
+            entityKey='zodiac'
+            title={`${data.displayName} Zodiac Connections`}
+            sections={cosmicSections}
+          />
+        }
         sources={[
           { name: 'Traditional Chinese Astrology' },
           { name: 'Chinese zodiac calendar calculations' },
         ]}
         faqs={faqs}
       >
+        {traitSection}
+        {compatibilitySection}
+        {luckySection}
+        <section id='how-to-work-with-it' className='space-y-4 mt-10'>
+          <h2 className='text-3xl font-light text-zinc-100'>
+            How to Work With {data.displayName} Energy
+          </h2>
+          <p className='text-sm text-zinc-300'>
+            The {data.displayName} thrives when you lean into its natural gifts:
+            {` ${data.strengths.slice(0, 3).join(', ')}`}. When you feel the
+            shadow side emerging—{` ${data.weaknesses.slice(0, 3).join(', ')}`}—
+            treat it as a cue to slow down, regulate, and choose the next step
+            with intention.
+          </p>
+          <ul className='list-disc list-inside text-sm text-zinc-300 space-y-2'>
+            <li>
+              Work with lucky colors ({data.luckyColors.join(', ')}) in
+              clothing, candles, or altar accents.
+            </li>
+            <li>
+              Use lucky numbers ({data.luckyNumbers.join(', ')}) for repetition,
+              ritual timing, or journaling prompts.
+            </li>
+            <li>
+              Anchor your practice with a “year theme” based on {data.element}{' '}
+              energy: choose one habit to build and one to release.
+            </li>
+          </ul>
+        </section>
+
+        <section id='relationship-notes' className='space-y-4 mt-10'>
+          <h2 className='text-3xl font-light text-zinc-100'>
+            Relationship Notes
+          </h2>
+          <p className='text-sm text-zinc-300'>
+            Compatibility is about rhythm, not fate. {data.displayName} tends to
+            flow best with{' '}
+            {data.compatibleWith
+              .map((a) => CHINESE_ZODIAC_DATA[a].displayName)
+              .slice(0, 3)
+              .join(', ')}{' '}
+            because those signs mirror or balance core drives. With challenging
+            matches, the work is conscious pacing: define boundaries,
+            communicate needs early, and return to shared values.
+          </p>
+        </section>
         <div className='mt-8 flex justify-between text-sm'>
           <Link
             href={`/grimoire/chinese-zodiac/${prevAnimal}`}

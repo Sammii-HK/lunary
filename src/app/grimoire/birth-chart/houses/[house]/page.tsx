@@ -1,6 +1,7 @@
 import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { SEOContentTemplate } from '@/components/grimoire/SEOContentTemplate';
+import { CosmicConnections } from '@/components/grimoire/CosmicConnections';
 import { astrologicalHouses } from '@/constants/grimoire/seo-data';
 
 const houseNumbers = Array.from({ length: 12 }, (_, i) => String(i + 1));
@@ -19,6 +20,13 @@ const houseKeyMap: Record<string, keyof typeof astrologicalHouses> = {
   '11': 'eleventh',
   '12': 'twelfth',
 };
+
+const tableOfContents = [
+  { label: 'House Overview', href: '#house-overview' },
+  { label: 'Key Themes', href: '#house-themes' },
+  { label: 'Practice', href: '#house-practice' },
+  { label: 'FAQ', href: '#faq' },
+];
 
 export async function generateStaticParams() {
   return houseNumbers.map((house) => ({
@@ -132,6 +140,69 @@ export default async function BirthChartHousePage({
     },
   ];
 
+  const sections = (
+    <div className='space-y-10'>
+      <section
+        id='house-overview'
+        className='bg-zinc-900/40 border border-zinc-800 rounded-xl p-6 space-y-3'
+      >
+        <h2 className='text-2xl font-medium text-zinc-100'>House Overview</h2>
+        <p className='text-zinc-300'>
+          {houseData.name} governs {houseData.area.toLowerCase()} and reflects
+          how that energy shows up in your life. The ruling sign{' '}
+          {houseData.rulingSign} and {houseData.rulingPlanet} shape its flavor.
+        </p>
+        <ul className='text-sm text-zinc-400 space-y-1 list-disc list-inside'>
+          <li>Element: {houseData.element}</li>
+          <li>Keywords: {houseData.keywords.join(', ')}</li>
+          <li>Ruling Planet: {houseData.rulingPlanet}</li>
+        </ul>
+      </section>
+
+      <section
+        id='house-themes'
+        className='bg-zinc-900/30 border border-zinc-800 rounded-xl p-6 space-y-3'
+      >
+        <h2 className='text-2xl font-medium text-zinc-100'>Key Themes</h2>
+        <p className='text-zinc-300 bg-zinc-950/40 border border-zinc-900/50 rounded-xl p-4 text-sm'>
+          {houseData.description}
+        </p>
+        <div className='grid md:grid-cols-2 gap-4 text-sm text-zinc-300'>
+          {houseData.themes.map((theme) => (
+            <div
+              key={theme}
+              className='rounded-lg border border-zinc-800 bg-zinc-900/50 p-3'
+            >
+              <p>{theme}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <section
+        id='house-practice'
+        className='bg-zinc-900/40 border border-zinc-800 rounded-xl p-6 space-y-3'
+      >
+        <h2 className='text-2xl font-medium text-zinc-100'>
+          Practice & Reflection
+        </h2>
+        <ol className='list-decimal list-inside text-zinc-300 space-y-2'>
+          <li>
+            Note which planets occupy this house; they tell the story in action.
+          </li>
+          <li>
+            Honor the planet that rules this house when working on its life
+            area.
+          </li>
+          <li>Track transits through this cusp to feel the narrative shift.</li>
+          <li>
+            Journal about how the house themes show up in current projects.
+          </li>
+        </ol>
+      </section>
+    </div>
+  );
+
   return (
     <div className='p-4 md:p-6 lg:p-8 xl:p-10 min-h-full'>
       <SEOContentTemplate
@@ -217,8 +288,18 @@ Understanding your ${ordinal} House helps you navigate its life areas more consc
         ]}
         ctaText='Calculate your birth chart'
         ctaHref='/birth-chart'
+        cosmicConnections={
+          <CosmicConnections
+            entityType='house'
+            entityKey={houseKey || 'first'}
+            title={`${houseData.name} Connections`}
+          />
+        }
+        tableOfContents={tableOfContents}
         faqs={faqs}
-      />
+      >
+        {sections}
+      </SEOContentTemplate>
     </div>
   );
 }

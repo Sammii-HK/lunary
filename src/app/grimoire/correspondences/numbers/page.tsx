@@ -1,6 +1,8 @@
 import { Metadata } from 'next';
 import Link from 'next/link';
 import { SEOContentTemplate } from '@/components/grimoire/SEOContentTemplate';
+import { CosmicConnections } from '@/components/grimoire/CosmicConnections';
+import { CosmicConnectionSection } from '@/lib/cosmicConnectionsConfig';
 import { correspondencesData } from '@/constants/grimoire/correspondences';
 
 export const metadata: Metadata = {
@@ -36,7 +38,7 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: 'Number Correspondences Guide | Lunary',
     description: 'Complete guide to magical numbers and their correspondences.',
-    images: ['/api/og/cosmic'],
+    images: ['/api/og/grimoire/correspondences'],
   },
   alternates: {
     canonical: 'https://lunary.app/grimoire/correspondences/numbers',
@@ -84,6 +86,31 @@ const faqs = [
 
 export default function NumbersIndexPage() {
   const numbers = Object.entries(correspondencesData.numbers);
+
+  const tableOfContents = [
+    { label: 'All Magical Numbers', href: '#all-magical-numbers' },
+    { label: 'Number Resources', href: '#number-resources' },
+    { label: 'FAQ', href: '#faq' },
+  ];
+
+  const cosmicSections: CosmicConnectionSection[] = [
+    {
+      title: 'Numerology Hubs',
+      links: [
+        { label: 'Numerology', href: '/grimoire/numerology' },
+        { label: 'Angel Numbers', href: '/grimoire/angel-numbers' },
+        { label: 'Life Path Numbers', href: '/grimoire/life-path' },
+      ],
+    },
+    {
+      title: 'Practice Tools',
+      links: [
+        { label: 'Planets', href: '/grimoire/astronomy/planets' },
+        { label: 'Correspondences', href: '/grimoire/correspondences' },
+        { label: 'Compatibility', href: '/grimoire/compatibility' },
+      ],
+    },
+  ];
 
   return (
     <div className='p-4 md:p-6 lg:p-8 xl:p-10 min-h-full'>
@@ -194,8 +221,17 @@ Numbers above 9 carry the energy of their reduced digit. 13 (1+3=4) has 4 energy
         ctaText='Want personalized number insights based on your birth chart?'
         ctaHref='/pricing'
         faqs={faqs}
+        tableOfContents={tableOfContents}
+        cosmicConnections={
+          <CosmicConnections
+            entityType='hub-numerology'
+            entityKey='numerology'
+            title='Number Connections'
+            sections={cosmicSections}
+          />
+        }
       >
-        <section className='mb-12'>
+        <section id='all-magical-numbers' className='mb-12'>
           <h2 className='text-2xl font-medium text-zinc-100 mb-6'>
             All Magical Numbers
           </h2>
@@ -221,6 +257,44 @@ Numbers above 9 carry the energy of their reduced digit. 13 (1+3=4) has 4 energy
                 </p>
               </Link>
             ))}
+          </div>
+        </section>
+        <section
+          id='number-resources'
+          className='mb-12 bg-lunary-delta border border-zinc-800 rounded-xl p-6'
+        >
+          <h2 className='text-2xl font-medium text-zinc-100 mb-4'>
+            Number Resources
+          </h2>
+          <p className='text-sm text-zinc-400 mb-6'>
+            Use these quick references to align your spells with planetary days,
+            numerology keywords, and practice tools.
+          </p>
+          <div className='grid md:grid-cols-3 gap-4 text-sm text-zinc-300'>
+            <div className='space-y-2'>
+              <p className='text-zinc-200 font-semibold'>Planetary Days</p>
+              <ul className='list-disc list-inside space-y-1'>
+                <li>Sun (Sunday) — 1</li>
+                <li>Moon (Monday) — 2</li>
+                <li>Mercury (Wednesday) — 5</li>
+              </ul>
+            </div>
+            <div className='space-y-2'>
+              <p className='text-zinc-200 font-semibold'>Intent Keywords</p>
+              <ul className='list-disc list-inside space-y-1'>
+                <li>1: Beginnings & leadership</li>
+                <li>4: Stability & structure</li>
+                <li>7: Mystery & healing</li>
+              </ul>
+            </div>
+            <div className='space-y-2'>
+              <p className='text-zinc-200 font-semibold'>Practice Tools</p>
+              <ul className='list-disc list-inside space-y-1'>
+                <li>Use 1/5 candles for bold action magic</li>
+                <li>Repeat phrases 2 or 6 times to invite harmony</li>
+                <li>Work with 9 to close cycles or complete rituals</li>
+              </ul>
+            </div>
           </div>
         </section>
       </SEOContentTemplate>

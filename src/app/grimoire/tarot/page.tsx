@@ -92,6 +92,50 @@ export default function TarotIndexPage() {
             'Tarot cards are a 78-card divination deck used for spiritual guidance and self-reflection. The deck consists of 22 Major Arcana cards representing significant life events and spiritual lessons, and 56 Minor Arcana cards divided into four suits (Wands, Cups, Swords, Pentacles) that reflect everyday experiences. Each card carries unique symbolism, meanings, and guidance for readings.',
         }}
         tldr='A tarot deck has 78 cards: 22 Major Arcana for big life themes and spiritual lessons, and 56 Minor Arcana across four suits for daily life. Major Arcana = significant events; Minor Arcana = everyday experiences. The suits represent different elements and life areas.'
+        meaning={`Tarot is a symbolic language for reflection and decision-making. Major Arcana cards mark key turning points, while Minor Arcana cards describe the daily context around those shifts.
+
+When reading, look for repeating suits or numbers. Repetition often points to the strongest theme. Court cards can show people, roles, or attitudes in the situation.
+
+If you are new, start with one-card pulls and short spreads. Focus on clear questions and give yourself time to build familiarity with the imagery.
+
+Tarot works best when you treat each card as a mirror rather than a verdict. Ask what the card wants you to notice, and choose one small action that matches the message.
+
+Over time, your notes become a personal guide to the deck.`}
+        rituals={[
+          'Shuffle slowly and name a clear question.',
+          'Pull one card each morning and note its theme.',
+          'Cleanse your deck after intense readings.',
+        ]}
+        journalPrompts={[
+          'What card shows up most often for me?',
+          'Which suit feels most relevant right now?',
+          'How can I apply the card’s advice today?',
+        ]}
+        tables={[
+          {
+            title: 'Arcana Overview',
+            headers: ['Section', 'Focus'],
+            rows: [
+              ['Major Arcana', 'Big life themes'],
+              ['Minor Arcana', 'Daily experiences'],
+            ],
+          },
+          {
+            title: 'Quick Reading Flow',
+            headers: ['Step', 'Focus'],
+            rows: [
+              ['Question', 'Keep it clear and specific'],
+              ['Card', 'Name the central theme'],
+              ['Action', 'Pick one practical step'],
+            ],
+          },
+        ]}
+        internalLinks={[
+          { text: 'Tarot Spreads', href: '/grimoire/tarot/spreads' },
+          { text: 'Tarot Suits', href: '/grimoire/tarot/suits' },
+          { text: 'Card Combinations', href: '/grimoire/card-combinations' },
+          { text: 'Grimoire Home', href: '/grimoire' },
+        ]}
         intro="The tarot deck is divided into two main sections: the Major Arcana (22 cards) and the Minor Arcana (56 cards). The Major Arcana represents significant life events and spiritual lessons, while the Minor Arcana covers day-to-day experiences across four suits. Each card carries unique symbolism, meanings, and guidance. Whether you're a beginner or experienced reader, understanding each card deepens your connection to this powerful divination tool."
         faqs={[
           {

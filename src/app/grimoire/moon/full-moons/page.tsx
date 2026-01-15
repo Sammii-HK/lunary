@@ -39,7 +39,7 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: 'Full Moon Names Guide | Lunary',
     description: 'Complete guide to monthly full moon names and meanings.',
-    images: ['/api/og/cosmic'],
+    images: ['/api/og/grimoire/moon'],
   },
   alternates: {
     canonical: 'https://lunary.app/grimoire/moon/full-moons',

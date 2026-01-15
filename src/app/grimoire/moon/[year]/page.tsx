@@ -1,7 +1,6 @@
 import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
-import { ExploreGrimoire } from '@/components/grimoire/ExploreGrimoire';
 import { SEOContentTemplate } from '@/components/grimoire/SEOContentTemplate';
 import { Moon, Calendar, ArrowRight, Sparkles } from 'lucide-react';
 import { MoonPhase } from 'astronomy-engine';
@@ -156,7 +155,7 @@ export async function generateMetadata({
       title: `${year} Moon Calendar | Lunary`,
       description: `Complete guide to all full moons and new moons in ${year}.`,
       images: [
-        `/api/og/cosmic?title=${encodeURIComponent(`${year} Moon Calendar`)}`,
+        `/api/og/educational/moon?title=${encodeURIComponent(`${year} Moon Calendar`)}&subtitle=${encodeURIComponent('Full Moon • New Moon • Lunar Phases')}&format=landscape`,
       ],
     },
     alternates: {
@@ -310,8 +309,6 @@ Understanding the moon's phases helps you align your spiritual practice, rituals
               Get Personalized Insights
             </Link>
           </section>
-
-          <ExploreGrimoire />
         </div>
       </SEOContentTemplate>
     </div>

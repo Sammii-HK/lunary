@@ -652,7 +652,11 @@ export async function generateMetadata({
       title,
       description,
       images: [
-        `/api/og/cosmic?title=${encodeURIComponent(data.type === 'full' ? data.name || '' : `New Moon in ${data.sign}`)}`,
+        `/api/og/educational/moon?title=${encodeURIComponent(
+          data.type === 'full'
+            ? data.name || 'Full Moon'
+            : `New Moon in ${data.sign}`,
+        )}&subtitle=${encodeURIComponent('2026')}&format=landscape`,
       ],
     },
   };

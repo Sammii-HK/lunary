@@ -183,7 +183,6 @@ export default async function SpellPage({
           { text: 'Crystal Guide', href: '/grimoire/crystals' },
           { text: 'Grimoire Home', href: '/grimoire' },
         ]}
-        childrenPosition='after-description'
         ctaText='Get personalized spell timing based on your chart'
         ctaHref='/pricing'
       >

@@ -39,7 +39,7 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: 'Moon in Signs Guide | Lunary',
     description: 'Complete guide to lunar zodiac placements.',
-    images: ['/api/og/cosmic'],
+    images: ['/api/og/grimoire/moon'],
   },
   alternates: {
     canonical: 'https://lunary.app/grimoire/moon-in',
@@ -140,13 +140,25 @@ Mood: Sensitive but potentially moody
 
 **Timing Magic by Moon Sign:**
 
-Each sign has optimal magical uses. Check the current Moon sign before important spellwork and align your intentions with the lunar energy.`}
+Each sign has optimal magical uses. Check the current Moon sign before important spellwork and align your intentions with the lunar energy.
+
+If your natal Moon sign matches the current Moon, you may feel especially supported. If it is opposite, treat it as a mirror for balance and gentle adjustment.`}
         howToWorkWith={[
           'Track the current Moon sign using a lunar calendar',
           'Plan activities that match the Moon elemental energy',
           'Time spells and rituals for compatible Moon signs',
           'Rest more during Water Moon days if you feel sensitive',
           'Take action during Fire Moon days for momentum',
+        ]}
+        rituals={[
+          'Check the Moon sign each morning and set a small intention.',
+          'Align one task with the element of the day.',
+          'Journal a quick note when the Moon changes signs.',
+        ]}
+        journalPrompts={[
+          "How do I feel under today's Moon sign?",
+          'What task feels easiest right now?',
+          'What would help me align with this energy?',
         ]}
         tables={[
           {

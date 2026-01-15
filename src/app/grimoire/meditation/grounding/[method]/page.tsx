@@ -182,6 +182,16 @@ export default async function GroundingMethodPage({
       question: `When should I use ${methodData.name}?`,
       answer: `${methodData.name} is best for ${methodData.bestFor.join(', ').toLowerCase()}.`,
     },
+    {
+      question: `How often can I practice ${methodData.name}?`,
+      answer:
+        'You can practice daily. Short, consistent sessions create the strongest grounding effect.',
+    },
+    {
+      question: 'What if I do not feel grounded right away?',
+      answer:
+        'Try a shorter session and add a physical element like pressing your feet into the floor. Grounding improves with repetition.',
+    },
   ];
 
   return (
@@ -208,9 +218,21 @@ ${methodData.benefits.map((b) => `- ${b}`).join('\n')}
 
 This technique is especially useful for ${methodData.bestFor.join(', ').toLowerCase()}. Regular grounding practice helps maintain stability and prevents the scattered, uncentered feeling that can come from intense spiritual work.
 
-The practice typically takes ${methodData.duration}, making it accessible for daily use or as-needed grounding. Even brief grounding can make a significant difference in your sense of stability and presence.`}
+The practice typically takes ${methodData.duration}, making it accessible for daily use or as-needed grounding. Even brief grounding can make a significant difference in your sense of stability and presence.
+
+You can use ${methodData.name} before meditation to settle your energy, or afterward to integrate what you experienced. It is also effective before sleep or after a long day when you feel mentally wired.
+
+If you are doing energy work, try pairing this technique with a few slow breaths or a gentle body scan. Combining methods can deepen the sense of safety and make the grounding feel more complete.
+
+Grounding should feel steady and supportive. If you feel overwhelmed, open your eyes, look around the room, and slow the pace. It is better to do a short, comfortable practice than to push through discomfort.`}
         emotionalThemes={['Stability', 'Presence', 'Connection', 'Safety']}
         howToWorkWith={methodData.steps}
+        rituals={[
+          'Light a candle or hold a stone to mark the start of practice.',
+          'Do three slow breaths before the first step.',
+          'Place a hand on your lower belly to reinforce the body connection.',
+          'Close by naming one thing you feel grateful for in the present moment.',
+        ]}
         tables={[
           {
             title: `${methodData.name} Overview`,
@@ -221,12 +243,22 @@ The practice typically takes ${methodData.duration}, making it accessible for da
               ['Best For', methodData.bestFor.join(', ')],
             ],
           },
+          {
+            title: 'Practice Tips',
+            headers: ['Tip', 'Why it helps'],
+            rows: [
+              ['Keep feet on the floor', 'Enhances physical stability'],
+              ['Use a timer', 'Reduces mental tracking'],
+              ['Practice daily', 'Builds grounding as a habit'],
+            ],
+          },
         ]}
         journalPrompts={[
           'How grounded do I feel before and after practice?',
           'What sensations do I notice during grounding?',
           'When do I most need grounding in my life?',
           'How can I incorporate grounding into my daily routine?',
+          'What is the first sign I am getting ungrounded?',
         ]}
         relatedItems={[
           {

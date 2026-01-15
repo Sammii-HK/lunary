@@ -1,6 +1,8 @@
 import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { SEOContentTemplate } from '@/components/grimoire/SEOContentTemplate';
+import { CosmicConnections } from '@/components/grimoire/CosmicConnections';
+import { CosmicConnectionSection } from '@/lib/cosmicConnectionsConfig';
 import { correspondencesData } from '@/constants/grimoire/correspondences';
 import { stringToKebabCase } from '../../../../../../utils/string';
 
@@ -112,6 +114,42 @@ Understanding number ${numberKey}'s correspondences helps you incorporate numeri
     },
   ];
 
+  const tableOfContents = [
+    { label: 'Overview', href: '#overview' },
+    { label: 'Practice Notes', href: '#practice-notes' },
+    { label: 'Ritual Ideas', href: '#ritual-ideas' },
+  ];
+
+  const cosmicSections: CosmicConnectionSection[] = [
+    {
+      title: 'Numerology Links',
+      links: [
+        {
+          label: 'Number Correspondences',
+          href: '/grimoire/correspondences/numbers',
+        },
+        { label: 'Numerology Guide', href: '/grimoire/numerology' },
+        { label: 'Angel Numbers', href: '/grimoire/angel-numbers' },
+      ],
+    },
+    {
+      title: 'Practice Tools',
+      links: [
+        { label: 'Moon Phases', href: '/grimoire/moon/phases' },
+        { label: 'Planets', href: '/grimoire/astronomy/planets' },
+        {
+          label: 'Spellcraft Fundamentals',
+          href: '/grimoire/spells/fundamentals',
+        },
+      ],
+    },
+  ];
+
+  const altarHue =
+    ('colors' in numberData
+      ? (numberData as { colors?: string[] }).colors?.[0]
+      : undefined) ?? 'nuanced';
+
   return (
     <SEOContentTemplate
       title={`Number ${numberKey}: Magical Number Correspondences - Lunary`}
@@ -128,15 +166,6 @@ Understanding number ${numberKey}'s correspondences helps you incorporate numeri
       meaning={meaning}
       howToWorkWith={howToWorkWith}
       faqs={faqs}
-      breadcrumbs={[
-        { label: 'Grimoire', href: '/grimoire' },
-        { label: 'Correspondences', href: '/grimoire/correspondences' },
-        { label: 'Numbers', href: '/grimoire/correspondences/numbers' },
-        {
-          label: `Number ${numberKey}`,
-          href: `/grimoire/correspondences/numbers/${number}`,
-        },
-      ]}
       internalLinks={[
         {
           text: 'Magical Correspondences',
@@ -160,6 +189,45 @@ Understanding number ${numberKey}'s correspondences helps you incorporate numeri
           ],
         },
       ]}
-    />
+      tableOfContents={tableOfContents}
+      cosmicConnections={
+        <CosmicConnections
+          entityType='hub-numerology'
+          entityKey='numerology'
+          title={`Number ${numberKey} Connections`}
+          sections={cosmicSections}
+        />
+      }
+      ctaText={`Want ${numberKey}-powered rituals?`}
+      ctaHref='/pricing'
+    >
+      <section id='overview' className='space-y-3 mb-8'>
+        <p className='text-sm text-zinc-300'>{meaning}</p>
+        <p className='text-sm text-zinc-300'>
+          Pair number {numberKey} with related correspondences like{' '}
+          {numberData.correspondences.slice(0, 2).join(' and ')} to tailor your
+          spellwork.
+        </p>
+      </section>
+      <section id='practice-notes' className='space-y-3 mb-8'>
+        <h2 className='text-xl font-semibold text-zinc-100'>Practice Notes</h2>
+        <ul className='list-disc list-inside text-sm text-zinc-300 space-y-2'>
+          {howToWorkWith.map((item) => (
+            <li key={item}>{item}</li>
+          ))}
+        </ul>
+      </section>
+      <section id='ritual-ideas' className='space-y-3'>
+        <h2 className='text-xl font-semibold text-zinc-100'>Ritual Ideas</h2>
+        <p className='text-sm text-zinc-300'>
+          Use {numberKey} candles or stones in multiples of {numberKey}, and
+          work during {numberData.planets[0]}-ruled hours for pronounced energy.
+        </p>
+        <p className='text-sm text-zinc-300'>
+          Craft altars with {altarHue} hues and pair with {numberData.uses[0]}{' '}
+          intentions for focused numerological alignment.
+        </p>
+      </section>
+    </SEOContentTemplate>
   );
 }

@@ -1,6 +1,8 @@
 import { Metadata } from 'next';
 import Link from 'next/link';
 import { SEOContentTemplate } from '@/components/grimoire/SEOContentTemplate';
+import { CosmicConnections } from '@/components/grimoire/CosmicConnections';
+import { CosmicConnectionSection } from '@/lib/cosmicConnectionsConfig';
 import { correspondencesData } from '@/constants/grimoire/correspondences';
 import { stringToKebabCase } from '../../../../../utils/string';
 
@@ -38,7 +40,7 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: 'Herb Correspondences Guide | Lunary',
     description: 'Complete guide to magical herbs and their correspondences.',
-    images: ['/api/og/cosmic'],
+    images: ['/api/og/grimoire/correspondences'],
   },
   alternates: {
     canonical: 'https://lunary.app/grimoire/correspondences/herbs',
@@ -86,6 +88,37 @@ const faqs = [
 
 export default function HerbsIndexPage() {
   const herbs = Object.entries(correspondencesData.herbs);
+
+  const tableOfContents = [
+    { label: 'All Magical Herbs', href: '#all-magical-herbs' },
+    { label: 'Herbs by Purpose', href: '#herbs-by-purpose' },
+    { label: 'FAQ', href: '#faq' },
+  ];
+
+  const cosmicSections: CosmicConnectionSection[] = [
+    {
+      title: 'Herb Resources',
+      links: [
+        {
+          label: 'Flower Correspondences',
+          href: '/grimoire/correspondences/flowers',
+        },
+        {
+          label: 'Color Correspondences',
+          href: '/grimoire/correspondences/colors',
+        },
+        { label: 'Elements', href: '/grimoire/correspondences/elements' },
+      ],
+    },
+    {
+      title: 'Practice Tools',
+      links: [
+        { label: 'Candle Magic', href: '/grimoire/candle-magic' },
+        { label: 'Moon Phases', href: '/grimoire/moon/phases' },
+        { label: 'Crystals', href: '/grimoire/crystals' },
+      ],
+    },
+  ];
 
   return (
     <div className='p-4 md:p-6 lg:p-8 xl:p-10 min-h-full'>
@@ -175,8 +208,17 @@ Not all magical herbs are safe for consumption or skin contact. Always research 
         ctaText='Want personalized herbal recommendations for your practice?'
         ctaHref='/pricing'
         faqs={faqs}
+        tableOfContents={tableOfContents}
+        cosmicConnections={
+          <CosmicConnections
+            entityType='hub-correspondences'
+            entityKey='correspondences'
+            title='Herb Connections'
+            sections={cosmicSections}
+          />
+        }
       >
-        <section className='mb-12'>
+        <section id='all-magical-herbs' className='mb-12'>
           <h2 className='text-2xl font-medium text-zinc-100 mb-6'>
             All Magical Herbs
           </h2>
@@ -205,7 +247,10 @@ Not all magical herbs are safe for consumption or skin contact. Always research 
           </div>
         </section>
 
-        <section className='mb-12 bg-emerald-950/20 border border-emerald-900/50 rounded-xl p-6'>
+        <section
+          id='herbs-by-purpose'
+          className='mb-12 bg-emerald-950/20 border border-emerald-900/50 rounded-xl p-6'
+        >
           <h2 className='text-xl font-medium text-zinc-100 mb-4'>
             Quick Reference: Herbs by Purpose
           </h2>

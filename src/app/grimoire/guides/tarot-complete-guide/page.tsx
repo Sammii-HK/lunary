@@ -2,15 +2,10 @@ export const revalidate = 86400;
 
 import { Metadata } from 'next';
 import Link from 'next/link';
-import {
-  createArticleWithSpeakableSchema,
-  createFAQPageSchema,
-  renderJsonLd,
-  createBreadcrumbSchema,
-} from '@/lib/schema';
+import { createArticleWithSpeakableSchema, renderJsonLd } from '@/lib/schema';
 import { Button } from '@/components/ui/button';
-import { ExploreGrimoire } from '@/components/grimoire/ExploreGrimoire';
 import { CosmicConnections } from '@/components/grimoire/CosmicConnections';
+import { SEOContentTemplate } from '@/components/grimoire/SEOContentTemplate';
 
 const currentYear = new Date().getFullYear();
 
@@ -273,600 +268,571 @@ export default function TarotCompleteGuidePage() {
     ],
   });
 
-  const faqSchema = createFAQPageSchema(faqs);
+  const tableOfContents = [
+    { label: 'What Is Tarot?', href: '#what-is-tarot' },
+    { label: 'History', href: '#history' },
+    { label: 'Deck Structure', href: '#deck-structure' },
+    { label: 'Major Arcana', href: '#major-arcana' },
+    { label: 'Minor Arcana', href: '#minor-arcana' },
+    { label: 'Suits', href: '#suits' },
+    { label: 'Court Cards', href: '#court-cards' },
+    { label: 'How to Read Tarot', href: '#reading-basics' },
+    { label: 'Popular Spreads', href: '#spreads' },
+  ];
+
+  const howToWorkWith = [
+    'Anchor readings in intention-setting rituals before shuffling.',
+    'Match each spread with a question that aligns with the layout.',
+    'Use reversals (or not) depending on how much nuance you want.',
+    'Lean into elemental meanings when interpreting Minor Arcana cards.',
+  ];
+
+  const relatedItems = [
+    { name: 'Tarot', href: '/grimoire/tarot', type: 'Tarot hub' },
+    {
+      name: 'Tarot Spreads',
+      href: '/grimoire/tarot/spreads',
+      type: 'Layouts',
+    },
+    {
+      name: 'Card Combinations',
+      href: '/grimoire/card-combinations',
+      type: 'Tools',
+    },
+  ];
+
+  const intro =
+    'From the Major Arcana to spreads and reading rituals, this master guide breaks down every tarot card, symbol, and layout so you can confidently interpret messages with clarity.';
+
+  const meaning =
+    'Tarot translates archetypal imagery into practical insight. The Major Arcana represents life-changing themes while the Minor Arcana reflects daily nuances—together they tell a story you can rely on for guidance.';
 
   return (
-    <div className='p-4 md:p-8 max-w-4xl mx-auto'>
+    <>
       {renderJsonLd(articleSchema)}
-      {renderJsonLd(
-        createBreadcrumbSchema([
-          { name: 'Grimoire', url: '/grimoire' },
-          { name: 'Guides', url: '/grimoire/guides' },
-          {
-            name: 'Tarot Complete Guide',
-            url: '/grimoire/guides/tarot-complete-guide',
-          },
-        ]),
-      )}
-      {renderJsonLd(faqSchema)}
+      {/* Breadcrumb + FAQ JSON-LD is owned by SEOContentTemplate to avoid duplication */}
+      <SEOContentTemplate
+        title={`Tarot: The Complete 78-Card Guide (${currentYear} Edition) - Lunary`}
+        h1='Tarot: The Complete Guide'
+        description='From Major Arcana to spreads, this guide teaches you how to read every tarot card and craft meaningful layouts.'
+        canonicalUrl='https://lunary.app/grimoire/guides/tarot-complete-guide'
+        keywords={[
+          'tarot guide',
+          'tarot cards meaning',
+          'major arcana',
+          'minor arcana',
+          'tarot reading',
+          'tarot spreads',
+        ]}
+        breadcrumbs={[
+          { label: 'Grimoire', href: '/grimoire' },
+          { label: 'Guides', href: '/grimoire/guides' },
+          { label: 'Tarot Complete Guide' },
+        ]}
+        intro={intro}
+        meaning={meaning}
+        howToWorkWith={howToWorkWith}
+        tableOfContents={tableOfContents}
+        relatedItems={relatedItems}
+        faqs={faqs}
+        internalLinks={[
+          { text: 'Tarot Card Meanings', href: '/grimoire/tarot' },
+          { text: 'Tarot Spreads', href: '/grimoire/tarot/spreads' },
+          { text: 'Card Combinations', href: '/grimoire/card-combinations' },
+        ]}
+        cosmicConnections={
+          <CosmicConnections
+            entityType='tarot'
+            entityKey='tarot-guide'
+            title='Tarot Connections'
+            sections={[
+              {
+                title: 'Related Pages',
+                links: [
+                  { label: 'All Tarot Cards', href: '/grimoire/tarot' },
+                  { label: 'Tarot Spreads', href: '/grimoire/tarot/spreads' },
+                  { label: 'Daily Tarot Reading', href: '/tarot' },
+                  {
+                    label: 'Card Combinations',
+                    href: '/grimoire/card-combinations',
+                  },
+                ],
+              },
+            ]}
+          />
+        }
+      >
+        <div className='space-y-16'>
+          <div className='space-y-6'>
+            <p className='text-xl text-zinc-400 leading-relaxed'>
+              From the mystical Major Arcana to the everyday wisdom of the Minor
+              Arcana, this comprehensive guide will teach you everything you
+              need to know about the tarot. Whether you&apos;re a complete
+              beginner or looking to deepen your practice, discover the rich
+              symbolism and meaning behind every card.
+            </p>
+            <div className='flex flex-wrap gap-3'>
+              <Button asChild variant='lunary-solid' size='lg'>
+                <Link href='/tarot'>Explore the Tarot</Link>
+              </Button>
+              <Button asChild variant='outline' size='lg'>
+                <Link href='/grimoire/tarot/spreads'>Browse Tarot Spreads</Link>
+              </Button>
+            </div>
+          </div>
 
-      {/* Breadcrumbs */}
-      <nav className='text-sm text-zinc-400 mb-8'>
-        <Link href='/grimoire' className='hover:text-lunary-primary-400'>
-          Grimoire
-        </Link>
-        <span className='mx-2'>→</span>
-        <Link href='/grimoire/tarot' className='hover:text-lunary-primary-400'>
-          Tarot
-        </Link>
-        <span className='mx-2'>→</span>
-        <span className='text-zinc-300'>Complete Guide</span>
-      </nav>
-
-      {/* Hero Section */}
-      <header className='mb-12'>
-        <h1 className='text-4xl md:text-5xl font-light text-zinc-100 mb-6'>
-          Tarot: The Complete Guide
-          <span className='block text-2xl text-lunary-primary-400 mt-2'>
-            All 78 Cards Explained
-          </span>
-        </h1>
-        <p className='text-xl text-zinc-400 leading-relaxed mb-6'>
-          From the mystical Major Arcana to the everyday wisdom of the Minor
-          Arcana, this comprehensive guide will teach you everything you need to
-          know about the tarot. Whether you&apos;re a complete beginner or
-          looking to deepen your practice, discover the rich symbolism and
-          meaning behind every card.
-        </p>
-        <div className='flex flex-wrap gap-4'>
-          <Button asChild variant='lunary-solid' size='lg'>
-            <Link href='/tarot'>Get a Free Tarot Reading</Link>
-          </Button>
-          <Button asChild variant='outline' size='lg'>
-            <Link href='#major-arcana'>Start Learning</Link>
-          </Button>
-        </div>
-      </header>
-
-      {/* Table of Contents */}
-      <nav className='bg-zinc-900/50 border border-zinc-800 rounded-xl p-6 mb-12'>
-        <h2 className='text-lg font-medium text-zinc-100 mb-4'>
-          Table of Contents
-        </h2>
-        <ol className='space-y-2 text-zinc-400'>
-          <li>
-            <a href='#what-is-tarot' className='hover:text-lunary-primary-400'>
+          {/* Section 1: What is Tarot */}
+          <section id='what-is-tarot' className='mb-16'>
+            <h2 className='text-3xl font-light text-zinc-100 mb-6'>
               1. What is Tarot?
-            </a>
-          </li>
-          <li>
-            <a href='#history' className='hover:text-lunary-primary-400'>
-              2. History of Tarot
-            </a>
-          </li>
-          <li>
-            <a href='#deck-structure' className='hover:text-lunary-primary-400'>
+            </h2>
+
+            <p className='text-zinc-300 leading-relaxed mb-6'>
+              Tarot is a powerful divination tool consisting of 78 illustrated
+              cards, each rich with symbolism and meaning. For centuries, these
+              cards have been used for spiritual guidance, self-reflection, and
+              exploring life&apos;s deeper questions.
+            </p>
+
+            <p className='text-zinc-300 leading-relaxed mb-6'>
+              Unlike what many believe, tarot isn&apos;t about predicting a
+              fixed future. Instead, it&apos;s a mirror that reflects your
+              current situation, unconscious thoughts, and potential paths
+              forward. The cards speak through archetypes and symbols that
+              resonate with universal human experiences.
+            </p>
+
+            <div className='bg-lunary-primary-900/20 border border-lunary-primary-700 rounded-lg p-6 mb-6'>
+              <h3 className='text-lg font-medium text-lunary-primary-300 mb-3'>
+                What Tarot Can Help You With
+              </h3>
+              <ul className='grid grid-cols-1 md:grid-cols-2 gap-2 text-zinc-300'>
+                <li>✦ Self-discovery and personal growth</li>
+                <li>✦ Decision making and clarity</li>
+                <li>✦ Understanding relationship dynamics</li>
+                <li>✦ Exploring career paths</li>
+                <li>✦ Processing emotions and experiences</li>
+                <li>✦ Developing intuition</li>
+                <li>✦ Meditation and spiritual practice</li>
+                <li>✦ Creative inspiration</li>
+              </ul>
+            </div>
+          </section>
+
+          {/* Section 2: History */}
+          <section id='history' className='mb-16'>
+            <h2 className='text-3xl font-light text-zinc-100 mb-6'>
+              2. A Brief History of Tarot
+            </h2>
+
+            <p className='text-zinc-300 leading-relaxed mb-6'>
+              The tarot&apos;s origins trace back to 15th century Italy, where
+              it began as a card game called &quot;tarocchi.&quot; The earliest
+              known decks, such as the Visconti-Sforza, were hand-painted for
+              wealthy Italian families.
+            </p>
+
+            <p className='text-zinc-300 leading-relaxed mb-6'>
+              It wasn&apos;t until the 18th century that tarot became associated
+              with divination and mysticism. French occultist Jean-Baptiste
+              Alliette (known as Etteilla) was among the first to use tarot for
+              fortune-telling and assign specific divinatory meanings to cards.
+            </p>
+
+            <p className='text-zinc-300 leading-relaxed mb-6'>
+              The modern tarot we know today was largely shaped by the
+              Rider-Waite- Smith deck, created in 1909 by Arthur Edward Waite
+              and illustrated by Pamela Colman Smith. This deck&apos;s
+              illustrated Minor Arcana cards revolutionized tarot reading and
+              remains the foundation for most contemporary tarot study.
+            </p>
+          </section>
+
+          {/* Section 3: Deck Structure */}
+          <section id='deck-structure' className='mb-16'>
+            <h2 className='text-3xl font-light text-zinc-100 mb-6'>
               3. Understanding the Deck Structure
-            </a>
-          </li>
-          <li>
-            <a href='#major-arcana' className='hover:text-lunary-primary-400'>
+            </h2>
+
+            <p className='text-zinc-300 leading-relaxed mb-6'>
+              A complete tarot deck contains 78 cards divided into two main
+              categories:
+            </p>
+
+            <div className='grid grid-cols-1 md:grid-cols-2 gap-6 mb-6'>
+              <div className='bg-zinc-900/50 border border-zinc-800 rounded-lg p-6'>
+                <h3 className='text-xl font-medium text-lunary-accent mb-3'>
+                  Major Arcana (22 cards)
+                </h3>
+                <p className='text-zinc-300 mb-4'>
+                  The &quot;Greater Secrets&quot; represent major life themes,
+                  spiritual lessons, and significant turning points. These cards
+                  carry more weight in a reading and often point to profound
+                  changes or important life lessons.
+                </p>
+                <p className='text-zinc-400 text-sm'>
+                  Cards 0-21: The Fool through The World
+                </p>
+              </div>
+
+              <div className='bg-zinc-900/50 border border-zinc-800 rounded-lg p-6'>
+                <h3 className='text-xl font-medium text-lunary-secondary mb-3'>
+                  Minor Arcana (56 cards)
+                </h3>
+                <p className='text-zinc-300 mb-4'>
+                  The &quot;Lesser Secrets&quot; deal with day-to-day
+                  situations, emotions, and challenges. They&apos;re divided
+                  into four suits (Wands, Cups, Swords, Pentacles), each with
+                  cards Ace through 10 plus four Court Cards.
+                </p>
+                <p className='text-zinc-400 text-sm'>
+                  14 cards per suit × 4 suits = 56 cards
+                </p>
+              </div>
+            </div>
+          </section>
+
+          {/* Section 4: Major Arcana */}
+          <section id='major-arcana' className='mb-16'>
+            <h2 className='text-3xl font-light text-zinc-100 mb-6'>
               4. The 22 Major Arcana Cards
-            </a>
-          </li>
-          <li>
-            <a href='#minor-arcana' className='hover:text-lunary-primary-400'>
+            </h2>
+
+            <p className='text-zinc-300 leading-relaxed mb-6'>
+              The Major Arcana tells the story of &quot;The Fool&apos;s
+              Journey&quot;—a spiritual path from innocence through experience
+              to enlightenment. Each card represents a significant archetype or
+              life lesson.
+            </p>
+
+            <div className='grid grid-cols-1 md:grid-cols-2 gap-3'>
+              {MAJOR_ARCANA.map((card) => (
+                <Link
+                  key={card.number}
+                  href={`/grimoire/tarot/${card.name.toLowerCase().replace(/ /g, '-')}`}
+                  className='p-4 bg-zinc-900/50 border border-zinc-800 rounded-lg hover:border-lunary-primary transition-colors'
+                >
+                  <div className='flex items-center gap-3'>
+                    <span className='text-2xl font-light text-lunary-primary-400 w-8'>
+                      {card.number}
+                    </span>
+                    <div>
+                      <span className='text-zinc-100 font-medium'>
+                        {card.name}
+                      </span>
+                      <p className='text-xs text-zinc-400 mt-1'>
+                        {card.keywords.join(' • ')}
+                      </p>
+                    </div>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          </section>
+
+          {/* Section 5: Minor Arcana Overview */}
+          <section id='minor-arcana' className='mb-16'>
+            <h2 className='text-3xl font-light text-zinc-100 mb-6'>
               5. The 56 Minor Arcana Cards
-            </a>
-          </li>
-          <li>
-            <a href='#suits' className='hover:text-lunary-primary-400'>
+            </h2>
+
+            <p className='text-zinc-300 leading-relaxed mb-6'>
+              The Minor Arcana represents the everyday events, challenges, and
+              emotions we encounter in daily life. Unlike the Major
+              Arcana&apos;s significant life lessons, the Minor Arcana shows the
+              day-to-day energies that influence our experiences.
+            </p>
+
+            <div className='grid grid-cols-1 md:grid-cols-2 gap-4 mb-6'>
+              <div className='bg-zinc-900/50 border border-zinc-800 rounded-lg p-5'>
+                <h4 className='text-lg font-medium text-zinc-100 mb-2'>
+                  56 Cards Total
+                </h4>
+                <p className='text-sm text-zinc-400'>
+                  Four suits of 14 cards each: Ace through Ten plus four Court
+                  Cards (Page, Knight, Queen, King).
+                </p>
+              </div>
+              <div className='bg-zinc-900/50 border border-zinc-800 rounded-lg p-5'>
+                <h4 className='text-lg font-medium text-zinc-100 mb-2'>
+                  Numbered Cards (Ace-10)
+                </h4>
+                <p className='text-sm text-zinc-400'>
+                  Each number carries meaning: Aces are new beginnings, numbers
+                  2-10 show progression, and 10 represents completion.
+                </p>
+              </div>
+            </div>
+
+            <div className='bg-lunary-primary-900/20 border border-lunary-primary-700 rounded-lg p-6'>
+              <h4 className='text-lg font-medium text-lunary-primary-300 mb-2'>
+                Reading Minor Arcana
+              </h4>
+              <p className='text-zinc-300'>
+                When Minor Arcana cards appear in a reading, they point to
+                specific situations, people, or temporary influences. Combine
+                the suit&apos;s element with the number&apos;s meaning for
+                accurate interpretation.
+              </p>
+            </div>
+          </section>
+
+          {/* Section 6: The Four Suits */}
+          <section id='suits' className='mb-16'>
+            <h2 className='text-3xl font-light text-zinc-100 mb-6'>
               6. The Four Suits Explained
-            </a>
-          </li>
-          <li>
-            <a href='#court-cards' className='hover:text-lunary-primary-400'>
+            </h2>
+
+            <p className='text-zinc-300 leading-relaxed mb-6'>
+              Each suit in the Minor Arcana corresponds to an element and
+              governs specific areas of life. Understanding the suits helps you
+              quickly interpret any Minor Arcana card.
+            </p>
+
+            <div className='space-y-4'>
+              {SUITS.map((suit) => (
+                <div
+                  key={suit.name}
+                  className='bg-zinc-900/50 border border-zinc-800 rounded-lg p-6'
+                >
+                  <div className='flex items-center gap-3 mb-3'>
+                    <span className='text-2xl'>{suit.emoji}</span>
+                    <h3 className='text-xl font-medium text-zinc-100'>
+                      {suit.name}
+                    </h3>
+                    <span className='text-sm text-zinc-400'>
+                      ({suit.element})
+                    </span>
+                  </div>
+                  <p className='text-zinc-300 mb-3'>{suit.description}</p>
+                  <div className='flex flex-wrap gap-2'>
+                    {suit.themes.map((theme) => (
+                      <span
+                        key={theme}
+                        className='px-2 py-1 bg-zinc-800 text-zinc-400 text-xs rounded'
+                      >
+                        {theme}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </section>
+
+          {/* Section 7: Court Cards */}
+          <section id='court-cards' className='mb-16'>
+            <h2 className='text-3xl font-light text-zinc-100 mb-6'>
               7. Understanding Court Cards
-            </a>
-          </li>
-          <li>
-            <a href='#reading-basics' className='hover:text-lunary-primary-400'>
+            </h2>
+
+            <p className='text-zinc-300 leading-relaxed mb-6'>
+              Each suit contains four Court Cards that can represent people in
+              your life, aspects of yourself, or energies you need to embody.
+            </p>
+
+            <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
+              <div className='bg-zinc-900/50 border border-zinc-800 rounded-lg p-5'>
+                <h4 className='text-lg font-medium text-zinc-100 mb-2'>Page</h4>
+                <p className='text-sm text-zinc-400'>
+                  Represents new beginnings, curiosity, and learning. Often
+                  indicates a young person or someone new to a situation.
+                  Messages and opportunities.
+                </p>
+              </div>
+              <div className='bg-zinc-900/50 border border-zinc-800 rounded-lg p-5'>
+                <h4 className='text-lg font-medium text-zinc-100 mb-2'>
+                  Knight
+                </h4>
+                <p className='text-sm text-zinc-400'>
+                  Represents action, pursuit, and movement. Often indicates
+                  someone in their 20s-30s or situations involving change and
+                  momentum.
+                </p>
+              </div>
+              <div className='bg-zinc-900/50 border border-zinc-800 rounded-lg p-5'>
+                <h4 className='text-lg font-medium text-zinc-100 mb-2'>
+                  Queen
+                </h4>
+                <p className='text-sm text-zinc-400'>
+                  Represents mastery, nurturing, and inward focus. Often
+                  indicates a mature feminine energy or someone who has
+                  internalized the suit&apos;s qualities.
+                </p>
+              </div>
+              <div className='bg-zinc-900/50 border border-zinc-800 rounded-lg p-5'>
+                <h4 className='text-lg font-medium text-zinc-100 mb-2'>King</h4>
+                <p className='text-sm text-zinc-400'>
+                  Represents authority, mastery, and external expression. Often
+                  indicates a mature masculine energy or someone who commands
+                  the suit&apos;s qualities.
+                </p>
+              </div>
+            </div>
+          </section>
+
+          {/* Section 8: Reading Basics */}
+          <section id='reading-basics' className='mb-16'>
+            <h2 className='text-3xl font-light text-zinc-100 mb-6'>
               8. How to Read Tarot
-            </a>
-          </li>
-          <li>
-            <a href='#spreads' className='hover:text-lunary-primary-400'>
-              9. Popular Tarot Spreads
-            </a>
-          </li>
-          <li>
-            <a href='#faq' className='hover:text-lunary-primary-400'>
-              10. Frequently Asked Questions
-            </a>
-          </li>
-        </ol>
-      </nav>
+            </h2>
 
-      {/* Section 1: What is Tarot */}
-      <section id='what-is-tarot' className='mb-16'>
-        <h2 className='text-3xl font-light text-zinc-100 mb-6'>
-          1. What is Tarot?
-        </h2>
-
-        <p className='text-zinc-300 leading-relaxed mb-6'>
-          Tarot is a powerful divination tool consisting of 78 illustrated
-          cards, each rich with symbolism and meaning. For centuries, these
-          cards have been used for spiritual guidance, self-reflection, and
-          exploring life&apos;s deeper questions.
-        </p>
-
-        <p className='text-zinc-300 leading-relaxed mb-6'>
-          Unlike what many believe, tarot isn&apos;t about predicting a fixed
-          future. Instead, it&apos;s a mirror that reflects your current
-          situation, unconscious thoughts, and potential paths forward. The
-          cards speak through archetypes and symbols that resonate with
-          universal human experiences.
-        </p>
-
-        <div className='bg-lunary-primary-900/20 border border-lunary-primary-700 rounded-lg p-6 mb-6'>
-          <h3 className='text-lg font-medium text-lunary-primary-300 mb-3'>
-            What Tarot Can Help You With
-          </h3>
-          <ul className='grid grid-cols-1 md:grid-cols-2 gap-2 text-zinc-300'>
-            <li>✦ Self-discovery and personal growth</li>
-            <li>✦ Decision making and clarity</li>
-            <li>✦ Understanding relationship dynamics</li>
-            <li>✦ Exploring career paths</li>
-            <li>✦ Processing emotions and experiences</li>
-            <li>✦ Developing intuition</li>
-            <li>✦ Meditation and spiritual practice</li>
-            <li>✦ Creative inspiration</li>
-          </ul>
-        </div>
-      </section>
-
-      {/* Section 2: History */}
-      <section id='history' className='mb-16'>
-        <h2 className='text-3xl font-light text-zinc-100 mb-6'>
-          2. A Brief History of Tarot
-        </h2>
-
-        <p className='text-zinc-300 leading-relaxed mb-6'>
-          The tarot&apos;s origins trace back to 15th century Italy, where it
-          began as a card game called &quot;tarocchi.&quot; The earliest known
-          decks, such as the Visconti-Sforza, were hand-painted for wealthy
-          Italian families.
-        </p>
-
-        <p className='text-zinc-300 leading-relaxed mb-6'>
-          It wasn&apos;t until the 18th century that tarot became associated
-          with divination and mysticism. French occultist Jean-Baptiste Alliette
-          (known as Etteilla) was among the first to use tarot for
-          fortune-telling and assign specific divinatory meanings to cards.
-        </p>
-
-        <p className='text-zinc-300 leading-relaxed mb-6'>
-          The modern tarot we know today was largely shaped by the Rider-Waite-
-          Smith deck, created in 1909 by Arthur Edward Waite and illustrated by
-          Pamela Colman Smith. This deck&apos;s illustrated Minor Arcana cards
-          revolutionized tarot reading and remains the foundation for most
-          contemporary tarot study.
-        </p>
-      </section>
-
-      {/* Section 3: Deck Structure */}
-      <section id='deck-structure' className='mb-16'>
-        <h2 className='text-3xl font-light text-zinc-100 mb-6'>
-          3. Understanding the Deck Structure
-        </h2>
-
-        <p className='text-zinc-300 leading-relaxed mb-6'>
-          A complete tarot deck contains 78 cards divided into two main
-          categories:
-        </p>
-
-        <div className='grid grid-cols-1 md:grid-cols-2 gap-6 mb-6'>
-          <div className='bg-zinc-900/50 border border-zinc-800 rounded-lg p-6'>
-            <h3 className='text-xl font-medium text-lunary-accent mb-3'>
-              Major Arcana (22 cards)
-            </h3>
-            <p className='text-zinc-300 mb-4'>
-              The &quot;Greater Secrets&quot; represent major life themes,
-              spiritual lessons, and significant turning points. These cards
-              carry more weight in a reading and often point to profound changes
-              or important life lessons.
+            <p className='text-zinc-300 leading-relaxed mb-6'>
+              Reading tarot is both an art and a skill. Here&apos;s a
+              step-by-step approach to getting started:
             </p>
-            <p className='text-zinc-400 text-sm'>
-              Cards 0-21: The Fool through The World
-            </p>
-          </div>
 
-          <div className='bg-zinc-900/50 border border-zinc-800 rounded-lg p-6'>
-            <h3 className='text-xl font-medium text-lunary-secondary mb-3'>
-              Minor Arcana (56 cards)
-            </h3>
-            <p className='text-zinc-300 mb-4'>
-              The &quot;Lesser Secrets&quot; deal with day-to-day situations,
-              emotions, and challenges. They&apos;re divided into four suits
-              (Wands, Cups, Swords, Pentacles), each with cards Ace through 10
-              plus four Court Cards.
-            </p>
-            <p className='text-zinc-400 text-sm'>
-              14 cards per suit × 4 suits = 56 cards
-            </p>
-          </div>
-        </div>
-      </section>
-
-      {/* Section 4: Major Arcana */}
-      <section id='major-arcana' className='mb-16'>
-        <h2 className='text-3xl font-light text-zinc-100 mb-6'>
-          4. The 22 Major Arcana Cards
-        </h2>
-
-        <p className='text-zinc-300 leading-relaxed mb-6'>
-          The Major Arcana tells the story of &quot;The Fool&apos;s
-          Journey&quot;—a spiritual path from innocence through experience to
-          enlightenment. Each card represents a significant archetype or life
-          lesson.
-        </p>
-
-        <div className='grid grid-cols-1 md:grid-cols-2 gap-3'>
-          {MAJOR_ARCANA.map((card) => (
-            <Link
-              key={card.number}
-              href={`/grimoire/tarot/${card.name.toLowerCase().replace(/ /g, '-')}`}
-              className='p-4 bg-zinc-900/50 border border-zinc-800 rounded-lg hover:border-lunary-primary transition-colors'
-            >
-              <div className='flex items-center gap-3'>
-                <span className='text-2xl font-light text-lunary-primary-400 w-8'>
-                  {card.number}
+            <div className='space-y-4'>
+              <div className='flex gap-4'>
+                <span className='flex-shrink-0 w-8 h-8 bg-lunary-primary-600 rounded-full flex items-center justify-center text-white font-medium'>
+                  1
                 </span>
                 <div>
-                  <span className='text-zinc-100 font-medium'>{card.name}</span>
-                  <p className='text-xs text-zinc-400 mt-1'>
-                    {card.keywords.join(' • ')}
+                  <h4 className='text-lg font-medium text-zinc-100'>
+                    Create Sacred Space
+                  </h4>
+                  <p className='text-zinc-400'>
+                    Find a quiet space, light a candle, or do whatever helps you
+                    feel centered and focused.
                   </p>
                 </div>
               </div>
-            </Link>
-          ))}
-        </div>
-      </section>
+              <div className='flex gap-4'>
+                <span className='flex-shrink-0 w-8 h-8 bg-lunary-primary-600 rounded-full flex items-center justify-center text-white font-medium'>
+                  2
+                </span>
+                <div>
+                  <h4 className='text-lg font-medium text-zinc-100'>
+                    Form Your Question
+                  </h4>
+                  <p className='text-zinc-400'>
+                    Ask open-ended questions like &quot;What do I need to know
+                    about...&quot; rather than yes/no questions.
+                  </p>
+                </div>
+              </div>
+              <div className='flex gap-4'>
+                <span className='flex-shrink-0 w-8 h-8 bg-lunary-primary-600 rounded-full flex items-center justify-center text-white font-medium'>
+                  3
+                </span>
+                <div>
+                  <h4 className='text-lg font-medium text-zinc-100'>
+                    Shuffle with Intention
+                  </h4>
+                  <p className='text-zinc-400'>
+                    Hold your question in mind as you shuffle. Stop when it
+                    feels right.
+                  </p>
+                </div>
+              </div>
+              <div className='flex gap-4'>
+                <span className='flex-shrink-0 w-8 h-8 bg-lunary-primary-600 rounded-full flex items-center justify-center text-white font-medium'>
+                  4
+                </span>
+                <div>
+                  <h4 className='text-lg font-medium text-zinc-100'>
+                    Draw and Lay Out Cards
+                  </h4>
+                  <p className='text-zinc-400'>
+                    Draw cards for your chosen spread, laying them face-down
+                    first.
+                  </p>
+                </div>
+              </div>
+              <div className='flex gap-4'>
+                <span className='flex-shrink-0 w-8 h-8 bg-lunary-primary-600 rounded-full flex items-center justify-center text-white font-medium'>
+                  5
+                </span>
+                <div>
+                  <h4 className='text-lg font-medium text-zinc-100'>
+                    Interpret the Cards
+                  </h4>
+                  <p className='text-zinc-400'>
+                    Consider each card&apos;s meaning, position in the spread,
+                    and how cards relate to each other.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </section>
 
-      {/* Section 5: Minor Arcana Overview */}
-      <section id='minor-arcana' className='mb-16'>
-        <h2 className='text-3xl font-light text-zinc-100 mb-6'>
-          5. The 56 Minor Arcana Cards
-        </h2>
+          {/* Section 9: Spreads */}
+          <section id='spreads' className='mb-16'>
+            <h2 className='text-3xl font-light text-zinc-100 mb-6'>
+              9. Popular Tarot Spreads
+            </h2>
 
-        <p className='text-zinc-300 leading-relaxed mb-6'>
-          The Minor Arcana represents the everyday events, challenges, and
-          emotions we encounter in daily life. Unlike the Major Arcana&apos;s
-          significant life lessons, the Minor Arcana shows the day-to-day
-          energies that influence our experiences.
-        </p>
-
-        <div className='grid grid-cols-1 md:grid-cols-2 gap-4 mb-6'>
-          <div className='bg-zinc-900/50 border border-zinc-800 rounded-lg p-5'>
-            <h4 className='text-lg font-medium text-zinc-100 mb-2'>
-              56 Cards Total
-            </h4>
-            <p className='text-sm text-zinc-400'>
-              Four suits of 14 cards each: Ace through Ten plus four Court Cards
-              (Page, Knight, Queen, King).
-            </p>
-          </div>
-          <div className='bg-zinc-900/50 border border-zinc-800 rounded-lg p-5'>
-            <h4 className='text-lg font-medium text-zinc-100 mb-2'>
-              Numbered Cards (Ace-10)
-            </h4>
-            <p className='text-sm text-zinc-400'>
-              Each number carries meaning: Aces are new beginnings, numbers 2-10
-              show progression, and 10 represents completion.
-            </p>
-          </div>
-        </div>
-
-        <div className='bg-lunary-primary-900/20 border border-lunary-primary-700 rounded-lg p-6'>
-          <h4 className='text-lg font-medium text-lunary-primary-300 mb-2'>
-            Reading Minor Arcana
-          </h4>
-          <p className='text-zinc-300'>
-            When Minor Arcana cards appear in a reading, they point to specific
-            situations, people, or temporary influences. Combine the suit&apos;s
-            element with the number&apos;s meaning for accurate interpretation.
-          </p>
-        </div>
-      </section>
-
-      {/* Section 6: The Four Suits */}
-      <section id='suits' className='mb-16'>
-        <h2 className='text-3xl font-light text-zinc-100 mb-6'>
-          6. The Four Suits Explained
-        </h2>
-
-        <p className='text-zinc-300 leading-relaxed mb-6'>
-          Each suit in the Minor Arcana corresponds to an element and governs
-          specific areas of life. Understanding the suits helps you quickly
-          interpret any Minor Arcana card.
-        </p>
-
-        <div className='space-y-4'>
-          {SUITS.map((suit) => (
-            <div
-              key={suit.name}
-              className='bg-zinc-900/50 border border-zinc-800 rounded-lg p-6'
-            >
-              <div className='flex items-center gap-3 mb-3'>
-                <span className='text-2xl'>{suit.emoji}</span>
-                <h3 className='text-xl font-medium text-zinc-100'>
-                  {suit.name}
+            <div className='space-y-6'>
+              <div className='bg-zinc-900/50 border border-zinc-800 rounded-lg p-6'>
+                <h3 className='text-xl font-medium text-zinc-100 mb-3'>
+                  Single Card Draw
                 </h3>
-                <span className='text-sm text-zinc-400'>({suit.element})</span>
+                <p className='text-zinc-300 mb-3'>
+                  Perfect for daily guidance or quick answers. Draw one card and
+                  reflect on its message for your day or situation.
+                </p>
+                <p className='text-zinc-400 text-sm'>
+                  Best for: Daily practice, simple questions
+                </p>
               </div>
-              <p className='text-zinc-300 mb-3'>{suit.description}</p>
-              <div className='flex flex-wrap gap-2'>
-                {suit.themes.map((theme) => (
-                  <span
-                    key={theme}
-                    className='px-2 py-1 bg-zinc-800 text-zinc-400 text-xs rounded'
-                  >
-                    {theme}
-                  </span>
-                ))}
+
+              <div className='bg-zinc-900/50 border border-zinc-800 rounded-lg p-6'>
+                <h3 className='text-xl font-medium text-zinc-100 mb-3'>
+                  Three-Card Spread
+                </h3>
+                <p className='text-zinc-300 mb-3'>
+                  The most versatile spread. Common variations include:
+                  Past/Present/Future, Situation/Action/Outcome, or
+                  Mind/Body/Spirit.
+                </p>
+                <p className='text-zinc-400 text-sm'>
+                  Best for: General readings, specific questions
+                </p>
+              </div>
+
+              <div className='bg-zinc-900/50 border border-zinc-800 rounded-lg p-6'>
+                <h3 className='text-xl font-medium text-zinc-100 mb-3'>
+                  Celtic Cross (10 cards)
+                </h3>
+                <p className='text-zinc-300 mb-3'>
+                  The classic comprehensive spread covering present situation,
+                  challenges, past influences, future possibilities, and
+                  outcome.
+                </p>
+                <p className='text-zinc-400 text-sm'>
+                  Best for: In-depth readings, complex situations
+                </p>
               </div>
             </div>
-          ))}
-        </div>
-      </section>
+          </section>
 
-      {/* Section 7: Court Cards */}
-      <section id='court-cards' className='mb-16'>
-        <h2 className='text-3xl font-light text-zinc-100 mb-6'>
-          7. Understanding Court Cards
-        </h2>
-
-        <p className='text-zinc-300 leading-relaxed mb-6'>
-          Each suit contains four Court Cards that can represent people in your
-          life, aspects of yourself, or energies you need to embody.
-        </p>
-
-        <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
-          <div className='bg-zinc-900/50 border border-zinc-800 rounded-lg p-5'>
-            <h4 className='text-lg font-medium text-zinc-100 mb-2'>Page</h4>
-            <p className='text-sm text-zinc-400'>
-              Represents new beginnings, curiosity, and learning. Often
-              indicates a young person or someone new to a situation. Messages
-              and opportunities.
+          {/* CTA Section */}
+          <section className='bg-gradient-to-r from-lunary-primary-900/30 to-lunary-rose-900/30 border border-lunary-primary-700 rounded-xl p-8 text-center'>
+            <h2 className='text-2xl font-light text-zinc-100 mb-4'>
+              Ready to Explore the Tarot?
+            </h2>
+            <p className='text-zinc-400 mb-6 max-w-xl mx-auto'>
+              Get a personalized tarot reading with interpretations tailored to
+              your question. Discover what the cards have to reveal about your
+              path.
             </p>
-          </div>
-          <div className='bg-zinc-900/50 border border-zinc-800 rounded-lg p-5'>
-            <h4 className='text-lg font-medium text-zinc-100 mb-2'>Knight</h4>
-            <p className='text-sm text-zinc-400'>
-              Represents action, pursuit, and movement. Often indicates someone
-              in their 20s-30s or situations involving change and momentum.
-            </p>
-          </div>
-          <div className='bg-zinc-900/50 border border-zinc-800 rounded-lg p-5'>
-            <h4 className='text-lg font-medium text-zinc-100 mb-2'>Queen</h4>
-            <p className='text-sm text-zinc-400'>
-              Represents mastery, nurturing, and inward focus. Often indicates a
-              mature feminine energy or someone who has internalized the
-              suit&apos;s qualities.
-            </p>
-          </div>
-          <div className='bg-zinc-900/50 border border-zinc-800 rounded-lg p-5'>
-            <h4 className='text-lg font-medium text-zinc-100 mb-2'>King</h4>
-            <p className='text-sm text-zinc-400'>
-              Represents authority, mastery, and external expression. Often
-              indicates a mature masculine energy or someone who commands the
-              suit&apos;s qualities.
-            </p>
-          </div>
-        </div>
-      </section>
-
-      {/* Section 8: Reading Basics */}
-      <section id='reading-basics' className='mb-16'>
-        <h2 className='text-3xl font-light text-zinc-100 mb-6'>
-          8. How to Read Tarot
-        </h2>
-
-        <p className='text-zinc-300 leading-relaxed mb-6'>
-          Reading tarot is both an art and a skill. Here&apos;s a step-by-step
-          approach to getting started:
-        </p>
-
-        <div className='space-y-4'>
-          <div className='flex gap-4'>
-            <span className='flex-shrink-0 w-8 h-8 bg-lunary-primary-600 rounded-full flex items-center justify-center text-white font-medium'>
-              1
-            </span>
-            <div>
-              <h4 className='text-lg font-medium text-zinc-100'>
-                Create Sacred Space
-              </h4>
-              <p className='text-zinc-400'>
-                Find a quiet space, light a candle, or do whatever helps you
-                feel centered and focused.
-              </p>
+            <div className='flex flex-col sm:flex-row gap-4 justify-center'>
+              <Link
+                href='/tarot'
+                className='px-8 py-3 bg-lunary-primary-600 hover:bg-lunary-primary-700 text-white rounded-lg font-medium transition-colors'
+              >
+                Get Free Tarot Reading
+              </Link>
+              <Link
+                href='/grimoire/tarot'
+                className='px-8 py-3 border border-lunary-primary text-lunary-primary-300 hover:bg-lunary-primary-900/10 rounded-lg font-medium transition-colors'
+              >
+                Browse All Cards
+              </Link>
             </div>
-          </div>
-          <div className='flex gap-4'>
-            <span className='flex-shrink-0 w-8 h-8 bg-lunary-primary-600 rounded-full flex items-center justify-center text-white font-medium'>
-              2
-            </span>
-            <div>
-              <h4 className='text-lg font-medium text-zinc-100'>
-                Form Your Question
-              </h4>
-              <p className='text-zinc-400'>
-                Ask open-ended questions like &quot;What do I need to know
-                about...&quot; rather than yes/no questions.
-              </p>
-            </div>
-          </div>
-          <div className='flex gap-4'>
-            <span className='flex-shrink-0 w-8 h-8 bg-lunary-primary-600 rounded-full flex items-center justify-center text-white font-medium'>
-              3
-            </span>
-            <div>
-              <h4 className='text-lg font-medium text-zinc-100'>
-                Shuffle with Intention
-              </h4>
-              <p className='text-zinc-400'>
-                Hold your question in mind as you shuffle. Stop when it feels
-                right.
-              </p>
-            </div>
-          </div>
-          <div className='flex gap-4'>
-            <span className='flex-shrink-0 w-8 h-8 bg-lunary-primary-600 rounded-full flex items-center justify-center text-white font-medium'>
-              4
-            </span>
-            <div>
-              <h4 className='text-lg font-medium text-zinc-100'>
-                Draw and Lay Out Cards
-              </h4>
-              <p className='text-zinc-400'>
-                Draw cards for your chosen spread, laying them face-down first.
-              </p>
-            </div>
-          </div>
-          <div className='flex gap-4'>
-            <span className='flex-shrink-0 w-8 h-8 bg-lunary-primary-600 rounded-full flex items-center justify-center text-white font-medium'>
-              5
-            </span>
-            <div>
-              <h4 className='text-lg font-medium text-zinc-100'>
-                Interpret the Cards
-              </h4>
-              <p className='text-zinc-400'>
-                Consider each card&apos;s meaning, position in the spread, and
-                how cards relate to each other.
-              </p>
-            </div>
-          </div>
+          </section>
         </div>
-      </section>
-
-      {/* Section 9: Spreads */}
-      <section id='spreads' className='mb-16'>
-        <h2 className='text-3xl font-light text-zinc-100 mb-6'>
-          9. Popular Tarot Spreads
-        </h2>
-
-        <div className='space-y-6'>
-          <div className='bg-zinc-900/50 border border-zinc-800 rounded-lg p-6'>
-            <h3 className='text-xl font-medium text-zinc-100 mb-3'>
-              Single Card Draw
-            </h3>
-            <p className='text-zinc-300 mb-3'>
-              Perfect for daily guidance or quick answers. Draw one card and
-              reflect on its message for your day or situation.
-            </p>
-            <p className='text-zinc-400 text-sm'>
-              Best for: Daily practice, simple questions
-            </p>
-          </div>
-
-          <div className='bg-zinc-900/50 border border-zinc-800 rounded-lg p-6'>
-            <h3 className='text-xl font-medium text-zinc-100 mb-3'>
-              Three-Card Spread
-            </h3>
-            <p className='text-zinc-300 mb-3'>
-              The most versatile spread. Common variations include:
-              Past/Present/Future, Situation/Action/Outcome, or
-              Mind/Body/Spirit.
-            </p>
-            <p className='text-zinc-400 text-sm'>
-              Best for: General readings, specific questions
-            </p>
-          </div>
-
-          <div className='bg-zinc-900/50 border border-zinc-800 rounded-lg p-6'>
-            <h3 className='text-xl font-medium text-zinc-100 mb-3'>
-              Celtic Cross (10 cards)
-            </h3>
-            <p className='text-zinc-300 mb-3'>
-              The classic comprehensive spread covering present situation,
-              challenges, past influences, future possibilities, and outcome.
-            </p>
-            <p className='text-zinc-400 text-sm'>
-              Best for: In-depth readings, complex situations
-            </p>
-          </div>
-        </div>
-      </section>
-
-      {/* FAQ Section */}
-      <section id='faq' className='mb-16'>
-        <h2 className='text-3xl font-light text-zinc-100 mb-6'>
-          10. Frequently Asked Questions
-        </h2>
-
-        <div className='space-y-4'>
-          {faqs.map((faq, index) => (
-            <div
-              key={index}
-              className='bg-zinc-900/50 border border-zinc-800 rounded-lg p-6'
-            >
-              <h3 className='text-lg font-medium text-zinc-100 mb-3'>
-                {faq.question}
-              </h3>
-              <p className='text-zinc-300 leading-relaxed'>{faq.answer}</p>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      {/* CTA Section */}
-      <section className='bg-gradient-to-r from-lunary-primary-900/30 to-lunary-rose-900/30 border border-lunary-primary-700 rounded-xl p-8 text-center'>
-        <h2 className='text-2xl font-light text-zinc-100 mb-4'>
-          Ready to Explore the Tarot?
-        </h2>
-        <p className='text-zinc-400 mb-6 max-w-xl mx-auto'>
-          Get a personalized tarot reading with interpretations tailored to your
-          question. Discover what the cards have to reveal about your path.
-        </p>
-        <div className='flex flex-col sm:flex-row gap-4 justify-center'>
-          <Link
-            href='/tarot'
-            className='px-8 py-3 bg-lunary-primary-600 hover:bg-lunary-primary-700 text-white rounded-lg font-medium transition-colors'
-          >
-            Get Free Tarot Reading
-          </Link>
-          <Link
-            href='/grimoire/tarot'
-            className='px-8 py-3 border border-lunary-primary text-lunary-primary-300 hover:bg-lunary-primary-900/10 rounded-lg font-medium transition-colors'
-          >
-            Browse All Cards
-          </Link>
-        </div>
-      </section>
-
-      <CosmicConnections
-        entityType='tarot'
-        entityKey='tarot-guide'
-        title='Tarot Connections'
-        sections={[
-          {
-            title: 'Related Pages',
-            links: [
-              { label: 'All Tarot Cards', href: '/grimoire/tarot' },
-              { label: 'Tarot Spreads', href: '/grimoire/tarot/spreads' },
-              { label: 'Daily Tarot Reading', href: '/tarot' },
-              {
-                label: 'Card Combinations',
-                href: '/grimoire/card-combinations',
-              },
-            ],
-          },
-        ]}
-      />
-
-      <ExploreGrimoire />
-    </div>
+      </SEOContentTemplate>
+    </>
   );
 }

@@ -3,6 +3,7 @@ export const revalidate = 86400;
 import { Metadata } from 'next';
 import Link from 'next/link';
 import { SEOContentTemplate } from '@/components/grimoire/SEOContentTemplate';
+import { CosmicConnections } from '@/components/grimoire/CosmicConnections';
 import { createItemListSchema, renderJsonLd } from '@/lib/schema';
 
 const astrologyItems = [
@@ -70,6 +71,7 @@ const astrologyItems = [
 
 const astrologyGroups = [
   {
+    id: 'foundations',
     title: 'Foundations',
     description:
       'Start with the birth chart, then deepen your understanding through houses, aspects, and placements.',
@@ -81,22 +83,59 @@ const astrologyGroups = [
     ],
   },
   {
+    id: 'identity-relationships',
     title: 'Identity & Relationships',
     description:
       'Explore how astrology shapes personality, connection, and growth.',
     items: ['Rising Sign', 'Synastry', 'Lunar Nodes'],
   },
   {
+    id: 'timing-cycles',
     title: 'Timing & Cycles',
     description:
       'Track the sky in motion and learn how to work with planetary timing.',
     items: ['Retrogrades', 'Transits', 'Monthly Horoscopes'],
   },
   {
+    id: 'context-method',
     title: 'Context & Method',
     description:
       'Understand the celestial mechanics and how astrology differs from astronomy.',
     items: ['Astronomy', 'Astronomy vs Astrology'],
+  },
+];
+
+const tableOfContents = [
+  { label: 'Foundations', href: '#foundations' },
+  { label: 'Identity & Relationships', href: '#identity-relationships' },
+  { label: 'Timing & Cycles', href: '#timing-cycles' },
+  { label: 'Context & Method', href: '#context-method' },
+  { label: 'Study Flow & Practice', href: '#study-flow' },
+];
+
+const studySteps = [
+  'Calculate your birth chart with precise time and place.',
+  'Map planets, houses, and aspects before interpreting themes.',
+  'Track current transits and retrogrades to understand timing.',
+  'Journal each transit’s lesson to build personalized reference data.',
+];
+
+const cosmicConnectionsSections = [
+  {
+    title: 'Astrology Foundations',
+    links: [
+      { label: 'Birth Chart', href: '/grimoire/birth-chart' },
+      { label: 'Houses', href: '/grimoire/houses' },
+      { label: 'Aspects', href: '/grimoire/aspects' },
+    ],
+  },
+  {
+    title: 'Timing & Practice',
+    links: [
+      { label: 'Transits', href: '/grimoire/transits' },
+      { label: 'Retrogrades', href: '/grimoire/astronomy/retrogrades' },
+      { label: 'Horoscopes', href: '/grimoire/horoscopes' },
+    ],
   },
 ];
 
@@ -179,6 +218,7 @@ export default function AstrologyIndexPage() {
           'synastry',
         ]}
         canonicalUrl='https://lunary.app/grimoire/astrology'
+        tableOfContents={tableOfContents}
         breadcrumbs={[
           { label: 'Grimoire', href: '/grimoire' },
           { label: 'Astrology', href: '/grimoire/astrology' },
@@ -190,7 +230,7 @@ export default function AstrologyIndexPage() {
         }}
         tldr='Astrology interprets the sky as a map of patterns. Your birth chart shows planetary placements, houses show life areas, and aspects show how energies interact. Transits and retrogrades describe how timing unfolds over time.'
         intro='Astrology is best understood as a language of patterns rather than a set of fixed predictions. It uses the positions of the Sun, Moon, and planets at a given moment to describe tendencies, themes, and timing. Your birth chart is a snapshot of the sky at the moment you were born. It does not tell you who you must be, but it can explain why certain experiences feel familiar, where your energy naturally flows, and what kinds of lessons repeat over time. When you learn the structure of astrology, you gain a way to name the cycles you already sense in your life. That is why this Grimoire section focuses on clarity: the basics are explained cleanly, and each topic links out to deeper guides so you can build understanding step by step.'
-        meaning='Astrology works through three main building blocks: planets, signs, and houses. Planets describe *what* energy is active, signs describe *how* that energy expresses, and houses describe *where* it shows up in life. A placement such as "Venus in Taurus in the 7th House" is a complete sentence: Venus (love, values) in Taurus (steady, sensual) expressed through the 7th House (relationships).\n\nAspects are the relationships between planets. They show how parts of your chart support, challenge, or intensify each other. A trine indicates ease and flow, a square indicates tension that pushes growth, and an opposition shows polarity that seeks balance. Aspects do not cancel each other out; they describe the way your inner world moves.\n\nTiming comes from transits and cycles. Transits show how the current sky interacts with your birth chart, revealing seasons of change, reflection, or momentum. Retrogrades highlight review periods rather than failure. Lunar nodes point to long-term growth themes, while eclipses and major transits mark turning points. Astrology becomes most helpful when you see these timing layers as context for choices, not a script to follow.\n\nThis page gathers the core topics that make astrology practical: understanding the birth chart, learning houses and aspects, exploring placements, and tracking cycles. Use it as a map to navigate the deeper guides below.'
+        meaning='Astrology works through three main building blocks: planets, signs, and houses. Planets describe *what* energy is active, signs describe *how* that energy expresses, and houses describe *where* it shows up in life. A placement such as "Venus in Taurus in the 7th House" is a complete sentence: Venus (love, values) in Taurus (steady, sensual) expressed through the 7th House (relationships).\n\nAspects are the relationships between planets. They show how parts of your chart support, challenge, or intensify each other. A trine indicates ease and flow, a square indicates tension that pushes growth, and an opposition shows polarity that seeks balance. Aspects do not cancel each other out; they describe the way your inner world moves.\n\nTiming comes from transits and cycles. Transits show how the current sky interacts with your birth chart, revealing seasons of change, reflection, or momentum. Retrogrades highlight review periods rather than failure. Lunar nodes point to long-term growth themes, while eclipses and major transits mark turning points. Astrology becomes most helpful when you see these timing layers as context for choices, not a script to follow.\n\nThis page gathers the core topics that make astrology practical: understanding the birth chart, learning houses and aspects, exploring placements, and tracking cycles. Use it as a map to navigate the deeper guides below.\n\nKeep a dedicated astrology journal and record what you learn about each topic before moving deeper. Revisit the same themes across moons and years to witness the way your chart references itself; repeating an entry when the same transit hits again turns raw data into embodied wisdom.'
         howToWorkWith={[
           'Start with your birth chart and identify your Sun, Moon, and Rising placements.',
           'Learn the 12 houses to understand the life areas each placement touches.',
@@ -223,11 +263,39 @@ export default function AstrologyIndexPage() {
           { text: 'Astrological Houses', href: '/grimoire/houses' },
           { text: 'Aspects', href: '/grimoire/aspects' },
           { text: 'Transits', href: '/grimoire/transits' },
+          { text: 'Horoscopes', href: '/grimoire/horoscopes' },
         ]}
+        relatedItems={[
+          {
+            name: 'Planets in Astrology',
+            href: '/grimoire/astronomy/planets',
+            type: 'Reference',
+          },
+          {
+            name: 'Retrogrades',
+            href: '/grimoire/astronomy/retrogrades',
+            type: 'Timing',
+          },
+          {
+            name: 'Synastry',
+            href: '/grimoire/synastry',
+            type: 'Relationships',
+          },
+        ]}
+        cosmicConnections={
+          <CosmicConnections
+            entityType='hub-astronomy'
+            entityKey='astronomy'
+            title='Astrology Connections'
+            sections={cosmicConnectionsSections}
+          />
+        }
+        ctaText='Book a personalized astrology reading'
+        ctaHref='/birth-chart'
       >
         <div className='space-y-12'>
           {astrologyGroups.map((group) => (
-            <section key={group.title}>
+            <section key={group.title} id={group.id}>
               <h2 className='text-2xl font-medium text-zinc-100 mb-3'>
                 {group.title}
               </h2>
@@ -262,6 +330,48 @@ export default function AstrologyIndexPage() {
               </div>
             </section>
           ))}
+
+          <section
+            id='study-flow'
+            className='bg-zinc-900/40 border border-zinc-800 rounded-xl p-6 space-y-3'
+          >
+            <h2 className='text-2xl font-medium text-zinc-100'>
+              Study Flow & Practice
+            </h2>
+            <p className='text-zinc-300'>
+              Turn this section into your study ritual: start with definitions,
+              layer in placements, then track timing so the sky becomes a
+              conversation.
+            </p>
+            <ol className='list-decimal list-inside text-zinc-300 space-y-2'>
+              {studySteps.map((step) => (
+                <li key={step}>{step}</li>
+              ))}
+            </ol>
+          </section>
+          <section id='tools' className='space-y-4'>
+            <h2 className='text-2xl font-medium text-zinc-100'>
+              Tools & Tracking
+            </h2>
+            <p className='text-sm text-zinc-400'>
+              Build a toolkit with an astrology wheel, apps that show
+              houses/aspects, and a paper planner for transits.
+            </p>
+            <ul className='list-disc list-inside text-sm text-zinc-300 max-w-2xl space-y-2'>
+              <li>
+                Print your radial chart and mark the planets as you learn each
+                planet’s mythic meaning.
+              </li>
+              <li>
+                Use a moon tracker to see how the phases color your feelings and
+                intentions.
+              </li>
+              <li>
+                Create a transit log to note what each major planet is touching;
+                revisit it each year for pattern recognition.
+              </li>
+            </ul>
+          </section>
         </div>
       </SEOContentTemplate>
     </>

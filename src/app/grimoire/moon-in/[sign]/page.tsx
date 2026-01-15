@@ -64,7 +64,7 @@ export async function generateMetadata({
       card: 'summary_large_image',
       title,
       description,
-      images: ['/api/og/cosmic'],
+      images: ['/api/og/grimoire/moon'],
     },
     alternates: {
       canonical: `https://lunary.app/grimoire/moon-in/${sign}`,
@@ -160,7 +160,9 @@ Moon in ${signData.name} influences how you:
 
 During this transit, you may feel more ${signData.element === 'Fire' ? 'passionate, energetic, and action-oriented' : signData.element === 'Earth' ? 'practical, grounded, and stable' : signData.element === 'Air' ? 'intellectual, communicative, and social' : 'emotional, intuitive, and sensitive'}. Your emotional needs align with ${signData.name} themes, and you may find yourself drawn to activities that honor this ${signData.element.toLowerCase()} nature.
 
-Understanding Moon in ${signData.name} helps you work with this emotional energy consciously, whether it's in your natal chart (Moon sign) or during current transits.`}
+Understanding Moon in ${signData.name} helps you work with this emotional energy consciously, whether it's in your natal chart (Moon sign) or during current transits.
+
+If you feel overwhelmed during this transit, simplify: choose one supportive activity and give yourself more rest. The Moon moves quickly, so the tone shifts within a few days.`}
         glyphs={['☽', symbol]}
         emotionalThemes={[
           `${signData.element} emotional expression`,
@@ -174,6 +176,22 @@ Understanding Moon in ${signData.name} helps you work with this emotional energy
           `Create space for ${signData.name} emotional needs`,
           `Connect with ${signData.element.toLowerCase()} element practices`,
           `Work with Moon in ${signData.name} energy consciously`,
+        ]}
+        rituals={[
+          `Light a candle and set one intention for ${signData.name} energy.`,
+          'Take a short walk or grounding practice to settle emotions.',
+          'Write one page about what you need most right now.',
+        ]}
+        tables={[
+          {
+            title: `Moon in ${signData.name} Focus`,
+            headers: ['Area', 'Focus'],
+            rows: [
+              ['Emotions', `${signData.element} expression`],
+              ['Needs', `Support ${signData.name} themes`],
+              ['Best Practice', 'Simple, consistent rituals'],
+            ],
+          },
         ]}
         signsMostAffected={[signData.name]}
         journalPrompts={[

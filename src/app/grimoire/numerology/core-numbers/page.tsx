@@ -39,7 +39,7 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: 'Core Numbers 1-9 Guide | Lunary',
     description: 'Complete guide to Core Numbers 1-9 in numerology.',
-    images: ['/api/og/cosmic'],
+    images: ['/api/og/grimoire/numerology'],
   },
   alternates: {
     canonical: 'https://lunary.app/grimoire/numerology/core-numbers',

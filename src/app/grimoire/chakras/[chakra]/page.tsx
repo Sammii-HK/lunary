@@ -86,6 +86,77 @@ export default async function ChakraPage({
     },
   ];
 
+  const tableOfContents = [
+    { label: 'Correspondences', href: '#correspondences' },
+    { label: 'Healing Practices', href: '#healing' },
+    { label: 'Daily Rituals', href: '#practice-notes' },
+    { label: 'FAQ', href: '#faq' },
+  ];
+
+  const sectionContent = (
+    <div className='space-y-10'>
+      <section id='correspondences' className='space-y-3'>
+        <h2 className='text-3xl font-light text-zinc-100'>Correspondences</h2>
+        <div className='grid gap-4 md:grid-cols-2 text-sm text-zinc-300'>
+          {[
+            { label: 'Element', value: chakraData.element },
+            { label: 'Color', value: chakraData.color },
+            { label: 'Location', value: chakraData.location },
+            { label: 'Seed Mantra', value: chakraData.seedMantra },
+          ].map((item) => (
+            <article
+              key={item.label}
+              className='rounded-xl border border-zinc-800 bg-zinc-900/30 p-4'
+            >
+              <h3 className='text-lg font-semibold text-zinc-100 mb-1'>
+                {item.label}
+              </h3>
+              <p className='text-sm text-zinc-300'>{item.value}</p>
+            </article>
+          ))}
+        </div>
+      </section>
+
+      <section id='healing' className='space-y-3'>
+        <h2 className='text-3xl font-light text-zinc-100'>Healing Practices</h2>
+        <p className='text-sm text-zinc-300 leading-relaxed'>
+          Cycle through meditation, crystals, and gentle movement to clear
+          blocks. Work with the listed practices while chanting the seed mantra
+          and embodying the affirmation.
+        </p>
+        <div className='grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-zinc-300'>
+          {chakraData.healingPractices.slice(0, 4).map((practice) => (
+            <article
+              key={practice}
+              className='rounded-xl border border-zinc-800 bg-zinc-900/30 p-4'
+            >
+              <p>{practice}</p>
+            </article>
+          ))}
+        </div>
+      </section>
+
+      <section id='practice-notes' className='space-y-3'>
+        <h2 className='text-3xl font-light text-zinc-100'>
+          Daily Ritual Notes
+        </h2>
+        <ul className='list-disc list-inside text-sm text-zinc-300 space-y-2'>
+          <li>
+            Light the corresponding color candle while chanting the seed mantra.
+          </li>
+          <li>
+            Layer crystals, oils, and journaling around the chakra’s balanced
+            state.
+          </li>
+          <li>
+            Notice sensations during pranayama and adjust to keep energy
+            flowing.
+          </li>
+        </ul>
+      </section>
+    </div>
+  );
+
   // Entity schema for Knowledge Graph
   const chakraSchema = createCosmicEntitySchema({
     name: `${chakraData.name} Chakra`,
@@ -122,6 +193,7 @@ export default async function ChakraPage({
           `${chakraData.name} chakra meaning`,
         ]}
         canonicalUrl={`https://lunary.app/grimoire/chakras/${chakra}`}
+        tableOfContents={tableOfContents}
         intro={`The ${chakraData.name} Chakra (Sanskrit: ${chakraData.sanskritName}) is located at ${chakraData.location.toLowerCase()}. Associated with the ${chakraData.element} element and the color ${chakraData.color.toLowerCase()}, this chakra is activated by the seed mantra "${chakraData.seedMantra}" and resonates at ${chakraData.frequency}Hz.`}
         tldr={`The ${chakraData.name} Chakra governs ${chakraData.keywords.slice(0, 4).join(', ').toLowerCase()}. ${chakraData.balancedState}`}
         meaning={`${chakraData.mysticalProperties}
@@ -144,7 +216,21 @@ ${chakraData.overactiveSymptoms.map((s) => `• ${s}`).join('\n')}
 **Balanced State:**
 ${chakraData.balancedState}
 
-**Affirmation:** "${chakraData.affirmation}"`}
+**Affirmation:** "${chakraData.affirmation}"
+
+**Daily Alignment:**
+Spend a few minutes noticing the area around ${chakraData.location.toLowerCase()}. Gentle breath, color visualization, or a short mantra repetition can shift the energy quickly.
+
+Track one small change each day so you can see progress over time.`}
+        symbolism={`The ${chakraData.name} Chakra is a bridge between body and emotion. When this center is balanced, its qualities show up as steady choices, clear boundaries, and a sense of inner permission. When it is blocked or overactive, the same qualities can become distorted.
+
+Treat balance as a process, not a fixed state. Small, consistent practices create more change than rare, intense sessions.
+
+If you are unsure where to start, choose one practice from the list and repeat it for a week. Tracking small shifts is more helpful than seeking a dramatic breakthrough.
+
+Balance often feels subtle: a calmer response, more grounded choices, or clearer emotional signals. Look for those small signs rather than a sudden, dramatic change.
+
+If the energy feels stuck, focus on breath and posture first. The body often unlocks the mind.`}
         glyphs={[chakraData.symbol]}
         astrologyCorrespondences={`Sanskrit Name: ${chakraData.sanskritName}
 Location: ${chakraData.location}
@@ -156,12 +242,45 @@ Crystals: ${chakraData.crystals.join(', ')}
 Essential Oils: ${chakraData.essentialOils.join(', ')}
 Foods: ${chakraData.foods.slice(0, 3).join(', ')}`}
         howToWorkWith={chakraData.healingPractices}
+        tables={[
+          {
+            title: `${chakraData.name} Focus`,
+            headers: ['Aspect', 'Details'],
+            rows: [
+              ['Element', chakraData.element],
+              ['Color', chakraData.color],
+              ['Seed Mantra', chakraData.seedMantra],
+              ['Key Theme', chakraData.keywords.slice(0, 2).join(', ')],
+            ],
+          },
+          {
+            title: 'Quick Alignment Routine',
+            headers: ['Step', 'Time'],
+            rows: [
+              ['Breath with mantra', '2 minutes'],
+              ['Visualize the color', '2 minutes'],
+              ['Light stretch or pose', '3 minutes'],
+              ['Short journal line', '1 minute'],
+            ],
+          },
+          {
+            title: 'Balance Signals',
+            headers: ['State', 'Common Feel'],
+            rows: [
+              ['Balanced', 'Steady, clear, grounded'],
+              ['Blocked', 'Stuck, low, disconnected'],
+              ['Overactive', 'Restless, intense, scattered'],
+            ],
+          },
+        ]}
         rituals={chakraData.yogaPoses}
         journalPrompts={[
           `How does ${chakraData.keywords[0].toLowerCase()} manifest in my daily life?`,
           `What blockages might I be experiencing in my ${chakraData.name} Chakra?`,
           `How can I embody the affirmation: "${chakraData.affirmation}"?`,
           `What healing practices can I incorporate for my ${chakraData.name} Chakra?`,
+          'What is one sign that my energy feels more balanced?',
+          'What small practice can I repeat for seven days?',
         ]}
         relatedItems={[
           {
@@ -213,7 +332,11 @@ Foods: ${chakraData.foods.slice(0, 3).join(', ')}`}
             ]}
           />
         }
-      />
+        ctaText='Practice chakra meditation'
+        ctaHref='/grimoire/meditation'
+      >
+        {sectionContent}
+      </SEOContentTemplate>
     </div>
   );
 }

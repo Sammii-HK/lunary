@@ -2,11 +2,10 @@ export const revalidate = 86400;
 
 import { Metadata } from 'next';
 import Link from 'next/link';
-import { createArticleSchema, renderJsonLd } from '@/lib/schema';
+import { SEOContentTemplate } from '@/components/grimoire/SEOContentTemplate';
 import { CosmicConnections } from '@/components/grimoire/CosmicConnections';
 import { CosmicConnectionSection } from '@/lib/cosmicConnectionsConfig';
 import { Button } from '@/components/ui/button';
-import { GrimoireBreadcrumbs } from '@/components/grimoire/GrimoireBreadcrumbs';
 
 export const metadata: Metadata = {
   title: 'The 12 Lunary Archetypes: A Guide to Your Inner Patterns - Lunary',
@@ -338,120 +337,92 @@ const cosmicConnectionsSections: CosmicConnectionSection[] = [
   },
 ];
 
+const tableOfContents = [
+  { label: '1. What Are Lunary Archetypes?', href: '#what-are-archetypes' },
+  { label: '2. How Archetypes Work in Lunary', href: '#how-archetypes-work' },
+  { label: '3. The 12 Archetypes', href: '#the-12-archetypes' },
+  ...ARCHETYPES.map((archetype, index) => ({
+    label: `3.${index + 1}. ${archetype.name}`,
+    href: `#${archetype.id}`,
+  })),
+  {
+    label: '4. Working With Your Archetypes',
+    href: '#working-with-archetypes',
+  },
+];
+
+const faqs = [
+  {
+    question: 'How do I identify my primary archetypes?',
+    answer:
+      'Observe recurring emotional cycles, dominant defense patterns, and habitual themes in relationships or career. Archetype manifests through both your light gifts and shadow blind spots, so look at what energizes you and what drains you repeatedly.',
+  },
+  {
+    question: 'Can multiple archetypes be active at once?',
+    answer:
+      'Yes — the Lunary system recognizes dominant, supporting, and emerging archetypes. Start with your strongest patterns and then explore how other archetypes color your responses, especially when you feel activated or out of balance.',
+  },
+  {
+    question: 'How do I work with difficult shadow traits?',
+    answer:
+      'Shadow work begins with awareness and curiosity. Journal the stories behind each shadow trait, practice self-compassion, and create rituals (breathwork, movement, journaling) that invite gentle integration rather than punishing perfectionism.',
+  },
+];
+
+const meaningText = `Lunary archetypes map internal patterns — emotional rhythms, relational dynamics, and spiritual callings — so you can see how past experiences sculpt your present behavior. Recognizing each archetype's gifts and shadows helps you lean into strengths while tenderly integrating wounded parts.`;
+
+const howToWorkWith = [
+  'Track the archetypes that appear during different seasons, moon phases, or emotional states',
+  'Honor both the light gifts and shadows without self-judgment; integration is an ongoing process',
+  'Use rituals, breath, or embodiment practices to embody the activated archetype before acting from it',
+  'Share insights with mentors or spiritual guides to receive reflection on what you might miss alone',
+];
+
+const relatedItems = [
+  { name: 'Book of Shadows', href: '/book-of-shadows', type: 'Practice' },
+  { name: 'Shadow Work Guide', href: '/grimoire/shadow-work', type: 'Guide' },
+  { name: 'Moon Phases', href: '/grimoire/moon', type: 'Guide' },
+];
+
+const internalLinks = [
+  {
+    text: 'Birth Chart Guide',
+    href: '/grimoire/guides/birth-chart-complete-guide',
+  },
+  { text: 'Tarot Guides', href: '/grimoire/guides/tarot-complete-guide' },
+  { text: 'Chakras', href: '/grimoire/chakras' },
+];
+
 export default function ArchetypesGuidePage() {
-  const articleSchema = createArticleSchema({
-    headline: 'The 12 Lunary Archetypes: A Guide to Your Inner Patterns',
-    description:
-      'Explore the Lunary Archetype System — twelve inner patterns that reveal your emotional cycles, strengths, and spiritual themes.',
-    url: 'https://lunary.app/grimoire/archetypes',
-    keywords: [
-      'lunary archetypes',
-      'spiritual archetypes',
-      'inner patterns',
-      'psychological archetypes',
-      'shadow work',
-    ],
-    section: 'Archetypes',
-  });
-
-  const breadcrumbItems = [
-    { name: 'Grimoire', url: 'https://lunary.app/grimoire' },
-    { name: 'Archetypes', url: 'https://lunary.app/grimoire/archetypes' },
-  ];
-
   return (
-    <div className='p-4 md:p-8 max-w-4xl mx-auto'>
-      {renderJsonLd(articleSchema)}
-      <GrimoireBreadcrumbs items={breadcrumbItems} />
-
-      <header className='mb-12'>
-        <h1 className='text-4xl md:text-5xl font-light text-zinc-100 mb-6'>
-          The 12 Lunary Archetypes
-          <span className='block text-2xl text-lunary-primary-400 mt-2'>
-            A Guide to Your Inner Patterns
-          </span>
-        </h1>
-        <p className='text-xl text-zinc-400 leading-relaxed'>
-          Discover the twelve archetypal patterns that shape your emotional
-          cycles, reveal your hidden strengths, and illuminate your spiritual
-          themes. Each archetype offers both gifts to embrace and shadows to
-          integrate.
-        </p>
-      </header>
-
-      <nav className='bg-zinc-900/50 border border-zinc-800 rounded-xl p-6 mb-12'>
-        <h2 className='text-lg font-medium text-zinc-100 mb-4'>
-          Table of Contents
-        </h2>
-        <ol className='space-y-2 text-zinc-400'>
-          <li>
-            <a
-              href='#what-are-archetypes'
-              className='hover:text-lunary-primary-400'
-            >
-              1. What Are Lunary Archetypes?
-            </a>
-          </li>
-          <li>
-            <a
-              href='#how-archetypes-work'
-              className='hover:text-lunary-primary-400'
-            >
-              2. How Archetypes Work in Lunary
-            </a>
-          </li>
-          <li>
-            <a
-              href='#the-12-archetypes'
-              className='hover:text-lunary-primary-400'
-            >
-              3. The 12 Archetypes
-            </a>
-            <ol className='ml-4 mt-2 space-y-1 text-sm'>
-              {ARCHETYPES.map((archetype, index) => (
-                <li key={archetype.id}>
-                  <a
-                    href={`#${archetype.id}`}
-                    className='hover:text-lunary-primary-400'
-                  >
-                    3.{index + 1}. {archetype.name}
-                  </a>
-                </li>
-              ))}
-            </ol>
-          </li>
-          <li>
-            <a
-              href='#working-with-archetypes'
-              className='hover:text-lunary-primary-400'
-            >
-              4. Working With Your Archetypes
-            </a>
-          </li>
-        </ol>
-      </nav>
-
+    <SEOContentTemplate
+      title={metadata.title as string}
+      h1='The 12 Lunary Archetypes'
+      description={metadata.description as string}
+      keywords={metadata.keywords as string[]}
+      canonicalUrl={metadata.alternates?.canonical as string}
+      intro='Discover the twelve archetypal patterns that shape your emotional cycles, reveal your hidden strengths, and illuminate your spiritual themes. Each archetype offers both gifts to embrace and shadows to integrate.'
+      meaning={meaningText}
+      howToWorkWith={howToWorkWith}
+      tableOfContents={tableOfContents}
+      relatedItems={relatedItems}
+      internalLinks={internalLinks}
+      faqs={faqs}
+      ctaText='Want a session to map your archetype landscape?'
+      ctaHref='/consultation'
+      cosmicConnections={
+        <CosmicConnections
+          entityType='hub-glossary'
+          entityKey='archetypes-guide'
+          title='Cosmic Connections'
+          sections={cosmicConnectionsSections}
+        />
+      }
+    >
       <section id='what-are-archetypes' className='mb-16'>
         <h2 className='text-3xl font-light text-zinc-100 mb-6'>
           1. What Are Lunary Archetypes?
         </h2>
-
-        <p className='text-zinc-300 leading-relaxed mb-6'>
-          Archetypes are universal patterns of human experience—recurring themes
-          that appear across cultures, mythologies, dreams, and individual
-          psyches. The concept, developed extensively by psychologist Carl Jung,
-          suggests that beneath our personal consciousness lies a collective
-          layer of shared human experience, populated by these timeless
-          patterns.
-        </p>
-
-        <p className='text-zinc-300 leading-relaxed mb-6'>
-          The Lunary Archetype System draws on this rich psychological tradition
-          while integrating insights from astrology, tarot symbolism, and
-          spiritual practice. These twelve archetypes represent distinct modes
-          of being—each with their own gifts, challenges, and invitations for
-          growth.
-        </p>
 
         <div className='bg-lunary-primary-900/20 border border-lunary-primary-700 rounded-lg p-6 mb-6'>
           <h3 className='text-lg font-medium text-lunary-primary-300 mb-3'>
@@ -481,7 +452,7 @@ export default function ArchetypesGuidePage() {
               </h4>
               <p className='text-zinc-400 text-sm'>
                 Beyond psychology, archetypes point toward deeper spiritual
-                truths about the soul&apos;s journey and purpose.
+                truths about the soul's journey and purpose.
               </p>
             </div>
             <div>
@@ -497,12 +468,19 @@ export default function ArchetypesGuidePage() {
         </div>
 
         <p className='text-zinc-300 leading-relaxed'>
-          Unlike fixed personality types, archetypes are dynamic. You are not
-          permanently one archetype—rather, different patterns become active at
-          different times in your life, responding to your circumstances,
-          challenges, and growth edges. Understanding archetypes helps you
-          recognize what energies are moving through you and how to work with
-          them consciously.
+          Archetypes are universal patterns of human experience—recurring themes
+          that appear across cultures, mythologies, dreams, and individual
+          psyches. The Lunary system blends psychological insight with
+          astrology, tarot symbolism, and spiritual practice to give you a
+          living, shifting map of the energies influencing your life.
+        </p>
+
+        <p className='text-zinc-300 leading-relaxed mt-6'>
+          Unlike fixed personality types, archetypes are dynamic. Different
+          patterns become active at different times in your life, responding to
+          your circumstances, challenges, and growth edges. Understanding these
+          archetypes helps you recognize the energies moving through you and
+          work with them consciously.
         </p>
       </section>
 
@@ -545,7 +523,7 @@ export default function ArchetypesGuidePage() {
             </h4>
             <p className='text-zinc-400 text-sm'>
               The words and themes that appear in your Book of Shadows entries
-              reveal what you&apos;re processing. Recurring emotional themes and
+              reveal what you're processing. Recurring emotional themes and
               questions point toward active archetypes.
             </p>
           </div>
@@ -564,9 +542,9 @@ export default function ArchetypesGuidePage() {
         <p className='text-zinc-300 leading-relaxed'>
           Your personal archetype—the one currently most active in your life—is
           revealed through your engagement with Book of Shadows, tarot readings,
-          and other practices within the app. This page provides the reference
-          guide to understand all twelve archetypes; your personalized insights
-          live within your profile and practice.
+          and other practices within the app. This reference guide surfaces the
+          full archetypal vocabulary while your personalized insights live
+          within your profile and practice.
         </p>
       </section>
 
@@ -706,13 +684,6 @@ export default function ArchetypesGuidePage() {
           </Button>
         </div>
       </section>
-
-      <CosmicConnections
-        entityType='hub-glossary'
-        entityKey='archetypes-guide'
-        title='Cosmic Connections'
-        sections={cosmicConnectionsSections}
-      />
-    </div>
+    </SEOContentTemplate>
   );
 }

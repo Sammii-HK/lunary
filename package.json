@@ -88,6 +88,8 @@
     "delete:moon-circle": "tsx scripts/delete-moon-circle.ts",
     "run:cron": "tsx scripts/run-cron.ts",
     "audit:grimoire-built": "tsx scripts/audit-grimoire-links-built.ts",
+    "audit:grimoire:seo": "tsx scripts/audit-grimoire-seo.ts",
+    "audit:grimoire": "python3 - <<'PY'\nimport pathlib\nroot=pathlib.Path('src/app/grimoire')\nfor path in sorted(root.rglob('page.tsx')):\n    if 'SEOContentTemplate' not in path.read_text():\n        print(path.relative_to(root))\nPY",
     "grimoire:index": "tsx scripts/build-grimoire-search-index.ts",
     "check": "pnpm lint && pnpm test && pnpm build",
     "legacy:audit": "tsx tools/remove-legacy-framework.ts",

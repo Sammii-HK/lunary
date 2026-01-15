@@ -120,13 +120,41 @@ ${sabbatData.history}
 **Spiritual Meaning:**
 ${sabbatData.spiritualMeaning}
 
+**Seasonal Theme:**
+${sabbatData.season} is a time to focus on ${sabbatData.keywords.slice(0, 2).join(' and ').toLowerCase()}. Use this sabbat to align with the natural cycle and mark a clear transition.
+
 **Keywords:** ${sabbatData.keywords.join(', ')}
 
 **Deities:** ${sabbatData.deities.join(', ')}
 
 **Symbols:** ${sabbatData.symbols.join(', ')}
 
-**Affirmation:** "${sabbatData.affirmation}"`}
+**Affirmation:** "${sabbatData.affirmation}"
+
+**Modern Celebrations:**
+You can celebrate with a small altar, seasonal foods, or a focused ritual. Keep it simple and meaningful - the intention matters more than the scale.
+
+**Working With the Date:**
+If the exact date feels busy, celebrate within a few days on either side. What matters most is your attention to the seasonal shift.
+
+**Simple Focus:**
+Choose one keyword and build a short ritual around it. A single candle, a short prayer, and a small act of service often capture the spirit of the sabbat more than elaborate preparation.
+
+**Seasonal Integration:**
+After the celebration, note one lesson you want to carry forward. This keeps the sabbat connected to your daily life.
+
+**Community and Solitary Practice:**
+Sabbats can be celebrated alone or with others. A solo ritual can be as meaningful as a group gathering when the intention is clear.
+
+**Ritual Pacing:**
+Open with a short grounding, focus on one core action, and close with gratitude. Short, consistent rituals often land more deeply than long, complex ones.
+
+**Family Traditions:**
+If you celebrate with others, invite one shared activity like a meal, a walk, or a simple blessing. Community adds warmth without requiring elaborate planning.
+
+Even a quiet, personal ritual can be powerful when it is intentional.
+
+Focus on one clear symbol that represents the season. A single object can hold the whole intention.`}
         emotionalThemes={sabbatData.keywords}
         howToWorkWith={sabbatData.traditions}
         rituals={sabbatData.rituals}
@@ -144,12 +172,47 @@ ${sabbatData.spiritualMeaning}
               ['Foods', sabbatData.foods.slice(0, 5).join(', ')],
             ],
           },
+          {
+            title: 'Ritual Focus',
+            headers: ['Focus', 'Idea'],
+            rows: [
+              ['Intention', sabbatData.affirmation],
+              ['Main Theme', sabbatData.keywords.slice(0, 2).join(', ')],
+              [
+                'Seasonal Action',
+                `Align with ${sabbatData.season.toLowerCase()} energy`,
+              ],
+            ],
+          },
+          {
+            title: 'Simple Celebration',
+            headers: ['Step', 'Action'],
+            rows: [
+              ['Prepare', 'Choose one seasonal symbol'],
+              ['Honor', 'Light a candle and speak the affirmation'],
+              ['Reflect', 'Journal one lesson from the season'],
+            ],
+          },
+          {
+            title: 'Common Intentions',
+            headers: ['Intention', 'Example'],
+            rows: [
+              ['Release', 'Let go of what no longer fits'],
+              ['Renew', 'Start one fresh habit'],
+              ['Gratitude', 'Name three seasonal gifts'],
+            ],
+          },
         ]}
         journalPrompts={[
           `How does ${sabbatData.keywords[0].toLowerCase()} manifest in my life right now?`,
           `What traditions from ${sabbatData.name} resonate with me?`,
           `How can I embody: "${sabbatData.affirmation}"?`,
           `What am I harvesting or releasing this ${sabbatData.name}?`,
+          `What simple ritual would feel most meaningful this year?`,
+          `What theme do I want to carry into the next season?`,
+          'What would a gentle celebration look like for me?',
+          'Who do I want to share this season with?',
+          'What symbol best captures this sabbat for me?',
         ]}
         relatedItems={[
           {

@@ -58,7 +58,7 @@ export async function generateMetadata({
       card: 'summary_large_image',
       title,
       description,
-      images: ['/api/og/cosmic'],
+      images: ['/api/og/grimoire/numerology'],
     },
     alternates: {
       canonical: `https://lunary.app/grimoire/numerology/core-numbers/${number}`,
@@ -110,6 +110,15 @@ export default async function CoreNumberPage({
       question: `How is Core Number ${number} different from Life Path ${number}?`,
       answer: `Core numbers and life path numbers share the same fundamental energy. Core Number ${number} represents the base vibrational qualities of ${numberData.meaning.toLowerCase()}, while Life Path ${number} applies these qualities to your life journey and purpose.`,
     },
+    {
+      question: `How can I work with Core Number ${number} daily?`,
+      answer: `Focus on one ${numberData.meaning.toLowerCase()} strength each day and choose one small action that expresses it.`,
+    },
+    {
+      question: `Is Core Number ${number} the same as an Angel Number?`,
+      answer:
+        'No. Core numbers are foundational numerology meanings, while angel numbers are repeating patterns that carry timing and messages.',
+    },
   ];
 
   return (
@@ -137,7 +146,19 @@ The energy of ${number} is fundamental in numerology, appearing in life path num
 - Work with ${number}'s vibration in timing and planning
 - Apply ${number}'s qualities to your personal growth
 
-Whether ${number} is prominent in your numerology chart or you're exploring number meanings, understanding Core Number ${number} provides valuable insights into this fundamental numerological energy.`}
+Whether ${number} is prominent in your numerology chart or you're exploring number meanings, understanding Core Number ${number} provides valuable insights into this fundamental numerological energy.
+
+**In Balance vs. Out of Balance**
+
+When you are aligned with Core Number ${number}, the best traits of ${numberData.meaning.toLowerCase()} come forward. When you are out of balance, the challenges can show up more strongly. Recognizing the shift helps you return to center.
+
+**Practical Use**
+
+You can work with Core Number ${number} during planning, habit building, and relationship growth. Lean into the strengths and set simple boundaries around the challenges.
+
+**Working With Repeating Numbers**
+
+If you see ${number} repeating in dates or timing, it can be a cue to lean into the core energy and choose one small action that expresses it.`}
         emotionalThemes={numberData.traits}
         howToWorkWith={[
           `Embrace the ${numberData.meaning.toLowerCase()} energy of ${number}`,
@@ -145,6 +166,12 @@ Whether ${number} is prominent in your numerology chart or you're exploring numb
           `Work on challenges: ${numberData.challenges[0]?.toLowerCase() || 'personal growth'}`,
           `Recognize ${number} energy in others`,
           `Use ${number} days for aligned activities`,
+        ]}
+        rituals={[
+          `Choose one ${number} trait to practice each morning for a week.`,
+          'Write a short affirmation that reflects your strongest quality.',
+          'Set one boundary that reduces your main challenge.',
+          `Schedule key tasks on dates that include ${number} when possible.`,
         ]}
         tables={[
           {
@@ -158,6 +185,25 @@ Whether ${number} is prominent in your numerology chart or you're exploring numb
               ['Keywords', numberData.keywords.join(', ')],
             ],
           },
+          {
+            title: 'Balance Check',
+            headers: ['In Balance', 'Out of Balance'],
+            rows: [
+              [
+                numberData.strengths.slice(0, 2).join(', '),
+                numberData.challenges.slice(0, 2).join(', '),
+              ],
+            ],
+          },
+          {
+            title: 'Daily Alignment',
+            headers: ['Practice', 'Why it helps'],
+            rows: [
+              ['Name one priority', 'Clarifies the core energy'],
+              ['Do one focused task', 'Builds confidence in the number'],
+              ['Reflect briefly at night', 'Tracks growth over time'],
+            ],
+          },
         ]}
         journalPrompts={[
           `How does Core Number ${number} energy appear in my life?`,
@@ -165,6 +211,7 @@ Whether ${number} is prominent in your numerology chart or you're exploring numb
           `How can I develop ${number}'s strengths?`,
           `What challenges related to ${number} do I face?`,
           `How can I balance ${number} energy in my daily life?`,
+          'Where do I see this number reflected in my relationships?',
         ]}
         numerology={`Core Number: ${number}
 Meaning: ${numberData.meaning}

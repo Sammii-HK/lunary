@@ -2,16 +2,10 @@ export const revalidate = 86400;
 
 import { Metadata } from 'next';
 import Link from 'next/link';
-import {
-  createArticleSchema,
-  createFAQPageSchema,
-  createBreadcrumbSchema,
-  renderJsonLd,
-} from '@/lib/schema';
-import { Breadcrumbs } from '@/components/grimoire/Breadcrumbs';
+import { Sparkles } from 'lucide-react';
+import { SEOContentTemplate } from '@/components/grimoire/SEOContentTemplate';
 import { CosmicConnections } from '@/components/grimoire/CosmicConnections';
 import { CosmicConnectionSection } from '@/lib/cosmicConnectionsConfig';
-import { Button } from '@/components/ui/button';
 
 export const metadata: Metadata = {
   title: 'Book of Shadows: Create Your Personal Grimoire - Lunary',
@@ -43,27 +37,27 @@ const faqs = [
   {
     question: 'What is a Book of Shadows?',
     answer:
-      "A Book of Shadows (BOS) is a personal record of your magical practice—spells, rituals, correspondences, dreams, reflections, and spiritual insights. The name comes from Wiccan tradition, but the concept exists across many practices. It's your magical diary and reference guide combined.",
+      'A Book of Shadows is your personal magical record—spells, rituals, readings, dreams, reflections, and correspondences that evolve with your practice.',
   },
   {
-    question: 'Should I use a physical journal or digital Book of Shadows?',
+    question: 'Physical or digital?',
     answer:
-      'Both have merits. Physical journals feel more ritualistic and tactile; digital versions are searchable, backed up, and always with you. Many practitioners use both—a digital BOS for quick reference and a physical one for special workings. Choose what fits your lifestyle and practice.',
+      'Both can coexist. Physical journals feel ritualistic; digital ones are searchable and backed up. Choose the format that keeps you writing.',
   },
   {
-    question: 'What should I write in my first entry?',
+    question: 'What should be in my first entry?',
     answer:
-      "Start simple: write the date, current moon phase, and a statement of intention for your practice. You might include what drew you to this path, what you hope to learn, or simply describe how you're feeling. There are no rules—your first entry can be as brief or detailed as you like.",
+      'Log the date, current moon phase, your intention for sharing your practice, and how you feel today. Keep it honest and simple.',
   },
   {
-    question: 'Do I need to make it pretty?',
+    question: 'Does it need to look perfect?',
     answer:
-      'No. Your BOS is a working document, not an art project. Some practitioners love decorating theirs with drawings and pressed flowers; others prefer plain text. What matters is that you use it. A messy, well-used BOS is more valuable than a beautiful, empty one.',
+      'No. The best Book of Shadows is the one you use. Messy, scribbled, sticky-note filled—it all counts as progress.',
   },
   {
-    question: 'Is my Book of Shadows private?',
+    question: 'Should I keep it private?',
     answer:
-      'Traditionally, yes—a BOS is deeply personal and often kept private. However, you decide what to share and with whom. Some practitioners share excerpts with trusted friends or mentors. The important thing is that you feel safe writing honestly in it.',
+      'Traditionally yes, but you decide. Share with trusted mentors if you wish, or keep it sacred. Safety and consent are yours to define.',
   },
 ];
 
@@ -81,7 +75,7 @@ const cosmicConnectionsSections: CosmicConnectionSection[] = [
     ],
   },
   {
-    title: 'Correspondences to Include',
+    title: 'Correspondences & References',
     links: [
       { label: 'Correspondences', href: '/grimoire/correspondences' },
       { label: 'Crystals', href: '/grimoire/crystals' },
@@ -90,406 +84,299 @@ const cosmicConnectionsSections: CosmicConnectionSection[] = [
     ],
   },
   {
-    title: 'Start Practicing',
+    title: 'Continue Learning',
     links: [
-      { label: 'Your Digital Book of Shadows', href: '/book-of-shadows' },
-      { label: 'Beginners Guide', href: '/grimoire/beginners' },
+      { label: 'Beginner’s Guide', href: '/grimoire/beginners' },
       { label: 'Modern Witchcraft', href: '/grimoire/modern-witchcraft' },
       { label: 'Archetypes', href: '/grimoire/archetypes' },
+      { label: 'Book of Shadows', href: '/book-of-shadows' },
     ],
   },
 ];
 
+const toc = [
+  { label: 'What Is a Book of Shadows?', href: '#what-is-bos' },
+  { label: 'Why Keep One?', href: '#why-keep-one' },
+  { label: 'What to Include', href: '#what-to-include' },
+  { label: 'How to Organize', href: '#organization' },
+  { label: 'Digital vs. Physical', href: '#digital-vs-physical' },
+  { label: 'Getting Started', href: '#getting-started' },
+  { label: 'FAQ', href: '#faq' },
+];
+
 export default function BookOfShadowsPage() {
-  const articleSchema = createArticleSchema({
-    headline: 'Book of Shadows: Create Your Personal Grimoire',
-    description:
-      'Learn how to create and maintain your Book of Shadows for tracking spells, rituals, and spiritual growth.',
-    url: 'https://lunary.app/grimoire/book-of-shadows',
-    keywords: ['book of shadows', 'grimoire', 'magical journal'],
-    section: 'Modern Witchcraft',
-  });
-
-  const faqSchema = createFAQPageSchema(faqs);
-
   return (
-    <div className='p-4 md:p-8 max-w-4xl mx-auto'>
-      {renderJsonLd(articleSchema)}
-      {renderJsonLd(faqSchema)}
-      {renderJsonLd(
-        createBreadcrumbSchema([
-          { name: 'Grimoire', url: '/grimoire' },
-          { name: 'Book of Shadows', url: '/grimoire/book-of-shadows' },
-        ]),
-      )}
-
-      <Breadcrumbs
-        items={[
-          { label: 'Grimoire', href: '/grimoire' },
-          { label: 'Book of Shadows' },
-        ]}
-      />
-
-      <header className='mb-12'>
-        <h1 className='text-4xl md:text-5xl font-light text-zinc-100 mb-6'>
-          Book of Shadows
-          <span className='block text-2xl text-lunary-primary-400 mt-2'>
-            Your Personal Grimoire
-          </span>
-        </h1>
-        <p className='text-xl text-zinc-400 leading-relaxed'>
-          A Book of Shadows is your personal record of magical practice—a place
-          to document spells, rituals, dreams, reflections, and discoveries. It
-          grows with you, becoming both a reference guide and a mirror of your
-          spiritual journey.
-        </p>
-      </header>
-
-      <nav className='bg-zinc-900/50 border border-zinc-800 rounded-xl p-6 mb-12'>
-        <h2 className='text-lg font-medium text-zinc-100 mb-4'>
-          Table of Contents
-        </h2>
-        <ol className='space-y-2 text-zinc-400'>
-          <li>
-            <a href='#what-is-bos' className='hover:text-lunary-primary-400'>
-              1. What Is a Book of Shadows?
-            </a>
-          </li>
-          <li>
-            <a href='#why-keep-one' className='hover:text-lunary-primary-400'>
-              2. Why Keep One?
-            </a>
-          </li>
-          <li>
-            <a
-              href='#what-to-include'
-              className='hover:text-lunary-primary-400'
-            >
-              3. What to Include
-            </a>
-          </li>
-          <li>
-            <a href='#organization' className='hover:text-lunary-primary-400'>
-              4. How to Organize
-            </a>
-          </li>
-          <li>
-            <a
-              href='#digital-vs-physical'
-              className='hover:text-lunary-primary-400'
-            >
-              5. Digital vs. Physical
-            </a>
-          </li>
-          <li>
-            <a
-              href='#getting-started'
-              className='hover:text-lunary-primary-400'
-            >
-              6. Getting Started
-            </a>
-          </li>
-          <li>
-            <a href='#faq' className='hover:text-lunary-primary-400'>
-              7. FAQ
-            </a>
-          </li>
-        </ol>
-      </nav>
-
-      {/* Section 1 */}
-      <section id='what-is-bos' className='mb-16'>
-        <h2 className='text-3xl font-light text-zinc-100 mb-6'>
+    <SEOContentTemplate
+      title='Book of Shadows: Create Your Personal Grimoire'
+      h1='Book of Shadows'
+      description='Learn how to create a living Book of Shadows—journal spells, rituals, correspondences, dreams, and reflections that anchor your practice.'
+      keywords={metadata.keywords as string[]}
+      canonicalUrl={metadata.alternates?.canonical as string}
+      breadcrumbs={[
+        { label: 'Grimoire', href: '/grimoire' },
+        { label: 'Book of Shadows', href: '/grimoire/book-of-shadows' },
+      ]}
+      intro='This personal grimoire grows with you. Record spells, readings, dreams, rituals, correspondences, and the insights that emerge along the way.'
+      meaning='A Book of Shadows combines spells, reference material, and journal entries so you can observe patterns, refine techniques, and witness your spiritual growth.'
+      tableOfContents={toc}
+      whatIs={{
+        question: 'Why keep a Book of Shadows?',
+        answer:
+          'It makes magic tangible. Recording your work turns random attempts into a living reference and shows how your practice evolves over time.',
+      }}
+      howToWorkWith={[
+        'Record intention, tools, timing, and outcome for each ritual',
+        'Log divination spreads, your interpretations, and follow-up notes',
+        'Keep a section for correspondences and symbols you invent',
+        'Review past entries monthly to notice patterns and growth',
+      ]}
+      faqs={faqs}
+      relatedItems={[
+        {
+          name: 'Beginners Guide',
+          href: '/grimoire/beginners',
+          type: 'Newbie path',
+        },
+        {
+          name: 'Spellcraft Fundamentals',
+          href: '/grimoire/spells/fundamentals',
+          type: 'Ritual basics',
+        },
+        {
+          name: 'Moon Phases Guide',
+          href: '/grimoire/guides/moon-phases-guide',
+          type: 'Lunar notes',
+        },
+      ]}
+      internalLinks={[
+        { text: 'Modern Witchcraft', href: '/grimoire/modern-witchcraft' },
+        { text: 'Tarot Cards', href: '/grimoire/tarot' },
+        { text: 'Correspondences', href: '/grimoire/correspondences' },
+      ]}
+      cosmicConnections={
+        <CosmicConnections
+          entityType='hub-book-of-shadows'
+          entityKey='book-of-shadows'
+          title='Book of Shadows Connections'
+          sections={cosmicConnectionsSections}
+        />
+      }
+      ctaText='Start your digital Book of Shadows'
+      ctaHref='/book-of-shadows'
+    >
+      <section id='what-is-bos' className='space-y-4 mb-10'>
+        <h2 className='text-3xl font-light text-zinc-100'>
           1. What Is a Book of Shadows?
         </h2>
-
-        <p className='text-zinc-300 leading-relaxed mb-6'>
-          A Book of Shadows (often abbreviated BOS) is a personal journal for
-          your magical and spiritual practice. The term originated in Wicca, but
-          the concept of keeping a magical diary exists across many traditions
-          and practices.
+        <p className='text-zinc-300 leading-relaxed'>
+          A Book of Shadows is a working grimoire—the place you log spells,
+          rituals, dreams, and insights. It merges practical instructions with
+          reflections on how your practice shifts over time.
         </p>
-
-        <p className='text-zinc-300 leading-relaxed mb-6'>
-          Think of it as a combination of:
-        </p>
-
-        <ul className='space-y-2 text-zinc-300 mb-6'>
-          <li>• A spell book—recording what you&apos;ve cast and created</li>
-          <li>• A reference guide—correspondences, symbols, and techniques</li>
-          <li>• A journal—reflections, dreams, and insights</li>
-          <li>• A lab notebook—what worked, what didn&apos;t, and why</li>
+        <ul className='list-disc list-inside text-zinc-300 space-y-1'>
+          <li>Spell book entries with intention, tools, and outcomes</li>
+          <li>Reference pages for correspondences, symbols, and rituals</li>
+          <li>
+            Journal sections capturing dreams, synchronicities, and reflections
+          </li>
+          <li>Lab notes documenting what worked and what didn’t</li>
         </ul>
-
-        <div className='bg-zinc-900/50 border border-zinc-800 rounded-xl p-6'>
-          <p className='text-zinc-400 text-sm'>
-            Your Book of Shadows is uniquely yours. There is no
-            &quot;correct&quot; format—it reflects your practice, your voice,
-            and your journey.
-          </p>
-        </div>
       </section>
 
-      {/* Section 2 */}
-      <section id='why-keep-one' className='mb-16'>
-        <h2 className='text-3xl font-light text-zinc-100 mb-6'>
-          2. Why Keep One?
-        </h2>
-
-        <p className='text-zinc-300 leading-relaxed mb-6'>
-          Recording your practice accelerates learning and deepens your
-          connection to the work. Here&apos;s why it matters:
-        </p>
-
-        <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
-          <div className='p-5 rounded-xl border border-zinc-800 bg-zinc-900/30'>
-            <h3 className='font-medium text-zinc-100 mb-2'>Track What Works</h3>
-            <p className='text-zinc-400 text-sm'>
-              When you record spells and rituals with outcomes, you learn what
-              techniques are most effective for you personally.
-            </p>
-          </div>
-          <div className='p-5 rounded-xl border border-zinc-800 bg-zinc-900/30'>
-            <h3 className='font-medium text-zinc-100 mb-2'>Notice Patterns</h3>
-            <p className='text-zinc-400 text-sm'>
-              Over time, you&apos;ll see recurring themes—in your dreams, your
-              readings, your life. Patterns reveal deeper truths.
-            </p>
-          </div>
-          <div className='p-5 rounded-xl border border-zinc-800 bg-zinc-900/30'>
-            <h3 className='font-medium text-zinc-100 mb-2'>
-              Build Your Reference
-            </h3>
-            <p className='text-zinc-400 text-sm'>
-              Collect correspondences, symbols, and techniques that resonate
-              with you. Your BOS becomes your personal magical encyclopedia.
-            </p>
-          </div>
-          <div className='p-5 rounded-xl border border-zinc-800 bg-zinc-900/30'>
-            <h3 className='font-medium text-zinc-100 mb-2'>
-              Witness Your Growth
-            </h3>
-            <p className='text-zinc-400 text-sm'>
-              Looking back at old entries shows how far you&apos;ve come.
-              It&apos;s evidence of your evolution as a practitioner.
-            </p>
-          </div>
-        </div>
-      </section>
-
-      {/* Section 3 */}
-      <section id='what-to-include' className='mb-16'>
-        <h2 className='text-3xl font-light text-zinc-100 mb-6'>
-          3. What to Include
-        </h2>
-
-        <p className='text-zinc-300 leading-relaxed mb-6'>
-          Include whatever is meaningful to your practice. Common entries
-          include:
-        </p>
-
-        <div className='bg-zinc-900/50 border border-zinc-800 rounded-xl p-6 mb-6'>
-          <h3 className='text-lg font-medium text-zinc-100 mb-3'>
-            Spells & Rituals
-          </h3>
-          <ul className='space-y-2 text-zinc-400 text-sm'>
-            <li>• Date, moon phase, and astrological context</li>
-            <li>• The spell or ritual performed</li>
-            <li>• Ingredients and tools used</li>
-            <li>• How you felt during and after</li>
-            <li>• Results (check back and update later)</li>
-          </ul>
-        </div>
-
-        <div className='bg-zinc-900/50 border border-zinc-800 rounded-xl p-6 mb-6'>
-          <h3 className='text-lg font-medium text-zinc-100 mb-3'>
-            Divination Readings
-          </h3>
-          <ul className='space-y-2 text-zinc-400 text-sm'>
-            <li>• Tarot spreads with card positions and your interpretation</li>
-            <li>• Questions asked and answers received</li>
-            <li>• Rune castings, pendulum answers, or other divination</li>
-            <li>• Follow-up notes on accuracy</li>
-          </ul>
-        </div>
-
-        <div className='bg-zinc-900/50 border border-zinc-800 rounded-xl p-6 mb-6'>
-          <h3 className='text-lg font-medium text-zinc-100 mb-3'>
-            Dreams & Symbols
-          </h3>
-          <ul className='space-y-2 text-zinc-400 text-sm'>
-            <li>• Dream journals (write immediately upon waking)</li>
-            <li>• Recurring symbols and their meanings for you</li>
-            <li>• Synchronicities and omens noticed</li>
-          </ul>
-        </div>
-
-        <div className='bg-zinc-900/50 border border-zinc-800 rounded-xl p-6'>
-          <h3 className='text-lg font-medium text-zinc-100 mb-3'>
-            Correspondences & Reference
-          </h3>
-          <ul className='space-y-2 text-zinc-400 text-sm'>
-            <li>• Herbs, crystals, and their properties</li>
-            <li>• Color and candle correspondences</li>
-            <li>• Moon phase and planetary day associations</li>
-            <li>• Personal symbols and sigils you&apos;ve created</li>
-          </ul>
-        </div>
-      </section>
-
-      {/* Section 4 */}
-      <section id='organization' className='mb-16'>
-        <h2 className='text-3xl font-light text-zinc-100 mb-6'>
-          4. How to Organize
-        </h2>
-
-        <p className='text-zinc-300 leading-relaxed mb-6'>
-          There&apos;s no single correct way. Choose what makes retrieval easy:
-        </p>
-
-        <div className='space-y-4'>
-          <div className='p-5 rounded-xl border border-zinc-800 bg-zinc-900/30'>
-            <h3 className='font-medium text-zinc-100 mb-2'>Chronological</h3>
-            <p className='text-zinc-400 text-sm'>
-              Simply write entries in date order. Easy to maintain; shows your
-              journey over time. Add an index if it grows large.
-            </p>
-          </div>
-          <div className='p-5 rounded-xl border border-zinc-800 bg-zinc-900/30'>
-            <h3 className='font-medium text-zinc-100 mb-2'>By Category</h3>
-            <p className='text-zinc-400 text-sm'>
-              Separate sections for spells, divination, correspondences, dreams,
-              etc. Good for reference; requires a bit more planning.
-            </p>
-          </div>
-          <div className='p-5 rounded-xl border border-zinc-800 bg-zinc-900/30'>
-            <h3 className='font-medium text-zinc-100 mb-2'>By Intention</h3>
-            <p className='text-zinc-400 text-sm'>
-              Group by purpose—protection, love, abundance, healing. Useful for
-              quickly finding relevant material for specific needs.
-            </p>
-          </div>
-          <div className='p-5 rounded-xl border border-zinc-800 bg-zinc-900/30'>
-            <h3 className='font-medium text-zinc-100 mb-2'>
-              Hybrid / Flexible
-            </h3>
-            <p className='text-zinc-400 text-sm'>
-              Use whatever system makes sense in the moment. Digital BOS tools
-              with search functions make this approach practical.
-            </p>
-          </div>
-        </div>
-      </section>
-
-      {/* Section 5 */}
-      <section id='digital-vs-physical' className='mb-16'>
-        <h2 className='text-3xl font-light text-zinc-100 mb-6'>
-          5. Digital vs. Physical
-        </h2>
-
-        <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
-          <div className='p-5 rounded-xl border border-zinc-800 bg-zinc-900/30'>
-            <h3 className='font-medium text-zinc-100 mb-3'>Physical Journal</h3>
-            <ul className='space-y-2 text-zinc-400 text-sm'>
-              <li>✦ Tactile, ritualistic feel</li>
-              <li>✦ No technology required</li>
-              <li>✦ Can include pressed flowers, drawings</li>
-              <li>✦ Limited by physical space</li>
-              <li>✦ Can be lost or damaged</li>
-            </ul>
-          </div>
-          <div className='p-5 rounded-xl border border-zinc-800 bg-zinc-900/30'>
-            <h3 className='font-medium text-zinc-100 mb-3'>Digital BOS</h3>
-            <ul className='space-y-2 text-zinc-400 text-sm'>
-              <li>✦ Searchable and organized</li>
-              <li>✦ Always backed up</li>
-              <li>✦ Accessible from anywhere</li>
-              <li>✦ Easy to add, edit, reorganize</li>
-              <li>✦ Can include photos and links</li>
-            </ul>
-          </div>
-        </div>
-
-        <p className='text-zinc-400 text-sm mt-4'>
-          Many practitioners use both: a physical journal for special rituals
-          and a digital one for everyday reference and quick notes.
-        </p>
-      </section>
-
-      {/* Section 6 */}
-      <section id='getting-started' className='mb-16'>
-        <h2 className='text-3xl font-light text-zinc-100 mb-6'>
-          6. Getting Started
-        </h2>
-
-        <div className='bg-lunary-primary-900/20 border border-lunary-primary-700 rounded-xl p-6'>
-          <h3 className='text-lg font-medium text-lunary-primary-300 mb-3'>
-            Your First Entry
-          </h3>
-          <ol className='space-y-2 text-zinc-300 text-sm'>
-            <li>1. Write today&apos;s date and current moon phase</li>
-            <li>
-              2. State your intention: &quot;I am beginning this Book of Shadows
-              to...&quot;
-            </li>
-            <li>3. Write briefly about what drew you to this path</li>
-            <li>4. Note how you feel right now</li>
-            <li>5. Close with something you&apos;re curious to learn</li>
-          </ol>
-        </div>
-
-        <p className='text-zinc-400 text-sm mt-4'>
-          Don&apos;t overthink it. The best Book of Shadows is one you actually
-          use. Start imperfectly and let it evolve.
-        </p>
-      </section>
-
-      {/* FAQ */}
-      <section id='faq' className='mb-16'>
-        <h2 className='text-3xl font-light text-zinc-100 mb-6'>
-          7. Frequently Asked Questions
-        </h2>
-
-        <div className='space-y-4'>
-          {faqs.map((faq, index) => (
-            <div
-              key={index}
-              className='bg-zinc-900/50 border border-zinc-800 rounded-lg p-6'
+      <section id='why-keep-one' className='space-y-4 mb-10'>
+        <h2 className='text-3xl font-light text-zinc-100'>2. Why Keep One?</h2>
+        <div className='grid gap-4 md:grid-cols-2'>
+          {[
+            {
+              title: 'Track What Works',
+              body: 'Logging spells reveals which ingredients, timing, and steps resonate with you.',
+            },
+            {
+              title: 'Notice Patterns',
+              body: 'Dreams, readings, and life events often repeat. Recording them uncovers hidden threads.',
+            },
+            {
+              title: 'Build a Reference',
+              body: 'Collect correspondences, sigils, and rituals tailored to your craft.',
+            },
+            {
+              title: 'Witness Growth',
+              body: 'Looking back at older entries highlights how far you’ve come.',
+            },
+          ].map((card) => (
+            <article
+              key={card.title}
+              className='rounded-xl border border-zinc-800 bg-zinc-900/50 p-5'
             >
-              <h3 className='text-lg font-medium text-zinc-100 mb-3'>
-                {faq.question}
+              <h3 className='text-lg font-semibold text-zinc-100 mb-2'>
+                {card.title}
               </h3>
-              <p className='text-zinc-300 leading-relaxed'>{faq.answer}</p>
-            </div>
+              <p className='text-sm text-zinc-400'>{card.body}</p>
+            </article>
           ))}
         </div>
       </section>
 
-      {/* CTA */}
-      <section className='bg-gradient-to-r from-lunary-primary-900/30 to-violet-900/30 border border-lunary-primary-700 rounded-xl p-8 text-center mb-12'>
-        <h2 className='text-2xl font-light text-zinc-100 mb-4'>
-          Start Your Digital Book of Shadows
+      <section id='what-to-include' className='space-y-6 mb-10'>
+        <h2 className='text-3xl font-light text-zinc-100'>
+          3. What to Include
         </h2>
-        <p className='text-zinc-400 mb-6 max-w-xl mx-auto'>
-          Lunary&apos;s Book of Shadows is always with you—searchable, backed
-          up, and integrated with moon phases and astrological data.
-        </p>
-        <div className='flex flex-wrap gap-4 justify-center'>
-          <Button asChild variant='lunary-solid' size='lg'>
-            <Link href='/book-of-shadows'>Open Your Book of Shadows</Link>
-          </Button>
-          <Button asChild variant='outline' size='lg'>
-            <Link href='/grimoire/beginners'>Beginner&apos;s Guide</Link>
-          </Button>
+        {[
+          {
+            title: 'Spells & Rituals',
+            bullets: [
+              'Date, moon phase, and astrological context',
+              'Ingredients, tools, and steps',
+              'How you felt and what happened',
+              'Follow-up notes once results emerge',
+            ],
+          },
+          {
+            title: 'Divination',
+            bullets: [
+              'Question asked and layout used',
+              'Cards or runes drawn with interpretations',
+              'Clues, guidance, and accuracy notes',
+            ],
+          },
+          {
+            title: 'Dreams & Symbols',
+            bullets: [
+              'Dream journals recorded immediately',
+              'Recurring symbols and what they mean to you',
+              'Synchronicities or omens to revisit',
+            ],
+          },
+          {
+            title: 'Correspondences',
+            bullets: [
+              'Herbs, crystals, colors, numbers, planetary days',
+              'Personal symbols or sigils',
+              'Links between ingredients and intentions',
+            ],
+          },
+        ].map((block) => (
+          <article
+            key={block.title}
+            className='rounded-xl border border-zinc-800 bg-zinc-900/50 p-5'
+          >
+            <h3 className='text-lg font-semibold text-zinc-100 mb-2'>
+              {block.title}
+            </h3>
+            <ul className='list-disc list-inside text-sm text-zinc-300 space-y-1'>
+              {block.bullets.map((bullet) => (
+                <li key={bullet}>{bullet}</li>
+              ))}
+            </ul>
+          </article>
+        ))}
+      </section>
+
+      <section id='organization' className='space-y-4 mb-10'>
+        <h2 className='text-3xl font-light text-zinc-100'>
+          4. How to Organize
+        </h2>
+        <div className='grid gap-4 md:grid-cols-2'>
+          {[
+            {
+              title: 'Chronological',
+              body: 'Date entries and add an index if the journal grows large.',
+            },
+            {
+              title: 'By Category',
+              body: 'Split sections for spells, dreams, correspondences, etc.',
+            },
+            {
+              title: 'By Intention',
+              body: 'Group rituals by themes such as protection, healing, or abundance.',
+            },
+            {
+              title: 'Hybrid',
+              body: 'Blend formats; digital journals with search make this easiest.',
+            },
+          ].map((card) => (
+            <article
+              key={card.title}
+              className='rounded-xl border border-zinc-800 bg-zinc-900/50 p-5'
+            >
+              <h3 className='text-lg font-semibold text-zinc-100 mb-2'>
+                {card.title}
+              </h3>
+              <p className='text-sm text-zinc-400'>{card.body}</p>
+            </article>
+          ))}
         </div>
       </section>
 
-      <CosmicConnections
-        entityType='hub-glossary'
-        entityKey='book-of-shadows'
-        title='Book of Shadows Connections'
-        sections={cosmicConnectionsSections}
-      />
-    </div>
+      <section id='digital-vs-physical' className='space-y-4 mb-10'>
+        <h2 className='text-3xl font-light text-zinc-100'>
+          5. Digital vs. Physical
+        </h2>
+        <div className='grid gap-4 md:grid-cols-2'>
+          <article className='rounded-xl border border-zinc-800 bg-zinc-900/50 p-5'>
+            <h3 className='text-lg font-semibold text-zinc-100 mb-2'>
+              Physical
+            </h3>
+            <ul className='list-disc list-inside text-sm text-zinc-300'>
+              <li>Ritual feel with tactile tools</li>
+              <li>No tech needed</li>
+              <li>Can include art, pressed botanicals, sigils</li>
+            </ul>
+          </article>
+          <article className='rounded-xl border border-zinc-800 bg-zinc-900/50 p-5'>
+            <h3 className='text-lg font-semibold text-zinc-100 mb-2'>
+              Digital
+            </h3>
+            <ul className='list-disc list-inside text-sm text-zinc-300'>
+              <li>Searchable and backed up</li>
+              <li>Accessible on the go with photos and links</li>
+              <li>Easy to reorganize and collaborate</li>
+            </ul>
+          </article>
+        </div>
+        <p className='text-zinc-400 text-sm'>
+          Many practitioners use both formats—one for sacred rituals, one for
+          quick reference.
+        </p>
+      </section>
+
+      <section id='getting-started' className='space-y-4 mb-10'>
+        <h2 className='text-3xl font-light text-zinc-100'>
+          6. Getting Started
+        </h2>
+        <ol className='list-decimal list-inside text-zinc-300 space-y-2'>
+          <li>Write today’s date and current moon phase.</li>
+          <li>State your intention for keeping this BOS.</li>
+          <li>Note what drew you to this path and how you feel.</li>
+          <li>Describe something you are curious to explore.</li>
+        </ol>
+        <p className='text-zinc-400 text-sm'>
+          Start imperfectly; the best BOS is the one you return to every day.
+        </p>
+        <Link
+          href='/grimoire/beginners'
+          className='inline-flex items-center gap-2 text-lunary-primary-300 hover:text-lunary-primary-400'
+        >
+          <Sparkles size={16} /> Follow a beginner’s path next
+        </Link>
+      </section>
+
+      <section id='faq' className='space-y-4'>
+        <h2 className='text-3xl font-light text-zinc-100'>7. FAQ</h2>
+        <div className='space-y-4'>
+          {faqs.map((faq) => (
+            <article
+              key={faq.question}
+              className='rounded-xl border border-zinc-800 bg-zinc-900/50 p-5'
+            >
+              <h3 className='text-lg font-semibold text-zinc-100 mb-2'>
+                {faq.question}
+              </h3>
+              <p className='text-zinc-400 text-sm'>{faq.answer}</p>
+            </article>
+          ))}
+        </div>
+      </section>
+    </SEOContentTemplate>
   );
 }

@@ -1,9 +1,27 @@
 import { Metadata } from 'next';
 import Link from 'next/link';
-import { ExploreGrimoire } from '@/components/grimoire/ExploreGrimoire';
 import { Layers } from 'lucide-react';
 import { tarotSuits } from '@/constants/tarot';
-import { GrimoireBreadcrumbs } from '@/components/grimoire/GrimoireBreadcrumbs';
+import { SEOContentTemplate } from '@/components/grimoire/SEOContentTemplate';
+
+const suitDetails: Record<string, { color: string; themes: string[] }> = {
+  wands: {
+    color: 'text-orange-400',
+    themes: ['Creativity', 'Passion', 'Ambition', 'Energy', 'Willpower'],
+  },
+  cups: {
+    color: 'text-blue-400',
+    themes: ['Emotions', 'Relationships', 'Love', 'Intuition', 'Dreams'],
+  },
+  swords: {
+    color: 'text-cyan-400',
+    themes: ['Intellect', 'Conflict', 'Truth', 'Communication', 'Decisions'],
+  },
+  pentacles: {
+    color: 'text-emerald-400',
+    themes: ['Material', 'Finances', 'Career', 'Health', 'Stability'],
+  },
+};
 
 export const metadata: Metadata = {
   title: 'Tarot Suits: Wands, Cups, Swords & Pentacles Meanings | Lunary',
@@ -32,133 +50,172 @@ export const metadata: Metadata = {
   },
 };
 
-const suitDetails: Record<
-  string,
-  { color: string; cards: string[]; themes: string[] }
-> = {
-  wands: {
-    color: 'text-orange-400',
-    cards: [
-      'Ace',
-      'Two',
-      'Three',
-      'Four',
-      'Five',
-      'Six',
-      'Seven',
-      'Eight',
-      'Nine',
-      'Ten',
-      'Page',
-      'Knight',
-      'Queen',
-      'King',
-    ],
-    themes: ['Creativity', 'Passion', 'Ambition', 'Energy', 'Willpower'],
-  },
-  cups: {
-    color: 'text-blue-400',
-    cards: [
-      'Ace',
-      'Two',
-      'Three',
-      'Four',
-      'Five',
-      'Six',
-      'Seven',
-      'Eight',
-      'Nine',
-      'Ten',
-      'Page',
-      'Knight',
-      'Queen',
-      'King',
-    ],
-    themes: ['Emotions', 'Relationships', 'Love', 'Intuition', 'Dreams'],
-  },
-  swords: {
-    color: 'text-cyan-400',
-    cards: [
-      'Ace',
-      'Two',
-      'Three',
-      'Four',
-      'Five',
-      'Six',
-      'Seven',
-      'Eight',
-      'Nine',
-      'Ten',
-      'Page',
-      'Knight',
-      'Queen',
-      'King',
-    ],
-    themes: ['Intellect', 'Conflict', 'Truth', 'Communication', 'Decisions'],
-  },
-  pentacles: {
-    color: 'text-emerald-400',
-    cards: [
-      'Ace',
-      'Two',
-      'Three',
-      'Four',
-      'Five',
-      'Six',
-      'Seven',
-      'Eight',
-      'Nine',
-      'Ten',
-      'Page',
-      'Knight',
-      'Queen',
-      'King',
-    ],
-    themes: ['Material', 'Finances', 'Career', 'Health', 'Stability'],
-  },
-};
-
 export default function TarotSuitsIndexPage() {
-  const breadcrumbItems = [
-    { name: 'Grimoire', url: '/grimoire' },
-    { name: 'Tarot', url: '/grimoire/tarot' },
-    { name: 'Suits', url: '/grimoire/tarot/suits' },
-  ];
-
   return (
-    <div className='p-4 md:p-6 lg:p-8 xl:p-10 min-h-full'>
-      <GrimoireBreadcrumbs items={breadcrumbItems} />
-      <div className='max-w-5xl mx-auto'>
-        <div className='text-center mb-12'>
-          <div className='flex justify-center mb-4'>
-            <Layers className='w-16 h-16 text-violet-400' />
-          </div>
-          <h1 className='text-3xl md:text-4xl lg:text-5xl font-light text-zinc-100 mb-4'>
-            Tarot Suits
-          </h1>
-          <p className='text-lg text-zinc-400 max-w-2xl mx-auto'>
-            The Minor Arcana consists of 56 cards divided into four suits, each
-            associated with an element and reflecting different aspects of daily
-            life.
-          </p>
-        </div>
+    <div className='min-h-screen bg-zinc-950 text-zinc-100'>
+      <SEOContentTemplate
+        title={metadata.title as string}
+        h1='Tarot Suits'
+        description={metadata.description as string}
+        keywords={metadata.keywords as string[]}
+        canonicalUrl={metadata.alternates?.canonical as string}
+        tableOfContents={[
+          { label: 'Understanding the Suits', href: '#understanding' },
+          { label: 'Reading Suit Balance', href: '#suit-balance' },
+          { label: 'Suit Progressions', href: '#suit-progressions' },
+          { label: 'Suit Breakdown', href: '#suit-breakdown' },
+          { label: 'Related Resources', href: '#related-resources' },
+        ]}
+        intro='The Minor Arcana is divided into four suits, each tied to an element and a part of everyday life. Suits tell you where energy is focused in a reading, whether in feelings, actions, thoughts, or material matters.'
+        tldr='Wands = fire/action, Cups = water/emotions, Swords = air/thoughts, Pentacles = earth/resources. Suit dominance points to where the story is happening.'
+        meaning={`Tarot suits act like a map of lived experience. When a suit repeats, it highlights the area of life the reading centers on. A spread heavy in Cups suggests emotional processing, while a spread heavy in Swords suggests decisions or conflict.
 
-        <div className='bg-zinc-900/50 border border-zinc-800 rounded-xl p-6 mb-10'>
+The suit and the number work together. The suit shows the domain, and the number shows the stage of development. Court cards show people, roles, or attitudes within that domain.
+
+Reading suit balance helps you see what is overactive or missing. Too much Swords can mean overthinking, while too much Wands can signal restlessness. If a suit is missing, it can point to the next action: add practicality if Earth is absent, or add emotional honesty if Water is missing.`}
+        heroContent={
+          <div className='text-center'>
+            <div className='flex justify-center mb-4'>
+              <Layers className='w-16 h-16 text-violet-400' />
+            </div>
+            <p className='text-lg text-zinc-400 max-w-3xl mx-auto'>
+              The Minor Arcana features 56 cards split across four suits, each
+              tied to an element and everyday life experiences.
+            </p>
+          </div>
+        }
+        breadcrumbs={[
+          { label: 'Grimoire', href: '/grimoire' },
+          { label: 'Tarot', href: '/grimoire/tarot' },
+          { label: 'Suits' },
+        ]}
+        rituals={[
+          'Sort your deck into suits and read each suit as a mini story.',
+          'Pull one card from each suit and compare the themes.',
+          'Journal which suit appears most often in your readings.',
+          'Practice reading without reversals to focus on suit energy.',
+        ]}
+        journalPrompts={[
+          'Which suit appears most often in my readings?',
+          'What area of life is asking for attention right now?',
+          'How do I respond to conflict, emotions, action, and stability?',
+          'What suit do I avoid and why?',
+        ]}
+        tables={[
+          {
+            title: 'Suit Overview',
+            headers: ['Suit', 'Element', 'Focus'],
+            rows: [
+              ['Wands', 'Fire', 'Action, will, creativity'],
+              ['Cups', 'Water', 'Emotions, relationships'],
+              ['Swords', 'Air', 'Thought, conflict, clarity'],
+              ['Pentacles', 'Earth', 'Resources, body, work'],
+            ],
+          },
+          {
+            title: 'Suit Dominance Clues',
+            headers: ['Dominant Suit', 'Common Signal'],
+            rows: [
+              ['Wands', 'Momentum or initiative'],
+              ['Cups', 'Emotional processing'],
+              ['Swords', 'Decisions or tension'],
+              ['Pentacles', 'Practical matters'],
+            ],
+          },
+          {
+            title: 'Suit Stages at a Glance',
+            headers: ['Stage', 'What it suggests'],
+            rows: [
+              ['Aces', 'Beginning energy and raw potential'],
+              ['Fives', 'Tension, adjustment, or turning point'],
+              ['Tens', 'Completion and integration'],
+              ['Courts', 'People, roles, or attitudes'],
+            ],
+          },
+        ]}
+        internalLinks={[
+          { text: 'All Tarot Cards', href: '/grimoire/tarot' },
+          { text: 'Tarot Spreads', href: '/grimoire/tarot/spreads' },
+          { text: 'Major Arcana', href: '/grimoire/tarot/major-arcana' },
+          { text: 'Grimoire Home', href: '/grimoire' },
+        ]}
+        faqs={[
+          {
+            question: 'What do the tarot suits represent?',
+            answer:
+              'Each suit represents a life domain: Wands for action, Cups for emotions, Swords for thoughts, and Pentacles for material matters.',
+          },
+          {
+            question: 'What does it mean if one suit dominates a reading?',
+            answer:
+              'It means that area of life is the main focus of the question or situation.',
+          },
+          {
+            question: 'How do court cards relate to suits?',
+            answer:
+              'Court cards show people, roles, or attitudes within the suit domain.',
+          },
+        ]}
+      >
+        <section
+          id='understanding'
+          className='mb-12 bg-zinc-900/50 border border-zinc-800 rounded-xl p-6'
+        >
           <h2 className='text-xl font-medium text-zinc-100 mb-3'>
             Understanding the Suits
           </h2>
           <p className='text-zinc-400 mb-4'>
-            Each suit contains 14 cards: Ace through Ten, plus four court cards
-            (Page, Knight, Queen, King). The suits correspond to the four
-            elements and represent different domains of human experience.
+            Each suit contains Ace through Ten plus four court cards. The suits
+            align with the four elements and reveal which areas of life are
+            highlighted in a reading.
           </p>
           <p className='text-zinc-400'>
-            When a suit dominates a reading, it indicates which area of life is
-            most relevant to your question or situation.
+            Dominant suits indicate the energy that’s most relevant to your
+            question or situation.
           </p>
-        </div>
+        </section>
 
-        <div className='space-y-8'>
+        <section
+          id='suit-balance'
+          className='mb-12 bg-zinc-900/50 border border-zinc-800 rounded-xl p-6'
+        >
+          <h2 className='text-xl font-medium text-zinc-100 mb-3'>
+            Reading Suit Balance
+          </h2>
+          <p className='text-zinc-400 mb-4'>
+            A balanced spread usually includes a mix of suits. When one suit is
+            missing, it may point to a blind spot or an area that is being
+            overlooked. When one suit dominates, it shows the main storyline.
+          </p>
+          <p className='text-zinc-400'>
+            If you pull many Wands, focus on action and initiative. If you pull
+            many Cups, attend to feelings and connection. Let the suits guide
+            your next step.
+          </p>
+        </section>
+
+        <section
+          id='suit-progressions'
+          className='mb-12 bg-zinc-900/50 border border-zinc-800 rounded-xl p-6'
+        >
+          <h2 className='text-xl font-medium text-zinc-100 mb-3'>
+            Suit Progressions
+          </h2>
+          <p className='text-zinc-400 mb-4'>
+            Numbers show the arc of a suit. Aces are beginnings, Fives test the
+            path, and Tens signal completion. Tracking the numbers inside a suit
+            helps you read whether the story is just starting, building, or
+            resolving.
+          </p>
+          <p className='text-zinc-400'>
+            If your spread jumps from low to high numbers in one suit, it can
+            mean a fast-moving situation. If the numbers cluster, the message is
+            often about staying with the process rather than rushing to the
+            outcome.
+          </p>
+        </section>
+
+        <section id='suit-breakdown' className='space-y-8'>
           {Object.entries(tarotSuits).map(([key, suit]) => (
             <section
               key={key}
@@ -170,7 +227,7 @@ export default function TarotSuitsIndexPage() {
               >
                 <div className='flex items-center gap-4 mb-4'>
                   <h2
-                    className={`text-2xl font-medium ${suitDetails[key].color} group-hover:opacity-80 transition-opacity`}
+                    className={`text-2xl font-medium ${suitDetails[key].color} group-hover:opacity-80`}
                   >
                     {suit.name}
                   </h2>
@@ -198,9 +255,12 @@ export default function TarotSuitsIndexPage() {
               </Link>
             </section>
           ))}
-        </div>
+        </section>
 
-        <div className='border-t border-zinc-800 pt-8 mt-12'>
+        <section
+          id='related-resources'
+          className='border-t border-zinc-800 pt-8 mt-12'
+        >
           <h3 className='text-lg font-medium text-zinc-100 mb-4'>
             Related Resources
           </h3>
@@ -224,9 +284,8 @@ export default function TarotSuitsIndexPage() {
               Reversed Cards
             </Link>
           </div>
-        </div>
-        <ExploreGrimoire />
-      </div>
+        </section>
+      </SEOContentTemplate>
     </div>
   );
 }

@@ -201,6 +201,52 @@ export default async function SpellsIndexPage({
         }}
         tldr='Spells combine intention, symbolism, and energy to create change. Key elements: clear intention, appropriate materials, timing (moon phases, planetary hours), and ethical practice. Always read through a spell completely before starting and gather all materials first.'
         intro='Spellwork requires intention, focus, and respect for magical practice. Always read through a spell completely before starting, gather your materials, and create sacred space. Remember that magic works best when aligned with ethical principles and genuine need.'
+        meaning={`Spells are structured intention. The goal is not to force an outcome, but to align your actions with the energy you want to invite or release. A strong spell has a clear purpose, a simple structure, and a real-world follow through.
+
+Start with a single goal. Choose timing and correspondences that support it, then keep the ritual short enough to complete with focus. Consistency matters more than complexity.
+
+After the spell, take one practical step that matches your intention. That step grounds the work and helps you notice results without overthinking them.`}
+        howToWorkWith={[
+          'Pick the simplest spell that matches your goal.',
+          'Gather materials before you begin to avoid breaks in focus.',
+          'Choose timing that supports the intention (moon phase, day, hour).',
+          'Speak the intention out loud once to anchor the ritual.',
+          'Close and ground so you leave the circle with clarity.',
+        ]}
+        rituals={[
+          'Cleanse the space with smoke, sound, or salt water.',
+          'Write your intention in one clear sentence.',
+          'Light a candle and read the spell slowly and steadily.',
+          'Thank any energies you invoked and close the ritual.',
+        ]}
+        journalPrompts={[
+          'What is the single outcome I want from this spell?',
+          'Which correspondences feel most supportive right now?',
+          'What practical action will I take after this ritual?',
+          'How will I measure progress over the next week?',
+        ]}
+        tables={[
+          {
+            title: 'Spell Components',
+            headers: ['Component', 'Purpose'],
+            rows: [
+              ['Intention', 'Clarifies the goal'],
+              ['Timing', 'Aligns the energy'],
+              ['Correspondences', 'Adds symbolic focus'],
+              ['Action', 'Anchors results in real life'],
+            ],
+          },
+          {
+            title: 'When to Keep It Simple',
+            headers: ['Situation', 'Simple Choice'],
+            rows: [
+              ['New to spellwork', 'Single candle ritual'],
+              ['Low energy day', 'Short written intention'],
+              ['Unclear goal', 'Clarity journaling spell'],
+              ['High urgency', 'Protection and grounding first'],
+            ],
+          },
+        ]}
         faqs={[
           {
             question: 'Do spells really work?',

@@ -55,7 +55,7 @@ export async function generateMetadata({
       description,
       url: `https://lunary.app/grimoire/seasons/${year}/${season}`,
       images: [
-        `/api/og/cosmic?title=${encodeURIComponent(`${seasonData.symbol} ${seasonData.displayName} Season ${year}`)}`,
+        `/api/og/thematic?category=zodiac&slug=${encodeURIComponent(season)}&title=${encodeURIComponent(`${seasonData.displayName} Season ${year}`)}&format=landscape`,
       ],
     },
     alternates: {
@@ -96,6 +96,7 @@ export default async function ZodiacSeasonPage({
         seasonData.element,
       ]}
       canonicalUrl={`https://lunary.app/grimoire/seasons/${year}/${season}`}
+      intro={`${seasonData.displayName} Season ${year} is a collective transit that colors the mood of the month. From ${dates.start} to ${dates.end}, the Sun amplifies ${seasonData.element.toLowerCase()} energy, inviting everyone to work with ${seasonData.theme}. Whether you track astrology daily or simply want to align with seasonal rhythms, this guide offers practical ways to integrate the season into your goals, relationships, and rituals.`}
       datePublished='2025-01-01'
       dateModified={new Date().toISOString().split('T')[0]}
       articleSection='Zodiac Seasons'
@@ -126,12 +127,44 @@ The primary theme of ${seasonData.displayName} Season is ${seasonData.theme}. Th
 ### ${seasonData.displayName} Season and the Natural World
 
 ${seasonData.displayName} Season falls during ${seasonData.season} in the Northern Hemisphere. The qualities of this natural season mirror the astrological energy beautifully.
+
+### How to Work with ${seasonData.displayName} Season
+
+The best way to use a zodiac season is to match your goals to its energy. If the season emphasizes action, start projects and take bold steps. If it emphasizes reflection, slow down, evaluate, and refine. Small daily rituals—like journaling or a short meditation—help you track how the season is influencing your mood and choices.
+
+### Relationships and Focus
+
+Seasonal energy shows up in communication and priorities. Notice where you feel motivated, and set one clear focus for the month so the season feels supportive rather than scattered.
+
+### Timing Tips
+
+If you want to plan ahead, use the first week to set direction, the middle weeks to build momentum, and the final days to review progress. This keeps your focus aligned with the natural arc of the season.
+
+If you miss a week, return without judgment. The season holds the theme for a full month, so you can re-enter at any point.
+
+### A Note on Hemispheres
+
+If you are in the Southern Hemisphere, the natural season may be opposite. The astrological themes still apply, but you can weave them into your local climate and culture. Let the season meet you where you are.
       `}
       rituals={seasonData.rituals}
       emotionalThemes={[
         seasonData.theme,
         `${seasonData.element} energy activation`,
         `${seasonData.season} themes`,
+      ]}
+      howToWorkWith={[
+        'Set one intention that mirrors the season theme.',
+        'Review your calendar and align key actions with the season energy.',
+        'Track your mood and energy levels each week to notice patterns.',
+        'Use the season element in rituals (candles, water, incense, stones).',
+        'Create a seasonal playlist or altar to anchor the vibe.',
+      ]}
+      journalPrompts={[
+        `What does ${seasonData.theme.toLowerCase()} look like in my daily life?`,
+        'Where do I feel most energized right now, and why?',
+        `How can I honor ${seasonData.element.toLowerCase()} energy with my routine?`,
+        'What needs closure before the next season begins?',
+        'What is one habit I want to carry into the next season?',
       ]}
       signsMostAffected={[seasonData.displayName]}
       tables={[
@@ -144,6 +177,15 @@ ${seasonData.displayName} Season falls during ${seasonData.season} in the Northe
             ['Element', seasonData.element],
             ['Natural Season', seasonData.season],
             ['Theme', seasonData.theme],
+          ],
+        },
+        {
+          title: 'Seasonal Focus Ideas',
+          headers: ['Area', 'Focus'],
+          rows: [
+            ['Work', `Align goals with ${seasonData.theme.toLowerCase()}`],
+            ['Relationships', 'Communicate needs clearly'],
+            ['Self-care', `Honor ${seasonData.element.toLowerCase()} balance`],
           ],
         },
       ]}
@@ -163,6 +205,26 @@ ${seasonData.displayName} Season falls during ${seasonData.season} in the Northe
           href: `/grimoire/seasons/${year}/${nextSeason.sign}`,
           type: 'Season',
         },
+      ]}
+      faqs={[
+        {
+          question: `Does ${seasonData.displayName} Season affect everyone?`,
+          answer: `Yes. The Sun's transit sets the collective tone for the month, so everyone feels some influence. Your natal chart shows which house is most activated for you personally.`,
+        },
+        {
+          question: `How is ${seasonData.displayName} Season different from ${seasonData.displayName} Sun sign?`,
+          answer: `Seasonal energy is a temporary transit that affects everyone, while your Sun sign is a lifelong placement. The season can highlight similar themes, but it does not change your core identity.`,
+        },
+        {
+          question: 'Is the timing exact every year?',
+          answer:
+            'Dates are approximate and can shift by a day based on exact solar ingress times. This guide uses standard transit dates for planning and reflection.',
+        },
+      ]}
+      internalLinks={[
+        { text: 'Zodiac Signs', href: '/grimoire/zodiac' },
+        { text: 'Birth Chart Basics', href: '/grimoire/birth-chart' },
+        { text: 'Astrology Transits', href: '/grimoire/transits' },
       ]}
       ctaText={`Discover how ${seasonData.displayName} Season affects your chart`}
       ctaHref='/horoscope'

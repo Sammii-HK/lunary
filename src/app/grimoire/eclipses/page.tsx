@@ -97,11 +97,51 @@ export default function EclipsesIndexPage() {
         }}
         tldr='Eclipses are cosmic wild cards that accelerate change. Solar eclipses bring new beginnings; lunar eclipses bring endings and revelations. Eclipse seasons occur every 6 months, and their effects unfold over 6 months. Avoid manifestation during eclipses — observe and receive instead.'
         intro='Eclipses occur when the Sun, Moon, and Earth align. They happen in pairs or sometimes trios, with a solar and lunar eclipse occurring about two weeks apart. Eclipse seasons happen roughly every 6 months. In astrology, eclipses are like cosmic wild cards — they can bring sudden changes, revelations, or new paths. Events set in motion during eclipses often unfold over the following 6 months.'
+        meaning={`Eclipses mark fated turning points. They compress time, reveal hidden information, and redirect your path. If you feel emotional or unsettled, that’s normal — eclipses heighten sensitivity and accelerate lessons.
+
+Use eclipse seasons to reflect on patterns, not to force outcomes. The clearest guidance often appears in hindsight, once the change has settled.
+
+Each eclipse activates a house in your birth chart, which is why two people experience the same eclipse differently. Knowing which house is triggered helps you understand the life area being highlighted.
+
+Solar eclipses are forward‑moving; they invite new chapters. Lunar eclipses are releasing; they highlight what is ready to end. If you want to work with eclipse energy in a grounded way, focus on awareness rather than outcomes.
+
+Eclipses can feel like curveballs, but they often reveal what has been building beneath the surface. The more you observe recurring themes, the more useful the eclipse season becomes.
+
+If you are unsure what to do, do less. Rest, reflect, and allow the message to arrive on its own timing.`}
         howToWorkWith={[
           "Don't manifest during eclipses: The energy is too chaotic. Observe what unfolds instead.",
           'Pay attention to themes: Notice what comes up 2 weeks before and after an eclipse.',
           'Check your chart: Eclipses hitting personal planets bring more noticeable effects.',
           'Stay flexible: Eclipses can bring unexpected changes — go with the flow.',
+        ]}
+        rituals={[
+          'Journal what is surfacing without trying to solve it immediately.',
+          'Take a cleansing bath or shower to reset your energy.',
+          'Light a single candle and ask for clarity rather than outcomes.',
+          'Rest more than usual and keep your schedule light.',
+        ]}
+        journalPrompts={[
+          'What is ending naturally in my life right now?',
+          'What is asking to begin even if it feels scary?',
+          'Where do I feel resistance, and why?',
+          'What truth has become impossible to ignore?',
+        ]}
+        emotionalThemes={[
+          'Uncertainty and change',
+          'Revelations',
+          'Letting go',
+          'Redirection',
+        ]}
+        tables={[
+          {
+            title: 'Eclipse Season Rhythm',
+            headers: ['Phase', 'What to Do'],
+            rows: [
+              ['Before', 'Notice repeating themes and slow down.'],
+              ['During', 'Observe, rest, and avoid forcing decisions.'],
+              ['After', 'Act on clarity and integrate lessons.'],
+            ],
+          },
         ]}
         faqs={[
           {
@@ -119,6 +159,16 @@ export default function EclipsesIndexPage() {
             answer:
               'Eclipses occur when the Sun and Moon align near the lunar nodes. Since the nodes are opposite each other, we get both a solar eclipse (New Moon) and lunar eclipse (Full Moon) about two weeks apart during each eclipse season.',
           },
+          {
+            question: 'Do eclipses affect everyone the same way?',
+            answer:
+              'Everyone feels the collective tone, but the strongest effects happen when an eclipse activates personal chart placements.',
+          },
+        ]}
+        internalLinks={[
+          { text: 'Lunar Nodes', href: '/grimoire/lunar-nodes' },
+          { text: 'Birth Chart Basics', href: '/grimoire/birth-chart' },
+          { text: 'Moon Phases', href: '/grimoire/moon/phases' },
         ]}
         relatedItems={[
           {
@@ -193,6 +243,37 @@ export default function EclipsesIndexPage() {
                 </Link>
               ))}
             </div>
+          </section>
+          <section className='rounded-xl border border-zinc-800 bg-zinc-900/40 p-6'>
+            <h2 className='text-2xl font-medium text-zinc-100 mb-4'>
+              Eclipse Season Checklist
+            </h2>
+            <p className='text-sm text-zinc-300 mb-4'>
+              Eclipse energy is intense but manageable when you move slowly. Use
+              this short checklist to stay grounded and focused.
+            </p>
+            <ul className='list-disc list-inside text-sm text-zinc-300 space-y-2'>
+              <li>Keep your schedule flexible and avoid big commitments.</li>
+              <li>Journal what repeats rather than forcing new plans.</li>
+              <li>Sleep and hydration become non‑negotiable.</li>
+              <li>Wait a few days before making major decisions.</li>
+            </ul>
+          </section>
+          <section className='rounded-xl border border-zinc-800 bg-zinc-900/40 p-6'>
+            <h2 className='text-2xl font-medium text-zinc-100 mb-4'>
+              Solar vs. Lunar Eclipses
+            </h2>
+            <p className='text-sm text-zinc-300 mb-4'>
+              Solar eclipses emphasize beginnings, action, and new direction.
+              Lunar eclipses emphasize endings, truth, and emotional release.
+              Think of solar as a doorway opening, and lunar as a doorway
+              closing.
+            </p>
+            <p className='text-sm text-zinc-300'>
+              If you are unsure which is happening, check the Moon phase: new
+              moon eclipses are solar, full moon eclipses are lunar. Both are
+              powerful, but they ask for different responses.
+            </p>
           </section>
         </div>
       </SEOContentTemplate>

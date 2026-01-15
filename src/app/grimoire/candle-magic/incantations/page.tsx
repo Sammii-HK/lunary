@@ -2,6 +2,182 @@ export const revalidate = 86400;
 
 import { Metadata } from 'next';
 import { SEOContentTemplate } from '@/components/grimoire/SEOContentTemplate';
+import { CosmicConnections } from '@/components/grimoire/CosmicConnections';
+import { CosmicConnectionSection } from '@/lib/cosmicConnectionsConfig';
+
+const tableOfContents = [
+  { label: 'Why Incantations Matter', href: '#why-incantations' },
+  { label: 'Incantation Structure', href: '#structure' },
+  { label: 'Color Spells', href: '#color-spells' },
+  { label: 'Practice Tips', href: '#practice-tips' },
+  { label: 'FAQs', href: '#faq' },
+];
+
+const faqs = [
+  {
+    question: 'Do I need to use these exact incantations?',
+    answer:
+      'No! Use them as templates and make the words your own. The key is speaking with conviction while feeling the energy behind each phrase.',
+  },
+  {
+    question: 'How many times should I repeat an incantation?',
+    answer:
+      'Traditional practice repeats words three times, but repeat as feels right for your ritual—once, thrice, or throughout the candle burn.',
+  },
+  {
+    question: 'Can I combine multiple colors in one spell?',
+    answer:
+      'Yes—use different candles for layered intentions. Light them consecutively, speak each color’s incantation, and weave the energies together.',
+  },
+];
+
+const relatedItems = [
+  {
+    name: 'Candle Magic Guide',
+    href: '/grimoire/candle-magic',
+    type: 'Overview',
+  },
+  {
+    name: 'Anointing Candles',
+    href: '/grimoire/candle-magic/anointing',
+    type: 'Preparation',
+  },
+  {
+    name: 'Lighting Candles on the Altar',
+    href: '/grimoire/candle-magic/altar-lighting',
+    type: 'Ritual Order',
+  },
+];
+
+const cosmicSections: CosmicConnectionSection[] = [
+  {
+    title: 'Candle Practice',
+    links: [
+      { label: 'Candle Magic', href: '/grimoire/candle-magic' },
+      { label: 'Color Guide', href: '/grimoire/candle-magic/colors' },
+      { label: 'Anointing Candles', href: '/grimoire/candle-magic/anointing' },
+    ],
+  },
+  {
+    title: 'Magical Tools',
+    links: [
+      {
+        label: 'Spellcraft Fundamentals',
+        href: '/grimoire/spells/fundamentals',
+      },
+      { label: 'Correspondences', href: '/grimoire/correspondences' },
+      { label: 'Jar Spells', href: '/grimoire/jar-spells' },
+    ],
+  },
+];
+
+const sectionContent = (
+  <div className='space-y-10'>
+    <section id='why-incantations' className='space-y-3'>
+      <h2 className='text-3xl font-light text-zinc-100'>
+        Why Incantations Matter
+      </h2>
+      <p className='text-zinc-300'>
+        Words anchor intention. When spoken alongside candle lighting,
+        incantations weave focus, resonance, and the vibration of the chosen
+        color into your magic.
+      </p>
+      <p className='text-zinc-300'>
+        If you struggle to “feel” magic, incantations help your body
+        participate. The voice carries breath, and breath carries state. When
+        you speak slowly, your nervous system settles; when you speak with fire,
+        your motivation rises. Your pacing is part of the spell.
+      </p>
+    </section>
+
+    <section id='structure' className='space-y-4'>
+      <h2 className='text-3xl font-light text-zinc-100'>
+        A Simple Incantation Structure
+      </h2>
+      <p className='text-sm text-zinc-300'>
+        Most candle incantations follow a reliable structure: name the energy,
+        name the intention, and declare the outcome. This keeps your words
+        specific (and avoids rambling mid-ritual).
+      </p>
+      <ol className='list-decimal list-inside text-sm text-zinc-300 space-y-2'>
+        <li>
+          <strong>Invocation:</strong> “By this [color] flame…”
+        </li>
+        <li>
+          <strong>Direction:</strong> “I call in [quality]…”
+        </li>
+        <li>
+          <strong>Declaration:</strong> “So it is / so it becomes.”
+        </li>
+      </ol>
+    </section>
+
+    <section id='color-spells' className='space-y-4'>
+      <h2 className='text-3xl font-light text-zinc-100'>
+        Color Spells Snapshot
+      </h2>
+      <div className='grid gap-4 md:grid-cols-2 text-sm text-zinc-300'>
+        {[
+          { title: 'Red', body: 'Love, courage, passion, action' },
+          { title: 'Green', body: 'Prosperity, growth, healing, abundance' },
+          { title: 'Blue', body: 'Peace, protection, healing, truth' },
+          {
+            title: 'Purple',
+            body: 'Spirituality, psychic vision, transformation',
+          },
+          { title: 'White', body: 'Protection, purification, all-purpose' },
+          { title: 'Black', body: 'Banishing, protection, endings' },
+        ].map((item) => (
+          <article
+            key={item.title}
+            className='rounded-xl border border-zinc-800 bg-zinc-900/30 p-4'
+          >
+            <h3 className='text-lg font-semibold text-zinc-100 mb-1'>
+              {item.title}
+            </h3>
+            <p>{item.body}</p>
+          </article>
+        ))}
+      </div>
+    </section>
+
+    <section id='practice-tips' className='space-y-3'>
+      <h2 className='text-3xl font-light text-zinc-100'>Practice Tips</h2>
+      <ul className='list-disc list-inside text-sm text-zinc-300 space-y-2'>
+        <li>
+          Speak the words with conviction and breathe the color into your body.
+        </li>
+        <li>
+          Layer incantations with anointing, carving, and correspondences.
+        </li>
+        <li>
+          Repeat phrases on repeat candles, but trust your intuition for rhythm.
+        </li>
+      </ul>
+      <p className='text-sm text-zinc-300'>
+        Try a repetition number that matches your intention: 3 for momentum, 6
+        for harmony, 9 for completion. The goal is consistency, not perfection.
+      </p>
+    </section>
+
+    <section id='faq' className='space-y-3'>
+      <h2 className='text-3xl font-light text-zinc-100'>FAQ</h2>
+      <div className='space-y-3'>
+        {faqs.map((faq) => (
+          <article
+            key={faq.question}
+            className='rounded-xl border border-zinc-800 bg-zinc-900/50 p-4'
+          >
+            <h3 className='text-lg font-semibold text-zinc-100 mb-1'>
+              {faq.question}
+            </h3>
+            <p className='text-sm text-zinc-300'>{faq.answer}</p>
+          </article>
+        ))}
+      </div>
+    </section>
+  </div>
+);
 
 export const metadata: Metadata = {
   title: 'Incantations by Candle Color: Candle Magic Spells - Lunary',
@@ -49,12 +225,8 @@ export default function IncantationsByCandleColorPage() {
         'candle magic words',
       ]}
       canonicalUrl='https://lunary.app/grimoire/candle-magic/incantations'
-      breadcrumbs={[
-        { label: 'Grimoire', href: '/grimoire' },
-        { label: 'Candle Magic', href: '/grimoire/candle-magic' },
-        { label: 'Incantations', href: '/grimoire/candle-magic/incantations' },
-      ]}
-      intro='Specific incantations to use when lighting candles of different colors. Speak with conviction and feel the energy of each color. These incantations combine the power of spoken word with color correspondences to amplify your candle magic.'
+      tableOfContents={tableOfContents}
+      intro='Specific incantations to use when lighting colored candles make your intention sound and feel real. Speak with conviction and layer the words with your color correspondences.'
       meaning={`Each candle color carries specific energetic properties. When you combine color energy with powerful incantations, you create a focused intention that manifests your desires. Speak these incantations with conviction, feeling the energy of each color flowing through you.
 
 **Red Candle:**
@@ -96,29 +268,9 @@ Use for: Banishing, protection, removing negativity`}
         'Choose the candle color that matches your intention',
         'Speak incantations with conviction and feeling',
         'Visualize the color energy flowing through you',
-        'Feel the meaning of each word as you speak',
-        'Combine incantations with candle carving and anointing',
-        'Use incantations during candle lighting rituals',
-        'Repeat incantations daily for multi-day spells',
-        'Modify incantations to fit your personal practice',
+        'Combine incantations with carving and anointing',
       ]}
-      faqs={[
-        {
-          question: 'Do I need to use these exact incantations?',
-          answer:
-            'No! These incantations are templates. Feel free to modify them to fit your personal practice and intention. The important thing is speaking with conviction and feeling the energy of the words.',
-        },
-        {
-          question: 'How many times should I repeat an incantation?',
-          answer:
-            'Traditionally, incantations are spoken three times, but you can repeat them as many times as feels right. Some practitioners say them once while lighting, others repeat them throughout the candle burn. Trust your intuition.',
-        },
-        {
-          question: 'Can I combine multiple colors in one ritual?',
-          answer:
-            'Yes! You can use multiple candles of different colors, each with its own incantation. For example, use a white candle for protection, then a green candle for prosperity, speaking the appropriate incantation for each.',
-        },
-      ]}
+      faqs={faqs}
       internalLinks={[
         { text: 'Candle Magic', href: '/grimoire/candle-magic' },
         {
@@ -134,6 +286,19 @@ Use for: Banishing, protection, removing negativity`}
           href: '/grimoire/spells/fundamentals',
         },
       ]}
-    />
+      relatedItems={relatedItems}
+      cosmicConnections={
+        <CosmicConnections
+          entityType='hub-candle-magic'
+          entityKey='candle-magic'
+          title='Candle Magic Connections'
+          sections={cosmicSections}
+        />
+      }
+      ctaText='Speak your candle incantations'
+      ctaHref='/grimoire/candle-magic'
+    >
+      {sectionContent}
+    </SEOContentTemplate>
   );
 }

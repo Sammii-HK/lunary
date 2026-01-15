@@ -146,7 +146,11 @@ export default async function WitchPage({
 
 This path emphasizes ${witchData.practices[0]?.toLowerCase() || 'specific practices'} and offers practitioners a way to connect with magic that aligns with their natural inclinations and interests. What makes this path unique is its focus on ${witchData.practices.slice(0, 2).join(' and ').toLowerCase()}.
 
-Walking the ${witchData.name} path means integrating these practices into your daily life, not just performing rituals occasionally. It's about developing a deep connection with your chosen focus area and living your practice authentically.`;
+Walking the ${witchData.name} path means integrating these practices into your daily life, not just performing rituals occasionally. It is about developing a deep connection with your chosen focus area and living your practice authentically.
+
+If you are new to this path, start with one small daily habit and expand slowly. Consistency builds confidence, and confidence builds clarity.
+
+Your path can evolve over time, so let curiosity guide you rather than rigid labels.`;
 
   const howToWorkWith = [
     `Research and learn about ${witchData.name.toLowerCase()} practices`,
@@ -192,6 +196,37 @@ Walking the ${witchData.name} path means integrating these practices into your d
       intro={`The ${witchData.name} path is one of many approaches to modern witchcraft. This comprehensive guide covers everything you need to know about this path, including its practices, philosophy, and how to get started.`}
       meaning={meaning}
       howToWorkWith={howToWorkWith}
+      rituals={[
+        `Create a small ritual that reflects ${witchData.practices[0]?.toLowerCase() || 'your focus'}.`,
+        'Set a weekly time for practice and keep it consistent.',
+        'Cleanse and close your space after each session.',
+      ]}
+      journalPrompts={[
+        `What drew me to the ${witchData.name} path?`,
+        `Which practice feels most natural right now?`,
+        'What is one small step I can take today?',
+        'How do I want my practice to evolve over the next season?',
+      ]}
+      tables={[
+        {
+          title: `${witchData.name} Path Snapshot`,
+          headers: ['Focus', 'Examples'],
+          rows: [
+            ['Primary themes', witchData.practices.slice(0, 2).join(', ')],
+            ['Daily practice', witchData.practices[0] || 'Foundational habits'],
+            ['Seasonal focus', witchData.practices[1] || 'Ritual cycles'],
+          ],
+        },
+        {
+          title: 'Getting Started Checklist',
+          headers: ['Step', 'Purpose'],
+          rows: [
+            ['Learn one core practice', 'Build confidence'],
+            ['Set a weekly ritual', 'Create consistency'],
+            ['Track results', 'Notice what works'],
+          ],
+        },
+      ]}
       emotionalThemes={witchData.practices}
       faqs={faqs}
       breadcrumbs={[

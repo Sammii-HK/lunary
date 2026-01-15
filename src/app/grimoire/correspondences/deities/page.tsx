@@ -38,7 +38,7 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: 'Deity Correspondences Guide | Lunary',
     description: 'Complete guide to working with gods and goddesses.',
-    images: ['/api/og/cosmic'],
+    images: ['/api/og/grimoire/correspondences'],
   },
   alternates: {
     canonical: 'https://lunary.app/grimoire/correspondences/deities',
@@ -90,6 +90,15 @@ const pantheonInfo: Record<string, string> = {
   Egyptian: 'The ancient gods of the Nile',
 };
 
+const tableOfContents = [
+  { label: 'What Are Deity Correspondences?', href: '#what-is' },
+  { label: 'Meaning', href: '#meaning' },
+  { label: 'Pantheons', href: '#pantheons' },
+  { label: 'Deities by Domain', href: '#domains' },
+  { label: 'How to Work With This Energy', href: '#how-to-work' },
+  { label: 'FAQ', href: '#faq' },
+];
+
 export default function DeitiesIndexPage() {
   const pantheons = Object.entries(correspondencesData.deities);
 
@@ -106,6 +115,7 @@ export default function DeitiesIndexPage() {
           'pantheons',
         ]}
         canonicalUrl='https://lunary.app/grimoire/correspondences/deities'
+        tableOfContents={tableOfContents}
         whatIs={{
           question: 'What are Deity Correspondences?',
           answer:
@@ -185,7 +195,7 @@ While eclectic practice is valid, be aware that some traditions are closed or re
         ctaHref='/pricing'
         faqs={faqs}
       >
-        <section className='mb-12'>
+        <section id='pantheons' className='mb-12'>
           <h2 className='text-2xl font-medium text-zinc-100 mb-6'>Pantheons</h2>
           <p className='text-zinc-400 mb-6'>
             Explore gods and goddesses organized by their cultural tradition.
@@ -233,7 +243,10 @@ While eclectic practice is valid, be aware that some traditions are closed or re
           </div>
         </section>
 
-        <section className='mb-12 bg-amber-950/20 border border-amber-900/50 rounded-xl p-6'>
+        <section
+          id='domains'
+          className='mb-12 bg-amber-950/20 border border-amber-900/50 rounded-xl p-6'
+        >
           <h2 className='text-xl font-medium text-zinc-100 mb-4'>
             Quick Reference: Deities by Domain
           </h2>

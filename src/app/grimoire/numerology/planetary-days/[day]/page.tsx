@@ -81,7 +81,7 @@ export async function generateMetadata({
       card: 'summary_large_image',
       title,
       description,
-      images: ['/api/og/cosmic'],
+      images: ['/api/og/grimoire/numerology'],
     },
     alternates: {
       canonical: `https://lunary.app/grimoire/numerology/planetary-days/${day}`,

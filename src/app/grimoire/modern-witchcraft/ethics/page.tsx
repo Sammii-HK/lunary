@@ -53,6 +53,7 @@ export default function WitchcraftEthicsPage() {
         { label: 'Ethics', href: '/grimoire/modern-witchcraft/ethics' },
       ]}
       intro='Witchcraft ethics emphasize personal responsibility, harm none (or harm reduction), and respecting free will. Understanding ethical principles helps you practice responsibly and create positive change. Ethics guide your magical work and ensure you act with intention, respect, and responsibility.'
+      tldr='Ethical witchcraft centers on consent, harm reduction, and accountability. The Wiccan Rede and Threefold Law are common guides, but many practitioners develop a personal code that balances compassion with boundaries.'
       meaning={`**The Wiccan Rede:**
 "An it harm none, do what ye will."
 
@@ -73,7 +74,41 @@ This means your actions (positive or negative) come back to you multiplied. It e
 - **Confidentiality:** Keep others' spiritual practices private
 
 **Coven vs Solitary Practice:**
-Both paths are valid. Solitary practice offers freedom and flexibility. Coven practice offers community and shared learning. Many witches practice both: solitary most of the time, with occasional group work. Choose what works for your lifestyle and needs.`}
+Both paths are valid. Solitary practice offers freedom and flexibility. Coven practice offers community and shared learning. Many witches practice both: solitary most of the time, with occasional group work. Choose what works for your lifestyle and needs.
+
+**Ethical decision points:**
+Before casting or ritual work, ask: Who is affected? Is consent possible? What is the least harmful path that still protects your well-being? Ethics are not about passivity—they are about clarity and responsibility. Protection, banishing, and boundary work are ethical when they are defensive, proportionate, and grounded in self-care rather than punishment.
+
+**Modern context:**
+Modern witchcraft often includes online communities, public sharing, and cross-cultural influence. That adds new ethical responsibilities: credit your sources, avoid closed practices, and prioritize care in how you speak about other people's spiritual paths. A simple code you revisit regularly will keep your practice clean, respectful, and sustainable.`}
+      tables={[
+        {
+          title: 'Ethical Questions Checklist',
+          headers: ['Question', 'Why It Matters', 'Example'],
+          rows: [
+            [
+              'Is there consent?',
+              'Consent protects autonomy',
+              'Do healing work for yourself, not to control another.',
+            ],
+            [
+              'Is there harm?',
+              'Harm creates backlash',
+              'Choose protection instead of punishment.',
+            ],
+            [
+              'Is it necessary?',
+              'Necessity clarifies intent',
+              'Set a boundary before a banishing.',
+            ],
+            [
+              'Is it respectful?',
+              'Respect avoids appropriation',
+              'Use traditions you are initiated into.',
+            ],
+          ],
+        },
+      ]}
       howToWorkWith={[
         'Follow the Wiccan Rede: harm none',
         'Understand the Threefold Law',
@@ -83,6 +118,20 @@ Both paths are valid. Solitary practice offers freedom and flexibility. Coven pr
         'Respect nature and the environment',
         'Avoid cultural appropriation',
         `Keep others' practices confidential`,
+      ]}
+      rituals={[
+        'Write a one-page personal ethics statement and revisit it monthly.',
+        'Before any spell, list potential impacts and choose the least harmful path.',
+        'Do a weekly protection ritual focused on boundaries, not control.',
+        'Cleanse your tools and space after emotionally intense work.',
+        'Offer a simple gratitude practice for teachers, lineages, and sources.',
+      ]}
+      journalPrompts={[
+        'What does harm reduction mean in my daily life?',
+        'Where do I feel tempted to override someone else’s will?',
+        'What boundary protects me without harming others?',
+        'How do I want my practice to impact my community?',
+        'Which ethical principle do I need to recommit to right now?',
       ]}
       faqs={[
         {
@@ -98,6 +147,11 @@ Both paths are valid. Solitary practice offers freedom and flexibility. Coven pr
         {
           question: 'Can I do love spells?',
           answer: `This is debated. Many practitioners avoid love spells that target specific people (manipulating free will). Instead, they do spells to attract love in general, enhance self-love, or improve existing relationships with consent. The key is not manipulating someone's free will.`,
+        },
+        {
+          question: 'How do I build my own ethical code?',
+          answer:
+            'Start with your core values and write clear boundaries. Review it monthly, update it after real experiences, and keep it grounded in consent, harm reduction, and accountability.',
         },
       ]}
       internalLinks={[

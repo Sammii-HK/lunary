@@ -28,7 +28,7 @@ export const metadata: Metadata = {
     siteName: 'Lunary',
     images: [
       {
-        url: '/api/og/tarot',
+        url: '/api/og/grimoire/tarot',
         width: 1200,
         height: 630,
         alt: 'Tarot Spreads Guide',
@@ -41,7 +41,7 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: 'Tarot Spreads Guide | Lunary',
     description: 'Master every tarot spread from beginner to advanced.',
-    images: ['/api/og/tarot'],
+    images: ['/api/og/grimoire/tarot'],
   },
   alternates: {
     canonical: 'https://lunary.app/grimoire/tarot/spreads',
@@ -149,7 +149,12 @@ export default function TarotSpreadsIndexPage() {
 3. Lay cards in the designated positions
 4. Read each card in context of its position
 5. Look for patterns and connections between cards
-6. Trust your intuition alongside traditional meanings`}
+6. Trust your intuition alongside traditional meanings
+
+**Keep It Practical:**
+After the reading, pick one actionable takeaway. Spreads are most helpful when they lead to a clear next step rather than abstract analysis.
+
+If you repeat the same spread weekly, look for how the story evolves instead of expecting a brand new message.`}
           howToWorkWith={[
             'Match spread size to question complexity',
             'Learn position meanings before laying cards',
@@ -157,6 +162,16 @@ export default function TarotSpreadsIndexPage() {
             'Read cards in context of their positions',
             'Look for patterns between cards',
             'Journal your readings for pattern recognition',
+          ]}
+          rituals={[
+            'Cleanse your deck briefly before a deep spread.',
+            'Set a single intention and write it at the top of your journal page.',
+            'Close the reading by summarizing one action step.',
+          ]}
+          journalPrompts={[
+            'Which spread gives me the clearest answers?',
+            'Where do I overcomplicate my questions?',
+            'How does my interpretation change when I slow down?',
           ]}
           tables={[
             {
@@ -171,6 +186,24 @@ export default function TarotSpreadsIndexPage() {
                 ['Life overview', 'Celtic Cross', '10'],
                 ['New Moon intentions', 'New Moon Spread', '5-7'],
                 ['Year ahead', 'Year Ahead Spread', '12-13'],
+              ],
+            },
+            {
+              title: 'Quick Practice Tips',
+              headers: ['Tip', 'Why it helps'],
+              rows: [
+                ['Keep questions focused', 'Reduces mixed signals'],
+                ['Use a timer', 'Keeps the session grounded'],
+                ['Review the spread weekly', 'Builds pattern awareness'],
+              ],
+            },
+            {
+              title: 'Reading Rhythm',
+              headers: ['Phase', 'Focus'],
+              rows: [
+                ['Start', 'Name the question clearly'],
+                ['Middle', 'Read each position in order'],
+                ['End', 'Summarize the message in one sentence'],
               ],
             },
           ]}

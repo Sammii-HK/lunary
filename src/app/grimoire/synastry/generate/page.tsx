@@ -1,431 +1,198 @@
-'use client';
+import { Metadata } from 'next';
+import { SEOContentTemplate } from '@/components/grimoire/SEOContentTemplate';
+import { CosmicConnections } from '@/components/grimoire/CosmicConnections';
+import { createArticleSchema, renderJsonLd } from '@/lib/schema';
+import SynastryGeneratorClient from './synastry-generator-client';
 
-import { useState, useEffect } from 'react';
-import Link from 'next/link';
-import { ExploreGrimoire } from '@/components/grimoire/ExploreGrimoire';
-import { useUser } from '@/context/UserContext';
-import { useSubscription } from '@/hooks/useSubscription';
-import { hasBirthChartAccess } from '../../../../../utils/pricing';
-import { BirthChartData } from '../../../../../utils/astrology/birthChart';
-import { createBirthChart } from '../../../../../utils/astrology/birthChartService';
-import {
-  calculateSynastry,
-  SynastryResult,
-  SynastryAspect,
-} from '../../../../../utils/astrology/synastry';
-import {
-  Heart,
-  Sparkles,
-  AlertTriangle,
-  Check,
-  Star,
-  Lock,
-} from 'lucide-react';
-import { SmartTrialButton } from '@/components/SmartTrialButton';
-import { GrimoireBreadcrumbs } from '@/components/grimoire/GrimoireBreadcrumbs';
-
-interface PersonData {
-  name: string;
-  birthDate: string;
-  birthTime: string;
-  birthLocation: string;
-}
-
-function PersonForm({
-  person,
-  onChange,
-  label,
-  useMyChart,
-  onUseMyChart,
-  hasUserChart,
-}: {
-  person: PersonData;
-  onChange: (data: PersonData) => void;
-  label: string;
-  useMyChart?: boolean;
-  onUseMyChart?: () => void;
-  hasUserChart?: boolean;
-}) {
-  return (
-    <div className='p-4 rounded-lg border border-zinc-800 bg-zinc-900/50'>
-      <div className='flex items-center justify-between mb-4'>
-        <h3 className='text-lg font-medium text-zinc-100'>{label}</h3>
-        {hasUserChart && onUseMyChart && (
-          <button
-            onClick={onUseMyChart}
-            className={`text-sm px-3 py-1 rounded-lg transition-colors ${
-              useMyChart
-                ? 'bg-lunary-primary-600 text-white'
-                : 'bg-zinc-800 text-zinc-400 hover:bg-zinc-700'
-            }`}
-          >
-            {useMyChart ? '✓ Using My Chart' : 'Use My Chart'}
-          </button>
-        )}
-      </div>
-      <div className='space-y-3'>
-        <div>
-          <label className='block text-sm text-zinc-400 mb-1'>Name</label>
-          <input
-            type='text'
-            value={person.name}
-            onChange={(e) => onChange({ ...person, name: e.target.value })}
-            placeholder='Enter name'
-            disabled={useMyChart}
-            className='w-full px-3 py-2 rounded-lg bg-zinc-800 border border-zinc-700 text-zinc-100 placeholder-zinc-500 focus:outline-none focus:border-lunary-primary disabled:opacity-50'
-          />
-        </div>
-        <div>
-          <label className='block text-sm text-zinc-400 mb-1'>Birth Date</label>
-          <input
-            type='date'
-            value={person.birthDate}
-            onChange={(e) => onChange({ ...person, birthDate: e.target.value })}
-            disabled={useMyChart}
-            className='w-full px-3 py-2 rounded-lg bg-zinc-800 border border-zinc-700 text-zinc-100 focus:outline-none focus:border-lunary-primary disabled:opacity-50'
-          />
-        </div>
-        <div>
-          <label className='block text-sm text-zinc-400 mb-1'>
-            Birth Time (optional)
-          </label>
-          <input
-            type='time'
-            value={person.birthTime}
-            onChange={(e) => onChange({ ...person, birthTime: e.target.value })}
-            disabled={useMyChart}
-            className='w-full px-3 py-2 rounded-lg bg-zinc-800 border border-zinc-700 text-zinc-100 focus:outline-none focus:border-lunary-primary disabled:opacity-50'
-          />
-        </div>
-        <div>
-          <label className='block text-sm text-zinc-400 mb-1'>
-            Birth Location (lat, lng)
-          </label>
-          <input
-            type='text'
-            value={person.birthLocation}
-            onChange={(e) =>
-              onChange({ ...person, birthLocation: e.target.value })
-            }
-            placeholder='e.g. 51.5074, -0.1278'
-            disabled={useMyChart}
-            className='w-full px-3 py-2 rounded-lg bg-zinc-800 border border-zinc-700 text-zinc-100 placeholder-zinc-500 focus:outline-none focus:border-lunary-primary disabled:opacity-50'
-          />
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function AspectCard({ aspect }: { aspect: SynastryAspect }) {
-  const natureColors = {
-    harmonious: 'border-lunary-success-600 bg-lunary-success-900/10',
-    challenging: 'border-lunary-error-600 bg-lunary-error-900/10',
-    neutral: 'border-lunary-accent-600 bg-lunary-accent-900/10',
-  };
-
-  return (
-    <div className={`p-4 rounded-lg border ${natureColors[aspect.nature]}`}>
-      <div className='flex items-center justify-between mb-2'>
-        <div className='flex items-center gap-2'>
-          <span className='text-lg'>{aspect.aspectSymbol}</span>
-          <span className='font-medium text-zinc-100'>
-            {aspect.personA.planet} {aspect.aspect} {aspect.personB.planet}
-          </span>
-        </div>
-        <span className='text-xs text-zinc-400'>orb: {aspect.orb}°</span>
-      </div>
-      <p className='text-sm text-zinc-400'>
-        {aspect.personA.planet} in {aspect.personA.sign} {aspect.aspect}{' '}
-        {aspect.personB.planet} in {aspect.personB.sign}
-      </p>
-      <p className='text-sm text-zinc-300 mt-2'>{aspect.description}</p>
-    </div>
-  );
-}
-
-function CompatibilityScore({ score }: { score: number }) {
-  const getScoreColor = () => {
-    if (score >= 70) return 'text-lunary-success';
-    if (score >= 50) return 'text-lunary-accent';
-    return 'text-lunary-rose';
-  };
-
-  return (
-    <div className='text-center p-6 rounded-lg border border-zinc-800 bg-zinc-900/50'>
-      <div className={`text-5xl font-light ${getScoreColor()}`}>{score}</div>
-      <div className='text-sm text-zinc-400 mt-1'>Compatibility Score</div>
-      <div className='flex justify-center gap-1 mt-2'>
-        {[...Array(5)].map((_, i) => (
-          <Star
-            key={i}
-            className={`w-4 h-4 ${i < Math.round(score / 20) ? 'text-lunary-accent fill-lunary-accent' : 'text-zinc-700'}`}
-          />
-        ))}
-      </div>
-    </div>
-  );
-}
+export const metadata: Metadata = {
+  title: 'Synastry Chart Generator: Compare Two Birth Charts | Lunary',
+  description:
+    'Generate a synastry chart to explore relationship compatibility. Compare two birth charts and see key aspects, strengths, and growth edges.',
+  keywords: [
+    'synastry',
+    'synastry chart',
+    'synastry generator',
+    'compatibility chart',
+    'relationship astrology',
+    'birth chart compatibility',
+  ],
+  alternates: {
+    canonical: 'https://lunary.app/grimoire/synastry/generate',
+  },
+  openGraph: {
+    title: 'Synastry Chart Generator | Lunary',
+    description:
+      'Generate a synastry chart to explore relationship compatibility and key aspects.',
+    url: 'https://lunary.app/grimoire/synastry/generate',
+    type: 'article',
+  },
+};
 
 export default function SynastryGeneratorPage() {
-  const breadcrumbItems = [
-    { name: 'Grimoire', url: '/grimoire' },
-    { name: 'Synastry', url: '/grimoire/synastry' },
-    { name: 'Generate', url: '/grimoire/synastry/generate' },
+  const articleSchema = createArticleSchema({
+    headline: 'Synastry Chart Generator',
+    description:
+      'Compare two birth charts to uncover relationship compatibility.',
+    url: 'https://lunary.app/grimoire/synastry/generate',
+    keywords: ['synastry chart', 'compatibility chart', 'synastry generator'],
+    section: 'Synastry',
+  });
+
+  const tableOfContents = [
+    { label: 'Input Charts', href: '#input-charts' },
+    { label: 'Synastry Summary', href: '#synastry-summary' },
+    { label: 'Key Aspects', href: '#key-aspects' },
   ];
-  const { user } = useUser();
-  const subscription = useSubscription();
-  const hasAccess = hasBirthChartAccess(subscription.status, subscription.plan);
-
-  const [personA, setPersonA] = useState<PersonData>({
-    name: '',
-    birthDate: '',
-    birthTime: '',
-    birthLocation: '',
-  });
-  const [personB, setPersonB] = useState<PersonData>({
-    name: '',
-    birthDate: '',
-    birthTime: '',
-    birthLocation: '',
-  });
-  const [useMyChartA, setUseMyChartA] = useState(false);
-  const [result, setResult] = useState<SynastryResult | null>(null);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-
-  const hasUserChart = user?.birthChart && user.birthChart.length > 0;
-
-  useEffect(() => {
-    if (useMyChartA && user) {
-      setPersonA({
-        name: user.name || 'You',
-        birthDate: user.birthday || '',
-        birthTime: '',
-        birthLocation: '',
-      });
-    }
-  }, [useMyChartA, user]);
-
-  const handleCalculate = async () => {
-    setLoading(true);
-    setError(null);
-    setResult(null);
-
-    try {
-      // Validate inputs
-      if (!personA.birthDate || !personB.birthDate) {
-        throw new Error('Please enter birth dates for both people');
-      }
-
-      let chartA: BirthChartData[];
-      let chartB: BirthChartData[];
-
-      // Get chart A
-      if (useMyChartA && user?.birthChart) {
-        chartA = user.birthChart;
-      } else {
-        chartA = await createBirthChart({
-          birthDate: personA.birthDate,
-          birthTime: personA.birthTime || undefined,
-          birthLocation: personA.birthLocation || undefined,
-          fallbackTimezone:
-            Intl.DateTimeFormat().resolvedOptions().timeZone || undefined,
-        });
-      }
-
-      // Get chart B
-      chartB = await createBirthChart({
-        birthDate: personB.birthDate,
-        birthTime: personB.birthTime || undefined,
-        birthLocation: personB.birthLocation || undefined,
-        fallbackTimezone:
-          Intl.DateTimeFormat().resolvedOptions().timeZone || undefined,
-      });
-
-      // Calculate synastry
-      const synastryResult = calculateSynastry(
-        chartA,
-        chartB,
-        personA.name || 'Person A',
-        personB.name || 'Person B',
-      );
-
-      setResult(synastryResult);
-    } catch (err) {
-      setError(
-        err instanceof Error ? err.message : 'Failed to calculate synastry',
-      );
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // Show upgrade prompt for non-subscribers
-  if (!hasAccess) {
-    return (
-      <div className='min-h-screen bg-zinc-950 text-zinc-100'>
-        <div className='max-w-2xl mx-auto px-4 py-12'>
-          <GrimoireBreadcrumbs items={breadcrumbItems} />
-
-          <div className='text-center py-12'>
-            <Lock className='w-16 h-16 text-lunary-primary-400 mx-auto mb-6' />
-            <h1 className='text-3xl font-light text-zinc-100 mb-4'>
-              Synastry Chart Generator
-            </h1>
-            <p className='text-zinc-400 mb-8 max-w-md mx-auto'>
-              Compare two birth charts to discover relationship compatibility,
-              strengths, and growth areas. Available for Lunary subscribers.
-            </p>
-            <SmartTrialButton size='lg' />
-            <Link
-              href='/grimoire/synastry'
-              className='block mt-4 text-sm text-lunary-primary-400 hover:text-lunary-primary-300'
-            >
-              Learn about synastry →
-            </Link>
-          </div>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className='min-h-screen bg-zinc-950 text-zinc-100'>
-      <div className='max-w-4xl mx-auto px-4 py-12'>
-        <GrimoireBreadcrumbs items={breadcrumbItems} />
+      {renderJsonLd(articleSchema)}
+      <SEOContentTemplate
+        title='Synastry Chart Generator · Lunary'
+        h1='Synastry Chart Generator'
+        description='Compare two birth charts to discover compatibility, strengths, and growth areas.'
+        keywords={metadata.keywords as string[]}
+        canonicalUrl='https://lunary.app/grimoire/synastry/generate'
+        tableOfContents={tableOfContents}
+        breadcrumbs={[
+          { label: 'Grimoire', href: '/grimoire' },
+          { label: 'Synastry', href: '/grimoire/synastry' },
+          { label: 'Generate' },
+        ]}
+        intro='Generate a synastry chart to explore relationship dynamics. Compare two natal charts and see major aspects, strengths, and growth edges.'
+        tldr='Enter two birth charts to generate synastry aspects and overlays. Use the results as a conversation tool: where do you feel ease, and where do you need clearer communication or boundaries?'
+        meaning={`Synastry compares two birth charts to highlight areas of harmony and friction. Use it as a map for communication and growth, not a verdict. The most helpful results come from looking at personal planets first, then assessing the overall balance of supportive versus challenging connections.
 
-        <header className='mb-8 text-center'>
-          <Heart className='w-12 h-12 text-lunary-rose mx-auto mb-4' />
-          <h1 className='text-3xl md:text-4xl font-light text-zinc-100 mb-2'>
-            Synastry Chart Generator
-          </h1>
-          <p className='text-zinc-400'>
-            Compare two birth charts to discover relationship compatibility
-          </p>
-        </header>
+Start with Sun, Moon, Venus, Mars, and Mercury. These describe identity, emotional needs, attraction, and communication. Outer planet contacts add longer-term themes and lessons.
 
-        {!result ? (
-          <>
-            <div className='grid md:grid-cols-2 gap-6 mb-8'>
-              <PersonForm
-                person={personA}
-                onChange={setPersonA}
-                label='Person A'
-                useMyChart={useMyChartA}
-                onUseMyChart={() => setUseMyChartA(!useMyChartA)}
-                hasUserChart={hasUserChart}
-              />
-              <PersonForm
-                person={personB}
-                onChange={setPersonB}
-                label='Person B'
-              />
-            </div>
+If you see challenging aspects, treat them as growth edges. They show where patience, clarity, or compromise is needed. If you see supportive aspects, use them as anchors during conflict.
 
-            {error && (
-              <div className='mb-6 p-4 rounded-lg bg-lunary-error-900/20 border border-lunary-error-700 flex items-center gap-3'>
-                <AlertTriangle className='w-5 h-5 text-lunary-error' />
-                <span className='text-lunary-error-300'>{error}</span>
-              </div>
-            )}
+Treat the report as a starting point for honest dialogue. A few high-impact connections matter more than dozens of minor aspects.
 
-            <button
-              onClick={handleCalculate}
-              disabled={loading || !personA.birthDate || !personB.birthDate}
-              className='w-full py-4 rounded-lg bg-lunary-primary-600 hover:bg-lunary-primary-700 disabled:bg-zinc-800 disabled:text-zinc-400 text-white font-medium transition-colors flex items-center justify-center gap-2'
-            >
-              {loading ? (
-                <>
-                  <div className='w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin' />
-                  Calculating...
-                </>
-              ) : (
-                <>
-                  <Sparkles className='w-5 h-5' />
-                  Calculate Synastry
-                </>
-              )}
-            </button>
-          </>
-        ) : (
-          <div className='space-y-8'>
-            {/* Summary */}
-            <div className='p-6 rounded-lg border border-lunary-primary-700 bg-lunary-primary-900/10'>
-              <div className='flex items-center gap-3 mb-4'>
-                <Heart className='w-6 h-6 text-lunary-rose' />
-                <h2 className='text-xl font-medium text-zinc-100'>
-                  {personA.name || 'Person A'} & {personB.name || 'Person B'}
-                </h2>
-              </div>
-              <p className='text-zinc-300'>{result.summary}</p>
-            </div>
+If the chart feels complex, focus on one shared theme and one action you can both take. Clarity beats overwhelm.
 
-            {/* Score and Overview */}
-            <div className='grid md:grid-cols-3 gap-6'>
-              <CompatibilityScore score={result.compatibilityScore} />
+It can help to note one supportive aspect and one challenging aspect. The supportive aspect shows what to lean on, while the challenging aspect shows where growth is required.
 
-              <div className='p-4 rounded-lg border border-zinc-800 bg-zinc-900/50'>
-                <h3 className='text-sm font-medium text-lunary-success mb-3 flex items-center gap-2'>
-                  <Check className='w-4 h-4' /> Strengths
-                </h3>
-                <ul className='space-y-2'>
-                  {result.strengths.map((s, i) => (
-                    <li key={i} className='text-sm text-zinc-300'>
-                      • {s}
-                    </li>
-                  ))}
-                </ul>
-              </div>
+House overlays add practical context. When one person's planets fall into the other person's house, it shows where the relationship activates daily life. For example, planets in the 7th house highlight partnership and commitment, while planets in the 10th emphasize visibility or shared goals.
 
-              <div className='p-4 rounded-lg border border-zinc-800 bg-zinc-900/50'>
-                <h3 className='text-sm font-medium text-lunary-rose mb-3 flex items-center gap-2'>
-                  <AlertTriangle className='w-4 h-4' /> Growth Areas
-                </h3>
-                <ul className='space-y-2'>
-                  {result.challenges.map((c, i) => (
-                    <li key={i} className='text-sm text-zinc-300'>
-                      • {c}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            </div>
+Angles are also important. Contacts to the Ascendant, Descendant, Midheaven, or IC tend to feel personal and noticeable. These can describe attraction, visibility, or shared direction over time.
 
-            {/* Aspects */}
-            <div>
-              <h2 className='text-xl font-medium text-zinc-100 mb-4'>
-                Synastry Aspects ({result.aspects.length})
-              </h2>
-              <div className='grid md:grid-cols-2 gap-4'>
-                {result.aspects.map((aspect, i) => (
-                  <AspectCard key={i} aspect={aspect} />
-                ))}
-              </div>
-            </div>
+Use the report as a mirror. It highlights patterns you can discuss, not a fixed destiny. The more honestly you talk about the themes, the more helpful the chart becomes.
 
-            {/* Reset Button */}
-            <button
-              onClick={() => setResult(null)}
-              className='w-full py-3 rounded-lg border border-zinc-700 text-zinc-300 hover:bg-zinc-800 transition-colors'
-            >
-              Calculate Another Synastry
-            </button>
-          </div>
-        )}
+If the chart feels dense, focus on one supportive aspect and one challenging aspect only. Depth beats volume.
 
-        {/* Learn More Link */}
-        <div className='mt-12 text-center'>
-          <Link
-            href='/grimoire/synastry'
-            className='text-sm text-lunary-primary-400 hover:text-lunary-primary-300'
-          >
-            Learn more about synastry and relationship astrology →
-          </Link>
-        </div>
+Remember that compatibility grows with communication and choice. Use the chart to support those conversations, not to replace them.
 
-        <ExploreGrimoire />
-      </div>
+Keep the focus on mutual growth rather than fault-finding.
+
+One honest conversation will do more than a hundred minor aspects.`}
+        tables={[
+          {
+            title: 'What the Generator Highlights',
+            headers: ['Category', 'Why It Matters', 'What to Look For'],
+            rows: [
+              [
+                'Sun/Moon',
+                'Emotional compatibility',
+                'Supportive aspects for felt safety',
+              ],
+              [
+                'Venus/Mars',
+                'Chemistry and attraction',
+                'Mutual links for desire and affection',
+              ],
+              [
+                'Mercury',
+                'Communication style',
+                'Ease vs friction in understanding',
+              ],
+              [
+                'Saturn',
+                'Long-term potential',
+                'Commitment and responsibility themes',
+              ],
+              ['Angles', 'Personal impact', 'Contacts to ASC, DSC, MC, or IC'],
+            ],
+          },
+          {
+            title: 'House Overlay Hints',
+            headers: ['House', 'Emphasis'],
+            rows: [
+              ['1st', 'Identity and first impressions'],
+              ['4th', 'Home, roots, and comfort'],
+              ['7th', 'Partnership and commitment'],
+              ['10th', 'Public life and shared goals'],
+            ],
+          },
+        ]}
+        howToWorkWith={[
+          'Start with personal planet aspects before outer-planet themes.',
+          'Note the most repeated aspect type (trines, squares, oppositions).',
+          'Check house overlays to see where the connection lands in daily life.',
+          'Use one or two key aspects as conversation prompts.',
+          'Avoid treating one challenging aspect as a final verdict.',
+        ]}
+        rituals={[
+          'Write down the top three supportive aspects and celebrate them.',
+          'Pick one challenging aspect and agree on one shared practice.',
+          'Do a short check-in ritual after conflict to reset.',
+          'Use a weekly 10-minute reflection to track patterns.',
+        ]}
+        journalPrompts={[
+          'Where do we feel naturally aligned, and why?',
+          'What is our most common misunderstanding?',
+          'Which aspect suggests a growth edge we can work on together?',
+          'How do we handle conflict when it shows up?',
+          'What do we consistently bring out in each other?',
+          'What is one practical change we can try this week?',
+        ]}
+        relatedItems={[
+          { name: 'Synastry Guide', href: '/grimoire/synastry', type: 'Guide' },
+          {
+            name: 'Birth Chart Basics',
+            href: '/grimoire/birth-chart',
+            type: 'Guide',
+          },
+          {
+            name: 'Astrological Aspects',
+            href: '/grimoire/aspects',
+            type: 'Guide',
+          },
+        ]}
+        internalLinks={[
+          { text: 'Learn Synastry', href: '/grimoire/synastry' },
+          { text: 'Birth Chart', href: '/grimoire/birth-chart' },
+          { text: 'Aspects', href: '/grimoire/aspects' },
+        ]}
+        faqs={[
+          {
+            question: 'Do I need an exact birth time?',
+            answer:
+              'Birth time improves accuracy for houses and angles. You can still generate a synastry overview without it, but it will be less precise.',
+          },
+          {
+            question: 'What matters most in synastry?',
+            answer:
+              'Sun/Moon connections, Venus/Mars chemistry, and strong aspect patterns between personal planets often show the biggest relationship themes.',
+          },
+          {
+            question: 'Can synastry predict relationship success?',
+            answer:
+              'No. Synastry shows patterns and dynamics, but how you communicate, choose, and grow together matters more than any single aspect.',
+          },
+        ]}
+        cosmicConnections={
+          <CosmicConnections
+            entityType='hub-zodiac'
+            entityKey='zodiac'
+            title='Synastry Connections'
+          />
+        }
+        ctaText='Learn how synastry works'
+        ctaHref='/grimoire/synastry'
+      >
+        <SynastryGeneratorClient />
+      </SEOContentTemplate>
     </div>
   );
 }

@@ -2,6 +2,7 @@ import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { SEOContentTemplate } from '@/components/grimoire/SEOContentTemplate';
 import { CosmicConnections } from '@/components/grimoire/CosmicConnections';
+import { CosmicConnectionSection } from '@/lib/cosmicConnectionsConfig';
 import { crystalDatabase } from '@/constants/grimoire/crystals';
 import { stringToKebabCase } from '../../../../../utils/string';
 import {
@@ -81,6 +82,35 @@ export default async function CrystalPage({
     {
       question: `How do I cleanse ${crystalData.name}?`,
       answer: `${crystalData.name} can be cleansed using ${crystalData.careInstructions.cleansing.join(', ').toLowerCase()}.`,
+    },
+  ];
+
+  const tableOfContents = [
+    { label: 'Overview', href: '#overview' },
+    { label: 'Properties & Correspondences', href: '#properties' },
+    { label: 'Working with It', href: '#working-with-it' },
+    { label: 'Care & Storage', href: '#care' },
+    { label: 'FAQ', href: '#faq' },
+  ];
+
+  const detailCosmicSections: CosmicConnectionSection[] = [
+    {
+      title: 'Crystal Combos',
+      links: crystalData.combinations.enhances.map((name) => ({
+        label: `Pairs well with ${name}`,
+        href: `/grimoire/crystals/${stringToKebabCase(name)}`,
+      })),
+    },
+    {
+      title: 'Practice Guides',
+      links: [
+        { label: 'Meditation', href: '/grimoire/meditation' },
+        {
+          label: 'Spellcraft Fundamentals',
+          href: '/grimoire/spells/fundamentals',
+        },
+        { label: 'Chakra Guide', href: '/grimoire/chakras' },
+      ],
     },
   ];
 
@@ -193,15 +223,97 @@ Rarity: ${crystalData.rarity}`}
           { text: 'Find Crystals by Chakra', href: '/grimoire/chakras' },
           { text: 'Grimoire Home', href: '/grimoire' },
         ]}
+        tableOfContents={tableOfContents}
         faqs={faqs}
+        ctaText={`Want a crystal stack that matches ${crystalData.name}?`}
+        ctaHref='/pricing'
         cosmicConnections={
           <CosmicConnections
             entityType='crystal'
             entityKey={crystal}
             title={`${crystalData.name} Cosmic Connections`}
+            sections={detailCosmicSections}
           />
         }
-      />
+      >
+        <section id='overview' className='space-y-4 mb-10'>
+          <h2 className='text-2xl font-semibold text-zinc-100'>Overview</h2>
+          <p className='text-sm text-zinc-300'>
+            {crystalData.name} is {crystalData.description.toLowerCase()}.{' '}
+            {crystalData.metaphysicalProperties}
+          </p>
+          <p className='text-sm text-zinc-300'>
+            Work with this crystal to invite{' '}
+            {crystalData.properties[0].toLowerCase()} energy while honoring the{' '}
+            {crystalData.chakras.join(', ')} chakra
+            {crystalData.chakras.length > 1 ? 's' : ''}.
+          </p>
+        </section>
+
+        <section id='properties' className='space-y-4 mb-10'>
+          <h2 className='text-2xl font-semibold text-zinc-100'>
+            Properties & Correspondences
+          </h2>
+          <div className='grid md:grid-cols-2 gap-4'>
+            <div className='rounded-xl border border-zinc-800 p-4 bg-zinc-900/40'>
+              <h3 className='text-sm font-semibold text-zinc-300 mb-2'>
+                Core Properties
+              </h3>
+              <ul className='list-disc list-inside text-sm text-zinc-300 space-y-1'>
+                {crystalData.properties.map((prop) => (
+                  <li key={prop}>{prop}</li>
+                ))}
+              </ul>
+            </div>
+            <div className='rounded-xl border border-zinc-800 p-4 bg-zinc-900/40'>
+              <h3 className='text-sm font-semibold text-zinc-300 mb-2'>
+                Correspondences
+              </h3>
+              <p className='text-zinc-300 text-sm'>
+                Chakras: {crystalData.chakras.join(', ')}
+                <br />
+                Elements: {crystalData.elements.join(', ')}
+                <br />
+                Planets: {crystalData.planets.join(', ')}
+                <br />
+                Zodiac Signs: {crystalData.zodiacSigns.join(', ')}
+              </p>
+            </div>
+          </div>
+        </section>
+
+        <section id='working-with-it' className='space-y-4 mb-10'>
+          <h2 className='text-2xl font-semibold text-zinc-100'>
+            Working with {crystalData.name}
+          </h2>
+          <ul className='list-disc list-inside text-sm text-zinc-300 space-y-1'>
+            {[
+              `Meditate with ${crystalData.name} to welcome ${crystalData.properties[0].toLowerCase()} energy`,
+              `Use it for ${crystalData.workingWith.spellwork.toLowerCase()} rituals`,
+              `Balance the ${crystalData.workingWith.healing.toLowerCase()} chakra energy it supports`,
+            ].map((item) => (
+              <li key={item}>{item}</li>
+            ))}
+          </ul>
+        </section>
+
+        <section id='care' className='space-y-4'>
+          <h2 className='text-2xl font-semibold text-zinc-100'>
+            Care & Storage
+          </h2>
+          <p className='text-sm text-zinc-300'>
+            Cleanse {crystalData.name} using{' '}
+            {crystalData.careInstructions.cleansing.join(', ')} and charge it
+            with {crystalData.careInstructions.charging.join(', ')}. Store it
+            wrapped or separated to preserve its vibration.
+          </p>
+          {crystalData.careInstructions.programming && (
+            <p className='text-sm text-zinc-300'>
+              Programming tip: {crystalData.careInstructions.programming}
+            </p>
+          )}
+        </section>
+      </SEOContentTemplate>
     </div>
   );
 }

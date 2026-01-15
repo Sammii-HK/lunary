@@ -150,6 +150,29 @@ export default function GuidesIndexPage() {
             'Our complete guides are comprehensive, in-depth resources covering major topics in astrology and spiritual practice. Each guide is 5,000-8,000+ words of thoroughly researched content, covering everything from fundamentals to advanced concepts. They serve as your go-to reference for mastering each subject.',
         }}
         tldr='Four comprehensive guides covering the essentials: Birth Chart (read your cosmic blueprint), Tarot (master all 78 cards), Crystal Healing (properties and uses), and Moon Phases (lunar cycles and rituals). Each 5,000-8,000+ words, beginner to advanced.'
+        intro='Browse our long-form guides to study a full topic from foundations to advanced practice. Use them as reference manuals, lesson plans, or deep-dive study tracks.'
+        meaning={`These guides are designed for depth. Each one takes a full topic and walks you through the core theory, practical applications, and common pitfalls so you can practice with confidence.
+
+If you are new, start with the Birth Chart guide, then move to Tarot or Moon Phases. If you are experienced, use the guides as structured refreshers when you want to revisit fundamentals.
+
+Pick a single guide and finish it before jumping to the next. Depth builds confidence and makes the knowledge easier to apply.`}
+        howToWorkWith={[
+          'Choose one guide and commit to a weekly study session.',
+          'Take notes in a journal and track insights.',
+          'Practice the exercises before moving on.',
+          'Return to the guide when you hit a new learning edge.',
+        ]}
+        rituals={[
+          'Set a study intention before you begin a new guide.',
+          'Light a candle to mark your learning session.',
+          'Summarize one key insight after each section.',
+        ]}
+        journalPrompts={[
+          'Which guide feels most relevant to my current path?',
+          'What concept keeps repeating across different guides?',
+          'How can I turn this knowledge into daily practice?',
+          'What do I want to master this season?',
+        ]}
         faqs={[
           {
             question: 'Are these guides suitable for beginners?',
@@ -165,6 +188,23 @@ export default function GuidesIndexPage() {
             question: 'Can I use these guides for reference during readings?',
             answer:
               'Yes! These guides are designed to be both learning resources and ongoing references. Bookmark them for quick lookups during tarot readings, chart interpretations, or crystal work.',
+          },
+          {
+            question: 'How long does each guide take to finish?',
+            answer:
+              'Most readers complete a guide over a few sessions. Treat them as ongoing references rather than one-time reads.',
+          },
+        ]}
+        tables={[
+          {
+            title: 'Guide Focus Map',
+            headers: ['Guide', 'Best For'],
+            rows: [
+              ['Birth Chart', 'Understanding your core placements'],
+              ['Tarot', 'Learning card meanings and spreads'],
+              ['Crystals', 'Energy work and ritual tools'],
+              ['Moon Phases', 'Timing and intention setting'],
+            ],
           },
         ]}
         relatedItems={[
@@ -254,6 +294,31 @@ export default function GuidesIndexPage() {
                   Guides link to related grimoire entries, giving you a complete
                   web of interconnected knowledge.
                 </p>
+              </div>
+            </div>
+          </section>
+          <section className='rounded-xl border border-zinc-800 bg-zinc-900/30 p-8'>
+            <h2 className='text-2xl font-light text-zinc-100 mb-4'>
+              Suggested Study Path
+            </h2>
+            <p className='text-sm text-zinc-400 mb-4'>
+              Start with the guide that matches your current focus, then branch
+              out to related topics. Each guide links to supporting grimoire
+              pages so you can deepen your understanding without losing the
+              thread.
+            </p>
+            <div className='grid md:grid-cols-3 gap-4 text-sm text-zinc-300'>
+              <div className='rounded-lg border border-zinc-800 bg-zinc-900/40 p-4'>
+                <p className='font-semibold text-zinc-100 mb-2'>Astrology</p>
+                <p>Birth Chart → Houses → Aspects</p>
+              </div>
+              <div className='rounded-lg border border-zinc-800 bg-zinc-900/40 p-4'>
+                <p className='font-semibold text-zinc-100 mb-2'>Tarot</p>
+                <p>Major Arcana → Minor Arcana → Spreads</p>
+              </div>
+              <div className='rounded-lg border border-zinc-800 bg-zinc-900/40 p-4'>
+                <p className='font-semibold text-zinc-100 mb-2'>Ritual</p>
+                <p>Moon Phases → Crystals → Daily practice</p>
               </div>
             </div>
           </section>

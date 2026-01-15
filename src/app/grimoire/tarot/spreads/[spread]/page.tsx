@@ -181,6 +181,16 @@ export default async function TarotSpreadPage({
       question: `Is the ${spreadData.name} good for beginners?`,
       answer: `The ${spreadData.name} is rated as ${details.difficulty} difficulty. ${details.difficulty === 'Beginner' ? 'It is an excellent choice for those new to tarot.' : 'It requires some tarot experience for best results.'}`,
     },
+    {
+      question: `Can I modify the ${spreadData.name}?`,
+      answer:
+        'Yes. You can add a clarifier or rename positions to fit your question, as long as you keep the overall structure clear.',
+    },
+    {
+      question: `How often should I use this spread?`,
+      answer:
+        'Use it whenever the question fits. Many readers return to the same spread repeatedly to build familiarity and insight.',
+    },
   ];
 
   return (
@@ -209,7 +219,22 @@ ${details.positions.map((pos, i) => `${i + 1}. ${pos}`).join('\n')}
 
 When using this spread, take time to shuffle while focusing on your question. Lay out the cards in order and read them both individually and in relation to each other. The overall story the cards tell is as important as individual meanings.
 
-${spreadData.instructions.length > 0 ? `Instructions: ${spreadData.instructions.join(' ')}` : ''}`}
+If a card feels unclear, return to the position meaning and your question. The position is often the key. Try to read the spread as a narrative arc rather than isolated points.
+
+**Best Practices**
+
+Keep questions focused and open-ended. Avoid yes/no framing so the cards can show nuance. If the reading feels scattered, pull a single clarifying card and reflect on how it relates to the spread's main theme.
+
+**When to Revisit**
+
+Some spreads are best read once, while others can be revisited weekly. If you repeat the spread, focus on shifts rather than expecting entirely new answers.
+
+${spreadData.instructions.length > 0 ? `Instructions: ${spreadData.instructions.join(' ')}` : ''}
+
+**Working with the Results**
+After the reading, summarize the message in one sentence, then choose one small action. This turns insight into practice and keeps the spread grounded.
+
+If the reading feels mixed, pull one clarifier for the most confusing position only. One clarifier is usually enough.`}
         emotionalThemes={['Insight', 'Guidance', 'Clarity', 'Understanding']}
         howToWorkWith={[
           'Shuffle while focusing on your question',
@@ -218,11 +243,36 @@ ${spreadData.instructions.length > 0 ? `Instructions: ${spreadData.instructions.
           'Consider card relationships',
           'Trust your intuition',
         ]}
+        rituals={[
+          'Cleanse the deck with a quick shuffle or knock before reading.',
+          'State the question out loud to focus the intention.',
+          'Light a candle to mark the start of the session.',
+          'Close by summarizing one clear action step.',
+        ]}
         tables={[
           {
             title: `${spreadData.name} Positions`,
             headers: ['Position', 'Meaning'],
             rows: details.positions.map((pos, i) => [String(i + 1), pos]),
+          },
+          {
+            title: 'Spread Overview',
+            headers: ['Detail', 'Value'],
+            rows: [
+              ['Difficulty', details.difficulty],
+              ['Best For', details.bestFor.join(', ')],
+              ['Card Count', String(details.positions.length)],
+            ],
+          },
+          {
+            title: 'Reading Flow',
+            headers: ['Step', 'Focus'],
+            rows: [
+              ['Question', 'Name it clearly'],
+              ['Layout', 'Place cards in order'],
+              ['Interpret', 'Read position and card together'],
+              ['Action', 'Choose one next step'],
+            ],
           },
         ]}
         journalPrompts={[
@@ -230,6 +280,8 @@ ${spreadData.instructions.length > 0 ? `Instructions: ${spreadData.instructions.
           'How do the cards relate to each other?',
           'What patterns do I notice in this reading?',
           'What actions should I take based on this reading?',
+          'Which position felt most important and why?',
+          'What would I do if I trusted this message?',
         ]}
         relatedItems={[
           { name: 'Tarot Guide', href: '/grimoire/tarot', type: 'Guide' },

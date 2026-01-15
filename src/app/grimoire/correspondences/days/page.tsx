@@ -1,6 +1,8 @@
 import { Metadata } from 'next';
 import Link from 'next/link';
 import { SEOContentTemplate } from '@/components/grimoire/SEOContentTemplate';
+import { CosmicConnections } from '@/components/grimoire/CosmicConnections';
+import { CosmicConnectionSection } from '@/lib/cosmicConnectionsConfig';
 import { correspondencesData } from '@/constants/grimoire/correspondences';
 import { stringToKebabCase } from '../../../../../utils/string';
 
@@ -38,7 +40,7 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: 'Days of the Week Correspondences | Lunary',
     description: 'Planetary magic timing for each day of the week.',
-    images: ['/api/og/cosmic'],
+    images: ['/api/og/grimoire/correspondences'],
   },
   alternates: {
     canonical: 'https://lunary.app/grimoire/correspondences/days',
@@ -86,6 +88,37 @@ const faqs = [
 
 export default function DaysIndexPage() {
   const days = Object.entries(correspondencesData.days);
+
+  const tableOfContents = [
+    { label: 'Weekly Timing', href: '#weekly-timing' },
+    { label: 'Explore Days', href: '#all-days' },
+    { label: 'FAQ', href: '#faq' },
+  ];
+
+  const cosmicSections: CosmicConnectionSection[] = [
+    {
+      title: 'Day Correspondences Resources',
+      links: [
+        {
+          label: 'Color Correspondences',
+          href: '/grimoire/correspondences/colors',
+        },
+        {
+          label: 'Planetary Days',
+          href: '/grimoire/numerology/planetary-days',
+        },
+        { label: 'Moon Phases', href: '/grimoire/moon/phases' },
+      ],
+    },
+    {
+      title: 'Practice Tools',
+      links: [
+        { label: 'Astrology', href: '/grimoire/astronomy' },
+        { label: 'Chakras', href: '/grimoire/chakras' },
+        { label: 'Correspondences', href: '/grimoire/correspondences' },
+      ],
+    },
+  ];
 
   return (
     <div className='p-4 md:p-6 lg:p-8 xl:p-10 min-h-full'>
@@ -199,8 +232,17 @@ Banishing, protection, boundaries, endings, long-term goals. Use black candles.
         ctaText='Want personalized timing for your magic based on your birth chart?'
         ctaHref='/pricing'
         faqs={faqs}
+        tableOfContents={tableOfContents}
+        cosmicConnections={
+          <CosmicConnections
+            entityType='hub-correspondences'
+            entityKey='correspondences'
+            title='Day Connections'
+            sections={cosmicSections}
+          />
+        }
       >
-        <section className='mb-12'>
+        <section id='all-days' className='mb-12'>
           <h2 className='text-2xl font-medium text-zinc-100 mb-6'>
             All Days of the Week
           </h2>

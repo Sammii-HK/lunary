@@ -45,7 +45,7 @@ export async function generateMetadata({
       description,
       url: `https://lunary.app/grimoire/numerology/year/${year}`,
       images: [
-        `/api/og/cosmic?title=${encodeURIComponent(`${year}: Universal Year ${universalYear}`)}`,
+        `/api/og/educational/numerology?title=${encodeURIComponent(`${year}: Universal Year ${universalYear}`)}&subtitle=${encodeURIComponent(data.theme)}&format=landscape`,
       ],
     },
     alternates: {
@@ -99,6 +99,10 @@ export default async function NumerologyYearPage({
 
 ${data.energy}
 
+Universal Years describe the collective tone, while your Personal Year describes your individual focus. Both are useful: the Universal Year sets the backdrop, and your Personal Year shows where you are working within that backdrop.
+
+To calculate the Universal Year, add the digits of the year and reduce to a single digit. This method is the same across numerology traditions and gives a clear snapshot of the year's overall emphasis.
+
 ### The Energy of ${universalYear}
 
 Universal Year ${universalYear} brings themes of ${data.theme.toLowerCase()}. This energy influences everyone on the planet, creating a collective backdrop for personal growth and societal shifts.
@@ -117,11 +121,32 @@ ${data.challenges.map((c) => `- ${c}`).join('\n')}
 
 ${year} offers these special opportunities:
 ${data.opportunities.map((o) => `- ${o}`).join('\n')}
+
+### How to Work With This Year
+
+Choose one theme from the list above and build a simple, consistent practice around it. If this is a year of expansion, focus on steady growth. If it is a year of refinement, focus on quality and clarity.
+
+### Relationships and Career
+
+Universal Year ${universalYear} also colors relationships and work. Notice where the theme appears in group dynamics or big decisions, and align your choices with the supportive opportunities.
+
+### Personal Year Contrast
+
+Your Personal Year shows your individual focus, while the Universal Year shows the shared backdrop. If your Personal Year feels at odds with the Universal Year, prioritize self-care and choose smaller, achievable goals.
       `}
       rituals={[
         `Meditate on the number ${universalYear} and its energy`,
         `Set ${universalYear}-aligned intentions for the year`,
         `Work with ${universalYear} energy in your personal practice`,
+        'Review your goals quarterly and adjust to the yearly theme',
+        'Choose one keyword for the year and post it somewhere visible',
+      ]}
+      journalPrompts={[
+        `Where do I see ${data.theme.toLowerCase()} showing up this year?`,
+        'What one focus would make this year feel successful?',
+        'Which challenge from this year is asking for my attention?',
+        'How can I work with the collective energy while honoring my needs?',
+        'What would I like to complete before this year ends?',
       ]}
       emotionalThemes={data.keywords.map(
         (k) => k.charAt(0).toUpperCase() + k.slice(1),
@@ -144,6 +169,14 @@ ${data.opportunities.map((o) => `- ${o}`).join('\n')}
           headers: ['Month', 'Energy'],
           rows: data.months.map((m) => [m.month, m.energy]),
         },
+        {
+          title: 'Universal vs Personal',
+          headers: ['Type', 'What it describes'],
+          rows: [
+            ['Universal Year', 'Collective theme and timing'],
+            ['Personal Year', 'Individual focus and priorities'],
+          ],
+        },
       ]}
       relatedItems={[
         {
@@ -160,6 +193,27 @@ ${data.opportunities.map((o) => `- ${o}`).join('\n')}
           name: 'Numerology Overview',
           href: '/grimoire/numerology',
           type: 'Guide',
+        },
+      ]}
+      internalLinks={[
+        { text: 'Personal Year Calculator', href: '/horoscope' },
+        { text: 'Numerology Guide', href: '/grimoire/numerology' },
+        { text: 'Core Numbers', href: '/grimoire/numerology/core-numbers/1' },
+        { text: 'Grimoire Home', href: '/grimoire' },
+      ]}
+      faqs={[
+        {
+          question: `How do I calculate the Universal Year for ${year}?`,
+          answer: `Add the digits of ${year} (${year.split('').join(' + ')}) until you reach a single digit. That total is Universal Year ${universalYear}.`,
+        },
+        {
+          question: 'Is Universal Year the same as Personal Year?',
+          answer:
+            'No. Universal Year affects everyone collectively, while Personal Year is calculated from your birth date and shows your individual focus.',
+        },
+        {
+          question: `How should I plan for Universal Year ${universalYear}?`,
+          answer: `Pick one theme from ${data.theme} and build a few small habits that support it. Consistent action aligns best.`,
         },
       ]}
       ctaText='Calculate your personal year number'

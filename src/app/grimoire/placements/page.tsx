@@ -4,15 +4,9 @@ import {
   planetDescriptions,
   signDescriptions,
 } from '@/constants/seo/planet-sign-content';
-import { ExploreGrimoire } from '@/components/grimoire/ExploreGrimoire';
-import { Breadcrumbs } from '@/components/grimoire/Breadcrumbs';
 import { CosmicConnections } from '@/components/grimoire/CosmicConnections';
-import {
-  createItemListSchema,
-  createFAQPageSchema,
-  renderJsonLd,
-  createBreadcrumbSchema,
-} from '@/lib/schema';
+import { SEOContentTemplate } from '@/components/grimoire/SEOContentTemplate';
+import { createItemListSchema, renderJsonLd } from '@/lib/schema';
 
 export const metadata: Metadata = {
   title:
@@ -85,43 +79,108 @@ export default function PlacementsIndexPage() {
     items: allPlacements.slice(0, 50),
   });
 
-  const faqSchema = createFAQPageSchema(
-    faqs.map((faq) => ({
-      question: faq.question,
-      answer: faq.answer,
-    })),
-  );
-
   return (
     <div className='min-h-screen bg-zinc-950 text-zinc-100'>
       {renderJsonLd(itemListSchema)}
-      {renderJsonLd(
-        createBreadcrumbSchema([
-          { name: 'Grimoire', url: '/grimoire' },
-          { name: 'Placements', url: '/grimoire/placements' },
-        ]),
-      )}
-      {renderJsonLd(faqSchema)}
-      <div className='max-w-6xl mx-auto px-4 py-12'>
-        <Breadcrumbs
-          items={[
-            { label: 'Grimoire', href: '/grimoire' },
-            { label: 'Placements' },
-          ]}
-        />
+      <SEOContentTemplate
+        title={metadata.title as string}
+        h1='Astrological Placements'
+        description='Explore every planet-in-sign combination to understand how placements shape your personality and life.'
+        keywords={[
+          'astrological placements',
+          'planet in sign meanings',
+          'birth chart placements',
+        ]}
+        canonicalUrl={
+          (metadata.alternates?.canonical as string) ??
+          'https://lunary.app/grimoire/placements'
+        }
+        intro='Placements show how each planet expresses itself through a zodiac sign. Together they form the character and focus of your chart.'
+        tldr='Planet = what, sign = how. Combine them to understand your chart and daily tendencies.'
+        meaning={`Placements are the core language of astrology. A planet shows the area of life, and the sign shows the style and tone.
 
-        <header className='mb-12'>
-          <h1 className='text-4xl font-light text-zinc-100 mb-4'>
-            Astrological Placements: Sun, Moon & Rising in Every Sign
-          </h1>
-          <p className='text-lg text-zinc-400 max-w-2xl'>
-            Explore what each planet means in every zodiac sign. Click any
-            combination to learn about its influence on personality, strengths,
-            and challenges.
+Look at personal planets first (Sun, Moon, Mercury, Venus, Mars). These describe identity, emotions, communication, love, and action. Outer planets add long-term themes.
+
+If a placement feels unfamiliar, read the planet meaning and the sign meaning separately, then blend the two.
+
+When you read any placement, ask: what does the planet want, how does the sign pursue it, and where does the house express it? That three-part question turns a list of placements into a practical story.
+
+If you are overwhelmed by details, pick one placement to study for a week and notice how it shows up in daily choices. Patterns become obvious when you track them.
+
+Over time, placements feel less like labels and more like tools for self-awareness.`}
+        howToWorkWith={[
+          'Start with Sun, Moon, and Rising placements.',
+          'Read the planet first, then the sign.',
+          'Notice repeating elements or modalities.',
+          'Compare placements in relationships for contrast.',
+        ]}
+        rituals={[
+          'Write your Sun, Moon, and Rising and describe each in one sentence.',
+          'Pick one placement to focus on for a week.',
+          'Track how that placement shows up in daily choices.',
+        ]}
+        journalPrompts={[
+          'Which placement feels most accurate right now, and why?',
+          'Which placement feels underused?',
+          'What habit would bring this placement into balance?',
+          'What placement do I want to understand next?',
+        ]}
+        tables={[
+          {
+            title: 'Placement Formula',
+            headers: ['Part', 'Meaning'],
+            rows: [
+              ['Planet', 'The life area or function'],
+              ['Sign', 'The style or expression'],
+              ['House', 'The life setting'],
+            ],
+          },
+          {
+            title: 'Placement Reading Order',
+            headers: ['Step', 'Focus'],
+            rows: [
+              ['1', 'Personal planets and Rising'],
+              ['2', 'Element and modality patterns'],
+              ['3', 'House emphasis'],
+              ['4', 'Outer planets for long-term tone'],
+            ],
+          },
+          {
+            title: 'Element Balance',
+            headers: ['If you have lots of', 'Notice'],
+            rows: [
+              ['Fire', 'Drive, initiative, restlessness'],
+              ['Earth', 'Stability, practicality, routine'],
+              ['Air', 'Ideas, communication, curiosity'],
+              ['Water', 'Emotion, sensitivity, intuition'],
+            ],
+          },
+        ]}
+        internalLinks={[
+          { text: 'Birth Chart', href: '/birth-chart' },
+          { text: 'Zodiac Signs', href: '/grimoire/zodiac' },
+          { text: 'Planets', href: '/grimoire/astronomy/planets' },
+          { text: 'Grimoire Home', href: '/grimoire' },
+        ]}
+        heroContent={
+          <p className='text-lg text-zinc-400 max-w-3xl mx-auto'>
+            Explore what each planet means in every zodiac sign. Tap any
+            combination to dive deeper into how it influences personality,
+            strengths, and challenges in your birth chart.
           </p>
-        </header>
-
-        <nav className='mb-8 overflow-x-auto'>
+        }
+        tableOfContents={[
+          { label: 'Planet Sections', href: '#planet-sections' },
+          { label: 'Browse by Sign', href: '#sign-links' },
+          { label: 'FAQ', href: '#faq' },
+        ]}
+        breadcrumbs={[
+          { label: 'Grimoire', href: '/grimoire' },
+          { label: 'Placements' },
+        ]}
+        faqs={faqs}
+      >
+        <div className='mb-8 overflow-x-auto'>
           <div className='flex gap-2 pb-2'>
             {planets.map(([planetKey, planet]) => (
               <a
@@ -133,7 +192,7 @@ export default function PlacementsIndexPage() {
               </a>
             ))}
           </div>
-        </nav>
+        </div>
 
         <div className='grid grid-cols-3 gap-4 mb-12 max-w-md'>
           <div className='p-4 rounded-lg border border-zinc-800 bg-zinc-900/50 text-center'>
@@ -156,8 +215,7 @@ export default function PlacementsIndexPage() {
           </div>
         </div>
 
-        {/* Planet Sections */}
-        <div className='space-y-12'>
+        <section id='planet-sections' className='space-y-12'>
           {planets.map(([planetKey, planet]) => (
             <section
               key={planetKey}
@@ -177,7 +235,7 @@ export default function PlacementsIndexPage() {
                   <Link
                     key={signKey}
                     href={`/grimoire/placements/${planetKey}-in-${signKey}`}
-                    className='p-3 rounded-lg bg-zinc-800/50 hover:bg-zinc-700/50 border border-zinc-700/50 hover:border-lunary-primary-600 transition-colors text-center group'
+                    className='p-3 rounded-lg bg-zinc-800/50 hover:bg-zinc-700/50 border border-zinc-700/50 hover:border-lunary-primary-600 text-center group'
                   >
                     <div className='text-lg mb-1'>
                       {sign.element === 'Fire'
@@ -188,7 +246,7 @@ export default function PlacementsIndexPage() {
                             ? '💨'
                             : '💧'}
                     </div>
-                    <div className='text-sm text-zinc-300 group-hover:text-lunary-primary-300 transition-colors'>
+                    <div className='text-sm text-zinc-300 group-hover:text-lunary-primary-300'>
                       {sign.name}
                     </div>
                   </Link>
@@ -196,10 +254,12 @@ export default function PlacementsIndexPage() {
               </div>
             </section>
           ))}
-        </div>
+        </section>
 
-        {/* Sign Quick Links */}
-        <section className='mt-12 p-6 rounded-lg border border-lunary-primary-700 bg-lunary-primary-900/10'>
+        <section
+          id='sign-links'
+          className='mt-12 p-6 rounded-lg border border-lunary-primary-700 bg-lunary-primary-900/10'
+        >
           <h2 className='text-xl font-medium text-zinc-100 mb-4'>
             Browse by Zodiac Sign
           </h2>
@@ -212,25 +272,6 @@ export default function PlacementsIndexPage() {
               >
                 {sign.name}
               </Link>
-            ))}
-          </div>
-        </section>
-
-        <section className='mt-12 mb-12'>
-          <h2 className='text-2xl font-light mb-6'>
-            Frequently Asked Questions
-          </h2>
-          <div className='space-y-4'>
-            {faqs.map((faq, index) => (
-              <div
-                key={index}
-                className='p-6 rounded-lg border border-zinc-800 bg-zinc-900/30'
-              >
-                <h3 className='text-lg font-medium mb-2 text-zinc-100'>
-                  {faq.question}
-                </h3>
-                <p className='text-zinc-400'>{faq.answer}</p>
-              </div>
             ))}
           </div>
         </section>
@@ -255,8 +296,7 @@ export default function PlacementsIndexPage() {
             title='Placements Connections'
           />
         </div>
-        <ExploreGrimoire />
-      </div>
+      </SEOContentTemplate>
     </div>
   );
 }

@@ -1,6 +1,8 @@
 import { Metadata } from 'next';
 import Link from 'next/link';
 import { SEOContentTemplate } from '@/components/grimoire/SEOContentTemplate';
+import { CosmicConnections } from '@/components/grimoire/CosmicConnections';
+import { CosmicConnectionSection } from '@/lib/cosmicConnectionsConfig';
 import { Flame, Droplets, Wind, Mountain } from 'lucide-react';
 import { correspondencesData } from '@/constants/grimoire/correspondences';
 import { stringToKebabCase } from '../../../../../utils/string';
@@ -40,7 +42,7 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: 'Four Elements Correspondences | Lunary',
     description: 'Complete guide to elemental magic and correspondences.',
-    images: ['/api/og/cosmic'],
+    images: ['/api/og/grimoire/correspondences'],
   },
   alternates: {
     canonical: 'https://lunary.app/grimoire/correspondences/elements',
@@ -99,6 +101,35 @@ const elementIcons: Record<string, React.ReactNode> = {
   Air: <Wind className='w-8 h-8 text-cyan-400' />,
   Earth: <Mountain className='w-8 h-8 text-emerald-400' />,
 };
+
+const tableOfContents = [
+  { label: 'Element Overview', href: '#element-overview' },
+  { label: 'Explore Elements', href: '#explore-elements' },
+  { label: 'Elemental Magic Reference', href: '#elemental-reference' },
+  { label: 'FAQs', href: '#faq' },
+];
+
+const cosmicSections: CosmicConnectionSection[] = [
+  {
+    title: 'Element Links',
+    links: [
+      {
+        label: 'Color Correspondences',
+        href: '/grimoire/correspondences/colors',
+      },
+      { label: 'Animals & Totems', href: '/grimoire/correspondences/animals' },
+      { label: 'Herbs', href: '/grimoire/correspondences/herbs' },
+    ],
+  },
+  {
+    title: 'Practice Tools',
+    links: [
+      { label: 'Candle Magic', href: '/grimoire/candle-magic' },
+      { label: 'Crystals', href: '/grimoire/crystals' },
+      { label: 'Numerology', href: '/grimoire/numerology' },
+    ],
+  },
+];
 
 export default function ElementsIndexPage() {
   const classicalElementKeys = ['Fire', 'Water', 'Air', 'Earth'] as const;
@@ -238,8 +269,17 @@ To incorporate elements into your practice, consider:
         ctaText='Want personalized elemental insights based on your birth chart?'
         ctaHref='/pricing'
         faqs={faqs}
+        tableOfContents={tableOfContents}
+        cosmicConnections={
+          <CosmicConnections
+            entityType='hub-correspondences'
+            entityKey='correspondences'
+            title='Element Connections'
+            sections={cosmicSections}
+          />
+        }
       >
-        <section className='mb-12'>
+        <section id='element-overview' className='mb-12'>
           <h2 className='text-2xl font-medium text-zinc-100 mb-6'>
             Explore Each Element
           </h2>
@@ -281,7 +321,10 @@ To incorporate elements into your practice, consider:
           </div>
         </section>
 
-        <section className='mb-12 bg-gradient-to-r from-orange-900/20 via-blue-900/20 to-emerald-900/20 border border-zinc-700 rounded-xl p-6'>
+        <section
+          id='elemental-reference'
+          className='mb-12 bg-gradient-to-r from-orange-900/20 via-blue-900/20 to-emerald-900/20 border border-zinc-700 rounded-xl p-6'
+        >
           <h2 className='text-xl font-medium text-zinc-100 mb-4'>
             Quick Reference: Elemental Magic
           </h2>

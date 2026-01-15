@@ -48,6 +48,7 @@ export default function WitchcraftEthicsPage() {
       ]}
       canonicalUrl='https://lunary.app/grimoire/witchcraft-ethics'
       intro='Witchcraft ethics emphasize personal responsibility, harm none (or harm reduction), and respecting free will. Understanding ethical principles helps you practice responsibly and create positive change. Ethics guide your magical work and ensure you act with intention, respect, and responsibility.'
+      tldr='Ethical witchcraft centers on harm reduction, consent, and accountability. The Wiccan Rede and Threefold Law are common guides, but many practitioners adapt them into a personal code. If your work affects others, prioritize consent and focus on protection, clarity, and healing.'
       meaning={`**The Wiccan Rede:**
 "An it harm none, do what ye will."
 
@@ -68,7 +69,44 @@ This means your actions (positive or negative) come back to you multiplied. It e
 - **Confidentiality:** Keep others' spiritual practices private
 
 **Coven vs Solitary Practice:**
-Both paths are valid. Solitary practice offers freedom and flexibility. Coven practice offers community and shared learning. Many witches practice both: solitary most of the time, with occasional group work. Choose what works for your lifestyle and needs.`}
+Both paths are valid. Solitary practice offers freedom and flexibility. Coven practice offers community and shared learning. Many witches practice both: solitary most of the time, with occasional group work. Choose what works for your lifestyle and needs.
+
+**Ethical decision check:**
+Before doing any spellwork, ask:
+- Who could be affected directly or indirectly?
+- Have I sought consent or chosen a method that avoids violating free will?
+- Am I acting from fear or from clarity?
+- Would I still be comfortable with this decision a month from now?
+
+Ethics are not about perfection. They are about honest reflection and responsibility for outcomes. A simple personal code you revisit regularly is often more effective than memorizing rules.`}
+      tables={[
+        {
+          title: 'Ethical Checkpoints',
+          headers: ['Question', 'Why It Matters', 'Example'],
+          rows: [
+            [
+              'Is there consent?',
+              'Consent protects autonomy',
+              'Focus on self-healing vs targeting a person',
+            ],
+            [
+              'Is there harm?',
+              'Harm creates backlash',
+              'Choose protection over punishment',
+            ],
+            [
+              'Is it necessary?',
+              'Necessity clarifies intent',
+              'Set a boundary before casting a banishing',
+            ],
+            [
+              'Is it respectful?',
+              'Respect avoids appropriation',
+              'Use traditions you are initiated into',
+            ],
+          ],
+        },
+      ]}
       howToWorkWith={[
         'Follow the Wiccan Rede: harm none',
         'Understand the Threefold Law',
@@ -78,6 +116,13 @@ Both paths are valid. Solitary practice offers freedom and flexibility. Coven pr
         'Respect nature and the environment',
         'Avoid cultural appropriation',
         `Keep others' practices confidential`,
+      ]}
+      journalPrompts={[
+        'What does harm reduction look like in my daily choices?',
+        'When I feel defensive, what ethical boundary is being tested?',
+        'Where do I need clearer consent in my relationships?',
+        'How do I want my practice to impact the people around me?',
+        'What is one ethical principle I want to recommit to this month?',
       ]}
       faqs={[
         {
@@ -93,6 +138,11 @@ Both paths are valid. Solitary practice offers freedom and flexibility. Coven pr
         {
           question: 'Can I do love spells?',
           answer: `This is debated. Many practitioners avoid love spells that target specific people (manipulating free will). Instead, they do spells to attract love in general, enhance self-love, or improve existing relationships with consent. The key is not manipulating someone's free will.`,
+        },
+        {
+          question: 'How do I build my own ethical code?',
+          answer:
+            'Start with your core values, then define what you will and will not do. Write it down, review it monthly, and adjust based on real outcomes. Ethics should be lived, not just read.',
         },
       ]}
       internalLinks={[

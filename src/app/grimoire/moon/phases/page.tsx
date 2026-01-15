@@ -44,7 +44,7 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: 'Moon Phases Guide | Lunary',
     description: 'Complete guide to lunar cycles and moon magic.',
-    images: ['/api/og/cosmic'],
+    images: ['/api/og/grimoire/moon'],
   },
   alternates: {
     canonical: 'https://lunary.app/grimoire/moon/phases',

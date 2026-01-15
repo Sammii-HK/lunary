@@ -178,7 +178,10 @@ Scrying works by relaxing the conscious mind and allowing images to arise from t
 - Gaze softly without hard focus
 - Allow images, symbols, or feelings to emerge
 - Trust your first impressions
-- Journal immediately after`}
+- Journal immediately after
+
+**Practice Notes:**
+Short sessions are better than long ones. Start with 5-10 minutes and end while you still feel grounded. Over time, your mind learns the visual language and the impressions become clearer.`}
           howToWorkWith={[
             'Choose a scrying method that resonates with you',
             'Create a quiet, dimly lit environment',

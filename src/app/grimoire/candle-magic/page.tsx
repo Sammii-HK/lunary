@@ -2,13 +2,7 @@ export const revalidate = 86400;
 
 import { Metadata } from 'next';
 import Link from 'next/link';
-import {
-  createArticleSchema,
-  createFAQPageSchema,
-  createBreadcrumbSchema,
-  renderJsonLd,
-} from '@/lib/schema';
-import { Breadcrumbs } from '@/components/grimoire/Breadcrumbs';
+import { SEOContentTemplate } from '@/components/grimoire/SEOContentTemplate';
 import { CosmicConnections } from '@/components/grimoire/CosmicConnections';
 import { CosmicConnectionSection } from '@/lib/cosmicConnectionsConfig';
 
@@ -147,99 +141,102 @@ const cosmicConnectionsSections: CosmicConnectionSection[] = [
   },
 ];
 
+const tableOfContents = [
+  { label: 'Why Candles Are Used in Magic', href: '#why-candles' },
+  { label: 'Candle Colours & Their Meanings', href: '#colors' },
+  { label: 'Anointing, Dressing & Carving', href: '#techniques' },
+  { label: 'Candle Safety & Ethical Use', href: '#safety' },
+  { label: 'Reading Candle Flames & Wax', href: '#reading' },
+  { label: 'A Simple Candle Ritual', href: '#simple-ritual' },
+  {
+    label: 'Linking with Moon Phases & Planetary Days',
+    href: '#timing',
+  },
+  { label: 'Frequently Asked Questions', href: '#faq' },
+];
+
+const whatIs = {
+  question: 'Why is candle magic such a beloved practice?',
+  answer:
+    'Candle magic transforms thought into visible fire, making your intention lived and seen. The candle becomes a symbolic vessel that releases your focus into the cosmos, mirroring the journey from idea to manifestation.',
+};
+
+const intro =
+  'Candle magic is one of the most accessible and powerful forms of spellwork. By combining color correspondences, focused intention, and the transformative element of fire, candles become vessels for manifestation, release, and change.\n\n' +
+  'Candle magic works through sympathetic magic—the principle that symbolic actions create real-world results. The candle becomes a focal point for your intention. As it burns, it releases your intention into the cosmos.';
+
+const howToWorkWith = [
+  'Accessible: Candles are affordable and available everywhere, making them an easy entry point for magic.',
+  'Visual: The flame provides a meditative focus and anchors intention in movement and light.',
+  'Symbolic: Colors, carvings, and herbs layer meaning into your work, matching the intention with the vessel.',
+  'Complete: Burning gives a clear beginning, middle, and end to the ritual.',
+  'Versatile: Candle magic works for nearly any intention you wish to manifest or release.',
+];
+
+const relatedItems = [
+  {
+    name: 'Candle Color Guide',
+    href: '/grimoire/candle-magic/colors',
+    type: 'Color meanings',
+  },
+  {
+    name: 'Spellcraft Fundamentals',
+    href: '/grimoire/spells/fundamentals',
+    type: 'Spellcraft basics',
+  },
+  {
+    name: 'Moon Rituals',
+    href: '/grimoire/moon/rituals',
+    type: 'Timing & cycles',
+  },
+  {
+    name: 'Correspondences',
+    href: '/grimoire/correspondences',
+    type: 'Magical resources',
+  },
+];
+
 export default function CandleMagicPage() {
-  const articleSchema = createArticleSchema({
-    headline: 'Candle Magic: Colours, Flames & Ritual Fire',
-    description:
-      'Complete guide to candle magic: color meanings, techniques, safety, and rituals.',
-    url: 'https://lunary.app/grimoire/candle-magic',
-    keywords: ['candle magic', 'candle spells', 'fire magic'],
-    section: 'Witchcraft Practices',
-  });
-
-  const faqSchema = createFAQPageSchema(faqs);
-  const breadcrumbSchema = createBreadcrumbSchema([
-    { name: 'Grimoire', url: '/grimoire' },
-    { name: 'Candle Magic', url: '/grimoire/candle-magic' },
-  ]);
-
   return (
-    <div className='p-4 md:p-8 max-w-4xl mx-auto'>
-      {renderJsonLd(articleSchema)}
-      {renderJsonLd(faqSchema)}
-      {renderJsonLd(breadcrumbSchema)}
-
-      <Breadcrumbs
-        items={[
-          { label: 'Grimoire', href: '/grimoire' },
-          { label: 'Candle Magic' },
-        ]}
-      />
-
-      <header className='mb-12'>
-        <h1 className='text-4xl md:text-5xl font-light text-zinc-100 mb-6'>
-          Candle Magic
-          <span className='block text-2xl text-lunary-primary-400 mt-2'>
-            Colours, Flames & Ritual Fire
-          </span>
-        </h1>
-        <p className='text-xl text-zinc-400 leading-relaxed'>
-          Candle magic is one of the most accessible and powerful forms of
-          spellwork. By combining color correspondences, focused intention, and
-          the transformative element of fire, candles become vessels for
-          manifestation, release, and change.
-        </p>
-      </header>
-
-      <nav className='bg-zinc-900/50 border border-zinc-800 rounded-xl p-6 mb-12'>
-        <h2 className='text-lg font-medium text-zinc-100 mb-4'>
-          Table of Contents
-        </h2>
-        <ol className='space-y-2 text-zinc-400'>
-          <li>
-            <a href='#why-candles' className='hover:text-lunary-primary-400'>
-              1. Why Candles Are Used in Magic
-            </a>
-          </li>
-          <li>
-            <a href='#colors' className='hover:text-lunary-primary-400'>
-              2. Candle Colours & Their Meanings
-            </a>
-          </li>
-          <li>
-            <a href='#techniques' className='hover:text-lunary-primary-400'>
-              3. Anointing, Dressing & Carving
-            </a>
-          </li>
-          <li>
-            <a href='#safety' className='hover:text-lunary-primary-400'>
-              4. Candle Safety & Ethical Use
-            </a>
-          </li>
-          <li>
-            <a href='#reading' className='hover:text-lunary-primary-400'>
-              5. Reading Candle Flames & Wax
-            </a>
-          </li>
-          <li>
-            <a href='#simple-ritual' className='hover:text-lunary-primary-400'>
-              6. A Simple Candle Ritual
-            </a>
-          </li>
-          <li>
-            <a href='#timing' className='hover:text-lunary-primary-400'>
-              7. Linking with Moon Phases & Planetary Days
-            </a>
-          </li>
-          <li>
-            <a href='#faq' className='hover:text-lunary-primary-400'>
-              8. FAQ
-            </a>
-          </li>
-        </ol>
-      </nav>
-
-      {/* Section 1: Why Candles */}
+    <SEOContentTemplate
+      title={metadata.title as string}
+      h1='Candle Magic'
+      description={metadata.description as string}
+      keywords={metadata.keywords as string[]}
+      canonicalUrl={metadata.alternates?.canonical as string}
+      tableOfContents={tableOfContents}
+      whatIs={whatIs}
+      intro={intro}
+      meaning='Candle magic balances intention, color, timing, and careful ritual structure so you can direct energy with confidence and clarity.'
+      howToWorkWith={howToWorkWith}
+      internalLinks={[
+        {
+          text: 'Candle Anointing & Dressing',
+          href: '/grimoire/candle-magic/anointing',
+        },
+        {
+          text: 'Candle Colors Reference',
+          href: '/grimoire/candle-magic/colors',
+        },
+        {
+          text: 'Candle Incantations',
+          href: '/grimoire/candle-magic/incantations',
+        },
+        { text: 'Magical Correspondences', href: '/grimoire/correspondences' },
+      ]}
+      faqs={faqs}
+      relatedItems={relatedItems}
+      cosmicConnections={
+        <CosmicConnections
+          entityType='hub-glossary'
+          entityKey='candle-magic'
+          title='Candle Magic Connections'
+          sections={cosmicConnectionsSections}
+        />
+      }
+      ctaText='Design a candle ritual'
+      ctaHref='/grimoire/candle-magic/anointing'
+    >
       <section id='why-candles' className='mb-16'>
         <h2 className='text-3xl font-light text-zinc-100 mb-6'>
           1. Why Candles Are Used in Magic
@@ -281,7 +278,6 @@ export default function CandleMagicPage() {
         </div>
       </section>
 
-      {/* Section 2: Colors */}
       <section id='colors' className='mb-16'>
         <h2 className='text-3xl font-light text-zinc-100 mb-6'>
           2. Candle Colours & Their Meanings
@@ -329,7 +325,6 @@ export default function CandleMagicPage() {
         </div>
       </section>
 
-      {/* Section 3: Techniques */}
       <section id='techniques' className='mb-16'>
         <h2 className='text-3xl font-light text-zinc-100 mb-6'>
           3. Anointing, Dressing & Carving
@@ -382,7 +377,6 @@ export default function CandleMagicPage() {
         </div>
       </section>
 
-      {/* Section 4: Safety */}
       <section id='safety' className='mb-16'>
         <h2 className='text-3xl font-light text-zinc-100 mb-6'>
           4. Candle Safety & Ethical Use
@@ -412,7 +406,6 @@ export default function CandleMagicPage() {
         </p>
       </section>
 
-      {/* Section 5: Reading */}
       <section id='reading' className='mb-16'>
         <h2 className='text-3xl font-light text-zinc-100 mb-6'>
           5. Reading Candle Flames & Wax
@@ -469,7 +462,6 @@ export default function CandleMagicPage() {
         </div>
       </section>
 
-      {/* Section 6: Simple Ritual */}
       <section id='simple-ritual' className='mb-16'>
         <h2 className='text-3xl font-light text-zinc-100 mb-6'>
           6. A Simple Candle Ritual
@@ -539,7 +531,6 @@ export default function CandleMagicPage() {
         </ol>
       </section>
 
-      {/* Section 7: Timing */}
       <section id='timing' className='mb-16'>
         <h2 className='text-3xl font-light text-zinc-100 mb-6'>
           7. Linking with Moon Phases & Planetary Days
@@ -617,28 +608,6 @@ export default function CandleMagicPage() {
         </div>
       </section>
 
-      {/* FAQ */}
-      <section id='faq' className='mb-16'>
-        <h2 className='text-3xl font-light text-zinc-100 mb-6'>
-          8. Frequently Asked Questions
-        </h2>
-
-        <div className='space-y-4'>
-          {faqs.map((faq, index) => (
-            <div
-              key={index}
-              className='bg-zinc-900/50 border border-zinc-800 rounded-lg p-6'
-            >
-              <h3 className='text-lg font-medium text-zinc-100 mb-3'>
-                {faq.question}
-              </h3>
-              <p className='text-zinc-300 leading-relaxed'>{faq.answer}</p>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      {/* CTA */}
       <section className='bg-gradient-to-r from-lunary-primary-900/30 to-orange-900/30 border border-lunary-primary-700 rounded-xl p-8 text-center mb-12'>
         <h2 className='text-2xl font-light text-zinc-100 mb-4'>
           Explore Candle Magic Further
@@ -662,13 +631,6 @@ export default function CandleMagicPage() {
           </Link>
         </div>
       </section>
-
-      <CosmicConnections
-        entityType='hub-glossary'
-        entityKey='candle-magic'
-        title='Candle Magic Connections'
-        sections={cosmicConnectionsSections}
-      />
-    </div>
+    </SEOContentTemplate>
   );
 }

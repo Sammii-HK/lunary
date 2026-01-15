@@ -83,6 +83,15 @@ const faqs = [
   },
 ];
 
+const tableOfContents = [
+  { label: 'What is dream interpretation?', href: '#what-is' },
+  { label: 'Meaning', href: '#meaning' },
+  { label: 'How to Work With This Energy', href: '#how-to-work' },
+  { label: 'Common Dream Symbols', href: '#practices-overview' },
+  { label: 'Journal Prompts', href: '#journal-prompts' },
+  { label: 'FAQ', href: '#faq' },
+];
+
 export default function DreamInterpretationPage() {
   const dreamHowToSchema = createHowToSchema({
     name: 'How to Interpret Your Dreams',
@@ -132,6 +141,7 @@ export default function DreamInterpretationPage() {
             'divination',
           ]}
           canonicalUrl='https://lunary.app/grimoire/divination/dream-interpretation'
+          tableOfContents={tableOfContents}
           breadcrumbs={[
             { label: 'Grimoire', href: '/grimoire' },
             { label: 'Divination', href: '/grimoire/divination' },

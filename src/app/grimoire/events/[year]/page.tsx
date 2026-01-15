@@ -3,7 +3,6 @@ import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import { Star, Sparkles, Sun, Moon, ArrowRight } from 'lucide-react';
 import { SEOContentTemplate } from '@/components/grimoire/SEOContentTemplate';
-import { ExploreGrimoire } from '@/components/grimoire/ExploreGrimoire';
 import { generateYearlyForecast } from '@/lib/forecast/yearly';
 import { format } from 'date-fns';
 
@@ -41,7 +40,9 @@ export async function generateMetadata({
       description: `Your complete guide to cosmic events in ${year}.`,
       url: `https://lunary.app/grimoire/events/${year}`,
       siteName: 'Lunary',
-      images: [`/api/og/cosmic?title=${year}%20Cosmic%20Events`],
+      images: [
+        `/api/og/educational/events?title=${encodeURIComponent(`${year} Cosmic Events`)}&subtitle=${encodeURIComponent('Eclipses • Retrogrades • Equinoxes')}&format=landscape`,
+      ],
     },
     alternates: {
       canonical: `https://lunary.app/grimoire/events/${year}`,
@@ -536,8 +537,6 @@ While these events affect everyone, their impact on your personal chart is uniqu
           </Link>
         </div>
       </div>
-
-      <ExploreGrimoire />
     </SEOContentTemplate>
   );
 }

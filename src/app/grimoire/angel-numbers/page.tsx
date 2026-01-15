@@ -1,6 +1,7 @@
 import { Metadata } from 'next';
 import Link from 'next/link';
 import { SEOContentTemplate } from '@/components/grimoire/SEOContentTemplate';
+import { CosmicConnections } from '@/components/grimoire/CosmicConnections';
 import { angelNumbers } from '@/constants/grimoire/numerology-data';
 
 export const metadata: Metadata = {
@@ -40,7 +41,7 @@ export const metadata: Metadata = {
     title: 'Angel Numbers Guide: Complete Meanings | Lunary',
     description:
       'Discover the spiritual meaning of angel numbers and repeating number sequences.',
-    images: ['/api/og/cosmic'],
+    images: ['/api/og/grimoire/numerology'],
   },
   alternates: {
     canonical: 'https://lunary.app/grimoire/angel-numbers',
@@ -86,6 +87,16 @@ const faqs = [
   },
 ];
 
+const tableOfContents = [
+  { label: 'Triple Number Sequences', href: '#triple-number-sequences' },
+  { label: 'Other Angel Numbers', href: '#other-numbers' },
+  { label: 'Where to Look', href: '#where-to-look' },
+  { label: 'Interpret Messages', href: '#interpretation' },
+  { label: 'Integration Rituals', href: '#integration' },
+  { label: 'Quick Reference', href: '#quick-reference' },
+  { label: 'Close the Loop', href: '#closing' },
+];
+
 export default function AngelNumbersIndexPage() {
   const numbers = Object.keys(angelNumbers).sort(
     (a, b) => parseInt(a) - parseInt(b),
@@ -112,6 +123,8 @@ export default function AngelNumbersIndexPage() {
           'repeating numbers',
         ]}
         canonicalUrl='https://lunary.app/grimoire/angel-numbers'
+        intro='Repeating number patterns show up on clocks, receipts, license plates, dreams, and digital dashboards precisely when you need a nudge from your guides. This index explains what each number means and how to integrate the message into practical magic.'
+        tableOfContents={tableOfContents}
         whatIs={{
           question: 'What are Angel Numbers?',
           answer:
@@ -193,8 +206,33 @@ This information helps you understand the specific message for you.`}
         ctaText='Want personalized spiritual insights for your journey?'
         ctaHref='/pricing'
         faqs={faqs}
+        cosmicConnections={
+          <CosmicConnections
+            entityType='hub-numerology'
+            entityKey='angel-numbers'
+            title='Numerology Connections'
+            sections={[
+              {
+                title: 'Numerology Resources',
+                links: [
+                  { label: 'Numerology Guide', href: '/grimoire/numerology' },
+                  { label: 'Life Path Numbers', href: '/grimoire/life-path' },
+                  { label: 'Double Hours', href: '/grimoire/double-hours' },
+                ],
+              },
+              {
+                title: 'Daily Practice',
+                links: [
+                  { label: 'Mirror Hours', href: '/grimoire/mirror-hours' },
+                  { label: 'Manifestation', href: '/grimoire/manifestation' },
+                  { label: 'Moon Rituals', href: '/grimoire/moon/rituals' },
+                ],
+              },
+            ]}
+          />
+        }
       >
-        <section className='mb-12'>
+        <section id='triple-number-sequences' className='mb-12'>
           <h2 className='text-2xl font-medium text-zinc-100 mb-6'>
             Triple Number Sequences
           </h2>
@@ -227,7 +265,7 @@ This information helps you understand the specific message for you.`}
         </section>
 
         {otherNumbers.length > 0 && (
-          <section className='mb-12'>
+          <section id='other-numbers' className='mb-12'>
             <h2 className='text-2xl font-medium text-zinc-100 mb-6'>
               Other Angel Numbers
             </h2>
@@ -251,7 +289,10 @@ This information helps you understand the specific message for you.`}
           </section>
         )}
 
-        <section className='mb-12 bg-zinc-900/50 border border-zinc-800 rounded-xl p-6'>
+        <section
+          id='where-to-look'
+          className='mb-12 bg-zinc-900/50 border border-zinc-800 rounded-xl p-6'
+        >
           <h2 className='text-xl font-medium text-zinc-100 mb-4'>
             Where to Look for Angel Numbers
           </h2>
@@ -295,7 +336,86 @@ This information helps you understand the specific message for you.`}
           </div>
         </section>
 
-        <section className='mb-12 bg-gradient-to-r from-lunary-primary-900/20 to-lunary-accent-900/20 border border-lunary-primary-800 rounded-xl p-6'>
+        <section
+          id='interpretation'
+          className='mb-12 bg-zinc-900/30 border border-zinc-800 rounded-xl p-6 space-y-4'
+        >
+          <h2 className='text-2xl font-medium text-zinc-100'>
+            How to Interpret Messages
+          </h2>
+          <p className='text-zinc-300 leading-relaxed'>
+            The meaning of an angel number is half collective wisdom, half
+            personal context. Follow this three-step workflow whenever a pattern
+            jumps out:
+          </p>
+          <ol className='list-decimal list-inside space-y-2 text-zinc-300'>
+            <li>
+              <strong className='text-zinc-100'>Capture the scene.</strong> Note
+              where you were, the time, the conversation or thought in your
+              head, and how you felt in your body.
+            </li>
+            <li>
+              <strong className='text-zinc-100'>
+                Look up the base meaning.
+              </strong>{' '}
+              Use the quick reference below or the individual number pages to
+              refresh the collective symbolism.
+            </li>
+            <li>
+              <strong className='text-zinc-100'>Blend with intuition.</strong>{' '}
+              Ask how the number’s qualities map onto your current chapter.
+              Treat it like dialogue with your guides and consider journaling
+              the insights.
+            </li>
+          </ol>
+          <p className='text-zinc-300 leading-relaxed'>
+            Over time you’ll build a personalized reference library of what each
+            sequence feels like, strengthening the conversation between you and
+            your angels.
+          </p>
+        </section>
+
+        <section
+          id='integration'
+          className='mb-12 bg-zinc-900/40 border border-zinc-800 rounded-xl p-6 space-y-4'
+        >
+          <h2 className='text-xl font-medium text-zinc-100'>
+            Integration Rituals & Daily Practice
+          </h2>
+          <p className='text-zinc-300 leading-relaxed'>
+            Seeing angel numbers is only half the story—the other half is
+            weaving the insight into your morning rituals, spellwork, or
+            planning sessions. Try this mini sequence the next time a number
+            keeps repeating:
+          </p>
+          <ol className='list-decimal list-inside text-zinc-300 space-y-2'>
+            <li>Pause, breathe, and thank your guides for reaching out.</li>
+            <li>
+              Jot down the number, date, and situation in your journal or Book
+              of Shadows.
+            </li>
+            <li>
+              Pull a single tarot card or rune to add another layer to the
+              message.
+            </li>
+            <li>
+              Decide on one grounded action that mirrors the number’s frequency
+              (e.g., call a mentor, meditate, set a boundary, launch a project).
+            </li>
+          </ol>
+          <p className='text-zinc-300 leading-relaxed'>
+            You can also align angel numbers with moon phases—write them next to
+            your lunar intentions so you know which goals are being emphasized
+            by your guides. Over time, you’ll build a personal reference
+            timeline that shows exactly how the numbers participated in your
+            evolution.
+          </p>
+        </section>
+
+        <section
+          id='quick-reference'
+          className='mb-12 bg-gradient-to-r from-lunary-primary-900/20 to-lunary-accent-900/20 border border-lunary-primary-800 rounded-xl p-6'
+        >
           <h2 className='text-xl font-medium text-zinc-100 mb-4'>
             Quick Reference: Common Angel Number Meanings
           </h2>
@@ -346,6 +466,23 @@ This information helps you understand the specific message for you.`}
               <span className='text-zinc-400'> — Completion, endings</span>
             </div>
           </div>
+        </section>
+        <section id='closing' className='space-y-3'>
+          <h2 className='text-2xl font-medium text-zinc-100'>
+            Close the Loop with Your Guides
+          </h2>
+          <p className='text-zinc-300 leading-relaxed'>
+            Angel numbers are invitations to collaborate with the unseen. Every
+            time you acknowledge them, you strengthen that channel. Wrap each
+            sighting by writing a short note to your guides, sharing what action
+            you plan to take, and thanking them for the nudge.
+          </p>
+          <p className='text-zinc-300 leading-relaxed'>
+            Keep this reference handy, add your own discoveries, and check back
+            whenever the universe taps you on the shoulder with another
+            repeating number. The more intentional you are, the louder the
+            guidance becomes.
+          </p>
         </section>
       </SEOContentTemplate>
     </div>

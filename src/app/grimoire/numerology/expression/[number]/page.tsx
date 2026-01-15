@@ -89,6 +89,16 @@ export default async function ExpressionNumberPage({
       question: `What are the challenges of Expression Number ${number}?`,
       answer: `Expression ${number} challenges include: ${numberData.challenges.slice(0, 3).join(', ')}.`,
     },
+    {
+      question: `How is Expression Number ${number} calculated?`,
+      answer:
+        'It is calculated from the letters in your full birth name using numerology letter values.',
+    },
+    {
+      question: `How does Expression ${number} differ from Life Path?`,
+      answer:
+        'Life Path describes your overall journey, while Expression describes your natural talents and how you show up day to day.',
+    },
   ];
 
   return (
@@ -110,6 +120,8 @@ export default async function ExpressionNumberPage({
 
 ${numberData.description}
 
+Expression numbers describe style and gifts, while Life Path numbers describe the broader lesson. If your Expression and Life Path align, your strengths may feel easy to access. If they differ, you may feel pulled to develop new capacities over time.
+
 ${isMaster ? `**Master Number Energy**\n\nAs a Master Number, Expression ${number} carries heightened spiritual potential and responsibility. You have access to profound abilities but also face greater challenges.\n\n` : ''}**Your Natural Talents**
 
 ${numberData.talents.map((t) => `- ${t}`).join('\n')}
@@ -120,7 +132,43 @@ ${numberData.challenges.map((c) => `- ${c}`).join('\n')}
 
 **Ideal Career Paths**
 
-Expression ${number} thrives in careers that allow you to use your natural talents: ${numberData.careers.join(', ')}.`}
+Expression ${number} thrives in careers that allow you to use your natural talents: ${numberData.careers.join(', ')}.
+
+**Relationships and Communication**
+
+Expression ${number} shapes how you speak, decide, and collaborate. When you are in balance, your strengths feel natural and others respond well to your style. When you are out of balance, the same gifts can become exaggerated.
+
+**In Balance vs. Out of Balance**
+
+When aligned, Expression ${number} feels like ${numberData.keywords.slice(0, 3).join(', ').toLowerCase()}. When stressed, the challenges can show up as ${numberData.challenges.slice(0, 2).join(', ').toLowerCase()}.
+
+**Growth Practices**
+
+Focus on one talent at a time and build it into a daily habit. Small, consistent steps help Expression ${number} mature into its best form.
+
+**Expression vs. Soul Urge**
+
+Expression shows how you naturally operate, while Soul Urge shows what you deeply want. If these align, life may feel smoother. If they differ, you can develop skills that support both.
+
+**Practical Application**
+
+Use Expression ${number} to choose roles, projects, and environments where your strengths are valued. When you feel out of place, return to the core strengths and make one adjustment.
+
+**How It Is Calculated**
+
+Expression Numbers are derived from the full birth name. Each letter has a numeric value, and the sum is reduced to a single digit or Master Number. This is why your legal name matters for accurate calculation.
+
+**In Career and Leadership**
+
+Expression ${number} influences how you lead and collaborate. In leadership roles, emphasize your strongest talent and delegate the tasks that highlight your challenges. In creative roles, your Expression shows the style others associate with you.
+
+**Shadow Expression**
+
+When Expression ${number} is under stress, it can overcompensate. Notice when your strengths turn into extremes, and return to balance with small, grounding routines.
+
+**Daily Alignment**
+
+Pick one talent to express deliberately each day. Consistent expression builds confidence and keeps the energy balanced. Small wins count. Track them weekly. Stay consistent.`}
         emotionalThemes={numberData.keywords}
         howToWorkWith={[
           `Develop your natural ${numberData.talents[0].toLowerCase()} abilities`,
@@ -128,12 +176,66 @@ Expression ${number} thrives in careers that allow you to use your natural talen
           `Consider career paths in ${numberData.careers[0].toLowerCase()}`,
           'Honor your unique expression while staying grounded',
           'Use your talents in service to others',
+          'Build routines that support your primary talent',
+        ]}
+        rituals={[
+          'Write a one-page statement of your core talents and read it weekly.',
+          'Choose one skill to practice for 10 minutes a day for 30 days.',
+          'Create a small altar item that represents your Expression Number.',
+          'End each day by listing one moment you expressed your strengths.',
+          'Ask for feedback from a trusted friend on your natural strengths.',
         ]}
         journalPrompts={[
           `How do I naturally express ${numberData.meaning.toLowerCase()} in my life?`,
           `Which of my talents am I not fully utilizing?`,
           `How can I overcome my tendency toward ${numberData.challenges[0].toLowerCase()}?`,
           `What career path would allow me to express my true nature?`,
+          'Where do I feel most confident in my expression?',
+          'What feedback do I receive repeatedly from others?',
+          'What role or project would showcase my strengths?',
+        ]}
+        tables={[
+          {
+            title: `Expression ${number} Snapshot`,
+            headers: ['Focus', 'Details'],
+            rows: [
+              ['Core Meaning', numberData.meaning],
+              ['Top Talents', numberData.talents.slice(0, 3).join(', ')],
+              ['Challenges', numberData.challenges.slice(0, 3).join(', ')],
+              ['Career Fit', numberData.careers.slice(0, 3).join(', ')],
+            ],
+          },
+          {
+            title: 'Balance Check',
+            headers: ['In Balance', 'Out of Balance'],
+            rows: [
+              [
+                numberData.keywords.slice(0, 2).join(', '),
+                numberData.challenges.slice(0, 2).join(', '),
+              ],
+            ],
+          },
+          {
+            title: 'Expression vs Soul Urge',
+            headers: ['Expression', 'Soul Urge'],
+            rows: [
+              [
+                'How you operate and express gifts',
+                'What your inner self truly desires',
+              ],
+            ],
+          },
+          {
+            title: 'Work and Relationships',
+            headers: ['Area', 'Focus'],
+            rows: [
+              ['Work', `Lead with ${numberData.talents[0]}`],
+              [
+                'Relationships',
+                `Communicate through ${numberData.keywords[0]}`,
+              ],
+            ],
+          },
         ]}
         relatedItems={[
           {

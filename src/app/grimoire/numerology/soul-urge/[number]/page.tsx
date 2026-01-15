@@ -87,6 +87,26 @@ export default async function SoulUrgeNumberPage({
       question: `How does Soul Urge ${number} behave in relationships?`,
       answer: numberData.inRelationships,
     },
+    {
+      question: `How can I honor Soul Urge ${number} daily?`,
+      answer:
+        'Choose one small action each day that supports your core desire. Consistency matters more than scale.',
+    },
+    {
+      question: `Can Soul Urge ${number} change over time?`,
+      answer:
+        'The number stays the same, but how you express it can evolve as you grow.',
+    },
+    {
+      question: `How do I calculate Soul Urge ${number}?`,
+      answer:
+        'It is calculated from the vowels in your full birth name using numerology letter values.',
+    },
+    {
+      question: `What if my Soul Urge ${number} feels hard to satisfy?`,
+      answer:
+        'Start with small, consistent choices that honor your desire. Alignment grows through repetition, not perfection.',
+    },
   ];
 
   return (
@@ -108,6 +128,8 @@ export default async function SoulUrgeNumberPage({
 
 ${numberData.description}
 
+Soul Urge numbers describe the "why" beneath your choices. Even when your life looks successful, misalignment with this number can feel like restlessness or dissatisfaction.
+
 ${isMaster ? `**Master Number Energy**\n\nAs a Master Number, Soul Urge ${number} carries intense spiritual energy and deeper soul purposes. Your desires transcend the ordinary.\n\n` : ''}**Your Deepest Desires**
 
 ${numberData.desires.map((d) => `- ${d}`).join('\n')}
@@ -118,7 +140,23 @@ ${numberData.motivations.map((m) => `- ${m}`).join('\n')}
 
 **In Relationships**
 
-${numberData.inRelationships}`}
+${numberData.inRelationships}
+
+**When You Are Out of Alignment**
+
+When your Soul Urge is ignored, you may feel drained, unfulfilled, or disconnected from your choices. Returning to what nourishes you brings your energy back.
+
+**Daily Alignment**
+
+Small rituals and consistent choices are enough. You do not need a dramatic life change to honor your soul's desire; you need steady attention.
+
+**Soul Urge vs Expression**
+
+Soul Urge is the inner desire, Expression is the outer style. When they support each other, you feel coherent. When they conflict, you may feel pulled in two directions and need to make choices that honor both.
+
+**Signs of Alignment**
+
+When aligned, you feel energized, calm, and clear about next steps. When misaligned, you may feel restless or disconnected from your choices. Use these signals to adjust gently rather than forcing change. Small shifts done weekly add up steadily.`}
         emotionalThemes={numberData.keywords}
         howToWorkWith={[
           `Honor your soul's desire for ${numberData.desires[0].toLowerCase()}`,
@@ -127,11 +165,55 @@ ${numberData.inRelationships}`}
           'Make choices aligned with your soul purpose',
           'Trust what truly fulfills you',
         ]}
+        rituals={[
+          'Write a short list of what truly nourishes you and revisit it weekly.',
+          'Choose one small daily action that aligns with your desire.',
+          'Set a boundary that protects your energy and time.',
+          'End the week by noting where you felt most fulfilled.',
+          'Create a simple symbol that represents your soul desire.',
+        ]}
         journalPrompts={[
           `What does ${numberData.meaning.toLowerCase()} mean to me?`,
           `Am I honoring my soul's desire for ${numberData.desires[0].toLowerCase()}?`,
           `What would my ideal life look like if I fully embraced my soul urge?`,
           `How can I better communicate my deeper needs in relationships?`,
+          'Where do I feel most aligned and alive?',
+          'What drains me that I can gently reduce?',
+          'What would I do if I trusted my inner desire fully?',
+        ]}
+        tables={[
+          {
+            title: `Soul Urge ${number} Snapshot`,
+            headers: ['Focus', 'Details'],
+            rows: [
+              ['Core Meaning', numberData.meaning],
+              ['Top Desires', numberData.desires.slice(0, 3).join(', ')],
+              ['Motivations', numberData.motivations.slice(0, 3).join(', ')],
+              [
+                'Relationship Theme',
+                numberData.keywords.slice(0, 3).join(', '),
+              ],
+            ],
+          },
+          {
+            title: 'Alignment Check',
+            headers: ['Aligned', 'Misaligned'],
+            rows: [
+              [
+                numberData.motivations.slice(0, 2).join(', '),
+                numberData.desires.slice(0, 2).join(', '),
+              ],
+            ],
+          },
+          {
+            title: 'Supportive Actions',
+            headers: ['Action', 'Why it helps'],
+            rows: [
+              ['Name your desire', 'Clarifies direction'],
+              ['Set one boundary', 'Protects energy'],
+              ['Schedule time', 'Turns desire into practice'],
+            ],
+          },
         ]}
         relatedItems={[
           {

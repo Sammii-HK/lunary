@@ -96,7 +96,7 @@ export async function generateMetadata({
       card: 'summary_large_image',
       title,
       description,
-      images: ['/api/og/cosmic'],
+      images: ['/api/og/grimoire/lunar-nodes'],
     },
     alternates: {
       canonical: `https://lunary.app/grimoire/lunar-nodes/${node}`,
@@ -169,18 +169,48 @@ ${nodeData.karmicMeaning}
 
 ${nodeData.inBirthChart}
 
-The lunar nodes move backward through the zodiac, completing a full cycle approximately every 18.6 years. Understanding your ${nodeData.name} helps you understand your karmic path and work with your soul\'s purpose consciously.`}
+The lunar nodes move backward through the zodiac, completing a full cycle approximately every 18.6 years. Understanding your ${nodeData.name} helps you understand your karmic path and work with your soul\'s purpose consciously.
+
+If you feel stuck, return to the node\'s keywords and choose one small action that supports growth. The work is gradual and becomes clearer with consistent practice.
+
+This node works best when you balance it with its opposite. Growth comes from stretching toward new behaviors without discarding your existing strengths.`}
         glyphs={[nodeData.symbol]}
         astrologyCorrespondences={`Lunar Node: ${nodeData.name}
 Symbol: ${nodeData.symbol}
 Meaning: ${nodeData.meaning}
 Keywords: ${nodeData.keywords.join(', ')}`}
         howToWorkWith={nodeData.howToWorkWith}
+        rituals={[
+          'Write one intention aligned with your node and read it weekly.',
+          'Create a small ritual that honors your growth edge.',
+          'Journal one example of this node showing up each week.',
+        ]}
         journalPrompts={[
           `What does my ${nodeData.name} mean to me?`,
           `How can I work with ${nodeData.name} energy?`,
           `What is my ${nodeData.name} teaching me?`,
           `How does ${nodeData.name} relate to my life purpose?`,
+          'Where do I feel the strongest pull toward growth?',
+        ]}
+        tables={[
+          {
+            title: `${nodeData.name} Snapshot`,
+            headers: ['Aspect', 'Details'],
+            rows: [
+              ['Meaning', nodeData.meaning],
+              ['Keywords', nodeData.keywords.join(', ')],
+              ['Focus', nodeData.name === 'North Node' ? 'Growth' : 'Release'],
+            ],
+          },
+          {
+            title: 'Integration Cues',
+            headers: ['When you notice', 'Try'],
+            rows: [
+              ['Repeating patterns', 'Choose one new response'],
+              ['Comfort-zone pull', 'Name the growth edge'],
+              ['Uncertainty', 'Return to a core value'],
+            ],
+          },
         ]}
         relatedItems={[
           {

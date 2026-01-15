@@ -17,7 +17,9 @@ export const metadata: Metadata = {
   openGraph: {
     title: '2026 Eclipses | Lunary',
     description: 'Complete guide to solar and lunar eclipses in 2026.',
-    images: ['/api/og/cosmic?title=2026%20Eclipses'],
+    images: [
+      '/api/og/educational/events?title=2026%20Eclipses&subtitle=Solar%20%E2%80%A2%20Lunar&format=landscape',
+    ],
   },
 };
 
@@ -36,6 +38,7 @@ export default function Eclipses2026Page() {
         'transformation',
       ]}
       canonicalUrl='https://lunary.app/grimoire/events/2026/eclipses'
+      intro={`Eclipses are not just dramatic sky events. In astrology, they are accelerators that compress months of growth into a short window. The 2026 eclipse seasons highlight major endings and openings, asking you to release what is complete and step into what is ready. Think of eclipses as course corrections rather than disruptions: they reveal what has been hidden and push you toward a more aligned path.`}
       datePublished='2025-12-01'
       dateModified='2025-12-06'
       articleSection='Astrological Events'
@@ -59,7 +62,13 @@ Lunar Eclipses (Full Moons amplified):
 • Releasing what no longer serves you
 • Truth coming to light
 
-The 2026 eclipses continue shifting the lunar nodes through new signs, activating different areas of your birth chart for major life lessons and evolution.`}
+The 2026 eclipses continue shifting the lunar nodes through new signs, activating different areas of your birth chart for major life lessons and evolution.
+
+Eclipses often reveal what has been brewing beneath the surface. If you have been ignoring a decision, postponing a change, or holding onto something out of habit, eclipse season tends to make the choice unavoidable. That does not mean the change is negative. It means timing has arrived. The most helpful stance is to observe what is falling away, then consciously choose what to build next.
+
+If you want to work with the eclipse energy in a grounded way, focus on awareness rather than force. Note what themes show up in your relationships, work, and inner life. The weeks around an eclipse can feel emotionally loud, but the clearest guidance comes from the patterns that repeat, not the single dramatic moment.
+
+Practical support helps. Keep your schedule lighter, stay hydrated, and prioritize rest during eclipse windows. If decisions feel pressured, give yourself a few days before committing. Eclipses reward patience and clarity more than urgency. When in doubt, choose the option that creates long-term stability rather than a quick fix.`}
       tables={[
         {
           title: '2026 Eclipse Calendar',
@@ -96,6 +105,20 @@ The 2026 eclipses continue shifting the lunar nodes through new signs, activatin
         'Note which houses the eclipses activate in your birth chart',
         'Trust that changes happening are aligned with your highest path',
       ]}
+      rituals={[
+        'Create a simple release ritual for lunar eclipses: write what you are ready to end, then safely burn or tear the paper.',
+        'Set a quiet intention for solar eclipses without demanding a result. Keep it open and process-focused.',
+        'Clean your space before each eclipse season to reduce noise and make room for clarity.',
+        'Take a ritual bath or shower with a grounding salt blend to reset your energy.',
+        'Light a single candle and sit in silence for 10 minutes, focusing on what feels inevitable.',
+      ]}
+      journalPrompts={[
+        'What area of my life has been asking for change for months?',
+        'What am I holding onto out of habit rather than alignment?',
+        'If I trusted the timing of my life, what would I release now?',
+        'What truth has become impossible to ignore?',
+        'What would a clean new beginning look like for me six months from now?',
+      ]}
       emotionalThemes={[
         'Sudden realizations and "aha" moments',
         'Feeling ungrounded or disoriented',
@@ -121,6 +144,16 @@ The 2026 eclipses continue shifting the lunar nodes through new signs, activatin
           answer:
             'Eclipses involve powerful cosmic energy shifts that can be physically and emotionally draining. The Sun (vitality) or Moon (emotions) is being blocked, which affects our energy. Rest as needed and avoid over-scheduling during eclipse windows.',
         },
+        {
+          question: 'How do I know which eclipse affects me most?',
+          answer:
+            'Look at the signs and houses the eclipses fall in for your birth chart. Those areas of life are most likely to show shifts. If you do not know your houses, notice what life area feels most activated around each eclipse.',
+        },
+        {
+          question: 'Is it normal to feel emotional during eclipse season?',
+          answer:
+            'Yes. Eclipses amplify lunar and solar energy, which can heighten emotions and sensitivity. Treat it as a signal to slow down and be gentle with yourself.',
+        },
       ]}
       relatedItems={[
         {
@@ -143,6 +176,14 @@ The 2026 eclipses continue shifting the lunar nodes through new signs, activatin
           href: '/grimoire/events/2025/eclipses',
           type: 'Event',
         },
+      ]}
+      internalLinks={[
+        { text: 'Lunar Nodes', href: '/grimoire/lunar-nodes' },
+        {
+          text: 'Moon Phases Guide',
+          href: '/grimoire/guides/moon-phases-guide',
+        },
+        { text: 'Astrology Basics', href: '/grimoire/astrology' },
       ]}
       ctaText='See how 2026 eclipses affect your birth chart'
       ctaHref='/welcome?from=eclipses-2026'

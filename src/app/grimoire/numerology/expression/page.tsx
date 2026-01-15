@@ -42,7 +42,7 @@ export const metadata: Metadata = {
     title: 'Expression Number Calculator & Meanings | Lunary',
     description:
       'Calculate your Expression Number and discover your natural talents.',
-    images: ['/api/og/cosmic'],
+    images: ['/api/og/grimoire/numerology'],
   },
   alternates: {
     canonical: 'https://lunary.app/grimoire/numerology/expression',

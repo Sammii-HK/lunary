@@ -104,6 +104,11 @@ export default async function DecanPage({
       question: `How does ${data.subruler} influence ${decanName} Decan ${signName}?`,
       answer: `${data.subruler} as the sub-ruler adds unique qualities to ${decanName} Decan ${signName}s, including ${data.strengths.slice(0, 2).join(' and ').toLowerCase()}.`,
     },
+    {
+      question: `Does the ${decanName} Decan affect compatibility?`,
+      answer:
+        'It can. Decans add nuance to how a sign expresses itself, which can influence communication style and pacing in relationships. Your full chart matters most, but decan insights can explain subtle differences.',
+    },
   ];
 
   return (
@@ -113,6 +118,7 @@ export default async function DecanPage({
       description={data.description}
       keywords={[`${signName} decan`, data.subruler, ...data.traits]}
       canonicalUrl={`https://lunary.app/grimoire/decans/${sign}/${decan}`}
+      intro={`Decans divide each zodiac sign into three segments, adding nuance to personality and timing. The ${decanName} Decan of ${signName} blends the core ${signName} nature with the influence of ${data.subruler}, creating a distinct expression of this sign. If you were born between ${data.dateRange}, this guide helps you understand your decan strengths, challenges, and energetic themes.`}
       datePublished='2025-01-01'
       dateModified={new Date().toISOString().split('T')[0]}
       articleSection='Zodiac Decans'
@@ -148,11 +154,46 @@ ${decanName} Decan ${signName}s tend to be: ${data.traits.join(', ')}.
 ### Associated Tarot Card
 
 The ${data.tarotCard} is associated with this decan, reflecting its themes and energy.
+
+### Decans in Your Birth Chart
+
+Decans add detail beyond the Sun sign. If you know your Rising sign or key planetary placements, those placements also have decans. This is why two people with the same Sun sign can feel different: their Sun may fall in a different decan, and the rest of the chart tells a fuller story.
+
+### Working with ${data.subruler} Energy
+
+Lean into the strengths of ${data.subruler} when you need support, and balance them with the core ${signName} traits. Decan work is about integration—using the sub-ruler's gifts to express the sign more clearly.
+
+### Decan Expression in Daily Life
+
+The ${decanName} Decan often shows up in how you handle stress, ambition, and relationships. Some decans feel more internal and reflective, while others are expressive and outward-facing. If you notice a repeated pattern in work or love, the decan lens can clarify why.
+
+You can also track decans through timing. When the Sun moves through your decan each year, themes related to that subruler can intensify. This makes the decan season a useful window for setting goals, refining habits, or focusing on a specific life area.
+
+If you work with astrology intentionally, schedule your most aligned projects during your decan season for extra momentum.
       `}
       emotionalThemes={data.traits.map(
         (t) => t.charAt(0).toUpperCase() + t.slice(1),
       )}
       signsMostAffected={[signName]}
+      howToWorkWith={[
+        `Reflect on how ${data.subruler} themes show up in your ${signName} expression`,
+        'Track your energy and mood during your decan season each year',
+        `Use the ${data.tarotCard} for meditation or journaling`,
+        'Study your Rising and Moon decans for a fuller picture',
+        'Notice where the decan strengths show up in relationships and work',
+      ]}
+      rituals={[
+        `Meditate on the ${data.tarotCard} and note what themes arise.`,
+        `Create a small altar with symbols of ${signName} and ${data.subruler}.`,
+        'Set a 3-week intention during your decan season and track progress.',
+        'Write a short affirmation that blends both rulers.',
+      ]}
+      journalPrompts={[
+        `Where do I see ${data.subruler.toLowerCase()} influence in my ${signName} traits?`,
+        'What is the strongest gift of this decan, and how do I use it?',
+        'Which decan challenge shows up most often, and what would balance it?',
+        `How does the ${data.tarotCard} reflect my current season of growth?`,
+      ]}
       tables={[
         {
           title: 'Decan Details',
@@ -176,6 +217,11 @@ The ${data.tarotCard} is associated with this decan, reflecting its themes and e
           type: 'Planet',
         },
         { name: 'Decans Overview', href: '/grimoire/decans', type: 'Guide' },
+      ]}
+      internalLinks={[
+        { text: 'Birth Chart', href: '/grimoire/birth-chart' },
+        { text: 'Zodiac Signs', href: '/grimoire/zodiac' },
+        { text: 'Tarot Guide', href: '/grimoire/tarot' },
       ]}
       ctaText='Discover your decan placement'
       ctaHref='/birth-chart'

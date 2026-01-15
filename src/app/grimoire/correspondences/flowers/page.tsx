@@ -1,6 +1,8 @@
 import { Metadata } from 'next';
 import Link from 'next/link';
 import { SEOContentTemplate } from '@/components/grimoire/SEOContentTemplate';
+import { CosmicConnections } from '@/components/grimoire/CosmicConnections';
+import { CosmicConnectionSection } from '@/lib/cosmicConnectionsConfig';
 import { correspondencesData } from '@/constants/grimoire/correspondences';
 import { stringToKebabCase } from '../../../../../utils/string';
 
@@ -38,7 +40,7 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: 'Flower Correspondences Guide | Lunary',
     description: 'Complete guide to magical flowers and their correspondences.',
-    images: ['/api/og/cosmic'],
+    images: ['/api/og/grimoire/correspondences'],
   },
   alternates: {
     canonical: 'https://lunary.app/grimoire/correspondences/flowers',
@@ -86,6 +88,40 @@ const faqs = [
 
 export default function FlowersIndexPage() {
   const flowers = Object.entries(correspondencesData.flowers);
+
+  const tableOfContents = [
+    { label: 'All Magical Flowers', href: '#all-magical-flowers' },
+    { label: 'Flowers by Purpose', href: '#flowers-by-purpose' },
+    { label: 'FAQ', href: '#faq' },
+  ];
+
+  const cosmicSections: CosmicConnectionSection[] = [
+    {
+      title: 'Flower Resources',
+      links: [
+        {
+          label: 'Flower Correspondences',
+          href: '/grimoire/correspondences/flowers',
+        },
+        {
+          label: 'Herb Correspondences',
+          href: '/grimoire/correspondences/herbs',
+        },
+        {
+          label: 'Color Correspondences',
+          href: '/grimoire/correspondences/colors',
+        },
+      ],
+    },
+    {
+      title: 'Practice Tools',
+      links: [
+        { label: 'Candle Magic', href: '/grimoire/candle-magic' },
+        { label: 'Books of Shadows', href: '/grimoire/book-of-shadows' },
+        { label: 'Moon Phases', href: '/grimoire/moon/phases' },
+      ],
+    },
+  ];
 
   return (
     <div className='p-4 md:p-6 lg:p-8 xl:p-10 min-h-full'>
@@ -175,8 +211,17 @@ Flowers represent the peak expression of a plant's energy — they are designed 
         ctaText='Want personalized flower recommendations for your practice?'
         ctaHref='/pricing'
         faqs={faqs}
+        tableOfContents={tableOfContents}
+        cosmicConnections={
+          <CosmicConnections
+            entityType='hub-correspondences'
+            entityKey='correspondences'
+            title='Flower Connections'
+            sections={cosmicSections}
+          />
+        }
       >
-        <section className='mb-12'>
+        <section id='all-magical-flowers' className='mb-12'>
           <h2 className='text-2xl font-medium text-zinc-100 mb-6'>
             All Magical Flowers
           </h2>
@@ -205,7 +250,10 @@ Flowers represent the peak expression of a plant's energy — they are designed 
           </div>
         </section>
 
-        <section className='mb-12 bg-pink-950/20 border border-pink-900/50 rounded-xl p-6'>
+        <section
+          id='flowers-by-purpose'
+          className='mb-12 bg-pink-950/20 border border-pink-900/50 rounded-xl p-6'
+        >
           <h2 className='text-xl font-medium text-zinc-100 mb-4'>
             Quick Reference: Flowers by Purpose
           </h2>

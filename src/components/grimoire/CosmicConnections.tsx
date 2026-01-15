@@ -6,7 +6,7 @@ import {
 } from '@/lib/cosmicConnectionsConfig';
 import { NavParamLink } from '@/components/NavParamLink';
 
-interface CosmicConnectionsProps {
+export interface CosmicConnectionsProps {
   entityType: EntityType;
   entityKey: string;
   title?: string;

@@ -84,6 +84,26 @@ export default async function KarmicDebtPage({
       question: `What are the challenges of Karmic Debt ${number}?`,
       answer: `The main challenges of Karmic Debt ${number} include: ${numberData.challenges.slice(0, 3).join(', ')}.`,
     },
+    {
+      question: `How long does it take to heal Karmic Debt ${number}?`,
+      answer:
+        'It is gradual and ongoing. Progress comes from consistent choices and repeating healthy patterns over time.',
+    },
+    {
+      question: `Can Karmic Debt ${number} affect relationships?`,
+      answer:
+        'Yes. The lesson often appears through relationships, which give you opportunities to practice new responses.',
+    },
+    {
+      question: `Does Karmic Debt ${number} show up in all charts?`,
+      answer:
+        'No. Only certain charts contain Karmic Debt numbers, and they highlight specific lessons rather than every life area.',
+    },
+    {
+      question: `What is a simple first step to heal Karmic Debt ${number}?`,
+      answer:
+        'Choose one recurring pattern and replace it with a small, consistent response you can practice weekly.',
+    },
   ];
 
   return (
@@ -115,14 +135,101 @@ Karmic Debt ${number} often indicates a past life where there were issues around
 
 **Challenges You May Face**
 
-${numberData.challenges.map((c) => `- ${c}`).join('\n')}`}
+${numberData.challenges.map((c) => `- ${c}`).join('\n')}
+
+**Signs the Lesson is Active**
+
+You may notice repeating scenarios, strong emotional reactions, or a feeling that a specific theme keeps returning. These patterns are not punishments; they are invitations to act differently and build new skills.
+
+**Healing the Pattern**
+
+Healing Karmic Debt ${number} is a gradual process. Focus on consistent, grounded choices over dramatic change. Small shifts practiced weekly are more effective than occasional big efforts.
+
+**In Relationships and Work**
+
+Karmic Debt ${number} can show up in close relationships and career choices. When you are aware of the lesson, you can respond with intention instead of habit.
+
+**Practical Steps**
+
+Choose one pattern to work on at a time. Replace it with a simple alternative behavior you can practice consistently. Over time, this rewires the pattern and reduces the charge.
+
+**Signs of Healing**
+
+You may notice calmer reactions, more consistent choices, and fewer repeated conflicts. Healing often feels subtle at first, but the shift becomes clear when you look back over months.
+
+**Supportive Practices**
+
+Pair the lesson with a grounding routine: a weekly reflection, a short affirmation, or a simple boundary. Karmic Debt work is most effective when it is gentle and consistent rather than intense and sporadic.
+
+**Self-Compassion**
+
+Karmic lessons are not punishments. Treat the process as a skill you are learning. Patience and honesty are part of the healing itself.
+
+Support helps. Share your goal with a trusted friend or therapist, and ask for gentle accountability. Progress tends to accelerate when you feel seen and supported.
+
+Avoid perfectionism. The goal is improvement, not a flawless performance. Each small shift counts and builds momentum.
+
+If you feel stuck, return to the lesson and choose one tiny, repeatable action. Momentum builds when the practice is simple enough to keep.
+
+Review your notes monthly to spot patterns and progress. The act of tracking creates clarity and helps you see how far you have come.`}
         emotionalThemes={numberData.keywords}
         howToWorkWith={numberData.howToHeal}
+        rituals={[
+          'Write the core lesson on paper and place it where you will see it daily.',
+          'Choose one healing action from the list and practice it for 30 days.',
+          'Light a candle and reflect on one pattern you are ready to release.',
+          'End each week by noting a small win related to the lesson.',
+          'Create a short mantra you can repeat when the pattern appears.',
+        ]}
         journalPrompts={[
           `How does Karmic Debt ${number}'s theme of ${numberData.meaning.toLowerCase()} show up in my life?`,
           `What patterns do I repeat that might relate to this karmic lesson?`,
           `How can I approach ${numberData.meaning.toLowerCase()} differently?`,
           `What would healing this karmic debt look like for me?`,
+          'What boundary would support my healing right now?',
+          'Where do I already see progress with this lesson?',
+          'What small action would break the pattern today?',
+          'Who can support me as I work on this lesson?',
+        ]}
+        tables={[
+          {
+            title: `Karmic Debt ${number} Snapshot`,
+            headers: ['Theme', 'Details'],
+            rows: [
+              ['Core Meaning', numberData.meaning],
+              ['Core Lesson', numberData.lesson],
+              ['Challenges', numberData.challenges.slice(0, 3).join(', ')],
+              ['Healing Focus', numberData.howToHeal.slice(0, 3).join(', ')],
+            ],
+          },
+          {
+            title: 'Balance Check',
+            headers: ['In Pattern', 'In Healing'],
+            rows: [
+              [
+                numberData.challenges.slice(0, 2).join(', '),
+                numberData.howToHeal.slice(0, 2).join(', '),
+              ],
+            ],
+          },
+          {
+            title: 'Practice Timeline',
+            headers: ['Timeframe', 'Focus'],
+            rows: [
+              ['Week 1', 'Notice the pattern'],
+              ['Weeks 2-4', 'Practice a new response'],
+              ['Month 2+', 'Reinforce and review'],
+            ],
+          },
+          {
+            title: 'Gentle Reminders',
+            headers: ['Reminder', 'Purpose'],
+            rows: [
+              ['Pause before reacting', 'Create space for choice'],
+              ['Name the lesson', 'Stay aware of the theme'],
+              ['Choose one small action', 'Build consistency'],
+            ],
+          },
         ]}
         relatedItems={[
           {

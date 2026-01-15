@@ -1,16 +1,16 @@
+export const revalidate = 86400;
+
 import { Metadata } from 'next';
 import Link from 'next/link';
-import {
-  createItemListSchema,
-  renderJsonLd,
-  createBreadcrumbSchema,
-} from '@/lib/schema';
-import { Breadcrumbs } from '@/components/grimoire/Breadcrumbs';
+import { SEOContentTemplate } from '@/components/grimoire/SEOContentTemplate';
+import { CosmicConnections } from '@/components/grimoire/CosmicConnections';
+import { CosmicConnectionSection } from '@/lib/cosmicConnectionsConfig';
+import { createItemListSchema, renderJsonLd } from '@/lib/schema';
 
 export const metadata: Metadata = {
   title: 'Lunary Grimoire A–Z: Complete Topic Index | Lunary',
   description:
-    'Alphabetical index of all grimoire topics. Browse zodiac signs, planets, houses, aspects, tarot, crystals, spells, witchcraft, and more. Your complete spiritual reference guide.',
+    'Alphabetical index of astrology, tarot, witchcraft, moon work, spells, and more. Find every topic by letter.',
   openGraph: {
     title: 'Lunary Grimoire A–Z Index | Lunary',
     description:
@@ -72,7 +72,7 @@ const topics = [
     letter: 'E',
     items: [
       { name: 'Eclipses', url: '/grimoire/eclipses' },
-      { name: 'Elements', url: '/grimoire/zodiac' },
+      { name: 'Elements', url: '/grimoire/correspondences/elements' },
     ],
   },
   {
@@ -115,7 +115,7 @@ const topics = [
       { name: 'Mars', url: '/grimoire/astronomy/planets/mars' },
       { name: 'Mercury', url: '/grimoire/astronomy/planets/mercury' },
       { name: 'Midheaven', url: '/grimoire/houses/overview/10' },
-      { name: 'Moon', url: '/grimoire/astronomy/planets/moon' },
+      { name: 'Moon', url: '/grimoire/moon' },
       { name: 'Moon Phases', url: '/grimoire/moon/phases' },
     ],
   },
@@ -188,142 +188,206 @@ const topics = [
   { letter: 'Z', items: [{ name: 'Zodiac Signs', url: '/grimoire/zodiac' }] },
 ];
 
+const cosmicConnectionsSections: CosmicConnectionSection[] = [
+  {
+    title: 'Quick Navigation',
+    links: [
+      { label: 'Grimoire Home', href: '/grimoire' },
+      { label: 'Grimoire Search', href: '/grimoire/search' },
+      { label: 'Explore the Grimoire', href: '/grimoire/page' },
+    ],
+  },
+];
+
+const toc = [
+  { label: 'How to use this index', href: '#how-to-use' },
+  { label: 'Alphabetical topics', href: '#alphabet' },
+  { label: 'Research tips', href: '#tips' },
+  { label: 'Add your own entries', href: '#personal' },
+];
+
 export default function AZIndexPage() {
   const allItems = topics.flatMap((t) => t.items);
 
   const itemListSchema = createItemListSchema({
-    name: 'Astrology A-Z Index',
-    description: 'Complete alphabetical guide to all astrology topics.',
+    name: 'Lunary Grimoire A–Z Index',
+    description:
+      'Alphabetical reference to astrology, tarot, and witchcraft topics.',
     url: 'https://lunary.app/grimoire/a-z',
     items: allItems.map((item) => ({
       name: item.name,
       url: `https://lunary.app${item.url}`,
-      description: `Learn about ${item.name} in astrology.`,
     })),
   });
 
-  const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
-
   return (
-    <div className='min-h-screen bg-zinc-950 text-zinc-100'>
+    <>
       {renderJsonLd(itemListSchema)}
-      {renderJsonLd(
-        createBreadcrumbSchema([
-          { name: 'Grimoire', url: '/grimoire' },
-          { name: 'A Z', url: '/grimoire/a-z' },
-        ]),
-      )}
-      <div className='max-w-5xl mx-auto px-4 py-12'>
-        <Breadcrumbs
-          items={[
-            { label: 'Grimoire', href: '/grimoire' },
-            { label: 'A-Z Index' },
-          ]}
-        />
-
-        <header className='mb-8'>
-          <h1 className='text-4xl md:text-5xl font-light mb-4'>
-            Lunary Grimoire A–Z
-          </h1>
-          <p className='text-xl text-zinc-400 leading-relaxed mb-6'>
-            Complete alphabetical index of astrology topics, zodiac signs,
-            planets, tarot, crystals, spells, and spiritual practices.
+      <SEOContentTemplate
+        title='Lunary Grimoire A–Z: Complete Topic Index'
+        h1='Grimoire A–Z Index'
+        description='Browse astrology, tarot, witchcraft, and lunar topics alphabetically for quick navigation.'
+        keywords={['grimoire a-z', 'astrology index', 'tarot index']}
+        canonicalUrl='https://lunary.app/grimoire/a-z'
+        breadcrumbs={[
+          { label: 'Grimoire', href: '/grimoire' },
+          { label: 'A–Z', href: '/grimoire/a-z' },
+        ]}
+        intro='Use this alphabetical list to jump straight to the topic you need—no memorizing section names or digging through menus. Every entry in the grimoire appears sorted by letter for fast navigation.'
+        meaning='Clarity arrives when you can find what you need instantly. This index maps the entire lunar library alphabetically so you always know where to go.'
+        tableOfContents={toc}
+        whatIs={{
+          question: 'How should I use this index?',
+          answer:
+            'Select the letter that matches your topic, then follow the link to read the full entry. Bookmark the index for quick reference whenever you remember a keyword.',
+        }}
+        howToWorkWith={[
+          'Combine this index with search if you want the quickest result',
+          'Note new entries you create so you can add them later',
+          'Use the alphabet to explore areas you haven’t studied yet',
+        ]}
+        faqs={[
+          {
+            question: 'What topics are covered?',
+            answer:
+              'Every major astrology, witchcraft, tarot, lunar, and manifestation topic listed in the Lunary Grimoire appears here, arranged by letter for speedy navigation. We also include references to tools (like the Birth Chart calculator) and seasonal resources so you always land on the right entry.',
+          },
+          {
+            question: 'Can I submit or track a new topic?',
+            answer:
+              'Yes. Whenever you publish or bookmark a new article, give it a clear title, note the associated letter, and jot a short description so it slots into this index and your personal Book of Shadows without friction.',
+          },
+          {
+            question: 'How do I keep the index updated?',
+            answer:
+              'Set aside a short “library maintenance” ritual at the start of each month. Review recent notes, add any standout spells or correspondences to their respective letters, and record cross references so future-you can trace the lineage of your research.',
+          },
+        ]}
+        relatedItems={[
+          {
+            name: 'Grimoire Search',
+            href: '/grimoire/search',
+            type: 'Keyword lookup',
+          },
+          {
+            name: 'Quick Explore',
+            href: '/grimoire/page',
+            type: 'Featured sections',
+          },
+        ]}
+        internalLinks={[
+          { text: 'Grimoire Home', href: '/grimoire' },
+          { text: 'Search', href: '/grimoire/search' },
+          { text: 'Book of Shadows', href: '/book-of-shadows' },
+        ]}
+        ctaText='Explore every section of the Grimoire'
+        ctaHref='/grimoire'
+        cosmicConnections={
+          <CosmicConnections
+            entityType='hub-a-z'
+            entityKey='a-z'
+            title='Quick Alphabet Links'
+            sections={cosmicConnectionsSections}
+          />
+        }
+      >
+        <section id='how-to-use' className='mb-10 space-y-4'>
+          <h2 className='text-3xl font-light text-zinc-100'>
+            How to Use This Index
+          </h2>
+          <p className='text-zinc-300 leading-relaxed'>
+            Scroll to the letter you need, then click the topic. Bookmark
+            letters you visit often and combine this index with the search bar
+            for ultimate speed.
           </p>
-          <div className='p-5 rounded-xl border border-zinc-800 bg-zinc-900/30'>
-            <h2 className='text-lg font-medium text-zinc-100 mb-3'>
-              How to Use This Index
-            </h2>
-            <p className='text-zinc-400 text-sm mb-4'>
-              Jump to any letter using the navigation bar below, or scroll
-              through to browse all topics. Each entry links directly to its
-              dedicated grimoire page with detailed information.
-            </p>
-            <div className='flex flex-wrap gap-3'>
-              <Link
-                href='/grimoire/beginners'
-                className='text-sm text-lunary-primary-400 hover:text-lunary-primary-300'
-              >
-                New here? Start with the Beginners Guide →
-              </Link>
-              <Link
-                href='/grimoire/guides/birth-chart-complete-guide'
-                className='text-sm text-lunary-primary-400 hover:text-lunary-primary-300'
-              >
-                Birth Chart Guide →
-              </Link>
-              <Link
-                href='/grimoire/guides/moon-phases-guide'
-                className='text-sm text-lunary-primary-400 hover:text-lunary-primary-300'
-              >
-                Moon Phases Guide →
-              </Link>
-            </div>
-          </div>
-        </header>
+          <p className='text-zinc-300 leading-relaxed'>
+            Each letter block mirrors the structure of the Grimoire sidebar.
+            When a section contains nested guides, note them in your personal
+            notes so you remember which letter hides the essay you want to
+            revisit. Treat the index like a map, and annotate it with the same
+            care you would give a spell journal.
+          </p>
+        </section>
 
-        <nav className='mb-8 flex flex-wrap gap-1'>
-          {alphabet.map((letter) => {
-            const hasItems = topics.some((t) => t.letter === letter);
-            return hasItems ? (
-              <a
-                key={letter}
-                href={`#letter-${letter}`}
-                className='w-8 h-8 flex items-center justify-center rounded bg-zinc-800 text-zinc-300 text-sm hover:bg-lunary-primary-900/30 hover:text-lunary-primary-300 transition-colors'
-              >
-                {letter}
-              </a>
-            ) : (
-              <span
-                key={letter}
-                className='w-8 h-8 flex items-center justify-center text-zinc-700 text-sm'
-              >
-                {letter}
-              </span>
-            );
-          })}
-        </nav>
-
-        <div className='space-y-8'>
-          {topics.map((section) => (
-            <section
-              key={section.letter}
-              id={`letter-${section.letter}`}
-              className='scroll-mt-24'
-            >
-              <h2 className='text-2xl font-light text-lunary-primary-400 mb-4 pb-2 border-b border-zinc-800'>
-                {section.letter}
-              </h2>
-              <div className='grid md:grid-cols-2 lg:grid-cols-3 gap-3'>
-                {section.items.map((item) => (
+        <section id='alphabet' className='space-y-10 mb-10'>
+          {topics.map((topic) => (
+            <article key={topic.letter} className='space-y-3'>
+              <div className='text-2xl font-semibold text-zinc-200'>
+                {topic.letter}
+              </div>
+              <div className='grid grid-cols-2 md:grid-cols-3 gap-2 text-sm'>
+                {topic.items.map((item) => (
                   <Link
-                    key={item.url}
+                    key={item.name}
                     href={item.url}
-                    className='p-4 rounded-lg border border-zinc-800 bg-zinc-900/30 hover:border-lunary-primary-600 transition-colors'
+                    className='block rounded-lg border border-zinc-800 bg-zinc-900/50 px-3 py-2 text-zinc-300 hover:border-lunary-primary-500 hover:text-white transition'
                   >
-                    <span className='text-zinc-200'>{item.name}</span>
+                    {item.name}
                   </Link>
                 ))}
               </div>
-            </section>
+            </article>
           ))}
-        </div>
-
-        <section className='mt-12 p-6 rounded-xl border border-lunary-primary-700 bg-gradient-to-r from-lunary-primary-900/20 to-lunary-rose-900/20'>
-          <h2 className='text-xl font-medium text-lunary-primary-300 mb-2'>
-            New to Astrology?
-          </h2>
-          <p className='text-zinc-300 mb-4'>
-            Start with our beginner's guide for a structured introduction to
-            astrology fundamentals.
-          </p>
-          <Link
-            href='/grimoire/beginners'
-            className='inline-flex px-6 py-3 rounded-lg bg-lunary-primary-900/30 hover:bg-lunary-primary-900/50 border border-lunary-primary-700 text-lunary-primary-300 font-medium transition-colors'
-          >
-            Astrology for Beginners
-          </Link>
         </section>
-      </div>
-    </div>
+
+        <section id='tips' className='space-y-4 mb-10'>
+          <h2 className='text-3xl font-light text-zinc-100'>
+            Research Tips & Shortcuts
+          </h2>
+          <p className='text-zinc-300 leading-relaxed'>
+            Every new article you add to your Book of Shadows becomes easier to
+            find when you note the letter, keywords, and cross references. Use
+            this checklist whenever you dive into study mode.
+          </p>
+          <ul className='space-y-2 text-zinc-300'>
+            <li>
+              <strong className='text-zinc-100'>Cross-link topics:</strong> if
+              you learn about Aquarius in a lunar guide, add “Aquarius – see
+              Moon Rituals” to keep the index relational.
+            </li>
+            <li>
+              <strong className='text-zinc-100'>
+                Highlight correspondences:
+              </strong>{' '}
+              note gemstones, herbs, and tarot cards alongside each entry so you
+              can jump between practices without leaving the A–Z.
+            </li>
+            <li>
+              <strong className='text-zinc-100'>
+                Archive seasonal updates:
+              </strong>{' '}
+              when a new sabbat set or forecast drops, add the year next to the
+              listing so you can trace past versions.
+            </li>
+            <li>
+              <strong className='text-zinc-100'>Bookmark letters:</strong> most
+              browsers let you create foldered bookmarks; save one per letter
+              and drag frequent topics to the top.
+            </li>
+          </ul>
+          <p className='text-zinc-300 leading-relaxed'>
+            Treat this page as a living table of contents. The more detail you
+            tag in your own notes, the faster you&apos;ll navigate the entire
+            grimoire ecosystem in moments.
+          </p>
+        </section>
+
+        <section id='personal' className='space-y-3'>
+          <h2 className='text-3xl font-light text-zinc-100'>
+            Add Your Own Entries
+          </h2>
+          <p className='text-zinc-300 leading-relaxed'>
+            Keep your Book of Shadows updated and note new topics you create.
+            Matching titles with alphabetical organization makes them easier for
+            others (and you) to find later.
+          </p>
+          <p className='text-zinc-300 leading-relaxed'>
+            When in doubt, attach three tags to every new entry: element,
+            modality, and magical purpose. Those tags become bonus keywords that
+            make the A–Z index an even richer discovery tool.
+          </p>
+        </section>
+      </SEOContentTemplate>
+    </>
   );
 }

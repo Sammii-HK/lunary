@@ -113,6 +113,26 @@ ${numberData.description}
 
 Life Path ${numberData.number} individuals are here to learn about ${numberData.meaning.toLowerCase()} and express these qualities in their lives. This number shapes your personality, influences your choices, and guides your path through life.
 
+## How Your Life Path Is Calculated
+
+Your Life Path Number is derived from your full birth date. Each part of the date is reduced to a single digit, then added together and reduced again until you reach a single digit (or a master number like 11 or 22). The resulting number reveals your life theme and the skills you are meant to cultivate.
+
+## Growth Lessons for ${numberData.name}
+
+Every life path comes with strengths and growth edges. For ${numberData.name}, the greatest growth happens when you lean into your natural gifts while staying aware of your tendencies. Awareness helps you balance intensity with patience, ambition with humility, and independence with collaboration.
+
+## Relationships and Communication
+
+Life Path ${numberData.number} shapes how you connect with others. When you are in balance, your traits feel supportive and clear. When you are out of balance, the same traits can feel rigid or overdone. Communication improves when you name your needs directly.
+
+## Career and Purpose
+
+Your life path influences the kinds of environments where you thrive. Use your strengths as a compass when choosing roles, and build habits that support the lesson you are here to learn.
+
+## Daily Alignment
+
+Choose one simple action each day that reflects your core theme. Repetition turns insight into growth, and growth turns the life path into a lived practice.
+
 Understanding your Life Path Number helps you:
 - Recognize your natural talents and abilities
 - Understand your life's purpose
@@ -120,7 +140,9 @@ Understanding your Life Path Number helps you:
 - Make choices aligned with your true nature
 - Develop your strengths and work on your challenges
 
-Whether ${numberData.number} is your Life Path Number or you're curious about this number's energy, understanding its meaning provides valuable insights into personality, purpose, and potential.`}
+Whether ${numberData.number} is your Life Path Number or you're curious about this number's energy, understanding its meaning provides valuable insights into personality, purpose, and potential.
+
+Return to this page seasonally to notice how the theme evolves over time.`}
         emotionalThemes={numberData.traits}
         howToWorkWith={[
           `Embrace your ${numberData.meaning.toLowerCase()} nature`,
@@ -140,6 +162,25 @@ Whether ${numberData.number} is your Life Path Number or you're curious about th
               ['Challenges', numberData.challenges.slice(0, 3).join(', ')],
             ],
           },
+          {
+            title: `${numberData.name} in Daily Life`,
+            headers: ['Area', 'Focus'],
+            rows: [
+              ['Career', numberData.career.slice(0, 3).join(', ')],
+              ['Love', numberData.love.slice(0, 3).join(', ')],
+              ['Motivation', numberData.keywords.slice(0, 3).join(', ')],
+            ],
+          },
+          {
+            title: 'Balance Check',
+            headers: ['In Balance', 'Out of Balance'],
+            rows: [
+              [
+                numberData.strengths.slice(0, 2).join(', '),
+                numberData.challenges.slice(0, 2).join(', '),
+              ],
+            ],
+          },
         ]}
         journalPrompts={[
           `How do I express my ${numberData.name} energy?`,
@@ -147,6 +188,13 @@ Whether ${numberData.number} is your Life Path Number or you're curious about th
           `What ${numberData.name} challenges do I face?`,
           `How can I align my career with ${numberData.name}?`,
           `What does ${numberData.name} teach me about my life purpose?`,
+          'What small habit would support my life path this month?',
+        ]}
+        rituals={[
+          'Write a short personal mission statement and read it each morning.',
+          'Choose a weekly ritual that strengthens your core strengths.',
+          'Set one small goal aligned with your life path and track progress.',
+          'Create a space with symbols that reflect your life path theme.',
         ]}
         numerology={`Life Path Number: ${numberData.number}
 Meaning: ${numberData.meaning}

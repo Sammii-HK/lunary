@@ -1,8 +1,7 @@
 import { Metadata } from 'next';
 import Link from 'next/link';
-import { ExploreGrimoire } from '@/components/grimoire/ExploreGrimoire';
 import { Wand2 } from 'lucide-react';
-import { GrimoireBreadcrumbs } from '@/components/grimoire/GrimoireBreadcrumbs';
+import { SEOContentTemplate } from '@/components/grimoire/SEOContentTemplate';
 
 const witchcraftTools = [
   {
@@ -117,32 +116,103 @@ export const metadata: Metadata = {
 };
 
 export default function WitchcraftToolsIndexPage() {
-  const breadcrumbItems = [
-    { name: 'Grimoire', url: '/grimoire' },
-    { name: 'Modern Witchcraft', url: '/grimoire/modern-witchcraft' },
-    { name: 'Tools', url: '/grimoire/modern-witchcraft/tools' },
+  const tableOfContents = [
+    { label: 'About Magical Tools', href: '#about-magical-tools' },
+    { label: 'Essential Tools', href: '#essential-tools' },
+    { label: 'Explore More', href: '#explore-more' },
   ];
 
-  return (
-    <div className='p-4 md:p-6 lg:p-8 xl:p-10 min-h-full'>
-      <GrimoireBreadcrumbs items={breadcrumbItems} />
-      <div className='max-w-5xl mx-auto'>
-        {/* Header */}
-        <div className='text-center mb-12'>
-          <div className='flex justify-center mb-4'>
-            <Wand2 className='w-16 h-16 text-amber-400' />
-          </div>
-          <h1 className='text-3xl md:text-4xl lg:text-5xl font-light text-zinc-100 mb-4'>
-            Witchcraft Tools
-          </h1>
-          <p className='text-lg text-zinc-400 max-w-2xl mx-auto'>
-            Tools are extensions of your will and help focus magical energy.
-            Learn about traditional tools and how to use them in your practice.
-          </p>
-        </div>
+  const heroContent = (
+    <div className='text-center'>
+      <div className='flex justify-center mb-4'>
+        <Wand2 className='w-16 h-16 text-amber-400' />
+      </div>
+      <p className='text-lg text-zinc-400 max-w-3xl mx-auto'>
+        Tools are extensions of your will and help focus magical energy. Learn
+        about traditional tools and how to incorporate them into your witchcraft
+        practice.
+      </p>
+    </div>
+  );
 
-        {/* Introduction */}
-        <div className='bg-zinc-900/50 border border-zinc-800 rounded-xl p-6 mb-10'>
+  return (
+    <div className='min-h-screen bg-zinc-950 text-zinc-100'>
+      <SEOContentTemplate
+        title={metadata.title as string}
+        h1='Witchcraft Tools'
+        description={metadata.description as string}
+        keywords={metadata.keywords as string[]}
+        canonicalUrl={
+          (metadata.alternates?.canonical as string) ??
+          'https://lunary.app/grimoire/modern-witchcraft/tools'
+        }
+        intro='Witchcraft tools help you focus intention and create ritual structure. You do not need every tool to practice, but each item can deepen your work.'
+        tldr='Tools are optional but useful. Start with one or two items that match your style and build from there.'
+        meaning={`Magical tools are symbols of focus. They help you enter ritual space, direct energy, and create consistent practice. The tool matters less than your relationship with it.
+
+Start with a candle, a journal, or a small altar. As your practice grows, add tools that support your goals. Keep them clean, stored respectfully, and used with intention.
+
+You can also treat tools as training wheels. Use them to build focus, then notice how your intention carries the ritual even without them.
+
+If a tool feels overwhelming, simplify. One well-used tool is more powerful than a shelf of unused items.
+
+Let usefulness guide you more than aesthetics. A tool that supports your daily ritual is the best choice.`}
+        howToWorkWith={[
+          'Choose one tool and learn its traditional purpose.',
+          'Use it consistently for a week to build familiarity.',
+          'Notice how your focus changes with or without the tool.',
+          'Cleanse and store it after each use.',
+        ]}
+        rituals={[
+          'Cleanse a new tool with smoke or salt before first use.',
+          'Dedicate one tool for a single purpose for a month.',
+          'Set a short intention before each ritual.',
+        ]}
+        journalPrompts={[
+          'Which tool feels most natural for me to use?',
+          'What tool do I reach for when I need clarity?',
+          'How can I keep my tools simple and intentional?',
+        ]}
+        tables={[
+          {
+            title: 'Tool Essentials',
+            headers: ['Tool', 'Primary Use'],
+            rows: [
+              ['Candle', 'Focus and intention'],
+              ['Altar', 'Sacred workspace'],
+              ['Journal', 'Tracking and reflection'],
+              ['Crystals', 'Amplifying energy'],
+            ],
+          },
+          {
+            title: 'Choosing Your First Tools',
+            headers: ['Goal', 'Suggested Tool'],
+            rows: [
+              ['Clarity', 'Journal or tarot cards'],
+              ['Protection', 'Salt or candle'],
+              ['Grounding', 'Pentacle or stone'],
+              ['Healing', 'Chalice or water bowl'],
+            ],
+          },
+        ]}
+        internalLinks={[
+          { text: 'Modern Witchcraft', href: '/grimoire/modern-witchcraft' },
+          { text: 'Candle Magic', href: '/grimoire/candle-magic' },
+          { text: 'Crystals', href: '/grimoire/crystals' },
+          { text: 'Grimoire Home', href: '/grimoire' },
+        ]}
+        tableOfContents={tableOfContents}
+        heroContent={heroContent}
+        breadcrumbs={[
+          { label: 'Grimoire', href: '/grimoire' },
+          { label: 'Modern Witchcraft', href: '/grimoire/modern-witchcraft' },
+          { label: 'Tools' },
+        ]}
+      >
+        <section
+          id='about-magical-tools'
+          className='bg-zinc-900/50 border border-zinc-800 rounded-xl p-6 mb-10'
+        >
           <h2 className='text-xl font-medium text-zinc-100 mb-3'>
             About Magical Tools
           </h2>
@@ -156,10 +226,9 @@ export default function WitchcraftToolsIndexPage() {
             collection gradually as you discover what resonates with your
             practice.
           </p>
-        </div>
+        </section>
 
-        {/* Tools Grid */}
-        <section className='mb-12'>
+        <section id='essential-tools' className='mb-12'>
           <h2 className='text-2xl font-medium text-zinc-100 mb-6'>
             Essential Tools
           </h2>
@@ -185,8 +254,7 @@ export default function WitchcraftToolsIndexPage() {
           </div>
         </section>
 
-        {/* Related Links */}
-        <div className='border-t border-zinc-800 pt-8'>
+        <section id='explore-more' className='border-t border-zinc-800 pt-8'>
           <h3 className='text-lg font-medium text-zinc-100 mb-4'>
             Explore More
           </h3>
@@ -216,9 +284,8 @@ export default function WitchcraftToolsIndexPage() {
               Crystals
             </Link>
           </div>
-        </div>
-        <ExploreGrimoire />
-      </div>
+        </section>
+      </SEOContentTemplate>
     </div>
   );
 }

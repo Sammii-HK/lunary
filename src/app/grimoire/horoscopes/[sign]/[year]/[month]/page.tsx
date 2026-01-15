@@ -76,7 +76,7 @@ export async function generateMetadata({
       description,
       url: `https://lunary.app/grimoire/horoscopes/${sign}/${year}/${month}`,
       images: [
-        `/api/og/cosmic?title=${encodeURIComponent(`${signName} ${SIGN_SYMBOLS[sign]} ${monthName} ${year}`)}`,
+        `/api/og/horoscope?sign=${encodeURIComponent(sign)}&month=${encodeURIComponent(month)}&year=${encodeURIComponent(year)}&size=landscape`,
       ],
     },
     alternates: {
@@ -167,7 +167,56 @@ The ${theme.luckyDays.join(', ')} of ${monthName} carry especially favorable ene
 ### Power Color
 
 Wearing or surrounding yourself with ${theme.powerColor} can help align your energy with the month's cosmic currents.
+
+### Practical Focus
+
+If you want a simple roadmap, focus on one core intention connected to ${theme.focus}. Build small, consistent actions around it, and notice how that shifts your confidence and direction throughout the month.
+
+### Love, Career, and Wellbeing
+
+In love, emphasize ${theme.opportunities} and practice patience around ${theme.challenges}. For career or school, let ${theme.focus} guide your priorities and set clear boundaries where needed. For wellbeing, support your ${element.toLowerCase()} energy with routines that keep you steady and focused.
       `}
+      howToWorkWith={[
+        'Choose one focus area and set a simple intention for the month.',
+        'Schedule important actions on your lucky days when possible.',
+        `Use ${theme.powerColor} in clothing or ritual tools for support.`,
+        `Reflect on ${theme.challenges} as a growth edge, not a flaw.`,
+        'Track how the theme shows up in love, work, and wellbeing.',
+      ]}
+      rituals={[
+        `Light a ${theme.powerColor} candle and set a clear monthly intention.`,
+        'Write a short affirmation and place it on your altar.',
+        'Do a mid‑month check‑in and adjust your plan if needed.',
+        'Close the month with a gratitude and release ritual.',
+      ]}
+      journalPrompts={[
+        `Where can I lean into ${theme.focus} without overextending?`,
+        `What is the first step toward ${theme.opportunities}?`,
+        `How can I respond to ${theme.challenges} with more clarity?`,
+        'What felt most aligned this month, and why?',
+      ]}
+      faqs={[
+        {
+          question: `Is this ${signName} horoscope personalized?`,
+          answer:
+            'It is a Sun‑sign forecast. For deeper personalization, use your full birth chart and rising sign.',
+        },
+        {
+          question: `How often should I check this horoscope?`,
+          answer:
+            'Read it at the start of the month and revisit mid‑month to stay aligned with the theme.',
+        },
+        {
+          question: `Can I use the power color daily?`,
+          answer:
+            'Yes. Small touches like accessories, stationery, or candles help reinforce the month’s intention without overthinking it.',
+        },
+        {
+          question: 'What if the horoscope feels off?',
+          answer:
+            'Check your Rising and Moon signs as well. Those placements often reflect timing and emotions more precisely.',
+        },
+      ]}
       emotionalThemes={[
         `Focus: ${theme.focus}`,
         `Challenge: ${theme.challenges}`,
@@ -212,6 +261,14 @@ Wearing or surrounding yourself with ${theme.powerColor} can help align your ene
           href: `/grimoire/astronomy/planets/${ruler.toLowerCase()}`,
           type: 'Planet',
         },
+      ]}
+      internalLinks={[
+        {
+          text: `${signName} Horoscopes`,
+          href: `/grimoire/horoscopes/${sign}`,
+        },
+        { text: 'Monthly Horoscopes', href: '/grimoire/horoscopes' },
+        { text: 'Personalized Horoscope', href: '/horoscope' },
       ]}
       ctaText={`Get your personalized ${signName} reading`}
       ctaHref='/horoscope'

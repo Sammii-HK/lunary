@@ -42,7 +42,7 @@ export const metadata: Metadata = {
     title: 'Soul Urge Number Calculator & Meanings | Lunary',
     description:
       "Calculate your Soul Urge Number and discover your heart's deepest desires.",
-    images: ['/api/og/cosmic'],
+    images: ['/api/og/grimoire/numerology'],
   },
   alternates: {
     canonical: 'https://lunary.app/grimoire/numerology/soul-urge',

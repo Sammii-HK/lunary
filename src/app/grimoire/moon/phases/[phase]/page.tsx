@@ -76,7 +76,7 @@ export async function generateMetadata({
       card: 'summary_large_image',
       title,
       description,
-      images: ['/api/og/cosmic'],
+      images: ['/api/og/grimoire/moon'],
     },
     alternates: {
       canonical: `https://lunary.app/grimoire/moon/phases/${phase}`,
@@ -250,7 +250,9 @@ The lunar cycle moves through these phases approximately every 29.5 days, creati
 
 During the ${phaseName} Moon, the energy is focused on ${phaseData.keywords
           .join(', ')
-          .toLowerCase()}. This makes it an ideal time for specific types of work, whether that's setting intentions, taking action, celebrating achievements, or releasing what no longer serves.`}
+          .toLowerCase()}. This makes it an ideal time for specific types of work, whether that's setting intentions, taking action, celebrating achievements, or releasing what no longer serves.
+
+If you feel off-rhythm, keep it simple: choose one aligned action and one thing to avoid. Consistency with the phase is more helpful than intensity.`}
         emotionalThemes={phaseData.keywords}
         howToWorkWith={[
           `Align your activities with ${phaseName} energy`,
@@ -265,6 +267,19 @@ During the ${phaseName} Moon, the energy is focused on ${phaseData.keywords
           `What does ${phaseName} energy inspire in me?`,
           `How can I work with ${phaseName} energy more consciously?`,
           `What intentions align with the ${phaseName} Moon?`,
+          'What is one small ritual I can repeat each cycle?',
+        ]}
+        tables={[
+          {
+            title: `${phaseName} Moon Focus`,
+            headers: ['Best For', 'Avoid'],
+            rows: [
+              [
+                phaseData.keywords.slice(0, 2).join(', '),
+                'Overcommitting or rushing the process',
+              ],
+            ],
+          },
         ]}
         relatedItems={[
           { name: 'Moon Guide', href: '/grimoire/moon', type: 'Guide' },

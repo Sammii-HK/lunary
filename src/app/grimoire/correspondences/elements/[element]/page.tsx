@@ -1,6 +1,8 @@
 import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { SEOContentTemplate } from '@/components/grimoire/SEOContentTemplate';
+import { CosmicConnections } from '@/components/grimoire/CosmicConnections';
+import { CosmicConnectionSection } from '@/lib/cosmicConnectionsConfig';
 import { correspondencesData } from '@/constants/grimoire/correspondences';
 import { stringToKebabCase } from '../../../../../../utils/string';
 
@@ -112,6 +114,43 @@ The ${elementKey.toLowerCase()} element's energy is ${elementData.colors.join(',
     },
   ];
 
+  const tableOfContents = [
+    { label: 'Element Overview', href: '#element-overview' },
+    { label: 'Practice Notes', href: '#practice-notes' },
+    { label: 'Correspondences', href: '#correspondences' },
+  ];
+
+  const cosmicSections: CosmicConnectionSection[] = [
+    {
+      title: 'Element Connections',
+      links: [
+        {
+          label: 'Element Correspondences',
+          href: '/grimoire/correspondences/elements',
+        },
+        {
+          label: 'Fire, Water, Air, Earth',
+          href: '/grimoire/correspondences/elements',
+        },
+        { label: 'Zodiac Signs', href: '/grimoire/zodiac' },
+      ],
+    },
+    {
+      title: 'Practice Tools',
+      links: [
+        {
+          label: 'Correspondences Overview',
+          href: '/grimoire/correspondences',
+        },
+        {
+          label: 'Spellcraft Fundamentals',
+          href: '/grimoire/spells/fundamentals',
+        },
+        { label: 'Moon Phases', href: '/grimoire/moon/phases' },
+      ],
+    },
+  ];
+
   return (
     <SEOContentTemplate
       title={`${elementKey} Element: Magical Correspondences & Meanings - Lunary`}
@@ -129,15 +168,6 @@ The ${elementKey.toLowerCase()} element's energy is ${elementData.colors.join(',
       meaning={meaning}
       howToWorkWith={howToWorkWith}
       faqs={faqs}
-      breadcrumbs={[
-        { label: 'Grimoire', href: '/grimoire' },
-        { label: 'Correspondences', href: '/grimoire/correspondences' },
-        { label: 'Elements', href: '/grimoire/correspondences/elements' },
-        {
-          label: `${elementKey}`,
-          href: `/grimoire/correspondences/elements/${element}`,
-        },
-      ]}
       internalLinks={[
         {
           text: 'Magical Correspondences',
@@ -168,6 +198,47 @@ The ${elementKey.toLowerCase()} element's energy is ${elementData.colors.join(',
           ],
         },
       ]}
-    />
+      tableOfContents={tableOfContents}
+      cosmicConnections={
+        <CosmicConnections
+          entityType='hub-correspondences'
+          entityKey='correspondences'
+          title={`${elementKey} Connections`}
+          sections={cosmicSections}
+        />
+      }
+      ctaText={`Want ${elementKey.toLowerCase()} ritual ideas?`}
+      ctaHref='/pricing'
+    >
+      <section id='element-overview' className='space-y-3 mb-8'>
+        <p className='text-sm text-zinc-300'>{meaning}</p>
+        <p className='text-sm text-zinc-300'>
+          Combine {elementData.colors.join(', ')} colors, crystals like{' '}
+          {elementData.crystals.slice(0, 2).join(', ')}, and herbs such as{' '}
+          {elementData.herbs.slice(0, 2).join(', ')} to embody{' '}
+          {elementKey.toLowerCase()} energy.
+        </p>
+      </section>
+      <section id='practice-notes' className='space-y-3 mb-8'>
+        <h2 className='text-xl font-semibold text-zinc-100'>Practice Notes</h2>
+        <ul className='list-disc list-inside text-sm text-zinc-300 space-y-2'>
+          {howToWorkWith.map((item) => (
+            <li key={item}>{item}</li>
+          ))}
+        </ul>
+      </section>
+      <section id='correspondences' className='space-y-3'>
+        <h2 className='text-xl font-semibold text-zinc-100'>
+          Element Correspondences
+        </h2>
+        <p className='text-sm text-zinc-300'>
+          {elementKey} connects to the {elementData.directions.toLowerCase()}{' '}
+          direction, {elementData.seasons.toLowerCase()} season, and{' '}
+          {elementData.timeOfDay.toLowerCase()} time of day. Its zodiac signs
+          include {elementData.zodiacSigns.join(', ')}, and it resonates with
+          planets such as {elementData.planets.join(', ')}.
+        </p>
+      </section>
+    </SEOContentTemplate>
   );
 }

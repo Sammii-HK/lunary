@@ -1,6 +1,8 @@
 import { Metadata } from 'next';
 import Link from 'next/link';
 import { SEOContentTemplate } from '@/components/grimoire/SEOContentTemplate';
+import { CosmicConnections } from '@/components/grimoire/CosmicConnections';
+import { CosmicConnectionSection } from '@/lib/cosmicConnectionsConfig';
 
 const animals = [
   {
@@ -87,7 +89,7 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: 'Animal Correspondences Guide | Lunary',
     description: 'Complete guide to spirit animals and animal magic.',
-    images: ['/api/og/cosmic'],
+    images: ['/api/og/grimoire/correspondences'],
   },
   alternates: {
     canonical: 'https://lunary.app/grimoire/correspondences/animals',
@@ -133,6 +135,30 @@ const faqs = [
   },
 ];
 
+const tableOfContents = [
+  { label: 'All Spirit Animals', href: '#all-spirit-animals' },
+  { label: 'Animals by Element', href: '#elements' },
+];
+
+const cosmicSections: CosmicConnectionSection[] = [
+  {
+    title: 'Correspondence Hubs',
+    links: [
+      { label: 'All Correspondences', href: '/grimoire/correspondences' },
+      { label: 'Elements', href: '/grimoire/correspondences/elements' },
+      { label: 'Divination', href: '/grimoire/divination' },
+    ],
+  },
+  {
+    title: 'Practice Tools',
+    links: [
+      { label: 'Meditation', href: '/grimoire/meditation' },
+      { label: 'Chinese Zodiac', href: '/grimoire/chinese-zodiac' },
+      { label: 'Animal Magic', href: '/grimoire/correspondences/animals' },
+    ],
+  },
+];
+
 export default function AnimalsIndexPage() {
   return (
     <div className='p-4 md:p-6 lg:p-8 xl:p-10 min-h-full'>
@@ -152,6 +178,8 @@ export default function AnimalsIndexPage() {
           answer:
             'Animal correspondences are the spiritual meanings, magical associations, and symbolic properties of different animals. Each creature carries unique medicine and wisdom that can guide, protect, and teach us. Understanding animal correspondences helps you interpret messages from spirit animals, work with animal energy in magic, and deepen your connection to the natural world.',
         }}
+        tableOfContents={tableOfContents}
+        intro='Animals carry healing medicine. This guide introduces power animals, their elemental affinities, and how to work with them intentionally.'
         tldr='Cat for magic and independence, owl for wisdom and intuition, wolf for loyalty and instinct, raven for prophecy and transformation, snake for healing and rebirth, bear for strength and protection.'
         meaning={`Animals have been spiritual guides and symbols across all human cultures. From cave paintings to modern spirit work, we recognize that animals carry powerful medicine and wisdom.
 
@@ -226,9 +254,17 @@ Animals connected to **Earth**: Grounding, abundance, stability`}
         ]}
         ctaText='Want personalized spirit animal insights?'
         ctaHref='/pricing'
+        cosmicConnections={
+          <CosmicConnections
+            entityType='hub-correspondences'
+            entityKey='correspondences'
+            title='Correspondence Connections'
+            sections={cosmicSections}
+          />
+        }
         faqs={faqs}
       >
-        <section className='mb-12'>
+        <section id='all-spirit-animals' className='mb-12'>
           <h2 className='text-2xl font-medium text-zinc-100 mb-6'>
             All Spirit Animals
           </h2>
@@ -254,7 +290,10 @@ Animals connected to **Earth**: Grounding, abundance, stability`}
           </div>
         </section>
 
-        <section className='mb-12 bg-orange-950/20 border border-orange-900/50 rounded-xl p-6'>
+        <section
+          id='elements'
+          className='mb-12 bg-orange-950/20 border border-orange-900/50 rounded-xl p-6'
+        >
           <h2 className='text-xl font-medium text-zinc-100 mb-4'>
             Quick Reference: Animals by Element
           </h2>

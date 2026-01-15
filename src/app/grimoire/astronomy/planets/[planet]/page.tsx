@@ -206,6 +206,14 @@ export default async function PlanetPage({
     sameAs: getWikipediaUrl('planets', planetKey),
   });
 
+  const tableOfContents = [
+    { label: `${planetData.name} Essentials`, href: '#planet-essentials' },
+    { label: 'Working with Correspondences', href: '#planet-correspondences' },
+    { label: 'Rituals & Devotion', href: '#planet-rituals' },
+    { label: 'Transit Timing Tips', href: '#planet-transits' },
+    { label: 'Frequently Asked Questions', href: '#faq' },
+  ];
+
   return (
     <div className='p-4 md:p-6 lg:p-8 xl:p-10 min-h-full'>
       {renderJsonLd(planetSchema)}
@@ -291,6 +299,7 @@ In magical practice, ${planetData.name} is invoked for matters relating to ${cor
         ]}
         ctaText={`Discover ${planetData.name} in your birth chart`}
         ctaHref='/pricing'
+        tableOfContents={tableOfContents}
         faqs={faqs}
         cosmicConnections={
           <CosmicConnections
@@ -299,7 +308,122 @@ In magical practice, ${planetData.name} is invoked for matters relating to ${cor
             title={`${planetData.name} Cosmic Connections`}
           />
         }
-      />
+      >
+        <section
+          id='planet-essentials'
+          className='mb-10 bg-zinc-900/40 border border-zinc-800 rounded-xl p-6 space-y-3'
+        >
+          <div className='flex items-center gap-3 text-3xl text-lunary-primary-300'>
+            <span>{unicodeSymbol}</span>
+            <span>{planetData.name}</span>
+          </div>
+          <p className='text-zinc-300'>
+            {planetData.name} expresses {planetData.properties.toLowerCase()}.
+            When this planet is strong in your chart, you naturally gravitate
+            toward experiences that highlight{' '}
+            {correspondences.themes.join(', ').toLowerCase()}.
+          </p>
+          <p className='text-zinc-300'>
+            Look at the sign and house placement of {planetData.name} to
+            understand how the planet colors your relationships, work style, and
+            inner dialogue. Any aspects to the planet describe allies or tension
+            points that help you work with its lessons.
+          </p>
+        </section>
+
+        <section
+          id='planet-correspondences'
+          className='mb-10 bg-zinc-900/30 border border-zinc-800 rounded-xl p-6 space-y-4'
+        >
+          <h2 className='text-2xl font-medium text-zinc-100'>
+            Working with Correspondences
+          </h2>
+          <p className='text-zinc-300'>
+            Bring {planetData.name} into your physical space by incorporating
+            its preferred colors, herbs, metals, and day of the week. Sensory
+            cues help your body remember the planet’s vibration, making rituals
+            more effective.
+          </p>
+          <div className='grid sm:grid-cols-2 gap-4 text-sm text-zinc-300'>
+            <div className='rounded-lg border border-zinc-800 bg-zinc-950/50 p-4 space-y-1'>
+              <p className='font-semibold text-zinc-100'>Day & Colors</p>
+              <p>
+                Day: {correspondences.day}. Colors:{' '}
+                {correspondences.colors.join(', ')}.
+              </p>
+            </div>
+            <div className='rounded-lg border border-zinc-800 bg-zinc-950/50 p-4 space-y-1'>
+              <p className='font-semibold text-zinc-100'>Themes</p>
+              <p>{correspondences.themes.join(', ')}</p>
+            </div>
+          </div>
+          <p className='text-zinc-300'>
+            Add these correspondences to candles, bath rituals, sigils, or
+            wardrobe choices on {correspondences.day} to strengthen the link
+            between your mundane routine and the planet’s magic.
+          </p>
+        </section>
+
+        <section
+          id='planet-rituals'
+          className='mb-10 bg-zinc-900/35 border border-zinc-800 rounded-xl p-6 space-y-4'
+        >
+          <h2 className='text-2xl font-medium text-zinc-100'>
+            Rituals & Devotion
+          </h2>
+          <ol className='list-decimal list-inside text-zinc-300 space-y-2'>
+            <li>
+              <strong>Morning check-in:</strong> Pull a tarot card or rune
+              asking, “How can I honor {planetData.name} today?” Record the
+              answer in your journal.
+            </li>
+            <li>
+              <strong>Planetary offering:</strong> Light a candle in{' '}
+              {correspondences.colors[0] || 'a matching'} tone and write an
+              intention focused on the planet’s themes.
+            </li>
+            <li>
+              <strong>Somatic anchor:</strong> Choose a movement practice that
+              mirrors the energy—fiery dance for Mars, slow breathing for
+              Saturn, oceanic flow for Neptune.
+            </li>
+            <li>
+              <strong>Closing gratitude:</strong> Note any synchronicities that
+              appeared after you honored the planet. Over time you’ll build a
+              personal dictionary of signs.
+            </li>
+          </ol>
+        </section>
+
+        <section
+          id='planet-transits'
+          className='mb-10 bg-zinc-900/40 border border-zinc-800 rounded-xl p-6 space-y-4'
+        >
+          <h2 className='text-2xl font-medium text-zinc-100'>
+            Transit Timing Tips
+          </h2>
+          <p className='text-zinc-300'>
+            Track {planetData.name} transits to anticipate when its lessons will
+            be front and center. If the planet moves quickly (Mercury, Venus,
+            Mars), note dates when it aspect your natal planets. If it moves
+            slowly (Jupiter outward) watch the houses it travels through.
+          </p>
+          <ul className='space-y-2 text-zinc-300'>
+            <li>
+              Retrograde phases invite you to review, rework, and reconnect with
+              the planet’s themes instead of forcing forward motion.
+            </li>
+            <li>
+              Conjunctions bring fresh cycles—plan launches or initiations that
+              echo the planet’s energy.
+            </li>
+            <li>
+              Squares/oppositions highlight growth edges; schedule rest and
+              reflection so you can respond intentionally.
+            </li>
+          </ul>
+        </section>
+      </SEOContentTemplate>
     </div>
   );
 }

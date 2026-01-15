@@ -123,11 +123,50 @@ ${planetName} in the ${ordinal} House expresses through ${houseData.lifeArea.toL
 ### Natural Ruler Connection
 
 The ${ordinal} House is naturally associated with ${houseData.naturalSign} and ruled by ${houseData.naturalRuler}. Having ${planetName} here creates a dialogue between ${planetName}'s energy and ${houseData.naturalRuler}'s themes.
+
+This placement becomes clearer over time. Look for repeated patterns in the ${houseData.lifeArea.toLowerCase()} area - those are the themes your chart is asking you to develop.
+
+If this placement feels challenging, focus on building skills rather than fixing yourself. Each house placement is a training ground with both gifts and lessons.
+
+Over time, you can learn to express this placement more consciously by noticing what triggers it and what supports it. Awareness is the fastest path to balance.
+
+Many people notice this placement most clearly during key life transitions. When you shift jobs, relationships, or routines, this planet-house combo often becomes more visible and easier to work with.
+
+If you want to work with the placement intentionally, focus on skill-building. One small habit, practiced weekly, will create more growth than occasional big efforts.
+
+Give yourself time. House placements mature with age and experience, so patience is part of the practice.
+
+Track this placement yearly to see how it evolves with different life stages.
+
+Patterns here often deepen as you gain experience.
+
+Notice the long arc.
+Small choices compound in this house, so track patterns over time.
+Look for repeating themes during transits and returns.
       `}
       emotionalThemes={houseData.keywords.map(
         (k) => k.charAt(0).toUpperCase() + k.slice(1),
       )}
       signsMostAffected={[houseData.naturalSign]}
+      howToWorkWith={[
+        `Notice how ${planetName.toLowerCase()} themes appear in ${houseData.lifeArea.toLowerCase()}.`,
+        `Use ${houseData.naturalSign} traits as a guide for balance.`,
+        'Track transits to this house for timing and emphasis.',
+        'Set one goal that honors this placement.',
+      ]}
+      rituals={[
+        `Write a simple intention for ${houseData.lifeArea.toLowerCase()} and revisit it weekly.`,
+        `Choose a symbol of ${planetName} and place it on your altar.`,
+        `Journal one small action that supports this placement.`,
+        `Set a weekly check-in focused on ${houseData.keywords[0]?.toLowerCase() || 'this theme'}.`,
+      ]}
+      journalPrompts={[
+        `How does ${planetName} show up in my ${houseData.lifeArea.toLowerCase()}?`,
+        `What feels most aligned with this ${ordinal} House placement?`,
+        `Where do I need more confidence or clarity in this area?`,
+        `What habit would help me express this placement more fully?`,
+        `What boundary supports me in ${houseData.lifeArea.toLowerCase()}?`,
+      ]}
       tables={[
         {
           title: `${ordinal} House Overview`,
@@ -138,6 +177,15 @@ The ${ordinal} House is naturally associated with ${houseData.naturalSign} and r
             ['Natural Sign', houseData.naturalSign],
             ['Natural Ruler', houseData.naturalRuler],
             ['Keywords', houseData.keywords.join(', ')],
+          ],
+        },
+        {
+          title: `${planetName} in ${ordinal} House Focus`,
+          headers: ['Theme', 'Prompt'],
+          rows: [
+            ['Energy', `How does ${planetName} express here?`],
+            ['Growth', `What supports ${houseData.lifeArea.toLowerCase()}?`],
+            ['Balance', `Where does moderation help?`],
           ],
         },
       ]}
@@ -154,6 +202,31 @@ The ${ordinal} House is naturally associated with ${houseData.naturalSign} and r
         },
         { name: 'Houses Overview', href: '/grimoire/houses', type: 'Guide' },
       ]}
+      internalLinks={[
+        { text: 'Houses Overview', href: '/grimoire/houses/overview' },
+        { text: 'Birth Chart Basics', href: '/grimoire/birth-chart' },
+        { text: 'Planets', href: `/grimoire/astronomy/planets/${planet}` },
+      ]}
+      faqs={[
+        {
+          question: `Is ${planetName} in the ${ordinal} House good or bad?`,
+          answer:
+            'No placement is purely good or bad. Each has strengths and challenges that depend on awareness and how you work with the energy.',
+        },
+        {
+          question: 'What if this house is empty in my chart?',
+          answer:
+            'Empty houses still matter. Transits will activate the house over time, and the house cusp sign still shapes it.',
+        },
+        {
+          question: 'How does this placement show up day to day?',
+          answer: `It tends to show up in ${houseData.lifeArea.toLowerCase()} choices, habits, and priorities. Watch where this theme repeats.`,
+        },
+        {
+          question: 'What should I focus on to grow this placement?',
+          answer: `Choose one habit that supports ${houseData.lifeArea.toLowerCase()} and practice it consistently. Small routines create lasting change.`,
+        },
+      ]}
       ctaText='Find your house placements'
       ctaHref='/birth-chart'
       sources={[{ name: 'Traditional house meanings' }]}
@@ -162,6 +235,14 @@ The ${ordinal} House is naturally associated with ${houseData.naturalSign} and r
         <h3 className='text-lg font-medium mb-4'>
           {planetName} in Other Houses
         </h3>
+        <p className='text-sm text-zinc-400 mb-4'>
+          Comparing placements shows how the same planet shifts focus depending
+          on life area. Use this as a quick way to see the range of expression.
+        </p>
+        <p className='text-sm text-zinc-400 mb-4'>
+          Each house changes the context, but the planet stays the same. This
+          helps you separate core energy from life setting.
+        </p>
         <div className='flex flex-wrap gap-2'>
           {HOUSES.map((h) => (
             <Link

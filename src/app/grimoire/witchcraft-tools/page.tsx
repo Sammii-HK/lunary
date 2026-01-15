@@ -50,6 +50,7 @@ export default function WitchcraftToolsPage() {
       ]}
       canonicalUrl='https://lunary.app/grimoire/witchcraft-tools'
       intro={`Essential witchcraft tools help focus energy and create sacred space. While tools aren't required for magic (your intention is most important), they can enhance your practice and provide structure. Learn about traditional tools and how to use them effectively.`}
+      tldr='Witchcraft tools are not requirements; they are focus aids. Start with one or two items that feel meaningful and build slowly. Cleanse, consecrate, and use them with intention. The tool is a symbol, but the power is your clarity and consistency.'
       meaning={`**Essential Tools:**
 
 **Athame (Ritual Knife):** Represents the element of Air (or Fire in some traditions). Used to cast circles, direct energy, and cut energetic ties. Never used for physical cutting—it's purely ceremonial.
@@ -71,7 +72,26 @@ export default function WitchcraftToolsPage() {
 - **Broom (Besom):** Cleanses space energetically
 
 **Using Tools:**
-Tools are extensions of your will. They help focus energy but aren't required—your intention is what matters. Choose tools that resonate with you, and cleanse/consecrate them before use.`}
+Tools are extensions of your will. They help focus energy but aren't required—your intention is what matters. Choose tools that resonate with you, and cleanse/consecrate them before use.
+
+**Tool care and respect:**
+Tools work best when they feel cared for. Store them in a clean place, wrap delicate items, and avoid using them for unrelated tasks. If a tool no longer resonates, you can retire it respectfully by cleaning it, thanking it, and repurposing or gifting it with clear intention.
+
+**Building your altar:**
+An altar can be as small as a shelf or as simple as a cloth and candle. What matters is consistency. Place items that represent the elements, your lineage, or your current intention. A simple altar you return to daily will be more powerful than a complex altar you rarely use.`}
+      tables={[
+        {
+          title: 'Tool Quick Reference',
+          headers: ['Tool', 'Element', 'Primary Use', 'Notes'],
+          rows: [
+            ['Athame', 'Air/Fire', 'Direct energy', 'Ceremonial only'],
+            ['Wand', 'Fire/Air', 'Invoke, bless', 'Wood or crystal'],
+            ['Chalice', 'Water', 'Receive, hold', 'Emotion, devotion'],
+            ['Pentacle', 'Earth', 'Consecrate', 'Grounding focus'],
+            ['Cauldron', 'Water', 'Transform', 'Burning, mixing'],
+          ],
+        },
+      ]}
       howToWorkWith={[
         'Choose tools that resonate with you',
         'Cleanse and consecrate tools before use',
@@ -81,6 +101,20 @@ Tools are extensions of your will. They help focus energy but aren't required—
         'Create your own tools if desired',
         'Respect traditional tool meanings',
         'Use tools with intention and focus',
+      ]}
+      rituals={[
+        'Consecrate a new tool by passing it through incense smoke and naming its purpose.',
+        'Create a weekly altar refresh: dust, replace water, and reset intention.',
+        'Use a bell to open and close a short ritual session.',
+        'Place a tool on the pentacle overnight to charge it.',
+        'Write a one-sentence intention and tuck it under your altar cloth.',
+      ]}
+      journalPrompts={[
+        'Which tool feels most resonant to me and why?',
+        'What is one ritual I can commit to weekly?',
+        'How does my altar space reflect my current priorities?',
+        'What symbolism do I want to invite into my practice this month?',
+        'What tool would help me feel more grounded right now?',
       ]}
       faqs={[
         {
@@ -97,6 +131,16 @@ Tools are extensions of your will. They help focus energy but aren't required—
           question: 'Do tools need to be expensive?',
           answer:
             'Not at all! Simple, inexpensive tools work just as well as expensive ones. A kitchen knife can serve as an athame, a wine glass as a chalice, a stick as a wand. What matters is your intention and connection to the tool, not its cost.',
+        },
+        {
+          question: 'How do I cleanse a tool safely?',
+          answer:
+            'Smoke cleansing, sound cleansing, and moonlight are gentle options. Avoid water or salt for delicate materials. Always use a method that is safe for the tool itself.',
+        },
+        {
+          question: 'Can I share tools with someone else?',
+          answer:
+            'Yes, but cleanse them between uses. Shared tools work best when everyone using them agrees on intention and respects the space.',
         },
       ]}
       internalLinks={[

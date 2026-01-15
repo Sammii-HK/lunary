@@ -151,7 +151,7 @@ export async function generateMetadata({
       card: 'summary_large_image',
       title,
       description,
-      images: ['/api/og/cosmic'],
+      images: ['/api/og/grimoire/meditation'],
     },
     alternates: {
       canonical: `https://lunary.app/grimoire/meditation/techniques/${technique}`,
@@ -200,6 +200,16 @@ export default async function MeditationTechniquePage({
       question: `Is ${techniqueData.name} good for beginners?`,
       answer: `${techniqueData.name} can be practiced by beginners with guidance. Start with short sessions and gradually increase duration as you become more comfortable.`,
     },
+    {
+      question: `How often should I practice ${techniqueData.name}?`,
+      answer:
+        'Daily practice is ideal, even if it is brief. Consistency builds the most noticeable benefits over time.',
+    },
+    {
+      question: `Can I combine ${techniqueData.name} with other techniques?`,
+      answer:
+        'Yes. Many people alternate styles across the week to match their energy, such as pairing this technique with breathwork or a body scan.',
+    },
   ];
 
   return (
@@ -226,9 +236,23 @@ ${techniqueData.benefits.map((b) => `- ${b}`).join('\n')}
 
 Regular practice of ${techniqueData.name} can transform your mental clarity, emotional balance, and spiritual awareness. Even short daily sessions can create significant positive changes over time.
 
-This technique is suitable for practitioners of all levels, though beginners may want to start with shorter sessions and gradually build duration. Consistency is more important than length—a daily 10-minute practice is more beneficial than occasional hour-long sessions.`}
+This technique is suitable for practitioners of all levels, though beginners may want to start with shorter sessions and gradually build duration. Consistency is more important than length - a daily 10-minute practice is more beneficial than occasional hour-long sessions.
+
+If your mind wanders, treat it as part of the practice. Each time you notice and return to the technique, you are strengthening attention. Over time, these small returns build real mental resilience.
+
+You can also pair ${techniqueData.name} with supportive habits like gentle stretching beforehand, calming music, or a dedicated meditation corner. Simple cues help your nervous system recognize it is time to settle.
+
+Common obstacles include impatience, restless body sensations, and the feeling that nothing is happening. These are normal. Give the practice time to unfold and focus on the process rather than immediate results.
+
+Signs the practice is working can be subtle: calmer reactions, clearer thinking, or better sleep. Track small shifts over a few weeks instead of looking for a single big breakthrough.`}
         emotionalThemes={['Peace', 'Clarity', 'Focus', 'Awareness']}
         howToWorkWith={techniqueData.howTo}
+        rituals={[
+          'Begin with a short intention for the session.',
+          'Use a timer so you can relax without watching the clock.',
+          'Close with three slow breaths to integrate the practice.',
+          'Write one sentence about what you noticed.',
+        ]}
         tables={[
           {
             title: `${techniqueData.name} Overview`,
@@ -240,12 +264,23 @@ This technique is suitable for practitioners of all levels, though beginners may
               ['Frequency', 'Daily practice ideal'],
             ],
           },
+          {
+            title: 'Session Structure',
+            headers: ['Phase', 'Focus'],
+            rows: [
+              ['Arrival', 'Settle your posture and breath'],
+              ['Practice', 'Follow the main technique'],
+              ['Closing', 'Notice how you feel and transition slowly'],
+            ],
+          },
         ]}
         journalPrompts={[
           'What drew me to this meditation technique?',
           'How do I feel before and after practice?',
           'What insights arose during meditation?',
           'How can I deepen my practice?',
+          'What distractions show up most often?',
+          'What small change would make this easier to practice daily?',
         ]}
         relatedItems={[
           {

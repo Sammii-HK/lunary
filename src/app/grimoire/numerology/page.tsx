@@ -1,57 +1,51 @@
+export const dynamic = 'force-dynamic';
+
 import { Metadata } from 'next';
 import Link from 'next/link';
+import { SEOContentTemplate } from '@/components/grimoire/SEOContentTemplate';
+import { NumerologyCalculator } from '@/components/grimoire/NumerologyCalculator';
+import { CosmicConnections } from '@/components/grimoire/CosmicConnections';
+import { CosmicConnectionSection } from '@/lib/cosmicConnectionsConfig';
 import {
   NUMEROLOGY_MEANINGS,
   getUniversalYear,
   getYearRange,
 } from '@/constants/seo/numerology';
-
-// Force dynamic rendering so Universal Year updates automatically
-export const dynamic = 'force-dynamic';
 import {
   angelNumbers,
   lifePathNumbers,
 } from '@/constants/grimoire/numerology-data';
 import {
-  mirrorHours,
-  doubleHours,
-} from '@/constants/grimoire/clock-numbers-data';
-import {
   karmicDebtNumbers,
   expressionNumbers,
   soulUrgeNumbers,
 } from '@/constants/grimoire/numerology-extended-data';
-import { NumerologyCalculator } from '@/components/grimoire/NumerologyCalculator';
-import { Breadcrumbs } from '@/components/grimoire/Breadcrumbs';
-import { CosmicConnections } from '@/components/grimoire/CosmicConnections';
-import { CosmicConnectionSection } from '@/lib/cosmicConnectionsConfig';
 import {
-  createItemListSchema,
-  createFAQPageSchema,
-  createBreadcrumbSchema,
-  renderJsonLd,
-} from '@/lib/schema';
+  mirrorHours,
+  doubleHours,
+} from '@/constants/grimoire/clock-numbers-data';
+import { createItemListSchema, renderJsonLd } from '@/lib/schema';
 
 const faqs = [
   {
     question: 'What is numerology?',
     answer:
-      'Numerology is the study of the spiritual significance of numbers and their influence on human life. It holds that numbers carry vibrational frequencies that affect personality, life path, and destiny. Numerology is used for self-discovery, guidance, and understanding life patterns.',
+      'Numerology is the mystical study of numbers and their vibrational influence on personality, purpose, and destiny. It helps you notice patterns, hidden guidance, and cycles you can align with.',
   },
   {
     question: 'How do I calculate my Life Path Number?',
     answer:
-      'Add all the digits of your birth date until you reach a single digit (1-9) or a Master Number (11, 22, 33). For example, if born March 15, 1990: 3+1+5+1+9+9+0=28, then 2+8=10, then 1+0=1. Your Life Path Number is 1.',
+      'Add the digits of your birth date until you reach a single digit (1-9) or a master number (11, 22, 33). For example, March 15, 1990 → 3+1+5+1+9+9+0=28 → 2+8=10 → 1+0=1.',
   },
   {
     question: 'What are angel numbers?',
     answer:
-      'Angel numbers are repeating number sequences (like 111, 222, 333) that many believe carry messages from angels or the universe. When you repeatedly notice these numbers on clocks, receipts, or elsewhere, pay attention to what you were thinking—the context often reveals the message.',
+      'Angel numbers are repeating sequences (111, 222, 333, etc.) that appear as synchronicities. Pay attention to the thought or feeling you had when you saw them; they carry subtle guidance.',
   },
   {
     question: 'What is a Universal Year?',
     answer:
-      'The Universal Year is the numerological energy affecting everyone globally during a calendar year. Calculate it by adding the digits of the year (e.g., 2025 = 2+0+2+5 = 9). Each Universal Year has themes that influence collective experiences and opportunities.',
+      'The Universal Year is the collective numerology theme for a calendar year. Add the digits of the year until you reach a single digit (e.g., 2025 → 2+0+2+5=9) and follow that year’s tone.',
   },
 ];
 
@@ -76,11 +70,100 @@ const cosmicConnectionsSections: CosmicConnectionSection[] = [
   },
 ];
 
+const numerologyListSchema = createItemListSchema({
+  name: 'Numerology Guide',
+  description:
+    'Complete guide to numerology including angel numbers, life path numbers, universal years, and practical tools.',
+  url: 'https://lunary.app/grimoire/numerology',
+  items: [
+    {
+      name: 'Angel Numbers',
+      url: 'https://lunary.app/grimoire/angel-numbers',
+      description: 'Repeating number sequences with divine guidance',
+    },
+    {
+      name: 'Life Path Numbers',
+      url: 'https://lunary.app/grimoire/life-path',
+      description: 'Your life purpose calculated from your birth date',
+    },
+    {
+      name: 'Expression Numbers',
+      url: 'https://lunary.app/grimoire/numerology/expression',
+      description: 'Natural talents and abilities drawn from your name',
+    },
+    {
+      name: 'Soul Urge Numbers',
+      url: 'https://lunary.app/grimoire/numerology/soul-urge',
+      description: 'Innermost motivations and heart’s desire',
+    },
+    {
+      name: 'Mirror Hours',
+      url: 'https://lunary.app/grimoire/mirror-hours',
+      description: 'Mirrored clock times with symbolic meaning',
+    },
+    {
+      name: 'Double Hours',
+      url: 'https://lunary.app/grimoire/double-hours',
+      description: 'Repeated hour and minute combinations on the clock',
+    },
+  ],
+});
+
+const tableOfContents = [
+  { label: 'Universal Year Forecast', href: '#universal-year' },
+  { label: 'Angel Numbers', href: '#angel-numbers' },
+  { label: 'Life Path Numbers', href: '#life-path' },
+  { label: 'Core Numbers', href: '#core-numbers' },
+  { label: 'Clock Numbers', href: '#clock-numbers' },
+  { label: 'Universal Year Meanings', href: '#universal-year-meanings' },
+  { label: 'Year Forecasts', href: '#year-forecasts' },
+  { label: 'Calculate Your Numbers', href: '#calculate' },
+  { label: 'FAQ', href: '#faq' },
+];
+
+const whatIs = {
+  question: 'What is numerology at Lunary?',
+  answer:
+    'Numerology is the study of numbers and their vibrations—how they describe your personality, purpose, and destiny. It reveals cycles, guides alignment, and invites reflection.',
+};
+
+const intro =
+  'Numerology translates everyday digits into themes, patterns, and guidance. From angel numbers and life paths to the Universal Year, it helps you decode the energetic context around every moment.';
+
+const howToWorkWith = [
+  'Track repeating numbers (mirror hours, double hours, sequences) and note the question or feeling that accompanied them.',
+  'Use the calculators to discover your personal numbers, then journal what the interpretations reveal about your choices.',
+  'Align with the Universal Year by timing big moves to that year’s energy while still honoring your personal year and cycle.',
+];
+
+const relatedItems = [
+  {
+    name: 'Mirror Hours',
+    href: '/grimoire/mirror-hours',
+    type: 'Synchronicities',
+  },
+  {
+    name: 'Double Hours',
+    href: '/grimoire/double-hours',
+    type: 'Repeating times',
+  },
+  {
+    name: 'Life Path Numbers',
+    href: '/grimoire/life-path',
+    type: 'Purpose',
+  },
+  {
+    name: 'Expression Numbers',
+    href: '/grimoire/numerology/expression',
+    type: 'Talents',
+  },
+];
+
 export const metadata: Metadata = {
   title:
     'Numerology Guide: Angel Numbers, Life Path & Universal Years | Lunary',
   description:
-    'Complete numerology guide. Learn about angel numbers (111, 222, 333), life path numbers, universal years, and how numbers influence your life.',
+    'Complete numerology guide. Learn about angel numbers (111, 222, 333), life path numbers, universal years, and how numeric vibrations influence your life.',
   keywords: [
     'numerology',
     'angel numbers',
@@ -94,7 +177,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: 'Numerology Guide: Angel Numbers, Life Path & Universal Years',
     description:
-      'Complete guide to numerology - angel numbers, life path numbers, and universal year meanings.',
+      'Complete guide to numerology - angel numbers, life path numbers, and Universal Year meanings.',
     url: 'https://lunary.app/grimoire/numerology',
     images: [
       {
@@ -109,7 +192,7 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: 'Numerology Guide: Angel Numbers, Life Path & Universal Years',
     description:
-      'Complete guide to numerology - angel numbers, life path numbers, and universal year meanings.',
+      'Complete guide to numerology - angel numbers, life path numbers, and Universal Year meanings.',
     images: ['/api/og/grimoire/numerology'],
   },
   alternates: {
@@ -121,406 +204,370 @@ export default function NumerologyIndexPage() {
   const currentYear = new Date().getFullYear();
   const currentUniversalYear = getUniversalYear(currentYear);
 
-  const faqSchema = createFAQPageSchema(faqs);
-
-  const numerologyListSchema = createItemListSchema({
-    name: 'Numerology Guide',
-    description:
-      'Complete guide to numerology including angel numbers, life path numbers, universal years, and more.',
-    url: 'https://lunary.app/grimoire/numerology',
-    items: [
-      {
-        name: 'Angel Numbers',
-        url: 'https://lunary.app/grimoire/angel-numbers',
-        description: 'Repeating number sequences with divine guidance',
-      },
-      {
-        name: 'Life Path Numbers',
-        url: 'https://lunary.app/grimoire/life-path',
-        description: 'Your life purpose calculated from birth date',
-      },
-      {
-        name: 'Expression Numbers',
-        url: 'https://lunary.app/grimoire/numerology/expression',
-        description: 'Natural talents and abilities from your name',
-      },
-      {
-        name: 'Soul Urge Numbers',
-        url: 'https://lunary.app/grimoire/numerology/soul-urge',
-        description: 'Innermost motivations and heart desires',
-      },
-      {
-        name: 'Mirror Hours',
-        url: 'https://lunary.app/grimoire/mirror-hours',
-        description: 'Clock times with mirrored digits',
-      },
-      {
-        name: 'Double Hours',
-        url: 'https://lunary.app/grimoire/double-hours',
-        description: 'Clock times with repeated digits',
-      },
-    ],
-  });
-
   return (
-    <div className='min-h-screen bg-zinc-950 text-zinc-100'>
+    <>
       {renderJsonLd(numerologyListSchema)}
-      {renderJsonLd(faqSchema)}
-      {renderJsonLd(
-        createBreadcrumbSchema([
-          { name: 'Grimoire', url: '/grimoire' },
-          { name: 'Numerology', url: '/grimoire/numerology' },
-        ]),
-      )}
-      <div className='max-w-6xl mx-auto px-4 py-12'>
-        <Breadcrumbs
-          items={[
-            { label: 'Grimoire', href: '/grimoire' },
-            { label: 'Numerology' },
-          ]}
-        />
-
-        <h1 className='text-4xl font-light mb-4'>Numerology</h1>
-        <p className='text-lg text-zinc-400 mb-8 max-w-3xl'>
-          Numerology is the mystical study of numbers and their influence on
-          human life. Discover angel number meanings, calculate your life path
-          number, and understand how numeric vibrations shape your destiny.
-        </p>
-
-        <div className='mb-12 p-6 rounded-lg border border-lunary-primary-700 bg-lunary-primary-900/10'>
-          <div className='flex items-center gap-4 mb-4'>
-            <span className='text-5xl font-light text-lunary-primary-300'>
-              {currentUniversalYear}
-            </span>
-            <div>
-              <h2 className='text-2xl font-medium text-lunary-primary-300'>
-                {currentYear}: Universal Year {currentUniversalYear}
-              </h2>
-              <p className='text-zinc-400'>
-                {NUMEROLOGY_MEANINGS[currentUniversalYear].theme}
-              </p>
+      <SEOContentTemplate
+        title={metadata.title as string}
+        h1='Numerology'
+        description={metadata.description as string}
+        keywords={metadata.keywords as string[]}
+        canonicalUrl={
+          (metadata.alternates?.canonical as string) ??
+          'https://lunary.app/grimoire/numerology'
+        }
+        tableOfContents={tableOfContents}
+        whatIs={whatIs}
+        intro={intro}
+        howToWorkWith={howToWorkWith}
+        faqs={faqs}
+        relatedItems={relatedItems}
+        cosmicConnections={
+          <CosmicConnections
+            entityType='hub-glossary'
+            entityKey='numerology'
+            title='Numerology Connections'
+            sections={cosmicConnectionsSections}
+          />
+        }
+      >
+        <section id='universal-year' className='mb-16'>
+          <div className='grid gap-4 rounded-xl border border-zinc-800 bg-zinc-900/50 p-6 md:p-8'>
+            <div className='flex flex-wrap items-center gap-4'>
+              <span className='text-5xl font-light text-lunary-primary-300'>
+                {currentUniversalYear}
+              </span>
+              <div>
+                <h2 className='text-2xl font-medium text-zinc-100'>
+                  {currentYear}: Universal Year {currentUniversalYear}
+                </h2>
+                <p className='text-sm text-zinc-400'>
+                  {NUMEROLOGY_MEANINGS[currentUniversalYear].theme}
+                </p>
+              </div>
             </div>
+            <p className='text-zinc-300'>
+              {NUMEROLOGY_MEANINGS[currentUniversalYear].energy}
+            </p>
+            <Link
+              href={`/grimoire/numerology/year/${currentYear}`}
+              className='inline-flex items-center gap-2 rounded-lg border border-lunary-primary-700 px-4 py-2 text-sm text-lunary-primary-300 transition-colors hover:bg-lunary-primary-900/20'
+            >
+              Read {currentYear} Full Forecast
+            </Link>
           </div>
-          <p className='text-zinc-300 mb-4'>
-            {NUMEROLOGY_MEANINGS[currentUniversalYear].energy}
-          </p>
+        </section>
+
+        <section id='angel-numbers' className='mb-16'>
           <Link
-            href={`/grimoire/numerology/year/${currentYear}`}
-            className='inline-flex px-4 py-2 rounded-lg bg-lunary-primary-900/20 hover:bg-lunary-primary-900/30 border border-lunary-primary-700 text-lunary-primary-300 text-sm transition-colors'
+            href='/grimoire/angel-numbers'
+            className='group inline-flex items-center gap-2 text-2xl font-light text-zinc-100 transition-colors hover:text-lunary-accent-300'
           >
-            Read {currentYear} Full Forecast
-          </Link>
-        </div>
-
-        <Link href='/grimoire/angel-numbers' className='group block'>
-          <h2 className='text-2xl font-light mb-6 flex items-center gap-2 group-hover:text-lunary-accent-300 transition-colors'>
             Angel Numbers
-            <span className='text-zinc-600 group-hover:text-lunary-accent-400 transition-colors'>
+            <span className='text-sm text-zinc-500 transition-colors group-hover:text-lunary-accent-300'>
               →
             </span>
-          </h2>
-        </Link>
-        <p className='text-zinc-400 mb-6'>
-          Angel numbers are repeating number sequences that carry divine
-          guidance. When you see these numbers repeatedly, your angels are
-          trying to communicate with you.
-        </p>
-        <div className='grid grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3 mb-12'>
-          {Object.entries(angelNumbers).map(([num, data]) => (
-            <Link
-              key={num}
-              href={`/grimoire/angel-numbers/${num}`}
-              className='p-4 rounded-lg border border-zinc-800 bg-zinc-900/50 hover:border-lunary-accent-600 hover:bg-zinc-900 transition-all text-center group'
-            >
-              <div className='text-2xl font-light text-lunary-accent-400 group-hover:text-lunary-accent-300 transition-colors mb-1'>
-                {num}
-              </div>
-              <div className='text-xs text-zinc-400 group-hover:text-zinc-400 transition-colors'>
-                {data.meaning.split(' & ')[0]}
-              </div>
-            </Link>
-          ))}
-        </div>
-
-        <Link href='/grimoire/life-path' className='group block'>
-          <h2 className='text-2xl font-light mb-6 flex items-center gap-2 group-hover:text-lunary-secondary-300 transition-colors'>
-            Life Path Numbers
-            <span className='text-zinc-600 group-hover:text-lunary-secondary-400 transition-colors'>
-              →
-            </span>
-          </h2>
-        </Link>
-        <p className='text-zinc-400 mb-6'>
-          Your Life Path Number reveals your life&apos;s purpose, natural
-          talents, and the lessons you&apos;re here to learn. It&apos;s
-          calculated from your birth date.
-        </p>
-        <div className='grid md:grid-cols-3 lg:grid-cols-4 gap-4 mb-12'>
-          {Object.entries(lifePathNumbers).map(([num, data]) => (
-            <Link
-              key={num}
-              href={`/grimoire/life-path/${num}`}
-              className='p-5 rounded-lg border border-zinc-800 bg-zinc-900/50 hover:border-lunary-secondary-600 hover:bg-zinc-900 transition-all group'
-            >
-              <div className='flex items-center gap-3 mb-2'>
-                <span className='text-3xl font-light text-lunary-secondary-400 group-hover:text-lunary-secondary-300 transition-colors'>
-                  {num}
-                </span>
-                <span className='text-sm text-zinc-400'>{data.meaning}</span>
-              </div>
-              <p className='text-sm text-zinc-400 line-clamp-2'>
-                {data.description.split('.')[0]}.
-              </p>
-            </Link>
-          ))}
-        </div>
-
-        <Link href='/grimoire/numerology/core-numbers' className='group block'>
-          <h2 className='text-2xl font-light mb-6 flex items-center gap-2 group-hover:text-lunary-primary-300 transition-colors'>
-            Core Numbers
-            <span className='text-zinc-600 group-hover:text-lunary-primary-400 transition-colors'>
-              →
-            </span>
-          </h2>
-        </Link>
-        <div className='grid md:grid-cols-3 gap-6 mb-12'>
-          <div className='p-6 rounded-lg border border-zinc-800 bg-zinc-900/50'>
-            <Link href='/grimoire/numerology/expression' className='group'>
-              <h3 className='text-xl font-medium text-lunary-secondary-400 mb-3 group-hover:text-lunary-secondary-300 transition-colors flex items-center gap-2'>
-                Expression Numbers
-                <span className='text-zinc-600 group-hover:text-lunary-secondary-400 transition-colors text-sm'>
-                  →
-                </span>
-              </h3>
-            </Link>
-            <p className='text-zinc-400 mb-4 text-sm'>
-              Also called Destiny Number, reveals your natural talents and
-              abilities.
-            </p>
-            <div className='flex flex-wrap gap-2'>
-              {Object.keys(expressionNumbers)
-                .slice(0, 9)
-                .map((num) => (
-                  <Link
-                    key={num}
-                    href={`/grimoire/numerology/expression/${num}`}
-                    className='px-3 py-1 rounded border border-zinc-700 hover:border-lunary-secondary-600 text-sm transition-colors'
-                  >
-                    {num}
-                  </Link>
-                ))}
-            </div>
-          </div>
-          <div className='p-6 rounded-lg border border-zinc-800 bg-zinc-900/50'>
-            <Link href='/grimoire/numerology/soul-urge' className='group'>
-              <h3 className='text-xl font-medium text-lunary-accent-400 mb-3 group-hover:text-lunary-accent-300 transition-colors flex items-center gap-2'>
-                Soul Urge Numbers
-                <span className='text-zinc-600 group-hover:text-lunary-accent-400 transition-colors text-sm'>
-                  →
-                </span>
-              </h3>
-            </Link>
-            <p className='text-zinc-400 mb-4 text-sm'>
-              Also called Heart&apos;s Desire, reveals your innermost
-              motivations.
-            </p>
-            <div className='flex flex-wrap gap-2'>
-              {Object.keys(soulUrgeNumbers)
-                .slice(0, 9)
-                .map((num) => (
-                  <Link
-                    key={num}
-                    href={`/grimoire/numerology/soul-urge/${num}`}
-                    className='px-3 py-1 rounded border border-zinc-700 hover:border-lunary-accent-600 text-sm transition-colors'
-                  >
-                    {num}
-                  </Link>
-                ))}
-            </div>
-          </div>
-          <div className='p-6 rounded-lg border border-zinc-800 bg-zinc-900/50'>
-            <Link href='/grimoire/numerology/karmic-debt' className='group'>
-              <h3 className='text-xl font-medium text-lunary-error-400 mb-3 group-hover:text-lunary-error-300 transition-colors flex items-center gap-2'>
-                Karmic Debt Numbers
-                <span className='text-zinc-600 group-hover:text-lunary-error-400 transition-colors text-sm'>
-                  →
-                </span>
-              </h3>
-            </Link>
-            <p className='text-zinc-400 mb-4 text-sm'>
-              Reveal lessons carried over from past lives.
-            </p>
-            <div className='flex flex-wrap gap-2'>
-              {Object.keys(karmicDebtNumbers).map((num) => (
-                <Link
-                  key={num}
-                  href={`/grimoire/numerology/karmic-debt/${num}`}
-                  className='px-3 py-1 rounded border border-zinc-700 hover:border-lunary-error-600 text-sm transition-colors'
-                >
-                  {num}
-                </Link>
-              ))}
-            </div>
-          </div>
-        </div>
-
-        <h2 className='text-2xl font-light mb-6'>Clock Numbers</h2>
-        <p className='text-zinc-400 mb-6'>
-          When you repeatedly notice certain times on the clock, the universe
-          may be sending you a message through mirror hours and double hours.
-        </p>
-        <div className='grid md:grid-cols-2 gap-6 mb-12'>
-          <div className='p-6 rounded-lg border border-zinc-800 bg-zinc-900/50'>
-            <Link href='/grimoire/mirror-hours' className='group'>
-              <h3 className='text-xl font-medium text-lunary-highlight-400 mb-3 group-hover:text-lunary-highlight-300 transition-colors flex items-center gap-2'>
-                Mirror Hours
-                <span className='text-zinc-600 group-hover:text-lunary-highlight-400 transition-colors text-sm'>
-                  →
-                </span>
-              </h3>
-            </Link>
-            <p className='text-zinc-400 mb-4 text-sm'>
-              Times where digits mirror each other (01:10, 12:21, etc.)
-            </p>
-            <div className='flex flex-wrap gap-2'>
-              {Object.keys(mirrorHours).map((time) => (
-                <Link
-                  key={time}
-                  href={`/grimoire/mirror-hours/${time.replace(':', '-')}`}
-                  className='px-3 py-1 rounded border border-zinc-700 hover:border-lunary-highlight-600 text-sm transition-colors'
-                >
-                  {time}
-                </Link>
-              ))}
-            </div>
-          </div>
-          <div className='p-6 rounded-lg border border-zinc-800 bg-zinc-900/50'>
-            <Link href='/grimoire/double-hours' className='group'>
-              <h3 className='text-xl font-medium text-lunary-primary-400 mb-3 group-hover:text-lunary-primary-300 transition-colors flex items-center gap-2'>
-                Double Hours
-                <span className='text-zinc-600 group-hover:text-lunary-primary-400 transition-colors text-sm'>
-                  →
-                </span>
-              </h3>
-            </Link>
-            <p className='text-zinc-400 mb-4 text-sm'>
-              Times where hour and minute are the same (11:11, 22:22, etc.)
-            </p>
-            <div className='flex flex-wrap gap-2'>
-              {Object.keys(doubleHours).map((time) => (
-                <Link
-                  key={time}
-                  href={`/grimoire/double-hours/${time.replace(':', '-')}`}
-                  className='px-3 py-1 rounded border border-zinc-700 hover:border-lunary-primary-600 text-sm transition-colors'
-                >
-                  {time}
-                </Link>
-              ))}
-            </div>
-          </div>
-        </div>
-
-        <h2 className='text-2xl font-light mb-6'>Universal Year Meanings</h2>
-        <p className='text-zinc-400 mb-6'>
-          The Universal Year influences the collective energy of the entire
-          world during that calendar year. Understanding it helps you align with
-          the year&apos;s themes.
-        </p>
-        <div className='grid md:grid-cols-3 gap-4 mb-12'>
-          {Object.entries(NUMEROLOGY_MEANINGS).map(([num, data]) => (
-            <div
-              key={num}
-              className='p-6 rounded-lg border border-zinc-800 bg-zinc-900/50'
-            >
-              <div className='flex items-center gap-3 mb-3'>
-                <span className='text-3xl font-light text-lunary-primary-400'>
-                  {num}
-                </span>
-              </div>
-              <h3 className='text-lg font-medium text-zinc-100 mb-2'>
-                {data.theme}
-              </h3>
-              <p className='text-sm text-zinc-400 mb-3'>
-                {data.keywords.join(', ')}
-              </p>
-            </div>
-          ))}
-        </div>
-
-        <h2 className='text-2xl font-light mb-6'>Year Forecasts</h2>
-        <div className='grid grid-cols-4 md:grid-cols-6 gap-3 mb-12'>
-          {getYearRange().map((year) => {
-            const uYear = getUniversalYear(year);
-            return (
+          </Link>
+          <p className='mt-4 text-zinc-400 mb-6'>
+            Angel numbers are repeating sequences that show up as subtle nudges
+            from the universe. Notice what you were thinking when they appeared.
+          </p>
+          <div className='grid grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3'>
+            {Object.entries(angelNumbers).map(([num, data]) => (
               <Link
-                key={year}
-                href={`/grimoire/numerology/year/${year}`}
-                className='p-4 rounded-lg border border-zinc-800 bg-zinc-900/50 hover:border-lunary-primary-600 hover:bg-zinc-900 transition-all text-center group'
+                key={num}
+                href={`/grimoire/angel-numbers/${num}`}
+                className='group rounded-lg border border-zinc-800 bg-zinc-900/50 p-4 text-center transition-all hover:border-lunary-accent-600 hover:bg-zinc-900'
               >
-                <div className='text-lg font-medium text-zinc-100 group-hover:text-lunary-primary-300 transition-colors'>
-                  {year}
+                <div className='text-2xl font-light text-lunary-accent-400 group-hover:text-lunary-accent-300'>
+                  {num}
                 </div>
-                <div className='text-2xl font-light text-lunary-primary-400'>
-                  {uYear}
-                </div>
+                <p className='text-xs text-zinc-400'>
+                  {data.meaning.split(' & ')[0]}
+                </p>
               </Link>
-            );
-          })}
-        </div>
+            ))}
+          </div>
+        </section>
 
-        <h2 className='text-2xl font-light mb-6'>Calculate Your Numbers</h2>
-        <p className='text-zinc-400 mb-6'>
-          Use these calculators to discover your personal numerology numbers.
-        </p>
-        <div className='grid md:grid-cols-2 gap-6 mb-12'>
-          <NumerologyCalculator type='life-path' />
-          <NumerologyCalculator type='soul-urge' />
-        </div>
-        <div className='grid md:grid-cols-2 gap-6 mb-12'>
-          <NumerologyCalculator type='expression' />
-          <NumerologyCalculator type='personal-year' />
-        </div>
+        <section id='life-path' className='mb-16'>
+          <Link
+            href='/grimoire/life-path'
+            className='group inline-flex items-center gap-2 text-2xl font-light text-zinc-100 transition-colors hover:text-lunary-secondary-300'
+          >
+            Life Path Numbers
+            <span className='text-sm text-zinc-500 transition-colors group-hover:text-lunary-secondary-300'>
+              →
+            </span>
+          </Link>
+          <p className='mt-4 text-zinc-400 mb-6'>
+            Your Life Path Number reveals your destiny themes, gifts, and the
+            lessons you’re here to learn.
+          </p>
+          <div className='grid md:grid-cols-3 lg:grid-cols-4 gap-4'>
+            {Object.entries(lifePathNumbers).map(([num, data]) => (
+              <Link
+                key={num}
+                href={`/grimoire/life-path/${num}`}
+                className='group rounded-lg border border-zinc-800 bg-zinc-900/50 p-4 transition-all hover:border-lunary-secondary-600 hover:bg-zinc-900'
+              >
+                <div className='flex items-center gap-2 mb-2'>
+                  <span className='text-3xl font-light text-lunary-secondary-400 group-hover:text-lunary-secondary-300'>
+                    {num}
+                  </span>
+                  <span className='text-sm text-zinc-400'>{data.meaning}</span>
+                </div>
+                <p className='text-sm text-zinc-400 line-clamp-2'>
+                  {data.description.split('.')[0]}.
+                </p>
+              </Link>
+            ))}
+          </div>
+        </section>
 
-        <div className='grid md:grid-cols-2 gap-6 mb-12'>
-          <div className='p-6 rounded-lg border border-zinc-800 bg-zinc-900/50'>
-            <h2 className='text-xl font-medium mb-4'>
-              How to Calculate Your Life Path Number
-            </h2>
-            <p className='text-zinc-400 mb-4'>
-              Add all digits of your birth date until you get a single digit
-              (1-9) or a Master Number (11, 22, 33).
-            </p>
-            <div className='bg-zinc-800/50 p-4 rounded-lg font-mono text-sm'>
-              <p className='text-zinc-400 mb-1'>Example: March 15, 1990</p>
-              <p>3 + 1 + 5 + 1 + 9 + 9 + 0 = 28</p>
-              <p>2 + 8 = 10</p>
-              <p>1 + 0 = 1</p>
-              <p className='text-lunary-secondary-400 mt-2'>Life Path: 1</p>
+        <section id='core-numbers' className='mb-16'>
+          <h2 className='text-2xl font-light text-zinc-100 mb-6'>
+            Core Numbers
+          </h2>
+          <div className='grid md:grid-cols-3 gap-6'>
+            <div className='rounded-lg border border-zinc-800 bg-zinc-900/50 p-6'>
+              <Link
+                href='/grimoire/numerology/expression'
+                className='group inline-flex items-center gap-2 text-xl font-medium text-lunary-secondary-400 transition-colors hover:text-lunary-secondary-300'
+              >
+                Expression Numbers →
+              </Link>
+              <p className='text-sm text-zinc-400 mb-4'>
+                Also called Destiny Number, it reveals your natural talents and
+                abilities.
+              </p>
+              <div className='flex flex-wrap gap-2 text-xs'>
+                {Object.keys(expressionNumbers)
+                  .slice(0, 9)
+                  .map((num) => (
+                    <Link
+                      key={num}
+                      href={`/grimoire/numerology/expression/${num}`}
+                      className='rounded border border-zinc-700 px-3 py-1 transition-colors hover:border-lunary-secondary-600'
+                    >
+                      {num}
+                    </Link>
+                  ))}
+              </div>
+            </div>
+            <div className='rounded-lg border border-zinc-800 bg-zinc-900/50 p-6'>
+              <Link
+                href='/grimoire/numerology/soul-urge'
+                className='group inline-flex items-center gap-2 text-xl font-medium text-lunary-accent-400 transition-colors hover:text-lunary-accent-300'
+              >
+                Soul Urge Numbers →
+              </Link>
+              <p className='text-sm text-zinc-400 mb-4'>
+                Also called Heart’s Desire, it describes your innermost
+                motivations.
+              </p>
+              <div className='flex flex-wrap gap-2 text-xs'>
+                {Object.keys(soulUrgeNumbers)
+                  .slice(0, 9)
+                  .map((num) => (
+                    <Link
+                      key={num}
+                      href={`/grimoire/numerology/soul-urge/${num}`}
+                      className='rounded border border-zinc-700 px-3 py-1 transition-colors hover:border-lunary-accent-600'
+                    >
+                      {num}
+                    </Link>
+                  ))}
+              </div>
+            </div>
+            <div className='rounded-lg border border-zinc-800 bg-zinc-900/50 p-6'>
+              <Link
+                href='/grimoire/numerology/karmic-debt'
+                className='group inline-flex items-center gap-2 text-xl font-medium text-lunary-error-400 transition-colors hover:text-lunary-error-300'
+              >
+                Karmic Debt Numbers →
+              </Link>
+              <p className='text-sm text-zinc-400 mb-4'>
+                These numbers highlight karmic lessons carried over from past
+                lives.
+              </p>
+              <div className='flex flex-wrap gap-2 text-xs'>
+                {Object.keys(karmicDebtNumbers).map((num) => (
+                  <Link
+                    key={num}
+                    href={`/grimoire/numerology/karmic-debt/${num}`}
+                    className='rounded border border-zinc-700 px-3 py-1 transition-colors hover:border-lunary-error-600'
+                  >
+                    {num}
+                  </Link>
+                ))}
+              </div>
             </div>
           </div>
+        </section>
 
-          <div className='p-6 rounded-lg border border-zinc-800 bg-zinc-900/50'>
-            <h2 className='text-xl font-medium mb-4'>
-              How to Calculate Universal Year
-            </h2>
-            <p className='text-zinc-400 mb-4'>
-              Add all digits of the year together until you get a single digit
-              (1-9).
-            </p>
-            <div className='bg-zinc-800/50 p-4 rounded-lg font-mono text-sm'>
-              <p>2025 = 2 + 0 + 2 + 5 = 9</p>
-              <p>2026 = 2 + 0 + 2 + 6 = 10 = 1 + 0 = 1</p>
+        <section id='clock-numbers' className='mb-16'>
+          <h2 className='text-2xl font-light text-zinc-100 mb-6'>
+            Clock Numbers
+          </h2>
+          <p className='text-zinc-400 mb-6'>
+            Mirror hours and double hours are repeating clock times that feel
+            meaningful.
+          </p>
+          <div className='grid md:grid-cols-2 gap-6'>
+            <div className='rounded-lg border border-zinc-800 bg-zinc-900/50 p-6'>
+              <Link
+                href='/grimoire/mirror-hours'
+                className='group inline-flex items-center gap-2 text-xl font-medium text-lunary-highlight-400 transition-colors hover:text-lunary-highlight-300'
+              >
+                Mirror Hours →
+              </Link>
+              <p className='text-sm text-zinc-400 mb-4'>
+                Times where the hour and minute mirror each other (01:10, 11:11,
+                etc.).
+              </p>
+              <div className='flex flex-wrap gap-2 text-xs'>
+                {Object.keys(mirrorHours).map((time) => (
+                  <Link
+                    key={time}
+                    href={`/grimoire/mirror-hours/${time.replace(':', '-')}`}
+                    className='rounded border border-zinc-700 px-3 py-1 transition-colors hover:border-lunary-highlight-600'
+                  >
+                    {time}
+                  </Link>
+                ))}
+              </div>
+            </div>
+            <div className='rounded-lg border border-zinc-800 bg-zinc-900/50 p-6'>
+              <Link
+                href='/grimoire/double-hours'
+                className='group inline-flex items-center gap-2 text-xl font-medium text-lunary-primary-400 transition-colors hover:text-lunary-primary-300'
+              >
+                Double Hours →
+              </Link>
+              <p className='text-sm text-zinc-400 mb-4'>
+                Times where the hour and minute match (11:11, 22:22, etc.).
+              </p>
+              <div className='flex flex-wrap gap-2 text-xs'>
+                {Object.keys(doubleHours).map((time) => (
+                  <Link
+                    key={time}
+                    href={`/grimoire/double-hours/${time.replace(':', '-')}`}
+                    className='rounded border border-zinc-700 px-3 py-1 transition-colors hover:border-lunary-primary-600'
+                  >
+                    {time}
+                  </Link>
+                ))}
+              </div>
             </div>
           </div>
-        </div>
+        </section>
 
-        <CosmicConnections
-          entityType='hub-glossary'
-          entityKey='numerology'
-          title='Numerology Connections'
-          sections={cosmicConnectionsSections}
-        />
-      </div>
-    </div>
+        <section id='universal-year-meanings' className='mb-16'>
+          <h2 className='text-2xl font-light text-zinc-100 mb-6'>
+            Universal Year Meanings
+          </h2>
+          <p className='text-zinc-400 mb-6'>
+            Each Universal Year delivers a collective theme. Tune into its
+            vibration for timing and mindset.
+          </p>
+          <div className='grid md:grid-cols-3 gap-4'>
+            {Object.entries(NUMEROLOGY_MEANINGS).map(([num, data]) => (
+              <div
+                key={num}
+                className='rounded-lg border border-zinc-800 bg-zinc-900/50 p-6'
+              >
+                <div className='flex items-center gap-3 mb-3'>
+                  <span className='text-3xl font-light text-lunary-primary-400'>
+                    {num}
+                  </span>
+                </div>
+                <h3 className='text-lg font-medium text-zinc-100 mb-2'>
+                  {data.theme}
+                </h3>
+                <p className='text-sm text-zinc-400'>
+                  {data.keywords.join(', ')}
+                </p>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        <section id='year-forecasts' className='mb-16'>
+          <h2 className='text-2xl font-light text-zinc-100 mb-6'>
+            Year Forecasts
+          </h2>
+          <div className='grid grid-cols-4 md:grid-cols-6 gap-3'>
+            {getYearRange().map((year) => {
+              const uYear = getUniversalYear(year);
+              return (
+                <Link
+                  key={year}
+                  href={`/grimoire/numerology/year/${year}`}
+                  className='group rounded-lg border border-zinc-800 bg-zinc-900/50 p-4 text-center transition-all hover:border-lunary-primary-600 hover:bg-zinc-900'
+                >
+                  <div className='text-lg font-medium text-zinc-100 group-hover:text-lunary-primary-300'>
+                    {year}
+                  </div>
+                  <div className='text-2xl font-light text-lunary-primary-400'>
+                    {uYear}
+                  </div>
+                </Link>
+              );
+            })}
+          </div>
+        </section>
+
+        <section id='calculate' className='mb-16'>
+          <h2 className='text-2xl font-light text-zinc-100 mb-6'>
+            Calculate Your Numbers
+          </h2>
+          <p className='text-zinc-400 mb-6'>
+            Use the calculators below to discover your key numerology
+            coordinates.
+          </p>
+          <div className='grid md:grid-cols-2 gap-6 mb-6'>
+            <NumerologyCalculator type='life-path' />
+            <NumerologyCalculator type='soul-urge' />
+          </div>
+          <div className='grid md:grid-cols-2 gap-6'>
+            <NumerologyCalculator type='expression' />
+            <NumerologyCalculator type='personal-year' />
+          </div>
+        </section>
+
+        <section className='mb-16'>
+          <div className='grid md:grid-cols-2 gap-6'>
+            <div className='rounded-lg border border-zinc-800 bg-zinc-900/50 p-6'>
+              <h2 className='text-xl font-medium mb-4'>
+                How to Calculate Your Life Path Number
+              </h2>
+              <p className='text-zinc-400 mb-4'>
+                Add all digits of your birth date until you get a single digit
+                (1-9) or a master number (11, 22, 33).
+              </p>
+              <div className='rounded-lg bg-zinc-800/50 px-4 py-3 font-mono text-sm text-zinc-400'>
+                <p className='mb-1'>Example: March 15, 1990</p>
+                <p>3 + 1 + 5 + 1 + 9 + 9 + 0 = 28</p>
+                <p>2 + 8 = 10</p>
+                <p className='text-lunary-secondary-400 mt-2'>Life Path: 1</p>
+              </div>
+            </div>
+            <div className='rounded-lg border border-zinc-800 bg-zinc-900/50 p-6'>
+              <h2 className='text-xl font-medium mb-4'>
+                How to Calculate Universal Year
+              </h2>
+              <p className='text-zinc-400 mb-4'>
+                Add the digits of the year until you reach a single digit.
+              </p>
+              <div className='rounded-lg bg-zinc-800/50 px-4 py-3 font-mono text-sm text-zinc-400'>
+                <p>2025 = 2 + 0 + 2 + 5 = 9</p>
+                <p>2026 = 2 + 0 + 2 + 6 = 10 → 1 + 0 = 1</p>
+              </div>
+            </div>
+          </div>
+        </section>
+      </SEOContentTemplate>
+    </>
   );
 }

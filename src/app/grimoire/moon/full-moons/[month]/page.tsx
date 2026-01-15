@@ -62,7 +62,7 @@ export async function generateMetadata({
       card: 'summary_large_image',
       title,
       description,
-      images: ['/api/og/cosmic'],
+      images: ['/api/og/grimoire/moon'],
     },
     alternates: {
       canonical: `https://lunary.app/grimoire/moon/full-moons/${month}`,
@@ -139,7 +139,9 @@ Full moons are powerful times for manifestation, celebration, and release. The $
 
 The names of the monthly full moons come from various traditions, including Native American, Celtic, and medieval European sources. Each name reflects the natural phenomena, agricultural activities, or spiritual themes associated with that time of year.
 
-Understanding the ${moonData.name}'s energy helps you plan meaningful rituals and align your intentions with cosmic forces. Whether you're celebrating achievements, releasing what no longer serves you, or charging crystals and tools, the ${monthKey} full moon provides powerful support.`}
+Understanding the ${moonData.name}'s energy helps you plan meaningful rituals and align your intentions with cosmic forces. Whether you're celebrating achievements, releasing what no longer serves you, or charging crystals and tools, the ${monthKey} full moon provides powerful support.
+
+If you want to deepen your practice, look up the zodiac sign the full moon occupies each year. That sign flavors the mood of the lunation and highlights specific life areas. Pair the seasonal energy of the ${moonData.name} with the sign's qualities for a more precise ritual focus.`}
         glyphs={['🌕']}
         emotionalThemes={[
           'Manifestation',
@@ -166,6 +168,18 @@ Understanding the ${moonData.name}'s energy helps you plan meaningful rituals an
           `What am I ready to release this ${monthKey}?`,
           'What achievements am I celebrating?',
           `How can I honor the ${moonData.name}?`,
+        ]}
+        tables={[
+          {
+            title: `${moonData.name} Correspondence Snapshot`,
+            headers: ['Focus', 'Ideas'],
+            rows: [
+              ['Ritual Theme', 'Release, renewal, celebration'],
+              ['Suggested Tools', 'Candle, water, journal, cleansing herbs'],
+              ['Best Timing', 'Evening of the full moon'],
+              ['Intention', 'Amplify and clarify what matters most'],
+            ],
+          },
         ]}
         relatedItems={[
           { name: 'Moon Guide', href: '/grimoire/moon', type: 'Guide' },

@@ -1,6 +1,8 @@
 import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { SEOContentTemplate } from '@/components/grimoire/SEOContentTemplate';
+import { CosmicConnections } from '@/components/grimoire/CosmicConnections';
+import { CosmicConnectionSection } from '@/lib/cosmicConnectionsConfig';
 import { correspondencesData } from '@/constants/grimoire/correspondences';
 import { stringToKebabCase } from '../../../../../../utils/string';
 
@@ -108,6 +110,80 @@ Understanding planetary days helps you time your spellwork for maximum effective
     },
   ];
 
+  const tableOfContents = [
+    { label: 'Planetary Correspondences', href: '#planetary' },
+    { label: 'Magical Uses', href: '#uses' },
+    { label: 'Ritual Notes', href: '#rituals' },
+    { label: 'FAQ', href: '#faq' },
+  ];
+
+  const cosmicSections: CosmicConnectionSection[] = [
+    {
+      title: 'Correspondence Guides',
+      links: [
+        {
+          label: 'Day Correspondences',
+          href: '/grimoire/correspondences/days',
+        },
+        {
+          label: 'Color Correspondences',
+          href: '/grimoire/correspondences/colors',
+        },
+        { label: 'Elements', href: '/grimoire/correspondences/elements' },
+      ],
+    },
+    {
+      title: 'Practice Tools',
+      links: [
+        {
+          label: 'Spellcraft Fundamentals',
+          href: '/grimoire/spells/fundamentals',
+        },
+        { label: 'Candle Magic', href: '/grimoire/candle-magic' },
+        { label: 'Moon Phases', href: '/grimoire/moon/phases' },
+      ],
+    },
+  ];
+
+  const sectionContent = (
+    <div className='space-y-10'>
+      <section id='planetary'>
+        <h2 className='text-3xl font-light text-zinc-100 mb-3'>
+          Planetary Correspondences
+        </h2>
+        <p className='text-sm text-zinc-300'>
+          {dayKey} is ruled by {dayData.planet} and aligned with the{' '}
+          {dayData.element} element. These correspondences shape its magical
+          tone.
+        </p>
+      </section>
+
+      <section id='uses'>
+        <h2 className='text-3xl font-light text-zinc-100 mb-3'>Magical Uses</h2>
+        <p className='text-sm text-zinc-300'>
+          This day supports {dayData.correspondences.join(', ')} energies, ideal
+          for {dayData.uses.join(', ')}.
+        </p>
+      </section>
+
+      <section id='rituals'>
+        <h2 className='text-3xl font-light text-zinc-100 mb-3'>Ritual Notes</h2>
+        <ul className='list-disc list-inside text-sm text-zinc-300 space-y-2'>
+          <li>
+            Plan {dayData.uses[0]} spells for {dayKey.toLowerCase()} dawn.
+          </li>
+          <li>
+            Dress altars with {dayData.element.toLowerCase()} colors, herbs, and
+            oils.
+          </li>
+          <li>
+            Light candles during {dayData.planet}-ruled hours for extra potency.
+          </li>
+        </ul>
+      </section>
+    </div>
+  );
+
   return (
     <SEOContentTemplate
       title={`${dayKey}: Planetary Day Correspondences & Magic - Lunary`}
@@ -124,18 +200,22 @@ Understanding planetary days helps you time your spellwork for maximum effective
       meaning={meaning}
       howToWorkWith={howToWorkWith}
       faqs={faqs}
-      breadcrumbs={[
-        { label: 'Grimoire', href: '/grimoire' },
-        { label: 'Correspondences', href: '/grimoire/correspondences' },
-        { label: 'Days', href: '/grimoire/correspondences/days' },
+      tableOfContents={tableOfContents}
+      relatedItems={[
         {
-          label: `${dayKey}`,
-          href: `/grimoire/correspondences/days/${day}`,
+          name: 'Day Correspondences Overview',
+          href: '/grimoire/correspondences/days',
+          type: 'Guide',
+        },
+        {
+          name: 'Color Correspondences',
+          href: '/grimoire/correspondences/colors',
+          type: 'Guide',
         },
       ]}
       internalLinks={[
         {
-          text: 'Magical Correspondences',
+          text: 'Correspondences Overview',
           href: '/grimoire/correspondences',
         },
         {
@@ -144,6 +224,25 @@ Understanding planetary days helps you time your spellwork for maximum effective
         },
         { text: 'Spells & Rituals', href: '/grimoire/spells' },
         { text: 'Astronomy & Astrology', href: '/grimoire/astronomy' },
+      ]}
+      cosmicConnections={
+        <CosmicConnections
+          entityType='hub-correspondences'
+          entityKey='correspondences'
+          title={`${dayKey} Day Connections`}
+          sections={cosmicSections}
+        />
+      }
+      ctaText='Book a timing reading'
+      ctaHref='/pricing'
+      breadcrumbs={[
+        { label: 'Grimoire', href: '/grimoire' },
+        { label: 'Correspondences', href: '/grimoire/correspondences' },
+        { label: 'Days', href: '/grimoire/correspondences/days' },
+        {
+          label: `${dayKey}`,
+          href: `/grimoire/correspondences/days/${day}`,
+        },
       ]}
       tables={[
         {
@@ -157,6 +256,8 @@ Understanding planetary days helps you time your spellwork for maximum effective
           ],
         },
       ]}
-    />
+    >
+      {sectionContent}
+    </SEOContentTemplate>
   );
 }

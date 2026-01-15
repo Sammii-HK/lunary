@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import { useSearchParams } from 'next/navigation';
 import { ChevronRight, Home } from 'lucide-react';
 import { useAuthStatus } from '@/components/AuthStatus';
 
@@ -19,7 +20,7 @@ interface BreadcrumbsProps {
   homeHref?: string;
   /** Force marketing home (/) regardless of auth */
   forceMarketingHome?: boolean;
-  /** Render schema - if false, no schema will be rendered */
+  /** Disable JSON-LD injection when the parent already renders breadcrumb schema */
   renderSchema?: boolean;
 }
 
@@ -27,13 +28,40 @@ export function Breadcrumbs({
   items,
   homeHref,
   forceMarketingHome = false,
-  renderSchema = false,
+  renderSchema = true,
 }: BreadcrumbsProps) {
   const { isAuthenticated } = useAuthStatus();
+  const searchParams = useSearchParams();
+  const navOverride = searchParams?.get('nav');
+  const fromParam = searchParams?.get('from');
 
   // Determine home href: explicit > force marketing > auth-based
   const resolvedHomeHref =
-    homeHref ?? (forceMarketingHome ? '/' : isAuthenticated ? '/app' : '/');
+    homeHref ??
+    (navOverride === 'app'
+      ? '/app'
+      : navOverride === 'marketing'
+        ? '/'
+        : forceMarketingHome
+          ? '/'
+          : isAuthenticated
+            ? '/app'
+            : '/');
+  const appendNavParams = (href?: string) => {
+    if (!href) return undefined;
+    if (!navOverride && !fromParam) return href;
+
+    const baseUrl = new URL(href, 'https://lunary.app');
+    if (navOverride && !baseUrl.searchParams.get('nav')) {
+      baseUrl.searchParams.set('nav', navOverride);
+    }
+    if (fromParam && !baseUrl.searchParams.get('from')) {
+      baseUrl.searchParams.set('from', fromParam);
+    }
+
+    const query = baseUrl.searchParams.toString();
+    return `${baseUrl.pathname}${query ? `?${query}` : ''}${baseUrl.hash}`;
+  };
 
   const breadcrumbSchema = {
     '@context': 'https://schema.org',
@@ -63,7 +91,7 @@ export function Breadcrumbs({
         aria-label='Breadcrumb'
       >
         <Link
-          href={resolvedHomeHref}
+          href={appendNavParams(resolvedHomeHref) as string}
           className='hover:text-lunary-primary-400 transition-colors flex items-center gap-1 flex-shrink-0'
         >
           <Home className='w-3.5 h-3.5 md:w-4 md:h-4' />
@@ -81,7 +109,7 @@ export function Breadcrumbs({
               </span>
             ) : (
               <Link
-                href={item.href}
+                href={appendNavParams(item.href) as string}
                 className='hover:text-lunary-primary-400 transition-colors truncate max-w-[120px] md:max-w-none'
               >
                 {item.label}
@@ -90,12 +118,14 @@ export function Breadcrumbs({
           </span>
         ))}
       </nav>
-      <script
-        type='application/ld+json'
-        dangerouslySetInnerHTML={{
-          __html: stringifySafe(breadcrumbSchema),
-        }}
-      />
+      {renderSchema && (
+        <script
+          type='application/ld+json'
+          dangerouslySetInnerHTML={{
+            __html: stringifySafe(breadcrumbSchema),
+          }}
+        />
+      )}
     </>
   );
 }

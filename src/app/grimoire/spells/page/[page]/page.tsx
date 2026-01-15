@@ -145,6 +145,84 @@ export default async function SpellsPaginatedPage({
       h1='Spells & Rituals'
       description='A complete collection of spells and rituals with instructions, timing, correspondences, and guidance for safe practice.'
       canonicalUrl={`https://lunary.app/grimoire/spells/page/${currentPage}`}
+      intro='Browse spells by intention, difficulty, and category. Use correspondences (colors, herbs, days, moon phases) to time your work and keep your practice grounded, ethical, and safe.'
+      tldr='Choose a clear goal, match it with timing and correspondences, and follow through with real-world action. Start simple and build consistency.'
+      meaning={`Spells are structured intention: a combination of focus, symbolism, timing, and repeated practice. A good spell does three things:\n\n1) **Clarifies the goal** (what you are asking for)\n2) **Builds a container** (tools and correspondences that support the intention)\n3) **Creates follow-through** (a real-world action that matches the spell)\n\nUse this library as a menu. Start with a category that matches your aim (protection, cleansing, love, prosperity), then adapt the steps to your own boundaries and beliefs. If you are new, begin with cleansing and protection work before attempting more complex rituals.\n\n**How to Choose a Spell**\n\nChoose the simplest spell that matches your goal. If you feel scattered, start with a short candle ritual or a single-card intention. Complexity does not guarantee results.\n\n**Aftercare**\n\nGround after spellwork and check in with your energy. A short walk, a glass of water, or a brief journal entry helps integrate the practice.\n\n**Consistency Matters**\n\nSmall, repeated rituals create stronger results than a one-time dramatic effort. Pick one spell to repeat weekly and track what shifts.\n\nIf you feel unsure, return to protection and cleansing. They create a stable foundation for every other spell type.\n\nKeep your notes simple so you can see progress clearly. Consistent tracking builds trust in the process. Small wins count. Give results time to unfold. Stay patient.`}
+      tableOfContents={[
+        { label: 'Meaning', href: '#meaning' },
+        { label: 'Explore Spells', href: '#explore-practices' },
+        { label: 'FAQ', href: '#faq' },
+      ]}
+      rituals={[
+        'Cleanse your space before beginning any spellwork.',
+        'Write the intention in one short sentence.',
+        'Use a timer for focused, distraction-free ritual time.',
+        'Close by thanking the elements or energies you invoked.',
+      ]}
+      journalPrompts={[
+        'What result am I truly seeking with this spell?',
+        'Which correspondences feel most aligned for me?',
+        'What real-world action supports this intention?',
+        'How will I know the spell is working?',
+      ]}
+      tables={[
+        {
+          title: 'Spell Planning Checklist',
+          headers: ['Step', 'Why it matters'],
+          rows: [
+            ['Clear goal', 'Focuses the intention'],
+            ['Timing', 'Supports momentum'],
+            ['Correspondences', 'Adds symbolic power'],
+            ['Aftercare', 'Integrates the work'],
+          ],
+        },
+        {
+          title: 'Common Timing Choices',
+          headers: ['Timing', 'Best For'],
+          rows: [
+            ['Waxing moon', 'Growth and attraction'],
+            ['Waning moon', 'Release and banishing'],
+            ['New moon', 'New beginnings'],
+            ['Full moon', 'Manifestation and visibility'],
+          ],
+        },
+        {
+          title: 'When to Pause or Simplify',
+          headers: ['Signal', 'Response'],
+          rows: [
+            ['Low energy', 'Shorter ritual or rest'],
+            ['Unclear goal', 'Journal first, then choose'],
+            ['Feeling scattered', 'Use one tool only'],
+          ],
+        },
+      ]}
+      faqs={[
+        {
+          question: 'Do spells “work” without tools?',
+          answer:
+            'Tools help focus and symbolize intention, but they are not required. Clear intention, consistency, and aligned real-world actions are the core of effective spellwork.',
+        },
+        {
+          question: 'What should beginners start with?',
+          answer:
+            'Start with cleansing, protection, and grounding. Build a simple routine (candle + salt + journaling) before layering more ingredients and timing.',
+        },
+        {
+          question: 'How do I choose timing for a spell?',
+          answer:
+            'Use moon phases (waxing for growth, waning for release), planetary days/hours, and your own energy. Timing is supportive—not mandatory.',
+        },
+        {
+          question: 'Is love magic ethical?',
+          answer:
+            'Avoid coercive work. Focus on self-love, attraction, clarity, and opening opportunities rather than controlling a specific person’s will.',
+        },
+        {
+          question: 'How long should I wait to see results?',
+          answer:
+            'Some effects are immediate, while others build over weeks. Track progress and adjust your approach if needed.',
+        },
+      ]}
       relatedItems={[
         {
           name: 'Spellcraft Fundamentals',
@@ -171,6 +249,15 @@ export default async function SpellsPaginatedPage({
         'love spells',
         'moon magic',
         'ritual magic',
+      ]}
+      internalLinks={[
+        {
+          text: 'Spellcraft Fundamentals',
+          href: '/grimoire/spells/fundamentals',
+        },
+        { text: 'Candle Magic', href: '/grimoire/candle-magic' },
+        { text: 'Correspondences', href: '/grimoire/correspondences' },
+        { text: 'Grimoire Home', href: '/grimoire' },
       ]}
     >
       <SpellsClient

@@ -52,6 +52,7 @@ export default function SynastryPage() {
       ]}
       canonicalUrl='https://lunary.app/grimoire/synastry'
       intro={`Synastry is the comparison of two birth charts to understand relationship dynamics, compatibility, and how two people interact. It reveals how planets in one person's chart interact with planets in another person's chart, showing areas of harmony, challenge, and growth potential.`}
+      tldr='Synastry compares two charts to map chemistry, communication, and long-term potential. Harmonious aspects show ease, challenging aspects show growth edges, and house overlays reveal where the relationship lands in daily life.'
       ctaText='Generate Synastry Chart'
       ctaHref='/grimoire/synastry/generate'
       meaning={`Synastry looks at how planets in one person's chart interact with planets in another person's chart. Key areas to examine:
@@ -74,12 +75,58 @@ export default function SynastryPage() {
 
 Remember: Challenging aspects don't mean incompatibility. They often create the most dynamic and growth-oriented relationships.
 
+**House Overlays**
+House overlays show where a partner's energy lands in your life. A planet in your 1st house affects identity, while a planet in your 10th affects career and visibility. This layer adds the everyday context to the aspect story.
+
 **How to Read Synastry:**
 1. Compare both charts side by side
 2. Look for aspects between planets (especially personal planets)
 3. Note which houses each person's planets fall into in the other person's chart
 4. Consider the overall balance of harmonious vs challenging aspects
-5. Remember: No relationship is perfect—challenges create growth`}
+5. Remember: No relationship is perfect—challenges create growth
+
+**Practical Use**
+Start with the top three aspects that repeat across the charts. Those tend to be the dominant themes. Use synastry to create better communication, not to decide whether a relationship should exist.
+
+**Timing**
+Synastry shows patterns, but transits and progressions show timing. If a relationship feels intense or unstable, check the current transits for additional context.
+
+**Use as a Conversation Tool**
+The most helpful use of synastry is dialogue. Use the chart to name needs, clarify boundaries, and build empathy.`}
+      tables={[
+        {
+          title: 'Synastry Focus Areas',
+          headers: ['Area', 'Planets', 'What It Shows'],
+          rows: [
+            ['Emotional Bond', 'Sun/Moon', 'Emotional safety, felt connection'],
+            ['Chemistry', 'Venus/Mars', 'Attraction, desire, magnetism'],
+            ['Communication', 'Mercury', 'Style, tone, misunderstandings'],
+            ['Commitment', 'Saturn', 'Stability, responsibility, longevity'],
+            ['Growth', 'Jupiter', 'Shared values, optimism, support'],
+            ['Change', 'Uranus/Pluto', 'Intensity, transformation, volatility'],
+          ],
+        },
+        {
+          title: 'Aspect Types',
+          headers: ['Aspect', 'Effect'],
+          rows: [
+            ['Trine', 'Easy flow and support'],
+            ['Sextile', 'Opportunity and cooperation'],
+            ['Square', 'Friction that pushes growth'],
+            ['Opposition', 'Polarity and balance lessons'],
+          ],
+        },
+        {
+          title: 'House Overlay Quick Cues',
+          headers: ['House', 'Common Theme'],
+          rows: [
+            ['1st', 'Identity and visibility'],
+            ['4th', 'Home and emotional safety'],
+            ['7th', 'Partnership and commitment'],
+            ['10th', 'Goals and public life'],
+          ],
+        },
+      ]}
       howToWorkWith={[
         'Compare two birth charts side by side',
         'Identify aspects between planets in both charts',
@@ -89,6 +136,20 @@ Remember: Challenging aspects don't mean incompatibility. They often create the 
         'Consider Saturn aspects for long-term potential',
         'Understand that challenging aspects can create growth',
         'Use synastry as a tool for understanding, not prediction',
+      ]}
+      journalPrompts={[
+        'Where do we feel most naturally aligned, and why?',
+        'What recurring friction shows up in our communication?',
+        'What does long-term stability mean to each of us?',
+        'Which shared values keep us grounded?',
+        'How can we turn a challenging aspect into a growth practice?',
+        'What do we consistently bring out in each other?',
+      ]}
+      rituals={[
+        'Choose one supportive aspect and celebrate it with a shared ritual.',
+        'Pick one challenging aspect and agree on a weekly check-in.',
+        'Write down one boundary that supports the relationship.',
+        'Use a shared calendar to align on timing and expectations.',
       ]}
       faqs={[
         {
@@ -105,6 +166,20 @@ Remember: Challenging aspects don't mean incompatibility. They often create the 
           answer:
             'Sun-Moon aspects show emotional compatibility, Venus-Mars aspects show romantic attraction, Mercury aspects show communication style, and Saturn aspects show long-term potential. However, all aspects contribute to the overall relationship dynamic.',
         },
+        {
+          question: 'Do house overlays matter in synastry?',
+          answer:
+            'Yes. House overlays show where someone activates your life: a partner’s Venus in your 7th house feels very different from Venus in your 12th. Houses add the lived context to the aspect.',
+        },
+      ]}
+      relatedItems={[
+        {
+          name: 'Compatibility',
+          href: '/grimoire/compatibility',
+          type: 'Guide',
+        },
+        { name: 'Aspects', href: '/grimoire/aspects', type: 'Reference' },
+        { name: 'Houses', href: '/grimoire/houses', type: 'Reference' },
       ]}
       internalLinks={[
         { text: 'Birth Chart', href: '/grimoire/birth-chart' },

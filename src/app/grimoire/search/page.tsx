@@ -8,9 +8,7 @@ import {
   type GrimoireEntry,
 } from '@/constants/seo/grimoire-search-index';
 import { AskTheGrimoire } from '@/components/grimoire/AskTheGrimoire';
-import { ExploreGrimoire } from '@/components/grimoire/ExploreGrimoire';
-import { GrimoireBreadcrumbs } from '@/components/grimoire/GrimoireBreadcrumbs';
-
+import { SEOContentTemplate } from '@/components/grimoire/SEOContentTemplate';
 export const metadata: Metadata = {
   title: 'Search the Grimoire | Lunary',
   description:
@@ -141,14 +139,8 @@ function SearchContent({ query }: { query: string }) {
 
   const isDefaultView = !query;
 
-  const breadcrumbItems = [
-    { name: 'Grimoire', url: '/grimoire' },
-    { name: 'Search', url: '/grimoire/search' },
-  ];
-
   return (
     <div className='space-y-6'>
-      <GrimoireBreadcrumbs items={breadcrumbItems} />
       {/* Results Header */}
       <div className='flex items-center justify-between'>
         <div className='flex items-center gap-2 text-lunary-primary-300/70'>
@@ -238,34 +230,35 @@ export default async function GrimoireSearchPage({
   const params = await searchParams;
   const query = params.q || '';
 
-  return (
-    <main className='min-h-screen bg-gradient-to-b from-[#0a0a0f] via-[#12121a] to-[#0a0a0f] text-white'>
-      {/* Header */}
-      <div className='border-b border-lunary-primary-700'>
-        <div className='max-w-4xl mx-auto px-4 py-6'>
-          {/* Title */}
-          <div className='flex items-center gap-3 mb-6'>
-            <BookOpen className='h-8 w-8 text-lunary-primary-400' />
-            <h1 className='text-3xl md:text-4xl font-light'>
-              Ask the <span className='font-medium'>Grimoire</span>
-            </h1>
-          </div>
+  const tableOfContents = [
+    { label: 'Search the Grimoire', href: '#grimoire-search-form' },
+    { label: 'Results', href: '#grimoire-search-results' },
+  ];
 
-          <p className='text-lunary-primary-300/70 mb-8 max-w-2xl'>
-            Search our cosmic knowledge base for astrology, tarot, crystals,
-            rituals, and spiritual wisdom. Find the answers you seek.
-          </p>
+  const heroContent = (
+    <div className='flex items-center gap-3 justify-center'>
+      <BookOpen className='h-8 w-8 text-lunary-primary-400' />
+      <p className='text-lg font-light text-zinc-100 max-w-3xl'>
+        Search our cosmic knowledge base for astrology, tarot, crystals,
+        rituals, and spiritual wisdom. Find the answers you seek across every
+        Grimoire category.
+      </p>
+    </div>
+  );
 
-          {/* Search Box */}
-          <AskTheGrimoire
-            variant='hero'
-            placeholder='What cosmic wisdom do you seek?'
-          />
-        </div>
-      </div>
+  const sections = (
+    <>
+      <section
+        id='grimoire-search-form'
+        className='border-b border-zinc-800 pb-8 mb-8'
+      >
+        <AskTheGrimoire
+          variant='hero'
+          placeholder='What cosmic wisdom do you seek?'
+        />
+      </section>
 
-      {/* Results */}
-      <div className='max-w-4xl mx-auto px-4 py-12'>
+      <section id='grimoire-search-results' className='space-y-6 mb-12'>
         <Suspense
           fallback={
             <div className='flex items-center justify-center py-16'>
@@ -275,9 +268,7 @@ export default async function GrimoireSearchPage({
         >
           <SearchContent query={query} />
         </Suspense>
-      </div>
-
-      {/* Structured Data */}
+      </section>
       <script
         type='application/ld+json'
         dangerouslySetInnerHTML={{
@@ -298,10 +289,62 @@ export default async function GrimoireSearchPage({
           }),
         }}
       />
+    </>
+  );
 
-      <div className='max-w-4xl mx-auto px-4'>
-        <ExploreGrimoire />
-      </div>
-    </main>
+  return (
+    <SEOContentTemplate
+      title={metadata.title as string}
+      h1='Ask the Grimoire'
+      description={metadata.description as string}
+      keywords={['grimoire search', 'cosmic search', 'lunar knowledge base']}
+      canonicalUrl={
+        (metadata.alternates?.canonical as string) ??
+        'https://lunary.app/grimoire/search'
+      }
+      tableOfContents={tableOfContents}
+      intro='Search our cosmic knowledge base for astrology, tarot, crystals, rituals, and celestial practice.'
+      tldr='Use the search to find specific meanings, then explore related pages for deeper context.'
+      meaning={`The Grimoire search helps you move quickly from a question to a focused answer. Start with a clear keyword, then follow the suggested links to expand your understanding.
+
+If you are not sure what to look for, browse by category or try a general theme like "love," "career," or "healing." The best results come from simple, specific queries.
+
+When you find a result that resonates, open related pages to see the wider pattern. Grimoire topics are designed to connect, so a single search can become a small study path.`}
+      howToWorkWith={[
+        'Start with one clear keyword.',
+        'Open a result and follow the related links.',
+        'Use categories to narrow your focus.',
+      ]}
+      rituals={[
+        'Write one question before you search.',
+        'Open two results and compare their themes.',
+        'Save a short note about what stood out.',
+      ]}
+      tables={[
+        {
+          title: 'Search Tips',
+          headers: ['If you want', 'Try searching'],
+          rows: [
+            ['Meaning of a symbol', 'Name of the card, rune, or sign'],
+            ['Timing guidance', 'Moon phase or planetary day'],
+            ['Practice ideas', 'Ritual, spell, or meditation'],
+          ],
+        },
+      ]}
+      journalPrompts={[
+        'What question do I want answered today?',
+        'Which topic keeps showing up for me?',
+        'What is one page I want to explore deeper this week?',
+      ]}
+      internalLinks={[
+        { text: 'Grimoire Home', href: '/grimoire' },
+        { text: 'Zodiac', href: '/grimoire/zodiac' },
+        { text: 'Tarot', href: '/grimoire/tarot' },
+        { text: 'Numerology', href: '/grimoire/numerology' },
+      ]}
+      heroContent={heroContent}
+    >
+      {sections}
+    </SEOContentTemplate>
   );
 }

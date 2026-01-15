@@ -1,6 +1,8 @@
 import { Metadata } from 'next';
 import Link from 'next/link';
 import { SEOContentTemplate } from '@/components/grimoire/SEOContentTemplate';
+import { CosmicConnections } from '@/components/grimoire/CosmicConnections';
+import { CosmicConnectionSection } from '@/lib/cosmicConnectionsConfig';
 import { correspondencesData } from '@/constants/grimoire/correspondences';
 import { stringToKebabCase } from '../../../../../utils/string';
 
@@ -38,7 +40,7 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: 'Color Correspondences Guide | Lunary',
     description: 'Complete guide to color magic and correspondences.',
-    images: ['/api/og/cosmic'],
+    images: ['/api/og/grimoire/correspondences'],
   },
   alternates: {
     canonical: 'https://lunary.app/grimoire/correspondences/colors',
@@ -100,6 +102,40 @@ const colorDisplay: Record<string, string> = {
 
 export default function ColorsIndexPage() {
   const colors = Object.entries(correspondencesData.colors);
+
+  const tableOfContents = [
+    { label: 'All Magical Colors', href: '#all-magical-colors' },
+    { label: 'Quick Reference', href: '#colors-by-intent' },
+    { label: 'FAQs', href: '#faq' },
+  ];
+
+  const cosmicSections: CosmicConnectionSection[] = [
+    {
+      title: 'Color Resources',
+      links: [
+        {
+          label: 'Color Correspondences',
+          href: '/grimoire/correspondences/colors',
+        },
+        {
+          label: 'Candle Magic Colors',
+          href: '/grimoire/candle-magic/colors',
+        },
+        {
+          label: 'Correspondences Overview',
+          href: '/grimoire/correspondences',
+        },
+      ],
+    },
+    {
+      title: 'Practice Tools',
+      links: [
+        { label: 'Elements', href: '/grimoire/correspondences/elements' },
+        { label: 'Crystals', href: '/grimoire/crystals' },
+        { label: 'Chakras', href: '/grimoire/chakras' },
+      ],
+    },
+  ];
 
   return (
     <div className='p-4 md:p-6 lg:p-8 xl:p-10 min-h-full'>
@@ -200,8 +236,17 @@ Colors affect us psychologically and energetically. In magic, we harness these e
         ctaText='Want personalized color recommendations for your practice?'
         ctaHref='/pricing'
         faqs={faqs}
+        tableOfContents={tableOfContents}
+        cosmicConnections={
+          <CosmicConnections
+            entityType='hub-correspondences'
+            entityKey='correspondences'
+            title='Color Connections'
+            sections={cosmicSections}
+          />
+        }
       >
-        <section className='mb-12'>
+        <section id='all-magical-colors' className='mb-12'>
           <h2 className='text-2xl font-medium text-zinc-100 mb-6'>
             All Magical Colors
           </h2>
@@ -232,7 +277,10 @@ Colors affect us psychologically and energetically. In magic, we harness these e
           </div>
         </section>
 
-        <section className='mb-12 bg-gradient-to-r from-red-900/20 via-green-900/20 to-blue-900/20 border border-zinc-700 rounded-xl p-6'>
+        <section
+          id='colors-by-intent'
+          className='mb-12 bg-gradient-to-r from-red-900/20 via-green-900/20 to-blue-900/20 border border-zinc-700 rounded-xl p-6'
+        >
           <h2 className='text-xl font-medium text-zinc-100 mb-4'>
             Quick Reference: Colors by Intention
           </h2>

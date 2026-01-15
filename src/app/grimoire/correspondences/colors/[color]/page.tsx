@@ -6,6 +6,13 @@ import { stringToKebabCase } from '../../../../../../utils/string';
 
 const colorKeys = Object.keys(correspondencesData.colors);
 
+const tableOfContents = [
+  { label: 'Meaning', href: '#meaning' },
+  { label: 'How to Work With This Energy', href: '#how-to-work' },
+  { label: 'Correspondences Table', href: '#practices-overview' },
+  { label: 'FAQ', href: '#faq' },
+];
+
 export async function generateStaticParams() {
   return colorKeys.map((color) => ({
     color: stringToKebabCase(color),
@@ -84,7 +91,9 @@ export default async function ColorPage({
 
 In candle magic, ${colorKey.toLowerCase()} candles are used for ${colorData.uses.join(', ')}. The color resonates with ${colorData.planets.join(' and ')} planetary influences, creating powerful alignments for specific types of spellwork.
 
-Understanding ${colorKey.toLowerCase()} color correspondences helps you choose the right color for your intentions, whether you're working with candles, crystals, fabrics, or other magical tools.`;
+Understanding ${colorKey.toLowerCase()} color correspondences helps you choose the right color for your intentions, whether you're working with candles, crystals, fabrics, or other magical tools.
+
+Color is one of the fastest ways to set a ritual tone. Even subtle touches like ribbons, cloth, or ink can focus an intention. If you are unsure which color to use, start with the core correspondence and let intuition guide the shade and intensity.`;
 
   const howToWorkWith = [
     `Use ${colorKey.toLowerCase()} candles for ${colorData.uses[0]}`,
@@ -124,10 +133,30 @@ Understanding ${colorKey.toLowerCase()} color correspondences helps you choose t
         `${colorKey.toLowerCase()} color meaning`,
       ]}
       canonicalUrl={`https://lunary.app/grimoire/correspondences/colors/${color}`}
+      tldr={`${colorKey} supports ${colorData.uses[0] || 'focused intention'} and resonates with ${colorData.correspondences.join(', ')}. Use it in candles, clothing, or altar tools to amplify the tone of your spellwork.`}
+      tableOfContents={tableOfContents}
       intro={`${colorKey} is a powerful color in magical practice, carrying specific energetic properties and correspondences. Understanding ${colorKey.toLowerCase()} color meanings helps you choose the right color for your intentions and create more effective spellwork.`}
       meaning={meaning}
       howToWorkWith={howToWorkWith}
+      rituals={[
+        `Light a ${colorKey.toLowerCase()} candle and speak a single clear intention.`,
+        `Tie a ${colorKey.toLowerCase()} ribbon around a journal or spell bag.`,
+        `Create a small ${colorKey.toLowerCase()} altar focal point for a week.`,
+        `Write your intention on ${colorKey.toLowerCase()} paper and keep it near your workspace.`,
+      ]}
+      journalPrompts={[
+        `Where in my life do I need more ${colorData.correspondences[0] || 'alignment'}?`,
+        `What does ${colorKey.toLowerCase()} energy help me release or invite?`,
+        `How does this color change my mood or focus during ritual?`,
+        'What is the smallest action I can take to match this color intention?',
+      ]}
       faqs={faqs}
+      cosmicConnectionsParams={{
+        entityType: 'hub-correspondences',
+        entityKey: 'correspondences',
+      }}
+      ctaText={`Want a personalized spell recipe using ${colorKey.toLowerCase()} correspondences?`}
+      ctaHref='/pricing'
       breadcrumbs={[
         { label: 'Grimoire', href: '/grimoire' },
         { label: 'Correspondences', href: '/grimoire/correspondences' },
@@ -160,6 +189,18 @@ Understanding ${colorKey.toLowerCase()} color correspondences helps you choose t
             ['Correspondences', colorData.correspondences.join(', ')],
             ['Uses', colorData.uses.join(', ')],
             ['Planets', colorData.planets.join(', ')],
+          ],
+        },
+        {
+          title: 'Practical Applications',
+          headers: ['Use', 'Example'],
+          rows: [
+            [
+              'Candle magic',
+              `Pair with ${colorData.uses[0] || 'focused intention'} rituals`,
+            ],
+            ['Altar work', 'Cloth, ribbons, or crystals in this color'],
+            ['Spellcraft', 'Ink, wax seals, or sachet ties'],
           ],
         },
       ]}

@@ -80,6 +80,56 @@ export default function ZodiacIndexPage() {
         }}
         tldr='The zodiac has 12 signs divided by elements (Fire, Earth, Air, Water) and modalities (Cardinal, Fixed, Mutable). Each sign has unique traits, a ruling planet, and represents different life themes. Your Sun sign is determined by your birth date.'
         intro='The zodiac is divided into 12 signs, each with unique personality traits, strengths, and challenges. Signs are grouped by element (Fire, Earth, Air, Water) which describes their core nature, and modality (Cardinal, Fixed, Mutable) which describes how they express energy. Understanding your Sun sign is just the beginning — your full birth chart reveals how all 12 signs influence different areas of your life.'
+        meaning={`The zodiac is a symbolic map of personality and life themes. Each sign represents a specific style of expression, and each planet expresses itself through the sign it occupies.
+
+Astrology looks at more than your Sun sign. Your Moon sign reflects emotional needs, and your Rising sign shapes your outer style and first impressions. Together, these are often called the "Big Three."
+
+Elements show what motivates you, and modalities show how you act. Fire brings passion, Earth brings stability, Air brings ideas, and Water brings feeling. Cardinal signs initiate, Fixed signs sustain, and Mutable signs adapt.
+
+When reading compatibility, look for element harmony, shared modalities, and the balance between initiative and responsiveness. No pairing is inherently bad; compatibility grows with awareness and communication.
+
+When you read a sign, notice both the gifts and the shadows. Every sign has strengths and challenges, and the goal is balance rather than perfection.
+
+If you are new, start with your Sun, Moon, and Rising signs. Then explore the signs of personal planets for a fuller picture.`}
+        howToWorkWith={[
+          'Identify your Sun, Moon, and Rising signs.',
+          'Notice which element dominates your chart.',
+          'Balance strong elements with grounding habits.',
+          'Read sign meanings in the context of house placement.',
+        ]}
+        rituals={[
+          'Write down three traits you recognize in your Sun sign.',
+          'Observe how your Moon sign shows up in your emotional life.',
+          'Track how you act under stress and compare it to your Rising sign.',
+          'Pick one sign trait to practice intentionally for a week.',
+        ]}
+        journalPrompts={[
+          'Where do I see my Sun sign most clearly?',
+          'How does my Moon sign shape my emotional needs?',
+          'What element feels strongest in my chart?',
+          'Which sign traits do I want to develop?',
+        ]}
+        tables={[
+          {
+            title: 'Elements and Qualities',
+            headers: ['Element', 'Qualities'],
+            rows: [
+              ['Fire', 'Bold, expressive, initiating'],
+              ['Earth', 'Practical, steady, grounded'],
+              ['Air', 'Curious, social, mental'],
+              ['Water', 'Intuitive, emotional, receptive'],
+            ],
+          },
+          {
+            title: 'Big Three Focus',
+            headers: ['Placement', 'What it describes'],
+            rows: [
+              ['Sun', 'Core identity and vitality'],
+              ['Moon', 'Emotional needs and habits'],
+              ['Rising', 'First impression and approach'],
+            ],
+          },
+        ]}
         faqs={[
           {
             question: 'What are the four elements in astrology?',
@@ -96,6 +146,11 @@ export default function ZodiacIndexPage() {
             answer:
               'Your Sun sign is determined by your birth date. The Sun moves through each zodiac sign for about 30 days. For the most accurate sign placement, especially if born on a cusp, calculate your full birth chart with your exact birth time.',
           },
+          {
+            question: 'What is the Big Three in astrology?',
+            answer:
+              'The Big Three are your Sun sign, Moon sign, and Rising sign. Together they describe identity, emotions, and outward style.',
+          },
         ]}
         relatedItems={[
           { name: 'Birth Chart', href: '/birth-chart', type: 'tool' },
@@ -110,6 +165,12 @@ export default function ZodiacIndexPage() {
             href: '/grimoire/compatibility',
             type: 'topic',
           },
+        ]}
+        internalLinks={[
+          { text: 'Birth Chart Calculator', href: '/birth-chart' },
+          { text: 'Zodiac Compatibility', href: '/grimoire/compatibility' },
+          { text: 'Houses Guide', href: '/grimoire/houses' },
+          { text: 'Grimoire Home', href: '/grimoire' },
         ]}
       >
         <div className='space-y-12'>
@@ -178,6 +239,23 @@ export default function ZodiacIndexPage() {
                 </ul>
               </div>
             </div>
+          </section>
+
+          <section className='p-6 rounded-lg border border-zinc-800 bg-zinc-900/30'>
+            <h2 className='text-xl font-medium text-zinc-100 mb-4'>
+              Reading Your Big Three
+            </h2>
+            <p className='text-sm text-zinc-400 mb-3'>
+              Your Sun sign shows core identity, your Moon sign shows emotional
+              needs, and your Rising sign shows how you move through the world.
+              These three placements create a quick, useful overview of your
+              chart.
+            </p>
+            <p className='text-sm text-zinc-400'>
+              If your chart has strong element or modality patterns, that
+              explains why certain traits feel emphasized. Use the Big Three as
+              a starting point, then explore house placements for deeper detail.
+            </p>
           </section>
 
           <section className='text-center'>

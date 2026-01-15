@@ -1,16 +1,10 @@
-export const revalidate = 86400;
-
 import { Metadata } from 'next';
 import Link from 'next/link';
-import {
-  createArticleSchema,
-  createFAQPageSchema,
-  renderJsonLd,
-  createBreadcrumbSchema,
-} from '@/lib/schema';
-import { Breadcrumbs } from '@/components/grimoire/Breadcrumbs';
+import { createArticleSchema, renderJsonLd } from '@/lib/schema';
+import { SEOContentTemplate } from '@/components/grimoire/SEOContentTemplate';
 import { CosmicConnections } from '@/components/grimoire/CosmicConnections';
 import { CosmicConnectionSection } from '@/lib/cosmicConnectionsConfig';
+export const revalidate = 86400;
 
 export const metadata: Metadata = {
   title: 'Tools of the Craft: Complete Witchcraft Tools Guide - Lunary',
@@ -90,450 +84,308 @@ export default function WitchcraftToolsPage() {
     section: 'Witchcraft',
   });
 
-  const faqSchema = createFAQPageSchema(faqs);
+  const tableOfContents = [
+    {
+      label: 'Working With Tools Intuitively vs. Dogmatically',
+      href: '#intuitive-vs-dogmatic',
+    },
+    { label: 'Altars & Sacred Space', href: '#altars' },
+    { label: 'Candles & Fire Tools', href: '#fire-tools' },
+    { label: 'Herbs & Kitchen Witchery', href: '#herbs' },
+    { label: 'Crystals & Mineral Allies', href: '#crystals' },
+    { label: 'Journals & Book of Shadows', href: '#journals' },
+    { label: 'Digital Tools (Lunary)', href: '#digital' },
+    { label: 'FAQ', href: '#faq' },
+  ];
+
+  const heroContent = (
+    <p className='text-lg text-zinc-400 leading-relaxed'>
+      Tools are extensions of your will and intention. They help focus energy,
+      create sacred space, and add symbolic weight to your practice—but they are
+      never required. Your intention is always the most powerful tool.
+    </p>
+  );
 
   return (
-    <div className='p-4 md:p-8 max-w-4xl mx-auto'>
+    <>
       {renderJsonLd(articleSchema)}
-      {renderJsonLd(
-        createBreadcrumbSchema([
-          { name: 'Grimoire', url: '/grimoire' },
-          { name: 'Modern Witchcraft', url: '/grimoire/modern-witchcraft' },
-          {
-            name: 'Tools Guide',
-            url: '/grimoire/modern-witchcraft/tools-guide',
-          },
-        ]),
-      )}
-      {renderJsonLd(faqSchema)}
-
-      <Breadcrumbs
-        items={[
+      <SEOContentTemplate
+        title={metadata.title as string}
+        h1='Tools of the Craft'
+        description={metadata.description as string}
+        keywords={metadata.keywords as string[]}
+        canonicalUrl={
+          (metadata.alternates?.canonical as string) ??
+          'https://lunary.app/grimoire/modern-witchcraft/tools-guide'
+        }
+        tableOfContents={tableOfContents}
+        heroContent={heroContent}
+        faqs={faqs}
+        cosmicConnections={
+          <CosmicConnections
+            title='Crystal Connections'
+            entityType='crystal'
+            entityKey='crystal-guide'
+            sections={cosmicConnectionsSections}
+          />
+        }
+        breadcrumbs={[
           { label: 'Grimoire', href: '/grimoire' },
           { label: 'Modern Witchcraft', href: '/grimoire/modern-witchcraft' },
           { label: 'Tools Guide' },
         ]}
-      />
-
-      <header className='mb-12'>
-        <h1 className='text-4xl md:text-5xl font-light text-zinc-100 mb-6'>
-          Tools of the Craft
-          <span className='block text-2xl text-lunary-primary-400 mt-2'>
-            Working With Magical Tools
-          </span>
-        </h1>
-        <p className='text-xl text-zinc-400 leading-relaxed'>
-          Tools are extensions of your will and intention. They help focus
-          energy, create sacred space, and add symbolic weight to your
-          practice—but they are never required. Your intention is always the
-          most powerful tool.
-        </p>
-      </header>
-
-      <nav className='bg-zinc-900/50 border border-zinc-800 rounded-xl p-6 mb-12'>
-        <h2 className='text-lg font-medium text-zinc-100 mb-4'>
-          Table of Contents
-        </h2>
-        <ol className='space-y-2 text-zinc-400'>
-          <li>
-            <a
-              href='#intuitive-vs-dogmatic'
-              className='hover:text-lunary-primary-400'
-            >
-              1. Working With Tools Intuitively vs. Dogmatically
-            </a>
-          </li>
-          <li>
-            <a href='#altars' className='hover:text-lunary-primary-400'>
-              2. Altars & Sacred Space
-            </a>
-          </li>
-          <li>
-            <a href='#fire-tools' className='hover:text-lunary-primary-400'>
-              3. Candles & Fire Tools
-            </a>
-          </li>
-          <li>
-            <a href='#herbs' className='hover:text-lunary-primary-400'>
-              4. Herbs & Kitchen Witchery
-            </a>
-          </li>
-          <li>
-            <a href='#crystals' className='hover:text-lunary-primary-400'>
-              5. Crystals & Mineral Allies
-            </a>
-          </li>
-          <li>
-            <a href='#journals' className='hover:text-lunary-primary-400'>
-              6. Journals & Book of Shadows
-            </a>
-          </li>
-          <li>
-            <a href='#digital' className='hover:text-lunary-primary-400'>
-              7. Digital Tools (Lunary)
-            </a>
-          </li>
-          <li>
-            <a href='#faq' className='hover:text-lunary-primary-400'>
-              8. FAQ
-            </a>
-          </li>
-        </ol>
-      </nav>
-
-      {/* Section 1 */}
-      <section id='intuitive-vs-dogmatic' className='mb-16'>
-        <h2 className='text-3xl font-light text-zinc-100 mb-6'>
-          1. Working With Tools Intuitively vs. Dogmatically
-        </h2>
-
-        <p className='text-zinc-300 leading-relaxed mb-6'>
-          There are two approaches to magical tools: following tradition exactly
-          as taught, or developing your own intuitive relationships with tools.
-          Most practitioners find a balance between both.
-        </p>
-
-        <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
-          <div className='p-5 rounded-xl border border-zinc-800 bg-zinc-900/30'>
-            <h3 className='font-medium text-zinc-100 mb-2'>
-              Traditional Approach
-            </h3>
-            <p className='text-zinc-400 text-sm mb-3'>
-              Follow established correspondences and uses. Athame for air, wand
-              for fire (or vice versa in some traditions). Specific tools for
-              specific purposes.
-            </p>
-            <p className='text-zinc-500 text-xs'>
-              Benefit: Taps into centuries of collective practice and energy.
-            </p>
-          </div>
-          <div className='p-5 rounded-xl border border-zinc-800 bg-zinc-900/30'>
-            <h3 className='font-medium text-zinc-100 mb-2'>
-              Intuitive Approach
-            </h3>
-            <p className='text-zinc-400 text-sm mb-3'>
-              Use what feels right to you. If a stone calls to you for a
-              specific purpose, use it—even if tradition says otherwise.
-            </p>
-            <p className='text-zinc-500 text-xs'>
-              Benefit: Develops deep personal connection and authentic practice.
-            </p>
-          </div>
-        </div>
-
-        <p className='text-zinc-400 text-sm mt-4'>
-          Neither approach is wrong. Learn the traditions, then let your
-          practice evolve naturally.
-        </p>
-      </section>
-
-      {/* Section 2: Altars */}
-      <section id='altars' className='mb-16'>
-        <h2 className='text-3xl font-light text-zinc-100 mb-6'>
-          2. Altars & Sacred Space
-        </h2>
-
-        <p className='text-zinc-300 leading-relaxed mb-6'>
-          An altar is a dedicated space for magical and spiritual practice. It
-          can be elaborate or simple—a shelf, a windowsill, or a corner of your
-          desk.
-        </p>
-
-        <div className='bg-zinc-900/50 border border-zinc-800 rounded-xl p-6'>
-          <h3 className='text-lg font-medium text-zinc-100 mb-3'>
-            Common Altar Elements
-          </h3>
-          <ul className='space-y-2 text-zinc-400 text-sm'>
-            <li>
-              <strong className='text-zinc-200'>
-                Representation of elements:
-              </strong>{' '}
-              Candle (fire), water bowl, feather or incense (air), salt or
-              crystal (earth)
-            </li>
-            <li>
-              <strong className='text-zinc-200'>Personal items:</strong> Photos,
-              mementos, symbols that hold meaning for you
-            </li>
-            <li>
-              <strong className='text-zinc-200'>Working tools:</strong> Candles,
-              crystals, herbs, tarot deck
-            </li>
-            <li>
-              <strong className='text-zinc-200'>
-                Deity or spirit representation:
-              </strong>{' '}
-              If you work with specific beings (optional)
-            </li>
-            <li>
-              <strong className='text-zinc-200'>Seasonal items:</strong> Change
-              with the Wheel of the Year
-            </li>
-          </ul>
-        </div>
-
-        <p className='text-zinc-400 text-sm mt-4'>
-          Cleanse your altar regularly. Arrange items intuitively—there is no
-          single &quot;correct&quot; layout.
-        </p>
-      </section>
-
-      {/* Section 3: Fire Tools */}
-      <section id='fire-tools' className='mb-16'>
-        <h2 className='text-3xl font-light text-zinc-100 mb-6'>
-          3. Candles & Fire Tools
-        </h2>
-
-        <p className='text-zinc-300 leading-relaxed mb-6'>
-          Fire is transformation. Candles are the most common fire tool—easy to
-          use, readily available, and endlessly versatile.
-        </p>
-
-        <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
-          <Link
-            href='/grimoire/candle-magic'
-            className='p-5 rounded-xl border border-zinc-800 bg-zinc-900/30 hover:border-orange-600 transition-colors'
-          >
-            <h3 className='font-medium text-zinc-100 mb-2'>Candles</h3>
-            <p className='text-zinc-400 text-sm'>
-              Color correspondences, carving, anointing, and spell candles. Full
-              guide available.
-            </p>
-          </Link>
-          <div className='p-5 rounded-xl border border-zinc-800 bg-zinc-900/30'>
-            <h3 className='font-medium text-zinc-100 mb-2'>Cauldron</h3>
-            <p className='text-zinc-400 text-sm'>
-              Fire-safe container for burning papers, mixing potions, or holding
-              ritual fire. Represents transformation.
-            </p>
-          </div>
-          <div className='p-5 rounded-xl border border-zinc-800 bg-zinc-900/30'>
-            <h3 className='font-medium text-zinc-100 mb-2'>Incense</h3>
-            <p className='text-zinc-400 text-sm'>
-              Combines fire and air. Use for cleansing space, setting mood, and
-              adding scent correspondences.
-            </p>
-          </div>
-          <div className='p-5 rounded-xl border border-zinc-800 bg-zinc-900/30'>
-            <h3 className='font-medium text-zinc-100 mb-2'>
-              Matches / Lighter
-            </h3>
-            <p className='text-zinc-400 text-sm'>
-              Some prefer matches for the ritual of striking fire. Choose what
-              feels right.
-            </p>
-          </div>
-        </div>
-      </section>
-
-      {/* Section 4: Herbs */}
-      <section id='herbs' className='mb-16'>
-        <h2 className='text-3xl font-light text-zinc-100 mb-6'>
-          4. Herbs & Kitchen Witchery
-        </h2>
-
-        <p className='text-zinc-300 leading-relaxed mb-6'>
-          Herbs are accessible, affordable, and powerful. Many are already in
-          your kitchen. Kitchen witchery weaves magic into everyday cooking and
-          home activities.
-        </p>
-
-        <div className='bg-zinc-900/50 border border-zinc-800 rounded-xl p-6'>
-          <h3 className='text-lg font-medium text-zinc-100 mb-3'>
-            Common Kitchen Herbs
-          </h3>
-          <div className='grid grid-cols-2 gap-3 text-sm'>
-            <div className='text-zinc-400'>
-              <strong className='text-zinc-200'>Rosemary:</strong> Protection,
-              memory
-            </div>
-            <div className='text-zinc-400'>
-              <strong className='text-zinc-200'>Basil:</strong> Prosperity, love
-            </div>
-            <div className='text-zinc-400'>
-              <strong className='text-zinc-200'>Cinnamon:</strong> Success,
-              passion
-            </div>
-            <div className='text-zinc-400'>
-              <strong className='text-zinc-200'>Salt:</strong> Purification,
-              protection
-            </div>
-            <div className='text-zinc-400'>
-              <strong className='text-zinc-200'>Bay leaves:</strong> Wishes,
-              divination
-            </div>
-            <div className='text-zinc-400'>
-              <strong className='text-zinc-200'>Lavender:</strong> Peace, sleep
-            </div>
-          </div>
-        </div>
-
-        <div className='mt-4'>
-          <Link
-            href='/grimoire/correspondences/herbs'
-            className='text-lunary-primary-400 hover:text-lunary-primary-300'
-          >
-            Full herb correspondence guide →
-          </Link>
-        </div>
-      </section>
-
-      {/* Section 5: Crystals */}
-      <section id='crystals' className='mb-16'>
-        <h2 className='text-3xl font-light text-zinc-100 mb-6'>
-          5. Crystals & Mineral Allies
-        </h2>
-
-        <p className='text-zinc-300 leading-relaxed mb-6'>
-          Crystals are used to amplify, store, and direct energy. Different
-          crystals carry different properties and can support various
-          intentions.
-        </p>
-
-        <div className='bg-zinc-900/50 border border-zinc-800 rounded-xl p-6'>
-          <h3 className='text-lg font-medium text-zinc-100 mb-3'>
-            Starter Crystals
-          </h3>
-          <ul className='space-y-2 text-zinc-400 text-sm'>
-            <li>
-              <strong className='text-zinc-200'>Clear Quartz:</strong> Master
-              healer, amplifies all intentions
-            </li>
-            <li>
-              <strong className='text-zinc-200'>Amethyst:</strong> Intuition,
-              protection, peace
-            </li>
-            <li>
-              <strong className='text-zinc-200'>Rose Quartz:</strong> Love,
-              heart healing, self-compassion
-            </li>
-            <li>
-              <strong className='text-zinc-200'>Black Tourmaline:</strong>{' '}
-              Protection, grounding, absorbs negativity
-            </li>
-          </ul>
-        </div>
-
-        <div className='mt-4'>
-          <Link
-            href='/grimoire/crystals'
-            className='text-lunary-primary-400 hover:text-lunary-primary-300'
-          >
-            Full crystal guide →
-          </Link>
-        </div>
-      </section>
-
-      {/* Section 6: Journals */}
-      <section id='journals' className='mb-16'>
-        <h2 className='text-3xl font-light text-zinc-100 mb-6'>
-          6. Journals & Book of Shadows
-        </h2>
-
-        <p className='text-zinc-300 leading-relaxed mb-6'>
-          A Book of Shadows is a personal record of your magical practice:
-          spells, rituals, dreams, observations, and insights. It is perhaps the
-          most important tool you can have.
-        </p>
-
-        <div className='bg-zinc-900/50 border border-zinc-800 rounded-xl p-6'>
-          <h3 className='text-lg font-medium text-zinc-100 mb-3'>
-            What to Record
-          </h3>
-          <ul className='space-y-2 text-zinc-400 text-sm'>
-            <li>• Spells you cast and their results</li>
-            <li>• Tarot readings and interpretations</li>
-            <li>• Moon phase observations</li>
-            <li>• Dreams and symbols</li>
-            <li>• Correspondences that work for you</li>
-            <li>• Reflections and insights</li>
-          </ul>
-        </div>
-
-        <div className='mt-4'>
-          <Link
-            href='/book-of-shadows'
-            className='text-lunary-primary-400 hover:text-lunary-primary-300'
-          >
-            Start your digital Book of Shadows →
-          </Link>
-        </div>
-      </section>
-
-      {/* Section 7: Digital */}
-      <section id='digital' className='mb-16'>
-        <h2 className='text-3xl font-light text-zinc-100 mb-6'>
-          7. Digital Tools (Lunary)
-        </h2>
-
-        <p className='text-zinc-300 leading-relaxed mb-6'>
-          Digital tools can enhance and support your practice without replacing
-          traditional methods. Lunary offers several features that function as
-          modern magical tools:
-        </p>
-
-        <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
-          <div className='p-5 rounded-xl border border-zinc-800 bg-zinc-900/30'>
-            <h3 className='font-medium text-zinc-100 mb-2'>
-              Birth Chart Calculator
-            </h3>
-            <p className='text-zinc-400 text-sm'>
-              Astronomical precision for your natal chart—no manual calculations
-              required.
-            </p>
-          </div>
-          <div className='p-5 rounded-xl border border-zinc-800 bg-zinc-900/30'>
-            <h3 className='font-medium text-zinc-100 mb-2'>
-              Moon Phase Tracker
-            </h3>
-            <p className='text-zinc-400 text-sm'>
-              Real-time moon data so you always know the current phase and sign.
-            </p>
-          </div>
-          <div className='p-5 rounded-xl border border-zinc-800 bg-zinc-900/30'>
-            <h3 className='font-medium text-zinc-100 mb-2'>Digital Tarot</h3>
-            <p className='text-zinc-400 text-sm'>
-              Draw cards for reflection when physical cards aren&apos;t
-              available.
-            </p>
-          </div>
-          <div className='p-5 rounded-xl border border-zinc-800 bg-zinc-900/30'>
-            <h3 className='font-medium text-zinc-100 mb-2'>Book of Shadows</h3>
-            <p className='text-zinc-400 text-sm'>
-              Digital journal that&apos;s always with you—searchable, backed up,
-              and private.
-            </p>
-          </div>
-        </div>
-      </section>
-
-      {/* FAQ */}
-      <section id='faq' className='mb-16'>
-        <h2 className='text-3xl font-light text-zinc-100 mb-6'>
-          8. Frequently Asked Questions
-        </h2>
-
-        <div className='space-y-4'>
-          {faqs.map((faq, index) => (
-            <div
-              key={index}
-              className='bg-zinc-900/50 border border-zinc-800 rounded-lg p-6'
-            >
-              <h3 className='text-lg font-medium text-zinc-100 mb-3'>
-                {faq.question}
+      >
+        <section id='intuitive-vs-dogmatic' className='mb-16'>
+          <h2 className='text-3xl font-light text-zinc-100 mb-6'>
+            1. Working With Tools Intuitively vs. Dogmatically
+          </h2>
+          <p className='text-zinc-300 leading-relaxed mb-6'>
+            There are two approaches to magical tools: following tradition
+            exactly as taught, or developing your own intuitive relationships
+            with tools. Most practitioners find a balance between both.
+          </p>
+          <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
+            <div className='p-5 rounded-xl border border-zinc-800 bg-zinc-900/30'>
+              <h3 className='font-medium text-zinc-100 mb-2'>
+                Traditional Approach
               </h3>
-              <p className='text-zinc-300 leading-relaxed'>{faq.answer}</p>
+              <p className='text-zinc-400 text-sm'>
+                Honor lineage and correspondences. Use the tool associated with
+                the ritual's intent, direction, or element.
+              </p>
             </div>
-          ))}
-        </div>
-      </section>
+            <div className='p-5 rounded-xl border border-zinc-800 bg-zinc-900/30'>
+              <h3 className='font-medium text-zinc-100 mb-2'>
+                Intuitive Approach
+              </h3>
+              <p className='text-zinc-400 text-sm'>
+                Allow your intuition to guide you. If a crystal, kitchen spoon,
+                or plant feels right, work with it—even if it deviates from
+                tradition.
+              </p>
+            </div>
+          </div>
+        </section>
 
-      <CosmicConnections
-        entityType='hub-glossary'
-        entityKey='tools-guide'
-        title='Tools Guide Connections'
-        sections={cosmicConnectionsSections}
-      />
-    </div>
+        <section id='altars' className='mb-16'>
+          <h2 className='text-3xl font-light text-zinc-100 mb-6'>
+            2. Altars & Sacred Space
+          </h2>
+          <p className='text-zinc-300 leading-relaxed mb-6'>
+            Your altar is the heart of your practice. It can be as simple as a
+            cloth on a windowsill or as elaborate as a dedicated corner.
+          </p>
+          <div className='grid md:grid-cols-2 gap-6'>
+            <div className='rounded-xl border border-zinc-800 bg-zinc-900/30 p-5'>
+              <h3 className='font-medium text-zinc-100 mb-2'>
+                Elements to Include
+              </h3>
+              <ul className='text-sm text-zinc-400 space-y-2'>
+                <li>☾ Water or a chalice</li>
+                <li>✦ Fire or a candle</li>
+                <li>🗡️ Air tool like a wand or athame</li>
+                <li>⛏️ Earth item such as crystals or herbs</li>
+              </ul>
+            </div>
+            <div className='rounded-xl border border-zinc-800 bg-zinc-900/30 p-5'>
+              <h3 className='font-medium text-zinc-100 mb-2'>
+                Maintaining Sacred Space
+              </h3>
+              <p className='text-zinc-400 text-sm'>
+                Cleanse regularly with smoke, sound, or intention. Re-arrange
+                seasonally to align with sabbats or personal shifts.
+              </p>
+            </div>
+          </div>
+        </section>
+
+        <section id='fire-tools' className='mb-16'>
+          <h2 className='text-3xl font-light text-zinc-100 mb-6'>
+            3. Candles & Fire Tools
+          </h2>
+          <p className='text-zinc-300 leading-relaxed mb-6'>
+            Candles are powerful focus points. Choose color based on intention,
+            dress them with oil, and burn with purpose.
+          </p>
+          <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
+            <div className='rounded-xl border border-zinc-800 bg-zinc-900/30 p-5'>
+              <h3 className='font-medium text-zinc-100 mb-2'>
+                Dressing Candles
+              </h3>
+              <p className='text-sm text-zinc-400'>
+                Anoint candles with corresponding oils and herbs before
+                lighting. Snooze last wish when flame is steady or use candle
+                magic combos.
+              </p>
+            </div>
+            <div className='rounded-xl border border-zinc-800 bg-zinc-900/30 p-5'>
+              <h3 className='font-medium text-zinc-100 mb-2'>Fire Safety</h3>
+              <p className='text-sm text-zinc-400'>
+                Keep a fire-safe surface, never leave candles unattended, and
+                have a grounding element nearby.
+              </p>
+            </div>
+          </div>
+        </section>
+
+        <section id='herbs' className='mb-16'>
+          <h2 className='text-3xl font-light text-zinc-100 mb-6'>
+            4. Herbs & Kitchen Witchery
+          </h2>
+          <p className='text-zinc-300 leading-relaxed mb-6'>
+            Herbs carry correspondences and scents that support intention. Use
+            simple kitchen herbs for spell jars or tea magick.
+          </p>
+          <div className='space-y-4'>
+            <div className='rounded-xl border border-zinc-800 bg-zinc-900/30 p-5'>
+              <h3 className='font-medium text-zinc-100 mb-2'>
+                Working with Spices
+              </h3>
+              <p className='text-sm text-zinc-400'>
+                Cinnamon for abundance, basil for protection, rosemary for
+                remembrance. Burn them, infuse oils, or add to spell jars.
+              </p>
+            </div>
+            <div className='rounded-xl border border-zinc-800 bg-zinc-900/30 p-5'>
+              <h3 className='font-medium text-zinc-100 mb-2'>
+                Herbs for Tea & Bath
+              </h3>
+              <p className='text-sm text-zinc-400'>
+                Steep chamomile for calming energy, lavender for sleep, or
+                nettle for strength. Charge intention while meditating with the
+                herbs.
+              </p>
+            </div>
+          </div>
+        </section>
+
+        <section id='crystals' className='mb-16'>
+          <h2 className='text-3xl font-light text-zinc-100 mb-6'>
+            5. Crystals & Mineral Allies
+          </h2>
+          <p className='text-zinc-300 leading-relaxed mb-6'>
+            Crystals amplify intention and can anchor energy to your altar,
+            body, or spell work.
+          </p>
+          <div className='grid grid-cols-1 md:grid-cols-3 gap-4'>
+            <div className='rounded-xl border border-zinc-800 bg-zinc-900/30 p-5'>
+              <h3 className='font-medium text-zinc-100 mb-2'>Clear Quartz</h3>
+              <p className='text-sm text-zinc-400'>
+                Amplifies other stones and your intention. Keep near you for
+                clarity.
+              </p>
+            </div>
+            <div className='rounded-xl border border-zinc-800 bg-zinc-900/30 p-5'>
+              <h3 className='font-medium text-zinc-100 mb-2'>
+                Black Tourmaline
+              </h3>
+              <p className='text-sm text-zinc-400'>
+                Protection stone—place near entryways or wear during heavy
+                energetic spells.
+              </p>
+            </div>
+            <div className='rounded-xl border border-zinc-800 bg-zinc-900/30 p-5'>
+              <h3 className='font-medium text-zinc-100 mb-2'>Moonstone</h3>
+              <p className='text-sm text-zinc-400'>
+                Intuition, new beginnings, and lunar magick.
+              </p>
+            </div>
+          </div>
+        </section>
+
+        <section id='journals' className='mb-16'>
+          <h2 className='text-3xl font-light text-zinc-100 mb-6'>
+            6. Journals & Book of Shadows
+          </h2>
+          <p className='text-zinc-300 leading-relaxed mb-6'>
+            Document your spells, dreams, and reflections. Writing enhances
+            clarity and helps track progress.
+          </p>
+          <div className='rounded-xl border border-zinc-800 bg-zinc-900/30 p-5'>
+            <p className='text-sm text-zinc-400'>
+              Include dates, intentions, ingredients, observations, and results.
+              Revisit entries to refine rituals and honor growth.
+            </p>
+          </div>
+        </section>
+
+        <section id='digital' className='mb-16'>
+          <h2 className='text-3xl font-light text-zinc-100 mb-6'>
+            7. Digital Tools (Lunary)
+          </h2>
+          <p className='text-zinc-300 leading-relaxed mb-6'>
+            Lunary offers digital horoscopes, personalized charts, and insight
+            notifications to complement your physical tools.
+          </p>
+          <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
+            <div className='rounded-xl border border-zinc-800 bg-zinc-900/30 p-5'>
+              <h3 className='font-medium text-zinc-100 mb-2'>
+                Personalized Charts
+              </h3>
+              <p className='text-sm text-zinc-400'>
+                Integrate birth data to keep rituals aligned with current
+                transits and lunar phases.
+              </p>
+            </div>
+            <div className='rounded-xl border border-zinc-800 bg-zinc-900/30 p-5'>
+              <h3 className='font-medium text-zinc-100 mb-2'>Notifications</h3>
+              <p className='text-sm text-zinc-400'>
+                Use push alerts to remember sabbats, retrogrades, and
+                personalized reflections.
+              </p>
+            </div>
+          </div>
+        </section>
+
+        <section id='faq' className='mb-16'>
+          <h2 className='text-3xl font-light text-zinc-100 mb-6'>8. FAQ</h2>
+          <div className='space-y-4'>
+            {faqs.map((faq, index) => (
+              <div
+                key={index}
+                className='bg-zinc-900/50 border border-zinc-800 rounded-lg p-6'
+              >
+                <h3 className='text-lg font-medium text-zinc-100 mb-3'>
+                  {faq.question}
+                </h3>
+                <p className='text-zinc-300 leading-relaxed'>{faq.answer}</p>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        <section className='bg-gradient-to-r from-lunary-primary-900/30 to-cyan-900/30 border border-lunary-primary-700 rounded-xl p-8 text-center mb-12'>
+          <h2 className='text-2xl font-light text-zinc-100 mb-4'>
+            Ready to Start Your Crystal Journey?
+          </h2>
+          <p className='text-zinc-400 mb-6 max-w-xl mx-auto'>
+            Explore our complete crystal library to find the perfect stones for
+            your needs. Discover crystals matched to your zodiac sign and life
+            intentions.
+          </p>
+          <div className='flex flex-col sm:flex-row gap-4 justify-center'>
+            <Link
+              href='/grimoire/crystals'
+              className='px-8 py-3 bg-lunary-primary-600 hover:bg-lunary-primary-700 text-white rounded-lg font-medium transition-colors'
+            >
+              Browse Crystal Library
+            </Link>
+            <Link
+              href='/pricing'
+              className='px-8 py-3 border border-lunary-primary text-lunary-primary-300 hover:bg-lunary-primary-900/10 rounded-lg font-medium transition-colors'
+            >
+              Get Personalized Crystals
+            </Link>
+          </div>
+        </section>
+
+        <CosmicConnections
+          entityType='crystal'
+          entityKey='crystal-guide'
+          title='Crystal Connections'
+          sections={cosmicConnectionsSections}
+        />
+      </SEOContentTemplate>
+    </>
   );
 }

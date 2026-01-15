@@ -73,7 +73,7 @@ export async function generateMetadata({
       card: 'summary_large_image',
       title,
       description,
-      images: ['/api/og/cosmic'],
+      images: ['/api/og/grimoire/houses'],
     },
     alternates: {
       canonical: `https://lunary.app/grimoire/houses/overview/${house}`,
@@ -180,7 +180,9 @@ The ${houseData.name} is ruled by ${houseData.rulingSign}, a ${houseData.element
 
 When planets are placed in your ${houseData.name}, they activate themes related to ${houseData.themes.join(', ').toLowerCase()}. The sign on the cusp of this house shows your approach and style in these areas.
 
-Understanding your ${houseData.name} helps you understand how you express energy related to ${houseData.area.toLowerCase()}. This knowledge empowers you to work with this house's themes consciously and constructively.`}
+Understanding your ${houseData.name} helps you understand how you express energy related to ${houseData.area.toLowerCase()}. This knowledge empowers you to work with this house's themes consciously and constructively.
+
+If this house is empty in your chart, it still matters. Transits activate it over time, so you will still experience its themes in cycles.`}
         emotionalThemes={houseData.themes}
         howToWorkWith={[
           `Understand planets in your ${houseData.name}`,
@@ -188,6 +190,17 @@ Understanding your ${houseData.name} helps you understand how you express energy
           `Express ${houseData.element} element through this house`,
           `Honor ${houseData.name} themes in your life`,
           `Use ${houseData.name} energy for growth`,
+        ]}
+        rituals={[
+          `Set a small intention connected to ${houseData.area.toLowerCase()} and revisit it weekly.`,
+          `Choose a symbol of ${houseData.rulingSign} and place it on your altar.`,
+          `Journal on how ${houseData.themes[0]?.toLowerCase() || 'this theme'} shows up in daily life.`,
+        ]}
+        journalPrompts={[
+          `Where do I feel most activated in ${houseData.area.toLowerCase()}?`,
+          `What does healthy expression of this house look like for me?`,
+          `How does ${houseData.rulingSign} influence my approach here?`,
+          `What boundary or habit would support this house?`,
         ]}
         astrologyCorrespondences={`House Number: ${houseData.number}
 Symbol: ${houseData.symbol}
@@ -225,6 +238,18 @@ Area: ${houseData.area}`}
           { text: "View Today's Horoscope", href: '/horoscope' },
           { text: 'Explore All Houses', href: '/grimoire/houses' },
           { text: 'Grimoire Home', href: '/grimoire' },
+        ]}
+        tables={[
+          {
+            title: `${houseData.name} Snapshot`,
+            headers: ['Aspect', 'Details'],
+            rows: [
+              ['Area', houseData.area],
+              ['Element', houseData.element],
+              ['Ruling Sign', houseData.rulingSign],
+              ['Ruling Planet', houseData.rulingPlanet],
+            ],
+          },
         ]}
         ctaText={`Want to see planets in your ${houseData.name}?`}
         ctaHref='/pricing'

@@ -47,6 +47,127 @@ export const metadata: Metadata = {
   },
 };
 
+const PLANETARY_HIGHLIGHTS = [
+  {
+    planet: 'Sun',
+    focus: 'core identity',
+    tooltip: 'Ego, vitality, purpose, and the conscious self.',
+  },
+  {
+    planet: 'Moon',
+    focus: 'emotional body',
+    tooltip: 'Feelings, instincts, memory, and rhythm.',
+  },
+  {
+    planet: 'Mercury',
+    focus: 'communication',
+    tooltip: 'Thought, travel, storytelling, and commerce.',
+  },
+  {
+    planet: 'Venus',
+    focus: 'relationships',
+    tooltip: 'Love, beauty, money, and pleasure.',
+  },
+  {
+    planet: 'Mars',
+    focus: 'action',
+    tooltip: 'Drive, courage, assertiveness, and passion.',
+  },
+  {
+    planet: 'Jupiter',
+    focus: 'expansion',
+    tooltip: 'Growth, abundance, wisdom, and teaching.',
+  },
+  {
+    planet: 'Saturn',
+    focus: 'structure',
+    tooltip: 'Discipline, boundaries, and karmic lessons.',
+  },
+  {
+    planet: 'Uranus',
+    focus: 'innovation',
+    tooltip: 'Change, rebellion, genius flashes, and technology.',
+  },
+  {
+    planet: 'Neptune',
+    focus: 'mystery',
+    tooltip: 'Dreams, imagination, healing, and dissolving limits.',
+  },
+  {
+    planet: 'Pluto',
+    focus: 'transformation',
+    tooltip: 'Power, regeneration, shadow, and rebirth cycles.',
+  },
+];
+
+const ELEMENTS = [
+  {
+    element: 'Fire',
+    signs: ['Aries', 'Leo', 'Sagittarius'],
+    tone: 'action, will, courage',
+  },
+  {
+    element: 'Earth',
+    signs: ['Taurus', 'Virgo', 'Capricorn'],
+    tone: 'stability, prosperity, grounding',
+  },
+  {
+    element: 'Air',
+    signs: ['Gemini', 'Libra', 'Aquarius'],
+    tone: 'ideas, communication, relationships',
+  },
+  {
+    element: 'Water',
+    signs: ['Cancer', 'Scorpio', 'Pisces'],
+    tone: 'emotion, intuition, healing',
+  },
+];
+
+const tableOfContents = [
+  { label: 'Understanding the Planets', href: '#planets' },
+  { label: 'Zodiac Signs & Elements', href: '#zodiac' },
+  { label: 'Planetary Days & Timing', href: '#timing' },
+  { label: 'Transits & Retrogrades', href: '#transits' },
+  { label: 'Sky to Altar Workflow', href: '#workflow' },
+  { label: 'Astronomy Explorer', href: '#astronomy-explorer' },
+];
+
+const relatedItems = [
+  {
+    name: 'Zodiac Signs',
+    href: '/grimoire/zodiac',
+    type: 'Meanings, glyphs, and elemental qualities',
+  },
+  {
+    name: 'Planets & Houses',
+    href: '/grimoire/astronomy/planets',
+    type: 'Deep planetary correspondences and placements',
+  },
+  {
+    name: 'Transits',
+    href: '/grimoire/transits',
+    type: 'Understand current cycles and timing',
+  },
+];
+
+const planetaryFAQs = [
+  {
+    question: 'How do planets influence magic?',
+    answer:
+      'Each planet rules specific areas of life and carries unique energy. For example, Venus rules love and beauty, so love spells work best on Venus day (Friday) or when Venus is strong. Understanding planetary influences helps you time spells optimally.',
+  },
+  {
+    question: 'What are planetary correspondences?',
+    answer:
+      'Planetary correspondences link planets to colors, herbs, crystals, days, and magical purposes. For example, Mercury corresponds to yellow, communication herbs, Wednesday, and mental work. Using these correspondences aligns your magic with planetary energy.',
+  },
+  {
+    question: 'How do zodiac signs affect daily magic?',
+    answer:
+      'The moon moves through zodiac signs every 2-3 days, influencing emotional energy. Moon in Fire signs supports action and passion. Moon in Water signs enhances intuition and emotions. Aligning your practice with moon signs adds another layer of power.',
+  },
+];
+
 export default function AstronomyPage() {
   const zodiacListSchema = createItemListSchema({
     name: 'Complete Zodiac Signs Guide',
@@ -128,68 +249,185 @@ export default function AstronomyPage() {
         title='Astronomy & Astrology: Planets & Zodiac Signs - Lunary'
         h1='Astronomy & Astrology'
         description='Learn about planets, zodiac signs, and astronomical knowledge. Understand the cosmic forces that shape our world and influence magical practice.'
-        keywords={[
-          'astronomy',
-          'planets',
-          'zodiac signs',
-          'astronomical data',
-          'celestial bodies',
-          'astronomical calculations',
-          'planetary magic',
-        ]}
-        canonicalUrl='https://lunary.app/grimoire/astronomy'
+        keywords={metadata.keywords as string[]}
+        canonicalUrl={metadata.alternates?.canonical as string}
         breadcrumbs={[
           { label: 'Grimoire', href: '/grimoire' },
           { label: 'Astronomy & Astrology', href: '/grimoire/astronomy' },
         ]}
-        intro='Astronomy and astrology connect us to the cosmos. Understanding planetary movements, zodiac signs, and celestial correspondences helps practitioners align their magic with cosmic energies and deepen their connection to the universe. This comprehensive guide covers planetary influences, zodiac sign meanings, and how to work with celestial energies in your magical practice.'
-        meaning='Astronomy is the scientific study of celestial objects, while astrology interprets their influence on human affairs and natural phenomena. Both disciplines offer valuable insights for magical practitioners.
-
-Planets represent different aspects of life and consciousness. Each planet rules specific signs, houses, and areas of life. Understanding planetary energies helps you choose optimal timing for spells and rituals, select appropriate correspondences, and align your practice with cosmic rhythms.
-
-Zodiac signs represent twelve archetypal energies that influence personality, behavior, and life experiences. Each sign belongs to an element (Fire, Earth, Air, Water) and a quality (Cardinal, Fixed, Mutable), creating a complex system of correspondences that enhances magical work.
-
-Working with planetary and zodiac energies creates powerful alignment between your intentions and cosmic forces, amplifying the effectiveness of your magical practice.'
+        intro='Astronomy and astrology connect us to the cosmos. Understanding planetary movements, zodiac signs, and celestial correspondences helps you align your magic with cosmic energies and deepen your connection to the universe.'
+        tldr='Blend astronomy (observable sky data) with astrology (symbolic meaning) to time rituals, understand planetary moods, and align daily practice with cosmic cycles.'
+        meaning='Astronomy studies the precise motions of planets, while astrology applies those motions to map archetypal energies onto questions of meaning and timing. Use both to read the sky and your inner world with equal clarity.'
+        tableOfContents={tableOfContents}
+        whatIs={{
+          question: 'How do astronomy and astrology work together?',
+          answer:
+            'Astronomy tracks planetary and stellar positions to the second. Astrology translates that precision into symbolic meaning so you can craft rituals, timing, and personal growth around living cycles.',
+        }}
         howToWorkWith={[
-          'Learn planetary correspondences for timing spells',
-          'Use zodiac signs to understand energy influences',
-          'Align spellwork with planetary days and hours',
-          'Work with planetary retrogrades consciously',
-          'Use zodiac sign correspondences in spell ingredients',
-          'Track planetary transits for optimal timing',
-          'Combine planetary and zodiac energies for power',
-          'Study your birth chart for personal correspondences',
+          'Tag each spell with a planetary ruler for extra clarity',
+          'Match zodiac elements to your intention (Fire for courage, Water for healing)',
+          'Use planetary days for timing (Venus Friday for love, Mars Tuesday for action)',
+          'Watch retrogrades as review periods before pushing forward',
+          'Combine planetary and zodiac correspondences in herb, crystal, and color choices',
         ]}
-        faqs={[
-          {
-            question: 'How do planets influence magic?',
-            answer:
-              'Each planet rules specific areas of life and carries unique energy. For example, Venus rules love and beauty, so love spells work best on Venus day (Friday) or when Venus is strong. Understanding planetary influences helps you time spells optimally.',
-          },
-          {
-            question: 'What are planetary correspondences?',
-            answer:
-              'Planetary correspondences link planets to colors, herbs, crystals, days, and magical purposes. For example, Mercury corresponds to yellow, communication herbs, Wednesday, and mental work. Using these correspondences aligns your magic with planetary energy.',
-          },
-          {
-            question: 'How do zodiac signs affect daily magic?',
-            answer:
-              'The moon moves through zodiac signs every 2-3 days, influencing emotional energy. Moon in Fire signs supports action and passion. Moon in Water signs enhances intuition and emotions. Aligning your practice with moon signs adds another layer of power.',
-          },
-        ]}
+        faqs={planetaryFAQs}
+        relatedItems={relatedItems}
         internalLinks={[
-          { text: 'Birth Chart', href: '/grimoire/birth-chart' },
+          { text: 'Birth Chart Guide', href: '/grimoire/birth-chart' },
           { text: 'Moon Phases', href: '/grimoire/moon' },
-          {
-            text: 'Magical Correspondences',
-            href: '/grimoire/correspondences',
-          },
-          { text: 'Spells & Rituals', href: '/grimoire/spells' },
+          { text: 'Transits', href: '/grimoire/transits' },
         ]}
-      />
-      <div className='max-w-4xl mx-auto p-4'>
-        <Astronomy />
-      </div>
+        cosmicConnectionsParams={{
+          entityType: 'hub-astronomy',
+          entityKey: 'astronomy',
+        }}
+        ctaText='Explore your personalized cosmic dashboard'
+        ctaHref='/forecast'
+      >
+        <section id='planets' className='mb-12'>
+          <h2 className='text-3xl font-light text-zinc-100 mb-6'>
+            Understanding the Planets
+          </h2>
+          <p className='text-zinc-300 mb-4'>
+            Each planet rules a distinct slice of the psyche. These highlights
+            help you match energy with intention when planning rituals.
+          </p>
+          <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
+            {PLANETARY_HIGHLIGHTS.map((item) => (
+              <article
+                key={item.planet}
+                className='rounded-xl border border-zinc-800 bg-zinc-900/50 p-4'
+              >
+                <h3 className='text-xl text-zinc-100 font-semibold'>
+                  {item.planet}
+                </h3>
+                <p className='text-zinc-400 text-sm mb-2'>
+                  Focus: {item.focus}
+                </p>
+                <p className='text-zinc-300 text-sm'>{item.tooltip}</p>
+              </article>
+            ))}
+          </div>
+        </section>
+
+        <section id='zodiac' className='mb-12'>
+          <h2 className='text-3xl font-light text-zinc-100 mb-6'>
+            Zodiac Signs & Elements
+          </h2>
+          <p className='text-zinc-300 leading-relaxed mb-6'>
+            The zodiac blends twelve archetypes with four elements. Fire for
+            courage, Earth for stability, Air for thought, and Water for
+            feeling. Layer these qualities into your spells.
+          </p>
+          <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
+            {ELEMENTS.map((item) => (
+              <div
+                key={item.element}
+                className='rounded-xl border border-zinc-800 bg-zinc-900/50 p-5'
+              >
+                <h3 className='text-xl text-zinc-100 font-semibold'>
+                  {item.element}
+                </h3>
+                <p className='text-zinc-400 text-sm mb-2'>
+                  Signs: {item.signs.join(', ')}
+                </p>
+                <p className='text-zinc-300 text-sm'>{item.tone}</p>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        <section id='timing' className='mb-12'>
+          <h2 className='text-3xl font-light text-zinc-100 mb-6'>
+            Planetary Days & Timing
+          </h2>
+          <p className='text-zinc-300 leading-relaxed mb-4'>
+            Each day of the week carries a planetary ruler. Align rituals to
+            that energy for stronger resonance.
+          </p>
+          <ul className='list-disc list-inside text-zinc-300 space-y-2'>
+            <li>Sunday → Sun: vitality, healing, leadership</li>
+            <li>Monday → Moon: intuition, emotions, home</li>
+            <li>Tuesday → Mars: courage, action, boundary-setting</li>
+            <li>Wednesday → Mercury: communication, commerce, study</li>
+            <li>Thursday → Jupiter: luck, learning, generosity</li>
+            <li>Friday → Venus: love, beauty, pleasure</li>
+            <li>Saturday → Saturn: protection, structure, release</li>
+          </ul>
+          <p className='text-zinc-400 text-sm mt-4'>
+            Layer planetary hours on top of the day ruler for even deeper timing
+            precision.
+          </p>
+        </section>
+
+        <section id='transits' className='mb-12'>
+          <h2 className='text-3xl font-light text-zinc-100 mb-6'>
+            Transits & Retrogrades
+          </h2>
+          <p className='text-zinc-300 leading-relaxed mb-4'>
+            Transits are the current movements of planets over your natal chart.
+            Retrogrades pull energy inward—use them for review, not big
+            launches.
+          </p>
+          <p className='text-zinc-300 leading-relaxed'>
+            Track Lunary's transit coverage so you know when Mercury slows your
+            tech, Venus asks for tenderness, or Saturn tests boundaries. Every
+            transit colors the narrative you can incorporate into ritual
+            planning.
+          </p>
+        </section>
+
+        <section
+          id='workflow'
+          className='mb-12 bg-zinc-900/40 border border-zinc-800 rounded-xl p-6 space-y-4'
+        >
+          <h2 className='text-3xl font-light text-zinc-100'>
+            From Sky to Altar Workflow
+          </h2>
+          <ol className='list-decimal list-inside text-zinc-300 space-y-2'>
+            <li>
+              <strong>Check the sky.</strong> Note current transits, moon phase,
+              and any retrogrades. Screenshot or jot the planetary degrees.
+            </li>
+            <li>
+              <strong>Match correspondences.</strong> Choose colors, herbs,
+              crystals, and tarot keys that echo the ruling planet or sign.
+            </li>
+            <li>
+              <strong>Set intention.</strong> Write a sentence that combines the
+              planetary lesson (e.g., Saturn discipline) with your practical
+              goal.
+            </li>
+            <li>
+              <strong>Anchor action.</strong> Schedule a tangible task—ritual
+              bath, journal session, or focused work sprint—during the aligned
+              planetary hour.
+            </li>
+            <li>
+              <strong>Reflect.</strong> After the ritual, note results and
+              sensations so you can fine tune timing for the next cycle.
+            </li>
+          </ol>
+          <p className='text-zinc-400 text-sm'>
+            Repeating this loop turns cosmic theory into lived experience and
+            keeps your Book of Shadows grounded in direct observation.
+          </p>
+        </section>
+
+        <section id='astronomy-explorer'>
+          <div className='rounded-2xl border border-zinc-800 bg-gradient-to-b from-zinc-900/80 to-zinc-950/60 p-6'>
+            <h2 className='text-3xl font-light text-zinc-100 mb-6'>
+              Astronomy Explorer
+            </h2>
+            <p className='text-zinc-300 mb-6'>
+              Dive into the interactive component for planetary visuals, zodiac
+              anchors, and curated layouts that reinforce what you just learned.
+            </p>
+            <Astronomy />
+          </div>
+        </section>
+      </SEOContentTemplate>
     </>
   );
 }

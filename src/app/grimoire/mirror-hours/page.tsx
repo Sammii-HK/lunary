@@ -1,13 +1,8 @@
 import { Metadata } from 'next';
 import Link from 'next/link';
-import { Breadcrumbs } from '@/components/grimoire/Breadcrumbs';
 import { CosmicConnections } from '@/components/grimoire/CosmicConnections';
+import { SEOContentTemplate } from '@/components/grimoire/SEOContentTemplate';
 import { CosmicConnectionSection } from '@/lib/cosmicConnectionsConfig';
-import {
-  createFAQPageSchema,
-  createBreadcrumbSchema,
-  renderJsonLd,
-} from '@/lib/schema';
 import { mirrorHourKeys } from '@/constants/grimoire/clock-numbers-data';
 
 export const metadata: Metadata = {
@@ -70,42 +65,100 @@ const cosmicConnectionsSections: CosmicConnectionSection[] = [
   },
 ];
 
-export default function MirrorHoursIndexPage() {
-  const faqSchema = createFAQPageSchema(faqs);
+const tableOfContents = [
+  { label: 'Understanding Mirror Hours', href: '#understanding' },
+  { label: 'How to Interpret', href: '#reading-method' },
+  { label: 'All Mirror Hours', href: '#all-mirror-hours' },
+  { label: 'Mirror Hour Connections', href: '#cosmic-connections' },
+  { label: 'Frequently Asked Questions', href: '#faq' },
+];
 
+const breadcrumbs = [
+  { label: 'Grimoire', href: '/grimoire' },
+  { label: 'Numerology', href: '/grimoire/numerology' },
+  { label: 'Mirror Hours' },
+];
+
+export default function MirrorHoursIndexPage() {
   return (
     <div className='min-h-screen bg-zinc-950 text-zinc-100'>
-      {renderJsonLd(faqSchema)}
-      {renderJsonLd(
-        createBreadcrumbSchema([
-          { name: 'Grimoire', url: '/grimoire' },
-          { name: 'Numerology', url: '/grimoire/numerology' },
-          { name: 'Mirror Hours', url: '/grimoire/mirror-hours' },
-        ]),
-      )}
-      <div className='max-w-4xl mx-auto px-4 py-12'>
-        <Breadcrumbs
-          items={[
-            { label: 'Grimoire', href: '/grimoire' },
-            { label: 'Numerology', href: '/grimoire/numerology' },
-            { label: 'Mirror Hours' },
-          ]}
-        />
+      <SEOContentTemplate
+        title='Mirror Hours: Meanings of 11:11, 12:21 & More - Lunary'
+        h1='Mirror Hours'
+        description='Mirror hours occur when clock digits mirror each other (like 12:21) or match exactly (like 11:11). Many traditions view these synchronicities as messages from the universe, angels, or your higher self.'
+        keywords={[
+          'mirror hours',
+          '11:11 meaning',
+          '12:21 meaning',
+          'clock synchronicity',
+          'angel messages',
+          'mirror time meaning',
+        ]}
+        canonicalUrl='https://lunary.app/grimoire/mirror-hours'
+        tableOfContents={tableOfContents}
+        intro='Mirror hours are repeating or mirrored clock times that many people experience as meaningful. They can act like small prompts to pause, reflect, and notice what is happening internally or around you.'
+        tldr='Mirror hours are synchronicities on the clock. Use them as reflection prompts rather than fixed predictions.'
+        meaning={`Mirror hours are a modern form of symbolic timing. When you see a mirror hour repeatedly, it can be a reminder to slow down, check in, and realign with your intention.
 
-        <header className='mb-12'>
-          <h1 className='text-4xl font-light text-zinc-100 mb-4'>
-            Mirror Hours
-          </h1>
-          <p className='text-lg text-zinc-400 leading-relaxed'>
-            Mirror hours occur when clock digits mirror each other (like 12:21)
-            or match exactly (like 11:11). Many traditions view these
-            synchronicities as messages from the universe, angels, or your
-            higher self. When you notice a mirror hour, pause and consider what
-            you were thinking—the context often reveals the meaning.
-          </p>
-        </header>
+Interpretation works best when you notice your thoughts and emotions in the moment. The meaning often relates to what you were thinking about just before you saw the time.
 
-        <section className='mb-12 p-6 rounded-lg border border-zinc-800 bg-zinc-900/30'>
+You do not need to force a meaning. Treat mirror hours as gentle cues, not strict instructions.`}
+        rituals={[
+          'Pause for three slow breaths when you see a mirror hour.',
+          'Write down the thought you were having in that moment.',
+          'Set a short intention for the next hour.',
+          'End the day by noting any repeated times you noticed.',
+        ]}
+        journalPrompts={[
+          'What was I thinking right before I saw the time?',
+          'What emotion is most present for me today?',
+          'Where do I need clarity or reassurance?',
+          'What action would help me align with my intention?',
+        ]}
+        tables={[
+          {
+            title: 'Mirror Hour Reflection',
+            headers: ['Step', 'Prompt'],
+            rows: [
+              ['Pause', 'Take three slow breaths'],
+              ['Notice', 'What were you just thinking?'],
+              ['Reflect', 'What might the message be?'],
+              ['Act', 'Choose one small aligned action'],
+            ],
+          },
+          {
+            title: 'Related Number Types',
+            headers: ['Type', 'Example'],
+            rows: [
+              ['Mirror Hours', '12:21'],
+              ['Double Hours', '11:11'],
+              ['Angel Numbers', '444'],
+            ],
+          },
+        ]}
+        faqs={faqs}
+        breadcrumbs={breadcrumbs}
+        internalLinks={[
+          { text: 'Angel Numbers', href: '/grimoire/angel-numbers' },
+          { text: 'Double Hours', href: '/grimoire/double-hours' },
+          { text: 'Numerology', href: '/grimoire/numerology' },
+          { text: 'Grimoire Home', href: '/grimoire' },
+        ]}
+        cosmicConnections={
+          <div id='cosmic-connections'>
+            <CosmicConnections
+              entityType='hub-glossary'
+              entityKey='mirror-hours'
+              title='Mirror Hour Connections'
+              sections={cosmicConnectionsSections}
+            />
+          </div>
+        }
+      >
+        <section
+          id='understanding'
+          className='mb-12 p-6 rounded-lg border border-zinc-800 bg-zinc-900/30'
+        >
           <h2 className='text-xl font-medium text-zinc-100 mb-4'>
             Understanding Mirror Hours
           </h2>
@@ -120,7 +173,31 @@ export default function MirrorHoursIndexPage() {
           </p>
         </section>
 
-        <section className='mb-12'>
+        <section
+          id='reading-method'
+          className='mb-12 p-6 rounded-lg border border-zinc-800 bg-zinc-900/30'
+        >
+          <h2 className='text-xl font-medium text-zinc-100 mb-4'>
+            How to Interpret Mirror Hours
+          </h2>
+          <p className='text-zinc-400 mb-4'>
+            Start with your immediate context. What were you focusing on, and
+            what do you need to hear right now? That is often the clearest
+            message.
+          </p>
+          <p className='text-zinc-400'>
+            Use the numerology meaning as a guide, then apply it to your current
+            situation. If the message feels vague, ask a more specific question
+            and wait to see if the time repeats.
+          </p>
+          <p className='text-zinc-400 mt-4'>
+            If you keep seeing the same time, treat it as a recurring theme for
+            the week. A single short practice, repeated daily, often reveals the
+            message more clearly than analysis.
+          </p>
+        </section>
+
+        <section id='all-mirror-hours' className='mb-12'>
           <h2 className='text-2xl font-light text-zinc-100 mb-6'>
             All Mirror Hours
           </h2>
@@ -138,33 +215,7 @@ export default function MirrorHoursIndexPage() {
             ))}
           </div>
         </section>
-
-        <section className='mb-12'>
-          <h2 className='text-2xl font-light text-zinc-100 mb-6'>
-            Frequently Asked Questions
-          </h2>
-          <div className='space-y-4'>
-            {faqs.map((faq, index) => (
-              <div
-                key={index}
-                className='p-5 rounded-lg border border-zinc-800 bg-zinc-900/30'
-              >
-                <h3 className='text-lg font-medium text-zinc-100 mb-2'>
-                  {faq.question}
-                </h3>
-                <p className='text-zinc-400 text-sm'>{faq.answer}</p>
-              </div>
-            ))}
-          </div>
-        </section>
-
-        <CosmicConnections
-          entityType='hub-glossary'
-          entityKey='mirror-hours'
-          title='Mirror Hour Connections'
-          sections={cosmicConnectionsSections}
-        />
-      </div>
+      </SEOContentTemplate>
     </div>
   );
 }

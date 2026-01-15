@@ -128,7 +128,48 @@ ${runeData.reversedMeaning}
 **In Divination:**
 ${runeData.divinationMeaning}
 
-**Affirmation:** "${runeData.affirmation}"`}
+**Affirmation:** "${runeData.affirmation}"
+
+**Practical Focus:** ${runeData.meaning} often shows up as a choice point. If this rune appears repeatedly, treat it as a reminder to focus on one concrete action that matches its energy rather than waiting for a sign to act.
+
+**Reading Tips:**
+Consider the question and the surrounding runes. ${runeData.name} can point to timing, inner attitude, or an external shift depending on the spread. Look for a single, grounded takeaway instead of multiple competing interpretations.
+
+**Daily Practice:**
+Pull one rune each morning and write one sentence about how its theme might appear that day. This builds familiarity and makes readings clearer over time.
+
+**Casting Tip:**
+When this rune appears with others, look for supporting themes or tension points. Two runes often create a small story: a challenge and a response.
+
+**Integration:**
+After a reading, pick one action that honors the rune’s message. Practical follow-through is the fastest way to learn the rune’s deeper layers.
+
+If you work with reversals, read them as tension, delay, or internalization rather than pure negativity. The rune still points toward growth.`}
+        tables={[
+          {
+            title: `${runeData.name} Quick Reference`,
+            headers: ['Aspect', 'Detail'],
+            rows: [
+              ['Aett', runeData.aett],
+              ['Element', runeData.element],
+              ['Keywords', runeData.keywords.join(', ')],
+              ['Magical Uses', runeData.magicalUses.join(', ')],
+            ],
+          },
+          {
+            title: 'Upright vs Reversed',
+            headers: ['Upright', 'Reversed'],
+            rows: [[runeData.uprightMeaning, runeData.reversedMeaning]],
+          },
+          {
+            title: 'Practice Cues',
+            headers: ['Cue', 'Focus'],
+            rows: [
+              ['Morning pull', 'Notice the main theme'],
+              ['Evening review', 'Track how it showed up'],
+            ],
+          },
+        ]}
         glyphs={[runeData.symbol]}
         symbolism={`${runeData.name} (${runeData.symbol}) is the ${runeData.aettPosition === 1 ? 'first' : runeData.aettPosition === 2 ? 'second' : runeData.aettPosition === 3 ? 'third' : `${runeData.aettPosition}th`} rune of ${runeData.aett}'s Aett in the Elder Futhark. It is associated with the ${runeData.element} element${runeData.deity ? ` and connected to ${runeData.deity}` : ''}.
 
@@ -136,13 +177,24 @@ ${runeData.divinationMeaning}
 
 **Magical Properties:** ${runeData.magicalProperties}
 
-${runeData.notes}`}
+${runeData.notes}
+
+Use this rune as a single focus point rather than mixing too many symbols at once. One rune, one intention keeps the signal clean.
+
+If you want a simple practice, draw the rune on paper and place it somewhere visible for a day. Notice when the theme appears in your choices, conversations, or mood.`}
         howToWorkWith={runeData.magicalUses}
+        rituals={[
+          `Carve or draw ${runeData.symbol} on paper and place it under a candle for one evening.`,
+          'Repeat the affirmation aloud for seven days and note any shifts.',
+          'Meditate on the rune for five minutes, focusing on one keyword.',
+          'Use the rune as a journal heading and write a short reflection.',
+        ]}
         journalPrompts={[
           `How does the energy of ${runeData.keywords[0].toLowerCase()} manifest in my life?`,
           `What is ${runeData.name} trying to teach me right now?`,
           `How can I embody the affirmation: "${runeData.affirmation}"?`,
           `Where do I see ${runeData.meaning.toLowerCase()} themes appearing in my journey?`,
+          'What one action would align me with this rune today?',
         ]}
         relatedItems={[
           {

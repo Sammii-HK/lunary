@@ -1,33 +1,26 @@
 import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
-import { ExploreGrimoire } from '@/components/grimoire/ExploreGrimoire';
-import { Breadcrumbs } from '@/components/grimoire/Breadcrumbs';
 import { CosmicConnections } from '@/components/grimoire/CosmicConnections';
-import { ArrowRight, Star, AlertTriangle, Lightbulb } from 'lucide-react';
+import { SEOContentTemplate } from '@/components/grimoire/SEOContentTemplate';
+import { Heart, Lightbulb, Star } from 'lucide-react';
 import {
   generatePlanetSignContent,
   getAllPlanetSignSlugs,
   planetDescriptions,
   signDescriptions,
 } from '@/constants/seo/planet-sign-content';
-import {
-  createArticleSchema,
-  renderJsonLd,
-  createBreadcrumbSchema,
-} from '@/lib/schema';
+import { createArticleSchema, renderJsonLd } from '@/lib/schema';
 
 interface PageProps {
   params: Promise<{ placement: string }>;
 }
 
-// Generate static params for all planet-sign combinations
 export async function generateStaticParams() {
   const slugs = getAllPlanetSignSlugs();
   return slugs.map((placement) => ({ placement }));
 }
 
-// Parse the placement slug to extract planet and sign
 function parsePlacement(slug: string): { planet: string; sign: string } | null {
   const match = slug.match(/^([a-z-]+)-in-([a-z]+)$/);
   if (!match) return null;
@@ -84,7 +77,6 @@ export default async function PlacementPage({ params }: PageProps) {
   const planetInfo = planetDescriptions[parsed.planet];
   const signInfo = signDescriptions[parsed.sign];
 
-  // Get related placements (same planet, different signs)
   const relatedPlacements = Object.keys(signDescriptions)
     .filter((s) => s !== parsed.sign)
     .slice(0, 4)
@@ -93,7 +85,6 @@ export default async function PlacementPage({ params }: PageProps) {
       label: `${content.planet} in ${signDescriptions[s].name}`,
     }));
 
-  // Get same sign, different planets
   const samePlaneRelated = Object.keys(planetDescriptions)
     .filter((p) => p !== parsed.planet)
     .slice(0, 4)
@@ -111,230 +102,198 @@ export default async function PlacementPage({ params }: PageProps) {
     dateModified: new Date().toISOString().split('T')[0],
   });
 
+  const iconMap: Record<string, string> = {
+    Fire: '🔥',
+    Earth: '🌍',
+    Air: '💨',
+    Water: '💧',
+  };
+
+  const tableOfContents = [
+    { label: 'Meaning', href: '#meaning' },
+    { label: 'Strengths', href: '#strengths' },
+    { label: 'Challenges', href: '#challenges' },
+    { label: 'Advice', href: '#advice' },
+    { label: 'Related Placements', href: '#related' },
+  ];
+
   return (
     <div className='min-h-screen bg-zinc-950 text-zinc-100'>
       {renderJsonLd(articleSchema)}
-      {renderJsonLd(
-        createBreadcrumbSchema([
-          { name: 'Grimoire', url: '/grimoire' },
-          { name: 'Placements', url: '/grimoire/placements' },
-        ]),
-      )}
+      <SEOContentTemplate
+        title={`${content.title} - Lunary`}
+        h1={`${content.planet} in ${content.sign}`}
+        description={content.description}
+        keywords={content.keywords}
+        canonicalUrl={`https://lunary.app/grimoire/placements/${placement}`}
+        tableOfContents={tableOfContents}
+        intro={`This placement blends ${content.planet} themes with ${content.sign} traits. Use it as a practical guide for strengths, challenges, and daily expression.`}
+        tldr={`${content.planet} in ${content.sign} blends ${planetInfo.themes.toLowerCase()} with ${signInfo.element.toLowerCase()} energy. Strengths grow with awareness and simple routines.`}
+        symbolism={`${content.planet} represents ${planetInfo.themes.toLowerCase()}, while ${content.sign} expresses it through ${signInfo.element.toLowerCase()} energy and ${signInfo.modality.toLowerCase()} pace. Together, they describe a practical style you can observe in daily choices, relationships, and goals.
 
-      <div className='max-w-4xl mx-auto px-4 py-12'>
-        <Breadcrumbs
-          items={[
-            { label: 'Grimoire', href: '/grimoire' },
-            { label: 'Placements', href: '/grimoire/placements' },
-            { label: content.title },
-          ]}
-        />
-
-        {/* Header */}
-        <header className='mb-12'>
-          <div className='flex items-center gap-3 mb-4'>
-            <span className='px-3 py-1 rounded-full bg-lunary-primary-900/20 text-lunary-primary-300 text-sm'>
-              {signInfo.element} Sign
-            </span>
-            <span className='px-3 py-1 rounded-full bg-zinc-800 text-zinc-300 text-sm'>
-              {signInfo.modality}
-            </span>
-          </div>
-          <h1 className='text-4xl font-light text-zinc-100 mb-4'>
-            {content.planet} in {content.sign}
-          </h1>
-          <p className='text-lg text-zinc-400'>{content.description}</p>
-        </header>
-
-        {/* Quick Stats */}
-        <div className='grid grid-cols-2 md:grid-cols-4 gap-4 mb-12'>
-          <div className='p-4 rounded-lg border border-zinc-800 bg-zinc-900/50 text-center'>
-            <div className='text-2xl mb-1'>
-              {signInfo.element === 'Fire'
-                ? '🔥'
-                : signInfo.element === 'Earth'
-                  ? '🌍'
-                  : signInfo.element === 'Air'
-                    ? '💨'
-                    : '💧'}
+If the placement feels intense, look at balance: add grounding if it is fiery, add movement if it is earthy, add clarity if it is watery, and add feeling if it is airy.`}
+        howToWorkWith={[
+          `Name one strength of ${content.planet} in ${content.sign}.`,
+          'Choose a daily habit that supports that strength.',
+          'Notice when the placement overreacts and soften the response.',
+          'Use reflection rather than judgment to guide change.',
+        ]}
+        rituals={[
+          'Choose one strength and use it intentionally this week.',
+          'Journal one example of the placement showing up each day.',
+          'Practice a grounding routine when challenges appear.',
+        ]}
+        journalPrompts={[
+          `How does ${content.planet} express through ${content.sign} in my daily life?`,
+          `Where do I see this placement as a strength?`,
+          `What challenge repeats most often for me?`,
+          `What habit would support this placement?`,
+        ]}
+        tables={[
+          {
+            title: 'Placement Snapshot',
+            headers: ['Focus', 'Details'],
+            rows: [
+              ['Planet', content.planet],
+              ['Sign', content.sign],
+              ['Element', signInfo.element],
+              ['Modality', signInfo.modality],
+            ],
+          },
+          {
+            title: 'Balance Cues',
+            headers: ['If this shows up', 'Try this'],
+            rows: [
+              ['Overactivity', 'Slow down and set one priority'],
+              ['Avoidance', 'Take one small action today'],
+              ['Emotional overwhelm', 'Name the feeling before reacting'],
+            ],
+          },
+        ]}
+        internalLinks={[
+          { text: 'Placements Guide', href: '/grimoire/placements' },
+          { text: 'Zodiac Signs', href: '/grimoire/zodiac' },
+          { text: 'Planets', href: '/grimoire/astronomy/planets' },
+          { text: 'Grimoire Home', href: '/grimoire' },
+        ]}
+        heroContent={
+          <div className='text-center'>
+            <div className='flex items-center justify-center gap-3 mb-4'>
+              <span className='px-3 py-1 rounded-full bg-zinc-800 text-zinc-300 text-sm'>
+                {signInfo.element} Sign
+              </span>
+              <span className='px-3 py-1 rounded-full bg-zinc-800 text-zinc-300 text-sm'>
+                {signInfo.modality}
+              </span>
             </div>
-            <div className='text-xs text-zinc-400'>Element</div>
-            <div className='text-sm text-zinc-300'>{signInfo.element}</div>
+            <p className='text-lg text-zinc-400'>{content.description}</p>
           </div>
-          <div className='p-4 rounded-lg border border-zinc-800 bg-zinc-900/50 text-center'>
-            <div className='text-2xl mb-1'>⚡</div>
-            <div className='text-xs text-zinc-400'>Modality</div>
-            <div className='text-sm text-zinc-300'>{signInfo.modality}</div>
-          </div>
-          <div className='p-4 rounded-lg border border-zinc-800 bg-zinc-900/50 text-center'>
-            <div className='text-2xl mb-1'>🌟</div>
-            <div className='text-xs text-zinc-400'>Planet Rules</div>
-            <div className='text-sm text-zinc-300'>{planetInfo.rules}</div>
-          </div>
-          <div className='p-4 rounded-lg border border-zinc-800 bg-zinc-900/50 text-center'>
-            <div className='text-2xl mb-1'>♈</div>
-            <div className='text-xs text-zinc-400'>Sign Ruler</div>
-            <div className='text-sm text-zinc-300'>{signInfo.ruler}</div>
-          </div>
-        </div>
-
-        {/* Main Content */}
-        <article className='space-y-12'>
-          {/* Meaning Section */}
-          <section>
-            <h2 className='text-2xl font-medium text-zinc-100 mb-4'>
-              What Does {content.planet} in {content.sign} Mean?
-            </h2>
-            <div className='prose prose-invert prose-zinc max-w-none'>
-              {content.meaning.split('\n\n').map((paragraph, i) => (
-                <p key={i} className='text-zinc-300 leading-relaxed mb-4'>
-                  {paragraph}
-                </p>
-              ))}
-            </div>
-          </section>
-
-          {/* Strengths */}
-          <section>
-            <h2 className='text-2xl font-medium text-zinc-100 mb-4 flex items-center gap-2'>
-              <Star className='h-6 w-6 text-lunary-accent' />
-              Strengths of This Placement
-            </h2>
-            <div className='p-6 rounded-lg border border-lunary-success-700 bg-lunary-success-950'>
-              <ul className='space-y-3'>
-                {content.strengths.map((strength, i) => (
-                  <li key={i} className='flex items-start gap-3 text-zinc-300'>
-                    <span className='text-lunary-success mt-1'>✓</span>
-                    {strength}
-                  </li>
-                ))}
-              </ul>
-            </div>
-          </section>
-
-          {/* Challenges */}
-          <section>
-            <h2 className='text-2xl font-medium text-zinc-100 mb-4 flex items-center gap-2'>
-              <AlertTriangle className='h-6 w-6 text-lunary-accent' />
-              Potential Challenges
-            </h2>
-            <div className='p-6 rounded-lg border border-lunary-accent-700 bg-lunary-accent-950'>
-              <ul className='space-y-3'>
-                {content.challenges.map((challenge, i) => (
-                  <li key={i} className='flex items-start gap-3 text-zinc-300'>
-                    <span className='text-lunary-accent mt-1'>!</span>
-                    {challenge}
-                  </li>
-                ))}
-              </ul>
-            </div>
-          </section>
-
-          {/* Advice */}
-          <section>
-            <h2 className='text-2xl font-medium text-zinc-100 mb-4 flex items-center gap-2'>
-              <Lightbulb className='h-6 w-6 text-lunary-primary-400' />
-              How to Work With This Placement
-            </h2>
-            <div className='p-6 rounded-lg border border-lunary-primary-700 bg-lunary-primary-900/10'>
-              <p className='text-zinc-300 leading-relaxed'>{content.advice}</p>
-            </div>
-          </section>
-        </article>
-
-        {/* Cross-Links to Core Resources */}
-        <section className='mt-12 pt-8 border-t border-zinc-800'>
-          <h2 className='text-xl font-medium text-zinc-100 mb-6'>
-            Deep Dive Resources
+        }
+        breadcrumbs={[
+          { label: 'Grimoire', href: '/grimoire' },
+          { label: 'Placements', href: '/grimoire/placements' },
+          { label: content.title },
+        ]}
+        faqs={[
+          {
+            question: `Is ${content.planet} in ${content.sign} good or bad?`,
+            answer:
+              'No placement is purely good or bad. Each has strengths and growth edges. The goal is to work with the energy rather than fight it.',
+          },
+          {
+            question: 'Do other placements change this meaning?',
+            answer:
+              'Yes. Aspects, houses, and other placements modify the expression. Start with the basic blend, then layer in context.',
+          },
+        ]}
+        ctaText='Discover Your Placements'
+        ctaHref='/birth-chart'
+      >
+        <section id='meaning' className='space-y-4'>
+          <h2 className='text-2xl font-medium text-zinc-100'>
+            What Does {content.planet} in {content.sign} Mean?
           </h2>
-          <div className='grid grid-cols-2 md:grid-cols-3 gap-3 mb-8'>
-            <Link
-              href={`/grimoire/astronomy/planets/${parsed.planet}`}
-              className='p-4 rounded-lg border border-zinc-800 bg-zinc-900/50 hover:border-lunary-primary-600 transition-colors text-center'
-            >
-              <div className='text-lg mb-1'>🪐</div>
-              <div className='text-sm text-zinc-300'>{content.planet}</div>
-              <div className='text-xs text-zinc-500'>
-                Learn about this planet
-              </div>
-            </Link>
-            <Link
-              href={`/grimoire/zodiac/${parsed.sign}`}
-              className='p-4 rounded-lg border border-zinc-800 bg-zinc-900/50 hover:border-lunary-primary-600 transition-colors text-center'
-            >
-              <div className='text-lg mb-1'>♈</div>
-              <div className='text-sm text-zinc-300'>{content.sign}</div>
-              <div className='text-xs text-zinc-500'>Explore this sign</div>
-            </Link>
-            <Link
-              href='/grimoire/houses/overview'
-              className='p-4 rounded-lg border border-zinc-800 bg-zinc-900/50 hover:border-lunary-primary-600 transition-colors text-center'
-            >
-              <div className='text-lg mb-1'>🏠</div>
-              <div className='text-sm text-zinc-300'>Houses</div>
-              <div className='text-xs text-zinc-500'>Where it manifests</div>
-            </Link>
-            <Link
-              href='/grimoire/guides/birth-chart-complete-guide'
-              className='p-4 rounded-lg border border-zinc-800 bg-zinc-900/50 hover:border-lunary-primary-600 transition-colors text-center'
-            >
-              <div className='text-lg mb-1'>📚</div>
-              <div className='text-sm text-zinc-300'>Birth Chart Guide</div>
-              <div className='text-xs text-zinc-500'>Complete guide</div>
-            </Link>
-            <Link
-              href='/grimoire/zodiac'
-              className='p-4 rounded-lg border border-zinc-800 bg-zinc-900/50 hover:border-lunary-primary-600 transition-colors text-center'
-            >
-              <div className='text-lg mb-1'>✨</div>
-              <div className='text-sm text-zinc-300'>All Zodiac Signs</div>
-              <div className='text-xs text-zinc-500'>Browse all 12 signs</div>
-            </Link>
-            <Link
-              href='/grimoire/placements'
-              className='p-4 rounded-lg border border-zinc-800 bg-zinc-900/50 hover:border-lunary-primary-600 transition-colors text-center'
-            >
-              <div className='text-lg mb-1'>🌟</div>
-              <div className='text-sm text-zinc-300'>All Placements</div>
-              <div className='text-xs text-zinc-500'>144+ combinations</div>
-            </Link>
+          <div className='prose prose-invert prose-zinc max-w-none'>
+            {content.meaning.split('\n\n').map((paragraph, index) => (
+              <p key={index}>{paragraph}</p>
+            ))}
           </div>
         </section>
 
-        {/* Related Placements */}
-        <section className='pt-8 border-t border-zinc-800'>
-          <h2 className='text-xl font-medium text-zinc-100 mb-6'>
-            Explore Related Placements
+        <section id='strengths' className='mb-12'>
+          <h2 className='text-2xl font-medium text-zinc-100 mb-4 flex items-center gap-2'>
+            <Star className='h-6 w-6 text-lunary-accent' />
+            Strengths
+          </h2>
+          <div className='grid md:grid-cols-2 gap-4'>
+            {content.strengths.map((strength, index) => (
+              <div
+                key={index}
+                className='rounded-xl border border-zinc-800 bg-zinc-900/30 p-5'
+              >
+                <p className='text-sm text-zinc-400'>{strength}</p>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        <section id='challenges' className='mb-12'>
+          <h2 className='text-2xl font-medium text-zinc-100 mb-4'>
+            Challenges
+          </h2>
+          <div className='grid md:grid-cols-2 gap-4'>
+            {content.challenges.map((challenge, index) => (
+              <div
+                key={index}
+                className='rounded-xl border border-zinc-800 bg-zinc-900/30 p-5'
+              >
+                <p className='text-sm text-zinc-400'>{challenge}</p>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        <section id='advice' className='mb-12'>
+          <h2 className='text-2xl font-medium text-zinc-100 mb-4 flex items-center gap-2'>
+            <Lightbulb className='h-5 w-5 text-lunary-primary-300' />
+            Advice
+          </h2>
+          <p className='text-zinc-300 leading-relaxed'>{content.advice}</p>
+        </section>
+
+        <section id='related' className='mb-12'>
+          <h2 className='text-2xl font-medium text-zinc-100 mb-4'>
+            Related Placements
           </h2>
           <div className='grid md:grid-cols-2 gap-4'>
             <div>
-              <h3 className='text-sm text-zinc-400 mb-3'>
-                {content.planet} in Other Signs
+              <h3 className='text-xl font-medium text-zinc-100 mb-2'>
+                More {content.planet} Placements
               </h3>
               <div className='flex flex-wrap gap-2'>
-                {relatedPlacements.map((p) => (
+                {relatedPlacements.map((placementItem) => (
                   <Link
-                    key={p.slug}
-                    href={`/grimoire/placements/${p.slug}`}
-                    className='px-3 py-1.5 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-300 text-sm transition-colors'
+                    key={placementItem.slug}
+                    href={`/grimoire/placements/${placementItem.slug}`}
+                    className='px-3 py-2 rounded-lg bg-zinc-800 text-sm text-zinc-300 hover:bg-zinc-700 transition-colors'
                   >
-                    {p.label}
+                    {placementItem.label}
                   </Link>
                 ))}
               </div>
             </div>
             <div>
-              <h3 className='text-sm text-zinc-400 mb-3'>
-                Other Planets in {content.sign}
+              <h3 className='text-xl font-medium text-zinc-100 mb-2'>
+                Same Sign, Other Planets
               </h3>
               <div className='flex flex-wrap gap-2'>
-                {samePlaneRelated.map((p) => (
+                {samePlaneRelated.map((placementItem) => (
                   <Link
-                    key={p.slug}
-                    href={`/grimoire/placements/${p.slug}`}
-                    className='px-3 py-1.5 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-300 text-sm transition-colors'
+                    key={placementItem.slug}
+                    href={`/grimoire/placements/${placementItem.slug}`}
+                    className='px-3 py-2 rounded-lg bg-zinc-800 text-sm text-zinc-300 hover:bg-zinc-700 transition-colors'
                   >
-                    {p.label}
+                    {placementItem.label}
                   </Link>
                 ))}
               </div>
@@ -342,50 +301,59 @@ export default async function PlacementPage({ params }: PageProps) {
           </div>
         </section>
 
-        {/* Cosmic Connections */}
-        <CosmicConnections
-          entityType='placement'
-          entityKey={placement}
-          title={`${content.planet} in ${content.sign} Cosmic Web`}
-        />
+        <section className='mb-12'>
+          <Link
+            href='/grimoire/synastry/generate'
+            className='block p-6 rounded-lg bg-gradient-to-r from-lunary-rose-900/30 to-lunary-primary-900/30 border border-lunary-rose-700 hover:border-lunary-rose-500 transition-colors group'
+          >
+            <div className='flex items-center justify-between'>
+              <div>
+                <h3 className='text-xl font-medium text-lunary-rose-300 group-hover:text-lunary-rose-200 transition-colors flex items-center gap-2'>
+                  💕 Generate Your Synastry Chart
+                </h3>
+                <p className='text-zinc-400 mt-1'>
+                  Compare complete birth charts for deeper compatibility
+                  insights beyond Sun signs.
+                </p>
+              </div>
+              <span className='text-lunary-rose-400 group-hover:text-lunary-rose-300 transition-colors text-2xl'>
+                →
+              </span>
+            </div>
+          </Link>
+        </section>
 
-        {/* CTA */}
-        <section className='mt-12 text-center'>
-          <div className='p-8 rounded-lg border border-lunary-primary-700 bg-lunary-primary-900/10'>
-            <h2 className='text-xl font-medium text-zinc-100 mb-2'>
-              Discover Your Full Birth Chart
-            </h2>
-            <p className='text-zinc-400 mb-6'>
-              {content.planet} in {content.sign} is just one part of your cosmic
-              story. Get your complete birth chart analysis.
-            </p>
-            <Link
-              href='/birth-chart'
-              className='inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-lunary-primary-900/20 hover:bg-lunary-primary-900/30 border border-lunary-primary-700 text-lunary-primary-300 font-medium transition-colors'
-            >
-              View Your Birth Chart
-              <ArrowRight className='h-5 w-5' />
-            </Link>
+        <section className='mb-12'>
+          <h2 className='text-2xl font-medium text-zinc-100 mb-4 flex items-center gap-2'>
+            <Heart className='h-5 w-5 text-lunary-rose' />
+            Compatibility Scores
+          </h2>
+          <div className='grid md:grid-cols-4 gap-6'>
+            {[
+              { label: 'Element', value: signInfo.element },
+              { label: 'Modality', value: signInfo.modality },
+              { label: 'Planet Rules', value: planetInfo.rules },
+              { label: 'Sign Ruler', value: signInfo.ruler },
+            ].map((item) => (
+              <div
+                key={item.label}
+                className='text-center p-4 rounded-lg border border-zinc-800 bg-zinc-900/50'
+              >
+                <div className='text-sm text-zinc-400 mb-1'>{item.label}</div>
+                <div className='text-lg text-zinc-100'>{item.value}</div>
+              </div>
+            ))}
           </div>
         </section>
 
-        {/* E-A-T Footer */}
-        <footer className='mt-12 pt-8 border-t border-zinc-800 text-sm text-zinc-400'>
-          <p>
-            Written by Sammii, Founder of Lunary • Last updated:{' '}
-            {new Date().toLocaleDateString('en-US', {
-              year: 'numeric',
-              month: 'long',
-              day: 'numeric',
-            })}
-          </p>
-          <p className='mt-2'>
-            Sources: Traditional astrological texts, modern psychological
-            astrology interpretations
-          </p>
-        </footer>
-        <ExploreGrimoire />
-      </div>
+        <div className='mt-8'>
+          <CosmicConnections
+            entityType='hub-placements'
+            entityKey='placements'
+            title='Placements Connections'
+          />
+        </div>
+      </SEOContentTemplate>
     </div>
   );
 }

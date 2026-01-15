@@ -40,7 +40,7 @@ export const metadata: Metadata = {
     title: 'Life Path Number Calculator & Meanings | Lunary',
     description:
       "Calculate your Life Path Number and discover your life's purpose.",
-    images: ['/api/og/cosmic'],
+    images: ['/api/og/grimoire/numerology'],
   },
   alternates: {
     canonical: 'https://lunary.app/grimoire/life-path',

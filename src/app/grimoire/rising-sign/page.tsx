@@ -64,6 +64,7 @@ export default function RisingSignPage() {
         ]}
         canonicalUrl='https://lunary.app/grimoire/rising-sign'
         intro='Your rising sign, also called the Ascendant, is the zodiac sign that was rising on the eastern horizon at your exact moment of birth. It represents your outer personality, how others see you, and your approach to life. Understanding your rising sign helps you understand how you present yourself to the world and how others perceive you.'
+        tldr='Your rising sign (Ascendant) changes about every two hours and shapes first impressions, body language, and how you initiate new situations. It does not replace your Sun sign—it adds the outer layer.'
         meaning={`The rising sign changes approximately every 2 hours, making it the most time-sensitive part of your chart. It's calculated using your exact birth time (most important), birth location (latitude/longitude), and birth date.
 
 **What Is the Rising Sign?**
@@ -87,7 +88,24 @@ Think of it this way: Your Sun sign is your true self, while your Rising sign is
 - **Fire Rising (Aries, Leo, Sagittarius):** Energetic, confident, action-oriented first impression
 - **Earth Rising (Taurus, Virgo, Capricorn):** Grounded, practical, reliable first impression
 - **Air Rising (Gemini, Libra, Aquarius):** Communicative, social, intellectual first impression
-- **Water Rising (Cancer, Scorpio, Pisces):** Intuitive, emotional, sensitive first impression`}
+- **Water Rising (Cancer, Scorpio, Pisces):** Intuitive, emotional, sensitive first impression
+
+**Why it feels so immediate:**
+The Ascendant is the doorway of your chart. It describes how you enter a room, how you initiate projects, and the kind of environments you naturally gravitate toward. It also colors your physical presence—how you dress, move, and project energy.
+
+If your Sun sign feels “true” but your rising sign feels like how people experience you, that is normal. The two are meant to work together. Learning your Ascendant helps you understand why certain roles or first impressions keep repeating in your life.`}
+        tables={[
+          {
+            title: 'Rising Sign vs Sun Sign',
+            headers: ['Factor', 'Rising Sign', 'Sun Sign'],
+            rows: [
+              ['Core Role', 'Outer personality', 'Core identity'],
+              ['Timing', 'Changes every 2 hours', 'Changes monthly'],
+              ['Visibility', 'First impressions', 'Long-term character'],
+              ['Focus', 'How you begin', 'Who you are becoming'],
+            ],
+          },
+        ]}
         howToWorkWith={[
           'Calculate your rising sign using your exact birth time',
           'Understand how your rising sign affects first impressions',
@@ -97,6 +115,19 @@ Think of it this way: Your Sun sign is your true self, while your Rising sign is
           'Understand how rising sign influences your appearance',
           'Use rising sign to navigate social situations',
           'Explore first house themes related to your rising sign',
+        ]}
+        journalPrompts={[
+          'How do people describe me when they first meet me?',
+          'Where do I initiate quickly, and where do I hesitate?',
+          'What does my rising sign teach me about self-presentation?',
+          'How does my Sun sign differ from my first impressions?',
+          'What environment makes my rising sign feel most at ease?',
+        ]}
+        rituals={[
+          'Stand before a mirror and name three qualities you want to project today.',
+          'Choose a simple outfit or accessory that aligns with your rising element.',
+          'Before a new project, set a one-sentence intention for how you want to start.',
+          'Practice a short grounding breath to align your outer energy with your inner values.',
         ]}
         faqs={[
           {
@@ -112,6 +143,11 @@ Think of it this way: Your Sun sign is your true self, while your Rising sign is
             question: 'Is rising sign more important than Sun sign?',
             answer:
               'Neither is more important—they serve different purposes. Your Sun sign represents your core identity and ego, while your Rising sign represents your outer personality and first impressions. Both are essential parts of your astrological profile.',
+          },
+          {
+            question: 'Can my rising sign change over time?',
+            answer:
+              'No. Your rising sign is fixed based on your birth time and location. What can change is how you consciously express it.',
           },
         ]}
         internalLinks={[

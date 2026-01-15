@@ -241,7 +241,9 @@ The ${toolData.name} is associated with the ${toolData.element} element and carr
 Uses of the ${toolData.name}:
 ${toolData.uses.map((u) => `- ${u}`).join('\n')}
 
-While traditional tools like the ${toolData.name} are valued in many practices, remember that your intention and will are the true source of magic. Tools simply help focus and direct that energy.`}
+While traditional tools like the ${toolData.name} are valued in many practices, remember that your intention and will are the true source of magic. Tools simply help focus and direct that energy.
+
+If you feel unsure, start with one simple use and repeat it for a week. Familiarity builds confidence.`}
         emotionalThemes={toolData.correspondences}
         howToWorkWith={[
           `Choose a ${toolData.name} that resonates with you`,

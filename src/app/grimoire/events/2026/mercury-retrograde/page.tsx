@@ -15,7 +15,9 @@ export const metadata: Metadata = {
   openGraph: {
     title: 'Mercury Retrograde 2026 | Lunary',
     description: 'Complete guide to Mercury Retrograde periods in 2026.',
-    images: ['/api/og/cosmic?title=Mercury%20Retrograde%202026'],
+    images: [
+      '/api/og/educational/events?title=Mercury%20Retrograde%202026&subtitle=Dates%20%E2%80%A2%20Meaning%20%E2%80%A2%20Survival%20Guide&format=landscape',
+    ],
   },
 };
 
@@ -34,6 +36,7 @@ export default function MercuryRetrograde2026Page() {
         'astrology',
       ]}
       canonicalUrl='https://lunary.app/grimoire/events/2026/mercury-retrograde'
+      intro={`Mercury retrograde is a review cycle, not a curse. When Mercury slows, the pace of communication and logistics slows with it. The benefit is clarity: you are asked to proofread, re-check, and revisit rather than rush. If you treat the retrograde as a scheduled audit, it becomes productive instead of chaotic.`}
       datePublished='2025-12-01'
       dateModified='2025-12-06'
       articleSection='Astrological Events'
@@ -51,7 +54,11 @@ During Mercury Retrograde, you may experience:
 • Travel disruptions and scheduling changes
 • Past situations or people resurfacing
 
-The key is to embrace the "re-" energy: review, revise, reflect, reconnect, and reconsider. Use these periods wisely rather than fighting against them.`}
+The key is to embrace the "re-" energy: review, revise, reflect, reconnect, and reconsider. Use these periods wisely rather than fighting against them.
+
+Mercury retrograde often exposes weak links: missing details in a contract, outdated expectations in a relationship, or a process that no longer works. Think of it as a quality-control pass. If something falls apart now, it likely needed adjustment.
+
+When Mercury goes direct, things move forward again with better information. Treat the retrograde as a checkpoint that protects you from moving forward blindly.`}
       tables={[
         {
           title: 'Mercury Retrograde 2026 Dates',
@@ -78,6 +85,20 @@ The key is to embrace the "re-" energy: review, revise, reflect, reconnect, and 
         'Practice patience with technology and communication issues',
         'Use the time for editing, revising, and completing unfinished work',
       ]}
+      rituals={[
+        'Do a "clarity reset": clean your inbox, notes, and calendars before the retrograde starts.',
+        'Set one intention for review (projects, relationships, or finances) and track it weekly.',
+        'Light a candle and write one communication habit you want to improve.',
+        'Create a tech protection routine: backups, updates, and device rest.',
+        'End the retrograde with a short gratitude ritual for what you corrected.',
+      ]}
+      journalPrompts={[
+        'Where am I rushing instead of reviewing?',
+        'What message keeps getting misunderstood in my life?',
+        'Which project needs revision rather than expansion?',
+        'What pattern keeps repeating in my communication?',
+        'What does "clearer communication" look like for me in practice?',
+      ]}
       emotionalThemes={[
         'Frustration with delays and miscommunications',
         'Nostalgia and reflection on the past',
@@ -102,6 +123,11 @@ The key is to embrace the "re-" energy: review, revise, reflect, reconnect, and 
           answer:
             'Mercury Retrograde effects typically begin 1-2 weeks before the official retrograde (the pre-shadow period) and continue for 1-2 weeks after it ends (the post-shadow period). The core retrograde period is when effects are strongest.',
         },
+        {
+          question: 'What should I prioritize during Mercury Retrograde?',
+          answer:
+            'Prioritize review: editing, revising, cleaning up processes, and reconnecting with unfinished work. It is less about new launches and more about fixing what is already on your plate.',
+        },
       ]}
       relatedItems={[
         {
@@ -124,6 +150,14 @@ The key is to embrace the "re-" energy: review, revise, reflect, reconnect, and 
           href: '/grimoire/events/2025/mercury-retrograde',
           type: 'Event',
         },
+      ]}
+      internalLinks={[
+        {
+          text: 'Retrogrades Overview',
+          href: '/grimoire/astronomy/retrogrades',
+        },
+        { text: 'Communication in Astrology', href: '/grimoire/astrology' },
+        { text: 'Journal Prompts', href: '/grimoire/book-of-shadows' },
       ]}
       ctaText='Get your personalized Mercury Retrograde forecast'
       ctaHref='/welcome?from=mercury-retrograde-2026'

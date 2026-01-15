@@ -359,6 +359,8 @@ export const astrologicalAspects = {
 export const retrogradeInfo = {
   mercury: {
     name: 'Mercury Retrograde',
+    symbol: '☿',
+    themes: 'Communication, technology, travel, review',
     frequency: '3-4 times per year',
     duration: '3 weeks',
     description:
@@ -388,6 +390,8 @@ export const retrogradeInfo = {
   },
   venus: {
     name: 'Venus Retrograde',
+    symbol: '♀',
+    themes: 'Relationships, values, money, self-worth',
     frequency: 'Every 18 months',
     duration: '6 weeks',
     description:
@@ -417,6 +421,8 @@ export const retrogradeInfo = {
   },
   mars: {
     name: 'Mars Retrograde',
+    symbol: '♂',
+    themes: 'Energy, desire, ambition, anger',
     frequency: 'Every 2 years',
     duration: '2-3 months',
     description:
@@ -446,6 +452,8 @@ export const retrogradeInfo = {
   },
   jupiter: {
     name: 'Jupiter Retrograde',
+    symbol: '♃',
+    themes: 'Growth, belief, wisdom, perspective',
     frequency: 'Yearly',
     duration: '4 months',
     description:
@@ -475,6 +483,8 @@ export const retrogradeInfo = {
   },
   saturn: {
     name: 'Saturn Retrograde',
+    symbol: '♄',
+    themes: 'Responsibility, discipline, boundaries, structure',
     frequency: 'Yearly',
     duration: '4.5 months',
     description:
@@ -504,6 +514,8 @@ export const retrogradeInfo = {
   },
   uranus: {
     name: 'Uranus Retrograde',
+    symbol: '♅',
+    themes: 'Change, freedom, disruption, innovation',
     frequency: 'Yearly',
     duration: '5 months',
     description:
@@ -533,6 +545,8 @@ export const retrogradeInfo = {
   },
   neptune: {
     name: 'Neptune Retrograde',
+    symbol: '♆',
+    themes: 'Dreams, intuition, illusion, spirituality',
     frequency: 'Yearly',
     duration: '5 months',
     description:
@@ -562,6 +576,8 @@ export const retrogradeInfo = {
   },
   pluto: {
     name: 'Pluto Retrograde',
+    symbol: '♇',
+    themes: 'Power, shadow, transformation, rebirth',
     frequency: 'Yearly',
     duration: '5-6 months',
     description:

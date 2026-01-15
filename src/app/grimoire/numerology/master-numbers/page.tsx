@@ -41,7 +41,7 @@ export const metadata: Metadata = {
     title: 'Master Numbers 11, 22, 33 Guide | Lunary',
     description:
       'Discover the spiritual power of Master Numbers in numerology.',
-    images: ['/api/og/cosmic'],
+    images: ['/api/og/grimoire/numerology'],
   },
   alternates: {
     canonical: 'https://lunary.app/grimoire/numerology/master-numbers',

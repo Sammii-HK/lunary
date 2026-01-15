@@ -23,6 +23,29 @@ export const metadata: Metadata = {
 };
 
 export default function ReversedCardsGuidePage() {
+  const faqs = [
+    {
+      question: 'Do reversed cards always mean the opposite?',
+      answer:
+        'Not always. Reversals can indicate blocked or internalized energy, delays, a lesson being integrated, or a shadow expression—not just a simple “opposite.”',
+    },
+    {
+      question: 'Should I read reversals as negative?',
+      answer:
+        'No. A reversal can point to growth, reflection, or a change in timing. Many reversals are “work-in-progress” messages rather than bad outcomes.',
+    },
+    {
+      question: 'What if I don’t want to use reversals?',
+      answer:
+        'That’s totally valid. Some readers don’t use reversals and instead read the full range of a card’s meaning based on position, surrounding cards, and intuition.',
+    },
+    {
+      question: 'How do I know which reversal meaning is correct?',
+      answer:
+        'Use context: the question, the spread position, the suit/element, and the surrounding cards. Over time you’ll notice patterns that make your reversal readings consistent.',
+    },
+  ];
+
   return (
     <SEOContentTemplate
       title='Reversed Cards Guide: How to Read Reversed Tarot Cards - Lunary'
@@ -36,6 +59,27 @@ export default function ReversedCardsGuidePage() {
         'upside down tarot cards',
       ]}
       canonicalUrl='https://lunary.app/grimoire/reversed-cards-guide'
+      intro='Reversals are a simple way to add nuance: they show where energy is blocked, delayed, internalized, or asking for integration. Use this guide to pick one consistent reversal framework and read with confidence.'
+      meaning={`Reversed tarot cards are best read as a **signal**, not a verdict. When a card appears upside down, it often points to one of four themes:\n\n- **Blocked expression**: the card’s energy is present but not flowing freely\n- **Internalization**: the lesson is happening inside first (mindset, self-belief, emotions)\n- **Delay or detour**: timing is off, resources are missing, or the process is incomplete\n- **Shadow expression**: the “unconscious” side of the upright meaning\n\nA consistent approach is: start with the upright meaning, then ask *how is this energy changing?* In practice, reversals help you locate the friction point—what to adjust so the situation can move forward.`}
+      howToWorkWith={[
+        'Pick one reversal lens (blocked, internal, delay, shadow) and apply it consistently before adding “opposites.”',
+        'Let the suit guide you: Cups (emotions), Wands (action), Swords (mind), Pentacles (practical/material).',
+        'Use surrounding cards to confirm whether the reversal is a delay, a lesson, or a boundary.',
+        'Journal your reversals for a week: note which themes repeat and what changed when you acted on the advice.',
+      ]}
+      faqs={faqs}
+      tableOfContents={[
+        { label: 'Meaning', href: '#meaning' },
+        { label: 'How to Work With This Energy', href: '#how-to-work' },
+        { label: 'FAQ', href: '#faq' },
+        { label: 'Related Topics', href: '#related-topics' },
+      ]}
+      internalLinks={[
+        { text: 'Tarot Cards Guide', href: '/grimoire/tarot' },
+        { text: 'Tarot Spreads', href: '/grimoire/tarot/spreads' },
+        { text: 'Card Combinations', href: '/grimoire/card-combinations' },
+        { text: 'Tarot Suits', href: '/grimoire/tarot/suits' },
+      ]}
     >
       <div className='space-y-6'>
         <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-6'>
@@ -166,7 +210,10 @@ export default function ReversedCardsGuidePage() {
           </ul>
         </div>
 
-        <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-6'>
+        <div
+          id='related-topics'
+          className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-6'
+        >
           <h2 className='text-xl font-medium text-zinc-100 mb-4'>
             Related Topics
           </h2>

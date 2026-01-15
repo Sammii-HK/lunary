@@ -1,6 +1,8 @@
 import { Metadata } from 'next';
 import Link from 'next/link';
 import { SEOContentTemplate } from '@/components/grimoire/SEOContentTemplate';
+import { CosmicConnections } from '@/components/grimoire/CosmicConnections';
+import { CosmicConnectionSection } from '@/lib/cosmicConnectionsConfig';
 import { correspondencesData } from '@/constants/grimoire/correspondences';
 import { stringToKebabCase } from '../../../../../utils/string';
 
@@ -38,7 +40,7 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: 'Wood Correspondences Guide | Lunary',
     description: 'Complete guide to sacred trees and magical woods.',
-    images: ['/api/og/cosmic'],
+    images: ['/api/og/grimoire/correspondences'],
   },
   alternates: {
     canonical: 'https://lunary.app/grimoire/correspondences/wood',
@@ -86,6 +88,40 @@ const faqs = [
 
 export default function WoodIndexPage() {
   const woods = Object.entries(correspondencesData.wood);
+
+  const tableOfContents = [
+    { label: 'All Sacred Woods', href: '#all-sacred-woods' },
+    { label: 'Quick Reference', href: '#quick-reference' },
+    { label: 'FAQ', href: '#faq' },
+  ];
+
+  const cosmicSections: CosmicConnectionSection[] = [
+    {
+      title: 'Wood Resources',
+      links: [
+        {
+          label: 'Herb Correspondences',
+          href: '/grimoire/correspondences/herbs',
+        },
+        { label: 'Elements', href: '/grimoire/correspondences/elements' },
+        {
+          label: 'Animal Correspondences',
+          href: '/grimoire/correspondences/animals',
+        },
+      ],
+    },
+    {
+      title: 'Practice Tools',
+      links: [
+        {
+          label: 'Modern Witchcraft Tools',
+          href: '/grimoire/modern-witchcraft/tools',
+        },
+        { label: 'Moon Phases', href: '/grimoire/moon/phases' },
+        { label: 'Candle Magic', href: '/grimoire/candle-magic' },
+      ],
+    },
+  ];
 
   return (
     <div className='p-4 md:p-6 lg:p-8 xl:p-10 min-h-full'>
@@ -184,8 +220,17 @@ Wood carries the living essence of the tree long after harvest. Each species has
         ctaText='Want personalized wood recommendations for your practice?'
         ctaHref='/pricing'
         faqs={faqs}
+        tableOfContents={tableOfContents}
+        cosmicConnections={
+          <CosmicConnections
+            entityType='hub-correspondences'
+            entityKey='correspondences'
+            title='Wood Connections'
+            sections={cosmicSections}
+          />
+        }
       >
-        <section className='mb-12'>
+        <section id='all-sacred-woods' className='mb-12'>
           <h2 className='text-2xl font-medium text-zinc-100 mb-6'>
             All Sacred Woods
           </h2>
@@ -211,6 +256,38 @@ Wood carries the living essence of the tree long after harvest. Each species has
                 </p>
               </Link>
             ))}
+          </div>
+        </section>
+        <section
+          id='quick-reference'
+          className='mb-12 bg-amber-950/20 border border-amber-900/50 rounded-xl p-6'
+        >
+          <h2 className='text-xl font-medium text-zinc-100 mb-4'>
+            Quick Reference: Wood Meanings
+          </h2>
+          <div className='grid md:grid-cols-2 gap-4 text-sm'>
+            <div>
+              <p className='text-amber-400 font-medium'>
+                Protection & Strength:
+              </p>
+              <p className='text-zinc-400'>Oak, Willow, Elder</p>
+            </div>
+            <div>
+              <p className='text-amber-400 font-medium'>
+                Divination & Insight:
+              </p>
+              <p className='text-zinc-400'>Ash, Hazel, Apple</p>
+            </div>
+            <div>
+              <p className='text-amber-400 font-medium'>Transformation:</p>
+              <p className='text-zinc-400'>Elder, Rowan, Hawthorn</p>
+            </div>
+            <div>
+              <p className='text-amber-400 font-medium'>
+                Creativity & New Beginnings:
+              </p>
+              <p className='text-zinc-400'>Birch, Cedar, Hazel</p>
+            </div>
           </div>
         </section>
       </SEOContentTemplate>

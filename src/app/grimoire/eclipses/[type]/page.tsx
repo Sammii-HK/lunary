@@ -59,7 +59,7 @@ export async function generateMetadata({
       card: 'summary_large_image',
       title,
       description,
-      images: ['/api/og/cosmic'],
+      images: ['/api/og/grimoire/eclipses'],
     },
     alternates: {
       canonical: `https://lunary.app/grimoire/eclipses/${type}`,
@@ -107,6 +107,11 @@ export default async function EclipsePage({
       question: `How does ${eclipseData.name} affect my birth chart?`,
       answer: `${eclipseData.name} activates areas of your chart related to ${eclipseData.effects[0]?.toLowerCase() || 'transformation'}.`,
     },
+    {
+      question: 'Should I manifest during an eclipse?',
+      answer:
+        'Most astrologers recommend observing rather than manifesting. Eclipse energy is volatile, so it’s better to reflect and wait until it stabilizes.',
+    },
   ];
 
   // Event schema for eclipses - helps appear in Google's event search
@@ -150,7 +155,11 @@ ${eclipseData.meaning}
 
 Eclipses mark turning points and significant changes in your life. They often bring revelations, endings, and new beginnings. Understanding ${eclipseData.name} helps you navigate these powerful periods consciously and make the most of their transformative energy.
 
-Eclipses occur in cycles, typically in pairs (solar and lunar), and their effects can be felt for months before and after the actual eclipse date.`}
+Eclipses occur in cycles, typically in pairs (solar and lunar), and their effects can be felt for months before and after the actual eclipse date.
+
+Eclipse energy moves quickly, so give yourself space to process. The most helpful approach is observation: notice what shifts, then respond with intention once the dust settles.
+
+If you know your birth chart, check which house the eclipse falls in. That house describes the life area being emphasized, such as relationships, work, or home.`}
         emotionalThemes={eclipseData.effects}
         howToWorkWith={[
           `Honor the energy of ${eclipseData.name}`,
@@ -158,11 +167,37 @@ Eclipses occur in cycles, typically in pairs (solar and lunar), and their effect
           `Be open to ${eclipseData.effects[1]?.toLowerCase() || 'change'}`,
           `Trust the process of ${eclipseData.name}`,
         ]}
+        rituals={[
+          'Keep your schedule light and prioritize rest.',
+          'Write down what is ending and what is beginning.',
+          'Do a simple cleansing ritual with water or smoke.',
+          'Set an intention to stay open rather than force outcomes.',
+        ]}
         journalPrompts={[
           `What does ${eclipseData.name} mean for me?`,
           `What areas of my life need ${eclipseData.effects[0]?.toLowerCase() || 'transformation'}?`,
           `How can I work with ${eclipseData.name} energy?`,
           `What should I release or embrace during this eclipse?`,
+        ]}
+        tables={[
+          {
+            title: `${eclipseData.name} Quick Lens`,
+            headers: ['Focus', 'Guidance'],
+            rows: [
+              ['Theme', eclipseData.effects[0] || 'Transformation'],
+              ['Best Action', 'Observe, reflect, and simplify'],
+              ['Avoid', 'Forcing big decisions under pressure'],
+            ],
+          },
+          {
+            title: 'Eclipse Season Timing',
+            headers: ['Phase', 'Tip'],
+            rows: [
+              ['Two weeks before', 'Notice repeating themes'],
+              ['Eclipse day', 'Rest and reflect'],
+              ['Two weeks after', 'Act on emerging clarity'],
+            ],
+          },
         ]}
         relatedItems={[
           {
@@ -188,6 +223,7 @@ Eclipses occur in cycles, typically in pairs (solar and lunar), and their effect
           { text: "View Today's Horoscope", href: '/horoscope' },
           { text: 'Explore Moon Phases', href: '/grimoire/moon' },
           { text: 'Grimoire Home', href: '/grimoire' },
+          { text: 'Lunar Nodes', href: '/grimoire/lunar-nodes' },
         ]}
         faqs={faqs}
       />

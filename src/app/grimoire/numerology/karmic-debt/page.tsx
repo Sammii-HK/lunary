@@ -42,7 +42,7 @@ export const metadata: Metadata = {
     title: 'Karmic Debt Numbers Guide | Lunary',
     description:
       'Discover Karmic Debt Numbers 13, 14, 16, 19 and their spiritual lessons.',
-    images: ['/api/og/cosmic'],
+    images: ['/api/og/grimoire/numerology'],
   },
   alternates: {
     canonical: 'https://lunary.app/grimoire/numerology/karmic-debt',

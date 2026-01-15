@@ -1,8 +1,7 @@
 import { Metadata } from 'next';
 import Link from 'next/link';
-import { ExploreGrimoire } from '@/components/grimoire/ExploreGrimoire';
 import { Calendar } from 'lucide-react';
-import { GrimoireBreadcrumbs } from '@/components/grimoire/GrimoireBreadcrumbs';
+import { SEOContentTemplate } from '@/components/grimoire/SEOContentTemplate';
 
 const personalYears = [
   {
@@ -78,30 +77,129 @@ export const metadata: Metadata = {
 };
 
 export default function PersonalYearIndexPage() {
-  const breadcrumbItems = [
-    { name: 'Grimoire', url: '/grimoire' },
-    { name: 'Numerology', url: '/grimoire/numerology' },
-    { name: 'Year', url: '/grimoire/numerology/year' },
+  const tableOfContents = [
+    { label: 'Calculating Your Personal Year', href: '#calculating' },
+    { label: 'Working With Your Year', href: '#working-with-year' },
+    { label: 'The 9-Year Cycle', href: '#cycle' },
+    { label: 'Related Resources', href: '#related' },
   ];
 
-  return (
-    <div className='p-4 md:p-6 lg:p-8 xl:p-10 min-h-full'>
-      <GrimoireBreadcrumbs items={breadcrumbItems} />
-      <div className='max-w-5xl mx-auto'>
-        <div className='text-center mb-12'>
-          <div className='flex justify-center mb-4'>
-            <Calendar className='w-16 h-16 text-lunary-primary-400' />
-          </div>
-          <h1 className='text-3xl md:text-4xl lg:text-5xl font-light text-zinc-100 mb-4'>
-            Personal Year Numbers
-          </h1>
-          <p className='text-lg text-zinc-400 max-w-2xl mx-auto'>
-            Your Personal Year reveals the themes, opportunities, and lessons
-            you&apos;ll encounter during a calendar year. It cycles from 1 to 9.
-          </p>
-        </div>
+  const heroContent = (
+    <div className='text-center'>
+      <div className='flex justify-center mb-4'>
+        <Calendar className='w-16 h-16 text-lunary-primary-400' />
+      </div>
+      <p className='text-lg text-zinc-400 max-w-3xl mx-auto'>
+        Your Personal Year reveals the themes, opportunities, and lessons
+        you&apos;ll encounter during a calendar year. It cycles from 1 to 9, and
+        each number carries distinct guidance.
+      </p>
+    </div>
+  );
 
-        <div className='bg-zinc-900/50 border border-zinc-800 rounded-xl p-6 mb-10'>
+  return (
+    <div className='min-h-screen bg-zinc-950 text-zinc-100'>
+      <SEOContentTemplate
+        title={metadata.title as string}
+        h1='Personal Year Numbers'
+        description={metadata.description as string}
+        keywords={metadata.keywords as string[]}
+        canonicalUrl={
+          (metadata.alternates?.canonical as string) ??
+          'https://lunary.app/grimoire/numerology/year'
+        }
+        intro='Personal Year numbers describe your unique focus for a calendar year. They work alongside the Universal Year and show what to build, release, or prioritize as you move through the nine-year cycle.'
+        tldr='Your Personal Year number guides the theme of your year. Align your goals and choices with that theme for smoother growth.'
+        meaning={`Personal Year numbers reveal the dominant lesson for a given year. Think of them as a seasonal blueprint: some years ask for beginnings, others for structure, completion, or rest.
+
+Using your Personal Year helps you plan with less resistance. It also explains why certain goals feel easier in some years and harder in others. When you align your focus with the number, progress tends to feel more natural.`}
+        howToWorkWith={[
+          'Calculate your number early in the year and keep it visible.',
+          'Set one primary goal that matches the theme.',
+          'Review progress each quarter and adjust.',
+          'Pair your Personal Year with the Universal Year for context.',
+        ]}
+        rituals={[
+          'Write a short intention for the year and revisit it monthly.',
+          'Choose one habit that supports the theme and track it weekly.',
+          'Do a simple end-of-month reflection on progress and lessons.',
+          'Share your theme with a friend for accountability.',
+        ]}
+        journalPrompts={[
+          'What does this year feel like it is asking of me?',
+          'Which goals feel most aligned right now?',
+          'Where am I resisting the theme of the year?',
+          'What would success look like by year end?',
+        ]}
+        tables={[
+          {
+            title: 'Personal Year Themes',
+            headers: ['Number', 'Theme'],
+            rows: personalYears.map((year) => [year.number, year.theme]),
+          },
+          {
+            title: 'Quick Focus Guide',
+            headers: ['Year', 'Focus'],
+            rows: [
+              ['1', 'Start, initiate, experiment'],
+              ['2', 'Cooperate, refine, support'],
+              ['3', 'Create, share, express'],
+              ['4', 'Build, organize, stabilize'],
+            ],
+          },
+        ]}
+        relatedItems={[
+          {
+            name: 'Numerology Overview',
+            href: '/grimoire/numerology',
+            type: 'Guide',
+          },
+          {
+            name: 'Core Numbers',
+            href: '/grimoire/numerology/core-numbers',
+            type: 'Guide',
+          },
+          {
+            name: 'Life Path Numbers',
+            href: '/grimoire/life-path',
+            type: 'Guide',
+          },
+        ]}
+        tableOfContents={tableOfContents}
+        heroContent={heroContent}
+        breadcrumbs={[
+          { label: 'Grimoire', href: '/grimoire' },
+          { label: 'Numerology', href: '/grimoire/numerology' },
+          { label: 'Year' },
+        ]}
+        internalLinks={[
+          { text: 'Personal Year Calculator', href: '/horoscope' },
+          { text: 'Core Numbers', href: '/grimoire/numerology/core-numbers' },
+          { text: 'Numerology Guide', href: '/grimoire/numerology' },
+          { text: 'Grimoire Home', href: '/grimoire' },
+        ]}
+        faqs={[
+          {
+            question: 'How do I calculate my Personal Year number?',
+            answer:
+              'Add your birth month and day to the current year, then reduce the total to a single digit.',
+          },
+          {
+            question: 'Does my Personal Year change on my birthday?',
+            answer:
+              'Some traditions start the Personal Year on your birthday, while others use the calendar year. Choose one method and stay consistent.',
+          },
+          {
+            question: 'How do I use my Personal Year in planning?',
+            answer:
+              'Pick one main goal that matches the theme and review it quarterly. Alignment makes progress smoother.',
+          },
+        ]}
+      >
+        <section
+          id='calculating'
+          className='mb-12 bg-zinc-900/50 border border-zinc-800 rounded-xl p-6'
+        >
           <h2 className='text-xl font-medium text-zinc-100 mb-3'>
             Calculating Your Personal Year
           </h2>
@@ -115,9 +213,28 @@ export default function PersonalYearIndexPage() {
             Working with your Personal Year helps you align with natural cycles
             and make the most of each period.
           </p>
-        </div>
+        </section>
 
-        <section className='mb-12'>
+        <section
+          id='working-with-year'
+          className='mb-12 bg-zinc-900/50 border border-zinc-800 rounded-xl p-6'
+        >
+          <h2 className='text-xl font-medium text-zinc-100 mb-3'>
+            Working With Your Personal Year
+          </h2>
+          <p className='text-zinc-400 mb-4'>
+            Use your Personal Year as a planning tool. For example, a Year 1 is
+            ideal for starting something new, while a Year 4 supports long-term
+            structure. A Year 9 is best for completion and release.
+          </p>
+          <p className='text-zinc-400'>
+            The goal is not to force outcomes, but to choose actions that match
+            the energy. That alignment usually makes progress feel smoother and
+            more sustainable.
+          </p>
+        </section>
+
+        <section id='cycle' className='mb-12'>
           <h2 className='text-2xl font-medium text-zinc-100 mb-6'>
             The 9-Year Cycle
           </h2>
@@ -142,7 +259,7 @@ export default function PersonalYearIndexPage() {
           </div>
         </section>
 
-        <div className='border-t border-zinc-800 pt-8'>
+        <section id='related' className='border-t border-zinc-800 pt-8'>
           <h3 className='text-lg font-medium text-zinc-100 mb-4'>
             Related Resources
           </h3>
@@ -172,9 +289,8 @@ export default function PersonalYearIndexPage() {
               Master Numbers
             </Link>
           </div>
-        </div>
-        <ExploreGrimoire />
-      </div>
+        </section>
+      </SEOContentTemplate>
     </div>
   );
 }

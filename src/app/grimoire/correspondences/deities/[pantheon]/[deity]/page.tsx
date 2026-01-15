@@ -119,7 +119,9 @@ export default async function DeityPage({
 
 When honoring ${deityKey.toLowerCase()}, consider their domain and correspondences. ${deityKey} can be called upon for ${deityData.domain.join(', ')} work, bringing divine support and ancient wisdom to your rituals and spellwork.
 
-Understanding ${deityKey.toLowerCase()}'s correspondences helps you honor this deity respectfully and effectively. Whether you're working with ${pantheonKey.toLowerCase()} pantheon, seeking guidance, or calling upon divine assistance, ${deityKey.toLowerCase()} brings their unique energy and domain to your practice.`;
+Understanding ${deityKey.toLowerCase()}'s correspondences helps you honor this deity respectfully and effectively. Whether you're working with ${pantheonKey.toLowerCase()} pantheon, seeking guidance, or calling upon divine assistance, ${deityKey.toLowerCase()} brings their unique energy and domain to your practice.
+
+Approach deity work with care and research. Start with small, consistent offerings or prayers, and listen for subtle shifts rather than dramatic signs. A steady relationship is more meaningful than a single elaborate ritual.`;
 
   const howToWorkWith = [
     `Honor ${deityKey.toLowerCase()} in ${deityData.domain[0]}-themed rituals`,
@@ -145,6 +147,10 @@ Understanding ${deityKey.toLowerCase()}'s correspondences helps you honor this d
       question: `Do I need to worship ${deityKey.toLowerCase()}?`,
       answer: `No. You can work with ${deityKey.toLowerCase()} respectfully without full worship. Some practitioners honor deities, others work with them as archetypes or energies. Choose what aligns with your practice and beliefs.`,
     },
+    {
+      question: `How do I know if ${deityKey} is a good fit?`,
+      answer: `Start with study and a simple offering. If the themes of ${deityData.domain.join(', ')} feel aligned with your life, it may be a good match. Let the relationship unfold over time.`,
+    },
   ];
 
   return (
@@ -159,9 +165,22 @@ Understanding ${deityKey.toLowerCase()}'s correspondences helps you honor this d
         `${pantheonKey.toLowerCase()} god`,
       ]}
       canonicalUrl={`https://lunary.app/grimoire/correspondences/deities/${pantheon}/${deity}`}
+      tldr={`${deityKey} supports ${deityData.domain.join(', ')}. Begin with respectful study, simple offerings, and clear intentions to build a consistent devotional practice.`}
       intro={`${deityKey} is a powerful ${pantheonKey.toLowerCase()} deity associated with ${deityData.domain.join(', ')}. Understanding ${deityKey.toLowerCase()}'s correspondences helps you honor this deity respectfully and work with their energy effectively.`}
       meaning={meaning}
       howToWorkWith={howToWorkWith}
+      rituals={[
+        `Light a candle and offer a short prayer to ${deityKey}.`,
+        `Place a small offering tied to ${deityData.domain[0] || 'their domain'} on your altar.`,
+        'Read a myth or hymn and reflect on its message.',
+        'Keep a devotional journal and note any themes that repeat.',
+      ]}
+      journalPrompts={[
+        `What aspect of ${deityKey.toLowerCase()} feels most relevant to my life now?`,
+        'How can I show respect without overcomplicating the practice?',
+        `What guidance do I seek in the realm of ${deityData.domain[0] || 'this domain'}?`,
+        'What signs or shifts have I noticed since beginning this work?',
+      ]}
       faqs={faqs}
       breadcrumbs={[
         { label: 'Grimoire', href: '/grimoire' },
@@ -194,7 +213,11 @@ Understanding ${deityKey.toLowerCase()}'s correspondences helps you honor this d
         {
           title: `${deityKey} Correspondences`,
           headers: ['Category', 'Details'],
-          rows: [['Domain', deityData.domain.join(', ')]],
+          rows: [
+            ['Domain', deityData.domain.join(', ')],
+            ['Focus', 'Guidance, devotion, and respectful study'],
+            ['Approach', 'Consistent offerings and clear intentions'],
+          ],
         },
       ]}
     />

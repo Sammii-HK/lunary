@@ -2,10 +2,10 @@
 
 import { grimoire, customContentHrefs } from '@/constants/grimoire';
 import Link from 'next/link';
-import { usePathname, useSearchParams } from 'next/navigation';
+import { usePathname } from 'next/navigation';
 import { stringToKebabCase } from '../../../utils/string';
 import { sectionToSlug, slugToSection } from '@/utils/grimoire';
-import { useState, useEffect, useTransition, useRef, useCallback } from 'react';
+import { useState, useEffect, useTransition, useRef } from 'react';
 import dynamic from 'next/dynamic';
 import { MarketingFooterGate } from '@/components/MarketingFooterGate';
 import {
@@ -23,7 +23,6 @@ import {
   Hash,
   Wand,
 } from 'lucide-react';
-import { ExploreGrimoire } from '@/components/grimoire/ExploreGrimoire';
 
 const currentYear = new Date().getFullYear();
 
@@ -746,11 +745,7 @@ const GRIMOIRE_FULL_STRUCTURE = [
   },
 ];
 
-function GrimoireIndexPage({
-  withNavParams,
-}: {
-  withNavParams: (href: string) => string;
-}) {
+function GrimoireIndexPage() {
   return (
     <div className='p-4 md:py-12 lg:py-16'>
       <div className='max-w-6xl mx-auto'>
@@ -763,6 +758,28 @@ function GrimoireIndexPage({
           <p className='text-base md:text-lg text-zinc-400 leading-relaxed max-w-2xl mx-auto'>
             Explore mystical knowledge, cosmic wisdom, and ancient practices to
             deepen your spiritual journey.
+          </p>
+        </div>
+
+        <div className='mb-12 md:mb-16 rounded-xl border border-zinc-800 bg-zinc-900/40 p-6 md:p-8'>
+          <h2 className='text-xl md:text-2xl font-medium text-zinc-100 mb-4'>
+            How to Use the Grimoire
+          </h2>
+          <p className='text-sm md:text-base text-zinc-400 mb-4'>
+            The Grimoire is organized by topic so you can explore at your own
+            pace. Start with a guide if you are new, or jump straight into a
+            specific practice. Each section is designed to give clear meanings,
+            practical steps, and links to deeper topics.
+          </p>
+          <p className='text-sm md:text-base text-zinc-400 mb-4'>
+            Use the categories below to browse by interest. If you are looking
+            for timing, check the Moon and Astrology sections. For intuitive
+            practice, explore Tarot, Runes, and Divination.
+          </p>
+          <p className='text-sm md:text-base text-zinc-400'>
+            Save the pages you return to most often and build your own study
+            path. Consistent study reveals patterns and helps the knowledge
+            settle into daily life.
           </p>
         </div>
 
@@ -784,7 +801,7 @@ function GrimoireIndexPage({
                 {category.items.map((item) => (
                   <Link
                     key={`${category.name}-${item.title}`}
-                    href={withNavParams(item.href)}
+                    href={item.href}
                     prefetch={true}
                     className='group rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4 hover:bg-zinc-900/50 hover:border-lunary-primary-600 transition-all'
                   >
@@ -809,14 +826,11 @@ export default function GrimoireLayout({
   currentSectionSlug?: string;
 }) {
   const pathname = usePathname();
-  const searchParams = useSearchParams();
   const [isPending, startTransition] = useTransition();
   const [expandedSections, setExpandedSections] = useState<Set<string>>(
     new Set(),
   );
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [isDesktop, setIsDesktop] = useState(false);
-  const showAppNav = searchParams?.get('nav') === 'app';
 
   const currentSection = currentSectionSlug
     ? slugToSection(currentSectionSlug)
@@ -894,37 +908,6 @@ export default function GrimoireLayout({
     }
   };
 
-  const withNavParams = useCallback(
-    (href: string) => {
-      if (!searchParams) return href;
-      if (/^https?:\/\//i.test(href)) return href;
-
-      const nav = searchParams.get('nav');
-      const from = searchParams.get('from');
-      if (!nav && !from) return href;
-
-      const baseUrl = new URL(href, 'https://lunary.app');
-      if (nav && !baseUrl.searchParams.get('nav')) {
-        baseUrl.searchParams.set('nav', nav);
-      }
-      if (from && !baseUrl.searchParams.get('from')) {
-        baseUrl.searchParams.set('from', from);
-      }
-      const query = baseUrl.searchParams.toString();
-      return `${baseUrl.pathname}${query ? `?${query}` : ''}${baseUrl.hash}`;
-    },
-    [searchParams],
-  );
-
-  useEffect(() => {
-    if (typeof window === 'undefined') return;
-    const media = window.matchMedia('(min-width: 768px)');
-    const apply = () => setIsDesktop(media.matches);
-    apply();
-    media.addEventListener?.('change', apply);
-    return () => media.removeEventListener?.('change', apply);
-  }, []);
-
   return (
     <div className='flex flex-row h-full overflow-hidden relative'>
       {/* Mobile overlay */}
@@ -937,14 +920,6 @@ export default function GrimoireLayout({
 
       {/* Sidebar */}
       <div
-        style={
-          isDesktop
-            ? undefined
-            : {
-                top: 'var(--global-nav-offset, 0px)',
-                height: 'calc(100vh - var(--global-nav-offset, 0px))',
-              }
-        }
         className={`
           fixed md:sticky top-0 left-0
           h-full z-50
@@ -952,13 +927,12 @@ export default function GrimoireLayout({
           w-64 md:w-72 lg:w-80 xl:w-96 flex-shrink-0 bg-zinc-900 border-r border-zinc-700
           transition-transform duration-300 ease-in-out
           flex flex-col
-          md:top-0 md:h-full
         `}
       >
         {/* Header */}
         <div className='p-4 md:p-5 lg:p-6 border-b border-zinc-700 flex items-center justify-between'>
           <Link
-            href={withNavParams('/grimoire')}
+            href='/grimoire'
             onClick={() => setSidebarOpen(false)}
             className='text-lg md:text-xl lg:text-2xl font-bold text-white hover:text-lunary-primary-400 transition-colors flex items-center gap-2'
           >
@@ -1043,7 +1017,7 @@ export default function GrimoireLayout({
                           )}
 
                           <Link
-                            href={withNavParams(href)}
+                            href={href}
                             prefetch={true}
                             onClick={() => {
                               startTransition(() => {
@@ -1078,7 +1052,7 @@ export default function GrimoireLayout({
                                   return (
                                     <Link
                                       key={content}
-                                      href={withNavParams(contentHref)}
+                                      href={contentHref}
                                       prefetch={true}
                                       onClick={() => {
                                         startTransition(() => {
@@ -1106,14 +1080,11 @@ export default function GrimoireLayout({
       </div>
 
       {/* Main content */}
-      <div className='flex-1 overflow-y-auto min-w-0 px-4 pt-4 pb-5'>
+      <div className='flex-1 overflow-y-auto min-w-0 px-4 pt-4 pb-20'>
         {/* Mobile menu button */}
         <button
           onClick={() => setSidebarOpen(true)}
-          style={{
-            top: 'calc(var(--global-nav-offset, 0px) + 12px)',
-          }}
-          className='md:hidden fixed left-4 z-30 p-2 bg-zinc-900 border border-zinc-700 rounded-md text-white hover:bg-zinc-800 transition-colors'
+          className='md:hidden fixed top-4 left-4 z-30 p-2 bg-zinc-900 border border-zinc-700 rounded-md text-white hover:bg-zinc-800 transition-colors'
           aria-label='Open grimoire menu'
         >
           <Menu size={20} aria-hidden='true' />
@@ -1130,7 +1101,7 @@ export default function GrimoireLayout({
           <div className='p-4 md:p-6 lg:p-8 xl:p-10 min-h-full'>
             <div className='max-w-7xl mx-auto'>
               {GrimoireContent[currentSection as keyof typeof GrimoireContent]}
-              <ExploreGrimoire />
+              {/* <ExploreGrimoire /> */}
               <MarketingFooterGate />
             </div>
           </div>
@@ -1138,6 +1109,7 @@ export default function GrimoireLayout({
           <div>
             <GrimoireIndexPage withNavParams={withNavParams} />
             <div className='max-w-7xl mx-auto px-4'>
+              {/* <ExploreGrimoire /> */}
               <MarketingFooterGate />
             </div>
           </div>

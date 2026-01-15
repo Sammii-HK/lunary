@@ -131,7 +131,25 @@ ${hourData.message}
 
 **In Love:** ${hourData.loveMeaning}
 
-**In Career:** ${hourData.careerMeaning}`}
+**In Career:** ${hourData.careerMeaning}
+
+Mirror hours work like spiritual punctuation: they ask you to pause, notice your inner dialogue, and realign with your values. If you see ${hourData.time} often, treat it as a reminder to slow down and check whether your current choices match your deeper intentions.
+
+You can also view mirror hours through numerology. Adding the digits of ${hourData.time} (for example, 1+1+1+1) creates a root number that highlights the core lesson. Use that number to guide your next step, whether it's initiating change, creating harmony, or grounding yourself.
+
+If the message feels unclear, pick one small action and watch for how the day responds. Clarity often follows action.
+
+Track how often you see this time over a week. Frequency usually points to a theme you are ready to face, not a random coincidence.
+
+If you want a simple practice, keep a short log with the date, what you were thinking about, and one word describing the mood. Patterns become obvious when you review them at the end of the week.
+
+Treat the appearance as a gentle prompt, not a demand. Your response can be simple.
+
+If the message feels too abstract, translate it into a concrete task. One small step is enough to honor the signal.
+
+Over time, mirror hours become less about prediction and more about self-awareness. They help you notice what is already true.
+
+If you want more depth, pair the message with a short affirmation you repeat for one day. Small repetition turns insight into action.`}
         emotionalThemes={hourData.keywords}
         howToWorkWith={[
           `When you see ${hourData.time}, pause and take a breath`,
@@ -140,11 +158,59 @@ ${hourData.message}
           'Keep a journal of when you see this mirror hour',
           'Express gratitude for the angelic guidance',
         ]}
+        tables={[
+          {
+            title: 'Mirror Hour Focus Areas',
+            rows: [
+              ['Area', 'Guidance'],
+              [
+                'Mindset',
+                'Notice your inner monologue and reframe with compassion.',
+              ],
+              [
+                'Relationships',
+                'Speak honestly and listen for what is unsaid.',
+              ],
+              [
+                'Work & Goals',
+                'Align your next action with your bigger intention.',
+              ],
+              ['Spiritual Growth', 'Ask for guidance and watch for patterns.'],
+            ],
+          },
+          {
+            title: 'Simple Reflection Flow',
+            rows: [
+              ['Step', 'Practice'],
+              ['Pause', 'Take one slow breath'],
+              ['Name', 'Write a one-sentence intention'],
+              ['Act', 'Choose one small aligned step'],
+            ],
+          },
+          {
+            title: 'When the Meaning Feels Vague',
+            rows: [
+              ['Question', 'Try asking'],
+              ['Clarity', 'What do I need to know today?'],
+              ['Action', 'What is the next right step?'],
+              ['Boundary', 'What do I need to protect?'],
+            ],
+          },
+        ]}
         journalPrompts={[
           `What was I thinking about when I saw ${hourData.time}?`,
           `How does the message of ${hourData.meaning.toLowerCase()} apply to my life?`,
           `What guidance am I receiving from this mirror hour?`,
           `How can I work with ${hourData.time}'s energy today?`,
+          'What small action would honor this message?',
+          'What theme repeats when this time appears?',
+          'What affirmation could support this message?',
+        ]}
+        rituals={[
+          'Set a 2-minute timer, breathe slowly, and ask for clarity on your next choice.',
+          'Write a one-sentence intention that matches the message of this mirror hour.',
+          'Light a candle and visualize the digits of the time glowing with guidance.',
+          'Send a short message of appreciation to someone you love or admire.',
         ]}
         relatedItems={[
           {
