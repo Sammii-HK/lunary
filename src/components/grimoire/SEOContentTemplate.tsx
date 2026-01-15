@@ -93,6 +93,9 @@ export interface SEOContentTemplateProps {
   // Table of Contents
   tableOfContents?: Array<{ label: string; href: string }>;
 
+  // Additional schema blocks (e.g., ItemList)
+  additionalSchemas?: Array<Record<string, unknown>>;
+
   // Cosmic Connections (custom component slot)
   cosmicConnections?: React.ReactNode;
 
@@ -158,6 +161,7 @@ export function SEOContentTemplate({
   examplePlacements,
   faqs,
   tableOfContents,
+  additionalSchemas,
   cosmicConnections,
   internalLinks,
   internalLinksTitle = 'Explore More',
@@ -268,6 +272,11 @@ export function SEOContentTemplate({
       {renderJsonLd(imageSchema)}
       {renderJsonLd(speakableSchema)}
       {renderJsonLd(breadcrumbSchema)}
+      {additionalSchemas?.map((schema, index) => (
+        <React.Fragment key={`schema-${index}`}>
+          {renderJsonLd(schema)}
+        </React.Fragment>
+      ))}
 
       {/* Breadcrumbs - auto-generated from URL if not provided */}
       {autoBreadcrumbs.length > 0 && (
