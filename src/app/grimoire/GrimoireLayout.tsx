@@ -2,10 +2,10 @@
 
 import { grimoire, customContentHrefs } from '@/constants/grimoire';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useSearchParams } from 'next/navigation';
 import { stringToKebabCase } from '../../../utils/string';
 import { sectionToSlug, slugToSection } from '@/utils/grimoire';
-import { useState, useEffect, useTransition, useRef } from 'react';
+import { useCallback, useEffect, useRef, useState, useTransition } from 'react';
 import dynamic from 'next/dynamic';
 import { MarketingFooterGate } from '@/components/MarketingFooterGate';
 import {
@@ -745,7 +745,11 @@ const GRIMOIRE_FULL_STRUCTURE = [
   },
 ];
 
-function GrimoireIndexPage() {
+type GrimoireIndexPageProps = {
+  resolveHref: (href: string) => string;
+};
+
+function GrimoireIndexPage({ resolveHref }: GrimoireIndexPageProps) {
   return (
     <div className='p-4 md:py-12 lg:py-16'>
       <div className='max-w-6xl mx-auto'>
@@ -801,7 +805,7 @@ function GrimoireIndexPage() {
                 {category.items.map((item) => (
                   <Link
                     key={`${category.name}-${item.title}`}
-                    href={item.href}
+                    href={resolveHref(item.href)}
                     prefetch={true}
                     className='group rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4 hover:bg-zinc-900/50 hover:border-lunary-primary-600 transition-all'
                   >
@@ -826,6 +830,9 @@ export default function GrimoireLayout({
   currentSectionSlug?: string;
 }) {
   const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const navParam = searchParams?.get('nav');
+  const fromParam = searchParams?.get('from');
   const [isPending, startTransition] = useTransition();
   const [expandedSections, setExpandedSections] = useState<Set<string>>(
     new Set(),
@@ -837,6 +844,28 @@ export default function GrimoireLayout({
     : undefined;
 
   const trackedSectionRef = useRef<string | undefined>(undefined);
+
+  const withNavParams = useCallback(
+    (href: string) => {
+      if (!navParam && !fromParam) return href;
+      if (/^https?:\/\//i.test(href)) return href;
+
+      const baseUrl = new URL(href, 'https://lunary.app');
+      if (navParam && !baseUrl.searchParams.get('nav')) {
+        baseUrl.searchParams.set('nav', navParam);
+      }
+      if (fromParam && !baseUrl.searchParams.get('from')) {
+        baseUrl.searchParams.set('from', fromParam);
+      }
+      const query = baseUrl.searchParams.toString();
+      return `${baseUrl.pathname}${query ? `?${query}` : ''}${baseUrl.hash}`;
+    },
+    [fromParam, navParam],
+  );
+  const resolveHref = useCallback(
+    (href: string) => withNavParams(href),
+    [withNavParams],
+  );
 
   useEffect(() => {
     if (currentSection && currentSection !== trackedSectionRef.current) {
@@ -932,7 +961,7 @@ export default function GrimoireLayout({
         {/* Header */}
         <div className='p-4 md:p-5 lg:p-6 border-b border-zinc-700 flex items-center justify-between'>
           <Link
-            href='/grimoire'
+            href={resolveHref('/grimoire')}
             onClick={() => setSidebarOpen(false)}
             className='text-lg md:text-xl lg:text-2xl font-bold text-white hover:text-lunary-primary-400 transition-colors flex items-center gap-2'
           >
@@ -1017,7 +1046,7 @@ export default function GrimoireLayout({
                           )}
 
                           <Link
-                            href={href}
+                            href={resolveHref(href)}
                             prefetch={true}
                             onClick={() => {
                               startTransition(() => {
@@ -1052,7 +1081,7 @@ export default function GrimoireLayout({
                                   return (
                                     <Link
                                       key={content}
-                                      href={contentHref}
+                                      href={resolveHref(contentHref)}
                                       prefetch={true}
                                       onClick={() => {
                                         startTransition(() => {
@@ -1107,7 +1136,7 @@ export default function GrimoireLayout({
           </div>
         ) : (
           <div>
-            <GrimoireIndexPage withNavParams={withNavParams} />
+            <GrimoireIndexPage resolveHref={resolveHref} />
             <div className='max-w-7xl mx-auto px-4'>
               {/* <ExploreGrimoire /> */}
               <MarketingFooterGate />

@@ -81,7 +81,7 @@ export interface SEOContentTemplateProps {
   relatedItems?: Array<{ name: string; href: string; type: string }>;
 
   // Rich content
-  tables?: Array<{ title: string; headers: string[]; rows: string[][] }>;
+  tables?: Array<{ title: string; headers?: string[]; rows: string[][] }>;
   diagrams?: string;
   glyphs?: string[];
   examplePlacements?: string[];
@@ -510,18 +510,20 @@ export function SEOContentTemplate({
             </h2>
             <div className='max-w-full overflow-x-auto'>
               <table className='w-full border-collapse border border-zinc-700'>
-                <thead>
-                  <tr className='bg-zinc-800/50'>
-                    {table.headers.map((header, headerIndex) => (
-                      <th
-                        key={headerIndex}
-                        className='border border-zinc-700 px-2 sm:px-4 py-2 sm:py-3 text-left text-zinc-200 font-medium text-sm sm:text-base break-words whitespace-normal'
-                      >
-                        {header}
-                      </th>
-                    ))}
-                  </tr>
-                </thead>
+                {table.headers && (
+                  <thead>
+                    <tr className='bg-zinc-800/50'>
+                      {table.headers.map((header, headerIndex) => (
+                        <th
+                          key={headerIndex}
+                          className='border border-zinc-700 px-2 sm:px-4 py-2 sm:py-3 text-left text-zinc-200 font-medium text-sm sm:text-base break-words whitespace-normal'
+                        >
+                          {header}
+                        </th>
+                      ))}
+                    </tr>
+                  </thead>
+                )}
                 <tbody>
                   {table.rows.map((row, rowIndex) => (
                     <tr

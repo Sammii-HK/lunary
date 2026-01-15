@@ -73,8 +73,8 @@ Think of the chakra system as a ladder: stability at the root supports creativit
       tables={[
         {
           title: 'Seven Chakra Overview',
+          headers: ['Chakra', 'Focus', 'Color', 'Element'],
           rows: [
-            ['Chakra', 'Focus', 'Color', 'Element'],
             ['Root', 'Safety & stability', 'Red', 'Earth'],
             ['Sacral', 'Creativity & intimacy', 'Orange', 'Water'],
             ['Solar Plexus', 'Confidence & will', 'Yellow', 'Fire'],
