@@ -1,6 +1,6 @@
 import { config } from 'dotenv';
 import { resolve } from 'path';
-import { execSync } from 'child_process';
+import { execFileSync } from 'child_process';
 import { resolveFxDriftUpdates } from '../utils/fx-drift-resolve';
 
 config({ path: resolve(process.cwd(), '.env.local') });
@@ -8,12 +8,12 @@ config({ path: resolve(process.cwd(), '.env') });
 
 const TARGET_FILE = 'utils/stripe-prices.ts';
 
-function run(command: string) {
-  return execSync(command, { stdio: 'inherit' });
+function runCmd(command: string, args: string[] = []) {
+  return execFileSync(command, args, { stdio: 'inherit' });
 }
 
-function runOutput(command: string): string {
-  return execSync(command, { encoding: 'utf-8' }).trim();
+function runCmdOutput(command: string, args: string[] = []): string {
+  return execFileSync(command, args, { encoding: 'utf-8' }).trim();
 }
 
 function parseArgs() {
@@ -34,7 +34,7 @@ async function main() {
     updateMap: true,
   });
 
-  const status = runOutput('git status --porcelain');
+  const status = runCmdOutput('git', ['status', '--porcelain']);
   const hasTargetChange = status
     .split('\n')
     .some((line) => line.includes(TARGET_FILE));
@@ -44,11 +44,11 @@ async function main() {
     return;
   }
 
-  run(`git add ${TARGET_FILE}`);
-  run(`git commit -m "${message.replace(/"/g, '\\"')}"`);
+  runCmd('git', ['add', TARGET_FILE]);
+  runCmd('git', ['commit', '-m', message]);
 
   if (pr) {
-    const branch = runOutput('git rev-parse --abbrev-ref HEAD');
+    const branch = runCmdOutput('git', ['rev-parse', '--abbrev-ref', 'HEAD']);
     const title = 'Update Stripe price mapping';
     const body = [
       '## Summary',
@@ -58,9 +58,16 @@ async function main() {
       '- N/A',
       '',
     ].join('\n');
-    run(
-      `gh pr create --title "${title}" --body "${body.replace(/"/g, '\\"')}" --head "${branch}"`,
-    );
+    runCmd('gh', [
+      'pr',
+      'create',
+      '--title',
+      title,
+      '--body',
+      body,
+      '--head',
+      branch,
+    ]);
   }
 }
 
