@@ -267,7 +267,7 @@ export function SEOContentTemplate({
     Boolean(contextualNudge?.headline) && Boolean(contextualNudge?.buttonLabel);
 
   return (
-    <article className='max-w-4xl mx-auto overflow-x-hidden py-2 px-4 pb-[60px] mb-[55px]'>
+    <article className='max-w-4xl mx-auto overflow-x-hidden pt-2 px-4 pb-[120px]'>
       {/* JSON-LD Schemas */}
       {renderJsonLd(faqSchema)}
       {renderJsonLd(articleSchema)}

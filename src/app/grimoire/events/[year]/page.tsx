@@ -1,11 +1,11 @@
 import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
-import { Star, Sparkles, Sun, Moon, ArrowRight } from 'lucide-react';
+import { Star, Sparkles, Sun, Moon, ArrowRight, Satellite } from 'lucide-react';
 import { SEOContentTemplate } from '@/components/grimoire/SEOContentTemplate';
-import { ExploreGrimoire } from '@/components/grimoire/ExploreGrimoire';
 import { generateYearlyForecast } from '@/lib/forecast/yearly';
 import { format } from 'date-fns';
+import { getTransitsForYear } from '@/constants/seo/yearly-transits';
 
 export async function generateStaticParams() {
   return [2025, 2026, 2027, 2028, 2029, 2030].map((year) => ({
@@ -26,10 +26,9 @@ export async function generateMetadata({
   }
 
   if (yearNum === 2025) {
-    const title =
-      'Major Astrological Events 2025: Eclipses, Retrogrades, Key Dates | Lunary';
+    const title = 'Astrology events 2025: eclipses, retrogrades, full moons';
     const description =
-      'Major astrological events 2025 highlights eclipses, retrogrades, and the key transits that shape the year so you can track the dates and their meaning.';
+      'Astrology events 2025 covers eclipses, retrogrades, and full moons so you can track the dates and the meaning behind each shift.';
     return {
       title,
       description,
@@ -325,6 +324,17 @@ async function getEventsForYear(year: number): Promise<EventCategory[]> {
       });
     }
 
+    const transits = getTransitsForYear(year);
+    if (transits.length > 0) {
+      categories.push({
+        category: 'Transits',
+        icon: Satellite,
+        color: 'blue',
+        events: transits.map((t) => ({ date: t.dates, description: t.title })),
+        link: `/grimoire/transits/${year}`,
+      });
+    }
+
     return categories;
   }
 
@@ -386,6 +396,7 @@ export default async function EventsYearPage({
 }) {
   const { year } = await params;
   const yearNum = parseInt(year);
+  const nextYear = yearNum + 1;
 
   if (yearNum < 2025 || yearNum > 2030) {
     notFound();
@@ -393,13 +404,13 @@ export default async function EventsYearPage({
 
   const is2025 = yearNum === 2025;
   const pageTitle = is2025
-    ? 'Major Astrological Events 2025: Eclipses, Retrogrades, Key Dates | Lunary'
+    ? 'Astrology events 2025: eclipses, retrogrades, full moons'
     : `${year} Astrological Events Calendar | Lunary`;
   const pageH1 = is2025
-    ? 'Major Astrological Events 2025'
+    ? 'Astrology events 2025'
     : `${year} Cosmic Events Calendar`;
   const pageDescription = is2025
-    ? 'Major astrological events 2025 shows eclipses, retrogrades, and the key transits that shape the year so you can track dates and what each shift means.'
+    ? 'Astrology events 2025 lists eclipses, retrogrades, and full moons so you can track key dates and what each shift means.'
     : `Complete guide to ${year} astrological events including Mercury retrograde dates, Venus retrograde, eclipses, equinoxes, and major planetary transits.`;
   const pageIntro = is2025
     ? 'Major astrological events 2025 gathers the eclipses, retrogrades, and major transits that matter so you can scan the dates and the quick meaning they carry. Each date also notes what to expect so you can plan within the timing instead of reacting to it.'
@@ -420,6 +431,17 @@ export default async function EventsYearPage({
 
   const events = await getEventsForYear(yearNum);
   const stats = getSummaryStats(yearNum, events);
+  const eclipseCategory = events.find((event) => event.category === 'Eclipses');
+  const eclipseEntries =
+    eclipseCategory?.events.map((event) => {
+      const [typePart, signPart] = event.description.split(' in ');
+      return {
+        date: event.date,
+        type: typePart || 'Eclipse',
+        sign: signPart || '—',
+        theme: 'Cosmic shift',
+      };
+    }) ?? [];
 
   const faqs = [
     {
@@ -508,6 +530,27 @@ While these events affect everyone, their impact on your personal chart is uniqu
     >
       {/* Custom content: Events Calendar */}
       <div className='mt-8 space-y-8'>
+        {nextYear <= 2030 && (
+          <section className='rounded-2xl border border-zinc-800 bg-zinc-900/50 px-6 py-5'>
+            <h2 className='text-base font-semibold text-zinc-100 mb-3'>
+              Upcoming events
+            </h2>
+            <div className='grid gap-3 md:grid-cols-2'>
+              <Link
+                href='/grimoire/events'
+                className='px-4 py-3 rounded-lg border border-zinc-800 bg-zinc-950 text-sm font-medium text-zinc-200 hover:border-lunary-primary-500 transition-colors'
+              >
+                Current astrology events
+              </Link>
+              <Link
+                href={`/grimoire/events/${nextYear}`}
+                className='px-4 py-3 rounded-lg border border-zinc-800 bg-zinc-950 text-sm font-medium text-zinc-200 hover:border-lunary-primary-500 transition-colors'
+              >
+                Astrology events {nextYear}
+              </Link>
+            </div>
+          </section>
+        )}
         {is2025 && quickLinkItems.length > 0 && (
           <section className='rounded-2xl border border-zinc-800 bg-zinc-900/50 px-6 py-5'>
             <h2 className='text-base font-semibold text-zinc-100 mb-3'>
@@ -526,7 +569,6 @@ While these events affect everyone, their impact on your personal chart is uniqu
             </div>
           </section>
         )}
-
         {/* Quick Summary */}
         <div className='p-6 rounded-lg border border-lunary-primary-700 bg-lunary-primary-900/10'>
           <h2 className='text-lg font-medium text-lunary-primary-300 mb-4'>
@@ -559,7 +601,51 @@ While these events affect everyone, their impact on your personal chart is uniqu
             </div>
           </div>
         </div>
-
+        {eclipseEntries.length > 0 && (
+          <section className='rounded-2xl border border-zinc-800 bg-zinc-900/50 p-6'>
+            <h2 className='text-2xl font-semibold text-zinc-100 mb-4'>
+              {year} Eclipse Calendar
+            </h2>
+            <div className='max-w-full overflow-x-auto'>
+              <table className='w-full border-collapse border border-zinc-800'>
+                <thead>
+                  <tr className='bg-zinc-800/50'>
+                    <th className='border border-zinc-800 px-3 py-2 text-left text-zinc-200 font-medium'>
+                      Date
+                    </th>
+                    <th className='border border-zinc-800 px-3 py-2 text-left text-zinc-200 font-medium'>
+                      Type
+                    </th>
+                    <th className='border border-zinc-800 px-3 py-2 text-left text-zinc-200 font-medium'>
+                      Sign
+                    </th>
+                    <th className='border border-zinc-800 px-3 py-2 text-left text-zinc-200 font-medium'>
+                      Theme
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {eclipseEntries.map((entry) => (
+                    <tr key={`${entry.date}-${entry.type}`}>
+                      <td className='border border-zinc-800 px-3 py-2 text-zinc-300'>
+                        {entry.date}
+                      </td>
+                      <td className='border border-zinc-800 px-3 py-2 text-zinc-300'>
+                        {entry.type}
+                      </td>
+                      <td className='border border-zinc-800 px-3 py-2 text-zinc-300'>
+                        {entry.sign}
+                      </td>
+                      <td className='border border-zinc-800 px-3 py-2 text-zinc-300'>
+                        {entry.theme}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </section>
+        )}
         {/* Events by Category */}
         <div className='space-y-8'>
           {events.map((category, index) => {
@@ -604,20 +690,7 @@ While these events affect everyone, their impact on your personal chart is uniqu
             );
           })}
         </div>
-
-        {/* CTA */}
-        <div className='mt-12 text-center'>
-          <Link
-            href='/birth-chart'
-            className='inline-flex items-center gap-2 px-8 py-4 rounded-lg bg-lunary-primary-900/20 hover:bg-lunary-primary-900/30 border border-lunary-primary-700 text-lunary-primary-300 font-medium text-lg transition-colors'
-          >
-            Get Your Personalized {year} Forecast
-            <ArrowRight className='h-5 w-5' />
-          </Link>
-        </div>
       </div>
-
-      <ExploreGrimoire />
     </SEOContentTemplate>
   );
 }
