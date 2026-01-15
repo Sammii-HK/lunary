@@ -267,7 +267,7 @@ export function SEOContentTemplate({
     Boolean(contextualNudge?.headline) && Boolean(contextualNudge?.buttonLabel);
 
   return (
-    <article className='max-w-4xl mx-auto overflow-x-hidden py-2 px-4'>
+    <article className='max-w-4xl mx-auto overflow-x-hidden py-2 px-4 pb-[60px] mb-[55px]'>
       {/* JSON-LD Schemas */}
       {renderJsonLd(faqSchema)}
       {renderJsonLd(articleSchema)}
@@ -290,7 +290,7 @@ export function SEOContentTemplate({
       {/* H1 */}
       <header className='mb-8'>
         <h1 className='text-xl md:text-2xl font-light lg:text-4xl text-lunary-primary-100 break-words'>
-          {h1}
+          {h1 || title}
         </h1>
         {subtitle && (
           <span className='block text-lg text-lunary-primary-400 mt-2 mb-4'>
