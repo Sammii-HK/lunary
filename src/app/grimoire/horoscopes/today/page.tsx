@@ -1,8 +1,9 @@
 import { Metadata } from 'next';
 import Link from 'next/link';
 import { ArrowRight } from 'lucide-react';
-import { createItemListSchema, renderJsonLd } from '@/lib/schema';
+import { createItemListSchema } from '@/lib/schema';
 import { SEOContentTemplate } from '@/components/grimoire/SEOContentTemplate';
+import { CosmicHighlight } from '../CosmicHighlight';
 
 export const revalidate = 86400;
 
@@ -72,6 +73,7 @@ const signs = [
 ];
 
 export default function GrimoireTodayHoroscopePage() {
+  const currentYear = new Date().getFullYear();
   const today = new Date().toLocaleDateString('en-US', {
     weekday: 'long',
     year: 'numeric',
@@ -91,7 +93,6 @@ export default function GrimoireTodayHoroscopePage() {
 
   return (
     <div className='min-h-screen bg-zinc-950 text-zinc-100'>
-      {renderJsonLd(itemListSchema)}
       <SEOContentTemplate
         title="Today's Horoscopes | Real-Time Zodiac Astrology"
         h1='Today’s Horoscopes'
@@ -107,6 +108,7 @@ export default function GrimoireTodayHoroscopePage() {
           'real astrology',
         ]}
         canonicalUrl='https://lunary.app/grimoire/horoscopes/today'
+        additionalSchemas={[itemListSchema]}
         intro='Select your zodiac sign to read the freshest daily horoscope. Each sign block mirrors the Moon + transit energy that powers our authenticated experience.'
         heroContent={
           <div className='text-center space-y-1'>
@@ -133,23 +135,23 @@ export default function GrimoireTodayHoroscopePage() {
             type: 'topic',
           },
           {
-            name: 'Moon Phases',
-            href: '/grimoire/moon',
+            name: 'All Zodiac Horoscopes',
+            href: '/grimoire/horoscopes',
             type: 'topic',
           },
           {
-            name: 'Planets',
-            href: '/grimoire/planets',
+            name: 'Astrological Events',
+            href: '/grimoire/events',
             type: 'topic',
           },
           {
-            name: 'Transits',
+            name: `${currentYear} Lunar Events`,
+            href: `/grimoire/moon/${currentYear}`,
+            type: 'topic',
+          },
+          {
+            name: 'Current Transits',
             href: '/grimoire/transits',
-            type: 'topic',
-          },
-          {
-            name: 'Birth Chart & Personalized Transits',
-            href: '/grimoire/birth-chart',
             type: 'topic',
           },
         ]}
@@ -209,6 +211,8 @@ export default function GrimoireTodayHoroscopePage() {
             </p>
           </div>
         </section>
+
+        <CosmicHighlight />
 
         <section className='mb-12'>
           <div className='grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4'>
