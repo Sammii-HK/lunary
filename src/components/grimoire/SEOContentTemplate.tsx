@@ -50,6 +50,7 @@ export interface SEOContentTemplateProps {
   // Core SEO
   title: string;
   h1: string;
+  subtitle?: string;
   description: string;
   keywords: string[];
   canonicalUrl: string;
@@ -134,6 +135,7 @@ export interface SEOContentTemplateProps {
 export function SEOContentTemplate({
   title,
   h1,
+  subtitle,
   description,
   keywords,
   canonicalUrl,
@@ -284,20 +286,25 @@ export function SEOContentTemplate({
           <Breadcrumbs items={autoBreadcrumbs} renderSchema={false} />
         </div>
       )}
+
+      {/* H1 */}
+      <header className='mb-8'>
+        <h1 className='text-xl md:text-2xl font-light lg:text-4xl text-lunary-primary-100 mb-4 break-words'>
+          {h1}
+        </h1>
+        {subtitle && (
+          <span className='block text-lg text-lunary-primary-400 mt-2'>
+            {subtitle}
+          </span>
+        )}
+        {description && (
+          <p className='text-zinc-400 leading-relaxed break-words'>
+            {description}
+          </p>
+        )}
+      </header>
       <div className='space-y-8 p-2 md:p-4'>
         {heroContent && <div className='mb-8'>{heroContent}</div>}
-
-        {/* H1 */}
-        <header className='mb-8'>
-          <h1 className='text-xl md:text-2xl font-medium lg:text-4xl text-lunary-primary-100 mb-4 break-words'>
-            {h1}
-          </h1>
-          {description && (
-            <p className='text-zinc-400 leading-relaxed break-words'>
-              {description}
-            </p>
-          )}
-        </header>
 
         {/* Table of Contents */}
         {tableOfContents && tableOfContents.length > 0 && (
@@ -671,14 +678,14 @@ export function SEOContentTemplate({
         {!cosmicConnections && relatedItems && relatedItems.length > 0 && (
           <section className='overflow-x-hidden'>
             <h2 className='text-lg md:text-2xl text-lunary-primary-100 mb-4 break-words'>
-              Related Topics
+              Continue Exploring
             </h2>
             <div className='flex flex-wrap gap-3'>
               {relatedItems?.map((item, index) => (
                 <NavParamLink
                   key={index}
                   href={item.href}
-                  className='px-3 sm:px-4 py-2 bg-zinc-800/50 border border-zinc-700 rounded-lg text-zinc-300 hover:bg-zinc-700 hover:text-lunary-accent-300 transition-colors  break-words'
+                  className='px-3 sm:px-4 py-2 bg-zinc-800/80 border border-lunary-primary-400 rounded-lg text-zinc-300 hover:bg-zinc-700 hover:text-lunary-accent-300 transition-colors  break-words'
                 >
                   {item.name}
                 </NavParamLink>
