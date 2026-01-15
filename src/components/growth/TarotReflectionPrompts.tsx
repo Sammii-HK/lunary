@@ -302,8 +302,8 @@ export function TarotReflectionPrompts({
             >
               Upgrade to Lunary+
             </a>{' '}
-            for {prompts.length - 1} more reflection prompts with journal
-            saving.
+            for {prompts.length - 1} more reflection prompts and to save prompts
+            into your journal.
           </p>
         </div>
       )}

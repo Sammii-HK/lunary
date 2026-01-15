@@ -1,9 +1,9 @@
 import { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Pricing [7-Day Free Trial, Cancel Anytime] | Lunary',
+  title: 'Pricing [Free Trial, Cancel Anytime] | Lunary',
   description:
-    'Try Lunary free for 7 days. No payment during trial. Plans from $4.99/month. Includes personalized horoscopes, daily tarot, birth chart analysis & AI astral guide. 10,000+ cosmic explorers.',
+    'Try Lunary free with a 7-day monthly or 14-day annual trial. No payment during trial. Plans from $4.99/month. Includes personalized horoscopes, daily tarot, birth chart analysis & AI astral guide. 10,000+ cosmic explorers.',
   keywords: [
     'astrology app pricing',
     'personalized astrology subscription',
@@ -22,9 +22,9 @@ export const metadata: Metadata = {
     canonical: 'https://lunary.app/pricing',
   },
   openGraph: {
-    title: 'Pricing [7-Day Free Trial, Cancel Anytime] | Lunary',
+    title: 'Pricing [Free Trial, Cancel Anytime] | Lunary',
     description:
-      'Try Lunary free for 7 days. No payment during trial. Plans from $4.99/month. Personalized horoscopes, daily tarot & birth chart analysis.',
+      'Try Lunary free with a 7-day monthly or 14-day annual trial. No payment during trial. Plans from $4.99/month. Personalized horoscopes, daily tarot & birth chart analysis.',
     url: 'https://lunary.app/pricing',
     siteName: 'Lunary',
     images: [
@@ -40,9 +40,9 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Pricing [7-Day Free Trial, Cancel Anytime] | Lunary',
+    title: 'Pricing [Free Trial, Cancel Anytime] | Lunary',
     description:
-      'Try Lunary free for 7 days. No payment during trial. Plans from $4.99/month. Cancel anytime.',
+      'Try Lunary free with a 7-day monthly or 14-day annual trial. No payment during trial. Plans from $4.99/month. Cancel anytime.',
     images: ['/api/og/cosmic'],
   },
   robots: {

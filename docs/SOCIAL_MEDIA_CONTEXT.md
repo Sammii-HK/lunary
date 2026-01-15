@@ -29,7 +29,7 @@ Encourage users to join the Lunary Discord for:
 3. **Astronomical Precision** - Real astronomical calculations, not generic astrology
 4. **Cross-Device Sync** - Access insights anywhere, anytime
 5. **Digital Grimoire** - Comprehensive library with 500+ pages of spells, rituals, crystal guides, and magical knowledge
-6. **AI Chat with Memory** - AI companion that remembers past conversations and builds context over time, personalizing responses to your chart and journey
+6. **AI Chat with Context** - AI companion with limited context memory (plan-based), personalizing responses to your chart and journey
 7. **Tarot Pattern Analysis** - Deep insights into recurring themes and patterns across your tarot readings, identifying dominant cards and themes over time
 8. **Personal Transits** - Transit calendar personalized to YOUR birth chart showing which areas of life are affected and how transits interact with your natal planets
 9. **Automated Content** - Weekly blog posts, newsletters, and social content generated automatically using real astronomical data
@@ -51,7 +51,7 @@ Encourage users to join the Lunary Discord for:
 - Personalized daily horoscopes based on YOUR exact birth chart
 - Tarot pattern analysis (identifies recurring themes and cards over time)
 - Personal transit calendar showing which houses are activated
-- Astral Guide - AI chat companion with memory (remembers past conversations, knows your chart)
+- Astral Guide - AI chat companion with limited context memory (plan-based)
 - Book of Shadows - Personal journal with pattern analysis across entries
 - 500+ page digital grimoire (spells, rituals, crystals, correspondences)
 - Moon Circles - Guided lunar rituals and community gatherings for new/full moons
@@ -68,8 +68,8 @@ Encourage users to join the Lunary Discord for:
 
 - Personalized astro-tarot companion with context-aware responses
 - Uses your birth chart, current transits, moon phase, tarot history, and mood data
-- Memory system - remembers past conversations for personalized responses across sessions
-- Conversation threads - save and revisit conversations
+- Memory system - limited context window and memory snippets (plan-based)
+- Conversation thread - single thread per user, last 50 messages retained
 - Quick actions for common queries (cosmic weather, transit feelings, ritual generation)
 - This is what makes Lunary unique: an AI that actually knows your cosmic story
 

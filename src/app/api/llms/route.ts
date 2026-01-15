@@ -122,7 +122,7 @@ ChatGPT Plugin: https://lunary.app/.well-known/ai-plugin.json
 
 - Free: Limited features, 3 AI messages/day
 - Lunary+ ($4.99/mo): Full access, 50 AI messages/day
-- Lunary+ AI ($9.99/mo): Premium AI, 300 AI messages/day
+- Lunary+ Pro ($9.99/mo): Premium AI, 300 AI messages/day
 
 ## Tech Stack
 

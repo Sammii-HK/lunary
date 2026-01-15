@@ -9,7 +9,7 @@ import Link from 'next/link';
 import { ArrowRight, Layers } from 'lucide-react';
 import { getTarotCard } from '../../../utils/tarot/tarot';
 import { useSubscription } from '../../hooks/useSubscription';
-import { hasBirthChartAccess } from '../../../utils/pricing';
+import { hasFeatureAccess } from '../../../utils/pricing';
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
 import dayOfYear from 'dayjs/plugin/dayOfYear';
@@ -26,14 +26,17 @@ export const DailyCardPreview = () => {
   const userName = user?.name;
   const userBirthday = user?.birthday;
 
-  const hasChartAccess = hasBirthChartAccess(
+  const hasPersonalizedAccess = hasFeatureAccess(
     subscription.status,
     subscription.plan,
+    'personal_tarot',
   );
 
-  // Birth chart is free but requires account - check authentication
   const canAccessPersonalized =
-    authStatus.isAuthenticated && hasChartAccess && userName && userBirthday;
+    authStatus.isAuthenticated &&
+    hasPersonalizedAccess &&
+    userName &&
+    userBirthday;
 
   const dailyCard = useMemo(() => {
     const dateStr = currentDate || dayjs().utc().format('YYYY-MM-DD');

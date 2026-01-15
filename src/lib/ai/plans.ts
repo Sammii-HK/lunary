@@ -30,7 +30,7 @@ export const AI_PLANS: Record<AiPlanId, AiPlan> = {
   },
   lunary_plus_ai: {
     id: 'lunary_plus_ai',
-    name: 'Lunary+ AI',
+    name: 'Lunary+ Pro',
     priceGBP: 8.99,
     dailyMessageLimit: 300,
     memoryTurns: 50,
@@ -49,7 +49,7 @@ export const AI_PLANS: Record<AiPlanId, AiPlan> = {
   },
   lunary_plus_ai_annual: {
     id: 'lunary_plus_ai_annual',
-    name: 'Lunary+ AI Annual',
+    name: 'Lunary+ Pro Annual',
     priceGBP: 89.99,
     dailyMessageLimit: 300,
     memoryTurns: 50,

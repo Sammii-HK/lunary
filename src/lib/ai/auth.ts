@@ -15,7 +15,7 @@ export type AuthenticatedUser = {
 };
 
 export class UnauthorizedError extends Error {
-  constructor(message = 'Unauthorised') {
+  constructor(message = 'Unauthorized') {
     super(message);
     this.name = 'UnauthorizedError';
   }
@@ -71,6 +71,9 @@ export const requireUser = async (
     const headers = Object.fromEntries(request.headers.entries());
     const origin = request.headers.get('origin') || new URL(request.url).origin;
     const cookieHeader = request.headers.get('cookie');
+    const forceUnauthorized =
+      headers['x-test-force-unauth'] === 'true' ||
+      headers['x-test-force-unauth'] === '1';
 
     const sessionResponse = await (auth as any).api.getSession({
       headers,
@@ -98,7 +101,7 @@ export const requireUser = async (
       sessionResponse?.session?.user;
 
     if (!user?.id) {
-      if (isTestMode) {
+      if (isTestMode && !forceUnauthorized) {
         return getTestUser(request);
       }
 

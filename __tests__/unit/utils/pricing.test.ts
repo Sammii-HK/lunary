@@ -1,3 +1,53 @@
+/**
+ * @jest-environment node
+ */
+import {
+  hasFeatureAccess,
+  normalizePlanType,
+  getTrialDaysRemaining,
+} from '../../../utils/pricing';
+
+describe('pricing entitlements', () => {
+  it('grants free features and blocks paid features', () => {
+    expect(hasFeatureAccess('free', 'free', 'birth_chart')).toBe(true);
+    expect(hasFeatureAccess('free', 'free', 'personalized_horoscope')).toBe(
+      false,
+    );
+  });
+
+  it('grants paid features for active plan', () => {
+    expect(
+      hasFeatureAccess('active', 'lunary_plus', 'personalized_horoscope'),
+    ).toBe(true);
+  });
+
+  it('normalizes yearly plan to annual entitlements', () => {
+    expect(hasFeatureAccess('active', 'yearly', 'yearly_forecast')).toBe(true);
+  });
+
+  it('treats trialing users as trial', () => {
+    expect(
+      hasFeatureAccess('trialing', 'lunary_plus_ai', 'downloadable_reports'),
+    ).toBe(true);
+  });
+
+  it('normalizes plan types consistently', () => {
+    expect(normalizePlanType('annual')).toBe('lunary_plus_ai_annual');
+    expect(normalizePlanType('monthly')).toBe('lunary_plus');
+    expect(normalizePlanType('lunary_plus_ai')).toBe('lunary_plus_ai');
+  });
+
+  it('calculates remaining trial days from trial end date', () => {
+    const now = new Date('2026-01-14T12:00:00Z');
+    jest.useFakeTimers();
+    jest.setSystemTime(now);
+
+    const trialEndsAt = '2026-01-17T12:00:00Z';
+    expect(getTrialDaysRemaining(trialEndsAt)).toBe(3);
+
+    jest.useRealTimers();
+  });
+});
 import { hasFeatureAccess, PRICING_PLANS } from 'utils/pricing';
 
 describe('Pricing Utilities', () => {

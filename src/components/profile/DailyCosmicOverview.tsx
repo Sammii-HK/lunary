@@ -4,13 +4,15 @@ import { useMemo } from 'react';
 import { useUser } from '@/context/UserContext';
 import { useAstronomyContext } from '@/context/AstronomyContext';
 import { useSubscription } from '@/hooks/useSubscription';
-import { hasBirthChartAccess } from '../../../utils/pricing';
+import { hasFeatureAccess } from '../../../utils/pricing';
 import { Star } from 'lucide-react';
 import { getTarotCard } from '../../../utils/tarot/tarot';
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
+import dayOfYear from 'dayjs/plugin/dayOfYear';
 
 dayjs.extend(utc);
+dayjs.extend(dayOfYear);
 
 interface DailyCosmicOverviewProps {
   className?: string;
@@ -24,7 +26,11 @@ export function DailyCosmicOverview({
   const { currentMoonPhase, currentMoonConstellationPosition } =
     useAstronomyContext();
 
-  const isPremium = hasBirthChartAccess(subscription.status, subscription.plan);
+  const hasPersonalTarotAccess = hasFeatureAccess(
+    subscription.status,
+    subscription.plan,
+    'personal_tarot',
+  );
   const userName = user?.name;
   const userBirthday = user?.birthday;
 
@@ -33,8 +39,12 @@ export function DailyCosmicOverview({
     const dateStr = dayjs().utc().format('YYYY-MM-DD');
 
     let dailyCard = null;
-    if (userName && userBirthday) {
+    if (hasPersonalTarotAccess && userName && userBirthday) {
       dailyCard = getTarotCard(`daily-${dateStr}`, userName, userBirthday);
+    } else {
+      const dayOfYearNum = dayjs(dateStr).utc().dayOfYear();
+      const generalSeed = `cosmic-${dateStr}-${dayOfYearNum}-energy`;
+      dailyCard = getTarotCard(generalSeed);
     }
 
     const moonText = currentMoonPhase
@@ -105,6 +115,7 @@ export function DailyCosmicOverview({
   }, [
     currentMoonPhase,
     currentMoonConstellationPosition,
+    hasPersonalTarotAccess,
     userName,
     userBirthday,
   ]);
@@ -128,7 +139,7 @@ export function DailyCosmicOverview({
         {cosmicOverview.overview}
       </p>
 
-      {isPremium && cosmicOverview.focusBullets.length > 0 && (
+      {hasPersonalTarotAccess && cosmicOverview.focusBullets.length > 0 && (
         <div className='space-y-1.5'>
           <p className='text-xs font-medium text-zinc-400 uppercase tracking-wide'>
             Best focus for today

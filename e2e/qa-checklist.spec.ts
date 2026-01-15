@@ -27,6 +27,8 @@ test.describe('QA Checklist - Metadata Validation', () => {
     test(`${page.name} should have complete metadata`, async ({ page: pg }) => {
       await pg.goto(`${BASE_URL}${page.path}`, {
         waitUntil: 'domcontentloaded',
+        // Some pages (notably /grimoire) can take longer on first compile in dev/test.
+        timeout: 60000,
       });
 
       // Wait for page to fully load before checking metadata
@@ -127,7 +129,13 @@ test.describe('QA Checklist - Mobile Responsiveness', () => {
 
     for (const pageInfo of keyPages.slice(0, 3)) {
       // Test first 3 pages
-      await page.goto(`${BASE_URL}${pageInfo.path}`);
+      await page.goto(`${BASE_URL}${pageInfo.path}`, {
+        waitUntil: 'domcontentloaded',
+        timeout: 60000,
+      });
+      await page
+        .waitForLoadState('networkidle', { timeout: 10000 })
+        .catch(() => {});
 
       // Check for horizontal scroll
       const bodyWidth = await page.evaluate(() => document.body.scrollWidth);
@@ -254,14 +262,17 @@ test.describe('QA Checklist - Performance', () => {
 test.describe('QA Checklist - Accessibility', () => {
   test('Images should have alt text', async ({ page }) => {
     await page.goto(`${BASE_URL}/`);
+    await page.waitForLoadState('domcontentloaded');
+    await page.waitForTimeout(1000);
 
-    const images = await page.locator('img').all();
+    // Avoid per-element auto-waits that can hang during hydration/re-renders.
+    const altAttributes = await page
+      .locator('img')
+      .evaluateAll((imgs) => imgs.map((img) => img.getAttribute('alt')));
 
-    for (const img of images) {
-      const alt = await img.getAttribute('alt');
-      // Decorative images can have empty alt, but should have the attribute
-      const altAttribute = await img.getAttribute('alt');
-      expect(altAttribute).not.toBeNull();
+    // Decorative images can have empty alt, but should have the attribute.
+    for (const alt of altAttributes) {
+      expect(alt).not.toBeNull();
     }
   });
 
@@ -351,8 +362,13 @@ test.describe('QA Checklist - Accessibility', () => {
 
 test.describe('QA Checklist - SEO', () => {
   test('Pages should have proper heading hierarchy', async ({ page }) => {
-    await page.goto(`${BASE_URL}/`);
-    await page.waitForLoadState('networkidle');
+    await page.goto(`${BASE_URL}/`, {
+      waitUntil: 'domcontentloaded',
+      timeout: 60000,
+    });
+    await page
+      .waitForLoadState('networkidle', { timeout: 10000 })
+      .catch(() => {});
 
     // Wait for h1 to be visible (handles dynamic rendering)
     await page.waitForSelector('h1', { timeout: 10000 }).catch(() => {});

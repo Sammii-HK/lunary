@@ -11,9 +11,7 @@ if (!process.env.STRIPE_SECRET_KEY) {
   process.exit(1);
 }
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
-  apiVersion: '2024-11-20.acacia',
-});
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
 // Approximate conversion rates
 const CURRENCY_RATES: Record<string, number> = {
@@ -54,8 +52,8 @@ function convertToLocalCurrency(usdPrice: number, currency: string): number {
     return Math.max(1, Math.ceil(converted));
   }
 
-  // Minimum 0.99 for yearly plans
-  return Math.max(0.99, priceWith99);
+  // Do not undercut base conversion for yearly pricing
+  return Math.max(converted, priceWith99);
 }
 
 async function updateYearlyPricing(dryRun: boolean) {

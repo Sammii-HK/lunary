@@ -11,7 +11,7 @@ import {
   getCrystalGuidance,
 } from '../../utils/crystals/personalizedCrystals';
 import { useSubscription } from '../hooks/useSubscription';
-import { hasBirthChartAccess, hasDateAccess } from '../../utils/pricing';
+import { hasFeatureAccess, hasDateAccess } from '../../utils/pricing';
 import { useAstronomyContext } from '../context/AstronomyContext';
 import dayjs from 'dayjs';
 import Link from 'next/link';
@@ -34,9 +34,10 @@ export const CrystalWidget = () => {
     });
   }, []);
 
-  const hasChartAccess = hasBirthChartAccess(
+  const hasPersonalCrystalAccess = hasFeatureAccess(
     subscription.status,
     subscription.plan,
+    'personalized_crystal_recommendations',
   );
 
   const normalizedDate = useMemo(() => {
@@ -48,10 +49,10 @@ export const CrystalWidget = () => {
 
   // Memoize general crystal for non-premium users
   const generalCrystal = useMemo(() => {
-    if (hasChartAccess) return null;
+    if (hasPersonalCrystalAccess) return null;
     if (!canAccessDate) return null; // Don't show general crystal if date is paywalled
     return getGeneralCrystalRecommendation(normalizedDate);
-  }, [hasChartAccess, canAccessDate, normalizedDate]);
+  }, [hasPersonalCrystalAccess, canAccessDate, normalizedDate]);
 
   const crystalData = useMemo(() => {
     if (!birthChart || !userBirthday || !observer) return null;
@@ -75,10 +76,10 @@ export const CrystalWidget = () => {
   }, [normalizedDate, userBirthday, observer, birthChart, canAccessDate]);
 
   useEffect(() => {
-    if (crystalData && hasChartAccess && user?.id) {
+    if (crystalData && hasPersonalCrystalAccess && user?.id) {
       conversionTracking.crystalRecommendationsViewed(user.id);
     }
-  }, [crystalData, hasChartAccess, user?.id]);
+  }, [crystalData, hasPersonalCrystalAccess, user?.id]);
 
   // Check date access - show paywall if date is restricted
   if (!canAccessDate) {
@@ -98,7 +99,7 @@ export const CrystalWidget = () => {
   }
 
   // If user doesn't have birth chart access, show general crystal recommendation
-  if (!hasChartAccess) {
+  if (!hasPersonalCrystalAccess) {
     if (!generalCrystal) {
       return (
         <div className='py-3 px-4 border border-stone-800 rounded-md w-full h-full flex flex-col min-h-64'>

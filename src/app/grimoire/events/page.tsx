@@ -13,7 +13,7 @@ export const metadata: Metadata = {
     'astrology calendar',
     'mercury retrograde',
     'venus retrograde',
-    'eclipses 2025',
+    'eclipses 2026',
     'planetary transits',
   ],
   openGraph: {

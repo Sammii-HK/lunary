@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { ChevronDown, Sparkles } from 'lucide-react';
 import { useSubscription } from '@/hooks/useSubscription';
-import { hasBirthChartAccess } from '../../../utils/pricing';
+import { hasFeatureAccess } from '../../../utils/pricing';
 import {
   detectPrimaryArchetype,
   hasEnoughDataForArchetypes,
@@ -17,7 +17,11 @@ interface ArchetypeBarProps {
 
 export function ArchetypeBar({ className = '' }: ArchetypeBarProps) {
   const subscription = useSubscription();
-  const isPremium = hasBirthChartAccess(subscription.status, subscription.plan);
+  const hasCosmicProfileAccess = hasFeatureAccess(
+    subscription.status,
+    subscription.plan,
+    'cosmic_profile',
+  );
 
   const [archetype, setArchetype] = useState<ArchetypeResult | null>(null);
   const [loading, setLoading] = useState(true);
@@ -108,12 +112,12 @@ export function ArchetypeBar({ className = '' }: ArchetypeBarProps) {
       {isExpanded && (
         <div className='px-3 pb-3 space-y-3'>
           <p className='text-sm text-zinc-300 leading-relaxed'>
-            {isPremium
+            {hasCosmicProfileAccess
               ? archetype.premiumNarrative.split('\n\n')[0]
               : archetype.freeSummary}
           </p>
 
-          {isPremium && archetype.suggestedWork.length > 0 && (
+          {hasCosmicProfileAccess && archetype.suggestedWork.length > 0 && (
             <div className='space-y-1.5'>
               <p className='text-xs font-medium text-zinc-400 uppercase tracking-wide'>
                 Suggested practices
@@ -132,7 +136,7 @@ export function ArchetypeBar({ className = '' }: ArchetypeBarProps) {
             </div>
           )}
 
-          {!isPremium && (
+          {!hasCosmicProfileAccess && (
             <p className='text-xs text-zinc-500'>
               Upgrade for deeper archetype insights and practices.
             </p>

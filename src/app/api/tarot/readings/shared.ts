@@ -251,8 +251,7 @@ export const computeUsageSnapshot = async (
       SELECT COUNT(*)::int as count
       FROM tarot_readings
       WHERE user_id = ${userId}
-        AND archived_at IS NULL
-        AND created_at >= NOW() - INTERVAL '30 days'
+        AND created_at >= date_trunc('month', NOW())
     `;
 
     monthlyUsed =

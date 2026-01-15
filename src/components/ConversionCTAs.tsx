@@ -12,10 +12,11 @@ import {
   getFeatureLinkText,
   getFeatureHref,
 } from '@/utils/messaging';
+import type { FeatureKey } from '../../utils/pricing';
 
 interface ConversionCTAProps {
   featureName?: string;
-  feature?: string; // Feature key to check if it's free or paid
+  feature?: FeatureKey; // Feature key to check if it's free or paid
   variant?: 'button' | 'link' | 'inline';
   size?: 'sm' | 'md' | 'lg';
   className?: string;

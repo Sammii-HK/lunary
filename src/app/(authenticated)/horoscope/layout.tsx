@@ -3,7 +3,7 @@ import { Metadata } from 'next';
 export const metadata: Metadata = {
   title: 'Daily Horoscope [Personalized to Your Birth Chart] | Lunary',
   description:
-    'Not generic zodiac predictions. Get YOUR daily horoscope calculated from your exact birth time, date & location. Real planetary transits affecting YOU today. Try free for 7 days.',
+    'Not generic zodiac predictions. Get YOUR daily horoscope calculated from your exact birth time, date & location. Real planetary transits affecting YOU today. Try a free monthly or annual trial.',
   keywords: [
     'personalized horoscope',
     'daily horoscope',
@@ -43,7 +43,7 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: 'Daily Horoscope [Personalized to Your Birth Chart] | Lunary',
     description:
-      'Not generic zodiac predictions. YOUR daily horoscope calculated from your exact birth time. Try free for 7 days.',
+      'Not generic zodiac predictions. YOUR daily horoscope calculated from your exact birth time. Try a free monthly or annual trial.',
     images: ['/api/og/horoscope'],
   },
   robots: {

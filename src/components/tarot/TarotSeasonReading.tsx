@@ -3,7 +3,7 @@
 import { useState, useMemo } from 'react';
 import { ChevronDown, Sparkles } from 'lucide-react';
 import { useSubscription } from '@/hooks/useSubscription';
-import { hasBirthChartAccess } from '../../../utils/pricing';
+import { hasFeatureAccess } from '../../../utils/pricing';
 import type { TrendAnalysis } from '../../../utils/tarot/improvedTarot';
 
 interface TarotSeasonReadingProps {
@@ -173,7 +173,11 @@ export function TarotSeasonReading({
   className = '',
 }: TarotSeasonReadingProps) {
   const subscription = useSubscription();
-  const isPremium = hasBirthChartAccess(subscription.status, subscription.plan);
+  const hasTarotPatternsAccess = hasFeatureAccess(
+    subscription.status,
+    subscription.plan,
+    'tarot_patterns',
+  );
   const [isExpanded, setIsExpanded] = useState(false);
 
   const seasonData = useMemo(() => {
@@ -181,9 +185,9 @@ export function TarotSeasonReading({
 
     return {
       name: generateSeasonName(trendAnalysis),
-      ...generateNarrative(trendAnalysis, period, isPremium),
+      ...generateNarrative(trendAnalysis, period, hasTarotPatternsAccess),
     };
-  }, [trendAnalysis, period, isPremium]);
+  }, [trendAnalysis, period, hasTarotPatternsAccess]);
 
   if (!trendAnalysis || !seasonData) {
     return null;
@@ -223,7 +227,7 @@ export function TarotSeasonReading({
             {seasonData.summary}
           </p>
 
-          {isPremium && seasonData.paragraphs.length > 0 && (
+          {hasTarotPatternsAccess && seasonData.paragraphs.length > 0 && (
             <div className='space-y-3'>
               {seasonData.paragraphs.map((paragraph, i) => (
                 <p key={i} className='text-sm text-zinc-300 leading-relaxed'>
@@ -233,7 +237,7 @@ export function TarotSeasonReading({
             </div>
           )}
 
-          {isPremium && seasonData.focusBullets.length > 0 && (
+          {hasTarotPatternsAccess && seasonData.focusBullets.length > 0 && (
             <div className='pt-3 border-t border-zinc-800/50'>
               <p className='text-xs font-medium text-zinc-400 uppercase tracking-wide mb-2'>
                 What to focus on
@@ -252,7 +256,7 @@ export function TarotSeasonReading({
             </div>
           )}
 
-          {!isPremium && (
+          {!hasTarotPatternsAccess && (
             <p className='text-xs text-zinc-500'>
               Upgrade for detailed narrative and focus guidance.
             </p>

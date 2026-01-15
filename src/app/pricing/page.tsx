@@ -10,8 +10,7 @@ import {
   getPricingPlansWithStripeData,
   type PricingPlan,
 } from '../../../utils/pricing';
-import { createCheckoutSession } from '../../../utils/stripe';
-import { loadStripe } from '@stripe/stripe-js';
+import { createCheckoutSession, getStripePromise } from '../../../utils/stripe';
 import { Check, Sparkles, Star, ChevronDown, ChevronUp } from 'lucide-react';
 import { useSubscription } from '../../hooks/useSubscription';
 import { useAuthStatus } from '@/components/AuthStatus';
@@ -192,12 +191,17 @@ export default function PricingPage() {
         throw new Error('Missing sessionId from checkout response');
       }
 
-      const stripe = await loadStripe(
-        process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!,
-      );
-      if (stripe) {
-        await stripe.redirectToCheckout({ sessionId });
+      const stripePromise = getStripePromise();
+      if (!stripePromise) {
+        throw new Error('Stripe is not configured');
       }
+
+      const stripe = await stripePromise;
+      if (!stripe) {
+        throw new Error('Stripe failed to initialize');
+      }
+
+      await stripe.redirectToCheckout({ sessionId });
     } catch (error) {
       console.error('Error creating checkout session:', error);
       alert('Something went wrong. Please try again.');
@@ -255,12 +259,17 @@ export default function PricingPage() {
     {
       question: 'What makes Lunary different?',
       answer:
-        'Every insight is calculated from your exact birth chart - not generic sun sign horoscopes.',
+        'Every insight is calculated from your exact birth chart - not generic sun sign horoscopes. Astronomy powers the charts - AI only appears in Astral Guide chat.',
     },
     {
-      question: 'Is AI chat unlimited?',
+      question: 'What are the Astral Guide chat limits?',
       answer:
-        'Lunary includes different chat limits depending on your plan.\n\nFree accounts include a small number of messages each day.\n\nLunary+ offers generous daily chat with conversation memory.\n\nLunary+ AI includes effectively unlimited chat for everyday use.',
+        'Astral Guide chat limits are set per plan.\n\nFree accounts include up to 3 messages per day.\n\nLunary+ includes up to 50 messages per day.\n\nLunary+ Pro includes up to 300 messages per day.',
+    },
+    {
+      question: 'What are “recent messages” and “memory snippets”?',
+      answer:
+        'Recent messages are the last chat turns included as live context. Memory snippets are short, saved notes about your preferences or recurring themes. Plans vary in how many recent messages and memory snippets are included.',
     },
   ];
 
@@ -317,9 +326,8 @@ export default function PricingPage() {
 
             <p className='text-base md:text-lg text-zinc-400 max-w-xl mx-auto leading-relaxed'>
               Start with free access to your birth chart, moon phases, and
-              cosmic insights. Upgrade for personalized readings based on your
-              exact birth chart. Astronomy powers the charts—AI only appears in
-              Astral Guide chat.
+              general cosmic insights. Upgrade for personalized readings based
+              on your exact birth chart.
             </p>
           </div>
         </section>

@@ -78,7 +78,7 @@ Lunary blends birth chart astrology, real-time moon phases, tarot, and lunar cyc
 
 - Free: Limited features, 3 AI messages/day
 - Lunary+ ($4.99/mo): Core subscription, 50 AI messages/day
-- Lunary+ AI ($9.99/mo): Premium tier, 300 AI messages/day
+- Lunary+ Pro ($9.99/mo): Premium tier, 300 AI messages/day
 
 ## Technical
 

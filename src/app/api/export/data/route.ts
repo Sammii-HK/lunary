@@ -67,7 +67,7 @@ export async function GET(request: NextRequest) {
     if (!hasFeatureAccess(subscriptionStatus, planType, 'data_export')) {
       return NextResponse.json(
         {
-          error: 'Data export is available for Lunary+ AI Annual subscribers',
+          error: 'Data export is available for Lunary+ Pro Annual subscribers',
           requiresUpgrade: true,
         },
         { status: 403 },

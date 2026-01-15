@@ -57,7 +57,11 @@ export const comparisonData: Record<string, ComparisonData> = {
       {
         name: 'Free Trial',
         description: 'Try before you buy',
-        lunary: { type: 'text', value: '7 days', highlight: true },
+        lunary: {
+          type: 'text',
+          value: '7 days (monthly) / 14 days (annual)',
+          highlight: true,
+        },
         competitor: { type: 'text', value: 'Free tier available' },
       },
       {
@@ -86,7 +90,7 @@ export const comparisonData: Record<string, ComparisonData> = {
       {
         title: 'Free Trial with No Payment During Trial',
         description:
-          'Try Lunary free for 7 days. No card required during the trial, making it easy to explore all features risk-free.',
+          'Try Lunary free with a 7-day monthly or 14-day annual trial. No card required during the trial, making it easy to explore all features risk-free.',
       },
     ],
     competitorStrengths:
@@ -143,7 +147,11 @@ export const comparisonData: Record<string, ComparisonData> = {
       {
         name: 'Free Trial',
         description: 'Try before you buy',
-        lunary: { type: 'text', value: '7 days', highlight: true },
+        lunary: {
+          type: 'text',
+          value: '7 days (monthly) / 14 days (annual)',
+          highlight: true,
+        },
         competitor: { type: 'text', value: 'Limited free features' },
       },
       {
@@ -230,7 +238,7 @@ export const comparisonData: Record<string, ComparisonData> = {
       {
         title: 'Transparent, Flat Pricing',
         description:
-          'Lunary charges a simple $4.99/month for unlimited access. Nebula uses credit-based pricing that can add up quickly, especially for frequent users.',
+          'Lunary charges a simple $4.99/month for full access to core personalized features. Nebula uses credit-based pricing that can add up quickly, especially for frequent users.',
       },
       {
         title: 'Real Astronomical Calculations',
@@ -303,7 +311,11 @@ export const comparisonData: Record<string, ComparisonData> = {
       {
         name: 'Free Trial',
         description: 'Try before you buy',
-        lunary: { type: 'text', value: '7 days', highlight: true },
+        lunary: {
+          type: 'text',
+          value: '7 days (monthly) / 14 days (annual)',
+          highlight: true,
+        },
         competitor: { type: 'text', value: 'Limited free features' },
       },
       {
@@ -402,7 +414,11 @@ export const comparisonData: Record<string, ComparisonData> = {
       {
         name: 'Free Trial',
         description: 'Try before you buy',
-        lunary: { type: 'text', value: '7 days', highlight: true },
+        lunary: {
+          type: 'text',
+          value: '7 days (monthly) / 14 days (annual)',
+          highlight: true,
+        },
         competitor: { type: 'text', value: 'Varies by plan' },
       },
       {
@@ -496,7 +512,11 @@ export const comparisonData: Record<string, ComparisonData> = {
       {
         name: 'Free Trial',
         description: 'Try before you buy',
-        lunary: { type: 'text', value: '7 days', highlight: true },
+        lunary: {
+          type: 'text',
+          value: '7 days (monthly) / 14 days (annual)',
+          highlight: true,
+        },
         competitor: { type: 'text', value: 'Limited free features' },
       },
       {
@@ -525,7 +545,7 @@ export const comparisonData: Record<string, ComparisonData> = {
       {
         title: 'Free Trial with No Payment During Trial',
         description:
-          'Try Lunary free for 7 days. No card required during the trial, making it easy to explore all features risk-free.',
+          'Try Lunary free with a 7-day monthly or 14-day annual trial. No card required during the trial, making it easy to explore all features risk-free.',
       },
     ],
     competitorStrengths:
@@ -662,7 +682,11 @@ export const comparisonData: Record<string, ComparisonData> = {
       {
         name: 'Free Trial',
         description: 'Try before you buy',
-        lunary: { type: 'text', value: '7 days', highlight: true },
+        lunary: {
+          type: 'text',
+          value: '7 days (monthly) / 14 days (annual)',
+          highlight: true,
+        },
         competitor: { type: 'text', value: 'Varies by plan' },
       },
       {
@@ -1262,7 +1286,11 @@ export const comparisonData: Record<string, ComparisonData> = {
       {
         name: 'Free Trial',
         description: 'Try before you buy',
-        lunary: { type: 'text', value: '7 days', highlight: true },
+        lunary: {
+          type: 'text',
+          value: '7 days (monthly) / 14 days (annual)',
+          highlight: true,
+        },
         competitor: { type: 'text', value: 'Limited free features' },
       },
       {

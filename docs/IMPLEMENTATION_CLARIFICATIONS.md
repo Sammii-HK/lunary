@@ -81,7 +81,7 @@ ORDER BY conversion_rate_percent DESC;
 **Current Pricing Tiers**:
 
 - **Lunary+** (£4.99/month) - Most popular (marked in pricing)
-- **Lunary+ AI** (£8.99/month) - Higher value tier
+- **Lunary+ Pro** (£8.99/month) - Higher value tier
 - **Annual** (£79.99/year) - Best value (26% savings)
 
 The analytics dashboard at `/admin/analytics` shows:

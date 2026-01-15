@@ -8,39 +8,9 @@ import { SmartTrialButton } from './SmartTrialButton';
 import { X } from 'lucide-react';
 import { captureEvent } from '@/lib/posthog-client';
 import { Button } from './ui/button';
+import type { FeatureKey } from '../../utils/pricing';
 
-type FeatureName =
-  | 'moon_phases'
-  | 'general_horoscope'
-  | 'general_tarot'
-  | 'general_crystal_recommendations'
-  | 'grimoire'
-  | 'lunar_calendar'
-  | 'weekly_ai_ritual'
-  | 'birth_chart'
-  | 'birthday_collection'
-  | 'personalized_horoscope'
-  | 'personal_tarot'
-  | 'personalized_crystal_recommendations'
-  | 'transit_calendar'
-  | 'tarot_patterns'
-  | 'solar_return'
-  | 'cosmic_profile'
-  | 'moon_circles'
-  | 'ritual_generator'
-  | 'collections'
-  | 'unlimited_ai_chat'
-  | 'deeper_readings'
-  | 'weekly_reports'
-  | 'saved_chat_threads'
-  | 'downloadable_reports'
-  | 'ai_ritual_generation'
-  | 'unlimited_collections'
-  | 'advanced_patterns'
-  | 'unlimited_tarot_spreads'
-  | 'yearly_forecast'
-  | 'data_export'
-  | 'monthly_insights';
+type FeatureName = FeatureKey;
 
 interface PaywallProps {
   feature: FeatureName;
@@ -154,15 +124,15 @@ export function Paywall({ feature, children, fallback }: PaywallProps) {
   );
 }
 
-function getFeatureDescription(feature: string): string {
+function getFeatureDescription(feature: FeatureKey): string {
   switch (feature) {
     case 'birth_chart':
       return 'Access your complete birth chart with detailed planetary positions, aspects, and cosmic patterns unique to your birth time and location.';
-    case 'detailed_horoscope':
+    case 'personalized_horoscope':
       return 'Get daily personalized horoscopes that go beyond sun signs, incorporating your entire birth chart for truly customized guidance.';
     case 'tarot_patterns':
       return 'Discover deep insights through tarot pattern analysis, revealing trends and themes in your cosmic journey over time.';
-    case 'crystal_recommendations':
+    case 'personalized_crystal_recommendations':
       return 'Receive daily crystal recommendations perfectly aligned with your birth chart and current cosmic energies.';
     case 'downloadable_reports':
       return 'Generate personalized PDF cosmic reports with transits, moon phases, tarot insights, and rituals. Create shareable reports for launches, birthdays, and special moments.';
@@ -243,7 +213,7 @@ export function UpgradePrompt() {
   };
 
   return (
-    <div className='fixed bottom-4 right-4 bg-gray-900 border border-gray-700 rounded-lg p-4 max-w-sm z-50 relative'>
+    <div className='fixed bottom-4 right-4 bg-gray-900 border border-gray-700 rounded-lg p-4 max-w-sm z-50'>
       {isTrialActive && (
         <button
           onClick={handleDismiss}

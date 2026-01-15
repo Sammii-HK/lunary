@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { Sparkles } from 'lucide-react';
 import { useSubscription } from '@/hooks/useSubscription';
-import { hasBirthChartAccess } from '../../utils/pricing';
+import { hasFeatureAccess, type FeatureKey } from '../../utils/pricing';
 
 type PathwayVariant = 'tarot' | 'themes' | 'shadow' | 'transits' | 'guide';
 
@@ -37,10 +37,26 @@ const VARIANT_COPY: Record<
       'See how planetary movements affect your unique birth chart with detailed transit analysis.',
   },
   guide: {
-    title: 'Unlimited Astral Guide',
+    title: 'Expanded Astral Guide',
     description:
-      'Get unlimited Astral Guide chat grounded in your chart and journey.',
+      'Get higher daily chat limits and deeper guidance grounded in your chart.',
   },
+};
+
+const FEATURE_BY_VARIANT: Record<PathwayVariant, FeatureKey> = {
+  tarot: 'tarot_patterns',
+  themes: 'cosmic_profile',
+  shadow: 'cosmic_profile',
+  transits: 'personalized_transit_readings',
+  guide: 'unlimited_ai_chat',
+};
+
+const CTA_BY_VARIANT: Record<PathwayVariant, string> = {
+  tarot: 'Unlock tarot patterns with Lunary+',
+  themes: 'Unlock life themes with Lunary+',
+  shadow: 'Unlock archetype insights with Lunary+',
+  transits: 'Unlock personal transits with Lunary+',
+  guide: 'Unlock Astral Guide chat with Lunary+',
 };
 
 export function PremiumPathway({
@@ -48,13 +64,19 @@ export function PremiumPathway({
   className = '',
 }: PremiumPathwayProps) {
   const subscription = useSubscription();
-  const isPremium = hasBirthChartAccess(subscription.status, subscription.plan);
+  const requiredFeature = FEATURE_BY_VARIANT[variant];
+  const hasAccess = hasFeatureAccess(
+    subscription.status,
+    subscription.plan,
+    requiredFeature,
+  );
 
-  if (isPremium) {
+  if (hasAccess) {
     return null;
   }
 
   const copy = VARIANT_COPY[variant];
+  const ctaLabel = CTA_BY_VARIANT[variant];
 
   return (
     <div
@@ -71,7 +93,7 @@ export function PremiumPathway({
             href='/pricing'
             className='inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-lunary-primary-600 hover:bg-lunary-primary-700 text-white transition-colors'
           >
-            Upgrade Now
+            {ctaLabel}
           </Link>
         </div>
       </div>

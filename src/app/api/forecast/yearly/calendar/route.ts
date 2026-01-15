@@ -295,7 +295,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json(
         {
           error:
-            'Yearly forecast calendar is available for Lunary+ AI Annual subscribers',
+            'Yearly forecast calendar is available for Lunary+ Pro Annual subscribers',
           requiresUpgrade: true,
         },
         { status: 403 },

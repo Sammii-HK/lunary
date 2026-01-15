@@ -70,7 +70,7 @@ export function GeneratorClient() {
           setStatus('Please sign in to use the Cosmic Report Generator');
         } else if (data.requiresUpgrade) {
           setStatus(
-            'Upgrade to Lunary+ AI to unlock the Cosmic Report Generator',
+            'Upgrade to Lunary+ Pro to unlock the Cosmic Report Generator',
           );
         } else {
           throw new Error(data.message || 'Failed to generate report');
@@ -150,7 +150,7 @@ export function GeneratorClient() {
           <h1 className='text-4xl font-semibold'>Cosmic Report Generator</h1>
           <p className='text-sm text-zinc-300'>
             Build launch-ready cosmic briefings with custom sections, optional
-            share links, and PDF exports. Available for Lunary+ AI subscribers.
+            share links, and PDF exports. Available for Lunary+ Pro subscribers.
           </p>
         </section>
 

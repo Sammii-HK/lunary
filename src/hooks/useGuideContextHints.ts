@@ -4,7 +4,7 @@ import { useMemo } from 'react';
 import { useUser } from '@/context/UserContext';
 import { useAstronomyContext } from '@/context/AstronomyContext';
 import { useSubscription } from './useSubscription';
-import { hasBirthChartAccess } from '../../utils/pricing';
+import { hasFeatureAccess } from '../../utils/pricing';
 
 export interface GuideContextHint {
   id: string;
@@ -122,25 +122,55 @@ export function useGuideContextHints(
   const subscription = useSubscription();
   const { currentMoonPhase } = useAstronomyContext();
 
-  const hasChartAccess = hasBirthChartAccess(
+  const hasPersonalizedHoroscopeAccess = hasFeatureAccess(
     subscription.status,
     subscription.plan,
+    'personalized_horoscope',
+  );
+  const hasTarotPatternsAccess = hasFeatureAccess(
+    subscription.status,
+    subscription.plan,
+    'tarot_patterns',
+  );
+  const hasTransitsAccess = hasFeatureAccess(
+    subscription.status,
+    subscription.plan,
+    'personalized_transit_readings',
+  );
+  const hasCosmicProfileAccess = hasFeatureAccess(
+    subscription.status,
+    subscription.plan,
+    'cosmic_profile',
+  );
+  const hasMonthlyInsightsAccess = hasFeatureAccess(
+    subscription.status,
+    subscription.plan,
+    'monthly_insights',
   );
 
   const hint = useMemo(() => {
     const context: HintContext = {
       moonPhase: currentMoonPhase || null,
       hasBirthChart: !!user?.birthChart,
-      hasTarotPatterns: false,
-      hasJournalPatterns: false,
-      hasTransits: !!user?.birthChart,
-      hasLifeTheme: false,
-      isPremium: hasChartAccess,
+      hasTarotPatterns: hasTarotPatternsAccess,
+      hasJournalPatterns: hasMonthlyInsightsAccess,
+      hasTransits: hasTransitsAccess && !!user?.birthChart,
+      hasLifeTheme: hasCosmicProfileAccess,
+      isPremium: hasPersonalizedHoroscopeAccess,
     };
 
     const hintGenerator = LOCATION_HINTS[location];
     return hintGenerator ? hintGenerator(context) : null;
-  }, [location, currentMoonPhase, user?.birthChart, hasChartAccess]);
+  }, [
+    location,
+    currentMoonPhase,
+    user?.birthChart,
+    hasPersonalizedHoroscopeAccess,
+    hasTarotPatternsAccess,
+    hasTransitsAccess,
+    hasCosmicProfileAccess,
+    hasMonthlyInsightsAccess,
+  ]);
 
   return hint;
 }
@@ -152,20 +182,41 @@ export function useGuideContextHintsMultiple(
   const subscription = useSubscription();
   const { currentMoonPhase } = useAstronomyContext();
 
-  const hasChartAccess = hasBirthChartAccess(
+  const hasPersonalizedHoroscopeAccess = hasFeatureAccess(
     subscription.status,
     subscription.plan,
+    'personalized_horoscope',
+  );
+  const hasTarotPatternsAccess = hasFeatureAccess(
+    subscription.status,
+    subscription.plan,
+    'tarot_patterns',
+  );
+  const hasTransitsAccess = hasFeatureAccess(
+    subscription.status,
+    subscription.plan,
+    'personalized_transit_readings',
+  );
+  const hasCosmicProfileAccess = hasFeatureAccess(
+    subscription.status,
+    subscription.plan,
+    'cosmic_profile',
+  );
+  const hasMonthlyInsightsAccess = hasFeatureAccess(
+    subscription.status,
+    subscription.plan,
+    'monthly_insights',
   );
 
   const hints = useMemo(() => {
     const context: HintContext = {
       moonPhase: currentMoonPhase || null,
       hasBirthChart: !!user?.birthChart,
-      hasTarotPatterns: false,
-      hasJournalPatterns: false,
-      hasTransits: !!user?.birthChart,
-      hasLifeTheme: false,
-      isPremium: hasChartAccess,
+      hasTarotPatterns: hasTarotPatternsAccess,
+      hasJournalPatterns: hasMonthlyInsightsAccess,
+      hasTransits: hasTransitsAccess && !!user?.birthChart,
+      hasLifeTheme: hasCosmicProfileAccess,
+      isPremium: hasPersonalizedHoroscopeAccess,
     };
 
     const allHints: GuideContextHint[] = [];
@@ -180,7 +231,16 @@ export function useGuideContextHintsMultiple(
 
     allHints.sort((a, b) => b.priority - a.priority);
     return allHints.slice(0, 3);
-  }, [locations, currentMoonPhase, user?.birthChart, hasChartAccess]);
+  }, [
+    locations,
+    currentMoonPhase,
+    user?.birthChart,
+    hasPersonalizedHoroscopeAccess,
+    hasTarotPatternsAccess,
+    hasTransitsAccess,
+    hasCosmicProfileAccess,
+    hasMonthlyInsightsAccess,
+  ]);
 
   return hints;
 }

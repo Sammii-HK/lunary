@@ -36,8 +36,8 @@ interface UpgradePromptProps {
 const PLAN_LABELS: Record<PlanType, string> = {
   free: 'Cosmic Explorer',
   lunary_plus: 'Lunary+',
-  lunary_plus_ai: 'Lunary+ AI',
-  lunary_plus_ai_annual: 'Lunary+ AI Annual',
+  lunary_plus_ai: 'Lunary+ Pro',
+  lunary_plus_ai_annual: 'Lunary+ Pro Annual',
 };
 
 const TRIAL_UPSELL_DISMISSAL_KEY = 'trialUpsellDismissed';

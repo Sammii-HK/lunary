@@ -6,9 +6,10 @@ import { useAuthStatus } from './AuthStatus';
 import { UpgradePrompt } from './UpgradePrompt';
 import { conversionTracking } from '@/lib/analytics';
 import { Lock as LockIcon } from 'lucide-react';
+import type { FeatureKey } from '../../utils/pricing';
 
 interface FeatureGateProps {
-  feature: string;
+  feature: FeatureKey;
   children: ReactNode;
   showPreview?: boolean;
   previewContent?: ReactNode;
@@ -30,7 +31,7 @@ export function FeatureGate({
 
   const { hasAccess, isTrialActive: _isTrialActive } = subscription;
 
-  const hasFeatureAccess = hasAccess(feature as any);
+  const hasFeatureAccess = hasAccess(feature);
 
   if (hasFeatureAccess) {
     return <>{children}</>;

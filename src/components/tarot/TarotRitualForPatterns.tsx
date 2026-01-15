@@ -3,7 +3,7 @@
 import { useState, useMemo } from 'react';
 import { ChevronDown, Moon } from 'lucide-react';
 import { useSubscription } from '@/hooks/useSubscription';
-import { hasBirthChartAccess } from '../../../utils/pricing';
+import { hasFeatureAccess } from '../../../utils/pricing';
 import type { TrendAnalysis } from '../../../utils/tarot/improvedTarot';
 
 interface Ritual {
@@ -136,7 +136,11 @@ export function TarotRitualForPatterns({
   className = '',
 }: TarotRitualForPatternsProps) {
   const subscription = useSubscription();
-  const isPremium = hasBirthChartAccess(subscription.status, subscription.plan);
+  const hasTarotPatternsAccess = hasFeatureAccess(
+    subscription.status,
+    subscription.plan,
+    'tarot_patterns',
+  );
   const [isExpanded, setIsExpanded] = useState(false);
 
   const ritual = useMemo(() => {
@@ -180,7 +184,7 @@ export function TarotRitualForPatterns({
             {ritual.oneLine}
           </p>
 
-          {isPremium ? (
+          {hasTarotPatternsAccess ? (
             <>
               <div className='space-y-3'>
                 <div>

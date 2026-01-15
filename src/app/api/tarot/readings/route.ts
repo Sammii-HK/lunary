@@ -41,9 +41,11 @@ export async function GET(request: NextRequest) {
 
     const historyCutoffDays = usage.historyWindowDays;
     const cutoffDate =
-      historyCutoffDays && Number.isFinite(historyCutoffDays)
-        ? new Date(Date.now() - historyCutoffDays * 24 * 60 * 60 * 1000)
-        : null;
+      subscription.plan === 'free'
+        ? new Date(new Date().getFullYear(), new Date().getMonth(), 1)
+        : historyCutoffDays && Number.isFinite(historyCutoffDays)
+          ? new Date(Date.now() - historyCutoffDays * 24 * 60 * 60 * 1000)
+          : null;
 
     const values: (string | number | boolean | null | undefined)[] = [userId];
     const whereClauses = ['user_id = $1', 'archived_at IS NULL'];

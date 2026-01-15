@@ -10,7 +10,7 @@ import { Sparkles, ArrowRight } from 'lucide-react';
 import { getGeneralHoroscope } from '../../../utils/astrology/generalHoroscope';
 import { getEnhancedPersonalizedHoroscope } from '../../../utils/astrology/enhancedHoroscope';
 import { useSubscription } from '../../hooks/useSubscription';
-import { hasBirthChartAccess } from '../../../utils/pricing';
+import { hasFeatureAccess } from '../../../utils/pricing';
 import {
   analyzeLifeThemes,
   hasEnoughDataForThemes,
@@ -28,14 +28,17 @@ export const DailyInsightCard = () => {
   const birthChart = user?.birthChart;
   const [lifeThemeName, setLifeThemeName] = useState<string | null>(null);
 
-  const hasChartAccess = hasBirthChartAccess(
+  const hasPersonalizedAccess = hasFeatureAccess(
     subscription.status,
     subscription.plan,
+    'personalized_horoscope',
   );
 
-  // Birth chart is free but requires account - check authentication
   const canAccessPersonalized =
-    authStatus.isAuthenticated && hasChartAccess && userBirthday && birthChart;
+    authStatus.isAuthenticated &&
+    hasPersonalizedAccess &&
+    userBirthday &&
+    birthChart;
 
   useEffect(() => {
     if (!canAccessPersonalized) return;

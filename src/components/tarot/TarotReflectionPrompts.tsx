@@ -3,7 +3,7 @@
 import { useState, useMemo } from 'react';
 import { ChevronDown, BookOpen, Check, Loader2 } from 'lucide-react';
 import { useSubscription } from '@/hooks/useSubscription';
-import { hasBirthChartAccess } from '../../../utils/pricing';
+import { hasFeatureAccess } from '../../../utils/pricing';
 import type { TrendAnalysis } from '../../../utils/tarot/improvedTarot';
 
 interface TarotReflectionPromptsProps {
@@ -107,7 +107,11 @@ export function TarotReflectionPrompts({
   className = '',
 }: TarotReflectionPromptsProps) {
   const subscription = useSubscription();
-  const isPremium = hasBirthChartAccess(subscription.status, subscription.plan);
+  const hasTarotPatternsAccess = hasFeatureAccess(
+    subscription.status,
+    subscription.plan,
+    'tarot_patterns',
+  );
   const [isExpanded, setIsExpanded] = useState(false);
   const [savingPrompt, setSavingPrompt] = useState<string | null>(null);
   const [savedPrompts, setSavedPrompts] = useState<Set<string>>(new Set());
@@ -117,7 +121,8 @@ export function TarotReflectionPrompts({
   const [drafts, setDrafts] = useState<Record<string, string>>({});
 
   const prompts = useMemo(() => {
-    if (!trendAnalysis) return DEFAULT_PROMPTS.slice(0, isPremium ? 5 : 1);
+    if (!trendAnalysis)
+      return DEFAULT_PROMPTS.slice(0, hasTarotPatternsAccess ? 5 : 1);
 
     const topTheme = trendAnalysis.dominantThemes[0]?.toLowerCase();
     const topSuit = trendAnalysis.suitPatterns[0];
@@ -132,10 +137,10 @@ export function TarotReflectionPrompts({
       selectedPrompts = [...DEFAULT_PROMPTS];
     }
 
-    return isPremium
+    return hasTarotPatternsAccess
       ? selectedPrompts.slice(0, 5)
       : selectedPrompts.slice(0, 1);
-  }, [trendAnalysis, isPremium]);
+  }, [trendAnalysis, hasTarotPatternsAccess]);
 
   const handleSaveToJournal = async (prompt: string, reflection: string) => {
     if (!reflection.trim()) return;
@@ -187,8 +192,10 @@ export function TarotReflectionPrompts({
               Reflection Prompts
             </p>
             <p className='text-xs text-zinc-400'>
-              {isPremium ? `${prompts.length} prompts` : '1 prompt'} for your
-              journal
+              {hasTarotPatternsAccess
+                ? `${prompts.length} prompts`
+                : '1 prompt'}{' '}
+              for your journal
             </p>
           </div>
         </div>
@@ -211,7 +218,7 @@ export function TarotReflectionPrompts({
                 className='p-3 rounded-lg border border-zinc-800/50 bg-zinc-800/20'
               >
                 <p className='text-sm text-zinc-300 mb-2'>{prompt}</p>
-                {isPremium && (
+                {hasTarotPatternsAccess && (
                   <div className='space-y-2'>
                     {activePromptIndex === i && !isSaved ? (
                       <>
@@ -278,10 +285,10 @@ export function TarotReflectionPrompts({
             );
           })}
 
-          {!isPremium && (
+          {!hasTarotPatternsAccess && (
             <p className='text-xs text-zinc-500'>
-              Upgrade for more prompts and the ability to save directly to your
-              journal.
+              Unlock more reflection prompts with Lunary+, plus save prompts
+              into your journal.
             </p>
           )}
         </div>

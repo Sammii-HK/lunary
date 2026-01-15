@@ -1,6 +1,7 @@
 'use client';
 
 import { SmartTrialButton } from '@/components/SmartTrialButton';
+import type { FeatureKey } from '../../../../../utils/pricing';
 import { ReactNode } from 'react';
 
 interface FeaturePreviewProps {
@@ -8,7 +9,7 @@ interface FeaturePreviewProps {
   description: string;
   blurredContent: ReactNode;
   icon?: ReactNode;
-  feature?: string; // Feature key to determine if free or paid
+  feature?: FeatureKey; // Feature key to determine if free or paid
 }
 
 export function FeaturePreview({

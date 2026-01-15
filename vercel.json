@@ -44,6 +44,10 @@
       "schedule": "0 9 * * *"
     },
     {
+      "path": "/api/cron/fx-drift",
+      "schedule": "0 9 1 * *"
+    },
+    {
       "path": "/api/cron/yearly-tarot-analysis",
       "schedule": "15 0 1 1 *"
     }

@@ -6,8 +6,8 @@ import { OnboardingFlow } from '@/components/OnboardingFlow';
 const planOptions = [
   { id: 'free', label: 'Free' },
   { id: 'lunary_plus', label: 'Lunary+' },
-  { id: 'lunary_plus_ai', label: 'Lunary+ AI' },
-  { id: 'lunary_plus_ai_annual', label: 'Lunary+ AI Annual' },
+  { id: 'lunary_plus_ai', label: 'Lunary+ Pro' },
+  { id: 'lunary_plus_ai_annual', label: 'Lunary+ Pro Annual' },
 ] as const;
 
 const stepOptions = [

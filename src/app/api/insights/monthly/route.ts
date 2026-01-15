@@ -316,6 +316,12 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ insight });
   } catch (error) {
     console.error('[Monthly Insights] Error:', error);
+    if (error instanceof Error && error.message.includes('Unauthorized')) {
+      return NextResponse.json(
+        { error: 'Please sign in to access monthly insights' },
+        { status: 401 },
+      );
+    }
     return NextResponse.json(
       { error: 'Failed to fetch monthly insights' },
       { status: 500 },

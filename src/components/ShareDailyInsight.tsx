@@ -18,7 +18,7 @@ import {
   PersonalTransitImpact,
 } from '../../utils/astrology/personalTransits';
 import { useSubscription } from '../hooks/useSubscription';
-import { hasBirthChartAccess } from '../../utils/pricing';
+import { hasFeatureAccess } from '../../utils/pricing';
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
 import dayOfYear from 'dayjs/plugin/dayOfYear';
@@ -42,9 +42,20 @@ export function ShareDailyInsight() {
   const firstName = userName?.trim() ? userName.split(' ')[0] : '';
   const birthChart = user?.birthChart;
 
-  const hasChartAccess = hasBirthChartAccess(
+  const hasPersonalTarotAccess = hasFeatureAccess(
     subscription.status,
     subscription.plan,
+    'personal_tarot',
+  );
+  const hasPersonalCrystalAccess = hasFeatureAccess(
+    subscription.status,
+    subscription.plan,
+    'personalized_crystal_recommendations',
+  );
+  const hasPersonalTransitAccess = hasFeatureAccess(
+    subscription.status,
+    subscription.plan,
+    'personalized_transit_readings',
   );
 
   useEffect(() => {
@@ -61,7 +72,7 @@ export function ShareDailyInsight() {
   }, [dateStr]);
 
   const tarotData = useMemo(() => {
-    if (hasChartAccess && userName && userBirthday) {
+    if (hasPersonalTarotAccess && userName && userBirthday) {
       const card = getTarotCard(`daily-${dateStr}`, userName, userBirthday);
       return {
         name: card.name,
@@ -79,10 +90,10 @@ export function ShareDailyInsight() {
       keywords: card.keywords?.slice(0, 3) || [],
       isPersonalized: false,
     };
-  }, [hasChartAccess, userName, userBirthday, dateStr, today]);
+  }, [hasPersonalTarotAccess, userName, userBirthday, dateStr, today]);
 
   const crystalData = useMemo(() => {
-    if (!hasChartAccess || !birthChart || !observer) {
+    if (!hasPersonalCrystalAccess || !birthChart || !observer) {
       const general = getGeneralCrystalRecommendation(normalizedDate);
       return {
         name: general.name,
@@ -106,7 +117,13 @@ export function ShareDailyInsight() {
       reason: guidance || crystal.properties?.slice(0, 2).join(', ') || '',
       isPersonalized: true,
     };
-  }, [hasChartAccess, birthChart, observer, normalizedDate, userBirthday]);
+  }, [
+    hasPersonalCrystalAccess,
+    birthChart,
+    observer,
+    normalizedDate,
+    userBirthday,
+  ]);
 
   const horoscope = useMemo(() => {
     const general = getGeneralHoroscope(normalizedDate);
@@ -133,7 +150,7 @@ export function ShareDailyInsight() {
     desc: string;
     date: string;
   } | null => {
-    if (!hasChartAccess || !birthChart || birthChart.length === 0) {
+    if (!hasPersonalTransitAccess || !birthChart || birthChart.length === 0) {
       return null;
     }
 
@@ -191,10 +208,14 @@ export function ShareDailyInsight() {
       desc: transit.actionableGuidance,
       date: dateLabel,
     };
-  }, [hasChartAccess, birthChart]);
+  }, [hasPersonalTransitAccess, birthChart]);
 
   const isPersonalized =
-    hasChartAccess && tarotData.isPersonalized && crystalData.isPersonalized;
+    hasPersonalTarotAccess &&
+    tarotData.isPersonalized &&
+    hasPersonalCrystalAccess &&
+    crystalData.isPersonalized &&
+    hasPersonalTransitAccess;
 
   const generateCard = useCallback(async () => {
     setLoading(true);

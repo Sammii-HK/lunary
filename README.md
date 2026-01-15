@@ -240,7 +240,7 @@ The Discord bot provides slash commands for cosmic information and community eng
 - **Context Building**: Dynamically assembles astrological context (birth chart, current transits, moon phase, tarot readings, mood history)
 - **Conversation Threads**: Persistent thread storage in PostgreSQL with user-specific localStorage keys
 - **Memory System**: Long-term memory snippets for personalized responses across conversations
-- **Plan-Based Limits**: Tiered daily message limits (free: 3, Lunary+: 50, Lunary+ AI: 300)
+- **Plan-Based Limits**: Tiered daily message limits (free: 3, Lunary+: 50, Lunary+ Pro: 300)
 - **Rate Limiting**: IP and user-level rate limiting to prevent abuse
 - **Assist Commands**: Special commands for specific actions (e.g., `/horoscope`, `/transits`)
 

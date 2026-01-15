@@ -110,6 +110,7 @@ If daily notifications aren't working, check:
 | Moon Circles               | `0 10 * * *` | 10:00 AM           | Create moon circles (new/full moons)                  |
 | Weekly Cosmic Report       | `0 10 * * 0` | 10:00 AM Sunday    | Weekly report generation                              |
 | Weekly Metrics             | `0 2 * * 1`  | 2:00 AM Monday     | Weekly analytics                                      |
+| FX Drift Review            | `0 9 1 * *`  | 9:00 AM monthly    | FX drift check + Discord summary                      |
 | Yearly Tarot Analysis      | `15 0 1 1 *` | 12:15 AM Jan 1     | Cache year-over-year tarot analysis                   |
 
 ## Cloudflare Worker Schedule

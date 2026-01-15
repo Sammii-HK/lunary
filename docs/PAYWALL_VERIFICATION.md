@@ -5,11 +5,14 @@
 ### Tarot Page
 
 - ✅ **Tarot Patterns** - `feature='tarot_patterns'` (Lunary+ required)
-- ✅ **Advanced Patterns** (180-365 days) - `subscription.hasAccess('advanced_patterns')` (Lunary+ AI Annual required)
-- ✅ **Card History** - `feature='tarot_patterns'` (Lunary+ required)
-- ✅ **Guided Tarot Spreads** - `feature='tarot_patterns'` (Lunary+ required)
-  - Free users: 2 spreads per month (enforced via API)
-  - Paid users: 10 spreads per month (Lunary+) or unlimited (Annual)
+- ✅ **Advanced Patterns** (180-365 days) - `subscription.hasAccess('advanced_patterns')` (Lunary+ Pro Annual required)
+- ✅ **Saved Spreads history** - available to authenticated users with plan-based retention
+  - Free users: 7-day history window
+  - Paid users: 365-day history window
+- ✅ **Guided Tarot Spreads** - access based on `TAROT_SPREADS.minimumPlan`
+  - Free users: only spreads marked `free`
+  - Monthly/yearly plans: all spreads unlocked
+  - Saved spreads per month: free 1, monthly plans 10, annual unlimited
 
 ### Horoscope Page
 
@@ -67,6 +70,14 @@
 - ✅ `hasChartAccess` - Correctly used for personalized content
 - ✅ `canAccessPersonalized` - Correctly used in components
 
+### Journal & Chat Limits
+
+- ✅ **Journal entries**: free plans limited to 3 entries per month (enforced in `/api/journal`)
+- ✅ **Chat history**: single thread per user, last 50 messages retained
+- ✅ **Context limits**: history + memory snippets follow `CONTEXT_RULES` and `MEMORY_SNIPPET_LIMITS`
+- ✅ **Save chat messages**: saving to Collections requires paid (`collections`); no cap enforced
+- ✅ **Collection folders**: no enforced folder limit for paid Collections
+
 ## ⚠️ Issues Found & Fixed
 
 ### 1. Missing Feature Keys in FeaturePreview
@@ -91,7 +102,7 @@
 - ✅ Your personal birth chart
 - ✅ Daily moon phases & basic insights
 - ✅ General tarot card of the day
-- ✅ 2 tarot spreads per month
+- ✅ 1 tarot spread per month
 - ✅ Basic lunar calendar
 - ✅ General daily horoscope
 - ✅ Access to grimoire knowledge

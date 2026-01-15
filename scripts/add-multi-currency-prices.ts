@@ -75,8 +75,8 @@ function convertToLocalCurrency(
     return Math.max(minPrice, Math.ceil(converted));
   }
 
-  // Minimum 4.99 for monthly plans, no minimum for yearly
-  const minPrice = interval === 'month' ? 4.99 : 0.99;
+  // Minimum 4.99 for monthly plans. Yearly should not undercut base conversion.
+  const minPrice = interval === 'month' ? 4.99 : converted;
   return Math.max(minPrice, priceWith99);
 }
 

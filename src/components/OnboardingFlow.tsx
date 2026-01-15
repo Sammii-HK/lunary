@@ -173,11 +173,11 @@ export function OnboardingFlow({
         {
           title: 'Plus AI guidance',
           items: [
-            'Generous daily AI chat with your cosmic companion',
+            'Up to 300 messages/day AI chat with your cosmic companion',
             'Personalized weekly reports + deeper readings',
             'Advanced pattern analysis + downloadable PDFs',
-            'AI ritual generation + saved chat threads',
-            'Limited Collections & saved insights',
+            'AI ritual generation + extended context memory',
+            'Collections & saved insights',
           ],
         },
       ];
@@ -186,12 +186,12 @@ export function OnboardingFlow({
     return [
       { title: 'Everything in Lunary+', items: basePlanHighlights },
       {
-        title: 'Everything in Lunary+ AI',
+        title: 'Everything in Lunary+ Pro',
         items: [
-          'Effectively unlimited AI chat with your cosmic companion',
+          'Up to 300 messages/day AI chat with your cosmic companion',
           'Personalized weekly reports + deeper readings',
           'Advanced pattern analysis + downloadable PDFs',
-          'AI ritual generation + saved chat threads',
+          'AI ritual generation + extended context memory',
         ],
       },
       {
@@ -199,7 +199,7 @@ export function OnboardingFlow({
         items: [
           'Unlimited tarot spreads + annual deep dives',
           'Yearly forecast + extended timeline analysis',
-          'Calendar download + unlimited collections',
+          'Calendar download (ICS format)',
           'Priority support + premium annual benefits',
         ],
       },

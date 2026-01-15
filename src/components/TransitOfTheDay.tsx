@@ -14,7 +14,7 @@ import {
   PersonalTransitImpact,
 } from '../../utils/astrology/personalTransits';
 import { useSubscription } from '../hooks/useSubscription';
-import { hasBirthChartAccess } from '../../utils/pricing';
+import { hasFeatureAccess } from '../../utils/pricing';
 import { bodiesSymbols } from '@/constants/symbols';
 import dayjs from 'dayjs';
 
@@ -42,15 +42,19 @@ export const TransitOfTheDay = () => {
   const authStatus = useAuthStatus();
   const subscription = useSubscription();
 
-  // For unauthenticated users, force hasChartAccess to false immediately
+  // For unauthenticated users, force paid access to false immediately
   // Don't wait for subscription to resolve
-  const hasChartAccess = !authStatus.isAuthenticated
+  const hasPersonalizedAccess = !authStatus.isAuthenticated
     ? false
-    : hasBirthChartAccess(subscription.status, subscription.plan);
+    : hasFeatureAccess(
+        subscription.status,
+        subscription.plan,
+        'personalized_transit_readings',
+      );
 
   // Get general transits for unauthenticated users or when no chart access
   const generalTransit = useMemo((): TransitEvent | null => {
-    if (authStatus.isAuthenticated && hasChartAccess) return null;
+    if (authStatus.isAuthenticated && hasPersonalizedAccess) return null;
 
     const upcomingTransits = getUpcomingTransits();
     if (upcomingTransits.length === 0) return null;
@@ -79,11 +83,12 @@ export const TransitOfTheDay = () => {
     });
 
     return sorted[0];
-  }, [authStatus.isAuthenticated, hasChartAccess]);
+  }, [authStatus.isAuthenticated, hasPersonalizedAccess]);
 
   // Get personalized transit for authenticated users with chart access
   const transit = useMemo((): PersonalTransitImpact | null => {
-    if (!authStatus.isAuthenticated || !user || !hasChartAccess) return null;
+    if (!authStatus.isAuthenticated || !user || !hasPersonalizedAccess)
+      return null;
     const birthChart = user.birthChart;
     if (!birthChart || birthChart.length === 0) return null;
 
@@ -120,10 +125,10 @@ export const TransitOfTheDay = () => {
     });
 
     return sorted[0];
-  }, [authStatus.isAuthenticated, user, hasChartAccess]);
+  }, [authStatus.isAuthenticated, user, hasPersonalizedAccess]);
 
   // Show general transit for unauthenticated users or users without chart access
-  if (!authStatus.isAuthenticated || !hasChartAccess) {
+  if (!authStatus.isAuthenticated || !hasPersonalizedAccess) {
     if (!generalTransit) {
       // Fallback: show upsell if no transits available (shouldn't happen)
       return (
