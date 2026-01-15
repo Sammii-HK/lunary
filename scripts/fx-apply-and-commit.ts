@@ -12,6 +12,10 @@ function run(command: string) {
   return execSync(command, { stdio: 'inherit' });
 }
 
+function runArgs(command: string, args: string[]) {
+  return execSync(command, { stdio: 'inherit', args });
+}
+
 function runOutput(command: string): string {
   return execSync(command, { encoding: 'utf-8' }).trim();
 }
@@ -45,7 +49,7 @@ async function main() {
   }
 
   run(`git add ${TARGET_FILE}`);
-  run(`git commit -m "${message.replace(/"/g, '\\"')}"`);
+  runArgs('git', ['commit', '-m', message]);
 
   if (pr) {
     const branch = runOutput('git rev-parse --abbrev-ref HEAD');
@@ -58,9 +62,16 @@ async function main() {
       '- N/A',
       '',
     ].join('\n');
-    run(
-      `gh pr create --title "${title}" --body "${body.replace(/"/g, '\\"')}" --head "${branch}"`,
-    );
+    runArgs('gh', [
+      'pr',
+      'create',
+      '--title',
+      title,
+      '--body',
+      body,
+      '--head',
+      branch,
+    ]);
   }
 }
 
