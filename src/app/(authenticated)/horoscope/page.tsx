@@ -26,10 +26,13 @@ export default function HoroscopePage() {
 
   useEffect(() => {
     if (hasPersonalHoroscopeAccess && user?.id) {
-      conversionTracking.horoscopeViewed(user.id);
-      conversionTracking.personalizedHoroscopeViewed(user.id);
+      conversionTracking.horoscopeViewed(user.id, subscription.plan);
+      conversionTracking.personalizedHoroscopeViewed(
+        user.id,
+        subscription.plan,
+      );
     }
-  }, [hasPersonalHoroscopeAccess, user?.id]);
+  }, [hasPersonalHoroscopeAccess, user?.id, subscription.plan]);
 
   // Simple sequential loading checks - prioritize unauthenticated users
   if (authStatus.loading) {

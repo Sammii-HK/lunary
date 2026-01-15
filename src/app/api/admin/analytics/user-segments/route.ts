@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { sql } from '@vercel/postgres';
 import { formatTimestamp, resolveDateRange } from '@/lib/analytics/date-range';
-import { getPostHogActiveUsers } from '@/lib/posthog-server';
 
 const TEST_EMAIL_PATTERN = '%@test.lunary.app';
 const TEST_EMAIL_EXACT = 'test@test.lunary.app';
@@ -25,10 +24,9 @@ export async function GET(request: NextRequest) {
 
     // Get free user IDs (all users not in paid list)
     const allUserIdsResult = await sql`
-      SELECT DISTINCT user_id
-      FROM conversion_events
-      WHERE event_type = 'signup'
-        AND (user_email IS NULL OR (user_email NOT LIKE ${TEST_EMAIL_PATTERN} AND user_email != ${TEST_EMAIL_EXACT}))
+      SELECT id as user_id
+      FROM "user"
+      WHERE (email IS NULL OR (email NOT LIKE ${TEST_EMAIL_PATTERN} AND email != ${TEST_EMAIL_EXACT}))
     `;
     const allUserIds = allUserIdsResult.rows
       .map((r) => r.user_id)
@@ -178,15 +176,70 @@ export async function GET(request: NextRequest) {
         `
         : { rows: [] };
 
-    // Get PostHog data for WAU/MAU comparison
-    const posthogData = await getPostHogActiveUsers(range.end);
+    const engagementEvents = [
+      'horoscope_viewed',
+      'tarot_viewed',
+      'birth_chart_viewed',
+      'personalized_tarot_viewed',
+      'personalized_horoscope_viewed',
+      'crystal_recommendations_viewed',
+    ];
+    const eventsArray = toTextArrayLiteral(engagementEvents)!;
+    const last7Start = new Date(range.end);
+    last7Start.setDate(last7Start.getDate() - 6);
+    const last30Start = new Date(range.end);
+    last30Start.setDate(last30Start.getDate() - 29);
+
+    const [paidWauResult, paidMauResult, freeWauResult, freeMauResult] =
+      await Promise.all([
+        paidUserIds.length > 0 && paidUserIdsArray
+          ? sql`
+            SELECT COUNT(DISTINCT user_id) as count
+            FROM conversion_events
+            WHERE user_id IN (SELECT unnest(${paidUserIdsArray}::text[]))
+              AND event_type = ANY(SELECT unnest(${eventsArray}::text[]))
+              AND created_at >= ${formatTimestamp(last7Start)}
+              AND created_at <= ${formatTimestamp(range.end)}
+          `
+          : { rows: [{ count: 0 }] },
+        paidUserIds.length > 0 && paidUserIdsArray
+          ? sql`
+            SELECT COUNT(DISTINCT user_id) as count
+            FROM conversion_events
+            WHERE user_id IN (SELECT unnest(${paidUserIdsArray}::text[]))
+              AND event_type = ANY(SELECT unnest(${eventsArray}::text[]))
+              AND created_at >= ${formatTimestamp(last30Start)}
+              AND created_at <= ${formatTimestamp(range.end)}
+          `
+          : { rows: [{ count: 0 }] },
+        freeUserIds.length > 0 && freeUserIdsArray
+          ? sql`
+            SELECT COUNT(DISTINCT user_id) as count
+            FROM conversion_events
+            WHERE user_id IN (SELECT unnest(${freeUserIdsArray}::text[]))
+              AND event_type = ANY(SELECT unnest(${eventsArray}::text[]))
+              AND created_at >= ${formatTimestamp(last7Start)}
+              AND created_at <= ${formatTimestamp(range.end)}
+          `
+          : { rows: [{ count: 0 }] },
+        freeUserIds.length > 0 && freeUserIdsArray
+          ? sql`
+            SELECT COUNT(DISTINCT user_id) as count
+            FROM conversion_events
+            WHERE user_id IN (SELECT unnest(${freeUserIdsArray}::text[]))
+              AND event_type = ANY(SELECT unnest(${eventsArray}::text[]))
+              AND created_at >= ${formatTimestamp(last30Start)}
+              AND created_at <= ${formatTimestamp(range.end)}
+          `
+          : { rows: [{ count: 0 }] },
+      ]);
 
     return NextResponse.json({
       free: {
         totalUsers: freeUserIds.length,
         dau: freeEngagement.dau,
-        wau: posthogData?.wau || 0, // Approximate
-        mau: posthogData?.mau || 0, // Approximate
+        wau: Number(freeWauResult.rows[0]?.count || 0),
+        mau: Number(freeMauResult.rows[0]?.count || 0),
         engagement: freeEngagement,
         featureUsage: freeFeatureUsageResult.rows.map((row) => ({
           feature: row.feature as string,
@@ -197,8 +250,8 @@ export async function GET(request: NextRequest) {
       paid: {
         totalUsers: paidUserIds.length,
         dau: paidEngagement.dau,
-        wau: 0, // Would need separate PostHog query filtered by paid users
-        mau: 0, // Would need separate PostHog query filtered by paid users
+        wau: Number(paidWauResult.rows[0]?.count || 0),
+        mau: Number(paidMauResult.rows[0]?.count || 0),
         engagement: paidEngagement,
         featureUsage: paidFeatureUsageResult.rows.map((row) => ({
           feature: row.feature as string,

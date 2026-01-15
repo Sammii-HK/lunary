@@ -1,6 +1,5 @@
 import { sql } from '@vercel/postgres';
 import { formatTimestamp } from '@/lib/analytics/date-range';
-import { getPostHogServer, queryPostHogAPI } from '@/lib/posthog-server';
 import {
   startOfWeek,
   endOfWeek,
@@ -10,6 +9,8 @@ import {
 } from 'date-fns';
 
 const TIMEZONE = 'Europe/London';
+const TEST_EMAIL_PATTERN = '%@test.lunary.app';
+const TEST_EMAIL_EXACT = 'test@test.lunary.app';
 
 /**
  * Helper to build a PostgreSQL text array literal safely.
@@ -250,11 +251,11 @@ async function calculateAcquisition(
 }> {
   const [newUsersResult, newTrialsResult, newPayingResult] = await Promise.all([
     sql`
-      SELECT COUNT(DISTINCT user_id) as count
-      FROM conversion_events
-      WHERE event_type = 'signup'
-        AND created_at >= ${weekStart}
-        AND created_at <= ${weekEnd}
+      SELECT COUNT(*) as count
+      FROM "user"
+      WHERE "createdAt" >= ${weekStart}
+        AND "createdAt" <= ${weekEnd}
+        AND (email IS NULL OR (email NOT LIKE ${TEST_EMAIL_PATTERN} AND email != ${TEST_EMAIL_EXACT}))
     `,
     sql`
       SELECT COUNT(DISTINCT user_id) as count
@@ -292,11 +293,11 @@ async function calculateActivation(
 }> {
   // Get new users this week
   const newUsersResult = await sql`
-    SELECT DISTINCT user_id, created_at as signup_at
-    FROM conversion_events
-    WHERE event_type = 'signup'
-      AND created_at >= ${weekStart}
-      AND created_at <= ${weekEnd}
+    SELECT id as user_id, "createdAt" as signup_at
+    FROM "user"
+    WHERE "createdAt" >= ${weekStart}
+      AND "createdAt" <= ${weekEnd}
+      AND (email IS NULL OR (email NOT LIKE ${TEST_EMAIL_PATTERN} AND email != ${TEST_EMAIL_EXACT}))
   `;
 
   const newUsers = newUsersResult.rows || [];
@@ -383,77 +384,40 @@ async function calculateEngagement(
     'trial_started',
     'trial_converted',
     'subscription_started',
+    'grimoire_viewed',
   ];
   const meaningfulEventsArray = toTextArrayLiteral(meaningfulEvents)!;
 
-  // Get WAU from PostHog
-  const posthog = getPostHogServer();
   let wau = 0;
   let totalSessions = 0;
   let totalEvents = 0;
-
-  if (posthog) {
-    try {
-      // Query PostHog for WAU
-      const wauResult = await queryPostHogAPI<{
-        results: Array<Array<number>>;
-      }>('/query/', {
-        method: 'POST',
-        body: JSON.stringify({
-          query: {
-            kind: 'HogQLQuery',
-            query: `SELECT count(DISTINCT person_id) FROM events WHERE event IN (${meaningfulEvents.map((e) => `'${e}'`).join(', ')}) AND timestamp >= '${weekStart}' AND timestamp <= '${weekEnd}'`,
-          },
-        }),
-      });
-
-      wau = wauResult?.results?.[0]?.[0] || 0;
-
-      // Get total sessions
-      const sessionsResult = await queryPostHogAPI<{
-        results: Array<Array<number>>;
-      }>('/query/', {
-        method: 'POST',
-        body: JSON.stringify({
-          query: {
-            kind: 'HogQLQuery',
-            query: `SELECT count(DISTINCT session_id) FROM events WHERE event IN (${meaningfulEvents.map((e) => `'${e}'`).join(', ')}) AND timestamp >= '${weekStart}' AND timestamp <= '${weekEnd}'`,
-          },
-        }),
-      });
-
-      totalSessions = sessionsResult?.results?.[0]?.[0] || 0;
-
-      // Get total events
-      const eventsResult = await queryPostHogAPI<{
-        results: Array<Array<number>>;
-      }>('/query/', {
-        method: 'POST',
-        body: JSON.stringify({
-          query: {
-            kind: 'HogQLQuery',
-            query: `SELECT count(*) FROM events WHERE event IN (${meaningfulEvents.map((e) => `'${e}'`).join(', ')}) AND timestamp >= '${weekStart}' AND timestamp <= '${weekEnd}'`,
-          },
-        }),
-      });
-
-      totalEvents = eventsResult?.results?.[0]?.[0] || 0;
-    } catch (error) {
-      console.error('[Weekly Metrics] PostHog query failed:', error);
-    }
-  }
-
-  // Fallback to conversion_events if PostHog fails
-  if (wau === 0) {
-    const wauResult = await sql`
+  const [wauResult, sessionsResult, eventsResult] = await Promise.all([
+    sql`
       SELECT COUNT(DISTINCT user_id) as count
       FROM conversion_events
       WHERE event_type = ANY(SELECT unnest(${meaningfulEventsArray}::text[]))
         AND created_at >= ${weekStart}
         AND created_at <= ${weekEnd}
-    `;
-    wau = parseInt(wauResult.rows[0]?.count || '0');
-  }
+    `,
+    sql`
+      SELECT COUNT(*) as count
+      FROM conversion_events
+      WHERE event_type = 'app_opened'
+        AND created_at >= ${weekStart}
+        AND created_at <= ${weekEnd}
+    `,
+    sql`
+      SELECT COUNT(*) as count
+      FROM conversion_events
+      WHERE event_type = ANY(SELECT unnest(${meaningfulEventsArray}::text[]))
+        AND created_at >= ${weekStart}
+        AND created_at <= ${weekEnd}
+    `,
+  ]);
+
+  wau = parseInt(wauResult.rows[0]?.count || '0');
+  totalSessions = parseInt(sessionsResult.rows[0]?.count || '0');
+  totalEvents = parseInt(eventsResult.rows[0]?.count || '0');
 
   const avgSessionsPerActiveUser = wau > 0 ? totalSessions / wau : 0;
   const avgEventsPerActiveUser = wau > 0 ? totalEvents / wau : 0;
@@ -477,11 +441,11 @@ async function calculateRetention(
 }> {
   // Get new users in this week
   const newUsersResult = await sql`
-    SELECT DISTINCT user_id
-    FROM conversion_events
-    WHERE event_type = 'signup'
-      AND created_at >= ${formatTimestamp(weekStart)}
-      AND created_at <= ${formatTimestamp(weekEnd)}
+    SELECT id as user_id
+    FROM "user"
+    WHERE "createdAt" >= ${formatTimestamp(weekStart)}
+      AND "createdAt" <= ${formatTimestamp(weekEnd)}
+      AND (email IS NULL OR (email NOT LIKE ${TEST_EMAIL_PATTERN} AND email != ${TEST_EMAIL_EXACT}))
   `;
 
   const newUserIds = newUsersResult.rows.map((r) => r.user_id).filter(Boolean);
@@ -805,11 +769,11 @@ export async function calculateFunnelMetrics(
           AND created_at <= ${weekEndFormatted}
       `,
     sql`
-        SELECT COUNT(DISTINCT user_id) as count
-        FROM conversion_events
-        WHERE event_type = 'signup'
-          AND created_at >= ${weekStartFormatted}
-          AND created_at <= ${weekEndFormatted}
+        SELECT COUNT(*) as count
+        FROM "user"
+        WHERE "createdAt" >= ${weekStartFormatted}
+          AND "createdAt" <= ${weekEndFormatted}
+          AND (email IS NULL OR (email NOT LIKE ${TEST_EMAIL_PATTERN} AND email != ${TEST_EMAIL_EXACT}))
       `,
     sql`
         SELECT COUNT(DISTINCT user_id) as count

@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from 'next/server';
 import { sql } from '@vercel/postgres';
 
 import { formatTimestamp, resolveDateRange } from '@/lib/analytics/date-range';
-import { getPostHogActiveUsers } from '@/lib/posthog-server';
 
 // Test user exclusion patterns - matches filtering in other analytics endpoints
 const TEST_EMAIL_PATTERN = '%@test.lunary.app';
@@ -193,14 +192,14 @@ export async function GET(request: NextRequest) {
       };
     });
 
-    // Get free users count from PostHog MAU
-    let freeUsersCount = 0;
-    try {
-      const posthogData = await getPostHogActiveUsers(range.end);
-      freeUsersCount = posthogData?.mau || 0;
-    } catch {
-      freeUsersCount = 0;
-    }
+    const freeUsersResult = await sql`
+      SELECT COUNT(*) AS count
+      FROM "user"
+      WHERE "createdAt" >= ${formatTimestamp(range.start)}
+        AND "createdAt" <= ${formatTimestamp(range.end)}
+        AND (email IS NULL OR (email NOT LIKE ${TEST_EMAIL_PATTERN} AND email != ${TEST_EMAIL_EXACT}))
+    `;
+    const freeUsersCount = Number(freeUsersResult.rows[0]?.count || 0);
 
     const trialUsersResult = await sql`
       SELECT COUNT(DISTINCT user_id) AS count

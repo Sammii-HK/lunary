@@ -1276,24 +1276,41 @@ export default function AnalyticsPage() {
                           </h4>
                           <div className='grid gap-3 grid-cols-1 md:grid-cols-2 lg:grid-cols-3'>
                             {Object.entries(activation.activationBreakdown).map(
-                              ([feature, count]: [string, any]) => (
-                                <div
-                                  key={feature}
-                                  className='rounded-lg border border-zinc-800/30 bg-zinc-900/5 p-3'
-                                >
-                                  <div className='text-xs text-zinc-400 mb-1'>
-                                    {feature
-                                      .replace(/_/g, ' ')
-                                      .replace(/\b\w/g, (c) => c.toUpperCase())}
+                              ([feature, count]: [string, any]) => {
+                                const breakdown =
+                                  activation.activationBreakdownByPlan?.[
+                                    feature
+                                  ] || {};
+                                const freeCount = breakdown.free ?? 0;
+                                const paidCount = breakdown.paid ?? 0;
+                                const unknownCount = breakdown.unknown ?? 0;
+                                return (
+                                  <div
+                                    key={feature}
+                                    className='rounded-lg border border-zinc-800/30 bg-zinc-900/5 p-3'
+                                  >
+                                    <div className='text-xs text-zinc-400 mb-1'>
+                                      {feature
+                                        .replace(/_/g, ' ')
+                                        .replace(/\b\w/g, (c) =>
+                                          c.toUpperCase(),
+                                        )}
+                                    </div>
+                                    <div className='text-lg font-semibold text-white'>
+                                      {count}
+                                    </div>
+                                    <div className='text-xs text-zinc-500 mt-1'>
+                                      users activated
+                                    </div>
+                                    <div className='text-xs text-zinc-500 mt-1'>
+                                      Free: {freeCount} · Paid: {paidCount}
+                                      {unknownCount > 0
+                                        ? ` · Unknown: ${unknownCount}`
+                                        : ''}
+                                    </div>
                                   </div>
-                                  <div className='text-lg font-semibold text-white'>
-                                    {count}
-                                  </div>
-                                  <div className='text-xs text-zinc-500 mt-1'>
-                                    users activated
-                                  </div>
-                                </div>
-                              ),
+                                );
+                              },
                             )}
                           </div>
                         </div>

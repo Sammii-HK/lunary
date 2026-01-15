@@ -7,10 +7,6 @@ import {
   resolveDateRange,
 } from '@/lib/analytics/date-range';
 import { getSearchConsoleData } from '@/lib/google/search-console';
-import {
-  getPostHogActiveUsers,
-  getPostHogActiveUsersTrends,
-} from '@/lib/posthog-server';
 import { summarizeEntitlements } from '@/lib/metrics/entitlement-metrics';
 
 // Test user exclusion patterns
@@ -32,7 +28,7 @@ export async function GET(request: NextRequest) {
     const endDate = formatDate(range.end);
     const startDate = formatDate(range.start);
 
-    // 1-3. DAU, WAU from PostHog
+    // 1-3. DAU, WAU from database events
     const periodDays = Math.ceil(
       (range.end.getTime() - range.start.getTime()) / (1000 * 60 * 60 * 24),
     );
@@ -48,72 +44,77 @@ export async function GET(request: NextRequest) {
     let weeklyReturningTrend: 'up' | 'down' | 'stable' = 'stable';
     let weeklyReturningChange = 0;
 
-    try {
-      // Get current period data
-      const posthogData = await getPostHogActiveUsers(range.end);
-      if (posthogData) {
-        dau = posthogData.dau;
-        weeklyReturning = posthogData.wau;
-      }
+    const activityEventsArray = `{${PRODUCT_INTERACTION_EVENTS.map((e) => `"${e}"`).join(',')}}`;
 
-      // Get previous period data for comparison
-      try {
-        const prevTrends = await getPostHogActiveUsersTrends(
-          prevRangeStart,
-          prevRangeEnd,
-          'day',
-        );
-        const currentTrends = await getPostHogActiveUsersTrends(
-          range.start,
-          range.end,
-          'day',
-        );
+    const currentDayStart = new Date(range.end);
+    currentDayStart.setUTCDate(currentDayStart.getUTCDate() - 1);
+    const currentWeekStart = new Date(range.end);
+    currentWeekStart.setUTCDate(currentWeekStart.getUTCDate() - 7);
 
-        if (prevTrends.length > 0 && currentTrends.length > 0) {
-          // Use the last value from each period
-          const prevDau = prevTrends[prevTrends.length - 1]?.dau || 0;
-          const prevWau = prevTrends[prevTrends.length - 1]?.wau || 0;
-          const currentDau =
-            currentTrends[currentTrends.length - 1]?.dau || dau;
-          const currentWau =
-            currentTrends[currentTrends.length - 1]?.wau || weeklyReturning;
+    const prevDayStart = new Date(prevRangeEnd);
+    prevDayStart.setUTCDate(prevDayStart.getUTCDate() - 1);
+    const prevWeekStart = new Date(prevRangeEnd);
+    prevWeekStart.setUTCDate(prevWeekStart.getUTCDate() - 7);
 
-          // Calculate trends
-          dauChange =
-            prevDau > 0 ? ((currentDau - prevDau) / prevDau) * 100 : 0;
-          dauTrend = dauChange > 1 ? 'up' : dauChange < -1 ? 'down' : 'stable';
+    const [currentDauResult, currentWauResult, prevDauResult, prevWauResult] =
+      await Promise.all([
+        sql`
+        SELECT COUNT(DISTINCT user_id) AS count
+        FROM conversion_events
+        WHERE event_type = ANY(SELECT unnest(${activityEventsArray}::text[]))
+          AND created_at >= ${formatTimestamp(currentDayStart)}
+          AND created_at <= ${formatTimestamp(range.end)}
+          AND (user_email IS NULL OR (user_email NOT LIKE ${TEST_EMAIL_PATTERN} AND user_email != ${TEST_EMAIL_EXACT}))
+      `,
+        sql`
+        SELECT COUNT(DISTINCT user_id) AS count
+        FROM conversion_events
+        WHERE event_type = ANY(SELECT unnest(${activityEventsArray}::text[]))
+          AND created_at >= ${formatTimestamp(currentWeekStart)}
+          AND created_at <= ${formatTimestamp(range.end)}
+          AND (user_email IS NULL OR (user_email NOT LIKE ${TEST_EMAIL_PATTERN} AND user_email != ${TEST_EMAIL_EXACT}))
+      `,
+        sql`
+        SELECT COUNT(DISTINCT user_id) AS count
+        FROM conversion_events
+        WHERE event_type = ANY(SELECT unnest(${activityEventsArray}::text[]))
+          AND created_at >= ${formatTimestamp(prevDayStart)}
+          AND created_at <= ${formatTimestamp(prevRangeEnd)}
+          AND (user_email IS NULL OR (user_email NOT LIKE ${TEST_EMAIL_PATTERN} AND user_email != ${TEST_EMAIL_EXACT}))
+      `,
+        sql`
+        SELECT COUNT(DISTINCT user_id) AS count
+        FROM conversion_events
+        WHERE event_type = ANY(SELECT unnest(${activityEventsArray}::text[]))
+          AND created_at >= ${formatTimestamp(prevWeekStart)}
+          AND created_at <= ${formatTimestamp(prevRangeEnd)}
+          AND (user_email IS NULL OR (user_email NOT LIKE ${TEST_EMAIL_PATTERN} AND user_email != ${TEST_EMAIL_EXACT}))
+      `,
+      ]);
 
-          weeklyReturningChange =
-            prevWau > 0 ? ((currentWau - prevWau) / prevWau) * 100 : 0;
-          weeklyReturningTrend =
-            weeklyReturningChange > 1
-              ? 'up'
-              : weeklyReturningChange < -1
-                ? 'down'
-                : 'stable';
+    dau = Number(currentDauResult.rows[0]?.count || 0);
+    weeklyReturning = Number(currentWauResult.rows[0]?.count || 0);
+    const prevDau = Number(prevDauResult.rows[0]?.count || 0);
+    const prevWau = Number(prevWauResult.rows[0]?.count || 0);
 
-          // Update values to use the trend data if available
-          dau = currentDau;
-          weeklyReturning = currentWau;
-        }
-      } catch (trendError) {
-        console.warn(
-          '[success-metrics] Failed to fetch trends for comparison:',
-          trendError,
-        );
-        // Fall back to current snapshot without trends
-      }
-    } catch (error) {
-      console.warn('[success-metrics] PostHog API error:', error);
-    }
+    dauChange = prevDau > 0 ? ((dau - prevDau) / prevDau) * 100 : 0;
+    dauTrend = dauChange > 1 ? 'up' : dauChange < -1 ? 'down' : 'stable';
+
+    weeklyReturningChange =
+      prevWau > 0 ? ((weeklyReturning - prevWau) / prevWau) * 100 : 0;
+    weeklyReturningTrend =
+      weeklyReturningChange > 1
+        ? 'up'
+        : weeklyReturningChange < -1
+          ? 'down'
+          : 'stable';
 
     // 4. Conversion Rate - use conversion_events for both numerator and denominator
     const signupsResult = await sql`
-      SELECT COUNT(DISTINCT user_id) AS total_signups
-      FROM conversion_events
-      WHERE event_type = 'signup'
-        AND created_at BETWEEN ${formatTimestamp(range.start)} AND ${formatTimestamp(range.end)}
-        AND (user_email IS NULL OR (user_email NOT LIKE ${TEST_EMAIL_PATTERN} AND user_email != ${TEST_EMAIL_EXACT}))
+      SELECT COUNT(*) AS total_signups
+      FROM "user"
+      WHERE "createdAt" BETWEEN ${formatTimestamp(range.start)} AND ${formatTimestamp(range.end)}
+        AND (email IS NULL OR (email NOT LIKE ${TEST_EMAIL_PATTERN} AND email != ${TEST_EMAIL_EXACT}))
     `;
     const totalSignups = Number(signupsResult.rows[0]?.total_signups || 0);
 
@@ -131,11 +132,10 @@ export async function GET(request: NextRequest) {
       totalSignups > 0 ? (totalConversions / totalSignups) * 100 : 0;
 
     const prevSignupsResult = await sql`
-      SELECT COUNT(DISTINCT user_id) AS total_signups
-      FROM conversion_events
-      WHERE event_type = 'signup'
-        AND created_at BETWEEN ${formatTimestamp(prevRangeStart)} AND ${formatTimestamp(prevRangeEnd)}
-        AND (user_email IS NULL OR (user_email NOT LIKE ${TEST_EMAIL_PATTERN} AND user_email != ${TEST_EMAIL_EXACT}))
+      SELECT COUNT(*) AS total_signups
+      FROM "user"
+      WHERE "createdAt" BETWEEN ${formatTimestamp(prevRangeStart)} AND ${formatTimestamp(prevRangeEnd)}
+        AND (email IS NULL OR (email NOT LIKE ${TEST_EMAIL_PATTERN} AND email != ${TEST_EMAIL_EXACT}))
     `;
     const prevTotalSignups = Number(
       prevSignupsResult.rows[0]?.total_signups || 0,

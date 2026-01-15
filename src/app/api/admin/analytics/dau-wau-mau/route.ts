@@ -1,20 +1,144 @@
 import { NextRequest, NextResponse } from 'next/server';
-import {
-  getPostHogActiveUsers,
-  getPostHogActiveUsersTrends,
-  getPostHogAppPageviewUsers,
-  getPostHogGrimoireActiveUsers,
-  getPostHogGrimoireOnlyUsers,
-  getPostHogGrimoirePageviewUsers,
-  getPostHogIdentifyEventCount,
-  getPostHogProductActiveUsers,
-  getPostHogRetention,
-  getPostHogSignedInProductActiveUsers,
-  getPostHogSignedInProductActiveUsersTrends,
-  getPostHogSignedInProductUsageSummary,
-  PRODUCT_USAGE_CONDITION,
-} from '@/lib/posthog-server';
-import { formatDate, resolveDateRange } from '@/lib/analytics/date-range';
+import { sql } from '@vercel/postgres';
+import { formatTimestamp, resolveDateRange } from '@/lib/analytics/date-range';
+
+const TEST_EMAIL_PATTERN = '%@test.lunary.app';
+const TEST_EMAIL_EXACT = 'test@test.lunary.app';
+
+const ACTIVITY_EVENTS = [
+  'app_opened',
+  'tarot_viewed',
+  'personalized_tarot_viewed',
+  'birth_chart_viewed',
+  'horoscope_viewed',
+  'personalized_horoscope_viewed',
+  'cosmic_pulse_opened',
+  'moon_circle_opened',
+  'weekly_report_opened',
+  'pricing_page_viewed',
+  'trial_started',
+  'trial_converted',
+  'subscription_started',
+  'login',
+  'dashboard_viewed',
+  'grimoire_viewed',
+];
+
+const PRODUCT_EVENTS = [
+  'birth_chart_viewed',
+  'personalized_horoscope_viewed',
+  'personalized_tarot_viewed',
+  'horoscope_viewed',
+  'tarot_viewed',
+  'dashboard_viewed',
+  'login',
+];
+
+const toTextArrayLiteral = (values: string[]): string | null => {
+  if (values.length === 0) return null;
+  return `{${values.map((v) => `"${String(v).replace(/\\/g, '\\\\').replace(/"/g, '\\"')}"`).join(',')}}`;
+};
+
+const formatDateKey = (date: Date) => date.toISOString().split('T')[0];
+
+const alignDateToGranularity = (
+  date: Date,
+  granularity: 'day' | 'week' | 'month',
+) => {
+  const aligned = new Date(
+    Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate()),
+  );
+
+  if (granularity === 'week') {
+    const day = aligned.getUTCDay();
+    const diff = (day + 6) % 7;
+    aligned.setUTCDate(aligned.getUTCDate() - diff);
+  } else if (granularity === 'month') {
+    aligned.setUTCDate(1);
+  }
+
+  return aligned;
+};
+
+const buildDateBuckets = (
+  startDate: Date,
+  endDate: Date,
+  granularity: 'day' | 'week' | 'month',
+) => {
+  const buckets: string[] = [];
+  const cursor = alignDateToGranularity(startDate, granularity);
+  const end = new Date(endDate.getTime());
+
+  while (cursor <= end) {
+    buckets.push(formatDateKey(cursor));
+    if (granularity === 'week') {
+      cursor.setUTCDate(cursor.getUTCDate() + 7);
+    } else if (granularity === 'month') {
+      cursor.setUTCMonth(cursor.getUTCMonth() + 1);
+    } else {
+      cursor.setUTCDate(cursor.getUTCDate() + 1);
+    }
+  }
+
+  return buckets;
+};
+
+const buildRollingTrends = (
+  userMap: Map<string, Set<string>>,
+  startDate: Date,
+  endDate: Date,
+  granularity: 'day' | 'week' | 'month',
+) => {
+  const trends: Array<{ date: string; dau: number; wau: number; mau: number }> =
+    [];
+  const buckets = buildDateBuckets(startDate, endDate, granularity);
+
+  const buildWindowSet = (end: Date, days: number) => {
+    const start = new Date(end);
+    start.setUTCDate(start.getUTCDate() - (days - 1));
+    const windowUsers = new Set<string>();
+    for (let d = new Date(start); d <= end; d.setUTCDate(d.getUTCDate() + 1)) {
+      const key = formatDateKey(d);
+      const users = userMap.get(key);
+      if (users) {
+        users.forEach((id) => windowUsers.add(id));
+      }
+    }
+    return windowUsers;
+  };
+
+  for (const bucket of buckets) {
+    const bucketDate = new Date(`${bucket}T00:00:00Z`);
+    const dau = userMap.get(bucket)?.size || 0;
+    const wau = buildWindowSet(bucketDate, 7).size;
+    const mau = buildWindowSet(bucketDate, 30).size;
+    trends.push({ date: bucket, dau, wau, mau });
+  }
+
+  return trends;
+};
+
+const countDistinctInWindow = (
+  userMap: Map<string, Set<string>>,
+  endDate: Date,
+  days: number,
+) => {
+  const start = new Date(endDate);
+  start.setUTCDate(start.getUTCDate() - (days - 1));
+  const windowUsers = new Set<string>();
+  for (
+    let d = new Date(start);
+    d <= endDate;
+    d.setUTCDate(d.getUTCDate() + 1)
+  ) {
+    const key = formatDateKey(d);
+    const users = userMap.get(key);
+    if (users) {
+      users.forEach((id) => windowUsers.add(id));
+    }
+  }
+  return windowUsers.size;
+};
 
 export async function GET(request: NextRequest) {
   try {
@@ -25,219 +149,247 @@ export async function GET(request: NextRequest) {
       | 'month';
     const range = resolveDateRange(searchParams, 30);
 
-    const [
-      posthogData,
-      retentionData,
-      trendsData,
-      productTrendsData,
-      signedInProductTrendsData,
-      productDau,
-      productWau,
-      productMau,
-      signedInProductDau,
-      signedInProductWau,
-      signedInProductMau,
-      signedInProductUsageSummary,
-      grimoireMau,
-      grimoireOnlyMau,
-      appPageviewUsers7d,
-      appPageviewUsers30d,
-      grimoirePageviewUsers7d,
-      grimoirePageviewUsers30d,
-      identifyEvents30d,
-    ] = await Promise.all([
-      getPostHogActiveUsers(range.end),
-      getPostHogRetention(),
-      getPostHogActiveUsersTrends(range.start, range.end, granularity),
-      getPostHogActiveUsersTrends(
-        range.start,
-        range.end,
-        granularity,
-        PRODUCT_USAGE_CONDITION,
-      ),
-      getPostHogSignedInProductActiveUsersTrends(
-        range.start,
-        range.end,
-        granularity,
-      ),
-      getPostHogProductActiveUsers(1),
-      getPostHogProductActiveUsers(7),
-      getPostHogProductActiveUsers(30),
-      getPostHogSignedInProductActiveUsers(1),
-      getPostHogSignedInProductActiveUsers(7),
-      getPostHogSignedInProductActiveUsers(30),
-      getPostHogSignedInProductUsageSummary(range.start, range.end),
-      getPostHogGrimoireActiveUsers(30),
-      getPostHogGrimoireOnlyUsers(30),
-      getPostHogAppPageviewUsers(7),
-      getPostHogAppPageviewUsers(30),
-      getPostHogGrimoirePageviewUsers(7),
-      getPostHogGrimoirePageviewUsers(30),
-      getPostHogIdentifyEventCount(30),
+    const eventsArray = toTextArrayLiteral(ACTIVITY_EVENTS)!;
+    const productEventsArray = toTextArrayLiteral(PRODUCT_EVENTS)!;
+
+    const extendedStart = new Date(range.start);
+    extendedStart.setUTCDate(extendedStart.getUTCDate() - 30);
+
+    const [activityRows, productRows] = await Promise.all([
+      sql`
+        SELECT DATE(created_at) as date, user_id
+        FROM conversion_events
+        WHERE event_type = ANY(SELECT unnest(${eventsArray}::text[]))
+          AND user_id IS NOT NULL
+          AND created_at >= ${formatTimestamp(extendedStart)}
+          AND created_at <= ${formatTimestamp(range.end)}
+          AND (user_email IS NULL OR (user_email NOT LIKE ${TEST_EMAIL_PATTERN} AND user_email != ${TEST_EMAIL_EXACT}))
+      `,
+      sql`
+        SELECT DATE(created_at) as date, user_id
+        FROM conversion_events
+        WHERE event_type = ANY(SELECT unnest(${productEventsArray}::text[]))
+          AND user_id IS NOT NULL
+          AND created_at >= ${formatTimestamp(extendedStart)}
+          AND created_at <= ${formatTimestamp(range.end)}
+          AND (user_email IS NULL OR (user_email NOT LIKE ${TEST_EMAIL_PATTERN} AND user_email != ${TEST_EMAIL_EXACT}))
+      `,
     ]);
 
-    if (!posthogData) {
-      return NextResponse.json(
-        {
-          error:
-            'PostHog API not configured. Set POSTHOG_PERSONAL_API_KEY and POSTHOG_PROJECT_ID environment variables.',
-          dau: 0,
-          wau: 0,
-          mau: 0,
-          returning_users: 0,
-          retention: { day_1: 0, day_7: 0, day_30: 0 },
-          churn_rate: null,
-          trends: [],
-          product_trends: [],
-          signed_in_product_trends: [],
-          product_dau: 0,
-          product_wau: 0,
-          product_mau: 0,
-          signed_in_product_dau: 0,
-          signed_in_product_wau: 0,
-          signed_in_product_mau: 0,
-          signed_in_product_users: 0,
-          signed_in_product_returning_users: 0,
-          signed_in_product_avg_sessions_per_user: 0,
-          content_mau_grimoire: 0,
-          grimoire_only_mau: 0,
-          source: 'error',
-        },
-        { status: 503 },
-      );
-    }
+    const activityMap = new Map<string, Set<string>>();
+    activityRows.rows.forEach((row) => {
+      const date = String(row.date);
+      const userId = String(row.user_id);
+      if (!activityMap.has(date)) {
+        activityMap.set(date, new Set());
+      }
+      activityMap.get(date)!.add(userId);
+    });
 
-    const retention = retentionData
-      ? {
-          day_1: Number(retentionData.day1.toFixed(2)),
-          day_7: Number(retentionData.day7.toFixed(2)),
-          day_30: Number(retentionData.day30.toFixed(2)),
-        }
-      : { day_1: 0, day_7: 0, day_30: 0 };
+    const productMap = new Map<string, Set<string>>();
+    productRows.rows.forEach((row) => {
+      const date = String(row.date);
+      const userId = String(row.user_id);
+      if (!productMap.has(date)) {
+        productMap.set(date, new Set());
+      }
+      productMap.get(date)!.add(userId);
+    });
 
-    // Churn rate: only calculate if we have valid day 30 retention data
-    // Churn = users who didn't return = 100 - retention
+    const trends = buildRollingTrends(
+      activityMap,
+      range.start,
+      range.end,
+      granularity,
+    );
+    const productTrends = buildRollingTrends(
+      productMap,
+      range.start,
+      range.end,
+      granularity,
+    );
+
+    const currentBucket = formatDateKey(
+      alignDateToGranularity(range.end, granularity),
+    );
+    const currentTrend = trends.find(
+      (trend) => trend.date === currentBucket,
+    ) || {
+      dau: 0,
+      wau: 0,
+      mau: 0,
+    };
+    const currentProductTrend = productTrends.find(
+      (trend) => trend.date === currentBucket,
+    ) || {
+      dau: 0,
+      wau: 0,
+      mau: 0,
+    };
+
+    const productDau = countDistinctInWindow(productMap, range.end, 1);
+    const productWau = countDistinctInWindow(productMap, range.end, 7);
+    const productMau = countDistinctInWindow(productMap, range.end, 30);
+
+    const signedInProductDau = productDau;
+    const signedInProductWau = productWau;
+    const signedInProductMau = productMau;
+
+    const grimoireWindowStart = new Date(range.end);
+    grimoireWindowStart.setUTCDate(grimoireWindowStart.getUTCDate() - 29);
+    const grimoireEventsResult = await sql`
+      SELECT DISTINCT user_id
+      FROM conversion_events
+      WHERE event_type = 'grimoire_viewed'
+        AND user_id IS NOT NULL
+        AND created_at >= ${formatTimestamp(grimoireWindowStart)}
+        AND created_at <= ${formatTimestamp(range.end)}
+        AND (user_email IS NULL OR (user_email NOT LIKE ${TEST_EMAIL_PATTERN} AND user_email != ${TEST_EMAIL_EXACT}))
+    `;
+    const productWindowResult = await sql`
+      SELECT DISTINCT user_id
+      FROM conversion_events
+      WHERE event_type = ANY(SELECT unnest(${productEventsArray}::text[]))
+        AND user_id IS NOT NULL
+        AND created_at >= ${formatTimestamp(grimoireWindowStart)}
+        AND created_at <= ${formatTimestamp(range.end)}
+        AND (user_email IS NULL OR (user_email NOT LIKE ${TEST_EMAIL_PATTERN} AND user_email != ${TEST_EMAIL_EXACT}))
+    `;
+
+    const grimoireUsers = new Set(
+      grimoireEventsResult.rows.map((row) => String(row.user_id)),
+    );
+    const signedInProductUsers = new Set(
+      productWindowResult.rows.map((row) => String(row.user_id)),
+    );
+    const grimoireMau = grimoireUsers.size;
+    let grimoireOnlyMau = 0;
+    grimoireUsers.forEach((id) => {
+      if (!signedInProductUsers.has(id)) {
+        grimoireOnlyMau += 1;
+      }
+    });
+
+    const productUsageSummaryResult = await sql`
+      SELECT
+        user_id,
+        COUNT(*) as total_events,
+        COUNT(DISTINCT DATE(created_at)) as active_days
+      FROM conversion_events
+      WHERE event_type = ANY(SELECT unnest(${productEventsArray}::text[]))
+        AND user_id IS NOT NULL
+        AND created_at >= ${formatTimestamp(range.start)}
+        AND created_at <= ${formatTimestamp(range.end)}
+        AND (user_email IS NULL OR (user_email NOT LIKE ${TEST_EMAIL_PATTERN} AND user_email != ${TEST_EMAIL_EXACT}))
+      GROUP BY user_id
+    `;
+
+    const productUsers = productUsageSummaryResult.rows.length;
+    const returningUsers = productUsageSummaryResult.rows.filter(
+      (row) => Number(row.active_days || 0) > 1,
+    ).length;
+    const totalSessions = productUsageSummaryResult.rows.reduce(
+      (sum, row) => sum + Number(row.active_days || 0),
+      0,
+    );
+    const avgSessionsPerUser =
+      productUsers > 0 ? totalSessions / productUsers : 0;
+
+    const retentionEventsArray = toTextArrayLiteral(ACTIVITY_EVENTS)!;
+
+    const calcRetention = async (
+      cohortStart: Date,
+      cohortEnd: Date,
+      days: 1 | 7 | 30,
+    ) => {
+      const result = await sql`
+        WITH cohort AS (
+          SELECT id, "createdAt"
+          FROM "user"
+          WHERE "createdAt" >= ${formatTimestamp(cohortStart)}
+            AND "createdAt" < ${formatTimestamp(cohortEnd)}
+            AND (email IS NULL OR (email NOT LIKE ${TEST_EMAIL_PATTERN} AND email != ${TEST_EMAIL_EXACT}))
+        )
+        SELECT
+          COUNT(*) AS cohort_size,
+          COUNT(*) FILTER (
+            WHERE EXISTS (
+              SELECT 1
+              FROM conversion_events ce
+              WHERE ce.user_id = cohort.id
+                AND ce.event_type = ANY(SELECT unnest(${retentionEventsArray}::text[]))
+                AND ce.created_at > cohort."createdAt"
+                AND ce.created_at <= cohort."createdAt" + INTERVAL '${days} days'
+                AND (ce.user_email IS NULL OR (ce.user_email NOT LIKE ${TEST_EMAIL_PATTERN} AND ce.user_email != ${TEST_EMAIL_EXACT}))
+            )
+          ) AS returned
+        FROM cohort
+      `;
+
+      const cohortSize = Number(result.rows[0]?.cohort_size || 0);
+      const returned = Number(result.rows[0]?.returned || 0);
+      return cohortSize > 0 ? (returned / cohortSize) * 100 : 0;
+    };
+
+    const day1Start = new Date(range.end);
+    day1Start.setUTCDate(day1Start.getUTCDate() - 2);
+    const day1End = new Date(range.end);
+    day1End.setUTCDate(day1End.getUTCDate() - 1);
+
+    const day7Start = new Date(range.end);
+    day7Start.setUTCDate(day7Start.getUTCDate() - 14);
+    const day7End = new Date(range.end);
+    day7End.setUTCDate(day7End.getUTCDate() - 7);
+
+    const day30Start = new Date(range.end);
+    day30Start.setUTCDate(day30Start.getUTCDate() - 60);
+    const day30End = new Date(range.end);
+    day30End.setUTCDate(day30End.getUTCDate() - 30);
+
+    const [day1Retention, day7Retention, day30Retention] = await Promise.all([
+      calcRetention(day1Start, day1End, 1),
+      calcRetention(day7Start, day7End, 7),
+      calcRetention(day30Start, day30End, 30),
+    ]);
+
     const churnRate =
-      retentionData && retentionData.day30 > 0
-        ? Number((100 - retentionData.day30).toFixed(2))
-        : null;
-
-    const returningUsers =
-      posthogData.wau > 0 && posthogData.dau > 0
-        ? Math.round(posthogData.wau - posthogData.dau * 0.5)
-        : 0;
-
-    const sortedTrends = [...(trendsData || [])].sort((a, b) =>
-      a.date.localeCompare(b.date),
-    );
-    if (posthogData) {
-      const lastDate = formatDate(range.end);
-      const lastIndex = sortedTrends.findIndex(
-        (trend) => trend.date === lastDate,
-      );
-      const wrappedSummary = {
-        date: lastDate,
-        ...posthogData,
-      };
-      if (lastIndex >= 0) {
-        sortedTrends[lastIndex] = {
-          ...sortedTrends[lastIndex],
-          ...wrappedSummary,
-        };
-      } else {
-        sortedTrends.push(wrappedSummary);
-      }
-    }
-
-    const sortedProductTrends = [...(productTrendsData || [])].sort((a, b) =>
-      a.date.localeCompare(b.date),
-    );
-
-    if (
-      typeof productDau === 'number' &&
-      typeof productWau === 'number' &&
-      typeof productMau === 'number'
-    ) {
-      const lastDate = formatDate(range.end);
-      const productSummary = {
-        date: lastDate,
-        dau: productDau,
-        wau: productWau,
-        mau: productMau,
-      };
-      const lastProductIndex = sortedProductTrends.findIndex(
-        (trend) => trend.date === lastDate,
-      );
-      if (lastProductIndex >= 0) {
-        sortedProductTrends[lastProductIndex] = {
-          ...sortedProductTrends[lastProductIndex],
-          ...productSummary,
-        };
-      } else {
-        sortedProductTrends.push(productSummary);
-      }
-    }
-
-    const sortedSignedInProductTrends = [
-      ...(signedInProductTrendsData || []),
-    ].sort((a, b) => a.date.localeCompare(b.date));
-
-    if (
-      typeof signedInProductDau === 'number' &&
-      typeof signedInProductWau === 'number' &&
-      typeof signedInProductMau === 'number'
-    ) {
-      const lastDate = formatDate(range.end);
-      const signedInProductSummary = {
-        date: lastDate,
-        dau: signedInProductDau,
-        wau: signedInProductWau,
-        mau: signedInProductMau,
-      };
-      const lastSignedInIndex = sortedSignedInProductTrends.findIndex(
-        (trend) => trend.date === lastDate,
-      );
-      if (lastSignedInIndex >= 0) {
-        sortedSignedInProductTrends[lastSignedInIndex] = {
-          ...sortedSignedInProductTrends[lastSignedInIndex],
-          ...signedInProductSummary,
-        };
-      } else {
-        sortedSignedInProductTrends.push(signedInProductSummary);
-      }
-    }
+      day30Retention > 0 ? Number((100 - day30Retention).toFixed(2)) : null;
 
     return NextResponse.json({
-      dau: posthogData.dau,
-      wau: posthogData.wau,
-      mau: posthogData.mau,
-      returning_users: returningUsers,
-      retention,
-      churn_rate: churnRate,
-      trends: sortedTrends,
-      product_trends: sortedProductTrends,
-      signed_in_product_trends: sortedSignedInProductTrends,
-      product_dau: productDau ?? 0,
-      product_wau: productWau ?? 0,
-      product_mau: productMau ?? 0,
-      signed_in_product_dau: signedInProductDau ?? 0,
-      signed_in_product_wau: signedInProductWau ?? 0,
-      signed_in_product_mau: signedInProductMau ?? 0,
-      signed_in_product_users: signedInProductUsageSummary?.users ?? 0,
-      signed_in_product_returning_users:
-        signedInProductUsageSummary?.returningUsers ?? 0,
-      signed_in_product_avg_sessions_per_user:
-        signedInProductUsageSummary?.avgSessionsPerUser ?? 0,
-      content_mau_grimoire: grimoireMau ?? 0,
-      grimoire_only_mau: grimoireOnlyMau ?? 0,
-      debug: {
-        app_pageview_users_7d: appPageviewUsers7d ?? 0,
-        app_pageview_users_30d: appPageviewUsers30d ?? 0,
-        grimoire_pageview_users_7d: grimoirePageviewUsers7d ?? 0,
-        grimoire_pageview_users_30d: grimoirePageviewUsers30d ?? 0,
-        identify_events_30d: identifyEvents30d ?? 0,
+      dau: currentTrend.dau,
+      wau: currentTrend.wau,
+      mau: currentTrend.mau,
+      returning_users:
+        currentTrend.wau > 0 && currentTrend.dau > 0
+          ? Math.round(currentTrend.wau - currentTrend.dau * 0.5)
+          : 0,
+      retention: {
+        day_1: Number(day1Retention.toFixed(2)),
+        day_7: Number(day7Retention.toFixed(2)),
+        day_30: Number(day30Retention.toFixed(2)),
       },
-      source: 'posthog',
+      churn_rate: churnRate,
+      trends,
+      product_trends: productTrends,
+      signed_in_product_trends: productTrends,
+      product_dau: productDau,
+      product_wau: productWau,
+      product_mau: productMau,
+      signed_in_product_dau: signedInProductDau,
+      signed_in_product_wau: signedInProductWau,
+      signed_in_product_mau: signedInProductMau,
+      signed_in_product_users: productUsers,
+      signed_in_product_returning_users: returningUsers,
+      signed_in_product_avg_sessions_per_user: Number(
+        avgSessionsPerUser.toFixed(2),
+      ),
+      content_mau_grimoire: grimoireMau,
+      grimoire_only_mau: grimoireOnlyMau,
+      debug: {
+        grimoire_metrics_source: 'conversion_events',
+        product_summary_source: 'conversion_events',
+      },
+      source: 'database',
     });
   } catch (error) {
     console.error('[analytics/dau-wau-mau] Failed to load metrics', error);

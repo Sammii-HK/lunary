@@ -24,12 +24,11 @@ export async function GET(request: NextRequest) {
 
     // Get new signups in the date range
     const signupsResult = await sql`
-      SELECT DISTINCT user_id, created_at as signup_at
-      FROM conversion_events
-      WHERE event_type = 'signup'
-        AND created_at >= ${formatTimestamp(range.start)}
-        AND created_at <= ${formatTimestamp(range.end)}
-        AND (user_email IS NULL OR (user_email NOT LIKE ${TEST_EMAIL_PATTERN} AND user_email != ${TEST_EMAIL_EXACT}))
+      SELECT id as user_id, "createdAt" as signup_at
+      FROM "user"
+      WHERE "createdAt" >= ${formatTimestamp(range.start)}
+        AND "createdAt" <= ${formatTimestamp(range.end)}
+        AND (email IS NULL OR (email NOT LIKE ${TEST_EMAIL_PATTERN} AND email != ${TEST_EMAIL_EXACT}))
     `;
 
     const signups = signupsResult.rows || [];
@@ -52,6 +51,10 @@ export async function GET(request: NextRequest) {
     // Check which users activated within 24h
     let activatedCount = 0;
     const activationBreakdown: Record<string, number> = {};
+    const activationBreakdownByPlan: Record<
+      string,
+      { free: number; paid: number; unknown: number }
+    > = {};
     const activationEventsArray = toTextArrayLiteral(ACTIVATION_EVENTS)!;
 
     for (const signup of signups) {
@@ -62,25 +65,45 @@ export async function GET(request: NextRequest) {
 
       // Check if user completed any activation event within 24h
       const activatedResult = await sql`
-        SELECT event_type
+        SELECT event_type, plan_type
         FROM conversion_events
         WHERE user_id = ${signup.user_id}
           AND event_type = ANY(SELECT unnest(${activationEventsArray}::text[]))
           AND created_at >= ${formatTimestamp(signupAt)}
           AND created_at <= ${formatTimestamp(activationDeadline)}
-        GROUP BY event_type
+        GROUP BY event_type, plan_type
       `;
 
       if (activatedResult.rows.length > 0) {
         activatedCount++;
         // Track which events triggered activation
         const seenEvents = new Set<string>();
+        const seenEventPlans = new Set<string>();
         activatedResult.rows.forEach((row) => {
           const eventType = row.event_type as string;
           if (!eventType || seenEvents.has(eventType)) return;
           seenEvents.add(eventType);
           activationBreakdown[eventType] =
             (activationBreakdown[eventType] || 0) + 1;
+
+          const planType = row.plan_type as string | null;
+          const bucket =
+            planType === 'monthly' || planType === 'yearly'
+              ? 'paid'
+              : planType === 'free'
+                ? 'free'
+                : 'unknown';
+          const planKey = `${eventType}:${bucket}`;
+          if (seenEventPlans.has(planKey)) return;
+          seenEventPlans.add(planKey);
+          if (!activationBreakdownByPlan[eventType]) {
+            activationBreakdownByPlan[eventType] = {
+              free: 0,
+              paid: 0,
+              unknown: 0,
+            };
+          }
+          activationBreakdownByPlan[eventType][bucket] += 1;
         });
       }
     }
@@ -92,29 +115,27 @@ export async function GET(request: NextRequest) {
     const dailyBreakdown = await sql`
       WITH signups_by_day AS (
         SELECT 
-          DATE(created_at) as date,
-          COUNT(DISTINCT user_id) as signups
-        FROM conversion_events
-        WHERE event_type = 'signup'
-          AND created_at >= ${formatTimestamp(range.start)}
-          AND created_at <= ${formatTimestamp(range.end)}
-          AND (user_email IS NULL OR (user_email NOT LIKE ${TEST_EMAIL_PATTERN} AND user_email != ${TEST_EMAIL_EXACT}))
-        GROUP BY DATE(created_at)
+          DATE("createdAt") as date,
+          COUNT(*) as signups
+        FROM "user"
+        WHERE "createdAt" >= ${formatTimestamp(range.start)}
+          AND "createdAt" <= ${formatTimestamp(range.end)}
+          AND (email IS NULL OR (email NOT LIKE ${TEST_EMAIL_PATTERN} AND email != ${TEST_EMAIL_EXACT}))
+        GROUP BY DATE("createdAt")
       ),
       activated_by_day AS (
         SELECT 
-          DATE(ce2.created_at) as date,
-          COUNT(DISTINCT ce1.user_id) as activated
-        FROM conversion_events ce1
-        INNER JOIN conversion_events ce2 ON ce1.user_id = ce2.user_id
-        WHERE ce2.event_type = 'signup'
-          AND ce2.created_at >= ${formatTimestamp(range.start)}
-          AND ce2.created_at <= ${formatTimestamp(range.end)}
-          AND ce1.event_type = ANY(SELECT unnest(${activationEventsArray}::text[]))
-          AND ce1.created_at >= ce2.created_at
-          AND ce1.created_at <= ce2.created_at + INTERVAL '24 hours'
-          AND (ce1.user_email IS NULL OR (ce1.user_email NOT LIKE ${TEST_EMAIL_PATTERN} AND ce1.user_email != ${TEST_EMAIL_EXACT}))
-        GROUP BY DATE(ce2.created_at)
+          DATE(u."createdAt") as date,
+          COUNT(DISTINCT ce.user_id) as activated
+        FROM "user" u
+        INNER JOIN conversion_events ce ON ce.user_id = u.id
+        WHERE u."createdAt" >= ${formatTimestamp(range.start)}
+          AND u."createdAt" <= ${formatTimestamp(range.end)}
+          AND (u.email IS NULL OR (u.email NOT LIKE ${TEST_EMAIL_PATTERN} AND u.email != ${TEST_EMAIL_EXACT}))
+          AND ce.event_type = ANY(SELECT unnest(${activationEventsArray}::text[]))
+          AND ce.created_at >= u."createdAt"
+          AND ce.created_at <= u."createdAt" + INTERVAL '24 hours'
+        GROUP BY DATE(u."createdAt")
       )
       SELECT 
         s.date,
@@ -141,6 +162,7 @@ export async function GET(request: NextRequest) {
       activatedUsers: activatedCount,
       totalSignups: signups.length,
       activationBreakdown,
+      activationBreakdownByPlan,
       trends,
     });
   } catch (error) {

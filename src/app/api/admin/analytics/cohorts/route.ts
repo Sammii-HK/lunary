@@ -118,12 +118,11 @@ export async function GET(request: NextRequest) {
       const cohortEndDate = period.end;
 
       const cohortUsersResult = await sql`
-        SELECT COUNT(DISTINCT user_id) as cohort_size
-        FROM conversion_events
-        WHERE event_type = 'signup'
-          AND created_at >= ${formatTimestamp(period.start)}
-          AND created_at < ${formatTimestamp(period.end)}
-          AND (user_email IS NULL OR (user_email NOT LIKE ${TEST_EMAIL_PATTERN} AND user_email != ${TEST_EMAIL_EXACT}))
+        SELECT COUNT(*) as cohort_size
+        FROM "user"
+        WHERE "createdAt" >= ${formatTimestamp(period.start)}
+          AND "createdAt" < ${formatTimestamp(period.end)}
+          AND (email IS NULL OR (email NOT LIKE ${TEST_EMAIL_PATTERN} AND email != ${TEST_EMAIL_EXACT}))
       `;
 
       const cohortSize = Number(cohortUsersResult.rows[0]?.cohort_size ?? 0);
@@ -131,44 +130,41 @@ export async function GET(request: NextRequest) {
 
       // Calculate retention metrics using the cohort window
       const day1Retained = await sql`
-        SELECT COUNT(DISTINCT ce1.user_id) as count
-        FROM conversion_events ce1
-        INNER JOIN conversion_events ce2 ON ce1.user_id = ce2.user_id
-        WHERE ce1.event_type = 'signup'
-          AND ce1.created_at >= ${formatTimestamp(cohortStartDate)}
-          AND ce1.created_at < ${formatTimestamp(cohortEndDate)}
-          AND (ce1.user_email IS NULL OR (ce1.user_email NOT LIKE ${TEST_EMAIL_PATTERN} AND ce1.user_email != ${TEST_EMAIL_EXACT}))
+        SELECT COUNT(DISTINCT u.id) as count
+        FROM "user" u
+        INNER JOIN conversion_events ce2 ON ce2.user_id = u.id
+        WHERE u."createdAt" >= ${formatTimestamp(cohortStartDate)}
+          AND u."createdAt" < ${formatTimestamp(cohortEndDate)}
+          AND (u.email IS NULL OR (u.email NOT LIKE ${TEST_EMAIL_PATTERN} AND u.email != ${TEST_EMAIL_EXACT}))
           AND ce2.event_type = ANY(SELECT unnest(${activityEventsArray}::text[]))
-          AND ce2.created_at > ce1.created_at
-          AND ce2.created_at <= ce1.created_at + INTERVAL '1 day'
+          AND ce2.created_at > u."createdAt"
+          AND ce2.created_at <= u."createdAt" + INTERVAL '1 day'
       `;
 
       // Day 7 retention: users who returned within 7 days after their signup
       const day7Retained = await sql`
-        SELECT COUNT(DISTINCT ce1.user_id) as count
-        FROM conversion_events ce1
-        INNER JOIN conversion_events ce2 ON ce1.user_id = ce2.user_id
-        WHERE ce1.event_type = 'signup'
-          AND ce1.created_at >= ${formatTimestamp(cohortStartDate)}
-          AND ce1.created_at < ${formatTimestamp(cohortEndDate)}
-          AND (ce1.user_email IS NULL OR (ce1.user_email NOT LIKE ${TEST_EMAIL_PATTERN} AND ce1.user_email != ${TEST_EMAIL_EXACT}))
+        SELECT COUNT(DISTINCT u.id) as count
+        FROM "user" u
+        INNER JOIN conversion_events ce2 ON ce2.user_id = u.id
+        WHERE u."createdAt" >= ${formatTimestamp(cohortStartDate)}
+          AND u."createdAt" < ${formatTimestamp(cohortEndDate)}
+          AND (u.email IS NULL OR (u.email NOT LIKE ${TEST_EMAIL_PATTERN} AND u.email != ${TEST_EMAIL_EXACT}))
           AND ce2.event_type = ANY(SELECT unnest(${activityEventsArray}::text[]))
-          AND ce2.created_at > ce1.created_at
-          AND ce2.created_at <= ce1.created_at + INTERVAL '7 days'
+          AND ce2.created_at > u."createdAt"
+          AND ce2.created_at <= u."createdAt" + INTERVAL '7 days'
       `;
 
       // Day 30 retention: users who returned within 30 days after their signup
       const day30Retained = await sql`
-        SELECT COUNT(DISTINCT ce1.user_id) as count
-        FROM conversion_events ce1
-        INNER JOIN conversion_events ce2 ON ce1.user_id = ce2.user_id
-        WHERE ce1.event_type = 'signup'
-          AND ce1.created_at >= ${formatTimestamp(cohortStartDate)}
-          AND ce1.created_at < ${formatTimestamp(cohortEndDate)}
-          AND (ce1.user_email IS NULL OR (ce1.user_email NOT LIKE ${TEST_EMAIL_PATTERN} AND ce1.user_email != ${TEST_EMAIL_EXACT}))
+        SELECT COUNT(DISTINCT u.id) as count
+        FROM "user" u
+        INNER JOIN conversion_events ce2 ON ce2.user_id = u.id
+        WHERE u."createdAt" >= ${formatTimestamp(cohortStartDate)}
+          AND u."createdAt" < ${formatTimestamp(cohortEndDate)}
+          AND (u.email IS NULL OR (u.email NOT LIKE ${TEST_EMAIL_PATTERN} AND u.email != ${TEST_EMAIL_EXACT}))
           AND ce2.event_type = ANY(SELECT unnest(${activityEventsArray}::text[]))
-          AND ce2.created_at > ce1.created_at
-          AND ce2.created_at <= ce1.created_at + INTERVAL '30 days'
+          AND ce2.created_at > u."createdAt"
+          AND ce2.created_at <= u."createdAt" + INTERVAL '30 days'
       `;
 
       const formattedStart = period.start.toISOString().split('T')[0];

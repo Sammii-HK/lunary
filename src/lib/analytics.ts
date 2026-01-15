@@ -7,6 +7,7 @@ import { getAttributionForTracking } from '@/lib/attribution';
 
 export type ConversionEvent =
   | 'signup'
+  | 'app_opened'
   | 'birth_data_submitted'
   | 'trial_started'
   | 'trial_expired'
@@ -30,7 +31,8 @@ export type ConversionEvent =
   | 'moon_circle_opened'
   | 'moon_circle_sent'
   | 'weekly_report_opened'
-  | 'weekly_report_sent';
+  | 'weekly_report_sent'
+  | 'grimoire_viewed';
 
 export interface ConversionEventData {
   event: ConversionEvent;
@@ -215,6 +217,10 @@ export async function trackConversion(
     }
 
     const payload = sanitizeEventPayload(eventData);
+    const apiPayload = {
+      ...payload,
+      metadata: eventData.metadata ?? undefined,
+    };
 
     // Track to Vercel Analytics (web vitals focus)
     track(event, payload);
@@ -230,7 +236,7 @@ export async function trackConversion(
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify(payload),
+      body: JSON.stringify(apiPayload),
     });
 
     const notificationPromise = fetch('/api/admin/notifications/conversion', {
@@ -273,6 +279,9 @@ export async function trackConversion(
 export const conversionTracking = {
   signup: (userId?: string, email?: string) =>
     trackConversion('signup', { userId, userEmail: email }),
+
+  appOpened: (userId?: string, email?: string) =>
+    trackConversion('app_opened', { userId, userEmail: email }),
 
   trialStarted: (
     userId?: string,
@@ -327,13 +336,18 @@ export const conversionTracking = {
   birthdayEntered: (userId?: string) =>
     trackConversion('birthday_entered', { userId }),
 
-  horoscopeViewed: (userId?: string) =>
-    trackConversion('horoscope_viewed', { userId }),
+  horoscopeViewed: (
+    userId?: string,
+    planType?: 'monthly' | 'yearly' | 'free',
+  ) => trackConversion('horoscope_viewed', { userId, planType }),
 
-  tarotViewed: (userId?: string) => trackConversion('tarot_viewed', { userId }),
+  tarotViewed: (userId?: string, planType?: 'monthly' | 'yearly' | 'free') =>
+    trackConversion('tarot_viewed', { userId, planType }),
 
-  birthChartViewed: (userId?: string) =>
-    trackConversion('birth_chart_viewed', { userId }),
+  birthChartViewed: (
+    userId?: string,
+    planType?: 'monthly' | 'yearly' | 'free',
+  ) => trackConversion('birth_chart_viewed', { userId, planType }),
 
   birthDataSubmitted: (userId?: string) =>
     trackConversion('birth_data_submitted', { userId }),
@@ -341,12 +355,21 @@ export const conversionTracking = {
   trialExpired: (userId?: string, email?: string) =>
     trackConversion('trial_expired', { userId, userEmail: email }),
 
-  personalizedTarotViewed: (userId?: string) =>
-    trackConversion('personalized_tarot_viewed', { userId }),
+  personalizedTarotViewed: (
+    userId?: string,
+    planType?: 'monthly' | 'yearly' | 'free',
+  ) => trackConversion('personalized_tarot_viewed', { userId, planType }),
 
-  personalizedHoroscopeViewed: (userId?: string) =>
-    trackConversion('personalized_horoscope_viewed', { userId }),
+  personalizedHoroscopeViewed: (
+    userId?: string,
+    planType?: 'monthly' | 'yearly' | 'free',
+  ) => trackConversion('personalized_horoscope_viewed', { userId, planType }),
 
-  crystalRecommendationsViewed: (userId?: string) =>
-    trackConversion('crystal_recommendations_viewed', { userId }),
+  crystalRecommendationsViewed: (
+    userId?: string,
+    planType?: 'monthly' | 'yearly' | 'free',
+  ) => trackConversion('crystal_recommendations_viewed', { userId, planType }),
+
+  grimoireViewed: (userId?: string, metadata?: Record<string, any>) =>
+    trackConversion('grimoire_viewed', { userId, metadata }),
 };

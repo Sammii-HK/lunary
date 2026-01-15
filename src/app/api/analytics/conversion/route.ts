@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { sql } from '@vercel/postgres';
 import { trackActivity } from '@/lib/analytics/tracking';
+import { getCurrentUser } from '@/lib/get-user-session';
 
 function normalizeEmail(email: unknown): string | undefined {
   if (typeof email !== 'string') {
@@ -58,32 +59,69 @@ export async function POST(request: NextRequest) {
           ? String(userId)
           : null;
 
-    await sql`
-      INSERT INTO conversion_events (
-        event_type,
-        user_id,
-        user_email,
-        plan_type,
-        trial_days_remaining,
-        feature_name,
-        page_path,
-        metadata,
-        created_at
-      ) VALUES (
-        ${event},
-        ${safeUserId},
-        ${normalizedEmail || null},
-        ${planType || null},
-        ${trialDaysRemaining || null},
-        ${featureName || null},
-        ${pagePath || null},
-        ${metadata ? JSON.stringify(metadata) : null},
-        NOW()
-      )
-    `;
+    const currentUser =
+      !safeUserId || !normalizedEmail ? await getCurrentUser(request) : null;
+    const resolvedUserId = safeUserId || currentUser?.id || null;
+    const resolvedEmail = normalizedEmail || currentUser?.email || null;
+
+    if (event === 'signup' && resolvedUserId) {
+      await sql`
+        INSERT INTO conversion_events (
+          event_type,
+          user_id,
+          user_email,
+          plan_type,
+          trial_days_remaining,
+          feature_name,
+          page_path,
+          metadata,
+          created_at
+        )
+        SELECT
+          ${event},
+          ${resolvedUserId},
+          ${resolvedEmail || null},
+          ${planType || null},
+          ${trialDaysRemaining || null},
+          ${featureName || null},
+          ${pagePath || null},
+          ${metadata ? JSON.stringify(metadata) : null},
+          NOW()
+        WHERE NOT EXISTS (
+          SELECT 1
+          FROM conversion_events
+          WHERE event_type = ${event}
+            AND user_id = ${resolvedUserId}
+        )
+      `;
+    } else {
+      await sql`
+        INSERT INTO conversion_events (
+          event_type,
+          user_id,
+          user_email,
+          plan_type,
+          trial_days_remaining,
+          feature_name,
+          page_path,
+          metadata,
+          created_at
+        ) VALUES (
+          ${event},
+          ${resolvedUserId},
+          ${resolvedEmail || null},
+          ${planType || null},
+          ${trialDaysRemaining || null},
+          ${featureName || null},
+          ${pagePath || null},
+          ${metadata ? JSON.stringify(metadata) : null},
+          NOW()
+        )
+      `;
+    }
 
     // Also track activity for feature views to populate feature usage analytics
-    if (safeUserId) {
+    if (resolvedUserId) {
       const activityTypeMap: Record<string, string> = {
         tarot_viewed: 'tarot',
         birth_chart_viewed: 'birth_chart',
@@ -106,7 +144,7 @@ export async function POST(request: NextRequest) {
       ) {
         try {
           await trackActivity({
-            userId: safeUserId,
+            userId: resolvedUserId,
             activityType,
             metadata: metadata || {},
           });

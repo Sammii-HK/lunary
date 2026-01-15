@@ -3,12 +3,6 @@ import { sql } from '@vercel/postgres';
 import { formatDate, formatTimestamp } from '@/lib/analytics/date-range';
 import { getSearchConsoleData, getTopPages } from '@/lib/google/search-console';
 import generateSitemap from '@/app/sitemap';
-import {
-  getPostHogActiveUsers,
-  getPostHogAIMetrics,
-  getPostHogRetention,
-  getPostHogProductUsage,
-} from '@/lib/posthog-server';
 
 // Test user exclusion patterns - matches filtering in conversion events
 const TEST_EMAIL_PATTERN = '%@test.lunary.app';
@@ -34,6 +28,34 @@ function isSearchEngine(referrer: string): boolean {
     referrer.toLowerCase().includes('search')
   );
 }
+
+const ACTIVITY_EVENTS = [
+  'app_opened',
+  'tarot_viewed',
+  'personalized_tarot_viewed',
+  'birth_chart_viewed',
+  'horoscope_viewed',
+  'personalized_horoscope_viewed',
+  'cosmic_pulse_opened',
+  'moon_circle_opened',
+  'weekly_report_opened',
+  'pricing_page_viewed',
+  'trial_started',
+  'trial_converted',
+  'subscription_started',
+  'login',
+  'dashboard_viewed',
+  'grimoire_viewed',
+];
+
+const PRODUCT_EVENTS = [
+  'birth_chart_viewed',
+  'tarot_viewed',
+  'horoscope_viewed',
+  'crystal_recommendations_viewed',
+  'personalized_tarot_viewed',
+  'personalized_horoscope_viewed',
+];
 
 export async function GET(request: NextRequest) {
   try {
@@ -170,18 +192,44 @@ export async function GET(request: NextRequest) {
       `,
     ]);
 
-    // DAU/WAU/MAU and Retention from PostHog
-    const [posthogActiveUsers, posthogRetention, posthogProductUsage] =
-      await Promise.all([
-        getPostHogActiveUsers(),
-        getPostHogRetention(),
-        getPostHogProductUsage(30),
-      ]);
+    const activityEventsArray = `{${ACTIVITY_EVENTS.map((e) => `"${e}"`).join(',')}}`;
 
-    const dau = posthogActiveUsers?.dau ?? 0;
-    const wau = posthogActiveUsers?.wau ?? 0;
-    const mau = posthogActiveUsers?.mau ?? 0;
-    const activeUsersSource = posthogActiveUsers ? 'posthog' : 'unavailable';
+    const dauStart = new Date(today);
+    dauStart.setUTCDate(dauStart.getUTCDate() - 1);
+    const wauStart = new Date(today);
+    wauStart.setUTCDate(wauStart.getUTCDate() - 7);
+
+    const [dauResult, wauResult, mauResult] = await Promise.all([
+      sql`
+        SELECT COUNT(DISTINCT user_id) AS count
+        FROM conversion_events
+        WHERE event_type = ANY(SELECT unnest(${activityEventsArray}::text[]))
+          AND created_at >= ${formatTimestamp(dauStart)}
+          AND created_at <= ${formatTimestamp(today)}
+          AND (user_email IS NULL OR (user_email NOT LIKE ${TEST_EMAIL_PATTERN} AND user_email != ${TEST_EMAIL_EXACT} ))
+      `,
+      sql`
+        SELECT COUNT(DISTINCT user_id) AS count
+        FROM conversion_events
+        WHERE event_type = ANY(SELECT unnest(${activityEventsArray}::text[]))
+          AND created_at >= ${formatTimestamp(wauStart)}
+          AND created_at <= ${formatTimestamp(today)}
+          AND (user_email IS NULL OR (user_email NOT LIKE ${TEST_EMAIL_PATTERN} AND user_email != ${TEST_EMAIL_EXACT} ))
+      `,
+      sql`
+        SELECT COUNT(DISTINCT user_id) AS count
+        FROM conversion_events
+        WHERE event_type = ANY(SELECT unnest(${activityEventsArray}::text[]))
+          AND created_at >= ${thirtyDaysAgoTimestamp}
+          AND created_at <= ${formatTimestamp(today)}
+          AND (user_email IS NULL OR (user_email NOT LIKE ${TEST_EMAIL_PATTERN} AND user_email != ${TEST_EMAIL_EXACT} ))
+      `,
+    ]);
+
+    const dau = Number(dauResult.rows[0]?.count || 0);
+    const wau = Number(wauResult.rows[0]?.count || 0);
+    const mau = Number(mauResult.rows[0]?.count || 0);
+    const activeUsersSource = 'database';
 
     const activeTrials = Number(activeTrialsResult.rows[0]?.count || 0);
     const activeSubscriptions = Number(subscriptionsResult.rows[0]?.count || 0);
@@ -212,17 +260,70 @@ export async function GET(request: NextRequest) {
     const trialToPaidConversionRate30d =
       totalTrials30d > 0 ? (trialConversions30d / totalTrials30d) * 100 : 0;
 
-    const retention = posthogRetention
-      ? {
-          day_1: posthogRetention.day1,
-          day_7: posthogRetention.day7,
-          day_30: posthogRetention.day30,
-        }
-      : { day_1: null, day_7: null, day_30: null };
+    const calcRetention = async (
+      cohortStart: Date,
+      cohortEnd: Date,
+      days: 1 | 7 | 30,
+    ) => {
+      const result = await sql`
+        WITH cohort AS (
+          SELECT id, "createdAt"
+          FROM "user"
+          WHERE "createdAt" >= ${formatTimestamp(cohortStart)}
+            AND "createdAt" < ${formatTimestamp(cohortEnd)}
+            AND (email IS NULL OR (email NOT LIKE ${TEST_EMAIL_PATTERN} AND email != ${TEST_EMAIL_EXACT} ))
+        )
+        SELECT
+          COUNT(*) AS cohort_size,
+          COUNT(*) FILTER (
+            WHERE EXISTS (
+              SELECT 1
+              FROM conversion_events ce
+              WHERE ce.user_id = cohort.id
+                AND ce.event_type = ANY(SELECT unnest(${activityEventsArray}::text[]))
+                AND ce.created_at > cohort."createdAt"
+                AND ce.created_at <= cohort."createdAt" + INTERVAL '${days} days'
+                AND (ce.user_email IS NULL OR (ce.user_email NOT LIKE ${TEST_EMAIL_PATTERN} AND ce.user_email != ${TEST_EMAIL_EXACT} ))
+            )
+          ) AS returned
+        FROM cohort
+      `;
+
+      const cohortSize = Number(result.rows[0]?.cohort_size || 0);
+      const returned = Number(result.rows[0]?.returned || 0);
+      return cohortSize > 0 ? (returned / cohortSize) * 100 : null;
+    };
+
+    const day1Start = new Date(today);
+    day1Start.setUTCDate(day1Start.getUTCDate() - 2);
+    const day1End = new Date(today);
+    day1End.setUTCDate(day1End.getUTCDate() - 1);
+
+    const day7Start = new Date(today);
+    day7Start.setUTCDate(day7Start.getUTCDate() - 14);
+    const day7End = new Date(today);
+    day7End.setUTCDate(day7End.getUTCDate() - 7);
+
+    const day30Start = new Date(today);
+    day30Start.setUTCDate(day30Start.getUTCDate() - 60);
+    const day30End = new Date(today);
+    day30End.setUTCDate(day30End.getUTCDate() - 30);
+
+    const [day1Retention, day7Retention, day30Retention] = await Promise.all([
+      calcRetention(day1Start, day1End, 1),
+      calcRetention(day7Start, day7End, 7),
+      calcRetention(day30Start, day30End, 30),
+    ]);
+
+    const retention = {
+      day_1: day1Retention,
+      day_7: day7Retention,
+      day_30: day30Retention,
+    };
 
     const churnRate =
-      posthogRetention !== null
-        ? Math.max(0, 100 - posthogRetention.day30)
+      retention.day_30 !== null
+        ? Math.max(0, 100 - Number(retention.day_30))
         : null;
 
     // Correct pricing:
@@ -349,9 +450,30 @@ export async function GET(request: NextRequest) {
     // Tarot engagement now tracked by PostHog
     const tarotEngagementType: Record<string, number> = {};
 
+    const productEventsArray = `{${PRODUCT_EVENTS.map((e) => `"${e}"`).join(',')}}`;
+    const productUsageResult = await sql`
+      SELECT event_type, COUNT(*) AS count
+      FROM conversion_events
+      WHERE event_type = ANY(SELECT unnest(${productEventsArray}::text[]))
+        AND created_at >= ${thirtyDaysAgoTimestamp}
+        AND (user_email IS NULL OR (user_email NOT LIKE ${TEST_EMAIL_PATTERN} AND user_email != ${TEST_EMAIL_EXACT} ))
+      GROUP BY event_type
+    `;
+    const productUsageCounts: Record<string, number> = {};
+    productUsageResult.rows.forEach((row) => {
+      productUsageCounts[row.event_type as string] = Number(row.count || 0);
+    });
+    const birthChartViews = productUsageCounts['birth_chart_viewed'] || 0;
+    const tarotPulls = productUsageCounts['tarot_viewed'] || 0;
+    const ritualsGenerated = 0; // Not currently tracked
+    const crystalSearches =
+      productUsageCounts['crystal_recommendations_viewed'] || 0;
+    const collectionsCreated = 0; // Not currently tracked
+    const reportsDownloaded = 0; // Not currently tracked
+
     // Crystal lookups from PostHog
-    const crystalUsers = posthogProductUsage?.crystalSearches ?? 0;
-    const crystalTotalLookups = posthogProductUsage?.crystalSearches ?? 0;
+    const crystalUsers = crystalSearches;
+    const crystalTotalLookups = crystalSearches;
     const crystalLookupsPerUser = crystalUsers > 0 ? 1 : 0;
 
     const stickiness = mau > 0 ? (dau / mau) * 100 : 0;
@@ -383,11 +505,10 @@ export async function GET(request: NextRequest) {
 
     // Calculate conversion rate (Free → Paid)
     const freeUsersResult = await sql`
-      SELECT COUNT(DISTINCT user_id) AS count
-      FROM conversion_events
-      WHERE event_type = 'signup'
-        AND created_at >= ${thirtyDaysAgoTimestamp}
-        AND (user_email IS NULL OR (user_email NOT LIKE ${TEST_EMAIL_PATTERN} AND user_email != ${TEST_EMAIL_EXACT} ))
+      SELECT COUNT(*) AS count
+      FROM "user"
+      WHERE "createdAt" >= ${thirtyDaysAgoTimestamp}
+        AND (email IS NULL OR (email NOT LIKE ${TEST_EMAIL_PATTERN} AND email != ${TEST_EMAIL_EXACT} ))
     `;
     const freeUsers = Number(freeUsersResult.rows[0]?.count || 0);
     const conversionRate =
@@ -539,13 +660,12 @@ export async function GET(request: NextRequest) {
     // Cohort retention now tracked by PostHog - only show signup counts
     const cohortRetentionResult = await sql`
       SELECT
-        DATE_TRUNC('week', created_at) AS cohort_start,
-        COUNT(DISTINCT user_id) AS day0_users
-      FROM conversion_events
-      WHERE event_type = 'signup'
-        AND created_at >= ${formatTimestamp(new Date(today.getTime() - 90 * 24 * 60 * 60 * 1000))}
-        AND (user_email IS NULL OR (user_email NOT LIKE ${TEST_EMAIL_PATTERN} AND user_email != ${TEST_EMAIL_EXACT} ))
-      GROUP BY DATE_TRUNC('week', created_at)
+        DATE_TRUNC('week', "createdAt") AS cohort_start,
+        COUNT(*) AS day0_users
+      FROM "user"
+      WHERE "createdAt" >= ${formatTimestamp(new Date(today.getTime() - 90 * 24 * 60 * 60 * 1000))}
+        AND (email IS NULL OR (email NOT LIKE ${TEST_EMAIL_PATTERN} AND email != ${TEST_EMAIL_EXACT} ))
+      GROUP BY DATE_TRUNC('week', "createdAt")
       ORDER BY cohort_start DESC
       LIMIT 12
     `;
@@ -553,47 +673,31 @@ export async function GET(request: NextRequest) {
     const cohorts = cohortRetentionResult.rows.map((row) => ({
       startDate: formatDate(new Date(row.cohort_start)),
       day0Users: Number(row.day0_users || 0),
-      day1Retention: posthogRetention?.day1 ?? null,
-      day7Retention: posthogRetention?.day7 ?? null,
-      day30Retention: posthogRetention?.day30 ?? null,
+      day1Retention: retention.day_1,
+      day7Retention: retention.day_7,
+      day30Retention: retention.day_30,
       day90Retention: null,
     }));
 
-    // AI Engagement metrics - try PostHog first, fallback to DB
-    const posthogAIMetrics = await getPostHogAIMetrics(30);
-
-    let aiSessions: number;
-    let aiUniqueUsers: number;
-    let aiTotalTokens: number;
-    let aiCompletedSessions: number;
-    let aiCostFromPostHog: number | null = null;
-
-    if (posthogAIMetrics) {
-      aiSessions = posthogAIMetrics.totalGenerations;
-      aiUniqueUsers = posthogAIMetrics.uniqueUsers;
-      aiTotalTokens =
-        posthogAIMetrics.totalInputTokens + posthogAIMetrics.totalOutputTokens;
-      aiCompletedSessions = posthogAIMetrics.totalGenerations;
-      aiCostFromPostHog = posthogAIMetrics.totalCostUsd;
-    } else {
-      const aiEngagementResult = await sql`
-        SELECT
-          COUNT(*) AS sessions,
-          COUNT(DISTINCT user_id) AS unique_users,
-          COALESCE(SUM(token_count), 0) AS total_tokens,
-          COUNT(*) FILTER (WHERE completed) AS completed_sessions
-        FROM analytics_ai_usage
-        WHERE created_at >= ${thirtyDaysAgoTimestamp}
-          AND user_id NOT IN (
-              SELECT DISTINCT user_id FROM subscriptions WHERE user_email LIKE ${TEST_EMAIL_PATTERN} OR user_email = ${TEST_EMAIL_EXACT}               UNION SELECT DISTINCT user_id FROM conversion_events WHERE user_email LIKE ${TEST_EMAIL_PATTERN} OR user_email = ${TEST_EMAIL_EXACT}             )
-      `;
-      aiSessions = Number(aiEngagementResult.rows[0]?.sessions || 0);
-      aiUniqueUsers = Number(aiEngagementResult.rows[0]?.unique_users || 0);
-      aiTotalTokens = Number(aiEngagementResult.rows[0]?.total_tokens || 0);
-      aiCompletedSessions = Number(
-        aiEngagementResult.rows[0]?.completed_sessions || 0,
-      );
-    }
+    // AI Engagement metrics - database source of truth
+    const aiEngagementResult = await sql`
+      SELECT
+        COUNT(*) AS sessions,
+        COUNT(DISTINCT user_id) AS unique_users,
+        COALESCE(SUM(token_count), 0) AS total_tokens,
+        COUNT(*) FILTER (WHERE completed) AS completed_sessions
+      FROM analytics_ai_usage
+      WHERE created_at >= ${thirtyDaysAgoTimestamp}
+        AND user_id NOT IN (
+            SELECT DISTINCT user_id FROM subscriptions WHERE user_email LIKE ${TEST_EMAIL_PATTERN} OR user_email = ${TEST_EMAIL_EXACT}             UNION SELECT DISTINCT user_id FROM conversion_events WHERE user_email LIKE ${TEST_EMAIL_PATTERN} OR user_email = ${TEST_EMAIL_EXACT}           )
+    `;
+    const aiSessions = Number(aiEngagementResult.rows[0]?.sessions || 0);
+    const aiUniqueUsers = Number(aiEngagementResult.rows[0]?.unique_users || 0);
+    const aiTotalTokens = Number(aiEngagementResult.rows[0]?.total_tokens || 0);
+    const aiCompletedSessions = Number(
+      aiEngagementResult.rows[0]?.completed_sessions || 0,
+    );
+    const aiCostFromPostHog: number | null = null;
 
     const aiTokensPerUser =
       aiUniqueUsers > 0 ? aiTotalTokens / aiUniqueUsers : 0;
@@ -616,16 +720,21 @@ export async function GET(request: NextRequest) {
     }));
 
     // Funnel metrics
+    const funnelFreeUsersResult = await sql`
+      SELECT COUNT(*) AS count
+      FROM "user"
+      WHERE "createdAt" >= ${thirtyDaysAgoTimestamp}
+        AND (email IS NULL OR (email NOT LIKE ${TEST_EMAIL_PATTERN} AND email != ${TEST_EMAIL_EXACT} ))
+    `;
     const funnelResult = await sql`
       SELECT
-        COUNT(DISTINCT CASE WHEN event_type = 'signup' THEN user_id END) AS free_users,
         COUNT(DISTINCT CASE WHEN event_type = 'trial_started' THEN user_id END) AS trial_starts,
         COUNT(DISTINCT CASE WHEN event_type IN ('trial_converted', 'subscription_started') THEN user_id END) AS paid_users
       FROM conversion_events
       WHERE created_at >= ${thirtyDaysAgoTimestamp}
         AND (user_email IS NULL OR (user_email NOT LIKE ${TEST_EMAIL_PATTERN} AND user_email != ${TEST_EMAIL_EXACT} ))
     `;
-    const funnelFreeUsers = Number(funnelResult.rows[0]?.free_users || 0);
+    const funnelFreeUsers = Number(funnelFreeUsersResult.rows[0]?.count || 0);
     const funnelTrialStarts = Number(funnelResult.rows[0]?.trial_starts || 0);
     const funnelPaidUsers = Number(funnelResult.rows[0]?.paid_users || 0);
 
@@ -697,20 +806,21 @@ export async function GET(request: NextRequest) {
     const arpnu = newPaidUsers > 0 ? newUserRevenue / newPaidUsers : 0;
 
     // Activation Rate (users who completed onboarding)
-    const activationRateResult = await sql`
-      SELECT
-        COUNT(DISTINCT CASE WHEN event_type = 'onboarding_completed' THEN user_id END) AS activated_users,
-        COUNT(DISTINCT CASE WHEN event_type = 'signup' THEN user_id END) AS total_signups
+    const activatedUsersResult = await sql`
+      SELECT COUNT(DISTINCT user_id) AS count
       FROM conversion_events
-      WHERE created_at >= ${thirtyDaysAgoTimestamp}
+      WHERE event_type = 'onboarding_completed'
+        AND created_at >= ${thirtyDaysAgoTimestamp}
         AND (user_email IS NULL OR (user_email NOT LIKE ${TEST_EMAIL_PATTERN} AND user_email != ${TEST_EMAIL_EXACT} ))
     `;
-    const activatedUsers = Number(
-      activationRateResult.rows[0]?.activated_users || 0,
-    );
-    const totalSignups = Number(
-      activationRateResult.rows[0]?.total_signups || 0,
-    );
+    const totalSignupsResult = await sql`
+      SELECT COUNT(*) AS count
+      FROM "user"
+      WHERE "createdAt" >= ${thirtyDaysAgoTimestamp}
+        AND (email IS NULL OR (email NOT LIKE ${TEST_EMAIL_PATTERN} AND email != ${TEST_EMAIL_EXACT} ))
+    `;
+    const activatedUsers = Number(activatedUsersResult.rows[0]?.count || 0);
+    const totalSignups = Number(totalSignupsResult.rows[0]?.count || 0);
     const activationRate =
       totalSignups > 0 ? (activatedUsers / totalSignups) * 100 : 0;
 
@@ -818,20 +928,11 @@ export async function GET(request: NextRequest) {
       };
     });
 
-    // Product usage metrics from PostHog
-    const birthChartViews = posthogProductUsage?.birthChartViews ?? 0;
-    const tarotPulls = posthogProductUsage?.tarotPulls ?? 0;
-    const ritualsGenerated = 0; // Not currently tracked
-    const crystalSearches = posthogProductUsage?.crystalSearches ?? 0;
-    const collectionsCreated = 0; // Not currently tracked
-    const reportsDownloaded = 0; // Not currently tracked
-
     // Pricing tier breakdown
     const freeUsersCount = await sql`
-      SELECT COUNT(DISTINCT user_id) AS count
-      FROM conversion_events
-      WHERE event_type = 'signup'
-        AND (user_email IS NULL OR (user_email NOT LIKE ${TEST_EMAIL_PATTERN} AND user_email != ${TEST_EMAIL_EXACT} ))
+      SELECT COUNT(*) AS count
+      FROM "user"
+      WHERE (email IS NULL OR (email NOT LIKE ${TEST_EMAIL_PATTERN} AND email != ${TEST_EMAIL_EXACT} ))
     `;
     const freeUsersTotal = Number(freeUsersCount.rows[0]?.count || 0);
     const arppu = activeSubscriptions > 0 ? mrr / activeSubscriptions : 0;
@@ -964,7 +1065,7 @@ export async function GET(request: NextRequest) {
       _metadata: {
         generatedAt: new Date().toISOString(),
         activeUsersSource: activeUsersSource,
-        aiMetricsSource: posthogAIMetrics ? 'posthog' : 'database',
+        aiMetricsSource: 'database',
       },
 
       // Sheet 1: High-Level KPIs

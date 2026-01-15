@@ -38,6 +38,9 @@ export function useConversionTracking() {
       case 'signup':
         conversionTracking.signup(eventData.userId, eventData.userEmail);
         break;
+      case 'app_opened':
+        conversionTracking.appOpened(eventData.userId, eventData.userEmail);
+        break;
       case 'trial_started':
         conversionTracking.trialStarted(
           eventData.userId,
@@ -89,13 +92,22 @@ export function useConversionTracking() {
         conversionTracking.birthdayEntered(eventData.userId);
         break;
       case 'horoscope_viewed':
-        conversionTracking.horoscopeViewed(eventData.userId);
+        conversionTracking.horoscopeViewed(
+          eventData.userId,
+          eventData.planType,
+        );
         break;
       case 'tarot_viewed':
-        conversionTracking.tarotViewed(eventData.userId);
+        conversionTracking.tarotViewed(eventData.userId, eventData.planType);
         break;
       case 'birth_chart_viewed':
-        conversionTracking.birthChartViewed(eventData.userId);
+        conversionTracking.birthChartViewed(
+          eventData.userId,
+          eventData.planType,
+        );
+        break;
+      case 'grimoire_viewed':
+        conversionTracking.grimoireViewed(eventData.userId, data);
         break;
     }
   };

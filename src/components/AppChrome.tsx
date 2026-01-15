@@ -25,9 +25,12 @@ import {
   TestimonialPromptMeta,
 } from '@/lib/testimonial-prompt';
 import { useAuthStatus } from './AuthStatus';
+import { conversionTracking } from '@/lib/analytics';
 
 const NAV_CONTEXT_KEY = 'lunary_nav_context';
 const TESTIMONIAL_PROMPT_KEY = 'lunary-testimonial-prompt';
+const APP_SESSION_KEY = 'lunary_app_session_ts';
+const APP_SESSION_TTL_MS = 30 * 60 * 1000;
 
 export function AppChrome() {
   const pathname = usePathname() || '';
@@ -301,6 +304,19 @@ export function AppChrome() {
     !isAdminSurface;
 
   const showBetaBanner = !authState.loading && !authState.isAuthenticated;
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    if (!isAppPage) return;
+    if (!authState.user?.id) return;
+
+    const now = Date.now();
+    const last = Number(sessionStorage.getItem(APP_SESSION_KEY) || 0);
+    if (last && now - last < APP_SESSION_TTL_MS) return;
+
+    sessionStorage.setItem(APP_SESSION_KEY, String(now));
+    conversionTracking.appOpened(authState.user.id, authState.user.email);
+  }, [isAppPage, authState.user?.id, authState.user?.email]);
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
