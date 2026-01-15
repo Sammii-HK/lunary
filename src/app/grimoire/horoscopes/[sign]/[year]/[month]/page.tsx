@@ -15,6 +15,8 @@ import {
   Month,
 } from '@/constants/seo/monthly-horoscope';
 import { SEOContentTemplate } from '@/components/grimoire/SEOContentTemplate';
+import { HoroscopeCosmicConnections } from '@/components/grimoire/HoroscopeCosmicConnections';
+import { ArrowLeft, ArrowRight } from 'lucide-react';
 
 interface PageParams {
   sign: string;
@@ -31,7 +33,7 @@ function validateParams(
 
   if (!ZODIAC_SIGNS.includes(sign)) return null;
   if (!MONTHS.includes(month)) return null;
-  if (year < 2024 || year > 2030) return null;
+  if (year < year - 5 || year > year + 5) return null;
 
   return { sign, year, month };
 }
@@ -92,6 +94,7 @@ export default async function MonthlyHoroscopePage({
 }) {
   const resolvedParams = await params;
   const validated = validateParams(resolvedParams);
+  const currentYear = new Date().getFullYear();
 
   if (!validated) {
     notFound();
@@ -106,8 +109,8 @@ export default async function MonthlyHoroscopePage({
   const theme = getMonthlyTheme(sign, month, year);
 
   const monthIndex = MONTHS.indexOf(month);
-  const prevMonth = monthIndex > 0 ? MONTHS[monthIndex - 1] : null;
-  const nextMonth = monthIndex < 11 ? MONTHS[monthIndex + 1] : null;
+  const prevMonth = monthIndex > 0 ? MONTHS[monthIndex - 1] : MONTHS[11];
+  const nextMonth = monthIndex < 11 ? MONTHS[monthIndex + 1] : MONTHS[0];
 
   const signIndex = ZODIAC_SIGNS.indexOf(sign);
   const prevSign =
@@ -203,28 +206,15 @@ ${monthName} sets the tone for ${year}. Use this month to lay foundations that s
           ],
         },
       ]}
-      relatedItems={[
-        {
-          name: `${signName} Zodiac Sign`,
-          href: `/grimoire/zodiac/${sign}`,
-          type: 'Zodiac',
-        },
-        {
-          name: `${SIGN_DISPLAY_NAMES[prevSign]} Horoscope ${monthName}`,
-          href: `/grimoire/horoscopes/${prevSign}/${year}/${month}`,
-          type: 'Horoscope',
-        },
-        {
-          name: `${SIGN_DISPLAY_NAMES[nextSign]} Horoscope ${monthName}`,
-          href: `/grimoire/horoscopes/${nextSign}/${year}/${month}`,
-          type: 'Horoscope',
-        },
-        {
-          name: `${ruler} in Astrology`,
-          href: `/grimoire/astronomy/planets/${ruler.toLowerCase()}`,
-          type: 'Planet',
-        },
-      ]}
+      cosmicConnections={
+        <HoroscopeCosmicConnections
+          variant='monthly-sign'
+          sign={sign}
+          monthSlug={month}
+          year={year}
+          currentYear={currentYear}
+        />
+      }
       ctaText={`Get your personalized ${signName} reading`}
       ctaHref='/horoscope'
       sources={[
@@ -232,50 +222,15 @@ ${monthName} sets the tone for ${year}. Use this month to lay foundations that s
         { name: 'Traditional astrological interpretations' },
       ]}
     >
-      <div className='mt-6 rounded-xl border border-zinc-800 bg-zinc-900/40 p-5'>
-        <h2 className='text-lg font-medium text-zinc-100 mb-2'>
-          Daily + Weekly {signName} horoscopes
-        </h2>
-        <p className='text-sm text-zinc-400 mb-4'>
-          Jump to today&apos;s or this week&apos;s guidance for {signName}, or
-          browse all signs.
-        </p>
-        <div className='flex flex-wrap gap-3'>
-          <Link
-            href={`/horoscope/today/${sign}`}
-            className='px-4 py-2 rounded-lg bg-lunary-primary-900/20 border border-lunary-primary-700 text-lunary-primary-300 text-sm hover:bg-lunary-primary-900/30 transition-colors'
-          >
-            Today&apos;s {signName}
-          </Link>
-          <Link
-            href={`/horoscope/weekly/${sign}`}
-            className='px-4 py-2 rounded-lg bg-zinc-800/50 border border-zinc-700 text-zinc-300 text-sm hover:bg-zinc-800 transition-colors'
-          >
-            This Week&apos;s {signName}
-          </Link>
-          <Link
-            href='/horoscope/today'
-            className='px-4 py-2 rounded-lg bg-zinc-800/50 border border-zinc-700 text-zinc-300 text-sm hover:bg-zinc-800 transition-colors'
-          >
-            All Daily
-          </Link>
-          <Link
-            href='/horoscope/weekly'
-            className='px-4 py-2 rounded-lg bg-zinc-800/50 border border-zinc-700 text-zinc-300 text-sm hover:bg-zinc-800 transition-colors'
-          >
-            All Weekly
-          </Link>
-        </div>
-      </div>
-
-      <div className='mt-8 flex justify-between text-sm'>
+      <div className='mt-8 flex justify-between text-lg'>
         <div className='space-x-4'>
           {prevMonth && (
             <Link
               href={`/grimoire/horoscopes/${sign}/${year}/${prevMonth}`}
-              className='text-lunary-primary-400 hover:text-lunary-primary-300'
+              className='text-lunary-primary-400 hover:text-lunary-primary-300 flex items-center gap-2'
             >
-              ← {MONTH_DISPLAY_NAMES[prevMonth]}
+              <ArrowLeft className='w-4 h-4' />
+              {MONTH_DISPLAY_NAMES[prevMonth]}
             </Link>
           )}
         </div>
@@ -283,9 +238,10 @@ ${monthName} sets the tone for ${year}. Use this month to lay foundations that s
           {nextMonth && (
             <Link
               href={`/grimoire/horoscopes/${sign}/${year}/${nextMonth}`}
-              className='text-lunary-primary-400 hover:text-lunary-primary-300'
+              className='text-lunary-primary-400 hover:text-lunary-primary-300 flex items-center gap-2'
             >
-              {MONTH_DISPLAY_NAMES[nextMonth]} →
+              {MONTH_DISPLAY_NAMES[nextMonth]}
+              <ArrowRight className='w-4 h-4' />
             </Link>
           )}
         </div>
