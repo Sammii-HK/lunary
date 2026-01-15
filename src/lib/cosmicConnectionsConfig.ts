@@ -33,7 +33,8 @@ export type EntityType =
   | 'hub-moon'
   | 'hub-placements'
   | 'hub-glossary'
-  | 'archetype';
+  | 'archetype'
+  | 'witchcraft';
 
 function toSlug(str: string): string {
   return str
@@ -155,12 +156,14 @@ function getPlanetConnections(planetKey: string): CosmicConnectionSection[] {
 
   sections.push({ title: 'About This Planet', links: aboutPlanet.slice(0, 4) });
 
+  const planetNotSun = planetLower === 'sun' ? 'Saturn' : planetName;
+
   const placementsTransits: CosmicConnectionLink[] = [
     { label: `${planetName} in Signs`, href: '/grimoire/placements' },
     { label: 'Transits Hub', href: '/grimoire/transits' },
     {
-      label: `${planetName} Retrograde`,
-      href: `/grimoire/astronomy/retrogrades/${planetLower}`,
+      label: `${planetNotSun} Retrograde`,
+      href: `/grimoire/astronomy/retrogrades/${planetNotSun.toLowerCase()}`,
     },
     { label: 'Current Forecast', href: '/forecast' },
   ];
@@ -442,6 +445,7 @@ function getHubTransitsConnections(): CosmicConnectionSection[] {
       title: 'Transit Resources',
       links: [
         { label: 'Birth Chart & Houses', href: '/birth-chart' },
+        { label: 'Astrological Events', href: '/grimoire/events' },
         {
           label: 'Planets Hub',
           href: '/grimoire/astronomy/planets',
@@ -538,6 +542,48 @@ function getArchetypeConnections(
   return sections;
 }
 
+function getWitchConnections(): CosmicConnectionSection[] {
+  const sections: CosmicConnectionSection[] = [];
+
+  const basics: CosmicConnectionLink[] = [
+    { label: 'Practices Hub', href: '/grimoire/practices' },
+    { label: 'Modern Witchcraft', href: '/grimoire/modern-witchcraft' },
+    {
+      label: 'Famous Witches',
+      href: '/grimoire/modern-witchcraft/famous-witches',
+    },
+    { label: 'Spells Fundamentals', href: '/grimoire/spells/fundamentals' },
+  ];
+  sections.push({
+    title: 'Witchcraft Basics',
+    links: basics,
+  });
+
+  const practiceLinks: CosmicConnectionLink[] = [
+    { label: 'Spells', href: '/grimoire/spells' },
+    { label: 'Tarot', href: '/grimoire/tarot' },
+    { label: 'Crystals', href: '/grimoire/crystals' },
+    { label: 'Witchcraft Tools', href: '/grimoire/witchcraft-tools' },
+  ];
+  sections.push({
+    title: 'Practices & Tools',
+    links: practiceLinks,
+  });
+
+  const deepenLinks: CosmicConnectionLink[] = [
+    { label: 'Protection Guide', href: '/grimoire/protection' },
+    { label: 'Shadow Work', href: '/grimoire/shadow-work' },
+    { label: 'Moon Rituals', href: '/grimoire/moon/rituals' },
+    { label: 'Tools Guide', href: '/grimoire/modern-witchcraft/tools-guide' },
+  ];
+  sections.push({
+    title: 'Deepen Your Practice',
+    links: deepenLinks,
+  });
+
+  return sections;
+}
+
 export function getCosmicConnections(
   entityType: EntityType,
   slugOrKey: string,
@@ -579,6 +625,8 @@ export function getCosmicConnections(
       return getHubGlossaryConnections();
     case 'archetype':
       return getArchetypeConnections(slugOrKey);
+    case 'witchcraft':
+      return getWitchConnections();
     default:
       return [];
   }

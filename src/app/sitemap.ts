@@ -15,6 +15,7 @@ import { zodiacSigns, planetaryBodies } from '../../utils/zodiac/zodiac';
 import { ZODIAC_SIGNS, MONTHS } from '@/constants/seo/monthly-horoscope';
 import { wheelOfTheYearSabbats } from '@/constants/sabbats';
 import { correspondencesData } from '@/constants/grimoire/correspondences';
+import { witchTypesOverview } from '@/constants/witch-types.json';
 import {
   astrologicalHouses,
   astrologicalAspects,
@@ -838,15 +839,8 @@ export default function sitemap(): MetadataRoute.Sitemap {
   );
 
   // Add modern witchcraft witch type pages
-  const witchTypeRoutes = [
-    'green-witch',
-    'kitchen-witch',
-    'hedge-witch',
-    'sea-witch',
-    'cosmic-witch',
-    'eclectic-witch',
-  ].map((type) => ({
-    url: `${baseUrl}/grimoire/modern-witchcraft/witch-types/${type}`,
+  const witchTypeRoutes = witchTypesOverview.map((type) => ({
+    url: `${baseUrl}/grimoire/modern-witchcraft/witch-types/${type.slug}`,
     lastModified: now,
     changeFrequency: 'monthly' as const,
     priority: 0.6,
