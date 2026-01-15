@@ -289,16 +289,16 @@ export function SEOContentTemplate({
 
       {/* H1 */}
       <header className='mb-8'>
-        <h1 className='text-xl md:text-2xl font-light lg:text-4xl text-lunary-primary-100 mb-4 break-words'>
+        <h1 className='text-xl md:text-2xl font-light lg:text-4xl text-lunary-primary-100 break-words'>
           {h1}
         </h1>
         {subtitle && (
-          <span className='block text-lg text-lunary-primary-400 mt-2'>
+          <span className='block text-lg text-lunary-primary-400 mt-2 mb-4'>
             {subtitle}
           </span>
         )}
         {description && (
-          <p className='text-zinc-400 leading-relaxed break-words'>
+          <p className='text-zinc-400 leading-relaxed break-words mt-4'>
             {description}
           </p>
         )}
