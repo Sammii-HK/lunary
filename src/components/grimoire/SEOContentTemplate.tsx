@@ -16,6 +16,7 @@ import { Heading } from '../ui/Heading';
 import { ArticleFooter } from './ArticleFooter';
 import { PeopleAlsoAsk } from './PeopleAlsoAsk';
 import { ContextualNudgeSection } from '../ui/ContextualNudgeSection';
+import { ReadFullGuidePrompt } from '@/app/grimoire/guides/ReadFullGuidePrompt';
 
 /**
  * Format a URL segment into a human-readable label
@@ -68,6 +69,13 @@ export interface SEOContentTemplateProps {
   whatIs?: {
     question: string;
     answer: string;
+  };
+
+  // Full Guide
+  fullGuide?: {
+    href: string;
+    title: string;
+    description: string;
   };
 
   // Content sections
@@ -165,6 +173,7 @@ export function SEOContentTemplate({
   glyphs,
   tableHidden = false,
   examplePlacements,
+  fullGuide,
   faqs,
   tableOfContents,
   additionalSchemas,
@@ -368,6 +377,14 @@ export function SEOContentTemplate({
           <section className='prose prose-invert max-w-none overflow-x-hidden'>
             <p className='text-zinc-300 leading-relaxed break-words'>{intro}</p>
           </section>
+        )}
+
+        {fullGuide && (
+          <ReadFullGuidePrompt
+            href={fullGuide.href}
+            title={fullGuide.title}
+            description={fullGuide.description}
+          />
         )}
 
         {/* Children (custom content) - optional placement */}
