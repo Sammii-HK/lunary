@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { ExploreGrimoire } from '@/components/grimoire/ExploreGrimoire';
 import { CosmicConnections } from '@/components/grimoire/CosmicConnections';
 import { SEOContentTemplate } from '@/components/grimoire/SEOContentTemplate';
+import { zodiacSymbol } from '@/constants/symbols';
 
 export const metadata: Metadata = {
   title:
@@ -422,10 +423,10 @@ export default function CrystalHealingGuidePage() {
                   className={`w-10 h-10 rounded-lg ${crystal.color} flex-shrink-0`}
                 />
                 <div>
-                  <Heading as='h4' variant='h4' className='text-zinc-100'>
+                  <Heading as='h4' variant='h4' className='text-zinc-100 mb-2'>
                     {crystal.name}
                   </Heading>
-                  <p className='text-sm text-lunary-primary-400 mb-2'>
+                  <p className='text-sm text-lunary-primary-400 mb-4'>
                     {crystal.nickname}
                   </p>
                   <div className='flex flex-wrap gap-1'>
@@ -701,7 +702,7 @@ export default function CrystalHealingGuidePage() {
               key={item.chakra}
               className='bg-zinc-900/50 border border-zinc-800 rounded-lg p-4'
             >
-              <div className='flex items-center gap-3 mb-2'>
+              <div className='flex items-center align-middle gap-3 mb-2 py-2'>
                 <div
                   className='w-4 h-4 rounded-full'
                   style={{
@@ -721,7 +722,11 @@ export default function CrystalHealingGuidePage() {
                                   : '#8b5cf6',
                   }}
                 />
-                <Heading as='h4' variant='h4' className='text-zinc-100'>
+                <Heading
+                  as='h4'
+                  variant='h4'
+                  className='text-zinc-100 align-middle mb-0'
+                >
                   {item.chakra} Chakra
                 </Heading>
               </div>
@@ -770,33 +775,35 @@ export default function CrystalHealingGuidePage() {
                 </Heading>
                 <ol className='space-y-2 text-sm text-zinc-400 list-decimal list-inside'>
                   <li>
-                    <strong className='text-zinc-200'>Choose one goal:</strong>{' '}
+                    <span className='text-lunary-secondary-200'>
+                      Choose one goal:
+                    </span>{' '}
                     protection, confidence, healing, love, or focus.
                   </li>
                   <li>
-                    <strong className='text-zinc-200'>Cleanse</strong> all
-                    stones and the space where the grid will sit.
+                    <span className='text-lunary-secondary-200'>Cleanse</span>{' '}
+                    all stones and the space where the grid will sit.
                   </li>
                   <li>
-                    <strong className='text-zinc-200'>
+                    <span className='text-lunary-secondary-200'>
                       Place a center stone
-                    </strong>{' '}
+                    </span>{' '}
                     (often quartz, but any “anchor” crystal works).
                   </li>
                   <li>
-                    <strong className='text-zinc-200'>
+                    <span className='text-lunary-secondary-200'>
                       Add supporting stones
-                    </strong>{' '}
+                    </span>{' '}
                     around it in a simple pattern (circle or hexagon is great
                     for beginners).
                   </li>
                   <li>
-                    <strong className='text-zinc-200'>Activate</strong> by
-                    tracing lines from stone to stone with intention.
+                    <span className='text-lunary-secondary-200'>Activate</span>{' '}
+                    by tracing lines from stone to stone with intention.
                   </li>
                   <li>
-                    <strong className='text-zinc-200'>Maintain</strong> by
-                    refreshing weekly or at the full moon.
+                    <span className='text-lunary-secondary-200'>Maintain</span>{' '}
+                    by refreshing weekly or at the full moon.
                   </li>
                 </ol>
               </div>
@@ -806,29 +813,35 @@ export default function CrystalHealingGuidePage() {
                 </Heading>
                 <ul className='space-y-2 text-sm text-zinc-400'>
                   <li>
-                    <strong className='text-zinc-200'>Keep it simple:</strong> 1
-                    center + 6 stones is enough to feel a difference.
+                    <span className='text-lunary-secondary-200'>
+                      Keep it simple:
+                    </span>{' '}
+                    1 center + 6 stones is enough to feel a difference.
                   </li>
                   <li>
-                    <strong className='text-zinc-200'>
+                    <span className='text-lunary-secondary-200'>
                       Don’t mix intentions:
-                    </strong>{' '}
+                    </span>{' '}
                     one grid = one outcome (avoid “love + hustle + sleep” in the
                     same layout).
                   </li>
                   <li>
-                    <strong className='text-zinc-200'>Use a base:</strong>{' '}
+                    <span className='text-lunary-secondary-200'>
+                      Use a base:
+                    </span>{' '}
                     paper, cloth, or a wooden board helps “contain” the grid
                     energy.
                   </li>
                   <li>
-                    <strong className='text-zinc-200'>
+                    <span className='text-lunary-secondary-200'>
                       Put it somewhere stable:
-                    </strong>{' '}
+                    </span>{' '}
                     grids work best when they aren’t moved daily.
                   </li>
                   <li>
-                    <strong className='text-zinc-200'>Close the work:</strong>{' '}
+                    <span className='text-lunary-secondary-200'>
+                      Close the work:
+                    </span>{' '}
                     when you’re done, thank the stones, cleanse, and store them.
                   </li>
                 </ul>
@@ -879,7 +892,7 @@ export default function CrystalHealingGuidePage() {
                 </p>
               </div>
             </div>
-            <p className='text-xs text-zinc-400'>
+            <p className='text-xs text-zinc-400 mt-3'>
               Best for manifestation, protection, healing, abundance, and dream
               work.
             </p>
@@ -906,9 +919,9 @@ export default function CrystalHealingGuidePage() {
                   <li>Take 6 slow breaths (inhale 4, exhale 6).</li>
                   <li>
                     Say: “I charge this crystal to support{' '}
-                    <strong className='text-zinc-200'>
+                    <span className='text-lunary-secondary-200'>
                       [one clear outcome]
-                    </strong>
+                    </span>
                     .”
                   </li>
                   <li>
@@ -1137,25 +1150,27 @@ export default function CrystalHealingGuidePage() {
             </Heading>
             <ul className='text-sm text-zinc-400 space-y-2'>
               <li>
-                <strong className='text-zinc-200'>
+                <span className='text-lunary-secondary-200'>
                   Rose Quartz + Clear Quartz
-                </strong>{' '}
+                </span>{' '}
                 for amplified heart intentions.
               </li>
               <li>
-                <strong className='text-zinc-200'>
+                <span className='text-lunary-secondary-200'>
                   Black Tourmaline + Smoky Quartz
-                </strong>{' '}
+                </span>{' '}
                 for grounding + protection.
               </li>
               <li>
-                <strong className='text-zinc-200'>Amethyst + Selenite</strong>{' '}
+                <span className='text-lunary-secondary-200'>
+                  Amethyst + Selenite
+                </span>{' '}
                 for calm, clarity, and spiritual cleansing.
               </li>
               <li>
-                <strong className='text-zinc-200'>
+                <span className='text-lunary-secondary-200'>
                   Citrine + Tiger&apos;s Eye
-                </strong>{' '}
+                </span>{' '}
                 for confidence and steady action.
               </li>
             </ul>
@@ -1196,13 +1211,13 @@ export default function CrystalHealingGuidePage() {
             </p>
             <ul className='text-sm text-zinc-400 space-y-1'>
               <li>
-                <strong className='text-zinc-200'>Best for:</strong> clarity,
-                manifestation, energy cleansing.
+                <span className='text-lunary-secondary-200'>Best for:</span>{' '}
+                clarity, manifestation, energy cleansing.
               </li>
               <li>
-                <strong className='text-zinc-200'>How to use:</strong> hold it
-                while setting an intention, place it at the center of a grid, or
-                keep it on your desk for focus.
+                <span className='text-lunary-secondary-200'>How to use:</span>{' '}
+                hold it while setting an intention, place it at the center of a
+                grid, or keep it on your desk for focus.
               </li>
             </ul>
           </div>
@@ -1220,13 +1235,13 @@ export default function CrystalHealingGuidePage() {
             </p>
             <ul className='text-sm text-zinc-400 space-y-1'>
               <li>
-                <strong className='text-zinc-200'>Best for:</strong> anxiety
-                relief, dream work, meditation.
+                <span className='text-lunary-secondary-200'>Best for:</span>{' '}
+                anxiety relief, dream work, meditation.
               </li>
               <li>
-                <strong className='text-zinc-200'>How to use:</strong> meditate
-                with it at your third eye, keep it by your bed, or pair it with
-                selenite for gentle energetic clearing.
+                <span className='text-lunary-secondary-200'>How to use:</span>{' '}
+                meditate with it at your third eye, keep it by your bed, or pair
+                it with selenite for gentle energetic clearing.
               </li>
             </ul>
           </div>
@@ -1245,13 +1260,13 @@ export default function CrystalHealingGuidePage() {
             </p>
             <ul className='text-sm text-zinc-400 space-y-1'>
               <li>
-                <strong className='text-zinc-200'>Best for:</strong> heart
-                healing, self-compassion, peace in relationships.
+                <span className='text-lunary-secondary-200'>Best for:</span>{' '}
+                heart healing, self-compassion, peace in relationships.
               </li>
               <li>
-                <strong className='text-zinc-200'>How to use:</strong> hold it
-                at your heart while breathing, place it in your bedroom, or pair
-                it with clear quartz to amplify love intentions.
+                <span className='text-lunary-secondary-200'>How to use:</span>{' '}
+                hold it at your heart while breathing, place it in your bedroom,
+                or pair it with clear quartz to amplify love intentions.
               </li>
             </ul>
           </div>
@@ -1269,13 +1284,13 @@ export default function CrystalHealingGuidePage() {
             </p>
             <ul className='text-sm text-zinc-400 space-y-1'>
               <li>
-                <strong className='text-zinc-200'>Best for:</strong> protection,
-                grounding, absorbing negativity.
+                <span className='text-lunary-secondary-200'>Best for:</span>{' '}
+                protection, grounding, absorbing negativity.
               </li>
               <li>
-                <strong className='text-zinc-200'>How to use:</strong> place by
-                the front door, carry it in your bag, or hold it during a “cut
-                cords” visualization after draining interactions.
+                <span className='text-lunary-secondary-200'>How to use:</span>{' '}
+                place by the front door, carry it in your bag, or hold it during
+                a “cut cords” visualization after draining interactions.
               </li>
             </ul>
           </div>
@@ -1329,94 +1344,154 @@ export default function CrystalHealingGuidePage() {
 
         <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4'>
           <div className='bg-zinc-900/50 border border-zinc-800 rounded-lg p-4'>
-            <Heading as='h4' variant='h4' className='text-zinc-100 mb-1'>
-              ♈ Aries
+            <Heading
+              as='h4'
+              variant='h4'
+              className='text-zinc-100 mb-1 flex items-center gap-2'
+            >
+              <span className='font-astro'>{zodiacSymbol.aries}</span>
+              Aries
             </Heading>
             <p className='text-sm text-zinc-400'>
               Carnelian, Red Jasper, Bloodstone
             </p>
           </div>
           <div className='bg-zinc-900/50 border border-zinc-800 rounded-lg p-4'>
-            <Heading as='h4' variant='h4' className='text-zinc-100 mb-1'>
-              ♉ Taurus
+            <Heading
+              as='h4'
+              variant='h4'
+              className='text-zinc-100 mb-1 flex items-center gap-2'
+            >
+              <span className='font-astro'>{zodiacSymbol.taurus}</span>
+              Taurus
             </Heading>
             <p className='text-sm text-zinc-400'>
               Rose Quartz, Emerald, Malachite
             </p>
           </div>
           <div className='bg-zinc-900/50 border border-zinc-800 rounded-lg p-4'>
-            <Heading as='h4' variant='h4' className='text-zinc-100 mb-1'>
-              ♊ Gemini
+            <Heading
+              as='h4'
+              variant='h4'
+              className='text-zinc-100 mb-1 flex items-center gap-2'
+            >
+              <span className='font-astro'>{zodiacSymbol.gemini}</span>
+              Gemini
             </Heading>
             <p className='text-sm text-zinc-400'>
               Citrine, Tiger&apos;s Eye, Aquamarine
             </p>
           </div>
           <div className='bg-zinc-900/50 border border-zinc-800 rounded-lg p-4'>
-            <Heading as='h4' variant='h4' className='text-zinc-100 mb-1'>
-              ♋ Cancer
+            <Heading
+              as='h4'
+              variant='h4'
+              className='text-zinc-100 mb-1 flex items-center gap-2'
+            >
+              <span className='font-astro'>{zodiacSymbol.cancer}</span>
+              Cancer
             </Heading>
             <p className='text-sm text-zinc-400'>Moonstone, Pearl, Selenite</p>
           </div>
           <div className='bg-zinc-900/50 border border-zinc-800 rounded-lg p-4'>
-            <Heading as='h4' variant='h4' className='text-zinc-100 mb-1'>
-              ♌ Leo
+            <Heading
+              as='h4'
+              variant='h4'
+              className='text-zinc-100 mb-1 flex items-center gap-2 '
+            >
+              <span className='font-astro'>{zodiacSymbol.leo}</span>
+              Leo
             </Heading>
             <p className='text-sm text-zinc-400'>
               Sunstone, Citrine, Tiger&apos;s Eye
             </p>
           </div>
           <div className='bg-zinc-900/50 border border-zinc-800 rounded-lg p-4'>
-            <Heading as='h4' variant='h4' className='text-zinc-100 mb-1'>
-              ♍ Virgo
+            <Heading
+              as='h4'
+              variant='h4'
+              className='text-zinc-100 mb-1 flex items-center gap-2'
+            >
+              <span className='font-astro'>{zodiacSymbol.virgo}</span>
+              Virgo
             </Heading>
             <p className='text-sm text-zinc-400'>
               Amazonite, Peridot, Moss Agate
             </p>
           </div>
           <div className='bg-zinc-900/50 border border-zinc-800 rounded-lg p-4'>
-            <Heading as='h4' variant='h4' className='text-zinc-100 mb-1'>
-              ♎ Libra
+            <Heading
+              as='h4'
+              variant='h4'
+              className='text-zinc-100 mb-1 flex items-center gap-2'
+            >
+              <span className='font-astro'>{zodiacSymbol.libra}</span>
+              Libra
             </Heading>
             <p className='text-sm text-zinc-400'>
               Rose Quartz, Lapis Lazuli, Lepidolite
             </p>
           </div>
           <div className='bg-zinc-900/50 border border-zinc-800 rounded-lg p-4'>
-            <Heading as='h4' variant='h4' className='text-zinc-100 mb-1'>
-              ♏ Scorpio
+            <Heading
+              as='h4'
+              variant='h4'
+              className='text-zinc-100 mb-1 flex items-center gap-2'
+            >
+              <span className='font-astro'>{zodiacSymbol.scorpio}</span>
+              Scorpio
             </Heading>
             <p className='text-sm text-zinc-400'>
               Obsidian, Labradorite, Malachite
             </p>
           </div>
           <div className='bg-zinc-900/50 border border-zinc-800 rounded-lg p-4'>
-            <Heading as='h4' variant='h4' className='text-zinc-100 mb-1'>
-              ♐ Sagittarius
+            <Heading
+              as='h4'
+              variant='h4'
+              className='text-zinc-100 mb-1 flex items-center gap-2'
+            >
+              <span className='font-astro'>{zodiacSymbol.sagittarius}</span>
+              Sagittarius
             </Heading>
             <p className='text-sm text-zinc-400'>
               Turquoise, Sodalite, Lapis Lazuli
             </p>
           </div>
           <div className='bg-zinc-900/50 border border-zinc-800 rounded-lg p-4'>
-            <Heading as='h4' variant='h4' className='text-zinc-100 mb-1'>
-              ♑ Capricorn
+            <Heading
+              as='h4'
+              variant='h4'
+              className='text-zinc-100 mb-1 flex items-center gap-2'
+            >
+              <span className='font-astro'>{zodiacSymbol.capricorn}</span>
+              Capricorn
             </Heading>
             <p className='text-sm text-zinc-400'>
               Garnet, Black Tourmaline, Smoky Quartz
             </p>
           </div>
           <div className='bg-zinc-900/50 border border-zinc-800 rounded-lg p-4'>
-            <Heading as='h4' variant='h4' className='text-zinc-100 mb-1'>
-              ♒ Aquarius
+            <Heading
+              as='h4'
+              variant='h4'
+              className='text-zinc-100 mb-1 flex items-center gap-2'
+            >
+              <span className='font-astro'>{zodiacSymbol.aquarius}</span>
+              Aquarius
             </Heading>
             <p className='text-sm text-zinc-400'>
               Amethyst, Aquamarine, Labradorite
             </p>
           </div>
           <div className='bg-zinc-900/50 border border-zinc-800 rounded-lg p-4'>
-            <Heading as='h4' variant='h4' className='text-zinc-100 mb-1'>
-              ♓ Pisces
+            <Heading
+              as='h4'
+              variant='h4'
+              className='text-zinc-100 mb-1 flex items-center gap-2'
+            >
+              <span className='font-astro'>{zodiacSymbol.pisces}</span>
+              Pisces
             </Heading>
             <p className='text-sm text-zinc-400'>
               Amethyst, Aquamarine, Fluorite

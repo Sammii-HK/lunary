@@ -1,3 +1,4 @@
+import { Heading } from '@/components/ui/Heading';
 import Link from 'next/link';
 import React from 'react';
 
@@ -124,12 +125,9 @@ export function ParsedMarkdown({
       flushList();
       const text = trimmed.slice(3);
       elements.push(
-        <h2
-          key={`h2-${index}`}
-          className='text-xl md:text-2xl font-medium text-zinc-100 mt-8 mb-4'
-        >
+        <Heading as='h2' variant='h2' key={`h2-${index}`}>
           {parseInlineMarkdown(text)}
-        </h2>,
+        </Heading>,
       );
       return;
     }
@@ -139,12 +137,9 @@ export function ParsedMarkdown({
       flushList();
       const text = trimmed.slice(4);
       elements.push(
-        <h3
-          key={`h3-${index}`}
-          className='text-lg md:text-xl font-medium text-zinc-200 mt-6 mb-3'
-        >
+        <Heading as='h3' variant='h3' key={`h3-${index}`}>
           {parseInlineMarkdown(text)}
-        </h3>,
+        </Heading>,
       );
       return;
     }
@@ -154,12 +149,9 @@ export function ParsedMarkdown({
       flushList();
       const text = trimmed.slice(5);
       elements.push(
-        <h4
-          key={`h4-${index}`}
-          className='text-base md:text-lg font-medium text-zinc-200 mt-4 mb-2'
-        >
+        <Heading as='h4' variant='h4' key={`h4-${index}`}>
           {parseInlineMarkdown(text)}
-        </h4>,
+        </Heading>,
       );
       return;
     }
@@ -174,7 +166,10 @@ export function ParsedMarkdown({
     // Regular paragraph
     flushList();
     elements.push(
-      <p key={`p-${index}`} className='text-zinc-300 leading-relaxed mb-4'>
+      <p
+        key={`p-${index}`}
+        className='text-base text-zinc-300 leading-relaxed mb-4'
+      >
         {parseInlineMarkdown(trimmed)}
       </p>,
     );
