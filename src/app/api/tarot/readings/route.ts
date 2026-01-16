@@ -9,6 +9,7 @@ import {
   mapRowToReading,
 } from './shared';
 import { auth } from '@/lib/auth';
+import { formatTextArray } from '@/lib/postgres/formatTextArray';
 
 export async function GET(request: NextRequest) {
   try {
@@ -243,10 +244,12 @@ export async function POST(request: NextRequest) {
       insight: item.insight,
     }));
 
-    const tagsSqlValue =
+    const cleanedTags =
       Array.isArray(tags) && tags.length > 0
         ? tags.filter((tag: unknown): tag is string => typeof tag === 'string')
-        : null;
+        : [];
+    const tagsSqlValue =
+      cleanedTags.length > 0 ? formatTextArray(cleanedTags) : null;
 
     const insertResult = await sql`
       INSERT INTO tarot_readings (

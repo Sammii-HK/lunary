@@ -33,6 +33,7 @@ export type EntityType =
   | 'hub-moon'
   | 'hub-placements'
   | 'hub-glossary'
+  | 'hub-horoscopes'
   | 'archetype'
   | 'witchcraft'
   | 'hub-events';
@@ -730,6 +731,8 @@ export function getCosmicConnections(
         return getHubCrystalsConnections();
       }
       return getHubGlossaryConnections();
+    case 'hub-horoscopes':
+      return [];
     case 'archetype':
       return getArchetypeConnections(slugOrKey);
     case 'witchcraft':

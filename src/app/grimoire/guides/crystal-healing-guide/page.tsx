@@ -4,7 +4,6 @@ import { Metadata } from 'next';
 import Link from 'next/link';
 import { Heading } from '@/components/ui/Heading';
 import { Button } from '@/components/ui/button';
-import { ExploreGrimoire } from '@/components/grimoire/ExploreGrimoire';
 import { CosmicConnections } from '@/components/grimoire/CosmicConnections';
 import { SEOContentTemplate } from '@/components/grimoire/SEOContentTemplate';
 import { zodiacSymbol } from '@/constants/symbols';
@@ -249,16 +248,6 @@ export default function CrystalHealingGuidePage() {
       intro='For thousands of years, crystals have been used for healing, protection, and spiritual growth. This comprehensive guide will teach you everything you need to know about working with crystals—from choosing and cleansing to programming and placement.'
       tldr='Crystal healing combines intention with mineral energy. Learn how crystals support healing, protection, and manifestation, plus how to cleanse, charge, and place them effectively.'
       faqs={faqs}
-      heroContent={
-        <div className='flex flex-wrap gap-4'>
-          <Button asChild variant='lunary-solid' size='lg'>
-            <Link href='/grimoire/crystals'>Explore Crystal Library</Link>
-          </Button>
-          <Button asChild variant='outline' size='lg'>
-            <Link href='#essential-crystals'>Start Learning</Link>
-          </Button>
-        </div>
-      }
       tableOfContents={tableOfContents}
       cosmicConnections={
         <CosmicConnections
@@ -1501,7 +1490,7 @@ export default function CrystalHealingGuidePage() {
       </section>
 
       {/* CTA Section */}
-      <section className='bg-gradient-to-r from-lunary-primary-900/30 to-cyan-900/30 border border-lunary-primary-700 rounded-xl p-8 text-center'>
+      <section className='bg-gradient-to-r from-lunary-primary-900/30 to-rose-900/30 border border-lunary-primary-700 rounded-xl p-8 text-center'>
         <Heading
           as='h2'
           variant='h2'
@@ -1515,7 +1504,7 @@ export default function CrystalHealingGuidePage() {
           intentions.
         </p>
         <div className='flex flex-col sm:flex-row gap-4 justify-center'>
-          <Button asChild variant='lunary-solid' size='lg'>
+          <Button asChild variant='lunary-soft' size='lg'>
             <Link href='/grimoire/crystals'>Browse Crystal Library</Link>
           </Button>
           <Button asChild variant='outline' size='lg'>
@@ -1523,8 +1512,6 @@ export default function CrystalHealingGuidePage() {
           </Button>
         </div>
       </section>
-
-      <ExploreGrimoire />
     </SEOContentTemplate>
   );
 }

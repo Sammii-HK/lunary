@@ -6,6 +6,7 @@ import {
   mapRowToReading,
 } from '../shared';
 import { auth } from '@/lib/auth';
+import { formatTextArray } from '@/lib/postgres/formatTextArray';
 
 export async function GET(request: NextRequest, context: unknown) {
   try {
@@ -119,7 +120,7 @@ export async function PATCH(request: NextRequest, context: unknown) {
         ? undefined
         : tagsValue === null
           ? null
-          : (tagsValue as string[]);
+          : formatTextArray(tagsValue);
 
     let updateResult;
     if (notesValue !== undefined && tagsValue !== undefined) {

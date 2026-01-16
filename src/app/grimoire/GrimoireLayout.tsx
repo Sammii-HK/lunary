@@ -6,6 +6,7 @@ import { usePathname, useSearchParams } from 'next/navigation';
 import { stringToKebabCase } from '../../../utils/string';
 import { sectionToSlug, slugToSection } from '@/utils/grimoire';
 import { useState, useEffect, useTransition, useRef, useCallback } from 'react';
+import type { ComponentProps } from 'react';
 import dynamic from 'next/dynamic';
 import { MarketingFooterGate } from '@/components/MarketingFooterGate';
 import {
@@ -172,6 +173,9 @@ const Crystals = dynamic(() => import('./components/Crystals'), {
     <div className='h-64 bg-zinc-900/50 rounded-lg animate-pulse' />
   ),
 });
+type CrystalsComponentProps = ComponentProps<typeof Crystals>;
+const EMPTY_CRYSTAL_CATEGORIES: CrystalsComponentProps['categories'] = [];
+const EMPTY_CRYSTAL_TOTAL_COUNT: CrystalsComponentProps['totalCount'] = 0;
 const BirthChart = dynamic(() => import('./components/BirthChart'), {
   loading: () => (
     <div className='h-64 bg-zinc-900/50 rounded-lg animate-pulse' />
@@ -219,7 +223,12 @@ const GrimoireContent = {
   runes: <Runes />,
   chakras: <Chakras />,
   numerology: <Numerology />,
-  crystals: <Crystals />,
+  crystals: (
+    <Crystals
+      categories={EMPTY_CRYSTAL_CATEGORIES}
+      totalCount={EMPTY_CRYSTAL_TOTAL_COUNT}
+    />
+  ),
   birthChart: <BirthChart />,
   candleMagic: <CandleMagic />,
   divination: <Divination />,
