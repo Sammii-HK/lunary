@@ -7,9 +7,6 @@ import {
 } from '../shared';
 import { auth } from '@/lib/auth';
 
-const toTextArrayLiteral = (values: string[]): string =>
-  `{${values.map((value) => `"${value.replace(/\\/g, '\\\\').replace(/"/g, '\\"')}"`).join(',')}}`;
-
 export async function GET(request: NextRequest, context: unknown) {
   try {
     const session = await auth.api.getSession({ headers: request.headers });
@@ -122,7 +119,7 @@ export async function PATCH(request: NextRequest, context: unknown) {
         ? undefined
         : tagsValue === null
           ? null
-          : toTextArrayLiteral(tagsValue as string[]);
+          : (tagsValue as string[]);
 
     let updateResult;
     if (notesValue !== undefined && tagsValue !== undefined) {

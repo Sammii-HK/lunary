@@ -10,9 +10,6 @@ import {
 } from './shared';
 import { auth } from '@/lib/auth';
 
-const toTextArrayLiteral = (values: string[]): string =>
-  `{${values.map((value) => `"${value.replace(/\\/g, '\\\\').replace(/"/g, '\\"')}"`).join(',')}}`;
-
 export async function GET(request: NextRequest) {
   try {
     const session = await auth.api.getSession({ headers: request.headers });
@@ -247,7 +244,9 @@ export async function POST(request: NextRequest) {
     }));
 
     const tagsSqlValue =
-      Array.isArray(tags) && tags.length > 0 ? toTextArrayLiteral(tags) : null;
+      Array.isArray(tags) && tags.length > 0
+        ? tags.filter((tag: unknown): tag is string => typeof tag === 'string')
+        : null;
 
     const insertResult = await sql`
       INSERT INTO tarot_readings (
