@@ -101,25 +101,14 @@ export async function getUsersWithTierInfo(): Promise<
 
   if (userIds.length > 0) {
     try {
-      // Helper to convert array to PostgreSQL text array literal with proper escaping
-      // This prevents SQL injection by properly escaping special characters
-      const toTextArrayLiteral = (values: string[]): string => {
-        return `{${values
-          .map(
-            (v) => `"${String(v).replace(/\\/g, '\\\\').replace(/"/g, '\\"')}"`,
-          )
-          .join(',')}}`;
-      };
-
-      const userIdsArray = toTextArrayLiteral(userIds);
-
-      // Use proper array parameterization with unnest for safety
-      // This ensures proper SQL escaping and prevents injection
-      const subResults = await sql`
-        SELECT user_id, status, plan_type
-        FROM subscriptions
-        WHERE user_id = ANY(SELECT unnest(${userIdsArray}::text[]))
-      `;
+      const subResults = await sql.query(
+        `
+          SELECT user_id, status, plan_type
+          FROM subscriptions
+          WHERE user_id = ANY($1::text[])
+        `,
+        [userIds],
+      );
       subscriptionStatuses = subResults.rows.reduce(
         (acc, row) => {
           acc[row.user_id] = { status: row.status, plan: row.plan_type };

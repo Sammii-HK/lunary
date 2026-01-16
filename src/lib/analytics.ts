@@ -2,7 +2,6 @@
 
 import { track } from '@vercel/analytics';
 import { betterAuthClient } from '@/lib/auth-client';
-import { captureEvent } from '@/lib/posthog-client';
 import { getAttributionForTracking } from '@/lib/attribution';
 
 export type ConversionEvent =
@@ -36,7 +35,9 @@ export type ConversionEvent =
 
 export interface ConversionEventData {
   event: ConversionEvent;
+  eventId?: string;
   userId?: string;
+  anonymousId?: string;
   userEmail?: string;
   planType?: 'monthly' | 'yearly' | 'free';
   trialDaysRemaining?: number;
@@ -54,6 +55,7 @@ const AUTH_CACHE_TTL = 1000 * 60; // 1 minute
 
 let cachedAuthContext: AuthContext | null = null;
 let cachedAuthContextAt = 0;
+const ANON_ID_STORAGE_KEY = 'lunary_anon_id';
 
 function extractEmailFromMetadata(
   metadata?: Record<string, any>,
@@ -174,7 +176,25 @@ function extractUTMParams(): Record<string, string> {
   return utmParams;
 }
 
-export async function trackConversion(
+export function getAnonymousId(): string | undefined {
+  if (typeof window === 'undefined') {
+    return undefined;
+  }
+
+  try {
+    let anonId = window.localStorage.getItem(ANON_ID_STORAGE_KEY);
+    if (!anonId) {
+      anonId = crypto.randomUUID();
+      window.localStorage.setItem(ANON_ID_STORAGE_KEY, anonId);
+    }
+    return anonId;
+  } catch (error) {
+    console.warn('Unable to access localStorage for anon id:', error);
+    return undefined;
+  }
+}
+
+export async function trackEvent(
   event: ConversionEvent,
   data?: Partial<ConversionEventData>,
 ): Promise<void> {
@@ -182,10 +202,15 @@ export async function trackConversion(
     const utmParams = extractUTMParams();
     const attributionData = getAttributionForTracking();
     const existingMetadata = data?.metadata || {};
+    const eventIdValue =
+      typeof data?.eventId === 'string' && data.eventId.trim().length > 0
+        ? data.eventId.trim()
+        : crypto.randomUUID();
 
     const eventData: ConversionEventData = {
       event,
       ...data,
+      eventId: eventIdValue,
       metadata: {
         ...existingMetadata,
         ...utmParams,
@@ -195,6 +220,11 @@ export async function trackConversion(
           existingMetadata.referrer,
       },
     };
+
+    // Default pagePath from the current browser location (privacy-safe: pathname only).
+    if (!eventData.pagePath && typeof window !== 'undefined') {
+      eventData.pagePath = window.location.pathname;
+    }
 
     const metadataEmail = extractEmailFromMetadata(eventData.metadata);
     if (metadataEmail && !eventData.userEmail) {
@@ -211,6 +241,13 @@ export async function trackConversion(
       eventData.userEmail = authContext.userEmail;
     }
 
+    if (!eventData.anonymousId) {
+      const anonId = getAnonymousId();
+      if (anonId) {
+        eventData.anonymousId = anonId;
+      }
+    }
+
     const normalizedEmail = normalizeEmail(eventData.userEmail);
     if (normalizedEmail) {
       eventData.userEmail = normalizedEmail;
@@ -219,17 +256,13 @@ export async function trackConversion(
     const payload = sanitizeEventPayload(eventData);
     const apiPayload = {
       ...payload,
+      anonymousId: eventData.anonymousId,
       metadata: eventData.metadata ?? undefined,
+      eventId: eventData.eventId,
     };
 
     // Track to Vercel Analytics (web vitals focus)
     track(event, payload);
-
-    // Track to PostHog (product analytics)
-    captureEvent(event, {
-      ...payload,
-      $set: eventData.userId ? { user_id: eventData.userId } : undefined,
-    });
 
     const analyticsPromise = fetch('/api/analytics/conversion', {
       method: 'POST',
@@ -275,6 +308,8 @@ export async function trackConversion(
     console.error('Failed to track conversion event:', error);
   }
 }
+
+export const trackConversion = trackEvent;
 
 export const conversionTracking = {
   signup: (userId?: string, email?: string) =>
