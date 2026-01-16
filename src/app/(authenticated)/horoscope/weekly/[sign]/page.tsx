@@ -16,7 +16,7 @@ import { getContextualNudge } from '@/lib/grimoire/getContextualNudge';
 
 export const revalidate = 604800;
 
-export const contextualNudge = getContextualNudge('/horoscope/weekly');
+const contextualNudge = getContextualNudge('/horoscope/weekly');
 
 const signs = [
   { name: 'Aries', symbol: '♈', dates: 'Mar 21 - Apr 19', element: 'Fire' },
