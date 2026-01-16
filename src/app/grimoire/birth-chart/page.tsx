@@ -5,10 +5,6 @@ import { SEOContentTemplate } from '@/components/grimoire/SEOContentTemplate';
 import BirthChart from '../components/BirthChart';
 import { createQAPageSchema } from '@/lib/schema';
 import { CosmicConnections } from '@/components/grimoire/CosmicConnections';
-import {
-  PeopleAlsoAsk,
-  BIRTH_CHART_PAA,
-} from '@/components/grimoire/PeopleAlsoAsk';
 
 export const metadata: Metadata = {
   title: 'Birth Chart: Planets, Houses & Astrology Guide - Lunary',
@@ -96,6 +92,11 @@ Understanding your birth chart helps you recognize your natural talents, work wi
           answer:
             "Your birth chart never changes—it's fixed at your moment of birth. However, transits (current planetary positions) aspect your natal chart, creating different influences over time. Progressions and solar returns also show how you evolve while your natal chart remains constant.",
         },
+        {
+          question: 'What are the most important parts of a birth chart?',
+          answer:
+            'The most important parts are typically: Sun sign (core identity), Moon sign (emotions), Rising sign (outer personality), and personal planets (Mercury, Venus, Mars). The aspects between planets and any planets near angles (Ascendant, Midheaven) are also significant.',
+        },
       ]}
       additionalSchemas={[qaSchema]}
       cosmicConnections={
@@ -106,7 +107,6 @@ Understanding your birth chart helps you recognize your natural talents, work wi
         />
       }
     >
-      <PeopleAlsoAsk questions={BIRTH_CHART_PAA} />
       <div className='py-8'>
         <BirthChart />
       </div>
