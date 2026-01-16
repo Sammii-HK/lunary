@@ -1,6 +1,5 @@
 import { sql } from '@vercel/postgres';
 import { formatTimestamp } from '@/lib/analytics/date-range';
-import { getPostHogServer, queryPostHogAPI } from '@/lib/posthog-server';
 import {
   startOfWeek,
   endOfWeek,
@@ -10,16 +9,8 @@ import {
 } from 'date-fns';
 
 const TIMEZONE = 'Europe/London';
-
-/**
- * Helper to build a PostgreSQL text array literal safely.
- */
-function toTextArrayLiteral(values: string[]): string | null {
-  if (values.length === 0) return null;
-  return `{${values
-    .map((v) => `"${String(v).replace(/\\/g, '\\\\').replace(/"/g, '\\"')}"`)
-    .join(',')}}`;
-}
+const TEST_EMAIL_PATTERN = '%@test.lunary.app';
+const TEST_EMAIL_EXACT = 'test@test.lunary.app';
 
 /**
  * Convert a date to a specific timezone (returns date string in that timezone)
@@ -250,11 +241,11 @@ async function calculateAcquisition(
 }> {
   const [newUsersResult, newTrialsResult, newPayingResult] = await Promise.all([
     sql`
-      SELECT COUNT(DISTINCT user_id) as count
-      FROM conversion_events
-      WHERE event_type = 'signup'
-        AND created_at >= ${weekStart}
-        AND created_at <= ${weekEnd}
+      SELECT COUNT(*) as count
+      FROM "user"
+      WHERE "createdAt" >= ${weekStart}
+        AND "createdAt" <= ${weekEnd}
+        AND (email IS NULL OR (email NOT LIKE ${TEST_EMAIL_PATTERN} AND email != ${TEST_EMAIL_EXACT}))
     `,
     sql`
       SELECT COUNT(DISTINCT user_id) as count
@@ -292,11 +283,11 @@ async function calculateActivation(
 }> {
   // Get new users this week
   const newUsersResult = await sql`
-    SELECT DISTINCT user_id, created_at as signup_at
-    FROM conversion_events
-    WHERE event_type = 'signup'
-      AND created_at >= ${weekStart}
-      AND created_at <= ${weekEnd}
+    SELECT id as user_id, "createdAt" as signup_at
+    FROM "user"
+    WHERE "createdAt" >= ${weekStart}
+      AND "createdAt" <= ${weekEnd}
+      AND (email IS NULL OR (email NOT LIKE ${TEST_EMAIL_PATTERN} AND email != ${TEST_EMAIL_EXACT}))
   `;
 
   const newUsers = newUsersResult.rows || [];
@@ -383,77 +374,45 @@ async function calculateEngagement(
     'trial_started',
     'trial_converted',
     'subscription_started',
+    'grimoire_viewed',
   ];
-  const meaningfulEventsArray = toTextArrayLiteral(meaningfulEvents)!;
 
-  // Get WAU from PostHog
-  const posthog = getPostHogServer();
   let wau = 0;
   let totalSessions = 0;
   let totalEvents = 0;
-
-  if (posthog) {
-    try {
-      // Query PostHog for WAU
-      const wauResult = await queryPostHogAPI<{
-        results: Array<Array<number>>;
-      }>('/query/', {
-        method: 'POST',
-        body: JSON.stringify({
-          query: {
-            kind: 'HogQLQuery',
-            query: `SELECT count(DISTINCT person_id) FROM events WHERE event IN (${meaningfulEvents.map((e) => `'${e}'`).join(', ')}) AND timestamp >= '${weekStart}' AND timestamp <= '${weekEnd}'`,
-          },
-        }),
-      });
-
-      wau = wauResult?.results?.[0]?.[0] || 0;
-
-      // Get total sessions
-      const sessionsResult = await queryPostHogAPI<{
-        results: Array<Array<number>>;
-      }>('/query/', {
-        method: 'POST',
-        body: JSON.stringify({
-          query: {
-            kind: 'HogQLQuery',
-            query: `SELECT count(DISTINCT session_id) FROM events WHERE event IN (${meaningfulEvents.map((e) => `'${e}'`).join(', ')}) AND timestamp >= '${weekStart}' AND timestamp <= '${weekEnd}'`,
-          },
-        }),
-      });
-
-      totalSessions = sessionsResult?.results?.[0]?.[0] || 0;
-
-      // Get total events
-      const eventsResult = await queryPostHogAPI<{
-        results: Array<Array<number>>;
-      }>('/query/', {
-        method: 'POST',
-        body: JSON.stringify({
-          query: {
-            kind: 'HogQLQuery',
-            query: `SELECT count(*) FROM events WHERE event IN (${meaningfulEvents.map((e) => `'${e}'`).join(', ')}) AND timestamp >= '${weekStart}' AND timestamp <= '${weekEnd}'`,
-          },
-        }),
-      });
-
-      totalEvents = eventsResult?.results?.[0]?.[0] || 0;
-    } catch (error) {
-      console.error('[Weekly Metrics] PostHog query failed:', error);
-    }
-  }
-
-  // Fallback to conversion_events if PostHog fails
-  if (wau === 0) {
-    const wauResult = await sql`
-      SELECT COUNT(DISTINCT user_id) as count
+  const [wauResult, sessionsResult, eventsResult] = await Promise.all([
+    sql.query(
+      `
+        SELECT COUNT(DISTINCT user_id) as count
+        FROM conversion_events
+        WHERE event_type = ANY($1::text[])
+          AND created_at >= $2
+          AND created_at <= $3
+      `,
+      [meaningfulEvents, weekStart, weekEnd],
+    ),
+    sql`
+      SELECT COUNT(*) as count
       FROM conversion_events
-      WHERE event_type = ANY(SELECT unnest(${meaningfulEventsArray}::text[]))
+      WHERE event_type = 'app_opened'
         AND created_at >= ${weekStart}
         AND created_at <= ${weekEnd}
-    `;
-    wau = parseInt(wauResult.rows[0]?.count || '0');
-  }
+    `,
+    sql.query(
+      `
+        SELECT COUNT(*) as count
+        FROM conversion_events
+        WHERE event_type = ANY($1::text[])
+          AND created_at >= $2
+          AND created_at <= $3
+      `,
+      [meaningfulEvents, weekStart, weekEnd],
+    ),
+  ]);
+
+  wau = parseInt(wauResult.rows[0]?.count || '0');
+  totalSessions = parseInt(sessionsResult.rows[0]?.count || '0');
+  totalEvents = parseInt(eventsResult.rows[0]?.count || '0');
 
   const avgSessionsPerActiveUser = wau > 0 ? totalSessions / wau : 0;
   const avgEventsPerActiveUser = wau > 0 ? totalEvents / wau : 0;
@@ -477,11 +436,11 @@ async function calculateRetention(
 }> {
   // Get new users in this week
   const newUsersResult = await sql`
-    SELECT DISTINCT user_id
-    FROM conversion_events
-    WHERE event_type = 'signup'
-      AND created_at >= ${formatTimestamp(weekStart)}
-      AND created_at <= ${formatTimestamp(weekEnd)}
+    SELECT id as user_id
+    FROM "user"
+    WHERE "createdAt" >= ${formatTimestamp(weekStart)}
+      AND "createdAt" <= ${formatTimestamp(weekEnd)}
+      AND (email IS NULL OR (email NOT LIKE ${TEST_EMAIL_PATTERN} AND email != ${TEST_EMAIL_EXACT}))
   `;
 
   const newUserIds = newUsersResult.rows.map((r) => r.user_id).filter(Boolean);
@@ -502,17 +461,22 @@ async function calculateRetention(
     'ritual_view',
     'moon_phase_view',
   ];
-  const newUserIdsArray = toTextArrayLiteral(newUserIds)!;
-  const retentionEventsArray = toTextArrayLiteral(meaningfulEvents)!;
-
-  const w1ActiveResult = await sql`
-    SELECT COUNT(DISTINCT user_id) as count
-    FROM conversion_events
-    WHERE user_id = ANY(SELECT unnest(${newUserIdsArray}::text[]))
-      AND event_type = ANY(SELECT unnest(${retentionEventsArray}::text[]))
-      AND created_at >= ${formatTimestamp(nextWeekStart)}
-      AND created_at <= ${formatTimestamp(nextWeekEnd)}
-  `;
+  const w1ActiveResult = await sql.query(
+    `
+      SELECT COUNT(DISTINCT user_id) as count
+      FROM conversion_events
+      WHERE user_id = ANY($1::text[])
+        AND event_type = ANY($2::text[])
+        AND created_at >= $3
+        AND created_at <= $4
+    `,
+    [
+      newUserIds.map(String),
+      meaningfulEvents,
+      formatTimestamp(nextWeekStart),
+      formatTimestamp(nextWeekEnd),
+    ],
+  );
 
   const w1Active = parseInt(w1ActiveResult.rows[0]?.count || '0');
   const w1Retention =
@@ -522,14 +486,22 @@ async function calculateRetention(
   const w4WeekStart = new Date(weekEnd.getTime() + 1);
   const w4WeekEnd = new Date(w4WeekStart.getTime() + 28 * 24 * 60 * 60 * 1000);
 
-  const w4ActiveResult = await sql`
-    SELECT COUNT(DISTINCT user_id) as count
-    FROM conversion_events
-    WHERE user_id = ANY(SELECT unnest(${newUserIdsArray}::text[]))
-      AND event_type = ANY(SELECT unnest(${retentionEventsArray}::text[]))
-      AND created_at >= ${formatTimestamp(w4WeekStart)}
-      AND created_at <= ${formatTimestamp(w4WeekEnd)}
-  `;
+  const w4ActiveResult = await sql.query(
+    `
+      SELECT COUNT(DISTINCT user_id) as count
+      FROM conversion_events
+      WHERE user_id = ANY($1::text[])
+        AND event_type = ANY($2::text[])
+        AND created_at >= $3
+        AND created_at <= $4
+    `,
+    [
+      newUserIds.map(String),
+      meaningfulEvents,
+      formatTimestamp(w4WeekStart),
+      formatTimestamp(w4WeekEnd),
+    ],
+  );
 
   const w4Active = parseInt(w4ActiveResult.rows[0]?.count || '0');
   const w4Retention =
@@ -719,14 +691,16 @@ async function calculateFeatureUsage(
 
   const featureUsage = await Promise.all(
     featureEvents.map(async ({ events, feature }) => {
-      const eventsArrayLiteral = toTextArrayLiteral(events)!;
-      const result = await sql`
-        SELECT COUNT(DISTINCT user_id) as count
-        FROM conversion_events
-        WHERE event_type = ANY(SELECT unnest(${eventsArrayLiteral}::text[]))
-          AND created_at >= ${weekStart}
-          AND created_at <= ${weekEnd}
-      `;
+      const result = await sql.query(
+        `
+          SELECT COUNT(DISTINCT user_id) as count
+          FROM conversion_events
+          WHERE event_type = ANY($1::text[])
+            AND created_at >= $2
+            AND created_at <= $3
+        `,
+        [events, weekStart, weekEnd],
+      );
       return {
         feature,
         distinctUsers: parseInt(result.rows[0]?.count || '0'),
@@ -805,11 +779,11 @@ export async function calculateFunnelMetrics(
           AND created_at <= ${weekEndFormatted}
       `,
     sql`
-        SELECT COUNT(DISTINCT user_id) as count
-        FROM conversion_events
-        WHERE event_type = 'signup'
-          AND created_at >= ${weekStartFormatted}
-          AND created_at <= ${weekEndFormatted}
+        SELECT COUNT(*) as count
+        FROM "user"
+        WHERE "createdAt" >= ${weekStartFormatted}
+          AND "createdAt" <= ${weekEndFormatted}
+          AND (email IS NULL OR (email NOT LIKE ${TEST_EMAIL_PATTERN} AND email != ${TEST_EMAIL_EXACT}))
       `,
     sql`
         SELECT COUNT(DISTINCT user_id) as count
@@ -899,22 +873,27 @@ export async function calculateFeatureUsageWeekly(
 
   const results = await Promise.all(
     featureEvents.map(async ({ events, feature }) => {
-      const eventsArrayLiteral = toTextArrayLiteral(events)!;
       const [usersResult, eventsResult] = await Promise.all([
-        sql`
-          SELECT COUNT(DISTINCT user_id) as count
-          FROM conversion_events
-          WHERE event_type = ANY(SELECT unnest(${eventsArrayLiteral}::text[]))
-            AND created_at >= ${weekStartFormatted}
-            AND created_at <= ${weekEndFormatted}
-        `,
-        sql`
-          SELECT COUNT(*) as count
-          FROM conversion_events
-          WHERE event_type = ANY(SELECT unnest(${eventsArrayLiteral}::text[]))
-            AND created_at >= ${weekStartFormatted}
-            AND created_at <= ${weekEndFormatted}
-        `,
+        sql.query(
+          `
+            SELECT COUNT(DISTINCT user_id) as count
+            FROM conversion_events
+            WHERE event_type = ANY($1::text[])
+              AND created_at >= $2
+              AND created_at <= $3
+          `,
+          [events, weekStartFormatted, weekEndFormatted],
+        ),
+        sql.query(
+          `
+            SELECT COUNT(*) as count
+            FROM conversion_events
+            WHERE event_type = ANY($1::text[])
+              AND created_at >= $2
+              AND created_at <= $3
+          `,
+          [events, weekStartFormatted, weekEndFormatted],
+        ),
       ]);
 
       return {

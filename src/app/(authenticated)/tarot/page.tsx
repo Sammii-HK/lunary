@@ -370,9 +370,9 @@ const TarotReadings = () => {
 
   useEffect(() => {
     if (personalizedReading && userId) {
-      conversionTracking.personalizedTarotViewed(userId);
+      conversionTracking.personalizedTarotViewed(userId, subscription.plan);
     }
-  }, [personalizedReading, userId]);
+  }, [personalizedReading, userId, subscription.plan]);
 
   const personalizedPreviousReadings = useMemo(() => {
     if (!hasPersonalTarotAccess || !userName || !userBirthday) return [];
@@ -645,9 +645,9 @@ const TarotReadings = () => {
 
   useEffect(() => {
     if (hasPersonalTarotAccess && personalizedReading && userId) {
-      conversionTracking.tarotViewed(userId);
+      conversionTracking.tarotViewed(userId, subscription.plan);
     }
-  }, [hasPersonalTarotAccess, personalizedReading, userId]);
+  }, [hasPersonalTarotAccess, personalizedReading, userId, subscription.plan]);
 
   // Simple sequential loading checks - prioritize unauthenticated users
   if (authStatus.loading) {

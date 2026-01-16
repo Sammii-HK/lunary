@@ -85,9 +85,26 @@ export async function trackActivity({
   count = 1,
   metadata,
 }: TrackActivityInput) {
-  // No-op: Activity tracking now handled by PostHog client-side
-  // This function is kept for backwards compatibility with existing callers
-  return;
+  const date = toISODate(activityDate);
+  await sql`
+    INSERT INTO analytics_user_activity (
+      user_id,
+      activity_date,
+      activity_type,
+      activity_count,
+      metadata
+    ) VALUES (
+      ${userId},
+      ${date},
+      ${activityType},
+      ${count},
+      ${toJson(metadata)}
+    )
+    ON CONFLICT (user_id, activity_date, activity_type)
+    DO UPDATE SET
+      activity_count = analytics_user_activity.activity_count + EXCLUDED.activity_count,
+      metadata = COALESCE(analytics_user_activity.metadata, '{}'::jsonb) || EXCLUDED.metadata
+  `;
 }
 
 export async function startAiSession({

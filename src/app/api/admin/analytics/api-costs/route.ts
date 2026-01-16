@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getPostHogAIMetrics } from '@/lib/posthog-server';
 import { resolveDateRange } from '@/lib/analytics/date-range';
 import { sql } from '@vercel/postgres';
 import { formatTimestamp } from '@/lib/analytics/date-range';
@@ -11,12 +10,31 @@ export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
     const range = resolveDateRange(searchParams, 30);
-    const daysBack = Math.ceil(
-      (range.end.getTime() - range.start.getTime()) / (1000 * 60 * 60 * 24),
+    const aiMetricsResult = await sql`
+      SELECT
+        COUNT(*) AS total_generations,
+        COUNT(DISTINCT user_id) AS unique_users,
+        COALESCE(SUM(token_count), 0) AS total_tokens
+      FROM analytics_ai_usage
+      WHERE created_at >= ${formatTimestamp(range.start)}
+        AND created_at <= ${formatTimestamp(range.end)}
+        AND NOT EXISTS (
+          SELECT 1 FROM subscriptions s
+          WHERE s.user_id = analytics_ai_usage.user_id
+            AND (s.user_email LIKE ${TEST_EMAIL_PATTERN} OR s.user_email = ${TEST_EMAIL_EXACT})
+        )
+        AND NOT EXISTS (
+          SELECT 1 FROM conversion_events ce
+          WHERE ce.user_id = analytics_ai_usage.user_id
+            AND (ce.user_email LIKE ${TEST_EMAIL_PATTERN} OR ce.user_email = ${TEST_EMAIL_EXACT})
+        )
+    `;
+    const totalGenerations = Number(
+      aiMetricsResult.rows[0]?.total_generations || 0,
     );
-
-    // Get AI costs from PostHog
-    const aiMetrics = await getPostHogAIMetrics(daysBack);
+    const uniqueUsers = Number(aiMetricsResult.rows[0]?.unique_users || 0);
+    const totalTokens = Number(aiMetricsResult.rows[0]?.total_tokens || 0);
+    const totalCost = (totalTokens / 1000) * 0.001;
 
     // Get MRR for comparison
     const mrrResult = await sql`
@@ -37,25 +55,9 @@ export async function GET(request: NextRequest) {
     `;
     const payingUsers = Number(payingUsersResult.rows[0]?.count || 0);
 
-    if (!aiMetrics) {
-      return NextResponse.json({
-        totalCost: 0,
-        totalGenerations: 0,
-        uniqueUsers: 0,
-        costPerUser: 0,
-        costPerSession: 0,
-        mrr,
-        revenueCostRatio: 0,
-        costTrends: [],
-      });
-    }
-
-    const totalCost = aiMetrics.totalCostUsd;
     const costPerUser = payingUsers > 0 ? totalCost / payingUsers : 0;
     const costPerSession =
-      aiMetrics.totalGenerations > 0
-        ? totalCost / aiMetrics.totalGenerations
-        : 0;
+      totalGenerations > 0 ? totalCost / totalGenerations : 0;
     const revenueCostRatio = totalCost > 0 ? mrr / totalCost : 0;
 
     // Get daily cost trends
@@ -96,8 +98,8 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({
       totalCost: Number(totalCost.toFixed(2)),
-      totalGenerations: aiMetrics.totalGenerations,
-      uniqueUsers: aiMetrics.uniqueUsers,
+      totalGenerations,
+      uniqueUsers,
       costPerUser: Number(costPerUser.toFixed(2)),
       costPerSession: Number(costPerSession.toFixed(4)),
       mrr,

@@ -3,12 +3,9 @@
 import { useEffect, useRef, useState } from 'react';
 import { usePathname, useSearchParams } from 'next/navigation';
 import { getCookieConsent } from './CookieConsent';
-import {
-  initializeAttribution,
-  getStoredAttribution,
-  getAttributionForTracking,
-} from '@/lib/attribution';
+import { initializeAttribution } from '@/lib/attribution';
 import { useAuthStatus } from '@/components/AuthStatus';
+import { getAnonymousId } from '@/lib/analytics';
 
 let posthogModule: any = null;
 let posthogLoaded = false;
@@ -82,11 +79,14 @@ function PostHogProviderContent({ children }: { children: React.ReactNode }) {
     };
   }, []);
 
+  const shouldInitPosthog =
+    !isAdminPath &&
+    !isAdminHost &&
+    (hasConsent === true || authStatus.isAuthenticated === true);
+
   useEffect(() => {
     if (typeof window === 'undefined') return;
-    if (isAdminPath || isAdminHost) return;
-    if (hasConsent !== true) return;
-
+    if (!shouldInitPosthog) return;
     const posthogKey = process.env.NEXT_PUBLIC_POSTHOG_KEY;
     if (!posthogKey || initializedRef.current) return;
 
@@ -130,6 +130,12 @@ function PostHogProviderContent({ children }: { children: React.ReactNode }) {
                 });
               }
 
+              const anonId = getAnonymousId();
+              if (anonId) {
+                posthog.register({ anon_id: anonId });
+                posthog.identify(anonId);
+              }
+
               const attribution = initializeAttribution();
               if (attribution) {
                 posthog.register({
@@ -149,14 +155,10 @@ function PostHogProviderContent({ children }: { children: React.ReactNode }) {
               }
             },
             capture_pageview: false,
-            capture_pageleave: true,
-            autocapture: true,
+            capture_pageleave: false,
+            autocapture: false,
             capture_exceptions: true,
-            disable_session_recording: false,
-            session_recording: {
-              maskAllInputs: false,
-              maskInputOptions: { password: true },
-            },
+            disable_session_recording: true,
             bootstrap: { featureFlags: {} },
           });
         } catch (error) {
@@ -164,17 +166,22 @@ function PostHogProviderContent({ children }: { children: React.ReactNode }) {
         }
       });
     });
-  }, [hasConsent, isAdminHost, isAdminPath]);
+  }, [shouldInitPosthog, isAdminHost, isAdminPath]);
 
   useEffect(() => {
-    if (hasConsent === false && posthogRef.current && initializedRef.current) {
+    if (
+      hasConsent === false &&
+      !authStatus.isAuthenticated &&
+      posthogRef.current &&
+      initializedRef.current
+    ) {
       try {
         posthogRef.current.opt_out_capturing();
       } catch (error) {
         console.error('[PostHog] Failed to opt out:', error);
       }
     }
-  }, [hasConsent]);
+  }, [hasConsent, authStatus.isAuthenticated]);
 
   useEffect(() => {
     if (isAdminPath || isAdminHost) return;
@@ -209,47 +216,6 @@ function PostHogProviderContent({ children }: { children: React.ReactNode }) {
     posthogAvailable,
     isAdminHost,
     isAdminPath,
-  ]);
-
-  useEffect(() => {
-    if (isAdminPath || isAdminHost) return;
-    if (!posthogAvailable || !posthogRef.current || !initializedRef.current) {
-      return;
-    }
-
-    if (pathname) {
-      try {
-        let url = window.origin + pathname;
-        if (searchParams?.toString()) {
-          url += `?${searchParams.toString()}`;
-        }
-
-        const attribution = getStoredAttribution();
-        const attributionData = getAttributionForTracking();
-
-        posthogRef.current?.capture?.('$pageview', {
-          $current_url: url,
-          pathname,
-          ...attributionData,
-          is_seo_traffic: attribution?.source === 'seo',
-          is_grimoire_page: pathname.startsWith('/grimoire'),
-          is_blog_page: pathname.startsWith('/blog'),
-          is_authenticated: authStatus.isAuthenticated,
-          isAuthenticated: authStatus.isAuthenticated,
-          auth_user_id: authStatus.user?.id,
-        });
-      } catch (error) {
-        console.error('[PostHog] Failed to capture pageview:', error);
-      }
-    }
-  }, [
-    pathname,
-    searchParams,
-    posthogAvailable,
-    isAdminHost,
-    isAdminPath,
-    authStatus.isAuthenticated,
-    authStatus.user?.id,
   ]);
 
   return <>{children}</>;

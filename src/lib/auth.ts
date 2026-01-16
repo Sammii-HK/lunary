@@ -195,6 +195,50 @@ async function hashPasswordForMigration(
   }
 }
 
+async function recordSignupConversionEvent(
+  pool: Pool,
+  user: { id: string; email?: string | null; createdAt?: Date | string | null },
+): Promise<void> {
+  try {
+    const normalizedEmail =
+      typeof user.email === 'string' && user.email.trim().length > 0
+        ? user.email.trim().toLowerCase()
+        : null;
+    const createdAt =
+      user.createdAt instanceof Date
+        ? user.createdAt
+        : user.createdAt
+          ? new Date(user.createdAt)
+          : new Date();
+
+    await pool.query(
+      `INSERT INTO conversion_events (
+        event_type,
+        user_id,
+        user_email,
+        metadata,
+        created_at
+      )
+      SELECT $1, $2, $3, $4, $5
+      WHERE NOT EXISTS (
+        SELECT 1
+        FROM conversion_events
+        WHERE event_type = $1
+          AND user_id = $2
+      )`,
+      [
+        'signup',
+        user.id,
+        normalizedEmail,
+        JSON.stringify({ source: 'auth' }),
+        createdAt,
+      ],
+    );
+  } catch (error) {
+    console.warn('[auth] Failed to record signup conversion event:', error);
+  }
+}
+
 // Jazz fallback adapter (READ-ONLY for existing users, disabled for new signups)
 async function createJazzFallbackAdapter() {
   try {
@@ -399,6 +443,10 @@ async function initializeAuth() {
         create: {
           async after(user: any) {
             console.log('✨ New user created in Postgres:', user.id);
+
+            if (pool) {
+              await recordSignupConversionEvent(pool, user);
+            }
 
             // Send welcome email (transactional - no opt-in required)
             if (user.email) {

@@ -23,7 +23,6 @@ import { PWA_MANIFEST_URL } from '@/constants/pwa';
 import { ConditionalMainWrapper } from '@/components/ConditionalMainWrapper';
 import { StructuredData } from '@/components/StructuredData';
 import { AppChrome } from '@/components/AppChrome';
-import { PostHogProvider } from '@/components/PostHogProvider';
 import { AuthStatusProvider } from '@/components/AuthStatus';
 import { UserProvider } from '@/context/UserContext';
 import { CookieConsent } from '@/components/CookieConsent';
@@ -123,7 +122,6 @@ export default function RootLayout({
     <html lang='en' suppressHydrationWarning>
       <head>
         {/* Preconnect to critical external services */}
-        <link rel='preconnect' href='https://eu.i.posthog.com' />
         <link rel='preconnect' href='https://api.stripe.com' />
         <link rel='preconnect' href='https://js.stripe.com' />
         <link
@@ -147,29 +145,27 @@ export default function RootLayout({
         <StructuredData />
         <Suspense fallback={null}>
           <AuthStatusProvider>
-            <PostHogProvider>
-              <ErrorBoundaryWrapper>
-                <UserProvider>
-                  <Suspense
-                    fallback={
-                      <main className='flex flex-col flex-1 w-full min-h-0 h-[calc(100vh-4rem)]'>
-                        {children}
-                      </main>
-                    }
-                  >
-                    <ConditionalMainWrapper>
-                      <ErrorBoundaryWrapper>{children}</ErrorBoundaryWrapper>
-                      <Analytics />
-                      <SpeedInsights />
-                    </ConditionalMainWrapper>
-                  </Suspense>
-                  <Suspense fallback={null}>
-                    <AppChrome />
-                  </Suspense>
-                  <CookieConsent />
-                </UserProvider>
-              </ErrorBoundaryWrapper>
-            </PostHogProvider>
+            <ErrorBoundaryWrapper>
+              <UserProvider>
+                <Suspense
+                  fallback={
+                    <main className='flex flex-col flex-1 w-full min-h-0 h-[calc(100vh-4rem)]'>
+                      {children}
+                    </main>
+                  }
+                >
+                  <ConditionalMainWrapper>
+                    <ErrorBoundaryWrapper>{children}</ErrorBoundaryWrapper>
+                    <Analytics />
+                    <SpeedInsights />
+                  </ConditionalMainWrapper>
+                </Suspense>
+                <Suspense fallback={null}>
+                  <AppChrome />
+                </Suspense>
+                <CookieConsent />
+              </UserProvider>
+            </ErrorBoundaryWrapper>
           </AuthStatusProvider>
         </Suspense>
       </body>

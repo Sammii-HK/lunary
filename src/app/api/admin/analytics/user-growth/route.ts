@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { sql } from '@vercel/postgres';
-import { getPostHogSignupTrends } from '@/lib/posthog-server';
 import { resolveDateRange, formatTimestamp } from '@/lib/analytics/date-range';
 
 const TEST_EMAIL_PATTERN = '%@test.lunary.app';
@@ -74,18 +73,11 @@ export async function GET(request: NextRequest) {
       | 'month';
     const range = resolveDateRange(searchParams, 30);
 
-    const posthogTrends = await getPostHogSignupTrends(
-      range.start,
-      range.end,
-      granularity,
-    );
-
     const dbTrends = await getSignupTrendsFromDb(
       range.start,
       range.end,
       granularity,
     );
-    const shouldFallbackToDb = posthogTrends.length === 0;
 
     const trends = fillSignupTrends(
       dbTrends,
@@ -93,27 +85,6 @@ export async function GET(request: NextRequest) {
       range.end,
       granularity,
     );
-
-    if (!shouldFallbackToDb) {
-      const posthogMap = new Map(
-        posthogTrends.map((trend) => [trend.date, trend.signups]),
-      );
-      const currentBucket = formatDateKey(
-        alignDateToGranularity(range.end, granularity),
-      );
-      const posthogToday = posthogMap.get(currentBucket);
-      if (typeof posthogToday === 'number') {
-        const todayIndex = trends.findIndex(
-          (trend) => trend.date === currentBucket,
-        );
-        if (todayIndex >= 0) {
-          trends[todayIndex] = {
-            ...trends[todayIndex],
-            signups: posthogToday,
-          };
-        }
-      }
-    }
 
     // Calculate growth rate
     let growthRate = 0;
@@ -134,7 +105,7 @@ export async function GET(request: NextRequest) {
       trends,
       growthRate: Number(growthRate.toFixed(2)),
       totalSignups: trends.reduce((sum, t) => sum + t.signups, 0),
-      source: shouldFallbackToDb ? 'conversion_events' : 'hybrid',
+      source: 'users',
     });
   } catch (error) {
     console.error('[analytics/user-growth] Failed to load metrics', error);
@@ -157,19 +128,18 @@ async function getSignupTrendsFromDb(
 ) {
   const dateTrunc =
     granularity === 'week'
-      ? "DATE_TRUNC('week', created_at)"
+      ? 'DATE_TRUNC(\'week\', "createdAt")'
       : granularity === 'month'
-        ? "DATE_TRUNC('month', created_at)"
-        : 'DATE(created_at)';
+        ? 'DATE_TRUNC(\'month\', "createdAt")'
+        : 'DATE("createdAt")';
 
   const result = await sql.query(
     `
-      SELECT ${dateTrunc} as date, COUNT(DISTINCT user_id) as signups
-      FROM conversion_events
-      WHERE event_type = 'signup'
-        AND created_at >= $1
-        AND created_at <= $2
-        AND (user_email IS NULL OR (user_email NOT LIKE $3 AND user_email != $4))
+      SELECT ${dateTrunc} as date, COUNT(*) as signups
+      FROM "user"
+      WHERE "createdAt" >= $1
+        AND "createdAt" <= $2
+        AND (email IS NULL OR (email NOT LIKE $3 AND email != $4))
       GROUP BY ${dateTrunc}
       ORDER BY date ASC
     `,

@@ -75,6 +75,12 @@ export default function PrivacyPolicyPage() {
                 through our payment provider (see Section 4)
               </li>
             </ul>
+            <p className='text-zinc-300 leading-relaxed mt-4'>
+              Journals, reflections, dreams, and other written entries are
+              user-generated content stored privately within your account. This
+              content is not reviewed manually and is not shared publicly unless
+              you explicitly choose to do so.
+            </p>
 
             <h3 className='text-xl font-medium text-white mb-3 mt-6'>
               1.2 Information Collected Automatically
@@ -116,6 +122,19 @@ export default function PrivacyPolicyPage() {
               </Link>
               .
             </p>
+
+            <h3 className='text-xl font-medium text-white mb-3 mt-6'>
+              1.4 Product Analytics & In-App Activity
+            </h3>
+            <p className='text-zinc-300 leading-relaxed'>
+              We collect limited in-app usage data to understand how features
+              are used, improve reliability, and develop new functionality. This
+              can include interactions with app features, navigation flows, and
+              content engagement tied to your account session. This data is
+              processed as part of providing the service, is not used for
+              advertising, and includes events stored in our databases as well
+              as signed-in tracking that does not rely on cookie banners.
+            </p>
           </section>
 
           <section>
@@ -154,6 +173,12 @@ export default function PrivacyPolicyPage() {
                 required)
               </li>
             </ul>
+            <p className='text-zinc-300 leading-relaxed mt-4'>
+              Lunary may generate derived insights (such as themes, patterns, or
+              summaries) based on your activity and content. These insights are
+              for personal reflection and are not medical, psychological, or
+              professional advice.
+            </p>
           </section>
 
           <section>

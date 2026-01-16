@@ -82,14 +82,7 @@ function trimToMax(text: string, maxChars: number, addEllipsis = true) {
   return output;
 }
 
-function toTextArrayLiteral(values: string[]): string {
-  return `{${values
-    .map(
-      (value) =>
-        `"${String(value).replace(/\\/g, '\\\\').replace(/"/g, '\\"')}"`,
-    )
-    .join(',')}}`;
-}
+// Avoid passing array literals as strings; use parameterized arrays instead.
 
 const videoHashtagConfig: Record<
   string,
@@ -404,15 +397,17 @@ export async function POST(request: NextRequest) {
             return `${trimmedBody}\n\n${tags}`;
           };
 
-          const shortPlatformsArray = toTextArrayLiteral(shortVideoPlatforms);
-          const existingPlatformsResult = await sql`
-            SELECT platform
-            FROM social_posts
-            WHERE topic = ${script.facet_title}
-              AND scheduled_date::date = ${dateKey}
-              AND platform = ANY(SELECT unnest(${shortPlatformsArray}::text[]))
-              AND post_type = 'video'
-          `;
+          const existingPlatformsResult = await sql.query(
+            `
+              SELECT platform
+              FROM social_posts
+              WHERE topic = $1
+                AND scheduled_date::date = $2
+                AND platform = ANY($3::text[])
+                AND post_type = 'video'
+            `,
+            [script.facet_title, dateKey, shortVideoPlatforms],
+          );
           const existingPlatforms = new Set(
             existingPlatformsResult.rows.map((row) => row.platform as string),
           );

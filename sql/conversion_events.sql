@@ -6,9 +6,11 @@ CREATE TABLE IF NOT EXISTS conversion_events (
   
   -- Event identification
   event_type TEXT NOT NULL,
+  event_id UUID,
   
   -- User identification
   user_id TEXT,
+  anonymous_id TEXT,
   user_email TEXT,
   
   -- Subscription context
@@ -18,6 +20,8 @@ CREATE TABLE IF NOT EXISTS conversion_events (
   -- Feature context
   feature_name TEXT,
   page_path TEXT,
+  entity_type TEXT,
+  entity_id TEXT,
   
   -- Additional metadata
   metadata JSONB,
@@ -29,12 +33,37 @@ CREATE TABLE IF NOT EXISTS conversion_events (
 -- Indexes for performance
 CREATE INDEX IF NOT EXISTS idx_conversion_events_event_type ON conversion_events(event_type);
 CREATE INDEX IF NOT EXISTS idx_conversion_events_user_id ON conversion_events(user_id);
+CREATE INDEX IF NOT EXISTS idx_conversion_events_anonymous_id ON conversion_events(anonymous_id);
 CREATE INDEX IF NOT EXISTS idx_conversion_events_user_email ON conversion_events(user_email);
 CREATE INDEX IF NOT EXISTS idx_conversion_events_created_at ON conversion_events(created_at);
 CREATE INDEX IF NOT EXISTS idx_conversion_events_plan_type ON conversion_events(plan_type);
+CREATE INDEX IF NOT EXISTS idx_conversion_events_event_created_at ON conversion_events(event_type, created_at);
+CREATE INDEX IF NOT EXISTS idx_conversion_events_user_created_at ON conversion_events(user_id, created_at);
 
 -- Composite index for common queries
 CREATE INDEX IF NOT EXISTS idx_conversion_events_user_event ON conversion_events(user_id, event_type, created_at);
+
+-- Dedupe unique indexes (UTC date bucketing)
+CREATE UNIQUE INDEX IF NOT EXISTS uq_conversion_events_app_opened_daily
+  ON conversion_events (
+    user_id,
+    event_type,
+    ((created_at AT TIME ZONE 'UTC')::date)
+  )
+  WHERE event_type = 'app_opened' AND user_id IS NOT NULL;
+
+CREATE UNIQUE INDEX IF NOT EXISTS uq_conversion_events_grimoire_viewed_daily
+  ON conversion_events (
+    user_id,
+    event_type,
+    ((created_at AT TIME ZONE 'UTC')::date),
+    COALESCE(entity_id, page_path, '')
+  )
+  WHERE event_type = 'grimoire_viewed' AND user_id IS NOT NULL;
+
+CREATE UNIQUE INDEX IF NOT EXISTS uq_conversion_events_event_id
+  ON conversion_events (event_id)
+  WHERE event_id IS NOT NULL;
 
 -- Example queries:
 -- Get conversion funnel for a user

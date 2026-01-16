@@ -1069,9 +1069,9 @@ const BirthChartPage = () => {
 
   useEffect(() => {
     if (hasChartAccess && user?.hasBirthChart && user?.id) {
-      conversionTracking.birthChartViewed(user.id);
+      conversionTracking.birthChartViewed(user.id, subscription.plan);
     }
-  }, [hasChartAccess, user?.hasBirthChart, user?.id]);
+  }, [hasChartAccess, user?.hasBirthChart, user?.id, subscription.plan]);
 
   if (loading) {
     return (

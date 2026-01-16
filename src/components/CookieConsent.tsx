@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { usePathname } from 'next/navigation';
 import Link from 'next/link';
 
 export type CookiePreferences = {
@@ -50,9 +51,26 @@ function saveCookieConsent(preferences: CookiePreferences) {
 }
 
 export function CookieConsent() {
+  const pathname = usePathname() || '';
   const [isVisible, setIsVisible] = useState(false);
   const [showCustomize, setShowCustomize] = useState(false);
   const [analyticsEnabled, setAnalyticsEnabled] = useState(true);
+  const [isAdminHost, setIsAdminHost] = useState(false);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const host = window.location.hostname;
+    const adminHostPatterns = [
+      'admin.lunary.app',
+      'admin.localhost',
+      'admin.127.0.0.1',
+    ];
+    const adminHost =
+      adminHostPatterns.includes(host) ||
+      host.startsWith('admin.') ||
+      host.endsWith('.admin.lunary.app');
+    setIsAdminHost(adminHost);
+  }, []);
 
   useEffect(() => {
     const consent = getCookieConsent();
@@ -92,7 +110,7 @@ export function CookieConsent() {
     setIsVisible(false);
   };
 
-  if (!isVisible) return null;
+  if (!isVisible || pathname.startsWith('/admin') || isAdminHost) return null;
 
   return (
     <div className='fixed bottom-20 right-4 z-50 max-w-sm'>

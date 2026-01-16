@@ -122,7 +122,9 @@ export default function CookiePolicyPage() {
             <p className='text-zinc-300 leading-relaxed mb-4'>
               These cookies help us understand how visitors interact with our
               website by collecting and reporting information anonymously. We
-              only set these cookies with your consent.
+              only set these cookies with your consent. Some in-app analytics
+              may be processed without cookies using first-party identifiers for
+              logged-in users, solely to operate and improve the service.
             </p>
             <div className='overflow-x-auto'>
               <table className='w-full text-sm text-zinc-300 border border-zinc-800 rounded-lg'>

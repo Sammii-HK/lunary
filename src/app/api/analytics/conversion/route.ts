@@ -1,28 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { getCurrentUser } from '@/lib/get-user-session';
+import {
+  canonicaliseEvent,
+  insertCanonicalEvent,
+} from '@/lib/analytics/canonical-events';
+import { forwardEventToPostHog, aliasPostHogUser } from '@/lib/posthog-forward';
 import { sql } from '@vercel/postgres';
-import { trackActivity } from '@/lib/analytics/tracking';
 
-function normalizeEmail(email: unknown): string | undefined {
-  if (typeof email !== 'string') {
-    return undefined;
-  }
-
-  const trimmed = email.trim();
-  return trimmed ? trimmed.toLowerCase() : undefined;
-}
-
-function extractEmailFromMetadata(metadata: unknown): string | undefined {
-  if (metadata && typeof metadata === 'object') {
-    const candidate =
-      (metadata as Record<string, unknown>).userEmail ||
-      (metadata as Record<string, unknown>).email ||
-      (metadata as Record<string, unknown>).customerEmail ||
-      (metadata as Record<string, unknown>).customer_email;
-
-    return normalizeEmail(candidate);
-  }
-
-  return undefined;
+function normalizeEmail(email: unknown): string | null {
+  if (typeof email !== 'string') return null;
+  const trimmed = email.trim().toLowerCase();
+  return trimmed ? trimmed : null;
 }
 
 export async function POST(request: NextRequest) {
@@ -40,80 +28,121 @@ export async function POST(request: NextRequest) {
 
     const {
       event,
+      eventId,
       userId,
+      anonymousId,
       userEmail,
       planType,
       trialDaysRemaining,
       featureName,
       pagePath,
+      entityType,
+      entityId,
       metadata,
     } = data;
 
-    const normalizedEmail =
-      normalizeEmail(userEmail) ?? extractEmailFromMetadata(metadata);
     const safeUserId =
       typeof userId === 'string'
-        ? userId.trim() || null
+        ? userId.trim()
         : typeof userId === 'number' || typeof userId === 'bigint'
           ? String(userId)
-          : null;
+          : '';
 
-    await sql`
-      INSERT INTO conversion_events (
-        event_type,
-        user_id,
-        user_email,
-        plan_type,
-        trial_days_remaining,
-        feature_name,
-        page_path,
-        metadata,
-        created_at
-      ) VALUES (
-        ${event},
-        ${safeUserId},
-        ${normalizedEmail || null},
-        ${planType || null},
-        ${trialDaysRemaining || null},
-        ${featureName || null},
-        ${pagePath || null},
-        ${metadata ? JSON.stringify(metadata) : null},
-        NOW()
-      )
-    `;
+    const normalizedEmail = normalizeEmail(userEmail);
 
-    // Also track activity for feature views to populate feature usage analytics
-    if (safeUserId) {
-      const activityTypeMap: Record<string, string> = {
-        tarot_viewed: 'tarot',
-        birth_chart_viewed: 'birth_chart',
-        horoscope_viewed: 'cosmic_state',
-        personalized_horoscope_viewed: 'cosmic_state',
-        personalized_tarot_viewed: 'tarot',
-        app_opened: 'session',
-        ai_chat: 'ai_chat',
+    const currentUser =
+      !safeUserId || !normalizedEmail ? await getCurrentUser(request) : null;
+    const resolvedUserId = safeUserId || currentUser?.id || null;
+    const resolvedEmail = normalizedEmail || currentUser?.email || null;
+
+    // Identity stitching: if we have both a real user id and an anonymous id, link them.
+    // This lets retention treat anonymous "returns" as belonging to the signed-in user.
+    if (
+      resolvedUserId &&
+      typeof anonymousId === 'string' &&
+      anonymousId.trim().length > 0 &&
+      !String(resolvedUserId).startsWith('anon:')
+    ) {
+      try {
+        await sql.query(
+          `
+            INSERT INTO analytics_identity_links (user_id, anonymous_id)
+            VALUES ($1, $2)
+            ON CONFLICT DO NOTHING
+          `,
+          [String(resolvedUserId), anonymousId.trim()],
+        );
+      } catch (e) {
+        // Backwards compatible: table may not exist until migrations run.
+        if (
+          !(e instanceof Error) ||
+          !String(e.message).includes('analytics_identity_links')
+        ) {
+          throw e;
+        }
+      }
+    }
+
+    const canonical = canonicaliseEvent({
+      eventType: event,
+      eventId,
+      userId: resolvedUserId,
+      anonymousId,
+      userEmail: resolvedEmail,
+      planType,
+      trialDaysRemaining,
+      featureName,
+      pagePath,
+      entityType,
+      entityId,
+      metadata,
+    });
+
+    if (!canonical.ok) {
+      return NextResponse.json({
+        success: true,
+        skipped: true,
+        reason: canonical.reason,
+      });
+    }
+
+    const { inserted } = await insertCanonicalEvent(canonical.row);
+
+    if (inserted) {
+      const distinctId =
+        canonical.row.anonymousId || canonical.row.userId || 'unknown';
+
+      const forwardProps = {
+        ...canonical.row.metadata,
+        event_id: canonical.row.eventId,
+        plan_type: canonical.row.planType,
+        trial_days_remaining: canonical.row.trialDaysRemaining,
+        feature_name: canonical.row.featureName,
+        page_path: canonical.row.pagePath,
+        entity_type: canonical.row.entityType,
+        entity_id: canonical.row.entityId,
+        authenticated: !canonical.row.userId.startsWith('anon:'),
       };
 
-      const activityType = activityTypeMap[event] || featureName || event;
+      forwardEventToPostHog({
+        distinctId,
+        event: canonical.row.eventType,
+        properties: forwardProps,
+      });
 
-      // Only track activity for feature-related events, not conversion events
       if (
-        activityType !== 'signup' &&
-        activityType !== 'trial_started' &&
-        activityType !== 'trial_converted' &&
-        activityType !== 'subscription_started' &&
-        activityType !== 'trial_expired'
+        canonical.row.userId &&
+        canonical.row.anonymousId &&
+        canonical.row.eventType === 'user_signed_up'
       ) {
-        try {
-          await trackActivity({
-            userId: safeUserId,
-            activityType,
-            metadata: metadata || {},
-          });
-        } catch (activityError) {
-          // Don't fail the conversion tracking if activity tracking fails
-          console.error('[analytics] Failed to track activity:', activityError);
-        }
+        aliasPostHogUser(canonical.row.userId, canonical.row.anonymousId);
+      }
+      if (
+        canonical.row.userId &&
+        canonical.row.anonymousId &&
+        canonical.row.eventType === 'user_logged_in'
+      ) {
+        aliasPostHogUser(canonical.row.userId, canonical.row.anonymousId);
       }
     }
 

@@ -1,6 +1,23 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { sql } from '@vercel/postgres';
-import { getPostHogActiveUsers } from '@/lib/posthog-server';
+const ACTIVITY_EVENTS = [
+  'app_opened',
+  'tarot_viewed',
+  'personalized_tarot_viewed',
+  'birth_chart_viewed',
+  'horoscope_viewed',
+  'personalized_horoscope_viewed',
+  'cosmic_pulse_opened',
+  'moon_circle_opened',
+  'weekly_report_opened',
+  'pricing_page_viewed',
+  'trial_started',
+  'trial_converted',
+  'subscription_started',
+  'login',
+  'dashboard_viewed',
+  'grimoire_viewed',
+];
 
 export async function GET(request: NextRequest) {
   try {
@@ -23,9 +40,10 @@ export async function GET(request: NextRequest) {
     }
 
     const signups = await sql`
-      SELECT COUNT(DISTINCT user_id) as count
-      FROM conversion_events
-      WHERE event_type = 'signup' AND ${(sql as any).raw(dateFilter)}
+      SELECT COUNT(*) as count
+      FROM "user"
+      WHERE "createdAt" IS NOT NULL
+        AND ${(sql as any).raw(dateFilter.replace('created_at', '"createdAt"'))}
     `;
 
     const trials = await sql`
@@ -181,20 +199,37 @@ export async function GET(request: NextRequest) {
           100
         : 0;
 
-    let dau = 0;
-    let wau = 0;
-    let stickiness = 0;
+    const dauStart = new Date();
+    dauStart.setUTCDate(dauStart.getUTCDate() - 1);
+    const wauStart = new Date();
+    wauStart.setUTCDate(wauStart.getUTCDate() - 7);
 
-    try {
-      const posthogData = await getPostHogActiveUsers();
-      if (posthogData) {
-        dau = posthogData.dau;
-        wau = posthogData.wau;
-        stickiness = wau > 0 ? (dau / wau) * 100 : 0;
-      }
-    } catch (error) {
-      console.warn('Error fetching DAU/WAU from PostHog:', error);
-    }
+    const [dauResult, wauResult] = await Promise.all([
+      sql.query(
+        `
+          SELECT COUNT(DISTINCT user_id) as count
+          FROM conversion_events
+          WHERE event_type = ANY($1::text[])
+            AND created_at >= $2
+            AND created_at <= NOW()
+        `,
+        [ACTIVITY_EVENTS, dauStart.toISOString()],
+      ),
+      sql.query(
+        `
+          SELECT COUNT(DISTINCT user_id) as count
+          FROM conversion_events
+          WHERE event_type = ANY($1::text[])
+            AND created_at >= $2
+            AND created_at <= NOW()
+        `,
+        [ACTIVITY_EVENTS, wauStart.toISOString()],
+      ),
+    ]);
+
+    const dau = parseInt(dauResult.rows[0]?.count || '0');
+    const wau = parseInt(wauResult.rows[0]?.count || '0');
+    const stickiness = wau > 0 ? (dau / wau) * 100 : 0;
 
     let tiktokVisitors = 0;
     let tiktokSignups = 0;

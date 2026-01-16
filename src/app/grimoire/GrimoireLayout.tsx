@@ -112,6 +112,7 @@ const SIDEBAR_CATEGORIES = [
 ];
 import { AskTheGrimoire } from './AskTheGrimoire';
 import { captureEvent } from '@/lib/posthog-client';
+import { conversionTracking } from '@/lib/analytics';
 import { getStoredAttribution, extractSearchQuery } from '@/lib/attribution';
 
 // Dynamic imports for grimoire components (lazy load to improve build speed)
@@ -831,7 +832,7 @@ export default function GrimoireLayout({
         typeof document !== 'undefined' ? document.referrer : undefined;
       const searchQuery = referrer ? extractSearchQuery(referrer) : undefined;
 
-      captureEvent('grimoire_viewed', {
+      const trackingPayload = {
         section: currentSection,
         section_title: grimoire[currentSection]?.title,
         source: attribution?.source || 'direct',
@@ -841,7 +842,12 @@ export default function GrimoireLayout({
         first_touch_source: attribution?.source,
         first_touch_page: attribution?.landingPage,
         is_seo_traffic: attribution?.source === 'seo',
+      };
+
+      captureEvent('grimoire_viewed', {
+        ...trackingPayload,
       });
+      conversionTracking.grimoireViewed(undefined, trackingPayload);
       trackedSectionRef.current = currentSection;
     }
   }, [currentSection, pathname]);
