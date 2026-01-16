@@ -541,6 +541,58 @@ function getHubPlacementsConnections(): CosmicConnectionSection[] {
   ];
 }
 
+function getHubCrystalsConnections(): CosmicConnectionSection[] {
+  return [
+    {
+      title: 'Crystal Uses',
+      links: [
+        { label: 'Protection Magic', href: '/grimoire/protection' },
+        { label: 'Manifestation', href: '/grimoire/manifestation' },
+        { label: 'Meditation', href: '/grimoire/meditation' },
+        { label: 'Chakras', href: '/grimoire/chakras' },
+      ],
+    },
+    {
+      title: 'Related Topics',
+      links: [
+        { label: 'Spells & Rituals', href: '/grimoire/spells' },
+        { label: 'Moon Magic', href: '/grimoire/moon' },
+        { label: 'Candle Magic', href: '/grimoire/candle-magic' },
+        {
+          label: 'Color Correspondences',
+          href: '/grimoire/correspondences/colors',
+        },
+        { label: 'Chakra Healing', href: '/grimoire/chakras' },
+        { label: 'Magical Correspondences', href: '/grimoire/correspondences' },
+      ],
+    },
+    {
+      title: 'Related Correspondences',
+      links: [
+        { label: 'Correspondences', href: '/grimoire/correspondences' },
+        { label: 'Herbs', href: '/grimoire/correspondences/herbs' },
+        { label: 'Colors', href: '/grimoire/correspondences/colors' },
+        { label: 'Elements', href: '/grimoire/correspondences/elements' },
+      ],
+    },
+    {
+      title: 'Learn More',
+      links: [
+        {
+          label: 'Crystal Healing Guide',
+          href: '/grimoire/guides/crystal-healing-guide',
+        },
+        { label: 'Candle Magic', href: '/grimoire/candle-magic' },
+        {
+          label: 'Spellcraft Fundamentals',
+          href: '/grimoire/spells/fundamentals',
+        },
+        { label: 'Book of Shadows', href: '/book-of-shadows' },
+      ],
+    },
+  ];
+}
+
 function getHubGlossaryConnections(): CosmicConnectionSection[] {
   return [
     {
@@ -674,6 +726,9 @@ export function getCosmicConnections(
     case 'hub-placements':
       return getHubPlacementsConnections();
     case 'hub-glossary':
+      if (slugOrKey === 'crystals') {
+        return getHubCrystalsConnections();
+      }
       return getHubGlossaryConnections();
     case 'archetype':
       return getArchetypeConnections(slugOrKey);

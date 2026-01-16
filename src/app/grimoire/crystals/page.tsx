@@ -4,7 +4,6 @@ import { Metadata } from 'next';
 import Link from 'next/link';
 import { createItemListSchema } from '@/lib/schema';
 import { CosmicConnections } from '@/components/grimoire/CosmicConnections';
-import { CosmicConnectionSection } from '@/lib/cosmicConnectionsConfig';
 import { SEOContentTemplate } from '@/components/grimoire/SEOContentTemplate';
 import Crystals from '../components/Crystals';
 import {
@@ -85,56 +84,6 @@ const faqs = [
     question: 'Are some crystals dangerous?',
     answer:
       'Some crystals contain toxic minerals and should not be placed in water or handled extensively without washing hands afterward. Examples include malachite (copper), cinnabar (mercury), and galena (lead). Research any crystal before using in elixirs or prolonged skin contact.',
-  },
-];
-
-const cosmicConnectionsSections: CosmicConnectionSection[] = [
-  {
-    title: 'Crystal Uses',
-    links: [
-      { label: 'Protection Magic', href: '/grimoire/protection' },
-      { label: 'Manifestation', href: '/grimoire/manifestation' },
-      { label: 'Meditation', href: '/grimoire/meditation' },
-      { label: 'Chakras', href: '/grimoire/chakras' },
-    ],
-  },
-  {
-    title: 'Related Topics',
-    links: [
-      { label: 'Spells & Rituals', href: '/grimoire/spells' },
-      { label: 'Moon Magic', href: '/grimoire/moon' },
-      { label: 'Candle Magic', href: '/grimoire/candle-magic' },
-      {
-        label: 'Color Correspondences',
-        href: '/grimoire/correspondences/colors',
-      },
-      { label: 'Chakra Healing', href: '/grimoire/chakras' },
-      { label: 'Magical Correspondences', href: '/grimoire/correspondences' },
-    ],
-  },
-  {
-    title: 'Related Correspondences',
-    links: [
-      { label: 'Correspondences', href: '/grimoire/correspondences' },
-      { label: 'Herbs', href: '/grimoire/correspondences/herbs' },
-      { label: 'Colors', href: '/grimoire/correspondences/colors' },
-      { label: 'Elements', href: '/grimoire/correspondences/elements' },
-    ],
-  },
-  {
-    title: 'Learn More',
-    links: [
-      {
-        label: 'Crystal Healing Guide',
-        href: '/grimoire/guides/crystal-healing-guide',
-      },
-      { label: 'Candle Magic', href: '/grimoire/candle-magic' },
-      {
-        label: 'Spellcraft Fundamentals',
-        href: '/grimoire/spells/fundamentals',
-      },
-      { label: 'Book of Shadows', href: '/book-of-shadows' },
-    ],
   },
 ];
 
@@ -245,7 +194,6 @@ export default async function CrystalsPage({
           entityType='hub-glossary'
           entityKey='crystals'
           title='Crystal Connections'
-          sections={cosmicConnectionsSections}
         />
       }
     >
