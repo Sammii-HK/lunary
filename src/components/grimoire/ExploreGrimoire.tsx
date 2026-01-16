@@ -1,4 +1,5 @@
 import { NavParamLink } from '../NavParamLink';
+import { Heading } from '@/components/ui/Heading';
 
 const GRIMOIRE_LINKS = [
   { href: '/grimoire/horoscopes', label: 'Horoscopes' },
@@ -18,9 +19,9 @@ const GRIMOIRE_LINKS = [
 export function ExploreGrimoire() {
   return (
     <section className='mt-12 pt-8 border-t border-zinc-800'>
-      <h2 className='text-xl font-medium text-zinc-100 mb-4'>
+      <Heading as='h2' variant='h2'>
         Explore the Grimoire
-      </h2>
+      </Heading>
       <p className='text-sm text-zinc-400 mb-4'>
         Continue your cosmic journey through Lunary&apos;s library of
         astrological wisdom.

@@ -5,6 +5,7 @@ import {
   EntityType,
 } from '@/lib/cosmicConnectionsConfig';
 import { NavParamLink } from '@/components/NavParamLink';
+import { Heading } from '@/components/ui/Heading';
 
 interface CosmicConnectionsProps {
   entityType: EntityType;
@@ -34,16 +35,16 @@ export function CosmicConnections({
 
   return (
     <section className='my-8 py-8 border-t border-b border-lunary-primary-700'>
-      <h2 className='text-xl font-medium text-zinc-100 mb-4 flex items-center gap-2'>
+      <Heading as='h2' variant='h2' className='flex items-center gap-2'>
         <Sparkles className='h-5 w-5 text-lunary-primary-400' />
         {title}
-      </h2>
+      </Heading>
       <div className='space-y-6'>
         {sections.map((section, sectionIndex) => (
           <div key={`${section.title}-${sectionIndex}`}>
-            <h3 className='text-sm font-medium text-zinc-400 mb-3'>
+            <Heading as='h3' variant='h4'>
               {section.title}
-            </h3>
+            </Heading>
             <div className='grid grid-cols-2 sm:grid-cols-4 gap-2'>
               {section.links.map((link, linkIndex) => (
                 <NavParamLink
