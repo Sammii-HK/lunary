@@ -129,7 +129,7 @@ export default function HousesIndexPage() {
           {PLANETS_FOR_HOUSES.slice(0, 10).map((planet) => (
             <Link
               key={planet}
-              href={`/grimoire/houses/${planet}/1`}
+              href={`/grimoire/houses/${planet}`}
               className='p-4 rounded-lg border border-zinc-800 bg-zinc-900/50 hover:border-lunary-primary-600 transition-all text-center group'
             >
               <div className='font-medium group-hover:text-lunary-primary-300 transition-colors'>
