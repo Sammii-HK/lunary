@@ -42,12 +42,6 @@ export async function GET(request: NextRequest) {
       });
     }
 
-    // Helper to convert array to PostgreSQL text array literal
-    const toTextArrayLiteral = (values: string[]): string | null => {
-      if (values.length === 0) return null;
-      return `{${values.map((v) => `"${String(v).replace(/\\/g, '\\\\').replace(/"/g, '\\"')}"`).join(',')}}`;
-    };
-
     // Check which users activated within 24h
     let activatedCount = 0;
     const activationBreakdown: Record<string, number> = {};
@@ -55,7 +49,6 @@ export async function GET(request: NextRequest) {
       string,
       { free: number; paid: number; unknown: number }
     > = {};
-    const activationEventsArray = toTextArrayLiteral(ACTIVATION_EVENTS)!;
 
     for (const signup of signups) {
       const signupAt = new Date(signup.signup_at);
@@ -64,15 +57,23 @@ export async function GET(request: NextRequest) {
       );
 
       // Check if user completed any activation event within 24h
-      const activatedResult = await sql`
-        SELECT event_type, plan_type
-        FROM conversion_events
-        WHERE user_id = ${signup.user_id}
-          AND event_type = ANY(SELECT unnest(${activationEventsArray}::text[]))
-          AND created_at >= ${formatTimestamp(signupAt)}
-          AND created_at <= ${formatTimestamp(activationDeadline)}
-        GROUP BY event_type, plan_type
-      `;
+      const activatedResult = await sql.query(
+        `
+          SELECT event_type, plan_type
+          FROM conversion_events
+          WHERE user_id = $1
+            AND event_type = ANY($2::text[])
+            AND created_at >= $3
+            AND created_at <= $4
+          GROUP BY event_type, plan_type
+        `,
+        [
+          String(signup.user_id),
+          ACTIVATION_EVENTS,
+          formatTimestamp(signupAt),
+          formatTimestamp(activationDeadline),
+        ],
+      );
 
       if (activatedResult.rows.length > 0) {
         activatedCount++;
@@ -112,43 +113,52 @@ export async function GET(request: NextRequest) {
       signups.length > 0 ? (activatedCount / signups.length) * 100 : 0;
 
     // Calculate daily breakdown for trends
-    const dailyBreakdown = await sql`
-      WITH signups_by_day AS (
-        SELECT 
-          DATE("createdAt") as date,
-          COUNT(*) as signups
-        FROM "user"
-        WHERE "createdAt" >= ${formatTimestamp(range.start)}
-          AND "createdAt" <= ${formatTimestamp(range.end)}
-          AND (email IS NULL OR (email NOT LIKE ${TEST_EMAIL_PATTERN} AND email != ${TEST_EMAIL_EXACT}))
-        GROUP BY DATE("createdAt")
-      ),
-      activated_by_day AS (
-        SELECT 
-          DATE(u."createdAt") as date,
-          COUNT(DISTINCT ce.user_id) as activated
-        FROM "user" u
-        INNER JOIN conversion_events ce ON ce.user_id = u.id
-        WHERE u."createdAt" >= ${formatTimestamp(range.start)}
-          AND u."createdAt" <= ${formatTimestamp(range.end)}
-          AND (u.email IS NULL OR (u.email NOT LIKE ${TEST_EMAIL_PATTERN} AND u.email != ${TEST_EMAIL_EXACT}))
-          AND ce.event_type = ANY(SELECT unnest(${activationEventsArray}::text[]))
-          AND ce.created_at >= u."createdAt"
-          AND ce.created_at <= u."createdAt" + INTERVAL '24 hours'
-        GROUP BY DATE(u."createdAt")
-      )
-      SELECT 
-        s.date,
-        s.signups,
-        COALESCE(a.activated, 0) as activated,
-        CASE 
-          WHEN s.signups > 0 THEN (COALESCE(a.activated, 0)::numeric / s.signups * 100)
-          ELSE 0
-        END as rate
-      FROM signups_by_day s
-      LEFT JOIN activated_by_day a ON s.date = a.date
-      ORDER BY s.date ASC
-    `;
+    const dailyBreakdown = await sql.query(
+      `
+        WITH signups_by_day AS (
+          SELECT
+            DATE("createdAt") as date,
+            COUNT(*) as signups
+          FROM "user"
+          WHERE "createdAt" >= $1
+            AND "createdAt" <= $2
+            AND (email IS NULL OR (email NOT LIKE $3 AND email != $4))
+          GROUP BY DATE("createdAt")
+        ),
+        activated_by_day AS (
+          SELECT
+            DATE(u."createdAt") as date,
+            COUNT(DISTINCT ce.user_id) as activated
+          FROM "user" u
+          INNER JOIN conversion_events ce ON ce.user_id = u.id
+          WHERE u."createdAt" >= $1
+            AND u."createdAt" <= $2
+            AND (u.email IS NULL OR (u.email NOT LIKE $3 AND u.email != $4))
+            AND ce.event_type = ANY($5::text[])
+            AND ce.created_at >= u."createdAt"
+            AND ce.created_at <= u."createdAt" + INTERVAL '24 hours'
+          GROUP BY DATE(u."createdAt")
+        )
+        SELECT
+          s.date,
+          s.signups,
+          COALESCE(a.activated, 0) as activated,
+          CASE
+            WHEN s.signups > 0 THEN (COALESCE(a.activated, 0)::numeric / s.signups * 100)
+            ELSE 0
+          END as rate
+        FROM signups_by_day s
+        LEFT JOIN activated_by_day a ON s.date = a.date
+        ORDER BY s.date ASC
+      `,
+      [
+        formatTimestamp(range.start),
+        formatTimestamp(range.end),
+        TEST_EMAIL_PATTERN,
+        TEST_EMAIL_EXACT,
+        ACTIVATION_EVENTS,
+      ],
+    );
 
     const trends = dailyBreakdown.rows.map((row) => ({
       date: row.date,

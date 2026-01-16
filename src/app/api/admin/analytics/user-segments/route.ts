@@ -33,63 +33,64 @@ export async function GET(request: NextRequest) {
       .filter(Boolean);
     const freeUserIds = allUserIds.filter((id) => !paidUserIds.includes(id));
 
-    // Helper to convert array to PostgreSQL text array literal
-    const toTextArrayLiteral = (values: string[]): string | null => {
-      if (values.length === 0) return null;
-      return `{${values.map((v) => `"${String(v).replace(/\\/g, '\\\\').replace(/"/g, '\\"')}"`).join(',')}}`;
-    };
-
-    const paidUserIdsArray = toTextArrayLiteral(paidUserIds);
-    const freeUserIdsArray = toTextArrayLiteral(freeUserIds);
-
     // Get engagement metrics for paid users
     const paidEngagementResult =
-      paidUserIds.length > 0 && paidUserIdsArray
-        ? await sql`
-          SELECT 
-            COUNT(DISTINCT user_id) as dau,
-            COUNT(DISTINCT DATE(created_at)) as active_days,
-            COUNT(*) as total_events
-          FROM conversion_events
-          WHERE user_id IN (
-            SELECT unnest(${paidUserIdsArray}::text[])
+      paidUserIds.length > 0
+        ? await sql.query(
+            `
+            SELECT
+              COUNT(DISTINCT user_id) as dau,
+              COUNT(DISTINCT DATE(created_at)) as active_days,
+              COUNT(*) as total_events
+            FROM conversion_events
+            WHERE user_id = ANY($1::text[])
+              AND created_at >= $2
+              AND created_at <= $3
+              AND event_type IN (
+                'horoscope_viewed',
+                'tarot_viewed',
+                'birth_chart_viewed',
+                'personalized_tarot_viewed',
+                'personalized_horoscope_viewed',
+                'crystal_recommendations_viewed'
+              )
+          `,
+            [
+              paidUserIds.map(String),
+              formatTimestamp(range.start),
+              formatTimestamp(range.end),
+            ],
           )
-            AND created_at >= ${formatTimestamp(range.start)}
-            AND created_at <= ${formatTimestamp(range.end)}
-            AND event_type IN (
-              'horoscope_viewed',
-              'tarot_viewed',
-              'birth_chart_viewed',
-              'personalized_tarot_viewed',
-              'personalized_horoscope_viewed',
-              'crystal_recommendations_viewed'
-            )
-        `
         : { rows: [{ dau: 0, active_days: 0, total_events: 0 }] };
 
     // Get engagement metrics for free users
     const freeEngagementResult =
-      freeUserIds.length > 0 && freeUserIdsArray
-        ? await sql`
-          SELECT 
-            COUNT(DISTINCT user_id) as dau,
-            COUNT(DISTINCT DATE(created_at)) as active_days,
-            COUNT(*) as total_events
-          FROM conversion_events
-          WHERE user_id IN (
-            SELECT unnest(${freeUserIdsArray}::text[])
+      freeUserIds.length > 0
+        ? await sql.query(
+            `
+            SELECT
+              COUNT(DISTINCT user_id) as dau,
+              COUNT(DISTINCT DATE(created_at)) as active_days,
+              COUNT(*) as total_events
+            FROM conversion_events
+            WHERE user_id = ANY($1::text[])
+              AND created_at >= $2
+              AND created_at <= $3
+              AND event_type IN (
+                'horoscope_viewed',
+                'tarot_viewed',
+                'birth_chart_viewed',
+                'personalized_tarot_viewed',
+                'personalized_horoscope_viewed',
+                'crystal_recommendations_viewed'
+              )
+          `,
+            [
+              freeUserIds.map(String),
+              formatTimestamp(range.start),
+              formatTimestamp(range.end),
+            ],
           )
-            AND created_at >= ${formatTimestamp(range.start)}
-            AND created_at <= ${formatTimestamp(range.end)}
-            AND event_type IN (
-              'horoscope_viewed',
-              'tarot_viewed',
-              'birth_chart_viewed',
-              'personalized_tarot_viewed',
-              'personalized_horoscope_viewed',
-              'crystal_recommendations_viewed'
-            )
-        `
         : { rows: [{ dau: 0, active_days: 0, total_events: 0 }] };
 
     const paidActiveUsers =
@@ -125,55 +126,65 @@ export async function GET(request: NextRequest) {
 
     // Get feature usage by segment
     const paidFeatureUsageResult =
-      paidUserIds.length > 0 && paidUserIdsArray
-        ? await sql`
-          SELECT 
-            event_type as feature,
-            COUNT(*) as count,
-            COUNT(DISTINCT user_id) as unique_users
-          FROM conversion_events
-          WHERE user_id IN (
-            SELECT unnest(${paidUserIdsArray}::text[])
+      paidUserIds.length > 0
+        ? await sql.query(
+            `
+            SELECT
+              event_type as feature,
+              COUNT(*) as count,
+              COUNT(DISTINCT user_id) as unique_users
+            FROM conversion_events
+            WHERE user_id = ANY($1::text[])
+              AND created_at >= $2
+              AND created_at <= $3
+              AND event_type IN (
+                'tarot_viewed',
+                'birth_chart_viewed',
+                'horoscope_viewed',
+                'personalized_tarot_viewed',
+                'personalized_horoscope_viewed',
+                'crystal_recommendations_viewed'
+              )
+            GROUP BY event_type
+            ORDER BY count DESC
+          `,
+            [
+              paidUserIds.map(String),
+              formatTimestamp(range.start),
+              formatTimestamp(range.end),
+            ],
           )
-            AND created_at >= ${formatTimestamp(range.start)}
-            AND created_at <= ${formatTimestamp(range.end)}
-            AND event_type IN (
-              'tarot_viewed',
-              'birth_chart_viewed',
-              'horoscope_viewed',
-              'personalized_tarot_viewed',
-              'personalized_horoscope_viewed',
-              'crystal_recommendations_viewed'
-            )
-          GROUP BY event_type
-          ORDER BY count DESC
-        `
         : { rows: [] };
 
     const freeFeatureUsageResult =
-      freeUserIds.length > 0 && freeUserIdsArray
-        ? await sql`
-          SELECT 
-            event_type as feature,
-            COUNT(*) as count,
-            COUNT(DISTINCT user_id) as unique_users
-          FROM conversion_events
-          WHERE user_id IN (
-            SELECT unnest(${freeUserIdsArray}::text[])
+      freeUserIds.length > 0
+        ? await sql.query(
+            `
+            SELECT
+              event_type as feature,
+              COUNT(*) as count,
+              COUNT(DISTINCT user_id) as unique_users
+            FROM conversion_events
+            WHERE user_id = ANY($1::text[])
+              AND created_at >= $2
+              AND created_at <= $3
+              AND event_type IN (
+                'tarot_viewed',
+                'birth_chart_viewed',
+                'horoscope_viewed',
+                'personalized_tarot_viewed',
+                'personalized_horoscope_viewed',
+                'crystal_recommendations_viewed'
+              )
+            GROUP BY event_type
+            ORDER BY count DESC
+          `,
+            [
+              freeUserIds.map(String),
+              formatTimestamp(range.start),
+              formatTimestamp(range.end),
+            ],
           )
-            AND created_at >= ${formatTimestamp(range.start)}
-            AND created_at <= ${formatTimestamp(range.end)}
-            AND event_type IN (
-              'tarot_viewed',
-              'birth_chart_viewed',
-              'horoscope_viewed',
-              'personalized_tarot_viewed',
-              'personalized_horoscope_viewed',
-              'crystal_recommendations_viewed'
-            )
-          GROUP BY event_type
-          ORDER BY count DESC
-        `
         : { rows: [] };
 
     const engagementEvents = [
@@ -184,7 +195,6 @@ export async function GET(request: NextRequest) {
       'personalized_horoscope_viewed',
       'crystal_recommendations_viewed',
     ];
-    const eventsArray = toTextArrayLiteral(engagementEvents)!;
     const last7Start = new Date(range.end);
     last7Start.setDate(last7Start.getDate() - 6);
     const last30Start = new Date(range.end);
@@ -192,45 +202,77 @@ export async function GET(request: NextRequest) {
 
     const [paidWauResult, paidMauResult, freeWauResult, freeMauResult] =
       await Promise.all([
-        paidUserIds.length > 0 && paidUserIdsArray
-          ? sql`
-            SELECT COUNT(DISTINCT user_id) as count
-            FROM conversion_events
-            WHERE user_id IN (SELECT unnest(${paidUserIdsArray}::text[]))
-              AND event_type = ANY(SELECT unnest(${eventsArray}::text[]))
-              AND created_at >= ${formatTimestamp(last7Start)}
-              AND created_at <= ${formatTimestamp(range.end)}
-          `
+        paidUserIds.length > 0
+          ? sql.query(
+              `
+              SELECT COUNT(DISTINCT user_id) as count
+              FROM conversion_events
+              WHERE user_id = ANY($1::text[])
+                AND event_type = ANY($2::text[])
+                AND created_at >= $3
+                AND created_at <= $4
+            `,
+              [
+                paidUserIds.map(String),
+                engagementEvents,
+                formatTimestamp(last7Start),
+                formatTimestamp(range.end),
+              ],
+            )
           : { rows: [{ count: 0 }] },
-        paidUserIds.length > 0 && paidUserIdsArray
-          ? sql`
-            SELECT COUNT(DISTINCT user_id) as count
-            FROM conversion_events
-            WHERE user_id IN (SELECT unnest(${paidUserIdsArray}::text[]))
-              AND event_type = ANY(SELECT unnest(${eventsArray}::text[]))
-              AND created_at >= ${formatTimestamp(last30Start)}
-              AND created_at <= ${formatTimestamp(range.end)}
-          `
+        paidUserIds.length > 0
+          ? sql.query(
+              `
+              SELECT COUNT(DISTINCT user_id) as count
+              FROM conversion_events
+              WHERE user_id = ANY($1::text[])
+                AND event_type = ANY($2::text[])
+                AND created_at >= $3
+                AND created_at <= $4
+            `,
+              [
+                paidUserIds.map(String),
+                engagementEvents,
+                formatTimestamp(last30Start),
+                formatTimestamp(range.end),
+              ],
+            )
           : { rows: [{ count: 0 }] },
-        freeUserIds.length > 0 && freeUserIdsArray
-          ? sql`
-            SELECT COUNT(DISTINCT user_id) as count
-            FROM conversion_events
-            WHERE user_id IN (SELECT unnest(${freeUserIdsArray}::text[]))
-              AND event_type = ANY(SELECT unnest(${eventsArray}::text[]))
-              AND created_at >= ${formatTimestamp(last7Start)}
-              AND created_at <= ${formatTimestamp(range.end)}
-          `
+        freeUserIds.length > 0
+          ? sql.query(
+              `
+              SELECT COUNT(DISTINCT user_id) as count
+              FROM conversion_events
+              WHERE user_id = ANY($1::text[])
+                AND event_type = ANY($2::text[])
+                AND created_at >= $3
+                AND created_at <= $4
+            `,
+              [
+                freeUserIds.map(String),
+                engagementEvents,
+                formatTimestamp(last7Start),
+                formatTimestamp(range.end),
+              ],
+            )
           : { rows: [{ count: 0 }] },
-        freeUserIds.length > 0 && freeUserIdsArray
-          ? sql`
-            SELECT COUNT(DISTINCT user_id) as count
-            FROM conversion_events
-            WHERE user_id IN (SELECT unnest(${freeUserIdsArray}::text[]))
-              AND event_type = ANY(SELECT unnest(${eventsArray}::text[]))
-              AND created_at >= ${formatTimestamp(last30Start)}
-              AND created_at <= ${formatTimestamp(range.end)}
-          `
+        freeUserIds.length > 0
+          ? sql.query(
+              `
+              SELECT COUNT(DISTINCT user_id) as count
+              FROM conversion_events
+              WHERE user_id = ANY($1::text[])
+                AND event_type = ANY($2::text[])
+                AND created_at >= $3
+                AND created_at <= $4
+            `,
+              [
+                freeUserIds.map(String),
+                engagementEvents,
+                formatTimestamp(last30Start),
+                formatTimestamp(range.end),
+              ],
+            )
           : { rows: [{ count: 0 }] },
       ]);
 

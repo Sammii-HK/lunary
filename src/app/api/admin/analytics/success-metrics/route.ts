@@ -44,8 +44,6 @@ export async function GET(request: NextRequest) {
     let weeklyReturningTrend: 'up' | 'down' | 'stable' = 'stable';
     let weeklyReturningChange = 0;
 
-    const activityEventsArray = `{${PRODUCT_INTERACTION_EVENTS.map((e) => `"${e}"`).join(',')}}`;
-
     const currentDayStart = new Date(range.end);
     currentDayStart.setUTCDate(currentDayStart.getUTCDate() - 1);
     const currentWeekStart = new Date(range.end);
@@ -58,38 +56,74 @@ export async function GET(request: NextRequest) {
 
     const [currentDauResult, currentWauResult, prevDauResult, prevWauResult] =
       await Promise.all([
-        sql`
-        SELECT COUNT(DISTINCT user_id) AS count
-        FROM conversion_events
-        WHERE event_type = ANY(SELECT unnest(${activityEventsArray}::text[]))
-          AND created_at >= ${formatTimestamp(currentDayStart)}
-          AND created_at <= ${formatTimestamp(range.end)}
-          AND (user_email IS NULL OR (user_email NOT LIKE ${TEST_EMAIL_PATTERN} AND user_email != ${TEST_EMAIL_EXACT}))
-      `,
-        sql`
-        SELECT COUNT(DISTINCT user_id) AS count
-        FROM conversion_events
-        WHERE event_type = ANY(SELECT unnest(${activityEventsArray}::text[]))
-          AND created_at >= ${formatTimestamp(currentWeekStart)}
-          AND created_at <= ${formatTimestamp(range.end)}
-          AND (user_email IS NULL OR (user_email NOT LIKE ${TEST_EMAIL_PATTERN} AND user_email != ${TEST_EMAIL_EXACT}))
-      `,
-        sql`
-        SELECT COUNT(DISTINCT user_id) AS count
-        FROM conversion_events
-        WHERE event_type = ANY(SELECT unnest(${activityEventsArray}::text[]))
-          AND created_at >= ${formatTimestamp(prevDayStart)}
-          AND created_at <= ${formatTimestamp(prevRangeEnd)}
-          AND (user_email IS NULL OR (user_email NOT LIKE ${TEST_EMAIL_PATTERN} AND user_email != ${TEST_EMAIL_EXACT}))
-      `,
-        sql`
-        SELECT COUNT(DISTINCT user_id) AS count
-        FROM conversion_events
-        WHERE event_type = ANY(SELECT unnest(${activityEventsArray}::text[]))
-          AND created_at >= ${formatTimestamp(prevWeekStart)}
-          AND created_at <= ${formatTimestamp(prevRangeEnd)}
-          AND (user_email IS NULL OR (user_email NOT LIKE ${TEST_EMAIL_PATTERN} AND user_email != ${TEST_EMAIL_EXACT}))
-      `,
+        sql.query(
+          `
+            SELECT COUNT(DISTINCT user_id) AS count
+            FROM conversion_events
+            WHERE event_type = ANY($1::text[])
+              AND created_at >= $2
+              AND created_at <= $3
+              AND (user_email IS NULL OR (user_email NOT LIKE $4 AND user_email != $5))
+          `,
+          [
+            PRODUCT_INTERACTION_EVENTS,
+            formatTimestamp(currentDayStart),
+            formatTimestamp(range.end),
+            TEST_EMAIL_PATTERN,
+            TEST_EMAIL_EXACT,
+          ],
+        ),
+        sql.query(
+          `
+            SELECT COUNT(DISTINCT user_id) AS count
+            FROM conversion_events
+            WHERE event_type = ANY($1::text[])
+              AND created_at >= $2
+              AND created_at <= $3
+              AND (user_email IS NULL OR (user_email NOT LIKE $4 AND user_email != $5))
+          `,
+          [
+            PRODUCT_INTERACTION_EVENTS,
+            formatTimestamp(currentWeekStart),
+            formatTimestamp(range.end),
+            TEST_EMAIL_PATTERN,
+            TEST_EMAIL_EXACT,
+          ],
+        ),
+        sql.query(
+          `
+            SELECT COUNT(DISTINCT user_id) AS count
+            FROM conversion_events
+            WHERE event_type = ANY($1::text[])
+              AND created_at >= $2
+              AND created_at <= $3
+              AND (user_email IS NULL OR (user_email NOT LIKE $4 AND user_email != $5))
+          `,
+          [
+            PRODUCT_INTERACTION_EVENTS,
+            formatTimestamp(prevDayStart),
+            formatTimestamp(prevRangeEnd),
+            TEST_EMAIL_PATTERN,
+            TEST_EMAIL_EXACT,
+          ],
+        ),
+        sql.query(
+          `
+            SELECT COUNT(DISTINCT user_id) AS count
+            FROM conversion_events
+            WHERE event_type = ANY($1::text[])
+              AND created_at >= $2
+              AND created_at <= $3
+              AND (user_email IS NULL OR (user_email NOT LIKE $4 AND user_email != $5))
+          `,
+          [
+            PRODUCT_INTERACTION_EVENTS,
+            formatTimestamp(prevWeekStart),
+            formatTimestamp(prevRangeEnd),
+            TEST_EMAIL_PATTERN,
+            TEST_EMAIL_EXACT,
+          ],
+        ),
       ]);
 
     dau = Number(currentDauResult.rows[0]?.count || 0);
