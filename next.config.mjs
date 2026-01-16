@@ -466,11 +466,6 @@ const nextConfig = {
         destination: '/grimoire/moon',
         permanent: true,
       },
-      {
-        source: '/book-of-shadows',
-        destination: '/grimoire/book-of-shadows',
-        permanent: true,
-      },
       // ========================================
       // GRIMOIRE CONSOLIDATION REDIRECTS
       // Phase 1: Deleted duplicate index pages
