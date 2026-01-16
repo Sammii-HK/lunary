@@ -86,6 +86,7 @@ export interface SEOContentTemplateProps {
 
   // Rich content
   tables?: Array<{ title: string; headers: string[]; rows: string[][] }>;
+  tableHidden?: boolean;
   diagrams?: string;
   glyphs?: string[];
   examplePlacements?: string[];
@@ -162,6 +163,7 @@ export function SEOContentTemplate({
   tables,
   diagrams,
   glyphs,
+  tableHidden = false,
   examplePlacements,
   faqs,
   tableOfContents,
@@ -514,7 +516,7 @@ export function SEOContentTemplate({
             <section
               key={tableIndex}
               id={tableIndex === 0 ? 'practices-overview' : undefined}
-              className='overflow-x-hidden'
+              className={`overflow-x-hidden ${tableHidden ? 'hidden' : ''}`}
             >
               <Heading as='h2' variant='h2' className='capitalize'>
                 {table.title}

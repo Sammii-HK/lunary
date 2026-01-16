@@ -1,7 +1,9 @@
 import Link from 'next/link';
 import { Calendar, ArrowRight } from 'lucide-react';
 import { SEOContentTemplate } from '@/components/grimoire/SEOContentTemplate';
+import { CosmicConnections } from '@/components/grimoire/CosmicConnections';
 import { createItemListSchema } from '@/lib/schema';
+import { getCosmicConnections } from '@/lib/cosmicConnectionsConfig';
 
 export const revalidate = 86400;
 
@@ -40,6 +42,20 @@ const otherYears = [2025, 2027, 2028, 2029, 2030];
 export default function EventsIndexPage() {
   const currentYear = new Date().getFullYear();
   const nextYear = currentYear + 1;
+  const hubSections = getCosmicConnections('hub-events', 'events');
+  const yearLinks = Array.from(new Set([currentYear, ...otherYears]).values())
+    .sort()
+    .map((year) => ({
+      label: `${year} Astrology Events`,
+      href: `/grimoire/events/${year}`,
+    }));
+  const cosmicSections = [
+    ...hubSections,
+    {
+      title: 'Yearly Archives',
+      links: yearLinks,
+    },
+  ];
   const eventsListSchema = createItemListSchema({
     name: 'Astrology Events Calendar',
     description:
@@ -118,20 +134,14 @@ export default function EventsIndexPage() {
             "Compare the event's zodiac sign and degree to your birth chart. Events in your Sun, Moon, or Rising sign, or aspecting personal planets, will be more noticeable. Get your birth chart to see your specific placements.",
         },
       ]}
-      relatedItems={[
-        {
-          name: 'Retrogrades',
-          href: '/grimoire/astronomy/retrogrades',
-          type: 'topic',
-        },
-        { name: 'Eclipses', href: '/grimoire/eclipses', type: 'topic' },
-        { name: 'Transits', href: '/grimoire/transits', type: 'topic' },
-        {
-          name: 'Moon Rituals',
-          href: '/grimoire/moon/rituals',
-          type: 'guide',
-        },
-      ]}
+      cosmicConnections={
+        <CosmicConnections
+          entityType='hub-events'
+          entityKey='events'
+          title='Event Connections'
+          sections={cosmicSections}
+        />
+      }
     >
       <div className='space-y-8'>
         <Link
@@ -195,7 +205,7 @@ export default function EventsIndexPage() {
           </Link>
 
           <Link
-            href='/grimoire/moon/full-moons'
+            href={`/grimoire/moon/${currentYear}`}
             className='group p-4 rounded-lg border border-lunary-secondary-700 bg-lunary-secondary-950 hover:bg-lunary-secondary-900 transition-colors'
           >
             <h3 className='font-medium text-zinc-100 group-hover:text-lunary-secondary-300 mb-1'>
