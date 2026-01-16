@@ -544,3 +544,9 @@ export function getTransitsForYear(year: number): YearlyTransit[] {
 export function generateAllTransitParams(): { transit: string }[] {
   return YEARLY_TRANSITS.map((t) => ({ transit: t.id }));
 }
+
+export function generateTransitYears(): number[] {
+  return Array.from(new Set(YEARLY_TRANSITS.map((t) => t.year))).sort(
+    (a, b) => a - b,
+  );
+}

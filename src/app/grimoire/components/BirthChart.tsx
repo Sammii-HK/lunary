@@ -181,7 +181,7 @@ const BirthChart = () => {
     <div className='space-y-8'>
       <div className='mb-6'>
         <h2 className='text-2xl md:text-3xl font-light text-zinc-100 mb-2'>
-          Complete Birth Chart Guide
+          Birth Chart Guide
         </h2>
         <p className='text-sm text-zinc-400'>
           Learn about planets, houses, aspects, retrogrades, and astrological
@@ -859,39 +859,6 @@ const BirthChart = () => {
           </p>
         </div>
       </div>
-
-      {/* Related Topics Section */}
-      <section className='mt-12 pt-8 border-t border-zinc-800/50'>
-        <h2 className='text-xl font-medium text-zinc-100 mb-4'>
-          Related Topics
-        </h2>
-        <div className='grid grid-cols-1 md:grid-cols-2 gap-3'>
-          <Link
-            href='/grimoire/moon'
-            className='block rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-3 hover:border-lunary-primary-700 hover:bg-zinc-900/50 transition-all text-sm text-zinc-300 hover:text-lunary-primary-300'
-          >
-            Moon Phases & Influences
-          </Link>
-          <Link
-            href='/grimoire/astronomy'
-            className='block rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-3 hover:border-lunary-primary-700 hover:bg-zinc-900/50 transition-all text-sm text-zinc-300 hover:text-lunary-primary-300'
-          >
-            Astronomy & Zodiac
-          </Link>
-          <Link
-            href='/grimoire/tarot'
-            className='block rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-3 hover:border-lunary-primary-700 hover:bg-zinc-900/50 transition-all text-sm text-zinc-300 hover:text-lunary-primary-300'
-          >
-            Tarot Readings
-          </Link>
-          <Link
-            href='/grimoire/astronomy/planets'
-            className='block rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-3 hover:border-lunary-primary-700 hover:bg-zinc-900/50 transition-all text-sm text-zinc-300 hover:text-lunary-primary-300'
-          >
-            Planetary Correspondences
-          </Link>
-        </div>
-      </section>
     </div>
   );
 };

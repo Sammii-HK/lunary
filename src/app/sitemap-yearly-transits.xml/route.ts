@@ -1,4 +1,7 @@
-import { generateAllTransitParams } from '@/constants/seo/yearly-transits';
+import {
+  generateAllTransitParams,
+  generateTransitYears,
+} from '@/constants/seo/yearly-transits';
 
 export async function GET(): Promise<Response> {
   const baseUrl = 'https://lunary.app';
@@ -13,6 +16,12 @@ export async function GET(): Promise<Response> {
     },
     ...transits.map((t) => ({
       loc: `${baseUrl}/grimoire/transits/${t.transit}`,
+      lastmod: new Date().toISOString().split('T')[0],
+      changefreq: 'yearly',
+      priority: '0.7',
+    })),
+    ...generateTransitYears().map((year) => ({
+      loc: `${baseUrl}/grimoire/transits/year/${year}`,
       lastmod: new Date().toISOString().split('T')[0],
       changefreq: 'yearly',
       priority: '0.7',

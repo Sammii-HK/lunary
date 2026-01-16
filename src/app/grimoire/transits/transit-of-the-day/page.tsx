@@ -76,7 +76,7 @@ export default async function TransitOfTheDayPage() {
     });
 
   return (
-    <div className='min-h-screen bg-zinc-950 text-zinc-100'>
+    <div className='min-h-fit bg-zinc-950 text-zinc-100'>
       <div className='max-w-4xl mx-auto px-4 py-12'>
         <SEOContentTemplate
           title='Transit of the Day | Daily Astrology Timing'

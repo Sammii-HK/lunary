@@ -7,6 +7,7 @@ import {
 import { CosmicConnections } from '@/components/grimoire/CosmicConnections';
 import { createItemListSchema } from '@/lib/schema';
 import { SEOContentTemplate } from '@/components/grimoire/SEOContentTemplate';
+import { getCosmicConnections } from '@/lib/cosmicConnectionsConfig';
 
 export const metadata: Metadata = {
   title: 'Astrological Transits: Meaning, How To Read Them, Timing | Lunary',
@@ -58,6 +59,16 @@ export const metadata: Metadata = {
 const currentYear = new Date().getFullYear();
 const transitYears = YEARLY_TRANSITS.map((transit) => transit.year);
 const years = [...new Set(transitYears)].sort((a, b) => a - b);
+const cosmicSections = [
+  ...getCosmicConnections('hub-transits', 'transits'),
+  {
+    title: 'Transit Years',
+    links: years.map((year) => ({
+      label: `${year} Transits`,
+      href: `/grimoire/transits/year/${year}`,
+    })),
+  },
+];
 
 const mostSearchedTransits = [
   {
@@ -122,6 +133,7 @@ const SATURN_CYCLE_STEPS = [
 ];
 
 export default function TransitsIndexPage() {
+  const currentYear = new Date().getFullYear();
   const transitsListSchema = createItemListSchema({
     name: 'Astrological transits meaning & timing',
     description:
@@ -157,205 +169,166 @@ export default function TransitsIndexPage() {
   ];
 
   return (
-    <div className='min-h-screen bg-zinc-950 text-zinc-100'>
-      <SEOContentTemplate
-        title='Transits Meaning, How to Read Transits & Transit of the Day'
-        h1='Transits Meaning, How to Read Transits & Transit of the Day'
-        description='Transits meaning, how to read transits, and the transit of the day—learn how planetary timing shapes your life and where to start.'
-        keywords={[
-          'astrological transits',
-          'transit meaning',
-          'how to read transits',
-          'transit timing',
-          'planetary transits',
-          'saturn return meaning',
-        ]}
-        canonicalUrl='https://lunary.app/grimoire/transits'
-        additionalSchemas={[transitsListSchema]}
-        faqs={faqs}
-        intro='Transits are the moving planets making angles to your natal placements. This hub catalogues their influence, timing, and practical meaning. Transits gain meaning through relationship, not isolation.'
-        breadcrumbs={[
-          { label: 'Grimoire', href: '/grimoire' },
-          { label: 'Transits', href: '/grimoire/transits' },
-        ]}
-        relatedItems={[
-          {
-            name: `${currentYear} Astrological Events`,
-            href: `/grimoire/events/${currentYear}`,
-            type: 'topic',
-          },
-          {
-            name: `${currentYear} Eclipses`,
-            href: `/grimoire/events/${currentYear}/eclipses`,
-            type: 'topic',
-          },
-          {
-            name: `${currentYear} Mercury Retrograde`,
-            href: `/grimoire/events/${currentYear}/mercury-retrograde`,
-            type: 'topic',
-          },
-          {
-            name: `${currentYear} Venus Retrograde`,
-            href: `/grimoire/events/${currentYear}/venus-retrograde`,
-            type: 'topic',
-          },
-          {
-            name: 'Transit of the Day',
-            href: '/grimoire/transits/transit-of-the-day',
-            type: 'topic',
-          },
-          {
-            name: `${currentYear} Moon Phases`,
-            href: `/grimoire/moon/${currentYear}`,
-            type: 'topic',
-          },
-        ]}
-        meaning={`
+    <SEOContentTemplate
+      title='Transits Meaning, How to Read Transits & Transit of the Day'
+      h1='Transits Meaning, How to Read Transits & Transit of the Day'
+      description='Transits meaning, how to read transits, and the transit of the day—learn how planetary timing shapes your life and where to start.'
+      keywords={[
+        'astrological transits',
+        'transit meaning',
+        'how to read transits',
+        'transit timing',
+        'planetary transits',
+        'saturn return meaning',
+      ]}
+      canonicalUrl='https://lunary.app/grimoire/transits'
+      additionalSchemas={[transitsListSchema]}
+      faqs={faqs}
+      intro='Transits are the moving planets making angles to your natal placements. This hub catalogues their influence, timing, and practical meaning. Transits gain meaning through relationship, not isolation.'
+      breadcrumbs={[
+        { label: 'Grimoire', href: '/grimoire' },
+        { label: 'Transits', href: '/grimoire/transits' },
+      ]}
+      meaning={`
             Each transit marks a planetary shift that gently reshapes the cosmic weather; observing it keeps you aligned with the sky rather than trying to force an outcome.
             We pair these notes with timing guidance so you can choose when to act and when to wait, depending on how your birth chart interacts with the current planetary dance.
           `}
-        cosmicConnections={
-          <CosmicConnections
-            entityType='hub-transits'
-            entityKey='transits'
-            title='Transits Connections'
-          />
-        }
-      >
-        <section className='mb-12 rounded-2xl border border-zinc-800 bg-zinc-900/50 p-6'>
-          <h2 className='text-2xl font-semibold text-zinc-100 mb-3'>
-            Start here
-          </h2>
-          <p className='text-sm text-zinc-400 mb-5'>
-            Use this quick guide to find the most relevant transit now, plus the
-            top resources for retrogrades and timing.
-          </p>
-          <div className='grid gap-3 md:grid-cols-3'>
-            <Link
-              href='/grimoire/transits/transit-of-the-day'
-              className='rounded-lg border border-zinc-800 bg-zinc-950/60 p-4 text-sm text-zinc-300 hover:border-lunary-primary-500 transition-colors'
-            >
-              <span className='block text-zinc-100 font-medium'>
-                Transit of the Day
-              </span>
-              <span className='text-zinc-400'>
-                Daily timing highlights and key shifts.
-              </span>
-            </Link>
-            <Link
-              href='/grimoire/astronomy/retrogrades'
-              className='rounded-lg border border-zinc-800 bg-zinc-950/60 p-4 text-sm text-zinc-300 hover:border-lunary-primary-500 transition-colors'
-            >
-              <span className='block text-zinc-100 font-medium'>
-                Retrogrades Calendar
-              </span>
-              <span className='text-zinc-400'>
-                Track Mercury, Venus, Mars, and outer planets.
-              </span>
-            </Link>
-            <Link
-              href={mostSearchedTransits[0]?.href ?? '/grimoire/transits'}
-              className='rounded-lg border border-zinc-800 bg-zinc-950/60 p-4 text-sm text-zinc-300 hover:border-lunary-primary-500 transition-colors'
-            >
-              <span className='block text-zinc-100 font-medium'>
-                Top Transit Right Now
-              </span>
-              <span className='text-zinc-400'>
-                Start with a high-intent transit overview.
-              </span>
-            </Link>
-          </div>
-        </section>
+      cosmicConnections={
+        <CosmicConnections
+          entityType='hub-transits'
+          entityKey='transits'
+          title='Transits Connections'
+          sections={cosmicSections}
+        />
+      }
+    >
+      <section className='mb-12 rounded-2xl border border-zinc-800 bg-zinc-900/50 p-6'>
+        <h2 className='text-2xl font-semibold text-zinc-100 mb-3'>
+          Start here
+        </h2>
+        <p className='text-sm text-zinc-400 mb-5'>
+          Use this quick guide to find the most relevant transit now, plus the
+          top resources for retrogrades and timing.
+        </p>
+        <div className='grid gap-3 md:grid-cols-3'>
+          <Link
+            href='/grimoire/transits/transit-of-the-day'
+            className='rounded-lg border border-zinc-800 bg-zinc-950/60 p-4 text-sm text-zinc-300 hover:border-lunary-primary-500 transition-colors'
+          >
+            <span className='block text-zinc-100 font-medium'>
+              Transit of the Day
+            </span>
+            <span className='text-zinc-400'>
+              Daily timing highlights and key shifts.
+            </span>
+          </Link>
+          <Link
+            href={`/grimoire/events/${currentYear}`}
+            className='rounded-lg border border-zinc-800 bg-zinc-950/60 p-4 text-sm text-zinc-300 hover:border-lunary-primary-500 transition-colors'
+          >
+            <span className='block text-zinc-100 font-medium'>
+              Current Astrological Events
+            </span>
+            <span className='text-zinc-400'>
+              Track retrogrades and eclipses.
+            </span>
+          </Link>
+          <Link
+            href={`/grimoire/moon/${currentYear}`}
+            className='rounded-lg border border-zinc-800 bg-zinc-950/60 p-4 text-sm text-zinc-300 hover:border-lunary-primary-500 transition-colors'
+          >
+            <span className='block text-zinc-100 font-medium'>
+              Lunar Phases & Full Moons Calender
+            </span>
+            <span className='text-zinc-400'>Track all new and full moons.</span>
+          </Link>
+        </div>
+      </section>
 
-        <section className='mb-12'>
-          <h2 className='text-2xl text-zinc-100 mb-4'>
-            Transit timing by year
-          </h2>
-          <div className='grid gap-4 grid-cols-4 md:grid-cols-8'>
-            {years.map((year) => (
-              <Link
-                key={year}
-                href={`/grimoire/transits#year-${year}-transits`}
-                className='p-2 rounded-lg border border-zinc-800 bg-zinc-900/40 text-sm text-center text-zinc-300 transition hover:border-lunary-primary-600'
+      <section className='mb-12'>
+        <h2 className='text-2xl text-zinc-100 mb-4'>Transit timing by year</h2>
+        <div className='grid gap-4 grid-cols-4 md:grid-cols-8'>
+          {years.map((year) => (
+            <Link
+              key={year}
+              href={`/grimoire/transits#year-${year}-transits`}
+              className='p-2 rounded-lg border border-zinc-800 bg-zinc-900/40 text-sm text-center text-zinc-300 transition hover:border-lunary-primary-600'
+            >
+              {year}
+            </Link>
+          ))}
+        </div>
+      </section>
+
+      <section className='mb-12'>
+        <h2 className='text-2xl text-zinc-100 mb-4'>Saturn cycle and timing</h2>
+        <div className='grid grid-cols-1 gap-4 md:grid-cols-2'>
+          {SATURN_CYCLE_STEPS.map((step) => (
+            <div
+              key={step.label}
+              className='rounded-2xl border border-zinc-800 bg-zinc-900/40 p-5 text-zinc-300'
+            >
+              <p className='text-xs uppercase tracking-[0.3em] text-zinc-500'>
+                {step.label}
+              </p>
+              <h3 className='text-lg my-1 font-light text-zinc-100'>
+                {step.years}
+              </h3>
+              <p className='text-sm text-zinc-500 my-2'>
+                Ages: {step.ages} · Birth years: {step.birthYears}
+              </p>
+              <p className='text-sm leading-relaxed'>{step.notes}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <section className='mb-12 grid gap-4'>
+        {years.map((year) => {
+          const yearTransits = getTransitsForYear(year);
+          if (yearTransits.length === 0) return null;
+          return (
+            <div key={year} id={`year-${year}`} className='space-y-4'>
+              <h2
+                id={`year-${year}-transits`}
+                className='text-xl font-semibold text-lunary-primary-300'
               >
-                {year}
-              </Link>
-            ))}
-          </div>
-        </section>
-
-        <section className='mb-12'>
-          <h2 className='text-2xl text-zinc-100 mb-4'>
-            Saturn cycle and timing
-          </h2>
-          <div className='grid grid-cols-1 gap-4 md:grid-cols-2'>
-            {SATURN_CYCLE_STEPS.map((step) => (
-              <div
-                key={step.label}
-                className='rounded-2xl border border-zinc-800 bg-zinc-900/40 p-5 text-zinc-300'
-              >
-                <p className='text-xs uppercase tracking-[0.3em] text-zinc-500'>
-                  {step.label}
-                </p>
-                <h3 className='text-lg my-1 font-light text-zinc-100'>
-                  {step.years}
-                </h3>
-                <p className='text-sm text-zinc-500 my-2'>
-                  Ages: {step.ages} · Birth years: {step.birthYears}
-                </p>
-                <p className='text-sm leading-relaxed'>{step.notes}</p>
+                {year} Transits
+              </h2>
+              <div className='grid gap-4 md:grid-cols-2'>
+                {yearTransits.map((transit) => (
+                  <Link
+                    key={transit.id}
+                    href={`/grimoire/transits/${transit.id}`}
+                    className='p-5 rounded-lg border border-zinc-800 bg-zinc-900/50 hover:border-lunary-primary-600 transition-all group'
+                  >
+                    <div className='text-sm text-zinc-400 mb-1'>
+                      {transit.dates}
+                    </div>
+                    <h3 className='text-lg font-medium mb-2 group-hover:text-lunary-primary-300 transition-colors'>
+                      {transit.title}
+                    </h3>
+                    <p className='text-sm text-zinc-400 line-clamp-2'>
+                      Quick snapshot of dates, standout signs, and practical
+                      steps so you know why to dive into this transit.
+                    </p>
+                    <div className='flex flex-wrap gap-1 mt-3'>
+                      {transit.signs.map((sign) => (
+                        <span
+                          key={sign}
+                          className='text-xs px-2 py-1 rounded bg-lunary-primary-900/20 text-lunary-primary-300'
+                        >
+                          {sign}
+                        </span>
+                      ))}
+                    </div>
+                  </Link>
+                ))}
               </div>
-            ))}
-          </div>
-        </section>
-
-        <section className='mb-12 grid gap-4'>
-          {years.map((year) => {
-            const yearTransits = getTransitsForYear(year);
-            if (yearTransits.length === 0) return null;
-            return (
-              <div key={year} id={`year-${year}`} className='space-y-4'>
-                <h2
-                  id={`year-${year}-transits`}
-                  className='text-xl font-semibold text-lunary-primary-300'
-                >
-                  {year} Transits
-                </h2>
-                <div className='grid gap-4 md:grid-cols-2'>
-                  {yearTransits.map((transit) => (
-                    <Link
-                      key={transit.id}
-                      href={`/grimoire/transits/${transit.id}`}
-                      className='p-5 rounded-lg border border-zinc-800 bg-zinc-900/50 hover:border-lunary-primary-600 transition-all group'
-                    >
-                      <div className='text-sm text-zinc-400 mb-1'>
-                        {transit.dates}
-                      </div>
-                      <h3 className='text-lg font-medium mb-2 group-hover:text-lunary-primary-300 transition-colors'>
-                        {transit.title}
-                      </h3>
-                      <p className='text-sm text-zinc-400 line-clamp-2'>
-                        Quick snapshot of dates, standout signs, and practical
-                        steps so you know why to dive into this transit.
-                      </p>
-                      <div className='flex flex-wrap gap-1 mt-3'>
-                        {transit.signs.map((sign) => (
-                          <span
-                            key={sign}
-                            className='text-xs px-2 py-1 rounded bg-lunary-primary-900/20 text-lunary-primary-300'
-                          >
-                            {sign}
-                          </span>
-                        ))}
-                      </div>
-                    </Link>
-                  ))}
-                </div>
-              </div>
-            );
-          })}
-        </section>
-      </SEOContentTemplate>
-    </div>
+            </div>
+          );
+        })}
+      </section>
+    </SEOContentTemplate>
   );
 }
