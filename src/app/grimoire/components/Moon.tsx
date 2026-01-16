@@ -9,7 +9,16 @@ import {
 } from '../../../../utils/moon/monthlyPhases';
 import { months } from '../../../../utils/months';
 import { stringToKebabCase } from '../../../../utils/string';
-import { Moon as MoonIcon, Sun, Sparkles, Calendar, Star } from 'lucide-react';
+import {
+  Moon as MoonIcon,
+  Sun,
+  Sparkles,
+  Calendar,
+  Star,
+  BookOpenIcon,
+  ArrowRight,
+} from 'lucide-react';
+import { Heading } from '@/components/ui/Heading';
 
 const MOON_SECTIONS = [
   {
@@ -57,9 +66,9 @@ const Moon = () => {
   return (
     <div className='space-y-8'>
       <div className='mb-6'>
-        <h2 className='text-2xl md:text-3xl font-light text-zinc-100 mb-2'>
-          Moon
-        </h2>
+        <Heading as='h2' variant='h2'>
+          Moon Guides & Resources
+        </Heading>
         <p className='text-sm text-zinc-400'>
           Explore moon phases, full moon names, lunar wisdom, and moon rituals
         </p>
@@ -72,16 +81,19 @@ const Moon = () => {
       >
         <div className='flex items-center justify-between'>
           <div>
-            <h3 className='text-lg font-medium text-lunary-primary-300 group-hover:text-lunary-primary-200 transition-colors'>
-              📖 Read the Complete Moon Phases Guide
-            </h3>
+            <Heading
+              as='h3'
+              variant='h4'
+              className='flex items-center gap-2 text-lunary-primary-300 group-hover:text-lunary-primary-200'
+            >
+              <BookOpenIcon className='w-4 h-4 mr-2 text-lunary-primary-300' />
+              Read the Complete Moon Phases Guide
+            </Heading>
             <p className='text-sm text-zinc-400'>
               Deep dive into lunar cycles, rituals, and working with moon energy
             </p>
           </div>
-          <span className='text-lunary-primary-400 group-hover:text-lunary-primary-300 transition-colors'>
-            →
-          </span>
+          <ArrowRight className='w-4 h-4 text-lunary-primary-400 group-hover:text-lunary-primary-300 transition-colors' />
         </div>
       </Link>
 
@@ -98,9 +110,13 @@ const Moon = () => {
                 {section.icon}
               </span>
               <div className='flex-1'>
-                <h3 className='text-lg font-medium text-zinc-100 group-hover:text-lunary-primary-300 transition-colors mb-1'>
+                <Heading
+                  as='h3'
+                  variant='h4'
+                  className='text-lunary-secondary-200 group-hover:text-lunary-secondary-300'
+                >
                   {section.title}
-                </h3>
+                </Heading>
                 <p className='text-sm text-zinc-400'>{section.description}</p>
               </div>
               <span className='text-zinc-600 group-hover:text-lunary-primary-400 transition-colors'>
@@ -113,7 +129,9 @@ const Moon = () => {
 
       {/* Moon Phases Quick Reference */}
       <section className='space-y-4'>
-        <h2 className='text-xl font-medium text-zinc-100'>All Moon Phases</h2>
+        <Heading as='h2' variant='h2'>
+          All Moon Phases
+        </Heading>
         <div className='grid grid-cols-2 md:grid-cols-4 gap-3'>
           {moonPhases.map((phase) => {
             const phaseSlug = stringToKebabCase(phase);
@@ -142,9 +160,9 @@ const Moon = () => {
 
       {/* Full Moon Names */}
       <section className='space-y-4'>
-        <h2 className='text-xl font-medium text-zinc-100'>
+        <Heading as='h2' variant='h2'>
           Full Moon Names by Month
-        </h2>
+        </Heading>
         <div className='grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3'>
           {fullMoonNames.map((moon, index) => {
             const monthSlug = months[index]?.toLowerCase() || 'january';
@@ -154,9 +172,13 @@ const Moon = () => {
                 href={`/grimoire/moon/full-moons/${monthSlug}`}
                 className='block rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-3 hover:bg-zinc-900/50 hover:border-lunary-primary-600 transition-all group'
               >
-                <h3 className='font-medium text-zinc-100 group-hover:text-lunary-primary-400 transition-colors'>
+                <Heading
+                  as='h3'
+                  variant='h4'
+                  className='text-zinc-100 group-hover:text-lunary-primary-400 mb-2'
+                >
                   {annualFullMoons[moon as keyof typeof annualFullMoons].name}
-                </h3>
+                </Heading>
                 <p className='text-xs text-zinc-400'>{months[index]}</p>
               </Link>
             );

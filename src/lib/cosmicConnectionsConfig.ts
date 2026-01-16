@@ -34,7 +34,8 @@ export type EntityType =
   | 'hub-placements'
   | 'hub-glossary'
   | 'archetype'
-  | 'witchcraft';
+  | 'witchcraft'
+  | 'hub-events';
 
 function toSlug(str: string): string {
   return str
@@ -457,6 +458,55 @@ function getHubTransitsConnections(): CosmicConnectionSection[] {
   ];
 }
 
+function getHubEventsConnections(): CosmicConnectionSection[] {
+  const currentYear = new Date().getFullYear();
+
+  return [
+    {
+      title: 'Event Resources',
+      links: [
+        { label: 'Retrogrades Hub', href: '/grimoire/astronomy/retrogrades' },
+        { label: 'Transits Hub', href: '/grimoire/transits' },
+        { label: 'Moon Calendar', href: '/grimoire/moon' },
+        {
+          label: 'Birth Chart Guide',
+          href: '/grimoire/guides/birth-chart-complete-guide',
+        },
+      ],
+    },
+    {
+      title: `${currentYear} Highlights`,
+      links: [
+        {
+          label: `${currentYear} Astrology Events`,
+          href: `/grimoire/events/${currentYear}`,
+        },
+        {
+          label: `${currentYear} Mercury Retrograde`,
+          href: `/grimoire/events/${currentYear}/mercury-retrograde`,
+        },
+        {
+          label: `${currentYear} Venus Retrograde`,
+          href: `/grimoire/events/${currentYear}/venus-retrograde`,
+        },
+        {
+          label: `${currentYear} Eclipses`,
+          href: `/grimoire/events/${currentYear}/eclipses`,
+        },
+      ],
+    },
+    {
+      title: 'Deep Dive',
+      links: [
+        { label: 'Moon Rituals', href: '/grimoire/moon/rituals' },
+        { label: 'Spells Fundamentals', href: '/grimoire/spells/fundamentals' },
+        { label: 'Crystals', href: '/grimoire/crystals' },
+        { label: 'Horoscopes Hub', href: '/grimoire/horoscopes' },
+      ],
+    },
+  ];
+}
+
 function getHubMoonConnections(): CosmicConnectionSection[] {
   return [
     {
@@ -619,6 +669,8 @@ export function getCosmicConnections(
       return getHubTransitsConnections();
     case 'hub-moon':
       return getHubMoonConnections();
+    case 'hub-events':
+      return getHubEventsConnections();
     case 'hub-placements':
       return getHubPlacementsConnections();
     case 'hub-glossary':

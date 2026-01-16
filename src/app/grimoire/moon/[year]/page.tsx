@@ -1,9 +1,11 @@
 import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { SEOContentTemplate } from '@/components/grimoire/SEOContentTemplate';
-import { Moon, Sparkles } from 'lucide-react';
 import MoonPhaseEventList from '@/components/grimoire/MoonPhaseEventList';
 import { getMoonEventsForYear } from '@/lib/moon/events';
+import { CosmicConnections } from '@/components/grimoire/CosmicConnections';
+import { getCosmicConnections } from '@/lib/cosmicConnectionsConfig';
+import { Heading } from '@/components/ui/Heading';
 
 export async function generateStaticParams() {
   // Generate pages for years 2025-2030
@@ -70,6 +72,35 @@ export default async function MoonYearPage({
 
 Understanding the moon's phases helps you align your spiritual practice, rituals, and personal growth with cosmic rhythms. Each lunar event provides an opportunity to work with specific energies for manifestation, release, and transformation.`;
 
+  const moonYears = [2025, 2026, 2027, 2028, 2029, 2030];
+  const cosmicSections = [
+    ...getCosmicConnections('hub-moon', 'moon'),
+    {
+      title: `${year} Links`,
+      links: [
+        { label: 'Moon Rituals', href: '/grimoire/moon/rituals' },
+        { label: 'Moon Signs', href: '/grimoire/moon/signs' },
+        {
+          label: `${year} Moon Calendar`,
+          href: `/grimoire/moon/${year}`,
+        },
+        {
+          label: 'Moon Phases Guide',
+          href: '/grimoire/guides/moon-phases-guide',
+        },
+      ],
+    },
+    {
+      title: 'Other Lunar Years',
+      links: moonYears
+        .filter((y) => y !== yearNum)
+        .map((y) => ({
+          label: `${y} Moon Calendar`,
+          href: `/grimoire/moon/${y}`,
+        })),
+    },
+  ];
+
   return (
     <SEOContentTemplate
       title={`${year} Moon Calendar: Full Moon & New Moon Dates | Lunary`}
@@ -95,39 +126,20 @@ Understanding the moon's phases helps you align your spiritual practice, rituals
         { label: 'Moon', href: '/grimoire/moon' },
         { label: year, href: `/grimoire/moon/${year}` },
       ]}
-      relatedItems={[
-        {
-          name: 'Moon Phases Guide',
-          href: '/grimoire/moon/phases',
-          type: 'Guide',
-        },
-        {
-          name: 'Full Moons',
-          href: '/grimoire/moon/full-moons',
-          type: 'Collection',
-        },
-        {
-          name: 'Moon Rituals',
-          href: '/grimoire/moon/rituals',
-          type: 'Practice',
-        },
-        { name: 'Moon Signs', href: '/grimoire/moon/signs', type: 'Guide' },
-      ]}
-      internalLinks={[
-        { text: 'View All Moon Phases', href: '/grimoire/moon/phases' },
-        { text: 'Moon Calendar Hub', href: '/moon-calendar' },
-        { text: "Today's Moon Phase", href: '/horoscope' },
-        { text: 'Grimoire Home', href: '/grimoire' },
-      ]}
-      ctaText='Get personalized lunar insights based on your birth chart'
-      ctaHref='/horoscope'
+      cosmicConnections={
+        <CosmicConnections
+          entityType='hub-moon'
+          entityKey='moon'
+          title='Moon Cosmic Connections'
+          sections={cosmicSections}
+        />
+      }
     >
       <div className='space-y-12'>
         <section className='mb-12'>
-          <h2 className='text-2xl font-medium text-white mb-3 flex items-center gap-2'>
-            <Sparkles className='h-6 w-6 text-lunary-accent' />
+          <Heading as='h2' variant='h2'>
             Full Moons {year}
-          </h2>
+          </Heading>
           <p className='text-sm text-zinc-400 mb-6'>
             Dates and times reflect your browser’s current timezone.
           </p>
@@ -135,10 +147,9 @@ Understanding the moon's phases helps you align your spiritual practice, rituals
         </section>
 
         <section className='mb-12'>
-          <h2 className='text-2xl font-medium text-white mb-3 flex items-center gap-2'>
-            <Moon className='h-6 w-6 text-lunary-primary-400' />
+          <Heading as='h2' variant='h2'>
             New Moons {year}
-          </h2>
+          </Heading>
           <p className='text-sm text-zinc-400 mb-6'>
             Times adjust to your browser’s timezone so every intention is on
             point.
