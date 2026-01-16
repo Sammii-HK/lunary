@@ -105,7 +105,7 @@ type CrystalSearchParams = {
 export default async function CrystalsPage({
   searchParams,
 }: {
-  searchParams?: CrystalSearchParams;
+  searchParams?: Promise<CrystalSearchParams>;
 }) {
   const resolvedSearchParams = await searchParams;
   const query = (resolvedSearchParams?.q || '').trim();
