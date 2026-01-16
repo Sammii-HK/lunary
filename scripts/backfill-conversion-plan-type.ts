@@ -37,37 +37,63 @@ function parseArgs(argv: string[]): Args {
   );
 }
 
-function toTextArrayLiteral(values: string[]): string | null {
-  if (values.length === 0) return null;
-  return `{${values
-    .map((v) => `"${String(v).replace(/\\/g, '\\\\').replace(/"/g, '\\"')}"`)
-    .join(',')}}`;
+function parseDate(input?: string): Date | null {
+  if (!input) return null;
+  const parsed = new Date(input);
+  if (Number.isNaN(parsed.getTime())) {
+    throw new Error(`Invalid date: ${input}`);
+  }
+  return parsed;
+}
+
+function buildRangeClause(
+  startDate: Date | null,
+  endDate: Date | null,
+  startIndex: number,
+) {
+  let clause = '';
+  const params: string[] = [];
+
+  if (startDate) {
+    params.push(startDate.toISOString());
+    clause += ` AND ce.created_at >= $${startIndex + params.length - 1}`;
+  }
+
+  if (endDate) {
+    params.push(endDate.toISOString());
+    clause += ` AND ce.created_at <= $${startIndex + params.length - 1}`;
+  }
+
+  return { clause, params };
 }
 
 async function main() {
   const args = parseArgs(process.argv.slice(2));
-  const eventsArray = toTextArrayLiteral(FEATURE_EVENTS);
-  if (!eventsArray) {
+  if (FEATURE_EVENTS.length === 0) {
     throw new Error('No feature events configured for backfill.');
   }
 
-  const startClause = args.startDate
-    ? sql`AND ce.created_at >= ${args.startDate}`
-    : sql``;
-  const endClause = args.endDate
-    ? sql`AND ce.created_at <= ${args.endDate}`
-    : sql``;
+  const startDate = parseDate(args.startDate);
+  const endDate = parseDate(args.endDate);
+  const { clause: rangeClause, params: rangeParams } = buildRangeClause(
+    startDate,
+    endDate,
+    2,
+  );
 
-  const candidates = await sql`
+  const candidatesQuery = `
     SELECT ce.id, COALESCE(s.plan_type, 'free') as plan_type
     FROM conversion_events ce
     LEFT JOIN subscriptions s ON s.user_id = ce.user_id
     WHERE ce.plan_type IS NULL
       AND ce.user_id IS NOT NULL
-      AND ce.event_type = ANY(SELECT unnest(${eventsArray}::text[]))
-      ${startClause}
-      ${endClause}
+      AND ce.event_type = ANY($1::text[])
+      ${rangeClause}
   `;
+  const candidates = await sql.query(candidatesQuery, [
+    FEATURE_EVENTS,
+    ...rangeParams,
+  ]);
 
   const candidateCount = candidates.rows.length;
   console.log(`Found ${candidateCount} conversion events to backfill.`);
@@ -87,7 +113,7 @@ async function main() {
     return;
   }
 
-  await sql`
+  const updateQuery = `
     UPDATE conversion_events ce
     SET plan_type = source.plan_type
     FROM (
@@ -96,12 +122,12 @@ async function main() {
       LEFT JOIN subscriptions s ON s.user_id = ce.user_id
       WHERE ce.plan_type IS NULL
         AND ce.user_id IS NOT NULL
-        AND ce.event_type = ANY(SELECT unnest(${eventsArray}::text[]))
-        ${startClause}
-        ${endClause}
+        AND ce.event_type = ANY($1::text[])
+        ${rangeClause}
     ) AS source
     WHERE ce.id = source.id
   `;
+  await sql.query(updateQuery, [FEATURE_EVENTS, ...rangeParams]);
 
   console.log('Backfill complete.');
 }
