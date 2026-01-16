@@ -3,12 +3,10 @@ import { sql } from '@vercel/postgres';
 
 const utcDateExpr = `(created_at AT TIME ZONE 'UTC')::date`;
 
-export async function GET(
-  _request: NextRequest,
-  context: { params: { userId: string } },
-) {
+export async function GET(request: NextRequest) {
   try {
-    const userId = context.params.userId;
+    const maybeUserId = request.nextUrl.pathname.split('/');
+    const userId = maybeUserId.at(-2) ?? '';
     if (!userId || typeof userId !== 'string') {
       return NextResponse.json({ error: 'Missing userId' }, { status: 400 });
     }
