@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextFetchEvent, NextRequest, NextResponse } from 'next/server';
 
 const camelToKebab = (str: string) =>
   str
@@ -10,6 +10,31 @@ const isProductionHost = (hostname: string) =>
   hostname === 'lunary.app' ||
   hostname === 'www.lunary.app' ||
   hostname.startsWith('admin.');
+
+const ANON_ID_COOKIE = 'lunary_anon_id';
+const BOT_UA_PATTERN =
+  /bot|crawler|spider|crawling|preview|facebookexternalhit|slackbot|discordbot|whatsapp|telegrambot|pinterest|embedly|quora|tumblr|redditbot/i;
+
+const shouldSkipTracking = (request: NextRequest, hostname: string) => {
+  if (request.method !== 'GET') return true;
+
+  const ua = request.headers.get('user-agent') || '';
+  if (BOT_UA_PATTERN.test(ua)) return true;
+
+  const pathname = request.nextUrl.pathname;
+  if (pathname.startsWith('/admin')) return true;
+
+  if (hostname.startsWith('admin.')) return true;
+
+  const purpose = request.headers.get('purpose');
+  if (purpose === 'prefetch') return true;
+
+  if (request.headers.get('x-middleware-prefetch') === '1') return true;
+
+  if (request.headers.get('next-router-prefetch') === '1') return true;
+
+  return false;
+};
 
 type NormaliseResult = {
   pathname: string;
@@ -89,7 +114,7 @@ function buildRedirect(request: NextRequest, pathname: string, status = 301) {
   return NextResponse.redirect(new URL(pathname, request.url), status);
 }
 
-export function middleware(request: NextRequest) {
+export function middleware(request: NextRequest, event: NextFetchEvent) {
   const { pathname, searchParams } = request.nextUrl;
 
   const hostname =
@@ -177,7 +202,55 @@ export function middleware(request: NextRequest) {
     return buildRedirect(request, finalPath, 301);
   }
 
-  return NextResponse.next();
+  const response = NextResponse.next();
+
+  if (!shouldSkipTracking(request, hostname) && isProd) {
+    let anonId = request.cookies.get(ANON_ID_COOKIE)?.value;
+
+    if (!anonId) {
+      anonId = crypto.randomUUID();
+      response.cookies.set(ANON_ID_COOKIE, anonId, {
+        httpOnly: true,
+        sameSite: 'lax',
+        secure: isProd,
+        path: '/',
+        maxAge: 60 * 60 * 24 * 365,
+      });
+    }
+
+    const trackingUrl = new URL('/api/telemetry/pageview', request.url);
+    const headers = new Headers();
+    headers.set('content-type', 'application/json');
+    headers.set('x-lunary-anon-id', anonId);
+
+    const cookieHeader = request.headers.get('cookie');
+    if (cookieHeader) headers.set('cookie', cookieHeader);
+
+    const userAgent = request.headers.get('user-agent');
+    if (userAgent) headers.set('user-agent', userAgent);
+
+    const referer = request.headers.get('referer');
+    if (referer) headers.set('referer', referer);
+
+    const acceptLanguage = request.headers.get('accept-language');
+    if (acceptLanguage) headers.set('accept-language', acceptLanguage);
+
+    const forwardedFor = request.headers.get('x-forwarded-for');
+    if (forwardedFor) headers.set('x-forwarded-for', forwardedFor);
+
+    const realIp = request.headers.get('x-real-ip');
+    if (realIp) headers.set('x-real-ip', realIp);
+
+    event.waitUntil(
+      fetch(trackingUrl, {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({ path: finalPath }),
+      }),
+    );
+  }
+
+  return response;
 }
 
 export const config = {

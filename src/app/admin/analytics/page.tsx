@@ -44,6 +44,12 @@ type ActivityResponse = {
   dau: number;
   wau: number;
   mau: number;
+  app_opened_dau: number;
+  app_opened_wau: number;
+  app_opened_mau: number;
+  sitewide_dau: number;
+  sitewide_wau: number;
+  sitewide_mau: number;
   returning_users: number;
   retention: {
     day_1: number | null;
@@ -52,6 +58,8 @@ type ActivityResponse = {
   };
   churn_rate: number | null;
   trends: ActivityTrend[];
+  app_opened_trends: ActivityTrend[];
+  sitewide_trends: ActivityTrend[];
   product_dau: number;
   product_wau: number;
   product_mau: number;
@@ -568,7 +576,23 @@ export default function AnalyticsPage() {
 
     if (activity) {
       rows.push(
-        ['Activity', 'DAU', String(activity.dau)],
+        [
+          'Activity',
+          'DAU (Sitewide Page Views)',
+          String(activity.sitewide_dau ?? 0),
+        ],
+        [
+          'Activity',
+          'WAU (Sitewide Page Views)',
+          String(activity.sitewide_wau ?? 0),
+        ],
+        [
+          'Activity',
+          'MAU (Sitewide Page Views)',
+          String(activity.sitewide_mau ?? 0),
+        ],
+        ['Activity', 'DAU (Engaged)', String(activity.dau)],
+        ['Activity', 'DAU (App Opened)', String(activity.app_opened_dau ?? 0)],
         [
           'Activity',
           'Returning Users (legacy)',
@@ -1376,9 +1400,10 @@ export default function AnalyticsPage() {
                   Audience Segments
                 </CardTitle>
                 <CardDescription className='text-xs text-zinc-400'>
-                  Compare all traffic, signed-in product usage, and
-                  Grimoire-only reach. Product users are signed-in event users,
-                  and Grimoire-only users never trigger a product event.
+                  Compare sitewide pageviews, engaged users, signed-in product
+                  usage, and Grimoire-only reach. Product users are signed-in
+                  event users, and Grimoire-only users never trigger a product
+                  event.
                 </CardDescription>
               </CardHeader>
               <CardContent>
@@ -1393,15 +1418,46 @@ export default function AnalyticsPage() {
                     MAU = {` ${mauWindowStart} to ${endDate}`}
                   </div>
                 </div>
-                <div className='grid gap-4 md:grid-cols-2'>
+                <div className='grid gap-4 md:grid-cols-3'>
                   <div className='space-y-2 rounded-xl border border-zinc-800/60 bg-zinc-950/50 p-4'>
                     <p className='text-xs uppercase tracking-wider text-zinc-400'>
-                      All Traffic
+                      Sitewide (page views)
+                    </p>
+                    <div className='text-sm text-zinc-300'>
+                      <div className='flex items-center justify-between'>
+                        <span>DAU</span>
+                        <span>
+                          {(activity?.sitewide_dau ?? 0).toLocaleString()}
+                        </span>
+                      </div>
+                      <div className='flex items-center justify-between'>
+                        <span>WAU</span>
+                        <span>
+                          {(activity?.sitewide_wau ?? 0).toLocaleString()}
+                        </span>
+                      </div>
+                      <div className='flex items-center justify-between'>
+                        <span>MAU</span>
+                        <span>
+                          {(activity?.sitewide_mau ?? 0).toLocaleString()}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                  <div className='space-y-2 rounded-xl border border-zinc-800/60 bg-zinc-950/50 p-4'>
+                    <p className='text-xs uppercase tracking-wider text-zinc-400'>
+                      Engaged (key actions)
                     </p>
                     <div className='text-sm text-zinc-300'>
                       <div className='flex items-center justify-between'>
                         <span>DAU</span>
                         <span>{(activity?.dau ?? 0).toLocaleString()}</span>
+                      </div>
+                      <div className='flex items-center justify-between'>
+                        <span>DAU (App opened)</span>
+                        <span>
+                          {(activity?.app_opened_dau ?? 0).toLocaleString()}
+                        </span>
                       </div>
                       <div className='flex items-center justify-between'>
                         <span>WAU</span>
@@ -2281,12 +2337,13 @@ export default function AnalyticsPage() {
                   Page Interaction
                 </CardTitle>
                 <CardDescription className='text-xs text-zinc-400'>
-                  Removed. We do not track raw pageviews or session recordings.
+                  Pageview tracking is limited to aggregate DAU/WAU/MAU only.
                 </CardDescription>
               </CardHeader>
               <CardContent>
                 <div className='rounded-xl border border-zinc-800 bg-zinc-950/40 p-4 text-sm text-zinc-300'>
-                  This dashboard prioritises privacy-safe, meaningful events.
+                  We record lightweight page_viewed events for sitewide activity
+                  totals without storing full session data.
                 </div>
               </CardContent>
             </Card>

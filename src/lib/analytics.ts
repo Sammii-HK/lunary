@@ -7,6 +7,7 @@ import { getAttributionForTracking } from '@/lib/attribution';
 export type ConversionEvent =
   | 'signup'
   | 'app_opened'
+  | 'page_viewed'
   | 'birth_data_submitted'
   | 'trial_started'
   | 'trial_expired'
@@ -317,6 +318,9 @@ export const conversionTracking = {
 
   appOpened: (userId?: string, email?: string) =>
     trackConversion('app_opened', { userId, userEmail: email }),
+
+  pageViewed: (pagePath?: string) =>
+    trackConversion('page_viewed', { pagePath }),
 
   trialStarted: (
     userId?: string,

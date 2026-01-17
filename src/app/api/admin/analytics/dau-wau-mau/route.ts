@@ -6,8 +6,18 @@ const TEST_EMAIL_PATTERN = '%@test.lunary.app';
 const TEST_EMAIL_EXACT = 'test@test.lunary.app';
 
 // Canonical event types (DB is SSOT)
-// - Engagement (DAU/WAU/MAU) is derived from app_opened only.
-const ACTIVITY_EVENTS = ['app_opened'];
+// - Engagement (DAU/WAU/MAU) is derived from app_opened plus key usage events.
+const ACTIVITY_EVENTS = [
+  'app_opened',
+  'grimoire_viewed',
+  'horoscope_viewed',
+  'tarot_drawn',
+  'daily_dashboard_viewed',
+  'chart_viewed',
+  'astral_chat_used',
+  'ritual_started',
+];
+const APP_OPENED_EVENTS = ['app_opened'];
 
 // Product interaction events (exclude Grimoire)
 const PRODUCT_EVENTS = [
@@ -17,11 +27,45 @@ const PRODUCT_EVENTS = [
   'astral_chat_used',
   'ritual_started',
 ];
+const SITEWIDE_EVENTS = ['page_viewed'];
 
 // Note: When using @vercel/postgres, avoid constructing "array SQL" as a string
 // or nesting sql fragments. Instead pass JS arrays as parameters and cast to text[].
 
 const formatDateKey = (date: Date) => date.toISOString().split('T')[0];
+
+type IdentityRow = {
+  date: unknown;
+  user_id?: string | null;
+  anonymous_id?: string | null;
+};
+
+const buildIdentityKey = (row: IdentityRow): string | null => {
+  const userId =
+    typeof row.user_id === 'string' && row.user_id.trim().length > 0
+      ? row.user_id.trim()
+      : null;
+  if (userId) {
+    return userId;
+  }
+  if (
+    typeof row.anonymous_id === 'string' &&
+    row.anonymous_id.trim().length > 0
+  ) {
+    return `anon:${row.anonymous_id.trim()}`;
+  }
+  return null;
+};
+
+const addIdentityRow = (map: Map<string, Set<string>>, row: IdentityRow) => {
+  const identity = buildIdentityKey(row);
+  if (!identity) return;
+  const date = normalizeRowDateKey(row.date);
+  if (!map.has(date)) {
+    map.set(date, new Set());
+  }
+  map.get(date)!.add(identity);
+};
 
 const normalizeRowDateKey = (value: unknown): string => {
   // `DATE(created_at)` can come back as a Date or a string depending on driver.
@@ -154,64 +198,101 @@ export async function GET(request: NextRequest) {
     const extendedStart = new Date(range.start);
     extendedStart.setUTCDate(extendedStart.getUTCDate() - 30);
 
-    const [activityRows, productRows] = await Promise.all([
-      sql.query(
-        `
-          SELECT DATE(created_at) as date, user_id
+    const [activityRows, appOpenedRows, productRows, sitewideRows] =
+      await Promise.all([
+        sql.query(
+          `
+          SELECT
+            DATE(created_at) as date,
+            user_id,
+            anonymous_id
           FROM conversion_events
           WHERE event_type = ANY($1::text[])
-            AND user_id IS NOT NULL
             AND created_at >= $2
             AND created_at <= $3
             AND (user_email IS NULL OR (user_email NOT LIKE $4 AND user_email != $5))
         `,
-        [
-          ACTIVITY_EVENTS,
-          formatTimestamp(extendedStart),
-          formatTimestamp(range.end),
-          TEST_EMAIL_PATTERN,
-          TEST_EMAIL_EXACT,
-        ],
-      ),
-      sql.query(
-        `
-          SELECT DATE(created_at) as date, user_id
+          [
+            ACTIVITY_EVENTS,
+            formatTimestamp(extendedStart),
+            formatTimestamp(range.end),
+            TEST_EMAIL_PATTERN,
+            TEST_EMAIL_EXACT,
+          ],
+        ),
+        sql.query(
+          `
+          SELECT
+            DATE(created_at) as date,
+            user_id,
+            anonymous_id
           FROM conversion_events
           WHERE event_type = ANY($1::text[])
-            AND user_id IS NOT NULL
             AND created_at >= $2
             AND created_at <= $3
             AND (user_email IS NULL OR (user_email NOT LIKE $4 AND user_email != $5))
         `,
-        [
-          PRODUCT_EVENTS,
-          formatTimestamp(extendedStart),
-          formatTimestamp(range.end),
-          TEST_EMAIL_PATTERN,
-          TEST_EMAIL_EXACT,
-        ],
-      ),
-    ]);
+          [
+            APP_OPENED_EVENTS,
+            formatTimestamp(extendedStart),
+            formatTimestamp(range.end),
+            TEST_EMAIL_PATTERN,
+            TEST_EMAIL_EXACT,
+          ],
+        ),
+        sql.query(
+          `
+          SELECT
+            DATE(created_at) as date,
+            user_id,
+            anonymous_id
+          FROM conversion_events
+          WHERE event_type = ANY($1::text[])
+            AND created_at >= $2
+            AND created_at <= $3
+            AND (user_email IS NULL OR (user_email NOT LIKE $4 AND user_email != $5))
+        `,
+          [
+            PRODUCT_EVENTS,
+            formatTimestamp(extendedStart),
+            formatTimestamp(range.end),
+            TEST_EMAIL_PATTERN,
+            TEST_EMAIL_EXACT,
+          ],
+        ),
+        sql.query(
+          `
+          SELECT
+            DATE(created_at) as date,
+            user_id,
+            anonymous_id
+          FROM conversion_events
+          WHERE event_type = ANY($1::text[])
+            AND created_at >= $2
+            AND created_at <= $3
+            AND (user_email IS NULL OR (user_email NOT LIKE $4 AND user_email != $5))
+        `,
+          [
+            SITEWIDE_EVENTS,
+            formatTimestamp(extendedStart),
+            formatTimestamp(range.end),
+            TEST_EMAIL_PATTERN,
+            TEST_EMAIL_EXACT,
+          ],
+        ),
+      ]);
 
     const activityMap = new Map<string, Set<string>>();
-    activityRows.rows.forEach((row) => {
-      const date = normalizeRowDateKey(row.date);
-      const userId = String(row.user_id);
-      if (!activityMap.has(date)) {
-        activityMap.set(date, new Set());
-      }
-      activityMap.get(date)!.add(userId);
-    });
+    activityRows.rows.forEach((row) => addIdentityRow(activityMap, row));
 
     const productMap = new Map<string, Set<string>>();
-    productRows.rows.forEach((row) => {
-      const date = normalizeRowDateKey(row.date);
-      const userId = String(row.user_id);
-      if (!productMap.has(date)) {
-        productMap.set(date, new Set());
-      }
-      productMap.get(date)!.add(userId);
-    });
+    productRows.rows.forEach((row) => addIdentityRow(productMap, row));
+
+    const sitewideMap = new Map<string, Set<string>>();
+    sitewideRows.rows.forEach((row) => addIdentityRow(sitewideMap, row));
+
+    const appOpenedMap = new Map<string, Set<string>>();
+    appOpenedRows.rows.forEach((row) => addIdentityRow(appOpenedMap, row));
 
     const trends = buildRollingTrends(
       activityMap,
@@ -221,6 +302,18 @@ export async function GET(request: NextRequest) {
     );
     const productTrends = buildRollingTrends(
       productMap,
+      range.start,
+      range.end,
+      granularity,
+    );
+    const appOpenedTrends = buildRollingTrends(
+      appOpenedMap,
+      range.start,
+      range.end,
+      granularity,
+    );
+    const sitewideTrends = buildRollingTrends(
+      sitewideMap,
       range.start,
       range.end,
       granularity,
@@ -243,10 +336,30 @@ export async function GET(request: NextRequest) {
       wau: 0,
       mau: 0,
     };
+    const currentAppOpenedTrend = appOpenedTrends.find(
+      (trend) => trend.date === currentBucket,
+    ) || {
+      dau: 0,
+      wau: 0,
+      mau: 0,
+    };
+    const currentSitewideTrend = sitewideTrends.find(
+      (trend) => trend.date === currentBucket,
+    ) || {
+      dau: 0,
+      wau: 0,
+      mau: 0,
+    };
 
     const productDau = countDistinctInWindow(productMap, range.end, 1);
     const productWau = countDistinctInWindow(productMap, range.end, 7);
     const productMau = countDistinctInWindow(productMap, range.end, 30);
+    const appOpenedDau = countDistinctInWindow(appOpenedMap, range.end, 1);
+    const appOpenedWau = countDistinctInWindow(appOpenedMap, range.end, 7);
+    const appOpenedMau = countDistinctInWindow(appOpenedMap, range.end, 30);
+    const sitewideDau = countDistinctInWindow(sitewideMap, range.end, 1);
+    const sitewideWau = countDistinctInWindow(sitewideMap, range.end, 7);
+    const sitewideMau = countDistinctInWindow(sitewideMap, range.end, 30);
 
     const signedInProductDau = productDau;
     const signedInProductWau = productWau;
@@ -433,6 +546,9 @@ export async function GET(request: NextRequest) {
       dau: currentTrend.dau,
       wau: currentTrend.wau,
       mau: currentTrend.mau,
+      sitewide_dau: currentSitewideTrend.dau,
+      sitewide_wau: currentSitewideTrend.wau,
+      sitewide_mau: currentSitewideTrend.mau,
       returning_users:
         currentTrend.wau > 0 && currentTrend.dau > 0
           ? Math.round(currentTrend.wau - currentTrend.dau * 0.5)
@@ -455,9 +571,17 @@ export async function GET(request: NextRequest) {
       trends,
       product_trends: productTrends,
       signed_in_product_trends: productTrends,
+      app_opened_trends: appOpenedTrends,
+      sitewide_trends: sitewideTrends,
       product_dau: productDau,
       product_wau: productWau,
       product_mau: productMau,
+      app_opened_dau: appOpenedDau,
+      app_opened_wau: appOpenedWau,
+      app_opened_mau: appOpenedMau,
+      sitewide_dau: sitewideDau,
+      sitewide_wau: sitewideWau,
+      sitewide_mau: sitewideMau,
       signed_in_product_dau: signedInProductDau,
       signed_in_product_wau: signedInProductWau,
       signed_in_product_mau: signedInProductMau,
@@ -471,6 +595,7 @@ export async function GET(request: NextRequest) {
       debug: {
         grimoire_metrics_source: 'conversion_events',
         product_summary_source: 'conversion_events',
+        sitewide_metrics_source: 'conversion_events',
       },
       source: 'database',
     });

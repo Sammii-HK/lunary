@@ -2,6 +2,7 @@ import { sql } from '@vercel/postgres';
 
 export type CanonicalEventType =
   | 'app_opened'
+  | 'page_viewed'
   | 'user_signed_up'
   | 'user_logged_in'
   | 'nav_tab_clicked'
@@ -101,6 +102,7 @@ function canonicaliseEventType(raw: unknown): {
   // Canonical events
   if (
     value === 'app_opened' ||
+    value === 'page_viewed' ||
     value === 'user_signed_up' ||
     value === 'user_logged_in' ||
     value === 'nav_tab_clicked' ||
@@ -378,8 +380,10 @@ export function canonicaliseEvent(input: {
 export async function insertCanonicalEvent(row: CanonicalInsertRow): Promise<{
   inserted: boolean;
 }> {
-  const result = await sql.query(
-    `
+  const metadataValue = row.metadata ?? null;
+  const createdAtValue = row.createdAt ?? null;
+
+  const result = await sql`
       INSERT INTO conversion_events (
         event_type,
         event_id,
@@ -395,38 +399,23 @@ export async function insertCanonicalEvent(row: CanonicalInsertRow): Promise<{
         metadata,
         created_at
       ) VALUES (
-        $1,
-        $2,
-        $3,
-        $4,
-        $5,
-        $6,
-        $7,
-        $8,
-        $9,
-        $10,
-        $11,
-        COALESCE($12::timestamptz, NOW())
+        ${row.eventType},
+        ${row.eventId},
+        ${row.userId},
+        ${row.anonymousId},
+        ${row.userEmail},
+        ${row.planType},
+        ${row.trialDaysRemaining},
+        ${row.featureName},
+        ${row.pagePath},
+        ${row.entityType},
+        ${row.entityId},
+        ${metadataValue},
+        COALESCE(${createdAtValue}::timestamptz, NOW())
       )
       ON CONFLICT DO NOTHING
       RETURNING id
-    `,
-    [
-      row.eventType,
-      row.eventId,
-      row.userId,
-      row.anonymousId,
-      row.userEmail,
-      row.planType,
-      row.trialDaysRemaining,
-      row.featureName,
-      row.pagePath,
-      row.entityType,
-      row.entityId,
-      row.metadata ? JSON.stringify(row.metadata) : null,
-      row.createdAt ? row.createdAt.toISOString() : null,
-    ],
-  );
+    `;
 
   return { inserted: result.rows.length > 0 };
 }
