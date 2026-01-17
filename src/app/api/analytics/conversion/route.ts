@@ -13,6 +13,32 @@ function normalizeEmail(email: unknown): string | null {
   return trimmed ? trimmed : null;
 }
 
+function normalizeOriginField(value: unknown): string | null {
+  if (typeof value !== 'string') return null;
+  const trimmed = value.trim();
+  return trimmed ? trimmed : null;
+}
+
+function extractOriginMetadata(
+  metadata: unknown,
+  pagePath: string | null,
+): {
+  originHub: string | null;
+  originPage: string | null;
+  originType: string | null;
+} {
+  const input =
+    metadata && typeof metadata === 'object'
+      ? (metadata as Record<string, unknown>)
+      : null;
+
+  const originHub = normalizeOriginField(input?.origin_hub);
+  const originPage = normalizeOriginField(input?.origin_page) || pagePath;
+  const originType = normalizeOriginField(input?.origin_type);
+
+  return { originHub, originPage, originType };
+}
+
 export async function POST(request: NextRequest) {
   try {
     // Handle empty body gracefully
@@ -107,6 +133,44 @@ export async function POST(request: NextRequest) {
     }
 
     const { inserted } = await insertCanonicalEvent(canonical.row);
+
+    if (
+      canonical.row.eventType === 'signup_completed' &&
+      resolvedUserId &&
+      !String(resolvedUserId).startsWith('anon:')
+    ) {
+      const { originHub, originPage, originType } = extractOriginMetadata(
+        metadata,
+        canonical.row.pagePath,
+      );
+      const signupAt = canonical.row.createdAt ?? new Date();
+
+      try {
+        await sql.query(
+          `
+            INSERT INTO user_profiles (
+              user_id,
+              origin_hub,
+              origin_page,
+              origin_type,
+              signup_at
+            )
+            VALUES ($1, $2, $3, $4, $5)
+            ON CONFLICT (user_id) DO UPDATE
+            SET
+              origin_hub = COALESCE(user_profiles.origin_hub, EXCLUDED.origin_hub),
+              origin_page = COALESCE(user_profiles.origin_page, EXCLUDED.origin_page),
+              origin_type = COALESCE(user_profiles.origin_type, EXCLUDED.origin_type),
+              signup_at = COALESCE(user_profiles.signup_at, EXCLUDED.signup_at)
+          `,
+          [String(resolvedUserId), originHub, originPage, originType, signupAt],
+        );
+      } catch (e: any) {
+        if (e?.code !== '42P01') {
+          throw e;
+        }
+      }
+    }
 
     if (inserted) {
       const distinctId =

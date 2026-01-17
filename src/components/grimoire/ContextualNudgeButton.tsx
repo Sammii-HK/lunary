@@ -1,21 +1,27 @@
 'use client';
 
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { useAuthStatus } from '@/components/AuthStatus';
 import { AuthComponent } from '@/components/Auth';
 import { useModal } from '@/hooks/useModal';
 import { Button } from '@/components/ui/button';
 import { ContextualNudge } from '@/lib/grimoire/getContextualNudge';
+import { trackCtaClick } from '@/lib/analytics';
 import { Heading } from '../ui/Heading';
 
 interface ContextualNudgeButtonProps {
   nudge: ContextualNudge;
+  location?: string;
 }
 
-export function ContextualNudgeButton({ nudge }: ContextualNudgeButtonProps) {
+export function ContextualNudgeButton({
+  nudge,
+  location = 'seo_contextual_nudge',
+}: ContextualNudgeButtonProps) {
   const authState = useAuthStatus();
   const router = useRouter();
+  const pathname = usePathname() || '';
   const [showAuthModal, setShowAuthModal] = useState(false);
 
   useModal({
@@ -31,6 +37,15 @@ export function ContextualNudgeButton({ nudge }: ContextualNudgeButtonProps) {
   };
 
   const handleClick = () => {
+    trackCtaClick({
+      hub: nudge.hub,
+      ctaId: 'contextual_nudge',
+      location,
+      label: nudge.buttonLabel,
+      href: nudge.href,
+      pagePath: pathname,
+    });
+
     if (nudge.action === 'link') {
       navigateToHref();
       return;

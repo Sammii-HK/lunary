@@ -343,14 +343,6 @@ export async function GET(request: NextRequest) {
       wau: 0,
       mau: 0,
     };
-    const currentSitewideTrend = sitewideTrends.find(
-      (trend) => trend.date === currentBucket,
-    ) || {
-      dau: 0,
-      wau: 0,
-      mau: 0,
-    };
-
     const productDau = countDistinctInWindow(productMap, range.end, 1);
     const productWau = countDistinctInWindow(productMap, range.end, 7);
     const productMau = countDistinctInWindow(productMap, range.end, 30);
@@ -546,9 +538,6 @@ export async function GET(request: NextRequest) {
       dau: currentTrend.dau,
       wau: currentTrend.wau,
       mau: currentTrend.mau,
-      sitewide_dau: currentSitewideTrend.dau,
-      sitewide_wau: currentSitewideTrend.wau,
-      sitewide_mau: currentSitewideTrend.mau,
       returning_users:
         currentTrend.wau > 0 && currentTrend.dau > 0
           ? Math.round(currentTrend.wau - currentTrend.dau * 0.5)

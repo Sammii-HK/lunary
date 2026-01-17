@@ -142,6 +142,26 @@ type FeatureUsageResponse = {
   }>;
 };
 
+type CtaConversionHub = {
+  hub: string;
+  total_clicks: number;
+  unique_clickers: number;
+  signups_7d: number;
+  conversion_rate: number;
+};
+
+type CtaConversionResponse = {
+  window_days: number;
+  hubs: CtaConversionHub[];
+};
+
+type Subscription30dResponse = {
+  window_days: number;
+  signups: number;
+  conversions: number;
+  conversion_rate: number;
+};
+
 type EngagementOverviewResponse = {
   dau_trend: Array<{ date: string; dau: number; returning_dau: number }>;
   dau: number;
@@ -296,6 +316,10 @@ export default function AnalyticsPage() {
     useState<GrimoireHealthResponse | null>(null);
   const [conversionInfluence, setConversionInfluence] =
     useState<ConversionInfluenceResponse | null>(null);
+  const [ctaConversions, setCtaConversions] =
+    useState<CtaConversionResponse | null>(null);
+  const [subscription30d, setSubscription30d] =
+    useState<Subscription30dResponse | null>(null);
 
   const wauWindowStart = useMemo(() => shiftDateInput(endDate, -6), [endDate]);
   const mauWindowStart = useMemo(() => shiftDateInput(endDate, -29), [endDate]);
@@ -379,6 +403,8 @@ export default function AnalyticsPage() {
         conversionInfluenceRes,
         aiRes,
         conversionsRes,
+        ctaConversionsRes,
+        subscription30dRes,
         notificationsRes,
         featureUsageRes,
         successMetricsRes,
@@ -402,6 +428,8 @@ export default function AnalyticsPage() {
         fetch(`/api/admin/analytics/conversion-influence?${queryParams}`),
         fetch(`/api/admin/analytics/ai-engagement?${queryParams}`),
         fetch(`/api/admin/analytics/conversions?${queryParams}`),
+        fetch(`/api/admin/analytics/cta-conversions?${queryParams}`),
+        fetch(`/api/admin/analytics/subscription-30d?${queryParams}`),
         fetch(`/api/admin/analytics/notifications?${queryParams}`),
         fetch(`/api/admin/analytics/feature-usage?${queryParams}`),
         fetch(`/api/admin/analytics/success-metrics?${queryParams}`),
@@ -467,6 +495,18 @@ export default function AnalyticsPage() {
         setConversions(await conversionsRes.json());
       } else {
         errors.push('Conversions');
+      }
+
+      if (ctaConversionsRes.ok) {
+        setCtaConversions(await ctaConversionsRes.json());
+      } else {
+        errors.push('CTA conversions');
+      }
+
+      if (subscription30dRes.ok) {
+        setSubscription30d(await subscription30dRes.json());
+      } else {
+        errors.push('Subscription 30d');
       }
 
       if (notificationsRes.ok) {
@@ -713,6 +753,43 @@ export default function AnalyticsPage() {
           'Conversions',
           'Trial Conversion Rate',
           `${conversions.trial_conversion_rate.toFixed(2)}%`,
+        ],
+      );
+    }
+
+    if (ctaConversions && ctaConversions.hubs.length > 0) {
+      ctaConversions.hubs.forEach((hub) => {
+        rows.push(
+          [
+            'CTA Conversions',
+            `${hub.hub} - Clickers`,
+            String(hub.unique_clickers ?? 0),
+          ],
+          [
+            'CTA Conversions',
+            `${hub.hub} - Signups (${ctaConversions.window_days}d)`,
+            String(hub.signups_7d ?? 0),
+          ],
+          [
+            'CTA Conversions',
+            `${hub.hub} - Conversion Rate`,
+            `${Number(hub.conversion_rate ?? 0).toFixed(2)}%`,
+          ],
+        );
+      });
+    }
+
+    if (subscription30d) {
+      rows.push(
+        [
+          'Conversions',
+          `Subscriptions within ${subscription30d.window_days}d`,
+          String(subscription30d.conversions ?? 0),
+        ],
+        [
+          'Conversions',
+          `Signup → Subscription (${subscription30d.window_days}d)`,
+          `${Number(subscription30d.conversion_rate ?? 0).toFixed(2)}%`,
         ],
       );
     }
@@ -1857,6 +1934,82 @@ export default function AnalyticsPage() {
               </CardContent>
             </Card>
           </section>
+
+          {subscription30d && (
+            <section>
+              <Card className='border-zinc-800/30 bg-zinc-900/10'>
+                <CardHeader>
+                  <CardTitle className='text-base font-medium'>
+                    Signup → Subscription ({subscription30d.window_days}d)
+                  </CardTitle>
+                  <CardDescription className='text-xs text-zinc-400'>
+                    Subscriptions started within {subscription30d.window_days}{' '}
+                    days of a free account signup.
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className='grid gap-4 md:grid-cols-3'>
+                  <MetricsCard
+                    title='Signups'
+                    value={subscription30d.signups.toLocaleString()}
+                  />
+                  <MetricsCard
+                    title='Subscriptions'
+                    value={subscription30d.conversions.toLocaleString()}
+                  />
+                  <MetricsCard
+                    title='Conversion Rate'
+                    value={`${subscription30d.conversion_rate.toFixed(2)}%`}
+                  />
+                </CardContent>
+              </Card>
+            </section>
+          )}
+
+          {ctaConversions && ctaConversions.hubs.length > 0 && (
+            <section>
+              <Card className='border-zinc-800/30 bg-zinc-900/10'>
+                <CardHeader>
+                  <CardTitle className='text-base font-medium'>
+                    CTA Conversions by Hub
+                  </CardTitle>
+                  <CardDescription className='text-xs text-zinc-400'>
+                    Signups within {ctaConversions.window_days} days of a CTA
+                    click
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className='space-y-4'>
+                  {ctaConversions.hubs.slice(0, 8).map((hub) => (
+                    <div key={hub.hub} className='space-y-2'>
+                      <div className='flex items-center justify-between text-sm text-zinc-300'>
+                        <span className='capitalize'>{hub.hub}</span>
+                        <span className='font-semibold text-white'>
+                          {Number(hub.signups_7d || 0).toLocaleString()}
+                        </span>
+                      </div>
+                      <div className='h-2 w-full rounded-full bg-zinc-800'>
+                        <div
+                          className='h-2 rounded-full bg-gradient-to-r from-lunary-primary-400 to-lunary-highlight-500'
+                          style={{
+                            width: `${Math.min(hub.conversion_rate ?? 0, 100)}%`,
+                          }}
+                        />
+                      </div>
+                      <div className='flex items-center justify-between text-[11px] text-zinc-500'>
+                        <span>
+                          {Number(hub.unique_clickers || 0).toLocaleString()}{' '}
+                          clickers
+                        </span>
+                        <span>
+                          {Number(hub.conversion_rate || 0).toFixed(2)}%
+                          conversion
+                        </span>
+                      </div>
+                    </div>
+                  ))}
+                </CardContent>
+              </Card>
+            </section>
+          )}
 
           {activation && (
             <section>

@@ -3,6 +3,7 @@ import { sql } from '@vercel/postgres';
 export type CanonicalEventType =
   | 'app_opened'
   | 'page_viewed'
+  | 'cta_clicked'
   | 'user_signed_up'
   | 'user_logged_in'
   | 'nav_tab_clicked'
@@ -103,6 +104,7 @@ function canonicaliseEventType(raw: unknown): {
   if (
     value === 'app_opened' ||
     value === 'page_viewed' ||
+    value === 'cta_clicked' ||
     value === 'user_signed_up' ||
     value === 'user_logged_in' ||
     value === 'nav_tab_clicked' ||
@@ -231,6 +233,9 @@ function sanitiseMetadata(
     'plan',
     'plan_type',
     'trial_days_remaining',
+    'origin_hub',
+    'origin_page',
+    'origin_type',
   ]);
 
   const result: Record<string, unknown> = {};
@@ -380,10 +385,17 @@ export function canonicaliseEvent(input: {
 export async function insertCanonicalEvent(row: CanonicalInsertRow): Promise<{
   inserted: boolean;
 }> {
-  const metadataValue = row.metadata ?? null;
-  const createdAtValue = row.createdAt ?? null;
+  const metadataValue =
+    row.metadata && Object.keys(row.metadata).length > 0
+      ? JSON.stringify(row.metadata)
+      : null;
+  const createdAtValue =
+    row.createdAt instanceof Date
+      ? row.createdAt.toISOString()
+      : (row.createdAt ?? null);
 
-  const result = await sql`
+  const result = await sql.query(
+    `
       INSERT INTO conversion_events (
         event_type,
         event_id,
@@ -399,23 +411,39 @@ export async function insertCanonicalEvent(row: CanonicalInsertRow): Promise<{
         metadata,
         created_at
       ) VALUES (
-        ${row.eventType},
-        ${row.eventId},
-        ${row.userId},
-        ${row.anonymousId},
-        ${row.userEmail},
-        ${row.planType},
-        ${row.trialDaysRemaining},
-        ${row.featureName},
-        ${row.pagePath},
-        ${row.entityType},
-        ${row.entityId},
-        ${metadataValue},
-        COALESCE(${createdAtValue}::timestamptz, NOW())
+        $1,
+        $2,
+        $3,
+        $4,
+        $5,
+        $6,
+        $7,
+        $8,
+        $9,
+        $10,
+        $11,
+        COALESCE($12::jsonb, NULL),
+        COALESCE($13::timestamptz, NOW())
       )
       ON CONFLICT DO NOTHING
       RETURNING id
-    `;
+    `,
+    [
+      row.eventType,
+      row.eventId,
+      row.userId,
+      row.anonymousId,
+      row.userEmail,
+      row.planType,
+      row.trialDaysRemaining,
+      row.featureName,
+      row.pagePath,
+      row.entityType,
+      row.entityId,
+      metadataValue,
+      createdAtValue,
+    ],
+  );
 
   return { inserted: result.rows.length > 0 };
 }

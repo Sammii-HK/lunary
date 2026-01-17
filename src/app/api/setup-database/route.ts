@@ -568,6 +568,10 @@ export async function POST(request: NextRequest) {
     await sql`CREATE INDEX IF NOT EXISTS idx_user_profiles_personal_card ON user_profiles USING GIN(personal_card)`;
     await sql`CREATE INDEX IF NOT EXISTS idx_user_profiles_location ON user_profiles USING GIN(location)`;
     await sql`ALTER TABLE user_profiles ADD COLUMN IF NOT EXISTS intention TEXT`;
+    await sql`ALTER TABLE user_profiles ADD COLUMN IF NOT EXISTS origin_hub TEXT`;
+    await sql`ALTER TABLE user_profiles ADD COLUMN IF NOT EXISTS origin_page TEXT`;
+    await sql`ALTER TABLE user_profiles ADD COLUMN IF NOT EXISTS origin_type TEXT`;
+    await sql`ALTER TABLE user_profiles ADD COLUMN IF NOT EXISTS signup_at TIMESTAMP WITH TIME ZONE`;
 
     await sql`
       CREATE OR REPLACE FUNCTION update_user_profiles_updated_at()
