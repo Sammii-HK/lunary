@@ -13,8 +13,6 @@ const planOptions = [
 const stepOptions = [
   { id: 'welcome', label: 'Welcome' },
   { id: 'birthday', label: 'Birthday' },
-  { id: 'intention', label: 'Intention' },
-  { id: 'feature_tour', label: 'Tour' },
   { id: 'complete', label: 'Complete' },
 ] as const;
 
