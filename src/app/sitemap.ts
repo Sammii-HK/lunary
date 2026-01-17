@@ -1,6 +1,7 @@
 import { MetadataRoute } from 'next';
-import { statSync } from 'node:fs';
-import { resolve as resolvePath } from 'node:path';
+import { readFileSync, statSync } from 'node:fs';
+import { resolve as resolvePath, relative as relativePath } from 'node:path';
+import { execFileSync } from 'node:child_process';
 import { grimoire } from '@/constants/grimoire';
 import { sectionToSlug } from '@/utils/grimoire';
 import spellsJson from '@/data/spells.json';
@@ -40,10 +41,73 @@ import dayjs from 'dayjs';
 import { getAllProducts } from '@/lib/shop/generators';
 
 const PROJECT_ROOT = process.cwd();
+const LAST_MODIFIED_MANIFEST_PATH = resolvePath(
+  PROJECT_ROOT,
+  'data',
+  'sitemap-last-modified.json',
+);
 const lastModifiedCache = new Map<string, Date | null>();
+let manifestCache: Record<string, string | null> = {};
+let manifestLoaded = false;
+
+function ensureManifestCache(): Record<string, string | null> {
+  if (manifestLoaded) {
+    return manifestCache;
+  }
+
+  try {
+    const content = readFileSync(LAST_MODIFIED_MANIFEST_PATH, 'utf8');
+    manifestCache = JSON.parse(content);
+  } catch {
+    manifestCache = {};
+  }
+
+  manifestLoaded = true;
+
+  return manifestCache;
+}
+
+function getManifestLastModified(path: string): Date | null {
+  const manifest = ensureManifestCache();
+  const entry = manifest[path];
+  if (!entry) {
+    return null;
+  }
+
+  const parsed = new Date(entry);
+  return Number.isNaN(parsed.getTime()) ? null : parsed;
+}
 
 function resolveProjectPath(filePath: string) {
   return resolvePath(PROJECT_ROOT, filePath);
+}
+
+function getGitLastModified(filePath: string): Date | null {
+  const relative = filePath.startsWith(PROJECT_ROOT)
+    ? relativePath(PROJECT_ROOT, filePath)
+    : filePath;
+
+  try {
+    const output = execFileSync(
+      'git',
+      ['log', '-1', '--format=%cI', '--', relative],
+      {
+        cwd: PROJECT_ROOT,
+        stdio: ['ignore', 'pipe', 'ignore'],
+      },
+    )
+      .toString()
+      .trim();
+
+    if (!output) {
+      return new Date();
+    }
+
+    const date = new Date(output);
+    return Number.isNaN(date.getTime()) ? null : date;
+  } catch {
+    return null;
+  }
 }
 
 function getFileLastModified(filePath: string): Date | null {
@@ -53,8 +117,8 @@ function getFileLastModified(filePath: string): Date | null {
   }
 
   try {
-    const stats = statSync(resolvedPath);
-    const date = stats.mtime;
+    const date =
+      getGitLastModified(resolvedPath) ?? statSync(resolvedPath).mtime;
     lastModifiedCache.set(resolvedPath, date);
     return date;
   } catch {
@@ -69,7 +133,7 @@ function getLastModifiedFromPaths(paths?: string[]): Date | null {
   }
 
   const dates = paths
-    .map(getFileLastModified)
+    .map((path) => getManifestLastModified(path) ?? getFileLastModified(path))
     .filter((entry): entry is Date => Boolean(entry))
     .map((date) => date.getTime());
 
@@ -83,7 +147,7 @@ function getLastModifiedFromPaths(paths?: string[]): Date | null {
 export default function sitemap(): MetadataRoute.Sitemap {
   // Use canonical domain (non-www)
   const baseUrl = 'https://lunary.app';
-  const now =
+  const date =
     getLastModifiedFromPaths([
       'src/app',
       'src/constants',
@@ -120,7 +184,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     lastModified,
   }: RouteConfig): MetadataRoute.Sitemap[number] => ({
     url: normalizePath(path),
-    lastModified: lastModified ?? getLastModifiedFromPaths(sourceFiles) ?? now,
+    lastModified: lastModified ?? getLastModifiedFromPaths(sourceFiles) ?? date,
     changeFrequency,
     priority,
   });
@@ -569,7 +633,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
   for (let page = 2; page <= totalBlogPages; page++) {
     blogPaginationRoutes.push({
       url: `${baseUrl}/blog/page/${page}`,
-      lastModified: now,
+      lastModified: date,
       changeFrequency: 'weekly' as const,
       priority: 0.6,
     });
@@ -579,7 +643,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
   const grimoireItems = Object.keys(grimoire);
   const grimoireRoutes = grimoireItems.map((item) => ({
     url: `${baseUrl}/grimoire/${sectionToSlug(item)}`,
-    lastModified: now,
+    lastModified: date,
     changeFrequency: 'monthly' as const,
     priority: 0.7,
   }));
@@ -587,7 +651,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
   // Add all spell pages
   const spellRoutes = spellsJson.map((spell) => ({
     url: `${baseUrl}/grimoire/spells/${spell.id}`,
-    lastModified: now,
+    lastModified: date,
     changeFrequency: 'monthly' as const,
     priority: 0.6,
   }));
@@ -595,7 +659,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
   // Add all crystal pages
   const crystalRoutes = crystalDatabase.map((crystal) => ({
     url: `${baseUrl}/grimoire/crystals/${crystal.id}`,
-    lastModified: now,
+    lastModified: date,
     changeFrequency: 'monthly' as const,
     priority: 0.6,
   }));
@@ -603,7 +667,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
   // Add all rune pages
   const runeRoutes = Object.keys(runesList).map((runeId) => ({
     url: `${baseUrl}/grimoire/runes/${runeId}`,
-    lastModified: now,
+    lastModified: date,
     changeFrequency: 'monthly' as const,
     priority: 0.6,
   }));
@@ -611,7 +675,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
   // Add all chakra pages
   const chakraRoutes = Object.keys(chakras).map((chakraId) => ({
     url: `${baseUrl}/grimoire/chakras/${chakraId}`,
-    lastModified: now,
+    lastModified: date,
     changeFrequency: 'monthly' as const,
     priority: 0.6,
   }));
@@ -620,7 +684,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
   const majorArcanaRoutes = Object.values(tarotCards.majorArcana).map(
     (card) => ({
       url: `${baseUrl}/grimoire/tarot/${stringToKebabCase(card.name)}`,
-      lastModified: now,
+      lastModified: date,
       changeFrequency: 'monthly' as const,
       priority: 0.6,
     }),
@@ -632,7 +696,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
       Object.values(suitCards as Record<string, { name: string }>).map(
         (card) => ({
           url: `${baseUrl}/grimoire/tarot/${stringToKebabCase(card.name)}`,
-          lastModified: now,
+          lastModified: date,
           changeFrequency: 'monthly' as const,
           priority: 0.6,
         }),
@@ -642,7 +706,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
   // Add all moon phase pages - using slugified phase names
   const moonPhaseRoutes = Object.keys(monthlyMoonPhases).map((phaseId) => ({
     url: `${baseUrl}/grimoire/moon/phases/${stringToKebabCase(phaseId)}`,
-    lastModified: now,
+    lastModified: date,
     changeFrequency: 'monthly' as const,
     priority: 0.6,
   }));
@@ -650,7 +714,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
   // Add all full moon pages
   const fullMoonRoutes = Object.keys(annualFullMoons).map((month) => ({
     url: `${baseUrl}/grimoire/moon/full-moons/${month.toLowerCase()}`,
-    lastModified: now,
+    lastModified: date,
     changeFrequency: 'monthly' as const,
     priority: 0.6,
   }));
@@ -658,7 +722,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
   // Add all planet pages
   const planetRoutes = Object.keys(planetaryBodies).map((planetId) => ({
     url: `${baseUrl}/grimoire/astronomy/planets/${planetId}`,
-    lastModified: now,
+    lastModified: date,
     changeFrequency: 'monthly' as const,
     priority: 0.6,
   }));
@@ -666,7 +730,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
   // Add all sabbat pages - using slugified names
   const sabbatRoutes = wheelOfTheYearSabbats.map((sabbat) => ({
     url: `${baseUrl}/grimoire/wheel-of-the-year/${stringToKebabCase(sabbat.name)}`,
-    lastModified: now,
+    lastModified: date,
     changeFrequency: 'monthly' as const,
     priority: 0.6,
   }));
@@ -674,7 +738,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
   // Add all tarot spread pages (using kebab-case for SEO)
   const tarotSpreadRoutes = Object.keys(tarotSpreads).map((spreadId) => ({
     url: `${baseUrl}/grimoire/tarot/spreads/${stringToKebabCase(spreadId)}`,
-    lastModified: now,
+    lastModified: date,
     changeFrequency: 'monthly' as const,
     priority: 0.6,
   }));
@@ -687,7 +751,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     'fire-scrying',
   ].map((method) => ({
     url: `${baseUrl}/grimoire/divination/scrying/${method}`,
-    lastModified: now,
+    lastModified: date,
     changeFrequency: 'monthly' as const,
     priority: 0.6,
   }));
@@ -696,7 +760,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
   const elementRoutes = Object.keys(correspondencesData.elements).map(
     (element) => ({
       url: `${baseUrl}/grimoire/correspondences/elements/${element.toLowerCase()}`,
-      lastModified: now,
+      lastModified: date,
       changeFrequency: 'monthly' as const,
       priority: 0.6,
     }),
@@ -705,7 +769,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
   // Add all correspondence color pages
   const colorRoutes = Object.keys(correspondencesData.colors).map((color) => ({
     url: `${baseUrl}/grimoire/correspondences/colors/${color.toLowerCase()}`,
-    lastModified: now,
+    lastModified: date,
     changeFrequency: 'monthly' as const,
     priority: 0.6,
   }));
@@ -713,7 +777,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
   // Add all correspondence day pages
   const dayRoutes = Object.keys(correspondencesData.days).map((day) => ({
     url: `${baseUrl}/grimoire/correspondences/days/${day.toLowerCase()}`,
-    lastModified: now,
+    lastModified: date,
     changeFrequency: 'monthly' as const,
     priority: 0.6,
   }));
@@ -723,7 +787,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     ([pantheon, gods]) =>
       Object.keys(gods).map((deityName) => ({
         url: `${baseUrl}/grimoire/correspondences/deities/${pantheon.toLowerCase()}/${deityName.toLowerCase()}`,
-        lastModified: now,
+        lastModified: date,
         changeFrequency: 'monthly' as const,
         priority: 0.6,
       })),
@@ -733,7 +797,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
   const flowerRoutes = Object.keys(correspondencesData.flowers).map(
     (flower) => ({
       url: `${baseUrl}/grimoire/correspondences/flowers/${flower.toLowerCase()}`,
-      lastModified: now,
+      lastModified: date,
       changeFrequency: 'monthly' as const,
       priority: 0.6,
     }),
@@ -742,7 +806,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
   // Add all correspondence number pages
   const numberRoutes = Object.keys(correspondencesData.numbers).map((num) => ({
     url: `${baseUrl}/grimoire/correspondences/numbers/${num}`,
-    lastModified: now,
+    lastModified: date,
     changeFrequency: 'monthly' as const,
     priority: 0.6,
   }));
@@ -750,7 +814,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
   // Add all correspondence wood pages
   const woodRoutes = Object.keys(correspondencesData.wood).map((wood) => ({
     url: `${baseUrl}/grimoire/correspondences/wood/${wood.toLowerCase()}`,
-    lastModified: now,
+    lastModified: date,
     changeFrequency: 'monthly' as const,
     priority: 0.6,
   }));
@@ -758,7 +822,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
   // Add all correspondence herb pages
   const herbRoutes = Object.keys(correspondencesData.herbs).map((herb) => ({
     url: `${baseUrl}/grimoire/correspondences/herbs/${herb.toLowerCase()}`,
-    lastModified: now,
+    lastModified: date,
     changeFrequency: 'monthly' as const,
     priority: 0.6,
   }));
@@ -767,7 +831,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
   const animalRoutes = Object.keys(correspondencesData.animals).map(
     (animal) => ({
       url: `${baseUrl}/grimoire/correspondences/animals/${animal.toLowerCase()}`,
-      lastModified: now,
+      lastModified: date,
       changeFrequency: 'monthly' as const,
       priority: 0.6,
     }),
@@ -777,7 +841,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
   const numerologyCoreRoutes = Array.from({ length: 9 }, (_, i) => i + 1).map(
     (num) => ({
       url: `${baseUrl}/grimoire/numerology/core-numbers/${num}`,
-      lastModified: now,
+      lastModified: date,
       changeFrequency: 'monthly' as const,
       priority: 0.6,
     }),
@@ -786,7 +850,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
   // Add numerology master number pages (11, 22, 33)
   const numerologyMasterRoutes = [11, 22, 33].map((num) => ({
     url: `${baseUrl}/grimoire/numerology/master-numbers/${num}`,
-    lastModified: now,
+    lastModified: date,
     changeFrequency: 'monthly' as const,
     priority: 0.6,
   }));
@@ -802,7 +866,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     'saturday',
   ].map((day) => ({
     url: `${baseUrl}/grimoire/numerology/planetary-days/${day}`,
-    lastModified: now,
+    lastModified: date,
     changeFrequency: 'monthly' as const,
     priority: 0.6,
   }));
@@ -823,7 +887,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     'silver',
   ].map((color) => ({
     url: `${baseUrl}/grimoire/candle-magic/colors/${color}`,
-    lastModified: now,
+    lastModified: date,
     changeFrequency: 'monthly' as const,
     priority: 0.6,
   }));
@@ -832,7 +896,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
   const birthChartHouseRoutes = Array.from({ length: 12 }, (_, i) => i + 1).map(
     (houseNum) => ({
       url: `${baseUrl}/grimoire/birth-chart/houses/${houseNum}`,
-      lastModified: now,
+      lastModified: date,
       changeFrequency: 'monthly' as const,
       priority: 0.6,
     }),
@@ -841,7 +905,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
   // Add modern witchcraft witch type pages
   const witchTypeRoutes = witchTypesOverview.map((type) => ({
     url: `${baseUrl}/grimoire/modern-witchcraft/witch-types/${type.slug}`,
-    lastModified: now,
+    lastModified: date,
     changeFrequency: 'monthly' as const,
     priority: 0.6,
   }));
@@ -855,7 +919,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     'pentacle',
   ].map((tool) => ({
     url: `${baseUrl}/grimoire/modern-witchcraft/tools/${tool}`,
-    lastModified: now,
+    lastModified: date,
     changeFrequency: 'monthly' as const,
     priority: 0.6,
   }));
@@ -869,7 +933,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     'mantra-meditation',
   ].map((technique) => ({
     url: `${baseUrl}/grimoire/meditation/techniques/${technique}`,
-    lastModified: now,
+    lastModified: date,
     changeFrequency: 'monthly' as const,
     priority: 0.6,
   }));
@@ -881,7 +945,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     'pranayama',
   ].map((method) => ({
     url: `${baseUrl}/grimoire/meditation/breathwork/${method}`,
-    lastModified: now,
+    lastModified: date,
     changeFrequency: 'monthly' as const,
     priority: 0.6,
   }));
@@ -893,7 +957,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     'crystal-grounding',
   ].map((method) => ({
     url: `${baseUrl}/grimoire/meditation/grounding/${method}`,
-    lastModified: now,
+    lastModified: date,
     changeFrequency: 'monthly' as const,
     priority: 0.6,
   }));
@@ -901,7 +965,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
   // Add divination pendulum page
   const pendulumRoute = {
     url: `${baseUrl}/grimoire/divination/pendulum`,
-    lastModified: now,
+    lastModified: date,
     changeFrequency: 'monthly' as const,
     priority: 0.6,
   };
@@ -909,7 +973,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
   // Add divination dream interpretation page
   const dreamInterpretationRoute = {
     url: `${baseUrl}/grimoire/divination/dream-interpretation`,
-    lastModified: now,
+    lastModified: date,
     changeFrequency: 'monthly' as const,
     priority: 0.6,
   };
@@ -917,7 +981,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
   // Add divination omen reading page
   const omenReadingRoute = {
     url: `${baseUrl}/grimoire/divination/omen-reading`,
-    lastModified: now,
+    lastModified: date,
     changeFrequency: 'monthly' as const,
     priority: 0.6,
   };
@@ -925,7 +989,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
   // Add all zodiac sign pages
   const zodiacRoutes = Object.keys(zodiacSigns).map((sign) => ({
     url: `${baseUrl}/grimoire/zodiac/${stringToKebabCase(sign)}`,
-    lastModified: now,
+    lastModified: date,
     changeFrequency: 'monthly' as const,
     priority: 0.8,
   }));
@@ -933,7 +997,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
   // Add daily horoscope sign pages
   const dailyHoroscopeSignRoutes = Object.keys(zodiacSigns).map((sign) => ({
     url: `${baseUrl}/horoscope/today/${stringToKebabCase(sign)}`,
-    lastModified: now,
+    lastModified: date,
     changeFrequency: 'daily' as const,
     priority: 0.7,
   }));
@@ -941,7 +1005,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
   // Add weekly horoscope sign pages
   const weeklyHoroscopeSignRoutes = Object.keys(zodiacSigns).map((sign) => ({
     url: `${baseUrl}/horoscope/weekly/${stringToKebabCase(sign)}`,
-    lastModified: now,
+    lastModified: date,
     changeFrequency: 'weekly' as const,
     priority: 0.7,
   }));
@@ -949,7 +1013,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
   // Add all house pages
   const houseRoutes = Object.keys(astrologicalHouses).map((house) => ({
     url: `${baseUrl}/grimoire/houses/overview/${stringToKebabCase(house)}`,
-    lastModified: now,
+    lastModified: date,
     changeFrequency: 'monthly' as const,
     priority: 0.8,
   }));
@@ -957,7 +1021,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
   // Add all moon in sign pages
   const moonInSignRoutes = Object.keys(zodiacSigns).map((sign) => ({
     url: `${baseUrl}/grimoire/moon-in/${stringToKebabCase(sign)}`,
-    lastModified: now,
+    lastModified: date,
     changeFrequency: 'monthly' as const,
     priority: 0.8,
   }));
@@ -966,61 +1030,61 @@ export default function sitemap(): MetadataRoute.Sitemap {
   const numerologyIndexRoutes = [
     {
       url: `${baseUrl}/grimoire/angel-numbers`,
-      lastModified: now,
+      lastModified: date,
       changeFrequency: 'monthly' as const,
       priority: 0.7,
     },
     {
       url: `${baseUrl}/grimoire/life-path`,
-      lastModified: now,
+      lastModified: date,
       changeFrequency: 'monthly' as const,
       priority: 0.7,
     },
     {
       url: `${baseUrl}/grimoire/mirror-hours`,
-      lastModified: now,
+      lastModified: date,
       changeFrequency: 'monthly' as const,
       priority: 0.7,
     },
     {
       url: `${baseUrl}/grimoire/double-hours`,
-      lastModified: now,
+      lastModified: date,
       changeFrequency: 'monthly' as const,
       priority: 0.7,
     },
     {
       url: `${baseUrl}/grimoire/numerology/soul-urge`,
-      lastModified: now,
+      lastModified: date,
       changeFrequency: 'monthly' as const,
       priority: 0.7,
     },
     {
       url: `${baseUrl}/grimoire/numerology/expression`,
-      lastModified: now,
+      lastModified: date,
       changeFrequency: 'monthly' as const,
       priority: 0.7,
     },
     {
       url: `${baseUrl}/grimoire/numerology/core-numbers`,
-      lastModified: now,
+      lastModified: date,
       changeFrequency: 'monthly' as const,
       priority: 0.7,
     },
     {
       url: `${baseUrl}/grimoire/numerology/master-numbers`,
-      lastModified: now,
+      lastModified: date,
       changeFrequency: 'monthly' as const,
       priority: 0.7,
     },
     {
       url: `${baseUrl}/grimoire/numerology/karmic-debt`,
-      lastModified: now,
+      lastModified: date,
       changeFrequency: 'monthly' as const,
       priority: 0.7,
     },
     {
       url: `${baseUrl}/grimoire/numerology/planetary-days`,
-      lastModified: now,
+      lastModified: date,
       changeFrequency: 'monthly' as const,
       priority: 0.7,
     },
@@ -1030,13 +1094,13 @@ export default function sitemap(): MetadataRoute.Sitemap {
   const moonIndexRoutes = [
     {
       url: `${baseUrl}/grimoire/moon/phases`,
-      lastModified: now,
+      lastModified: date,
       changeFrequency: 'monthly' as const,
       priority: 0.7,
     },
     {
       url: `${baseUrl}/grimoire/moon/full-moons`,
-      lastModified: now,
+      lastModified: date,
       changeFrequency: 'monthly' as const,
       priority: 0.7,
     },
@@ -1045,7 +1109,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
   // Add moon year pages (generated by moon/[year]/page.tsx)
   const moonYearRoutes = [2025, 2026, 2027, 2028, 2029, 2030].map((year) => ({
     url: `${baseUrl}/grimoire/moon/${year}`,
-    lastModified: now,
+    lastModified: date,
     changeFrequency: 'monthly' as const,
     priority: 0.7,
   }));
@@ -1054,19 +1118,19 @@ export default function sitemap(): MetadataRoute.Sitemap {
   const astrologyIndexRoutes = [
     {
       url: `${baseUrl}/grimoire/astronomy/retrogrades`,
-      lastModified: now,
+      lastModified: date,
       changeFrequency: 'monthly' as const,
       priority: 0.7,
     },
     {
       url: `${baseUrl}/grimoire/lunar-nodes`,
-      lastModified: now,
+      lastModified: date,
       changeFrequency: 'monthly' as const,
       priority: 0.7,
     },
     {
       url: `${baseUrl}/grimoire/eclipses`,
-      lastModified: now,
+      lastModified: date,
       changeFrequency: 'monthly' as const,
       priority: 0.7,
     },
@@ -1076,19 +1140,19 @@ export default function sitemap(): MetadataRoute.Sitemap {
   const meditationIndexRoutes = [
     {
       url: `${baseUrl}/grimoire/meditation/techniques`,
-      lastModified: now,
+      lastModified: date,
       changeFrequency: 'monthly' as const,
       priority: 0.7,
     },
     {
       url: `${baseUrl}/grimoire/meditation/breathwork`,
-      lastModified: now,
+      lastModified: date,
       changeFrequency: 'monthly' as const,
       priority: 0.7,
     },
     {
       url: `${baseUrl}/grimoire/meditation/grounding`,
-      lastModified: now,
+      lastModified: date,
       changeFrequency: 'monthly' as const,
       priority: 0.7,
     },
@@ -1098,13 +1162,13 @@ export default function sitemap(): MetadataRoute.Sitemap {
   const witchcraftIndexRoutes = [
     {
       url: `${baseUrl}/grimoire/modern-witchcraft/witch-types`,
-      lastModified: now,
+      lastModified: date,
       changeFrequency: 'monthly' as const,
       priority: 0.7,
     },
     {
       url: `${baseUrl}/grimoire/modern-witchcraft/tools`,
-      lastModified: now,
+      lastModified: date,
       changeFrequency: 'monthly' as const,
       priority: 0.7,
     },
@@ -1114,13 +1178,13 @@ export default function sitemap(): MetadataRoute.Sitemap {
   const otherIndexRoutes = [
     {
       url: `${baseUrl}/grimoire/tarot/spreads`,
-      lastModified: now,
+      lastModified: date,
       changeFrequency: 'monthly' as const,
       priority: 0.7,
     },
     {
       url: `${baseUrl}/grimoire/candle-magic/colors`,
-      lastModified: now,
+      lastModified: date,
       changeFrequency: 'monthly' as const,
       priority: 0.7,
     },
@@ -1129,7 +1193,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
   // Add all angel number pages
   const angelNumberRoutes = Object.keys(angelNumbers).map((number) => ({
     url: `${baseUrl}/grimoire/angel-numbers/${number}`,
-    lastModified: now,
+    lastModified: date,
     changeFrequency: 'monthly' as const,
     priority: 0.8,
   }));
@@ -1137,7 +1201,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
   // Add all life path number pages
   const lifePathRoutes = Object.keys(lifePathNumbers).map((number) => ({
     url: `${baseUrl}/grimoire/life-path/${number}`,
-    lastModified: now,
+    lastModified: date,
     changeFrequency: 'monthly' as const,
     priority: 0.8,
   }));
@@ -1145,7 +1209,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
   // Add all aspect pages
   const aspectRoutes = Object.keys(astrologicalAspects).map((aspect) => ({
     url: `${baseUrl}/grimoire/aspects/types/${stringToKebabCase(aspect)}`,
-    lastModified: now,
+    lastModified: date,
     changeFrequency: 'monthly' as const,
     priority: 0.8,
   }));
@@ -1153,7 +1217,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
   // Add all retrograde pages
   const retrogradeRoutes = Object.keys(retrogradeInfo).map((planet) => ({
     url: `${baseUrl}/grimoire/astronomy/retrogrades/${planet}`,
-    lastModified: now,
+    lastModified: date,
     changeFrequency: 'monthly' as const,
     priority: 0.8,
   }));
@@ -1161,7 +1225,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
   // Add all eclipse pages
   const eclipseRoutes = Object.keys(eclipseInfo).map((type) => ({
     url: `${baseUrl}/grimoire/eclipses/${type}`,
-    lastModified: now,
+    lastModified: date,
     changeFrequency: 'monthly' as const,
     priority: 0.8,
   }));
@@ -1170,13 +1234,13 @@ export default function sitemap(): MetadataRoute.Sitemap {
   const lunarNodeRoutes = [
     {
       url: `${baseUrl}/grimoire/lunar-nodes/north-node`,
-      lastModified: now,
+      lastModified: date,
       changeFrequency: 'monthly' as const,
       priority: 0.8,
     },
     {
       url: `${baseUrl}/grimoire/lunar-nodes/south-node`,
-      lastModified: now,
+      lastModified: date,
       changeFrequency: 'monthly' as const,
       priority: 0.8,
     },
@@ -1185,7 +1249,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
   // Add synastry generator page
   const synastryGeneratorRoute = {
     url: `${baseUrl}/grimoire/synastry/generate`,
-    lastModified: now,
+    lastModified: date,
     changeFrequency: 'monthly' as const,
     priority: 0.7,
   };
@@ -1196,7 +1260,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
   // Sign pages
   const grimoireHoroscopeSignRoutes = ZODIAC_SIGNS.map((sign) => ({
     url: `${baseUrl}/grimoire/horoscopes/${sign}`,
-    lastModified: now,
+    lastModified: date,
     changeFrequency: 'monthly' as const,
     priority: 0.7,
   }));
@@ -1205,7 +1269,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
   const grimoireHoroscopeYearRoutes = ZODIAC_SIGNS.flatMap((sign) =>
     AVAILABLE_YEARS.map((year) => ({
       url: `${baseUrl}/grimoire/horoscopes/${sign}/${year}`,
-      lastModified: now,
+      lastModified: date,
       changeFrequency: 'monthly' as const,
       priority: 0.6,
     })),
@@ -1216,7 +1280,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     AVAILABLE_YEARS.flatMap((year) =>
       MONTHS.map((month) => ({
         url: `${baseUrl}/grimoire/horoscopes/${sign}/${year}/${month}`,
-        lastModified: now,
+        lastModified: date,
         changeFrequency: 'monthly' as const,
         priority: 0.5,
       })),
@@ -1226,7 +1290,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
   // Add mirror hour pages
   const mirrorHourRoutes = mirrorHourKeys.map((time) => ({
     url: `${baseUrl}/grimoire/mirror-hours/${time.replace(':', '-')}`,
-    lastModified: now,
+    lastModified: date,
     changeFrequency: 'monthly' as const,
     priority: 0.7,
   }));
@@ -1234,7 +1298,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
   // Add double hour pages
   const doubleHourRoutes = doubleHourKeys.map((time) => ({
     url: `${baseUrl}/grimoire/double-hours/${time.replace(':', '-')}`,
-    lastModified: now,
+    lastModified: date,
     changeFrequency: 'monthly' as const,
     priority: 0.7,
   }));
@@ -1242,7 +1306,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
   // Add expression number pages
   const expressionRoutes = expressionKeys.map((num) => ({
     url: `${baseUrl}/grimoire/numerology/expression/${num}`,
-    lastModified: now,
+    lastModified: date,
     changeFrequency: 'monthly' as const,
     priority: 0.7,
   }));
@@ -1250,7 +1314,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
   // Add soul urge number pages
   const soulUrgeRoutes = soulUrgeKeys.map((num) => ({
     url: `${baseUrl}/grimoire/numerology/soul-urge/${num}`,
-    lastModified: now,
+    lastModified: date,
     changeFrequency: 'monthly' as const,
     priority: 0.7,
   }));
@@ -1258,7 +1322,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
   // Add karmic debt number pages
   const karmicDebtRoutes = karmicDebtKeys.map((num) => ({
     url: `${baseUrl}/grimoire/numerology/karmic-debt/${num}`,
-    lastModified: now,
+    lastModified: date,
     changeFrequency: 'monthly' as const,
     priority: 0.7,
   }));
@@ -1298,7 +1362,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
   // Add events year pages (dynamic route generates 2025-2030)
   const eventsYearRoutes = [2025, 2026, 2027, 2028, 2029, 2030].map((year) => ({
     url: `${baseUrl}/grimoire/events/${year}`,
-    lastModified: now,
+    lastModified: date,
     changeFrequency: 'monthly' as const,
     priority: 0.7,
   }));
@@ -1307,37 +1371,37 @@ export default function sitemap(): MetadataRoute.Sitemap {
   const eventSubpages = [
     {
       url: `${baseUrl}/grimoire/events/2025/mercury-retrograde`,
-      lastModified: now,
+      lastModified: date,
       changeFrequency: 'monthly' as const,
       priority: 0.7,
     },
     {
       url: `${baseUrl}/grimoire/events/2025/venus-retrograde`,
-      lastModified: now,
+      lastModified: date,
       changeFrequency: 'monthly' as const,
       priority: 0.7,
     },
     {
       url: `${baseUrl}/grimoire/events/2025/eclipses`,
-      lastModified: now,
+      lastModified: date,
       changeFrequency: 'monthly' as const,
       priority: 0.7,
     },
     {
       url: `${baseUrl}/grimoire/events/2026/mercury-retrograde`,
-      lastModified: now,
+      lastModified: date,
       changeFrequency: 'monthly' as const,
       priority: 0.7,
     },
     {
       url: `${baseUrl}/grimoire/events/2026/venus-retrograde`,
-      lastModified: now,
+      lastModified: date,
       changeFrequency: 'monthly' as const,
       priority: 0.7,
     },
     {
       url: `${baseUrl}/grimoire/events/2026/eclipses`,
-      lastModified: now,
+      lastModified: date,
       changeFrequency: 'monthly' as const,
       priority: 0.7,
     },
@@ -1347,7 +1411,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
   const tarotSuitRoutes = ['cups', 'pentacles', 'swords', 'wands'].map(
     (suit) => ({
       url: `${baseUrl}/grimoire/tarot/suits/${suit}`,
-      lastModified: now,
+      lastModified: date,
       changeFrequency: 'monthly' as const,
       priority: 0.7,
     }),
@@ -1357,7 +1421,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
   const shopProducts = getAllProducts();
   const shopProductRoutes = shopProducts.map((product) => ({
     url: `${baseUrl}/shop/${product.slug}`,
-    lastModified: now,
+    lastModified: date,
     changeFrequency: 'weekly' as const,
     priority: 0.7,
   }));
@@ -1369,7 +1433,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { length: shopTotalPages },
     (_, i) => ({
       url: i === 0 ? `${baseUrl}/shop` : `${baseUrl}/shop/page/${i + 1}`,
-      lastModified: now,
+      lastModified: date,
       changeFrequency: 'weekly' as const,
       priority: i === 0 ? 0.8 : 0.4,
     }),

@@ -5,7 +5,8 @@
   "private": true,
   "scripts": {
     "dev": "next dev --turbopack",
-    "build": "next build",
+    "build": "pnpm run generate:sitemap-last-modified && next build",
+    "generate:sitemap-last-modified": "node scripts/generate-sitemap-last-modified.js",
     "start": "next start",
     "lint": "eslint . --fix --ext .ts,.tsx",
     "lint:check": "eslint . --ext .ts,.tsx",
