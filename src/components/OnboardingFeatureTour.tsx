@@ -68,6 +68,8 @@ export function OnboardingFeatureTour({
     'Personalized crystal recommendations + cosmic state',
   ];
 
+  console.log('planId', planId);
+
   const planHighlights = (() => {
     if (!isSubscribed || planId === 'free') {
       return [
@@ -195,7 +197,7 @@ export function OnboardingFeatureTour({
           <div className='flex items-center justify-between mb-2'>
             <h4 className='text-xs font-semibold text-zinc-200 uppercase tracking-wide'>
               {isSubscribed && planId !== 'free'
-                ? 'Unlocked in your plan'
+                ? 'Included in your plan'
                 : 'Included with your account'}
             </h4>
             {isSubscribed && planId !== 'free' && (

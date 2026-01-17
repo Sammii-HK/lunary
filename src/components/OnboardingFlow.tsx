@@ -11,24 +11,19 @@ import {
   Calendar,
   Star,
   NotebookPen,
-  Eye,
-  Brain,
-  Heart,
-  Zap,
   ChevronDown,
 } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { createBirthChartWithMetadata } from '../../utils/astrology/birthChartService';
 import { conversionTracking } from '@/lib/analytics';
-import { OnboardingFeatureTour } from './OnboardingFeatureTour';
 import { BirthdayInput } from './ui/birthday-input';
-import { PlanId } from '../../utils/stripe-prices';
 import {
   clearOnboardingPrefill,
   getOnboardingPrefill,
 } from '@/lib/onboarding/prefill';
 import { parseCoordinates } from '../../utils/location';
+import { Button } from './ui/button';
 
 interface OnboardingFlowProps {
   overridePlanId?:
@@ -40,12 +35,7 @@ interface OnboardingFlowProps {
   simulateSubscribed?: boolean;
   previewMode?: boolean;
   previewHeader?: ReactNode;
-  previewStep?:
-    | 'welcome'
-    | 'birthday'
-    | 'intention'
-    | 'feature_tour'
-    | 'complete';
+  previewStep?: 'welcome' | 'birthday' | 'complete';
 }
 
 type LocationSuggestion = {
@@ -71,7 +61,7 @@ export function OnboardingFlow({
   const router = useRouter();
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [currentStep, setCurrentStep] = useState<
-    'welcome' | 'birthday' | 'intention' | 'feature_tour' | 'complete'
+    'welcome' | 'birthday' | 'complete'
   >('welcome');
   const [completedSteps, setCompletedSteps] = useState<string[]>([]);
   const [birthday, setBirthday] = useState('');
@@ -86,17 +76,20 @@ export function OnboardingFlow({
   const [locationSuggestionError, setLocationSuggestionError] = useState<
     string | null
   >(null);
-  const [selectedIntention, setSelectedIntention] = useState<string | null>(
-    null,
-  );
   const [saving, setSaving] = useState(false);
-  const [savingIntention, setSavingIntention] = useState(false);
   const [showOptionalDetails, setShowOptionalDetails] = useState(false);
   const [showSkipWarning, setShowSkipWarning] = useState(false);
   const [showBirthChartConfirmation, setShowBirthChartConfirmation] =
     useState(false);
   const [prefillLoaded, setPrefillLoaded] = useState(false);
   const [autoSavePrefill, setAutoSavePrefill] = useState(false);
+  const [expandedHighlights, setExpandedHighlights] = useState<string | null>(
+    null,
+  );
+  const [skipOrigin, setSkipOrigin] = useState<'modal' | 'step' | null>(null);
+  const [pendingSkipStep, setPendingSkipStep] = useState<
+    'welcome' | 'birthday' | 'complete' | null
+  >(null);
   const locationSuggestionsAbortRef = useRef<AbortController | null>(null);
   const lastLocationQueryRef = useRef<string | null>(null);
   const locationSuggestionBlurTimeoutRef = useRef<number | null>(null);
@@ -105,34 +98,28 @@ export function OnboardingFlow({
     loading: true,
     completed: false,
   });
-  const isSubscribedOrTrial =
-    simulateSubscribed ||
-    subscription.isSubscribed ||
-    subscription.isTrialActive;
+  const subscriptionActive = previewMode
+    ? false
+    : subscription.isSubscribed || subscription.isTrialActive;
+  const isSubscribedOrTrial = simulateSubscribed || subscriptionActive;
   const normalizedPlan =
     overridePlanId || normalizePlanType(subscription.planName || 'free');
   const activePlan =
     PRICING_PLANS.find((plan) => plan.id === normalizedPlan) ||
     PRICING_PLANS[0];
-  const stepOrder: Array<
-    'welcome' | 'birthday' | 'intention' | 'feature_tour' | 'complete'
-  > = ['welcome', 'birthday', 'intention', 'feature_tour', 'complete'];
+  const stepOrder: Array<'welcome' | 'birthday' | 'complete'> = [
+    'welcome',
+    'birthday',
+    'complete',
+  ];
   const moonPhases = [
     {
       label: 'New Moon',
       src: '/icons/moon-phases/new-moon.svg',
     },
     {
-      label: 'Waxing Crescent',
-      src: '/icons/moon-phases/waxing-cresent-moon.svg',
-    },
-    {
       label: 'Half Moon',
       src: '/icons/moon-phases/first-quarter.svg',
-    },
-    {
-      label: 'Waxing Gibbous',
-      src: '/icons/moon-phases/waxing-gibbous-moon.svg',
     },
     {
       label: 'Full Moon',
@@ -171,12 +158,12 @@ export function OnboardingFlow({
       return [
         { title: 'Everything in Lunary+', items: basePlanHighlights },
         {
-          title: 'Plus AI guidance',
+          title: 'Plus Pro Features',
           items: [
-            'Up to 300 messages/day AI chat with your cosmic companion',
+            'Up to 300 messages/day with the Astral Guide chat',
             'Personalized weekly reports + deeper readings',
             'Advanced pattern analysis + downloadable PDFs',
-            'AI ritual generation + extended context memory',
+            'Astral Guide ritual generation + extended context memory',
             'Collections & saved insights',
           ],
         },
@@ -188,10 +175,10 @@ export function OnboardingFlow({
       {
         title: 'Everything in Lunary+ Pro',
         items: [
-          'Up to 300 messages/day AI chat with your cosmic companion',
+          'Up to 300 messages/day with the Astral Guide chat',
           'Personalized weekly reports + deeper readings',
           'Advanced pattern analysis + downloadable PDFs',
-          'AI ritual generation + extended context memory',
+          'Astral Guide ritual generation + extended context memory',
         ],
       },
       {
@@ -429,7 +416,7 @@ export function OnboardingFlow({
     setSaving(true);
     try {
       if (previewMode) {
-        setCurrentStep('intention');
+        setCurrentStep('complete');
         return;
       }
       const existingLocation = (user as any)?.location || {};
@@ -522,7 +509,7 @@ export function OnboardingFlow({
       await refetch();
       setShowBirthChartConfirmation(true);
 
-      setCurrentStep('intention');
+      setCurrentStep('complete');
     } catch (error) {
       console.error('Failed to save birthday:', error);
       alert('Failed to save birthday. Please try again.');
@@ -540,35 +527,6 @@ export function OnboardingFlow({
     user,
   ]);
 
-  const saveIntentionSelection = useCallback(async () => {
-    if (!selectedIntention) {
-      return;
-    }
-
-    setSavingIntention(true);
-    try {
-      const response = await fetch('/api/profile', {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify({
-          intention: selectedIntention,
-        }),
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to save intention');
-      }
-
-      await refetch();
-    } catch (error) {
-      console.error('Failed to save intention:', error);
-      alert('Failed to save your intention. Please try again.');
-    } finally {
-      setSavingIntention(false);
-    }
-  }, [refetch, selectedIntention]);
-
   useEffect(() => {
     if (!autoSavePrefill || currentStep !== 'birthday' || saving) {
       return;
@@ -582,7 +540,7 @@ export function OnboardingFlow({
   }, [autoSavePrefill, birthday, currentStep, handleSaveBirthday, saving]);
 
   useEffect(() => {
-    if (currentStep !== 'intention') {
+    if (currentStep !== 'complete') {
       setShowBirthChartConfirmation(false);
     }
   }, [currentStep]);
@@ -612,31 +570,57 @@ export function OnboardingFlow({
     }
   };
 
-  const handleSkip = async () => {
+  const handleSkip = () => {
+    setSkipOrigin('modal');
+    setPendingSkipStep(null);
     setShowSkipWarning(true);
   };
 
+  const cancelSkip = () => {
+    setShowSkipWarning(false);
+    setSkipOrigin(null);
+    setPendingSkipStep(null);
+  };
+
+  const skipStep = async (step: 'welcome' | 'birthday' | 'complete') => {
+    await trackStepCompletion(step, true);
+    if (step === 'welcome') {
+      setCurrentStep('birthday');
+      return;
+    }
+    if (step === 'birthday') {
+      setCurrentStep('complete');
+      return;
+    }
+    handleComplete();
+  };
+
   const handleConfirmSkip = async (redirectPath?: string) => {
+    if (skipOrigin === 'step' && pendingSkipStep) {
+      await skipStep(pendingSkipStep);
+      setPendingSkipStep(null);
+      setSkipOrigin(null);
+      setShowSkipWarning(false);
+      if (redirectPath && !previewMode) {
+        router.push(redirectPath);
+      }
+      return;
+    }
+
     await trackStepCompletion('complete', true);
     resolveOnboarding();
     setShowSkipWarning(false);
     setCurrentStep('complete');
+    setSkipOrigin(null);
     if (redirectPath && !previewMode) {
       router.push(redirectPath);
     }
   };
 
-  const handleStepSkip = async () => {
-    await trackStepCompletion(currentStep, true);
-    if (currentStep === 'welcome') {
-      setCurrentStep('birthday');
-    } else if (currentStep === 'birthday') {
-      setCurrentStep('intention');
-    } else if (currentStep === 'intention') {
-      setCurrentStep('feature_tour');
-    } else if (currentStep === 'feature_tour') {
-      setCurrentStep('complete');
-    }
+  const handleStepSkip = () => {
+    setSkipOrigin('step');
+    setPendingSkipStep(currentStep);
+    setShowSkipWarning(true);
   };
 
   const handleComplete = async () => {
@@ -644,33 +628,8 @@ export function OnboardingFlow({
     resolveOnboarding();
     if (!previewMode) {
       // User already has subscription, send them to personalized content
-      router.push('/book-of-shadows');
+      router.push('/app');
     }
-  };
-
-  const handleNext = async () => {
-    await trackStepCompletion(currentStep, false);
-    if (currentStep === 'welcome') {
-      setCurrentStep('birthday');
-    } else if (currentStep === 'birthday') {
-      setCurrentStep('intention');
-    } else if (currentStep === 'intention') {
-      setCurrentStep('feature_tour');
-    } else {
-      handleComplete();
-    }
-  };
-
-  const handleIntentionContinue = async () => {
-    if (selectedIntention) {
-      conversionTracking.upgradeClicked(
-        'onboarding_intention',
-        selectedIntention,
-      );
-      await saveIntentionSelection();
-    }
-
-    await handleNext();
   };
 
   if (!showOnboarding) {
@@ -689,7 +648,7 @@ export function OnboardingFlow({
         </button>
 
         {showSkipWarning && (
-          <div className='absolute inset-0 z-10 flex items-center justify-center rounded-lg bg-black/70 p-4'>
+          <div className='absolute inset-0 z-10 flex items-center justify-center rounded-lg bg-black/70 py-4 px-6'>
             <div className='w-full max-w-sm rounded-lg border border-zinc-800 bg-zinc-950 p-4 text-left shadow-lg'>
               <div className='flex items-start justify-between gap-4'>
                 <div>
@@ -702,7 +661,7 @@ export function OnboardingFlow({
                   </p>
                 </div>
                 <button
-                  onClick={() => setShowSkipWarning(false)}
+                  onClick={cancelSkip}
                   className='text-zinc-400 hover:text-white'
                   aria-label='Cancel'
                 >
@@ -710,25 +669,28 @@ export function OnboardingFlow({
                 </button>
               </div>
 
-              <div className='mt-4 flex flex-col gap-2'>
-                <button
-                  onClick={() => setShowSkipWarning(false)}
-                  className='w-full rounded-lg border border-zinc-700 px-3 py-2 text-xs font-medium text-zinc-200 hover:border-zinc-500'
+              <div className='mt-4 flex flex-col gap-3 py-3'>
+                <Button
+                  onClick={cancelSkip}
+                  variant='lunary-soft'
+                  className='w-full'
                 >
                   Continue
-                </button>
-                <button
+                </Button>
+                <Button
                   onClick={() => handleConfirmSkip('/profile')}
-                  className='w-full rounded-lg bg-lunary-primary px-3 py-2 text-xs font-medium text-white hover:bg-lunary-primary-400'
+                  variant='lunary'
+                  className='w-full'
                 >
                   Go to profile
-                </button>
-                <button
+                </Button>
+                <Button
                   onClick={() => handleConfirmSkip()}
-                  className='w-full rounded-lg text-xs text-zinc-400 hover:text-zinc-200'
+                  variant='ghost'
+                  className='w-full'
                 >
                   Skip for now
-                </button>
+                </Button>
               </div>
             </div>
           </div>
@@ -794,12 +756,12 @@ export function OnboardingFlow({
                   <h3 className='text-sm font-semibold text-white flex items-center gap-2'>
                     <Sparkles className='w-4 h-4 text-lunary-accent-300' />
                     {isSubscribedOrTrial
-                      ? `You’ve unlocked ${activePlan.name}`
+                      ? `You’ve got ${activePlan.name}`
                       : 'What’s waiting for you'}
                   </h3>
                   {isSubscribedOrTrial && (
                     <span className='text-[10px] uppercase tracking-wide text-lunary-accent-200/80'>
-                      Premium unlocked
+                      Premium features included
                     </span>
                   )}
                 </div>
@@ -809,40 +771,70 @@ export function OnboardingFlow({
                     : 'Here’s what you can explore right away with a free account.'}
                 </p>
                 <div className='space-y-3 text-xs text-zinc-300'>
-                  {planHighlights.map((section) => (
-                    <div key={section.title} className='space-y-2'>
-                      <div className='text-[11px] font-semibold uppercase tracking-wide text-zinc-400'>
-                        {section.title}
+                  {planHighlights.map((section) => {
+                    const isExpanded = expandedHighlights === section.title;
+                    const visibleItems = isExpanded
+                      ? section.items
+                      : section.items.slice(0, 1);
+
+                    return (
+                      <div key={section.title} className='space-y-2'>
+                        <div className='text-[11px] font-semibold uppercase tracking-wide text-zinc-400 flex items-center justify-between'>
+                          {section.title}
+                          {section.items.length > 1 && (
+                            <button
+                              type='button'
+                              onClick={() =>
+                                setExpandedHighlights((prev) =>
+                                  prev === section.title ? null : section.title,
+                                )
+                              }
+                              className='inline-flex items-center gap-1 text-[11px] font-semibold uppercase tracking-wide text-lunary-accent-200/80 hover:text-lunary-accent-100 transition-colors'
+                            >
+                              {isExpanded ? 'Show fewer' : 'View all'}
+                              <ChevronDown
+                                className={`h-3 w-3 text-current transition-transform ${
+                                  isExpanded ? 'rotate-180' : ''
+                                }`}
+                              />
+                            </button>
+                          )}
+                        </div>
+                        <ul className='space-y-2'>
+                          {visibleItems.map((feature) => (
+                            <li
+                              key={feature}
+                              className='flex items-start gap-2'
+                            >
+                              <span className='text-lunary-accent-300 mt-0.5'>
+                                •
+                              </span>
+                              <span>{feature}</span>
+                            </li>
+                          ))}
+                        </ul>
                       </div>
-                      <ul className='space-y-2'>
-                        {section.items.map((feature) => (
-                          <li key={feature} className='flex items-start gap-2'>
-                            <span className='text-lunary-accent-300 mt-0.5'>
-                              •
-                            </span>
-                            <span>{feature}</span>
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               </div>
             </div>
 
             <div className='pt-4'>
-              <button
+              <Button
                 onClick={() => setCurrentStep('birthday')}
-                className='w-full bg-gradient-to-r from-lunary-primary to-lunary-highlight hover:from-lunary-primary-400 hover:to-lunary-highlight-400 text-white py-3 px-6 rounded-lg font-medium transition-all'
+                variant='lunary-soft'
+                className='w-full'
               >
                 Get Started
-              </button>
-              <button
+              </Button>
+              <Button
                 onClick={handleSkip}
-                className='w-full mt-3 text-zinc-400 hover:text-zinc-300 text-sm transition-colors'
+                variant='ghost'
+                className='w-full mt-3'
               >
                 Skip for now
-              </button>
+              </Button>
             </div>
           </div>
         )}
@@ -854,8 +846,8 @@ export function OnboardingFlow({
                 When Were You Born?
               </h2>
               <p className='text-zinc-300 text-sm'>
-                Your birthday unlocks personalized cosmic insights based on your
-                full birth chart.
+                Your birthday lets us calculate your birth chart and personalise
+                your daily guidance.
               </p>
             </div>
 
@@ -907,7 +899,7 @@ export function OnboardingFlow({
 
               <div>
                 <label className='block text-sm font-medium text-zinc-300 mb-2'>
-                  Birthday *
+                  Birthday (recommended)
                 </label>
                 <BirthdayInput value={birthday} onChange={setBirthday} />
               </div>
@@ -1004,129 +996,33 @@ export function OnboardingFlow({
               )}
 
               <p className='text-xs text-zinc-400'>
-                We use this to calculate your exact birth chart and planetary
-                positions. Add birth time and location for the most accurate
-                chart and daily guidance.
+                We use this to calculate your birth chart and planetary
+                positions. Birth time and location can improve accuracy.
               </p>
             </div>
 
             <div className='pt-4 space-y-3'>
-              <button
+              <Button
                 onClick={handleSaveBirthday}
                 disabled={!birthday || saving}
-                className='w-full bg-gradient-to-r from-lunary-primary to-lunary-highlight hover:from-lunary-primary-400 hover:to-lunary-highlight-400 disabled:opacity-50 disabled:cursor-not-allowed text-white py-3 px-6 rounded-lg font-medium transition-all'
+                variant='lunary-soft'
+                className='w-full'
               >
                 {saving ? 'Saving...' : 'Continue'}
-              </button>
+              </Button>
               <div className='flex items-center justify-between'>
-                <button
+                <Button
                   onClick={() => setCurrentStep('welcome')}
-                  className='text-zinc-400 hover:text-zinc-300 text-sm transition-colors'
+                  variant='ghost'
                 >
                   Back
-                </button>
-                <button
-                  onClick={handleStepSkip}
-                  className='text-zinc-400 hover:text-zinc-300 text-sm transition-colors'
-                >
+                </Button>
+                <Button onClick={handleStepSkip} variant='ghost'>
                   Skip
-                </button>
+                </Button>
               </div>
             </div>
           </div>
-        )}
-
-        {currentStep === 'intention' && (
-          <div className='space-y-6'>
-            <div className='text-center'>
-              <h2 className='text-base font-semibold text-white mb-2 md:text-lg'>
-                What brings you here?
-              </h2>
-              <p className='text-zinc-300 text-sm'>
-                Help us personalize your experience
-              </p>
-              {showBirthChartConfirmation && (
-                <p className='text-xs text-lunary-accent-200 mt-1'>
-                  Your birth chart is now set. Lunary uses it to interpret
-                  everything you explore.
-                </p>
-              )}
-            </div>
-
-            <div className='grid grid-cols-2 gap-3'>
-              {[
-                { id: 'clarity', label: 'Clarity', icon: Eye, color: 'purple' },
-                {
-                  id: 'confidence',
-                  label: 'Confidence',
-                  icon: Zap,
-                  color: 'yellow',
-                },
-                { id: 'calm', label: 'Calm', icon: Heart, color: 'pink' },
-                { id: 'insight', label: 'Insight', icon: Brain, color: 'blue' },
-              ].map((intention) => {
-                const Icon = intention.icon;
-                const isSelected = selectedIntention === intention.id;
-                return (
-                  <button
-                    key={intention.id}
-                    onClick={() => setSelectedIntention(intention.id)}
-                    className={`p-4 rounded-lg border-2 transition-all ${
-                      isSelected
-                        ? 'border-lunary-primary bg-lunary-primary-900'
-                        : 'border-zinc-700 bg-zinc-800/50 hover:border-zinc-600'
-                    }`}
-                  >
-                    <Icon
-                      className={`w-6 h-6 mx-auto mb-2 ${
-                        isSelected ? 'text-lunary-accent-300' : 'text-zinc-400'
-                      }`}
-                    />
-                    <div
-                      className={`text-sm font-medium ${
-                        isSelected ? 'text-white' : 'text-zinc-300'
-                      }`}
-                    >
-                      {intention.label}
-                    </div>
-                  </button>
-                );
-              })}
-            </div>
-
-            <div className='pt-4 space-y-3'>
-              <button
-                onClick={handleIntentionContinue}
-                disabled={savingIntention}
-                className='w-full bg-gradient-to-r from-lunary-primary to-lunary-highlight hover:from-lunary-primary-400 hover:to-lunary-highlight-400 text-white py-3 px-6 rounded-lg font-medium transition-all'
-              >
-                {savingIntention ? 'Saving...' : 'Continue'}
-              </button>
-              <div className='flex items-center justify-between'>
-                <button
-                  onClick={() => setCurrentStep('birthday')}
-                  className='text-zinc-400 hover:text-zinc-300 text-sm transition-colors'
-                >
-                  Back
-                </button>
-                <button
-                  onClick={handleStepSkip}
-                  className='text-zinc-400 hover:text-zinc-300 text-sm transition-colors'
-                >
-                  Skip
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {currentStep === 'feature_tour' && (
-          <OnboardingFeatureTour
-            onComplete={() => setCurrentStep('complete')}
-            onSkip={handleStepSkip}
-            planId={normalizedPlan as PlanId}
-            isSubscribed={isSubscribedOrTrial}
-          />
         )}
 
         {currentStep === 'complete' && (

@@ -2,11 +2,17 @@
 
 import { track } from '@vercel/analytics';
 import { betterAuthClient } from '@/lib/auth-client';
-import { getAttributionForTracking } from '@/lib/attribution';
+import {
+  getAttributionForTracking,
+  getStoredAttribution,
+} from '@/lib/attribution';
+import { getContextualHub } from '@/lib/grimoire/getContextualNudge';
 
 export type ConversionEvent =
   | 'signup'
   | 'app_opened'
+  | 'page_viewed'
+  | 'cta_clicked'
   | 'birth_data_submitted'
   | 'trial_started'
   | 'trial_expired'
@@ -40,9 +46,14 @@ export interface ConversionEventData {
   anonymousId?: string;
   userEmail?: string;
   planType?: 'monthly' | 'yearly' | 'free';
+  hub?: string;
   trialDaysRemaining?: number;
   featureName?: string;
   pagePath?: string;
+  cta_id?: string;
+  cta_location?: string;
+  cta_label?: string;
+  cta_href?: string;
   metadata?: Record<string, any>;
 }
 
@@ -194,6 +205,39 @@ export function getAnonymousId(): string | undefined {
   }
 }
 
+function getOriginMetadata(): Record<string, string> {
+  if (typeof window === 'undefined') {
+    return {};
+  }
+
+  const attribution = getStoredAttribution();
+  const pathname = window.location.pathname || '/';
+  const originPage = attribution?.landingPage || pathname;
+  const originHub = getContextualHub(pathname, 'universal');
+  const referrer = attribution?.referrer || document.referrer || '';
+
+  let originType: 'seo' | 'internal' | 'direct' = 'direct';
+
+  if (attribution?.source === 'seo') {
+    originType = 'seo';
+  } else if (referrer) {
+    try {
+      const referrerHost = new URL(referrer).hostname.toLowerCase();
+      if (referrerHost.includes('lunary.app')) {
+        originType = 'internal';
+      }
+    } catch {
+      originType = 'direct';
+    }
+  }
+
+  return {
+    origin_hub: originHub,
+    origin_page: originPage,
+    origin_type: originType,
+  };
+}
+
 export async function trackEvent(
   event: ConversionEvent,
   data?: Partial<ConversionEventData>,
@@ -201,6 +245,7 @@ export async function trackEvent(
   try {
     const utmParams = extractUTMParams();
     const attributionData = getAttributionForTracking();
+    const originMetadata = event === 'signup' ? getOriginMetadata() : {};
     const existingMetadata = data?.metadata || {};
     const eventIdValue =
       typeof data?.eventId === 'string' && data.eventId.trim().length > 0
@@ -215,6 +260,7 @@ export async function trackEvent(
         ...existingMetadata,
         ...utmParams,
         ...attributionData,
+        ...originMetadata,
         referrer:
           (typeof document !== 'undefined' ? document.referrer : undefined) ||
           existingMetadata.referrer,
@@ -311,12 +357,68 @@ export async function trackEvent(
 
 export const trackConversion = trackEvent;
 
+type CtaClickPayload = {
+  hub?: string;
+  ctaId?: string;
+  location?: string;
+  label?: string;
+  href?: string;
+  pagePath?: string;
+};
+
+export async function trackCtaClick(payload: CtaClickPayload): Promise<void> {
+  try {
+    const sanitized = sanitizeEventPayload({
+      event: 'cta_clicked',
+      featureName: payload.ctaId,
+      pagePath: payload.pagePath,
+      hub: payload.hub,
+      cta_id: payload.ctaId,
+      cta_location: payload.location,
+      cta_label: payload.label,
+      cta_href: payload.href,
+    });
+
+    track('cta_clicked', sanitized);
+
+    const body = JSON.stringify({
+      hub: payload.hub,
+      ctaId: payload.ctaId,
+      location: payload.location,
+      label: payload.label,
+      href: payload.href,
+      pagePath: payload.pagePath,
+      anonymousId: getAnonymousId(),
+    });
+
+    if (typeof navigator !== 'undefined' && 'sendBeacon' in navigator) {
+      const blob = new Blob([body], { type: 'application/json' });
+      navigator.sendBeacon('/api/telemetry/cta-click', blob);
+      return;
+    }
+
+    await fetch('/api/telemetry/cta-click', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body,
+      keepalive: true,
+    });
+  } catch (error) {
+    console.error('Failed to track CTA click:', error);
+  }
+}
+
 export const conversionTracking = {
   signup: (userId?: string, email?: string) =>
     trackConversion('signup', { userId, userEmail: email }),
 
   appOpened: (userId?: string, email?: string) =>
     trackConversion('app_opened', { userId, userEmail: email }),
+
+  pageViewed: (pagePath?: string) =>
+    trackConversion('page_viewed', { pagePath }),
+
+  ctaClicked: (payload: CtaClickPayload) => trackCtaClick(payload),
 
   trialStarted: (
     userId?: string,

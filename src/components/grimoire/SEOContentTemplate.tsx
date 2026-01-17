@@ -10,8 +10,12 @@ import {
 import { ParsedMarkdown } from '@/utils/markdown';
 import { NavParamLink } from '@/components/NavParamLink';
 import { getContextualCopy } from '@/lib/grimoire/getContextualCopy';
-import { getContextualNudge } from '@/lib/grimoire/getContextualNudge';
+import {
+  getContextualHub,
+  getContextualNudge,
+} from '@/lib/grimoire/getContextualNudge';
 import { ContextualNudgeButton } from '@/components/grimoire/ContextualNudgeButton';
+import { SEOCTAButton } from '@/components/grimoire/SEOCTAButton';
 import { ExploreGrimoire } from './ExploreGrimoire';
 import { Heading } from '../ui/Heading';
 
@@ -248,6 +252,7 @@ export function SEOContentTemplate({
     }
   })();
   const automaticCopy = getContextualCopy(canonicalPathname);
+  const contextualHub = getContextualHub(canonicalPathname);
   const contextualCopySentence = contextualCopy ?? automaticCopy.sentence;
   const contextualCopyClasses =
     contextualCopyVariant === 'callout'
@@ -632,19 +637,21 @@ export function SEOContentTemplate({
             <p className='text-zinc-200 mb-5 leading-relaxed'>
               {contextualNudge.subline}
             </p>
-            <ContextualNudgeButton nudge={contextualNudge} />
+            <ContextualNudgeButton
+              nudge={contextualNudge}
+              location='seo_contextual_nudge'
+            />
           </section>
         ) : ctaText && ctaHref ? (
           <section className='bg-gradient-to-r from-lunary-primary-900/30 to-lunary-highlight-900/30 border border-lunary-primary-700 rounded-lg p-6 sm:p-8 text-center overflow-x-hidden'>
             <h2 className='text-lg md:text-2xl text-lunary-primary-100 mb-3 break-words'>
               {ctaText}
             </h2>
-            <NavParamLink
+            <SEOCTAButton
               href={ctaHref}
-              className='inline-block px-5 sm:px-6 py-2 sm:py-3 bg-lunary-primary hover:bg-lunary-primary-400 text-white rounded-lg font-medium transition-colors '
-            >
-              Get Started
-            </NavParamLink>
+              label='Get Started'
+              hub={contextualHub}
+            />
           </section>
         ) : null}
 

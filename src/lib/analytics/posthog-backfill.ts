@@ -1,5 +1,6 @@
 import { sql } from '@vercel/postgres';
 import { queryPostHogAPI } from '@/lib/posthog-server';
+import { createHash } from 'crypto';
 import {
   canonicaliseEvent,
   insertCanonicalEventsBatch,
@@ -22,6 +23,8 @@ type BackfillCounters = {
 };
 
 const PAGEVIEW_EVENT = '$pageview';
+const PAGEVIEW_CANONICAL_EVENT: CanonicalEventType = 'page_viewed';
+const INSERT_BATCH_SIZE = 500;
 
 const APP_PAGE_PREFIXES = [
   '/app',
@@ -94,6 +97,22 @@ function mapPageviewToEvent(
   }
 
   return null;
+}
+
+function buildPosthogEventId(params: {
+  timestamp: string | null;
+  candidateEvent: string;
+  distinctId: string | null;
+  pathname: string | null;
+}) {
+  const normalized = [
+    params.timestamp ?? '',
+    params.candidateEvent,
+    params.distinctId ?? '',
+    params.pathname ?? '',
+  ].join('|');
+  const hash = createHash('sha256').update(normalized).digest('hex');
+  return `${hash.slice(0, 8)}-${hash.slice(8, 12)}-${hash.slice(12, 16)}-${hash.slice(16, 20)}-${hash.slice(20, 32)}`;
 }
 
 function formatAsHogQLStringList(values: string[]) {
@@ -231,47 +250,68 @@ export async function runPostHogBackfill({
 
       const mappedEvent =
         event === PAGEVIEW_EVENT ? mapPageviewToEvent(pathname) : event;
+      const backfillMetadata = {
+        source: 'posthog_backfill',
+        posthog_event: event,
+        referrer: referrer ?? undefined,
+        utm_source: utmSource ?? undefined,
+        utm_medium: utmMedium ?? undefined,
+        utm_campaign: utmCampaign ?? undefined,
+      };
 
-      const canonical = canonicaliseEvent({
-        eventType: mappedEvent,
-        userId: resolvedUserId,
-        anonymousId: distinctId,
-        userEmail,
-        pagePath: pathname,
-        metadata: {
-          source: 'posthog_backfill',
-          posthog_event: event,
-          referrer: referrer ?? undefined,
-          utm_source: utmSource ?? undefined,
-          utm_medium: utmMedium ?? undefined,
-          utm_campaign: utmCampaign ?? undefined,
-        },
-        createdAt: timestamp,
-      });
+      const candidateEvents: string[] =
+        event === PAGEVIEW_EVENT
+          ? mappedEvent && mappedEvent !== PAGEVIEW_CANONICAL_EVENT
+            ? [PAGEVIEW_CANONICAL_EVENT, mappedEvent]
+            : [PAGEVIEW_CANONICAL_EVENT]
+          : mappedEvent
+            ? [mappedEvent]
+            : [];
 
-      if (!canonical.ok) {
-        if (canonical.reason === 'skipped_no_user')
-          counters.skipped_no_user += 1;
-        if (canonical.reason === 'skipped_invalid')
+      for (const candidateEvent of candidateEvents) {
+        const eventId = buildPosthogEventId({
+          timestamp,
+          candidateEvent,
+          distinctId,
+          pathname,
+        });
+        const canonical = canonicaliseEvent({
+          eventType: candidateEvent,
+          userId: resolvedUserId,
+          anonymousId: distinctId,
+          userEmail,
+          pagePath: pathname,
+          eventId,
+          metadata: backfillMetadata,
+          createdAt: timestamp,
+        });
+
+        if (!canonical.ok) {
+          if (canonical.reason === 'skipped_no_user')
+            counters.skipped_no_user += 1;
+          if (canonical.reason === 'skipped_invalid')
+            counters.skipped_invalid += 1;
+          continue;
+        }
+
+        // Drop invalid anon user IDs that are too long (PostHog occasionally yields huge IDs)
+        if (canonical.row.userId.length > 255) {
           counters.skipped_invalid += 1;
-        continue;
-      }
+          continue;
+        }
 
-      // Drop invalid anon user IDs that are too long (PostHog occasionally yields huge IDs)
-      if (canonical.row.userId.length > 255) {
-        counters.skipped_invalid += 1;
-        continue;
+        rowsForInsert.push(canonical.row);
       }
-
-      rowsForInsert.push(canonical.row);
     }
 
     if (!dryRun && rowsForInsert.length > 0) {
-      // Insert in a single batch; unique indexes enforce dedupe.
-      const { inserted, duplicates } =
-        await insertCanonicalEventsBatch(rowsForInsert);
-      counters.inserted += inserted;
-      counters.skipped_duplicate += duplicates;
+      for (let i = 0; i < rowsForInsert.length; i += INSERT_BATCH_SIZE) {
+        const batch = rowsForInsert.slice(i, i + INSERT_BATCH_SIZE);
+        const { inserted, duplicates } =
+          await insertCanonicalEventsBatch(batch);
+        counters.inserted += inserted;
+        counters.skipped_duplicate += duplicates;
+      }
     }
 
     if (results.length < limit) break;
