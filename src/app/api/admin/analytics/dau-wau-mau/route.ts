@@ -40,31 +40,96 @@ type IdentityRow = {
   anonymous_id?: string | null;
 };
 
-const buildIdentityKey = (row: IdentityRow): string | null => {
-  const userId =
+type IdentityOptions = {
+  requireSignedIn?: boolean;
+};
+
+const isSignedInUserId = (value: unknown): value is string => {
+  return (
+    typeof value === 'string' &&
+    value.trim().length > 0 &&
+    !value.trim().startsWith('anon:')
+  );
+};
+
+const buildIdentityKey = (
+  row: IdentityRow,
+  options: IdentityOptions = {},
+): string | null => {
+  const trimmedUserId =
     typeof row.user_id === 'string' && row.user_id.trim().length > 0
       ? row.user_id.trim()
       : null;
-  if (userId) {
-    return userId;
+
+  if (options.requireSignedIn) {
+    return trimmedUserId && isSignedInUserId(trimmedUserId)
+      ? trimmedUserId
+      : null;
   }
+
+  if (trimmedUserId) {
+    return trimmedUserId;
+  }
+
   if (
     typeof row.anonymous_id === 'string' &&
     row.anonymous_id.trim().length > 0
   ) {
     return `anon:${row.anonymous_id.trim()}`;
   }
+
   return null;
 };
 
-const addIdentityRow = (map: Map<string, Set<string>>, row: IdentityRow) => {
-  const identity = buildIdentityKey(row);
+const addIdentityRow = (
+  map: Map<string, Set<string>>,
+  row: IdentityRow,
+  options: IdentityOptions = {},
+) => {
+  const identity = buildIdentityKey(row, options);
   if (!identity) return;
   const date = normalizeRowDateKey(row.date);
   if (!map.has(date)) {
     map.set(date, new Set());
   }
   map.get(date)!.add(identity);
+};
+
+const toUtcStartOfDay = (value: Date) =>
+  new Date(
+    Date.UTC(value.getUTCFullYear(), value.getUTCMonth(), value.getUTCDate()),
+  );
+
+const gatherUsersBetween = (
+  map: Map<string, Set<string>>,
+  start: Date,
+  end: Date,
+) => {
+  if (start > end) {
+    return new Set<string>();
+  }
+  const users = new Set<string>();
+  for (
+    let cursor = new Date(start);
+    cursor <= end;
+    cursor.setUTCDate(cursor.getUTCDate() + 1)
+  ) {
+    const key = formatDateKey(cursor);
+    const bucket = map.get(key);
+    if (!bucket) continue;
+    bucket.forEach((id) => users.add(id));
+  }
+  return users;
+};
+
+const intersectionSize = (a: Set<string>, b: Set<string>) => {
+  let count = 0;
+  a.forEach((value) => {
+    if (b.has(value)) {
+      count += 1;
+    }
+  });
+  return count;
 };
 
 const normalizeRowDateKey = (value: unknown): string => {
@@ -283,13 +348,50 @@ export async function GET(request: NextRequest) {
       ]);
 
     const activityMap = new Map<string, Set<string>>();
-    activityRows.rows.forEach((row) => addIdentityRow(activityMap, row));
+    const signedInActivityMap = new Map<string, Set<string>>();
+    activityRows.rows.forEach((row) => {
+      addIdentityRow(activityMap, row);
+      addIdentityRow(signedInActivityMap, row, { requireSignedIn: true });
+    });
 
     const productMap = new Map<string, Set<string>>();
-    productRows.rows.forEach((row) => addIdentityRow(productMap, row));
+    productRows.rows.forEach((row) =>
+      addIdentityRow(productMap, row, { requireSignedIn: true }),
+    );
 
     const sitewideMap = new Map<string, Set<string>>();
     sitewideRows.rows.forEach((row) => addIdentityRow(sitewideMap, row));
+
+    const endOfRangeDay = toUtcStartOfDay(range.end);
+    const yesterdayDay = new Date(endOfRangeDay);
+    yesterdayDay.setUTCDate(yesterdayDay.getUTCDate() - 1);
+
+    const currentWauStart = new Date(endOfRangeDay);
+    currentWauStart.setUTCDate(currentWauStart.getUTCDate() - 6);
+    const prevWauEnd = new Date(currentWauStart);
+    prevWauEnd.setUTCDate(prevWauEnd.getUTCDate() - 1);
+    const prevWauStart = new Date(prevWauEnd);
+    prevWauStart.setUTCDate(prevWauStart.getUTCDate() - 6);
+
+    const currentMauStart = new Date(endOfRangeDay);
+    currentMauStart.setUTCDate(currentMauStart.getUTCDate() - 29);
+    const prevMauEnd = new Date(currentMauStart);
+    prevMauEnd.setUTCDate(prevMauEnd.getUTCDate() - 1);
+    const prevMauStart = new Date(prevMauEnd);
+    prevMauStart.setUTCDate(prevMauStart.getUTCDate() - 29);
+
+    const returningDau = intersectionSize(
+      signedInActivityMap.get(formatDateKey(endOfRangeDay)) ?? new Set(),
+      signedInActivityMap.get(formatDateKey(yesterdayDay)) ?? new Set(),
+    );
+    const returningWau = intersectionSize(
+      gatherUsersBetween(signedInActivityMap, currentWauStart, endOfRangeDay),
+      gatherUsersBetween(signedInActivityMap, prevWauStart, prevWauEnd),
+    );
+    const returningMau = intersectionSize(
+      gatherUsersBetween(signedInActivityMap, currentMauStart, endOfRangeDay),
+      gatherUsersBetween(signedInActivityMap, prevMauStart, prevMauEnd),
+    );
 
     const appOpenedMap = new Map<string, Set<string>>();
     appOpenedRows.rows.forEach((row) => addIdentityRow(appOpenedMap, row));
@@ -360,20 +462,22 @@ export async function GET(request: NextRequest) {
     const grimoireWindowStart = new Date(range.end);
     grimoireWindowStart.setUTCDate(grimoireWindowStart.getUTCDate() - 29);
     const grimoireEventsResult = await sql`
-      SELECT DISTINCT user_id
-      FROM conversion_events
-      WHERE event_type = 'grimoire_viewed'
+        SELECT DISTINCT user_id
+        FROM conversion_events
+        WHERE event_type = 'grimoire_viewed'
         AND user_id IS NOT NULL
+        AND user_id NOT LIKE 'anon:%'
         AND created_at >= ${formatTimestamp(grimoireWindowStart)}
         AND created_at <= ${formatTimestamp(range.end)}
         AND (user_email IS NULL OR (user_email NOT LIKE ${TEST_EMAIL_PATTERN} AND user_email != ${TEST_EMAIL_EXACT}))
-    `;
+      `;
     const productWindowResult = await sql.query(
       `
         SELECT DISTINCT user_id
         FROM conversion_events
         WHERE event_type = ANY($1::text[])
           AND user_id IS NOT NULL
+          AND user_id NOT LIKE 'anon:%'
           AND created_at >= $2
           AND created_at <= $3
           AND (user_email IS NULL OR (user_email NOT LIKE $4 AND user_email != $5))
@@ -412,6 +516,7 @@ export async function GET(request: NextRequest) {
         FROM conversion_events
         WHERE event_type = ANY($1::text[])
           AND user_id IS NOT NULL
+          AND user_id NOT LIKE 'anon:%'
           AND created_at >= $2
           AND created_at <= $3
           AND (user_email IS NULL OR (user_email NOT LIKE $4 AND user_email != $5))
@@ -538,10 +643,9 @@ export async function GET(request: NextRequest) {
       dau: currentTrend.dau,
       wau: currentTrend.wau,
       mau: currentTrend.mau,
-      returning_users:
-        currentTrend.wau > 0 && currentTrend.dau > 0
-          ? Math.round(currentTrend.wau - currentTrend.dau * 0.5)
-          : 0,
+      returning_dau: returningDau,
+      returning_wau: returningWau,
+      returning_mau: returningMau,
       retention: {
         day_1:
           typeof day1Retention === 'number'

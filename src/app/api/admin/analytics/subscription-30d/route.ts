@@ -18,6 +18,10 @@ export async function GET(request: NextRequest) {
           FROM conversion_events
           WHERE event_type = 'signup_completed'
             AND user_id IS NOT NULL
+            AND (
+              (metadata->>'plan_type') IS NULL
+              OR metadata->>'plan_type' = 'free'
+            )
             AND created_at >= $1
             AND created_at <= $2
             AND (user_email IS NULL OR (user_email NOT LIKE $3 AND user_email != $4))
