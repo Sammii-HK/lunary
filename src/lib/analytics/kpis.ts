@@ -4,6 +4,7 @@ import { formatTimestamp } from '@/lib/analytics/date-range';
 export type DateRange = { start: Date; end: Date };
 
 const utcDateExpr = `(created_at AT TIME ZONE 'UTC')::date`;
+const parseIsoDay = (dateKey: string) => new Date(`${dateKey}T00:00:00.000Z`);
 
 export type EngagementOverview = {
   dau_trend: Array<{ date: string; dau: number; returning_dau: number }>;
@@ -16,6 +17,8 @@ export type EngagementOverview = {
   returning_users_lifetime: number;
   returning_users_range: number;
   returning_dau: number;
+  returning_wau: number;
+  returning_mau: number;
   avg_active_days_per_user: number;
   active_days_distribution: {
     '1': number;
@@ -70,6 +73,43 @@ function pct(numerator: number, denominator: number): number {
   return (numerator / denominator) * 100;
 }
 
+async function countWindowOverlap(
+  startCurrent: string,
+  endCurrent: string,
+  startPrev: string,
+  endPrev: string,
+) {
+  const result = await sql.query(
+    `
+      WITH current_window AS (
+        SELECT DISTINCT user_id
+      FROM conversion_events
+      WHERE event_type = 'app_opened'
+        AND user_id IS NOT NULL
+        AND user_id NOT LIKE 'anon:%'
+        AND created_at >= $1
+        AND created_at <= $2
+      ),
+      prev_window AS (
+        SELECT DISTINCT user_id
+        FROM conversion_events
+        WHERE event_type = 'app_opened'
+          AND user_id IS NOT NULL
+          AND user_id NOT LIKE 'anon:%'
+          AND created_at >= $3
+          AND created_at <= $4
+      )
+      SELECT COUNT(*) AS overlap
+      FROM current_window c
+      WHERE EXISTS (
+        SELECT 1 FROM prev_window p WHERE p.user_id = c.user_id
+      )
+    `,
+    [startCurrent, endCurrent, startPrev, endPrev],
+  );
+  return Number(result.rows[0]?.overlap || 0);
+}
+
 function toDateKey(value: unknown): string {
   if (value instanceof Date) {
     return value.toISOString().slice(0, 10);
@@ -92,12 +132,12 @@ export async function getEngagementOverview(
   const dauTrendResult = await sql.query(
     `
       WITH days AS (
-        SELECT DISTINCT user_id, ${utcDateExpr} AS day
-        FROM conversion_events
-        WHERE event_type = 'app_opened'
-          AND user_id IS NOT NULL
-          AND created_at >= $1
-          AND created_at <= $2
+      SELECT DISTINCT user_id, ${utcDateExpr} AS day
+      FROM conversion_events
+      WHERE event_type = 'app_opened'
+        AND user_id IS NOT NULL
+        AND created_at >= $1
+        AND created_at <= $2
       ),
       first_in_range AS (
         SELECT user_id, MIN(day) AS first_day_in_range
@@ -141,23 +181,23 @@ export async function getEngagementOverview(
   const [wauResult, mauResult] = await Promise.all([
     sql.query(
       `
-        SELECT COUNT(DISTINCT user_id) AS count
-        FROM conversion_events
-        WHERE event_type = 'app_opened'
-          AND user_id IS NOT NULL
-          AND created_at >= $1
-          AND created_at <= $2
+      SELECT COUNT(DISTINCT user_id) AS count
+      FROM conversion_events
+      WHERE event_type = 'app_opened'
+        AND user_id IS NOT NULL
+        AND created_at >= $1
+        AND created_at <= $2
       `,
       [formatTimestamp(wauStart), endTs],
     ),
     sql.query(
       `
-        SELECT COUNT(DISTINCT user_id) AS count
-        FROM conversion_events
-        WHERE event_type = 'app_opened'
-          AND user_id IS NOT NULL
-          AND created_at >= $1
-          AND created_at <= $2
+      SELECT COUNT(DISTINCT user_id) AS count
+      FROM conversion_events
+      WHERE event_type = 'app_opened'
+        AND user_id IS NOT NULL
+        AND created_at >= $1
+        AND created_at <= $2
       `,
       [formatTimestamp(mauStart), endTs],
     ),
@@ -172,20 +212,22 @@ export async function getEngagementOverview(
   const newReturningResult = await sql.query(
     `
       WITH first_open AS (
-        SELECT user_id, MIN(${utcDateExpr}) AS first_day
-        FROM conversion_events
-        WHERE event_type = 'app_opened'
-          AND user_id IS NOT NULL
-        GROUP BY user_id
-      ),
-      active_in_range AS (
-        SELECT DISTINCT user_id
-        FROM conversion_events
-        WHERE event_type = 'app_opened'
-          AND user_id IS NOT NULL
-          AND created_at >= $1
-          AND created_at <= $2
-      )
+    SELECT user_id, MIN(${utcDateExpr}) AS first_day
+    FROM conversion_events
+    WHERE event_type = 'app_opened'
+      AND user_id IS NOT NULL
+      AND user_id NOT LIKE 'anon:%'
+    GROUP BY user_id
+  ),
+  active_in_range AS (
+    SELECT DISTINCT user_id
+    FROM conversion_events
+    WHERE event_type = 'app_opened'
+      AND user_id IS NOT NULL
+      AND user_id NOT LIKE 'anon:%'
+      AND created_at >= $1
+      AND created_at <= $2
+  )
       SELECT
         COUNT(*) FILTER (WHERE fo.first_day >= $3::date AND fo.first_day <= $4::date) AS new_users,
         COUNT(*) FILTER (WHERE fo.first_day < $3::date) AS returning_users_lifetime
@@ -230,6 +272,11 @@ export async function getEngagementOverview(
   );
 
   // Returning DAU (selected end day): active on end day AND also active on an earlier day in the selected range.
+  const endDayDate = parseIsoDay(endDayKey);
+  const prevDayDate = new Date(endDayDate);
+  prevDayDate.setUTCDate(prevDayDate.getUTCDate() - 1);
+  const prevDayKey = toDateKey(prevDayDate);
+
   const returningDauResult = await sql.query(
     `
       WITH days AS (
@@ -237,23 +284,59 @@ export async function getEngagementOverview(
         FROM conversion_events
         WHERE event_type = 'app_opened'
           AND user_id IS NOT NULL
+          AND user_id NOT LIKE 'anon:%'
           AND created_at >= $1
           AND created_at <= $2
-      ),
-      first_in_range AS (
-        SELECT user_id, MIN(day) AS first_day_in_range
-        FROM days
-        GROUP BY user_id
       )
       SELECT COUNT(*) AS returning_dau
       FROM days d
-      INNER JOIN first_in_range f ON f.user_id = d.user_id
       WHERE d.day = $3::date
-        AND d.day > f.first_day_in_range
+        AND EXISTS (
+          SELECT 1
+          FROM days prev
+          WHERE prev.user_id = d.user_id
+            AND prev.day = $4::date
+        )
     `,
-    [startTs, endTs, endDayKey],
+    [startTs, endTs, endDayKey, prevDayKey],
   );
   const returningDau = Number(returningDauResult.rows[0]?.returning_dau || 0);
+
+  const currentWauStart = new Date(range.end);
+  currentWauStart.setUTCDate(currentWauStart.getUTCDate() - 6);
+  currentWauStart.setUTCHours(0, 0, 0, 0);
+
+  const prevWauEnd = new Date(currentWauStart);
+  prevWauEnd.setUTCDate(prevWauEnd.getUTCDate() - 1);
+  prevWauEnd.setUTCHours(0, 0, 0, 0);
+  const prevWauStart = new Date(prevWauEnd);
+  prevWauStart.setUTCDate(prevWauStart.getUTCDate() - 6);
+  prevWauStart.setUTCHours(0, 0, 0, 0);
+
+  const returningWau = await countWindowOverlap(
+    formatTimestamp(currentWauStart),
+    endTs,
+    formatTimestamp(prevWauStart),
+    formatTimestamp(prevWauEnd),
+  );
+
+  const currentMauStart = new Date(range.end);
+  currentMauStart.setUTCDate(currentMauStart.getUTCDate() - 29);
+  currentMauStart.setUTCHours(0, 0, 0, 0);
+
+  const prevMauEnd = new Date(currentMauStart);
+  prevMauEnd.setUTCDate(prevMauEnd.getUTCDate() - 1);
+  prevMauEnd.setUTCHours(0, 0, 0, 0);
+  const prevMauStart = new Date(prevMauEnd);
+  prevMauStart.setUTCDate(prevMauStart.getUTCDate() - 29);
+  prevMauStart.setUTCHours(0, 0, 0, 0);
+
+  const returningMau = await countWindowOverlap(
+    formatTimestamp(currentMauStart),
+    endTs,
+    formatTimestamp(prevMauStart),
+    formatTimestamp(prevMauEnd),
+  );
 
   // Active days per user (within selected range)
   const activeDaysResult = await sql.query(
@@ -288,23 +371,25 @@ export async function getEngagementOverview(
     `
       WITH first_open AS (
         SELECT user_id, MIN(${utcDateExpr}) AS first_day
-        FROM conversion_events
-        WHERE event_type = 'app_opened'
-          AND user_id IS NOT NULL
-        GROUP BY user_id
-      ),
-      cohort AS (
-        SELECT user_id, first_day
-        FROM first_open
-        WHERE first_day >= $1::date
-          AND first_day <= $2::date
-      ),
-      opens AS (
-        SELECT DISTINCT user_id, ${utcDateExpr} AS day
-        FROM conversion_events
-        WHERE event_type = 'app_opened'
-          AND user_id IS NOT NULL
-      )
+      FROM conversion_events
+      WHERE event_type = 'app_opened'
+        AND user_id IS NOT NULL
+        AND user_id NOT LIKE 'anon:%'
+      GROUP BY user_id
+    ),
+    cohort AS (
+      SELECT user_id, first_day
+      FROM first_open
+      WHERE first_day >= $1::date
+        AND first_day <= $2::date
+    ),
+    opens AS (
+      SELECT DISTINCT user_id, ${utcDateExpr} AS day
+      FROM conversion_events
+      WHERE event_type = 'app_opened'
+        AND user_id IS NOT NULL
+        AND user_id NOT LIKE 'anon:%'
+    )
       SELECT
         c.first_day AS cohort_day,
         COUNT(*) AS cohort_users,
@@ -383,6 +468,8 @@ export async function getEngagementOverview(
     returning_users_lifetime: returningUsersLifetime,
     returning_users_range: returningUsersRange,
     returning_dau: returningDau,
+    returning_wau: returningWau,
+    returning_mau: returningMau,
     avg_active_days_per_user: Number(avgActiveDays.toFixed(2)),
     active_days_distribution: {
       '1': Number(activeDaysResult.rows[0]?.bucket_1 || 0),
@@ -410,6 +497,7 @@ export async function getFeatureAdoption(
       FROM conversion_events
       WHERE event_type = 'app_opened'
         AND user_id IS NOT NULL
+        AND user_id NOT LIKE 'anon:%'
         AND created_at >= $1
         AND created_at <= $2
     `,
@@ -472,6 +560,7 @@ export async function getGrimoireHealth(
       FROM conversion_events
       WHERE event_type = 'app_opened'
         AND user_id IS NOT NULL
+        AND user_id NOT LIKE 'anon:%'
         AND created_at >= $1
         AND created_at <= $2
     `,

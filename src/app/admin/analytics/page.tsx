@@ -50,7 +50,9 @@ type ActivityResponse = {
   sitewide_dau: number;
   sitewide_wau: number;
   sitewide_mau: number;
-  returning_users: number;
+  returning_dau: number;
+  returning_wau: number;
+  returning_mau: number;
   retention: {
     day_1: number | null;
     day_7: number | null;
@@ -73,23 +75,6 @@ type ActivityResponse = {
   signed_in_product_avg_sessions_per_user: number;
   content_mau_grimoire: number;
   grimoire_only_mau: number;
-};
-
-type AiMode = {
-  mode: string;
-  count: number;
-  percentage: number;
-};
-
-type AiResponse = {
-  total_sessions: number;
-  unique_users: number;
-  avg_sessions_per_user: number;
-  avg_tokens_per_user: number;
-  avg_messages_per_session: number;
-  completion_rate: number;
-  mode_breakdown: AiMode[];
-  trends: Array<{ date: string; sessions: number; tokens: number }>;
 };
 
 type ConversionResponse = {
@@ -173,6 +158,8 @@ type EngagementOverviewResponse = {
   returning_users_lifetime: number;
   returning_users_range: number;
   returning_dau: number;
+  returning_wau: number;
+  returning_mau: number;
   avg_active_days_per_user: number;
   active_days_distribution: Record<string, number>;
   retention: {
@@ -299,7 +286,6 @@ export default function AnalyticsPage() {
   );
   const [showProductSeries, setShowProductSeries] = useState(false);
   const [activity, setActivity] = useState<ActivityResponse | null>(null);
-  const [aiMetrics, setAiMetrics] = useState<AiResponse | null>(null);
   const [conversions, setConversions] = useState<ConversionResponse | null>(
     null,
   );
@@ -401,7 +387,6 @@ export default function AnalyticsPage() {
         featureAdoptionRes,
         grimoireHealthRes,
         conversionInfluenceRes,
-        aiRes,
         conversionsRes,
         ctaConversionsRes,
         subscription30dRes,
@@ -426,7 +411,6 @@ export default function AnalyticsPage() {
         fetch(`/api/admin/analytics/feature-adoption?${queryParams}`),
         fetch(`/api/admin/analytics/grimoire-health?${queryParams}`),
         fetch(`/api/admin/analytics/conversion-influence?${queryParams}`),
-        fetch(`/api/admin/analytics/ai-engagement?${queryParams}`),
         fetch(`/api/admin/analytics/conversions?${queryParams}`),
         fetch(`/api/admin/analytics/cta-conversions?${queryParams}`),
         fetch(`/api/admin/analytics/subscription-30d?${queryParams}`),
@@ -483,12 +467,6 @@ export default function AnalyticsPage() {
         setConversionInfluence(data);
       } else {
         errors.push('Conversion influence');
-      }
-
-      if (aiRes.ok) {
-        setAiMetrics(await aiRes.json());
-      } else {
-        errors.push('AI engagement');
       }
 
       if (conversionsRes.ok) {
@@ -635,8 +613,18 @@ export default function AnalyticsPage() {
         ['Activity', 'DAU (App Opened)', String(activity.app_opened_dau ?? 0)],
         [
           'Activity',
-          'Returning Users (legacy)',
-          String(activity.returning_users ?? 0),
+          'Returning DAU (signed-in overlap)',
+          String(activity.returning_dau ?? 0),
+        ],
+        [
+          'Activity',
+          'Returning WAU (7-day overlap)',
+          String(activity.returning_wau ?? 0),
+        ],
+        [
+          'Activity',
+          'Returning MAU (30-day overlap)',
+          String(activity.returning_mau ?? 0),
         ],
         ['Activity', 'WAU', String(activity.wau)],
         ['Activity', 'MAU', String(activity.mau)],
@@ -721,18 +709,6 @@ export default function AnalyticsPage() {
           'Engagement Overview',
           'Returning users (range)',
           String(engagementOverview.returning_users_range ?? 0),
-        ],
-      );
-    }
-
-    if (aiMetrics) {
-      rows.push(
-        ['AI Engagement', 'Total Sessions', String(aiMetrics.total_sessions)],
-        ['AI Engagement', 'Unique Users', String(aiMetrics.unique_users)],
-        [
-          'AI Engagement',
-          'Avg Sessions/User',
-          aiMetrics.avg_sessions_per_user.toFixed(2),
         ],
       );
     }
@@ -895,19 +871,6 @@ export default function AnalyticsPage() {
       });
     }
 
-    if (aiMetrics?.trends?.length) {
-      rows.push(['', '', '']);
-      rows.push(['AI Trend', 'date', 'sessions', 'tokens']);
-      aiMetrics.trends.forEach((point) => {
-        rows.push([
-          'AI Trend',
-          point.date,
-          String(point.sessions ?? 0),
-          String(point.tokens ?? 0),
-        ]);
-      });
-    }
-
     if (featureUsage?.heatmap?.length) {
       rows.push(['', '', '']);
       rows.push(['Feature Heatmap', 'date', 'feature', 'count']);
@@ -1056,7 +1019,6 @@ export default function AnalyticsPage() {
   if (
     loading &&
     !activity &&
-    !aiMetrics &&
     !conversions &&
     !notifications &&
     !featureUsage &&
@@ -1274,12 +1236,31 @@ export default function AnalyticsPage() {
                       <Activity className='h-5 w-5 text-lunary-secondary-300' />
                     }
                   />
+                  <MiniStat
+                    label='Returning WAU (7-day overlap)'
+                    value={(
+                      engagementOverview?.returning_wau ?? 0
+                    ).toLocaleString()}
+                    icon={
+                      <Activity className='h-5 w-5 text-lunary-success-300' />
+                    }
+                  />
+                  <MiniStat
+                    label='Returning MAU (30-day overlap)'
+                    value={(
+                      engagementOverview?.returning_mau ?? 0
+                    ).toLocaleString()}
+                    icon={
+                      <Activity className='h-5 w-5 text-lunary-primary-300' />
+                    }
+                  />
                 </div>
                 <div className='rounded-lg border border-zinc-800/30 bg-zinc-950/40 px-3 py-2 text-xs text-zinc-400'>
                   Returning users (range) are users with 2+ distinct active days
-                  inside the selected range. Returning DAU counts users active
-                  on the selected end date who were also active on an earlier
-                  day in the selected range.
+                  inside the selected range. Returning DAU counts signed-in
+                  users active on the selected end date who were also active on
+                  an earlier day in the selected range; identity links ensure we
+                  dedupe anonymous→signed transitions.
                 </div>
 
                 <div className='grid gap-4 md:grid-cols-3'>
@@ -1494,11 +1475,15 @@ export default function AnalyticsPage() {
                     {` ${endDate}`}, WAU = {` ${wauWindowStart} to ${endDate}`},
                     MAU = {` ${mauWindowStart} to ${endDate}`}
                   </div>
+                  <div className='mt-2 text-xs text-zinc-400'>
+                    Page-View DAU is deduplicated across `page_viewed` canonical
+                    events for the selected window.
+                  </div>
                 </div>
                 <div className='grid gap-4 md:grid-cols-3'>
                   <div className='space-y-2 rounded-xl border border-zinc-800/60 bg-zinc-950/50 p-4'>
                     <p className='text-xs uppercase tracking-wider text-zinc-400'>
-                      Sitewide (page views)
+                      Page-View DAU
                     </p>
                     <div className='text-sm text-zinc-300'>
                       <div className='flex items-center justify-between'>
@@ -1529,12 +1514,6 @@ export default function AnalyticsPage() {
                       <div className='flex items-center justify-between'>
                         <span>DAU</span>
                         <span>{(activity?.dau ?? 0).toLocaleString()}</span>
-                      </div>
-                      <div className='flex items-center justify-between'>
-                        <span>DAU (App opened)</span>
-                        <span>
-                          {(activity?.app_opened_dau ?? 0).toLocaleString()}
-                        </span>
                       </div>
                       <div className='flex items-center justify-between'>
                         <span>WAU</span>
@@ -2320,7 +2299,7 @@ export default function AnalyticsPage() {
             </section>
           )}
 
-          <section className='grid grid-cols-1 gap-6 lg:grid-cols-2'>
+          <section className='grid grid-cols-1 gap-6'>
             <Card className='border-zinc-800/30 bg-zinc-900/10'>
               <CardHeader>
                 <CardTitle className='text-base font-medium'>
@@ -2351,20 +2330,6 @@ export default function AnalyticsPage() {
                       </div>
                     </div>
                   ))}
-              </CardContent>
-            </Card>
-
-            <Card className='border-zinc-800/30 bg-zinc-900/10'>
-              <CardHeader>
-                <CardTitle className='text-base font-medium'>
-                  AI Mode Breakdown
-                </CardTitle>
-                <CardDescription className='text-xs text-zinc-400'>
-                  Usage by mode
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <ModeBreakdown modes={aiMetrics?.mode_breakdown ?? []} />
               </CardContent>
             </Card>
           </section>
@@ -2432,71 +2397,21 @@ export default function AnalyticsPage() {
             </Card>
           </section>
 
-          <section className='grid grid-cols-1 gap-6 lg:grid-cols-2'>
-            <Card className='border-zinc-800/30 bg-zinc-900/10'>
-              <CardHeader>
-                <CardTitle className='text-base font-medium'>
-                  AI Usage Summary
-                </CardTitle>
-                <CardDescription className='text-xs text-zinc-400'>
-                  Engagement metrics
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className='grid grid-cols-1 gap-4 md:grid-cols-2'>
-                  <MiniStat
-                    label='Total Sessions'
-                    value={aiMetrics?.total_sessions ?? 0}
-                    icon={
-                      <Sparkles className='h-5 w-5 text-lunary-primary-300' />
-                    }
-                  />
-                  <MiniStat
-                    label='Unique Users'
-                    value={aiMetrics?.unique_users ?? 0}
-                    icon={
-                      <Activity className='h-5 w-5 text-lunary-success-300' />
-                    }
-                  />
-                  <MiniStat
-                    label='Tokens / User'
-                    value={
-                      aiMetrics
-                        ? aiMetrics.avg_tokens_per_user.toFixed(0)
-                        : 'N/A'
-                    }
-                    icon={
-                      <Target className='h-5 w-5 text-lunary-secondary-300' />
-                    }
-                  />
-                  <MiniStat
-                    label='Completion Rate'
-                    value={
-                      aiMetrics
-                        ? `${aiMetrics.completion_rate.toFixed(1)}%`
-                        : 'N/A'
-                    }
-                    icon={
-                      <Sparkles className='h-5 w-5 text-lunary-accent-300' />
-                    }
-                  />
-                </div>
-              </CardContent>
-            </Card>
-
+          <section className='grid grid-cols-1 gap-6'>
             <Card className='border-zinc-800/30 bg-zinc-900/10'>
               <CardHeader>
                 <CardTitle className='text-base font-medium'>
                   Page Interaction
                 </CardTitle>
                 <CardDescription className='text-xs text-zinc-400'>
-                  Pageview tracking is limited to aggregate DAU/WAU/MAU only.
+                  Pageview tracking is limited to the deduplicated Page-View DAU
+                  total.
                 </CardDescription>
               </CardHeader>
               <CardContent>
                 <div className='rounded-xl border border-zinc-800 bg-zinc-950/40 p-4 text-sm text-zinc-300'>
-                  We record lightweight page_viewed events for sitewide activity
-                  totals without storing full session data.
+                  We record lightweight `page_viewed` events for sitewide
+                  activity totals without storing full session data.
                 </div>
               </CardContent>
             </Card>
@@ -2911,37 +2826,6 @@ function RetentionCard({
       <div className='mt-1.5 text-2xl font-light tracking-tight text-white'>
         {typeof value === 'number' ? `${value.toFixed(1)}%` : 'N/A'}
       </div>
-    </div>
-  );
-}
-
-function ModeBreakdown({ modes }: { modes: AiMode[] }) {
-  if (!modes.length) {
-    return (
-      <div className='text-sm text-zinc-400'>No AI usage data available.</div>
-    );
-  }
-
-  const max = Math.max(...modes.map((mode) => Number(mode.percentage ?? 0)), 1);
-
-  return (
-    <div className='space-y-3'>
-      {modes.map((mode) => (
-        <div key={mode.mode}>
-          <div className='flex items-center justify-between text-sm text-zinc-400'>
-            <span className='capitalize'>{mode.mode || 'general'}</span>
-            <span>{Number(mode.percentage ?? 0).toFixed(1)}%</span>
-          </div>
-          <div className='h-2 rounded-full bg-zinc-800'>
-            <div
-              className='h-2 rounded-full bg-gradient-to-r from-sky-400 to-lunary-primary-500'
-              style={{
-                width: `${(Number(mode.percentage ?? 0) / max) * 100}%`,
-              }}
-            />
-          </div>
-        </div>
-      ))}
     </div>
   );
 }
