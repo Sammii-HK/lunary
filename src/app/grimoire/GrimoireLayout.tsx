@@ -371,9 +371,24 @@ const GRIMOIRE_FULL_STRUCTURE = [
         description: 'Current planetary transits',
       },
       {
+        title: 'Daily Horoscopes',
+        href: '/grimoire/horoscopes/today',
+        description: 'Daily horoscope forecasts for all signs',
+      },
+      {
+        title: 'Weekly Horoscopes',
+        href: '/grimoire/horoscopes/weekly',
+        description: 'Weekly horoscope forecasts for all signs',
+      },
+      {
         title: 'Monthly Horoscopes',
         href: '/grimoire/horoscopes',
-        description: 'Sign forecasts',
+        description: 'Monthly horoscope forecasts for all signs',
+      },
+      {
+        title: 'Yearly Horoscopes',
+        href: '/grimoire/horoscopes/yearly',
+        description: 'Yearly horoscope forecasts for all signs',
       },
       {
         title: 'Astronomy',
