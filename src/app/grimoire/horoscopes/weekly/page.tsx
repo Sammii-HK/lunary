@@ -9,9 +9,9 @@ import { CosmicHighlight } from '../CosmicHighlight';
 export const revalidate = 604800;
 
 export const metadata: Metadata = {
-  title: 'Weekly Horoscope Hub | Lunary Grimoire',
+  title: 'Weekly Horoscope Hub: Insights for All Zodiac Signs | Lunary',
   description:
-    'Public weekly horoscopes for every zodiac sign, refreshed with transit and lunar context for the week ahead.',
+    'See the week ahead for every zodiac sign. Fresh horoscopes each week with transit context, lunar phases, and astrological guidance.',
   keywords: [
     'weekly horoscope',
     'weekly astrology',

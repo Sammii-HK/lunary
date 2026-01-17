@@ -10,9 +10,10 @@ import { SEOContentTemplate } from '@/components/grimoire/SEOContentTemplate';
 import { getCosmicConnections } from '@/lib/cosmicConnectionsConfig';
 
 export const metadata: Metadata = {
-  title: 'Astrological Transits: Meaning, How To Read Them, Timing | Lunary',
+  title:
+    'Astrological Transits: Meanings & How To Read Planetary Movement | Lunary',
   description:
-    'Transits meaning, how to read transits, and the transit of the day—learn how planetary timing shapes your life and where to start.',
+    'Understand astrological transits and timing. Learn how planetary movements shape daily life and long-term growth.',
   keywords: [
     'astrological transits',
     'transit meaning',

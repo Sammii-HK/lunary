@@ -29,9 +29,9 @@ async function getTransitOfDay(): Promise<TransitOfDayData | null> {
 }
 
 export const metadata: Metadata = {
-  title: 'Today’s Astrology Transit | Lunary',
+  title: 'Today’s Astrology Transit: Planetary Highlights & Guidance | Lunary',
   description:
-    'See the most influential transit today with quick highlights and daily timing guidance.',
+    'See today’s most influential planetary transit with real-time insights, timing, and interpretation from Lunary’s astrologers.',
   alternates: {
     canonical: 'https://lunary.app/grimoire/transits/transit-of-the-day',
   },

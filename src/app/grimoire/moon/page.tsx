@@ -7,9 +7,9 @@ import { getCosmicConnections } from '@/lib/cosmicConnectionsConfig';
 export const revalidate = 86400;
 
 export const metadata: Metadata = {
-  title: 'Moon Phases: New, Full, Waxing & Waning Meanings - Lunary',
+  title: 'Moon Phases: New, Full, Waxing & Waning Meanings | Lunary',
   description:
-    "Explore moon phases, full moon names, and lunar wisdom. Learn about the moon's influence on magic and daily life. Discover moon rituals, moon signs, eclipses, and how to work with lunar energy for manifestation and spiritual growth.",
+    'Explore moon phases, full moon names, and lunar rituals. Learn how to work with the Moon’s cycles for manifestation and emotional balance.',
   keywords: [
     'moon phases',
     'lunar cycles',

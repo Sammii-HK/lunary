@@ -9,10 +9,9 @@ import { SEOContentTemplate } from '@/components/grimoire/SEOContentTemplate';
 import { zodiacSymbol } from '@/constants/symbols';
 
 export const metadata: Metadata = {
-  title:
-    'Crystal Healing: The Complete Guide to Crystals & Their Powers - Lunary',
+  title: 'Crystal Healing: Complete Guide to Crystals & Their Powers | Lunary',
   description:
-    'Discover the healing properties of crystals and gemstones. Learn how to cleanse, charge, and use crystals for healing, meditation, and manifestation. Complete guide with zodiac and chakra correspondences.',
+    'Discover the healing power of crystals. Learn how to cleanse, charge, and use crystals for meditation, manifestation, and wellbeing.',
   keywords: [
     'crystal healing',
     'healing crystals',

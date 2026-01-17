@@ -9,9 +9,10 @@ import { CosmicHighlight } from '../CosmicHighlight';
 export const revalidate = 86400;
 
 export const metadata: Metadata = {
-  title: "Today's Horoscopes | Real-Time Astrology by Zodiac Sign | Lunary",
+  title:
+    'Today’s Horoscopes: Real-Time Astrology for Every Zodiac Sign | Lunary',
   description:
-    'Read today’s horoscopes for all zodiac signs, based on real planetary movement and current lunar conditions. Clear, grounded astrology updated daily — with the option to explore deeper personal insight through your full birth chart.',
+    'Read your free, real-time horoscope for all zodiac signs. Updated daily with planetary transits and lunar influences from Lunary’s astrology experts.',
   keywords: [
     'today horoscope',
     'daily horoscope',

@@ -15,9 +15,9 @@ import { stringToKebabCase } from 'utils/string';
 import { Heading } from '@/components/ui/Heading';
 
 export const metadata: Metadata = {
-  title: 'Crystals A-Z: Meanings, Properties & Healing Guide - Lunary',
+  title: 'Crystals A-Z: Meanings, Properties & Uses for Healing | Lunary',
   description:
-    'Complete guide to over 200 crystals, their meanings and usage. Learn how to choose, cleanse, and work with crystals for healing, protection, and magical practice.',
+    'Browse over 200 crystals with meanings, properties, and uses. Discover which stones support healing, protection, and spiritual alignment.',
   keywords: [
     'crystals',
     'crystal meanings',

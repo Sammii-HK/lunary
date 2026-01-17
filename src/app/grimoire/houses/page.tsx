@@ -16,9 +16,10 @@ import {
 } from '@/lib/schema';
 
 export const metadata: Metadata = {
-  title: 'The 12 Astrological Houses: Meanings & Themes Explained | Lunary',
+  title:
+    'The 12 Astrological Houses: Meanings, Themes & Chart Examples | Lunary',
   description:
-    'Complete guide to the 12 houses in astrology. Learn what each house represents, from identity (1st) to spirituality (12th), and how planet placements affect you.',
+    'Learn the meaning of all 12 astrological houses—from self and relationships to spirituality. Understand how each house shapes your birth chart.',
   keywords: [
     'astrological houses',
     '12 houses',

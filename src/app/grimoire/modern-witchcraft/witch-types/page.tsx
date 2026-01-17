@@ -9,7 +9,7 @@ import CosmicConnections from '@/components/grimoire/CosmicConnections';
 export const metadata: Metadata = {
   title: 'Types of Witches: Hedge, Kitchen, Green, Eclectic & More | Lunary',
   description:
-    'Explore different types of witches and magical paths. From Green Witch to Cosmic Witch, find the practice that resonates with you.',
+    'Discover witch types and magical paths—from Green to Cosmic Witch. Find the traditions, tools, and practices that resonate with your spirit.',
   keywords: [
     'types of witches',
     'witch types',

@@ -8,9 +8,9 @@ import { CosmicConnectionSection } from '@/lib/cosmicConnectionsConfig';
 import { Button } from '@/components/ui/button';
 
 export const metadata: Metadata = {
-  title: 'Modern Witchcraft: Paths, Practice & Community - Lunary',
+  title: 'Modern Witchcraft: Paths, Practice & Community | Lunary',
   description:
-    'Comprehensive guide to modern witchcraft at Lunary. Explore different witch paths, core practices, building a sustainable practice, and finding community.',
+    'Explore modern witchcraft with Lunary’s guide to paths, rituals, and community. Build a grounded, sustainable magical practice.',
   keywords: [
     'modern witchcraft',
     'witchcraft guide',
