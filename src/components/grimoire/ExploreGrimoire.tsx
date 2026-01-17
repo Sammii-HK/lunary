@@ -1,23 +1,27 @@
 import { NavParamLink } from '../NavParamLink';
+import { Heading } from '@/components/ui/Heading';
 
 const GRIMOIRE_LINKS = [
-  { href: '/birth-chart', label: 'Birth Chart' },
+  { href: '/grimoire/horoscopes', label: 'Horoscopes' },
+  { href: '/grimoire/events', label: 'Astrological Events' },
+  { href: '/grimoire/moon', label: 'Lunar Events' },
+  { href: '/grimoire/transits', label: 'Transits' },
+  { href: '/grimoire/birth-chart', label: 'Birth Chart' },
   { href: '/grimoire/zodiac', label: 'Zodiac Signs' },
   { href: '/grimoire/astronomy/planets', label: 'Planets' },
   { href: '/grimoire/tarot', label: 'Tarot' },
   { href: '/grimoire/crystals', label: 'Crystals' },
-  { href: '/grimoire/moon/phases', label: 'Moon Phases' },
-  { href: '/grimoire/houses/overview/first', label: 'Houses' },
+  { href: '/grimoire/guides/moon-phases-guide', label: 'Moon Phases' },
+  { href: '/grimoire/houses/overview/', label: 'Astrological Houses' },
   { href: '/grimoire/spells', label: 'Spells' },
-  { href: '/grimoire/horoscopes', label: 'Horoscopes' },
 ];
 
 export function ExploreGrimoire() {
   return (
     <section className='mt-12 pt-8 border-t border-zinc-800'>
-      <h2 className='text-xl font-medium text-zinc-100 mb-4'>
+      <Heading as='h2' variant='h2'>
         Explore the Grimoire
-      </h2>
+      </Heading>
       <p className='text-sm text-zinc-400 mb-4'>
         Continue your cosmic journey through Lunary&apos;s library of
         astrological wisdom.

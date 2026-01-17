@@ -4,9 +4,19 @@ import { notFound } from 'next/navigation';
 import { ArrowLeft, ArrowRight, Calendar } from 'lucide-react';
 import { renderJsonLd } from '@/lib/schema';
 import { Breadcrumbs } from '@/components/grimoire/Breadcrumbs';
-import { MONTHS, MONTH_DISPLAY_NAMES } from '@/constants/seo/monthly-horoscope';
+import {
+  MONTHS,
+  MONTH_DISPLAY_NAMES,
+  ZodiacSign,
+} from '@/constants/seo/monthly-horoscope';
+import { ContextualNudgeButton } from '@/components/grimoire/ContextualNudgeButton';
+import { HoroscopeCosmicConnections } from '@/components/grimoire/HoroscopeCosmicConnections';
+import { Heading } from '@/components/ui/Heading';
+import { getContextualNudge } from '@/lib/grimoire/getContextualNudge';
 
 export const revalidate = 604800;
+
+const contextualNudge = getContextualNudge('/horoscope/weekly');
 
 const signs = [
   { name: 'Aries', symbol: '♈', dates: 'Mar 21 - Apr 19', element: 'Fire' },
@@ -109,6 +119,7 @@ export default async function WeeklyHoroscopePage({
 }) {
   const { sign } = await params;
   const signData = signs.find((s) => s.name.toLowerCase() === sign);
+  const signKey = sign.toLowerCase() as ZodiacSign;
 
   if (!signData) {
     notFound();
@@ -147,7 +158,7 @@ export default async function WeeklyHoroscopePage({
   };
 
   return (
-    <div className='min-h-screen bg-zinc-950 text-zinc-100'>
+    <div className='min-h-fit bg-zinc-950 text-zinc-100'>
       {renderJsonLd(articleSchema)}
       <div className='max-w-4xl mx-auto px-4 py-12'>
         <Breadcrumbs
@@ -263,21 +274,23 @@ export default async function WeeklyHoroscopePage({
           </Link>
         </section>
 
-        <section className='p-6 rounded-xl border border-lunary-primary-700 bg-gradient-to-r from-lunary-primary-900/20 to-lunary-rose-900/20 text-center'>
-          <h2 className='text-xl font-medium text-lunary-primary-300 mb-2'>
-            Get Personalised Insights
-          </h2>
-          <p className='text-zinc-300 mb-4'>
-            Your weekly horoscope, tailored to your exact birth chart
-            placements.
-          </p>
-          <Link
-            href='/birth-chart'
-            className='inline-flex px-6 py-3 rounded-lg bg-lunary-primary-900/30 hover:bg-lunary-primary-900/50 border border-lunary-primary-700 text-lunary-primary-300 font-medium transition-colors'
+        <section className='bg-gradient-to-r from-lunary-primary-900/30 to-lunary-highlight-900/30 border border-lunary-primary-700 rounded-lg p-6 sm:p-8 my-4 md:my-6 text-center overflow-x-hidden'>
+          <Heading
+            variant='h2'
+            className='text-lunary-primary-200 mb-3 break-words text-xl md:text-2xl'
           >
-            Calculate Your Birth Chart
-          </Link>
+            {contextualNudge.headline}
+          </Heading>
+          <p className='text-zinc-200 mb-5 leading-relaxed'>
+            {contextualNudge.subline}
+          </p>
+          <ContextualNudgeButton nudge={contextualNudge} />
         </section>
+        <HoroscopeCosmicConnections
+          variant='weekly-hub'
+          sign={signKey}
+          currentYear={currentYear}
+        />
       </div>
     </div>
   );

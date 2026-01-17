@@ -61,7 +61,7 @@ export function ContextualNudgeButton({
 
   return (
     <>
-      <Button variant='lunary-soft' size='lg' onClick={handleClick}>
+      <Button variant='lunary-soft' onClick={handleClick}>
         {nudge.buttonLabel}
       </Button>
 

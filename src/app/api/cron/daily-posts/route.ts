@@ -645,7 +645,8 @@ async function runDailyPosts(dateStr: string) {
   const redditTitle = `Daily Cosmic Guidance - ${dateStr}: ${cosmicContent.primaryEvent.name}`;
 
   // Generate post content
-  const postContent = generateCosmicPost(cosmicContent).snippet;
+  const { snippet: postContent, snippetShort: postSnippetShort } =
+    generateCosmicPost(cosmicContent);
 
   // Generate AI quote for Pinterest/TikTok using shared utility
   const quote = await generateCatchyQuote(postContent, 'cosmic');
@@ -683,13 +684,21 @@ async function runDailyPosts(dateStr: string) {
     // `${productionUrl}/api/og/horoscope?date=${dateStr}`,
   ];
 
-  const instagramContent = `${postContent}\n\n${platformHashtags.instagram}`;
-  const pinterestContent = platformHashtags.pinterest
-    ? `${postContent}\n\n${platformHashtags.pinterest}`
-    : postContent;
-  const facebookContent = platformHashtags.facebook
-    ? `${postContent}\n\n${platformHashtags.facebook}`
-    : postContent;
+  const astroLeadFull = `Current astrology: ${postContent}`;
+  const astroSynopsis = (postSnippetShort || '').replace(/\n/g, ' ').trim();
+  const astroLeadShort = `Current astrology: ${astroSynopsis}`;
+  const instagramContent = addAstrologyHashtags(
+    astroLeadFull,
+    platformHashtags.instagram,
+  );
+  const pinterestContent = addAstrologyHashtags(
+    astroLeadFull,
+    platformHashtags.pinterest,
+  );
+  const facebookContent = addAstrologyHashtags(
+    astroLeadFull,
+    platformHashtags.facebook,
+  );
 
   // Generate posts with dynamic content
   const posts: DailySocialPost[] = [
@@ -698,7 +707,7 @@ async function runDailyPosts(dateStr: string) {
       content: instagramContent,
       platforms: ['pinterest', 'facebook', 'instagram'],
       imageUrls: buildCosmicMediaUrls(getCosmicFormat('instagram')),
-      alt: `${cosmicContent.primaryEvent.name} - ${cosmicContent.primaryEvent.energy}. Daily cosmic guidance from lunary.app.`,
+      alt: `${cosmicContent.primaryEvent.name} - ${cosmicContent.primaryEvent.energy}. Daily cosmic guidance from lunary.`,
       scheduledDate: new Date(scheduleBase.getTime()).toISOString(),
       // redditOptions: {
       //   title: redditTitle,
@@ -722,15 +731,24 @@ async function runDailyPosts(dateStr: string) {
           media: buildCosmicMediaUrls(getCosmicFormat('facebook')),
         },
         threads: {
-          content: `${postContent}`,
+          content: addAstrologyHashtags(
+            astroLeadFull,
+            platformHashtags.threads,
+          ),
           media: buildCosmicMediaUrls(getCosmicFormat('threads')),
         },
         tiktok: {
-          content: `${generateCosmicPost(cosmicContent).snippetShort} ${platformHashtags.tiktok}`,
+          content: addAstrologyHashtags(
+            astroLeadShort,
+            platformHashtags.tiktok,
+          ),
           media: buildCosmicMediaUrls(getCosmicFormat('tiktok')),
         },
         twitter: {
-          content: `${generateCosmicPost(cosmicContent).snippetShort.replace(/\n/g, ' ')} ${platformHashtags.twitter}`,
+          content: addAstrologyHashtags(
+            astroLeadShort,
+            platformHashtags.twitter,
+          ),
           media: buildCosmicMediaUrls(getCosmicFormat('twitter')),
           twitterOptions: {
             thread: false,
@@ -738,11 +756,17 @@ async function runDailyPosts(dateStr: string) {
           },
         },
         bluesky: {
-          content: `${generateCosmicPost(cosmicContent).snippetShort} ${platformHashtags.bluesky}`,
+          content: addAstrologyHashtags(
+            astroLeadShort,
+            platformHashtags.bluesky,
+          ),
           media: buildCosmicMediaUrls(getCosmicFormat('bluesky')),
         },
         linkedin: {
-          content: `${postContent}\n\n${platformHashtags.linkedin}`,
+          content: addAstrologyHashtags(
+            astroLeadFull,
+            platformHashtags.linkedin,
+          ),
           media: buildCosmicMediaUrls(getCosmicFormat('linkedin')),
         },
       },
@@ -3290,6 +3314,98 @@ function addHashtags(text: string, hashtags?: string): string {
   return `${text}\n\n${hashtags.trim()}`;
 }
 
+const transitHashtagPriority = [
+  '#astrology',
+  '#transit',
+  '#planetary',
+  '#horoscope',
+  '#dailytransit',
+];
+
+const retrogradeHashtagPriority = [
+  '#astrology',
+  '#retrograde',
+  '#mercuryretrograde',
+  '#planetary',
+  '#horoscope',
+];
+
+const astrologyHashtagPriority = [
+  '#astrology',
+  '#currentastrology',
+  '#horoscope',
+  '#planetary',
+  '#cosmicinsight',
+];
+
+const retrogradeReflectionTemplates = [
+  'This is a reflective phase for {focus}, especially around clarity and follow-through.',
+  'This transit slows momentum, making it a useful time to review {focus} rather than push ahead.',
+  'You may notice {focus} feels more inward or uncertain, inviting patience rather than action.',
+  'There’s value in pausing to reassess {focus} during this retrograde.',
+  'How this shows up depends on your chart, but the collective tone leans reflective rather than decisive for {focus}.',
+];
+
+function getRetrogradeReflectionLine(focus: string, sign?: string): string {
+  const index =
+    (focus.length +
+      (sign?.length ?? 0) +
+      retrogradeReflectionTemplates.length) %
+    retrogradeReflectionTemplates.length;
+  return retrogradeReflectionTemplates[index].replace('{focus}', focus);
+}
+
+function mergeHashtagsWithPriority(
+  baseHashtags: string | undefined,
+  priorityHashtags: string[],
+): string {
+  const tags: string[] = [];
+  const seen = new Set<string>();
+
+  const pushTag = (tag?: string) => {
+    if (!tag) return;
+    const trimmed = tag.trim();
+    if (trimmed && !seen.has(trimmed)) {
+      seen.add(trimmed);
+      tags.push(trimmed);
+    }
+  };
+
+  for (const tag of priorityHashtags) {
+    pushTag(tag);
+  }
+
+  if (baseHashtags) {
+    baseHashtags.split(/\s+/).forEach(pushTag);
+  }
+
+  return tags.join(' ');
+}
+
+function addFocusedHashtags(
+  text: string,
+  baseHashtags: string | undefined,
+  priorityHashtags: string[],
+): string {
+  const mergedHashtags = mergeHashtagsWithPriority(
+    baseHashtags,
+    priorityHashtags,
+  );
+  return addHashtags(text, mergedHashtags);
+}
+
+function addTransitHashtags(text: string, baseHashtags?: string): string {
+  return addFocusedHashtags(text, baseHashtags, transitHashtagPriority);
+}
+
+function addRetrogradeHashtags(text: string, baseHashtags?: string): string {
+  return addFocusedHashtags(text, baseHashtags, retrogradeHashtagPriority);
+}
+
+function addAstrologyHashtags(text: string, baseHashtags?: string): string {
+  return addFocusedHashtags(text, baseHashtags, astrologyHashtagPriority);
+}
+
 function buildRetrogradeTextPosts({
   events,
   getSchedule,
@@ -3318,7 +3434,7 @@ function buildRetrogradeTextPosts({
   );
 
   const posts: DailySocialPost[] = [];
-  // const cta = 'Find the full timing details at lunary.app';
+  // const cta = 'Find the full timing details with Lunary.app';
 
   for (const event of retrogradeEvents) {
     const planet = event.planet;
@@ -3328,16 +3444,29 @@ function buildRetrogradeTextPosts({
       event.type === 'retrograde_start'
         ? 'stations retrograde'
         : 'stations direct';
+    const retrogradePrefix =
+      event.type === 'retrograde_start'
+        ? 'Astrology update'
+        : 'Current astrology';
     const focus = focusMap[planet] || `${planet.toLowerCase()} energy`;
     const reflectionLine =
       event.type === 'retrograde_start'
-        ? `Hold space for reflection on ${focus}.`
+        ? getRetrogradeReflectionLine(focus, event.sign)
         : `Momentum returns to ${focus}.`;
-    const baseMessage = `${planet} ${actionLabel} in ${event.sign}. ${reflectionLine}`;
+    const baseMessage = `${retrogradePrefix}: ${planet} ${actionLabel} in ${event.sign}. ${reflectionLine}`;
 
-    const xContent = addHashtags(baseMessage, platformHashtags.twitter);
-    const threadsContent = addHashtags(baseMessage, platformHashtags.threads);
-    const blueskyContent = addHashtags(baseMessage, platformHashtags.bluesky);
+    const xContent = addRetrogradeHashtags(
+      baseMessage,
+      platformHashtags.twitter,
+    );
+    const threadsContent = addRetrogradeHashtags(
+      baseMessage,
+      platformHashtags.threads,
+    );
+    const blueskyContent = addRetrogradeHashtags(
+      baseMessage,
+      platformHashtags.bluesky,
+    );
 
     posts.push({
       name: `Retrograde • ${planet} ${
@@ -3371,13 +3500,23 @@ function buildTransitSummaryPost({
   getSchedule: () => string;
 }): DailySocialPost | null {
   const lines: string[] = [];
+  const leadLines: string[] = [];
   const primaryEvent = cosmicContent.primaryEvent;
 
   if (primaryEvent?.name) {
-    const energyLine = primaryEvent.energy
-      ? `bringing ${primaryEvent.energy.toLowerCase()} energy.`
-      : 'setting the tone for the day.';
-    lines.push(`${primaryEvent.name} ${energyLine}`);
+    const energyDescriptor = primaryEvent.energy?.toLowerCase();
+    const tone = energyDescriptor
+      ? `is channeling ${energyDescriptor} energy`
+      : 'is setting the tone for the day';
+    lines.push(`${primaryEvent.name} ${tone}.`);
+
+    const transitIntro = energyDescriptor
+      ? `Planetary transit: ${primaryEvent.name} is channeling ${energyDescriptor} energy.`
+      : `Planetary transit: ${primaryEvent.name} is shaping the sky today.`;
+    const slowdownLine = energyDescriptor
+      ? `A time to slow down and lean into ${energyDescriptor} energy.`
+      : 'A time to slow down and observe the planetary rhythm.';
+    leadLines.push(transitIntro, slowdownLine);
   }
 
   const ingressEvents = Array.isArray(cosmicContent.ingressEvents)
@@ -3385,7 +3524,9 @@ function buildTransitSummaryPost({
     : [];
   ingressEvents.slice(0, 2).forEach((event: any) => {
     if (event?.planet && event?.sign) {
-      lines.push(`${event.planet} enters ${event.sign} today.`);
+      lines.push(
+        `${event.planet} slides into ${event.sign}, brightening ${event.sign} energy.`,
+      );
     }
   });
 
@@ -3403,6 +3544,7 @@ function buildTransitSummaryPost({
     .map(formatTransitAspectLine);
 
   lines.push(...aspectLines);
+  lines.unshift(...leadLines);
 
   if (lines.length === 0) {
     return null;
@@ -3418,13 +3560,21 @@ function buildTransitSummaryPost({
   )}`;
   const summaryBody = [
     header,
+    '',
     ...lines,
-    'Track every angle at lunary.app',
+    '',
+    'Track every angle with Lunary',
   ].join('\n');
 
-  const xContent = addHashtags(summaryBody, platformHashtags.twitter);
-  const threadsContent = addHashtags(summaryBody, platformHashtags.threads);
-  const blueskyContent = addHashtags(summaryBody, platformHashtags.bluesky);
+  const xContent = addTransitHashtags(summaryBody, platformHashtags.twitter);
+  const threadsContent = addTransitHashtags(
+    summaryBody,
+    platformHashtags.threads,
+  );
+  const blueskyContent = addTransitHashtags(
+    summaryBody,
+    platformHashtags.bluesky,
+  );
 
   return {
     name: `Transit Snapshot • ${dateStr}`,

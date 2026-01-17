@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { ChevronDown, ChevronUp } from 'lucide-react';
+import { Heading } from '@/components/ui/Heading';
 
 export interface PAQItem {
   question: string;
@@ -25,7 +26,9 @@ export function PeopleAlsoAsk({
 
   return (
     <section className='space-y-4'>
-      <h2 className='text-2xl font-medium text-zinc-100'>{title}</h2>
+      <Heading as='h2' variant='h2'>
+        {title}
+      </Heading>
       <div className='space-y-2'>
         {questions.map((item, index) => (
           <div
@@ -34,12 +37,16 @@ export function PeopleAlsoAsk({
           >
             <button
               onClick={() => toggleQuestion(index)}
-              className='w-full flex items-center justify-between p-4 text-left hover:bg-zinc-800/50 transition-colors'
+              className='w-full flex items-center justify-between text-left hover:bg-zinc-800/50 transition-colors px-4 py-1'
               aria-expanded={openIndex === index}
             >
-              <span className='font-medium text-zinc-100 pr-4'>
+              <Heading
+                as='h3'
+                variant='h4'
+                className='text-lunary-secondary-200 font-normal pt-3'
+              >
                 {item.question}
-              </span>
+              </Heading>
               {openIndex === index ? (
                 <ChevronUp className='h-5 w-5 text-zinc-400 flex-shrink-0' />
               ) : (

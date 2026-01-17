@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import Image from 'next/image';
 import { ArrowRight } from 'lucide-react';
 import type { MoonEvent } from '@/lib/moon/events';
 
@@ -33,7 +34,11 @@ export default function MoonPhaseEventList({
     );
   }
 
-  const emoji = type === 'full' ? '🌕' : '🌑';
+  const iconSrc =
+    type === 'full'
+      ? '/icons/moon-phases/full-moon.svg'
+      : '/icons/moon-phases/new-moon.svg';
+  const iconAlt = type === 'full' ? 'Full moon' : 'New moon';
 
   return (
     <div className='grid gap-4'>
@@ -50,7 +55,13 @@ export default function MoonPhaseEventList({
             className='group flex items-center justify-between p-4 bg-zinc-900/60 border border-zinc-800/50 rounded-xl hover:bg-zinc-800/60 hover:border-lunary-primary-600 transition-all'
           >
             <div className='flex items-center gap-4'>
-              <span className='text-2xl'>{emoji}</span>
+              <Image
+                src={iconSrc}
+                alt={iconAlt}
+                width={24}
+                height={24}
+                className='h-10 w-10'
+              />
               <div>
                 <h3 className='font-medium text-white group-hover:text-lunary-primary-300'>
                   {title}

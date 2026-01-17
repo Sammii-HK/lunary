@@ -25,6 +25,7 @@
     { "match": "^/grimoire/correspondences", "hub": "symbolicSystems" },
     { "match": "^/grimoire/birth-chart", "hub": "personalContext" },
     { "match": "^/grimoire/events", "hub": "cosmicTiming" },
+    { "match": "^/grimoire/transits", "hub": "cosmicTiming" },
     { "match": "^/grimoire/astrology", "hub": "astrology" },
     { "match": "^/grimoire", "hub": "grimoireReference" }
   ],

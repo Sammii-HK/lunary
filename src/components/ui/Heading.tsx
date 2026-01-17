@@ -6,10 +6,12 @@ import { cn } from '@/lib/utils';
 const headingVariants = cva('text-zinc-100', {
   variants: {
     variant: {
-      h1: 'text-2xl md:text-4xl lg:text-5xl font-light tracking-tight',
-      h2: 'text-xl md:text-2xl font-medium tracking-tight',
-      h3: 'text-lg md:text-xl font-medium',
-      h4: 'text-base md:text-lg font-medium',
+      // text-xl md:text-2xl font-light lg:text-4xl text-lunary-primary-100 break-words
+      h1: 'text-xl md:text-2xl font-light tracking-tight lg:text-4xl text-lunary-primary-100 break-words',
+      // h1: 'text-2xl md:text-4xl lg:text-5xl font-light tracking-tight',
+      h2: 'text-lg md:text-xl font-light tracking-tight text-zinc-300 mb-3',
+      h3: 'text-sm md:text-md font-normal text-lunary-primary-300 mb-2',
+      h4: 'text-sm font-medium text-zinc-400 mb-3',
     },
   },
   defaultVariants: {
@@ -30,7 +32,11 @@ export const Heading = React.forwardRef<HTMLHeadingElement, HeadingProps>(
     return (
       <Comp
         ref={ref as any}
-        className={cn(headingVariants({ variant }), className)}
+        className={cn(
+          headingVariants({ variant }),
+          className,
+          'transition-colors',
+        )}
         {...props}
       />
     );

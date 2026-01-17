@@ -2,21 +2,15 @@ export const revalidate = 86400;
 
 import { Metadata } from 'next';
 import Link from 'next/link';
-import {
-  createArticleSchema,
-  createFAQPageSchema,
-  createBreadcrumbSchema,
-  renderJsonLd,
-} from '@/lib/schema';
-import { Breadcrumbs } from '@/components/grimoire/Breadcrumbs';
+import { SEOContentTemplate } from '@/components/grimoire/SEOContentTemplate';
 import { CosmicConnections } from '@/components/grimoire/CosmicConnections';
 import { CosmicConnectionSection } from '@/lib/cosmicConnectionsConfig';
 import { Button } from '@/components/ui/button';
 
 export const metadata: Metadata = {
-  title: 'Modern Witchcraft: Paths, Practice & Community - Lunary',
+  title: 'Modern Witchcraft: Paths, Practice & Community | Lunary',
   description:
-    'Comprehensive guide to modern witchcraft at Lunary. Explore different witch paths, core practices, building a sustainable practice, and finding community.',
+    'Explore modern witchcraft with Lunary’s guide to paths, rituals, and community. Build a grounded, sustainable magical practice.',
   keywords: [
     'modern witchcraft',
     'witchcraft guide',
@@ -99,117 +93,74 @@ const cosmicConnectionsSections: CosmicConnectionSection[] = [
   },
 ];
 
+const tableOfContents = [
+  { label: 'What Modern Witchcraft Means', href: '#what-is-witchcraft' },
+  { label: 'Common Witch Paths', href: '#paths' },
+  { label: 'Core Practices', href: '#core-practices' },
+  { label: 'Building a Sustainable Practice', href: '#sustainable' },
+  { label: 'Community, Solitary Practice & Safety', href: '#community' },
+  { label: 'Where to Go Next', href: '#where-next' },
+  { label: 'Frequently Asked Questions', href: '#faq' },
+];
+
+const heroContent = (
+  <p className='text-xl text-zinc-400 leading-relaxed max-w-3xl mx-auto'>
+    Modern witchcraft is a diverse spiritual practice that honors nature, works
+    with energy, and empowers practitioners to create positive change. This
+    guide covers what modern witchcraft means at Lunary, the many paths you can
+    explore, and how to build a sustainable practice.
+  </p>
+);
+
+const whatIsAnswer =
+  'At Lunary, modern witchcraft is a practice—not a religion, not a fixed tradition, not a set of rigid rules. It is a way of engaging with the world that honors natural cycles, works with symbolic and energetic tools, and places responsibility for your path in your own hands.';
+
+const whatIsFollowup =
+  'We define witchcraft broadly: the intentional use of focus, ritual, correspondences, and timing to create change. This includes spellwork, divination (like tarot), working with moon phases, herb and crystal magic, and journaling for self-discovery.';
+
 export default function ModernWitchcraftPage() {
-  const articleSchema = createArticleSchema({
-    headline: 'Modern Witchcraft: Paths, Practice & Community',
-    description:
-      'Comprehensive guide to modern witchcraft: paths, practices, and community.',
-    url: 'https://lunary.app/grimoire/modern-witchcraft',
-    keywords: ['modern witchcraft', 'witchcraft', 'witch paths'],
-    section: 'Witchcraft',
-  });
-
-  const faqSchema = createFAQPageSchema(faqs);
-  const breadcrumbSchema = createBreadcrumbSchema([
-    { name: 'Grimoire', url: '/grimoire' },
-    { name: 'Modern Witchcraft', url: '/grimoire/modern-witchcraft' },
-  ]);
-
   return (
-    <div className='p-4 md:p-8 max-w-4xl mx-auto'>
-      {renderJsonLd(articleSchema)}
-      {renderJsonLd(faqSchema)}
-      {renderJsonLd(breadcrumbSchema)}
-
-      <Breadcrumbs
-        items={[
-          { label: 'Grimoire', href: '/grimoire' },
-          { label: 'Modern Witchcraft' },
-        ]}
-      />
-
-      <header className='mb-12'>
-        <h1 className='text-4xl md:text-5xl font-light text-zinc-100 mb-6'>
-          Modern Witchcraft
-          <span className='block text-2xl text-lunary-primary-400 mt-2'>
-            Paths, Practice & Community
-          </span>
-        </h1>
-        <p className='text-xl text-zinc-400 leading-relaxed'>
-          Modern witchcraft is a diverse spiritual practice that honors nature,
-          works with energy, and empowers practitioners to create positive
-          change. This guide covers what modern witchcraft means at Lunary, the
-          many paths you can explore, and how to build a sustainable practice.
-        </p>
-      </header>
-
-      <nav className='bg-zinc-900/50 border border-zinc-800 rounded-xl p-6 mb-12'>
-        <h2 className='text-lg font-medium text-zinc-100 mb-4'>
-          Table of Contents
-        </h2>
-        <ol className='space-y-2 text-zinc-400'>
-          <li>
-            <a
-              href='#what-is-witchcraft'
-              className='hover:text-lunary-primary-400'
-            >
-              1. What Modern Witchcraft Means at Lunary
-            </a>
-          </li>
-          <li>
-            <a href='#paths' className='hover:text-lunary-primary-400'>
-              2. Common Witch Paths
-            </a>
-          </li>
-          <li>
-            <a href='#core-practices' className='hover:text-lunary-primary-400'>
-              3. Core Practices
-            </a>
-          </li>
-          <li>
-            <a href='#sustainable' className='hover:text-lunary-primary-400'>
-              4. Building a Sustainable Practice
-            </a>
-          </li>
-          <li>
-            <a href='#community' className='hover:text-lunary-primary-400'>
-              5. Community, Solitary Practice & Safety
-            </a>
-          </li>
-          <li>
-            <a href='#where-next' className='hover:text-lunary-primary-400'>
-              6. Where to Go Next
-            </a>
-          </li>
-          <li>
-            <a href='#faq' className='hover:text-lunary-primary-400'>
-              7. FAQ
-            </a>
-          </li>
-        </ol>
-      </nav>
-
-      {/* Section 1 */}
+    <SEOContentTemplate
+      title='Modern Witchcraft: Paths, Practice & Community - Lunary'
+      h1='Modern Witchcraft'
+      subtitle='Paths, Practice & Community'
+      description='Comprehensive guide to modern witchcraft at Lunary. Explore different witch paths, core practices, building a sustainable practice, and finding community.'
+      keywords={[
+        'modern witchcraft',
+        'witchcraft guide',
+        'types of witches',
+        'witchcraft practice',
+        'how to become a witch',
+        'witchcraft for beginners',
+      ]}
+      canonicalUrl='https://lunary.app/grimoire/modern-witchcraft'
+      heroContent={heroContent}
+      intro='Modern witchcraft is a diverse spiritual practice that honors nature, works with energy, and empowers practitioners to create positive change.'
+      whatIs={{
+        question: 'What does modern witchcraft mean at Lunary?',
+        answer: whatIsAnswer,
+      }}
+      tableOfContents={tableOfContents}
+      breadcrumbs={[
+        { label: 'Grimoire', href: '/grimoire' },
+        { label: 'Modern Witchcraft' },
+      ]}
+      faqs={faqs}
+      cosmicConnections={
+        <CosmicConnections
+          entityType='hub-glossary'
+          entityKey='modern-witchcraft'
+          title='Modern Witchcraft Connections'
+          sections={cosmicConnectionsSections}
+        />
+      }
+    >
       <section id='what-is-witchcraft' className='mb-16'>
-        <h2 className='text-3xl font-light text-zinc-100 mb-6'>
-          1. What Modern Witchcraft Means at Lunary
-        </h2>
-
-        <p className='text-zinc-300 leading-relaxed mb-6'>
-          At Lunary, modern witchcraft is a practice—not a religion, not a fixed
-          tradition, not a set of rigid rules. It is a way of engaging with the
-          world that honors natural cycles, works with symbolic and energetic
-          tools, and places responsibility for your path in your own hands.
-        </p>
-
-        <p className='text-zinc-300 leading-relaxed mb-6'>
-          We define witchcraft broadly: the intentional use of focus, ritual,
-          correspondences, and timing to create change. This includes spellwork,
-          divination (like tarot), working with moon phases, herb and crystal
-          magic, and journaling for self-discovery.
-        </p>
-
-        <div className='bg-zinc-900/50 border border-zinc-800 rounded-xl p-6'>
+        <div className='prose prose-invert max-w-none'>
+          <p className='text-zinc-300 leading-relaxed mb-6'>{whatIsAnswer}</p>
+          <p className='text-zinc-300 leading-relaxed'>{whatIsFollowup}</p>
+        </div>
+        <div className='mt-6 bg-zinc-900/50 border border-zinc-800 rounded-xl p-6'>
           <h3 className='text-lg font-medium text-zinc-100 mb-3'>
             Principles at Lunary
           </h3>
@@ -240,18 +191,15 @@ export default function ModernWitchcraftPage() {
         </div>
       </section>
 
-      {/* Section 2: Paths */}
       <section id='paths' className='mb-16'>
-        <h2 className='text-3xl font-light text-zinc-100 mb-6'>
-          2. Common Witch Paths
+        <h2 className='text-2xl font-medium text-zinc-100 mb-6'>
+          Common Witch Paths
         </h2>
-
         <p className='text-zinc-300 leading-relaxed mb-6'>
           There are many ways to practice witchcraft. These &quot;paths&quot;
           describe where practitioners focus their energy and which elements
           resonate with them most deeply. Most witches blend multiple paths.
         </p>
-
         <div className='grid grid-cols-1 md:grid-cols-2 gap-4 mb-6'>
           <div className='p-5 rounded-xl border border-zinc-800 bg-zinc-900/30'>
             <h3 className='font-medium text-zinc-100 mb-2'>🌿 Green Witch</h3>
@@ -298,7 +246,6 @@ export default function ModernWitchcraftPage() {
             </p>
           </div>
         </div>
-
         <Link
           href='/grimoire/modern-witchcraft/witch-types'
           className='text-lunary-primary-400 hover:text-lunary-primary-300'
@@ -307,17 +254,14 @@ export default function ModernWitchcraftPage() {
         </Link>
       </section>
 
-      {/* Section 3: Core Practices */}
       <section id='core-practices' className='mb-16'>
-        <h2 className='text-3xl font-light text-zinc-100 mb-6'>
-          3. Core Practices
+        <h2 className='text-2xl font-medium text-zinc-100 mb-6'>
+          Core Practices
         </h2>
-
         <p className='text-zinc-300 leading-relaxed mb-6'>
           Regardless of your specific path, these core practices form the
           foundation of most witchcraft traditions:
         </p>
-
         <div className='space-y-4'>
           <Link
             href='/grimoire/spells/fundamentals'
@@ -376,18 +320,15 @@ export default function ModernWitchcraftPage() {
         </div>
       </section>
 
-      {/* Section 4: Sustainable Practice */}
       <section id='sustainable' className='mb-16'>
-        <h2 className='text-3xl font-light text-zinc-100 mb-6'>
-          4. Building a Sustainable Practice
+        <h2 className='text-2xl font-medium text-zinc-100 mb-6'>
+          Building a Sustainable Practice
         </h2>
-
         <p className='text-zinc-300 leading-relaxed mb-6'>
           A sustainable practice is one you can maintain over years—not intense
           bursts followed by burnout. Here are principles for building something
           lasting:
         </p>
-
         <div className='bg-zinc-900/50 border border-zinc-800 rounded-xl p-6'>
           <ul className='space-y-4 text-zinc-300'>
             <li>
@@ -429,17 +370,14 @@ export default function ModernWitchcraftPage() {
         </div>
       </section>
 
-      {/* Section 5: Community */}
       <section id='community' className='mb-16'>
-        <h2 className='text-3xl font-light text-zinc-100 mb-6'>
-          5. Community, Solitary Practice & Safety
+        <h2 className='text-2xl font-medium text-zinc-100 mb-6'>
+          Community, Solitary Practice & Safety
         </h2>
-
         <p className='text-zinc-300 leading-relaxed mb-6'>
           You can practice entirely alone, with a small group, or within a
           formal coven or tradition. Each has advantages:
         </p>
-
         <div className='grid grid-cols-1 md:grid-cols-2 gap-6 mb-6'>
           <div className='p-5 rounded-xl border border-zinc-800 bg-zinc-900/30'>
             <h3 className='font-medium text-zinc-100 mb-2'>
@@ -462,7 +400,6 @@ export default function ModernWitchcraftPage() {
             </ul>
           </div>
         </div>
-
         <div className='bg-lunary-error-900/20 border border-lunary-error-700 rounded-xl p-6'>
           <h3 className='text-lg font-medium text-lunary-error-300 mb-3'>
             Safety in Community
@@ -487,17 +424,14 @@ export default function ModernWitchcraftPage() {
         </div>
       </section>
 
-      {/* Section 6: Where Next */}
       <section id='where-next' className='mb-16'>
-        <h2 className='text-3xl font-light text-zinc-100 mb-6'>
-          6. Where to Go Next
+        <h2 className='text-2xl font-medium text-zinc-100 mb-6'>
+          Where to Go Next
         </h2>
-
         <p className='text-zinc-300 leading-relaxed mb-6'>
           Ready to dive deeper? Here are recommended next steps based on your
           interests:
         </p>
-
         <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
           <Link
             href='/grimoire/spells/fundamentals'
@@ -538,28 +472,6 @@ export default function ModernWitchcraftPage() {
         </div>
       </section>
 
-      {/* FAQ */}
-      <section id='faq' className='mb-16'>
-        <h2 className='text-3xl font-light text-zinc-100 mb-6'>
-          7. Frequently Asked Questions
-        </h2>
-
-        <div className='space-y-4'>
-          {faqs.map((faq, index) => (
-            <div
-              key={index}
-              className='bg-zinc-900/50 border border-zinc-800 rounded-lg p-6'
-            >
-              <h3 className='text-lg font-medium text-zinc-100 mb-3'>
-                {faq.question}
-              </h3>
-              <p className='text-zinc-300 leading-relaxed'>{faq.answer}</p>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      {/* CTA */}
       <section className='bg-gradient-to-r from-lunary-primary-900/30 to-violet-900/30 border border-lunary-primary-700 rounded-xl p-8 text-center mb-12'>
         <h2 className='text-2xl font-light text-zinc-100 mb-4'>
           Begin Your Practice
@@ -577,13 +489,6 @@ export default function ModernWitchcraftPage() {
           </Button>
         </div>
       </section>
-
-      <CosmicConnections
-        entityType='hub-glossary'
-        entityKey='modern-witchcraft'
-        title='Modern Witchcraft Connections'
-        sections={cosmicConnectionsSections}
-      />
-    </div>
+    </SEOContentTemplate>
   );
 }

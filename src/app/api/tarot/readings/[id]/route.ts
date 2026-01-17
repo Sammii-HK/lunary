@@ -6,9 +6,7 @@ import {
   mapRowToReading,
 } from '../shared';
 import { auth } from '@/lib/auth';
-
-const toTextArrayLiteral = (values: string[]): string =>
-  `{${values.map((value) => `"${value.replace(/\\/g, '\\\\').replace(/"/g, '\\"')}"`).join(',')}}`;
+import { formatTextArray } from '@/lib/postgres/formatTextArray';
 
 export async function GET(request: NextRequest, context: unknown) {
   try {
@@ -122,7 +120,7 @@ export async function PATCH(request: NextRequest, context: unknown) {
         ? undefined
         : tagsValue === null
           ? null
-          : toTextArrayLiteral(tagsValue as string[]);
+          : formatTextArray(tagsValue);
 
     let updateResult;
     if (notesValue !== undefined && tagsValue !== undefined) {

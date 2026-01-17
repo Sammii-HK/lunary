@@ -16,9 +16,10 @@ import {
 } from '@/lib/schema';
 
 export const metadata: Metadata = {
-  title: 'The 12 Astrological Houses: Meanings & Themes Explained | Lunary',
+  title:
+    'The 12 Astrological Houses: Meanings, Themes & Chart Examples | Lunary',
   description:
-    'Complete guide to the 12 houses in astrology. Learn what each house represents, from identity (1st) to spirituality (12th), and how planet placements affect you.',
+    'Learn the meaning of all 12 astrological houses—from self and relationships to spirituality. Understand how each house shapes your birth chart.',
   keywords: [
     'astrological houses',
     '12 houses',
@@ -129,7 +130,7 @@ export default function HousesIndexPage() {
           {PLANETS_FOR_HOUSES.slice(0, 10).map((planet) => (
             <Link
               key={planet}
-              href={`/grimoire/houses/${planet}/1`}
+              href={`/grimoire/houses/${planet}`}
               className='p-4 rounded-lg border border-zinc-800 bg-zinc-900/50 hover:border-lunary-primary-600 transition-all text-center group'
             >
               <div className='font-medium group-hover:text-lunary-primary-300 transition-colors'>

@@ -22,6 +22,9 @@ playwright/.cache/
 /.next/
 /out/
 
+# generated data
+data/sitemap-last-modified.json
+
 # production
 /build
 

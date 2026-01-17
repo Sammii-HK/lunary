@@ -15,6 +15,23 @@ import {
   Month,
 } from '@/constants/seo/monthly-horoscope';
 import { SEOContentTemplate } from '@/components/grimoire/SEOContentTemplate';
+import { HoroscopeCosmicConnections } from '@/components/grimoire/HoroscopeCosmicConnections';
+import { monthMeta, articleSchema } from '@/lib/horoscope-meta';
+import { ArrowLeft, ArrowRight } from 'lucide-react';
+
+function resolveOgImageUrl(value: unknown): string | undefined {
+  if (!value) return undefined;
+  if (typeof value === 'string') return value;
+  if (value instanceof URL) return value.toString();
+  if (typeof value === 'object' && value !== null) {
+    const candidate = value as { url?: string | URL; src?: string | URL };
+    if (typeof candidate.url === 'string') return candidate.url;
+    if (candidate.url instanceof URL) return candidate.url.toString();
+    if (typeof candidate.src === 'string') return candidate.src;
+    if (candidate.src instanceof URL) return candidate.src.toString();
+  }
+  return undefined;
+}
 
 interface PageParams {
   sign: string;
@@ -22,18 +39,22 @@ interface PageParams {
   month: string;
 }
 
-function validateParams(
-  params: PageParams,
-): { sign: ZodiacSign; year: number; month: Month } | null {
+function validateParams(params: PageParams): {
+  sign: ZodiacSign;
+  year: number;
+  month: Month;
+  monthNumber: number;
+} | null {
   const sign = params.sign.toLowerCase() as ZodiacSign;
   const month = params.month.toLowerCase() as Month;
-  const year = parseInt(params.year);
+  const year = parseInt(params.year, 10);
 
   if (!ZODIAC_SIGNS.includes(sign)) return null;
   if (!MONTHS.includes(month)) return null;
-  if (year < 2024 || year > 2030) return null;
+  if (year < 2025 || year > 2030) return null;
 
-  return { sign, year, month };
+  const monthNumber = MONTHS.indexOf(month) + 1;
+  return { sign, year, month, monthNumber };
 }
 
 export async function generateStaticParams() {
@@ -52,37 +73,11 @@ export async function generateMetadata({
     return { title: 'Horoscope Not Found | Lunary' };
   }
 
-  const { sign, year, month } = validated;
+  const { sign, year, month, monthNumber } = validated;
   const signName = SIGN_DISPLAY_NAMES[sign];
   const monthName = MONTH_DISPLAY_NAMES[month];
 
-  const title = `${signName} Horoscope ${monthName} ${year}: Monthly Predictions | Lunary`;
-  const description = `${signName} horoscope for ${monthName} ${year}. Discover what the stars have in store for ${signName} this month including love, career, health, and financial predictions.`;
-
-  return {
-    title,
-    description,
-    keywords: [
-      `${signName.toLowerCase()} horoscope ${monthName.toLowerCase()} ${year}`,
-      `${signName.toLowerCase()} ${monthName.toLowerCase()} ${year}`,
-      `${signName.toLowerCase()} monthly horoscope`,
-      `${monthName.toLowerCase()} ${year} horoscope`,
-      'monthly horoscope',
-      'zodiac predictions',
-      signName.toLowerCase(),
-    ],
-    openGraph: {
-      title,
-      description,
-      url: `https://lunary.app/grimoire/horoscopes/${sign}/${year}/${month}`,
-      images: [
-        `/api/og/cosmic?title=${encodeURIComponent(`${signName} ${SIGN_SYMBOLS[sign]} ${monthName} ${year}`)}`,
-      ],
-    },
-    alternates: {
-      canonical: `https://lunary.app/grimoire/horoscopes/${sign}/${year}/${month}`,
-    },
-  };
+  return monthMeta(signName, sign, String(year), month, monthName, monthNumber);
 }
 
 export default async function MonthlyHoroscopePage({
@@ -92,12 +87,13 @@ export default async function MonthlyHoroscopePage({
 }) {
   const resolvedParams = await params;
   const validated = validateParams(resolvedParams);
+  const currentYear = new Date().getFullYear();
 
   if (!validated) {
     notFound();
   }
 
-  const { sign, year, month } = validated;
+  const { sign, year, month, monthNumber } = validated;
   const signName = SIGN_DISPLAY_NAMES[sign];
   const monthName = MONTH_DISPLAY_NAMES[month];
   const symbol = SIGN_SYMBOLS[sign];
@@ -106,8 +102,8 @@ export default async function MonthlyHoroscopePage({
   const theme = getMonthlyTheme(sign, month, year);
 
   const monthIndex = MONTHS.indexOf(month);
-  const prevMonth = monthIndex > 0 ? MONTHS[monthIndex - 1] : null;
-  const nextMonth = monthIndex < 11 ? MONTHS[monthIndex + 1] : null;
+  const prevMonth = monthIndex > 0 ? MONTHS[monthIndex - 1] : MONTHS[11];
+  const nextMonth = monthIndex < 11 ? MONTHS[monthIndex + 1] : MONTHS[0];
 
   const signIndex = ZODIAC_SIGNS.indexOf(sign);
   const prevSign =
@@ -115,20 +111,54 @@ export default async function MonthlyHoroscopePage({
   const nextSign =
     signIndex < 11 ? ZODIAC_SIGNS[signIndex + 1] : ZODIAC_SIGNS[0];
 
+  const meta = monthMeta(
+    signName,
+    sign,
+    String(year),
+    month,
+    monthName,
+    monthNumber,
+  );
+  const canonicalSource =
+    meta.alternates?.canonical ??
+    `/grimoire/horoscopes/${sign}/${year}/${month}`;
+  const canonicalUrl =
+    typeof canonicalSource === 'string'
+      ? canonicalSource
+      : String(canonicalSource);
+  const metaTitle = meta.title ? String(meta.title) : undefined;
+  const keywords =
+    Array.isArray(meta.keywords) || typeof meta.keywords === 'string'
+      ? Array.isArray(meta.keywords)
+        ? meta.keywords
+        : [meta.keywords]
+      : [];
+  const openGraphImages = meta.openGraph?.images
+    ? Array.isArray(meta.openGraph.images)
+      ? meta.openGraph.images
+      : [meta.openGraph.images]
+    : [];
+  const resolvedImage = openGraphImages
+    .map(resolveOgImageUrl)
+    .find((value): value is string => typeof value === 'string');
+  const image = resolvedImage ?? 'https://lunary.app/api/og/cosmic';
+  const articleLd = articleSchema(
+    signName,
+    String(year),
+    monthName,
+    monthNumber,
+  );
+
   return (
     <SEOContentTemplate
-      title={`${signName} Horoscope ${monthName} ${year}`}
+      title={metaTitle ?? `${signName} Horoscope ${monthName} ${year}`}
       h1={`${symbol} ${signName} Horoscope: ${monthName} ${year}`}
-      description={`Your complete ${signName} horoscope for ${monthName} ${year}. As a ${element} sign ruled by ${ruler}, this month brings focus to ${theme.focus}. Discover your cosmic guidance below.`}
-      keywords={[
-        `${signName} horoscope`,
-        monthName,
-        String(year),
-        'monthly prediction',
-        'zodiac forecast',
-      ]}
-      canonicalUrl={`https://lunary.app/grimoire/horoscopes/${sign}/${year}/${month}`}
-      datePublished='2025-01-01'
+      description={meta.description ?? ''}
+      keywords={keywords}
+      canonicalUrl={canonicalUrl}
+      image={image}
+      imageAlt={`${signName} ${monthName} ${year} Horoscope | Lunary`}
+      datePublished={`${year}-${String(monthNumber).padStart(2, '0')}-01`}
       dateModified={new Date().toISOString().split('T')[0]}
       articleSection='Monthly Horoscopes'
       breadcrumbs={[
@@ -203,79 +233,32 @@ ${monthName} sets the tone for ${year}. Use this month to lay foundations that s
           ],
         },
       ]}
-      relatedItems={[
-        {
-          name: `${signName} Zodiac Sign`,
-          href: `/grimoire/zodiac/${sign}`,
-          type: 'Zodiac',
-        },
-        {
-          name: `${SIGN_DISPLAY_NAMES[prevSign]} Horoscope ${monthName}`,
-          href: `/grimoire/horoscopes/${prevSign}/${year}/${month}`,
-          type: 'Horoscope',
-        },
-        {
-          name: `${SIGN_DISPLAY_NAMES[nextSign]} Horoscope ${monthName}`,
-          href: `/grimoire/horoscopes/${nextSign}/${year}/${month}`,
-          type: 'Horoscope',
-        },
-        {
-          name: `${ruler} in Astrology`,
-          href: `/grimoire/astronomy/planets/${ruler.toLowerCase()}`,
-          type: 'Planet',
-        },
-      ]}
+      cosmicConnections={
+        <HoroscopeCosmicConnections
+          variant='monthly-sign'
+          sign={sign}
+          monthSlug={month}
+          year={year}
+          currentYear={currentYear}
+        />
+      }
       ctaText={`Get your personalized ${signName} reading`}
       ctaHref='/horoscope'
       sources={[
         { name: 'Planetary transit calculations' },
         { name: 'Traditional astrological interpretations' },
       ]}
+      additionalSchemas={[articleLd]}
     >
-      <div className='mt-6 rounded-xl border border-zinc-800 bg-zinc-900/40 p-5'>
-        <h2 className='text-lg font-medium text-zinc-100 mb-2'>
-          Daily + Weekly {signName} horoscopes
-        </h2>
-        <p className='text-sm text-zinc-400 mb-4'>
-          Jump to today&apos;s or this week&apos;s guidance for {signName}, or
-          browse all signs.
-        </p>
-        <div className='flex flex-wrap gap-3'>
-          <Link
-            href={`/horoscope/today/${sign}`}
-            className='px-4 py-2 rounded-lg bg-lunary-primary-900/20 border border-lunary-primary-700 text-lunary-primary-300 text-sm hover:bg-lunary-primary-900/30 transition-colors'
-          >
-            Today&apos;s {signName}
-          </Link>
-          <Link
-            href={`/horoscope/weekly/${sign}`}
-            className='px-4 py-2 rounded-lg bg-zinc-800/50 border border-zinc-700 text-zinc-300 text-sm hover:bg-zinc-800 transition-colors'
-          >
-            This Week&apos;s {signName}
-          </Link>
-          <Link
-            href='/horoscope/today'
-            className='px-4 py-2 rounded-lg bg-zinc-800/50 border border-zinc-700 text-zinc-300 text-sm hover:bg-zinc-800 transition-colors'
-          >
-            All Daily
-          </Link>
-          <Link
-            href='/horoscope/weekly'
-            className='px-4 py-2 rounded-lg bg-zinc-800/50 border border-zinc-700 text-zinc-300 text-sm hover:bg-zinc-800 transition-colors'
-          >
-            All Weekly
-          </Link>
-        </div>
-      </div>
-
-      <div className='mt-8 flex justify-between text-sm'>
+      <div className='mt-8 flex justify-between text-lg'>
         <div className='space-x-4'>
           {prevMonth && (
             <Link
               href={`/grimoire/horoscopes/${sign}/${year}/${prevMonth}`}
-              className='text-lunary-primary-400 hover:text-lunary-primary-300'
+              className='text-lunary-primary-400 hover:text-lunary-primary-300 flex items-center gap-2'
             >
-              ← {MONTH_DISPLAY_NAMES[prevMonth]}
+              <ArrowLeft className='w-4 h-4' />
+              {MONTH_DISPLAY_NAMES[prevMonth]}
             </Link>
           )}
         </div>
@@ -283,9 +266,10 @@ ${monthName} sets the tone for ${year}. Use this month to lay foundations that s
           {nextMonth && (
             <Link
               href={`/grimoire/horoscopes/${sign}/${year}/${nextMonth}`}
-              className='text-lunary-primary-400 hover:text-lunary-primary-300'
+              className='text-lunary-primary-400 hover:text-lunary-primary-300 flex items-center gap-2'
             >
-              {MONTH_DISPLAY_NAMES[nextMonth]} →
+              {MONTH_DISPLAY_NAMES[nextMonth]}
+              <ArrowRight className='w-4 h-4' />
             </Link>
           )}
         </div>

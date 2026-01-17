@@ -1,580 +1,194 @@
-import { NextRequest } from 'next/server';
 import { ImageResponse } from 'next/og';
-import {
-  getRealPlanetaryPositions,
-  getAccurateMoonPhase,
-  checkSeasonalEvents,
-  calculateRealAspects,
-  getZodiacSymbol,
-  getAspectGlyph,
-  loadAstronomiconFont,
-  loadGoogleFont,
-} from '../../../../../utils/astrology/cosmic-og';
+import { readFileSync } from 'fs';
+import { join } from 'path';
 
 export const runtime = 'nodejs';
-export const dynamic = 'force-dynamic';
-export const revalidate = 3600; // Cache for 1 hour - base OG image updates hourly
 
-// Request deduplication
-const pendingRequests = new Map<string, Promise<Response>>();
-type Format = 'square' | 'portrait' | 'landscape' | 'story';
+let robotoFont: ArrayBuffer | null = null;
+let logoData: Buffer | null = null;
 
-function getZodiacSign(longitude: number): string {
-  const signs = [
-    'Aries',
-    'Taurus',
-    'Gemini',
-    'Cancer',
-    'Leo',
-    'Virgo',
-    'Libra',
-    'Scorpio',
-    'Sagittarius',
-    'Capricorn',
-    'Aquarius',
-    'Pisces',
-  ];
-  const index = Math.floor((((longitude % 360) + 360) % 360) / 30);
-  return signs[index];
+function loadAssets() {
+  if (!robotoFont) {
+    try {
+      const fontPath = join(
+        process.cwd(),
+        'public',
+        'fonts',
+        'RobotoMono-Regular.ttf',
+      );
+      const buffer = readFileSync(fontPath);
+      robotoFont = buffer.buffer.slice(
+        buffer.byteOffset,
+        buffer.byteOffset + buffer.byteLength,
+      );
+    } catch (error) {
+      console.error('Failed to load Roboto Mono font:', error);
+    }
+  }
+  if (!logoData) {
+    try {
+      const logoPath = join(process.cwd(), 'public', 'logo.png');
+      logoData = readFileSync(logoPath);
+    } catch (error) {
+      console.error('Failed to load logo:', error);
+    }
+  }
 }
 
-async function generateImage(req: NextRequest): Promise<Response> {
-  let astronomiconFont: ArrayBuffer | null = null;
-  let robotoFont: ArrayBuffer | null = null;
-
+export async function GET(): Promise<Response> {
   try {
-    astronomiconFont = await loadAstronomiconFont(req);
-  } catch (error) {
-    console.error('Failed to load Astronomicon font:', error);
-  }
+    loadAssets();
 
-  try {
-    robotoFont = await loadGoogleFont(req);
-  } catch (error) {
-    console.error('Failed to load Roboto Mono font:', error);
-  }
+    const fonts: {
+      name: string;
+      data: ArrayBuffer;
+      style: 'normal';
+      weight: 100 | 200 | 300 | 400 | 500 | 600 | 700 | 800 | 900;
+    }[] = [];
 
-  if (!astronomiconFont)
-    throw new Error('Astronomicon font load returned null');
-
-  const { searchParams } = new URL(req.url);
-  const rawFormat = (
-    searchParams.get('format') ||
-    searchParams.get('size') ||
-    'square'
-  ).toLowerCase();
-  const allowedFormats: Format[] = ['square', 'portrait', 'landscape', 'story'];
-  const format = allowedFormats.includes(rawFormat as Format)
-    ? (rawFormat as Format)
-    : 'square';
-
-  const today = new Date();
-  const targetDate = new Date(
-    `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}T12:00:00Z`,
-  );
-
-  const sizes: Record<
-    Format,
-    { width: number; height: number; padding: string }
-  > = {
-    square: { width: 1200, height: 1200, padding: '60px 40px' },
-    portrait: { width: 1080, height: 1920, padding: '80px 60px' },
-    landscape: { width: 1920, height: 1080, padding: '40px 80px' },
-    story: { width: 1080, height: 1920, padding: '100px 80px' },
-  };
-
-  const responsive: Record<
-    Format,
-    {
-      titleSize: number;
-      planetNameSize: number;
-      symbolSize: number;
-      aspectSize: number;
-      constellationSize: number;
-      zodiacSymbolSize: number;
-      energySize: number;
-      dateSize: number;
-      footerSize: number;
-      titlePadding: string;
-      itemSpacing: string;
+    if (robotoFont) {
+      fonts.push({
+        name: 'Roboto Mono',
+        data: robotoFont,
+        style: 'normal',
+        weight: 400,
+      });
     }
-  > = {
-    square: {
-      titleSize: 32,
-      planetNameSize: 42,
-      symbolSize: 222,
-      aspectSize: 42,
-      constellationSize: 28,
-      zodiacSymbolSize: 72,
-      energySize: 36,
-      dateSize: 28,
-      footerSize: 28,
-      titlePadding: '100px',
-      itemSpacing: '200px',
-    },
-    portrait: {
-      titleSize: 48,
-      planetNameSize: 52,
-      symbolSize: 280,
-      aspectSize: 52,
-      constellationSize: 36,
-      zodiacSymbolSize: 88,
-      energySize: 44,
-      dateSize: 36,
-      footerSize: 36,
-      titlePadding: '120px',
-      itemSpacing: '160px',
-    },
-    landscape: {
-      titleSize: 36,
-      planetNameSize: 52,
-      symbolSize: 250,
-      aspectSize: 36,
-      constellationSize: 48,
-      zodiacSymbolSize: 80,
-      energySize: 52,
-      dateSize: 50,
-      footerSize: 36,
-      titlePadding: '60px',
-      itemSpacing: '120px',
-    },
-    story: {
-      titleSize: 48,
-      planetNameSize: 52,
-      symbolSize: 280,
-      aspectSize: 52,
-      constellationSize: 36,
-      zodiacSymbolSize: 88,
-      energySize: 44,
-      dateSize: 36,
-      footerSize: 36,
-      titlePadding: '120px',
-      itemSpacing: '160px',
-    },
-  };
 
-  const style = responsive[format] || responsive.square;
-  const imageSize = sizes[format] || sizes.square;
+    const logoSrc = logoData
+      ? `data:image/png;base64,${logoData.toString('base64')}`
+      : null;
 
-  const positions = getRealPlanetaryPositions(targetDate);
-  const moonPhase = getAccurateMoonPhase(targetDate);
-  const seasonalEvents = checkSeasonalEvents(positions);
-  const aspects = calculateRealAspects(positions);
-
-  let allEvents: Array<any> = [];
-
-  if (moonPhase.isSignificant) {
-    allEvents.push({
-      name: moonPhase.name,
-      energy: moonPhase.energy,
-      priority: 10,
-      type: 'moon',
-      emoji: moonPhase.emoji,
-    });
-  }
-
-  const extraordinaryAspects = aspects.filter((a) => a.priority >= 9);
-  allEvents.push(...extraordinaryAspects);
-
-  const dailyAspects = aspects.filter((a) => a.priority < 9);
-  allEvents.push(...dailyAspects);
-
-  allEvents.push(...seasonalEvents);
-
-  if (allEvents.length === 0) {
-    allEvents.push({
-      name: 'Cosmic Flow',
-      energy: 'Universal Harmony',
-      priority: 1,
-      type: 'general',
-    });
-  }
-
-  allEvents.sort((a, b) => b.priority - a.priority);
-  const primaryEvent = allEvents[0];
-
-  const isAspectEvent = primaryEvent.type === 'aspect';
-  const sunPosition = positions.Sun;
-  const sunZodiac = getZodiacSign(sunPosition.longitude);
-  const sunSymbol = getZodiacSymbol(sunPosition.longitude);
-
-  const theme = {
-    background:
-      'linear-gradient(135deg, #0f172a 0%, #1e293b 30%, #312e81 70%, #1e1b2e 100%)',
-  };
-
-  return new ImageResponse(
-    <div
-      style={{
-        height: '100%',
-        width: '100%',
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        background: theme.background,
-        fontFamily: 'Roboto Mono',
-        color: 'white',
-        padding: imageSize.padding,
-        justifyContent: 'space-between',
-      }}
-    >
+    const response = new ImageResponse(
       <div
         style={{
+          height: '100%',
+          width: '100%',
           display: 'flex',
-          justifyContent: 'center',
+          flexDirection: 'column',
           alignItems: 'center',
-          paddingBottom: '40px',
-          paddingTop: style.titlePadding,
+          justifyContent: 'center',
+          backgroundColor: '#0a0a0a',
+          fontFamily: robotoFont ? 'Roboto Mono' : 'system-ui',
+          color: 'white',
+          padding: '120px 160px',
         }}
       >
-        <div
-          style={{
-            fontSize: `${style.titleSize}px`,
-            fontWeight: '400',
-            color: 'white',
-            textAlign: 'center',
-            letterSpacing: '0.1em',
-            fontFamily: 'Roboto Mono',
-            display: 'flex',
-          }}
-        >
-          Lunary
-        </div>
-      </div>
-
-      {isAspectEvent ? (
-        <div
-          style={{
-            display: 'flex',
-            flexDirection: 'row',
-            justifyContent: 'space-around',
-            alignItems: 'stretch',
-            width: '100%',
-            flex: 1,
-            padding: '0 200px',
-          }}
-        >
-          <div
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: style.itemSpacing,
-              width: '100%',
-              height: '90%',
-            }}
-          >
-            <div
-              style={{
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                flex: 1,
-              }}
-            >
-              <div
-                style={{
-                  fontSize: `${style.planetNameSize}px`,
-                  fontWeight: '300',
-                  color: 'white',
-                  textAlign: 'center',
-                  marginBottom: '50px',
-                  display: 'flex',
-                }}
-              >
-                {primaryEvent.planetA.name}
-              </div>
-              <div
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  width: '180px',
-                  height: '180px',
-                  borderRadius: '20px',
-                  marginBottom: '70px',
-                }}
-              >
-                <div
-                  style={{
-                    fontSize: `${style.symbolSize}px`,
-                    color: 'white',
-                    lineHeight: '1',
-                    fontFamily: 'Astronomicon',
-                  }}
-                >
-                  {primaryEvent.planetA.symbol}
-                </div>
-              </div>
-              <div
-                style={{
-                  display: 'flex',
-                  flexDirection: 'column',
-                  alignItems: 'center',
-                  gap: '8px',
-                }}
-              >
-                <div
-                  style={{
-                    fontSize: `${style.constellationSize}px`,
-                    fontWeight: '300',
-                    color: 'white',
-                    fontFamily: 'Roboto Mono',
-                    paddingBottom: '10px',
-                  }}
-                >
-                  {primaryEvent.planetA.constellation}
-                </div>
-                <div
-                  style={{
-                    fontSize: `${style.zodiacSymbolSize}px`,
-                    color: 'white',
-                    fontFamily: 'Astronomicon',
-                  }}
-                >
-                  {primaryEvent.planetA.constellationSymbol}
-                </div>
-              </div>
-            </div>
-
-            <div
-              style={{
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                justifyContent: 'space-around',
-                flex: 1,
-                height: '400px',
-                marginTop: '-78px',
-              }}
-            >
-              <div
-                style={{
-                  fontSize: `${style.aspectSize}px`,
-                  color: 'white',
-                  fontFamily: 'Astronomicon',
-                }}
-              >
-                {getAspectGlyph(primaryEvent.aspect)}
-              </div>
-              <div
-                style={{
-                  fontSize: `${style.constellationSize}px`,
-                  fontWeight: '300',
-                  color: 'white',
-                  fontFamily: 'Roboto Mono',
-                  textAlign: 'center',
-                }}
-              >
-                {primaryEvent.aspect}
-              </div>
-            </div>
-
-            <div
-              style={{
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                flex: 1,
-              }}
-            >
-              <div
-                style={{
-                  fontSize: `${style.planetNameSize}px`,
-                  fontWeight: '300',
-                  color: 'white',
-                  textAlign: 'center',
-                  marginBottom: '50px',
-                  display: 'flex',
-                }}
-              >
-                {primaryEvent.planetB.name}
-              </div>
-              <div
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  width: '180px',
-                  height: '180px',
-                  borderRadius: '20px',
-                  marginBottom: '70px',
-                }}
-              >
-                <div
-                  style={{
-                    fontSize: `${style.symbolSize}px`,
-                    color: 'white',
-                    lineHeight: '1',
-                    fontFamily: 'Astronomicon',
-                  }}
-                >
-                  {primaryEvent.planetB.symbol}
-                </div>
-              </div>
-              <div
-                style={{
-                  display: 'flex',
-                  flexDirection: 'column',
-                  alignItems: 'center',
-                  gap: '8px',
-                }}
-              >
-                <div
-                  style={{
-                    fontSize: `${style.constellationSize}px`,
-                    fontWeight: '300',
-                    color: 'white',
-                    fontFamily: 'Roboto Mono',
-                    paddingBottom: '10px',
-                  }}
-                >
-                  {primaryEvent.planetB.constellation}
-                </div>
-                <div
-                  style={{
-                    fontSize: `${style.zodiacSymbolSize}px`,
-                    color: 'white',
-                    fontFamily: 'Astronomicon',
-                  }}
-                >
-                  {primaryEvent.planetB.constellationSymbol}
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      ) : (
         <div
           style={{
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
             justifyContent: 'center',
-            flex: 1,
-            width: '100%',
+            gap: '48px',
           }}
         >
-          {primaryEvent.emoji && (
-            <div
-              style={{
-                fontSize: '120px',
-                marginBottom: '40px',
-                display: 'flex',
-              }}
-            >
-              {primaryEvent.emoji}
-            </div>
+          {logoSrc && (
+            // eslint-disable-next-line @next/next/no-img-element, jsx-a11y/alt-text
+            <img
+              src={logoSrc}
+              width={200}
+              height={200}
+              style={{ marginTop: '-40px' }}
+            />
           )}
+
           <div
             style={{
-              fontSize: `${style.energySize}px`,
-              fontWeight: '300',
-              color: 'rgba(255,255,255,0.8)',
-              textAlign: 'center',
-              marginTop: '40px',
-              fontFamily: 'Roboto Mono',
+              fontSize: '40px',
+              color: 'rgba(216, 180, 254, 0.8)',
+              letterSpacing: '0.12em',
+              textTransform: 'uppercase',
               display: 'flex',
             }}
           >
-            {primaryEvent.energy || 'Cosmic Guidance'}
+            Personal astrology grounded in real astronomy
+          </div>
+
+          <div
+            style={{
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              gap: '48px',
+            }}
+          >
+            <div
+              style={{
+                fontSize: '104px',
+                fontWeight: '300',
+                color: '#fafafa',
+                textAlign: 'center',
+                lineHeight: 1.1,
+                display: 'flex',
+                flexDirection: 'column',
+              }}
+            >
+              <span style={{ display: 'flex', justifyContent: 'center' }}>
+                Personalised astrology for clarity
+              </span>
+              <span style={{ display: 'flex', justifyContent: 'center' }}>
+                and self understanding
+              </span>
+            </div>
+
+            <div
+              style={{
+                fontSize: '52px',
+                fontWeight: '400',
+                color: '#a1a1aa',
+                textAlign: 'center',
+                lineHeight: 1.5,
+                maxWidth: '1800px',
+                display: 'flex',
+              }}
+            >
+              Lunary brings together your birth chart, today's sky, tarot and
+              lunar cycles to give you calm and personal daily guidance.
+            </div>
           </div>
         </div>
-      )}
 
-      <div
-        style={{
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center',
-          paddingTop: '40px',
-          gap: '20px',
-        }}
-      >
         <div
           style={{
-            fontSize: `${style.zodiacSymbolSize}px`,
-            color: 'white',
-            fontFamily: 'Astronomicon',
+            marginTop: '80px',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '24px',
+            color: 'rgba(216, 180, 254, 0.8)',
+            fontSize: '48px',
           }}
         >
-          {sunSymbol}
+          <span style={{ display: 'flex' }}>lunary.app</span>
         </div>
-        <div
-          style={{
-            fontSize: `${style.constellationSize}px`,
-            fontWeight: '300',
-            color: 'rgba(255,255,255,0.7)',
-            fontFamily: 'Roboto Mono',
-          }}
-        >
-          {sunZodiac}
-        </div>
-      </div>
-    </div>,
-    {
-      width: imageSize.width,
-      height: imageSize.height,
-      fonts: [
-        {
-          name: 'Astronomicon',
-          data: astronomiconFont,
-          style: 'normal',
-          weight: 400,
-        },
-        ...(robotoFont
-          ? [
-              {
-                name: 'Roboto Mono',
-                data: robotoFont,
-                style: 'normal' as const,
-              },
-            ]
-          : []),
-      ],
-    },
-  );
-}
+      </div>,
+      {
+        width: 2400,
+        height: 1260,
+        fonts,
+      },
+    );
 
-export async function GET(req: NextRequest): Promise<Response> {
-  const { searchParams } = new URL(req.url);
-  const rawFormat = (
-    searchParams.get('format') ||
-    searchParams.get('size') ||
-    'square'
-  ).toLowerCase();
-  const allowedFormats: Format[] = ['square', 'portrait', 'landscape', 'story'];
-  const format = allowedFormats.includes(rawFormat as Format)
-    ? (rawFormat as Format)
-    : 'square';
-  const cacheKey = `cosmic-og-base-${format}`;
+    const headers = new Headers(response.headers);
+    headers.set(
+      'Cache-Control',
+      'public, s-maxage=86400, stale-while-revalidate=43200, max-age=86400',
+    );
+    headers.set('CDN-Cache-Control', 'public, s-maxage=86400');
+    headers.set('Vercel-CDN-Cache-Control', 'public, s-maxage=86400');
 
-  if (pendingRequests.has(cacheKey)) {
-    return pendingRequests.get(cacheKey)!;
-  }
-
-  const promise = generateImage(req)
-    .then((response) => {
-      const headers = new Headers(response.headers);
-      headers.set(
-        'Cache-Control',
-        'public, s-maxage=3600, stale-while-revalidate=1800, max-age=3600',
-      );
-      headers.set('CDN-Cache-Control', 'public, s-maxage=3600');
-      headers.set('Vercel-CDN-Cache-Control', 'public, s-maxage=3600');
-
-      return new Response(response.body, {
-        status: response.status,
-        statusText: response.statusText,
-        headers,
-      });
-    })
-    .finally(() => {
-      pendingRequests.delete(cacheKey);
+    return new Response(response.body, {
+      status: response.status,
+      statusText: response.statusText,
+      headers,
     });
-
-  pendingRequests.set(cacheKey, promise);
-  return promise;
+  } catch (error) {
+    console.error('Cosmic OG image generation failed:', error);
+    return new Response(
+      JSON.stringify({
+        error: 'Failed to generate image',
+      }),
+      { status: 500, headers: { 'Content-Type': 'application/json' } },
+    );
+  }
 }

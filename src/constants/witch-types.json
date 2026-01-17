@@ -1,0 +1,832 @@
+{
+  "witchTypesOverview": [
+    {
+      "slug": "green-witch",
+      "name": "Green Witch",
+      "emoji": "🌿",
+      "description": "Works with plants, herbs, seasons, and nature-based magic"
+    },
+    {
+      "slug": "kitchen-witch",
+      "name": "Kitchen Witch",
+      "emoji": "🍳",
+      "description": "Practises magic through cooking, food, and the home"
+    },
+    {
+      "slug": "hedge-witch",
+      "name": "Hedge Witch",
+      "emoji": "🌙",
+      "description": "Works with dreams, folklore, trance, and liminal spaces"
+    },
+    {
+      "slug": "sea-witch",
+      "name": "Sea Witch",
+      "emoji": "🌊",
+      "description": "Draws power from water, tides, the moon, and emotional flow"
+    },
+    {
+      "slug": "cosmic-witch",
+      "name": "Cosmic Witch",
+      "emoji": "✨",
+      "description": "Works with astrology, planetary cycles, and celestial timing"
+    },
+    {
+      "slug": "crystal-witch",
+      "name": "Crystal Witch",
+      "emoji": "💎",
+      "description": "Uses crystals and stones for energy work, focus, and healing"
+    },
+    {
+      "slug": "eclectic-witch",
+      "name": "Eclectic Witch",
+      "emoji": "🔮",
+      "description": "Blends multiple traditions into a personal, evolving practice"
+    },
+    {
+      "slug": "hereditary-witch",
+      "name": "Hereditary Witch",
+      "emoji": "👵",
+      "description": "Follows practices passed down through family or ancestry"
+    },
+    {
+      "slug": "solitary-witch",
+      "name": "Solitary Witch",
+      "emoji": "🧙‍♀️",
+      "description": "Practises alone, guided by personal study and intuition"
+    },
+    {
+      "slug": "ceremonial-witch",
+      "name": "Ceremonial Witch",
+      "emoji": "⭐",
+      "description": "Works with structured rituals, symbols, and formal magic systems"
+    }
+  ],
+  "witchTypes": {
+    "green-witch": {
+      "slug": "green-witch",
+      "name": "Green Witch",
+      "emoji": "🌿",
+      "seo": {
+        "title": "Green Witch: Traits, Practices, Tools | Lunary",
+        "description": "A green witch works with herbs, plants, seasons, and earth-based ritual. Explore traits, beginner steps, tools, and safe ways to start.",
+        "h1": "Green witch",
+        "intro": "Green witches build their practice through relationship with the living world: soil, leaves, roots, remedies, and seasonal rhythm. It is practical, grounding, and quietly powerful, designed for people who feel most like themselves outdoors or with their hands in something growing.",
+        "tldr": "If you feel calmer in nature, love herbs and remedies, and notice the seasons like a second language, green witchcraft might be your path.",
+        "keywords": [
+          "green witch",
+          "green witch traits",
+          "green witch practices",
+          "green witch tools",
+          "herbalism",
+          "plant magic",
+          "nature witch",
+          "witch types"
+        ]
+      },
+      "focuses": [
+        "Herbalism",
+        "Plant magic",
+        "Seasonal cycles",
+        "Earth-based ritual",
+        "Gentle healing"
+      ],
+      "practices": [
+        "Growing herbs and tending plants with intention",
+        "Simple herbal preparations (teas, infused oils, baths) with safety checks",
+        "Seasonal altars and nature offerings that leave no trace",
+        "Nature journalling and observational magic (weather, birds, buds)",
+        "Protection and cleansing using common kitchen herbs"
+      ],
+      "tools": [
+        "Mortar and pestle",
+        "Herb drying rack or hangers",
+        "Plant identification guide",
+        "Glass jars for blends",
+        "Notebook for seasonal notes"
+      ],
+      "element": "Earth",
+      "strengths": [
+        "Grounding and steadiness",
+        "Patience and consistency",
+        "Strong sensing of cycles",
+        "Practical healing mindset"
+      ],
+      "traits": [
+        "You feel restored by green spaces",
+        "You prefer repeatable rituals over dramatic ones",
+        "You learn through observation and practice",
+        "You are drawn to herbs, gardens, forests, or wild edges"
+      ],
+      "beginnerSteps": [
+        "Start a windowsill herb or one hardy plant and care for it daily",
+        "Learn five common herbs and their safe uses",
+        "Create one tiny ritual you can repeat (watering, pruning, or tea)",
+        "Track one lunar cycle alongside seasonal changes"
+      ],
+      "misconceptions": [
+        "You do not need a garden to be a green witch",
+        "Plant magic is not about perfection, it is about relationship",
+        "Green witchcraft can be simple and still be real"
+      ],
+      "safetyNote": "If you ingest herbs or use essential oils, check interactions, allergies, pregnancy guidance, and safe dosages. When unsure, keep it external, gentle, and simple.",
+      "starterRitual": {
+        "title": "Starter ritual: herb intention tea",
+        "steps": [
+          "Choose a herb you already have (tea bag or spice jar is fine).",
+          "Hold it and name one quality you want to grow this week.",
+          "Breathe in slowly and say: “Grow with me, gently.”",
+          "Drink mindfully and write one sentence about how you feel after."
+        ]
+      }
+    },
+
+    "kitchen-witch": {
+      "slug": "kitchen-witch",
+      "name": "Kitchen Witch",
+      "emoji": "🍳",
+      "seo": {
+        "title": "Kitchen Witch: Traits, Practices, Tools | Lunary",
+        "description": "Kitchen witches practise hearth magic through food, comfort, and home protection. Explore traits, beginner steps, tools, and simple rituals.",
+        "h1": "Kitchen witch",
+        "intro": "Kitchen witches turn everyday routines into spellwork: cooking, cleaning, blessing, and feeding. Their magic is comforting but serious, built from repetition, warmth, and the steady protection of a well-loved space.",
+        "tldr": "If your best rituals happen while stirring, seasoning, baking, or setting your home right, kitchen witchcraft will feel natural.",
+        "keywords": [
+          "kitchen witch",
+          "kitchen witch traits",
+          "kitchen witch practices",
+          "hearth magic",
+          "home blessing",
+          "cooking magic",
+          "witch types"
+        ]
+      },
+      "focuses": [
+        "Hearth magic",
+        "Home protection",
+        "Food as ritual",
+        "Comfort and care",
+        "Practical blessings"
+      ],
+      "practices": [
+        "Cooking with intention (seasoning as spellwork)",
+        "Simmer pots and scent cleansing (ventilated and pet-safe)",
+        "Salt at thresholds and simple home wards",
+        "Recipe grimoire building (what you made, how it felt, what shifted)",
+        "Seasonal meals tied to personal goals"
+      ],
+      "tools": [
+        "Wooden spoon",
+        "A favourite pan",
+        "Herb and spice staples",
+        "Jar of salt and jar of honey",
+        "Recipe notebook or digital grimoire"
+      ],
+      "element": "Fire and Earth",
+      "strengths": [
+        "Consistency",
+        "Protective instincts",
+        "Comforting presence",
+        "Magic that fits real life"
+      ],
+      "traits": [
+        "You feel calm when your home feels cared for",
+        "You love rituals that are useful and repeatable",
+        "You associate flavours and scents with moods and memories",
+        "You enjoy making small daily things feel special"
+      ],
+      "beginnerSteps": [
+        "Choose one ‘intention meal’ per week",
+        "Learn one protection staple (salt, rosemary, bay) and use it simply",
+        "Try a simmer pot with safe ingredients and good ventilation",
+        "Write down what changed in mood or energy afterwards"
+      ],
+      "misconceptions": [
+        "Domestic magic is not ‘lesser’ magic",
+        "You do not need to cook elaborate meals for it to count",
+        "Care and protection are powerful themes, not soft ones"
+      ],
+      "safetyNote": "Ventilate well for smoke or simmer pots, avoid toxic ingredients around pets, and never leave flames unattended.",
+      "starterRitual": {
+        "title": "Starter ritual: threshold salt blessing",
+        "steps": [
+          "Sprinkle a tiny pinch of salt at your doorway threshold.",
+          "Say: “Only what supports me may enter.”",
+          "Sweep or wipe it away later as a closing act.",
+          "Note how your space feels over the next 24 hours."
+        ]
+      }
+    },
+
+    "hedge-witch": {
+      "slug": "hedge-witch",
+      "name": "Hedge Witch",
+      "emoji": "🌙",
+      "seo": {
+        "title": "Hedge Witch: Traits, Practices, Tools | Lunary",
+        "description": "Hedge witches work with dreams, folklore, trance, and liminal practice. Explore traits, tools, beginner steps, and grounding rituals.",
+        "h1": "Hedge witch",
+        "intro": "Hedge witches are boundary-walkers: between waking and dreaming, ordinary and symbolic. Their craft often includes dreams, intuition, folk charms, and gentle trance work, with a strong emphasis on protection and grounding.",
+        "tldr": "If dreams, symbols, and liminal spaces call to you, hedge witchcraft may fit, especially if you value boundaries and calm.",
+        "keywords": [
+          "hedge witch",
+          "hedge witch traits",
+          "hedge witch practices",
+          "dream work",
+          "folk magic",
+          "trance work",
+          "witch types"
+        ]
+      },
+      "focuses": [
+        "Dream work",
+        "Folk magic",
+        "Trance and journeying",
+        "Protection",
+        "Symbolic insight"
+      ],
+      "practices": [
+        "Dream journalling and pattern tracking",
+        "Guided journeying or meditation-based trance",
+        "Simple protective charms and wards",
+        "Folklore study and seasonal threshold rites",
+        "Divination for self-reflection (tarot, runes, pendulum)"
+      ],
+      "tools": [
+        "Dream journal",
+        "Divination tool (tarot/runes/pendulum)",
+        "Protection herbs (rosemary, bay)",
+        "Bell or chime for clearing",
+        "Grounding stone (e.g., smoky quartz)"
+      ],
+      "element": "Air and Spirit",
+      "strengths": [
+        "Symbolic thinking",
+        "Intuitive perception",
+        "Independence",
+        "Deep reflective insight"
+      ],
+      "traits": [
+        "Your dreams feel meaningful or vivid",
+        "You are drawn to dusk, crossroads, forests, thresholds",
+        "You need quiet to hear your own inner voice",
+        "You feel better when you have clear energetic boundaries"
+      ],
+      "beginnerSteps": [
+        "Keep a dream journal for 14 days",
+        "Learn one grounding practice you can do in 60 seconds",
+        "Choose one divination tool and practise weekly",
+        "Create a simple ‘open/close’ ritual for spiritual work"
+      ],
+      "misconceptions": [
+        "Hedge witchcraft does not require risky practices",
+        "Solitary does not mean isolated or unsupported",
+        "Sensitivity is a skill to manage, not a flaw"
+      ],
+      "safetyNote": "Prioritise grounding and good sleep. If you feel overwhelmed, pause spirit-adjacent work and focus on body-based calm and routine.",
+      "starterRitual": {
+        "title": "Starter ritual: dream boundary",
+        "steps": [
+          "Before bed, put your phone away for five minutes.",
+          "Place a notebook by your bed.",
+          "Say: “Only what supports my wellbeing may enter my dreams.”",
+          "On waking, write one sentence, even if it is messy."
+        ]
+      }
+    },
+
+    "sea-witch": {
+      "slug": "sea-witch",
+      "name": "Sea Witch",
+      "emoji": "🌊",
+      "seo": {
+        "title": "Sea Witch: Traits, Practices, Tools | Lunary",
+        "description": "Sea witches work with water magic, tides, lunar cycles, cleansing, and emotional renewal. Explore traits, tools, and simple rituals.",
+        "h1": "Sea witch",
+        "intro": "Sea witches draw power from water in all its forms: ocean, river, rain, mist, bath, and bowl. Their craft is cleansing, intuitive, and emotionally intelligent, often synced to moon phases and the rhythm of release and return.",
+        "tldr": "If water restores you, the moon affects your mood, and cleansing rituals feel like medicine, sea witchcraft may fit.",
+        "keywords": [
+          "sea witch",
+          "sea witch traits",
+          "water magic",
+          "moon magic",
+          "tide magic",
+          "cleansing rituals",
+          "witch types"
+        ]
+      },
+      "focuses": [
+        "Water magic",
+        "Cleansing and release",
+        "Moon phases",
+        "Emotional healing",
+        "Flow and renewal"
+      ],
+      "practices": [
+        "Moon water (simple, symbolic, and safe handling)",
+        "Release rituals with water (bowl, bath, shower)",
+        "Salt cleansing and protection",
+        "Water scrying for reflection",
+        "Respectful gratitude offerings that leave no trace"
+      ],
+      "tools": [
+        "Sea salt",
+        "A bowl or glass for water work",
+        "Shells or stones (ethically found)",
+        "Moon phase tracker",
+        "Soft cloth or scarf for altar wrapping"
+      ],
+      "element": "Water",
+      "strengths": [
+        "Emotional depth",
+        "Adaptability",
+        "Cleansing power",
+        "Strong intuition"
+      ],
+      "traits": [
+        "Water helps you regulate",
+        "You process life through feeling first",
+        "You are good at letting go and starting again",
+        "You notice subtle mood shifts around lunar phases"
+      ],
+      "beginnerSteps": [
+        "Track the moon phase for one full cycle",
+        "Do one weekly cleansing ritual (bowl or shower) and note the effect",
+        "Learn a simple salt protection practice",
+        "Build a calm release routine for stress"
+      ],
+      "misconceptions": [
+        "You do not need to live near the sea",
+        "Water magic is not about drama, it is about flow and regulation",
+        "Cleansing can be gentle and still be effective"
+      ],
+      "safetyNote": "Be mindful with natural waterways and avoid leaving offerings that harm wildlife. Keep water rituals practical, safe, and respectful.",
+      "starterRitual": {
+        "title": "Starter ritual: release bowl",
+        "steps": [
+          "Fill a bowl with water and add a pinch of salt.",
+          "Name what you are releasing in one clear sentence.",
+          "Stir anti-clockwise three times and breathe slowly.",
+          "Pour it away and wash your hands as a closing act."
+        ]
+      }
+    },
+
+    "cosmic-witch": {
+      "slug": "cosmic-witch",
+      "name": "Cosmic Witch",
+      "emoji": "✨",
+      "seo": {
+        "title": "Cosmic Witch: Traits, Practices, Tools | Lunary",
+        "description": "Cosmic witches work with astrology, planetary cycles, eclipses, and timing. Explore traits, tools, beginner steps, and simple rituals.",
+        "h1": "Cosmic witch",
+        "intro": "Cosmic witches use the sky like a living calendar. Their craft blends astrology, planetary symbolism, and timing, not to control life, but to choose better moments, understand patterns, and work with cycles instead of against them.",
+        "tldr": "If you love transits, lunar phases, and using timing to guide intention, cosmic witchcraft is your lane.",
+        "keywords": [
+          "cosmic witch",
+          "cosmic witch traits",
+          "celestial witch",
+          "planetary magic",
+          "astrology timing",
+          "transits",
+          "witch types"
+        ]
+      },
+      "focuses": [
+        "Astrology",
+        "Planetary cycles",
+        "Celestial timing",
+        "Pattern recognition",
+        "Ritual planning"
+      ],
+      "practices": [
+        "Tracking moon phases and personal energy shifts",
+        "Using transits to choose supportive timing for goals",
+        "Planetary correspondences (colours, days, symbols)",
+        "Eclipse and retrograde reflection (grounded, not fear-based)",
+        "Sky journalling and timing experiments"
+      ],
+      "tools": [
+        "Birth chart (basic placements)",
+        "Moon phase and transit tracker",
+        "Planetary correspondence notes",
+        "Candles or colours linked to planets",
+        "Journal for timing experiments"
+      ],
+      "element": "Spirit and Fire",
+      "strengths": [
+        "Big-picture thinking",
+        "Timing awareness",
+        "Curiosity and learning",
+        "Pattern mapping"
+      ],
+      "traits": [
+        "You love systems, cycles, and meaning in time",
+        "You notice repeated themes across months or years",
+        "You feel energised by new moons, full moons, eclipses",
+        "You prefer guidance over rigid rules"
+      ],
+      "beginnerSteps": [
+        "Learn your Sun, Moon, and Rising signs",
+        "Track one month of moon phases and mood/energy",
+        "Pick one planet to study for a week",
+        "Test timing by repeating a small ritual on two different phases"
+      ],
+      "misconceptions": [
+        "Cosmic witchcraft is not fear-based astrology",
+        "You do not need to be technical to begin",
+        "Timing supports your choices, it does not replace them"
+      ],
+      "safetyNote": "Astrology is a reflective tool and timing aid, not a substitute for professional advice or personal agency.",
+      "starterRitual": {
+        "title": "Starter ritual: new moon intention + action",
+        "steps": [
+          "Write one intention in plain language.",
+          "Write one action you can take within 48 hours.",
+          "Say: “I move with the sky, and I still choose my life.”",
+          "Take the action, even if it is small."
+        ]
+      }
+    },
+
+    "crystal-witch": {
+      "slug": "crystal-witch",
+      "name": "Crystal Witch",
+      "emoji": "💎",
+      "seo": {
+        "title": "Crystal Witch: Traits, Practices, Tools | Lunary",
+        "description": "Crystal witches use stones for focus, energy work, protection, and intention. Explore traits, tools, beginner steps, and safe crystal care.",
+        "h1": "Crystal witch",
+        "intro": "Crystal witches work with stones as anchors: for calm, clarity, protection, and intention. The practice is less about owning loads of crystals and more about learning a few well, working consistently, and choosing ethically sourced pieces when possible.",
+        "tldr": "If you love tactile tools, energy anchors, and simple intention work, crystal witchcraft may fit perfectly.",
+        "keywords": [
+          "crystal witch",
+          "crystal witch traits",
+          "crystal magic",
+          "crystals for protection",
+          "crystals for clarity",
+          "energy work",
+          "witch types"
+        ]
+      },
+      "focuses": [
+        "Energy work",
+        "Protection",
+        "Clarity and focus",
+        "Intention anchors",
+        "Cleansing routines"
+      ],
+      "practices": [
+        "Choosing crystals by intention (calm, focus, confidence)",
+        "Carrying or wearing stones as daily anchors",
+        "Crystal grids (simple layouts, clear purpose)",
+        "Cleansing and charging routines that are practical",
+        "Pairing crystals with journalling and breathwork"
+      ],
+      "tools": [
+        "A small starter set (3–5 crystals)",
+        "Pouch or dish for storage",
+        "Selenite or sound for cleansing",
+        "Journal for intentions",
+        "Soft cloth for care"
+      ],
+      "element": "Earth",
+      "strengths": [
+        "Focus and consistency",
+        "Strong sense of ritual objects",
+        "Calming presence",
+        "Practical intention setting"
+      ],
+      "traits": [
+        "You love tangible tools you can hold",
+        "You notice how environments affect your energy",
+        "You like simple daily rituals",
+        "You prefer learning a few things deeply"
+      ],
+      "beginnerSteps": [
+        "Pick one intention and one crystal to pair with it",
+        "Create a daily ‘touchstone’ habit (hold it, breathe, name the intention)",
+        "Learn basic cleansing methods that fit your life",
+        "Keep notes on what actually changes for you"
+      ],
+      "misconceptions": [
+        "You do not need a huge collection",
+        "Crystals are not a replacement for action",
+        "Ethics matter more than aesthetics"
+      ],
+      "safetyNote": "Avoid putting unknown crystals in water (some dissolve or contain unsafe minerals). Prioritise safe cleansing methods like sound, smoke-free airflow, or dry salt bowls.",
+      "starterRitual": {
+        "title": "Starter ritual: pocket anchor",
+        "steps": [
+          "Choose one crystal and one intention (e.g., calm).",
+          "Hold it and take three slow breaths.",
+          "Say: “When I touch this, I return to calm.”",
+          "Carry it for a week and note when it helped."
+        ]
+      }
+    },
+
+    "eclectic-witch": {
+      "slug": "eclectic-witch",
+      "name": "Eclectic Witch",
+      "emoji": "🔮",
+      "seo": {
+        "title": "Eclectic Witch: Traits, Practices, Tools | Lunary",
+        "description": "Eclectic witches build a personalised practice by blending tools and traditions with discernment. Explore traits, beginner steps, tools, and grounding tips.",
+        "h1": "Eclectic witch",
+        "intro": "Eclectic witches are practice-builders. They explore widely, test what works, and keep what feels true. The key is discernment: learning origins, avoiding appropriation, and creating a stable core routine so curiosity stays grounded.",
+        "tldr": "If you love experimenting and shaping your own path, eclectic witchcraft gives you permission to build a practice that fits you.",
+        "keywords": [
+          "eclectic witch",
+          "eclectic witch traits",
+          "modern witchcraft",
+          "witchcraft practice",
+          "divination",
+          "rituals",
+          "witch types"
+        ]
+      },
+      "focuses": [
+        "Personal practice",
+        "Experimentation",
+        "Discernment",
+        "Flexible ritual",
+        "Learning and integration"
+      ],
+      "practices": [
+        "Trying different tools (tarot, herbs, candles, astrology) one at a time",
+        "Building a consistent weekly routine (one small ritual you repeat)",
+        "Keeping a ‘what I tried / what happened’ log",
+        "Studying origins before borrowing from traditions",
+        "Creating simple protection and grounding habits"
+      ],
+      "tools": [
+        "A flexible grimoire system",
+        "One core divination tool",
+        "Candles or salt for simple rituals",
+        "Notebook for results",
+        "A small, rotating altar space"
+      ],
+      "element": "All elements",
+      "strengths": [
+        "Creativity",
+        "Adaptability",
+        "Curiosity",
+        "Long-term discernment"
+      ],
+      "traits": [
+        "You do not fit neatly into one label",
+        "You like testing ideas, not just collecting them",
+        "You prefer a practice that can evolve",
+        "You want spirituality that fits real life"
+      ],
+      "beginnerSteps": [
+        "Choose one core practice to repeat weekly for a month",
+        "Pick one area to study deeply before mixing (e.g., tarot)",
+        "Start a simple protection habit (salt, breath, boundaries)",
+        "Keep notes so you can see what actually works"
+      ],
+      "misconceptions": [
+        "Eclectic does not mean random",
+        "Mixing is safest when you study first",
+        "A simple routine beats constant novelty"
+      ],
+      "safetyNote": "Be mindful of closed practices and cultural appropriation. When unsure, do not borrow. Choose reputable sources and prioritise respect.",
+      "starterRitual": {
+        "title": "Starter ritual: three-pillar practice",
+        "steps": [
+          "Pick three pillars: protection, clarity, nourishment.",
+          "Choose one simple practice for each (salt, journalling, tea).",
+          "Do them for seven days in a row.",
+          "Keep what works. Release what does not."
+        ]
+      }
+    },
+
+    "hereditary-witch": {
+      "slug": "hereditary-witch",
+      "name": "Hereditary Witch",
+      "emoji": "👵",
+      "seo": {
+        "title": "Hereditary Witch: Traits, Practices, Tools | Lunary",
+        "description": "Hereditary witches practise traditions passed through family or ancestry. Explore traits, tools, beginner steps, and respectful ways to build lineage connection.",
+        "h1": "Hereditary witch",
+        "intro": "Hereditary witches often inherit stories, habits, or folk practices through family lines: protective sayings, remedies, rituals, or seasonal customs. It can be explicit or subtle, and it is not about being ‘more real’, it is about relationship, memory, and continuity.",
+        "tldr": "If your family carries folk practices, stories, or spiritual habits across generations, hereditary witchcraft may resonate, even if you are rebuilding it gently.",
+        "keywords": [
+          "hereditary witch",
+          "ancestral practice",
+          "folk magic",
+          "family traditions",
+          "ancestor work",
+          "witch types"
+        ]
+      },
+      "focuses": [
+        "Ancestry and continuity",
+        "Folk practices",
+        "Home and protection",
+        "Memory and story",
+        "Respectful ancestor connection"
+      ],
+      "practices": [
+        "Collecting family stories, sayings, and rituals",
+        "Rebuilding lost traditions with respect and research",
+        "Ancestor remembrance (photos, candles, simple offerings)",
+        "Protection work rooted in home and family",
+        "Seasonal customs and commemorations"
+      ],
+      "tools": [
+        "Family photos or names list",
+        "Journal for stories and recipes",
+        "Simple candle for remembrance",
+        "A small offering dish",
+        "Protective herbs or salt"
+      ],
+      "element": "Earth and Spirit",
+      "strengths": [
+        "Continuity and devotion",
+        "Strong protective instincts",
+        "Deep meaning-making",
+        "Respect for tradition"
+      ],
+      "traits": [
+        "You feel drawn to family stories and old customs",
+        "You sense meaning in inherited habits and rituals",
+        "You value respect and responsibility in practice",
+        "You feel anchored by remembrance and continuity"
+      ],
+      "beginnerSteps": [
+        "Write down what you know (even fragments) about family traditions",
+        "Create a small remembrance space for one month",
+        "Choose one inherited practice to repeat weekly (tea, prayer, protection)",
+        "Research cultural context before expanding the practice"
+      ],
+      "misconceptions": [
+        "Hereditary does not mean ‘better’ or ‘more powerful’",
+        "You can be hereditary even if you are rebuilding what was hidden",
+        "Lineage can be chosen through mentorship and respect too"
+      ],
+      "safetyNote": "If family history carries grief or trauma, go gently. Ancestor work should feel stabilising, not activating. Pause if it feels overwhelming.",
+      "starterRitual": {
+        "title": "Starter ritual: simple remembrance candle",
+        "steps": [
+          "Light a candle and speak one family name (or ‘those who came before’).",
+          "Say: “Only what supports my wellbeing may come close.”",
+          "Sit for one minute and breathe steadily.",
+          "Blow out the candle and thank them, keeping boundaries firm."
+        ]
+      }
+    },
+
+    "solitary-witch": {
+      "slug": "solitary-witch",
+      "name": "Solitary Witch",
+      "emoji": "🧙‍♀️",
+      "seo": {
+        "title": "Solitary Witch: Traits, Practices, Tools | Lunary",
+        "description": "Solitary witches practise independently through study, intuition, and self-led ritual. Explore traits, tools, beginner steps, and how to stay grounded.",
+        "h1": "Solitary witch",
+        "intro": "Solitary witches build their practice privately and independently. It is often quiet, self-directed, and flexible, shaped by what works rather than what is popular. The strength of this path is autonomy, with an emphasis on clear boundaries and steady routines.",
+        "tldr": "If you prefer learning alone, working at your own pace, and keeping your practice private, solitary witchcraft may suit you.",
+        "keywords": [
+          "solitary witch",
+          "solitary witch traits",
+          "self initiated witch",
+          "witchcraft alone",
+          "modern witchcraft",
+          "witch types"
+        ]
+      },
+      "focuses": [
+        "Autonomy",
+        "Private practice",
+        "Study and experimentation",
+        "Ritual consistency",
+        "Strong boundaries"
+      ],
+      "practices": [
+        "Self-led study plans and skill-building",
+        "Simple personal rituals you repeat weekly",
+        "Journalling and reflection as core magic",
+        "Protection and grounding routines",
+        "Divination for self-clarity (not dependency)"
+      ],
+      "tools": [
+        "A journal or grimoire",
+        "One divination tool",
+        "Salt or candle for simple rituals",
+        "Timer for meditation or focus",
+        "A small private storage box"
+      ],
+      "element": "Varies (often Air and Earth)",
+      "strengths": [
+        "Self-trust",
+        "Consistency",
+        "Personal clarity",
+        "Strong boundaries"
+      ],
+      "traits": [
+        "You prefer privacy and independence",
+        "You learn best at your own pace",
+        "You value consistency over spectacle",
+        "You want spiritual practice that fits your daily life"
+      ],
+      "beginnerSteps": [
+        "Choose one weekly ritual and repeat it for a month",
+        "Create a simple protection habit you do daily",
+        "Keep a log of results and feelings",
+        "Set boundaries around over-consuming spiritual content"
+      ],
+      "misconceptions": [
+        "Solitary does not mean lonely",
+        "You do not need a group to be legitimate",
+        "Private practice can still be disciplined and deep"
+      ],
+      "safetyNote": "If you find yourself spiralling into fear-based readings or dependency, pause divination and return to grounding, sleep, food, and movement.",
+      "starterRitual": {
+        "title": "Starter ritual: weekly reset candle",
+        "steps": [
+          "Choose one day of the week as your reset day.",
+          "Light a candle and write one intention for the week.",
+          "Write one small action to support it.",
+          "Close by saying: “Small steps count. I will show up.”"
+        ]
+      }
+    },
+
+    "ceremonial-witch": {
+      "slug": "ceremonial-witch",
+      "name": "Ceremonial Witch",
+      "emoji": "⭐",
+      "seo": {
+        "title": "Ceremonial Witch: Traits, Practices, Tools | Lunary",
+        "description": "Ceremonial witches work with structured ritual, symbols, and formal magical systems. Explore traits, tools, beginner steps, and safe ways to start.",
+        "h1": "Ceremonial witch",
+        "intro": "Ceremonial witches are ritual architects. Their practice is structured and symbolic, often drawing from formal systems, correspondences, and deliberate preparation. It is less about spontaneity and more about precision, intention, and ritual craft.",
+        "tldr": "If you love structure, symbolism, and repeatable ritual frameworks, ceremonial witchcraft may be your path.",
+        "keywords": [
+          "ceremonial witch",
+          "ceremonial magic",
+          "ritual magic",
+          "symbols and correspondences",
+          "witch types"
+        ]
+      },
+      "focuses": [
+        "Structured ritual",
+        "Symbolism",
+        "Correspondences",
+        "Preparation and intent",
+        "Formal systems"
+      ],
+      "practices": [
+        "Ritual design with clear opening and closing",
+        "Working with symbols, sigils, and correspondences",
+        "Protective circles and space preparation",
+        "Invocations and intention statements",
+        "Study of a chosen system over time (slow and steady)"
+      ],
+      "tools": [
+        "Candle(s)",
+        "Incense alternative (sound or mist) if needed",
+        "Notebook for scripts and symbols",
+        "Simple altar cloth",
+        "Correspondence reference notes"
+      ],
+      "element": "Fire and Spirit",
+      "strengths": [
+        "Discipline",
+        "Clarity of intent",
+        "Strong ritual containment",
+        "Skill-building mindset"
+      ],
+      "traits": [
+        "You like structure and repeatable systems",
+        "You enjoy symbolism and deliberate preparation",
+        "You feel calmer with a clear ritual ‘container’",
+        "You prefer deep study over quick trends"
+      ],
+      "beginnerSteps": [
+        "Learn a basic ritual structure (open, work, close)",
+        "Create a simple weekly ritual script and refine it",
+        "Keep a record of what you did and what changed",
+        "Study one system slowly rather than mixing everything at once"
+      ],
+      "misconceptions": [
+        "Ceremonial does not have to be complicated to be effective",
+        "You do not need expensive tools",
+        "Precision can be gentle, not rigid"
+      ],
+      "safetyNote": "Keep rituals grounded and avoid practices that feel destabilising. Clear opening and closing reduces emotional residue and helps you stay regulated.",
+      "starterRitual": {
+        "title": "Starter ritual: simple open-work-close",
+        "steps": [
+          "Open: take three breaths and state your intention in one sentence.",
+          "Work: light a candle and write a short commitment (one action).",
+          "Close: thank the space, blow out the candle, and wash your hands.",
+          "Record: write one line about how you feel afterwards."
+        ]
+      }
+    }
+  }
+}

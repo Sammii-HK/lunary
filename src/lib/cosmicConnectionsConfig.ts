@@ -33,7 +33,10 @@ export type EntityType =
   | 'hub-moon'
   | 'hub-placements'
   | 'hub-glossary'
-  | 'archetype';
+  | 'hub-horoscopes'
+  | 'archetype'
+  | 'witchcraft'
+  | 'hub-events';
 
 function toSlug(str: string): string {
   return str
@@ -155,12 +158,14 @@ function getPlanetConnections(planetKey: string): CosmicConnectionSection[] {
 
   sections.push({ title: 'About This Planet', links: aboutPlanet.slice(0, 4) });
 
+  const planetNotSun = planetLower === 'sun' ? 'Saturn' : planetName;
+
   const placementsTransits: CosmicConnectionLink[] = [
     { label: `${planetName} in Signs`, href: '/grimoire/placements' },
     { label: 'Transits Hub', href: '/grimoire/transits' },
     {
-      label: `${planetName} Retrograde`,
-      href: `/grimoire/astronomy/retrogrades/${planetLower}`,
+      label: `${planetNotSun} Retrograde`,
+      href: `/grimoire/astronomy/retrogrades/${planetNotSun.toLowerCase()}`,
     },
     { label: 'Current Forecast', href: '/forecast' },
   ];
@@ -442,12 +447,62 @@ function getHubTransitsConnections(): CosmicConnectionSection[] {
       title: 'Transit Resources',
       links: [
         { label: 'Birth Chart & Houses', href: '/birth-chart' },
+        { label: 'Astrological Events', href: '/grimoire/events' },
         {
           label: 'Planets Hub',
           href: '/grimoire/astronomy/planets',
         },
         { label: 'Zodiac Signs', href: '/grimoire/zodiac' },
         { label: 'Houses Guide', href: '/grimoire/houses' },
+      ],
+    },
+  ];
+}
+
+function getHubEventsConnections(): CosmicConnectionSection[] {
+  const currentYear = new Date().getFullYear();
+
+  return [
+    {
+      title: 'Event Resources',
+      links: [
+        { label: 'Retrogrades Hub', href: '/grimoire/astronomy/retrogrades' },
+        { label: 'Transits Hub', href: '/grimoire/transits' },
+        { label: 'Moon Calendar', href: '/grimoire/moon' },
+        {
+          label: 'Birth Chart Guide',
+          href: '/grimoire/guides/birth-chart-complete-guide',
+        },
+      ],
+    },
+    {
+      title: `${currentYear} Highlights`,
+      links: [
+        {
+          label: `${currentYear} Astrology Events`,
+          href: `/grimoire/events/${currentYear}`,
+        },
+        {
+          label: `${currentYear} Mercury Retrograde`,
+          href: `/grimoire/events/${currentYear}/mercury-retrograde`,
+        },
+        {
+          label: `${currentYear} Venus Retrograde`,
+          href: `/grimoire/events/${currentYear}/venus-retrograde`,
+        },
+        {
+          label: `${currentYear} Eclipses`,
+          href: `/grimoire/events/${currentYear}/eclipses`,
+        },
+      ],
+    },
+    {
+      title: 'Deep Dive',
+      links: [
+        { label: 'Moon Rituals', href: '/grimoire/moon/rituals' },
+        { label: 'Spells Fundamentals', href: '/grimoire/spells/fundamentals' },
+        { label: 'Crystals', href: '/grimoire/crystals' },
+        { label: 'Horoscopes Hub', href: '/grimoire/horoscopes' },
       ],
     },
   ];
@@ -482,6 +537,58 @@ function getHubPlacementsConnections(): CosmicConnectionSection[] {
         { label: 'All Zodiac Signs', href: '/grimoire/zodiac' },
         { label: 'All Planets', href: '/grimoire/astronomy/planets' },
         { label: 'Calculate Birth Chart', href: '/birth-chart' },
+      ],
+    },
+  ];
+}
+
+function getHubCrystalsConnections(): CosmicConnectionSection[] {
+  return [
+    {
+      title: 'Crystal Uses',
+      links: [
+        { label: 'Protection Magic', href: '/grimoire/protection' },
+        { label: 'Manifestation', href: '/grimoire/manifestation' },
+        { label: 'Meditation', href: '/grimoire/meditation' },
+        { label: 'Chakras', href: '/grimoire/chakras' },
+      ],
+    },
+    {
+      title: 'Related Topics',
+      links: [
+        { label: 'Spells & Rituals', href: '/grimoire/spells' },
+        { label: 'Moon Magic', href: '/grimoire/moon' },
+        { label: 'Candle Magic', href: '/grimoire/candle-magic' },
+        {
+          label: 'Color Correspondences',
+          href: '/grimoire/correspondences/colors',
+        },
+        { label: 'Chakra Healing', href: '/grimoire/chakras' },
+        { label: 'Magical Correspondences', href: '/grimoire/correspondences' },
+      ],
+    },
+    {
+      title: 'Related Correspondences',
+      links: [
+        { label: 'Correspondences', href: '/grimoire/correspondences' },
+        { label: 'Herbs', href: '/grimoire/correspondences/herbs' },
+        { label: 'Colors', href: '/grimoire/correspondences/colors' },
+        { label: 'Elements', href: '/grimoire/correspondences/elements' },
+      ],
+    },
+    {
+      title: 'Learn More',
+      links: [
+        {
+          label: 'Crystal Healing Guide',
+          href: '/grimoire/guides/crystal-healing-guide',
+        },
+        { label: 'Candle Magic', href: '/grimoire/candle-magic' },
+        {
+          label: 'Spellcraft Fundamentals',
+          href: '/grimoire/spells/fundamentals',
+        },
+        { label: 'Book of Shadows', href: '/book-of-shadows' },
       ],
     },
   ];
@@ -538,6 +645,48 @@ function getArchetypeConnections(
   return sections;
 }
 
+function getWitchConnections(): CosmicConnectionSection[] {
+  const sections: CosmicConnectionSection[] = [];
+
+  const basics: CosmicConnectionLink[] = [
+    { label: 'Practices Hub', href: '/grimoire/practices' },
+    { label: 'Modern Witchcraft', href: '/grimoire/modern-witchcraft' },
+    {
+      label: 'Famous Witches',
+      href: '/grimoire/modern-witchcraft/famous-witches',
+    },
+    { label: 'Spells Fundamentals', href: '/grimoire/spells/fundamentals' },
+  ];
+  sections.push({
+    title: 'Witchcraft Basics',
+    links: basics,
+  });
+
+  const practiceLinks: CosmicConnectionLink[] = [
+    { label: 'Spells', href: '/grimoire/spells' },
+    { label: 'Tarot', href: '/grimoire/tarot' },
+    { label: 'Crystals', href: '/grimoire/crystals' },
+    { label: 'Witchcraft Tools', href: '/grimoire/witchcraft-tools' },
+  ];
+  sections.push({
+    title: 'Practices & Tools',
+    links: practiceLinks,
+  });
+
+  const deepenLinks: CosmicConnectionLink[] = [
+    { label: 'Protection Guide', href: '/grimoire/protection' },
+    { label: 'Shadow Work', href: '/grimoire/shadow-work' },
+    { label: 'Moon Rituals', href: '/grimoire/moon/rituals' },
+    { label: 'Tools Guide', href: '/grimoire/modern-witchcraft/tools-guide' },
+  ];
+  sections.push({
+    title: 'Deepen Your Practice',
+    links: deepenLinks,
+  });
+
+  return sections;
+}
+
 export function getCosmicConnections(
   entityType: EntityType,
   slugOrKey: string,
@@ -573,12 +722,21 @@ export function getCosmicConnections(
       return getHubTransitsConnections();
     case 'hub-moon':
       return getHubMoonConnections();
+    case 'hub-events':
+      return getHubEventsConnections();
     case 'hub-placements':
       return getHubPlacementsConnections();
     case 'hub-glossary':
+      if (slugOrKey === 'crystals') {
+        return getHubCrystalsConnections();
+      }
       return getHubGlossaryConnections();
+    case 'hub-horoscopes':
+      return [];
     case 'archetype':
       return getArchetypeConnections(slugOrKey);
+    case 'witchcraft':
+      return getWitchConnections();
     default:
       return [];
   }
