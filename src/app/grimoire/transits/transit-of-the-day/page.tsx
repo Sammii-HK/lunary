@@ -17,15 +17,21 @@ type TransitOfDayData = {
 async function getTransitOfDay(): Promise<TransitOfDayData | null> {
   const baseUrl = getImageBaseUrl();
   const dateStr = new Date().toISOString().split('T')[0];
-  const response = await fetch(`${baseUrl}/api/og/cosmic-post/${dateStr}`, {
-    next: { revalidate: 3600 },
-  });
 
-  if (!response.ok) {
+  try {
+    const response = await fetch(`${baseUrl}/api/og/cosmic-post/${dateStr}`, {
+      next: { revalidate: 3600 },
+    });
+
+    if (!response.ok) {
+      return null;
+    }
+
+    return response.json();
+  } catch (error) {
+    console.error('TransitOfDay fetch failed:', error);
     return null;
   }
-
-  return response.json();
 }
 
 export const metadata: Metadata = {

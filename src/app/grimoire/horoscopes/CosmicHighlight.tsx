@@ -19,15 +19,21 @@ type CosmicPostContent = {
 async function getCosmicHighlight(): Promise<CosmicPostContent | null> {
   const baseUrl = getImageBaseUrl();
   const today = new Date().toISOString().split('T')[0];
-  const response = await fetch(`${baseUrl}/api/og/cosmic-post/${today}`, {
-    next: { revalidate: 3600 },
-  });
 
-  if (!response.ok) {
+  try {
+    const response = await fetch(`${baseUrl}/api/og/cosmic-post/${today}`, {
+      next: { revalidate: 3600 },
+    });
+
+    if (!response.ok) {
+      return null;
+    }
+
+    return response.json();
+  } catch (error) {
+    console.error('CosmicHighlight fetch failed:', error);
     return null;
   }
-
-  return response.json();
 }
 
 export async function CosmicHighlight() {
