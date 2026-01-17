@@ -1,6 +1,11 @@
 #!/usr/bin/env node
 const { execFileSync } = require('node:child_process');
-const { existsSync, readFileSync, writeFileSync } = require('node:fs');
+const {
+  existsSync,
+  mkdirSync,
+  readFileSync,
+  writeFileSync,
+} = require('node:fs');
 const { resolve } = require('node:path');
 
 const PROJECT_ROOT = process.cwd();
@@ -13,6 +18,7 @@ const existingEntries = existsSync(OUTPUT_PATH)
   : {};
 
 const result = { ...existingEntries };
+mkdirSync(resolve(PROJECT_ROOT, 'data'), { recursive: true });
 
 /** Run a git command and return trimmed stdout, or null if git fails. */
 function runGitCommand(args) {
