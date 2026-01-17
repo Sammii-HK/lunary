@@ -7,30 +7,38 @@ import { createQAPageSchema } from '@/lib/schema';
 import { CosmicConnections } from '@/components/grimoire/CosmicConnections';
 
 export const metadata: Metadata = {
-  title: 'Birth Chart: Planets, Houses & Astrology Guide - Lunary',
+  title: 'Free Birth Chart Calculator & Astrology Guide | Lunary',
   description:
-    'Learn about planets, houses, and astrological components. Understand how birth charts are calculated and interpreted. Discover your astrological blueprint and how it influences your life.',
+    'Learn how planets, houses, and signs shape your astrology chart. Generate your free birth chart with Lunary — sign in to unlock your personalised placements and insights.',
   keywords: [
     'birth chart',
+    'free birth chart calculator',
+    'astrology chart',
     'natal chart',
-    'astrological chart',
+    'planets and houses',
     'birth chart reading',
-    'planets in astrology',
-    'astrological houses',
-    'birth chart interpretation',
-    'how to read birth chart',
+    'astrology guide',
+    'zodiac',
+    'Lunary',
   ],
   openGraph: {
-    title: 'Birth Chart: Planets, Houses & Astrology Guide - Lunary',
+    title: 'Free Birth Chart Calculator & Astrology Guide | Lunary',
     description:
-      'Learn about planets, houses, and astrological components. Understand how birth charts are calculated and interpreted.',
-    type: 'article',
+      'Generate your free birth chart with Lunary’s astrology calculator. Learn about planets, houses, and signs — sign in to reveal your personal placements.',
+    type: 'website',
+    url: 'https://lunary.app/grimoire/birth-chart',
+    images: [
+      {
+        url: 'https://lunary.app/api/og/cosmic',
+      },
+    ],
   },
   twitter: {
-    card: 'summary',
-    title: 'Birth Chart: Planets, Houses & Astrology Guide - Lunary',
+    card: 'summary_large_image',
+    title: 'Free Birth Chart Calculator & Astrology Guide | Lunary',
     description:
-      'Learn about planets, houses, and astrological components. Understand how birth charts are calculated and interpreted.',
+      'Discover your free astrology birth chart. Learn about planets, houses, and signs — sign in to see your personalised cosmic blueprint.',
+    images: ['https://lunary.app/api/og/cosmic'],
   },
   alternates: {
     canonical: 'https://lunary.app/grimoire/birth-chart',
@@ -45,20 +53,48 @@ export default function BirthChartPage() {
     url: 'https://lunary.app/grimoire/birth-chart',
   });
 
+  const webAppSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'WebApplication',
+    name: 'Lunary Birth Chart Calculator',
+    url: 'https://lunary.app/grimoire/birth-chart',
+    applicationCategory: 'LifestyleApplication',
+    operatingSystem: 'Web',
+    description:
+      'Free interactive birth chart calculator with personalised astrology insights. Sign in required for full chart access.',
+    offers: {
+      '@type': 'Offer',
+      price: '0',
+      priceCurrency: 'USD',
+    },
+    provider: {
+      '@type': 'Organization',
+      name: 'Lunary',
+      url: 'https://lunary.app',
+    },
+    isAccessibleForFree: true,
+    requiresAuthentication: 'Sign-in required for personalised chart results',
+  };
+
   return (
     <SEOContentTemplate
-      title='Birth Chart: Planets, Houses & Astrology Guide - Lunary'
+      title='Free Birth Chart Calculator & Astrology Guide | Lunary'
       h1='Birth Chart'
-      description='Learn about planets, houses, and astrological components. Understand how birth charts are calculated and interpreted. Discover your astrological blueprint.'
+      description='Learn how planets, houses, and signs shape your astrology chart. Generate your free birth chart with Lunary — sign in to unlock your personalised placements and insights.'
       keywords={[
         'birth chart',
+        'free birth chart calculator',
+        'astrology chart',
         'natal chart',
-        'astrological chart',
+        'planets and houses',
         'birth chart reading',
-        'planets in astrology',
-        'astrological houses',
+        'astrology guide',
+        'zodiac',
+        'Lunary',
       ]}
       canonicalUrl='https://lunary.app/grimoire/birth-chart'
+      image='https://lunary.app/api/og/cosmic'
+      imageAlt='Lunary Birth Chart Calculator'
       intro='Your birth chart (natal chart) is a snapshot of the sky at the moment you were born. It reveals your astrological blueprint—the positions of planets, signs, houses, and aspects that influence your personality, life path, and potential. Understanding your birth chart helps you understand yourself deeply, recognize your strengths and challenges, and align with your true purpose. This comprehensive guide covers all components of birth charts and how to interpret them.'
       meaning={`A birth chart maps the positions of planets, signs, and houses at your exact moment of birth. Each component reveals different aspects of your personality and life experience. Planets represent different parts of your psyche and life areas. Signs show how those planets express themselves. Houses indicate where in your life these energies manifest. Aspects show how planets interact with each other.
 
@@ -76,6 +112,11 @@ Understanding your birth chart helps you recognize your natural talents, work wi
         'Combine astrology with other divination methods',
       ]}
       faqs={[
+        {
+          question: 'What information do I need to calculate my birth chart?',
+          answer:
+            'You’ll need your date, time, and place of birth. Exact time gives the most accurate rising sign and house placements, but you can still get a general chart without it.',
+        },
         {
           question: 'Do I need my exact birth time for a birth chart?',
           answer:
@@ -97,8 +138,24 @@ Understanding your birth chart helps you recognize your natural talents, work wi
           answer:
             'The most important parts are typically: Sun sign (core identity), Moon sign (emotions), Rising sign (outer personality), and personal planets (Mercury, Venus, Mars). The aspects between planets and any planets near angles (Ascendant, Midheaven) are also significant.',
         },
+        {
+          question: "Is Lunary's birth chart calculator free?",
+          answer:
+            'Yes. Lunary’s birth chart calculator is completely free to use. You simply need to sign in to access your personalised astrology chart and save your results.',
+        },
+        {
+          question:
+            'Why do I need to sign in to use the birth chart calculator?',
+          answer:
+            'Signing in allows Lunary to securely save your birth details and chart interpretations, so you can revisit your placements, track transits, and receive personalised updates.',
+        },
+        {
+          question: 'Can I learn about birth charts without signing in?',
+          answer:
+            'Yes. The Birth Chart Guide explains planets, houses, and aspects for anyone to explore freely. Signing in simply unlocks your personal chart data for deeper insight.',
+        },
       ]}
-      additionalSchemas={[qaSchema]}
+      additionalSchemas={[qaSchema, webAppSchema]}
       cosmicConnections={
         <CosmicConnections
           entityType='hub-placements'
