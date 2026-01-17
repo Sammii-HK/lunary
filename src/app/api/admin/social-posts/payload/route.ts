@@ -14,16 +14,6 @@ type PayloadGroup = {
   payload: Record<string, unknown>;
 };
 
-function toTextArrayLiteral(values: string[]): string | null {
-  if (values.length === 0) return null;
-  return `{${values
-    .map(
-      (value) =>
-        `"${String(value).replace(/\\/g, '\\\\').replace(/"/g, '\\"')}"`,
-    )
-    .join(',')}}`;
-}
-
 export async function GET(request: NextRequest) {
   try {
     const url = new URL(request.url);
@@ -49,7 +39,6 @@ export async function GET(request: NextRequest) {
           .map((value) => value.trim())
           .filter((value) => allowedStatuses.has(value))
       : ['pending', 'approved'];
-    const statusArrayLiteral = toTextArrayLiteral(statuses);
 
     const accountGroupId = process.env.SUCCULENT_ACCOUNT_GROUP_ID;
     if (!accountGroupId) {
@@ -59,13 +48,16 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    const result = await sql`
-      SELECT id, content, platform, post_type, topic, scheduled_date, image_url, video_url, week_theme, week_start, status, base_group_key, base_post_id
-      FROM social_posts
-      WHERE scheduled_date::date = ${date}
-        AND status = ANY(SELECT unnest(${statusArrayLiteral}::text[]))
-      ORDER BY scheduled_date ASC, id ASC
-    `;
+    const result = await sql.query(
+      `
+        SELECT id, content, platform, post_type, topic, scheduled_date, image_url, video_url, week_theme, week_start, status, base_group_key, base_post_id
+        FROM social_posts
+        WHERE scheduled_date::date = $1
+          AND status = ANY($2::text[])
+        ORDER BY scheduled_date ASC, id ASC
+      `,
+      [date, statuses],
+    );
 
     const rows = result.rows as DbPostRow[];
     if (rows.length === 0) {

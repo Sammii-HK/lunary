@@ -10,7 +10,11 @@ import {
 import { ParsedMarkdown } from '@/utils/markdown';
 import { NavParamLink } from '@/components/NavParamLink';
 import { getContextualCopy } from '@/lib/grimoire/getContextualCopy';
-import { getContextualNudge } from '@/lib/grimoire/getContextualNudge';
+import {
+  getContextualHub,
+  getContextualNudge,
+} from '@/lib/grimoire/getContextualNudge';
+import { SEOCTAButton } from '@/components/grimoire/SEOCTAButton';
 import { ExploreGrimoire } from './ExploreGrimoire';
 import { Heading } from '../ui/Heading';
 import { ArticleFooter } from './ArticleFooter';
@@ -265,6 +269,7 @@ export function SEOContentTemplate({
     }
   })();
   const automaticCopy = getContextualCopy(canonicalPathname);
+  const contextualHub = getContextualHub(canonicalPathname);
   const contextualCopySentence = contextualCopy ?? automaticCopy.sentence;
   const contextualCopyClasses =
     contextualCopyVariant === 'callout'
@@ -641,18 +646,20 @@ export function SEOContentTemplate({
 
         {/* CTA or contextual nudge */}
         {hasContextualNudge && contextualNudge ? (
-          <ContextualNudgeSection nudge={contextualNudge} />
+          <ContextualNudgeSection
+            nudge={contextualNudge}
+            location='seo_contextual_nudge'
+          />
         ) : ctaText && ctaHref ? (
           <section className='bg-gradient-to-r from-lunary-primary-900/30 to-lunary-highlight-900/30 border border-lunary-primary-700 rounded-lg p-6 sm:p-8 text-center overflow-x-hidden'>
             <Heading as='h2' variant='h3'>
               {ctaText}
             </Heading>
-            <NavParamLink
+            <SEOCTAButton
               href={ctaHref}
-              className='inline-block px-5 sm:px-6 py-2 sm:py-3 bg-lunary-primary hover:bg-lunary-primary-400 text-white rounded-lg font-medium transition-colors '
-            >
-              Get Started
-            </NavParamLink>
+              label='Get Started'
+              hub={contextualHub}
+            />
           </section>
         ) : null}
 

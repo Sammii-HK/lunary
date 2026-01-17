@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import { useAuthStatus } from './AuthStatus';
 import { useSubscription } from '@/hooks/useSubscription';
 import { AuthComponent } from './Auth';
@@ -10,6 +11,8 @@ import { Button } from '@/components/ui/button';
 import { isFreeFeature } from '@/utils/messaging';
 import type { FeatureKey } from '../../utils/pricing';
 import { cn } from '@/lib/utils';
+import { trackCtaClick } from '@/lib/analytics';
+import { getContextualHub } from '@/lib/grimoire/getContextualNudge';
 
 interface SmartTrialButtonProps {
   size?: 'sm' | 'default' | 'lg' | 'xs';
@@ -29,6 +32,7 @@ export function SmartTrialButton({
   const authState = useAuthStatus();
   const { isSubscribed, isTrialActive } = useSubscription();
   const [showAuthModal, setShowAuthModal] = useState(false);
+  const pathname = usePathname() || '';
 
   useModal({
     isOpen: showAuthModal,
@@ -96,6 +100,18 @@ export function SmartTrialButton({
 
   const config = getButtonConfig();
 
+  const trackClick = (hrefOverride?: string) => {
+    const hub = getContextualHub(pathname, 'app');
+    trackCtaClick({
+      hub,
+      ctaId: 'smart_trial',
+      location: 'smart_trial_button',
+      label: config.text,
+      href: hrefOverride ?? config.href ?? undefined,
+      pagePath: pathname,
+    });
+  };
+
   if (config.action === 'link' && config.href) {
     return (
       <Button
@@ -104,12 +120,15 @@ export function SmartTrialButton({
         className={fullWidth ? 'w-full' : ''}
         asChild
       >
-        <Link href={config.href}>{config.text}</Link>
+        <Link href={config.href} onClick={() => trackClick(config.href)}>
+          {config.text}
+        </Link>
       </Button>
     );
   }
 
   const handleClick = () => {
+    trackClick();
     if (config.action === 'modal') {
       setShowAuthModal(true);
     }

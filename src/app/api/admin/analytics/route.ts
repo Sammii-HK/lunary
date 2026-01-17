@@ -199,27 +199,32 @@ export async function GET(request: NextRequest) {
           100
         : 0;
 
-    const eventsArray = `{${ACTIVITY_EVENTS.map((e) => `"${e}"`).join(',')}}`;
     const dauStart = new Date();
     dauStart.setUTCDate(dauStart.getUTCDate() - 1);
     const wauStart = new Date();
     wauStart.setUTCDate(wauStart.getUTCDate() - 7);
 
     const [dauResult, wauResult] = await Promise.all([
-      sql`
-        SELECT COUNT(DISTINCT user_id) as count
-        FROM conversion_events
-        WHERE event_type = ANY(SELECT unnest(${eventsArray}::text[]))
-          AND created_at >= ${dauStart.toISOString()}
-          AND created_at <= NOW()
-      `,
-      sql`
-        SELECT COUNT(DISTINCT user_id) as count
-        FROM conversion_events
-        WHERE event_type = ANY(SELECT unnest(${eventsArray}::text[]))
-          AND created_at >= ${wauStart.toISOString()}
-          AND created_at <= NOW()
-      `,
+      sql.query(
+        `
+          SELECT COUNT(DISTINCT user_id) as count
+          FROM conversion_events
+          WHERE event_type = ANY($1::text[])
+            AND created_at >= $2
+            AND created_at <= NOW()
+        `,
+        [ACTIVITY_EVENTS, dauStart.toISOString()],
+      ),
+      sql.query(
+        `
+          SELECT COUNT(DISTINCT user_id) as count
+          FROM conversion_events
+          WHERE event_type = ANY($1::text[])
+            AND created_at >= $2
+            AND created_at <= NOW()
+        `,
+        [ACTIVITY_EVENTS, wauStart.toISOString()],
+      ),
     ]);
 
     const dau = parseInt(dauResult.rows[0]?.count || '0');

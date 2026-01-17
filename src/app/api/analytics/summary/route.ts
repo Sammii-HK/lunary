@@ -192,38 +192,63 @@ export async function GET(request: NextRequest) {
       `,
     ]);
 
-    const activityEventsArray = `{${ACTIVITY_EVENTS.map((e) => `"${e}"`).join(',')}}`;
-
     const dauStart = new Date(today);
     dauStart.setUTCDate(dauStart.getUTCDate() - 1);
     const wauStart = new Date(today);
     wauStart.setUTCDate(wauStart.getUTCDate() - 7);
 
     const [dauResult, wauResult, mauResult] = await Promise.all([
-      sql`
-        SELECT COUNT(DISTINCT user_id) AS count
-        FROM conversion_events
-        WHERE event_type = ANY(SELECT unnest(${activityEventsArray}::text[]))
-          AND created_at >= ${formatTimestamp(dauStart)}
-          AND created_at <= ${formatTimestamp(today)}
-          AND (user_email IS NULL OR (user_email NOT LIKE ${TEST_EMAIL_PATTERN} AND user_email != ${TEST_EMAIL_EXACT} ))
-      `,
-      sql`
-        SELECT COUNT(DISTINCT user_id) AS count
-        FROM conversion_events
-        WHERE event_type = ANY(SELECT unnest(${activityEventsArray}::text[]))
-          AND created_at >= ${formatTimestamp(wauStart)}
-          AND created_at <= ${formatTimestamp(today)}
-          AND (user_email IS NULL OR (user_email NOT LIKE ${TEST_EMAIL_PATTERN} AND user_email != ${TEST_EMAIL_EXACT} ))
-      `,
-      sql`
-        SELECT COUNT(DISTINCT user_id) AS count
-        FROM conversion_events
-        WHERE event_type = ANY(SELECT unnest(${activityEventsArray}::text[]))
-          AND created_at >= ${thirtyDaysAgoTimestamp}
-          AND created_at <= ${formatTimestamp(today)}
-          AND (user_email IS NULL OR (user_email NOT LIKE ${TEST_EMAIL_PATTERN} AND user_email != ${TEST_EMAIL_EXACT} ))
-      `,
+      sql.query(
+        `
+          SELECT COUNT(DISTINCT user_id) AS count
+          FROM conversion_events
+          WHERE event_type = ANY($1::text[])
+            AND created_at >= $2
+            AND created_at <= $3
+            AND (user_email IS NULL OR (user_email NOT LIKE $4 AND user_email != $5))
+        `,
+        [
+          ACTIVITY_EVENTS,
+          formatTimestamp(dauStart),
+          formatTimestamp(today),
+          TEST_EMAIL_PATTERN,
+          TEST_EMAIL_EXACT,
+        ],
+      ),
+      sql.query(
+        `
+          SELECT COUNT(DISTINCT user_id) AS count
+          FROM conversion_events
+          WHERE event_type = ANY($1::text[])
+            AND created_at >= $2
+            AND created_at <= $3
+            AND (user_email IS NULL OR (user_email NOT LIKE $4 AND user_email != $5))
+        `,
+        [
+          ACTIVITY_EVENTS,
+          formatTimestamp(wauStart),
+          formatTimestamp(today),
+          TEST_EMAIL_PATTERN,
+          TEST_EMAIL_EXACT,
+        ],
+      ),
+      sql.query(
+        `
+          SELECT COUNT(DISTINCT user_id) AS count
+          FROM conversion_events
+          WHERE event_type = ANY($1::text[])
+            AND created_at >= $2
+            AND created_at <= $3
+            AND (user_email IS NULL OR (user_email NOT LIKE $4 AND user_email != $5))
+        `,
+        [
+          ACTIVITY_EVENTS,
+          thirtyDaysAgoTimestamp,
+          formatTimestamp(today),
+          TEST_EMAIL_PATTERN,
+          TEST_EMAIL_EXACT,
+        ],
+      ),
     ]);
 
     const dau = Number(dauResult.rows[0]?.count || 0);
@@ -265,29 +290,38 @@ export async function GET(request: NextRequest) {
       cohortEnd: Date,
       days: 1 | 7 | 30,
     ) => {
-      const result = await sql`
-        WITH cohort AS (
-          SELECT id, "createdAt"
-          FROM "user"
-          WHERE "createdAt" >= ${formatTimestamp(cohortStart)}
-            AND "createdAt" < ${formatTimestamp(cohortEnd)}
-            AND (email IS NULL OR (email NOT LIKE ${TEST_EMAIL_PATTERN} AND email != ${TEST_EMAIL_EXACT} ))
-        )
-        SELECT
-          COUNT(*) AS cohort_size,
-          COUNT(*) FILTER (
-            WHERE EXISTS (
-              SELECT 1
-              FROM conversion_events ce
-              WHERE ce.user_id = cohort.id
-                AND ce.event_type = ANY(SELECT unnest(${activityEventsArray}::text[]))
-                AND ce.created_at > cohort."createdAt"
-                AND ce.created_at <= cohort."createdAt" + INTERVAL '${days} days'
-                AND (ce.user_email IS NULL OR (ce.user_email NOT LIKE ${TEST_EMAIL_PATTERN} AND ce.user_email != ${TEST_EMAIL_EXACT} ))
-            )
-          ) AS returned
-        FROM cohort
-      `;
+      const result = await sql.query(
+        `
+          WITH cohort AS (
+            SELECT id, "createdAt"
+            FROM "user"
+            WHERE "createdAt" >= $1
+              AND "createdAt" < $2
+              AND (email IS NULL OR (email NOT LIKE $4 AND email != $5))
+          )
+          SELECT
+            COUNT(*) AS cohort_size,
+            COUNT(*) FILTER (
+              WHERE EXISTS (
+                SELECT 1
+                FROM conversion_events ce
+                WHERE ce.user_id = cohort.id
+                  AND ce.event_type = ANY($3::text[])
+                  AND ce.created_at > cohort."createdAt"
+                  AND ce.created_at <= cohort."createdAt" + INTERVAL '${days} days'
+                  AND (ce.user_email IS NULL OR (ce.user_email NOT LIKE $4 AND ce.user_email != $5))
+              )
+            ) AS returned
+          FROM cohort
+        `,
+        [
+          formatTimestamp(cohortStart),
+          formatTimestamp(cohortEnd),
+          ACTIVITY_EVENTS,
+          TEST_EMAIL_PATTERN,
+          TEST_EMAIL_EXACT,
+        ],
+      );
 
       const cohortSize = Number(result.rows[0]?.cohort_size || 0);
       const returned = Number(result.rows[0]?.returned || 0);
@@ -450,15 +484,22 @@ export async function GET(request: NextRequest) {
     // Tarot engagement now tracked by PostHog
     const tarotEngagementType: Record<string, number> = {};
 
-    const productEventsArray = `{${PRODUCT_EVENTS.map((e) => `"${e}"`).join(',')}}`;
-    const productUsageResult = await sql`
-      SELECT event_type, COUNT(*) AS count
-      FROM conversion_events
-      WHERE event_type = ANY(SELECT unnest(${productEventsArray}::text[]))
-        AND created_at >= ${thirtyDaysAgoTimestamp}
-        AND (user_email IS NULL OR (user_email NOT LIKE ${TEST_EMAIL_PATTERN} AND user_email != ${TEST_EMAIL_EXACT} ))
-      GROUP BY event_type
-    `;
+    const productUsageResult = await sql.query(
+      `
+        SELECT event_type, COUNT(*) AS count
+        FROM conversion_events
+        WHERE event_type = ANY($1::text[])
+          AND created_at >= $2
+          AND (user_email IS NULL OR (user_email NOT LIKE $3 AND user_email != $4))
+        GROUP BY event_type
+      `,
+      [
+        PRODUCT_EVENTS,
+        thirtyDaysAgoTimestamp,
+        TEST_EMAIL_PATTERN,
+        TEST_EMAIL_EXACT,
+      ],
+    );
     const productUsageCounts: Record<string, number> = {};
     productUsageResult.rows.forEach((row) => {
       productUsageCounts[row.event_type as string] = Number(row.count || 0);

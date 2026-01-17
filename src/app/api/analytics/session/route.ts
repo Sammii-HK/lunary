@@ -1,16 +1,22 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { sql } from '@vercel/postgres';
 import { getCurrentUser } from '@/lib/get-user-session';
+import {
+  canonicaliseEvent,
+  insertCanonicalEvent,
+} from '@/lib/analytics/canonical-events';
+import { forwardEventToPostHog } from '@/lib/posthog-forward';
+import { sql } from '@vercel/postgres';
 
 const TEST_EMAIL_PATTERN = '%@test.lunary.app';
 const TEST_EMAIL_EXACT = 'test@test.lunary.app';
-const SESSION_WINDOW_MINUTES = 30;
 
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json().catch(() => ({}));
-    const { userId, pagePath, metadata } = body as {
+    const { userId, anonymousId, eventId, pagePath, metadata } = body as {
       userId?: string;
+      anonymousId?: string;
+      eventId?: string;
       pagePath?: string;
       metadata?: Record<string, unknown>;
     };
@@ -18,10 +24,6 @@ export async function POST(request: NextRequest) {
     const currentUser = await getCurrentUser(request);
     const resolvedUserId = userId || currentUser?.id;
     const resolvedEmail = currentUser?.email;
-
-    if (!resolvedUserId) {
-      return NextResponse.json({ success: false, skipped: true });
-    }
 
     if (
       resolvedEmail &&
@@ -31,38 +33,73 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ success: true, skipped: true });
     }
 
-    const recentSession = await sql`
-      SELECT 1
-      FROM conversion_events
-      WHERE event_type = 'app_opened'
-        AND user_id = ${resolvedUserId}
-        AND created_at >= NOW() - INTERVAL '${SESSION_WINDOW_MINUTES} minutes'
-      LIMIT 1
-    `;
+    const canonical = canonicaliseEvent({
+      eventType: 'app_opened',
+      eventId,
+      userId: resolvedUserId,
+      anonymousId,
+      userEmail: resolvedEmail,
+      pagePath,
+      metadata,
+    });
 
-    if (recentSession.rows.length > 0) {
-      return NextResponse.json({ success: true, skipped: true });
+    if (!canonical.ok) {
+      return NextResponse.json({
+        success: true,
+        skipped: true,
+        reason: canonical.reason,
+      });
     }
 
-    await sql`
-      INSERT INTO conversion_events (
-        event_type,
-        user_id,
-        user_email,
-        page_path,
-        metadata,
-        created_at
-      ) VALUES (
-        'app_opened',
-        ${resolvedUserId},
-        ${resolvedEmail || null},
-        ${pagePath || null},
-        ${metadata ? JSON.stringify(metadata) : null},
-        NOW()
-      )
-    `;
+    // Identity stitching: if we have both a real user id and an anonymous id, link them.
+    if (
+      canonical.row.userId &&
+      canonical.row.anonymousId &&
+      !canonical.row.userId.startsWith('anon:')
+    ) {
+      try {
+        await sql.query(
+          `
+            INSERT INTO analytics_identity_links (user_id, anonymous_id)
+            VALUES ($1, $2)
+            ON CONFLICT DO NOTHING
+          `,
+          [canonical.row.userId, canonical.row.anonymousId],
+        );
+      } catch (e) {
+        // Backwards compatible: table may not exist until migrations run.
+        if (
+          !(e instanceof Error) ||
+          !String(e.message).includes('analytics_identity_links')
+        ) {
+          throw e;
+        }
+      }
+    }
 
-    return NextResponse.json({ success: true });
+    const { inserted } = await insertCanonicalEvent(canonical.row);
+
+    if (inserted) {
+      const distinctId =
+        canonical.row.anonymousId || canonical.row.userId || 'unknown';
+      forwardEventToPostHog({
+        distinctId,
+        event: canonical.row.eventType,
+        properties: {
+          ...canonical.row.metadata,
+          event_id: canonical.row.eventId,
+          plan_type: canonical.row.planType,
+          trial_days_remaining: canonical.row.trialDaysRemaining,
+          feature_name: canonical.row.featureName,
+          page_path: canonical.row.pagePath,
+          entity_type: canonical.row.entityType,
+          entity_id: canonical.row.entityId,
+          authenticated: !canonical.row.userId.startsWith('anon:'),
+        },
+      });
+    }
+
+    return NextResponse.json({ success: true, skipped: !inserted });
   } catch (error) {
     console.error('Error tracking session:', error);
 

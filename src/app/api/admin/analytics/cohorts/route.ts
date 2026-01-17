@@ -30,6 +30,11 @@ export async function GET(request: NextRequest) {
     const today = new Date();
     today.setUTCHours(0, 0, 0, 0);
 
+    const identityLinksExistsResult = await sql.query(
+      `SELECT to_regclass('analytics_identity_links') IS NOT NULL AS exists`,
+    );
+    const hasIdentityLinks = Boolean(identityLinksExistsResult.rows[0]?.exists);
+
     let rangeStart = parseDateParam(startParam, defaultStart);
     let rangeEndInclusive = parseDateParam(endParam, today);
 
@@ -92,26 +97,8 @@ export async function GET(request: NextRequest) {
       day30: number;
     }> = [];
 
-    // Helper to convert array to PostgreSQL text array literal
-    const toTextArrayLiteral = (values: string[]): string | null => {
-      if (values.length === 0) return null;
-      return `{${values.map((v) => `"${String(v).replace(/\\/g, '\\\\').replace(/"/g, '\\"')}"`).join(',')}}`;
-    };
-
-    // Events that indicate user activity/return
-    const ACTIVITY_EVENTS = [
-      'tarot_viewed',
-      'horoscope_viewed',
-      'birth_chart_viewed',
-      'personalized_tarot_viewed',
-      'personalized_horoscope_viewed',
-      'onboarding_completed',
-      'profile_completed',
-      'birthday_entered',
-      'cosmic_pulse_opened',
-      'moon_circle_opened',
-    ];
-    const activityEventsArray = toTextArrayLiteral(ACTIVITY_EVENTS)!;
+    // DB SSOT: retention is based on meaningful opens (deduped at source).
+    const ACTIVITY_EVENTS = ['app_opened'];
 
     for (const period of periodStarts) {
       const cohortStartDate = period.start;
@@ -128,44 +115,164 @@ export async function GET(request: NextRequest) {
       const cohortSize = Number(cohortUsersResult.rows[0]?.cohort_size ?? 0);
       if (cohortSize === 0) continue;
 
-      // Calculate retention metrics using the cohort window
-      const day1Retained = await sql`
-        SELECT COUNT(DISTINCT u.id) as count
-        FROM "user" u
-        INNER JOIN conversion_events ce2 ON ce2.user_id = u.id
-        WHERE u."createdAt" >= ${formatTimestamp(cohortStartDate)}
-          AND u."createdAt" < ${formatTimestamp(cohortEndDate)}
-          AND (u.email IS NULL OR (u.email NOT LIKE ${TEST_EMAIL_PATTERN} AND u.email != ${TEST_EMAIL_EXACT}))
-          AND ce2.event_type = ANY(SELECT unnest(${activityEventsArray}::text[]))
-          AND ce2.created_at > u."createdAt"
-          AND ce2.created_at <= u."createdAt" + INTERVAL '1 day'
-      `;
+      // Calculate retention metrics using identity stitching (user_id or linked anonymous_id).
+      const day1Retained = await sql.query(
+        hasIdentityLinks
+          ? `
+          SELECT COUNT(*) as count
+          FROM "user" u
+          WHERE u."createdAt" >= $1
+            AND u."createdAt" < $2
+            AND (u.email IS NULL OR (u.email NOT LIKE $3 AND u.email != $4))
+            AND EXISTS (
+              SELECT 1
+              FROM conversion_events ce2
+              WHERE ce2.event_type = ANY($5::text[])
+                AND ce2.created_at > u."createdAt"
+                AND ce2.created_at <= u."createdAt" + INTERVAL '1 day'
+                AND (
+                  ce2.user_id = u.id
+                  OR (
+                    ce2.anonymous_id IS NOT NULL
+                    AND EXISTS (
+                      SELECT 1
+                      FROM analytics_identity_links l
+                      WHERE l.user_id = u.id
+                        AND l.anonymous_id = ce2.anonymous_id
+                    )
+                  )
+                )
+            )
+        `
+          : `
+          SELECT COUNT(*) as count
+          FROM "user" u
+          WHERE u."createdAt" >= $1
+            AND u."createdAt" < $2
+            AND (u.email IS NULL OR (u.email NOT LIKE $3 AND u.email != $4))
+            AND EXISTS (
+              SELECT 1
+              FROM conversion_events ce2
+              WHERE ce2.user_id = u.id
+                AND ce2.event_type = ANY($5::text[])
+                AND ce2.created_at > u."createdAt"
+                AND ce2.created_at <= u."createdAt" + INTERVAL '1 day'
+            )
+        `,
+        [
+          formatTimestamp(cohortStartDate),
+          formatTimestamp(cohortEndDate),
+          TEST_EMAIL_PATTERN,
+          TEST_EMAIL_EXACT,
+          ACTIVITY_EVENTS,
+        ],
+      );
 
       // Day 7 retention: users who returned within 7 days after their signup
-      const day7Retained = await sql`
-        SELECT COUNT(DISTINCT u.id) as count
-        FROM "user" u
-        INNER JOIN conversion_events ce2 ON ce2.user_id = u.id
-        WHERE u."createdAt" >= ${formatTimestamp(cohortStartDate)}
-          AND u."createdAt" < ${formatTimestamp(cohortEndDate)}
-          AND (u.email IS NULL OR (u.email NOT LIKE ${TEST_EMAIL_PATTERN} AND u.email != ${TEST_EMAIL_EXACT}))
-          AND ce2.event_type = ANY(SELECT unnest(${activityEventsArray}::text[]))
-          AND ce2.created_at > u."createdAt"
-          AND ce2.created_at <= u."createdAt" + INTERVAL '7 days'
-      `;
+      const day7Retained = await sql.query(
+        hasIdentityLinks
+          ? `
+          SELECT COUNT(*) as count
+          FROM "user" u
+          WHERE u."createdAt" >= $1
+            AND u."createdAt" < $2
+            AND (u.email IS NULL OR (u.email NOT LIKE $3 AND u.email != $4))
+            AND EXISTS (
+              SELECT 1
+              FROM conversion_events ce2
+              WHERE ce2.event_type = ANY($5::text[])
+                AND ce2.created_at > u."createdAt"
+                AND ce2.created_at <= u."createdAt" + INTERVAL '7 days'
+                AND (
+                  ce2.user_id = u.id
+                  OR (
+                    ce2.anonymous_id IS NOT NULL
+                    AND EXISTS (
+                      SELECT 1
+                      FROM analytics_identity_links l
+                      WHERE l.user_id = u.id
+                        AND l.anonymous_id = ce2.anonymous_id
+                    )
+                  )
+                )
+            )
+        `
+          : `
+          SELECT COUNT(*) as count
+          FROM "user" u
+          WHERE u."createdAt" >= $1
+            AND u."createdAt" < $2
+            AND (u.email IS NULL OR (u.email NOT LIKE $3 AND u.email != $4))
+            AND EXISTS (
+              SELECT 1
+              FROM conversion_events ce2
+              WHERE ce2.user_id = u.id
+                AND ce2.event_type = ANY($5::text[])
+                AND ce2.created_at > u."createdAt"
+                AND ce2.created_at <= u."createdAt" + INTERVAL '7 days'
+            )
+        `,
+        [
+          formatTimestamp(cohortStartDate),
+          formatTimestamp(cohortEndDate),
+          TEST_EMAIL_PATTERN,
+          TEST_EMAIL_EXACT,
+          ACTIVITY_EVENTS,
+        ],
+      );
 
       // Day 30 retention: users who returned within 30 days after their signup
-      const day30Retained = await sql`
-        SELECT COUNT(DISTINCT u.id) as count
-        FROM "user" u
-        INNER JOIN conversion_events ce2 ON ce2.user_id = u.id
-        WHERE u."createdAt" >= ${formatTimestamp(cohortStartDate)}
-          AND u."createdAt" < ${formatTimestamp(cohortEndDate)}
-          AND (u.email IS NULL OR (u.email NOT LIKE ${TEST_EMAIL_PATTERN} AND u.email != ${TEST_EMAIL_EXACT}))
-          AND ce2.event_type = ANY(SELECT unnest(${activityEventsArray}::text[]))
-          AND ce2.created_at > u."createdAt"
-          AND ce2.created_at <= u."createdAt" + INTERVAL '30 days'
-      `;
+      const day30Retained = await sql.query(
+        hasIdentityLinks
+          ? `
+          SELECT COUNT(*) as count
+          FROM "user" u
+          WHERE u."createdAt" >= $1
+            AND u."createdAt" < $2
+            AND (u.email IS NULL OR (u.email NOT LIKE $3 AND u.email != $4))
+            AND EXISTS (
+              SELECT 1
+              FROM conversion_events ce2
+              WHERE ce2.event_type = ANY($5::text[])
+                AND ce2.created_at > u."createdAt"
+                AND ce2.created_at <= u."createdAt" + INTERVAL '30 days'
+                AND (
+                  ce2.user_id = u.id
+                  OR (
+                    ce2.anonymous_id IS NOT NULL
+                    AND EXISTS (
+                      SELECT 1
+                      FROM analytics_identity_links l
+                      WHERE l.user_id = u.id
+                        AND l.anonymous_id = ce2.anonymous_id
+                    )
+                  )
+                )
+            )
+        `
+          : `
+          SELECT COUNT(*) as count
+          FROM "user" u
+          WHERE u."createdAt" >= $1
+            AND u."createdAt" < $2
+            AND (u.email IS NULL OR (u.email NOT LIKE $3 AND u.email != $4))
+            AND EXISTS (
+              SELECT 1
+              FROM conversion_events ce2
+              WHERE ce2.user_id = u.id
+                AND ce2.event_type = ANY($5::text[])
+                AND ce2.created_at > u."createdAt"
+                AND ce2.created_at <= u."createdAt" + INTERVAL '30 days'
+            )
+        `,
+        [
+          formatTimestamp(cohortStartDate),
+          formatTimestamp(cohortEndDate),
+          TEST_EMAIL_PATTERN,
+          TEST_EMAIL_EXACT,
+          ACTIVITY_EVENTS,
+        ],
+      );
 
       const formattedStart = period.start.toISOString().split('T')[0];
       const day1Retention =

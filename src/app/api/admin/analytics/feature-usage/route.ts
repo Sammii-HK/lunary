@@ -1,65 +1,92 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { sql } from '@vercel/postgres';
+import { resolveDateRange, formatTimestamp } from '@/lib/analytics/date-range';
 
+// Canonical event types shown in the product feature panel.
 const FEATURE_EVENTS = [
-  'birth_chart_viewed',
-  'tarot_viewed',
-  'horoscope_viewed',
-  'crystal_recommendations_viewed',
-  'personalized_tarot_viewed',
-  'personalized_horoscope_viewed',
-  'pricing_page_viewed',
-  'upgrade_clicked',
+  'daily_dashboard_viewed',
+  'grimoire_viewed',
+  'astral_chat_used',
+  'tarot_drawn',
+  'ritual_started',
+  'chart_viewed',
+  'signup_completed',
+  'trial_started',
+  'subscription_started',
+  'subscription_cancelled',
 ];
 
 const TEST_EMAIL_PATTERN = '%@test.lunary.app';
 const TEST_EMAIL_EXACT = 'test@test.lunary.app';
 
-const toTextArrayLiteral = (values: string[]): string | null => {
-  if (values.length === 0) return null;
-  return `{${values.map((v) => `"${String(v).replace(/\\/g, '\\\\').replace(/"/g, '\\"')}"`).join(',')}}`;
-};
-
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
-    const daysBack = parseInt(searchParams.get('days') || '7', 10);
-
-    const eventsArray = toTextArrayLiteral(FEATURE_EVENTS)!;
+    const range = resolveDateRange(searchParams, 7);
 
     const [featureResult, activeUsersResult, heatmapResult] = await Promise.all(
       [
-        sql`
-          SELECT
-            event_type as feature,
-            COUNT(*) as total_events,
-            COUNT(DISTINCT user_id) as unique_users
-          FROM conversion_events
-          WHERE event_type = ANY(SELECT unnest(${eventsArray}::text[]))
-            AND created_at >= NOW() - INTERVAL '${daysBack} days'
-            AND (user_email IS NULL OR (user_email NOT LIKE ${TEST_EMAIL_PATTERN} AND user_email != ${TEST_EMAIL_EXACT}))
-          GROUP BY event_type
-          ORDER BY total_events DESC
-        `,
-        sql`
-          SELECT COUNT(DISTINCT user_id) as total_users
-          FROM conversion_events
-          WHERE event_type = ANY(SELECT unnest(${eventsArray}::text[]))
-            AND created_at >= NOW() - INTERVAL '${daysBack} days'
-            AND (user_email IS NULL OR (user_email NOT LIKE ${TEST_EMAIL_PATTERN} AND user_email != ${TEST_EMAIL_EXACT}))
-        `,
-        sql`
-          SELECT
-            DATE(created_at) as date,
-            event_type,
-            COUNT(*) as count
-          FROM conversion_events
-          WHERE event_type = ANY(SELECT unnest(${eventsArray}::text[]))
-            AND created_at >= NOW() - INTERVAL '${daysBack} days'
-            AND (user_email IS NULL OR (user_email NOT LIKE ${TEST_EMAIL_PATTERN} AND user_email != ${TEST_EMAIL_EXACT}))
-          GROUP BY DATE(created_at), event_type
-          ORDER BY date ASC
-        `,
+        sql.query(
+          `
+            SELECT
+              event_type as feature,
+              COUNT(*) as total_events,
+              COUNT(DISTINCT user_id) as unique_users
+            FROM conversion_events
+            WHERE event_type = ANY($1::text[])
+              AND created_at >= $2
+              AND created_at <= $3
+              AND (user_email IS NULL OR (user_email NOT LIKE $4 AND user_email != $5))
+            GROUP BY event_type
+            ORDER BY total_events DESC
+          `,
+          [
+            FEATURE_EVENTS,
+            formatTimestamp(range.start),
+            formatTimestamp(range.end),
+            TEST_EMAIL_PATTERN,
+            TEST_EMAIL_EXACT,
+          ],
+        ),
+        sql.query(
+          `
+            SELECT COUNT(DISTINCT user_id) as total_users
+            FROM conversion_events
+            WHERE event_type = ANY($1::text[])
+              AND created_at >= $2
+              AND created_at <= $3
+              AND (user_email IS NULL OR (user_email NOT LIKE $4 AND user_email != $5))
+          `,
+          [
+            FEATURE_EVENTS,
+            formatTimestamp(range.start),
+            formatTimestamp(range.end),
+            TEST_EMAIL_PATTERN,
+            TEST_EMAIL_EXACT,
+          ],
+        ),
+        sql.query(
+          `
+            SELECT
+              DATE(created_at) as date,
+              event_type,
+              COUNT(*) as count
+            FROM conversion_events
+            WHERE event_type = ANY($1::text[])
+              AND created_at >= $2
+              AND created_at <= $3
+              AND (user_email IS NULL OR (user_email NOT LIKE $4 AND user_email != $5))
+            GROUP BY DATE(created_at), event_type
+            ORDER BY date ASC
+          `,
+          [
+            FEATURE_EVENTS,
+            formatTimestamp(range.start),
+            formatTimestamp(range.end),
+            TEST_EMAIL_PATTERN,
+            TEST_EMAIL_EXACT,
+          ],
+        ),
       ],
     );
 

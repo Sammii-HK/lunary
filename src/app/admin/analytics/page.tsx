@@ -19,7 +19,6 @@ import {
 
 import { MetricsCard } from '@/components/admin/MetricsCard';
 import { ConversionFunnel } from '@/components/admin/ConversionFunnel';
-import { PostHogHeatmap } from '@/components/admin/PostHogHeatmap';
 import { SuccessMetrics } from '@/components/admin/SuccessMetrics';
 import { SearchConsoleMetrics } from '@/components/admin/SearchConsoleMetrics';
 import { AttributionMetrics } from '@/components/admin/AttributionMetrics';
@@ -45,14 +44,22 @@ type ActivityResponse = {
   dau: number;
   wau: number;
   mau: number;
+  app_opened_dau: number;
+  app_opened_wau: number;
+  app_opened_mau: number;
+  sitewide_dau: number;
+  sitewide_wau: number;
+  sitewide_mau: number;
   returning_users: number;
   retention: {
-    day_1: number;
-    day_7: number;
-    day_30: number;
+    day_1: number | null;
+    day_7: number | null;
+    day_30: number | null;
   };
   churn_rate: number | null;
   trends: ActivityTrend[];
+  app_opened_trends: ActivityTrend[];
+  sitewide_trends: ActivityTrend[];
   product_dau: number;
   product_wau: number;
   product_mau: number;
@@ -135,6 +142,80 @@ type FeatureUsageResponse = {
   }>;
 };
 
+type CtaConversionHub = {
+  hub: string;
+  total_clicks: number;
+  unique_clickers: number;
+  signups_7d: number;
+  conversion_rate: number;
+};
+
+type CtaConversionResponse = {
+  window_days: number;
+  hubs: CtaConversionHub[];
+};
+
+type Subscription30dResponse = {
+  window_days: number;
+  signups: number;
+  conversions: number;
+  conversion_rate: number;
+};
+
+type EngagementOverviewResponse = {
+  dau_trend: Array<{ date: string; dau: number; returning_dau: number }>;
+  dau: number;
+  wau: number;
+  mau: number;
+  stickiness_dau_mau: number;
+  stickiness_wau_mau: number;
+  new_users: number;
+  returning_users_lifetime: number;
+  returning_users_range: number;
+  returning_dau: number;
+  avg_active_days_per_user: number;
+  active_days_distribution: Record<string, number>;
+  retention: {
+    cohorts: Array<{
+      cohort_day: string;
+      cohort_users: number;
+      day_1: number | null;
+      day_7: number | null;
+      day_30: number | null;
+    }>;
+  };
+};
+
+type FeatureAdoptionResponse = {
+  mau: number;
+  features: Array<{
+    event_type: string;
+    users: number;
+    adoption_rate: number;
+  }>;
+};
+
+type GrimoireHealthResponse = {
+  grimoire_entry_rate: number;
+  grimoire_views_per_active_user: number;
+  return_to_grimoire_rate: number;
+  influence: {
+    subscription_users: number;
+    subscription_users_with_grimoire_before: number;
+    subscription_with_grimoire_before_rate: number;
+    median_days_first_grimoire_to_signup: number | null;
+    median_days_signup_to_subscription: number | null;
+  };
+};
+
+type ConversionInfluenceResponse = {
+  subscription_users: number;
+  subscription_users_with_grimoire_before: number;
+  subscription_with_grimoire_before_rate: number;
+  median_days_first_grimoire_to_signup: number | null;
+  median_days_signup_to_subscription: number | null;
+};
+
 type IntentionBreakdownItem = {
   intention: string;
   count: number;
@@ -187,6 +268,14 @@ const productSeries: UsageChartSeries[] = [
 
 const formatDateInput = (date: Date) => date.toISOString().split('T')[0];
 
+const shiftDateInput = (dateOnly: string, deltaDays: number) => {
+  // Treat the date input as UTC for consistent analytics windows.
+  const base = new Date(`${dateOnly}T00:00:00.000Z`);
+  if (Number.isNaN(base.getTime())) return dateOnly;
+  base.setUTCDate(base.getUTCDate() + deltaDays);
+  return formatDateInput(base);
+};
+
 const INTENTION_LABELS: Record<string, string> = {
   clarity: 'Clarity',
   confidence: 'Confidence',
@@ -219,6 +308,21 @@ export default function AnalyticsPage() {
   const [featureUsage, setFeatureUsage] = useState<FeatureUsageResponse | null>(
     null,
   );
+  const [engagementOverview, setEngagementOverview] =
+    useState<EngagementOverviewResponse | null>(null);
+  const [featureAdoption, setFeatureAdoption] =
+    useState<FeatureAdoptionResponse | null>(null);
+  const [grimoireHealth, setGrimoireHealth] =
+    useState<GrimoireHealthResponse | null>(null);
+  const [conversionInfluence, setConversionInfluence] =
+    useState<ConversionInfluenceResponse | null>(null);
+  const [ctaConversions, setCtaConversions] =
+    useState<CtaConversionResponse | null>(null);
+  const [subscription30d, setSubscription30d] =
+    useState<Subscription30dResponse | null>(null);
+
+  const wauWindowStart = useMemo(() => shiftDateInput(endDate, -6), [endDate]);
+  const mauWindowStart = useMemo(() => shiftDateInput(endDate, -29), [endDate]);
   const [successMetrics, setSuccessMetrics] = useState<any | null>(null);
   const [discordAnalytics, setDiscordAnalytics] = useState<any | null>(null);
   const [searchConsoleData, setSearchConsoleData] = useState<any | null>(null);
@@ -276,8 +380,8 @@ export default function AnalyticsPage() {
       ? (activity.signed_in_product_wau / activity.signed_in_product_mau) * 100
       : 0;
   const grimoireShareRatio =
-    activity?.mau && activity.mau > 0
-      ? (activity.grimoire_only_mau / activity.mau) * 100
+    activity?.content_mau_grimoire && activity.content_mau_grimoire > 0
+      ? (activity.grimoire_only_mau / activity.content_mau_grimoire) * 100
       : 0;
 
   const chartSeries = showProductSeries
@@ -293,8 +397,14 @@ export default function AnalyticsPage() {
     try {
       const [
         activityRes,
+        engagementOverviewRes,
+        featureAdoptionRes,
+        grimoireHealthRes,
+        conversionInfluenceRes,
         aiRes,
         conversionsRes,
+        ctaConversionsRes,
+        subscription30dRes,
         notificationsRes,
         featureUsageRes,
         successMetricsRes,
@@ -312,8 +422,14 @@ export default function AnalyticsPage() {
         fetch(
           `/api/admin/analytics/dau-wau-mau?${queryParams}&granularity=${granularity}`,
         ),
+        fetch(`/api/admin/analytics/engagement-overview?${queryParams}`),
+        fetch(`/api/admin/analytics/feature-adoption?${queryParams}`),
+        fetch(`/api/admin/analytics/grimoire-health?${queryParams}`),
+        fetch(`/api/admin/analytics/conversion-influence?${queryParams}`),
         fetch(`/api/admin/analytics/ai-engagement?${queryParams}`),
         fetch(`/api/admin/analytics/conversions?${queryParams}`),
+        fetch(`/api/admin/analytics/cta-conversions?${queryParams}`),
+        fetch(`/api/admin/analytics/subscription-30d?${queryParams}`),
         fetch(`/api/admin/analytics/notifications?${queryParams}`),
         fetch(`/api/admin/analytics/feature-usage?${queryParams}`),
         fetch(`/api/admin/analytics/success-metrics?${queryParams}`),
@@ -341,6 +457,34 @@ export default function AnalyticsPage() {
         errors.push('DAU/WAU/MAU');
       }
 
+      if (engagementOverviewRes.ok) {
+        const data = await engagementOverviewRes.json();
+        setEngagementOverview(data);
+      } else {
+        errors.push('Engagement overview');
+      }
+
+      if (featureAdoptionRes.ok) {
+        const data = await featureAdoptionRes.json();
+        setFeatureAdoption(data);
+      } else {
+        errors.push('Feature adoption');
+      }
+
+      if (grimoireHealthRes.ok) {
+        const data = await grimoireHealthRes.json();
+        setGrimoireHealth(data);
+      } else {
+        errors.push('Grimoire health');
+      }
+
+      if (conversionInfluenceRes.ok) {
+        const data = await conversionInfluenceRes.json();
+        setConversionInfluence(data);
+      } else {
+        errors.push('Conversion influence');
+      }
+
       if (aiRes.ok) {
         setAiMetrics(await aiRes.json());
       } else {
@@ -353,6 +497,18 @@ export default function AnalyticsPage() {
         errors.push('Conversions');
       }
 
+      if (ctaConversionsRes.ok) {
+        setCtaConversions(await ctaConversionsRes.json());
+      } else {
+        errors.push('CTA conversions');
+      }
+
+      if (subscription30dRes.ok) {
+        setSubscription30d(await subscription30dRes.json());
+      } else {
+        errors.push('Subscription 30d');
+      }
+
       if (notificationsRes.ok) {
         setNotifications(await notificationsRes.json());
       } else {
@@ -362,12 +518,7 @@ export default function AnalyticsPage() {
       if (featureUsageRes.ok) {
         setFeatureUsage(await featureUsageRes.json());
       } else {
-        const data = await featureUsageRes.json().catch(() => ({}));
-        if (data.error?.includes('PostHog')) {
-          setFeatureUsage({ features: [], heatmap: [] });
-        } else {
-          errors.push('Feature usage');
-        }
+        errors.push('Feature usage');
       }
 
       if (successMetricsRes.ok) {
@@ -446,12 +597,47 @@ export default function AnalyticsPage() {
   }, [fetchAnalytics]);
 
   const handleExport = () => {
+    const escapeCsvCell = (value: unknown): string => {
+      const text = value === null || value === undefined ? '' : String(value);
+      // Quote if needed (commas, quotes, newlines)
+      if (/[",\n\r]/.test(text)) {
+        return `"${text.replace(/"/g, '""')}"`;
+      }
+      return text;
+    };
+
     const rows: string[][] = [['Section', 'Metric', 'Value']];
+    rows.push(
+      ['Export', 'Start date', startDate],
+      ['Export', 'End date', endDate],
+      ['Export', 'Granularity', granularity],
+      ['Export', 'Generated at (UTC)', new Date().toISOString()],
+    );
 
     if (activity) {
       rows.push(
-        ['Activity', 'DAU', String(activity.dau)],
-        ['Activity', 'Returning Users', String(activity.returning_users ?? 0)],
+        [
+          'Activity',
+          'DAU (Sitewide Page Views)',
+          String(activity.sitewide_dau ?? 0),
+        ],
+        [
+          'Activity',
+          'WAU (Sitewide Page Views)',
+          String(activity.sitewide_wau ?? 0),
+        ],
+        [
+          'Activity',
+          'MAU (Sitewide Page Views)',
+          String(activity.sitewide_mau ?? 0),
+        ],
+        ['Activity', 'DAU (Engaged)', String(activity.dau)],
+        ['Activity', 'DAU (App Opened)', String(activity.app_opened_dau ?? 0)],
+        [
+          'Activity',
+          'Returning Users (legacy)',
+          String(activity.returning_users ?? 0),
+        ],
         ['Activity', 'WAU', String(activity.wau)],
         ['Activity', 'MAU', String(activity.mau)],
         [
@@ -494,6 +680,51 @@ export default function AnalyticsPage() {
       );
     }
 
+    if (engagementOverview) {
+      rows.push(
+        [
+          'Engagement Overview',
+          'DAU (end day)',
+          String(engagementOverview.dau ?? 0),
+        ],
+        [
+          'Engagement Overview',
+          'Returning DAU (end day)',
+          String(engagementOverview.returning_dau ?? 0),
+        ],
+        [
+          'Engagement Overview',
+          'WAU (rolling)',
+          String(engagementOverview.wau ?? 0),
+        ],
+        [
+          'Engagement Overview',
+          'MAU (rolling)',
+          String(engagementOverview.mau ?? 0),
+        ],
+        [
+          'Engagement Overview',
+          'Stickiness (DAU/MAU)',
+          `${Number(engagementOverview.stickiness_dau_mau ?? 0).toFixed(2)}%`,
+        ],
+        [
+          'Engagement Overview',
+          'Stickiness (WAU/MAU)',
+          `${Number(engagementOverview.stickiness_wau_mau ?? 0).toFixed(2)}%`,
+        ],
+        [
+          'Engagement Overview',
+          'New users (range)',
+          String(engagementOverview.new_users ?? 0),
+        ],
+        [
+          'Engagement Overview',
+          'Returning users (range)',
+          String(engagementOverview.returning_users_range ?? 0),
+        ],
+      );
+    }
+
     if (aiMetrics) {
       rows.push(
         ['AI Engagement', 'Total Sessions', String(aiMetrics.total_sessions)],
@@ -522,6 +753,43 @@ export default function AnalyticsPage() {
           'Conversions',
           'Trial Conversion Rate',
           `${conversions.trial_conversion_rate.toFixed(2)}%`,
+        ],
+      );
+    }
+
+    if (ctaConversions && ctaConversions.hubs.length > 0) {
+      ctaConversions.hubs.forEach((hub) => {
+        rows.push(
+          [
+            'CTA Conversions',
+            `${hub.hub} - Clickers`,
+            String(hub.unique_clickers ?? 0),
+          ],
+          [
+            'CTA Conversions',
+            `${hub.hub} - Signups (${ctaConversions.window_days}d)`,
+            String(hub.signups_7d ?? 0),
+          ],
+          [
+            'CTA Conversions',
+            `${hub.hub} - Conversion Rate`,
+            `${Number(hub.conversion_rate ?? 0).toFixed(2)}%`,
+          ],
+        );
+      });
+    }
+
+    if (subscription30d) {
+      rows.push(
+        [
+          'Conversions',
+          `Subscriptions within ${subscription30d.window_days}d`,
+          String(subscription30d.conversions ?? 0),
+        ],
+        [
+          'Conversions',
+          `Signup → Subscription (${subscription30d.window_days}d)`,
+          `${Number(subscription30d.conversion_rate ?? 0).toFixed(2)}%`,
         ],
       );
     }
@@ -558,15 +826,101 @@ export default function AnalyticsPage() {
 
     if (featureUsage) {
       featureUsage.features.slice(0, 5).forEach((feature) => {
+        const featureName =
+          typeof feature.feature === 'string' && feature.feature.length > 0
+            ? feature.feature
+            : 'unknown_feature';
+        const totalEvents =
+          typeof feature.total_events === 'number' &&
+          Number.isFinite(feature.total_events)
+            ? feature.total_events
+            : 0;
+        rows.push(['Feature Usage', featureName, String(totalEvents)]);
+      });
+    }
+
+    // Append daily trend tables (as separate sections)
+    if (engagementOverview?.dau_trend?.length) {
+      rows.push(['', '', '']);
+      rows.push(['Daily Trend', 'date', 'dau', 'returning_dau']);
+      engagementOverview.dau_trend.forEach((point) => {
         rows.push([
-          'Feature Usage',
-          feature.feature,
-          feature.total_events.toString(),
+          'Daily Trend',
+          point.date,
+          String(point.dau ?? 0),
+          String(point.returning_dau ?? 0),
         ]);
       });
     }
 
-    const csv = rows.map((row) => row.join(',')).join('\n');
+    if (activity?.trends?.length) {
+      rows.push(['', '', '']);
+      rows.push(['Activity Trend', 'date', 'dau', 'wau', 'mau']);
+      activity.trends.forEach((point) => {
+        rows.push([
+          'Activity Trend',
+          point.date,
+          String(point.dau ?? 0),
+          String(point.wau ?? 0),
+          String(point.mau ?? 0),
+        ]);
+      });
+    }
+
+    if (activity?.product_trends?.length) {
+      rows.push(['', '', '']);
+      rows.push(['Product Trend', 'date', 'dau', 'wau', 'mau']);
+      activity.product_trends.forEach((point) => {
+        rows.push([
+          'Product Trend',
+          point.date,
+          String(point.dau ?? 0),
+          String(point.wau ?? 0),
+          String(point.mau ?? 0),
+        ]);
+      });
+    }
+
+    if (activity?.signed_in_product_trends?.length) {
+      rows.push(['', '', '']);
+      rows.push(['Signed-in Product Trend', 'date', 'dau', 'wau', 'mau']);
+      activity.signed_in_product_trends.forEach((point) => {
+        rows.push([
+          'Signed-in Product Trend',
+          point.date,
+          String(point.dau ?? 0),
+          String(point.wau ?? 0),
+          String(point.mau ?? 0),
+        ]);
+      });
+    }
+
+    if (aiMetrics?.trends?.length) {
+      rows.push(['', '', '']);
+      rows.push(['AI Trend', 'date', 'sessions', 'tokens']);
+      aiMetrics.trends.forEach((point) => {
+        rows.push([
+          'AI Trend',
+          point.date,
+          String(point.sessions ?? 0),
+          String(point.tokens ?? 0),
+        ]);
+      });
+    }
+
+    if (featureUsage?.heatmap?.length) {
+      rows.push(['', '', '']);
+      rows.push(['Feature Heatmap', 'date', 'feature', 'count']);
+      featureUsage.heatmap.forEach((row) => {
+        const date = row.date;
+        const features = row.features ?? {};
+        Object.entries(features).forEach(([feature, count]) => {
+          rows.push(['Feature Heatmap', date, feature, String(count ?? 0)]);
+        });
+      });
+    }
+
+    const csv = rows.map((row) => row.map(escapeCsvCell).join(',')).join('\n');
     const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
@@ -613,10 +967,10 @@ export default function AnalyticsPage() {
           minimumFractionDigits: 2,
           maximumFractionDigits: 2,
         })}`
-      : '—';
+      : 'N/A';
 
   const formatPercent = (value?: number, digits = 1) =>
-    typeof value === 'number' ? `${value.toFixed(digits)}%` : '—';
+    typeof value === 'number' ? `${value.toFixed(digits)}%` : 'N/A';
 
   const activeSubscribers =
     successMetrics?.active_subscriptions?.value ??
@@ -665,18 +1019,18 @@ export default function AnalyticsPage() {
     },
     {
       title: 'Monthly Active Users',
-      value: activity?.mau ?? 0,
-      subtitle: 'PostHog active users (30d)',
+      value: engagementOverview?.mau ?? 0,
+      subtitle: 'Deduped app opens (30d)',
     },
     {
       title: 'Weekly Active Users',
-      value: activity?.wau ?? 0,
-      subtitle: 'PostHog active users (7d)',
+      value: engagementOverview?.wau ?? 0,
+      subtitle: 'Deduped app opens (7d)',
     },
     {
       title: 'Daily Active Users',
-      value: activity?.dau ?? 0,
-      subtitle: 'PostHog active users (24h)',
+      value: engagementOverview?.dau ?? 0,
+      subtitle: 'Deduped app opens (UTC day)',
     },
   ];
 
@@ -766,19 +1120,12 @@ export default function AnalyticsPage() {
             <option value='month'>Monthly</option>
           </select>
 
-          <Button
-            variant='ghost'
-            onClick={handleExport}
-            className='h-9 gap-1.5 rounded-xl border-0 bg-transparent px-3 text-xs text-zinc-400 hover:bg-zinc-900/30 hover:text-zinc-300'
-          >
+          <Button variant='lunary-soft' onClick={handleExport}>
             <Download className='h-3.5 w-3.5' />
-            Export
+            Download CSV
           </Button>
 
-          <Button
-            onClick={fetchAnalytics}
-            className='h-9 gap-1.5 rounded-xl bg-lunary-primary-600/90 px-3 text-xs text-white hover:bg-lunary-primary-600'
-          >
+          <Button onClick={fetchAnalytics} variant='outline'>
             {loading ? (
               <Loader2 className='h-3.5 w-3.5 animate-spin' />
             ) : (
@@ -829,6 +1176,300 @@ export default function AnalyticsPage() {
               ))}
             </div>
           </section>
+
+          <section className='space-y-3'>
+            <Card className='border-zinc-800/30 bg-zinc-900/10'>
+              <CardHeader>
+                <CardTitle className='text-base font-medium'>
+                  Engagement Overview (deduplicated)
+                </CardTitle>
+                <CardDescription className='text-xs text-zinc-400'>
+                  Metrics are deduplicated to meaningful user-level events (for
+                  example, one app open per user per day) to prioritise
+                  engagement quality over raw pageview volume.
+                </CardDescription>
+              </CardHeader>
+              <CardContent className='space-y-4'>
+                <div className='grid gap-4 md:grid-cols-2 lg:grid-cols-4'>
+                  <MiniStat
+                    label='DAU'
+                    value={(engagementOverview?.dau ?? 0).toLocaleString()}
+                    icon={
+                      <Activity className='h-5 w-5 text-lunary-primary-300' />
+                    }
+                  />
+                  <MiniStat
+                    label='WAU'
+                    value={(engagementOverview?.wau ?? 0).toLocaleString()}
+                    icon={
+                      <Activity className='h-5 w-5 text-lunary-success-300' />
+                    }
+                  />
+                  <MiniStat
+                    label='MAU'
+                    value={(engagementOverview?.mau ?? 0).toLocaleString()}
+                    icon={
+                      <Activity className='h-5 w-5 text-lunary-secondary-300' />
+                    }
+                  />
+                  <MiniStat
+                    label='Avg active days'
+                    value={
+                      typeof engagementOverview?.avg_active_days_per_user ===
+                      'number'
+                        ? engagementOverview.avg_active_days_per_user.toFixed(2)
+                        : 'N/A'
+                    }
+                    icon={<Target className='h-5 w-5 text-lunary-accent-300' />}
+                  />
+                </div>
+
+                <div className='grid gap-4 md:grid-cols-2 lg:grid-cols-4'>
+                  <MiniStat
+                    label='Stickiness (DAU/MAU)'
+                    value={
+                      typeof engagementOverview?.stickiness_dau_mau === 'number'
+                        ? `${engagementOverview.stickiness_dau_mau.toFixed(2)}%`
+                        : 'N/A'
+                    }
+                    icon={
+                      <Sparkles className='h-5 w-5 text-lunary-primary-300' />
+                    }
+                  />
+                  <MiniStat
+                    label='Stickiness (WAU/MAU)'
+                    value={
+                      typeof engagementOverview?.stickiness_wau_mau === 'number'
+                        ? `${engagementOverview.stickiness_wau_mau.toFixed(2)}%`
+                        : 'N/A'
+                    }
+                    icon={
+                      <Sparkles className='h-5 w-5 text-lunary-success-300' />
+                    }
+                  />
+                  <MiniStat
+                    label='New users (range)'
+                    value={(
+                      engagementOverview?.new_users ?? 0
+                    ).toLocaleString()}
+                    icon={
+                      <Target className='h-5 w-5 text-lunary-secondary-300' />
+                    }
+                  />
+                  <MiniStat
+                    label='Returning users (range)'
+                    value={(
+                      engagementOverview?.returning_users_range ?? 0
+                    ).toLocaleString()}
+                    icon={<Target className='h-5 w-5 text-lunary-accent-300' />}
+                  />
+                </div>
+                <div className='grid gap-4 md:grid-cols-2 lg:grid-cols-4'>
+                  <MiniStat
+                    label='Returning DAU'
+                    value={(
+                      engagementOverview?.returning_dau ?? 0
+                    ).toLocaleString()}
+                    icon={
+                      <Activity className='h-5 w-5 text-lunary-secondary-300' />
+                    }
+                  />
+                </div>
+                <div className='rounded-lg border border-zinc-800/30 bg-zinc-950/40 px-3 py-2 text-xs text-zinc-400'>
+                  Returning users (range) are users with 2+ distinct active days
+                  inside the selected range. Returning DAU counts users active
+                  on the selected end date who were also active on an earlier
+                  day in the selected range.
+                </div>
+
+                <div className='grid gap-4 md:grid-cols-3'>
+                  <div className='rounded-xl border border-zinc-800/60 bg-zinc-950/50 p-4'>
+                    <p className='text-xs uppercase tracking-wider text-zinc-400'>
+                      Active days distribution (range)
+                    </p>
+                    <div className='mt-2 space-y-1 text-sm text-zinc-300'>
+                      {(['1', '2-3', '4-7', '8-14', '15+'] as const).map(
+                        (bucket) => (
+                          <div
+                            key={bucket}
+                            className='flex items-center justify-between'
+                          >
+                            <span>{bucket}</span>
+                            <span>
+                              {(
+                                engagementOverview?.active_days_distribution?.[
+                                  bucket
+                                ] ?? 0
+                              ).toLocaleString()}
+                            </span>
+                          </div>
+                        ),
+                      )}
+                    </div>
+                  </div>
+
+                  <div className='rounded-xl border border-zinc-800/60 bg-zinc-950/50 p-4 md:col-span-2'>
+                    <p className='text-xs uppercase tracking-wider text-zinc-400'>
+                      Cohort retention (first app open)
+                    </p>
+                    <div className='mt-2 space-y-1 text-sm text-zinc-300'>
+                      {(engagementOverview?.retention?.cohorts ?? [])
+                        .slice(-7)
+                        .map((row) => (
+                          <div
+                            key={row.cohort_day}
+                            className='grid grid-cols-4 gap-2'
+                          >
+                            <span className='text-zinc-400'>
+                              {row.cohort_day}
+                            </span>
+                            <span>Day 1: {row.day_1 ?? 'N/A'}%</span>
+                            <span>Day 7: {row.day_7 ?? 'N/A'}%</span>
+                            <span>Day 30: {row.day_30 ?? 'N/A'}%</span>
+                          </div>
+                        ))}
+                      {(engagementOverview?.retention?.cohorts ?? []).length ===
+                        0 && (
+                        <div className='text-zinc-500'>
+                          No cohorts found for this range.
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </section>
+
+          <section className='grid gap-6 lg:grid-cols-2'>
+            <Card className='border-zinc-800/30 bg-zinc-900/10'>
+              <CardHeader>
+                <CardTitle className='text-base font-medium'>
+                  Feature adoption (per MAU)
+                </CardTitle>
+                <CardDescription className='text-xs text-zinc-400'>
+                  Adoption is distinct users triggering the feature in range,
+                  divided by MAU.
+                </CardDescription>
+              </CardHeader>
+              <CardContent className='space-y-2'>
+                {(featureAdoption?.features ?? []).map((row) => (
+                  <div
+                    key={row.event_type}
+                    className='flex items-center justify-between rounded-lg border border-zinc-800/60 bg-zinc-950/40 px-3 py-2 text-sm'
+                  >
+                    <span className='text-zinc-300'>{row.event_type}</span>
+                    <span className='text-zinc-400'>
+                      {row.users.toLocaleString()} users ·{' '}
+                      {row.adoption_rate.toFixed(2)}%
+                    </span>
+                  </div>
+                ))}
+                {(featureAdoption?.features ?? []).length === 0 && (
+                  <div className='text-sm text-zinc-500'>
+                    No feature adoption data for this range.
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+
+            <Card className='border-zinc-800/30 bg-zinc-900/10'>
+              <CardHeader>
+                <CardTitle className='text-base font-medium'>
+                  Grimoire health
+                </CardTitle>
+                <CardDescription className='text-xs text-zinc-400'>
+                  Product and SEO signals from Grimoire engagement.
+                </CardDescription>
+              </CardHeader>
+              <CardContent className='space-y-4'>
+                <div className='grid gap-4 md:grid-cols-3'>
+                  <MiniStat
+                    label='Entry rate'
+                    value={
+                      typeof grimoireHealth?.grimoire_entry_rate === 'number'
+                        ? `${grimoireHealth.grimoire_entry_rate.toFixed(2)}%`
+                        : 'N/A'
+                    }
+                    icon={
+                      <Sparkles className='h-5 w-5 text-lunary-primary-300' />
+                    }
+                  />
+                  <MiniStat
+                    label='Views per active user'
+                    value={
+                      typeof grimoireHealth?.grimoire_views_per_active_user ===
+                      'number'
+                        ? grimoireHealth.grimoire_views_per_active_user.toFixed(
+                            2,
+                          )
+                        : 'N/A'
+                    }
+                    icon={
+                      <Activity className='h-5 w-5 text-lunary-success-300' />
+                    }
+                  />
+                  <MiniStat
+                    label='Return rate'
+                    value={
+                      typeof grimoireHealth?.return_to_grimoire_rate ===
+                      'number'
+                        ? `${grimoireHealth.return_to_grimoire_rate.toFixed(2)}%`
+                        : 'N/A'
+                    }
+                    icon={
+                      <Target className='h-5 w-5 text-lunary-secondary-300' />
+                    }
+                  />
+                </div>
+
+                <div className='rounded-xl border border-zinc-800/60 bg-zinc-950/50 p-4'>
+                  <p className='text-xs uppercase tracking-wider text-zinc-400'>
+                    Conversion influence
+                  </p>
+                  <div className='mt-2 space-y-1 text-sm text-zinc-300'>
+                    <div className='flex items-center justify-between'>
+                      <span>Subscriptions in range</span>
+                      <span>
+                        {(
+                          conversionInfluence?.subscription_users ?? 0
+                        ).toLocaleString()}
+                      </span>
+                    </div>
+                    <div className='flex items-center justify-between'>
+                      <span>Had Grimoire view before subscription</span>
+                      <span>
+                        {(
+                          conversionInfluence?.subscription_users_with_grimoire_before ??
+                          0
+                        ).toLocaleString()}{' '}
+                        (
+                        {(
+                          conversionInfluence?.subscription_with_grimoire_before_rate ??
+                          0
+                        ).toFixed(2)}
+                        %)
+                      </span>
+                    </div>
+                    <div className='flex items-center justify-between'>
+                      <span>Median days (first Grimoire to signup)</span>
+                      <span>
+                        {conversionInfluence?.median_days_first_grimoire_to_signup ??
+                          'N/A'}
+                      </span>
+                    </div>
+                    <div className='flex items-center justify-between'>
+                      <span>Median days (signup to subscription)</span>
+                      <span>
+                        {conversionInfluence?.median_days_signup_to_subscription ??
+                          'N/A'}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </section>
           <section className='space-y-3'>
             <Card className='border-zinc-800/30 bg-zinc-900/10'>
               <CardHeader>
@@ -836,21 +1477,64 @@ export default function AnalyticsPage() {
                   Audience Segments
                 </CardTitle>
                 <CardDescription className='text-xs text-zinc-400'>
-                  Compare all traffic, signed-in product usage, and
-                  Grimoire-only reach. Product users are signed-in event users,
-                  and Grimoire-only users never trigger a product event.
+                  Compare sitewide pageviews, engaged users, signed-in product
+                  usage, and Grimoire-only reach. Product users are signed-in
+                  event users, and Grimoire-only users never trigger a product
+                  event.
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <div className='grid gap-4 md:grid-cols-2'>
+                <div className='mb-4 rounded-lg border border-zinc-800/30 bg-zinc-950/40 px-3 py-2 text-xs text-zinc-400'>
+                  <div>
+                    <strong>Selected range:</strong> {startDate} to {endDate}{' '}
+                    (UTC)
+                  </div>
+                  <div className='mt-1'>
+                    <strong>Snapshot windows ending {endDate}:</strong> DAU =
+                    {` ${endDate}`}, WAU = {` ${wauWindowStart} to ${endDate}`},
+                    MAU = {` ${mauWindowStart} to ${endDate}`}
+                  </div>
+                </div>
+                <div className='grid gap-4 md:grid-cols-3'>
                   <div className='space-y-2 rounded-xl border border-zinc-800/60 bg-zinc-950/50 p-4'>
                     <p className='text-xs uppercase tracking-wider text-zinc-400'>
-                      All Traffic
+                      Sitewide (page views)
+                    </p>
+                    <div className='text-sm text-zinc-300'>
+                      <div className='flex items-center justify-between'>
+                        <span>DAU</span>
+                        <span>
+                          {(activity?.sitewide_dau ?? 0).toLocaleString()}
+                        </span>
+                      </div>
+                      <div className='flex items-center justify-between'>
+                        <span>WAU</span>
+                        <span>
+                          {(activity?.sitewide_wau ?? 0).toLocaleString()}
+                        </span>
+                      </div>
+                      <div className='flex items-center justify-between'>
+                        <span>MAU</span>
+                        <span>
+                          {(activity?.sitewide_mau ?? 0).toLocaleString()}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                  <div className='space-y-2 rounded-xl border border-zinc-800/60 bg-zinc-950/50 p-4'>
+                    <p className='text-xs uppercase tracking-wider text-zinc-400'>
+                      Engaged (key actions)
                     </p>
                     <div className='text-sm text-zinc-300'>
                       <div className='flex items-center justify-between'>
                         <span>DAU</span>
                         <span>{(activity?.dau ?? 0).toLocaleString()}</span>
+                      </div>
+                      <div className='flex items-center justify-between'>
+                        <span>DAU (App opened)</span>
+                        <span>
+                          {(activity?.app_opened_dau ?? 0).toLocaleString()}
+                        </span>
                       </div>
                       <div className='flex items-center justify-between'>
                         <span>WAU</span>
@@ -901,8 +1585,8 @@ export default function AnalyticsPage() {
                         className='normal-case'
                         title='Includes users who may also use the product.'
                       >
-                        Content MAU (users who viewed Grimoire content,
-                        including signed-in users)
+                        Content MAU (Grimoire viewers, last 30 days ending{' '}
+                        {endDate})
                       </span>
                     </p>
                     <p className='text-2xl font-semibold text-lime-100'>
@@ -915,8 +1599,8 @@ export default function AnalyticsPage() {
                         className='normal-case'
                         title='Excludes anyone who interacted with product features.'
                       >
-                        Grimoire-only MAU (users who viewed Grimoire content and
-                        never triggered a product event)
+                        Grimoire-only MAU (Grimoire viewers who did not open the
+                        app, last 30 days ending {endDate})
                       </span>
                     </p>
                     <p className='text-2xl font-semibold text-amber-100'>
@@ -943,7 +1627,7 @@ export default function AnalyticsPage() {
                   </div>
                   <div className='rounded-xl border border-zinc-800/60 bg-zinc-950/50 p-3'>
                     <p className='text-[11px] uppercase tracking-wider text-zinc-500'>
-                      Grimoire-only share of MAU
+                      Grimoire-only share of Content MAU
                     </p>
                     <p className='text-xl font-semibold text-white'>
                       {grimoireShareRatio.toFixed(1)}%
@@ -965,6 +1649,18 @@ export default function AnalyticsPage() {
                 </CardDescription>
               </CardHeader>
               <CardContent>
+                <div className='mb-4 rounded-lg border border-zinc-800/30 bg-zinc-950/40 px-3 py-2 text-xs text-zinc-400'>
+                  <div>
+                    <strong>Selected range:</strong> {startDate} to {endDate}{' '}
+                    (UTC)
+                  </div>
+                  <div className='mt-1'>
+                    <strong>Snapshot windows ending {endDate}:</strong> Product
+                    DAU = {` ${endDate}`}, Product WAU ={' '}
+                    {` ${wauWindowStart} to ${endDate}`}, Product MAU ={' '}
+                    {` ${mauWindowStart} to ${endDate}`}
+                  </div>
+                </div>
                 <div className='grid gap-4 md:grid-cols-3'>
                   <div className='rounded-xl border border-zinc-800/60 bg-zinc-950/50 p-4'>
                     <p className='text-xs uppercase tracking-wider text-zinc-400'>
@@ -1032,7 +1728,9 @@ export default function AnalyticsPage() {
               <CardHeader>
                 <CardTitle>Active User Trends</CardTitle>
                 <CardDescription>
-                  DAU, WAU, and MAU trends ({granularity})
+                  DAU, WAU, and MAU trends ({granularity}) for {startDate} to{' '}
+                  {endDate}. WAU and MAU are rolling windows anchored to each
+                  day.
                 </CardDescription>
               </CardHeader>
               <CardContent>
@@ -1184,19 +1882,19 @@ export default function AnalyticsPage() {
                 <div className='grid grid-cols-1 gap-4 md:grid-cols-2'>
                   <RetentionCard
                     label='Day 1'
-                    value={activity?.retention.day_1 ?? 0}
+                    value={activity?.retention.day_1 ?? null}
                   />
                   <RetentionCard
                     label='Day 7'
-                    value={activity?.retention.day_7 ?? 0}
+                    value={activity?.retention.day_7 ?? null}
                   />
                   <RetentionCard
                     label='Day 30'
-                    value={activity?.retention.day_30 ?? 0}
+                    value={activity?.retention.day_30 ?? null}
                   />
                   <RetentionCard
                     label='Churn'
-                    value={activity?.churn_rate ?? 0}
+                    value={activity?.churn_rate ?? null}
                     variant='negative'
                   />
                 </div>
@@ -1236,6 +1934,82 @@ export default function AnalyticsPage() {
               </CardContent>
             </Card>
           </section>
+
+          {subscription30d && (
+            <section>
+              <Card className='border-zinc-800/30 bg-zinc-900/10'>
+                <CardHeader>
+                  <CardTitle className='text-base font-medium'>
+                    Signup → Subscription ({subscription30d.window_days}d)
+                  </CardTitle>
+                  <CardDescription className='text-xs text-zinc-400'>
+                    Subscriptions started within {subscription30d.window_days}{' '}
+                    days of a free account signup.
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className='grid gap-4 md:grid-cols-3'>
+                  <MetricsCard
+                    title='Signups'
+                    value={subscription30d.signups.toLocaleString()}
+                  />
+                  <MetricsCard
+                    title='Subscriptions'
+                    value={subscription30d.conversions.toLocaleString()}
+                  />
+                  <MetricsCard
+                    title='Conversion Rate'
+                    value={`${subscription30d.conversion_rate.toFixed(2)}%`}
+                  />
+                </CardContent>
+              </Card>
+            </section>
+          )}
+
+          {ctaConversions && ctaConversions.hubs.length > 0 && (
+            <section>
+              <Card className='border-zinc-800/30 bg-zinc-900/10'>
+                <CardHeader>
+                  <CardTitle className='text-base font-medium'>
+                    CTA Conversions by Hub
+                  </CardTitle>
+                  <CardDescription className='text-xs text-zinc-400'>
+                    Signups within {ctaConversions.window_days} days of a CTA
+                    click
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className='space-y-4'>
+                  {ctaConversions.hubs.slice(0, 8).map((hub) => (
+                    <div key={hub.hub} className='space-y-2'>
+                      <div className='flex items-center justify-between text-sm text-zinc-300'>
+                        <span className='capitalize'>{hub.hub}</span>
+                        <span className='font-semibold text-white'>
+                          {Number(hub.signups_7d || 0).toLocaleString()}
+                        </span>
+                      </div>
+                      <div className='h-2 w-full rounded-full bg-zinc-800'>
+                        <div
+                          className='h-2 rounded-full bg-gradient-to-r from-lunary-primary-400 to-lunary-highlight-500'
+                          style={{
+                            width: `${Math.min(hub.conversion_rate ?? 0, 100)}%`,
+                          }}
+                        />
+                      </div>
+                      <div className='flex items-center justify-between text-[11px] text-zinc-500'>
+                        <span>
+                          {Number(hub.unique_clickers || 0).toLocaleString()}{' '}
+                          clickers
+                        </span>
+                        <span>
+                          {Number(hub.conversion_rate || 0).toFixed(2)}%
+                          conversion
+                        </span>
+                      </div>
+                    </div>
+                  ))}
+                </CardContent>
+              </Card>
+            </section>
+          )}
 
           {activation && (
             <section>
@@ -1687,7 +2461,9 @@ export default function AnalyticsPage() {
                   <MiniStat
                     label='Tokens / User'
                     value={
-                      aiMetrics ? aiMetrics.avg_tokens_per_user.toFixed(0) : '—'
+                      aiMetrics
+                        ? aiMetrics.avg_tokens_per_user.toFixed(0)
+                        : 'N/A'
                     }
                     icon={
                       <Target className='h-5 w-5 text-lunary-secondary-300' />
@@ -1698,7 +2474,7 @@ export default function AnalyticsPage() {
                     value={
                       aiMetrics
                         ? `${aiMetrics.completion_rate.toFixed(1)}%`
-                        : '—'
+                        : 'N/A'
                     }
                     icon={
                       <Sparkles className='h-5 w-5 text-lunary-accent-300' />
@@ -1711,14 +2487,17 @@ export default function AnalyticsPage() {
             <Card className='border-zinc-800/30 bg-zinc-900/10'>
               <CardHeader>
                 <CardTitle className='text-base font-medium'>
-                  Page-Level Heatmaps
+                  Page Interaction
                 </CardTitle>
                 <CardDescription className='text-xs text-zinc-400'>
-                  User interaction patterns
+                  Pageview tracking is limited to aggregate DAU/WAU/MAU only.
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <PostHogHeatmap />
+                <div className='rounded-xl border border-zinc-800 bg-zinc-950/40 p-4 text-sm text-zinc-300'>
+                  We record lightweight page_viewed events for sitewide activity
+                  totals without storing full session data.
+                </div>
               </CardContent>
             </Card>
           </section>
@@ -1755,7 +2534,7 @@ export default function AnalyticsPage() {
                       value={
                         discordAnalytics.stats?.funnel?.clickThroughRate
                           ? `${discordAnalytics.stats.funnel.clickThroughRate}%`
-                          : '—'
+                          : 'N/A'
                       }
                       icon={
                         <Sparkles className='h-5 w-5 text-lunary-secondary-300' />
@@ -1964,7 +2743,7 @@ export default function AnalyticsPage() {
                 <CardContent>
                   <div className='mb-4 text-xs text-zinc-500'>
                     Uses app event activity in the selected date range. This is
-                    a different source than PostHog DAU/WAU.
+                    a different view than deduplicated app opens (DAU/WAU/MAU).
                   </div>
                   <div className='grid gap-6 grid-cols-1 lg:grid-cols-2'>
                     <div className='rounded-lg border border-zinc-800/30 bg-zinc-900/5 p-4'>
@@ -2118,7 +2897,7 @@ function RetentionCard({
   variant = 'positive',
 }: {
   label: string;
-  value: number;
+  value: number | null;
   variant?: 'positive' | 'negative';
 }) {
   const color =
@@ -2130,7 +2909,7 @@ function RetentionCard({
     <div className={`rounded-xl border px-3 py-2.5 ${color}`}>
       <div className='text-xs font-medium text-zinc-400'>{label}</div>
       <div className='mt-1.5 text-2xl font-light tracking-tight text-white'>
-        {value.toFixed(1)}%
+        {typeof value === 'number' ? `${value.toFixed(1)}%` : 'N/A'}
       </div>
     </div>
   );

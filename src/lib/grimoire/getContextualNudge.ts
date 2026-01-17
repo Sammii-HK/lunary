@@ -55,3 +55,14 @@ export function getContextualNudge(pathname: string): ContextualNudge {
 
   return { hub, ...base };
 }
+
+export function getContextualHub(
+  pathname: string,
+  fallbackHub = 'universal',
+): string {
+  const normalizedPath = pathname || '/';
+  const matchingRule = config.rules?.find((rule) =>
+    new RegExp(rule.match).test(normalizedPath),
+  );
+  return matchingRule?.hub || fallbackHub;
+}

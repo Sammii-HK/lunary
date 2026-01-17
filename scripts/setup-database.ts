@@ -132,9 +132,11 @@ async function setupDatabase() {
         
         -- Event identification
         event_type TEXT NOT NULL,
+        event_id UUID,
         
         -- User identification
         user_id TEXT,
+        anonymous_id TEXT,
         user_email TEXT,
         
         -- Subscription context
@@ -144,6 +146,8 @@ async function setupDatabase() {
         -- Feature context
         feature_name TEXT,
         page_path TEXT,
+        entity_type TEXT,
+        entity_id TEXT,
         
         -- Additional metadata
         metadata JSONB,
@@ -153,13 +157,146 @@ async function setupDatabase() {
       )
     `;
 
+    // Identity stitching table: links anonymous ids to real user ids.
+    // This enables retention/engagement queries to attribute anonymous returns to signed-in users.
+    await sql`
+      CREATE TABLE IF NOT EXISTS analytics_identity_links (
+        user_id TEXT NOT NULL,
+        anonymous_id TEXT NOT NULL,
+        first_seen_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+        last_seen_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+        PRIMARY KEY (user_id, anonymous_id)
+      )
+    `;
+    await sql`CREATE INDEX IF NOT EXISTS idx_analytics_identity_links_anonymous_id ON analytics_identity_links(anonymous_id)`;
+
+    // Ensure schema is up to date for existing databases
+    await sql`ALTER TABLE conversion_events ADD COLUMN IF NOT EXISTS event_id UUID`;
+    await sql`ALTER TABLE conversion_events ADD COLUMN IF NOT EXISTS anonymous_id TEXT`;
+    await sql`ALTER TABLE conversion_events ADD COLUMN IF NOT EXISTS entity_type TEXT`;
+    await sql`ALTER TABLE conversion_events ADD COLUMN IF NOT EXISTS entity_id TEXT`;
+
     // Create indexes for conversion_events
     await sql`CREATE INDEX IF NOT EXISTS idx_conversion_events_event_type ON conversion_events(event_type)`;
     await sql`CREATE INDEX IF NOT EXISTS idx_conversion_events_user_id ON conversion_events(user_id)`;
+    await sql`CREATE INDEX IF NOT EXISTS idx_conversion_events_anonymous_id ON conversion_events(anonymous_id)`;
     await sql`CREATE INDEX IF NOT EXISTS idx_conversion_events_user_email ON conversion_events(user_email)`;
     await sql`CREATE INDEX IF NOT EXISTS idx_conversion_events_created_at ON conversion_events(created_at)`;
     await sql`CREATE INDEX IF NOT EXISTS idx_conversion_events_plan_type ON conversion_events(plan_type)`;
+    await sql`CREATE INDEX IF NOT EXISTS idx_conversion_events_event_created_at ON conversion_events(event_type, created_at)`;
+    await sql`CREATE INDEX IF NOT EXISTS idx_conversion_events_user_created_at ON conversion_events(user_id, created_at)`;
     await sql`CREATE INDEX IF NOT EXISTS idx_conversion_events_user_event ON conversion_events(user_id, event_type, created_at)`;
+
+    // Normalise legacy event types to canonical values (one-time, safe to re-run).
+    await sql`UPDATE conversion_events SET event_type = 'chart_viewed' WHERE event_type = 'birth_chart_viewed'`;
+    await sql`UPDATE conversion_events SET event_type = 'daily_dashboard_viewed' WHERE event_type = 'dashboard_viewed'`;
+    await sql`UPDATE conversion_events SET event_type = 'astral_chat_used' WHERE event_type = 'ai_chat'`;
+    await sql`UPDATE conversion_events SET event_type = 'tarot_drawn' WHERE event_type = 'tarot_viewed'`;
+    await sql`UPDATE conversion_events SET event_type = 'ritual_started' WHERE event_type = 'ritual_view'`;
+    await sql`UPDATE conversion_events SET event_type = 'signup_completed' WHERE event_type = 'signup'`;
+    await sql`UPDATE conversion_events SET event_type = 'subscription_started' WHERE event_type = 'trial_converted'`;
+
+    // Backfill anonymous_id where user_id is anon:<id>.
+    await sql`
+      UPDATE conversion_events
+      SET anonymous_id = REPLACE(user_id, 'anon:', '')
+      WHERE anonymous_id IS NULL
+        AND user_id LIKE 'anon:%'
+    `;
+
+    // Backfill identity links from any events that include both user_id and anonymous_id.
+    await sql`
+      INSERT INTO analytics_identity_links (user_id, anonymous_id, first_seen_at, last_seen_at)
+      SELECT
+        user_id,
+        anonymous_id,
+        MIN(created_at) AS first_seen_at,
+        MAX(created_at) AS last_seen_at
+      FROM conversion_events
+      WHERE user_id IS NOT NULL
+        AND anonymous_id IS NOT NULL
+        AND user_id NOT LIKE 'anon:%'
+      GROUP BY user_id, anonymous_id
+      ON CONFLICT DO NOTHING
+    `;
+
+    // Derive Grimoire entity fields when missing.
+    await sql`
+      UPDATE conversion_events
+      SET entity_type = 'grimoire'
+      WHERE event_type = 'grimoire_viewed'
+        AND entity_type IS NULL
+    `;
+    await sql`
+      UPDATE conversion_events
+      SET entity_id = NULLIF(REGEXP_REPLACE(page_path, '^/grimoire/?', ''), '')
+      WHERE event_type = 'grimoire_viewed'
+        AND (entity_id IS NULL OR entity_id = '')
+        AND page_path IS NOT NULL
+        AND page_path LIKE '/grimoire%'
+    `;
+
+    // Pre-clean existing duplicates so the new unique dedupe indexes can be created.
+    // This is expected when older tracking inserted multiple app_opened rows per day.
+    await sql`
+      WITH ranked AS (
+        SELECT
+          id,
+          ROW_NUMBER() OVER (
+            PARTITION BY user_id, ((created_at AT TIME ZONE 'UTC')::date)
+            ORDER BY created_at ASC, id ASC
+          ) AS rn
+        FROM conversion_events
+        WHERE event_type = 'app_opened'
+          AND user_id IS NOT NULL
+      )
+      DELETE FROM conversion_events
+      WHERE id IN (SELECT id FROM ranked WHERE rn > 1)
+    `;
+
+    await sql`
+      WITH ranked AS (
+        SELECT
+          id,
+          ROW_NUMBER() OVER (
+            PARTITION BY user_id, ((created_at AT TIME ZONE 'UTC')::date), COALESCE(entity_id, page_path, '')
+            ORDER BY created_at ASC, id ASC
+          ) AS rn
+        FROM conversion_events
+        WHERE event_type = 'grimoire_viewed'
+          AND user_id IS NOT NULL
+      )
+      DELETE FROM conversion_events
+      WHERE id IN (SELECT id FROM ranked WHERE rn > 1)
+    `;
+
+    // Dedupe unique indexes (UTC date bucketing)
+    await sql`
+      CREATE UNIQUE INDEX IF NOT EXISTS uq_conversion_events_app_opened_daily
+      ON conversion_events (
+        user_id,
+        event_type,
+        ((created_at AT TIME ZONE 'UTC')::date)
+      )
+      WHERE event_type = 'app_opened' AND user_id IS NOT NULL
+    `;
+
+    await sql`
+      CREATE UNIQUE INDEX IF NOT EXISTS uq_conversion_events_grimoire_viewed_daily
+      ON conversion_events (
+        user_id,
+        event_type,
+        ((created_at AT TIME ZONE 'UTC')::date),
+        COALESCE(entity_id, page_path, '')
+      )
+      WHERE event_type = 'grimoire_viewed' AND user_id IS NOT NULL
+    `;
+
+    await sql`
+      CREATE UNIQUE INDEX IF NOT EXISTS uq_conversion_events_event_id
+      ON conversion_events (event_id)
+      WHERE event_id IS NOT NULL
+    `;
 
     console.log('✅ Conversion events table created');
 
