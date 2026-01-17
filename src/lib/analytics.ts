@@ -46,9 +46,14 @@ export interface ConversionEventData {
   anonymousId?: string;
   userEmail?: string;
   planType?: 'monthly' | 'yearly' | 'free';
+  hub?: string;
   trialDaysRemaining?: number;
   featureName?: string;
   pagePath?: string;
+  cta_id?: string;
+  cta_location?: string;
+  cta_label?: string;
+  cta_href?: string;
   metadata?: Record<string, any>;
 }
 
