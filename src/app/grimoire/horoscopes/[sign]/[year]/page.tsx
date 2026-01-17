@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import { SEOContentTemplate } from '@/components/grimoire/SEOContentTemplate';
 import { HoroscopeCosmicConnections } from '@/components/grimoire/HoroscopeCosmicConnections';
+import { yearMeta } from '@/lib/horoscope-meta';
 
 import {
   ZODIAC_SIGNS,
@@ -16,6 +17,33 @@ import {
 } from '@/constants/seo/monthly-horoscope';
 
 const AVAILABLE_YEARS = [2025, 2026, 2027, 2028, 2029, 2030];
+
+function resolveOgImageUrl(value: unknown): string | undefined {
+  if (!value) return undefined;
+  if (typeof value === 'string') return value;
+  if (value instanceof URL) return value.toString();
+  if (typeof value === 'object' && value !== null) {
+    const candidate = value as { url?: string | URL; src?: string | URL };
+    if (typeof candidate.url === 'string') return candidate.url;
+    if (candidate.url instanceof URL) return candidate.url.toString();
+    if (typeof candidate.src === 'string') return candidate.src;
+    if (candidate.src instanceof URL) return candidate.src.toString();
+  }
+  return undefined;
+}
+
+function resolveCanonicalUrl(value: unknown, fallback: string): string {
+  if (!value) return fallback;
+  if (typeof value === 'string') return value;
+  if (value instanceof URL) return value.toString();
+  if (typeof value === 'object' && value !== null) {
+    const candidate = value as { canonical?: string | URL };
+    if (typeof candidate.canonical === 'string') return candidate.canonical;
+    if (candidate.canonical instanceof URL)
+      return candidate.canonical.toString();
+  }
+  return fallback;
+}
 
 const SIGN_SEASON_MONTHS: Record<ZodiacSign, string[]> = {
   aries: ['March', 'April'],
@@ -61,27 +89,7 @@ export async function generateMetadata({
   }
 
   const signName = SIGN_DISPLAY_NAMES[signKey];
-  const title = `${signName} Horoscope ${year} | Monthly Predictions & Forecasts | Lunary`;
-  const description = `Your complete ${signName} horoscope for ${year}, with month-by-month predictions covering love, career, and personal growth.`;
-
-  return {
-    title,
-    description,
-    keywords: [
-      `${signName.toLowerCase()} horoscope ${year}`,
-      `${signName.toLowerCase()} ${year}`,
-      `${signName.toLowerCase()} monthly horoscope`,
-      `${year} horoscope`,
-    ],
-    openGraph: {
-      title,
-      description,
-      url: `https://lunary.app/grimoire/horoscopes/${sign}/${year}`,
-    },
-    alternates: {
-      canonical: `https://lunary.app/grimoire/horoscopes/${sign}/${year}`,
-    },
-  };
+  return yearMeta(signName, sign, year);
 }
 
 export default async function YearHoroscopePage({
@@ -153,17 +161,39 @@ export default async function YearHoroscopePage({
   const currentYear = now.getFullYear();
   const currentMonthSlug = MONTHS[now.getMonth()];
 
+  const meta = yearMeta(signName, sign, year);
+  const canonicalValue =
+    meta.alternates?.canonical ?? `/grimoire/horoscopes/${sign}/${year}`;
+  const canonicalUrl = resolveCanonicalUrl(
+    canonicalValue,
+    `/grimoire/horoscopes/${sign}/${year}`,
+  );
+  const metaTitle = meta.title ? String(meta.title) : undefined;
+  const keywords =
+    Array.isArray(meta.keywords) || typeof meta.keywords === 'string'
+      ? Array.isArray(meta.keywords)
+        ? meta.keywords
+        : [meta.keywords]
+      : [];
+  const openGraphImages = meta.openGraph?.images
+    ? Array.isArray(meta.openGraph.images)
+      ? meta.openGraph.images
+      : [meta.openGraph.images]
+    : [];
+  const resolvedImage = openGraphImages
+    .map(resolveOgImageUrl)
+    .find((value): value is string => typeof value === 'string');
+  const image = resolvedImage ?? 'https://lunary.app/api/og/cosmic';
+
   return (
     <SEOContentTemplate
-      title={`${signName} Horoscope ${year} | Monthly Predictions & Forecasts`}
+      title={metaTitle ?? `${signName} Horoscope ${year}`}
       h1={`${signName} Horoscope ${year}`}
-      description={`Your complete ${signName} horoscope for ${year}, with month-by-month predictions covering love, career, and personal growth.`}
-      keywords={[
-        `${signName.toLowerCase()} horoscope ${year}`,
-        `${signName.toLowerCase()} ${year}`,
-        `${year} monthly horoscope`,
-      ]}
-      canonicalUrl={`https://lunary.app/grimoire/horoscopes/${sign}/${year}`}
+      description={meta.description ?? ''}
+      keywords={keywords}
+      canonicalUrl={canonicalUrl}
+      image={image}
+      imageAlt={`${signName} Horoscope ${year} | Lunary`}
       intro={`Dive into every month of ${year} with forecasts for ${signName} that weave together the Moon, planetary transits, and practical rituals so you can plan ahead.`}
       meaning={`This ${year} forecast helps ${signName} timeframe focus. Use slow, deliberate planning infused with ${element.toLowerCase()} energy and the guidance of ${ruler} to own visible progress throughout the year.`}
       heroContent={heroContent}
