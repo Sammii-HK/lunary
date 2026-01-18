@@ -24,7 +24,7 @@ describe('resolveThemeCategory', () => {
     const result = resolveThemeCategory({
       title: 'Lunar cycles and moon phases',
     });
-    expect(result.category).toBe('lunar');
+    expect(result.category).toBe('moon');
     expect(result.inferredFrom).toBe('title');
   });
 
