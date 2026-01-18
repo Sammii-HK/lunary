@@ -802,6 +802,9 @@ export async function POST(request: NextRequest) {
       console.log(
         `[Intro Palette] bg=${BRAND_COLORS.cosmicBlack} accent=${themePalette.accent} highlight=${themePalette.highlight}`,
       );
+      if (imageUrl && themePaletteParams) {
+        imageUrl += themePaletteParams;
+      }
       if (
         resolution.inferredFrom === 'title' ||
         resolution.inferredFrom === 'fallback'
