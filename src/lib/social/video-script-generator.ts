@@ -21,6 +21,11 @@ import chakras from '@/data/chakras.json';
 import sabbats from '@/data/sabbats.json';
 import planetaryBodies from '@/data/planetary-bodies.json';
 import { capitalizeThematicTitle } from '../../../utils/og/text';
+import {
+  buildFallbackCaption,
+  validateCaption,
+  validateSpokenHook,
+} from './caption-utils';
 
 function getOpenAI(): OpenAI {
   const apiKey = process.env.OPENAI_API_KEY?.trim();
@@ -380,7 +385,7 @@ export async function generateTikTokScript(
   const grimoireData = getGrimoireDataForFacet(facet);
 
   // Generate complete, flowing script using AI
-  const fullScript = await generateTikTokScriptContent(
+  const { script: fullScript, postCopy } = await generateTikTokScriptContent(
     facet,
     theme,
     grimoireData,
@@ -422,6 +427,7 @@ export async function generateTikTokScript(
     metadata,
     coverImageUrl,
     partNumber: safePartNumber,
+    writtenPostContent: postCopy?.caption,
   };
 }
 
@@ -429,13 +435,20 @@ export async function generateTikTokScript(
  * Generate complete TikTok script using AI
  * Creates a flowing 30-45 second narrative (70-110 words)
  */
+type TikTokPostCopy = {
+  hook: string;
+  caption: string;
+  cta: string;
+  pinnedComment?: string;
+};
+
 async function generateTikTokScriptContent(
   facet: DailyFacet,
   theme: WeeklyTheme,
   grimoireData: Record<string, any> | null,
   partNumber: number,
   totalParts: number,
-): Promise<string> {
+): Promise<{ script: string; postCopy?: TikTokPostCopy }> {
   const openai = getOpenAI();
 
   // Build context from Grimoire data
@@ -467,6 +480,7 @@ async function generateTikTokScriptContent(
     }
   }
 
+  // JSON contract keeps script + post copy deterministic and auditable.
   const prompt = `Create a complete, flowing short-form thematic video script (20–30 seconds, 45–70 words) about ${facet.title}. The video uses a sequence of OG images as frames, so the narration must be tight, structured, and easy to follow.
 Daily topic: ${facet.title} (focus: ${facet.focus})
 
@@ -478,12 +492,21 @@ Tone + delivery:
   - Use natural pauses with line breaks. No em dashes.
 
 Hook requirements (first 2–3 seconds):
-  - Sentence 1 must be a concrete fact stated plainly
-  - Make it immediately meaningful and specific, not generic
-  - Include the topic name in the first sentence
-  - Keep it punchy (6–10 words if possible)
-  - Avoid vague abstractions and avoid repeating the topic word twice
-  - No questions, no teasers, no bait
+  - Sentence 1 MUST be one of these exact structures:
+    1) CONTRARIAN: "[Topic] isn't about [common misconception]."
+    2) MISUNDERSTANDING: "Most people misunderstand [topic]."
+    3) REFRAME: "This isn't random - it's [underlying pattern]."
+    4) RELEVANCE: "This affects you more than you realise."
+    5) CLARITY PROMISE: "This explains why [specific experience]."
+  - Exactly one sentence, 6-12 words, no questions, no CTA
+  - No series references, no time references, no "Lunary"
+  - No mystical filler words (magic, powerful, cosmic, destiny, universe)
+  - No hedging (maybe, often, can be, tends to)
+  - Do not use "you" more than once
+  - Must match the facet focus (no vague bait)
+
+Second sentence:
+  - Exactly: "Welcome back to our series on ${theme.name}."
 
 Rhythm + structure:
   - Follow: hook → context → reflective close
@@ -512,55 +535,128 @@ Topic: ${facet.title}
 Focus: ${facet.focus}
 ${dataContext ? `\nGrimoire Data:\n${dataContext}` : ''}
 
-Return ONLY the script text. No headings, no markdown. Use line breaks to create pauses.`;
+Return strict JSON:
+{
+  "script": string,
+  "postCopy": {
+    "hook": string,
+    "caption": string,
+    "cta": string,
+    "pinnedComment"?: string
+  }
+}
 
-  try {
+postCopy rules:
+- Caption is 4 lines, no emojis, no hashtags, no URLs
+- Line 1: stronger post hook (can differ from spoken hook, still aligned)
+- Line 2: one-sentence summary + concrete "watch for this" takeaway
+- Line 3: short educational CTA (save/share/comment)
+- Line 4: "Read more on the Lunary blog."
+- Rewrite from the script; do not copy the script verbatim.
+
+No markdown. JSON only.`;
+
+  const requestScriptOnce = async (retryNote?: string) => {
+    const retrySuffix = retryNote ? `\n\nFix these issues:\n${retryNote}` : '';
     const completion = await openai.chat.completions.create({
       model: 'gpt-4o-mini',
       messages: [
         {
           role: 'system',
           content:
-            'You are an educational content creator writing complete, flowing video scripts. Write in a natural, authoritative tone that flows smoothly when read aloud. The script must be complete and coherent - not fragmented or broken up. Make it educational and informative.',
+            'You are an educational content creator writing complete, flowing video scripts and strong post copy. Return only valid JSON with script and postCopy.',
         },
-        { role: 'user', content: prompt },
+        { role: 'user', content: `${prompt}${retrySuffix}` },
       ],
-      max_tokens: 400,
-      temperature: 0.7,
+      response_format: { type: 'json_object' },
+      max_tokens: 600,
+      temperature: 0.4,
     });
 
-    let script = completion.choices[0]?.message?.content || '';
-    if (!script || script.trim().length === 0) {
+    const raw = completion.choices[0]?.message?.content || '';
+    const parsed = JSON.parse(raw);
+    return parsed as { script?: string; postCopy?: TikTokPostCopy };
+  };
+
+  try {
+    const primary = await requestScriptOnce();
+    let script = String(primary.script || '').trim();
+    if (!script) {
       throw new Error('OpenAI returned empty script');
     }
 
-    script = script.trim();
-
     script = ensureTikTokHookFirstSentence(script, facet, theme, grimoireData);
-    // Theme/part context is handled in OG images, not the script.
+    script = ensureSeriesSentence(script, theme.name);
     script = ensureThematicListAndClose(script);
     script = enforceThematicPacing(script, facet, grimoireData, theme.name);
 
-    // Series/part details are intentionally omitted from scripts.
+    let postCopy = primary.postCopy;
+    const captionReasons = postCopy?.caption
+      ? validateCaption(postCopy.caption, theme.name).reasons
+      : ['Missing postCopy caption'];
 
-    return script;
+    const hookReasons = validateSpokenHook(
+      splitSentencesPreservingDecimals(script)[0] || '',
+    );
+    const issues = [...hookReasons, ...captionReasons];
+
+    if (issues.length > 0) {
+      const retry = await requestScriptOnce(issues.join('; '));
+      if (retry.script) {
+        script = ensureTikTokHookFirstSentence(
+          retry.script,
+          facet,
+          theme,
+          grimoireData,
+        );
+        script = ensureSeriesSentence(script, theme.name);
+        script = ensureThematicListAndClose(script);
+        script = enforceThematicPacing(script, facet, grimoireData, theme.name);
+      }
+      postCopy = retry.postCopy;
+    }
+
+    if (postCopy?.caption) {
+      const validated = validateCaption(postCopy.caption, theme.name);
+      if (!validated.valid) {
+        postCopy = {
+          hook: postCopy.hook,
+          caption: buildFallbackCaption({
+            script,
+            themeName: theme.name,
+            facetTitle: facet.title,
+            facetFocus: facet.focus,
+            platform: 'tiktok',
+          }),
+          cta: postCopy.cta,
+          pinnedComment: postCopy.pinnedComment,
+        };
+      } else {
+        postCopy.caption = validated.sanitizedCaption;
+      }
+    }
+
+    return { script, postCopy };
   } catch (error) {
     console.error('Failed to generate TikTok script with AI:', error);
     // Fallback to structured script
-    return enforceThematicPacing(
+    const fallbackScript = enforceThematicPacing(
       ensureThematicListAndClose(
         ensureThemePartSentence(
-          ensureTikTokHookFirstSentence(
-            generateTikTokScriptFallback(
+          ensureSeriesSentence(
+            ensureTikTokHookFirstSentence(
+              generateTikTokScriptFallback(
+                facet,
+                theme,
+                grimoireData,
+                partNumber,
+                totalParts,
+              ),
               facet,
               theme,
               grimoireData,
-              partNumber,
-              totalParts,
             ),
-            facet,
-            theme,
-            grimoireData,
+            theme.name,
           ),
           theme.name,
           partNumber,
@@ -572,6 +668,21 @@ Return ONLY the script text. No headings, no markdown. Use line breaks to create
       grimoireData,
       theme.name,
     );
+
+    return {
+      script: fallbackScript,
+      postCopy: {
+        hook: splitSentencesPreservingDecimals(fallbackScript)[0] || '',
+        caption: buildFallbackCaption({
+          script: fallbackScript,
+          themeName: theme.name,
+          facetTitle: facet.title,
+          facetFocus: facet.focus,
+          platform: 'tiktok',
+        }),
+        cta: 'Save this for later.',
+      },
+    };
   }
 }
 
@@ -612,9 +723,37 @@ function ensureTikTokHookFirstSentence(
   const firstSentenceMatch = trimmed.match(/^[^.!?]+[.!?]/);
   if (!firstSentenceMatch) return text;
 
-  const desiredHook = buildThematicHookSentence(facet, grimoireData);
+  const firstSentence = firstSentenceMatch[0].trim();
+  const hookIssues = validateSpokenHook(firstSentence);
+  const desiredHook =
+    hookIssues.length === 0
+      ? firstSentence
+      : buildSpokenHookSentence(facet, grimoireData);
   const rest = trimmed.slice(firstSentenceMatch[0].length).trim();
   return rest ? `${desiredHook} ${rest}` : desiredHook;
+}
+
+function ensureSeriesSentence(text: string, themeName: string): string {
+  const sentences = splitSentencesPreservingDecimals(text);
+  if (sentences.length === 0) return text;
+
+  const seriesSentence = `Welcome back to our series on ${themeName}.`;
+  const existingIndex = sentences.findIndex((sentence) =>
+    /^Welcome back to our series on\b/i.test(sentence),
+  );
+
+  if (existingIndex !== -1) {
+    sentences[existingIndex] = seriesSentence;
+    if (existingIndex !== 1) {
+      const filtered = sentences.filter((_, idx) => idx !== existingIndex);
+      filtered.splice(1, 0, seriesSentence);
+      return filtered.join(' ');
+    }
+    return sentences.join(' ');
+  }
+
+  sentences.splice(1, 0, seriesSentence);
+  return sentences.join(' ');
 }
 
 function ensureThemePartSentence(
@@ -652,85 +791,30 @@ function splitSentencesPreservingDecimals(text: string): string[] {
   return fallback ? [fallback] : [];
 }
 
-function buildThematicHookSentence(
+function buildSpokenHookSentence(
   facet: DailyFacet,
   grimoireData: Record<string, any> | null,
 ): string {
-  const title = facet.title;
-  const description =
-    grimoireData?.description ||
-    grimoireData?.meaning ||
-    grimoireData?.mysticalProperties ||
-    '';
-  const descSentence = splitSentencesPreservingDecimals(String(description))[0];
-  const element = grimoireData?.element;
-  const ruler = grimoireData?.ruler || grimoireData?.rulingPlanet;
-  const modality = grimoireData?.modality;
-  const keyword = Array.isArray(grimoireData?.keywords)
-    ? grimoireData.keywords[0]
-    : null;
+  const titleWords = facet.title.trim().split(/\s+/).filter(Boolean);
+  const baseTitle =
+    titleWords.length > 6 ? titleWords.slice(0, 6).join(' ') : facet.title;
+  const topicPhrase =
+    titleWords.length <= 2 ? `the role of ${baseTitle}` : baseTitle;
 
-  const isGeneric = (sentence: string) =>
-    /marks the beginning|is about|is a time|is known for|invites|encourages/i.test(
-      sentence.toLowerCase(),
-    );
-
-  const preferMotion = (sentence: string) =>
-    sentence
-      .replace(/marks the beginning of/gi, 'begins')
-      .replace(/\bis the beginning of\b/gi, 'begins')
-      .replace(/\bmarks the start of\b/gi, 'begins')
-      .replace(/\bis the start of\b/gi, 'begins')
-      .replace(/\bopens the\b/gi, 'opens')
-      .replace(/\bin it begins\b/gi, 'begins')
-      .replace(/\bin it starts\b/gi, 'begins')
-      .replace(/\binitiates\b/gi, 'initiates')
-      .replace(/\bopens\b/gi, 'opens');
-
-  const ensureTitleContext = (sentence: string) => {
-    if (!sentence) return sentence;
-    if (new RegExp(`\\b${title}\\b`, 'i').test(sentence)) {
-      return sentence;
-    }
-    const trimmed = sentence.trim();
-    const lowered = trimmed.charAt(0).toLowerCase() + trimmed.slice(1);
-    return `${title} ${lowered}`;
-  };
-
-  if (descSentence && !isGeneric(descSentence)) {
-    const cleaned = preferMotion(descSentence).replace(/\?+$/, '.').trim();
-    const withContext = ensureTitleContext(cleaned);
-    return withContext.endsWith('.') ? withContext : `${withContext}.`;
+  const baseHook = `Most people misunderstand ${topicPhrase}.`;
+  const words = baseHook
+    .replace(/[.!?]+$/, '')
+    .split(/\s+/)
+    .filter(Boolean).length;
+  if (words >= 6 && words <= 12) {
+    return baseHook;
   }
 
-  if (element || ruler || modality) {
-    const parts = [
-      modality ? `${modality} ${element || ''}`.trim() : element,
-      ruler ? `ruled by ${ruler}` : null,
-    ]
-      .filter(Boolean)
-      .join(', ');
-    const sentence = parts
-      ? `${title} is a ${parts}.`
-      : `${title} is defined by its timing and tone.`;
-    return preferMotion(sentence);
-  }
-
-  if (keyword) {
-    return preferMotion(`${title} highlights ${keyword}.`);
-  }
-
-  const fallbackSource =
-    facet.shortFormHook || description || facet.focus || facet.title;
-  const fallbackSentence = splitSentencesPreservingDecimals(
-    String(fallbackSource),
-  )[0];
-  const sentence = preferMotion(String(fallbackSentence || fallbackSource))
-    .replace(/\?+$/, '.')
-    .replace(/\s+/g, ' ')
-    .trim();
-  const withContext = ensureTitleContext(sentence);
-  return withContext.endsWith('.') ? withContext : `${withContext}.`;
+  const trimmedTopic = topicPhrase
+    .split(/\s+/)
+    .slice(0, Math.max(1, 12 - 3))
+    .join(' ');
+  return `Most people misunderstand ${trimmedTopic}.`;
 }
 
 function ensureThematicListAndClose(text: string): string {

@@ -1,22 +1,8 @@
 import { ImageResponse } from 'next/og';
 import { NextRequest } from 'next/server';
+import { BRAND_COLORS } from '@/lib/video/theme-palette';
 
 export const runtime = 'nodejs';
-
-const BRAND_COLORS = {
-  purple600: '#5227a5', // lunary-primary-600
-  purple500: '#6730cf', // lunary-primary-500
-  purple400: '#855ad8', // lunary-primary-400
-  purple300: '#b094e6', // lunary-primary-300
-  pink600: '#921cb0', // lunary-highlight-600
-  pink500: '#b723dc', // lunary-highlight-500
-  zinc900: '#0A0A0A', // lunary-bg
-  zinc800: '#050505', // lunary-bg-deep
-  zinc700: '#3f3f46',
-  zinc400: '#a1a1aa',
-  zinc300: '#d4d4d8',
-  white: '#ffffff',
-};
 
 const FORMATS = {
   landscape: {
@@ -111,6 +97,11 @@ export async function GET(request: NextRequest) {
   const weekRange = getWeekDates(weekOffset);
   const format = (searchParams.get('format') || 'landscape') as Format;
   const moonPhasePng = getMoonPhasePng(weekOffset);
+  const bg = searchParams.get('bg') || BRAND_COLORS.cosmicBlack;
+  const fg = searchParams.get('fg') || BRAND_COLORS.textPrimary;
+  const accent = searchParams.get('accent') || BRAND_COLORS.accentDefault;
+  const highlight = searchParams.get('highlight') || accent;
+  const lockHue = searchParams.get('lockHue') === '1';
 
   const baseUrl =
     process.env.NODE_ENV === 'production'
@@ -123,8 +114,9 @@ export async function GET(request: NextRequest) {
   return new ImageResponse(
     <div
       style={{
-        background:
-          'linear-gradient(160deg, #0a0a0f 0%, #12101a 40%, #0f0d14 70%, #0a0a0f 100%)',
+        background: lockHue
+          ? bg
+          : `linear-gradient(160deg, ${bg} 0%, ${bg} 55%, ${highlight} 160%)`,
         width: '100%',
         height: '100%',
         display: 'flex',
@@ -184,7 +176,7 @@ export async function GET(request: NextRequest) {
               left: `${5 + ((i * 23) % 90)}%`,
               width: i % 3 === 0 ? 4 : 2,
               height: i % 3 === 0 ? 4 : 2,
-              background: BRAND_COLORS.purple300,
+              background: accent,
               borderRadius: '50%',
               display: 'flex',
             }}
@@ -222,7 +214,7 @@ export async function GET(request: NextRequest) {
           style={{
             fontSize: sizes.titleSize,
             fontWeight: 700,
-            color: BRAND_COLORS.white,
+            color: fg,
             lineHeight: 1.15,
             marginBottom: 20,
             display: 'flex',
@@ -239,7 +231,7 @@ export async function GET(request: NextRequest) {
           <div
             style={{
               fontSize: sizes.subtitleSize,
-              color: BRAND_COLORS.purple300,
+              color: accent,
               marginBottom: 16,
               display: 'flex',
               fontWeight: 500,
@@ -254,7 +246,7 @@ export async function GET(request: NextRequest) {
           <div
             style={{
               fontSize: sizes.weekSize,
-              color: BRAND_COLORS.zinc400,
+              color: fg,
               marginTop: 8,
               display: 'flex',
               letterSpacing: '0.05em',
@@ -270,7 +262,7 @@ export async function GET(request: NextRequest) {
             marginTop: sizes.brandMargin,
             fontSize: sizes.brandSize + 4,
             fontWeight: 700,
-            color: BRAND_COLORS.purple300,
+            color: accent,
             letterSpacing: '0.05em',
             display: 'flex',
           }}

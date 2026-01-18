@@ -4,6 +4,8 @@ import { sql } from '@vercel/postgres';
 import { composeVideo } from '@/lib/video/compose-video';
 import { generateVoiceover } from '@/lib/tts';
 import { generateVoiceoverScriptFromWeeklyData } from '@/lib/video/composition';
+import { TTS_PRESETS } from '@/lib/tts/presets';
+import { normalizeScriptForTTS } from '@/lib/tts/normalize-script';
 import {
   generateNarrativeFromWeeklyData,
   generateShortFormNarrative,
@@ -13,6 +15,9 @@ import {
   segmentScriptIntoMediumItems,
 } from '@/lib/video/narrative-generator';
 import { generateTopicImages } from '@/lib/video/image-generator';
+import { resolveThemeCategory } from '@/lib/video/theme-category';
+import { BRAND_COLORS, getThemePalette } from '@/lib/video/theme-palette';
+import { clampHueShift, getThemeHueBase } from '@/lib/video/hue';
 import { generateWeeklyContent } from '../../../../../utils/blog/weeklyContentGenerator';
 import { sendDiscordNotification } from '@/lib/discord';
 
@@ -78,6 +83,60 @@ function getWeekOfYear(weekStart: Date): { year: number; weekOfYear: number } {
   const weekOfYear = Math.floor(daysSinceYearStart / 7) + 1;
   return { year: weekStart.getFullYear(), weekOfYear };
 }
+
+const normalizeHueDelta = (delta: number) => {
+  let normalized = ((delta + 180) % 360) - 180;
+  if (normalized < -180) normalized += 360;
+  return normalized;
+};
+
+const buildIntroImageUrl = ({
+  baseUrl,
+  weeklyData,
+  format,
+  weekOffset,
+  paletteParams,
+}: {
+  baseUrl: string;
+  weeklyData: any;
+  format: string;
+  weekOffset: number;
+  paletteParams: string;
+}) => {
+  const weekOf = weeklyData.weekStart.toLocaleDateString('en-US', {
+    month: 'long',
+    day: 'numeric',
+  });
+  const year = weeklyData.weekStart.getFullYear();
+  const introTitle = `Week of ${weekOf}, ${year}`;
+  const introSubtitle = weeklyData.subtitle || '';
+
+  return `${baseUrl}/api/social/images?format=${format}&title=${encodeURIComponent(introTitle)}&subtitle=${encodeURIComponent(introSubtitle)}&week=${weekOffset}${paletteParams}`;
+};
+
+const buildPaletteParams = ({
+  bg,
+  fg,
+  accent,
+  highlight,
+  lockHue,
+}: {
+  bg: string;
+  fg: string;
+  accent: string;
+  highlight: string;
+  lockHue?: boolean;
+}) => {
+  const params = new URLSearchParams();
+  params.set('bg', bg);
+  params.set('fg', fg);
+  params.set('accent', accent);
+  params.set('highlight', highlight);
+  if (lockHue) {
+    params.set('lockHue', '1');
+  }
+  return `&${params.toString()}`;
+};
 
 /**
  * Truncate content to fit platform character limits
@@ -547,6 +606,11 @@ export async function POST(request: NextRequest) {
     let script: string | undefined;
     let weeklyData: Awaited<ReturnType<typeof generateWeeklyContent>> | null =
       null;
+    let themePaletteParams = '';
+    let introPaletteParams = '';
+    let hueShiftBase = 0;
+    let themeCategory = '';
+    let resolvedThemePalette: ReturnType<typeof getThemePalette> | null = null;
 
     // Determine cache key for script and audio
     let scriptCacheKey: string | null = null;
@@ -702,6 +766,57 @@ export async function POST(request: NextRequest) {
         ) {
           description = weeklyData.subtitle || description;
         }
+      }
+    }
+
+    if (weeklyData) {
+      const resolution = resolveThemeCategory({
+        weeklyCategory: (weeklyData as any).category || null,
+        title: weeklyData.title,
+      });
+      themeCategory = resolution.category;
+      const themePalette = getThemePalette(resolution.category);
+      resolvedThemePalette = themePalette;
+      const themeHue = getThemeHueBase(themePalette.highlight);
+      const brandHue = getThemeHueBase(BRAND_COLORS.accentDefault);
+      const rawDelta = normalizeHueDelta(themeHue - brandHue);
+      hueShiftBase = clampHueShift(0, rawDelta, 12);
+
+      themePaletteParams = buildPaletteParams({
+        bg: themePalette.background,
+        fg: themePalette.foreground,
+        accent: themePalette.accent,
+        highlight: themePalette.highlight,
+      });
+      introPaletteParams = buildPaletteParams({
+        bg: BRAND_COLORS.cosmicBlack,
+        fg: themePalette.foreground,
+        accent: themePalette.accent,
+        highlight: themePalette.highlight,
+        lockHue: true,
+      });
+
+      console.log(
+        `[Theme Palette] category=${resolution.category} inferred=${resolution.inferredFrom} bg=${themePalette.background} highlight=${themePalette.highlight} hueShift=${hueShiftBase}`,
+      );
+      console.log(
+        `[Intro Palette] bg=${BRAND_COLORS.cosmicBlack} accent=${themePalette.accent} highlight=${themePalette.highlight}`,
+      );
+      if (
+        resolution.inferredFrom === 'title' ||
+        resolution.inferredFrom === 'fallback'
+      ) {
+        await sendDiscordNotification({
+          title: 'Theme category inferred',
+          description: `Category inferred from ${resolution.inferredFrom}`,
+          fields: [
+            { name: 'Week', value: weekKey || 'unknown', inline: true },
+            { name: 'Category', value: resolution.category, inline: true },
+            { name: 'Source', value: resolution.sourceText || 'n/a' },
+          ],
+          category: 'general',
+          dedupeKey: `theme-category-${weekKey || 'unknown'}`,
+        });
       }
     }
 
@@ -956,11 +1071,12 @@ export async function POST(request: NextRequest) {
       console.log(
         `🎙️ Generating new audio for ${type} video (not found in cache for ${weekKey})...`,
       );
-      const ttsSpeed = 1.0;
-      audioBuffer = await generateVoiceover(script, {
-        voiceName: 'alloy',
-        model: 'gpt-4o-mini-tts',
-        speed: ttsSpeed,
+      const ttsPreset = TTS_PRESETS[type];
+      const ttsScript = normalizeScriptForTTS(script);
+      audioBuffer = await generateVoiceover(ttsScript, {
+        voiceName: ttsPreset.voiceName,
+        model: ttsPreset.model,
+        speed: ttsPreset.speed,
       });
 
       // Upload audio to Vercel Blob with week/blog key
@@ -1013,7 +1129,7 @@ export async function POST(request: NextRequest) {
     // Ensure imageUrl is set before composing video
     if (!imageUrl || imageUrl === '') {
       if (weeklyData) {
-        imageUrl = `${baseUrl}/api/social/images?format=youtube&title=${encodeURIComponent(weeklyData.title)}&subtitle=${encodeURIComponent(weeklyData.subtitle || '')}`;
+        imageUrl = `${baseUrl}/api/social/images?format=youtube&title=${encodeURIComponent(weeklyData.title)}&subtitle=${encodeURIComponent(weeklyData.subtitle || '')}${introPaletteParams || ''}`;
       } else {
         throw new Error('No image URL available for video composition');
       }
@@ -1065,9 +1181,53 @@ export async function POST(request: NextRequest) {
           weeklyData,
           baseUrl,
           videoFormat,
+          {
+            palette: resolvedThemePalette || undefined,
+            introBg: BRAND_COLORS.cosmicBlack,
+            lockIntroHue: true,
+          },
         );
 
         console.log(`✅ Generated ${topicImages.length} topic images`);
+
+        if (topicImages.length > 0) {
+          const firstImage = topicImages[0];
+          const parsed = new URL(firstImage.imageUrl);
+          const bgParam = parsed.searchParams.get('bg');
+          if (
+            !bgParam ||
+            bgParam.toLowerCase() !== BRAND_COLORS.cosmicBlack.toLowerCase()
+          ) {
+            console.warn(
+              '[Intro Frame] Enforcing cosmic black background for first frame',
+            );
+            parsed.searchParams.set('bg', BRAND_COLORS.cosmicBlack);
+            parsed.searchParams.set('lockHue', '1');
+            if (resolvedThemePalette) {
+              parsed.searchParams.set('fg', resolvedThemePalette.foreground);
+              parsed.searchParams.set('accent', resolvedThemePalette.accent);
+              parsed.searchParams.set(
+                'highlight',
+                resolvedThemePalette.highlight,
+              );
+            }
+            firstImage.imageUrl = parsed.toString();
+            await sendDiscordNotification({
+              title: 'Intro hue lock enforced',
+              description: 'First frame was rebuilt with cosmic black.',
+              fields: [
+                { name: 'Week', value: weekKey || 'unknown', inline: true },
+                {
+                  name: 'Category',
+                  value: themeCategory || 'unknown',
+                  inline: true,
+                },
+              ],
+              category: 'general',
+              dedupeKey: `intro-hue-lock-${weekKey || 'unknown'}`,
+            });
+          }
+        }
 
         // Compose video with multiple images
         videoBuffer = await composeVideo({
@@ -1078,6 +1238,9 @@ export async function POST(request: NextRequest) {
           })),
           audioBuffer,
           format: videoFormat,
+          hueShiftBase,
+          hueShiftMaxDelta: 12,
+          lockIntroHue: true,
         });
         console.log(`✅ Video composed with ${topicImages.length} images`);
       } catch (error) {
@@ -1100,6 +1263,9 @@ export async function POST(request: NextRequest) {
         imageUrl,
         audioBuffer,
         format: videoFormat,
+        hueShiftBase,
+        hueShiftMaxDelta: 12,
+        lockIntroHue: true,
       });
     }
 

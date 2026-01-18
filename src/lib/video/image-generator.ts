@@ -1,4 +1,5 @@
 import type { ScriptTopic, ScriptItem } from './narrative-generator';
+import type { ThemePalette } from './theme-palette';
 import type {
   WeeklyCosmicData,
   PlanetaryHighlight,
@@ -37,6 +38,11 @@ export async function generateTopicImages(
   weeklyData: WeeklyCosmicData,
   baseUrl: string,
   format: 'story' | 'square' | 'landscape' | 'youtube' = 'youtube',
+  options?: {
+    palette?: ThemePalette;
+    introBg?: string;
+    lockIntroHue?: boolean;
+  },
 ): Promise<TopicImageConfig[]> {
   const images: TopicImageConfig[] = [];
 
@@ -71,6 +77,24 @@ export async function generateTopicImages(
   );
   const weekOffset = weeksDiff;
 
+  const buildPaletteParams = (overrideBg?: string, lockHue?: boolean) => {
+    if (!options?.palette && !overrideBg) {
+      return '';
+    }
+    const bg = overrideBg || options?.palette?.background;
+    const fg = options?.palette?.foreground;
+    const accent = options?.palette?.accent;
+    const highlight = options?.palette?.highlight;
+    const params = new URLSearchParams();
+    if (bg) params.set('bg', bg);
+    if (fg) params.set('fg', fg);
+    if (accent) params.set('accent', accent);
+    if (highlight) params.set('highlight', highlight);
+    if (lockHue) params.set('lockHue', '1');
+    const built = params.toString();
+    return built ? `&${built}` : '';
+  };
+
   for (const topic of topics) {
     let imageUrl: string;
     let imageKey: string;
@@ -93,7 +117,10 @@ export async function generateTopicImages(
           `[Intro Image] Week: ${weeklyData.weekStart.toISOString()}, Title: ${introTitle}, Subtitle: ${introSubtitle}, weekOffset: ${weekOffset}`,
         );
 
-        imageUrl = `${baseUrl}/api/social/images?format=${format}&title=${encodeURIComponent(introTitle)}&subtitle=${encodeURIComponent(introSubtitle)}&week=${weekOffset}`;
+        imageUrl = `${baseUrl}/api/social/images?format=${format}&title=${encodeURIComponent(introTitle)}&subtitle=${encodeURIComponent(introSubtitle)}&week=${weekOffset}${buildPaletteParams(
+          options?.introBg,
+          options?.lockIntroHue,
+        )}`;
         break;
       case 'planetary_highlights': {
         let planet: PlanetaryHighlight | null = null;
@@ -183,7 +210,7 @@ export async function generateTopicImages(
           // Add a unique suffix
           imageKey = `planetary-${planetTitle}-${usedIndices.planetaryHighlights.size}`;
         }
-        imageUrl = `${baseUrl}/api/social/images?format=${format}&title=${encodeURIComponent(planetTitle)}&subtitle=${encodeURIComponent(subtitle)}&week=${weekOffset}`;
+        imageUrl = `${baseUrl}/api/social/images?format=${format}&title=${encodeURIComponent(planetTitle)}&subtitle=${encodeURIComponent(subtitle)}&week=${weekOffset}${buildPaletteParams()}`;
         break;
       }
       case 'retrogrades': {
@@ -230,7 +257,7 @@ export async function generateTopicImages(
         if (usedImageKeys.has(imageKey)) {
           imageKey = `retrograde-${retroTitle}-${usedIndices.retrogrades.size}`;
         }
-        imageUrl = `${baseUrl}/api/social/images?format=${format}&title=${encodeURIComponent(retroTitle)}&subtitle=${encodeURIComponent(subtitle)}&week=${weekOffset}`;
+        imageUrl = `${baseUrl}/api/social/images?format=${format}&title=${encodeURIComponent(retroTitle)}&subtitle=${encodeURIComponent(subtitle)}&week=${weekOffset}${buildPaletteParams()}`;
         break;
       }
       case 'aspects': {
@@ -360,7 +387,7 @@ export async function generateTopicImages(
         if (usedImageKeys.has(imageKey)) {
           imageKey = `aspect-${aspectTitle}-${usedIndices.aspects.size}`;
         }
-        imageUrl = `${baseUrl}/api/social/images?format=${format}&title=${encodeURIComponent(aspectTitle)}&subtitle=${encodeURIComponent(subtitle)}&week=${weekOffset}`;
+        imageUrl = `${baseUrl}/api/social/images?format=${format}&title=${encodeURIComponent(aspectTitle)}&subtitle=${encodeURIComponent(subtitle)}&week=${weekOffset}${buildPaletteParams()}`;
         break;
       }
       case 'moon_phases': {
@@ -478,7 +505,7 @@ export async function generateTopicImages(
         if (usedImageKeys.has(imageKey)) {
           imageKey = `moon-${moonTitle}-${usedIndices.moonPhases.size}`;
         }
-        imageUrl = `${baseUrl}/api/social/images?format=${format}&title=${encodeURIComponent(moonTitle)}&subtitle=${encodeURIComponent(subtitle)}&week=${weekOffset}`;
+        imageUrl = `${baseUrl}/api/social/images?format=${format}&title=${encodeURIComponent(moonTitle)}&subtitle=${encodeURIComponent(subtitle)}&week=${weekOffset}${buildPaletteParams()}`;
         break;
       }
       case 'seasonal_events': {
@@ -517,7 +544,7 @@ export async function generateTopicImages(
         if (usedImageKeys.has(imageKey)) {
           imageKey = `seasonal-${eventTitle}-${images.filter((i) => i.topic === 'seasonal_events').length}`;
         }
-        imageUrl = `${baseUrl}/api/social/images?format=${format}&title=${encodeURIComponent(eventTitle)}&subtitle=${encodeURIComponent(eventSubtitle)}&week=${weekOffset}`;
+        imageUrl = `${baseUrl}/api/social/images?format=${format}&title=${encodeURIComponent(eventTitle)}&subtitle=${encodeURIComponent(eventSubtitle)}&week=${weekOffset}${buildPaletteParams()}`;
         break;
       }
       case 'best_days':
@@ -525,7 +552,7 @@ export async function generateTopicImages(
         if (usedImageKeys.has(imageKey)) {
           imageKey = `best-days-${images.filter((i) => i.topic === 'best_days').length}`;
         }
-        imageUrl = `${baseUrl}/api/social/images?format=${format}&title=${encodeURIComponent('Best Days This Week')}&subtitle=${encodeURIComponent('Optimal timing for your activities')}&week=${weekOffset}`;
+        imageUrl = `${baseUrl}/api/social/images?format=${format}&title=${encodeURIComponent('Best Days This Week')}&subtitle=${encodeURIComponent('Optimal timing for your activities')}&week=${weekOffset}${buildPaletteParams()}`;
         break;
       case 'conclusion': {
         // Use engaging conclusion titles (same as long form)
@@ -543,7 +570,7 @@ export async function generateTopicImages(
         const conclusionTitle = conclusionTitles[titleIndex];
 
         imageKey = 'conclusion';
-        imageUrl = `${baseUrl}/api/social/images?format=${format}&title=${encodeURIComponent(conclusionTitle)}&week=${weekOffset}`;
+        imageUrl = `${baseUrl}/api/social/images?format=${format}&title=${encodeURIComponent(conclusionTitle)}&week=${weekOffset}${buildPaletteParams()}`;
         break;
       }
       default:
@@ -552,7 +579,7 @@ export async function generateTopicImages(
         const words = topic.text.split(/\s+/).slice(0, 5).join(' ');
         const title =
           words.length > 30 ? words.substring(0, 30) + '...' : words;
-        imageUrl = `${baseUrl}/api/social/images?format=${format}&title=${encodeURIComponent(title)}&subtitle=${encodeURIComponent('Cosmic insights')}&week=${weekOffset}`;
+        imageUrl = `${baseUrl}/api/social/images?format=${format}&title=${encodeURIComponent(title)}&subtitle=${encodeURIComponent('Cosmic insights')}&week=${weekOffset}${buildPaletteParams()}`;
     }
 
     // Mark this image key as used
@@ -561,7 +588,7 @@ export async function generateTopicImages(
     // Ensure moon phase images are always created (safeguard)
     if (topic.topic === 'moon_phases' && !imageUrl) {
       console.warn('⚠️ Moon phase image URL not set, creating fallback image');
-      imageUrl = `${baseUrl}/api/social/images?format=${format}&title=${encodeURIComponent('No Major Changes')}&subtitle=${encodeURIComponent('Moon phases')}&week=${weekOffset}`;
+      imageUrl = `${baseUrl}/api/social/images?format=${format}&title=${encodeURIComponent('No Major Changes')}&subtitle=${encodeURIComponent('Moon phases')}&week=${weekOffset}${buildPaletteParams()}`;
       imageKey = 'moon-fallback';
     }
 
