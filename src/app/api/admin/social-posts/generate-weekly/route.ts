@@ -256,12 +256,21 @@ async function generateThematicWeeklyPosts(
   const themeIndex =
     forcedThemeIndex !== null ? forcedThemeIndex : await getNextThemeIndex(sql);
   const currentTheme = categoryThemes[themeIndex % categoryThemes.length];
+  const themeUsageResult = await sql`
+    SELECT use_count
+    FROM content_rotation
+    WHERE rotation_type = 'theme'
+      AND item_id = ${currentTheme.id}
+    LIMIT 1
+  `;
+  const themeUseCount = Number(themeUsageResult.rows[0]?.use_count || 0);
+  const facetOffset = themeUseCount * 7;
   console.log(
     `📚 [THEMATIC] Using theme: ${currentTheme.name} (index ${themeIndex})`,
   );
 
   // Get weekly content plan (handles sabbat detection automatically)
-  const weekPlan = getWeeklyContentPlan(weekStartDate, themeIndex);
+  const weekPlan = getWeeklyContentPlan(weekStartDate, themeIndex, facetOffset);
   console.log(
     `📋 [THEMATIC] Week plan:`,
     weekPlan.map(
@@ -286,6 +295,7 @@ async function generateThematicWeeklyPosts(
     weekStartDate,
     themeIndex,
     videoScriptContext,
+    facetOffset,
   );
   console.log(`📝 [THEMATIC] Generated ${posts.length} posts`);
 

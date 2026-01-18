@@ -54,6 +54,7 @@ export async function POST(request: NextRequest) {
         `;
 
     const weekPlanCache = new Map<string, Map<string, number>>();
+    const themeUsageCountCache = new Map<string, number>();
 
     let updated = 0;
     for (const post of postsResult.rows) {
@@ -70,9 +71,26 @@ export async function POST(request: NextRequest) {
           themeName !== null
             ? categoryThemes.findIndex((theme) => theme.name === themeName)
             : -1;
+        let themeUseCount = 0;
+        if (themeName) {
+          const usageKey = `${postWeekKey}|${themeName}`;
+          if (themeUsageCountCache.has(usageKey)) {
+            themeUseCount = themeUsageCountCache.get(usageKey) || 0;
+          } else {
+            const usageResult = await sql`
+              SELECT COUNT(*) AS use_count
+              FROM theme_publications
+              WHERE theme_name = ${themeName}
+                AND week_start < ${postWeekKey}
+            `;
+            themeUseCount = Number(usageResult.rows[0]?.use_count || 0);
+            themeUsageCountCache.set(usageKey, themeUseCount);
+          }
+        }
+        const facetOffset = themeUseCount * 7;
         const weekPlan =
           themeIndex >= 0
-            ? getWeeklyContentPlan(postWeekStart, themeIndex)
+            ? getWeeklyContentPlan(postWeekStart, themeIndex, facetOffset)
             : [];
         const partMap = new Map<string, number>();
         for (const [index, day] of weekPlan.entries()) {
@@ -102,7 +120,11 @@ export async function POST(request: NextRequest) {
         imageUrl = `${baseUrl}/api/og/social-quote?${params.toString()}`;
       } else if (topic) {
         const theme = categoryThemes.find((t) => t.name === post.week_theme);
-        const facet = theme?.facets.find((f) => f.title === topic);
+        const facets =
+          theme?.facetPool && theme.facetPool.length > 0
+            ? theme.facetPool
+            : theme?.facets || [];
+        const facet = facets.find((f) => f.title === topic);
         const slug =
           facet?.grimoireSlug.split('/').pop() ||
           topic.toLowerCase().replace(/\s+/g, '-');

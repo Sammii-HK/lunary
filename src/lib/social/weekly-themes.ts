@@ -27,6 +27,7 @@ export interface WeeklyTheme {
     | 'chakras'
     | 'sabbat';
   facets: DailyFacet[];
+  facetPool?: DailyFacet[];
 }
 
 export interface SabbatTheme {
@@ -184,6 +185,88 @@ export const categoryThemes: WeeklyTheme[] = [
         focus: 'Structure, discipline, limitations, and mastery',
         shortFormHook:
           'Saturn represents structure, discipline, and life lessons. Its placement reveals where you face challenges that build mastery.',
+      },
+    ],
+    facetPool: [
+      {
+        dayIndex: 0,
+        title: 'The Sun',
+        grimoireSlug: 'astronomy/planets/sun',
+        focus: 'Core identity, vitality, and conscious self-expression',
+        shortFormHook:
+          'The Sun represents core identity and life force. Its sign shows how you express your essential self and where you seek recognition.',
+      },
+      {
+        dayIndex: 1,
+        title: 'The Moon',
+        grimoireSlug: 'astronomy/planets/moon',
+        focus: 'Emotional nature, instincts, and the unconscious',
+        shortFormHook:
+          'The Moon governs emotional instincts and inner needs. Its sign reveals how you process feelings and what makes you feel secure.',
+      },
+      {
+        dayIndex: 2,
+        title: 'Mercury',
+        grimoireSlug: 'astronomy/planets/mercury',
+        focus: 'Communication, thought patterns, and mental processing',
+        shortFormHook:
+          'Mercury rules the mind and communication. Its placement shows how you think, learn, and express ideas.',
+      },
+      {
+        dayIndex: 3,
+        title: 'Venus',
+        grimoireSlug: 'astronomy/planets/venus',
+        focus: 'Love, beauty, values, and attraction',
+        shortFormHook:
+          'Venus governs love, beauty, and values. Its sign reveals what you find attractive and how you express affection.',
+      },
+      {
+        dayIndex: 4,
+        title: 'Mars',
+        grimoireSlug: 'astronomy/planets/mars',
+        focus: 'Drive, assertion, passion, and how we take action',
+        shortFormHook:
+          'Mars represents drive, assertion, and desire. Its placement shows how you pursue goals and express anger.',
+      },
+      {
+        dayIndex: 5,
+        title: 'Jupiter',
+        grimoireSlug: 'astronomy/planets/jupiter',
+        focus: 'Expansion, luck, philosophy, and growth',
+        shortFormHook:
+          'Jupiter expands whatever it touches, bringing growth and opportunity. Its sign shows where you find meaning and abundance.',
+      },
+      {
+        dayIndex: 6,
+        title: 'Saturn',
+        grimoireSlug: 'astronomy/planets/saturn',
+        focus: 'Structure, discipline, limitations, and mastery',
+        shortFormHook:
+          'Saturn represents structure, discipline, and life lessons. Its placement reveals where you face challenges that build mastery.',
+      },
+      {
+        dayIndex: 0,
+        title: 'Uranus',
+        grimoireSlug: 'astronomy/planets/uranus',
+        focus: 'Innovation, disruption, liberation, and awakening',
+        shortFormHook:
+          'Uranus rules breakthroughs and rebellion. Its sign shows where you crave freedom, originality, and sudden change.',
+      },
+      {
+        dayIndex: 1,
+        title: 'Neptune',
+        grimoireSlug: 'astronomy/planets/neptune',
+        focus: 'Dreams, intuition, spirituality, and imagination',
+        shortFormHook:
+          'Neptune dissolves boundaries and heightens intuition. Its sign reveals where you seek meaning, mystery, and spiritual connection.',
+      },
+      {
+        dayIndex: 2,
+        title: 'Pluto',
+        grimoireSlug: 'astronomy/planets/pluto',
+        focus: 'Transformation, power, shadow work, and renewal',
+        shortFormHook:
+          'Pluto governs deep transformation. Its sign shows where you shed the old, reclaim power, and regenerate.',
       },
     ],
   },
@@ -882,6 +965,7 @@ export function getSabbatForDate(date: Date): {
 export function getThemeForDate(
   date: Date,
   currentThemeIndex: number = 0,
+  facetOffset: number = 0,
 ): {
   theme: WeeklyTheme | SabbatTheme;
   facet: DailyFacet;
@@ -906,9 +990,15 @@ export function getThemeForDate(
   const facetIndex = dayOfWeek === 0 ? 6 : dayOfWeek - 1; // Mon=0, Sun=6
 
   const theme = categoryThemes[currentThemeIndex % categoryThemes.length];
+  const facets =
+    theme.facetPool && theme.facetPool.length > 0
+      ? theme.facetPool
+      : theme.facets;
+  const resolvedIndex =
+    facets.length > 0 ? (facetIndex + facetOffset) % facets.length : facetIndex;
   return {
     theme,
-    facet: theme.facets[facetIndex],
+    facet: facets[resolvedIndex] || theme.facets[facetIndex],
     isSabbat: false,
   };
 }
@@ -973,6 +1063,7 @@ export function generateHashtags(
 export function getWeeklyContentPlan(
   weekStartDate: Date,
   currentThemeIndex: number = 0,
+  facetOffset: number = 0,
 ): Array<{
   date: Date;
   dayName: string;
@@ -996,7 +1087,11 @@ export function getWeeklyContentPlan(
     const date = new Date(weekStartDate);
     date.setDate(weekStartDate.getDate() + i);
 
-    const { theme, facet, isSabbat } = getThemeForDate(date, currentThemeIndex);
+    const { theme, facet, isSabbat } = getThemeForDate(
+      date,
+      currentThemeIndex,
+      facetOffset,
+    );
     const hashtags = generateHashtags(theme, facet);
 
     plan.push({

@@ -582,8 +582,13 @@ export function generateWeekContent(
   weekStartDate: Date,
   currentThemeIndex: number = 0,
   videoScript?: VideoScriptContext,
+  facetOffset: number = 0,
 ): ThematicContent[] {
-  const plan = getWeeklyContentPlan(weekStartDate, currentThemeIndex);
+  const plan = getWeeklyContentPlan(
+    weekStartDate,
+    currentThemeIndex,
+    facetOffset,
+  );
 
   return plan.map(({ date, theme, facet }) =>
     generateDayContent(date, theme, facet, videoScript),
@@ -642,11 +647,13 @@ export function generateThematicPostsForWeek(
   weekStartDate: Date,
   currentThemeIndex: number = 0,
   videoScript?: VideoScriptContext,
+  facetOffset: number = 0,
 ): ThematicPost[] {
   const weekContent = generateWeekContent(
     weekStartDate,
     currentThemeIndex,
     videoScript,
+    facetOffset,
   );
   const posts: ThematicPost[] = [];
 
