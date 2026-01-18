@@ -6,6 +6,11 @@ import {
   getDefaultPostingTime,
 } from '@/utils/posting-times';
 import { getImageBaseUrl } from '@/lib/urls';
+import {
+  buildFallbackCaption,
+  logCaptionIssue,
+  validateCaption,
+} from '@/lib/social/caption-utils';
 
 export const runtime = 'nodejs';
 
@@ -327,6 +332,7 @@ async function generateThematicWeeklyPosts(
   const postContentByKey = new Map<string, string>();
   const scriptByDate = new Map<string, string>();
   const scriptPostBaseByDate = new Map<string, string>();
+  const scriptCaptionByDate = new Map<string, string>();
   let closingRitualQuote: {
     id: number;
     text: string;
@@ -586,6 +592,9 @@ async function generateThematicWeeklyPosts(
       if (!scriptByDate.has(dateKey)) {
         scriptByDate.set(dateKey, script.fullScript);
       }
+      if (script.writtenPostContent && !scriptCaptionByDate.has(dateKey)) {
+        scriptCaptionByDate.set(dateKey, script.writtenPostContent);
+      }
     }
 
     for (const [dateKey, scriptText] of scriptByDate.entries()) {
@@ -643,25 +652,86 @@ async function generateThematicWeeklyPosts(
     );
     let postContent = post.content;
     const scriptBase = scriptPostBaseByDate.get(dateKey);
+    const scriptFull = scriptByDate.get(dateKey);
+    const aiCaption = scriptCaptionByDate.get(dateKey);
+    let captionRegenReasons: string[] | null = null;
+    let captionFallbackReasons: string[] | null = null;
+
+    const regenerateCaptionOnce = async () => {
+      const apiKey = process.env.OPENAI_API_KEY?.trim();
+      if (!apiKey || !scriptFull) {
+        return null;
+      }
+      const { OpenAI } = await import('openai');
+      const openai = new OpenAI({ apiKey });
+      const prompt = `Rewrite a social caption from this script.
+
+Script:
+${scriptFull}
+
+Rules:
+- Return strict JSON: {"caption": string, "hook": string, "cta": string}
+- Caption is 4 lines, no emojis, no hashtags, no URLs
+- Line 1: stronger post hook (can differ from spoken hook, still aligned)
+- Line 2: one sentence summary + concrete "watch for this" takeaway
+- Line 3: short educational CTA (save/share/comment)
+- Line 4: "Read more on the Lunary blog."
+- Avoid sales language. Do not include "today" or "this week".
+
+Return JSON only.`;
+
+      const completion = await openai.chat.completions.create({
+        model: 'gpt-4o-mini',
+        messages: [
+          {
+            role: 'system',
+            content:
+              'You rewrite scripts into educational captions. Return valid JSON only.',
+          },
+          { role: 'user', content: prompt },
+        ],
+        response_format: { type: 'json_object' },
+        temperature: 0.3,
+        max_tokens: 300,
+      });
+      const raw = completion.choices[0]?.message?.content || '{}';
+      const parsed = JSON.parse(raw);
+      return parsed?.caption ? String(parsed.caption) : null;
+    };
+
     if (scriptBase && post.postType === 'educational') {
-      if (shortPostPlatforms.has(post.platform)) {
-        const shortLimit = post.platform === 'bluesky' ? 300 : 180;
-        postContent = buildPostVariant(
-          scriptBase,
-          shortLimit,
-          post.hashtags,
-          2,
-          true,
-          post.platform === 'bluesky' ? '' : "From Lunary's Grimoire",
-        );
-      } else {
-        postContent = buildPostVariant(
-          scriptBase,
-          2200,
-          post.hashtags,
-          3,
-          false,
-        );
+      if (aiCaption) {
+        const validated = validateCaption(aiCaption, currentTheme.name);
+        if (validated.valid) {
+          postContent = validated.sanitizedCaption;
+        } else {
+          captionRegenReasons = validated.reasons;
+          const regenerated = await regenerateCaptionOnce();
+          if (regenerated) {
+            const retryCheck = validateCaption(regenerated, currentTheme.name);
+            if (retryCheck.valid) {
+              postContent = retryCheck.sanitizedCaption;
+            } else {
+              captionFallbackReasons = retryCheck.reasons;
+            }
+          } else {
+            captionFallbackReasons = validated.reasons;
+          }
+        }
+      }
+
+      if (
+        !postContent ||
+        postContent === post.content ||
+        captionFallbackReasons
+      ) {
+        postContent = buildFallbackCaption({
+          script: scriptFull || scriptBase || post.content,
+          themeName: currentTheme.name,
+          facetTitle: post.topic || 'Today',
+          facetFocus: post.topic || 'this topic',
+          platform: post.platform,
+        });
       }
     }
 
@@ -744,6 +814,20 @@ async function generateThematicWeeklyPosts(
         RETURNING id
       `;
       savedPostIds.push(result.rows[0].id);
+      if (captionRegenReasons) {
+        await logCaptionIssue('regenerated', captionRegenReasons, {
+          postId: result.rows[0].id,
+          themeId: currentTheme.id || currentTheme.name,
+          facetTitle: post.topic || post.content,
+        });
+      }
+      if (captionFallbackReasons) {
+        await logCaptionIssue('fallback', captionFallbackReasons, {
+          postId: result.rows[0].id,
+          themeId: currentTheme.id || currentTheme.name,
+          facetTitle: post.topic || post.content,
+        });
+      }
 
       const dayOfWeek = scheduledDate.getDay();
       const dayOffset = dayOfWeek === 0 ? 6 : dayOfWeek - 1;

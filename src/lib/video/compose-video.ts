@@ -1,5 +1,6 @@
 import ffmpeg from 'fluent-ffmpeg';
 import { VIDEO_DIMENSIONS } from './types';
+import { getFrameHueShift, getHueSteps } from './hue';
 import {
   writeFile,
   unlink,
@@ -129,6 +130,9 @@ export interface ComposeVideoOptions {
     style?: 'chapter' | 'stamp' | 'title';
   }>;
   backgroundMusicPath?: string | null;
+  hueShiftBase?: number;
+  hueShiftMaxDelta?: number;
+  lockIntroHue?: boolean;
 }
 
 /**
@@ -152,6 +156,9 @@ export async function composeVideo(
     subtitlesHighlightColor,
     overlays,
     backgroundMusicPath,
+    hueShiftBase = 0,
+    hueShiftMaxDelta = 12,
+    lockIntroHue = false,
   } = options;
 
   const dimensions = VIDEO_DIMENSIONS[format] || VIDEO_DIMENSIONS.landscape;
@@ -527,37 +534,43 @@ export async function composeVideo(
       // Build filter complex for scaling, padding, and concatenation
       const filterParts: string[] = [];
 
-      const colorSteps = [
-        {
-          hue: 0,
-          balance: 'rs=0:gs=0:bs=0',
-          saturation: 1.0,
-          contrast: 1.02,
-        },
-        {
-          hue: 10,
-          balance: 'rs=-0.02:gs=0.01:bs=0.08',
-          saturation: 1.08,
-          contrast: 1.05,
-        },
-        {
-          hue: -10,
-          balance: 'rs=-0.04:gs=0.02:bs=0.14',
-          saturation: 1.1,
-          contrast: 1.08,
-        },
-      ];
+      const hueSteps = getHueSteps(hueShiftBase, hueShiftMaxDelta);
+      const driftAmplitude = Math.min(6, hueShiftMaxDelta);
+      const colorSteps = hueSteps.map((hue) => ({
+        hue,
+        balance: 'rs=0:gs=0:bs=0',
+        saturation: 1.03,
+        contrast: 1.02,
+      }));
+      console.log(
+        `[HueShift] base=${hueShiftBase} maxDelta=${hueShiftMaxDelta} steps=${colorSteps.map((step) => step.hue).join(',')}`,
+      );
 
       const segmentDurations: number[] = [];
 
       adjustedImages.forEach((img, i) => {
         const duration = img.endTime - img.startTime;
         segmentDurations.push(duration);
-        const step = colorSteps[i % colorSteps.length];
+        const stepHue = getFrameHueShift({
+          frameIndex: i,
+          baseHue: hueShiftBase,
+          maxDelta: hueShiftMaxDelta,
+          lockIntroHue,
+        });
+        const step = {
+          hue: stepHue,
+          balance: 'rs=0:gs=0:bs=0',
+          saturation: 1.03,
+          contrast: 1.02,
+        };
         const hueDrift = Math.max(duration, 3).toFixed(2);
+        const hueExpression =
+          lockIntroHue && i === 0
+            ? `h='0':s=1`
+            : `h='${step.hue}+${driftAmplitude}*sin(2*PI*t/${hueDrift})':s=1`;
         // Scale, pad, and set duration for each image
         filterParts.push(
-          `[${i}:v]scale=${dimensions.width}:${dimensions.height}:force_original_aspect_ratio=decrease,pad=${dimensions.width}:${dimensions.height}:(ow-iw)/2:(oh-ih)/2,setpts=PTS-STARTPTS,fps=30,colorbalance=${step.balance},hue=h='${step.hue}+6*sin(2*PI*t/${hueDrift})':s=1,eq=saturation=${step.saturation}:contrast=${step.contrast}:brightness=0.01[scaled${i}]`,
+          `[${i}:v]scale=${dimensions.width}:${dimensions.height}:force_original_aspect_ratio=decrease,pad=${dimensions.width}:${dimensions.height}:(ow-iw)/2:(oh-ih)/2,setpts=PTS-STARTPTS,fps=30,colorbalance=${step.balance},hue=${hueExpression},eq=saturation=${step.saturation}:contrast=${step.contrast}:brightness=0.01[scaled${i}]`,
         );
         // Trim to exact duration
         filterParts.push(
@@ -686,10 +699,16 @@ export async function composeVideo(
       );
 
       const zoomFilter = `zoompan=z='if(eq(on,0),1.0,min(zoom+0.00003,1.06))':x='iw/2-(iw/zoom/2)':y='ih/2-(ih/zoom/2)':d=1:fps=30:s=${dimensions.width}x${dimensions.height}`;
+      const [baseHueStep, altHueStep] = getHueSteps(
+        hueShiftBase,
+        hueShiftMaxDelta,
+      );
+      const baseHue = lockIntroHue ? 0 : baseHueStep;
+      const altHue = lockIntroHue ? 0 : altHueStep;
       const gradientBlendFilter =
         `split=2[base][alt];` +
-        `[base]hue=h=0:s=1.03[base];` +
-        `[alt]hue=h=18:s=1.06[alt];` +
+        `[base]hue=h=${baseHue}:s=1.03[base];` +
+        `[alt]hue=h=${altHue}:s=1.06[alt];` +
         `[base][alt]blend=all_expr='A*(1-(0.5+0.5*sin(2*3.1415926*N/360)))+B*(0.5+0.5*sin(2*3.1415926*N/360))'`;
       const overlayFilter = buildOverlayFilters(overlays, dimensions, format);
       const videoFilter = [
