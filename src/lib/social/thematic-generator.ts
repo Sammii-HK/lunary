@@ -1706,7 +1706,9 @@ export interface ThematicPost {
     | 'closing_ritual'
     | 'closing_statement'
     | 'persona'
-    | 'question';
+    | 'question'
+    | 'video'
+    | 'video_caption';
   topic: string;
   scheduledDate: Date;
   hashtags: string;
