@@ -813,7 +813,7 @@ const hasRepeatedAdjacentBigrams = (lines: string[]) => {
 };
 
 const findSoWhatLineIndex = (lines: string[]) =>
-  lines.findIndex((line) => /^\s*so what:/i.test(line.trim()));
+  lines.findIndex((line) => /^\s*(so what:|try this:)\b/i.test(line.trim()));
 
 const normaliseTopicKey = (topic: string) =>
   topic
@@ -1131,16 +1131,18 @@ const validateScriptBody = (
   }
   const soWhatIndex = findSoWhatLineIndex(lines);
   if (soWhatIndex === -1) {
-    reasons.push('Missing "So what" line');
+    reasons.push('Missing "So what" or "Try this" line');
   } else {
     const soWhatCount = lines.filter((line) =>
-      /^\s*so what:/i.test(line.trim()),
+      /^\s*(so what:|try this:)\b/i.test(line.trim()),
     ).length;
     if (soWhatCount !== 1) {
-      reasons.push('Script must include exactly one "So what" line');
+      reasons.push(
+        'Script must include exactly one "So what" or "Try this" line',
+      );
     }
     if (soWhatIndex < Math.max(0, lines.length - 2)) {
-      reasons.push('"So what" line must be near the end');
+      reasons.push('"So what" or "Try this" line must be near the end');
     }
   }
   if (
@@ -1365,6 +1367,14 @@ Aspect focus: ${aspectLabel(aspect)}
 Keyword phrase: ${searchPhrase}
 Focus: ${facet.focus}
 ${buildScopeGuard(facet.title)}
+
+Hook requirements (FIRST LINE):
+- Write a single-sentence spoken hook that introduces the topic clearly and naturally.
+- Must be 8–14 words.
+- Must include the primary keyword exactly once (use "${facet.title}" or "${searchPhrase}").
+- Calm and grounded; no hype, no dramatic claims.
+- Do not use hook template phrases like "Most people", "This will click", "Here's what matters", or "Here's how it helps".
+
 Script body requirements (AFTER HOOK):
 - 6–10 short lines total
 - calm, factual, suitable for TTS
@@ -1375,9 +1385,8 @@ Script body requirements (AFTER HOOK):
 - If a thought is long, split it into two full sentences and end the line at punctuation, never mid-sentence.
 - Do not end a line with articles, prepositions, or dangling clauses (e.g., "the.", "a.", "to.", "with.", "of.", "which.", "because.").
 - Do not use hook-style phrases in the body like "Most people", "If this confuses you", "Here's what matters", "Here's how it helps", or "Why it matters".
-- Do not include a hook line at all. Only return the body lines.
-- Avoid deterministic claims; use soft language like "can", "tends to", "may", "often", "influences", "highlights".
-- Include exactly one line starting with "So what:" near the end. It should say what to notice or do today, and must stay within the topic scope guard.
+- Do not repeat the hook or include extra hook lines in the body.
+- Include exactly one practical application line near the end that begins with either "Try this:" or "So what:" and ties a simple, emotionally grounded action about ${facet.title} to a clear window (today, tonight, within 24 hours, over the next 2.5 days, this week). Stay within the topic scope guard.
 ${guardrailNote}
 
 Hard bans (never include):
@@ -1389,6 +1398,7 @@ ${dataContext ? `\nGrimoire Data (reference only):\n${dataContext}` : ''}
 Return strict JSON only:
 {
   "video": {
+    "hook": "Spoken hook line",
     "scriptBody": [
       "Line 1",
       "Line 2"
@@ -1417,6 +1427,7 @@ Return strict JSON only:
     const parsed = JSON.parse(raw);
     return parsed as {
       video?: {
+        hook?: string;
         scriptBody?: string[];
       };
     };
@@ -1425,28 +1436,33 @@ Return strict JSON only:
   try {
     let primary = await requestScriptOnce();
     let video = primary.video || {};
+    let hook = String(video.hook || '').trim();
     let scriptBodyLines = Array.isArray(video.scriptBody)
       ? video.scriptBody.map((line) => String(line).trim()).filter(Boolean)
       : [];
 
     scriptBodyLines = sanitizeLines(scriptBodyLines);
 
+    let hookIssues = validateVideoHook(hook, facet.title, searchPhrase);
     let bodyIssues = validateScriptBody(
       scriptBodyLines,
       facet.title,
       searchPhrase,
     );
 
-    if (bodyIssues.length > 0) {
-      const retryNote = [...bodyIssues.map((issue) => `Body: ${issue}`)].join(
-        '; ',
-      );
+    if (hookIssues.length > 0 || bodyIssues.length > 0) {
+      const retryNote = [
+        ...hookIssues.map((issue) => `Hook: ${issue}`),
+        ...bodyIssues.map((issue) => `Body: ${issue}`),
+      ].join('; ');
       primary = await requestScriptOnce(retryNote);
       video = primary.video || {};
+      hook = String(video.hook || '').trim();
       scriptBodyLines = Array.isArray(video.scriptBody)
         ? video.scriptBody.map((line) => String(line).trim()).filter(Boolean)
         : [];
       scriptBodyLines = sanitizeLines(scriptBodyLines);
+      hookIssues = validateVideoHook(hook, facet.title, searchPhrase);
       bodyIssues = validateScriptBody(
         scriptBodyLines,
         facet.title,
@@ -1464,9 +1480,12 @@ Return strict JSON only:
       .map((line) => line.replace(/[—–]/g, '-').replace(/\s+/g, ' ').trim())
       .filter(Boolean)
       .join('\n');
-    const hookLine = ensureSentenceEndsWithPunctuation(
-      normalizeHookLine(buildHookForTopic(facet.title)),
-    );
+    const hookLine =
+      validateVideoHook(hook, facet.title, searchPhrase).length === 0
+        ? ensureSentenceEndsWithPunctuation(normalizeHookLine(hook))
+        : ensureSentenceEndsWithPunctuation(
+            normalizeHookLine(buildHookForTopic(facet.title)),
+          );
     const script = `${hookLine}\n\n${scriptBody}`.trim();
     if (hasTruncationArtifact(script)) {
       throw new Error('Generated script contains truncation artifact');
@@ -2174,6 +2193,7 @@ Closing guidance:
 - End with a reflective synthesis that reinforces meaning and understanding
 - Do not include CTAs, prompts to like/subscribe, or platform references
 - Leave the viewer with a sense of conceptual completion
+- Add one short final sentence that begins with "try this:" and connects a concrete action about ${theme.name} to a clear time window (today, tonight, within 24 hours, over the next 2.5 days, this week) so viewers know how to apply the week/day focus.
 
 Theme: ${theme.name}
 Category: ${theme.category}

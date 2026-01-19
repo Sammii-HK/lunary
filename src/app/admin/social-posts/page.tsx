@@ -131,6 +131,7 @@ export default function SocialPostsPage() {
   const [useThematicMode, setUseThematicMode] = useState(true);
   const [replaceExisting, setReplaceExisting] = useState(false);
   const [videosOnly, setVideosOnly] = useState(false);
+  const [includeSecondaryThemes, setIncludeSecondaryThemes] = useState(true);
   const [videoJobFeedback, setVideoJobFeedback] = useState<string | null>(null);
   const [requeueingFailed, setRequeueingFailed] = useState(false);
   const [requeueingProcessing, setRequeueingProcessing] = useState(false);
@@ -296,6 +297,7 @@ export default function SocialPostsPage() {
                 weekOffset === 0 ? null : getWeekStartForOffset(weekOffset),
               mode: useThematicMode ? 'thematic' : 'legacy',
               replaceExisting,
+              includeSecondaryThemes,
             }),
           },
         );
@@ -333,12 +335,17 @@ export default function SocialPostsPage() {
     return date.toISOString();
   };
 
-  const resolveQueueWeekTheme = (): string | null => {
+  const getThemeCounts = (): Map<string, number> => {
     const counts = new Map<string, number>();
     for (const post of pendingPosts) {
       if (!post.weekTheme) continue;
       counts.set(post.weekTheme, (counts.get(post.weekTheme) || 0) + 1);
     }
+    return counts;
+  };
+
+  const resolveQueueWeekTheme = (): string | null => {
+    const counts = getThemeCounts();
     let bestTheme: string | null = null;
     let bestCount = 0;
     for (const [theme, count] of counts.entries()) {
@@ -348,6 +355,16 @@ export default function SocialPostsPage() {
       }
     }
     return bestTheme;
+  };
+
+  const resolveQueueSecondaryTheme = (): string | null => {
+    const counts = Array.from(getThemeCounts().entries()).sort(
+      (a, b) => b[1] - a[1],
+    );
+    if (counts.length < 2) {
+      return null;
+    }
+    return counts[1][0];
   };
 
   const handleRefreshImages = async () => {
@@ -1096,6 +1113,9 @@ export default function SocialPostsPage() {
     (p) => p.postType === 'video' && p.videoJobStatus === 'failed',
   ).length;
 
+  const queuedPrimaryTheme = resolveQueueWeekTheme();
+  const queuedSecondaryTheme = resolveQueueSecondaryTheme();
+
   return (
     <div className='min-h-screen bg-zinc-950 text-zinc-100 p-6'>
       <div className='max-w-6xl mx-auto space-y-6'>
@@ -1343,6 +1363,38 @@ export default function SocialPostsPage() {
                     >
                       Generate videos only (skip post regeneration)
                     </label>
+                  </div>
+                  <div className='flex items-center gap-2 p-3 bg-zinc-800/50 rounded-lg border border-zinc-700'>
+                    <input
+                      type='checkbox'
+                      id='include-secondary-themes'
+                      checked={includeSecondaryThemes}
+                      onChange={(e) =>
+                        setIncludeSecondaryThemes(e.target.checked)
+                      }
+                      className='w-4 h-4 rounded border-zinc-600 bg-zinc-700 text-lunary-secondary focus:ring-lunary-secondary'
+                    />
+                    <label
+                      htmlFor='include-secondary-themes'
+                      className='text-sm text-zinc-300 cursor-pointer'
+                    >
+                      Include secondary theme video posts
+                    </label>
+                  </div>
+
+                  <div className='rounded-lg border border-zinc-700 bg-zinc-900/40 px-3 py-2 text-xs text-zinc-400'>
+                    <p>
+                      Primary theme:
+                      <span className='ml-1 font-medium text-white'>
+                        {queuedPrimaryTheme || 'Pending'}
+                      </span>
+                    </p>
+                    <p>
+                      Secondary theme:
+                      <span className='ml-1 font-medium text-white'>
+                        {queuedSecondaryTheme || 'Not enough posts yet'}
+                      </span>
+                    </p>
                   </div>
 
                   <div className='grid grid-cols-3 gap-3'>

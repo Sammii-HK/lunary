@@ -33,6 +33,10 @@ export type SourcePack = {
   grimoireExamples: string[];
   relatedKeywords: string[];
   contentDomain: string;
+  topicDomain: string;
+  topicDefinition: string;
+  grimoireExcerpt: string;
+  disallowedAnalogies: string[];
   searchKeyword: string;
   displayTitle: string;
   topicTitle: string;
@@ -101,13 +105,7 @@ const CTA_PHRASES = new Set(CTA_OPTIONS);
 const pickCTA = () =>
   CTA_OPTIONS[Math.floor(Math.random() * CTA_OPTIONS.length)];
 
-const AMBIGUOUS_DOMAINS = new Set([
-  'astrology',
-  'moon',
-  'tarot',
-  'crystals',
-  'numerology',
-]);
+const AMBIGUOUS_DOMAINS = new Set(['tarot', 'crystals', 'numerology']);
 
 const PLATFORM_HASHTAG_LIMITS: Record<string, number> = {
   tiktok: 4,
@@ -157,6 +155,24 @@ const CATEGORY_DOMAIN_MAP: Record<
   numerology: 'numerology',
   sabbat: 'rituals',
 };
+
+const TOPIC_DOMAIN_LABELS: Record<string, string> = {
+  astrology: 'astrology',
+  moon: 'moon_phases',
+  tarot: 'tarot',
+  numerology: 'numerology',
+  rituals: 'rituals',
+  crystals: 'crystals',
+};
+
+const DISALLOWED_ANALOGY_DOMAINS = [
+  'astrology',
+  'moon_phases',
+  'tarot',
+  'numerology',
+  'rituals',
+  'crystals',
+];
 
 const DOMAIN_ALLOWED_PREFIXES: Record<string, string[]> = {
   astrology: [
@@ -221,18 +237,28 @@ const PLATFORM_TONE_NOTES: Record<string, string> = {
     'Keep the tone calm, grounded, and observational—describe how a pattern shows up, not why someone must believe it.',
 };
 
-const SOCIAL_POST_STYLE_INSTRUCTION = (platform: string) => {
+const SOCIAL_POST_STYLE_INSTRUCTION = (
+  platform: string,
+  postType?: SocialPostType,
+) => {
   const platformNote =
     PLATFORM_TONE_NOTES[platform] || PLATFORM_TONE_NOTES.default;
+  const mattersLine =
+    postType === 'educational_intro' || postType === 'video_caption'
+      ? '- Every post must include exactly one “why this matters today” line (practical, emotional, or behavioral).'
+      : '- A “why this matters today” line is optional and should only appear when it adds practical value.';
   return `Global style rules:
 - Avoid repeating sentence structures within a single post and never reuse the same opening or closing sentence across variants.
 - Limit “Many believe” to once across the 7-day batch and allow “may influence” only once per post; prefer “often”, “tends to”, “is best used for”, “shows up as”, or “is felt as”.
 - Skip filler phrases like “can deepen”, “may enhance”, or “often signifies” unless you immediately follow with a concrete example.
-- Every post must include exactly one “why this matters today” line (practical, emotional, or behavioral).
+${mattersLine}
 - Max 3 short paragraphs; first sentence must reframe a misconception or describe lived experience, and the final sentence should invite reflection (not a CTA).
 - Stay calm, grounded, and authoritative—explain patterns without pushing belief or using mystical exaggeration.
 Platform-specific note: ${platformNote}`;
 };
+
+const TIMING_CUE_INSTRUCTION = (topic: string, weekLabel: string | undefined) =>
+  `Timing cue: add one short sentence near the end formatted as "try this: [action] [time window]." Tie the action to this week's ${weekLabel || 'topic'} (today, tonight, within 24h, over the next 2.5 days, this week), keep it emotionally grounded and immediately usable, and ensure it doesn't repeat an opening or closing sentence used elsewhere.`;
 
 const CATEGORY_META: Record<string, { label: string; contextClause: string }> =
   {
@@ -398,6 +424,27 @@ const sentenceSafe = (value: string) => {
   return /[.!?]$/.test(trimmed) ? trimmed : `${trimmed}.`;
 };
 
+const buildTopicDefinition = (
+  topic: string,
+  excerpt: string,
+  fallback: string,
+) => {
+  const source = excerpt.trim() || fallback.trim();
+  if (!source) return sentenceSafe(topic);
+  const sentences = source
+    .split(/[.!?]+/)
+    .map((segment) => segment.trim())
+    .filter(Boolean)
+    .slice(0, 2);
+  const combined = sentences.join('. ');
+  const ensured = sentenceSafe(combined || source);
+  return ensured.toLowerCase().includes(topic.toLowerCase())
+    ? ensured
+    : sentenceSafe(
+        `${topic} ${ensured.replace(/^[A-Z]/, (c) => c.toLowerCase())}`,
+      );
+};
+
 type OpeningIntent =
   | 'definition'
   | 'misconception'
@@ -446,6 +493,18 @@ const buildOpeningPrompt = (
         .join('\n- ')}`
     : '';
   return `Write one opening sentence for an educational social post about "${pack.topicTitle}".
+
+Semantic anchors (required):
+- topic_definition: ${pack.topicDefinition}
+- topic_domain: ${pack.topicDomain}
+- grimoire_excerpt: ${pack.grimoireExcerpt}
+- disallowed_analogies: ${pack.disallowedAnalogies.join(', ')}
+
+Rules:
+- Write only within topic_domain.
+- Use grimoire_excerpt as the primary source of meaning.
+- Avoid metaphors or frameworks from disallowed_analogies.
+- Treat the topic as a domain-specific term, not a generic concept.
 
 Allowed opening intents (choose the provided intent only):
 - definition: a clear definition or framing of what the topic is
@@ -595,6 +654,8 @@ export function normalizeHashtagsForPlatform(
 const hasTruncation = (text: string) =>
   TRUNCATION_PATTERNS.some((pattern) => pattern.test(text.trim()));
 
+const hasGrimoireMention = (text: string) => /\bgrimoire\b/i.test(text);
+
 const buildNoveltyInstruction = (context?: NoveltyContext) => {
   if (!context) return '';
   const recent = (context.recentTexts || []).slice(-6);
@@ -629,6 +690,12 @@ const hasDeterministicLanguage = (text: string) => {
     new RegExp(`\\b${word}\\b`, 'i').test(lower),
   );
 };
+
+const softenDeterministicLanguage = (text: string) =>
+  text
+    .replace(/\bcontrols\b/gi, 'can influence')
+    .replace(/\balways\b/gi, 'often')
+    .replace(/\bguarantees\b/gi, 'can support');
 
 const countTopicMentions = (content: string, topic: string) => {
   const haystack = normalise(content);
@@ -813,6 +880,7 @@ export function buildSourcePack({
     ? facet.grimoireSlug.replace('#', '/')
     : facet.grimoireSlug;
   const contentDomain = CATEGORY_DOMAIN_MAP[theme.category] || 'astrology';
+  const topicDomain = TOPIC_DOMAIN_LABELS[contentDomain] || contentDomain;
   const searchKeyword = deriveSearchKeyword(topic);
   const displayTitle = formatCaptionTitle(topic);
   const allowJournaling =
@@ -838,6 +906,19 @@ export function buildSourcePack({
   }
   const sourceSummary =
     snippet?.summary || snippet?.fullContent?.description || '';
+  const rawFallback = facet.shortFormHook || facet.focus || topic;
+  const safeFallback = hasOffDomainKeyword(rawFallback) ? '' : rawFallback;
+  const neutralFallback = `${topic} is a domain-specific term in ${topicDomain}.`;
+  const fallbackText = safeFallback || neutralFallback;
+  const grimoireExcerpt = sentenceSafe(sourceSummary || fallbackText);
+  const topicDefinition = buildTopicDefinition(
+    topic,
+    sourceSummary,
+    fallbackText,
+  );
+  const disallowedAnalogies = DISALLOWED_ANALOGY_DOMAINS.filter(
+    (domain) => domain !== topicDomain,
+  );
   const sourceFacts = extractFactsFromData(snippet?.fullContent || null);
   if (sourceSummary) sourceFacts.unshift(sentenceSafe(sourceSummary));
   if (sourceFacts.length === 0) {
@@ -878,6 +959,10 @@ export function buildSourcePack({
     grimoireExamples: examples,
     relatedKeywords,
     contentDomain,
+    topicDomain,
+    topicDefinition,
+    grimoireExcerpt,
+    disallowedAnalogies,
     searchKeyword,
     displayTitle,
     topicTitle: facet.title,
@@ -949,13 +1034,36 @@ const buildEducationalPrompt = (pack: SourcePack) => {
   ].includes(pack.postType)
     ? `${CLOSING_PARTICIPATION_INSTRUCTION}\n`
     : '';
-  const styleGuidance = SOCIAL_POST_STYLE_INSTRUCTION(pack.platform);
+  const styleGuidance = SOCIAL_POST_STYLE_INSTRUCTION(
+    pack.platform,
+    pack.postType,
+  );
+  const timingCueNote = [
+    'educational_deep_2',
+    'closing_statement',
+    'closing_ritual',
+  ].includes(pack.postType)
+    ? TIMING_CUE_INSTRUCTION(pack.topicTitle, pack.theme)
+    : '';
 
   return `You are writing social copy for Lunary. Use UK English, stay calm, and keep the tone educational.
 Keyword reference (first line added later): ${pack.displayTitle}
 ${domainInstruction}
 ${anchorInstruction}
 ${journalingInstruction}
+Semantic anchors (required):
+- topic_definition: ${pack.topicDefinition}
+- topic_domain: ${pack.topicDomain}
+- grimoire_excerpt: ${pack.grimoireExcerpt}
+- disallowed_analogies: ${pack.disallowedAnalogies.join(', ')}
+
+Rules:
+- Write only within topic_domain.
+- Use grimoire_excerpt as the primary source of meaning.
+- Avoid metaphors or frameworks from disallowed_analogies.
+- Treat the topic as a domain-specific term, not a generic concept.
+- Do not mention the Grimoire, Lunary, or any product language.
+- Do not include CTAs or “full guide / explore further / read more” phrasing unless postType is explicitly "promo".
 ${contextInstruction}
 ${discoveryInstruction}
 ${structureNote}
@@ -963,6 +1071,7 @@ ${nonDeterministicNote}
 ${guardrailNote}
 ${closingParticipationNote}
 ${styleGuidance}
+${timingCueNote}
 ${buildScopeGuard(pack.topicTitle)}
 ${noveltyNote}
 
@@ -972,6 +1081,10 @@ sourcePack:
 - platform: ${pack.platform}
 - postType: ${pack.postType}
 - categoryLabel: ${pack.categoryLabel}
+- topic_definition: ${pack.topicDefinition}
+- topic_domain: ${pack.topicDomain}
+- grimoire_excerpt: ${pack.grimoireExcerpt}
+- disallowed_analogies: ${pack.disallowedAnalogies.join(', ')}
 - grimoireSnippets:
 ${pack.grimoireSnippets.map((snippet) => `  - ${snippet}`).join('\\n')}
 - tone: ${pack.tone}
@@ -1015,7 +1128,6 @@ const buildVideoCaptionPrompt = (pack: SourcePack) => {
     ? `Line one must mention ${pack.categoryLabel.toLowerCase()} ${pack.categoryContextClause} while explaining what ${pack.displayTitle} illuminates.`
     : `Line one should introduce what ${pack.displayTitle} means and why it matters.`;
   const discoveryKeywords = pack.relatedKeywords
-    .map((keyword) => keyword.toLowerCase())
     .filter((keyword) => keyword && keyword !== pack.topic.toLowerCase())
     .slice(0, 2);
   const discoveryInstruction = discoveryKeywords.length
@@ -1027,18 +1139,36 @@ const buildVideoCaptionPrompt = (pack: SourcePack) => {
     'Avoid deterministic claims. Use soft language like "can", "tends to", "may", "often", "influences", "highlights".';
   const noveltyNote = buildNoveltyInstruction(pack.noveltyContext);
   const guardrailNote = FACTUAL_GUARDRAIL_INSTRUCTION;
-  const styleGuidance = SOCIAL_POST_STYLE_INSTRUCTION(pack.platform);
+  const styleGuidance = SOCIAL_POST_STYLE_INSTRUCTION(
+    pack.platform,
+    pack.postType,
+  );
+  const timingCueNote = TIMING_CUE_INSTRUCTION(pack.topicTitle, pack.theme);
 
   return `You are writing a search-optimized caption for Lunary in UK English to pair with the short-form video script. Focus on "${pack.topicTitle}" and keep the style informative and calm.
 Keyword reference (displayTitle added separately): ${pack.displayTitle}
 ${domainInstruction}
 ${anchorInstruction}
 ${contextInstruction}
+Semantic anchors (required):
+- topic_definition: ${pack.topicDefinition}
+- topic_domain: ${pack.topicDomain}
+- grimoire_excerpt: ${pack.grimoireExcerpt}
+- disallowed_analogies: ${pack.disallowedAnalogies.join(', ')}
+
+Rules:
+- Write only within topic_domain.
+- Use grimoire_excerpt as the primary source of meaning.
+- Avoid metaphors or frameworks from disallowed_analogies.
+- Treat the topic as a domain-specific term, not a generic concept.
+- Do not mention the Grimoire, Lunary, or any product language.
+- Do not include CTAs or “full guide / explore further / read more” phrasing unless postType is explicitly "promo".
 ${discoveryInstruction}
 ${structureNote}
 ${nonDeterministicNote}
 ${guardrailNote}
 ${styleGuidance}
+${timingCueNote}
 ${buildScopeGuard(pack.topicTitle)}
 ${noveltyNote}
 Do not include hashtags or CTA phrases; those will be added later.
@@ -1046,6 +1176,10 @@ Do not include hashtags or CTA phrases; those will be added later.
 sourcePack:
 - topicTitle: ${pack.topicTitle}
 - categoryLabel: ${pack.categoryLabel}
+- topic_definition: ${pack.topicDefinition}
+- topic_domain: ${pack.topicDomain}
+- grimoire_excerpt: ${pack.grimoireExcerpt}
+- disallowed_analogies: ${pack.disallowedAnalogies.join(', ')}
 - grimoireSnippets:
 ${pack.grimoireSnippets.map((snippet) => `  - ${snippet}`).join('\\n')}
 - constraints:
@@ -1079,15 +1213,33 @@ const buildQuestionPrompt = (pack: SourcePack) => {
     : 'Include a discovery term like "astrology" or "lunar timing" when natural.';
   const noveltyNote = buildNoveltyInstruction(pack.noveltyContext);
   const guardrailNote = FACTUAL_GUARDRAIL_INSTRUCTION;
-  const styleGuidance = SOCIAL_POST_STYLE_INSTRUCTION(pack.platform);
+  const styleGuidance = SOCIAL_POST_STYLE_INSTRUCTION(
+    pack.platform,
+    pack.postType,
+  );
+  const timingCueNote = '';
   return `Write a question post for Lunary in UK English about "${pack.topicTitle}".
 ${domainInstruction}
 ${anchorInstruction}
+Semantic anchors (required):
+- topic_definition: ${pack.topicDefinition}
+- topic_domain: ${pack.topicDomain}
+- grimoire_excerpt: ${pack.grimoireExcerpt}
+- disallowed_analogies: ${pack.disallowedAnalogies.join(', ')}
+
+Rules:
+- Write only within topic_domain.
+- Use grimoire_excerpt as the primary source of meaning.
+- Avoid metaphors or frameworks from disallowed_analogies.
+- Treat the topic as a domain-specific term, not a generic concept.
+- Do not mention the Grimoire, Lunary, or any product language.
+- Do not include CTAs or “full guide / explore further / read more” phrasing unless postType is explicitly "promo".
 ${discoveryInstruction}
 ${buildScopeGuard(pack.topicTitle)}
 Avoid deterministic claims; use soft language like "can", "tends to", "may", "often", "influences", "highlights".
 ${guardrailNote}
 ${styleGuidance}
+${timingCueNote}
 ${noveltyNote}
 
 Schema:
@@ -1240,6 +1392,18 @@ export async function generateSocialCopy(
       )) as VideoCaptionResponse;
       validation = validateVideoCaptionResponse(response.bodyLines || [], pack);
     }
+    if (validation.issues.length === 0) {
+      const combined = (validation.lines || []).join(' ');
+      if (hasGrimoireMention(combined)) {
+        response = (await requestCopy(
+          'Remove any mention of the Grimoire, Lunary, or product language.',
+        )) as VideoCaptionResponse;
+        validation = validateVideoCaptionResponse(
+          response.bodyLines || [],
+          pack,
+        );
+      }
+    }
     if (validation.issues.length > 0) {
       const fallback = buildFallbackCopy(pack);
       return {
@@ -1289,6 +1453,47 @@ export async function generateSocialCopy(
       content = `${fallbackQuestion}\n${fallbackPrompt}`;
     }
   }
+  if (hasGrimoireMention(content)) {
+    const retry = (await requestCopy(
+      'Remove any mention of the Grimoire, Lunary, or product language.',
+    )) as any;
+    const retriedContent = String(retry.content || '').trim();
+    content = hasGrimoireMention(retriedContent)
+      ? content
+          .replace(/\bgrimoire\b/gi, '')
+          .replace(/\s+/g, ' ')
+          .trim()
+      : retriedContent;
+  }
+
+  if (hasDeterministicLanguage(content)) {
+    const retry = (await requestCopy(
+      'Soften deterministic language (avoid "controls", "always", "guarantees"; use "can influence", "often", "tends to").',
+    )) as any;
+    const retriedContent = String(retry.content || '').trim();
+    content = hasDeterministicLanguage(retriedContent)
+      ? softenDeterministicLanguage(retriedContent)
+      : retriedContent;
+  }
+  if (
+    [
+      'educational',
+      'educational_intro',
+      'educational_deep_1',
+      'educational_deep_2',
+      'educational_deep_3',
+    ].includes(pack.postType)
+  ) {
+    const opening = await generateOpeningVariation(pack, {
+      avoidOpenings: pack.noveltyContext?.recentOpenings,
+    });
+    content = applyOpeningVariation(content, opening.line);
+    if (!Array.isArray(response.safetyChecks)) {
+      response.safetyChecks = [];
+    }
+    response.safetyChecks.push(`opening:${opening.intent}`);
+  }
+
   content = normalizeGeneratedContent(content, {
     topicLabel: pack.topicTitle,
   });

@@ -111,6 +111,7 @@ async function generateThematicWeeklyPosts(
   weekStart: string | null,
   currentWeek: boolean,
   replaceExisting: boolean,
+  includeSecondaryThemes: boolean,
 ): Promise<NextResponse> {
   const { sql } = await import('@vercel/postgres');
   const {
@@ -344,7 +345,7 @@ async function generateThematicWeeklyPosts(
 
   const sabbatPlan = getWeeklySabbatPlan(weekStartDate);
   const themeByName = new Map<string, (typeof categoryThemes)[number] | any>();
-  const facetByTopic = new Map<string, any>();
+  const facetByTopic = new Map<string, DailyFacet>();
   for (const day of weekPlan) {
     themeByName.set(day.theme.name, day.theme);
     facetByTopic.set(day.facet.title, day.facet);
@@ -353,6 +354,40 @@ async function generateThematicWeeklyPosts(
     themeByName.set(day.theme.name, day.theme);
     facetByTopic.set(day.facet.title, day.facet);
   }
+  for (const theme of categoryThemes) {
+    themeByName.set(theme.name, theme);
+    theme.facets.forEach((facet) => {
+      if (!facetByTopic.has(facet.title)) {
+        facetByTopic.set(facet.title, facet);
+      }
+    });
+  }
+
+  const resolveThemeForScript = (script: { themeName?: string }) =>
+    (script.themeName && themeByName.get(script.themeName)) || currentTheme;
+
+  const resolveFacetForTheme = (
+    theme: WeeklyTheme | SabbatTheme | undefined,
+    facetTitle: string,
+  ) =>
+    (theme as WeeklyTheme)?.facets?.find(
+      (facet: DailyFacet) => facet.title === facetTitle,
+    ) ||
+    (theme as SabbatTheme)?.leadUpFacets?.find(
+      (facet: DailyFacet) => facet.title === facetTitle,
+    ) ||
+    facetByTopic.get(facetTitle);
+
+  const buildFallbackFacet = (title: string): DailyFacet => ({
+    dayIndex: 0,
+    title,
+    focus: title,
+    shortFormHook: title,
+    grimoireSlug: title
+      .toLowerCase()
+      .replace(/[^a-z0-9\s]/g, '')
+      .replace(/\s+/g, '-'),
+  });
   const sabbatPosts = sabbatPlan.flatMap((day) => {
     const dayContent = generateDayContent(day.date, day.theme, day.facet);
     const sourceInfo = resolveSourceForFacet(day.facet, day.theme.category);
@@ -459,7 +494,10 @@ async function generateThematicWeeklyPosts(
   }> = [];
 
   const postContentByKey = new Map<string, string>();
-  const scriptByKey = new Map<string, string>();
+  const scriptByKey = new Map<
+    string,
+    Awaited<ReturnType<typeof getVideoScripts>>[number]
+  >();
   const scriptFacetByKey = new Map<string, string>();
   const scriptPostBaseByKey = new Map<string, string>();
   const openingUsageByTopic = new Map<string, string[]>();
@@ -639,12 +677,18 @@ async function generateThematicWeeklyPosts(
   let videoScriptsGenerated = false;
   try {
     await ensureVideoJobsTable();
-    const existingTikTokScripts = dedupeScriptsByDate(
+    const allTikTokScripts = dedupeScriptsByDate(
       (await getVideoScripts({
         platform: 'tiktok',
         weekStart: weekStartDate,
       })) || [],
-    ).filter((script) => script.themeName === currentTheme.name);
+    );
+    const primaryTikTokScripts = allTikTokScripts.filter(
+      (script) => script.themeName === currentTheme.name,
+    );
+    const existingTikTokScripts = includeSecondaryThemes
+      ? allTikTokScripts
+      : primaryTikTokScripts;
 
     const existingYouTubeScripts = (
       await getVideoScripts({
@@ -658,7 +702,7 @@ async function generateThematicWeeklyPosts(
       )[0] || null;
 
     if (
-      existingTikTokScripts.length === currentTheme.facets.length &&
+      primaryTikTokScripts.length === currentTheme.facets.length &&
       latestYouTubeScript
     ) {
       videoScripts = {
@@ -673,6 +717,18 @@ async function generateThematicWeeklyPosts(
         themeIndex,
       );
       videoScriptsGenerated = true;
+      if (includeSecondaryThemes) {
+        const refreshedScripts = dedupeScriptsByDate(
+          (await getVideoScripts({
+            platform: 'tiktok',
+            weekStart: weekStartDate,
+          })) || [],
+        );
+        videoScripts = {
+          ...videoScripts,
+          tiktokScripts: refreshedScripts,
+        };
+      }
     }
     console.log(
       `🎬 [VIDEO] Generated ${videoScripts.tiktokScripts.length} daily shorts + 1 YouTube script`,
@@ -683,15 +739,22 @@ async function generateThematicWeeklyPosts(
         await import('@/lib/social/educational-images');
       const uniqueScripts = dedupeScriptsByDate(videoScripts.tiktokScripts);
       for (const [index, script] of uniqueScripts.entries()) {
+        const scriptTheme = resolveThemeForScript(script);
+        const scriptFacet =
+          resolveFacetForTheme(scriptTheme, script.facetTitle) ||
+          buildFallbackFacet(script.facetTitle);
         const partNumber = Number.isFinite(script.partNumber)
           ? script.partNumber
           : index + 1;
-        const totalParts = uniqueScripts.length || 7;
+        const totalParts =
+          scriptTheme.category === 'sabbat'
+            ? scriptTheme.leadUpFacets.length
+            : scriptTheme.facets.length || uniqueScripts.length || 7;
         const slug =
-          facetSlugByTitle.get(script.facetTitle) ||
+          scriptFacet.grimoireSlug.split('/').pop() ||
           script.facetTitle.toLowerCase().replace(/\s+/g, '-');
         const coverImageUrl = getThematicImageUrl(
-          currentTheme.category,
+          scriptTheme.category,
           script.facetTitle,
           baseUrl,
           'tiktok',
@@ -717,26 +780,20 @@ async function generateThematicWeeklyPosts(
       const dateKey = script.scheduledDate.toISOString().split('T')[0];
       const key = `${dateKey}|${script.facetTitle}`;
       if (!scriptByKey.has(key)) {
-        scriptByKey.set(key, script.fullScript);
+        scriptByKey.set(key, script);
       }
     }
 
     const ensureHookFallback = (title: string) =>
       `If you’ve heard of ${title}, here’s what to know.`;
 
-    const findFacetHook = (facetTitle: string) =>
-      currentTheme.facets.find(
-        (facet: DailyFacet) => facet.title === facetTitle,
-      );
-
-    for (const [key, scriptText] of scriptByKey.entries()) {
-      const cleaned = cleanScriptForPost(scriptText);
-      const facetForHook = findFacetHook(
-        key.split('|')[1] || key.split('|').pop() || '',
-      );
+    for (const [key, script] of scriptByKey.entries()) {
+      const cleaned = cleanScriptForPost(script.fullScript);
+      const scriptTheme = resolveThemeForScript(script);
+      const facetForHook = resolveFacetForTheme(scriptTheme, script.facetTitle);
       const hookLine = facetForHook
         ? buildVideoHook(facetForHook)
-        : ensureHookFallback(key.split('|')[1] || '');
+        : ensureHookFallback(script.facetTitle);
       const finalScript = `${hookLine}\n\n${cleaned}`.trim();
       scriptPostBaseByKey.set(key, finalScript);
     }
@@ -1097,15 +1154,16 @@ async function generateThematicWeeklyPosts(
     if (videoScripts?.tiktokScripts?.length) {
       const { getThematicImageUrl } =
         await import('@/lib/social/educational-images');
-      const totalParts = videoScripts.tiktokScripts.length;
       const videoPlatforms = ['instagram', 'tiktok', 'facebook', 'youtube'];
-      const dayInfoByDate = new Map<
+      const uniqueScripts = dedupeScriptsByDate(videoScripts.tiktokScripts);
+      const dayInfoByKey = new Map<
         string,
         {
           facetTitle: string;
           category: string;
           slug: string;
-          facet: (typeof weekPlan)[number]['facet'];
+          facet: DailyFacet;
+          theme: WeeklyTheme | SabbatTheme;
         }
       >();
       const activeDates = new Set(
@@ -1113,17 +1171,38 @@ async function generateThematicWeeklyPosts(
           (post) => post.scheduledDate.toISOString().split('T')[0],
         ),
       );
-      for (const day of weekPlan) {
-        const dateKey = day.date.toISOString().split('T')[0];
-        const slug =
-          day.facet.grimoireSlug.split('/').pop() ||
-          day.facet.title.toLowerCase().replace(/\s+/g, '-');
-        dayInfoByDate.set(dateKey, {
-          facetTitle: day.facet.title,
-          category: day.theme.category,
-          slug,
-          facet: day.facet,
-        });
+      if (includeSecondaryThemes) {
+        for (const script of uniqueScripts) {
+          const dateKey = script.scheduledDate.toISOString().split('T')[0];
+          const scriptTheme = resolveThemeForScript(script);
+          const scriptFacet =
+            resolveFacetForTheme(scriptTheme, script.facetTitle) ||
+            buildFallbackFacet(script.facetTitle);
+          const slug =
+            scriptFacet.grimoireSlug.split('/').pop() ||
+            script.facetTitle.toLowerCase().replace(/\s+/g, '-');
+          dayInfoByKey.set(`${dateKey}|${script.facetTitle}`, {
+            facetTitle: script.facetTitle,
+            category: scriptTheme.category,
+            slug,
+            facet: scriptFacet,
+            theme: scriptTheme,
+          });
+        }
+      } else {
+        for (const day of weekPlan) {
+          const dateKey = day.date.toISOString().split('T')[0];
+          const slug =
+            day.facet.grimoireSlug.split('/').pop() ||
+            day.facet.title.toLowerCase().replace(/\s+/g, '-');
+          dayInfoByKey.set(`${dateKey}|${day.facet.title}`, {
+            facetTitle: day.facet.title,
+            category: day.theme.category,
+            slug,
+            facet: day.facet,
+            theme: day.theme,
+          });
+        }
       }
 
       const existingVideoByKey = new Map<string, string>();
@@ -1140,13 +1219,11 @@ async function generateThematicWeeklyPosts(
         existingVideoByKey.set(`${dateKey}|${row.topic}`, row.video_url);
       }
 
-      const uniqueScripts = dedupeScriptsByDate(videoScripts.tiktokScripts);
-
       for (const script of uniqueScripts) {
         try {
           const dateKey = script.scheduledDate.toISOString().split('T')[0];
           if (!activeDates.has(dateKey)) continue;
-          const dayInfo = dayInfoByDate.get(dateKey);
+          const dayInfo = dayInfoByKey.get(`${dateKey}|${script.facetTitle}`);
           if (!dayInfo) continue;
 
           console.log(`🎬 [VIDEO] Start: ${dayInfo.facetTitle} (${dateKey})`);
@@ -1158,7 +1235,6 @@ async function generateThematicWeeklyPosts(
             : scriptIndex >= 0
               ? scriptIndex + 1
               : 1;
-          const totalParts = uniqueScripts.length || 7;
           const existingVideoKey = `${dateKey}|${dayInfo.facetTitle}`;
           const existingVideoUrl = existingVideoByKey.get(existingVideoKey);
 
@@ -1171,7 +1247,7 @@ async function generateThematicWeeklyPosts(
               dateKey,
               'video',
               dayInfo.facetTitle,
-              currentTheme.name,
+              dayInfo.theme.name,
             );
             let videoCaption = postContentByKey.get(
               `${dateKey}|${dayInfo.facetTitle}|video|${platform}`,
@@ -1179,7 +1255,7 @@ async function generateThematicWeeklyPosts(
             if (!videoCaption) {
               const sourcePack = buildSourcePack({
                 topic: dayInfo.facetTitle,
-                theme: currentTheme,
+                theme: dayInfo.theme,
                 platform,
                 postType: 'video_caption',
                 facet: dayInfo.facet,
@@ -1238,7 +1314,7 @@ async function generateThematicWeeklyPosts(
                 scheduled_date, week_theme, week_start, source_type, source_id,
                 source_title, base_group_key, created_at
               )
-              SELECT ${videoCaption}, ${platform}, 'video', ${dayInfo.facetTitle}, 'pending', ${imageUrl}, ${existingVideoUrl || null}, ${videoScheduledDate.toISOString()}, ${currentTheme.name}, ${weekStartDate.toISOString().split('T')[0]}, 'video_script', ${script.id || null}, ${script.facetTitle}, ${baseGroupKey}, NOW()
+              SELECT ${videoCaption}, ${platform}, 'video', ${dayInfo.facetTitle}, 'pending', ${imageUrl}, ${existingVideoUrl || null}, ${videoScheduledDate.toISOString()}, ${dayInfo.theme.name}, ${weekStartDate.toISOString().split('T')[0]}, 'video_script', ${script.id || null}, ${script.facetTitle}, ${baseGroupKey}, NOW()
               WHERE NOT EXISTS (
                 SELECT 1 FROM social_posts
                 WHERE platform = ${platform}
@@ -1382,6 +1458,7 @@ export async function POST(request: NextRequest) {
       currentWeek,
       mode = 'thematic',
       replaceExisting = false,
+      includeSecondaryThemes = false,
     } = await request.json().catch(() => ({}));
 
     console.log('📥 Generate weekly posts request:', {
@@ -1398,6 +1475,7 @@ export async function POST(request: NextRequest) {
         weekStart,
         currentWeek,
         replaceExisting,
+        includeSecondaryThemes,
       );
     }
 
