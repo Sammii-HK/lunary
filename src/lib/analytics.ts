@@ -37,7 +37,10 @@ export type ConversionEvent =
   | 'moon_circle_sent'
   | 'weekly_report_opened'
   | 'weekly_report_sent'
-  | 'grimoire_viewed';
+  | 'grimoire_viewed'
+  | 'daily_dashboard_viewed'
+  | 'astral_chat_used'
+  | 'ritual_started';
 
 export interface ConversionEventData {
   event: ConversionEvent;
@@ -509,4 +512,24 @@ export const conversionTracking = {
 
   grimoireViewed: (userId?: string, metadata?: Record<string, any>) =>
     trackConversion('grimoire_viewed', { userId, metadata }),
+  dailyDashboardViewed: (userId?: string, email?: string) =>
+    trackConversion('daily_dashboard_viewed', { userId, userEmail: email }),
+  astralChatUsed: (
+    userId?: string,
+    email?: string,
+    planType?: 'monthly' | 'yearly' | 'free',
+  ) =>
+    trackConversion('astral_chat_used', { userId, userEmail: email, planType }),
+  ritualStarted: (
+    userId?: string,
+    email?: string,
+    planType?: 'monthly' | 'yearly' | 'free',
+    metadata?: Record<string, any>,
+  ) =>
+    trackConversion('ritual_started', {
+      userId,
+      userEmail: email,
+      planType,
+      metadata,
+    }),
 };

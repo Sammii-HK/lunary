@@ -326,7 +326,14 @@ export async function GET(request: NextRequest): Promise<Response> {
 
         {/* Main content - shifted down slightly for better visual balance */}
         <OGContentCenter>
-          <div style={{ transform: `translateY(${contentOffsetY}px)` }}>
+          <div
+            style={{
+              transform: `translateY(${contentOffsetY}px)`,
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+            }}
+          >
             {/* Moon phase image */}
             {moonImage && (
               <div style={{ display: 'flex', marginBottom: '50px' }}>

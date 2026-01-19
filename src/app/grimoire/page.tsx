@@ -1,6 +1,6 @@
 import { Metadata } from 'next';
 
-import GrimoireLayout from './GrimoireLayout';
+import GrimoireLayout, { GrimoireSearchParams } from './GrimoireLayout';
 import { createItemListSchema, renderJsonLd } from '@/lib/schema';
 
 export const metadata: Metadata = {
@@ -96,7 +96,12 @@ const grimoireCategories = [
   },
 ];
 
-const GrimoireHome = () => {
+const GrimoireHome = async ({
+  searchParams,
+}: {
+  searchParams?: Promise<GrimoireSearchParams>;
+}) => {
+  const resolvedSearchParams = searchParams ? await searchParams : undefined;
   const grimoireListSchema = createItemListSchema({
     name: 'Lunary Grimoire',
     description:
@@ -109,7 +114,10 @@ const GrimoireHome = () => {
   return (
     <div className='h-full w-full'>
       {renderJsonLd(grimoireListSchema)}
-      <GrimoireLayout />
+      <GrimoireLayout
+        searchParams={resolvedSearchParams}
+        pathname='/grimoire'
+      />
     </div>
   );
 };

@@ -20,8 +20,6 @@ const EMOJI_PATTERN = /[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}]/gu;
 const FORBIDDEN_HOOK_PREFIX = /^(welcome back|today|in this video|part|day)\b/i;
 const FORBIDDEN_HOOK_WORDS = /\b(this week|episode)\b/i;
 
-const REQUIRED_FINAL_LINE = 'Read more on the Lunary blog.';
-
 const hookWordCount = (hook: string) =>
   hook
     .replace(/[.!?]+$/, '')
@@ -96,12 +94,8 @@ export function validateCaption(
     reasons.push('Missing concrete takeaway');
   }
 
-  if (
-    lines.length === 4 &&
-    lines[3] &&
-    lines[3].trim() !== REQUIRED_FINAL_LINE
-  ) {
-    reasons.push('Final line must be "Read more on the Lunary blog."');
+  if (lines.length === 4 && !lines[3]) {
+    reasons.push('Missing CTA line');
   }
 
   return {
@@ -118,7 +112,7 @@ export function validateSpokenHook(hook: string): string[] {
   const words = hookWordCount(trimmed);
   const allowedStructures = [
     /^.+ isn't about .+\.$/i,
-    /^Most people misunderstand .+\.$/i,
+    /^If .+ feels (confusing|vague), start here\.$/i,
     /^This isn't random\s-\sit's .+\.$/i,
     /^This affects you more than you realise\.$/i,
     /^This explains why .+\.$/i,
@@ -174,22 +168,18 @@ export function buildFallbackCaption({
   facetFocus: string;
   platform: string;
 }): string {
-  const hook = `Most people misunderstand ${facetTitle.toLowerCase()}.`;
+  const hook = `If ${facetTitle.toLowerCase()} feels vague, start here.`;
   const summarySentence =
     splitSentences(script)[0] ||
     `${facetTitle} shapes ${facetFocus.toLowerCase()}.`;
-  const summaryLine = `In ${themeName}, ${summarySentence
-    .replace(/[.!?]+$/, '')
-    .trim()}.`;
-  const takeaway = `Watch for ${facetFocus.toLowerCase()}.`;
+  const lineTwo = summarySentence.replace(/[.!?]+$/, '').trim() + '.';
+  const lineThree = `In daily life, watch for ${facetFocus.toLowerCase()}.`;
   const cta =
     platform === 'twitter' || platform === 'bluesky'
-      ? 'Save this for later.'
-      : 'Share this with someone learning this.';
+      ? 'Save this.'
+      : 'Save this and come back to it.';
 
-  return [hook, summaryLine, `${takeaway} ${cta}`, REQUIRED_FINAL_LINE].join(
-    '\n',
-  );
+  return [hook, lineTwo, lineThree, cta].join('\n');
 }
 
 export async function logCaptionIssue(

@@ -1264,9 +1264,20 @@ export async function generateMetadata({
   ];
 
   return {
-    title: `${blogData.title} | Lunary Blog`,
-    description: `${blogData.subtitle} Week of ${weekRange}. ${blogData.summary.substring(0, 120)}...`,
-    keywords,
+    title: `${blogData.title} | Weekly Astrology & Planetary Transits`,
+    description: `${blogData.subtitle}. Week of ${weekRange}. Key planetary transits, moon phases, and the best days for love, career, money, and healing.`,
+    keywords: [
+      'weekly astrology forecast',
+      'astrology timing',
+      'planetary transits',
+      'moon phases',
+      'best days astrology',
+      'weekly horoscope timing',
+      'astrological guidance',
+      `week ${blogData.weekNumber} ${blogData.year}`,
+      'retrogrades',
+      'astrological aspects',
+    ],
     authors: [{ name: 'Lunary Cosmic Team' }],
     creator: 'Lunary',
     publisher: 'Lunary',
@@ -1275,7 +1286,7 @@ export async function generateMetadata({
     },
     openGraph: {
       title: blogData.title,
-      description: `${blogData.subtitle} Week of ${weekRange}`,
+      description: `Weekly astrology forecast for ${weekRange}. Planetary transits, moon phases, and practical timing for love, work, money, and rest.`,
       url,
       siteName: 'Lunary',
       images: [
@@ -1291,13 +1302,19 @@ export async function generateMetadata({
       publishedTime: weekStart.toISOString(),
       modifiedTime: blogData.generatedAt,
       authors: ['Lunary Cosmic Team'],
-      section: 'Weekly Forecast',
-      tags: keywords,
+      section: 'Weekly Astrology',
+      tags: [
+        'weekly astrology',
+        'planetary transits',
+        'moon phases',
+        'best days astrology',
+        'astrological timing',
+      ],
     },
     twitter: {
       card: 'summary_large_image',
       title: blogData.title,
-      description: `${blogData.subtitle} Week of ${weekRange}`,
+      description: `This week’s astrology forecast with key transits, moon phases, and the best days for love, money, and healing.`,
       images: [ogImage],
       creator: '@lunaryapp',
     },
@@ -1311,12 +1328,6 @@ export async function generateMetadata({
         'max-image-preview': 'large',
         'max-snippet': -1,
       },
-    },
-    other: {
-      'article:published_time': weekStart.toISOString(),
-      'article:modified_time': blogData.generatedAt,
-      'article:author': 'Lunary Cosmic Team',
-      'article:section': 'Weekly Forecast',
     },
   };
 }

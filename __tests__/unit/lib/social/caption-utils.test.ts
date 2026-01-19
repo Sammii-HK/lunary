@@ -8,8 +8,7 @@ describe('caption utils', () => {
   it('rejects forbidden hook openings and word count violations', () => {
     const reasons = validateSpokenHook('Today we cover Mars retrograde.');
     expect(reasons.some((r) => r.includes('forbidden'))).toBe(true);
-    const longHook =
-      'Most people misunderstand the role of Mars retrograde timing shifts.';
+    const longHook = 'If Mars retrograde feels confusing, start here.';
     const longReasons = validateSpokenHook(longHook);
     expect(longReasons.some((r) => r.includes('6-12 words'))).toBe(false);
   });
@@ -24,6 +23,6 @@ describe('caption utils', () => {
     });
     const validation = validateCaption(caption, 'Mars Wisdom');
     expect(validation.lines.length).toBe(4);
-    expect(validation.lines[3]).toBe('Read more on the Lunary blog.');
+    expect(validation.lines[3]).toContain('Save this');
   });
 });

@@ -90,29 +90,29 @@ const normalizeHueDelta = (delta: number) => {
   return normalized;
 };
 
-const buildIntroImageUrl = ({
-  baseUrl,
-  weeklyData,
-  format,
-  weekOffset,
-  paletteParams,
-}: {
-  baseUrl: string;
-  weeklyData: any;
-  format: string;
-  weekOffset: number;
-  paletteParams: string;
-}) => {
-  const weekOf = weeklyData.weekStart.toLocaleDateString('en-US', {
-    month: 'long',
-    day: 'numeric',
-  });
-  const year = weeklyData.weekStart.getFullYear();
-  const introTitle = `Week of ${weekOf}, ${year}`;
-  const introSubtitle = weeklyData.subtitle || '';
+// const buildIntroImageUrl = ({
+//   baseUrl,
+//   weeklyData,
+//   format,
+//   weekOffset,
+//   paletteParams,
+// }: {
+//   baseUrl: string;
+//   weeklyData: any;
+//   format: string;
+//   weekOffset: number;
+//   paletteParams: string;
+// }) => {
+//   const weekOf = weeklyData.weekStart.toLocaleDateString('en-US', {
+//     month: 'long',
+//     day: 'numeric',
+//   });
+//   const year = weeklyData.weekStart.getFullYear();
+//   const introTitle = `Week of ${weekOf}, ${year}`;
+//   const introSubtitle = weeklyData.subtitle || '';
 
-  return `${baseUrl}/api/social/images?format=${format}&title=${encodeURIComponent(introTitle)}&subtitle=${encodeURIComponent(introSubtitle)}&week=${weekOffset}${paletteParams}`;
-};
+//   return `${baseUrl}/api/social/images?format=${format}&title=${encodeURIComponent(introTitle)}&subtitle=${encodeURIComponent(introSubtitle)}&week=${weekOffset}${paletteParams}`;
+// };
 
 const buildPaletteParams = ({
   bg,

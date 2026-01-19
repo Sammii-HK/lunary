@@ -5,12 +5,19 @@
  * Scripts are complete, flowing narratives that can be read naturally.
  */
 
-import OpenAI from 'openai';
+import { getOpenAI } from '@/lib/openai-client';
+import { buildScopeGuard } from '@/lib/social/topic-scope';
+import { normalizeGeneratedContent } from '@/lib/social/content-normalizer';
+import { FACTUAL_GUARDRAIL_INSTRUCTION } from '@/lib/social/prompt-guards';
 import {
   type WeeklyTheme,
   type DailyFacet,
   categoryThemes,
 } from './weekly-themes';
+
+const THEME_CATEGORY_BY_NAME = new Map(
+  categoryThemes.map((theme) => [theme.name, theme.category]),
+);
 
 // Import data sources
 import zodiacSigns from '@/data/zodiac-signs.json';
@@ -21,19 +28,7 @@ import chakras from '@/data/chakras.json';
 import sabbats from '@/data/sabbats.json';
 import planetaryBodies from '@/data/planetary-bodies.json';
 import { capitalizeThematicTitle } from '../../../utils/og/text';
-import {
-  buildFallbackCaption,
-  validateCaption,
-  validateSpokenHook,
-} from './caption-utils';
-
-function getOpenAI(): OpenAI {
-  const apiKey = process.env.OPENAI_API_KEY?.trim();
-  if (!apiKey) {
-    throw new Error('OPENAI_API_KEY is not configured');
-  }
-  return new OpenAI({ apiKey });
-}
+import { validateSpokenHook } from './caption-utils';
 
 // ============================================================================
 // TYPES
@@ -50,13 +45,24 @@ export interface TikTokMetadata {
   title: string; // Facet title e.g. "The Sun"
   series: string; // Series part e.g. "Part 1 of 3"
   summary: string; // Short description from facet focus
+  angle?: string;
+  topic?: string;
+  aspect?: string;
 }
 
 export interface VideoScript {
   id?: number;
   themeId: string;
   themeName: string;
+  primaryThemeId?: string;
+  secondaryThemeId?: string;
+  secondaryFacetSlug?: string;
+  secondaryAngleKey?: string;
+  secondaryAspectKey?: string;
   facetTitle: string;
+  topic?: string;
+  angle?: string;
+  aspect?: string;
   platform: 'tiktok' | 'youtube';
   sections: ScriptSection[];
   fullScript: string;
@@ -65,6 +71,8 @@ export interface VideoScript {
   scheduledDate: Date;
   status: 'draft' | 'approved' | 'used';
   createdAt?: Date;
+  hookText?: string;
+  hookVersion?: number;
   // TikTok-specific fields
   metadata?: TikTokMetadata;
   coverImageUrl?: string;
@@ -79,6 +87,40 @@ export interface WeeklyVideoScripts {
   weekStartDate: Date;
 }
 
+export enum ContentAspect {
+  CORE_MEANING = 'core_meaning',
+  COMMON_MISCONCEPTION = 'common_misconception',
+  EMOTIONAL_IMPACT = 'emotional_impact',
+  REAL_LIFE_EXPRESSION = 'real_life_expression',
+  TIMING_AND_CONTEXT = 'timing_and_context',
+  PRACTICAL_APPLICATION = 'practical_application',
+  WHEN_TO_AVOID = 'when_to_avoid',
+  SUBTLE_INSIGHT = 'subtle_insight',
+}
+
+const VIDEO_ANGLE_OPTIONS = [
+  'Misconception',
+  'Felt experience',
+  'Pattern recognition',
+  'Timing nuance',
+  'Practical observation',
+];
+
+const CONTENT_ASPECTS: ContentAspect[] = [
+  ContentAspect.CORE_MEANING,
+  ContentAspect.COMMON_MISCONCEPTION,
+  ContentAspect.EMOTIONAL_IMPACT,
+  ContentAspect.REAL_LIFE_EXPRESSION,
+  ContentAspect.TIMING_AND_CONTEXT,
+  ContentAspect.PRACTICAL_APPLICATION,
+  ContentAspect.WHEN_TO_AVOID,
+  ContentAspect.SUBTLE_INSIGHT,
+];
+
+const SECONDARY_THEME_COOLDOWN_DAYS = 10;
+
+const SEARCH_PHRASE_MAP: Record<string, string> = {};
+
 // ============================================================================
 // DATABASE
 // ============================================================================
@@ -91,7 +133,15 @@ export async function ensureVideoScriptsTable(): Promise<void> {
       id SERIAL PRIMARY KEY,
       theme_id TEXT NOT NULL,
       theme_name TEXT NOT NULL,
+      primary_theme_id TEXT,
+      secondary_theme_id TEXT,
+      secondary_facet_slug TEXT,
+      secondary_angle_key TEXT,
+      secondary_aspect_key TEXT,
       facet_title TEXT NOT NULL,
+      topic TEXT,
+      angle TEXT,
+      aspect TEXT,
       platform TEXT NOT NULL,
       sections JSONB NOT NULL,
       full_script TEXT NOT NULL,
@@ -102,6 +152,9 @@ export async function ensureVideoScriptsTable(): Promise<void> {
       metadata JSONB,
       cover_image_url TEXT,
       part_number INTEGER,
+      written_post_content TEXT,
+      hook_text TEXT,
+      hook_version INTEGER DEFAULT 1,
       created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
       updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
     )
@@ -125,6 +178,16 @@ export async function ensureVideoScriptsTable(): Promise<void> {
     await sql`ALTER TABLE video_scripts ADD COLUMN IF NOT EXISTS cover_image_url TEXT`;
     await sql`ALTER TABLE video_scripts ADD COLUMN IF NOT EXISTS part_number INTEGER`;
     await sql`ALTER TABLE video_scripts ADD COLUMN IF NOT EXISTS written_post_content TEXT`;
+    await sql`ALTER TABLE video_scripts ADD COLUMN IF NOT EXISTS hook_text TEXT`;
+    await sql`ALTER TABLE video_scripts ADD COLUMN IF NOT EXISTS hook_version INTEGER DEFAULT 1`;
+    await sql`ALTER TABLE video_scripts ADD COLUMN IF NOT EXISTS topic TEXT`;
+    await sql`ALTER TABLE video_scripts ADD COLUMN IF NOT EXISTS angle TEXT`;
+    await sql`ALTER TABLE video_scripts ADD COLUMN IF NOT EXISTS aspect TEXT`;
+    await sql`ALTER TABLE video_scripts ADD COLUMN IF NOT EXISTS primary_theme_id TEXT`;
+    await sql`ALTER TABLE video_scripts ADD COLUMN IF NOT EXISTS secondary_theme_id TEXT`;
+    await sql`ALTER TABLE video_scripts ADD COLUMN IF NOT EXISTS secondary_facet_slug TEXT`;
+    await sql`ALTER TABLE video_scripts ADD COLUMN IF NOT EXISTS secondary_angle_key TEXT`;
+    await sql`ALTER TABLE video_scripts ADD COLUMN IF NOT EXISTS secondary_aspect_key TEXT`;
   } catch {
     // Columns may already exist
   }
@@ -135,14 +198,24 @@ export async function saveVideoScript(script: VideoScript): Promise<number> {
 
   const result = await sql`
     INSERT INTO video_scripts (
-      theme_id, theme_name, facet_title, platform, sections,
+      theme_id, theme_name, primary_theme_id, secondary_theme_id,
+      secondary_facet_slug, secondary_angle_key, secondary_aspect_key,
+      facet_title, topic, angle, aspect, platform, sections,
       full_script, word_count, estimated_duration, scheduled_date, status,
-      metadata, cover_image_url, part_number, written_post_content
+      metadata, cover_image_url, part_number, written_post_content, hook_text, hook_version
     )
     VALUES (
       ${script.themeId},
       ${script.themeName},
+      ${script.primaryThemeId || null},
+      ${script.secondaryThemeId || null},
+      ${script.secondaryFacetSlug || null},
+      ${script.secondaryAngleKey || null},
+      ${script.secondaryAspectKey || null},
       ${script.facetTitle},
+      ${script.topic || null},
+      ${script.angle || null},
+      ${script.aspect || null},
       ${script.platform},
       ${JSON.stringify(script.sections)},
       ${script.fullScript},
@@ -153,12 +226,29 @@ export async function saveVideoScript(script: VideoScript): Promise<number> {
       ${script.metadata ? JSON.stringify(script.metadata) : null},
       ${script.coverImageUrl || null},
       ${script.partNumber || null},
-      ${script.writtenPostContent || null}
+      ${script.writtenPostContent || null},
+      ${script.hookText || null},
+      ${script.hookVersion || 1}
     )
     RETURNING id
   `;
 
   return result.rows[0].id;
+}
+
+export async function updateVideoScriptHook(
+  id: number,
+  payload: { fullScript: string; hookText: string; hookVersion: number },
+): Promise<void> {
+  const { sql } = await import('@vercel/postgres');
+  await sql`
+    UPDATE video_scripts
+    SET full_script = ${payload.fullScript},
+        hook_text = ${payload.hookText},
+        hook_version = ${payload.hookVersion},
+        updated_at = NOW()
+    WHERE id = ${id}
+  `;
 }
 
 export async function getVideoScripts(filters?: {
@@ -215,24 +305,61 @@ export async function getVideoScripts(filters?: {
     `;
   }
 
-  return result.rows.map((row) => ({
-    id: row.id,
-    themeId: row.theme_id,
-    themeName: row.theme_name,
-    facetTitle: row.facet_title,
-    platform: row.platform,
-    sections: row.sections,
-    fullScript: row.full_script,
-    wordCount: row.word_count,
-    estimatedDuration: row.estimated_duration,
-    scheduledDate: new Date(row.scheduled_date),
-    status: row.status,
-    createdAt: new Date(row.created_at),
-    metadata: row.metadata || undefined,
-    coverImageUrl: row.cover_image_url || undefined,
-    partNumber: row.part_number || undefined,
-    writtenPostContent: row.written_post_content || undefined,
-  }));
+  const scripts: VideoScript[] = [];
+  for (const row of result.rows) {
+    const scheduledDate = new Date(row.scheduled_date);
+    const topic = row.topic || row.facet_title || row.theme_name;
+    const category = THEME_CATEGORY_BY_NAME.get(row.theme_name);
+
+    const ensuredHook = ensureVideoHook(row.full_script, {
+      topic,
+      category,
+      source: 'db',
+      scriptId: row.id,
+      scheduledDate,
+    });
+
+    let hookVersion = row.hook_version || 1;
+    if (ensuredHook.modified) {
+      hookVersion = (row.hook_version || 1) + 1;
+      await updateVideoScriptHook(row.id, {
+        fullScript: ensuredHook.script,
+        hookText: ensuredHook.hook,
+        hookVersion,
+      });
+    }
+
+    scripts.push({
+      id: row.id,
+      themeId: row.theme_id,
+      themeName: row.theme_name,
+      primaryThemeId: row.primary_theme_id || undefined,
+      secondaryThemeId: row.secondary_theme_id || undefined,
+      secondaryFacetSlug: row.secondary_facet_slug || undefined,
+      secondaryAngleKey: row.secondary_angle_key || undefined,
+      secondaryAspectKey: row.secondary_aspect_key || undefined,
+      facetTitle: row.facet_title,
+      topic: row.topic || undefined,
+      angle: row.angle || undefined,
+      aspect: row.aspect || undefined,
+      platform: row.platform,
+      sections: row.sections,
+      fullScript: ensuredHook.script,
+      wordCount: row.word_count,
+      estimatedDuration: row.estimated_duration,
+      scheduledDate,
+      status: row.status,
+      createdAt: new Date(row.created_at),
+      metadata: row.metadata || undefined,
+      coverImageUrl: row.cover_image_url || undefined,
+      partNumber: row.part_number || undefined,
+      writtenPostContent: row.written_post_content || undefined,
+      hookText: ensuredHook.hook,
+      hookVersion,
+    });
+  }
+
+  return scripts;
 }
 
 export async function updateVideoScriptStatus(
@@ -258,6 +385,217 @@ export async function updateVideoScriptWrittenPost(
     UPDATE video_scripts
     SET written_post_content = ${writtenPostContent}, updated_at = NOW()
     WHERE id = ${id}
+  `;
+}
+
+async function ensureContentRotationSecondaryTable(): Promise<void> {
+  const { sql } = await import('@vercel/postgres');
+  await sql`
+    CREATE TABLE IF NOT EXISTS content_rotation_secondary (
+      theme_id TEXT PRIMARY KEY,
+      secondary_usage_count INTEGER NOT NULL DEFAULT 0,
+      last_secondary_used_at TIMESTAMP WITH TIME ZONE,
+      updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+    )
+  `;
+  await sql`
+    CREATE INDEX IF NOT EXISTS idx_content_rotation_secondary_last_used
+    ON content_rotation_secondary(last_secondary_used_at)
+  `;
+}
+
+const pickRandom = <T>(items: T[]): T => {
+  return items[Math.floor(Math.random() * items.length)];
+};
+
+const aspectLabel = (aspect: ContentAspect): string => {
+  const labels: Record<ContentAspect, string> = {
+    [ContentAspect.CORE_MEANING]: 'Core meaning and symbolism',
+    [ContentAspect.COMMON_MISCONCEPTION]: 'Common misconception',
+    [ContentAspect.EMOTIONAL_IMPACT]: 'Emotional or psychological impact',
+    [ContentAspect.REAL_LIFE_EXPRESSION]: 'How it shows up in daily life',
+    [ContentAspect.TIMING_AND_CONTEXT]: 'Timing and context',
+    [ContentAspect.PRACTICAL_APPLICATION]: 'Practical application',
+    [ContentAspect.WHEN_TO_AVOID]: 'When to avoid working with it',
+    [ContentAspect.SUBTLE_INSIGHT]: 'Subtle or overlooked detail',
+  };
+  return labels[aspect];
+};
+
+const mapAngleToAspect = (angle: string): ContentAspect => {
+  switch (angle) {
+    case 'Misconception':
+      return ContentAspect.COMMON_MISCONCEPTION;
+    case 'Felt experience':
+      return ContentAspect.EMOTIONAL_IMPACT;
+    case 'Pattern recognition':
+      return ContentAspect.SUBTLE_INSIGHT;
+    case 'Timing nuance':
+      return ContentAspect.TIMING_AND_CONTEXT;
+    case 'Practical observation':
+      return ContentAspect.PRACTICAL_APPLICATION;
+    default:
+      return ContentAspect.CORE_MEANING;
+  }
+};
+
+async function getAngleForTopic(
+  topic: string,
+  scheduledDate: Date,
+): Promise<string> {
+  const { sql } = await import('@vercel/postgres');
+  const result = await sql`
+    SELECT angle
+    FROM video_scripts
+    WHERE topic = ${topic}
+      AND angle IS NOT NULL
+      AND scheduled_date <= ${scheduledDate.toISOString()}
+    ORDER BY scheduled_date DESC NULLS LAST
+    LIMIT 10
+  `;
+  const recentAngles = result.rows
+    .map((row) => String(row.angle))
+    .filter(Boolean);
+  for (const option of VIDEO_ANGLE_OPTIONS) {
+    if (!recentAngles.includes(option)) {
+      return option;
+    }
+  }
+  if (recentAngles.length === 0) {
+    return pickRandom(VIDEO_ANGLE_OPTIONS);
+  }
+  const lastIndex = new Map<string, number>();
+  recentAngles.forEach((angle, index) => {
+    if (!lastIndex.has(angle)) lastIndex.set(angle, index);
+  });
+  const sorted = VIDEO_ANGLE_OPTIONS.slice().sort((a, b) => {
+    const aIndex = lastIndex.get(a) ?? 999;
+    const bIndex = lastIndex.get(b) ?? 999;
+    return bIndex - aIndex;
+  });
+  return sorted[0] || VIDEO_ANGLE_OPTIONS[0];
+}
+
+async function selectSecondaryTheme(
+  primaryThemeId: string,
+  asOfDate: Date,
+): Promise<WeeklyTheme> {
+  const { sql } = await import('@vercel/postgres');
+  await ensureContentRotationSecondaryTable();
+  const usageResult = await sql`
+    SELECT theme_id, secondary_usage_count, last_secondary_used_at
+    FROM content_rotation_secondary
+  `;
+  const usageMap = new Map<string, { count: number; lastUsed: Date | null }>();
+  usageResult.rows.forEach((row) => {
+    usageMap.set(row.theme_id, {
+      count: Number(row.secondary_usage_count) || 0,
+      lastUsed: row.last_secondary_used_at
+        ? new Date(row.last_secondary_used_at)
+        : null,
+    });
+  });
+  const recentResult = await sql`
+    SELECT secondary_theme_id
+    FROM video_scripts
+    WHERE secondary_theme_id IS NOT NULL
+    ORDER BY created_at DESC
+    LIMIT 10
+  `;
+  const recentSecondaryIds = new Set(
+    recentResult.rows
+      .map((row) => String(row.secondary_theme_id))
+      .filter(Boolean),
+  );
+  const cutoff = new Date(asOfDate);
+  cutoff.setDate(cutoff.getDate() - SECONDARY_THEME_COOLDOWN_DAYS);
+
+  const buildCandidates = (ignoreCooldown: boolean, ignoreRecent: boolean) =>
+    categoryThemes
+      .filter((theme) => theme.id !== primaryThemeId)
+      .filter((theme) => ignoreRecent || !recentSecondaryIds.has(theme.id))
+      .filter((theme) => {
+        if (ignoreCooldown) return true;
+        const record = usageMap.get(theme.id);
+        if (!record?.lastUsed) return true;
+        return record.lastUsed.getTime() < cutoff.getTime();
+      })
+      .map((theme) => {
+        const record = usageMap.get(theme.id);
+        return {
+          theme,
+          count: record?.count ?? 0,
+        };
+      });
+
+  let candidates = buildCandidates(false, false);
+  if (candidates.length === 0) {
+    candidates = buildCandidates(true, false);
+  }
+  if (candidates.length === 0) {
+    candidates = buildCandidates(true, true);
+  }
+  if (candidates.length === 0) {
+    return (
+      categoryThemes.find((theme) => theme.id !== primaryThemeId) ||
+      categoryThemes[0]
+    );
+  }
+
+  const minCount = Math.min(...candidates.map((item) => item.count));
+  const lowest = candidates.filter((item) => item.count === minCount);
+  return pickRandom(lowest).theme;
+}
+
+async function selectSecondaryAspect(themeId: string): Promise<ContentAspect> {
+  const { sql } = await import('@vercel/postgres');
+  const result = await sql`
+    SELECT secondary_aspect_key, scheduled_date
+    FROM video_scripts
+    WHERE secondary_theme_id = ${themeId}
+      AND secondary_aspect_key IS NOT NULL
+    ORDER BY scheduled_date DESC NULLS LAST
+    LIMIT 50
+  `;
+  const lastUsed = new Map<ContentAspect, Date>();
+  for (const row of result.rows) {
+    const aspect = row.secondary_aspect_key as ContentAspect;
+    if (!aspect || lastUsed.has(aspect)) continue;
+    lastUsed.set(aspect, new Date(row.scheduled_date));
+  }
+
+  const unused = CONTENT_ASPECTS.filter((aspect) => !lastUsed.has(aspect));
+  if (unused.length > 0) {
+    return pickRandom(unused);
+  }
+
+  let oldestAspect = CONTENT_ASPECTS[0];
+  let oldestTime = Number.POSITIVE_INFINITY;
+  for (const aspect of CONTENT_ASPECTS) {
+    const usedAt = lastUsed.get(aspect)?.getTime() ?? 0;
+    if (usedAt < oldestTime) {
+      oldestTime = usedAt;
+      oldestAspect = aspect;
+    }
+  }
+  return oldestAspect;
+}
+
+async function recordSecondaryThemeUsage(
+  themeId: string,
+  usedAt: Date,
+): Promise<void> {
+  const { sql } = await import('@vercel/postgres');
+  await sql`
+    INSERT INTO content_rotation_secondary (
+      theme_id, secondary_usage_count, last_secondary_used_at, updated_at
+    )
+    VALUES (${themeId}, 1, ${usedAt.toISOString()}, NOW())
+    ON CONFLICT (theme_id)
+    DO UPDATE SET
+      secondary_usage_count = content_rotation_secondary.secondary_usage_count + 1,
+      last_secondary_used_at = ${usedAt.toISOString()},
+      updated_at = NOW()
   `;
 }
 
@@ -350,6 +688,32 @@ function getGrimoireDataForFacet(
   return null;
 }
 
+function isAllowedSlugForCategory(category: string, slug: string): boolean {
+  const lower = slug.toLowerCase();
+  const allowedPrefixes: Record<string, string[]> = {
+    lunar: ['moon', 'moon/', 'moon-', 'moon-in', 'lunar', 'eclipses'],
+    planetary: ['astronomy/planets', 'astronomy/retrogrades', 'planets'],
+    zodiac: ['zodiac', 'rising-sign', 'birth-chart'],
+    tarot: ['tarot', 'card-combinations', 'tarot-spreads'],
+    crystals: ['crystals'],
+    numerology: ['numerology', 'angel-numbers', 'life-path'],
+    chakras: ['chakras'],
+    sabbat: ['wheel-of-the-year', 'sabbats', 'sabbat'],
+  };
+  const prefixes = allowedPrefixes[category] || [];
+  return prefixes.some((prefix) => lower.startsWith(prefix));
+}
+
+function getSafeGrimoireDataForFacet(
+  facet: DailyFacet,
+  category: string,
+): Record<string, any> | null {
+  if (!isAllowedSlugForCategory(category, facet.grimoireSlug)) {
+    return null;
+  }
+  return getGrimoireDataForFacet(facet);
+}
+
 function countWords(text: string): number {
   return text
     .trim()
@@ -368,6 +732,445 @@ function estimateDuration(wordCount: number): string {
   return secs > 0 ? `${mins}m ${secs}s` : `${mins} minutes`;
 }
 
+const TRUNCATION_PATTERNS = [
+  /\bthe\.$/i,
+  /\beach\.$/i,
+  /\bbegin at\.$/i,
+  /\bcrosses the\.$/i,
+  /\band the\.$/i,
+  /,\s*each\.$/i,
+  /:\s*$/i,
+];
+
+const DETERMINISTIC_WORDS = ['controls', 'always', 'guarantees'];
+
+const hasDeterministicLanguage = (text: string) => {
+  const lower = text.toLowerCase();
+  return DETERMINISTIC_WORDS.some((word) =>
+    new RegExp(`\\b${word}\\b`, 'i').test(lower),
+  );
+};
+
+const LINE_DANGLING_PATTERNS = [
+  /,\s*each\.$/i,
+  /crosses the\.$/i,
+  /begin at\.$/i,
+  /\b(the|a|an|at|to|with|of|in|for|on|by|from)\.$/i,
+  /,\s*(and|but|or|each|which|that)\.$/i,
+  /\b(which|that|because|while|since)\.$/i,
+];
+
+const needsLineRewrite = (line: string) => {
+  const trimmed = line.trim();
+  if (!trimmed) return false;
+  if (hasTruncationArtifact(trimmed)) return true;
+  return LINE_DANGLING_PATTERNS.some((pattern) => pattern.test(trimmed));
+};
+
+const hasTruncationArtifact = (text: string) =>
+  TRUNCATION_PATTERNS.some((pattern) => pattern.test(text.trim()));
+
+const HOOK_LIKE_PATTERNS = [
+  /^most people get /i,
+  /^if .+ confuses you/i,
+  /this will click/i,
+  /here's what matters/i,
+  /here's how/i,
+  /why it matters/i,
+  /makes timing clearer/i,
+];
+
+const TEXTBOOK_PATTERNS = [/\bis defined as\b/i, /\brefers to\b/i];
+
+const hasRepeatedAdjacentBigrams = (lines: string[]) => {
+  const normalize = (line: string) =>
+    line
+      .toLowerCase()
+      .replace(/[^a-z0-9\s]/g, '')
+      .split(/\s+/)
+      .filter(Boolean);
+  const bigrams = (words: string[]) => {
+    const pairs: string[] = [];
+    for (let i = 0; i < words.length - 1; i += 1) {
+      pairs.push(`${words[i]} ${words[i + 1]}`);
+    }
+    return new Set(pairs);
+  };
+  for (let i = 0; i < lines.length - 1; i += 1) {
+    const current = bigrams(normalize(lines[i]));
+    const next = bigrams(normalize(lines[i + 1]));
+    if (current.size === 0 || next.size === 0) continue;
+    let overlap = 0;
+    for (const pair of current) {
+      if (next.has(pair)) overlap += 1;
+    }
+    const ratio = overlap / Math.max(current.size, next.size);
+    if (overlap >= 2 && ratio > 0.35) {
+      return true;
+    }
+  }
+  return false;
+};
+
+const findSoWhatLineIndex = (lines: string[]) =>
+  lines.findIndex((line) => /^\s*(so what:|try this:)\b/i.test(line.trim()));
+
+const normaliseTopicKey = (topic: string) =>
+  topic
+    .toLowerCase()
+    .replace(/[^a-z0-9\s]/g, '')
+    .replace(/\s+/g, ' ')
+    .trim();
+
+const VIDEO_BANNED_PHRASES = [
+  'distinct rhythm worth tracking',
+  'explore in the grimoire',
+];
+
+const VIDEO_BANNED_PATTERNS = [/here is how .+ shows up in real life/i];
+
+const getSearchPhraseForTopic = (topic: string, category?: string) => {
+  const key = normaliseTopicKey(topic);
+  switch (category) {
+    case 'zodiac':
+      return `${key} explained`;
+    case 'tarot':
+      return `${key} meaning`;
+    case 'crystals':
+      return `${key} meaning`;
+    case 'numerology':
+      return `${key} meaning`;
+    case 'chakras':
+      return `${key} meaning`;
+    case 'sabbat':
+      return `${key} explained`;
+    case 'lunar':
+      return `${key} meaning`;
+    case 'planetary':
+      return `what is ${key}`;
+    default:
+      return `${key} meaning`;
+  }
+};
+
+const escapeRegExp = (value: string) =>
+  value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
+const countOccurrences = (text: string, term: string) => {
+  if (!term) return 0;
+  const escaped = escapeRegExp(term.trim());
+  const regex = new RegExp(escaped, 'gi');
+  return (text.match(regex) || []).length;
+};
+
+const DEBUG_VIDEO_HOOK = process.env.DEBUG_VIDEO_HOOK === '1';
+
+const normalizeHookLine = (value: string) =>
+  value.replace(/[—–]/g, '-').replace(/\s+/g, ' ').trim();
+
+const ensureSentenceEndsWithPunctuation = (text: string) => {
+  const trimmed = text.trim();
+  if (!trimmed) return trimmed;
+  return /[.!?]$/.test(trimmed) ? trimmed : `${trimmed}.`;
+};
+
+const isHookLikeLine = (line: string, topic: string, searchPhrase: string) => {
+  const trimmed = line.trim();
+  if (!trimmed) return false;
+  const lower = trimmed.toLowerCase();
+  const includesKeyword =
+    lower.includes(topic.toLowerCase()) ||
+    lower.includes(searchPhrase.toLowerCase());
+  if (!includesKeyword) return false;
+  if (HOOK_LIKE_PATTERNS.some((pattern) => pattern.test(lower))) return true;
+  const candidate = getFirstSentence(trimmed) || trimmed;
+  return validateVideoHook(candidate, topic, searchPhrase).length === 0;
+};
+
+const getFirstSentence = (text: string): string | null => {
+  const cleaned = text.trim();
+  if (!cleaned) return null;
+  const match = cleaned.match(/^[^.!?]+[.!?]/);
+  return match ? match[0].trim() : null;
+};
+
+interface EnsureVideoHookOptions {
+  topic: string;
+  category?: string;
+  source?: 'generation' | 'db' | 'fallback';
+  scriptId?: number;
+  scheduledDate?: Date;
+}
+
+interface EnsureVideoHookResult {
+  script: string;
+  hook: string;
+  modified: boolean;
+  issues?: string[];
+}
+
+const logVideoHookEvent = (
+  detail: string,
+  context: EnsureVideoHookOptions & { changed: boolean; issues?: string[] },
+) => {
+  if (!DEBUG_VIDEO_HOOK) return;
+  const dateLabel = context.scheduledDate
+    ? context.scheduledDate.toISOString().split('T')[0]
+    : 'unknown';
+  const idLabel = context.scriptId ? `id=${context.scriptId}` : 'id=unsaved';
+  const issueLabel = context.issues?.length
+    ? ` issues=${context.issues.join('|')}`
+    : '';
+  console.log(
+    `[video-hook] ${detail} source=${context.source || 'unknown'} ${idLabel} topic=${context.topic} date=${dateLabel} changed=${context.changed}${issueLabel}`,
+  );
+};
+
+const ensureVideoHook = (
+  script: string,
+  options: EnsureVideoHookOptions,
+): EnsureVideoHookResult => {
+  const trimmedScript = (script || '').trim();
+  const topic = options.topic;
+  const searchPhrase = getSearchPhraseForTopic(topic, options.category);
+  const firstSentence = getFirstSentence(trimmedScript);
+  let hookLine = '';
+  let modified = false;
+  let issues: string[] = [];
+
+  if (firstSentence) {
+    const normalized = normalizeHookLine(firstSentence);
+    issues = validateVideoHook(normalized, topic, searchPhrase);
+    if (issues.length === 0) {
+      hookLine = normalized;
+    }
+  } else {
+    issues = ['Hook missing'];
+  }
+
+  if (!hookLine) {
+    const fallbackHook = normalizeHookLine(buildHookForTopic(topic));
+    hookLine = fallbackHook;
+    modified = true;
+  }
+
+  hookLine = ensureSentenceEndsWithPunctuation(hookLine);
+  if (hookLine.length > 140) {
+    hookLine = `${hookLine.substring(0, 140).trim()}`;
+    hookLine = ensureSentenceEndsWithPunctuation(hookLine);
+  }
+
+  let bodyAfterHook = trimmedScript;
+  if (modified && firstSentence) {
+    bodyAfterHook = trimmedScript.slice(firstSentence.length).trim();
+  }
+  const normalizedHook = normalizeHookLine(hookLine);
+  const bodyLinesRaw = bodyAfterHook
+    .split('\n')
+    .map((line) => line.trim())
+    .filter(Boolean);
+  let cleanedBodyLines = bodyLinesRaw;
+  while (
+    cleanedBodyLines.length > 0 &&
+    (normalizeHookLine(cleanedBodyLines[0]) === normalizedHook ||
+      isHookLikeLine(cleanedBodyLines[0], topic, searchPhrase))
+  ) {
+    cleanedBodyLines = cleanedBodyLines.slice(1);
+    modified = true;
+  }
+  while (
+    cleanedBodyLines.length > 0 &&
+    needsLineRewrite(cleanedBodyLines[cleanedBodyLines.length - 1])
+  ) {
+    cleanedBodyLines = cleanedBodyLines.slice(0, -1);
+    modified = true;
+  }
+  if (cleanedBodyLines.length > 0) {
+    bodyAfterHook = cleanedBodyLines.join('\n');
+  }
+  const finalScript = modified
+    ? `${hookLine}\n\n${bodyAfterHook}`.trim()
+    : trimmedScript;
+
+  logVideoHookEvent('hook-check', {
+    ...options,
+    changed: modified,
+    issues: modified ? issues : undefined,
+  });
+
+  return {
+    script: finalScript,
+    hook: hookLine,
+    modified,
+    issues: modified ? issues : undefined,
+  };
+};
+
+type SanitizeScriptOptions = {
+  topic: string;
+  category?: string;
+  sourceSnippet?: string;
+  fallbackSource?: string;
+};
+
+export const sanitizeVideoScriptLines = (
+  lines: string[],
+  options: SanitizeScriptOptions & { allowTruncationFix?: boolean },
+): string[] => {
+  const buildFallbackLine = () => {
+    const snippet = (options.sourceSnippet || '').trim();
+    const fallback = (options.fallbackSource || '').trim();
+    let candidate = snippet || fallback;
+    if (!candidate) {
+      candidate = `${options.topic} keeps attention on recurring timing`;
+    }
+    const lowerTopic = options.topic.toLowerCase();
+    if (!candidate.toLowerCase().includes(lowerTopic)) {
+      const normalized = candidate.replace(/^[A-Z]/, (c) => c.toLowerCase());
+      candidate = `${options.topic} ${normalized}`;
+    }
+    return ensureSentenceEndsWithPunctuation(candidate.replace(/[.!?]+$/, ''));
+  };
+
+  const trimmedLines = lines.map((line) => line.trim()).filter(Boolean);
+  const allowTruncationFix = options.allowTruncationFix !== false;
+  return trimmedLines.map((line) => {
+    const needsReplacement = TRUNCATION_PATTERNS.some((pattern) =>
+      pattern.test(line.trim()),
+    );
+    if (!needsReplacement || !allowTruncationFix) {
+      return ensureSentenceEndsWithPunctuation(line);
+    }
+    return buildFallbackLine();
+  });
+};
+
+export const sanitizeVideoScriptText = (
+  text: string,
+  options: SanitizeScriptOptions,
+): string => {
+  const lines = text
+    .split('\n')
+    .map((line) => line.trim())
+    .filter(Boolean);
+  const sanitizedLines = sanitizeVideoScriptLines(lines, options);
+  return sanitizedLines.join('\n');
+};
+export function buildHookForTopic(topic: string) {
+  const safeTopic = topic.trim();
+  const templates = [
+    `Many people misread ${safeTopic}, but its core is simple.`,
+    `Here is the clear meaning of ${safeTopic} in practice.`,
+    `${safeTopic} points to a shift worth noticing right now.`,
+  ];
+  return templates[Math.floor(Math.random() * templates.length)];
+}
+
+export const validateVideoHook = (
+  hook: string,
+  topic: string,
+  searchPhrase: string,
+): string[] => {
+  const reasons: string[] = [];
+  const trimmed = hook.trim();
+  if (!trimmed) {
+    return ['Hook is empty'];
+  }
+  const firstSentence = getFirstSentence(trimmed);
+  if (!firstSentence || firstSentence !== trimmed) {
+    reasons.push('Hook must be a single sentence');
+  }
+  if (!/[.!?]$/.test(trimmed)) {
+    reasons.push('Hook must end with punctuation');
+  }
+  const wordCount = countWords(trimmed);
+  if (wordCount < 8 || wordCount > 14) {
+    reasons.push(`Hook word count out of range (${wordCount})`);
+  }
+  const hasTopic = trimmed.toLowerCase().includes(topic.toLowerCase());
+  const hasSearch = trimmed.toLowerCase().includes(searchPhrase.toLowerCase());
+  if (!hasTopic && !hasSearch) {
+    reasons.push('Hook missing keyword');
+  } else {
+    const keyword = hasTopic ? topic : searchPhrase;
+    if (countOccurrences(trimmed, keyword) !== 1) {
+      reasons.push('Hook must include keyword exactly once');
+    }
+  }
+  const lower = trimmed.toLowerCase();
+  if (VIDEO_BANNED_PHRASES.some((phrase) => lower.includes(phrase))) {
+    reasons.push('Hook contains banned phrase');
+  }
+  if (VIDEO_BANNED_PATTERNS.some((pattern) => pattern.test(trimmed))) {
+    reasons.push('Hook contains banned pattern');
+  }
+  return reasons;
+};
+
+const validateScriptBody = (
+  lines: string[],
+  topic: string,
+  searchPhrase: string,
+): string[] => {
+  const reasons: string[] = [];
+  if (lines.length < 6 || lines.length > 10) {
+    reasons.push(`Script body must be 6–10 lines (${lines.length})`);
+  }
+  const combined = lines.join(' ').trim();
+  if (hasTruncationArtifact(combined)) {
+    reasons.push('Script contains truncation artifact');
+  }
+  if (hasDeterministicLanguage(combined)) {
+    reasons.push('Script contains deterministic language');
+  }
+  if (hasRepeatedAdjacentBigrams(lines)) {
+    reasons.push('Adjacent lines repeat meaning');
+  }
+  if (TEXTBOOK_PATTERNS.some((pattern) => pattern.test(combined))) {
+    reasons.push('Script sounds too textbook');
+  }
+  const soWhatIndex = findSoWhatLineIndex(lines);
+  if (soWhatIndex === -1) {
+    reasons.push('Missing "So what" or "Try this" line');
+  } else {
+    const soWhatCount = lines.filter((line) =>
+      /^\s*(so what:|try this:)\b/i.test(line.trim()),
+    ).length;
+    if (soWhatCount !== 1) {
+      reasons.push(
+        'Script must include exactly one "So what" or "Try this" line',
+      );
+    }
+    if (soWhatIndex < Math.max(0, lines.length - 2)) {
+      reasons.push('"So what" or "Try this" line must be near the end');
+    }
+  }
+  if (
+    lines.some((line) =>
+      LINE_DANGLING_PATTERNS.some((pattern) => pattern.test(line.trim())),
+    )
+  ) {
+    reasons.push('Script contains a line ending with a dangling word');
+  }
+  if (lines.some((line) => isHookLikeLine(line, topic, searchPhrase))) {
+    reasons.push('Script body contains extra hook line');
+  }
+  const lower = combined.toLowerCase();
+  if (VIDEO_BANNED_PHRASES.some((phrase) => lower.includes(phrase))) {
+    reasons.push('Script contains banned phrase');
+  }
+  if (VIDEO_BANNED_PATTERNS.some((pattern) => pattern.test(combined))) {
+    reasons.push('Script contains banned pattern');
+  }
+  if (
+    countOccurrences(combined, topic) > 3 ||
+    countOccurrences(combined, searchPhrase) > 2
+  ) {
+    reasons.push('Script repeats keyword too often');
+  }
+  return reasons;
+};
+
 // ============================================================================
 // TIKTOK SCRIPT GENERATOR (30-45 seconds, ~70-110 words)
 // ============================================================================
@@ -379,19 +1182,42 @@ export async function generateTikTokScript(
   partNumber: number = 1,
   totalParts: number = 3,
   baseUrl: string = '',
+  options?: {
+    primaryThemeId?: string;
+    secondaryThemeId?: string;
+    secondaryFacetSlug?: string;
+    secondaryAngleKey?: string;
+    secondaryAspectKey?: string;
+    angleOverride?: string;
+    aspectOverride?: ContentAspect;
+  },
 ): Promise<VideoScript> {
   const safePartNumber = Number.isFinite(partNumber) ? partNumber : 1;
   const safeTotalParts = Number.isFinite(totalParts) ? totalParts : 7;
-  const grimoireData = getGrimoireDataForFacet(facet);
+  const grimoireData = getSafeGrimoireDataForFacet(facet, theme.category);
+  const angle =
+    options?.angleOverride ||
+    (await getAngleForTopic(facet.title, scheduledDate));
+  const aspect =
+    options?.aspectOverride ||
+    options?.secondaryAspectKey ||
+    mapAngleToAspect(angle);
 
   // Generate complete, flowing script using AI
-  const { script: fullScript, postCopy } = await generateTikTokScriptContent(
-    facet,
-    theme,
-    grimoireData,
-    safePartNumber,
-    safeTotalParts,
-  );
+  const { script: rawScript, hook: generatedHook } =
+    await generateTikTokScriptContent(
+      facet,
+      theme,
+      grimoireData,
+      safePartNumber,
+      safeTotalParts,
+      angle,
+      aspect as ContentAspect,
+    );
+  const fullScript = normalizeGeneratedContent(rawScript.trim(), {
+    topicLabel: facet.title,
+  });
+  const hookVersion = 1;
 
   const wordCount = countWords(fullScript);
 
@@ -405,6 +1231,9 @@ export async function generateTikTokScript(
     safePartNumber,
     safeTotalParts,
   );
+  metadata.angle = angle;
+  metadata.topic = facet.title;
+  metadata.aspect = aspect;
   const coverImageUrl = generateCoverImageUrl(
     facet,
     theme,
@@ -416,7 +1245,15 @@ export async function generateTikTokScript(
   return {
     themeId: theme.id,
     themeName: theme.name,
+    primaryThemeId: options?.primaryThemeId || theme.id,
+    secondaryThemeId: options?.secondaryThemeId,
+    secondaryFacetSlug: options?.secondaryFacetSlug,
+    secondaryAngleKey: options?.secondaryAngleKey,
+    secondaryAspectKey: options?.secondaryAspectKey,
     facetTitle: facet.title,
+    topic: facet.title,
+    angle,
+    aspect,
     platform: 'tiktok',
     sections,
     fullScript,
@@ -427,7 +1264,9 @@ export async function generateTikTokScript(
     metadata,
     coverImageUrl,
     partNumber: safePartNumber,
-    writtenPostContent: postCopy?.caption,
+    writtenPostContent: undefined,
+    hookText: generatedHook,
+    hookVersion,
   };
 }
 
@@ -448,8 +1287,11 @@ async function generateTikTokScriptContent(
   grimoireData: Record<string, any> | null,
   partNumber: number,
   totalParts: number,
-): Promise<{ script: string; postCopy?: TikTokPostCopy }> {
+  angle: string,
+  aspect: ContentAspect,
+): Promise<{ script: string; hook: string; scriptBody: string }> {
   const openai = getOpenAI();
+  const searchPhrase = getSearchPhraseForTopic(facet.title, theme.category);
 
   // Build context from Grimoire data
   let dataContext = '';
@@ -480,81 +1322,89 @@ async function generateTikTokScriptContent(
     }
   }
 
-  // JSON contract keeps script + post copy deterministic and auditable.
-  const prompt = `Create a complete, flowing short-form thematic video script (20–30 seconds, 45–70 words) about ${facet.title}. The video uses a sequence of OG images as frames, so the narration must be tight, structured, and easy to follow.
-Daily topic: ${facet.title} (focus: ${facet.focus})
+  const snippetSource =
+    grimoireData?.description ||
+    grimoireData?.meaning ||
+    grimoireData?.focus ||
+    facet.focus ||
+    facet.shortFormHook ||
+    '';
 
-Tone + delivery:
-  - Short, declarative sentences (max 10–12 words)
-  - Calm, grounded, neutral-warm, confident
-  - Educational and interpretive, not conversational or hype-driven
-  - Written for clean OpenAI TTS delivery: avoid tongue-twisters, avoid long compound sentences
-  - Use natural pauses with line breaks. No em dashes.
+  const sanitizeLines = (rawLines: string[]) =>
+    sanitizeVideoScriptLines(rawLines, {
+      topic: facet.title,
+      category: theme.category,
+      sourceSnippet: snippetSource,
+      fallbackSource: facet.focus || facet.shortFormHook || facet.title,
+      allowTruncationFix: false,
+    });
 
-Hook requirements (first 2–3 seconds):
-  - Sentence 1 MUST be one of these exact structures:
-    1) CONTRARIAN: "[Topic] isn't about [common misconception]."
-    2) MISUNDERSTANDING: "Most people misunderstand [topic]."
-    3) REFRAME: "This isn't random - it's [underlying pattern]."
-    4) RELEVANCE: "This affects you more than you realise."
-    5) CLARITY PROMISE: "This explains why [specific experience]."
-  - Exactly one sentence, 6-12 words, no questions, no CTA
-  - No series references, no time references, no "Lunary"
-  - No mystical filler words (magic, powerful, cosmic, destiny, universe)
-  - No hedging (maybe, often, can be, tends to)
-  - Do not use "you" more than once
-  - Must match the facet focus (no vague bait)
+  const guardrailNote = FACTUAL_GUARDRAIL_INSTRUCTION;
 
-Second sentence:
-  - Exactly: "Welcome back to our series on ${theme.name}."
+  const prompt = `You are the short-form video script generator for Lunary.
 
-Rhythm + structure:
-  - Follow: hook → context → reflective close
-  - Include exactly ONE sentence that explains the significance
-  - Insert a blank line before the final reflective line
+Your job is to generate ONE educational short-form video script per day for:
+- Instagram Reels
+- TikTok
+- YouTube Shorts
+- Facebook Reels
 
-Educational guidance:
-  - Include at least one practical or interpretive sentence about timing, focus, or what it supports
-  - Avoid listing items without explanation
+This video is independent from written posts.
+Do NOT reference Threads, X, blogs, or other content.
+Do NOT include hashtags, emojis, links, or CTAs.
+Do NOT promote features or the app.
 
-List guidance (only if a list fits the topic):
-  - Keep it short and concrete
-  - Only number items when it adds clarity
-  - Avoid repeating the same idea across items
-
-Ending:
-  - End with a single observational line (not instructional)
-
-Constraints:
-  - Do NOT mention “next week”
-  - No CTAs (no likes, follows, app promotion)
-  - Avoid sensational language
-  - Parts 2+ must not include a full intro or welcome back
+Tone:
+- calm
+- grounded
+- intelligent
+- authoritative without being heavy
+- never hype-driven
 
 Topic: ${facet.title}
+Angle: ${angle}
+Aspect focus: ${aspectLabel(aspect)}
+Keyword phrase: ${searchPhrase}
 Focus: ${facet.focus}
-${dataContext ? `\nGrimoire Data:\n${dataContext}` : ''}
+${buildScopeGuard(facet.title)}
 
-Return strict JSON:
+Hook requirements (FIRST LINE):
+- Write a single-sentence spoken hook that introduces the topic clearly and naturally.
+- Must be 8–14 words.
+- Must include the primary keyword exactly once (use "${facet.title}" or "${searchPhrase}").
+- Calm and grounded; no hype, no dramatic claims.
+- Do not use hook template phrases like "Most people", "This will click", "Here's what matters", or "Here's how it helps".
+
+Script body requirements (AFTER HOOK):
+- 6–10 short lines total
+- calm, factual, suitable for TTS
+- spoken, not textbook; avoid "is defined as" or "refers to"
+- no "today we're going to", no filler, no repetition loops
+- Do not repeat the hook or include extra hook lines in the body.
+- Each line must be exactly one complete sentence with a subject and verb.
+- If a thought is long, split it into two full sentences and end the line at punctuation, never mid-sentence.
+- Do not end a line with articles, prepositions, or dangling clauses (e.g., "the.", "a.", "to.", "with.", "of.", "which.", "because.").
+- Do not use hook-style phrases in the body like "Most people", "If this confuses you", "Here's what matters", "Here's how it helps", or "Why it matters".
+- Do not repeat the hook or include extra hook lines in the body.
+- Include exactly one practical application line near the end that begins with either "Try this:" or "So what:" and ties a simple, emotionally grounded action about ${facet.title} to a clear window (today, tonight, within 24 hours, over the next 2.5 days, this week). Stay within the topic scope guard.
+${guardrailNote}
+
+Hard bans (never include):
+- "distinct rhythm worth tracking"
+- "here is how X shows up in real life: X"
+- "explore in the grimoire"
+${dataContext ? `\nGrimoire Data (reference only):\n${dataContext}` : ''}
+
+Return strict JSON only:
 {
-  "script": string,
-  "postCopy": {
-    "hook": string,
-    "caption": string,
-    "cta": string,
-    "pinnedComment"?: string
+  "video": {
+    "hook": "Spoken hook line",
+    "scriptBody": [
+      "Line 1",
+      "Line 2"
+    ]
   }
-}
-
-postCopy rules:
-- Caption is 4 lines, no emojis, no hashtags, no URLs
-- Line 1: stronger post hook (can differ from spoken hook, still aligned)
-- Line 2: one-sentence summary + concrete "watch for this" takeaway
-- Line 3: short educational CTA (save/share/comment)
-- Line 4: "Read more on the Lunary blog."
-- Rewrite from the script; do not copy the script verbatim.
-
-No markdown. JSON only.`;
+}`;
 
   const requestScriptOnce = async (retryNote?: string) => {
     const retrySuffix = retryNote ? `\n\nFix these issues:\n${retryNote}` : '';
@@ -564,126 +1414,158 @@ No markdown. JSON only.`;
         {
           role: 'system',
           content:
-            'You are an educational content creator writing complete, flowing video scripts and strong post copy. Return only valid JSON with script and postCopy.',
+            'You are an educational content creator writing concise, spoken video scripts. Return only valid JSON for the requested structure.',
         },
         { role: 'user', content: `${prompt}${retrySuffix}` },
       ],
       response_format: { type: 'json_object' },
       max_tokens: 600,
-      temperature: 0.4,
+      temperature: 0.2,
     });
 
     const raw = completion.choices[0]?.message?.content || '';
     const parsed = JSON.parse(raw);
-    return parsed as { script?: string; postCopy?: TikTokPostCopy };
+    return parsed as {
+      video?: {
+        hook?: string;
+        scriptBody?: string[];
+      };
+    };
   };
 
   try {
-    const primary = await requestScriptOnce();
-    let script = String(primary.script || '').trim();
-    if (!script) {
-      throw new Error('OpenAI returned empty script');
-    }
+    let primary = await requestScriptOnce();
+    let video = primary.video || {};
+    let hook = String(video.hook || '').trim();
+    let scriptBodyLines = Array.isArray(video.scriptBody)
+      ? video.scriptBody.map((line) => String(line).trim()).filter(Boolean)
+      : [];
 
-    script = ensureTikTokHookFirstSentence(script, facet, theme, grimoireData);
-    script = ensureSeriesSentence(script, theme.name);
-    script = ensureThematicListAndClose(script);
-    script = enforceThematicPacing(script, facet, grimoireData, theme.name);
+    scriptBodyLines = sanitizeLines(scriptBodyLines);
 
-    let postCopy = primary.postCopy;
-    const captionReasons = postCopy?.caption
-      ? validateCaption(postCopy.caption, theme.name).reasons
-      : ['Missing postCopy caption'];
-
-    const hookReasons = validateSpokenHook(
-      splitSentencesPreservingDecimals(script)[0] || '',
+    let hookIssues = validateVideoHook(hook, facet.title, searchPhrase);
+    let bodyIssues = validateScriptBody(
+      scriptBodyLines,
+      facet.title,
+      searchPhrase,
     );
-    const issues = [...hookReasons, ...captionReasons];
 
-    if (issues.length > 0) {
-      const retry = await requestScriptOnce(issues.join('; '));
-      if (retry.script) {
-        script = ensureTikTokHookFirstSentence(
-          retry.script,
-          facet,
-          theme,
-          grimoireData,
-        );
-        script = ensureSeriesSentence(script, theme.name);
-        script = ensureThematicListAndClose(script);
-        script = enforceThematicPacing(script, facet, grimoireData, theme.name);
-      }
-      postCopy = retry.postCopy;
+    if (hookIssues.length > 0 || bodyIssues.length > 0) {
+      const retryNote = [
+        ...hookIssues.map((issue) => `Hook: ${issue}`),
+        ...bodyIssues.map((issue) => `Body: ${issue}`),
+      ].join('; ');
+      primary = await requestScriptOnce(retryNote);
+      video = primary.video || {};
+      hook = String(video.hook || '').trim();
+      scriptBodyLines = Array.isArray(video.scriptBody)
+        ? video.scriptBody.map((line) => String(line).trim()).filter(Boolean)
+        : [];
+      scriptBodyLines = sanitizeLines(scriptBodyLines);
+      hookIssues = validateVideoHook(hook, facet.title, searchPhrase);
+      bodyIssues = validateScriptBody(
+        scriptBodyLines,
+        facet.title,
+        searchPhrase,
+      );
     }
 
-    if (postCopy?.caption) {
-      const validated = validateCaption(postCopy.caption, theme.name);
-      if (!validated.valid) {
-        postCopy = {
-          hook: postCopy.hook,
-          caption: buildFallbackCaption({
-            script,
-            themeName: theme.name,
-            facetTitle: facet.title,
-            facetFocus: facet.focus,
-            platform: 'tiktok',
-          }),
-          cta: postCopy.cta,
-          pinnedComment: postCopy.pinnedComment,
-        };
-      } else {
-        postCopy.caption = validated.sanitizedCaption;
-      }
+    if (bodyIssues.length > 0) {
+      throw new Error(
+        `Video script validation failed: ${bodyIssues.join('; ')}`,
+      );
     }
 
-    return { script, postCopy };
+    const scriptBody = scriptBodyLines
+      .map((line) => line.replace(/[—–]/g, '-').replace(/\s+/g, ' ').trim())
+      .filter(Boolean)
+      .join('\n');
+    const hookLine =
+      validateVideoHook(hook, facet.title, searchPhrase).length === 0
+        ? ensureSentenceEndsWithPunctuation(normalizeHookLine(hook))
+        : ensureSentenceEndsWithPunctuation(
+            normalizeHookLine(buildHookForTopic(facet.title)),
+          );
+    const script = `${hookLine}\n\n${scriptBody}`.trim();
+    if (hasTruncationArtifact(script)) {
+      throw new Error('Generated script contains truncation artifact');
+    }
+    return { script, hook: hookLine, scriptBody };
   } catch (error) {
     console.error('Failed to generate TikTok script with AI:', error);
-    // Fallback to structured script
-    const fallbackScript = enforceThematicPacing(
-      ensureThematicListAndClose(
-        ensureThemePartSentence(
-          ensureSeriesSentence(
-            ensureTikTokHookFirstSentence(
-              generateTikTokScriptFallback(
-                facet,
-                theme,
-                grimoireData,
-                partNumber,
-                totalParts,
-              ),
-              facet,
-              theme,
-              grimoireData,
-            ),
-            theme.name,
-          ),
-          theme.name,
-          partNumber,
-          totalParts,
-          facet.title,
-        ),
-      ),
+    const fallback = buildFallbackShortScript(
       facet,
       grimoireData,
-      theme.name,
+      angle,
+      aspect,
     );
-
+    const [fallbackHook, fallbackBody] = fallback.split('\n\n');
     return {
-      script: fallbackScript,
-      postCopy: {
-        hook: splitSentencesPreservingDecimals(fallbackScript)[0] || '',
-        caption: buildFallbackCaption({
-          script: fallbackScript,
-          themeName: theme.name,
-          facetTitle: facet.title,
-          facetFocus: facet.focus,
-          platform: 'tiktok',
-        }),
-        cta: 'Save this for later.',
-      },
+      script: fallback,
+      hook: fallbackHook || '',
+      scriptBody: fallbackBody || '',
     };
   }
+}
+
+function buildFallbackShortScript(
+  facet: DailyFacet,
+  grimoireData: Record<string, any> | null,
+  angle: string,
+  aspect: ContentAspect,
+): string {
+  const rawBase =
+    grimoireData?.meaning ||
+    grimoireData?.mysticalProperties ||
+    grimoireData?.description ||
+    facet.focus ||
+    facet.shortFormHook;
+  const base =
+    rawBase && !hasTruncationArtifact(String(rawBase)) ? String(rawBase) : '';
+  const lowerTopic = facet.title.toLowerCase();
+  const searchPhrase = getSearchPhraseForTopic(facet.title);
+  void searchPhrase;
+  const hook = buildHookForTopic(facet.title);
+  const context = `${facet.title} describes ${(
+    base || 'how a pattern tends to express itself'
+  )
+    .replace(/[.!?]+$/, '')
+    .toLowerCase()}.`;
+  const takeaway = [
+    grimoireData?.transitEffect,
+    grimoireData?.houseMeaning,
+    base,
+  ]
+    .filter(Boolean)
+    .map((line) => String(line).trim())
+    .slice(0, 2)
+    .join(' ');
+  const actionByAspect: Record<ContentAspect, string> = {
+    [ContentAspect.CORE_MEANING]: `Notice where ${lowerTopic} shapes your focus today.`,
+    [ContentAspect.COMMON_MISCONCEPTION]: `Look for ${lowerTopic} in what you repeat, not just what you claim.`,
+    [ContentAspect.EMOTIONAL_IMPACT]: `Pay attention to the mood shift ${lowerTopic} brings.`,
+    [ContentAspect.REAL_LIFE_EXPRESSION]: `Watch how ${lowerTopic} shows up in your routines.`,
+    [ContentAspect.TIMING_AND_CONTEXT]: `Note when ${lowerTopic} feels more present than usual.`,
+    [ContentAspect.PRACTICAL_APPLICATION]: `Make one small choice aligned with ${lowerTopic} today.`,
+    [ContentAspect.WHEN_TO_AVOID]: `Pause if ${lowerTopic} feels rushed or brittle.`,
+    [ContentAspect.SUBTLE_INSIGHT]: `Track the subtle signals ${lowerTopic} brings first.`,
+  };
+  const action =
+    actionByAspect[aspect] || actionByAspect[ContentAspect.CORE_MEANING];
+  const closing = 'Patterns make sense once you start noticing them.';
+  const secondary = grimoireData?.meaning || grimoireData?.description || '';
+  const lines = [
+    context,
+    takeaway || secondary || `It helps explain how ${lowerTopic} unfolds.`,
+    `Look for ${lowerTopic} in the small, repeatable details.`,
+    action,
+    `Notice what shifts when you work with ${lowerTopic} intentionally.`,
+    closing,
+  ]
+    .map((line) => line.replace(/[—–]/g, '-').replace(/\s+/g, ' ').trim())
+    .filter(Boolean);
+  const scriptBody = lines.slice(0, 10).join('\n');
+  return `${hook}\n\n${scriptBody}`.trim();
 }
 
 /**
@@ -801,7 +1683,7 @@ function buildSpokenHookSentence(
   const topicPhrase =
     titleWords.length <= 2 ? `the role of ${baseTitle}` : baseTitle;
 
-  const baseHook = `Most people misunderstand ${topicPhrase}.`;
+  const baseHook = `If ${topicPhrase} feels confusing, start here.`;
   const words = baseHook
     .replace(/[.!?]+$/, '')
     .split(/\s+/)
@@ -814,7 +1696,7 @@ function buildSpokenHookSentence(
     .split(/\s+/)
     .slice(0, Math.max(1, 12 - 3))
     .join(' ');
-  return `Most people misunderstand ${trimmedTopic}.`;
+  return `If ${trimmedTopic} feels confusing, start here.`;
 }
 
 function ensureThematicListAndClose(text: string): string {
@@ -1207,11 +2089,19 @@ export async function generateYouTubeScript(
   // Gather all Grimoire data for the week's facets
   const allData = facets.map((f) => ({
     facet: f,
-    data: getGrimoireDataForFacet(f),
+    data: getSafeGrimoireDataForFacet(f, theme.category),
   }));
 
   // Generate complete, flowing script using AI
-  const fullScript = await generateYouTubeScriptContent(theme, facets, allData);
+  const rawScript = await generateYouTubeScriptContent(theme, facets, allData);
+  const ensuredHook = ensureVideoHook(rawScript, {
+    topic: theme.name,
+    category: theme.category,
+    source: 'generation',
+    scheduledDate: weekStartDate,
+  });
+  const fullScript = ensuredHook.script;
+  const hookVersion = ensuredHook.modified ? 2 : 1;
 
   const wordCount = countWords(fullScript);
 
@@ -1224,7 +2114,9 @@ export async function generateYouTubeScript(
   return {
     themeId: theme.id,
     themeName: theme.name,
+    primaryThemeId: theme.id,
     facetTitle: `Weekly Deep Dive: ${theme.name}`,
+    aspect: ContentAspect.CORE_MEANING,
     platform: 'youtube',
     sections,
     fullScript,
@@ -1233,6 +2125,8 @@ export async function generateYouTubeScript(
     scheduledDate: weekStartDate,
     status: 'draft',
     coverImageUrl,
+    hookText: ensuredHook.hook,
+    hookVersion,
   };
 }
 
@@ -1273,6 +2167,7 @@ async function generateYouTubeScriptContent(
     return context;
   });
 
+  const guardrailNote = FACTUAL_GUARDRAIL_INSTRUCTION;
   const prompt = `Create a complete, flowing YouTube video script (3–4 minutes, 450–650 words) for a weekly educational deep dive on ${theme.name}.
 
 The script should be:
@@ -1298,6 +2193,7 @@ Closing guidance:
 - End with a reflective synthesis that reinforces meaning and understanding
 - Do not include CTAs, prompts to like/subscribe, or platform references
 - Leave the viewer with a sense of conceptual completion
+- Add one short final sentence that begins with "try this:" and connects a concrete action about ${theme.name} to a clear time window (today, tonight, within 24 hours, over the next 2.5 days, this week) so viewers know how to apply the week/day focus.
 
 Theme: ${theme.name}
 Category: ${theme.category}
@@ -1306,9 +2202,13 @@ Description: ${theme.description}
 Facets to cover:
 ${facetContexts.join('\n---\n')}
 
-Return ONLY the complete script text. No section headers, no labels, no markdown, no formatting. The output should read as a single, cohesive spoken narrative with a calm, confident delivery.`;
+Return ONLY the complete script text. No section headers, no labels, no markdown, no formatting. The output should read as a single, cohesive spoken narrative with a calm, confident delivery.
+Avoid deterministic claims; use soft language like "can", "tends to", "may", "often", "influences", "highlights".
+${buildScopeGuard(theme.name)}
+${guardrailNote}`;
 
-  try {
+  const requestYouTubeScript = async (retryNote?: string) => {
+    const retrySuffix = retryNote ? `\n\nFix: ${retryNote}` : '';
     const completion = await openai.chat.completions.create({
       model: 'gpt-4o-mini',
       messages: [
@@ -1317,18 +2217,24 @@ Return ONLY the complete script text. No section headers, no labels, no markdown
           content:
             'You are an educational content creator writing complete, flowing video scripts. Write in a natural, authoritative tone that flows smoothly when read aloud. The script must be complete and coherent - all sections must flow naturally into each other with smooth transitions. Make it educational and informative. Write as a continuous narrative, not fragmented sections.',
         },
-        { role: 'user', content: prompt },
+        { role: 'user', content: `${prompt}${retrySuffix}` },
       ],
       max_tokens: 1200,
       temperature: 0.7,
     });
 
-    let script = completion.choices[0]?.message?.content || '';
+    return completion.choices[0]?.message?.content || '';
+  };
+
+  try {
+    let script = await requestYouTubeScript();
     if (!script || script.trim().length === 0) {
       throw new Error('OpenAI returned empty script');
     }
 
-    script = script.trim();
+    script = normalizeGeneratedContent(script.trim(), {
+      topicLabel: theme.name,
+    });
 
     // Clean up any section markers that might have been added
     script = script
@@ -1345,15 +2251,32 @@ Return ONLY the complete script text. No section headers, no labels, no markdown
       script += `\n\nFor deeper exploration of ${theme.name.toLowerCase()} and related topics, the Lunary Grimoire offers comprehensive reference material. It is freely available for those who wish to continue their study. Until next time.`;
     }
 
-    const normalizedScript = ensureHookFirstSentence(script, theme);
+    if (hasDeterministicLanguage(script)) {
+      script = await requestYouTubeScript(
+        'Remove deterministic claims; use softer language (can, may, tends to, often, influences).',
+      );
+      script = script.trim();
+    }
+
+    const sanitizedScript = sanitizeVideoScriptText(script, {
+      topic: theme.name,
+      category: theme.category,
+      sourceSnippet: theme.description || '',
+      fallbackSource: theme.description || '',
+    });
+    const normalizedScript = ensureHookFirstSentence(sanitizedScript, theme);
     return normalizedScript;
   } catch (error) {
     console.error('Failed to generate YouTube script with AI:', error);
     // Fallback to structured script
-    return ensureHookFirstSentence(
-      generateYouTubeScriptFallback(theme, facets, allData),
-      theme,
-    );
+    const fallback = generateYouTubeScriptFallback(theme, facets, allData);
+    const sanitizedFallback = sanitizeVideoScriptText(fallback, {
+      topic: theme.name,
+      category: theme.category,
+      sourceSnippet: theme.description || '',
+      fallbackSource: theme.description || '',
+    });
+    return ensureHookFirstSentence(sanitizedFallback, theme);
   }
 }
 
@@ -1616,6 +2539,7 @@ export async function generateAndSaveWeeklyScripts(
   baseUrl: string = 'https://lunary.app',
 ): Promise<WeeklyVideoScripts> {
   await ensureVideoScriptsTable();
+  await ensureContentRotationSecondaryTable();
 
   const scripts = await generateWeeklyVideoScripts(
     weekStartDate,
@@ -1626,6 +2550,41 @@ export async function generateAndSaveWeeklyScripts(
   // Save TikTok scripts
   for (const script of scripts.tiktokScripts) {
     await saveVideoScript(script);
+  }
+
+  // Generate and save secondary daily scripts without affecting weekly rotation
+  for (const [index, primaryScript] of scripts.tiktokScripts.entries()) {
+    const scriptDate = primaryScript.scheduledDate;
+    const secondaryTheme = await selectSecondaryTheme(
+      scripts.theme.id,
+      scriptDate,
+    );
+    const secondaryFacet =
+      secondaryTheme.facets[index % secondaryTheme.facets.length];
+    const secondaryAngle = await getAngleForTopic(
+      secondaryFacet.title,
+      scriptDate,
+    );
+    const secondaryAspect = await selectSecondaryAspect(secondaryTheme.id);
+    const secondaryScript = await generateTikTokScript(
+      secondaryFacet,
+      secondaryTheme,
+      scriptDate,
+      index + 1,
+      secondaryTheme.facets.length,
+      baseUrl,
+      {
+        primaryThemeId: scripts.theme.id,
+        secondaryThemeId: secondaryTheme.id,
+        secondaryFacetSlug: secondaryFacet.grimoireSlug,
+        secondaryAngleKey: secondaryAngle,
+        secondaryAspectKey: secondaryAspect,
+        angleOverride: secondaryAngle,
+        aspectOverride: secondaryAspect,
+      },
+    );
+    await saveVideoScript(secondaryScript);
+    await recordSecondaryThemeUsage(secondaryTheme.id, scriptDate);
   }
 
   // Save YouTube script

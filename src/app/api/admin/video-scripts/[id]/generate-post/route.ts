@@ -1,11 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server';
-const { OpenAI } = await import('openai');
 import {
   getVideoScripts,
   updateVideoScriptWrittenPost,
   VideoScript,
 } from '@/lib/social/video-script-generator';
 import { categoryThemes, generateHashtags } from '@/lib/social/weekly-themes';
+import {
+  applyPlatformFormatting,
+  buildFallbackCopy,
+  buildSourcePack,
+  generateSocialCopy,
+  validateSocialCopy,
+} from '@/lib/social/social-copy-generator';
 
 export const dynamic = 'force-dynamic';
 
@@ -26,7 +32,7 @@ function buildThematicHashtags(script: VideoScript): string | null {
       [tags.domain, tags.topic, tags.brand, ...additionalTags].filter(Boolean),
     ),
   );
-  return uniqueTags.slice(0, 5).join(' ');
+  return uniqueTags.slice(0, 3).join(' ');
 }
 
 /**
@@ -66,7 +72,7 @@ function generateFallbackHashtags(script: VideoScript): string {
   // Add astrology-related hashtag
   hashtags.push('#astrology', '#lunary');
 
-  return hashtags.slice(0, 5).join(' ');
+  return hashtags.slice(0, 3).join(' ');
 }
 
 /**
@@ -94,67 +100,48 @@ export async function POST(
       return NextResponse.json({ error: 'Script not found' }, { status: 404 });
     }
 
-    // const openai = getOpenAI();
-    const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
-
-    // Create prompt based on script content
-    const platformDescription =
-      script.platform === 'tiktok'
-        ? 'TikTok short-form video'
-        : 'YouTube video';
-    const dateStr = script.scheduledDate.toLocaleDateString('en-US', {
-      month: 'long',
-      day: 'numeric',
-      year: 'numeric',
-    });
-
-    const prompt = `Create a social media post caption to accompany a ${platformDescription} about ${script.facetTitle} for ${dateStr}.
-
-Theme: ${script.themeName}
-Video Topic: ${script.facetTitle}
-
-The post should:
-- Be engaging and natural, not salesy
-- Mention that more details are available on Lunary (but DO NOT include a link or URL)
-- Say something like "check out more on Lunary" or "explore this in Lunary" - never write out the full URL
-- Be appropriate for Instagram, TikTok, and other platforms
-- Be 2-4 sentences, concise but inviting
-- Match the mystical but accessible tone of Lunary
-- For TikTok: Be brief and hook-focused
-- For YouTube: Be slightly more informative, highlight key points
-
-Video Script Summary:
-${script.fullScript.substring(0, 500)}...
-
-Return ONLY the post content text, no markdown, no formatting, just the caption text. Do NOT include any URLs or links. DO NOT use any emojis. DO NOT include hashtags - they will be added separately.`;
-
-    const completion = await openai.chat.completions.create({
-      model: 'gpt-4o-mini',
-      messages: [
-        {
-          role: 'system',
-          content:
-            'You are a social media content creator for Lunary, a cosmic astrology app. Create engaging, natural captions that guide people to learn more without being pushy or salesy. Write in a mystical but accessible tone. DO NOT use any emojis - keep the text clean and professional. DO NOT include hashtags.',
-        },
-        { role: 'user', content: prompt },
-      ],
-      max_tokens: 300,
-      temperature: 0.8,
-    });
-
-    let postContent = completion.choices[0]?.message?.content || '';
-    if (!postContent || postContent.trim().length === 0) {
-      throw new Error('OpenAI returned empty post content');
+    const theme = categoryThemes.find((item) => item.name === script.themeName);
+    const facet =
+      theme?.facets.find((item) => item.title === script.facetTitle) ||
+      theme?.facets.find(
+        (item) => item.title.toLowerCase() === script.facetTitle.toLowerCase(),
+      );
+    let postContent = script.fullScript;
+    let hashtags: string[] = [];
+    if (theme && facet) {
+      const pack = buildSourcePack({
+        topic: script.facetTitle,
+        theme,
+        platform: script.platform,
+        postType: 'video_caption',
+        facet,
+      });
+      let generated = await generateSocialCopy(pack);
+      let issues = validateSocialCopy(generated.content, pack.topic);
+      const lineCount = generated.content.split('\n').filter(Boolean).length;
+      if (lineCount !== 4) {
+        issues.push('Video caption must be 4 lines');
+      }
+      if (issues.length > 0) {
+        generated = await generateSocialCopy(pack, `Fix: ${issues.join('; ')}`);
+        issues = validateSocialCopy(generated.content, pack.topic);
+      }
+      if (issues.length > 0) {
+        const fallback = buildFallbackCopy(pack);
+        postContent = fallback.content;
+        hashtags = fallback.hashtags;
+      } else {
+        postContent = generated.content;
+        hashtags = generated.hashtags || [];
+      }
+      postContent = applyPlatformFormatting(postContent, script.platform);
     }
 
-    postContent = postContent.trim();
-
-    // Generate hashtags from the thematic hashtag system
-    const hashtags =
-      buildThematicHashtags(script) || generateFallbackHashtags(script);
-
-    // Append hashtags to post content
-    const postContentWithHashtags = `${postContent}\n\n${hashtags}`;
+    const shouldAppendHashtags =
+      hashtags.length > 0 && !/#\w+/.test(postContent);
+    const postContentWithHashtags = shouldAppendHashtags
+      ? `${postContent}\n\n${hashtags.slice(0, 3).join(' ')}`
+      : postContent;
 
     // Save to database
     await updateVideoScriptWrittenPost(scriptId, postContentWithHashtags);

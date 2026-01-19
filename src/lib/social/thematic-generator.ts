@@ -17,6 +17,18 @@ import {
   searchGrimoireForTopic,
   getGrimoireSnippetBySlug,
 } from './grimoire-content';
+import {
+  generatePersonaPost,
+  generateQuestionPost,
+  generateClosingPost,
+  generateEducationalCta,
+} from './microcopy-ai';
+import {
+  normalizeHashtagsForPlatform,
+  selectHashtagsForPostType,
+  SocialPostType,
+} from './social-copy-generator';
+import { normalizeGeneratedContent } from './content-normalizer';
 
 // Import data sources
 import zodiacSigns from '@/data/zodiac-signs.json';
@@ -72,9 +84,1076 @@ const platformHashtagConfig: Record<
   facebook: { useHashtags: true, count: 3 },
   linkedin: { useHashtags: true, count: 3 },
   twitter: { useHashtags: true, count: 2 },
-  bluesky: { useHashtags: true, count: 3 },
-  threads: { useHashtags: false, count: 0 },
+  bluesky: { useHashtags: true, count: 1 },
+  threads: { useHashtags: true, count: 2 },
   reddit: { useHashtags: true, count: 3 },
+};
+
+const PERSONA_VOCAB = [
+  'astrology lovers',
+  'astrology curious',
+  'tarot readers',
+  'people who pull cards',
+  'moon watchers',
+  'lunar folk',
+  'crystal lovers',
+  'star gazers',
+  'cosmic wanderers',
+  'horoscope readers',
+];
+
+const PERSONA_BODY_TEMPLATES = [
+  'We keep this corner calm for astrology lovers who prefer steady notice-taking over excess hype.',
+  'Tarot readers and lunar folk are invited to track the pause between shifts rather than chase swift answers.',
+  'Moon watchers and crystal lovers often find it useful to catalog how timing changes, not just what it promises.',
+  'Cosmic wanderers and horoscope readers can hold onto the idea that timing reveals itself quietly, not on command.',
+];
+
+const QUESTION_POOL = [
+  'Which do you check most: moon phase, tarot, transits, or horoscopes?',
+  'What made astrology click for you: tarot, a horoscope, the moon, or something else?',
+  'What do you usually turn to astrology for?',
+  'When do you find yourself coming back to astrology most?',
+  'What do you wish astrology helped you understand better?',
+  'What part of astrology feels most grounding to you?',
+];
+
+const CLOSING_STATEMENTS = [
+  'Most astrology insights only make sense in hindsight.',
+  'Understanding rarely arrives on schedule.',
+  'The meaning usually shows up later, not when you are looking for it.',
+  'Patterns are clearer once the rush of the moment passes.',
+  'One more look later often changes how the whole week reads.',
+];
+
+const buildQuestionPost = (topic: string, data: Record<string, any> | null) => {
+  const keywords = Array.isArray(data?.keywords) ? data.keywords : [];
+  const options = keywords.filter(Boolean).slice(0, 3);
+  if (options.length >= 3) {
+    return `When it comes to ${topic}, what do you notice most: ${options[0]}, ${options[1]}, or ${options[2]}?`;
+  }
+  return `What's your biggest question about ${topic}?`;
+};
+
+type ShortFormOverride = {
+  dayOffset: number;
+  postType: 'persona' | 'question' | 'closing_statement';
+  seed: number;
+  personaList?: string[];
+};
+
+const hashString = (value: string) => {
+  let hash = 0;
+  for (let i = 0; i < value.length; i += 1) {
+    hash = (hash << 5) - hash + value.charCodeAt(i);
+    hash |= 0;
+  }
+  return Math.abs(hash);
+};
+
+const splitSentences = (text: string) =>
+  text
+    .replace(/(\d)\.(\d)/g, '$1<DECIMAL>$2')
+    .match(/[^.!?]+[.!?]+|[^.!?]+$/g)
+    ?.map((sentence) => sentence.replace(/<DECIMAL>/g, '.').trim())
+    .filter(Boolean) || [];
+
+const ensurePeriod = (text: string) => {
+  const trimmed = text.trim();
+  if (!trimmed) return trimmed;
+  return /[.!?]$/.test(trimmed) ? trimmed : `${trimmed}.`;
+};
+
+const formatList = (items: string[], max = 3) => {
+  const values = items.filter(Boolean).slice(0, max);
+  if (values.length === 0) return '';
+  if (values.length === 1) return values[0];
+  if (values.length === 2) return `${values[0]} and ${values[1]}`;
+  return `${values.slice(0, -1).join(', ')}, and ${values[values.length - 1]}`;
+};
+
+const normaliseUkSpelling = (text: string) => {
+  const replacements: Array<[RegExp, string]> = [
+    [/\bcolor\b/gi, 'colour'],
+    [/\bcolors\b/gi, 'colours'],
+    [/\bfavor\b/gi, 'favour'],
+    [/\bfavors\b/gi, 'favours'],
+    [/\bhonor\b/gi, 'honour'],
+    [/\bhonors\b/gi, 'honours'],
+    [/\bcenter\b/gi, 'centre'],
+    [/\bcenters\b/gi, 'centres'],
+    [/\banalyze\b/gi, 'analyse'],
+    [/\banalyzes\b/gi, 'analyses'],
+    [/\borganize\b/gi, 'organise'],
+    [/\borganizes\b/gi, 'organises'],
+    [/\bpersonalize\b/gi, 'personalise'],
+    [/\bpersonalizes\b/gi, 'personalises'],
+    [/\brealize\b/gi, 'realise'],
+    [/\brealizes\b/gi, 'realises'],
+    [/\brecognize\b/gi, 'recognise'],
+    [/\brecognizes\b/gi, 'recognises'],
+  ];
+  return replacements.reduce((acc, [pattern, replacement]) => {
+    return acc.replace(pattern, (match) => {
+      if (match.toUpperCase() === match) {
+        return replacement.toUpperCase();
+      }
+      if (match[0] && match[0] === match[0].toUpperCase()) {
+        return replacement[0].toUpperCase() + replacement.slice(1);
+      }
+      return replacement;
+    });
+  }, text);
+};
+
+const normalizeLunarNodesText = (text: string) =>
+  text.replace(
+    /what is lunar nodes(\?|!|\.|$)/gi,
+    'what are the Lunar Nodes$1',
+  );
+
+const adjustMoonCapitalization = (text: string) =>
+  text
+    .replace(/moon phases of the Moon/gi, 'moon phases')
+    .replace(/moon phases of the moon/gi, 'moon phases')
+    .replace(/the moon/gi, 'the Moon')
+    .replace(/moon of the Moon/gi, 'Moon')
+    .replace(/moon of the moon/gi, 'Moon');
+
+const applyShortFormNormalizations = (text: string, category?: string) => {
+  const normalized = text.replace(/[—–]/g, '-').replace(/\s+/g, ' ').trim();
+  const uk = normaliseUkSpelling(normalized);
+  if (category === 'lunar') {
+    return adjustMoonCapitalization(normalizeLunarNodesText(uk));
+  }
+  return uk;
+};
+
+const cleanShortForm = (text: string, category?: string) =>
+  applyShortFormNormalizations(text, category);
+
+const trimToLimit = (text: string, maxChars: number) => {
+  if (text.length <= maxChars) return text;
+  const snippet = text.slice(0, Math.max(0, maxChars - 3)).trim();
+  const lastSpace = snippet.lastIndexOf(' ');
+  if (lastSpace > 0) {
+    return `${snippet.slice(0, lastSpace).trim()}...`;
+  }
+  return `${snippet}...`;
+};
+
+const trimShortFormForPlatform = (text: string, platform: string) => {
+  const limits: Record<string, number> = {
+    twitter: 280,
+    threads: 450,
+    bluesky: 300,
+  };
+  const limit = limits[platform] || 450;
+  return trimToLimit(text, limit);
+};
+
+const TRUNCATION_PATTERNS = [
+  /\bthe\.$/i,
+  /\beach\.$/i,
+  /\bbegin at\.$/i,
+  /\bcrosses the\.$/i,
+  /\band the\.$/i,
+  /:\s*$/i,
+];
+
+const hasTruncationArtifact = (text: string) =>
+  TRUNCATION_PATTERNS.some((pattern) => pattern.test(text.trim()));
+
+const getTopicFallbackDefinition = (topic: string) => {
+  const key = topic.trim().toLowerCase();
+  if (!topic.trim()) {
+    return 'describes a timing marker that helps track cycles over time';
+  }
+  return `${topic.trim()} highlights how timing and attention cycle through experience`;
+};
+
+const isCompleteSentence = (text: string) => {
+  if (!text) return false;
+  const trimmed = text.trim();
+  if (!/[.!?]$/.test(trimmed)) return false;
+  return !hasTruncationArtifact(trimmed);
+};
+
+const sanitizeSnippet = (text: string | undefined, fallback: string) => {
+  const source = String(text || '').trim();
+  if (!source) return fallback;
+  const sentences = splitSentences(source);
+  for (const sentence of sentences) {
+    if (isCompleteSentence(sentence)) {
+      return sentence;
+    }
+  }
+  if (isCompleteSentence(source)) return source;
+  return fallback;
+};
+
+const formatTopicLabel = (topic: string) => {
+  const trimmed = topic.trim();
+  const lower = trimmed.toLowerCase();
+  if (
+    lower.startsWith('the ') ||
+    lower.startsWith('a ') ||
+    lower.startsWith('an ')
+  ) {
+    return trimmed;
+  }
+  return `The ${trimmed}`;
+};
+
+const buildDefinitionSentence = (
+  topic: string,
+  sourceSnippet: string,
+): string => {
+  const safeSnippet = sourceSnippet.replace(/[.!?]+$/, '').trim();
+  if (!safeSnippet) {
+    return `${formatTopicLabel(topic)} ${getTopicFallbackDefinition(topic)}.`;
+  }
+  if (safeSnippet.toLowerCase().includes(topic.toLowerCase())) {
+    return ensurePeriod(safeSnippet);
+  }
+  return ensurePeriod(`${formatTopicLabel(topic)} is ${safeSnippet}`);
+};
+
+const buildPracticalSentence = (
+  topic: string,
+  data: Record<string, any> | null,
+): string => {
+  if (Array.isArray(data?.magicalUses) && data.magicalUses.length > 0) {
+    return ensurePeriod(
+      `${topic} is often used for ${formatList(data.magicalUses, 2)}`,
+    );
+  }
+  if (
+    Array.isArray(data?.healingPractices) &&
+    data.healingPractices.length > 0
+  ) {
+    return ensurePeriod(
+      `People work with ${topic} through ${formatList(
+        data.healingPractices,
+        2,
+      )}`,
+    );
+  }
+  if (Array.isArray(data?.traditions) && data.traditions.length > 0) {
+    return ensurePeriod(
+      `${topic} is often marked by ${formatList(data.traditions, 2)}`,
+    );
+  }
+  if (data?.houseMeaning) {
+    return ensurePeriod(String(data.houseMeaning));
+  }
+  if (data?.transitEffect) {
+    return ensurePeriod(String(data.transitEffect));
+  }
+  if (data?.element || data?.modality) {
+    const parts = [data.element, data.modality].filter(Boolean).join(' and ');
+    if (parts) {
+      return ensurePeriod(`${topic} works through ${parts}`);
+    }
+  }
+  const keywords = Array.isArray(data?.keywords) ? data.keywords : [];
+  if (keywords.length > 0) {
+    return ensurePeriod(`${topic} often relates to ${formatList(keywords, 2)}`);
+  }
+  return ensurePeriod(`${topic} adds practical context to daily timing`);
+};
+
+const prefixSentenceWithTopic = (topic: string, sentence: string) => {
+  const trimmed = sentence.trim();
+  if (!trimmed) return '';
+  if (trimmed.toLowerCase().includes(topic.toLowerCase())) {
+    return ensurePeriod(trimmed);
+  }
+  if (/^it\s/i.test(trimmed)) {
+    return ensurePeriod(
+      trimmed.replace(/^it\s/i, `${formatTopicLabel(topic)} `),
+    );
+  }
+  return ensurePeriod(
+    `${formatTopicLabel(topic)} ${trimmed.replace(/^[A-Z]/, (c) => c.toLowerCase())}`,
+  );
+};
+
+const buildMechanicsSentence = (
+  topic: string,
+  data: Record<string, any> | null,
+): string => {
+  if (data?.element && data?.modality) {
+    return ensurePeriod(
+      `${topic} works through the ${data.element} element and ${data.modality} modality`,
+    );
+  }
+  if (data?.element) {
+    return ensurePeriod(`${topic} is linked to the ${data.element} element`);
+  }
+  if (data?.modality) {
+    return ensurePeriod(`${topic} moves through ${data.modality} modality`);
+  }
+  if (Array.isArray(data?.rules) && data.rules.length > 0) {
+    return ensurePeriod(
+      `${topic} is associated with ${formatList(data.rules, 2)}`,
+    );
+  }
+  if (data?.rulingPlanet || data?.ruler) {
+    return ensurePeriod(
+      `${topic} is associated with ${(data.rulingPlanet || data.ruler).toString()}`,
+    );
+  }
+  if (data?.houseMeaning) {
+    return ensurePeriod(String(data.houseMeaning));
+  }
+  if (data?.transitEffect) {
+    return ensurePeriod(String(data.transitEffect));
+  }
+  return ensurePeriod(`${topic} has a role within wider cycles`);
+};
+
+const buildUseSentence = (
+  topic: string,
+  data: Record<string, any> | null,
+): string => {
+  if (Array.isArray(data?.magicalUses) && data.magicalUses.length > 0) {
+    return ensurePeriod(
+      `Try working with ${topic} for ${formatList(data.magicalUses, 2)}`,
+    );
+  }
+  if (
+    Array.isArray(data?.healingPractices) &&
+    data.healingPractices.length > 0
+  ) {
+    return ensurePeriod(
+      `A simple way to use ${topic} is ${formatList(data.healingPractices, 2)}`,
+    );
+  }
+  if (Array.isArray(data?.traditions) && data.traditions.length > 0) {
+    return ensurePeriod(
+      `A practical example is ${formatList(data.traditions, 2)}`,
+    );
+  }
+  return ensurePeriod(`Try noting how ${topic} shows up this week`);
+};
+
+const buildStandaloneEducationalCopy = ({
+  topic,
+  data,
+  detail,
+  sourceSnippet,
+  mode,
+  category,
+  deepKind,
+}: {
+  topic: string;
+  data: Record<string, any> | null;
+  detail?: string;
+  sourceSnippet: string;
+  mode: 'intro' | 'deep';
+  category?: string;
+  deepKind?: 'mechanics' | 'use';
+}) => {
+  const definitionSentence = buildDefinitionSentence(topic, sourceSnippet);
+  const practicalSentence = buildPracticalSentence(topic, data);
+  const detailSentence = detail
+    ? sanitizeSnippet(detail, '')
+    : sanitizeSnippet(sourceSnippet, '');
+  const sentences =
+    mode === 'intro'
+      ? [definitionSentence, practicalSentence]
+      : [
+          prefixSentenceWithTopic(
+            topic,
+            detailSentence || sanitizeSnippet(sourceSnippet, ''),
+          ),
+          deepKind === 'use'
+            ? buildUseSentence(topic, data)
+            : buildMechanicsSentence(topic, data),
+        ];
+  return cleanShortForm(sentences.filter(Boolean).join(' '), category);
+};
+
+const enforceContentSafety = ({
+  text,
+  category,
+  topic,
+  mode,
+  detail,
+}: {
+  text: string;
+  category: string;
+  topic: string;
+  mode: 'intro' | 'deep';
+  detail?: string;
+}) => {
+  let safe = text;
+  const bannedPhrases = [
+    'is the focus here',
+    'matters because it adds context to timing and pattern',
+    'related focus points include',
+  ];
+  if (hasTruncationArtifact(safe)) {
+    safe = buildStandaloneEducationalCopy({
+      topic,
+      data: null,
+      detail: undefined,
+      sourceSnippet: '',
+      mode,
+      category,
+    });
+  }
+  if (bannedPhrases.some((phrase) => safe.toLowerCase().includes(phrase))) {
+    safe = buildStandaloneEducationalCopy({
+      topic,
+      data: null,
+      detail: undefined,
+      sourceSnippet: '',
+      mode,
+      category,
+    });
+  }
+  return safe;
+};
+
+const getInlineHashtags = (
+  platform: string,
+  hashtags?: { domain: string; topic: string; brand: string },
+): string[] => {
+  if (!hashtags) return [];
+  if (platform === 'threads') {
+    return [hashtags.domain, hashtags.topic, hashtags.brand].slice(0, 2);
+  }
+  if (platform === 'bluesky') {
+    return [hashtags.topic].filter(Boolean).slice(0, 1);
+  }
+  return [];
+};
+
+const isAllowedSlugForCategory = (category: string, slug: string) => {
+  const lower = slug.toLowerCase();
+  const allowedPrefixes: Record<string, string[]> = {
+    lunar: ['moon', 'moon/', 'moon-', 'moon-in', 'lunar', 'eclipses'],
+    planetary: ['astronomy/planets', 'astronomy/retrogrades', 'planets'],
+    zodiac: ['zodiac', 'rising-sign', 'birth-chart'],
+    tarot: ['tarot', 'card-combinations', 'tarot-spreads'],
+    crystals: ['crystals'],
+    numerology: ['numerology', 'angel-numbers', 'life-path'],
+    chakras: ['chakras'],
+    sabbat: ['wheel-of-the-year', 'sabbats', 'sabbat'],
+  };
+  const prefixes = allowedPrefixes[category] || [];
+  return prefixes.some((prefix) => lower.startsWith(prefix));
+};
+
+type SourceInfo = {
+  sourceType: 'grimoire' | 'fallback';
+  sourceId: string;
+  sourceTitle: string;
+  sourceSnippet: string;
+  data: Record<string, any> | null;
+};
+
+const normalizeTopicKey = (value: string) =>
+  value
+    .toLowerCase()
+    .replace(/[^a-z0-9\s]/g, '')
+    .replace(/\s+/g, ' ')
+    .trim();
+
+const matchesTopic = (title: string, topic: string) => {
+  const titleKey = normalizeTopicKey(title);
+  const topicKey = normalizeTopicKey(topic);
+  return (
+    titleKey.includes(topicKey) ||
+    topicKey.includes(titleKey) ||
+    titleKey === topicKey
+  );
+};
+
+const splitSentencesForHook = (text?: string) => {
+  if (!text) return [];
+  return (
+    text
+      .replace(/(\d)\.(\d)/g, '$1<DECIMAL>$2')
+      .match(/[^.!?]+[.!?]+|[^.!?]+$/g)
+      ?.map((sentence) => sentence.replace(/<DECIMAL>/g, '.').trim())
+      .filter(Boolean) || []
+  );
+};
+
+const buildHookSentenceFromSource = (source?: string, topic?: string) => {
+  if (!source) return null;
+  const sentences = splitSentencesForHook(source);
+  for (const sentence of sentences) {
+    if (!sentence) continue;
+    if (hasTruncationArtifact(sentence)) continue;
+    if (sentence.endsWith(':')) continue;
+    if (
+      topic &&
+      !sentence.toLowerCase().includes(topic.toLowerCase()) &&
+      sentence.length < 40
+    ) {
+      continue;
+    }
+    return ensurePeriod(sentence);
+  }
+  return null;
+};
+
+export const buildVideoHook = (facet: DailyFacet) => {
+  const topic = facet.title;
+  const sourceCandidate =
+    buildHookSentenceFromSource(facet.shortFormHook, topic) ||
+    buildHookSentenceFromSource(facet.focus, topic);
+  if (sourceCandidate) {
+    return sourceCandidate;
+  }
+  return `If you’ve heard of ${topic}, here’s what to know.`;
+};
+
+export const resolveSourceForFacet = (
+  facet: DailyFacet,
+  category: string,
+): SourceInfo => {
+  const rawSlug = facet.grimoireSlug;
+  const normalizedSlug = rawSlug.includes('#')
+    ? rawSlug.replace('#', '/')
+    : rawSlug;
+  const allowedSlug = isAllowedSlugForCategory(category, normalizedSlug);
+  const fallbackSnippet = facet.focus || facet.shortFormHook || facet.title;
+
+  const trySnippets: Array<{ snippet: any; slug: string }> = [];
+  if (allowedSlug) {
+    const direct = getGrimoireSnippetBySlug(normalizedSlug);
+    if (direct) {
+      trySnippets.push({ snippet: direct, slug: direct.slug });
+    }
+  }
+
+  if (trySnippets.length === 0) {
+    const searched = searchGrimoireForTopic(facet.title, 3);
+    for (const snippet of searched) {
+      if (!isAllowedSlugForCategory(category, snippet.slug)) continue;
+      trySnippets.push({ snippet, slug: snippet.slug });
+    }
+  }
+
+  const matched = trySnippets.find((candidate) =>
+    matchesTopic(candidate.snippet.title || '', facet.title),
+  );
+  if (matched) {
+    const sourceSnippet =
+      matched.snippet.summary ||
+      matched.snippet.fullContent?.description ||
+      matched.snippet.title ||
+      fallbackSnippet;
+    return {
+      sourceType: 'grimoire',
+      sourceId: matched.slug || normalizedSlug,
+      sourceTitle: matched.snippet.title || facet.title,
+      sourceSnippet,
+      data: getSafeGrimoireData(facet, category),
+    };
+  }
+
+  return {
+    sourceType: 'fallback',
+    sourceId: normalizedSlug,
+    sourceTitle: facet.title,
+    sourceSnippet: fallbackSnippet,
+    data: null,
+  };
+};
+
+const getSafeGrimoireData = (
+  facet: DailyFacet,
+  category: string,
+): Record<string, any> | null => {
+  if (!isAllowedSlugForCategory(category, facet.grimoireSlug)) {
+    return null;
+  }
+  const data = getGrimoireDataForFacet(facet);
+  if (!data) return null;
+  if (category === 'lunar') {
+    const tarotKeys = [
+      'arcana',
+      'suit',
+      'cardNumber',
+      'court',
+      'uprightMeaning',
+      'reversedMeaning',
+    ];
+    const hasTarotFields = tarotKeys.some((key) => key in data);
+    if (hasTarotFields) return null;
+  }
+  return data;
+};
+
+const containsForbiddenKeywords = (_text: string, _category: string) => false;
+
+const applyPlatformFormatting = (
+  text: string,
+  platform: string,
+  hashtags?: { domain: string; topic: string; brand: string },
+) => {
+  const tags = getInlineHashtags(platform, hashtags);
+  const limits: Record<string, number> = {
+    twitter: 280,
+    threads: 450,
+    bluesky: 350,
+  };
+  const limit = limits[platform] || 450;
+  const tagText = tags.length > 0 ? tags.join(' ') : '';
+  const reserved = tagText ? tagText.length + 1 : 0;
+  const bodyLimit = Math.max(80, limit - reserved);
+  const trimmedBody = trimToLimit(text, bodyLimit);
+  return tagText ? `${trimmedBody} ${tagText}` : trimmedBody;
+};
+
+const buildKeywordSentence = (data: Record<string, any> | null) => {
+  if (!data) return '';
+  const keywords: string[] = [];
+  if (Array.isArray(data.keywords)) {
+    keywords.push(...data.keywords);
+  }
+  if (Array.isArray(data.rules)) {
+    keywords.push(...data.rules);
+  }
+  if (data.element) keywords.push(data.element);
+  if (data.modality) keywords.push(data.modality);
+  if (data.planet) keywords.push(data.planet);
+  if (data.rulingPlanet) keywords.push(data.rulingPlanet);
+  if (data.ruler) keywords.push(data.ruler);
+
+  const unique = Array.from(
+    new Map(
+      keywords.filter(Boolean).map((item) => [String(item), String(item)]),
+    ).values(),
+  );
+  const trimmed = unique.slice(0, 4);
+  if (trimmed.length === 0) return '';
+  return `Common keywords: ${formatList(trimmed, 4)}.`;
+};
+
+const addDiscoveryKeywords = (
+  text: string,
+  data: Record<string, any> | null,
+  category?: string,
+) => {
+  const keywordSentence = buildKeywordSentence(data);
+  if (!keywordSentence) return text;
+  const lowerText = text.toLowerCase();
+  const keywords = keywordSentence
+    .replace(/^Common keywords:\s+/i, '')
+    .replace(/\.$/, '')
+    .split(',')
+    .map((item) => item.replace(/\band\b/i, '').trim())
+    .filter(Boolean);
+  const hasKeyword = keywords.some((keyword) =>
+    lowerText.includes(keyword.toLowerCase()),
+  );
+  if (hasKeyword) return text;
+  return cleanShortForm(`${text} ${keywordSentence}`, category);
+};
+
+const buildIntroShortForm = (
+  facet: DailyFacet,
+  data: Record<string, any> | null,
+  category?: string,
+) => {
+  const source =
+    data?.description ||
+    data?.mysticalProperties ||
+    data?.information ||
+    data?.meaning ||
+    data?.properties ||
+    facet.focus ||
+    facet.shortFormHook ||
+    facet.title;
+  const sentences = splitSentences(String(source));
+  const intro = sentences.slice(0, 2).map(ensurePeriod).join(' ');
+  return cleanShortForm(intro, category);
+};
+
+const buildDeepShortForm = (
+  facet: DailyFacet,
+  data: Record<string, any> | null,
+  category?: string,
+) => {
+  const sentences: string[] = [];
+  const keywords = Array.isArray(data?.keywords) ? data.keywords : [];
+  if (keywords.length > 0) {
+    sentences.push(`Common keywords: ${formatList(keywords, 3)}.`);
+  }
+  if (data?.mysticalProperties) {
+    sentences.push(ensurePeriod(String(data.mysticalProperties)));
+  } else if (data?.metaphysicalProperties) {
+    sentences.push(ensurePeriod(String(data.metaphysicalProperties)));
+  }
+  if (data?.element && data?.modality) {
+    sentences.push(
+      `Its element is ${data.element} and its modality is ${data.modality}.`,
+    );
+  } else if (data?.element) {
+    sentences.push(`Its element is ${data.element}.`);
+  } else if (data?.modality) {
+    sentences.push(`Its modality is ${data.modality}.`);
+  }
+  if (Array.isArray(data?.rules) && data.rules.length > 0) {
+    sentences.push(`It rules ${formatList(data.rules, 3)}.`);
+  } else if (data?.rulingPlanet || data?.ruler) {
+    sentences.push(`Its ruling planet is ${data.rulingPlanet || data.ruler}.`);
+  }
+  if (data?.exalted || data?.detriment || data?.fall) {
+    const parts = [
+      data?.exalted ? `exalted in ${data.exalted}` : null,
+      data?.detriment ? `in detriment in ${data.detriment}` : null,
+      data?.fall ? `in fall in ${data.fall}` : null,
+    ].filter(Boolean);
+    if (parts.length > 0) {
+      sentences.push(`It is ${parts.join(', ')}.`);
+    }
+  }
+  if (data?.houseMeaning) {
+    sentences.push(ensurePeriod(String(data.houseMeaning)));
+  } else if (data?.transitEffect) {
+    sentences.push(ensurePeriod(String(data.transitEffect)));
+  }
+  if (Array.isArray(data?.magicalUses) && data.magicalUses.length > 0) {
+    sentences.push(
+      `In magical practice, it is used for ${formatList(data.magicalUses, 3)}.`,
+    );
+  } else if (
+    Array.isArray(data?.healingPractices) &&
+    data.healingPractices.length > 0
+  ) {
+    sentences.push(
+      `Practices include ${formatList(data.healingPractices, 3)}.`,
+    );
+  } else if (Array.isArray(data?.traditions) && data.traditions.length > 0) {
+    sentences.push(
+      `Traditional observances include ${formatList(data.traditions, 3)}.`,
+    );
+  }
+
+  if (sentences.length === 0) {
+    const fallback =
+      facet.focus ||
+      facet.shortFormHook ||
+      facet.title ||
+      'Astrological insight.';
+    sentences.push(ensurePeriod(fallback));
+  }
+
+  const core = sentences.slice(0, 2).join(' ');
+  const expanded =
+    sentences.length < 2 && facet.focus
+      ? `${core} ${ensurePeriod(facet.focus)}`
+      : core;
+  return cleanShortForm(expanded, category);
+};
+
+type DeepDiveCandidate = { kind: string; text: string };
+
+const buildDeepDiveShortForms = (
+  facet: DailyFacet,
+  data: Record<string, any> | null,
+  category?: string,
+): DeepDiveCandidate[] => {
+  const deepDives: DeepDiveCandidate[] = [];
+  const keywords = Array.isArray(data?.keywords) ? data.keywords : [];
+
+  const structureSentences: string[] = [];
+  if (data?.element && data?.modality) {
+    structureSentences.push(
+      `It sits in the ${data.element} element and the ${data.modality} modality, describing how its energy moves.`,
+    );
+  } else if (data?.element) {
+    structureSentences.push(`It belongs to the ${data.element} element.`);
+  } else if (data?.modality) {
+    structureSentences.push(`Its modality is ${data.modality}.`);
+  }
+  if (Array.isArray(data?.rules) && data.rules.length > 0) {
+    structureSentences.push(`It rules ${formatList(data.rules, 3)}.`);
+  } else if (data?.rulingPlanet || data?.ruler) {
+    structureSentences.push(
+      `Its ruling planet is ${data.rulingPlanet || data.ruler}.`,
+    );
+  }
+  if (data?.exalted || data?.detriment || data?.fall) {
+    const parts = [
+      data?.exalted ? `exalted in ${data.exalted}` : null,
+      data?.detriment ? `in detriment in ${data.detriment}` : null,
+      data?.fall ? `in fall in ${data.fall}` : null,
+    ].filter(Boolean);
+    if (parts.length > 0) {
+      structureSentences.push(`It is ${parts.join(', ')}.`);
+    }
+  }
+  if (structureSentences.length > 0) {
+    deepDives.push({
+      kind: 'structure',
+      text: cleanShortForm(structureSentences.slice(0, 2).join(' '), category),
+    });
+  }
+
+  const meaningSentences: string[] = [];
+  if (data?.houseMeaning) {
+    meaningSentences.push(ensurePeriod(String(data.houseMeaning)));
+  }
+  if (data?.transitEffect) {
+    meaningSentences.push(ensurePeriod(String(data.transitEffect)));
+  }
+  if (!meaningSentences.length && data?.uprightMeaning) {
+    meaningSentences.push(
+      `When expressed clearly, ${data.uprightMeaning.replace(/^[A-Z]/, (c: string) => c.toLowerCase())}`,
+    );
+  }
+  if (!meaningSentences.length && data?.spiritualMeaning) {
+    meaningSentences.push(ensurePeriod(String(data.spiritualMeaning)));
+  }
+  if (!meaningSentences.length && data?.mysticalProperties) {
+    meaningSentences.push(ensurePeriod(String(data.mysticalProperties)));
+  }
+  if (meaningSentences.length > 0) {
+    deepDives.push({
+      kind: 'meaning',
+      text: cleanShortForm(meaningSentences.slice(0, 2).join(' '), category),
+    });
+  }
+
+  const practiceSentences: string[] = [];
+  if (Array.isArray(data?.magicalUses) && data.magicalUses.length > 0) {
+    practiceSentences.push(
+      `In magical practice, it is used for ${formatList(data.magicalUses, 3)}.`,
+    );
+  }
+  if (
+    Array.isArray(data?.healingPractices) &&
+    data.healingPractices.length > 0
+  ) {
+    practiceSentences.push(
+      `Practices include ${formatList(data.healingPractices, 3)}.`,
+    );
+  }
+  if (Array.isArray(data?.traditions) && data.traditions.length > 0) {
+    practiceSentences.push(
+      `Traditional observances include ${formatList(data.traditions, 3)}.`,
+    );
+  }
+  if (Array.isArray(data?.colors) && data.colors.length > 0) {
+    practiceSentences.push(
+      `Correspondences often include colours like ${formatList(data.colors, 3)}.`,
+    );
+  }
+  if (Array.isArray(data?.herbs) && data.herbs.length > 0) {
+    practiceSentences.push(
+      `Herbal allies often include ${formatList(data.herbs, 3)}.`,
+    );
+  }
+  if (practiceSentences.length > 0) {
+    deepDives.push({
+      kind: 'practice',
+      text: cleanShortForm(practiceSentences.slice(0, 2).join(' '), category),
+    });
+  }
+
+  if (keywords.length > 0) {
+    const keywordSentence = cleanShortForm(
+      `Common keywords: ${formatList(keywords, 3)}.`,
+      category,
+    );
+    if (keywordSentence) {
+      deepDives.push({ kind: 'keywords', text: keywordSentence });
+    }
+  }
+
+  const fallbackSentence =
+    facet.focus ||
+    facet.shortFormHook ||
+    facet.title ||
+    'Astrological insight.';
+  if (deepDives.length === 0) {
+    deepDives.push({
+      kind: 'fallback',
+      text: cleanShortForm(ensurePeriod(fallbackSentence), category),
+    });
+  }
+
+  return deepDives;
+};
+
+const normalizeForComparison = (text: string) =>
+  text
+    .toLowerCase()
+    .replace(/[^a-z0-9\s]/g, '')
+    .replace(/\s+/g, ' ')
+    .trim();
+
+const isTooSimilar = (a: string, b: string) => {
+  const aNorm = normalizeForComparison(a);
+  const bNorm = normalizeForComparison(b);
+  if (!aNorm || !bNorm) return false;
+  if (aNorm === bNorm) return true;
+  if (aNorm.startsWith(bNorm) || bNorm.startsWith(aNorm)) return true;
+  const aWords = new Set(aNorm.split(' ').filter(Boolean));
+  const bWords = new Set(bNorm.split(' ').filter(Boolean));
+  if (aWords.size < 6 || bWords.size < 6) return false;
+  let overlap = 0;
+  for (const word of aWords) {
+    if (bWords.has(word)) overlap += 1;
+  }
+  const ratio = overlap / Math.min(aWords.size, bWords.size);
+  return ratio >= 0.75;
+};
+
+const bigramOverlapRatio = (a: string, b: string) => {
+  const aNorm = normalizeForComparison(a);
+  const bNorm = normalizeForComparison(b);
+  const aWords = aNorm.split(' ').filter(Boolean);
+  const bWords = bNorm.split(' ').filter(Boolean);
+  if (aWords.length < 2 || bWords.length < 2) return 0;
+  const aBigrams = new Set(
+    aWords.slice(0, -1).map((_, idx) => `${aWords[idx]} ${aWords[idx + 1]}`),
+  );
+  const bBigrams = new Set(
+    bWords.slice(0, -1).map((_, idx) => `${bWords[idx]} ${bWords[idx + 1]}`),
+  );
+  let overlap = 0;
+  for (const bigram of aBigrams) {
+    if (bBigrams.has(bigram)) overlap += 1;
+  }
+  return overlap / Math.max(aBigrams.size, bBigrams.size);
+};
+
+const selectUniqueDeepDives = (
+  candidates: DeepDiveCandidate[],
+  intro: string,
+  count: number,
+): string[] => {
+  const picks: DeepDiveCandidate[] = [];
+  const usedKinds = new Set<string>();
+  const filtered = candidates.filter(
+    (candidate) =>
+      candidate.text &&
+      !hasTruncationArtifact(candidate.text) &&
+      !isTooSimilar(candidate.text, intro),
+  );
+
+  for (const candidate of filtered) {
+    if (picks.length >= count) break;
+    if (usedKinds.has(candidate.kind)) continue;
+    if (picks.some((pick) => isTooSimilar(pick.text, candidate.text))) continue;
+    picks.push(candidate);
+    usedKinds.add(candidate.kind);
+  }
+
+  if (picks.length < count) {
+    for (const candidate of filtered) {
+      if (picks.length >= count) break;
+      if (picks.some((pick) => isTooSimilar(pick.text, candidate.text)))
+        continue;
+      picks.push(candidate);
+    }
+  }
+
+  return picks.map((pick) => pick.text);
+};
+
+const pickDeepDiveCandidate = (
+  candidates: DeepDiveCandidate[],
+  preferredKinds: string[],
+  usedTexts: string[],
+): DeepDiveCandidate | null => {
+  const filtered = candidates.filter(
+    (candidate) =>
+      candidate.text &&
+      !hasTruncationArtifact(candidate.text) &&
+      !usedTexts.some((used) => isTooSimilar(used, candidate.text)),
+  );
+  for (const kind of preferredKinds) {
+    const match = filtered.find((candidate) => candidate.kind === kind);
+    if (match) return match;
+  }
+  return filtered[0] || null;
+};
+
+const buildFallbackDeepDive = (
+  facet: DailyFacet,
+  data: Record<string, any> | null,
+  category?: string,
+): string => {
+  const topic = facet.title;
+  const keywords = Array.isArray(data?.keywords) ? data.keywords : [];
+  if (keywords.length > 0) {
+    return cleanShortForm(
+      `${topic} often links to ${formatList(keywords, 2)} in practice.`,
+      category,
+    );
+  }
+  if (data?.element) {
+    return cleanShortForm(
+      `${topic} is commonly associated with the ${data.element} element and its tone.`,
+      category,
+    );
+  }
+  if (Array.isArray(data?.rules) && data.rules.length > 0) {
+    return cleanShortForm(
+      `${topic} connects with ${formatList(data.rules, 2)} in astrological practice.`,
+      category,
+    );
+  }
+  return cleanShortForm(
+    ensurePeriod(facet.focus || facet.shortFormHook || topic),
+    category,
+  );
+};
+
+const createSeededRng = (seed: number) => () => {
+  let nextSeed = seed >>> 0;
+  nextSeed = (nextSeed * 1664525 + 1013904223) % 4294967296;
+  seed = nextSeed;
+  return nextSeed / 4294967296;
+};
+
+const seededShuffle = <T>(values: T[], seed: number) => {
+  const rng = createSeededRng(seed);
+  const arr = [...values];
+  for (let i = arr.length - 1; i > 0; i -= 1) {
+    const j = Math.floor(rng() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+};
+
+const buildShortFormOverrides = (weekStartDate: Date): ShortFormOverride[] => {
+  const weekKey = weekStartDate.toISOString().split('T')[0];
+  const seed = hashString(weekKey);
+  const closingDayOffset = 6;
+  const dayPool = [0, 1, 2, 3, 4, 5];
+  const [personaDayOffset, questionDayOffset] = seededShuffle(dayPool, seed);
+  const personaCount = seed % 2 === 0 ? 3 : 4;
+  const personaList = seededShuffle(PERSONA_VOCAB, seed).slice(0, personaCount);
+  return [
+    {
+      dayOffset: personaDayOffset,
+      postType: 'persona',
+      seed,
+      personaList,
+    },
+    {
+      dayOffset: questionDayOffset,
+      postType: 'question',
+      seed: seed + 1,
+    },
+    {
+      dayOffset: closingDayOffset,
+      postType: 'closing_statement',
+      seed: seed + 2,
+    },
+  ];
 };
 
 /**
@@ -486,6 +1565,7 @@ export function formatLongFormForPlatform(
   content: LongFormContent,
   hashtags: { domain: string; topic: string; brand: string },
   platform: string,
+  options?: { postType?: SocialPostType; topicTitle?: string },
 ): string {
   const config = platformHashtagConfig[platform] || {
     useHashtags: false,
@@ -514,24 +1594,31 @@ export function formatLongFormForPlatform(
 
   // Add hashtags if platform supports them
   if (config.useHashtags && config.count > 0) {
-    const tags = [hashtags.domain, hashtags.topic, hashtags.brand].slice(
-      0,
-      config.count,
-    );
-    formatted += '\n\n' + tags.join(' ');
+    const topicTitle = options?.topicTitle || '';
+    const postType = options?.postType || 'educational';
+    const tags = selectHashtagsForPostType({
+      topicTitle,
+      postType,
+      platform,
+      hashtagData: hashtags,
+    });
+    if (tags.length > 0) {
+      formatted += '\n\n' + tags.join(' ');
+    }
   }
 
-  return formatted;
+  return normalizeHashtagsForPlatform(formatted, platform);
 }
 
 /**
  * Format short-form content for a specific platform
- * Now includes hashtags (3) for all platforms
+ * Adds hashtags where enabled per platform
  */
 export function formatShortFormForPlatform(
   content: string,
   platform: string,
   hashtags?: { domain: string; topic: string; brand: string },
+  options?: { postType?: SocialPostType; topicTitle?: string },
 ): string {
   const config = platformHashtagConfig[platform] || {
     useHashtags: true,
@@ -542,14 +1629,20 @@ export function formatShortFormForPlatform(
 
   // Add hashtags if platform supports them and hashtags are provided
   if (config.useHashtags && config.count > 0 && hashtags) {
-    const tags = [hashtags.domain, hashtags.topic, hashtags.brand].slice(
-      0,
-      config.count,
-    );
-    formatted += '\n\n' + tags.join(' ');
+    const topicTitle = options?.topicTitle || '';
+    const postType = options?.postType || 'educational';
+    const tags = selectHashtagsForPostType({
+      topicTitle,
+      postType,
+      platform,
+      hashtagData: hashtags,
+    });
+    if (tags.length > 0) {
+      formatted += '\n\n' + tags.join(' ');
+    }
   }
 
-  return formatted;
+  return normalizeHashtagsForPlatform(formatted, platform);
 }
 
 /**
@@ -582,8 +1675,15 @@ export function generateWeekContent(
   weekStartDate: Date,
   currentThemeIndex: number = 0,
   videoScript?: VideoScriptContext,
+  facetOffset: number = 0,
+  includeSabbats: boolean = true,
 ): ThematicContent[] {
-  const plan = getWeeklyContentPlan(weekStartDate, currentThemeIndex);
+  const plan = getWeeklyContentPlan(
+    weekStartDate,
+    currentThemeIndex,
+    facetOffset,
+    includeSabbats,
+  );
 
   return plan.map(({ date, theme, facet }) =>
     generateDayContent(date, theme, facet, videoScript),
@@ -596,13 +1696,31 @@ export function generateWeekContent(
 export interface ThematicPost {
   content: string;
   platform: string;
-  postType: 'educational' | 'closing_ritual';
+  postType:
+    | 'educational'
+    | 'educational_intro'
+    | 'educational_deep'
+    | 'educational_deep_1'
+    | 'educational_deep_2'
+    | 'educational_deep_3'
+    | 'closing_ritual'
+    | 'closing_statement'
+    | 'persona'
+    | 'question'
+    | 'video'
+    | 'video_caption';
   topic: string;
   scheduledDate: Date;
   hashtags: string;
   category: string;
   slug: string;
   dayOffset: number;
+  themeName: string;
+  sourceType?: 'grimoire' | 'fallback';
+  sourceId?: string;
+  sourceTitle?: string;
+  partNumber?: number;
+  totalParts?: number;
 }
 
 type ClosingRitualStyle = 'long' | 'short';
@@ -625,37 +1743,121 @@ function getClosingThemeDescriptor(
     : `This week's ${normalized} energy invites a slow, conscious ending.`;
 }
 
+function buildClosingInvitation(themeName?: string): string {
+  if (themeName) {
+    const normalized = themeName.toLowerCase();
+    return `What are you noticing about ${normalized} as you let this pause settle?`;
+  }
+  return 'What subtle detail are you sitting with as this pause settles?';
+}
+
 function buildClosingRitualContent(
   themeName: string | undefined,
   style: ClosingRitualStyle,
 ): string {
   const descriptor = getClosingThemeDescriptor(themeName, style === 'short');
+  const invitation = buildClosingInvitation(themeName);
 
   if (style === 'long') {
-    return `Sunday closing ritual • Pause with the twilight, breathe slowly, and release what no longer serves. ${descriptor} Keep returning to the stars for steadying breath.`;
+    return `Sunday closing ritual • Pause with the twilight, breathe slowly, and release what no longer serves. ${descriptor} Keep returning to the stars for steadying breath. ${invitation}`;
   }
 
-  return `Sunday closing ritual: breathe slow, release, rest. ${descriptor}`;
+  return `Sunday closing ritual: breathe slow, release, rest. ${descriptor} ${invitation}`;
 }
 
-export function generateThematicPostsForWeek(
+export async function generateThematicPostsForWeek(
   weekStartDate: Date,
   currentThemeIndex: number = 0,
   videoScript?: VideoScriptContext,
-): ThematicPost[] {
+  facetOffset: number = 0,
+  includeSabbats: boolean = true,
+): Promise<ThematicPost[]> {
   const weekContent = generateWeekContent(
     weekStartDate,
     currentThemeIndex,
     videoScript,
+    facetOffset,
+    includeSabbats,
   );
   const posts: ThematicPost[] = [];
+  const weekTopics = weekContent.map((entry) => entry.facet.title);
+  const overrideCache = new Map<number, string>();
+  const getOverrideContent = async (
+    override: ShortFormOverride,
+    dayContent: ThematicContent,
+    sourceInfo: SourceInfo,
+  ) => {
+    if (!override) return '';
+    if (overrideCache.has(override.dayOffset)) {
+      return overrideCache.get(override.dayOffset) ?? '';
+    }
+    const snippet =
+      sourceInfo.sourceSnippet ||
+      dayContent.facet.focus ||
+      dayContent.facet.shortFormHook ||
+      dayContent.facet.title;
+    const dataKeywords = Array.isArray(sourceInfo.data?.keywords)
+      ? sourceInfo.data.keywords
+      : [];
+    let text: string | null = null;
+    if (override.postType === 'persona') {
+      text = await generatePersonaPost({
+        seed: override.seed,
+        themeName: dayContent.theme.name,
+        category: dayContent.theme.category,
+        dayTopic: dayContent.facet.title,
+        sourceSnippet: snippet,
+        personaList: override.personaList || PERSONA_VOCAB,
+        personaBodies: PERSONA_BODY_TEMPLATES,
+      });
+    } else if (override.postType === 'question') {
+      text = await generateQuestionPost({
+        seed: override.seed,
+        themeName: dayContent.theme.name,
+        category: dayContent.theme.category,
+        dayTopic: dayContent.facet.title,
+        dataKeywords,
+        sourceSnippet: snippet,
+        questionGuides: QUESTION_POOL,
+      });
+    } else if (override.postType === 'closing_statement') {
+      text = await generateClosingPost({
+        seed: override.seed,
+        themeName: dayContent.theme.name,
+        category: dayContent.theme.category,
+        weekTopics,
+        closingGuides: CLOSING_STATEMENTS,
+      });
+    }
+    if (!text && override.postType === 'question') {
+      text = buildQuestionPost(dayContent.facet.title, sourceInfo.data);
+    }
+    const resolvedText = text || '';
+    overrideCache.set(override.dayOffset, resolvedText);
+    return resolvedText;
+  };
+  const shortFormOverrides = buildShortFormOverrides(weekStartDate);
+  const overrideByDayOffset = new Map(
+    shortFormOverrides.map((override) => [override.dayOffset, override]),
+  );
+  const shortFormOverridePlatforms = new Set(['twitter', 'threads', 'bluesky']);
+  const ctaPlatforms = new Set(['threads', 'bluesky']);
 
   // Long-form platforms (educational depth, images)
-  const longFormPlatforms = ['linkedin', 'pinterest', 'facebook'];
-  // Short-form platforms (1-2 sentences, with hashtags and images)
+  const longFormPlatforms = ['linkedin', 'pinterest'];
+  // Short-form platforms (1-2 sentences, optional hashtags)
   const shortFormPlatforms = ['twitter', 'bluesky', 'threads'];
 
   for (const dayContent of weekContent) {
+    const sourceInfo = resolveSourceForFacet(
+      dayContent.facet,
+      dayContent.theme.category,
+    );
+    const sourceMeta = {
+      sourceType: sourceInfo.sourceType,
+      sourceId: sourceInfo.sourceId,
+      sourceTitle: sourceInfo.sourceTitle,
+    };
     // Long-form posts
     for (const platform of longFormPlatforms) {
       const longFormData = generateLongFormContent(
@@ -666,8 +1868,18 @@ export function generateThematicPostsForWeek(
         longFormData,
         dayContent.hashtags,
         platform,
+        {
+          postType: 'educational',
+          topicTitle: dayContent.facet.title,
+        },
       );
 
+      const dayOffset =
+        dayContent.date.getDay() === 0 ? 6 : dayContent.date.getDay() - 1;
+      const totalParts =
+        dayContent.theme.category === 'sabbat'
+          ? (dayContent.theme as SabbatTheme).leadUpFacets.length
+          : 7;
       posts.push({
         content: formattedContent,
         platform,
@@ -676,35 +1888,341 @@ export function generateThematicPostsForWeek(
         scheduledDate: dayContent.date,
         hashtags: `${dayContent.hashtags.domain} ${dayContent.hashtags.topic}`,
         category: dayContent.theme.category,
-        dayOffset:
-          dayContent.date.getDay() === 0 ? 6 : dayContent.date.getDay() - 1,
+        dayOffset,
         slug:
           dayContent.facet.grimoireSlug.split('/').pop() ||
           dayContent.facet.title.toLowerCase().replace(/\s+/g, '-'),
+        themeName: dayContent.theme.name,
+        partNumber: dayOffset + 1,
+        totalParts,
+        ...sourceMeta,
       });
     }
 
     // Short-form posts (now with hashtags and images)
     for (const platform of shortFormPlatforms) {
+      const dayOffset =
+        dayContent.date.getDay() === 0 ? 6 : dayContent.date.getDay() - 1;
+      const override = shortFormOverridePlatforms.has(platform)
+        ? overrideByDayOffset.get(dayOffset)
+        : undefined;
+      const data = sourceInfo.data;
+
+      if (shortFormOverridePlatforms.has(platform)) {
+        const baseIntro = buildStandaloneEducationalCopy({
+          topic: dayContent.facet.title,
+          data,
+          sourceSnippet: sourceInfo.sourceSnippet,
+          mode: 'intro',
+          category: dayContent.theme.category,
+        });
+        const safeIntro = enforceContentSafety({
+          text: baseIntro,
+          category: dayContent.theme.category,
+          topic: dayContent.facet.title,
+          mode: 'intro',
+        });
+        const keywordBoostedIntro = addDiscoveryKeywords(
+          safeIntro,
+          data,
+          dayContent.theme.category,
+        );
+        let aiCtaLine = '';
+        if (ctaPlatforms.has(platform)) {
+          try {
+            const snippet =
+              sourceInfo.sourceSnippet ||
+              dayContent.facet.focus ||
+              dayContent.facet.shortFormHook ||
+              dayContent.facet.title;
+            aiCtaLine = await generateEducationalCta({
+              themeName: dayContent.theme.name,
+              category: dayContent.theme.category,
+              topic: dayContent.facet.title,
+              sourceSnippet: snippet,
+            });
+          } catch (error) {
+            console.warn(
+              'Failed to generate CTA line for',
+              platform,
+              dayContent.facet.title,
+              (error as Error).message,
+            );
+          }
+        }
+        const assembledIntro = [keywordBoostedIntro, aiCtaLine]
+          .filter(Boolean)
+          .join(' ');
+        const introContent = applyPlatformFormatting(
+          normalizeGeneratedContent(assembledIntro, {
+            topicLabel: dayContent.facet.title,
+          }),
+          platform,
+          dayContent.hashtags,
+        );
+        posts.push({
+          content: introContent,
+          platform,
+          postType: 'educational_intro',
+          topic: dayContent.facet.title,
+          scheduledDate: dayContent.date,
+          hashtags: `${dayContent.hashtags.domain} ${dayContent.hashtags.topic}`,
+          category: dayContent.theme.category,
+          dayOffset,
+          slug:
+            dayContent.facet.grimoireSlug.split('/').pop() ||
+            dayContent.facet.title.toLowerCase().replace(/\s+/g, '-'),
+          themeName: dayContent.theme.name,
+          partNumber: dayOffset + 1,
+          totalParts:
+            dayContent.theme.category === 'sabbat'
+              ? (dayContent.theme as SabbatTheme).leadUpFacets.length
+              : 7,
+          ...sourceMeta,
+        });
+
+        if (platform !== 'threads') {
+          continue;
+        }
+
+        const deepDiveCandidates = buildDeepDiveShortForms(
+          dayContent.facet,
+          data,
+          dayContent.theme.category,
+        );
+        const deepDiveTargets = override ? 2 : 3;
+        const usedTexts: string[] = [safeIntro];
+        const deep1Candidate = pickDeepDiveCandidate(
+          deepDiveCandidates,
+          ['structure', 'meaning', 'keywords'],
+          usedTexts,
+        );
+        const deep1Text = deep1Candidate?.text || '';
+        if (deep1Text) usedTexts.push(deep1Text);
+        const deep2Candidate = pickDeepDiveCandidate(
+          deepDiveCandidates,
+          ['practice', 'keywords', 'meaning'],
+          usedTexts,
+        );
+        const deep2Text = deep2Candidate?.text || '';
+        if (deep2Text) usedTexts.push(deep2Text);
+        const deep3Candidate =
+          deepDiveTargets > 2
+            ? pickDeepDiveCandidate(
+                deepDiveCandidates,
+                ['meaning', 'practice', 'keywords'],
+                usedTexts,
+              )
+            : null;
+        const deepDives = [deep1Text, deep2Text, deep3Candidate?.text]
+          .filter(Boolean)
+          .slice(0, deepDiveTargets);
+
+        const uniqueDeepDives: string[] = [];
+        for (const deepDive of deepDives) {
+          if (deepDive && hasTruncationArtifact(deepDive)) continue;
+          if (deepDive && isTooSimilar(deepDive, dayContent.shortForm))
+            continue;
+          if (
+            deepDive &&
+            uniqueDeepDives.some((entry) => isTooSimilar(entry, deepDive))
+          )
+            continue;
+          if (deepDive) uniqueDeepDives.push(deepDive);
+        }
+
+        let attempts = 0;
+        while (uniqueDeepDives.length < deepDiveTargets && attempts < 3) {
+          const fallback = buildFallbackDeepDive(
+            dayContent.facet,
+            data,
+            dayContent.theme.category,
+          );
+          if (
+            !hasTruncationArtifact(fallback) &&
+            !isTooSimilar(fallback, dayContent.shortForm) &&
+            !uniqueDeepDives.some((entry) => isTooSimilar(entry, fallback))
+          ) {
+            uniqueDeepDives.push(fallback);
+          }
+          attempts += 1;
+        }
+
+        while (uniqueDeepDives.length < 2) {
+          const fallback = cleanShortForm(
+            ensurePeriod(dayContent.facet.title),
+            dayContent.theme.category,
+          );
+          uniqueDeepDives.push(fallback);
+        }
+
+        const builtDeepContents: string[] = [];
+        uniqueDeepDives.forEach((deepDive, index) => {
+          let resolvedDeep = deepDive;
+          const overlapIntro = bigramOverlapRatio(resolvedDeep, safeIntro);
+          const overlapPrev = uniqueDeepDives
+            .slice(0, index)
+            .some((prev) => bigramOverlapRatio(prev, resolvedDeep) > 0.3);
+          if (overlapIntro > 0.3 || overlapPrev) {
+            const fallback = buildFallbackDeepDive(
+              dayContent.facet,
+              data,
+              dayContent.theme.category,
+            );
+            if (
+              !hasTruncationArtifact(fallback) &&
+              bigramOverlapRatio(fallback, safeIntro) <= 0.3
+            ) {
+              resolvedDeep = fallback;
+            }
+          }
+          const deepKind = index === 1 ? 'use' : 'mechanics';
+          let baseDeep = buildStandaloneEducationalCopy({
+            topic: dayContent.facet.title,
+            data,
+            detail: resolvedDeep,
+            sourceSnippet: sourceInfo.sourceSnippet,
+            mode: 'deep',
+            category: dayContent.theme.category,
+            deepKind,
+          });
+          if (
+            bigramOverlapRatio(baseDeep, safeIntro) > 0.3 ||
+            builtDeepContents.some(
+              (prev) => bigramOverlapRatio(prev, baseDeep) > 0.3,
+            )
+          ) {
+            baseDeep = buildStandaloneEducationalCopy({
+              topic: dayContent.facet.title,
+              data,
+              detail: resolvedDeep,
+              sourceSnippet: sourceInfo.sourceSnippet,
+              mode: 'deep',
+              category: dayContent.theme.category,
+              deepKind: deepKind === 'use' ? 'mechanics' : 'use',
+            });
+          }
+          const safeDeep = enforceContentSafety({
+            text: baseDeep,
+            category: dayContent.theme.category,
+            topic: dayContent.facet.title,
+            mode: 'deep',
+            detail: deepDive,
+          });
+          builtDeepContents.push(safeDeep);
+          const deepDiveContent = applyPlatformFormatting(
+            addDiscoveryKeywords(safeDeep, data, dayContent.theme.category),
+            platform,
+            dayContent.hashtags,
+          );
+          posts.push({
+            content: deepDiveContent,
+            platform,
+            postType:
+              index === 0
+                ? 'educational_deep_1'
+                : index === 1
+                  ? 'educational_deep_2'
+                  : 'educational_deep_3',
+            topic: dayContent.facet.title,
+            scheduledDate: dayContent.date,
+            hashtags: `${dayContent.hashtags.domain} ${dayContent.hashtags.topic}`,
+            category: dayContent.theme.category,
+            dayOffset,
+            slug:
+              dayContent.facet.grimoireSlug.split('/').pop() ||
+              dayContent.facet.title.toLowerCase().replace(/\s+/g, '-'),
+            themeName: dayContent.theme.name,
+            partNumber: dayOffset + 1,
+            totalParts:
+              dayContent.theme.category === 'sabbat'
+                ? (dayContent.theme as SabbatTheme).leadUpFacets.length
+                : 7,
+            ...sourceMeta,
+          });
+        });
+
+        if (override) {
+          const overrideText = await getOverrideContent(
+            override,
+            dayContent,
+            sourceInfo,
+          );
+          const optionalBase =
+            overrideText ||
+            (override.postType === 'question'
+              ? buildQuestionPost(dayContent.facet.title, data)
+              : '');
+          const optionalContent = applyPlatformFormatting(
+            normalizeGeneratedContent(optionalBase, {
+              topicLabel: dayContent.facet.title,
+            }),
+            platform,
+            dayContent.hashtags,
+          );
+          const optionalSource =
+            override.postType === 'question'
+              ? sourceMeta
+              : {
+                  sourceType: 'fallback' as const,
+                  sourceId: sourceInfo.sourceId,
+                  sourceTitle: dayContent.facet.title,
+                };
+          posts.push({
+            content: optionalContent,
+            platform,
+            postType: override.postType,
+            topic: dayContent.facet.title,
+            scheduledDate: dayContent.date,
+            hashtags: `${dayContent.hashtags.domain} ${dayContent.hashtags.topic}`,
+            category: dayContent.theme.category,
+            dayOffset,
+            slug:
+              dayContent.facet.grimoireSlug.split('/').pop() ||
+              dayContent.facet.title.toLowerCase().replace(/\s+/g, '-'),
+            themeName: dayContent.theme.name,
+            partNumber: dayOffset + 1,
+            totalParts:
+              dayContent.theme.category === 'sabbat'
+                ? (dayContent.theme as SabbatTheme).leadUpFacets.length
+                : 7,
+            ...optionalSource,
+          });
+        }
+        continue;
+      }
+
       const formattedContent = formatShortFormForPlatform(
-        dayContent.shortForm,
+        normalizeGeneratedContent(dayContent.shortForm, {
+          topicLabel: dayContent.facet.title,
+        }),
         platform,
         dayContent.hashtags,
+        {
+          postType: override?.postType ?? 'educational',
+          topicTitle: dayContent.facet.title,
+        },
       );
-
+      const totalParts =
+        dayContent.theme.category === 'sabbat'
+          ? (dayContent.theme as SabbatTheme).leadUpFacets.length
+          : 7;
       posts.push({
         content: formattedContent,
         platform,
-        postType: 'educational',
+        postType: override?.postType ?? 'educational',
         topic: dayContent.facet.title,
         scheduledDate: dayContent.date,
         hashtags: `${dayContent.hashtags.domain} ${dayContent.hashtags.topic}`,
         category: dayContent.theme.category,
-        dayOffset:
-          dayContent.date.getDay() === 0 ? 6 : dayContent.date.getDay() - 1,
+        dayOffset,
         slug:
           dayContent.facet.grimoireSlug.split('/').pop() ||
           dayContent.facet.title.toLowerCase().replace(/\s+/g, '-'),
+        themeName: dayContent.theme.name,
+        partNumber: dayOffset + 1,
+        totalParts,
+        ...sourceMeta,
       });
     }
   }
@@ -716,7 +2234,7 @@ export function generateThematicPostsForWeek(
     const closingThemeName = weekContent[0]?.theme?.name;
     const closingPlatforms = Array.from(
       new Set([...longFormPlatforms, ...shortFormPlatforms]),
-    );
+    ).filter((platform) => !shortFormOverridePlatforms.has(platform));
 
     for (const platform of closingPlatforms) {
       const style: ClosingRitualStyle = longFormPlatforms.includes(platform)
@@ -732,6 +2250,9 @@ export function generateThematicPostsForWeek(
         category: 'ritual',
         dayOffset: 6,
         slug: 'closing-ritual',
+        themeName: closingThemeName || 'Closing Ritual',
+        partNumber: undefined,
+        totalParts: undefined,
       });
     }
   }

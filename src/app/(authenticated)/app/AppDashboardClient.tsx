@@ -6,6 +6,7 @@ import dynamic from 'next/dynamic';
 import { useUser } from '@/context/UserContext';
 import { useAuthStatus } from '@/components/AuthStatus';
 import { recordCheckIn } from '@/lib/streak/check-in';
+import { conversionTracking } from '@/lib/analytics';
 
 import { DateWidget } from '@/components/DateWidget';
 import { ShareDailyInsight } from '@/components/ShareDailyInsight';
@@ -117,6 +118,30 @@ export default function AppDashboardClient() {
       recordCheckIn();
     }
   }, [authState.isAuthenticated, authState.loading]);
+
+  useEffect(() => {
+    if (!authState.isAuthenticated || authState.loading) return;
+    if (typeof window === 'undefined') return;
+
+    const today = new Date().toISOString().split('T')[0];
+    const userId = authState.user?.id ? String(authState.user.id) : 'anon';
+    const key = `lunary_daily_dashboard_viewed:${userId}:${today}`;
+
+    if (localStorage.getItem(key)) {
+      return;
+    }
+
+    localStorage.setItem(key, '1');
+    conversionTracking.dailyDashboardViewed(
+      authState.user?.id,
+      authState.user?.email,
+    );
+  }, [
+    authState.isAuthenticated,
+    authState.loading,
+    authState.user?.id,
+    authState.user?.email,
+  ]);
 
   const greeting = () => {
     const hour = new Date().getHours();

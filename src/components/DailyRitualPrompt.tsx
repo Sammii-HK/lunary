@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { Sparkles, Sunrise, Sunset } from 'lucide-react';
 import { useAuthStatus } from './AuthStatus';
+import { conversionTracking } from '@/lib/analytics';
 
 interface RitualPrompt {
   time: 'morning' | 'evening';
@@ -76,6 +77,13 @@ export function DailyRitualPrompt() {
   }
 
   const handleRitualClick = async () => {
+    conversionTracking.ritualStarted(
+      _authState.user?.id,
+      _authState.user?.email,
+      undefined,
+      { ritualType: ritualPrompt.time, prompt: ritualPrompt.prompt },
+    );
+
     try {
       await fetch('/api/ritual/complete', {
         method: 'POST',

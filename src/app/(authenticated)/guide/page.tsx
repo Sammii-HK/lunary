@@ -28,6 +28,7 @@ import { SaveToCollection } from '@/components/SaveToCollection';
 import { parseMessageContent } from '@/utils/messageParser';
 import { recordCheckIn } from '@/lib/streak/check-in';
 import { captureEvent } from '@/lib/posthog-client';
+import { conversionTracking } from '@/lib/analytics';
 import {
   dismissRitualBadge,
   useRitualBadge,
@@ -325,7 +326,7 @@ function BookOfShadowsContent() {
   const { user } = useUser();
   const userBirthday = user?.birthday;
   const userName = user?.name?.split(' ')[0];
-  const { isSubscribed } = useSubscription();
+  const subscription = useSubscription();
   const [weeklyInsights, setWeeklyInsights] = useState<
     WeeklyInsights | undefined
   >(undefined);
@@ -335,15 +336,19 @@ function BookOfShadowsContent() {
     const isSunday = now.getDay() === 0;
     const isMorning = now.getHours() < 14;
 
-    if (isSubscribed && isSunday && isMorning) {
+    if (subscription.isSubscribed && isSunday && isMorning) {
       fetch('/api/rituals/weekly-insights')
         .then((res) => res.json())
         .then((data) => setWeeklyInsights(data))
         .catch(() => {});
     }
-  }, [isSubscribed]);
+  }, [subscription.isSubscribed]);
 
-  const ritualState = useRitualBadge(isSubscribed, userName, weeklyInsights);
+  const ritualState = useRitualBadge(
+    subscription.isSubscribed,
+    userName,
+    weeklyInsights,
+  );
 
   const {
     messages,
@@ -498,14 +503,14 @@ function BookOfShadowsContent() {
       }
 
       setRitualInjected(true);
-      dismissRitualBadge(isSubscribed);
+      dismissRitualBadge(subscription.isSubscribed);
     }
   }, [
     isLoadingHistory,
     ritualState,
     ritualInjected,
     addMessage,
-    isSubscribed,
+    subscription.isSubscribed,
     user?.id,
   ]);
 
@@ -664,6 +669,11 @@ function BookOfShadowsContent() {
       is_first_message: messages.length === 0,
       plan_id: planId,
     });
+    conversionTracking.astralChatUsed(
+      authState.user?.id,
+      authState.user?.email,
+      subscription.plan,
+    );
 
     sendMessage(trimmed);
     setInput('');

@@ -584,6 +584,17 @@ export default function AnalyticsPage() {
       return text;
     };
 
+    const normalize = (value: unknown) =>
+      value === null || value === undefined ? 'N/A' : value;
+
+    const addRow = (section: string, metric: string, ...values: unknown[]) => {
+      rows.push([
+        section,
+        metric,
+        ...values.map((value) => normalize(value) as string),
+      ]);
+    };
+
     const rows: string[][] = [['Section', 'Metric', 'Value']];
     rows.push(
       ['Export', 'Start date', startDate],
@@ -591,6 +602,246 @@ export default function AnalyticsPage() {
       ['Export', 'Granularity', granularity],
       ['Export', 'Generated at (UTC)', new Date().toISOString()],
     );
+
+    const primaryKpis = [
+      [
+        'Monthly Recurring Revenue (MRR)',
+        formatCurrency(successMetrics?.monthly_recurring_revenue?.value),
+      ],
+      [
+        'Annual Recurring Revenue (ARR)',
+        formatCurrency(successMetrics?.annual_recurring_revenue?.value),
+      ],
+      ['Active Subscribers', activeSubscribers],
+      ['Conversion Rate', formatPercent(conversions?.conversion_rate, 1)],
+      ['Activation Rate', formatPercent(activation?.activationRate, 2)],
+      ['Growth Rate', formatPercent(userGrowth?.growthRate, 1)],
+      ['Monthly Active Users (MAU)', engagementOverview?.mau],
+      ['Weekly Active Users (WAU)', engagementOverview?.wau],
+      ['Daily Active Users (DAU)', engagementOverview?.dau],
+    ];
+    primaryKpis.forEach(([metric, value]) =>
+      addRow('Primary KPIs', metric, value),
+    );
+
+    if (successMetrics) {
+      const exportSuccessMetric = (
+        label: string,
+        value: unknown,
+        trend?: string,
+        change?: number,
+        note?: string,
+      ) => {
+        addRow('Success Metrics', label, value, trend, change, note);
+      };
+
+      exportSuccessMetric(
+        'Daily Active Users',
+        successMetrics.daily_active_users.value.toLocaleString(),
+        successMetrics.daily_active_users.trend,
+        successMetrics.daily_active_users.change,
+      );
+      exportSuccessMetric(
+        'Weekly Returning Users',
+        successMetrics.weekly_returning_users.value.toLocaleString(),
+        successMetrics.weekly_returning_users.trend,
+        successMetrics.weekly_returning_users.change,
+      );
+      exportSuccessMetric(
+        'Conversion Rate',
+        `${successMetrics.conversion_rate.value.toFixed(2)}%`,
+        successMetrics.conversion_rate.trend,
+        successMetrics.conversion_rate.change,
+        `Target: ${successMetrics.conversion_rate.target?.min ?? 'N/A'}–${successMetrics.conversion_rate.target?.max ?? 'N/A'}%`,
+      );
+      exportSuccessMetric(
+        'Search Impressions + Clicks',
+        `${successMetrics.search_impressions_clicks.impressions.toLocaleString()} impressions, ${successMetrics.search_impressions_clicks.clicks.toLocaleString()} clicks`,
+        successMetrics.search_impressions_clicks.trend,
+        successMetrics.search_impressions_clicks.change,
+        successMetrics.search_impressions_clicks.note,
+      );
+      exportSuccessMetric(
+        'Monthly Recurring Revenue',
+        formatCurrency(successMetrics.monthly_recurring_revenue.value),
+        successMetrics.monthly_recurring_revenue.trend,
+        successMetrics.monthly_recurring_revenue.change,
+      );
+      exportSuccessMetric(
+        'Annual Recurring Revenue',
+        formatCurrency(successMetrics.annual_recurring_revenue.value),
+        successMetrics.annual_recurring_revenue.trend,
+        successMetrics.annual_recurring_revenue.change,
+      );
+      exportSuccessMetric(
+        'Active Subscriptions',
+        successMetrics.active_subscriptions.value.toLocaleString(),
+        successMetrics.active_subscriptions.trend,
+        successMetrics.active_subscriptions.change,
+      );
+      exportSuccessMetric(
+        'Active Entitlements',
+        successMetrics.active_entitlements.value.toLocaleString(),
+        'stable',
+        Number(
+          typeof successMetrics.active_entitlements.duplicate_rate === 'number'
+            ? successMetrics.active_entitlements.duplicate_rate.toFixed(1)
+            : 0,
+        ),
+        `${successMetrics.active_entitlements.duplicates} duplicate subscriptions`,
+      );
+      exportSuccessMetric(
+        'Paying Customers',
+        successMetrics.paying_customers.value.toLocaleString(),
+        'stable',
+        0,
+        'Unique paying customers',
+      );
+      exportSuccessMetric(
+        'Subscription Cancels',
+        successMetrics.subscription_cancels.toLocaleString(),
+        'down',
+        0,
+        'Cancellations logged this period',
+      );
+      exportSuccessMetric(
+        'Churn Rate',
+        formatPercent(successMetrics.churn_rate, 1),
+        successMetrics.churn_rate > 0 ? 'down' : 'stable',
+        0,
+        `${successMetrics.churned_customers} churned / ${successMetrics.starting_paying_customers} starting`,
+      );
+      exportSuccessMetric(
+        'Activation → Return (48h)',
+        `${successMetrics.activation_to_return.value.toFixed(1)}%`,
+        'up',
+        0,
+        `${successMetrics.activation_to_return.returning}/${successMetrics.activation_to_return.total} returned`,
+      );
+      if (successMetrics.arpu) {
+        exportSuccessMetric(
+          'ARPU',
+          formatCurrency(successMetrics.arpu.value),
+          successMetrics.arpu.trend,
+          successMetrics.arpu.change,
+        );
+      }
+      exportSuccessMetric(
+        'Trial Conversion Rate',
+        `${successMetrics.trial_conversion_rate.value.toFixed(2)}%`,
+        successMetrics.trial_conversion_rate.trend,
+        successMetrics.trial_conversion_rate.change,
+      );
+      exportSuccessMetric(
+        'AI Chat Messages',
+        successMetrics.ai_chat_messages.value.toLocaleString(),
+        successMetrics.ai_chat_messages.trend,
+        successMetrics.ai_chat_messages.change,
+      );
+      exportSuccessMetric(
+        'Push Subscribers',
+        successMetrics.substack_subscribers.value.toLocaleString(),
+        successMetrics.substack_subscribers.trend,
+        successMetrics.substack_subscribers.change,
+      );
+    }
+
+    if (activation) {
+      const formattedActivationRate =
+        typeof activation.activationRate === 'number'
+          ? `${activation.activationRate.toFixed(2)}%`
+          : 'N/A';
+      addRow('Activation', 'Activation Rate', formattedActivationRate);
+      addRow('Activation', 'Activated Users', activation.activatedUsers);
+      addRow('Activation', 'Total Signups', activation.totalSignups);
+      if (activation.activationBreakdown) {
+        Object.entries(activation.activationBreakdown).forEach(
+          ([feature, count]) => {
+            const breakdown =
+              activation.activationBreakdownByPlan?.[feature] || {};
+            const freeCount = breakdown.free ?? 0;
+            const paidCount = breakdown.paid ?? 0;
+            const unknownCount = breakdown.unknown ?? 0;
+            addRow(
+              'Activation',
+              `Feature "${feature}" activations`,
+              count,
+              `Free: ${freeCount} · Paid: ${paidCount}${
+                unknownCount > 0 ? ` · Unknown: ${unknownCount}` : ''
+              }`,
+            );
+          },
+        );
+      }
+    }
+
+    if (subscriptionLifecycle) {
+      Object.entries(subscriptionLifecycle.states || {}).forEach(
+        ([status, count]) => {
+          const title =
+            status.charAt(0).toUpperCase() + status.slice(1).replace(/_/g, ' ');
+          addRow('Subscription Lifecycle', `${title} updates`, count);
+        },
+      );
+      addRow(
+        'Subscription Lifecycle',
+        'Average Subscription Duration',
+        `${subscriptionLifecycle.avgDurationDays.toFixed(1)} days`,
+      );
+      if (subscriptionLifecycle.churnRate !== undefined) {
+        addRow(
+          'Subscription Lifecycle',
+          'Churn Rate',
+          `${subscriptionLifecycle.churnRate.toFixed(2)}%`,
+        );
+      }
+    }
+
+    if (planBreakdown?.planBreakdown?.length) {
+      planBreakdown.planBreakdown.forEach((plan: any) => {
+        addRow(
+          'Plan Breakdown',
+          plan.plan,
+          `Subscriptions: ${plan.count}`,
+          `Active: ${plan.active}`,
+          `MRR: $${Number(plan.mrr ?? 0).toFixed(2)}`,
+          `Share: ${Number(plan.percentage ?? 0).toFixed(1)}%`,
+        );
+      });
+    }
+
+    if (apiCosts) {
+      addRow(
+        'API Costs',
+        'Total API Costs',
+        `$${apiCosts.totalCost.toFixed(2)}`,
+      );
+      addRow(
+        'API Costs',
+        'Cost per User',
+        `$${apiCosts.costPerUser.toFixed(2)}`,
+      );
+      addRow(
+        'API Costs',
+        'Revenue / Cost Ratio',
+        apiCosts.revenueCostRatio.toFixed(2),
+      );
+      addRow(
+        'API Costs',
+        'Total Generations',
+        apiCosts.totalGenerations.toLocaleString(),
+      );
+      addRow(
+        'API Costs',
+        'Unique Users',
+        apiCosts.uniqueUsers.toLocaleString(),
+      );
+      addRow(
+        'API Costs',
+        'Cost per Session',
+        `$${apiCosts.costPerSession.toFixed(4)}`,
+      );
+    }
 
     if (activity) {
       rows.push(
