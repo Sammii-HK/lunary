@@ -28,6 +28,7 @@ import { SaveToCollection } from '@/components/SaveToCollection';
 import { parseMessageContent } from '@/utils/messageParser';
 import { recordCheckIn } from '@/lib/streak/check-in';
 import { captureEvent } from '@/lib/posthog-client';
+import { conversionTracking } from '@/lib/analytics';
 import {
   dismissRitualBadge,
   useRitualBadge,
@@ -664,6 +665,11 @@ function BookOfShadowsContent() {
       is_first_message: messages.length === 0,
       plan_id: planId,
     });
+    conversionTracking.astralChatUsed(
+      authState.user?.id,
+      authState.user?.email,
+      subscription.plan,
+    );
 
     sendMessage(trimmed);
     setInput('');

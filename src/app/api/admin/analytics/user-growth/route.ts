@@ -86,25 +86,35 @@ export async function GET(request: NextRequest) {
       granularity,
     );
 
-    // Calculate growth rate
-    let growthRate = 0;
-    if (trends.length >= 2) {
-      const firstHalf = trends.slice(0, Math.floor(trends.length / 2));
-      const secondHalf = trends.slice(Math.floor(trends.length / 2));
-      const firstHalfAvg =
-        firstHalf.reduce((sum, t) => sum + t.signups, 0) / firstHalf.length;
-      const secondHalfAvg =
-        secondHalf.reduce((sum, t) => sum + t.signups, 0) / secondHalf.length;
-      growthRate =
-        firstHalfAvg > 0
-          ? ((secondHalfAvg - firstHalfAvg) / firstHalfAvg) * 100
-          : 0;
-    }
+    const totalSignups = trends.reduce((sum, t) => sum + t.signups, 0);
+    const rangeDurationMs = range.end.getTime() - range.start.getTime();
+    const previousRangeEnd = new Date(range.start.getTime() - 1);
+    const previousRangeStart = new Date(
+      previousRangeEnd.getTime() - rangeDurationMs,
+    );
+    const previousTrends = fillSignupTrends(
+      await getSignupTrendsFromDb(
+        previousRangeStart,
+        previousRangeEnd,
+        granularity,
+      ),
+      previousRangeStart,
+      previousRangeEnd,
+      granularity,
+    );
+    const previousTotalSignups = previousTrends.reduce(
+      (sum, t) => sum + t.signups,
+      0,
+    );
+    const growthRate =
+      previousTotalSignups > 0
+        ? ((totalSignups - previousTotalSignups) / previousTotalSignups) * 100
+        : 0;
 
     return NextResponse.json({
       trends,
       growthRate: Number(growthRate.toFixed(2)),
-      totalSignups: trends.reduce((sum, t) => sum + t.signups, 0),
+      totalSignups,
       source: 'users',
     });
   } catch (error) {
