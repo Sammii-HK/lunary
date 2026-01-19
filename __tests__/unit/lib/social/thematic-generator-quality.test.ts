@@ -93,6 +93,6 @@ describe('thematic generator quality', () => {
     const caption = buildFallbackCopy(pack).content;
     const lines = caption.split('\n').filter(Boolean);
     expect(lines.length).toBeGreaterThanOrEqual(5);
-    expect(lines[0].toLowerCase()).toContain(pack.searchKeyword);
+    expect(lines[0].toLowerCase()).toContain('meaning and context');
   });
 });

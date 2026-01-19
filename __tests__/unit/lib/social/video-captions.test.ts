@@ -10,7 +10,7 @@ describe('buildVideoCaption', () => {
     const lines = caption.split('\n');
     expect(lines[0]).toBe('new moon meaning');
     expect(lines[1].toLowerCase()).toContain('new moon');
-    expect(lines[3]).toBe("Read more in Lunary's Grimoire. Save this.");
+    expect(lines).toHaveLength(3);
   });
 
   it('formats Void of Course Moon caption with search phrase', () => {
@@ -22,6 +22,6 @@ describe('buildVideoCaption', () => {
     const lines = caption.split('\n');
     expect(lines[0]).toBe('void of course moon meaning');
     expect(lines[1].toLowerCase()).toContain('void of course moon');
-    expect(lines[3]).toBe("Read more in Lunary's Grimoire. Save this.");
+    expect(lines).toHaveLength(3);
   });
 });

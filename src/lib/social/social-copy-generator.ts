@@ -102,9 +102,6 @@ const CTA_OPTIONS = [
 ];
 const CTA_PHRASES = new Set(CTA_OPTIONS);
 
-const pickCTA = () =>
-  CTA_OPTIONS[Math.floor(Math.random() * CTA_OPTIONS.length)];
-
 const AMBIGUOUS_DOMAINS = new Set(['tarot', 'crystals', 'numerology']);
 
 const PLATFORM_HASHTAG_LIMITS: Record<string, number> = {
@@ -1333,14 +1330,11 @@ const buildCaptionContent = (
     .filter((line) => !CTA_PHRASES.has(line));
   const curatedHashtags = buildCuratedHashtags(pack);
   const hashtagsLine = curatedHashtags.join(' ');
-  const includeCTA =
-    !['question', 'persona', 'closing_statement', 'closing_ritual'].includes(
-      pack.postType,
-    ) && !sanitizedLines.some(hasInlineCTA);
+  const includeCTA = false;
   const contentLines = [
     pack.displayTitle,
     ...sanitizedLines,
-    includeCTA ? pickCTA() : '',
+    includeCTA ? CTA_OPTIONS[0] : '',
   ]
     .filter(Boolean)
     .map((line) => line.replace(/\s+/g, ' ').trim());
@@ -1575,13 +1569,7 @@ export function buildFallbackCopy(pack: SourcePack): SocialCopyResult {
           baseDefinition,
         )}`
       : baseDefinition;
-  const includeCTA = ![
-    'question',
-    'persona',
-    'closing_statement',
-    'closing_ritual',
-  ].includes(pack.postType);
-  const ctaLine = includeCTA ? pickCTA() : '';
+  const ctaLine = '';
   const withOptionalCTA = (lines: string[]) => {
     const merged = lines
       .filter(Boolean)
@@ -1618,7 +1606,7 @@ export function buildFallbackCopy(pack: SourcePack): SocialCopyResult {
       };
     }
     case 'educational_deep_1': {
-      const content = withOptionalCTA([detailSentence, nuanceSentence]);
+      const content = withOptionalCTA([nuanceSentence, keywordSentence]);
       return {
         content: normalizeGeneratedContent(content, {
           topicLabel: pack.topicTitle,

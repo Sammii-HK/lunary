@@ -1059,9 +1059,9 @@ export const sanitizeVideoScriptText = (
 export function buildHookForTopic(topic: string) {
   const safeTopic = topic.trim();
   const templates = [
-    `Most people get ${safeTopic} wrong. Here's what matters.`,
-    `What is ${safeTopic}, and why does it matter?`,
-    `If ${safeTopic} confuses you, this will click.`,
+    `Many people misread ${safeTopic}, but its core is simple.`,
+    `Here is the clear meaning of ${safeTopic} in practice.`,
+    `${safeTopic} points to a shift worth noticing right now.`,
   ];
   return templates[Math.floor(Math.random() * templates.length)];
 }
