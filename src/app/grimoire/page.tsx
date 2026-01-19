@@ -96,11 +96,12 @@ const grimoireCategories = [
   },
 ];
 
-const GrimoireHome = ({
+const GrimoireHome = async ({
   searchParams,
 }: {
-  searchParams?: GrimoireSearchParams;
+  searchParams?: Promise<GrimoireSearchParams>;
 }) => {
+  const resolvedSearchParams = searchParams ? await searchParams : undefined;
   const grimoireListSchema = createItemListSchema({
     name: 'Lunary Grimoire',
     description:
@@ -113,7 +114,10 @@ const GrimoireHome = ({
   return (
     <div className='h-full w-full'>
       {renderJsonLd(grimoireListSchema)}
-      <GrimoireLayout searchParams={searchParams} pathname='/grimoire' />
+      <GrimoireLayout
+        searchParams={resolvedSearchParams}
+        pathname='/grimoire'
+      />
     </div>
   );
 };

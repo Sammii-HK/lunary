@@ -292,9 +292,10 @@ export default async function GrimoireSectionPage({
   searchParams,
 }: {
   params: Promise<{ section: string }>;
-  searchParams?: GrimoireSearchParams;
+  searchParams?: Promise<GrimoireSearchParams>;
 }) {
   const { section } = await params;
+  const resolvedSearchParams = searchParams ? await searchParams : undefined;
   if (!isValidGrimoireSection(section)) {
     notFound();
   }
@@ -310,7 +311,7 @@ export default async function GrimoireSectionPage({
       <GrimoireBreadcrumbs items={breadcrumbItems} />
       <GrimoireLayout
         currentSectionSlug={section}
-        searchParams={searchParams}
+        searchParams={resolvedSearchParams}
         pathname={`/grimoire/${section}`}
       />
     </>
