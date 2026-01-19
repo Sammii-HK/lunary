@@ -5,7 +5,7 @@ import GrimoireLayoutClient, {
 } from './GrimoireLayoutClient';
 import { GrimoireClientIslands } from './GrimoireClientIslands';
 
-export { GrimoireSearchParams };
+export type { GrimoireSearchParams };
 
 export default function GrimoireLayout(props: GrimoireLayoutProps) {
   return (
