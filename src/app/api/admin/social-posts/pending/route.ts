@@ -34,6 +34,9 @@ export async function GET(request: NextRequest) {
       await sql`ALTER TABLE social_posts ADD COLUMN IF NOT EXISTS week_start DATE`;
       await sql`ALTER TABLE social_posts ADD COLUMN IF NOT EXISTS base_group_key TEXT`;
       await sql`ALTER TABLE social_posts ADD COLUMN IF NOT EXISTS base_post_id INTEGER`;
+      await sql`ALTER TABLE social_posts ADD COLUMN IF NOT EXISTS source_type TEXT`;
+      await sql`ALTER TABLE social_posts ADD COLUMN IF NOT EXISTS source_id TEXT`;
+      await sql`ALTER TABLE social_posts ADD COLUMN IF NOT EXISTS source_title TEXT`;
       await ensureVideoScriptsTable();
       await ensureVideoJobsTable();
     } catch (tableError) {
@@ -55,6 +58,9 @@ export async function GET(request: NextRequest) {
         sp.week_start as "weekStart",
         sp.base_group_key as "baseGroupKey",
         sp.base_post_id as "basePostId",
+        sp.source_type as "sourceType",
+        sp.source_id as "sourceId",
+        sp.source_title as "sourceTitle",
         sp.created_at as "createdAt",
         vs.id as "videoScriptId",
         vs.full_script as "videoScript",

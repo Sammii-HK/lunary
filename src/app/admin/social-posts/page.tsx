@@ -50,6 +50,9 @@ interface PendingPost {
   weekStart?: string;
   baseGroupKey?: string;
   basePostId?: number;
+  sourceType?: string;
+  sourceId?: string;
+  sourceTitle?: string;
   videoScriptId?: number;
   videoScript?: string;
   videoScriptPlatform?: string;
@@ -139,6 +142,9 @@ export default function SocialPostsPage() {
   const [activeVariantByGroup, setActiveVariantByGroup] = useState<
     Record<string, string>
   >({});
+  const [highlightedThreadsGroup, setHighlightedThreadsGroup] = useState<
+    string | null
+  >(null);
 
   useEffect(() => {
     loadPendingPosts();
@@ -193,6 +199,12 @@ export default function SocialPostsPage() {
     }
 
     const sortedGroups = Array.from(groups.values()).map((group) => {
+      const threadsVariant = group.posts.find(
+        (post) => post.platform === 'threads',
+      );
+      if (threadsVariant) {
+        group.basePost = threadsVariant;
+      }
       const sortedPosts = group.posts.slice().sort((a, b) => {
         const aIdx = platformOrder.indexOf(a.platform);
         const bIdx = platformOrder.indexOf(b.platform);
@@ -221,6 +233,25 @@ export default function SocialPostsPage() {
       return a.dateKey.localeCompare(b.dateKey);
     });
   }, [pendingPosts]);
+
+  const formatGroupId = (key: string) =>
+    `group-${key.replace(/[^a-z0-9]/gi, '-')}`;
+
+  useEffect(() => {
+    const threadsGroup = groupedPosts.find((group) =>
+      group.posts.some((post) => post.platform === 'threads'),
+    );
+    if (!threadsGroup) {
+      setHighlightedThreadsGroup(null);
+      return;
+    }
+    if (highlightedThreadsGroup === threadsGroup.key) return;
+    setHighlightedThreadsGroup(threadsGroup.key);
+    const element = document.getElementById(formatGroupId(threadsGroup.key));
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  }, [groupedPosts, highlightedThreadsGroup]);
 
   const getWeekStartForOffset = (offset: number): string => {
     const now = new Date();
@@ -1607,10 +1638,20 @@ export default function SocialPostsPage() {
                           day: 'numeric',
                         });
 
+                  const hasThreadsVariant = group.posts.some(
+                    (post) => post.platform === 'threads',
+                  );
+                  const isHighlightedThreads =
+                    hasThreadsVariant && highlightedThreadsGroup === group.key;
                   return (
                     <Card
                       key={group.key}
-                      className='bg-zinc-900 border-zinc-800 hover:border-zinc-700 transition-colors'
+                      id={formatGroupId(group.key)}
+                      className={`bg-zinc-900 border-zinc-800 hover:border-zinc-700 transition-colors ${
+                        hasThreadsVariant
+                          ? 'border-lunary-primary-500 shadow-[0_0_20px_rgba(129,140,248,0.4)]'
+                          : ''
+                      }`}
                     >
                       <CardHeader>
                         <div className='flex items-start justify-between'>
@@ -1619,6 +1660,11 @@ export default function SocialPostsPage() {
                               <CardTitle className='text-lg'>
                                 {dateLabel}
                               </CardTitle>
+                              {hasThreadsVariant && (
+                                <Badge className='bg-lunary-primary-900/30 text-lunary-primary-200 border-lunary-primary-700'>
+                                  Threads highlighted
+                                </Badge>
+                              )}
                               <Badge className='bg-lunary-primary-900/20 text-lunary-primary-400 border-lunary-primary-700 capitalize'>
                                 {group.postType}
                               </Badge>
@@ -1681,7 +1727,11 @@ export default function SocialPostsPage() {
                           )}
                           {basePost.postType === 'video' &&
                             basePost.videoScript && (
-                              <details className='bg-zinc-800/50 rounded-lg border border-zinc-700 p-3'>
+                              <details
+                                className='bg-zinc-800/50 rounded-lg border border-zinc-700 p-3'
+                                // open={!baseVideoUrl}
+                                open={true}
+                              >
                                 <summary className='cursor-pointer text-sm text-zinc-300 flex items-center gap-2'>
                                   <FileText className='h-4 w-4' />
                                   Base video script

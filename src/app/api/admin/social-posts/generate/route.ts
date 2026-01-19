@@ -9,6 +9,9 @@ import {
   type ContentArchetype,
 } from '@/lib/social/content-archetypes';
 import { getImageBaseUrl } from '@/lib/urls';
+import { buildScopeGuard } from '@/lib/social/topic-scope';
+import { normalizeHashtagsForPlatform } from '@/lib/social/social-copy-generator';
+import { normalizeGeneratedContent } from '@/lib/social/content-normalizer';
 
 let cachedSocialContext: string | null = null;
 let cachedAIContext: string | null = null;
@@ -182,6 +185,9 @@ export async function POST(request: NextRequest) {
           rejection_feedback TEXT,
           image_url TEXT,
           video_url TEXT,
+          source_type TEXT,
+          source_id TEXT,
+          source_title TEXT,
           created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
           updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
         )
@@ -215,6 +221,10 @@ export async function POST(request: NextRequest) {
         FOR EACH ROW
         EXECUTE FUNCTION update_social_posts_updated_at()
       `;
+
+      await sql`ALTER TABLE social_posts ADD COLUMN IF NOT EXISTS source_type TEXT`;
+      await sql`ALTER TABLE social_posts ADD COLUMN IF NOT EXISTS source_id TEXT`;
+      await sql`ALTER TABLE social_posts ADD COLUMN IF NOT EXISTS source_title TEXT`;
 
       // Create social_quotes table for quote pool
       await sql`
@@ -478,17 +488,36 @@ REQUIREMENTS:
 - Each post must be DISTINCT - different hooks, angles, and structures
 - NO pricing mentions, NO trial mentions, NO "free" language
 - Lead with curiosity, vulnerability, or education - NOT features
+- Avoid deterministic claims; use "can", "tends to", "may", "often", "influences", "highlights".
 ${!includeCTA ? '- No CTA in these posts - pure value content' : '- Soft CTA only if appropriate: "discover at lunary.app" or "try Lunary"'}
+${buildScopeGuard(topic || 'general')}
 
 Return JSON: {"posts": ["Post 1", "Post 2", ...]}`;
 
-    console.log('🤖 Calling OpenAI API...');
-    const completion = await openai.chat.completions.create({
-      model: 'gpt-4o-mini',
-      messages: [
-        {
-          role: 'system',
-          content: `${SOCIAL_CONTEXT}\n\n${AI_CONTEXT}\n\n${COMPETITOR_CONTEXT}\n\n${POSTING_STRATEGY}${feedbackContext}
+    const hasDeterministicLanguage = (text: string) => {
+      const lower = text.toLowerCase();
+      return ['controls', 'always', 'guarantees'].some((word) =>
+        new RegExp(`\\b${word}\\b`, 'i').test(lower),
+      );
+    };
+    const hasOffDomainKeyword = (text: string) =>
+      [
+        'project',
+        'management',
+        'development',
+        'productivity',
+        'kpi',
+        'agile',
+      ].some((word) => new RegExp(`\\b${word}\\b`, 'i').test(text));
+
+    const requestPosts = async (retryNote?: string) => {
+      const retrySuffix = retryNote ? `\nFix: ${retryNote}` : '';
+      return openai.chat.completions.create({
+        model: 'gpt-4o-mini',
+        messages: [
+          {
+            role: 'system',
+            content: `${SOCIAL_CONTEXT}\n\n${AI_CONTEXT}\n\n${COMPETITOR_CONTEXT}\n\n${POSTING_STRATEGY}${feedbackContext}
 
 You are creating authentic social media content for Lunary, a cosmic astrology app.
 
@@ -505,18 +534,38 @@ CRITICAL RULES:
 10. Position Lunary as a library/reference authority, not a product
 
 Return only valid JSON.`,
-        },
-        { role: 'user', content: prompt },
-      ],
-      response_format: { type: 'json_object' },
-      max_tokens: 1200,
-      temperature: 0.9,
-    });
+          },
+          { role: 'user', content: `${prompt}${retrySuffix}` },
+        ],
+        response_format: { type: 'json_object' },
+        max_tokens: 1200,
+        temperature: 0.9,
+      });
+    };
+
+    console.log('🤖 Calling OpenAI API...');
+    const completion = await requestPosts();
     console.log('✅ OpenAI API call successful');
 
     const result = JSON.parse(completion.choices[0]?.message?.content || '{}');
     const posts = result.posts || result.post || [];
-    const postsArray = Array.isArray(posts) ? posts : [posts];
+    let postsArray = Array.isArray(posts) ? posts : [posts];
+    if (
+      postsArray.some(
+        (post) =>
+          hasDeterministicLanguage(String(post)) ||
+          hasOffDomainKeyword(String(post)),
+      )
+    ) {
+      const retryCompletion = await requestPosts(
+        'Remove deterministic claims and off-domain terms; use softer language (can, may, tends to, often, influences) and stay within astrology/tarot/lunar context.',
+      );
+      const retryResult = JSON.parse(
+        retryCompletion.choices[0]?.message?.content || '{}',
+      );
+      const retryPosts = retryResult.posts || retryResult.post || [];
+      postsArray = Array.isArray(retryPosts) ? retryPosts : [retryPosts];
+    }
 
     // Save posts to database (table already exists from earlier check)
     const savedPostIds: string[] = [];
@@ -623,9 +672,15 @@ Return only valid JSON.`,
         }
       }
       try {
+        const normalizedContent = normalizeHashtagsForPlatform(
+          normalizeGeneratedContent(String(postContent || '').trim(), {
+            topicLabel: topic || undefined,
+          }),
+          platform || 'general',
+        );
         const insertResult = await sql`
           INSERT INTO social_posts (content, platform, post_type, topic, status, image_url, scheduled_date, created_at)
-          VALUES (${postContent}, ${platform}, ${postType}, ${topic || null}, 'pending', ${imageUrl || null}, ${scheduledDate.toISOString()}, NOW())
+          VALUES (${normalizedContent}, ${platform}, ${postType}, ${topic || null}, 'pending', ${imageUrl || null}, ${scheduledDate.toISOString()}, NOW())
           RETURNING id
         `;
         savedPostIds.push(insertResult.rows[0].id);

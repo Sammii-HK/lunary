@@ -1,4 +1,6 @@
 import { generateVoiceover } from '@/lib/tts';
+import { normalizeHashtagsForPlatform } from '@/lib/social/social-copy-generator';
+import { normalizeGeneratedContent } from '@/lib/social/content-normalizer';
 
 const IMAGE_FORMATS = ['landscape', 'square', 'portrait', 'story'] as const;
 
@@ -78,21 +80,46 @@ export async function generateSocialAssets(
     hashtags: content.hashtags,
     platforms: {
       instagram: {
-        feed: `${content.captions.medium}\n\n${content.hashtags.join(' ')}`,
+        feed: normalizeHashtagsForPlatform(
+          normalizeGeneratedContent(
+            `${content.captions.medium}\n\n${content.hashtags.join(' ')}`,
+          ),
+          'instagram',
+        ),
         story: content.captions.short,
       },
       tiktok: {
-        video: `${content.captions.short} ${content.hashtags.slice(0, 5).join(' ')}`,
+        video: normalizeHashtagsForPlatform(
+          normalizeGeneratedContent(
+            `${content.captions.short} ${content.hashtags
+              .slice(0, 5)
+              .join(' ')}`,
+          ),
+          'tiktok',
+        ),
       },
       facebook: {
-        post: content.captions.long,
+        post: normalizeHashtagsForPlatform(
+          normalizeGeneratedContent(content.captions.long),
+          'facebook',
+        ),
         story: content.captions.short,
       },
       twitter: {
-        post: `${content.captions.short}\n\n${content.hashtags.slice(0, 3).join(' ')}`,
+        post: normalizeHashtagsForPlatform(
+          normalizeGeneratedContent(
+            `${content.captions.short}\n\n${content.hashtags
+              .slice(0, 3)
+              .join(' ')}`,
+          ),
+          'twitter',
+        ),
       },
       linkedin: {
-        post: content.captions.long,
+        post: normalizeHashtagsForPlatform(
+          normalizeGeneratedContent(content.captions.long),
+          'linkedin',
+        ),
       },
     },
   };

@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getImageBaseUrl } from '@/lib/urls';
 import { getPlatformImageFormat } from '@/lib/social/educational-images';
+import { normalizeHashtagsForPlatform } from '@/lib/social/social-copy-generator';
+import { normalizeGeneratedContent } from '@/lib/social/content-normalizer';
 
 export const runtime = 'nodejs';
 
@@ -52,7 +54,10 @@ function formatCosmicPost(content: PostContent, date: string): string {
     .map((section) => section?.trim())
     .filter(Boolean);
 
-  return sections.join('\n\n');
+  return normalizeHashtagsForPlatform(
+    normalizeGeneratedContent(sections.join('\n\n')),
+    'instagram',
+  );
 }
 
 function formatTwitterContent(content: PostContent, date: string): string {
@@ -76,7 +81,10 @@ function formatTwitterContent(content: PostContent, date: string): string {
       ? `${normalized.slice(0, maxLength - 1)}…`
       : normalized;
 
-  return `${truncated}${hashtagSegment}`.trim();
+  return normalizeHashtagsForPlatform(
+    normalizeGeneratedContent(`${truncated}${hashtagSegment}`.trim()),
+    'twitter',
+  );
 }
 
 function formatLinkedInContent(content: PostContent, date: string): string {
@@ -98,7 +106,10 @@ function formatLinkedInContent(content: PostContent, date: string): string {
     .map((section) => section?.trim())
     .filter(Boolean);
 
-  return sections.join('\n\n');
+  return normalizeHashtagsForPlatform(
+    normalizeGeneratedContent(sections.join('\n\n')),
+    'linkedin',
+  );
 }
 
 function resolveTargetDate(raw?: string): string | null {

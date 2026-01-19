@@ -5,6 +5,8 @@
  * Each theme has 7 facets that build understanding cumulatively across the week.
  */
 
+import { generatedCategoryThemes } from '@/constants/seo/generated-category-themes';
+
 export interface DailyFacet {
   dayIndex: number; // 0-6 for Mon-Sun
   title: string;
@@ -54,7 +56,7 @@ export const domainHashtags: Record<string, string> = {
 // CATEGORY THEMES - 7 facets each, rotate weekly
 // ============================================================================
 
-export const categoryThemes: WeeklyTheme[] = [
+const baseCategoryThemes: WeeklyTheme[] = [
   {
     id: 'zodiac-foundations',
     name: 'Foundations of the Zodiac',
@@ -597,6 +599,11 @@ export const categoryThemes: WeeklyTheme[] = [
   },
 ];
 
+export const categoryThemes: WeeklyTheme[] = [
+  ...baseCategoryThemes,
+  ...generatedCategoryThemes,
+];
+
 // ============================================================================
 // SABBAT THEMES - 4 facets each (lead-up days)
 // ============================================================================
@@ -966,23 +973,26 @@ export function getThemeForDate(
   date: Date,
   currentThemeIndex: number = 0,
   facetOffset: number = 0,
+  includeSabbats: boolean = true,
 ): {
   theme: WeeklyTheme | SabbatTheme;
   facet: DailyFacet;
   isSabbat: boolean;
 } {
   // Check if this date falls within a sabbat lead-up
-  const sabbatInfo = getSabbatForDate(date);
+  if (includeSabbats) {
+    const sabbatInfo = getSabbatForDate(date);
 
-  if (sabbatInfo) {
-    const { sabbat, daysUntil } = sabbatInfo;
-    // daysUntil: 3 = day -3, 2 = day -2, 1 = day -1, 0 = day of
-    const facetIndex = 3 - daysUntil;
-    return {
-      theme: sabbat,
-      facet: sabbat.leadUpFacets[facetIndex],
-      isSabbat: true,
-    };
+    if (sabbatInfo) {
+      const { sabbat, daysUntil } = sabbatInfo;
+      // daysUntil: 3 = day -3, 2 = day -2, 1 = day -1, 0 = day of
+      const facetIndex = 3 - daysUntil;
+      return {
+        theme: sabbat,
+        facet: sabbat.leadUpFacets[facetIndex],
+        isSabbat: true,
+      };
+    }
   }
 
   // Otherwise use rotating category theme
@@ -1012,48 +1022,21 @@ export function generateHashtags(
 ): { domain: string; topic: string; brand: string } {
   const domain = domainHashtags[theme.category] || '#spirituality';
 
-  // Generate topic hashtag from facet title
-  const topicBase = facet.title
-    .toLowerCase()
-    .replace(/[^a-z0-9\s]/g, '')
-    .replace(/\s+/g, '');
-  const topic = `#${topicBase}`;
-
-  // Third hashtag based on category (for variety, not brand)
-  const categoryThirdHashtags: Record<string, string> = {
+  const categoryHashtags: Record<string, string> = {
     zodiac: '#astrology',
-    tarot: '#tarot',
-    lunar: '#moonmagic',
     planetary: '#astrology',
+    lunar: '#moonmagic',
     sabbat: '#wheeloftheyear',
     numerology: '#numerology',
     crystals: '#crystalhealing',
-    chakras: '#chakras',
+    tarot: '#tarot',
+    chakras: '#chakrahealing',
   };
-  const fallbackThirdHashtags: Record<string, string[]> = {
-    zodiac: ['#zodiacsigns', '#horoscope'],
-    tarot: ['#tarotreading', '#tarotcards'],
-    lunar: ['#lunarcycle', '#moonmagic'],
-    planetary: ['#planets', '#cosmicwisdom'],
-    sabbat: ['#seasonalrituals', '#paganwheel'],
-    numerology: ['#numbersymbolism', '#numerologyguide'],
-    crystals: ['#crystals', '#healingstones'],
-    chakras: ['#energyhealing', '#chakrawork'],
-  };
-  const baseThird = categoryThirdHashtags[theme.category] || '#spirituality';
-  const used = new Set([domain, topic]);
-  let thirdHashtag = baseThird;
-  if (used.has(baseThird)) {
-    const fallbacks = fallbackThirdHashtags[theme.category] || [
-      '#cosmicwisdom',
-    ];
-    thirdHashtag = fallbacks.find((tag) => !used.has(tag)) || baseThird;
-  }
 
   return {
     domain,
-    topic,
-    brand: thirdHashtag, // Reusing brand field for third hashtag (not actually brand)
+    topic: categoryHashtags[theme.category] || '#cosmicwisdom',
+    brand: '#lunary',
   };
 }
 
@@ -1064,6 +1047,7 @@ export function getWeeklyContentPlan(
   weekStartDate: Date,
   currentThemeIndex: number = 0,
   facetOffset: number = 0,
+  includeSabbats: boolean = true,
 ): Array<{
   date: Date;
   dayName: string;
@@ -1091,6 +1075,7 @@ export function getWeeklyContentPlan(
       date,
       currentThemeIndex,
       facetOffset,
+      includeSabbats,
     );
     const hashtags = generateHashtags(theme, facet);
 
@@ -1101,6 +1086,45 @@ export function getWeeklyContentPlan(
       facet,
       isSabbat,
       hashtags,
+    });
+  }
+
+  return plan;
+}
+
+export function getWeeklySabbatPlan(weekStartDate: Date): Array<{
+  date: Date;
+  dayName: string;
+  theme: SabbatTheme;
+  facet: DailyFacet;
+}> {
+  const plan = [];
+  const dayNames = [
+    'Monday',
+    'Tuesday',
+    'Wednesday',
+    'Thursday',
+    'Friday',
+    'Saturday',
+    'Sunday',
+  ];
+
+  for (let i = 0; i < 7; i++) {
+    const date = new Date(weekStartDate);
+    date.setDate(weekStartDate.getDate() + i);
+    const sabbatInfo = getSabbatForDate(date);
+    if (!sabbatInfo) continue;
+
+    const { sabbat, daysUntil } = sabbatInfo;
+    const facetIndex = 3 - daysUntil;
+    const facet = sabbat.leadUpFacets[facetIndex];
+    if (!facet) continue;
+
+    plan.push({
+      date,
+      dayName: dayNames[i],
+      theme: sabbat,
+      facet,
     });
   }
 
