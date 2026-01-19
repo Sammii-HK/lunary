@@ -206,6 +206,34 @@ const DOMAIN_DESCRIPTIONS: Record<string, string> = {
     'Focus on seasonal practices, sabbat rhythms, or ceremony structure without branching into unrelated tarot imagery.',
 };
 
+const PLATFORM_TONE_NOTES: Record<string, string> = {
+  threads:
+    'Threads posts should feel conversational and reflective, zeroing in on one strong idea per post.',
+  twitter:
+    'Twitter/X posts need tighter phrasing, a single insight, and no repeated adjectives; keep the copy sharp.',
+  pinterest:
+    'Pinterest entries can be slightly more explanatory while staying practical, grounded, and calm.',
+  instagram:
+    'Instagram and TikTok captions remain emotionally resonant, present-tense, and paired with the video energy.',
+  tiktok:
+    'TikTok captions should sound like a lived-in observation about what you notice right now.',
+  default:
+    'Keep the tone calm, grounded, and observational—describe how a pattern shows up, not why someone must believe it.',
+};
+
+const SOCIAL_POST_STYLE_INSTRUCTION = (platform: string) => {
+  const platformNote =
+    PLATFORM_TONE_NOTES[platform] || PLATFORM_TONE_NOTES.default;
+  return `Global style rules:
+- Avoid repeating sentence structures within a single post and never reuse the same opening or closing sentence across variants.
+- Limit “Many believe” to once across the 7-day batch and allow “may influence” only once per post; prefer “often”, “tends to”, “is best used for”, “shows up as”, or “is felt as”.
+- Skip filler phrases like “can deepen”, “may enhance”, or “often signifies” unless you immediately follow with a concrete example.
+- Every post must include exactly one “why this matters today” line (practical, emotional, or behavioral).
+- Max 3 short paragraphs; first sentence must reframe a misconception or describe lived experience, and the final sentence should invite reflection (not a CTA).
+- Stay calm, grounded, and authoritative—explain patterns without pushing belief or using mystical exaggeration.
+Platform-specific note: ${platformNote}`;
+};
+
 const CATEGORY_META: Record<string, { label: string; contextClause: string }> =
   {
     zodiac: { label: 'Astrology basics', contextClause: 'in astrology' },
@@ -921,6 +949,7 @@ const buildEducationalPrompt = (pack: SourcePack) => {
   ].includes(pack.postType)
     ? `${CLOSING_PARTICIPATION_INSTRUCTION}\n`
     : '';
+  const styleGuidance = SOCIAL_POST_STYLE_INSTRUCTION(pack.platform);
 
   return `You are writing social copy for Lunary. Use UK English, stay calm, and keep the tone educational.
 Keyword reference (first line added later): ${pack.displayTitle}
@@ -933,6 +962,7 @@ ${structureNote}
 ${nonDeterministicNote}
 ${guardrailNote}
 ${closingParticipationNote}
+${styleGuidance}
 ${buildScopeGuard(pack.topicTitle)}
 ${noveltyNote}
 
@@ -997,6 +1027,7 @@ const buildVideoCaptionPrompt = (pack: SourcePack) => {
     'Avoid deterministic claims. Use soft language like "can", "tends to", "may", "often", "influences", "highlights".';
   const noveltyNote = buildNoveltyInstruction(pack.noveltyContext);
   const guardrailNote = FACTUAL_GUARDRAIL_INSTRUCTION;
+  const styleGuidance = SOCIAL_POST_STYLE_INSTRUCTION(pack.platform);
 
   return `You are writing a search-optimized caption for Lunary in UK English to pair with the short-form video script. Focus on "${pack.topicTitle}" and keep the style informative and calm.
 Keyword reference (displayTitle added separately): ${pack.displayTitle}
@@ -1007,6 +1038,7 @@ ${discoveryInstruction}
 ${structureNote}
 ${nonDeterministicNote}
 ${guardrailNote}
+${styleGuidance}
 ${buildScopeGuard(pack.topicTitle)}
 ${noveltyNote}
 Do not include hashtags or CTA phrases; those will be added later.
@@ -1047,6 +1079,7 @@ const buildQuestionPrompt = (pack: SourcePack) => {
     : 'Include a discovery term like "astrology" or "lunar timing" when natural.';
   const noveltyNote = buildNoveltyInstruction(pack.noveltyContext);
   const guardrailNote = FACTUAL_GUARDRAIL_INSTRUCTION;
+  const styleGuidance = SOCIAL_POST_STYLE_INSTRUCTION(pack.platform);
   return `Write a question post for Lunary in UK English about "${pack.topicTitle}".
 ${domainInstruction}
 ${anchorInstruction}
@@ -1054,6 +1087,7 @@ ${discoveryInstruction}
 ${buildScopeGuard(pack.topicTitle)}
 Avoid deterministic claims; use soft language like "can", "tends to", "may", "often", "influences", "highlights".
 ${guardrailNote}
+${styleGuidance}
 ${noveltyNote}
 
 Schema:
