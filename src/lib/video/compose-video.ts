@@ -614,7 +614,7 @@ export async function composeVideo(
         const musicIndex = adjustedImages.length + 1;
         filterParts.push(`[${voiceIndex}:a]asetpts=PTS-STARTPTS[voice]`);
         filterParts.push(
-          `[${musicIndex}:a]loudnorm=I=-23:TP=-2:LRA=7,volume=0.75,afade=t=in:st=0:d=0.5,atrim=duration=${audioDuration}[music]`,
+          `[${musicIndex}:a]loudnorm=I=-23:TP=-2:LRA=7,volume=0.5,afade=t=in:st=0:d=0.5,atrim=duration=${audioDuration}[music]`,
         );
         filterParts.push(
           `[voice][music]amix=inputs=2:duration=first:dropout_transition=0[aout]`,
