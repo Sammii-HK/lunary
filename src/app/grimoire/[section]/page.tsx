@@ -8,7 +8,7 @@ import {
   isValidGrimoireSection,
   getAllGrimoireSectionSlugs,
 } from '@/utils/grimoire';
-import GrimoireLayout from '../GrimoireLayout';
+import GrimoireLayout, { GrimoireSearchParams } from '../GrimoireLayout';
 import { GrimoireBreadcrumbs } from '@/components/grimoire/GrimoireBreadcrumbs';
 
 const sectionDescriptions: Record<string, string> = {
@@ -289,8 +289,10 @@ export async function generateStaticParams() {
 
 export default async function GrimoireSectionPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ section: string }>;
+  searchParams?: GrimoireSearchParams;
 }) {
   const { section } = await params;
   if (!isValidGrimoireSection(section)) {
@@ -306,7 +308,11 @@ export default async function GrimoireSectionPage({
   return (
     <>
       <GrimoireBreadcrumbs items={breadcrumbItems} />
-      <GrimoireLayout currentSectionSlug={section} />
+      <GrimoireLayout
+        currentSectionSlug={section}
+        searchParams={searchParams}
+        pathname={`/grimoire/${section}`}
+      />
     </>
   );
 }
