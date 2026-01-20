@@ -10,6 +10,7 @@ import { conversionTracking } from '@/lib/analytics';
 
 import { DateWidget } from '@/components/DateWidget';
 import { ShareDailyInsight } from '@/components/ShareDailyInsight';
+import dayjs from 'dayjs';
 
 const MoonPreview = dynamic(
   () =>
@@ -119,11 +120,11 @@ export default function AppDashboardClient() {
     }
   }, [authState.isAuthenticated, authState.loading]);
 
+  const today = new Date().toISOString().split('T')[0];
   useEffect(() => {
     if (!authState.isAuthenticated || authState.loading) return;
     if (typeof window === 'undefined') return;
 
-    const today = new Date().toISOString().split('T')[0];
     const userId = authState.user?.id ? String(authState.user.id) : 'anon';
     const key = `lunary_daily_dashboard_viewed:${userId}:${today}`;
 
@@ -141,10 +142,14 @@ export default function AppDashboardClient() {
     authState.loading,
     authState.user?.id,
     authState.user?.email,
+    today,
   ]);
 
   const greeting = () => {
+    const isBirthday =
+      dayjs(user?.birthday).format('MM-DD') === dayjs(today).format('MM-DD');
     const hour = new Date().getHours();
+    if (isBirthday) return 'Happy birthday';
     if (hour < 12) return 'Good morning';
     if (hour < 17) return 'Good afternoon';
     return 'Good evening';
