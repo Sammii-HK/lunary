@@ -155,7 +155,7 @@ export const DailyCardPreview = () => {
               {dailyCard.information}
             </p>
           )}
-          <p className='text-xs text-zinc-500 mt-1.5'>View your patterns →</p>
+          <p className='text-xs text-zinc-500 mt-1.5'>View your patterns</p>
         </div>
         <ArrowRight className='w-4 h-4 text-zinc-600 group-hover:text-lunary-accent-300 transition-colors flex-shrink-0 mt-1' />
       </div>
