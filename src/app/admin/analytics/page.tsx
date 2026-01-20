@@ -171,6 +171,11 @@ type EngagementOverviewResponse = {
       day_30: number | null;
     }>;
   };
+  returning_referrer_breakdown?: {
+    organic_returning: number;
+    direct_returning: number;
+    internal_returning: number;
+  };
 };
 
 type FeatureAdoptionResponse = {
@@ -369,6 +374,8 @@ export default function AnalyticsPage() {
     activity?.content_mau_grimoire && activity.content_mau_grimoire > 0
       ? (activity.grimoire_only_mau / activity.content_mau_grimoire) * 100
       : 0;
+  const returningReferrerBreakdown =
+    engagementOverview?.returning_referrer_breakdown;
 
   const chartSeries = showProductSeries
     ? [...activitySeries, ...productSeries]
@@ -1506,6 +1513,43 @@ export default function AnalyticsPage() {
                     }
                   />
                 </div>
+                {returningReferrerBreakdown && (
+                  <>
+                    <p className='text-xs uppercase tracking-wider text-zinc-400'>
+                      Returning referrer breakdown
+                    </p>
+                    <div className='grid gap-4 md:grid-cols-3'>
+                      <MiniStat
+                        label='Organic returning'
+                        value={returningReferrerBreakdown.organic_returning}
+                        icon={
+                          <Sparkles className='h-5 w-5 text-lunary-primary-300' />
+                        }
+                      />
+                      <MiniStat
+                        label='Direct / brand returning'
+                        value={returningReferrerBreakdown.direct_returning}
+                        icon={
+                          <Target className='h-5 w-5 text-lunary-secondary-300' />
+                        }
+                      />
+                      <MiniStat
+                        label='Internal returning'
+                        value={returningReferrerBreakdown.internal_returning}
+                        icon={
+                          <Activity className='h-5 w-5 text-lunary-success-300' />
+                        }
+                      />
+                    </div>
+                    <div className='rounded-lg border border-zinc-800/30 bg-zinc-950/40 px-3 py-2 text-xs text-zinc-400'>
+                      Segments use the most recent `app_opened` metadata
+                      (referrer, UTM source, or origin type) for returning users
+                      (2+ active days) so you can tell whether they came back
+                      via organic search, a direct/brand touchpoint, or internal
+                      navigation inside Lunary.
+                    </div>
+                  </>
+                )}
                 <div className='rounded-lg border border-zinc-800/30 bg-zinc-950/40 px-3 py-2 text-xs text-zinc-400'>
                   Returning users (range) are users with 2+ distinct active days
                   inside the selected range. Returning DAU counts signed-in

@@ -36,6 +36,11 @@ export type EngagementOverview = {
       day_30: number | null;
     }>;
   };
+  returning_referrer_breakdown: {
+    organic_returning: number;
+    direct_returning: number;
+    internal_returning: number;
+  };
 };
 
 export type FeatureAdoption = {
@@ -271,6 +276,85 @@ export async function getEngagementOverview(
     returningUsersRangeResult.rows[0]?.returning_users_range || 0,
   );
 
+  const returningReferrerResult = await sql.query(
+    `
+      WITH returning_users AS (
+        SELECT user_id
+        FROM conversion_events
+        WHERE event_type = 'app_opened'
+          AND user_id IS NOT NULL
+          AND created_at >= $1
+          AND created_at <= $2
+        GROUP BY user_id
+        HAVING COUNT(DISTINCT ${utcDateExpr}) >= 2
+      ),
+      latest_returning AS (
+        SELECT DISTINCT ON (user_id)
+          user_id,
+          COALESCE(metadata->>'referrer', '') AS referrer,
+          COALESCE(metadata->>'utm_source', '') AS utm_source,
+          COALESCE(metadata->>'origin_type', '') AS origin_type
+        FROM conversion_events
+        WHERE event_type = 'app_opened'
+          AND user_id IS NOT NULL
+          AND created_at >= $1
+          AND created_at <= $2
+          AND user_id IN (SELECT user_id FROM returning_users)
+        ORDER BY user_id, created_at DESC
+      ),
+      classified AS (
+        SELECT
+          user_id,
+          LOWER(referrer) AS ref_lower,
+          LOWER(utm_source) AS utm_lower,
+          LOWER(origin_type) AS origin_lower
+        FROM latest_returning
+      ),
+      categorized AS (
+        SELECT
+          user_id,
+          (origin_lower = 'internal' OR ref_lower LIKE '%lunary.app%')
+            AS is_internal,
+          (
+            origin_lower = 'seo'
+            OR utm_lower LIKE '%organic%'
+            OR utm_lower LIKE '%seo%'
+            OR utm_lower LIKE '%search%'
+            OR ref_lower LIKE '%google.%'
+            OR ref_lower LIKE '%bing.%'
+            OR ref_lower LIKE '%yahoo.%'
+            OR ref_lower LIKE '%duckduckgo.%'
+            OR ref_lower LIKE '%search%'
+          ) AS is_search
+        FROM classified
+      )
+      SELECT
+        COALESCE(SUM(CASE WHEN is_internal THEN 1 ELSE 0 END), 0) AS internal_returning,
+        COALESCE(
+          SUM(CASE WHEN NOT is_internal AND is_search THEN 1 ELSE 0 END),
+          0,
+        ) AS organic_returning,
+        COALESCE(
+          SUM(CASE WHEN NOT is_internal AND NOT is_search THEN 1 ELSE 0 END),
+          0,
+        ) AS direct_returning
+      FROM categorized
+    `,
+    [startTs, endTs],
+  );
+
+  const returningReferrerBreakdown = {
+    internal_returning: Number(
+      returningReferrerResult.rows[0]?.internal_returning || 0,
+    ),
+    organic_returning: Number(
+      returningReferrerResult.rows[0]?.organic_returning || 0,
+    ),
+    direct_returning: Number(
+      returningReferrerResult.rows[0]?.direct_returning || 0,
+    ),
+  };
+
   // Returning DAU (selected end day): active on end day AND also active on an earlier day in the selected range.
   const endDayDate = parseIsoDay(endDayKey);
   const prevDayDate = new Date(endDayDate);
@@ -479,6 +563,7 @@ export async function getEngagementOverview(
       '15+': Number(activeDaysResult.rows[0]?.bucket_15_plus || 0),
     },
     retention: { cohorts },
+    returning_referrer_breakdown: returningReferrerBreakdown,
   };
 }
 
