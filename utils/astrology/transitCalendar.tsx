@@ -12,12 +12,85 @@ export type TransitEvent = {
   type: 'sign_change' | 'retrograde' | 'direct' | 'aspect' | 'lunar_phase';
 };
 
+const PLANETS_OF_INTEREST = [
+  'Sun',
+  'Moon',
+  'Mercury',
+  'Venus',
+  'Mars',
+  'Jupiter',
+  'Saturn',
+  'Uranus',
+  'Neptune',
+  'Pluto',
+];
+
+const PLANET_SIGNIFICANCE: Record<string, TransitEvent['significance']> = {
+  Sun: 'high',
+  Moon: 'medium',
+  Mercury: 'medium',
+  Venus: 'medium',
+  Mars: 'high',
+  Jupiter: 'high',
+  Saturn: 'high',
+  Uranus: 'medium',
+  Neptune: 'medium',
+  Pluto: 'high',
+};
+
+const PLANET_ENERGY = {
+  Sun: 'identity and leadership',
+  Moon: 'emotions and intuition',
+  Mercury: 'communication and ideas',
+  Venus: 'relationships and values',
+  Mars: 'action and assertion',
+  Jupiter: 'expansion and possibility',
+  Saturn: 'structure and responsibility',
+  Uranus: 'change and liberation',
+  Neptune: 'dreams and clarity',
+  Pluto: 'transformation and power',
+} satisfies Record<string, string>;
+
+const getSignChangeEvents = (
+  chart: AstroChartInformation[],
+  previousChart: AstroChartInformation[],
+  date: dayjs.Dayjs,
+): TransitEvent[] => {
+  const events: TransitEvent[] = [];
+
+  PLANETS_OF_INTEREST.forEach((planet) => {
+    const current = chart.find((entry) => entry.body === planet);
+    const previous = previousChart.find((entry) => entry.body === planet);
+    if (!current || !previous) return;
+
+    if (current.sign !== previous.sign) {
+      const description = `${planet} shifts into ${current.sign}, inviting new focus on ${
+        PLANET_ENERGY[planet as keyof typeof PLANET_ENERGY] ?? 'personal growth'
+      }.`;
+      events.push({
+        date,
+        planet,
+        event: `Enters ${current.sign}`,
+        description,
+        significance: PLANET_SIGNIFICANCE[planet] ?? 'medium',
+        type: 'sign_change',
+      });
+    }
+  });
+
+  return events;
+};
+
 // Get upcoming transit events for the next 30 days
 export const getUpcomingTransits = (
   startDate: dayjs.Dayjs = dayjs(),
 ): TransitEvent[] => {
   const events: TransitEvent[] = [];
   const observer = new Observer(51.4769, 0.0005, 0);
+  let previousChart = getAstrologicalChart(
+    startDate.subtract(1, 'day').toDate(),
+    observer,
+  );
 
   // Check each day for the next 30 days
   for (let i = 0; i < 30; i++) {
@@ -28,13 +101,14 @@ export const getUpcomingTransits = (
     const lunarEvents = getLunarPhaseEvents(checkDate);
     events.push(...lunarEvents);
 
-    // Add planetary sign changes (simplified - would need ephemeris data for accuracy)
-    const signChangeEvents = getPlanetarySignChanges(checkDate, chart);
-    events.push(...signChangeEvents);
+    // Add planetary sign changes
+    events.push(...getSignChangeEvents(chart, previousChart, checkDate));
 
     // Add retrograde events (simplified)
     const retrogradeEvents = getRetrogradeEvents(checkDate);
     events.push(...retrogradeEvents);
+
+    previousChart = chart;
   }
 
   // Remove duplicates and sort by date
@@ -107,63 +181,6 @@ const getLunarPhaseEvents = (date: dayjs.Dayjs): TransitEvent[] => {
   return events;
 };
 
-const getPlanetarySignChanges = (
-  date: dayjs.Dayjs,
-  chart: AstroChartInformation[],
-): TransitEvent[] => {
-  const events: TransitEvent[] = [];
-
-  // Simplified sign change detection - in reality would need ephemeris data
-  // This is a mock implementation for demonstration
-  const planets = ['Mercury', 'Venus', 'Mars'];
-
-  planets.forEach((planetName) => {
-    const planet = chart.find((p) => p.body === planetName);
-    if (planet) {
-      // Mock sign change dates (in reality, would calculate from ephemeris)
-      const dayOfYear = date.dayOfYear();
-
-      // Mercury changes signs roughly every 20-25 days
-      if (planetName === 'Mercury' && dayOfYear % 23 === 0) {
-        events.push({
-          date,
-          planet: planetName,
-          event: `Enters ${getNextSign(planet.sign)}`,
-          description: `${planetName} shifts energy, bringing new communication themes and mental focus.`,
-          significance: 'medium',
-          type: 'sign_change',
-        });
-      }
-
-      // Venus changes signs roughly every 30 days
-      if (planetName === 'Venus' && dayOfYear % 31 === 0) {
-        events.push({
-          date,
-          planet: planetName,
-          event: `Enters ${getNextSign(planet.sign)}`,
-          description: `${planetName} brings new themes in love, beauty, and values.`,
-          significance: 'medium',
-          type: 'sign_change',
-        });
-      }
-
-      // Mars changes signs roughly every 45-60 days
-      if (planetName === 'Mars' && dayOfYear % 52 === 0) {
-        events.push({
-          date,
-          planet: planetName,
-          event: `Enters ${getNextSign(planet.sign)}`,
-          description: `${planetName} energizes a new area of life with passion and drive.`,
-          significance: 'high',
-          type: 'sign_change',
-        });
-      }
-    }
-  });
-
-  return events;
-};
-
 const getRetrogradeEvents = (date: dayjs.Dayjs): TransitEvent[] => {
   const events: TransitEvent[] = [];
 
@@ -207,26 +224,6 @@ const getRetrogradeEvents = (date: dayjs.Dayjs): TransitEvent[] => {
   }
 
   return events;
-};
-
-const getNextSign = (currentSign: string): string => {
-  const signs = [
-    'Aries',
-    'Taurus',
-    'Gemini',
-    'Cancer',
-    'Leo',
-    'Virgo',
-    'Libra',
-    'Scorpio',
-    'Sagittarius',
-    'Capricorn',
-    'Aquarius',
-    'Pisces',
-  ];
-
-  const currentIndex = signs.indexOf(currentSign);
-  return signs[(currentIndex + 1) % 12];
 };
 
 // Get Solar Return information

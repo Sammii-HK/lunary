@@ -15,6 +15,27 @@ import {
   createBreadcrumbSchema,
 } from '@/lib/schema';
 
+const ASPECT_COLOR: Record<
+  (typeof ASPECT_DATA)[keyof typeof ASPECT_DATA]['nature'],
+  { border: string; bg: string; badge: string }
+> = {
+  harmonious: {
+    border: 'border-lunary-success-500/70',
+    bg: 'bg-gradient-to-br from-lunary-success-900/30 to-lunary-success-950/30',
+    badge: 'bg-lunary-success-900 text-lunary-success-300',
+  },
+  challenging: {
+    border: 'border-lunary-error-500/60',
+    bg: 'bg-gradient-to-br from-lunary-error-900/30 to-lunary-error-950/30',
+    badge: 'bg-lunary-error-900 text-lunary-error-300',
+  },
+  neutral: {
+    border: 'border-zinc-700/70',
+    bg: 'bg-gradient-to-br from-zinc-900/60 to-zinc-950/40',
+    badge: 'bg-zinc-900 text-zinc-300',
+  },
+};
+
 export const metadata: Metadata = {
   title:
     'Astrological Aspects: Conjunct, Trine, Square, Sextile, Opposition | Lunary',
@@ -106,24 +127,46 @@ export default function AspectsIndexPage() {
         <div className='grid md:grid-cols-2 lg:grid-cols-3 gap-4 mb-12'>
           {ASPECTS.map((aspect) => {
             const data = ASPECT_DATA[aspect];
+            const palette = ASPECT_COLOR[data.nature];
             return (
               <div
                 key={aspect}
-                className='p-6 rounded-lg border border-zinc-800 bg-zinc-900/50'
+                className={`p-6 rounded-2xl border ${palette.border} ${palette.bg} shadow-lg shadow-black/60`}
               >
-                <div className='flex items-center gap-3 mb-3'>
-                  <span className='text-3xl'>{data.symbol}</span>
-                  <span
-                    className={`text-xs px-2 py-1 rounded ${data.nature === 'harmonious' ? 'bg-lunary-success-900 text-lunary-success-300' : data.nature === 'challenging' ? 'bg-lunary-error-900 text-lunary-error-300' : 'bg-lunary-secondary-900 text-lunary-secondary-300'}`}
-                  >
-                    {data.nature}
-                  </span>
+                <div className='flex items-start justify-between gap-4 mb-4'>
+                  <div>
+                    <p className='text-[0.65rem] uppercase tracking-[0.4em] text-zinc-400'>
+                      Aspect sign
+                    </p>
+                    <span className='text-4xl font-medium leading-none'>
+                      {data.symbol}
+                    </span>
+                  </div>
+                  <div className='text-right'>
+                    <p className='text-[0.65rem] uppercase tracking-[0.4em] text-zinc-400'>
+                      Degrees
+                    </p>
+                    <span className='text-lg font-semibold text-zinc-100'>
+                      {data.degrees}°
+                    </span>
+                  </div>
                 </div>
-                <h3 className='text-lg font-medium mb-1'>{data.displayName}</h3>
-                <p className='text-sm text-zinc-400 mb-2'>{data.degrees}°</p>
-                <p className='text-sm text-zinc-400'>
-                  {data.keywords.join(', ')}
-                </p>
+                <span
+                  className={`inline-flex items-center justify-center text-[0.65rem] font-semibold uppercase tracking-[0.35em] px-3 py-1 rounded-full ${palette.badge} mb-3`}
+                >
+                  {data.displayName}
+                </span>
+                <p className='text-sm text-zinc-200 mb-3'>{data.description}</p>
+                <div className='flex flex-wrap gap-2 text-[0.65rem] uppercase tracking-[0.3em] text-zinc-300'>
+                  {data.keywords.map((keyword) => (
+                    <span
+                      key={keyword}
+                      className='rounded-full border border-zinc-700 px-2 py-1 bg-black/20'
+                    >
+                      {keyword}
+                    </span>
+                  ))}
+                </div>
               </div>
             );
           })}
