@@ -90,7 +90,7 @@ export function ChartWheelSvg({
   fontFamilySymbols = 'Astronomicon',
 }: {
   birthChart: BirthChartData[];
-  houses?: HouseCusp[];
+  houses?: Partial<HouseCusp>[] | null;
   size?: number;
   showHouseNumbers?: boolean;
   colours?: Partial<{
