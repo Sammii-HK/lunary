@@ -3547,6 +3547,21 @@ function buildTransitSummaryPost({
   lines.unshift(...leadLines);
 
   if (lines.length === 0) {
+    const fallbackLine =
+      primaryEvent?.name && primaryEvent?.energy
+        ? `${primaryEvent.name} is bringing ${primaryEvent.energy.toLowerCase()} energy today.`
+        : ingressEvents[0]
+          ? `${ingressEvents[0].planet} enters ${ingressEvents[0].sign}, shifting today's themes.`
+          : aspectSource[0]
+            ? formatTransitAspectLine(aspectSource[0])
+            : 'Cosmic energies continue to shift—Lunary tracks the latest transits for you.';
+
+    if (fallbackLine) {
+      lines.push(fallbackLine);
+    }
+  }
+
+  if (lines.length === 0) {
     return null;
   }
 
