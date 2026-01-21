@@ -275,6 +275,11 @@ const INTENTION_LABELS: Record<string, string> = {
   insight: 'Insight',
 };
 
+const computePercent = (numerator?: number, denominator?: number) => {
+  if (!denominator || denominator <= 0) return 0;
+  return ((numerator || 0) / denominator) * 100;
+};
+
 export default function AnalyticsPage() {
   const today = useMemo(() => new Date(), []);
   const defaultEnd = formatDateInput(today);
@@ -374,6 +379,23 @@ export default function AnalyticsPage() {
     activity?.content_mau_grimoire && activity.content_mau_grimoire > 0
       ? (activity.grimoire_only_mau / activity.content_mau_grimoire) * 100
       : 0;
+
+  const productReturningPercent = activity
+    ? {
+        dau: computePercent(
+          activity.returning_dau,
+          activity.signed_in_product_dau,
+        ),
+        wau: computePercent(
+          activity.returning_wau,
+          activity.signed_in_product_wau,
+        ),
+        mau: computePercent(
+          activity.returning_mau,
+          activity.signed_in_product_mau,
+        ),
+      }
+    : { dau: 0, wau: 0, mau: 0 };
   const returningReferrerBreakdown =
     engagementOverview?.returning_referrer_breakdown;
 
@@ -1990,6 +2012,32 @@ export default function AnalyticsPage() {
                     </p>
                     <p className='text-xl font-semibold text-white'>
                       {(activity?.signed_in_product_mau ?? 0).toLocaleString()}
+                    </p>
+                  </div>
+                </div>
+                <div className='mt-4 grid grid-cols-1 gap-4 sm:grid-cols-3'>
+                  <div className='rounded-xl border border-zinc-800/60 bg-zinc-950/50 p-3'>
+                    <p className='text-[11px] uppercase tracking-wider text-zinc-500'>
+                      Returning Product DAU %
+                    </p>
+                    <p className='text-xl font-semibold text-white'>
+                      {productReturningPercent.dau.toFixed(1)}%
+                    </p>
+                  </div>
+                  <div className='rounded-xl border border-zinc-800/60 bg-zinc-950/50 p-3'>
+                    <p className='text-[11px] uppercase tracking-wider text-zinc-500'>
+                      Returning Product WAU %
+                    </p>
+                    <p className='text-xl font-semibold text-white'>
+                      {productReturningPercent.wau.toFixed(1)}%
+                    </p>
+                  </div>
+                  <div className='rounded-xl border border-zinc-800/60 bg-zinc-950/50 p-3'>
+                    <p className='text-[11px] uppercase tracking-wider text-zinc-500'>
+                      Returning Product MAU %
+                    </p>
+                    <p className='text-xl font-semibold text-white'>
+                      {productReturningPercent.mau.toFixed(1)}%
                     </p>
                   </div>
                 </div>
