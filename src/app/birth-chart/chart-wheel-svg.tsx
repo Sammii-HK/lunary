@@ -138,7 +138,11 @@ export function ChartWheelSvg({
   const houseData = (() => {
     if (houses && houses.length > 0) {
       return houses.map((h) => {
-        const pos = polarFromLongitude(h.eclipticLongitude, ascendantAngle, 0);
+        const pos = polarFromLongitude(
+          h.eclipticLongitude || 0,
+          ascendantAngle,
+          0,
+        );
         return { ...h, ...pos };
       });
     }
@@ -211,7 +215,7 @@ export function ChartWheelSvg({
         const x2 = Math.cos(h.radian) * 85;
         const y2 = Math.sin(h.radian) * 85;
 
-        const isAngular = [1, 4, 7, 10].includes(h.house);
+        const isAngular = [1, 4, 7, 10].includes(h.house || 0);
 
         return (
           <line
