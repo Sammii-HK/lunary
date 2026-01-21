@@ -6,10 +6,11 @@ import { constellations } from '../constellations';
 import { Observer } from 'astronomy-engine';
 import { parseIsoDateOnly } from '@/lib/date-only';
 
-type HoroscopeReading = {
+export type HoroscopeReading = {
   sunSign: string;
   moonPhase: string;
   dailyGuidance: string;
+  dailyFocus: string;
   personalInsight: string;
   luckyElements: string[];
 };
@@ -26,61 +27,37 @@ export const getPersonalizedHoroscope = (
       ? dayjs(userBirthday)
       : null;
 
-  // Default observer (can be enhanced with user location later)
   const observer = new Observer(51.4769, 0.0005, 0);
-
-  // Get current astrological chart
   const currentChart = getAstrologicalChart(today.toDate(), observer);
-
-  // Get natal chart if birthday is provided
   const natalChart = birthDate
     ? getAstrologicalChart(birthDate.toDate(), observer)
     : null;
 
-  // Determine sun sign from birthday
-  const sunSign = birthDate
-    ? getSunSign(birthDate.month() + 1, birthDate.date())
-    : 'Unknown';
-
-  // Get current moon phase
+  const natalSunSign =
+    natalChart?.find((planet) => planet.body === 'Sun')?.sign ||
+    currentChart.find((planet) => planet.body === 'Sun')?.sign ||
+    'Unknown';
   const moonPhase = getCurrentMoonPhase(today.toDate());
 
-  // Generate personalized guidance
-  const dailyGuidance = generateDailyGuidance(currentChart, sunSign, userName);
+  const dailyGuidance = generateDailyGuidance(
+    currentChart,
+    natalSunSign,
+    userName,
+  );
   const personalInsight = generatePersonalInsight(
     natalChart,
     currentChart,
     userName,
   );
-  const luckyElements = generateLuckyElements(sunSign, moonPhase);
+  const luckyElements = generateLuckyElements(natalSunSign, moonPhase);
 
   return {
-    sunSign,
+    sunSign: natalSunSign,
     moonPhase,
-    dailyGuidance,
+    ...dailyGuidance,
     personalInsight,
     luckyElements,
   };
-};
-
-const getSunSign = (month: number, day: number): string => {
-  // Simplified sun sign calculation
-  if ((month === 3 && day >= 21) || (month === 4 && day <= 19)) return 'Aries';
-  if ((month === 4 && day >= 20) || (month === 5 && day <= 20)) return 'Taurus';
-  if ((month === 5 && day >= 21) || (month === 6 && day <= 20)) return 'Gemini';
-  if ((month === 6 && day >= 21) || (month === 7 && day <= 22)) return 'Cancer';
-  if ((month === 7 && day >= 23) || (month === 8 && day <= 22)) return 'Leo';
-  if ((month === 8 && day >= 23) || (month === 9 && day <= 22)) return 'Virgo';
-  if ((month === 9 && day >= 23) || (month === 10 && day <= 22)) return 'Libra';
-  if ((month === 10 && day >= 23) || (month === 11 && day <= 21))
-    return 'Scorpio';
-  if ((month === 11 && day >= 22) || (month === 12 && day <= 21))
-    return 'Sagittarius';
-  if ((month === 12 && day >= 22) || (month === 1 && day <= 19))
-    return 'Capricorn';
-  if ((month === 1 && day >= 20) || (month === 2 && day <= 18))
-    return 'Aquarius';
-  return 'Pisces';
 };
 
 const getCurrentMoonPhase = (date: Date): string => {
@@ -104,22 +81,34 @@ const generateDailyGuidance = (
   currentChart: AstroChartInformation[],
   sunSign: string,
   userName?: string,
-): string => {
+): { dailyGuidance: string; dailyFocus: string } => {
   const name = userName || 'dear soul';
   const sunPosition = currentChart.find((planet) => planet.body === 'Sun');
   const moonPosition = currentChart.find((planet) => planet.body === 'Moon');
-
   const constellation = sunPosition?.sign
     ? constellations[
         sunPosition.sign.toLowerCase() as keyof typeof constellations
       ]
     : null;
 
+  const focusKeyword =
+    constellation?.keywords?.[1]?.toLowerCase() || 'inner wisdom';
+  const moonSign = moonPosition?.sign || 'the void';
+
   if (constellation) {
-    return `${name}, as a ${sunSign}, today's cosmic energies align with ${constellation.name} influence. ${constellation.information} The moon in ${moonPosition?.sign || 'transition'} enhances your ${constellation.keywords[0].toLowerCase()} nature. Focus on ${constellation.keywords[1]?.toLowerCase() || 'inner wisdom'} today.`;
+    return {
+      dailyGuidance: `${name}, the Sun in ${constellation.name.replace(
+        / sign$/i,
+        '',
+      )} amplifies your ${sunSign} energy today. ${constellation.information} The moon in ${moonSign} invites you to honor your ${focusKeyword} focus.`,
+      dailyFocus: `Lean into ${focusKeyword} today.`,
+    };
   }
 
-  return `${name}, the cosmic energies today support your ${sunSign} nature. Trust your intuition and embrace the day's possibilities.`;
+  return {
+    dailyGuidance: `${name}, with the Sun in ${sunPosition?.sign || sunSign}, today's skies support your ${sunSign} qualities. The moon in ${moonSign} nudges you toward ${focusKeyword}.`,
+    dailyFocus: `Lean into ${focusKeyword} today.`,
+  };
 };
 
 const generatePersonalInsight = (

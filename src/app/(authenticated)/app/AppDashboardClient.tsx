@@ -64,6 +64,17 @@ const DailyCardPreview = dynamic(
   },
 );
 
+const PersonalizedHoroscopePreview = dynamic(
+  () =>
+    import('@/components/compact/PersonalizedHoroscopePreview').then((m) => ({
+      default: m.PersonalizedHoroscopePreview,
+    })),
+  {
+    loading: () => <div className='min-h-0' />,
+    ssr: false,
+  },
+);
+
 const CrystalPreview = dynamic(
   () =>
     import('@/components/compact/CrystalModal').then((m) => ({
@@ -149,9 +160,9 @@ export default function AppDashboardClient() {
     const isBirthday =
       dayjs(user?.birthday).format('MM-DD') === dayjs(today).format('MM-DD');
     const hour = new Date().getHours();
-    if (isBirthday) return 'Happy birthday';
     if (hour < 12) return 'Good morning';
     if (hour < 17) return 'Good afternoon';
+    if (isBirthday) return 'Happy birthday';
     return 'Good evening';
   };
 
@@ -187,6 +198,7 @@ export default function AppDashboardClient() {
         </div>
       </header>
 
+      <PersonalizedHoroscopePreview />
       <div className='grid grid-cols-1 md:grid-cols-2 gap-3'>
         <MoonPreview />
         <SkyNowCard />
