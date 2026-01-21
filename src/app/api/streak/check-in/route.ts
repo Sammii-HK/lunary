@@ -32,6 +32,12 @@ export async function POST(request: NextRequest) {
 
     // Calculate if this is a new day
     const isNewDay = lastCheckIn !== today;
+    const MS_PER_DAY = 1000 * 60 * 60 * 24;
+    const calculateDaysAway = (from: string, to: string) => {
+      const fromDate = new Date(`${from}T00:00:00Z`);
+      const toDate = new Date(`${to}T00:00:00Z`);
+      return Math.round((toDate.getTime() - fromDate.getTime()) / MS_PER_DAY);
+    };
 
     if (isNewDay) {
       // Check if streak should continue or reset
@@ -43,8 +49,14 @@ export async function POST(request: NextRequest) {
         // Continue streak
         currentStreak += 1;
       } else if (lastCheckIn !== null) {
-        // Streak broken, reset to 1
-        currentStreak = 1;
+        const daysAway = calculateDaysAway(lastCheckIn, today);
+        if (daysAway >= 7) {
+          // Reset streak after a full break
+          currentStreak = 1;
+        } else {
+          // Pause streak during short breaks
+          currentStreak = Math.max(currentStreak, 1);
+        }
       } else {
         // First check-in
         currentStreak = 1;
