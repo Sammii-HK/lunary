@@ -152,10 +152,10 @@ export async function POST(request: NextRequest) {
       content.length > 50 ? content.substring(0, 50) + '...' : content;
 
     const allowedCategories: JournalCategory[] = ['journal', 'dream', 'ritual'];
-    const requestedCategory =
-      typeof category === 'string' && allowedCategories.includes(category)
-        ? (category as JournalCategory)
-        : null;
+    const isJournalCategory = (value: unknown): value is JournalCategory =>
+      typeof value === 'string' &&
+      allowedCategories.includes(value as JournalCategory);
+    const requestedCategory = isJournalCategory(category) ? category : null;
     const resolvedCategory =
       requestedCategory ??
       (isDreamEntry({ content, moodTags, source }) ? 'dream' : 'journal');
