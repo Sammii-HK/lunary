@@ -43,6 +43,7 @@ import {
   extractCardReferences,
 } from '@/lib/journal/extract-moments';
 import { DailyThread } from '@/components/daily-thread/DailyThread';
+import { useRouter } from 'next/navigation';
 
 interface CollectionFolder {
   id: number;
@@ -324,6 +325,7 @@ function BookOfShadowsContent() {
   const authState = useAuthStatus();
   const searchParams = useSafeSearchParams();
   const { user } = useUser();
+  const router = useRouter();
   const userBirthday = user?.birthday;
   const userName = user?.name?.split(' ')[0];
   const subscription = useSubscription();
@@ -1077,7 +1079,7 @@ function BookOfShadowsContent() {
                 </button>
               </div>
               {isAssistExpanded && (
-                <div className='px-3 pb-2 text-sm text-zinc-300 md:px-6 md:pb-4'>
+                <div className='px-3 pb-2 text-sm text-zinc-300 md:px-6 md:pb-4 space-y-3'>
                   <CopilotQuickActions
                     onActionClick={(prompt) => sendMessage(prompt)}
                     disabled={isStreaming}
@@ -1101,6 +1103,39 @@ function BookOfShadowsContent() {
                       }
                     }}
                   />
+                  <div className='space-y-2 border-t border-zinc-800/70 pt-3'>
+                    <p className='text-[0.65rem] uppercase tracking-widest text-zinc-500'>
+                      Astral tools
+                    </p>
+                    <div className='flex flex-wrap gap-2'>
+                      <button
+                        type='button'
+                        onClick={() => router.push('/book-of-shadows')}
+                        className='px-3 py-2 text-xs font-semibold uppercase tracking-wide rounded-lg border border-zinc-700 text-zinc-200 transition hover:border-lunary-primary/80 hover:text-lunary-primary-200'
+                      >
+                        Book of Shadows
+                      </button>
+                      <button
+                        type='button'
+                        onClick={() => router.push('/collections')}
+                        className='px-3 py-2 text-xs font-semibold uppercase tracking-wide rounded-lg border border-zinc-700 text-zinc-200 transition hover:border-lunary-primary/80 hover:text-lunary-primary-200'
+                      >
+                        Collections
+                      </button>
+                      <button
+                        type='button'
+                        aria-pressed={isJournalMode}
+                        onClick={() => setIsJournalMode((prev) => !prev)}
+                        className={`px-3 py-2 text-xs font-semibold uppercase tracking-wide rounded-lg border transition ${
+                          isJournalMode
+                            ? 'border-lunary-primary bg-lunary-primary-600/20 text-lunary-primary-100'
+                            : 'border-zinc-700 text-zinc-200 hover:border-lunary-primary/80 hover:text-lunary-primary-200'
+                        }`}
+                      >
+                        {isJournalMode ? 'Exit journal' : 'Journal mode'}
+                      </button>
+                    </div>
+                  </div>
                 </div>
               )}
             </div>

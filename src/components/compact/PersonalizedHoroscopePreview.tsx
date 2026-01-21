@@ -79,7 +79,12 @@ export const PersonalizedHoroscopePreview = () => {
   const handleJournalClick = (event: MouseEvent<HTMLButtonElement>) => {
     event.preventDefault();
     event.stopPropagation();
-    router.push('/guide?journal=true');
+    const promptKey = Date.now();
+    router.push(
+      `/book-of-shadows?prompt=${encodeURIComponent(
+        `Ritual reflection: ${dailyFocusCard.focus}. ${dailyFocusCard.prompt}`,
+      )}&tab=journal&promptKey=${promptKey}`,
+    );
   };
 
   const handleRitualCompletion = async (
@@ -170,17 +175,20 @@ export const PersonalizedHoroscopePreview = () => {
       <p className='text-[0.65rem] uppercase tracking-widest text-zinc-500 mb-2'>
         Today's ritual
       </p>
-      {!ritualComplete && (
-        <p className='text-zinc-300 leading-relaxed'>{focusText}</p>
-      )}
+      <p className='text-zinc-300 leading-relaxed'>{focusText}</p>
       {ritualComplete && (
-        <button
-          type='button'
-          onClick={handleJournalClick}
-          className='text-lunary-accent hover:text-lunary-accent-100 transition-colors'
-        >
-          Journal about this focus.
-        </button>
+        <p className='text-[0.65rem] text-zinc-400 mt-1 flex items-center gap-2'>
+          <span className='whitespace-nowrap'>
+            Capture this ritual inside your Book of Shadows.
+          </span>
+          <button
+            type='button'
+            onClick={handleJournalClick}
+            className='text-[0.65rem] font-medium text-lunary-accent hover:text-lunary-accent-100 transition-colors'
+          >
+            Journal about this ritual
+          </button>
+        </p>
       )}
 
       {streakCopy && (
