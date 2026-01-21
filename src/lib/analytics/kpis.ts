@@ -330,14 +330,8 @@ export async function getEngagementOverview(
       )
       SELECT
         COALESCE(SUM(CASE WHEN is_internal THEN 1 ELSE 0 END), 0) AS internal_returning,
-        COALESCE(
-          SUM(CASE WHEN NOT is_internal AND is_search THEN 1 ELSE 0 END),
-          0,
-        ) AS organic_returning,
-        COALESCE(
-          SUM(CASE WHEN NOT is_internal AND NOT is_search THEN 1 ELSE 0 END),
-          0,
-        ) AS direct_returning
+        COALESCE(SUM(CASE WHEN NOT is_internal AND is_search THEN 1 ELSE 0 END), 0) AS organic_returning,
+        COALESCE(SUM(CASE WHEN NOT is_internal AND NOT is_search THEN 1 ELSE 0 END), 0) AS direct_returning
       FROM categorized
     `,
     [startTs, endTs],
