@@ -1,7 +1,7 @@
 'use client';
 
 import { useMemo, useState } from 'react';
-import { Map, Telescope, X } from 'lucide-react';
+import { Map, Telescope, X, Check, MapPin } from 'lucide-react';
 import { useLocation } from '@/hooks/useLocation';
 import { useAstronomyContext } from '@/context/AstronomyContext';
 import { BirthChartPlacement, useUser } from '@/context/UserContext';
@@ -340,14 +340,14 @@ export const SkyNowCard = () => {
               title='Refresh my location'
               className='p-0.5 rounded-full border border-transparent text-zinc-500 hover:text-zinc-300 hover:border-zinc-700 transition-colors relative'
             >
-              {/* TODO: add back in with rise and set times */}
-              {/* {refreshState === 'success' ? (
+              {/* TODO: add back in with rise and set times functionality */}
+              {refreshState === 'success' ? (
                 <Check className='w-3 h-3 text-lunary-success' />
               ) : (
                 <MapPin
                   className={`w-3 h-3 ${locationLoading ? 'animate-pulse' : ''}`}
                 />
-              )} */}
+              )}
               {showLocationFeedback && locationError && (
                 <span className='absolute -top-5 left-1/2 -translate-x-1/2 text-[10px] text-zinc-300'>
                   Failed

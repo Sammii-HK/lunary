@@ -166,9 +166,12 @@ export const TransitOfTheDay = () => {
         <div className='flex items-start justify-between gap-3'>
           <div className='flex-1 min-w-0'>
             <div className='flex items-center justify-between mb-1'>
-              <div className='flex items-center gap-2'>
-                <span className='font-astro text-lg text-lunary-secondary-200'>
+              <div className='flex items-center gap-2 align-middle'>
+                <span className='font-astro text-lg text-lunary-secondary-200 align-middle'>
                   {getPlanetSymbol(generalTransit.planet)}
+                </span>
+                <span className='text-sm font-medium text-zinc-200'>
+                  Your Next Transit
                 </span>
                 <span className='text-xs text-zinc-400 uppercase tracking-wide'>
                   {dateLabel}
@@ -222,9 +225,12 @@ export const TransitOfTheDay = () => {
           <div className='flex items-start justify-between gap-3'>
             <div className='flex-1 min-w-0'>
               <div className='flex items-center justify-between mb-1'>
-                <div className='flex items-center gap-2'>
+                <div className='flex items-center gap-2 align-middle'>
                   <span className='font-astro text-lg text-lunary-secondary-200'>
                     {getPlanetSymbol(generalTransit.planet)}
+                  </span>
+                  <span className='text-sm font-medium text-zinc-200'>
+                    Your Next Transit
                   </span>
                   <span className='text-xs text-zinc-400 uppercase tracking-wide'>
                     {dateLabel}
@@ -268,9 +274,12 @@ export const TransitOfTheDay = () => {
       <div className='flex items-start justify-between gap-3'>
         <div className='flex-1 min-w-0'>
           <div className='flex items-center justify-between mb-1'>
-            <div className='flex items-center gap-2'>
+            <div className='flex items-center gap-2 align-middle'>
               <span className='font-astro text-lg text-lunary-secondary-200'>
                 {getPlanetSymbol(transit.planet)}
+              </span>
+              <span className='text-sm font-medium text-zinc-200'>
+                Your Next Transit
               </span>
               <span className='text-xs text-zinc-400 uppercase tracking-wide'>
                 {dateLabel}
