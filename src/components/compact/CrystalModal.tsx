@@ -180,7 +180,7 @@ export const CrystalPreview = () => {
         className='w-full h-full py-3 px-4 bg-lunary-bg border border-zinc-800/50 rounded-md hover:border-lunary-primary-700/50 transition-colors group text-left min-h-16 cursor-pointer'
       >
         <div className='flex items-start gap-3 h-full'>
-          <div className='flex-1 min-w-0 h-full mt-1 justify-between flex flex-col'>
+          <div className='flex-1 min-w-0 h-full mt-1 flex flex-col'>
             <div className='flex items-center justify-between mb-1'>
               <div className='flex items-center gap-2'>
                 <Gem className='w-4 h-4 text-lunary-accent-200' />
@@ -190,11 +190,11 @@ export const CrystalPreview = () => {
               </div>
               {canAccessPersonalized && (
                 <span className='text-xs bg-zinc-800/50 text-lunary-primary-200 px-1.5 py-0.5 rounded'>
-                  Personalized
+                  Personal
                 </span>
               )}
             </div>
-            <p className='text-xs text-zinc-400 line-clamp-2'>
+            <p className='text-xs text-zinc-400 line-clamp-3 mt-2'>
               {crystalReason}
             </p>
             {!canAccessPersonalized && (
