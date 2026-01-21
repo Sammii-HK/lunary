@@ -82,7 +82,7 @@ export const PersonalizedHoroscopePreview = () => {
     const promptKey = Date.now();
     router.push(
       `/book-of-shadows?prompt=${encodeURIComponent(
-        `Ritual reflection: ${dailyFocusCard.focus}. ${dailyFocusCard.prompt}`,
+        `${dailyFocusCard.prompt}`,
       )}&tab=journal&promptKey=${promptKey}`,
     );
   };

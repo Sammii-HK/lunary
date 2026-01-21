@@ -39,7 +39,7 @@ interface JournalEntry {
   moonPhase?: string;
   source: string;
   createdAt: string;
-  category?: string;
+  category?: 'journal' | 'dream' | 'ritual';
 }
 
 interface DreamEntry {
@@ -91,6 +91,11 @@ function JournalEntryCard({ entry }: { entry: JournalEntry }) {
         {entry.source === 'chat' && (
           <span className='text-xs bg-zinc-800 text-zinc-400 px-2 py-0.5 rounded'>
             from chat
+          </span>
+        )}
+        {entry.category === 'ritual' && (
+          <span className='text-xs bg-lunary-accent/20 text-lunary-accent px-2 py-0.5 rounded'>
+            Ritual
           </span>
         )}
       </div>
@@ -414,6 +419,9 @@ export default function BookOfShadowsPage() {
     );
   }
 
+  const journalEntries = entries.filter((entry) => entry.category !== 'ritual');
+  const ritualEntries = entries.filter((entry) => entry.category === 'ritual');
+
   const tabs: {
     id: TabId;
     label: string;
@@ -424,12 +432,13 @@ export default function BookOfShadowsPage() {
       id: 'journal',
       label: 'Journal',
       icon: <Feather className='w-4 h-4' />,
-      count: entries.length,
+      count: journalEntries.length,
     },
     {
       id: 'ritual',
       label: 'Ritual',
       icon: <Sparkles className='w-4 h-4' />,
+      count: ritualEntries.length,
     },
     {
       id: 'dreams',
@@ -547,7 +556,7 @@ export default function BookOfShadowsPage() {
               </button>
             )}
 
-            {entries.length === 0 ? (
+            {journalEntries.length === 0 ? (
               <div className='text-center py-12'>
                 <Feather className='w-10 h-10 text-zinc-700 mx-auto mb-3' />
                 <p className='text-zinc-400'>No journal entries yet</p>
@@ -557,7 +566,7 @@ export default function BookOfShadowsPage() {
               </div>
             ) : (
               <div className='space-y-2'>
-                {entries.map((entry) => (
+                {journalEntries.map((entry) => (
                   <JournalEntryCard key={entry.id} entry={entry} />
                 ))}
               </div>
@@ -594,6 +603,19 @@ export default function BookOfShadowsPage() {
             ) : (
               <div className='text-center text-xs text-zinc-500'>
                 Complete today’s focus to unlock a ritual prompt here.
+              </div>
+            )}
+
+            {ritualEntries.length > 0 && (
+              <div className='space-y-3 bg-zinc-900/40 border border-zinc-800 rounded-lg p-4'>
+                <p className='text-[0.65rem] uppercase tracking-widest text-zinc-500'>
+                  Ritual reflections
+                </p>
+                <div className='space-y-2'>
+                  {ritualEntries.map((entry) => (
+                    <JournalEntryCard key={entry.id} entry={entry} />
+                  ))}
+                </div>
               </div>
             )}
           </div>
