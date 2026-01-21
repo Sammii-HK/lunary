@@ -44,9 +44,8 @@ const formatTransitSentence = (
   const houseLabel = transit.house
     ? `in your ${transit.house}${getOrdinalSuffix(transit.house)} house`
     : 'in your chart';
-  const dateLabel = dayjs(transit.date).format('MMM D');
   const eventLabel = transit.event || transit.type || 'moves through';
-  const base = `${transit.planet} ${eventLabel} ${houseLabel} on ${dateLabel}`;
+  const base = `${transit.planet} ${eventLabel} ${houseLabel}`;
   const prefix = isFirst ? '' : 'Meanwhile, ';
   const sentence = `${prefix}${base}`.trim();
   const capitalized = sentence.charAt(0).toUpperCase() + sentence.slice(1);
@@ -162,6 +161,7 @@ export const DailyInsightCard = () => {
     const todayStart = selectedDay.startOf('day');
     const lookbackDays = 2;
     const windowStart = todayStart.subtract(lookbackDays, 'day');
+    const windowEnd = todayStart.add(1, 'day');
     const upcomingTransits = getUpcomingTransits(todayStart);
     const impacts = getPersonalTransitImpacts(upcomingTransits, birthChart, 60);
 
@@ -174,20 +174,27 @@ export const DailyInsightCard = () => {
       low: 1,
     };
 
-    const relevantImpacts = impacts.filter((impact) => {
+    const candidateImpacts = impacts.filter((impact) => {
       const impactDayValue = impact.date.startOf('day').valueOf();
       return (
-        impact.house &&
         impactDayValue >= windowStart.valueOf() &&
-        impactDayValue <= todayStart.valueOf() &&
+        impactDayValue <= windowEnd.valueOf() &&
         !Number.isNaN(significanceOrder[impact.significance])
       );
     });
+    const relevantImpacts = candidateImpacts.filter((impact) => impact.house);
 
-    if (relevantImpacts.length === 0) return [];
+    console.log('impacts', impacts);
+
+    console.log('relevantImpacts', relevantImpacts);
+
+    const impactsToScore =
+      relevantImpacts.length > 0 ? relevantImpacts : candidateImpacts;
+
+    if (impactsToScore.length === 0) return [];
 
     const daySeed = todayStart.valueOf();
-    const prioritized = relevantImpacts
+    const prioritized = impactsToScore
       .map((impact) => {
         const nameHash = Array.from(impact.planet).reduce(
           (acc, char) => acc + char.charCodeAt(0),
@@ -223,7 +230,30 @@ export const DailyInsightCard = () => {
       }
     });
 
-    const selection: PersonalTransitImpact[] = uniqueImpacts.slice(0, 2);
+    const todayValue = todayStart.valueOf();
+    const todayImpacts = uniqueImpacts.filter(
+      (impact) => impact.date.startOf('day').valueOf() === todayValue,
+    );
+    const otherImpacts = uniqueImpacts.filter(
+      (impact) => impact.date.startOf('day').valueOf() !== todayValue,
+    );
+
+    const dayIndex = Math.floor(todayStart.valueOf() / 86400000);
+    const rotation = otherImpacts.length ? dayIndex % otherImpacts.length : 0;
+    const rotatedOthers = [
+      ...otherImpacts.slice(rotation),
+      ...otherImpacts.slice(0, rotation),
+    ];
+
+    const selection: PersonalTransitImpact[] = [];
+    const insertImpact = (impact: PersonalTransitImpact) => {
+      if (selection.length >= 2) return;
+      selection.push(impact);
+    };
+
+    todayImpacts.forEach(insertImpact);
+    rotatedOthers.forEach(insertImpact);
+
     let dupIndex = 0;
     while (selection.length < 2 && dupIndex < duplicateFallbacks.length) {
       selection.push(duplicateFallbacks[dupIndex]);
@@ -253,7 +283,7 @@ export const DailyInsightCard = () => {
             <div className='flex items-center gap-2 mb-1'>
               <Sparkles className='w-4 h-4 text-lunary-primary-300' />
               <span className='text-sm font-medium text-zinc-200'>
-                Your Day
+                Today's Influence
               </span>
             </div>
             <p className='text-sm text-zinc-300 leading-relaxed'>
@@ -308,7 +338,7 @@ export const DailyInsightCard = () => {
             <div className='flex items-center gap-2'>
               <Sparkles className='w-4 h-4 text-lunary-primary-300' />
               <span className='text-sm font-medium text-zinc-200'>
-                Your Day
+                Today's Influence
               </span>
             </div>
             <span className='text-xs bg-zinc-800/50 text-lunary-primary-200 px-1.5 py-0.5 rounded'>
@@ -316,39 +346,8 @@ export const DailyInsightCard = () => {
             </span>
           </div>
           <p className='text-sm text-zinc-300 leading-relaxed'>{displayText}</p>
-          {transitHighlights.length > 0 && (
-            <div className='mt-2 space-y-2 text-zinc-400 text-[11px]'>
-              <p className='text-[10px] uppercase tracking-[0.3em] text-lunary-primary-200'>
-                Transit highlights
-              </p>
-              {transitHighlights.map((transit) => (
-                <div
-                  key={`${transit.planet}-${transit.date.valueOf()}`}
-                  className='space-y-0.5'
-                >
-                  <p className='text-xs text-zinc-200 leading-snug'>
-                    {transit.planet} {transit.event}
-                    {transit.house
-                      ? ` in your ${transit.house}${getOrdinalSuffix(
-                          transit.house,
-                        )} house`
-                      : ''}
-                  </p>
-                  <p className='text-[11px] text-zinc-500 leading-snug line-clamp-2'>
-                    {dayjs(transit.date).format('MMM D')}
-                    {transit.personalImpact
-                      ? ` · ${transit.personalImpact}`
-                      : ''}
-                  </p>
-                  <p className='text-xs text-zinc-500 mt-1.5'>
-                    View your transits
-                  </p>
-                </div>
-              ))}
-            </div>
-          )}
           {lifeThemeName && (
-            <p className='text-xs text-zinc-500 mt-1.5'>
+            <p className='text-xs text-lunary-secondary-200 mt-2'>
               Connects to your theme: {lifeThemeName}
             </p>
           )}
