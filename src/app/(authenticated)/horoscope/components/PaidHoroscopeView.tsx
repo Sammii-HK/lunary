@@ -18,7 +18,6 @@ import { PersonalTransitImpactCard } from './PersonalTransitImpact';
 import { TodaysAspects } from './TodaysAspects';
 import { TransitWisdom } from './TransitWisdom';
 import { GuideNudge } from '@/components/GuideNudge';
-import { StreakBanner } from '@/components/StreakBanner';
 import { ReflectionBox } from '@/components/horoscope/ReflectionBox';
 import { PremiumPathway } from '@/components/PremiumPathway';
 import { getPersonalDayNumber } from '@/lib/numerology/personalNumbers';
@@ -774,8 +773,6 @@ export function PaidHoroscopeView({
 
   return (
     <div className='h-full space-y-6 p-4 pb-16 md:pb-20 overflow-auto'>
-      <StreakBanner location='horoscope' className='mb-2' />
-
       <div className='pt-6'>
         <div className='flex flex-wrap items-start justify-between gap-3'>
           <div>
