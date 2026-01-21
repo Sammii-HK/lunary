@@ -87,7 +87,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
   const birthChartRefreshAttemptRef = useRef<number>(0);
   const subscriptionSyncAttemptRef = useRef(false);
   const [hasLoadedOnce, setHasLoadedOnce] = useState(false);
-  const BIRTH_CHART_VERSION = 4;
+  const BIRTH_CHART_VERSION = 5;
 
   const fetchUserData = useCallback(async () => {
     if (!isAuthenticated || !userId) {

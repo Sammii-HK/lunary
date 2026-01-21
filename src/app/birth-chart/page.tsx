@@ -3,6 +3,10 @@
 import { useUser } from '@/context/UserContext';
 import { SmartTrialButton } from '@/components/SmartTrialButton';
 import { BirthChartData } from '../../../utils/astrology/birthChart';
+import {
+  formatDegree,
+  getZodiacSign,
+} from '../../../utils/astrology/astrology';
 import { BirthChart } from '@/components/BirthChart';
 import {
   bodiesSymbols,
@@ -18,7 +22,7 @@ import { hasBirthChartAccess } from '../../../utils/pricing';
 import Link from 'next/link';
 import { UpgradePrompt } from '@/components/UpgradePrompt';
 import { conversionTracking } from '@/lib/analytics';
-import { useEffect } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { ShareBirthChart } from '@/components/ShareBirthChart';
 
 const ZODIAC_ORDER = [
@@ -77,6 +81,29 @@ const calculateWholeSigHouses = (birthChart: BirthChartData[]) => {
   }
 
   return houses;
+};
+
+const ensureDescendantInChart = (birthChart: BirthChartData[]) => {
+  const hasDescendant = birthChart.some((p) => p.body === 'Descendant');
+  if (hasDescendant) return birthChart;
+  const ascendant = birthChart.find((p) => p.body === 'Ascendant');
+  if (!ascendant) return birthChart;
+
+  const descendantLongitude = (ascendant.eclipticLongitude + 180) % 360;
+  const formatted = formatDegree(descendantLongitude);
+  const descendantSign = getZodiacSign(descendantLongitude);
+
+  return [
+    ...birthChart,
+    {
+      body: 'Descendant',
+      sign: descendantSign,
+      degree: formatted.degree,
+      minute: formatted.minute,
+      eclipticLongitude: descendantLongitude,
+      retrograde: false,
+    },
+  ];
 };
 
 // Function to generate concise planetary interpretations
@@ -1058,9 +1085,14 @@ const getSplayPattern = (birthChart: BirthChartData[]): ChartPattern | null => {
 const BirthChartPage = () => {
   const { user, loading } = useUser();
   const subscription = useSubscription();
+  const [hasMounted, setHasMounted] = useState(false);
   const userName = user?.name;
   const userBirthday = user?.birthday;
-  const birthChartData = user?.birthChart || null;
+  const originalBirthChartData = user?.birthChart || null;
+  const birthChartData = useMemo(() => {
+    if (!originalBirthChartData) return null;
+    return ensureDescendantInChart(originalBirthChartData);
+  }, [originalBirthChartData]);
 
   const hasChartAccess = hasBirthChartAccess(
     subscription.status,
@@ -1068,12 +1100,18 @@ const BirthChartPage = () => {
   );
 
   useEffect(() => {
+    setHasMounted(true);
+  }, []);
+
+  useEffect(() => {
     if (hasChartAccess && user?.hasBirthChart && user?.id) {
       conversionTracking.birthChartViewed(user.id, subscription.plan);
     }
   }, [hasChartAccess, user?.hasBirthChart, user?.id, subscription.plan]);
 
-  if (loading) {
+  const shouldShowLoading = loading || !hasMounted;
+
+  if (shouldShowLoading) {
     return (
       <div className='h-full flex items-center justify-center'>
         <div className='text-center'>
@@ -1522,8 +1560,16 @@ const BirthChartPage = () => {
               const chiron = birthChartData.find((p) => p.body === 'Chiron');
               const lilith = birthChartData.find((p) => p.body === 'Lilith');
 
+              const descendant = birthChartData.find(
+                (p) => p.body === 'Descendant',
+              );
               const hasPoints =
-                midheaven || northNode || southNode || chiron || lilith;
+                midheaven ||
+                descendant ||
+                northNode ||
+                southNode ||
+                chiron ||
+                lilith;
 
               if (!hasPoints) return null;
 
@@ -1550,6 +1596,26 @@ const BirthChartPage = () => {
                         </h5>
                         <p className='text-xs text-zinc-300 mt-1'>
                           {astrologicalPoints.midheaven.mysticalProperties}
+                        </p>
+                      </div>
+                    )}
+                    {descendant && (
+                      <div className='border-l-2 border-lunary-primary-400 pl-3'>
+                        <h5 className='text-sm font-medium text-white flex items-center gap-2'>
+                          <span className='font-astro text-lg text-lunary-primary-400'>
+                            {astroPointSymbols.descendant}
+                          </span>
+                          Descendant in {descendant.sign}
+                          <span className='font-astro text-zinc-400'>
+                            {
+                              zodiacSymbol[
+                                descendant.sign.toLowerCase() as keyof typeof zodiacSymbol
+                              ]
+                            }
+                          </span>
+                        </h5>
+                        <p className='text-xs text-zinc-300 mt-1'>
+                          {astrologicalPoints.descendant.mysticalProperties}
                         </p>
                       </div>
                     )}

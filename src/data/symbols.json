@@ -25,7 +25,8 @@
     "neptune": "Y",
     "pluto": "Z",
     "ascendant": "a",
-    "midheaven": "m",
+    "descendant": "f",
+    "midheaven": "d",
     "northnode": "n",
     "southnode": "s",
     "chiron": "c",
@@ -62,13 +63,13 @@
   },
   "points": {
     "ascendant": "a",
-    "descendant": "d",
-    "midheaven": "m",
+    "descendant": "f",
+    "midheaven": "d",
     "imumcoeli": "i",
     "northnode": "n",
     "southnode": "s",
     "chiron": "c",
     "lilith": "l",
-    "partoffortune": "f"
+    "partoffortune": "p"
   }
 }

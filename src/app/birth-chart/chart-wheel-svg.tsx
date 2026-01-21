@@ -21,7 +21,7 @@ const MAIN_PLANETS = [
   'Neptune',
   'Pluto',
 ];
-const ANGLES = ['Ascendant', 'Midheaven'];
+const ANGLES = ['Ascendant', 'Descendant', 'Midheaven'];
 const POINTS = ['North Node', 'South Node', 'Chiron', 'Lilith'];
 
 function getSymbolForBody(body: string): string {

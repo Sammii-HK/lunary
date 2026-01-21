@@ -584,6 +584,21 @@ export const generateBirthChart = async (
       retrograde: false,
     });
 
+    const descendantLongitudeDeg = normalizeDegrees(
+      ascendantLongitudeDeg + 180,
+    );
+    const descendantSign = getZodiacSign(descendantLongitudeDeg);
+    const descendantFormatted = formatDegree(descendantLongitudeDeg);
+
+    birthChartData.push({
+      body: 'Descendant',
+      sign: descendantSign,
+      degree: descendantFormatted.degree,
+      minute: descendantFormatted.minute,
+      eclipticLongitude: descendantLongitudeDeg,
+      retrograde: false,
+    });
+
     const mcLongitude = calculateMidheaven(lstDeg, obliquity);
     const mcSign = getZodiacSign(mcLongitude);
     const mcFormatted = formatDegree(mcLongitude);

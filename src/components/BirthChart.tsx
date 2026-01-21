@@ -24,9 +24,10 @@ const MAIN_PLANETS = [
   'Neptune',
   'Pluto',
 ];
-const ANGLES = ['Ascendant', 'Midheaven'];
+const ANGLES = ['Ascendant', 'Descendant', 'Midheaven'];
 const ANGLE_DISPLAY: Record<string, string> = {
   Ascendant: 'Rising',
+  Descendant: 'Descendant',
   Midheaven: 'Midheaven',
 };
 const POINTS = ['North Node', 'South Node', 'Chiron', 'Lilith'];
