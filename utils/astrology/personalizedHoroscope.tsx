@@ -10,14 +10,13 @@ export type HoroscopeReading = {
   sunSign: string;
   moonPhase: string;
   dailyGuidance: string;
-  dailyFocus: string;
+  dailyFocus: string; // should be a clean phrase, not a sentence
   personalInsight: string;
   luckyElements: string[];
 };
 
 export const getPersonalizedHoroscope = (
   userBirthday?: string,
-  userName?: string,
 ): HoroscopeReading => {
   const today = dayjs();
   const parsedBirthDate = userBirthday ? parseIsoDateOnly(userBirthday) : null;
@@ -37,31 +36,28 @@ export const getPersonalizedHoroscope = (
     natalChart?.find((planet) => planet.body === 'Sun')?.sign ||
     currentChart.find((planet) => planet.body === 'Sun')?.sign ||
     'Unknown';
+
   const moonPhase = getCurrentMoonPhase(today.toDate());
 
-  const dailyGuidance = generateDailyGuidance(
+  const { dailyGuidance, dailyFocus } = generateDailyGuidance(
     currentChart,
     natalSunSign,
-    userName,
   );
-  const personalInsight = generatePersonalInsight(
-    natalChart,
-    currentChart,
-    userName,
-  );
+
+  const personalInsight = generatePersonalInsight(natalChart, currentChart);
   const luckyElements = generateLuckyElements(natalSunSign, moonPhase);
 
   return {
     sunSign: natalSunSign,
     moonPhase,
-    ...dailyGuidance,
+    dailyGuidance,
+    dailyFocus,
     personalInsight,
     luckyElements,
   };
 };
 
 const getCurrentMoonPhase = (date: Date): string => {
-  // Simplified moon phase calculation
   const phases = [
     'New Moon',
     'Waxing Crescent',
@@ -80,52 +76,63 @@ const getCurrentMoonPhase = (date: Date): string => {
 const generateDailyGuidance = (
   currentChart: AstroChartInformation[],
   sunSign: string,
-  userName?: string,
 ): { dailyGuidance: string; dailyFocus: string } => {
-  const name = userName || 'dear soul';
   const sunPosition = currentChart.find((planet) => planet.body === 'Sun');
   const moonPosition = currentChart.find((planet) => planet.body === 'Moon');
+
   const constellation = sunPosition?.sign
     ? constellations[
         sunPosition.sign.toLowerCase() as keyof typeof constellations
       ]
     : null;
 
-  const focusKeyword =
-    constellation?.keywords?.[1]?.toLowerCase() || 'inner wisdom';
   const moonSign = moonPosition?.sign || 'the void';
 
+  // Prefer a keyword that becomes a clean focus phrase
+  const focusPhrase = (
+    constellation?.keywords?.[1] ||
+    constellation?.keywords?.[0] ||
+    'inner wisdom'
+  )
+    .toLowerCase()
+    .trim();
+
   if (constellation) {
+    const signName = constellation.name.replace(/ sign$/i, '');
+
     return {
-      dailyGuidance: `${name}, the Sun in ${constellation.name.replace(
-        / sign$/i,
-        '',
-      )} amplifies your ${sunSign} energy today. ${constellation.information} The moon in ${moonSign} invites you to honor your ${focusKeyword} focus.`,
-      dailyFocus: `Lean into ${focusKeyword} today.`,
+      // Keep copy clean and parsable
+      dailyGuidance:
+        `The Sun in ${signName} amplifies your ${sunSign} energy today. ` +
+        `${constellation.information} ` +
+        `With the Moon in ${moonSign}, your attention is pulled inward.\n` +
+        `Focus: ${focusPhrase}.`,
+      // Keep this as a phrase, not a sentence
+      dailyFocus: focusPhrase,
     };
   }
 
   return {
-    dailyGuidance: `${name}, with the Sun in ${sunPosition?.sign || sunSign}, today's skies support your ${sunSign} qualities. The moon in ${moonSign} nudges you toward ${focusKeyword}.`,
-    dailyFocus: `Lean into ${focusKeyword} today.`,
+    dailyGuidance:
+      `With the Sun in ${sunPosition?.sign || sunSign}, today supports your ${sunSign} qualities. ` +
+      `The Moon in ${moonSign} nudges you towards steadier choices.\n` +
+      `Focus: ${focusPhrase}.`,
+    dailyFocus: focusPhrase,
   };
 };
 
 const generatePersonalInsight = (
   natalChart: AstroChartInformation[] | null,
   currentChart: AstroChartInformation[],
-  userName?: string,
 ): string => {
-  const name = userName || 'seeker';
-
   if (!natalChart) {
-    return `${name}, while I don't have your complete birth information, the current planetary alignment suggests a time of growth and self-discovery. Trust in your inner wisdom.`;
+    return `Without your full birth data, today still points to growth through small, intentional choices. Trust what you already know.`;
   }
 
   const natalSun = natalChart.find((planet) => planet.body === 'Sun');
   const currentMoon = currentChart.find((planet) => planet.body === 'Moon');
 
-  return `${name}, your natal Sun in ${natalSun?.sign || 'your birth sign'} resonates beautifully with today's Moon in ${currentMoon?.sign || 'transition'}. This creates a harmonious flow of energy that supports both your core self and your emotional needs. Pay attention to any intuitive insights that arise today.`;
+  return `Your natal Sun in ${natalSun?.sign || 'your birth sign'} resonates with today’s Moon in ${currentMoon?.sign || 'transition'}. This supports both self-direction and emotional clarity. Notice any intuitive insights that surface.`;
 };
 
 const generateLuckyElements = (
@@ -153,12 +160,8 @@ const generateLuckyElements = (
     'Number 7',
   ];
 
-  // Add moon phase specific element
-  if (moonPhase.includes('Full')) {
-    baseElements.push('Silver jewelry');
-  } else if (moonPhase.includes('New')) {
-    baseElements.push('Black candle');
-  }
+  if (moonPhase.includes('Full')) baseElements.push('Silver jewellery');
+  if (moonPhase.includes('New')) baseElements.push('Black candle');
 
   return baseElements;
 };

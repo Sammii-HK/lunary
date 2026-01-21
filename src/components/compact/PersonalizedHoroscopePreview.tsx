@@ -24,10 +24,7 @@ export const PersonalizedHoroscopePreview = () => {
 
   if (!canAccessPersonalized) return null;
 
-  const personalizedHoroscope = getPersonalizedHoroscope(
-    user?.birthday,
-    user?.name,
-  );
+  const personalizedHoroscope = getPersonalizedHoroscope(user?.birthday);
   const dailyFocusCard = buildDailyFocusCard(personalizedHoroscope);
   console.log('dailyFocusCard', dailyFocusCard);
 
