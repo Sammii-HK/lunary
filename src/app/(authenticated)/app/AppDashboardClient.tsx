@@ -157,8 +157,10 @@ export default function AppDashboardClient() {
   ]);
 
   const greeting = () => {
+    const hasBirthday = Boolean(user?.birthday);
     const isBirthday =
-      dayjs(user?.birthday).format('MM-DD') === dayjs(today).format('MM-DD');
+      hasBirthday &&
+      dayjs(user!.birthday).format('MM-DD') === dayjs(today).format('MM-DD');
     const hour = new Date().getHours();
     if (hour < 12) return 'Good morning';
     if (hour < 17) return 'Good afternoon';
