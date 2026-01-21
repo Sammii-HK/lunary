@@ -13,6 +13,8 @@ export type HoroscopeReading = {
   dailyFocus: string; // should be a clean phrase, not a sentence
   personalInsight: string;
   luckyElements: string[];
+  lunarPhaseProgress: number;
+  lunarPhaseDay: number;
 };
 
 export const getPersonalizedHoroscope = (
@@ -38,6 +40,10 @@ export const getPersonalizedHoroscope = (
     'Unknown';
 
   const moonPhase = getCurrentMoonPhase(today.toDate());
+  const { lunarPhaseProgress, lunarPhaseDay } = getLunarPhaseContext(
+    moonPhase,
+    today,
+  );
 
   const { dailyGuidance, dailyFocus } = generateDailyGuidance(
     currentChart,
@@ -54,23 +60,48 @@ export const getPersonalizedHoroscope = (
     dailyFocus,
     personalInsight,
     luckyElements,
+    lunarPhaseProgress,
+    lunarPhaseDay,
   };
 };
 
+const LUNAR_PHASES = [
+  'New Moon',
+  'Waxing Crescent',
+  'First Quarter',
+  'Waxing Gibbous',
+  'Full Moon',
+  'Waning Gibbous',
+  'Last Quarter',
+  'Waning Crescent',
+] as const;
+
 const getCurrentMoonPhase = (date: Date): string => {
-  const phases = [
-    'New Moon',
-    'Waxing Crescent',
-    'First Quarter',
-    'Waxing Gibbous',
-    'Full Moon',
-    'Waning Gibbous',
-    'Last Quarter',
-    'Waning Crescent',
-  ];
   const dayOfMonth = date.getDate();
-  const phaseIndex = Math.floor((dayOfMonth / 30) * 8) % 8;
-  return phases[phaseIndex];
+  const phaseIndex =
+    Math.floor((dayOfMonth / 30) * LUNAR_PHASES.length) % LUNAR_PHASES.length;
+  return LUNAR_PHASES[phaseIndex];
+};
+
+const getLunarPhaseContext = (
+  moonPhase: string,
+  date: dayjs.Dayjs,
+): { lunarPhaseProgress: number; lunarPhaseDay: number } => {
+  const phaseIndex = LUNAR_PHASES.findIndex((phase) => phase === moonPhase);
+  const normalizedIndex = phaseIndex >= 0 ? phaseIndex : 0;
+  const nominalDuration = 30 / LUNAR_PHASES.length;
+  const cycleDay = ((date.date() - 1) % 30) + 1;
+  const phaseStart = Math.round(normalizedIndex * nominalDuration) + 1;
+  let dayOffset = cycleDay - phaseStart;
+  if (dayOffset < 0) dayOffset += 30;
+  let dayPosition = dayOffset + 1;
+  if (dayPosition > nominalDuration) dayPosition = nominalDuration;
+  const lunarPhaseDay = Math.max(1, Math.round(dayPosition));
+  const lunarPhaseProgress = Math.min(
+    100,
+    Math.max(0, Math.round((dayPosition / nominalDuration) * 100)),
+  );
+  return { lunarPhaseProgress, lunarPhaseDay };
 };
 
 const generateDailyGuidance = (

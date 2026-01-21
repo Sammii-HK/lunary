@@ -10,6 +10,8 @@ import {
   ExpandableCard,
   ExpandableCardHeader,
 } from '@/components/ui/expandable-card';
+import { useUser } from '@/context/UserContext';
+import { getPersonalizedHoroscope } from '../../../utils/astrology/personalizedHoroscope';
 
 const ZODIAC_ELEMENTS: Record<string, string> = {
   aries: 'Fire',
@@ -230,6 +232,7 @@ const getDaysUntilNextPhase = (
 };
 
 export const MoonPreview = () => {
+  const { user } = useUser();
   const {
     currentMoonPhase,
     currentMoonConstellationPosition,
@@ -243,6 +246,20 @@ export const MoonPreview = () => {
   const nextPhaseInfo = getDaysUntilNextPhase(currentMoonPhase, moonAge);
   const zodiacInfo = getZodiacInfo(currentMoonConstellationPosition || '');
   const illuminationDisplay = Math.round(moonIllumination);
+
+  const personalizedHoroscope = user?.birthday
+    ? getPersonalizedHoroscope(user.birthday)
+    : null;
+  const lunarPhaseDay = personalizedHoroscope?.lunarPhaseDay;
+  const lunarPhaseProgress = personalizedHoroscope?.lunarPhaseProgress;
+  const cycleLine =
+    lunarPhaseDay && currentMoonPhase
+      ? `Day ${lunarPhaseDay} of the ${currentMoonPhase}${
+          typeof lunarPhaseProgress === 'number'
+            ? ` · ${lunarPhaseProgress}% through this phase`
+            : ''
+        }`
+      : null;
 
   useEffect(() => {
     if (!currentMoonPhase) return;
@@ -309,9 +326,10 @@ export const MoonPreview = () => {
             : `${illuminationDisplay}% illuminated`
         }
       />
+      {cycleLine && <p className='text-xs text-zinc-400 mt-1'>{cycleLine}</p>}
       <p className='text-xs text-zinc-400 mt-1'>
-        {nextPhaseInfo.days} {nextPhaseInfo.days === 1 ? 'day' : 'days'} until{' '}
-        {nextPhaseInfo.phase}
+        Next shift in {nextPhaseInfo.days}{' '}
+        {nextPhaseInfo.days === 1 ? 'day' : 'days'}
       </p>
     </>
   );

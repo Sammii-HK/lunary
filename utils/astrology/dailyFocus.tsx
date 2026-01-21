@@ -63,6 +63,20 @@ const toFocusSentence = (focus: string) => {
   return `Today invites you to lean into ${lower}.`;
 };
 
+const getMoonPhaseRitualCue = (moonPhase: string): string | null => {
+  const normalized = moonPhase.toLowerCase();
+  if (/(new|waxing)/.test(normalized)) {
+    return 'Begin with a planted micro-step to feel momentum.';
+  }
+  if (normalized.includes('full')) {
+    return 'Notice what surfaces and release what no longer fits.';
+  }
+  if (normalized.includes('waning')) {
+    return 'Refine what remains and let go of extra motion.';
+  }
+  return null;
+};
+
 export const buildDailyFocusCard = (
   reading: Pick<
     HoroscopeReading,
@@ -85,13 +99,12 @@ export const buildDailyFocusCard = (
     lines.push(firstSentence(reading.personalInsight));
   }
 
-  const focus = lines.join(' ');
+  const focusBase = lines.join(' ');
+  const ritualCue = getMoonPhaseRitualCue(reading.moonPhase);
+  const focus = ritualCue ? `${focusBase} ${ritualCue}` : focusBase;
 
-  const crystal = reading.luckyElements?.[0];
-  const promptBase = `Choose one small action that proves ${focusPhrase.toLowerCase()}.`;
-  const prompt = crystal
-    ? `Carry ${crystal} and ${promptBase.charAt(0).toLowerCase()}${promptBase.slice(1)}`
-    : promptBase;
+  const focusLower = focusPhrase.toLowerCase();
+  const prompt = `Choose one small action that proves ${focusLower} before this evening.`;
 
   return {
     title: 'Your focus today',
