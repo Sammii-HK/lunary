@@ -15,7 +15,7 @@ export async function calculateUserLevel(userId: string): Promise<UserLevel> {
       SELECT COUNT(*) as count
       FROM collections
       WHERE user_id = ${userId}
-      AND category IN ('journal', 'dream')
+    AND category IN ('journal', 'dream', 'ritual')
     `;
     const journalEntries = parseInt(journalCount.rows[0]?.count || '0', 10);
 

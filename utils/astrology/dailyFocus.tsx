@@ -1,33 +1,11 @@
 import { HoroscopeReading } from './personalizedHoroscope';
 
-const normalizePhrase = (raw: string) => {
-  return raw
-    .replace(/focus on|lean into|today/gi, '')
-    .replace(/\.+$/, '')
-    .trim();
-};
-
-const toCoreWord = (phrase: string) => {
-  const cleaned = normalizePhrase(phrase);
-  return cleaned.charAt(0).toUpperCase() + cleaned.slice(1);
-};
-
-const toSentenceForm = (phrase: string) => {
-  const cleaned = normalizePhrase(phrase).toLowerCase();
-  return `Today invites you to honour ${cleaned}.`;
-};
-
-const firstSentence = (text: string) => {
-  const match = text.match(/[^.]+\.?/);
-  return match ? match[0].trim() : text.trim();
-};
-
 type DailyFocusCard = {
-  title: string; // "Your focus today"
-  tag: string; // "Personal" | "Work" | "Love" | "Inner"
-  headline: string; // short, punchy
+  title: string;
+  tag: string;
+  headline: string; // single word where possible
   focus: string; // 1–2 sentences
-  prompt: string; // a concrete action for today
+  prompt: string;
 };
 
 const DEFAULT_TAGS = ['Personal', 'Work', 'Love', 'Inner'] as const;
@@ -43,20 +21,60 @@ const pickTag = (focusLower: string): FocusTag => {
   return 'Personal';
 };
 
-const extractFocusPhrase = (dailyGuidance: string, fallback: string) => {
-  // Tries to pull: "Focus on ____ today." from the guidance text
-  const match = dailyGuidance.match(/Focus on\s+([^\.]+)\s+today\./i);
-  const phrase = (match?.[1] || fallback || '').trim();
-  return phrase || 'what matters most';
+const firstSentence = (text: string) => {
+  const match = text.match(/[^.]+\.?/);
+  return match ? match[0].trim() : text.trim();
 };
 
-const toHeadline = (phrase: string) => {
-  // Keep it short and “card-like”
-  // Examples: "Choose individuality." / "Back yourself." / "Lead with curiosity."
-  const cleaned = phrase.replace(/^\w/, (c) => c.toUpperCase());
-  if (cleaned.length <= 24)
-    return cleaned.endsWith('.') ? cleaned : `${cleaned}.`;
-  return `Lean into ${cleaned.toLowerCase()}.`;
+const clean = (s: string) => s.replace(/\s+/g, ' ').replace(/\.+$/g, '').trim();
+
+const extractFocus = (
+  reading: Pick<HoroscopeReading, 'dailyGuidance' | 'dailyFocus'>,
+) => {
+  const fromGuidance = reading.dailyGuidance.match(
+    /Focus:\s*([^.\n]+)\.?/i,
+  )?.[1];
+  const raw = fromGuidance || reading.dailyFocus || 'what matters most';
+  return clean(raw);
+};
+
+const toHeadline = (focus: string) => {
+  // Aim for 1 word. If it is clearly multi-word, keep it tight.
+  const words = focus.split(' ').filter(Boolean);
+
+  // Common patterns: "inner wisdom" -> "Wisdom", "self trust" -> "Trust"
+  if (words.length >= 2 && words[0].toLowerCase() === 'inner')
+    return capitalise(words[1]);
+  if (words.length >= 2 && words[0].toLowerCase() === 'self')
+    return capitalise(words[1]);
+
+  // Single word headline
+  if (words.length === 1) return capitalise(words[0]);
+
+  // Short phrase headline if needed
+  return capitalise(focus);
+};
+
+const capitalise = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
+
+const toFocusSentence = (focus: string) => {
+  // Keep it simple and ritual-coded
+  const lower = focus.toLowerCase();
+  return `Today invites you to lean into ${lower}.`;
+};
+
+const getMoonPhaseRitualCue = (moonPhase: string): string | null => {
+  const normalized = moonPhase.toLowerCase();
+  if (/(new|waxing)/.test(normalized)) {
+    return 'Begin with a planted micro-step to feel momentum.';
+  }
+  if (normalized.includes('full')) {
+    return 'Notice what surfaces and release what no longer fits.';
+  }
+  if (normalized.includes('waning')) {
+    return 'Refine what remains and let go of extra motion.';
+  }
+  return null;
 };
 
 export const buildDailyFocusCard = (
@@ -70,32 +88,28 @@ export const buildDailyFocusCard = (
     | 'luckyElements'
   >,
 ): DailyFocusCard => {
-  const rawPhrase = extractFocusPhrase(
-    reading.dailyGuidance,
-    reading.dailyFocus,
-  );
+  const focusPhrase = extractFocus(reading);
+  const tag = pickTag(focusPhrase.toLowerCase());
+  const headline = toHeadline(focusPhrase);
 
-  const core = toCoreWord(rawPhrase);
-  const tag = pickTag(core.toLowerCase());
-
-  const focusLines: string[] = [];
-  focusLines.push(`${toSentenceForm(rawPhrase)}`);
+  const lines: string[] = [];
+  lines.push(toFocusSentence(focusPhrase));
 
   if (reading.personalInsight) {
-    focusLines.push(firstSentence(reading.personalInsight));
+    lines.push(firstSentence(reading.personalInsight));
   }
 
-  const focus = focusLines.join(' ');
+  const focusBase = lines.join(' ');
+  const ritualCue = getMoonPhaseRitualCue(reading.moonPhase);
+  const focus = ritualCue ? `${focusBase} ${ritualCue}` : focusBase;
 
-  const crystal = reading.luckyElements?.[0];
-  const prompt = crystal
-    ? `Carry ${crystal} and take one small action that reflects who you truly are.`
-    : `Take one small action today that reflects who you truly are.`;
+  const focusLower = focusPhrase.toLowerCase();
+  const prompt = `Choose one small action that proves ${focusLower} before this evening.`;
 
   return {
     title: 'Your focus today',
     tag,
-    headline: core,
+    headline,
     focus,
     prompt,
   };

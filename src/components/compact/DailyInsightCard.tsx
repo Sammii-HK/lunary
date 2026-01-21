@@ -341,9 +341,9 @@ export const DailyInsightCard = () => {
                 Today's Influence
               </span>
             </div>
-            <span className='text-xs bg-zinc-800/50 text-lunary-primary-200 px-1.5 py-0.5 rounded'>
+            {/* <span className='text-xs bg-zinc-800/50 text-lunary-primary-200 px-1.5 py-0.5 rounded'>
               Personal
-            </span>
+            </span> */}
           </div>
           <p className='text-sm text-zinc-300 leading-relaxed'>{displayText}</p>
           {lifeThemeName && (

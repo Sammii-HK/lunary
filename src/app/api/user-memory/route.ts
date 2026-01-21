@@ -1,5 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { loadUserMemory, deleteUserMemory } from '@/lib/ai/user-memory';
+import {
+  loadUserMemory,
+  deleteUserMemory,
+  ensureUserMemoryTable,
+} from '@/lib/ai/user-memory';
 import { sql } from '@vercel/postgres';
 import { auth } from '@/lib/auth';
 
@@ -45,6 +49,7 @@ export async function DELETE(request: NextRequest) {
 
     if (memoryId) {
       // Delete specific memory
+      await ensureUserMemoryTable();
       await sql`
         DELETE FROM user_memory 
         WHERE id = ${parseInt(memoryId, 10)} 
@@ -53,6 +58,7 @@ export async function DELETE(request: NextRequest) {
       return NextResponse.json({ success: true, deleted: memoryId });
     } else {
       // Delete all memories for user
+      await ensureUserMemoryTable();
       await deleteUserMemory(user.id);
       return NextResponse.json({ success: true, deleted: 'all' });
     }

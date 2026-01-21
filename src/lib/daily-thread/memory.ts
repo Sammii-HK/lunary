@@ -24,7 +24,7 @@ export async function generateMemoryModule(
       SELECT id, title, content, created_at
       FROM collections
       WHERE user_id = ${userId}
-      AND category IN ('journal', 'dream')
+      AND category IN ('journal', 'dream', 'ritual')
       AND EXTRACT(MONTH FROM created_at) = ${targetMonth + 1}
       AND EXTRACT(DAY FROM created_at) = ${targetDay}
       AND created_at < ${targetDate.toISOString()}

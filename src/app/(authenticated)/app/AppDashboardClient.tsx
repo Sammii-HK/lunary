@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import dynamic from 'next/dynamic';
 import { useUser } from '@/context/UserContext';
@@ -123,6 +123,7 @@ const ConditionalWheel = dynamic(
 export default function AppDashboardClient() {
   const { user } = useUser();
   const authState = useAuthStatus();
+  const [focusHonoured, setFocusHonoured] = useState(false);
   const firstName = user?.name?.trim() ? user.name.split(' ')[0] : null;
 
   useEffect(() => {
@@ -155,6 +156,28 @@ export default function AppDashboardClient() {
     authState.user?.email,
     today,
   ]);
+
+  useEffect(() => {
+    if (!authState.isAuthenticated) {
+      setFocusHonoured(false);
+      return;
+    }
+    if (typeof window === 'undefined') return;
+
+    const key = 'lunary_focus_complete_date';
+    const todayString = new Date().toISOString().split('T')[0];
+
+    const updateCompletion = () => {
+      setFocusHonoured(localStorage.getItem(key) === todayString);
+    };
+
+    updateCompletion();
+    window.addEventListener('lunary-focus-complete', updateCompletion);
+
+    return () => {
+      window.removeEventListener('lunary-focus-complete', updateCompletion);
+    };
+  }, [authState.isAuthenticated]);
 
   const greeting = () => {
     const hasBirthday = Boolean(user?.birthday);
@@ -215,6 +238,18 @@ export default function AppDashboardClient() {
           <ConditionalWheel />
         </div>
       </div>
+      {authState.isAuthenticated && (
+        <p className='text-xs text-zinc-500 text-center mt-4'>
+          {focusHonoured
+            ? "You've honoured today's focus."
+            : "You've checked in with today's sky."}
+        </p>
+      )}
+      {authState.isAuthenticated && focusHonoured && (
+        <p className='text-[0.65rem] text-zinc-400 text-center'>
+          Tomorrow feels calm, steady light.
+        </p>
+      )}
     </div>
   );
 }

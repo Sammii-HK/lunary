@@ -1,7 +1,8 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import Link from 'next/link';
+import { useSearchParams } from 'next/navigation';
 import {
   BookOpen,
   Plus,
@@ -38,7 +39,7 @@ interface JournalEntry {
   moonPhase?: string;
   source: string;
   createdAt: string;
-  category?: string;
+  category?: 'journal' | 'dream' | 'ritual';
 }
 
 interface DreamEntry {
@@ -90,6 +91,11 @@ function JournalEntryCard({ entry }: { entry: JournalEntry }) {
         {entry.source === 'chat' && (
           <span className='text-xs bg-zinc-800 text-zinc-400 px-2 py-0.5 rounded'>
             from chat
+          </span>
+        )}
+        {entry.category === 'ritual' && (
+          <span className='text-xs bg-lunary-accent/20 text-lunary-accent px-2 py-0.5 rounded'>
+            Ritual
           </span>
         )}
       </div>
@@ -210,11 +216,28 @@ function MemoryCard({
   );
 }
 
-type TabId = 'journal' | 'dreams' | 'memories' | 'patterns';
+type TabId = 'journal' | 'dreams' | 'memories' | 'patterns' | 'ritual';
+
+const VALID_TAB_IDS: TabId[] = [
+  'journal',
+  'dreams',
+  'memories',
+  'patterns',
+  'ritual',
+];
+
+const normalizeTab = (tab: string | null): TabId =>
+  VALID_TAB_IDS.includes(tab as TabId) ? (tab as TabId) : 'journal';
 
 export default function BookOfShadowsPage() {
   const { user, loading: authLoading } = useAuthStatus();
-  const [activeTab, setActiveTab] = useState<TabId>('journal');
+  const searchParams = useSearchParams();
+  const queryTabParam = searchParams.get('tab');
+  const queryPrompt = searchParams.get('prompt') ?? '';
+  const queryPromptKey = searchParams.get('promptKey') ?? '';
+  const [activeTab, setActiveTab] = useState<TabId>(() =>
+    normalizeTab(queryTabParam),
+  );
   const [entries, setEntries] = useState<JournalEntry[]>([]);
   const [dreams, setDreams] = useState<DreamEntry[]>([]);
   const [memories, setMemories] = useState<UserMemory[]>([]);
@@ -222,6 +245,31 @@ export default function BookOfShadowsPage() {
   const [showAddForm, setShowAddForm] = useState(false);
   const [newReflection, setNewReflection] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [incomingRitualPrompt, setIncomingRitualPrompt] = useState('');
+  const handledRitualPromptRef = useRef('');
+
+  useEffect(() => {
+    if (!queryTabParam) return;
+    setActiveTab((current) => {
+      const requested = normalizeTab(queryTabParam);
+      return current === requested ? current : requested;
+    });
+  }, [queryTabParam]);
+
+  useEffect(() => {
+    if (!queryPrompt) {
+      setIncomingRitualPrompt('');
+      handledRitualPromptRef.current = '';
+      return;
+    }
+    const promptKey = queryPromptKey || queryPrompt;
+    if (handledRitualPromptRef.current === promptKey) return;
+    handledRitualPromptRef.current = promptKey;
+    setIncomingRitualPrompt(queryPrompt);
+    setNewReflection('');
+    setShowAddForm(true);
+    setActiveTab('journal');
+  }, [queryPrompt, queryPromptKey]);
 
   const loadData = useCallback(async () => {
     try {
@@ -288,18 +336,25 @@ export default function BookOfShadowsPage() {
         // Continue without cosmic context
       }
 
+      const requestBody: Record<string, unknown> = {
+        content: newReflection,
+        moodTags,
+        cardReferences,
+        moonPhase,
+        transitHighlight,
+      };
+      if (incomingRitualPrompt) {
+        requestBody.source = 'ritual';
+        requestBody.category = 'ritual';
+      } else {
+        requestBody.source = 'manual';
+      }
+
       const response = await fetch('/api/journal', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
-        body: JSON.stringify({
-          content: newReflection,
-          moodTags,
-          cardReferences,
-          moonPhase,
-          transitHighlight,
-          source: 'manual',
-        }),
+        body: JSON.stringify(requestBody),
       });
 
       if (response.ok) {
@@ -364,6 +419,9 @@ export default function BookOfShadowsPage() {
     );
   }
 
+  const journalEntries = entries.filter((entry) => entry.category !== 'ritual');
+  const ritualEntries = entries.filter((entry) => entry.category === 'ritual');
+
   const tabs: {
     id: TabId;
     label: string;
@@ -374,7 +432,13 @@ export default function BookOfShadowsPage() {
       id: 'journal',
       label: 'Journal',
       icon: <Feather className='w-4 h-4' />,
-      count: entries.length,
+      count: journalEntries.length,
+    },
+    {
+      id: 'ritual',
+      label: 'Ritual',
+      icon: <Sparkles className='w-4 h-4' />,
+      count: ritualEntries.length,
     },
     {
       id: 'dreams',
@@ -449,6 +513,11 @@ export default function BookOfShadowsPage() {
 
             {showAddForm ? (
               <form onSubmit={handleSubmitReflection} className='space-y-3'>
+                {incomingRitualPrompt && (
+                  <p className='text-xs text-zinc-400'>
+                    Ritual prompt: {incomingRitualPrompt}
+                  </p>
+                )}
                 <textarea
                   value={newReflection}
                   onChange={(e) => setNewReflection(e.target.value)}
@@ -487,7 +556,7 @@ export default function BookOfShadowsPage() {
               </button>
             )}
 
-            {entries.length === 0 ? (
+            {journalEntries.length === 0 ? (
               <div className='text-center py-12'>
                 <Feather className='w-10 h-10 text-zinc-700 mx-auto mb-3' />
                 <p className='text-zinc-400'>No journal entries yet</p>
@@ -497,9 +566,56 @@ export default function BookOfShadowsPage() {
               </div>
             ) : (
               <div className='space-y-2'>
-                {entries.map((entry) => (
+                {journalEntries.map((entry) => (
                   <JournalEntryCard key={entry.id} entry={entry} />
                 ))}
+              </div>
+            )}
+          </div>
+        )}
+
+        {activeTab === 'ritual' && (
+          <div className='space-y-4'>
+            <div className='bg-zinc-900/50 border border-zinc-800 rounded-lg p-4'>
+              <p className='text-sm text-zinc-400'>
+                Ritual entries keep today’s focus anchored in your practice.
+              </p>
+            </div>
+            {queryPrompt ? (
+              <div className='space-y-3 bg-zinc-900/50 border border-zinc-800 rounded-lg p-4'>
+                <p className='text-[0.65rem] uppercase tracking-widest text-zinc-500'>
+                  Ritual prompt
+                </p>
+                <p className='text-sm text-zinc-200 leading-relaxed'>
+                  {queryPrompt}
+                </p>
+                <Button
+                  type='button'
+                  onClick={() => {
+                    setActiveTab('journal');
+                    setShowAddForm(true);
+                    setNewReflection(queryPrompt);
+                  }}
+                >
+                  Journal this ritual
+                </Button>
+              </div>
+            ) : (
+              <div className='text-center text-xs text-zinc-500'>
+                Complete today’s focus to unlock a ritual prompt here.
+              </div>
+            )}
+
+            {ritualEntries.length > 0 && (
+              <div className='space-y-3 bg-zinc-900/40 border border-zinc-800 rounded-lg p-4'>
+                <p className='text-[0.65rem] uppercase tracking-widest text-zinc-500'>
+                  Ritual reflections
+                </p>
+                <div className='space-y-2'>
+                  {ritualEntries.map((entry) => (
+                    <JournalEntryCard key={entry.id} entry={entry} />
+                  ))}
+                </div>
               </div>
             )}
           </div>

@@ -4,6 +4,8 @@ import { requireUser } from '@/lib/ai/auth';
 import { isDreamEntry } from '@/lib/journal/dream-classifier';
 import { JOURNAL_LIMITS, normalizePlanType } from '../../../../utils/pricing';
 
+export type JournalCategory = 'journal' | 'dream' | 'ritual';
+
 export interface JournalEntry {
   id: number;
   content: string;
@@ -14,7 +16,7 @@ export interface JournalEntry {
   source: 'manual' | 'chat' | 'astral-guide';
   sourceMessageId: string | null;
   createdAt: string;
-  category?: 'journal' | 'dream';
+  category?: JournalCategory;
 }
 
 export async function GET(request: NextRequest) {
@@ -33,7 +35,7 @@ export async function GET(request: NextRequest) {
         created_at
       FROM collections
       WHERE user_id = ${user.id}
-      AND category IN ('journal', 'dream')
+      AND category IN ('journal', 'dream', 'ritual')
       ORDER BY created_at DESC
       LIMIT ${limit}
       OFFSET ${offset}
@@ -53,7 +55,7 @@ export async function GET(request: NextRequest) {
         source: contentData.source || 'manual',
         sourceMessageId: contentData.sourceMessageId || null,
         createdAt: row.created_at,
-        category: row.category as 'journal' | 'dream',
+        category: row.category as JournalCategory,
       };
     });
 
@@ -61,7 +63,7 @@ export async function GET(request: NextRequest) {
       SELECT COUNT(*) as total
       FROM collections
       WHERE user_id = ${user.id}
-      AND category IN ('journal', 'dream')
+      AND category IN ('journal', 'dream', 'ritual')
     `;
     const total = parseInt(totalResult.rows[0]?.total || '0', 10);
 
@@ -107,7 +109,7 @@ export async function POST(request: NextRequest) {
         SELECT COUNT(*)::int as count
         FROM collections
         WHERE user_id = ${user.id}
-          AND category IN ('journal', 'dream')
+          AND category IN ('journal', 'dream', 'ritual')
           AND created_at >= date_trunc('month', NOW())
       `;
       const count = Number(entryCountResult.rows[0]?.count ?? 0);
@@ -132,6 +134,7 @@ export async function POST(request: NextRequest) {
       transitHighlight = null,
       source = 'manual',
       sourceMessageId = null,
+      category = null,
     } = body;
 
     if (
@@ -148,9 +151,14 @@ export async function POST(request: NextRequest) {
     const title =
       content.length > 50 ? content.substring(0, 50) + '...' : content;
 
-    const category = isDreamEntry({ content, moodTags, source })
-      ? 'dream'
-      : 'journal';
+    const allowedCategories: JournalCategory[] = ['journal', 'dream', 'ritual'];
+    const isJournalCategory = (value: unknown): value is JournalCategory =>
+      typeof value === 'string' &&
+      allowedCategories.includes(value as JournalCategory);
+    const requestedCategory = isJournalCategory(category) ? category : null;
+    const resolvedCategory =
+      requestedCategory ??
+      (isDreamEntry({ content, moodTags, source }) ? 'dream' : 'journal');
 
     const contentData = {
       text: content.trim(),
@@ -167,7 +175,7 @@ export async function POST(request: NextRequest) {
       VALUES (
         ${user.id},
         ${title},
-        ${category},
+        ${resolvedCategory},
         ${JSON.stringify(contentData)}::jsonb,
         ${moodTags}::text[]
       )

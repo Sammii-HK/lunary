@@ -138,21 +138,8 @@ export async function saveUserMemory(
   let savedCount = 0;
 
   try {
+    await ensureUserMemoryTable();
     // Ensure table exists
-    await sql`
-      CREATE TABLE IF NOT EXISTS user_memory (
-        id SERIAL PRIMARY KEY,
-        user_id TEXT NOT NULL,
-        category TEXT NOT NULL,
-        fact_encrypted TEXT NOT NULL,
-        confidence REAL DEFAULT 0.8,
-        source_message_id TEXT,
-        mentioned_count INTEGER DEFAULT 1,
-        last_mentioned_at TIMESTAMPTZ DEFAULT NOW(),
-        created_at TIMESTAMPTZ DEFAULT NOW(),
-        updated_at TIMESTAMPTZ DEFAULT NOW()
-      )
-    `;
 
     for (const fact of facts) {
       // Check if similar fact already exists
@@ -223,6 +210,7 @@ export async function loadUserMemory(
   limit: number = 20,
 ): Promise<UserMemoryFact[]> {
   try {
+    await ensureUserMemoryTable();
     const result = await sql`
       SELECT id, category, fact_encrypted, confidence, mentioned_count, last_mentioned_at
       FROM user_memory
@@ -293,6 +281,7 @@ export function formatUserMemoryForContext(facts: UserMemoryFact[]): string {
  */
 export async function deleteUserMemory(userId: string): Promise<boolean> {
   try {
+    await ensureUserMemoryTable();
     await sql`DELETE FROM user_memory WHERE user_id = ${userId}`;
     console.info(`[User Memory] Deleted all memory for user ${userId}`);
     return true;
@@ -301,3 +290,44 @@ export async function deleteUserMemory(userId: string): Promise<boolean> {
     return false;
   }
 }
+export const ensureUserMemoryTable = async () => {
+  await sql`
+    CREATE TABLE IF NOT EXISTS user_memory (
+      id SERIAL PRIMARY KEY,
+      user_id TEXT NOT NULL,
+      category TEXT NOT NULL,
+      fact_encrypted TEXT NOT NULL,
+      confidence REAL DEFAULT 0.8,
+      source_message_id TEXT,
+      mentioned_count INTEGER DEFAULT 1,
+      last_mentioned_at TIMESTAMPTZ DEFAULT NOW(),
+      created_at TIMESTAMPTZ DEFAULT NOW(),
+      updated_at TIMESTAMPTZ DEFAULT NOW()
+    )
+  `;
+  await sql`
+    CREATE INDEX IF NOT EXISTS idx_user_memory_user_id ON user_memory(user_id)
+  `;
+  await sql`
+    CREATE INDEX IF NOT EXISTS idx_user_memory_category ON user_memory(category)
+  `;
+  await sql`
+    CREATE INDEX IF NOT EXISTS idx_user_memory_last_mentioned ON user_memory(last_mentioned_at DESC)
+  `;
+  await sql`
+    CREATE OR REPLACE FUNCTION update_user_memory_updated_at()
+    RETURNS TRIGGER AS $$
+    BEGIN
+      NEW.updated_at = NOW();
+      RETURN NEW;
+    END;
+    $$ LANGUAGE plpgsql
+  `;
+  await sql`DROP TRIGGER IF EXISTS update_user_memory_timestamp ON user_memory`;
+  await sql`
+    CREATE TRIGGER update_user_memory_timestamp
+    BEFORE UPDATE ON user_memory
+    FOR EACH ROW
+    EXECUTE FUNCTION update_user_memory_updated_at()
+  `;
+};
