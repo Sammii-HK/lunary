@@ -251,12 +251,12 @@ export const MoonPreview = () => {
     ? getPersonalizedHoroscope(user.birthday)
     : null;
   const lunarPhaseDay = personalizedHoroscope?.lunarPhaseDay;
-  const lunarPhaseProgress = personalizedHoroscope?.lunarPhaseProgress;
+  const lunarCycleProgress = personalizedHoroscope?.lunarCycleProgress;
   const cycleLine =
     lunarPhaseDay && currentMoonPhase
       ? `Day ${lunarPhaseDay} of the ${currentMoonPhase}${
-          typeof lunarPhaseProgress === 'number'
-            ? ` · ${lunarPhaseProgress}% through this phase`
+          typeof lunarCycleProgress === 'number'
+            ? ` · ${lunarCycleProgress}% through the lunar cycle`
             : ''
         }`
       : null;

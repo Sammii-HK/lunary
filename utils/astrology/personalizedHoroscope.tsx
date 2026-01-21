@@ -15,6 +15,7 @@ export type HoroscopeReading = {
   luckyElements: string[];
   lunarPhaseProgress: number;
   lunarPhaseDay: number;
+  lunarCycleProgress: number;
 };
 
 export const getPersonalizedHoroscope = (
@@ -40,10 +41,8 @@ export const getPersonalizedHoroscope = (
     'Unknown';
 
   const moonPhase = getCurrentMoonPhase(today.toDate());
-  const { lunarPhaseProgress, lunarPhaseDay } = getLunarPhaseContext(
-    moonPhase,
-    today,
-  );
+  const { lunarPhaseProgress, lunarPhaseDay, lunarCycleProgress } =
+    getLunarPhaseContext(moonPhase, today);
 
   const { dailyGuidance, dailyFocus } = generateDailyGuidance(
     currentChart,
@@ -62,6 +61,7 @@ export const getPersonalizedHoroscope = (
     luckyElements,
     lunarPhaseProgress,
     lunarPhaseDay,
+    lunarCycleProgress,
   };
 };
 
@@ -86,7 +86,11 @@ const getCurrentMoonPhase = (date: Date): string => {
 const getLunarPhaseContext = (
   moonPhase: string,
   date: dayjs.Dayjs,
-): { lunarPhaseProgress: number; lunarPhaseDay: number } => {
+): {
+  lunarPhaseProgress: number;
+  lunarPhaseDay: number;
+  lunarCycleProgress: number;
+} => {
   const phaseIndex = LUNAR_PHASES.findIndex((phase) => phase === moonPhase);
   const normalizedIndex = phaseIndex >= 0 ? phaseIndex : 0;
   const nominalDuration = 30 / LUNAR_PHASES.length;
@@ -101,7 +105,11 @@ const getLunarPhaseContext = (
     100,
     Math.max(0, Math.round((dayPosition / nominalDuration) * 100)),
   );
-  return { lunarPhaseProgress, lunarPhaseDay };
+  const lunarCycleProgress = Math.min(
+    100,
+    Math.max(0, Math.round((cycleDay / 29.53) * 100)),
+  );
+  return { lunarPhaseProgress, lunarPhaseDay, lunarCycleProgress };
 };
 
 const generateDailyGuidance = (

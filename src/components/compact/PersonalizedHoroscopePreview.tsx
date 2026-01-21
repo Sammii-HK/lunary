@@ -137,9 +137,9 @@ export const PersonalizedHoroscopePreview = () => {
                 {dailyFocusCard.headline}
               </span>
             </div>
-            <span className='text-xs bg-zinc-800/50 text-lunary-primary-200 px-1.5 py-0.5 rounded'>
+            {/* <span className='text-xs bg-zinc-800/50 text-lunary-primary-200 px-1.5 py-0.5 rounded'>
               Personal
-            </span>
+            </span> */}
           </div>
         </div>
         <div className='flex items-center gap-2'>
