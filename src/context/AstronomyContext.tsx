@@ -14,25 +14,8 @@ import {
   MoonPhaseLabels,
   stringToCamelCase,
 } from '../../utils/moon/moonPhases';
+import type { GlobalCosmicData } from '@/lib/cosmic-snapshot/global-cache';
 import { useUser } from '@/context/UserContext';
-
-type GlobalCosmicData = {
-  moonPhase: {
-    name: string;
-    energy: string;
-    illumination: number;
-    age: number;
-    isSignificant: boolean;
-  };
-  planetaryPositions: Record<
-    string,
-    {
-      longitude: number;
-      sign: string;
-      retrograde: boolean;
-    }
-  >;
-} | null;
 
 export const AstronomyContext = createContext<{
   currentAstrologicalChart: AstroChartInformation[];
@@ -51,6 +34,7 @@ export const AstronomyContext = createContext<{
   symbol: string;
   currentDate: string;
   refreshCosmicData: () => void;
+  generalTransits: GlobalCosmicData['generalTransits'];
 } | null>(null);
 
 export function useAstronomyContext() {
@@ -76,7 +60,7 @@ export const AstronomyContextProvider = ({
   const [currentDate, setCurrentDate] = useState(
     dayjs(currentDateTime).format('YYYY-MM-DD'),
   );
-  const [cosmicData, setCosmicData] = useState<GlobalCosmicData>(null);
+  const [cosmicData, setCosmicData] = useState<GlobalCosmicData | null>(null);
   const [refreshKey, setRefreshKey] = useState(0);
 
   useEffect(() => {
@@ -133,6 +117,11 @@ export const AstronomyContextProvider = ({
 
     return result;
   }, [cosmicData]);
+
+  const generalTransits = useMemo(
+    () => cosmicData?.generalTransits ?? [],
+    [cosmicData],
+  );
 
   const currentMoonPosition = currentAstrologicalChart.find(
     ({ body }) => body === 'Moon',
@@ -196,6 +185,7 @@ export const AstronomyContextProvider = ({
         symbol,
         currentDate,
         refreshCosmicData: () => setRefreshKey((prev) => prev + 1),
+        generalTransits,
       }}
     >
       {children}

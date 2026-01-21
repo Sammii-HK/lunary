@@ -74,7 +74,7 @@ export const DailyCardPreview = () => {
             <div className='flex items-center gap-2 mb-1'>
               <Layers className='w-4 h-4 text-lunary-accent-300' />
               <span className='text-sm font-medium text-zinc-200'>
-                Daily Card
+                Tarot for Today
               </span>
             </div>
             <p className='text-sm text-lunary-primary-200 font-medium'>
@@ -137,7 +137,7 @@ export const DailyCardPreview = () => {
             <div className='flex items-center gap-2'>
               <Layers className='w-4 h-4 text-lunary-accent-300' />
               <span className='text-sm font-medium text-zinc-200'>
-                Daily Card
+                Tarot for Today
               </span>
             </div>
             <span className='text-xs bg-zinc-800/50 text-lunary-primary-200 px-1.5 py-0.5 rounded'>
@@ -155,7 +155,6 @@ export const DailyCardPreview = () => {
               {dailyCard.information}
             </p>
           )}
-          <p className='text-xs text-zinc-500 mt-1.5'>View your patterns →</p>
         </div>
         <ArrowRight className='w-4 h-4 text-zinc-600 group-hover:text-lunary-accent-300 transition-colors flex-shrink-0 mt-1' />
       </div>

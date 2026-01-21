@@ -47,14 +47,14 @@ export const planetSymbols = {
 // Astromicon symbols for astrological points (use with font-astro class)
 export const astroPointSymbols = {
   ascendant: 'a',
-  descendant: 'd',
+  descendant: 'f',
   midheaven: 'm',
   imumcoeli: 'i',
   northnode: 'n',
   southnode: 's',
   chiron: 'c',
   lilith: 'l',
-  partoffortune: 'f',
+  partoffortune: 'p',
 };
 
 // Unicode symbols for astrological points (fallback without special font)
@@ -1007,6 +1007,12 @@ export const astrologicalPoints = {
     alias: 'Ascendant',
     mysticalProperties:
       'Your outer personality and first impression. How others perceive you and how you approach new situations.',
+  },
+  descendant: {
+    name: 'Descendant',
+    alias: 'DC',
+    mysticalProperties:
+      'Your partnerships, close relationships, and what you project onto others. It reveals your approach to committed one-on-one dynamics.',
   },
   midheaven: {
     name: 'Midheaven',

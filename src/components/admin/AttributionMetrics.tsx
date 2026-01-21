@@ -233,20 +233,20 @@ export function AttributionMetrics({ startDate, endDate }: Props) {
         </Card>
       </div>
 
-      <div className='grid gap-6 md:grid-cols-2'>
+      <div className='grid gap-6 grid-cols-1 xl:grid-cols-2'>
         <Card>
           <CardHeader>
             <CardTitle>Top Landing Pages</CardTitle>
             <CardDescription>Pages where users first arrive</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className='space-y-2 max-h-64 overflow-y-auto'>
+            <div className='space-y-2'>
               {data.topLandingPages.slice(0, 10).map((page, i) => (
                 <div
                   key={`${page.page}-${i}`}
-                  className='flex items-center justify-between py-1.5 text-sm'
+                  className='flex flex-col gap-1 rounded-lg border border-zinc-800/30 bg-zinc-950/30 p-3 text-sm sm:flex-row sm:items-center sm:justify-between'
                 >
-                  <div className='flex items-center gap-2 truncate flex-1 mr-4'>
+                  <div className='flex items-center gap-2 flex-1 min-w-0'>
                     <span
                       className={`w-2 h-2 rounded-full ${SOURCE_COLORS[page.source] || 'bg-zinc-500'}`}
                     />
@@ -254,8 +254,8 @@ export function AttributionMetrics({ startDate, endDate }: Props) {
                       {page.page}
                     </span>
                   </div>
-                  <span className='text-muted-foreground whitespace-nowrap'>
-                    {page.user_count} users
+                  <span className='text-xs text-muted-foreground'>
+                    {page.user_count.toLocaleString()} users
                   </span>
                 </div>
               ))}
@@ -280,15 +280,17 @@ export function AttributionMetrics({ startDate, endDate }: Props) {
                 engine referrers when available.
               </p>
             ) : (
-              <div className='space-y-2 max-h-64 overflow-y-auto'>
+              <div className='space-y-2'>
                 {data.keywordBreakdown.slice(0, 10).map((kw, i) => (
                   <div
                     key={`${kw.keyword}-${i}`}
-                    className='flex items-center justify-between py-1.5 text-sm'
+                    className='flex flex-col gap-1 rounded-lg border border-zinc-800/30 bg-zinc-950/30 p-3 text-sm sm:flex-row sm:items-center sm:justify-between'
                   >
-                    <span className='truncate flex-1 mr-4'>{kw.keyword}</span>
-                    <span className='text-muted-foreground whitespace-nowrap'>
-                      {kw.user_count} users
+                    <span className='truncate flex-1 text-xs font-medium'>
+                      {kw.keyword}
+                    </span>
+                    <span className='text-xs text-muted-foreground'>
+                      {kw.user_count.toLocaleString()} users
                     </span>
                   </div>
                 ))}

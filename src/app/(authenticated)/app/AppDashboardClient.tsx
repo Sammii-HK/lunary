@@ -10,6 +10,7 @@ import { conversionTracking } from '@/lib/analytics';
 
 import { DateWidget } from '@/components/DateWidget';
 import { ShareDailyInsight } from '@/components/ShareDailyInsight';
+import dayjs from 'dayjs';
 
 const MoonPreview = dynamic(
   () =>
@@ -59,6 +60,17 @@ const DailyCardPreview = dynamic(
     loading: () => (
       <div className='h-20 bg-zinc-900/50 rounded-md animate-pulse' />
     ),
+    ssr: false,
+  },
+);
+
+const PersonalizedHoroscopePreview = dynamic(
+  () =>
+    import('@/components/compact/PersonalizedHoroscopePreview').then((m) => ({
+      default: m.PersonalizedHoroscopePreview,
+    })),
+  {
+    loading: () => <div className='min-h-0' />,
     ssr: false,
   },
 );
@@ -119,11 +131,11 @@ export default function AppDashboardClient() {
     }
   }, [authState.isAuthenticated, authState.loading]);
 
+  const today = new Date().toISOString().split('T')[0];
   useEffect(() => {
     if (!authState.isAuthenticated || authState.loading) return;
     if (typeof window === 'undefined') return;
 
-    const today = new Date().toISOString().split('T')[0];
     const userId = authState.user?.id ? String(authState.user.id) : 'anon';
     const key = `lunary_daily_dashboard_viewed:${userId}:${today}`;
 
@@ -141,12 +153,18 @@ export default function AppDashboardClient() {
     authState.loading,
     authState.user?.id,
     authState.user?.email,
+    today,
   ]);
 
   const greeting = () => {
+    const hasBirthday = Boolean(user?.birthday);
+    const isBirthday =
+      hasBirthday &&
+      dayjs(user!.birthday).format('MM-DD') === dayjs(today).format('MM-DD');
     const hour = new Date().getHours();
     if (hour < 12) return 'Good morning';
     if (hour < 17) return 'Good afternoon';
+    if (isBirthday) return 'Happy birthday';
     return 'Good evening';
   };
 
@@ -182,6 +200,7 @@ export default function AppDashboardClient() {
         </div>
       </header>
 
+      <PersonalizedHoroscopePreview />
       <div className='grid grid-cols-1 md:grid-cols-2 gap-3'>
         <MoonPreview />
         <SkyNowCard />

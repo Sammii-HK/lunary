@@ -7,8 +7,14 @@ import { useAstronomyContext } from '@/context/AstronomyContext';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Sparkles, ArrowRight } from 'lucide-react';
+import dayjs from 'dayjs';
 import { getGeneralHoroscope } from '../../../utils/astrology/generalHoroscope';
 import { getEnhancedPersonalizedHoroscope } from '../../../utils/astrology/enhancedHoroscope';
+import { getUpcomingTransits } from '../../../utils/astrology/transitCalendar';
+import {
+  getPersonalTransitImpacts,
+  PersonalTransitImpact,
+} from '../../../utils/astrology/personalTransits';
 import { useSubscription } from '../../hooks/useSubscription';
 import { hasFeatureAccess } from '../../../utils/pricing';
 import {
@@ -17,11 +23,44 @@ import {
   LifeThemeInput,
 } from '@/lib/life-themes/engine';
 
+const getOrdinalSuffix = (n: number): string => {
+  if (n >= 11 && n <= 13) return 'th';
+  switch (n % 10) {
+    case 1:
+      return 'st';
+    case 2:
+      return 'nd';
+    case 3:
+      return 'rd';
+    default:
+      return 'th';
+  }
+};
+
+const formatTransitSentence = (
+  transit: PersonalTransitImpact,
+  isFirst: boolean,
+): string => {
+  const houseLabel = transit.house
+    ? `in your ${transit.house}${getOrdinalSuffix(transit.house)} house`
+    : 'in your chart';
+  const eventLabel = transit.event || transit.type || 'moves through';
+  const base = `${transit.planet} ${eventLabel} ${houseLabel}`;
+  const prefix = isFirst ? '' : 'Meanwhile, ';
+  const sentence = `${prefix}${base}`.trim();
+  const capitalized = sentence.charAt(0).toUpperCase() + sentence.slice(1);
+  return capitalized.endsWith('.') ? capitalized : `${capitalized}.`;
+};
+
 export const DailyInsightCard = () => {
   const { user } = useUser();
   const authStatus = useAuthStatus();
   const subscription = useSubscription();
   const { currentDate } = useAstronomyContext();
+  const selectedDay = useMemo(
+    () => (currentDate ? dayjs(currentDate) : dayjs()),
+    [currentDate],
+  );
   const router = useRouter();
   const userName = user?.name;
   const userBirthday = user?.birthday;
@@ -88,7 +127,7 @@ export const DailyInsightCard = () => {
   }, [canAccessPersonalized]);
 
   const insight = useMemo(() => {
-    const selectedDate = currentDate ? new Date(currentDate) : new Date();
+    const selectedDate = selectedDay.toDate();
 
     if (canAccessPersonalized) {
       const horoscope = getEnhancedPersonalizedHoroscope(
@@ -109,7 +148,129 @@ export const DailyInsightCard = () => {
       text: firstSentence,
       isPersonalized: false,
     };
-  }, [canAccessPersonalized, userBirthday, userName, birthChart, currentDate]);
+  }, [
+    canAccessPersonalized,
+    userBirthday,
+    userName,
+    birthChart,
+    selectedDay.valueOf(),
+  ]);
+
+  const transitHighlights = useMemo<PersonalTransitImpact[]>(() => {
+    if (!canAccessPersonalized || !birthChart) return [];
+    const todayStart = selectedDay.startOf('day');
+    const lookbackDays = 2;
+    const windowStart = todayStart.subtract(lookbackDays, 'day');
+    const windowEnd = todayStart.add(1, 'day');
+    const upcomingTransits = getUpcomingTransits(todayStart);
+    const impacts = getPersonalTransitImpacts(upcomingTransits, birthChart, 60);
+
+    const significanceOrder: Record<
+      PersonalTransitImpact['significance'],
+      number
+    > = {
+      high: 3,
+      medium: 2,
+      low: 1,
+    };
+
+    const candidateImpacts = impacts.filter((impact) => {
+      const impactDayValue = impact.date.startOf('day').valueOf();
+      return (
+        impactDayValue >= windowStart.valueOf() &&
+        impactDayValue <= windowEnd.valueOf() &&
+        !Number.isNaN(significanceOrder[impact.significance])
+      );
+    });
+    const relevantImpacts = candidateImpacts.filter((impact) => impact.house);
+
+    console.log('impacts', impacts);
+
+    console.log('relevantImpacts', relevantImpacts);
+
+    const impactsToScore =
+      relevantImpacts.length > 0 ? relevantImpacts : candidateImpacts;
+
+    if (impactsToScore.length === 0) return [];
+
+    const daySeed = todayStart.valueOf();
+    const prioritized = impactsToScore
+      .map((impact) => {
+        const nameHash = Array.from(impact.planet).reduce(
+          (acc, char) => acc + char.charCodeAt(0),
+          0,
+        );
+        const jitter = ((nameHash + daySeed / 1000) % 10) / 1000;
+        const score =
+          (significanceOrder[impact.significance] ?? 1) * 100000 +
+          impact.date.valueOf() +
+          jitter;
+        return { impact, score };
+      })
+      .sort((a, b) => {
+        if (b.score !== a.score) return b.score - a.score;
+        if (a.impact.planet !== b.impact.planet) {
+          return a.impact.planet.localeCompare(b.impact.planet);
+        }
+        return b.impact.date.valueOf() - a.impact.date.valueOf();
+      });
+
+    const seenPlanets = new Set<string>();
+    const uniqueImpacts: PersonalTransitImpact[] = [];
+    const duplicateFallbacks: PersonalTransitImpact[] = [];
+
+    prioritized.forEach(({ impact }) => {
+      if (seenPlanets.has(impact.planet)) {
+        if (duplicateFallbacks.length < 4) {
+          duplicateFallbacks.push(impact);
+        }
+      } else {
+        seenPlanets.add(impact.planet);
+        uniqueImpacts.push(impact);
+      }
+    });
+
+    const todayValue = todayStart.valueOf();
+    const todayImpacts = uniqueImpacts.filter(
+      (impact) => impact.date.startOf('day').valueOf() === todayValue,
+    );
+    const otherImpacts = uniqueImpacts.filter(
+      (impact) => impact.date.startOf('day').valueOf() !== todayValue,
+    );
+
+    const dayIndex = Math.floor(todayStart.valueOf() / 86400000);
+    const rotation = otherImpacts.length ? dayIndex % otherImpacts.length : 0;
+    const rotatedOthers = [
+      ...otherImpacts.slice(rotation),
+      ...otherImpacts.slice(0, rotation),
+    ];
+
+    const selection: PersonalTransitImpact[] = [];
+    const insertImpact = (impact: PersonalTransitImpact) => {
+      if (selection.length >= 2) return;
+      selection.push(impact);
+    };
+
+    todayImpacts.forEach(insertImpact);
+    rotatedOthers.forEach(insertImpact);
+
+    let dupIndex = 0;
+    while (selection.length < 2 && dupIndex < duplicateFallbacks.length) {
+      selection.push(duplicateFallbacks[dupIndex]);
+      dupIndex += 1;
+    }
+
+    return selection;
+  }, [canAccessPersonalized, birthChart, selectedDay.valueOf()]);
+
+  const transitSummaryText = useMemo(() => {
+    if (transitHighlights.length === 0) return null;
+    return transitHighlights
+      .map((transit, index) => formatTransitSentence(transit, index === 0))
+      .join(' ');
+  }, [transitHighlights]);
+
+  const displayText = transitSummaryText ?? insight.text;
 
   if (!insight.isPersonalized) {
     return (
@@ -122,7 +283,7 @@ export const DailyInsightCard = () => {
             <div className='flex items-center gap-2 mb-1'>
               <Sparkles className='w-4 h-4 text-lunary-primary-300' />
               <span className='text-sm font-medium text-zinc-200'>
-                Your Day
+                Today's Influence
               </span>
             </div>
             <p className='text-sm text-zinc-300 leading-relaxed'>
@@ -177,18 +338,16 @@ export const DailyInsightCard = () => {
             <div className='flex items-center gap-2'>
               <Sparkles className='w-4 h-4 text-lunary-primary-300' />
               <span className='text-sm font-medium text-zinc-200'>
-                Your Day
+                Today's Influence
               </span>
             </div>
             <span className='text-xs bg-zinc-800/50 text-lunary-primary-200 px-1.5 py-0.5 rounded'>
               Personal
             </span>
           </div>
-          <p className='text-sm text-zinc-300 leading-relaxed'>
-            {insight.text}
-          </p>
+          <p className='text-sm text-zinc-300 leading-relaxed'>{displayText}</p>
           {lifeThemeName && (
-            <p className='text-xs text-zinc-500 mt-1.5'>
+            <p className='text-xs text-lunary-secondary-200 mt-2'>
               Connects to your theme: {lifeThemeName}
             </p>
           )}

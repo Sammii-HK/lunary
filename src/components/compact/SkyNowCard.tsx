@@ -1,10 +1,16 @@
 'use client';
 
 import { useMemo, useState } from 'react';
-import { Check, RefreshCw, Telescope } from 'lucide-react';
+import { Map, Telescope, X, Check, MapPin } from 'lucide-react';
 import { useLocation } from '@/hooks/useLocation';
 import { useAstronomyContext } from '@/context/AstronomyContext';
-import { bodiesSymbols, zodiacSymbol } from '../../../utils/zodiac/zodiac';
+import { BirthChartPlacement, useUser } from '@/context/UserContext';
+import { ChartWheelSvg } from '@/app/birth-chart/chart-wheel-svg';
+import {
+  ZODIAC_SIGNS,
+  bodiesSymbols,
+  zodiacSymbol,
+} from '../../../utils/zodiac/zodiac';
 import {
   ExpandableCard,
   ExpandableCardHeader,
@@ -153,7 +159,94 @@ const getZodiacSymbol = (sign: string): string => {
   return zodiacSymbol[key] || sign.charAt(0);
 };
 
+const normalizeSignName = (sign?: string): string => {
+  if (!sign) return '';
+  const lower = sign.toLowerCase();
+  return lower.charAt(0).toUpperCase() + lower.slice(1);
+};
+
+type HouseCusp = {
+  house: number;
+  eclipticLongitude: number;
+};
+
+const calculateWholeSignHouses = (ascendantLongitude: number): HouseCusp[] => {
+  const houses: HouseCusp[] = [];
+  const ascSign = Math.floor(ascendantLongitude / 30);
+  for (let i = 0; i < 12; i += 1) {
+    const sign = (ascSign + i) % 12;
+    houses.push({
+      house: i + 1,
+      eclipticLongitude: (sign * 30) % 360,
+    });
+  }
+  return houses;
+};
+
+const getHouseForLongitude = (
+  longitude: number,
+  houses: HouseCusp[],
+): number => {
+  for (let i = 0; i < 12; i += 1) {
+    const currentHouse = houses[i];
+    const nextHouse = houses[(i + 1) % 12];
+    const start = currentHouse.eclipticLongitude;
+    const end = nextHouse.eclipticLongitude;
+
+    if (end <= start) {
+      if (longitude >= start || longitude < end) {
+        return currentHouse.house;
+      }
+    } else if (longitude >= start && longitude < end) {
+      return currentHouse.house;
+    }
+  }
+  return 1;
+};
+
+type NatalHouseInfo = {
+  houses: HouseCusp[];
+  bodyLookup: Record<string, number>;
+  signLookup: Record<string, number>;
+};
+
+const buildNatalHouseInfo = (
+  birthChart?: BirthChartPlacement[] | null,
+): NatalHouseInfo | null => {
+  if (!birthChart) return null;
+  const ascendant = birthChart.find(
+    (placement) => placement.body === 'Ascendant',
+  );
+  if (!ascendant) return null;
+
+  const houses = calculateWholeSignHouses(ascendant.eclipticLongitude);
+  const bodyLookup: Record<string, number> = {};
+  birthChart.forEach((placement) => {
+    if (placement.body) {
+      bodyLookup[placement.body] =
+        placement.house ??
+        getHouseForLongitude(placement.eclipticLongitude, houses);
+    }
+  });
+
+  const signLookup: Record<string, number> = {};
+  houses.forEach((house) => {
+    const signIndex = Math.floor(house.eclipticLongitude / 30) % 12;
+    const signName = ZODIAC_SIGNS[signIndex];
+    if (signName) {
+      signLookup[signName] = house.house;
+    }
+  });
+
+  return {
+    houses,
+    bodyLookup,
+    signLookup,
+  };
+};
+
 export const SkyNowCard = () => {
+  const { user } = useUser();
   const { currentAstrologicalChart } = useAstronomyContext();
   const {
     requestLocation,
@@ -164,6 +257,7 @@ export const SkyNowCard = () => {
   const [refreshState, setRefreshState] = useState<
     'idle' | 'success' | 'error'
   >('idle');
+  const [showChartModal, setShowChartModal] = useState(false);
   const handleRefreshLocation = async () => {
     setRefreshState('idle');
     try {
@@ -191,6 +285,25 @@ export const SkyNowCard = () => {
     return planets.filter((p) => p.retrograde).length;
   }, [planets]);
 
+  const chartData = useMemo(() => {
+    return planets.map((planet) => ({
+      body: planet.body,
+      sign: planet.sign,
+      degree: planet.formattedDegree?.degree ?? 0,
+      minute: planet.formattedDegree?.minute ?? 0,
+      eclipticLongitude: planet.eclipticLongitude,
+      retrograde: planet.retrograde,
+    }));
+  }, [planets]);
+
+  const natalHouseInfo = useMemo(
+    () => buildNatalHouseInfo(user?.birthChart),
+    [user?.birthChart],
+  );
+  const natalHouseLookup = natalHouseInfo?.bodyLookup ?? {};
+  const natalSignHouseLookup = natalHouseInfo?.signLookup ?? {};
+  const natalHouses = natalHouseInfo?.houses;
+
   if (planets.length === 0) {
     return (
       <div className='py-3 px-4 bg-lunary-bg border border-zinc-800/50 rounded-md animate-pulse'>
@@ -209,59 +322,74 @@ export const SkyNowCard = () => {
         }
         badgeVariant={retrogradeCount > 0 ? 'danger' : 'default'}
         action={
-          <div
-            role='button'
-            tabIndex={0}
-            onClick={async (event) => {
-              event.stopPropagation();
-              await handleRefreshLocation();
-            }}
-            onKeyDown={(event) => {
-              if (event.key === 'Enter' || event.key === ' ') {
-                event.preventDefault();
+          <div className='flex items-center gap-2'>
+            <button
+              type='button'
+              onClick={async (event) => {
                 event.stopPropagation();
-                void handleRefreshLocation();
-              }
-            }}
-            aria-label='Refresh location used for Sky Now'
-            title='Refresh my location'
-            className='p-0.5 rounded-full border border-transparent text-zinc-500 hover:text-zinc-300 hover:border-zinc-700 transition-colors relative'
-          >
-            {refreshState === 'success' ? (
-              <Check className='w-3 h-3 text-lunary-success' />
-            ) : (
-              <RefreshCw
-                className={`w-3 h-3 ${locationLoading ? 'animate-spin' : ''}`}
-              />
-            )}
-            {showLocationFeedback && locationError && (
-              <span className='absolute -top-5 left-1/2 -translate-x-1/2 text-[10px] text-zinc-300'>
-                Failed
-              </span>
-            )}
+                await handleRefreshLocation();
+              }}
+              onKeyDown={(event) => {
+                if (event.key === 'Enter' || event.key === ' ') {
+                  event.preventDefault();
+                  event.stopPropagation();
+                  void handleRefreshLocation();
+                }
+              }}
+              aria-label='Refresh location used for Sky Now'
+              title='Refresh my location'
+              className='p-0.5 rounded-full border border-transparent text-zinc-500 hover:text-zinc-300 hover:border-zinc-700 transition-colors relative'
+            >
+              {/* TODO: add back in with rise and set times functionality */}
+              {refreshState === 'success' ? (
+                <Check className='w-3 h-3 text-lunary-success' />
+              ) : (
+                <MapPin
+                  className={`w-3 h-3 ${locationLoading ? 'animate-pulse' : ''}`}
+                />
+              )}
+              {showLocationFeedback && locationError && (
+                <span className='absolute -top-5 left-1/2 -translate-x-1/2 text-[10px] text-zinc-300'>
+                  Failed
+                </span>
+              )}
+            </button>
+            <button
+              type='button'
+              onClick={(event) => {
+                event.stopPropagation();
+                setShowChartModal(true);
+              }}
+              className='p-0.5 rounded-full border border-transparent text-zinc-500 hover:text-zinc-300 hover:border-zinc-700 transition-colors'
+              aria-label='Open chart modal'
+              title='Open chart modal'
+            >
+              <Map className='w-3 h-3' />
+            </button>
           </div>
         }
       />
       <div className='mt-2 space-y-1 w-full'>
-        <div className='grid grid-cols-10 w-full text-center'>
+        <div className='grid grid-cols-10 gap-y-2 w-full text-center'>
           {planets.map((planet) => (
-            <span
+            <div
               key={planet.body}
-              className={`font-astro text-base ${planet.retrograde ? 'text-lunary-error-300' : 'text-zinc-300'}`}
-              title={planet.body}
+              className='flex flex-col items-center justify-center gap-0'
             >
-              {getPlanetSymbol(planet.body)}
-            </span>
-          ))}
-        </div>
-        <div className='grid grid-cols-10 w-full text-center'>
-          {planets.map((planet) => (
-            <span
-              key={planet.body}
-              className={`text-xs font-astro ${planet.retrograde ? 'text-lunary-error-300' : 'text-zinc-400'}`}
-            >
-              {getZodiacSymbol(planet.sign)}
-            </span>
+              <span
+                className={`font-astro text-base ${planet.retrograde ? 'text-lunary-error-300' : 'text-zinc-300'}`}
+                title={planet.body}
+              >
+                {getPlanetSymbol(planet.body)}
+              </span>
+              <span
+                className={`text-xs font-astro tracking-wider ${
+                  planet.retrograde ? 'text-lunary-error-300' : 'text-zinc-400'
+                }`}
+              >
+                {getZodiacSymbol(planet.sign)}
+              </span>
+            </div>
           ))}
         </div>
       </div>
@@ -271,49 +399,90 @@ export const SkyNowCard = () => {
   const expanded = (
     <div className='pt-3 space-y-4'>
       <div className='space-y-2'>
-        {planets.map((planet) => (
-          <div
-            key={planet.body}
-            className={`py-2 border-b border-zinc-800/30 last:border-0 ${planet.retrograde ? 'text-lunary-error-200' : ''}`}
-          >
-            <div className='flex items-baseline gap-2'>
-              <span
-                className={`font-astro text-lg ${planet.retrograde ? 'text-lunary-error-300' : 'text-lunary-secondary-300'}`}
-              >
-                {getPlanetSymbol(planet.body)}
-              </span>
-              <span className='text-sm font-medium text-zinc-200'>
-                {planet.body}
-              </span>
-              <span className='font-astro text-zinc-400'>
-                {getZodiacSymbol(planet.sign)}
-              </span>
-              <span className='text-sm text-zinc-400'>
-                {planet.sign} {planet.formattedDegree?.degree || 0}°
-                {planet.formattedDegree?.minute !== undefined &&
-                  `${planet.formattedDegree.minute}'`}
-              </span>
-              {planet.retrograde && (
-                <span className='text-xs text-lunary-error-300 font-medium'>
-                  ℞
+        {planets.map((planet) => {
+          const normalizedSign = normalizeSignName(planet.sign);
+          return (
+            <div
+              key={planet.body}
+              className={`py-2 border-b border-zinc-800/30 last:border-0 ${planet.retrograde ? 'text-lunary-error-200' : ''}`}
+            >
+              <div className='flex items-baseline gap-2'>
+                <span
+                  className={`font-astro text-lg ${planet.retrograde ? 'text-lunary-error-300' : 'text-lunary-secondary-300'}`}
+                >
+                  {getPlanetSymbol(planet.body)}
                 </span>
+                <span className='text-sm font-medium text-zinc-200'>
+                  {planet.body}
+                </span>
+                <span className='font-astro text-zinc-400'>
+                  {getZodiacSymbol(planet.sign)}
+                </span>
+                <span className='text-sm text-zinc-400'>
+                  {planet.sign} {planet.formattedDegree?.degree || 0}°
+                  {planet.formattedDegree?.minute !== undefined &&
+                    `${planet.formattedDegree.minute}'`}
+                </span>
+                {natalSignHouseLookup[normalizedSign] != null && (
+                  <span className='text-xs uppercase text-zinc-500'>
+                    {natalSignHouseLookup[normalizedSign]}H
+                  </span>
+                )}
+                {planet.retrograde && (
+                  <span className='text-xs text-lunary-error-300 font-medium'>
+                    ℞
+                  </span>
+                )}
+              </div>
+              <p className='text-xs text-zinc-400 mt-1 ml-7'>
+                {getPlanetMeaning(planet.body, planet.sign)}
+              </p>
+              {planet.retrograde && (
+                <p className='text-xs text-lunary-error-300/80 mt-1 ml-7 leading-relaxed'>
+                  {getRetrogradeGuidance(planet.body, planet.sign)}
+                </p>
               )}
             </div>
-            <p className='text-xs text-zinc-400 mt-1 ml-7'>
-              {getPlanetMeaning(planet.body, planet.sign)}
-            </p>
-            {planet.retrograde && (
-              <p className='text-xs text-lunary-error-300/80 mt-1 ml-7 leading-relaxed'>
-                {getRetrogradeGuidance(planet.body, planet.sign)}
-              </p>
-            )}
-          </div>
-        ))}
+          );
+        })}
       </div>
     </div>
   );
 
   return (
-    <ExpandableCard preview={preview} expanded={expanded} autoExpandOnDesktop />
+    <>
+      <ExpandableCard
+        preview={preview}
+        expanded={expanded}
+        autoExpandOnDesktop
+      />
+      {showChartModal && (
+        <div
+          className='fixed inset-0 z-50 flex items-center justify-center bg-black/80'
+          role='presentation'
+          onClick={() => setShowChartModal(false)}
+        >
+          <div
+            className='relative w-[min(90vw,560px)] rounded-[32px] border border-zinc-800 bg-zinc-950 p-6 shadow-2xl'
+            onClick={(event) => event.stopPropagation()}
+          >
+            <button
+              type='button'
+              className='absolute right-4 top-4 text-zinc-400 hover:text-zinc-200'
+              onClick={() => setShowChartModal(false)}
+            >
+              <X className='w-4 h-4' />
+            </button>
+            <div className='flex justify-center'>
+              <ChartWheelSvg
+                birthChart={chartData}
+                size={420}
+                houses={natalHouses as HouseCusp[] | null}
+              />
+            </div>
+          </div>
+        </div>
+      )}
+    </>
   );
 };
