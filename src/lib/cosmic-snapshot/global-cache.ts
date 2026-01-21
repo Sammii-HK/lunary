@@ -103,9 +103,15 @@ export async function buildGlobalCosmicData(
   };
 }
 
+const hasPostgres = Boolean(process.env.POSTGRES_URL);
+
 export async function getGlobalCosmicData(
   date: Date = new Date(),
 ): Promise<GlobalCosmicData | null> {
+  if (!hasPostgres) {
+    return await buildGlobalCosmicData(date);
+  }
+
   const dateStr = date.toISOString().split('T')[0];
   const cacheKey = `global-cosmic-${dateStr}`;
   const tags = ['cosmic-global', `cosmic-global-${dateStr}`];
@@ -146,6 +152,7 @@ export async function saveGlobalCosmicData(
   data: GlobalCosmicData,
   options?: { revalidateTags?: boolean },
 ): Promise<void> {
+  if (!hasPostgres) return;
   const dateStr = date.toISOString().split('T')[0];
   const shouldRevalidate = options?.revalidateTags ?? true;
 
