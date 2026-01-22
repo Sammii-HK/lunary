@@ -12,6 +12,7 @@ const isProductionHost = (hostname: string) =>
   hostname.startsWith('admin.');
 
 const ANON_ID_COOKIE = 'lunary_anon_id';
+
 const BOT_UA_PATTERN =
   /bot|crawler|spider|crawling|preview|facebookexternalhit|slackbot|discordbot|whatsapp|telegrambot|pinterest|embedly|quora|tumblr|redditbot/i;
 
@@ -208,7 +209,7 @@ export function middleware(request: NextRequest, event: NextFetchEvent) {
     let anonId = request.cookies.get(ANON_ID_COOKIE)?.value;
 
     if (!anonId) {
-      anonId = crypto.randomUUID();
+      anonId = crypto.randomUUID?.() ?? Math.random().toString(36).slice(2, 10);
       response.cookies.set(ANON_ID_COOKIE, anonId, {
         httpOnly: true,
         sameSite: 'lax',

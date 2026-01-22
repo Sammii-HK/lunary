@@ -70,6 +70,47 @@ const AUTH_CACHE_TTL = 1000 * 60; // 1 minute
 let cachedAuthContext: AuthContext | null = null;
 let cachedAuthContextAt = 0;
 const ANON_ID_STORAGE_KEY = 'lunary_anon_id';
+const APP_OPENED_GUARD_KEY = 'lunary_event_guard';
+const DAILY_DASHBOARD_GUARD_PREFIX = 'lunary_daily_dashboard_viewed_guard';
+const APP_OPENED_GUARD_TTL_MS = 1000 * 60 * 30; // 30 minutes
+
+const shouldTrackAppOpened = () => {
+  if (typeof window === 'undefined') return true;
+  try {
+    const payload = JSON.parse(
+      window.sessionStorage.getItem(APP_OPENED_GUARD_KEY) || '{}',
+    );
+    const lastRecorded =
+      typeof payload?.appOpened === 'number' ? payload.appOpened : 0;
+    const now = Date.now();
+    if (lastRecorded && now - lastRecorded < APP_OPENED_GUARD_TTL_MS) {
+      return false;
+    }
+    payload.appOpened = now;
+    window.sessionStorage.setItem(
+      APP_OPENED_GUARD_KEY,
+      JSON.stringify(payload),
+    );
+  } catch {
+    // Fail open to avoid blocking tracking when storage is unavailable.
+  }
+  return true;
+};
+
+const shouldTrackDailyDashboardViewed = () => {
+  if (typeof window === 'undefined') return true;
+  try {
+    const today = new Date().toISOString().split('T')[0];
+    const key = `${DAILY_DASHBOARD_GUARD_PREFIX}:${today}`;
+    if (window.localStorage.getItem(key)) {
+      return false;
+    }
+    window.localStorage.setItem(key, '1');
+  } catch {
+    // Fail open so analytics still fires if storage is blocked.
+  }
+  return true;
+};
 
 function extractEmailFromMetadata(
   metadata?: Record<string, any>,
@@ -415,8 +456,10 @@ export const conversionTracking = {
   signup: (userId?: string, email?: string) =>
     trackConversion('signup', { userId, userEmail: email }),
 
-  appOpened: (userId?: string, email?: string) =>
-    trackConversion('app_opened', { userId, userEmail: email }),
+  appOpened: (userId?: string, email?: string) => {
+    if (!shouldTrackAppOpened()) return;
+    return trackConversion('app_opened', { userId, userEmail: email });
+  },
 
   pageViewed: (pagePath?: string) =>
     trackConversion('page_viewed', { pagePath }),
@@ -512,8 +555,13 @@ export const conversionTracking = {
 
   grimoireViewed: (userId?: string, metadata?: Record<string, any>) =>
     trackConversion('grimoire_viewed', { userId, metadata }),
-  dailyDashboardViewed: (userId?: string, email?: string) =>
-    trackConversion('daily_dashboard_viewed', { userId, userEmail: email }),
+  dailyDashboardViewed: (userId?: string, email?: string) => {
+    if (!shouldTrackDailyDashboardViewed()) return;
+    return trackConversion('daily_dashboard_viewed', {
+      userId,
+      userEmail: email,
+    });
+  },
   astralChatUsed: (
     userId?: string,
     email?: string,
