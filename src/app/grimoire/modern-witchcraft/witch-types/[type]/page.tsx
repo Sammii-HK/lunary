@@ -13,6 +13,13 @@ function getIntroDefinition(intro: string): string {
   return firstSentence || intro;
 }
 
+export function buildWitchTypeMetadata(witch: { name: string }) {
+  const title = `${witch.name}: Meaning, Traits, Practices and Tools | Lunary`;
+  const description = `What is a ${witch.name.toLowerCase()}? Learn the meaning, common traits, beginner practices, and tools, with a grounded way to start.`;
+
+  return { title, description };
+}
+
 export async function generateStaticParams() {
   return typeKeys.map((type) => ({
     type: type,
@@ -32,8 +39,9 @@ export async function generateMetadata({
       title: 'Not Found - Lunary Grimoire',
     };
   }
-  const title = typeData.seo.title;
-  const description = typeData.seo.description;
+
+  const title = `${typeData.name}: Meaning, Traits, Practices and Tools | Lunary`;
+  const description = `What is a ${typeData.name.toLowerCase()}? Learn the meaning, common traits, beginner practices, and tools, with a grounded way to start.`;
 
   return {
     title,

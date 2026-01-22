@@ -12,9 +12,10 @@ export async function generateMetadata() {
   const nextYear = currentYear + 1;
 
   return {
-    title: `Astrology Events Calendar ${currentYear}-${nextYear} | Lunary`,
+    title:
+      'Astrology Events Calendar: Retrogrades, Eclipses and Key Dates | Lunary',
     description:
-      'Astrology events calendar with retrogrades, eclipses, lunar events, and planetary transits. Navigate cosmic events with guidance and rituals.',
+      'Astrology events calendar with retrograde dates, eclipses, lunar events, and major transits. Use cosmic timing with practical guidance and rituals.',
     keywords: [
       'astrology events',
       'astrology calendar',
