@@ -216,6 +216,79 @@ type IntentionBreakdownItem = {
 
 type IntentionBreakdown = IntentionBreakdownItem[];
 
+type RollingAverage = {
+  average: number | null;
+  previousAverage: number | null;
+};
+
+const sortRowsByDate = <T extends { date: string }>(rows: T[]) =>
+  [...rows].sort((a, b) =>
+    a.date.localeCompare(b.date, undefined, { numeric: true }),
+  );
+
+const computeRollingAverage = <T extends { date: string }>(
+  rows: T[],
+  extractor: (row: T) => number | null | undefined,
+  window = 7,
+): RollingAverage => {
+  if (window <= 0 || rows.length === 0) {
+    return { average: null, previousAverage: null };
+  }
+  const sorted = sortRowsByDate(rows);
+  const takeWindow = (offset: number) => {
+    const start = Math.max(0, sorted.length - window - offset);
+    const end = Math.max(0, sorted.length - offset);
+    return sorted.slice(start, end);
+  };
+  const lastWindow = takeWindow(0);
+  if (lastWindow.length === 0) {
+    return { average: null, previousAverage: null };
+  }
+  const average =
+    lastWindow.reduce((sum, row) => sum + (extractor(row) ?? 0), 0) /
+    lastWindow.length;
+  const prevWindow = takeWindow(window);
+  const previousAverage =
+    prevWindow.length === window
+      ? prevWindow.reduce((sum, row) => sum + (extractor(row) ?? 0), 0) /
+        prevWindow.length
+      : null;
+  return { average, previousAverage };
+};
+
+const describeTrend = (current: number | null, previous: number | null) => {
+  if (current === null || previous === null) {
+    return 'Trend data pending';
+  }
+  if (current > previous) {
+    return <span className='text-lunary-success'>Momentum rising</span>;
+  }
+  if (current < previous) {
+    return <span className='text-lunary-warning'>Momentum easing</span>;
+  }
+  return <span className='text-lunary-secondary'>Momentum steady</span>;
+};
+
+const computeWeekOverWeekChange = (
+  current: number | null,
+  previous: number | null,
+) => {
+  if (current === null || previous === null) {
+    return { change: null, percentChange: null };
+  }
+  const change = current - previous;
+  const percentChange = previous !== 0 ? (change / previous) * 100 : null;
+  return { change, percentChange };
+};
+
+const formatMetricValue = (value: number | null, decimals = 0) =>
+  value === null || Number.isNaN(value)
+    ? '—'
+    : value.toLocaleString(undefined, {
+        minimumFractionDigits: decimals,
+        maximumFractionDigits: decimals,
+      });
+
 const DEFAULT_RANGE_DAYS = 30;
 const activitySeries: UsageChartSeries[] = [
   {
@@ -1277,6 +1350,243 @@ export default function AnalyticsPage() {
     },
   ];
 
+  const momentumWindowSize = 7;
+
+  const sortedActivityTrends = useMemo(
+    () =>
+      activity?.trends
+        ? [...activity.trends].sort((a, b) =>
+            a.date.localeCompare(b.date, undefined, { numeric: true }),
+          )
+        : [],
+    [activity?.trends],
+  );
+
+  const sortedActivationTrends = useMemo(
+    () =>
+      activation?.trends
+        ? [...activation.trends].sort((a, b) =>
+            a.date.localeCompare(b.date, undefined, { numeric: true }),
+          )
+        : [],
+    [activation?.trends],
+  );
+
+  const dauStats = useMemo(
+    () =>
+      computeRollingAverage(
+        sortedActivityTrends,
+        (row) => row.dau ?? 0,
+        momentumWindowSize,
+      ),
+    [sortedActivityTrends],
+  );
+
+  const wauStats = useMemo(
+    () =>
+      computeRollingAverage(
+        sortedActivityTrends,
+        (row) => row.wau ?? 0,
+        momentumWindowSize,
+      ),
+    [sortedActivityTrends],
+  );
+
+  const mauStats = useMemo(
+    () =>
+      computeRollingAverage(
+        sortedActivityTrends,
+        (row) => row.mau ?? 0,
+        momentumWindowSize,
+      ),
+    [sortedActivityTrends],
+  );
+
+  const activationStats = useMemo(
+    () =>
+      computeRollingAverage(
+        sortedActivationTrends,
+        (row) => row.rate ?? null,
+        momentumWindowSize,
+      ),
+    [sortedActivationTrends],
+  );
+
+  const sessionStats = useMemo(
+    () => ({
+      average:
+        typeof activity?.signed_in_product_avg_sessions_per_user === 'number'
+          ? activity.signed_in_product_avg_sessions_per_user
+          : null,
+      previousAverage: null,
+    }),
+    [activity?.signed_in_product_avg_sessions_per_user],
+  );
+
+  type MomentumMetric = {
+    id: string;
+    label: string;
+    stats: RollingAverage;
+    decimals?: number;
+    formatter: (value: number | null) => string;
+  };
+
+  const momentumMetrics = useMemo<MomentumMetric[]>(
+    () => [
+      {
+        id: 'dau',
+        label: 'DAU',
+        stats: dauStats,
+        decimals: 0,
+        formatter: (value) =>
+          value === null ? '—' : value.toLocaleString(undefined),
+      },
+      {
+        id: 'wau',
+        label: 'WAU',
+        stats: wauStats,
+        decimals: 0,
+        formatter: (value) =>
+          value === null ? '—' : value.toLocaleString(undefined),
+      },
+      {
+        id: 'mau',
+        label: 'MAU',
+        stats: mauStats,
+        decimals: 0,
+        formatter: (value) =>
+          value === null ? '—' : value.toLocaleString(undefined),
+      },
+      {
+        id: 'activation',
+        label: 'Activation rate',
+        stats: activationStats,
+        decimals: 1,
+        formatter: (value) =>
+          typeof value === 'number' ? `${value.toFixed(1)}%` : '—',
+      },
+      {
+        id: 'sessions',
+        label: 'Avg sessions per user',
+        stats: sessionStats,
+        decimals: 2,
+        formatter: (value) => (value === null ? '—' : value.toFixed(2)),
+      },
+    ],
+    [activationStats, sessionStats, dauStats, wauStats, mauStats],
+  );
+
+  const weekOverWeekRows = useMemo(
+    () =>
+      momentumMetrics.map((metric) => {
+        const { change, percentChange } = computeWeekOverWeekChange(
+          metric.stats.average,
+          metric.stats.previousAverage,
+        );
+        return { ...metric, change, percentChange };
+      }),
+    [momentumMetrics],
+  );
+
+  const latestRetentionCohort = useMemo(
+    () => engagementOverview?.retention?.cohorts?.slice(-1).at(0) ?? null,
+    [engagementOverview?.retention?.cohorts],
+  );
+
+  const retentionStability = useMemo(
+    () => ({
+      returning7: activity?.returning_wau ?? null,
+      returning14: activity?.returning_mau ?? null,
+      avgWau: wauStats.average,
+      avgMau: mauStats.average,
+    }),
+    [activity?.returning_wau, activity?.returning_mau, wauStats, mauStats],
+  );
+
+  const cohortAgeBuckets = useMemo(() => {
+    const rows = cohorts?.cohorts ?? [];
+    if (!rows.length) return { last7: 0, last14: 0, olderThan30: 0 };
+    const lastWeek = rows.slice(-1);
+    const lastTwo = rows.slice(-2);
+    const coverWeeks = 5;
+    const older = rows.slice(0, Math.max(0, rows.length - coverWeeks));
+    const sumRows = (items: typeof rows) =>
+      items.reduce(
+        (sum: number, row: (typeof rows)[0]) => sum + (row.day0 ?? 0),
+        0,
+      );
+    return {
+      last7: sumRows(lastWeek),
+      last14: sumRows(lastTwo),
+      olderThan30: sumRows(older),
+    };
+  }, [cohorts?.cohorts]);
+
+  const cohortAgePercents = useMemo(() => {
+    const totalMau = activity?.mau ?? 0;
+    if (totalMau <= 0) {
+      return { last7: null, last14: null, olderThan30: null };
+    }
+    const { last7, last14, olderThan30 } = cohortAgeBuckets;
+    return {
+      last7: Number(((last7 / totalMau) * 100).toFixed(1)),
+      last14: Number(((last14 / totalMau) * 100).toFixed(1)),
+      olderThan30: Number(
+        Math.min((olderThan30 / totalMau) * 100, 100).toFixed(1),
+      ),
+    };
+  }, [activity?.mau, cohortAgeBuckets]);
+
+  const trustFunnelSteps = useMemo(() => {
+    const featureUsers =
+      featureUsage?.features?.reduce(
+        (sum, feature) => sum + (feature.unique_users ?? 0),
+        0,
+      ) ?? 0;
+    return [
+      {
+        label: 'First Grimoire view',
+        value: formatPercent(grimoireHealth?.grimoire_entry_rate, 1),
+      },
+      {
+        label: 'Return within 7 days',
+        value: formatPercent(latestRetentionCohort?.day_7 ?? undefined, 1),
+      },
+      {
+        label: 'App open',
+        value:
+          typeof activity?.app_opened_dau === 'number'
+            ? activity.app_opened_dau.toLocaleString()
+            : 'N/A',
+      },
+      {
+        label: 'Second app open',
+        value:
+          typeof activity?.returning_dau === 'number'
+            ? activity.returning_dau.toLocaleString()
+            : 'N/A',
+      },
+      {
+        label: 'Signup',
+        value:
+          typeof userGrowth?.totalSignups === 'number'
+            ? userGrowth.totalSignups.toLocaleString()
+            : 'N/A',
+      },
+      {
+        label: 'Product feature used',
+        value: featureUsers > 0 ? featureUsers.toLocaleString() : 'N/A',
+      },
+    ];
+  }, [
+    grimoireHealth?.grimoire_entry_rate,
+    latestRetentionCohort?.day_7,
+    activity?.app_opened_dau,
+    activity?.returning_dau,
+    userGrowth?.totalSignups,
+    featureUsage?.features,
+  ]);
+
   const notificationTypes: Array<{
     key: string;
     label: string;
@@ -1637,6 +1947,220 @@ export default function AnalyticsPage() {
                 </div>
               </CardContent>
             </Card>
+          </section>
+
+          <section className='space-y-6'>
+            <Card className='border-zinc-800/30 bg-zinc-900/10'>
+              <CardHeader>
+                <CardTitle className='text-base font-medium'>
+                  Momentum analytics
+                </CardTitle>
+                <CardDescription className='text-xs text-zinc-400'>
+                  Seven-day rolling averages keep the focus on durable trends,
+                  even if a single day dips.
+                </CardDescription>
+              </CardHeader>
+              <CardContent className='space-y-4'>
+                <div className='grid gap-4 md:grid-cols-2 lg:grid-cols-3'>
+                  {momentumMetrics.map((metric) => {
+                    const trendCopy = describeTrend(
+                      metric.stats.average,
+                      metric.stats.previousAverage,
+                    );
+                    const hasPrevious = metric.stats.previousAverage !== null;
+                    return (
+                      <div
+                        key={metric.id}
+                        className='rounded-2xl border border-zinc-800/40 bg-zinc-950/40 p-4'
+                      >
+                        <div className='flex items-center justify-between text-xs text-zinc-400'>
+                          <span>{metric.label}</span>
+                          <span className='text-xs text-zinc-500'>
+                            {trendCopy}
+                          </span>
+                        </div>
+                        <div className='mt-2 text-2xl font-light tracking-tight text-white'>
+                          {metric.formatter(metric.stats.average)}
+                        </div>
+                        <p className='mt-1 text-[11px] text-zinc-500'>
+                          {hasPrevious
+                            ? `Last week ${metric.formatter(
+                                metric.stats.previousAverage,
+                              )}`
+                            : '7-day average'}
+                        </p>
+                      </div>
+                    );
+                  })}
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className='border-zinc-800/30 bg-zinc-900/10'>
+              <CardHeader>
+                <CardTitle className='text-base font-medium'>
+                  Week-over-week deltas
+                </CardTitle>
+                <CardDescription className='text-xs text-zinc-400'>
+                  Break down the latest 7-day average versus the prior week.
+                </CardDescription>
+              </CardHeader>
+              <CardContent className='overflow-x-auto'>
+                <table className='w-full text-left text-xs text-zinc-400'>
+                  <thead>
+                    <tr className='text-[11px] uppercase tracking-wide text-zinc-500'>
+                      <th className='pb-2 pr-3'>Metric</th>
+                      <th className='pb-2 pr-3'>This week</th>
+                      <th className='pb-2 pr-3'>Last week</th>
+                      <th className='pb-2 pr-3'>Δ</th>
+                      <th className='pb-2'>% change</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {weekOverWeekRows.map((row) => {
+                      const changeLabel =
+                        row.change === null
+                          ? '—'
+                          : `${row.change >= 0 ? '+' : ''}${row.change.toLocaleString(
+                              undefined,
+                              {
+                                minimumFractionDigits: row.decimals ?? 0,
+                                maximumFractionDigits: row.decimals ?? 0,
+                              },
+                            )}`;
+                      const percentLabel =
+                        row.percentChange === null
+                          ? '—'
+                          : `${row.percentChange >= 0 ? '+' : ''}${row.percentChange.toFixed(
+                              1,
+                            )}%`;
+                      return (
+                        <tr
+                          key={row.id}
+                          className='border-b border-zinc-800/50 last:border-0'
+                        >
+                          <td className='py-2 pr-3 font-semibold text-zinc-200'>
+                            {row.label}
+                          </td>
+                          <td className='py-2 pr-3 text-white'>
+                            {row.formatter(row.stats.average)}
+                          </td>
+                          <td className='py-2 pr-3'>
+                            {row.stats.previousAverage !== null
+                              ? row.formatter(row.stats.previousAverage)
+                              : '—'}
+                          </td>
+                          <td className='py-2 pr-3 text-white'>
+                            {changeLabel}
+                          </td>
+                          <td className='py-2 text-white'>{percentLabel}</td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </CardContent>
+            </Card>
+
+            <div className='grid gap-6 lg:grid-cols-3'>
+              <Card className='border-zinc-800/30 bg-zinc-900/10'>
+                <CardHeader>
+                  <CardTitle className='text-sm font-medium'>
+                    Retention stability
+                  </CardTitle>
+                  <CardDescription className='text-xs text-zinc-400'>
+                    Returning users are deduped at the identity level.
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className='space-y-3 text-sm text-zinc-200'>
+                  <div className='flex items-center justify-between'>
+                    <span>Returning users (7-day)</span>
+                    <span>
+                      {retentionStability.returning7 !== null
+                        ? retentionStability.returning7.toLocaleString()
+                        : '—'}
+                    </span>
+                  </div>
+                  <div className='flex items-center justify-between'>
+                    <span>Returning users (14-day)</span>
+                    <span>
+                      {retentionStability.returning14 !== null
+                        ? retentionStability.returning14.toLocaleString()
+                        : '—'}
+                    </span>
+                  </div>
+                  <div className='flex items-center justify-between text-xs text-zinc-400'>
+                    <span>7-day avg WAU</span>
+                    <span>{formatMetricValue(retentionStability.avgWau)}</span>
+                  </div>
+                  <div className='flex items-center justify-between text-xs text-zinc-400'>
+                    <span>7-day avg MAU</span>
+                    <span>{formatMetricValue(retentionStability.avgMau)}</span>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className='border-zinc-800/30 bg-zinc-900/10'>
+                <CardHeader>
+                  <CardTitle className='text-sm font-medium'>
+                    Cohort age lens
+                  </CardTitle>
+                  <CardDescription className='text-xs text-zinc-400'>
+                    Weekly cohorts proxy how fresh the MAU base is.
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className='space-y-2 text-sm text-zinc-200'>
+                  <div className='flex items-center justify-between'>
+                    <span>Signed up in last 7 days</span>
+                    <span>
+                      {cohortAgePercents.last7 !== null
+                        ? `${cohortAgePercents.last7}%`
+                        : 'N/A'}
+                    </span>
+                  </div>
+                  <div className='flex items-center justify-between'>
+                    <span>Signed up in last 14 days</span>
+                    <span>
+                      {cohortAgePercents.last14 !== null
+                        ? `${cohortAgePercents.last14}%`
+                        : 'N/A'}
+                    </span>
+                  </div>
+                  <div className='flex items-center justify-between'>
+                    <span>Signed up &gt; 30 days ago</span>
+                    <span>
+                      {cohortAgePercents.olderThan30 !== null
+                        ? `${cohortAgePercents.olderThan30}%`
+                        : 'N/A'}
+                    </span>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className='border-zinc-800/30 bg-zinc-900/10'>
+                <CardHeader>
+                  <CardTitle className='text-sm font-medium'>
+                    Trust funnel
+                  </CardTitle>
+                  <CardDescription className='text-xs text-zinc-400'>
+                    Track how the core engagement steps stack up.
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className='space-y-2 text-sm text-zinc-200'>
+                  {trustFunnelSteps.map((step) => (
+                    <div
+                      key={step.label}
+                      className='flex items-center justify-between border-b border-zinc-900/40 pb-2 last:border-0'
+                    >
+                      <span className='text-xs uppercase tracking-wider text-zinc-500'>
+                        {step.label}
+                      </span>
+                      <span className='text-sm text-white'>{step.value}</span>
+                    </div>
+                  ))}
+                </CardContent>
+              </Card>
+            </div>
           </section>
 
           <section className='grid gap-6 lg:grid-cols-2'>

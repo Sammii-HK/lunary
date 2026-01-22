@@ -4,6 +4,19 @@ import { formatTimestamp } from '@/lib/analytics/date-range';
 export type DateRange = { start: Date; end: Date };
 
 const utcDateExpr = `(created_at AT TIME ZONE 'UTC')::date`;
+const canonicalIdentityExpr = `
+  CASE
+    WHEN user_id IS NOT NULL AND user_id <> '' THEN user_id
+    WHEN anonymous_id IS NOT NULL AND anonymous_id <> '' THEN 'anon:' || anonymous_id
+    ELSE NULL
+  END
+`;
+const hasCanonicalIdentity = `
+  (
+    (user_id IS NOT NULL AND user_id <> '')
+    OR (anonymous_id IS NOT NULL AND anonymous_id <> '')
+  )
+`;
 const parseIsoDay = (dateKey: string) => new Date(`${dateKey}T00:00:00.000Z`);
 
 export type EngagementOverview = {
@@ -87,27 +100,25 @@ async function countWindowOverlap(
   const result = await sql.query(
     `
       WITH current_window AS (
-        SELECT DISTINCT user_id
-      FROM conversion_events
-      WHERE event_type = 'app_opened'
-        AND user_id IS NOT NULL
-        AND user_id NOT LIKE 'anon:%'
-        AND created_at >= $1
-        AND created_at <= $2
-      ),
-      prev_window AS (
-        SELECT DISTINCT user_id
+        SELECT DISTINCT ${canonicalIdentityExpr} AS identity
         FROM conversion_events
         WHERE event_type = 'app_opened'
-          AND user_id IS NOT NULL
-          AND user_id NOT LIKE 'anon:%'
+          AND created_at >= $1
+          AND created_at <= $2
+          AND ${hasCanonicalIdentity}
+      ),
+      prev_window AS (
+        SELECT DISTINCT ${canonicalIdentityExpr} AS identity
+        FROM conversion_events
+        WHERE event_type = 'app_opened'
           AND created_at >= $3
           AND created_at <= $4
+          AND ${hasCanonicalIdentity}
       )
       SELECT COUNT(*) AS overlap
       FROM current_window c
       WHERE EXISTS (
-        SELECT 1 FROM prev_window p WHERE p.user_id = c.user_id
+        SELECT 1 FROM prev_window p WHERE p.identity = c.identity
       )
     `,
     [startCurrent, endCurrent, startPrev, endPrev],

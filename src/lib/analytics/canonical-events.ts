@@ -394,6 +394,7 @@ export async function insertCanonicalEvent(row: CanonicalInsertRow): Promise<{
       ? row.createdAt.toISOString()
       : (row.createdAt ?? null);
 
+  // The unique constraint on event_id keeps retries/idempotent inserts from inflating counts.
   const result = await sql.query(
     `
       INSERT INTO conversion_events (
