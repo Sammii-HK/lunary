@@ -26,6 +26,7 @@ import { AppChrome } from '@/components/AppChrome';
 import { AuthStatusProvider } from '@/components/AuthStatus';
 import { UserProvider } from '@/context/UserContext';
 import { CookieConsent } from '@/components/CookieConsent';
+import { AppOpenedTracker } from '@/components/AppOpenedTracker';
 
 export async function generateMetadata(): Promise<Metadata> {
   return {
@@ -155,6 +156,7 @@ export default function RootLayout({
                   }
                 >
                   <ConditionalMainWrapper>
+                    <AppOpenedTracker />
                     <ErrorBoundaryWrapper>{children}</ErrorBoundaryWrapper>
                     <Analytics />
                     <SpeedInsights />
