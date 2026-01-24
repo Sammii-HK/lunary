@@ -6,8 +6,11 @@ export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
     const range = resolveDateRange(searchParams, 30);
+    const includeAudit = searchParams.get('debug') === '1';
 
-    const overview = await getEngagementOverview(range);
+    const overview = await getEngagementOverview(range, {
+      includeAudit,
+    });
     return NextResponse.json({ source: 'database', range, ...overview });
   } catch (error) {
     console.error('[analytics/engagement-overview] Failed', error);

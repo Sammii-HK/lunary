@@ -32,6 +32,7 @@ import {
 } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import UsageChart, { UsageChartSeries } from '@/components/charts/UsageChart';
+import type { AuditInfo } from '@/lib/analytics/kpis';
 
 type ActivityTrend = {
   date: string;
@@ -176,6 +177,7 @@ type EngagementOverviewResponse = {
     direct_returning: number;
     internal_returning: number;
   };
+  audit?: AuditInfo;
 };
 
 type FeatureAdoptionResponse = {
@@ -368,6 +370,7 @@ export default function AnalyticsPage() {
     'day',
   );
   const [showProductSeries, setShowProductSeries] = useState(false);
+  const [includeAudit, setIncludeAudit] = useState(false);
   const [activity, setActivity] = useState<ActivityResponse | null>(null);
   const [conversions, setConversions] = useState<ConversionResponse | null>(
     null,
@@ -481,6 +484,7 @@ export default function AnalyticsPage() {
     setError(null);
 
     const queryParams = `start_date=${startDate}&end_date=${endDate}`;
+    const debugParam = includeAudit ? '&debug=1' : '';
 
     try {
       const [
@@ -509,7 +513,9 @@ export default function AnalyticsPage() {
         fetch(
           `/api/admin/analytics/dau-wau-mau?${queryParams}&granularity=${granularity}`,
         ),
-        fetch(`/api/admin/analytics/engagement-overview?${queryParams}`),
+        fetch(
+          `/api/admin/analytics/engagement-overview?${queryParams}${debugParam}`,
+        ),
         fetch(`/api/admin/analytics/feature-adoption?${queryParams}`),
         fetch(`/api/admin/analytics/grimoire-health?${queryParams}`),
         fetch(`/api/admin/analytics/conversion-influence?${queryParams}`),
@@ -670,7 +676,7 @@ export default function AnalyticsPage() {
     } finally {
       setLoading(false);
     }
-  }, [granularity, startDate, endDate]);
+  }, [granularity, startDate, endDate, includeAudit]);
 
   useEffect(() => {
     fetchAnalytics();
@@ -1677,6 +1683,13 @@ export default function AnalyticsPage() {
             Download CSV
           </Button>
 
+          <Button
+            variant='ghost'
+            onClick={() => setIncludeAudit((prev) => !prev)}
+          >
+            {includeAudit ? 'Hide audit' : 'Show audit'}
+          </Button>
+
           <Button onClick={fetchAnalytics} variant='outline'>
             {loading ? (
               <Loader2 className='h-3.5 w-3.5 animate-spin' />
@@ -1809,7 +1822,7 @@ export default function AnalyticsPage() {
                     }
                   />
                   <MiniStat
-                    label='Returning users (range)'
+                    label='Returning Users (range)'
                     value={(
                       engagementOverview?.returning_users_range ?? 0
                     ).toLocaleString()}
@@ -1818,7 +1831,7 @@ export default function AnalyticsPage() {
                 </div>
                 <div className='grid gap-4 md:grid-cols-2 lg:grid-cols-4'>
                   <MiniStat
-                    label='Returning DAU'
+                    label='Returning DAU (D1)'
                     value={(
                       engagementOverview?.returning_dau ?? 0
                     ).toLocaleString()}
@@ -1827,7 +1840,7 @@ export default function AnalyticsPage() {
                     }
                   />
                   <MiniStat
-                    label='Returning WAU (7-day overlap)'
+                    label='Returning WAU overlap'
                     value={(
                       engagementOverview?.returning_wau ?? 0
                     ).toLocaleString()}
@@ -1836,7 +1849,7 @@ export default function AnalyticsPage() {
                     }
                   />
                   <MiniStat
-                    label='Returning MAU (30-day overlap)'
+                    label='Returning MAU overlap'
                     value={(
                       engagementOverview?.returning_mau ?? 0
                     ).toLocaleString()}
@@ -1883,12 +1896,65 @@ export default function AnalyticsPage() {
                   </>
                 )}
                 <div className='rounded-lg border border-zinc-800/30 bg-zinc-950/40 px-3 py-2 text-xs text-zinc-400'>
-                  Returning users (range) are users with 2+ distinct active days
-                  inside the selected range. Returning DAU counts signed-in
-                  users active on the selected end date who were also active on
-                  an earlier day in the selected range; identity links ensure we
-                  dedupe anonymous→signed transitions.
+                  Returning Users (range) are users with 2+ distinct active days
+                  inside the selected range. Returning DAU (D1) counts users
+                  active on the selected end date who were also active the day
+                  prior, while Returning WAU overlap and Returning MAU overlap
+                  compare the most recent 7-day/30-day windows to the prior
+                  period. Identity links keep anonymous→signed transitions
+                  deduplicated.
                 </div>
+                {includeAudit && engagementOverview?.audit && (
+                  <div className='rounded-lg border border-lunary-primary-500/30 bg-zinc-950/40 px-4 py-3 text-sm text-zinc-200'>
+                    <div className='flex items-center justify-between text-xs text-zinc-400'>
+                      <span>Audit (debug=1)</span>
+                      <span className='text-[11px] text-zinc-500'>
+                        Last event{' '}
+                        {engagementOverview.audit.last_event_timestamp ?? '—'}
+                      </span>
+                    </div>
+                    <div className='mt-2 space-y-1 text-[13px]'>
+                      <div className='flex items-center justify-between'>
+                        <span>Raw app_opened events</span>
+                        <span className='font-semibold'>
+                          {engagementOverview.audit.raw_events_count.toLocaleString()}
+                        </span>
+                      </div>
+                      <div className='flex items-center justify-between'>
+                        <span>Distinct canonical identities</span>
+                        <span className='font-semibold'>
+                          {engagementOverview.audit.distinct_canonical_identities.toLocaleString()}
+                        </span>
+                      </div>
+                      <div className='flex items-center justify-between'>
+                        <span>Missing identity rows</span>
+                        <span className='font-semibold'>
+                          {engagementOverview.audit.missing_identity_rows.toLocaleString()}
+                        </span>
+                      </div>
+                      <div className='flex items-center justify-between'>
+                        <span>Identity links applied</span>
+                        <span className='font-semibold'>
+                          {engagementOverview.audit.linked_identities_applied.toLocaleString()}
+                        </span>
+                      </div>
+                      {engagementOverview.audit.anomalies.length > 0 && (
+                        <div className='rounded-xl border border-lunary-warning-500/30 bg-lunary-warning-950/20 px-3 py-2 text-[11px] text-lunary-warning-300'>
+                          <p className='text-xs font-medium text-lunary-warning-200'>
+                            Anomalies detected
+                          </p>
+                          <ul className='mt-1 space-y-1'>
+                            {engagementOverview.audit.anomalies.map(
+                              (anomaly: string) => (
+                                <li key={anomaly}>{anomaly}</li>
+                              ),
+                            )}
+                          </ul>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
 
                 <div className='grid gap-4 md:grid-cols-3'>
                   <div className='rounded-xl border border-zinc-800/60 bg-zinc-950/50 p-4'>
@@ -3585,6 +3651,92 @@ export default function AnalyticsPage() {
               </Card>
             </section>
           )}
+          <section className='space-y-4'>
+            <Card className='border-zinc-800/30 bg-zinc-900/10'>
+              <CardHeader>
+                <CardTitle className='text-base font-medium'>
+                  Glossary & definitions
+                </CardTitle>
+                <CardDescription className='text-xs text-zinc-400'>
+                  Variant definitions tied to canonical `app_opened` analytics.
+                </CardDescription>
+              </CardHeader>
+              <CardContent className='space-y-3 text-sm text-zinc-300'>
+                <div>
+                  <p className='text-[11px] uppercase tracking-wider text-zinc-500'>
+                    Canonical identity
+                  </p>
+                  <p className='text-zinc-200'>
+                    User counts dedupe to{' '}
+                    <code>
+                      user:{'{'}user_id{'}'}
+                    </code>{' '}
+                    when authenticated or{' '}
+                    <code>
+                      anon:{'{'}anonymous_id{'}'}
+                    </code>{' '}
+                    otherwise; analytics_identity_links merges anonymous
+                    sessions into the signed-in identity.
+                  </p>
+                </div>
+                <div>
+                  <p className='text-[11px] uppercase tracking-wider text-zinc-500'>
+                    DAU / WAU / MAU
+                  </p>
+                  <p className='text-zinc-200'>
+                    Computed solely from `app_opened` events inside UTC
+                    day/week/month windows.
+                  </p>
+                </div>
+                <div>
+                  <p className='text-[11px] uppercase tracking-wider text-zinc-500'>
+                    Returning DAU (D1)
+                  </p>
+                  <p className='text-zinc-200'>
+                    Users active on the selected end day who were also active on
+                    the prior UTC day (deduped via canonical identity).
+                  </p>
+                </div>
+                <div>
+                  <p className='text-[11px] uppercase tracking-wider text-zinc-500'>
+                    Returning Users (range)
+                  </p>
+                  <p className='text-zinc-200'>
+                    Canonical identities with 2+ distinct `app_opened` days in
+                    the selected range.
+                  </p>
+                </div>
+                <div>
+                  <p className='text-[11px] uppercase tracking-wider text-zinc-500'>
+                    WAU / MAU overlap
+                  </p>
+                  <p className='text-zinc-200'>
+                    Overlap between the most recent 7d/30d canonical windows and
+                    their preceding windows (deduped identities).
+                  </p>
+                </div>
+                <div>
+                  <p className='text-[11px] uppercase tracking-wider text-zinc-500'>
+                    Cohort retention
+                  </p>
+                  <p className='text-zinc-200'>
+                    Cohorts are generated from the first-ever canonical
+                    `app_opened`, with Day+1/Day+7/Day+30 presence reported.
+                  </p>
+                </div>
+                <div>
+                  <p className='text-[11px] uppercase tracking-wider text-zinc-500'>
+                    Audit flag
+                  </p>
+                  <p className='text-zinc-200'>
+                    Append `?debug=1` to the engagement overview fetch to reveal
+                    raw `app_opened` counts, missing identities, identity links,
+                    and anomaly flags for reconciliation.
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
+          </section>
         </TabsContent>
       </Tabs>
     </div>
