@@ -107,7 +107,7 @@ const AMBIGUOUS_DOMAINS = new Set(['tarot', 'crystals', 'numerology']);
 const PLATFORM_HASHTAG_LIMITS: Record<string, number> = {
   tiktok: 4,
   instagram: 4,
-  threads: 2,
+  threads: 0,
   twitter: 2,
   bluesky: 2,
   facebook: 4,
@@ -129,7 +129,7 @@ const TRUNCATION_PATTERNS = [
 
 const MAX_CHARS: Record<string, number> = {
   twitter: 280,
-  threads: 450,
+  threads: 320,
   bluesky: 350,
   instagram: 2200,
   facebook: 2200,
@@ -221,7 +221,7 @@ const DOMAIN_DESCRIPTIONS: Record<string, string> = {
 
 const PLATFORM_TONE_NOTES: Record<string, string> = {
   threads:
-    'Threads posts should feel conversational and reflective, zeroing in on one strong idea per post.',
+    'Threads posts should read like an insightful snippet from a private grimoire: one strong idea, one practical human cue. Keep it short and specific. Avoid definition-y, encyclopaedic tone. Prefer lived observation and a crisp reframe.',
   twitter:
     'Twitter/X posts need tighter phrasing, a single insight, and no repeated adjectives; keep the copy sharp.',
   pinterest:
@@ -240,17 +240,36 @@ const SOCIAL_POST_STYLE_INSTRUCTION = (
 ) => {
   const platformNote =
     PLATFORM_TONE_NOTES[platform] || PLATFORM_TONE_NOTES.default;
+
+  const threadsFormat =
+    platform === 'threads'
+      ? `
+Threads formatting rules (strict):
+- 2 to 4 sentences total.
+- Target 220–320 characters. Hard max ${MAX_CHARS.threads}.
+- First sentence must be a hook: a reframe, contrast, or lived observation. No definitions.
+- Mention the topic keyword phrase exactly once in sentence one.
+- No “Many believe”, no “not just”, no “can deepen your understanding”.
+- Avoid academic phrasing. Write like a distilled note from a grimoire.
+- End with either a single reflective question OR one "try this:" line (not both).
+`
+      : '';
+
   const mattersLine =
     postType === 'educational_intro' || postType === 'video_caption'
-      ? '- Every post must include exactly one “why this matters today” line (practical, emotional, or behavioral).'
+      ? '- Every post must include exactly one “why this matters today” line (practical, emotional, or behavioural).'
       : '- A “why this matters today” line is optional and should only appear when it adds practical value.';
+
   return `Global style rules:
 - Avoid repeating sentence structures within a single post and never reuse the same opening or closing sentence across variants.
 - Limit “Many believe” to once across the 7-day batch and allow “may influence” only once per post; prefer “often”, “tends to”, “is best used for”, “shows up as”, or “is felt as”.
 - Skip filler phrases like “can deepen”, “may enhance”, or “often signifies” unless you immediately follow with a concrete example.
 ${mattersLine}
 - Max 3 short paragraphs; first sentence must reframe a misconception or describe lived experience, and the final sentence should invite reflection (not a CTA).
-- Stay calm, grounded, and authoritative—explain patterns without pushing belief or using mystical exaggeration.
+- Stay calm, grounded, and authoritative. Explain patterns without pushing belief.
+
+${threadsFormat}
+
 Platform-specific note: ${platformNote}`;
 };
 
@@ -357,6 +376,7 @@ export const selectHashtagsForPostType = ({
   platform: string;
   hashtagData: { domain: string; topic: string; brand: string };
 }): string[] => {
+  if (platform === 'threads') return [];
   const pool = getTopicHashtagPool(topicTitle);
   const fallback = [hashtagData.topic, hashtagData.domain].filter(Boolean);
   const baseTags = (pool.length > 0 ? pool : fallback).map((tag) =>
@@ -1035,16 +1055,20 @@ const buildEducationalPrompt = (pack: SourcePack) => {
     pack.platform,
     pack.postType,
   );
-  const timingCueNote = [
-    'educational_deep_2',
-    'closing_statement',
-    'closing_ritual',
-  ].includes(pack.postType)
-    ? TIMING_CUE_INSTRUCTION(pack.topicTitle, pack.theme)
-    : '';
+  const timingCueNote =
+    pack.platform === 'threads'
+      ? TIMING_CUE_INSTRUCTION(pack.topicTitle, pack.theme)
+      : ['educational_deep_2', 'closing_statement', 'closing_ritual'].includes(
+            pack.postType,
+          )
+        ? TIMING_CUE_INSTRUCTION(pack.topicTitle, pack.theme)
+        : '';
 
   return `You are writing social copy for Lunary. Use UK English, stay calm, and keep the tone educational.
-Keyword reference (first line added later): ${pack.displayTitle}
+Keyword reference: ${pack.displayTitle}
+If platform is Threads:
+- Do not output the keyword as a standalone title line.
+- Integrate it naturally into sentence one.
 ${domainInstruction}
 ${anchorInstruction}
 ${journalingInstruction}
@@ -1061,6 +1085,10 @@ Rules:
 - Treat the topic as a domain-specific term, not a generic concept.
 - Do not mention the Grimoire, Lunary, or any product language.
 - Do not include CTAs or “full guide / explore further / read more” phrasing unless postType is explicitly "promo".
+- If platform is Threads: end with exactly one of:
+  - a single reflective question, OR
+  - a single "try this: ..." line
+  Do not include both.
 ${contextInstruction}
 ${discoveryInstruction}
 ${structureNote}
@@ -1092,7 +1120,10 @@ Structure guidance:
 - Provide 2-3 short sentences (no bullet list), each focused on one concrete idea (timing, visibility, transition, pause, culmination).
 - Sentence one should open with the idea above and avoid filler phrases (no "What it is"/"Why it matters").
 - Sentence two should add a concrete detail or observation; sentence three (optional) may add a second nuance but keep it observational.
-- End with an observational statement rather than advice or actions.
+- If platform is Threads, end with exactly one of:
+  - one reflective question (single sentence), OR
+  - one "try this: ..." line (single sentence)
+- Do not end with a neutral concluding statement.
 - Do not include CTA phrases; they will be added separately after generation.
 - Avoid repeating the topic more than twice per 200 characters.
 
@@ -1478,14 +1509,19 @@ export async function generateSocialCopy(
       'educational_deep_3',
     ].includes(pack.postType)
   ) {
-    const opening = await generateOpeningVariation(pack, {
-      avoidOpenings: pack.noveltyContext?.recentOpenings,
-    });
-    content = applyOpeningVariation(content, opening.line);
-    if (!Array.isArray(response.safetyChecks)) {
-      response.safetyChecks = [];
+    if (pack.platform === 'threads') {
+      content = 'Most people feel this before they can name it.';
+    } else {
+      const opening = await generateOpeningVariation(pack, {
+        avoidOpenings: pack.noveltyContext?.recentOpenings,
+        intentOrder: OPENING_INTENTS,
+      });
+      content = applyOpeningVariation(content, opening.line);
+      if (!Array.isArray(response.safetyChecks)) {
+        response.safetyChecks = [];
+      }
+      response.safetyChecks.push(`opening:${opening.intent}`);
     }
-    response.safetyChecks.push(`opening:${opening.intent}`);
   }
 
   content = normalizeGeneratedContent(content, {
@@ -1724,6 +1760,18 @@ export function applyPlatformFormatting(
   platform: string,
 ): string {
   const max = MAX_CHARS[platform] || 450;
+
+  if (platform === 'threads') {
+    // Threads: no hashtags, no extra blank lines, single paragraph.
+    const cleaned = content
+      .replace(HASHTAG_REGEX, '')
+      .replace(/\n{2,}/g, '\n')
+      .replace(/\s+\n/g, '\n')
+      .trim();
+    const flattened = cleaned.replace(/\n+/g, '\n').trim();
+    return trimToMaxChars(flattened, max);
+  }
+
   const normalized = normalizeHashtagsForPlatform(content, platform);
   const trimmed = trimToMaxChars(normalized, max);
   if (platform === 'twitter' || platform === 'bluesky') {
