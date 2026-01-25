@@ -77,6 +77,10 @@ export async function POST(
           grimoireSlug: slug,
           focus: script.facetTitle,
           shortFormHook: script.facetTitle,
+          threads: {
+            keyword: script.facetTitle,
+            angles: [],
+          },
         },
         theme,
         baseUrl,

@@ -36,7 +36,9 @@ export const domainHashtags: Record<ThemeCategory, string> = {
 const baseCategoryThemesWithThreads = withThreads(
   themes.baseCategoryThemes as WeeklyTheme[],
 );
-const generatedThemesWithThreads = withThreads(generatedCategoryThemes);
+const generatedThemesWithThreads = withThreads(
+  generatedCategoryThemes as WeeklyTheme[],
+);
 
 export const categoryThemes: WeeklyTheme[] = [
   ...baseCategoryThemesWithThreads,
