@@ -705,7 +705,7 @@ async function runDailyPosts(dateStr: string) {
     {
       name: `Cosmic Post - ${new Date(dateStr).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}`,
       content: instagramContent,
-      platforms: ['pinterest', 'facebook', 'instagram'],
+      platforms: ['pinterest', 'facebook', 'instagram', 'threads'],
       imageUrls: buildCosmicMediaUrls(getCosmicFormat('instagram')),
       alt: `${cosmicContent.primaryEvent.name} - ${cosmicContent.primaryEvent.energy}. Daily cosmic guidance from lunary.`,
       scheduledDate: new Date(scheduleBase.getTime()).toISOString(),
@@ -3473,7 +3473,7 @@ function buildRetrogradeTextPosts({
         event.type === 'retrograde_start' ? 'Begins' : 'Ends'
       }`,
       content: xContent,
-      platforms: ['x'],
+      platforms: ['x', 'threads', 'bluesky'],
       imageUrls: [],
       alt: `${planet} retrograde update`,
       scheduledDate: getSchedule(),
@@ -3594,7 +3594,7 @@ function buildTransitSummaryPost({
   return {
     name: `Transit Snapshot • ${dateStr}`,
     content: xContent,
-    platforms: ['x'],
+    platforms: ['x', 'threads', 'bluesky'],
     imageUrls: [],
     alt: 'Daily transit summary',
     scheduledDate: getSchedule(),
