@@ -545,13 +545,6 @@ export default function NumerologyIndexPage() {
               </div>
             </div>
           </div>
-
-          <CosmicConnections
-            entityType='hub-glossary'
-            entityKey='numerology'
-            title='Numerology Connections'
-            sections={cosmicConnectionsSections}
-          />
         </div>
       </SEOContentTemplate>
     </div>
