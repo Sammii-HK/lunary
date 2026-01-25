@@ -10,7 +10,7 @@ import {
   TransitEvent,
 } from '../../utils/astrology/transitCalendar';
 import {
-  getPersonalTransitImpacts,
+  getPersonalTransitImpactList,
   PersonalTransitImpact,
 } from '../../utils/astrology/personalTransits';
 import { useSubscription } from '../hooks/useSubscription';
@@ -64,14 +64,14 @@ export const TransitOfTheDay = () => {
 
     const relevantTransits = upcomingTransits.filter((t) => {
       const transitDate = dayjs(t.date);
-      return (
-        transitDate.isAfter(today.subtract(1, 'day')) &&
-        transitDate.isBefore(nextWeek)
-      );
+      return transitDate.isAfter(today); // && transitDate.isBefore(nextWeek);
     });
 
     if (relevantTransits.length === 0) {
-      return upcomingTransits[0];
+      const futureTransit = upcomingTransits.find((t) =>
+        dayjs(t.date).isAfter(today),
+      );
+      return futureTransit ?? upcomingTransits[0];
     }
 
     const priorityOrder = { high: 3, medium: 2, low: 1 };
@@ -85,47 +85,40 @@ export const TransitOfTheDay = () => {
     return sorted[0];
   }, [authStatus.isAuthenticated, hasPersonalizedAccess]);
 
-  // Get personalized transit for authenticated users with chart access
-  const transit = useMemo((): PersonalTransitImpact | null => {
+  const personalImpacts = useMemo(() => {
     if (!authStatus.isAuthenticated || !user || !hasPersonalizedAccess)
-      return null;
+      return [];
     const birthChart = user.birthChart;
-    if (!birthChart || birthChart.length === 0) return null;
+    if (!birthChart || birthChart.length === 0) return [];
+    return getPersonalTransitImpactList(birthChart, 60);
+  }, [authStatus.isAuthenticated, user, hasPersonalizedAccess]);
 
-    const upcomingTransits = getUpcomingTransits();
-    const personalImpacts = getPersonalTransitImpacts(
-      upcomingTransits,
-      birthChart,
-      20,
-    );
-
+  const transit = useMemo((): PersonalTransitImpact | null => {
     if (personalImpacts.length === 0) return null;
-
     const today = dayjs().startOf('day');
     const nextWeek = today.add(7, 'day');
 
-    const relevantTransits = personalImpacts.filter((t) => {
-      const transitDate = dayjs(t.date);
-      return (
-        transitDate.isAfter(today.subtract(1, 'day')) &&
-        transitDate.isBefore(nextWeek)
-      );
+    const futureImpacts = personalImpacts.filter((impact) => {
+      const impactDate = dayjs(impact.date);
+      return impactDate.isAfter(today) && impactDate.isBefore(nextWeek);
     });
 
-    if (relevantTransits.length === 0) {
-      return personalImpacts[0];
+    if (futureImpacts.length > 0) {
+      const priorityOrder = { high: 3, medium: 2, low: 1 };
+      const sorted = [...futureImpacts].sort((a, b) => {
+        const priorityDiff =
+          priorityOrder[b.significance] - priorityOrder[a.significance];
+        if (priorityDiff !== 0) return priorityDiff;
+        return dayjs(a.date).diff(dayjs(b.date));
+      });
+      return sorted[0];
     }
 
-    const priorityOrder = { high: 3, medium: 2, low: 1 };
-    const sorted = relevantTransits.sort((a, b) => {
-      const priorityDiff =
-        priorityOrder[b.significance] - priorityOrder[a.significance];
-      if (priorityDiff !== 0) return priorityDiff;
-      return dayjs(a.date).diff(dayjs(b.date));
-    });
-
-    return sorted[0];
-  }, [authStatus.isAuthenticated, user, hasPersonalizedAccess]);
+    const nextFuture = personalImpacts.find((impact) =>
+      dayjs(impact.date).isAfter(today),
+    );
+    return nextFuture ?? personalImpacts[0];
+  }, [personalImpacts]);
 
   // Show general transit for unauthenticated users or users without chart access
   if (!authStatus.isAuthenticated || !hasPersonalizedAccess) {
@@ -150,13 +143,14 @@ export const TransitOfTheDay = () => {
     }
 
     const transitDate = dayjs(generalTransit.date);
-    const isToday = transitDate.isSame(dayjs(), 'day');
+    // const isToday = transitDate.isSame(dayjs(), 'day');
     const isTomorrow = transitDate.isSame(dayjs().add(1, 'day'), 'day');
-    const dateLabel = isToday
-      ? 'Today'
-      : isTomorrow
-        ? 'Tomorrow'
-        : transitDate.format('MMM D');
+    // const dateLabel = isToday
+    //   ? 'Today'
+    //   : isTomorrow
+    //     ? 'Tomorrow'
+    //     : transitDate.format('MMM D');
+    const dateLabel = isTomorrow ? 'Tomorrow' : transitDate.format('MMM D');
 
     return (
       <Link

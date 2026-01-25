@@ -77,9 +77,10 @@ const retrogrades = [
 ];
 
 export const metadata: Metadata = {
-  title: 'Planetary Retrogrades 2025: Mercury, Venus, Mars & More | Lunary',
+  title:
+    'Planetary Retrogrades: Dates, Meanings and How to Navigate Them | Lunary',
   description:
-    'Understand all planetary retrogrades from Mercury to Pluto. Learn when they occur, how long they last, and how to navigate their energies.',
+    'See retrograde dates for Mercury, Venus, Mars and more. Learn what retrogrades mean, how long they last, and how to work with the themes.',
   keywords: [
     'planetary retrograde',
     'mercury retrograde',

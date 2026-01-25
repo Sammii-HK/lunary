@@ -257,7 +257,7 @@ Season: (varies by sign)`}
         internalLinks={[
           {
             text: `${signData.name} Daily Horoscope`,
-            href: `/horoscope/${signKey.toLowerCase()}`,
+            href: `/grimoire/horoscopes/${signKey.toLowerCase()}`,
           },
           {
             text: `${signData.name} Compatibility`,

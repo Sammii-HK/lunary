@@ -85,26 +85,34 @@ export const WheelOfTheYearWidget = () => {
   const _isApproaching = false;
 
   return (
-    <div className='bg-gradient-to-br from-lunary-rose-900/20 to-lunary-accent-900/20 rounded-lg p-4 border border-lunary-rose-700'>
-      <div className='flex items-center justify-between mb-3'>
-        <h3 className='text-lg font-semibold text-lunary-rose-300'>
+    <div className='bg-gradient-to-br from-lunary-secondary-900/20 to-lunary-accent-900/20 rounded-lg p-4 border border-lunary-secondary-700'>
+      <div className='flex items-center justify-between mb-1'>
+        <h3 className='text-md font-semibold text-lunary-secondary-300'>
           Wheel of the Year
         </h3>
       </div>
 
       <div className='space-y-3'>
         <div>
-          <div className='flex items-center gap-2 mb-1'>
-            <h4 className='font-medium text-lunary-rose-200'>Current Season</h4>
-            <span className='text-sm text-lunary-rose'>{displaySabbat}</span>
+          <div className='flex items-center gap-2 mb-1 justify-between align-middle'>
+            <div className='flex items-center gap-2'>
+              <h4 className='font-medium text-lunary-secondary-200'>
+                Current Season
+              </h4>
+              <span className='text-sm text-lunary-secondary'>
+                {displaySabbat}
+              </span>
+            </div>
+            {sabbatInfo && (
+              <p className='text-sm text-lunary-secondary-100 mb-2'>
+                {sabbatInfo.date}
+              </p>
+            )}
           </div>
 
           {sabbatInfo && (
             <>
-              <p className='text-sm text-lunary-rose-100 mb-2'>
-                {sabbatInfo.date}
-              </p>
-              <p className='text-xs text-lunary-rose-200 leading-relaxed'>
+              <p className='text-xs text-lunary-secondary-200 leading-relaxed'>
                 {sabbatInfo.description}
               </p>
             </>

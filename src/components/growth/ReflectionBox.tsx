@@ -178,16 +178,16 @@ export function HoroscopeNavigationLinks({
   return (
     <div className={`flex flex-wrap gap-2 ${className}`}>
       <Link
-        href='/horoscope/tomorrow'
+        href='/grimoire/horoscopes/weekly'
         className='inline-flex items-center px-3 py-1.5 rounded-full border border-zinc-700/50 bg-zinc-800/30 text-xs text-zinc-300 hover:border-lunary-primary-700/50 hover:text-lunary-primary-300 transition-colors'
       >
-        Tomorrow&apos;s Energy →
+        Your Weekly Horoscope
       </Link>
       <Link
-        href='/horoscope/weekly'
+        href='/grimoire/horoscopes/monthly'
         className='inline-flex items-center px-3 py-1.5 rounded-full border border-zinc-700/50 bg-zinc-800/30 text-xs text-zinc-300 hover:border-lunary-primary-700/50 hover:text-lunary-primary-300 transition-colors'
       >
-        Your Week →
+        Your Monthly Horoscope
       </Link>
     </div>
   );

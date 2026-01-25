@@ -287,6 +287,10 @@ function buildFacet(facetSlug: string, dayIndex: number): ThemeFacet | null {
     grimoireSlug: facetSlug,
     focus: `Meaning, themes, and how to work with ${title}.`,
     shortFormHook: `In Lunary's Grimoire, ${title} is explained through meaning, themes, and practical reflection.`,
+    threads: {
+      keyword: title,
+      angles: [],
+    },
   };
 }
 
@@ -667,6 +671,10 @@ export function buildThemesFromLocs(locs: string[]) {
         description: `A structured deep dive into ${themeName} from Lunary's Grimoire.`,
         category: mapBucketToCategory(bucketKey, unmappedBuckets),
         facets,
+        threads: {
+          keyword: themeName,
+          angles: [],
+        },
       });
     }
   }

@@ -9,10 +9,9 @@ import { CosmicHighlight } from '../CosmicHighlight';
 export const revalidate = 86400;
 
 export const metadata: Metadata = {
-  title:
-    'Today’s Horoscopes: Real-Time Astrology for Every Zodiac Sign | Lunary',
+  title: "Today's Horoscope: Daily Astrology for All 12 Signs | Lunary",
   description:
-    'Read your free, real-time horoscope for all zodiac signs. Updated daily with planetary transits and lunar influences from Lunary’s astrology experts.',
+    "Read today's horoscope for all 12 zodiac signs. Daily astrology insights, cosmic guidance, and personalised readings updated every day.",
   keywords: [
     'today horoscope',
     'daily horoscope',
@@ -24,9 +23,8 @@ export const metadata: Metadata = {
     'real astrology',
   ],
   openGraph: {
-    title: "Today's Horoscopes | Real-Time Zodiac Astrology",
-    description:
-      'Daily horoscopes grounded in real planetary movement and lunar timing. Explore today’s zodiac themes and see how they connect to deeper personal patterns.',
+    title: "Today's Horoscope - All 12 Signs | Lunary",
+    description: 'Daily astrology insights for every zodiac sign.',
     url: 'https://lunary.app/grimoire/horoscopes/today',
     images: [
       {
@@ -39,9 +37,8 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: "Today's Horoscopes | Real-Time Zodiac Astrology",
-    description:
-      'Explore today’s zodiac horoscopes based on real planetary movement and lunar timing.',
+    title: "Today's Horoscope - All 12 Signs | Lunary",
+    description: 'Daily astrology insights for every zodiac sign.',
     images: ['/api/og/grimoire/horoscopes-today'],
   },
   alternates: {
@@ -85,19 +82,19 @@ export default function GrimoireTodayHoroscopePage() {
   const itemListSchema = createItemListSchema({
     name: "Today's Horoscopes",
     description: 'Daily horoscope readings for every zodiac sign.',
-    url: 'https://lunary.app/horoscope/today',
+    url: 'https://lunary.app/grimoire/horoscopes/today',
     items: signs.map((sign) => ({
       name: `${sign.name} Daily Horoscope`,
-      url: `https://lunary.app/horoscope/today/${sign.name.toLowerCase()}`,
+      url: `https://lunary.app/grimoire/horoscopes/today/${sign.name.toLowerCase()}`,
       description: `Today's horoscope for ${sign.name} (${sign.dates}).`,
     })),
   });
 
   return (
     <SEOContentTemplate
-      title="Today's Horoscopes | Real-Time Zodiac Astrology"
+      title='Horoscope Today: Daily Astrology for All 12 Zodiac Signs | Lunary'
       h1='Today’s Horoscopes'
-      description='Based on real planetary movement and current lunar conditions. Daily horoscope insights for all twelve signs with live lunar and transit context.'
+      description='Horoscope today for all 12 zodiac signs. Clear daily astrology guidance with insights for love, career, and personal growth.'
       keywords={[
         'today horoscope',
         'daily horoscope',
@@ -111,6 +108,16 @@ export default function GrimoireTodayHoroscopePage() {
       canonicalUrl='https://lunary.app/grimoire/horoscopes/today'
       additionalSchemas={[itemListSchema]}
       intro='Select your zodiac sign to read the freshest daily horoscope. Each sign block mirrors the Moon + transit energy that powers our authenticated experience.'
+      meaningTitle='How the daily forecast stays fresh'
+      meaning={`
+Every dawn we rebuild the horoscopes so the tone, keywords, and advice mirror the current Moon phase, transits, and planetary aspects. That means what you read today feels different tomorrow, just like the sky.
+
+The same Moon + transit data that powers the authenticated app feeds this Grimoire hub, so you still get the full cosmic story before signing in.
+
+- Transits update the moment a planet shifts signs.
+- The Moon focus highlights phase, polarity, and keywords hourly.
+- We spotlight the top tensions so you can respond instead of react.
+      `}
       heroContent={
         <div className='text-center space-y-1'>
           <p className='text-sm text-lunary-primary-400'>{today}</p>
@@ -130,40 +137,9 @@ export default function GrimoireTodayHoroscopePage() {
           currentYear={currentYear}
         />
       }
+      components={<CosmicHighlight />}
     >
-      <section className='mb-12 space-y-4'>
-        <p className='text-sm text-zinc-400 leading-relaxed'>
-          These horoscopes reflect today’s planetary conditions for each zodiac
-          sign.
-        </p>
-        <p className='text-sm text-zinc-400 leading-relaxed'>
-          Personal timing and house placements require a full birth chart.
-        </p>
-        <h2 className='text-2xl font-semibold text-zinc-100'>
-          How the daily forecast stays fresh
-        </h2>
-        <p className='text-sm text-zinc-400 leading-relaxed'>
-          Every dawn we rebuild the horoscopes so the tone, keywords, and advice
-          mirror the current Moon phase, transits, and planetary aspects. That
-          means what you read today feels different tomorrow, just like the sky.
-        </p>
-        <p className='text-sm text-zinc-400 leading-relaxed'>
-          The same Moon + transit data that powers the authenticated app feeds
-          this Grimoire hub, so you still get the full cosmic story before
-          signing in.
-        </p>
-        <ul className='list-disc pl-5 text-sm text-zinc-300 space-y-1'>
-          <li>Transits update the moment a planet shifts signs.</li>
-          <li>
-            The Moon focus highlights phase, polarity, and keywords hourly.
-          </li>
-          <li>
-            We spotlight the top tensions so you can respond instead of react.
-          </li>
-        </ul>
-      </section>
-
-      <section className='mb-12 grid gap-6 md:grid-cols-2'>
+      {/* <section className='mb-12 grid gap-6 md:grid-cols-2'>
         <div className='rounded-2xl border border-zinc-800 bg-zinc-900/50 p-6'>
           <h3 className='text-lg font-semibold text-zinc-100 mb-2'>
             Daily Signals
@@ -184,16 +160,14 @@ export default function GrimoireTodayHoroscopePage() {
             into the app when you want chart-precise guidance.
           </p>
         </div>
-      </section>
-
-      <CosmicHighlight />
+      </section> */}
 
       <section className='mb-12'>
         <div className='grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4'>
           {signs.map((sign) => (
             <Link
               key={sign.name}
-              href={`/horoscope/today/${sign.name.toLowerCase()}`}
+              href={`/grimoire/horoscopes/today/${sign.name.toLowerCase()}`}
               className='group p-6 rounded-xl border border-zinc-800 bg-zinc-900/30 hover:border-lunary-primary-600 transition-all'
             >
               <div className='text-3xl mb-2'>{sign.symbol}</div>

@@ -7,15 +7,15 @@ const TEST_EMAIL_EXACT = 'test@test.lunary.app';
 
 // Canonical event types (DB is SSOT)
 // - Engagement (DAU/WAU/MAU) is derived from app_opened plus key usage events.
-const ACTIVITY_EVENTS = [
-  'app_opened',
+const ENGAGEMENT_EVENTS = [
   'grimoire_viewed',
-  'horoscope_viewed',
   'tarot_drawn',
-  'daily_dashboard_viewed',
   'chart_viewed',
+  'personalized_horoscope_viewed',
+  'personalized_tarot_viewed',
   'astral_chat_used',
   'ritual_started',
+  'horoscope_viewed',
 ];
 const APP_OPENED_EVENTS = ['app_opened'];
 
@@ -28,6 +28,8 @@ const PRODUCT_EVENTS = [
   'ritual_started',
 ];
 const SITEWIDE_EVENTS = ['page_viewed'];
+const GRIMOIRE_EVENTS = ['grimoire_viewed'];
+const AUDIT_THRESHOLD_PERCENT = 2;
 
 // Note: When using @vercel/postgres, avoid constructing "array SQL" as a string
 // or nesting sql fragments. Instead pass JS arrays as parameters and cast to text[].
@@ -44,50 +46,45 @@ type IdentityOptions = {
   requireSignedIn?: boolean;
 };
 
-const isSignedInUserId = (value: unknown): value is string => {
-  return (
-    typeof value === 'string' &&
-    value.trim().length > 0 &&
-    !value.trim().startsWith('anon:')
-  );
+const sanitizeIdentityValue = (value?: string | null): string | null => {
+  if (typeof value !== 'string') return null;
+  const trimmed = value.trim();
+  return trimmed.length > 0 ? trimmed : null;
 };
 
-const buildIdentityKey = (
+const canonicalIdentityFromRow = (
   row: IdentityRow,
-  options: IdentityOptions = {},
-): string | null => {
-  const trimmedUserId =
-    typeof row.user_id === 'string' && row.user_id.trim().length > 0
-      ? row.user_id.trim()
-      : null;
-
-  if (options.requireSignedIn) {
-    return trimmedUserId && isSignedInUserId(trimmedUserId)
-      ? trimmedUserId
-      : null;
+  identityLinks: Map<string, string>,
+): { identity: string | null; signedIn: boolean } => {
+  const userId = sanitizeIdentityValue(row.user_id);
+  if (userId) {
+    return { identity: `user:${userId}`, signedIn: true };
   }
 
-  if (trimmedUserId) {
-    return trimmedUserId;
+  const anonymousId = sanitizeIdentityValue(row.anonymous_id);
+  if (!anonymousId) {
+    return { identity: null, signedIn: false };
   }
 
-  if (
-    typeof row.anonymous_id === 'string' &&
-    row.anonymous_id.trim().length > 0
-  ) {
-    return `anon:${row.anonymous_id.trim()}`;
+  const linkedUserId = identityLinks.get(anonymousId);
+  if (linkedUserId) {
+    return { identity: `user:${linkedUserId}`, signedIn: true };
   }
 
-  return null;
+  return { identity: `anon:${anonymousId}`, signedIn: false };
 };
 
 const addIdentityRow = (
   map: Map<string, Set<string>>,
   row: IdentityRow,
+  identityLinks: Map<string, string>,
   options: IdentityOptions = {},
 ) => {
-  const identity = buildIdentityKey(row, options);
+  const { identity, signedIn } = canonicalIdentityFromRow(row, identityLinks);
   if (!identity) return;
+  if (options.requireSignedIn && !signedIn) {
+    return;
+  }
   const date = normalizeRowDateKey(row.date);
   if (!map.has(date)) {
     map.set(date, new Set());
@@ -263,10 +260,66 @@ export async function GET(request: NextRequest) {
     const extendedStart = new Date(range.start);
     extendedStart.setUTCDate(extendedStart.getUTCDate() - 30);
 
-    const [activityRows, appOpenedRows, productRows, sitewideRows] =
-      await Promise.all([
-        sql.query(
-          `
+    const auditAppOpenedQuery = hasIdentityLinks
+      ? `
+      WITH canonical AS (
+        SELECT
+          DATE((ce.created_at AT TIME ZONE 'UTC')) AS date,
+          COALESCE(
+            CASE WHEN ce.user_id IS NOT NULL AND ce.user_id <> '' THEN 'user:' || ce.user_id END,
+            CASE WHEN l.user_id IS NOT NULL THEN 'user:' || l.user_id END,
+            CASE WHEN ce.anonymous_id IS NOT NULL AND ce.anonymous_id <> '' THEN 'anon:' || ce.anonymous_id END
+          ) AS identity
+        FROM conversion_events ce
+        LEFT JOIN analytics_identity_links l
+          ON l.anonymous_id = ce.anonymous_id
+        WHERE ce.event_type = 'app_opened'
+          AND ce.created_at >= $1
+          AND ce.created_at <= $2
+          AND (ce.user_email IS NULL OR (ce.user_email NOT LIKE $3 AND ce.user_email != $4))
+          AND (ce.user_id IS NOT NULL OR ce.anonymous_id IS NOT NULL)
+      )
+      SELECT date, identity
+      FROM canonical
+      WHERE identity IS NOT NULL
+    `
+      : `
+      WITH canonical AS (
+        SELECT
+          DATE((created_at AT TIME ZONE 'UTC')) AS date,
+          COALESCE(
+            CASE WHEN user_id IS NOT NULL AND user_id <> '' THEN 'user:' || user_id END,
+            CASE WHEN anonymous_id IS NOT NULL AND anonymous_id <> '' THEN 'anon:' || anonymous_id END
+          ) AS identity
+        FROM conversion_events
+        WHERE event_type = 'app_opened'
+          AND created_at >= $1
+          AND created_at <= $2
+          AND (user_email IS NULL OR (user_email NOT LIKE $3 AND user_email != $4))
+          AND (user_id IS NOT NULL OR anonymous_id IS NOT NULL)
+      )
+      SELECT date, identity
+      FROM canonical
+      WHERE identity IS NOT NULL
+    `;
+
+    const auditAppOpenedParams = [
+      formatTimestamp(extendedStart),
+      formatTimestamp(range.end),
+      TEST_EMAIL_PATTERN,
+      TEST_EMAIL_EXACT,
+    ];
+
+    const [
+      activityRows,
+      appOpenedRows,
+      productRows,
+      grimoireRows,
+      sitewideRows,
+      auditRows,
+    ] = await Promise.all([
+      sql.query(
+        `
           SELECT
             DATE(created_at) as date,
             user_id,
@@ -277,16 +330,16 @@ export async function GET(request: NextRequest) {
             AND created_at <= $3
             AND (user_email IS NULL OR (user_email NOT LIKE $4 AND user_email != $5))
         `,
-          [
-            ACTIVITY_EVENTS,
-            formatTimestamp(extendedStart),
-            formatTimestamp(range.end),
-            TEST_EMAIL_PATTERN,
-            TEST_EMAIL_EXACT,
-          ],
-        ),
-        sql.query(
-          `
+        [
+          ENGAGEMENT_EVENTS,
+          formatTimestamp(extendedStart),
+          formatTimestamp(range.end),
+          TEST_EMAIL_PATTERN,
+          TEST_EMAIL_EXACT,
+        ],
+      ),
+      sql.query(
+        `
           SELECT
             DATE(created_at) as date,
             user_id,
@@ -297,16 +350,16 @@ export async function GET(request: NextRequest) {
             AND created_at <= $3
             AND (user_email IS NULL OR (user_email NOT LIKE $4 AND user_email != $5))
         `,
-          [
-            APP_OPENED_EVENTS,
-            formatTimestamp(extendedStart),
-            formatTimestamp(range.end),
-            TEST_EMAIL_PATTERN,
-            TEST_EMAIL_EXACT,
-          ],
-        ),
-        sql.query(
-          `
+        [
+          APP_OPENED_EVENTS,
+          formatTimestamp(extendedStart),
+          formatTimestamp(range.end),
+          TEST_EMAIL_PATTERN,
+          TEST_EMAIL_EXACT,
+        ],
+      ),
+      sql.query(
+        `
           SELECT
             DATE(created_at) as date,
             user_id,
@@ -317,16 +370,16 @@ export async function GET(request: NextRequest) {
             AND created_at <= $3
             AND (user_email IS NULL OR (user_email NOT LIKE $4 AND user_email != $5))
         `,
-          [
-            PRODUCT_EVENTS,
-            formatTimestamp(extendedStart),
-            formatTimestamp(range.end),
-            TEST_EMAIL_PATTERN,
-            TEST_EMAIL_EXACT,
-          ],
-        ),
-        sql.query(
-          `
+        [
+          PRODUCT_EVENTS,
+          formatTimestamp(extendedStart),
+          formatTimestamp(range.end),
+          TEST_EMAIL_PATTERN,
+          TEST_EMAIL_EXACT,
+        ],
+      ),
+      sql.query(
+        `
           SELECT
             DATE(created_at) as date,
             user_id,
@@ -337,34 +390,163 @@ export async function GET(request: NextRequest) {
             AND created_at <= $3
             AND (user_email IS NULL OR (user_email NOT LIKE $4 AND user_email != $5))
         `,
-          [
-            SITEWIDE_EVENTS,
-            formatTimestamp(extendedStart),
-            formatTimestamp(range.end),
-            TEST_EMAIL_PATTERN,
-            TEST_EMAIL_EXACT,
-          ],
-        ),
-      ]);
+        [
+          GRIMOIRE_EVENTS,
+          formatTimestamp(extendedStart),
+          formatTimestamp(range.end),
+          TEST_EMAIL_PATTERN,
+          TEST_EMAIL_EXACT,
+        ],
+      ),
+      sql.query(
+        `
+          SELECT
+            DATE(created_at) as date,
+            user_id,
+            anonymous_id
+          FROM conversion_events
+          WHERE event_type = ANY($1::text[])
+            AND created_at >= $2
+            AND created_at <= $3
+            AND (user_email IS NULL OR (user_email NOT LIKE $4 AND user_email != $5))
+        `,
+        [
+          SITEWIDE_EVENTS,
+          formatTimestamp(extendedStart),
+          formatTimestamp(range.end),
+          TEST_EMAIL_PATTERN,
+          TEST_EMAIL_EXACT,
+        ],
+      ),
+      sql.query(auditAppOpenedQuery, auditAppOpenedParams),
+    ]);
+
+    const collectSources = [
+      activityRows.rows,
+      appOpenedRows.rows,
+      productRows.rows,
+      grimoireRows.rows,
+      sitewideRows.rows,
+    ];
+    const anonymousIds = new Set<string>();
+    collectSources.forEach((rows) => {
+      rows.forEach((row) => {
+        const anonymousId = sanitizeIdentityValue(row.anonymous_id);
+        if (anonymousId) {
+          anonymousIds.add(anonymousId);
+        }
+      });
+    });
+
+    const identityLinks = new Map<string, string>();
+    if (hasIdentityLinks && anonymousIds.size > 0) {
+      const linkResult = await sql.query(
+        `
+          SELECT anonymous_id, user_id
+          FROM analytics_identity_links
+          WHERE anonymous_id = ANY($1::text[])
+        `,
+        [[...anonymousIds]],
+      );
+      linkResult.rows.forEach((linkRow) => {
+        const anonymousId = sanitizeIdentityValue(linkRow.anonymous_id);
+        const userId = sanitizeIdentityValue(linkRow.user_id);
+        if (anonymousId && userId) {
+          identityLinks.set(anonymousId, userId);
+        }
+      });
+    }
+
+    const totalAccountsQuery = hasIdentityLinks
+      ? `
+      WITH canonical AS (
+        SELECT
+          CASE
+            WHEN ce.user_id IS NOT NULL AND ce.user_id <> '' THEN 'user:' || ce.user_id
+            WHEN l.user_id IS NOT NULL AND l.user_id <> '' THEN 'user:' || l.user_id
+            WHEN ce.anonymous_id IS NOT NULL AND ce.anonymous_id <> '' THEN 'anon:' || ce.anonymous_id
+          END AS identity
+        FROM conversion_events ce
+        LEFT JOIN analytics_identity_links l
+          ON l.anonymous_id = ce.anonymous_id
+        WHERE ce.event_type = 'signup_completed'
+          AND (ce.user_email IS NULL OR (ce.user_email NOT LIKE $1 AND ce.user_email != $2))
+          AND (ce.user_id IS NOT NULL OR ce.anonymous_id IS NOT NULL)
+      )
+      SELECT COUNT(DISTINCT identity) AS total_accounts
+      FROM canonical
+      WHERE identity IS NOT NULL
+    `
+      : `
+      WITH canonical AS (
+        SELECT
+          CASE
+            WHEN ce.user_id IS NOT NULL AND ce.user_id <> '' THEN 'user:' || ce.user_id
+            WHEN ce.anonymous_id IS NOT NULL AND ce.anonymous_id <> '' THEN 'anon:' || ce.anonymous_id
+          END AS identity
+        FROM conversion_events ce
+        WHERE ce.event_type = 'signup_completed'
+          AND (ce.user_email IS NULL OR (ce.user_email NOT LIKE $1 AND ce.user_email != $2))
+          AND (ce.user_id IS NOT NULL OR ce.anonymous_id IS NOT NULL)
+      )
+      SELECT COUNT(DISTINCT identity) AS total_accounts
+      FROM canonical
+      WHERE identity IS NOT NULL
+    `;
+
+    const totalAccountsResult = await sql.query(totalAccountsQuery, [
+      TEST_EMAIL_PATTERN,
+      TEST_EMAIL_EXACT,
+    ]);
+    const totalAccountsEver = Number(
+      totalAccountsResult.rows[0]?.total_accounts || 0,
+    );
 
     const activityMap = new Map<string, Set<string>>();
-    const signedInActivityMap = new Map<string, Set<string>>();
     activityRows.rows.forEach((row) => {
-      addIdentityRow(activityMap, row);
-      addIdentityRow(signedInActivityMap, row, { requireSignedIn: true });
+      addIdentityRow(activityMap, row, identityLinks);
     });
+    const engagementDau = countDistinctInWindow(activityMap, range.end, 1);
 
     const productMap = new Map<string, Set<string>>();
     productRows.rows.forEach((row) =>
-      addIdentityRow(productMap, row, { requireSignedIn: true }),
+      addIdentityRow(productMap, row, identityLinks, { requireSignedIn: true }),
+    );
+
+    const grimoireMap = new Map<string, Set<string>>();
+    grimoireRows.rows.forEach((row) =>
+      addIdentityRow(grimoireMap, row, identityLinks),
     );
 
     const sitewideMap = new Map<string, Set<string>>();
-    sitewideRows.rows.forEach((row) => addIdentityRow(sitewideMap, row));
+    sitewideRows.rows.forEach((row) =>
+      addIdentityRow(sitewideMap, row, identityLinks),
+    );
+
+    const appOpenedMap = new Map<string, Set<string>>();
+    appOpenedRows.rows.forEach((row) =>
+      addIdentityRow(appOpenedMap, row, identityLinks),
+    );
+    const auditMap = new Map<string, Set<string>>();
+    auditRows.rows.forEach((row) => {
+      const dateKey = normalizeRowDateKey(row.date);
+      if (!auditMap.has(dateKey)) {
+        auditMap.set(dateKey, new Set());
+      }
+      auditMap.get(dateKey)!.add(row.identity);
+    });
 
     const endOfRangeDay = toUtcStartOfDay(range.end);
-    const yesterdayDay = new Date(endOfRangeDay);
-    yesterdayDay.setUTCDate(yesterdayDay.getUTCDate() - 1);
+    const lookbackEnd = new Date(endOfRangeDay);
+    lookbackEnd.setUTCDate(lookbackEnd.getUTCDate() - 1);
+    const earlierLookbackSet = gatherUsersBetween(
+      appOpenedMap,
+      lookbackEnd,
+      lookbackEnd,
+    );
+    const currentDaySet =
+      appOpenedMap.get(formatDateKey(endOfRangeDay)) ?? new Set<string>();
+    const returningDau = intersectionSize(currentDaySet, earlierLookbackSet);
 
     const currentWauStart = new Date(endOfRangeDay);
     currentWauStart.setUTCDate(currentWauStart.getUTCDate() - 6);
@@ -372,6 +554,17 @@ export async function GET(request: NextRequest) {
     prevWauEnd.setUTCDate(prevWauEnd.getUTCDate() - 1);
     const prevWauStart = new Date(prevWauEnd);
     prevWauStart.setUTCDate(prevWauStart.getUTCDate() - 6);
+    const currentWauSet = gatherUsersBetween(
+      appOpenedMap,
+      currentWauStart,
+      endOfRangeDay,
+    );
+    const prevWauSet = gatherUsersBetween(
+      appOpenedMap,
+      prevWauStart,
+      prevWauEnd,
+    );
+    const returningWau = intersectionSize(currentWauSet, prevWauSet);
 
     const currentMauStart = new Date(endOfRangeDay);
     currentMauStart.setUTCDate(currentMauStart.getUTCDate() - 29);
@@ -379,37 +572,39 @@ export async function GET(request: NextRequest) {
     prevMauEnd.setUTCDate(prevMauEnd.getUTCDate() - 1);
     const prevMauStart = new Date(prevMauEnd);
     prevMauStart.setUTCDate(prevMauStart.getUTCDate() - 29);
-
-    const returningDau = intersectionSize(
-      signedInActivityMap.get(formatDateKey(endOfRangeDay)) ?? new Set(),
-      signedInActivityMap.get(formatDateKey(yesterdayDay)) ?? new Set(),
+    const currentMauSet = gatherUsersBetween(
+      appOpenedMap,
+      currentMauStart,
+      endOfRangeDay,
     );
-    const returningWau = intersectionSize(
-      gatherUsersBetween(signedInActivityMap, currentWauStart, endOfRangeDay),
-      gatherUsersBetween(signedInActivityMap, prevWauStart, prevWauEnd),
+    const prevMauSet = gatherUsersBetween(
+      appOpenedMap,
+      prevMauStart,
+      prevMauEnd,
     );
-    const returningMau = intersectionSize(
-      gatherUsersBetween(signedInActivityMap, currentMauStart, endOfRangeDay),
-      gatherUsersBetween(signedInActivityMap, prevMauStart, prevMauEnd),
-    );
+    const returningMau = intersectionSize(currentMauSet, prevMauSet);
 
-    const appOpenedMap = new Map<string, Set<string>>();
-    appOpenedRows.rows.forEach((row) => addIdentityRow(appOpenedMap, row));
-
-    const trends = buildRollingTrends(
+    const engagementTrends = buildRollingTrends(
       activityMap,
-      range.start,
-      range.end,
-      granularity,
-    );
-    const productTrends = buildRollingTrends(
-      productMap,
       range.start,
       range.end,
       granularity,
     );
     const appOpenedTrends = buildRollingTrends(
       appOpenedMap,
+      range.start,
+      range.end,
+      granularity,
+    );
+    const trends = engagementTrends;
+    const productTrends = buildRollingTrends(
+      productMap,
+      range.start,
+      range.end,
+      granularity,
+    );
+    const grimoireTrends = buildRollingTrends(
+      grimoireMap,
       range.start,
       range.end,
       granularity,
@@ -438,6 +633,13 @@ export async function GET(request: NextRequest) {
       wau: 0,
       mau: 0,
     };
+    const currentGrimoireTrend = grimoireTrends.find(
+      (trend) => trend.date === currentBucket,
+    ) || {
+      dau: 0,
+      wau: 0,
+      mau: 0,
+    };
     const currentAppOpenedTrend = appOpenedTrends.find(
       (trend) => trend.date === currentBucket,
     ) || {
@@ -448,12 +650,30 @@ export async function GET(request: NextRequest) {
     const productDau = countDistinctInWindow(productMap, range.end, 1);
     const productWau = countDistinctInWindow(productMap, range.end, 7);
     const productMau = countDistinctInWindow(productMap, range.end, 30);
+    const grimoireDau = countDistinctInWindow(grimoireMap, range.end, 1);
+    const grimoireWau = countDistinctInWindow(grimoireMap, range.end, 7);
+    const grimoireMau = countDistinctInWindow(grimoireMap, range.end, 30);
     const appOpenedDau = countDistinctInWindow(appOpenedMap, range.end, 1);
     const appOpenedWau = countDistinctInWindow(appOpenedMap, range.end, 7);
     const appOpenedMau = countDistinctInWindow(appOpenedMap, range.end, 30);
     const sitewideDau = countDistinctInWindow(sitewideMap, range.end, 1);
     const sitewideWau = countDistinctInWindow(sitewideMap, range.end, 7);
     const sitewideMau = countDistinctInWindow(sitewideMap, range.end, 30);
+
+    const rawDau = countDistinctInWindow(auditMap, range.end, 1);
+    const rawWau = countDistinctInWindow(auditMap, range.end, 7);
+    const rawMau = countDistinctInWindow(auditMap, range.end, 30);
+    const calculateAuditDiff = (actual: number, reference: number) =>
+      reference > 0 ? (Math.abs(actual - reference) / reference) * 100 : 0;
+    const auditDiffPercentages = {
+      dau: calculateAuditDiff(appOpenedDau, rawDau),
+      wau: calculateAuditDiff(appOpenedWau, rawWau),
+      mau: calculateAuditDiff(appOpenedMau, rawMau),
+    };
+    const auditMismatch =
+      (rawDau > 0 && auditDiffPercentages.dau > AUDIT_THRESHOLD_PERCENT) ||
+      (rawWau > 0 && auditDiffPercentages.wau > AUDIT_THRESHOLD_PERCENT) ||
+      (rawMau > 0 && auditDiffPercentages.mau > AUDIT_THRESHOLD_PERCENT);
 
     const signedInProductDau = productDau;
     const signedInProductWau = productWau;
@@ -499,7 +719,7 @@ export async function GET(request: NextRequest) {
     const signedInProductUsers = new Set(
       productWindowResult.rows.map((row) => String(row.user_id)),
     );
-    const grimoireMau = grimoireUsers.size;
+    const grimoireOnlyMauBase = grimoireUsers.size;
     let grimoireOnlyMau = 0;
     grimoireUsers.forEach((id) => {
       if (!signedInProductUsers.has(id)) {
@@ -610,7 +830,7 @@ export async function GET(request: NextRequest) {
       const result = await sql.query(query, [
         formatTimestamp(cohortStart),
         formatTimestamp(cohortEndInclusive),
-        ACTIVITY_EVENTS,
+        ENGAGEMENT_EVENTS,
         TEST_EMAIL_PATTERN,
         TEST_EMAIL_EXACT,
       ]);
@@ -664,17 +884,34 @@ export async function GET(request: NextRequest) {
       trends,
       product_trends: productTrends,
       signed_in_product_trends: productTrends,
+      grimoire_trends: grimoireTrends,
       app_opened_trends: appOpenedTrends,
       sitewide_trends: sitewideTrends,
       product_dau: productDau,
       product_wau: productWau,
       product_mau: productMau,
+      grimoire_dau: grimoireDau,
+      grimoire_wau: grimoireWau,
+      grimoire_mau: grimoireMau,
       app_opened_dau: appOpenedDau,
       app_opened_wau: appOpenedWau,
       app_opened_mau: appOpenedMau,
       sitewide_dau: sitewideDau,
       sitewide_wau: sitewideWau,
       sitewide_mau: sitewideMau,
+      audit: {
+        raw_dau: rawDau,
+        raw_wau: rawWau,
+        raw_mau: rawMau,
+        difference_percent: {
+          dau: Number(auditDiffPercentages.dau.toFixed(2)),
+          wau: Number(auditDiffPercentages.wau.toFixed(2)),
+          mau: Number(auditDiffPercentages.mau.toFixed(2)),
+        },
+        mismatch: auditMismatch,
+        threshold_percent: AUDIT_THRESHOLD_PERCENT,
+        source: 'conversion_events',
+      },
       signed_in_product_dau: signedInProductDau,
       signed_in_product_wau: signedInProductWau,
       signed_in_product_mau: signedInProductMau,
@@ -683,12 +920,15 @@ export async function GET(request: NextRequest) {
       signed_in_product_avg_sessions_per_user: Number(
         avgSessionsPerUser.toFixed(2),
       ),
-      content_mau_grimoire: grimoireMau,
+      content_mau_grimoire: grimoireOnlyMauBase,
       grimoire_only_mau: grimoireOnlyMau,
+      total_accounts: totalAccountsEver,
       debug: {
         grimoire_metrics_source: 'conversion_events',
         product_summary_source: 'conversion_events',
         sitewide_metrics_source: 'conversion_events',
+        engagement_dau: engagementDau,
+        activity_rows: activityRows.rows.length,
       },
       source: 'database',
     });

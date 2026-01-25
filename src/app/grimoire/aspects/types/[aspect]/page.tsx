@@ -31,8 +31,8 @@ export async function generateMetadata({
 
   const aspectData =
     astrologicalAspects[aspectKey as keyof typeof astrologicalAspects];
-  const title = `${aspectData.name} (${aspectData.degrees}°): Meaning in Astrology - Lunary`;
-  const description = `${aspectData.name} aspect (${aspectData.degrees}°) in astrology: ${aspectData.nature.toLowerCase()} aspect. What ${aspectData.name.toLowerCase()} means between planets in your birth chart.`;
+  const title = `${aspectData.name} Aspect: Meaning in Astrology (${aspectData.degrees}°) | Lunary`;
+  const description = `What does a ${aspectData.name.toLowerCase()} mean in astrology? Learn how this ${aspectData.nature.toLowerCase()} aspect shows up between planets in birth charts and transits.`;
 
   return {
     title,

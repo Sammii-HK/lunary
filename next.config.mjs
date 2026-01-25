@@ -648,6 +648,28 @@ const nextConfig = {
       },
       // Monthly horoscopes moved under Grimoire
       {
+        source: '/horoscope/today/',
+        destination: '/grimoire/horoscopes/today',
+        permanent: true,
+      },
+      {
+        source:
+          '/horoscope/today/:sign(aries|taurus|gemini|cancer|leo|virgo|libra|scorpio|sagittarius|capricorn|aquarius|pisces)',
+        destination: '/grimoire/horoscopes/today/:sign',
+        permanent: true,
+      },
+      {
+        source: '/horoscope/weekly/',
+        destination: '/grimoire/horoscopes/weekly',
+        permanent: true,
+      },
+      {
+        source:
+          '/horoscope/weekly/:sign(aries|taurus|gemini|cancer|leo|virgo|libra|scorpio|sagittarius|capricorn|aquarius|pisces)',
+        destination: '/grimoire/horoscopes/weekly/:sign',
+        permanent: true,
+      },
+      {
         source:
           '/horoscope/:sign(aries|taurus|gemini|cancer|leo|virgo|libra|scorpio|sagittarius|capricorn|aquarius|pisces)',
         destination: '/grimoire/horoscopes/:sign',

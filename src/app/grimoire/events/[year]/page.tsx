@@ -26,8 +26,8 @@ export async function generateMetadata({
   const { year } = await params;
 
   return {
-    title: `${year} Astrological Events Calendar | Lunary`,
-    description: `Complete guide to ${year} astrological events including dates for Mercury retrograde, Venus retrograde, eclipses, equinoxes, and major planetary transits.`,
+    title: `${year} Cosmic Events Calendar: Retrogrades, Eclipses & Key Dates | Lunary`,
+    description: `Complete ${year} astrology events calendar with Mercury retrograde, Venus retrograde, eclipses, and major transits. Scan dates, signs, themes, and planning guidance.`,
     keywords: [
       `${year} astrology`,
       `${year} mercury retrograde`,

@@ -1,6 +1,7 @@
 // AUTO-GENERATED. Do not edit by hand. Run pnpm generate:themes
 
-import type { WeeklyTheme } from '@/lib/social/weekly-themes';
+import { ThemeCategory } from '@/lib/social/types';
+import type { DailyFacet } from '@/lib/social/weekly-themes';
 
 export type ThemeBucket = {
   key: string;
@@ -1848,7 +1849,15 @@ export const thematicPaletteConfig = {
   },
 } as const;
 
-export const generatedCategoryThemes: WeeklyTheme[] = [
+type WeeklyThemeWithoutThreadsFacets = {
+  id: string;
+  name: string;
+  description: string;
+  category: ThemeCategory;
+  facets: Omit<DailyFacet, 'threads'>[];
+};
+
+export const generatedCategoryThemes: WeeklyThemeWithoutThreadsFacets[] = [
   {
     id: 'angel-numbers-0-3',
     name: 'Angel-numbers 0–3',

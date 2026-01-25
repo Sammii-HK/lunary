@@ -1,6 +1,6 @@
 import dayjs from 'dayjs';
 import { getAstrologicalChart, AstroChartInformation } from './astrology';
-import { TransitEvent } from './transitCalendar';
+import { getUpcomingTransits, TransitEvent } from './transitCalendar';
 import { Observer } from 'astronomy-engine';
 
 export type PersonalTransitImpact = {
@@ -438,4 +438,17 @@ export const getPersonalTransitImpacts = (
   }
 
   return impacts;
+};
+
+export const getPersonalTransitImpactList = (
+  natalChart: any[],
+  limit = 15,
+): PersonalTransitImpact[] => {
+  const upcomingTransits = getUpcomingTransits();
+  const nonLunarTransits = upcomingTransits.filter(
+    (transit) => transit.type !== 'lunar_phase',
+  );
+  const transitsToUse =
+    nonLunarTransits.length > 0 ? nonLunarTransits : upcomingTransits;
+  return getPersonalTransitImpacts(transitsToUse, natalChart, limit);
 };

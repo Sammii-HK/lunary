@@ -36,15 +36,20 @@ async function getCosmicHighlight(): Promise<CosmicPostContent | null> {
   }
 }
 
-export async function CosmicHighlight() {
+export async function CosmicHighlight({
+  variant,
+}: {
+  variant?: 'daily' | 'weekly';
+}) {
   const highlight = await getCosmicHighlight();
-  const headline = highlight?.primaryEvent?.name || 'Daily cosmic highlight';
+  const headline =
+    variant === 'daily' ? 'Daily cosmic highlight' : 'Weekly cosmic highlight';
   const moonPhaseName = highlight?.astronomicalData?.moonPhase?.name;
   const moonSign = highlight?.astronomicalData?.planets?.moon?.sign;
   const sunSign = highlight?.astronomicalData?.planets?.sun?.sign;
   const summary =
     highlight?.horoscopeSnippet ||
-    'Check today’s horoscopes for the latest lunar, transit, and timing cues.';
+    `Check ${variant === 'daily' ? 'today’s' : 'this week’s'} horoscopes for the latest lunar, transit, and timing cues.`;
   const dateLabel =
     highlight?.date ||
     new Date().toLocaleDateString('en-US', {
@@ -79,16 +84,20 @@ export async function CosmicHighlight() {
       <div className='space-y-4 rounded-2xl border border-zinc-800/60 bg-zinc-900/60 p-5'>
         <div>
           <h3 className='text-sm font-semibold tracking-wide text-zinc-300'>
-            Daily Signals
+            {variant === 'daily' ? 'Daily Signals' : 'Weekly Signals'}
           </h3>
           <p className='text-xs text-zinc-500 mt-1'>
-            Updated every morning with real sky timing.
+            Updated {variant === 'daily' ? 'every morning' : 'every Monday'}{' '}
+            with real sky timing.
           </p>
         </div>
         <ul className='space-y-2 text-xs text-zinc-200 leading-relaxed'>
           <li>
-            <strong>Daily Vibe:</strong> New highlights land each day for
-            immediate timing.
+            <strong>
+              {variant === 'daily' ? 'Daily Vibe' : 'Weekly Vibe'}:
+            </strong>{' '}
+            New highlights land each {variant === 'daily' ? 'day' : 'Monday'}{' '}
+            for immediate timing.
           </li>
           <li>
             <strong>Transit Watch:</strong> Planet shifts trigger fresh cues and

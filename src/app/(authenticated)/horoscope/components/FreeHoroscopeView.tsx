@@ -196,13 +196,13 @@ export function FreeHoroscopeView() {
         </div>
         <div className='flex gap-3 mt-3'>
           <Link
-            href='/horoscope/today'
+            href='/grimoire/horoscopes/today'
             className='inline-flex items-center gap-1 text-xs text-lunary-primary-400 hover:text-lunary-primary-300 transition-colors'
           >
             See all daily horoscopes <ChevronRight className='w-3 h-3' />
           </Link>
           <Link
-            href='/horoscope/weekly'
+            href='/grimoire/horoscopes/weekly'
             className='inline-flex items-center gap-1 text-xs text-lunary-primary-400 hover:text-lunary-primary-300 transition-colors'
           >
             Browse weekly horoscopes <ChevronRight className='w-3 h-3' />

@@ -38,9 +38,9 @@ const ASPECT_COLOR: Record<
 
 export const metadata: Metadata = {
   title:
-    'Astrological Aspects: Conjunct, Trine, Square, Sextile, Opposition | Lunary',
+    'Astrological Aspects: Meanings of Conjunction, Trine, Square and More | Lunary',
   description:
-    'Complete guide to astrological aspects. Learn about conjunctions, trines, squares, sextiles, and oppositions between planets in your natal chart, transits, and synastry.',
+    'Learn what astrological aspects mean in natal charts and transits. Clear explanations of conjunctions, trines, squares, sextiles, and oppositions.',
   keywords: [
     'astrological aspects',
     'conjunction',

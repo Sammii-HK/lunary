@@ -2,6 +2,7 @@ import { sql } from '@vercel/postgres';
 
 export type CanonicalEventType =
   | 'app_opened'
+  | 'product_opened'
   | 'page_viewed'
   | 'cta_clicked'
   | 'user_signed_up'
@@ -103,6 +104,7 @@ function canonicaliseEventType(raw: unknown): {
   // Canonical events
   if (
     value === 'app_opened' ||
+    value === 'product_opened' ||
     value === 'page_viewed' ||
     value === 'cta_clicked' ||
     value === 'user_signed_up' ||
@@ -394,6 +396,7 @@ export async function insertCanonicalEvent(row: CanonicalInsertRow): Promise<{
       ? row.createdAt.toISOString()
       : (row.createdAt ?? null);
 
+  // The unique constraint on event_id keeps retries/idempotent inserts from inflating counts.
   const result = await sql.query(
     `
       INSERT INTO conversion_events (

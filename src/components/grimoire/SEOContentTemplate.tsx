@@ -86,6 +86,7 @@ export interface SEOContentTemplateProps {
   intro?: string;
   tldr?: string;
   meaning?: string;
+  meaningTitle?: string;
   emotionalThemes?: string[];
   howToWorkWith?: string[];
   signsMostAffected?: string[];
@@ -145,6 +146,9 @@ export interface SEOContentTemplateProps {
   childrenPosition?: 'after-description' | 'before-faqs' | 'after-faqs';
   contextualCopy?: string;
   contextualCopyVariant?: 'note' | 'callout';
+
+  // Components
+  components?: React.ReactNode;
 }
 
 export function SEOContentTemplate({
@@ -163,6 +167,7 @@ export function SEOContentTemplate({
   intro,
   tldr,
   meaning,
+  meaningTitle,
   emotionalThemes,
   howToWorkWith,
   signsMostAffected,
@@ -195,6 +200,7 @@ export function SEOContentTemplate({
   childrenPosition = 'before-faqs',
   contextualCopy,
   contextualCopyVariant = 'note',
+  components,
 }: SEOContentTemplateProps) {
   // Auto-generate breadcrumbs from URL if not provided
   const autoBreadcrumbs =
@@ -399,11 +405,13 @@ export function SEOContentTemplate({
           </div>
         )}
 
+        {components && components}
+
         {/* Meaning Section */}
         {meaning && (
           <section id='meaning' className='overflow-x-hidden'>
             <Heading as='h2' variant='h2'>
-              Meaning
+              {meaningTitle ? meaningTitle : 'Meaning'}
             </Heading>
             <div className='prose prose-invert max-w-none break-words'>
               <ParsedMarkdown content={meaning} />

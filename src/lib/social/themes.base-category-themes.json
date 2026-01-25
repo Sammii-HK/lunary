@@ -1,0 +1,3422 @@
+{
+  "baseCategoryThemes": [
+    {
+      "id": "zodiac-foundations",
+      "name": "Foundations of the Zodiac",
+      "description": "A foundational exploration of the zodiacal system, its structure, and core principles.",
+      "category": "zodiac",
+      "facets": [
+        {
+          "dayIndex": 0,
+          "title": "The Four Elements",
+          "grimoireSlug": "correspondences/elements",
+          "focus": "Fire, Earth, Air, Water - the elemental building blocks of astrological temperament",
+          "shortFormHook": "The zodiac divides into four elements: Fire signs act, Earth signs build, Air signs think, Water signs feel.",
+          "threads": {
+            "keyword": "four elements",
+            "angles": [
+              {
+                "intent": "observation",
+                "opener": "The four elements show up in habits faster than in labels",
+                "payload": "Watch how you respond under pressure, then name the element.",
+                "closerType": "question",
+                "closer": "Which element feels loudest in you this week?"
+              },
+              {
+                "intent": "contrast",
+                "opener": "Fire acts, Earth builds, Air thinks, Water feels, and each solves differently",
+                "payload": "Same problem, different element, totally different approach.",
+                "closerType": "question",
+                "closer": "Do you move first, plan first, analyse first, or feel first?"
+              },
+              {
+                "intent": "quick_rule",
+                "opener": "Quick rule: match the element to the problem, not your mood",
+                "payload": "Some days need Earth even when you feel Fire.",
+                "closerType": "try_this",
+                "closer": "Pick one task and choose an element to complete it."
+              }
+            ]
+          }
+        },
+        {
+          "dayIndex": 1,
+          "title": "The Three Modalities",
+          "grimoireSlug": "glossary#modality",
+          "focus": "Cardinal initiates, Fixed stabilizes, Mutable adapts - the modes of expression",
+          "shortFormHook": "Cardinal signs begin each season and initiate action. Fixed signs sustain it. Mutable signs transform and release.",
+          "threads": {
+            "keyword": "three modalities",
+            "angles": [
+              {
+                "intent": "observation",
+                "opener": "The three modalities explain why some people start and others finish",
+                "payload": "Each mode has a job in the cycle, even when it looks messy.",
+                "closerType": "question",
+                "closer": "Are you starting, sustaining, or adapting right now?"
+              },
+              {
+                "intent": "contrast",
+                "opener": "Cardinal sparks, Fixed holds, Mutable reshapes, and none are optional",
+                "payload": "A plan collapses without Fixed, and stagnates without Mutable.",
+                "closerType": "question",
+                "closer": "Which mode do you tend to avoid?"
+              },
+              {
+                "intent": "quick_rule",
+                "opener": "Quick rule: initiate, stabilise, then iterate, in that order",
+                "payload": "Use the right mode at the right moment.",
+                "closerType": "try_this",
+                "closer": "Write one goal and assign it a mode for today."
+              }
+            ]
+          }
+        },
+        {
+          "dayIndex": 2,
+          "title": "The Twelve Houses",
+          "grimoireSlug": "birth-chart/houses",
+          "focus": "The twelve life areas governed by the houses in a birth chart",
+          "shortFormHook": "The twelve houses divide the birth chart into life domains, from identity to spirituality, each ruling specific experiences.",
+          "threads": {
+            "keyword": "twelve houses",
+            "angles": [
+              {
+                "intent": "observation",
+                "opener": "The twelve houses answer where life happens, not who you are",
+                "payload": "They turn vague placements into concrete life arenas.",
+                "closerType": "question",
+                "closer": "Which life area feels most activated lately?"
+              },
+              {
+                "intent": "contrast",
+                "opener": "A sign is the style, a house is the stage, and timing is the plot",
+                "payload": "Same planet, different stage, totally different storyline.",
+                "closerType": "question",
+                "closer": "Do you read house first or sign first?"
+              },
+              {
+                "intent": "try_this",
+                "opener": "A good house check starts with real examples from your week",
+                "payload": "List what happened, then map it to the house themes.",
+                "closerType": "try_this",
+                "closer": "Pick one house and write three recent examples."
+              }
+            ]
+          }
+        },
+        {
+          "dayIndex": 3,
+          "title": "Planetary Rulership",
+          "grimoireSlug": "astronomy/planets",
+          "focus": "Each sign has a ruling planet that colors its expression",
+          "shortFormHook": "Each zodiac sign is ruled by a planet that shapes its core expression. Mars rules Aries with drive; Venus rules Taurus with sensuality.",
+          "threads": {
+            "keyword": "planetary rulership",
+            "angles": [
+              {
+                "intent": "observation",
+                "opener": "Planetary rulership explains the motive underneath the sign\u2019s vibe",
+                "payload": "Follow the ruler and the chart starts making sense faster.",
+                "closerType": "question",
+                "closer": "Do you know the ruler of your Sun sign?"
+              },
+              {
+                "intent": "contrast",
+                "opener": "A sign is a lens, the ruler is the engine that drives it",
+                "payload": "Engine placement shifts how the lens behaves in real life.",
+                "closerType": "try_this",
+                "closer": "Locate a sign ruler and note its house in one sentence."
+              },
+              {
+                "intent": "quick_rule",
+                "opener": "Quick rule: when a sign feels confusing, check its ruler first",
+                "payload": "The ruler often shows why the expression feels blocked or loud.",
+                "closerType": "question",
+                "closer": "Which sign feels hardest for you to embody?"
+              }
+            ]
+          }
+        },
+        {
+          "dayIndex": 4,
+          "title": "The Ascendant",
+          "grimoireSlug": "rising-sign",
+          "focus": "The rising sign as the mask we wear and how we meet the world",
+          "shortFormHook": "The Ascendant, or rising sign, is the zodiac sign on the eastern horizon at birth. It shapes first impressions and outward personality.",
+          "threads": {
+            "keyword": "ascendant",
+            "angles": [
+              {
+                "intent": "observation",
+                "opener": "Your ascendant shows how you enter rooms before you speak",
+                "payload": "It colours pacing, style, and first impressions.",
+                "closerType": "question",
+                "closer": "Do people guess your Sun sign or your rising sign?"
+              },
+              {
+                "intent": "misconception",
+                "opener": "Rising sign is not fake, it is adaptive intelligence in motion",
+                "payload": "It is how you learned to move through the world safely.",
+                "closerType": "try_this",
+                "closer": "Notice your entrance today and describe it in one line."
+              },
+              {
+                "intent": "quick_rule",
+                "opener": "Quick rule: your chart ruler tells the story behind the ascendant",
+                "payload": "Find the ruling planet and you find the chart\u2019s steering wheel.",
+                "closerType": "try_this",
+                "closer": "Find your chart ruler and write its sign and house."
+              }
+            ]
+          }
+        },
+        {
+          "dayIndex": 5,
+          "title": "Aspects and Relationships",
+          "grimoireSlug": "glossary#aspect",
+          "focus": "How planets in aspect create dialogue - conjunctions, squares, trines",
+          "shortFormHook": "Aspects are geometric relationships between planets. Trines flow easily; squares create tension that drives growth.",
+          "threads": {
+            "keyword": "aspects",
+            "angles": [
+              {
+                "intent": "observation",
+                "opener": "Aspects feel like inner conversations that repeat until you listen",
+                "payload": "The pattern shows up in choices, not just chart diagrams.",
+                "closerType": "question",
+                "closer": "What conversation keeps repeating in your life lately?"
+              },
+              {
+                "intent": "contrast",
+                "opener": "Trines flow, squares push, conjunctions merge, and each teaches differently",
+                "payload": "Ease builds confidence, friction builds skill, merging builds focus.",
+                "closerType": "question",
+                "closer": "Do you learn faster through ease or tension?"
+              },
+              {
+                "intent": "quick_rule",
+                "opener": "Quick rule: read aspects as dynamics, not as good or bad",
+                "payload": "Every aspect becomes useful when you work with it consciously.",
+                "closerType": "try_this",
+                "closer": "Pick one aspect and write how it shows up in behaviour."
+              }
+            ]
+          }
+        },
+        {
+          "dayIndex": 6,
+          "title": "Reading Your Birth Chart",
+          "grimoireSlug": "birth-chart",
+          "focus": "Synthesizing elements, modalities, houses, and aspects",
+          "shortFormHook": "A birth chart is a snapshot of the sky at your moment of birth. It maps planetary positions across signs and houses.",
+          "threads": {
+            "keyword": "birth chart",
+            "angles": [
+              {
+                "intent": "observation",
+                "opener": "A birth chart reads best when you stop hunting one magic placement",
+                "payload": "The meaning lives in combinations and repeated themes.",
+                "closerType": "question",
+                "closer": "Which theme keeps appearing across your chart?"
+              },
+              {
+                "intent": "quick_rule",
+                "opener": "Quick rule: start with big three, then houses, then aspects",
+                "payload": "Build the skeleton first, then add detail without overwhelm.",
+                "closerType": "try_this",
+                "closer": "Write your big three and one house focus for today."
+              },
+              {
+                "intent": "try_this",
+                "opener": "One chart reading trick is to translate placements into real examples",
+                "payload": "If you cannot name examples, you are still in theory mode.",
+                "closerType": "try_this",
+                "closer": "Choose one placement and list three lived examples."
+              }
+            ]
+          }
+        }
+      ],
+      "threads": {
+        "keyword": "imbolc",
+        "angles": [
+          {
+            "intent": "observation",
+            "opener": "Imbolc feels like a pause before new light appears",
+            "payload": "Hope sits under the frost, waiting to bud.",
+            "closerType": "question",
+            "closer": "Where do you feel the first warmth this week?"
+          },
+          {
+            "intent": "contrast",
+            "opener": "The season hangs between resting and beginning, and both belong",
+            "payload": "One moment is stillness, the next is planting trust.",
+            "closerType": "question",
+            "closer": "Which side of that threshold needs your attention?"
+          },
+          {
+            "intent": "misconception",
+            "opener": "Imbolc is not pressure to leap, it is permission to plan",
+            "payload": "You can map intention without rushing the spark.",
+            "closerType": "try_this",
+            "closer": "Name one gentle step you can repeat daily."
+          },
+          {
+            "intent": "quick_rule",
+            "opener": "Quick rule: tend one steady ember instead of chasing a blaze",
+            "payload": "A single ritual keeps the flame ready when the sun returns.",
+            "closerType": "try_this",
+            "closer": "Choose one small light and keep it lit each evening."
+          },
+          {
+            "intent": "signal",
+            "opener": "A reliable signal is curiosity for slow change",
+            "payload": "When things stay calm, your nervous system knows repair is happening.",
+            "closerType": "question",
+            "closer": "What shift feels safe to observe before it shows up?"
+          }
+        ]
+      }
+    },
+    {
+      "id": "planetary-wisdom",
+      "name": "Understanding Planetary Rulership",
+      "description": "Deep exploration of each classical planet and its astrological significance.",
+      "category": "planetary",
+      "facets": [
+        {
+          "dayIndex": 0,
+          "title": "The Sun",
+          "grimoireSlug": "astronomy/planets/sun",
+          "focus": "Core identity, vitality, and conscious self-expression",
+          "shortFormHook": "The Sun represents core identity and life force. Its sign shows how you express your essential self and where you seek recognition.",
+          "threads": {
+            "keyword": "the sun",
+            "angles": [
+              {
+                "intent": "observation",
+                "opener": "The Sun shows what you protect when everything else gets noisy",
+                "payload": "It is the part of you that wants to be seen clearly.",
+                "closerType": "question",
+                "closer": "What part of you feels most real lately?"
+              },
+              {
+                "intent": "contrast",
+                "opener": "Sun confidence feels different from Sun performance, and both matter",
+                "payload": "One is inner permission, the other is outward expression.",
+                "closerType": "question",
+                "closer": "Do you feel more pressure to shine or to be understood?"
+              },
+              {
+                "intent": "try_this",
+                "opener": "A Sun check is simple: ask what makes you feel proud without proving",
+                "payload": "That answer usually points straight at your core.",
+                "closerType": "try_this",
+                "closer": "Write one sentence: I feel most like myself when I ___."
+              }
+            ]
+          }
+        },
+        {
+          "dayIndex": 1,
+          "title": "The Moon",
+          "grimoireSlug": "astronomy/planets/moon",
+          "focus": "Emotional nature, instincts, and the unconscious",
+          "shortFormHook": "The Moon governs emotional instincts and inner needs. Its sign reveals how you process feelings and what makes you feel secure.",
+          "threads": {
+            "keyword": "the moon",
+            "angles": [
+              {
+                "intent": "observation",
+                "opener": "The Moon shows what you need when you are tired, not inspired",
+                "payload": "Your comfort patterns are the clue, even the messy ones.",
+                "closerType": "question",
+                "closer": "What actually soothes you, not just distracts you?"
+              },
+              {
+                "intent": "misconception",
+                "opener": "Moon work is not being emotional, it is being honest with needs",
+                "payload": "Needs do not disappear when you ignore them.",
+                "closerType": "try_this",
+                "closer": "Name one need today and meet it in a small way."
+              },
+              {
+                "intent": "quick_rule",
+                "opener": "Quick rule: your Moon is your baseline, not your highlight reel",
+                "payload": "It is the daily rhythm that keeps you steady.",
+                "closerType": "question",
+                "closer": "What does your baseline look like right now?"
+              }
+            ]
+          }
+        },
+        {
+          "dayIndex": 2,
+          "title": "Mercury",
+          "grimoireSlug": "astronomy/planets/mercury",
+          "focus": "Communication, thought patterns, and mental processing",
+          "shortFormHook": "Mercury rules the mind and communication. Its placement shows how you think, learn, and express ideas.",
+          "threads": {
+            "keyword": "mercury",
+            "angles": [
+              {
+                "intent": "observation",
+                "opener": "Mercury shows how you translate life into words, patterns, and plans",
+                "payload": "Your learning style is hiding in plain sight.",
+                "closerType": "question",
+                "closer": "Do you learn by doing, debating, reading, or observing?"
+              },
+              {
+                "intent": "contrast",
+                "opener": "Mercury speed is not the same as Mercury clarity, and both can shift",
+                "payload": "Fast does not always mean accurate, slow does not mean stuck.",
+                "closerType": "question",
+                "closer": "Do you need more space or more structure right now?"
+              },
+              {
+                "intent": "try_this",
+                "opener": "A Mercury reset starts with one clean sentence and nothing extra",
+                "payload": "Clarity is often subtraction, not addition.",
+                "closerType": "try_this",
+                "closer": "Rewrite one thought today as a single sentence."
+              }
+            ]
+          }
+        },
+        {
+          "dayIndex": 3,
+          "title": "Venus",
+          "grimoireSlug": "astronomy/planets/venus",
+          "focus": "Love, beauty, values, and attraction",
+          "shortFormHook": "Venus governs love, beauty, and values. Its sign reveals what you find attractive and how you express affection.",
+          "threads": {
+            "keyword": "venus",
+            "angles": [
+              {
+                "intent": "observation",
+                "opener": "Venus shows what you naturally return to when life feels harsh",
+                "payload": "Taste is a compass, not a luxury.",
+                "closerType": "question",
+                "closer": "What kind of beauty calms your nervous system?"
+              },
+              {
+                "intent": "contrast",
+                "opener": "Attraction and values are linked, but they are not identical",
+                "payload": "One pulls you in, the other decides what stays.",
+                "closerType": "question",
+                "closer": "What do you want, and what do you stand for?"
+              },
+              {
+                "intent": "try_this",
+                "opener": "A Venus practice is choosing one small pleasure without justification",
+                "payload": "Pleasure can be clean, simple, and grounded.",
+                "closerType": "try_this",
+                "closer": "Pick one nourishing pleasure today and let it count."
+              }
+            ]
+          }
+        },
+        {
+          "dayIndex": 4,
+          "title": "Mars",
+          "grimoireSlug": "astronomy/planets/mars",
+          "focus": "Drive, assertion, passion, and how we take action",
+          "shortFormHook": "Mars represents drive, assertion, and desire. Its placement shows how you pursue goals and express anger.",
+          "threads": {
+            "keyword": "mars",
+            "angles": [
+              {
+                "intent": "observation",
+                "opener": "Mars shows how you move when you are sure, and when you are threatened",
+                "payload": "It is energy, boundaries, and instincts in motion.",
+                "closerType": "question",
+                "closer": "Do you chase, defend, or withdraw under pressure?"
+              },
+              {
+                "intent": "misconception",
+                "opener": "Mars is not aggression, it is the courage to act cleanly",
+                "payload": "Healthy Mars is direct, not explosive.",
+                "closerType": "try_this",
+                "closer": "Say one honest boundary today, short and kind."
+              },
+              {
+                "intent": "quick_rule",
+                "opener": "Quick rule: when Mars is blocked, start with the smallest action",
+                "payload": "Momentum builds confidence faster than perfect planning.",
+                "closerType": "try_this",
+                "closer": "Do the first two minutes of the task, then reassess."
+              }
+            ]
+          }
+        },
+        {
+          "dayIndex": 5,
+          "title": "Jupiter",
+          "grimoireSlug": "astronomy/planets/jupiter",
+          "focus": "Expansion, luck, philosophy, and growth",
+          "shortFormHook": "Jupiter expands whatever it touches, bringing growth and opportunity. Its sign shows where you find meaning and abundance.",
+          "threads": {
+            "keyword": "jupiter",
+            "angles": [
+              {
+                "intent": "observation",
+                "opener": "Jupiter shows what grows when you stop playing small in your mind",
+                "payload": "Belief can be an engine, not just an idea.",
+                "closerType": "question",
+                "closer": "Where do you feel ready to expand this year?"
+              },
+              {
+                "intent": "contrast",
+                "opener": "Jupiter optimism works best with a plan, not with blind faith",
+                "payload": "Expansion is real when it has structure to land in.",
+                "closerType": "try_this",
+                "closer": "Name one risk and one support for it, in two lines."
+              },
+              {
+                "intent": "quick_rule",
+                "opener": "Quick rule: follow curiosity, then verify with reality",
+                "payload": "Curiosity opens doors, verification keeps you safe.",
+                "closerType": "try_this",
+                "closer": "Try one curious step today, then review what happened."
+              }
+            ]
+          }
+        },
+        {
+          "dayIndex": 6,
+          "title": "Saturn",
+          "grimoireSlug": "astronomy/planets/saturn",
+          "focus": "Structure, discipline, limitations, and mastery",
+          "shortFormHook": "Saturn represents structure, discipline, and life lessons. Its placement reveals where you face challenges that build mastery.",
+          "threads": {
+            "keyword": "saturn",
+            "angles": [
+              {
+                "intent": "observation",
+                "opener": "Saturn shows the place you become strong through repetition, not hype",
+                "payload": "It is the long road, but it is yours.",
+                "closerType": "question",
+                "closer": "What are you quietly mastering right now?"
+              },
+              {
+                "intent": "contrast",
+                "opener": "Saturn pressure can feel heavy, but it also builds real authority",
+                "payload": "The same weight becomes a backbone over time.",
+                "closerType": "question",
+                "closer": "What responsibility is shaping you lately?"
+              },
+              {
+                "intent": "try_this",
+                "opener": "Saturn work is choosing one constraint and letting it help you focus",
+                "payload": "Constraints can be a container, not a punishment.",
+                "closerType": "try_this",
+                "closer": "Pick one rule for today and keep it all day."
+              }
+            ]
+          }
+        }
+      ],
+      "facetPool": [
+        {
+          "dayIndex": 0,
+          "title": "The Sun",
+          "grimoireSlug": "astronomy/planets/sun",
+          "focus": "Core identity, vitality, and conscious self-expression",
+          "shortFormHook": "The Sun represents core identity and life force. Its sign shows how you express your essential self and where you seek recognition.",
+          "threads": {
+            "keyword": "the sun",
+            "angles": [
+              {
+                "intent": "observation",
+                "opener": "The Sun shows what you protect when everything else gets noisy",
+                "payload": "It is the part of you that wants to be seen clearly.",
+                "closerType": "question",
+                "closer": "What part of you feels most real lately?"
+              },
+              {
+                "intent": "contrast",
+                "opener": "Sun confidence feels different from Sun performance, and both matter",
+                "payload": "One is inner permission, the other is outward expression.",
+                "closerType": "question",
+                "closer": "Do you feel more pressure to shine or to be understood?"
+              },
+              {
+                "intent": "try_this",
+                "opener": "A Sun check is simple: ask what makes you feel proud without proving",
+                "payload": "That answer usually points straight at your core.",
+                "closerType": "try_this",
+                "closer": "Write one sentence: I feel most like myself when I ___."
+              }
+            ]
+          }
+        },
+        {
+          "dayIndex": 1,
+          "title": "The Moon",
+          "grimoireSlug": "astronomy/planets/moon",
+          "focus": "Emotional nature, instincts, and the unconscious",
+          "shortFormHook": "The Moon governs emotional instincts and inner needs. Its sign reveals how you process feelings and what makes you feel secure.",
+          "threads": {
+            "keyword": "the moon",
+            "angles": [
+              {
+                "intent": "observation",
+                "opener": "The Moon shows what you need when you are tired, not inspired",
+                "payload": "Your comfort patterns are the clue, even the messy ones.",
+                "closerType": "question",
+                "closer": "What actually soothes you, not just distracts you?"
+              },
+              {
+                "intent": "misconception",
+                "opener": "Moon work is not being emotional, it is being honest with needs",
+                "payload": "Needs do not disappear when you ignore them.",
+                "closerType": "try_this",
+                "closer": "Name one need today and meet it in a small way."
+              },
+              {
+                "intent": "quick_rule",
+                "opener": "Quick rule: your Moon is your baseline, not your highlight reel",
+                "payload": "It is the daily rhythm that keeps you steady.",
+                "closerType": "question",
+                "closer": "What does your baseline look like right now?"
+              }
+            ]
+          }
+        },
+        {
+          "dayIndex": 2,
+          "title": "Mercury",
+          "grimoireSlug": "astronomy/planets/mercury",
+          "focus": "Communication, thought patterns, and mental processing",
+          "shortFormHook": "Mercury rules the mind and communication. Its placement shows how you think, learn, and express ideas.",
+          "threads": {
+            "keyword": "mercury",
+            "angles": [
+              {
+                "intent": "observation",
+                "opener": "Mercury shows how you translate life into words, patterns, and plans",
+                "payload": "Your learning style is hiding in plain sight.",
+                "closerType": "question",
+                "closer": "Do you learn by doing, debating, reading, or observing?"
+              },
+              {
+                "intent": "contrast",
+                "opener": "Mercury speed is not the same as Mercury clarity, and both can shift",
+                "payload": "Fast does not always mean accurate, slow does not mean stuck.",
+                "closerType": "question",
+                "closer": "Do you need more space or more structure right now?"
+              },
+              {
+                "intent": "try_this",
+                "opener": "A Mercury reset starts with one clean sentence and nothing extra",
+                "payload": "Clarity is often subtraction, not addition.",
+                "closerType": "try_this",
+                "closer": "Rewrite one thought today as a single sentence."
+              }
+            ]
+          }
+        },
+        {
+          "dayIndex": 3,
+          "title": "Venus",
+          "grimoireSlug": "astronomy/planets/venus",
+          "focus": "Love, beauty, values, and attraction",
+          "shortFormHook": "Venus governs love, beauty, and values. Its sign reveals what you find attractive and how you express affection.",
+          "threads": {
+            "keyword": "venus",
+            "angles": [
+              {
+                "intent": "observation",
+                "opener": "Venus shows what you naturally return to when life feels harsh",
+                "payload": "Taste is a compass, not a luxury.",
+                "closerType": "question",
+                "closer": "What kind of beauty calms your nervous system?"
+              },
+              {
+                "intent": "contrast",
+                "opener": "Attraction and values are linked, but they are not identical",
+                "payload": "One pulls you in, the other decides what stays.",
+                "closerType": "question",
+                "closer": "What do you want, and what do you stand for?"
+              },
+              {
+                "intent": "try_this",
+                "opener": "A Venus practice is choosing one small pleasure without justification",
+                "payload": "Pleasure can be clean, simple, and grounded.",
+                "closerType": "try_this",
+                "closer": "Pick one nourishing pleasure today and let it count."
+              }
+            ]
+          }
+        },
+        {
+          "dayIndex": 4,
+          "title": "Mars",
+          "grimoireSlug": "astronomy/planets/mars",
+          "focus": "Drive, assertion, passion, and how we take action",
+          "shortFormHook": "Mars represents drive, assertion, and desire. Its placement shows how you pursue goals and express anger.",
+          "threads": {
+            "keyword": "mars",
+            "angles": [
+              {
+                "intent": "observation",
+                "opener": "Mars shows how you move when you are sure, and when you are threatened",
+                "payload": "It is energy, boundaries, and instincts in motion.",
+                "closerType": "question",
+                "closer": "Do you chase, defend, or withdraw under pressure?"
+              },
+              {
+                "intent": "misconception",
+                "opener": "Mars is not aggression, it is the courage to act cleanly",
+                "payload": "Healthy Mars is direct, not explosive.",
+                "closerType": "try_this",
+                "closer": "Say one honest boundary today, short and kind."
+              },
+              {
+                "intent": "quick_rule",
+                "opener": "Quick rule: when Mars is blocked, start with the smallest action",
+                "payload": "Momentum builds confidence faster than perfect planning.",
+                "closerType": "try_this",
+                "closer": "Do the first two minutes of the task, then reassess."
+              }
+            ]
+          }
+        },
+        {
+          "dayIndex": 5,
+          "title": "Jupiter",
+          "grimoireSlug": "astronomy/planets/jupiter",
+          "focus": "Expansion, luck, philosophy, and growth",
+          "shortFormHook": "Jupiter expands whatever it touches, bringing growth and opportunity. Its sign shows where you find meaning and abundance.",
+          "threads": {
+            "keyword": "jupiter",
+            "angles": [
+              {
+                "intent": "observation",
+                "opener": "Jupiter shows what grows when you stop playing small in your mind",
+                "payload": "Belief can be an engine, not just an idea.",
+                "closerType": "question",
+                "closer": "Where do you feel ready to expand this year?"
+              },
+              {
+                "intent": "contrast",
+                "opener": "Jupiter optimism works best with a plan, not with blind faith",
+                "payload": "Expansion is real when it has structure to land in.",
+                "closerType": "try_this",
+                "closer": "Name one risk and one support for it, in two lines."
+              },
+              {
+                "intent": "quick_rule",
+                "opener": "Quick rule: follow curiosity, then verify with reality",
+                "payload": "Curiosity opens doors, verification keeps you safe.",
+                "closerType": "try_this",
+                "closer": "Try one curious step today, then review what happened."
+              }
+            ]
+          }
+        },
+        {
+          "dayIndex": 6,
+          "title": "Saturn",
+          "grimoireSlug": "astronomy/planets/saturn",
+          "focus": "Structure, discipline, limitations, and mastery",
+          "shortFormHook": "Saturn represents structure, discipline, and life lessons. Its placement reveals where you face challenges that build mastery.",
+          "threads": {
+            "keyword": "saturn",
+            "angles": [
+              {
+                "intent": "observation",
+                "opener": "Saturn shows the place you become strong through repetition, not hype",
+                "payload": "It is the long road, but it is yours.",
+                "closerType": "question",
+                "closer": "What are you quietly mastering right now?"
+              },
+              {
+                "intent": "contrast",
+                "opener": "Saturn pressure can feel heavy, but it also builds real authority",
+                "payload": "The same weight becomes a backbone over time.",
+                "closerType": "question",
+                "closer": "What responsibility is shaping you lately?"
+              },
+              {
+                "intent": "try_this",
+                "opener": "Saturn work is choosing one constraint and letting it help you focus",
+                "payload": "Constraints can be a container, not a punishment.",
+                "closerType": "try_this",
+                "closer": "Pick one rule for today and keep it all day."
+              }
+            ]
+          }
+        },
+        {
+          "dayIndex": 0,
+          "title": "Uranus",
+          "grimoireSlug": "astronomy/planets/uranus",
+          "focus": "Innovation, disruption, liberation, and awakening",
+          "shortFormHook": "Uranus rules breakthroughs and rebellion. Its sign shows where you crave freedom, originality, and sudden change.",
+          "threads": {
+            "keyword": "uranus",
+            "angles": [
+              {
+                "intent": "observation",
+                "opener": "Uranus brings the moment you cannot pretend the old way still fits",
+                "payload": "The discomfort is often a signal of overdue growth.",
+                "closerType": "question",
+                "closer": "Where do you feel ready to change the rules?"
+              },
+              {
+                "intent": "contrast",
+                "opener": "Uranus freedom is not chaos, it is truth with movement",
+                "payload": "Liberation can be clean, precise, and intentional.",
+                "closerType": "try_this",
+                "closer": "Replace one habit today with a truer alternative."
+              },
+              {
+                "intent": "quick_rule",
+                "opener": "Quick rule: when Uranus hits, keep what works and update the rest",
+                "payload": "You do not need to burn everything down to evolve.",
+                "closerType": "try_this",
+                "closer": "Pick one system and upgrade one small piece of it."
+              }
+            ]
+          }
+        },
+        {
+          "dayIndex": 1,
+          "title": "Neptune",
+          "grimoireSlug": "astronomy/planets/neptune",
+          "focus": "Dreams, intuition, spirituality, and imagination",
+          "shortFormHook": "Neptune dissolves boundaries and heightens intuition. Its sign reveals where you seek meaning, mystery, and spiritual connection.",
+          "threads": {
+            "keyword": "neptune",
+            "angles": [
+              {
+                "intent": "observation",
+                "opener": "Neptune blurs the edges so you can feel what logic misses",
+                "payload": "Intuition grows when you listen without forcing certainty.",
+                "closerType": "question",
+                "closer": "What feeling keeps returning even when you doubt it?"
+              },
+              {
+                "intent": "misconception",
+                "opener": "Neptune is not delusion, it is sensitivity that needs boundaries",
+                "payload": "Clarity arrives when you ground the message in reality.",
+                "closerType": "try_this",
+                "closer": "Write the intuition, then write one verifiable next step."
+              },
+              {
+                "intent": "quick_rule",
+                "opener": "Quick rule: if it is foggy, slow down and reduce inputs",
+                "payload": "Noise can masquerade as intuition.",
+                "closerType": "try_this",
+                "closer": "Take ten minutes of quiet and see what remains."
+              }
+            ]
+          }
+        },
+        {
+          "dayIndex": 2,
+          "title": "Pluto",
+          "grimoireSlug": "astronomy/planets/pluto",
+          "focus": "Transformation, power, shadow work, and renewal",
+          "shortFormHook": "Pluto governs deep transformation. Its sign shows where you shed the old, reclaim power, and regenerate.",
+          "threads": {
+            "keyword": "pluto",
+            "angles": [
+              {
+                "intent": "observation",
+                "opener": "Pluto work starts when you stop negotiating with what hurts you",
+                "payload": "Transformation is often a boundary, not a glow up.",
+                "closerType": "question",
+                "closer": "What are you no longer willing to carry?"
+              },
+              {
+                "intent": "contrast",
+                "opener": "Pluto intensity can feel like crisis, but it is also cleansing",
+                "payload": "It reveals what is real by removing what is not.",
+                "closerType": "question",
+                "closer": "Where are you being asked to tell the truth?"
+              },
+              {
+                "intent": "try_this",
+                "opener": "One Pluto practice is naming the fear, then choosing the next brave step",
+                "payload": "Power returns when you act with clarity.",
+                "closerType": "try_this",
+                "closer": "Write the fear in one line, then write the next action."
+              }
+            ]
+          }
+        }
+      ],
+      "threads": {
+        "keyword": "spring equinox",
+        "angles": [
+          {
+            "intent": "observation",
+            "opener": "Ostara feels like the scales ticking toward warmth",
+            "payload": "Equal day and night hint at momentum about to swing.",
+            "closerType": "question",
+            "closer": "What part of your week wants a little more light?"
+          },
+          {
+            "intent": "contrast",
+            "opener": "Balance is not neutral, it is a turning point waiting to sway",
+            "payload": "You're leaving stillness and moving toward growth.",
+            "closerType": "question",
+            "closer": "Are you leaning toward action or tending the soil?"
+          },
+          {
+            "intent": "misconception",
+            "opener": "Ostara is not a single grand leap, it is the quiet shift between cycles",
+            "payload": "Matching small routines to the daylight keeps you honest.",
+            "closerType": "try_this",
+            "closer": "List one slow change you\u2019ll steward for the next three mornings."
+          },
+          {
+            "intent": "quick_rule",
+            "opener": "Quick rule: pair one seed idea with one restful boundary",
+            "payload": "Rest protects the new momentum.",
+            "closerType": "try_this",
+            "closer": "Sketch one rest block and one courage block and keep both small."
+          },
+          {
+            "intent": "signal",
+            "opener": "A signal Ostara landed is feeling energy settle into curiosity",
+            "payload": "When the body welcomes change, you know the momentum is ready.",
+            "closerType": "question",
+            "closer": "What curiosity is asking for more space right now?"
+          }
+        ]
+      }
+    },
+    {
+      "id": "tarot-symbolic-system",
+      "name": "Tarot as a Symbolic System",
+      "description": "Understanding tarot as a complete symbolic language for self-reflection.",
+      "category": "tarot",
+      "facets": [
+        {
+          "dayIndex": 0,
+          "title": "Structure of the Deck",
+          "grimoireSlug": "tarot",
+          "focus": "78 cards: 22 Major Arcana and 56 Minor Arcana",
+          "shortFormHook": "The tarot deck contains 78 cards: 22 Major Arcana representing life lessons, and 56 Minor Arcana reflecting daily experiences.",
+          "threads": {
+            "keyword": "tarot deck",
+            "angles": [
+              {
+                "intent": "observation",
+                "opener": "Tarot clicks when you stop treating each card as isolated",
+                "payload": "The deck is a system, so meanings echo across cards.",
+                "closerType": "question",
+                "closer": "Do you read cards as stories or as single symbols?"
+              },
+              {
+                "intent": "contrast",
+                "opener": "Major Arcana feels like chapters, Minor Arcana feels like scenes",
+                "payload": "Both matter, but they move at different speeds.",
+                "closerType": "question",
+                "closer": "Which shows up more in your pulls lately?"
+              },
+              {
+                "intent": "try_this",
+                "opener": "A deck structure trick is to sort by arcana and notice patterns",
+                "payload": "Patterns teach faster than memorising keywords.",
+                "closerType": "try_this",
+                "closer": "Pull one Major and one Minor and compare their timing."
+              }
+            ]
+          }
+        },
+        {
+          "dayIndex": 1,
+          "title": "The Fool's Journey",
+          "grimoireSlug": "tarot/the-fool",
+          "focus": "The Major Arcana as a narrative of spiritual development",
+          "shortFormHook": "The Major Arcana tells the Fool's Journey, a narrative arc from innocence through trials to integration and wholeness.",
+          "threads": {
+            "keyword": "fool's journey",
+            "angles": [
+              {
+                "intent": "observation",
+                "opener": "The Fool\u2019s Journey is a map for growth that repeats in cycles",
+                "payload": "You can be The Fool and The World in the same month.",
+                "closerType": "question",
+                "closer": "Which chapter are you living right now?"
+              },
+              {
+                "intent": "misconception",
+                "opener": "The Fool is not naive, it is brave enough to begin",
+                "payload": "Beginnings look messy because they are alive.",
+                "closerType": "try_this",
+                "closer": "Name one beginning you have been delaying and take one step."
+              },
+              {
+                "intent": "quick_rule",
+                "opener": "Quick rule: read Major Arcana as themes, not predictions",
+                "payload": "Theme reading keeps you grounded and accurate.",
+                "closerType": "question",
+                "closer": "What theme keeps following you lately?"
+              }
+            ]
+          }
+        },
+        {
+          "dayIndex": 2,
+          "title": "The Four Suits",
+          "grimoireSlug": "tarot",
+          "focus": "Wands (Fire), Cups (Water), Swords (Air), Pentacles (Earth)",
+          "shortFormHook": "The four suits correspond to elements: Wands to Fire and passion, Cups to Water and emotion, Swords to Air and mind, Pentacles to Earth and matter.",
+          "threads": {
+            "keyword": "four suits",
+            "angles": [
+              {
+                "intent": "observation",
+                "opener": "Suit patterns reveal what domain of life is actually asking for attention",
+                "payload": "Repeats matter more than one dramatic card.",
+                "closerType": "question",
+                "closer": "Which suit keeps showing up for you?"
+              },
+              {
+                "intent": "contrast",
+                "opener": "Wands ignite, Cups soften, Swords sharpen, Pentacles stabilise",
+                "payload": "Each suit pulls a different lever in your life.",
+                "closerType": "question",
+                "closer": "Do you need ignition, softness, clarity, or stability today?"
+              },
+              {
+                "intent": "try_this",
+                "opener": "A suit practice is to describe your day using one suit only",
+                "payload": "It trains your intuition to spot the dominant energy fast.",
+                "closerType": "try_this",
+                "closer": "Pick one suit and label three moments from today."
+              }
+            ]
+          }
+        },
+        {
+          "dayIndex": 3,
+          "title": "Number Symbolism",
+          "grimoireSlug": "numerology",
+          "focus": "Aces through Tens - the numerological progression",
+          "shortFormHook": "In tarot, numbers carry meaning: Aces are beginnings, Fives bring conflict, Tens represent completion of a cycle.",
+          "threads": {
+            "keyword": "tarot numbers",
+            "angles": [
+              {
+                "intent": "observation",
+                "opener": "Numbers tell you the phase of the story even before the imagery",
+                "payload": "The number often nails timing better than the suit.",
+                "closerType": "question",
+                "closer": "Are you in a beginning, challenge, or completion phase?"
+              },
+              {
+                "intent": "contrast",
+                "opener": "Aces open doors, Fives test you, Tens close cycles, and it is precise",
+                "payload": "Progression turns readings from vague into usable.",
+                "closerType": "try_this",
+                "closer": "Pull two cards and read only the numbers first."
+              },
+              {
+                "intent": "quick_rule",
+                "opener": "Quick rule: read the number as the stage, then add suit as the domain",
+                "payload": "Stage plus domain equals clarity.",
+                "closerType": "try_this",
+                "closer": "Write one line: stage, domain, message."
+              }
+            ]
+          }
+        },
+        {
+          "dayIndex": 4,
+          "title": "Court Cards",
+          "grimoireSlug": "tarot",
+          "focus": "Page, Knight, Queen, King - aspects of personality or people",
+          "shortFormHook": "Court cards represent personality aspects or people. Pages are students, Knights are seekers, Queens embody mastery, Kings command authority.",
+          "threads": {
+            "keyword": "court cards",
+            "angles": [
+              {
+                "intent": "observation",
+                "opener": "Court cards show roles you step into, not just people you meet",
+                "payload": "They describe behaviour patterns that rotate across time.",
+                "closerType": "question",
+                "closer": "Which role are you playing right now, Page, Knight, Queen, or King?"
+              },
+              {
+                "intent": "misconception",
+                "opener": "Court cards are not always romance, they are often identity shifts",
+                "payload": "They can mark maturity, confidence, or new learning.",
+                "closerType": "question",
+                "closer": "Where are you levelling up without noticing?"
+              },
+              {
+                "intent": "try_this",
+                "opener": "A court card trick is to ask what skill is developing, not who it is",
+                "payload": "Skill focus makes the reading instantly practical.",
+                "closerType": "try_this",
+                "closer": "Name one skill you are learning and map it to Page, Knight, Queen, or King."
+              }
+            ]
+          }
+        },
+        {
+          "dayIndex": 5,
+          "title": "Reading Patterns",
+          "grimoireSlug": "tarot",
+          "focus": "Spreads, positions, and card relationships",
+          "shortFormHook": "Tarot spreads assign meaning through position. Cards in relationship reveal nuance beyond individual card meanings.",
+          "threads": {
+            "keyword": "tarot spreads",
+            "angles": [
+              {
+                "intent": "observation",
+                "opener": "Tarot becomes accurate when you read relationships between cards",
+                "payload": "One card is a word, a spread is a sentence.",
+                "closerType": "question",
+                "closer": "Do you read the middle card first or the edges?"
+              },
+              {
+                "intent": "contrast",
+                "opener": "Positions give structure, but the gaps between cards hold the nuance",
+                "payload": "Contrast and repetition reveal the message.",
+                "closerType": "try_this",
+                "closer": "Circle repeating symbols across a spread and read those first."
+              },
+              {
+                "intent": "quick_rule",
+                "opener": "Quick rule: ask one clear question per spread and keep it narrow",
+                "payload": "Clarity in question gives clarity in answer.",
+                "closerType": "try_this",
+                "closer": "Rewrite your question into one sentence before pulling."
+              }
+            ]
+          }
+        },
+        {
+          "dayIndex": 6,
+          "title": "Tarot as Mirror",
+          "grimoireSlug": "tarot",
+          "focus": "Using tarot for self-reflection rather than prediction",
+          "shortFormHook": "Tarot functions as a mirror for the unconscious, surfacing what is already known but not yet articulated.",
+          "threads": {
+            "keyword": "tarot reflection",
+            "angles": [
+              {
+                "intent": "observation",
+                "opener": "Tarot works best when you treat it like a mirror, not a verdict",
+                "payload": "It shows what you already know but have not named.",
+                "closerType": "question",
+                "closer": "What truth are you circling around lately?"
+              },
+              {
+                "intent": "misconception",
+                "opener": "A reflective reading is not vague, it is precise about inner patterns",
+                "payload": "Patterns create outcomes more than luck does.",
+                "closerType": "try_this",
+                "closer": "Ask: what is the pattern, and what is the next choice?"
+              },
+              {
+                "intent": "try_this",
+                "opener": "A simple mirror spread is: now, next, and what I am avoiding",
+                "payload": "It cuts through noise quickly.",
+                "closerType": "try_this",
+                "closer": "Pull three cards and write one line per position."
+              }
+            ]
+          }
+        }
+      ],
+      "threads": {
+        "keyword": "beltane",
+        "angles": [
+          {
+            "intent": "observation",
+            "opener": "Beltane feels like the bones of desire loosening into dance",
+            "payload": "The season pushes for celebration and authentic expression.",
+            "closerType": "question",
+            "closer": "Where does your body want to move more fully?"
+          },
+          {
+            "intent": "contrast",
+            "opener": "This fire season is bold compared to Imbolc's hush",
+            "payload": "Growth is louder now but still grounded in reverence.",
+            "closerType": "question",
+            "closer": "What feels worthy of both tenderness and heat?"
+          },
+          {
+            "intent": "misconception",
+            "opener": "Beltane is not only romance, it is creative magnetism meeting responsibility",
+            "payload": "Even playful rituals have structure when you make them intentional.",
+            "closerType": "try_this",
+            "closer": "Name one joyful act you can repeat with intention today."
+          },
+          {
+            "intent": "quick_rule",
+            "opener": "Quick rule: pair one bold feeling with one grounded check-in",
+            "payload": "That preserves clarity when the energy rises.",
+            "closerType": "try_this",
+            "closer": "Check in with your breath before you act on a craving."
+          },
+          {
+            "intent": "signal",
+            "opener": "A signal the season is real is sudden generosity without exhaustion",
+            "payload": "When you feel expansive yet steady, the festival has arrived.",
+            "closerType": "question",
+            "closer": "Where are you ready to offer energy without burning out?"
+          }
+        ]
+      }
+    },
+    {
+      "id": "lunar-cycles",
+      "name": "Emotional Cycles and the Moon",
+      "description": "Understanding lunar phases and their influence on emotional rhythms.",
+      "category": "lunar",
+      "facets": [
+        {
+          "dayIndex": 0,
+          "title": "The Eight Phases",
+          "grimoireSlug": "moon-rituals",
+          "focus": "New, Waxing Crescent, First Quarter, Waxing Gibbous, Full, Waning Gibbous, Last Quarter, Waning Crescent",
+          "shortFormHook": "The Moon moves through eight phases in 29.5 days, each carrying distinct energy from initiation to release.",
+          "threads": {
+            "keyword": "eight phases",
+            "angles": [
+              {
+                "intent": "observation",
+                "opener": "The eight phases track emotional timing better than brute force planning",
+                "payload": "Energy rises, peaks, then asks for release and integration.",
+                "closerType": "question",
+                "closer": "Which phase matches your energy this week?"
+              },
+              {
+                "intent": "contrast",
+                "opener": "Waxing builds momentum, waning clears space, and both are productive",
+                "payload": "Clearing is action, not failure.",
+                "closerType": "try_this",
+                "closer": "Choose one thing to build and one thing to release today."
+              },
+              {
+                "intent": "quick_rule",
+                "opener": "Quick rule: begin at New, refine at quarters, release at Full",
+                "payload": "Use the phase as a rhythm, not a rulebook.",
+                "closerType": "try_this",
+                "closer": "Write one intention and one release in two lines."
+              }
+            ]
+          }
+        },
+        {
+          "dayIndex": 1,
+          "title": "New Moon",
+          "grimoireSlug": "moon-rituals",
+          "focus": "Beginnings, intention setting, planting seeds",
+          "shortFormHook": "The New Moon marks the beginning of the lunar cycle. It is a time for setting intentions and initiating new projects.",
+          "threads": {
+            "keyword": "new moon",
+            "angles": [
+              {
+                "intent": "observation",
+                "opener": "New Moon energy is quiet, and it rewards small committed beginnings",
+                "payload": "The seed matters more than the spectacle.",
+                "closerType": "question",
+                "closer": "What do you want to begin in a gentle way?"
+              },
+              {
+                "intent": "misconception",
+                "opener": "Intentions are not wishes, they are choices you keep choosing",
+                "payload": "A strong intention includes a boundary and a next action.",
+                "closerType": "try_this",
+                "closer": "Write your intention as a promise, then add one action."
+              },
+              {
+                "intent": "quick_rule",
+                "opener": "Quick rule: pick one seed, protect it, and do not scatter your focus",
+                "payload": "Too many seeds becomes no harvest.",
+                "closerType": "try_this",
+                "closer": "Choose one intention only for the next 24 hours."
+              }
+            ]
+          }
+        },
+        {
+          "dayIndex": 2,
+          "title": "Full Moon",
+          "grimoireSlug": "moon-rituals",
+          "focus": "Illumination, culmination, release",
+          "shortFormHook": "The Full Moon brings illumination and culmination. What was begun at the New Moon reaches peak visibility.",
+          "threads": {
+            "keyword": "full moon",
+            "angles": [
+              {
+                "intent": "observation",
+                "opener": "Full Moon reveals what is working and what is draining you",
+                "payload": "Visibility is feedback, not judgement.",
+                "closerType": "question",
+                "closer": "What is ready to be released, even if it is familiar?"
+              },
+              {
+                "intent": "contrast",
+                "opener": "Culmination feels like celebration for some, closure for others",
+                "payload": "Both are valid endings.",
+                "closerType": "question",
+                "closer": "Does this Full Moon feel like a yes or a goodbye?"
+              },
+              {
+                "intent": "try_this",
+                "opener": "A Full Moon practice is to name what you learned, then let something go",
+                "payload": "Learning without release keeps you stuck.",
+                "closerType": "try_this",
+                "closer": "Write one lesson and one release in two lines."
+              }
+            ]
+          }
+        },
+        {
+          "dayIndex": 3,
+          "title": "Moon Signs",
+          "grimoireSlug": "astronomy/planets/moon",
+          "focus": "How the Moon's sign colors emotional expression",
+          "shortFormHook": "The Moon changes signs every 2.5 days, coloring the collective emotional atmosphere with each sign's qualities.",
+          "threads": {
+            "keyword": "moon sign",
+            "angles": [
+              {
+                "intent": "observation",
+                "opener": "Moon signs change the emotional weather, even when your plans stay fixed",
+                "payload": "Track mood shifts across two days and you will often see the pattern.",
+                "closerType": "question",
+                "closer": "Which mood keeps returning for you lately?"
+              },
+              {
+                "intent": "contrast",
+                "opener": "A Moon in Fire pushes expression, a Moon in Earth wants containment",
+                "payload": "Same feelings, different delivery style depending on sign.",
+                "closerType": "question",
+                "closer": "Do you process emotion by moving, grounding, talking, or retreating?"
+              },
+              {
+                "intent": "misconception",
+                "opener": "Moon sign work is not only for sensitivity, it is for timing too",
+                "payload": "Some conversations land better under certain Moon tones.",
+                "closerType": "try_this",
+                "closer": "Try scheduling one vulnerable chat on a calmer Moon day."
+              },
+              {
+                "intent": "quick_rule",
+                "opener": "Quick rule: match tasks to the Moon sign\u2019s pace and texture",
+                "payload": "Fast Moon days for outreach, slow Moon days for planning and care.",
+                "closerType": "try_this",
+                "closer": "Pick one task today and choose a Moon-matching approach."
+              },
+              {
+                "intent": "signal",
+                "opener": "When the Moon sign clashes with your default, everything feels louder",
+                "payload": "Irritability, overthinking, or lethargy can be a mismatch cue.",
+                "closerType": "question",
+                "closer": "What feels out of sync for you today?"
+              }
+            ]
+          }
+        },
+        {
+          "dayIndex": 4,
+          "title": "Void of Course Moon",
+          "grimoireSlug": "astronomy/planets/moon",
+          "focus": "The pause between lunar sign changes",
+          "shortFormHook": "Void of Course Moon occurs when the Moon makes no more aspects before changing signs. Decisions made during this time may not manifest as expected.",
+          "threads": {
+            "keyword": "void of course",
+            "angles": [
+              {
+                "intent": "observation",
+                "opener": "Void of course days can feel like pushing a trolley through sand",
+                "payload": "Things still happen, but outcomes drift or reroute unexpectedly.",
+                "closerType": "question",
+                "closer": "Where have you noticed delays or detours lately?"
+              },
+              {
+                "intent": "contrast",
+                "opener": "Some days reward initiation, and some days reward maintenance",
+                "payload": "Void windows often favour loose ends over brand new commitments.",
+                "closerType": "try_this",
+                "closer": "Use the next lull to tidy one backlog item you keep ignoring."
+              },
+              {
+                "intent": "misconception",
+                "opener": "Void of course is not \u201cbad luck\u201d, it is low-traction timing",
+                "payload": "It is great for reflection, editing, and quiet recalibration.",
+                "closerType": "question",
+                "closer": "What would feel lighter if you revised it instead of forcing it?"
+              },
+              {
+                "intent": "quick_rule",
+                "opener": "Quick rule: avoid irreversible choices during void windows when possible",
+                "payload": "If you must decide, build in flexibility and double-check details.",
+                "closerType": "try_this",
+                "closer": "Add one safety buffer to a decision you are making today."
+              },
+              {
+                "intent": "signal",
+                "opener": "A classic void signal is plans changing twice for no clear reason",
+                "payload": "It can show up as reschedules, mixed messages, or missing information.",
+                "closerType": "question",
+                "closer": "Has anything kept reshuffling on you this week?"
+              }
+            ]
+          }
+        },
+        {
+          "dayIndex": 5,
+          "title": "Lunar Nodes",
+          "grimoireSlug": "glossary#north-node",
+          "focus": "North Node destiny, South Node past patterns",
+          "shortFormHook": "The Lunar Nodes mark where the Moon's path crosses the ecliptic. The North Node points toward growth; the South Node indicates familiar patterns.",
+          "threads": {
+            "keyword": "lunar nodes",
+            "angles": [
+              {
+                "intent": "observation",
+                "opener": "The nodes show the tug between comfort and evolution in real time",
+                "payload": "You can feel it most when you are choosing the harder, truer option.",
+                "closerType": "question",
+                "closer": "What choice is asking you to grow right now?"
+              },
+              {
+                "intent": "contrast",
+                "opener": "South node feels natural, North node feels earned, even when it fits",
+                "payload": "Growth can feel unfamiliar before it feels like home.",
+                "closerType": "question",
+                "closer": "Where do you keep defaulting to what you already know?"
+              },
+              {
+                "intent": "misconception",
+                "opener": "Node work is not about rejecting the past, it is about upgrading it",
+                "payload": "You bring gifts forward, you just stop repeating the same loop.",
+                "closerType": "try_this",
+                "closer": "Name one strength you keep overusing, then choose a new expression of it."
+              },
+              {
+                "intent": "quick_rule",
+                "opener": "Quick rule: follow the path that builds character, not applause",
+                "payload": "Nodes reward integrity over performance.",
+                "closerType": "try_this",
+                "closer": "Do one small brave thing today that nobody needs to see."
+              },
+              {
+                "intent": "signal",
+                "opener": "A node signal is d\u00e9j\u00e0 vu conflict, same theme, different person",
+                "payload": "Life repeats the lesson until you change the response.",
+                "closerType": "question",
+                "closer": "What lesson do you think life is repeating for you?"
+              }
+            ]
+          }
+        },
+        {
+          "dayIndex": 6,
+          "title": "Working with Lunar Cycles",
+          "grimoireSlug": "moon-rituals",
+          "focus": "Practical alignment with lunar rhythms",
+          "shortFormHook": "Aligning activities with lunar phases creates natural rhythm: begin at New Moon, assess at First Quarter, celebrate or release at Full Moon.",
+          "threads": {
+            "keyword": "lunar cycles",
+            "angles": [
+              {
+                "intent": "observation",
+                "opener": "Lunar cycles give your goals a rhythm, so motivation is not the fuel",
+                "payload": "You stop forcing the same intensity every day.",
+                "closerType": "question",
+                "closer": "Which phase do you keep trying to live in permanently?"
+              },
+              {
+                "intent": "contrast",
+                "opener": "New Moon is quieter than people expect, Full Moon is clearer than louder",
+                "payload": "Both phases work best when you listen instead of rush.",
+                "closerType": "try_this",
+                "closer": "Choose one intention and one release, then keep them simple."
+              },
+              {
+                "intent": "misconception",
+                "opener": "Working with the Moon is not about perfection, it is about repetition",
+                "payload": "Small monthly cycles build big long-term change.",
+                "closerType": "try_this",
+                "closer": "Repeat the same tiny ritual for one full lunar month."
+              },
+              {
+                "intent": "quick_rule",
+                "opener": "Quick rule: initiate, build, adjust, harvest, release, rest, repeat",
+                "payload": "Use the cycle as a planning template, not a rigid rulebook.",
+                "closerType": "try_this",
+                "closer": "Map one project onto the phases and see where it naturally sits."
+              },
+              {
+                "intent": "signal",
+                "opener": "A good sign you are aligned is steadier energy across the whole month",
+                "payload": "You feel less whiplash between bursts and burnout.",
+                "closerType": "question",
+                "closer": "What would \u201csteady\u201d look like for you this month?"
+              }
+            ]
+          }
+        }
+      ],
+      "threads": {
+        "keyword": "winter solstice",
+        "angles": [
+          {
+            "intent": "observation",
+            "opener": "Yule feels like the dark pause before the return of light",
+            "payload": "It is the deepest rest before the rhythm shifts.",
+            "closerType": "question",
+            "closer": "Where in your body do you feel that pause?"
+          },
+          {
+            "intent": "contrast",
+            "opener": "The long night is not empty, it is full of promise waiting to bloom",
+            "payload": "Patience is the practice that keeps the signal alive.",
+            "closerType": "question",
+            "closer": "What promise are you guarding through the silence?"
+          },
+          {
+            "intent": "misconception",
+            "opener": "Yule does not demand fireworks, it invites a steady vow",
+            "payload": "You can mark the solstice with the same gentleness you hope to receive.",
+            "closerType": "try_this",
+            "closer": "Name one short vow you can repeat for the next three evenings."
+          },
+          {
+            "intent": "quick_rule",
+            "opener": "Quick rule: honour what closed, then set one small seed for warmth",
+            "payload": "Closure and hope can share the same breath.",
+            "closerType": "try_this",
+            "closer": "Write two short lines: release, then new light."
+          },
+          {
+            "intent": "signal",
+            "opener": "A signal this sabbat landed is feeling lighter without overdoing optimism",
+            "payload": "Hope can be quiet and still real.",
+            "closerType": "question",
+            "closer": "What quiet hope feels easiest to keep alive?"
+          }
+        ]
+      }
+    }
+  ],
+  "sabbatThemes": [
+    {
+      "id": "imbolc",
+      "name": "Imbolc",
+      "date": {
+        "month": 2,
+        "day": 1
+      },
+      "category": "sabbat",
+      "leadUpFacets": [
+        {
+          "dayIndex": -3,
+          "title": "Origins of Imbolc",
+          "grimoireSlug": "wheel-of-the-year/imbolc",
+          "focus": "The stirring of spring beneath winter's surface",
+          "shortFormHook": "Imbolc marks the first stirrings of spring. Though winter persists, seeds beneath the soil begin to awaken toward growth.",
+          "threads": {
+            "keyword": "imbolc",
+            "angles": [
+              {
+                "intent": "observation",
+                "opener": "Imbolc lands like a quiet spark under the frost",
+                "payload": "It marks the moment hope returns before anything looks different.",
+                "closerType": "question",
+                "closer": "Where do you feel the first hint of change?"
+              },
+              {
+                "intent": "contrast",
+                "opener": "Winter still holds the air, but spring starts moving underground",
+                "payload": "This is the season of almost, and almost is powerful.",
+                "closerType": "question",
+                "closer": "What is growing privately before it shows publicly?"
+              },
+              {
+                "intent": "misconception",
+                "opener": "Imbolc is not a big restart, it is a small ignition",
+                "payload": "You do not need momentum yet, you need direction.",
+                "closerType": "try_this",
+                "closer": "Pick one tiny seed goal and write it on paper."
+              },
+              {
+                "intent": "quick_rule",
+                "opener": "Quick rule: choose one flame, one focus, one promise to yourself",
+                "payload": "Keep it simple so it stays real all week.",
+                "closerType": "try_this",
+                "closer": "Light a candle and speak your promise in one sentence."
+              },
+              {
+                "intent": "signal",
+                "opener": "A strong Imbolc signal is wanting to clear space without forcing",
+                "payload": "Your system knows it needs room for new growth.",
+                "closerType": "question",
+                "closer": "What would you love to make room for next?"
+              }
+            ]
+          }
+        },
+        {
+          "dayIndex": -2,
+          "title": "Imbolc Correspondences",
+          "grimoireSlug": "wheel-of-the-year/imbolc",
+          "focus": "Brigid, flame, and purification symbols",
+          "shortFormHook": "Imbolc honors Brigid, goddess of flame, poetry, and healing. White candles and dairy offerings are traditional correspondences.",
+          "threads": {
+            "keyword": "imbolc correspondences",
+            "angles": [
+              {
+                "intent": "observation",
+                "opener": "Imbolc correspondences make the season feel touchable and close",
+                "payload": "Flame, milk, and white symbols bring warmth to your intention.",
+                "closerType": "question",
+                "closer": "Which symbol feels most alive to you right now?"
+              },
+              {
+                "intent": "contrast",
+                "opener": "Fire wakes the will, cleansing steadies the nervous system",
+                "payload": "Together they create a reset that does not rely on force.",
+                "closerType": "question",
+                "closer": "Do you need ignition or purification more today?"
+              },
+              {
+                "intent": "misconception",
+                "opener": "You do not need a perfect altar, you need one meaningful choice",
+                "payload": "One candle with intention beats a crowded setup.",
+                "closerType": "try_this",
+                "closer": "Choose one correspondence and use it for three days straight."
+              },
+              {
+                "intent": "quick_rule",
+                "opener": "Quick rule: match one item to one theme and stop there",
+                "payload": "Simplicity keeps the ritual sharp and personal.",
+                "closerType": "try_this",
+                "closer": "Pick one colour, one scent, and one word for the week."
+              },
+              {
+                "intent": "signal",
+                "opener": "A correspondence signal is feeling calmer the moment you set it down",
+                "payload": "Your body recognises the anchor before your mind does.",
+                "closerType": "question",
+                "closer": "What anchor calms you fastest?"
+              }
+            ]
+          }
+        },
+        {
+          "dayIndex": -1,
+          "title": "Purification Rituals",
+          "grimoireSlug": "wheel-of-the-year/imbolc",
+          "focus": "Cleansing home and self for new growth",
+          "shortFormHook": "Imbolc emphasizes purification and preparation. Cleansing the home and setting intentions prepares for spring's emergence.",
+          "threads": {
+            "keyword": "purification ritual",
+            "angles": [
+              {
+                "intent": "observation",
+                "opener": "Purification rituals feel different when you treat them as preparation",
+                "payload": "You are clearing space for the next version of you.",
+                "closerType": "question",
+                "closer": "What needs clearing so you can breathe again?"
+              },
+              {
+                "intent": "contrast",
+                "opener": "Cleaning removes clutter, purification removes the emotional residue",
+                "payload": "Both matter, but they land in different parts of you.",
+                "closerType": "question",
+                "closer": "Are you clearing objects or clearing energy?"
+              },
+              {
+                "intent": "misconception",
+                "opener": "Purification is not punishment, it is permission to start lighter",
+                "payload": "You are not fixing yourself, you are making space.",
+                "closerType": "try_this",
+                "closer": "Clear one small corner and call it complete."
+              },
+              {
+                "intent": "quick_rule",
+                "opener": "Quick rule: cleanse the doorway first, then the place you rest",
+                "payload": "Start with entry, then give your body a calmer base.",
+                "closerType": "try_this",
+                "closer": "Open a window, wipe the threshold, and reset the room tone."
+              },
+              {
+                "intent": "signal",
+                "opener": "A purification signal is sleeping deeper after you tidy one small thing",
+                "payload": "Your nervous system reads the shift immediately.",
+                "closerType": "question",
+                "closer": "Where could you create one pocket of peace tonight?"
+              }
+            ]
+          }
+        },
+        {
+          "dayIndex": 0,
+          "title": "Imbolc Celebration",
+          "grimoireSlug": "wheel-of-the-year/imbolc",
+          "focus": "Lighting the flame of inspiration",
+          "shortFormHook": "Imbolc celebrates returning light and creative inspiration. Lighting candles honors Brigid's flame and the quickening of the year.",
+          "threads": {
+            "keyword": "imbolc celebration",
+            "angles": [
+              {
+                "intent": "observation",
+                "opener": "Imbolc celebration is about noticing light return in small ways",
+                "payload": "The win is recognising the spark before it becomes a blaze.",
+                "closerType": "question",
+                "closer": "What spark are you protecting right now?"
+              },
+              {
+                "intent": "contrast",
+                "opener": "Celebration can be quiet, and it can still shift your whole week",
+                "payload": "Gentle joy has a long half-life.",
+                "closerType": "question",
+                "closer": "What would a quiet celebration look like for you?"
+              },
+              {
+                "intent": "misconception",
+                "opener": "You do not need ceremony, you need intention you can repeat",
+                "payload": "One small act done consciously is a celebration.",
+                "closerType": "try_this",
+                "closer": "Light one candle and name what you are calling in."
+              },
+              {
+                "intent": "quick_rule",
+                "opener": "Quick rule: one flame, one gratitude, one next step",
+                "payload": "That trio keeps inspiration grounded and usable.",
+                "closerType": "try_this",
+                "closer": "Write your next step in seven words or fewer."
+              },
+              {
+                "intent": "signal",
+                "opener": "A celebration signal is sudden clarity about what deserves your energy",
+                "payload": "The flame shows you what is worth feeding.",
+                "closerType": "question",
+                "closer": "What deserves your energy this month?"
+              }
+            ]
+          }
+        }
+      ],
+      "threads": {
+        "keyword": "imbolc",
+        "angles": [
+          {
+            "intent": "observation",
+            "opener": "Imbolc feels like a pause before new light appears",
+            "payload": "Hope sits under the frost, waiting to bud.",
+            "closerType": "question",
+            "closer": "Where do you feel the first warmth this week?"
+          },
+          {
+            "intent": "contrast",
+            "opener": "The season hangs between resting and beginning, and both belong",
+            "payload": "One moment is stillness, the next is planting trust.",
+            "closerType": "question",
+            "closer": "Which side of that threshold needs your attention?"
+          },
+          {
+            "intent": "misconception",
+            "opener": "Imbolc is not pressure to leap, it is permission to plan",
+            "payload": "You can map intention without rushing the spark.",
+            "closerType": "try_this",
+            "closer": "Name one gentle step you can repeat daily."
+          },
+          {
+            "intent": "quick_rule",
+            "opener": "Quick rule: tend one steady ember instead of chasing a blaze",
+            "payload": "A single ritual keeps the flame ready when the sun returns.",
+            "closerType": "try_this",
+            "closer": "Choose one small light and keep it lit each evening."
+          },
+          {
+            "intent": "signal",
+            "opener": "A reliable signal is curiosity for slow change",
+            "payload": "When things stay calm, your nervous system knows repair is happening.",
+            "closerType": "question",
+            "closer": "What shift feels safe to observe before it shows up?"
+          }
+        ]
+      }
+    },
+    {
+      "id": "ostara",
+      "name": "Ostara",
+      "date": {
+        "month": 3,
+        "day": 20
+      },
+      "category": "sabbat",
+      "leadUpFacets": [
+        {
+          "dayIndex": -3,
+          "title": "Spring Equinox Origins",
+          "grimoireSlug": "wheel-of-the-year/ostara",
+          "focus": "Balance of light and dark at the vernal equinox",
+          "shortFormHook": "Ostara occurs at the Spring Equinox when day and night are equal. From this point, light overtakes darkness as spring fully arrives.",
+          "threads": {
+            "keyword": "spring equinox",
+            "angles": [
+              {
+                "intent": "observation",
+                "opener": "Spring equinox feels like your inner scales clicking into place",
+                "payload": "Balance is not stillness, it is active adjustment.",
+                "closerType": "question",
+                "closer": "What are you rebalancing right now?"
+              },
+              {
+                "intent": "contrast",
+                "opener": "Equal light and dark is not neutrality, it is a turning point",
+                "payload": "After today, the season leans towards growth.",
+                "closerType": "question",
+                "closer": "Where are you ready to lean towards growth?"
+              },
+              {
+                "intent": "misconception",
+                "opener": "Balance is not fifty fifty, it is what keeps you steady",
+                "payload": "Your ratio changes depending on the season you are in.",
+                "closerType": "try_this",
+                "closer": "Name one thing you will do less, and one thing you will do more."
+              },
+              {
+                "intent": "quick_rule",
+                "opener": "Quick rule: match effort with recovery, then add one small stretch",
+                "payload": "That creates sustainable spring momentum.",
+                "closerType": "try_this",
+                "closer": "Plan one rest block first, then schedule one brave action."
+              },
+              {
+                "intent": "signal",
+                "opener": "A strong Ostara signal is craving freshness in routines and space",
+                "payload": "Your system wants lighter input and cleaner rhythms.",
+                "closerType": "question",
+                "closer": "What routine wants a spring reset?"
+              }
+            ]
+          }
+        },
+        {
+          "dayIndex": -2,
+          "title": "Ostara Correspondences",
+          "grimoireSlug": "wheel-of-the-year/ostara",
+          "focus": "Eggs, rabbits, and symbols of fertility",
+          "shortFormHook": "Ostara symbols include eggs representing potential, rabbits for fertility, and spring flowers marking nature's renewal.",
+          "threads": {
+            "keyword": "ostara correspondences",
+            "angles": [
+              {
+                "intent": "observation",
+                "opener": "Ostara correspondences bring potential into your hands, not your head",
+                "payload": "Eggs, blossoms, and green symbols make growth feel real.",
+                "closerType": "question",
+                "closer": "Which symbol feels like your next beginning?"
+              },
+              {
+                "intent": "contrast",
+                "opener": "Seeds hold promise quietly, flowers announce the promise loudly",
+                "payload": "Both stages are part of the same truth.",
+                "closerType": "question",
+                "closer": "Are you in seed stage or bloom stage?"
+              },
+              {
+                "intent": "misconception",
+                "opener": "Fertility is not only about babies, it is about creation",
+                "payload": "Your projects, art, and choices count too.",
+                "closerType": "try_this",
+                "closer": "Name one thing you want to create this season."
+              },
+              {
+                "intent": "quick_rule",
+                "opener": "Quick rule: choose one symbol to carry all week as your anchor",
+                "payload": "It trains your attention to keep returning to growth.",
+                "closerType": "try_this",
+                "closer": "Pick one object and place it where you will see it daily."
+              },
+              {
+                "intent": "signal",
+                "opener": "A correspondence signal is feeling energised after you add colour",
+                "payload": "Spring responds to simple sensory cues.",
+                "closerType": "question",
+                "closer": "What colour makes you feel most alive right now?"
+              }
+            ]
+          }
+        },
+        {
+          "dayIndex": -1,
+          "title": "Planting Seeds",
+          "grimoireSlug": "wheel-of-the-year/ostara",
+          "focus": "Rituals for new beginnings and growth",
+          "shortFormHook": "Ostara is ideal for planting literal and metaphorical seeds. What was envisioned at Imbolc can now be set into motion.",
+          "threads": {
+            "keyword": "planting seeds",
+            "angles": [
+              {
+                "intent": "observation",
+                "opener": "Planting seeds works best when you choose patience as the spell",
+                "payload": "Growth responds to consistency more than intensity.",
+                "closerType": "question",
+                "closer": "What do you want to grow slowly on purpose?"
+              },
+              {
+                "intent": "contrast",
+                "opener": "Vision is Imbolc, planting is Ostara, and the difference is action",
+                "payload": "You move from idea to practice today.",
+                "closerType": "question",
+                "closer": "What is one action that proves the idea is real?"
+              },
+              {
+                "intent": "misconception",
+                "opener": "Seeds do not need perfect conditions, they need regular care",
+                "payload": "Small daily attention beats occasional grand effort.",
+                "closerType": "try_this",
+                "closer": "Pick one micro habit and commit to it for seven days."
+              },
+              {
+                "intent": "quick_rule",
+                "opener": "Quick rule: choose one seed per life area, not ten seeds in one",
+                "payload": "Focus keeps your energy from splitting into static.",
+                "closerType": "try_this",
+                "closer": "Choose one priority and say no to one distraction today."
+              },
+              {
+                "intent": "signal",
+                "opener": "A planting signal is relief after you choose the next right step",
+                "payload": "Your nervous system likes clear direction.",
+                "closerType": "question",
+                "closer": "What step would bring you relief immediately?"
+              }
+            ]
+          }
+        },
+        {
+          "dayIndex": 0,
+          "title": "Ostara Celebration",
+          "grimoireSlug": "wheel-of-the-year/ostara",
+          "focus": "Celebrating balance and new growth",
+          "shortFormHook": "Ostara celebrates the balance point before light prevails. It honors fertility, growth, and the return of warmth and colour.",
+          "threads": {
+            "keyword": "ostara celebration",
+            "angles": [
+              {
+                "intent": "observation",
+                "opener": "Ostara celebration feels like breathing out after a long inner winter",
+                "payload": "You are allowed to feel hopeful without proof yet.",
+                "closerType": "question",
+                "closer": "What hope are you letting yourself feel again?"
+              },
+              {
+                "intent": "contrast",
+                "opener": "Celebration can be playful, and it can still be spiritually serious",
+                "payload": "Joy is a valid form of devotion.",
+                "closerType": "question",
+                "closer": "What would playful devotion look like today?"
+              },
+              {
+                "intent": "misconception",
+                "opener": "You do not celebrate only outcomes, you celebrate beginnings too",
+                "payload": "Beginnings deserve attention so they can survive.",
+                "closerType": "try_this",
+                "closer": "Celebrate one small start you made this week."
+              },
+              {
+                "intent": "quick_rule",
+                "opener": "Quick rule: name what is growing, then support it with one action",
+                "payload": "This turns celebration into momentum.",
+                "closerType": "try_this",
+                "closer": "Write one sentence of gratitude, then do one supportive step."
+              },
+              {
+                "intent": "signal",
+                "opener": "A celebration signal is suddenly wanting to share, connect, and create",
+                "payload": "Spring energy loves community and motion.",
+                "closerType": "question",
+                "closer": "Who do you want to create alongside this season?"
+              }
+            ]
+          }
+        }
+      ],
+      "threads": {
+        "keyword": "spring equinox",
+        "angles": [
+          {
+            "intent": "observation",
+            "opener": "Ostara feels like the scales ticking toward warmth",
+            "payload": "Equal day and night hint at momentum about to swing.",
+            "closerType": "question",
+            "closer": "What part of your week wants a little more light?"
+          },
+          {
+            "intent": "contrast",
+            "opener": "Balance is not neutral, it is a turning point waiting to sway",
+            "payload": "You are leaving stillness and moving toward growth.",
+            "closerType": "question",
+            "closer": "Are you leaning toward action or tending the soil?"
+          },
+          {
+            "intent": "misconception",
+            "opener": "Ostara is not a single grand leap, it is the quiet shift between cycles",
+            "payload": "Matching small routines to the daylight keeps you honest.",
+            "closerType": "try_this",
+            "closer": "List one slow change you'll steward for the next three mornings."
+          },
+          {
+            "intent": "quick_rule",
+            "opener": "Quick rule: pair one seed idea with one restful boundary",
+            "payload": "Rest protects the new momentum.",
+            "closerType": "try_this",
+            "closer": "Sketch one rest block and one courage block and keep both small."
+          },
+          {
+            "intent": "signal",
+            "opener": "A signal Ostara landed is feeling energy settle into curiosity",
+            "payload": "When the body welcomes change, you know the momentum is ready.",
+            "closerType": "question",
+            "closer": "What curiosity is asking for more space right now?"
+          }
+        ]
+      }
+    },
+    {
+      "id": "beltane",
+      "name": "Beltane",
+      "date": {
+        "month": 5,
+        "day": 1
+      },
+      "category": "sabbat",
+      "leadUpFacets": [
+        {
+          "dayIndex": -3,
+          "title": "Origins of Beltane",
+          "grimoireSlug": "wheel-of-the-year/beltane",
+          "focus": "Fire festival marking the height of spring",
+          "shortFormHook": "Beltane is the great fire festival celebrating fertility and the union of masculine and feminine energies at spring's peak.",
+          "threads": {
+            "keyword": "beltane",
+            "angles": [
+              {
+                "intent": "observation",
+                "opener": "Beltane energy feels like your life force turning the volume up",
+                "payload": "It is a season for desire, creation, and embodied joy.",
+                "closerType": "question",
+                "closer": "Where do you want more aliveness?"
+              },
+              {
+                "intent": "contrast",
+                "opener": "Beltane is not subtle like Imbolc, it is bold like bloom",
+                "payload": "This is growth you can feel in your body.",
+                "closerType": "question",
+                "closer": "What feels ready to move from private to public?"
+              },
+              {
+                "intent": "misconception",
+                "opener": "Fertility is not only romance, it is creative power in motion",
+                "payload": "Your work, art, and ambition count as sacred too.",
+                "closerType": "try_this",
+                "closer": "Choose one creation and give it one hour of full attention."
+              },
+              {
+                "intent": "quick_rule",
+                "opener": "Quick rule: follow desire, then add boundaries so it stays clean",
+                "payload": "Passion thrives with structure, not chaos.",
+                "closerType": "try_this",
+                "closer": "Name one desire and one boundary that protects it."
+              },
+              {
+                "intent": "signal",
+                "opener": "A Beltane signal is courage to be seen, even if imperfect",
+                "payload": "Life force wants expression, not approval.",
+                "closerType": "question",
+                "closer": "Where are you ready to be seen this season?"
+              }
+            ]
+          }
+        },
+        {
+          "dayIndex": -2,
+          "title": "Beltane Correspondences",
+          "grimoireSlug": "wheel-of-the-year/beltane",
+          "focus": "Maypole, flowers, and fertility symbols",
+          "shortFormHook": "Beltane symbols include the Maypole representing union, flowers in full bloom, and the sacred fire through which cattle were driven.",
+          "threads": {
+            "keyword": "beltane correspondences",
+            "angles": [
+              {
+                "intent": "observation",
+                "opener": "Beltane correspondences bring sensual spring energy into your space",
+                "payload": "Flowers, ribbons, and flame cues wake up your senses.",
+                "closerType": "question",
+                "closer": "Which symbol feels like your most honest desire?"
+              },
+              {
+                "intent": "contrast",
+                "opener": "Flame sparks action, flowers invite receiving, and you need both",
+                "payload": "Giving and receiving are part of the same cycle.",
+                "closerType": "question",
+                "closer": "Are you better at giving or receiving right now?"
+              },
+              {
+                "intent": "misconception",
+                "opener": "You do not need a big ritual, you need one vivid detail",
+                "payload": "One ribbon on a handle can shift the whole mood.",
+                "closerType": "try_this",
+                "closer": "Add one bright element and treat it like a seasonal marker."
+              },
+              {
+                "intent": "quick_rule",
+                "opener": "Quick rule: choose one colour, one scent, and one movement",
+                "payload": "Make the ritual physical so it lands in your body.",
+                "closerType": "try_this",
+                "closer": "Pick a song and move for one full minute with intention."
+              },
+              {
+                "intent": "signal",
+                "opener": "A correspondence signal is feeling bolder after you change your space",
+                "payload": "Your environment gives your nervous system permission.",
+                "closerType": "question",
+                "closer": "What change to your space would make you feel braver?"
+              }
+            ]
+          }
+        },
+        {
+          "dayIndex": -1,
+          "title": "Fire and Passion",
+          "grimoireSlug": "wheel-of-the-year/beltane",
+          "focus": "Rituals celebrating life force and creativity",
+          "shortFormHook": "Beltane honors the life force at its most vibrant. Fire rituals, dancing, and celebration of passion mark this fertile time.",
+          "threads": {
+            "keyword": "fire ritual",
+            "angles": [
+              {
+                "intent": "observation",
+                "opener": "Fire and passion rituals work when you choose honesty over performance",
+                "payload": "Real desire is simpler than the fantasy version.",
+                "closerType": "question",
+                "closer": "What do you actually want, stripped of optics?"
+              },
+              {
+                "intent": "contrast",
+                "opener": "Passion without grounding burns out, grounding without passion goes stale",
+                "payload": "Beltane asks for both heat and steadiness.",
+                "closerType": "question",
+                "closer": "Do you need more heat or more steadiness?"
+              },
+              {
+                "intent": "misconception",
+                "opener": "Passion is not chaos, it is direction with fuel",
+                "payload": "The point is to create, not to spiral.",
+                "closerType": "try_this",
+                "closer": "Write one desire, then write one next step you can do today."
+              },
+              {
+                "intent": "quick_rule",
+                "opener": "Quick rule: burn one fear on paper, then name one brave action",
+                "payload": "Release first, then move with a cleaner signal.",
+                "closerType": "try_this",
+                "closer": "Burn or tear the paper safely, then do the brave action."
+              },
+              {
+                "intent": "signal",
+                "opener": "A fire signal is feeling energised after you take one scary step",
+                "payload": "Your body recognises aligned courage.",
+                "closerType": "question",
+                "closer": "What scary step would energise you, not drain you?"
+              }
+            ]
+          }
+        },
+        {
+          "dayIndex": 0,
+          "title": "Beltane Celebration",
+          "grimoireSlug": "wheel-of-the-year/beltane",
+          "focus": "Honoring union and abundance",
+          "shortFormHook": "Beltane celebrates the sacred marriage of earth and sky. It is a time of joy, union, and abundant creative energy.",
+          "threads": {
+            "keyword": "beltane celebration",
+            "angles": [
+              {
+                "intent": "observation",
+                "opener": "Beltane celebration is permission to enjoy what you are building",
+                "payload": "Joy is part of abundance, not a distraction from it.",
+                "closerType": "question",
+                "closer": "What would enjoyment look like in your life this week?"
+              },
+              {
+                "intent": "contrast",
+                "opener": "Union can mean romance, collaboration, or inner alignment, all count",
+                "payload": "Beltane celebrates connection in every form.",
+                "closerType": "question",
+                "closer": "What connection do you want to deepen?"
+              },
+              {
+                "intent": "misconception",
+                "opener": "Abundance is not only money, it is vitality, time, and support",
+                "payload": "Track what feels full, not only what looks full.",
+                "closerType": "try_this",
+                "closer": "List three ways you are already supported, then thank them."
+              },
+              {
+                "intent": "quick_rule",
+                "opener": "Quick rule: celebrate one win, then commit to one next step",
+                "payload": "This keeps the season bright and productive.",
+                "closerType": "try_this",
+                "closer": "Choose one win and share it with someone you trust."
+              },
+              {
+                "intent": "signal",
+                "opener": "A celebration signal is feeling more magnetic when you stop apologising",
+                "payload": "Self permission changes your whole field.",
+                "closerType": "question",
+                "closer": "Where do you want to stop apologising for wanting more?"
+              }
+            ]
+          }
+        }
+      ],
+      "threads": {
+        "keyword": "beltane",
+        "angles": [
+          {
+            "intent": "observation",
+            "opener": "Beltane feels like the bones of desire loosening into dance",
+            "payload": "The season pushes for celebration and authentic expression.",
+            "closerType": "question",
+            "closer": "Where does your body want to move more fully?"
+          },
+          {
+            "intent": "contrast",
+            "opener": "This fire season is bold compared to Imbolc's hush",
+            "payload": "Growth is louder now but still grounded in reverence.",
+            "closerType": "question",
+            "closer": "What feels worthy of both tenderness and heat?"
+          },
+          {
+            "intent": "misconception",
+            "opener": "Beltane is not only romance, it is creative magnetism meeting responsibility",
+            "payload": "Even playful rituals have structure when you make them intentional.",
+            "closerType": "try_this",
+            "closer": "Name one joyful act you can repeat with intention today."
+          },
+          {
+            "intent": "quick_rule",
+            "opener": "Quick rule: pair one bold feeling with one grounded check-in",
+            "payload": "That preserves clarity when the energy rises.",
+            "closerType": "try_this",
+            "closer": "Check in with your breath before you act on a craving."
+          },
+          {
+            "intent": "signal",
+            "opener": "A signal the season is real is sudden generosity without exhaustion",
+            "payload": "When you feel expansive yet steady, the festival has arrived.",
+            "closerType": "question",
+            "closer": "Where are you ready to offer energy without burning out?"
+          }
+        ]
+      }
+    },
+    {
+      "id": "litha",
+      "name": "Litha",
+      "date": {
+        "month": 6,
+        "day": 21
+      },
+      "category": "sabbat",
+      "leadUpFacets": [
+        {
+          "dayIndex": -3,
+          "title": "Summer Solstice Origins",
+          "grimoireSlug": "wheel-of-the-year/litha",
+          "focus": "The longest day and peak of solar power",
+          "shortFormHook": "Litha marks the Summer Solstice, the longest day of the year. The sun reaches its peak power before beginning its descent.",
+          "threads": {
+            "keyword": "summer solstice",
+            "angles": [
+              {
+                "intent": "observation",
+                "opener": "Summer solstice feels like the sun holding its breath at the top",
+                "payload": "It is peak power, and also the moment the cycle turns.",
+                "closerType": "question",
+                "closer": "What are you ready to honour at your peak?"
+              },
+              {
+                "intent": "contrast",
+                "opener": "Litha is celebration and preparation, both at once, and that is the magic",
+                "payload": "You enjoy the light while respecting the coming shift.",
+                "closerType": "question",
+                "closer": "What do you want to enjoy, and what do you want to protect?"
+              },
+              {
+                "intent": "misconception",
+                "opener": "Peak season is not endless, it is a moment to use wisely",
+                "payload": "Use the light to strengthen what matters most.",
+                "closerType": "try_this",
+                "closer": "Pick one priority and give it your best energy today."
+              },
+              {
+                "intent": "quick_rule",
+                "opener": "Quick rule: do the bold task first, then celebrate with something simple",
+                "payload": "Solar energy loves decisive action.",
+                "closerType": "try_this",
+                "closer": "Choose one bold task and complete the smallest version of it."
+              },
+              {
+                "intent": "signal",
+                "opener": "A solstice signal is sudden confidence, like your spine remembering itself",
+                "payload": "The sun invites you to stand taller in your choices.",
+                "closerType": "question",
+                "closer": "Where do you want to stand taller?"
+              }
+            ]
+          }
+        },
+        {
+          "dayIndex": -2,
+          "title": "Litha Correspondences",
+          "grimoireSlug": "wheel-of-the-year/litha",
+          "focus": "Solar symbols, herbs, and midsummer magic",
+          "shortFormHook": "Litha correspondences include gold and yellow colours, sunflowers, St. John's Wort, and all solar symbols at their most potent.",
+          "threads": {
+            "keyword": "litha correspondences",
+            "angles": [
+              {
+                "intent": "observation",
+                "opener": "Litha correspondences brighten your space like a mood-altering sunrise",
+                "payload": "Gold, herbs, and solar symbols reinforce confidence and clarity.",
+                "closerType": "question",
+                "closer": "What symbol makes you feel most powerful?"
+              },
+              {
+                "intent": "contrast",
+                "opener": "Solar herbs support vitality, solar colours support visibility, and both matter",
+                "payload": "Body and identity get the message together.",
+                "closerType": "question",
+                "closer": "Do you want more vitality or more visibility?"
+              },
+              {
+                "intent": "misconception",
+                "opener": "You do not need rare items, you need something that feels like summer",
+                "payload": "A bowl of fruit can do more than an expensive tool.",
+                "closerType": "try_this",
+                "closer": "Choose one ordinary item and treat it as a solar charm."
+              },
+              {
+                "intent": "quick_rule",
+                "opener": "Quick rule: pick one bright colour and repeat it in three places",
+                "payload": "Repetition makes the intention stick in your nervous system.",
+                "closerType": "try_this",
+                "closer": "Wear it, place it, and light it, then notice your mood shift."
+              },
+              {
+                "intent": "signal",
+                "opener": "A correspondence signal is motivation returning after you add light",
+                "payload": "Your body responds to brightness more than you realise.",
+                "closerType": "question",
+                "closer": "Where could you add light in your daily routine?"
+              }
+            ]
+          }
+        },
+        {
+          "dayIndex": -1,
+          "title": "Midsummer Magic",
+          "grimoireSlug": "wheel-of-the-year/litha",
+          "focus": "Rituals harnessing peak solar energy",
+          "shortFormHook": "Midsummer is considered a powerful time for magic. The fae are active, and solar energy can be captured for the darker months ahead.",
+          "threads": {
+            "keyword": "midsummer magic",
+            "angles": [
+              {
+                "intent": "observation",
+                "opener": "Midsummer magic works best when you focus on one clear desire",
+                "payload": "Peak light amplifies whatever you choose to feed.",
+                "closerType": "question",
+                "closer": "What desire do you want to amplify right now?"
+              },
+              {
+                "intent": "contrast",
+                "opener": "Solar magic energises action, lunar magic nurtures process, and both belong",
+                "payload": "Today is for bold movement, not endless planning.",
+                "closerType": "question",
+                "closer": "What action have you been circling instead of doing?"
+              },
+              {
+                "intent": "misconception",
+                "opener": "Magic is not a shortcut, it is a spotlight on your commitment",
+                "payload": "It magnifies what you are already choosing.",
+                "closerType": "try_this",
+                "closer": "Write your commitment, then choose the next action that proves it."
+              },
+              {
+                "intent": "quick_rule",
+                "opener": "Quick rule: charge one object in sunlight, then use it as a reminder",
+                "payload": "It becomes a cue for follow-through.",
+                "closerType": "try_this",
+                "closer": "Place it where you make decisions, then act once when you see it."
+              },
+              {
+                "intent": "signal",
+                "opener": "A midsummer signal is feeling brave enough to take up space",
+                "payload": "The sun invites visibility, not shrinking.",
+                "closerType": "question",
+                "closer": "Where do you want to take up more space?"
+              }
+            ]
+          }
+        },
+        {
+          "dayIndex": 0,
+          "title": "Litha Celebration",
+          "grimoireSlug": "wheel-of-the-year/litha",
+          "focus": "Honoring the sun at its zenith",
+          "shortFormHook": "Litha celebrates light at its fullest while acknowledging the turn toward darkness. It balances celebration with preparation.",
+          "threads": {
+            "keyword": "litha celebration",
+            "angles": [
+              {
+                "intent": "observation",
+                "opener": "Litha celebration is a ritual of confidence, like sunlight in your chest",
+                "payload": "You honour what is bright in you without waiting for permission.",
+                "closerType": "question",
+                "closer": "What part of you deserves to be honoured today?"
+              },
+              {
+                "intent": "contrast",
+                "opener": "Celebration marks the peak, preparation respects the turn, and both are wise",
+                "payload": "You can enjoy and still be intentional.",
+                "closerType": "question",
+                "closer": "What do you want to enjoy fully before you move on?"
+              },
+              {
+                "intent": "misconception",
+                "opener": "Rest is not wasted during summer, it is how you keep the flame",
+                "payload": "Sustained light needs pauses.",
+                "closerType": "try_this",
+                "closer": "Schedule a small rest block, then protect it like a meeting."
+              },
+              {
+                "intent": "quick_rule",
+                "opener": "Quick rule: name one peak win, then set one protective boundary",
+                "payload": "This keeps your energy from leaking in the bright season.",
+                "closerType": "try_this",
+                "closer": "Write the boundary as a sentence you can actually say out loud."
+              },
+              {
+                "intent": "signal",
+                "opener": "A celebration signal is gratitude arriving without guilt or minimising",
+                "payload": "You can receive your own success cleanly.",
+                "closerType": "question",
+                "closer": "What win are you ready to receive fully?"
+              }
+            ]
+          }
+        }
+      ],
+      "threads": {
+        "keyword": "litha",
+        "angles": [
+          {
+            "intent": "observation",
+            "opener": "Litha feels like the sun holding its brightest breath",
+            "payload": "Midsummer is the peak of outward energy before release.",
+            "closerType": "question",
+            "closer": "What brightness are you protecting right now?"
+          },
+          {
+            "intent": "contrast",
+            "opener": "The height of light is also an invitation to rest, and both belong",
+            "payload": "Too much in one direction invites the opposite soon.",
+            "closerType": "question",
+            "closer": "Where do you need to temper fire with shade?"
+          },
+          {
+            "intent": "misconception",
+            "opener": "Litha is not about showing off power, it is about honoring steady radiance",
+            "payload": "Consistency beats spectacle by the time the wheel turns.",
+            "closerType": "try_this",
+            "closer": "Notice one way you can rest inside the heat today."
+          },
+          {
+            "intent": "quick_rule",
+            "opener": "Quick rule: celebrate sunlight with something practical, not just performative",
+            "payload": "Sustainability keeps the fire useful beyond the moment.",
+            "closerType": "try_this",
+            "closer": "Pair one joyful flame with one cooling gesture."
+          },
+          {
+            "intent": "signal",
+            "opener": "A signal Litha is actually working is feeling calmer after you celebrate the light",
+            "payload": "True heat leaves you energised, not depleted.",
+            "closerType": "question",
+            "closer": "What celebration leaves you steady afterwards?"
+          }
+        ]
+      }
+    },
+    {
+      "id": "lughnasadh",
+      "name": "Lughnasadh",
+      "date": {
+        "month": 8,
+        "day": 1
+      },
+      "category": "sabbat",
+      "leadUpFacets": [
+        {
+          "dayIndex": -3,
+          "title": "Origins of Lughnasadh",
+          "grimoireSlug": "wheel-of-the-year/lughnasadh",
+          "focus": "First harvest festival honoring Lugh",
+          "shortFormHook": "Lughnasadh is the first harvest festival, honoring the Celtic god Lugh. It marks the beginning of the grain harvest season.",
+          "threads": {
+            "keyword": "lughnasadh",
+            "angles": [
+              {
+                "intent": "observation",
+                "opener": "Lughnasadh arrives when your effort finally starts looking like results",
+                "payload": "The first harvest asks you to notice what is ripening.",
+                "closerType": "question",
+                "closer": "What is ripening in your life right now?"
+              },
+              {
+                "intent": "contrast",
+                "opener": "Planting was hope, harvest is proof, and proof changes your self-trust",
+                "payload": "You learn what works by seeing what grew.",
+                "closerType": "question",
+                "closer": "What proof do you need to actually believe yourself?"
+              },
+              {
+                "intent": "misconception",
+                "opener": "Harvest is not only taking, it is gratitude and responsibility too",
+                "payload": "Receiving well includes sharing and honouring the process.",
+                "closerType": "try_this",
+                "closer": "Write one thing you received this season, then thank the effort behind it."
+              },
+              {
+                "intent": "quick_rule",
+                "opener": "Quick rule: name the yield, name the lesson, then choose the next refinement",
+                "payload": "Harvest teaches iteration, not perfection.",
+                "closerType": "try_this",
+                "closer": "Pick one thing to refine, and make it smaller than you think."
+              },
+              {
+                "intent": "signal",
+                "opener": "A Lughnasadh signal is pride that feels calm, not performative",
+                "payload": "You know what you built because you lived it.",
+                "closerType": "question",
+                "closer": "What are you quietly proud of?"
+              }
+            ]
+          }
+        },
+        {
+          "dayIndex": -2,
+          "title": "Lughnasadh Correspondences",
+          "grimoireSlug": "wheel-of-the-year/lughnasadh",
+          "focus": "Grain, bread, and harvest symbols",
+          "shortFormHook": "Lughnasadh symbols include wheat and grain, freshly baked bread, and the colours of ripening fields: gold, orange, and brown.",
+          "threads": {
+            "keyword": "lughnasadh correspondences",
+            "angles": [
+              {
+                "intent": "observation",
+                "opener": "Harvest correspondences feel grounding, like warm bread in your hands",
+                "payload": "Wheat, gold tones, and hearth symbols anchor abundance in reality.",
+                "closerType": "question",
+                "closer": "What symbol makes abundance feel real to you?"
+              },
+              {
+                "intent": "contrast",
+                "opener": "Bread is comfort, grain is effort, and both belong in the story",
+                "payload": "Abundance is built and then shared.",
+                "closerType": "question",
+                "closer": "Do you need comfort or recognition today?"
+              },
+              {
+                "intent": "misconception",
+                "opener": "Abundance is not luxury only, it is nourishment and stability",
+                "payload": "Sometimes the richest thing is enoughness.",
+                "closerType": "try_this",
+                "closer": "Name one way you have enough today, then let yourself feel it."
+              },
+              {
+                "intent": "quick_rule",
+                "opener": "Quick rule: choose one food, one colour, one gratitude, keep it simple",
+                "payload": "Sensory anchors make the ritual stick.",
+                "closerType": "try_this",
+                "closer": "Eat one bite slowly and dedicate it to your effort this year."
+              },
+              {
+                "intent": "signal",
+                "opener": "A correspondence signal is feeling more present when you slow down",
+                "payload": "Harvest energy rewards attention, not speed.",
+                "closerType": "question",
+                "closer": "Where could you slow down and still be effective?"
+              }
+            ]
+          }
+        },
+        {
+          "dayIndex": -1,
+          "title": "Harvest Gratitude",
+          "grimoireSlug": "wheel-of-the-year/lughnasadh",
+          "focus": "Rituals of thanksgiving for abundance",
+          "shortFormHook": "Lughnasadh invites gratitude for what has ripened. Baking bread and sharing meals honors the sacrifice inherent in harvest.",
+          "threads": {
+            "keyword": "harvest gratitude",
+            "angles": [
+              {
+                "intent": "observation",
+                "opener": "Harvest gratitude hits hardest when you thank the hard parts too",
+                "payload": "You honour the labour, not just the outcome.",
+                "closerType": "question",
+                "closer": "What hard part deserves a thank you?"
+              },
+              {
+                "intent": "contrast",
+                "opener": "Gratitude can be soft, but it can also be fierce and honest",
+                "payload": "It is not ignoring pain, it is recognising survival.",
+                "closerType": "question",
+                "closer": "What did you survive that deserves recognition?"
+              },
+              {
+                "intent": "misconception",
+                "opener": "Gratitude is not denial, it is attention to what is true",
+                "payload": "You can be grateful and still want more.",
+                "closerType": "try_this",
+                "closer": "Write two truths: what you are grateful for, and what you still want."
+              },
+              {
+                "intent": "quick_rule",
+                "opener": "Quick rule: thank the support, thank yourself, then share one piece",
+                "payload": "Harvest becomes healthier when it circulates.",
+                "closerType": "try_this",
+                "closer": "Send one thank you message to someone who helped you grow."
+              },
+              {
+                "intent": "signal",
+                "opener": "A gratitude signal is feeling less desperate to prove yourself",
+                "payload": "You recognise your own effort as valid.",
+                "closerType": "question",
+                "closer": "Where are you done proving yourself?"
+              }
+            ]
+          }
+        },
+        {
+          "dayIndex": 0,
+          "title": "Lughnasadh Celebration",
+          "grimoireSlug": "wheel-of-the-year/lughnasadh",
+          "focus": "Celebrating first fruits and skilled craft",
+          "shortFormHook": "Lughnasadh celebrates the first harvest and the skills that created abundance. Games and crafts honor Lugh, god of many talents.",
+          "threads": {
+            "keyword": "lughnasadh celebration",
+            "angles": [
+              {
+                "intent": "observation",
+                "opener": "Lughnasadh celebration honours skill, the kind earned through repetition",
+                "payload": "You celebrate what your hands and mind learned this year.",
+                "closerType": "question",
+                "closer": "What skill have you earned the hard way?"
+              },
+              {
+                "intent": "contrast",
+                "opener": "First fruits are not the final harvest, they are proof you are on track",
+                "payload": "You are allowed to celebrate early signs of success.",
+                "closerType": "question",
+                "closer": "What early sign tells you you are on track?"
+              },
+              {
+                "intent": "misconception",
+                "opener": "Celebration is not complacency, it is fuel for the next stretch",
+                "payload": "You refill the tank before the next push.",
+                "closerType": "try_this",
+                "closer": "Celebrate one win today, then choose one next refinement."
+              },
+              {
+                "intent": "quick_rule",
+                "opener": "Quick rule: name the craft, name the offering, name the next practice",
+                "payload": "This keeps your talent growing instead of plateauing.",
+                "closerType": "try_this",
+                "closer": "Practice your craft for ten focused minutes, then stop."
+              },
+              {
+                "intent": "signal",
+                "opener": "A celebration signal is wanting to share your work without shrinking",
+                "payload": "You let your craft be seen as it is.",
+                "closerType": "question",
+                "closer": "Where do you want to stop shrinking your work?"
+              }
+            ]
+          }
+        }
+      ],
+      "threads": {
+        "keyword": "lughnasadh",
+        "angles": [
+          {
+            "intent": "observation",
+            "opener": "Lughnasadh feels like the first harvest breathing relief into hard work",
+            "payload": "Fields show the payoff of steady tending.",
+            "closerType": "question",
+            "closer": "What harvest are you pausing to notice?"
+          },
+          {
+            "intent": "contrast",
+            "opener": "This moment balances effort and gratitude, not either/or",
+            "payload": "You keep building even while you give thanks.",
+            "closerType": "question",
+            "closer": "What feels both earned and tender this season?"
+          },
+          {
+            "intent": "misconception",
+            "opener": "Lughnasadh is not a finish line, it is a checkpoint that invites recalibration",
+            "payload": "The pause lets you adjust before the next push.",
+            "closerType": "try_this",
+            "closer": "Write one lesson the harvest taught you this year."
+          },
+          {
+            "intent": "quick_rule",
+            "opener": "Quick rule: name one resource you can share without losing your edge",
+            "payload": "Generosity keeps abundance moving forward.",
+            "closerType": "try_this",
+            "closer": "Offer a small act of support to someone who picked up the slack."
+          },
+          {
+            "intent": "signal",
+            "opener": "A signal it landed is calmer pride instead of loud perfectionism",
+            "payload": "You feel steady even while admitting you were tired.",
+            "closerType": "question",
+            "closer": "How can you let calm pride live beside unfinished work?"
+          }
+        ]
+      }
+    },
+    {
+      "id": "mabon",
+      "name": "Mabon",
+      "date": {
+        "month": 9,
+        "day": 22
+      },
+      "category": "sabbat",
+      "leadUpFacets": [
+        {
+          "dayIndex": -3,
+          "title": "Autumn Equinox Origins",
+          "grimoireSlug": "wheel-of-the-year/mabon",
+          "focus": "Second harvest and balance before darkness",
+          "shortFormHook": "Mabon marks the Autumn Equinox, when day and night are equal. It is the second harvest festival before darkness overtakes light.",
+          "threads": {
+            "keyword": "autumn equinox",
+            "angles": [
+              {
+                "intent": "observation",
+                "opener": "Autumn equinox feels like the year exhaling after the bright rush",
+                "payload": "Balance returns, then the season turns toward inwardness.",
+                "closerType": "question",
+                "closer": "What are you exhaling right now?"
+              },
+              {
+                "intent": "contrast",
+                "opener": "Second harvest is gratitude and release, not just gathering more",
+                "payload": "You keep what sustains you and let the rest compost.",
+                "closerType": "question",
+                "closer": "What needs to become compost in your life?"
+              },
+              {
+                "intent": "misconception",
+                "opener": "Letting go is not loss, it is seasonal intelligence",
+                "payload": "Release creates warmth for what you keep.",
+                "closerType": "try_this",
+                "closer": "Choose one thing to stop feeding and call it complete."
+              },
+              {
+                "intent": "quick_rule",
+                "opener": "Quick rule: keep what nourishes, release what drains, and do it gently",
+                "payload": "Autumn rewards clean boundaries and soft discipline.",
+                "closerType": "try_this",
+                "closer": "Write one nourish list and one drain list, then act on one item."
+              },
+              {
+                "intent": "signal",
+                "opener": "A Mabon signal is craving simplicity, warmth, and fewer demands",
+                "payload": "Your body knows the season is shifting.",
+                "closerType": "question",
+                "closer": "What demand could you lower this week?"
+              }
+            ]
+          }
+        },
+        {
+          "dayIndex": -2,
+          "title": "Mabon Correspondences",
+          "grimoireSlug": "wheel-of-the-year/mabon",
+          "focus": "Apples, wine, and symbols of abundance",
+          "shortFormHook": "Mabon symbols include apples, grapes and wine, gourds, and the rich colours of autumn leaves: red, orange, gold, and brown.",
+          "threads": {
+            "keyword": "mabon correspondences",
+            "angles": [
+              {
+                "intent": "observation",
+                "opener": "Mabon correspondences feel cosy, like harvest colours wrapping your space",
+                "payload": "Apples and warm tones turn gratitude into something tangible.",
+                "closerType": "question",
+                "closer": "What autumn symbol makes you feel safest?"
+              },
+              {
+                "intent": "contrast",
+                "opener": "Apples speak nourishment, wine speaks celebration, and both can coexist",
+                "payload": "You can be grounded and joyful at once.",
+                "closerType": "question",
+                "closer": "Do you want grounding or celebration today?"
+              },
+              {
+                "intent": "misconception",
+                "opener": "Abundance is not loud, it is steady, warm, and repeatable",
+                "payload": "Mabon teaches enoughness as a practice.",
+                "closerType": "try_this",
+                "closer": "Choose one comfort ritual and repeat it for three nights."
+              },
+              {
+                "intent": "quick_rule",
+                "opener": "Quick rule: pick one harvest food and eat it slowly with gratitude",
+                "payload": "Taste becomes a ritual when you pay attention.",
+                "closerType": "try_this",
+                "closer": "Take one bite and name one thing you are grateful for."
+              },
+              {
+                "intent": "signal",
+                "opener": "A correspondence signal is feeling calmer after you add warmth and colour",
+                "payload": "Your nervous system reads seasonal cues immediately.",
+                "closerType": "question",
+                "closer": "What cue would make your home feel warmer?"
+              }
+            ]
+          }
+        },
+        {
+          "dayIndex": -1,
+          "title": "Balance and Release",
+          "grimoireSlug": "wheel-of-the-year/mabon",
+          "focus": "Rituals for gratitude and letting go",
+          "shortFormHook": "Mabon invites both gratitude for harvest and release of what is complete. Balance is honored before the descent into darkness.",
+          "threads": {
+            "keyword": "balance and release",
+            "angles": [
+              {
+                "intent": "observation",
+                "opener": "Balance and release rituals work when you tell the truth kindly",
+                "payload": "You admit what is done without blaming yourself for it.",
+                "closerType": "question",
+                "closer": "What chapter is finished, even if you loved it?"
+              },
+              {
+                "intent": "contrast",
+                "opener": "Holding on feels safer short term, letting go feels cleaner long term",
+                "payload": "Mabon asks you to choose long-term peace.",
+                "closerType": "question",
+                "closer": "What are you holding that costs you peace?"
+              },
+              {
+                "intent": "misconception",
+                "opener": "Release is not forgetting, it is stopping the daily re-injury",
+                "payload": "You honour the lesson and stop reopening it.",
+                "closerType": "try_this",
+                "closer": "Write what the lesson was, then write what you are done repeating."
+              },
+              {
+                "intent": "quick_rule",
+                "opener": "Quick rule: thank it, name it, release it, then replace it with care",
+                "payload": "Do not leave an empty space, fill it gently.",
+                "closerType": "try_this",
+                "closer": "Choose one supportive habit to replace what you are releasing."
+              },
+              {
+                "intent": "signal",
+                "opener": "A release signal is feeling lighter after you decide, not after you fix",
+                "payload": "Decision is the real turning key.",
+                "closerType": "question",
+                "closer": "What decision would lighten you instantly?"
+              }
+            ]
+          }
+        },
+        {
+          "dayIndex": 0,
+          "title": "Mabon Celebration",
+          "grimoireSlug": "wheel-of-the-year/mabon",
+          "focus": "Thanksgiving and preparation for winter",
+          "shortFormHook": "Mabon is a thanksgiving celebration for the harvest's bounty. It prepares body and spirit for the introspective dark season ahead.",
+          "threads": {
+            "keyword": "mabon celebration",
+            "angles": [
+              {
+                "intent": "observation",
+                "opener": "Mabon celebration is gratitude with foresight, like packing warmth for later",
+                "payload": "You appreciate what you have and prepare for what is coming.",
+                "closerType": "question",
+                "closer": "What do you want to carry into winter?"
+              },
+              {
+                "intent": "contrast",
+                "opener": "Thanksgiving looks back, preparation looks forward, and you need both",
+                "payload": "Reflection and planning can be a single ritual.",
+                "closerType": "question",
+                "closer": "What are you thankful for, and what are you preparing for?"
+              },
+              {
+                "intent": "misconception",
+                "opener": "Preparing is not anxiety, it is care for your future self",
+                "payload": "You make winter easier by choosing softness now.",
+                "closerType": "try_this",
+                "closer": "Make one small plan that will comfort you next month."
+              },
+              {
+                "intent": "quick_rule",
+                "opener": "Quick rule: choose one comfort, one boundary, and one intention for winter",
+                "payload": "That trio keeps you steady when the light drops.",
+                "closerType": "try_this",
+                "closer": "Write your winter trio and pin it somewhere visible."
+              },
+              {
+                "intent": "signal",
+                "opener": "A celebration signal is feeling ready to slow down without guilt",
+                "payload": "Your body knows it is time to shift pace.",
+                "closerType": "question",
+                "closer": "Where do you want to slow down without guilt?"
+              }
+            ]
+          }
+        }
+      ],
+      "threads": {
+        "keyword": "mabon",
+        "angles": [
+          {
+            "intent": "observation",
+            "opener": "Mabon feels like the balance tipping toward inward seasons",
+            "payload": "Light and dark stand equal before the tilt inward.",
+            "closerType": "question",
+            "closer": "What do you feel ready to harvest internally?"
+          },
+          {
+            "intent": "contrast",
+            "opener": "The equinox is not only endings, it is a reading of what to keep",
+            "payload": "Nods of gratitude live beside the recognition of loss.",
+            "closerType": "question",
+            "closer": "Which part of your story do you want to preserve?"
+          },
+          {
+            "intent": "misconception",
+            "opener": "Mabon is not resignation, it is the skill of choosing what to carry",
+            "payload": "Your next steps stem from thoughtful release.",
+            "closerType": "try_this",
+            "closer": "Pick one thing to let go of and one to keep steady."
+          },
+          {
+            "intent": "quick_rule",
+            "opener": "Quick rule: align one ritual with one practical plan for the darker months",
+            "payload": "Intentions stay useful when grounded in logistics.",
+            "closerType": "try_this",
+            "closer": "Map one winter need onto a tiny weekly habit."
+          },
+          {
+            "intent": "signal",
+            "opener": "A signal Mabon landed is calmer appetite for quiet work",
+            "payload": "Your nervous system agrees to fewer inputs.",
+            "closerType": "question",
+            "closer": "Where could you set a boundary before the dark grows heavier?"
+          }
+        ]
+      }
+    },
+    {
+      "id": "samhain",
+      "name": "Samhain",
+      "date": {
+        "month": 10,
+        "day": 31
+      },
+      "category": "sabbat",
+      "leadUpFacets": [
+        {
+          "dayIndex": -3,
+          "title": "Origins of Samhain",
+          "grimoireSlug": "wheel-of-the-year/samhain",
+          "focus": "Celtic origins and the thinning veil between worlds",
+          "shortFormHook": "Samhain marks the Celtic New Year when the veil between worlds grows thin. It honors the dead and embraces the dark half of the year.",
+          "threads": {
+            "keyword": "samhain",
+            "angles": [
+              {
+                "intent": "observation",
+                "opener": "Samhain feels like the world going quiet so you can hear yourself",
+                "payload": "The season turns inward, and truth gets louder.",
+                "closerType": "question",
+                "closer": "What truth gets louder when everything goes quiet?"
+              },
+              {
+                "intent": "contrast",
+                "opener": "Samhain is ending and beginning at once, a doorway not a dead end",
+                "payload": "It closes one cycle and names the next.",
+                "closerType": "question",
+                "closer": "What are you ending, and what are you beginning?"
+              },
+              {
+                "intent": "misconception",
+                "opener": "Dark season work is not fear, it is intimacy with reality",
+                "payload": "You look at what is true without flinching.",
+                "closerType": "try_this",
+                "closer": "Write one fear, then write the truth underneath it."
+              },
+              {
+                "intent": "quick_rule",
+                "opener": "Quick rule: honour the ending first, then invite the new name",
+                "payload": "Respecting closure makes room for clean beginnings.",
+                "closerType": "try_this",
+                "closer": "Say out loud what you are done carrying."
+              },
+              {
+                "intent": "signal",
+                "opener": "A Samhain signal is clear boundaries and less tolerance for noise",
+                "payload": "Your energy gets selective for a reason.",
+                "closerType": "question",
+                "closer": "What noise are you ready to cut off?"
+              }
+            ]
+          }
+        },
+        {
+          "dayIndex": -2,
+          "title": "Samhain Correspondences",
+          "grimoireSlug": "wheel-of-the-year/samhain",
+          "focus": "Colors, crystals, herbs, and deities of Samhain",
+          "shortFormHook": "Samhain correspondences include black and orange colours, obsidian and jet stones, mugwort and rosemary, and deities of death and rebirth.",
+          "threads": {
+            "keyword": "samhain correspondences",
+            "angles": [
+              {
+                "intent": "observation",
+                "opener": "Samhain correspondences feel protective, like wrapping your spirit in velvet",
+                "payload": "Dark stones and herbs support grounding and clear perception.",
+                "closerType": "question",
+                "closer": "What makes you feel most protected spiritually?"
+              },
+              {
+                "intent": "contrast",
+                "opener": "Protection tools calm the body, divination tools sharpen the signal",
+                "payload": "Choose what you need before you reach out.",
+                "closerType": "question",
+                "closer": "Do you need grounding or clearer messages?"
+              },
+              {
+                "intent": "misconception",
+                "opener": "You do not need many tools, you need one tool you trust",
+                "payload": "Trust is the real amplifier in seasonal work.",
+                "closerType": "try_this",
+                "closer": "Choose one item and use it consistently all week."
+              },
+              {
+                "intent": "quick_rule",
+                "opener": "Quick rule: cleanse first, protect second, then ask your questions",
+                "payload": "Order matters when the veil feels thin.",
+                "closerType": "try_this",
+                "closer": "Cleanse your space, then ask one question only."
+              },
+              {
+                "intent": "signal",
+                "opener": "A correspondence signal is sudden stillness when you place the tool down",
+                "payload": "Your body recognises the boundary immediately.",
+                "closerType": "question",
+                "closer": "What practice helps you feel most centred?"
+              }
+            ]
+          }
+        },
+        {
+          "dayIndex": -1,
+          "title": "Ancestor Work",
+          "grimoireSlug": "wheel-of-the-year/samhain",
+          "focus": "Rituals for honoring ancestors and the beloved dead",
+          "shortFormHook": "Samhain invites ancestor communion. Traditional practices include setting a place at the table for the dead and speaking their names aloud.",
+          "threads": {
+            "keyword": "ancestor work",
+            "angles": [
+              {
+                "intent": "observation",
+                "opener": "Ancestor work often begins with gratitude before it becomes guidance",
+                "payload": "Honour builds the bridge, then messages come through.",
+                "closerType": "question",
+                "closer": "Who do you want to honour by name today?"
+              },
+              {
+                "intent": "contrast",
+                "opener": "Remembering is soft, asking for guidance is bold, and both are sacred",
+                "payload": "You can honour and still seek support.",
+                "closerType": "question",
+                "closer": "What support do you wish you could ask for?"
+              },
+              {
+                "intent": "misconception",
+                "opener": "Ancestor work is not only bloodline, it is lineage of love too",
+                "payload": "Mentors, friends, and chosen family can be honoured.",
+                "closerType": "try_this",
+                "closer": "Write one name from your chosen lineage and thank them."
+              },
+              {
+                "intent": "quick_rule",
+                "opener": "Quick rule: offer one thing, speak one name, then sit in silence",
+                "payload": "Silence is where the signal has space.",
+                "closerType": "try_this",
+                "closer": "Set a two-minute timer and just listen."
+              },
+              {
+                "intent": "signal",
+                "opener": "A strong signal is warmth or emotion rising when you speak their name",
+                "payload": "Your body carries memory like a message.",
+                "closerType": "question",
+                "closer": "What name brings a feeling immediately?"
+              }
+            ]
+          }
+        },
+        {
+          "dayIndex": 0,
+          "title": "Samhain Celebration",
+          "grimoireSlug": "wheel-of-the-year/samhain",
+          "focus": "Honoring the day and embracing transformation",
+          "shortFormHook": "Samhain is both an ending and a beginning. As the final harvest, it teaches that death is part of the cycle, making space for new growth.",
+          "threads": {
+            "keyword": "samhain celebration",
+            "angles": [
+              {
+                "intent": "observation",
+                "opener": "Samhain celebration is a vow to transform, not a wish to escape",
+                "payload": "You let endings be real so beginnings can be clean.",
+                "closerType": "question",
+                "closer": "What transformation are you ready to choose?"
+              },
+              {
+                "intent": "contrast",
+                "opener": "Final harvest celebrates what grew, and honours what must be released",
+                "payload": "You keep the lesson, not the weight.",
+                "closerType": "question",
+                "closer": "What lesson do you want to keep from this year?"
+              },
+              {
+                "intent": "misconception",
+                "opener": "Transformation is not instant, it is a sequence of brave decisions",
+                "payload": "You change by choosing again and again.",
+                "closerType": "try_this",
+                "closer": "Name one decision you will keep choosing for seven days."
+              },
+              {
+                "intent": "quick_rule",
+                "opener": "Quick rule: release one thing, bless one thing, protect one boundary",
+                "payload": "That is enough for a powerful night.",
+                "closerType": "try_this",
+                "closer": "Write your release, blessing, and boundary in three lines."
+              },
+              {
+                "intent": "signal",
+                "opener": "A celebration signal is feeling done with old patterns without hatred",
+                "payload": "Clean closure is the real magic.",
+                "closerType": "question",
+                "closer": "What pattern are you ready to outgrow?"
+              }
+            ]
+          }
+        }
+      ],
+      "threads": {
+        "keyword": "samhain",
+        "angles": [
+          {
+            "intent": "observation",
+            "opener": "Samhain feels like thresholds thinning around you",
+            "payload": "The honoring work is quieter but more intense.",
+            "closerType": "question",
+            "closer": "Who are you inviting to sit beside you tonight?"
+          },
+          {
+            "intent": "contrast",
+            "opener": "It invites both grief and celebration without forcing them apart",
+            "payload": "You can hold endings and gratitude simultaneously.",
+            "closerType": "question",
+            "closer": "What ending feels sacred this season?"
+          },
+          {
+            "intent": "misconception",
+            "opener": "Samhain is not only about fear, it is about listening deeply",
+            "payload": "When you pause, messages arrive without noise.",
+            "closerType": "try_this",
+            "closer": "Light one candle and whisper a name you want to hear from."
+          },
+          {
+            "intent": "quick_rule",
+            "opener": "Quick rule: say thank you before you request anything from the other side",
+            "payload": "Gratitude opens a cleaner channel.",
+            "closerType": "try_this",
+            "closer": "Offer a brief thanks to an ancestor, available or imagined."
+          },
+          {
+            "intent": "signal",
+            "opener": "A signal the veil thins is sudden clarity about unresolved threads",
+            "payload": "The quiet momentum brings cords of story forward.",
+            "closerType": "question",
+            "closer": "What unresolved thread wants a gentle update?"
+          }
+        ]
+      }
+    },
+    {
+      "id": "yule",
+      "name": "Yule",
+      "date": {
+        "month": 12,
+        "day": 21
+      },
+      "category": "sabbat",
+      "leadUpFacets": [
+        {
+          "dayIndex": -3,
+          "title": "Winter Solstice Origins",
+          "grimoireSlug": "wheel-of-the-year/yule",
+          "focus": "The longest night and return of the light",
+          "shortFormHook": "Yule marks the Winter Solstice, the longest night of the year. From this point, daylight slowly returns as the sun is symbolically reborn.",
+          "threads": {
+            "keyword": "winter solstice",
+            "angles": [
+              {
+                "intent": "observation",
+                "opener": "Winter solstice feels like darkness reaching its edge, then softening",
+                "payload": "The return of light begins before you can see it.",
+                "closerType": "question",
+                "closer": "Where do you need proof that light returns?"
+              },
+              {
+                "intent": "contrast",
+                "opener": "The night is long, but the turning point is real, and that matters",
+                "payload": "Hope is a calendar event, not a mood.",
+                "closerType": "question",
+                "closer": "What would hope look like in one practical action?"
+              },
+              {
+                "intent": "misconception",
+                "opener": "Darkness is not failure, it is incubation and recovery",
+                "payload": "Rest is part of creation.",
+                "closerType": "try_this",
+                "closer": "Give yourself one rest rule and follow it tonight."
+              },
+              {
+                "intent": "quick_rule",
+                "opener": "Quick rule: honour what ended, then choose one light to tend",
+                "payload": "One small light is enough to change direction.",
+                "closerType": "try_this",
+                "closer": "Light a candle and name the one thing you will keep tending."
+              },
+              {
+                "intent": "signal",
+                "opener": "A solstice signal is craving quiet rituals and fewer inputs",
+                "payload": "Your system wants stillness to reset.",
+                "closerType": "question",
+                "closer": "What input could you reduce for one day?"
+              }
+            ]
+          }
+        },
+        {
+          "dayIndex": -2,
+          "title": "Yule Correspondences",
+          "grimoireSlug": "wheel-of-the-year/yule",
+          "focus": "Colors, plants, and symbols of Yule",
+          "shortFormHook": "Yule correspondences include red, green, and gold colours; holly, ivy, and mistletoe; and symbols of the evergreen tree and Yule log.",
+          "threads": {
+            "keyword": "yule correspondences",
+            "angles": [
+              {
+                "intent": "observation",
+                "opener": "Yule correspondences feel like warmth made visual, green against the dark",
+                "payload": "Evergreens remind you what stays alive through winter.",
+                "closerType": "question",
+                "closer": "What part of you stays alive no matter what?"
+              },
+              {
+                "intent": "contrast",
+                "opener": "Evergreen symbols hold endurance, candlelight holds hope, and both belong",
+                "payload": "You need resilience and tenderness together.",
+                "closerType": "question",
+                "closer": "Do you need endurance or tenderness right now?"
+              },
+              {
+                "intent": "misconception",
+                "opener": "You do not need decoration, you need one symbol that means something",
+                "payload": "Meaning is the magic ingredient.",
+                "closerType": "try_this",
+                "closer": "Choose one plant or colour and make it your seasonal anchor."
+              },
+              {
+                "intent": "quick_rule",
+                "opener": "Quick rule: choose one green, one gold, one flame, then stop",
+                "payload": "A focused ritual lands deeper than a crowded one.",
+                "closerType": "try_this",
+                "closer": "Place the three anchors together and sit with them for two minutes."
+              },
+              {
+                "intent": "signal",
+                "opener": "A correspondence signal is feeling steadier after you simplify your space",
+                "payload": "Winter energy likes clean, warm containers.",
+                "closerType": "question",
+                "closer": "What would make your space feel steadier tonight?"
+              }
+            ]
+          }
+        },
+        {
+          "dayIndex": -1,
+          "title": "Yule Traditions",
+          "grimoireSlug": "wheel-of-the-year/yule",
+          "focus": "Rituals of light, giving, and renewal",
+          "shortFormHook": "Yule traditions center on light returning to darkness: lighting candles, burning the Yule log, and exchanging gifts as symbols of hope.",
+          "threads": {
+            "keyword": "yule traditions",
+            "angles": [
+              {
+                "intent": "observation",
+                "opener": "Yule traditions feel powerful when you treat giving as an energy practice",
+                "payload": "What you offer becomes part of the light you return to the world.",
+                "closerType": "question",
+                "closer": "What do you want to offer more of this season?"
+              },
+              {
+                "intent": "contrast",
+                "opener": "Receiving can be harder than giving, and winter asks you to practise",
+                "payload": "Let support land without earning it.",
+                "closerType": "question",
+                "closer": "What support are you ready to receive cleanly?"
+              },
+              {
+                "intent": "misconception",
+                "opener": "Renewal is not a grand resolution, it is a small return to yourself",
+                "payload": "One gentle ritual can reset your whole week.",
+                "closerType": "try_this",
+                "closer": "Choose one nightly ritual and repeat it for seven nights."
+              },
+              {
+                "intent": "quick_rule",
+                "opener": "Quick rule: light a candle, name one hope, then do one kind act",
+                "payload": "Hope becomes real when it moves through you.",
+                "closerType": "try_this",
+                "closer": "Do one kind act that nobody needs to know about."
+              },
+              {
+                "intent": "signal",
+                "opener": "A tradition signal is crying easily, then feeling calmer afterwards",
+                "payload": "Your system releases what it could not carry alone.",
+                "closerType": "question",
+                "closer": "What do you want to release before the year turns?"
+              }
+            ]
+          }
+        },
+        {
+          "dayIndex": 0,
+          "title": "Yule Celebration",
+          "grimoireSlug": "wheel-of-the-year/yule",
+          "focus": "Celebrating the rebirth of the sun",
+          "shortFormHook": "Yule celebrates the rebirth of the sun at the darkest point. It is a reminder that light always returns, even from the deepest darkness.",
+          "threads": {
+            "keyword": "yule celebration",
+            "angles": [
+              {
+                "intent": "observation",
+                "opener": "Yule celebration is a reminder that the turning point can be invisible",
+                "payload": "Light returns quietly, then it returns for real.",
+                "closerType": "question",
+                "closer": "Where do you need patience for the turning point?"
+              },
+              {
+                "intent": "contrast",
+                "opener": "Darkness shows you what matters, light shows you how to act on it",
+                "payload": "Both are teachers, just in different tones.",
+                "closerType": "question",
+                "closer": "What did darkness teach you this year?"
+              },
+              {
+                "intent": "misconception",
+                "opener": "Rebirth is not instant, it is a sequence of small renewals",
+                "payload": "You return to yourself one choice at a time.",
+                "closerType": "try_this",
+                "closer": "Choose one renewal practice and make it easy enough to repeat."
+              },
+              {
+                "intent": "quick_rule",
+                "opener": "Quick rule: bless the past, release the weight, then name your next light",
+                "payload": "That is enough for a strong solstice ritual.",
+                "closerType": "try_this",
+                "closer": "Write three lines: bless, release, and light."
+              },
+              {
+                "intent": "signal",
+                "opener": "A celebration signal is feeling hopeful without forcing yourself to feel okay",
+                "payload": "Hope can coexist with heaviness.",
+                "closerType": "question",
+                "closer": "What would gentle hope look like tomorrow?"
+              }
+            ]
+          }
+        }
+      ],
+      "threads": {
+        "keyword": "winter solstice",
+        "angles": [
+          {
+            "intent": "observation",
+            "opener": "Yule feels like the dark pause before the return of light",
+            "payload": "It is the deepest rest before the rhythm shifts.",
+            "closerType": "question",
+            "closer": "Where in your body do you feel that pause?"
+          },
+          {
+            "intent": "contrast",
+            "opener": "The long night is not empty, it is full of promise waiting to bloom",
+            "payload": "Patience is the practice that keeps the signal alive.",
+            "closerType": "question",
+            "closer": "What promise are you guarding through the silence?"
+          },
+          {
+            "intent": "misconception",
+            "opener": "Yule does not demand fireworks, it invites a steady vow",
+            "payload": "You can mark the solstice with the same gentleness you hope to receive.",
+            "closerType": "try_this",
+            "closer": "Name one short vow you can repeat for the next three evenings."
+          },
+          {
+            "intent": "quick_rule",
+            "opener": "Quick rule: honour what closed, then set one small seed for warmth",
+            "payload": "Closure and hope can share the same breath.",
+            "closerType": "try_this",
+            "closer": "Write two short lines: release, then new light."
+          },
+          {
+            "intent": "signal",
+            "opener": "A signal this sabbat landed is feeling lighter without overdoing optimism",
+            "payload": "Hope can be quiet and still real.",
+            "closerType": "question",
+            "closer": "What quiet hope feels easiest to keep alive?"
+          }
+        ]
+      }
+    }
+  ]
+}

@@ -1,4 +1,7 @@
-import { generateAllHoroscopeParams } from '@/constants/seo/monthly-horoscope';
+import {
+  generateAllHoroscopeParams,
+  ZODIAC_SIGNS,
+} from '@/constants/seo/monthly-horoscope';
 
 export async function GET(): Promise<Response> {
   const baseUrl = 'https://lunary.app';
@@ -6,13 +9,45 @@ export async function GET(): Promise<Response> {
 
   const urls = [
     {
-      loc: `${baseUrl}/horoscope`,
+      loc: `${baseUrl}/grimoire/horoscopes`,
       lastmod: new Date().toISOString().split('T')[0],
       changefreq: 'daily',
       priority: '0.9',
     },
+    {
+      loc: `${baseUrl}/grimoire/horoscopes/today`,
+      lastmod: new Date().toISOString().split('T')[0],
+      changefreq: 'daily',
+      priority: '0.8',
+    },
+    {
+      loc: `${baseUrl}/grimoire/horoscopes/weekly`,
+      lastmod: new Date().toISOString().split('T')[0],
+      changefreq: 'weekly',
+      priority: '0.8',
+    },
+    ...ZODIAC_SIGNS.flatMap((sign) => [
+      {
+        loc: `${baseUrl}/grimoire/horoscopes/${sign}`,
+        lastmod: new Date().toISOString().split('T')[0],
+        changefreq: 'monthly',
+        priority: '0.7',
+      },
+      {
+        loc: `${baseUrl}/grimoire/horoscopes/today/${sign}`,
+        lastmod: new Date().toISOString().split('T')[0],
+        changefreq: 'daily',
+        priority: '0.6',
+      },
+      {
+        loc: `${baseUrl}/grimoire/horoscopes/weekly/${sign}`,
+        lastmod: new Date().toISOString().split('T')[0],
+        changefreq: 'weekly',
+        priority: '0.6',
+      },
+    ]),
     ...horoscopes.map((h) => ({
-      loc: `${baseUrl}/horoscope/${h.sign}/${h.year}/${h.month}`,
+      loc: `${baseUrl}/grimoire/horoscopes/${h.sign}/${h.year}/${h.month}`,
       lastmod: new Date().toISOString().split('T')[0],
       changefreq: 'monthly',
       priority: '0.7',

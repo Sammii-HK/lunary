@@ -247,20 +247,40 @@ export async function GET(request: NextRequest) {
 
     // 6. Monthly Recurring Revenue (MRR), Active Entitlements, and Subscription Health
     const perUserSubscriptionsResult = await sql`
-      WITH filtered_subs AS (
-        SELECT *
+      WITH scoped AS (
+        SELECT user_id, status, monthly_amount_due, is_paying
         FROM subscriptions
-        WHERE status IN ('active', 'trial', 'past_due')
+        WHERE user_id IS NOT NULL
+          AND COALESCE(updated_at, created_at) <= ${formatTimestamp(range.end)}
           AND (user_email IS NULL OR (user_email NOT LIKE ${TEST_EMAIL_PATTERN} AND user_email != ${TEST_EMAIL_EXACT}))
-          AND user_id IS NOT NULL
+      ),
+      per_user AS (
+        SELECT
+          user_id,
+          COUNT(*) FILTER (WHERE status IN ('active', 'trial', 'past_due', 'free')) AS active_rows,
+          BOOL_OR(status IN ('active', 'trial', 'past_due', 'free')) AS has_active,
+          MAX(
+            CASE
+              WHEN status IN ('active', 'trial', 'past_due') THEN monthly_amount_due
+              ELSE 0
+            END
+          ) AS max_monthly,
+          BOOL_OR(
+            CASE
+              WHEN status IN ('active', 'trial', 'past_due') THEN is_paying
+              ELSE false
+            END
+          ) AS has_paying
+        FROM scoped
+        GROUP BY user_id
       )
       SELECT
         user_id,
-        COUNT(*) AS subscription_count,
-        COALESCE(MAX(monthly_amount_due), 0) AS max_monthly,
-        bool_or(is_paying) AS has_paying
-      FROM filtered_subs
-      GROUP BY user_id
+        active_rows AS subscription_count,
+        max_monthly,
+        has_paying
+      FROM per_user
+      WHERE has_active
     `;
 
     const entitlementEntries = perUserSubscriptionsResult.rows.map((row) => ({
@@ -273,29 +293,41 @@ export async function GET(request: NextRequest) {
     const currentEntitlementStats = summarizeEntitlements(entitlementEntries);
 
     const activeSubscriptionsCountResult = await sql`
-      SELECT COUNT(*) AS total_active
-      FROM subscriptions
-      WHERE status IN ('active', 'trial', 'past_due')
-        AND (user_email IS NULL OR (user_email NOT LIKE ${TEST_EMAIL_PATTERN} AND user_email != ${TEST_EMAIL_EXACT}))
+      WITH scoped AS (
+        SELECT user_id, status
+        FROM subscriptions
+        WHERE user_id IS NOT NULL
+          AND COALESCE(updated_at, created_at) <= ${formatTimestamp(range.end)}
+          AND (user_email IS NULL OR (user_email NOT LIKE ${TEST_EMAIL_PATTERN} AND user_email != ${TEST_EMAIL_EXACT}))
+      ),
+      per_user AS (
+        SELECT
+          user_id,
+          BOOL_OR(status IN ('active', 'trial', 'past_due', 'free')) AS has_active
+        FROM scoped
+        GROUP BY user_id
+      )
+      SELECT COUNT(*) FILTER (WHERE has_active) AS total_active
+      FROM per_user
     `;
 
     const prevActiveSubscriptionsResult = await sql`
-      SELECT 
-        COUNT(*) FILTER (WHERE status IN ('active', 'trial', 'past_due')) AS total_active
-      FROM subscriptions
-      WHERE status IN ('active', 'trial', 'past_due')
-        AND (
-          created_at <= ${formatTimestamp(prevRangeEnd)}
-          OR updated_at <= ${formatTimestamp(prevRangeEnd)}
-        )
-        AND (user_email IS NULL OR (user_email NOT LIKE ${TEST_EMAIL_PATTERN} AND user_email != ${TEST_EMAIL_EXACT}))
-        AND NOT EXISTS (
-          SELECT 1 FROM conversion_events ce
-          WHERE ce.user_id = subscriptions.user_id
-            AND ce.event_type IN ('subscription_cancelled', 'subscription_ended')
-            AND ce.created_at <= ${formatTimestamp(prevRangeEnd)}
-            AND ce.created_at >= subscriptions.created_at
-        )
+      WITH scoped AS (
+        SELECT user_id, status
+        FROM subscriptions
+        WHERE user_id IS NOT NULL
+          AND COALESCE(updated_at, created_at) <= ${formatTimestamp(prevRangeEnd)}
+          AND (user_email IS NULL OR (user_email NOT LIKE ${TEST_EMAIL_PATTERN} AND user_email != ${TEST_EMAIL_EXACT}))
+      ),
+      per_user AS (
+        SELECT
+          user_id,
+          BOOL_OR(status IN ('active', 'trial', 'past_due', 'free')) AS has_active
+        FROM scoped
+        GROUP BY user_id
+      )
+      SELECT COUNT(*) FILTER (WHERE has_active) AS total_active
+      FROM per_user
     `;
 
     const previousSubscriptionsResult = await sql`

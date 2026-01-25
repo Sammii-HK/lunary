@@ -13,10 +13,9 @@ import { tarotSpreads } from '@/constants/tarot';
 import { monthlyMoonPhases } from '../../utils/moon/monthlyPhases';
 import { annualFullMoons } from '@/constants/moon/annualFullMoons';
 import { zodiacSigns, planetaryBodies } from '../../utils/zodiac/zodiac';
-import { ZODIAC_SIGNS, MONTHS } from '@/constants/seo/monthly-horoscope';
 import { wheelOfTheYearSabbats } from '@/constants/sabbats';
 import { correspondencesData } from '@/constants/grimoire/correspondences';
-import { witchTypesOverview } from '@/constants/witch-types.json';
+import witchTypesData from '@/constants/witch-types.json';
 import {
   astrologicalHouses,
   astrologicalAspects,
@@ -224,11 +223,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
     'grimoire/runes': ['src/app/grimoire/runes/page.tsx'],
     'grimoire/candle-magic': ['src/app/grimoire/candle-magic/page.tsx'],
     'grimoire/correspondences': ['src/app/grimoire/correspondences/page.tsx'],
-    'grimoire/horoscopes': ['src/app/grimoire/horoscopes/page.tsx'],
-    'grimoire/horoscopes/weekly': [
-      'src/app/grimoire/horoscopes/weekly/page.tsx',
-    ],
-    'grimoire/horoscopes/today': ['src/app/grimoire/horoscopes/today/page.tsx'],
     'grimoire/decans': ['src/app/grimoire/decans/page.tsx'],
     'grimoire/cusps': ['src/app/grimoire/cusps/page.tsx'],
     'grimoire/seasons': ['src/app/grimoire/seasons/page.tsx'],
@@ -310,8 +304,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
     'grimoire/glossary': ['src/app/grimoire/glossary/page.tsx'],
     transits: ['src/app/transits/page.tsx'],
     'moon-calendar': ['src/app/moon-calendar/page.tsx'],
-    'horoscope/today': ['src/app/horoscope/today/page.tsx'],
-    'horoscope/weekly': ['src/app/horoscope/weekly/page.tsx'],
     'about/sammii': ['src/app/about/sammii/page.tsx'],
     'about/editorial-guidelines': [
       'src/app/about/editorial-guidelines/page.tsx',
@@ -381,21 +373,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
       path: 'grimoire/correspondences',
       changeFrequency: 'monthly',
       priority: 0.8,
-    },
-    {
-      path: 'grimoire/horoscopes',
-      changeFrequency: 'weekly',
-      priority: 0.8,
-    },
-    {
-      path: 'grimoire/horoscopes/weekly',
-      changeFrequency: 'daily',
-      priority: 0.7,
-    },
-    {
-      path: 'grimoire/horoscopes/today',
-      changeFrequency: 'daily',
-      priority: 0.7,
     },
     { path: 'grimoire/decans', changeFrequency: 'monthly', priority: 0.7 },
     { path: 'grimoire/cusps', changeFrequency: 'monthly', priority: 0.7 },
@@ -542,16 +519,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
     {
       path: 'moon-calendar',
       changeFrequency: 'monthly',
-      priority: 0.8,
-    },
-    {
-      path: 'horoscope/today',
-      changeFrequency: 'daily',
-      priority: 0.8,
-    },
-    {
-      path: 'horoscope/weekly',
-      changeFrequency: 'weekly',
       priority: 0.8,
     },
     {
@@ -903,12 +870,14 @@ export default function sitemap(): MetadataRoute.Sitemap {
   );
 
   // Add modern witchcraft witch type pages
-  const witchTypeRoutes = witchTypesOverview.map((type) => ({
-    url: `${baseUrl}/grimoire/modern-witchcraft/witch-types/${type.slug}`,
-    lastModified: date,
-    changeFrequency: 'monthly' as const,
-    priority: 0.6,
-  }));
+  const witchTypeRoutes = (witchTypesData.witchTypesOverview || []).map(
+    (type) => ({
+      url: `${baseUrl}/grimoire/modern-witchcraft/witch-types/${type.slug}`,
+      lastModified: date,
+      changeFrequency: 'monthly' as const,
+      priority: 0.6,
+    }),
+  );
 
   // Add modern witchcraft tool pages
   const witchToolRoutes = [
@@ -992,22 +961,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
     lastModified: date,
     changeFrequency: 'monthly' as const,
     priority: 0.8,
-  }));
-
-  // Add daily horoscope sign pages
-  const dailyHoroscopeSignRoutes = Object.keys(zodiacSigns).map((sign) => ({
-    url: `${baseUrl}/horoscope/today/${stringToKebabCase(sign)}`,
-    lastModified: date,
-    changeFrequency: 'daily' as const,
-    priority: 0.7,
-  }));
-
-  // Add weekly horoscope sign pages
-  const weeklyHoroscopeSignRoutes = Object.keys(zodiacSigns).map((sign) => ({
-    url: `${baseUrl}/horoscope/weekly/${stringToKebabCase(sign)}`,
-    lastModified: date,
-    changeFrequency: 'weekly' as const,
-    priority: 0.7,
   }));
 
   // Add all house pages
@@ -1254,39 +1207,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
     priority: 0.7,
   };
 
-  // Add grimoire horoscope routes (monthly horoscopes under grimoire)
-  const AVAILABLE_YEARS = [2025, 2026, 2027, 2028, 2029, 2030];
-
-  // Sign pages
-  const grimoireHoroscopeSignRoutes = ZODIAC_SIGNS.map((sign) => ({
-    url: `${baseUrl}/grimoire/horoscopes/${sign}`,
-    lastModified: date,
-    changeFrequency: 'monthly' as const,
-    priority: 0.7,
-  }));
-
-  // Year pages
-  const grimoireHoroscopeYearRoutes = ZODIAC_SIGNS.flatMap((sign) =>
-    AVAILABLE_YEARS.map((year) => ({
-      url: `${baseUrl}/grimoire/horoscopes/${sign}/${year}`,
-      lastModified: date,
-      changeFrequency: 'monthly' as const,
-      priority: 0.6,
-    })),
-  );
-
-  // Month pages
-  const grimoireHoroscopeMonthRoutes = ZODIAC_SIGNS.flatMap((sign) =>
-    AVAILABLE_YEARS.flatMap((year) =>
-      MONTHS.map((month) => ({
-        url: `${baseUrl}/grimoire/horoscopes/${sign}/${year}/${month}`,
-        lastModified: date,
-        changeFrequency: 'monthly' as const,
-        priority: 0.5,
-      })),
-    ),
-  );
-
   // Add mirror hour pages
   const mirrorHourRoutes = mirrorHourKeys.map((time) => ({
     url: `${baseUrl}/grimoire/mirror-hours/${time.replace(':', '-')}`,
@@ -1493,9 +1413,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
     ...soulUrgeRoutes,
     ...karmicDebtRoutes,
     synastryGeneratorRoute,
-    ...grimoireHoroscopeSignRoutes,
-    ...grimoireHoroscopeYearRoutes,
-    ...grimoireHoroscopeMonthRoutes,
     ...numerologyIndexRoutes,
     ...moonIndexRoutes,
     ...moonYearRoutes,
@@ -1507,8 +1424,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
     ...eventsYearRoutes,
     ...eventSubpages,
     ...tarotSuitRoutes,
-    ...dailyHoroscopeSignRoutes,
-    ...weeklyHoroscopeSignRoutes,
     ...shopProductRoutes,
     ...shopPaginationRoutes,
   ];

@@ -3,9 +3,10 @@ import { notFound } from 'next/navigation';
 import { SEOContentTemplate } from '@/components/grimoire/SEOContentTemplate';
 import { CosmicConnections } from '@/components/grimoire/CosmicConnections';
 import type { FAQItem } from '@/components/grimoire/SEOContentTemplate';
-import { witchTypes } from '@/constants/witch-types.json';
+import witchTypesData from '@/constants/witch-types.json';
 import { getCosmicConnections } from '@/lib/cosmicConnectionsConfig';
 
+const witchTypes = witchTypesData.witchTypes || {};
 const typeKeys = Object.keys(witchTypes);
 
 function getIntroDefinition(intro: string): string {
@@ -32,8 +33,9 @@ export async function generateMetadata({
       title: 'Not Found - Lunary Grimoire',
     };
   }
-  const title = typeData.seo.title;
-  const description = typeData.seo.description;
+
+  const title = `${typeData.name}: Meaning, Traits, Practices and Tools | Lunary`;
+  const description = `What is a ${typeData.name.toLowerCase()}? Learn the meaning, common traits, beginner practices, and tools, with a grounded way to start.`;
 
   return {
     title,

@@ -2,20 +2,30 @@ import { Metadata } from 'next';
 import Link from 'next/link';
 import { SEOContentTemplate } from '@/components/grimoire/SEOContentTemplate';
 import { Wand2 } from 'lucide-react';
-import { witchTypesOverview } from '@/constants/witch-types.json';
+import witchTypesData from '@/constants/witch-types.json';
 import { getCosmicConnections } from '@/lib/cosmicConnectionsConfig';
 import CosmicConnections from '@/components/grimoire/CosmicConnections';
 
 export const metadata: Metadata = {
-  title: 'Types of Witches: Hedge, Kitchen, Green, Eclectic & More | Lunary',
+  title: 'Types of Witches: Meanings, Traits and Practices | Lunary',
   description:
-    'Discover witch types and magical paths—from Green to Cosmic Witch. Find the traditions, tools, and practices that resonate with your spirit.',
+    'Explore witch types from Green and Kitchen to Cosmic and Eclectic. Learn traits, beginner practices, and tools to help you find your path.',
   keywords: [
     'types of witches',
     'witch types',
     'green witch',
     'kitchen witch',
     'hedge witch',
+    'cosmic witch',
+    'eclectic witch',
+    'sea witch',
+    'crystal witch',
+    'hereditary witch',
+    'solitary witch',
+    'ceremonial witch',
+    'witch traits',
+    'witch practices',
+    'witch tools',
     'what kind of witch am i',
   ],
   openGraph: {
@@ -44,6 +54,8 @@ export default function WitchTypesIndexPage() {
       </p>
     </div>
   );
+
+  const witchTypesOverview = witchTypesData.witchTypesOverview ?? [];
 
   const contextList = [
     'These categories are modern constructs—most historical witches simply practiced what worked for them.',

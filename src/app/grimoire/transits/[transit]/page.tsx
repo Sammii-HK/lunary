@@ -88,12 +88,10 @@ export async function generateMetadata({
   }
 
   return createGrimoireMetadata({
-    title: `${transit.title}: ${transit.transitType} | Meaning, Effects & What to Do | Lunary`,
-    description: `${transit.title} (${transit.dates}) lands in ${transit.signs.join(
+    title: `${transit.title} Transit: Dates, Meaning & What to Do | Lunary`,
+    description: `${transit.title} transit (${transit.dates}) activates ${transit.themes.join(
       ', ',
-    )} and highlights ${transit.themes.join(
-      ', ',
-    )}—learn how to work with this ${transit.transitType.toLowerCase()} energy.`,
+    )}. Learn the meaning, likely effects, and grounded ways to work with this ${transit.transitType.toLowerCase()}.`,
     keywords: [
       transit.title.toLowerCase(),
       transit.transitType.toLowerCase(),

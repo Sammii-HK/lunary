@@ -28,8 +28,8 @@ export async function generateMetadata({
     };
   }
 
-  const title = `${retrogradeData.name} ${year}: Dates, Meaning & Survival Guide - Lunary`;
-  const description = `${retrogradeData.name} ${year} dates & effects. Occurs ${retrogradeData.frequency.toLowerCase()}, lasts ${retrogradeData.duration.toLowerCase()}. What to do (and avoid) during ${planet} retrograde.`;
+  const title = `${retrogradeData.name} Retrograde: Meaning, Effects & How to Work With It | Lunary`;
+  const description = `Complete guide to ${retrogradeData.name} retrograde: what it means, how often it happens, how long it lasts, common effects, and grounded ways to work with the energy.`;
 
   return {
     title,
