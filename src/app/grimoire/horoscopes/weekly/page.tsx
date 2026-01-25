@@ -80,7 +80,7 @@ export default function GrimoireWeeklyHoroscopePage() {
     url: 'https://lunary.app/grimoire/horoscopes/weekly',
     items: signs.map((sign) => ({
       name: `${sign.name} Weekly Horoscope`,
-      url: `https://lunary.app/horoscope/weekly/${sign.name.toLowerCase()}`,
+      url: `https://lunary.app/grimoire/horoscopes/weekly/${sign.name.toLowerCase()}`,
       description: `Weekly astrology for ${sign.name} (${sign.dates}).`,
     })),
   });

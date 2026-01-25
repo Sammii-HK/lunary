@@ -187,7 +187,7 @@ export default async function WeeklyHoroscopePage({
                 a personalised reading.
               </p>
               <Link
-                href='/horoscope'
+                href='/grimoire/horoscopes'
                 className='text-lunary-primary-400 hover:text-lunary-primary-300'
               >
                 View personalised horoscope →

@@ -114,8 +114,11 @@ function getSignConnections(signKey: string): CosmicConnectionSection[] {
   });
 
   const tools: CosmicConnectionLink[] = [
-    { label: `${signName} Daily Horoscope`, href: `/horoscope/${signLower}` },
-    { label: 'Weekly Horoscope', href: '/horoscope' },
+    {
+      label: `${signName} Daily Horoscope`,
+      href: `/grimoire/horoscopes/${signLower}`,
+    },
+    { label: 'Weekly Horoscope', href: '/grimoire/horoscopes/weekly' },
   ];
 
   if (signData?.crystals?.[0]) {

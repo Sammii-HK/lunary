@@ -937,7 +937,7 @@ export function PaidHoroscopeView({
                 <div className='pt-3 border-t border-zinc-800/50 space-y-3'>
                   <div className='flex flex-wrap gap-3 text-xs'>
                     <Link
-                      href='/horoscope/weekly'
+                      href='/grimoire/horoscopes/weekly'
                       className='text-lunary-primary-400 hover:text-lunary-primary-300 transition-colors'
                     >
                       Week ahead →
@@ -954,7 +954,7 @@ export function PaidHoroscopeView({
                 <div className='pt-3 border-t border-zinc-800/50 space-y-3'>
                   <div className='flex flex-wrap gap-3 text-xs'>
                     <Link
-                      href='/horoscope/weekly'
+                      href='/grimoire/horoscopes/weekly'
                       className='text-lunary-primary-400 hover:text-lunary-primary-300 transition-colors'
                     >
                       Week ahead →

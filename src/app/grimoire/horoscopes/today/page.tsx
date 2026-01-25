@@ -82,10 +82,10 @@ export default function GrimoireTodayHoroscopePage() {
   const itemListSchema = createItemListSchema({
     name: "Today's Horoscopes",
     description: 'Daily horoscope readings for every zodiac sign.',
-    url: 'https://lunary.app/horoscope/today',
+    url: 'https://lunary.app/grimoire/horoscopes/today',
     items: signs.map((sign) => ({
       name: `${sign.name} Daily Horoscope`,
-      url: `https://lunary.app/horoscopes/today/${sign.name.toLowerCase()}`,
+      url: `https://lunary.app/grimoire/horoscopes/today/${sign.name.toLowerCase()}`,
       description: `Today's horoscope for ${sign.name} (${sign.dates}).`,
     })),
   });

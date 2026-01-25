@@ -11,8 +11,8 @@ const formatKeywords = (...terms: string[]) =>
     .filter(Boolean);
 
 export const signMeta = (signName: string, slug: string): Metadata => {
-  const title = `${signName} Horoscope Guide: Monthly & Yearly Astrology Forecasts | Lunary`;
-  const description = `Explore ${signName} horoscopes by month and year with real planetary insights. Find love, career, and life guidance updated from Lunary’s astrology Grimoire.`;
+  const title = `${signName} Horoscopes: Monthly Predictions & Forecasts | Lunary`;
+  const description = `${signName} horoscopes for all months and years. Get detailed monthly predictions for ${signName} including love, career, health, and finance forecasts.`;
   const image = `${OG_BASE}?sign=${encode(signName)}`;
 
   return {
@@ -50,8 +50,8 @@ export const yearMeta = (
   slug: string,
   year: string,
 ): Metadata => {
-  const title = `${signName} Horoscope ${year}: Yearly & Monthly Astrology Forecast | Lunary`;
-  const description = `See what ${year} holds for ${signName}. Month-by-month astrology forecasts for love, career, and growth — written from Lunary’s cosmic perspective.`;
+  const title = `${signName} Horoscope ${year}: All Monthly Forecasts | Lunary`;
+  const description = `${signName} horoscope for all 12 months of ${year}. Complete monthly predictions including love, career, and life guidance for ${signName}.`;
   const image = `${OG_BASE}?sign=${encode(signName)}&year=${encode(year)}`;
 
   return {
@@ -91,8 +91,8 @@ export const monthMeta = (
   monthName: string,
   monthNumber: number,
 ): Metadata => {
-  const title = `${signName} Horoscope for ${monthName} ${year} | Love, Career & Wellbeing Astrology Forecast | Lunary`;
-  const description = `Read ${signName}’s ${monthName} ${year} horoscope — detailed astrology forecasts for love, career, and personal growth, based on real planetary transits from Lunary.`;
+  const title = `${signName} Horoscope ${monthName} ${year}: Monthly Predictions | Lunary`;
+  const description = `${signName} horoscope for ${monthName} ${year}. Discover what the stars have in store for ${signName} this month including love, career, health, and financial predictions.`;
   const image = `${OG_BASE}?sign=${encode(signName)}&month=${encode(monthSlug)}&year=${encode(year)}`;
 
   return {

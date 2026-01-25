@@ -120,7 +120,7 @@ export default function GrimoireHoroscopesPage() {
           {ZODIAC_SIGNS.map((sign) => (
             <Link
               key={sign}
-              href={`/horoscope/${sign}/${currentYear}/${currentMonth}`}
+              href={`/grimoire/horoscopes/${sign}/${currentYear}/${currentMonth}`}
               className='p-6 rounded-lg border border-zinc-800 bg-zinc-900/50 hover:border-lunary-primary-600 hover:bg-zinc-900 transition-all group'
             >
               <div className='text-4xl mb-3'>{SIGN_SYMBOLS[sign]}</div>

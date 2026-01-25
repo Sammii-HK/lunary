@@ -51,7 +51,7 @@ export default function NotFound() {
               Explore Grimoire
             </Link>
             <Link
-              href='/horoscope'
+              href='/grimoire/horoscopes'
               className='flex-1 px-4 py-2.5 rounded-lg bg-zinc-800/50 hover:bg-zinc-800 text-zinc-300 text-sm transition-colors'
             >
               Read Horoscopes

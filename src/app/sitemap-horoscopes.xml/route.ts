@@ -6,13 +6,13 @@ export async function GET(): Promise<Response> {
 
   const urls = [
     {
-      loc: `${baseUrl}/horoscope`,
+      loc: `${baseUrl}/grimoire/horoscopes`,
       lastmod: new Date().toISOString().split('T')[0],
       changefreq: 'daily',
       priority: '0.9',
     },
     ...horoscopes.map((h) => ({
-      loc: `${baseUrl}/horoscope/${h.sign}/${h.year}/${h.month}`,
+      loc: `${baseUrl}/grimoire/horoscopes/${h.sign}/${h.year}/${h.month}`,
       lastmod: new Date().toISOString().split('T')[0],
       changefreq: 'monthly',
       priority: '0.7',
