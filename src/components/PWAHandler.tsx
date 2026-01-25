@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { useAuthStatus } from '@/components/AuthStatus';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
+import { SquarePlus, Ellipsis, Share } from 'lucide-react';
 
 interface BeforeInstallPromptEvent extends Event {
   readonly platforms: string[];
@@ -23,11 +24,15 @@ declare global {
 interface PWAHandlerProps {
   allowUnauthenticatedInstall?: boolean;
   silent?: boolean;
+  forceShowBanner?: boolean;
+  ignoreDismissed?: boolean;
 }
 
 export function PWAHandler({
   allowUnauthenticatedInstall = false,
   silent = false,
+  forceShowBanner = false,
+  ignoreDismissed = false,
 }: PWAHandlerProps = {}) {
   const authState = useAuthStatus();
   const [deferredPrompt, setDeferredPrompt] =
@@ -41,7 +46,7 @@ export function PWAHandler({
 
   // Check if user dismissed the banner within the last 7 days
   useEffect(() => {
-    if (typeof window === 'undefined') return;
+    if (typeof window === 'undefined' || ignoreDismissed) return;
 
     const dismissedAt = localStorage.getItem('pwa_banner_dismissed');
     if (dismissedAt) {
@@ -53,7 +58,7 @@ export function PWAHandler({
         localStorage.removeItem('pwa_banner_dismissed');
       }
     }
-  }, []);
+  }, [ignoreDismissed]);
 
   useEffect(() => {
     // Skip service worker registration in development to prevent caching issues
@@ -189,6 +194,12 @@ export function PWAHandler({
   }, [deferredPrompt, silent]);
 
   useEffect(() => {
+    if (forceShowBanner) {
+      setShowInstallPrompt(true);
+    }
+  }, [forceShowBanner]);
+
+  useEffect(() => {
     if (typeof window === 'undefined') return;
     const seen = localStorage.getItem('pwa_notifications_prompted');
     setNotificationPromptSeen(seen === '1');
@@ -254,13 +265,16 @@ export function PWAHandler({
     localStorage.setItem('pwa_notifications_prompted', '1');
   };
 
+  const canShowForAuth =
+    allowUnauthenticatedInstall || authState.isAuthenticated;
+
   const showInstallBanner =
     !silent &&
     !isInstalled &&
-    !isDismissed &&
-    showInstallPrompt &&
+    (!isDismissed || ignoreDismissed) &&
+    (showInstallPrompt || forceShowBanner) &&
     !authState.loading &&
-    authState.isAuthenticated;
+    canShowForAuth;
 
   const showNotificationsBanner =
     !silent &&
@@ -276,17 +290,18 @@ export function PWAHandler({
   const isIOS =
     typeof window !== 'undefined' &&
     /iPhone|iPad|iPod/.test(window.navigator.userAgent);
-  const installInstructions = isIOS
-    ? [
-        'Tap the Share button (square with arrow) from Safari.',
-        'Choose "Add to Home Screen".',
-        'Tap "Add" and launch Lunary from your home screen.',
-      ]
-    : [
-        'Open the browser menu (⋮ or ⁝) and tap "Install app".',
-        'Choose "Add to Home screen" or "Install".',
-        'Launch Lunary from your home screen or launcher for a fast, offline-ready experience.',
-      ];
+  const isAndroid =
+    typeof window !== 'undefined' && /Android/.test(window.navigator.userAgent);
+  const isDesktop = !isIOS && !isAndroid;
+
+  const iosSteps = [
+    { label: 'Tap ', icon: Ellipsis },
+    {
+      label: 'Tap ',
+      icon: Share,
+    },
+    { label: 'Tap “Add to Home Screen”', icon: SquarePlus },
+  ];
 
   if (showNotificationsBanner) {
     return (
@@ -326,26 +341,58 @@ export function PWAHandler({
     <div className='fixed bottom-14 md:bottom-16 left-0 right-0 z-40'>
       <div className='bg-gradient-to-r from-lunary-primary-950/80 via-zinc-950/80 to-lunary-rose-950/80 border-t border-lunary-primary-700/30 px-4 py-4 backdrop-blur-md'>
         <div className='max-w-4xl mx-auto flex flex-col gap-3 md:flex-row md:items-start md:justify-between'>
-          <div className='flex-1'>
+          <div className='flex-1 space-y-2'>
             <h3 className='text-sm font-semibold text-lunary-primary-200'>
-              Install Lunary App
+              Keep Lunary close
             </h3>
-            <p className='text-xs text-zinc-300 mt-0.5'>
-              Instant access, offline reads, and a smoother home-screen
-              experience.
+            <p className='text-xs text-zinc-300'>
+              Your daily insights, right where you need them.
             </p>
-            <ul className='mt-2 space-y-1 text-[11px] text-zinc-400'>
-              {installInstructions.map((instruction) => (
-                <li key={instruction}>• {instruction}</li>
-              ))}
-            </ul>
+            {isAndroid && (
+              <p className='text-[11px] text-zinc-400'>
+                Add Lunary to your Home Screen for instant access to your daily
+                astrology.
+              </p>
+            )}
+            {isDesktop && (
+              <p className='text-[11px] text-zinc-400'>
+                Open Lunary anytime, as an app.
+              </p>
+            )}
+            {isIOS && (
+              <div className='space-y-1 text-[11px] text-zinc-400'>
+                <h4 className='text-[12px] font-semibold text-lunary-primary-200 uppercase tracking-wide'>
+                  Keep Lunary close
+                </h4>
+                <p className='text-[10px] uppercase tracking-wide text-zinc-500'>
+                  Use Safari on iPhone or iPad
+                </p>
+                <ol className='list-decimal list-inside space-y-1 text-[11px] text-zinc-400'>
+                  {iosSteps.map((step) => {
+                    const Icon = step.icon;
+                    return (
+                      <li
+                        key={step.label}
+                        className='flex items-center gap-2 marker:text-lunary-primary-200'
+                      >
+                        <Icon className='h-3 w-3 text-lunary-primary-200' />
+                        <span>{step.label}</span>
+                      </li>
+                    );
+                  })}
+                </ol>
+                <p className='text-[10px] text-zinc-500'>
+                  Lunary will now be right there when you need it.
+                </p>
+              </div>
+            )}
           </div>
           <div className='flex gap-3 md:ml-4'>
             <Button variant='ghost' size='sm' onClick={handleDismiss}>
               Maybe Later
             </Button>
             <Button variant='lunary' size='sm' onClick={handleInstallClick}>
-              {isIOS ? 'Show Steps' : 'Install'}
+              Get the app
             </Button>
           </div>
         </div>
