@@ -106,13 +106,13 @@ const generateEnhancedDailyGuidance = (
 
 const getDayOfWeekInfluence = (dayOfWeek: number, ruler: string): string => {
   const influences = {
-    0: `this Sunday's Solar energy illuminates new possibilities and personal power.`, // Sun
-    1: `this Monday's Lunar influence heightens intuition and emotional awareness.`, // Moon
-    2: `this Tuesday's Martian fire energizes action and courage.`, // Mars
-    3: `this Wednesday's Mercurial energy sharpens communication and learning.`, // Mercury
-    4: `this Thursday's Jupiterian expansion brings wisdom and opportunities.`, // Jupiter
-    5: `this Friday's Venusian grace enhances love, beauty, and creativity.`, // Venus
-    6: `this Saturday's Saturnian structure supports discipline and practical achievements.`, // Saturn
+    0: `This Sunday's Solar energy illuminates new possibilities and personal power.`, // Sun
+    1: `This Monday's Lunar influence heightens intuition and emotional awareness.`, // Moon
+    2: `This Tuesday's Martian fire energizes action and courage.`, // Mars
+    3: `This Wednesday's Mercurial energy sharpens communication and learning.`, // Mercury
+    4: `This Thursday's Jupiterian expansion brings wisdom and opportunities.`, // Jupiter
+    5: `This Friday's Venusian grace enhances love, beauty, and creativity.`, // Venus
+    6: `This Saturday's Saturnian structure supports discipline and practical achievements.`, // Saturn
   };
 
   return influences[dayOfWeek as keyof typeof influences];
@@ -1113,10 +1113,10 @@ const generateHeadline = (
   const dayIndex = today.dayOfYear() % headlines.length;
 
   // Add Moon sign flavor
-  const moonSign = currentMoon?.sign;
-  if (moonSign) {
-    return `${headlines[dayIndex]} (Moon in ${moonSign})`;
-  }
+  // const moonSign = currentMoon?.sign;
+  // if (moonSign) {
+  //   return `${headlines[dayIndex]} (Moon in ${moonSign})`;
+  // }
 
   return headlines[dayIndex];
 };
@@ -1443,10 +1443,10 @@ const generateTinyAction = (
 
   // Add sign-specific flavor if we have natal data
   if (natalSun && currentMoon) {
-    return `Today's anchor: ${anchors[dayIndex]} Your ${natalSun.sign} spirit knows how.`;
+    return `${anchors[dayIndex]} Your ${natalSun.sign} spirit knows how.`;
   }
 
-  return `Today's anchor: ${anchors[dayIndex]}`;
+  return `${anchors[dayIndex]}`;
 };
 
 export const getEnhancedPersonalizedHoroscope = (
