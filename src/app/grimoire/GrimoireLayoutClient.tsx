@@ -866,32 +866,39 @@ export default function GrimoireLayout({
     : undefined;
 
   const trackedSectionRef = useRef<string | undefined>(undefined);
+  const trackedPathRef = useRef<string | undefined>(undefined);
 
   useEffect(() => {
-    if (currentSection && currentSection !== trackedSectionRef.current) {
-      const attribution = getStoredAttribution();
-      const referrer =
-        typeof document !== 'undefined' ? document.referrer : undefined;
-      const searchQuery = referrer ? extractSearchQuery(referrer) : undefined;
-
-      const trackingPayload = {
-        section: currentSection,
-        section_title: grimoire[currentSection]?.title,
-        source: attribution?.source || 'direct',
-        landing_page: pathname,
-        referrer,
-        search_query: searchQuery || attribution?.keyword,
-        first_touch_source: attribution?.source,
-        first_touch_page: attribution?.landingPage,
-        is_seo_traffic: attribution?.source === 'seo',
-      };
-
-      captureEvent('grimoire_viewed', {
-        ...trackingPayload,
-      });
-      conversionTracking.grimoireViewed(undefined, trackingPayload);
-      trackedSectionRef.current = currentSection;
+    if (trackedPathRef.current === pathname) {
+      return;
     }
+
+    const attribution = getStoredAttribution();
+    const referrer =
+      typeof document !== 'undefined' ? document.referrer : undefined;
+    const searchQuery = referrer ? extractSearchQuery(referrer) : undefined;
+
+    const resolvedSection = currentSection ?? 'grimoire_home';
+    const trackingPayload = {
+      section: resolvedSection,
+      section_title: currentSection
+        ? grimoire[currentSection]?.title
+        : 'Grimoire',
+      source: attribution?.source || 'direct',
+      landing_page: pathname,
+      referrer,
+      search_query: searchQuery || attribution?.keyword,
+      first_touch_source: attribution?.source,
+      first_touch_page: attribution?.landingPage,
+      is_seo_traffic: attribution?.source === 'seo',
+    };
+
+    captureEvent('grimoire_viewed', {
+      ...trackingPayload,
+    });
+    conversionTracking.grimoireViewed(undefined, trackingPayload);
+    trackedSectionRef.current = currentSection;
+    trackedPathRef.current = pathname;
   }, [currentSection, pathname]);
 
   // Auto-expand active section

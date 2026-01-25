@@ -1,7 +1,6 @@
 'use client';
 
 import { useEffect } from 'react';
-import { AstronomyContextProvider } from '@/context/AstronomyContext';
 import { useAuthStatus } from '@/components/AuthStatus';
 import { conversionTracking } from '@/lib/analytics';
 
@@ -21,5 +20,5 @@ export default function AuthenticatedLayout({
     }
   }, [authStatus.loading, authStatus.user?.id, authStatus.user?.email]);
 
-  return <AstronomyContextProvider>{children}</AstronomyContextProvider>;
+  return <>{children}</>;
 }

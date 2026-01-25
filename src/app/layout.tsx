@@ -27,6 +27,7 @@ import { AuthStatusProvider } from '@/components/AuthStatus';
 import { UserProvider } from '@/context/UserContext';
 import { CookieConsent } from '@/components/CookieConsent';
 import { AppOpenedTracker } from '@/components/AppOpenedTracker';
+import { AstronomyProviderWrapper } from '@/components/AstronomyProviderWrapper';
 
 export async function generateMetadata(): Promise<Metadata> {
   return {
@@ -148,24 +149,26 @@ export default function RootLayout({
           <AuthStatusProvider>
             <ErrorBoundaryWrapper>
               <UserProvider>
-                <Suspense
-                  fallback={
-                    <main className='flex flex-col flex-1 w-full min-h-0 h-[calc(100vh-4rem)]'>
-                      {children}
-                    </main>
-                  }
-                >
-                  <ConditionalMainWrapper>
-                    <AppOpenedTracker />
-                    <ErrorBoundaryWrapper>{children}</ErrorBoundaryWrapper>
-                    <Analytics />
-                    <SpeedInsights />
-                  </ConditionalMainWrapper>
-                </Suspense>
-                <Suspense fallback={null}>
-                  <AppChrome />
-                </Suspense>
-                <CookieConsent />
+                <AstronomyProviderWrapper>
+                  <Suspense
+                    fallback={
+                      <main className='flex flex-col flex-1 w-full min-h-0 h-[calc(100vh-4rem)]'>
+                        {children}
+                      </main>
+                    }
+                  >
+                    <ConditionalMainWrapper>
+                      <AppOpenedTracker />
+                      <ErrorBoundaryWrapper>{children}</ErrorBoundaryWrapper>
+                      <Analytics />
+                      <SpeedInsights />
+                    </ConditionalMainWrapper>
+                  </Suspense>
+                  <Suspense fallback={null}>
+                    <AppChrome />
+                  </Suspense>
+                  <CookieConsent />
+                </AstronomyProviderWrapper>
               </UserProvider>
             </ErrorBoundaryWrapper>
           </AuthStatusProvider>
