@@ -64,14 +64,14 @@ export const TransitOfTheDay = () => {
 
     const relevantTransits = upcomingTransits.filter((t) => {
       const transitDate = dayjs(t.date);
-      return (
-        transitDate.isAfter(today.subtract(1, 'day')) &&
-        transitDate.isBefore(nextWeek)
-      );
+      return transitDate.isAfter(today); // && transitDate.isBefore(nextWeek);
     });
 
     if (relevantTransits.length === 0) {
-      return upcomingTransits[0];
+      const futureTransit = upcomingTransits.find((t) =>
+        dayjs(t.date).isAfter(today),
+      );
+      return futureTransit ?? upcomingTransits[0];
     }
 
     const priorityOrder = { high: 3, medium: 2, low: 1 };
@@ -106,14 +106,14 @@ export const TransitOfTheDay = () => {
 
     const relevantTransits = personalImpacts.filter((t) => {
       const transitDate = dayjs(t.date);
-      return (
-        transitDate.isAfter(today.subtract(1, 'day')) &&
-        transitDate.isBefore(nextWeek)
-      );
+      return transitDate.isAfter(today); // && transitDate.isBefore(nextWeek);
     });
 
     if (relevantTransits.length === 0) {
-      return personalImpacts[0];
+      const futureImpact = personalImpacts.find((t) =>
+        dayjs(t.date).isAfter(today),
+      );
+      return futureImpact ?? personalImpacts[0];
     }
 
     const priorityOrder = { high: 3, medium: 2, low: 1 };
@@ -150,13 +150,14 @@ export const TransitOfTheDay = () => {
     }
 
     const transitDate = dayjs(generalTransit.date);
-    const isToday = transitDate.isSame(dayjs(), 'day');
+    // const isToday = transitDate.isSame(dayjs(), 'day');
     const isTomorrow = transitDate.isSame(dayjs().add(1, 'day'), 'day');
-    const dateLabel = isToday
-      ? 'Today'
-      : isTomorrow
-        ? 'Tomorrow'
-        : transitDate.format('MMM D');
+    // const dateLabel = isToday
+    //   ? 'Today'
+    //   : isTomorrow
+    //     ? 'Tomorrow'
+    //     : transitDate.format('MMM D');
+    const dateLabel = isTomorrow ? 'Tomorrow' : transitDate.format('MMM D');
 
     return (
       <Link
