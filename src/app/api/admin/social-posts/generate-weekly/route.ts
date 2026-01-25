@@ -387,6 +387,10 @@ async function generateThematicWeeklyPosts(
       .toLowerCase()
       .replace(/[^a-z0-9\s]/g, '')
       .replace(/\s+/g, '-'),
+    threads: {
+      keyword: title,
+      angles: [],
+    },
   });
   const sabbatPosts = sabbatPlan.flatMap((day) => {
     const dayContent = generateDayContent(day.date, day.theme, day.facet);
