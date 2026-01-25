@@ -2,7 +2,7 @@ import { Metadata } from 'next';
 import Link from 'next/link';
 import { SEOContentTemplate } from '@/components/grimoire/SEOContentTemplate';
 import { Wand2 } from 'lucide-react';
-import { witchTypesOverview } from '@/constants/witch-types.json';
+import witchTypesData from '@/constants/witch-types.json';
 import { getCosmicConnections } from '@/lib/cosmicConnectionsConfig';
 import CosmicConnections from '@/components/grimoire/CosmicConnections';
 
@@ -54,6 +54,8 @@ export default function WitchTypesIndexPage() {
       </p>
     </div>
   );
+
+  const witchTypesOverview = witchTypesData.witchTypesOverview ?? [];
 
   const contextList = [
     'These categories are modern constructs—most historical witches simply practiced what worked for them.',

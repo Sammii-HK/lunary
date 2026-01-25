@@ -3,21 +3,15 @@ import { notFound } from 'next/navigation';
 import { SEOContentTemplate } from '@/components/grimoire/SEOContentTemplate';
 import { CosmicConnections } from '@/components/grimoire/CosmicConnections';
 import type { FAQItem } from '@/components/grimoire/SEOContentTemplate';
-import { witchTypes } from '@/constants/witch-types.json';
+import witchTypesData from '@/constants/witch-types.json';
 import { getCosmicConnections } from '@/lib/cosmicConnectionsConfig';
 
+const witchTypes = witchTypesData.witchTypes || {};
 const typeKeys = Object.keys(witchTypes);
 
 function getIntroDefinition(intro: string): string {
   const [firstSentence] = intro.split(/(?<=[.!?])\s+/);
   return firstSentence || intro;
-}
-
-export function buildWitchTypeMetadata(witch: { name: string }) {
-  const title = `${witch.name}: Meaning, Traits, Practices and Tools | Lunary`;
-  const description = `What is a ${witch.name.toLowerCase()}? Learn the meaning, common traits, beginner practices, and tools, with a grounded way to start.`;
-
-  return { title, description };
 }
 
 export async function generateStaticParams() {

@@ -15,7 +15,7 @@ import { annualFullMoons } from '@/constants/moon/annualFullMoons';
 import { zodiacSigns, planetaryBodies } from '../../utils/zodiac/zodiac';
 import { wheelOfTheYearSabbats } from '@/constants/sabbats';
 import { correspondencesData } from '@/constants/grimoire/correspondences';
-import { witchTypesOverview } from '@/constants/witch-types.json';
+import witchTypesData from '@/constants/witch-types.json';
 import {
   astrologicalHouses,
   astrologicalAspects,
@@ -870,12 +870,14 @@ export default function sitemap(): MetadataRoute.Sitemap {
   );
 
   // Add modern witchcraft witch type pages
-  const witchTypeRoutes = witchTypesOverview.map((type) => ({
-    url: `${baseUrl}/grimoire/modern-witchcraft/witch-types/${type.slug}`,
-    lastModified: date,
-    changeFrequency: 'monthly' as const,
-    priority: 0.6,
-  }));
+  const witchTypeRoutes = (witchTypesData.witchTypesOverview || []).map(
+    (type) => ({
+      url: `${baseUrl}/grimoire/modern-witchcraft/witch-types/${type.slug}`,
+      lastModified: date,
+      changeFrequency: 'monthly' as const,
+      priority: 0.6,
+    }),
+  );
 
   // Add modern witchcraft tool pages
   const witchToolRoutes = [
