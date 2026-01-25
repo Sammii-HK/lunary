@@ -9,9 +9,9 @@ import { CosmicHighlight } from '../CosmicHighlight';
 export const revalidate = 604800;
 
 export const metadata: Metadata = {
-  title: 'Weekly Horoscope Hub: Insights for All Zodiac Signs | Lunary',
+  title: 'Weekly Horoscope: This Week for All 12 Signs | Lunary',
   description:
-    'See the week ahead for every zodiac sign. Fresh horoscopes each week with transit context, lunar phases, and astrological guidance.',
+    'Read your weekly horoscope for all 12 zodiac signs. Extended astrology forecasts with insights for love, career, and personal growth this week.',
   keywords: [
     'weekly horoscope',
     'weekly astrology',
@@ -19,9 +19,8 @@ export const metadata: Metadata = {
     'horoscope hub',
   ],
   openGraph: {
-    title: 'Weekly Horoscope Hub | Lunary Grimoire',
-    description:
-      'Public weekly horoscopes for all signs, including transit cues and lunar highlights.',
+    title: 'Weekly Horoscope - All 12 Signs | Lunary',
+    description: 'Extended weekly astrology forecasts for every zodiac sign.',
     url: 'https://lunary.app/grimoire/horoscopes/weekly',
   },
   alternates: { canonical: 'https://lunary.app/grimoire/horoscopes/weekly' },
@@ -55,7 +54,9 @@ const signs = [
 function getWeekRange(): string {
   const now = new Date();
   const startOfWeek = new Date(now);
-  startOfWeek.setDate(now.getDate() - now.getDay());
+  const day = now.getDay();
+  const mondayOffset = day === 0 ? -6 : 1 - day;
+  startOfWeek.setDate(now.getDate() + mondayOffset);
   const endOfWeek = new Date(startOfWeek);
   endOfWeek.setDate(startOfWeek.getDate() + 6);
 
@@ -86,9 +87,9 @@ export default function GrimoireWeeklyHoroscopePage() {
 
   return (
     <SEOContentTemplate
-      title='Weekly Horoscope Hub | Lunary Grimoire'
+      title='Weekly Horoscope This Week: All 12 Zodiac Signs | Lunary'
       h1='Weekly Horoscope'
-      description='Extended weekly forecasts for every zodiac sign, refreshed each week with lunar and transit signals.'
+      description="This week's horoscope for all 12 zodiac signs. Clear astrology guidance for love, career, money, and emotional themes."
       keywords={[
         'weekly horoscope',
         'weekly astrology',
@@ -98,6 +99,16 @@ export default function GrimoireWeeklyHoroscopePage() {
       canonicalUrl='https://lunary.app/grimoire/horoscopes/weekly'
       additionalSchemas={[itemListSchema]}
       intro='A weekly overview for every zodiac sign, built with transits, Moon phases, and actionable cues so you can plan ahead.'
+      meaningTitle='How to read a weekly horoscope'
+      meaning={`
+Weekly horoscopes describe shifting planetary movement, not fixed outcomes, and each entry highlights the current dance between the planets rather than delivering a predetermined fate.
+
+This week reflects changing relationships between the planets, so how it lands depends on your individual birth chart, houses, and personal timing.
+
+Focus on timing, transits, and context-these themes evolve through the week and guide what feels activated for you more than predicting certainty.
+
+Weekly horoscopes update because planetary relationships shift, not because of calendar dates.
+      `}
       heroContent={
         <div className='text-center space-y-1'>
           <p className='text-sm text-lunary-primary-400'>{weekRange}</p>
@@ -119,40 +130,14 @@ export default function GrimoireWeeklyHoroscopePage() {
       }
       ctaText='Read this week through your full birth chart'
       ctaHref='/horoscope'
+      components={<CosmicHighlight variant='weekly' />}
     >
-      <section className='mb-12 space-y-4'>
-        <h2 className='text-2xl font-semibold text-zinc-100'>
-          How to read a weekly horoscope
-        </h2>
-        <p className='text-sm text-zinc-400 leading-relaxed'>
-          Weekly horoscopes describe shifting planetary movement, not fixed
-          outcomes, and each entry highlights the current dance between the
-          planets rather than delivering a predetermined fate.
-        </p>
-        <p className='text-sm text-zinc-400 leading-relaxed'>
-          This week reflects changing relationships between the planets, so how
-          it lands depends on your individual birth chart, houses, and personal
-          timing.
-        </p>
-        <p className='text-sm text-zinc-400 leading-relaxed'>
-          Focus on timing, transits, and context—these themes evolve through the
-          week and guide what feels activated for you more than predicting
-          certainty.
-        </p>
-        <p className='text-xs text-zinc-500'>
-          Weekly horoscopes update because planetary relationships shift, not
-          because of calendar dates.
-        </p>
-      </section>
-
-      <CosmicHighlight />
-
       <section className='mb-12'>
         <div className='grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4'>
           {signs.map((sign) => (
             <Link
               key={sign.name}
-              href={`/horoscope/weekly/${sign.name.toLowerCase()}`}
+              href={`/grimoire/horoscopes/weekly/${sign.name.toLowerCase()}`}
               className='group p-6 rounded-xl border border-zinc-800 bg-zinc-900/30 hover:border-lunary-primary-600 transition-all'
             >
               <div className='text-3xl mb-2'>{sign.symbol}</div>
