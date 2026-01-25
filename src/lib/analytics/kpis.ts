@@ -3,17 +3,28 @@ import { formatTimestamp } from '@/lib/analytics/date-range';
 
 export type DateRange = { start: Date; end: Date };
 
+export type EngagementEventType =
+  | 'app_opened'
+  | 'product_opened'
+  | 'grimoire_viewed'
+  | 'signup';
+
 const utcDateExpr = `(created_at AT TIME ZONE 'UTC')::date`;
 const parseIsoDay = (dateKey: string) => new Date(`${dateKey}T00:00:00.000Z`);
 
+const identityLinksCte = `
+  identity_links AS (
+    SELECT DISTINCT ON (anonymous_id)
+      anonymous_id,
+      user_id
+    FROM analytics_identity_links
+    ORDER BY anonymous_id, last_seen_at DESC, first_seen_at DESC
+  )
+`;
+
 const identityLinkJoin = `
-  LEFT JOIN LATERAL (
-    SELECT user_id
-    FROM analytics_identity_links l
-    WHERE l.anonymous_id = ce.anonymous_id
-    ORDER BY l.created_at DESC
-    LIMIT 1
-  ) linked ON ce.anonymous_id IS NOT NULL AND ce.anonymous_id <> ''
+  LEFT JOIN identity_links linked
+    ON linked.anonymous_id = ce.anonymous_id
 `;
 
 const canonicalIdentityExpression = `
@@ -42,7 +53,11 @@ const missingIdentityExpression = `
   END
 `;
 
-const buildCanonicalAppOpenedCtes = (startParamIndex: number) => `
+const buildCanonicalEventCtes = (
+  startParamIndex: number,
+  eventTypeParamIndex: number,
+) => `
+  ${identityLinksCte},
   base AS (
     SELECT
       ce.*,
@@ -52,7 +67,7 @@ const buildCanonicalAppOpenedCtes = (startParamIndex: number) => `
       (ce.created_at AT TIME ZONE 'UTC')::date AS day
     FROM conversion_events ce
     ${identityLinkJoin}
-    WHERE ce.event_type = 'app_opened'
+    WHERE ce.event_type = $${eventTypeParamIndex}
       AND ce.created_at >= $${startParamIndex}
       AND ce.created_at <= $${startParamIndex + 1}
   ),
@@ -65,12 +80,13 @@ const buildCanonicalAppOpenedCtes = (startParamIndex: number) => `
 const buildCanonicalIdentitySetCte = (
   alias: string,
   startParamIndex: number,
+  eventTypeParamIndex: number,
 ) => `
   ${alias} AS (
     SELECT DISTINCT ${canonicalIdentityExpression} AS canonical_identity
     FROM conversion_events ce
     ${identityLinkJoin}
-    WHERE ce.event_type = 'app_opened'
+    WHERE ce.event_type = $${eventTypeParamIndex}
       AND ce.created_at >= $${startParamIndex}
       AND ce.created_at <= $${startParamIndex + 1}
       AND (${canonicalIdentityExpression} IS NOT NULL)
@@ -86,10 +102,14 @@ export type AuditInfo = {
   anomalies: string[];
 };
 
-async function getAppOpenedAudit(startTs: string, endTs: string) {
+export async function getEventAudit(
+  startTs: string,
+  endTs: string,
+  eventType: EngagementEventType,
+) {
   const result = await sql.query(
     `
-      WITH ${buildCanonicalAppOpenedCtes(1)}
+      WITH ${buildCanonicalEventCtes(1, 3)}
       SELECT
         COUNT(*) AS raw_events_count,
         (
@@ -101,7 +121,7 @@ async function getAppOpenedAudit(startTs: string, endTs: string) {
         MAX(created_at) AS last_event_timestamp
       FROM base
     `,
-    [startTs, endTs],
+    [startTs, endTs, eventType],
   );
 
   const row = result.rows[0];
@@ -122,14 +142,15 @@ async function getAppOpenedAudit(startTs: string, endTs: string) {
 async function countCanonicalIdentities(
   startTs: string,
   endTs: string,
+  eventType: EngagementEventType,
 ): Promise<number> {
   const countResult = await sql.query(
     `
-      WITH ${buildCanonicalAppOpenedCtes(1)}
+      WITH ${buildCanonicalEventCtes(1, 3)}
       SELECT COUNT(DISTINCT canonical_identity) AS count
       FROM canonical
     `,
-    [startTs, endTs],
+    [startTs, endTs, eventType],
   );
   return Number(countResult.rows[0]?.count || 0);
 }
@@ -147,6 +168,11 @@ export type EngagementOverview = {
   returning_dau: number;
   returning_wau: number;
   returning_mau: number;
+  all_time: {
+    total_product_users: number;
+    returning_users: number;
+    median_active_days_per_user: number;
+  };
   avg_active_days_per_user: number;
   active_days_distribution: {
     '1': number;
@@ -185,6 +211,7 @@ export type GrimoireHealth = {
   grimoire_entry_rate: number;
   grimoire_views_per_active_user: number;
   return_to_grimoire_rate: number;
+  grimoire_penetration: number;
   influence: {
     subscription_users: number;
     subscription_users_with_grimoire_before: number;
@@ -212,18 +239,20 @@ async function countWindowOverlap(
   endCurrent: string,
   startPrev: string,
   endPrev: string,
+  eventType: EngagementEventType,
 ) {
   const result = await sql.query(
     `
-      WITH ${buildCanonicalIdentitySetCte('current_window', 1)},
-           ${buildCanonicalIdentitySetCte('prev_window', 3)}
+      WITH ${identityLinksCte},
+           ${buildCanonicalIdentitySetCte('current_window', 1, 5)},
+           ${buildCanonicalIdentitySetCte('prev_window', 3, 5)}
       SELECT COUNT(*) AS overlap
       FROM current_window c
       WHERE EXISTS (
         SELECT 1 FROM prev_window p WHERE p.canonical_identity = c.canonical_identity
       )
     `,
-    [startCurrent, endCurrent, startPrev, endPrev],
+    [startCurrent, endCurrent, startPrev, endPrev, eventType],
   );
   return Number(result.rows[0]?.overlap || 0);
 }
@@ -241,32 +270,42 @@ function toDateKey(value: unknown): string {
 
 export async function getEngagementOverview(
   range: DateRange,
-  options?: { includeAudit?: boolean },
+  options?: { includeAudit?: boolean; eventType?: EngagementEventType },
 ): Promise<EngagementOverview> {
   const startTs = formatTimestamp(range.start);
   const endTs = formatTimestamp(range.end);
-  const canonicalCtes = buildCanonicalAppOpenedCtes(1);
+  const eventType = options?.eventType ?? 'app_opened';
+  const canonicalCtes = buildCanonicalEventCtes(1, 3);
+
+  const trendStart = new Date(range.start);
+  trendStart.setUTCDate(trendStart.getUTCDate() - 1);
+  trendStart.setUTCHours(0, 0, 0, 0);
+  const trendStartTs = formatTimestamp(trendStart);
+  const rangeStartKey = range.start.toISOString().slice(0, 10);
+  const rangeEndKey = range.end.toISOString().slice(0, 10);
 
   const dauTrendResult = await sql.query(
     `
-      WITH ${canonicalCtes},
-           first_in_range AS (
-             SELECT canonical_identity, MIN(day) AS first_day_in_range
-             FROM canonical
-             GROUP BY canonical_identity
-           )
+      WITH ${buildCanonicalEventCtes(1, 3)}
       SELECT
         c.day AS date,
         COUNT(DISTINCT c.canonical_identity) AS dau,
         COUNT(DISTINCT c.canonical_identity)
-          FILTER (WHERE c.day > f.first_day_in_range) AS returning_dau
+          FILTER (
+            WHERE EXISTS (
+              SELECT 1
+              FROM canonical prev
+              WHERE prev.canonical_identity = c.canonical_identity
+                AND prev.day = c.day - 1
+            )
+          ) AS returning_dau
       FROM canonical c
-      INNER JOIN first_in_range f
-        ON f.canonical_identity = c.canonical_identity
+      WHERE c.day >= $4::date
+        AND c.day <= $5::date
       GROUP BY c.day
       ORDER BY c.day ASC
     `,
-    [startTs, endTs],
+    [trendStartTs, endTs, eventType, rangeStartKey, rangeEndKey],
   );
 
   // Current-day DAU over the selected end date (UTC day)
@@ -276,9 +315,9 @@ export async function getEngagementOverview(
       WITH ${canonicalCtes}
       SELECT COUNT(DISTINCT canonical_identity) AS count
       FROM canonical
-      WHERE day = $3::date
+      WHERE day = $4::date
     `,
-    [startTs, endTs, endDayKey],
+    [startTs, endTs, eventType, endDayKey],
   );
 
   // WAU/MAU relative to selected end
@@ -299,18 +338,18 @@ export async function getEngagementOverview(
       WITH ${canonicalCtes}
       SELECT COUNT(DISTINCT canonical_identity) AS count
       FROM canonical
-      WHERE day >= $3::date
+      WHERE day >= $4::date
       `,
-      [startTs, endTs, wauStartKey],
+      [startTs, endTs, eventType, wauStartKey],
     ),
     sql.query(
       `
       WITH ${canonicalCtes}
       SELECT COUNT(DISTINCT canonical_identity) AS count
       FROM canonical
-      WHERE day >= $3::date
+      WHERE day >= $4::date
       `,
-      [startTs, endTs, mauStartKey],
+      [startTs, endTs, eventType, mauStartKey],
     ),
   ]);
 
@@ -335,15 +374,16 @@ export async function getEngagementOverview(
            )
       SELECT
         COUNT(*) FILTER (
-          WHERE fo.first_day >= $3::date AND fo.first_day <= $4::date
+          WHERE fo.first_day >= $4::date AND fo.first_day <= $5::date
         ) AS new_users,
-        COUNT(*) FILTER (WHERE fo.first_day < $3::date) AS returning_users_lifetime
+        COUNT(*) FILTER (WHERE fo.first_day < $4::date) AS returning_users_lifetime
       FROM active_in_range a
       INNER JOIN first_open fo ON fo.canonical_identity = a.canonical_identity
     `,
     [
       startTs,
       endTs,
+      eventType,
       range.start.toISOString().slice(0, 10),
       range.end.toISOString().slice(0, 10),
     ],
@@ -367,7 +407,7 @@ export async function getEngagementOverview(
       FROM per_identity
       WHERE active_days >= 2
     `,
-    [startTs, endTs],
+    [startTs, endTs, eventType],
   );
   const returningUsersRange = Number(
     returningUsersRangeResult.rows[0]?.returning_users_range || 0,
@@ -426,7 +466,7 @@ export async function getEngagementOverview(
         COALESCE(SUM(CASE WHEN NOT is_internal AND NOT is_search THEN 1 ELSE 0 END), 0) AS direct_returning
       FROM categorized
     `,
-    [startTs, endTs],
+    [startTs, endTs, eventType],
   );
 
   const returningReferrerBreakdown = {
@@ -446,21 +486,31 @@ export async function getEngagementOverview(
   const prevDayDate = new Date(endDayDate);
   prevDayDate.setUTCDate(prevDayDate.getUTCDate() - 1);
   const prevDayKey = toDateKey(prevDayDate);
+  const d1Start = new Date(prevDayDate);
+  d1Start.setUTCHours(0, 0, 0, 0);
+  const d1End = new Date(endDayDate);
+  d1End.setUTCHours(23, 59, 59, 999);
 
   const returningDauResult = await sql.query(
     `
-      WITH ${canonicalCtes}
+      WITH ${buildCanonicalEventCtes(1, 3)}
       SELECT COUNT(*) AS returning_dau
       FROM canonical c
-      WHERE c.day = $3::date
+      WHERE c.day = $4::date
         AND EXISTS (
           SELECT 1
           FROM canonical prev
           WHERE prev.canonical_identity = c.canonical_identity
-            AND prev.day = $4::date
+            AND prev.day = $5::date
         )
     `,
-    [startTs, endTs, endDayKey, prevDayKey],
+    [
+      formatTimestamp(d1Start),
+      formatTimestamp(d1End),
+      eventType,
+      endDayKey,
+      prevDayKey,
+    ],
   );
   const returningDau = Number(returningDauResult.rows[0]?.returning_dau || 0);
 
@@ -480,6 +530,7 @@ export async function getEngagementOverview(
     endTs,
     formatTimestamp(prevWauStart),
     formatTimestamp(prevWauEnd),
+    eventType,
   );
 
   const currentMauStart = new Date(range.end);
@@ -498,6 +549,7 @@ export async function getEngagementOverview(
     endTs,
     formatTimestamp(prevMauStart),
     formatTimestamp(prevMauEnd),
+    eventType,
   );
 
   // Active days per user (within selected range)
@@ -518,16 +570,39 @@ export async function getEngagementOverview(
         COUNT(*) FILTER (WHERE active_days >= 15) AS bucket_15_plus
       FROM per_identity
     `,
-    [startTs, endTs],
+    [startTs, endTs, eventType],
   );
 
   const avgActiveDays = Number(activeDaysResult.rows[0]?.avg_active_days || 0);
+
+  const allTimeStartTs = '1970-01-01T00:00:00.000Z';
+  const allTimeResult = await sql.query(
+    `
+      WITH ${buildCanonicalEventCtes(1, 3)},
+           per_user AS (
+             SELECT canonical_identity, COUNT(DISTINCT day) AS active_days
+             FROM canonical
+             GROUP BY canonical_identity
+           )
+      SELECT
+        COUNT(*) AS total_users,
+        COUNT(*) FILTER (WHERE active_days >= 2) AS returning_users,
+        percentile_cont(0.5) WITHIN GROUP (ORDER BY active_days)
+          AS median_active_days
+      FROM per_user
+    `,
+    [allTimeStartTs, endTs, eventType],
+  );
+  const allTimeRow = allTimeResult.rows[0];
+  const allTimeTotalUsers = Number(allTimeRow?.total_users || 0);
+  const allTimeReturningUsers = Number(allTimeRow?.returning_users || 0);
+  const allTimeMedianActiveDays = Number(allTimeRow?.median_active_days || 0);
 
   // Cohort-lite retention: day+1/day+7/day+30 from first-ever open day
   const retentionStartTs = '1970-01-01T00:00:00.000Z';
   const retentionResult = await sql.query(
     `
-      WITH ${buildCanonicalAppOpenedCtes(1)},
+      WITH ${buildCanonicalEventCtes(1, 3)},
            first_open AS (
              SELECT canonical_identity, MIN(day) AS first_day
              FROM canonical
@@ -536,8 +611,8 @@ export async function getEngagementOverview(
            cohort AS (
              SELECT canonical_identity, first_day
              FROM first_open
-             WHERE first_day >= $3::date
-               AND first_day <= $4::date
+             WHERE first_day >= $4::date
+               AND first_day <= $5::date
            ),
            opens AS (
              SELECT canonical_identity, day
@@ -574,6 +649,7 @@ export async function getEngagementOverview(
     [
       retentionStartTs,
       endTs,
+      eventType,
       range.start.toISOString().slice(0, 10),
       range.end.toISOString().slice(0, 10),
     ],
@@ -610,7 +686,7 @@ export async function getEngagementOverview(
 
   let audit: AuditInfo | undefined;
   if (options?.includeAudit) {
-    audit = await getAppOpenedAudit(startTs, endTs);
+    audit = await getEventAudit(startTs, endTs, eventType);
     const anomalies: string[] = [];
     if (dau > wau) {
       anomalies.push('DAU is greater than WAU');
@@ -653,6 +729,11 @@ export async function getEngagementOverview(
     returning_dau: returningDau,
     returning_wau: returningWau,
     returning_mau: returningMau,
+    all_time: {
+      total_product_users: allTimeTotalUsers,
+      returning_users: allTimeReturningUsers,
+      median_active_days_per_user: Number(allTimeMedianActiveDays.toFixed(2)),
+    },
     avg_active_days_per_user: Number(avgActiveDays.toFixed(2)),
     active_days_distribution: {
       '1': Number(activeDaysResult.rows[0]?.bucket_1 || 0),
@@ -669,12 +750,14 @@ export async function getEngagementOverview(
 
 export async function getFeatureAdoption(
   range: DateRange,
+  options?: { eventType?: EngagementEventType; featureTypes?: string[] },
 ): Promise<FeatureAdoption> {
   const startTs = formatTimestamp(range.start);
   const endTs = formatTimestamp(range.end);
-  const mau = await countCanonicalIdentities(startTs, endTs);
+  const eventType = options?.eventType ?? 'app_opened';
+  const mau = await countCanonicalIdentities(startTs, endTs, eventType);
 
-  const featureTypes = [
+  const featureTypes = options?.featureTypes ?? [
     'daily_dashboard_viewed',
     'grimoire_viewed',
     'astral_chat_used',
@@ -685,7 +768,9 @@ export async function getFeatureAdoption(
 
   const result = await sql.query(
     `
-      WITH feature_rows AS (
+      WITH ${identityLinksCte},
+           ${buildCanonicalIdentitySetCte('active_set', 2, 4)},
+           feature_rows AS (
         SELECT
           ce.event_type,
           ${canonicalIdentityExpression} AS canonical_identity
@@ -694,14 +779,15 @@ export async function getFeatureAdoption(
         WHERE ce.event_type = ANY($1::text[])
           AND ce.created_at >= $2
           AND ce.created_at <= $3
+          AND ${canonicalIdentityExpression} IS NOT NULL
       )
       SELECT event_type, COUNT(DISTINCT canonical_identity) AS users
       FROM feature_rows
-      WHERE canonical_identity IS NOT NULL
+      WHERE canonical_identity IN (SELECT canonical_identity FROM active_set)
       GROUP BY event_type
       ORDER BY users DESC
     `,
-    [featureTypes, startTs, endTs],
+    [featureTypes, startTs, endTs, eventType],
   );
 
   const usersByType = new Map<string, number>();
@@ -728,10 +814,15 @@ export async function getGrimoireHealth(
   const startTs = formatTimestamp(range.start);
   const endTs = formatTimestamp(range.end);
 
-  const canonicalRangeCtes = buildCanonicalAppOpenedCtes(1);
+  const canonicalRangeCtes = buildCanonicalEventCtes(1, 3);
+  const baseEventType: EngagementEventType = 'app_opened';
+  const grimoireEventType: EngagementEventType = 'grimoire_viewed';
 
   // Active users in selected range
-  const activeUsers = await countCanonicalIdentities(startTs, endTs);
+  const [activeUsers, grimoireUsers] = await Promise.all([
+    countCanonicalIdentities(startTs, endTs, baseEventType),
+    countCanonicalIdentities(startTs, endTs, grimoireEventType),
+  ]);
 
   // New users in selected range (first app_opened within range)
   const newUsersResult = await sql.query(
@@ -744,12 +835,13 @@ export async function getGrimoireHealth(
            )
       SELECT COUNT(*) AS count
       FROM first_open
-      WHERE first_day >= $3::date
-        AND first_day <= $4::date
+      WHERE first_day >= $4::date
+        AND first_day <= $5::date
     `,
     [
       startTs,
       endTs,
+      baseEventType,
       range.start.toISOString().slice(0, 10),
       range.end.toISOString().slice(0, 10),
     ],
@@ -768,8 +860,8 @@ export async function getGrimoireHealth(
            new_users AS (
              SELECT canonical_identity, first_day
              FROM first_open
-             WHERE first_day >= $3::date
-               AND first_day <= $4::date
+             WHERE first_day >= $4::date
+               AND first_day <= $5::date
            ),
            grimoire_events AS (
              SELECT
@@ -795,53 +887,46 @@ export async function getGrimoireHealth(
     [
       startTs,
       endTs,
+      baseEventType,
       range.start.toISOString().slice(0, 10),
       range.end.toISOString().slice(0, 10),
     ],
   );
   const entryUsers = Number(entryResult.rows[0]?.entry_users || 0);
 
-  // Grimoire distinct pages per active user (avg distinct entity per user, include 0s)
-  const grimoireDistinctPerUser = await sql.query(
+  // Grimoire views per grimoire user (total events / distinct grimoire identities)
+  const grimoireViewsResult = await sql.query(
     `
-      WITH ${canonicalRangeCtes},
-           active_users AS (
-             SELECT DISTINCT canonical_identity
-             FROM canonical
-           ),
-      grimoire_events AS (
+      WITH ${identityLinksCte},
+           grimoire_events AS (
         SELECT
-          ${canonicalIdentityExpression} AS canonical_identity,
-          COALESCE(ce.entity_id, ce.page_path, '') AS entity
+          ${canonicalIdentityExpression} AS canonical_identity
         FROM conversion_events ce
         ${identityLinkJoin}
         WHERE ce.event_type = 'grimoire_viewed'
           AND ce.created_at >= $1
           AND ce.created_at <= $2
           AND ${canonicalIdentityExpression} IS NOT NULL
-      ),
-      per_user AS (
-        SELECT
-          au.canonical_identity,
-          COUNT(DISTINCT ge.entity) AS distinct_pages
-        FROM active_users au
-        LEFT JOIN grimoire_events ge
-          ON ge.canonical_identity = au.canonical_identity
-        GROUP BY au.canonical_identity
       )
-      SELECT AVG(distinct_pages)::float AS avg_distinct_pages
-      FROM per_user
+      SELECT
+        COUNT(*) AS total_events,
+        COUNT(DISTINCT canonical_identity) AS distinct_users
+      FROM grimoire_events
     `,
     [startTs, endTs],
   );
-  const viewsPerActiveUser = Number(
-    grimoireDistinctPerUser.rows[0]?.avg_distinct_pages || 0,
+  const grimoireViews = Number(grimoireViewsResult.rows[0]?.total_events || 0);
+  const grimoireDistinctUsers = Number(
+    grimoireViewsResult.rows[0]?.distinct_users || 0,
   );
+  const viewsPerActiveUser =
+    grimoireDistinctUsers > 0 ? grimoireViews / grimoireDistinctUsers : 0;
 
   // Return-to-Grimoire: 2+ distinct grimoire days among users who viewed grimoire
   const returnToGrimoireResult = await sql.query(
     `
-      WITH grimoire_activity AS (
+      WITH ${identityLinksCte},
+           grimoire_activity AS (
         SELECT
           ${canonicalIdentityExpression} AS canonical_identity,
           (ce.created_at AT TIME ZONE 'UTC')::date AS day
@@ -868,6 +953,7 @@ export async function getGrimoireHealth(
     returnToGrimoireResult.rows[0]?.any_grimoire_users || 0,
   );
   const returnUsers = Number(returnToGrimoireResult.rows[0]?.return_users || 0);
+  const grimoirePenetration = pct(grimoireUsers, activeUsers);
 
   // Influence metrics
   const influence = await getConversionInfluence(range);
@@ -878,6 +964,7 @@ export async function getGrimoireHealth(
     return_to_grimoire_rate: Number(
       pct(returnUsers, anyGrimoireUsers).toFixed(2),
     ),
+    grimoire_penetration: Number(grimoirePenetration.toFixed(2)),
     influence,
   };
 }
@@ -887,6 +974,8 @@ export async function getConversionInfluence(
 ): Promise<ConversionInfluence> {
   const startTs = formatTimestamp(range.start);
   const endTs = formatTimestamp(range.end);
+  const testEmailPattern = '%@test.lunary.app';
+  const testEmailExact = 'test@test.lunary.app';
 
   // Subscription influence: % of subscription_started users that had a prior grimoire view
   const subscriptionEventTypes = ['subscription_started', 'trial_converted'];
@@ -901,6 +990,7 @@ export async function getConversionInfluence(
           AND user_id IS NOT NULL
           AND created_at >= $1
           AND created_at <= $2
+          AND (user_email IS NULL OR (user_email NOT LIKE $4 AND user_email != $5))
         GROUP BY user_id
       )
       SELECT
@@ -912,11 +1002,12 @@ export async function getConversionInfluence(
             WHERE gv.user_id = subs.user_id
               AND gv.event_type = 'grimoire_viewed'
               AND gv.created_at < subs.sub_at
+              AND (gv.user_email IS NULL OR (gv.user_email NOT LIKE $4 AND gv.user_email != $5))
           )
         ) AS subscription_users_with_grimoire_before
       FROM subs
     `,
-    [startTs, endTs, subscriptionEventTypes],
+    [startTs, endTs, subscriptionEventTypes, testEmailPattern, testEmailExact],
   );
 
   const subscriptionUsers = Number(base.rows[0]?.subscription_users || 0);
@@ -933,6 +1024,7 @@ export async function getConversionInfluence(
           AND user_id IS NOT NULL
           AND created_at >= $1
           AND created_at <= $2
+          AND (user_email IS NULL OR (user_email NOT LIKE $5 AND user_email != $6))
         GROUP BY user_id
       ),
       grimoire_first AS (
@@ -940,6 +1032,7 @@ export async function getConversionInfluence(
         FROM conversion_events
         WHERE event_type = 'grimoire_viewed'
           AND user_id IS NOT NULL
+          AND (user_email IS NULL OR (user_email NOT LIKE $5 AND user_email != $6))
         GROUP BY user_id
       ),
       signup_first AS (
@@ -947,6 +1040,7 @@ export async function getConversionInfluence(
         FROM conversion_events
         WHERE event_type = ANY($4::text[])
           AND user_id IS NOT NULL
+          AND (user_email IS NULL OR (user_email NOT LIKE $5 AND user_email != $6))
         GROUP BY user_id
       ),
       joined AS (
@@ -972,7 +1066,14 @@ export async function getConversionInfluence(
         ) AS median_days_signup_to_subscription
       FROM joined
     `,
-    [startTs, endTs, subscriptionEventTypes, signupEventTypes],
+    [
+      startTs,
+      endTs,
+      subscriptionEventTypes,
+      signupEventTypes,
+      testEmailPattern,
+      testEmailExact,
+    ],
   );
 
   const medianFirstGrimoireToSignupRaw =

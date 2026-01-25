@@ -16,6 +16,11 @@ const ACTIVATION_EVENTS = [
   'personalized_tarot_viewed',
   'personalized_horoscope_viewed',
 ];
+const PLAN_CHANGE_EVENTS = [
+  'trial_started',
+  'trial_converted',
+  'subscription_started',
+];
 
 export async function GET(request: NextRequest) {
   try {
@@ -43,74 +48,101 @@ export async function GET(request: NextRequest) {
     }
 
     // Check which users activated within 24h
-    let activatedCount = 0;
+    const activationRowsResult = await sql.query(
+      `
+        WITH signups AS (
+          SELECT id as user_id, "createdAt" as signup_at
+          FROM "user"
+          WHERE "createdAt" >= $1
+            AND "createdAt" <= $2
+            AND (email IS NULL OR (email NOT LIKE $3 AND email != $4))
+        ),
+        activation_events AS (
+          SELECT
+            ce.user_id,
+            ce.event_type,
+            MIN(ce.created_at) as activation_at
+          FROM conversion_events ce
+          JOIN signups s ON ce.user_id = s.user_id
+          WHERE ce.event_type = ANY($5::text[])
+            AND ce.created_at >= s.signup_at
+            AND ce.created_at <= s.signup_at + INTERVAL '24 hours'
+          GROUP BY ce.user_id, ce.event_type
+        ),
+        plan_snapshots AS (
+          SELECT user_id, plan_type, created_at
+          FROM conversion_events
+          WHERE event_type = ANY($6::text[])
+        ),
+        activation_with_plans AS (
+          SELECT
+            ae.user_id,
+            ae.event_type,
+            ae.activation_at,
+            COALESCE(ps.plan_type, 'free') as resolved_plan_type
+          FROM activation_events ae
+          LEFT JOIN LATERAL (
+            SELECT plan_type
+            FROM plan_snapshots ps
+            WHERE ps.user_id = ae.user_id
+              AND ps.created_at <= ae.activation_at
+            ORDER BY ps.created_at DESC
+            LIMIT 1
+          ) ps ON true
+        )
+        SELECT
+          user_id,
+          event_type,
+          CASE
+            WHEN resolved_plan_type IN ('monthly', 'yearly') THEN 'paid'
+            WHEN resolved_plan_type = 'free' THEN 'free'
+            ELSE 'unknown'
+          END as bucket
+        FROM activation_with_plans
+      `,
+      [
+        formatTimestamp(range.start),
+        formatTimestamp(range.end),
+        TEST_EMAIL_PATTERN,
+        TEST_EMAIL_EXACT,
+        ACTIVATION_EVENTS,
+        PLAN_CHANGE_EVENTS,
+      ],
+    );
+
+    const activationRows = activationRowsResult.rows ?? [];
+    const activatedUsers = new Set<string>();
     const activationBreakdown: Record<string, number> = {};
     const activationBreakdownByPlan: Record<
       string,
       { free: number; paid: number; unknown: number }
     > = {};
 
-    for (const signup of signups) {
-      const signupAt = new Date(signup.signup_at);
-      const activationDeadline = new Date(
-        signupAt.getTime() + 24 * 60 * 60 * 1000,
-      );
+    activationRows.forEach((row) => {
+      const eventType = String(row.event_type || '');
+      if (!eventType) return;
+      const userId = String(row.user_id);
+      const bucket = ['free', 'paid', 'unknown'].includes(row.bucket)
+        ? (row.bucket as 'free' | 'paid' | 'unknown')
+        : 'unknown';
 
-      // Check if user completed any activation event within 24h
-      const activatedResult = await sql.query(
-        `
-          SELECT event_type, plan_type
-          FROM conversion_events
-          WHERE user_id = $1
-            AND event_type = ANY($2::text[])
-            AND created_at >= $3
-            AND created_at <= $4
-          GROUP BY event_type, plan_type
-        `,
-        [
-          String(signup.user_id),
-          ACTIVATION_EVENTS,
-          formatTimestamp(signupAt),
-          formatTimestamp(activationDeadline),
-        ],
-      );
+      activatedUsers.add(userId);
+      activationBreakdown[eventType] =
+        (activationBreakdown[eventType] || 0) + 1;
 
-      if (activatedResult.rows.length > 0) {
-        activatedCount++;
-        // Track which events triggered activation
-        const seenEvents = new Set<string>();
-        const seenEventPlans = new Set<string>();
-        activatedResult.rows.forEach((row) => {
-          const eventType = row.event_type as string;
-          if (!eventType || seenEvents.has(eventType)) return;
-          seenEvents.add(eventType);
-          activationBreakdown[eventType] =
-            (activationBreakdown[eventType] || 0) + 1;
-
-          const planType = row.plan_type as string | null;
-          const bucket =
-            planType === 'monthly' || planType === 'yearly'
-              ? 'paid'
-              : planType === 'free'
-                ? 'free'
-                : 'unknown';
-          const planKey = `${eventType}:${bucket}`;
-          if (seenEventPlans.has(planKey)) return;
-          seenEventPlans.add(planKey);
-          if (!activationBreakdownByPlan[eventType]) {
-            activationBreakdownByPlan[eventType] = {
-              free: 0,
-              paid: 0,
-              unknown: 0,
-            };
-          }
-          activationBreakdownByPlan[eventType][bucket] += 1;
-        });
+      if (!activationBreakdownByPlan[eventType]) {
+        activationBreakdownByPlan[eventType] = {
+          free: 0,
+          paid: 0,
+          unknown: 0,
+        };
       }
-    }
+      activationBreakdownByPlan[eventType][bucket] += 1;
+    });
 
+    const totalActivatedUsers = activatedUsers.size;
     const activationRate =
-      signups.length > 0 ? (activatedCount / signups.length) * 100 : 0;
+      signups.length > 0 ? (totalActivatedUsers / signups.length) * 100 : 0;
 
     // Calculate daily breakdown for trends
     const dailyBreakdown = await sql.query(
@@ -169,7 +201,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({
       activationRate: Number(activationRate.toFixed(2)),
-      activatedUsers: activatedCount,
+      activatedUsers: totalActivatedUsers,
       totalSignups: signups.length,
       activationBreakdown,
       activationBreakdownByPlan,

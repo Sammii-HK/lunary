@@ -2,13 +2,35 @@ import { NextRequest, NextResponse } from 'next/server';
 import { resolveDateRange } from '@/lib/analytics/date-range';
 import { getFeatureAdoption } from '@/lib/analytics/kpis';
 
+const familyToEventType = (
+  family: string | null,
+): 'app_opened' | 'product_opened' | 'grimoire_viewed' => {
+  switch (family) {
+    case 'product':
+      return 'product_opened';
+    case 'grimoire':
+      return 'grimoire_viewed';
+    case 'site':
+    default:
+      return 'app_opened';
+  }
+};
+
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
     const range = resolveDateRange(searchParams, 30);
+    const family = searchParams.get('family');
+    const eventType = familyToEventType(family);
 
-    const adoption = await getFeatureAdoption(range);
-    return NextResponse.json({ source: 'database', range, ...adoption });
+    const adoption = await getFeatureAdoption(range, { eventType });
+    return NextResponse.json({
+      source: 'database',
+      family: family ?? 'site',
+      event_type: eventType,
+      range,
+      ...adoption,
+    });
   } catch (error) {
     console.error('[analytics/feature-adoption] Failed', error);
     return NextResponse.json(

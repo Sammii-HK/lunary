@@ -2,6 +2,7 @@ import { sql } from '@vercel/postgres';
 
 export type CanonicalEventType =
   | 'app_opened'
+  | 'product_opened'
   | 'page_viewed'
   | 'cta_clicked'
   | 'user_signed_up'
@@ -103,6 +104,7 @@ function canonicaliseEventType(raw: unknown): {
   // Canonical events
   if (
     value === 'app_opened' ||
+    value === 'product_opened' ||
     value === 'page_viewed' ||
     value === 'cta_clicked' ||
     value === 'user_signed_up' ||

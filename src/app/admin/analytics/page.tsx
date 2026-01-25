@@ -19,9 +19,7 @@ import {
 
 import { MetricsCard } from '@/components/admin/MetricsCard';
 import { ConversionFunnel } from '@/components/admin/ConversionFunnel';
-import { SuccessMetrics } from '@/components/admin/SuccessMetrics';
 import { SearchConsoleMetrics } from '@/components/admin/SearchConsoleMetrics';
-import { AttributionMetrics } from '@/components/admin/AttributionMetrics';
 import { Button } from '@/components/ui/button';
 import {
   Card,
@@ -31,7 +29,7 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import UsageChart, { UsageChartSeries } from '@/components/charts/UsageChart';
+import { UsageChartSeries } from '@/components/charts/UsageChart';
 import type { AuditInfo } from '@/lib/analytics/kpis';
 
 type ActivityTrend = {
@@ -76,6 +74,7 @@ type ActivityResponse = {
   signed_in_product_avg_sessions_per_user: number;
   content_mau_grimoire: number;
   grimoire_only_mau: number;
+  total_accounts: number;
 };
 
 type ConversionResponse = {
@@ -128,6 +127,51 @@ type FeatureUsageResponse = {
   }>;
 };
 
+type AttributionSummary = {
+  totalUsers: number;
+  organicUsers: number;
+  organicPercentage: number;
+};
+
+type AttributionResponse = {
+  summary: AttributionSummary;
+  sourceBreakdown?: Array<{
+    source: string;
+    user_count: number;
+    percentage: number;
+  }>;
+  mediumBreakdown?: Array<{
+    source: string;
+    medium: string;
+    user_count: number;
+  }>;
+  topLandingPages?: Array<{
+    page: string;
+    source: string;
+    user_count: number;
+  }>;
+  keywordBreakdown?: Array<{ keyword: string; user_count: number }>;
+  dailyTrend?: Array<{
+    date: string;
+    source: string;
+    user_count: number;
+  }>;
+  conversionBySource?: Array<{
+    source: string;
+    total_users: number;
+    paying_users: number;
+    conversion_rate: number;
+  }>;
+  source?: string;
+  error?: string;
+};
+
+const ACTIVATION_FEATURES = [
+  { event: 'horoscope_viewed', label: 'Horoscope Viewed' },
+  { event: 'personalized_horoscope_viewed', label: 'Personalized Horoscope' },
+  { event: 'personalized_tarot_viewed', label: 'Personalized Tarot' },
+];
+
 type CtaConversionHub = {
   hub: string;
   total_clicks: number;
@@ -161,6 +205,11 @@ type EngagementOverviewResponse = {
   returning_dau: number;
   returning_wau: number;
   returning_mau: number;
+  all_time: {
+    total_product_users: number;
+    returning_users: number;
+    median_active_days_per_user: number;
+  };
   avg_active_days_per_user: number;
   active_days_distribution: Record<string, number>;
   retention: {
@@ -392,6 +441,9 @@ export default function AnalyticsPage() {
     useState<CtaConversionResponse | null>(null);
   const [subscription30d, setSubscription30d] =
     useState<Subscription30dResponse | null>(null);
+  const [attribution, setAttribution] = useState<AttributionResponse | null>(
+    null,
+  );
 
   const wauWindowStart = useMemo(() => shiftDateInput(endDate, -6), [endDate]);
   const mauWindowStart = useMemo(() => shiftDateInput(endDate, -29), [endDate]);
@@ -475,6 +527,128 @@ export default function AnalyticsPage() {
   const returningReferrerBreakdown =
     engagementOverview?.returning_referrer_breakdown;
 
+  const appDau = activity?.app_opened_dau ?? 0;
+  const appWau = activity?.app_opened_wau ?? 0;
+  const appMau = activity?.app_opened_mau ?? 0;
+
+  const engagedDau = activity?.dau ?? 0;
+  const engagedWau = activity?.wau ?? 0;
+  const engagedMau = activity?.mau ?? 0;
+
+  const engagementRate = appMau > 0 ? (engagedMau / appMau) * 100 : null;
+
+  const appVisits = engagementOverview?.audit?.raw_events_count ?? null;
+  const canonicalIdentities =
+    engagementOverview?.audit?.distinct_canonical_identities ?? null;
+  const appVisitsPerUser =
+    appVisits !== null && appMau > 0 ? appVisits / appMau : null;
+
+  const reachDau = activity?.sitewide_dau ?? 0;
+  const reachWau = activity?.sitewide_wau ?? 0;
+  const reachMau = activity?.sitewide_mau ?? 0;
+
+  const grimoireMau = activity?.content_mau_grimoire ?? 0;
+  const grimoireOnlyMau = activity?.grimoire_only_mau ?? 0;
+  const totalAccountsEver = activity?.total_accounts ?? 0;
+  const allTimeTotalProductUsers =
+    activity?.signed_in_product_users ??
+    engagementOverview?.all_time?.total_product_users ??
+    engagementOverview?.mau ??
+    0;
+  const allTimeReturningUsers =
+    engagementOverview?.all_time?.returning_users ??
+    engagementOverview?.returning_users_lifetime ??
+    engagementOverview?.returning_users_range ??
+    0;
+  const allTimeMedianActiveDays =
+    activity?.signed_in_product_avg_sessions_per_user ??
+    engagementOverview?.avg_active_days_per_user ??
+    null;
+
+  // const returningStickinessDau =
+  //   engagementOverview?.mau && engagementOverview.mau > 0
+  //     ? (engagementOverview.returning_dau / engagementOverview.mau) * 100
+  //     : null;
+  // const returningStickinessWau =
+  //   engagementOverview?.mau && engagementOverview.mau > 0
+  //     ? (engagementOverview.returning_wau / engagementOverview.mau) * 100
+  //     : null;
+
+  const conversionStages =
+    conversions?.funnel &&
+    typeof conversions.funnel.free_users === 'number' &&
+    typeof conversions.funnel.trial_users === 'number' &&
+    typeof conversions.funnel.paid_users === 'number'
+      ? [
+          { label: 'Free users', value: conversions.funnel.free_users },
+          { label: 'Trial users', value: conversions.funnel.trial_users },
+          { label: 'Paid users', value: conversions.funnel.paid_users },
+        ]
+      : [];
+  const conversionDropOff = conversions?.funnel?.drop_off_points ?? [];
+
+  const productMaError = (activity?.signed_in_product_mau ?? 0) > appMau;
+  const integrityWarnings: string[] = [];
+  if (appMau < appWau) {
+    integrityWarnings.push(
+      'App MAU is below WAU, indicating overlapping windows need review.',
+    );
+  }
+  if (appWau < appDau) {
+    integrityWarnings.push(
+      'App WAU is below DAU, which suggests a window miscount.',
+    );
+  }
+  if (engagedMau > appMau) {
+    integrityWarnings.push(
+      'Engaged MAU exceeds App MAU; key action totals surpass app opens.',
+    );
+  }
+  if (productMaError) {
+    integrityWarnings.push(
+      'Signed-in Product MAU exceeds App MAU; review the canonical `app_opened` audit.',
+    );
+  }
+
+  const pageviewFeature = featureUsage?.features?.find(
+    (feature) => feature.feature === '$pageview',
+  );
+  const pageviewsPerReachUser =
+    pageviewFeature && reachMau > 0
+      ? pageviewFeature.total_events / reachMau
+      : null;
+
+  const attributionSummary = attribution?.summary;
+  const totalAttributedUsers = attributionSummary?.totalUsers ?? 0;
+  const organicAttributedUsers = attributionSummary?.organicUsers ?? 0;
+  const organicAttributionPercentage =
+    typeof attributionSummary?.organicPercentage === 'number'
+      ? `${attributionSummary.organicPercentage.toFixed(1)}%`
+      : 'N/A';
+
+  const signup30dSignups = subscription30d?.signups ?? 0;
+  const signup30dSubscriptions = subscription30d?.conversions ?? 0;
+  const signup30dRate =
+    signup30dSignups > 0
+      ? `${(subscription30d?.conversion_rate ?? 0).toFixed(2)}%`
+      : 'N/A';
+
+  const activationTotalSignups = activation?.totalSignups ?? 0;
+  const activationActivatedUsers = activation?.activatedUsers ?? 0;
+  const activationRateValue =
+    typeof activation?.activationRate === 'number'
+      ? activation.activationRate
+      : 0;
+  const activationRateDisplay =
+    activationTotalSignups > 0 ? `${activationRateValue.toFixed(2)}%` : 'N/A';
+
+  const ctaHubs = ctaConversions?.hubs ?? [];
+  const lifecycleStateEntries = subscriptionLifecycle?.states
+    ? Object.entries(subscriptionLifecycle.states as Record<string, number>)
+    : [];
+  const engagedMatchesApp =
+    engagedDau === appDau && engagedWau === appWau && engagedMau === appMau;
+
   const chartSeries = showProductSeries
     ? [...activitySeries, ...productSeries]
     : activitySeries;
@@ -498,6 +672,7 @@ export default function AnalyticsPage() {
         subscription30dRes,
         notificationsRes,
         featureUsageRes,
+        attributionRes,
         successMetricsRes,
         discordRes,
         searchConsoleRes,
@@ -524,6 +699,7 @@ export default function AnalyticsPage() {
         fetch(`/api/admin/analytics/subscription-30d?${queryParams}`),
         fetch(`/api/admin/analytics/notifications?${queryParams}`),
         fetch(`/api/admin/analytics/feature-usage?${queryParams}`),
+        fetch(`/api/admin/analytics/attribution?${queryParams}`),
         fetch(`/api/admin/analytics/success-metrics?${queryParams}`),
         fetch(`/api/analytics/discord-interactions?range=7d`),
         fetch(`/api/admin/analytics/search-console?${queryParams}`),
@@ -605,6 +781,12 @@ export default function AnalyticsPage() {
         setFeatureUsage(await featureUsageRes.json());
       } else {
         errors.push('Feature usage');
+      }
+
+      if (attributionRes.ok) {
+        setAttribution(await attributionRes.json());
+      } else {
+        errors.push('Attribution');
       }
 
       if (successMetricsRes.ok) {
@@ -955,17 +1137,17 @@ export default function AnalyticsPage() {
       rows.push(
         [
           'Activity',
-          'DAU (Sitewide Page Views)',
+          'DAU (App Page Views)',
           String(activity.sitewide_dau ?? 0),
         ],
         [
           'Activity',
-          'WAU (Sitewide Page Views)',
+          'WAU (App Page Views)',
           String(activity.sitewide_wau ?? 0),
         ],
         [
           'Activity',
-          'MAU (Sitewide Page Views)',
+          'MAU (App Page Views)',
           String(activity.sitewide_mau ?? 0),
         ],
         ['Activity', 'DAU (Engaged)', String(activity.dau)],
@@ -1294,7 +1476,11 @@ export default function AnalyticsPage() {
   const formatPercent = (value?: number, digits = 1) =>
     typeof value === 'number' ? `${value.toFixed(digits)}%` : 'N/A';
 
+  const formatPercentOrDash = (value?: number | null, digits = 2) =>
+    typeof value === 'number' ? `${value.toFixed(digits)}%` : '—';
+
   const activeSubscribers =
+    successMetrics?.active_entitlements?.value ??
     successMetrics?.active_subscriptions?.value ??
     conversions?.funnel.paid_users ??
     subscriptionLifecycle?.states?.active ??
@@ -1322,7 +1508,7 @@ export default function AnalyticsPage() {
     {
       title: 'Active Subscribers',
       value: activeSubscribers,
-      subtitle: 'Paid subscriptions',
+      subtitle: 'Paid + free subscribers',
     },
     {
       title: 'Conversion Rate',
@@ -1339,33 +1525,29 @@ export default function AnalyticsPage() {
       value: formatPercent(userGrowth?.growthRate, 1),
       subtitle: 'Signups period-over-period',
     },
-    {
-      title: 'Monthly Active Users',
-      value: engagementOverview?.mau ?? 0,
-      subtitle: 'Deduped app opens (30d)',
-    },
-    {
-      title: 'Weekly Active Users',
-      value: engagementOverview?.wau ?? 0,
-      subtitle: 'Deduped app opens (7d)',
-    },
-    {
-      title: 'Daily Active Users',
-      value: engagementOverview?.dau ?? 0,
-      subtitle: 'Deduped app opens (UTC day)',
-    },
   ];
 
   const momentumWindowSize = 7;
 
   const sortedActivityTrends = useMemo(
-    () =>
-      activity?.trends
-        ? [...activity.trends].sort((a, b) =>
-            a.date.localeCompare(b.date, undefined, { numeric: true }),
-          )
-        : [],
+    () => (activity?.trends ? sortRowsByDate(activity.trends) : []),
     [activity?.trends],
+  );
+
+  const sortedAppOpenedTrends = useMemo(
+    () =>
+      activity?.app_opened_trends
+        ? sortRowsByDate(activity.app_opened_trends)
+        : [],
+    [activity?.app_opened_trends],
+  );
+
+  const sortedProductTrends = useMemo(
+    () =>
+      activity?.signed_in_product_trends
+        ? sortRowsByDate(activity.signed_in_product_trends)
+        : [],
+    [activity?.signed_in_product_trends],
   );
 
   const sortedActivationTrends = useMemo(
@@ -1376,16 +1558,6 @@ export default function AnalyticsPage() {
           )
         : [],
     [activation?.trends],
-  );
-
-  const dauStats = useMemo(
-    () =>
-      computeRollingAverage(
-        sortedActivityTrends,
-        (row) => row.dau ?? 0,
-        momentumWindowSize,
-      ),
-    [sortedActivityTrends],
   );
 
   const wauStats = useMemo(
@@ -1408,6 +1580,66 @@ export default function AnalyticsPage() {
     [sortedActivityTrends],
   );
 
+  const siteDauStats = useMemo(
+    () =>
+      computeRollingAverage(
+        sortedAppOpenedTrends,
+        (row) => row.dau ?? 0,
+        momentumWindowSize,
+      ),
+    [sortedAppOpenedTrends],
+  );
+
+  const siteWauStats = useMemo(
+    () =>
+      computeRollingAverage(
+        sortedAppOpenedTrends,
+        (row) => row.wau ?? 0,
+        momentumWindowSize,
+      ),
+    [sortedAppOpenedTrends],
+  );
+
+  const siteMauStats = useMemo(
+    () =>
+      computeRollingAverage(
+        sortedAppOpenedTrends,
+        (row) => row.mau ?? 0,
+        momentumWindowSize,
+      ),
+    [sortedAppOpenedTrends],
+  );
+
+  const productDauStats = useMemo(
+    () =>
+      computeRollingAverage(
+        sortedProductTrends,
+        (row) => row.dau ?? 0,
+        momentumWindowSize,
+      ),
+    [sortedProductTrends],
+  );
+
+  const productWauStats = useMemo(
+    () =>
+      computeRollingAverage(
+        sortedProductTrends,
+        (row) => row.wau ?? 0,
+        momentumWindowSize,
+      ),
+    [sortedProductTrends],
+  );
+
+  const productMauStats = useMemo(
+    () =>
+      computeRollingAverage(
+        sortedProductTrends,
+        (row) => row.mau ?? 0,
+        momentumWindowSize,
+      ),
+    [sortedProductTrends],
+  );
+
   const activationStats = useMemo(
     () =>
       computeRollingAverage(
@@ -1418,17 +1650,6 @@ export default function AnalyticsPage() {
     [sortedActivationTrends],
   );
 
-  const sessionStats = useMemo(
-    () => ({
-      average:
-        typeof activity?.signed_in_product_avg_sessions_per_user === 'number'
-          ? activity.signed_in_product_avg_sessions_per_user
-          : null,
-      previousAverage: null,
-    }),
-    [activity?.signed_in_product_avg_sessions_per_user],
-  );
-
   type MomentumMetric = {
     id: string;
     label: string;
@@ -1437,61 +1658,92 @@ export default function AnalyticsPage() {
     formatter: (value: number | null) => string;
   };
 
-  const momentumMetrics = useMemo<MomentumMetric[]>(
+  const siteMomentumMetrics = useMemo<MomentumMetric[]>(
     () => [
       {
-        id: 'dau',
+        id: 'site_dau',
         label: 'DAU',
-        stats: dauStats,
-        decimals: 0,
-        formatter: (value) =>
-          value === null ? '—' : value.toLocaleString(undefined),
+        stats: siteDauStats,
+        formatter: (value) => formatMetricValue(value, 0),
       },
       {
-        id: 'wau',
+        id: 'site_wau',
         label: 'WAU',
-        stats: wauStats,
-        decimals: 0,
-        formatter: (value) =>
-          value === null ? '—' : value.toLocaleString(undefined),
+        stats: siteWauStats,
+        formatter: (value) => formatMetricValue(value, 0),
       },
       {
-        id: 'mau',
+        id: 'site_mau',
         label: 'MAU',
-        stats: mauStats,
-        decimals: 0,
-        formatter: (value) =>
-          value === null ? '—' : value.toLocaleString(undefined),
+        stats: siteMauStats,
+        formatter: (value) => formatMetricValue(value, 0),
       },
+    ],
+    [siteDauStats, siteMauStats, siteWauStats],
+  );
+
+  const productMomentumMetrics = useMemo<MomentumMetric[]>(
+    () => [
+      {
+        id: 'product_dau',
+        label: 'DAU',
+        stats: productDauStats,
+        formatter: (value) => formatMetricValue(value, 0),
+      },
+      {
+        id: 'product_wau',
+        label: 'WAU',
+        stats: productWauStats,
+        formatter: (value) => formatMetricValue(value, 0),
+      },
+      {
+        id: 'product_mau',
+        label: 'MAU',
+        stats: productMauStats,
+        formatter: (value) => formatMetricValue(value, 0),
+      },
+    ],
+    [productDauStats, productMauStats, productWauStats],
+  );
+
+  const activationMomentumMetrics = useMemo<MomentumMetric[]>(
+    () => [
       {
         id: 'activation',
         label: 'Activation rate',
         stats: activationStats,
-        decimals: 1,
         formatter: (value) =>
           typeof value === 'number' ? `${value.toFixed(1)}%` : '—',
       },
-      {
-        id: 'sessions',
-        label: 'Avg sessions per user',
-        stats: sessionStats,
-        decimals: 2,
-        formatter: (value) => (value === null ? '—' : value.toFixed(2)),
-      },
     ],
-    [activationStats, sessionStats, dauStats, wauStats, mauStats],
+    [activationStats],
   );
 
-  const weekOverWeekRows = useMemo(
-    () =>
-      momentumMetrics.map((metric) => {
+  const buildMomentumRows = useCallback(
+    (metrics: MomentumMetric[]) =>
+      metrics.map((metric) => {
         const { change, percentChange } = computeWeekOverWeekChange(
           metric.stats.average,
           metric.stats.previousAverage,
         );
         return { ...metric, change, percentChange };
       }),
-    [momentumMetrics],
+    [],
+  );
+
+  const siteMomentumRows = useMemo(
+    () => buildMomentumRows(siteMomentumMetrics),
+    [buildMomentumRows, siteMomentumMetrics],
+  );
+
+  const productMomentumRows = useMemo(
+    () => buildMomentumRows(productMomentumMetrics),
+    [buildMomentumRows, productMomentumMetrics],
+  );
+
+  const activationMomentumRows = useMemo(
+    () => buildMomentumRows(activationMomentumMetrics),
+    [buildMomentumRows, activationMomentumMetrics],
   );
 
   const latestRetentionCohort = useMemo(
@@ -1721,11 +1973,10 @@ export default function AnalyticsPage() {
           <section className='space-y-3'>
             <div>
               <h2 className='text-sm font-medium text-zinc-200'>
-                Primary KPIs
+                Quick Glance
               </h2>
               <p className='text-xs text-zinc-500'>
-                The highest-signal metrics for traction, revenue, and
-                conversion.
+                Primary revenue, conversion, and growth signals for investors.
               </p>
             </div>
             <div className='grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-3'>
@@ -1742,272 +1993,464 @@ export default function AnalyticsPage() {
             </div>
           </section>
 
+          {(productMaError || integrityWarnings.length > 0) && (
+            <div className='space-y-2'>
+              {productMaError && (
+                <div className='rounded-xl border border-lunary-error-700/40 bg-lunary-error-950/40 px-4 py-3 text-sm text-lunary-error-200'>
+                  Signed-in Product MAU exceeds App MAU. Review the canonical
+                  `app_opened` audit by toggling Show audit.
+                </div>
+              )}
+              {integrityWarnings.length > 0 && (
+                <div className='rounded-xl border border-lunary-warning-600/40 bg-zinc-900/40 px-4 py-3 text-sm text-zinc-200'>
+                  <p className='text-xs text-zinc-400'>
+                    Integrity checks flag the following:
+                  </p>
+                  <ul className='mt-2 space-y-1 text-xs text-zinc-300'>
+                    {integrityWarnings.map((warning) => (
+                      <li key={warning}>• {warning}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+            </div>
+          )}
+          <section className='space-y-3'>
+            <div className='space-y-4 rounded-3xl border border-zinc-800/60 bg-zinc-950/40 p-5 shadow-lg shadow-black/30'>
+              <div>
+                <div className='flex items-center justify-between'>
+                  <div>
+                    <p className='text-xs uppercase tracking-wider text-zinc-500'>
+                      Core App Usage
+                    </p>
+                    <h3 className='text-lg font-medium text-white'>
+                      App Active Users
+                    </h3>
+                  </div>
+                  <p className='text-xs text-zinc-400'>
+                    Measures who opened the app in the selected window.
+                  </p>
+                </div>
+              </div>
+              <div className='grid gap-4 md:grid-cols-2 lg:grid-cols-4'>
+                <MiniStat
+                  label='App DAU'
+                  value={appDau}
+                  icon={
+                    <Activity className='h-5 w-5 text-lunary-primary-300' />
+                  }
+                />
+                <MiniStat
+                  label='App WAU'
+                  value={appWau}
+                  icon={
+                    <Activity className='h-5 w-5 text-lunary-success-300' />
+                  }
+                />
+                <MiniStat
+                  label='App MAU'
+                  value={appMau}
+                  icon={
+                    <Activity className='h-5 w-5 text-lunary-secondary-300' />
+                  }
+                />
+                <MiniStat
+                  label='New users (range)'
+                  value={engagementOverview?.new_users ?? 0}
+                  icon={
+                    <Target className='h-5 w-5 text-lunary-secondary-300' />
+                  }
+                />
+                {appVisits !== null && (
+                  <MiniStat
+                    label='App Visits'
+                    value={appVisits}
+                    icon={
+                      <Loader2 className='h-5 w-5 text-lunary-accent-300' />
+                    }
+                  />
+                )}
+              </div>
+              {appVisits !== null && (
+                <div className='grid gap-4 md:grid-cols-2'>
+                  <MiniStat
+                    label='App visits per App user'
+                    value={
+                      appVisitsPerUser !== null
+                        ? appVisitsPerUser.toFixed(2)
+                        : '—'
+                    }
+                    icon={
+                      <Target className='h-5 w-5 text-lunary-primary-300' />
+                    }
+                  />
+                  {includeAudit && canonicalIdentities !== null && (
+                    <MiniStat
+                      label='Canonical identities (audit)'
+                      value={canonicalIdentities}
+                      icon={
+                        <Sparkles className='h-5 w-5 text-lunary-success-300' />
+                      }
+                    />
+                  )}
+                </div>
+              )}
+              <p className='text-xs text-zinc-500'>
+                App Active Users (DAU/WAU/MAU) are deduplicated by canonical
+                identity per UTC window.
+              </p>
+            </div>
+          </section>
+
+          <section className='space-y-3'>
+            <div className='space-y-4 rounded-3xl border border-zinc-800/60 bg-zinc-950/40 p-5 shadow-lg shadow-black/30'>
+              <div className='flex items-start justify-between'>
+                <div>
+                  <p className='text-xs uppercase tracking-wider text-zinc-500'>
+                    Engagement Health
+                  </p>
+                  <h3 className='text-lg font-medium text-white'>
+                    Engaged users & stickiness
+                  </h3>
+                </div>
+                <p className='text-xs text-zinc-400'>
+                  Key actions vs. returns inside the same canonical window.
+                </p>
+              </div>
+              <div className='grid gap-4 md:grid-cols-2 lg:grid-cols-4'>
+                <MiniStat
+                  label='Engaged DAU'
+                  value={engagedDau}
+                  icon={
+                    <Activity className='h-5 w-5 text-lunary-primary-300' />
+                  }
+                />
+                <MiniStat
+                  label='Engaged WAU'
+                  value={engagedWau}
+                  icon={
+                    <Activity className='h-5 w-5 text-lunary-success-300' />
+                  }
+                />
+                <MiniStat
+                  label='Engaged MAU'
+                  value={engagedMau}
+                  icon={
+                    <Activity className='h-5 w-5 text-lunary-secondary-300' />
+                  }
+                />
+                <MiniStat
+                  label='Engaged Rate (MAU)'
+                  value={formatPercent(engagementRate ?? undefined, 1)}
+                  icon={<Sparkles className='h-5 w-5 text-lunary-accent-300' />}
+                />
+              </div>
+              {engagedMatchesApp && (
+                <p className='text-xs text-zinc-500'>
+                  Engaged Users currently matches App opens for this window.
+                  Check key-action event set.
+                </p>
+              )}
+              <div className='grid gap-4 md:grid-cols-2 lg:grid-cols-4'>
+                <MiniStat
+                  label='Stickiness (DAU/MAU)'
+                  value={formatPercent(
+                    engagementOverview?.stickiness_dau_mau,
+                    2,
+                  )}
+                  icon={
+                    <Sparkles className='h-5 w-5 text-lunary-success-300' />
+                  }
+                />
+                <MiniStat
+                  label='Stickiness (WAU/MAU)'
+                  value={formatPercent(
+                    engagementOverview?.stickiness_wau_mau,
+                    2,
+                  )}
+                  icon={
+                    <Sparkles className='h-5 w-5 text-lunary-secondary-300' />
+                  }
+                />
+                <MiniStat
+                  label='Avg active days'
+                  value={
+                    typeof engagementOverview?.avg_active_days_per_user ===
+                    'number'
+                      ? engagementOverview.avg_active_days_per_user.toFixed(2)
+                      : '—'
+                  }
+                  icon={<Target className='h-5 w-5 text-lunary-primary-300' />}
+                />
+                <MiniStat
+                  label='Returning Users (range)'
+                  value={engagementOverview?.returning_users_range ?? 0}
+                  icon={<Activity className='h-5 w-5 text-lunary-accent-300' />}
+                />
+              </div>
+            </div>
+          </section>
+
+          <section className='space-y-3'>
+            <div className='space-y-4 rounded-3xl border border-zinc-800/60 bg-zinc-950/40 p-5 shadow-lg shadow-black/30'>
+              <div className='flex items-start justify-between'>
+                <div>
+                  <p className='text-xs uppercase tracking-wider text-zinc-500'>
+                    Retention & return
+                  </p>
+                  <h3 className='text-lg font-medium text-white'>
+                    Returning canonical users
+                  </h3>
+                </div>
+                <p className='text-xs text-zinc-400'>
+                  D1 + WAU/MAU overlap inspect deduped identity recurrence.
+                </p>
+              </div>
+              <div className='grid gap-4 md:grid-cols-2 lg:grid-cols-4'>
+                <MiniStat
+                  label='Returning DAU (D1)'
+                  value={engagementOverview?.returning_dau ?? 0}
+                  icon={
+                    <Activity className='h-5 w-5 text-lunary-secondary-300' />
+                  }
+                />
+                <MiniStat
+                  label='Returning WAU overlap'
+                  value={engagementOverview?.returning_wau ?? 0}
+                  icon={
+                    <Activity className='h-5 w-5 text-lunary-success-300' />
+                  }
+                />
+                <MiniStat
+                  label='Returning MAU overlap'
+                  value={engagementOverview?.returning_mau ?? 0}
+                  icon={
+                    <Activity className='h-5 w-5 text-lunary-primary-300' />
+                  }
+                />
+                <MiniStat
+                  label='Returning Users (range)'
+                  value={engagementOverview?.returning_users_range ?? 0}
+                  icon={<Target className='h-5 w-5 text-lunary-accent-300' />}
+                />
+              </div>
+              <p className='text-xs text-zinc-500'>
+                Returning Users (range) need 2+ distinct active days in the
+                window. WAU/MAU overlap compares the current period to the prior
+                window.
+              </p>
+            </div>
+          </section>
+
+          <section className='space-y-3'>
+            <div className='space-y-4 rounded-3xl border border-zinc-800/60 bg-zinc-950/40 p-5 shadow-lg shadow-black/30'>
+              <div className='flex items-start justify-between'>
+                <div>
+                  <p className='text-xs uppercase tracking-wider text-zinc-500'>
+                    Returning referrer breakdown
+                  </p>
+                  <h3 className='text-lg font-medium text-white'>
+                    Where returning users come from
+                  </h3>
+                </div>
+                <p className='text-xs text-zinc-400'>
+                  Uses the most recent app_opened metadata for returning users.
+                </p>
+              </div>
+              <div className='grid gap-4 md:grid-cols-3'>
+                <MiniStat
+                  label='Organic returning'
+                  value={returningReferrerBreakdown?.organic_returning ?? 0}
+                  icon={
+                    <Sparkles className='h-5 w-5 text-lunary-primary-300' />
+                  }
+                />
+                <MiniStat
+                  label='Direct / brand returning'
+                  value={returningReferrerBreakdown?.direct_returning ?? 0}
+                  icon={
+                    <Activity className='h-5 w-5 text-lunary-success-300' />
+                  }
+                />
+                <MiniStat
+                  label='Internal returning'
+                  value={returningReferrerBreakdown?.internal_returning ?? 0}
+                  icon={
+                    <Activity className='h-5 w-5 text-lunary-secondary-300' />
+                  }
+                />
+              </div>
+              <p className='text-xs text-zinc-500'>
+                Segments use the most recent app_opened metadata (referrer, UTM
+                source, or origin type) for returning users (2+ active days).
+              </p>
+            </div>
+          </section>
+
+          <section className='space-y-3'>
+            <div className='space-y-4 rounded-3xl border border-zinc-800/60 bg-zinc-950/40 p-5 shadow-lg shadow-black/30'>
+              <div className='flex items-start justify-between'>
+                <div>
+                  <p className='text-xs uppercase tracking-wider text-zinc-500'>
+                    Active days distribution (range)
+                  </p>
+                  <h3 className='text-lg font-medium text-white'>
+                    Distinct active days per user
+                  </h3>
+                </div>
+                <p className='text-xs text-zinc-400'>
+                  Users grouped by distinct active days in the selected range.
+                </p>
+              </div>
+              <div className='grid gap-4 md:grid-cols-2 lg:grid-cols-5'>
+                <MiniStat
+                  label='1 day'
+                  value={
+                    engagementOverview?.active_days_distribution?.['1'] ?? 0
+                  }
+                  icon={
+                    <Activity className='h-5 w-5 text-lunary-primary-300' />
+                  }
+                />
+                <MiniStat
+                  label='2-3 days'
+                  value={
+                    engagementOverview?.active_days_distribution?.['2-3'] ?? 0
+                  }
+                  icon={
+                    <Activity className='h-5 w-5 text-lunary-success-300' />
+                  }
+                />
+                <MiniStat
+                  label='4-7 days'
+                  value={
+                    engagementOverview?.active_days_distribution?.['4-7'] ?? 0
+                  }
+                  icon={
+                    <Activity className='h-5 w-5 text-lunary-secondary-300' />
+                  }
+                />
+                <MiniStat
+                  label='8-14 days'
+                  value={
+                    engagementOverview?.active_days_distribution?.['8-14'] ?? 0
+                  }
+                  icon={<Activity className='h-5 w-5 text-lunary-accent-300' />}
+                />
+                <MiniStat
+                  label='15+ days'
+                  value={
+                    engagementOverview?.active_days_distribution?.['15+'] ?? 0
+                  }
+                  icon={<Target className='h-5 w-5 text-lunary-primary-300' />}
+                />
+              </div>
+            </div>
+          </section>
+
           <section className='space-y-3'>
             <Card className='border-zinc-800/30 bg-zinc-900/10'>
               <CardHeader>
                 <CardTitle className='text-base font-medium'>
-                  Engagement Overview (deduplicated)
+                  Content & Funnel
                 </CardTitle>
                 <CardDescription className='text-xs text-zinc-400'>
-                  Metrics are deduplicated to meaningful user-level events (for
-                  example, one app open per user per day) to prioritise
-                  engagement quality over raw pageview volume.
+                  Grimoire metrics are scoped to `grimoire_viewed`.
                 </CardDescription>
               </CardHeader>
               <CardContent className='space-y-4'>
-                <div className='grid gap-4 md:grid-cols-2 lg:grid-cols-4'>
+                <div className='grid gap-4 md:grid-cols-2 lg:grid-cols-5'>
                   <MiniStat
-                    label='DAU'
-                    value={(engagementOverview?.dau ?? 0).toLocaleString()}
-                    icon={
-                      <Activity className='h-5 w-5 text-lunary-primary-300' />
-                    }
-                  />
-                  <MiniStat
-                    label='WAU'
-                    value={(engagementOverview?.wau ?? 0).toLocaleString()}
-                    icon={
-                      <Activity className='h-5 w-5 text-lunary-success-300' />
-                    }
-                  />
-                  <MiniStat
-                    label='MAU'
-                    value={(engagementOverview?.mau ?? 0).toLocaleString()}
-                    icon={
-                      <Activity className='h-5 w-5 text-lunary-secondary-300' />
-                    }
-                  />
-                  <MiniStat
-                    label='Avg active days'
+                    label='Grimoire Entry Rate'
                     value={
-                      typeof engagementOverview?.avg_active_days_per_user ===
-                      'number'
-                        ? engagementOverview.avg_active_days_per_user.toFixed(2)
-                        : 'N/A'
-                    }
-                    icon={<Target className='h-5 w-5 text-lunary-accent-300' />}
-                  />
-                </div>
-
-                <div className='grid gap-4 md:grid-cols-2 lg:grid-cols-4'>
-                  <MiniStat
-                    label='Stickiness (DAU/MAU)'
-                    value={
-                      typeof engagementOverview?.stickiness_dau_mau === 'number'
-                        ? `${engagementOverview.stickiness_dau_mau.toFixed(2)}%`
-                        : 'N/A'
+                      typeof grimoireHealth?.grimoire_entry_rate === 'number'
+                        ? `${grimoireHealth.grimoire_entry_rate.toFixed(2)}%`
+                        : '—'
                     }
                     icon={
                       <Sparkles className='h-5 w-5 text-lunary-primary-300' />
                     }
                   />
                   <MiniStat
-                    label='Stickiness (WAU/MAU)'
-                    value={
-                      typeof engagementOverview?.stickiness_wau_mau === 'number'
-                        ? `${engagementOverview.stickiness_wau_mau.toFixed(2)}%`
-                        : 'N/A'
-                    }
-                    icon={
-                      <Sparkles className='h-5 w-5 text-lunary-success-300' />
-                    }
-                  />
-                  <MiniStat
-                    label='New users (range)'
-                    value={(
-                      engagementOverview?.new_users ?? 0
-                    ).toLocaleString()}
-                    icon={
-                      <Target className='h-5 w-5 text-lunary-secondary-300' />
-                    }
-                  />
-                  <MiniStat
-                    label='Returning Users (range)'
-                    value={(
-                      engagementOverview?.returning_users_range ?? 0
-                    ).toLocaleString()}
-                    icon={<Target className='h-5 w-5 text-lunary-accent-300' />}
-                  />
-                </div>
-                <div className='grid gap-4 md:grid-cols-2 lg:grid-cols-4'>
-                  <MiniStat
-                    label='Returning DAU (D1)'
-                    value={(
-                      engagementOverview?.returning_dau ?? 0
-                    ).toLocaleString()}
-                    icon={
-                      <Activity className='h-5 w-5 text-lunary-secondary-300' />
-                    }
-                  />
-                  <MiniStat
-                    label='Returning WAU overlap'
-                    value={(
-                      engagementOverview?.returning_wau ?? 0
-                    ).toLocaleString()}
+                    label='Grimoire MAU'
+                    value={grimoireMau}
                     icon={
                       <Activity className='h-5 w-5 text-lunary-success-300' />
                     }
                   />
                   <MiniStat
-                    label='Returning MAU overlap'
-                    value={(
-                      engagementOverview?.returning_mau ?? 0
-                    ).toLocaleString()}
+                    label='Grimoire-only MAU'
+                    value={grimoireOnlyMau}
+                    icon={
+                      <Activity className='h-5 w-5 text-lunary-secondary-300' />
+                    }
+                  />
+                  <MiniStat
+                    label='Views per Grimoire user'
+                    value={
+                      typeof grimoireHealth?.grimoire_views_per_active_user ===
+                      'number'
+                        ? grimoireHealth.grimoire_views_per_active_user.toFixed(
+                            2,
+                          )
+                        : '—'
+                    }
                     icon={
                       <Activity className='h-5 w-5 text-lunary-primary-300' />
                     }
                   />
+                  <MiniStat
+                    label='Grimoire return rate'
+                    value={
+                      typeof grimoireHealth?.return_to_grimoire_rate ===
+                      'number'
+                        ? `${grimoireHealth.return_to_grimoire_rate.toFixed(2)}%`
+                        : '—'
+                    }
+                    icon={<Target className='h-5 w-5 text-lunary-accent-300' />}
+                  />
                 </div>
-                {returningReferrerBreakdown && (
-                  <>
-                    <p className='text-xs uppercase tracking-wider text-zinc-400'>
-                      Returning referrer breakdown
-                    </p>
-                    <div className='grid gap-4 md:grid-cols-3'>
-                      <MiniStat
-                        label='Organic returning'
-                        value={returningReferrerBreakdown.organic_returning}
-                        icon={
-                          <Sparkles className='h-5 w-5 text-lunary-primary-300' />
-                        }
-                      />
-                      <MiniStat
-                        label='Direct / brand returning'
-                        value={returningReferrerBreakdown.direct_returning}
-                        icon={
-                          <Target className='h-5 w-5 text-lunary-secondary-300' />
-                        }
-                      />
-                      <MiniStat
-                        label='Internal returning'
-                        value={returningReferrerBreakdown.internal_returning}
-                        icon={
-                          <Activity className='h-5 w-5 text-lunary-success-300' />
-                        }
-                      />
-                    </div>
-                    <div className='rounded-lg border border-zinc-800/30 bg-zinc-950/40 px-3 py-2 text-xs text-zinc-400'>
-                      Segments use the most recent `app_opened` metadata
-                      (referrer, UTM source, or origin type) for returning users
-                      (2+ active days) so you can tell whether they came back
-                      via organic search, a direct/brand touchpoint, or internal
-                      navigation inside Lunary.
-                    </div>
-                  </>
-                )}
-                <div className='rounded-lg border border-zinc-800/30 bg-zinc-950/40 px-3 py-2 text-xs text-zinc-400'>
-                  Returning Users (range) are users with 2+ distinct active days
-                  inside the selected range. Returning DAU (D1) counts users
-                  active on the selected end date who were also active the day
-                  prior, while Returning WAU overlap and Returning MAU overlap
-                  compare the most recent 7-day/30-day windows to the prior
-                  period. Identity links keep anonymous→signed transitions
-                  deduplicated.
-                </div>
-                {includeAudit && engagementOverview?.audit && (
-                  <div className='rounded-lg border border-lunary-primary-500/30 bg-zinc-950/40 px-4 py-3 text-sm text-zinc-200'>
-                    <div className='flex items-center justify-between text-xs text-zinc-400'>
-                      <span>Audit (debug=1)</span>
-                      <span className='text-[11px] text-zinc-500'>
-                        Last event{' '}
-                        {engagementOverview.audit.last_event_timestamp ?? '—'}
+                <div className='rounded-xl border border-zinc-800/30 bg-zinc-950/50 p-4 text-sm text-zinc-300'>
+                  <p className='text-xs uppercase tracking-wider text-zinc-400'>
+                    Conversion influence
+                  </p>
+                  <div className='mt-2 space-y-1'>
+                    <div className='flex items-center justify-between'>
+                      <span>Subscriptions in range</span>
+                      <span>
+                        {(
+                          conversionInfluence?.subscription_users ?? 0
+                        ).toLocaleString()}
                       </span>
                     </div>
-                    <div className='mt-2 space-y-1 text-[13px]'>
-                      <div className='flex items-center justify-between'>
-                        <span>Raw app_opened events</span>
-                        <span className='font-semibold'>
-                          {engagementOverview.audit.raw_events_count.toLocaleString()}
-                        </span>
-                      </div>
-                      <div className='flex items-center justify-between'>
-                        <span>Distinct canonical identities</span>
-                        <span className='font-semibold'>
-                          {engagementOverview.audit.distinct_canonical_identities.toLocaleString()}
-                        </span>
-                      </div>
-                      <div className='flex items-center justify-between'>
-                        <span>Missing identity rows</span>
-                        <span className='font-semibold'>
-                          {engagementOverview.audit.missing_identity_rows.toLocaleString()}
-                        </span>
-                      </div>
-                      <div className='flex items-center justify-between'>
-                        <span>Identity links applied</span>
-                        <span className='font-semibold'>
-                          {engagementOverview.audit.linked_identities_applied.toLocaleString()}
-                        </span>
-                      </div>
-                      {engagementOverview.audit.anomalies.length > 0 && (
-                        <div className='rounded-xl border border-lunary-warning-500/30 bg-lunary-warning-950/20 px-3 py-2 text-[11px] text-lunary-warning-300'>
-                          <p className='text-xs font-medium text-lunary-warning-200'>
-                            Anomalies detected
-                          </p>
-                          <ul className='mt-1 space-y-1'>
-                            {engagementOverview.audit.anomalies.map(
-                              (anomaly: string) => (
-                                <li key={anomaly}>{anomaly}</li>
-                              ),
-                            )}
-                          </ul>
-                        </div>
-                      )}
+                    <div className='flex items-center justify-between'>
+                      <span>Had Grimoire view before subscription</span>
+                      <span>
+                        {(
+                          conversionInfluence?.subscription_users_with_grimoire_before ??
+                          0
+                        ).toLocaleString()}
+                        (
+                        {(
+                          conversionInfluence?.subscription_with_grimoire_before_rate ??
+                          0
+                        ).toFixed(2)}
+                        %)
+                      </span>
                     </div>
-                  </div>
-                )}
-
-                <div className='grid gap-4 md:grid-cols-3'>
-                  <div className='rounded-xl border border-zinc-800/60 bg-zinc-950/50 p-4'>
-                    <p className='text-xs uppercase tracking-wider text-zinc-400'>
-                      Active days distribution (range)
-                    </p>
-                    <div className='mt-2 space-y-1 text-sm text-zinc-300'>
-                      {(['1', '2-3', '4-7', '8-14', '15+'] as const).map(
-                        (bucket) => (
-                          <div
-                            key={bucket}
-                            className='flex items-center justify-between'
-                          >
-                            <span>{bucket}</span>
-                            <span>
-                              {(
-                                engagementOverview?.active_days_distribution?.[
-                                  bucket
-                                ] ?? 0
-                              ).toLocaleString()}
-                            </span>
-                          </div>
-                        ),
-                      )}
+                    <div className='flex items-center justify-between'>
+                      <span>Median days (first Grimoire → signup)</span>
+                      <span>
+                        {conversionInfluence?.median_days_first_grimoire_to_signup ??
+                          'N/A'}
+                      </span>
                     </div>
-                  </div>
-
-                  <div className='rounded-xl border border-zinc-800/60 bg-zinc-950/50 p-4 md:col-span-2'>
-                    <p className='text-xs uppercase tracking-wider text-zinc-400'>
-                      Cohort retention (first app open)
-                    </p>
-                    <div className='mt-2 space-y-1 text-sm text-zinc-300'>
-                      {(engagementOverview?.retention?.cohorts ?? [])
-                        .slice(-7)
-                        .map((row) => (
-                          <div
-                            key={row.cohort_day}
-                            className='grid grid-cols-4 gap-2'
-                          >
-                            <span className='text-zinc-400'>
-                              {row.cohort_day}
-                            </span>
-                            <span>Day 1: {row.day_1 ?? 'N/A'}%</span>
-                            <span>Day 7: {row.day_7 ?? 'N/A'}%</span>
-                            <span>Day 30: {row.day_30 ?? 'N/A'}%</span>
-                          </div>
-                        ))}
-                      {(engagementOverview?.retention?.cohorts ?? []).length ===
-                        0 && (
-                        <div className='text-zinc-500'>
-                          No cohorts found for this range.
-                        </div>
-                      )}
+                    <div className='flex items-center justify-between'>
+                      <span>Median days (signup → subscription)</span>
+                      <span>
+                        {conversionInfluence?.median_days_signup_to_subscription ??
+                          'N/A'}
+                      </span>
                     </div>
                   </div>
                 </div>
@@ -2015,235 +2458,951 @@ export default function AnalyticsPage() {
             </Card>
           </section>
 
-          <section className='space-y-6'>
+          <section className='space-y-3'>
             <Card className='border-zinc-800/30 bg-zinc-900/10'>
               <CardHeader>
                 <CardTitle className='text-base font-medium'>
-                  Momentum analytics
+                  Reach (page_viewed)
                 </CardTitle>
                 <CardDescription className='text-xs text-zinc-400'>
-                  Seven-day rolling averages keep the focus on durable trends,
-                  even if a single day dips.
+                  Reach measures visits. App usage measures product engagement.
                 </CardDescription>
               </CardHeader>
               <CardContent className='space-y-4'>
                 <div className='grid gap-4 md:grid-cols-2 lg:grid-cols-3'>
-                  {momentumMetrics.map((metric) => {
-                    const trendCopy = describeTrend(
-                      metric.stats.average,
-                      metric.stats.previousAverage,
-                    );
-                    const hasPrevious = metric.stats.previousAverage !== null;
-                    return (
-                      <div
-                        key={metric.id}
-                        className='rounded-2xl border border-zinc-800/40 bg-zinc-950/40 p-4'
-                      >
-                        <div className='flex items-center justify-between text-xs text-zinc-400'>
-                          <span>{metric.label}</span>
-                          <span className='text-xs text-zinc-500'>
-                            {trendCopy}
-                          </span>
-                        </div>
-                        <div className='mt-2 text-2xl font-light tracking-tight text-white'>
-                          {metric.formatter(metric.stats.average)}
-                        </div>
-                        <p className='mt-1 text-[11px] text-zinc-500'>
-                          {hasPrevious
-                            ? `Last week ${metric.formatter(
-                                metric.stats.previousAverage,
-                              )}`
-                            : '7-day average'}
-                        </p>
-                      </div>
-                    );
-                  })}
+                  <MiniStat
+                    label='Reach DAU'
+                    value={reachDau}
+                    icon={<Bell className='h-5 w-5 text-lunary-primary-300' />}
+                  />
+                  <MiniStat
+                    label='Reach WAU'
+                    value={reachWau}
+                    icon={<Bell className='h-5 w-5 text-lunary-success-300' />}
+                  />
+                  <MiniStat
+                    label='Reach MAU'
+                    value={reachMau}
+                    icon={
+                      <Bell className='h-5 w-5 text-lunary-secondary-300' />
+                    }
+                  />
                 </div>
+                <p className='text-xs text-zinc-500'>
+                  Reach counts distinct canonical identities with at least one
+                  `page_viewed` event in the window.
+                </p>
+                <p className='text-xs text-zinc-500'>
+                  Reach measures visits, while App usage tracks product
+                  engagement via `app_opened`.
+                </p>
+                {pageviewsPerReachUser !== null && (
+                  <p className='text-xs text-zinc-500'>
+                    Page views per Reach user:{' '}
+                    {pageviewsPerReachUser.toFixed(1)}
+                  </p>
+                )}
               </CardContent>
             </Card>
-
+          </section>
+        </TabsContent>
+        <TabsContent value='details' className='space-y-10'>
+          {integrityWarnings.length > 0 && (
+            <div className='rounded-xl border border-lunary-warning-600/40 bg-zinc-900/40 px-4 py-3 text-sm text-zinc-200'>
+              <p className='text-xs text-zinc-400 font-medium'>
+                Integrity warnings
+              </p>
+              <ul className='mt-2 space-y-1 text-xs text-zinc-300'>
+                {integrityWarnings.map((warning) => (
+                  <li key={warning}>• {warning}</li>
+                ))}
+              </ul>
+            </div>
+          )}
+          <section className='space-y-3'>
+            <div className='space-y-4 rounded-3xl border border-zinc-800/60 bg-zinc-950/40 p-5 shadow-lg shadow-black/30'>
+              <div className='flex items-start justify-between'>
+                <div>
+                  <p className='text-xs uppercase tracking-wider text-zinc-500'>
+                    Total usage
+                  </p>
+                  <h3 className='text-lg font-medium text-white'>
+                    All-time product footprint
+                  </h3>
+                </div>
+                <p className='text-xs text-zinc-400'>
+                  Totals as of the selected range end.
+                </p>
+              </div>
+              <div className='grid gap-4 md:grid-cols-2 lg:grid-cols-4'>
+                <MiniStat
+                  label='Total accounts (all-time)'
+                  value={totalAccountsEver.toLocaleString()}
+                  icon={
+                    <Activity className='h-5 w-5 text-lunary-primary-300' />
+                  }
+                />
+                <MiniStat
+                  label='Product users (signed-in, range)'
+                  value={allTimeTotalProductUsers}
+                  icon={
+                    <Sparkles className='h-5 w-5 text-lunary-success-300' />
+                  }
+                />
+                <MiniStat
+                  label='Total returning users (all-time)'
+                  value={allTimeReturningUsers}
+                  icon={
+                    <Activity className='h-5 w-5 text-lunary-secondary-300' />
+                  }
+                />
+                <MiniStat
+                  label='Avg active days per product user (range)'
+                  value={
+                    typeof allTimeMedianActiveDays === 'number'
+                      ? allTimeMedianActiveDays.toFixed(2)
+                      : '—'
+                  }
+                  icon={<Target className='h-5 w-5 text-lunary-accent-300' />}
+                />
+              </div>
+            </div>
+          </section>
+          <section className='space-y-3'>
+            <div>
+              <h2 className='text-sm font-medium text-zinc-200'>
+                SEO & Attribution
+              </h2>
+              <p className='text-xs text-zinc-500'>
+                First-touch attribution tracking for organic and marketing
+                channels.
+              </p>
+            </div>
             <Card className='border-zinc-800/30 bg-zinc-900/10'>
               <CardHeader>
                 <CardTitle className='text-base font-medium'>
-                  Week-over-week deltas
+                  First-touch attribution
                 </CardTitle>
                 <CardDescription className='text-xs text-zinc-400'>
-                  Break down the latest 7-day average versus the prior week.
+                  Total attributed users (first-touch source logged at signup).
                 </CardDescription>
               </CardHeader>
-              <CardContent className='overflow-x-auto'>
-                <table className='w-full text-left text-xs text-zinc-400'>
-                  <thead>
-                    <tr className='text-[11px] uppercase tracking-wide text-zinc-500'>
-                      <th className='pb-2 pr-3'>Metric</th>
-                      <th className='pb-2 pr-3'>This week</th>
-                      <th className='pb-2 pr-3'>Last week</th>
-                      <th className='pb-2 pr-3'>Δ</th>
-                      <th className='pb-2'>% change</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {weekOverWeekRows.map((row) => {
-                      const changeLabel =
-                        row.change === null
-                          ? '—'
-                          : `${row.change >= 0 ? '+' : ''}${row.change.toLocaleString(
-                              undefined,
-                              {
-                                minimumFractionDigits: row.decimals ?? 0,
-                                maximumFractionDigits: row.decimals ?? 0,
-                              },
-                            )}`;
-                      const percentLabel =
-                        row.percentChange === null
-                          ? '—'
-                          : `${row.percentChange >= 0 ? '+' : ''}${row.percentChange.toFixed(
-                              1,
-                            )}%`;
-                      return (
-                        <tr
-                          key={row.id}
-                          className='border-b border-zinc-800/50 last:border-0'
-                        >
-                          <td className='py-2 pr-3 font-semibold text-zinc-200'>
-                            {row.label}
-                          </td>
-                          <td className='py-2 pr-3 text-white'>
-                            {row.formatter(row.stats.average)}
-                          </td>
-                          <td className='py-2 pr-3'>
-                            {row.stats.previousAverage !== null
-                              ? row.formatter(row.stats.previousAverage)
-                              : '—'}
-                          </td>
-                          <td className='py-2 pr-3 text-white'>
-                            {changeLabel}
-                          </td>
-                          <td className='py-2 text-white'>{percentLabel}</td>
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
+              <CardContent>
+                <div className='grid grid-cols-1 gap-4 md:grid-cols-3'>
+                  <MiniStat
+                    label='Total Attributed Users'
+                    value={totalAttributedUsers}
+                    icon={
+                      <Activity className='h-5 w-5 text-lunary-primary-300' />
+                    }
+                  />
+                  <MiniStat
+                    label='Organic (SEO) Users'
+                    value={organicAttributedUsers}
+                    icon={
+                      <Target className='h-5 w-5 text-lunary-success-300' />
+                    }
+                  />
+                  <MiniStat
+                    label='Organic % of attributed signups'
+                    value={organicAttributionPercentage}
+                    icon={
+                      <Sparkles className='h-5 w-5 text-lunary-secondary-300' />
+                    }
+                  />
+                </div>
               </CardContent>
             </Card>
-
-            <div className='grid gap-6 lg:grid-cols-3'>
+            <div className='grid gap-4 lg:grid-cols-2'>
               <Card className='border-zinc-800/30 bg-zinc-900/10'>
                 <CardHeader>
-                  <CardTitle className='text-sm font-medium'>
-                    Retention stability
+                  <CardTitle className='text-base font-medium'>
+                    Traffic Source Breakdown
                   </CardTitle>
                   <CardDescription className='text-xs text-zinc-400'>
-                    Returning users are deduped at the identity level.
+                    Where your users are coming from.
                   </CardDescription>
                 </CardHeader>
-                <CardContent className='space-y-3 text-sm text-zinc-200'>
-                  <div className='flex items-center justify-between'>
-                    <span>Returning users (7-day)</span>
-                    <span>
-                      {retentionStability.returning7 !== null
-                        ? retentionStability.returning7.toLocaleString()
-                        : '—'}
-                    </span>
-                  </div>
-                  <div className='flex items-center justify-between'>
-                    <span>Returning users (14-day)</span>
-                    <span>
-                      {retentionStability.returning14 !== null
-                        ? retentionStability.returning14.toLocaleString()
-                        : '—'}
-                    </span>
-                  </div>
-                  <div className='flex items-center justify-between text-xs text-zinc-400'>
-                    <span>7-day avg WAU</span>
-                    <span>{formatMetricValue(retentionStability.avgWau)}</span>
-                  </div>
-                  <div className='flex items-center justify-between text-xs text-zinc-400'>
-                    <span>7-day avg MAU</span>
-                    <span>{formatMetricValue(retentionStability.avgMau)}</span>
-                  </div>
+                <CardContent className='overflow-x-auto'>
+                  <table className='w-full text-left text-sm text-zinc-400'>
+                    <thead>
+                      <tr className='border-b border-zinc-800'>
+                        <th className='pb-3 text-xs font-medium text-zinc-400'>
+                          Source
+                        </th>
+                        <th className='pb-3 text-xs font-medium text-zinc-400 text-right'>
+                          Users
+                        </th>
+                        <th className='pb-3 text-xs font-medium text-zinc-400 text-right'>
+                          Share
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {(attribution?.sourceBreakdown ?? []).length > 0 ? (
+                        attribution!.sourceBreakdown!.map((row) => (
+                          <tr
+                            key={row.source}
+                            className='border-b border-zinc-800/50 hover:bg-zinc-900/20'
+                          >
+                            <td className='py-3 text-zinc-300 font-medium'>
+                              {row.source}
+                            </td>
+                            <td className='py-3 text-right text-zinc-300'>
+                              {Number(row.user_count || 0).toLocaleString()}
+                            </td>
+                            <td className='py-3 text-right text-zinc-300'>
+                              {typeof row.percentage === 'number'
+                                ? `${row.percentage.toFixed(1)}%`
+                                : '—'}
+                            </td>
+                          </tr>
+                        ))
+                      ) : (
+                        <tr>
+                          <td
+                            colSpan={3}
+                            className='py-4 text-center text-xs text-zinc-500'
+                          >
+                            No attribution breakdown for this range.
+                          </td>
+                        </tr>
+                      )}
+                    </tbody>
+                  </table>
                 </CardContent>
               </Card>
-
               <Card className='border-zinc-800/30 bg-zinc-900/10'>
                 <CardHeader>
-                  <CardTitle className='text-sm font-medium'>
-                    Cohort age lens
+                  <CardTitle className='text-base font-medium'>
+                    Conversion by Source
                   </CardTitle>
                   <CardDescription className='text-xs text-zinc-400'>
-                    Weekly cohorts proxy how fresh the MAU base is.
+                    Which sources convert to paid users.
                   </CardDescription>
                 </CardHeader>
-                <CardContent className='space-y-2 text-sm text-zinc-200'>
-                  <div className='flex items-center justify-between'>
-                    <span>Signed up in last 7 days</span>
-                    <span>
-                      {cohortAgePercents.last7 !== null
-                        ? `${cohortAgePercents.last7}%`
-                        : 'N/A'}
-                    </span>
-                  </div>
-                  <div className='flex items-center justify-between'>
-                    <span>Signed up in last 14 days</span>
-                    <span>
-                      {cohortAgePercents.last14 !== null
-                        ? `${cohortAgePercents.last14}%`
-                        : 'N/A'}
-                    </span>
-                  </div>
-                  <div className='flex items-center justify-between'>
-                    <span>Signed up &gt; 30 days ago</span>
-                    <span>
-                      {cohortAgePercents.olderThan30 !== null
-                        ? `${cohortAgePercents.olderThan30}%`
-                        : 'N/A'}
-                    </span>
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card className='border-zinc-800/30 bg-zinc-900/10'>
-                <CardHeader>
-                  <CardTitle className='text-sm font-medium'>
-                    Trust funnel
-                  </CardTitle>
-                  <CardDescription className='text-xs text-zinc-400'>
-                    Track how the core engagement steps stack up.
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className='space-y-2 text-sm text-zinc-200'>
-                  {trustFunnelSteps.map((step) => (
-                    <div
-                      key={step.label}
-                      className='flex items-center justify-between border-b border-zinc-900/40 pb-2 last:border-0'
-                    >
-                      <span className='text-xs uppercase tracking-wider text-zinc-500'>
-                        {step.label}
-                      </span>
-                      <span className='text-sm text-white'>{step.value}</span>
-                    </div>
-                  ))}
+                <CardContent className='overflow-x-auto'>
+                  <table className='w-full text-left text-sm text-zinc-400'>
+                    <thead>
+                      <tr className='border-b border-zinc-800'>
+                        <th className='pb-3 text-xs font-medium text-zinc-400'>
+                          Source
+                        </th>
+                        <th className='pb-3 text-xs font-medium text-zinc-400 text-right'>
+                          Paid / Total
+                        </th>
+                        <th className='pb-3 text-xs font-medium text-zinc-400 text-right'>
+                          Rate
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {(attribution?.conversionBySource ?? []).length > 0 ? (
+                        attribution!.conversionBySource!.map((row) => (
+                          <tr
+                            key={row.source}
+                            className='border-b border-zinc-800/50 hover:bg-zinc-900/20'
+                          >
+                            <td className='py-3 text-zinc-300 font-medium'>
+                              {row.source}
+                            </td>
+                            <td className='py-3 text-right text-zinc-300'>
+                              {Number(row.paying_users || 0).toLocaleString()} /{' '}
+                              {Number(row.total_users || 0).toLocaleString()}
+                            </td>
+                            <td className='py-3 text-right text-zinc-300'>
+                              {typeof row.conversion_rate === 'number'
+                                ? `${row.conversion_rate.toFixed(1)}%`
+                                : '—'}
+                            </td>
+                          </tr>
+                        ))
+                      ) : (
+                        <tr>
+                          <td
+                            colSpan={3}
+                            className='py-4 text-center text-xs text-zinc-500'
+                          >
+                            No conversion source data for this range.
+                          </td>
+                        </tr>
+                      )}
+                    </tbody>
+                  </table>
                 </CardContent>
               </Card>
             </div>
           </section>
 
-          <section className='grid gap-6 lg:grid-cols-2'>
+          <section className='space-y-3'>
+            <div>
+              <h2 className='text-sm font-medium text-zinc-200'>
+                Signup → Subscription (30d)
+              </h2>
+              <p className='text-xs text-zinc-500'>
+                Tracks new free accounts that converted to paid within 30 days
+                of signup.
+              </p>
+            </div>
             <Card className='border-zinc-800/30 bg-zinc-900/10'>
               <CardHeader>
                 <CardTitle className='text-base font-medium'>
-                  Feature adoption (per MAU)
+                  Subscription funnel
                 </CardTitle>
                 <CardDescription className='text-xs text-zinc-400'>
-                  Adoption is distinct users triggering the feature in range,
-                  divided by MAU.
+                  Window is scoped to signup date (30-day lookback).
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className='grid gap-4 md:grid-cols-3'>
+                  <div className='rounded-xl border border-zinc-800/40 bg-zinc-950/60 px-3 py-3 text-sm'>
+                    <p className='text-xs font-medium text-zinc-400'>Signups</p>
+                    <p className='text-2xl font-light text-white'>
+                      {signup30dSignups.toLocaleString()}
+                    </p>
+                  </div>
+                  <div className='rounded-xl border border-zinc-800/40 bg-zinc-950/60 px-3 py-3 text-sm'>
+                    <p className='text-xs font-medium text-zinc-400'>
+                      Subscriptions
+                    </p>
+                    <p className='text-2xl font-light text-white'>
+                      {signup30dSubscriptions.toLocaleString()}
+                    </p>
+                  </div>
+                  <div className='rounded-xl border border-zinc-800/40 bg-zinc-950/60 px-3 py-3 text-sm'>
+                    <p className='text-xs font-medium text-zinc-400'>
+                      Conversion rate
+                    </p>
+                    <p className='text-2xl font-light text-white'>
+                      {signup30dRate}
+                    </p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </section>
+
+          <section className='space-y-3'>
+            <div>
+              <h2 className='text-sm font-medium text-zinc-200'>
+                CTA Conversions by Hub
+              </h2>
+              <p className='text-xs text-zinc-500'>
+                Clickers, signups within 7 days, and conversion % per hub.
+              </p>
+            </div>
+            <Card className='border-zinc-800/30 bg-zinc-900/10'>
+              <CardHeader>
+                <CardTitle className='text-base font-medium'>
+                  CTA conversion performance
+                </CardTitle>
+                <CardDescription className='text-xs text-zinc-400'>
+                  Click + signup window is{' '}
+                  <span className='font-semibold'>
+                    {ctaConversions?.window_days ?? 7}
+                  </span>{' '}
+                  days.
+                </CardDescription>
+              </CardHeader>
+              <CardContent className='overflow-x-auto'>
+                <table className='w-full text-left text-sm text-zinc-400'>
+                  <thead>
+                    <tr className='border-b border-zinc-800'>
+                      <th className='pb-3 text-xs font-medium text-zinc-400'>
+                        Hub
+                      </th>
+                      <th className='pb-3 text-xs font-medium text-zinc-400 text-right'>
+                        CTA clickers
+                      </th>
+                      <th className='pb-3 text-xs font-medium text-zinc-400 text-right'>
+                        Signups (7d)
+                      </th>
+                      <th className='pb-3 text-xs font-medium text-zinc-400 text-right'>
+                        Conversion %
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {ctaHubs.length > 0 ? (
+                      ctaHubs.map((hub) => (
+                        <tr
+                          key={hub.hub}
+                          className='border-b border-zinc-800/50 hover:bg-zinc-900/20'
+                        >
+                          <td className='py-3 text-zinc-300 font-medium'>
+                            {hub.hub}
+                          </td>
+                          <td className='py-3 text-right font-semibold text-white'>
+                            {hub.unique_clickers.toLocaleString()}
+                          </td>
+                          <td className='py-3 text-right text-zinc-300'>
+                            {hub.signups_7d.toLocaleString()}
+                          </td>
+                          <td className='py-3 text-right text-zinc-300'>
+                            {hub.unique_clickers > 0
+                              ? `${hub.conversion_rate.toFixed(2)}%`
+                              : 'N/A'}
+                          </td>
+                        </tr>
+                      ))
+                    ) : (
+                      <tr>
+                        <td
+                          colSpan={4}
+                          className='py-4 text-center text-xs text-zinc-500'
+                        >
+                          No CTA conversion data for this range.
+                        </td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
+              </CardContent>
+            </Card>
+          </section>
+
+          <section className='space-y-3'>
+            <div>
+              <h2 className='text-sm font-medium text-zinc-200'>
+                Activation Rate
+              </h2>
+              <p className='text-xs text-zinc-500'>
+                Users who completed ≥1 key action within 24 hours of signup.
+              </p>
+            </div>
+            <Card className='border-zinc-800/30 bg-zinc-900/10'>
+              <CardHeader>
+                <CardTitle className='text-base font-medium'>
+                  Activation health
+                </CardTitle>
+                <CardDescription className='text-xs text-zinc-400'>
+                  Activated users cannot exceed total signups.
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className='grid grid-cols-1 gap-4 md:grid-cols-3'>
+                  <MiniStat
+                    label='Activation Rate %'
+                    value={activationRateDisplay}
+                    icon={
+                      <Sparkles className='h-5 w-5 text-lunary-primary-300' />
+                    }
+                  />
+                  <MiniStat
+                    label='Activated Users'
+                    value={activationActivatedUsers}
+                    icon={
+                      <Activity className='h-5 w-5 text-lunary-success-300' />
+                    }
+                  />
+                  <MiniStat
+                    label='Total Signups'
+                    value={activationTotalSignups}
+                    icon={
+                      <Target className='h-5 w-5 text-lunary-secondary-300' />
+                    }
+                  />
+                </div>
+              </CardContent>
+            </Card>
+          </section>
+
+          <section className='space-y-3'>
+            <div>
+              <h2 className='text-sm font-medium text-zinc-200'>
+                Activation by Feature
+              </h2>
+              <p className='text-xs text-zinc-500'>
+                Free / Paid / Unknown splits based on tier at activation time.
+              </p>
+            </div>
+            <Card className='border-zinc-800/30 bg-zinc-900/10'>
+              <CardHeader>
+                <CardTitle className='text-base font-medium'>
+                  Feature-driven tiers
+                </CardTitle>
+                <CardDescription className='text-xs text-zinc-400'>
+                  Tier is resolved at the time of the activation event.
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className='overflow-x-auto'>
+                  <table className='w-full text-left text-sm text-zinc-400'>
+                    <thead>
+                      <tr className='border-b border-zinc-800'>
+                        <th className='pb-3 text-xs font-medium text-zinc-400'>
+                          Feature
+                        </th>
+                        <th className='pb-3 text-xs font-medium text-zinc-400 text-right'>
+                          Total
+                        </th>
+                        <th className='pb-3 text-xs font-medium text-zinc-400 text-right'>
+                          Free
+                        </th>
+                        <th className='pb-3 text-xs font-medium text-zinc-400 text-right'>
+                          Paid
+                        </th>
+                        <th className='pb-3 text-xs font-medium text-zinc-400 text-right'>
+                          Unknown
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {ACTIVATION_FEATURES.map((feature) => {
+                        const total =
+                          activation?.activationBreakdown?.[feature.event] ?? 0;
+                        const breakdown = activation
+                          ?.activationBreakdownByPlan?.[feature.event] ?? {
+                          free: 0,
+                          paid: 0,
+                          unknown: 0,
+                        };
+                        return (
+                          <tr
+                            key={feature.event}
+                            className='border-b border-zinc-800/50 hover:bg-zinc-900/20'
+                          >
+                            <td className='py-3 text-zinc-300 font-medium'>
+                              {feature.label}
+                            </td>
+                            <td className='py-3 text-right text-white font-semibold'>
+                              {total.toLocaleString()}
+                            </td>
+                            <td className='py-3 text-right text-zinc-300'>
+                              {breakdown.free.toLocaleString()}
+                            </td>
+                            <td className='py-3 text-right text-zinc-300'>
+                              {breakdown.paid.toLocaleString()}
+                            </td>
+                            <td className='py-3 text-right text-zinc-300'>
+                              {breakdown.unknown.toLocaleString()}
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+              </CardContent>
+            </Card>
+          </section>
+
+          <section className='space-y-3'>
+            <div>
+              <h2 className='text-sm font-medium text-zinc-200'>Momentum</h2>
+              <p className='text-xs text-zinc-500'>
+                Rolling 7-day averages plus week-over-week deltas for site and
+                signed-in product usage.
+              </p>
+            </div>
+            <Card className='border-zinc-800/30 bg-zinc-900/10'>
+              <CardHeader>
+                <CardTitle className='text-base font-medium'>
+                  Momentum
+                </CardTitle>
+                <CardDescription className='text-xs text-zinc-400'>
+                  Site momentum uses app_opened. Product momentum uses signed-in
+                  product events. Activation uses signup activation rate.
+                </CardDescription>
+              </CardHeader>
+              <CardContent className='space-y-3'>
+                <div className='space-y-2'>
+                  <p className='text-xs uppercase tracking-wider text-zinc-500'>
+                    Site momentum (app_opened)
+                  </p>
+                  {siteMomentumRows.map((row) => (
+                    <div
+                      key={row.id}
+                      className='flex items-start justify-between gap-4 rounded-xl border border-zinc-800/40 bg-zinc-950/60 px-4 py-3'
+                    >
+                      <div>
+                        <p className='text-xs uppercase tracking-wider text-zinc-500'>
+                          {row.label}
+                        </p>
+                        <p className='text-2xl font-light text-white'>
+                          {row.formatter(row.stats.average)}
+                        </p>
+                        <p className='text-xs text-zinc-500'>7-day rolling</p>
+                      </div>
+                      <div className='text-right text-xs'>
+                        <p className='text-sm font-semibold text-white'>
+                          {row.change !== null
+                            ? `${row.change >= 0 ? '+' : ''}${row.change.toLocaleString()}`
+                            : 'N/A'}
+                        </p>
+                        <p className='text-[11px] text-zinc-500'>
+                          {row.percentChange !== null
+                            ? `${row.percentChange.toFixed(1)}% vs prior 7d`
+                            : 'No prior window'}
+                        </p>
+                        <p className='text-[11px] text-zinc-500'>
+                          {describeTrend(
+                            row.stats.average,
+                            row.stats.previousAverage,
+                          )}
+                        </p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                <div className='space-y-2'>
+                  <p className='text-xs uppercase tracking-wider text-zinc-500'>
+                    Product momentum (signed-in)
+                  </p>
+                  {productMomentumRows.map((row) => (
+                    <div
+                      key={row.id}
+                      className='flex items-start justify-between gap-4 rounded-xl border border-zinc-800/40 bg-zinc-950/60 px-4 py-3'
+                    >
+                      <div>
+                        <p className='text-xs uppercase tracking-wider text-zinc-500'>
+                          {row.label}
+                        </p>
+                        <p className='text-2xl font-light text-white'>
+                          {row.formatter(row.stats.average)}
+                        </p>
+                        <p className='text-xs text-zinc-500'>7-day rolling</p>
+                      </div>
+                      <div className='text-right text-xs'>
+                        <p className='text-sm font-semibold text-white'>
+                          {row.change !== null
+                            ? `${row.change >= 0 ? '+' : ''}${row.change.toLocaleString()}`
+                            : 'N/A'}
+                        </p>
+                        <p className='text-[11px] text-zinc-500'>
+                          {row.percentChange !== null
+                            ? `${row.percentChange.toFixed(1)}% vs prior 7d`
+                            : 'No prior window'}
+                        </p>
+                        <p className='text-[11px] text-zinc-500'>
+                          {describeTrend(
+                            row.stats.average,
+                            row.stats.previousAverage,
+                          )}
+                        </p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                <div className='space-y-2'>
+                  <p className='text-xs uppercase tracking-wider text-zinc-500'>
+                    Activation momentum
+                  </p>
+                  {activationMomentumRows.map((row) => (
+                    <div
+                      key={row.id}
+                      className='flex items-start justify-between gap-4 rounded-xl border border-zinc-800/40 bg-zinc-950/60 px-4 py-3'
+                    >
+                      <div>
+                        <p className='text-xs uppercase tracking-wider text-zinc-500'>
+                          {row.label}
+                        </p>
+                        <p className='text-2xl font-light text-white'>
+                          {row.formatter(row.stats.average)}
+                        </p>
+                        <p className='text-xs text-zinc-500'>7-day rolling</p>
+                      </div>
+                      <div className='text-right text-xs'>
+                        <p className='text-sm font-semibold text-white'>
+                          {row.change !== null
+                            ? `${row.change >= 0 ? '+' : ''}${row.change.toLocaleString()}`
+                            : 'N/A'}
+                        </p>
+                        <p className='text-[11px] text-zinc-500'>
+                          {row.percentChange !== null
+                            ? `${row.percentChange.toFixed(1)}% vs prior 7d`
+                            : 'No prior window'}
+                        </p>
+                        <p className='text-[11px] text-zinc-500'>
+                          {describeTrend(
+                            row.stats.average,
+                            row.stats.previousAverage,
+                          )}
+                        </p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                <p className='text-xs text-zinc-400'>
+                  Activation momentum is expressed as the rolling rate plus its
+                  change vs. the previous 7-day window.
+                </p>
+              </CardContent>
+            </Card>
+          </section>
+
+          <section className='space-y-6'>
+            <div>
+              <h2 className='text-sm font-medium text-zinc-200'>
+                Event Volume & Quality
+              </h2>
+              <p className='text-xs text-zinc-500'>
+                Understand raw `app_opened` volume, session depth, and AI costs
+                before digging into usage trends.
+              </p>
+            </div>
+            <div className='grid gap-6 lg:grid-cols-3'>
+              <Card className='border-zinc-800/30 bg-zinc-900/10'>
+                <CardHeader>
+                  <CardTitle className='text-base font-medium'>
+                    Raw Event Audit
+                  </CardTitle>
+                  <CardDescription className='text-xs text-zinc-400'>
+                    Canonical `app_opened` counts are surfaced when the audit
+                    mode is enabled.
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className='grid gap-4 md:grid-cols-2'>
+                  <MiniStat
+                    label='Raw app_opened events'
+                    value={engagementOverview?.audit?.raw_events_count ?? '—'}
+                    icon={
+                      <Loader2 className='h-5 w-5 text-lunary-accent-300' />
+                    }
+                  />
+                  <MiniStat
+                    label='Canonical identities'
+                    value={
+                      engagementOverview?.audit
+                        ?.distinct_canonical_identities ?? '—'
+                    }
+                    icon={
+                      <Sparkles className='h-5 w-5 text-lunary-primary-300' />
+                    }
+                  />
+                  <MiniStat
+                    label='Missing identity rows'
+                    value={
+                      engagementOverview?.audit?.missing_identity_rows ?? '—'
+                    }
+                    icon={
+                      <Target className='h-5 w-5 text-lunary-secondary-300' />
+                    }
+                  />
+                  <MiniStat
+                    label='Identity links applied'
+                    value={
+                      engagementOverview?.audit?.linked_identities_applied ??
+                      '—'
+                    }
+                    icon={
+                      <Activity className='h-5 w-5 text-lunary-success-300' />
+                    }
+                  />
+                </CardContent>
+              </Card>
+
+              <Card className='border-zinc-800/30 bg-zinc-900/10'>
+                <CardHeader>
+                  <CardTitle className='text-base font-medium'>
+                    Average sessions
+                  </CardTitle>
+                  <CardDescription className='text-xs text-zinc-400'>
+                    Depth of signed-in product engagement per user.
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className='space-y-3 text-sm text-zinc-200'>
+                  <div className='flex items-center justify-between'>
+                    <span>Signed-in product sessions</span>
+                    <span>
+                      {typeof activity?.signed_in_product_avg_sessions_per_user ===
+                      'number'
+                        ? activity.signed_in_product_avg_sessions_per_user.toFixed(
+                            2,
+                          )
+                        : '—'}
+                    </span>
+                  </div>
+                  <div className='flex items-center justify-between'>
+                    <span>Signed-in returning users</span>
+                    <span>
+                      {(
+                        activity?.signed_in_product_returning_users ?? 0
+                      ).toLocaleString()}
+                    </span>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className='border-zinc-800/30 bg-zinc-900/10'>
+                <CardHeader>
+                  <CardTitle className='text-base font-medium'>
+                    AI usage & costs
+                  </CardTitle>
+                  <CardDescription className='text-xs text-zinc-400'>
+                    Track generation volume versus spend.
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className='space-y-2 text-sm text-zinc-300'>
+                  <div className='flex items-center justify-between'>
+                    <span>Total API cost</span>
+                    <span>
+                      {apiCosts ? `$${apiCosts.totalCost.toFixed(2)}` : 'N/A'}
+                    </span>
+                  </div>
+                  <div className='flex items-center justify-between'>
+                    <span>Cost per session</span>
+                    <span>
+                      {apiCosts
+                        ? `$${apiCosts.costPerSession.toFixed(4)}`
+                        : 'N/A'}
+                    </span>
+                  </div>
+                  <div className='flex items-center justify-between'>
+                    <span>Revenue / cost ratio</span>
+                    <span>
+                      {apiCosts ? apiCosts.revenueCostRatio.toFixed(2) : 'N/A'}
+                    </span>
+                  </div>
+                  <div className='flex items-center justify-between'>
+                    <span>Total generations</span>
+                    <span>
+                      {apiCosts
+                        ? apiCosts.totalGenerations.toLocaleString()
+                        : 'N/A'}
+                    </span>
+                  </div>
+                  <div className='flex items-center justify-between'>
+                    <span>Unique users</span>
+                    <span>
+                      {apiCosts ? apiCosts.uniqueUsers.toLocaleString() : 'N/A'}
+                    </span>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+
+            <Card className='border-zinc-800/30 bg-zinc-900/10'>
+              <CardHeader>
+                <CardTitle className='text-base font-medium'>
+                  Feature usage heatmap
+                </CardTitle>
+                <CardDescription className='text-xs text-zinc-400'>
+                  Past seven days of key feature events.
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <HeatmapGrid data={heatmapData} />
+              </CardContent>
+            </Card>
+
+            <Card className='border-zinc-800/30 bg-zinc-900/10'>
+              <CardHeader>
+                <CardTitle className='text-base font-medium'>
+                  Audience Segments
+                </CardTitle>
+                <CardDescription className='text-xs text-zinc-400'>
+                  Compare the deduped counts across the four canonical families.
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <p className='text-xs text-zinc-400'>
+                  Pageview Reach = `page_viewed` deduped · Engaged Users = key
+                  action events · Signed-in Product Usage = authenticated
+                  product event users · Grimoire Viewers = `grimoire_viewed`
+                  users
+                </p>
+                <div className='grid gap-4 md:grid-cols-2 lg:grid-cols-4 pt-3'>
+                  <MiniStat
+                    label='Pageview Reach MAU'
+                    value={reachMau}
+                    icon={<Bell className='h-5 w-5 text-lunary-primary-300' />}
+                  />
+                  <MiniStat
+                    label='Engaged Users MAU'
+                    value={engagedMau}
+                    icon={
+                      <Activity className='h-5 w-5 text-lunary-success-300' />
+                    }
+                  />
+                  <MiniStat
+                    label='Signed-in Product MAU'
+                    value={activity?.signed_in_product_mau ?? 0}
+                    icon={
+                      <Sparkles className='h-5 w-5 text-lunary-secondary-300' />
+                    }
+                  />
+                  <MiniStat
+                    label='Grimoire Viewers MAU'
+                    value={grimoireMau}
+                    icon={<Target className='h-5 w-5 text-lunary-accent-300' />}
+                  />
+                </div>
+                <p className='mt-2 text-xs text-zinc-500'>
+                  These families let you compare reach, engagement, product, and
+                  Grimoire-only cohorts without mixing denominators.
+                </p>
+              </CardContent>
+            </Card>
+          </section>
+
+          <section className='space-y-6'>
+            <div>
+              <h2 className='text-sm font-medium text-zinc-200'>
+                Signed-In Product Usage
+              </h2>
+              <p className='text-xs text-zinc-500'>
+                Signed-in product users capture authenticated engagement inside
+                the app.
+              </p>
+            </div>
+            <Card className='border-zinc-800/30 bg-zinc-900/10'>
+              <CardHeader>
+                <CardTitle className='text-base font-medium'>
+                  Product usage (signed-in)
+                </CardTitle>
+                <CardDescription className='text-xs text-zinc-400'>
+                  Product users are a subset of App users. Counts will not align
+                  1:1.
+                </CardDescription>
+              </CardHeader>
+              <CardContent className='grid gap-4 md:grid-cols-2 lg:grid-cols-4'>
+                <MiniStat
+                  label='Product DAU'
+                  value={activity?.signed_in_product_dau ?? 0}
+                  icon={
+                    <Activity className='h-5 w-5 text-lunary-primary-300' />
+                  }
+                />
+                <MiniStat
+                  label='Product WAU'
+                  value={activity?.signed_in_product_wau ?? 0}
+                  icon={
+                    <Activity className='h-5 w-5 text-lunary-success-300' />
+                  }
+                />
+                <MiniStat
+                  label='Product MAU'
+                  value={activity?.signed_in_product_mau ?? 0}
+                  icon={
+                    <Activity className='h-5 w-5 text-lunary-secondary-300' />
+                  }
+                />
+                <MiniStat
+                  label='Returning product MAU%'
+                  value={
+                    typeof productReturningPercent.mau === 'number'
+                      ? `${productReturningPercent.mau.toFixed(1)}%`
+                      : '—'
+                  }
+                  icon={<Sparkles className='h-5 w-5 text-lunary-accent-300' />}
+                />
+              </CardContent>
+            </Card>
+            <Card className='border-zinc-800/30 bg-zinc-900/10'>
+              <CardHeader>
+                <CardTitle className='text-base font-medium'>
+                  Feature adoption (per Product MAU)
+                </CardTitle>
+                <CardDescription className='text-xs text-zinc-400'>
+                  Distinct signed-in product users who triggered the feature
+                  relative to Product MAU.
                 </CardDescription>
               </CardHeader>
               <CardContent className='space-y-2'>
                 {(featureAdoption?.features ?? []).map((row) => (
                   <div
-                    key={row.event_type}
+                    key={`${row.event_type}-product`}
                     className='flex items-center justify-between rounded-lg border border-zinc-800/60 bg-zinc-950/40 px-3 py-2 text-sm'
                   >
                     <span className='text-zinc-300'>{row.event_type}</span>
@@ -2260,94 +3419,125 @@ export default function AnalyticsPage() {
                 )}
               </CardContent>
             </Card>
+          </section>
 
+          <section className='space-y-6'>
+            <div>
+              <h2 className='text-sm font-medium text-zinc-200'>
+                Grimoire Deep Dive
+              </h2>
+              <p className='text-xs text-zinc-500'>
+                Grimoire viewers are scoped to `grimoire_viewed` events and feed
+                the conversion flywheel.
+              </p>
+            </div>
             <Card className='border-zinc-800/30 bg-zinc-900/10'>
               <CardHeader>
                 <CardTitle className='text-base font-medium'>
                   Grimoire health
                 </CardTitle>
                 <CardDescription className='text-xs text-zinc-400'>
-                  Product and SEO signals from Grimoire engagement.
+                  Entry rate, penetration, and return behavior inside the
+                  Grimoire experience.
                 </CardDescription>
               </CardHeader>
               <CardContent className='space-y-4'>
-                <div className='grid gap-4 md:grid-cols-3'>
+                <div className='grid gap-4 md:grid-cols-2 lg:grid-cols-4'>
                   <MiniStat
-                    label='Entry rate'
+                    label='Grimoire Entry Rate'
                     value={
                       typeof grimoireHealth?.grimoire_entry_rate === 'number'
                         ? `${grimoireHealth.grimoire_entry_rate.toFixed(2)}%`
-                        : 'N/A'
+                        : '—'
                     }
                     icon={
                       <Sparkles className='h-5 w-5 text-lunary-primary-300' />
                     }
                   />
                   <MiniStat
-                    label='Views per active user'
+                    label='Grimoire MAU'
+                    value={grimoireMau}
+                    icon={
+                      <Activity className='h-5 w-5 text-lunary-success-300' />
+                    }
+                  />
+                  <MiniStat
+                    label='Grimoire-only MAU'
+                    value={grimoireOnlyMau}
+                    icon={
+                      <Activity className='h-5 w-5 text-lunary-secondary-300' />
+                    }
+                  />
+                  <MiniStat
+                    label='Views per Grimoire user'
                     value={
                       typeof grimoireHealth?.grimoire_views_per_active_user ===
                       'number'
                         ? grimoireHealth.grimoire_views_per_active_user.toFixed(
                             2,
                           )
-                        : 'N/A'
+                        : '—'
                     }
                     icon={
-                      <Activity className='h-5 w-5 text-lunary-success-300' />
+                      <Activity className='h-5 w-5 text-lunary-primary-300' />
                     }
                   />
+                </div>
+                <div className='grid gap-4 md:grid-cols-2'>
                   <MiniStat
-                    label='Return rate'
+                    label='Grimoire return rate'
                     value={
                       typeof grimoireHealth?.return_to_grimoire_rate ===
                       'number'
                         ? `${grimoireHealth.return_to_grimoire_rate.toFixed(2)}%`
-                        : 'N/A'
+                        : '—'
                     }
+                    icon={<Target className='h-5 w-5 text-lunary-accent-300' />}
+                  />
+                  <MiniStat
+                    label='Grimoire conversions'
+                    value={(
+                      conversionInfluence?.subscription_users_with_grimoire_before ??
+                      0
+                    ).toLocaleString()}
                     icon={
-                      <Target className='h-5 w-5 text-lunary-secondary-300' />
+                      <Sparkles className='h-5 w-5 text-lunary-success-300' />
                     }
                   />
                 </div>
-
-                <div className='rounded-xl border border-zinc-800/60 bg-zinc-950/50 p-4'>
+                <div className='rounded-xl border border-zinc-800/30 bg-zinc-950/50 p-4 text-sm text-zinc-300'>
                   <p className='text-xs uppercase tracking-wider text-zinc-400'>
                     Conversion influence
                   </p>
-                  <div className='mt-2 space-y-1 text-sm text-zinc-300'>
+                  <div className='mt-2 space-y-1'>
                     <div className='flex items-center justify-between'>
-                      <span>Subscriptions in range</span>
-                      <span>
-                        {(
-                          conversionInfluence?.subscription_users ?? 0
-                        ).toLocaleString()}
-                      </span>
-                    </div>
-                    <div className='flex items-center justify-between'>
-                      <span>Had Grimoire view before subscription</span>
+                      <span>Subscriptions with Grimoire before signup</span>
                       <span>
                         {(
                           conversionInfluence?.subscription_users_with_grimoire_before ??
                           0
-                        ).toLocaleString()}{' '}
-                        (
+                        ).toLocaleString()}
+                      </span>
+                    </div>
+                    <div className='flex items-center justify-between'>
+                      <span>Conversion rate with Grimoire</span>
+                      <span>
                         {(
                           conversionInfluence?.subscription_with_grimoire_before_rate ??
                           0
                         ).toFixed(2)}
-                        %)
+                        %
                       </span>
                     </div>
                     <div className='flex items-center justify-between'>
-                      <span>Median days (first Grimoire to signup)</span>
+                      <span>Median days (first Grimoire → signup)</span>
                       <span>
                         {conversionInfluence?.median_days_first_grimoire_to_signup ??
                           'N/A'}
                       </span>
                     </div>
                     <div className='flex items-center justify-between'>
-                      <span>Median days (signup to subscription)</span>
+                      <span>Median days (signup → subscription)</span>
                       <span>
                         {conversionInfluence?.median_days_signup_to_subscription ??
                           'N/A'}
@@ -2357,1383 +3547,365 @@ export default function AnalyticsPage() {
                 </div>
               </CardContent>
             </Card>
-          </section>
-          <section className='space-y-3'>
-            <Card className='border-zinc-800/30 bg-zinc-900/10'>
-              <CardHeader>
-                <CardTitle className='text-base font-medium'>
-                  Audience Segments
-                </CardTitle>
-                <CardDescription className='text-xs text-zinc-400'>
-                  Compare sitewide pageviews, engaged users, signed-in product
-                  usage, and Grimoire-only reach. Product users are signed-in
-                  event users, and Grimoire-only users never trigger a product
-                  event.
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className='mb-4 rounded-lg border border-zinc-800/30 bg-zinc-950/40 px-3 py-2 text-xs text-zinc-400'>
-                  <div>
-                    <strong>Selected range:</strong> {startDate} to {endDate}{' '}
-                    (UTC)
-                  </div>
-                  <div className='mt-1'>
-                    <strong>Snapshot windows ending {endDate}:</strong> DAU =
-                    {` ${endDate}`}, WAU = {` ${wauWindowStart} to ${endDate}`},
-                    MAU = {` ${mauWindowStart} to ${endDate}`}
-                  </div>
-                  <div className='mt-2 text-xs text-zinc-400'>
-                    Page-View DAU is deduplicated across `page_viewed` canonical
-                    events for the selected window.
-                  </div>
-                </div>
-                <div className='grid gap-4 md:grid-cols-3'>
-                  <div className='space-y-2 rounded-xl border border-zinc-800/60 bg-zinc-950/50 p-4'>
-                    <p className='text-xs uppercase tracking-wider text-zinc-400'>
-                      Page-View DAU
-                    </p>
-                    <div className='text-sm text-zinc-300'>
-                      <div className='flex items-center justify-between'>
-                        <span>DAU</span>
-                        <span>
-                          {(activity?.sitewide_dau ?? 0).toLocaleString()}
-                        </span>
-                      </div>
-                      <div className='flex items-center justify-between'>
-                        <span>WAU</span>
-                        <span>
-                          {(activity?.sitewide_wau ?? 0).toLocaleString()}
-                        </span>
-                      </div>
-                      <div className='flex items-center justify-between'>
-                        <span>MAU</span>
-                        <span>
-                          {(activity?.sitewide_mau ?? 0).toLocaleString()}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                  <div className='space-y-2 rounded-xl border border-zinc-800/60 bg-zinc-950/50 p-4'>
-                    <p className='text-xs uppercase tracking-wider text-zinc-400'>
-                      Engaged (key actions)
-                    </p>
-                    <div className='text-sm text-zinc-300'>
-                      <div className='flex items-center justify-between'>
-                        <span>DAU</span>
-                        <span>{(activity?.dau ?? 0).toLocaleString()}</span>
-                      </div>
-                      <div className='flex items-center justify-between'>
-                        <span>WAU</span>
-                        <span>{(activity?.wau ?? 0).toLocaleString()}</span>
-                      </div>
-                      <div className='flex items-center justify-between'>
-                        <span>MAU</span>
-                        <span>{(activity?.mau ?? 0).toLocaleString()}</span>
-                      </div>
-                    </div>
-                  </div>
-                  <div className='space-y-2 rounded-xl border border-zinc-800/60 bg-zinc-950/50 p-4'>
-                    <p className='text-xs uppercase tracking-wider text-zinc-400'>
-                      Product (signed-in)
-                    </p>
-                    <div className='text-sm text-zinc-300'>
-                      <div className='flex items-center justify-between'>
-                        <span>DAU</span>
-                        <span>
-                          {(
-                            activity?.signed_in_product_dau ?? 0
-                          ).toLocaleString()}
-                        </span>
-                      </div>
-                      <div className='flex items-center justify-between'>
-                        <span>WAU</span>
-                        <span>
-                          {(
-                            activity?.signed_in_product_wau ?? 0
-                          ).toLocaleString()}
-                        </span>
-                      </div>
-                      <div className='flex items-center justify-between'>
-                        <span>MAU</span>
-                        <span>
-                          {(
-                            activity?.signed_in_product_mau ?? 0
-                          ).toLocaleString()}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                <div className='mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2'>
-                  <div className='rounded-xl border border-lime-500/20 bg-lime-500/5 p-4'>
-                    <p className='text-xs uppercase tracking-wider text-lime-300'>
-                      <span
-                        className='normal-case'
-                        title='Includes users who may also use the product.'
-                      >
-                        Content MAU (Grimoire viewers, last 30 days ending{' '}
-                        {endDate})
-                      </span>
-                    </p>
-                    <p className='text-2xl font-semibold text-lime-100'>
-                      {(activity?.content_mau_grimoire ?? 0).toLocaleString()}
-                    </p>
-                  </div>
-                  <div className='rounded-xl border border-amber-500/20 bg-amber-500/5 p-4'>
-                    <p className='text-xs uppercase tracking-wider text-amber-300'>
-                      <span
-                        className='normal-case'
-                        title='Excludes anyone who interacted with product features.'
-                      >
-                        Grimoire-only MAU (Grimoire viewers who did not open the
-                        app, last 30 days ending {endDate})
-                      </span>
-                    </p>
-                    <p className='text-2xl font-semibold text-amber-100'>
-                      {(activity?.grimoire_only_mau ?? 0).toLocaleString()}
-                    </p>
-                  </div>
-                </div>
-                <div className='mt-4 grid grid-cols-1 gap-3 sm:grid-cols-3'>
-                  <div className='rounded-xl border border-zinc-800/60 bg-zinc-950/50 p-3'>
-                    <p className='text-[11px] uppercase tracking-wider text-zinc-500'>
-                      Product DAU/WAU
-                    </p>
-                    <p className='text-xl font-semibold text-white'>
-                      {productDauToWauRatio.toFixed(1)}%
-                    </p>
-                  </div>
-                  <div className='rounded-xl border border-zinc-800/60 bg-zinc-950/50 p-3'>
-                    <p className='text-[11px] uppercase tracking-wider text-zinc-500'>
-                      Product WAU/MAU
-                    </p>
-                    <p className='text-xl font-semibold text-white'>
-                      {productWauToMauRatio.toFixed(1)}%
-                    </p>
-                  </div>
-                  <div className='rounded-xl border border-zinc-800/60 bg-zinc-950/50 p-3'>
-                    <p className='text-[11px] uppercase tracking-wider text-zinc-500'>
-                      Grimoire-only share of Content MAU
-                    </p>
-                    <p className='text-xl font-semibold text-white'>
-                      {grimoireShareRatio.toFixed(1)}%
-                    </p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </section>
-          <section className='space-y-3'>
-            <Card className='border-zinc-800/30 bg-zinc-900/10'>
-              <CardHeader>
-                <CardTitle className='text-base font-medium'>
-                  Product Usage
-                </CardTitle>
-                <CardDescription className='text-xs text-zinc-400'>
-                  Signed-in product engagement for {startDate} to {endDate}.
-                  Product users are not counted as Grimoire-only.
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className='mb-4 rounded-lg border border-zinc-800/30 bg-zinc-950/40 px-3 py-2 text-xs text-zinc-400'>
-                  <div>
-                    <strong>Selected range:</strong> {startDate} to {endDate}{' '}
-                    (UTC)
-                  </div>
-                  <div className='mt-1'>
-                    <strong>Snapshot windows ending {endDate}:</strong> Product
-                    DAU = {` ${endDate}`}, Product WAU ={' '}
-                    {` ${wauWindowStart} to ${endDate}`}, Product MAU ={' '}
-                    {` ${mauWindowStart} to ${endDate}`}
-                  </div>
-                </div>
-                <div className='grid gap-4 md:grid-cols-3'>
-                  <div className='rounded-xl border border-zinc-800/60 bg-zinc-950/50 p-4'>
-                    <p className='text-xs uppercase tracking-wider text-zinc-400'>
-                      Product Users (signed-in)
-                    </p>
-                    <p className='text-2xl font-semibold text-white'>
-                      {(
-                        activity?.signed_in_product_users ?? 0
-                      ).toLocaleString()}
-                    </p>
-                  </div>
-                  <div className='rounded-xl border border-zinc-800/60 bg-zinc-950/50 p-4'>
-                    <p className='text-xs uppercase tracking-wider text-zinc-400'>
-                      Returning Product Users (signed-in)
-                    </p>
-                    <p className='text-2xl font-semibold text-white'>
-                      {(
-                        activity?.signed_in_product_returning_users ?? 0
-                      ).toLocaleString()}
-                    </p>
-                  </div>
-                  <div className='rounded-xl border border-zinc-800/60 bg-zinc-950/50 p-4'>
-                    <p className='text-xs uppercase tracking-wider text-zinc-400'>
-                      Avg Sessions per User (product)
-                    </p>
-                    <p className='text-2xl font-semibold text-white'>
-                      {Number(
-                        activity?.signed_in_product_avg_sessions_per_user ?? 0,
-                      ).toFixed(2)}
-                    </p>
-                  </div>
-                </div>
-                <div className='mt-4 grid grid-cols-1 gap-4 sm:grid-cols-3'>
-                  <div className='rounded-xl border border-zinc-800/60 bg-zinc-950/50 p-3'>
-                    <p className='text-[11px] uppercase tracking-wider text-zinc-500'>
-                      Product DAU
-                    </p>
-                    <p className='text-xl font-semibold text-white'>
-                      {(activity?.signed_in_product_dau ?? 0).toLocaleString()}
-                    </p>
-                  </div>
-                  <div className='rounded-xl border border-zinc-800/60 bg-zinc-950/50 p-3'>
-                    <p className='text-[11px] uppercase tracking-wider text-zinc-500'>
-                      Product WAU
-                    </p>
-                    <p className='text-xl font-semibold text-white'>
-                      {(activity?.signed_in_product_wau ?? 0).toLocaleString()}
-                    </p>
-                  </div>
-                  <div className='rounded-xl border border-zinc-800/60 bg-zinc-950/50 p-3'>
-                    <p className='text-[11px] uppercase tracking-wider text-zinc-500'>
-                      Product MAU
-                    </p>
-                    <p className='text-xl font-semibold text-white'>
-                      {(activity?.signed_in_product_mau ?? 0).toLocaleString()}
-                    </p>
-                  </div>
-                </div>
-                <div className='mt-4 grid grid-cols-1 gap-4 sm:grid-cols-3'>
-                  <div className='rounded-xl border border-zinc-800/60 bg-zinc-950/50 p-3'>
-                    <p className='text-[11px] uppercase tracking-wider text-zinc-500'>
-                      Returning Product DAU %
-                    </p>
-                    <p className='text-xl font-semibold text-white'>
-                      {productReturningPercent.dau.toFixed(1)}%
-                    </p>
-                  </div>
-                  <div className='rounded-xl border border-zinc-800/60 bg-zinc-950/50 p-3'>
-                    <p className='text-[11px] uppercase tracking-wider text-zinc-500'>
-                      Returning Product WAU %
-                    </p>
-                    <p className='text-xl font-semibold text-white'>
-                      {productReturningPercent.wau.toFixed(1)}%
-                    </p>
-                  </div>
-                  <div className='rounded-xl border border-zinc-800/60 bg-zinc-950/50 p-3'>
-                    <p className='text-[11px] uppercase tracking-wider text-zinc-500'>
-                      Returning Product MAU %
-                    </p>
-                    <p className='text-xl font-semibold text-white'>
-                      {productReturningPercent.mau.toFixed(1)}%
-                    </p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </section>
-
-          <section className='grid grid-cols-1 gap-6 lg:grid-cols-2'>
-            <Card className='border-zinc-800/30 bg-zinc-900/10'>
-              <CardHeader>
-                <CardTitle>Active User Trends</CardTitle>
-                <CardDescription>
-                  DAU, WAU, and MAU trends ({granularity}) for {startDate} to{' '}
-                  {endDate}. WAU and MAU are rolling windows anchored to each
-                  day.
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <UsageChart
-                  data={activityUsageData}
-                  series={chartSeries}
-                  height={240}
-                />
-                <div className='mt-3 flex flex-wrap gap-2'>
-                  <Button
-                    variant={showProductSeries ? 'secondary' : 'outline'}
-                    onClick={() => setShowProductSeries((prev) => !prev)}
-                  >
-                    {showProductSeries
-                      ? 'Hide signed-in product series'
-                      : 'Show signed-in product series'}
-                  </Button>
-                  <span className='text-xs text-zinc-400'>
-                    {showProductSeries
-                      ? 'Currently overlaying signed-in product activity.'
-                      : 'Toggle to compare signed-in product activity.'}
-                  </span>
-                </div>
-                <div className='mt-4 flex flex-wrap items-center gap-4 border-t border-zinc-800 pt-4'>
-                  <div className='flex items-center gap-2'>
-                    <div
-                      className='h-3 w-3 rounded-full'
-                      style={{ backgroundColor: 'rgba(196,181,253,0.8)' }}
-                    />
-                    <span className='text-xs text-zinc-400'>
-                      <span className='font-medium text-zinc-300'>DAU</span> -
-                      Daily Active Users
-                    </span>
-                  </div>
-                  <div className='flex items-center gap-2'>
-                    <div
-                      className='h-2 w-2 rounded-full'
-                      style={{ backgroundColor: 'rgba(129,140,248,0.9)' }}
-                    />
-                    <span className='text-xs text-zinc-400'>
-                      <span className='font-medium text-zinc-300'>WAU</span> -
-                      Weekly Active Users
-                    </span>
-                  </div>
-                  <div className='flex items-center gap-2'>
-                    <div
-                      className='h-2 w-2 rounded-full'
-                      style={{ backgroundColor: 'rgba(56,189,248,0.9)' }}
-                    />
-                    <span className='text-xs text-zinc-400'>
-                      <span className='font-medium text-zinc-300'>MAU</span> -
-                      Monthly Active Users
-                    </span>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            {userGrowth && (
+            {searchConsoleData && (
               <Card className='border-zinc-800/30 bg-zinc-900/10'>
                 <CardHeader>
                   <CardTitle className='text-base font-medium'>
-                    User Growth Trends
+                    SEO & referral entry rate
                   </CardTitle>
                   <CardDescription className='text-xs text-zinc-400'>
-                    New signups over time
+                    Organic reach that feeds the Grimoire experience.
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <div className='space-y-4'>
-                    <div className='grid gap-4 grid-cols-1 lg:grid-cols-3'>
-                      <MetricsCard
-                        title='Total Signups'
-                        value={userGrowth.totalSignups.toLocaleString()}
-                        subtitle='New users in this period'
-                      />
-                      <MetricsCard
-                        title='Growth Rate'
-                        value={`${userGrowth.growthRate > 0 ? '+' : ''}${userGrowth.growthRate.toFixed(1)}%`}
-                        subtitle='Period-over-period change'
-                        trend={
-                          userGrowth.growthRate > 0
-                            ? 'up'
-                            : userGrowth.growthRate < 0
-                              ? 'down'
-                              : 'stable'
-                        }
-                        change={Math.abs(userGrowth.growthRate)}
-                      />
-                      {userGrowth.avgDailySignups !== undefined && (
-                        <MetricsCard
-                          title='Avg Daily Signups'
-                          value={userGrowth.avgDailySignups.toFixed(1)}
-                          subtitle='Average per day'
-                        />
-                      )}
-                    </div>
-                    {userGrowth.trends && userGrowth.trends.length > 0 && (
-                      <div>
-                        <UsageChart
-                          data={userGrowth.trends.map((t: any) => ({
-                            date: t.date,
-                            signups: t.signups,
-                          }))}
-                          series={[
-                            {
-                              dataKey: 'signups',
-                              name: 'Signups',
-                              stroke: 'rgba(249,115,22,0.9)',
-                            },
-                          ]}
-                          height={200}
-                        />
-                        <div className='mt-4 flex flex-wrap items-center gap-4 border-t border-zinc-800 pt-4'>
-                          <div className='flex items-center gap-2'>
-                            <div
-                              className='h-3 w-3 rounded-full'
-                              style={{
-                                backgroundColor: 'rgba(196,181,253,0.8)',
-                              }}
-                            />
-                            <span className='text-xs text-zinc-400'>
-                              <span className='font-medium text-zinc-300'>
-                                Signups
-                              </span>{' '}
-                              - New user registrations
-                            </span>
-                          </div>
-                        </div>
-                      </div>
-                    )}
-                  </div>
+                  <SearchConsoleMetrics
+                    data={searchConsoleData}
+                    loading={loading && !searchConsoleData}
+                  />
                 </CardContent>
               </Card>
             )}
           </section>
 
-          <section className='grid grid-cols-1 gap-6 lg:grid-cols-2'>
-            <Card className='border-zinc-800/30 bg-zinc-900/10'>
-              <CardHeader>
-                <CardTitle className='text-base font-medium'>
-                  Retention & Churn
-                </CardTitle>
-                <CardDescription className='text-xs text-zinc-400'>
-                  Cohort retention ({startDate} → {endDate})
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className='grid grid-cols-1 gap-4 md:grid-cols-2'>
-                  <RetentionCard
-                    label='Day 1'
-                    value={activity?.retention.day_1 ?? null}
+          <section className='space-y-6'>
+            <div>
+              <h2 className='text-sm font-medium text-zinc-200'>
+                Conversion & Lifecycle
+              </h2>
+              <p className='text-xs text-zinc-500'>
+                Signup to trial to paid movement, lifecycle stages, and churn
+                diagnostics.
+              </p>
+            </div>
+            <div className='grid gap-6 xl:grid-cols-2'>
+              <Card className='border-zinc-800/30 bg-zinc-900/10'>
+                <CardHeader>
+                  <CardTitle className='text-base font-medium'>
+                    Conversion funnel
+                  </CardTitle>
+                  <CardDescription className='text-xs text-zinc-400'>
+                    Free → trial → paid transitions for the selected range.
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <ConversionFunnel
+                    stages={conversionStages}
+                    dropOffPoints={conversionDropOff}
                   />
-                  <RetentionCard
-                    label='Day 7'
-                    value={activity?.retention.day_7 ?? null}
-                  />
-                  <RetentionCard
-                    label='Day 30'
-                    value={activity?.retention.day_30 ?? null}
-                  />
-                  <RetentionCard
-                    label='Churn'
-                    value={activity?.churn_rate ?? null}
-                    variant='negative'
-                  />
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card className='border-zinc-800/30 bg-zinc-900/10'>
-              <CardHeader>
-                <CardTitle className='text-base font-medium'>
-                  Conversion Funnel
-                </CardTitle>
-                <CardDescription className='text-xs text-zinc-400'>
-                  Free → Trial → Paid
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <ConversionFunnel
-                  stages={[
-                    {
-                      label: 'Free Users',
-                      value: conversions?.funnel.free_users ?? 0,
-                      subtitle: 'Total active free accounts',
-                    },
-                    {
-                      label: 'Trial Users',
-                      value: conversions?.funnel.trial_users ?? 0,
-                      subtitle: 'Currently in trial',
-                    },
-                    {
-                      label: 'Paid Users',
-                      value: conversions?.funnel.paid_users ?? 0,
-                      subtitle: 'Active paid subscriptions',
-                    },
-                  ]}
-                  dropOffPoints={conversions?.funnel.drop_off_points}
-                />
-              </CardContent>
-            </Card>
+                </CardContent>
+              </Card>
+              <Card className='border-zinc-800/30 bg-zinc-900/10'>
+                <CardHeader>
+                  <CardTitle className='text-base font-medium'>
+                    Subscription lifecycle & plans
+                  </CardTitle>
+                  <CardDescription className='text-xs text-zinc-400'>
+                    Track plan states, duration, and churn.
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className='space-y-3 text-sm text-zinc-200'>
+                  <div className='grid gap-2 md:grid-cols-2'>
+                    {lifecycleStateEntries.map(([status, count]) => (
+                      <div
+                        key={status}
+                        className='flex items-center justify-between'
+                      >
+                        <span className='capitalize tracking-wide text-xs text-zinc-500'>
+                          {status.replace(/_/g, ' ')}
+                        </span>
+                        <span>{count.toLocaleString()}</span>
+                      </div>
+                    ))}
+                  </div>
+                  <div className='flex items-center justify-between text-xs text-zinc-400'>
+                    <span>Avg subscription duration</span>
+                    <span>
+                      {subscriptionLifecycle?.avgDurationDays
+                        ? `${subscriptionLifecycle.avgDurationDays.toFixed(1)} days`
+                        : 'N/A'}
+                    </span>
+                  </div>
+                  <div className='flex items-center justify-between text-xs text-zinc-400'>
+                    <span>Churn rate</span>
+                    <span>
+                      {subscriptionLifecycle?.churnRate !== undefined
+                        ? `${subscriptionLifecycle.churnRate.toFixed(2)}%`
+                        : 'N/A'}
+                    </span>
+                  </div>
+                  <div className='space-y-2 pt-2 text-xs text-zinc-300'>
+                    {planBreakdown?.planBreakdown?.map((plan: any) => (
+                      <div
+                        key={plan.plan}
+                        className='flex flex-col gap-1 rounded-lg border border-zinc-800/60 bg-zinc-950/40 px-3 py-2'
+                      >
+                        <span className='text-[11px] uppercase tracking-wide text-zinc-500'>
+                          {plan.plan}
+                        </span>
+                        <span>Subscriptions: {plan.count}</span>
+                        <span>Active: {plan.active}</span>
+                        <span>MRR: ${Number(plan.mrr ?? 0).toFixed(2)}</span>
+                        <span>
+                          Share: {Number(plan.percentage ?? 0).toFixed(1)}%
+                        </span>
+                      </div>
+                    ))}
+                    {!planBreakdown?.planBreakdown?.length && (
+                      <div className='text-xs text-zinc-500'>
+                        No plan breakdown data for this range.
+                      </div>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
           </section>
 
-          {subscription30d && (
-            <section>
+          <section className='space-y-6'>
+            <div>
+              <h2 className='text-sm font-medium text-zinc-200'>
+                Notifications & External Channels
+              </h2>
+              <p className='text-xs text-zinc-500'>
+                Track deliverability and command usage across push, email, and
+                Discord.
+              </p>
+            </div>
+            <div className='grid gap-6 lg:grid-cols-2'>
               <Card className='border-zinc-800/30 bg-zinc-900/10'>
                 <CardHeader>
                   <CardTitle className='text-base font-medium'>
-                    Signup → Subscription ({subscription30d.window_days}d)
+                    Notification health
                   </CardTitle>
                   <CardDescription className='text-xs text-zinc-400'>
-                    Subscriptions started within {subscription30d.window_days}{' '}
-                    days of a free account signup.
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className='grid gap-4 md:grid-cols-3'>
-                  <MetricsCard
-                    title='Signups'
-                    value={subscription30d.signups.toLocaleString()}
-                  />
-                  <MetricsCard
-                    title='Subscriptions'
-                    value={subscription30d.conversions.toLocaleString()}
-                  />
-                  <MetricsCard
-                    title='Conversion Rate'
-                    value={`${subscription30d.conversion_rate.toFixed(2)}%`}
-                  />
-                </CardContent>
-              </Card>
-            </section>
-          )}
-
-          {ctaConversions && ctaConversions.hubs.length > 0 && (
-            <section>
-              <Card className='border-zinc-800/30 bg-zinc-900/10'>
-                <CardHeader>
-                  <CardTitle className='text-base font-medium'>
-                    CTA Conversions by Hub
-                  </CardTitle>
-                  <CardDescription className='text-xs text-zinc-400'>
-                    Signups within {ctaConversions.window_days} days of a CTA
-                    click
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className='space-y-4'>
-                  {ctaConversions.hubs.slice(0, 8).map((hub) => (
-                    <div key={hub.hub} className='space-y-2'>
-                      <div className='flex items-center justify-between text-sm text-zinc-300'>
-                        <span className='capitalize'>{hub.hub}</span>
-                        <span className='font-semibold text-white'>
-                          {Number(hub.signups_7d || 0).toLocaleString()}
-                        </span>
-                      </div>
-                      <div className='h-2 w-full rounded-full bg-zinc-800'>
-                        <div
-                          className='h-2 rounded-full bg-gradient-to-r from-lunary-primary-400 to-lunary-highlight-500'
-                          style={{
-                            width: `${Math.min(hub.conversion_rate ?? 0, 100)}%`,
-                          }}
-                        />
-                      </div>
-                      <div className='flex items-center justify-between text-[11px] text-zinc-500'>
-                        <span>
-                          {Number(hub.unique_clickers || 0).toLocaleString()}{' '}
-                          clickers
-                        </span>
-                        <span>
-                          {Number(hub.conversion_rate || 0).toFixed(2)}%
-                          conversion
-                        </span>
-                      </div>
-                    </div>
-                  ))}
-                </CardContent>
-              </Card>
-            </section>
-          )}
-
-          {activation && (
-            <section>
-              <Card className='border-zinc-800/30 bg-zinc-900/10'>
-                <CardHeader>
-                  <CardTitle className='text-base font-medium'>
-                    Activation Rate
-                  </CardTitle>
-                  <CardDescription className='text-xs text-zinc-400'>
-                    Users who complete meaningful actions within 24h of signup
+                    Open rates by channel.
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <div className='space-y-4'>
-                    <div className='grid gap-4 grid-cols-1 lg:grid-cols-3'>
-                      <MetricsCard
-                        title='Activation Rate'
-                        value={`${activation.activationRate.toFixed(2)}%`}
-                        subtitle={`${activation.activatedUsers} of ${activation.totalSignups} users activated`}
-                      />
-                      <MetricsCard
-                        title='Activated Users'
-                        value={activation.activatedUsers.toLocaleString()}
-                        subtitle='Users who completed key actions within 24h'
-                      />
-                      <MetricsCard
-                        title='Total Signups'
-                        value={activation.totalSignups.toLocaleString()}
-                        subtitle='New users in this period'
-                      />
-                    </div>
-                    {activation.activationBreakdown &&
-                      Object.keys(activation.activationBreakdown).length >
-                        0 && (
-                        <div className='mt-6'>
-                          <h4 className='text-sm font-medium mb-3 text-zinc-300'>
-                            Activation by Feature
-                          </h4>
-                          <div className='grid gap-3 grid-cols-1 md:grid-cols-2 lg:grid-cols-3'>
-                            {Object.entries(activation.activationBreakdown).map(
-                              ([feature, count]: [string, any]) => {
-                                const breakdown =
-                                  activation.activationBreakdownByPlan?.[
-                                    feature
-                                  ] || {};
-                                const freeCount = breakdown.free ?? 0;
-                                const paidCount = breakdown.paid ?? 0;
-                                const unknownCount = breakdown.unknown ?? 0;
-                                return (
-                                  <div
-                                    key={feature}
-                                    className='rounded-lg border border-zinc-800/30 bg-zinc-900/5 p-3'
-                                  >
-                                    <div className='text-xs text-zinc-400 mb-1'>
-                                      {feature
-                                        .replace(/_/g, ' ')
-                                        .replace(/\b\w/g, (c) =>
-                                          c.toUpperCase(),
-                                        )}
-                                    </div>
-                                    <div className='text-lg font-semibold text-white'>
-                                      {count}
-                                    </div>
-                                    <div className='text-xs text-zinc-500 mt-1'>
-                                      users activated
-                                    </div>
-                                    <div className='text-xs text-zinc-500 mt-1'>
-                                      Free: {freeCount} · Paid: {paidCount}
-                                      {unknownCount > 0
-                                        ? ` · Unknown: ${unknownCount}`
-                                        : ''}
-                                    </div>
-                                  </div>
-                                );
-                              },
-                            )}
-                          </div>
+                  <div className='grid grid-cols-1 gap-4 md:grid-cols-2'>
+                    {notificationTypes.map((type) => (
+                      <div
+                        key={type.key}
+                        className='rounded-2xl border border-zinc-800 bg-zinc-900/40 p-4'
+                      >
+                        <div className='flex items-center gap-2 text-sm font-medium text-zinc-300'>
+                          <Bell className='h-4 w-4 text-lunary-primary-300' />
+                          {type.label}
                         </div>
-                      )}
-                  </div>
-                </CardContent>
-              </Card>
-            </section>
-          )}
-
-          {subscriptionLifecycle && (
-            <section>
-              <Card className='border-zinc-800/30 bg-zinc-900/10'>
-                <CardHeader>
-                  <CardTitle className='text-base font-medium'>
-                    Subscription Lifecycle
-                  </CardTitle>
-                  <CardDescription className='text-xs text-zinc-400'>
-                    Status changes and churn trends ({startDate} → {endDate})
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className='space-y-4'>
-                    <div className='grid gap-4 grid-cols-2 lg:grid-cols-4'>
-                      {Object.entries(subscriptionLifecycle.states || {}).map(
-                        ([status, count]: [string, any]) => (
-                          <MetricsCard
-                            key={status}
-                            title={
-                              status.charAt(0).toUpperCase() +
-                              status.slice(1).replace(/_/g, ' ')
-                            }
-                            value={count.toLocaleString()}
-                            subtitle={`${status} updates`}
-                          />
-                        ),
-                      )}
-                    </div>
-                    <div className='grid gap-4 grid-cols-1 lg:grid-cols-2'>
-                      <MetricsCard
-                        title='Avg Subscription Duration'
-                        value={`${subscriptionLifecycle.avgDurationDays.toFixed(1)} days`}
-                        subtitle='Average time users stay subscribed'
-                      />
-                      {subscriptionLifecycle.churnRate !== undefined && (
-                        <MetricsCard
-                          title='Churn Rate'
-                          value={`${subscriptionLifecycle.churnRate.toFixed(2)}%`}
-                          subtitle='Cancellations in this period'
-                          trend={
-                            subscriptionLifecycle.churnRate > 10
-                              ? 'down'
-                              : 'stable'
-                          }
-                        />
-                      )}
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </section>
-          )}
-
-          {planBreakdown && (
-            <section>
-              <Card className='border-zinc-800/30 bg-zinc-900/10'>
-                <CardHeader>
-                  <CardTitle className='text-base font-medium'>
-                    Plan Breakdown
-                  </CardTitle>
-                  <CardDescription className='text-xs text-zinc-400'>
-                    MRR contribution by plan type
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className='space-y-4'>
-                    <div className='grid gap-4 grid-cols-1 lg:grid-cols-2'>
-                      {planBreakdown.planBreakdown?.map((plan: any) => (
-                        <div
-                          key={plan.plan}
-                          className='border border-zinc-800 rounded-lg p-4'
-                        >
-                          <div className='flex items-center justify-between mb-2'>
-                            <span className='font-medium'>{plan.plan}</span>
-                            <span className='text-sm text-zinc-400'>
-                              {Number(plan.percentage ?? 0).toFixed(1)}%
+                        <div className='mt-3 grid gap-2 text-sm'>
+                          <div className='flex items-center justify-between text-zinc-400'>
+                            <span>Sent</span>
+                            <span>{type.data.sent.toLocaleString()}</span>
+                          </div>
+                          <div className='flex items-center justify-between text-zinc-400'>
+                            <span>Open rate</span>
+                            <span>
+                              {Number(type.data.open_rate ?? 0).toFixed(1)}%
                             </span>
                           </div>
-                          <div className='space-y-1 text-sm'>
-                            <div className='flex justify-between'>
-                              <span className='text-zinc-400'>
-                                Subscriptions:
-                              </span>
-                              <span>{plan.count}</span>
-                            </div>
-                            <div className='flex justify-between'>
-                              <span className='text-zinc-400'>MRR:</span>
-                              <span>${Number(plan.mrr ?? 0).toFixed(2)}</span>
-                            </div>
-                            <div className='flex justify-between'>
-                              <span className='text-zinc-400'>Active:</span>
-                              <span>{plan.active}</span>
-                            </div>
+                          <div className='flex items-center justify-between text-zinc-400'>
+                            <span>CTR</span>
+                            <span>
+                              {Number(
+                                type.data.click_through_rate ?? 0,
+                              ).toFixed(1)}
+                              %
+                            </span>
                           </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </section>
-          )}
-
-          {apiCosts && (
-            <section>
-              <Card className='border-zinc-800/30 bg-zinc-900/10'>
-                <CardHeader>
-                  <CardTitle className='text-base font-medium'>
-                    API Costs vs Revenue
-                  </CardTitle>
-                  <CardDescription className='text-xs text-zinc-400'>
-                    AI generation costs and efficiency metrics
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className='space-y-4'>
-                    <div className='grid gap-4 grid-cols-1 lg:grid-cols-3'>
-                      <MetricsCard
-                        title='Total API Costs'
-                        value={`$${apiCosts.totalCost.toFixed(2)}`}
-                        subtitle='AI generation costs this period'
-                      />
-                      <MetricsCard
-                        title='Cost per User'
-                        value={`$${apiCosts.costPerUser.toFixed(2)}`}
-                        subtitle={`${apiCosts.uniqueUsers.toLocaleString()} unique users`}
-                      />
-                      <MetricsCard
-                        title='Revenue/Cost Ratio'
-                        value={apiCosts.revenueCostRatio.toFixed(2)}
-                        subtitle={
-                          apiCosts.revenueCostRatio > 1
-                            ? 'Profitable'
-                            : 'Below break-even'
-                        }
-                        trend={apiCosts.revenueCostRatio > 1 ? 'up' : 'down'}
-                      />
-                    </div>
-                    <div className='grid gap-4 grid-cols-1 lg:grid-cols-3'>
-                      <MetricsCard
-                        title='Total Generations'
-                        value={apiCosts.totalGenerations.toLocaleString()}
-                        subtitle='AI requests processed'
-                      />
-                      <MetricsCard
-                        title='Unique Users'
-                        value={apiCosts.uniqueUsers.toLocaleString()}
-                        subtitle='Users who used AI features'
-                      />
-                      <MetricsCard
-                        title='Cost per Session'
-                        value={`$${apiCosts.costPerSession.toFixed(4)}`}
-                        subtitle='Average cost per AI generation'
-                      />
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </section>
-          )}
-        </TabsContent>
-
-        <TabsContent value='details' className='space-y-10'>
-          <section>
-            <SuccessMetrics
-              data={successMetrics}
-              loading={loading && !successMetrics}
-            />
-          </section>
-
-          {intentionBreakdown && intentionBreakdown.length > 0 && (
-            <section>
-              <Card className='border-zinc-800/30 bg-zinc-900/10'>
-                <CardHeader>
-                  <CardTitle className='text-base font-medium'>
-                    Onboarding Intentions
-                  </CardTitle>
-                  <CardDescription className='text-xs text-zinc-400'>
-                    Popular intention selections ({startDate} → {endDate})
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className='space-y-4'>
-                  {intentionBreakdown.map((item) => {
-                    const label =
-                      INTENTION_LABELS[item.intention] ||
-                      (item.intention
-                        ? item.intention.charAt(0).toUpperCase() +
-                          item.intention.slice(1)
-                        : 'Other');
-                    return (
-                      <div key={item.intention} className='space-y-2'>
-                        <div className='flex items-center justify-between text-sm text-zinc-300'>
-                          <span>{label}</span>
-                          <span className='font-semibold text-white'>
-                            {item.count.toLocaleString()}
-                          </span>
-                        </div>
-                        <div className='h-2 w-full rounded-full bg-zinc-800'>
-                          <div
-                            className='h-2 rounded-full bg-gradient-to-r from-lunary-primary to-lunary-highlight'
-                            style={{
-                              width: `${Math.min(item.percentage, 100)}%`,
-                            }}
-                          />
-                        </div>
-                        <p className='text-[11px] text-zinc-500'>
-                          {item.percentage.toFixed(2)}% of saved intentions
-                        </p>
-                      </div>
-                    );
-                  })}
-                </CardContent>
-              </Card>
-            </section>
-          )}
-
-          {searchConsoleData && (
-            <section>
-              <SearchConsoleMetrics
-                data={searchConsoleData}
-                loading={loading && !searchConsoleData}
-              />
-            </section>
-          )}
-
-          <section className='grid grid-cols-1 gap-6'>
-            <Card className='border-zinc-800/30 bg-zinc-900/10'>
-              <CardHeader>
-                <CardTitle className='text-base font-medium'>
-                  Trigger Features
-                </CardTitle>
-                <CardDescription className='text-xs text-zinc-400'>
-                  Top conversion drivers
-                </CardDescription>
-              </CardHeader>
-              <CardContent className='space-y-4'>
-                {(conversions?.trigger_breakdown ?? [])
-                  .slice(0, 5)
-                  .map((trigger) => (
-                    <div key={trigger.feature} className='space-y-2'>
-                      <div className='flex items-center justify-between text-sm text-zinc-400'>
-                        <span className='capitalize'>
-                          {trigger.feature || 'Other'}
-                        </span>
-                        <span>{trigger.count.toLocaleString()}</span>
-                      </div>
-                      <div className='h-2 w-full rounded-full bg-zinc-800'>
-                        <div
-                          className='h-2 rounded-full bg-gradient-to-r from-lunary-primary-400 to-lunary-highlight-500'
-                          style={{
-                            width: `${Number(trigger.percentage ?? 0).toFixed(2)}%`,
-                          }}
-                        />
-                      </div>
-                    </div>
-                  ))}
-              </CardContent>
-            </Card>
-          </section>
-
-          <section className='grid grid-cols-1 gap-6 lg:grid-cols-2'>
-            <Card className='border-zinc-800/30 bg-zinc-900/10'>
-              <CardHeader>
-                <CardTitle className='text-base font-medium'>
-                  Feature Usage Heatmap
-                </CardTitle>
-                <CardDescription className='text-xs text-zinc-400'>
-                  Past 7 days activity
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <HeatmapGrid data={heatmapData} />
-              </CardContent>
-            </Card>
-
-            <Card className='border-zinc-800/30 bg-zinc-900/10'>
-              <CardHeader>
-                <CardTitle className='text-base font-medium'>
-                  Notification Health
-                </CardTitle>
-                <CardDescription className='text-xs text-zinc-400'>
-                  Open rates by channel
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className='grid grid-cols-1 gap-4 md:grid-cols-2'>
-                  {notificationTypes.map((type) => (
-                    <div
-                      key={type.key}
-                      className='rounded-2xl border border-zinc-800 bg-zinc-900/40 p-4'
-                    >
-                      <div className='flex items-center gap-2 text-sm font-medium text-zinc-300'>
-                        <Bell className='h-4 w-4 text-lunary-primary-300' />
-                        {type.label}
-                      </div>
-                      <div className='mt-3 grid gap-2 text-sm'>
-                        <div className='flex items-center justify-between text-zinc-400'>
-                          <span>Sent</span>
-                          <span>{type.data.sent.toLocaleString()}</span>
-                        </div>
-                        <div className='flex items-center justify-between text-zinc-400'>
-                          <span>Open rate</span>
-                          <span>
-                            {Number(type.data.open_rate ?? 0).toFixed(1)}%
-                          </span>
-                        </div>
-                        <div className='flex items-center justify-between text-zinc-400'>
-                          <span>CTR</span>
-                          <span>
-                            {Number(type.data.click_through_rate ?? 0).toFixed(
-                              1,
-                            )}
-                            %
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-          </section>
-
-          <section className='grid grid-cols-1 gap-6'>
-            <Card className='border-zinc-800/30 bg-zinc-900/10'>
-              <CardHeader>
-                <CardTitle className='text-base font-medium'>
-                  Page Interaction
-                </CardTitle>
-                <CardDescription className='text-xs text-zinc-400'>
-                  Pageview tracking is limited to the deduplicated Page-View DAU
-                  total.
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className='rounded-xl border border-zinc-800 bg-zinc-950/40 p-4 text-sm text-zinc-300'>
-                  We record lightweight `page_viewed` events for sitewide
-                  activity totals without storing full session data.
-                </div>
-              </CardContent>
-            </Card>
-          </section>
-
-          {discordAnalytics && (
-            <section className='grid gap-6 lg:grid-cols-2'>
-              <Card className='border-zinc-800/30 bg-zinc-900/10'>
-                <CardHeader>
-                  <CardTitle className='text-base font-medium'>
-                    Discord Bot Engagement
-                  </CardTitle>
-                  <CardDescription className='text-xs text-zinc-400'>
-                    Command usage and interactions (last 7 days)
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className='grid gap-4 md:grid-cols-2'>
-                    <MiniStat
-                      label='Total Commands'
-                      value={discordAnalytics.stats?.funnel?.totalCommands ?? 0}
-                      icon={
-                        <Activity className='h-5 w-5 text-lunary-primary-300' />
-                      }
-                    />
-                    <MiniStat
-                      label='Button Clicks'
-                      value={discordAnalytics.stats?.funnel?.buttonClicks ?? 0}
-                      icon={
-                        <Target className='h-5 w-5 text-lunary-success-300' />
-                      }
-                    />
-                    <MiniStat
-                      label='Click-Through Rate'
-                      value={
-                        discordAnalytics.stats?.funnel?.clickThroughRate
-                          ? `${discordAnalytics.stats.funnel.clickThroughRate}%`
-                          : 'N/A'
-                      }
-                      icon={
-                        <Sparkles className='h-5 w-5 text-lunary-secondary-300' />
-                      }
-                    />
-                    <MiniStat
-                      label='Accounts Linked'
-                      value={
-                        discordAnalytics.stats?.funnel?.accountsLinked ?? 0
-                      }
-                      icon={<Bell className='h-5 w-5 text-lunary-accent-300' />}
-                    />
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card className='border-zinc-800/30 bg-zinc-900/10'>
-                <CardHeader>
-                  <CardTitle className='text-base font-medium'>
-                    Top Discord Commands
-                  </CardTitle>
-                  <CardDescription className='text-xs text-zinc-400'>
-                    Most popular bot interactions
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className='space-y-4'>
-                  {(discordAnalytics.stats?.commands ?? [])
-                    .slice(0, 5)
-                    .map((cmd: any) => (
-                      <div key={cmd.command_name} className='space-y-2'>
-                        <div className='flex items-center justify-between text-sm text-zinc-400'>
-                          <span className='capitalize'>
-                            {cmd.command_name || 'Unknown'}
-                          </span>
-                          <span>{cmd.total_uses.toLocaleString()}</span>
-                        </div>
-                        <div className='h-2 w-full rounded-full bg-zinc-800'>
-                          <div
-                            className='h-2 rounded-full bg-gradient-to-r from-lunary-primary-400 to-lunary-highlight-500'
-                            style={{
-                              width: `${
-                                discordAnalytics.stats?.commands?.[0]
-                                  ?.total_uses > 0
-                                  ? (
-                                      (cmd.total_uses /
-                                        discordAnalytics.stats.commands[0]
-                                          .total_uses) *
-                                      100
-                                    ).toFixed(2)
-                                  : 0
-                              }%`,
-                            }}
-                          />
-                        </div>
-                        <div className='flex items-center justify-between text-xs text-zinc-400'>
-                          <span>{cmd.unique_users} users</span>
-                          <span>{cmd.linked_users} linked</span>
                         </div>
                       </div>
                     ))}
-                  {(!discordAnalytics.stats?.commands ||
-                    discordAnalytics.stats.commands.length === 0) && (
-                    <div className='text-sm text-zinc-400'>
-                      No Discord interactions yet
-                    </div>
-                  )}
+                  </div>
                 </CardContent>
               </Card>
-            </section>
-          )}
+              {discordAnalytics && (
+                <div className='space-y-6'>
+                  <Card className='border-zinc-800/30 bg-zinc-900/10'>
+                    <CardHeader>
+                      <CardTitle className='text-base font-medium'>
+                        Discord bot engagement
+                      </CardTitle>
+                      <CardDescription className='text-xs text-zinc-400'>
+                        Command usage (last 7 days).
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent className='grid gap-4 md:grid-cols-2'>
+                      <MiniStat
+                        label='Total commands'
+                        value={
+                          discordAnalytics.stats?.funnel?.totalCommands ?? 0
+                        }
+                        icon={
+                          <Activity className='h-5 w-5 text-lunary-primary-300' />
+                        }
+                      />
+                      <MiniStat
+                        label='Button clicks'
+                        value={
+                          discordAnalytics.stats?.funnel?.buttonClicks ?? 0
+                        }
+                        icon={
+                          <Target className='h-5 w-5 text-lunary-success-300' />
+                        }
+                      />
+                      <MiniStat
+                        label='Click-through rate'
+                        value={
+                          discordAnalytics.stats?.funnel?.clickThroughRate
+                            ? `${discordAnalytics.stats.funnel.clickThroughRate}%`
+                            : 'N/A'
+                        }
+                        icon={
+                          <Sparkles className='h-5 w-5 text-lunary-secondary-300' />
+                        }
+                      />
+                      <MiniStat
+                        label='Accounts linked'
+                        value={
+                          discordAnalytics.stats?.funnel?.accountsLinked ?? 0
+                        }
+                        icon={
+                          <Bell className='h-5 w-5 text-lunary-accent-300' />
+                        }
+                      />
+                    </CardContent>
+                  </Card>
+                  <Card className='border-zinc-800/30 bg-zinc-900/10'>
+                    <CardHeader>
+                      <CardTitle className='text-base font-medium'>
+                        Top Discord commands
+                      </CardTitle>
+                      <CardDescription className='text-xs text-zinc-400'>
+                        Most popular bot interactions
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent className='space-y-4'>
+                      {(discordAnalytics.stats?.commands ?? [])
+                        .slice(0, 5)
+                        .map((cmd: any) => (
+                          <div key={cmd.command_name} className='space-y-2'>
+                            <div className='flex items-center justify-between text-sm text-zinc-400'>
+                              <span className='capitalize'>
+                                {cmd.command_name || 'Unknown'}
+                              </span>
+                              <span>{cmd.total_uses.toLocaleString()}</span>
+                            </div>
+                            <div className='h-2 w-full rounded-full bg-zinc-800'>
+                              <div
+                                className='h-2 rounded-full bg-gradient-to-r from-lunary-primary-400 to-lunary-highlight-500'
+                                style={{
+                                  width: `${
+                                    discordAnalytics.stats?.commands?.[0]
+                                      ?.total_uses > 0
+                                      ? (
+                                          (cmd.total_uses /
+                                            discordAnalytics.stats.commands[0]
+                                              .total_uses) *
+                                          100
+                                        ).toFixed(2)
+                                      : 0
+                                  }%`,
+                                }}
+                              />
+                            </div>
+                            <div className='flex items-center justify-between text-xs text-zinc-400'>
+                              <span>{cmd.unique_users} users</span>
+                              <span>{cmd.linked_users} linked</span>
+                            </div>
+                          </div>
+                        ))}
+                    </CardContent>
+                  </Card>
+                </div>
+              )}
+            </div>
+          </section>
 
-          <section>
+          <section className='space-y-6'>
+            <div>
+              <h2 className='text-sm font-medium text-zinc-200'>
+                Cohorts & Retention
+              </h2>
+              <p className='text-xs text-zinc-500'>
+                View retention by signup cohort. Cohorts younger than 30 days
+                are still maturing.
+              </p>
+            </div>
             <Card className='border-zinc-800/30 bg-zinc-900/10'>
               <CardHeader>
                 <CardTitle className='text-base font-medium'>
-                  SEO & Attribution
+                  Cohort retention analysis
                 </CardTitle>
                 <CardDescription className='text-xs text-zinc-400'>
-                  First-touch attribution tracking for organic and marketing
-                  channels
+                  Retention by signup week/month (first `app_opened`).
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <AttributionMetrics startDate={startDate} endDate={endDate} />
-              </CardContent>
-            </Card>
-          </section>
-
-          {cohorts && cohorts.cohorts && cohorts.cohorts.length > 0 && (
-            <section>
-              <Card className='border-zinc-800/30 bg-zinc-900/10'>
-                <CardHeader>
-                  <CardTitle className='text-base font-medium'>
-                    Cohort Retention Analysis
-                  </CardTitle>
-                  <CardDescription className='text-xs text-zinc-400'>
-                    Retention by signup cohort
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className='mb-4 text-xs text-zinc-400'>
-                    Shows what % of users from each signup week/month returned
-                    after 1, 7, and 30 days
-                  </div>
-                  <div className='overflow-x-auto'>
-                    <table className='w-full text-left text-sm'>
-                      <thead>
-                        <tr className='border-b border-zinc-800'>
-                          <th className='pb-3 text-xs font-medium text-zinc-400'>
-                            Cohort Week
-                          </th>
-                          <th className='pb-3 text-xs font-medium text-zinc-400 text-right'>
-                            Cohort Size
-                          </th>
-                          <th className='pb-3 text-xs font-medium text-zinc-400 text-right'>
-                            Day 1 Retention
-                          </th>
-                          <th className='pb-3 text-xs font-medium text-zinc-400 text-right'>
-                            Day 7 Retention
-                          </th>
-                          <th className='pb-3 text-xs font-medium text-zinc-400 text-right'>
-                            Day 30 Retention
-                          </th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {cohorts.cohorts.map((cohort: any, idx: number) => {
-                          const formatDate = (dateStr: string) => {
-                            const date = new Date(dateStr);
-                            return date.toLocaleDateString('en-US', {
-                              month: 'short',
-                              day: 'numeric',
-                              year: 'numeric',
-                            });
-                          };
-                          return (
-                            <tr
-                              key={idx}
-                              className='border-b border-zinc-800/50 hover:bg-zinc-900/20'
-                            >
-                              <td className='py-3 text-zinc-300 font-medium'>
-                                {formatDate(cohort.cohort)}
-                              </td>
-                              <td className='py-3 text-zinc-300 text-right'>
-                                {cohort.day0.toLocaleString()}
-                              </td>
-                              <td
-                                className={`py-3 text-right font-medium ${
-                                  cohort.day1 > 0
-                                    ? 'text-lunary-success-300'
-                                    : 'text-zinc-500'
-                                }`}
-                              >
-                                {Number(cohort.day1 ?? 0).toFixed(1)}%
-                              </td>
-                              <td
-                                className={`py-3 text-right font-medium ${
-                                  cohort.day7 > 0
-                                    ? 'text-lunary-success-300'
-                                    : 'text-zinc-500'
-                                }`}
-                              >
-                                {Number(cohort.day7 ?? 0).toFixed(1)}%
-                              </td>
-                              <td
-                                className={`py-3 text-right font-medium ${
-                                  cohort.day30 > 0
-                                    ? 'text-lunary-success-300'
-                                    : 'text-zinc-500'
-                                }`}
-                              >
-                                {Number(cohort.day30 ?? 0).toFixed(1)}%
-                              </td>
-                            </tr>
-                          );
-                        })}
-                      </tbody>
-                    </table>
-                  </div>
-                  {cohorts.cohorts.every(
-                    (c: any) => c.day1 === 0 && c.day7 === 0 && c.day30 === 0,
-                  ) && (
-                    <div className='mt-4 rounded-lg border border-zinc-800/30 bg-zinc-900/10 p-3 text-xs text-zinc-400'>
-                      <strong>Note:</strong> Retention metrics require users to
-                      return after their signup date. If all values are 0%, it
-                      means users haven&apos;t returned yet or the time windows
-                      haven&apos;t elapsed.
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-            </section>
-          )}
-
-          {userSegments && (
-            <section>
-              <Card className='border-zinc-800/30 bg-zinc-900/10'>
-                <CardHeader>
-                  <CardTitle className='text-base font-medium'>
-                    Free vs Paid User Engagement
-                  </CardTitle>
-                  <CardDescription className='text-xs text-zinc-400'>
-                    Engagement comparison by user segment (event-based)
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className='mb-4 text-xs text-zinc-500'>
-                    Uses app event activity in the selected date range. This is
-                    a different view than deduplicated app opens (DAU/WAU/MAU).
-                  </div>
-                  <div className='grid gap-6 grid-cols-1 lg:grid-cols-2'>
-                    <div className='rounded-lg border border-zinc-800/30 bg-zinc-900/5 p-4'>
-                      <h4 className='text-sm font-semibold mb-4 text-zinc-300'>
-                        Free Users
-                      </h4>
-                      <div className='space-y-3'>
-                        <MetricsCard
-                          title='Total Users'
-                          value={(
-                            userSegments.free?.totalUsers || 0
-                          ).toLocaleString()}
-                          subtitle='Free tier users'
-                        />
-                        <MetricsCard
-                          title='Active Users (events)'
-                          value={(userSegments.free?.dau || 0).toLocaleString()}
-                          subtitle='Active via app events in range'
-                        />
-                        <MetricsCard
-                          title='Avg Events per User'
-                          value={(
-                            userSegments.free?.engagement?.avgEventsPerUser || 0
-                          ).toFixed(2)}
-                          subtitle='Average engagement level'
-                        />
-                      </div>
-                    </div>
-                    <div className='rounded-lg border border-zinc-800/30 bg-zinc-900/5 p-4'>
-                      <h4 className='text-sm font-semibold mb-4 text-zinc-300'>
-                        Paid Users
-                      </h4>
-                      <div className='space-y-3'>
-                        <MetricsCard
-                          title='Total Users'
-                          value={(
-                            userSegments.paid?.totalUsers || 0
-                          ).toLocaleString()}
-                          subtitle='Active paid subscribers'
-                        />
-                        <MetricsCard
-                          title='Active Users (events)'
-                          value={(userSegments.paid?.dau || 0).toLocaleString()}
-                          subtitle='Active via app events in range'
-                        />
-                        <MetricsCard
-                          title='Avg Events per User'
-                          value={(
-                            userSegments.paid?.engagement?.avgEventsPerUser || 0
-                          ).toFixed(2)}
-                          subtitle='Average engagement level'
-                        />
-                      </div>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </section>
-          )}
-          <section className='space-y-4'>
-            <Card className='border-zinc-800/30 bg-zinc-900/10'>
-              <CardHeader>
-                <CardTitle className='text-base font-medium'>
-                  Glossary & definitions
-                </CardTitle>
-                <CardDescription className='text-xs text-zinc-400'>
-                  Variant definitions tied to canonical `app_opened` analytics.
-                </CardDescription>
-              </CardHeader>
-              <CardContent className='space-y-3 text-sm text-zinc-300'>
-                <div>
-                  <p className='text-[11px] uppercase tracking-wider text-zinc-500'>
-                    Canonical identity
-                  </p>
-                  <p className='text-zinc-200'>
-                    User counts dedupe to{' '}
-                    <code>
-                      user:{'{'}user_id{'}'}
-                    </code>{' '}
-                    when authenticated or{' '}
-                    <code>
-                      anon:{'{'}anonymous_id{'}'}
-                    </code>{' '}
-                    otherwise; analytics_identity_links merges anonymous
-                    sessions into the signed-in identity.
-                  </p>
+                <div className='mb-4 text-xs text-zinc-400'>
+                  Keeps cohort size, Day 1/7/30 retention, and maturity notes in
+                  view.
                 </div>
-                <div>
-                  <p className='text-[11px] uppercase tracking-wider text-zinc-500'>
-                    DAU / WAU / MAU
-                  </p>
-                  <p className='text-zinc-200'>
-                    Computed solely from `app_opened` events inside UTC
-                    day/week/month windows.
-                  </p>
+                <div className='overflow-x-auto'>
+                  <table className='w-full text-left text-sm text-zinc-400'>
+                    <thead>
+                      <tr className='border-b border-zinc-800'>
+                        <th className='pb-3 text-xs font-medium text-zinc-400'>
+                          Cohort Week
+                        </th>
+                        <th className='pb-3 text-xs font-medium text-zinc-400 text-right'>
+                          Cohort Size
+                        </th>
+                        <th className='pb-3 text-xs font-medium text-zinc-400 text-right'>
+                          Day 1
+                        </th>
+                        <th className='pb-3 text-xs font-medium text-zinc-400 text-right'>
+                          Day 7
+                        </th>
+                        <th className='pb-3 text-xs font-medium text-zinc-400 text-right'>
+                          Day 30
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {cohorts?.cohorts?.map((cohort: any, idx: number) => {
+                        const formatDate = (dateStr: string) => {
+                          const date = new Date(dateStr);
+                          return date.toLocaleDateString('en-US', {
+                            month: 'short',
+                            day: 'numeric',
+                            year: 'numeric',
+                          });
+                        };
+                        return (
+                          <tr
+                            key={idx}
+                            className='border-b border-zinc-800/50 hover:bg-zinc-900/20'
+                          >
+                            <td className='py-3 text-zinc-300 font-medium'>
+                              {formatDate(cohort.cohort)}
+                            </td>
+                            <td className='py-3 text-zinc-300 text-right'>
+                              {cohort.day0.toLocaleString()}
+                            </td>
+                            <td className='py-3 text-right font-medium'>
+                              {Number(cohort.day1 ?? 0).toFixed(1)}%
+                            </td>
+                            <td className='py-3 text-right font-medium'>
+                              {Number(cohort.day7 ?? 0).toFixed(1)}%
+                            </td>
+                            <td className='py-3 text-right font-medium'>
+                              {Number(cohort.day30 ?? 0).toFixed(1)}%
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
                 </div>
-                <div>
-                  <p className='text-[11px] uppercase tracking-wider text-zinc-500'>
-                    Returning DAU (D1)
-                  </p>
-                  <p className='text-zinc-200'>
-                    Users active on the selected end day who were also active on
-                    the prior UTC day (deduped via canonical identity).
-                  </p>
-                </div>
-                <div>
-                  <p className='text-[11px] uppercase tracking-wider text-zinc-500'>
-                    Returning Users (range)
-                  </p>
-                  <p className='text-zinc-200'>
-                    Canonical identities with 2+ distinct `app_opened` days in
-                    the selected range.
-                  </p>
-                </div>
-                <div>
-                  <p className='text-[11px] uppercase tracking-wider text-zinc-500'>
-                    WAU / MAU overlap
-                  </p>
-                  <p className='text-zinc-200'>
-                    Overlap between the most recent 7d/30d canonical windows and
-                    their preceding windows (deduped identities).
-                  </p>
-                </div>
-                <div>
-                  <p className='text-[11px] uppercase tracking-wider text-zinc-500'>
-                    Cohort retention
-                  </p>
-                  <p className='text-zinc-200'>
-                    Cohorts are generated from the first-ever canonical
-                    `app_opened`, with Day+1/Day+7/Day+30 presence reported.
-                  </p>
-                </div>
-                <div>
-                  <p className='text-[11px] uppercase tracking-wider text-zinc-500'>
-                    Audit flag
-                  </p>
-                  <p className='text-zinc-200'>
-                    Append `?debug=1` to the engagement overview fetch to reveal
-                    raw `app_opened` counts, missing identities, identity links,
-                    and anomaly flags for reconciliation.
-                  </p>
-                </div>
+                <p className='mt-3 text-xs text-zinc-500'>
+                  Immature cohorts (less than or equal to 30 days old) are still
+                  filling out, so treat their Day 30 rows as provisional.
+                </p>
               </CardContent>
             </Card>
           </section>
@@ -3932,7 +4104,7 @@ function MiniStat({
   icon: ReactNode;
 }) {
   return (
-    <div className='rounded-xl border border-zinc-800/20 bg-zinc-900/5 p-3'>
+    <div className='rounded-2xl border border-zinc-800/60 bg-zinc-950/40 p-3 shadow-sm shadow-black/30'>
       <div className='flex items-center gap-1.5 text-xs font-medium text-zinc-400'>
         {icon}
         {label}

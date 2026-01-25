@@ -11,6 +11,7 @@ import { getContextualHub } from '@/lib/grimoire/getContextualNudge';
 export type ConversionEvent =
   | 'signup'
   | 'app_opened'
+  | 'product_opened'
   | 'page_viewed'
   | 'cta_clicked'
   | 'birth_data_submitted'
@@ -71,6 +72,7 @@ let cachedAuthContext: AuthContext | null = null;
 let cachedAuthContextAt = 0;
 const ANON_ID_STORAGE_KEY = 'lunary_anon_id';
 const APP_OPENED_GUARD_KEY = 'lunary_event_guard';
+const PRODUCT_OPENED_GUARD_KEY = 'lunary_product_opened_guard';
 const DAILY_DASHBOARD_GUARD_PREFIX = 'lunary_daily_dashboard_viewed_guard';
 const APP_OPENED_GUARD_TTL_MS = 1000 * 60 * 30; // 30 minutes
 
@@ -89,6 +91,29 @@ const shouldTrackAppOpened = () => {
     payload.appOpened = now;
     window.sessionStorage.setItem(
       APP_OPENED_GUARD_KEY,
+      JSON.stringify(payload),
+    );
+  } catch {
+    // Fail open to avoid blocking tracking when storage is unavailable.
+  }
+  return true;
+};
+
+const shouldTrackProductOpened = () => {
+  if (typeof window === 'undefined') return true;
+  try {
+    const payload = JSON.parse(
+      window.sessionStorage.getItem(PRODUCT_OPENED_GUARD_KEY) || '{}',
+    );
+    const lastRecorded =
+      typeof payload?.productOpened === 'number' ? payload.productOpened : 0;
+    const now = Date.now();
+    if (lastRecorded && now - lastRecorded < APP_OPENED_GUARD_TTL_MS) {
+      return false;
+    }
+    payload.productOpened = now;
+    window.sessionStorage.setItem(
+      PRODUCT_OPENED_GUARD_KEY,
       JSON.stringify(payload),
     );
   } catch {
@@ -459,6 +484,11 @@ export const conversionTracking = {
   appOpened: (userId?: string, email?: string) => {
     if (!shouldTrackAppOpened()) return;
     return trackConversion('app_opened', { userId, userEmail: email });
+  },
+
+  productOpened: (userId?: string, email?: string) => {
+    if (!shouldTrackProductOpened()) return;
+    return trackConversion('product_opened', { userId, userEmail: email });
   },
 
   pageViewed: (pagePath?: string) =>

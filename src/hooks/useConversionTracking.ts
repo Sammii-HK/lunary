@@ -38,9 +38,6 @@ export function useConversionTracking() {
       case 'signup':
         conversionTracking.signup(eventData.userId, eventData.userEmail);
         break;
-      case 'app_opened':
-        conversionTracking.appOpened(eventData.userId, eventData.userEmail);
-        break;
       case 'trial_started':
         conversionTracking.trialStarted(
           eventData.userId,

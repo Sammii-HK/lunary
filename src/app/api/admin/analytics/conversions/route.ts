@@ -208,6 +208,7 @@ export async function GET(request: NextRequest) {
         AND updated_at BETWEEN ${formatTimestamp(range.start)} AND ${formatTimestamp(
           range.end,
         )}
+        AND (user_email IS NULL OR (user_email NOT LIKE ${TEST_EMAIL_PATTERN} AND user_email != ${TEST_EMAIL_EXACT}))
     `;
 
     const paidUsersResult = await sql`
@@ -217,6 +218,7 @@ export async function GET(request: NextRequest) {
         AND updated_at BETWEEN ${formatTimestamp(range.start)} AND ${formatTimestamp(
           range.end,
         )}
+        AND (user_email IS NULL OR (user_email NOT LIKE ${TEST_EMAIL_PATTERN} AND user_email != ${TEST_EMAIL_EXACT}))
     `;
 
     const freeUsers = freeUsersCount;
@@ -226,9 +228,7 @@ export async function GET(request: NextRequest) {
     const trialConversions = Number(trialConversionsResult.rows[0]?.count || 0);
 
     const conversionRate =
-      freeUsers > 0
-        ? Number(((totalConversions / freeUsers) * 100).toFixed(2))
-        : 0;
+      freeUsers > 0 ? Number(((paidUsers / freeUsers) * 100).toFixed(2)) : 0;
 
     const trialConversionRate =
       trialUsers > 0
