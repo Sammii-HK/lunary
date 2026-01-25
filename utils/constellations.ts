@@ -1,5 +1,16 @@
 // export type Constellation
 
+export interface Constellation {
+  name: string;
+  element: string;
+  quality: string;
+  rulingPlanet: string;
+  symbol: string;
+  keywords: string[];
+  information: string;
+  crystals: string[];
+}
+
 export const constellations = {
   aries: {
     name: 'Aries',
