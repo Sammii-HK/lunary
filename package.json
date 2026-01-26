@@ -23,6 +23,7 @@
     "prisma:studio": "prisma studio",
     "generate-moon-packs": "tsx scripts/generate-moon-packs.ts",
     "generate-moon-packs:dry": "tsx scripts/generate-moon-packs.ts --dry-run",
+    "generate-cta-examples": "tsx scripts/generate-cta-examples.ts",
     "generate-moon-packs:monthly": "tsx scripts/generate-moon-packs.ts --type=monthly",
     "generate-moon-packs:quarterly": "tsx scripts/generate-moon-packs.ts --type=quarterly",
     "generate-moon-packs:yearly": "tsx scripts/generate-moon-packs.ts --type=yearly",
@@ -118,6 +119,7 @@
     "cron:daily:force": "curl -sS -H \"Authorization: Bearer $CRON_SECRET\" \"http://localhost:3000/api/cron/daily-posts?force=true\"",
     "cron:daily:date": "DATE=${DATE:-$(date -u +%F)}; curl -sS -H \"Authorization: Bearer $CRON_SECRET\" \"http://localhost:3000/api/cron/daily-posts?date=$DATE\"",
     "cron:daily:date:force": "DATE=${DATE:-$(date -u +%F)}; curl -sS -H \"Authorization: Bearer $CRON_SECRET\" \"http://localhost:3000/api/cron/daily-posts?force=true&date=$DATE\"",
+    "cron:cta-examples": "curl -sS -H \"Authorization: Bearer $CRON_SECRET\" \"http://localhost:3000/api/cron/generate-cta-examples\"",
     "oauth:google": "tsx scripts/regenerate-google-token.ts"
   },
   "lint-staged": {

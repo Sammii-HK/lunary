@@ -1,0 +1,113 @@
+{
+  "generatedAt": "2026-01-26T16:42:29.859Z",
+  "generatedForDate": "2026-01-26",
+  "reference": {
+    "birthDate": "1990-01-15",
+    "birthTime": "12:00 PM",
+    "birthLocation": "London, UK"
+  },
+  "horoscopes": {
+    "examples": [
+      {
+        "type": "transit_to_natal",
+        "text": "Jupiter 17°58' Cancer ⚹ your natal Moon 17°30' Virgo",
+        "interpretation": "opportunity for connection"
+      },
+      {
+        "type": "house_activation",
+        "text": "Mars activating your 10th house",
+        "interpretation": "career, public life, legacy"
+      },
+      {
+        "type": "personal_day",
+        "text": "Personal Day 8",
+        "interpretation": "power, success, material focus"
+      }
+    ]
+  },
+  "planets": {
+    "examples": [
+      {
+        "type": "natal_position",
+        "text": "Mercury 11°20' Capricorn",
+        "interpretation": "communication style and mental patterns"
+      },
+      {
+        "type": "current_transit",
+        "text": "Mars ☌ your Venus",
+        "interpretation": "dynamic action and initiative"
+      }
+    ]
+  },
+  "houses": {
+    "examples": [
+      {
+        "type": "house_activation",
+        "text": "Your 1st house activity",
+        "interpretation": "identity, appearance, new beginnings"
+      },
+      {
+        "type": "multi_planet_house",
+        "text": "Your 10th house focus",
+        "interpretation": "career, public life, legacy"
+      }
+    ]
+  },
+  "transits": {
+    "examples": [
+      {
+        "type": "major_transit",
+        "text": "Jupiter sextile Moon",
+        "interpretation": "0.5° orb, exact today"
+      },
+      {
+        "type": "transit_house",
+        "text": "Venus through your 5th house",
+        "interpretation": "creativity, romance, self-expression"
+      },
+      {
+        "type": "multiple_aspects",
+        "text": "13 aspects forming to your natal planets",
+        "interpretation": "layered cosmic influences today"
+      }
+    ]
+  },
+  "moon": {
+    "examples": [
+      {
+        "type": "moon_phase",
+        "text": "First Quarter",
+        "interpretation": "overcoming challenges, decisive action"
+      },
+      {
+        "type": "moon_position",
+        "text": "Moon 13°13' Taurus in your 1st house",
+        "interpretation": "identity, appearance, new beginnings"
+      },
+      {
+        "type": "moon_aspect",
+        "text": "Moon △ your natal Mercury",
+        "interpretation": "emotional comfort and support"
+      }
+    ]
+  },
+  "aspects": {
+    "examples": [
+      {
+        "type": "aspect",
+        "text": "Jupiter ⚹ Moon",
+        "interpretation": "sextile, 0.5° orb"
+      },
+      {
+        "type": "aspect",
+        "text": "Jupiter ☍ Saturn",
+        "interpretation": "opposition, 0.7° orb"
+      },
+      {
+        "type": "aspect",
+        "text": "Moon △ Mercury",
+        "interpretation": "trine, 1.9° orb"
+      }
+    ]
+  }
+}

@@ -60,7 +60,7 @@
     "planets": [
       {
         "headline": "Find this planet in your chart",
-        "subline": "Sign in to see its house, aspects, and what is activating it right now.",
+        "subline": "Sign in to see its house, aspects, and what is activating it right now.\n\nExample: {EXAMPLE}",
         "buttonLabel": "See it in my chart",
         "href": "/auth?signup=true",
         "action": "authOrLink"
@@ -70,7 +70,7 @@
     "houses": [
       {
         "headline": "See what this house means in your life",
-        "subline": "Sign in to map this house to your chart, planets, and current transits.",
+        "subline": "Sign in to map this house to your chart, planets, and current transits.\n\nExample: {EXAMPLE}",
         "buttonLabel": "Check my houses",
         "href": "/auth?signup=true",
         "action": "authOrLink"
@@ -80,7 +80,7 @@
     "aspects": [
       {
         "headline": "Understand the full pattern",
-        "subline": "Sign in to see how this aspect behaves inside your complete chart.",
+        "subline": "Sign in to see how this aspect behaves inside your complete chart.\n\nExample: {EXAMPLE}",
         "buttonLabel": "View my aspects",
         "href": "/auth?signup=true",
         "action": "authOrLink"
@@ -90,7 +90,7 @@
     "transits": [
       {
         "headline": "See what this transit is touching for you",
-        "subline": "Sign in to map it to your natal chart and the exact life areas it activates.",
+        "subline": "Sign in to map it to your natal chart and the exact life areas it activates.\n\nExample: {EXAMPLE}",
         "buttonLabel": "Check my transits",
         "href": "/auth?signup=true",
         "action": "authOrLink"
@@ -99,9 +99,9 @@
 
     "horoscopes": [
       {
-        "headline": "Go beyond sun sign",
-        "subline": "Sign in to read this through your full birth chart and today’s transits.",
-        "buttonLabel": "Get my personalised horoscope",
+        "headline": "This is your sun sign forecast",
+        "subline": "With your birth chart, you'd see:\n\n✓ Today's transits to YOUR natal planets\n✓ Which houses are activated\n✓ Your Personal Day number\n✓ Real aspects forming to YOUR chart\n\nExample: {EXAMPLE}\n\nTakes 2 minutes.",
+        "buttonLabel": "Create my free birth chart",
         "href": "/auth?signup=true",
         "action": "authOrLink"
       }
@@ -110,7 +110,7 @@
     "moon": [
       {
         "headline": "Feel this phase in your chart",
-        "subline": "Sign in to see how the Moon is interacting with your natal placements right now.",
+        "subline": "Sign in to see how the Moon is interacting with your natal placements right now.\n\nExample: {EXAMPLE}",
         "buttonLabel": "Personalise the Moon",
         "href": "/auth?signup=true",
         "action": "authOrLink"
@@ -220,7 +220,7 @@
     "cosmicTiming": [
       {
         "headline": "Make timing usable",
-        "subline": "Sign in to see how real planetary movement interacts with your chart right now.",
+        "subline": "Sign in to see how real planetary movement interacts with your chart right now.\n\nExample: {EXAMPLE}",
         "buttonLabel": "See my timing",
         "href": "/auth?signup=true",
         "action": "authOrLink"

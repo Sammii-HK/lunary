@@ -50,6 +50,10 @@
     {
       "path": "/api/cron/yearly-tarot-analysis",
       "schedule": "15 0 1 1 *"
+    },
+    {
+      "path": "/api/cron/generate-cta-examples",
+      "schedule": "0 6 20 * *"
     }
   ]
 }
