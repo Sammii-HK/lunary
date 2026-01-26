@@ -3,6 +3,7 @@ import { sql } from '@vercel/postgres';
 import { put } from '@vercel/blob';
 import { composeVideo } from '@/lib/video/compose-video';
 import { generateVoiceover } from '@/lib/tts';
+import { TTS_PRESETS } from '@/lib/tts/presets';
 import {
   generateAndSaveWeeklyScripts,
   getVideoScripts,
@@ -126,10 +127,11 @@ export async function POST(request: NextRequest) {
         formattedThemeName,
       )}&subtitle=${encodeURIComponent('Weekly Deep Dive')}&format=landscape`;
 
+    const ttsPreset = TTS_PRESETS.long;
     const audioBuffer = await generateVoiceover(script.fullScript, {
-      voiceName: 'alloy',
-      model: 'gpt-4o-mini-tts',
-      speed: 1.0,
+      voiceName: ttsPreset.voiceName,
+      model: ttsPreset.model,
+      speed: ttsPreset.speed,
     });
 
     const videoBuffer = await composeVideo({

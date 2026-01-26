@@ -427,12 +427,12 @@ async function generateThematicWeeklyPosts(
         dayContent.hashtags,
         platform,
         {
-          postType: 'educational',
+          postType: 'educational_intro',
           topicTitle: day.facet.title,
         },
       ),
       platform,
-      postType: 'educational' as const,
+      postType: 'educational_intro' as const,
       ...base,
     }));
     const shortFormPosts = shortFormPlatforms.map((platform) => ({
@@ -441,12 +441,12 @@ async function generateThematicWeeklyPosts(
         platform,
         dayContent.hashtags,
         {
-          postType: 'educational',
+          postType: 'educational_intro',
           topicTitle: day.facet.title,
         },
       ),
       platform,
-      postType: 'educational' as const,
+      postType: 'educational_intro' as const,
       ...base,
     }));
     return [...longFormPosts, ...shortFormPosts];
@@ -1036,7 +1036,7 @@ async function generateThematicWeeklyPosts(
             await import('@/lib/social/educational-images');
           let partLabel: string | undefined;
           if (
-            normalizedPostType === 'educational' &&
+            normalizedPostType.startsWith('educational') &&
             post.topic !== 'closing ritual'
           ) {
             const totalParts =
@@ -1986,7 +1986,7 @@ export async function POST(request: NextRequest) {
       let postContent: string | null = null;
 
       // For educational posts (80%+ of content), use REAL Grimoire data
-      if (postPlan.postType === 'educational' || Math.random() < 0.8) {
+      if (postPlan.postType.startsWith('educational') || Math.random() < 0.8) {
         try {
           const eduPost = await genEduPost(postPlan.platform, 'mixed');
           if (eduPost) {
@@ -2189,7 +2189,7 @@ Return JSON: {"posts": ["Post content"]}`;
             allGeneratedPosts.push({
               content: sabbatPost.content,
               platform,
-              postType: 'educational',
+              postType: 'educational_intro',
               topic: sabbat.name,
               day: [
                 'Sunday',
@@ -2236,7 +2236,7 @@ Return JSON: {"posts": ["Post content"]}`;
       if (platformsNeedingImages.includes(post.platform)) {
         const platformFormat = getPlatformImageFormat(post.platform);
         // For educational posts, use Grimoire educational images
-        if (post.postType === 'educational') {
+        if (post.postType.startsWith('educational')) {
           try {
             const educationalPost = await generateEducationalPost(
               post.platform,

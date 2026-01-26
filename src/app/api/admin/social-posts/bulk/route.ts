@@ -48,7 +48,7 @@ export async function POST(request: NextRequest) {
     if (action === 'clear_all') {
       const result = await sql`
         DELETE FROM social_posts
-        WHERE status = 'pending'
+        WHERE status IN ('pending', 'approved')
         RETURNING id
       `;
       await sql`

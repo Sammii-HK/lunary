@@ -3,6 +3,7 @@ import { sql } from '@vercel/postgres';
 import { head, put } from '@vercel/blob';
 import { composeVideo } from '@/lib/video/compose-video';
 import { generateVoiceover } from '@/lib/tts';
+import { TTS_PRESETS } from '@/lib/tts/presets';
 import { buildThematicVideoComposition } from '@/lib/video/thematic-video';
 import { buildVideoCaption } from '@/lib/social/video-captions';
 import { categoryThemes, generateHashtags } from '@/lib/social/weekly-themes';
@@ -144,6 +145,7 @@ export async function POST(request: NextRequest) {
             ON sp.topic = vs.facet_title
            AND sp.scheduled_date::date = vs.scheduled_date
            AND sp.week_theme = vs.theme_name
+           AND sp.status IN ('pending', 'approved')
           WHERE vs.id = vj.script_id
         )
     `;
@@ -283,14 +285,12 @@ export async function POST(request: NextRequest) {
             throw new Error('Script text missing');
           }
 
-          const voiceName = 'alloy';
-          const model = 'gpt-4o-mini-tts';
-          const speed = 1.0;
+          const ttsPreset = TTS_PRESETS.medium;
           const audioCacheKey = getAudioCacheKey(
             script.full_script,
-            voiceName,
-            model,
-            speed,
+            ttsPreset.voiceName,
+            ttsPreset.model,
+            ttsPreset.speed,
           );
 
           let audioBuffer: ArrayBuffer | null = null;
@@ -313,9 +313,9 @@ export async function POST(request: NextRequest) {
 
           if (!audioBuffer) {
             audioBuffer = await generateVoiceover(script.full_script, {
-              voiceName,
-              model,
-              speed,
+              voiceName: ttsPreset.voiceName,
+              model: ttsPreset.model,
+              speed: ttsPreset.speed,
             });
             try {
               await put(audioCacheKey, audioBuffer, {
