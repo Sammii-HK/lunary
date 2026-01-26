@@ -1595,7 +1595,7 @@ export function formatLongFormForPlatform(
   // Add hashtags if platform supports them
   if (config.useHashtags && config.count > 0) {
     const topicTitle = options?.topicTitle || '';
-    const postType = options?.postType || 'educational';
+    const postType = options?.postType || 'educational_intro';
     const tags = selectHashtagsForPostType({
       topicTitle,
       postType,
@@ -1630,7 +1630,7 @@ export function formatShortFormForPlatform(
   // Add hashtags if platform supports them and hashtags are provided
   if (config.useHashtags && config.count > 0 && hashtags) {
     const topicTitle = options?.topicTitle || '';
-    const postType = options?.postType || 'educational';
+    const postType = options?.postType || 'educational_intro';
     const tags = selectHashtagsForPostType({
       topicTitle,
       postType,
@@ -1697,7 +1697,6 @@ export interface ThematicPost {
   content: string;
   platform: string;
   postType:
-    | 'educational'
     | 'educational_intro'
     | 'educational_deep'
     | 'educational_deep_1'
@@ -1869,7 +1868,7 @@ export async function generateThematicPostsForWeek(
         dayContent.hashtags,
         platform,
         {
-          postType: 'educational',
+          postType: 'educational_intro',
           topicTitle: dayContent.facet.title,
         },
       );
@@ -1883,7 +1882,7 @@ export async function generateThematicPostsForWeek(
       posts.push({
         content: formattedContent,
         platform,
-        postType: 'educational',
+        postType: 'educational_intro',
         topic: dayContent.facet.title,
         scheduledDate: dayContent.date,
         hashtags: `${dayContent.hashtags.domain} ${dayContent.hashtags.topic}`,
@@ -2199,7 +2198,7 @@ export async function generateThematicPostsForWeek(
         platform,
         dayContent.hashtags,
         {
-          postType: override?.postType ?? 'educational',
+          postType: override?.postType ?? 'educational_intro',
           topicTitle: dayContent.facet.title,
         },
       );
@@ -2210,7 +2209,7 @@ export async function generateThematicPostsForWeek(
       posts.push({
         content: formattedContent,
         platform,
-        postType: override?.postType ?? 'educational',
+        postType: override?.postType ?? 'educational_intro',
         topic: dayContent.facet.title,
         scheduledDate: dayContent.date,
         hashtags: `${dayContent.hashtags.domain} ${dayContent.hashtags.topic}`,
