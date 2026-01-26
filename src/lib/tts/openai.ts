@@ -1,5 +1,6 @@
 import OpenAI from 'openai';
 import type { TTSProvider, TTSOptions, TTSVoice } from './types';
+import { TONE_INSTRUCTIONS } from './presets';
 
 export class OpenAITTSProvider implements TTSProvider {
   name = 'openai';
@@ -91,35 +92,21 @@ export class OpenAITTSProvider implements TTSProvider {
     text: string,
     options: TTSOptions = {},
   ): Promise<ArrayBuffer> {
-    // Lock in the Lunary house voice (alloy) with neutral delivery.
-    const requestedVoice = options.voiceName || 'alloy';
-    if (requestedVoice !== 'alloy') {
-      console.warn(
-        `Voice '${requestedVoice}' requested, but only 'alloy' is allowed. Using 'alloy' instead.`,
-      );
-    }
+    // Use provided voice or default to 'shimmer' (warm, natural for spiritual content)
+    const voice = options.voiceName || 'shimmer';
+    // Use provided model or default to 'tts-1-hd' for higher quality
+    const model = options.model || 'tts-1-hd';
+    // Use provided speed or default to 1.0
+    const speed = options.speed || 1.0;
+    // Get tone instruction - use default for general content
+    const toneInstruction = TONE_INSTRUCTIONS.default;
 
-    const voice = 'alloy';
-    const model = 'gpt-4o-mini-tts';
-    const toneInstruction =
-      'Calm, steady, neutral-warm. Avoid emotional emphasis.';
-
-    if (options.model && options.model !== model) {
-      console.warn(
-        `Model '${options.model}' requested, but only '${model}' is allowed. Using '${model}' instead.`,
-      );
-    }
-
-    if (options.speed && options.speed !== 1.0) {
-      console.warn(
-        `Speed '${options.speed}' requested, but default speed is locked. Using default instead.`,
-      );
-    }
+    console.log(
+      `🎙️ Generating voiceover with model: ${model}, voice: ${voice}, speed: ${speed}`,
+    );
 
     // Preprocess text to help with pronunciation
     const processedText = this.preprocessTextForTTS(text);
-
-    console.log(`🎙️ Generating voiceover with voice: ${voice}`);
 
     // Check if text exceeds character limit
     if (processedText.length > 4096) {
@@ -140,6 +127,7 @@ export class OpenAITTSProvider implements TTSProvider {
           voice: voice as any,
           input: chunks[i],
           instructions: toneInstruction,
+          speed,
         });
         audioChunks.push(await chunkAudio.arrayBuffer());
       }
@@ -169,6 +157,7 @@ export class OpenAITTSProvider implements TTSProvider {
       voice: voice as any,
       input: processedText,
       instructions: toneInstruction,
+      speed,
     });
 
     return await response.arrayBuffer();
