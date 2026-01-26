@@ -105,11 +105,12 @@ export function getThematicImageUrl(
   const rawTitleNorm = normalizeForComparison(title);
 
   // Only include symbol if it's different from title AND slug (avoids duplication like "111" symbol + "111" title)
+  // Use includes() check because title might be "111 Angel Number" while symbol is just "111"
   const symbol =
     rawSymbol &&
-    symbolNorm !== titleNorm &&
-    symbolNorm !== slugNorm &&
-    symbolNorm !== rawTitleNorm
+    !titleNorm.includes(symbolNorm) &&
+    !slugNorm.includes(symbolNorm) &&
+    !rawTitleNorm.includes(symbolNorm)
       ? rawSymbol
       : null;
 

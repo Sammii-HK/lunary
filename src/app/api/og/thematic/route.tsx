@@ -249,8 +249,10 @@ export async function GET(request: NextRequest): Promise<Response> {
     const slugNormalized = normalizeForComparison(slug);
 
     // First check if URL symbol param matches title - if so, ignore it
+    // Use includes() to handle cases like title "111 Angel Number" with symbol "111"
+    const symbolNormalized = symbol ? normalizeForComparison(symbol) : '';
     const symbolFromUrl =
-      symbol && normalizeForComparison(symbol) !== titleNormalized
+      symbol && symbolNormalized && !titleNormalized.includes(symbolNormalized)
         ? symbol
         : null;
 
@@ -261,11 +263,13 @@ export async function GET(request: NextRequest): Promise<Response> {
         getSymbolForContent(category, slug));
 
     // Double-check: if symbol still matches title or slug after all lookups, hide it
+    // Use includes() to handle cases like title "111 Angel Number" with symbol "111"
     const rawSymbolNorm = rawSymbol ? normalizeForComparison(rawSymbol) : '';
     const displaySymbol =
       rawSymbol &&
-      rawSymbolNorm !== titleNormalized &&
-      rawSymbolNorm !== slugNormalized
+      rawSymbolNorm &&
+      !titleNormalized.includes(rawSymbolNorm) &&
+      !slugNormalized.includes(rawSymbolNorm)
         ? rawSymbol
         : null;
 
