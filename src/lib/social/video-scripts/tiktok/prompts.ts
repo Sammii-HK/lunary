@@ -157,10 +157,10 @@ SCRIPT BODY (6-10 lines after hook):
 - Each line = one complete sentence
 - Each sentence must be SPECIFIC to ${facet.title}
 - TEST: Would this sentence work for a different ${contentType.replace('_', ' ')}? If yes, rewrite it.
-- Include ONE recognition cue (real-world sign)
-- Include ONE contrast/clarification
-- Include ONE practical line near the end (Try this: or So what:) tied to a time window
-- Final line: observational, NOT inspirational
+- Include ONE recognition cue (real-world sign someone would notice)
+- Include ONE contrast/clarification (what it's NOT or how it differs)
+- Near the end, include a practical observation - something the viewer can notice or try this week
+- Final line: observational and grounded, NOT inspirational or motivational
 
 KEY PHRASES TO CONSIDER USING:
 ${voiceConfig.keyPhrases.map((p) => `- "${p}"`).join('\n')}
@@ -171,10 +171,14 @@ ${dataContext ? `\nGrimoire Data (reference only):\n${dataContext}` : ''}
 Return strict JSON only:
 {
   "video": {
-    "hook": "Spoken hook line specific to ${facet.title}",
+    "hook": "Single hook sentence about ${facet.title}",
     "scriptBody": [
-      "Line 1 - specific to ${facet.title}",
-      "Line 2 - specific to ${facet.title}"
+      "Observation specific to ${facet.title}",
+      "Recognition cue - when/where someone notices this",
+      "Contrast or clarification",
+      "Deeper insight",
+      "Practical moment to notice this week",
+      "Grounded closing observation"
     ]
   }
 }`;

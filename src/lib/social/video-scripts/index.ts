@@ -96,4 +96,5 @@ export { generateYouTubeScript } from './youtube';
 export {
   generateWeeklyVideoScripts,
   generateAndSaveWeeklyScripts,
+  generateSecondaryScriptsOnly,
 } from './generation';

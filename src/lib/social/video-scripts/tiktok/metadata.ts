@@ -45,5 +45,6 @@ export function generateCoverImageUrl(
   const title = encodeURIComponent(capitalizeThematicTitle(facet.title));
 
   // cover=tiktok triggers larger text sizes for TikTok thumbnail legibility
-  return `${baseUrl}/api/og/thematic?category=${theme.category}&slug=${slug}&title=${title}&subtitle=${subtitle}&format=story&cover=tiktok`;
+  // v=2 for cache busting
+  return `${baseUrl}/api/og/thematic?category=${theme.category}&slug=${slug}&title=${title}&subtitle=${subtitle}&format=story&cover=tiktok&v=2`;
 }
