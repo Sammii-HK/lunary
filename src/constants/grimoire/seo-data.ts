@@ -353,6 +353,42 @@ export const astrologicalAspects = {
       'Mercury sextile Jupiter: Optimistic communication, learning opportunities',
     ],
   },
+  quincunx: {
+    name: 'Quincunx',
+    symbol: '⚻',
+    degrees: 150,
+    orb: 3,
+    type: 'minor',
+    nature: 'challenging',
+    description:
+      'A Quincunx (also called Inconjunct) occurs when planets are 150 degrees apart. This creates a subtle but persistent friction between energies that have no natural affinity.',
+    meaning:
+      'Planets struggle to find common ground, requiring constant adjustment and adaptation. This aspect often manifests as health or lifestyle adjustments.',
+    keywords: ['Adjustment', 'Discomfort', 'Integration', 'Fine-tuning'],
+    examples: [
+      'Sun quincunx Moon: Ongoing tension between identity and emotional needs',
+      'Venus quincunx Saturn: Adjusting expectations in relationships and values',
+      'Mars quincunx Neptune: Difficulty aligning action with intuition',
+    ],
+  },
+  semisextile: {
+    name: 'Semi-Sextile',
+    symbol: '⚺',
+    degrees: 30,
+    orb: 2,
+    type: 'minor',
+    nature: 'harmonious',
+    description:
+      'A Semi-Sextile occurs when planets are 30 degrees apart, connecting adjacent signs. This creates a minor but supportive connection that encourages gradual growth.',
+    meaning:
+      'Planets offer subtle support through their proximity, creating opportunities for incremental development and learning from contrast.',
+    keywords: ['Growth', 'Potential', 'Subtle Opportunity', 'Adjacent Energy'],
+    examples: [
+      'Sun semi-sextile Moon: Subtle emotional awareness supporting identity',
+      'Venus semi-sextile Mars: Gentle harmony between love and desire',
+      'Mercury semi-sextile Venus: Natural connection between thought and aesthetics',
+    ],
+  },
 };
 
 // Retrogrades overview

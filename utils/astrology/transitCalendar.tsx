@@ -185,7 +185,7 @@ const getRetrogradeEvents = (date: dayjs.Dayjs): TransitEvent[] => {
   const events: TransitEvent[] = [];
 
   // Simplified retrograde calculation - mock implementation
-  const dayOfYear = date.dayOfYear();
+  const dayOfYear = date.diff(date.startOf('year'), 'day') + 1;
 
   // Mercury retrograde roughly 3-4 times per year
   if (dayOfYear % 88 === 0) {
