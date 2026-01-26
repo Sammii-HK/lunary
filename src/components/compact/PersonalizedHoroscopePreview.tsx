@@ -208,7 +208,7 @@ export const PersonalizedHoroscopePreview = () => {
           </div>
         ) : (
           <>
-            <p className='text-sm text-zinc-300 leading-snug line-clamp-3'>
+            <p className='text-sm text-zinc-300 leading-snug'>
               {focusText || horoscope?.dailyGuidance}
             </p>
 
