@@ -51,7 +51,21 @@ export {
   isHookLikeLine,
   hasRepeatedAdjacentBigrams,
   findSoWhatLineIndex,
+  hasGenericFillerPattern,
+  hasTemplatePattern,
+  countGenericLines,
 } from './validation';
+
+// Content-type specific voices and structures
+export {
+  getContentTypeFromCategory,
+  getVoiceConfig,
+  getRandomScriptStructure,
+  getAllScriptStructures,
+  CONTENT_TYPE_VOICES,
+  SCRIPT_STRUCTURES,
+  type ContentTypeKey,
+} from './content-type-voices';
 
 // Hooks
 export {

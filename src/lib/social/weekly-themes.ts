@@ -122,8 +122,16 @@ export function getThemeForDate(
     theme.facetPool && theme.facetPool.length > 0
       ? theme.facetPool
       : theme.facets;
+
+  // Calculate week's starting position in facet pool
+  // Each week gets a contiguous block of 7 unique facets
+  // facetOffset rotates through the pool week-by-week
+  const weekBlockStart = (facetOffset * 7) % facets.length;
   const resolvedIndex =
-    facets.length > 0 ? (facetIndex + facetOffset) % facets.length : facetIndex;
+    facets.length > 0
+      ? (weekBlockStart + facetIndex) % facets.length
+      : facetIndex;
+
   return {
     theme,
     facet: facets[resolvedIndex] || theme.facets[facetIndex],

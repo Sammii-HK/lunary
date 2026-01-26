@@ -30,6 +30,23 @@ import {
 } from './social-copy-generator';
 import { normalizeGeneratedContent } from './content-normalizer';
 
+// Shared utilities
+import { sentenceSafe, normalise, matchesTopic } from './shared/text/normalize';
+import {
+  splitSentencesPreservingDecimals,
+  hasTruncationArtifact,
+} from './shared/text/truncation';
+import { normaliseUkSpelling } from './shared/text/spelling';
+import { formatList } from './shared/text/formatting';
+import { PLATFORM_HASHTAG_CONFIG } from './shared/constants/platform-hashtag-config';
+import {
+  PERSONA_VOCAB,
+  PERSONA_BODY_TEMPLATES,
+  QUESTION_POOL,
+  CLOSING_STATEMENTS,
+} from './shared/constants/persona-templates';
+import { isAllowedSlugForCategory } from './shared/constants/category-slugs';
+
 // Import data sources
 import zodiacSigns from '@/data/zodiac-signs.json';
 import tarotCards from '@/data/tarot-cards.json';
@@ -70,61 +87,7 @@ export interface VideoScriptContext {
   facetTitles: string[];
 }
 
-/**
- * Platform configuration for hashtag usage
- * All platforms now use exactly 3 hashtags
- */
-const platformHashtagConfig: Record<
-  string,
-  { useHashtags: boolean; count: number }
-> = {
-  instagram: { useHashtags: true, count: 3 },
-  pinterest: { useHashtags: true, count: 3 },
-  tiktok: { useHashtags: true, count: 3 },
-  facebook: { useHashtags: true, count: 3 },
-  linkedin: { useHashtags: true, count: 3 },
-  twitter: { useHashtags: true, count: 2 },
-  bluesky: { useHashtags: true, count: 1 },
-  threads: { useHashtags: true, count: 2 },
-  reddit: { useHashtags: true, count: 3 },
-};
-
-const PERSONA_VOCAB = [
-  'astrology lovers',
-  'astrology curious',
-  'tarot readers',
-  'people who pull cards',
-  'moon watchers',
-  'lunar folk',
-  'crystal lovers',
-  'star gazers',
-  'cosmic wanderers',
-  'horoscope readers',
-];
-
-const PERSONA_BODY_TEMPLATES = [
-  'We keep this corner calm for astrology lovers who prefer steady notice-taking over excess hype.',
-  'Tarot readers and lunar folk are invited to track the pause between shifts rather than chase swift answers.',
-  'Moon watchers and crystal lovers often find it useful to catalog how timing changes, not just what it promises.',
-  'Cosmic wanderers and horoscope readers can hold onto the idea that timing reveals itself quietly, not on command.',
-];
-
-const QUESTION_POOL = [
-  'Which do you check most: moon phase, tarot, transits, or horoscopes?',
-  'What made astrology click for you: tarot, a horoscope, the moon, or something else?',
-  'What do you usually turn to astrology for?',
-  'When do you find yourself coming back to astrology most?',
-  'What do you wish astrology helped you understand better?',
-  'What part of astrology feels most grounding to you?',
-];
-
-const CLOSING_STATEMENTS = [
-  'Most astrology insights only make sense in hindsight.',
-  'Understanding rarely arrives on schedule.',
-  'The meaning usually shows up later, not when you are looking for it.',
-  'Patterns are clearer once the rush of the moment passes.',
-  'One more look later often changes how the whole week reads.',
-];
+// Constants are now imported from shared/constants
 
 const buildQuestionPost = (topic: string, data: Record<string, any> | null) => {
   const keywords = Array.isArray(data?.keywords) ? data.keywords : [];
@@ -151,60 +114,8 @@ const hashString = (value: string) => {
   return Math.abs(hash);
 };
 
-const splitSentences = (text: string) =>
-  text
-    .replace(/(\d)\.(\d)/g, '$1<DECIMAL>$2')
-    .match(/[^.!?]+[.!?]+|[^.!?]+$/g)
-    ?.map((sentence) => sentence.replace(/<DECIMAL>/g, '.').trim())
-    .filter(Boolean) || [];
-
-const ensurePeriod = (text: string) => {
-  const trimmed = text.trim();
-  if (!trimmed) return trimmed;
-  return /[.!?]$/.test(trimmed) ? trimmed : `${trimmed}.`;
-};
-
-const formatList = (items: string[], max = 3) => {
-  const values = items.filter(Boolean).slice(0, max);
-  if (values.length === 0) return '';
-  if (values.length === 1) return values[0];
-  if (values.length === 2) return `${values[0]} and ${values[1]}`;
-  return `${values.slice(0, -1).join(', ')}, and ${values[values.length - 1]}`;
-};
-
-const normaliseUkSpelling = (text: string) => {
-  const replacements: Array<[RegExp, string]> = [
-    [/\bcolor\b/gi, 'colour'],
-    [/\bcolors\b/gi, 'colours'],
-    [/\bfavor\b/gi, 'favour'],
-    [/\bfavors\b/gi, 'favours'],
-    [/\bhonor\b/gi, 'honour'],
-    [/\bhonors\b/gi, 'honours'],
-    [/\bcenter\b/gi, 'centre'],
-    [/\bcenters\b/gi, 'centres'],
-    [/\banalyze\b/gi, 'analyse'],
-    [/\banalyzes\b/gi, 'analyses'],
-    [/\borganize\b/gi, 'organise'],
-    [/\borganizes\b/gi, 'organises'],
-    [/\bpersonalize\b/gi, 'personalise'],
-    [/\bpersonalizes\b/gi, 'personalises'],
-    [/\brealize\b/gi, 'realise'],
-    [/\brealizes\b/gi, 'realises'],
-    [/\brecognize\b/gi, 'recognise'],
-    [/\brecognizes\b/gi, 'recognises'],
-  ];
-  return replacements.reduce((acc, [pattern, replacement]) => {
-    return acc.replace(pattern, (match) => {
-      if (match.toUpperCase() === match) {
-        return replacement.toUpperCase();
-      }
-      if (match[0] && match[0] === match[0].toUpperCase()) {
-        return replacement[0].toUpperCase() + replacement.slice(1);
-      }
-      return replacement;
-    });
-  }, text);
-};
+// Helper functions are now imported from shared/text/*
+// Using: splitSentencesPreservingDecimals, sentenceSafe, formatList, normaliseUkSpelling
 
 const normalizeLunarNodesText = (text: string) =>
   text.replace(
@@ -252,17 +163,7 @@ const trimShortFormForPlatform = (text: string, platform: string) => {
   return trimToLimit(text, limit);
 };
 
-const TRUNCATION_PATTERNS = [
-  /\bthe\.$/i,
-  /\beach\.$/i,
-  /\bbegin at\.$/i,
-  /\bcrosses the\.$/i,
-  /\band the\.$/i,
-  /:\s*$/i,
-];
-
-const hasTruncationArtifact = (text: string) =>
-  TRUNCATION_PATTERNS.some((pattern) => pattern.test(text.trim()));
+// TRUNCATION_PATTERNS and hasTruncationArtifact are now imported from shared/text/truncation
 
 const getTopicFallbackDefinition = (topic: string) => {
   const key = topic.trim().toLowerCase();
@@ -282,7 +183,7 @@ const isCompleteSentence = (text: string) => {
 const sanitizeSnippet = (text: string | undefined, fallback: string) => {
   const source = String(text || '').trim();
   if (!source) return fallback;
-  const sentences = splitSentences(source);
+  const sentences = splitSentencesPreservingDecimals(source);
   for (const sentence of sentences) {
     if (isCompleteSentence(sentence)) {
       return sentence;
@@ -314,9 +215,9 @@ const buildDefinitionSentence = (
     return `${formatTopicLabel(topic)} ${getTopicFallbackDefinition(topic)}.`;
   }
   if (safeSnippet.toLowerCase().includes(topic.toLowerCase())) {
-    return ensurePeriod(safeSnippet);
+    return sentenceSafe(safeSnippet);
   }
-  return ensurePeriod(`${formatTopicLabel(topic)} is ${safeSnippet}`);
+  return sentenceSafe(`${formatTopicLabel(topic)} is ${safeSnippet}`);
 };
 
 const buildPracticalSentence = (
@@ -324,7 +225,7 @@ const buildPracticalSentence = (
   data: Record<string, any> | null,
 ): string => {
   if (Array.isArray(data?.magicalUses) && data.magicalUses.length > 0) {
-    return ensurePeriod(
+    return sentenceSafe(
       `${topic} is often used for ${formatList(data.magicalUses, 2)}`,
     );
   }
@@ -332,7 +233,7 @@ const buildPracticalSentence = (
     Array.isArray(data?.healingPractices) &&
     data.healingPractices.length > 0
   ) {
-    return ensurePeriod(
+    return sentenceSafe(
       `People work with ${topic} through ${formatList(
         data.healingPractices,
         2,
@@ -340,41 +241,41 @@ const buildPracticalSentence = (
     );
   }
   if (Array.isArray(data?.traditions) && data.traditions.length > 0) {
-    return ensurePeriod(
+    return sentenceSafe(
       `${topic} is often marked by ${formatList(data.traditions, 2)}`,
     );
   }
   if (data?.houseMeaning) {
-    return ensurePeriod(String(data.houseMeaning));
+    return sentenceSafe(String(data.houseMeaning));
   }
   if (data?.transitEffect) {
-    return ensurePeriod(String(data.transitEffect));
+    return sentenceSafe(String(data.transitEffect));
   }
   if (data?.element || data?.modality) {
     const parts = [data.element, data.modality].filter(Boolean).join(' and ');
     if (parts) {
-      return ensurePeriod(`${topic} works through ${parts}`);
+      return sentenceSafe(`${topic} works through ${parts}`);
     }
   }
   const keywords = Array.isArray(data?.keywords) ? data.keywords : [];
   if (keywords.length > 0) {
-    return ensurePeriod(`${topic} often relates to ${formatList(keywords, 2)}`);
+    return sentenceSafe(`${topic} often relates to ${formatList(keywords, 2)}`);
   }
-  return ensurePeriod(`${topic} adds practical context to daily timing`);
+  return sentenceSafe(`${topic} adds practical context to daily timing`);
 };
 
 const prefixSentenceWithTopic = (topic: string, sentence: string) => {
   const trimmed = sentence.trim();
   if (!trimmed) return '';
   if (trimmed.toLowerCase().includes(topic.toLowerCase())) {
-    return ensurePeriod(trimmed);
+    return sentenceSafe(trimmed);
   }
   if (/^it\s/i.test(trimmed)) {
-    return ensurePeriod(
+    return sentenceSafe(
       trimmed.replace(/^it\s/i, `${formatTopicLabel(topic)} `),
     );
   }
-  return ensurePeriod(
+  return sentenceSafe(
     `${formatTopicLabel(topic)} ${trimmed.replace(/^[A-Z]/, (c) => c.toLowerCase())}`,
   );
 };
@@ -384,33 +285,33 @@ const buildMechanicsSentence = (
   data: Record<string, any> | null,
 ): string => {
   if (data?.element && data?.modality) {
-    return ensurePeriod(
+    return sentenceSafe(
       `${topic} works through the ${data.element} element and ${data.modality} modality`,
     );
   }
   if (data?.element) {
-    return ensurePeriod(`${topic} is linked to the ${data.element} element`);
+    return sentenceSafe(`${topic} is linked to the ${data.element} element`);
   }
   if (data?.modality) {
-    return ensurePeriod(`${topic} moves through ${data.modality} modality`);
+    return sentenceSafe(`${topic} moves through ${data.modality} modality`);
   }
   if (Array.isArray(data?.rules) && data.rules.length > 0) {
-    return ensurePeriod(
+    return sentenceSafe(
       `${topic} is associated with ${formatList(data.rules, 2)}`,
     );
   }
   if (data?.rulingPlanet || data?.ruler) {
-    return ensurePeriod(
+    return sentenceSafe(
       `${topic} is associated with ${(data.rulingPlanet || data.ruler).toString()}`,
     );
   }
   if (data?.houseMeaning) {
-    return ensurePeriod(String(data.houseMeaning));
+    return sentenceSafe(String(data.houseMeaning));
   }
   if (data?.transitEffect) {
-    return ensurePeriod(String(data.transitEffect));
+    return sentenceSafe(String(data.transitEffect));
   }
-  return ensurePeriod(`${topic} has a role within wider cycles`);
+  return sentenceSafe(`${topic} has a role within wider cycles`);
 };
 
 const buildUseSentence = (
@@ -418,7 +319,7 @@ const buildUseSentence = (
   data: Record<string, any> | null,
 ): string => {
   if (Array.isArray(data?.magicalUses) && data.magicalUses.length > 0) {
-    return ensurePeriod(
+    return sentenceSafe(
       `Try working with ${topic} for ${formatList(data.magicalUses, 2)}`,
     );
   }
@@ -426,16 +327,16 @@ const buildUseSentence = (
     Array.isArray(data?.healingPractices) &&
     data.healingPractices.length > 0
   ) {
-    return ensurePeriod(
+    return sentenceSafe(
       `A simple way to use ${topic} is ${formatList(data.healingPractices, 2)}`,
     );
   }
   if (Array.isArray(data?.traditions) && data.traditions.length > 0) {
-    return ensurePeriod(
+    return sentenceSafe(
       `A practical example is ${formatList(data.traditions, 2)}`,
     );
   }
-  return ensurePeriod(`Try noting how ${topic} shows up this week`);
+  return sentenceSafe(`Try noting how ${topic} shows up this week`);
 };
 
 const buildStandaloneEducationalCopy = ({
@@ -531,21 +432,7 @@ const getInlineHashtags = (
   return [];
 };
 
-const isAllowedSlugForCategory = (category: string, slug: string) => {
-  const lower = slug.toLowerCase();
-  const allowedPrefixes: Record<string, string[]> = {
-    lunar: ['moon', 'moon/', 'moon-', 'moon-in', 'lunar', 'eclipses'],
-    planetary: ['astronomy/planets', 'astronomy/retrogrades', 'planets'],
-    zodiac: ['zodiac', 'rising-sign', 'birth-chart'],
-    tarot: ['tarot', 'card-combinations', 'tarot-spreads'],
-    crystals: ['crystals'],
-    numerology: ['numerology', 'angel-numbers', 'life-path'],
-    chakras: ['chakras'],
-    sabbat: ['wheel-of-the-year', 'sabbats', 'sabbat'],
-  };
-  const prefixes = allowedPrefixes[category] || [];
-  return prefixes.some((prefix) => lower.startsWith(prefix));
-};
+// isAllowedSlugForCategory is now imported from shared/constants/category-slugs
 
 type SourceInfo = {
   sourceType: 'grimoire' | 'fallback';
@@ -562,17 +449,9 @@ const normalizeTopicKey = (value: string) =>
     .replace(/\s+/g, ' ')
     .trim();
 
-const matchesTopic = (title: string, topic: string) => {
-  const titleKey = normalizeTopicKey(title);
-  const topicKey = normalizeTopicKey(topic);
-  return (
-    titleKey.includes(topicKey) ||
-    topicKey.includes(titleKey) ||
-    titleKey === topicKey
-  );
-};
+// matchesTopic is now imported from shared/text/normalize
 
-const splitSentencesForHook = (text?: string) => {
+const splitSentencesPreservingDecimalsForHook = (text?: string) => {
   if (!text) return [];
   return (
     text
@@ -585,7 +464,7 @@ const splitSentencesForHook = (text?: string) => {
 
 const buildHookSentenceFromSource = (source?: string, topic?: string) => {
   if (!source) return null;
-  const sentences = splitSentencesForHook(source);
+  const sentences = splitSentencesPreservingDecimalsForHook(source);
   for (const sentence of sentences) {
     if (!sentence) continue;
     if (hasTruncationArtifact(sentence)) continue;
@@ -597,7 +476,7 @@ const buildHookSentenceFromSource = (source?: string, topic?: string) => {
     ) {
       continue;
     }
-    return ensurePeriod(sentence);
+    return sentenceSafe(sentence);
   }
   return null;
 };
@@ -772,8 +651,8 @@ const buildIntroShortForm = (
     facet.focus ||
     facet.shortFormHook ||
     facet.title;
-  const sentences = splitSentences(String(source));
-  const intro = sentences.slice(0, 2).map(ensurePeriod).join(' ');
+  const sentences = splitSentencesPreservingDecimals(String(source));
+  const intro = sentences.slice(0, 2).map(sentenceSafe).join(' ');
   return cleanShortForm(intro, category);
 };
 
@@ -788,9 +667,9 @@ const buildDeepShortForm = (
     sentences.push(`Common keywords: ${formatList(keywords, 3)}.`);
   }
   if (data?.mysticalProperties) {
-    sentences.push(ensurePeriod(String(data.mysticalProperties)));
+    sentences.push(sentenceSafe(String(data.mysticalProperties)));
   } else if (data?.metaphysicalProperties) {
-    sentences.push(ensurePeriod(String(data.metaphysicalProperties)));
+    sentences.push(sentenceSafe(String(data.metaphysicalProperties)));
   }
   if (data?.element && data?.modality) {
     sentences.push(
@@ -817,9 +696,9 @@ const buildDeepShortForm = (
     }
   }
   if (data?.houseMeaning) {
-    sentences.push(ensurePeriod(String(data.houseMeaning)));
+    sentences.push(sentenceSafe(String(data.houseMeaning)));
   } else if (data?.transitEffect) {
-    sentences.push(ensurePeriod(String(data.transitEffect)));
+    sentences.push(sentenceSafe(String(data.transitEffect)));
   }
   if (Array.isArray(data?.magicalUses) && data.magicalUses.length > 0) {
     sentences.push(
@@ -844,13 +723,13 @@ const buildDeepShortForm = (
       facet.shortFormHook ||
       facet.title ||
       'Astrological insight.';
-    sentences.push(ensurePeriod(fallback));
+    sentences.push(sentenceSafe(fallback));
   }
 
   const core = sentences.slice(0, 2).join(' ');
   const expanded =
     sentences.length < 2 && facet.focus
-      ? `${core} ${ensurePeriod(facet.focus)}`
+      ? `${core} ${sentenceSafe(facet.focus)}`
       : core;
   return cleanShortForm(expanded, category);
 };
@@ -901,10 +780,10 @@ const buildDeepDiveShortForms = (
 
   const meaningSentences: string[] = [];
   if (data?.houseMeaning) {
-    meaningSentences.push(ensurePeriod(String(data.houseMeaning)));
+    meaningSentences.push(sentenceSafe(String(data.houseMeaning)));
   }
   if (data?.transitEffect) {
-    meaningSentences.push(ensurePeriod(String(data.transitEffect)));
+    meaningSentences.push(sentenceSafe(String(data.transitEffect)));
   }
   if (!meaningSentences.length && data?.uprightMeaning) {
     meaningSentences.push(
@@ -912,10 +791,10 @@ const buildDeepDiveShortForms = (
     );
   }
   if (!meaningSentences.length && data?.spiritualMeaning) {
-    meaningSentences.push(ensurePeriod(String(data.spiritualMeaning)));
+    meaningSentences.push(sentenceSafe(String(data.spiritualMeaning)));
   }
   if (!meaningSentences.length && data?.mysticalProperties) {
-    meaningSentences.push(ensurePeriod(String(data.mysticalProperties)));
+    meaningSentences.push(sentenceSafe(String(data.mysticalProperties)));
   }
   if (meaningSentences.length > 0) {
     deepDives.push({
@@ -978,23 +857,18 @@ const buildDeepDiveShortForms = (
   if (deepDives.length === 0) {
     deepDives.push({
       kind: 'fallback',
-      text: cleanShortForm(ensurePeriod(fallbackSentence), category),
+      text: cleanShortForm(sentenceSafe(fallbackSentence), category),
     });
   }
 
   return deepDives;
 };
 
-const normalizeForComparison = (text: string) =>
-  text
-    .toLowerCase()
-    .replace(/[^a-z0-9\s]/g, '')
-    .replace(/\s+/g, ' ')
-    .trim();
+// normalise is now replaced with normalise from shared/text/normalize
 
 const isTooSimilar = (a: string, b: string) => {
-  const aNorm = normalizeForComparison(a);
-  const bNorm = normalizeForComparison(b);
+  const aNorm = normalise(a);
+  const bNorm = normalise(b);
   if (!aNorm || !bNorm) return false;
   if (aNorm === bNorm) return true;
   if (aNorm.startsWith(bNorm) || bNorm.startsWith(aNorm)) return true;
@@ -1010,8 +884,8 @@ const isTooSimilar = (a: string, b: string) => {
 };
 
 const bigramOverlapRatio = (a: string, b: string) => {
-  const aNorm = normalizeForComparison(a);
-  const bNorm = normalizeForComparison(b);
+  const aNorm = normalise(a);
+  const bNorm = normalise(b);
   const aWords = aNorm.split(' ').filter(Boolean);
   const bWords = bNorm.split(' ').filter(Boolean);
   if (aWords.length < 2 || bWords.length < 2) return 0;
@@ -1106,7 +980,7 @@ const buildFallbackDeepDive = (
     );
   }
   return cleanShortForm(
-    ensurePeriod(facet.focus || facet.shortFormHook || topic),
+    sentenceSafe(facet.focus || facet.shortFormHook || topic),
     category,
   );
 };
@@ -1567,7 +1441,7 @@ export function formatLongFormForPlatform(
   platform: string,
   options?: { postType?: SocialPostType; topicTitle?: string },
 ): string {
-  const config = platformHashtagConfig[platform] || {
+  const config = PLATFORM_HASHTAG_CONFIG[platform] || {
     useHashtags: false,
     count: 0,
   };
@@ -1620,7 +1494,7 @@ export function formatShortFormForPlatform(
   hashtags?: { domain: string; topic: string; brand: string },
   options?: { postType?: SocialPostType; topicTitle?: string },
 ): string {
-  const config = platformHashtagConfig[platform] || {
+  const config = PLATFORM_HASHTAG_CONFIG[platform] || {
     useHashtags: true,
     count: 3,
   };
@@ -2049,7 +1923,7 @@ export async function generateThematicPostsForWeek(
 
         while (uniqueDeepDives.length < 2) {
           const fallback = cleanShortForm(
-            ensurePeriod(dayContent.facet.title),
+            sentenceSafe(dayContent.facet.title),
             dayContent.theme.category,
           );
           uniqueDeepDives.push(fallback);

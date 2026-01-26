@@ -8,6 +8,46 @@ import { SOCIAL_POST_STYLE_INSTRUCTION } from './style-instructions';
 import { buildNoveltyInstruction } from './novelty';
 
 /**
+ * Critical rules that must appear in all prompts
+ */
+const CRITICAL_RULES = `
+CRITICAL RULES:
+1. NEVER use these overused phrases: "gentle nudge," "cosmic wink/thumbs-up," "like the universe is," "whisper/whispering," "perfect timing to," "curious to see where it leads"
+2. Each post about the same topic MUST use completely different angles - not just rephrased versions
+3. Vary sentence length dramatically - use fragments, short punchy lines, and longer explanations
+4. Only use emojis in rare cases, and vary placement (not always at end)
+5. Use concrete, specific details instead of vague metaphors
+6. Questions must sound like genuine human curiosity, not rhetorical fluff
+7. Never use em dashes
+8. ANTI-REPETITION: Before writing, check if your sentence could work for ANY topic by swapping the number/topic. If yes, REWRITE with details that ONLY work for THIS specific topic.
+   BAD (generic): "Pay attention to how [X] shapes timing or small decisions"
+   GOOD (specific): "222 appears most when you're doubting whether to stay - it's telling you to stay"
+   GOOD (specific): "The Tower often shows up after you've been ignoring what you already knew"
+   GOOD (specific): "Sagittarius risings tend to overshare within 5 minutes of meeting someone"`;
+
+/**
+ * Banned patterns that must be avoided
+ */
+const BANNED_PATTERNS = `
+BANNED PATTERNS:
+- "Ever notice [X]? It's [metaphor]. In numerology, [meaning]."
+- Starting with "Seeing/Spotting/Noticed [number] lately?"
+- Ending with vague reflection questions
+- Using "journey" more than once per 10 posts
+- Three-part structure (hook + explanation + question) every time
+- "Many believe" or "can deepen your understanding"
+- "deepen your practice" or marketing-speak
+
+GENERIC FILLER SENTENCES (never use these - they work for ANY topic):
+- "Pay attention to how [X] shapes timing or small decisions"
+- "[X] often appears when you need it most"
+- "Notice how [X] shows up in your daily life"
+- "There's wisdom in understanding [X]"
+- "[X] invites you to reflect on what matters"
+- "Consider what [X] might be telling you"
+Instead, write sentences with SPECIFIC details that only apply to THIS topic.`;
+
+/**
  * Build educational post prompt
  */
 export const buildEducationalPrompt = (pack: SourcePack): string => {
@@ -42,7 +82,7 @@ ${pack.grimoireExcerpt}
 
 ${pack.grimoireFacts
   .slice(0, 2)
-  .map((fact) => `• ${fact}`)
+  .map((fact) => `- ${fact}`)
   .join('\n')}
 
 ${domainContext}
@@ -53,13 +93,16 @@ ${styleGuidance}
 ${timingNote}
 ${reflectionNote}
 
+${CRITICAL_RULES}
+
+${BANNED_PATTERNS}
+
 Important:
-• Use natural, conversational language
-• Vary your sentence structure and openings
-• Avoid formulaic phrases like "Many believe" or "can deepen your understanding"
-• Stay factual but not deterministic - use "tends to", "often", "can" rather than "always" or "guarantees"
-• Don't mention Lunary or the Grimoire
-• ${spec.sentenceCount[0]}-${spec.sentenceCount[1]} sentences
+- Use natural, conversational language
+- Vary your sentence structure and openings dramatically
+- Stay factual but not deterministic - use "tends to", "often", "can" rather than "always" or "guarantees"
+- Don't mention Lunary or the Grimoire
+- ${spec.sentenceCount[0]}-${spec.sentenceCount[1]} sentences
 ${noveltyNote ? `\n${noveltyNote}` : ''}
 
 Return JSON:
@@ -92,7 +135,7 @@ ${pack.grimoireExcerpt}
 
 ${pack.grimoireFacts
   .slice(0, 2)
-  .map((fact) => `• ${fact}`)
+  .map((fact) => `- ${fact}`)
   .join('\n')}
 
 ${domainContext}
@@ -100,17 +143,21 @@ ${domainContext}
 ${styleGuidance}
 
 Write 2-4 lines that:
-• Complement the video naturally
-• Provide context or insight
-• Use conversational, clear language
-• Include the topic name once
-• Optionally mention timing if relevant (this week, tonight, etc.)
+- Complement the video naturally
+- Provide context or insight
+- Use conversational, clear language
+- Include the topic name once
+- Optionally mention timing if relevant (this week, tonight, etc.)
+
+${CRITICAL_RULES}
+
+${BANNED_PATTERNS}
 
 Avoid:
-• Marketing speak or "deepen your practice" type phrases
-• Rigid formulas
-• Mentioning Lunary or the Grimoire
-• Deterministic claims - use "tends to", "often", "can" not "always" or "controls"
+- Marketing speak or "deepen your practice" type phrases
+- Rigid formulas
+- Mentioning Lunary or the Grimoire
+- Deterministic claims - use "tends to", "often", "can" not "always" or "controls"
 ${noveltyNote ? `\n${noveltyNote}` : ''}
 
 Return JSON:
@@ -146,10 +193,14 @@ ${domainContext}
 ${styleGuidance}
 
 Ask a genuine question that:
-• Relates to lived experience with this topic
-• Encourages people to share their observations
-• Feels conversational and curious
-• Avoids "What is..." definitions
+- Relates to lived experience with this topic
+- Encourages people to share their observations
+- Feels conversational and curious (like genuine human curiosity, not rhetorical fluff)
+- Avoids "What is..." definitions
+- Should inspire CONCRETE, SPECIFIC responses - not vague reflection
+- Is answerable, not rhetorical
+
+${CRITICAL_RULES}
 
 Optionally add a short follow-up line to encourage responses (keep it under 7 words).
 

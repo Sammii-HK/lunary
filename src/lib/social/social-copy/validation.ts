@@ -13,13 +13,46 @@ import type { SourcePack, VideoCaptionValidation } from './types';
 import { QUESTION_STARTERS } from './constants';
 
 /**
+ * Patterns that indicate repetitive/formulaic content
+ */
+const OVERUSED_PATTERNS = [
+  /ever notice .+\? it's .+\./i,
+  /seeing .+ lately\?/i,
+  /spotting .+ lately\?/i,
+  /noticed .+ lately\?/i,
+  /^in numerology,/i,
+  /^many believe/i,
+  /journey of self/i,
+  /cosmic dance/i,
+  /step into your/i,
+  /unlock your/i,
+  /manifest your/i,
+  /embrace your/i,
+];
+
+/**
+ * Check for overused opening patterns
+ */
+export function hasOverusedPattern(content: string): boolean {
+  const lower = content.toLowerCase();
+  return OVERUSED_PATTERNS.some((pattern) => pattern.test(lower));
+}
+
+/**
+ * Check for em dashes (banned)
+ */
+export function hasEmDash(content: string): boolean {
+  return content.includes('—') || content.includes('--');
+}
+
+/**
  * Validate social copy content
  */
 export function validateSocialCopy(content: string, topic: string): string[] {
   const reasons: string[] = [];
   const lower = content.toLowerCase();
   for (const phrase of BANNED_PHRASES) {
-    if (lower.includes(phrase)) {
+    if (lower.includes(phrase.toLowerCase())) {
       reasons.push(`Contains banned phrase: ${phrase}`);
     }
   }
@@ -37,6 +70,12 @@ export function validateSocialCopy(content: string, topic: string): string[] {
   }
   if (content.includes('..') || /:\s*$/.test(content.trim())) {
     reasons.push('Trailing punctuation');
+  }
+  if (hasOverusedPattern(content)) {
+    reasons.push('Contains overused/formulaic pattern');
+  }
+  if (hasEmDash(content)) {
+    reasons.push('Contains em dash (banned)');
   }
   return reasons;
 }
@@ -78,12 +117,20 @@ export const validateVideoCaptionResponse = (
       issues.push('Avoid journalling or affirmation language');
     }
     for (const phrase of BANNED_PHRASES) {
-      if (lower.includes(phrase)) {
+      if (lower.includes(phrase.toLowerCase())) {
         issues.push(`Line includes banned phrase: ${phrase}`);
         break;
       }
     }
+    if (hasEmDash(line)) {
+      issues.push('Caption line contains em dash (banned)');
+    }
   });
+
+  const combined = sanitizedLines.join(' ');
+  if (hasOverusedPattern(combined)) {
+    issues.push('Caption contains overused/formulaic pattern');
+  }
 
   return {
     issues,
