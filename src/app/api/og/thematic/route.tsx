@@ -237,13 +237,21 @@ export async function GET(request: NextRequest): Promise<Response> {
     // Get symbol if not provided (and not using images)
     // Use dynamic loader symbol, then fallback to existing symbol lookup
     // Skip symbol if it matches the title (e.g., numerology "111" symbol = "111" title)
+    const titleNormalized = formattedTitle.trim().toLowerCase();
+
+    // First check if URL symbol param matches title - if so, ignore it
+    const symbolFromUrl =
+      symbol?.trim().toLowerCase() === titleNormalized ? null : symbol;
+
     const rawSymbol =
       !needsImage &&
-      (symbol || dynamicData?.symbol || getSymbolForContent(category, slug));
+      (symbolFromUrl ||
+        dynamicData?.symbol ||
+        getSymbolForContent(category, slug));
+
+    // Double-check: if symbol still matches title after all lookups, hide it
     const displaySymbol =
-      rawSymbol &&
-      rawSymbol.toString().trim().toLowerCase() !==
-        formattedTitle.trim().toLowerCase()
+      rawSymbol && rawSymbol.toString().trim().toLowerCase() !== titleNormalized
         ? rawSymbol
         : null;
 

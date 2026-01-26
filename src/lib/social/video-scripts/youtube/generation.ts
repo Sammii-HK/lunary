@@ -102,7 +102,8 @@ function generateYouTubeCoverUrl(
   const title = encodeURIComponent(capitalizeThematicTitle(theme.name));
   const subtitle = encodeURIComponent('Weekly Deep Dive');
 
-  return `${baseUrl}/api/og/thematic?category=${theme.category}&slug=${slug}&title=${title}&subtitle=${subtitle}&format=landscape&cover=youtube`;
+  // v=2 for cache busting
+  return `${baseUrl}/api/og/thematic?category=${theme.category}&slug=${slug}&title=${title}&subtitle=${subtitle}&format=landscape&cover=youtube&v=2`;
 }
 
 /**

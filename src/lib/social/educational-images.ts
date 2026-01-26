@@ -88,16 +88,28 @@ export function getThematicImageUrl(
   const thematicCategory = mapToThematicCategory(category);
   const normalizedSlug = slug || title.toLowerCase().replace(/\s+/g, '-');
 
-  // Get symbol for this content
-  const symbol = getSymbolForContent(thematicCategory, normalizedSlug);
-
-  // Build URL
+  // Get symbol for this content - but skip if it matches the title
+  const rawSymbol = getSymbolForContent(thematicCategory, normalizedSlug);
   const formattedTitle = capitalizeThematicTitle(title);
+
+  // Only include symbol if it's different from the title (avoids duplication like "111" symbol + "111" title)
+  const symbol =
+    rawSymbol &&
+    rawSymbol.toString().trim().toLowerCase() !==
+      formattedTitle.trim().toLowerCase() &&
+    rawSymbol.toString().trim().toLowerCase() !==
+      normalizedSlug.trim().toLowerCase()
+      ? rawSymbol
+      : null;
+
+  // Build URL - include version for cache busting when we make changes
+  const IMAGE_VERSION = '2';
   const params = new URLSearchParams({
     category: thematicCategory,
     title: formattedTitle,
     format,
     slug: normalizedSlug,
+    v: IMAGE_VERSION,
   });
 
   if (subtitle) {
