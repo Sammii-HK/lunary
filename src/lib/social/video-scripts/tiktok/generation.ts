@@ -23,7 +23,13 @@ import type { VideoScript, ScriptSection } from '../types';
 import { mapAngleToAspect } from '../constants';
 import { getSafeGrimoireDataForFacet } from '../grimoire-helpers';
 import { getAngleForTopic } from '../rotation';
-import { validateVideoHook, validateScriptBody } from '../validation';
+import {
+  validateVideoHook,
+  validateScriptBody,
+  getCriticalIssues,
+  getSoftIssuesAsFeedback,
+  hasOnlySoftIssues,
+} from '../validation';
 import { buildHookForTopic } from '../hooks';
 import { sanitizeVideoScriptLines } from '../sanitization';
 import { buildTikTokPrompt } from './prompts';
@@ -134,11 +140,29 @@ async function generateTikTokScriptContent(
       searchPhrase,
     );
 
+    // Get critical vs soft issues
+    const hookCritical = getCriticalIssues(hookIssues);
+    const bodyCritical = getCriticalIssues(bodyIssues);
+    const hasCriticalIssues =
+      hookCritical.length > 0 || bodyCritical.length > 0;
+
+    // Retry if there are ANY issues (critical or soft), giving feedback
     if (hookIssues.length > 0 || bodyIssues.length > 0) {
-      const retryNote = [
-        ...hookIssues.map((issue) => `Hook: ${issue}`),
-        ...bodyIssues.map((issue) => `Body: ${issue}`),
-      ].join('; ');
+      // Build retry note with all feedback
+      const retryParts: string[] = [];
+      if (hookCritical.length > 0) {
+        retryParts.push(`Hook MUST FIX: ${hookCritical.join('; ')}`);
+      }
+      if (bodyCritical.length > 0) {
+        retryParts.push(`Body MUST FIX: ${bodyCritical.join('; ')}`);
+      }
+      // Add soft issues as suggestions
+      const hookSoft = getSoftIssuesAsFeedback(hookIssues);
+      const bodySoft = getSoftIssuesAsFeedback(bodyIssues);
+      if (hookSoft) retryParts.push(`Hook suggestions: ${hookSoft}`);
+      if (bodySoft) retryParts.push(`Body suggestions: ${bodySoft}`);
+
+      const retryNote = retryParts.join('\n');
       primary = await requestScriptOnce(retryNote);
       video = primary.video || {};
       hook = String(video.hook || '').trim();
@@ -154,19 +178,36 @@ async function generateTikTokScriptContent(
       );
     }
 
+    // After retry, only fallback on CRITICAL issues
+    // Soft issues are OK - they're style preferences, not blockers
+    const hookCriticalAfterRetry = getCriticalIssues(hookIssues);
+    const bodyCriticalAfterRetry = getCriticalIssues(bodyIssues);
+
     let fallbackScript: string | null = null;
 
-    if (bodyIssues.length > 0) {
-      console.warn(`Video script validation failed: ${bodyIssues.join('; ')}`, {
-        facet: facet.title,
-        angle,
-        aspect,
-      });
+    // Only use fallback for CRITICAL failures after retry
+    if (bodyCriticalAfterRetry.length > 0) {
+      console.warn(
+        `Video script CRITICAL validation failed: ${bodyCriticalAfterRetry.join('; ')}`,
+        {
+          facet: facet.title,
+          angle,
+          aspect,
+        },
+      );
       fallbackScript = buildFallbackShortScript(
         facet,
         grimoireData,
         angle,
         aspect,
+      );
+    } else if (hasOnlySoftIssues(bodyIssues)) {
+      // Log soft issues but proceed with the script
+      console.log(
+        `Video script has minor style suggestions (proceeding): ${getSoftIssuesAsFeedback(bodyIssues)}`,
+        {
+          facet: facet.title,
+        },
       );
     }
 
@@ -184,8 +225,15 @@ async function generateTikTokScriptContent(
           normalizeHookLine(buildHookForTopic(facet.title, aspect)),
         );
     } else {
+      // Only fallback hook if CRITICAL issues
+      const finalHookIssues = validateVideoHook(
+        hook,
+        facet.title,
+        searchPhrase,
+      );
+      const finalHookCritical = getCriticalIssues(finalHookIssues);
       hookLine =
-        validateVideoHook(hook, facet.title, searchPhrase).length === 0
+        finalHookCritical.length === 0
           ? ensureSentenceEndsWithPunctuation(normalizeHookLine(hook))
           : ensureSentenceEndsWithPunctuation(
               normalizeHookLine(buildHookForTopic(facet.title, aspect)),

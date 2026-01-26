@@ -54,6 +54,11 @@ export {
   hasGenericFillerPattern,
   hasTemplatePattern,
   countGenericLines,
+  getCriticalIssues,
+  getSoftIssuesAsFeedback,
+  hasOnlySoftIssues,
+  hasCriticalBannedPattern,
+  getSoftWarnings,
 } from './validation';
 
 // Content-type specific voices and structures
