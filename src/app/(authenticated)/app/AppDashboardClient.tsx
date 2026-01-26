@@ -8,8 +8,20 @@ import { useAuthStatus } from '@/components/AuthStatus';
 import { recordCheckIn } from '@/lib/streak/check-in';
 import { conversionTracking } from '@/lib/analytics';
 
-import { DateWidget } from '@/components/DateWidget';
 import { ShareDailyInsight } from '@/components/ShareDailyInsight';
+
+const DateWidget = dynamic(
+  () =>
+    import('@/components/DateWidget').then((m) => ({
+      default: m.DateWidget,
+    })),
+  {
+    loading: () => (
+      <div className='h-6 w-48 bg-zinc-800/50 rounded animate-pulse mx-auto' />
+    ),
+    ssr: false,
+  },
+);
 import dayjs from 'dayjs';
 
 const MoonPreview = dynamic(
