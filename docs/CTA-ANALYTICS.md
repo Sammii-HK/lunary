@@ -19,6 +19,8 @@ Fired when a CTA is shown to a user:
 - **exampleType**: Type of example shown (e.g., "transit_to_natal", "house_activation")
 - **exampleText**: Actual example text (e.g., "Jupiter 17°58' Cancer ⚹ your natal Moon")
 - **ctaVariant**: Hub + CTA index (e.g., "horoscopes_0", "planets_1")
+- **ctaHeadline**: Original headline text before example injection
+- **ctaSubline**: Original subline text before example injection
 - **anonymousId**: User tracking ID
 - **userId**: If authenticated
 - **userEmail**: If authenticated
@@ -125,12 +127,12 @@ LIMIT 10;
    ]
    ```
 
-2. Track `ctaVariant` field: "horoscopes_0" vs "horoscopes_1"
+2. Query by `ctaVariant` (indexed) or `cta_headline` (actual text):
 
-3. Query after 2 weeks:
    ```sql
    SELECT
      cta_variant,
+     cta_headline,
      COUNT(CASE WHEN event = 'cta_impression' THEN 1 END) as impressions,
      COUNT(CASE WHEN event = 'cta_clicked' THEN 1 END) as clicks,
      ROUND(100.0 * COUNT(CASE WHEN event = 'cta_clicked' THEN 1 END) /
@@ -138,7 +140,23 @@ LIMIT 10;
    FROM events
    WHERE hub = 'horoscopes'
      AND timestamp >= NOW() - INTERVAL '14 days'
-   GROUP BY cta_variant;
+   GROUP BY cta_variant, cta_headline
+   ORDER BY ctr DESC;
+   ```
+
+3. Alternative - Query by headline text directly from metadata:
+   ```sql
+   SELECT
+     metadata->>'cta_headline' as headline,
+     COUNT(CASE WHEN event_type = 'cta_impression' THEN 1 END) as impressions,
+     COUNT(CASE WHEN event_type = 'cta_clicked' THEN 1 END) as clicks,
+     ROUND(100.0 * COUNT(CASE WHEN event_type = 'cta_clicked' THEN 1 END) /
+       NULLIF(COUNT(CASE WHEN event_type = 'cta_impression' THEN 1 END), 0), 2) as ctr
+   FROM events
+   WHERE metadata->>'hub' = 'horoscopes'
+     AND timestamp >= NOW() - INTERVAL '14 days'
+   GROUP BY headline
+   ORDER BY ctr DESC;
    ```
 
 **Statistical Significance**:
@@ -272,6 +290,7 @@ LEFT JOIN converters cv ON c.user_id = cv.user_id;
    - **Update**: Refresh examples monthly via cron (already automated)
 
 4. **Document Changes**:
+
    ```markdown
    ## CTA Changes - February 2026
 
@@ -312,6 +331,8 @@ POST /api/telemetry/cta-impression
   "exampleType": "transit_to_natal",
   "exampleText": "Jupiter 17°58' Cancer ⚹ your natal Moon",
   "ctaVariant": "horoscopes_0",
+  "ctaHeadline": "This is your sun sign forecast",
+  "ctaSubline": "With your birth chart, you'd see: {EXAMPLE}\n\nTakes 2 minutes.",
   "anonymousId": "..."
 }
 ```
@@ -349,7 +370,9 @@ CREATE TABLE events (
   "cta_href": "/auth?signup=true",
   "example_type": "transit_to_natal",
   "example_text": "Jupiter 17°58' Cancer ⚹ your natal Moon",
-  "cta_variant": "horoscopes_0"
+  "cta_variant": "horoscopes_0",
+  "cta_headline": "This is your sun sign forecast",
+  "cta_subline": "With your birth chart, you'd see: {EXAMPLE}\n\nTakes 2 minutes."
 }
 ```
 

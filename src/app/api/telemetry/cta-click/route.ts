@@ -65,6 +65,14 @@ export async function POST(request: NextRequest) {
           typeof payload?.ctaVariant === 'string'
             ? payload.ctaVariant
             : undefined,
+        cta_headline:
+          typeof payload?.ctaHeadline === 'string'
+            ? payload.ctaHeadline
+            : undefined,
+        cta_subline:
+          typeof payload?.ctaSubline === 'string'
+            ? payload.ctaSubline
+            : undefined,
         referrer: request.headers.get('referer') || undefined,
       },
     });

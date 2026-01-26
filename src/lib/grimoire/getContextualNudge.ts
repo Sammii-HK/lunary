@@ -11,6 +11,8 @@ export type ContextualNudge = {
   exampleType?: string;
   exampleText?: string;
   ctaVariant?: string;
+  ctaHeadline?: string;
+  ctaSubline?: string;
 };
 
 type CTAExample = {
@@ -117,6 +119,8 @@ export function getContextualNudge(pathname: string): ContextualNudge {
     exampleType: example?.type,
     exampleText: example?.text,
     ctaVariant: `${hub}_${index}`,
+    ctaHeadline: base.headline,
+    ctaSubline: base.subline,
   };
 }
 
