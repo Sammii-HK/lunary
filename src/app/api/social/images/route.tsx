@@ -91,7 +91,12 @@ function getMoonPhasePng(weekOffset: number): string {
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
   const title = searchParams.get('title') || 'Weekly Cosmic Forecast';
-  const subtitle = searchParams.get('subtitle') || '';
+  const rawSubtitle = searchParams.get('subtitle') || '';
+  // Skip subtitle if it's the same as title (case-insensitive)
+  const subtitle =
+    rawSubtitle.trim().toLowerCase() === title.trim().toLowerCase()
+      ? ''
+      : rawSubtitle;
   const weekOffsetParam = searchParams.get('week') || '0';
   const weekOffset = parseInt(weekOffsetParam, 10);
   const weekRange = getWeekDates(weekOffset);

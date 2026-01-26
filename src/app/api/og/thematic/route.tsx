@@ -236,16 +236,30 @@ export async function GET(request: NextRequest): Promise<Response> {
 
     // Get symbol if not provided (and not using images)
     // Use dynamic loader symbol, then fallback to existing symbol lookup
-    const displaySymbol =
+    // Skip symbol if it matches the title (e.g., numerology "111" symbol = "111" title)
+    const rawSymbol =
       !needsImage &&
       (symbol || dynamicData?.symbol || getSymbolForContent(category, slug));
+    const displaySymbol =
+      rawSymbol &&
+      rawSymbol.toString().trim().toLowerCase() !==
+        formattedTitle.trim().toLowerCase()
+        ? rawSymbol
+        : null;
 
     // Get moon phase image if lunar category
     const moonImage = needsImage ? getMoonPhaseImage(slug) : null;
 
     // Get attribute string - prefer dynamic data
-    const attributeText =
+    // Skip if it matches the title (case-insensitive) to avoid duplicate headings
+    const rawAttributeText =
       subtitle || dynamicData?.attributes || getAttributeString(category, slug);
+    const attributeText =
+      rawAttributeText &&
+      rawAttributeText.trim().toLowerCase() !==
+        formattedTitle.trim().toLowerCase()
+        ? rawAttributeText
+        : null;
 
     // Get glow color for chakras - use dynamic color or fallback
     const chakraColor =
