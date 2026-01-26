@@ -8,6 +8,9 @@ export type ContextualNudge = {
   buttonLabel: string;
   href: string;
   action: 'authOrLink' | 'link';
+  exampleType?: string;
+  exampleText?: string;
+  ctaVariant?: string;
 };
 
 type CTAExample = {
@@ -102,12 +105,18 @@ export function getContextualNudge(pathname: string): ContextualNudge {
     action: 'authOrLink',
   };
 
+  // Get example for tracking
+  const example = getExampleForHub(hub, normalizedPath);
+
   // Inject examples into headline and subline
   return {
     hub,
     ...base,
     headline: injectExamples(base.headline, hub, normalizedPath),
     subline: injectExamples(base.subline, hub, normalizedPath),
+    exampleType: example?.type,
+    exampleText: example?.text,
+    ctaVariant: `${hub}_${index}`,
   };
 }
 

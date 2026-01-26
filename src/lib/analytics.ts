@@ -433,7 +433,69 @@ type CtaClickPayload = {
   label?: string;
   href?: string;
   pagePath?: string;
+  exampleType?: string;
+  exampleText?: string;
+  ctaVariant?: string;
 };
+
+type CtaImpressionPayload = {
+  hub?: string;
+  ctaId?: string;
+  location?: string;
+  label?: string;
+  href?: string;
+  pagePath?: string;
+  exampleType?: string;
+  exampleText?: string;
+  ctaVariant?: string;
+};
+
+export async function trackCtaImpression(
+  payload: CtaImpressionPayload,
+): Promise<void> {
+  try {
+    const sanitized = sanitizeEventPayload({
+      event: 'cta_clicked',
+      featureName: `${payload.ctaId}_impression`,
+      pagePath: payload.pagePath,
+      hub: payload.hub,
+      cta_id: payload.ctaId,
+      cta_location: payload.location,
+      cta_label: payload.label,
+      cta_href: payload.href,
+    });
+
+    track('cta_impression', sanitized);
+
+    const body = JSON.stringify({
+      hub: payload.hub,
+      ctaId: payload.ctaId,
+      location: payload.location,
+      label: payload.label,
+      href: payload.href,
+      pagePath: payload.pagePath,
+      exampleType: payload.exampleType,
+      exampleText: payload.exampleText,
+      ctaVariant: payload.ctaVariant,
+      anonymousId: getAnonymousId(),
+    });
+
+    if (typeof navigator !== 'undefined' && 'sendBeacon' in navigator) {
+      const blob = new Blob([body], { type: 'application/json' });
+      navigator.sendBeacon('/api/telemetry/cta-impression', blob);
+      return;
+    }
+
+    await fetch('/api/telemetry/cta-impression', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body,
+      keepalive: true,
+    });
+  } catch (error) {
+    console.error('Failed to track CTA impression:', error);
+  }
+}
 
 export async function trackCtaClick(payload: CtaClickPayload): Promise<void> {
   try {
@@ -457,6 +519,9 @@ export async function trackCtaClick(payload: CtaClickPayload): Promise<void> {
       label: payload.label,
       href: payload.href,
       pagePath: payload.pagePath,
+      exampleType: payload.exampleType,
+      exampleText: payload.exampleText,
+      ctaVariant: payload.ctaVariant,
       anonymousId: getAnonymousId(),
     });
 
