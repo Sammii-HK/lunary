@@ -1,4 +1,4 @@
-import { thematicPaletteConfig } from '@/constants/seo/generated-category-themes';
+import { thematicPaletteConfig } from '@/constants/seo/thematic-palette-config';
 
 /**
  * Symbol and Color Mappings for Thematic OG Images
