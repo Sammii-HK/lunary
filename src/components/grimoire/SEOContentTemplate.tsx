@@ -405,7 +405,7 @@ export function SEOContentTemplate({
           </div>
         )}
 
-        {components && components}
+        {components}
 
         {/* Meaning Section */}
         {meaning && (

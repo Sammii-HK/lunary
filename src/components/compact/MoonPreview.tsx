@@ -322,7 +322,7 @@ export const MoonPreview = () => {
         title={currentMoonPhase}
         subtitle={
           currentMoonConstellationPosition
-            ? `in ${currentMoonConstellationPosition} · ${illuminationDisplay}%`
+            ? `in ${currentMoonConstellationPosition}, ${illuminationDisplay}% illuminated`
             : `${illuminationDisplay}% illuminated`
         }
       />
