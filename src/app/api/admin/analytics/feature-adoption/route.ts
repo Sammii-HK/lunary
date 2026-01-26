@@ -7,11 +7,13 @@ const familyToEventType = (
 ): 'app_opened' | 'product_opened' | 'grimoire_viewed' => {
   switch (family) {
     case 'product':
+    default:
+      // Default to product_opened for feature adoption metrics
+      // Product MAU (signed-in users) is the correct denominator for product features
       return 'product_opened';
     case 'grimoire':
       return 'grimoire_viewed';
     case 'site':
-    default:
       return 'app_opened';
   }
 };
