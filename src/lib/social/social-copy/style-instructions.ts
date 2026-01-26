@@ -13,10 +13,11 @@ Voice guidelines:
 - Use concrete, specific details instead of vague metaphors
 - Write like you're texting someone who asked, not writing an article
 - Occasional bold claims or contrarian takes are encouraged
-- Let some posts be incomplete thoughts - humans don't always wrap everything perfectly
+- Let some posts be incomplete thoughts
 - Vary emotional tone: excited, matter-of-fact, conspiratorial, practical, challenging
-- NEVER use emojis - no emojis in any content
-- Never use em dashes`;
+- NEVER use emojis
+- NEVER use em dashes or hyphens to join clauses. Use full stops, commas, or colons instead.
+- Use proper capitalisation: always capitalise "I", start sentences with capital letters`;
 
 /**
  * Banned opening patterns to force variety
@@ -66,10 +67,13 @@ const POST_TYPE_FRAMEWORKS: Partial<Record<SocialPostType, string>> = {
 - Use varied combinations like: "witches, star gazers, astrologers, tarot readers"
 - Or: "crystal hoarders, moon lovers, chart nerds, cosmic wanderers"
 - Mix up the order and terms each time for variety
-- Second part introduces Lunary and mentions the current topic
-- Conversational, lowercase, like texting your community
-- Pattern: "dear [audience terms]\\n[Lunary intro mentioning topic and features]"
-- Example: "dear tarot readers, witches, astrologers, and moon lovers\\ni built lunary for you. {topic} is just one tool inside."`,
+- IMPORTANT: Do NOT mention any specific topic, theme, or category - keep it general about Lunary
+- Second part introduces Lunary focusing on the key USP: full birth chart personalisation
+- Always use "full birth chart" or "full natal chart" (not just "chart") to emphasize going beyond sun sign
+- Use proper capitalisation (especially "I"), conversational but grammatically correct
+- NEVER use em dashes or hyphens to join clauses. Use full stops, commas, or colons instead.
+- Pattern: "dear [audience terms]\\n[Lunary intro about full birth chart personalisation]"
+- Example: "dear tarot readers, witches, astrologers, and moon lovers\\nI built Lunary for you. Personalised to your full birth chart, not just your sun sign."`,
 
   question: `Format for question (engagement):
 - Specific, answerable question

@@ -161,6 +161,8 @@ export function buildFallbackCopy(pack: SourcePack): SocialCopyResult {
     }
     case 'persona': {
       // "dear [audience]" format with varied terms + Lunary intro
+      // Focus on USP: full birth chart personalisation (go beyond sun sign)
+      // No topic/category references
       const audienceTermPools = [
         [
           'witches',
@@ -198,10 +200,10 @@ export function buildFallbackCopy(pack: SourcePack): SocialCopyResult {
         ['star seekers', 'chart readers', 'moon trackers', 'cosmic curious'],
       ];
       const bodyTemplates = [
-        `i built lunary for you.\n${pack.topicTitle} is just one of the tools inside - along with personalised horoscopes, transits, tarot, and crystals.`,
-        `this one's about ${pack.topicTitle.toLowerCase()}.\nlunary has your daily horoscopes, transits, tarot pulls, and crystal guidance too - all in one place.`,
-        `lunary is where i put everything i wish i had when i started.\ntoday: ${pack.topicTitle.toLowerCase()}. tomorrow it might be your transits or a tarot pull.`,
-        `i made lunary for moments like this.\n${pack.topicTitle.toLowerCase()}, personalised horoscopes, transits, tarot, crystals - all based on your chart.`,
+        'I built Lunary for you.\nPersonalised horoscopes, transits, tarot, and crystals. All based on your full birth chart, not just your sun sign.',
+        'Lunary goes beyond your sun sign.\nYour full natal chart shapes everything: horoscopes, transits, tarot pulls, crystal guidance. All personalised to you.',
+        'Lunary is where I put everything I wish I had when I started.\nEverything based on your full birth chart. Horoscopes, transits, tarot, crystals.',
+        'I made Lunary for moments like this.\nPersonalised to your full natal chart. Not generic sun sign content. Horoscopes, transits, tarot, crystals.',
       ];
       const audienceTerms =
         audienceTermPools[Math.floor(Math.random() * audienceTermPools.length)];

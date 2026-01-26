@@ -46,28 +46,21 @@ export async function POST(request: NextRequest) {
     }
 
     if (action === 'clear_all') {
+      // Delete ALL posts regardless of status (pending, approved, rejected, draft)
       const result = await sql`
         DELETE FROM social_posts
-        WHERE status IN ('pending', 'approved')
+        WHERE status IN ('pending', 'approved', 'rejected', 'draft')
         RETURNING id
       `;
+
+      // Clear orphaned video jobs (jobs without corresponding posts)
       await sql`
-        DELETE FROM video_jobs vj
-        WHERE vj.status IN ('pending', 'failed')
-          AND NOT EXISTS (
-            SELECT 1
-            FROM video_scripts vs
-            JOIN social_posts sp
-              ON sp.topic = vs.facet_title
-             AND sp.scheduled_date::date = vs.scheduled_date
-             AND sp.week_theme = vs.theme_name
-            WHERE vs.id = vj.script_id
-          )
+        DELETE FROM video_jobs
       `;
 
       return NextResponse.json({
         success: true,
-        message: `Cleared ${result.rows.length} pending posts`,
+        message: `Cleared ${result.rows.length} posts and video jobs`,
         count: result.rows.length,
       });
     }

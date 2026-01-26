@@ -145,8 +145,11 @@ async function generateThematicWeeklyPosts(
   } = await import('@/lib/social/weekly-themes');
   const { getEducationalImageUrl } =
     await import('@/lib/social/educational-images');
-  const { generateAndSaveWeeklyScripts, getVideoScripts } =
-    await import('@/lib/social/video-script-generator');
+  const {
+    generateAndSaveWeeklyScripts,
+    getVideoScripts,
+    generateSecondaryScriptsOnly,
+  } = await import('@/lib/social/video-script-generator');
 
   const ensureVideoJobsTable = async () => {
     await sql`
@@ -274,22 +277,25 @@ async function generateThematicWeeklyPosts(
       }
     }
 
+    // Delete ALL posts for this week (not just pending/approved)
     await sql`
       DELETE FROM social_posts
-      WHERE status IN ('pending', 'approved')
-        AND scheduled_date::date >= ${weekStartKey}
+      WHERE scheduled_date::date >= ${weekStartKey}
         AND scheduled_date::date <= ${weekEndKey}
     `;
 
+    // Delete all video scripts for this week
     await sql`
       DELETE FROM video_scripts
       WHERE scheduled_date >= ${weekStartKey}
         AND scheduled_date <= ${weekEndKey}
     `;
 
+    // Delete all video jobs for this week
     await sql`
       DELETE FROM video_jobs
-      WHERE week_start = ${weekStartKey}
+      WHERE week_start >= ${weekStartKey}
+        AND week_start <= ${weekEndKey}
     `;
   }
 
@@ -705,34 +711,63 @@ async function generateThematicWeeklyPosts(
         (a, b) => (b.createdAt?.getTime() ?? 0) - (a.createdAt?.getTime() ?? 0),
       )[0] || null;
 
-    if (
-      primaryTikTokScripts.length === currentTheme.facets.length &&
-      latestYouTubeScript
-    ) {
-      videoScripts = {
-        theme: currentTheme,
-        tiktokScripts: existingTikTokScripts,
-        youtubeScript: latestYouTubeScript,
-        weekStartDate,
-      };
-    } else {
-      videoScripts = await generateAndSaveWeeklyScripts(
-        weekStartDate,
-        themeIndex,
+    // Check if secondary scripts exist when includeSecondaryThemes is enabled
+    const secondaryTikTokScripts = allTikTokScripts.filter(
+      (script) => script.secondaryThemeId != null,
+    );
+    const needsSecondaryScripts =
+      includeSecondaryThemes &&
+      secondaryTikTokScripts.length < currentTheme.facets.length;
+
+    // ALWAYS regenerate video scripts fresh to avoid stale/outdated content
+    // Delete any existing scripts, jobs, and video posts for this week first
+    const weekStartKeyVideo = weekStartDate.toISOString().split('T')[0];
+    const weekEndVideo = new Date(weekStartDate);
+    weekEndVideo.setDate(weekEndVideo.getDate() + 7);
+    const weekEndKeyVideo = weekEndVideo.toISOString().split('T')[0];
+
+    console.log('🎬 [VIDEO] Clearing old scripts, jobs, and video posts...');
+
+    // Delete video scripts
+    await sql`
+      DELETE FROM video_scripts
+      WHERE scheduled_date >= ${weekStartKeyVideo}
+        AND scheduled_date < ${weekEndKeyVideo}
+    `;
+
+    // Delete video jobs for this week
+    await sql`
+      DELETE FROM video_jobs
+      WHERE week_start >= ${weekStartKeyVideo}
+        AND week_start < ${weekEndKeyVideo}
+    `;
+
+    // Delete ALL video posts for this week (regardless of status)
+    await sql`
+      DELETE FROM social_posts
+      WHERE post_type = 'video'
+        AND scheduled_date::date >= ${weekStartKeyVideo}
+        AND scheduled_date::date < ${weekEndKeyVideo}
+    `;
+
+    // Generate all scripts fresh (primary + secondary + YouTube)
+    videoScripts = await generateAndSaveWeeklyScripts(
+      weekStartDate,
+      themeIndex,
+    );
+    videoScriptsGenerated = true;
+
+    if (includeSecondaryThemes) {
+      const refreshedScripts = dedupeScriptsByDate(
+        (await getVideoScripts({
+          platform: 'tiktok',
+          weekStart: weekStartDate,
+        })) || [],
       );
-      videoScriptsGenerated = true;
-      if (includeSecondaryThemes) {
-        const refreshedScripts = dedupeScriptsByDate(
-          (await getVideoScripts({
-            platform: 'tiktok',
-            weekStart: weekStartDate,
-          })) || [],
-        );
-        videoScripts = {
-          ...videoScripts,
-          tiktokScripts: refreshedScripts,
-        };
-      }
+      videoScripts = {
+        ...videoScripts,
+        tiktokScripts: refreshedScripts,
+      };
     }
     console.log(
       `🎬 [VIDEO] Generated ${videoScripts.tiktokScripts.length} daily shorts + 1 YouTube script`,
