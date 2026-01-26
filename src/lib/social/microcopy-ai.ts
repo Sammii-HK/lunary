@@ -230,10 +230,13 @@ export const generatePersonaPost = async ({
   personaList,
   personaBodies,
 }: PersonaInput): Promise<string> => {
-  const personas = personaList.slice(0, 4);
+  // Use facet-based audience terms to prevent duplication (e.g., no "moon lovers, moon watchers")
+  const { buildAudienceTerms } =
+    await import('./shared/constants/persona-templates');
+  const audienceTerms = buildAudienceTerms(4);
   const styleGuide =
     personaBodies[seed % personaBodies.length] || personaBodies[0];
-  const prompt = `Write a Lunary persona post in UK English. Provide only one text block. First line must be "dear ..." listing ${personas.join(
+  const prompt = `Write a Lunary persona post in UK English. Provide only one text block. First line must be "dear ..." listing ${audienceTerms.join(
     ', ',
   )} with a single line break before the body.
 

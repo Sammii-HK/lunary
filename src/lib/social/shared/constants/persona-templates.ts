@@ -5,83 +5,84 @@
  */
 
 /**
- * Pools of audience terms to mix and match for variety
- * Each pool should be used as a complete set, shuffled or varied
+ * Audience term facets - each facet has variations
+ * Pick ONE term from each facet to avoid duplication (e.g., no "moon lovers, moon watchers")
+ */
+export const AUDIENCE_FACETS: Record<string, string[]> = {
+  moon: ['moon lovers', 'moon watchers', 'lunar folk', 'moon trackers'],
+  tarot: [
+    'tarot readers',
+    'tarot pullers',
+    'tarot enthusiasts',
+    'tarot curious',
+  ],
+  crystals: [
+    'crystal hoarders',
+    'crystal collectors',
+    'crystal keepers',
+    'crystal lovers',
+  ],
+  astrology: [
+    'astrologers',
+    'astrology lovers',
+    'horoscope readers',
+    'horoscope checkers',
+  ],
+  cosmic: [
+    'cosmic wanderers',
+    'cosmic explorers',
+    'cosmic seekers',
+    'cosmic souls',
+    'cosmic curious',
+  ],
+  charts: [
+    'chart nerds',
+    'chart readers',
+    'chart obsessives',
+    'birth chart obsessives',
+  ],
+  stars: ['star gazers', 'star seekers', 'star chasers'],
+  witches: ['witches'],
+  transits: ['transit trackers', 'astro nerds'],
+};
+
+/**
+ * Get a random term from a facet
+ */
+const pickFromFacet = (facet: string[]): string =>
+  facet[Math.floor(Math.random() * facet.length)];
+
+/**
+ * Build audience terms by picking one from each of 4-5 random facets
+ * This prevents duplication like "moon lovers, moon watchers"
+ */
+export function buildAudienceTerms(count: number = 4): string[] {
+  const facetKeys = Object.keys(AUDIENCE_FACETS);
+  const shuffled = [...facetKeys].sort(() => Math.random() - 0.5);
+  const selectedFacets = shuffled.slice(0, Math.min(count, facetKeys.length));
+  return selectedFacets.map((key) => pickFromFacet(AUDIENCE_FACETS[key]));
+}
+
+/**
+ * @deprecated Use buildAudienceTerms() instead
+ * Legacy pools kept for backwards compatibility
  */
 export const AUDIENCE_TERM_POOLS = [
-  [
-    'witches',
-    'star gazers',
-    'astrologers',
-    'tarot readers',
-    'cosmic wanderers',
-  ],
+  ['witches', 'star gazers', 'astrologers', 'tarot readers'],
   ['tarot readers', 'witches', 'astrologers', 'moon lovers'],
-  [
-    'crystal hoarders',
-    'moon lovers',
-    'tarot readers',
-    'astrologers',
-    'chart nerds',
-  ],
+  ['crystal hoarders', 'moon lovers', 'tarot readers', 'astrologers'],
   [
     'cosmic explorers',
-    'birth chart obsessives',
+    'chart obsessives',
     'tarot pullers',
     'crystal collectors',
   ],
-  ['moon watchers', 'transit trackers', 'horoscope readers', 'cosmic seekers'],
-  ['astrology lovers', 'tarot enthusiasts', 'crystal keepers', 'lunar folk'],
-  ['star seekers', 'chart readers', 'moon trackers', 'cosmic curious'],
-  [
-    'horoscope checkers',
-    'crystal lovers',
-    'moon phase trackers',
-    'astro nerds',
-  ],
-  [
-    'tarot pullers',
-    'birth chart readers',
-    'crystal collectors',
-    'cosmic souls',
-  ],
-  ['lunar lovers', 'star chasers', 'chart obsessives', 'tarot curious'],
 ];
 
 /**
- * Individual audience terms that can be combined
+ * @deprecated Use AUDIENCE_FACETS instead
  */
-export const AUDIENCE_TERMS = [
-  'witches',
-  'star gazers',
-  'astrologers',
-  'tarot readers',
-  'cosmic wanderers',
-  'moon lovers',
-  'crystal hoarders',
-  'chart nerds',
-  'cosmic explorers',
-  'birth chart obsessives',
-  'tarot pullers',
-  'crystal collectors',
-  'moon watchers',
-  'transit trackers',
-  'horoscope readers',
-  'cosmic seekers',
-  'astrology lovers',
-  'tarot enthusiasts',
-  'crystal keepers',
-  'lunar folk',
-  'star seekers',
-  'chart readers',
-  'moon trackers',
-  'cosmic curious',
-  'horoscope checkers',
-  'astro nerds',
-  'cosmic souls',
-  'lunar lovers',
-  'star chasers',
-];
+export const AUDIENCE_TERMS = Object.values(AUDIENCE_FACETS).flat();
 
 /**
  * Body templates for after the "dear [audience]" line
