@@ -35,7 +35,8 @@ export type ThemeCategory =
   | 'crystals'
   | 'numerology'
   | 'chakras'
-  | 'sabbat';
+  | 'sabbat'
+  | 'runes';
 
 export interface WeeklyTheme {
   id: string;

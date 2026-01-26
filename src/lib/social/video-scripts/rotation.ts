@@ -70,7 +70,23 @@ export async function getAngleForTopic(
 }
 
 /**
+ * Related category groups - secondary themes should come from same/related categories
+ */
+const RELATED_CATEGORIES: Record<string, string[]> = {
+  numerology: ['numerology'], // Keep numerology themes together
+  zodiac: ['zodiac', 'planetary'], // Zodiac and planets are related
+  planetary: ['zodiac', 'planetary'],
+  tarot: ['tarot'], // Keep tarot themes together
+  lunar: ['lunar', 'planetary'],
+  crystals: ['crystals', 'chakras'], // Crystals and chakras are related
+  chakras: ['crystals', 'chakras'],
+  sabbat: ['sabbat', 'lunar'],
+  runes: ['runes'],
+};
+
+/**
  * Select secondary theme based on usage and cooldown
+ * Prefers themes from the same or related categories
  */
 export async function selectSecondaryTheme(
   primaryThemeId: string,
@@ -78,6 +94,14 @@ export async function selectSecondaryTheme(
 ): Promise<WeeklyTheme> {
   const { sql } = await import('@vercel/postgres');
   await ensureContentRotationSecondaryTable();
+
+  // Find primary theme to get its category
+  const primaryTheme = categoryThemes.find((t) => t.id === primaryThemeId);
+  const primaryCategory = primaryTheme?.category || 'default';
+  const relatedCategories = RELATED_CATEGORIES[primaryCategory] || [
+    primaryCategory,
+  ];
+
   const usageResult = await sql`
     SELECT theme_id, secondary_usage_count, last_secondary_used_at
     FROM content_rotation_secondary
@@ -106,9 +130,18 @@ export async function selectSecondaryTheme(
   const cutoff = new Date(asOfDate);
   cutoff.setDate(cutoff.getDate() - SECONDARY_THEME_COOLDOWN_DAYS);
 
-  const buildCandidates = (ignoreCooldown: boolean, ignoreRecent: boolean) =>
+  const buildCandidates = (
+    ignoreCooldown: boolean,
+    ignoreRecent: boolean,
+    allowAnyCategory: boolean,
+  ) =>
     categoryThemes
       .filter((theme) => theme.id !== primaryThemeId)
+      // Prefer same/related categories unless allowAnyCategory
+      .filter(
+        (theme) =>
+          allowAnyCategory || relatedCategories.includes(theme.category),
+      )
       .filter((theme) => ignoreRecent || !recentSecondaryIds.has(theme.id))
       .filter((theme) => {
         if (ignoreCooldown) return true;
@@ -124,12 +157,17 @@ export async function selectSecondaryTheme(
         };
       });
 
-  let candidates = buildCandidates(false, false);
+  // Try same/related category first
+  let candidates = buildCandidates(false, false, false);
   if (candidates.length === 0) {
-    candidates = buildCandidates(true, false);
+    candidates = buildCandidates(true, false, false);
   }
   if (candidates.length === 0) {
-    candidates = buildCandidates(true, true);
+    candidates = buildCandidates(true, true, false);
+  }
+  // Fall back to any category if no related themes available
+  if (candidates.length === 0) {
+    candidates = buildCandidates(true, true, true);
   }
   if (candidates.length === 0) {
     return (

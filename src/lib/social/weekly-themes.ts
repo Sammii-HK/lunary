@@ -27,6 +27,7 @@ export const domainHashtags: Record<ThemeCategory, string> = {
   numerology: '#numerology',
   crystals: '#crystalhealing',
   chakras: '#spirituality',
+  runes: '#runes',
 };
 
 // ============================================================================
@@ -168,6 +169,7 @@ export function generateHashtags(
 
 /**
  * Get the week's content plan
+ * Filters out duplicate facets when a theme has fewer than 7 unique facets
  */
 export function getWeeklyContentPlan(
   weekStartDate: Date,
@@ -193,6 +195,9 @@ export function getWeeklyContentPlan(
     'Sunday',
   ];
 
+  // Track used facet titles to prevent duplicates within the same week
+  const usedFacetTitles = new Set<string>();
+
   for (let i = 0; i < 7; i++) {
     const date = new Date(weekStartDate);
     date.setDate(weekStartDate.getDate() + i);
@@ -203,6 +208,14 @@ export function getWeeklyContentPlan(
       facetOffset,
       includeSabbats,
     );
+
+    // Skip duplicate facets (can happen when theme has fewer than 7 facets)
+    const facetKey = `${theme.id}-${facet.title}`;
+    if (usedFacetTitles.has(facetKey)) {
+      continue;
+    }
+    usedFacetTitles.add(facetKey);
+
     const hashtags = generateHashtags(theme, facet);
 
     plan.push({

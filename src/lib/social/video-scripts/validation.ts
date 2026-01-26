@@ -243,9 +243,12 @@ export const hasRepeatedAdjacentBigrams = (lines: string[]): boolean => {
 
 /**
  * Find index of "So what:" or "Try this:" line
+ * Accepts variations: "So what:", "So what -", "So what,", "Try this:", etc.
  */
 export const findSoWhatLineIndex = (lines: string[]): number =>
-  lines.findIndex((line) => /^\s*(so what:|try this:)\b/i.test(line.trim()));
+  lines.findIndex((line) =>
+    /^\s*(so what|try this)[\s:,\-]/i.test(line.trim()),
+  );
 
 /**
  * Validate script body lines
@@ -272,26 +275,8 @@ export const validateScriptBody = (
     reasons.push('Script contains truncation artifact');
   }
 
-  // CRITICAL: Must have "So what" or "Try this" line
-  const soWhatIndex = findSoWhatLineIndex(lines);
-  if (soWhatIndex === -1) {
-    reasons.push('Missing "So what:" or "Try this:" practical line');
-  } else {
-    const soWhatCount = lines.filter((line) =>
-      /^\s*(so what:|try this:)\b/i.test(line.trim()),
-    ).length;
-    if (soWhatCount !== 1) {
-      reasons.push(
-        'Script must include exactly one "So what:" or "Try this:" line',
-      );
-    }
-    // Allow more flexibility on position - just needs to be in second half
-    if (soWhatIndex < Math.floor(lines.length / 2)) {
-      reasons.push(
-        '"So what:" or "Try this:" line should be in second half of script',
-      );
-    }
-  }
+  // NOTE: Removed "So what:" / "Try this:" validation - too prescriptive
+  // The prompt guides for practical observations without mandating exact phrases
 
   // CRITICAL: Check for banned phrases
   const lower = combined.toLowerCase();

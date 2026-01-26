@@ -67,4 +67,5 @@ export { generateYouTubeScript } from './video-scripts/youtube';
 export {
   generateWeeklyVideoScripts,
   generateAndSaveWeeklyScripts,
+  generateSecondaryScriptsOnly,
 } from './video-scripts/generation';

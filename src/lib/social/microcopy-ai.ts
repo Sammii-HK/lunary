@@ -235,14 +235,24 @@ export const generatePersonaPost = async ({
     personaBodies[seed % personaBodies.length] || personaBodies[0];
   const prompt = `Write a Lunary persona post in UK English. Provide only one text block. First line must be "dear ..." listing ${personas.join(
     ', ',
-  )} with a single line break before the body. Keep the body 1-2 sentences that describe your worldview and audience focus, calm and inclusive, avoiding references to features, access, or promo codes. Do not use em dashes. Reference this context: ${sourceSnippet}.
+  )} with a single line break before the body.
+
+IMPORTANT: Do NOT mention any specific topic, theme, or category (like "${themeName}", "${category}", or "${dayTopic}"). Keep it general about Lunary.
+
+The body should be 1-2 sentences focusing on Lunary's key USP: everything is personalised to your FULL BIRTH CHART (or "full natal chart"), not just your sun sign. Mention features like horoscopes, transits, tarot, crystals. Use "full birth chart" or "full natal chart" instead of just "chart".
+
+FORMATTING RULES:
+- Use proper capitalisation (always capitalise "I", start sentences with capitals)
+- NEVER use em dashes or hyphens to join clauses. Use full stops, commas, or colons instead.
+- Keep it calm and inclusive, avoiding promo codes.
+
 ${FACTUAL_GUARDRAIL_INSTRUCTION}
 ${CLOSING_PARTICIPATION_INSTRUCTION}
 Use this tone reference: "${styleGuide}".`;
   const text = await ensureDistinct(
     prompt,
     personaBodies,
-    'Be more distinct from the example persona language while keeping the format calm and reflective.',
+    'Be more distinct from the example persona language while keeping the format calm and reflective. Emphasize full birth chart personalisation. Use proper capitalisation.',
   );
   return text;
 };
