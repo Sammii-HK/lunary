@@ -111,12 +111,17 @@ export const useLunaryChat = () => {
     });
   }, [status, isLoading, error]);
 
-  // Process data parts for metadata
+  // Process data parts for metadata (handles both v5 and v6 SDK formats)
   useEffect(() => {
     if (data && Array.isArray(data)) {
       data.forEach((item: unknown) => {
-        const dataItem = item as LunaryMetadata;
-        if (dataItem?.type === 'metadata') {
+        const dataItem = item as LunaryMetadata & { data?: LunaryMetadata };
+        // v6 format: { type: 'data-metadata', data: { type: 'metadata', ... } }
+        if (dataItem?.type === 'data-metadata' && dataItem.data) {
+          handleMetadata(dataItem.data);
+        }
+        // v5 format: { type: 'metadata', ... }
+        else if (dataItem?.type === 'metadata') {
           handleMetadata(dataItem);
         }
       });

@@ -132,7 +132,7 @@ export interface ComposeVideoOptions {
     text: string;
     startTime: number;
     endTime: number;
-    style?: 'chapter' | 'stamp' | 'title';
+    style?: 'chapter' | 'stamp' | 'title' | 'hook' | 'cta';
   }>;
   backgroundMusicPath?: string | null;
   hueShiftBase?: number;

@@ -11,9 +11,6 @@ import { Config } from '@remotion/cli/config';
 // Set the entry point for Remotion
 Config.setEntryPoint('./src/remotion/index.ts');
 
-// Enable webpack caching for faster rebuilds
-Config.setWebpackCaching(true);
-
 // Set output codec
 Config.setCodec('h264');
 

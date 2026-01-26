@@ -107,13 +107,24 @@ const defaultLongFormProps: LongFormVideoProps = {
   },
 };
 
+// Cast components to work around Remotion's strict typing
+const ShortFormVideoComponent = ShortFormVideo as unknown as React.FC<
+  Record<string, unknown>
+>;
+const MediumFormVideoComponent = MediumFormVideo as unknown as React.FC<
+  Record<string, unknown>
+>;
+const LongFormVideoComponent = LongFormVideo as unknown as React.FC<
+  Record<string, unknown>
+>;
+
 export const RemotionVideo: React.FC = () => {
   return (
     <>
       {/* Short Form - TikTok/Stories (9:16) */}
       <Composition
         id='ShortFormVideo'
-        component={ShortFormVideo}
+        component={ShortFormVideoComponent}
         durationInFrames={450} // 15 seconds
         fps={30}
         width={DIMENSIONS.story.width}
@@ -124,7 +135,7 @@ export const RemotionVideo: React.FC = () => {
       {/* Medium Form - Reels/TikTok Extended (9:16) */}
       <Composition
         id='MediumFormVideo'
-        component={MediumFormVideo}
+        component={MediumFormVideoComponent}
         durationInFrames={1800} // 60 seconds
         fps={30}
         width={DIMENSIONS.story.width}
@@ -135,7 +146,7 @@ export const RemotionVideo: React.FC = () => {
       {/* Long Form - YouTube (16:9) */}
       <Composition
         id='LongFormVideo'
-        component={LongFormVideo}
+        component={LongFormVideoComponent}
         durationInFrames={9000} // 5 minutes
         fps={30}
         width={DIMENSIONS.youtube.width}

@@ -1,4 +1,8 @@
-import { streamText, StreamData } from 'ai';
+import {
+  streamText,
+  createUIMessageStream,
+  createUIMessageStreamResponse,
+} from 'ai';
 import { openai } from '@ai-sdk/openai';
 import { detectAssistCommand, runAssistCommand } from './assist';
 import { buildReflectionPrompt } from './reflection';
@@ -140,18 +144,28 @@ export const createStreamingChatResponse = async ({
   }
 
   const tokensIn = estimateTokenCount(userMessage);
-  const data = new StreamData();
   const startTime = Date.now();
 
-  const result = streamText({
-    model: openai('gpt-4o-mini'),
-    system: systemPrompt,
-    messages,
-    maxTokens,
-    temperature: 0.9,
-    onFinish: async ({ text, usage: aiUsage }) => {
+  // Create UI message stream for v6 SDK
+  const stream = createUIMessageStream({
+    execute: async ({ writer }) => {
+      const result = streamText({
+        model: openai('gpt-4o-mini'),
+        system: systemPrompt,
+        messages,
+        maxOutputTokens: maxTokens,
+        temperature: 0.9,
+      });
+
+      // Merge the text stream into the UI message stream
+      writer.merge(result.toUIMessageStream());
+
+      // Wait for completion and process metadata
+      const text = await result.text;
+      const aiUsage = await result.usage;
+
       try {
-        const tokensOut = aiUsage?.completionTokens || estimateTokenCount(text);
+        const tokensOut = aiUsage?.outputTokens || estimateTokenCount(text);
 
         const usageResult = await updateUsage({
           userId,
@@ -160,8 +174,6 @@ export const createStreamingChatResponse = async ({
           tokensOut,
           now,
         });
-
-        // Ritual count system removed - no longer tracking ritual usage
 
         const timestamp = now.toISOString();
         const { thread } = await appendToThread({
@@ -195,10 +207,10 @@ export const createStreamingChatResponse = async ({
         });
 
         // Extract and save personal facts from this conversation (encrypted)
-        const userMessages = thread.messages
+        const userMsgs = thread.messages
           .filter((m) => m.role === 'user')
           .map((m) => m.content);
-        const extractedFacts = extractPersonalFacts(userMessages);
+        const extractedFacts = extractPersonalFacts(userMsgs);
         if (extractedFacts.length > 0) {
           await saveUserMemory(userId, extractedFacts, thread.id).catch(
             (error) => {
@@ -236,20 +248,24 @@ export const createStreamingChatResponse = async ({
             ? getMemorySnippets(userId, memorySnippetLimit)
             : memorySnippets;
 
-        data.append({
-          type: 'metadata',
-          threadId: thread.id,
-          planId,
-          usage: {
-            used: usageResult.usage.usedMessages,
-            limit: usageResult.dailyLimit,
-            tokensIn: usageResult.usage.tokensIn,
-            tokensOut: usageResult.usage.tokensOut,
+        // Write metadata as a data part (v6 pattern)
+        writer.write({
+          type: 'data-metadata',
+          data: {
+            type: 'metadata',
+            threadId: thread.id,
+            planId,
+            usage: {
+              used: usageResult.usage.usedMessages,
+              limit: usageResult.dailyLimit,
+              tokensIn: usageResult.usage.tokensIn,
+              tokensOut: usageResult.usage.tokensOut,
+            },
+            dailyHighlight: dailyHighlight ?? null,
+            assistSnippet: assistSnippet ?? null,
+            reflection,
+            memories: updatedMemorySnippets,
           },
-          dailyHighlight: dailyHighlight ?? null,
-          assistSnippet: assistSnippet ?? null,
-          reflection,
-          memories: updatedMemorySnippets,
         } as any);
 
         await recordAiInteraction({
@@ -267,19 +283,17 @@ export const createStreamingChatResponse = async ({
           distinctId: userId,
           model: 'gpt-4o-mini',
           provider: 'openai',
-          inputTokens: aiUsage?.promptTokens || tokensIn,
-          outputTokens: aiUsage?.completionTokens || tokensOut,
+          inputTokens: aiUsage?.inputTokens || tokensIn,
+          outputTokens: aiUsage?.outputTokens || tokensOut,
           latencyMs: Date.now() - startTime,
           traceId: thread.id,
           success: true,
         });
       } catch (error) {
-        console.error('[AI Stream] onFinish error:', error);
-      } finally {
-        await data.close();
+        console.error('[AI Stream] Error processing metadata:', error);
       }
     },
   });
 
-  return result.toDataStreamResponse({ data });
+  return createUIMessageStreamResponse({ stream });
 };
