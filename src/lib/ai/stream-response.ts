@@ -1,4 +1,4 @@
-import { streamText, StreamData } from 'ai';
+import { streamText } from 'ai';
 import { openai } from '@ai-sdk/openai';
 import { detectAssistCommand, runAssistCommand } from './assist';
 import { buildReflectionPrompt } from './reflection';
@@ -140,18 +140,18 @@ export const createStreamingChatResponse = async ({
   }
 
   const tokensIn = estimateTokenCount(userMessage);
-  const data = new StreamData();
   const startTime = Date.now();
+
+  let streamMetadata: any = null;
 
   const result = streamText({
     model: openai('gpt-4o-mini'),
     system: systemPrompt,
     messages,
-    maxTokens,
     temperature: 0.9,
     onFinish: async ({ text, usage: aiUsage }) => {
       try {
-        const tokensOut = aiUsage?.completionTokens || estimateTokenCount(text);
+        const tokensOut = aiUsage?.outputTokens || estimateTokenCount(text);
 
         const usageResult = await updateUsage({
           userId,
@@ -236,7 +236,8 @@ export const createStreamingChatResponse = async ({
             ? getMemorySnippets(userId, memorySnippetLimit)
             : memorySnippets;
 
-        data.append({
+        // Store metadata to be returned with the stream
+        streamMetadata = {
           type: 'metadata',
           threadId: thread.id,
           planId,
@@ -250,7 +251,7 @@ export const createStreamingChatResponse = async ({
           assistSnippet: assistSnippet ?? null,
           reflection,
           memories: updatedMemorySnippets,
-        } as any);
+        };
 
         await recordAiInteraction({
           userId,
@@ -267,19 +268,51 @@ export const createStreamingChatResponse = async ({
           distinctId: userId,
           model: 'gpt-4o-mini',
           provider: 'openai',
-          inputTokens: aiUsage?.promptTokens || tokensIn,
-          outputTokens: aiUsage?.completionTokens || tokensOut,
+          inputTokens: aiUsage?.inputTokens || tokensIn,
+          outputTokens: aiUsage?.outputTokens || tokensOut,
           latencyMs: Date.now() - startTime,
           traceId: thread.id,
           success: true,
         });
       } catch (error) {
         console.error('[AI Stream] onFinish error:', error);
-      } finally {
-        await data.close();
       }
     },
   });
 
-  return result.toDataStreamResponse({ data });
+  // AI SDK v6: Create a custom data stream response
+  // We'll wrap the text stream and append metadata when onFinish completes
+  const textStream = result.textStream;
+  const encoder = new TextEncoder();
+
+  const customStream = new ReadableStream({
+    async start(controller) {
+      try {
+        // Stream all the text chunks first
+        for await (const chunk of textStream) {
+          controller.enqueue(encoder.encode(chunk));
+        }
+
+        // Wait a bit for onFinish to complete and set streamMetadata
+        await new Promise((resolve) => setTimeout(resolve, 100));
+
+        // Append metadata as a special chunk after text is done
+        if (streamMetadata) {
+          const metadataChunk = `\n\n__METADATA__:${JSON.stringify(streamMetadata)}`;
+          controller.enqueue(encoder.encode(metadataChunk));
+        }
+
+        controller.close();
+      } catch (error) {
+        controller.error(error);
+      }
+    },
+  });
+
+  return new Response(customStream, {
+    headers: {
+      'Content-Type': 'text/plain; charset=utf-8',
+      'X-Content-Type-Options': 'nosniff',
+    },
+  });
 };

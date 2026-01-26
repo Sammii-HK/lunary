@@ -75,7 +75,6 @@ export async function generateContent({
     system: systemPrompt,
     prompt: fullPrompt,
     temperature,
-    maxTokens,
   });
 
   return result.text.trim();
