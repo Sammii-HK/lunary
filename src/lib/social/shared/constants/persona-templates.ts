@@ -85,15 +85,17 @@ export const AUDIENCE_TERMS = [
 
 /**
  * Body templates for after the "dear [audience]" line
- * Use {topic} as placeholder for the current topic
+ * Focus on Lunary's USP: full birth chart personalisation (go beyond your sun sign)
+ * No topic/category references - keep it about the app and community
+ * Use proper capitalisation (especially "I") and avoid em dashes/hyphens
  */
 export const PERSONA_BODY_TEMPLATES = [
-  'i built lunary for you.\n{topic} is just one of the tools inside - along with personalised horoscopes, transits, tarot, and crystals.',
-  "this one's about {topic}.\nlunary has your daily horoscopes, transits, tarot pulls, and crystal guidance too - all in one place.",
-  'lunary is where i put everything i wish i had when i started.\ntoday: {topic}. tomorrow it might be your transits or a tarot pull.',
-  'i made lunary for moments like this.\n{topic}, personalised horoscopes, transits, tarot, crystals - all based on your chart.',
-  "i'm opening lunary's beta and gifting you a free year.\n{topic} is one of many features - horoscopes, transits, tarot, crystals, all personalised to your chart.",
-  'lunary is live.\n{topic}, daily horoscopes, birth chart breakdowns, tarot readings, crystal guidance - all in one app.',
+  'I built Lunary for you.\nPersonalised horoscopes, transits, tarot, and crystals. All based on your full birth chart, not just your sun sign.',
+  'Lunary goes beyond your sun sign.\nYour full natal chart shapes everything: horoscopes, transits, tarot pulls, crystal guidance. All personalised to you.',
+  'Lunary is where I put everything I wish I had when I started.\nEverything based on your full birth chart. Horoscopes, transits, tarot, crystals.',
+  'I made Lunary for moments like this.\nPersonalised to your full natal chart. Not generic sun sign content. Horoscopes, transits, tarot, crystals.',
+  "I'm opening Lunary's beta and gifting you a free year.\nEverything personalised to your full birth chart. Horoscopes, transits, tarot, crystals.",
+  'Lunary is live.\nDaily horoscopes, transits, tarot readings, crystal guidance. All based on your complete natal chart, not just your sun sign.',
 ];
 
 /**
