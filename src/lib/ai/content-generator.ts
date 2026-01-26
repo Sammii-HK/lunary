@@ -75,7 +75,7 @@ export async function generateContent({
     system: systemPrompt,
     prompt: fullPrompt,
     temperature,
-    maxTokens,
+    maxOutputTokens: maxTokens,
   });
 
   return result.text.trim();
@@ -105,7 +105,7 @@ export async function generateStructuredContent<T extends ZodSchema>({
     schema,
     schemaName,
     temperature,
-    maxTokens,
+    maxOutputTokens: maxTokens,
   });
 
   return result.object as z.infer<T>;

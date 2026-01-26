@@ -127,6 +127,7 @@ export interface ComposeVideoOptions {
   subtitlesText?: string;
   subtitlesHighlightTerms?: string[];
   subtitlesHighlightColor?: string;
+  // Overlays for hook, CTA, chapter titles, stamps etc
   overlays?: Array<{
     text: string;
     startTime: number;
@@ -164,6 +165,10 @@ export async function composeVideo(
     hueShiftMaxDelta = 12,
     lockIntroHue = false,
   } = options;
+
+  console.log(
+    `🎬 composeVideo: format=${format}, subtitlesText length=${subtitlesText?.length || 0}, overlays=${overlays?.length || 0}`,
+  );
 
   const dimensions = VIDEO_DIMENSIONS[format] || VIDEO_DIMENSIONS.landscape;
   const workDir = await mkdtemp(join(tmpdir(), 'lunary-video-'));
@@ -326,10 +331,9 @@ export async function composeVideo(
     marginV: number,
     highlightColor: string,
   ): string => {
-    // Enhanced ASS subtitles with:
+    // ASS subtitles with:
     // - Fade in/out effects (200ms each)
     // - Semi-transparent background box (BorderStyle=4)
-    // - Soft shadow for depth
     // - Roboto font for cleaner look
     const header = [
       '[Script Info]',
@@ -340,8 +344,8 @@ export async function composeVideo(
       '',
       '[V4+ Styles]',
       'Format: Name,Fontname,Fontsize,PrimaryColour,SecondaryColour,OutlineColour,BackColour,Bold,Italic,Underline,StrikeOut,ScaleX,ScaleY,Spacing,Angle,BorderStyle,Outline,Shadow,Alignment,MarginL,MarginR,MarginV,Encoding',
+      // Default: center-bottom for main subtitles
       // BorderStyle=4 creates opaque box background, BackColour with alpha for semi-transparent
-      // &HAA000000 = black with ~66% opacity (AA in hex = 170, so 170/255 opacity)
       `Style: Default,RobotoMono-Bold,${fontSize},&H00FFFFFF,&H00FFFFFF,&H40000000,&HAA000000,0,0,0,0,100,100,1,0,4,0,3,2,50,50,${marginV},0`,
       '',
       '[Events]',
@@ -350,7 +354,6 @@ export async function composeVideo(
 
     const highlightTag = `{\\c${hexToAssColor(highlightColor)}\\b1}`;
     const resetTag = '{\\c&HFFFFFF&\\b0}';
-    // Fade effect: \fad(fade_in_ms, fade_out_ms)
     const fadeEffect = '{\\fad(200,200)}';
 
     const lines = chunks.map((chunk) => {
@@ -358,9 +361,7 @@ export async function composeVideo(
       const safeText = escapeAssText(highlighted)
         .replace(/\[\[HIGHLIGHT_START\]\]/g, highlightTag)
         .replace(/\[\[HIGHLIGHT_END\]\]/g, resetTag);
-      return `Dialogue: 0,${formatAssTime(chunk.startTime)},${formatAssTime(
-        chunk.endTime,
-      )},Default,,0,0,0,,${fadeEffect}${safeText}`;
+      return `Dialogue: 0,${formatAssTime(chunk.startTime)},${formatAssTime(chunk.endTime)},Default,,0,0,0,,${fadeEffect}${safeText}`;
     });
 
     return [...header, ...lines].join('\n');
@@ -372,6 +373,25 @@ export async function composeVideo(
       .replace(/:/g, '\\:')
       .replace(/'/g, "\\'")
       .replace(/%/g, '\\%');
+
+  // Wrap text to fit within screen width (for overlays)
+  const wrapText = (text: string, maxCharsPerLine: number): string => {
+    const words = text.split(' ');
+    const lines: string[] = [];
+    let currentLine = '';
+
+    for (const word of words) {
+      if (currentLine.length + word.length + 1 <= maxCharsPerLine) {
+        currentLine += (currentLine ? ' ' : '') + word;
+      } else {
+        if (currentLine) lines.push(currentLine);
+        currentLine = word;
+      }
+    }
+    if (currentLine) lines.push(currentLine);
+
+    return lines.join('\n');
+  };
 
   const buildOverlayFilters = (
     overlayItems: ComposeVideoOptions['overlays'],
@@ -389,27 +409,60 @@ export async function composeVideo(
     const baseFontSize =
       videoFormat === 'story' ? 44 : videoFormat === 'square' ? 34 : 24;
 
-    const filters = overlayItems.map((overlay) => {
+    // Max chars per line based on format (story is narrower)
+    const maxCharsPerLine =
+      videoFormat === 'story' ? 25 : videoFormat === 'square' ? 30 : 40;
+
+    console.log(
+      `🎬 Building overlay filters for ${overlayItems.length} overlays`,
+    );
+    const filters = overlayItems.map((overlay, idx) => {
       const style = overlay.style || 'chapter';
       const fontFile = fontRegular;
+
+      // Font sizes by style
       const fontSize =
-        style === 'title'
-          ? baseFontSize
-          : style === 'stamp'
-            ? baseFontSize - 6
-            : baseFontSize;
-      const text = escapeDrawText(overlay.text);
-      const x =
-        style === 'stamp'
-          ? `w-text_w-48`
-          : style === 'title'
-            ? `(w-text_w)/2`
-            : `(w-text_w)/2`;
+        style === 'hook'
+          ? baseFontSize + 2 // Hook text slightly larger
+          : style === 'cta'
+            ? baseFontSize + 4 // CTA prominent
+            : style === 'stamp'
+              ? baseFontSize - 12 // Stamp much smaller
+              : baseFontSize; // Chapter labels
+
+      // Wrap text for hook/cta/chapter styles
+      const shouldWrap =
+        style === 'hook' || style === 'cta' || style === 'chapter';
+      const wrappedText = shouldWrap
+        ? wrapText(overlay.text, maxCharsPerLine)
+        : overlay.text;
+      const text = escapeDrawText(wrappedText);
+
+      // All styles centered horizontally
+      const x = `(w-text_w)/2`;
+
+      // Vertical positioning by style
       const y =
-        style === 'stamp' ? `64` : style === 'title' ? `h*0.16` : `h*0.69`;
-      const useBox = style === 'stamp';
-      const boxColor = style === 'stamp' ? '0x000000AA' : '0x00000000';
-      return `drawtext=fontfile='${fontFile}':text='${text}':x=${x}:y=${y}:fontsize=${fontSize}:fontcolor=white:box=${useBox ? 1 : 0}:boxcolor=${boxColor}:boxborderw=12:enable='between(t,${overlay.startTime},${overlay.endTime})'`;
+        style === 'hook'
+          ? `h*0.65` // Hook above subtitles
+          : style === 'cta'
+            ? `h*0.28` // CTA in upper area
+            : style === 'stamp'
+              ? `h*0.90` // Stamp 10% from bottom
+              : `h*0.65`; // Chapter labels lower
+
+      // Fade in/out effect using alpha
+      // Fade in over 0.4s, fade out over 0.4s
+      const fadeIn = 0.4;
+      const fadeOut = 0.4;
+      const start = overlay.startTime;
+      const end = overlay.endTime;
+      const alpha = `if(lt(t-${start},${fadeIn}),(t-${start})/${fadeIn},if(gt(${end}-t,${fadeOut}),1,(${end}-t)/${fadeOut}))`;
+
+      console.log(
+        `  Overlay ${idx}: style=${style}, text="${overlay.text.substring(0, 30)}...", time=${overlay.startTime}-${overlay.endTime}`,
+      );
+      return `drawtext=fontfile='${fontFile}':text='${text}':x=${x}:y=${y}:fontsize=${fontSize}:fontcolor=white:alpha='${alpha}':box=0:line_spacing=8:enable='between(t,${overlay.startTime},${overlay.endTime})'`;
     });
 
     return filters.join(',');
@@ -479,6 +532,7 @@ export async function composeVideo(
           safeMargin,
           highlightColorValue,
         );
+        console.log(`📝 ASS subtitles: ${subtitleChunks.length} chunks`);
         await writeFile(subtitlesPath, assContent);
         escapedSubPath = escapeFilterPath(subtitlesPath);
         subtitleFilter = `subtitles='${escapedSubPath}':fontsdir='${escapedFontsDir}'`;
@@ -625,7 +679,7 @@ export async function composeVideo(
         // Scale, pad, and set duration for each image with enhanced color grading
         // Stronger vignette (PI/3), crushed blacks, cinematic color balance
         filterParts.push(
-          `[${i}:v]scale=${dimensions.width}:${dimensions.height}:force_original_aspect_ratio=decrease,pad=${dimensions.width}:${dimensions.height}:(ow-iw)/2:(oh-ih)/2,setpts=PTS-STARTPTS,fps=30,colorbalance=${step.balance},hue=${hueExpression},eq=saturation=${step.saturation}:contrast=${step.contrast}:brightness=-0.04:gamma=0.95,vignette=PI/3[scaled${i}]`,
+          `[${i}:v]scale=${dimensions.width}:${dimensions.height}:force_original_aspect_ratio=decrease,pad=${dimensions.width}:${dimensions.height}:(ow-iw)/2:(oh-ih)/2,setpts=PTS-STARTPTS,fps=30,colorbalance=${step.balance},hue=${hueExpression},eq=saturation=${step.saturation}:contrast=${step.contrast}:brightness=-0.04:gamma=0.95,vignette=PI/5[scaled${i}]`,
         );
         // Trim to exact duration
         filterParts.push(
@@ -663,12 +717,21 @@ export async function composeVideo(
           : `[v${Math.max(adjustedImages.length - 1, 0)}]`;
       let intermediateLabel = finalVideoLabel;
       const overlayFilter = buildOverlayFilters(overlays, dimensions, format);
+      console.log(
+        `🎬 Filters - subtitleFilter: ${subtitleFilter ? 'yes' : 'no'}, overlayFilter: ${overlayFilter ? 'yes' : 'no'}, overlays count: ${overlays?.length || 0}`,
+      );
       if (subtitleFilter) {
         filterParts.push(`${intermediateLabel}${subtitleFilter}[vsub]`);
         intermediateLabel = '[vsub]';
       }
       if (overlayFilter) {
-        filterParts.push(`${intermediateLabel}${overlayFilter}[vfinal]`);
+        // Overlay filter needs to be applied after subtitles
+        // FFmpeg syntax: [input]filter1,filter2[output]
+        const overlayFilterChain = `${intermediateLabel}${overlayFilter}[vfinal]`;
+        console.log(
+          `🎬 Adding overlay filter chain: ${overlayFilterChain.substring(0, 300)}...`,
+        );
+        filterParts.push(overlayFilterChain);
         intermediateLabel = '[vfinal]';
       }
 
@@ -783,7 +846,7 @@ export async function composeVideo(
         `[alt]hue=h=${altHue}:s=0.95[alt];` +
         `[base][alt]blend=all_expr='A*(1-(0.5+0.5*sin(2*3.1415926*N/360)))+B*(0.5+0.5*sin(2*3.1415926*N/360))'`;
       // Stronger vignette (PI/3), crushed blacks (gamma=0.95), cinematic color balance
-      const colorGradingFilter = `colorbalance=rs=-0.05:gs=-0.02:bs=0.08:rm=-0.03:gm=0:bm=0.05,eq=saturation=0.92:contrast=1.06:brightness=-0.04:gamma=0.95,vignette=PI/3`;
+      const colorGradingFilter = `colorbalance=rs=-0.05:gs=-0.02:bs=0.08:rm=-0.03:gm=0:bm=0.05,eq=saturation=0.92:contrast=1.06:brightness=-0.04:gamma=0.95,vignette=PI/5`;
       const overlayFilter = buildOverlayFilters(overlays, dimensions, format);
       const videoFilter = [
         zoomFilter,

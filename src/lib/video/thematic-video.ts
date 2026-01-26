@@ -305,24 +305,17 @@ export function buildThematicVideoComposition({
   const totalDuration = images[images.length - 1]?.endTime || durationEstimate;
 
   const overlays = [
-    // Hook text (first sentence) at top during first 3 seconds
+    // Hook text (first sentence) below center during first segment
     ...(hookText.length > 10
       ? [
           {
             text: hookText,
             startTime: 0.3,
-            endTime: Math.min(3.0, images[0].endTime - 0.5),
-            style: 'title' as const, // Title style = top center
+            endTime: Math.min(3.5, images[0].endTime - 0.3),
+            style: 'hook' as const, // Hook style = below center
           },
         ]
       : []),
-    // Follow stamp - shown throughout the video at bottom
-    {
-      text: 'follow @lunary.app',
-      startTime: 1.0,
-      endTime: totalDuration - 3,
-      style: 'stamp' as const,
-    },
     // Chapter labels for middle and end segments
     {
       text: CHAPTER_LABELS[1],
@@ -336,12 +329,19 @@ export function buildThematicVideoComposition({
       endTime: images[2].endTime,
       style: 'chapter' as const,
     },
-    // CTA at the end - title style for top center positioning
+    // CTA appears later, fades out near video end
     {
       text: getRandomCTA(),
-      startTime: totalDuration - 2.5,
-      endTime: totalDuration + 0.5,
-      style: 'title' as const,
+      startTime: totalDuration - 6,
+      endTime: totalDuration - 0.5,
+      style: 'cta' as const,
+    },
+    // Follow stamp - appears with CTA, fades out near video end
+    {
+      text: 'follow @lunary.app',
+      startTime: totalDuration - 5.5,
+      endTime: totalDuration - 0.5,
+      style: 'stamp' as const,
     },
   ];
 

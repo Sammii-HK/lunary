@@ -8,10 +8,10 @@
  * - alloy: Neutral, versatile (legacy default)
  */
 export const TTS_PRESETS = {
-  // Short-form (TikTok/Stories): energetic, engaging
-  short: { model: 'tts-1-hd', voiceName: 'nova', speed: 1.05 },
-  short_energetic: { model: 'tts-1-hd', voiceName: 'nova', speed: 1.05 },
-  short_mystical: { model: 'tts-1-hd', voiceName: 'shimmer', speed: 1.0 },
+  // Short-form (TikTok/Stories): energetic, engaging, slightly faster pace
+  short: { model: 'tts-1-hd', voiceName: 'nova', speed: 1.1 },
+  short_energetic: { model: 'tts-1-hd', voiceName: 'nova', speed: 1.1 },
+  short_mystical: { model: 'tts-1-hd', voiceName: 'shimmer', speed: 1.05 },
 
   // Medium-form (Reels/TikTok): balanced, warm
   medium: { model: 'tts-1-hd', voiceName: 'shimmer', speed: 1.0 },
