@@ -31,12 +31,13 @@ const DEFAULT_INPUT = './public/sitemap.xml';
 const FALLBACK_DIRS = ['./public/sitemaps', './sitemaps'];
 
 const FLAT_BUCKETS = new Set([
-  // Keep only “true index-style” buckets flat.
+  // Keep only "true index-style" buckets flat.
   // Everything else should split into subthemes so we get more weekly themes.
   'zodiac',
   'numerology',
   'chakras',
   'wheel-of-the-year',
+  'angel-numbers', // All 12 angel numbers as one theme with facet pool rotation
 ]);
 
 const BLOCKED_BUCKETS = new Set([
@@ -80,12 +81,6 @@ type SubthemeStrategy =
       ranges: Array<{ key: string; label: string; from: number; to: number }>;
     };
 
-const digitRanges = [
-  { key: '0-3', label: '0-3', from: '0', to: '3' },
-  { key: '4-6', label: '4-6', from: '4', to: '6' },
-  { key: '7-9', label: '7-9', from: '7', to: '9' },
-];
-
 const SUBTHEME_STRATEGIES: Record<string, SubthemeStrategy> = {
   crystals: {
     kind: 'alphaRange',
@@ -96,11 +91,6 @@ const SUBTHEME_STRATEGIES: Record<string, SubthemeStrategy> = {
       { key: 'm-r', label: 'M–R', from: 'm', to: 'r' },
       { key: 's-z', label: 'S–Z', from: 's', to: 'z' },
     ],
-  },
-  'angel-numbers': {
-    kind: 'alphaRange',
-    segmentIndex: 1,
-    ranges: digitRanges,
   },
   'mirror-hours': {
     kind: 'hourRange',
@@ -491,37 +481,48 @@ function mapBucketToCategory(bucket: string, unmapped: Set<string>) {
   return mapped;
 }
 
-function pickFacetSlugs(slugs: string[], bucket: string): string[] {
-  if (slugs.length === 0) return [];
+/**
+ * Select facet slugs for a theme.
+ * Returns { primary: 7 slugs for facets, pool: all slugs for facetPool rotation }
+ */
+function pickFacetSlugs(
+  slugs: string[],
+  bucket: string,
+  fallbackSlugs: string[] = [],
+): { primary: string[]; pool: string[] } {
+  if (slugs.length === 0) return { primary: [], pool: [] };
   const rootSlug = bucket;
   const hasNonRoot = slugs.some((slug) => slug !== rootSlug);
   const filtered = hasNonRoot
     ? slugs.filter((slug) => slug !== rootSlug)
     : slugs;
-  if (filtered.length <= 7) {
-    return filtered;
+
+  // If we have more than 7, return first 7 as primary and ALL as pool for rotation
+  if (filtered.length > 7) {
+    return {
+      primary: filtered.slice(0, 7),
+      pool: filtered,
+    };
   }
-  const total = filtered.length;
-  const step = Math.max(1, Math.floor(total / 7));
-  const picked: string[] = [];
-  const seen = new Set<string>();
-  for (let i = 0; i < total && picked.length < 7; i += step) {
-    const slug = filtered[Math.min(i, total - 1)];
-    if (!seen.has(slug)) {
+
+  // If we have exactly 7, use them all
+  if (filtered.length === 7) {
+    return { primary: filtered, pool: [] };
+  }
+
+  // If we have fewer than 7, pad from fallbacks
+  const picked = [...filtered];
+  const seen = new Set(picked);
+
+  for (const slug of fallbackSlugs) {
+    if (picked.length >= 7) break;
+    if (!seen.has(slug) && slug !== rootSlug) {
       seen.add(slug);
       picked.push(slug);
     }
   }
-  if (picked.length < 7) {
-    for (const slug of filtered) {
-      if (picked.length >= 7) break;
-      if (!seen.has(slug)) {
-        seen.add(slug);
-        picked.push(slug);
-      }
-    }
-  }
-  return picked;
+
+  return { primary: picked, pool: [] };
 }
 
 function formatRangeLabel(label: string) {
@@ -644,6 +645,12 @@ export function buildThemesFromLocs(locs: string[]) {
     ) {
       continue;
     }
+
+    // Collect all slugs from this bucket as fallback pool for padding themes to 7 facets
+    const allBucketSlugs = Object.values(bucket.subthemes).flatMap(
+      (sub) => sub.slugs,
+    );
+
     for (const subKey of Object.keys(bucket.subthemes).sort()) {
       const subtheme = bucket.subthemes[subKey];
       if (subKey.endsWith('-core')) {
@@ -654,8 +661,13 @@ export function buildThemesFromLocs(locs: string[]) {
           continue;
         }
       }
+      const { primary: selectedSlugs, pool: poolSlugs } = pickFacetSlugs(
+        subtheme.slugs,
+        bucket.key,
+        allBucketSlugs,
+      );
+
       const facets: ThemeFacet[] = [];
-      const selectedSlugs = pickFacetSlugs(subtheme.slugs, bucket.key);
       for (const slug of selectedSlugs) {
         const facet = buildFacet(slug, facets.length);
         if (facet) facets.push(facet);
@@ -663,9 +675,18 @@ export function buildThemesFromLocs(locs: string[]) {
       if (facets.length === 0) continue;
       if (facets.length < 3) continue;
 
+      // Build facetPool if we have more slugs than the primary 7
+      const facetPool: ThemeFacet[] = [];
+      if (poolSlugs.length > 0) {
+        for (const slug of poolSlugs) {
+          const facet = buildFacet(slug, facetPool.length);
+          if (facet) facetPool.push(facet);
+        }
+      }
+
       const themeName = themeNameFromSubtheme(subKey);
       const id = slugify(subKey);
-      themes.push({
+      const theme: WeeklyTheme = {
         id,
         name: themeName,
         description: `A structured deep dive into ${themeName} from Lunary's Grimoire.`,
@@ -675,7 +696,14 @@ export function buildThemesFromLocs(locs: string[]) {
           keyword: themeName,
           angles: [],
         },
-      });
+      };
+
+      // Add facetPool for themes with more than 7 topics (enables weekly rotation)
+      if (facetPool.length > 0) {
+        theme.facetPool = facetPool;
+      }
+
+      themes.push(theme);
     }
   }
 
