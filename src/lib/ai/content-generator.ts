@@ -258,14 +258,14 @@ export const VideoScriptSchema = z.object({
 
 export const SocialPostSchema = z.object({
   content: z.string().describe('The post content'),
-  hashtags: z.array(z.string()).optional().describe('Optional hashtags'),
-  safetyChecks: z.array(z.string()).optional().describe('Safety check flags'),
+  hashtags: z.array(z.string()).nullable().describe('Optional hashtags'),
+  safetyChecks: z.array(z.string()).nullable().describe('Safety check flags'),
 });
 
 export const VideoCaptionSchema = z.object({
   bodyLines: z.array(z.string()).describe('Caption body lines (2-4 lines)'),
-  hashtags: z.array(z.string()).optional().describe('Optional hashtags'),
-  safetyChecks: z.array(z.string()).optional().describe('Safety check flags'),
+  hashtags: z.array(z.string()).nullable().describe('Optional hashtags'),
+  safetyChecks: z.array(z.string()).nullable().describe('Safety check flags'),
 });
 
 export const OpeningLineSchema = z.object({

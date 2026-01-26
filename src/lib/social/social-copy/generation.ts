@@ -99,7 +99,11 @@ export async function generateSocialCopy(
         safetyChecks: fallback.safetyChecks,
       };
     }
-    return buildCaptionContent(pack, validation.lines, response.safetyChecks);
+    return buildCaptionContent(
+      pack,
+      validation.lines,
+      response.safetyChecks ?? undefined,
+    );
   }
 
   const validateQuestionContent = (text: string) => {
