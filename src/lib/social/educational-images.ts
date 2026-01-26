@@ -92,13 +92,24 @@ export function getThematicImageUrl(
   const rawSymbol = getSymbolForContent(thematicCategory, normalizedSlug);
   const formattedTitle = capitalizeThematicTitle(title);
 
-  // Only include symbol if it's different from the title (avoids duplication like "111" symbol + "111" title)
+  // Normalize for comparison - remove all non-alphanumeric chars and lowercase
+  const normalizeForComparison = (str: string) =>
+    str
+      .toString()
+      .replace(/[^a-z0-9]/gi, '')
+      .toLowerCase();
+
+  const symbolNorm = rawSymbol ? normalizeForComparison(rawSymbol) : '';
+  const titleNorm = normalizeForComparison(formattedTitle);
+  const slugNorm = normalizeForComparison(normalizedSlug);
+  const rawTitleNorm = normalizeForComparison(title);
+
+  // Only include symbol if it's different from title AND slug (avoids duplication like "111" symbol + "111" title)
   const symbol =
     rawSymbol &&
-    rawSymbol.toString().trim().toLowerCase() !==
-      formattedTitle.trim().toLowerCase() &&
-    rawSymbol.toString().trim().toLowerCase() !==
-      normalizedSlug.trim().toLowerCase()
+    symbolNorm !== titleNorm &&
+    symbolNorm !== slugNorm &&
+    symbolNorm !== rawTitleNorm
       ? rawSymbol
       : null;
 

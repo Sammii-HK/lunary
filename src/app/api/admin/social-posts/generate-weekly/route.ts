@@ -925,7 +925,7 @@ async function generateThematicWeeklyPosts(
         issues = validateSocialCopy(generated.content, sourcePack.topic);
       }
       if (issues.length > 0) {
-        const fallback = buildFallbackCopy(sourcePack);
+        const fallback = await buildFallbackCopy(sourcePack);
         postContent = fallback.content;
         hashtags = fallback.hashtags;
       } else {
@@ -960,7 +960,7 @@ async function generateThematicWeeklyPosts(
         );
         issues = validateSocialCopy(generated.content, sourcePack.topic);
         if (issues.length > 0) {
-          const fallback = buildFallbackCopy(sourcePack);
+          const fallback = await buildFallbackCopy(sourcePack);
           postContent = fallback.content;
           hashtags = fallback.hashtags;
         } else {
@@ -1321,7 +1321,7 @@ async function generateThematicWeeklyPosts(
                 );
               }
               if (issues.length > 0) {
-                const fallback = buildFallbackCopy(sourcePack);
+                const fallback = await buildFallbackCopy(sourcePack);
                 videoCaption = fallback.content;
                 if (fallback.hashtags.length > 0) {
                   videoCaption = `${videoCaption}\n\n${fallback.hashtags.join(

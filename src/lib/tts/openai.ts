@@ -1,6 +1,5 @@
 import OpenAI from 'openai';
 import type { TTSProvider, TTSOptions, TTSVoice } from './types';
-import { TONE_INSTRUCTIONS } from './presets';
 
 export class OpenAITTSProvider implements TTSProvider {
   name = 'openai';
@@ -98,8 +97,17 @@ export class OpenAITTSProvider implements TTSProvider {
     const model = options.model || 'tts-1-hd';
     // Use provided speed or default to 1.0
     const speed = options.speed || 1.0;
-    // Get tone instruction - use default for general content
-    const toneInstruction = TONE_INSTRUCTIONS.default;
+
+    // Enhanced tone instruction for engaging, professional astrology narration
+    const toneInstruction = `Speak as a warm, knowledgeable astrology guide. Your tone should be:
+- Confident and clear, like a trusted friend sharing cosmic wisdom
+- Slightly mysterious and intriguing when discussing planetary movements
+- Warm and reassuring, especially during challenging transits
+- Use natural pauses for emphasis before key astrological terms
+- Vary your pace: slower for important revelations, slightly faster for lists
+- Pronounce astrological terms clearly: zodiac signs, planets, aspects
+- End sentences with gentle downward inflection, not upward questioning
+- Overall: professional podcast host meets mystical storyteller`;
 
     console.log(
       `🎙️ Generating voiceover with model: ${model}, voice: ${voice}, speed: ${speed}`,

@@ -91,7 +91,7 @@ export async function generateSocialCopy(
       }
     }
     if (validation.issues.length > 0) {
-      const fallback = buildFallbackCopy(pack);
+      const fallback = await buildFallbackCopy(pack);
       return {
         content: fallback.content,
         hashtags: fallback.hashtags,

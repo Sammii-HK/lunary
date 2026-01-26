@@ -45,7 +45,9 @@ export const buildCaptionContent = (
 /**
  * Build fallback copy when AI generation fails
  */
-export function buildFallbackCopy(pack: SourcePack): SocialCopyResult {
+export async function buildFallbackCopy(
+  pack: SourcePack,
+): Promise<SocialCopyResult> {
   const curatedHashtags = buildCuratedHashtags(pack);
   const safeSentence = (text: string) => sentenceSafe(text);
   const joinSentences = (lines: string[]) =>
@@ -163,50 +165,16 @@ export function buildFallbackCopy(pack: SourcePack): SocialCopyResult {
       // "dear [audience]" format with varied terms + Lunary intro
       // Focus on USP: full birth chart personalisation (go beyond sun sign)
       // No topic/category references
-      const audienceTermPools = [
-        [
-          'witches',
-          'star gazers',
-          'astrologers',
-          'tarot readers',
-          'cosmic wanderers',
-        ],
-        ['tarot readers', 'witches', 'astrologers', 'moon lovers'],
-        [
-          'crystal hoarders',
-          'moon lovers',
-          'tarot readers',
-          'astrologers',
-          'chart nerds',
-        ],
-        [
-          'cosmic explorers',
-          'birth chart obsessives',
-          'tarot pullers',
-          'crystal collectors',
-        ],
-        [
-          'moon watchers',
-          'transit trackers',
-          'horoscope readers',
-          'cosmic seekers',
-        ],
-        [
-          'astrology lovers',
-          'tarot enthusiasts',
-          'crystal keepers',
-          'lunar folk',
-        ],
-        ['star seekers', 'chart readers', 'moon trackers', 'cosmic curious'],
-      ];
+      // Use facet-based audience terms to prevent duplication
+      const { buildAudienceTerms } =
+        await import('@/lib/social/shared/constants/persona-templates');
       const bodyTemplates = [
         'I built Lunary for you.\nPersonalised horoscopes, transits, tarot, and crystals. All based on your full birth chart, not just your sun sign.',
         'Lunary goes beyond your sun sign.\nYour full natal chart shapes everything: horoscopes, transits, tarot pulls, crystal guidance. All personalised to you.',
         'Lunary is where I put everything I wish I had when I started.\nEverything based on your full birth chart. Horoscopes, transits, tarot, crystals.',
         'I made Lunary for moments like this.\nPersonalised to your full natal chart. Not generic sun sign content. Horoscopes, transits, tarot, crystals.',
       ];
-      const audienceTerms =
-        audienceTermPools[Math.floor(Math.random() * audienceTermPools.length)];
+      const audienceTerms = buildAudienceTerms(4);
       const body =
         bodyTemplates[Math.floor(Math.random() * bodyTemplates.length)];
       const content = `dear ${audienceTerms.join(', ')}\n${body}`;

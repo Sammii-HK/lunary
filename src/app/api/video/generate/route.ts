@@ -6,6 +6,9 @@ import { generateVoiceover } from '@/lib/tts';
 import { generateVoiceoverScriptFromWeeklyData } from '@/lib/video/composition';
 import { TTS_PRESETS } from '@/lib/tts/presets';
 import { normalizeScriptForTTS } from '@/lib/tts/normalize-script';
+
+// Feature flags for video rendering
+const USE_REMOTION_RENDERER = process.env.USE_REMOTION_RENDERER === 'true';
 import {
   generateNarrativeFromWeeklyData,
   generateShortFormNarrative,
@@ -23,9 +26,9 @@ import { sendDiscordNotification } from '@/lib/discord';
 
 // Version for cache invalidation - increment when prompts change
 const SCRIPT_VERSION = {
-  short: 'v11', // v5: fixed moon phase detection using MoonPhase angle + seasonal events
-  medium: 'v16', // v9: explains what Sun in X means, seasonal events
-  long: 'v14', // v7: dedicated solstice section, in-depth Sun/Moon meanings, intention setting
+  short: 'v13', // v13: 2s end buffer for subtitle visibility, extended music
+  medium: 'v18', // v18: 2s end buffer for subtitle visibility, extended music
+  long: 'v16', // v16: 2s end buffer for subtitle visibility, extended music
 };
 
 export const runtime = 'nodejs';
@@ -1233,6 +1236,18 @@ export async function POST(request: NextRequest) {
         }
 
         // Compose video with multiple images
+        // Future: When USE_REMOTION_RENDERER is enabled, use Remotion for more
+        // sophisticated animations. For now, FFmpeg handles all rendering.
+        // To enable Remotion: set USE_REMOTION_RENDERER=true in environment
+        if (USE_REMOTION_RENDERER) {
+          console.log(
+            `🎬 Remotion rendering enabled but not yet implemented for production`,
+          );
+          console.log(
+            `💡 Falling back to FFmpeg for now. Remotion structure ready at src/remotion/`,
+          );
+        }
+
         videoBuffer = await composeVideo({
           images: topicImages.map((img) => ({
             url: img.imageUrl,

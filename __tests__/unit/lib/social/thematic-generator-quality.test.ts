@@ -36,7 +36,7 @@ describe('thematic generator quality', () => {
   const categories = ['tarot', 'zodiac', 'crystals', 'lunar'];
 
   for (const category of categories) {
-    it(`generates clean posts for ${category}`, () => {
+    it(`generates clean posts for ${category}`, async () => {
       const themeIndex = findThemeIndex(category);
       expect(themeIndex).toBeGreaterThan(-1);
       const theme = categoryThemes[themeIndex];
@@ -62,9 +62,9 @@ describe('thematic generator quality', () => {
         postType: 'educational_deep_2',
         facet,
       });
-      const intro = buildFallbackCopy(introPack).content;
-      const deep1 = buildFallbackCopy(deep1Pack).content;
-      const deep2 = buildFallbackCopy(deep2Pack).content;
+      const intro = (await buildFallbackCopy(introPack)).content;
+      const deep1 = (await buildFallbackCopy(deep1Pack)).content;
+      const deep2 = (await buildFallbackCopy(deep2Pack)).content;
       expect(intro).toBeTruthy();
       expect(deep1).toBeTruthy();
       expect(deep2).toBeTruthy();
@@ -80,7 +80,7 @@ describe('thematic generator quality', () => {
     });
   }
 
-  it('formats video captions with the search phrase first', () => {
+  it('formats video captions with the search phrase first', async () => {
     const theme = categoryThemes[findThemeIndex('lunar')];
     const facet = theme.facets[0];
     const pack = buildSourcePack({
@@ -90,7 +90,7 @@ describe('thematic generator quality', () => {
       postType: 'video_caption',
       facet,
     });
-    const caption = buildFallbackCopy(pack).content;
+    const caption = (await buildFallbackCopy(pack)).content;
     const lines = caption.split('\n').filter(Boolean);
     expect(lines.length).toBeGreaterThanOrEqual(5);
     expect(lines[0].toLowerCase()).toContain('meaning and context');

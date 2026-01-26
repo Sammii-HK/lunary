@@ -237,11 +237,22 @@ export async function GET(request: NextRequest): Promise<Response> {
     // Get symbol if not provided (and not using images)
     // Use dynamic loader symbol, then fallback to existing symbol lookup
     // Skip symbol if it matches the title (e.g., numerology "111" symbol = "111" title)
-    const titleNormalized = formattedTitle.trim().toLowerCase();
+
+    // Normalize for comparison - remove all non-alphanumeric chars and lowercase
+    const normalizeForComparison = (str: string) =>
+      str
+        .toString()
+        .replace(/[^a-z0-9]/gi, '')
+        .toLowerCase();
+
+    const titleNormalized = normalizeForComparison(formattedTitle);
+    const slugNormalized = normalizeForComparison(slug);
 
     // First check if URL symbol param matches title - if so, ignore it
     const symbolFromUrl =
-      symbol?.trim().toLowerCase() === titleNormalized ? null : symbol;
+      symbol && normalizeForComparison(symbol) !== titleNormalized
+        ? symbol
+        : null;
 
     const rawSymbol =
       !needsImage &&
@@ -249,9 +260,12 @@ export async function GET(request: NextRequest): Promise<Response> {
         dynamicData?.symbol ||
         getSymbolForContent(category, slug));
 
-    // Double-check: if symbol still matches title after all lookups, hide it
+    // Double-check: if symbol still matches title or slug after all lookups, hide it
+    const rawSymbolNorm = rawSymbol ? normalizeForComparison(rawSymbol) : '';
     const displaySymbol =
-      rawSymbol && rawSymbol.toString().trim().toLowerCase() !== titleNormalized
+      rawSymbol &&
+      rawSymbolNorm !== titleNormalized &&
+      rawSymbolNorm !== slugNormalized
         ? rawSymbol
         : null;
 

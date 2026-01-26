@@ -5,7 +5,7 @@ import {
 } from '@/lib/social/social-copy-generator';
 
 describe('social copy comparison sample', () => {
-  it('logs the new caption content versus fallback for manual QA', () => {
+  it('logs the new caption content versus fallback for manual QA', async () => {
     const theme = categoryThemes.find(
       (candidate) => candidate.category === 'lunar',
     );
@@ -20,7 +20,7 @@ describe('social copy comparison sample', () => {
       postType: 'video_caption',
       facet,
     });
-    const fallback = buildFallbackCopy(pack);
+    const fallback = await buildFallbackCopy(pack);
     console.log('=== Sample Topic ===');
     console.log('Topic:', pack.topicTitle);
     console.log('Category context:', pack.categoryContextClause);

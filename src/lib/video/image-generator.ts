@@ -95,6 +95,10 @@ export async function generateTopicImages(
     return built ? `&${built}` : '';
   };
 
+  // Normalize for comparison - remove all non-alphanumeric chars and lowercase
+  const normalizeForComparison = (str: string) =>
+    str.replace(/[^a-z0-9]/gi, '').toLowerCase();
+
   const buildSocialImageUrl = ({
     format,
     title,
@@ -108,8 +112,11 @@ export async function generateTopicImages(
   }) => {
     const trimmedTitle = title.trim();
     const subtitleText = subtitle?.trim() || '';
+    // Use normalized comparison to catch formatting differences (e.g., "111" vs "1 1 1")
     const shouldIncludeSubtitle =
-      subtitleText && subtitleText.toLowerCase() !== trimmedTitle.toLowerCase();
+      subtitleText &&
+      normalizeForComparison(subtitleText) !==
+        normalizeForComparison(trimmedTitle);
     const subtitleParam = shouldIncludeSubtitle
       ? `&subtitle=${encodeURIComponent(subtitleText)}`
       : '';
