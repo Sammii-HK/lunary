@@ -161,7 +161,7 @@ export function buildYouTubeSummary(
     .map((f) => f.title.toLowerCase())
     .join(', ');
 
-  return `To summarize: we have explored ${theme.name.toLowerCase()}, covering ${keyPoints}, and more. Each of these elements interconnects, forming a coherent system of understanding. The key is not memorization, but integration—allowing this knowledge to deepen your perspective over time.`;
+  return `To summarize: we have explored ${theme.name.toLowerCase()}, covering ${keyPoints}, and more. Each of these elements interconnects, forming a coherent system of understanding. The key is not memorization, but integration. Allow this knowledge to deepen your perspective over time.`;
 }
 
 /**

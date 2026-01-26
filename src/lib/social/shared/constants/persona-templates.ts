@@ -1,31 +1,99 @@
 /**
  * Persona vocabulary and template constants for social content
+ *
+ * Format: "dear [varied audience terms]" + Lunary intro content
  */
 
 /**
- * Audience persona vocabulary for targeting
+ * Pools of audience terms to mix and match for variety
+ * Each pool should be used as a complete set, shuffled or varied
  */
-export const PERSONA_VOCAB = [
-  'astrology lovers',
-  'astrology curious',
-  'tarot readers',
-  'people who pull cards',
-  'moon watchers',
-  'lunar folk',
-  'crystal lovers',
-  'star gazers',
-  'cosmic wanderers',
-  'horoscope readers',
+export const AUDIENCE_TERM_POOLS = [
+  [
+    'witches',
+    'star gazers',
+    'astrologers',
+    'tarot readers',
+    'cosmic wanderers',
+  ],
+  ['tarot readers', 'witches', 'astrologers', 'moon lovers'],
+  [
+    'crystal hoarders',
+    'moon lovers',
+    'tarot readers',
+    'astrologers',
+    'chart nerds',
+  ],
+  [
+    'cosmic explorers',
+    'birth chart obsessives',
+    'tarot pullers',
+    'crystal collectors',
+  ],
+  ['moon watchers', 'transit trackers', 'horoscope readers', 'cosmic seekers'],
+  ['astrology lovers', 'tarot enthusiasts', 'crystal keepers', 'lunar folk'],
+  ['star seekers', 'chart readers', 'moon trackers', 'cosmic curious'],
+  [
+    'horoscope checkers',
+    'crystal lovers',
+    'moon phase trackers',
+    'astro nerds',
+  ],
+  [
+    'tarot pullers',
+    'birth chart readers',
+    'crystal collectors',
+    'cosmic souls',
+  ],
+  ['lunar lovers', 'star chasers', 'chart obsessives', 'tarot curious'],
 ];
 
 /**
- * Template bodies for persona-targeted posts
+ * Individual audience terms that can be combined
+ */
+export const AUDIENCE_TERMS = [
+  'witches',
+  'star gazers',
+  'astrologers',
+  'tarot readers',
+  'cosmic wanderers',
+  'moon lovers',
+  'crystal hoarders',
+  'chart nerds',
+  'cosmic explorers',
+  'birth chart obsessives',
+  'tarot pullers',
+  'crystal collectors',
+  'moon watchers',
+  'transit trackers',
+  'horoscope readers',
+  'cosmic seekers',
+  'astrology lovers',
+  'tarot enthusiasts',
+  'crystal keepers',
+  'lunar folk',
+  'star seekers',
+  'chart readers',
+  'moon trackers',
+  'cosmic curious',
+  'horoscope checkers',
+  'astro nerds',
+  'cosmic souls',
+  'lunar lovers',
+  'star chasers',
+];
+
+/**
+ * Body templates for after the "dear [audience]" line
+ * Use {topic} as placeholder for the current topic
  */
 export const PERSONA_BODY_TEMPLATES = [
-  'We keep this corner calm for astrology lovers who prefer steady notice-taking over excess hype.',
-  'Tarot readers and lunar folk are invited to track the pause between shifts rather than chase swift answers.',
-  'Moon watchers and crystal lovers often find it useful to catalog how timing changes, not just what it promises.',
-  'Cosmic wanderers and horoscope readers can hold onto the idea that timing reveals itself quietly, not on command.',
+  'i built lunary for you.\n{topic} is just one of the tools inside - along with personalised horoscopes, transits, tarot, and crystals.',
+  "this one's about {topic}.\nlunary has your daily horoscopes, transits, tarot pulls, and crystal guidance too - all in one place.",
+  'lunary is where i put everything i wish i had when i started.\ntoday: {topic}. tomorrow it might be your transits or a tarot pull.',
+  'i made lunary for moments like this.\n{topic}, personalised horoscopes, transits, tarot, crystals - all based on your chart.',
+  "i'm opening lunary's beta and gifting you a free year.\n{topic} is one of many features - horoscopes, transits, tarot, crystals, all personalised to your chart.",
+  'lunary is live.\n{topic}, daily horoscopes, birth chart breakdowns, tarot readings, crystal guidance - all in one app.',
 ];
 
 /**
@@ -50,3 +118,8 @@ export const CLOSING_STATEMENTS = [
   'Patterns are clearer once the rush of the moment passes.',
   'One more look later often changes how the whole week reads.',
 ];
+
+/**
+ * @deprecated Use AUDIENCE_TERMS instead
+ */
+export const PERSONA_VOCAB = AUDIENCE_TERMS;

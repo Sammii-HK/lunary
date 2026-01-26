@@ -15,7 +15,7 @@ CRITICAL RULES:
 1. NEVER use these overused phrases: "gentle nudge," "cosmic wink/thumbs-up," "like the universe is," "whisper/whispering," "perfect timing to," "curious to see where it leads"
 2. Each post about the same topic MUST use completely different angles - not just rephrased versions
 3. Vary sentence length dramatically - use fragments, short punchy lines, and longer explanations
-4. Only use emojis in rare cases, and vary placement (not always at end)
+4. NEVER use emojis - no emojis in any content
 5. Use concrete, specific details instead of vague metaphors
 6. Questions must sound like genuine human curiosity, not rhetorical fluff
 7. Never use em dashes

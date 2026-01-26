@@ -15,7 +15,7 @@ Voice guidelines:
 - Occasional bold claims or contrarian takes are encouraged
 - Let some posts be incomplete thoughts - humans don't always wrap everything perfectly
 - Vary emotional tone: excited, matter-of-fact, conspiratorial, practical, challenging
-- Only use emojis sparingly (rare), and vary placement when used
+- NEVER use emojis - no emojis in any content
 - Never use em dashes`;
 
 /**
@@ -61,12 +61,15 @@ const POST_TYPE_FRAMEWORKS: Partial<Record<SocialPostType, string>> = {
 - Focus on practical application
 - Pattern: "Most people think X, but actually..."`,
 
-  persona: `Format for persona (relatable/story-based):
-- Personal observation or micro-story
-- Conversational, like texting a friend
-- Can use "I" voice occasionally
-- More casual language
-- Pattern: Authentic share, not teaching moment`,
+  persona: `Format for persona (dear [audience] + Lunary intro):
+- Start with "dear [varied audience terms]" on first line
+- Use varied combinations like: "witches, star gazers, astrologers, tarot readers"
+- Or: "crystal hoarders, moon lovers, chart nerds, cosmic wanderers"
+- Mix up the order and terms each time for variety
+- Second part introduces Lunary and mentions the current topic
+- Conversational, lowercase, like texting your community
+- Pattern: "dear [audience terms]\\n[Lunary intro mentioning topic and features]"
+- Example: "dear tarot readers, witches, astrologers, and moon lovers\\ni built lunary for you. {topic} is just one tool inside."`,
 
   question: `Format for question (engagement):
 - Specific, answerable question

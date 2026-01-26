@@ -150,7 +150,7 @@ export function buildFallbackCopy(pack: SourcePack): SocialCopyResult {
       };
     }
     case 'question': {
-      const content = `Which part of this rhythm do you actually sense first—tension, release, or the pause before the shift?`;
+      const content = `Which part of this rhythm do you actually sense first: tension, release, or the pause before the shift?`;
       return {
         content: normalizeGeneratedContent(content, {
           topicLabel: pack.topicTitle,
@@ -160,7 +160,54 @@ export function buildFallbackCopy(pack: SourcePack): SocialCopyResult {
       };
     }
     case 'persona': {
-      const content = `dear astrology lovers, moon watchers, and cosmic wanderers\nThis space is for people who want grounded clarity on ${pack.topicTitle.toLowerCase()}.`;
+      // "dear [audience]" format with varied terms + Lunary intro
+      const audienceTermPools = [
+        [
+          'witches',
+          'star gazers',
+          'astrologers',
+          'tarot readers',
+          'cosmic wanderers',
+        ],
+        ['tarot readers', 'witches', 'astrologers', 'moon lovers'],
+        [
+          'crystal hoarders',
+          'moon lovers',
+          'tarot readers',
+          'astrologers',
+          'chart nerds',
+        ],
+        [
+          'cosmic explorers',
+          'birth chart obsessives',
+          'tarot pullers',
+          'crystal collectors',
+        ],
+        [
+          'moon watchers',
+          'transit trackers',
+          'horoscope readers',
+          'cosmic seekers',
+        ],
+        [
+          'astrology lovers',
+          'tarot enthusiasts',
+          'crystal keepers',
+          'lunar folk',
+        ],
+        ['star seekers', 'chart readers', 'moon trackers', 'cosmic curious'],
+      ];
+      const bodyTemplates = [
+        `i built lunary for you.\n${pack.topicTitle} is just one of the tools inside - along with personalised horoscopes, transits, tarot, and crystals.`,
+        `this one's about ${pack.topicTitle.toLowerCase()}.\nlunary has your daily horoscopes, transits, tarot pulls, and crystal guidance too - all in one place.`,
+        `lunary is where i put everything i wish i had when i started.\ntoday: ${pack.topicTitle.toLowerCase()}. tomorrow it might be your transits or a tarot pull.`,
+        `i made lunary for moments like this.\n${pack.topicTitle.toLowerCase()}, personalised horoscopes, transits, tarot, crystals - all based on your chart.`,
+      ];
+      const audienceTerms =
+        audienceTermPools[Math.floor(Math.random() * audienceTermPools.length)];
+      const body =
+        bodyTemplates[Math.floor(Math.random() * bodyTemplates.length)];
+      const content = `dear ${audienceTerms.join(', ')}\n${body}`;
       return {
         content: normalizeGeneratedContent(content, {
           topicLabel: pack.topicTitle,
