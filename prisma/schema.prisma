@@ -1,6 +1,3 @@
-// Prisma Schema for Lunary
-// This schema includes the social_posts table for AI-generated social media posts
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -13,140 +10,1263 @@ datasource db {
 
 model SocialPost {
   id                Int       @id @default(autoincrement())
-  content           String    @db.Text
-  platform          String    // instagram, twitter, facebook, linkedin, pinterest, reddit
-  postType          String    @map("post_type") // feature, benefit, educational, inspirational, behind_scenes, promotional, user_story
-  topic             String?   @db.Text
+  content           String
+  platform          String
+  postType          String    @map("post_type")
+  topic             String?
   scheduledDate     DateTime? @map("scheduled_date") @db.Timestamptz(6)
-  status            String    @default("pending") // pending, approved, rejected, sent
-  rejectionFeedback String?   @map("rejection_feedback") @db.Text
-  createdAt         DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
-  updatedAt         DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+  status            String    @default("pending")
+  rejectionFeedback String?   @map("rejection_feedback")
+  createdAt         DateTime? @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt         DateTime? @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+  image_url         String?
+  edited_content    String?
+  improvement_notes String?
+  video_url         String?
+  week_theme        String?
+  week_start        DateTime? @db.Date
+  quote_id          Int?
+  quote_text        String?
+  quote_author      String?
+  base_group_key    String?
+  base_post_id      Int?
+  youtube_video_id  String?
+  source_type       String?
+  source_id         String?
+  source_title      String?
 
-  @@index([status], name: "idx_social_posts_status")
-  @@index([platform], name: "idx_social_posts_platform")
-  @@index([createdAt], name: "idx_social_posts_created_at")
-  @@index([scheduledDate], name: "idx_social_posts_scheduled_date")
+  @@index([status], map: "idx_social_posts_status")
+  @@index([platform], map: "idx_social_posts_platform")
+  @@index([createdAt], map: "idx_social_posts_created_at")
+  @@index([scheduledDate], map: "idx_social_posts_scheduled_date")
   @@map("social_posts")
 }
 
 model AiThread {
-  id        String   @id @default(cuid())
-  userId    String   @map("user_id")
+  id        String    @id @default(cuid())
+  userId    String    @map("user_id")
   title     String?
   messages  Json
-  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
-  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+  createdAt DateTime? @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime? @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
 
-  @@index([userId], name: "idx_ai_threads_user_id")
+  @@index([userId], map: "idx_ai_threads_user_id")
   @@map("ai_threads")
 }
 
 model AiUsage {
-  id        String   @id @default(cuid())
-  userId    String   @unique @map("user_id")
-  day       DateTime @default(now()) @db.Timestamptz(6)
-  count     Int      @default(0)
-  tokensIn  Int      @default(0) @map("tokens_in")
-  tokensOut Int      @default(0) @map("tokens_out")
+  id        String    @id @default(cuid())
+  userId    String    @unique @map("user_id")
+  day       DateTime? @default(now()) @db.Timestamptz(6)
+  count     Int?      @default(0)
+  tokensIn  Int?      @default(0) @map("tokens_in")
+  tokensOut Int?      @default(0) @map("tokens_out")
   plan      String
-  renewedAt DateTime @default(now()) @map("renewed_at") @db.Timestamptz(6)
+  renewedAt DateTime? @default(now()) @map("renewed_at") @db.Timestamptz(6)
 
-  @@index([day], name: "idx_ai_usage_day")
+  @@index([day], map: "idx_ai_usage_day")
   @@map("ai_usage")
 }
 
 model ApiKey {
-  id           String   @id @default(cuid())
-  keyHash      String   @unique @map("key_hash")
-  keyPrefix    String   @map("key_prefix")
-  userId       String   @map("user_id")
-  name         String   @default("Default API Key")
-  tier         String   @default("free")
-  requests     Int      @default(0)
-  requestLimit Int      @default(100) @map("request_limit")
-  rateLimit    Int      @default(10) @map("rate_limit")
-  isActive     Boolean  @default(true) @map("is_active")
-  lastUsedAt   DateTime? @map("last_used_at") @db.Timestamptz(6)
+  id           String    @id @default(cuid())
+  keyHash      String    @unique @map("key_hash")
+  keyPrefix    String    @map("key_prefix")
+  userId       String    @map("user_id")
+  name         String
+  tier         String
+  isActive     Boolean?  @default(true) @map("is_active")
+  requests     Int?      @default(0)
+  requestLimit Int       @map("request_limit")
+  rateLimit    Int       @map("rate_limit")
   expiresAt    DateTime? @map("expires_at") @db.Timestamptz(6)
-  resetAt      DateTime @default(now()) @map("reset_at") @db.Timestamptz(6)
-  createdAt    DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
-  updatedAt    DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+  createdAt    DateTime? @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt    DateTime? @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+  lastUsedAt   DateTime? @map("last_used_at") @db.Timestamptz(6)
+  resetAt      DateTime  @map("reset_at") @db.Timestamptz(6)
 
-  @@index([userId], name: "idx_api_keys_user_id")
-  @@index([keyHash], name: "idx_api_keys_key_hash")
-  @@index([tier], name: "idx_api_keys_tier")
+  @@index([userId], map: "idx_api_keys_user_id")
+  @@index([keyHash], map: "idx_api_keys_key_hash")
+  @@index([tier], map: "idx_api_keys_tier")
   @@map("api_keys")
 }
 
 model GptBridgeLog {
-  id             String   @id @default(cuid())
-  createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  id             String    @id @default(dbgenerated("gen_random_uuid()"))
+  createdAt      DateTime? @default(now()) @map("created_at") @db.Timestamptz(6)
   route          String
-  seedRaw        String   @map("seed_raw")
-  seedNormalized String   @map("seed_normalized")
-  typesRequested Json     @map("types_requested")
+  seedRaw        String    @map("seed_raw")
+  seedNormalized String    @map("seed_normalized")
+  typesRequested Json      @map("types_requested")
   limit          Int
-  resultCount    Int      @map("result_count")
-  curatedCount   Int      @map("curated_count")
-  aliasHit       Boolean  @map("alias_hit")
-  searchCount    Int      @map("search_count")
-  topSlugs       Json     @map("top_slugs")
-  timingMs       Int      @map("timing_ms")
-  cacheStatus    String?  @map("cache_status")
+  resultCount    Int       @map("result_count")
+  curatedCount   Int       @map("curated_count")
+  aliasHit       Boolean   @map("alias_hit")
+  searchCount    Int       @map("search_count")
+  topSlugs       Json      @map("top_slugs")
+  timingMs       Int       @map("timing_ms")
+  cacheStatus    String?   @map("cache_status")
   level          String
   message        String
-  errorName      String?  @map("error_name")
-  errorMessage   String?  @map("error_message")
+  errorName      String?   @map("error_name")
+  errorMessage   String?   @map("error_message")
 
-  @@index([createdAt], name: "idx_gpt_bridge_logs_created_at")
-  @@index([seedNormalized], name: "idx_gpt_bridge_logs_seed_normalized")
-  @@index([level], name: "idx_gpt_bridge_logs_level")
+  @@index([createdAt(sort: Desc)], map: "idx_gpt_bridge_logs_created_at")
+  @@index([seedNormalized], map: "idx_gpt_bridge_logs_seed_normalized")
+  @@index([level], map: "idx_gpt_bridge_logs_level")
   @@map("gpt_bridge_logs")
 }
 
 model Testimonial {
-  id          Int      @id @default(autoincrement())
+  id          Int       @id @default(autoincrement())
   name        String
-  message     String   @db.Text
-  isPublished Boolean  @default(false) @map("is_published")
-  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  message     String
+  isPublished Boolean   @default(false) @map("is_published")
+  createdAt   DateTime? @default(now()) @map("created_at") @db.Timestamptz(6)
 
+  @@index([isPublished], map: "idx_testimonials_is_published")
   @@map("testimonials")
-  @@index([isPublished], name: "idx_testimonials_is_published")
 }
 
 model TourProgress {
-  id          String      @id @default(cuid())
-  userId      String      @map("user_id")
-  tourId      String      @map("tour_id")
-  status      TourStatus  @default(ACTIVE)
-  completedAt DateTime?   @map("completed_at") @db.Timestamptz(6)
-  dismissedAt DateTime?   @map("dismissed_at") @db.Timestamptz(6)
-  lastShownAt DateTime    @default(now()) @map("last_shown_at") @db.Timestamptz(6)
-  createdAt   DateTime    @default(now()) @map("created_at") @db.Timestamptz(6)
+  id          String       @id @default(dbgenerated("gen_random_uuid()"))
+  userId      String       @map("user_id")
+  tourId      String       @map("tour_id")
+  status      tour_status? @default(ACTIVE)
+  completedAt DateTime?    @map("completed_at") @db.Timestamptz(6)
+  dismissedAt DateTime?    @map("dismissed_at") @db.Timestamptz(6)
+  lastShownAt DateTime?    @default(now()) @map("last_shown_at") @db.Timestamptz(6)
+  createdAt   DateTime?    @default(now()) @map("created_at") @db.Timestamptz(6)
 
   @@unique([userId, tourId], name: "user_tour_unique")
-  @@index([userId], name: "idx_tour_progress_user_id")
+  @@index([userId], map: "idx_tour_progress_user_id")
   @@map("tour_progress")
 }
 
-enum TourStatus {
+model TestimonialPromptTracking {
+  id           String    @id @default(dbgenerated("gen_random_uuid()"))
+  userId       String    @unique @map("user_id")
+  firstSeen    DateTime? @default(now()) @map("first_seen") @db.Timestamptz(6)
+  dontAskUntil DateTime? @default(now()) @map("dont_ask_until") @db.Timestamptz(6)
+  submitted    Boolean?  @default(false)
+  createdAt    DateTime? @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt    DateTime? @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@index([userId], map: "idx_testimonial_prompt_user_id")
+  @@index([dontAskUntil], map: "idx_testimonial_prompt_dont_ask_until")
+  @@map("testimonial_prompt_tracking")
+}
+
+model account {
+  id                    String    @id
+  accountId             String
+  providerId            String
+  userId                String
+  accessToken           String?
+  refreshToken          String?
+  idToken               String?
+  accessTokenExpiresAt  DateTime? @db.Timestamptz(6)
+  refreshTokenExpiresAt DateTime? @db.Timestamptz(6)
+  scope                 String?
+  password              String?
+  createdAt             DateTime  @default(now()) @db.Timestamptz(6)
+  updatedAt             DateTime  @default(now()) @db.Timestamptz(6)
+  user                  user      @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([userId], map: "idx_account_userid")
+}
+
+model admin_activity_log {
+  id                Int       @id @default(autoincrement())
+  activity_type     String
+  activity_category String
+  status            String    @default("pending")
+  message           String?
+  metadata          Json?     @default("{}")
+  error_message     String?
+  execution_time_ms Int?
+  created_at        DateTime? @default(now()) @db.Timestamptz(6)
+
+  @@index([activity_category], map: "idx_admin_activity_log_category")
+  @@index([created_at(sort: Desc)], map: "idx_admin_activity_log_created_at")
+  @@index([status], map: "idx_admin_activity_log_status")
+  @@index([activity_type], map: "idx_admin_activity_log_type")
+}
+
+model ai_prompts {
+  id             Int       @id @default(autoincrement())
+  user_id        String
+  prompt_type    String    @db.VarChar(50)
+  prompt_text    String
+  cosmic_context Json?
+  generated_at   DateTime  @default(now()) @db.Timestamptz(6)
+  expires_at     DateTime  @db.Timestamptz(6)
+  read_at        DateTime? @db.Timestamptz(6)
+  created_at     DateTime  @default(now()) @db.Timestamptz(6)
+  updated_at     DateTime  @default(now()) @db.Timestamptz(6)
+
+  @@unique([user_id, prompt_type, generated_at], map: "unique_user_prompt_type_date")
+  @@index([expires_at], map: "idx_ai_prompts_expires_at")
+  @@index([generated_at], map: "idx_ai_prompts_generated_at")
+  @@index([prompt_type], map: "idx_ai_prompts_type")
+  @@index([user_id], map: "idx_ai_prompts_user_id")
+}
+
+model analytics_ai_usage {
+  id            Int       @id @default(autoincrement())
+  user_id       String
+  session_id    String    @unique
+  message_count Int?      @default(0)
+  token_count   Int?      @default(0)
+  mode          String?
+  completed     Boolean?  @default(false)
+  created_at    DateTime? @default(now()) @db.Timestamptz(6)
+  completed_at  DateTime? @db.Timestamptz(6)
+
+  @@index([created_at], map: "idx_analytics_ai_usage_created_at")
+  @@index([mode], map: "idx_analytics_ai_usage_mode")
+  @@index([session_id], map: "idx_analytics_ai_usage_session_id")
+  @@index([user_id], map: "idx_analytics_ai_usage_user_id")
+}
+
+model analytics_conversions {
+  id              Int       @id @default(autoincrement())
+  user_id         String
+  conversion_type String
+  from_plan       String?
+  to_plan         String?
+  trigger_feature String?
+  days_to_convert Int?
+  metadata        Json?
+  created_at      DateTime? @default(now()) @db.Timestamptz(6)
+
+  @@index([created_at], map: "idx_analytics_conversions_created_at")
+  @@index([trigger_feature], map: "idx_analytics_conversions_trigger_feature")
+  @@index([conversion_type], map: "idx_analytics_conversions_type")
+  @@index([user_id], map: "idx_analytics_conversions_user_id")
+}
+
+model analytics_discord_interactions {
+  id               Int       @id @default(autoincrement())
+  discord_id       String
+  lunary_user_id   String?
+  interaction_type String
+  command_name     String?
+  button_action    String?
+  destination_url  String?
+  source           String?   @default("discord")
+  feature          String?
+  campaign         String?
+  metadata         Json?
+  created_at       DateTime? @default(now()) @db.Timestamptz(6)
+
+  @@index([command_name], map: "idx_analytics_discord_interactions_command")
+  @@index([created_at], map: "idx_analytics_discord_interactions_created_at")
+  @@index([discord_id], map: "idx_analytics_discord_interactions_discord_id")
+  @@index([feature], map: "idx_analytics_discord_interactions_feature")
+  @@index([lunary_user_id], map: "idx_analytics_discord_interactions_lunary_user_id")
+  @@index([interaction_type], map: "idx_analytics_discord_interactions_type")
+}
+
+model analytics_identity_links {
+  user_id       String
+  anonymous_id  String
+  first_seen_at DateTime? @default(now()) @db.Timestamptz(6)
+  last_seen_at  DateTime? @default(now()) @db.Timestamptz(6)
+
+  @@id([user_id, anonymous_id])
+  @@index([anonymous_id], map: "idx_analytics_identity_links_anonymous_id")
+}
+
+model analytics_notification_events {
+  id                Int       @id @default(autoincrement())
+  user_id           String
+  notification_type String
+  event_type        String
+  notification_id   String?
+  metadata          Json?
+  created_at        DateTime? @default(now()) @db.Timestamptz(6)
+
+  @@index([created_at], map: "idx_analytics_notification_events_created_at")
+  @@index([event_type], map: "idx_analytics_notification_events_event_type")
+  @@index([notification_type], map: "idx_analytics_notification_events_type")
+  @@index([user_id], map: "idx_analytics_notification_events_user_id")
+}
+
+model analytics_seo_metrics {
+  id               Int       @id @default(autoincrement())
+  metric_date      DateTime  @unique @db.Date
+  clicks           Int?      @default(0)
+  impressions      Int?      @default(0)
+  ctr              Decimal?  @default(0) @db.Decimal(10, 4)
+  average_position Decimal?  @default(0) @db.Decimal(10, 2)
+  pages_indexed    Int?      @default(0)
+  article_count    Int?      @default(0)
+  top_pages        Json?
+  created_at       DateTime? @default(now()) @db.Timestamptz(6)
+  updated_at       DateTime? @default(now()) @db.Timestamptz(6)
+
+  @@index([created_at], map: "idx_analytics_seo_metrics_created_at")
+  @@index([metric_date], map: "idx_analytics_seo_metrics_date")
+}
+
+model analytics_user_activity {
+  id             Int       @id @default(autoincrement())
+  user_id        String
+  activity_date  DateTime  @db.Date
+  activity_type  String
+  activity_count Int?      @default(1)
+  metadata       Json?
+  created_at     DateTime? @default(now()) @db.Timestamptz(6)
+
+  @@unique([user_id, activity_date, activity_type])
+  @@index([activity_date], map: "idx_analytics_user_activity_date")
+  @@index([activity_type], map: "idx_analytics_user_activity_type")
+  @@index([user_id, activity_date], map: "idx_analytics_user_activity_user_date")
+  @@index([user_id], map: "idx_analytics_user_activity_user_id")
+}
+
+model app_config {
+  key        String    @id
+  value      String
+  updated_at DateTime? @default(now()) @db.Timestamptz(6)
+}
+
+model collection_folders {
+  id          Int           @id @default(autoincrement())
+  user_id     String
+  name        String
+  description String?
+  color       String?       @default("#6366f1")
+  icon        String?       @default("book")
+  created_at  DateTime?     @default(now()) @db.Timestamptz(6)
+  updated_at  DateTime?     @default(now()) @db.Timestamptz(6)
+  collections collections[]
+
+  @@index([user_id], map: "idx_collection_folders_user_id")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model collections {
+  id                 Int                 @id @default(autoincrement())
+  user_id            String
+  title              String
+  description        String?
+  category           String
+  content            Json
+  tags               String[]
+  folder_id          Int?
+  created_at         DateTime?           @default(now()) @db.Timestamptz(6)
+  updated_at         DateTime?           @default(now()) @db.Timestamptz(6)
+  collection_folders collection_folders? @relation(fields: [folder_id], references: [id], onUpdate: NoAction)
+
+  @@index([category], map: "idx_collections_category")
+  @@index([created_at(sort: Desc)], map: "idx_collections_created_at")
+  @@index([folder_id], map: "idx_collections_folder_id")
+  @@index([tags], map: "idx_collections_tags", type: Gin)
+  @@index([user_id], map: "idx_collections_user_id")
+}
+
+model consent_log {
+  id           Int       @id @default(autoincrement())
+  user_id      String
+  consent_type String
+  version      String
+  accepted_at  DateTime? @default(now()) @db.Timestamptz(6)
+  ip_address   String?
+  user_agent   String?
+  metadata     Json?     @default("{}")
+
+  @@index([accepted_at], map: "idx_consent_log_accepted_at")
+  @@index([consent_type], map: "idx_consent_log_type")
+  @@index([user_id], map: "idx_consent_log_user_id")
+}
+
+model content_rotation {
+  id            Int       @id @default(autoincrement())
+  rotation_type String
+  item_id       String
+  last_used_at  DateTime? @db.Timestamptz(6)
+  use_count     Int?      @default(0)
+
+  @@unique([rotation_type, item_id])
+}
+
+model content_rotation_secondary {
+  theme_id               String    @id
+  secondary_usage_count  Int       @default(0)
+  last_secondary_used_at DateTime? @db.Timestamptz(6)
+  updated_at             DateTime? @default(now()) @db.Timestamptz(6)
+
+  @@index([last_secondary_used_at], map: "idx_content_rotation_secondary_last_used")
+}
+
+model conversation_snippets {
+  id                Int       @id @default(autoincrement())
+  user_id           String
+  snippet_encrypted String
+  created_at        DateTime? @default(now()) @db.Timestamptz(6)
+}
+
+model conversion_events {
+  id                   Int       @id @default(autoincrement())
+  event_type           String
+  user_id              String?
+  user_email           String?
+  plan_type            String?
+  trial_days_remaining Int?
+  feature_name         String?
+  page_path            String?
+  metadata             Json?
+  created_at           DateTime? @default(now()) @db.Timestamptz(6)
+  anonymous_id         String?
+  entity_type          String?
+  entity_id            String?
+  event_id             String?   @db.Uuid
+
+  @@index([anonymous_id], map: "idx_conversion_events_anonymous_id")
+  @@index([created_at], map: "idx_conversion_events_created_at")
+  @@index([event_type, created_at], map: "idx_conversion_events_event_created_at")
+  @@index([event_type], map: "idx_conversion_events_event_type")
+  @@index([plan_type], map: "idx_conversion_events_plan_type")
+  @@index([user_id, created_at], map: "idx_conversion_events_user_created_at")
+  @@index([user_email], map: "idx_conversion_events_user_email")
+  @@index([user_id, event_type, created_at], map: "idx_conversion_events_user_event")
+  @@index([user_id], map: "idx_conversion_events_user_id")
+}
+
+model cosmic_reports {
+  id          Int       @id @default(autoincrement())
+  user_id     String?
+  report_type String
+  report_data Json
+  share_token String?   @unique
+  is_public   Boolean?  @default(false)
+  created_at  DateTime? @default(now()) @db.Timestamptz(6)
+  expires_at  DateTime? @db.Timestamptz(6)
+
+  @@index([created_at], map: "idx_cosmic_reports_created_at")
+  @@index([share_token], map: "idx_cosmic_reports_share_token")
+  @@index([user_id], map: "idx_cosmic_reports_user_id")
+}
+
+model cosmic_snapshots {
+  user_id       String
+  snapshot_date DateTime  @db.Date
+  snapshot_data Json
+  created_at    DateTime? @default(now()) @db.Timestamptz(6)
+  updated_at    DateTime? @default(now()) @db.Timestamptz(6)
+
+  @@id([user_id, snapshot_date])
+  @@index([snapshot_date], map: "idx_cosmic_snapshots_date")
+  @@index([updated_at], map: "idx_cosmic_snapshots_updated_at")
+  @@index([user_id], map: "idx_cosmic_snapshots_user_id")
+}
+
+model daily_horoscopes {
+  id             Int       @id @default(autoincrement())
+  user_id        String    @db.VarChar(255)
+  horoscope_date DateTime  @db.Date
+  horoscope_data Json
+  generated_at   DateTime? @default(now()) @db.Timestamp(6)
+
+  @@unique([user_id, horoscope_date])
+}
+
+model daily_thread_modules {
+  id           Int       @id @default(autoincrement())
+  user_id      String
+  date         DateTime  @db.Date
+  modules_json Json
+  created_at   DateTime? @default(now()) @db.Timestamptz(6)
+  updated_at   DateTime? @default(now()) @db.Timestamptz(6)
+
+  @@unique([user_id, date])
+  @@index([user_id, date(sort: Desc)], map: "idx_daily_thread_modules_user_date")
+}
+
+model deletion_requests {
+  id            String    @id
+  user_id       String    @unique
+  user_email    String?
+  reason        String?
+  status        String    @default("pending")
+  scheduled_for DateTime  @db.Timestamptz(6)
+  processed_at  DateTime? @db.Timestamptz(6)
+  cancelled_at  DateTime? @db.Timestamptz(6)
+  created_at    DateTime? @default(now()) @db.Timestamptz(6)
+  updated_at    DateTime? @default(now()) @db.Timestamptz(6)
+
+  @@index([scheduled_for], map: "idx_deletion_requests_scheduled_for")
+  @@index([status], map: "idx_deletion_requests_status")
+  @@index([user_id], map: "idx_deletion_requests_user_id")
+}
+
+model discord_notification_analytics {
+  id                  Int       @id @default(autoincrement())
+  category            String
+  event_type          String
+  title               String?
+  dedupe_key          String?
+  sent_at             DateTime? @default(now()) @db.Timestamptz(6)
+  metadata            Json?
+  skipped_reason      String?
+  rate_limited        Boolean?  @default(false)
+  quiet_hours_skipped Boolean?  @default(false)
+
+  @@index([category], map: "idx_discord_notification_analytics_category")
+  @@index([dedupe_key], map: "idx_discord_notification_analytics_dedupe_key")
+  @@index([event_type], map: "idx_discord_notification_analytics_event_type")
+  @@index([sent_at], map: "idx_discord_notification_analytics_sent_at")
+}
+
+model discord_notification_log {
+  id              Int       @id @default(autoincrement())
+  dedupe_key      String?
+  category        String
+  title           String?
+  recipient_count Int?      @default(0)
+  sent_at         DateTime? @default(now()) @db.Timestamptz(6)
+
+  @@index([category], map: "idx_discord_notification_log_category")
+  @@index([category, sent_at], map: "idx_discord_notification_log_category_sent_at")
+  @@index([dedupe_key], map: "idx_discord_notification_log_dedupe_key")
+  @@index([sent_at], map: "idx_discord_notification_log_sent_at")
+}
+
+model email_events {
+  id         Int       @id @default(autoincrement())
+  user_id    String
+  email_type String
+  sent_at    DateTime? @default(now()) @db.Timestamptz(6)
+  metadata   Json?
+
+  @@unique([user_id, email_type])
+  @@index([email_type], map: "idx_email_events_email_type")
+  @@index([sent_at], map: "idx_email_events_sent_at")
+  @@index([user_id], map: "idx_email_events_user_id")
+}
+
+model email_preferences {
+  id               Int       @id @default(autoincrement())
+  user_id          String    @unique
+  marketing_emails Boolean?  @default(true)
+  product_updates  Boolean?  @default(true)
+  cosmic_insights  Boolean?  @default(true)
+  trial_reminders  Boolean?  @default(true)
+  weekly_digest    Boolean?  @default(true)
+  unsubscribed_all Boolean?  @default(false)
+  created_at       DateTime? @default(now()) @db.Timestamptz(6)
+  updated_at       DateTime? @default(now()) @db.Timestamptz(6)
+
+  @@index([user_id], map: "idx_email_preferences_user_id")
+}
+
+model global_cosmic_data {
+  data_date           DateTime  @id @db.Date
+  moon_phase          Json
+  planetary_positions Json
+  general_transits    Json
+  updated_at          DateTime? @default(now()) @db.Timestamptz(6)
+
+  @@index([data_date], map: "idx_global_cosmic_data_date")
+  @@index([updated_at], map: "idx_global_cosmic_data_updated_at")
+}
+
+model grimoire_embeddings {
+  id         String                 @id
+  slug       String                 @unique
+  title      String
+  category   String
+  content    String
+  embedding  Unsupported("vector")?
+  metadata   Json?
+  created_at DateTime?              @default(now()) @db.Timestamptz(6)
+  updated_at DateTime?              @default(now()) @db.Timestamptz(6)
+
+  @@index([category], map: "idx_grimoire_embeddings_category")
+  @@index([slug], map: "idx_grimoire_embeddings_slug")
+}
+
+model journal_patterns {
+  id           Int       @id @default(autoincrement())
+  user_id      String
+  pattern_type String
+  pattern_data Json
+  generated_at DateTime? @default(now()) @db.Timestamptz(6)
+  expires_at   DateTime? @db.Timestamptz(6)
+
+  @@index([expires_at], map: "idx_journal_patterns_expires")
+  @@index([user_id], map: "idx_journal_patterns_user_id")
+}
+
+model launch_signups {
+  id         Int       @id @default(autoincrement())
+  email      String    @unique
+  source     String
+  metadata   Json?
+  created_at DateTime? @default(now()) @db.Timestamptz(6)
+
+  @@index([created_at], map: "idx_launch_signups_created_at")
+  @@index([email], map: "idx_launch_signups_email")
+  @@index([source], map: "idx_launch_signups_source")
+}
+
+model legacy_fallback_usage {
+  id         String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  user_id    String?
+  user_email String?
+  used_at    DateTime? @default(now()) @db.Timestamptz(6)
+  migrated   Boolean?  @default(false)
+  created_at DateTime? @default(now()) @db.Timestamptz(6)
+
+  @@index([used_at(sort: Desc)], map: "idx_legacy_fallback_usage_used_at")
+  @@index([user_email], map: "idx_legacy_fallback_usage_user_email")
+  @@index([user_id], map: "idx_legacy_fallback_usage_user_id")
+}
+
+model monthly_insights {
+  user_id    String
+  month      Int
+  year       Int
+  insights   Json
+  created_at DateTime? @default(now()) @db.Timestamptz(6)
+  updated_at DateTime? @default(now()) @db.Timestamptz(6)
+
+  @@id([user_id, month, year])
+  @@index([year, month], map: "idx_monthly_insights_date")
+  @@index([updated_at], map: "idx_monthly_insights_updated_at")
+  @@index([user_id], map: "idx_monthly_insights_user_id")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model moon_circle_insights {
+  id              Int          @id @default(autoincrement())
+  moon_circle_id  Int
+  user_id         String
+  insight_text    String
+  is_anonymous    Boolean?     @default(true)
+  source          String?      @default("app")
+  email_thread_id String?
+  is_approved     Boolean?     @default(true)
+  created_at      DateTime?    @default(now()) @db.Timestamptz(6)
+  updated_at      DateTime?    @default(now()) @db.Timestamptz(6)
+  moon_circles    moon_circles @relation(fields: [moon_circle_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([created_at(sort: Desc)], map: "idx_moon_circle_insights_created_at")
+  @@index([moon_circle_id], map: "idx_moon_circle_insights_moon_circle_id")
+  @@index([user_id], map: "idx_moon_circle_insights_user_id")
+}
+
+model moon_circles {
+  id                   Int                    @id @default(autoincrement())
+  moon_phase           String
+  event_date           DateTime               @db.Date
+  title                String?
+  theme                String?
+  description          String?
+  focus_points         Json?                  @default("[]")
+  rituals              Json?                  @default("[]")
+  journal_prompts      Json?                  @default("[]")
+  astrology_highlights Json?                  @default("[]")
+  resource_links       Json?                  @default("[]")
+  hero_image_url       String?
+  cta_url              String?
+  insight_count        Int?                   @default(0)
+  created_at           DateTime?              @default(now()) @db.Timestamptz(6)
+  updated_at           DateTime?              @default(now()) @db.Timestamptz(6)
+  moon_circle_insights moon_circle_insights[]
+
+  @@index([event_date(sort: Desc)], map: "idx_moon_circles_event_date")
+  @@index([moon_phase], map: "idx_moon_circles_moon_phase")
+}
+
+model newsletter_subscribers {
+  id                 Int       @id @default(autoincrement())
+  email              String    @unique
+  user_id            String?
+  is_active          Boolean?  @default(true)
+  is_verified        Boolean?  @default(false)
+  verification_token String?
+  verified_at        DateTime? @db.Timestamptz(6)
+  unsubscribed_at    DateTime? @db.Timestamptz(6)
+  preferences        Json?     @default("{\"blogUpdates\": true, \"cosmicAlerts\": false, \"productUpdates\": false, \"weeklyNewsletter\": true}")
+  source             String?
+  referrer           String?
+  created_at         DateTime? @default(now()) @db.Timestamptz(6)
+  updated_at         DateTime? @default(now()) @db.Timestamptz(6)
+  last_email_sent    DateTime? @db.Timestamptz(6)
+  email_count        Int?      @default(0)
+
+  @@index([email], map: "idx_newsletter_subscribers_email")
+  @@index([preferences], map: "idx_newsletter_subscribers_preferences", type: Gin)
+  @@index([user_id], map: "idx_newsletter_subscribers_user_id")
+}
+
+model notification_sent_events {
+  id             Int       @id @default(autoincrement())
+  date           DateTime  @db.Date
+  event_key      String
+  event_type     String
+  event_name     String
+  event_priority Int
+  sent_by        String
+  sent_at        DateTime? @default(now()) @db.Timestamptz(6)
+
+  @@unique([date, event_key])
+  @@index([date], map: "idx_notification_sent_events_date")
+  @@index([event_key], map: "idx_notification_sent_events_event_key")
+  @@index([sent_at], map: "idx_notification_sent_events_sent_at")
+}
+
+model onboarding_completion {
+  user_id         String    @id
+  completed_at    DateTime? @default(now()) @db.Timestamptz(6)
+  steps_completed String[]  @default([])
+  skipped         Boolean?  @default(false)
+  created_at      DateTime? @default(now()) @db.Timestamptz(6)
+  updated_at      DateTime? @default(now()) @db.Timestamptz(6)
+
+  @@index([completed_at], map: "idx_onboarding_completion_completed_at")
+}
+
+model pattern_analysis {
+  user_id          String
+  analysis_type    String
+  element_patterns Json?
+  color_patterns   Json?
+  correlations     Json?
+  timeline_data    Json?
+  created_at       DateTime? @default(now()) @db.Timestamptz(6)
+  updated_at       DateTime? @default(now()) @db.Timestamptz(6)
+
+  @@id([user_id, analysis_type])
+  @@index([analysis_type], map: "idx_pattern_analysis_type")
+  @@index([updated_at], map: "idx_pattern_analysis_updated_at")
+  @@index([user_id], map: "idx_pattern_analysis_user_id")
+}
+
+model push_subscriptions {
+  id                     Int       @id @default(autoincrement())
+  user_id                String?
+  user_email             String?
+  endpoint               String    @unique
+  p256dh                 String
+  auth                   String
+  preferences            Json?     @default("{\"sabbats\": true, \"eclipses\": true, \"moonPhases\": true, \"retrogrades\": true, \"majorAspects\": true, \"planetaryTransits\": true}")
+  user_agent             String?
+  created_at             DateTime? @default(now()) @db.Timestamptz(6)
+  updated_at             DateTime? @default(now()) @db.Timestamptz(6)
+  last_notification_sent DateTime? @db.Timestamptz(6)
+  is_active              Boolean?  @default(true)
+
+  @@index([endpoint], map: "idx_push_subscriptions_endpoint")
+  @@index([preferences], map: "idx_push_subscriptions_preferences", type: Gin)
+  @@index([user_id], map: "idx_push_subscriptions_user_id")
+}
+
+model re_engagement_campaigns {
+  id            Int       @id @default(autoincrement())
+  user_id       String
+  campaign_type String
+  sent_at       DateTime? @default(now()) @db.Timestamptz(6)
+  opened_at     DateTime? @db.Timestamptz(6)
+  clicked_at    DateTime? @db.Timestamptz(6)
+  metadata      Json?
+  created_at    DateTime? @default(now()) @db.Timestamptz(6)
+
+  @@index([sent_at], map: "idx_re_engagement_campaigns_sent_at")
+  @@index([campaign_type], map: "idx_re_engagement_campaigns_type")
+  @@index([user_id], map: "idx_re_engagement_campaigns_user_id")
+  @@index([user_id, campaign_type, sent_at], map: "idx_re_engagement_campaigns_user_type_sent")
+}
+
+model referral_codes {
+  id         Int       @id @default(autoincrement())
+  code       String    @unique
+  user_id    String
+  created_at DateTime? @default(now()) @db.Timestamptz(6)
+  uses       Int?      @default(0)
+  max_uses   Int?
+
+  @@index([user_id], map: "idx_referral_codes_user_id")
+}
+
+model refund_requests {
+  id                     String    @id
+  user_id                String
+  user_email             String?
+  stripe_subscription_id String?
+  stripe_customer_id     String?
+  plan_type              String?
+  subscription_start     DateTime? @db.Timestamptz(6)
+  amount_cents           Int?
+  reason                 String?
+  status                 String    @default("pending")
+  eligible               Boolean?
+  eligibility_reason     String?
+  processed_at           DateTime? @db.Timestamptz(6)
+  refund_id              String?
+  created_at             DateTime? @default(now()) @db.Timestamptz(6)
+  updated_at             DateTime? @default(now()) @db.Timestamptz(6)
+
+  @@index([created_at], map: "idx_refund_requests_created_at")
+  @@index([status], map: "idx_refund_requests_status")
+  @@index([user_id], map: "idx_refund_requests_user_id")
+}
+
+model ritual_habits {
+  user_id         String
+  habit_date      DateTime  @db.Date
+  ritual_type     String
+  completed       Boolean?  @default(false)
+  completion_time DateTime? @db.Timestamptz(6)
+  metadata        Json?
+  created_at      DateTime? @default(now()) @db.Timestamptz(6)
+  updated_at      DateTime? @default(now()) @db.Timestamptz(6)
+
+  @@id([user_id, habit_date, ritual_type])
+  @@index([habit_date], map: "idx_ritual_habits_date")
+  @@index([user_id, habit_date], map: "idx_ritual_habits_user_date")
+  @@index([user_id], map: "idx_ritual_habits_user_id")
+}
+
+model ritual_message_events {
+  id         Int       @id @default(autoincrement())
+  message_id String    @db.VarChar(100)
+  context    String    @db.VarChar(50)
+  user_id    String?   @default("anonymous") @db.VarChar(255)
+  shown_at   DateTime? @default(now()) @db.Timestamptz(6)
+  engaged    Boolean?  @default(false)
+  engaged_at DateTime? @db.Timestamptz(6)
+
+  @@index([message_id, context], map: "idx_ritual_message_performance")
+  @@index([user_id, shown_at(sort: Desc)], map: "idx_ritual_message_user")
+}
+
+model session {
+  id        String   @id
+  expiresAt DateTime @db.Timestamptz(6)
+  token     String   @unique
+  createdAt DateTime @default(now()) @db.Timestamptz(6)
+  updatedAt DateTime @default(now()) @db.Timestamptz(6)
+  ipAddress String?
+  userAgent String?
+  userId    String
+  user      user     @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([token], map: "idx_session_token")
+  @@index([userId], map: "idx_session_userid")
+}
+
+model shop_packs {
+  id                String    @id
+  name              String
+  description       String?
+  category          String
+  subcategory       String?
+  price             Int
+  stripe_product_id String?
+  stripe_price_id   String?
+  image_url         String?
+  download_url      String?
+  file_size         Int?
+  is_active         Boolean?  @default(true)
+  metadata          Json?
+  created_at        DateTime? @default(now()) @db.Timestamptz(6)
+  updated_at        DateTime? @default(now()) @db.Timestamptz(6)
+
+  @@index([category], map: "idx_shop_packs_category")
+  @@index([metadata], map: "idx_shop_packs_metadata", type: Gin)
+  @@index([stripe_product_id], map: "idx_shop_packs_stripe_product_id")
+}
+
+model shop_purchases {
+  id                       String    @id
+  user_id                  String
+  pack_id                  String
+  stripe_session_id        String?
+  stripe_payment_intent_id String?
+  status                   String    @default("pending")
+  amount                   Int
+  download_token           String
+  download_count           Int?      @default(0)
+  max_downloads            Int?      @default(5)
+  expires_at               DateTime? @db.Timestamptz(6)
+  created_at               DateTime? @default(now()) @db.Timestamptz(6)
+  updated_at               DateTime? @default(now()) @db.Timestamptz(6)
+  pack_name                String?
+  pack_slug                String?
+  blob_url                 String?
+  currency                 String?
+  stripe_product_id        String?
+  stripe_price_id          String?
+
+  @@index([download_token], map: "idx_shop_purchases_download_token")
+  @@index([pack_id], map: "idx_shop_purchases_pack_id")
+  @@index([status], map: "idx_shop_purchases_status")
+  @@index([stripe_session_id], map: "idx_shop_purchases_stripe_session_id")
+  @@index([user_id], map: "idx_shop_purchases_user_id")
+}
+
+model social_quotes {
+  id         Int       @id @default(autoincrement())
+  quote_text String    @unique
+  author     String?
+  status     String    @default("available")
+  used_at    DateTime? @db.Timestamptz(6)
+  use_count  Int?      @default(0)
+  created_at DateTime? @default(now()) @db.Timestamptz(6)
+  updated_at DateTime? @default(now()) @db.Timestamptz(6)
+
+  @@index([created_at], map: "idx_social_quotes_created_at")
+  @@index([status], map: "idx_social_quotes_status")
+  @@index([use_count], map: "idx_social_quotes_use_count")
+}
+
+model subscriptions {
+  id                       Int       @id @default(autoincrement())
+  user_id                  String    @unique
+  user_email               String?
+  user_name                String?
+  status                   String    @default("free")
+  plan_type                String    @default("free")
+  trial_ends_at            DateTime? @db.Timestamptz(6)
+  trial_reminder_3d_sent   Boolean?  @default(false)
+  trial_reminder_1d_sent   Boolean?  @default(false)
+  trial_expired_email_sent Boolean?  @default(false)
+  stripe_customer_id       String?
+  stripe_subscription_id   String?
+  current_period_end       DateTime? @db.Timestamptz(6)
+  created_at               DateTime? @default(now()) @db.Timestamptz(6)
+  updated_at               DateTime? @default(now()) @db.Timestamptz(6)
+  trial_nurture_day2_sent  Boolean?  @default(false)
+  trial_nurture_day3_sent  Boolean?  @default(false)
+  trial_nurture_day5_sent  Boolean?  @default(false)
+  trial_nurture_day7_sent  Boolean?  @default(false)
+  has_discount             Boolean?  @default(false)
+  discount_percent         Decimal?  @db.Decimal(5, 2)
+  monthly_amount_due       Decimal?  @db.Decimal(10, 2)
+  coupon_id                String?
+  is_paying                Boolean?  @default(dbgenerated("(COALESCE(monthly_amount_due, (0)::numeric) > (0)::numeric)"))
+
+  @@index([status], map: "idx_subscriptions_status")
+  @@index([trial_ends_at], map: "idx_subscriptions_trial_ends_at")
+  @@index([user_email], map: "idx_subscriptions_user_email")
+  @@index([user_id], map: "idx_subscriptions_user_id")
+}
+
+model tarot_readings {
+  id                 String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  user_id            String
+  spread_slug        String
+  spread_name        String
+  plan_snapshot      String    @default("free")
+  cards              Json
+  summary            String?
+  highlights         Json?
+  journaling_prompts Json?
+  notes              String?
+  tags               String[]
+  metadata           Json?
+  archived_at        DateTime? @db.Timestamptz(6)
+  created_at         DateTime? @default(now()) @db.Timestamptz(6)
+  updated_at         DateTime? @default(now()) @db.Timestamptz(6)
+  ai_interpretation  String?
+
+  @@index([created_at(sort: Desc)], map: "idx_tarot_readings_created")
+  @@index([user_id], map: "idx_tarot_readings_user")
+}
+
+model theme_publications {
+  id         Int       @id @default(autoincrement())
+  week_start DateTime  @db.Date
+  theme_name String
+  created_at DateTime? @default(now()) @db.Timestamptz(6)
+
+  @@unique([week_start, theme_name])
+}
+
+model user {
+  id            String    @id
+  name          String
+  email         String    @unique
+  emailVerified Boolean   @default(false)
+  image         String?
+  createdAt     DateTime  @default(now()) @db.Timestamptz(6)
+  updatedAt     DateTime  @default(now()) @db.Timestamptz(6)
+  account       account[]
+  session       session[]
+
+  @@index([email], map: "idx_user_email")
+}
+
+model user_attribution {
+  id                   Int       @id @default(autoincrement())
+  user_id              String?   @unique
+  anonymous_id         String?
+  first_touch_source   String?
+  first_touch_medium   String?
+  first_touch_campaign String?
+  first_touch_keyword  String?
+  first_touch_page     String?
+  first_touch_referrer String?
+  first_touch_at       DateTime? @db.Timestamptz(6)
+  utm_source           String?
+  utm_medium           String?
+  utm_campaign         String?
+  utm_term             String?
+  utm_content          String?
+  created_at           DateTime? @default(now()) @db.Timestamptz(6)
+  updated_at           DateTime? @default(now()) @db.Timestamptz(6)
+
+  @@index([created_at], map: "idx_user_attribution_created_at")
+  @@index([first_touch_at], map: "idx_user_attribution_first_touch_at")
+  @@index([first_touch_medium], map: "idx_user_attribution_medium")
+  @@index([first_touch_source], map: "idx_user_attribution_source")
+  @@index([first_touch_source, first_touch_medium], map: "idx_user_attribution_source_medium")
+  @@index([user_id], map: "idx_user_attribution_user_id")
+}
+
+model user_memory {
+  id                Int       @id @default(autoincrement())
+  user_id           String
+  category          String
+  fact_encrypted    String
+  confidence        Float?    @default(0.8) @db.Real
+  source_message_id String?
+  mentioned_count   Int?      @default(1)
+  last_mentioned_at DateTime? @default(now()) @db.Timestamptz(6)
+  created_at        DateTime? @default(now()) @db.Timestamptz(6)
+  updated_at        DateTime? @default(now()) @db.Timestamptz(6)
+
+  @@index([category], map: "idx_user_memory_category")
+  @@index([last_mentioned_at(sort: Desc)], map: "idx_user_memory_last_mentioned")
+  @@index([user_id], map: "idx_user_memory_user_id")
+}
+
+model user_notes {
+  id         String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  user_id    String
+  title      String
+  content    String
+  created_at DateTime? @default(now()) @db.Timestamptz(6)
+  updated_at DateTime? @default(now()) @db.Timestamptz(6)
+
+  @@index([created_at(sort: Desc)], map: "idx_user_notes_created_at")
+  @@index([user_id], map: "idx_user_notes_user_id")
+}
+
+model user_profiles {
+  id                 String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  user_id            String    @unique
+  name               String?
+  birthday           String?
+  birth_chart        Json?
+  personal_card      Json?
+  location           Json?
+  stripe_customer_id String?
+  created_at         DateTime? @default(now()) @db.Timestamptz(6)
+  updated_at         DateTime? @default(now()) @db.Timestamptz(6)
+  intention          String?
+  origin_hub         String?
+  origin_page        String?
+  origin_type        String?
+  signup_at          DateTime? @db.Timestamptz(6)
+
+  @@index([birth_chart], map: "idx_user_profiles_birth_chart", type: Gin)
+  @@index([location], map: "idx_user_profiles_location", type: Gin)
+  @@index([personal_card], map: "idx_user_profiles_personal_card", type: Gin)
+  @@index([stripe_customer_id], map: "idx_user_profiles_stripe_customer_id")
+  @@index([user_id], map: "idx_user_profiles_user_id")
+}
+
+model user_referrals {
+  id                Int       @id @default(autoincrement())
+  referrer_user_id  String
+  referred_user_id  String    @unique
+  referral_code     String
+  created_at        DateTime? @default(now()) @db.Timestamptz(6)
+  reward_granted    Boolean?  @default(false)
+  reward_granted_at DateTime? @db.Timestamptz(6)
+
+  @@index([referral_code], map: "idx_user_referrals_code")
+  @@index([referred_user_id], map: "idx_user_referrals_referred")
+  @@index([referrer_user_id], map: "idx_user_referrals_referrer")
+}
+
+model user_sessions {
+  id                Int       @id @default(autoincrement())
+  user_id           String
+  session_date      DateTime  @default(dbgenerated("CURRENT_DATE")) @db.Date
+  session_timestamp DateTime? @default(now()) @db.Timestamptz(6)
+  page_path         String?
+  feature_name      String?
+  metadata          Json?
+  created_at        DateTime? @default(now()) @db.Timestamptz(6)
+
+  @@index([created_at], map: "idx_user_sessions_created_at")
+  @@index([session_date], map: "idx_user_sessions_session_date")
+  @@index([user_id, session_date], map: "idx_user_sessions_user_date")
+  @@index([user_id], map: "idx_user_sessions_user_id")
+  @@index([user_id, session_timestamp], map: "idx_user_sessions_user_timestamp")
+}
+
+model user_streaks {
+  user_id               String    @id
+  current_streak        Int?      @default(0)
+  longest_streak        Int?      @default(0)
+  last_check_in         DateTime? @db.Date
+  total_check_ins       Int?      @default(0)
+  created_at            DateTime? @default(now()) @db.Timestamptz(6)
+  updated_at            DateTime? @default(now()) @db.Timestamptz(6)
+  ritual_streak         Int?      @default(0)
+  longest_ritual_streak Int?      @default(0)
+  last_ritual_date      DateTime? @db.Date
+
+  @@index([last_check_in], map: "idx_user_streaks_last_check_in")
+}
+
+model verification {
+  id         String   @id
+  identifier String
+  value      String
+  expiresAt  DateTime @db.Timestamptz(6)
+  createdAt  DateTime @default(now()) @db.Timestamptz(6)
+  updatedAt  DateTime @default(now()) @db.Timestamptz(6)
+}
+
+model video_jobs {
+  id         Int       @id @default(autoincrement())
+  script_id  Int       @unique(map: "idx_video_jobs_script_id")
+  week_start DateTime? @db.Date
+  date_key   DateTime? @db.Date
+  topic      String?
+  status     String    @default("pending")
+  attempts   Int       @default(0)
+  last_error String?
+  created_at DateTime? @default(now()) @db.Timestamptz(6)
+  updated_at DateTime? @default(now()) @db.Timestamptz(6)
+
+  @@unique([week_start, date_key, topic], map: "idx_video_jobs_week_topic")
+}
+
+model video_scripts {
+  id                   Int       @id @default(autoincrement())
+  theme_id             String
+  theme_name           String
+  facet_title          String
+  platform             String
+  sections             Json
+  full_script          String
+  word_count           Int
+  estimated_duration   String
+  scheduled_date       DateTime  @db.Date
+  status               String    @default("draft")
+  metadata             Json?
+  cover_image_url      String?
+  part_number          Int?
+  created_at           DateTime? @default(now()) @db.Timestamptz(6)
+  updated_at           DateTime? @default(now()) @db.Timestamptz(6)
+  written_post_content String?
+  topic                String?
+  angle                String?
+  aspect               String?
+  primary_theme_id     String?
+  secondary_theme_id   String?
+  secondary_facet_slug String?
+  secondary_angle_key  String?
+  secondary_aspect_key String?
+  hook_text            String?
+  hook_version         Int?      @default(1)
+
+  @@index([platform], map: "idx_video_scripts_platform")
+  @@index([scheduled_date], map: "idx_video_scripts_scheduled")
+  @@index([status], map: "idx_video_scripts_status")
+}
+
+model videos {
+  id               String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  type             String    @db.VarChar(20)
+  video_url        String
+  thumbnail_url    String?
+  title            String?
+  description      String?
+  week_number      Int?
+  blog_slug        String?
+  status           String?   @default("pending") @db.VarChar(20)
+  youtube_video_id String?
+  created_at       DateTime? @default(now()) @db.Timestamptz(6)
+  expires_at       DateTime? @default(dbgenerated("(now() + '7 days'::interval)")) @db.Timestamptz(6)
+  post_content     String?
+  audio_url        String?
+  updated_at       DateTime? @default(now()) @db.Timestamptz(6)
+  script           String?
+
+  @@index([created_at(sort: Desc)], map: "idx_videos_created_at")
+  @@index([expires_at], map: "idx_videos_expires_at")
+  @@index([status], map: "idx_videos_status")
+  @@index([type, week_number], map: "idx_videos_type_week")
+}
+
+model weekly_ritual_usage {
+  id           Int       @id @default(autoincrement())
+  user_id      String
+  week_start   DateTime  @db.Date
+  ritual_count Int?      @default(0)
+  created_at   DateTime? @default(now()) @db.Timestamptz(6)
+  updated_at   DateTime? @default(now()) @db.Timestamptz(6)
+
+  @@unique([user_id, week_start])
+  @@index([user_id, week_start], map: "idx_weekly_ritual_usage_user_week")
+}
+
+model year_analysis {
+  user_id           String
+  year              Int
+  analysis_data     Json
+  created_at        DateTime? @default(now()) @db.Timestamptz(6)
+  updated_at        DateTime? @default(now()) @db.Timestamptz(6)
+  card_recaps       Json?
+  trends            Json?
+  last_reading_date DateTime? @db.Timestamptz(6)
+
+  @@id([user_id, year])
+  @@index([updated_at], map: "idx_year_analysis_updated_at")
+  @@index([user_id], map: "idx_year_analysis_user_id")
+  @@index([year], map: "idx_year_analysis_year")
+}
+
+model yearly_forecasts {
+  year         Int       @id
+  summary      String?
+  forecast     Json
+  stats        Json?
+  source       String?   @default("manual")
+  generated_at DateTime? @default(now()) @db.Timestamptz(6)
+  expires_at   DateTime? @db.Timestamptz(6)
+  created_at   DateTime? @default(now()) @db.Timestamptz(6)
+  updated_at   DateTime? @default(now()) @db.Timestamptz(6)
+
+  @@index([generated_at], map: "idx_yearly_forecasts_generated_at")
+  @@index([updated_at], map: "idx_yearly_forecasts_updated_at")
+}
+
+model youtube_uploads {
+  id               Int       @id @default(autoincrement())
+  topic            String
+  scheduled_date   DateTime  @db.Date
+  video_url        String
+  youtube_video_id String?
+  status           String    @default("pending")
+  error            String?
+  created_at       DateTime? @default(now()) @db.Timestamptz(6)
+
+  @@unique([topic, scheduled_date])
+}
+
+enum tour_status {
   ACTIVE
   COMPLETED
   DISMISSED
-}
-
-model TestimonialPromptTracking {
-  id            String   @id @default(cuid())
-  userId        String   @unique @map("user_id")
-  firstSeen     DateTime @default(now()) @map("first_seen") @db.Timestamptz(6)
-  dontAskUntil  DateTime @default(now()) @map("dont_ask_until") @db.Timestamptz(6)
-  submitted     Boolean  @default(false)
-  createdAt     DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
-  updatedAt     DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
-
-  @@index([userId], name: "idx_testimonial_prompt_user_id")
-  @@index([dontAskUntil], name: "idx_testimonial_prompt_dont_ask_until")
-  @@map("testimonial_prompt_tracking")
 }
