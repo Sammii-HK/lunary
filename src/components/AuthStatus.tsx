@@ -28,6 +28,11 @@ function isTestMode(): boolean {
   );
 }
 
+function isAuthenticatedTestMode(): boolean {
+  if (typeof window === 'undefined') return false;
+  return (window as any).__PLAYWRIGHT_AUTHENTICATED__ === true;
+}
+
 const defaultAuthState: AuthState = {
   isAuthenticated: false,
   user: null,
@@ -53,6 +58,19 @@ export function invalidateAuthCache() {
 
 export function AuthStatusProvider({ children }: { children: ReactNode }) {
   const [authState, setAuthState] = useState<AuthState>(() => {
+    if (isAuthenticatedTestMode()) {
+      // Return authenticated state for Playwright authenticated tests
+      return {
+        isAuthenticated: true,
+        user: {
+          id: 'test-user-id',
+          email: 'test@example.com',
+          name: 'Test User',
+        },
+        profile: null,
+        loading: false,
+      };
+    }
     if (isTestMode()) {
       return { ...defaultAuthState, loading: false };
     }

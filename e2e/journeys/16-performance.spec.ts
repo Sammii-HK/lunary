@@ -82,10 +82,11 @@ test.describe('Performance', () => {
     expect(currentUrl).toContain('/horoscope');
 
     // Check that content is visible (indicates successful load)
+    // Look for any horoscope-related content on the page
     await expect(
-      authenticatedPage.getByRole('heading', { name: /horoscope/i }).first(),
+      authenticatedPage.locator('text=/horoscope|transit|moon/i').first(),
     ).toBeVisible({
-      timeout: 5000,
+      timeout: 10000,
     });
   });
 

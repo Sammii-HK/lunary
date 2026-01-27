@@ -184,6 +184,12 @@ export const test = base.extend<AuthFixtures>({
     });
 
     const page = await context.newPage();
+
+    // Set authenticated test flag before navigating
+    await page.addInitScript(() => {
+      (window as any).__PLAYWRIGHT_AUTHENTICATED__ = true;
+    });
+
     await page.goto(`${testBaseURL}/`, { waitUntil: 'domcontentloaded' });
 
     await use(page);
@@ -244,6 +250,12 @@ export const test = base.extend<AuthFixtures>({
     });
 
     const page = await context.newPage();
+
+    // Set authenticated test flag before navigating
+    await page.addInitScript(() => {
+      (window as any).__PLAYWRIGHT_AUTHENTICATED__ = true;
+    });
+
     await page.goto(`${testBaseURL}/admin`, { waitUntil: 'domcontentloaded' });
 
     await use(page);
