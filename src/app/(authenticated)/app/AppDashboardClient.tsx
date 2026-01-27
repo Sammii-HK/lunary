@@ -8,6 +8,7 @@ import { useAuthStatus } from '@/components/AuthStatus';
 import { recordCheckIn } from '@/lib/streak/check-in';
 import { conversionTracking } from '@/lib/analytics';
 import { useTour } from '@/context/TourContext';
+import { useNotificationDeepLink } from '@/hooks/useNotificationDeepLink';
 
 import { ShareDailyInsight } from '@/components/ShareDailyInsight';
 import { TourTrigger } from '@/components/feature-tour/tour-trigger';
@@ -141,6 +142,9 @@ export default function AppDashboardClient() {
   const [focusHonoured, setFocusHonoured] = useState(false);
   const firstName = user?.name?.trim() ? user.name.split(' ')[0] : null;
 
+  // Handle push notification deep links
+  useNotificationDeepLink();
+
   useEffect(() => {
     if (authState.isAuthenticated && !authState.loading) {
       recordCheckIn();
@@ -246,13 +250,17 @@ export default function AppDashboardClient() {
 
       <PersonalizedHoroscopePreview />
       <div className='grid grid-cols-1 md:grid-cols-2 gap-3'>
-        <MoonPreview />
+        <div id='moon-phase' className='scroll-mt-20'>
+          <MoonPreview />
+        </div>
         <SkyNowCard />
 
         <DailyInsightCard />
         <DailyCardPreview />
 
-        <TransitOfTheDay />
+        <div id='transit-of-day' className='scroll-mt-20'>
+          <TransitOfTheDay />
+        </div>
         <CrystalPreview />
 
         <div className='md:col-span-2'>
