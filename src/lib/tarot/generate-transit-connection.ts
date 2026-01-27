@@ -5,17 +5,20 @@
  * Produces both compact (one sentence) and in-depth (paragraph) interpretations.
  */
 
-import type { BirthChartSnapshot, TransitRecord } from '@/lib/ai/types';
+import type { BirthChartSnapshot } from '@/lib/ai/types';
 import type { TransitAspect } from '@/features/horoscope/transitDetails';
-import {
-  getCardAffinity,
-  type CardTransitAffinity,
-  type AspectType,
-} from './card-transit-mappings';
+import { getCardAffinity, type AspectType } from './card-transit-mappings';
+
+export type TransitInsight = {
+  transit: TransitAspect;
+  insight: string; // Why this transit matters for the card
+  relevance: string; // Short phrase describing the connection
+};
 
 export type TransitConnection = {
   compact: string; // One sentence for dashboard
   inDepth: string; // Full paragraph(s) for tarot page/spreads
+  perTransitInsights?: TransitInsight[]; // Individual insights for each transit
 };
 
 /**
@@ -24,7 +27,7 @@ export type TransitConnection = {
 function findRelevantTransits(
   cardName: string,
   transits: TransitAspect[],
-  birthChart: BirthChartSnapshot
+  birthChart: BirthChartSnapshot,
 ): TransitAspect[] {
   const affinity = getCardAffinity(cardName);
   if (!affinity || !transits || transits.length === 0) {
@@ -37,7 +40,11 @@ function findRelevantTransits(
       let score = 0;
 
       // Check if transit planet matches card's planetary affinity
-      if (affinity.planets.some((p) => p.toLowerCase() === transit.transitPlanet.toLowerCase())) {
+      if (
+        affinity.planets.some(
+          (p) => p.toLowerCase() === transit.transitPlanet.toLowerCase(),
+        )
+      ) {
         score += 3;
       }
 
@@ -100,7 +107,7 @@ function getOrdinalSuffix(n: number): string {
  */
 function generateCompactConnection(
   cardName: string,
-  transit: TransitAspect
+  transit: TransitAspect,
 ): string {
   const aspectName = formatAspectName(transit.aspectType);
   const cardAffinity = getCardAffinity(cardName);
@@ -173,12 +180,71 @@ function generateCardInsight(cardName: string, transit: TransitAspect): string {
 }
 
 /**
+ * Generate individual transit insight for timeline view
+ */
+function generateTransitInsight(
+  cardName: string,
+  transit: TransitAspect,
+): TransitInsight {
+  const affinity = getCardAffinity(cardName);
+  const primaryTheme = affinity?.themes[0]?.replace(/-/g, ' ') || 'awareness';
+  const aspectType = transit.aspectType.toLowerCase();
+  const aspectName = formatAspectName(transit.aspectType);
+
+  // Short relevance phrase
+  let relevance = '';
+  if (aspectType === 'square' || aspectType === 'opposition') {
+    relevance = 'challenges you to grow';
+  } else if (aspectType === 'trine' || aspectType === 'sextile') {
+    relevance = 'supports your path';
+  } else {
+    relevance = 'intensifies the energy';
+  }
+
+  // Build contextual insight - start directly with aspect quality
+  let insight = '';
+
+  // Get aspect quality and customize it
+  if (aspectType === 'conjunction') {
+    insight =
+      'This conjunction intensifies and merges these energies, creating a powerful focus point.';
+  } else if (aspectType === 'trine') {
+    insight =
+      'This harmonious trine allows these energies to flow naturally together, offering ease and support.';
+  } else if (aspectType === 'sextile') {
+    insight =
+      'This supportive sextile opens doors for integration when you take conscious action.';
+  } else if (aspectType === 'square') {
+    insight =
+      'This dynamic square creates productive tension that motivates growth and breakthrough.';
+  } else if (aspectType === 'opposition') {
+    insight =
+      'This opposition illuminates both sides of this dynamic, calling for balance and integration.';
+  } else {
+    insight =
+      'This aspect creates a meaningful connection between these areas of your life.';
+  }
+
+  // Add house context if available
+  if (transit.house) {
+    const houseTheme = HOUSE_THEMES[transit.house] || 'this area of your life';
+    insight += ` This activates your ${transit.house}${getOrdinalSuffix(transit.house)} house, bringing focus to ${houseTheme}.`;
+  }
+
+  return {
+    transit,
+    insight,
+    relevance,
+  };
+}
+
+/**
  * Generates in-depth connection (full paragraph)
  */
 function generateInDepthConnection(
   cardName: string,
   transits: TransitAspect[],
-  birthChart: BirthChartSnapshot
+  birthChart: BirthChartSnapshot,
 ): string {
   if (transits.length === 0) {
     return '';
@@ -231,7 +297,7 @@ function generateInDepthConnection(
 export async function generateTarotTransitConnection(
   cardName: string,
   birthChart: BirthChartSnapshot | null,
-  transits: TransitAspect[]
+  transits: TransitAspect[],
 ): Promise<TransitConnection | null> {
   // Require birth chart for personalized connections
   if (!birthChart || !transits || transits.length === 0) {
@@ -245,13 +311,18 @@ export async function generateTarotTransitConnection(
     return null; // No connection if no relevant transits
   }
 
-  // Generate both versions
+  // Generate all versions
   const compact = generateCompactConnection(cardName, relevantTransits[0]);
   const inDepth = generateInDepthConnection(
     cardName,
     relevantTransits,
-    birthChart
+    birthChart,
   );
 
-  return { compact, inDepth };
+  // Generate per-transit insights for timeline view
+  const perTransitInsights = relevantTransits.map((transit) =>
+    generateTransitInsight(cardName, transit),
+  );
+
+  return { compact, inDepth, perTransitInsights };
 }

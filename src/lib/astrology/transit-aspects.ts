@@ -6,15 +6,18 @@
 
 import type { BirthChartData } from '../../../utils/astrology/birthChart';
 import type { TransitAspect } from '@/features/horoscope/transitDetails';
+import { zodiacSymbol } from '@/constants/symbols';
 
 /**
- * Format degree position as readable string
+ * Format degree position as readable string with Astromicon zodiac symbol
  */
 export function formatDegree(longitude: number, sign: string): string {
   const degreeInSign = longitude % 30;
   const wholeDegree = Math.floor(degreeInSign);
   const minutes = Math.floor((degreeInSign - wholeDegree) * 60);
-  return `${wholeDegree}°${minutes.toString().padStart(2, '0')}' ${sign}`;
+  const signSymbol =
+    zodiacSymbol[sign.toLowerCase() as keyof typeof zodiacSymbol] || sign;
+  return `${wholeDegree}°${minutes.toString().padStart(2, '0')}' ${signSymbol}`;
 }
 
 /**
@@ -22,7 +25,7 @@ export function formatDegree(longitude: number, sign: string): string {
  */
 export function calculateHouse(
   planetLongitude: number,
-  ascendantLongitude: number
+  ascendantLongitude: number,
 ): number {
   const ascendantSign = Math.floor(ascendantLongitude / 30);
   const planetSign = Math.floor(planetLongitude / 30);
@@ -36,7 +39,7 @@ export function calculateHouse(
  */
 export function calculateTransitAspects(
   birthChart: BirthChartData[],
-  currentTransits: any[]
+  currentTransits: any[],
 ): TransitAspect[] {
   const aspects: TransitAspect[] = [];
 
@@ -53,7 +56,7 @@ export function calculateTransitAspects(
   }
 
   // Get ascendant for house calculations
-  const ascendant = birthChart.find((p) => p.planet === 'Ascendant');
+  const ascendant = birthChart.find((p) => p.body === 'Ascendant');
   const ascendantLongitude = ascendant?.eclipticLongitude ?? 0;
 
   currentTransits.forEach((transit) => {
@@ -62,7 +65,7 @@ export function calculateTransitAspects(
     const transitLongitude = transit.eclipticLongitude;
 
     birthChart.forEach((natal) => {
-      const natalPlanet = natal.planet;
+      const natalPlanet = natal.body;
       const natalSign = natal.sign;
       const natalLongitude = natal.eclipticLongitude;
 

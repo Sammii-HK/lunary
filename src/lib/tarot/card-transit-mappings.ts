@@ -75,7 +75,7 @@ export const CARD_TRANSIT_AFFINITIES: Record<string, CardTransitAffinity> = {
     aspectTypes: ['conjunction', 'square', 'any'],
     weight: 6,
   },
-  'strength': {
+  strength: {
     planets: ['Mars', 'Sun'],
     themes: ['courage', 'vitality', 'inner-power', 'compassion'],
     aspectTypes: ['any'],
@@ -93,7 +93,7 @@ export const CARD_TRANSIT_AFFINITIES: Record<string, CardTransitAffinity> = {
     aspectTypes: ['any'],
     weight: 6,
   },
-  'justice': {
+  justice: {
     planets: ['Saturn', 'Venus'],
     themes: ['balance', 'truth', 'consequences', 'fairness'],
     aspectTypes: ['opposition', 'square', 'any'],
@@ -105,13 +105,13 @@ export const CARD_TRANSIT_AFFINITIES: Record<string, CardTransitAffinity> = {
     aspectTypes: ['any'],
     weight: 6,
   },
-  'death': {
+  death: {
     planets: ['Pluto', 'Saturn'],
     themes: ['transformation', 'endings', 'release', 'rebirth'],
     aspectTypes: ['any'],
     weight: 8,
   },
-  'temperance': {
+  temperance: {
     planets: ['Jupiter', 'Venus'],
     themes: ['balance', 'moderation', 'integration', 'healing'],
     aspectTypes: ['trine', 'sextile', 'any'],
@@ -147,7 +147,7 @@ export const CARD_TRANSIT_AFFINITIES: Record<string, CardTransitAffinity> = {
     aspectTypes: ['conjunction', 'trine', 'any'],
     weight: 8,
   },
-  'judgement': {
+  judgement: {
     planets: ['Pluto', 'Uranus'],
     themes: ['awakening', 'rebirth', 'calling', 'evaluation'],
     aspectTypes: ['any'],
@@ -349,7 +349,12 @@ export const CARD_TRANSIT_AFFINITIES: Record<string, CardTransitAffinity> = {
   // MINOR ARCANA - PENTACLES (Earth/Saturn/Venus)
   'ace-of-pentacles': {
     planets: ['Saturn', 'Venus', 'Jupiter'],
-    themes: ['manifestation', 'opportunity', 'material-foundation', 'prosperity'],
+    themes: [
+      'manifestation',
+      'opportunity',
+      'material-foundation',
+      'prosperity',
+    ],
     aspectTypes: ['conjunction', 'trine', 'any'],
     weight: 7,
   },
@@ -510,6 +515,113 @@ export const CARD_TRANSIT_AFFINITIES: Record<string, CardTransitAffinity> = {
     themes: ['abundance', 'security', 'leadership', 'material-success'],
     aspectTypes: ['any'],
     weight: 5,
+  },
+
+  // ALTERNATIVE COURT CARD NAMES (Father/Mother/Son/Daughter)
+  // These map to the traditional King/Queen/Knight/Page
+
+  // Father = King
+  'father-of-wands': {
+    planets: ['Sun', 'Mars'],
+    themes: ['leadership', 'vision', 'entrepreneurship', 'charisma'],
+    aspectTypes: ['any'],
+    weight: 5,
+  },
+  'father-of-cups': {
+    planets: ['Moon', 'Jupiter'],
+    themes: ['emotional-balance', 'diplomacy', 'wisdom', 'compassion'],
+    aspectTypes: ['any'],
+    weight: 5,
+  },
+  'father-of-swords': {
+    planets: ['Mercury', 'Saturn'],
+    themes: ['intellectual-power', 'authority', 'truth', 'judgment'],
+    aspectTypes: ['any'],
+    weight: 5,
+  },
+  'father-of-pentacles': {
+    planets: ['Saturn', 'Jupiter'],
+    themes: ['abundance', 'security', 'leadership', 'material-success'],
+    aspectTypes: ['any'],
+    weight: 5,
+  },
+
+  // Mother = Queen
+  'mother-of-wands': {
+    planets: ['Sun', 'Venus'],
+    themes: ['confidence', 'independence', 'warmth', 'determination'],
+    aspectTypes: ['any'],
+    weight: 5,
+  },
+  'mother-of-cups': {
+    planets: ['Moon', 'Venus'],
+    themes: ['emotional-depth', 'intuition', 'compassion', 'nurturing'],
+    aspectTypes: ['any'],
+    weight: 5,
+  },
+  'mother-of-swords': {
+    planets: ['Mercury', 'Saturn'],
+    themes: ['clarity', 'independence', 'discernment', 'boundaries'],
+    aspectTypes: ['any'],
+    weight: 5,
+  },
+  'mother-of-pentacles': {
+    planets: ['Venus', 'Saturn'],
+    themes: ['nurturing', 'practicality', 'security', 'prosperity'],
+    aspectTypes: ['any'],
+    weight: 5,
+  },
+
+  // Son = Knight
+  'son-of-wands': {
+    planets: ['Sun', 'Mars'],
+    themes: ['enthusiasm', 'adventure', 'passion', 'impulsiveness'],
+    aspectTypes: ['any'],
+    weight: 5,
+  },
+  'son-of-cups': {
+    planets: ['Venus', 'Neptune'],
+    themes: ['romance', 'charm', 'idealism', 'pursuit'],
+    aspectTypes: ['any'],
+    weight: 5,
+  },
+  'son-of-swords': {
+    planets: ['Mercury', 'Mars'],
+    themes: ['action', 'ambition', 'hastiness', 'directness'],
+    aspectTypes: ['any'],
+    weight: 5,
+  },
+  'son-of-pentacles': {
+    planets: ['Saturn', 'Venus'],
+    themes: ['reliability', 'hard-work', 'routine', 'responsibility'],
+    aspectTypes: ['any'],
+    weight: 5,
+  },
+
+  // Daughter = Page
+  'daughter-of-wands': {
+    planets: ['Sun', 'Mercury'],
+    themes: ['enthusiasm', 'exploration', 'news', 'potential'],
+    aspectTypes: ['any'],
+    weight: 4,
+  },
+  'daughter-of-cups': {
+    planets: ['Moon', 'Mercury'],
+    themes: ['intuition', 'creativity', 'sensitivity', 'messages'],
+    aspectTypes: ['any'],
+    weight: 4,
+  },
+  'daughter-of-swords': {
+    planets: ['Mercury'],
+    themes: ['curiosity', 'vigilance', 'communication', 'ideas'],
+    aspectTypes: ['any'],
+    weight: 4,
+  },
+  'daughter-of-pentacles': {
+    planets: ['Mercury', 'Venus'],
+    themes: ['manifestation', 'study', 'planning', 'opportunity'],
+    aspectTypes: ['any'],
+    weight: 4,
   },
 };
 

@@ -956,6 +956,9 @@ const TarotReadings = () => {
                 <TarotSpreadExperience
                   userId={userId}
                   userName={userName}
+                  userBirthday={userBirthday}
+                  birthChart={user?.birthChart}
+                  userBirthLocation={user?.location?.birthLocation}
                   subscriptionPlan={tarotPlan}
                   onCardPreview={(card) => setSelectedCard(card)}
                   onShareReading={handleShareSpread}
@@ -1061,9 +1064,17 @@ const TarotReadings = () => {
               >
                 {personalizedReading.daily.name}
               </p>
-              <p className='text-xs md:text-sm text-zinc-400'>
-                {personalizedReading.daily.keywords.slice(0, 2).join(', ')}
-              </p>
+              <div className='flex flex-wrap items-center gap-2 text-xs md:text-sm'>
+                <span className='inline-flex items-center px-2 py-0.5 rounded-md bg-lunary-primary-900/50 border border-lunary-primary-700/30 text-lunary-primary-200 font-medium'>
+                  {personalizedReading.daily.keywords[2] ||
+                    personalizedReading.daily.keywords[0]}
+                </span>
+                <span className='text-zinc-400'>
+                  {personalizedReading.daily.keywords
+                    .filter((_, idx) => idx !== 2 && idx < 2)
+                    .join(', ')}
+                </span>
+              </div>
 
               {personalizedDailyShare && (
                 <div className='mt-3 flex flex-wrap items-center gap-2'>
@@ -1085,6 +1096,7 @@ const TarotReadings = () => {
                 userBirthday={userBirthday}
                 currentTransits={currentAstrologicalChart}
                 variant='inDepth'
+                userBirthLocation={user?.location?.birthLocation}
               />
             </div>
 
@@ -1103,9 +1115,17 @@ const TarotReadings = () => {
               >
                 {personalizedReading.weekly.name}
               </p>
-              <p className='text-xs md:text-sm text-zinc-400'>
-                {personalizedReading.weekly.keywords.slice(0, 2).join(', ')}
-              </p>
+              <div className='flex flex-wrap items-center gap-2 text-xs md:text-sm'>
+                <span className='inline-flex items-center px-2 py-0.5 rounded-md bg-lunary-primary-900/50 border border-lunary-primary-700/30 text-lunary-primary-200 font-medium'>
+                  {personalizedReading.weekly.keywords[2] ||
+                    personalizedReading.weekly.keywords[0]}
+                </span>
+                <span className='text-zinc-400'>
+                  {personalizedReading.weekly.keywords
+                    .filter((_, idx) => idx !== 2 && idx < 2)
+                    .join(', ')}
+                </span>
+              </div>
               {personalizedWeeklyShare && (
                 <div className='mt-3 flex flex-wrap items-center gap-2'>
                   <button
@@ -1118,6 +1138,16 @@ const TarotReadings = () => {
                   </button>
                 </div>
               )}
+
+              {/* In Your Chart Today for weekly card */}
+              <TarotTransitConnection
+                cardName={personalizedReading.weekly.name}
+                birthChart={user?.birthChart}
+                userBirthday={user?.birthday}
+                currentTransits={currentAstrologicalChart || []}
+                variant='inDepth'
+                userBirthLocation={user?.location?.birthLocation}
+              />
             </div>
           </div>
 
@@ -1317,6 +1347,9 @@ const TarotReadings = () => {
             <TarotSpreadExperience
               userId={userId}
               userName={userName}
+              userBirthday={userBirthday}
+              birthChart={user?.birthChart}
+              userBirthLocation={user?.location?.birthLocation}
               subscriptionPlan={tarotPlan}
               onCardPreview={(card) => setSelectedCard(card)}
               onShareReading={handleShareSpread}

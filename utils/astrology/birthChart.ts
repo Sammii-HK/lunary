@@ -754,3 +754,5 @@ export const getBirthChartFromProfile = (
   }
   return birthChart as BirthChartData[];
 };
+
+export { parseLocationToCoordinates };

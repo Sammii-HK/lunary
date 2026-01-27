@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo } from 'react';
+import { useMemo, useState, useEffect } from 'react';
 import { useUser } from '@/context/UserContext';
 import { useAuthStatus } from '@/components/AuthStatus';
 import { useAstronomyContext } from '@/context/AstronomyContext';
@@ -14,6 +14,9 @@ import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
 import dayOfYear from 'dayjs/plugin/dayOfYear';
 import { useFeatureFlagVariant } from '@/hooks/useFeatureFlag';
+import { calculateTransitAspects } from '@/lib/astrology/transit-aspects';
+import { generateTarotTransitConnection } from '@/lib/tarot/generate-transit-connection';
+import type { TransitInsight } from '@/lib/tarot/generate-transit-connection';
 
 dayjs.extend(utc);
 dayjs.extend(dayOfYear);
@@ -23,10 +26,12 @@ export const DailyCardPreview = () => {
   const authStatus = useAuthStatus();
   const router = useRouter();
   const subscription = useSubscription();
-  const { currentDate } = useAstronomyContext();
+  const { currentDate, currentAstrologicalChart } = useAstronomyContext();
   const userName = user?.name;
   const userBirthday = user?.birthday;
   const variant = useFeatureFlagVariant('paywall_preview_style_v1');
+  const [firstTransitInsight, setFirstTransitInsight] =
+    useState<TransitInsight | null>(null);
 
   const hasPersonalizedAccess = hasFeatureAccess(
     subscription.status,
@@ -76,6 +81,76 @@ export const DailyCardPreview = () => {
         : `This card speaks to your current journey. ${generalCard.information}`,
     };
   }, [canAccessPersonalized, userName, userBirthday, currentDate]);
+
+  // Calculate first transit insight for authenticated users with access
+  useEffect(() => {
+    async function calculateTransitInsight() {
+      if (
+        !canAccessPersonalized ||
+        !user?.birthChart ||
+        !user.birthChart.length ||
+        !dailyCard.name ||
+        !currentAstrologicalChart?.length
+      ) {
+        setFirstTransitInsight(null);
+        return;
+      }
+
+      try {
+        // Calculate transit aspects
+        const aspects = calculateTransitAspects(
+          user.birthChart as any,
+          currentAstrologicalChart as any,
+        );
+
+        if (aspects.length === 0) {
+          setFirstTransitInsight(null);
+          return;
+        }
+
+        // Convert birth chart to snapshot format
+        const birthChartSnapshot = {
+          date: userBirthday || '',
+          time: '12:00',
+          lat: 0,
+          lon: 0,
+          placements: user.birthChart.map((p: any) => ({
+            planet: p.planet || p.body,
+            sign: p.sign,
+            house: p.house,
+            degree: p.degree,
+          })),
+        };
+
+        // Generate transit connection
+        const connection = await generateTarotTransitConnection(
+          dailyCard.name,
+          birthChartSnapshot,
+          aspects,
+        );
+
+        if (
+          connection?.perTransitInsights &&
+          connection.perTransitInsights.length > 0
+        ) {
+          setFirstTransitInsight(connection.perTransitInsights[0]);
+        } else {
+          setFirstTransitInsight(null);
+        }
+      } catch (err) {
+        console.error('Failed to calculate transit insight:', err);
+        setFirstTransitInsight(null);
+      }
+    }
+
+    calculateTransitInsight();
+  }, [
+    canAccessPersonalized,
+    user?.birthChart,
+    userBirthday,
+    dailyCard.name,
+    currentAstrologicalChart,
+  ]);
 
   // Helper to determine if a word should be redacted
   const shouldRedactWord = (word: string, index: number): boolean => {
@@ -307,6 +382,30 @@ export const DailyCardPreview = () => {
             <p className='hidden md:block text-xs text-zinc-400 mt-2 line-clamp-2'>
               {dailyCard.information}
             </p>
+          )}
+          {firstTransitInsight && (
+            <div className='mt-2 pt-2 border-t border-zinc-800/50'>
+              <p className='text-xs text-lunary-accent-300'>
+                {firstTransitInsight.transit.transitPlanet}{' '}
+                {firstTransitInsight.transit.aspectType}{' '}
+                {firstTransitInsight.transit.natalPlanet}{' '}
+                {firstTransitInsight.relevance}
+                {firstTransitInsight.transit.house && (
+                  <span className='opacity-70'>
+                    {' '}
+                    · activates {firstTransitInsight.transit.house}
+                    {firstTransitInsight.transit.house === 1
+                      ? 'st'
+                      : firstTransitInsight.transit.house === 2
+                        ? 'nd'
+                        : firstTransitInsight.transit.house === 3
+                          ? 'rd'
+                          : 'th'}{' '}
+                    house
+                  </span>
+                )}
+              </p>
+            </div>
           )}
         </div>
         <ArrowRight className='w-4 h-4 text-zinc-600 group-hover:text-lunary-accent-300 transition-colors flex-shrink-0 mt-1' />
