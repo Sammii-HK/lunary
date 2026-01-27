@@ -15,7 +15,7 @@ import timezone from 'dayjs/plugin/timezone';
 import { getReferenceChart, formatFullPosition } from './lib/reference-chart';
 import { generateBirthChart } from '../utils/astrology/birthChart';
 import { calculateTransitHouses } from '../src/lib/ai/transit-houses';
-import type { BirthChartSnapshot } from '../src/lib/ai/transit-houses';
+import type { BirthChartSnapshot } from '../src/lib/ai/types';
 
 dayjs.extend(utc);
 dayjs.extend(timezone);
@@ -305,11 +305,15 @@ async function generateExamples(): Promise<CTAExamplesOutput> {
 
   // Calculate transit houses relative to natal chart
   const natalSnapshot: BirthChartSnapshot = {
-    planets: natalChart.map((p) => ({
-      body: p.body,
+    date: '1990-01-15',
+    time: '12:00',
+    lat: 51.5074, // London latitude
+    lon: -0.1278, // London longitude
+    placements: natalChart.map((p) => ({
+      planet: p.body,
       sign: p.sign,
       degree: p.degree,
-      house: p.house,
+      house: p.house || 1, // Default to house 1 if undefined
     })),
   };
 
