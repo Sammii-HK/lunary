@@ -26,10 +26,15 @@ export const DailyCardPreview = () => {
   const authStatus = useAuthStatus();
   const router = useRouter();
   const subscription = useSubscription();
-  const { currentDate, currentAstrologicalChart } = useAstronomyContext();
+  const astronomyContext = useAstronomyContext();
+  const currentDate =
+    astronomyContext?.currentDate || dayjs().utc().format('YYYY-MM-DD');
+  const currentAstrologicalChart =
+    astronomyContext?.currentAstrologicalChart || [];
   const userName = user?.name;
   const userBirthday = user?.birthday;
-  const variant = useFeatureFlagVariant('paywall_preview_style_v1');
+  const variantRaw = useFeatureFlagVariant('paywall_preview_style_v1');
+  const variant = variantRaw || 'blur'; // Default to blur if not loaded
   const [firstTransitInsight, setFirstTransitInsight] =
     useState<TransitInsight | null>(null);
 

@@ -189,9 +189,13 @@ type TarotShareTarget = {
 const TarotReadings = () => {
   const { user, loading } = useUser();
   const authStatus = useAuthStatus();
-  const { currentAstrologicalChart } = useAstronomyContext();
+  const astronomyContext = useAstronomyContext();
+  const currentAstrologicalChart =
+    astronomyContext?.currentAstrologicalChart || [];
   const subscription = useSubscription();
-  const variant = useFeatureFlagVariant('paywall_preview_style_v1');
+  const variantRaw = useFeatureFlagVariant('paywall_preview_style_v1');
+  // Default to blur variant if feature flag isn't loaded yet
+  const variant = variantRaw || 'blur';
   const userName = user?.name;
   const userBirthday = user?.birthday;
   const userId = user?.id;

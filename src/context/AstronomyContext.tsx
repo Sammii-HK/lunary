@@ -40,9 +40,84 @@ export const AstronomyContext = createContext<{
 export function useAstronomyContext() {
   const context = useContext(AstronomyContext);
   if (!context) {
-    throw new Error(
-      'useAstronomyContext must be used within an AstronomyContextProvider',
-    );
+    // Emergency fallback - this should RARELY happen in production
+    // Collect diagnostic information
+    const errorInfo = {
+      timestamp: new Date().toISOString(),
+      url: typeof window !== 'undefined' ? window.location.href : 'SSR',
+      userAgent: typeof navigator !== 'undefined' ? navigator.userAgent : 'N/A',
+      componentStack:
+        process.env.NODE_ENV === 'development' ? new Error().stack : undefined,
+    };
+
+    // In development, show a very visible error to help developers fix the issue
+    if (process.env.NODE_ENV === 'development') {
+      console.error(
+        '🚨 ASTRONOMY CONTEXT ERROR: Component is not wrapped in AstronomyContextProvider!',
+        '\n📍 Location:',
+        errorInfo.url,
+        '\n⏰ Time:',
+        errorInfo.timestamp,
+        '\n\n💡 Fix: Ensure this component is rendered inside <AstronomyContextProvider>',
+      );
+      console.trace('📋 Component stack trace:');
+    } else {
+      // In production, log quietly for monitoring systems
+      console.warn('AstronomyContext: Missing provider, using fallback', {
+        url: errorInfo.url,
+        timestamp: errorInfo.timestamp,
+      });
+    }
+
+    // Send to error monitoring service if available
+    if (typeof window !== 'undefined') {
+      // Sentry integration
+      if ((window as any).Sentry) {
+        (window as any).Sentry.captureMessage(
+          'AstronomyContext used without provider',
+          {
+            level: 'warning',
+            extra: errorInfo,
+            tags: {
+              context: 'astronomy',
+              fallback: 'active',
+            },
+          },
+        );
+      }
+
+      // PostHog integration for analytics
+      if ((window as any).posthog) {
+        (window as any).posthog.capture('astronomy_context_fallback_used', {
+          ...errorInfo,
+          environment: process.env.NODE_ENV,
+        });
+      }
+    }
+
+    // Return safe defaults as absolute last resort
+    // This keeps the app running but we'll know about it via monitoring
+    return {
+      currentAstrologicalChart: [],
+      currentMoonPosition: undefined,
+      currentMoonConstellationPosition: undefined,
+      currentMoonConstellation: undefined,
+      currentDateTime: new Date(),
+      setCurrentDateTime: () => {
+        console.warn('AstronomyContext fallback: setCurrentDateTime called');
+      },
+      currentMoonPhase: 'New Moon' as MoonPhaseLabels,
+      moonIllumination: 0,
+      moonAge: 0,
+      writtenDate: '',
+      currentTarotCard: null,
+      symbol: '',
+      currentDate: dayjs().utc().format('YYYY-MM-DD'),
+      refreshCosmicData: () => {
+        console.warn('AstronomyContext fallback: refreshCosmicData called');
+      },
+      generalTransits: undefined,
+    };
   }
   return context;
 }
