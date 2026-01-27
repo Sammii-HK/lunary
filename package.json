@@ -5,7 +5,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev --turbopack",
-    "build": "pnpm run generate:sitemap-last-modified && next build",
+    "build": "NODE_OPTIONS='--max-old-space-size=6144' pnpm run generate:sitemap-last-modified && NODE_OPTIONS='--max-old-space-size=6144' next build",
     "generate:sitemap-last-modified": "node scripts/generate-sitemap-last-modified.js",
     "start": "next start",
     "lint": "eslint . --fix --ext .ts,.tsx",
