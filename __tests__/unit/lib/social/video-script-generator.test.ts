@@ -14,7 +14,7 @@ describe('video script hook validation', () => {
   it('builds a valid hook for New Moon', () => {
     const hook = buildHookForTopic('New Moon');
     const issues = validateVideoHook(hook, 'New Moon', 'new moon meaning');
-    expect(issues.length).toBe(1);
+    expect(issues.length).toBe(0);
     expect(hook).toContain('New Moon');
     const words = countWords(hook);
     expect(words).toBeGreaterThanOrEqual(8);
