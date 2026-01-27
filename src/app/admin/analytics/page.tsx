@@ -1,25 +1,32 @@
 'use client';
 
-import {
-  type ReactNode,
-  useCallback,
-  useEffect,
-  useMemo,
-  useState,
-} from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   Activity,
+  BarChart3,
   Bell,
   CalendarRange,
+  CheckCircle,
+  DollarSign,
   Download,
+  Info,
   Loader2,
+  RefreshCw,
+  Settings,
   Sparkles,
   Target,
+  TrendingUp,
+  Users,
 } from 'lucide-react';
 
 import { MetricsCard } from '@/components/admin/MetricsCard';
 import { ConversionFunnel } from '@/components/admin/ConversionFunnel';
 import { SearchConsoleMetrics } from '@/components/admin/SearchConsoleMetrics';
+import { MiniStat } from '@/components/admin/MiniStat';
+import { InsightCard } from '@/components/admin/InsightCard';
+import { StatSection } from '@/components/admin/StatSection';
+import { MetricTable } from '@/components/admin/MetricTable';
+import { HealthMetricCard, StatusBadge, BadgeStatus } from '@/components/admin';
 import { Button } from '@/components/ui/button';
 import {
   Card,
@@ -31,6 +38,14 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { UsageChartSeries } from '@/components/charts/UsageChart';
 import type { AuditInfo } from '@/lib/analytics/kpis';
+import {
+  describeTrend as describeTrendUtil,
+  computeWeekOverWeekChange as computeWoWChange,
+  formatMetricValue as formatMetric,
+  computePercent,
+  formatDateInput,
+  shiftDateInput,
+} from '@/lib/analytics/utils';
 
 type ActivityTrend = {
   date: string;
@@ -307,38 +322,9 @@ const computeRollingAverage = <T extends { date: string }>(
   return { average, previousAverage };
 };
 
-const describeTrend = (current: number | null, previous: number | null) => {
-  if (current === null || previous === null) {
-    return 'Trend data pending';
-  }
-  if (current > previous) {
-    return <span className='text-lunary-success'>Momentum rising</span>;
-  }
-  if (current < previous) {
-    return <span className='text-lunary-warning'>Momentum easing</span>;
-  }
-  return <span className='text-lunary-secondary'>Momentum steady</span>;
-};
-
-const computeWeekOverWeekChange = (
-  current: number | null,
-  previous: number | null,
-) => {
-  if (current === null || previous === null) {
-    return { change: null, percentChange: null };
-  }
-  const change = current - previous;
-  const percentChange = previous !== 0 ? (change / previous) * 100 : null;
-  return { change, percentChange };
-};
-
-const formatMetricValue = (value: number | null, decimals = 0) =>
-  value === null || Number.isNaN(value)
-    ? '—'
-    : value.toLocaleString(undefined, {
-        minimumFractionDigits: decimals,
-        maximumFractionDigits: decimals,
-      });
+const describeTrend = describeTrendUtil;
+const computeWeekOverWeekChange = computeWoWChange;
+const formatMetricValue = formatMetric;
 
 const DEFAULT_RANGE_DAYS = 30;
 const activitySeries: UsageChartSeries[] = [
@@ -382,15 +368,7 @@ const productSeries: UsageChartSeries[] = [
   },
 ];
 
-const formatDateInput = (date: Date) => date.toISOString().split('T')[0];
-
-const shiftDateInput = (dateOnly: string, deltaDays: number) => {
-  // Treat the date input as UTC for consistent analytics windows.
-  const base = new Date(`${dateOnly}T00:00:00.000Z`);
-  if (Number.isNaN(base.getTime())) return dateOnly;
-  base.setUTCDate(base.getUTCDate() + deltaDays);
-  return formatDateInput(base);
-};
+// formatDateInput and shiftDateInput imported from @/lib/analytics/utils
 
 const INTENTION_LABELS: Record<string, string> = {
   clarity: 'Clarity',
@@ -399,10 +377,7 @@ const INTENTION_LABELS: Record<string, string> = {
   insight: 'Insight',
 };
 
-const computePercent = (numerator?: number, denominator?: number) => {
-  if (!denominator || denominator <= 0) return 0;
-  return ((numerator || 0) / denominator) * 100;
-};
+// computePercent imported from @/lib/analytics/utils
 
 export default function AnalyticsPage() {
   const today = useMemo(() => new Date(), []);
@@ -461,6 +436,10 @@ export default function AnalyticsPage() {
   const [userSegments, setUserSegments] = useState<any | null>(null);
   const [intentionBreakdown, setIntentionBreakdown] =
     useState<IntentionBreakdown | null>(null);
+  const [insights, setInsights] = useState<any[]>([]);
+  const [insightTypeFilter, setInsightTypeFilter] = useState<string>('all');
+  const [insightCategoryFilter, setInsightCategoryFilter] =
+    useState<string>('all');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const activityUsageData = useMemo(() => {
@@ -684,6 +663,7 @@ export default function AnalyticsPage() {
         cohortsRes,
         userSegmentsRes,
         intentionBreakdownRes,
+        insightsRes,
       ] = await Promise.all([
         fetch(
           `/api/admin/analytics/dau-wau-mau?${queryParams}&granularity=${granularity}`,
@@ -715,6 +695,7 @@ export default function AnalyticsPage() {
         fetch(`/api/admin/analytics/cohorts?${queryParams}&type=week&weeks=12`),
         fetch(`/api/admin/analytics/user-segments?${queryParams}`),
         fetch(`/api/admin/analytics/intention-breakdown?${queryParams}`),
+        fetch(`/api/admin/analytics/insights?${queryParams}`),
       ]);
 
       const errors: string[] = [];
@@ -844,6 +825,11 @@ export default function AnalyticsPage() {
         setIntentionBreakdown(breakdown);
       } else {
         errors.push('Intention breakdown');
+      }
+
+      if (insightsRes.ok) {
+        const data = await insightsRes.json();
+        setInsights(data.insights || []);
       }
 
       if (errors.length > 0) {
@@ -1731,6 +1717,65 @@ export default function AnalyticsPage() {
     [],
   );
 
+  const filteredInsights = useMemo(() => {
+    return insights.filter((insight) => {
+      const typeMatch =
+        insightTypeFilter === 'all' || insight.type === insightTypeFilter;
+      const categoryMatch =
+        insightCategoryFilter === 'all' ||
+        insight.category === insightCategoryFilter;
+      return typeMatch && categoryMatch;
+    });
+  }, [insights, insightTypeFilter, insightCategoryFilter]);
+
+  const handleExportInsights = useCallback(() => {
+    const escapeCsvCell = (value: unknown): string => {
+      const text = value === null || value === undefined ? '' : String(value);
+      if (/[",\n\r]/.test(text)) {
+        return `"${text.replace(/"/g, '""')}"`;
+      }
+      return text;
+    };
+
+    const rows: string[][] = [
+      [
+        'Priority',
+        'Type',
+        'Category',
+        'Message',
+        'Action',
+        'Metric Label',
+        'Metric Value',
+      ],
+    ];
+
+    insights.forEach((insight) => {
+      rows.push([
+        escapeCsvCell(insight.priority),
+        escapeCsvCell(insight.type),
+        escapeCsvCell(insight.category),
+        escapeCsvCell(insight.message),
+        escapeCsvCell(insight.action || ''),
+        escapeCsvCell(insight.metric?.label || ''),
+        escapeCsvCell(insight.metric?.value?.toString() || ''),
+      ]);
+    });
+
+    const csv = rows.map((row) => row.join(',')).join('\n');
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    const url = URL.createObjectURL(blob);
+    link.setAttribute('href', url);
+    link.setAttribute(
+      'download',
+      `analytics-insights-${startDate}-to-${endDate}.csv`,
+    );
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  }, [insights, startDate, endDate]);
+
   const siteMomentumRows = useMemo(
     () => buildMomentumRows(siteMomentumMetrics),
     [buildMomentumRows, siteMomentumMetrics],
@@ -1961,15 +2006,90 @@ export default function AnalyticsPage() {
 
       <Tabs defaultValue='snapshot' className='space-y-10'>
         <TabsList className='w-full flex-wrap justify-start gap-2 rounded-xl border border-zinc-800/40 bg-zinc-900/20 p-1'>
-          <TabsTrigger value='snapshot' className='text-xs'>
+          <TabsTrigger
+            value='snapshot'
+            className='text-xs flex items-center gap-2'
+          >
+            <BarChart3 className='h-4 w-4' />
             Investor Snapshot
           </TabsTrigger>
-          <TabsTrigger value='details' className='text-xs'>
+          <TabsTrigger
+            value='details'
+            className='text-xs flex items-center gap-2'
+          >
+            <Settings className='h-4 w-4' />
             Operational Detail
           </TabsTrigger>
         </TabsList>
 
         <TabsContent value='snapshot' className='space-y-10'>
+          {/* Health Overview */}
+          <Card>
+            <CardHeader>
+              <CardTitle className='flex items-center gap-2'>
+                <Activity className='h-5 w-5 text-lunary-primary' />
+                Health Snapshot
+              </CardTitle>
+              <CardDescription>Last 30 days</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className='grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4'>
+                <HealthMetricCard
+                  icon={TrendingUp}
+                  label='Product Growth'
+                  value={productMauCurrentWeek}
+                  unit='MAU'
+                  trend={
+                    productMauGrowth > 0
+                      ? `+${productMauGrowth.toFixed(1)}% vs last week`
+                      : `${productMauGrowth.toFixed(1)}% vs last week`
+                  }
+                  status={
+                    productMauGrowth > 5
+                      ? 'excellent'
+                      : productMauGrowth > 0
+                        ? 'good'
+                        : 'warning'
+                  }
+                />
+
+                <HealthMetricCard
+                  icon={DollarSign}
+                  label='Monthly Revenue'
+                  value={`$${revenue?.mrr?.toLocaleString() || 0}`}
+                  unit='MRR'
+                  status='good'
+                  description='Recurring revenue'
+                />
+
+                <HealthMetricCard
+                  icon={RefreshCw}
+                  label='User Retention'
+                  value={`${((cohorts?.overall_d30_retention || 0) * 100).toFixed(0)}%`}
+                  unit='D30'
+                  status={
+                    (cohorts?.overall_d30_retention || 0) > 0.5
+                      ? 'excellent'
+                      : 'good'
+                  }
+                  description='30-day retention'
+                />
+
+                <HealthMetricCard
+                  icon={CheckCircle}
+                  label='Activation Rate'
+                  value={`${((activation?.activation_rate || 0) * 100).toFixed(1)}%`}
+                  status={
+                    (activation?.activation_rate || 0) > 0.5
+                      ? 'excellent'
+                      : 'good'
+                  }
+                  description='24h activation'
+                />
+              </div>
+            </CardContent>
+          </Card>
+
           <section className='space-y-3'>
             <div>
               <h2 className='text-sm font-medium text-zinc-200'>
@@ -1992,6 +2112,76 @@ export default function AnalyticsPage() {
               ))}
             </div>
           </section>
+
+          {insights.length > 0 && (
+            <section className='space-y-3'>
+              <div className='flex items-center justify-between'>
+                <div>
+                  <h2 className='text-sm font-medium text-zinc-200 flex items-center gap-2'>
+                    <Sparkles className='h-4 w-4 text-lunary-accent' />
+                    Actionable Insights
+                  </h2>
+                  <p className='text-xs text-zinc-500'>
+                    Auto-generated recommendations based on your metrics.
+                  </p>
+                </div>
+                <Button
+                  onClick={handleExportInsights}
+                  variant='outline'
+                  size='sm'
+                  className='gap-2'
+                >
+                  <Download className='h-4 w-4' />
+                  Export Insights
+                </Button>
+              </div>
+              <div className='flex flex-wrap items-center gap-2 rounded-xl border border-zinc-800/60 bg-zinc-950/40 p-3'>
+                <span className='text-xs font-medium text-zinc-400'>
+                  Filter by:
+                </span>
+                <div className='flex gap-2'>
+                  <select
+                    value={insightTypeFilter}
+                    onChange={(e) => setInsightTypeFilter(e.target.value)}
+                    className='rounded-lg border border-zinc-800 bg-zinc-900/60 px-3 py-1.5 text-xs text-zinc-200 focus:outline-none focus:ring-2 focus:ring-lunary-primary-500'
+                  >
+                    <option value='all'>All Types</option>
+                    <option value='positive'>Positive</option>
+                    <option value='warning'>Warning</option>
+                    <option value='critical'>Critical</option>
+                    <option value='info'>Info</option>
+                  </select>
+                  <select
+                    value={insightCategoryFilter}
+                    onChange={(e) => setInsightCategoryFilter(e.target.value)}
+                    className='rounded-lg border border-zinc-800 bg-zinc-900/60 px-3 py-1.5 text-xs text-zinc-200 focus:outline-none focus:ring-2 focus:ring-lunary-primary-500'
+                  >
+                    <option value='all'>All Categories</option>
+                    <option value='retention'>Retention</option>
+                    <option value='product'>Product</option>
+                    <option value='growth'>Growth</option>
+                    <option value='engagement'>Engagement</option>
+                    <option value='revenue'>Revenue</option>
+                    <option value='quality'>Quality</option>
+                  </select>
+                </div>
+                <span className='ml-auto text-xs text-zinc-500'>
+                  {filteredInsights.length} of {insights.length} insights
+                </span>
+              </div>
+              <div className='grid grid-cols-1 gap-3 md:grid-cols-2'>
+                {filteredInsights.length > 0 ? (
+                  filteredInsights.map((insight, idx) => (
+                    <InsightCard key={idx} insight={insight} />
+                  ))
+                ) : (
+                  <div className='col-span-2 rounded-xl border border-zinc-800/60 bg-zinc-950/40 px-4 py-6 text-center text-sm text-zinc-400'>
+                    No insights match the selected filters.
+                  </div>
+                )}
+              </div>
+            </section>
+          )}
 
           {(productMaError || integrityWarnings.length > 0) && (
             <div className='space-y-2'>
@@ -2016,22 +2206,12 @@ export default function AnalyticsPage() {
             </div>
           )}
           <section className='space-y-3'>
-            <div className='space-y-4 rounded-3xl border border-zinc-800/60 bg-zinc-950/40 p-5 shadow-lg shadow-black/30'>
-              <div>
-                <div className='flex items-center justify-between'>
-                  <div>
-                    <p className='text-xs uppercase tracking-wider text-zinc-500'>
-                      Core App Usage
-                    </p>
-                    <h3 className='text-lg font-medium text-white'>
-                      App Active Users
-                    </h3>
-                  </div>
-                  <p className='text-xs text-zinc-400'>
-                    Measures who opened the app in the selected window.
-                  </p>
-                </div>
-              </div>
+            <StatSection
+              eyebrow='Core App Usage'
+              title='App Active Users'
+              description='Measures who opened the app in the selected window.'
+              footerText='App Active Users (DAU/WAU/MAU) are deduplicated by canonical identity per UTC window.'
+            >
               <div className='grid gap-4 md:grid-cols-2 lg:grid-cols-4'>
                 <MiniStat
                   label='App DAU'
@@ -2095,28 +2275,15 @@ export default function AnalyticsPage() {
                   )}
                 </div>
               )}
-              <p className='text-xs text-zinc-500'>
-                App Active Users (DAU/WAU/MAU) are deduplicated by canonical
-                identity per UTC window.
-              </p>
-            </div>
+            </StatSection>
           </section>
 
           <section className='space-y-3'>
-            <div className='space-y-4 rounded-3xl border border-zinc-800/60 bg-zinc-950/40 p-5 shadow-lg shadow-black/30'>
-              <div className='flex items-start justify-between'>
-                <div>
-                  <p className='text-xs uppercase tracking-wider text-zinc-500'>
-                    Engagement Health
-                  </p>
-                  <h3 className='text-lg font-medium text-white'>
-                    Engaged users & stickiness
-                  </h3>
-                </div>
-                <p className='text-xs text-zinc-400'>
-                  Key actions vs. returns inside the same canonical window.
-                </p>
-              </div>
+            <StatSection
+              eyebrow='Engagement Health'
+              title='Engaged users & stickiness'
+              description='Key actions vs. returns inside the same canonical window.'
+            >
               <div className='grid gap-4 md:grid-cols-2 lg:grid-cols-4'>
                 <MiniStat
                   label='Engaged DAU'
@@ -2188,24 +2355,16 @@ export default function AnalyticsPage() {
                   icon={<Activity className='h-5 w-5 text-lunary-accent-300' />}
                 />
               </div>
-            </div>
+            </StatSection>
           </section>
 
           <section className='space-y-3'>
-            <div className='space-y-4 rounded-3xl border border-zinc-800/60 bg-zinc-950/40 p-5 shadow-lg shadow-black/30'>
-              <div className='flex items-start justify-between'>
-                <div>
-                  <p className='text-xs uppercase tracking-wider text-zinc-500'>
-                    Retention & return
-                  </p>
-                  <h3 className='text-lg font-medium text-white'>
-                    Returning canonical users
-                  </h3>
-                </div>
-                <p className='text-xs text-zinc-400'>
-                  D1 + WAU/MAU overlap inspect deduped identity recurrence.
-                </p>
-              </div>
+            <StatSection
+              eyebrow='Retention & return'
+              title='Returning canonical users'
+              description='D1 + WAU/MAU overlap inspect deduped identity recurrence.'
+              footerText='Returning Users (range) need 2+ distinct active days in the window. WAU/MAU overlap compares the current period to the prior window.'
+            >
               <div className='grid gap-4 md:grid-cols-2 lg:grid-cols-4'>
                 <MiniStat
                   label='Returning DAU (D1)'
@@ -2234,29 +2393,16 @@ export default function AnalyticsPage() {
                   icon={<Target className='h-5 w-5 text-lunary-accent-300' />}
                 />
               </div>
-              <p className='text-xs text-zinc-500'>
-                Returning Users (range) need 2+ distinct active days in the
-                window. WAU/MAU overlap compares the current period to the prior
-                window.
-              </p>
-            </div>
+            </StatSection>
           </section>
 
           <section className='space-y-3'>
-            <div className='space-y-4 rounded-3xl border border-zinc-800/60 bg-zinc-950/40 p-5 shadow-lg shadow-black/30'>
-              <div className='flex items-start justify-between'>
-                <div>
-                  <p className='text-xs uppercase tracking-wider text-zinc-500'>
-                    Returning referrer breakdown
-                  </p>
-                  <h3 className='text-lg font-medium text-white'>
-                    Where returning users come from
-                  </h3>
-                </div>
-                <p className='text-xs text-zinc-400'>
-                  Uses the most recent app_opened metadata for returning users.
-                </p>
-              </div>
+            <StatSection
+              eyebrow='Returning referrer breakdown'
+              title='Where returning users come from'
+              description='Uses the most recent app_opened metadata for returning users.'
+              footerText='Segments use the most recent app_opened metadata (referrer, UTM source, or origin type) for returning users (2+ active days).'
+            >
               <div className='grid gap-4 md:grid-cols-3'>
                 <MiniStat
                   label='Organic returning'
@@ -2280,28 +2426,15 @@ export default function AnalyticsPage() {
                   }
                 />
               </div>
-              <p className='text-xs text-zinc-500'>
-                Segments use the most recent app_opened metadata (referrer, UTM
-                source, or origin type) for returning users (2+ active days).
-              </p>
-            </div>
+            </StatSection>
           </section>
 
           <section className='space-y-3'>
-            <div className='space-y-4 rounded-3xl border border-zinc-800/60 bg-zinc-950/40 p-5 shadow-lg shadow-black/30'>
-              <div className='flex items-start justify-between'>
-                <div>
-                  <p className='text-xs uppercase tracking-wider text-zinc-500'>
-                    Active days distribution (range)
-                  </p>
-                  <h3 className='text-lg font-medium text-white'>
-                    Distinct active days per user
-                  </h3>
-                </div>
-                <p className='text-xs text-zinc-400'>
-                  Users grouped by distinct active days in the selected range.
-                </p>
-              </div>
+            <StatSection
+              eyebrow='Active days distribution (range)'
+              title='Distinct active days per user'
+              description='Users grouped by distinct active days in the selected range.'
+            >
               <div className='grid gap-4 md:grid-cols-2 lg:grid-cols-5'>
                 <MiniStat
                   label='1 day'
@@ -2345,7 +2478,7 @@ export default function AnalyticsPage() {
                   icon={<Target className='h-5 w-5 text-lunary-primary-300' />}
                 />
               </div>
-            </div>
+            </StatSection>
           </section>
 
           <section className='space-y-3'>
@@ -2507,6 +2640,54 @@ export default function AnalyticsPage() {
           </section>
         </TabsContent>
         <TabsContent value='details' className='space-y-10'>
+          {/* MAU Type Explainer */}
+          <Card className='border-lunary-primary-700/40 bg-lunary-primary-950/20'>
+            <CardContent className='pt-6'>
+              <div className='flex items-start gap-3'>
+                <Users className='mt-0.5 h-5 w-5 flex-shrink-0 text-lunary-primary-300' />
+                <div className='space-y-3'>
+                  <h3 className='font-medium text-lunary-primary-200'>
+                    Understanding MAU Types
+                  </h3>
+                  <div className='space-y-2 text-sm text-zinc-300'>
+                    <div className='flex items-start gap-2'>
+                      <CheckCircle className='mt-0.5 h-4 w-4 flex-shrink-0 text-lunary-success-300' />
+                      <div>
+                        <strong className='text-lunary-success-200'>
+                          Product MAU ({productMauCurrentWeek}):
+                        </strong>{' '}
+                        Signed-in users who used app features like horoscope,
+                        tarot, chart viewing. This is our{' '}
+                        <strong>north star metric</strong> for product
+                        engagement.
+                      </div>
+                    </div>
+                    <div className='flex items-start gap-2'>
+                      <Activity className='mt-0.5 h-4 w-4 flex-shrink-0 text-lunary-secondary-300' />
+                      <div>
+                        <strong className='text-lunary-secondary-200'>
+                          App MAU:
+                        </strong>{' '}
+                        All users who opened the app, including logged-out users
+                        browsing grimoire content.
+                      </div>
+                    </div>
+                    <div className='flex items-start gap-2'>
+                      <Info className='mt-0.5 h-4 w-4 flex-shrink-0 text-lunary-accent-300' />
+                      <div>
+                        <strong className='text-lunary-accent-200'>
+                          Grimoire MAU:
+                        </strong>{' '}
+                        Users who only viewed grimoire educational content
+                        without signing in.
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
           {integrityWarnings.length > 0 && (
             <div className='rounded-xl border border-lunary-warning-600/40 bg-zinc-900/40 px-4 py-3 text-sm text-zinc-200'>
               <p className='text-xs text-zinc-400 font-medium'>
@@ -2520,20 +2701,11 @@ export default function AnalyticsPage() {
             </div>
           )}
           <section className='space-y-3'>
-            <div className='space-y-4 rounded-3xl border border-zinc-800/60 bg-zinc-950/40 p-5 shadow-lg shadow-black/30'>
-              <div className='flex items-start justify-between'>
-                <div>
-                  <p className='text-xs uppercase tracking-wider text-zinc-500'>
-                    Total usage
-                  </p>
-                  <h3 className='text-lg font-medium text-white'>
-                    All-time product footprint
-                  </h3>
-                </div>
-                <p className='text-xs text-zinc-400'>
-                  Totals as of the selected range end.
-                </p>
-              </div>
+            <StatSection
+              eyebrow='Total usage'
+              title='All-time product footprint'
+              description='Totals as of the selected range end.'
+            >
               <div className='grid gap-4 md:grid-cols-2 lg:grid-cols-4'>
                 <MiniStat
                   label='Total accounts (all-time)'
@@ -2566,7 +2738,7 @@ export default function AnalyticsPage() {
                   icon={<Target className='h-5 w-5 text-lunary-accent-300' />}
                 />
               </div>
-            </div>
+            </StatSection>
           </section>
           <section className='space-y-3'>
             <div>
@@ -2624,52 +2796,26 @@ export default function AnalyticsPage() {
                   </CardDescription>
                 </CardHeader>
                 <CardContent className='overflow-x-auto'>
-                  <table className='w-full text-left text-sm text-zinc-400'>
-                    <thead>
-                      <tr className='border-b border-zinc-800'>
-                        <th className='pb-3 text-xs font-medium text-zinc-400'>
-                          Source
-                        </th>
-                        <th className='pb-3 text-xs font-medium text-zinc-400 text-right'>
-                          Users
-                        </th>
-                        <th className='pb-3 text-xs font-medium text-zinc-400 text-right'>
-                          Share
-                        </th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {(attribution?.sourceBreakdown ?? []).length > 0 ? (
-                        attribution!.sourceBreakdown!.map((row) => (
-                          <tr
-                            key={row.source}
-                            className='border-b border-zinc-800/50 hover:bg-zinc-900/20'
-                          >
-                            <td className='py-3 text-zinc-300 font-medium'>
-                              {row.source}
-                            </td>
-                            <td className='py-3 text-right text-zinc-300'>
-                              {Number(row.user_count || 0).toLocaleString()}
-                            </td>
-                            <td className='py-3 text-right text-zinc-300'>
-                              {typeof row.percentage === 'number'
-                                ? `${row.percentage.toFixed(1)}%`
-                                : '—'}
-                            </td>
-                          </tr>
-                        ))
-                      ) : (
-                        <tr>
-                          <td
-                            colSpan={3}
-                            className='py-4 text-center text-xs text-zinc-500'
-                          >
-                            No attribution breakdown for this range.
-                          </td>
-                        </tr>
-                      )}
-                    </tbody>
-                  </table>
+                  <MetricTable
+                    columns={[
+                      { label: 'Source', key: 'source', type: 'text' },
+                      {
+                        label: 'Users',
+                        key: 'user_count',
+                        type: 'number',
+                        align: 'right',
+                      },
+                      {
+                        label: 'Share',
+                        key: 'percentage',
+                        type: 'percentage',
+                        align: 'right',
+                        decimals: 1,
+                      },
+                    ]}
+                    data={attribution?.sourceBreakdown ?? []}
+                    emptyMessage='No attribution breakdown for this range.'
+                  />
                 </CardContent>
               </Card>
               <Card className='border-zinc-800/30 bg-zinc-900/10'>
@@ -2682,53 +2828,28 @@ export default function AnalyticsPage() {
                   </CardDescription>
                 </CardHeader>
                 <CardContent className='overflow-x-auto'>
-                  <table className='w-full text-left text-sm text-zinc-400'>
-                    <thead>
-                      <tr className='border-b border-zinc-800'>
-                        <th className='pb-3 text-xs font-medium text-zinc-400'>
-                          Source
-                        </th>
-                        <th className='pb-3 text-xs font-medium text-zinc-400 text-right'>
-                          Paid / Total
-                        </th>
-                        <th className='pb-3 text-xs font-medium text-zinc-400 text-right'>
-                          Rate
-                        </th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {(attribution?.conversionBySource ?? []).length > 0 ? (
-                        attribution!.conversionBySource!.map((row) => (
-                          <tr
-                            key={row.source}
-                            className='border-b border-zinc-800/50 hover:bg-zinc-900/20'
-                          >
-                            <td className='py-3 text-zinc-300 font-medium'>
-                              {row.source}
-                            </td>
-                            <td className='py-3 text-right text-zinc-300'>
-                              {Number(row.paying_users || 0).toLocaleString()} /{' '}
-                              {Number(row.total_users || 0).toLocaleString()}
-                            </td>
-                            <td className='py-3 text-right text-zinc-300'>
-                              {typeof row.conversion_rate === 'number'
-                                ? `${row.conversion_rate.toFixed(1)}%`
-                                : '—'}
-                            </td>
-                          </tr>
-                        ))
-                      ) : (
-                        <tr>
-                          <td
-                            colSpan={3}
-                            className='py-4 text-center text-xs text-zinc-500'
-                          >
-                            No conversion source data for this range.
-                          </td>
-                        </tr>
-                      )}
-                    </tbody>
-                  </table>
+                  <MetricTable
+                    columns={[
+                      { label: 'Source', key: 'source', type: 'text' },
+                      {
+                        label: 'Paid / Total',
+                        key: 'ratio',
+                        type: 'text',
+                        align: 'right',
+                        render: (_, row) =>
+                          `${Number(row.paying_users || 0).toLocaleString()} / ${Number(row.total_users || 0).toLocaleString()}`,
+                      },
+                      {
+                        label: 'Rate',
+                        key: 'conversion_rate',
+                        type: 'percentage',
+                        align: 'right',
+                        decimals: 1,
+                      },
+                    ]}
+                    data={attribution?.conversionBySource ?? []}
+                    emptyMessage='No conversion source data for this range.'
+                  />
                 </CardContent>
               </Card>
             </div>
@@ -2805,58 +2926,32 @@ export default function AnalyticsPage() {
                 </CardDescription>
               </CardHeader>
               <CardContent className='overflow-x-auto'>
-                <table className='w-full text-left text-sm text-zinc-400'>
-                  <thead>
-                    <tr className='border-b border-zinc-800'>
-                      <th className='pb-3 text-xs font-medium text-zinc-400'>
-                        Hub
-                      </th>
-                      <th className='pb-3 text-xs font-medium text-zinc-400 text-right'>
-                        CTA clickers
-                      </th>
-                      <th className='pb-3 text-xs font-medium text-zinc-400 text-right'>
-                        Signups (7d)
-                      </th>
-                      <th className='pb-3 text-xs font-medium text-zinc-400 text-right'>
-                        Conversion %
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {ctaHubs.length > 0 ? (
-                      ctaHubs.map((hub) => (
-                        <tr
-                          key={hub.hub}
-                          className='border-b border-zinc-800/50 hover:bg-zinc-900/20'
-                        >
-                          <td className='py-3 text-zinc-300 font-medium'>
-                            {hub.hub}
-                          </td>
-                          <td className='py-3 text-right font-semibold text-white'>
-                            {hub.unique_clickers.toLocaleString()}
-                          </td>
-                          <td className='py-3 text-right text-zinc-300'>
-                            {hub.signups_7d.toLocaleString()}
-                          </td>
-                          <td className='py-3 text-right text-zinc-300'>
-                            {hub.unique_clickers > 0
-                              ? `${hub.conversion_rate.toFixed(2)}%`
-                              : 'N/A'}
-                          </td>
-                        </tr>
-                      ))
-                    ) : (
-                      <tr>
-                        <td
-                          colSpan={4}
-                          className='py-4 text-center text-xs text-zinc-500'
-                        >
-                          No CTA conversion data for this range.
-                        </td>
-                      </tr>
-                    )}
-                  </tbody>
-                </table>
+                <MetricTable
+                  columns={[
+                    { label: 'Hub', key: 'hub', type: 'text' },
+                    {
+                      label: 'CTA clickers',
+                      key: 'unique_clickers',
+                      type: 'number',
+                      align: 'right',
+                    },
+                    {
+                      label: 'Signups (7d)',
+                      key: 'signups_7d',
+                      type: 'number',
+                      align: 'right',
+                    },
+                    {
+                      label: 'Conversion %',
+                      key: 'conversion_rate',
+                      type: 'percentage',
+                      align: 'right',
+                      decimals: 2,
+                    },
+                  ]}
+                  data={ctaHubs}
+                  emptyMessage='No CTA conversion data for this range.'
+                />
               </CardContent>
             </Card>
           </section>
@@ -2926,63 +3021,50 @@ export default function AnalyticsPage() {
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <div className='overflow-x-auto'>
-                  <table className='w-full text-left text-sm text-zinc-400'>
-                    <thead>
-                      <tr className='border-b border-zinc-800'>
-                        <th className='pb-3 text-xs font-medium text-zinc-400'>
-                          Feature
-                        </th>
-                        <th className='pb-3 text-xs font-medium text-zinc-400 text-right'>
-                          Total
-                        </th>
-                        <th className='pb-3 text-xs font-medium text-zinc-400 text-right'>
-                          Free
-                        </th>
-                        <th className='pb-3 text-xs font-medium text-zinc-400 text-right'>
-                          Paid
-                        </th>
-                        <th className='pb-3 text-xs font-medium text-zinc-400 text-right'>
-                          Unknown
-                        </th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {ACTIVATION_FEATURES.map((feature) => {
-                        const total =
-                          activation?.activationBreakdown?.[feature.event] ?? 0;
-                        const breakdown = activation
-                          ?.activationBreakdownByPlan?.[feature.event] ?? {
-                          free: 0,
-                          paid: 0,
-                          unknown: 0,
-                        };
-                        return (
-                          <tr
-                            key={feature.event}
-                            className='border-b border-zinc-800/50 hover:bg-zinc-900/20'
-                          >
-                            <td className='py-3 text-zinc-300 font-medium'>
-                              {feature.label}
-                            </td>
-                            <td className='py-3 text-right text-white font-semibold'>
-                              {total.toLocaleString()}
-                            </td>
-                            <td className='py-3 text-right text-zinc-300'>
-                              {breakdown.free.toLocaleString()}
-                            </td>
-                            <td className='py-3 text-right text-zinc-300'>
-                              {breakdown.paid.toLocaleString()}
-                            </td>
-                            <td className='py-3 text-right text-zinc-300'>
-                              {breakdown.unknown.toLocaleString()}
-                            </td>
-                          </tr>
-                        );
-                      })}
-                    </tbody>
-                  </table>
-                </div>
+                <MetricTable
+                  columns={[
+                    { label: 'Feature', key: 'feature', type: 'text' },
+                    {
+                      label: 'Total',
+                      key: 'total',
+                      type: 'number',
+                      align: 'right',
+                    },
+                    {
+                      label: 'Free',
+                      key: 'free',
+                      type: 'number',
+                      align: 'right',
+                    },
+                    {
+                      label: 'Paid',
+                      key: 'paid',
+                      type: 'number',
+                      align: 'right',
+                    },
+                    {
+                      label: 'Unknown',
+                      key: 'unknown',
+                      type: 'number',
+                      align: 'right',
+                    },
+                  ]}
+                  data={ACTIVATION_FEATURES.map((feature) => ({
+                    feature: feature.label,
+                    total:
+                      activation?.activationBreakdown?.[feature.event] ?? 0,
+                    free:
+                      activation?.activationBreakdownByPlan?.[feature.event]
+                        ?.free ?? 0,
+                    paid:
+                      activation?.activationBreakdownByPlan?.[feature.event]
+                        ?.paid ?? 0,
+                    unknown:
+                      activation?.activationBreakdownByPlan?.[feature.event]
+                        ?.unknown ?? 0,
+                  }))}
+                  emptyMessage='No activation data for this range.'
+                />
               </CardContent>
             </Card>
           </section>
@@ -3400,18 +3482,33 @@ export default function AnalyticsPage() {
                 </CardDescription>
               </CardHeader>
               <CardContent className='space-y-2'>
-                {(featureAdoption?.features ?? []).map((row) => (
-                  <div
-                    key={`${row.event_type}-product`}
-                    className='flex items-center justify-between rounded-lg border border-zinc-800/60 bg-zinc-950/40 px-3 py-2 text-sm'
-                  >
-                    <span className='text-zinc-300'>{row.event_type}</span>
-                    <span className='text-zinc-400'>
-                      {row.users.toLocaleString()} users ·{' '}
-                      {row.adoption_rate.toFixed(2)}%
-                    </span>
-                  </div>
-                ))}
+                {(featureAdoption?.features ?? []).map((row) => {
+                  const adoption = row.adoption_rate;
+                  let status: BadgeStatus = 'good';
+                  if (adoption === 0) status = 'critical';
+                  else if (adoption < 10) status = 'warning';
+                  else if (adoption > 50) status = 'excellent';
+
+                  return (
+                    <div
+                      key={`${row.event_type}-product`}
+                      className='flex items-center justify-between rounded-lg border border-zinc-800/60 bg-zinc-950/40 px-3 py-2 text-sm'
+                    >
+                      <span className='text-zinc-300'>{row.event_type}</span>
+                      <div className='flex items-center gap-2'>
+                        <span className='text-zinc-400'>
+                          {row.users.toLocaleString()} users ·{' '}
+                          {row.adoption_rate.toFixed(2)}%
+                        </span>
+                        <StatusBadge
+                          status={status}
+                          label=''
+                          showIcon={false}
+                        />
+                      </div>
+                    </div>
+                  );
+                })}
                 {(featureAdoption?.features ?? []).length === 0 && (
                   <div className='text-sm text-zinc-500'>
                     No feature adoption data for this range.
@@ -3845,63 +3942,52 @@ export default function AnalyticsPage() {
                   Keeps cohort size, Day 1/7/30 retention, and maturity notes in
                   view.
                 </div>
-                <div className='overflow-x-auto'>
-                  <table className='w-full text-left text-sm text-zinc-400'>
-                    <thead>
-                      <tr className='border-b border-zinc-800'>
-                        <th className='pb-3 text-xs font-medium text-zinc-400'>
-                          Cohort Week
-                        </th>
-                        <th className='pb-3 text-xs font-medium text-zinc-400 text-right'>
-                          Cohort Size
-                        </th>
-                        <th className='pb-3 text-xs font-medium text-zinc-400 text-right'>
-                          Day 1
-                        </th>
-                        <th className='pb-3 text-xs font-medium text-zinc-400 text-right'>
-                          Day 7
-                        </th>
-                        <th className='pb-3 text-xs font-medium text-zinc-400 text-right'>
-                          Day 30
-                        </th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {cohorts?.cohorts?.map((cohort: any, idx: number) => {
-                        const formatDate = (dateStr: string) => {
-                          const date = new Date(dateStr);
-                          return date.toLocaleDateString('en-US', {
-                            month: 'short',
-                            day: 'numeric',
-                            year: 'numeric',
-                          });
-                        };
-                        return (
-                          <tr
-                            key={idx}
-                            className='border-b border-zinc-800/50 hover:bg-zinc-900/20'
-                          >
-                            <td className='py-3 text-zinc-300 font-medium'>
-                              {formatDate(cohort.cohort)}
-                            </td>
-                            <td className='py-3 text-zinc-300 text-right'>
-                              {cohort.day0.toLocaleString()}
-                            </td>
-                            <td className='py-3 text-right font-medium'>
-                              {Number(cohort.day1 ?? 0).toFixed(1)}%
-                            </td>
-                            <td className='py-3 text-right font-medium'>
-                              {Number(cohort.day7 ?? 0).toFixed(1)}%
-                            </td>
-                            <td className='py-3 text-right font-medium'>
-                              {Number(cohort.day30 ?? 0).toFixed(1)}%
-                            </td>
-                          </tr>
-                        );
-                      })}
-                    </tbody>
-                  </table>
-                </div>
+                <MetricTable
+                  columns={[
+                    {
+                      label: 'Cohort Week',
+                      key: 'cohort',
+                      type: 'text',
+                      render: (dateStr: string) => {
+                        const date = new Date(dateStr);
+                        return date.toLocaleDateString('en-US', {
+                          month: 'short',
+                          day: 'numeric',
+                          year: 'numeric',
+                        });
+                      },
+                    },
+                    {
+                      label: 'Cohort Size',
+                      key: 'day0',
+                      type: 'number',
+                      align: 'right',
+                    },
+                    {
+                      label: 'Day 1',
+                      key: 'day1',
+                      type: 'percentage',
+                      align: 'right',
+                      decimals: 1,
+                    },
+                    {
+                      label: 'Day 7',
+                      key: 'day7',
+                      type: 'percentage',
+                      align: 'right',
+                      decimals: 1,
+                    },
+                    {
+                      label: 'Day 30',
+                      key: 'day30',
+                      type: 'percentage',
+                      align: 'right',
+                      decimals: 1,
+                    },
+                  ]}
+                  data={cohorts?.cohorts ?? []}
+                  emptyMessage='No cohort data for this range.'
+                />
                 <p className='mt-3 text-xs text-zinc-500'>
                   Immature cohorts (less than or equal to 30 days old) are still
                   filling out, so treat their Day 30 rows as provisional.
@@ -4094,24 +4180,4 @@ function HeatmapGrid({
   );
 }
 
-function MiniStat({
-  label,
-  value,
-  icon,
-}: {
-  label: string;
-  value: string | number;
-  icon: ReactNode;
-}) {
-  return (
-    <div className='rounded-2xl border border-zinc-800/60 bg-zinc-950/40 p-3 shadow-sm shadow-black/30'>
-      <div className='flex items-center gap-1.5 text-xs font-medium text-zinc-400'>
-        {icon}
-        {label}
-      </div>
-      <div className='mt-2 text-xl font-light tracking-tight text-white'>
-        {typeof value === 'number' ? value.toLocaleString() : value}
-      </div>
-    </div>
-  );
-}
+// MiniStat component now imported from @/components/admin/MiniStat

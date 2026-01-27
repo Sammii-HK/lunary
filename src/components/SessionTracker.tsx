@@ -114,10 +114,7 @@ export default function SessionTracker() {
     const newFeature = getFeatureFromPath(pathname);
 
     // If feature changed, end current session and start new one
-    if (
-      currentFeatureRef.current &&
-      currentFeatureRef.current !== newFeature
-    ) {
+    if (currentFeatureRef.current && currentFeatureRef.current !== newFeature) {
       endSession();
       startSession(newFeature);
     } else if (!sessionStartRef.current) {

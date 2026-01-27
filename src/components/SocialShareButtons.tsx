@@ -99,7 +99,9 @@ export function SocialShareButtons({
               href={`https://twitter.com/intent/tweet?text=${encodedTitle}&url=${encodedUrl}`}
               target='_blank'
               rel='noopener noreferrer'
-              onClick={() => conversionTracking.contentShared(user?.id, 'twitter')}
+              onClick={() =>
+                conversionTracking.contentShared(user?.id, 'twitter')
+              }
               className='inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-zinc-800/50 bg-zinc-900/30 hover:bg-zinc-900/50 text-zinc-300 hover:text-white transition-colors text-sm text-left'
             >
               <svg className='w-4 h-4' fill='currentColor' viewBox='0 0 24 24'>
@@ -111,7 +113,9 @@ export function SocialShareButtons({
               href={`https://www.facebook.com/sharer/sharer.php?u=${encodedUrl}&quote=${encodedDescription}`}
               target='_blank'
               rel='noopener noreferrer'
-              onClick={() => conversionTracking.contentShared(user?.id, 'facebook')}
+              onClick={() =>
+                conversionTracking.contentShared(user?.id, 'facebook')
+              }
               className='inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-zinc-800/50 bg-zinc-900/30 hover:bg-zinc-900/50 text-zinc-300 hover:text-white transition-colors text-sm text-left'
             >
               <svg className='w-4 h-4' fill='currentColor' viewBox='0 0 24 24'>
@@ -135,7 +139,9 @@ export function SocialShareButtons({
               href={`https://www.threads.net/intent/post?text=${encodeURIComponent(shareText)}`}
               target='_blank'
               rel='noopener noreferrer'
-              onClick={() => conversionTracking.contentShared(user?.id, 'threads')}
+              onClick={() =>
+                conversionTracking.contentShared(user?.id, 'threads')
+              }
               className='inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-zinc-800/50 bg-zinc-900/30 hover:bg-zinc-900/50 text-zinc-300 hover:text-white transition-colors text-sm text-left'
             >
               <svg
@@ -151,7 +157,9 @@ export function SocialShareButtons({
               href={`https://bsky.app/intent/compose?text=${encodeURIComponent(shareText)}`}
               target='_blank'
               rel='noopener noreferrer'
-              onClick={() => conversionTracking.contentShared(user?.id, 'bluesky')}
+              onClick={() =>
+                conversionTracking.contentShared(user?.id, 'bluesky')
+              }
               className='inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-zinc-800/50 bg-zinc-900/30 hover:bg-zinc-900/50 text-zinc-300 hover:text-white transition-colors text-sm text-left'
             >
               <svg
@@ -167,7 +175,9 @@ export function SocialShareButtons({
               href={`https://www.reddit.com/submit?url=${encodedUrl}&title=${encodedTitle}`}
               target='_blank'
               rel='noopener noreferrer'
-              onClick={() => conversionTracking.contentShared(user?.id, 'reddit')}
+              onClick={() =>
+                conversionTracking.contentShared(user?.id, 'reddit')
+              }
               className='inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-zinc-800/50 bg-zinc-900/30 hover:bg-zinc-900/50 text-zinc-300 hover:text-white transition-colors text-sm text-left'
             >
               <svg className='w-4 h-4' fill='currentColor' viewBox='0 0 24 24'>
