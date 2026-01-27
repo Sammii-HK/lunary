@@ -120,7 +120,7 @@ const nextConfig = {
       }
     }
 
-    // Client-side polyfills for Jazz
+    // Client-side polyfills
     if (!isServer) {
       config.resolve.fallback = {
         ...config.resolve.fallback,
@@ -162,13 +162,6 @@ const nextConfig = {
             radix: {
               name: 'radix',
               test: /[\\/]node_modules[\\/]@radix-ui[\\/]/,
-              chunks: 'all',
-              priority: 25,
-            },
-            // Separate chunk for Jazz/Cojson (user wants to remove eventually)
-            jazz: {
-              name: 'jazz',
-              test: /[\\/]node_modules[\\/](jazz|cojson)[\\/]/,
               chunks: 'all',
               priority: 25,
             },
@@ -229,7 +222,7 @@ const nextConfig = {
   },
 
   // Transpile packages for better compatibility
-  transpilePackages: ['jazz-tools'],
+  transpilePackages: [],
 
   // Compression and optimization
   compress: true,
