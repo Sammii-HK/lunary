@@ -113,6 +113,13 @@ export const CrystalWidget = () => {
     return (
       <div className='py-3 px-4 border border-stone-800 rounded-md w-full h-full flex flex-col min-h-64'>
         <div className='space-y-2'>
+          <div className='flex items-center justify-between mb-1'>
+            <h3 className='font-bold text-sm'>Personal Crystal</h3>
+            <span className='text-[10px] text-lunary-primary-300 uppercase tracking-wide'>
+              Personal 🔒
+            </span>
+          </div>
+
           <div className='space-y-2'>
             <div className='text-center'>
               <h4 className='font-semibold text-lunary-accent-300'>
@@ -123,13 +130,19 @@ export const CrystalWidget = () => {
               </p>
             </div>
 
-            <p className='text-xs text-zinc-300'>{generalCrystal.reason}</p>
+            <p className='text-xs text-zinc-300 mb-2'>{generalCrystal.reason}</p>
+
+            {/* Blurred preview of personalized guidance */}
+            <div className='locked-preview-zinc locked-preview mb-2'>
+              <p className='locked-preview-text text-xs'>
+                Aligned with your Capricorn Sun and resonates with your Moon placement. With current planetary transits activating your chart, this crystal amplifies your natural strengths in manifestation and grounding. Moon in Taurus enhances this stone&apos;s earthy properties...
+              </p>
+            </div>
           </div>
 
           <div className='bg-gradient-to-r from-lunary-primary-900/20 to-lunary-highlight-900/20 rounded p-2 border border-lunary-primary-800'>
             <p className='text-xs text-zinc-400 mb-2'>
-              Get crystals chosen specifically for YOUR birth chart. See what
-              the universe has selected for you!
+              Get crystals chosen specifically for YOUR birth chart with personalized guidance.
             </p>
             <SmartTrialButton size='sm' />
           </div>
