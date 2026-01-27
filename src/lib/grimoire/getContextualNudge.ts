@@ -21,11 +21,25 @@ type CTAExample = {
   interpretation: string;
 };
 
-type CTAExamples = {
-  [hub: string]: {
-    examples: CTAExample[];
-  };
+type CTAExamplesHubs = {
+  horoscopes?: { examples: CTAExample[] };
+  planets?: { examples: CTAExample[] };
+  houses?: { examples: CTAExample[] };
+  transits?: { examples: CTAExample[] };
+  moon?: { examples: CTAExample[] };
+  aspects?: { examples: CTAExample[] };
+  [hub: string]: { examples: CTAExample[] } | undefined;
 };
+
+type CTAExamples = {
+  generatedAt: string;
+  generatedForDate: string;
+  reference: {
+    birthDate: string;
+    birthTime: string;
+    birthLocation: string;
+  };
+} & CTAExamplesHubs;
 
 type ContextualRule = {
   match: string;
