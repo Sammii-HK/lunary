@@ -9,7 +9,7 @@ const countWords = (text: string) =>
     .replace(/[.!?]+$/, '')
     .split(/\s+/)
     .filter(Boolean).length;
-
+// TODO: fix flakey test
 describe('video script hook validation', () => {
   it('builds a valid hook for New Moon', () => {
     const hook = buildHookForTopic('New Moon');
