@@ -280,15 +280,33 @@ export const DailyInsightCard = () => {
       >
         <div className='flex items-start justify-between gap-3'>
           <div className='flex-1 min-w-0'>
-            <div className='flex items-center gap-2 mb-1'>
-              <Sparkles className='w-4 h-4 text-lunary-primary-300' />
-              <span className='text-sm font-medium text-zinc-200'>
-                Today's Influence
+            <div className='flex items-center justify-between gap-2 mb-1'>
+              <div className='flex items-center gap-2'>
+                <Sparkles className='w-4 h-4 text-lunary-primary-300' />
+                <span className='text-sm font-medium text-zinc-200'>
+                  Today&apos;s Influence
+                </span>
+              </div>
+              <span className='text-[10px] text-lunary-primary-300 uppercase tracking-wide'>
+                Personal 🔒
               </span>
             </div>
-            <p className='text-sm text-zinc-300 leading-relaxed'>
+            <p className='text-sm text-zinc-300 leading-relaxed mb-2'>
               {insight.text}
             </p>
+
+            {/* Blurred preview of personalized full-chart reading */}
+            <div className='locked-preview mb-2'>
+              <p className='locked-preview-text text-xs'>
+                Moon First Quarter in your 7th house brings focus to
+                partnerships and collaboration. Meanwhile, Neptune enters Aries
+                in your 6th house, inspiring you to reimagine your daily
+                routines. This connects to your theme: Creative Emergence. Your
+                natal placements suggest this is a pivotal moment for
+                transformation...
+              </p>
+            </div>
+
             <span
               role='button'
               tabIndex={0}
@@ -316,9 +334,9 @@ export const DailyInsightCard = () => {
                   }
                 }
               }}
-              className='flex items-center gap-1.5 mt-2 text-xs text-lunary-primary-200 hover:text-lunary-primary-100 transition-colors bg-none border-none p-0 cursor-pointer'
+              className='flex items-center gap-1.5 text-xs text-lunary-primary-200 hover:text-lunary-primary-100 transition-colors bg-none border-none p-0 cursor-pointer font-medium'
             >
-              Unlock full-chart readings with Lunary+
+              Unlock Full-Chart Readings
             </span>
           </div>
           <ArrowRight className='w-4 h-4 text-zinc-600 group-hover:text-lunary-primary-300 transition-colors flex-shrink-0 mt-1' />

@@ -171,26 +171,43 @@ export const TransitOfTheDay = () => {
                   {dateLabel}
                 </span>
               </div>
-              {generalTransit.significance === 'high' && (
-                <span className='text-xs bg-zinc-800/50 text-lunary-primary-200 px-1.5 py-0.5 rounded'>
-                  Major
+              <div className='flex items-center gap-2'>
+                {generalTransit.significance === 'high' && (
+                  <span className='text-xs bg-zinc-800/50 text-lunary-primary-200 px-1.5 py-0.5 rounded'>
+                    Major
+                  </span>
+                )}
+                <span className='text-[10px] text-lunary-primary-300 uppercase tracking-wide'>
+                  Personal 🔒
                 </span>
-              )}
+              </div>
             </div>
             <p className='text-sm text-zinc-200 mb-1'>
               {generalTransit.planet} {generalTransit.event}
             </p>
-            <p className='text-xs text-zinc-400 line-clamp-2 mb-2'>
-              {generalTransit.description}
+            <p className='text-xs text-zinc-300 mb-2'>
+              {generalTransit.description.split('.')[0]}.
             </p>
+
+            {/* Blurred preview of personal transit impact */}
+            <div className='locked-preview mb-2'>
+              <p className='locked-preview-text text-xs'>
+                This transit activates your 7th house of partnerships and
+                relationships. With this planetary energy moving through your
+                chart, you may experience shifts in how you connect with others.
+                The tension between your natal placements and this transit
+                suggests growth through collaboration...
+              </p>
+            </div>
+
             <button
               onClick={(e) => {
                 e.preventDefault();
                 e.stopPropagation();
               }}
-              className='flex items-center gap-1.5 text-xs text-lunary-primary-200 hover:text-lunary-primary-100 transition-colors bg-none border-none p-0 cursor-pointer'
+              className='flex items-center gap-1.5 text-xs text-lunary-primary-200 hover:text-lunary-primary-100 transition-colors bg-none border-none p-0 cursor-pointer font-medium'
             >
-              Unlock personal transit insights with Lunary+
+              See Your Transit Timing
             </button>
           </div>
           <ArrowRight className='w-4 h-4 text-zinc-600 group-hover:text-lunary-secondary-200 transition-colors flex-shrink-0 mt-1' />

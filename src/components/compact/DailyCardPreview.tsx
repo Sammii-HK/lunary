@@ -71,23 +71,39 @@ export const DailyCardPreview = () => {
       >
         <div className='flex items-start justify-between gap-3 h-full'>
           <div className='flex-1 min-w-0 h-full justify-between flex flex-col'>
-            <div className='flex items-center gap-2 mb-1'>
-              <Layers className='w-4 h-4 text-lunary-accent-300' />
-              <span className='text-sm font-medium text-zinc-200'>
-                Tarot for Today
+            <div className='flex items-center justify-between gap-2 mb-1'>
+              <div className='flex items-center gap-2'>
+                <Layers className='w-4 h-4 text-lunary-accent-300' />
+                <span className='text-sm font-medium text-zinc-200'>
+                  Tarot for Today
+                </span>
+              </div>
+              <span className='text-[10px] text-lunary-primary-300 uppercase tracking-wide'>
+                Personal 🔒
               </span>
             </div>
             <p className='text-sm text-lunary-primary-200 font-medium'>
               {dailyCard.name}
             </p>
-            <p className='text-xs text-zinc-400'>
+            <p className='text-xs text-zinc-400 mb-2'>
               {dailyCard.keywords.join(' • ')}
             </p>
             {dailyCard.information && (
-              <p className='hidden md:block text-xs text-zinc-400 mt-2 line-clamp-2'>
-                {dailyCard.information}
+              <p className='hidden md:block text-xs text-zinc-300 mb-2'>
+                {dailyCard.information.split('.')[0]}.
               </p>
             )}
+
+            {/* Blurred preview of personalized content */}
+            <div className='locked-preview mb-2'>
+              <p className='locked-preview-text text-xs'>
+                This card connects deeply to your birth chart placements. With
+                your Sun in your natal chart and current planetary transits,
+                this energy speaks to the transformation you&apos;re
+                experiencing in relationships and personal growth...
+              </p>
+            </div>
+
             <span
               role='button'
               tabIndex={0}
@@ -115,9 +131,9 @@ export const DailyCardPreview = () => {
                   }
                 }
               }}
-              className='flex items-center gap-1.5 mt-2 text-xs text-lunary-primary-200 hover:text-lunary-primary-100 transition-colors bg-none border-none p-0 cursor-pointer'
+              className='flex items-center gap-1.5 text-xs text-lunary-primary-200 hover:text-lunary-primary-100 transition-colors bg-none border-none p-0 cursor-pointer font-medium'
             >
-              <span>Unlock personalized tarot with Lunary+</span>
+              <span>Unlock Your Personal Reading</span>
             </span>
           </div>
           <ArrowRight className='w-4 h-4 text-zinc-600 group-hover:text-lunary-accent-300 transition-colors flex-shrink-0 mt-1' />
