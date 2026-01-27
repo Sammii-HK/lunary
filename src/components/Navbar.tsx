@@ -62,18 +62,26 @@ export const Navbar = () => {
   return (
     <nav className='fixed bottom-0 z-[100] flex w-full justify-center border-t border-stone-800 bg-zinc-950/95 backdrop-blur'>
       <div className='flex w-full h-12 md:h-14 items-center justify-around px-2 py-2 text-white max-w-lg'>
-        <NavLink href='/app' icon={Home} label='Home' activePath={pathname} />
+        <NavLink
+          href='/app'
+          icon={Home}
+          label='Home'
+          activePath={pathname}
+          dataNav='home'
+        />
         <NavLink
           href='/tarot'
           icon={Layers}
           label='Tarot'
           activePath={pathname}
+          dataNav='tarot'
         />
         <NavLink
           href='/horoscope'
           icon={Orbit}
           label='Horoscope'
           activePath={pathname}
+          dataNav='horoscope'
         />
         <NavLink
           href='/guide'
@@ -81,12 +89,14 @@ export const Navbar = () => {
           label='Guide'
           activePath={pathname}
           showBadge={hasUnreadMessage}
+          dataNav='guide'
         />
         <NavLink
           href='/explore'
           icon={MoreHorizontal}
           label='More'
           activePath={pathname}
+          dataNav='explore'
         />
       </div>
     </nav>
@@ -126,6 +136,7 @@ type NavLinkProps = {
   label: string;
   activePath: string | null;
   showBadge?: boolean;
+  dataNav?: string;
 };
 
 const NavLink = ({
@@ -134,11 +145,13 @@ const NavLink = ({
   label,
   activePath,
   showBadge,
+  dataNav,
 }: NavLinkProps) => {
   const active = isActive(activePath, href);
   return (
     <Link
       href={href}
+      data-nav={dataNav}
       className={`relative flex flex-col items-center gap-0.5 rounded-lg px-3 py-1.5 text-xs transition ${
         active ? 'text-lunary-secondary' : 'text-zinc-400 hover:text-zinc-300'
       }`}

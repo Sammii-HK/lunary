@@ -4,6 +4,7 @@ import { useEffect } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import { useAuthStatus } from '@/components/AuthStatus';
 import { conversionTracking } from '@/lib/analytics';
+import { TourProvider } from '@/context/TourContext';
 
 export default function AuthenticatedLayout({
   children,
@@ -42,5 +43,5 @@ export default function AuthenticatedLayout({
     return null;
   }
 
-  return <>{children}</>;
+  return <TourProvider>{children}</TourProvider>;
 }

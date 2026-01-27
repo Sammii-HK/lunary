@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { usePathname, useSearchParams } from 'next/navigation';
 import { Navbar } from '@/components/Navbar';
 import { MarketingNavbar } from '@/components/MarketingNavbar';
@@ -18,16 +18,9 @@ import {
   ModalHeader,
 } from '@/components/ui/modal';
 import { TestimonialForm } from '@/components/TestimonialForm';
-import {
-  markTestimonialSubmitted,
-  scheduleTestimonialReask,
-  shouldPromptForTestimonial,
-  TestimonialPromptMeta,
-} from '@/lib/testimonial-prompt';
 import { useAuthStatus } from './AuthStatus';
 
 const NAV_CONTEXT_KEY = 'lunary_nav_context';
-const TESTIMONIAL_PROMPT_KEY = 'lunary-testimonial-prompt';
 
 export function AppChrome() {
   const pathname = usePathname() || '';
@@ -215,68 +208,53 @@ export function AppChrome() {
     (page) => pathname === page || pathname?.startsWith(`${page}/`),
   );
 
-  const [testimonialMeta, setTestimonialMeta] =
-    useState<TestimonialPromptMeta | null>(null);
   const [testimonialModalOpen, setTestimonialModalOpen] = useState(false);
 
-  const persistTestimonialMeta = useCallback((next: TestimonialPromptMeta) => {
-    if (typeof window === 'undefined') return;
-    window.localStorage.setItem(TESTIMONIAL_PROMPT_KEY, JSON.stringify(next));
-    setTestimonialMeta(next);
-  }, []);
-
+  // Fetch testimonial prompt status from server
   useEffect(() => {
     if (typeof window === 'undefined') return;
-    const stored = window.localStorage.getItem(TESTIMONIAL_PROMPT_KEY);
-    if (stored) {
+    if (!authState.isAuthenticated || isAdminSurface) return;
+
+    const checkTestimonialPrompt = async () => {
       try {
-        const parsed: TestimonialPromptMeta = JSON.parse(stored);
-        persistTestimonialMeta(parsed);
+        const response = await fetch('/api/testimonials/prompt-tracking');
+        if (response.ok) {
+          const data = await response.json();
+          if (data.shouldPrompt) {
+            setTestimonialModalOpen(true);
+          }
+        }
       } catch (error) {
-        const fallbackMeta: TestimonialPromptMeta = {
-          firstSeen: Date.now(),
-          dontAskUntil: 0,
-          submitted: false,
-        };
-        persistTestimonialMeta(fallbackMeta);
+        console.error('Error checking testimonial prompt:', error);
       }
-    } else {
-      const initialMeta: TestimonialPromptMeta = {
-        firstSeen: Date.now(),
-        dontAskUntil: 0,
-        submitted: false,
-      };
-      persistTestimonialMeta(initialMeta);
-    }
-  }, [persistTestimonialMeta]);
+    };
 
-  useEffect(() => {
-    if (!testimonialMeta) return;
-    const now = Date.now();
-    if (shouldPromptForTestimonial(testimonialMeta, now)) {
-      setTestimonialModalOpen(true);
-    }
-  }, [testimonialMeta]);
+    checkTestimonialPrompt();
+  }, [authState.isAuthenticated, isAdminSurface]);
 
-  const handleTestimonialModalClose = () => {
-    if (!testimonialMeta) {
-      setTestimonialModalOpen(false);
-      return;
+  const handleTestimonialModalClose = async () => {
+    try {
+      await fetch('/api/testimonials/prompt-tracking', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'dismiss' }),
+      });
+    } catch (error) {
+      console.error('Error dismissing testimonial prompt:', error);
     }
-
-    persistTestimonialMeta(
-      scheduleTestimonialReask(testimonialMeta, Date.now()),
-    );
     setTestimonialModalOpen(false);
   };
 
-  const handleTestimonialSubmitted = () => {
-    if (!testimonialMeta) {
-      setTestimonialModalOpen(false);
-      return;
+  const handleTestimonialSubmitted = async () => {
+    try {
+      await fetch('/api/testimonials/prompt-tracking', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'submitted' }),
+      });
+    } catch (error) {
+      console.error('Error marking testimonial as submitted:', error);
     }
-
-    persistTestimonialMeta(markTestimonialSubmitted(testimonialMeta));
     setTestimonialModalOpen(false);
   };
 
@@ -381,36 +359,38 @@ export function AppChrome() {
           </>
         )}
       </ErrorBoundaryWrapper>
-      <Modal
-        isOpen={testimonialModalOpen}
-        onClose={handleTestimonialModalClose}
-        size='lg'
-      >
-        <ModalHeader>Share your Lunary experience?</ModalHeader>
-        <ModalBody>
-          <p className='text-sm text-zinc-300'>
-            You&apos;ve been engaging with Lunary for about a week—would you
-            mind sharing a quick testimonial while the experience is still
-            fresh?
-          </p>
-          <TestimonialForm
-            helperText='We read every submission and may feature the ones that inspire other cosmic seekers.'
-            submitButtonLabel='Submit Testimonial'
-            onSuccess={handleTestimonialSubmitted}
-            onError={(message) => {
-              console.warn(
-                '[Testimonial Modal] Failed to submit testimonial:',
-                message,
-              );
-            }}
-          />
-        </ModalBody>
-        <ModalFooter>
-          <Button variant='ghost' onClick={handleTestimonialModalClose}>
-            Maybe later
-          </Button>
-        </ModalFooter>
-      </Modal>
+      {!isAdminSurface && (
+        <Modal
+          isOpen={testimonialModalOpen}
+          onClose={handleTestimonialModalClose}
+          size='lg'
+        >
+          <ModalHeader>Share your Lunary experience?</ModalHeader>
+          <ModalBody>
+            <p className='text-sm text-zinc-300'>
+              You&apos;ve been engaging with Lunary for about a week—would you
+              mind sharing a quick testimonial while the experience is still
+              fresh?
+            </p>
+            <TestimonialForm
+              helperText='We read every submission and may feature the ones that inspire other cosmic seekers.'
+              submitButtonLabel='Submit Testimonial'
+              onSuccess={handleTestimonialSubmitted}
+              onError={(message) => {
+                console.warn(
+                  '[Testimonial Modal] Failed to submit testimonial:',
+                  message,
+                );
+              }}
+            />
+          </ModalBody>
+          <ModalFooter>
+            <Button variant='ghost' onClick={handleTestimonialModalClose}>
+              Maybe later
+            </Button>
+          </ModalFooter>
+        </Modal>
+      )}
     </>
   );
 }

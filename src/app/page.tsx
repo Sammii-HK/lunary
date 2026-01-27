@@ -2,12 +2,12 @@ import { redirect } from 'next/navigation';
 import { cookies } from 'next/headers';
 import { auth } from '@/lib/auth';
 import { Metadata } from 'next';
-import WelcomePage from './welcome/page';
+import WelcomePage from '@/components/pages/WelcomePage';
 
 export const metadata: Metadata = {
   title: 'Lunary: Personal Astrology App | Birth Chart, Horoscopes & Tarot',
   description:
-    'A calm astrology companion grounded in real astronomy. Create your birth chart, explore today’s horoscopes, moon phase, tarot and transits, and learn through the Grimoire. Upgrade for personalised insights connected to your chart.',
+    'A calm astrology companion grounded in real astronomy. Create your birth chart, explore horoscopes, moon phase, tarot and transits, and learn through the Grimoire. Upgrade for personalised insights connected to your chart.',
   keywords: [
     'personalised astrology app',
     'birth chart astrology',

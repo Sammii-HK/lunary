@@ -7,8 +7,11 @@ import { useUser } from '@/context/UserContext';
 import { useAuthStatus } from '@/components/AuthStatus';
 import { recordCheckIn } from '@/lib/streak/check-in';
 import { conversionTracking } from '@/lib/analytics';
+import { useTour } from '@/context/TourContext';
+import { useNotificationDeepLink } from '@/hooks/useNotificationDeepLink';
 
 import { ShareDailyInsight } from '@/components/ShareDailyInsight';
+import { TourTrigger } from '@/components/feature-tour/tour-trigger';
 
 const DateWidget = dynamic(
   () =>
@@ -135,8 +138,12 @@ const ConditionalWheel = dynamic(
 export default function AppDashboardClient() {
   const { user } = useUser();
   const authState = useAuthStatus();
+  const { startTour, hasSeenOnboarding } = useTour();
   const [focusHonoured, setFocusHonoured] = useState(false);
   const firstName = user?.name?.trim() ? user.name.split(' ')[0] : null;
+
+  // Handle push notification deep links
+  useNotificationDeepLink();
 
   useEffect(() => {
     if (authState.isAuthenticated && !authState.loading) {
@@ -204,7 +211,7 @@ export default function AppDashboardClient() {
   };
 
   return (
-    <div className='flex w-full flex-col gap-4 max-w-2xl md:max-w-4xl mx-auto p-4 mb-10'>
+    <div className='dashboard-container flex w-full flex-col gap-4 max-w-2xl md:max-w-4xl mx-auto p-4 mb-10'>
       <h1 className='sr-only'>Lunary - Your Daily Cosmic Guide</h1>
 
       <PostTrialMessaging />
@@ -232,18 +239,28 @@ export default function AppDashboardClient() {
         </div>
         <div className='text-center'>
           <DateWidget />
+          <div className='mt-2'>
+            <TourTrigger
+              onStartTour={() => startTour('first_time_onboarding')}
+              hasSeenOnboarding={hasSeenOnboarding}
+            />
+          </div>
         </div>
       </header>
 
       <PersonalizedHoroscopePreview />
       <div className='grid grid-cols-1 md:grid-cols-2 gap-3'>
-        <MoonPreview />
+        <div id='moon-phase' className='scroll-mt-20'>
+          <MoonPreview />
+        </div>
         <SkyNowCard />
 
         <DailyInsightCard />
         <DailyCardPreview />
 
-        <TransitOfTheDay />
+        <div id='transit-of-day' className='scroll-mt-20'>
+          <TransitOfTheDay />
+        </div>
         <CrystalPreview />
 
         <div className='md:col-span-2'>
