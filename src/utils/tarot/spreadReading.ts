@@ -4,6 +4,9 @@ import {
   TarotSpreadDefinition,
 } from '@/constants/tarotSpreads';
 import { TAROT_DECK, TarotDeckCard, getTarotCardByName } from './deck';
+import type { BirthChartPlacement } from '@/context/UserContext';
+import { getSpreadCardSeed, seedToIndex } from '@/lib/tarot/chart-seeding';
+import type { BirthChartSnapshot } from '@/lib/ai/types';
 
 export interface SpreadCardInsight {
   positionId: string;
@@ -33,6 +36,8 @@ export interface GenerateSpreadOptions {
   userId?: string;
   userName?: string;
   userIntent?: string;
+  birthChart?: BirthChartPlacement[];
+  userBirthday?: string;
 }
 
 const ensureSeed = (options: GenerateSpreadOptions): string => {
@@ -71,6 +76,56 @@ const drawUniqueCards = (
   return selected;
 };
 
+/**
+ * Draw unique cards using chart-based seeding
+ */
+const drawUniqueCardsWithChart = (
+  count: number,
+  spreadSlug: string,
+  birthChart: BirthChartPlacement[],
+  userBirthday: string,
+  timestamp: number,
+): TarotDeckCard[] => {
+  // Convert birth chart to snapshot format
+  const chartSnapshot: BirthChartSnapshot = {
+    date: userBirthday,
+    time: '12:00',
+    lat: 0,
+    lon: 0,
+    placements: birthChart.map((p: any) => ({
+      planet: p.planet || p.body,
+      sign: p.sign,
+      house: p.house || 1,
+      degree: p.degree,
+    })),
+  };
+
+  const deckIndexes = Array.from(
+    { length: TAROT_DECK.length },
+    (_, index) => index,
+  );
+  const selected: TarotDeckCard[] = [];
+
+  for (let i = 0; i < count; i++) {
+    if (deckIndexes.length === 0) break;
+
+    // Generate chart-influenced seed for this position
+    const positionSeed = getSpreadCardSeed(
+      chartSnapshot,
+      spreadSlug,
+      i,
+      timestamp,
+    );
+
+    // Use seed to select from remaining cards
+    const index = seedToIndex(positionSeed, deckIndexes.length);
+    const [deckIndex] = deckIndexes.splice(index, 1);
+    selected.push(TAROT_DECK[deckIndex]);
+  }
+
+  return selected;
+};
+
 const buildInsight = (
   position: TarotSpreadDefinition['positions'][number],
   card: TarotDeckCard,
@@ -89,7 +144,26 @@ export const generateSpreadReading = (
   }
 
   const seedValue = ensureSeed(options);
-  const cards = drawUniqueCards(spread.cardCount, seedValue);
+
+  // Use chart-based seeding if birth chart is available
+  let cards: TarotDeckCard[];
+  if (
+    options.birthChart &&
+    options.birthChart.length > 0 &&
+    options.userBirthday
+  ) {
+    const timestamp = Date.now();
+    cards = drawUniqueCardsWithChart(
+      spread.cardCount,
+      options.spreadSlug,
+      options.birthChart,
+      options.userBirthday,
+      timestamp,
+    );
+  } else {
+    // Fallback to original seeding method
+    cards = drawUniqueCards(spread.cardCount, seedValue);
+  }
 
   const cardsWithPositions: SpreadCardInsight[] = spread.positions.map(
     (position, index) => {

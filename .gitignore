@@ -64,3 +64,6 @@ project-audit.txt
 
 # Internal TODO docs (not for git)
 PRESS-KIT-TODO.md
+
+# Sentry Config File
+.env.sentry-build-plugin

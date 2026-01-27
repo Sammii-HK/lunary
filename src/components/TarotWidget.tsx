@@ -2,22 +2,96 @@
 import { SmartTrialButton } from './SmartTrialButton';
 import { useAstronomyContext } from '@/context/AstronomyContext';
 import { useSubscription } from '../hooks/useSubscription';
+import { useUser } from '@/context/UserContext';
 import { hasFeatureAccess } from '../../utils/pricing';
 import { useState, useEffect } from 'react';
 import type { GeneralTarotReading } from '../../utils/tarot/generalTarot';
+import { calculateTransitAspects } from '@/lib/astrology/transit-aspects';
+import { generateTarotTransitConnection } from '@/lib/tarot/generate-transit-connection';
 
 export const TarotWidget = () => {
   const subscription = useSubscription();
-  const { currentTarotCard } = useAstronomyContext();
+  const { user } = useUser();
+  const { currentTarotCard, currentAstrologicalChart } = useAstronomyContext();
   const [generalTarot, setGeneralTarot] = useState<GeneralTarotReading | null>(
     null,
   );
+  const [transitConnection, setTransitConnection] = useState<{
+    compact: string;
+  } | null>(null);
 
   const hasPersonalTarotAccess = hasFeatureAccess(
     subscription.status,
     subscription.plan,
     'personal_tarot',
   );
+
+  // Calculate transit connection if user has birth chart
+  useEffect(() => {
+    if (
+      !hasPersonalTarotAccess ||
+      !user?.birthChart ||
+      !user.birthChart.length ||
+      !currentTarotCard?.name ||
+      !currentAstrologicalChart?.length
+    ) {
+      setTransitConnection(null);
+      return;
+    }
+
+    // Calculate transit aspects
+    const aspects = calculateTransitAspects(
+      user.birthChart as any,
+      currentAstrologicalChart as any,
+    );
+
+    if (aspects.length === 0) {
+      setTransitConnection(null);
+      return;
+    }
+
+    // Convert birth chart to snapshot format for the generator
+    const birthChartSnapshot = user.birthday
+      ? {
+          date: user.birthday,
+          time: '12:00',
+          lat: 0,
+          lon: 0,
+          placements: user.birthChart.map((p: any) => ({
+            planet: p.planet,
+            sign: p.sign,
+            house: p.house,
+            degree: p.degree,
+          })),
+        }
+      : null;
+
+    // Generate transit connection
+    if (birthChartSnapshot) {
+      generateTarotTransitConnection(
+        currentTarotCard.name,
+        birthChartSnapshot,
+        aspects,
+      )
+        .then((connection) => {
+          if (connection) {
+            setTransitConnection({ compact: connection.compact });
+          } else {
+            setTransitConnection(null);
+          }
+        })
+        .catch((err) => {
+          console.error('Failed to generate transit connection:', err);
+          setTransitConnection(null);
+        });
+    }
+  }, [
+    hasPersonalTarotAccess,
+    user?.birthChart,
+    user?.birthday,
+    currentTarotCard?.name,
+    currentAstrologicalChart,
+  ]);
 
   useEffect(() => {
     if (!hasPersonalTarotAccess && !generalTarot) {
@@ -94,6 +168,15 @@ export const TarotWidget = () => {
         <p className='text-sm text-zinc-300 leading-relaxed break-words'>
           {currentTarotCard.information}
         </p>
+
+        {/* Transit connection (if available) */}
+        {transitConnection && (
+          <div className='pt-2 mt-2 border-t border-zinc-800'>
+            <p className='text-xs text-lunary-accent-300 leading-relaxed'>
+              {transitConnection.compact}
+            </p>
+          </div>
+        )}
       </div>
     </div>
   );

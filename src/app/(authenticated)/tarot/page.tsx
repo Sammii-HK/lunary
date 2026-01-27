@@ -2,6 +2,7 @@
 
 import dayjs from 'dayjs';
 import { useState, useMemo, useEffect, useCallback } from 'react';
+import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { useUser } from '@/context/UserContext';
 import { useAuthStatus } from '@/components/AuthStatus';
@@ -58,6 +59,9 @@ import { PremiumPathway } from '@/components/PremiumPathway';
 import { RecurringThemesCard } from '@/components/RecurringThemesCard';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
+import { useAstronomyContext } from '@/context/AstronomyContext';
+import { TarotTransitConnection } from '@/components/tarot/TarotTransitConnection';
+import { useFeatureFlagVariant } from '@/hooks/useFeatureFlag';
 
 const SUIT_ELEMENTS: Record<string, string> = {
   Cups: 'Water',
@@ -185,7 +189,13 @@ type TarotShareTarget = {
 const TarotReadings = () => {
   const { user, loading } = useUser();
   const authStatus = useAuthStatus();
+  const astronomyContext = useAstronomyContext();
+  const currentAstrologicalChart =
+    astronomyContext?.currentAstrologicalChart || [];
   const subscription = useSubscription();
+  const variantRaw = useFeatureFlagVariant('paywall_preview_style_v1');
+  // Default to blur variant if feature flag isn't loaded yet
+  const variant = variantRaw || 'blur';
   const userName = user?.name;
   const userBirthday = user?.birthday;
   const userId = user?.id;
@@ -286,6 +296,140 @@ const TarotReadings = () => {
     if (value.length <= limit) return value;
     return `${value.slice(0, limit - 1).trimEnd()}…`;
   }, []);
+
+  // Helper to determine if a word should be redacted
+  const shouldRedactWord = useCallback(
+    (word: string, index: number): boolean => {
+      const cleanWord = word.toLowerCase().replace(/[.,!?;:]/g, '');
+
+      // Prioritize house numbers (1st, 2nd, 3rd, 12th, etc.)
+      if (/^\d+(st|nd|rd|th)$/.test(cleanWord)) return true;
+
+      // Redact planet names
+      const planets = [
+        'sun',
+        'moon',
+        'mercury',
+        'venus',
+        'mars',
+        'jupiter',
+        'saturn',
+        'uranus',
+        'neptune',
+        'pluto',
+      ];
+      if (planets.includes(cleanWord)) return true;
+
+      // Redact zodiac signs
+      const signs = [
+        'aries',
+        'taurus',
+        'gemini',
+        'cancer',
+        'leo',
+        'virgo',
+        'libra',
+        'scorpio',
+        'sagittarius',
+        'capricorn',
+        'aquarius',
+        'pisces',
+      ];
+      if (signs.includes(cleanWord)) return true;
+
+      // Redact chart-related terms
+      const chartTerms = [
+        'house',
+        'placement',
+        'natal',
+        'chart',
+        'transit',
+        'aspect',
+      ];
+      if (chartTerms.includes(cleanWord)) return true;
+
+      // Redact guidance/conclusion phrases
+      const guidanceTerms = [
+        'authentically',
+        'instincts',
+        'transformation',
+        'healing',
+        'manifestation',
+        'intuition',
+        'wisdom',
+        'strength',
+        'clarity',
+        'balance',
+        'harmony',
+        'power',
+        'growth',
+        'abundance',
+        'passion',
+        'creativity',
+        'connection',
+        'release',
+        'embrace',
+        'illuminate',
+      ];
+      if (guidanceTerms.includes(cleanWord)) return true;
+
+      // Redact some other words for variety (every 6th word if not already redacted)
+      return index % 6 === 4;
+    },
+    [],
+  );
+
+  // Helper to render preview based on A/B test variant
+  const renderPreview = useCallback(
+    (content: string) => {
+      if (variant === 'truncated') {
+        // Variant B: Truncated - let the truncation itself create curiosity
+        return (
+          <div className='locked-preview-truncated mb-2'>
+            <p className='text-xs text-zinc-400'>{content}</p>
+          </div>
+        );
+      }
+
+      if (variant === 'redacted') {
+        // Variant C: Redacted style - soft blur effect
+        const words = content.split(' ');
+        const redactedContent = words.map((word, i) => {
+          const shouldRedact = shouldRedactWord(word, i);
+          return shouldRedact ? (
+            <span key={i} className='redacted-word'>
+              {word}
+            </span>
+          ) : (
+            <span key={i}>{word}</span>
+          );
+        });
+
+        // Join with spaces
+        const contentWithSpaces: React.ReactNode[] = [];
+        redactedContent.forEach((element, i) => {
+          contentWithSpaces.push(element);
+          if (i < redactedContent.length - 1) {
+            contentWithSpaces.push(' ');
+          }
+        });
+
+        return (
+          <div className='locked-preview-redacted mb-2'>
+            <p className='text-xs text-zinc-400'>{contentWithSpaces}</p>
+          </div>
+        );
+      }
+
+      // Variant A: Blur Effect (default)
+      return (
+        <div className='locked-preview mb-2'>
+          <p className='locked-preview-text text-xs text-zinc-400'>{content}</p>
+        </div>
+      );
+    },
+    [variant, shouldRedactWord],
+  );
 
   const generalDailyShare = useMemo(() => {
     if (!generalTarot) return null;
@@ -654,6 +798,8 @@ const TarotReadings = () => {
     }));
   }, [personalizedReading]);
 
+  const router = useRouter();
+
   useEffect(() => {
     if (hasPersonalTarotAccess && personalizedReading && userId) {
       conversionTracking.tarotViewed(userId, subscription.plan);
@@ -812,9 +958,17 @@ const TarotReadings = () => {
                 >
                   {generalTarot.daily.name}
                 </p>
-                <p className='text-xs md:text-sm text-zinc-400'>
-                  {generalTarot.daily.keywords.slice(0, 2).join(', ')}
-                </p>
+                <div className='flex flex-wrap items-center gap-2 text-xs md:text-sm mb-3'>
+                  <span className='inline-flex items-center px-2 py-0.5 rounded-md bg-lunary-primary-900/50 border border-lunary-primary-700/30 text-lunary-primary-200 font-medium'>
+                    {generalTarot.daily.keywords[2] ||
+                      generalTarot.daily.keywords[0]}
+                  </span>
+                  <span className='text-zinc-400'>
+                    {generalTarot.daily.keywords
+                      .filter((_, idx) => idx !== 2 && idx < 2)
+                      .join(', ')}
+                  </span>
+                </div>
 
                 {generalDailyShare && (
                   <div className='mt-3 flex flex-wrap items-center gap-2'>
@@ -828,6 +982,26 @@ const TarotReadings = () => {
                     </button>
                   </div>
                 )}
+
+                {/* Locked preview of transit insights */}
+                <div className='mt-4 pt-4 border-t border-zinc-800'>
+                  <div className='flex items-center gap-2 mb-2'>
+                    <LockIcon className='w-3 h-3 text-lunary-primary-300' />
+                    <span className='text-xs font-medium text-lunary-primary-200'>
+                      In Your Chart Today
+                    </span>
+                  </div>
+                  {renderPreview(
+                    "Mars trine Sun supports your path · activates 5th house. See how today's transits connect to this card's message in your birth chart.",
+                  )}
+                  <button
+                    type='button'
+                    onClick={() => router.push('/pricing')}
+                    className='mt-2 text-xs text-lunary-primary-300 hover:text-lunary-primary-100 transition-colors font-medium'
+                  >
+                    Unlock personalized insights
+                  </button>
+                </div>
               </div>
 
               <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/50 p-4'>
@@ -843,9 +1017,18 @@ const TarotReadings = () => {
                 >
                   {generalTarot.weekly.name}
                 </p>
-                <p className='text-xs md:text-sm text-zinc-400'>
-                  {generalTarot.weekly.keywords.slice(0, 2).join(', ')}
-                </p>
+                <div className='flex flex-wrap items-center gap-2 text-xs md:text-sm mb-3'>
+                  <span className='inline-flex items-center px-2 py-0.5 rounded-md bg-lunary-primary-900/50 border border-lunary-primary-700/30 text-lunary-primary-200 font-medium'>
+                    {generalTarot.weekly.keywords[2] ||
+                      generalTarot.weekly.keywords[0]}
+                  </span>
+                  <span className='text-zinc-400'>
+                    {generalTarot.weekly.keywords
+                      .filter((_, idx) => idx !== 2 && idx < 2)
+                      .join(', ')}
+                  </span>
+                </div>
+
                 {generalWeeklyShare && (
                   <div className='mt-3 flex flex-wrap items-center gap-2'>
                     <button
@@ -858,6 +1041,26 @@ const TarotReadings = () => {
                     </button>
                   </div>
                 )}
+
+                {/* Locked preview of transit insights */}
+                <div className='mt-4 pt-4 border-t border-zinc-800'>
+                  <div className='flex items-center gap-2 mb-2'>
+                    <LockIcon className='w-3 h-3 text-lunary-primary-300' />
+                    <span className='text-xs font-medium text-lunary-primary-200'>
+                      In Your Chart This Week
+                    </span>
+                  </div>
+                  {renderPreview(
+                    "Venus sextile Jupiter supports your path · activates 7th house. See how this week's transits connect to this card's message in your birth chart.",
+                  )}
+                  <button
+                    type='button'
+                    onClick={() => router.push('/pricing')}
+                    className='mt-2 text-xs text-lunary-primary-300 hover:text-lunary-primary-100 transition-colors font-medium'
+                  >
+                    Unlock personalized insights
+                  </button>
+                </div>
               </div>
             </div>
 
@@ -953,6 +1156,9 @@ const TarotReadings = () => {
                 <TarotSpreadExperience
                   userId={userId}
                   userName={userName}
+                  userBirthday={userBirthday}
+                  birthChart={user?.birthChart}
+                  userBirthLocation={user?.location?.birthLocation}
                   subscriptionPlan={tarotPlan}
                   onCardPreview={(card) => setSelectedCard(card)}
                   onShareReading={handleShareSpread}
@@ -1058,9 +1264,17 @@ const TarotReadings = () => {
               >
                 {personalizedReading.daily.name}
               </p>
-              <p className='text-xs md:text-sm text-zinc-400'>
-                {personalizedReading.daily.keywords.slice(0, 2).join(', ')}
-              </p>
+              <div className='flex flex-wrap items-center gap-2 text-xs md:text-sm'>
+                <span className='inline-flex items-center px-2 py-0.5 rounded-md bg-lunary-primary-900/50 border border-lunary-primary-700/30 text-lunary-primary-200 font-medium'>
+                  {personalizedReading.daily.keywords[2] ||
+                    personalizedReading.daily.keywords[0]}
+                </span>
+                <span className='text-zinc-400'>
+                  {personalizedReading.daily.keywords
+                    .filter((_, idx) => idx !== 2 && idx < 2)
+                    .join(', ')}
+                </span>
+              </div>
 
               {personalizedDailyShare && (
                 <div className='mt-3 flex flex-wrap items-center gap-2'>
@@ -1073,6 +1287,18 @@ const TarotReadings = () => {
                     Share daily card
                   </button>
                 </div>
+              )}
+
+              {/* Transit connection for daily card */}
+              {subscription.hasAccess('personal_tarot') && (
+                <TarotTransitConnection
+                  cardName={personalizedReading.daily.name}
+                  birthChart={user?.birthChart}
+                  userBirthday={userBirthday}
+                  currentTransits={currentAstrologicalChart}
+                  variant='inDepth'
+                  userBirthLocation={user?.location?.birthLocation}
+                />
               )}
             </div>
 
@@ -1091,9 +1317,17 @@ const TarotReadings = () => {
               >
                 {personalizedReading.weekly.name}
               </p>
-              <p className='text-xs md:text-sm text-zinc-400'>
-                {personalizedReading.weekly.keywords.slice(0, 2).join(', ')}
-              </p>
+              <div className='flex flex-wrap items-center gap-2 text-xs md:text-sm'>
+                <span className='inline-flex items-center px-2 py-0.5 rounded-md bg-lunary-primary-900/50 border border-lunary-primary-700/30 text-lunary-primary-200 font-medium'>
+                  {personalizedReading.weekly.keywords[2] ||
+                    personalizedReading.weekly.keywords[0]}
+                </span>
+                <span className='text-zinc-400'>
+                  {personalizedReading.weekly.keywords
+                    .filter((_, idx) => idx !== 2 && idx < 2)
+                    .join(', ')}
+                </span>
+              </div>
               {personalizedWeeklyShare && (
                 <div className='mt-3 flex flex-wrap items-center gap-2'>
                   <button
@@ -1105,6 +1339,18 @@ const TarotReadings = () => {
                     Share weekly card
                   </button>
                 </div>
+              )}
+
+              {/* In Your Chart Today for weekly card */}
+              {subscription.hasAccess('personal_tarot') && (
+                <TarotTransitConnection
+                  cardName={personalizedReading.weekly.name}
+                  birthChart={user?.birthChart}
+                  userBirthday={user?.birthday}
+                  currentTransits={currentAstrologicalChart || []}
+                  variant='inDepth'
+                  userBirthLocation={user?.location?.birthLocation}
+                />
               )}
             </div>
           </div>
@@ -1305,6 +1551,9 @@ const TarotReadings = () => {
             <TarotSpreadExperience
               userId={userId}
               userName={userName}
+              userBirthday={userBirthday}
+              birthChart={user?.birthChart}
+              userBirthLocation={user?.location?.birthLocation}
               subscriptionPlan={tarotPlan}
               onCardPreview={(card) => setSelectedCard(card)}
               onShareReading={handleShareSpread}
@@ -1381,6 +1630,9 @@ const TarotReadings = () => {
         card={selectedCard}
         isOpen={!!selectedCard}
         onClose={() => setSelectedCard(null)}
+        birthChart={user?.birthChart}
+        userBirthday={userBirthday}
+        currentTransits={currentAstrologicalChart}
       />
 
       {shareTarget && (

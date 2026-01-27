@@ -74,6 +74,166 @@ html {
     font-size: 1rem;
     line-height: 1.5rem;
   }
+
+  /* Locked Preview Styles */
+  .locked-preview {
+    position: relative;
+    max-height: 60px;
+    overflow: hidden;
+  }
+
+  .locked-preview-text {
+    color: rgb(161 161 170); /* zinc-400 */
+    filter: blur(2.5px);
+    opacity: 0.5;
+    user-select: none;
+    pointer-events: none;
+    line-height: 1.4;
+  }
+
+  .locked-preview::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 30px;
+    background: linear-gradient(
+      to bottom,
+      transparent,
+      rgb(10, 10, 10) /* --color-bg */
+    );
+    pointer-events: none;
+  }
+
+  /* Variant for cards with lunary-bg background (darker) */
+  .locked-preview-zinc::after {
+    background: linear-gradient(
+      to bottom,
+      transparent,
+      rgb(10 10 10) /* lunary-bg (#0a0a0a) - match widget background */
+    );
+  }
+
+  /* A/B Test Variant B: Truncated Style */
+  .locked-preview-truncated {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    position: relative;
+    line-height: 1.25rem;
+  }
+
+  /* Text inside truncated preview should be muted */
+  .locked-preview-truncated p {
+    color: rgb(113 113 122); /* zinc-500 - more muted than zinc-400 */
+  }
+
+  .locked-preview-truncated::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    width: 50%;
+    height: 1.25rem;
+    background: linear-gradient(
+      to right,
+      transparent,
+      rgb(9 9 11)
+    ); /* Solid dark, no transparency */
+  }
+
+  /* Variant for cards with lunary-bg background (darker) */
+  .locked-preview-truncated-zinc p {
+    color: rgb(113 113 122); /* zinc-500 - same muted color */
+  }
+
+  .locked-preview-truncated-zinc::after {
+    background: linear-gradient(
+      to right,
+      transparent,
+      rgb(10 10 10)
+    ); /* Solid lunary-bg (#0a0a0a) */
+  }
+
+  /* Single-line truncation variant for compact widgets */
+  .locked-preview-truncated-single {
+    display: -webkit-box;
+    -webkit-line-clamp: 1;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    position: relative;
+    line-height: 1.25rem;
+  }
+
+  .locked-preview-truncated-single p {
+    color: rgb(113 113 122); /* zinc-500 - muted */
+  }
+
+  .locked-preview-truncated-single::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    width: 70%;
+    height: 1.25rem;
+    background: linear-gradient(to right, transparent, rgb(9 9 11));
+  }
+
+  /* Single-line variant for lunary-bg background */
+  .locked-preview-truncated-single-zinc p {
+    color: rgb(113 113 122);
+  }
+
+  .locked-preview-truncated-single-zinc::after {
+    background: linear-gradient(to right, transparent, rgb(10 10 10));
+  }
+
+  /* Extra-wide gradient for ritual preview - hides most of the line */
+  .locked-preview-ritual {
+    display: -webkit-box;
+    -webkit-line-clamp: 1;
+    line-clamp: 1;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    position: relative;
+    line-height: 1.25rem;
+    width: 100%;
+  }
+
+  .locked-preview-ritual p {
+    color: rgb(113 113 122); /* zinc-500 - muted */
+  }
+
+  .locked-preview-ritual::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    width: 85%;
+    height: 1.25rem;
+    background: linear-gradient(to right, transparent 0%, rgb(9 9 11) 25%);
+  }
+
+  /* Variant C: Redacted/Censored Style - softer blur effect */
+  .locked-preview-redacted {
+    position: relative;
+    line-height: 1.4;
+  }
+
+  .locked-preview-redacted .redacted-word {
+    filter: blur(5px);
+    color: rgb(113 113 122); /* zinc-500 */
+    user-select: none;
+    display: inline-block;
+  }
+
+  /* Variant for cards with lunary-bg background */
+  .locked-preview-redacted-zinc .redacted-word {
+    filter: blur(5px);
+    color: rgb(113 113 122); /* zinc-500 */
+  }
 }
 
 /* Custom scrollbar - Comet Trail (desktop only) */

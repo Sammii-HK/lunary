@@ -1,3 +1,4 @@
+import { withSentryConfig } from '@sentry/nextjs';
 import { createRequire } from 'module';
 const require = createRequire(import.meta.url);
 
@@ -5,8 +6,8 @@ const require = createRequire(import.meta.url);
 const withBundleAnalyzer =
   process.env.ANALYZE === 'true'
     ? require('@next/bundle-analyzer')({
-      enabled: true,
-    })
+        enabled: true,
+      })
     : (config) => config;
 
 /** @type {import('next').NextConfig} */
@@ -232,8 +233,8 @@ const nextConfig = {
     removeConsole:
       process.env.NODE_ENV === 'production'
         ? {
-          exclude: ['error', 'warn'], // Keep console.error and console.warn
-        }
+            exclude: ['error', 'warn'], // Keep console.error and console.warn
+          }
         : false,
   },
 
@@ -684,4 +685,18 @@ const nextConfig = {
   },
 };
 
-export default withBundleAnalyzer(nextConfig);
+// Only enable Sentry build integration when explicitly requested
+// Set ENABLE_SENTRY_SOURCEMAPS=true in Vercel to enable source map uploads
+// This prevents expensive source map processing on every build
+const shouldEnableSentry =
+  process.env.ENABLE_SENTRY_SOURCEMAPS === 'true' &&
+  process.env.SENTRY_AUTH_TOKEN;
+
+export default shouldEnableSentry
+  ? withSentryConfig(withBundleAnalyzer(nextConfig), {
+      org: 'lunar-computing-inc',
+      project: 'javascript-nextjs',
+      silent: !process.env.CI,
+      tunnelRoute: '/monitoring',
+    })
+  : withBundleAnalyzer(nextConfig);

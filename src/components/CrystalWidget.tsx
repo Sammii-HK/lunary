@@ -15,7 +15,7 @@ import { hasFeatureAccess, hasDateAccess } from '../../utils/pricing';
 import { useAstronomyContext } from '../context/AstronomyContext';
 import dayjs from 'dayjs';
 import Link from 'next/link';
-import { Info, X } from 'lucide-react';
+import { Info, X, Lock } from 'lucide-react';
 import { Paywall } from './Paywall';
 
 export const CrystalWidget = () => {
@@ -47,13 +47,13 @@ export const CrystalWidget = () => {
 
   const canAccessDate = hasDateAccess(normalizedDate, subscription.status);
 
-  // Memoize general crystal for non-premium users
+  // Memoize general crystal for all users
   const generalCrystal = useMemo(() => {
-    if (hasPersonalCrystalAccess) return null;
     if (!canAccessDate) return null; // Don't show general crystal if date is paywalled
     return getGeneralCrystalRecommendation(normalizedDate);
-  }, [hasPersonalCrystalAccess, canAccessDate, normalizedDate]);
+  }, [canAccessDate, normalizedDate]);
 
+  // Calculate personalized crystal for ALL users (for paid users AND blurred preview)
   const crystalData = useMemo(() => {
     if (!birthChart || !userBirthday || !observer) return null;
     if (!canAccessDate) return null;
@@ -71,6 +71,7 @@ export const CrystalWidget = () => {
 
     return {
       crystal,
+      reasons,
       guidance,
     };
   }, [normalizedDate, userBirthday, observer, birthChart, canAccessDate]);
@@ -113,6 +114,13 @@ export const CrystalWidget = () => {
     return (
       <div className='py-3 px-4 border border-stone-800 rounded-md w-full h-full flex flex-col min-h-64'>
         <div className='space-y-2'>
+          <div className='flex items-center justify-between mb-1'>
+            <h3 className='font-bold text-sm'>Personal Crystal</h3>
+            <span className='flex items-center gap-1 text-[10px] text-lunary-primary-300 uppercase tracking-wide'>
+              Personal <Lock className='w-3 h-3' />
+            </span>
+          </div>
+
           <div className='space-y-2'>
             <div className='text-center'>
               <h4 className='font-semibold text-lunary-accent-300'>
@@ -123,13 +131,25 @@ export const CrystalWidget = () => {
               </p>
             </div>
 
-            <p className='text-xs text-zinc-300'>{generalCrystal.reason}</p>
+            <p className='text-xs text-zinc-300 mb-2'>
+              {generalCrystal.reason}
+            </p>
+
+            {/* Blurred preview of REAL personalized guidance */}
+            {crystalData && (
+              <div className='locked-preview-zinc locked-preview mb-2'>
+                <p className='locked-preview-text text-xs'>
+                  {crystalData.reasons?.[0]}. {crystalData.reasons?.[1]}{' '}
+                  {crystalData.guidance}
+                </p>
+              </div>
+            )}
           </div>
 
           <div className='bg-gradient-to-r from-lunary-primary-900/20 to-lunary-highlight-900/20 rounded p-2 border border-lunary-primary-800'>
             <p className='text-xs text-zinc-400 mb-2'>
-              Get crystals chosen specifically for YOUR birth chart. See what
-              the universe has selected for you!
+              Get crystals chosen specifically for YOUR birth chart with
+              personalized guidance.
             </p>
             <SmartTrialButton size='sm' />
           </div>

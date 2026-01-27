@@ -6,7 +6,7 @@ import { useAuthStatus } from '@/components/AuthStatus';
 import { useAstronomyContext } from '@/context/AstronomyContext';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { Sparkles, ArrowRight } from 'lucide-react';
+import { Sparkles, ArrowRight, Lock } from 'lucide-react';
 import dayjs from 'dayjs';
 import { getGeneralHoroscope } from '../../../utils/astrology/generalHoroscope';
 import { getEnhancedPersonalizedHoroscope } from '../../../utils/astrology/enhancedHoroscope';
@@ -22,6 +22,7 @@ import {
   hasEnoughDataForThemes,
   LifeThemeInput,
 } from '@/lib/life-themes/engine';
+import { useFeatureFlagVariant } from '@/hooks/useFeatureFlag';
 
 const getOrdinalSuffix = (n: number): string => {
   if (n >= 11 && n <= 13) return 'th';
@@ -66,6 +67,7 @@ export const DailyInsightCard = () => {
   const userBirthday = user?.birthday;
   const birthChart = user?.birthChart;
   const [lifeThemeName, setLifeThemeName] = useState<string | null>(null);
+  const variant = useFeatureFlagVariant('paywall_preview_style_v1');
 
   const hasPersonalizedAccess = hasFeatureAccess(
     subscription.status,
@@ -156,8 +158,9 @@ export const DailyInsightCard = () => {
     selectedDay.valueOf(),
   ]);
 
+  // Calculate transit highlights for ALL authenticated users (for preview and paid access)
   const transitHighlights = useMemo<PersonalTransitImpact[]>(() => {
-    if (!canAccessPersonalized || !birthChart) return [];
+    if (!authStatus.isAuthenticated || !birthChart) return [];
     const todayStart = selectedDay.startOf('day');
     const lookbackDays = 2;
     const windowStart = todayStart.subtract(lookbackDays, 'day');
@@ -272,6 +275,158 @@ export const DailyInsightCard = () => {
 
   const displayText = transitSummaryText ?? insight.text;
 
+  // Helper to determine if a word should be redacted
+  const shouldRedactWord = (word: string, index: number): boolean => {
+    const cleanWord = word.toLowerCase().replace(/[.,!?;:]/g, '');
+
+    // Prioritize house numbers (1st, 2nd, 3rd, 12th, etc.)
+    if (/^\d+(st|nd|rd|th)$/.test(cleanWord)) return true;
+
+    // Redact planet names
+    const planets = [
+      'sun',
+      'moon',
+      'mercury',
+      'venus',
+      'mars',
+      'jupiter',
+      'saturn',
+      'uranus',
+      'neptune',
+      'pluto',
+    ];
+    if (planets.includes(cleanWord)) return true;
+
+    // Redact zodiac signs
+    const signs = [
+      'aries',
+      'taurus',
+      'gemini',
+      'cancer',
+      'leo',
+      'virgo',
+      'libra',
+      'scorpio',
+      'sagittarius',
+      'capricorn',
+      'aquarius',
+      'pisces',
+    ];
+    if (signs.includes(cleanWord)) return true;
+
+    // Redact chart-related terms
+    const chartTerms = [
+      'house',
+      'placement',
+      'natal',
+      'chart',
+      'transit',
+      'aspect',
+    ];
+    if (chartTerms.includes(cleanWord)) return true;
+
+    // Redact guidance/conclusion phrases
+    const guidanceTerms = [
+      'authentically',
+      'instincts',
+      'transformation',
+      'healing',
+      'manifestation',
+      'intuition',
+      'wisdom',
+      'strength',
+      'clarity',
+      'balance',
+      'harmony',
+      'power',
+      'growth',
+      'abundance',
+      'passion',
+      'creativity',
+      'connection',
+      'release',
+      'embrace',
+      'illuminate',
+    ];
+    if (guidanceTerms.includes(cleanWord)) return true;
+
+    // Redact some other words for variety (every 6th word if not already redacted)
+    return index % 6 === 4;
+  };
+
+  // Helper to render preview based on A/B test variant
+  const renderPreview = () => {
+    // Use the EXACT content that paid users would see
+    // Paid users see: transitSummaryText (if available) OR insight.text
+    // We need to show what authenticated users would get with personalization
+    let previewContent = '';
+
+    if (transitHighlights.length > 0) {
+      // Show the personalized transit highlights that paid users see
+      const personalizedTransits = transitHighlights
+        .map((transit, index) => formatTransitSentence(transit, index === 0))
+        .join(' ');
+      previewContent = personalizedTransits;
+    } else if (birthChart) {
+      // If we have birth chart but no transit highlights, show personalized horoscope
+      const personalizedHoroscope = getEnhancedPersonalizedHoroscope(
+        userBirthday!,
+        userName || undefined,
+        { birthday: userBirthday!, birthChart: birthChart },
+        selectedDay.toDate(),
+      );
+      previewContent = personalizedHoroscope.personalInsight;
+    } else {
+      // Fallback to general insight (shouldn't happen for authenticated users)
+      previewContent = insight.text;
+    }
+
+    if (variant === 'truncated') {
+      // Variant B: Truncated - let the truncation itself create curiosity (1 line)
+      return (
+        <div className='locked-preview-truncated-single mb-2'>
+          <p className='text-xs'>{previewContent}</p>
+        </div>
+      );
+    }
+
+    if (variant === 'redacted') {
+      // Variant C: Redacted style - soft blur effect on key terms
+      const words = previewContent.split(' ');
+      const redactedContent = words.map((word, i) => {
+        const shouldRedact = shouldRedactWord(word, i);
+        return shouldRedact ? (
+          <span key={i} className='redacted-word'>
+            {word}
+          </span>
+        ) : (
+          <span key={i}>{word}</span>
+        );
+      });
+
+      const contentWithSpaces: React.ReactNode[] = [];
+      redactedContent.forEach((element, i) => {
+        contentWithSpaces.push(element);
+        if (i < redactedContent.length - 1) {
+          contentWithSpaces.push(' ');
+        }
+      });
+
+      return (
+        <div className='locked-preview-redacted mb-2'>
+          <p className='text-xs text-zinc-400'>{contentWithSpaces}</p>
+        </div>
+      );
+    }
+
+    // Variant A: Blur Effect (default)
+    return (
+      <div className='locked-preview mb-2'>
+        <p className='locked-preview-text text-xs'>{previewContent}</p>
+      </div>
+    );
+  };
+
   if (!insight.isPersonalized) {
     return (
       <Link
@@ -280,15 +435,24 @@ export const DailyInsightCard = () => {
       >
         <div className='flex items-start justify-between gap-3'>
           <div className='flex-1 min-w-0'>
-            <div className='flex items-center gap-2 mb-1'>
-              <Sparkles className='w-4 h-4 text-lunary-primary-300' />
-              <span className='text-sm font-medium text-zinc-200'>
-                Today's Influence
+            <div className='flex items-center justify-between gap-2 mb-1'>
+              <div className='flex items-center gap-2'>
+                <Sparkles className='w-4 h-4 text-lunary-primary-300' />
+                <span className='text-sm font-medium text-zinc-200'>
+                  Today&apos;s Influence
+                </span>
+              </div>
+              <span className='flex items-center gap-1 text-[10px] text-lunary-primary-300 uppercase tracking-wide'>
+                Personal <Lock className='w-3 h-3' />
               </span>
             </div>
-            <p className='text-sm text-zinc-300 leading-relaxed'>
+            <p className='text-sm text-zinc-200 leading-relaxed mb-2'>
               {insight.text}
             </p>
+
+            {/* A/B test: Show preview based on variant */}
+            {renderPreview()}
+
             <span
               role='button'
               tabIndex={0}
@@ -316,9 +480,9 @@ export const DailyInsightCard = () => {
                   }
                 }
               }}
-              className='flex items-center gap-1.5 mt-2 text-xs text-lunary-primary-200 hover:text-lunary-primary-100 transition-colors bg-none border-none p-0 cursor-pointer'
+              className='flex items-center gap-1.5 text-xs text-lunary-primary-200 hover:text-lunary-primary-100 transition-colors bg-none border-none p-0 cursor-pointer font-medium'
             >
-              Unlock full-chart readings with Lunary+
+              Unlock Full-Chart Readings
             </span>
           </div>
           <ArrowRight className='w-4 h-4 text-zinc-600 group-hover:text-lunary-primary-300 transition-colors flex-shrink-0 mt-1' />

@@ -8,8 +8,13 @@ export function useFeatureFlag(flag: string): boolean | undefined {
 
   useEffect(() => {
     const checkFlag = () => {
-      const result = isFeatureEnabled(flag);
-      setEnabled(result);
+      try {
+        const result = isFeatureEnabled(flag);
+        setEnabled(result);
+      } catch (error) {
+        // Silently fail and keep undefined state
+        console.warn('Failed to check feature flag:', flag, error);
+      }
     };
 
     checkFlag();
@@ -38,8 +43,13 @@ export function useFeatureFlagVariant(
 
   useEffect(() => {
     const checkFlag = () => {
-      const result = getFeatureFlag(flag);
-      setVariant(result);
+      try {
+        const result = getFeatureFlag(flag);
+        setVariant(result);
+      } catch (error) {
+        // Silently fail and keep undefined state
+        console.warn('Failed to get feature flag:', flag, error);
+      }
     };
 
     checkFlag();
