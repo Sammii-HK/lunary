@@ -136,3 +136,17 @@ enum TourStatus {
   COMPLETED
   DISMISSED
 }
+
+model TestimonialPromptTracking {
+  id            String   @id @default(cuid())
+  userId        String   @unique @map("user_id")
+  firstSeen     DateTime @default(now()) @map("first_seen") @db.Timestamptz(6)
+  dontAskUntil  DateTime @default(now()) @map("dont_ask_until") @db.Timestamptz(6)
+  submitted     Boolean  @default(false)
+  createdAt     DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt     DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@index([userId], name: "idx_testimonial_prompt_user_id")
+  @@index([dontAskUntil], name: "idx_testimonial_prompt_dont_ask_until")
+  @@map("testimonial_prompt_tracking")
+}

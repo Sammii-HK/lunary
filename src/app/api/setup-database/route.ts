@@ -1052,6 +1052,23 @@ export async function POST(request: NextRequest) {
 
     console.log('✅ Tour progress table created');
 
+    // Create testimonial_prompt_tracking table
+    await sql`
+      CREATE TABLE IF NOT EXISTS testimonial_prompt_tracking (
+        id TEXT PRIMARY KEY DEFAULT gen_random_uuid(),
+        user_id TEXT NOT NULL UNIQUE,
+        first_seen TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+        dont_ask_until TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+        submitted BOOLEAN DEFAULT FALSE,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+        updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+      )
+    `;
+    await sql`CREATE INDEX IF NOT EXISTS idx_testimonial_prompt_user_id ON testimonial_prompt_tracking(user_id)`;
+    await sql`CREATE INDEX IF NOT EXISTS idx_testimonial_prompt_dont_ask_until ON testimonial_prompt_tracking(dont_ask_until)`;
+
+    console.log('✅ Testimonial prompt tracking table created');
+
     console.log('✅ Production database setup complete!');
 
     return NextResponse.json({
