@@ -231,7 +231,8 @@
     "tinycolor2": "^1.6.0",
     "ts-jest": "^29.4.6",
     "tsx": "^4.21.0",
-    "typescript": "^5.9.3"
+    "typescript": "^5.9.3",
+    "web-streams-polyfill": "^4.2.0"
   },
   "packageManager": "pnpm@9.15.0"
 }

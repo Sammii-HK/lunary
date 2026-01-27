@@ -309,6 +309,9 @@ importers:
       typescript:
         specifier: ^5.9.3
         version: 5.9.3
+      web-streams-polyfill:
+        specifier: ^4.2.0
+        version: 4.2.0
 
 packages:
 
@@ -6600,6 +6603,10 @@ packages:
     resolution: {integrity: sha512-d2JWLCivmZYTSIoge9MsgFCZrt571BikcWGYkjC1khllbTeDlGqZ2D8vD8E/lJa8WGWbb7Plm8/XJYV7IJHZZw==}
     engines: {node: '>= 8'}
 
+  web-streams-polyfill@4.2.0:
+    resolution: {integrity: sha512-0rYDzGOh9EZpig92umN5g5D/9A1Kff7k0/mzPSSCY8jEQeYkgRMoY7LhbXtUCWzLCMX0TUE9aoHkjFNB7D9pfA==}
+    engines: {node: '>= 8'}
+
   web-vitals@4.2.4:
     resolution: {integrity: sha512-r4DIlprAGwJ7YM11VZp4R884m0Vmgr6EAKe3P+kO0PPj3Unqyvv59rczf6UiGcb9Z8QxZVcqKNwv/g0WNdWwsw==}
 
@@ -8388,14 +8395,14 @@ snapshots:
       '@remotion/media-parser': 4.0.409
       '@remotion/studio': 4.0.409(bufferutil@4.0.9)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@remotion/studio-shared': 4.0.409(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
-      css-loader: 5.2.7(webpack@5.96.1)
+      css-loader: 5.2.7(webpack@5.96.1(esbuild@0.25.0))
       esbuild: 0.25.0
       react: 18.3.1
       react-dom: 18.3.1(react@18.3.1)
       react-refresh: 0.9.0
       remotion: 4.0.409(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       source-map: 0.7.3
-      style-loader: 4.0.0(webpack@5.96.1)
+      style-loader: 4.0.0(webpack@5.96.1(esbuild@0.25.0))
       webpack: 5.96.1(esbuild@0.25.0)
     transitivePeerDependencies:
       - '@swc/core'
@@ -9790,7 +9797,7 @@ snapshots:
 
   crypto@1.0.1: {}
 
-  css-loader@5.2.7(webpack@5.96.1):
+  css-loader@5.2.7(webpack@5.96.1(esbuild@0.25.0)):
     dependencies:
       icss-utils: 5.1.0(postcss@8.5.6)
       loader-utils: 2.0.4
@@ -13413,7 +13420,7 @@ snapshots:
 
   strnum@1.1.2: {}
 
-  style-loader@4.0.0(webpack@5.96.1):
+  style-loader@4.0.0(webpack@5.96.1(esbuild@0.25.0)):
     dependencies:
       webpack: 5.96.1(esbuild@0.25.0)
 
@@ -13883,6 +13890,8 @@ snapshots:
       - supports-color
 
   web-streams-polyfill@3.3.3: {}
+
+  web-streams-polyfill@4.2.0: {}
 
   web-vitals@4.2.4: {}
 
