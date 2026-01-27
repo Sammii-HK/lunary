@@ -304,7 +304,16 @@ export const auth = new Proxy({} as ReturnType<typeof betterAuth>, {
       return undefined;
     }
 
-    // Lazy initialization for all properties
+    // For 'handler', return a function that lazily initializes auth
+    // This ensures withCors receives a function, not a Promise
+    if (prop === 'handler') {
+      return async (request: Request) => {
+        const instance = await initializeAuth();
+        return instance.handler(request);
+      };
+    }
+
+    // For other properties, return a Promise that resolves to the value
     return (async () => {
       const instance = await initializeAuth();
       const value = (instance as any)[prop];
