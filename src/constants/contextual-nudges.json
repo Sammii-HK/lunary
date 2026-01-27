@@ -32,16 +32,16 @@
   "ctaNudges": {
     "universal": [
       {
-        "headline": "Make this personal",
-        "subline": "Create your chart so Lunary can interpret everything through your full birth chart and current timing.",
-        "buttonLabel": "Create my chart",
+        "headline": "See how this shows up in your chart",
+        "subline": "Sign in to view your full birth chart with planets, houses, and aspects.",
+        "buttonLabel": "View my chart",
         "href": "/auth?signup=true",
         "action": "authOrLink"
       },
       {
-        "headline": "Get your real context",
-        "subline": "Sign in to connect this topic to your placements, houses, and transits.",
-        "buttonLabel": "See my context",
+        "headline": "Connect this to your placements",
+        "subline": "Create a free account to see your natal chart and how this relates to you.",
+        "buttonLabel": "Get my free chart",
         "href": "/auth?signup=true",
         "action": "authOrLink"
       }
@@ -49,9 +49,9 @@
 
     "astrology": [
       {
-        "headline": "See how this actually shows up for you",
-        "subline": "Lunary uses your full birth chart, not just a sun sign, to make this specific.",
-        "buttonLabel": "Personalise with my chart",
+        "headline": "Go beyond your sun sign",
+        "subline": "Create a free account to see your complete natal chart with all planets and houses.",
+        "buttonLabel": "Get my free chart",
         "href": "/auth?signup=true",
         "action": "authOrLink"
       }
@@ -59,9 +59,9 @@
 
     "planets": [
       {
-        "headline": "Find this planet in your chart",
-        "subline": "Sign in to see its house, aspects, and what is activating it right now.",
-        "buttonLabel": "See it in my chart",
+        "headline": "Where is this planet in your chart?",
+        "subline": "Sign in to see where this planet sits in your natal chart.",
+        "buttonLabel": "View my chart",
         "href": "/auth?signup=true",
         "action": "authOrLink"
       }
@@ -69,9 +69,9 @@
 
     "houses": [
       {
-        "headline": "See what this house means in your life",
-        "subline": "Sign in to map this house to your chart, planets, and current transits.",
-        "buttonLabel": "Check my houses",
+        "headline": "What planets live in this house?",
+        "subline": "Sign in to see which planets sit in this house in your chart.",
+        "buttonLabel": "View my chart",
         "href": "/auth?signup=true",
         "action": "authOrLink"
       }
@@ -79,9 +79,9 @@
 
     "aspects": [
       {
-        "headline": "Understand the full pattern",
-        "subline": "Sign in to see how this aspect behaves inside your complete chart.",
-        "buttonLabel": "View my aspects",
+        "headline": "See this aspect in your chart",
+        "subline": "Sign in to view all the aspects in your birth chart.",
+        "buttonLabel": "View my chart",
         "href": "/auth?signup=true",
         "action": "authOrLink"
       }
@@ -89,9 +89,9 @@
 
     "transits": [
       {
-        "headline": "See what this transit is touching for you",
-        "subline": "Sign in to map it to your natal chart and the exact life areas it activates.",
-        "buttonLabel": "Check my transits",
+        "headline": "See where the planets are today",
+        "subline": "Sign in to view today's planetary positions and your birth chart.",
+        "buttonLabel": "View transits & my chart",
         "href": "/auth?signup=true",
         "action": "authOrLink"
       }
@@ -99,9 +99,9 @@
 
     "horoscopes": [
       {
-        "headline": "Go beyond sun sign",
-        "subline": "Sign in to read this through your full birth chart and today’s transits.",
-        "buttonLabel": "Get my personalised horoscope",
+        "headline": "Go beyond your sun sign",
+        "subline": "Sign in to see your complete natal chart with all planets and houses.",
+        "buttonLabel": "Get my free chart",
         "href": "/auth?signup=true",
         "action": "authOrLink"
       }
@@ -109,9 +109,9 @@
 
     "moon": [
       {
-        "headline": "Feel this phase in your chart",
-        "subline": "Sign in to see how the Moon is interacting with your natal placements right now.",
-        "buttonLabel": "Personalise the Moon",
+        "headline": "Track the moon through your chart",
+        "subline": "Sign in to follow moon phases and see your natal moon placement.",
+        "buttonLabel": "View my chart",
         "href": "/auth?signup=true",
         "action": "authOrLink"
       }
@@ -119,9 +119,9 @@
 
     "tarot": [
       {
-        "headline": "Let the cards land in context",
-        "subline": "Sign in to interpret tarot alongside your chart and timing, not as a generic meaning.",
-        "buttonLabel": "Start a reading",
+        "headline": "Pull a spread for yourself",
+        "subline": "Sign in to try tarot spreads and get interpretations.",
+        "buttonLabel": "Try a reading",
         "href": "/auth?signup=true",
         "action": "authOrLink"
       }
@@ -129,9 +129,9 @@
 
     "tarotSpreadsIndex": [
       {
-        "headline": "Pull a spread inside Lunary",
-        "subline": "Sign in to try a spread with interpretation grounded in your chart and current season.",
-        "buttonLabel": "Pull a spread",
+        "headline": "Pull a spread",
+        "subline": "Sign in to try these spreads and get interpretations.",
+        "buttonLabel": "Try a spread",
         "href": "/auth?signup=true",
         "action": "authOrLink"
       }
@@ -139,9 +139,9 @@
 
     "tarotSpreadsDetail": [
       {
-        "headline": "Try this spread with your context",
-        "subline": "Sign in to pull this spread in Lunary and connect it back to your birth chart.",
-        "buttonLabel": "Try this spread",
+        "headline": "Try this spread for yourself",
+        "subline": "Sign in to pull this spread and get an interpretation.",
+        "buttonLabel": "Pull this spread",
         "href": "/auth?signup=true",
         "action": "authOrLink"
       }
@@ -149,9 +149,9 @@
 
     "numerology": [
       {
-        "headline": "Make this number personal",
-        "subline": "Sign in to interpret it through your current cycle and wider chart context.",
-        "buttonLabel": "Personalise this number",
+        "headline": "What's your number today?",
+        "subline": "Sign in to see your Personal Day number and birth chart.",
+        "buttonLabel": "View my chart",
         "href": "/auth?signup=true",
         "action": "authOrLink"
       }
@@ -179,9 +179,9 @@
 
     "crystals": [
       {
-        "headline": "Choose what supports your timing",
-        "subline": "Sign in to match crystal support to what your chart is activating right now.",
-        "buttonLabel": "Get my recommendation",
+        "headline": "See what crystals support this moment",
+        "subline": "Sign in to see your birth chart and get crystal recommendations for today.",
+        "buttonLabel": "View recommendations",
         "href": "/auth?signup=true",
         "action": "authOrLink"
       }
@@ -219,9 +219,9 @@
 
     "cosmicTiming": [
       {
-        "headline": "Make timing usable",
-        "subline": "Sign in to see how real planetary movement interacts with your chart right now.",
-        "buttonLabel": "See my timing",
+        "headline": "See how this timing relates to you",
+        "subline": "Sign in to view today's transits and your birth chart.",
+        "buttonLabel": "View my chart",
         "href": "/auth?signup=true",
         "action": "authOrLink"
       }
@@ -229,9 +229,9 @@
 
     "personalContext": [
       {
-        "headline": "This only makes sense in your chart",
-        "subline": "Sign in to see how your placements connect across the whole chart.",
-        "buttonLabel": "View my full context",
+        "headline": "See your complete chart",
+        "subline": "Sign in to view your full natal chart with all placements.",
+        "buttonLabel": "View my chart",
         "href": "/auth?signup=true",
         "action": "authOrLink"
       }
@@ -279,9 +279,9 @@
 
     "grimoireReference": [
       {
-        "headline": "Turn this library into your system",
-        "subline": "Sign in so every topic can connect back to your chart, timing, and saved context.",
-        "buttonLabel": "Start personalised",
+        "headline": "Connect this to your chart",
+        "subline": "Sign in to see your birth chart and explore how this relates to you.",
+        "buttonLabel": "View my chart",
         "href": "/auth?signup=true",
         "action": "authOrLink"
       }

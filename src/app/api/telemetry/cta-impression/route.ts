@@ -39,13 +39,13 @@ export async function POST(request: NextRequest) {
     const userEmail = currentUser?.email;
 
     const canonical = canonicaliseEvent({
-      eventType: 'cta_clicked',
+      eventType: 'cta_impression',
       userId,
       anonymousId,
       userEmail,
       pagePath,
       metadata: {
-        source: 'cta_click',
+        source: 'cta_impression',
         hub: typeof payload?.hub === 'string' ? payload.hub : undefined,
         cta_id: typeof payload?.ctaId === 'string' ? payload.ctaId : undefined,
         cta_location:
@@ -88,7 +88,10 @@ export async function POST(request: NextRequest) {
     await insertCanonicalEvent(canonical.row);
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error('[telemetry/cta-click] Failed to record CTA click', error);
+    console.error(
+      '[telemetry/cta-impression] Failed to record CTA impression',
+      error,
+    );
     return NextResponse.json(
       {
         success: false,
