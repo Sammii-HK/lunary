@@ -9,7 +9,7 @@ import type {
   TourContext as ITourContext,
   TourId,
 } from '@/lib/feature-tours/tour-system';
-import type { PlanKey } from '@/lib/entitlements';
+import type { PlanId } from '../../utils/entitlements';
 
 interface TourContextValue {
   startTour: (tourId: TourId) => void;
@@ -54,7 +54,7 @@ export function TourProvider({ children }: { children: React.ReactNode }) {
     startTour,
   } = useFeatureTour(
     tourContext || {
-      userTier: 'free' as PlanKey,
+      userTier: 'free' as PlanId,
       chatCount: 0,
       tarotCount: 0,
       journalCount: 0,
