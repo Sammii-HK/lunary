@@ -75,6 +75,31 @@ export async function GET(request: NextRequest) {
       revenueResponse.json(),
     ]);
 
+    // Transform feature adoption array to lookup map
+    const featureAdoptionMap = new Map<string, number>();
+    const featureMetricsForTracking: Record<
+      string,
+      { count: number; adoption: number }
+    > = {};
+
+    if (featureAdoption.features && Array.isArray(featureAdoption.features)) {
+      for (const feature of featureAdoption.features) {
+        const eventType = String(feature.event_type || '');
+        const adoptionRate = Number(feature.adoption_rate || 0);
+        const users = Number(feature.users || 0);
+
+        featureAdoptionMap.set(eventType, adoptionRate);
+        featureMetricsForTracking[eventType] = {
+          count: users,
+          adoption: adoptionRate,
+        };
+      }
+    }
+
+    // Helper to get adoption rate by event type
+    const getAdoption = (eventType: string): number =>
+      featureAdoptionMap.get(eventType) || 0;
+
     // Build metrics object for insights generation
     const metrics: AnalyticsMetrics = {
       // Core metrics
@@ -101,12 +126,12 @@ export async function GET(request: NextRequest) {
       stickiness: engagement.stickiness || 0,
 
       // Feature adoption (Product MAU as denominator)
-      dashboardAdoption: featureAdoption.dashboard?.adoption || 0,
-      horoscopeAdoption: featureAdoption.horoscope?.adoption || 0,
-      tarotAdoption: featureAdoption.tarot?.adoption || 0,
-      guideAdoption: featureAdoption.guide?.adoption || 0,
-      chartAdoption: featureAdoption.chart?.adoption || 0,
-      ritualAdoption: featureAdoption.ritual?.adoption || 0,
+      dashboardAdoption: getAdoption('daily_dashboard_viewed'),
+      horoscopeAdoption: getAdoption('personalized_horoscope_viewed'),
+      tarotAdoption: getAdoption('tarot_drawn'),
+      guideAdoption: getAdoption('astral_chat_used'),
+      chartAdoption: getAdoption('chart_viewed'),
+      ritualAdoption: getAdoption('ritual_started'),
 
       // Revenue
       mrr: revenue.mrr || 0,
@@ -114,7 +139,7 @@ export async function GET(request: NextRequest) {
 
       // Tracking quality
       trackingIssues: detectTrackingIssues(
-        featureAdoption.features || {},
+        featureMetricsForTracking,
         activity.signed_in_product_mau || 0,
       ),
     };
