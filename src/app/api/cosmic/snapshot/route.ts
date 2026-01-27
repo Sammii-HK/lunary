@@ -13,7 +13,6 @@ import {
 import { requireUser, AuthenticatedUser } from '@/lib/ai/auth';
 import { auth } from '@/lib/auth';
 import { sql } from '@vercel/postgres';
-import { loadJazzProfile } from '@/lib/jazz/server';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -74,56 +73,6 @@ async function hydrateProfileFromDatabase(
     return baseProfile;
   }
 }
-
-const ensureProfileFromJazz = async (
-  userId: string,
-  baseProfile: SnapshotProfile,
-): Promise<SnapshotProfile> => {
-  if (
-    baseProfile.birthday &&
-    baseProfile.timezone &&
-    baseProfile.locale &&
-    baseProfile.name
-  ) {
-    return baseProfile;
-  }
-
-  console.log('[cosmic/snapshot] Loading Jazz profile for userId:', userId);
-  const jazzProfile = await loadJazzProfile(userId);
-  console.log('[cosmic/snapshot] Jazz profile loaded:', {
-    hasProfile: !!jazzProfile,
-    profileType: jazzProfile ? typeof jazzProfile : 'null',
-    profileKeys: jazzProfile ? Object.keys(jazzProfile as any) : [],
-    birthday: (jazzProfile as any)?.birthday,
-    name: (jazzProfile as any)?.name,
-  });
-
-  if (!jazzProfile) {
-    console.warn('[cosmic/snapshot] No Jazz profile found');
-    return baseProfile;
-  }
-
-  const finalProfile = {
-    email: baseProfile.email,
-    name: baseProfile.name ?? (jazzProfile as any)?.name ?? undefined,
-    timezone:
-      baseProfile.timezone ??
-      (jazzProfile as any)?.timezone ??
-      DEFAULT_TIMEZONE,
-    locale:
-      baseProfile.locale ?? (jazzProfile as any)?.locale ?? DEFAULT_LOCALE,
-    birthday:
-      baseProfile.birthday ?? (jazzProfile as any)?.birthday ?? undefined,
-  };
-
-  console.log('[cosmic/snapshot] Final profile after Jazz merge:', {
-    hasBirthday: !!finalProfile.birthday,
-    birthday: finalProfile.birthday,
-    hasName: !!finalProfile.name,
-  });
-
-  return finalProfile;
-};
 
 export async function GET(request: NextRequest) {
   console.log('[cosmic/snapshot] GET request received');
@@ -190,14 +139,6 @@ export async function GET(request: NextRequest) {
     console.log('[cosmic/snapshot] After DB hydration:', {
       hasBirthday: !!profile.birthday,
       hasName: !!profile.name,
-    });
-
-    console.log('[cosmic/snapshot] Ensuring profile from Jazz...');
-    profile = await ensureProfileFromJazz(jazzAccountId, profile);
-    console.log('[cosmic/snapshot] Final profile:', {
-      hasBirthday: !!profile.birthday,
-      hasName: !!profile.name,
-      birthday: profile.birthday,
     });
 
     // Generate snapshot if it doesn't exist or is stale (>24h old)
