@@ -39,7 +39,8 @@ export default function NotificationAdminPage() {
   const [sentHistory, setSentHistory] = useState<SentNotification[]>([]);
   const [sentSummary, setSentSummary] = useState<SentSummary[]>([]);
   const [historyLoading, setHistoryLoading] = useState(false);
-  const [activeTab, setActiveTab] = useState<'preview' | 'history'>('preview');
+  const [activeTab, setActiveTab] = useState<'preview' | 'history' | 'manual'>('preview');
+  const [manualTestLoading, setManualTestLoading] = useState(false);
 
   useEffect(() => {
     loadNotificationPreview(selectedDate);
@@ -549,6 +550,204 @@ export default function NotificationAdminPage() {
     }
   };
 
+  // Manual test notification sender
+  const sendManualTestNotification = async (
+    notificationType: string,
+    testUrl: string,
+  ) => {
+    setManualTestLoading(true);
+    try {
+      const notificationPayload = {
+        type: notificationType,
+        title: `Test: ${notificationType}`,
+        body: `Testing deep link to: ${testUrl}`,
+        icon: '/icons/icon-192x192.png',
+        badge: '/icons/icon-72x72.png',
+        data: {
+          url: testUrl,
+          isTest: true,
+          testType: notificationType,
+        },
+      };
+
+      const response = await fetch('/api/notifications/send', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          payload: notificationPayload,
+        }),
+      });
+
+      const result = await response.json();
+
+      if (result.success) {
+        alert(
+          `✅ Notification sent!\n\nType: ${notificationType}\nURL: ${testUrl}\n\nRecipients: ${result.recipientCount || 0}\nSuccessful: ${result.successful || 0}\nFailed: ${result.failed || 0}\n\nClick the notification to test the deep link!`,
+        );
+      } else {
+        alert(
+          `❌ Send failed: ${result.error || result.message || 'Unknown error'}`,
+        );
+      }
+    } catch (error) {
+      console.error('Manual test notification error:', error);
+      alert(
+        `❌ Test failed: ${error instanceof Error ? error.message : 'Unknown error'}`,
+      );
+    }
+    setManualTestLoading(false);
+  };
+
+  // All notification types with their deep links
+  const manualTestNotifications = [
+    // Daily Notifications
+    {
+      category: 'Daily Notifications',
+      tests: [
+        {
+          name: 'Daily Tarot',
+          type: 'daily_tarot',
+          url: '/app',
+          description: 'Dashboard with tarot card',
+        },
+        {
+          name: 'Daily Energy Theme',
+          type: 'energy_theme',
+          url: '/app',
+          description: 'Dashboard with energy theme',
+        },
+        {
+          name: 'Daily Insight',
+          type: 'daily_insight',
+          url: '/app',
+          description: 'Dashboard with insight',
+        },
+        {
+          name: 'Sky Shift Alert',
+          type: 'sky_shift',
+          url: '/horoscope#transit-wisdom',
+          description: 'Horoscope → Transit Wisdom section',
+        },
+      ],
+    },
+    // Weekly Notifications
+    {
+      category: 'Weekly Notifications',
+      tests: [
+        {
+          name: 'Monday Week Ahead',
+          type: 'monday_week_ahead',
+          url: '/blog',
+          description: 'Blog page with weekly forecast',
+        },
+        {
+          name: 'Friday Tarot',
+          type: 'friday_tarot',
+          url: '/app',
+          description: 'Dashboard with tarot',
+        },
+        {
+          name: 'Sunday Cosmic Reset',
+          type: 'sunday_reset',
+          url: '/guide',
+          description: 'Guide/chat page',
+        },
+        {
+          name: 'Weekly Report (Email Only)',
+          type: 'weekly_report',
+          url: '/app',
+          description: 'Dashboard fallback (no web UI)',
+        },
+      ],
+    },
+    // Personal/Paid Features
+    {
+      category: 'Personal Features (Paid)',
+      tests: [
+        {
+          name: 'Personal Transit',
+          type: 'personal_transit',
+          url: '/horoscope#personal-transits',
+          description: 'Horoscope → Personal Transits section',
+        },
+        {
+          name: 'Transit Change',
+          type: 'transit_change',
+          url: '/horoscope#transit-wisdom',
+          description: 'Horoscope → Transit Wisdom section',
+        },
+        {
+          name: 'Rising Activation',
+          type: 'rising_activation',
+          url: '/birth-chart',
+          description: 'Birth chart page',
+        },
+      ],
+    },
+    // Cosmic Events
+    {
+      category: 'Cosmic Events',
+      tests: [
+        {
+          name: 'Moon Phase Event',
+          type: 'moon_phase',
+          url: '/app#moon-phase',
+          description: 'Dashboard → Moon section',
+        },
+        {
+          name: 'Retrograde (Mercury)',
+          type: 'retrograde',
+          url: '/app#retrograde-mercury',
+          description: 'Dashboard → Retrograde section',
+        },
+        {
+          name: 'Planetary Ingress',
+          type: 'planetary_transit',
+          url: '/horoscope#transit-wisdom',
+          description: 'Horoscope → Transit Wisdom section',
+        },
+        {
+          name: 'Major Aspect',
+          type: 'major_aspect',
+          url: '/horoscope#today-aspects',
+          description: "Horoscope → Today's Aspects section",
+        },
+        {
+          name: 'Sabbat/Seasonal',
+          type: 'sabbat',
+          url: '/cosmic-state#current-transits',
+          description: 'Cosmic State → Current Transits',
+        },
+        {
+          name: 'Eclipse Alert',
+          type: 'eclipse',
+          url: '/cosmic-state#current-transits',
+          description: 'Cosmic State → Current Transits',
+        },
+        {
+          name: 'Cosmic Changes',
+          type: 'cosmic_changes',
+          url: '/cosmic-state#current-transits',
+          description: 'Cosmic State → Current Transits',
+        },
+      ],
+    },
+    // Special
+    {
+      category: 'Special',
+      tests: [
+        {
+          name: 'Moon Circle Reminder',
+          type: 'moon_circle',
+          url: '/moon-circles',
+          description: 'Moon Circles page',
+        },
+      ],
+    },
+  ];
+
   return (
     <div className='min-h-screen bg-zinc-950 text-white p-4 md:p-8'>
       <div className='max-w-6xl mx-auto'>
@@ -566,7 +765,17 @@ export default function NotificationAdminPage() {
                 : 'text-zinc-400 hover:text-white'
             }`}
           >
-            Preview
+            Cosmic Events
+          </button>
+          <button
+            onClick={() => setActiveTab('manual')}
+            className={`pb-3 px-1 text-sm font-medium transition-colors ${
+              activeTab === 'manual'
+                ? 'border-b-2 border-lunary-secondary text-lunary-secondary'
+                : 'text-zinc-400 hover:text-white'
+            }`}
+          >
+            Manual Test
           </button>
           <button
             onClick={() => setActiveTab('history')}
@@ -775,6 +984,119 @@ export default function NotificationAdminPage() {
             >
               Refresh History
             </button>
+          </div>
+        )}
+
+        {activeTab === 'manual' && (
+          <div className='space-y-8'>
+            <div className='bg-lunary-accent-950/30 border border-lunary-accent-800 rounded-lg p-4'>
+              <h3 className='font-semibold text-lunary-accent mb-2'>
+                📱 Manual Notification Testing
+              </h3>
+              <p className='text-sm text-zinc-300'>
+                Test all notification types and their deep links. Each test will
+                send a real push notification to all active subscribers.
+              </p>
+              <p className='text-xs text-zinc-400 mt-2'>
+                💡 Tip: Click the notification on your device to test if it
+                navigates to the correct page and scrolls to the right section.
+              </p>
+            </div>
+
+            <div className='space-y-1 text-sm text-zinc-400 bg-zinc-900 p-3 rounded'>
+              <div>
+                <strong>Active Subscribers:</strong> {subscribers}
+              </div>
+              <div>
+                <strong>Route Format:</strong> Uses anchor links (#) to scroll
+                to sections
+              </div>
+            </div>
+
+            {manualTestNotifications.map((category, categoryIndex) => (
+              <div key={categoryIndex}>
+                <h3 className='text-lg font-semibold mb-4 text-lunary-primary'>
+                  {category.category}
+                </h3>
+                <div className='grid gap-4'>
+                  {category.tests.map((test, testIndex) => (
+                    <div
+                      key={testIndex}
+                      className='border border-zinc-700 bg-zinc-800/50 rounded-lg p-4 hover:border-zinc-600 transition-colors'
+                    >
+                      <div className='flex flex-col md:flex-row md:justify-between md:items-start gap-4'>
+                        <div className='flex-1'>
+                          <div className='font-semibold text-base mb-1'>
+                            {test.name}
+                          </div>
+                          <div className='text-sm text-zinc-300 mb-2'>
+                            {test.description}
+                          </div>
+                          <div className='flex flex-col gap-1 text-xs'>
+                            <div className='text-zinc-400'>
+                              <span className='text-zinc-500'>Type:</span>{' '}
+                              <code className='bg-zinc-900 px-1.5 py-0.5 rounded'>
+                                {test.type}
+                              </code>
+                            </div>
+                            <div className='text-zinc-400'>
+                              <span className='text-zinc-500'>URL:</span>{' '}
+                              <code className='bg-zinc-900 px-1.5 py-0.5 rounded text-lunary-secondary'>
+                                {test.url}
+                              </code>
+                            </div>
+                          </div>
+                        </div>
+                        <button
+                          onClick={() =>
+                            sendManualTestNotification(test.type, test.url)
+                          }
+                          disabled={manualTestLoading}
+                          className='px-4 py-2 bg-lunary-primary hover:bg-lunary-primary-400 disabled:bg-zinc-700 disabled:cursor-not-allowed text-white text-sm rounded transition-colors whitespace-nowrap'
+                        >
+                          {manualTestLoading ? 'Sending...' : 'Test Send'}
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ))}
+
+            <div className='bg-zinc-900 border border-zinc-800 rounded-lg p-4 mt-8'>
+              <h4 className='font-semibold mb-3'>Testing Checklist</h4>
+              <ul className='space-y-2 text-sm text-zinc-300'>
+                <li className='flex items-start gap-2'>
+                  <span className='text-lunary-accent mt-0.5'>1.</span>
+                  <span>
+                    Click "Test Send" to send notification to all subscribers
+                  </span>
+                </li>
+                <li className='flex items-start gap-2'>
+                  <span className='text-lunary-accent mt-0.5'>2.</span>
+                  <span>
+                    Check your device for the notification (you must be
+                    subscribed)
+                  </span>
+                </li>
+                <li className='flex items-start gap-2'>
+                  <span className='text-lunary-accent mt-0.5'>3.</span>
+                  <span>Click the notification to test deep link navigation</span>
+                </li>
+                <li className='flex items-start gap-2'>
+                  <span className='text-lunary-accent mt-0.5'>4.</span>
+                  <span>
+                    Verify it opens correct page and scrolls to right section
+                  </span>
+                </li>
+                <li className='flex items-start gap-2'>
+                  <span className='text-lunary-accent mt-0.5'>5.</span>
+                  <span>
+                    Check browser console for [NotificationDeepLink] logs
+                  </span>
+                </li>
+              </ul>
+            </div>
           </div>
         )}
       </div>
