@@ -5,7 +5,7 @@ import * as LucideIcons from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import type { FeatureTour } from '@/lib/feature-tours/tour-system';
-import type { PlanId } from '../../../utils/entitlements';
+import type { PlanKey } from '../../../utils/entitlements';
 
 interface TourOverlayProps {
   tour: FeatureTour;
@@ -14,7 +14,7 @@ interface TourOverlayProps {
   onPrev: () => void;
   onDismiss: () => void;
   onComplete: () => void;
-  userTier: PlanId;
+  userTier: PlanKey;
 }
 
 export function TourOverlay({

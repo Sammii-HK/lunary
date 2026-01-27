@@ -1,4 +1,4 @@
-import type { PlanId } from '../../../utils/entitlements';
+import type { PlanKey } from '../../../utils/entitlements';
 
 export type TourId =
   | 'first_time_onboarding'
@@ -21,8 +21,8 @@ export type TourTrigger =
 
 export interface TourStep {
   target: string; // CSS selector to highlight
-  title: string | ((tier: PlanId) => string);
-  content: string | ((tier: PlanId) => string);
+  title: string | ((tier: PlanKey) => string);
+  content: string | ((tier: PlanKey) => string);
   icon?: string; // Lucide icon name
   placement: 'top' | 'bottom' | 'left' | 'right' | 'center';
   action?: {
@@ -42,15 +42,15 @@ export interface FeatureTour {
   name: string;
   trigger: TourTrigger;
   triggerCondition?: (context: TourContext) => boolean;
-  requiredTier?: PlanId[]; // Only show to these tiers
-  excludedTier?: PlanId[]; // Don't show to these tiers
+  requiredTier?: PlanKey[]; // Only show to these tiers
+  excludedTier?: PlanKey[]; // Don't show to these tiers
   showOnce?: boolean; // Only show once ever
   showUpgradePrompt?: boolean; // Show upgrade CTA
   steps: TourStep[];
 }
 
 export interface TourContext {
-  userTier: PlanId;
+  userTier: PlanKey;
   chatCount: number;
   tarotCount: number;
   journalCount: number;
