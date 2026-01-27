@@ -1219,7 +1219,7 @@ const TarotReadings = () => {
   }
 
   return (
-    <div className='h-full space-y-6 p-4 overflow-auto mb-12'>
+    <div className='h-full space-y-6 p-4 overflow-auto pb-20'>
       <div className='pt-6'>
         <h1 className='text-2xl md:text-3xl font-light text-zinc-100 mb-2'>
           {userName ? `${userName}'s Tarot Readings` : 'Your Tarot Readings'}
