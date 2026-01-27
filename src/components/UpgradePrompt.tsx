@@ -85,12 +85,6 @@ export function UpgradePrompt({
     }
   }, [isTrialActive]);
 
-  // For trial-specific prompts, only show if user is actually on trial AND not dismissed
-  // For general upgrade prompts, show if showUpgradePrompt is true (free users)
-  // This prevents showing trial upsells to paid users who are not on trial
-  if (isTrialActive && isDismissed) return null;
-  if (!isTrialActive && !showUpgradePrompt) return null;
-
   useEffect(() => {
     if (onShow && showUpgradePrompt) {
       onShow();
@@ -99,6 +93,12 @@ export function UpgradePrompt({
       conversionTracking.paywallShown(authState.user?.id, featureName);
     }
   }, [onShow, showUpgradePrompt, featureName, authState.user?.id]);
+
+  // For trial-specific prompts, only show if user is actually on trial AND not dismissed
+  // For general upgrade prompts, show if showUpgradePrompt is true (free users)
+  // This prevents showing trial upsells to paid users who are not on trial
+  if (isTrialActive && isDismissed) return null;
+  if (!isTrialActive && !showUpgradePrompt) return null;
 
   const planLabel = requiredPlan ? PLAN_LABELS[requiredPlan] : undefined;
   const dayLabel = trialDaysRemaining === 1 ? 'day' : 'days';
