@@ -313,6 +313,25 @@ export const auth = new Proxy({} as ReturnType<typeof betterAuth>, {
       };
     }
 
+    // For 'api', return a Proxy that lazily initializes and forwards calls
+    if (prop === 'api') {
+      return new Proxy(
+        {},
+        {
+          get(_apiTarget, apiProp) {
+            return async (...args: any[]) => {
+              const instance = await initializeAuth();
+              const apiMethod = (instance.api as any)[apiProp];
+              if (typeof apiMethod === 'function') {
+                return apiMethod.apply(instance.api, args);
+              }
+              return apiMethod;
+            };
+          },
+        },
+      );
+    }
+
     // For other properties, return a Promise that resolves to the value
     return (async () => {
       const instance = await initializeAuth();
