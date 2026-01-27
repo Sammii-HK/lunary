@@ -45,9 +45,9 @@ export default function AuthenticatedLayout({
   }
 
   return (
-    <>
+    <TourProvider>
       <SessionTracker />
-      <TourProvider>{children}</TourProvider>
-    </>
+      {children}
+    </TourProvider>
   );
 }
