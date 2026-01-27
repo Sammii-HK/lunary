@@ -57,7 +57,7 @@ const customJestConfig = {
   ],
   moduleDirectories: ['node_modules', '<rootDir>/'],
   testTimeout: 10000,
-  transformIgnorePatterns: ['/node_modules/(?!(jazz-tools|better-auth)/)'],
+  transformIgnorePatterns: ['/node_modules/(?!(better-auth)/)'],
 };
 
 module.exports = createJestConfig(customJestConfig);
