@@ -8,6 +8,7 @@
 ## Summary of Changes
 
 Based on actual app architecture audit, I've updated all notification deep links to:
+
 1. **Use real routes** that exist in the codebase
 2. **Use anchor links (#)** to scroll to specific sections
 3. **Added section IDs** to enable smooth scrolling
@@ -18,13 +19,13 @@ Based on actual app architecture audit, I've updated all notification deep links
 
 ### ✅ Working Routes (No Changes Needed)
 
-| Notification | Route | Status |
-|--------------|-------|--------|
-| Monday Week Ahead | `/blog` | ✅ Page exists |
-| Sunday Cosmic Reset | `/guide` | ✅ Page exists |
-| Moon Circles | `/moon-circles` | ✅ Page exists |
-| Daily Tarot/Energy/Insight | `/app` | ✅ Page exists |
-| Friday Tarot | `/app` | ✅ Page exists |
+| Notification               | Route           | Status         |
+| -------------------------- | --------------- | -------------- |
+| Monday Week Ahead          | `/blog`         | ✅ Page exists |
+| Sunday Cosmic Reset        | `/guide`        | ✅ Page exists |
+| Moon Circles               | `/moon-circles` | ✅ Page exists |
+| Daily Tarot/Energy/Insight | `/app`          | ✅ Page exists |
+| Friday Tarot               | `/app`          | ✅ Page exists |
 
 ---
 
@@ -33,19 +34,21 @@ Based on actual app architecture audit, I've updated all notification deep links
 ### Horoscope Page (`/horoscope`)
 
 **Changes Made:**
+
 1. Added `id` prop to `HoroscopeSection` component
 2. Added `scroll-mt-20` for proper scroll offset
 3. Added IDs to three key sections
 
-| Notification | Old Route | New Route | Section ID |
-|--------------|-----------|-----------|------------|
-| Sky Shift Alert | `/app?view=transits&date={date}` | `/horoscope#transit-wisdom` | `transit-wisdom` |
-| Transit Change | `/app?tab=transits` | `/horoscope#transit-wisdom` | `transit-wisdom` |
-| Personal Transit | `/app?tab=transits` | `/horoscope#personal-transits` | `personal-transits` |
-| Planetary Ingress | `/app?event=ingress&...` | `/horoscope#transit-wisdom` | `transit-wisdom` |
-| Major Aspect | `/app?event=aspect&...` | `/horoscope#today-aspects` | `today-aspects` |
+| Notification      | Old Route                        | New Route                      | Section ID          |
+| ----------------- | -------------------------------- | ------------------------------ | ------------------- |
+| Sky Shift Alert   | `/app?view=transits&date={date}` | `/horoscope#transit-wisdom`    | `transit-wisdom`    |
+| Transit Change    | `/app?tab=transits`              | `/horoscope#transit-wisdom`    | `transit-wisdom`    |
+| Personal Transit  | `/app?tab=transits`              | `/horoscope#personal-transits` | `personal-transits` |
+| Planetary Ingress | `/app?event=ingress&...`         | `/horoscope#transit-wisdom`    | `transit-wisdom`    |
+| Major Aspect      | `/app?event=aspect&...`          | `/horoscope#today-aspects`     | `today-aspects`     |
 
 **Code Changes:**
+
 ```tsx
 // HoroscopeSection.tsx - Added id prop
 interface HoroscopeSectionProps {
@@ -53,9 +56,11 @@ interface HoroscopeSectionProps {
   // ... other props
 }
 
-<div id={id} className='... scroll-mt-20'> // NEW id and scroll offset
+<div id={id} className='... scroll-mt-20'>
+  {' '}
+  // NEW id and scroll offset
   {/* ... */}
-</div>
+</div>;
 ```
 
 ```tsx
@@ -70,15 +75,17 @@ interface HoroscopeSectionProps {
 ### Dashboard Page (`/app`)
 
 **Changes Made:**
+
 1. Wrapped components with divs containing IDs
 2. Added `scroll-mt-20` for proper scroll offset
 
-| Notification | Old Route | New Route | Section ID |
-|--------------|-----------|-----------|------------|
-| Moon Phase Event | `/app?event=moon-phase&...` | `/app#moon-phase` | `moon-phase` |
+| Notification            | Old Route                               | New Route                  | Section ID                          |
+| ----------------------- | --------------------------------------- | -------------------------- | ----------------------------------- |
+| Moon Phase Event        | `/app?event=moon-phase&...`             | `/app#moon-phase`          | `moon-phase`                        |
 | Retrograde (any planet) | `/app?event=retrograde&planet={planet}` | `/app#retrograde-{planet}` | Dynamic: `retrograde-mercury`, etc. |
 
 **Code Changes:**
+
 ```tsx
 // AppDashboardClient.tsx
 <div id='moon-phase' className='scroll-mt-20'>
@@ -97,16 +104,18 @@ interface HoroscopeSectionProps {
 ### Cosmic State Page (`/cosmic-state`)
 
 **Changes Made:**
+
 1. Added ID to Current Transits section
 2. Added `scroll-mt-20` for proper scroll offset
 
-| Notification | Old Route | New Route | Section ID |
-|--------------|-----------|-----------|------------|
-| Cosmic Changes | `/app?view=cosmic-changes` | `/cosmic-state#current-transits` | `current-transits` |
-| Eclipse Alert | `/app?event=eclipse&...` | `/cosmic-state#current-transits` | `current-transits` |
-| Sabbat/Seasonal | `/app?event=sabbat&...` | `/cosmic-state#seasonal-events` | `seasonal-events` |
+| Notification    | Old Route                  | New Route                        | Section ID         |
+| --------------- | -------------------------- | -------------------------------- | ------------------ |
+| Cosmic Changes  | `/app?view=cosmic-changes` | `/cosmic-state#current-transits` | `current-transits` |
+| Eclipse Alert   | `/app?event=eclipse&...`   | `/cosmic-state#current-transits` | `current-transits` |
+| Sabbat/Seasonal | `/app?event=sabbat&...`    | `/cosmic-state#seasonal-events`  | `seasonal-events`  |
 
 **Code Changes:**
+
 ```tsx
 // cosmic-state/page.tsx
 <div id='current-transits' className='... scroll-mt-20'>
@@ -121,8 +130,8 @@ interface HoroscopeSectionProps {
 
 ### Birth Chart Page (`/birth-chart`)
 
-| Notification | Route | Status |
-|--------------|-------|--------|
+| Notification      | Route          | Status                            |
+| ----------------- | -------------- | --------------------------------- |
 | Rising Activation | `/birth-chart` | ✅ Page exists (no anchor needed) |
 
 ---
@@ -130,12 +139,22 @@ interface HoroscopeSectionProps {
 ### Weekly Report
 
 **Old Route:** `/app?tab=reports` or `/reports/weekly`
-**New Route:** `/app` (fallback to dashboard)
-**Reason:** Weekly reports are email-only, no web UI exists
+**New Route:** `/reports` ✅ **WEB UI NOW EXISTS**
+**Implementation:** Created new page and API endpoint for viewing weekly reports
 
-| Notification | Old Route | New Route | Status |
-|--------------|-----------|-----------|--------|
-| Weekly Cosmic Report | `/app?tab=reports` | `/app` | ⚠️ Email-only feature |
+| Notification         | Old Route          | New Route  | Status                     |
+| -------------------- | ------------------ | ---------- | -------------------------- |
+| Weekly Cosmic Report | `/app?tab=reports` | `/reports` | ✅ Web UI + Email delivery |
+
+**New Implementation (2026-01-27):**
+
+- **Page:** `/app/(authenticated)/reports/page.tsx` - Shows last 4 weeks of reports
+- **API:** `/api/reports/weekly` - Fetches user's weekly reports from cached snapshots
+- **Features:**
+  - View past 4 weeks of weekly cosmic reports
+  - Summary, moon phases, key transits, tarot patterns
+  - Authenticated users only (requires birthday)
+  - Complements email delivery with persistent web access
 
 ---
 
@@ -144,11 +163,13 @@ interface HoroscopeSectionProps {
 **File:** `src/hooks/useNotificationDeepLink.tsx`
 
 **Changes:**
+
 1. Added anchor link detection and handling
 2. Smooth scroll to anchor elements
 3. Kept legacy query param support for backward compatibility
 
 **New Code:**
+
 ```typescript
 useEffect(() => {
   // Check if there's an anchor/hash in the URL
@@ -176,6 +197,7 @@ useEffect(() => {
 ```
 
 **Integration:**
+
 - ✅ Added to `/app/(authenticated)/app/AppDashboardClient.tsx`
 - ✅ Added to `/app/(authenticated)/horoscope/page.tsx`
 - ✅ Added to `/app/cosmic-state/page.tsx`
@@ -189,14 +211,19 @@ useEffect(() => {
 ```typescript
 // This is the actual mapping in tiered-service.ts
 
-function getNotificationUrl(cadence: string, type: string, eventData?: any): string {
+function getNotificationUrl(
+  cadence: string,
+  type: string,
+  eventData?: any,
+): string {
   // Weekly
   if (type === 'monday_week_ahead') return '/blog';
   if (type === 'sunday_reset') return '/guide';
   if (type === 'friday_tarot') return '/app';
 
   // Daily
-  if (type === 'tarot' || type === 'energy_theme' || type === 'insight') return '/app';
+  if (type === 'tarot' || type === 'energy_theme' || type === 'insight')
+    return '/app';
   if (type === 'sky_shift') return '/horoscope#transit-wisdom';
 
   // Event-based
@@ -236,12 +263,14 @@ function getNotificationUrl(cadence: string, type: string, eventData?: any): str
 ## Benefits of Anchor Links
 
 ### Before (Query Params)
+
 - ❌ Required app-level routing logic
 - ❌ Needed modal state management
 - ❌ Complex query param parsing
 - ❌ Routes like `/app?tab=transits` when tabs don't exist
 
 ### After (Anchor Links)
+
 - ✅ Native browser behavior
 - ✅ Smooth scrolling built-in
 - ✅ No additional state management
@@ -304,6 +333,7 @@ All sections with IDs have `scroll-mt-20` class, which adds a `scroll-margin-top
 **Issue:** Route uses `#seasonal-events` but ID doesn't exist
 **Current:** Sabbats are mixed into `/cosmic-state#current-transits` section
 **Fix Options:**
+
 - **Option A:** Change route to `/cosmic-state#current-transits`
 - **Option B:** Add separate seasonal events section with ID
 - **Option C:** Leave as-is (will scroll to current transits)
@@ -320,12 +350,17 @@ All sections with IDs have `scroll-mt-20` class, which adds a `scroll-margin-top
 
 ```tsx
 // In TransitOfTheDay.tsx
-{retrogradeData && (
-  <div id={`retrograde-${retrogradeData.planet.toLowerCase()}`} className='scroll-mt-20'>
-    <h3>{retrogradeData.planet} Retrograde</h3>
-    {/* ... content */}
-  </div>
-)}
+{
+  retrogradeData && (
+    <div
+      id={`retrograde-${retrogradeData.planet.toLowerCase()}`}
+      className='scroll-mt-20'
+    >
+      <h3>{retrogradeData.planet} Retrograde</h3>
+      {/* ... content */}
+    </div>
+  );
+}
 ```
 
 **Recommendation:** Implement this in TransitOfTheDay component
@@ -337,6 +372,7 @@ All sections with IDs have `scroll-mt-20` class, which adds a `scroll-margin-top
 **Issue:** Weekly reports are email-only, no web UI
 **Current:** Fallback to `/app` dashboard
 **Options:**
+
 - Keep fallback (current approach)
 - Create `/reports/weekly` page to show reports
 - Add reports tab to dashboard

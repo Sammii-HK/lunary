@@ -20,47 +20,47 @@
 
 ### 📅 Daily Notifications (4 types)
 
-| Notification | Type | Deep Link | What to Test |
-|--------------|------|-----------|--------------|
-| Daily Tarot | `daily_tarot` | `/app` | Dashboard shows tarot card |
-| Daily Energy Theme | `energy_theme` | `/app` | Dashboard shows energy theme |
-| Daily Insight | `daily_insight` | `/app` | Dashboard shows insight |
-| Sky Shift Alert | `sky_shift` | `/horoscope#transit-wisdom` | Horoscope page, scrolls to Transit Wisdom section |
+| Notification       | Type            | Deep Link                   | What to Test                                      |
+| ------------------ | --------------- | --------------------------- | ------------------------------------------------- |
+| Daily Tarot        | `daily_tarot`   | `/app`                      | Dashboard shows tarot card                        |
+| Daily Energy Theme | `energy_theme`  | `/app`                      | Dashboard shows energy theme                      |
+| Daily Insight      | `daily_insight` | `/app`                      | Dashboard shows insight                           |
+| Sky Shift Alert    | `sky_shift`     | `/horoscope#transit-wisdom` | Horoscope page, scrolls to Transit Wisdom section |
 
 ### 📆 Weekly Notifications (4 types)
 
-| Notification | Type | Deep Link | What to Test |
-|--------------|------|-----------|--------------|
-| Monday Week Ahead | `monday_week_ahead` | `/blog` | Blog page loads |
-| Friday Tarot | `friday_tarot` | `/app` | Dashboard shows tarot |
-| Sunday Cosmic Reset | `sunday_reset` | `/guide` | Guide/chat page loads |
-| Weekly Report | `weekly_report` | `/app` | Dashboard (fallback, email-only) |
+| Notification        | Type                | Deep Link  | What to Test                          |
+| ------------------- | ------------------- | ---------- | ------------------------------------- |
+| Monday Week Ahead   | `monday_week_ahead` | `/blog`    | Blog page loads                       |
+| Friday Tarot        | `friday_tarot`      | `/app`     | Dashboard shows tarot                 |
+| Sunday Cosmic Reset | `sunday_reset`      | `/guide`   | Guide/chat page loads                 |
+| Weekly Report       | `weekly_report`     | `/reports` | Weekly reports page with past 4 weeks |
 
 ### 💎 Personal Features - Paid Users (3 types)
 
-| Notification | Type | Deep Link | What to Test |
-|--------------|------|-----------|--------------|
-| Personal Transit | `personal_transit` | `/horoscope#personal-transits` | Horoscope page, scrolls to Personal Transit Impact section |
-| Transit Change | `transit_change` | `/horoscope#transit-wisdom` | Horoscope page, scrolls to Transit Wisdom section |
-| Rising Activation | `rising_activation` | `/birth-chart` | Birth chart page loads |
+| Notification      | Type                | Deep Link                      | What to Test                                               |
+| ----------------- | ------------------- | ------------------------------ | ---------------------------------------------------------- |
+| Personal Transit  | `personal_transit`  | `/horoscope#personal-transits` | Horoscope page, scrolls to Personal Transit Impact section |
+| Transit Change    | `transit_change`    | `/horoscope#transit-wisdom`    | Horoscope page, scrolls to Transit Wisdom section          |
+| Rising Activation | `rising_activation` | `/birth-chart`                 | Birth chart page loads                                     |
 
 ### ⭐ Cosmic Events (7 types)
 
-| Notification | Type | Deep Link | What to Test |
-|--------------|------|-----------|--------------|
-| Moon Phase | `moon_phase` | `/app#moon-phase` | Dashboard, scrolls to Moon section |
-| Retrograde | `retrograde` | `/app#retrograde-mercury` | Dashboard, scrolls to retrograde info |
-| Planetary Ingress | `planetary_transit` | `/horoscope#transit-wisdom` | Horoscope, scrolls to Transit Wisdom |
-| Major Aspect | `major_aspect` | `/horoscope#today-aspects` | Horoscope, scrolls to Today's Aspects |
-| Sabbat/Seasonal | `sabbat` | `/cosmic-state#current-transits` | Cosmic State, scrolls to Current Transits |
-| Eclipse | `eclipse` | `/cosmic-state#current-transits` | Cosmic State, scrolls to Current Transits |
-| Cosmic Changes | `cosmic_changes` | `/cosmic-state#current-transits` | Cosmic State, scrolls to Current Transits |
+| Notification      | Type                | Deep Link                        | What to Test                              |
+| ----------------- | ------------------- | -------------------------------- | ----------------------------------------- |
+| Moon Phase        | `moon_phase`        | `/app#moon-phase`                | Dashboard, scrolls to Moon section        |
+| Retrograde        | `retrograde`        | `/app#retrograde-mercury`        | Dashboard, scrolls to retrograde info     |
+| Planetary Ingress | `planetary_transit` | `/horoscope#transit-wisdom`      | Horoscope, scrolls to Transit Wisdom      |
+| Major Aspect      | `major_aspect`      | `/horoscope#today-aspects`       | Horoscope, scrolls to Today's Aspects     |
+| Sabbat/Seasonal   | `sabbat`            | `/cosmic-state#current-transits` | Cosmic State, scrolls to Current Transits |
+| Eclipse           | `eclipse`           | `/cosmic-state#current-transits` | Cosmic State, scrolls to Current Transits |
+| Cosmic Changes    | `cosmic_changes`    | `/cosmic-state#current-transits` | Cosmic State, scrolls to Current Transits |
 
 ### 🌙 Special (1 type)
 
-| Notification | Type | Deep Link | What to Test |
-|--------------|------|-----------|--------------|
-| Moon Circle | `moon_circle` | `/moon-circles` | Moon circles page loads |
+| Notification | Type          | Deep Link       | What to Test            |
+| ------------ | ------------- | --------------- | ----------------------- |
+| Moon Circle  | `moon_circle` | `/moon-circles` | Moon circles page loads |
 
 **Total:** 19 notification types available for testing
 
@@ -122,12 +122,14 @@ Or:
 ### Issue: Notification Not Received
 
 **Possible Causes:**
+
 - Not subscribed to notifications
 - Notifications blocked in browser
 - Push subscription expired
 - Server error
 
 **How to Debug:**
+
 1. Check browser notification permissions
 2. Check Network tab for `/api/notifications/send` response
 3. Check subscriber count in admin dashboard
@@ -138,11 +140,13 @@ Or:
 ### Issue: Wrong Page Loads
 
 **Possible Causes:**
+
 - Deep link URL incorrect in `tiered-service.ts`
 - Service worker not reading `data.url` correctly
 - Browser caching old service worker
 
 **How to Debug:**
+
 1. Check `tiered-service.ts` `getNotificationUrl()` function
 2. Check `public/sw.js` notification click handler
 3. Clear service worker cache and refresh
@@ -153,18 +157,21 @@ Or:
 ### Issue: Page Loads but Doesn't Scroll
 
 **Possible Causes:**
+
 - Section ID missing on target element
 - Hook not integrated on page
 - Hook running before element renders
 - Typo in section ID
 
 **How to Debug:**
+
 1. Check if section ID exists: `document.getElementById('transit-wisdom')`
 2. Check if hook is called on page (look for console logs)
 3. Check for `[NotificationDeepLink] Element not found` warning
 4. Verify ID in HTML matches URL hash
 
 **Example Check:**
+
 ```javascript
 // In browser console
 document.getElementById('transit-wisdom'); // Should return element
@@ -176,16 +183,19 @@ document.getElementById('transit-wisdom'); // Should return element
 ### Issue: Scrolls but Content Hidden Under Header
 
 **Possible Causes:**
+
 - Missing `scroll-mt-20` class on section
 - Fixed header covering content
 - Scroll offset calculation incorrect
 
 **How to Debug:**
+
 1. Check if element has `scroll-mt-20` class
 2. Try adding `scroll-mt-32` for larger offset
 3. Check computed styles for `scroll-margin-top`
 
 **Fix:**
+
 ```tsx
 // Add scroll-mt-20 class to section
 <div id='transit-wisdom' className='... scroll-mt-20'>
@@ -196,17 +206,20 @@ document.getElementById('transit-wisdom'); // Should return element
 ### Issue: Hook Not Working on Page
 
 **Possible Causes:**
+
 - Hook not imported on page
 - Hook not called in component
 - Page is server-side rendered (needs 'use client')
 
 **How to Debug:**
+
 1. Check imports at top of page file
 2. Check if `useNotificationDeepLink()` is called
 3. Check if page has `'use client'` directive
 4. Look for console logs - should see `[NotificationDeepLink]` messages
 
 **Fix:**
+
 ```tsx
 // Add to page component
 'use client';
@@ -262,6 +275,7 @@ export default function MyPage() {
 ### Scenario 1: Testing Anchor Link Scrolling
 
 **Steps:**
+
 1. Test notification: Sky Shift Alert (`/horoscope#transit-wisdom`)
 2. Click notification
 3. Verify:
@@ -275,6 +289,7 @@ export default function MyPage() {
 ### Scenario 2: Testing Page-Only Navigation
 
 **Steps:**
+
 1. Test notification: Moon Circles (`/moon-circles`)
 2. Click notification
 3. Verify:
@@ -287,6 +302,7 @@ export default function MyPage() {
 ### Scenario 3: Testing Dynamic Anchor (Retrograde)
 
 **Steps:**
+
 1. Test notification: Retrograde (`/app#retrograde-mercury`)
 2. Click notification
 3. Verify:
@@ -300,21 +316,27 @@ export default function MyPage() {
 ## Browser Console Commands
 
 ### Check if Section ID Exists
+
 ```javascript
 document.getElementById('transit-wisdom'); // Should return element, not null
 ```
 
 ### Check All IDs on Page
+
 ```javascript
-document.querySelectorAll('[id]').forEach(el => console.log(el.id));
+document.querySelectorAll('[id]').forEach((el) => console.log(el.id));
 ```
 
 ### Manually Trigger Scroll
+
 ```javascript
-document.getElementById('transit-wisdom')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+document
+  .getElementById('transit-wisdom')
+  ?.scrollIntoView({ behavior: 'smooth', block: 'center' });
 ```
 
 ### Check Scroll Offset
+
 ```javascript
 const el = document.getElementById('transit-wisdom');
 console.log(window.getComputedStyle(el)['scroll-margin-top']); // Should show "5rem" or "80px"
@@ -336,6 +358,7 @@ console.log(window.getComputedStyle(el)['scroll-margin-top']); // Should show "5
 - ❌ `/blog` (no anchor links needed currently)
 - ❌ `/guide` (no anchor links needed currently)
 - ❌ `/moon-circles` (no anchor links needed currently)
+- ❌ `/reports` (no anchor links needed - displays full page)
 
 ---
 
@@ -343,23 +366,23 @@ console.log(window.getComputedStyle(el)['scroll-margin-top']); // Should show "5
 
 ### Dashboard (`/app`)
 
-| ID | Section | Component |
-|----|---------|-----------|
-| `moon-phase` | Moon Preview | MoonPreview wrapper div |
+| ID               | Section            | Component                   |
+| ---------------- | ------------------ | --------------------------- |
+| `moon-phase`     | Moon Preview       | MoonPreview wrapper div     |
 | `transit-of-day` | Transit of the Day | TransitOfTheDay wrapper div |
 
 ### Horoscope (`/horoscope`)
 
-| ID | Section | Component |
-|----|---------|-----------|
-| `transit-wisdom` | Transit Wisdom | HoroscopeSection |
-| `today-aspects` | Today's Aspects to Your Chart | HoroscopeSection |
-| `personal-transits` | Personal Transit Impact | HoroscopeSection |
+| ID                  | Section                       | Component        |
+| ------------------- | ----------------------------- | ---------------- |
+| `transit-wisdom`    | Transit Wisdom                | HoroscopeSection |
+| `today-aspects`     | Today's Aspects to Your Chart | HoroscopeSection |
+| `personal-transits` | Personal Transit Impact       | HoroscopeSection |
 
 ### Cosmic State (`/cosmic-state`)
 
-| ID | Section | Component |
-|----|---------|-----------|
+| ID                 | Section          | Component   |
+| ------------------ | ---------------- | ----------- |
 | `current-transits` | Current Transits | div wrapper |
 
 ---
@@ -425,26 +448,31 @@ setTimeout(() => {
 ## Tips for Effective Testing
 
 ### 1. Test on Real Devices
+
 - Mobile behavior differs from desktop
 - Test both Chrome and Safari on iOS
 - Test Chrome on Android
 
 ### 2. Clear Cache Between Tests
+
 - Service worker caching can cause issues
 - Clear application cache in DevTools
 - Unregister and re-register service worker if needed
 
 ### 3. Check Network Tab
+
 - Verify `/api/notifications/send` returns 200 status
 - Check response for success/failure details
 - Look for subscription endpoints being called
 
 ### 4. Use Console Logs
+
 - Every anchor link logs to console
 - Look for `[NotificationDeepLink]` prefix
 - Warnings indicate missing IDs
 
 ### 5. Test Edge Cases
+
 - What happens with no internet?
 - What if section hasn't loaded yet?
 - What if user clicks notification twice?
@@ -465,6 +493,7 @@ When reporting a notification issue, include:
 8. **Screenshot** - If possible
 
 **Example:**
+
 ```
 Notification Type: Personal Transit
 Expected URL: /horoscope#personal-transits
