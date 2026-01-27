@@ -76,6 +76,8 @@ export async function getUserTourContext(
     tarotCount,
     journalCount,
     daysActive,
-    hasSeenTour: createHasSeenTourFn(progress.completed, progress.dismissed),
+    // Return arrays instead of function since this will be serialized to JSON
+    completedTours: progress.completed,
+    dismissedTours: progress.dismissed,
   };
 }

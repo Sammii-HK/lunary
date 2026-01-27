@@ -33,8 +33,18 @@ export function TourProvider({ children }: { children: React.ReactNode }) {
         const response = await fetch('/api/tours/context');
         if (response.ok) {
           const data = await response.json();
-          setTourContext(data);
-          setHasSeenOnboarding(data.hasSeenTour('first_time_onboarding'));
+          // Reconstruct hasSeenTour function from the tour arrays
+          const contextWithFn = {
+            ...data,
+            hasSeenTour: (tourId: TourId) =>
+              data.completedTours?.includes(tourId) ||
+              data.dismissedTours?.includes(tourId) ||
+              false,
+          };
+          setTourContext(contextWithFn);
+          setHasSeenOnboarding(
+            contextWithFn.hasSeenTour('first_time_onboarding'),
+          );
         }
       } catch (error) {
         console.error('Failed to fetch tour context:', error);
