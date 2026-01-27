@@ -21,7 +21,10 @@ export function HoroscopeSection({
   id,
 }: HoroscopeSectionProps) {
   return (
-    <div id={id} className={`rounded-lg border ${colorClasses[color]} p-6 scroll-mt-20`}>
+    <div
+      id={id}
+      className={`rounded-lg border ${colorClasses[color]} p-6 scroll-mt-20`}
+    >
       <h2 className='text-base md:text-lg font-medium text-zinc-100 mb-3'>
         {title}
       </h2>

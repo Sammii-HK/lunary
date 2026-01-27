@@ -505,7 +505,10 @@ export default function CosmicStatePage() {
             {/* Current Transits - Grouped by Applying/Exact */}
             {cosmicData.currentTransits &&
               cosmicData.currentTransits.length > 0 && (
-                <div id='current-transits' className='bg-zinc-900/80 rounded-xl p-6 border border-zinc-800/50 backdrop-blur-sm scroll-mt-20'>
+                <div
+                  id='current-transits'
+                  className='bg-zinc-900/80 rounded-xl p-6 border border-zinc-800/50 backdrop-blur-sm scroll-mt-20'
+                >
                   <div className='flex items-center gap-3 mb-6'>
                     <div className='p-2 bg-lunary-primary-900 rounded-lg'>
                       <TrendingUp className='w-5 h-5 text-lunary-primary' />

@@ -39,7 +39,9 @@ export default function NotificationAdminPage() {
   const [sentHistory, setSentHistory] = useState<SentNotification[]>([]);
   const [sentSummary, setSentSummary] = useState<SentSummary[]>([]);
   const [historyLoading, setHistoryLoading] = useState(false);
-  const [activeTab, setActiveTab] = useState<'preview' | 'history' | 'manual'>('preview');
+  const [activeTab, setActiveTab] = useState<'preview' | 'history' | 'manual'>(
+    'preview',
+  );
   const [manualTestLoading, setManualTestLoading] = useState(false);
 
   useEffect(() => {
@@ -655,10 +657,10 @@ export default function NotificationAdminPage() {
           description: 'Guide/chat page',
         },
         {
-          name: 'Weekly Report (Email Only)',
+          name: 'Weekly Cosmic Report',
           type: 'weekly_report',
-          url: '/app',
-          description: 'Dashboard fallback (no web UI)',
+          url: '/reports',
+          description: 'Weekly reports page',
         },
       ],
     },
@@ -1081,7 +1083,9 @@ export default function NotificationAdminPage() {
                 </li>
                 <li className='flex items-start gap-2'>
                   <span className='text-lunary-accent mt-0.5'>3.</span>
-                  <span>Click the notification to test deep link navigation</span>
+                  <span>
+                    Click the notification to test deep link navigation
+                  </span>
                 </li>
                 <li className='flex items-start gap-2'>
                   <span className='text-lunary-accent mt-0.5'>4.</span>

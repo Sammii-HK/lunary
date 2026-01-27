@@ -931,7 +931,11 @@ export function PaidHoroscopeView({
           <GuideNudge location='horoscope' />
 
           {birthChart && currentTransits.length > 0 && (
-            <HoroscopeSection title='Transit Wisdom' color='indigo' id='transit-wisdom'>
+            <HoroscopeSection
+              title='Transit Wisdom'
+              color='indigo'
+              id='transit-wisdom'
+            >
               <p className='text-sm text-zinc-400 mb-4'>
                 Today&apos;s most significant transits to your birth chart
               </p>
@@ -959,7 +963,11 @@ export function PaidHoroscopeView({
             </HoroscopeSection>
           )}
 
-          <HoroscopeSection title='Personal Transit Impact' color='zinc' id='personal-transits'>
+          <HoroscopeSection
+            title='Personal Transit Impact'
+            color='zinc'
+            id='personal-transits'
+          >
             <p className='text-sm text-zinc-400 mb-4'>
               How upcoming transits specifically affect your birth chart
             </p>

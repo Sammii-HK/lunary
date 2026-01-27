@@ -549,9 +549,9 @@ function getNotificationUrl(
     return '/cosmic-state#current-transits';
   }
 
-  // Weekly report - email only, fallback to dashboard
+  // Weekly report - navigate to reports page
   if (type === 'weekly_report') {
-    return '/app';
+    return '/reports';
   }
 
   // Cosmic event-based deep links
