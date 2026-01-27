@@ -16,6 +16,7 @@ import { hasFeatureAccess } from '../../../utils/pricing';
 import { useAstronomyContext } from '../../context/AstronomyContext';
 import dayjs from 'dayjs';
 import { Button } from '../ui/button';
+import { useFeatureFlagVariant } from '@/hooks/useFeatureFlag';
 
 export const CrystalPreview = () => {
   const { user } = useUser();
@@ -25,6 +26,7 @@ export const CrystalPreview = () => {
   const { currentDateTime } = useAstronomyContext();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [observer, setObserver] = useState<any>(null);
+  const variant = useFeatureFlagVariant('paywall_preview_style_v1');
 
   const hasPersonalizedAccess = hasFeatureAccess(
     subscription.status,
@@ -113,6 +115,203 @@ export const CrystalPreview = () => {
     return () => document.removeEventListener('keydown', handleEsc);
   }, [isModalOpen, closeModal]);
 
+  // Helper to determine if a word should be redacted
+  const shouldRedactWord = (
+    word: string,
+    index: number,
+    crystalName?: string,
+  ): boolean => {
+    // Remove punctuation AND possessive 's
+    const cleanWord = word
+      .toLowerCase()
+      .replace(/[.,!?;:']+/g, '')
+      .replace(/s$/, '');
+
+    // MUST redact the personalized crystal name itself (including possessive forms like "Amethyst's")
+    if (crystalName) {
+      const cleanCrystalName = crystalName.toLowerCase();
+      if (
+        cleanWord === cleanCrystalName ||
+        cleanWord === cleanCrystalName.replace(/s$/, '')
+      ) {
+        return true;
+      }
+    }
+
+    // Prioritize crystal names (common crystals)
+    const crystals = [
+      'amethyst',
+      'quartz',
+      'citrine',
+      'rose',
+      'jasper',
+      'agate',
+      'selenite',
+      'obsidian',
+      'moonstone',
+      'labradorite',
+      'carnelian',
+      'malachite',
+      'turquoise',
+      'aventurine',
+      'fluorite',
+      'hematite',
+      'jade',
+      'lapis',
+      'onyx',
+      'peridot',
+      'rhodonite',
+      'sodalite',
+      'tiger',
+      'topaz',
+      'amazonite',
+    ];
+    if (crystals.includes(cleanWord)) return true;
+
+    // Redact planet names
+    const planets = [
+      'sun',
+      'moon',
+      'mercury',
+      'venus',
+      'mars',
+      'jupiter',
+      'saturn',
+      'uranus',
+      'neptune',
+      'pluto',
+    ];
+    if (planets.includes(cleanWord)) return true;
+
+    // Redact zodiac signs
+    const signs = [
+      'aries',
+      'taurus',
+      'gemini',
+      'cancer',
+      'leo',
+      'virgo',
+      'libra',
+      'scorpio',
+      'sagittarius',
+      'capricorn',
+      'aquarius',
+      'pisces',
+    ];
+    if (signs.includes(cleanWord)) return true;
+
+    // Redact chart-related terms
+    const chartTerms = [
+      'house',
+      'placement',
+      'natal',
+      'chart',
+      'transit',
+      'aspect',
+      'chakra',
+    ];
+    if (chartTerms.includes(cleanWord)) return true;
+
+    // Redact guidance/conclusion phrases
+    const guidanceTerms = [
+      'authentically',
+      'instincts',
+      'transformation',
+      'healing',
+      'manifestation',
+      'intuition',
+      'wisdom',
+      'strength',
+      'clarity',
+      'balance',
+      'harmony',
+      'power',
+      'growth',
+      'abundance',
+      'passion',
+      'creativity',
+      'connection',
+      'release',
+      'embrace',
+      'illuminate',
+      'grounding',
+      'protection',
+      'energy',
+      'vibration',
+    ];
+    if (guidanceTerms.includes(cleanWord)) return true;
+
+    // Redact some other words for variety (every 6th word if not already redacted)
+    return index % 6 === 4;
+  };
+
+  // Helper to render preview based on A/B test variant
+  const renderPreview = () => {
+    if (!crystalData) return null;
+
+    if (variant === 'truncated') {
+      // Variant B: Truncated with BLURRED name - let the truncation itself create curiosity (1 line)
+      // Blur the crystal name but show the rest of the text to create mystery
+      return (
+        <div className='locked-preview-truncated-single locked-preview-truncated-single-zinc mb-2'>
+          <p className='text-xs'>
+            Your personalized recommendation is{' '}
+            <span
+              className='inline-block'
+              style={{ filter: 'blur(4px)', userSelect: 'none' }}
+            >
+              {crystalData.crystal.name}
+            </span>
+            . Aligned with your {crystalData.reasons[0]?.toLowerCase() || ''}
+          </p>
+        </div>
+      );
+    }
+
+    if (variant === 'redacted') {
+      // Variant C: Redacted style - soft blur effect on key terms
+      const content = `Your personalized recommendation is ${crystalData.crystal.name}. ${crystalData.reasons[0]}. ${crystalData.reasons[1] || ''} ${crystalData.guidance}`;
+      const words = content.split(' ');
+      const redactedContent = words.map((word, i) => {
+        // CRITICAL: Pass crystal name to ensure it's always redacted
+        const shouldRedact = shouldRedactWord(
+          word,
+          i,
+          crystalData.crystal.name,
+        );
+        return shouldRedact ? (
+          <span key={i} className='redacted-word'>
+            {word}
+          </span>
+        ) : (
+          <span key={i}>{word}</span>
+        );
+      });
+
+      const contentWithSpaces: React.ReactNode[] = [];
+      redactedContent.forEach((element, i) => {
+        contentWithSpaces.push(element);
+        if (i < redactedContent.length - 1) {
+          contentWithSpaces.push(' ');
+        }
+      });
+
+      return (
+        <div className='locked-preview-redacted locked-preview-redacted-zinc mb-2'>
+          <p className='text-xs text-zinc-400'>{contentWithSpaces}</p>
+        </div>
+      );
+    }
+
+    // Variant A: Blur Effect (default)
+    const content = `Your personalized recommendation is ${crystalData.crystal.name}. ${crystalData.reasons[0]}. ${crystalData.reasons[1] || ''} ${crystalData.guidance}`;
+    return (
+      <div className='locked-preview locked-preview-zinc mb-2'>
+        <p className='locked-preview-text text-xs'>{content}</p>
+      </div>
+    );
+  };
+
   // Only show loading state if we're actually waiting for authenticated user data
   if (!crystalName && authStatus.loading && authStatus.isAuthenticated) {
     return (
@@ -189,19 +388,12 @@ export const CrystalPreview = () => {
                 </span>
               )}
             </div>
-            <p className='text-xs text-zinc-400 line-clamp-2 mb-2'>
+            <p className='text-xs text-white line-clamp-2 mb-2'>
               {crystalReason}
             </p>
 
-            {/* Blurred preview of personalized guidance for free users */}
-            {!canAccessPersonalized && crystalData && (
-              <div className='locked-preview locked-preview-zinc mb-2'>
-                <p className='locked-preview-text text-xs'>
-                  {crystalData.reasons[0]}. {crystalData.reasons[1] || ''}{' '}
-                  {crystalData.guidance}
-                </p>
-              </div>
-            )}
+            {/* A/B test: Show preview based on variant */}
+            {!canAccessPersonalized && renderPreview()}
 
             {!canAccessPersonalized && (
               <span

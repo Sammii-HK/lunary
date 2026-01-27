@@ -17,6 +17,7 @@ import { useSubscription } from '../hooks/useSubscription';
 import { hasFeatureAccess } from '../../utils/pricing';
 import { bodiesSymbols } from '@/constants/symbols';
 import dayjs from 'dayjs';
+import { useFeatureFlagVariant } from '@/hooks/useFeatureFlag';
 
 const getOrdinalSuffix = (n: number): string => {
   if (n >= 11 && n <= 13) return 'th';
@@ -41,6 +42,7 @@ export const TransitOfTheDay = () => {
   const { user } = useUser();
   const authStatus = useAuthStatus();
   const subscription = useSubscription();
+  const variant = useFeatureFlagVariant('paywall_preview_style_v1');
 
   // For unauthenticated users, force paid access to false immediately
   // Don't wait for subscription to resolve
@@ -85,13 +87,13 @@ export const TransitOfTheDay = () => {
     return sorted[0];
   }, [authStatus.isAuthenticated, hasPersonalizedAccess]);
 
+  // Calculate personal impacts for ALL authenticated users (for preview and paid access)
   const personalImpacts = useMemo(() => {
-    if (!authStatus.isAuthenticated || !user || !hasPersonalizedAccess)
-      return [];
+    if (!authStatus.isAuthenticated || !user) return [];
     const birthChart = user.birthChart;
     if (!birthChart || birthChart.length === 0) return [];
     return getPersonalTransitImpactList(birthChart, 60);
-  }, [authStatus.isAuthenticated, user, hasPersonalizedAccess]);
+  }, [authStatus.isAuthenticated, user]);
 
   const transit = useMemo((): PersonalTransitImpact | null => {
     if (personalImpacts.length === 0) return null;
@@ -119,6 +121,196 @@ export const TransitOfTheDay = () => {
     );
     return nextFuture ?? personalImpacts[0];
   }, [personalImpacts]);
+
+  // Helper to determine if a word should be redacted
+  const shouldRedactWord = (word: string, index: number): boolean => {
+    const cleanWord = word.toLowerCase().replace(/[.,!?;:]/g, '');
+
+    // Prioritize house numbers (1st, 2nd, 3rd, 12th, etc.)
+    if (/^\d+(st|nd|rd|th)$/.test(cleanWord)) return true;
+
+    // Redact planet names
+    const planets = [
+      'sun',
+      'moon',
+      'mercury',
+      'venus',
+      'mars',
+      'jupiter',
+      'saturn',
+      'uranus',
+      'neptune',
+      'pluto',
+    ];
+    if (planets.includes(cleanWord)) return true;
+
+    // Redact zodiac signs
+    const signs = [
+      'aries',
+      'taurus',
+      'gemini',
+      'cancer',
+      'leo',
+      'virgo',
+      'libra',
+      'scorpio',
+      'sagittarius',
+      'capricorn',
+      'aquarius',
+      'pisces',
+    ];
+    if (signs.includes(cleanWord)) return true;
+
+    // Redact chart-related terms
+    const chartTerms = [
+      'house',
+      'placement',
+      'natal',
+      'chart',
+      'transit',
+      'aspect',
+    ];
+    if (chartTerms.includes(cleanWord)) return true;
+
+    // Redact guidance/conclusion phrases
+    const guidanceTerms = [
+      'authentically',
+      'instincts',
+      'transformation',
+      'healing',
+      'manifestation',
+      'intuition',
+      'wisdom',
+      'strength',
+      'clarity',
+      'balance',
+      'harmony',
+      'power',
+      'growth',
+      'abundance',
+      'passion',
+      'creativity',
+      'connection',
+      'release',
+      'embrace',
+      'illuminate',
+    ];
+    if (guidanceTerms.includes(cleanWord)) return true;
+
+    // Redact some other words for variety (every 6th word if not already redacted)
+    return index % 6 === 4;
+  };
+
+  // Helper to render preview based on A/B test variant
+  // Takes the transit to show (either general or personalized)
+  const renderPreview = (
+    previewTransit: TransitEvent | PersonalTransitImpact,
+  ) => {
+    if (!previewTransit) return null;
+
+    if (variant === 'truncated') {
+      // Variant B: Truncated with BLURRED date - show month but blur day, then continue with content
+      const transitDate = dayjs(previewTransit.date);
+      const month = transitDate.format('MMM');
+      const day = transitDate.format('D');
+
+      // Build additional content to show after the date
+      let additionalContent = '';
+      if ('house' in previewTransit && previewTransit.house) {
+        const houseText = ` → your ${previewTransit.house}${getOrdinalSuffix(previewTransit.house)} house`;
+        additionalContent = `${houseText}. ${previewTransit.actionableGuidance || ''}`;
+      } else {
+        // For general transit, show description
+        const fullDescription =
+          (previewTransit as TransitEvent).description || '';
+        additionalContent = `. ${fullDescription}`;
+      }
+
+      return (
+        <div className='locked-preview-truncated-single mb-2'>
+          <p className='text-xs'>
+            {month}{' '}
+            <span
+              className='inline-block'
+              style={{ filter: 'blur(4px)', userSelect: 'none' }}
+            >
+              {day}
+            </span>
+            : {previewTransit.planet} {previewTransit.event}
+            {additionalContent}
+          </p>
+        </div>
+      );
+    }
+
+    if (variant === 'redacted') {
+      // Variant C: Redacted style - soft blur effect on key terms
+      // Build full content string
+      let fullContent = '';
+      if ('house' in previewTransit && previewTransit.house) {
+        const houseText = ` → your ${previewTransit.house}${getOrdinalSuffix(previewTransit.house)} house`;
+        fullContent = `${previewTransit.planet} ${previewTransit.event}${houseText}. ${previewTransit.actionableGuidance || ''}`;
+      } else {
+        const fullDescription =
+          (previewTransit as TransitEvent).description || '';
+        fullContent = `${previewTransit.planet} ${previewTransit.event}. ${fullDescription}`;
+      }
+
+      const words = fullContent.split(' ');
+      const redactedContent = words.map((word, i) => {
+        const shouldRedact = shouldRedactWord(word, i);
+        return shouldRedact ? (
+          <span key={i} className='redacted-word'>
+            {word}
+          </span>
+        ) : (
+          <span key={i}>{word}</span>
+        );
+      });
+
+      const contentWithSpaces: React.ReactNode[] = [];
+      redactedContent.forEach((element, i) => {
+        contentWithSpaces.push(element);
+        if (i < redactedContent.length - 1) {
+          contentWithSpaces.push(' ');
+        }
+      });
+
+      return (
+        <div className='locked-preview-redacted mb-2'>
+          <p className='text-xs text-zinc-400'>{contentWithSpaces}</p>
+        </div>
+      );
+    }
+
+    // Variant A: Blur Effect (default)
+    // Build preview content based on transit type
+    let previewContent = '';
+
+    // Check if it's a PersonalTransitImpact (has house property)
+    if ('house' in previewTransit && previewTransit.house) {
+      const houseText = ` → your ${previewTransit.house}${getOrdinalSuffix(previewTransit.house)} house`;
+      previewContent = `${previewTransit.planet} ${previewTransit.event}${houseText}. ${previewTransit.actionableGuidance || ''}`;
+    } else {
+      // It's a TransitEvent (general), show continuation of description
+      const fullDescription =
+        (previewTransit as TransitEvent).description || '';
+      const sentences = fullDescription.split('.');
+      // Skip the first sentence (already shown) and show the rest
+      previewContent = sentences.slice(1).join('.').trim();
+      if (previewContent && !previewContent.endsWith('.')) {
+        previewContent += '.';
+      }
+    }
+
+    if (!previewContent) return null;
+
+    return (
+      <div className='locked-preview mb-2'>
+        <p className='locked-preview-text text-xs'>{previewContent}</p>
+      </div>
+    );
+  };
 
   // Show general transit for unauthenticated users or users without chart access
   if (!authStatus.isAuthenticated || !hasPersonalizedAccess) {
@@ -185,20 +377,12 @@ export const TransitOfTheDay = () => {
             <p className='text-sm text-zinc-200 mb-1'>
               {generalTransit.planet} {generalTransit.event}
             </p>
-            <p className='text-xs text-zinc-300 mb-2'>
+            <p className='text-xs text-zinc-200 mb-2'>
               {generalTransit.description.split('.')[0]}.
             </p>
 
-            {/* Blurred preview of personal transit impact */}
-            <div className='locked-preview mb-2'>
-              <p className='locked-preview-text text-xs'>
-                This transit activates your 7th house of partnerships and
-                relationships. With this planetary energy moving through your
-                chart, you may experience shifts in how you connect with others.
-                The tension between your natal placements and this transit
-                suggests growth through collaboration...
-              </p>
-            </div>
+            {/* A/B test: Show preview of PERSONALIZED content (what they're missing) */}
+            {renderPreview(transit || generalTransit)}
 
             <button
               onClick={(e) => {
