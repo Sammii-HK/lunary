@@ -115,3 +115,24 @@ model Testimonial {
   @@map("testimonials")
   @@index([isPublished], name: "idx_testimonials_is_published")
 }
+
+model TourProgress {
+  id          String      @id @default(cuid())
+  userId      String      @map("user_id")
+  tourId      String      @map("tour_id")
+  status      TourStatus  @default(ACTIVE)
+  completedAt DateTime?   @map("completed_at") @db.Timestamptz(6)
+  dismissedAt DateTime?   @map("dismissed_at") @db.Timestamptz(6)
+  lastShownAt DateTime    @default(now()) @map("last_shown_at") @db.Timestamptz(6)
+  createdAt   DateTime    @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  @@unique([userId, tourId], name: "user_tour_unique")
+  @@index([userId], name: "idx_tour_progress_user_id")
+  @@map("tour_progress")
+}
+
+enum TourStatus {
+  ACTIVE
+  COMPLETED
+  DISMISSED
+}

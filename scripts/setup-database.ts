@@ -1247,6 +1247,33 @@ async function setupDatabase() {
 
     console.log('✅ Consent log table created');
 
+    // Create TourStatus enum type
+    await sql`
+      DO $$ BEGIN
+        CREATE TYPE tour_status AS ENUM ('ACTIVE', 'COMPLETED', 'DISMISSED');
+      EXCEPTION
+        WHEN duplicate_object THEN null;
+      END $$;
+    `;
+
+    // Create tour_progress table for feature tour tracking
+    await sql`
+      CREATE TABLE IF NOT EXISTS tour_progress (
+        id TEXT PRIMARY KEY DEFAULT gen_random_uuid(),
+        user_id TEXT NOT NULL,
+        tour_id TEXT NOT NULL,
+        status tour_status DEFAULT 'ACTIVE',
+        completed_at TIMESTAMP WITH TIME ZONE,
+        dismissed_at TIMESTAMP WITH TIME ZONE,
+        last_shown_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+        UNIQUE(user_id, tour_id)
+      )
+    `;
+    await sql`CREATE INDEX IF NOT EXISTS idx_tour_progress_user_id ON tour_progress(user_id)`;
+
+    console.log('✅ Tour progress table created');
+
     // Create email_preferences table
     await sql`
       CREATE TABLE IF NOT EXISTS email_preferences (
