@@ -166,10 +166,6 @@ export async function composeVideo(
     lockIntroHue = false,
   } = options;
 
-  console.log(
-    `🎬 composeVideo: format=${format}, subtitlesText length=${subtitlesText?.length || 0}, overlays=${overlays?.length || 0}`,
-  );
-
   const dimensions = VIDEO_DIMENSIONS[format] || VIDEO_DIMENSIONS.landscape;
   const workDir = await mkdtemp(join(tmpdir(), 'lunary-video-'));
   const timestamp = Date.now();
