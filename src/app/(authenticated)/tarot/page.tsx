@@ -58,6 +58,8 @@ import { PremiumPathway } from '@/components/PremiumPathway';
 import { RecurringThemesCard } from '@/components/RecurringThemesCard';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
+import { useAstronomyContext } from '@/context/AstronomyContext';
+import { TarotTransitConnection } from '@/components/tarot/TarotTransitConnection';
 
 const SUIT_ELEMENTS: Record<string, string> = {
   Cups: 'Water',
@@ -185,6 +187,7 @@ type TarotShareTarget = {
 const TarotReadings = () => {
   const { user, loading } = useUser();
   const authStatus = useAuthStatus();
+  const { currentAstrologicalChart } = useAstronomyContext();
   const subscription = useSubscription();
   const userName = user?.name;
   const userBirthday = user?.birthday;
@@ -1074,6 +1077,15 @@ const TarotReadings = () => {
                   </button>
                 </div>
               )}
+
+              {/* Transit connection for daily card */}
+              <TarotTransitConnection
+                cardName={personalizedReading.daily.name}
+                birthChart={user?.birthChart}
+                userBirthday={userBirthday}
+                currentTransits={currentAstrologicalChart}
+                variant='inDepth'
+              />
             </div>
 
             <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/50 p-4'>
@@ -1381,6 +1393,9 @@ const TarotReadings = () => {
         card={selectedCard}
         isOpen={!!selectedCard}
         onClose={() => setSelectedCard(null)}
+        birthChart={user?.birthChart}
+        userBirthday={userBirthday}
+        currentTransits={currentAstrologicalChart}
       />
 
       {shareTarget && (
