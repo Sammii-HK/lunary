@@ -41,6 +41,7 @@ function getSearchConsoleClient() {
       });
     } catch (error) {
       console.error('[Search Console] Invalid service account JSON:', error);
+      // Fall through to OAuth2 attempt
     }
   }
 
@@ -50,9 +51,11 @@ function getSearchConsoleClient() {
   const refreshToken = process.env.GOOGLE_REFRESH_TOKEN;
 
   if (!clientId || !clientSecret || !refreshToken) {
-    throw new Error(
+    const error = new Error(
       'Missing Google Search Console credentials. Set either GOOGLE_SERVICE_ACCOUNT_JSON (recommended) or GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, and GOOGLE_REFRESH_TOKEN.',
-    );
+    ) as Error & { code?: string };
+    error.code = 'MISSING_CREDENTIALS';
+    throw error;
   }
 
   const oauth2Client = new google.auth.OAuth2(

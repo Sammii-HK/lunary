@@ -544,6 +544,9 @@ export default function AnalyticsPage() {
     engagementOverview?.avg_active_days_per_user ??
     null;
 
+  const productMauCurrentWeek = activity?.signed_in_product_mau ?? 0;
+  const productMauGrowth = userGrowth?.growthRate ?? 0;
+
   // const returningStickinessDau =
   //   engagementOverview?.mau && engagementOverview.mau > 0
   //     ? (engagementOverview.returning_dau / engagementOverview.mau) * 100
@@ -2056,7 +2059,7 @@ export default function AnalyticsPage() {
                 <HealthMetricCard
                   icon={DollarSign}
                   label='Monthly Revenue'
-                  value={`$${revenue?.mrr?.toLocaleString() || 0}`}
+                  value={`$${planBreakdown?.totalMrr?.toLocaleString() || 0}`}
                   unit='MRR'
                   status='good'
                   description='Recurring revenue'
