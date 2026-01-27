@@ -842,7 +842,7 @@ const TarotReadings = () => {
     // If generalTarot failed to load, show error state with upsell instead of blank page
     if (!generalTarot) {
       return (
-        <div className='h-full w-full space-y-6 p-4 overflow-y-auto overflow-x-hidden pb-20'>
+        <div className='h-full w-full space-y-6 p-4 overflow-y-auto overflow-x-hidden pb-32'>
           <div className='pt-6'>
             <h1 className='text-2xl md:text-3xl font-light text-zinc-100 mb-2'>
               Your Tarot Readings
@@ -909,7 +909,7 @@ const TarotReadings = () => {
     }
 
     return (
-      <div className='h-full w-full space-y-6 p-4 overflow-y-auto overflow-x-hidden pb-20'>
+      <div className='h-full w-full space-y-6 p-4 overflow-y-auto overflow-x-hidden pb-32'>
         <div className='pt-6'>
           <h1 className='text-2xl md:text-3xl font-light text-zinc-100 mb-2'>
             Today's Tarot Readings
@@ -1219,7 +1219,7 @@ const TarotReadings = () => {
   }
 
   return (
-    <div className='h-full w-full space-y-6 p-4 overflow-y-auto overflow-x-hidden pb-20'>
+    <div className='h-full w-full space-y-6 p-4 overflow-y-auto overflow-x-hidden pb-32'>
       <div className='pt-6'>
         <h1 className='text-2xl md:text-3xl font-light text-zinc-100 mb-2'>
           {userName ? `${userName}'s Tarot Readings` : 'Your Tarot Readings'}
