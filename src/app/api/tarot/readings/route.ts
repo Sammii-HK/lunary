@@ -229,11 +229,68 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Fetch user's birth chart and birthday for chart-based seeding
+    let birthChart;
+    let userBirthday;
+    let userBirthLocation;
+    let currentTransits;
+    try {
+      const profileResult = await sql`
+        SELECT birth_chart, birthday, location
+        FROM user_profiles
+        WHERE user_id = ${userId}
+        LIMIT 1
+      `;
+      if (profileResult.rows.length > 0) {
+        birthChart = profileResult.rows[0].birth_chart;
+        userBirthday = profileResult.rows[0].birthday;
+        const location = profileResult.rows[0].location as Record<
+          string,
+          any
+        > | null;
+        userBirthLocation = location?.birthLocation;
+      }
+
+      // Get current transits for saving with the reading
+      if (birthChart) {
+        const { getAstrologicalChart } =
+          await import('../../../../../utils/astrology/astrology');
+        const { calculateTransitAspects } =
+          await import('@/lib/astrology/transit-aspects');
+        const { Observer } = await import('astronomy-engine');
+        const { parseLocationToCoordinates } =
+          await import('../../../../../utils/astrology/birthChart');
+
+        const now = new Date();
+
+        // Use user's birth location if available
+        let observer: typeof Observer.prototype;
+        if (userBirthLocation) {
+          const coords = await parseLocationToCoordinates(userBirthLocation);
+          if (coords) {
+            observer = new Observer(coords.latitude, coords.longitude, 0);
+          } else {
+            observer = new Observer(51.4769, 0.0005, 0); // Default fallback
+          }
+        } else {
+          observer = new Observer(51.4769, 0.0005, 0); // Default fallback
+        }
+
+        const transitsNow = getAstrologicalChart(now, observer);
+        currentTransits = calculateTransitAspects(birthChart, transitsNow);
+      }
+    } catch (err) {
+      // Non-critical - will fall back to regular seeding
+      console.warn('[tarot/readings] Failed to fetch birth chart:', err);
+    }
+
     const reading = generateSpreadReading({
       spreadSlug,
       userId,
       userName,
       seed,
+      birthChart,
+      userBirthday,
     });
 
     const cardsForStorage = reading.cards.map((item) => ({
@@ -243,6 +300,13 @@ export async function POST(request: NextRequest) {
       card: item.card,
       insight: item.insight,
     }));
+
+    // Enhance metadata with transit aspects at time of pull
+    const enhancedMetadata = {
+      ...reading.metadata,
+      transitAspects: currentTransits || null,
+      transitCapturedAt: new Date().toISOString(),
+    };
 
     const cleanedTags =
       Array.isArray(tags) && tags.length > 0
@@ -275,7 +339,7 @@ export async function POST(request: NextRequest) {
         ${JSON.stringify(reading.journalingPrompts)}::jsonb,
         ${notes || null},
         ${tagsSqlValue}::text[],
-        ${JSON.stringify(reading.metadata)}::jsonb
+        ${JSON.stringify(enhancedMetadata)}::jsonb
       )
       RETURNING id,
                 spread_slug,

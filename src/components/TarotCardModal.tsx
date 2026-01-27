@@ -5,6 +5,9 @@ import { X } from 'lucide-react';
 import { TarotCard } from './TarotCard';
 import { useModal } from '@/hooks/useModal';
 import { stringToKebabCase } from '../../utils/string';
+import { TarotTransitConnection } from './tarot/TarotTransitConnection';
+import type { BirthChartPlacement } from '@/context/UserContext';
+import type { AstroChartInformation } from '../../utils/astrology/astrology';
 
 interface TarotCardModalProps {
   card: {
@@ -14,9 +17,19 @@ interface TarotCardModalProps {
   } | null;
   isOpen: boolean;
   onClose: () => void;
+  birthChart?: BirthChartPlacement[];
+  userBirthday?: string;
+  currentTransits?: AstroChartInformation[];
 }
 
-export function TarotCardModal({ card, isOpen, onClose }: TarotCardModalProps) {
+export function TarotCardModal({
+  card,
+  isOpen,
+  onClose,
+  birthChart,
+  userBirthday,
+  currentTransits,
+}: TarotCardModalProps) {
   useModal({
     isOpen,
     onClose,
@@ -52,6 +65,18 @@ export function TarotCardModal({ card, isOpen, onClose }: TarotCardModalProps) {
           variant={isMajorArcana ? 'major' : 'minor'}
           disableLink
         />
+
+        {/* Transit connection */}
+        {birthChart && userBirthday && currentTransits && (
+          <TarotTransitConnection
+            cardName={card.name}
+            birthChart={birthChart}
+            userBirthday={userBirthday}
+            currentTransits={currentTransits}
+            variant='inDepth'
+          />
+        )}
+
         <div className='mt-4'>
           <Link
             href={`/grimoire/tarot/${cardSlug}`}

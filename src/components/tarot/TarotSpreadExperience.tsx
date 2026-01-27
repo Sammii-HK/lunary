@@ -19,6 +19,9 @@ import {
   TarotPlan,
 } from '@/constants/tarotSpreads';
 import { UpgradePrompt } from '@/components/UpgradePrompt';
+import { TarotTransitConnection } from './TarotTransitConnection';
+import type { BirthChartPlacement } from '@/context/UserContext';
+import { useAstronomyContext } from '@/context/AstronomyContext';
 
 export type SubscriptionStatus =
   | 'free'
@@ -31,6 +34,8 @@ export interface TarotSpreadExperienceProps {
   userId?: string;
   userName?: string;
   userBirthday?: string;
+  birthChart?: BirthChartPlacement[];
+  userBirthLocation?: string;
   subscriptionPlan: {
     plan: TarotPlan;
     status: SubscriptionStatus;
@@ -143,11 +148,15 @@ function CollapsibleSpreadLibrary({ children }: { children: ReactNode }) {
 export function TarotSpreadExperience({
   userId,
   userName,
+  userBirthday,
+  birthChart,
+  userBirthLocation,
   subscriptionPlan,
   onRequireUpgrade,
   onCardPreview,
   onShareReading,
 }: TarotSpreadExperienceProps) {
+  const { currentAstrologicalChart } = useAstronomyContext();
   const [selectedSpreadSlug, setSelectedSpreadSlug] = useState<string | null>(
     null,
   );
@@ -162,6 +171,8 @@ export function TarotSpreadExperience({
   const [isGenerating, setIsGenerating] = useState<boolean>(false);
   const [limitWarning, setLimitWarning] = useState<string | null>(null);
   const [notesDraft, setNotesDraft] = useState<string>('');
+  const [expandedTransitCardIndex, setExpandedTransitCardIndex] =
+    useState<number>(0);
   const [isSavingNotes, setIsSavingNotes] = useState<boolean>(false);
   const [lastSavedNotes, setLastSavedNotes] = useState<string>('');
   const [error, setError] = useState<string | null>(null);
@@ -317,6 +328,7 @@ export function TarotSpreadExperience({
     if (!currentReading) return;
     setNotesDraft(currentReading.notes || '');
     setLastSavedNotes(currentReading.notes || '');
+    setExpandedTransitCardIndex(0); // Reset to first card when reading changes
   }, [currentReading]);
 
   useEffect(() => {
@@ -785,48 +797,102 @@ export function TarotSpreadExperience({
                 </div>
               </div>
 
-              <div className='grid gap-3 md:grid-cols-2'>
-                {currentReading?.cards?.map((card) => (
-                  <button
-                    key={card.positionId}
-                    type='button'
-                    onClick={() => handleCardPreview(card.card)}
-                    className='flex flex-col items-start gap-2 rounded-lg border border-zinc-800/50 bg-zinc-900/40 p-3 text-left transition-colors hover:border-lunary-primary-600'
-                  >
-                    <div className='flex w-full items-center justify-between'>
-                      <div>
-                        <p className='text-xs uppercase tracking-wide text-zinc-400'>
-                          {card.positionLabel}
+              <div className='space-y-6'>
+                {currentReading?.cards?.map((card, cardIndex) => {
+                  const isTransitExpanded =
+                    expandedTransitCardIndex === cardIndex;
+                  return (
+                    <div
+                      key={card.positionId}
+                      className='rounded-lg border border-zinc-800/50 bg-zinc-900/40 p-4'
+                    >
+                      {/* Card header - clickable to preview */}
+                      <button
+                        type='button'
+                        onClick={() => handleCardPreview(card.card)}
+                        className='w-full flex flex-col items-start gap-2 text-left transition-colors hover:opacity-80'
+                      >
+                        <div className='flex w-full items-center justify-between'>
+                          <div>
+                            <p className='text-xs uppercase tracking-wide text-zinc-400'>
+                              {card.positionLabel}
+                            </p>
+                            <p className='text-xs text-zinc-500'>
+                              {card.positionPrompt}
+                            </p>
+                          </div>
+                          <span className='text-[10px] uppercase tracking-[0.2em] text-zinc-500'>
+                            {card.card.arcana === 'major' ? 'Major' : 'Minor'}
+                          </span>
+                        </div>
+                        <p className='text-lg font-semibold text-zinc-100'>
+                          {card.card.name}
                         </p>
-                        <p className='text-xs text-zinc-500'>
-                          {card.positionPrompt}
+                        <p className='text-sm text-zinc-300 leading-relaxed'>
+                          "{card.insight}"
                         </p>
-                      </div>
-                      <span className='text-[10px] uppercase tracking-[0.2em] text-zinc-500'>
-                        {card.card.arcana === 'major' ? 'Major' : 'Minor'}
-                      </span>
-                    </div>
-                    <p className='text-lg font-semibold text-zinc-100'>
-                      {card.card.name}
-                    </p>
-                    <p className='text-sm text-zinc-300 leading-relaxed'>
-                      “{card.insight}”
-                    </p>
-                    <div className='flex flex-wrap gap-1'>
-                      {card.card.keywords.slice(0, 4).map((keyword) => (
-                        <span
-                          key={`${card.positionId}-${keyword}`}
-                          className='text-xs px-2 py-0.5 rounded text-zinc-100 bg-zinc-900 border border-zinc-800'
+                        <div className='flex flex-wrap gap-1'>
+                          {card.card.keywords.slice(0, 4).map((keyword) => (
+                            <span
+                              key={`${card.positionId}-${keyword}`}
+                              className='text-xs px-2 py-0.5 rounded text-zinc-100 bg-zinc-900 border border-zinc-800'
+                            >
+                              {keyword}
+                            </span>
+                          ))}
+                        </div>
+                        <p className='text-xs text-lunary-primary-300'>
+                          Tap to explore the full meaning
+                        </p>
+                      </button>
+
+                      {/* In Your Chart - collapsible per card transit insights */}
+                      <div className='mt-4'>
+                        <button
+                          type='button'
+                          onClick={() =>
+                            setExpandedTransitCardIndex(
+                              isTransitExpanded ? -1 : cardIndex,
+                            )
+                          }
+                          className='w-full flex items-center justify-between px-4 py-3 rounded-lg border border-lunary-primary-800/30 bg-lunary-primary-950/20 hover:bg-lunary-primary-950/30 transition-colors'
                         >
-                          {keyword}
-                        </span>
-                      ))}
+                          <span className='text-sm font-medium text-lunary-accent-200'>
+                            In Your Chart
+                          </span>
+                          {isTransitExpanded ? (
+                            <ChevronUp className='w-4 h-4 text-lunary-accent-300' />
+                          ) : (
+                            <ChevronDown className='w-4 h-4 text-lunary-accent-300' />
+                          )}
+                        </button>
+
+                        {isTransitExpanded && (
+                          <div className='mt-2'>
+                            <TarotTransitConnection
+                              cardName={card.card.name}
+                              birthChart={birthChart}
+                              userBirthday={userBirthday}
+                              currentTransits={currentAstrologicalChart || []}
+                              historicalTransits={
+                                currentReading.metadata?.transitAspects as
+                                  | any[]
+                                  | null
+                              }
+                              historicalTimestamp={
+                                currentReading.metadata?.transitCapturedAt as
+                                  | string
+                                  | null
+                              }
+                              readingCreatedAt={currentReading.createdAt}
+                              userBirthLocation={userBirthLocation}
+                            />
+                          </div>
+                        )}
+                      </div>
                     </div>
-                    <p className='text-xs text-lunary-primary-300'>
-                      Tap to explore the full meaning
-                    </p>
-                  </button>
-                ))}
+                  );
+                })}
               </div>
 
               <div className='space-y-3'>
