@@ -26,8 +26,8 @@ function convertToBirthChartSnapshot(
     time: '12:00', // We don't have exact time, but this is just for seeding
     lat: 0,
     lon: 0,
-    placements: birthChart.map((p) => ({
-      planet: p.planet,
+    placements: birthChart.map((p: any) => ({
+      planet: p.planet || p.body,
       sign: p.sign,
       house: p.house,
       degree: p.degree,

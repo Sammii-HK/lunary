@@ -92,10 +92,10 @@ const drawUniqueCardsWithChart = (
     time: '12:00',
     lat: 0,
     lon: 0,
-    placements: birthChart.map((p) => ({
-      planet: p.planet,
+    placements: birthChart.map((p: any) => ({
+      planet: p.planet || p.body,
       sign: p.sign,
-      house: p.house,
+      house: p.house || 1,
       degree: p.degree,
     })),
   };
