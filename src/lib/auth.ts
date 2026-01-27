@@ -309,6 +309,9 @@ export const auth = new Proxy({} as ReturnType<typeof betterAuth>, {
     if (prop === 'handler') {
       return async (request: Request) => {
         const instance = await initializeAuth();
+        if (!instance) {
+          return new Response('Auth not initialized', { status: 503 });
+        }
         return instance.handler(request);
       };
     }
@@ -321,6 +324,9 @@ export const auth = new Proxy({} as ReturnType<typeof betterAuth>, {
           get(_apiTarget, apiProp) {
             return async (...args: any[]) => {
               const instance = await initializeAuth();
+              if (!instance) {
+                return { user: null, session: null };
+              }
               const apiMethod = (instance.api as any)[apiProp];
               if (typeof apiMethod === 'function') {
                 return apiMethod.apply(instance.api, args);
@@ -335,6 +341,9 @@ export const auth = new Proxy({} as ReturnType<typeof betterAuth>, {
     // For other properties, return a Promise that resolves to the value
     return (async () => {
       const instance = await initializeAuth();
+      if (!instance) {
+        return undefined;
+      }
       const value = (instance as any)[prop];
       return typeof value === 'function' ? value.bind(instance) : value;
     })();
