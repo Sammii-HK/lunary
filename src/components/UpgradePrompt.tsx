@@ -91,10 +91,14 @@ export function UpgradePrompt({
   if (isTrialActive && isDismissed) return null;
   if (!isTrialActive && !showUpgradePrompt) return null;
 
-  if (onShow && showUpgradePrompt) {
-    onShow();
-    conversionTracking.upgradePromptShown(featureName);
-  }
+  useEffect(() => {
+    if (onShow && showUpgradePrompt) {
+      onShow();
+      conversionTracking.upgradePromptShown(featureName);
+      // Track paywall shown
+      conversionTracking.paywallShown(authState.user?.id, featureName);
+    }
+  }, [onShow, showUpgradePrompt, featureName, authState.user?.id]);
 
   const planLabel = requiredPlan ? PLAN_LABELS[requiredPlan] : undefined;
   const dayLabel = trialDaysRemaining === 1 ? 'day' : 'days';
@@ -115,6 +119,7 @@ export function UpgradePrompt({
 
   const handleUpgradeClick = () => {
     conversionTracking.upgradeClicked(featureName);
+    conversionTracking.paywallAccepted(authState.user?.id, featureName);
   };
 
   const handleDismiss = () => {

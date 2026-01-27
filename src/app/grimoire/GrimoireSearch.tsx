@@ -6,6 +6,8 @@ import { Search } from 'lucide-react';
 import { grimoire, grimoireItems } from '@/constants/grimoire';
 import { stringToKebabCase } from '../../../utils/string';
 import { sectionToSlug } from '@/utils/grimoire';
+import { conversionTracking } from '@/lib/analytics';
+import { useUser } from '@/context/UserContext';
 
 type SearchDataType = {
   runesList: any;
@@ -43,6 +45,7 @@ export function GrimoireSearch({
   onResultClick,
   onSidebarClose,
 }: GrimoireSearchProps) {
+  const { user } = useUser();
   const [, startTransition] = useTransition();
   const [searchQuery, setSearchQuery] = useState('');
   const [showSearchResults, setShowSearchResults] = useState(false);
@@ -746,6 +749,18 @@ export function GrimoireSearch({
           onChange={(e) => {
             setSearchQuery(e.target.value);
             setShowSearchResults(e.target.value.length > 0);
+
+            // Track search when user types (debounced by 1 second)
+            if (e.target.value.trim().length >= 3) {
+              const timeoutId = setTimeout(() => {
+                conversionTracking.grimoireSearchPerformed(
+                  user?.id,
+                  e.target.value.trim(),
+                  searchResults.length,
+                );
+              }, 1000);
+              return () => clearTimeout(timeoutId);
+            }
           }}
           onFocus={() => {
             if (searchQuery.length > 0) setShowSearchResults(true);
@@ -775,6 +790,15 @@ export function GrimoireSearch({
                   setShowSearchResults(false);
                   setSearchQuery('');
                   onSidebarClose?.();
+
+                  // Track article opened from search
+                  conversionTracking.grimoireArticleOpened(
+                    user?.id,
+                    result.title,
+                    result.type,
+                    searchQuery,
+                  );
+
                   startTransition(() => {
                     onResultClick?.(result.section);
                   });
