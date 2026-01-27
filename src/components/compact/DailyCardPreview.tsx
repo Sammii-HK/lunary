@@ -6,7 +6,7 @@ import { useAuthStatus } from '@/components/AuthStatus';
 import { useAstronomyContext } from '@/context/AstronomyContext';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { ArrowRight, Layers } from 'lucide-react';
+import { ArrowRight, Layers, Lock } from 'lucide-react';
 import { getTarotCard } from '../../../utils/tarot/tarot';
 import { useSubscription } from '../../hooks/useSubscription';
 import { hasFeatureAccess } from '../../../utils/pricing';
@@ -42,24 +42,36 @@ export const DailyCardPreview = () => {
     const dateStr = currentDate || dayjs().utc().format('YYYY-MM-DD');
     const selectedDay = dayjs(dateStr);
 
-    if (canAccessPersonalized) {
-      const card = getTarotCard(`daily-${dateStr}`, userName!, userBirthday!);
+    // Generate general card for all users
+    const dayOfYearNum = selectedDay.dayOfYear();
+    const generalSeed = `cosmic-${dateStr}-${dayOfYearNum}-energy`;
+    const generalCard = getTarotCard(generalSeed);
+
+    // Also generate personalized card for preview (if we have user data)
+    const personalizedCard =
+      userName && userBirthday
+        ? getTarotCard(`daily-${dateStr}`, userName, userBirthday)
+        : null;
+
+    if (canAccessPersonalized && personalizedCard) {
       return {
-        name: card.name,
-        keywords: card.keywords?.slice(0, 3) || [],
-        information: card.information || '',
+        name: personalizedCard.name,
+        keywords: personalizedCard.keywords?.slice(0, 3) || [],
+        information: personalizedCard.information || '',
         isPersonalized: true,
+        personalizedPreview: personalizedCard.information || '',
       };
     }
 
-    const dayOfYearNum = selectedDay.dayOfYear();
-    const generalSeed = `cosmic-${dateStr}-${dayOfYearNum}-energy`;
-    const card = getTarotCard(generalSeed);
     return {
-      name: card.name,
-      keywords: card.keywords?.slice(0, 3) || [],
-      information: card.information || '',
+      name: generalCard.name,
+      keywords: generalCard.keywords?.slice(0, 3) || [],
+      information: generalCard.information || '',
       isPersonalized: false,
+      // For blurred preview, show a sample of what personalized would look like
+      personalizedPreview: personalizedCard?.information
+        ? `This card connects to your birth chart placements. ${personalizedCard.information}`
+        : 'This card connects deeply to your birth chart placements. With your natal placements and current planetary transits, this energy speaks to transformation and growth in your life...',
     };
   }, [canAccessPersonalized, userName, userBirthday, currentDate]);
 
@@ -78,8 +90,8 @@ export const DailyCardPreview = () => {
                   Tarot for Today
                 </span>
               </div>
-              <span className='text-[10px] text-lunary-primary-300 uppercase tracking-wide'>
-                Personal 🔒
+              <span className='flex items-center gap-1 text-[10px] text-lunary-primary-300 uppercase tracking-wide'>
+                Personal <Lock className='w-3 h-3' />
               </span>
             </div>
             <p className='text-sm text-lunary-primary-200 font-medium'>
@@ -97,10 +109,7 @@ export const DailyCardPreview = () => {
             {/* Blurred preview of personalized content */}
             <div className='locked-preview mb-2'>
               <p className='locked-preview-text text-xs'>
-                This card connects deeply to your birth chart placements. With
-                your Sun in your natal chart and current planetary transits,
-                this energy speaks to the transformation you&apos;re
-                experiencing in relationships and personal growth...
+                {dailyCard.personalizedPreview}
               </p>
             </div>
 

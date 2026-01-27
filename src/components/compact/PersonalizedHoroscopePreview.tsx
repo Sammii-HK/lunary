@@ -5,7 +5,7 @@ import { useUser } from '@/context/UserContext';
 import { useAuthStatus } from '@/components/AuthStatus';
 import { useSubscription } from '@/hooks/useSubscription';
 import { hasFeatureAccess } from '../../../utils/pricing';
-import { Check, Circle, Orbit } from 'lucide-react';
+import { Check, Circle, Orbit, Lock, ArrowRight } from 'lucide-react';
 import Link from 'next/link';
 import { recordCheckIn, type StreakRecord } from '@/lib/streak/check-in';
 import { useRouter } from 'next/navigation';
@@ -91,7 +91,8 @@ export const PersonalizedHoroscopePreview = () => {
   }, [ritualComplete]);
 
   useEffect(() => {
-    if (!canAccessPersonalized) return;
+    // Generate horoscope for ALL authenticated users (free and paid)
+    if (!authStatus.isAuthenticated || !user?.birthday) return;
     let active = true;
     setIsLoading(true);
     const profile =
@@ -132,9 +133,15 @@ export const PersonalizedHoroscopePreview = () => {
     return () => {
       active = false;
     };
-  }, [canAccessPersonalized, user?.birthday, user?.name, user?.birthChart]);
+  }, [
+    authStatus.isAuthenticated,
+    user?.birthday,
+    user?.name,
+    user?.birthChart,
+  ]);
 
-  if (!canAccessPersonalized) return null;
+  // Don't show at all for unauthenticated users or users without birthday
+  if (!authStatus.isAuthenticated || !user?.birthday) return null;
 
   const journalPrompt = horoscope?.dailyGuidance
     ? horoscope.dailyGuidance.replace(/\n+/g, ' ')
@@ -172,7 +179,7 @@ export const PersonalizedHoroscopePreview = () => {
   };
 
   const focusText = ritualComplete
-    ? 'You honoured today’s focus.'
+    ? "You honoured today's focus."
     : horoscope?.overview || horoscope?.dailyGuidance || '';
   const anchorCopy = ritualComplete
     ? 'Ritual complete for today.'
@@ -185,6 +192,63 @@ export const PersonalizedHoroscopePreview = () => {
         }`
       : null;
 
+  // Show locked preview for free users
+  if (!canAccessPersonalized) {
+    return (
+      <Link
+        href='/pricing'
+        className='group block border border-zinc-800 rounded-2xl bg-zinc-950/70 p-4 shadow-sm transition-colors hover:border-lunary-primary-500 hover:bg-zinc-900'
+      >
+        <div className='space-y-3'>
+          <div className='flex items-center justify-between gap-3'>
+            <div>
+              <h3 className='text-sm font-semibold leading-snug text-zinc-100 flex items-center'>
+                <Orbit className='mr-2 w-4 h-4 text-lunary-accent-300' />
+                {horoscope?.headline || 'Personalized review'}
+              </h3>
+            </div>
+            <span className='flex items-center gap-1 text-[10px] text-lunary-primary-300 uppercase tracking-wide'>
+              Personal <Lock className='w-3 h-3' />
+            </span>
+          </div>
+
+          {isLoading ? (
+            <div className='space-y-2 text-xs text-zinc-500'>
+              <div className='h-3 bg-zinc-800 rounded animate-pulse' />
+              <div className='h-3 bg-zinc-800 rounded animate-pulse w-5/6' />
+              <div className='h-3 bg-zinc-800 rounded animate-pulse w-4/6' />
+            </div>
+          ) : (
+            <>
+              <p className='text-sm text-zinc-300 leading-snug mb-2'>
+                {horoscope?.overview?.split('.')[0] ||
+                  horoscope?.dailyGuidance?.split('.')[0] ||
+                  'Your personalized cosmic guidance for today'}
+                .
+              </p>
+
+              {/* Blurred preview of personalized horoscope */}
+              <div className='locked-preview mb-2'>
+                <p className='locked-preview-text text-xs'>
+                  {horoscope?.overview} {horoscope?.dailyGuidance}{' '}
+                  {horoscope?.tinyAction} With your natal placements and
+                  today&apos;s transits, this is a pivotal moment for growth and
+                  transformation...
+                </p>
+              </div>
+
+              <span className='flex items-center gap-1.5 text-xs text-lunary-primary-200 hover:text-lunary-primary-100 transition-colors font-medium'>
+                <span>Unlock Your Full Horoscope</span>
+                <ArrowRight className='w-4 h-4' />
+              </span>
+            </>
+          )}
+        </div>
+      </Link>
+    );
+  }
+
+  // Full personalized horoscope for paid users
   return (
     <Link
       href='/horoscope'

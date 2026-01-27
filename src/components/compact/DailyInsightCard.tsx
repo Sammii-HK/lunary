@@ -6,7 +6,7 @@ import { useAuthStatus } from '@/components/AuthStatus';
 import { useAstronomyContext } from '@/context/AstronomyContext';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { Sparkles, ArrowRight } from 'lucide-react';
+import { Sparkles, ArrowRight, Lock } from 'lucide-react';
 import dayjs from 'dayjs';
 import { getGeneralHoroscope } from '../../../utils/astrology/generalHoroscope';
 import { getEnhancedPersonalizedHoroscope } from '../../../utils/astrology/enhancedHoroscope';
@@ -287,8 +287,8 @@ export const DailyInsightCard = () => {
                   Today&apos;s Influence
                 </span>
               </div>
-              <span className='text-[10px] text-lunary-primary-300 uppercase tracking-wide'>
-                Personal 🔒
+              <span className='flex items-center gap-1 text-[10px] text-lunary-primary-300 uppercase tracking-wide'>
+                Personal <Lock className='w-3 h-3' />
               </span>
             </div>
             <p className='text-sm text-zinc-300 leading-relaxed mb-2'>

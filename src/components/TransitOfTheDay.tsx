@@ -4,7 +4,7 @@ import { useMemo } from 'react';
 import { useUser } from '@/context/UserContext';
 import { useAuthStatus } from '@/components/AuthStatus';
 import Link from 'next/link';
-import { Sparkles, ArrowRight } from 'lucide-react';
+import { Sparkles, ArrowRight, Lock } from 'lucide-react';
 import {
   getUpcomingTransits,
   TransitEvent,
@@ -177,8 +177,8 @@ export const TransitOfTheDay = () => {
                     Major
                   </span>
                 )}
-                <span className='text-[10px] text-lunary-primary-300 uppercase tracking-wide'>
-                  Personal 🔒
+                <span className='flex items-center gap-1 text-[10px] text-lunary-primary-300 uppercase tracking-wide'>
+                  Personal <Lock className='w-3 h-3' />
                 </span>
               </div>
             </div>

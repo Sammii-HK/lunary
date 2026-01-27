@@ -4,7 +4,7 @@ import { useMemo, useState, useEffect, useCallback } from 'react';
 import { useUser } from '@/context/UserContext';
 import { useAuthStatus } from '@/components/AuthStatus';
 import { useRouter } from 'next/navigation';
-import { X, Gem, ArrowRight, Sparkles } from 'lucide-react';
+import { X, Gem, ArrowRight, Sparkles, Lock } from 'lucide-react';
 import { getAstrologicalChart } from '../../../utils/astrology/astrology';
 import { getGeneralCrystalRecommendation } from '../../../utils/crystals/generalCrystals';
 import {
@@ -62,16 +62,14 @@ export const CrystalPreview = () => {
   const birthChart = user?.birthChart;
   const userBirthday = user?.birthday;
 
-  // Always compute general crystal for unauthenticated users or users without chart access
+  // Always compute general crystal for all users (used as fallback or free tier content)
   const generalCrystal = useMemo(() => {
-    // Only show general crystal if user is not authenticated OR doesn't have chart access
-    if (authStatus.isAuthenticated && hasPersonalizedAccess) return null;
     return getGeneralCrystalRecommendation(normalizedDate);
-  }, [authStatus.isAuthenticated, hasPersonalizedAccess, normalizedDate]);
+  }, [normalizedDate]);
 
+  // Compute personalized crystal for ALL authenticated users (for paid users AND blurred preview)
   const crystalData = useMemo(() => {
-    if (!authStatus.isAuthenticated || !hasPersonalizedAccess) return null;
-    if (!birthChart || !observer) return null;
+    if (!birthChart || !observer || !userBirthday) return null;
 
     const currentTransits = getAstrologicalChart(normalizedDate, observer);
     const { crystal, reasons } = calculateCrystalRecommendation(
@@ -88,14 +86,7 @@ export const CrystalPreview = () => {
       reasons,
       guidance,
     };
-  }, [
-    authStatus.isAuthenticated,
-    hasPersonalizedAccess,
-    birthChart,
-    observer,
-    normalizedDate,
-    userBirthday,
-  ]);
+  }, [birthChart, observer, normalizedDate, userBirthday]);
 
   const canAccessPersonalized =
     authStatus.isAuthenticated &&
@@ -180,7 +171,7 @@ export const CrystalPreview = () => {
         className='w-full h-full py-3 px-4 bg-lunary-bg border border-zinc-800/50 rounded-md hover:border-lunary-primary-700/50 transition-colors group text-left min-h-16 cursor-pointer'
       >
         <div className='flex items-start gap-3 h-full'>
-          <div className='flex-1 min-w-0 h-full mt-1 flex flex-col'>
+          <div className='flex-1 min-w-0 h-full mt-1 flex flex-col justify-between'>
             <div className='flex items-center justify-between mb-1'>
               <div className='flex items-center gap-2'>
                 <Gem className='w-4 h-4 text-lunary-accent-200' />
@@ -188,15 +179,30 @@ export const CrystalPreview = () => {
                   {crystalName}
                 </span>
               </div>
-              {canAccessPersonalized && (
+              {canAccessPersonalized ? (
                 <span className='text-xs bg-zinc-800/50 text-lunary-primary-200 px-1.5 py-0.5 rounded'>
                   Personal
                 </span>
+              ) : (
+                <span className='flex items-center gap-1 text-[10px] text-lunary-primary-300 uppercase tracking-wide'>
+                  Personal <Lock className='w-3 h-3' />
+                </span>
               )}
             </div>
-            <p className='text-xs text-zinc-400 line-clamp-3 mt-2'>
+            <p className='text-xs text-zinc-400 line-clamp-2 mb-2'>
               {crystalReason}
             </p>
+
+            {/* Blurred preview of personalized guidance for free users */}
+            {!canAccessPersonalized && crystalData && (
+              <div className='locked-preview locked-preview-zinc mb-2'>
+                <p className='locked-preview-text text-xs'>
+                  {crystalData.reasons[0]}. {crystalData.reasons[1] || ''}{' '}
+                  {crystalData.guidance}
+                </p>
+              </div>
+            )}
+
             {!canAccessPersonalized && (
               <span
                 role='button'
@@ -225,9 +231,9 @@ export const CrystalPreview = () => {
                     }
                   }
                 }}
-                className='flex items-center gap-1.5 mt-2 text-xs text-lunary-primary-200 hover:text-lunary-primary-100 transition-colors bg-none border-none p-0 cursor-pointer'
+                className='flex items-center gap-1.5 text-xs text-lunary-primary-200 hover:text-lunary-primary-100 transition-colors bg-none border-none p-0 cursor-pointer font-medium'
               >
-                Unlock personalized recommendations with Lunary+
+                <span>Unlock Your Personal Recommendations</span>
               </span>
             )}
           </div>
