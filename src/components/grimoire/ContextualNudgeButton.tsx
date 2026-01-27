@@ -87,7 +87,11 @@ export function ContextualNudgeButton({
 
   return (
     <>
-      <Button variant='lunary-soft' onClick={handleClick}>
+      <Button
+        variant='lunary-soft'
+        onClick={handleClick}
+        className='min-w-[200px] py-6 px-8 text-base font-semibold shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-105'
+      >
         {nudge.buttonLabel}
       </Button>
 
