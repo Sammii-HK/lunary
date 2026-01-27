@@ -40,6 +40,25 @@ export async function GET(request: NextRequest) {
       ),
     ]);
 
+    // Validate all responses are successful
+    const responses = [
+      { name: 'activity', response: activityResponse },
+      { name: 'engagement', response: engagementResponse },
+      { name: 'feature-adoption', response: featureAdoptionResponse },
+      { name: 'cohort-retention', response: cohortRetentionResponse },
+      { name: 'growth', response: growthResponse },
+      { name: 'revenue', response: revenueResponse },
+    ];
+
+    for (const { name, response } of responses) {
+      if (!response.ok) {
+        const text = await response.text();
+        throw new Error(
+          `Failed to fetch ${name} analytics: ${response.status} ${response.statusText}. Response: ${text.substring(0, 200)}`,
+        );
+      }
+    }
+
     const [
       activity,
       engagement,
