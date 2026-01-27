@@ -1,13 +1,13 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import { useAuthStatus } from '@/components/AuthStatus';
 import { AuthComponent } from '@/components/Auth';
 import { useModal } from '@/hooks/useModal';
 import { Button } from '@/components/ui/button';
 import { ContextualNudge } from '@/lib/grimoire/getContextualNudge';
-import { trackCtaClick } from '@/lib/analytics';
+import { trackCtaClick, trackCtaImpression } from '@/lib/analytics';
 import { Heading } from '../ui/Heading';
 
 interface ContextualNudgeButtonProps {
@@ -23,12 +23,33 @@ export function ContextualNudgeButton({
   const router = useRouter();
   const pathname = usePathname() || '';
   const [showAuthModal, setShowAuthModal] = useState(false);
+  const impressionTracked = useRef(false);
 
   useModal({
     isOpen: showAuthModal,
     onClose: () => setShowAuthModal(false),
     closeOnClickOutside: false,
   });
+
+  // Track impression when component mounts
+  useEffect(() => {
+    if (!impressionTracked.current) {
+      impressionTracked.current = true;
+      trackCtaImpression({
+        hub: nudge.hub,
+        ctaId: 'contextual_nudge',
+        location,
+        label: nudge.buttonLabel,
+        href: nudge.href,
+        pagePath: pathname,
+        exampleType: nudge.exampleType,
+        exampleText: nudge.exampleText,
+        ctaVariant: nudge.ctaVariant,
+        ctaHeadline: nudge.ctaHeadline,
+        ctaSubline: nudge.ctaSubline,
+      });
+    }
+  }, [nudge, location, pathname]);
 
   const navigateToHref = () => {
     if (nudge.href) {
@@ -44,6 +65,11 @@ export function ContextualNudgeButton({
       label: nudge.buttonLabel,
       href: nudge.href,
       pagePath: pathname,
+      exampleType: nudge.exampleType,
+      exampleText: nudge.exampleText,
+      ctaVariant: nudge.ctaVariant,
+      ctaHeadline: nudge.ctaHeadline,
+      ctaSubline: nudge.ctaSubline,
     });
 
     if (nudge.action === 'link') {
@@ -61,7 +87,11 @@ export function ContextualNudgeButton({
 
   return (
     <>
-      <Button variant='lunary-soft' onClick={handleClick}>
+      <Button
+        variant='lunary-soft'
+        onClick={handleClick}
+        className='min-w-[200px] py-6 px-8 text-base font-semibold shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-105'
+      >
         {nudge.buttonLabel}
       </Button>
 

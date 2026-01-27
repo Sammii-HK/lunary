@@ -5,6 +5,7 @@ import { usePathname, useRouter } from 'next/navigation';
 import { useAuthStatus } from '@/components/AuthStatus';
 import { conversionTracking } from '@/lib/analytics';
 import SessionTracker from '@/components/SessionTracker';
+import { TourProvider } from '@/context/TourContext';
 
 export default function AuthenticatedLayout({
   children,
@@ -46,7 +47,7 @@ export default function AuthenticatedLayout({
   return (
     <>
       <SessionTracker />
-      {children}
+      <TourProvider>{children}</TourProvider>
     </>
   );
 }

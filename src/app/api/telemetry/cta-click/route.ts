@@ -53,6 +53,26 @@ export async function POST(request: NextRequest) {
         cta_label:
           typeof payload?.label === 'string' ? payload.label : undefined,
         cta_href: typeof payload?.href === 'string' ? payload.href : undefined,
+        example_type:
+          typeof payload?.exampleType === 'string'
+            ? payload.exampleType
+            : undefined,
+        example_text:
+          typeof payload?.exampleText === 'string'
+            ? payload.exampleText
+            : undefined,
+        cta_variant:
+          typeof payload?.ctaVariant === 'string'
+            ? payload.ctaVariant
+            : undefined,
+        cta_headline:
+          typeof payload?.ctaHeadline === 'string'
+            ? payload.ctaHeadline
+            : undefined,
+        cta_subline:
+          typeof payload?.ctaSubline === 'string'
+            ? payload.ctaSubline
+            : undefined,
         referrer: request.headers.get('referer') || undefined,
       },
     });

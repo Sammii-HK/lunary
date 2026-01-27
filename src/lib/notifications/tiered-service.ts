@@ -307,7 +307,7 @@ export async function sendTieredNotification(
         const context = await getPersonalizedContext(user, cosmicData);
         const copy = getNotificationCopy(cadence, type, user.tier, context);
 
-        const notificationUrl = getNotificationUrl(cadence, type);
+        const notificationUrl = getNotificationUrl(cadence, type, cosmicData);
 
         const notification = {
           title: copy.title,
@@ -496,13 +496,101 @@ export async function sendDailyInsightNotification(
   return sendTieredNotification('daily', notificationType, cosmicData);
 }
 
-function getNotificationUrl(cadence: string, type: string): string {
+function getNotificationUrl(
+  cadence: string,
+  type: string,
+  eventData?: any,
+): string {
+  // Weekly special cases
   if (type === 'monday_week_ahead') {
     return '/blog';
   }
   if (type === 'sunday_reset') {
     return '/guide';
   }
+
+  // Daily notifications - dashboard shows these prominently
+  if (type === 'tarot' || type === 'energy_theme' || type === 'insight') {
+    return '/app';
+  }
+
+  // Sky shift alert - show on horoscope with transit context
+  if (type === 'sky_shift') {
+    return '/horoscope#transit-wisdom';
+  }
+
+  // Weekly tarot
+  if (type === 'friday_tarot') {
+    return '/app';
+  }
+
+  // Event-based notifications
+  if (cadence === 'event') {
+    if (type === 'transit_change') {
+      return '/horoscope#transit-wisdom';
+    }
+    if (type === 'rising_activation') {
+      return '/birth-chart';
+    }
+  }
+
+  // Moon circles - navigate to dedicated page
+  if (type === 'moon_circle') {
+    return '/moon-circles';
+  }
+
+  // Personal transits - widget on horoscope page
+  if (type === 'personal_transit') {
+    return '/horoscope#personal-transits';
+  }
+
+  // Cosmic changes - show on cosmic state page
+  if (type === 'cosmic_changes') {
+    return '/cosmic-state#current-transits';
+  }
+
+  // Weekly report - navigate to reports page
+  if (type === 'weekly_report') {
+    return '/reports';
+  }
+
+  // Cosmic event-based deep links
+  if (eventData?.eventType) {
+    const { eventType, planet, sign, aspect, planetA, planetB, name } =
+      eventData;
+
+    // Retrograde - show on dashboard (integrated into TransitOfTheDay)
+    if (eventType === 'retrograde' && planet) {
+      return `/app#retrograde-${encodeURIComponent(planet.toLowerCase())}`;
+    }
+
+    // Ingress - show on horoscope transit section
+    if (eventType === 'ingress' && planet && sign) {
+      return `/horoscope#transit-wisdom`;
+    }
+
+    // Aspect - show on horoscope aspects section
+    if (eventType === 'aspect' && planetA && planetB && aspect) {
+      return `/horoscope#today-aspects`;
+    }
+
+    // Moon phase - show on dashboard
+    if (eventType === 'moon') {
+      return '/app#moon-phase';
+    }
+
+    // Sabbat/seasonal - show on cosmic state (mixed into current transits)
+    if (eventType === 'seasonal' && name) {
+      return '/cosmic-state#current-transits';
+    }
+
+    // Eclipse - show on cosmic state
+    if (eventType === 'eclipse' && name) {
+      return '/cosmic-state#current-transits';
+    }
+  }
+
+  // Default fallback
   return '/app';
 }
 

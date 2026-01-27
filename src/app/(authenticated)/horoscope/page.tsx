@@ -3,6 +3,7 @@
 import { useUser } from '@/context/UserContext';
 import { useAuthStatus } from '@/components/AuthStatus';
 import { useSubscription } from '../../../hooks/useSubscription';
+import { useNotificationDeepLink } from '@/hooks/useNotificationDeepLink';
 import { hasFeatureAccess } from '../../../../utils/pricing';
 import { FreeHoroscopeView } from './components/FreeHoroscopeView';
 import { PaidHoroscopeView } from './components/PaidHoroscopeView';
@@ -14,6 +15,7 @@ export default function HoroscopePage() {
   const { user, loading } = useUser();
   const authStatus = useAuthStatus();
   const subscription = useSubscription();
+  useNotificationDeepLink(); // Handle push notification deep links
   // For unauthenticated users, force paid horoscope access to false immediately
   // Don't wait for subscription to resolve
   const hasPersonalHoroscopeAccess = !authStatus.isAuthenticated
