@@ -236,16 +236,56 @@ export async function GET(request: NextRequest): Promise<Response> {
 
     // Get symbol if not provided (and not using images)
     // Use dynamic loader symbol, then fallback to existing symbol lookup
-    const displaySymbol =
+    // Skip symbol if it matches the title (e.g., numerology "111" symbol = "111" title)
+
+    // Normalize for comparison - remove all non-alphanumeric chars and lowercase
+    const normalizeForComparison = (str: string) =>
+      str
+        .toString()
+        .replace(/[^a-z0-9]/gi, '')
+        .toLowerCase();
+
+    const titleNormalized = normalizeForComparison(formattedTitle);
+    const slugNormalized = normalizeForComparison(slug);
+
+    // First check if URL symbol param matches title - if so, ignore it
+    // Use includes() to handle cases like title "111 Angel Number" with symbol "111"
+    const symbolNormalized = symbol ? normalizeForComparison(symbol) : '';
+    const symbolFromUrl =
+      symbol && symbolNormalized && !titleNormalized.includes(symbolNormalized)
+        ? symbol
+        : null;
+
+    const rawSymbol =
       !needsImage &&
-      (symbol || dynamicData?.symbol || getSymbolForContent(category, slug));
+      (symbolFromUrl ||
+        dynamicData?.symbol ||
+        getSymbolForContent(category, slug));
+
+    // Double-check: if symbol still matches title or slug after all lookups, hide it
+    // Use includes() to handle cases like title "111 Angel Number" with symbol "111"
+    const rawSymbolNorm = rawSymbol ? normalizeForComparison(rawSymbol) : '';
+    const displaySymbol =
+      rawSymbol &&
+      rawSymbolNorm &&
+      !titleNormalized.includes(rawSymbolNorm) &&
+      !slugNormalized.includes(rawSymbolNorm)
+        ? rawSymbol
+        : null;
 
     // Get moon phase image if lunar category
     const moonImage = needsImage ? getMoonPhaseImage(slug) : null;
 
     // Get attribute string - prefer dynamic data
-    const attributeText =
+    // Skip if it matches the title (case-insensitive) to avoid duplicate headings
+    const rawAttributeText =
       subtitle || dynamicData?.attributes || getAttributeString(category, slug);
+    const attributeText =
+      rawAttributeText &&
+      rawAttributeText.trim().toLowerCase() !==
+        formattedTitle.trim().toLowerCase()
+        ? rawAttributeText
+        : null;
 
     // Get glow color for chakras - use dynamic color or fallback
     const chakraColor =

@@ -6,6 +6,9 @@ import { generateVoiceover } from '@/lib/tts';
 import { generateVoiceoverScriptFromWeeklyData } from '@/lib/video/composition';
 import { TTS_PRESETS } from '@/lib/tts/presets';
 import { normalizeScriptForTTS } from '@/lib/tts/normalize-script';
+
+// Feature flags for video rendering
+const USE_REMOTION_RENDERER = process.env.USE_REMOTION_RENDERER === 'true';
 import {
   generateNarrativeFromWeeklyData,
   generateShortFormNarrative,
@@ -23,10 +26,23 @@ import { sendDiscordNotification } from '@/lib/discord';
 
 // Version for cache invalidation - increment when prompts change
 const SCRIPT_VERSION = {
-  short: 'v11', // v5: fixed moon phase detection using MoonPhase angle + seasonal events
-  medium: 'v16', // v9: explains what Sun in X means, seasonal events
-  long: 'v14', // v7: dedicated solstice section, in-depth Sun/Moon meanings, intention setting
+  short: 'v21',
+  medium: 'v26',
+  long: 'v24',
 };
+
+// Bank of CTA messages to rotate through
+const CTA_MESSAGES = [
+  'Dive deeper with Lunary',
+  'Find more insights on Lunary',
+  'Learn more with Lunary',
+  'Explore more on Lunary',
+  'Discover more with Lunary',
+];
+
+function getRandomCTA(): string {
+  return CTA_MESSAGES[Math.floor(Math.random() * CTA_MESSAGES.length)];
+}
 
 export const runtime = 'nodejs';
 export const maxDuration = 300; // 5 minutes for video generation
@@ -1233,6 +1249,52 @@ export async function POST(request: NextRequest) {
         }
 
         // Compose video with multiple images
+        // Future: When USE_REMOTION_RENDERER is enabled, use Remotion for more
+        // sophisticated animations. For now, FFmpeg handles all rendering.
+        // To enable Remotion: set USE_REMOTION_RENDERER=true in environment
+        if (USE_REMOTION_RENDERER) {
+          console.log(
+            `🎬 Remotion rendering enabled but not yet implemented for production`,
+          );
+          console.log(
+            `💡 Falling back to FFmpeg for now. Remotion structure ready at src/remotion/`,
+          );
+        }
+
+        // Extract hook (first sentence) for overlay
+        const hookMatch = script.match(/^[^.!?]+[.!?]/);
+        const hookText = hookMatch
+          ? hookMatch[0].trim().substring(0, 60) // Max 60 chars for readability
+          : undefined;
+
+        // Build overlays for hook and CTA
+        const videoOverlays: Array<{
+          text: string;
+          startTime: number;
+          endTime: number;
+          style: 'chapter' | 'stamp' | 'title';
+        }> = [];
+
+        // Hook overlay at the beginning
+        if (hookText && hookText.length > 10) {
+          videoOverlays.push({
+            text: hookText,
+            startTime: 0.5,
+            endTime: 3.5,
+            style: 'title',
+          });
+        }
+
+        // CTA overlay at the end (random from bank)
+        if (actualAudioDuration && actualAudioDuration > 8) {
+          videoOverlays.push({
+            text: getRandomCTA(),
+            startTime: actualAudioDuration - 2,
+            endTime: actualAudioDuration + 1.5,
+            style: 'stamp',
+          });
+        }
+
         videoBuffer = await composeVideo({
           images: topicImages.map((img) => ({
             url: img.imageUrl,
@@ -1241,11 +1303,15 @@ export async function POST(request: NextRequest) {
           })),
           audioBuffer,
           format: videoFormat,
+          subtitlesText: script,
+          overlays: videoOverlays.length > 0 ? videoOverlays : undefined,
           hueShiftBase,
           hueShiftMaxDelta: 12,
           lockIntroHue: true,
         });
-        console.log(`✅ Video composed with ${topicImages.length} images`);
+        console.log(
+          `✅ Video composed with ${topicImages.length} images, subtitles, ${videoOverlays.length} overlays`,
+        );
       } catch (error) {
         console.error(
           '❌ Failed to generate topic-based images:',
@@ -1262,14 +1328,54 @@ export async function POST(request: NextRequest) {
       if (!imageUrl) {
         throw new Error('No image URL available for video composition');
       }
+
+      // Extract hook (first sentence) for overlay
+      const hookMatch = script.match(/^[^.!?]+[.!?]/);
+      const hookText = hookMatch
+        ? hookMatch[0].trim().substring(0, 50) // Max 50 chars for short-form
+        : undefined;
+
+      // Build overlays for hook and CTA
+      const videoOverlays: Array<{
+        text: string;
+        startTime: number;
+        endTime: number;
+        style: 'chapter' | 'stamp' | 'title';
+      }> = [];
+
+      // Hook overlay at the beginning
+      if (hookText && hookText.length > 10) {
+        videoOverlays.push({
+          text: hookText,
+          startTime: 0.3,
+          endTime: 3.0,
+          style: 'title',
+        });
+      }
+
+      // CTA overlay at the end (random from bank)
+      if (actualAudioDuration && actualAudioDuration > 8) {
+        videoOverlays.push({
+          text: getRandomCTA(),
+          startTime: actualAudioDuration - 1.5,
+          endTime: actualAudioDuration + 1.5,
+          style: 'stamp',
+        });
+      }
+
       videoBuffer = await composeVideo({
         imageUrl,
         audioBuffer,
         format: videoFormat,
+        subtitlesText: script,
+        overlays: videoOverlays.length > 0 ? videoOverlays : undefined,
         hueShiftBase,
         hueShiftMaxDelta: 12,
         lockIntroHue: true,
       });
+      console.log(
+        `✅ Short-form video composed with subtitles, ${videoOverlays.length} overlays`,
+      );
     }
 
     // Upload to Vercel Blob

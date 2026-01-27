@@ -4,6 +4,19 @@ import { getPaletteHighlightColor } from '../../../utils/og/symbols';
 
 const CHAPTER_LABELS = ['Context', 'Significance', 'Reflection'];
 
+// CTA messages to rotate through
+const CTA_MESSAGES = [
+  'Dive deeper with Lunary',
+  'Find more insights on Lunary',
+  'Learn more with Lunary',
+  'Explore more on Lunary',
+  'Discover more with Lunary',
+];
+
+function getRandomCTA(): string {
+  return CTA_MESSAGES[Math.floor(Math.random() * CTA_MESSAGES.length)];
+}
+
 const ZODIAC_SIGNS = [
   'Aries',
   'Taurus',
@@ -284,14 +297,26 @@ export function buildThematicVideoComposition({
     return { url, startTime, endTime };
   });
 
-  const topSubtitle = theme?.name || 'Weekly Theme';
+  // Get hook text (full first sentence - wrapping handled by compose-video)
+  const sentences = splitSentences(script);
+  const hookText = sentences[0] || '';
+
+  // Calculate total duration for CTA timing
+  const totalDuration = images[images.length - 1]?.endTime || durationEstimate;
+
   const overlays = [
-    {
-      text: topSubtitle,
-      startTime: images[0].startTime,
-      endTime: images[0].endTime,
-      style: 'title' as const,
-    },
+    // Hook text (first sentence) below center during first segment
+    ...(hookText.length > 10
+      ? [
+          {
+            text: hookText,
+            startTime: 0.3,
+            endTime: Math.min(3.5, images[0].endTime - 0.3),
+            style: 'hook' as const, // Hook style = below center
+          },
+        ]
+      : []),
+    // Chapter labels for middle and end segments
     {
       text: CHAPTER_LABELS[1],
       startTime: images[1].startTime,
@@ -304,6 +329,20 @@ export function buildThematicVideoComposition({
       endTime: images[2].endTime,
       style: 'chapter' as const,
     },
+    // CTA appears later, fades out near video end
+    {
+      text: getRandomCTA(),
+      startTime: totalDuration - 6,
+      endTime: totalDuration - 0.5,
+      style: 'cta' as const,
+    },
+    // Follow stamp - appears with CTA, fades out near video end
+    {
+      text: 'follow @lunary.app',
+      startTime: totalDuration - 5.5,
+      endTime: totalDuration - 0.5,
+      style: 'stamp' as const,
+    },
   ];
 
   const stamps = extractDataStamps(script);
@@ -314,14 +353,13 @@ export function buildThematicVideoComposition({
     style: 'stamp' as const,
   }));
 
-  const sentences = splitSentences(script);
-  const hookSentence = sentences[0] || '';
+  // sentences and hookText already declared above for hook overlay
   const rawHighlightTerms = extractHighlightTerms(script, facet);
   const filteredHighlightTerms = rawHighlightTerms.filter(
     (term) => !STOPWORDS.has(term.toLowerCase()),
   );
   if (filteredHighlightTerms.length === 0) {
-    const fallbackTerm = getHighlightFallbackTerm(script, hookSentence, facet);
+    const fallbackTerm = getHighlightFallbackTerm(script, hookText, facet);
     if (fallbackTerm) {
       filteredHighlightTerms.push(fallbackTerm);
     } else if (rawHighlightTerms.length > 0) {

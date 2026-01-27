@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import dayjs from 'dayjs';
+import dynamic from 'next/dynamic';
 import { Share2 } from 'lucide-react';
 import { getEnhancedPersonalizedHoroscope } from '../../../../../utils/astrology/enhancedHoroscope';
 import {
@@ -17,7 +18,17 @@ import { HoroscopeSection } from './HoroscopeSection';
 import { PersonalTransitImpactCard } from './PersonalTransitImpact';
 import { TodaysAspects } from './TodaysAspects';
 import { TransitWisdom } from './TransitWisdom';
-import { GuideNudge } from '@/components/GuideNudge';
+
+const GuideNudge = dynamic(
+  () =>
+    import('@/components/GuideNudge').then((m) => ({
+      default: m.GuideNudge,
+    })),
+  {
+    loading: () => null,
+    ssr: false,
+  },
+);
 import { PremiumPathway } from '@/components/PremiumPathway';
 import { getPersonalDayNumber } from '@/lib/numerology/personalNumbers';
 import {

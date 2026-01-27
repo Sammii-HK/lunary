@@ -10,6 +10,43 @@ type YouTubeUploadResult = {
   error?: string;
 };
 
+async function removeVideoJobsForPost(postId: number) {
+  try {
+    const postResult = await sql`
+      SELECT topic, week_theme, scheduled_date::date AS scheduled_date
+      FROM social_posts
+      WHERE id = ${postId}
+      LIMIT 1
+    `;
+    const post = postResult.rows[0];
+    if (!post?.topic || !post?.scheduled_date) {
+      return;
+    }
+
+    await sql`
+      DELETE FROM video_jobs
+      WHERE topic = ${post.topic}
+        AND date_key = ${post.scheduled_date}
+    `;
+
+    await sql`
+      DELETE FROM video_jobs
+      WHERE script_id IN (
+        SELECT id
+        FROM video_scripts
+        WHERE facet_title = ${post.topic}
+          AND scheduled_date = ${post.scheduled_date}
+          AND (
+            (${post.week_theme} IS NOT NULL AND theme_name = ${post.week_theme})
+            OR (${post.week_theme} IS NULL AND theme_name IS NULL)
+          )
+      )
+    `;
+  } catch (error) {
+    console.warn('Failed to clean up video jobs for rejected post:', error);
+  }
+}
+
 function getWeekStart(date: Date): Date {
   const d = new Date(date);
   const day = d.getDay();
@@ -124,6 +161,8 @@ export async function POST(request: NextRequest) {
           WHERE id = ${parsedPostId}
         `;
       }
+
+      await removeVideoJobsForPost(parsedPostId);
     } else if (action === 'approve') {
       const idsToUpdate =
         groupIds.length > 0

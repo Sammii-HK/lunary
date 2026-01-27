@@ -127,7 +127,7 @@ export async function POST(
         issues = validateSocialCopy(generated.content, pack.topic);
       }
       if (issues.length > 0) {
-        const fallback = buildFallbackCopy(pack);
+        const fallback = await buildFallbackCopy(pack);
         postContent = fallback.content;
         hashtags = fallback.hashtags;
       } else {

@@ -27,6 +27,7 @@ export const domainHashtags: Record<ThemeCategory, string> = {
   numerology: '#numerology',
   crystals: '#crystalhealing',
   chakras: '#spirituality',
+  runes: '#runes',
 };
 
 // ============================================================================
@@ -122,8 +123,16 @@ export function getThemeForDate(
     theme.facetPool && theme.facetPool.length > 0
       ? theme.facetPool
       : theme.facets;
+
+  // Calculate week's starting position in facet pool
+  // Each week gets a contiguous block of 7 unique facets
+  // facetOffset rotates through the pool week-by-week
+  const weekBlockStart = (facetOffset * 7) % facets.length;
   const resolvedIndex =
-    facets.length > 0 ? (facetIndex + facetOffset) % facets.length : facetIndex;
+    facets.length > 0
+      ? (weekBlockStart + facetIndex) % facets.length
+      : facetIndex;
+
   return {
     theme,
     facet: facets[resolvedIndex] || theme.facets[facetIndex],
@@ -160,6 +169,7 @@ export function generateHashtags(
 
 /**
  * Get the week's content plan
+ * Filters out duplicate facets when a theme has fewer than 7 unique facets
  */
 export function getWeeklyContentPlan(
   weekStartDate: Date,
@@ -185,6 +195,9 @@ export function getWeeklyContentPlan(
     'Sunday',
   ];
 
+  // Track used facet titles to prevent duplicates within the same week
+  const usedFacetTitles = new Set<string>();
+
   for (let i = 0; i < 7; i++) {
     const date = new Date(weekStartDate);
     date.setDate(weekStartDate.getDate() + i);
@@ -195,6 +208,14 @@ export function getWeeklyContentPlan(
       facetOffset,
       includeSabbats,
     );
+
+    // Skip duplicate facets (can happen when theme has fewer than 7 facets)
+    const facetKey = `${theme.id}-${facet.title}`;
+    if (usedFacetTitles.has(facetKey)) {
+      continue;
+    }
+    usedFacetTitles.add(facetKey);
+
     const hashtags = generateHashtags(theme, facet);
 
     plan.push({

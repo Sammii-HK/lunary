@@ -687,10 +687,14 @@ export default function SocialPostsPage() {
   };
 
   const handleBulkAction = async (action: 'approve_all' | 'clear_all') => {
+    const pendingCount = pendingPosts.filter(
+      (p) => p.status === 'pending',
+    ).length;
+    const totalCount = pendingPosts.length;
     const confirmMessage =
       action === 'approve_all'
-        ? `Approve all ${pendingPosts.filter((p) => p.status === 'pending').length} pending posts?`
-        : `Delete all ${pendingPosts.filter((p) => p.status === 'pending').length} pending posts? This cannot be undone.`;
+        ? `Approve all ${pendingCount} pending posts?`
+        : `Delete ${totalCount} queued posts? This cannot be undone.`;
 
     if (!confirm(confirmMessage)) return;
 

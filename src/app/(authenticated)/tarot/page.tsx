@@ -39,7 +39,18 @@ import type { TarotPlan } from '@/constants/tarotSpreads';
 import { FeaturePreview } from '../horoscope/components/FeaturePreview';
 import { HoroscopeSection } from '../horoscope/components/HoroscopeSection';
 import { cn } from '@/lib/utils';
-import { GuideNudge } from '@/components/GuideNudge';
+import dynamic from 'next/dynamic';
+
+const GuideNudge = dynamic(
+  () =>
+    import('@/components/GuideNudge').then((m) => ({
+      default: m.GuideNudge,
+    })),
+  {
+    loading: () => null,
+    ssr: false,
+  },
+);
 import { TarotSeasonReading } from '@/components/tarot/TarotSeasonReading';
 import { TarotRitualForPatterns } from '@/components/tarot/TarotRitualForPatterns';
 import { TarotReflectionPrompts } from '@/components/tarot/TarotReflectionPrompts';

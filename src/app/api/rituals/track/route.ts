@@ -3,7 +3,15 @@ import { sql } from '@vercel/postgres';
 
 export async function POST(request: NextRequest) {
   try {
-    const body = await request.json();
+    let body;
+    try {
+      body = await request.json();
+    } catch {
+      return NextResponse.json(
+        { error: 'Invalid or empty request body' },
+        { status: 400 },
+      );
+    }
     const { messageId, context, userId, action } = body;
 
     if (!messageId || !context) {

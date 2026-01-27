@@ -88,16 +88,40 @@ export function getThematicImageUrl(
   const thematicCategory = mapToThematicCategory(category);
   const normalizedSlug = slug || title.toLowerCase().replace(/\s+/g, '-');
 
-  // Get symbol for this content
-  const symbol = getSymbolForContent(thematicCategory, normalizedSlug);
-
-  // Build URL
+  // Get symbol for this content - but skip if it matches the title
+  const rawSymbol = getSymbolForContent(thematicCategory, normalizedSlug);
   const formattedTitle = capitalizeThematicTitle(title);
+
+  // Normalize for comparison - remove all non-alphanumeric chars and lowercase
+  const normalizeForComparison = (str: string) =>
+    str
+      .toString()
+      .replace(/[^a-z0-9]/gi, '')
+      .toLowerCase();
+
+  const symbolNorm = rawSymbol ? normalizeForComparison(rawSymbol) : '';
+  const titleNorm = normalizeForComparison(formattedTitle);
+  const slugNorm = normalizeForComparison(normalizedSlug);
+  const rawTitleNorm = normalizeForComparison(title);
+
+  // Only include symbol if it's different from title AND slug (avoids duplication like "111" symbol + "111" title)
+  // Use includes() check because title might be "111 Angel Number" while symbol is just "111"
+  const symbol =
+    rawSymbol &&
+    !titleNorm.includes(symbolNorm) &&
+    !slugNorm.includes(symbolNorm) &&
+    !rawTitleNorm.includes(symbolNorm)
+      ? rawSymbol
+      : null;
+
+  // Build URL - include version for cache busting when we make changes
+  const IMAGE_VERSION = '2';
   const params = new URLSearchParams({
     category: thematicCategory,
     title: formattedTitle,
     format,
     slug: normalizedSlug,
+    v: IMAGE_VERSION,
   });
 
   if (subtitle) {

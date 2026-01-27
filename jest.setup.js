@@ -1,6 +1,22 @@
 import '@testing-library/jest-dom';
 import { TextEncoder, TextDecoder } from 'util';
+import {
+  ReadableStream,
+  WritableStream,
+  TransformStream,
+} from 'web-streams-polyfill';
 import dotenv from 'dotenv';
+
+// Polyfill Web Streams API for AI SDK v6
+if (typeof global.ReadableStream === 'undefined') {
+  global.ReadableStream = ReadableStream;
+}
+if (typeof global.WritableStream === 'undefined') {
+  global.WritableStream = WritableStream;
+}
+if (typeof global.TransformStream === 'undefined') {
+  global.TransformStream = TransformStream;
+}
 
 // Set default environment variables for tests
 if (!process.env.BETTER_AUTH_SECRET) {

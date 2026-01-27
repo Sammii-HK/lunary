@@ -45,6 +45,8 @@ export const ASPECTS = [
   'square',
   'trine',
   'opposite',
+  'quincunx',
+  'semisextile',
 ] as const;
 
 export type Aspect = (typeof ASPECTS)[number];
@@ -104,6 +106,24 @@ export const ASPECT_DATA: Record<
     keywords: ['polarity', 'balance', 'awareness', 'projection'],
     description:
       'An opposition at 180 degrees creates a polarity between two planets, requiring balance and integration of opposite energies.',
+  },
+  quincunx: {
+    displayName: 'Quincunx',
+    symbol: '⚻',
+    degrees: 150,
+    nature: 'challenging',
+    keywords: ['adjustment', 'discomfort', 'integration', 'fine-tuning'],
+    description:
+      'A quincunx at 150 degrees creates subtle friction between planets that share no natural connection, requiring constant adjustment and adaptation.',
+  },
+  semisextile: {
+    displayName: 'Semi-Sextile',
+    symbol: '⚺',
+    degrees: 30,
+    nature: 'harmonious',
+    keywords: ['growth', 'potential', 'subtle opportunity', 'adjacent signs'],
+    description:
+      'A semi-sextile at 30 degrees connects planets in adjacent signs, creating minor but helpful connections that support gradual development.',
   },
 };
 

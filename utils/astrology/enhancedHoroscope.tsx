@@ -1146,7 +1146,7 @@ const generateOverview = (
     } else {
       const houseArea = getSignHouseRelation(currentSun.sign, natalSun.sign);
       parts.push(
-        `The Sun in ${currentSun.sign} activates ${houseArea} for you, ${natalSun.sign}.`,
+        `The Sun in ${currentSun.sign} activates ${houseArea} for you.`,
       );
     }
   }

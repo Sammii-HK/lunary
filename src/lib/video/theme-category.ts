@@ -1,4 +1,4 @@
-import { thematicPaletteConfig } from '@/constants/seo/generated-category-themes';
+import { thematicPaletteConfig } from '@/constants/seo/thematic-palette-config';
 
 export type ThemeCategory =
   keyof typeof thematicPaletteConfig.palettesByTopLevelCategory;

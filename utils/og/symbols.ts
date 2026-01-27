@@ -1,4 +1,4 @@
-import { thematicPaletteConfig } from '@/constants/seo/generated-category-themes';
+import { thematicPaletteConfig } from '@/constants/seo/thematic-palette-config';
 
 /**
  * Symbol and Color Mappings for Thematic OG Images
@@ -571,8 +571,10 @@ export function getSymbolForContent(
       return null;
 
     case 'numerology': {
+      // Only return a symbol if there's a special mapping, not the number itself
+      // (returning "111" as symbol when title is "111" causes duplication)
       const num = normalizedSlug.match(/\d+/)?.[0];
-      return num ? numerologySymbols[num] || num : null;
+      return num ? numerologySymbols[num] || null : null;
     }
 
     default:
