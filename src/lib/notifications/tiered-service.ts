@@ -307,7 +307,7 @@ export async function sendTieredNotification(
         const context = await getPersonalizedContext(user, cosmicData);
         const copy = getNotificationCopy(cadence, type, user.tier, context);
 
-        const notificationUrl = getNotificationUrl(cadence, type);
+        const notificationUrl = getNotificationUrl(cadence, type, cosmicData);
 
         const notification = {
           title: copy.title,
@@ -496,13 +496,95 @@ export async function sendDailyInsightNotification(
   return sendTieredNotification('daily', notificationType, cosmicData);
 }
 
-function getNotificationUrl(cadence: string, type: string): string {
+function getNotificationUrl(
+  cadence: string,
+  type: string,
+  eventData?: any,
+): string {
+  // Weekly special cases
   if (type === 'monday_week_ahead') {
     return '/blog';
   }
   if (type === 'sunday_reset') {
     return '/guide';
   }
+
+  // Daily notifications - most can use /app dashboard
+  if (type === 'tarot' || type === 'energy_theme' || type === 'insight') {
+    return '/app'; // Dashboard shows these prominently
+  }
+
+  // Sky shift alert - should show transit context
+  if (type === 'sky_shift') {
+    const date = new Date().toISOString().split('T')[0];
+    return `/app?view=transits&date=${date}`;
+  }
+
+  // Weekly tarot
+  if (type === 'friday_tarot') {
+    return '/app'; // Dashboard
+  }
+
+  // Event-based notifications
+  if (cadence === 'event') {
+    if (type === 'transit_change') {
+      return '/app?tab=transits';
+    }
+    if (type === 'rising_activation') {
+      return '/app?tab=chart&highlight=rising';
+    }
+  }
+
+  // Moon circles - navigate to dedicated page
+  if (type === 'moon_circle') {
+    return '/moon-circles';
+  }
+
+  // Personal transits
+  if (type === 'personal_transit') {
+    return '/app?tab=transits';
+  }
+
+  // Cosmic changes
+  if (type === 'cosmic_changes') {
+    return '/app?view=cosmic-changes';
+  }
+
+  // Weekly report - use app for now since /reports/weekly doesn't exist
+  if (type === 'weekly_report') {
+    return '/app?tab=reports';
+  }
+
+  // Cosmic event-based deep links
+  if (eventData?.eventType) {
+    const { eventType, planet, sign, aspect, planetA, planetB, name } =
+      eventData;
+
+    if (eventType === 'retrograde' && planet) {
+      return `/app?event=retrograde&planet=${encodeURIComponent(planet)}`;
+    }
+    if (eventType === 'ingress' && planet && sign) {
+      return `/app?event=ingress&planet=${encodeURIComponent(planet)}&sign=${encodeURIComponent(sign)}`;
+    }
+    if (eventType === 'aspect' && planetA && planetB && aspect) {
+      return `/app?event=aspect&planetA=${encodeURIComponent(planetA)}&planetB=${encodeURIComponent(planetB)}&aspect=${encodeURIComponent(aspect)}`;
+    }
+    if (eventType === 'moon') {
+      const phase = name?.replace('Moon', '').trim() || 'phase';
+      return `/app?event=moon-phase&phase=${encodeURIComponent(phase)}`;
+    }
+    if (eventType === 'seasonal' && name) {
+      return `/app?event=sabbat&name=${encodeURIComponent(name)}`;
+    }
+    if (eventType === 'eclipse' && name) {
+      const eclipseType = name.toLowerCase().includes('solar')
+        ? 'solar'
+        : 'lunar';
+      return `/app?event=eclipse&type=${eclipseType}`;
+    }
+  }
+
+  // Default fallback
   return '/app';
 }
 

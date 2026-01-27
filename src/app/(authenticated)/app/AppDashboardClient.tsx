@@ -7,6 +7,7 @@ import { useUser } from '@/context/UserContext';
 import { useAuthStatus } from '@/components/AuthStatus';
 import { recordCheckIn } from '@/lib/streak/check-in';
 import { conversionTracking } from '@/lib/analytics';
+import { useNotificationDeepLink } from '@/hooks/useNotificationDeepLink';
 
 import { ShareDailyInsight } from '@/components/ShareDailyInsight';
 
@@ -137,6 +138,9 @@ export default function AppDashboardClient() {
   const authState = useAuthStatus();
   const [focusHonoured, setFocusHonoured] = useState(false);
   const firstName = user?.name?.trim() ? user.name.split(' ')[0] : null;
+
+  // Handle push notification deep links
+  useNotificationDeepLink();
 
   useEffect(() => {
     if (authState.isAuthenticated && !authState.loading) {
