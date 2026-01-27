@@ -188,9 +188,7 @@ export async function POST(request: NextRequest) {
         break;
 
       case 'invoice.payment_failed':
-        await handleInvoicePaymentFailed(
-          event.data.object as Stripe.Invoice,
-        );
+        await handleInvoicePaymentFailed(event.data.object as Stripe.Invoice);
         break;
 
       case 'invoice.payment_succeeded':
@@ -543,9 +541,7 @@ async function handleSubscriptionDeleted(subscription: Stripe.Subscription) {
   }
 }
 
-async function handleCheckoutSessionExpired(
-  session: Stripe.Checkout.Session,
-) {
+async function handleCheckoutSessionExpired(session: Stripe.Checkout.Session) {
   if (session.mode !== 'subscription') return;
 
   const userId =
@@ -648,7 +644,8 @@ async function handleInvoicePaymentFailed(invoice: Stripe.Invoice) {
     let planType: string | undefined = undefined;
     if (subscriptionId) {
       try {
-        const subscription = await stripe.subscriptions.retrieve(subscriptionId);
+        const subscription =
+          await stripe.subscriptions.retrieve(subscriptionId);
         planType = getPlanTypeFromSubscription(subscription);
       } catch (error) {
         console.error('Failed to get subscription for failed invoice:', error);
