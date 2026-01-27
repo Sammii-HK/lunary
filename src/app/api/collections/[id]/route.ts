@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { sql } from '@vercel/postgres';
 import { requireUser } from '@/lib/ai/auth';
+import { conversionTracking } from '@/lib/analytics';
 
 export async function GET(
   request: NextRequest,
@@ -231,6 +232,19 @@ export async function PATCH(
 
     const collection = result.rows[0];
 
+    // Track journal/dream updates
+    if (collection.category === 'dream') {
+      conversionTracking.dreamEntryUpdated(user.id, {
+        entryId: collection.id,
+        fieldsUpdated: Object.keys(body),
+      });
+    } else if (collection.category === 'journal') {
+      conversionTracking.journalEntryUpdated(user.id, {
+        entryId: collection.id,
+        fieldsUpdated: Object.keys(body),
+      });
+    }
+
     return NextResponse.json({
       success: true,
       collection: {
@@ -265,6 +279,14 @@ export async function DELETE(
     const user = await requireUser(request);
     const { id } = await params;
 
+    // Get category before deletion for tracking
+    const categoryResult = await sql`
+      SELECT category
+      FROM collections
+      WHERE id = ${parseInt(id, 10)}
+      AND user_id = ${user.id}
+    `;
+
     const result = await sql`
       DELETE FROM collections
       WHERE id = ${parseInt(id, 10)}
@@ -277,6 +299,18 @@ export async function DELETE(
         { success: false, error: 'Collection not found' },
         { status: 404 },
       );
+    }
+
+    // Track journal/dream deletion
+    const category = categoryResult.rows[0]?.category;
+    if (category === 'dream') {
+      conversionTracking.dreamEntryDeleted(user.id, {
+        entryId: parseInt(id, 10),
+      });
+    } else if (category === 'journal') {
+      conversionTracking.journalEntryDeleted(user.id, {
+        entryId: parseInt(id, 10),
+      });
     }
 
     return NextResponse.json({ success: true });

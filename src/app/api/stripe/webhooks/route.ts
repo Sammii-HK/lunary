@@ -5,6 +5,7 @@ import { sql } from '@vercel/postgres';
 
 import { trackConversionEvent } from '@/lib/analytics/tracking';
 import { captureEvent } from '@/lib/posthog-server';
+import { conversionTracking } from '@/lib/analytics';
 
 function getStripe() {
   if (!process.env.STRIPE_SECRET_KEY) {
@@ -174,6 +175,32 @@ export async function POST(request: NextRequest) {
         await handleCheckoutSessionCompleted(
           event.data.object as Stripe.Checkout.Session,
         );
+        break;
+
+      case 'checkout.session.expired':
+        await handleCheckoutSessionExpired(
+          event.data.object as Stripe.Checkout.Session,
+        );
+        break;
+
+      case 'charge.failed':
+        await handleChargeFailed(event.data.object as Stripe.Charge);
+        break;
+
+      case 'invoice.payment_failed':
+        await handleInvoicePaymentFailed(
+          event.data.object as Stripe.Invoice,
+        );
+        break;
+
+      case 'invoice.payment_succeeded':
+        await handleInvoicePaymentSucceeded(
+          event.data.object as Stripe.Invoice,
+        );
+        break;
+
+      case 'charge.refunded':
+        await handleChargeRefunded(event.data.object as Stripe.Charge);
         break;
     }
 
@@ -500,5 +527,215 @@ async function handleSubscriptionDeleted(subscription: Stripe.Subscription) {
     } catch (error) {
       console.error('DB update failed:', error);
     }
+
+    // Track cancellation
+    const planType = getPlanTypeFromSubscription(subscription);
+    conversionTracking.subscriptionCancelled(userId, planType);
+
+    // Track cancellation reason if available in metadata
+    if (subscription.metadata?.cancellation_reason) {
+      conversionTracking.subscriptionCancellationReason(
+        userId,
+        subscription.metadata.cancellation_reason,
+        subscription.metadata.cancellation_category || undefined,
+      );
+    }
+  }
+}
+
+async function handleCheckoutSessionExpired(
+  session: Stripe.Checkout.Session,
+) {
+  if (session.mode !== 'subscription') return;
+
+  const userId =
+    (typeof session.client_reference_id === 'string' &&
+      session.client_reference_id.trim().length > 0 &&
+      session.client_reference_id.trim()) ||
+    (typeof session.metadata?.userId === 'string' &&
+      session.metadata.userId.trim().length > 0 &&
+      session.metadata.userId.trim()) ||
+    null;
+
+  if (userId) {
+    // Track checkout abandonment
+    conversionTracking.checkoutAbandoned(userId, 'expired');
+  }
+}
+
+async function handleChargeFailed(charge: Stripe.Charge) {
+  const stripe = getStripe();
+  const customerId = charge.customer as string | null;
+  if (!customerId) return;
+
+  let userId: string | null = null;
+  try {
+    const customer = await stripe.customers.retrieve(customerId);
+    userId = (customer as any).metadata?.userId || null;
+  } catch (error) {
+    console.error('Failed to get customer for failed charge:', error);
+  }
+
+  // Fallback: match userId by customer id in DB
+  if (!userId && customerId) {
+    try {
+      const match = await sql`
+        SELECT user_id FROM subscriptions
+        WHERE stripe_customer_id = ${customerId}
+        LIMIT 1
+      `;
+      userId = match.rows[0]?.user_id || null;
+    } catch (error) {
+      console.error('Failed to match user for failed charge:', error);
+    }
+  }
+
+  if (userId) {
+    const failureCode = charge.failure_code || 'unknown';
+    const failureMessage = charge.failure_message || 'Payment failed';
+    const amount = (charge.amount || 0) / 100;
+
+    // Track payment failure
+    conversionTracking.paymentFailed(
+      userId,
+      failureCode,
+      amount,
+      charge.metadata?.plan_type || undefined,
+    );
+
+    // Log for support investigation
+    console.error('Payment failed for user:', {
+      userId,
+      chargeId: charge.id,
+      failureCode,
+      failureMessage,
+      amount,
+    });
+  }
+}
+
+async function handleInvoicePaymentFailed(invoice: Stripe.Invoice) {
+  const stripe = getStripe();
+  const customerId = invoice.customer as string | null;
+  if (!customerId) return;
+
+  let userId: string | null = null;
+  try {
+    const customer = await stripe.customers.retrieve(customerId);
+    userId = (customer as any).metadata?.userId || null;
+  } catch (error) {
+    console.error('Failed to get customer for failed invoice:', error);
+  }
+
+  if (!userId && customerId) {
+    try {
+      const match = await sql`
+        SELECT user_id FROM subscriptions
+        WHERE stripe_customer_id = ${customerId}
+        LIMIT 1
+      `;
+      userId = match.rows[0]?.user_id || null;
+    } catch (error) {
+      console.error('Failed to match user for failed invoice:', error);
+    }
+  }
+
+  if (userId) {
+    const attemptCount = invoice.attempt_count || 1;
+    const amount = (invoice.amount_due || 0) / 100;
+    const subscriptionId = invoice.subscription as string | null;
+
+    let planType: string | undefined = undefined;
+    if (subscriptionId) {
+      try {
+        const subscription = await stripe.subscriptions.retrieve(subscriptionId);
+        planType = getPlanTypeFromSubscription(subscription);
+      } catch (error) {
+        console.error('Failed to get subscription for failed invoice:', error);
+      }
+    }
+
+    // Track payment failure
+    const failureReason = invoice.charge
+      ? `Invoice payment failed (attempt ${attemptCount})`
+      : 'Invoice payment failed';
+    conversionTracking.paymentFailed(userId, failureReason, amount, planType);
+
+    // Track retry if this is not the first attempt
+    if (attemptCount > 1) {
+      conversionTracking.paymentRetryAttempted(userId, attemptCount, amount);
+    }
+  }
+}
+
+async function handleInvoicePaymentSucceeded(invoice: Stripe.Invoice) {
+  const stripe = getStripe();
+  const customerId = invoice.customer as string | null;
+  if (!customerId) return;
+
+  let userId: string | null = null;
+  try {
+    const customer = await stripe.customers.retrieve(customerId);
+    userId = (customer as any).metadata?.userId || null;
+  } catch (error) {
+    console.error('Failed to get customer for successful invoice:', error);
+  }
+
+  if (!userId && customerId) {
+    try {
+      const match = await sql`
+        SELECT user_id FROM subscriptions
+        WHERE stripe_customer_id = ${customerId}
+        LIMIT 1
+      `;
+      userId = match.rows[0]?.user_id || null;
+    } catch (error) {
+      console.error('Failed to match user for successful invoice:', error);
+    }
+  }
+
+  if (userId && invoice.attempt_count && invoice.attempt_count > 1) {
+    // Payment succeeded after retry
+    const amount = (invoice.amount_paid || 0) / 100;
+    conversionTracking.paymentRetrySuccess(
+      userId,
+      invoice.attempt_count,
+      amount,
+    );
+  }
+}
+
+async function handleChargeRefunded(charge: Stripe.Charge) {
+  const stripe = getStripe();
+  const customerId = charge.customer as string | null;
+  if (!customerId) return;
+
+  let userId: string | null = null;
+  try {
+    const customer = await stripe.customers.retrieve(customerId);
+    userId = (customer as any).metadata?.userId || null;
+  } catch (error) {
+    console.error('Failed to get customer for refund:', error);
+  }
+
+  if (!userId && customerId) {
+    try {
+      const match = await sql`
+        SELECT user_id FROM subscriptions
+        WHERE stripe_customer_id = ${customerId}
+        LIMIT 1
+      `;
+      userId = match.rows[0]?.user_id || null;
+    } catch (error) {
+      console.error('Failed to match user for refund:', error);
+    }
+  }
+
+  if (userId) {
+    const amount = (charge.amount_refunded || 0) / 100;
+    const reason = charge.refunds?.data[0]?.reason || 'unknown';
+
+    // Track refund
+    conversionTracking.subscriptionRefunded(userId, amount, reason);
   }
 }

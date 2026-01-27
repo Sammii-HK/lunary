@@ -1,6 +1,7 @@
 import { sql } from '@vercel/postgres';
 
 export type CanonicalEventType =
+  // Core engagement
   | 'app_opened'
   | 'product_opened'
   | 'page_viewed'
@@ -10,6 +11,7 @@ export type CanonicalEventType =
   | 'nav_tab_clicked'
   | 'dashboard_widget_cta_clicked'
   | 'dashboard_widget_expanded'
+  // Tarot
   | 'tarot_draw_started'
   | 'tarot_card_drawn'
   | 'tarot_reading_completed'
@@ -18,32 +20,113 @@ export type CanonicalEventType =
   | 'tarot_patterns_module_viewed'
   | 'tarot_card_modal_opened'
   | 'tarot_card_grimoire_clicked'
+  // Horoscope
   | 'horoscope_viewed'
   | 'horoscope_section_expanded'
   | 'birth_chart_learn_more_clicked'
+  // Journal & Content Creation
   | 'journal_mode_activated'
   | 'reflection_started'
   | 'reflection_saved'
+  | 'journal_entry_created'
+  | 'journal_entry_updated'
+  | 'journal_entry_deleted'
+  | 'dream_entry_created'
+  | 'dream_entry_updated'
+  // Collections
   | 'book_of_shadows_tab_selected'
   | 'archetype_modal_opened'
   | 'collection_page_viewed'
   | 'collection_filter_applied'
   | 'collection_item_opened'
+  // Guide/Chat
   | 'guide_thread_prompt_shown'
   | 'guide_thread_prompt_actioned'
   | 'guide_assist_clicked'
   | 'guide_message_sent'
   | 'guide_to_journal_initiated'
+  | 'guide_conversation_depth'
+  | 'guide_follow_up_rate'
+  // Grimoire & Discovery
   | 'grimoire_viewed'
+  | 'grimoire_search_performed'
+  | 'grimoire_search_results_viewed'
+  | 'grimoire_article_opened'
+  | 'grimoire_article_scroll_depth'
+  // Product Features
   | 'chart_viewed'
   | 'daily_dashboard_viewed'
   | 'astral_chat_used'
   | 'tarot_drawn'
   | 'ritual_started'
+  | 'ritual_completed'
+  | 'ritual_created'
+  // Sharing & Viral
+  | 'content_shared'
+  | 'horoscope_shared'
+  | 'tarot_reading_shared'
+  | 'birth_chart_shared'
+  | 'cosmic_report_shared'
+  | 'referral_link_copied'
+  | 'referral_link_shared'
+  | 'referral_code_generated'
+  | 'invite_sent'
+  // Session & Engagement
+  | 'session_started'
+  | 'session_ended'
+  | 'feature_session_duration'
+  | 'feature_first_use'
+  | 'feature_adoption_velocity'
+  // Personalization
+  | 'preferences_updated'
+  | 'settings_changed'
+  | 'notification_preference_changed'
+  | 'birth_data_completed'
+  | 'birth_time_confirmed'
+  | 'birth_location_updated'
+  // Subscription & Lifecycle
   | 'signup_completed'
   | 'subscription_started'
   | 'subscription_cancelled'
-  | 'trial_started';
+  | 'subscription_cancellation_reason'
+  | 'subscription_plan_upgraded'
+  | 'subscription_plan_downgraded'
+  | 'trial_started'
+  | 'trial_converted'
+  | 'trial_expired'
+  // Payment & Revenue
+  | 'payment_failed'
+  | 'payment_declined'
+  | 'payment_retry_attempted'
+  | 'payment_retry_success'
+  | 'payment_method_added'
+  | 'payment_method_changed'
+  | 'checkout_started'
+  | 'checkout_abandoned'
+  | 'checkout_completed'
+  // Paywall & Conversion
+  | 'paywall_shown'
+  | 'paywall_accepted'
+  | 'paywall_dismissed'
+  | 'feature_gated_accessed'
+  | 'upgrade_prompted'
+  | 'upgrade_motivation_identified'
+  | 'pricing_page_viewed'
+  // Retention & Reactivation
+  | 'user_reactivated'
+  | 'login_streak_milestone'
+  | 'streak_broken'
+  | 'notification_opened'
+  | 'notification_clicked'
+  | 'email_opened'
+  | 'email_clicked'
+  // Support & Feedback
+  | 'help_requested'
+  | 'support_ticket_submitted'
+  | 'feature_request_submitted'
+  | 'bug_report_submitted'
+  | 'feedback_submitted'
+  | 'product_rating_given';
 
 type CanonicalInsertRow = {
   eventType: CanonicalEventType;

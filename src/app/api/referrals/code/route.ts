@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { generateReferralCode, getReferralCode } from '@/lib/referrals';
+import { conversionTracking } from '@/lib/analytics';
 
 export async function GET(request: NextRequest) {
   try {
@@ -43,6 +44,9 @@ export async function POST(request: NextRequest) {
     }
 
     const code = await generateReferralCode(userId);
+
+    // Track referral code generation
+    conversionTracking.referralCodeGenerated(userId);
 
     return NextResponse.json({ code });
   } catch (error) {
