@@ -4,7 +4,7 @@ import { useAstronomyContext } from '@/context/AstronomyContext';
 import { useSubscription } from '../hooks/useSubscription';
 import { useUser } from '@/context/UserContext';
 import { hasFeatureAccess } from '../../utils/pricing';
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect } from 'react';
 import type { GeneralTarotReading } from '../../utils/tarot/generalTarot';
 import { calculateTransitAspects } from '@/lib/astrology/transit-aspects';
 import { generateTarotTransitConnection } from '@/lib/tarot/generate-transit-connection';

@@ -15,7 +15,7 @@ import { TAROT_DECK, type TarotDeckCard } from '@/utils/tarot/deck';
  */
 function convertToBirthChartSnapshot(
   birthChart: BirthChartPlacement[] | undefined,
-  userBirthday?: string
+  userBirthday?: string,
 ): any | null {
   if (!birthChart || birthChart.length === 0 || !userBirthday) {
     return null;
@@ -41,7 +41,7 @@ function convertToBirthChartSnapshot(
 function createMoonSnapshot(
   moonSign: string | undefined,
   moonPhase: string | undefined,
-  moonIllumination: number
+  moonIllumination: number,
 ): MoonSnapshot | null {
   if (!moonSign || !moonPhase) {
     return null;
@@ -68,12 +68,16 @@ export function getPersonalizedTarotCard(
   moonPhase: string | undefined,
   moonIllumination: number,
   userName?: string,
-  userBirthday?: string
+  userBirthday?: string,
 ): TarotDeckCard | any {
   // Try chart-based seeding if we have birth chart data
   if (birthChart && birthChart.length > 0 && userBirthday) {
     const chartSnapshot = convertToBirthChartSnapshot(birthChart, userBirthday);
-    const moonSnapshot = createMoonSnapshot(moonSign, moonPhase, moonIllumination);
+    const moonSnapshot = createMoonSnapshot(
+      moonSign,
+      moonPhase,
+      moonIllumination,
+    );
 
     if (chartSnapshot) {
       const seed = getDailyCardSeed(chartSnapshot, moonSnapshot);

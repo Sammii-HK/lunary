@@ -14,7 +14,7 @@ function simpleHash(str: string): number {
   let hash = 0;
   for (let i = 0; i < str.length; i++) {
     const char = str.charCodeAt(i);
-    hash = ((hash << 5) - hash) + char;
+    hash = (hash << 5) - hash + char;
     hash = hash & hash; // Convert to 32-bit integer
   }
   return Math.abs(hash);
@@ -25,13 +25,15 @@ function simpleHash(str: string): number {
  * Uses Sun, Moon, and Ascendant positions for personalization
  */
 function getNatalSignature(birthChart: BirthChartSnapshot): string {
-  const sun = birthChart.placements.find(p => p.planet === 'Sun');
-  const moon = birthChart.placements.find(p => p.planet === 'Moon');
-  const ascendant = birthChart.placements.find(p => p.planet === 'Ascendant');
+  const sun = birthChart.placements.find((p) => p.planet === 'Sun');
+  const moon = birthChart.placements.find((p) => p.planet === 'Moon');
+  const ascendant = birthChart.placements.find((p) => p.planet === 'Ascendant');
 
   const sunPos = sun ? `${sun.sign}${sun.degree.toFixed(2)}` : '';
   const moonPos = moon ? `${moon.sign}${moon.degree.toFixed(2)}` : '';
-  const ascPos = ascendant ? `${ascendant.sign}${ascendant.degree.toFixed(2)}` : '';
+  const ascPos = ascendant
+    ? `${ascendant.sign}${ascendant.degree.toFixed(2)}`
+    : '';
 
   return `${sunPos}|${moonPos}|${ascPos}`;
 }
@@ -56,7 +58,7 @@ function getMoonPosition(moon: MoonSnapshot | null): string {
  */
 export function getDailyCardSeed(
   birthChart: BirthChartSnapshot | null,
-  moon: MoonSnapshot | null
+  moon: MoonSnapshot | null,
 ): number {
   const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
 
@@ -87,7 +89,7 @@ export function getSpreadCardSeed(
   birthChart: BirthChartSnapshot | null,
   spreadSlug: string,
   positionIndex: number,
-  timestamp: number
+  timestamp: number,
 ): number {
   if (!birthChart) {
     // Fallback for users without birth chart
