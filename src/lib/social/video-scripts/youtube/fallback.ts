@@ -120,7 +120,7 @@ export function buildYouTubePractical(
     `How does this knowledge apply practically? Understanding ${theme.name.toLowerCase()} offers several applications.`,
   );
 
-  for (const { facet, data: grimoireData } of data) {
+  for (const { facet: _facet, data: grimoireData } of data) {
     if (grimoireData) {
       if (grimoireData.transitEffect) {
         paragraphs.push(grimoireData.transitEffect);

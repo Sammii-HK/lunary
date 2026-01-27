@@ -4,7 +4,7 @@ import {
   ReadableStream,
   WritableStream,
   TransformStream,
-} from 'web-streams-polyfill/ponyfill';
+} from 'web-streams-polyfill';
 import dotenv from 'dotenv';
 
 // Polyfill Web Streams API for AI SDK v6
