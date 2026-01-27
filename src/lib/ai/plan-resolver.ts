@@ -87,12 +87,28 @@ export const resolvePlanId = (user: AuthenticatedUser): AiPlanId => {
     (user as any)?.plan_type,
   ];
 
+  console.log('[Plan Resolver] Checking user plan:', {
+    userId: user.id,
+    userPlan: user.plan,
+    candidates: planCandidates,
+  });
+
   for (const candidate of planCandidates) {
     const resolved = resolveFromValue(candidate);
     if (resolved) {
+      console.log(
+        '[Plan Resolver] Resolved to:',
+        resolved,
+        'from candidate:',
+        candidate,
+      );
       return resolved;
     }
   }
 
+  console.warn(
+    '[Plan Resolver] No plan found, defaulting to free for user:',
+    user.id,
+  );
   return 'free';
 };
