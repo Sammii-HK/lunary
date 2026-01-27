@@ -87,7 +87,7 @@ export async function GET(request: NextRequest) {
       ],
       color: 'success',
       footer: `Generated at ${new Date().toISOString()}`,
-      category: 'operations',
+      category: 'general',
       dedupeKey: `cta-examples-${examples.generatedForDate}`,
     });
 
