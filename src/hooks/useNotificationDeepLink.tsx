@@ -36,21 +36,40 @@ export function useNotificationDeepLink() {
     // Only run on client side
     if (typeof window === 'undefined') return;
 
-    // Event-based deep links (cosmic events)
+    // Check if there's an anchor/hash in the URL
+    const hash = window.location.hash.slice(1); // Remove the # symbol
+    if (hash) {
+      console.log(`[NotificationDeepLink] Anchor link detected: #${hash}`);
+
+      // Wait for page to load, then scroll to element
+      setTimeout(() => {
+        const element = document.getElementById(hash);
+        if (element) {
+          element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          console.log(`[NotificationDeepLink] Scrolled to #${hash}`);
+        } else {
+          console.warn(`[NotificationDeepLink] Element not found: #${hash}`);
+        }
+      }, 300);
+
+      return; // Anchor links don't need further processing
+    }
+
+    // Legacy support: Event-based deep links (cosmic events)
     const event = searchParams.get('event');
     if (event) {
       handleEventDeepLink(event, searchParams);
       return;
     }
 
-    // Tab navigation
+    // Legacy support: Tab navigation
     const tab = searchParams.get('tab');
     if (tab) {
       handleTabDeepLink(tab);
       return;
     }
 
-    // View navigation
+    // Legacy support: View navigation
     const view = searchParams.get('view');
     if (view) {
       handleViewDeepLink(view, searchParams);

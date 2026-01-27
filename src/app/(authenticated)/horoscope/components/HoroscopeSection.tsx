@@ -2,6 +2,7 @@ interface HoroscopeSectionProps {
   title: string;
   children: React.ReactNode;
   color?: 'purple' | 'blue' | 'emerald' | 'amber' | 'indigo' | 'zinc';
+  id?: string;
 }
 
 const colorClasses = {
@@ -17,9 +18,10 @@ export function HoroscopeSection({
   title,
   children,
   color = 'zinc',
+  id,
 }: HoroscopeSectionProps) {
   return (
-    <div className={`rounded-lg border ${colorClasses[color]} p-6`}>
+    <div id={id} className={`rounded-lg border ${colorClasses[color]} p-6 scroll-mt-20`}>
       <h2 className='text-base md:text-lg font-medium text-zinc-100 mb-3'>
         {title}
       </h2>

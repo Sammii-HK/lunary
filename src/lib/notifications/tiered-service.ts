@@ -509,29 +509,28 @@ function getNotificationUrl(
     return '/guide';
   }
 
-  // Daily notifications - most can use /app dashboard
+  // Daily notifications - dashboard shows these prominently
   if (type === 'tarot' || type === 'energy_theme' || type === 'insight') {
-    return '/app'; // Dashboard shows these prominently
+    return '/app';
   }
 
-  // Sky shift alert - should show transit context
+  // Sky shift alert - show on horoscope with transit context
   if (type === 'sky_shift') {
-    const date = new Date().toISOString().split('T')[0];
-    return `/app?view=transits&date=${date}`;
+    return '/horoscope#transit-wisdom';
   }
 
   // Weekly tarot
   if (type === 'friday_tarot') {
-    return '/app'; // Dashboard
+    return '/app';
   }
 
   // Event-based notifications
   if (cadence === 'event') {
     if (type === 'transit_change') {
-      return '/app?tab=transits';
+      return '/horoscope#transit-wisdom';
     }
     if (type === 'rising_activation') {
-      return '/app?tab=chart&highlight=rising';
+      return '/birth-chart';
     }
   }
 
@@ -540,19 +539,19 @@ function getNotificationUrl(
     return '/moon-circles';
   }
 
-  // Personal transits
+  // Personal transits - widget on horoscope page
   if (type === 'personal_transit') {
-    return '/app?tab=transits';
+    return '/horoscope#personal-transits';
   }
 
-  // Cosmic changes
+  // Cosmic changes - show on cosmic state page
   if (type === 'cosmic_changes') {
-    return '/app?view=cosmic-changes';
+    return '/cosmic-state#current-transits';
   }
 
-  // Weekly report - use app for now since /reports/weekly doesn't exist
+  // Weekly report - email only, fallback to dashboard
   if (type === 'weekly_report') {
-    return '/app?tab=reports';
+    return '/app';
   }
 
   // Cosmic event-based deep links
@@ -560,27 +559,34 @@ function getNotificationUrl(
     const { eventType, planet, sign, aspect, planetA, planetB, name } =
       eventData;
 
+    // Retrograde - show on dashboard (integrated into TransitOfTheDay)
     if (eventType === 'retrograde' && planet) {
-      return `/app?event=retrograde&planet=${encodeURIComponent(planet)}`;
+      return `/app#retrograde-${encodeURIComponent(planet.toLowerCase())}`;
     }
+
+    // Ingress - show on horoscope transit section
     if (eventType === 'ingress' && planet && sign) {
-      return `/app?event=ingress&planet=${encodeURIComponent(planet)}&sign=${encodeURIComponent(sign)}`;
+      return `/horoscope#transit-wisdom`;
     }
+
+    // Aspect - show on horoscope aspects section
     if (eventType === 'aspect' && planetA && planetB && aspect) {
-      return `/app?event=aspect&planetA=${encodeURIComponent(planetA)}&planetB=${encodeURIComponent(planetB)}&aspect=${encodeURIComponent(aspect)}`;
+      return `/horoscope#today-aspects`;
     }
+
+    // Moon phase - show on dashboard
     if (eventType === 'moon') {
-      const phase = name?.replace('Moon', '').trim() || 'phase';
-      return `/app?event=moon-phase&phase=${encodeURIComponent(phase)}`;
+      return '/app#moon-phase';
     }
+
+    // Sabbat/seasonal - show on cosmic state (mixed into current transits)
     if (eventType === 'seasonal' && name) {
-      return `/app?event=sabbat&name=${encodeURIComponent(name)}`;
+      return '/cosmic-state#current-transits';
     }
+
+    // Eclipse - show on cosmic state
     if (eventType === 'eclipse' && name) {
-      const eclipseType = name.toLowerCase().includes('solar')
-        ? 'solar'
-        : 'lunar';
-      return `/app?event=eclipse&type=${eclipseType}`;
+      return '/cosmic-state#current-transits';
     }
   }
 

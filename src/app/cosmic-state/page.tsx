@@ -5,6 +5,7 @@ import { useState, useEffect } from 'react';
 import { useSubscription } from '@/hooks/useSubscription';
 import { SmartTrialButton } from '@/components/SmartTrialButton';
 import { betterAuthClient } from '@/lib/auth-client';
+import { useNotificationDeepLink } from '@/hooks/useNotificationDeepLink';
 import Link from 'next/link';
 import {
   Lock as LockIcon,
@@ -19,6 +20,7 @@ import { Button } from '@/components/ui/button';
 export default function CosmicStatePage() {
   useUser();
   const subscription = useSubscription();
+  useNotificationDeepLink(); // Handle push notification deep links
   const [loading, setLoading] = useState(true);
   const [cosmicData, setCosmicData] = useState<any>(null);
   const [error, setError] = useState<string | null>(null);
@@ -503,7 +505,7 @@ export default function CosmicStatePage() {
             {/* Current Transits - Grouped by Applying/Exact */}
             {cosmicData.currentTransits &&
               cosmicData.currentTransits.length > 0 && (
-                <div className='bg-zinc-900/80 rounded-xl p-6 border border-zinc-800/50 backdrop-blur-sm'>
+                <div id='current-transits' className='bg-zinc-900/80 rounded-xl p-6 border border-zinc-800/50 backdrop-blur-sm scroll-mt-20'>
                   <div className='flex items-center gap-3 mb-6'>
                     <div className='p-2 bg-lunary-primary-900 rounded-lg'>
                       <TrendingUp className='w-5 h-5 text-lunary-primary' />

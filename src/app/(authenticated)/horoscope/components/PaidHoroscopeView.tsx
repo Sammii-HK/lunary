@@ -931,7 +931,7 @@ export function PaidHoroscopeView({
           <GuideNudge location='horoscope' />
 
           {birthChart && currentTransits.length > 0 && (
-            <HoroscopeSection title='Transit Wisdom' color='indigo'>
+            <HoroscopeSection title='Transit Wisdom' color='indigo' id='transit-wisdom'>
               <p className='text-sm text-zinc-400 mb-4'>
                 Today&apos;s most significant transits to your birth chart
               </p>
@@ -947,6 +947,7 @@ export function PaidHoroscopeView({
             <HoroscopeSection
               title="Today's Aspects to Your Chart"
               color='zinc'
+              id='today-aspects'
             >
               <p className='text-sm text-zinc-400 mb-4'>
                 How today&apos;s planetary positions align with your birth chart
@@ -958,7 +959,7 @@ export function PaidHoroscopeView({
             </HoroscopeSection>
           )}
 
-          <HoroscopeSection title='Personal Transit Impact' color='zinc'>
+          <HoroscopeSection title='Personal Transit Impact' color='zinc' id='personal-transits'>
             <p className='text-sm text-zinc-400 mb-4'>
               How upcoming transits specifically affect your birth chart
             </p>

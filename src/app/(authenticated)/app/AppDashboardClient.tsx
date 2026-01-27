@@ -241,13 +241,17 @@ export default function AppDashboardClient() {
 
       <PersonalizedHoroscopePreview />
       <div className='grid grid-cols-1 md:grid-cols-2 gap-3'>
-        <MoonPreview />
+        <div id='moon-phase' className='scroll-mt-20'>
+          <MoonPreview />
+        </div>
         <SkyNowCard />
 
         <DailyInsightCard />
         <DailyCardPreview />
 
-        <TransitOfTheDay />
+        <div id='transit-of-day' className='scroll-mt-20'>
+          <TransitOfTheDay />
+        </div>
         <CrystalPreview />
 
         <div className='md:col-span-2'>
