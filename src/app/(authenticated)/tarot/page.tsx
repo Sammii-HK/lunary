@@ -1290,14 +1290,16 @@ const TarotReadings = () => {
               )}
 
               {/* Transit connection for daily card */}
-              <TarotTransitConnection
-                cardName={personalizedReading.daily.name}
-                birthChart={user?.birthChart}
-                userBirthday={userBirthday}
-                currentTransits={currentAstrologicalChart}
-                variant='inDepth'
-                userBirthLocation={user?.location?.birthLocation}
-              />
+              {subscription.hasAccess('personal_tarot') && (
+                <TarotTransitConnection
+                  cardName={personalizedReading.daily.name}
+                  birthChart={user?.birthChart}
+                  userBirthday={userBirthday}
+                  currentTransits={currentAstrologicalChart}
+                  variant='inDepth'
+                  userBirthLocation={user?.location?.birthLocation}
+                />
+              )}
             </div>
 
             <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/50 p-4'>
@@ -1340,14 +1342,16 @@ const TarotReadings = () => {
               )}
 
               {/* In Your Chart Today for weekly card */}
-              <TarotTransitConnection
-                cardName={personalizedReading.weekly.name}
-                birthChart={user?.birthChart}
-                userBirthday={user?.birthday}
-                currentTransits={currentAstrologicalChart || []}
-                variant='inDepth'
-                userBirthLocation={user?.location?.birthLocation}
-              />
+              {subscription.hasAccess('personal_tarot') && (
+                <TarotTransitConnection
+                  cardName={personalizedReading.weekly.name}
+                  birthChart={user?.birthChart}
+                  userBirthday={user?.birthday}
+                  currentTransits={currentAstrologicalChart || []}
+                  variant='inDepth'
+                  userBirthLocation={user?.location?.birthLocation}
+                />
+              )}
             </div>
           </div>
 
