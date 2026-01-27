@@ -229,11 +229,32 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Fetch user's birth chart and birthday for chart-based seeding
+    let birthChart;
+    let userBirthday;
+    try {
+      const profileResult = await sql`
+        SELECT birth_chart, birthday
+        FROM user_profiles
+        WHERE user_id = ${userId}
+        LIMIT 1
+      `;
+      if (profileResult.rows.length > 0) {
+        birthChart = profileResult.rows[0].birth_chart;
+        userBirthday = profileResult.rows[0].birthday;
+      }
+    } catch (err) {
+      // Non-critical - will fall back to regular seeding
+      console.warn('[tarot/readings] Failed to fetch birth chart:', err);
+    }
+
     const reading = generateSpreadReading({
       spreadSlug,
       userId,
       userName,
       seed,
+      birthChart,
+      userBirthday,
     });
 
     const cardsForStorage = reading.cards.map((item) => ({

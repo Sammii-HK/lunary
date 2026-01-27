@@ -9,6 +9,7 @@ import { constellations } from '../../utils/constellations';
 import dayjs from 'dayjs';
 import { getWrittenDate } from '../../utils/date/date';
 import { getTarotCard } from '../../utils/tarot/tarot';
+import { getPersonalizedTarotCard } from '@/lib/tarot/get-personalized-card';
 import { monthlyMoonPhases } from '../../utils/moon/monthlyPhases';
 import {
   MoonPhaseLabels,
@@ -156,8 +157,25 @@ export const AstronomyContextProvider = ({
     [currentDateTime],
   );
   const currentTarotCard = useMemo(
-    () => getTarotCard(`daily-${currentDate}`, userName, userBirthday),
-    [currentDate, userName, userBirthday],
+    () =>
+      getPersonalizedTarotCard(
+        currentDate,
+        user?.birthChart,
+        currentMoonConstellationPosition,
+        currentMoonPhase,
+        moonIllumination,
+        userName,
+        userBirthday
+      ),
+    [
+      currentDate,
+      user?.birthChart,
+      currentMoonConstellationPosition,
+      currentMoonPhase,
+      moonIllumination,
+      userName,
+      userBirthday,
+    ]
   );
   const symbol =
     monthlyMoonPhases[
