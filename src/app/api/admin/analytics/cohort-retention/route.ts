@@ -10,6 +10,11 @@ export async function GET(request: NextRequest) {
     const start = searchParams.get('start');
     const end = searchParams.get('end');
 
+    const baseUrl =
+      process.env.NEXTAUTH_URL ||
+      process.env.NEXT_PUBLIC_SITE_URL ||
+      'http://localhost:3000';
+
     // Convert to YYYY-MM-DD format expected by cohorts endpoint
     const formatDate = (dateStr: string | null) => {
       if (!dateStr) return '';
@@ -19,7 +24,7 @@ export async function GET(request: NextRequest) {
 
     // Fetch from cohorts endpoint
     const cohortsResponse = await fetch(
-      `${request.nextUrl.origin}/api/admin/analytics/cohorts?start_date=${formatDate(start)}&end_date=${formatDate(end)}`,
+      `${baseUrl}/api/admin/analytics/cohorts?start_date=${formatDate(start)}&end_date=${formatDate(end)}`,
     );
 
     if (!cohortsResponse.ok) {

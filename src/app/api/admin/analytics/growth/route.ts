@@ -10,9 +10,14 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const range = resolveDateRange(searchParams, 30);
 
+    const baseUrl =
+      process.env.NEXTAUTH_URL ||
+      process.env.NEXT_PUBLIC_SITE_URL ||
+      'http://localhost:3000';
+
     // Fetch from user-growth endpoint
     const userGrowthResponse = await fetch(
-      `${request.nextUrl.origin}/api/admin/analytics/user-growth?start=${range.start.toISOString()}&end=${range.end.toISOString()}`,
+      `${baseUrl}/api/admin/analytics/user-growth?start=${range.start.toISOString()}&end=${range.end.toISOString()}`,
     );
 
     if (!userGrowthResponse.ok) {
@@ -25,7 +30,7 @@ export async function GET(request: NextRequest) {
 
     // Fetch activation data from dau-wau-mau
     const dauWauMauResponse = await fetch(
-      `${request.nextUrl.origin}/api/admin/analytics/dau-wau-mau?start=${range.start.toISOString()}&end=${range.end.toISOString()}`,
+      `${baseUrl}/api/admin/analytics/dau-wau-mau?start=${range.start.toISOString()}&end=${range.end.toISOString()}`,
     );
 
     if (!dauWauMauResponse.ok) {

@@ -12,6 +12,11 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const range = resolveDateRange(searchParams, 30);
 
+    const baseUrl =
+      process.env.NEXTAUTH_URL ||
+      process.env.NEXT_PUBLIC_SITE_URL ||
+      'http://localhost:3000';
+
     // Fetch all necessary metrics in parallel
     const [
       activityResponse,
@@ -22,22 +27,22 @@ export async function GET(request: NextRequest) {
       revenueResponse,
     ] = await Promise.all([
       fetch(
-        `${request.nextUrl.origin}/api/admin/analytics/activity?start=${range.start}&end=${range.end}`,
+        `${baseUrl}/api/admin/analytics/activity?start=${range.start}&end=${range.end}`,
       ),
       fetch(
-        `${request.nextUrl.origin}/api/admin/analytics/engagement?start=${range.start}&end=${range.end}`,
+        `${baseUrl}/api/admin/analytics/engagement?start=${range.start}&end=${range.end}`,
       ),
       fetch(
-        `${request.nextUrl.origin}/api/admin/analytics/feature-adoption?start=${range.start}&end=${range.end}`,
+        `${baseUrl}/api/admin/analytics/feature-adoption?start=${range.start}&end=${range.end}`,
       ),
       fetch(
-        `${request.nextUrl.origin}/api/admin/analytics/cohort-retention?start=${range.start}&end=${range.end}`,
+        `${baseUrl}/api/admin/analytics/cohort-retention?start=${range.start}&end=${range.end}`,
       ),
       fetch(
-        `${request.nextUrl.origin}/api/admin/analytics/growth?start=${range.start}&end=${range.end}`,
+        `${baseUrl}/api/admin/analytics/growth?start=${range.start}&end=${range.end}`,
       ),
       fetch(
-        `${request.nextUrl.origin}/api/admin/analytics/revenue?start=${range.start}&end=${range.end}`,
+        `${baseUrl}/api/admin/analytics/revenue?start=${range.start}&end=${range.end}`,
       ),
     ]);
 

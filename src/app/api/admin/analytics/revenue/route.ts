@@ -10,9 +10,14 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const range = resolveDateRange(searchParams, 30);
 
+    const baseUrl =
+      process.env.NEXTAUTH_URL ||
+      process.env.NEXT_PUBLIC_SITE_URL ||
+      'http://localhost:3000';
+
     // Fetch from plan-breakdown endpoint for MRR
     const planBreakdownResponse = await fetch(
-      `${request.nextUrl.origin}/api/admin/analytics/plan-breakdown?start=${range.start.toISOString()}&end=${range.end.toISOString()}`,
+      `${baseUrl}/api/admin/analytics/plan-breakdown?start=${range.start.toISOString()}&end=${range.end.toISOString()}`,
     );
 
     if (!planBreakdownResponse.ok) {
@@ -25,7 +30,7 @@ export async function GET(request: NextRequest) {
 
     // Fetch from subscription-30d endpoint for conversion rate
     const subscription30dResponse = await fetch(
-      `${request.nextUrl.origin}/api/admin/analytics/subscription-30d?start=${range.start.toISOString()}&end=${range.end.toISOString()}`,
+      `${baseUrl}/api/admin/analytics/subscription-30d?start=${range.start.toISOString()}&end=${range.end.toISOString()}`,
     );
 
     if (!subscription30dResponse.ok) {
