@@ -66,10 +66,9 @@ if (typeof window !== 'undefined') {
         });
       }
 
-      // BLOCK tarot readings, horoscope, and other user-specific endpoints
+      // BLOCK user-specific write endpoints (journal, patterns, tarot readings history)
       if (
         url.includes('/api/tarot/readings') ||
-        url.includes('/api/horoscope/daily') ||
         url.includes('/api/journal') ||
         url.includes('/api/patterns')
       ) {
@@ -79,8 +78,12 @@ if (typeof window !== 'undefined') {
         });
       }
 
-      // Allow only safe, public API calls
-      const allowedEndpoints = ['/api/cosmic/global', '/api/grimoire/spells'];
+      // Allow safe, public API calls and personalized preview data (with caching)
+      const allowedEndpoints = [
+        '/api/cosmic/global',
+        '/api/grimoire/spells',
+        '/api/horoscope/daily', // Allow for personalized preview
+      ];
       const isAllowed = allowedEndpoints.some((endpoint) =>
         url.includes(endpoint),
       );
