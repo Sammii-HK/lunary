@@ -31,8 +31,9 @@ export const DailyCardPreview = () => {
   const astronomyContext = useAstronomyContext();
   const currentDate =
     astronomyContext?.currentDate || dayjs().utc().format('YYYY-MM-DD');
-  const currentAstrologicalChart =
-    astronomyContext?.currentAstrologicalChart || [];
+  const currentAstrologicalChart = useMemo(() => {
+    return astronomyContext?.currentAstrologicalChart || [];
+  }, [astronomyContext]);
   const userName = user?.name;
   const userBirthday = user?.birthday;
   const variantRaw = useFeatureFlagVariant('paywall_preview_style_v1');
@@ -221,13 +222,9 @@ export const DailyCardPreview = () => {
           <div className='flex-1 min-w-0 h-full justify-between flex flex-col'>
             <div className='flex items-center gap-2 mb-1'>
               <Layers className='w-4 h-4 text-lunary-accent-300' />
-              <span className='text-sm font-medium text-zinc-200'>
-                Tarot for Today
-              </span>
+              <span className='text-sm text-zinc-200'>Tarot for Today</span>
             </div>
-            <p className='text-sm text-lunary-primary-200 font-medium'>
-              {dailyCard.name}
-            </p>
+            <p className='text-sm text-lunary-primary-2'>{dailyCard.name}</p>
             <p className='text-xs text-zinc-400 mb-2'>
               {dailyCard.keywords.join(' • ')}
             </p>
@@ -274,7 +271,7 @@ export const DailyCardPreview = () => {
                   }
                 }
               }}
-              className='flex items-center gap-1.5 text-xs text-lunary-primary-200 hover:text-lunary-primary-100 transition-colors bg-none border-none p-0 cursor-pointer font-medium'
+              className='flex items-center gap-1.5 text-xs text-lunary-primary-200 hover:text-lunary-primary-100 transition-colors bg-none border-none p-0 cursor-pointer'
             >
               {ctaCopy.tarotDaily}
             </span>
@@ -295,18 +292,14 @@ export const DailyCardPreview = () => {
           <div className='flex items-center justify-between mb-1'>
             <div className='flex items-center gap-2'>
               <Layers className='w-4 h-4 text-lunary-accent-300' />
-              <span className='text-sm font-medium text-zinc-200'>
-                Tarot for Today
-              </span>
+              <span className='text-sm text-zinc-200'>Tarot for Today</span>
             </div>
             <span className='text-xs bg-zinc-800/50 text-lunary-primary-200 px-1.5 py-0.5 rounded'>
               Personal
             </span>
           </div>
-          <p className='text-sm text-lunary-primary-200 font-medium'>
-            {dailyCard.name}
-          </p>
-          <p className='text-xs text-zinc-400'>
+          <p className='text-sm text-lunary-primary-200'>{dailyCard.name}</p>
+          <p className='text-xs text-zinc-400 mt-12'>
             {dailyCard.keywords.join(' • ')}
           </p>
           {dailyCard.information && (

@@ -12,6 +12,8 @@ import {
 } from '@/components/ui/expandable-card';
 import { useUser } from '@/context/UserContext';
 import { getPersonalizedHoroscope } from '../../../utils/astrology/personalizedHoroscope';
+import { useDemoMode } from '@/components/marketing/DemoModeProvider';
+import { getZodiacSymbol } from 'utils/astrology/cosmic-og';
 
 const ZODIAC_ELEMENTS: Record<string, string> = {
   aries: 'Fire',
@@ -243,8 +245,35 @@ export const MoonPreview = () => {
   const [spells, setSpells] = useState<Spell[]>([]);
   const [loading, setLoading] = useState(true);
 
+  // Detect mobile or demo mode to show compact symbol display
+  const [isMobile, setIsMobile] = useState(false);
+  const { isDemoMode } = useDemoMode();
+
+  // Check if viewport is mobile-sized
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.matchMedia('(max-width: 767px)').matches);
+    };
+
+    checkMobile();
+    const mediaQuery = window.matchMedia('(max-width: 767px)');
+    mediaQuery.addEventListener('change', checkMobile);
+    return () => mediaQuery.removeEventListener('change', checkMobile);
+  }, []);
+
   const nextPhaseInfo = getDaysUntilNextPhase(currentMoonPhase, moonAge);
   const zodiacInfo = getZodiacInfo(currentMoonConstellationPosition || '');
+
+  // Show zodiac symbol only on mobile or in demo mode
+  const shouldShowSymbolOnly = isMobile || isDemoMode;
+  const moonPhaseConstellation =
+    shouldShowSymbolOnly && currentMoonConstellationPosition ? (
+      <span className='font-astro'>
+        {getZodiacSymbol(currentMoonConstellationPosition)}
+      </span>
+    ) : (
+      currentMoonConstellationPosition
+    );
   const illuminationDisplay = Math.round(moonIllumination);
 
   const personalizedHoroscope = user?.birthday
@@ -321,9 +350,13 @@ export const MoonPreview = () => {
         }
         title={currentMoonPhase}
         subtitle={
-          currentMoonConstellationPosition
-            ? `in ${currentMoonConstellationPosition}, ${illuminationDisplay}% illuminated`
-            : `${illuminationDisplay}% illuminated`
+          currentMoonConstellationPosition ? (
+            <>
+              in {moonPhaseConstellation} {illuminationDisplay}% illuminated
+            </>
+          ) : (
+            <>{illuminationDisplay}% illuminated</>
+          )
         }
       />
       {cycleLine && <p className='text-xs text-zinc-400 mt-1'>{cycleLine}</p>}
@@ -377,7 +410,7 @@ export const MoonPreview = () => {
         </div>
       ) : spells.length > 0 ? (
         <div>
-          <h4 className='text-xs font-medium text-lunary-accent-300 capitalize tracking-wide mb-2'>
+          <h4 className='text-xs text-lunary-accent-300 capitalize tracking-wide mb-2'>
             Recommended Spells
           </h4>
           <div className='space-y-2'>

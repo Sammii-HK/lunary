@@ -396,7 +396,7 @@ export const DailyInsightCard = () => {
           <div className='flex-1 min-w-0'>
             <div className='flex items-center gap-2 mb-1'>
               <Sparkles className='w-4 h-4 text-lunary-primary-300' />
-              <span className='text-sm font-medium text-zinc-200'>
+              <span className='text-sm text-zinc-200'>
                 Today&apos;s Influence
               </span>
             </div>
@@ -441,7 +441,7 @@ export const DailyInsightCard = () => {
                   }
                 }
               }}
-              className='flex items-center gap-1.5 text-xs text-lunary-primary-200 hover:text-lunary-primary-100 transition-colors bg-none border-none p-0 cursor-pointer font-medium'
+              className='flex items-center gap-1.5 text-xs text-lunary-primary-200 hover:text-lunary-primary-100 transition-colors bg-none border-none p-0 cursor-pointer'
             >
               {ctaCopy.horoscope}
             </span>
@@ -462,9 +462,7 @@ export const DailyInsightCard = () => {
           <div className='flex items-center justify-between mb-1'>
             <div className='flex items-center gap-2'>
               <Sparkles className='w-4 h-4 text-lunary-primary-300' />
-              <span className='text-sm font-medium text-zinc-200'>
-                Today's Influence
-              </span>
+              <span className='text-sm text-zinc-200'>Today's Influence</span>
             </div>
             {/* <span className='text-xs bg-zinc-800/50 text-lunary-primary-200 px-1.5 py-0.5 rounded'>
               Personal

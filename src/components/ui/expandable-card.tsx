@@ -109,7 +109,7 @@ export const ExpandableCard = ({
 interface ExpandableCardHeaderProps {
   icon?: ReactNode;
   title: string;
-  subtitle?: string;
+  subtitle?: ReactNode;
   badge?: string;
   badgeVariant?: 'default' | 'highlight' | 'warning' | 'danger';
   action?: ReactNode;
@@ -134,7 +134,7 @@ export const ExpandableCardHeader = ({
     <div className='flex items-center justify-between w-full pr-2'>
       <div className='flex items-center gap-2'>
         {icon && <span>{icon}</span>}
-        <span className='text-sm font-medium text-zinc-200'>{title}</span>
+        <span className='text-sm text-zinc-200'>{title}</span>
         {subtitle && <span className='text-xs text-zinc-400'>{subtitle}</span>}
       </div>
       <div className='flex items-center gap-2'>
