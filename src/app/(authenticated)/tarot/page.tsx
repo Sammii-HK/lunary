@@ -1143,6 +1143,9 @@ const TarotReadings = () => {
             title='Personal Tarot Patterns'
             description='Discover your personal patterns and trends over time.'
             feature='tarot_patterns'
+            ctaKey='chartConnection'
+            trackingFeature='tarot_patterns'
+            page='tarot'
             blurredContent={
               <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-6 opacity-60 h-150'>
                 <p className='text-sm text-zinc-300 leading-relaxed'>
@@ -1162,6 +1165,9 @@ const TarotReadings = () => {
               title='Guided Tarot Spreads'
               description='Choose a spread, draw cards instantly, and save your insights.'
               feature='tarot_patterns'
+              ctaKey='chartConnection'
+              trackingFeature='tarot_spreads'
+              page='tarot'
               blurredContent={
                 <div className='rounded-lg border border-lunary-accent-700 bg-lunary-accent-950 p-6 opacity-60'>
                   <div className='space-y-3'>

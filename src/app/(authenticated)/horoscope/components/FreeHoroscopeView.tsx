@@ -6,12 +6,10 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { getGeneralHoroscope } from '../../../../../utils/astrology/generalHoroscope';
 import { getUpcomingTransits } from '../../../../../utils/astrology/transitCalendar';
-import { FREE_TRANSIT_LIMIT } from '../../../../../utils/entitlements';
 import { HoroscopeSection } from './HoroscopeSection';
 import { FeaturePreview } from './FeaturePreview';
-import { SmartTrialButton } from '@/components/SmartTrialButton';
+import { UnifiedTransitList } from './UnifiedTransitList';
 import { Share2, ChevronRight, Sparkles } from 'lucide-react';
-import { TransitCard } from './TransitCard';
 import { getNumerologyDetail } from '@/lib/numerology/numerologyDetails';
 import { useCTACopy } from '@/hooks/useCTACopy';
 import { captureEvent } from '@/lib/posthog-client';
@@ -216,30 +214,32 @@ export function FreeHoroscopeView() {
         </div>
       </div>
 
-      <div className='rounded-2xl border border-zinc-800/70 bg-zinc-900/70 p-5 space-y-4'>
+      <div className='rounded-2xl border border-zinc-800/70 bg-gradient-to-br from-zinc-900/70 via-zinc-950/70 to-lunary-primary-950 p-5 space-y-4'>
         <p className='text-[11px] font-semibold tracking-[0.3em] uppercase text-zinc-400'>
           Cosmic Highlight
         </p>
-        <p className='text-lg font-light text-zinc-100'>
+        <p className='text-2xl font-light text-zinc-100'>
           {generalHoroscope.generalAdvice}
         </p>
         <p className='text-sm text-zinc-300 leading-relaxed'>
           {generalHoroscope.reading}
         </p>
-        <div className='mt-1 grid grid-cols-2 gap-3 text-[11px] text-zinc-300'>
+        <div className='mt-2 grid grid-cols-1 sm:grid-cols-2 gap-3'>
           <div className='relative'>
             <button
               type='button'
               onClick={openUniversalModal}
-              className='rounded-lg border border-zinc-700 px-3 py-3 capitalize text-center transition hover:border-lunary-primary-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-lunary-primary-400 w-full'
+              className='rounded-lg border border-zinc-700 px-4 py-3 bg-zinc-900/40 text-center transition hover:border-lunary-primary-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-lunary-primary-400 w-full'
             >
-              <div className='text-2xl font-semibold text-lunary-accent-300'>
-                {universalDay.number}
-              </div>
-              <div className='text-[9px] text-zinc-400 uppercase tracking-wide'>
+              <div className='text-xs uppercase tracking-widest text-zinc-400'>
                 Universal Day
               </div>
-              <p className='text-[11px] mt-1'>{universalDay.meaning}</p>
+              <div className='text-3xl font-semibold text-lunary-accent-300'>
+                {universalDay.number}
+              </div>
+              <p className='text-[11px] text-zinc-300'>
+                {universalDay.meaning}
+              </p>
             </button>
             <button
               type='button'
@@ -252,20 +252,20 @@ export function FreeHoroscopeView() {
                   universalDay.meaning,
                 );
               }}
-              className='absolute top-2 right-2 flex h-7 w-7 items-center justify-center rounded-full border border-zinc-700 bg-zinc-950/60 text-zinc-300 transition hover:border-lunary-primary-500 hover:text-white'
+              className='absolute top-3 right-3 flex h-8 w-8 items-center justify-center rounded-full border border-zinc-700 bg-zinc-950/50 text-zinc-400 transition hover:border-lunary-primary-500 hover:text-white'
               aria-label='Share Universal Day'
             >
-              <Share2 className='h-3 w-3' />
+              <Share2 className='h-4 w-4' />
             </button>
           </div>
-          <div className='rounded-lg border border-zinc-700 px-3 py-3 capitalize tracking-wide text-center'>
-            <div className='text-md text-semibold md:text-lg mt-1'>
-              {generalHoroscope.moonPhase}
-            </div>
-            <div className='text-[9px] text-zinc-400 uppercase tracking-wide'>
+          <div className='rounded-lg border border-zinc-700 px-4 py-3 bg-zinc-900/40 text-center'>
+            <div className='text-xs uppercase tracking-widest text-zinc-400'>
               Moon Phase
             </div>
-            <p className='text-[11px] mt-1'>
+            <div className='text-lg font-medium text-zinc-100 mt-0.5'>
+              {generalHoroscope.moonPhase}
+            </div>
+            <p className='text-[11px] text-zinc-300 mt-0.5'>
               {MOON_PHASE_TIPS[generalHoroscope.moonPhase as MoonPhaseLabels]}
             </p>
           </div>
@@ -276,137 +276,72 @@ export function FreeHoroscopeView() {
         </p>
       </div>
 
-      <HoroscopeSection title="Today's Transits" color='zinc'>
-        {upcomingTransits.length > 0 ? (
-          <>
-            <p className='text-sm text-zinc-400 mb-4'>
-              Upcoming planetary events happening in the next 30 days affecting
-              everyone
-            </p>
-            <div className='space-y-3'>
-              {upcomingTransits
-                .slice(0, FREE_TRANSIT_LIMIT)
-                .map((transit, index) => (
-                  <TransitCard key={index} transit={transit} />
-                ))}
-            </div>
-
-            {upcomingTransits.length > FREE_TRANSIT_LIMIT && (
-              <div className='relative mt-4'>
-                <div className='blur-sm opacity-50 select-none pointer-events-none'>
-                  {upcomingTransits
-                    .slice(FREE_TRANSIT_LIMIT, FREE_TRANSIT_LIMIT + 2)
-                    .map((transit, index) => (
-                      <TransitCard key={`locked-${index}`} transit={transit} />
-                    ))}
-                </div>
-                <div className='absolute inset-0 bg-gradient-to-b from-transparent via-zinc-950/60 to-zinc-950 flex items-end justify-center pb-3'>
-                  <button
-                    type='button'
-                    onClick={() => {
-                      ctaCopy.trackCTAClick('transitList', 'horoscope');
-                      captureEvent('locked_content_clicked', {
-                        feature: 'transit_list',
-                        tier: 'free',
-                      });
-                      router.push('/pricing');
-                    }}
-                    className='inline-flex items-center gap-2 rounded-lg border border-lunary-primary-700 bg-zinc-900/80 px-4 py-2 text-xs font-medium text-lunary-primary-300 hover:bg-zinc-900 transition-colors'
-                  >
-                    <Sparkles className='w-3 h-3' />
-                    {ctaCopy.transitList}
-                    <span className='text-[10px] bg-lunary-primary-900/50 border border-lunary-primary-700/50 px-1.5 py-0.5 rounded'>
-                      Lunary+
-                    </span>
-                  </button>
-                </div>
-              </div>
-            )}
-
-            <div className='mt-4 pt-4 border-t border-zinc-800/50'>
-              <p className='text-xs text-zinc-400 mb-3'>
-                See how these transits specifically affect your birth chart with
-                personalized insights
-              </p>
-              <div className='w-full flex justify-center'>
-                <SmartTrialButton feature='personalized_transit_readings' />
-              </div>
-            </div>
-          </>
-        ) : (
-          <>
-            <p className='text-sm text-zinc-400 mb-4'>
-              No major transits happening today. Check upcoming transits below
-              or unlock personalized transit insights for your birth chart.
-            </p>
-            <div className='mt-4 pt-4 border-t border-zinc-800/50'>
-              <p className='text-xs text-zinc-400 mb-3'>
-                Get personalized transit insights based on your birth chart
-              </p>
-              <div className='w-full flex justify-center'>
-                <SmartTrialButton feature='personalized_transit_readings' />
-              </div>
-            </div>
-          </>
-        )}
+      <HoroscopeSection title='Upcoming Transits' color='zinc'>
+        <p className='text-sm text-zinc-400 mb-4'>
+          Planetary events in the next 30 days — unlock personal impact for each
+        </p>
+        <UnifiedTransitList transits={upcomingTransits} hasPaidAccess={false} />
       </HoroscopeSection>
 
       <div className='space-y-6'>
-        <HoroscopeSection title='Cosmic Highlight' color='indigo'>
-          <div className='grid grid-cols-1 md:grid-cols-2 gap-4 pt-3 border-t border-zinc-700/50'>
-            <div className='text-center my-7'>
-              <div className='text-2xl md:text-3xl font-light text-lunary-accent-200 mb-1'>
-                {universalDay.number}
+        <HoroscopeSection title='Your Numbers' color='indigo'>
+          <div className='space-y-3'>
+            <div className='rounded-lg border border-zinc-700/50 bg-zinc-900/40 p-4 text-center'>
+              <div className='text-xs text-zinc-500 uppercase tracking-[0.3em] mb-1'>
+                Personal Day
               </div>
-              <div className='text-xs text-zinc-400 uppercase tracking-wide mb-1'>
-                Universal Day
+              <div className='text-3xl font-semibold text-lunary-accent-300'>
+                {personalDay ? personalDay.number : '—'}
               </div>
-              <p className='text-xs text-zinc-300'>{universalDay.meaning}</p>
-              <SmartTrialButton
-                size='sm'
-                className='mx-auto my-8'
-                feature='personal_day_number'
-              />
+              <p className='text-xs text-zinc-400 mt-1'>
+                {personalDay
+                  ? 'Numbers are free. Upgrade for the interpretation.'
+                  : 'Add your birth date to reveal your Personal Day number.'}
+              </p>
             </div>
-            <div className='space-y-3'>
-              <div className='rounded-2xl border border-zinc-700/50 bg-zinc-900/30 p-4 text-center'>
-                <div className='text-xs text-zinc-500 uppercase tracking-[0.3em] mb-1'>
-                  Personal Day
-                </div>
-                <div className='text-3xl font-light text-lunary-accent-200'>
-                  {personalDay ? personalDay.number : '—'}
-                </div>
-                <p className='text-xs text-zinc-400 mt-1'>
-                  {personalDay
-                    ? 'Numbers are free. Upgrade for the interpretation.'
-                    : 'Add your birth date to reveal your Personal Day number.'}
-                </p>
+            <div className='rounded-lg border border-zinc-700/50 bg-zinc-900/40 p-4 text-center'>
+              <div className='text-xs text-zinc-500 uppercase tracking-[0.3em] mb-1'>
+                Personal Year
               </div>
-              <div className='rounded-2xl border border-zinc-700/50 bg-zinc-900/30 p-4 text-center'>
-                <div className='text-xs text-zinc-500 uppercase tracking-[0.3em] mb-1'>
-                  Personal Year
-                </div>
-                <div className='text-3xl font-light text-lunary-accent-200'>
-                  {personalYear ? personalYear.number : '—'}
-                </div>
-                <p className='text-xs text-zinc-400 mt-1'>
-                  {personalYear
-                    ? 'Numbers are free. Upgrade for the interpretation.'
-                    : 'Add your birth date to reveal your Personal Year number.'}
-                </p>
+              <div className='text-3xl font-semibold text-lunary-accent-300'>
+                {personalYear ? personalYear.number : '—'}
               </div>
+              <p className='text-xs text-zinc-400 mt-1'>
+                {personalYear
+                  ? 'Numbers are free. Upgrade for the interpretation.'
+                  : 'Add your birth date to reveal your Personal Year number.'}
+              </p>
+            </div>
+            <div className='pt-3 text-center'>
+              <button
+                type='button'
+                onClick={() => {
+                  ctaCopy.trackCTAClick('horoscope', 'horoscope');
+                  captureEvent('locked_content_clicked', {
+                    feature: 'personal_numbers_interpretation',
+                    tier: 'free',
+                  });
+                  router.push('/pricing');
+                }}
+                className='inline-flex items-center gap-1.5 rounded-lg border border-lunary-primary-700 bg-zinc-900/80 px-4 py-2 text-xs font-medium text-lunary-primary-300 hover:bg-zinc-900 transition-colors'
+              >
+                <Sparkles className='w-3 h-3' />
+                {ctaCopy.horoscope}
+                <span className='text-[10px] bg-lunary-primary-900/50 border border-lunary-primary-700/50 px-1.5 py-0.5 rounded'>
+                  Lunary+
+                </span>
+              </button>
             </div>
           </div>
-          <p className='text-xs text-zinc-500 mt-2 text-center'>
-            Personal Day and Personal Year numbers are free. Interpretations
-            unlocked with Lunary+.
-          </p>
         </HoroscopeSection>
 
         <FeaturePreview
           title='Personal Insight'
           description='Get insights specifically tailored to your birth chart and cosmic profile'
           feature='personalized_horoscope'
+          ctaKey='horoscope'
+          trackingFeature='personal_horoscope_insight'
+          page='horoscope'
           blurredContent={
             <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-6 opacity-60 h-150'>
               <p className='text-sm text-zinc-300 leading-relaxed'>
@@ -425,6 +360,9 @@ export function FreeHoroscopeView() {
           title='Solar Return Insights'
           description='Discover your personal year themes and birthday insights'
           feature='solar_return'
+          ctaKey='horoscope'
+          trackingFeature='solar_return_insights'
+          page='horoscope'
           blurredContent={
             <div className='rounded-lg border border-lunary-accent-700 bg-lunary-accent-950 p-6 opacity-60'>
               <div className='space-y-3'>

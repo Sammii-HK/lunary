@@ -15,9 +15,9 @@ import { getSolarReturnInsights } from '../../../../../utils/astrology/transitCa
 import { getPersonalTransitImpacts } from '../../../../../utils/astrology/personalTransits';
 import { getUpcomingTransits } from '../../../../../utils/astrology/transitCalendar';
 import { HoroscopeSection } from './HoroscopeSection';
-import { PersonalTransitImpactCard } from './PersonalTransitImpact';
 import { TodaysAspects } from './TodaysAspects';
 import { TransitWisdom } from './TransitWisdom';
+import { UnifiedTransitList } from './UnifiedTransitList';
 
 const GuideNudge = dynamic(
   () =>
@@ -964,24 +964,18 @@ export function PaidHoroscopeView({
           )}
 
           <HoroscopeSection
-            title='Personal Transit Impact'
+            title='Upcoming Transits'
             color='zinc'
             id='personal-transits'
           >
             <p className='text-sm text-zinc-400 mb-4'>
-              How upcoming transits specifically affect your birth chart
+              How upcoming transits affect your birth chart
             </p>
-            <div className='space-y-3 max-h-96 overflow-y-auto'>
-              {personalTransitImpacts.length > 0 ? (
-                personalTransitImpacts.map((impact, index) => (
-                  <PersonalTransitImpactCard key={index} impact={impact} />
-                ))
-              ) : (
-                <p className='text-zinc-400 text-center py-4 text-sm'>
-                  No significant personal transits in the next 30 days
-                </p>
-              )}
-            </div>
+            <UnifiedTransitList
+              transits={upcomingTransits}
+              personalImpacts={personalTransitImpacts}
+              hasPaidAccess={true}
+            />
           </HoroscopeSection>
 
           {!userBirthday && (
