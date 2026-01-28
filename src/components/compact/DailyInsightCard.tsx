@@ -26,6 +26,7 @@ import {
 import { useFeatureFlagVariant } from '@/hooks/useFeatureFlag';
 import { useCTACopy } from '@/hooks/useCTACopy';
 import { shouldRedactWord } from '@/constants/redactedWords';
+import { DailyCache } from '@/lib/cache/dailyCache';
 import {
   buildTransitDetails,
   TransitAspect,
@@ -154,22 +155,42 @@ export const DailyInsightCard = () => {
 
     async function loadTheme() {
       try {
-        const [journalRes, patternsRes] = await Promise.all([
-          fetch('/api/journal?limit=30', { credentials: 'include' }).catch(
-            () => null,
-          ),
-          fetch('/api/patterns?days=30', { credentials: 'include' }).catch(
-            () => null,
-          ),
-        ]);
+        // Check cache first
+        const userId = authStatus.user?.id || 'anon';
+        const journalCacheKey = `journal_${userId}`;
+        const patternsCacheKey = `patterns_${userId}`;
 
-        const journalData = journalRes?.ok
-          ? await journalRes.json()
-          : { entries: [] };
-        const patternsData = patternsRes?.ok ? await patternsRes.json() : null;
+        let journalData = DailyCache.get<{ entries: any[] }>(journalCacheKey);
+        let patternsData = DailyCache.get<any>(patternsCacheKey);
+
+        // Fetch if not cached
+        if (!journalData || !patternsData) {
+          const [journalRes, patternsRes] = await Promise.all([
+            fetch('/api/journal?limit=30', { credentials: 'include' }).catch(
+              () => null,
+            ),
+            fetch('/api/patterns?days=30', { credentials: 'include' }).catch(
+              () => null,
+            ),
+          ]);
+
+          if (!journalData) {
+            journalData = journalRes?.ok
+              ? await journalRes.json()
+              : { entries: [] };
+            // Cache journal data until midnight (daily)
+            DailyCache.set(journalCacheKey, journalData, 'daily');
+          }
+
+          if (!patternsData) {
+            patternsData = patternsRes?.ok ? await patternsRes.json() : null;
+            // Cache patterns data until midnight (daily)
+            DailyCache.set(patternsCacheKey, patternsData, 'daily');
+          }
+        }
 
         const input: LifeThemeInput = {
-          journalEntries: (journalData.entries || []).map((e: any) => ({
+          journalEntries: (journalData?.entries || []).map((e: any) => ({
             content: e.content || '',
             moodTags: e.moodTags || [],
             createdAt: e.createdAt,

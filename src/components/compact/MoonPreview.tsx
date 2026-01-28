@@ -13,6 +13,7 @@ import {
 import { useUser } from '@/context/UserContext';
 import { getPersonalizedHoroscope } from '../../../utils/astrology/personalizedHoroscope';
 import { useDemoMode } from '@/components/marketing/DemoModeProvider';
+import { DailyCache } from '@/lib/cache/dailyCache';
 import { getZodiacSymbol } from 'utils/astrology/cosmic-og';
 
 const ZODIAC_ELEMENTS: Record<string, string> = {
@@ -319,12 +320,26 @@ export const MoonPreview = ({ isExpanded }: MoonPreviewProps = {}) => {
       ? 'Full Moon'
       : currentMoonPhase;
 
+    // Check cache first
+    const cacheKey = `spells_${normalizedPhase}`;
+    const cached = DailyCache.get<Spell[]>(cacheKey);
+
+    if (cached) {
+      setSpells(cached.slice(0, 3));
+      setLoading(false);
+      return;
+    }
+
+    // Cache miss, fetch from API
     fetch(
       `/api/grimoire/spells?moonPhase=${encodeURIComponent(normalizedPhase)}`,
     )
       .then((r) => r.json())
       .then((data) => {
-        setSpells((data || []).slice(0, 3));
+        const spellData = (data || []).slice(0, 3);
+        // Cache spells for this phase until midnight (daily) - spells don't change throughout the day
+        DailyCache.set(cacheKey, data || [], 'daily');
+        setSpells(spellData);
         setLoading(false);
       })
       .catch(() => {

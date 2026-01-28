@@ -16,6 +16,7 @@ import {
 } from '../../utils/moon/moonPhases';
 import type { GlobalCosmicData } from '@/lib/cosmic-snapshot/global-cache';
 import { useUser } from '@/context/UserContext';
+import { DailyCache } from '@/lib/cache/dailyCache';
 
 export const AstronomyContext = createContext<{
   currentAstrologicalChart: AstroChartInformation[];
@@ -153,10 +154,23 @@ export const AstronomyContextProvider = ({
 
     let isMounted = true;
 
+    // Check cache first - cosmic data updates every 2 hours
+    const cacheKey = `cosmic_global_${currentDate}`;
+    const cached = DailyCache.get<GlobalCosmicData>(cacheKey);
+
+    if (cached && refreshKey === 0) {
+      // Use cached data (skip if user manually refreshed)
+      setCosmicData(cached);
+      return;
+    }
+
+    // Cache miss or manual refresh, fetch from API
     fetch(`/api/cosmic/global?date=${currentDate}`)
       .then((res) => res.json())
       .then((data) => {
         if (isMounted && data && !data.error) {
+          // Cache for 2 hours (hourly = 2 hour expiration)
+          DailyCache.set(cacheKey, data, 'hourly');
           setCosmicData(data);
         }
       })
