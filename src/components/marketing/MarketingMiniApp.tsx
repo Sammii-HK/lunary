@@ -113,7 +113,7 @@ export function MarketingMiniApp() {
     }
 
     const forceMobileLayout = () => {
-      // Collapse auto-expanded cards
+      // Collapse auto-expanded cards (CSS handles the grid layout)
       const expandableCards = contentEl.querySelectorAll(
         '[data-component="expandable-card"]',
       );
@@ -121,24 +121,6 @@ export function MarketingMiniApp() {
         const button = card.querySelector('[role="button"]');
         if (button?.getAttribute('aria-expanded') === 'true') {
           (button as HTMLElement).click();
-        }
-      });
-
-      // Force single column on card grids
-      const allGrids = contentEl.querySelectorAll('.grid');
-      allGrids.forEach((grid) => {
-        if (grid instanceof HTMLElement) {
-          const hasMultipleCards =
-            grid.children.length >= 2 &&
-            Array.from(grid.children).some(
-              (child) =>
-                child.className?.includes('border') ||
-                child.className?.includes('rounded'),
-            );
-
-          if (hasMultipleCards) {
-            grid.style.gridTemplateColumns = 'repeat(1, minmax(0, 1fr))';
-          }
         }
       });
     };
