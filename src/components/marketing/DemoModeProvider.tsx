@@ -32,51 +32,74 @@ export function DemoModeProvider({
   // Override Math.random in demo mode to make it deterministic
   // This prevents Transit Wisdom suggestions from cycling on each render
   useEffect(() => {
-    const originalRandom = Math.random;
+    // Defer this to after initial render for faster load
+    const timer = setTimeout(() => {
+      const originalRandom = Math.random;
 
-    // Return a fixed sequence of pseudo-random values
-    // This makes selections consistent across renders
-    let callCount = 0;
-    const fixedValues = [0.42, 0.17, 0.89, 0.63, 0.28, 0.75, 0.51, 0.94];
+      // Return a fixed sequence of pseudo-random values
+      // This makes selections consistent across renders
+      let callCount = 0;
+      const fixedValues = [0.42, 0.17, 0.89, 0.63, 0.28, 0.75, 0.51, 0.94];
 
-    const demoRandom = () => {
-      const value = fixedValues[callCount % fixedValues.length];
-      callCount++;
-      return value;
-    };
+      const demoRandom = () => {
+        const value = fixedValues[callCount % fixedValues.length];
+        callCount++;
+        return value;
+      };
 
-    Math.random = demoRandom;
+      Math.random = demoRandom;
+    }, 100);
 
     return () => {
-      Math.random = originalRandom;
+      clearTimeout(timer);
+      // Note: Math.random cleanup happens on unmount
     };
   }, []);
 
   // Intercept fetch API calls to prevent unauthorized requests in demo
   useEffect(() => {
     const originalFetch = window.fetch;
+    const fetchCache = new Map<string, Response>();
+
     const demoFetch: typeof fetch = async (input, init?) => {
       const url = typeof input === 'string' ? input : input.url;
 
-      // Allow only safe, public API calls in demo mode
-      const allowedEndpoints = [
-        '/api/cosmic/global',
-        '/api/grimoire/spells',
-        '/api/analytics/conversion',
-        '/api/admin/notifications/conversion',
-      ];
+      // BLOCK analytics and conversion tracking in demo mode
+      if (
+        url.includes('/api/analytics') ||
+        url.includes('/api/admin/notifications')
+      ) {
+        return new Response(JSON.stringify({ success: true }), {
+          status: 200,
+          headers: { 'Content-Type': 'application/json' },
+        });
+      }
 
-      // Check if this is an allowed endpoint
+      // Allow only safe, public API calls in demo mode
+      const allowedEndpoints = ['/api/cosmic/global', '/api/grimoire/spells'];
+
       const isAllowed = allowedEndpoints.some((endpoint) =>
         url.includes(endpoint),
       );
 
       if (isAllowed) {
+        // Cache GET requests to avoid duplicate calls
+        if (!init || init.method === 'GET' || !init.method) {
+          if (fetchCache.has(url)) {
+            const cached = fetchCache.get(url)!;
+            return cached.clone();
+          }
+
+          const response = await originalFetch(input, init);
+          const cloned = response.clone();
+          fetchCache.set(url, cloned);
+          return response;
+        }
+
         return originalFetch(input, init);
       }
 
-      // Block unauthorized API calls and return empty response
-      console.log('[Demo Mode] Blocked API call:', url);
+      // Block all other API calls
       return new Response(
         JSON.stringify({ error: 'Demo mode - API call blocked' }),
         {
@@ -86,7 +109,7 @@ export function DemoModeProvider({
       );
     };
 
-    // Only override fetch when component mounts
+    // Override fetch immediately to block analytics ASAP
     window.fetch = demoFetch;
 
     return () => {

@@ -21,10 +21,29 @@ import { DemoModeProvider } from './DemoModeProvider';
 import { ForceMobileLayout } from './ForceMobileLayout';
 import { Button } from '@/components/ui/button';
 
-// All static imports for instant loading (no spinners, better initial performance)
-import AppDashboardClient from '@/app/(authenticated)/app/AppDashboardClient';
-import { TarotView } from '@/app/(authenticated)/tarot/components/TarotView';
-import { HoroscopeView } from '@/app/(authenticated)/horoscope/components/HoroscopeView';
+// Dynamic imports for code splitting - only load tabs when needed
+import dynamic from 'next/dynamic';
+
+const AppDashboardClient = dynamic(
+  () => import('@/app/(authenticated)/app/AppDashboardClient'),
+  { ssr: false },
+);
+
+const TarotView = dynamic(
+  () =>
+    import('@/app/(authenticated)/tarot/components/TarotView').then((m) => ({
+      default: m.TarotView,
+    })),
+  { ssr: false },
+);
+
+const HoroscopeView = dynamic(
+  () =>
+    import('@/app/(authenticated)/horoscope/components/HoroscopeView').then(
+      (m) => ({ default: m.HoroscopeView }),
+    ),
+  { ssr: false },
+);
 
 type TabId = 'app' | 'tarot' | 'horoscope' | 'guide' | 'explore';
 
@@ -67,6 +86,11 @@ export function MarketingMiniApp() {
 
   // Use static fallback data for demo (no API calls)
   const celesteUser = useMemo(() => createFallbackUser(), []);
+
+  // Preload the app dashboard component on mount for faster initial render
+  useEffect(() => {
+    import('@/app/(authenticated)/app/AppDashboardClient');
+  }, []);
 
   // Track visibility
   useEffect(() => {
