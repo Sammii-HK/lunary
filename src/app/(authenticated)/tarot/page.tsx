@@ -232,6 +232,17 @@ const TarotReadings = () => {
   const [upgradeFeature, setUpgradeFeature] = useState<string | null>(null);
   const [expandedSuit, setExpandedSuit] = useState<string | null>(null);
 
+  // Free users are limited to 7-day patterns view
+  useEffect(() => {
+    if (
+      !subscription.hasAccess('tarot_patterns') &&
+      typeof selectedView === 'number' &&
+      selectedView > 7
+    ) {
+      setSelectedView(7);
+    }
+  }, [subscription, selectedView]);
+
   // Handle ESC key to close upgrade modal
   useModal({
     isOpen: showUpgradeModal,
@@ -292,6 +303,66 @@ const TarotReadings = () => {
         : null,
     [hasPersonalTarotAccess, userName, timeFrame, userBirthday],
   );
+
+  // Build basic 7-day patterns for free users from previousReadings
+  const freeBasicPatterns = useMemo(() => {
+    if (
+      hasPersonalTarotAccess ||
+      !previousReadings ||
+      previousReadings.length === 0
+    )
+      return undefined;
+    const cardCounts = new Map<string, number>();
+    const suitCounts = new Map<
+      string,
+      { count: number; cards: Map<string, number> }
+    >();
+    previousReadings.forEach(({ card }) => {
+      cardCounts.set(card.name, (cardCounts.get(card.name) || 0) + 1);
+      const suit = card.name.includes('Wands')
+        ? 'Wands'
+        : card.name.includes('Cups')
+          ? 'Cups'
+          : card.name.includes('Swords')
+            ? 'Swords'
+            : card.name.includes('Pentacles')
+              ? 'Pentacles'
+              : 'Major Arcana';
+      const suitData = suitCounts.get(suit) || { count: 0, cards: new Map() };
+      suitData.count++;
+      suitData.cards.set(card.name, (suitData.cards.get(card.name) || 0) + 1);
+      suitCounts.set(suit, suitData);
+    });
+    const frequentCards = Array.from(cardCounts.entries())
+      .map(([name, count]) => ({ name, count }))
+      .sort((a, b) => b.count - a.count);
+    const suitPatterns = Array.from(suitCounts.entries())
+      .map(([suit, data]) => ({
+        suit,
+        count: data.count,
+        cards: Array.from(data.cards.entries()).map(([name, count]) => ({
+          name,
+          count,
+        })),
+      }))
+      .sort((a, b) => b.count - a.count);
+    const themes = frequentCards.slice(0, 3).flatMap((c) => {
+      const card = previousReadings.find((r) => r.card.name === c.name);
+      return card?.card.keywords?.slice(0, 2) || [];
+    });
+    return {
+      dominantThemes: [...new Set(themes)],
+      frequentCards,
+      suitPatterns,
+      numberPatterns: [] as Array<{
+        number: string;
+        count: number;
+        cards: string[];
+      }>,
+      arcanaPatterns: [] as Array<{ type: string; count: number }>,
+      timeFrame: 7,
+    };
+  }, [hasPersonalTarotAccess, previousReadings]);
 
   const guidanceActionPoints =
     personalizedReading?.guidance?.actionPoints ?? [];
@@ -1437,158 +1508,161 @@ const TarotReadings = () => {
             </div>
           )}
 
-        {subscription.hasAccess('tarot_patterns') && (
-          <CollapsibleSection title='Tarot Patterns' defaultCollapsed={false}>
-            <HoroscopeSection
-              title={
-                selectedView === 'year-over-year'
-                  ? 'Year-over-Year Patterns'
-                  : timeFrame === 365
-                    ? '12-Month Patterns'
-                    : timeFrame === 180
-                      ? '6-Month Patterns'
-                      : timeFrame === 90
-                        ? '90-Day Patterns'
-                        : timeFrame === 30
-                          ? '30-Day Patterns'
-                          : timeFrame === 14
-                            ? '14-Day Patterns'
-                            : '7-Day Patterns'
-              }
-              color='zinc'
-            >
-              <div className='mb-4 flex flex-wrap gap-2'>
-                {[7, 14, 30, 90, 180, 365].map((days) => {
-                  const needsAdvancedAccess = days === 180 || days === 365;
-                  const hasAccess = needsAdvancedAccess
-                    ? subscription.hasAccess('advanced_patterns')
-                    : subscription.hasAccess('tarot_patterns');
-                  const isLocked = needsAdvancedAccess && !hasAccess;
+        <CollapsibleSection title='Tarot Patterns' defaultCollapsed={false}>
+          <HoroscopeSection
+            title={
+              selectedView === 'year-over-year'
+                ? 'Year-over-Year Patterns'
+                : timeFrame === 365
+                  ? '12-Month Patterns'
+                  : timeFrame === 180
+                    ? '6-Month Patterns'
+                    : timeFrame === 90
+                      ? '90-Day Patterns'
+                      : timeFrame === 30
+                        ? '30-Day Patterns'
+                        : timeFrame === 14
+                          ? '14-Day Patterns'
+                          : '7-Day Patterns'
+            }
+            color='zinc'
+          >
+            <div className='mb-4 flex flex-wrap gap-2'>
+              {[7, 14, 30, 90, 180, 365].map((days) => {
+                const needsAdvancedAccess = days === 365;
+                const needsPatternsAccess = days >= 14; // 14+ requires tarot_patterns
+                const hasAccess = needsAdvancedAccess
+                  ? subscription.hasAccess('advanced_patterns')
+                  : needsPatternsAccess
+                    ? subscription.hasAccess('tarot_patterns')
+                    : true; // 7-day is free
+                const isLocked = !hasAccess;
 
-                  return (
-                    <button
-                      key={days}
-                      onClick={() => {
-                        if (isLocked) {
-                          setUpgradeFeature('advanced_patterns');
-                          setShowUpgradeModal(true);
-                          return;
-                        }
-                        setSelectedView(days);
-                      }}
-                      className={cn(
-                        'rounded-full px-3 py-1.5 text-xs font-medium transition-colors relative',
-                        isLocked
-                          ? 'bg-zinc-800/30 text-zinc-600 border border-zinc-700/30 cursor-not-allowed opacity-50'
-                          : selectedView === days
-                            ? 'bg-lunary-primary-900/20 text-lunary-primary-300 border border-lunary-primary-700'
-                            : 'bg-zinc-800/50 text-zinc-400 border border-zinc-700/50 hover:bg-zinc-800/70',
-                      )}
-                      title={
-                        isLocked
-                          ? 'Upgrade to Lunary+ Pro Annual to unlock'
-                          : undefined
+                return (
+                  <button
+                    key={days}
+                    onClick={() => {
+                      if (isLocked) {
+                        setUpgradeFeature('advanced_patterns');
+                        setShowUpgradeModal(true);
+                        return;
                       }
-                    >
-                      {days === 180
-                        ? '6 months'
-                        : days === 365
-                          ? '12 months'
-                          : `${days} days`}
-                      {isLocked && (
-                        <LockIcon className='w-3 h-3 absolute -top-1 -right-1 text-zinc-600' />
-                      )}
-                    </button>
-                  );
-                })}
-                <button
-                  onClick={() => {
-                    const hasAccess =
-                      subscription.hasAccess('advanced_patterns');
-                    if (!hasAccess) {
-                      setUpgradeFeature('advanced_patterns');
-                      setShowUpgradeModal(true);
-                      return;
+                      setSelectedView(days);
+                    }}
+                    className={cn(
+                      'rounded-full px-3 py-1.5 text-xs font-medium transition-colors relative',
+                      isLocked
+                        ? 'bg-zinc-800/30 text-zinc-600 border border-zinc-700/30 cursor-not-allowed opacity-50'
+                        : selectedView === days
+                          ? 'bg-lunary-primary-900/20 text-lunary-primary-300 border border-lunary-primary-700'
+                          : 'bg-zinc-800/50 text-zinc-400 border border-zinc-700/50 hover:bg-zinc-800/70',
+                    )}
+                    title={
+                      isLocked
+                        ? needsAdvancedAccess
+                          ? 'Upgrade to Lunary+ Pro to unlock'
+                          : 'Upgrade to Lunary+ to unlock'
+                        : undefined
                     }
-                    setSelectedView('year-over-year');
-                    setIsMultidimensionalMode(true); // Year-over-year requires advanced mode
-                  }}
-                  className={cn(
-                    'rounded-full px-3 py-1.5 text-xs font-medium transition-colors relative',
-                    !subscription.hasAccess('advanced_patterns')
-                      ? 'bg-zinc-800/30 text-zinc-600 border border-zinc-700/30 cursor-not-allowed opacity-50'
-                      : selectedView === 'year-over-year'
-                        ? 'bg-lunary-primary-900 text-lunary-primary-300 border border-lunary-primary-700'
-                        : 'bg-zinc-800/50 text-zinc-400 border border-zinc-700/50 hover:bg-zinc-800/70',
-                  )}
-                  title={
-                    !subscription.hasAccess('advanced_patterns')
-                      ? 'Upgrade to Lunary+ Pro Annual to unlock'
-                      : undefined
+                  >
+                    {days === 180
+                      ? '6 months'
+                      : days === 365
+                        ? '12 months'
+                        : `${days} days`}
+                    {isLocked && (
+                      <LockIcon className='w-3 h-3 absolute -top-1 -right-1 text-zinc-600' />
+                    )}
+                  </button>
+                );
+              })}
+              <button
+                onClick={() => {
+                  const hasAccess = subscription.hasAccess('advanced_patterns');
+                  if (!hasAccess) {
+                    setUpgradeFeature('advanced_patterns');
+                    setShowUpgradeModal(true);
+                    return;
                   }
-                >
-                  Year-over-Year
-                  {!subscription.hasAccess('advanced_patterns') && (
-                    <LockIcon className='w-3 h-3 absolute -top-1 -right-1 text-zinc-600' />
-                  )}
-                </button>
-                <button
-                  onClick={() => {
-                    const hasAccess =
-                      subscription.hasAccess('advanced_patterns');
-                    if (!hasAccess) {
-                      setUpgradeFeature('advanced_patterns');
-                      setShowUpgradeModal(true);
-                      return;
-                    }
-                    setIsMultidimensionalMode(!isMultidimensionalMode);
-                  }}
-                  className={cn(
-                    'rounded-full px-3 py-1.5 text-xs font-medium transition-colors relative flex items-center gap-1.5',
-                    !subscription.hasAccess('advanced_patterns')
-                      ? 'bg-zinc-800/30 text-zinc-600 border border-zinc-700/30 cursor-not-allowed opacity-50'
-                      : isMultidimensionalMode
-                        ? 'bg-lunary-primary-900/20 text-lunary-primary-300 border border-lunary-primary-700'
-                        : 'bg-zinc-800/50 text-zinc-400 border border-zinc-700/50 hover:bg-zinc-800/70',
-                  )}
-                  title={
-                    !subscription.hasAccess('advanced_patterns')
-                      ? 'Upgrade to Lunary+ Pro Annual to unlock advanced patterns'
-                      : isMultidimensionalMode
-                        ? 'Turn off multidimensional analysis'
-                        : 'Turn on multidimensional analysis'
-                  }
-                >
-                  <Sparkles className='w-3 h-3' />
-                  Advanced
-                  {!subscription.hasAccess('advanced_patterns') && (
-                    <LockIcon className='w-3 h-3 absolute -top-1 -right-1 text-zinc-600' />
-                  )}
-                </button>
-              </div>
-              <AdvancedPatterns
-                key={`patterns-${selectedView}-${isMultidimensionalMode}`}
-                basicPatterns={
-                  hasPersonalTarotAccess
-                    ? personalizedReading?.trendAnalysis
-                    : undefined
-                }
-                selectedView={selectedView}
-                isMultidimensionalMode={isMultidimensionalMode}
-                onMultidimensionalModeChange={setIsMultidimensionalMode}
-                recentReadings={
-                  typeof selectedView === 'number' && selectedView === 7
-                    ? personalizedPreviousReadings
-                    : undefined
-                }
-                onCardClick={(card: { name: string }) => {
-                  const tarotCard = getTarotCardByName(card.name);
-                  if (tarotCard) setSelectedCard(tarotCard);
+                  setSelectedView('year-over-year');
+                  setIsMultidimensionalMode(true); // Year-over-year requires advanced mode
                 }}
-              />
-            </HoroscopeSection>
-          </CollapsibleSection>
-        )}
+                className={cn(
+                  'rounded-full px-3 py-1.5 text-xs font-medium transition-colors relative',
+                  !subscription.hasAccess('advanced_patterns')
+                    ? 'bg-zinc-800/30 text-zinc-600 border border-zinc-700/30 cursor-not-allowed opacity-50'
+                    : selectedView === 'year-over-year'
+                      ? 'bg-lunary-primary-900 text-lunary-primary-300 border border-lunary-primary-700'
+                      : 'bg-zinc-800/50 text-zinc-400 border border-zinc-700/50 hover:bg-zinc-800/70',
+                )}
+                title={
+                  !subscription.hasAccess('advanced_patterns')
+                    ? 'Upgrade to Lunary+ Pro Annual to unlock'
+                    : undefined
+                }
+              >
+                Year-over-Year
+                {!subscription.hasAccess('advanced_patterns') && (
+                  <LockIcon className='w-3 h-3 absolute -top-1 -right-1 text-zinc-600' />
+                )}
+              </button>
+              <button
+                onClick={() => {
+                  const hasAccess = subscription.hasAccess('advanced_patterns');
+                  if (!hasAccess) {
+                    setUpgradeFeature('advanced_patterns');
+                    setShowUpgradeModal(true);
+                    return;
+                  }
+                  setIsMultidimensionalMode(!isMultidimensionalMode);
+                }}
+                className={cn(
+                  'rounded-full px-3 py-1.5 text-xs font-medium transition-colors relative flex items-center gap-1.5',
+                  !subscription.hasAccess('advanced_patterns')
+                    ? 'bg-zinc-800/30 text-zinc-600 border border-zinc-700/30 cursor-not-allowed opacity-50'
+                    : isMultidimensionalMode
+                      ? 'bg-lunary-primary-900/20 text-lunary-primary-300 border border-lunary-primary-700'
+                      : 'bg-zinc-800/50 text-zinc-400 border border-zinc-700/50 hover:bg-zinc-800/70',
+                )}
+                title={
+                  !subscription.hasAccess('advanced_patterns')
+                    ? 'Upgrade to Lunary+ Pro Annual to unlock advanced patterns'
+                    : isMultidimensionalMode
+                      ? 'Turn off multidimensional analysis'
+                      : 'Turn on multidimensional analysis'
+                }
+              >
+                <Sparkles className='w-3 h-3' />
+                Advanced
+                {!subscription.hasAccess('advanced_patterns') && (
+                  <LockIcon className='w-3 h-3 absolute -top-1 -right-1 text-zinc-600' />
+                )}
+              </button>
+            </div>
+            <AdvancedPatterns
+              key={`patterns-${selectedView}-${isMultidimensionalMode}`}
+              basicPatterns={
+                hasPersonalTarotAccess
+                  ? personalizedReading?.trendAnalysis
+                  : freeBasicPatterns
+              }
+              selectedView={selectedView}
+              isMultidimensionalMode={isMultidimensionalMode}
+              onMultidimensionalModeChange={setIsMultidimensionalMode}
+              recentReadings={
+                typeof selectedView === 'number' && selectedView === 7
+                  ? hasPersonalTarotAccess
+                    ? personalizedPreviousReadings
+                    : previousReadings
+                  : undefined
+              }
+              onCardClick={(card: { name: string }) => {
+                const tarotCard = getTarotCardByName(card.name);
+                if (tarotCard) setSelectedCard(tarotCard);
+              }}
+            />
+          </HoroscopeSection>
+        </CollapsibleSection>
 
         <div id='tarot-spreads-section'>
           <CollapsibleSection title='Tarot Spreads' defaultCollapsed={false}>
