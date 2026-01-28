@@ -15,6 +15,9 @@ import {
   MONTHS,
 } from '@/constants/seo/monthly-horoscope';
 
+// 30-day revalidation for sign overview pages
+export const revalidate = 2592000;
+
 const AVAILABLE_YEARS = [2025, 2026, 2027, 2028, 2029, 2030];
 
 function resolveOgImageUrl(value: unknown): string | undefined {
@@ -44,11 +47,8 @@ function resolveCanonicalUrl(value: unknown, fallback: string): string {
   return fallback;
 }
 
-export async function generateStaticParams() {
-  return ZODIAC_SIGNS.map((sign) => ({
-    sign,
-  }));
-}
+// Removed generateStaticParams - using pure ISR for faster builds
+// Pages are generated on-demand and cached with 30-day revalidation
 
 export async function generateMetadata({
   params,
