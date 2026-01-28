@@ -19,6 +19,7 @@ import referenceChartData from '@/lib/reference-chart-data.json';
 import { DemoNavigationProvider } from './DemoNavigationProvider';
 import { DemoModeProvider } from './DemoModeProvider';
 import { ForceMobileLayout } from './ForceMobileLayout';
+import { Button } from '@/components/ui/button';
 
 // All static imports for instant loading (no spinners, better initial performance)
 import AppDashboardClient from '@/app/(authenticated)/app/AppDashboardClient';
@@ -56,16 +57,31 @@ function DashboardSkeleton() {
 export function MarketingMiniApp() {
   const [activeTab, setActiveTab] = useState<TabId>('app');
   const [userHasInteracted, setUserHasInteracted] = useState(false);
-  const [showClickHint, setShowClickHint] = useState(true);
   const [cycleProgress, setCycleProgress] = useState(0);
   const previewRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
   const [isVisible, setIsVisible] = useState(false);
   const [showScrollHint, setShowScrollHint] = useState(true);
   const [hasScrolled, setHasScrolled] = useState(false);
+  const autoCycleIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const mobileLayoutTimerRef = useRef<NodeJS.Timeout | null>(null);
 
   // Use static fallback data for demo (no API calls)
   const celesteUser = useMemo(() => createFallbackUser(), []);
+
+  // Clean up timers on unmount
+  useEffect(() => {
+    return () => {
+      if (autoCycleIntervalRef.current) {
+        clearInterval(autoCycleIntervalRef.current);
+        autoCycleIntervalRef.current = null;
+      }
+      if (mobileLayoutTimerRef.current) {
+        clearTimeout(mobileLayoutTimerRef.current);
+        mobileLayoutTimerRef.current = null;
+      }
+    };
+  }, []);
 
   // Track visibility
   useEffect(() => {
@@ -85,31 +101,17 @@ export function MarketingMiniApp() {
     return () => observer.disconnect();
   }, []);
 
-  // Prevent autoExpandOnDesktop from working - keep cards collapsed like mobile
-  // ALSO continuously enforce mobile grid layout by REMOVING responsive classes
+  // Simple mobile layout enforcement - run on mount and when tab changes
   useEffect(() => {
     const contentEl = contentRef.current;
     if (!contentEl) return;
 
-    // Strip responsive classes from className string
-    const stripResponsiveClasses = (className: string): string => {
-      return className
-        .split(' ')
-        .filter((cls) => {
-          // Remove ALL responsive variants (sm:, md:, lg:, xl:, 2xl:)
-          // This includes text sizes, padding, margins, grids, etc.
-          return (
-            !cls.startsWith('md:') &&
-            !cls.startsWith('lg:') &&
-            !cls.startsWith('xl:') &&
-            !cls.startsWith('2xl:') &&
-            !cls.startsWith('sm:')
-          );
-        })
-        .join(' ');
-    };
+    // Clear any existing timeout
+    if (mobileLayoutTimerRef.current) {
+      clearTimeout(mobileLayoutTimerRef.current);
+      mobileLayoutTimerRef.current = null;
+    }
 
-    // Function to aggressively force mobile layout
     const forceMobileLayout = () => {
       // Collapse auto-expanded cards
       const expandableCards = contentEl.querySelectorAll(
@@ -122,24 +124,10 @@ export function MarketingMiniApp() {
         }
       });
 
-      // Walk ALL elements and strip responsive classes from className
-      const allElements = contentEl.querySelectorAll('*');
-      allElements.forEach((element) => {
-        if (element.className && typeof element.className === 'string') {
-          const originalClass = element.className;
-          const strippedClass = stripResponsiveClasses(originalClass);
-
-          if (originalClass !== strippedClass) {
-            element.className = strippedClass;
-          }
-        }
-      });
-
-      // Also apply inline styles to grids as double-enforcement
+      // Force single column on card grids
       const allGrids = contentEl.querySelectorAll('.grid');
       allGrids.forEach((grid) => {
         if (grid instanceof HTMLElement) {
-          // Check if this looks like a card grid (not a content grid like planets/icons)
           const hasMultipleCards =
             grid.children.length >= 2 &&
             Array.from(grid.children).some(
@@ -149,61 +137,24 @@ export function MarketingMiniApp() {
             );
 
           if (hasMultipleCards) {
-            grid.style.setProperty(
-              'grid-template-columns',
-              'repeat(1, minmax(0, 1fr))',
-              'important',
-            );
+            grid.style.gridTemplateColumns = 'repeat(1, minmax(0, 1fr))';
           }
         }
       });
     };
 
-    // Initial application
+    // Run immediately and once after content loads
     forceMobileLayout();
-
-    // Also run after delays to catch lazy-loaded content
-    const timer = setTimeout(forceMobileLayout, 50);
-    const timer2 = setTimeout(forceMobileLayout, 200);
-    const timer3 = setTimeout(forceMobileLayout, 500);
-
-    // Watch for DOM changes and reapply
-    const observer = new MutationObserver(() => {
-      forceMobileLayout();
-    });
-
-    observer.observe(contentEl, {
-      childList: true,
-      subtree: true,
-      attributes: true,
-      attributeFilter: ['class', 'style'],
-    });
-
-    // ALSO use requestAnimationFrame for continuous enforcement
-    // This catches changes that MutationObserver might miss
-    let rafId: number;
-    let lastRun = 0;
-
-    const continuousEnforcement = () => {
-      const now = Date.now();
-      // Only run every 100ms to avoid excessive processing
-      if (now - lastRun > 100) {
-        forceMobileLayout();
-        lastRun = now;
-      }
-      rafId = requestAnimationFrame(continuousEnforcement);
-    };
-
-    rafId = requestAnimationFrame(continuousEnforcement);
+    const timer = setTimeout(forceMobileLayout, 100);
+    mobileLayoutTimerRef.current = timer;
 
     return () => {
-      clearTimeout(timer);
-      clearTimeout(timer2);
-      clearTimeout(timer3);
-      observer.disconnect();
-      cancelAnimationFrame(rafId);
+      if (mobileLayoutTimerRef.current) {
+        clearTimeout(mobileLayoutTimerRef.current);
+        mobileLayoutTimerRef.current = null;
+      }
     };
-  }, [activeTab]);
+  }, [activeTab]); // Re-run when tab changes
 
   // Intercept modals and keep them inside the preview
   useEffect(() => {
@@ -457,13 +408,19 @@ export function MarketingMiniApp() {
         }
       }
 
-      /* Smooth bounce animation for scroll hint */
-      @keyframes gentleBounce {
-        0%, 100% { transform: translateY(0); }
-        50% { transform: translateY(-8px); }
+      /* Pulse glow animation for scroll hint */
+      @keyframes pulseGlow {
+        0%, 100% {
+          border-color: rgb(126, 86, 194);
+          box-shadow: 0 0 8px rgba(126, 86, 194, 0.4);
+        }
+        50% {
+          border-color: rgb(156, 116, 224);
+          box-shadow: 0 0 16px rgba(126, 86, 194, 0.6), 0 0 24px rgba(126, 86, 194, 0.3);
+        }
       }
-      .scroll-hint-bounce {
-        animation: gentleBounce 2s ease-in-out infinite;
+      .animate-pulse-glow {
+        animation: pulseGlow 4s ease-in-out infinite;
       }
     `;
     document.head.appendChild(style);
@@ -473,18 +430,12 @@ export function MarketingMiniApp() {
     };
   }, []);
 
-  // Hide click hint after 5 seconds
-  useEffect(() => {
-    const timer = setTimeout(() => setShowClickHint(false), 5000);
-    return () => clearTimeout(timer);
-  }, []);
-
   // Show scroll hint after 3 seconds if user hasn't scrolled
   useEffect(() => {
+    if (hasScrolled || !isVisible) return;
+
     const timer = setTimeout(() => {
-      if (!hasScrolled && isVisible) {
-        setShowScrollHint(true);
-      }
+      setShowScrollHint(true);
     }, 3000);
 
     return () => clearTimeout(timer);
@@ -498,6 +449,14 @@ export function MarketingMiniApp() {
     const handleScroll = () => {
       setHasScrolled(true);
       setShowScrollHint(false);
+      setUserHasInteracted(true);
+      setCycleProgress(0);
+
+      // Stop auto-cycle immediately
+      if (autoCycleIntervalRef.current) {
+        clearInterval(autoCycleIntervalRef.current);
+        autoCycleIntervalRef.current = null;
+      }
     };
 
     const handleInteraction = () => {
@@ -518,13 +477,19 @@ export function MarketingMiniApp() {
 
   // Auto-cycle through tabs (only cyclable tabs, not locked ones)
   useEffect(() => {
+    // Clear any existing interval first
+    if (autoCycleIntervalRef.current) {
+      clearInterval(autoCycleIntervalRef.current);
+      autoCycleIntervalRef.current = null;
+    }
+
     if (!isVisible || userHasInteracted) {
       setCycleProgress(0);
       return;
     }
 
-    const cycleDuration = 12000; // 12 seconds per tab (slower for better viewing)
-    const frameRate = 60;
+    const cycleDuration = 12000; // 12 seconds per tab
+    const frameRate = 10; // Reduced from 60 to 10fps for performance
     const incrementPerFrame = (100 / cycleDuration) * (1000 / frameRate);
 
     let progress = 0;
@@ -542,8 +507,13 @@ export function MarketingMiniApp() {
       setCycleProgress(progress);
     }, 1000 / frameRate);
 
-    return () => clearInterval(progressInterval);
-  }, [isVisible, userHasInteracted, activeTab]);
+    autoCycleIntervalRef.current = progressInterval;
+
+    return () => {
+      clearInterval(progressInterval);
+      autoCycleIntervalRef.current = null;
+    };
+  }, [isVisible, userHasInteracted]); // Removed activeTab - interval continues across tab changes
 
   const handleTabClick = (tabId: TabId) => {
     setUserHasInteracted(true);
@@ -583,13 +553,13 @@ export function MarketingMiniApp() {
       style={{ height: '750px' }}
     >
       {/* Click to explore hint */}
-      {showClickHint && !userHasInteracted && isVisible && (
+      {/* {showClickHint && !userHasInteracted && isVisible && (
         <div className='absolute -top-8 left-1/2 -translate-x-1/2 z-10 animate-in fade-in slide-in-from-top-2 duration-500'>
           <p className='text-xs text-lunary-primary-300 whitespace-nowrap'>
             Click tabs to explore ✨
           </p>
         </div>
-      )}
+      )} */}
 
       {/* iPhone frame */}
       <div
@@ -729,15 +699,17 @@ export function MarketingMiniApp() {
         {/* Interactive demo hint */}
         {showScrollHint && !hasScrolled && isVisible && !userHasInteracted && (
           <div
-            className='absolute left-0 right-0 flex justify-center pointer-events-none z-20 animate-bounce'
-            style={{ bottom: '59px' }}
+            className='absolute left-0 right-0 flex justify-center pointer-events-none z-20'
+            style={{ bottom: '64px' }}
           >
-            <div className='bg-lunary-primary-600/90 backdrop-blur-sm rounded-full px-3 py-1.5 flex items-center gap-1.5 shadow-lg'>
-              <ChevronDown className='w-4 h-4 text-white' />
-              <span className='text-xs text-white font-medium'>
-                Fully interactive • Click & scroll
-              </span>
-            </div>
+            <Button
+              variant='outline'
+              size='xs'
+              className='animate-pulse-glow pointer-events-none bg-lunary-primary-900/90'
+            >
+              <ChevronDown className='w-3.5 h-3.5' />
+              Fully interactive
+            </Button>
           </div>
         )}
 

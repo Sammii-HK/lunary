@@ -29,6 +29,29 @@ export function DemoModeProvider({
 }: DemoModeProviderProps) {
   const containerRef = useRef<HTMLElement | null>(null);
 
+  // Override Math.random in demo mode to make it deterministic
+  // This prevents Transit Wisdom suggestions from cycling on each render
+  useEffect(() => {
+    const originalRandom = Math.random;
+
+    // Return a fixed sequence of pseudo-random values
+    // This makes selections consistent across renders
+    let callCount = 0;
+    const fixedValues = [0.42, 0.17, 0.89, 0.63, 0.28, 0.75, 0.51, 0.94];
+
+    const demoRandom = () => {
+      const value = fixedValues[callCount % fixedValues.length];
+      callCount++;
+      return value;
+    };
+
+    Math.random = demoRandom;
+
+    return () => {
+      Math.random = originalRandom;
+    };
+  }, []);
+
   // Intercept fetch API calls to prevent unauthorized requests in demo
   useEffect(() => {
     const originalFetch = window.fetch;
