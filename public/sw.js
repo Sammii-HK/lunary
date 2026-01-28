@@ -1,4 +1,4 @@
-const CACHE_NAME = 'lunary-v15';
+const CACHE_NAME = 'lunary-v16';
 const STATIC_CACHE_URLS = [
   '/app',
   '/manifest.json?v=20251103-1',
@@ -187,7 +187,29 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // PRODUCTION: For non-navigation requests (assets, images, etc.), use cache-first strategy
+  // Next.js JS/CSS chunks: stale-while-revalidate so deploys take effect
+  const isNextChunk = url.pathname.startsWith('/_next/static/');
+  if (isNextChunk) {
+    event.respondWith(
+      caches.open(CACHE_NAME).then((cache) => {
+        return cache.match(event.request).then((cachedResponse) => {
+          const fetchPromise = fetch(event.request)
+            .then((networkResponse) => {
+              if (networkResponse.ok) {
+                cache.put(event.request, networkResponse.clone());
+              }
+              return networkResponse;
+            })
+            .catch(() => cachedResponse);
+
+          return cachedResponse || fetchPromise;
+        });
+      }),
+    );
+    return;
+  }
+
+  // PRODUCTION: For other non-navigation requests (images, icons, etc.), use cache-first strategy
   event.respondWith(
     caches.match(event.request).then((cachedResponse) => {
       if (cachedResponse) {
