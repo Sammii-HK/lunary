@@ -19,6 +19,7 @@ export type ConversionEvent =
   | 'trial_expired'
   | 'trial_converted'
   | 'subscription_started'
+  | 'subscription_cancelled'
   | 'pricing_page_viewed'
   | 'upgrade_prompt_shown'
   | 'upgrade_clicked'
@@ -818,6 +819,11 @@ export const conversionTracking = {
     trackConversion('checkout_abandoned', { userId, metadata: { step } }),
 
   // Subscription & Lifecycle
+  subscriptionCancelled: (userId?: string, planType?: string) =>
+    trackConversion('subscription_cancelled', {
+      userId,
+      metadata: { planType },
+    }),
   subscriptionCancellationReason: (
     userId?: string,
     reason?: string,
