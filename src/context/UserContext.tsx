@@ -73,16 +73,24 @@ interface UserContextValue {
 
 const UserContext = createContext<UserContextValue | null>(null);
 
-export function UserProvider({ children }: { children: ReactNode }) {
+interface UserProviderProps {
+  children: ReactNode;
+  demoData?: UserData | null;
+}
+
+export function UserProvider({ children, demoData }: UserProviderProps) {
   const authStatus = useAuthStatus();
   const isAuthenticated = authStatus.isAuthenticated;
   const userId = authStatus.user?.id;
   const userEmail = authStatus.user?.email;
   const userName = authStatus.user?.name;
 
-  const [user, setUser] = useState<UserData | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [user, setUser] = useState<UserData | null>(demoData || null);
+  const [loading, setLoading] = useState(!demoData);
   const [error, setError] = useState<Error | null>(null);
+
+  // If demo data is provided, skip all fetching
+  const isDemoMode = Boolean(demoData);
   const birthChartRefreshRef = useRef(false);
   const birthChartRefreshAttemptRef = useRef<number>(0);
   const subscriptionSyncAttemptRef = useRef(false);
@@ -164,10 +172,12 @@ export function UserProvider({ children }: { children: ReactNode }) {
   }, [isAuthenticated, userId, userEmail, userName, hasLoadedOnce]);
 
   useEffect(() => {
+    if (isDemoMode) return; // Skip fetching in demo mode
     fetchUserData();
-  }, [fetchUserData]);
+  }, [fetchUserData, isDemoMode]);
 
   useEffect(() => {
+    if (isDemoMode) return; // Skip sync in demo mode
     const syncSubscription = async () => {
       if (!user || subscriptionSyncAttemptRef.current) return;
       if (!user.stripeCustomerId) return;
@@ -198,6 +208,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
   }, [user, fetchUserData]);
 
   useEffect(() => {
+    if (isDemoMode) return; // Skip refresh in demo mode
     const refreshBirthChart = async () => {
       if (!user || birthChartRefreshRef.current) return;
       if (birthChartRefreshAttemptRef.current > 0) return;

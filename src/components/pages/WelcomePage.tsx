@@ -19,6 +19,19 @@ import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import { NewsletterSignupForm } from '@/components/NewsletterSignupForm';
 import { renderJsonLd } from '@/lib/schema';
+import { MarketingMiniApp } from '@/components/marketing/MarketingMiniApp';
+import ctaExamples from '@/lib/cta-examples.json';
+
+const moonPhaseIconMap: Record<string, string> = {
+  'New Moon': '/icons/moon-phases/new-moon.svg',
+  'Waxing Crescent': '/icons/moon-phases/waxing-cresent-moon.svg',
+  'First Quarter': '/icons/moon-phases/first-quarter.svg',
+  'Waxing Gibbous': '/icons/moon-phases/waxing-gibbous-moon.svg',
+  'Full Moon': '/icons/moon-phases/full-moon.svg',
+  'Waning Gibbous': '/icons/moon-phases/waning-gibbous-moon.svg',
+  'Last Quarter': '/icons/moon-phases/last-quarter.svg',
+  'Waning Crescent': '/icons/moon-phases/waning-cresent-moon.svg',
+};
 
 const structuredData = {
   '@context': 'https://schema.org',
@@ -66,24 +79,10 @@ export default function WelcomePage() {
             </div>
           </div>
 
-          {/* Hero Screenshot */}
+          {/* Hero Mini App */}
           <div className='mt-8 md:mt-[72px] flex justify-center'>
-            <Image
-              src='/lunary_hero.png'
-              alt='Lunary app dashboard showing personalised cosmic insights'
-              className='w-full max-w-[420px] md:max-w-[380px] h-auto rounded-2xl border border-zinc-700/50'
-              width={380}
-              height={827}
-              priority
-              style={{
-                boxShadow:
-                  '0 18px 28px rgba(0, 0, 0, 0.28), 0 0 22px rgba(178, 126, 255, 0.18)',
-              }}
-            />
+            <MarketingMiniApp />
           </div>
-          <p className='text-xs text-zinc-500 mt-4 text-center'>
-            Preview shown from Lunary+.
-          </p>
         </section>
 
         <section className='py-2 px-4 md:py-8 leading-relaxed max-w-3xl mx-auto text-center'>
@@ -313,18 +312,23 @@ export default function WelcomePage() {
                 <div className='py-3 px-4 border border-zinc-800 rounded-lg'>
                   <div className='flex items-center gap-2 mb-1'>
                     <Image
-                      src='/icons/moon-phases/waning-cresent-moon.svg'
-                      alt='Waning Crescent'
+                      src={
+                        moonPhaseIconMap[ctaExamples.marketing.moonPhase.phase]
+                      }
+                      alt={ctaExamples.marketing.moonPhase.phase}
                       width={20}
                       height={20}
                     />
                     <span className='text-sm font-medium text-zinc-200'>
-                      Waning Crescent
+                      {ctaExamples.marketing.moonPhase.phase}
                     </span>
                   </div>
-                  <p className='text-xs text-zinc-400'>in Scorpio</p>
+                  <p className='text-xs text-zinc-400'>
+                    in {ctaExamples.marketing.moonPhase.sign}
+                  </p>
                   <p className='text-xs text-zinc-600 mt-1'>
-                    3 days until New Moon
+                    {ctaExamples.marketing.moonPhase.daysUntilNext} days until{' '}
+                    {ctaExamples.marketing.moonPhase.nextPhase}
                   </p>
                 </div>
                 <div className='py-3 px-4 border border-zinc-800 rounded-lg'>
@@ -337,23 +341,25 @@ export default function WelcomePage() {
                       Personal
                     </span>
                   </div>
-                  <p className='text-sm text-lunary-primary-300'>The Star</p>
+                  <p className='text-sm text-lunary-primary-300'>
+                    {ctaExamples.marketing.tarotCard.name}
+                  </p>
                   <p className='text-xs text-zinc-400'>
-                    Hope • Renewal • Serenity
+                    {ctaExamples.marketing.tarotCard.keywords}
                   </p>
                 </div>
                 <div className='py-3 px-4 border border-zinc-800 rounded-lg'>
                   <div className='flex items-center gap-2 mb-1'>
                     <Gem className='w-4 h-4 text-lunary-accent-200' />
                     <span className='text-sm font-medium text-zinc-200'>
-                      Amethyst
+                      {ctaExamples.marketing.crystal.name}
                     </span>
                     <span className='text-xs bg-lunary-primary-900/20 text-lunary-primary-300 px-1.5 py-0.5 rounded'>
                       For you
                     </span>
                   </div>
                   <p className='text-xs text-zinc-400'>
-                    Supports intuition during this reflective phase
+                    {ctaExamples.marketing.crystal.meaning}
                   </p>
                 </div>
               </div>

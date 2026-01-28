@@ -124,12 +124,22 @@ export function useAstronomyContext() {
 
 export const AstronomyContextProvider = ({
   children,
+  demoData,
 }: {
   children: React.ReactNode;
+  demoData?: {
+    currentMoonPhase?: MoonPhaseLabels;
+    currentMoonConstellationPosition?: ZodiacSign;
+    currentTarotCard?: any;
+    moonIllumination?: number;
+    moonAge?: number;
+  };
 }) => {
   const { user } = useUser();
   const userName = user?.name;
   const userBirthday = user?.birthday;
+
+  const isDemoMode = Boolean(demoData);
 
   const [currentDateTime, setCurrentDateTime] = useState(dayjs().toDate());
   const [currentDate, setCurrentDate] = useState(
@@ -139,6 +149,8 @@ export const AstronomyContextProvider = ({
   const [refreshKey, setRefreshKey] = useState(0);
 
   useEffect(() => {
+    if (isDemoMode) return; // Skip fetching in demo mode
+
     let isMounted = true;
 
     fetch(`/api/cosmic/global?date=${currentDate}`)
@@ -155,7 +167,7 @@ export const AstronomyContextProvider = ({
     return () => {
       isMounted = false;
     };
-  }, [currentDate, refreshKey]);
+  }, [currentDate, refreshKey, isDemoMode]);
 
   const currentAstrologicalChart = useMemo(() => {
     if (!cosmicData?.planetaryPositions) return [];
@@ -265,15 +277,24 @@ export const AstronomyContextProvider = ({
       value={{
         currentAstrologicalChart,
         currentMoonPosition,
-        currentMoonConstellationPosition,
+        currentMoonConstellationPosition: isDemoMode
+          ? demoData!.currentMoonConstellationPosition ||
+            currentMoonConstellationPosition
+          : currentMoonConstellationPosition,
         currentMoonConstellation,
         currentDateTime,
         setCurrentDateTime,
-        currentMoonPhase,
-        moonIllumination,
-        moonAge,
+        currentMoonPhase: isDemoMode
+          ? demoData!.currentMoonPhase || currentMoonPhase
+          : currentMoonPhase,
+        moonIllumination: isDemoMode
+          ? (demoData!.moonIllumination ?? moonIllumination)
+          : moonIllumination,
+        moonAge: isDemoMode ? (demoData!.moonAge ?? moonAge) : moonAge,
         writtenDate,
-        currentTarotCard,
+        currentTarotCard: isDemoMode
+          ? demoData!.currentTarotCard || currentTarotCard
+          : currentTarotCard,
         symbol,
         currentDate,
         refreshCosmicData: () => setRefreshKey((prev) => prev + 1),

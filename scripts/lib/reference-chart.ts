@@ -3,8 +3,14 @@
  * Profile: January 15, 1990, 12:00 PM, London, UK
  */
 
-import { generateBirthChart } from '../../utils/astrology/birthChart';
-import type { BirthChartData } from '../../utils/astrology/birthChart';
+import {
+  generateBirthChart,
+  generateBirthChartWithHouses,
+} from '../../utils/astrology/birthChart';
+import type {
+  BirthChartData,
+  BirthChartResult,
+} from '../../utils/astrology/birthChart';
 
 export const REFERENCE_PROFILE = {
   birthDate: '1990-01-15',
@@ -55,4 +61,30 @@ export function formatPosition(
  */
 export function formatFullPosition(body: BirthChartData): string {
   return formatPosition(body.degree, body.minute, body.sign);
+}
+
+/**
+ * Generate the reference birth chart with houses
+ */
+export async function generateReferenceChartWithHouses(): Promise<BirthChartResult> {
+  const result = await generateBirthChartWithHouses(
+    REFERENCE_PROFILE.birthDate,
+    REFERENCE_PROFILE.birthTime,
+    REFERENCE_PROFILE.birthLocation,
+    REFERENCE_PROFILE.birthTimezone,
+  );
+
+  return result;
+}
+
+/**
+ * Get a cached reference chart with houses or generate a new one
+ */
+let cachedChartWithHouses: BirthChartResult | null = null;
+
+export async function getReferenceChartWithHouses(): Promise<BirthChartResult> {
+  if (!cachedChartWithHouses) {
+    cachedChartWithHouses = await generateReferenceChartWithHouses();
+  }
+  return cachedChartWithHouses;
 }

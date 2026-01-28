@@ -1,7 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getGlobalCosmicData } from '@/lib/cosmic-snapshot/global-cache';
+import { getHourlyCacheHeaders } from '@/lib/cache-utils';
 
 export const runtime = 'nodejs';
+export const revalidate = 3600; // Revalidate hourly (moon/planets update frequently)
 
 export async function GET(request: NextRequest) {
   try {
@@ -19,9 +21,7 @@ export async function GET(request: NextRequest) {
     }
 
     return NextResponse.json(data, {
-      headers: {
-        'Cache-Control': 'public, s-maxage=7200, stale-while-revalidate=3600',
-      },
+      headers: getHourlyCacheHeaders(), // Moon/planets update frequently
     });
   } catch (error) {
     console.error('[cosmic/global] Error:', error);

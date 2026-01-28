@@ -1,6 +1,6 @@
 {
-  "generatedAt": "2026-01-27T13:36:43.883Z",
-  "generatedForDate": "2026-01-27",
+  "generatedAt": "2026-01-28T17:36:32.407Z",
+  "generatedForDate": "2026-01-28",
   "reference": {
     "birthDate": "1990-01-15",
     "birthTime": "12:00 PM",
@@ -10,18 +10,18 @@
     "examples": [
       {
         "type": "transit_to_natal",
-        "text": "Jupiter 17°52' Cancer ⚹ your natal Moon 17°30' Virgo",
+        "text": "Jupiter 17°44' Cancer ⚹ your natal Moon 17°30' Virgo",
         "interpretation": "opportunity for connection"
       },
       {
         "type": "house_activation",
-        "text": "Mars activating your 10th house",
+        "text": "Venus activating your 10th house",
         "interpretation": "career, public life, legacy"
       },
       {
         "type": "personal_day",
-        "text": "Personal Day 9",
-        "interpretation": "completion, wisdom, humanitarianism"
+        "text": "Personal Day 1",
+        "interpretation": "new beginnings, leadership, independence"
       }
     ]
   },
@@ -43,12 +43,12 @@
     "examples": [
       {
         "type": "house_activation",
-        "text": "Your 1st house activity",
-        "interpretation": "identity, appearance, new beginnings"
+        "text": "Sun, Mercury, Venus, Mars activating your 10th house",
+        "interpretation": "career, public life, legacy"
       },
       {
         "type": "multi_planet_house",
-        "text": "Your 10th house focus",
+        "text": "Sun, Mercury, Venus, Mars in your 10th house",
         "interpretation": "career, public life, legacy"
       }
     ]
@@ -58,16 +58,16 @@
       {
         "type": "major_transit",
         "text": "Jupiter sextile Moon",
-        "interpretation": "0.4° orb, exact today"
+        "interpretation": "0.2° orb, exact today"
       },
       {
         "type": "transit_house",
-        "text": "Venus through your 5th house",
-        "interpretation": "creativity, romance, self-expression"
+        "text": "Moon through your 2nd house",
+        "interpretation": "resources, values, self-worth"
       },
       {
         "type": "multiple_aspects",
-        "text": "11 aspects forming to your natal planets",
+        "text": "10 aspects forming to your natal planets",
         "interpretation": "layered cosmic influences today"
       }
     ]
@@ -81,13 +81,13 @@
       },
       {
         "type": "moon_position",
-        "text": "Moon 25°37' Taurus in your 1st house",
-        "interpretation": "identity, appearance, new beginnings"
+        "text": "Moon 12°27' Gemini in your 2nd house",
+        "interpretation": "resources, values, self-worth"
       },
       {
         "type": "moon_aspect",
-        "text": "Moon △ your natal Sun",
-        "interpretation": "emotional comfort and support"
+        "text": "Moon □ your natal Moon",
+        "interpretation": "emotional challenge prompting change"
       }
     ]
   },
@@ -96,18 +96,56 @@
       {
         "type": "aspect",
         "text": "Jupiter ⚹ Moon",
-        "interpretation": "sextile, 0.4° orb"
-      },
-      {
-        "type": "aspect",
-        "text": "Moon △ Sun",
-        "interpretation": "trine, 0.5° orb"
+        "interpretation": "sextile, 0.2° orb"
       },
       {
         "type": "aspect",
         "text": "Jupiter ☍ Saturn",
-        "interpretation": "opposition, 0.6° orb"
+        "interpretation": "opposition, 0.4° orb"
+      },
+      {
+        "type": "aspect",
+        "text": "Saturn ⚹ Venus",
+        "interpretation": "sextile, 2.4° orb"
       }
     ]
+  },
+  "marketing": {
+    "persona": {
+      "name": "Celeste",
+      "birthDate": "1990-01-15",
+      "birthTime": "12:00",
+      "birthLocation": "London, UK",
+      "sunSign": "Capricorn",
+      "moonSign": "Virgo",
+      "risingSign": "Taurus"
+    },
+    "moonPhase": {
+      "phase": "First Quarter",
+      "sign": "Gemini",
+      "daysUntilNext": 1,
+      "nextPhase": "Waxing Gibbous",
+      "element": "Air",
+      "rulingPlanet": "Mercury",
+      "modality": "Mutable",
+      "spell": "Decision Clarity Ritual"
+    },
+    "tarotCard": {
+      "name": "Temperance",
+      "keywords": "Balance • Patience • Harmony"
+    },
+    "crystal": {
+      "name": "Clear Quartz",
+      "meaning": "Amplifies mental clarity and communication"
+    },
+    "todayTheme": "Jupiter supports your natal Moon - opportunity emerging",
+    "todayTransit": {
+      "planet": "Jupiter",
+      "aspect": "sextile",
+      "aspectSymbol": "⚹",
+      "natalPlanet": "Moon",
+      "house": 6,
+      "meaning": "opportunity for connection"
+    }
   }
 }

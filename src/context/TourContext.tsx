@@ -34,13 +34,22 @@ interface TourContextValue {
 
 const TourContext = createContext<TourContextValue | null>(null);
 
-export function TourProvider({ children }: { children: React.ReactNode }) {
+interface TourProviderProps {
+  children: React.ReactNode;
+  demoMode?: boolean;
+}
+
+export function TourProvider({
+  children,
+  demoMode = false,
+}: TourProviderProps) {
   const { user } = useUser();
   const authState = useAuthStatus();
   const [rawContext, setRawContext] = useState<RawTourContext | null>(null);
 
   // Fetch tour context on mount
   useEffect(() => {
+    if (demoMode) return; // Skip tour fetching in demo mode
     if (!authState.isAuthenticated || !user?.id) return;
 
     const fetchTourContext = async () => {
