@@ -7,12 +7,10 @@ import { CosmicConnections } from '@/components/grimoire/CosmicConnections';
 import { getCosmicConnections } from '@/lib/cosmicConnectionsConfig';
 import { Heading } from '@/components/ui/Heading';
 
-export async function generateStaticParams() {
-  // Generate pages for years 2025-2030
-  return [2025, 2026, 2027, 2028, 2029, 2030].map((year) => ({
-    year: year.toString(),
-  }));
-}
+// 30-day ISR revalidation
+export const revalidate = 2592000;
+// Removed generateStaticParams - using pure ISR for faster builds
+// Pages are generated on-demand and cached with 30-day revalidation
 
 export async function generateMetadata({
   params,

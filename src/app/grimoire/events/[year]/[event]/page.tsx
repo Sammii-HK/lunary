@@ -7,6 +7,8 @@ import { generateYearlyForecast } from '@/lib/forecast/yearly';
 import yearlyEventContent from '@/data/grimoire/yearly-event-content.json';
 import { CosmicConnections } from '@/components/grimoire/CosmicConnections';
 
+// 30-day ISR revalidation
+export const revalidate = 2592000;
 const AVAILABLE_YEARS = [2025, 2026, 2027, 2028, 2029, 2030];
 const EVENT_KEYS = [
   'mercury-retrograde',
@@ -133,14 +135,8 @@ const getEventContent = (event: EventKey, year: number): EventContent => {
   return resolveContent(merged, year);
 };
 
-export async function generateStaticParams() {
-  return AVAILABLE_YEARS.flatMap((year) =>
-    EVENT_KEYS.map((event) => ({
-      year: year.toString(),
-      event,
-    })),
-  );
-}
+// Removed generateStaticParams - using pure ISR for faster builds
+// Pages are generated on-demand and cached with 30-day revalidation
 
 export async function generateMetadata({
   params,

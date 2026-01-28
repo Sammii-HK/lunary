@@ -9,6 +9,8 @@ import { createItemListSchema } from '@/lib/schema';
 import { SEOContentTemplate } from '@/components/grimoire/SEOContentTemplate';
 import { getCosmicConnections } from '@/lib/cosmicConnectionsConfig';
 
+// 30-day ISR revalidation
+export const revalidate = 2592000;
 export const metadata: Metadata = {
   title: 'Astrological Transits: What They Mean and How to Read Them | Lunary',
   description:

@@ -5,6 +5,8 @@ import { ExploreGrimoire } from '@/components/grimoire/ExploreGrimoire';
 import { Sun } from 'lucide-react';
 import { GrimoireBreadcrumbs } from '@/components/grimoire/GrimoireBreadcrumbs';
 
+// 30-day ISR revalidation
+export const revalidate = 2592000;
 const VALID_YEARS = ['2024', '2025', '2026'];
 
 const seasons = [
@@ -82,9 +84,8 @@ const seasons = [
   },
 ];
 
-export async function generateStaticParams() {
-  return VALID_YEARS.map((year) => ({ year }));
-}
+// Removed generateStaticParams - using pure ISR for faster builds
+// Pages are generated on-demand and cached with 30-day revalidation
 
 export async function generateMetadata({
   params,
