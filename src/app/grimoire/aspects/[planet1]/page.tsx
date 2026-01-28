@@ -11,6 +11,8 @@ import {
 } from '@/constants/seo/aspects';
 import { GrimoireBreadcrumbs } from '@/components/grimoire/GrimoireBreadcrumbs';
 
+// 30-day ISR revalidation
+export const revalidate = 2592000;
 const ASPECTS = ['conjunction', 'opposition', 'trine', 'square', 'sextile'];
 const aspectSymbols: Record<string, string> = {
   conjunction: '☌',
@@ -20,9 +22,8 @@ const aspectSymbols: Record<string, string> = {
   sextile: '⚹',
 };
 
-export async function generateStaticParams() {
-  return PLANETS.map((planet) => ({ planet1: planet }));
-}
+// Removed generateStaticParams - using pure ISR for faster builds
+// Pages are generated on-demand and cached with 30-day revalidation
 
 export async function generateMetadata({
   params,

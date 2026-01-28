@@ -11,6 +11,8 @@ import {
 } from '@/constants/seo/aspects';
 import { GrimoireBreadcrumbs } from '@/components/grimoire/GrimoireBreadcrumbs';
 
+// 30-day ISR revalidation
+export const revalidate = 2592000;
 const ASPECTS = [
   'conjunction',
   'opposition',
@@ -36,15 +38,8 @@ const aspectDescriptions: Record<Aspect, string> = {
   sextile: 'opportunistic and cooperative',
 };
 
-export async function generateStaticParams() {
-  const params: { planet1: string; aspect: string }[] = [];
-  for (const planet of PLANETS) {
-    for (const aspect of ASPECTS) {
-      params.push({ planet1: planet, aspect });
-    }
-  }
-  return params;
-}
+// Removed generateStaticParams - using pure ISR for faster builds
+// Pages are generated on-demand and cached with 30-day revalidation
 
 export async function generateMetadata({
   params,

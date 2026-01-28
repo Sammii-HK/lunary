@@ -9,6 +9,8 @@ import {
   createBreadcrumbSchema,
 } from '@/lib/schema';
 
+// 30-day ISR revalidation
+export const revalidate = 2592000;
 const retrogrades = [
   {
     slug: 'mercury',
