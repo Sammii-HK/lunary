@@ -83,9 +83,9 @@ export function ShareDailyInsight() {
       };
     }
 
-    const nowUtc = today.utc();
-    const dayOfYearUtc = nowUtc.dayOfYear();
-    const generalSeed = `cosmic-${nowUtc.format('YYYY-MM-DD')}-${dayOfYearUtc}-energy`;
+    // Use LOCAL date/day so card changes at user's midnight, not UTC midnight
+    const dayOfYearLocal = today.dayOfYear();
+    const generalSeed = `cosmic-${dateStr}-${dayOfYearLocal}-energy`;
     const card = getTarotCard(generalSeed);
     return {
       name: card.name,

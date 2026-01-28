@@ -25,6 +25,26 @@ const CACHE_PREFIX = 'lunary_cache_';
 
 export type CacheDuration = 'daily' | 'hourly';
 
+/**
+ * Get user's local date string (YYYY-MM-DD) in their timezone
+ * CRITICAL: Must use local date, not UTC, so each user gets new content at their midnight
+ *
+ * Example: User in Tokyo (JST, UTC+9) at 11:30 PM on Dec 31st
+ * - getLocalDateString() returns "2024-12-31" (their local date)
+ * - new Date().toISOString() would return "2024-12-31T14:30:00.000Z" (UTC date, wrong!)
+ *
+ * This ensures:
+ * - Daily tarot cards change at user's midnight, not server's midnight
+ * - Daily crystals, insights change at user's local midnight
+ * - Cache expires at user's end of day
+ */
+export function getLocalDateString(date: Date = new Date()): string {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
+
 export class DailyCache {
   /**
    * Get cached data if still valid
@@ -63,14 +83,15 @@ export class DailyCache {
 
     try {
       const now = new Date();
-      const today = now.toISOString().split('T')[0];
+      const today = getLocalDateString(now); // User's local date in their timezone
+
       let expiresAt: number;
 
       if (duration === 'hourly') {
         // Expire in 2 hours for "live" data
         expiresAt = now.getTime() + 2 * 60 * 60 * 1000;
       } else {
-        // Expire at midnight local timezone for daily data
+        // Expire at midnight in USER'S local timezone for daily data
         const endOfDay = new Date(now);
         endOfDay.setHours(23, 59, 59, 999);
         expiresAt = endOfDay.getTime();
@@ -78,7 +99,7 @@ export class DailyCache {
 
       const entry: CacheEntry<T> = {
         data,
-        timestamp: today,
+        timestamp: today, // Stores user's local date
         expiresAt,
       };
 

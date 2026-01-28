@@ -16,7 +16,7 @@ import {
 } from '../../utils/moon/moonPhases';
 import type { GlobalCosmicData } from '@/lib/cosmic-snapshot/global-cache';
 import { useUser } from '@/context/UserContext';
-import { DailyCache } from '@/lib/cache/dailyCache';
+import { DailyCache, getLocalDateString } from '@/lib/cache/dailyCache';
 
 export const AstronomyContext = createContext<{
   currentAstrologicalChart: AstroChartInformation[];
@@ -113,7 +113,7 @@ export function useAstronomyContext() {
       writtenDate: '',
       currentTarotCard: null,
       symbol: '',
-      currentDate: dayjs().utc().format('YYYY-MM-DD'),
+      currentDate: getLocalDateString(), // User's local date, not UTC
       refreshCosmicData: () => {
         console.warn('AstronomyContext fallback: refreshCosmicData called');
       },

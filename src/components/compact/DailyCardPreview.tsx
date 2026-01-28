@@ -19,6 +19,7 @@ import { shouldRedactWord } from '@/constants/redactedWords';
 import { calculateTransitAspects } from '@/lib/astrology/transit-aspects';
 import { generateTarotTransitConnection } from '@/lib/tarot/generate-transit-connection';
 import type { TransitInsight } from '@/lib/tarot/generate-transit-connection';
+import { getLocalDateString } from '@/lib/cache/dailyCache';
 
 dayjs.extend(utc);
 dayjs.extend(dayOfYear);
@@ -29,8 +30,8 @@ export const DailyCardPreview = () => {
   const router = useRouter();
   const subscription = useSubscription();
   const astronomyContext = useAstronomyContext();
-  const currentDate =
-    astronomyContext?.currentDate || dayjs().utc().format('YYYY-MM-DD');
+  // CRITICAL: Use user's LOCAL date, not UTC, so tarot changes at their midnight
+  const currentDate = astronomyContext?.currentDate || getLocalDateString();
   const currentAstrologicalChart = useMemo(() => {
     return astronomyContext?.currentAstrologicalChart || [];
   }, [astronomyContext]);
@@ -55,7 +56,8 @@ export const DailyCardPreview = () => {
     userBirthday;
 
   const dailyCard = useMemo(() => {
-    const dateStr = currentDate || dayjs().utc().format('YYYY-MM-DD');
+    // Use local date so card changes at user's midnight, not server's
+    const dateStr = currentDate || getLocalDateString();
     const selectedDay = dayjs(dateStr);
 
     // Generate general card for all users
