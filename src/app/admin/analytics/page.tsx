@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   Activity,
   BarChart3,
@@ -440,6 +440,12 @@ export default function AnalyticsPage() {
   const [insightTypeFilter, setInsightTypeFilter] = useState<string>('all');
   const [insightCategoryFilter, setInsightCategoryFilter] =
     useState<string>('all');
+  const [metricSnapshots, setMetricSnapshots] = useState<{
+    weekly: any[];
+    monthly: any[];
+  }>({ weekly: [], monthly: [] });
+  const [showExportMenu, setShowExportMenu] = useState(false);
+  const exportMenuRef = useRef<HTMLDivElement>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const activityUsageData = useMemo(() => {
@@ -853,10 +859,239 @@ export default function AnalyticsPage() {
     fetchAnalytics();
   }, [fetchAnalytics]);
 
+  useEffect(() => {
+    const fetchSnapshots = async () => {
+      try {
+        const [weeklyRes, monthlyRes] = await Promise.all([
+          fetch('/api/admin/analytics/metric-snapshots?type=weekly&limit=12'),
+          fetch('/api/admin/analytics/metric-snapshots?type=monthly&limit=12'),
+        ]);
+        const weekly = weeklyRes.ok
+          ? ((await weeklyRes.json()).snapshots ?? [])
+          : [];
+        const monthly = monthlyRes.ok
+          ? ((await monthlyRes.json()).snapshots ?? [])
+          : [];
+        setMetricSnapshots({ weekly, monthly });
+      } catch {
+        // Snapshots are supplementary — fail silently
+      }
+    };
+    fetchSnapshots();
+  }, []);
+
+  const downloadCsv = (rows: string[][], filename: string) => {
+    const escapeCsvCell = (value: unknown): string => {
+      const text = value === null || value === undefined ? '' : String(value);
+      if (/[",\n\r]/.test(text)) {
+        return `"${text.replace(/"/g, '""')}"`;
+      }
+      return text;
+    };
+    const csv = rows.map((row) => row.map(escapeCsvCell).join(',')).join('\n');
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', filename);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  };
+
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (
+        exportMenuRef.current &&
+        !exportMenuRef.current.contains(e.target as Node)
+      ) {
+        setShowExportMenu(false);
+      }
+    };
+    if (showExportMenu) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [showExportMenu]);
+
+  const handleExportSnapshot = () => {
+    const rows: string[][] = [
+      ['Metric', 'Value', 'Period'],
+      ['Generated', new Date().toISOString(), `${startDate} to ${endDate}`],
+    ];
+
+    rows.push(
+      ['New Signups', String(engagementOverview?.new_users ?? 0), 'Range'],
+      ['WAU', String(engagementOverview?.wau ?? 0), 'Range'],
+      ['MAU', String(engagementOverview?.mau ?? 0), 'Range'],
+      ['DAU', String(engagementOverview?.dau ?? 0), 'Range'],
+      ['New Trials', String(conversions?.total_conversions ?? 0), 'Range'],
+      [
+        'Conversion Rate',
+        `${(conversions?.conversion_rate ?? 0).toFixed(2)}%`,
+        'Range',
+      ],
+      [
+        'Trial Conversion Rate',
+        `${(conversions?.trial_conversion_rate ?? 0).toFixed(2)}%`,
+        'Range',
+      ],
+      [
+        'Activation Rate',
+        `${(activation?.activationRate ?? 0).toFixed(2)}%`,
+        'Range',
+      ],
+      [
+        'Active Subscribers',
+        String(planBreakdown?.totalActivePaid ?? 0),
+        'Current',
+      ],
+      ['MRR', `$${Number(planBreakdown?.totalMrr ?? 0).toFixed(2)}`, 'Current'],
+      [
+        'Churn Rate',
+        `${Number(successMetrics?.churn_rate ?? 0).toFixed(2)}%`,
+        'Range',
+      ],
+    );
+
+    if (activity?.retention) {
+      rows.push(
+        [
+          'D1 Retention',
+          activity.retention.day_1 != null
+            ? `${activity.retention.day_1.toFixed(1)}%`
+            : 'N/A',
+          'Range',
+        ],
+        [
+          'D7 Retention',
+          activity.retention.day_7 != null
+            ? `${activity.retention.day_7.toFixed(1)}%`
+            : 'N/A',
+          'Range',
+        ],
+        [
+          'D30 Retention',
+          activity.retention.day_30 != null
+            ? `${activity.retention.day_30.toFixed(1)}%`
+            : 'N/A',
+          'Range',
+        ],
+      );
+    }
+
+    downloadCsv(
+      rows,
+      `lunary-investor-snapshot-${startDate}-to-${endDate}.csv`,
+    );
+    setShowExportMenu(false);
+  };
+
+  const handleExportWeeklyComparison = () => {
+    const snapshots = metricSnapshots.weekly;
+    if (!snapshots.length) return;
+
+    const rows: string[][] = [
+      [
+        'Week',
+        'Signups',
+        'Signups Δ%',
+        'WAU',
+        'WAU Δ%',
+        'New Trials',
+        'New Paying',
+        'Active Subs',
+        'Active Subs Δ%',
+        'MRR',
+        'MRR Δ%',
+        'Activation %',
+        'Churn %',
+        'Trial→Paid %',
+      ],
+    ];
+
+    snapshots.forEach((s: any, i: number) => {
+      const prev = snapshots[i + 1];
+      const pct = (cur: number, p: number | undefined) =>
+        p != null && p > 0 ? `${(((cur - p) / p) * 100).toFixed(1)}%` : '';
+
+      rows.push([
+        s.period_key,
+        String(s.new_signups),
+        pct(s.new_signups, prev?.new_signups),
+        String(s.wau),
+        pct(s.wau, prev?.wau),
+        String(s.new_trials),
+        String(s.new_paying_subscribers),
+        String(s.active_subscribers),
+        pct(s.active_subscribers, prev?.active_subscribers),
+        `$${Number(s.mrr).toFixed(2)}`,
+        pct(s.mrr, prev?.mrr),
+        `${s.activation_rate}%`,
+        `${s.churn_rate}%`,
+        `${s.trial_to_paid_conversion_rate}%`,
+      ]);
+    });
+
+    downloadCsv(rows, 'lunary-weekly-comparison.csv');
+    setShowExportMenu(false);
+  };
+
+  const handleExportMonthlyComparison = () => {
+    const snapshots = metricSnapshots.monthly;
+    if (!snapshots.length) return;
+
+    const rows: string[][] = [
+      [
+        'Month',
+        'Signups',
+        'Signups Δ%',
+        'MAU',
+        'MAU Δ%',
+        'New Trials',
+        'New Paying',
+        'Active Subs',
+        'Active Subs Δ%',
+        'MRR',
+        'MRR Δ%',
+        'Activation %',
+        'Churn %',
+        'Trial→Paid %',
+      ],
+    ];
+
+    snapshots.forEach((s: any, i: number) => {
+      const prev = snapshots[i + 1];
+      const pct = (cur: number, p: number | undefined) =>
+        p != null && p > 0 ? `${(((cur - p) / p) * 100).toFixed(1)}%` : '';
+
+      rows.push([
+        s.period_key,
+        String(s.new_signups),
+        pct(s.new_signups, prev?.new_signups),
+        String(s.wau),
+        pct(s.wau, prev?.wau),
+        String(s.new_trials),
+        String(s.new_paying_subscribers),
+        String(s.active_subscribers),
+        pct(s.active_subscribers, prev?.active_subscribers),
+        `$${Number(s.mrr).toFixed(2)}`,
+        pct(s.mrr, prev?.mrr),
+        `${s.activation_rate}%`,
+        `${s.churn_rate}%`,
+        `${s.trial_to_paid_conversion_rate}%`,
+      ]);
+    });
+
+    downloadCsv(rows, 'lunary-monthly-comparison.csv');
+    setShowExportMenu(false);
+  };
+
+  // Full operational export for the details tab
   const handleExport = () => {
     const escapeCsvCell = (value: unknown): string => {
       const text = value === null || value === undefined ? '' : String(value);
-      // Quote if needed (commas, quotes, newlines)
       if (/[",\n\r]/.test(text)) {
         return `"${text.replace(/"/g, '""')}"`;
       }
@@ -1413,19 +1648,7 @@ export default function AnalyticsPage() {
       });
     }
 
-    const csv = rows.map((row) => row.map(escapeCsvCell).join(',')).join('\n');
-    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.setAttribute(
-      'download',
-      `lunary-analytics-${startDate}-to-${endDate}.csv`,
-    );
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    URL.revokeObjectURL(url);
+    downloadCsv(rows, `lunary-analytics-full-${startDate}-to-${endDate}.csv`);
   };
 
   const heatmapData = useMemo(() => {
@@ -2008,10 +2231,48 @@ export default function AnalyticsPage() {
             <option value='month'>Monthly</option>
           </select>
 
-          <Button variant='lunary-soft' onClick={handleExport}>
-            <Download className='h-3.5 w-3.5' />
-            Download CSV
-          </Button>
+          <div ref={exportMenuRef} className='relative'>
+            <Button
+              variant='lunary-soft'
+              onClick={() => setShowExportMenu(!showExportMenu)}
+            >
+              <Download className='h-3.5 w-3.5' />
+              Export
+            </Button>
+            {showExportMenu && (
+              <div className='absolute top-full left-0 z-10 mt-1 w-56 rounded-lg border border-zinc-800/40 bg-zinc-900 shadow-lg'>
+                <button
+                  className='w-full px-4 py-2.5 text-left text-xs text-zinc-300 hover:bg-zinc-800/50 first:rounded-t-lg'
+                  onClick={handleExportSnapshot}
+                >
+                  Investor Snapshot
+                </button>
+                <button
+                  className='w-full px-4 py-2.5 text-left text-xs text-zinc-300 hover:bg-zinc-800/50'
+                  onClick={handleExportWeeklyComparison}
+                  disabled={!metricSnapshots.weekly.length}
+                >
+                  Weekly Comparison
+                </button>
+                <button
+                  className='w-full px-4 py-2.5 text-left text-xs text-zinc-300 hover:bg-zinc-800/50'
+                  onClick={handleExportMonthlyComparison}
+                  disabled={!metricSnapshots.monthly.length}
+                >
+                  Monthly Comparison
+                </button>
+                <button
+                  className='w-full px-4 py-2.5 text-left text-xs text-zinc-300 hover:bg-zinc-800/50 last:rounded-b-lg'
+                  onClick={() => {
+                    handleExport();
+                    setShowExportMenu(false);
+                  }}
+                >
+                  Full Overview
+                </button>
+              </div>
+            )}
+          </div>
 
           <Button
             variant='ghost'
@@ -2675,6 +2936,264 @@ export default function AnalyticsPage() {
                     {pageviewsPerReachUser.toFixed(1)}
                   </p>
                 )}
+              </CardContent>
+            </Card>
+          </section>
+
+          {/* Growth History */}
+          <section>
+            <Card>
+              <CardHeader>
+                <CardTitle className='flex items-center gap-2'>
+                  <TrendingUp className='h-5 w-5 text-lunary-primary' />
+                  Growth History
+                </CardTitle>
+                <CardDescription>
+                  Stored weekly & monthly snapshots for comparison
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <Tabs defaultValue='weekly' className='space-y-4'>
+                  <TabsList className='rounded-lg border border-zinc-800/40 bg-zinc-900/20'>
+                    <TabsTrigger value='weekly' className='text-xs'>
+                      Weekly
+                    </TabsTrigger>
+                    <TabsTrigger value='monthly' className='text-xs'>
+                      Monthly
+                    </TabsTrigger>
+                  </TabsList>
+
+                  <TabsContent value='weekly'>
+                    {metricSnapshots.weekly.length === 0 ? (
+                      <p className='text-sm text-zinc-500'>
+                        No weekly snapshots yet. They are generated every Monday
+                        at 02:00 UTC.
+                      </p>
+                    ) : (
+                      <div className='overflow-x-auto'>
+                        <table className='w-full text-sm'>
+                          <thead>
+                            <tr className='border-b border-zinc-800'>
+                              <th className='py-2 text-left text-zinc-400'>
+                                Week
+                              </th>
+                              <th className='py-2 text-right text-zinc-400'>
+                                Signups
+                              </th>
+                              <th className='py-2 text-right text-zinc-400'>
+                                WAU
+                              </th>
+                              <th className='py-2 text-right text-zinc-400'>
+                                Trials
+                              </th>
+                              <th className='py-2 text-right text-zinc-400'>
+                                New Paying
+                              </th>
+                              <th className='py-2 text-right text-zinc-400'>
+                                Active Subs
+                              </th>
+                              <th className='py-2 text-right text-zinc-400'>
+                                MRR
+                              </th>
+                              <th className='py-2 text-right text-zinc-400'>
+                                Activation
+                              </th>
+                              <th className='py-2 text-right text-zinc-400'>
+                                Churn
+                              </th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {metricSnapshots.weekly.map((s: any, i: number) => {
+                              const prev = metricSnapshots.weekly[i + 1];
+                              const delta = (
+                                current: number,
+                                previous: number | undefined,
+                              ) =>
+                                previous != null && previous > 0
+                                  ? ((current - previous) / previous) * 100
+                                  : null;
+                              const fmtDelta = (val: number | null) =>
+                                val != null
+                                  ? `${val > 0 ? '+' : ''}${val.toFixed(0)}%`
+                                  : '';
+                              return (
+                                <tr
+                                  key={s.period_key}
+                                  className='border-b border-zinc-800/40'
+                                >
+                                  <td className='py-2 font-medium text-zinc-300'>
+                                    {s.period_key}
+                                  </td>
+                                  <td className='py-2 text-right text-zinc-300'>
+                                    {s.new_signups}
+                                    <span
+                                      className={`ml-1 text-xs ${(delta(s.new_signups, prev?.new_signups) ?? 0) >= 0 ? 'text-lunary-success-400' : 'text-lunary-error-400'}`}
+                                    >
+                                      {fmtDelta(
+                                        delta(s.new_signups, prev?.new_signups),
+                                      )}
+                                    </span>
+                                  </td>
+                                  <td className='py-2 text-right text-zinc-300'>
+                                    {s.wau}
+                                    <span
+                                      className={`ml-1 text-xs ${(delta(s.wau, prev?.wau) ?? 0) >= 0 ? 'text-lunary-success-400' : 'text-lunary-error-400'}`}
+                                    >
+                                      {fmtDelta(delta(s.wau, prev?.wau))}
+                                    </span>
+                                  </td>
+                                  <td className='py-2 text-right text-zinc-300'>
+                                    {s.new_trials}
+                                  </td>
+                                  <td className='py-2 text-right text-zinc-300'>
+                                    {s.new_paying_subscribers}
+                                  </td>
+                                  <td className='py-2 text-right text-zinc-300'>
+                                    {s.active_subscribers}
+                                  </td>
+                                  <td className='py-2 text-right text-zinc-300'>
+                                    {s.mrr != null
+                                      ? `$${s.mrr % 1 ? s.mrr.toFixed(1) : s.mrr}`
+                                      : '—'}
+                                  </td>
+                                  <td className='py-2 text-right text-zinc-300'>
+                                    {s.activation_rate != null
+                                      ? `${s.activation_rate}%`
+                                      : '—'}
+                                  </td>
+                                  <td className='py-2 text-right text-zinc-300'>
+                                    {s.churn_rate != null
+                                      ? `${s.churn_rate}%`
+                                      : '—'}
+                                  </td>
+                                </tr>
+                              );
+                            })}
+                          </tbody>
+                        </table>
+                      </div>
+                    )}
+                  </TabsContent>
+
+                  <TabsContent value='monthly'>
+                    {metricSnapshots.monthly.length === 0 ? (
+                      <p className='text-sm text-zinc-500'>
+                        No monthly snapshots yet. They are generated on the 2nd
+                        of each month at 03:00 UTC.
+                      </p>
+                    ) : (
+                      <div className='overflow-x-auto'>
+                        <table className='w-full text-sm'>
+                          <thead>
+                            <tr className='border-b border-zinc-800'>
+                              <th className='py-2 text-left text-zinc-400'>
+                                Month
+                              </th>
+                              <th className='py-2 text-right text-zinc-400'>
+                                Signups
+                              </th>
+                              <th className='py-2 text-right text-zinc-400'>
+                                MAU
+                              </th>
+                              <th className='py-2 text-right text-zinc-400'>
+                                Trials
+                              </th>
+                              <th className='py-2 text-right text-zinc-400'>
+                                New Paying
+                              </th>
+                              <th className='py-2 text-right text-zinc-400'>
+                                Active Subs
+                              </th>
+                              <th className='py-2 text-right text-zinc-400'>
+                                MRR
+                              </th>
+                              <th className='py-2 text-right text-zinc-400'>
+                                Activation
+                              </th>
+                              <th className='py-2 text-right text-zinc-400'>
+                                Churn
+                              </th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {metricSnapshots.monthly.map(
+                              (s: any, i: number) => {
+                                const prev = metricSnapshots.monthly[i + 1];
+                                const delta = (
+                                  current: number,
+                                  previous: number | undefined,
+                                ) =>
+                                  previous != null && previous > 0
+                                    ? ((current - previous) / previous) * 100
+                                    : null;
+                                const fmtDelta = (val: number | null) =>
+                                  val != null
+                                    ? `${val > 0 ? '+' : ''}${val.toFixed(0)}%`
+                                    : '';
+                                return (
+                                  <tr
+                                    key={s.period_key}
+                                    className='border-b border-zinc-800/40'
+                                  >
+                                    <td className='py-2 font-medium text-zinc-300'>
+                                      {s.period_key}
+                                    </td>
+                                    <td className='py-2 text-right text-zinc-300'>
+                                      {s.new_signups}
+                                      <span
+                                        className={`ml-1 text-xs ${(delta(s.new_signups, prev?.new_signups) ?? 0) >= 0 ? 'text-lunary-success-400' : 'text-lunary-error-400'}`}
+                                      >
+                                        {fmtDelta(
+                                          delta(
+                                            s.new_signups,
+                                            prev?.new_signups,
+                                          ),
+                                        )}
+                                      </span>
+                                    </td>
+                                    <td className='py-2 text-right text-zinc-300'>
+                                      {s.wau}
+                                      <span
+                                        className={`ml-1 text-xs ${(delta(s.wau, prev?.wau) ?? 0) >= 0 ? 'text-lunary-success-400' : 'text-lunary-error-400'}`}
+                                      >
+                                        {fmtDelta(delta(s.wau, prev?.wau))}
+                                      </span>
+                                    </td>
+                                    <td className='py-2 text-right text-zinc-300'>
+                                      {s.new_trials}
+                                    </td>
+                                    <td className='py-2 text-right text-zinc-300'>
+                                      {s.new_paying_subscribers}
+                                    </td>
+                                    <td className='py-2 text-right text-zinc-300'>
+                                      {s.active_subscribers}
+                                    </td>
+                                    <td className='py-2 text-right text-zinc-300'>
+                                      {s.mrr != null
+                                        ? `$${s.mrr % 1 ? s.mrr.toFixed(1) : s.mrr}`
+                                        : '—'}
+                                    </td>
+                                    <td className='py-2 text-right text-zinc-300'>
+                                      {s.activation_rate != null
+                                        ? `${s.activation_rate}%`
+                                        : '—'}
+                                    </td>
+                                    <td className='py-2 text-right text-zinc-300'>
+                                      {s.churn_rate != null
+                                        ? `${s.churn_rate}%`
+                                        : '—'}
+                                    </td>
+                                  </tr>
+                                );
+                              },
+                            )}
+                          </tbody>
+                        </table>
+                      </div>
+                    )}
+                  </TabsContent>
+                </Tabs>
               </CardContent>
             </Card>
           </section>
