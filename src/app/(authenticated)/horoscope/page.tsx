@@ -5,8 +5,7 @@ import { useAuthStatus } from '@/components/AuthStatus';
 import { useSubscription } from '../../../hooks/useSubscription';
 import { useNotificationDeepLink } from '@/hooks/useNotificationDeepLink';
 import { hasFeatureAccess } from '../../../../utils/pricing';
-import { FreeHoroscopeView } from './components/FreeHoroscopeView';
-import { PaidHoroscopeView } from './components/PaidHoroscopeView';
+import { HoroscopeView } from './components/HoroscopeView';
 import { conversionTracking } from '@/lib/analytics';
 import { useEffect } from 'react';
 import { MarketingFooterGate } from '@/components/MarketingFooterGate';
@@ -57,10 +56,6 @@ export default function HoroscopePage() {
     );
   }
 
-  // If unauthenticated, show content immediately (don't wait for useUser)
-  // hasChartAccess will be false, so FreeHoroscopeView will be shown
-  // Continue to render content below
-
   // If authenticated but user data is still loading, show loading
   if (authStatus.isAuthenticated && loading) {
     return (
@@ -75,24 +70,14 @@ export default function HoroscopePage() {
 
   // Otherwise, continue to render content
 
-  if (!hasPersonalHoroscopeAccess) {
-    return (
-      <div className='min-h-screen flex flex-col'>
-        <div className='flex-1'>
-          <FreeHoroscopeView />
-        </div>
-        <MarketingFooterGate />
-      </div>
-    );
-  }
-
   return (
     <div className='min-h-screen flex flex-col'>
       <div className='flex-1'>
-        <PaidHoroscopeView
+        <HoroscopeView
           userBirthday={user?.birthday}
           userName={user?.name}
           profile={{ birthday: user?.birthday, birthChart: user?.birthChart }}
+          hasPaidAccess={hasPersonalHoroscopeAccess}
         />
       </div>
       <MarketingFooterGate />

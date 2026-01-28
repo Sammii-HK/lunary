@@ -68,3 +68,6 @@ PRESS-KIT-TODO.md
 
 # Sentry Config File
 .env.sentry-build-plugin
+
+# Claude plans
+.claude/plans

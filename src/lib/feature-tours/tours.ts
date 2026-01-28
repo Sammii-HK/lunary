@@ -1,4 +1,15 @@
 import type { FeatureTour } from './tour-system';
+import { CHAT_LIMITS } from '../../../utils/entitlements';
+import {
+  FREE_PLAN_MONTHLY_READING_LIMIT,
+  MONTHLY_PLAN_MONTHLY_READING_LIMIT,
+} from '@/constants/tarotSpreads';
+
+function getTarotLimit(tier: string): string {
+  if (tier === 'lunary_plus_ai_annual') return 'unlimited';
+  if (tier === 'free') return `${FREE_PLAN_MONTHLY_READING_LIMIT}/month`;
+  return `${MONTHLY_PLAN_MONTHLY_READING_LIMIT}/month`;
+}
 
 // Helper to check if near new or full moon (within 2 days)
 function isNearMoonPhase(): boolean {
@@ -42,9 +53,7 @@ export const FEATURE_TOURS: FeatureTour[] = [
         target: '[data-nav="guide"]',
         title: 'Astral Guide',
         content: (tier) =>
-          tier === 'free'
-            ? 'Ask questions about your chart, transits, or practices. Free tier: 3 questions per day.'
-            : 'Ask questions about your chart, transits, or practices. Your conversations build context over time.',
+          `Ask questions about your chart, transits, or practices. ${CHAT_LIMITS[tier]} questions per day.`,
         icon: 'MessageCircle',
         placement: 'right',
         action: {
@@ -56,9 +65,7 @@ export const FEATURE_TOURS: FeatureTour[] = [
         target: '[data-nav="tarot"]',
         title: 'Personal Tarot',
         content: (tier) =>
-          tier === 'free'
-            ? 'Draw your daily tarot card. Free tier: 1 spread per month.'
-            : 'Draw personalized tarot cards seeded from your birth chart.',
+          `Draw personalized tarot cards seeded from your birth chart. ${getTarotLimit(tier)} spreads.`,
         icon: 'Sparkles',
         placement: 'right',
         action: {
@@ -121,8 +128,7 @@ export const FEATURE_TOURS: FeatureTour[] = [
       {
         target: '.chat-input-container',
         title: 'Daily Limit Reached',
-        content:
-          "You've used all 3 questions today. Upgrade to continue the conversation.",
+        content: `You've used all ${CHAT_LIMITS.free} questions today. Upgrade to continue the conversation.`,
         icon: 'AlertCircle',
         placement: 'top',
         action: {
@@ -150,8 +156,7 @@ export const FEATURE_TOURS: FeatureTour[] = [
       {
         target: '.tarot-container',
         title: 'Monthly Spread Used',
-        content:
-          'Free tier includes 1 spread per month. Upgrade for 10 spreads/month or unlimited on Pro Annual.',
+        content: `Free tier includes ${FREE_PLAN_MONTHLY_READING_LIMIT} spread per month. Upgrade for ${MONTHLY_PLAN_MONTHLY_READING_LIMIT} spreads/month or unlimited on Pro Annual.`,
         icon: 'AlertCircle',
         placement: 'center',
         action: {

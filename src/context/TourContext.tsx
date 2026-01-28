@@ -1,6 +1,13 @@
 'use client';
 
-import { createContext, useContext, useEffect, useState } from 'react';
+import {
+  createContext,
+  useContext,
+  useEffect,
+  useState,
+  useMemo,
+  useCallback,
+} from 'react';
 import { useUser } from '@/context/UserContext';
 import { useAuthStatus } from '@/components/AuthStatus';
 import { TourOverlay } from '@/components/feature-tour/tour-overlay';
@@ -9,7 +16,16 @@ import type {
   TourContext as ITourContext,
   TourId,
 } from '@/lib/feature-tours/tour-system';
-import type { PlanKey } from '../../utils/entitlements';
+
+interface RawTourContext {
+  userTier: string;
+  chatCount: number;
+  tarotCount: number;
+  journalCount: number;
+  daysActive: number;
+  completedTours: string[];
+  dismissedTours: string[];
+}
 
 interface TourContextValue {
   startTour: (tourId: TourId) => void;
@@ -21,8 +37,7 @@ const TourContext = createContext<TourContextValue | null>(null);
 export function TourProvider({ children }: { children: React.ReactNode }) {
   const { user } = useUser();
   const authState = useAuthStatus();
-  const [tourContext, setTourContext] = useState<ITourContext | null>(null);
-  const [hasSeenOnboarding, setHasSeenOnboarding] = useState(true);
+  const [rawContext, setRawContext] = useState<RawTourContext | null>(null);
 
   // Fetch tour context on mount
   useEffect(() => {
@@ -33,18 +48,7 @@ export function TourProvider({ children }: { children: React.ReactNode }) {
         const response = await fetch('/api/tours/context');
         if (response.ok) {
           const data = await response.json();
-          // Reconstruct hasSeenTour function from the tour arrays
-          const contextWithFn = {
-            ...data,
-            hasSeenTour: (tourId: TourId) =>
-              data.completedTours?.includes(tourId) ||
-              data.dismissedTours?.includes(tourId) ||
-              false,
-          };
-          setTourContext(contextWithFn);
-          setHasSeenOnboarding(
-            contextWithFn.hasSeenTour('first_time_onboarding'),
-          );
+          setRawContext(data);
         }
       } catch (error) {
         console.error('Failed to fetch tour context:', error);
@@ -54,6 +58,43 @@ export function TourProvider({ children }: { children: React.ReactNode }) {
     fetchTourContext();
   }, [authState.isAuthenticated, user?.id]);
 
+  // Reconstruct full TourContext only once API data arrives
+  const tourContext: ITourContext | null = useMemo(() => {
+    if (!rawContext) return null;
+    return {
+      userTier: rawContext.userTier as ITourContext['userTier'],
+      chatCount: rawContext.chatCount,
+      tarotCount: rawContext.tarotCount,
+      journalCount: rawContext.journalCount,
+      daysActive: rawContext.daysActive,
+      hasSeenTour: (tourId) =>
+        rawContext.completedTours.includes(tourId) ||
+        rawContext.dismissedTours.includes(tourId),
+    };
+  }, [rawContext]);
+
+  // Optimistically update local context so checkTours doesn't re-activate a dismissed/completed tour
+  const markTourSeen = useCallback(
+    (tourId: string, status: 'dismissed' | 'completed') => {
+      setRawContext((prev) => {
+        if (!prev) return prev;
+        const key =
+          status === 'dismissed' ? 'dismissedTours' : 'completedTours';
+        if (prev[key].includes(tourId)) return prev;
+        return { ...prev, [key]: [...prev[key], tourId] };
+      });
+    },
+    [],
+  );
+
+  const hasSeenOnboarding = useMemo(() => {
+    if (!rawContext) return true; // default to true to avoid flicker
+    return (
+      rawContext.completedTours.includes('first_time_onboarding') ||
+      rawContext.dismissedTours.includes('first_time_onboarding')
+    );
+  }, [rawContext]);
+
   const {
     activeTour,
     currentStep,
@@ -62,16 +103,7 @@ export function TourProvider({ children }: { children: React.ReactNode }) {
     dismissTour,
     completeTour,
     startTour,
-  } = useFeatureTour(
-    tourContext || {
-      userTier: 'free' as PlanKey,
-      chatCount: 0,
-      tarotCount: 0,
-      journalCount: 0,
-      daysActive: 0,
-      hasSeenTour: () => false,
-    },
-  );
+  } = useFeatureTour(tourContext, markTourSeen);
 
   const value = {
     startTour,

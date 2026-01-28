@@ -313,8 +313,11 @@ export function AdvancedPatterns({
     );
   }
 
-  // Show paywall if user doesn't have tarot_patterns access
-  if (!hasTarotPatternsAccess) {
+  // Show paywall only if user doesn't have tarot_patterns access
+  // AND they're not on the free 7-day view (which is provided via basicPatterns)
+  const isFree7DayView =
+    typeof selectedView === 'number' && selectedView <= 7 && basicPatterns;
+  if (!hasTarotPatternsAccess && !isFree7DayView) {
     return (
       <Paywall feature='tarot_patterns'>
         <div />

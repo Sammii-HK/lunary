@@ -578,8 +578,12 @@ export default function PricingPage() {
                   desc: 'Personalized insights calculated from your natal chart',
                 },
                 {
+                  title: 'Personal Tarot Card',
+                  desc: 'Daily card drawn from your birth chart with transit timeline context',
+                },
+                {
                   title: 'Personal Transit Impacts',
-                  desc: 'See how current planets specifically affect your chart',
+                  desc: 'See how current planets affect your chart, with tarot transit timeline',
                 },
                 {
                   title: 'Solar Return Insights',
@@ -588,6 +592,10 @@ export default function PricingPage() {
                 {
                   title: 'Moon Circles',
                   desc: 'New and full moon rituals personalized to your chart',
+                },
+                {
+                  title: 'Tarot Pattern Analysis',
+                  desc: 'Track recurring themes and card trends across up to 6 months of readings',
                 },
                 {
                   title: 'Crystal Recommendations',

@@ -41,14 +41,17 @@ export async function GET(request: NextRequest) {
     const dateStr = now.toISOString().split('T')[0];
     const eventKey = `weekly-report-${dateStr}`;
 
-    const alreadySent = await sql`
-      SELECT id FROM notification_sent_events 
-      WHERE date = ${dateStr}::date 
-      AND event_key = ${eventKey}
+    // Atomically claim this run to prevent duplicate sends from concurrent triggers
+    // (both Vercel cron and Cloudflare worker may hit this endpoint simultaneously)
+    const claim = await sql`
+      INSERT INTO notification_sent_events (date, event_key, event_type, event_name, event_priority, sent_by)
+      VALUES (${dateStr}::date, ${eventKey}, 'weekly_report', 'Weekly Cosmic Report', 5, 'weekly')
+      ON CONFLICT (date, event_key) DO NOTHING
+      RETURNING id
     `;
 
-    if (alreadySent.rows.length > 0) {
-      console.log('[weekly-report] Already sent today, skipping');
+    if (claim.rows.length === 0) {
+      console.log('[weekly-report] Already claimed by another run, skipping');
       return NextResponse.json({
         success: true,
         emailsSent: 0,
@@ -138,14 +141,6 @@ export async function GET(request: NextRequest) {
         );
         emailsFailed++;
       }
-    }
-
-    if (emailsSent > 0) {
-      await sql`
-        INSERT INTO notification_sent_events (date, event_key, event_type, event_name, event_priority, sent_by)
-        VALUES (${dateStr}::date, ${eventKey}, 'weekly_report', 'Weekly Cosmic Report', 5, 'weekly')
-        ON CONFLICT (date, event_key) DO NOTHING
-      `;
     }
 
     console.log(

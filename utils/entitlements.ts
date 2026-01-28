@@ -131,6 +131,9 @@ export const CHAT_LIMITS: Record<PlanKey, number> = {
   lunary_plus_ai_annual: 300,
 };
 
+export const FREE_TRANSIT_LIMIT = 2;
+export const FREE_DAILY_TAROT_TRUNCATE_LENGTH = 120;
+
 export const JOURNAL_LIMITS = {
   freeMonthlyEntries: 3,
 } as const;
@@ -151,6 +154,7 @@ export const PRICING_PLANS: PricingPlan[] = [
       'Your personal birth chart',
       'Daily moon phases & basic insights',
       'General tarot card of the day',
+      'Tarot pattern analysis (last 7 days)',
       'Limited tarot spreads (free library only)',
       '1 tarot spread per month',
       'Basic lunar calendar',
@@ -181,14 +185,12 @@ export const PRICING_PLANS: PricingPlan[] = [
       'Personal transit impacts',
       'Solar Return & birthday insights',
       'Moon Circles (New & Full Moon)',
-      'Personal tarot card & guidance',
-      'All tarot spreads unlocked',
-      '10 tarot spreads per month',
-      'Ritual generator',
+      'Personal tarot card drawn from your birth chart, with transit context',
+      'All tarot spreads unlocked (10/month)',
       'Personalized crystal recommendations',
       'Monthly cosmic insights',
       'Personal Day & Personal Year interpretations',
-      'Tarot pattern analysis',
+      'Tarot pattern analysis (up to 6 months)',
       'Cosmic State (shareable snapshot)',
       'Book of Shadows journal (no limit)',
       'Astral Guide context memory (4 recent messages + 2 memory snippets)',
@@ -212,13 +214,11 @@ export const PRICING_PLANS: PricingPlan[] = [
       'Everything in Lunary+',
       'Personalized weekly reports',
       'Astral Guide ritual prompts (AI)',
-      'Deeper tarot interpretations',
-      'Advanced pattern analysis',
+      'Tarot pattern analysis (up to 12 months + year-over-year)',
+      'Advanced multi-dimensional pattern analysis',
       'Downloadable PDF reports',
       'Astral Guide context memory (8 recent messages + 4 memory snippets)',
-      'Deeper readings and weekly reports',
-      'All tarot spreads unlocked',
-      '10 tarot spreads per month',
+      'All tarot spreads unlocked (10/month)',
       'Book of Shadows journal (no limit)',
       'Save chat messages to collections (no limit)',
       'Collections (no limit)',
@@ -239,16 +239,13 @@ export const PRICING_PLANS: PricingPlan[] = [
     trialDays: FREE_TRIAL_DAYS.yearly,
     features: [
       'Everything in Lunary+ Pro',
-      'All tarot spreads unlocked',
       'Unlimited tarot spreads',
       'Yearly cosmic forecast',
       'Extended timeline analysis (6 & 12-month trends)',
-      'Calendar download (ICS format)',
       'Book of Shadows journal (no limit)',
       'Astral Guide context memory (8 recent messages + 4 memory snippets)',
       'Save chat messages to collections (no limit)',
       'Collections & folders (no limit)',
-      'Priority customer support',
     ],
   },
 ];

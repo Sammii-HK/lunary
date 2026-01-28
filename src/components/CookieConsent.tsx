@@ -12,9 +12,41 @@ export type CookiePreferences = {
 
 const COOKIE_CONSENT_KEY = 'cookie_consent';
 const CONSENT_VERSION = 1;
+// 1 year in seconds
+const CONSENT_MAX_AGE = 365 * 24 * 60 * 60;
+
+function readConsentCookie(): {
+  version: number;
+  preferences: CookiePreferences;
+} | null {
+  if (typeof document === 'undefined') return null;
+  const match = document.cookie
+    .split('; ')
+    .find((row) => row.startsWith(COOKIE_CONSENT_KEY + '='));
+  if (!match) return null;
+  try {
+    return JSON.parse(decodeURIComponent(match.split('=').slice(1).join('=')));
+  } catch {
+    return null;
+  }
+}
+
+function writeConsentCookie(payload: {
+  version: number;
+  preferences: CookiePreferences;
+}) {
+  if (typeof document === 'undefined') return;
+  document.cookie = `${COOKIE_CONSENT_KEY}=${encodeURIComponent(JSON.stringify(payload))}; max-age=${CONSENT_MAX_AGE}; path=/; SameSite=Lax`;
+}
 
 export function getCookieConsent(): CookiePreferences | null {
   if (typeof window === 'undefined') return null;
+
+  // Try cookie first (persists across sessions), then localStorage as fallback
+  const fromCookie = readConsentCookie();
+  if (fromCookie && fromCookie.version === CONSENT_VERSION) {
+    return fromCookie.preferences;
+  }
 
   try {
     const stored = localStorage.getItem(COOKIE_CONSENT_KEY);
@@ -23,6 +55,8 @@ export function getCookieConsent(): CookiePreferences | null {
     const parsed = JSON.parse(stored);
     if (parsed.version !== CONSENT_VERSION) return null;
 
+    // Migrate localStorage value into the cookie so it persists going forward
+    writeConsentCookie(parsed);
     return parsed.preferences;
   } catch {
     return null;
@@ -37,13 +71,11 @@ export function hasAnalyticsConsent(): boolean {
 function saveCookieConsent(preferences: CookiePreferences) {
   if (typeof window === 'undefined') return;
 
-  localStorage.setItem(
-    COOKIE_CONSENT_KEY,
-    JSON.stringify({
-      version: CONSENT_VERSION,
-      preferences,
-    }),
-  );
+  const payload = { version: CONSENT_VERSION, preferences };
+
+  // Write to both cookie (persistent) and localStorage (fast read)
+  writeConsentCookie(payload);
+  localStorage.setItem(COOKIE_CONSENT_KEY, JSON.stringify(payload));
 
   window.dispatchEvent(
     new CustomEvent('cookieConsentChanged', { detail: preferences }),
@@ -203,6 +235,8 @@ export function CookieConsent() {
 export function CookieSettingsButton() {
   const openCookieSettings = () => {
     localStorage.removeItem(COOKIE_CONSENT_KEY);
+    // Clear the persistent cookie too
+    document.cookie = `${COOKIE_CONSENT_KEY}=; max-age=0; path=/; SameSite=Lax`;
     window.location.reload();
   };
 
