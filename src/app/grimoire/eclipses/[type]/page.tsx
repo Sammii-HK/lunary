@@ -4,13 +4,12 @@ import { SEOContentTemplate } from '@/components/grimoire/SEOContentTemplate';
 import { eclipseInfo } from '@/constants/grimoire/seo-data';
 import { createEventSchema, renderJsonLd } from '@/lib/schema';
 
+// 30-day ISR revalidation
+export const revalidate = 2592000;
 const eclipseKeys = Object.keys(eclipseInfo);
 
-export async function generateStaticParams() {
-  return eclipseKeys.map((type) => ({
-    type: type,
-  }));
-}
+// Removed generateStaticParams - using pure ISR for faster builds
+// Pages are generated on-demand and cached with 30-day revalidation
 
 export async function generateMetadata({
   params,

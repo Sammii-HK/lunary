@@ -24,6 +24,8 @@ import {
 import { SmartTrialButton } from '@/components/SmartTrialButton';
 import { GrimoireBreadcrumbs } from '@/components/grimoire/GrimoireBreadcrumbs';
 
+// 30-day ISR revalidation
+export const revalidate = 2592000;
 interface PersonData {
   name: string;
   birthDate: string;

@@ -27,6 +27,8 @@ import { CosmicConnectionSection } from '@/lib/cosmicConnectionsConfig';
 import { createItemListSchema, renderJsonLd } from '@/lib/schema';
 import { SEOContentTemplate } from '@/components/grimoire/SEOContentTemplate';
 
+// 30-day ISR revalidation
+export const revalidate = 2592000;
 const faqs = [
   {
     question: 'What is numerology?',

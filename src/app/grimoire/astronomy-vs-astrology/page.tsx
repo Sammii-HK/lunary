@@ -7,6 +7,8 @@ import {
 } from '@/lib/schema';
 import { Breadcrumbs } from '@/components/grimoire/Breadcrumbs';
 
+// 30-day ISR revalidation
+export const revalidate = 2592000;
 export const metadata: Metadata = {
   title: 'Astronomy vs Astrology: What Is the Difference? | Lunary',
   description:

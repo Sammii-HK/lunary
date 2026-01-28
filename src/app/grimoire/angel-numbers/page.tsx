@@ -3,6 +3,8 @@ import Link from 'next/link';
 import { SEOContentTemplate } from '@/components/grimoire/SEOContentTemplate';
 import { angelNumbers } from '@/constants/grimoire/numerology-data';
 
+// 30-day ISR revalidation
+export const revalidate = 2592000;
 export const metadata: Metadata = {
   title: 'Angel Numbers Guide: Meanings of 111, 222, 333 & More | Lunary',
   description:

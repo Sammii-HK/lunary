@@ -2,6 +2,8 @@ import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { SEOContentTemplate } from '@/components/grimoire/SEOContentTemplate';
 
+// 30-day ISR revalidation
+export const revalidate = 2592000;
 const groundingMethods = {
   'tree-root-visualization': {
     name: 'Tree Root Visualization',
@@ -91,11 +93,8 @@ const groundingMethods = {
 
 const methodKeys = Object.keys(groundingMethods);
 
-export async function generateStaticParams() {
-  return methodKeys.map((method) => ({
-    method: method,
-  }));
-}
+// Removed generateStaticParams - using pure ISR for faster builds
+// Pages are generated on-demand and cached with 30-day revalidation
 
 export async function generateMetadata({
   params,

@@ -7,6 +7,8 @@ import {
   expressionKeys,
 } from '@/constants/grimoire/numerology-extended-data';
 
+// 30-day ISR revalidation
+export const revalidate = 2592000;
 export const metadata: Metadata = {
   title: 'Expression Number Calculator & Meanings | Lunary',
   description:

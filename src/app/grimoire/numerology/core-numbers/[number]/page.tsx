@@ -4,13 +4,12 @@ import { SEOContentTemplate } from '@/components/grimoire/SEOContentTemplate';
 import { NumerologyProfileCalculator } from '@/components/grimoire/NumerologyProfileCalculator';
 import { lifePathNumbers } from '@/constants/grimoire/numerology-data';
 
+// 30-day ISR revalidation
+export const revalidate = 2592000;
 const coreNumberKeys = ['1', '2', '3', '4', '5', '6', '7', '8', '9'];
 
-export async function generateStaticParams() {
-  return coreNumberKeys.map((number) => ({
-    number: number,
-  }));
-}
+// Removed generateStaticParams - using pure ISR for faster builds
+// Pages are generated on-demand and cached with 30-day revalidation
 
 export async function generateMetadata({
   params,

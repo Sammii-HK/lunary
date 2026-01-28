@@ -6,13 +6,12 @@ import { stringToKebabCase } from '../../../../../utils/string';
 import { createGrimoireMetadata } from '@/lib/grimoire-metadata';
 import { createCosmicEntitySchema, renderJsonLd } from '@/lib/schema';
 
+// 30-day ISR revalidation
+export const revalidate = 2592000;
 const runeKeys = Object.keys(runesList);
 
-export async function generateStaticParams() {
-  return runeKeys.map((rune) => ({
-    rune: stringToKebabCase(rune),
-  }));
-}
+// Removed generateStaticParams - using pure ISR for faster builds
+// Pages are generated on-demand and cached with 30-day revalidation
 
 export async function generateMetadata({
   params,

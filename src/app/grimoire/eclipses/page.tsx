@@ -4,6 +4,8 @@ import { Sun, Moon as MoonIcon } from 'lucide-react';
 import { SEOContentTemplate } from '@/components/grimoire/SEOContentTemplate';
 import { createItemListSchema, renderJsonLd } from '@/lib/schema';
 
+// 30-day ISR revalidation
+export const revalidate = 2592000;
 const eclipseTypes = [
   {
     slug: 'solar',

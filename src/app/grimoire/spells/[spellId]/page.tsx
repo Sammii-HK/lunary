@@ -1,17 +1,16 @@
 import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
-import { getSpellById, spellDatabase, spellCategories } from '@/lib/spells';
+import { getSpellById, spellCategories } from '@/lib/spells';
 import { Clock, Star, Moon, Leaf } from 'lucide-react';
 import { createHowToSchema, renderJsonLd } from '@/lib/schema';
 import { SEOContentTemplate } from '@/components/grimoire/SEOContentTemplate';
 import { stringToKebabCase } from '../../../../../utils/string';
 
-export async function generateStaticParams() {
-  return spellDatabase.map((spell) => ({
-    spellId: spell.id,
-  }));
-}
+// 30-day ISR revalidation
+export const revalidate = 2592000;
+// Removed generateStaticParams - using pure ISR for faster builds
+// Pages are generated on-demand and cached with 30-day revalidation
 
 export async function generateMetadata({
   params,

@@ -6,6 +6,8 @@ import type { FAQItem } from '@/components/grimoire/SEOContentTemplate';
 import witchTypesData from '@/constants/witch-types.json';
 import { getCosmicConnections } from '@/lib/cosmicConnectionsConfig';
 
+// 30-day ISR revalidation
+export const revalidate = 2592000;
 const witchTypes = witchTypesData.witchTypes || {};
 const typeKeys = Object.keys(witchTypes);
 
@@ -14,11 +16,8 @@ function getIntroDefinition(intro: string): string {
   return firstSentence || intro;
 }
 
-export async function generateStaticParams() {
-  return typeKeys.map((type) => ({
-    type: type,
-  }));
-}
+// Removed generateStaticParams - using pure ISR for faster builds
+// Pages are generated on-demand and cached with 30-day revalidation
 
 export async function generateMetadata({
   params,
