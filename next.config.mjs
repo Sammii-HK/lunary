@@ -1,4 +1,3 @@
-import { withSentryConfig } from '@sentry/nextjs';
 import { createRequire } from 'module';
 const require = createRequire(import.meta.url);
 
@@ -707,18 +706,4 @@ const nextConfig = {
   },
 };
 
-// Only enable Sentry build integration when explicitly requested
-// Set ENABLE_SENTRY_SOURCEMAPS=true in Vercel to enable source map uploads
-// This prevents expensive source map processing on every build
-const shouldEnableSentry =
-  process.env.ENABLE_SENTRY_SOURCEMAPS === 'true' &&
-  process.env.SENTRY_AUTH_TOKEN;
-
-export default shouldEnableSentry
-  ? withSentryConfig(withBundleAnalyzer(nextConfig), {
-      org: 'lunar-computing-inc',
-      project: 'javascript-nextjs',
-      silent: !process.env.CI,
-      tunnelRoute: '/monitoring',
-    })
-  : withBundleAnalyzer(nextConfig);
+export default withBundleAnalyzer(nextConfig);
