@@ -41,17 +41,16 @@ export async function GET(request: NextRequest) {
 
     const dauWauMauData = await dauWauMauResponse.json();
 
-    // Calculate activation rate (product MAU / total signups)
+    // Activation rate as 0–1 fraction (insights lib expects this scale)
     const activationRate =
       userGrowthData.totalSignups > 0
-        ? (dauWauMauData.signed_in_product_mau / userGrowthData.totalSignups) *
-          100
+        ? dauWauMauData.signed_in_product_mau / userGrowthData.totalSignups
         : 0;
 
     return NextResponse.json({
       product_mau_growth_rate: userGrowthData.growthRate || 0,
       new_signups: userGrowthData.totalSignups || 0,
-      activation_rate: Number(activationRate.toFixed(2)),
+      activation_rate: Number(activationRate.toFixed(4)),
     });
   } catch (error) {
     console.error('[analytics/growth] Failed', error);

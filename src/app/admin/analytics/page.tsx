@@ -612,7 +612,7 @@ export default function AnalyticsPage() {
   const organicAttributionPercentage =
     typeof attributionSummary?.organicPercentage === 'number'
       ? `${attributionSummary.organicPercentage.toFixed(1)}%`
-      : 'N/A';
+      : '0%';
 
   const signup30dSignups = subscription30d?.signups ?? 0;
   const signup30dSubscriptions = subscription30d?.conversions ?? 0;
@@ -2379,9 +2379,9 @@ export default function AnalyticsPage() {
                 <HealthMetricCard
                   icon={CheckCircle}
                   label='Activation Rate'
-                  value={`${((activation?.activation_rate || 0) * 100).toFixed(1)}%`}
+                  value={`${(activation?.activationRate ?? 0).toFixed(1)}%`}
                   status={
-                    (activation?.activation_rate || 0) > 0.5
+                    (activation?.activationRate ?? 0) > 30
                       ? 'excellent'
                       : 'good'
                   }

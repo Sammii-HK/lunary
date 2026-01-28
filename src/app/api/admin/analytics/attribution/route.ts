@@ -27,8 +27,8 @@ export async function GET(request: NextRequest) {
 
     const dateFilter =
       startDate && endDate
-        ? `WHERE ua.created_at >= '${startDate}'::date AND ua.created_at <= '${endDate}'::date + INTERVAL '1 day'`
-        : "WHERE ua.created_at >= NOW() - INTERVAL '30 days'";
+        ? `WHERE COALESCE(ua.first_touch_at, ua.created_at) >= '${startDate}'::date AND COALESCE(ua.first_touch_at, ua.created_at) <= '${endDate}'::date + INTERVAL '1 day'`
+        : "WHERE COALESCE(ua.first_touch_at, ua.created_at) >= NOW() - INTERVAL '30 days'";
 
     const sourceBreakdown = await sql.query(`
       SELECT 
@@ -107,11 +107,10 @@ export async function GET(request: NextRequest) {
       ${testUserFilter}
     `);
 
-    // Fix ambiguous column reference by properly qualifying created_at
     const conversionDateFilter =
       startDate && endDate
-        ? `WHERE ua.created_at >= '${startDate}'::date AND ua.created_at <= '${endDate}'::date + INTERVAL '1 day'`
-        : "WHERE ua.created_at >= NOW() - INTERVAL '30 days'";
+        ? `WHERE COALESCE(ua.first_touch_at, ua.created_at) >= '${startDate}'::date AND COALESCE(ua.first_touch_at, ua.created_at) <= '${endDate}'::date + INTERVAL '1 day'`
+        : "WHERE COALESCE(ua.first_touch_at, ua.created_at) >= NOW() - INTERVAL '30 days'";
 
     const conversionBySource = await sql.query(`
       SELECT 
