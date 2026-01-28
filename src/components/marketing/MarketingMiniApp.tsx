@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef, Suspense } from 'react';
+import { useState, useEffect, useRef, Suspense, useMemo } from 'react';
 import {
   Home,
   Layers,
@@ -64,34 +64,8 @@ export function MarketingMiniApp() {
   const [showScrollHint, setShowScrollHint] = useState(true);
   const [hasScrolled, setHasScrolled] = useState(false);
 
-  // Start with fallback data immediately (no loading state!)
-  const [celesteUser, setCelesteUser] =
-    useState<UserData>(createFallbackUser());
-
-  // Fetch real Celeste user data in background and swap when ready
-  useEffect(() => {
-    const fetchCelesteData = async () => {
-      try {
-        // Fetch persona profile with aggressive caching
-        // Email is server-side only for security
-        const response = await fetch('/api/persona/profile', {
-          next: { revalidate: 300 }, // Cache for 5 minutes
-        });
-
-        if (response.ok) {
-          const data = await response.json();
-          // Smoothly swap in real data when ready
-          setCelesteUser(data);
-        } else {
-          console.warn('Failed to fetch persona data, keeping fallback');
-        }
-      } catch (error) {
-        console.error('Error fetching persona data, keeping fallback:', error);
-      }
-    };
-
-    fetchCelesteData();
-  }, []);
+  // Use static fallback data for demo (no API calls)
+  const celesteUser = useMemo(() => createFallbackUser(), []);
 
   // Track visibility
   useEffect(() => {
@@ -122,7 +96,8 @@ export function MarketingMiniApp() {
       return className
         .split(' ')
         .filter((cls) => {
-          // Remove md:, lg:, xl:, 2xl:, sm: responsive variants
+          // Remove ALL responsive variants (sm:, md:, lg:, xl:, 2xl:)
+          // This includes text sizes, padding, margins, grids, etc.
           return (
             !cls.startsWith('md:') &&
             !cls.startsWith('lg:') &&
@@ -374,82 +349,99 @@ export function MarketingMiniApp() {
       /* Let expandable cards render naturally - no height overrides */
       /* They will collapse/expand based on their internal React state */
 
-      /* Padding - force mobile padding */
+      /* Padding & Spacing - force mobile values to prevent layout issues */
       @media (min-width: 640px) {
-        #demo-preview-container [class*="sm:p-8"] {
-          padding: 1.5rem !important; /* Keep p-6 */
-        }
-        #demo-preview-container [class*="sm:gap-6"] {
-          gap: 1.25rem !important; /* Keep gap-5 */
-        }
+        /* Padding overrides for sm: */
+        #demo-preview-container .sm\\:p-8 { padding: 1.5rem !important; }
+        #demo-preview-container .sm\\:p-6 { padding: 1rem !important; }
+        #demo-preview-container .sm\\:px-8 { padding-left: 1.5rem !important; padding-right: 1.5rem !important; }
+        #demo-preview-container .sm\\:py-8 { padding-top: 1.5rem !important; padding-bottom: 1.5rem !important; }
+        #demo-preview-container .sm\\:gap-6 { gap: 1.25rem !important; }
+        #demo-preview-container .sm\\:gap-4 { gap: 1rem !important; }
       }
 
       @media (min-width: 768px) {
-        #demo-preview-container [class*="md:p-6"] {
-          padding: 1rem !important; /* Keep p-4 */
-        }
-        #demo-preview-container [class*="md:py-24"] {
-          padding-top: 4rem !important; /* Keep py-16 */
-          padding-bottom: 4rem !important;
-        }
+        /* Padding overrides for md: - critical for compact widgets */
+        #demo-preview-container .md\\:p-8 { padding: 1rem !important; }
+        #demo-preview-container .md\\:p-6 { padding: 1rem !important; }
+        #demo-preview-container .md\\:p-5 { padding: 1rem !important; }
+        #demo-preview-container .md\\:px-8 { padding-left: 1rem !important; padding-right: 1rem !important; }
+        #demo-preview-container .md\\:px-6 { padding-left: 1rem !important; padding-right: 1rem !important; }
+        #demo-preview-container .md\\:py-8 { padding-top: 1rem !important; padding-bottom: 1rem !important; }
+        #demo-preview-container .md\\:py-6 { padding-top: 1rem !important; padding-bottom: 1rem !important; }
+        #demo-preview-container .md\\:py-24 { padding-top: 4rem !important; padding-bottom: 4rem !important; }
+
+        /* Gap overrides */
+        #demo-preview-container .md\\:gap-6 { gap: 1.25rem !important; }
+        #demo-preview-container .md\\:gap-5 { gap: 1.25rem !important; }
+        #demo-preview-container .md\\:gap-4 { gap: 1rem !important; }
+
+        /* Margin overrides */
+        #demo-preview-container .md\\:mx-8 { margin-left: 1rem !important; margin-right: 1rem !important; }
+        #demo-preview-container .md\\:my-8 { margin-top: 1rem !important; margin-bottom: 1rem !important; }
       }
 
-      /* Text sizing - force mobile sizes for ALL text elements */
+      /*
+       * Text sizing - force mobile sizes by overriding ALL responsive text classes
+       * Critical for compact widgets like moon card where titles/body text have md: variants
+       */
+      @media (min-width: 640px) {
+        /* Override sm: text size variants */
+        #demo-preview-container .sm\\:text-5xl { font-size: 1.875rem !important; line-height: 2.25rem !important; }
+        #demo-preview-container .sm\\:text-4xl { font-size: 1.875rem !important; line-height: 2.25rem !important; }
+        #demo-preview-container .sm\\:text-3xl { font-size: 1.5rem !important; line-height: 2rem !important; }
+        #demo-preview-container .sm\\:text-2xl { font-size: 1.5rem !important; line-height: 2rem !important; }
+        #demo-preview-container .sm\\:text-xl { font-size: 1.125rem !important; line-height: 1.75rem !important; }
+        #demo-preview-container .sm\\:text-lg { font-size: 1.125rem !important; line-height: 1.75rem !important; }
+        #demo-preview-container .sm\\:text-base { font-size: 1rem !important; line-height: 1.5rem !important; }
+        #demo-preview-container .sm\\:text-sm { font-size: 0.875rem !important; line-height: 1.25rem !important; }
+        #demo-preview-container .sm\\:text-xs { font-size: 0.75rem !important; line-height: 1rem !important; }
+      }
+
       @media (min-width: 768px) {
-        /* Override ALL responsive text classes - target any element */
-        #demo-preview-container * {
-          /* These will only apply if the class exists on the element */
-        }
-
-        /* text-3xl -> text-2xl (1.875rem -> 1.5rem) */
-        #demo-preview-container .text-3xl,
-        #demo-preview-container [class*="text-3xl"] {
-          font-size: 1.5rem !important;
-          line-height: 2rem !important;
-        }
-
-        /* text-2xl stays text-2xl (1.5rem) */
-        #demo-preview-container .text-2xl,
-        #demo-preview-container [class*="text-2xl"] {
-          font-size: 1.5rem !important;
-          line-height: 2rem !important;
-        }
-
-        /* text-xl -> text-lg (1.25rem -> 1.125rem) */
-        #demo-preview-container .text-xl,
-        #demo-preview-container [class*="text-xl"] {
-          font-size: 1.125rem !important;
-          line-height: 1.75rem !important;
-        }
-
-        /* text-lg stays text-lg (1.125rem) */
-        #demo-preview-container .text-lg,
-        #demo-preview-container [class*="text-lg"] {
-          font-size: 1.125rem !important;
-          line-height: 1.75rem !important;
-        }
-
-        /* text-base stays text-base (1rem) */
-        #demo-preview-container .text-base,
-        #demo-preview-container [class*="text-base"] {
-          font-size: 1rem !important;
-          line-height: 1.5rem !important;
-        }
-
-        /* text-sm stays text-sm (0.875rem) */
-        #demo-preview-container .text-sm,
-        #demo-preview-container [class*="text-sm"] {
-          font-size: 0.875rem !important;
-          line-height: 1.25rem !important;
-        }
-
-        /* text-xs stays text-xs (0.75rem) */
-        #demo-preview-container .text-xs,
-        #demo-preview-container [class*="text-xs"] {
-          font-size: 0.75rem !important;
-          line-height: 1rem !important;
-        }
+        /* Override md: text size variants - main culprits for layout issues */
+        #demo-preview-container .md\\:text-5xl { font-size: 1.875rem !important; line-height: 2.25rem !important; }
+        #demo-preview-container .md\\:text-4xl { font-size: 1.875rem !important; line-height: 2.25rem !important; }
+        #demo-preview-container .md\\:text-3xl { font-size: 1.5rem !important; line-height: 2rem !important; }
+        #demo-preview-container .md\\:text-2xl { font-size: 1.5rem !important; line-height: 2rem !important; }
+        #demo-preview-container .md\\:text-xl { font-size: 1.125rem !important; line-height: 1.75rem !important; }
+        #demo-preview-container .md\\:text-lg { font-size: 1.125rem !important; line-height: 1.75rem !important; }
+        #demo-preview-container .md\\:text-base { font-size: 1rem !important; line-height: 1.5rem !important; }
+        #demo-preview-container .md\\:text-sm { font-size: 0.875rem !important; line-height: 1.25rem !important; }
+        #demo-preview-container .md\\:text-xs { font-size: 0.75rem !important; line-height: 1rem !important; }
       }
+
+      @media (min-width: 1024px) {
+        /* Override lg: text size variants */
+        #demo-preview-container .lg\\:text-5xl { font-size: 1.875rem !important; line-height: 2.25rem !important; }
+        #demo-preview-container .lg\\:text-4xl { font-size: 1.875rem !important; line-height: 2.25rem !important; }
+        #demo-preview-container .lg\\:text-3xl { font-size: 1.5rem !important; line-height: 2rem !important; }
+        #demo-preview-container .lg\\:text-2xl { font-size: 1.5rem !important; line-height: 2rem !important; }
+        #demo-preview-container .lg\\:text-xl { font-size: 1.125rem !important; line-height: 1.75rem !important; }
+        #demo-preview-container .lg\\:text-lg { font-size: 1.125rem !important; line-height: 1.75rem !important; }
+      }
+
+      @media (min-width: 1280px) {
+        /* Override xl: text size variants */
+        #demo-preview-container .xl\\:text-5xl { font-size: 1.875rem !important; line-height: 2.25rem !important; }
+        #demo-preview-container .xl\\:text-4xl { font-size: 1.875rem !important; line-height: 2.25rem !important; }
+        #demo-preview-container .xl\\:text-3xl { font-size: 1.5rem !important; line-height: 2rem !important; }
+        #demo-preview-container .xl\\:text-2xl { font-size: 1.5rem !important; line-height: 2rem !important; }
+      }
+
+      /*
+       * Force base text classes to maintain mobile sizes at ALL viewport widths
+       * Prevents browser/CSS from scaling text-sm, text-xs, etc. on larger screens
+       */
+      #demo-preview-container .text-5xl { font-size: 3rem !important; line-height: 1 !important; }
+      #demo-preview-container .text-4xl { font-size: 2.25rem !important; line-height: 2.5rem !important; }
+      #demo-preview-container .text-3xl { font-size: 1.875rem !important; line-height: 2.25rem !important; }
+      #demo-preview-container .text-2xl { font-size: 1.5rem !important; line-height: 2rem !important; }
+      #demo-preview-container .text-xl { font-size: 1.25rem !important; line-height: 1.75rem !important; }
+      #demo-preview-container .text-lg { font-size: 1.125rem !important; line-height: 1.75rem !important; }
+      #demo-preview-container .text-base { font-size: 1rem !important; line-height: 1.5rem !important; }
+      #demo-preview-container .text-sm { font-size: 0.875rem !important; line-height: 1.25rem !important; }
+      #demo-preview-container .text-xs { font-size: 0.75rem !important; line-height: 1rem !important; }
 
       /* Padding - force mobile padding */
       @media (min-width: 768px) {

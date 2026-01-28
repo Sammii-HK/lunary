@@ -29,6 +29,49 @@ export function DemoModeProvider({
 }: DemoModeProviderProps) {
   const containerRef = useRef<HTMLElement | null>(null);
 
+  // Intercept fetch API calls to prevent unauthorized requests in demo
+  useEffect(() => {
+    const originalFetch = window.fetch;
+    const demoFetch: typeof fetch = async (input, init?) => {
+      const url = typeof input === 'string' ? input : input.url;
+
+      // Allow only safe, public API calls in demo mode
+      const allowedEndpoints = [
+        '/api/cosmic/global',
+        '/api/grimoire/spells',
+        '/api/analytics/conversion',
+        '/api/admin/notifications/conversion',
+      ];
+
+      // Check if this is an allowed endpoint
+      const isAllowed = allowedEndpoints.some((endpoint) =>
+        url.includes(endpoint),
+      );
+
+      if (isAllowed) {
+        return originalFetch(input, init);
+      }
+
+      // Block unauthorized API calls and return empty response
+      console.log('[Demo Mode] Blocked API call:', url);
+      return new Response(
+        JSON.stringify({ error: 'Demo mode - API call blocked' }),
+        {
+          status: 200,
+          headers: { 'Content-Type': 'application/json' },
+        },
+      );
+    };
+
+    // Only override fetch when component mounts
+    window.fetch = demoFetch;
+
+    return () => {
+      // Restore original fetch when component unmounts
+      window.fetch = originalFetch;
+    };
+  }, []);
+
   // Intercept form submissions ONLY within the demo container
   useEffect(() => {
     const container = document.getElementById(containerId);
