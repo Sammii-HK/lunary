@@ -756,7 +756,6 @@ export function GrimoireSearch({
                 conversionTracking.grimoireSearchPerformed(
                   user?.id,
                   e.target.value.trim(),
-                  searchResults.length,
                 );
               }, 1000);
               return () => clearTimeout(timeoutId);
@@ -795,8 +794,6 @@ export function GrimoireSearch({
                   conversionTracking.grimoireArticleOpened(
                     user?.id,
                     result.title,
-                    result.type,
-                    searchQuery,
                   );
 
                   startTransition(() => {

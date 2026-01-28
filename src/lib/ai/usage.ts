@@ -93,7 +93,7 @@ export const loadUsage = async ({
       return saveUsageToMemory(initialUsageSnapshot(userId, planId, now));
     }
 
-    if (!isSameDay(record.day, now)) {
+    if (!record.day || !isSameDay(record.day, now)) {
       return saveUsageToMemory({
         userId,
         planId,
@@ -108,9 +108,9 @@ export const loadUsage = async ({
       userId,
       planId,
       day: todayKey,
-      usedMessages: record.count,
-      tokensIn: record.tokensIn,
-      tokensOut: record.tokensOut,
+      usedMessages: record.count ?? 0,
+      tokensIn: record.tokensIn ?? 0,
+      tokensOut: record.tokensOut ?? 0,
     };
 
     return saveUsageToMemory(snapshot);

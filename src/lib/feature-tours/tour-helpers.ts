@@ -37,7 +37,9 @@ export async function getUserTourProgress(userId: string) {
       .map((p) => p.tourId),
     lastShownAt: progress.reduce(
       (acc, p) => {
-        acc[p.tourId] = p.lastShownAt;
+        if (p.lastShownAt) {
+          acc[p.tourId] = p.lastShownAt;
+        }
         return acc;
       },
       {} as Record<string, Date>,

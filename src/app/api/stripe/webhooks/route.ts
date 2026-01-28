@@ -655,7 +655,7 @@ async function handleInvoicePaymentFailed(invoice: Stripe.Invoice) {
 
     // Track retry if this is not the first attempt
     if (attemptCount > 1) {
-      conversionTracking.paymentRetryAttempted(userId, attemptCount, amount);
+      conversionTracking.paymentRetryAttempted(userId, attemptCount);
     }
   }
 }
@@ -688,12 +688,7 @@ async function handleInvoicePaymentSucceeded(invoice: Stripe.Invoice) {
 
   if (userId && invoice.attempt_count && invoice.attempt_count > 1) {
     // Payment succeeded after retry
-    const amount = (invoice.amount_paid || 0) / 100;
-    conversionTracking.paymentRetrySuccess(
-      userId,
-      invoice.attempt_count,
-      amount,
-    );
+    conversionTracking.paymentRetrySuccess(userId);
   }
 }
 
