@@ -62,6 +62,9 @@ import { Button } from '@/components/ui/button';
 import { useAstronomyContext } from '@/context/AstronomyContext';
 import { TarotTransitConnection } from '@/components/tarot/TarotTransitConnection';
 import { useFeatureFlagVariant } from '@/hooks/useFeatureFlag';
+import { useCTACopy } from '@/hooks/useCTACopy';
+import { FREE_DAILY_TAROT_TRUNCATE_LENGTH } from '../../../../utils/entitlements';
+import { captureEvent } from '@/lib/posthog-client';
 
 const SUIT_ELEMENTS: Record<string, string> = {
   Cups: 'Water',
@@ -196,6 +199,7 @@ const TarotReadings = () => {
   const variantRaw = useFeatureFlagVariant('paywall_preview_style_v1');
   // Default to blur variant if feature flag isn't loaded yet
   const variant = variantRaw || 'blur';
+  const ctaCopy = useCTACopy();
   const userName = user?.name;
   const userBirthday = user?.birthday;
   const userId = user?.id;
@@ -1004,61 +1008,46 @@ const TarotReadings = () => {
                 </div>
               </div>
 
-              <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/50 p-4'>
-                <h3 className='text-xs md:text-sm font-medium text-zinc-400 mb-2'>
-                  Weekly Card
-                </h3>
-                <p
-                  className='text-lg font-medium text-zinc-100 mb-1 cursor-pointer hover:text-lunary-primary-300 transition-colors'
-                  onClick={() => {
-                    const card = getTarotCardByName(generalTarot.weekly.name);
-                    if (card) setSelectedCard(card);
-                  }}
-                >
-                  {generalTarot.weekly.name}
-                </p>
-                <div className='flex flex-wrap items-center gap-2 text-xs md:text-sm mb-3'>
-                  <span className='inline-flex items-center px-2 py-0.5 rounded-md bg-lunary-primary-900/50 border border-lunary-primary-700/30 text-lunary-primary-200 font-medium'>
-                    {generalTarot.weekly.keywords[2] ||
-                      generalTarot.weekly.keywords[0]}
-                  </span>
-                  <span className='text-zinc-400'>
-                    {generalTarot.weekly.keywords
-                      .filter((_, idx) => idx !== 2 && idx < 2)
-                      .join(', ')}
-                  </span>
-                </div>
-
-                {generalWeeklyShare && (
-                  <div className='mt-3 flex flex-wrap items-center gap-2'>
-                    <button
-                      type='button'
-                      onClick={() => handleCardShare(generalWeeklyShare)}
-                      className='inline-flex items-center gap-2 text-xs font-medium text-lunary-primary-300 hover:text-lunary-primary-100 transition-colors'
-                    >
-                      <Share2 className='w-4 h-4' />
-                      Share weekly card
-                    </button>
-                  </div>
-                )}
-
-                {/* Locked preview of transit insights */}
-                <div className='mt-4 pt-4 border-t border-zinc-800'>
-                  <div className='flex items-center gap-2 mb-2'>
-                    <LockIcon className='w-3 h-3 text-lunary-primary-300' />
-                    <span className='text-xs font-medium text-lunary-primary-200'>
-                      In Your Chart This Week
+              <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/50 p-4 relative overflow-hidden'>
+                <div className='blur-md opacity-30 select-none pointer-events-none'>
+                  <h3 className='text-xs md:text-sm font-medium text-zinc-400 mb-2'>
+                    Weekly Card
+                  </h3>
+                  <p className='text-lg font-medium text-zinc-100 mb-1'>
+                    {generalTarot.weekly.name}
+                  </p>
+                  <div className='flex flex-wrap items-center gap-2 text-xs md:text-sm mb-3'>
+                    <span className='inline-flex items-center px-2 py-0.5 rounded-md bg-lunary-primary-900/50 border border-lunary-primary-700/30 text-lunary-primary-200 font-medium'>
+                      {generalTarot.weekly.keywords[2] ||
+                        generalTarot.weekly.keywords[0]}
                     </span>
                   </div>
-                  {renderPreview(
-                    "Venus sextile Jupiter supports your path · activates 7th house. See how this week's transits connect to this card's message in your birth chart.",
-                  )}
+                </div>
+                <div className='absolute inset-0 flex flex-col items-center justify-center gap-3 p-4'>
+                  <LockIcon className='w-6 h-6 text-lunary-primary-300' />
+                  <h4 className='text-sm font-semibold text-zinc-100 text-center'>
+                    Weekly Card
+                  </h4>
+                  <p className='text-xs text-zinc-400 text-center max-w-[200px]'>
+                    Deeper weekly guidance seeded from your birth chart
+                  </p>
+                  <span className='inline-flex items-center gap-1 text-[10px] bg-lunary-primary-900/50 border border-lunary-primary-700/50 px-2 py-0.5 rounded text-lunary-primary-300'>
+                    <Sparkles className='w-2.5 h-2.5' />
+                    Lunary+ Feature
+                  </span>
                   <button
                     type='button'
-                    onClick={() => router.push('/pricing')}
-                    className='mt-2 text-xs text-lunary-primary-300 hover:text-lunary-primary-100 transition-colors font-medium'
+                    onClick={() => {
+                      ctaCopy.trackCTAClick('tarotWeekly', 'tarot');
+                      captureEvent('locked_content_clicked', {
+                        feature: 'weekly_tarot_card',
+                        tier: 'free',
+                      });
+                      router.push('/pricing');
+                    }}
+                    className='mt-1 inline-flex items-center gap-1.5 rounded-lg border border-lunary-primary-700 bg-zinc-900/80 px-3 py-1.5 text-xs font-medium text-lunary-primary-300 hover:bg-zinc-900 transition-colors'
                   >
-                    Unlock personalized insights
+                    {ctaCopy.tarotWeekly}
                   </button>
                 </div>
               </div>
@@ -1070,17 +1059,61 @@ const TarotReadings = () => {
                   Daily Message
                 </h3>
                 <p className='text-xs md:text-sm text-zinc-300 leading-relaxed'>
-                  {generalTarot.guidance.dailyMessage}
+                  {generalTarot.guidance.dailyMessage.length >
+                  FREE_DAILY_TAROT_TRUNCATE_LENGTH
+                    ? generalTarot.guidance.dailyMessage
+                        .substring(0, FREE_DAILY_TAROT_TRUNCATE_LENGTH)
+                        .trim() + '…'
+                    : generalTarot.guidance.dailyMessage}
                 </p>
+                {generalTarot.guidance.dailyMessage.length >
+                  FREE_DAILY_TAROT_TRUNCATE_LENGTH && (
+                  <button
+                    type='button'
+                    onClick={() => {
+                      ctaCopy.trackCTAClick('tarotDaily', 'tarot');
+                      captureEvent('locked_content_clicked', {
+                        feature: 'daily_tarot_interpretation',
+                        tier: 'free',
+                      });
+                      router.push('/pricing');
+                    }}
+                    className='mt-2 text-xs text-lunary-primary-300 hover:text-lunary-primary-100 transition-colors font-medium'
+                  >
+                    {ctaCopy.tarotDaily}
+                  </button>
+                )}
               </div>
 
-              <div className='rounded-lg border border-lunary-secondary-800 bg-zinc-900/50 p-4'>
-                <h3 className='text-xs md:text-sm font-medium text-lunary-primary-300 mb-2'>
-                  Weekly Energy
-                </h3>
-                <p className='text-xs md:text-sm text-zinc-300 leading-relaxed'>
-                  {generalTarot.guidance.weeklyMessage}
-                </p>
+              <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/50 p-4 relative overflow-hidden'>
+                <div className='flex items-center justify-between mb-2'>
+                  <h3 className='text-xs md:text-sm font-medium text-lunary-primary-300'>
+                    Weekly Energy
+                  </h3>
+                  <span className='inline-flex items-center gap-1 text-[10px] bg-lunary-primary-900/50 border border-lunary-primary-700/50 px-1.5 py-0.5 rounded text-lunary-primary-300'>
+                    <Sparkles className='w-2.5 h-2.5' />
+                    Lunary+
+                  </span>
+                </div>
+                <div className='blur-sm opacity-40 select-none pointer-events-none'>
+                  <p className='text-xs md:text-sm text-zinc-300 leading-relaxed'>
+                    {generalTarot.guidance.weeklyMessage}
+                  </p>
+                </div>
+                <button
+                  type='button'
+                  onClick={() => {
+                    ctaCopy.trackCTAClick('tarotWeekly', 'tarot');
+                    captureEvent('locked_content_clicked', {
+                      feature: 'weekly_tarot',
+                      tier: 'free',
+                    });
+                    router.push('/pricing');
+                  }}
+                  className='mt-3 text-xs text-lunary-primary-300 hover:text-lunary-primary-100 transition-colors font-medium'
+                >
+                  {ctaCopy.tarotWeekly}
+                </button>
               </div>
             </div>
           </div>

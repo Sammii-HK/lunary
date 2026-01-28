@@ -3,14 +3,18 @@
 import Link from 'next/link';
 import dayjs from 'dayjs';
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { getGeneralHoroscope } from '../../../../../utils/astrology/generalHoroscope';
 import { getUpcomingTransits } from '../../../../../utils/astrology/transitCalendar';
+import { FREE_TRANSIT_LIMIT } from '../../../../../utils/entitlements';
 import { HoroscopeSection } from './HoroscopeSection';
 import { FeaturePreview } from './FeaturePreview';
 import { SmartTrialButton } from '@/components/SmartTrialButton';
-import { Share2, ChevronRight } from 'lucide-react';
+import { Share2, ChevronRight, Sparkles } from 'lucide-react';
 import { TransitCard } from './TransitCard';
 import { getNumerologyDetail } from '@/lib/numerology/numerologyDetails';
+import { useCTACopy } from '@/hooks/useCTACopy';
+import { captureEvent } from '@/lib/posthog-client';
 import {
   buildHoroscopeNumerologyShareUrl,
   getShareOrigin,
@@ -79,6 +83,8 @@ export function FreeHoroscopeView() {
   const generalHoroscope = getGeneralHoroscope();
   const upcomingTransits = getUpcomingTransits();
   const today = dayjs();
+  const router = useRouter();
+  const ctaCopy = useCTACopy();
   const { user } = useUser();
   const birthday = user?.birthday;
   const personalDay = birthday ? getPersonalDayNumber(birthday, today) : null;
@@ -277,11 +283,46 @@ export function FreeHoroscopeView() {
               Upcoming planetary events happening in the next 30 days affecting
               everyone
             </p>
-            <div className='space-y-3 max-h-96 overflow-y-auto'>
-              {upcomingTransits.map((transit, index) => (
-                <TransitCard key={index} transit={transit} />
-              ))}
+            <div className='space-y-3'>
+              {upcomingTransits
+                .slice(0, FREE_TRANSIT_LIMIT)
+                .map((transit, index) => (
+                  <TransitCard key={index} transit={transit} />
+                ))}
             </div>
+
+            {upcomingTransits.length > FREE_TRANSIT_LIMIT && (
+              <div className='relative mt-4'>
+                <div className='blur-sm opacity-50 select-none pointer-events-none'>
+                  {upcomingTransits
+                    .slice(FREE_TRANSIT_LIMIT, FREE_TRANSIT_LIMIT + 2)
+                    .map((transit, index) => (
+                      <TransitCard key={`locked-${index}`} transit={transit} />
+                    ))}
+                </div>
+                <div className='absolute inset-0 bg-gradient-to-b from-transparent via-zinc-950/60 to-zinc-950 flex items-end justify-center pb-3'>
+                  <button
+                    type='button'
+                    onClick={() => {
+                      ctaCopy.trackCTAClick('transitList', 'horoscope');
+                      captureEvent('locked_content_clicked', {
+                        feature: 'transit_list',
+                        tier: 'free',
+                      });
+                      router.push('/pricing');
+                    }}
+                    className='inline-flex items-center gap-2 rounded-lg border border-lunary-primary-700 bg-zinc-900/80 px-4 py-2 text-xs font-medium text-lunary-primary-300 hover:bg-zinc-900 transition-colors'
+                  >
+                    <Sparkles className='w-3 h-3' />
+                    {ctaCopy.transitList}
+                    <span className='text-[10px] bg-lunary-primary-900/50 border border-lunary-primary-700/50 px-1.5 py-0.5 rounded'>
+                      Lunary+
+                    </span>
+                  </button>
+                </div>
+              </div>
+            )}
+
             <div className='mt-4 pt-4 border-t border-zinc-800/50'>
               <p className='text-xs text-zinc-400 mb-3'>
                 See how these transits specifically affect your birth chart with

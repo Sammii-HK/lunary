@@ -131,6 +131,9 @@ export const CHAT_LIMITS: Record<PlanKey, number> = {
   lunary_plus_ai_annual: 300,
 };
 
+export const FREE_TRANSIT_LIMIT = 2;
+export const FREE_DAILY_TAROT_TRUNCATE_LENGTH = 120;
+
 export const JOURNAL_LIMITS = {
   freeMonthlyEntries: 3,
 } as const;
