@@ -695,6 +695,8 @@ export const conversionTracking = {
     trackConversion('dream_entry_created', { userId, metadata }),
   dreamEntryUpdated: (userId?: string, metadata?: Record<string, any>) =>
     trackConversion('dream_entry_updated', { userId, metadata }),
+  dreamEntryDeleted: (userId?: string, metadata?: Record<string, any>) =>
+    trackConversion('dream_entry_deleted', { userId, metadata }),
 
   // Sharing & Viral
   contentShared: (
