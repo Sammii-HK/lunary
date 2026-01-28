@@ -228,6 +228,9 @@ const nextConfig = {
   // Compression and optimization
   compress: true,
 
+  // Disable source maps in production to save memory
+  productionBrowserSourceMaps: false,
+
   // SWC compiler configuration - remove console statements in production
   compiler: {
     removeConsole:
@@ -254,6 +257,9 @@ const nextConfig = {
       'date-fns',
       '@react-email/components',
     ],
+    // Reduce memory usage during builds
+    workerThreads: false,
+    cpus: 1,
   },
 
   // Image optimization
