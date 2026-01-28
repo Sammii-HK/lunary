@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useMemo } from 'react';
+import { useEffect, useState, useMemo, useCallback } from 'react';
 import { useUser } from '@/context/UserContext';
 import { useAuthStatus } from '@/components/AuthStatus';
 import { TourOverlay } from './tour-overlay';
@@ -56,6 +56,20 @@ export function TourProvider({ children }: { children: React.ReactNode }) {
     };
   }, [rawContext]);
 
+  // Optimistically update local context so checkTours doesn't re-activate the tour
+  const markTourSeen = useCallback(
+    (tourId: string, status: 'dismissed' | 'completed') => {
+      setRawContext((prev) => {
+        if (!prev) return prev;
+        const key =
+          status === 'dismissed' ? 'dismissedTours' : 'completedTours';
+        if (prev[key].includes(tourId)) return prev;
+        return { ...prev, [key]: [...prev[key], tourId] };
+      });
+    },
+    [],
+  );
+
   const {
     activeTour,
     currentStep,
@@ -64,7 +78,7 @@ export function TourProvider({ children }: { children: React.ReactNode }) {
     dismissTour,
     completeTour,
     startTour,
-  } = useFeatureTour(tourContext);
+  } = useFeatureTour(tourContext, markTourSeen);
 
   return (
     <>

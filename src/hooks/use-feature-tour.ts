@@ -8,7 +8,15 @@ import type {
   FeatureTour,
 } from '@/lib/feature-tours/tour-system';
 
-export function useFeatureTour(context: TourContext | null) {
+type MarkTourSeenFn = (
+  tourId: string,
+  status: 'dismissed' | 'completed',
+) => void;
+
+export function useFeatureTour(
+  context: TourContext | null,
+  markTourSeen: MarkTourSeenFn,
+) {
   const [activeTour, setActiveTour] = useState<FeatureTour | null>(null);
   const [currentStep, setCurrentStep] = useState(0);
 
@@ -68,11 +76,19 @@ export function useFeatureTour(context: TourContext | null) {
   const dismissTour = useCallback(async () => {
     if (!activeTour) return;
 
+    const tourId = activeTour.id;
+
+    // Optimistically update context before clearing active tour,
+    // so checkTours won't re-activate this tour when activeTour becomes null
+    markTourSeen(tourId, 'dismissed');
+    setActiveTour(null);
+    setCurrentStep(0);
+
     try {
       const res = await fetch('/api/tours/dismiss', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ tourId: activeTour.id }),
+        body: JSON.stringify({ tourId }),
       });
       if (!res.ok) {
         console.error('[tour] dismiss failed:', res.status, await res.text());
@@ -80,19 +96,23 @@ export function useFeatureTour(context: TourContext | null) {
     } catch (error) {
       console.error('Failed to dismiss tour:', error);
     }
-
-    setActiveTour(null);
-    setCurrentStep(0);
-  }, [activeTour]);
+  }, [activeTour, markTourSeen]);
 
   const completeTour = useCallback(async () => {
     if (!activeTour) return;
+
+    const tourId = activeTour.id;
+
+    // Optimistically update context before clearing active tour
+    markTourSeen(tourId, 'completed');
+    setActiveTour(null);
+    setCurrentStep(0);
 
     try {
       const res = await fetch('/api/tours/complete', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ tourId: activeTour.id }),
+        body: JSON.stringify({ tourId }),
       });
       if (!res.ok) {
         console.error('[tour] complete failed:', res.status, await res.text());
@@ -100,10 +120,7 @@ export function useFeatureTour(context: TourContext | null) {
     } catch (error) {
       console.error('Failed to complete tour:', error);
     }
-
-    setActiveTour(null);
-    setCurrentStep(0);
-  }, [activeTour]);
+  }, [activeTour, markTourSeen]);
 
   return {
     activeTour,
