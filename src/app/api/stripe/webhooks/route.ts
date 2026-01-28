@@ -639,7 +639,7 @@ async function handleInvoicePaymentFailed(invoice: Stripe.Invoice) {
   if (userId) {
     const attemptCount = invoice.attempt_count || 1;
     const amount = (invoice.amount_due || 0) / 100;
-    const subscriptionId = invoice.subscription as string | null;
+    const subscriptionId = (invoice as any).subscription as string | null;
 
     let planType: string | undefined = undefined;
     if (subscriptionId) {
