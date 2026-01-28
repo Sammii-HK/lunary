@@ -16,6 +16,32 @@ export function useDemoMode() {
 
 // CRITICAL: Override fetch at module level BEFORE any components render
 // This ensures ALL fetch calls are intercepted, even those made during initial render
+//
+// DEMO MODE API POLICY:
+// ✅ ALLOWED (with caching):
+//    - /api/cosmic/global - planetary positions
+//    - /api/grimoire/spells - moon spells
+//    - /api/horoscope/daily - personalized horoscope preview
+// ✅ ALLOWED (session-only, no persistence):
+//    - POST /api/ritual/complete - marks ritual complete (UI only, resets on refresh)
+// 🚫 BLOCKED (with user alerts):
+//    - POST /api/journal - reflection/dream submissions
+//    - POST /api/tarot/readings - pulling new tarot spreads
+//    - PATCH /api/tarot/readings - modifying tarot readings
+//    - DELETE /api/tarot/readings - deleting tarot readings
+//    - POST /api/moon-circles/*/insights - sharing insights
+//    - navigator.clipboard.writeText() - copying share links
+//    - navigator.share() - native share dialog
+//    - Social share links (Twitter, Facebook, Instagram, Threads, Bluesky, Reddit)
+//    - Share button clicks
+// 🚫 BLOCKED (silent):
+//    - /api/auth/* - returns mock authenticated user
+//    - /api/analytics/* - returns success
+//    - /api/admin/notifications/* - returns success
+//    - GET /api/tarot/readings - returns empty (shows pre-pulled demo spreads only)
+//    - GET /api/journal - returns empty
+//    - GET /api/patterns - returns empty
+//    - All other endpoints - blocked with error message
 if (typeof window !== 'undefined') {
   const originalFetch = window.fetch;
   const fetchCache = new Map<string, Response>();
@@ -66,7 +92,63 @@ if (typeof window !== 'undefined') {
         });
       }
 
-      // BLOCK user-specific write endpoints (journal, patterns, tarot readings history)
+      // BLOCK journal/reflection submissions (POST)
+      if (url.includes('/api/journal') && init?.method === 'POST') {
+        alert('Reflections cannot be saved in the demo preview');
+        return new Response(
+          JSON.stringify({ success: false, error: 'Demo mode' }),
+          { status: 403, headers: { 'Content-Type': 'application/json' } },
+        );
+      }
+
+      // BLOCK moon circle insights sharing (POST)
+      if (
+        url.includes('/api/moon-circles') &&
+        url.includes('/insights') &&
+        init?.method === 'POST'
+      ) {
+        alert('Insights cannot be shared in the demo preview');
+        return new Response(
+          JSON.stringify({ success: false, error: 'Demo mode' }),
+          { status: 403, headers: { 'Content-Type': 'application/json' } },
+        );
+      }
+
+      // BLOCK tarot spread pulls and modifications
+      if (url.includes('/api/tarot/readings')) {
+        const method = init?.method || 'GET';
+        // Block POST (new spreads), PATCH (updates), DELETE (deletions)
+        if (method === 'POST' || method === 'PATCH' || method === 'DELETE') {
+          const action =
+            method === 'POST'
+              ? 'pulled'
+              : method === 'DELETE'
+                ? 'deleted'
+                : 'modified';
+          alert(`Tarot spreads cannot be ${action} in the demo preview`);
+          return new Response(
+            JSON.stringify({ success: false, error: 'Demo mode' }),
+            { status: 403, headers: { 'Content-Type': 'application/json' } },
+          );
+        }
+      }
+
+      // ALLOW ritual completion (POST) but return mock success - session only, doesn't persist
+      if (url.includes('/api/ritual/complete') && init?.method === 'POST') {
+        return new Response(
+          JSON.stringify({
+            success: true,
+            ritualStreak: 1,
+            longestRitualStreak: 1,
+          }),
+          {
+            status: 200,
+            headers: { 'Content-Type': 'application/json' },
+          },
+        );
+      }
+
+      // BLOCK GET requests to user-specific data (journal, patterns, tarot history)
       if (
         url.includes('/api/tarot/readings') ||
         url.includes('/api/journal') ||
@@ -156,6 +238,46 @@ export function DemoModeProvider({
     };
   }, []);
 
+  // Block clipboard and native share APIs in demo mode
+  useEffect(() => {
+    if (typeof navigator === 'undefined') return;
+
+    const originalClipboardWriteText = navigator.clipboard?.writeText;
+    const originalShare = navigator.share;
+
+    // Override clipboard.writeText to prevent copying share links
+    if (
+      navigator.clipboard &&
+      typeof originalClipboardWriteText !== 'undefined'
+    ) {
+      navigator.clipboard.writeText = async (text: string) => {
+        alert('Sharing is not available in the demo preview');
+        throw new Error('Demo mode - clipboard blocked');
+      };
+    }
+
+    // Override navigator.share to prevent native share dialog
+    if (typeof originalShare !== 'undefined') {
+      navigator.share = async (data?: ShareData) => {
+        alert('Sharing is not available in the demo preview');
+        throw new Error('Demo mode - sharing blocked');
+      };
+    }
+
+    return () => {
+      // Restore original functions
+      if (
+        navigator.clipboard &&
+        typeof originalClipboardWriteText !== 'undefined'
+      ) {
+        navigator.clipboard.writeText = originalClipboardWriteText;
+      }
+      if (typeof originalShare !== 'undefined') {
+        navigator.share = originalShare;
+      }
+    };
+  }, []);
+
   // Note: Fetch interception happens at module level (see top of file)
   // No need for useEffect/useLayoutEffect - it's applied before any components render
 
@@ -200,12 +322,45 @@ export function DemoModeProvider({
       // Only handle events within our container
       if (!container.contains(target)) return;
 
+      // Check for social share links (Twitter, Facebook, Instagram, etc.)
+      const link = target.closest('a');
+      if (link) {
+        const href = link.getAttribute('href') || '';
+        const socialDomains = [
+          'twitter.com',
+          'facebook.com',
+          'instagram.com',
+          'threads.net',
+          'bsky.app',
+          'reddit.com',
+          'linkedin.com',
+        ];
+        const isSocialShare = socialDomains.some((domain) =>
+          href.includes(domain),
+        );
+
+        if (isSocialShare) {
+          e.preventDefault();
+          e.stopPropagation();
+          alert('Sharing is not available in the demo preview');
+          return;
+        }
+      }
+
       const button = target.closest('button');
 
       if (button) {
         const text = button.textContent?.toLowerCase() || '';
         const ariaLabel =
           button.getAttribute('aria-label')?.toLowerCase() || '';
+
+        // Block share buttons
+        if (text.includes('share') || ariaLabel.includes('share')) {
+          e.preventDefault();
+          e.stopPropagation();
+          alert('Sharing is not available in the demo preview');
+          return;
+        }
 
         // Block buttons with save/create/add/update keywords
         const blockKeywords = [
