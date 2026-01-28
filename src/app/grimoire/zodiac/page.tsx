@@ -5,6 +5,8 @@ import { stringToKebabCase } from '../../../../utils/string';
 import { SEOContentTemplate } from '@/components/grimoire/SEOContentTemplate';
 import { createItemListSchema, renderJsonLd } from '@/lib/schema';
 
+// 30-day ISR revalidation
+export const revalidate = 2592000;
 export const metadata: Metadata = {
   title: 'All 12 Zodiac Signs: Dates, Traits & Compatibility - Lunary',
   description:

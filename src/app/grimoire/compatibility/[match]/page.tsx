@@ -3,10 +3,7 @@ import Link from 'next/link';
 import { ExploreGrimoire } from '@/components/grimoire/ExploreGrimoire';
 import { ArrowRight, Heart, Users, Briefcase, Star } from 'lucide-react';
 import { signDescriptions } from '@/constants/seo/planet-sign-content';
-import {
-  generateCompatibilityContent,
-  getAllCompatibilitySlugs,
-} from '@/constants/seo/compatibility-content';
+import { generateCompatibilityContent } from '@/constants/seo/compatibility-content';
 import {
   createArticleSchema,
   renderJsonLd,
@@ -15,6 +12,8 @@ import {
 } from '@/lib/schema';
 import { createGrimoireMetadata } from '@/lib/grimoire-metadata';
 
+// 30-day ISR revalidation
+export const revalidate = 2592000;
 const ZODIAC_SYMBOLS: Record<string, string> = {
   aries: '♈',
   taurus: '♉',
@@ -34,10 +33,8 @@ interface PageProps {
   params: Promise<{ match: string }>;
 }
 
-export async function generateStaticParams() {
-  const slugs = getAllCompatibilitySlugs();
-  return slugs.map((match) => ({ match }));
-}
+// Removed generateStaticParams - using pure ISR for faster builds
+// Pages are generated on-demand and cached with 30-day revalidation
 
 function parseMatch(slug: string): { sign1: string; sign2: string } | null {
   const match = slug.match(/^([a-z]+)-and-([a-z]+)$/);

@@ -1,23 +1,18 @@
 import { notFound } from 'next/navigation';
 import { SEOContentTemplate } from '@/components/grimoire/SEOContentTemplate';
-import {
-  TAROT_SPREADS,
-  TAROT_SPREAD_MAP,
-  type TarotPlan,
-} from '@/constants/tarotSpreads';
+import { TAROT_SPREAD_MAP, type TarotPlan } from '@/constants/tarotSpreads';
 import { createGrimoireMetadata } from '@/lib/grimoire-metadata';
 
+// 30-day ISR revalidation
+export const revalidate = 2592000;
 const difficultyLabel: Record<TarotPlan, string> = {
   free: 'Beginner',
   monthly: 'Intermediate',
   yearly: 'Advanced',
 };
 
-export async function generateStaticParams() {
-  return TAROT_SPREADS.map((spread) => ({
-    spread: spread.slug,
-  }));
-}
+// Removed generateStaticParams - using pure ISR for faster builds
+// Pages are generated on-demand and cached with 30-day revalidation
 
 export async function generateMetadata({
   params,
