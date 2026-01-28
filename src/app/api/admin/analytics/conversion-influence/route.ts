@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { resolveDateRange } from '@/lib/analytics/date-range';
 import { getConversionInfluence } from '@/lib/analytics/kpis';
+import { ANALYTICS_CACHE_TTL_SECONDS } from '@/lib/analytics-cache-config';
 
 export async function GET(request: NextRequest) {
   try {
@@ -8,7 +9,16 @@ export async function GET(request: NextRequest) {
     const range = resolveDateRange(searchParams, 30);
 
     const influence = await getConversionInfluence(range);
-    return NextResponse.json({ source: 'database', range, ...influence });
+    const response = NextResponse.json({
+      source: 'database',
+      range,
+      ...influence,
+    });
+    response.headers.set(
+      'Cache-Control',
+      `private, max-age=${ANALYTICS_CACHE_TTL_SECONDS}`,
+    );
+    return response;
   } catch (error) {
     console.error('[analytics/conversion-influence] Failed', error);
     return NextResponse.json(

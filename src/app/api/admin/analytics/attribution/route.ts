@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { sql } from '@vercel/postgres';
+import { ANALYTICS_CACHE_TTL_SECONDS } from '@/lib/analytics-cache-config';
 
 const TEST_EMAIL_PATTERN = '%@test.lunary.app';
 const TEST_EMAIL_EXACT = 'test@test.lunary.app';
@@ -130,7 +131,7 @@ export async function GET(request: NextRequest) {
       ORDER BY total_users DESC
     `);
 
-    return NextResponse.json({
+    const response = NextResponse.json({
       summary: {
         totalUsers: organicStats.rows[0]?.total_users || 0,
         organicUsers: organicStats.rows[0]?.organic_users || 0,
@@ -143,6 +144,11 @@ export async function GET(request: NextRequest) {
       dailyTrend: dailyTrend.rows,
       conversionBySource: conversionBySource.rows,
     });
+    response.headers.set(
+      'Cache-Control',
+      `private, max-age=${ANALYTICS_CACHE_TTL_SECONDS}`,
+    );
+    return response;
   } catch (error) {
     console.error('Attribution analytics error:', error);
     return NextResponse.json(

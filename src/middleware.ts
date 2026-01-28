@@ -14,13 +14,16 @@ const isProductionHost = (hostname: string) =>
 const ANON_ID_COOKIE = 'lunary_anon_id';
 
 const BOT_UA_PATTERN =
-  /bot|crawler|spider|crawling|preview|facebookexternalhit|slackbot|discordbot|whatsapp|telegrambot|pinterest|embedly|quora|tumblr|redditbot/i;
+  /bot|crawler|spider|crawling|preview|facebookexternalhit|slackbot|discordbot|whatsapp|telegrambot|pinterest|embedly|quora|tumblr|redditbot|gpt|openai|anthropic|gemini|perplexity|cohere|googlebot|baiduspider|yandexbot|ccbot|duckduckbot|bingbot|python-requests|libcurl|scrapy|wget|curl\//i;
 
 const shouldSkipTracking = (request: NextRequest, hostname: string) => {
   if (request.method !== 'GET') return true;
 
   const ua = request.headers.get('user-agent') || '';
   if (BOT_UA_PATTERN.test(ua)) return true;
+
+  const acceptLang = request.headers.get('accept-language');
+  if (!acceptLang) return true;
 
   const pathname = request.nextUrl.pathname;
   if (pathname.startsWith('/admin')) return true;

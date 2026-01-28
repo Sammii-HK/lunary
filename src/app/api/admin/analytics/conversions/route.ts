@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { sql } from '@vercel/postgres';
 
 import { formatTimestamp, resolveDateRange } from '@/lib/analytics/date-range';
+import { ANALYTICS_CACHE_TTL_SECONDS } from '@/lib/analytics-cache-config';
 
 // Test user exclusion patterns - matches filtering in other analytics endpoints
 const TEST_EMAIL_PATTERN = '%@test.lunary.app';
@@ -252,7 +253,7 @@ export async function GET(request: NextRequest) {
       },
     ];
 
-    return NextResponse.json({
+    const response = NextResponse.json({
       total_conversions: totalConversions,
       conversion_rate: conversionRate,
       trial_conversion_rate: trialConversionRate,
@@ -268,6 +269,11 @@ export async function GET(request: NextRequest) {
         drop_off_points: dropOffPoints,
       },
     });
+    response.headers.set(
+      'Cache-Control',
+      `private, max-age=${ANALYTICS_CACHE_TTL_SECONDS}`,
+    );
+    return response;
   } catch (error) {
     console.error('[analytics/conversions] Failed to load metrics', error);
     return NextResponse.json(

@@ -1,0 +1,1 @@
+export const ANALYTICS_CACHE_TTL_SECONDS = 86400; // 1 day

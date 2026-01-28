@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { sql } from '@vercel/postgres';
 import {
   canonicaliseEvent,
   insertCanonicalEvent,
@@ -48,6 +49,33 @@ export async function POST(request: NextRequest) {
         skipped: true,
         reason: canonical.reason,
       });
+    }
+
+    const today = new Date().toISOString().split('T')[0];
+    const existing = userId
+      ? await sql`
+          SELECT 1 FROM conversion_events
+          WHERE event_type = 'page_viewed'
+            AND user_id = ${userId}
+            AND page_path = ${path}
+            AND created_at >= ${today}::date
+            AND created_at < (${today}::date + INTERVAL '1 day')
+          LIMIT 1
+        `
+      : anonymousId
+        ? await sql`
+            SELECT 1 FROM conversion_events
+            WHERE event_type = 'page_viewed'
+              AND anonymous_id = ${anonymousId}
+              AND page_path = ${path}
+              AND created_at >= ${today}::date
+              AND created_at < (${today}::date + INTERVAL '1 day')
+            LIMIT 1
+          `
+        : { rows: [] };
+
+    if (existing.rows.length > 0) {
+      return NextResponse.json({ status: 'skipped', reason: 'duplicate' });
     }
 
     await insertCanonicalEvent(canonical.row);

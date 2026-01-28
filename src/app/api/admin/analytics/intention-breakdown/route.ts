@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { sql } from '@vercel/postgres';
 
 import { formatTimestamp, resolveDateRange } from '@/lib/analytics/date-range';
+import { ANALYTICS_CACHE_TTL_SECONDS } from '@/lib/analytics-cache-config';
 
 export async function GET(request: NextRequest) {
   try {
@@ -33,7 +34,12 @@ export async function GET(request: NextRequest) {
         total > 0 ? Number(((item.count / total) * 100).toFixed(2)) : 0,
     }));
 
-    return NextResponse.json({ data: breakdown, total });
+    const response = NextResponse.json({ data: breakdown, total });
+    response.headers.set(
+      'Cache-Control',
+      `private, max-age=${ANALYTICS_CACHE_TTL_SECONDS}`,
+    );
+    return response;
   } catch (error) {
     console.error(
       '[admin/analytics/intention-breakdown] Failed to fetch intention data',

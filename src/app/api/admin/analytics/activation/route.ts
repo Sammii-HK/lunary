@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { sql } from '@vercel/postgres';
 import { formatTimestamp, resolveDateRange } from '@/lib/analytics/date-range';
+import { ANALYTICS_CACHE_TTL_SECONDS } from '@/lib/analytics-cache-config';
 
 const TEST_EMAIL_PATTERN = '%@test.lunary.app';
 const TEST_EMAIL_EXACT = 'test@test.lunary.app';
@@ -199,7 +200,7 @@ export async function GET(request: NextRequest) {
       rate: Number(row.rate || 0),
     }));
 
-    return NextResponse.json({
+    const response = NextResponse.json({
       activationRate: Number(activationRate.toFixed(2)),
       activatedUsers: totalActivatedUsers,
       totalSignups: signups.length,
@@ -207,6 +208,11 @@ export async function GET(request: NextRequest) {
       activationBreakdownByPlan,
       trends,
     });
+    response.headers.set(
+      'Cache-Control',
+      `private, max-age=${ANALYTICS_CACHE_TTL_SECONDS}`,
+    );
+    return response;
   } catch (error) {
     console.error('[analytics/activation] Failed to load metrics', error);
     return NextResponse.json(

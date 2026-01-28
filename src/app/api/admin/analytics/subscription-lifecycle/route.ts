@@ -6,6 +6,7 @@ import {
   formatTimestamp,
   resolveDateRange,
 } from '@/lib/analytics/date-range';
+import { ANALYTICS_CACHE_TTL_SECONDS } from '@/lib/analytics-cache-config';
 
 const TEST_EMAIL_PATTERN = '%@test.lunary.app';
 const TEST_EMAIL_EXACT = 'test@test.lunary.app';
@@ -291,7 +292,7 @@ export async function GET(request: NextRequest) {
         ? (cancelledInPeriod / activeSubscriptions) * 100
         : 0;
 
-    return NextResponse.json({
+    const response = NextResponse.json({
       states,
       churnTrends,
       avgDurationDays: Number(avgDuration.toFixed(1)),
@@ -301,6 +302,11 @@ export async function GET(request: NextRequest) {
       debugCancelledDetails,
       debugStripeActiveEmails,
     });
+    response.headers.set(
+      'Cache-Control',
+      `private, max-age=${ANALYTICS_CACHE_TTL_SECONDS}`,
+    );
+    return response;
   } catch (error) {
     console.error(
       '[analytics/subscription-lifecycle] Failed to load metrics',

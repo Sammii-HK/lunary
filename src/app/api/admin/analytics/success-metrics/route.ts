@@ -8,6 +8,7 @@ import {
 } from '@/lib/analytics/date-range';
 import { getSearchConsoleData } from '@/lib/google/search-console';
 import { summarizeEntitlements } from '@/lib/metrics/entitlement-metrics';
+import { ANALYTICS_CACHE_TTL_SECONDS } from '@/lib/analytics-cache-config';
 
 // Test user exclusion patterns
 const TEST_EMAIL_PATTERN = '%@test.lunary.app';
@@ -642,7 +643,7 @@ export async function GET(request: NextRequest) {
           ? 100
           : 0;
 
-    return NextResponse.json({
+    const response = NextResponse.json({
       daily_active_users: {
         value: dau,
         trend: dauTrend,
@@ -736,6 +737,11 @@ export async function GET(request: NextRequest) {
         target: null,
       },
     });
+    response.headers.set(
+      'Cache-Control',
+      `private, max-age=${ANALYTICS_CACHE_TTL_SECONDS}`,
+    );
+    return response;
   } catch (error) {
     console.error('[analytics/success-metrics] Failed to load metrics', error);
     return NextResponse.json(

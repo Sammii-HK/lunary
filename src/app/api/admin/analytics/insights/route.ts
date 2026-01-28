@@ -5,6 +5,7 @@ import {
   detectTrackingIssues,
   type AnalyticsMetrics,
 } from '@/lib/analytics/insights';
+import { ANALYTICS_CACHE_TTL_SECONDS } from '@/lib/analytics-cache-config';
 
 export async function GET(request: NextRequest) {
   try {
@@ -147,11 +148,16 @@ export async function GET(request: NextRequest) {
     // Generate insights
     const insights = generateInsights(metrics);
 
-    return NextResponse.json({
+    const response = NextResponse.json({
       insights,
       metrics,
       range,
     });
+    response.headers.set(
+      'Cache-Control',
+      `private, max-age=${ANALYTICS_CACHE_TTL_SECONDS}`,
+    );
+    return response;
   } catch (error) {
     console.error('[analytics/insights] Failed', error);
     return NextResponse.json(

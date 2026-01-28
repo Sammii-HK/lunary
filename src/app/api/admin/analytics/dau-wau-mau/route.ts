@@ -859,7 +859,7 @@ export async function GET(request: NextRequest) {
         ? Number((100 - day30Retention).toFixed(2))
         : null;
 
-    return NextResponse.json({
+    const response = NextResponse.json({
       dau: currentTrend.dau,
       wau: currentTrend.wau,
       mau: currentTrend.mau,
@@ -932,6 +932,8 @@ export async function GET(request: NextRequest) {
       },
       source: 'database',
     });
+    response.headers.set('Cache-Control', 'no-store');
+    return response;
   } catch (error) {
     console.error('[analytics/dau-wau-mau] Failed to load metrics', error);
     return NextResponse.json(

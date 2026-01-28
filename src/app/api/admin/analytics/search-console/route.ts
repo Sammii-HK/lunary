@@ -5,6 +5,7 @@ import {
   getTopPages,
 } from '@/lib/google/search-console';
 import { resolveDateRange, formatDate } from '@/lib/analytics/date-range';
+import { ANALYTICS_CACHE_TTL_SECONDS } from '@/lib/analytics-cache-config';
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
@@ -20,7 +21,7 @@ export async function GET(request: NextRequest) {
       getTopPages(startDate, endDate, 10, siteUrl),
     ]);
 
-    return NextResponse.json({
+    const response = NextResponse.json({
       success: true,
       data: {
         performance: performanceData,
@@ -32,6 +33,11 @@ export async function GET(request: NextRequest) {
         end: endDate,
       },
     });
+    response.headers.set(
+      'Cache-Control',
+      `private, max-age=${ANALYTICS_CACHE_TTL_SECONDS}`,
+    );
+    return response;
   } catch (error) {
     console.error('[analytics/search-console] Error:', error);
 

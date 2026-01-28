@@ -1828,6 +1828,36 @@ export default function AnalyticsPage() {
     };
   }, [cohorts?.cohorts]);
 
+  const overallD7Retention = useMemo(() => {
+    const rows = cohorts?.cohorts ?? [];
+    if (!rows.length) return 0;
+    const totalUsers = rows.reduce(
+      (sum: number, r: any) => sum + (r.day0 || 0),
+      0,
+    );
+    if (totalUsers === 0) return 0;
+    const weightedSum = rows.reduce(
+      (sum: number, r: any) => sum + ((r.day7 || 0) / 100) * (r.day0 || 0),
+      0,
+    );
+    return weightedSum / totalUsers;
+  }, [cohorts?.cohorts]);
+
+  const overallD30Retention = useMemo(() => {
+    const rows = cohorts?.cohorts ?? [];
+    if (!rows.length) return 0;
+    const totalUsers = rows.reduce(
+      (sum: number, r: any) => sum + (r.day0 || 0),
+      0,
+    );
+    if (totalUsers === 0) return 0;
+    const weightedSum = rows.reduce(
+      (sum: number, r: any) => sum + ((r.day30 || 0) / 100) * (r.day0 || 0),
+      0,
+    );
+    return weightedSum / totalUsers;
+  }, [cohorts?.cohorts]);
+
   const cohortAgePercents = useMemo(() => {
     const totalMau = activity?.mau ?? 0;
     if (totalMau <= 0) {
@@ -2068,15 +2098,22 @@ export default function AnalyticsPage() {
                 <HealthMetricCard
                   icon={RefreshCw}
                   label='User Retention'
-                  value={`${((cohorts?.overall_d30_retention || 0) * 100).toFixed(0)}%`}
+                  value={`${(overallD7Retention * 100).toFixed(0)}%`}
+                  unit='D7'
+                  status={overallD7Retention > 0.3 ? 'excellent' : 'good'}
+                  description='7-day retention'
+                />
+
+                {/* D30 retention — uncomment when cohort size is large enough to measure
+                <HealthMetricCard
+                  icon={RefreshCw}
+                  label='User Retention'
+                  value={`${(overallD30Retention * 100).toFixed(0)}%`}
                   unit='D30'
-                  status={
-                    (cohorts?.overall_d30_retention || 0) > 0.5
-                      ? 'excellent'
-                      : 'good'
-                  }
+                  status={overallD30Retention > 0.5 ? 'excellent' : 'good'}
                   description='30-day retention'
                 />
+                */}
 
                 <HealthMetricCard
                   icon={CheckCircle}

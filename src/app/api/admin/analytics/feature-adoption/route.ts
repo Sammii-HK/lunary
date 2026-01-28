@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { resolveDateRange } from '@/lib/analytics/date-range';
 import { getFeatureAdoption } from '@/lib/analytics/kpis';
+import { ANALYTICS_CACHE_TTL_SECONDS } from '@/lib/analytics-cache-config';
 
 const familyToEventType = (
   family: string | null,
@@ -26,13 +27,18 @@ export async function GET(request: NextRequest) {
     const eventType = familyToEventType(family);
 
     const adoption = await getFeatureAdoption(range, { eventType });
-    return NextResponse.json({
+    const response = NextResponse.json({
       source: 'database',
       family: family ?? 'site',
       event_type: eventType,
       range,
       ...adoption,
     });
+    response.headers.set(
+      'Cache-Control',
+      `private, max-age=${ANALYTICS_CACHE_TTL_SECONDS}`,
+    );
+    return response;
   } catch (error) {
     console.error('[analytics/feature-adoption] Failed', error);
     return NextResponse.json(
