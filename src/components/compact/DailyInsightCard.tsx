@@ -10,6 +10,7 @@ import { Sparkles, ArrowRight, Lock } from 'lucide-react';
 import dayjs from 'dayjs';
 import { getGeneralHoroscope } from '../../../utils/astrology/generalHoroscope';
 import { getEnhancedPersonalizedHoroscope } from '../../../utils/astrology/enhancedHoroscope';
+import { getAstrologicalChart } from '../../../utils/astrology/astrology';
 import { getUpcomingTransits } from '../../../utils/astrology/transitCalendar';
 import {
   getPersonalTransitImpacts,
@@ -23,6 +24,11 @@ import {
   LifeThemeInput,
 } from '@/lib/life-themes/engine';
 import { useFeatureFlagVariant } from '@/hooks/useFeatureFlag';
+import {
+  buildTransitDetails,
+  TransitAspect,
+  TransitDetail,
+} from '@/features/horoscope';
 
 const getOrdinalSuffix = (n: number): string => {
   if (n >= 11 && n <= 13) return 'th';
@@ -53,6 +59,56 @@ const formatTransitSentence = (
   return capitalized.endsWith('.') ? capitalized : `${capitalized}.`;
 };
 
+function calculateAspects(
+  birthChart: any[],
+  currentTransits: any[],
+): TransitAspect[] {
+  const aspects: TransitAspect[] = [];
+  const aspectDefinitions = [
+    { name: 'conjunction', angle: 0, orb: 10 },
+    { name: 'opposition', angle: 180, orb: 10 },
+    { name: 'trine', angle: 120, orb: 8 },
+    { name: 'square', angle: 90, orb: 8 },
+    { name: 'sextile', angle: 60, orb: 6 },
+  ];
+
+  for (const transit of currentTransits) {
+    for (const natal of birthChart) {
+      if (['North Node', 'South Node', 'Chiron', 'Lilith'].includes(natal.body))
+        continue;
+
+      let diff = Math.abs(transit.eclipticLongitude - natal.eclipticLongitude);
+      if (diff > 180) diff = 360 - diff;
+
+      for (const aspectDef of aspectDefinitions) {
+        const orb = Math.abs(diff - aspectDef.angle);
+        if (orb <= aspectDef.orb) {
+          const degreeInSign = (longitude: number) => {
+            const d = longitude % 30;
+            const whole = Math.floor(d);
+            const minutes = Math.floor((d - whole) * 60);
+            return `${whole}°${minutes.toString().padStart(2, '0')}'`;
+          };
+          aspects.push({
+            transitPlanet: transit.body,
+            transitSign: transit.sign,
+            transitDegree: `${degreeInSign(transit.eclipticLongitude)} ${transit.sign}`,
+            natalPlanet: natal.body,
+            natalSign: natal.sign,
+            natalDegree: `${degreeInSign(natal.eclipticLongitude)} ${natal.sign}`,
+            aspectType: aspectDef.name,
+            orbDegrees: Math.round(orb * 10) / 10,
+            house: natal.house,
+          });
+          break;
+        }
+      }
+    }
+  }
+
+  return aspects;
+}
+
 export const DailyInsightCard = () => {
   const { user } = useUser();
   const authStatus = useAuthStatus();
@@ -67,6 +123,7 @@ export const DailyInsightCard = () => {
   const userBirthday = user?.birthday;
   const birthChart = user?.birthChart;
   const [lifeThemeName, setLifeThemeName] = useState<string | null>(null);
+  const [observer, setObserver] = useState<any>(null);
   const variant = useFeatureFlagVariant('paywall_preview_style_v1');
 
   const hasPersonalizedAccess = hasFeatureAccess(
@@ -80,6 +137,14 @@ export const DailyInsightCard = () => {
     hasPersonalizedAccess &&
     userBirthday &&
     birthChart;
+
+  useEffect(() => {
+    if (!authStatus.isAuthenticated || !birthChart) return;
+    import('astronomy-engine').then((module) => {
+      const { Observer } = module;
+      setObserver(new Observer(51.4769, 0.0005, 0));
+    });
+  }, [authStatus.isAuthenticated, birthChart]);
 
   useEffect(() => {
     if (!canAccessPersonalized) return;
@@ -158,12 +223,11 @@ export const DailyInsightCard = () => {
     selectedDay.valueOf(),
   ]);
 
-  // Calculate transit highlights for ALL authenticated users (for preview and paid access)
+  // Calculate transit event sentences (enters/leaves)
   const transitHighlights = useMemo<PersonalTransitImpact[]>(() => {
     if (!authStatus.isAuthenticated || !birthChart) return [];
     const todayStart = selectedDay.startOf('day');
-    const lookbackDays = 2;
-    const windowStart = todayStart.subtract(lookbackDays, 'day');
+    const windowStart = todayStart.subtract(2, 'day');
     const windowEnd = todayStart.add(1, 'day');
     const upcomingTransits = getUpcomingTransits(todayStart);
     const impacts = getPersonalTransitImpacts(upcomingTransits, birthChart, 60);
@@ -171,100 +235,41 @@ export const DailyInsightCard = () => {
     const significanceOrder: Record<
       PersonalTransitImpact['significance'],
       number
-    > = {
-      high: 3,
-      medium: 2,
-      low: 1,
-    };
+    > = { high: 3, medium: 2, low: 1 };
 
-    const candidateImpacts = impacts.filter((impact) => {
-      const impactDayValue = impact.date.startOf('day').valueOf();
+    const candidates = impacts.filter((impact) => {
+      const val = impact.date.startOf('day').valueOf();
       return (
-        impactDayValue >= windowStart.valueOf() &&
-        impactDayValue <= windowEnd.valueOf() &&
+        val >= windowStart.valueOf() &&
+        val <= windowEnd.valueOf() &&
         !Number.isNaN(significanceOrder[impact.significance])
       );
     });
-    const relevantImpacts = candidateImpacts.filter((impact) => impact.house);
 
-    console.log('impacts', impacts);
+    const withHouse = candidates.filter((impact) => impact.house);
+    const pool = withHouse.length > 0 ? withHouse : candidates;
+    if (pool.length === 0) return [];
 
-    console.log('relevantImpacts', relevantImpacts);
-
-    const impactsToScore =
-      relevantImpacts.length > 0 ? relevantImpacts : candidateImpacts;
-
-    if (impactsToScore.length === 0) return [];
-
-    const daySeed = todayStart.valueOf();
-    const prioritized = impactsToScore
-      .map((impact) => {
-        const nameHash = Array.from(impact.planet).reduce(
-          (acc, char) => acc + char.charCodeAt(0),
-          0,
-        );
-        const jitter = ((nameHash + daySeed / 1000) % 10) / 1000;
-        const score =
+    const sorted = pool
+      .map((impact) => ({
+        impact,
+        score:
           (significanceOrder[impact.significance] ?? 1) * 100000 +
-          impact.date.valueOf() +
-          jitter;
-        return { impact, score };
-      })
-      .sort((a, b) => {
-        if (b.score !== a.score) return b.score - a.score;
-        if (a.impact.planet !== b.impact.planet) {
-          return a.impact.planet.localeCompare(b.impact.planet);
-        }
-        return b.impact.date.valueOf() - a.impact.date.valueOf();
-      });
+          impact.date.valueOf(),
+      }))
+      .sort((a, b) => b.score - a.score);
 
-    const seenPlanets = new Set<string>();
-    const uniqueImpacts: PersonalTransitImpact[] = [];
-    const duplicateFallbacks: PersonalTransitImpact[] = [];
-
-    prioritized.forEach(({ impact }) => {
-      if (seenPlanets.has(impact.planet)) {
-        if (duplicateFallbacks.length < 4) {
-          duplicateFallbacks.push(impact);
-        }
-      } else {
-        seenPlanets.add(impact.planet);
-        uniqueImpacts.push(impact);
+    const seen = new Set<string>();
+    const result: PersonalTransitImpact[] = [];
+    for (const { impact } of sorted) {
+      if (result.length >= 2) break;
+      if (!seen.has(impact.planet)) {
+        seen.add(impact.planet);
+        result.push(impact);
       }
-    });
-
-    const todayValue = todayStart.valueOf();
-    const todayImpacts = uniqueImpacts.filter(
-      (impact) => impact.date.startOf('day').valueOf() === todayValue,
-    );
-    const otherImpacts = uniqueImpacts.filter(
-      (impact) => impact.date.startOf('day').valueOf() !== todayValue,
-    );
-
-    const dayIndex = Math.floor(todayStart.valueOf() / 86400000);
-    const rotation = otherImpacts.length ? dayIndex % otherImpacts.length : 0;
-    const rotatedOthers = [
-      ...otherImpacts.slice(rotation),
-      ...otherImpacts.slice(0, rotation),
-    ];
-
-    const selection: PersonalTransitImpact[] = [];
-    const insertImpact = (impact: PersonalTransitImpact) => {
-      if (selection.length >= 2) return;
-      selection.push(impact);
-    };
-
-    todayImpacts.forEach(insertImpact);
-    rotatedOthers.forEach(insertImpact);
-
-    let dupIndex = 0;
-    while (selection.length < 2 && dupIndex < duplicateFallbacks.length) {
-      selection.push(duplicateFallbacks[dupIndex]);
-      dupIndex += 1;
     }
-
-    return selection;
-  }, [canAccessPersonalized, birthChart, selectedDay.valueOf()]);
+    return result;
+  }, [authStatus.isAuthenticated, birthChart, selectedDay.valueOf()]);
 
   const transitSummaryText = useMemo(() => {
     if (transitHighlights.length === 0) return null;
@@ -272,6 +277,15 @@ export const DailyInsightCard = () => {
       .map((transit, index) => formatTransitSentence(transit, index === 0))
       .join(' ');
   }, [transitHighlights]);
+
+  // Calculate transit aspect titles (short bios) for ALL authenticated users
+  const transitDetails = useMemo<TransitDetail[]>(() => {
+    if (!authStatus.isAuthenticated || !birthChart || !observer) return [];
+    const normalizedDate = new Date(dayjs().format('YYYY-MM-DD') + 'T12:00:00');
+    const currentTransits = getAstrologicalChart(normalizedDate, observer);
+    const aspects = calculateAspects(birthChart, currentTransits);
+    return buildTransitDetails(aspects, { maxItems: 2 });
+  }, [authStatus.isAuthenticated, birthChart, observer]);
 
   const displayText = transitSummaryText ?? insight.text;
 
@@ -356,43 +370,25 @@ export const DailyInsightCard = () => {
 
   // Helper to render preview based on A/B test variant
   const renderPreview = () => {
-    // Use the EXACT content that paid users would see
-    // Paid users see: transitSummaryText (if available) OR insight.text
-    // We need to show what authenticated users would get with personalization
-    let previewContent = '';
-
-    if (transitHighlights.length > 0) {
-      // Show the personalized transit highlights that paid users see
-      const personalizedTransits = transitHighlights
-        .map((transit, index) => formatTransitSentence(transit, index === 0))
-        .join(' ');
-      previewContent = personalizedTransits;
-    } else if (birthChart) {
-      // If we have birth chart but no transit highlights, show personalized horoscope
-      const personalizedHoroscope = getEnhancedPersonalizedHoroscope(
-        userBirthday!,
-        userName || undefined,
-        { birthday: userBirthday!, birthChart: birthChart },
-        selectedDay.toDate(),
-      );
-      previewContent = personalizedHoroscope.personalInsight;
-    } else {
-      // Fallback to general insight (shouldn't happen for authenticated users)
-      previewContent = insight.text;
-    }
+    // Mirror paid view: transit sentence + aspect short bios
+    const previewText = transitSummaryText ?? insight.text;
+    const aspectBios = transitDetails
+      .map((d) => `${d.title} · ${d.header}`)
+      .join(' | ');
+    const fullContent = aspectBios
+      ? `${previewText} ${aspectBios}`
+      : previewText;
 
     if (variant === 'truncated') {
-      // Variant B: Truncated - let the truncation itself create curiosity (1 line)
       return (
-        <div className='locked-preview-truncated-single mb-2'>
-          <p className='text-xs'>{previewContent}</p>
+        <div className='locked-preview-truncated mb-2'>
+          <p className='text-xs'>{fullContent}</p>
         </div>
       );
     }
 
     if (variant === 'redacted') {
-      // Variant C: Redacted style - soft blur effect on key terms
-      const words = previewContent.split(' ');
+      const words = fullContent.split(' ');
       const redactedContent = words.map((word, i) => {
         const shouldRedact = shouldRedactWord(word, i);
         return shouldRedact ? (
@@ -419,10 +415,10 @@ export const DailyInsightCard = () => {
       );
     }
 
-    // Variant A: Blur Effect (default)
+    // Default: blur
     return (
       <div className='locked-preview mb-2'>
-        <p className='locked-preview-text text-xs'>{previewContent}</p>
+        <p className='locked-preview-text text-xs'>{fullContent}</p>
       </div>
     );
   };
@@ -510,6 +506,15 @@ export const DailyInsightCard = () => {
             </span> */}
           </div>
           <p className='text-sm text-zinc-300 leading-relaxed'>{displayText}</p>
+          {transitDetails.length > 0 && (
+            <div className='mt-2 space-y-1'>
+              {transitDetails.map((detail) => (
+                <p key={detail.id} className='text-xs text-zinc-500'>
+                  {detail.title} · {detail.header}
+                </p>
+              ))}
+            </div>
+          )}
           {lifeThemeName && (
             <p className='text-xs text-lunary-secondary-200 mt-2'>
               Connects to your theme: {lifeThemeName}
