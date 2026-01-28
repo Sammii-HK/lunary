@@ -36,10 +36,6 @@
       "schedule": "0 2 * * 1"
     },
     {
-      "path": "/api/cron/weekly-cosmic-report",
-      "schedule": "0 10 * * 0"
-    },
-    {
       "path": "/api/cron/check-notification-failures",
       "schedule": "0 9 * * *"
     },
