@@ -84,12 +84,27 @@ export function MarketingMiniApp() {
   const [hasScrolled, setHasScrolled] = useState(false);
   const autoCycleIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
+  // Set global flag for demo mode IMMEDIATELY (before any rendering)
+  // This ensures fetch override can check the flag even during initial render
+  if (typeof window !== 'undefined') {
+    (window as any).__LUNARY_DEMO_MODE__ = true;
+  }
+
   // Use static fallback data for demo (no API calls)
   const celesteUser = useMemo(() => createFallbackUser(), []);
 
   // Preload the app dashboard component on mount for faster initial render
   useEffect(() => {
     import('@/app/(authenticated)/app/AppDashboardClient');
+  }, []);
+
+  // Cleanup demo mode flag on unmount
+  useEffect(() => {
+    return () => {
+      if (typeof window !== 'undefined') {
+        delete (window as any).__LUNARY_DEMO_MODE__;
+      }
+    };
   }, []);
 
   // Track visibility

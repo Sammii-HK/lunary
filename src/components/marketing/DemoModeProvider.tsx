@@ -14,6 +14,107 @@ export function useDemoMode() {
   return useContext(DemoModeContext);
 }
 
+// CRITICAL: Override fetch at module level BEFORE any components render
+// This ensures ALL fetch calls are intercepted, even those made during initial render
+if (typeof window !== 'undefined') {
+  const originalFetch = window.fetch;
+  const fetchCache = new Map<string, Response>();
+  let isOverridden = false;
+
+  if (!isOverridden) {
+    window.fetch = async (input: RequestInfo | URL, init?: RequestInit) => {
+      // Extract URL string from all possible input types
+      const url =
+        typeof input === 'string'
+          ? input
+          : input instanceof URL
+            ? input.href
+            : input instanceof Request
+              ? input.url
+              : String(input);
+
+      // Check if we're in demo mode using global flag (more reliable than DOM check)
+      const isDemoMode =
+        (window as any).__LUNARY_DEMO_MODE__ === true ||
+        document.getElementById('demo-preview-container') !== null;
+      if (!isDemoMode) {
+        return originalFetch(input, init);
+      }
+
+      // BLOCK auth session calls
+      if (url.includes('/api/auth')) {
+        return new Response(
+          JSON.stringify({
+            isAuthenticated: true,
+            user: { id: 'demo', email: 'demo@lunary.app' },
+          }),
+          {
+            status: 200,
+            headers: { 'Content-Type': 'application/json' },
+          },
+        );
+      }
+
+      // BLOCK analytics and notifications
+      if (
+        url.includes('/api/analytics') ||
+        url.includes('/api/admin/notifications')
+      ) {
+        return new Response(JSON.stringify({ success: true }), {
+          status: 200,
+          headers: { 'Content-Type': 'application/json' },
+        });
+      }
+
+      // BLOCK tarot readings, horoscope, and other user-specific endpoints
+      if (
+        url.includes('/api/tarot/readings') ||
+        url.includes('/api/horoscope/daily') ||
+        url.includes('/api/journal') ||
+        url.includes('/api/patterns')
+      ) {
+        return new Response(JSON.stringify([]), {
+          status: 200,
+          headers: { 'Content-Type': 'application/json' },
+        });
+      }
+
+      // Allow only safe, public API calls
+      const allowedEndpoints = ['/api/cosmic/global', '/api/grimoire/spells'];
+      const isAllowed = allowedEndpoints.some((endpoint) =>
+        url.includes(endpoint),
+      );
+
+      if (isAllowed) {
+        // Cache GET requests
+        if (!init || init.method === 'GET' || !init.method) {
+          if (fetchCache.has(url)) {
+            const cached = fetchCache.get(url)!;
+            return cached.clone();
+          }
+
+          const response = await originalFetch(input, init);
+          const cloned = response.clone();
+          fetchCache.set(url, cloned);
+          return response;
+        }
+        return originalFetch(input, init);
+      }
+
+      // Block everything else
+      return new Response(
+        JSON.stringify({ error: 'Demo mode - API call blocked' }),
+        {
+          status: 200,
+          headers: { 'Content-Type': 'application/json' },
+        },
+      );
+    };
+
+    isOverridden = true;
+  }
+}
+
 interface DemoModeProviderProps {
   children: ReactNode;
   containerId?: string; // ID of the container to scope event listeners to
@@ -34,89 +135,26 @@ export function DemoModeProvider({
   useEffect(() => {
     // Defer this to after initial render for faster load
     const timer = setTimeout(() => {
-      const originalRandom = Math.random;
-
       // Return a fixed sequence of pseudo-random values
       // This makes selections consistent across renders
       let callCount = 0;
       const fixedValues = [0.42, 0.17, 0.89, 0.63, 0.28, 0.75, 0.51, 0.94];
 
-      const demoRandom = () => {
+      Math.random = () => {
         const value = fixedValues[callCount % fixedValues.length];
         callCount++;
         return value;
       };
-
-      Math.random = demoRandom;
     }, 100);
 
     return () => {
       clearTimeout(timer);
-      // Note: Math.random cleanup happens on unmount
+      // Note: Math.random override persists in demo mode (no cleanup needed)
     };
   }, []);
 
-  // Intercept fetch API calls to prevent unauthorized requests in demo
-  useEffect(() => {
-    const originalFetch = window.fetch;
-    const fetchCache = new Map<string, Response>();
-
-    const demoFetch: typeof fetch = async (input, init?) => {
-      const url = typeof input === 'string' ? input : input.url;
-
-      // BLOCK analytics and conversion tracking in demo mode
-      if (
-        url.includes('/api/analytics') ||
-        url.includes('/api/admin/notifications')
-      ) {
-        return new Response(JSON.stringify({ success: true }), {
-          status: 200,
-          headers: { 'Content-Type': 'application/json' },
-        });
-      }
-
-      // Allow only safe, public API calls in demo mode
-      const allowedEndpoints = ['/api/cosmic/global', '/api/grimoire/spells'];
-
-      const isAllowed = allowedEndpoints.some((endpoint) =>
-        url.includes(endpoint),
-      );
-
-      if (isAllowed) {
-        // Cache GET requests to avoid duplicate calls
-        if (!init || init.method === 'GET' || !init.method) {
-          if (fetchCache.has(url)) {
-            const cached = fetchCache.get(url)!;
-            return cached.clone();
-          }
-
-          const response = await originalFetch(input, init);
-          const cloned = response.clone();
-          fetchCache.set(url, cloned);
-          return response;
-        }
-
-        return originalFetch(input, init);
-      }
-
-      // Block all other API calls
-      return new Response(
-        JSON.stringify({ error: 'Demo mode - API call blocked' }),
-        {
-          status: 200,
-          headers: { 'Content-Type': 'application/json' },
-        },
-      );
-    };
-
-    // Override fetch immediately to block analytics ASAP
-    window.fetch = demoFetch;
-
-    return () => {
-      // Restore original fetch when component unmounts
-      window.fetch = originalFetch;
-    };
-  }, []);
+  // Note: Fetch interception happens at module level (see top of file)
+  // No need for useEffect/useLayoutEffect - it's applied before any components render
 
   // Intercept form submissions ONLY within the demo container
   useEffect(() => {
