@@ -228,6 +228,12 @@ export function generateAllAspectParams(): {
   aspect: string;
   planet2: string;
 }[] {
+  // Skip static generation during build to reduce build time
+  // Pages will be generated on-demand (ISR)
+  if (process.env.SKIP_STATIC_GENERATION === 'true') {
+    return [];
+  }
+
   const params: { planet1: string; aspect: string; planet2: string }[] = [];
 
   for (let i = 0; i < PLANETS.length; i++) {

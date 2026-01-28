@@ -206,7 +206,17 @@ export function generateAllHoroscopeParams(): {
   month: string;
 }[] {
   const params: { sign: string; year: string; month: string }[] = [];
-  const years = ['2025', '2026', '2027', '2028', '2029', '2030'];
+
+  // Skip static generation during build to reduce build time
+  // Pages will be generated on-demand (ISR)
+  if (process.env.SKIP_STATIC_GENERATION === 'true') {
+    return [];
+  }
+
+  // Only generate for current and next year to reduce build time
+  // Other years will be generated on-demand (ISR)
+  const currentYear = new Date().getFullYear();
+  const years = [currentYear.toString(), (currentYear + 1).toString()];
 
   for (const year of years) {
     for (const sign of ZODIAC_SIGNS) {
