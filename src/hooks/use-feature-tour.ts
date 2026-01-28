@@ -8,12 +8,14 @@ import type {
   FeatureTour,
 } from '@/lib/feature-tours/tour-system';
 
-export function useFeatureTour(context: TourContext) {
+export function useFeatureTour(context: TourContext | null) {
   const [activeTour, setActiveTour] = useState<FeatureTour | null>(null);
   const [currentStep, setCurrentStep] = useState(0);
 
-  // Check if any tour should trigger
+  // Check if any tour should trigger — only once we have real context
   const checkTours = useCallback(() => {
+    if (!context) return;
+
     const tour = FEATURE_TOURS.find((t) => {
       // Check if already seen/dismissed
       if (t.showOnce && context.hasSeenTour(t.id)) return false;
@@ -67,11 +69,14 @@ export function useFeatureTour(context: TourContext) {
     if (!activeTour) return;
 
     try {
-      await fetch('/api/tours/dismiss', {
+      const res = await fetch('/api/tours/dismiss', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ tourId: activeTour.id }),
       });
+      if (!res.ok) {
+        console.error('[tour] dismiss failed:', res.status, await res.text());
+      }
     } catch (error) {
       console.error('Failed to dismiss tour:', error);
     }
@@ -84,11 +89,14 @@ export function useFeatureTour(context: TourContext) {
     if (!activeTour) return;
 
     try {
-      await fetch('/api/tours/complete', {
+      const res = await fetch('/api/tours/complete', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ tourId: activeTour.id }),
       });
+      if (!res.ok) {
+        console.error('[tour] complete failed:', res.status, await res.text());
+      }
     } catch (error) {
       console.error('Failed to complete tour:', error);
     }
