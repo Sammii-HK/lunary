@@ -20,6 +20,13 @@ export type ConversionEvent =
   | 'trial_converted'
   | 'subscription_started'
   | 'subscription_cancelled'
+  | 'subscription_refunded'
+  | 'journal_entry_created'
+  | 'journal_entry_updated'
+  | 'journal_entry_deleted'
+  | 'dream_entry_created'
+  | 'dream_entry_updated'
+  | 'dream_entry_deleted'
   | 'pricing_page_viewed'
   | 'upgrade_prompt_shown'
   | 'upgrade_clicked'
@@ -850,6 +857,11 @@ export const conversionTracking = {
     trackConversion('subscription_plan_downgraded', {
       userId,
       metadata: { fromPlan, toPlan },
+    }),
+  subscriptionRefunded: (userId?: string, amount?: number, reason?: string) =>
+    trackConversion('subscription_refunded', {
+      userId,
+      metadata: { amount, reason },
     }),
 
   // Paywall & Conversion

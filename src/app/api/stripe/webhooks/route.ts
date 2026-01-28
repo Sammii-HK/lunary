@@ -592,12 +592,7 @@ async function handleChargeFailed(charge: Stripe.Charge) {
     const amount = (charge.amount || 0) / 100;
 
     // Track payment failure
-    conversionTracking.paymentFailed(
-      userId,
-      failureCode,
-      amount,
-      charge.metadata?.plan_type || undefined,
-    );
+    conversionTracking.paymentFailed(userId, failureCode, amount);
 
     // Log for support investigation
     console.error('Payment failed for user:', {
@@ -653,10 +648,10 @@ async function handleInvoicePaymentFailed(invoice: Stripe.Invoice) {
     }
 
     // Track payment failure
-    const failureReason = invoice.charge
+    const failureReason = (invoice as any).charge
       ? `Invoice payment failed (attempt ${attemptCount})`
       : 'Invoice payment failed';
-    conversionTracking.paymentFailed(userId, failureReason, amount, planType);
+    conversionTracking.paymentFailed(userId, failureReason, amount);
 
     // Track retry if this is not the first attempt
     if (attemptCount > 1) {
