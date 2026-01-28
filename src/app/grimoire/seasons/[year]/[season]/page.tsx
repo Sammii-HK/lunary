@@ -4,23 +4,15 @@ import Link from 'next/link';
 import { ZODIAC_SEASONS, getSeasonDates } from '@/constants/seo/zodiac-seasons';
 import { SEOContentTemplate } from '@/components/grimoire/SEOContentTemplate';
 
+// 30-day ISR revalidation
+export const revalidate = 2592000;
 interface PageParams {
   year: string;
   season: string;
 }
 
-export async function generateStaticParams() {
-  const years = ['2025', '2026'];
-  const params: PageParams[] = [];
-
-  for (const year of years) {
-    for (const s of ZODIAC_SEASONS) {
-      params.push({ year, season: s.sign });
-    }
-  }
-
-  return params;
-}
+// Removed generateStaticParams - using pure ISR for faster builds
+// Pages are generated on-demand and cached with 30-day revalidation
 
 export async function generateMetadata({
   params,

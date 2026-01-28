@@ -11,6 +11,8 @@ import { AskTheGrimoire } from '@/components/grimoire/AskTheGrimoire';
 import { ExploreGrimoire } from '@/components/grimoire/ExploreGrimoire';
 import { GrimoireBreadcrumbs } from '@/components/grimoire/GrimoireBreadcrumbs';
 
+// 30-day ISR revalidation
+export const revalidate = 2592000;
 export const metadata: Metadata = {
   title: 'Search the Grimoire | Lunary',
   description:

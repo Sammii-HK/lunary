@@ -2,6 +2,8 @@ import { Metadata } from 'next';
 import Link from 'next/link';
 import { SEOContentTemplate } from '@/components/grimoire/SEOContentTemplate';
 
+// 30-day ISR revalidation
+export const revalidate = 2592000;
 const animals = [
   {
     slug: 'cat',

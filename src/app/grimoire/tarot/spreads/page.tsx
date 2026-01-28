@@ -6,6 +6,8 @@ import { SEOContentTemplate } from '@/components/grimoire/SEOContentTemplate';
 import { createItemListSchema, renderJsonLd } from '@/lib/schema';
 import { stringToKebabCase } from '../../../../../utils/string';
 
+// 30-day ISR revalidation
+export const revalidate = 2592000;
 export const metadata: Metadata = {
   title: 'Tarot Spreads: 3 Card, Celtic Cross & Year Ahead Layouts | Lunary',
   description:

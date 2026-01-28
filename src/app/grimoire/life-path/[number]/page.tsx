@@ -5,13 +5,12 @@ import { lifePathNumbers } from '@/constants/grimoire/numerology-data';
 import { createGrimoireMetadata } from '@/lib/grimoire-metadata';
 import { createCosmicEntitySchema, renderJsonLd } from '@/lib/schema';
 
+// 30-day ISR revalidation
+export const revalidate = 2592000;
 const lifePathKeys = Object.keys(lifePathNumbers);
 
-export async function generateStaticParams() {
-  return lifePathKeys.map((number) => ({
-    number: number,
-  }));
-}
+// Removed generateStaticParams - using pure ISR for faster builds
+// Pages are generated on-demand and cached with 30-day revalidation
 
 export async function generateMetadata({
   params,

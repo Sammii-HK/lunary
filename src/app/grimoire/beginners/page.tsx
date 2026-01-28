@@ -12,6 +12,8 @@ import { CosmicConnections } from '@/components/grimoire/CosmicConnections';
 import { CosmicConnectionSection } from '@/lib/cosmicConnectionsConfig';
 import { Button } from '@/components/ui/button';
 
+// 30-day ISR revalidation
+export const revalidate = 2592000;
 export const metadata: Metadata = {
   title:
     "Beginner's Guide to Astrology, Tarot & Modern Witchcraft | Lunary Grimoire",

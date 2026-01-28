@@ -3,6 +3,8 @@ import { notFound } from 'next/navigation';
 import { SEOContentTemplate } from '@/components/grimoire/SEOContentTemplate';
 import { stringToKebabCase } from '../../../../../utils/string';
 
+// 30-day ISR revalidation
+export const revalidate = 2592000;
 const meditationTechniques = {
   'guided-meditation': {
     name: 'Guided Meditation',
@@ -272,11 +274,8 @@ const meditationTechniques = {
 
 type TechniqueKey = keyof typeof meditationTechniques;
 
-export async function generateStaticParams() {
-  return Object.keys(meditationTechniques).map((key) => ({
-    technique: key,
-  }));
-}
+// Removed generateStaticParams - using pure ISR for faster builds
+// Pages are generated on-demand and cached with 30-day revalidation
 
 export async function generateMetadata({
   params,

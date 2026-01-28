@@ -3,11 +3,7 @@ export const revalidate = 86400;
 import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { grimoire } from '@/constants/grimoire';
-import {
-  slugToSection,
-  isValidGrimoireSection,
-  getAllGrimoireSectionSlugs,
-} from '@/utils/grimoire';
+import { slugToSection, isValidGrimoireSection } from '@/utils/grimoire';
 import GrimoireLayout, { GrimoireSearchParams } from '../GrimoireLayout';
 import { GrimoireBreadcrumbs } from '@/components/grimoire/GrimoireBreadcrumbs';
 
@@ -281,11 +277,8 @@ export async function generateMetadata({
   };
 }
 
-export async function generateStaticParams() {
-  return getAllGrimoireSectionSlugs().map((slug) => ({
-    section: slug,
-  }));
-}
+// Removed generateStaticParams - using pure ISR for faster builds
+// Pages are generated on-demand and cached with 30-day revalidation
 
 export default async function GrimoireSectionPage({
   params,

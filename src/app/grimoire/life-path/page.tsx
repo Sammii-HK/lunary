@@ -4,6 +4,8 @@ import { SEOContentTemplate } from '@/components/grimoire/SEOContentTemplate';
 import { NumerologyCalculator } from '@/components/grimoire/NumerologyCalculator';
 import { lifePathNumbers } from '@/constants/grimoire/numerology-data';
 
+// 30-day ISR revalidation
+export const revalidate = 2592000;
 export const metadata: Metadata = {
   title: 'Life Path Number Calculator & Meanings | Lunary',
   description:

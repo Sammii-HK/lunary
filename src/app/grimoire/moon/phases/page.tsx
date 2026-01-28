@@ -9,6 +9,8 @@ import {
 } from '../../../../../utils/moon/monthlyPhases';
 import { stringToKebabCase } from '../../../../../utils/string';
 
+// 30-day ISR revalidation
+export const revalidate = 2592000;
 export const metadata: Metadata = {
   title: 'Moon Phases: Complete 8-Phase Lunar Cycle Guide | Lunary',
   description:

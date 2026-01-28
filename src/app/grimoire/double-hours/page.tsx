@@ -5,6 +5,8 @@ import { CosmicConnections } from '@/components/grimoire/CosmicConnections';
 import { CosmicConnectionSection } from '@/lib/cosmicConnectionsConfig';
 import { doubleHourKeys } from '@/constants/grimoire/clock-numbers-data';
 
+// 30-day ISR revalidation
+export const revalidate = 2592000;
 export const metadata: Metadata = {
   title: 'Double Hours: Meanings of 10:10, 12:12, 21:21 & More - Lunary',
   description:

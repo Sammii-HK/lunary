@@ -3,6 +3,8 @@ import { notFound } from 'next/navigation';
 import { SEOContentTemplate } from '@/components/grimoire/SEOContentTemplate';
 import { astrologicalHouses } from '@/constants/grimoire/seo-data';
 
+// 30-day ISR revalidation
+export const revalidate = 2592000;
 const houseNumbers = Array.from({ length: 12 }, (_, i) => String(i + 1));
 
 const houseKeyMap: Record<string, keyof typeof astrologicalHouses> = {
@@ -20,11 +22,8 @@ const houseKeyMap: Record<string, keyof typeof astrologicalHouses> = {
   '12': 'twelfth',
 };
 
-export async function generateStaticParams() {
-  return houseNumbers.map((house) => ({
-    house: house,
-  }));
-}
+// Removed generateStaticParams - using pure ISR for faster builds
+// Pages are generated on-demand and cached with 30-day revalidation
 
 export async function generateMetadata({
   params,

@@ -12,6 +12,8 @@ import {
   renderJsonLd,
 } from '@/lib/schema';
 
+// 30-day ISR revalidation
+export const revalidate = 2592000;
 const faqs = [
   {
     question: 'What are sabbats?',

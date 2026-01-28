@@ -4,6 +4,8 @@ import { spellCategories, spellDatabase } from '@/lib/spells';
 import { SEOContentTemplate } from '@/components/grimoire/SEOContentTemplate';
 import SpellsClient from '../../SpellsClient';
 
+// 30-day ISR revalidation
+export const revalidate = 2592000;
 const PAGE_SIZE = 10;
 
 /**

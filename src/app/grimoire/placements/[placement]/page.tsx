@@ -7,7 +7,6 @@ import { CosmicConnections } from '@/components/grimoire/CosmicConnections';
 import { ArrowRight, Star, AlertTriangle, Lightbulb } from 'lucide-react';
 import {
   generatePlanetSignContent,
-  getAllPlanetSignSlugs,
   planetDescriptions,
   signDescriptions,
 } from '@/constants/seo/planet-sign-content';
@@ -17,15 +16,15 @@ import {
   createBreadcrumbSchema,
 } from '@/lib/schema';
 
+// 30-day ISR revalidation
+export const revalidate = 2592000;
 interface PageProps {
   params: Promise<{ placement: string }>;
 }
 
 // Generate static params for all planet-sign combinations
-export async function generateStaticParams() {
-  const slugs = getAllPlanetSignSlugs();
-  return slugs.map((placement) => ({ placement }));
-}
+// Removed generateStaticParams - using pure ISR for faster builds
+// Pages are generated on-demand and cached with 30-day revalidation
 
 // Parse the placement slug to extract planet and sign
 function parsePlacement(slug: string): { planet: string; sign: string } | null {

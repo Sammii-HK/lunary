@@ -5,13 +5,12 @@ import { CosmicConnections } from '@/components/grimoire/CosmicConnections';
 import { zodiacSigns, zodiacSymbol } from '../../../../../utils/zodiac/zodiac';
 import { stringToKebabCase } from '../../../../../utils/string';
 
+// 30-day ISR revalidation
+export const revalidate = 2592000;
 const signSlugs = Object.keys(zodiacSigns);
 
-export async function generateStaticParams() {
-  return signSlugs.map((sign) => ({
-    sign: stringToKebabCase(sign),
-  }));
-}
+// Removed generateStaticParams - using pure ISR for faster builds
+// Pages are generated on-demand and cached with 30-day revalidation
 
 export async function generateMetadata({
   params,

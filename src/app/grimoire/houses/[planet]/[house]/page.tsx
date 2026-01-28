@@ -7,20 +7,20 @@ import {
   PLANET_HOUSE_DISPLAY,
   HOUSE_DATA,
   getOrdinalSuffix,
-  generateAllHouseParams,
   HousePlanet,
   House,
 } from '@/constants/seo/houses';
 import { SEOContentTemplate } from '@/components/grimoire/SEOContentTemplate';
 
+// 30-day ISR revalidation
+export const revalidate = 2592000;
 interface PageParams {
   planet: string;
   house: string;
 }
 
-export async function generateStaticParams() {
-  return generateAllHouseParams();
-}
+// Removed generateStaticParams - using pure ISR for faster builds
+// Pages are generated on-demand and cached with 30-day revalidation
 
 export async function generateMetadata({
   params,

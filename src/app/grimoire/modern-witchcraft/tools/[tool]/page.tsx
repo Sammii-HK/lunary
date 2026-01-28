@@ -2,6 +2,8 @@ import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { SEOContentTemplate } from '@/components/grimoire/SEOContentTemplate';
 
+// 30-day ISR revalidation
+export const revalidate = 2592000;
 const witchTools = {
   athame: {
     name: 'Athame',
@@ -122,11 +124,8 @@ const witchTools = {
 
 const toolKeys = Object.keys(witchTools);
 
-export async function generateStaticParams() {
-  return toolKeys.map((tool) => ({
-    tool: tool,
-  }));
-}
+// Removed generateStaticParams - using pure ISR for faster builds
+// Pages are generated on-demand and cached with 30-day revalidation
 
 export async function generateMetadata({
   params,

@@ -6,6 +6,8 @@ import { stringToKebabCase } from '../../../../utils/string';
 import { SEOContentTemplate } from '@/components/grimoire/SEOContentTemplate';
 import { createItemListSchema, renderJsonLd } from '@/lib/schema';
 
+// 30-day ISR revalidation
+export const revalidate = 2592000;
 export const metadata: Metadata = {
   title: 'All 78 Tarot Cards: Major & Minor Arcana Meanings | Lunary',
   description:

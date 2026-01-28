@@ -2,6 +2,8 @@ import { Metadata } from 'next';
 import { SEOContentTemplate } from '@/components/grimoire/SEOContentTemplate';
 import { createHowToSchema, renderJsonLd } from '@/lib/schema';
 
+// 30-day ISR revalidation
+export const revalidate = 2592000;
 export const metadata: Metadata = {
   title: 'Dream Interpretation: Common Dreams & What They Mean | Lunary',
   description:

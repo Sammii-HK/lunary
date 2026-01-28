@@ -8,6 +8,8 @@ import {
 import { Breadcrumbs } from '@/components/grimoire/Breadcrumbs';
 import { renderJsonLd, createBreadcrumbSchema } from '@/lib/schema';
 
+// 30-day ISR revalidation
+export const revalidate = 2592000;
 export const metadata: Metadata = {
   title: 'Birthday Zodiac Signs: Find Your Sun Sign by Birth Date | Lunary',
   description:

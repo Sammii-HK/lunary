@@ -8,22 +8,22 @@ import {
   PLANET_SYMBOLS,
   ASPECT_DATA,
   getAspectInterpretation,
-  generateAllAspectParams,
   Planet,
   Aspect,
 } from '@/constants/seo/aspects';
 import { SEOContentTemplate } from '@/components/grimoire/SEOContentTemplate';
 import { CosmicConnections } from '@/components/grimoire/CosmicConnections';
 
+// 30-day ISR revalidation
+export const revalidate = 2592000;
 interface PageParams {
   planet1: string;
   aspect: string;
   planet2: string;
 }
 
-export async function generateStaticParams() {
-  return generateAllAspectParams();
-}
+// Removed generateStaticParams - using pure ISR for faster builds
+// Pages are generated on-demand and cached with 30-day revalidation
 
 export async function generateMetadata({
   params,
