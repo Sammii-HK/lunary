@@ -18,6 +18,7 @@ import type { UserData } from '@/context/UserContext';
 import referenceChartData from '@/lib/reference-chart-data.json';
 import { DemoNavigationProvider } from './DemoNavigationProvider';
 import { DemoModeProvider } from './DemoModeProvider';
+import { ForceMobileLayout } from './ForceMobileLayout';
 
 // All static imports for instant loading (no spinners, better initial performance)
 import AppDashboardClient from '@/app/(authenticated)/app/AppDashboardClient';
@@ -111,30 +112,128 @@ export function MarketingMiniApp() {
   }, []);
 
   // Prevent autoExpandOnDesktop from working - keep cards collapsed like mobile
+  // ALSO continuously enforce mobile grid layout by REMOVING responsive classes
   useEffect(() => {
     const contentEl = contentRef.current;
     if (!contentEl) return;
 
-    // Wait for cards to mount, then collapse any auto-expanded cards
-    const timer = setTimeout(() => {
+    // Strip responsive classes from className string
+    const stripResponsiveClasses = (className: string): string => {
+      return className
+        .split(' ')
+        .filter((cls) => {
+          // Remove md:, lg:, xl:, 2xl:, sm: responsive variants
+          return (
+            !cls.startsWith('md:') &&
+            !cls.startsWith('lg:') &&
+            !cls.startsWith('xl:') &&
+            !cls.startsWith('2xl:') &&
+            !cls.startsWith('sm:')
+          );
+        })
+        .join(' ');
+    };
+
+    // Function to aggressively force mobile layout
+    const forceMobileLayout = () => {
+      // Collapse auto-expanded cards
       const expandableCards = contentEl.querySelectorAll(
         '[data-component="expandable-card"]',
       );
       expandableCards.forEach((card) => {
         const button = card.querySelector('[role="button"]');
-        // If card is expanded (autoExpandOnDesktop), collapse it
         if (button?.getAttribute('aria-expanded') === 'true') {
           (button as HTMLElement).click();
         }
       });
-    }, 300); // Wait for components to fully mount
 
-    return () => clearTimeout(timer);
+      // Walk ALL elements and strip responsive classes from className
+      const allElements = contentEl.querySelectorAll('*');
+      allElements.forEach((element) => {
+        if (element.className && typeof element.className === 'string') {
+          const originalClass = element.className;
+          const strippedClass = stripResponsiveClasses(originalClass);
+
+          if (originalClass !== strippedClass) {
+            element.className = strippedClass;
+          }
+        }
+      });
+
+      // Also apply inline styles to grids as double-enforcement
+      const allGrids = contentEl.querySelectorAll('.grid');
+      allGrids.forEach((grid) => {
+        if (grid instanceof HTMLElement) {
+          // Check if this looks like a card grid (not a content grid like planets/icons)
+          const hasMultipleCards =
+            grid.children.length >= 2 &&
+            Array.from(grid.children).some(
+              (child) =>
+                child.className?.includes('border') ||
+                child.className?.includes('rounded'),
+            );
+
+          if (hasMultipleCards) {
+            grid.style.setProperty(
+              'grid-template-columns',
+              'repeat(1, minmax(0, 1fr))',
+              'important',
+            );
+          }
+        }
+      });
+    };
+
+    // Initial application
+    forceMobileLayout();
+
+    // Also run after delays to catch lazy-loaded content
+    const timer = setTimeout(forceMobileLayout, 50);
+    const timer2 = setTimeout(forceMobileLayout, 200);
+    const timer3 = setTimeout(forceMobileLayout, 500);
+
+    // Watch for DOM changes and reapply
+    const observer = new MutationObserver(() => {
+      forceMobileLayout();
+    });
+
+    observer.observe(contentEl, {
+      childList: true,
+      subtree: true,
+      attributes: true,
+      attributeFilter: ['class', 'style'],
+    });
+
+    // ALSO use requestAnimationFrame for continuous enforcement
+    // This catches changes that MutationObserver might miss
+    let rafId: number;
+    let lastRun = 0;
+
+    const continuousEnforcement = () => {
+      const now = Date.now();
+      // Only run every 100ms to avoid excessive processing
+      if (now - lastRun > 100) {
+        forceMobileLayout();
+        lastRun = now;
+      }
+      rafId = requestAnimationFrame(continuousEnforcement);
+    };
+
+    rafId = requestAnimationFrame(continuousEnforcement);
+
+    return () => {
+      clearTimeout(timer);
+      clearTimeout(timer2);
+      clearTimeout(timer3);
+      observer.disconnect();
+      cancelAnimationFrame(rafId);
+    };
   }, [activeTab]);
 
   // Intercept modals and keep them inside the preview
   useEffect(() => {
     const style = document.createElement('style');
+    style.setAttribute('data-demo-mobile-overrides', 'true');
     style.textContent = `
       /* Scope all modals to the demo preview container */
       #demo-preview-container [role="dialog"],
@@ -158,16 +257,104 @@ export function MarketingMiniApp() {
        * These rules force mobile styling regardless of browser size.
        */
 
-      /* MINIMAL CSS - Only override what's absolutely necessary for mobile layout */
+      /* Create an isolation layer - prevent viewport-based responsive classes */
+      #demo-preview-container.demo-mobile-view {
+        container-type: inline-size;
+        container-name: demo-mobile;
+        /* Reset max-width constraints */
+        max-width: 100% !important;
+      }
 
-      /* Force single column layout for dashboard grid */
+      /* Nuclear option: Override ALL Tailwind responsive variants at all breakpoints */
+      #demo-preview-container.demo-mobile-view * {
+        /* This will be overridden by more specific rules below */
+      }
+
+      /* Remove side margins */
+      #demo-preview-container.demo-mobile-view .dashboard-container {
+        margin-left: 0 !important;
+        margin-right: 0 !important;
+      }
+
+      /* Force single column with maximum specificity - no media query needed */
+      #demo-preview-container.demo-mobile-view div.dashboard-container > div.grid {
+        grid-template-columns: repeat(1, minmax(0, 1fr)) !important;
+      }
+
+      /*
+       * NUCLEAR OPTION: Override ALL responsive breakpoints with maximum specificity
+       * This creates a complete responsive class blacklist for sm:, md:, lg:, xl:, 2xl:
+       */
+      @media (min-width: 640px) {
+        #demo-preview-container .sm\\:grid-cols-2,
+        #demo-preview-container .sm\\:grid-cols-3,
+        #demo-preview-container .sm\\:grid-cols-4 {
+          grid-template-columns: repeat(1, minmax(0, 1fr)) !important;
+        }
+      }
+
       @media (min-width: 768px) {
-        #demo-preview-container .dashboard-container {
-          max-width: 42rem !important;
+        /* Grid columns - force single column for ALL md: variants */
+        #demo-preview-container .md\\:grid-cols-2,
+        #demo-preview-container .md\\:grid-cols-3,
+        #demo-preview-container .md\\:grid-cols-4,
+        #demo-preview-container .md\\:grid-cols-5,
+        #demo-preview-container .md\\:grid-cols-6,
+        #demo-preview-container [class*="md:grid-cols"] {
+          grid-template-columns: repeat(1, minmax(0, 1fr)) !important;
         }
 
-        #demo-preview-container .grid.grid-cols-1 {
+        /* Target with attribute selectors for even higher specificity */
+        #demo-preview-container.demo-mobile-view .grid[class*="md:grid-cols"],
+        #demo-preview-container.demo-mobile-view div.grid[class*="md:grid-cols"],
+        #demo-preview-container.demo-mobile-view .dashboard-container > .grid {
           grid-template-columns: repeat(1, minmax(0, 1fr)) !important;
+        }
+
+        /* Blanket override for ALL grids */
+        #demo-preview-container.demo-mobile-view .grid {
+          grid-template-columns: repeat(1, minmax(0, 1fr)) !important;
+        }
+
+        /* Max-width overrides */
+        #demo-preview-container .md\\:max-w-4xl,
+        #demo-preview-container .md\\:max-w-3xl,
+        #demo-preview-container .md\\:max-w-2xl {
+          max-width: 100% !important;
+        }
+      }
+
+      @media (min-width: 1024px) {
+        #demo-preview-container .lg\\:grid-cols-2,
+        #demo-preview-container .lg\\:grid-cols-3,
+        #demo-preview-container .lg\\:grid-cols-4 {
+          grid-template-columns: repeat(1, minmax(0, 1fr)) !important;
+        }
+      }
+
+      @media (min-width: 1280px) {
+        #demo-preview-container .xl\\:grid-cols-2,
+        #demo-preview-container .xl\\:grid-cols-3,
+        #demo-preview-container .xl\\:grid-cols-4 {
+          grid-template-columns: repeat(1, minmax(0, 1fr)) !important;
+        }
+      }
+
+        /* Exception: Restore content grids (icons, symbols, planets) */
+        #demo-preview-container.demo-mobile-view .grid.grid-cols-10 {
+          grid-template-columns: repeat(10, minmax(0, 1fr)) !important;
+        }
+
+        #demo-preview-container.demo-mobile-view .grid.grid-cols-4:not([class*="md:grid-cols"]) {
+          grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+        }
+
+        #demo-preview-container.demo-mobile-view .grid.grid-cols-3:not([class*="md:grid-cols"]) {
+          grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+        }
+
+        #demo-preview-container.demo-mobile-view .grid.grid-cols-2:not([class*="md:grid-cols"]) {
+          grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
         }
       }
 
@@ -423,8 +610,13 @@ export function MarketingMiniApp() {
         {/* Content area - Render REAL app with demo data */}
         <div
           ref={contentRef}
-          className='flex-1 overflow-y-auto'
+          className='flex-1 overflow-y-auto demo-mobile-view'
           id='demo-preview-container'
+          style={{
+            // Inline styles for maximum specificity
+            containerType: 'inline-size',
+            maxWidth: '100%',
+          }}
         >
           <DemoModeProvider>
             <DemoNavigationProvider onNavigate={handleNavigation}>
@@ -438,22 +630,30 @@ export function MarketingMiniApp() {
                   <AstronomyContextProvider>
                     <TourProvider demoMode={true}>
                       <Suspense fallback={<DashboardSkeleton />}>
-                        {activeTab === 'app' && <AppDashboardClient />}
+                        {activeTab === 'app' && (
+                          <ForceMobileLayout>
+                            <AppDashboardClient />
+                          </ForceMobileLayout>
+                        )}
                         {activeTab === 'tarot' && (
-                          <TarotView
-                            hasPaidAccess={celesteUser.isPaid}
-                            userName={celesteUser.name}
-                            userBirthday={celesteUser.birthday}
-                            user={celesteUser}
-                          />
+                          <ForceMobileLayout>
+                            <TarotView
+                              hasPaidAccess={celesteUser.isPaid}
+                              userName={celesteUser.name}
+                              userBirthday={celesteUser.birthday}
+                              user={celesteUser}
+                            />
+                          </ForceMobileLayout>
                         )}
                         {activeTab === 'horoscope' && (
-                          <HoroscopeView
-                            hasPaidAccess={celesteUser.isPaid}
-                            userName={celesteUser.name}
-                            userBirthday={celesteUser.birthday}
-                            profile={celesteUser}
-                          />
+                          <ForceMobileLayout>
+                            <HoroscopeView
+                              hasPaidAccess={celesteUser.isPaid}
+                              userName={celesteUser.name}
+                              userBirthday={celesteUser.birthday}
+                              profile={celesteUser}
+                            />
+                          </ForceMobileLayout>
                         )}
                       </Suspense>
                       {activeTab === 'guide' && (
