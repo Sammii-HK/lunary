@@ -26,6 +26,7 @@ const DateWidget = dynamic(
   },
 );
 import dayjs from 'dayjs';
+import { useDemoMode } from '@/components/marketing/DemoModeProvider';
 
 const MoonPreview = dynamic(
   () =>
@@ -141,6 +142,22 @@ export default function AppDashboardClient() {
   const { startTour, hasSeenOnboarding } = useTour();
   const [focusHonoured, setFocusHonoured] = useState(false);
   const firstName = user?.name?.trim() ? user.name.split(' ')[0] : null;
+  const demoContext = useDemoMode();
+  const [isDemoMode, setIsDemoMode] = useState(
+    demoContext?.isDemoMode || false,
+  );
+
+  // Detect demo mode from context OR DOM (for reliability on tab changes)
+  useEffect(() => {
+    const checkDemoMode = () => {
+      const inDemoContainer =
+        document.getElementById('demo-preview-container') !== null;
+      const contextDemoMode = demoContext?.isDemoMode || false;
+      setIsDemoMode(inDemoContainer || contextDemoMode);
+    };
+
+    checkDemoMode();
+  }, [demoContext]);
 
   // Handle push notification deep links
   useNotificationDeepLink();
@@ -211,7 +228,10 @@ export default function AppDashboardClient() {
   };
 
   return (
-    <div className='dashboard-container flex w-full flex-col gap-4 max-w-2xl md:max-w-4xl mx-auto p-4 mb-10'>
+    <div
+      id='dashboard-container'
+      className='dashboard-container flex w-full flex-col gap-4 max-w-2xl md:max-w-4xl mx-auto p-4 mb-10'
+    >
       <h1 className='sr-only'>Lunary - Your Daily Cosmic Guide</h1>
 
       <PostTrialMessaging />
@@ -249,7 +269,10 @@ export default function AppDashboardClient() {
       </header>
 
       <PersonalizedHoroscopePreview />
-      <div className='grid grid-cols-1 md:grid-cols-2 gap-3'>
+      <div
+        id='dashboard-main-grid'
+        className={`grid gap-3 ${isDemoMode ? 'grid-cols-1' : 'grid-cols-1 md:grid-cols-2'}`}
+      >
         <div id='moon-phase' className='scroll-mt-20'>
           <MoonPreview />
         </div>
@@ -263,7 +286,7 @@ export default function AppDashboardClient() {
         </div>
         <CrystalPreview />
 
-        <div className='md:col-span-2'>
+        <div className={isDemoMode ? '' : 'md:col-span-2'}>
           <ConditionalWheel />
         </div>
       </div>

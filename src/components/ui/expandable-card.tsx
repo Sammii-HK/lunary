@@ -31,6 +31,15 @@ export const ExpandableCard = ({
   useEffect(() => {
     if (!autoExpandOnDesktop) return;
 
+    // Check if we're in demo mode by checking for demo-preview-container
+    const isDemoMode =
+      document.getElementById('demo-preview-container') !== null;
+    if (isDemoMode) {
+      // In demo mode, keep cards collapsed
+      setIsExpanded(false);
+      return;
+    }
+
     const checkDesktop = () => {
       const isNowDesktop = window.matchMedia('(min-width: 768px)').matches;
       setIsDesktop(isNowDesktop);

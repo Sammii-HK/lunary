@@ -61,27 +61,12 @@ export function MarketingMiniApp() {
   const previewRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
   const [isVisible, setIsVisible] = useState(false);
-  const [showScrollHint, setShowScrollHint] = useState(true);
+  const [showScrollHint, setShowScrollHint] = useState(false);
   const [hasScrolled, setHasScrolled] = useState(false);
   const autoCycleIntervalRef = useRef<NodeJS.Timeout | null>(null);
-  const mobileLayoutTimerRef = useRef<NodeJS.Timeout | null>(null);
 
   // Use static fallback data for demo (no API calls)
   const celesteUser = useMemo(() => createFallbackUser(), []);
-
-  // Clean up timers on unmount
-  useEffect(() => {
-    return () => {
-      if (autoCycleIntervalRef.current) {
-        clearInterval(autoCycleIntervalRef.current);
-        autoCycleIntervalRef.current = null;
-      }
-      if (mobileLayoutTimerRef.current) {
-        clearTimeout(mobileLayoutTimerRef.current);
-        mobileLayoutTimerRef.current = null;
-      }
-    };
-  }, []);
 
   // Track visibility
   useEffect(() => {
@@ -101,19 +86,13 @@ export function MarketingMiniApp() {
     return () => observer.disconnect();
   }, []);
 
-  // Simple mobile layout enforcement - run on mount and when tab changes
+  // Collapse cards and force dashboard grid to single column
   useEffect(() => {
     const contentEl = contentRef.current;
     if (!contentEl) return;
 
-    // Clear any existing timeout
-    if (mobileLayoutTimerRef.current) {
-      clearTimeout(mobileLayoutTimerRef.current);
-      mobileLayoutTimerRef.current = null;
-    }
-
     const forceMobileLayout = () => {
-      // Collapse auto-expanded cards (CSS handles the grid layout)
+      // Collapse expandable cards
       const expandableCards = contentEl.querySelectorAll(
         '[data-component="expandable-card"]',
       );
@@ -123,20 +102,19 @@ export function MarketingMiniApp() {
           (button as HTMLElement).click();
         }
       });
-    };
 
-    // Run immediately and once after content loads
-    forceMobileLayout();
-    const timer = setTimeout(forceMobileLayout, 100);
-    mobileLayoutTimerRef.current = timer;
-
-    return () => {
-      if (mobileLayoutTimerRef.current) {
-        clearTimeout(mobileLayoutTimerRef.current);
-        mobileLayoutTimerRef.current = null;
+      // Force dashboard grid with inline style (highest specificity)
+      const dashboardGrid = contentEl.querySelector('#dashboard-main-grid');
+      if (dashboardGrid instanceof HTMLElement) {
+        dashboardGrid.style.gridTemplateColumns = 'repeat(1, minmax(0, 1fr))';
       }
     };
-  }, [activeTab]); // Re-run when tab changes
+
+    forceMobileLayout();
+    const timer = setTimeout(forceMobileLayout, 100);
+
+    return () => clearTimeout(timer);
+  }, [activeTab]);
 
   // Intercept modals and keep them inside the preview
   useEffect(() => {
@@ -169,13 +147,7 @@ export function MarketingMiniApp() {
       #demo-preview-container.demo-mobile-view {
         container-type: inline-size;
         container-name: demo-mobile;
-        /* Reset max-width constraints */
         max-width: 100% !important;
-      }
-
-      /* Nuclear option: Override ALL Tailwind responsive variants at all breakpoints */
-      #demo-preview-container.demo-mobile-view * {
-        /* This will be overridden by more specific rules below */
       }
 
       /* Remove side margins */
@@ -184,47 +156,30 @@ export function MarketingMiniApp() {
         margin-right: 0 !important;
       }
 
-      /* Force single column with maximum specificity - no media query needed */
-      #demo-preview-container.demo-mobile-view div.dashboard-container > div.grid {
-        grid-template-columns: repeat(1, minmax(0, 1fr)) !important;
-      }
-
       /*
        * NUCLEAR OPTION: Override ALL responsive breakpoints with maximum specificity
        * This creates a complete responsive class blacklist for sm:, md:, lg:, xl:, 2xl:
        */
+      /* Target dashboard grid by ID for maximum specificity */
       @media (min-width: 640px) {
-        #demo-preview-container .sm\\:grid-cols-2,
-        #demo-preview-container .sm\\:grid-cols-3,
-        #demo-preview-container .sm\\:grid-cols-4 {
+        #demo-preview-container #dashboard-main-grid {
+          grid-template-columns: repeat(1, minmax(0, 1fr)) !important;
+        }
+
+        #demo-preview-container .grid:not(.grid-cols-4):not(.grid-cols-10) {
           grid-template-columns: repeat(1, minmax(0, 1fr)) !important;
         }
       }
 
       @media (min-width: 768px) {
-        /* Grid columns - force single column for ALL md: variants */
-        #demo-preview-container .md\\:grid-cols-2,
-        #demo-preview-container .md\\:grid-cols-3,
-        #demo-preview-container .md\\:grid-cols-4,
-        #demo-preview-container .md\\:grid-cols-5,
-        #demo-preview-container .md\\:grid-cols-6,
-        #demo-preview-container [class*="md:grid-cols"] {
+        #demo-preview-container #dashboard-main-grid {
           grid-template-columns: repeat(1, minmax(0, 1fr)) !important;
         }
 
-        /* Target with attribute selectors for even higher specificity */
-        #demo-preview-container.demo-mobile-view .grid[class*="md:grid-cols"],
-        #demo-preview-container.demo-mobile-view div.grid[class*="md:grid-cols"],
-        #demo-preview-container.demo-mobile-view .dashboard-container > .grid {
+        #demo-preview-container .grid:not(.grid-cols-4):not(.grid-cols-10) {
           grid-template-columns: repeat(1, minmax(0, 1fr)) !important;
         }
 
-        /* Blanket override for ALL grids */
-        #demo-preview-container.demo-mobile-view .grid {
-          grid-template-columns: repeat(1, minmax(0, 1fr)) !important;
-        }
-
-        /* Max-width overrides */
         #demo-preview-container .md\\:max-w-4xl,
         #demo-preview-container .md\\:max-w-3xl,
         #demo-preview-container .md\\:max-w-2xl {
@@ -233,20 +188,34 @@ export function MarketingMiniApp() {
       }
 
       @media (min-width: 1024px) {
-        #demo-preview-container .lg\\:grid-cols-2,
-        #demo-preview-container .lg\\:grid-cols-3,
-        #demo-preview-container .lg\\:grid-cols-4 {
+        #demo-preview-container #dashboard-main-grid {
+          grid-template-columns: repeat(1, minmax(0, 1fr)) !important;
+        }
+
+        #demo-preview-container .grid:not(.grid-cols-4):not(.grid-cols-10) {
           grid-template-columns: repeat(1, minmax(0, 1fr)) !important;
         }
       }
 
       @media (min-width: 1280px) {
-        #demo-preview-container .xl\\:grid-cols-2,
-        #demo-preview-container .xl\\:grid-cols-3,
-        #demo-preview-container .xl\\:grid-cols-4 {
+        #demo-preview-container #dashboard-main-grid {
+          grid-template-columns: repeat(1, minmax(0, 1fr)) !important;
+        }
+
+        #demo-preview-container .grid:not(.grid-cols-4):not(.grid-cols-10) {
           grid-template-columns: repeat(1, minmax(0, 1fr)) !important;
         }
       }
+
+      /* Preserve symbol grids at all sizes */
+      #demo-preview-container .grid.grid-cols-4 {
+        grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+      }
+
+      #demo-preview-container .grid.grid-cols-10 {
+        grid-template-columns: repeat(10, minmax(0, 1fr)) !important;
+      }
+
 
         /* Exception: Restore content grids (icons, symbols, planets) */
         #demo-preview-container.demo-mobile-view .grid.grid-cols-10 {
@@ -433,38 +402,30 @@ export function MarketingMiniApp() {
       setShowScrollHint(false);
       setUserHasInteracted(true);
       setCycleProgress(0);
-
-      // Stop auto-cycle immediately
       if (autoCycleIntervalRef.current) {
         clearInterval(autoCycleIntervalRef.current);
         autoCycleIntervalRef.current = null;
       }
     };
 
-    const handleInteraction = () => {
+    const handleTouch = () => {
       setHasScrolled(true);
       setShowScrollHint(false);
     };
 
     contentEl.addEventListener('scroll', handleScroll);
-    contentEl.addEventListener('touchstart', handleInteraction);
-    contentEl.addEventListener('mousedown', handleInteraction);
+    contentEl.addEventListener('touchstart', handleTouch);
+    contentEl.addEventListener('mousedown', handleTouch);
 
     return () => {
       contentEl.removeEventListener('scroll', handleScroll);
-      contentEl.removeEventListener('touchstart', handleInteraction);
-      contentEl.removeEventListener('mousedown', handleInteraction);
+      contentEl.removeEventListener('touchstart', handleTouch);
+      contentEl.removeEventListener('mousedown', handleTouch);
     };
   }, []);
 
   // Auto-cycle through tabs (only cyclable tabs, not locked ones)
   useEffect(() => {
-    // Clear any existing interval first
-    if (autoCycleIntervalRef.current) {
-      clearInterval(autoCycleIntervalRef.current);
-      autoCycleIntervalRef.current = null;
-    }
-
     if (!isVisible || userHasInteracted) {
       setCycleProgress(0);
       return;
