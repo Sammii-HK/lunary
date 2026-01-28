@@ -19,6 +19,7 @@ import { bodiesSymbols } from '@/constants/symbols';
 import dayjs from 'dayjs';
 import { useFeatureFlagVariant } from '@/hooks/useFeatureFlag';
 import { useCTACopy } from '@/hooks/useCTACopy';
+import { shouldRedactWord } from '@/constants/redactedWords';
 
 const getOrdinalSuffix = (n: number): string => {
   if (n >= 11 && n <= 13) return 'th';
@@ -123,85 +124,6 @@ export const TransitOfTheDay = () => {
     );
     return nextFuture ?? personalImpacts[0];
   }, [personalImpacts]);
-
-  // Helper to determine if a word should be redacted
-  const shouldRedactWord = (word: string, index: number): boolean => {
-    const cleanWord = word.toLowerCase().replace(/[.,!?;:]/g, '');
-
-    // Prioritize house numbers (1st, 2nd, 3rd, 12th, etc.)
-    if (/^\d+(st|nd|rd|th)$/.test(cleanWord)) return true;
-
-    // Redact planet names
-    const planets = [
-      'sun',
-      'moon',
-      'mercury',
-      'venus',
-      'mars',
-      'jupiter',
-      'saturn',
-      'uranus',
-      'neptune',
-      'pluto',
-    ];
-    if (planets.includes(cleanWord)) return true;
-
-    // Redact zodiac signs
-    const signs = [
-      'aries',
-      'taurus',
-      'gemini',
-      'cancer',
-      'leo',
-      'virgo',
-      'libra',
-      'scorpio',
-      'sagittarius',
-      'capricorn',
-      'aquarius',
-      'pisces',
-    ];
-    if (signs.includes(cleanWord)) return true;
-
-    // Redact chart-related terms
-    const chartTerms = [
-      'house',
-      'placement',
-      'natal',
-      'chart',
-      'transit',
-      'aspect',
-    ];
-    if (chartTerms.includes(cleanWord)) return true;
-
-    // Redact guidance/conclusion phrases
-    const guidanceTerms = [
-      'authentically',
-      'instincts',
-      'transformation',
-      'healing',
-      'manifestation',
-      'intuition',
-      'wisdom',
-      'strength',
-      'clarity',
-      'balance',
-      'harmony',
-      'power',
-      'growth',
-      'abundance',
-      'passion',
-      'creativity',
-      'connection',
-      'release',
-      'embrace',
-      'illuminate',
-    ];
-    if (guidanceTerms.includes(cleanWord)) return true;
-
-    // Redact some other words for variety (every 6th word if not already redacted)
-    return index % 6 === 4;
-  };
 
   // Helper to render preview based on A/B test variant
   // Takes the transit to show (either general or personalized)

@@ -18,6 +18,7 @@ import dayjs from 'dayjs';
 import { Button } from '../ui/button';
 import { useFeatureFlagVariant } from '@/hooks/useFeatureFlag';
 import { useCTACopy } from '@/hooks/useCTACopy';
+import { shouldRedactWord } from '@/constants/redactedWords';
 
 export const CrystalPreview = () => {
   const { user } = useUser();
@@ -116,136 +117,6 @@ export const CrystalPreview = () => {
     document.addEventListener('keydown', handleEsc);
     return () => document.removeEventListener('keydown', handleEsc);
   }, [isModalOpen, closeModal]);
-
-  // Helper to determine if a word should be redacted
-  const shouldRedactWord = (
-    word: string,
-    index: number,
-    crystalName?: string,
-  ): boolean => {
-    // Remove punctuation AND possessive 's
-    const cleanWord = word
-      .toLowerCase()
-      .replace(/[.,!?;:']+/g, '')
-      .replace(/s$/, '');
-
-    // MUST redact the personalized crystal name itself (including possessive forms like "Amethyst's")
-    if (crystalName) {
-      const cleanCrystalName = crystalName.toLowerCase();
-      if (
-        cleanWord === cleanCrystalName ||
-        cleanWord === cleanCrystalName.replace(/s$/, '')
-      ) {
-        return true;
-      }
-    }
-
-    // Prioritize crystal names (common crystals)
-    const crystals = [
-      'amethyst',
-      'quartz',
-      'citrine',
-      'rose',
-      'jasper',
-      'agate',
-      'selenite',
-      'obsidian',
-      'moonstone',
-      'labradorite',
-      'carnelian',
-      'malachite',
-      'turquoise',
-      'aventurine',
-      'fluorite',
-      'hematite',
-      'jade',
-      'lapis',
-      'onyx',
-      'peridot',
-      'rhodonite',
-      'sodalite',
-      'tiger',
-      'topaz',
-      'amazonite',
-    ];
-    if (crystals.includes(cleanWord)) return true;
-
-    // Redact planet names
-    const planets = [
-      'sun',
-      'moon',
-      'mercury',
-      'venus',
-      'mars',
-      'jupiter',
-      'saturn',
-      'uranus',
-      'neptune',
-      'pluto',
-    ];
-    if (planets.includes(cleanWord)) return true;
-
-    // Redact zodiac signs
-    const signs = [
-      'aries',
-      'taurus',
-      'gemini',
-      'cancer',
-      'leo',
-      'virgo',
-      'libra',
-      'scorpio',
-      'sagittarius',
-      'capricorn',
-      'aquarius',
-      'pisces',
-    ];
-    if (signs.includes(cleanWord)) return true;
-
-    // Redact chart-related terms
-    const chartTerms = [
-      'house',
-      'placement',
-      'natal',
-      'chart',
-      'transit',
-      'aspect',
-      'chakra',
-    ];
-    if (chartTerms.includes(cleanWord)) return true;
-
-    // Redact guidance/conclusion phrases
-    const guidanceTerms = [
-      'authentically',
-      'instincts',
-      'transformation',
-      'healing',
-      'manifestation',
-      'intuition',
-      'wisdom',
-      'strength',
-      'clarity',
-      'balance',
-      'harmony',
-      'power',
-      'growth',
-      'abundance',
-      'passion',
-      'creativity',
-      'connection',
-      'release',
-      'embrace',
-      'illuminate',
-      'grounding',
-      'protection',
-      'energy',
-      'vibration',
-    ];
-    if (guidanceTerms.includes(cleanWord)) return true;
-
-    // Redact some other words for variety (every 6th word if not already redacted)
-    return index % 6 === 4;
-  };
 
   // Helper to render preview based on A/B test variant
   const renderPreview = () => {
