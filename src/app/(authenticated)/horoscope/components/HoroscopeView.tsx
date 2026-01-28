@@ -5,7 +5,7 @@ import Link from 'next/link';
 import dayjs from 'dayjs';
 import dynamic from 'next/dynamic';
 import { useRouter } from 'next/navigation';
-import { Share2, ChevronRight, Sparkles, Lock } from 'lucide-react';
+import { Share2, Sparkles, Lock } from 'lucide-react';
 import { getGeneralHoroscope } from '../../../../../utils/astrology/generalHoroscope';
 import { getEnhancedPersonalizedHoroscope } from '../../../../../utils/astrology/enhancedHoroscope';
 import { getBirthChartFromProfile } from '../../../../../utils/astrology/birthChart';
@@ -196,6 +196,12 @@ export function HoroscopeView({
     ? getPersonalDayNumber(userBirthday, today)
     : null;
 
+  // Personalized teaser for free users with a birthday
+  const personalizedTeaser =
+    !hasPaidAccess && userBirthday
+      ? getEnhancedPersonalizedHoroscope(userBirthday, userName, profile)
+      : null;
+
   const openNumerologyModal = (
     contextLabel: string,
     number: number,
@@ -308,7 +314,13 @@ export function HoroscopeView({
   const dailyGuidance =
     hasPaidAccess && horoscope
       ? horoscope.dailyGuidance
-      : generalHoroscope.reading;
+      : // Free: trim to first 2 sentences so it stays scannable
+        (() => {
+          const sentences = generalHoroscope.reading
+            .split('. ')
+            .filter(Boolean);
+          return sentences.slice(0, 2).join('. ') + '.';
+        })();
 
   // Loading skeleton (paid only, while fetching personalized horoscope)
   if (hasPaidAccess && isLoading) {
@@ -340,7 +352,7 @@ export function HoroscopeView({
             <p className='text-sm text-zinc-400'>
               {hasPaidAccess
                 ? 'Guidance written just for you'
-                : 'General cosmic guidance based on universal energies'}
+                : 'Universal reading — unlock yours for something personal'}
             </p>
           </div>
           <button
@@ -353,20 +365,6 @@ export function HoroscopeView({
             Share {hasPaidAccess ? 'horoscope' : 'highlight'}
           </button>
         </div>
-        <div className='flex gap-3 mt-3'>
-          <Link
-            href='/grimoire/horoscopes/today'
-            className='inline-flex items-center gap-1 text-xs text-lunary-primary-400 hover:text-lunary-primary-300 transition-colors'
-          >
-            See all daily horoscopes <ChevronRight className='w-3 h-3' />
-          </Link>
-          <Link
-            href='/grimoire/horoscopes/weekly'
-            className='inline-flex items-center gap-1 text-xs text-lunary-primary-400 hover:text-lunary-primary-300 transition-colors'
-          >
-            Browse weekly horoscopes <ChevronRight className='w-3 h-3' />
-          </Link>
-        </div>
       </div>
 
       {/* Cosmic Highlight Card */}
@@ -376,6 +374,46 @@ export function HoroscopeView({
         </p>
         <p className='text-2xl font-light text-zinc-100'>{cosmicHighlight}</p>
         <p className='text-sm text-zinc-300 leading-relaxed'>{dailyGuidance}</p>
+
+        {personalizedTeaser && (
+          <Link href='/pricing' className='block space-y-2 group'>
+            {/* Line 1: readable start → blur fade */}
+            <div className='relative h-[1.25rem] overflow-hidden'>
+              {/* Blurred layer underneath */}
+              <p className='text-xs text-zinc-500 blur-sm'>
+                {personalizedTeaser.dailyGuidance}
+              </p>
+              {/* Clear layer on top — bg covers blur bleed, mask fades to reveal blur */}
+              <p
+                className='absolute inset-0 text-xs text-zinc-500 bg-zinc-950'
+                style={{
+                  WebkitMaskImage:
+                    'linear-gradient(to right, black 5%, transparent 15%)',
+                }}
+              >
+                {personalizedTeaser.dailyGuidance}
+              </p>
+            </div>
+            {/* Line 2: fully blurred */}
+            <p className='text-xs text-zinc-500 blur-sm whitespace-nowrap truncate'>
+              {personalizedTeaser.cosmicHighlight}
+            </p>
+            <span className='inline-flex items-center gap-1.5 text-xs text-lunary-primary-300 group-hover:text-lunary-primary-200 transition-colors'>
+              <Sparkles className='w-3 h-3' />
+              Get a reading written just for you
+            </span>
+          </Link>
+        )}
+
+        {!hasPaidAccess && !userBirthday && (
+          <Link
+            href='/pricing'
+            className='inline-flex items-center gap-1.5 text-xs text-lunary-primary-300 hover:text-lunary-primary-200 transition-colors'
+          >
+            <Sparkles className='w-3 h-3' />
+            Get a reading written just for you
+          </Link>
+        )}
 
         {/* Numerology Grid */}
         <div className='mt-2 grid grid-cols-1 sm:grid-cols-2 gap-3'>
