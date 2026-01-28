@@ -22,40 +22,49 @@ function updatePageToISR(filePath) {
 
   // Add revalidate after imports if not present
   if (!hasRevalidate) {
-    // Find the end of all imports by tracking open braces
     const lines = content.split('\n');
     let insertIndex = 0;
+    let lastImportLine = -1;
+    let braceDepth = 0;
     let inImport = false;
 
     for (let i = 0; i < lines.length; i++) {
-      const line = lines[i].trim();
+      const line = lines[i];
+      const trimmed = line.trim();
 
-      // Track if we're inside a multi-line import
-      if (line.startsWith('import ')) {
+      // Start tracking import
+      if (trimmed.startsWith('import ')) {
         inImport = true;
       }
 
-      // Check if import statement ends
-      if (
-        inImport &&
-        (line.includes(';') || line.endsWith("';") || line.endsWith('";'))
-      ) {
-        inImport = false;
-        insertIndex = i + 1;
-      } else if (
-        (!inImport && line.startsWith('//')) ||
-        line === '' ||
-        line.startsWith('/*') ||
-        line.startsWith('*')
-      ) {
-        insertIndex = i + 1;
-      } else if (
-        !inImport &&
-        line &&
-        !line.startsWith('export const revalidate') &&
-        !line.startsWith('import')
-      ) {
-        break;
+      // Track braces in imports for destructuring
+      if (inImport) {
+        for (const char of line) {
+          if (char === '{') braceDepth++;
+          if (char === '}') braceDepth--;
+        }
+
+        // Import ends when we have a semicolon and all braces are closed
+        if (line.includes(';') && braceDepth === 0) {
+          inImport = false;
+          lastImportLine = i;
+        }
+      }
+    }
+
+    // If we found imports, insert after the last one
+    // Otherwise insert at the beginning
+    if (lastImportLine >= 0) {
+      insertIndex = lastImportLine + 1;
+
+      // Skip any empty lines or comments immediately after last import
+      for (let i = insertIndex; i < lines.length; i++) {
+        const trimmed = lines[i].trim();
+        if (trimmed === '' || trimmed.startsWith('//')) {
+          insertIndex = i + 1;
+        } else {
+          break;
+        }
       }
     }
 
@@ -91,8 +100,12 @@ function updatePageToISR(filePath) {
         if (content[i] === '{') depth++;
         if (content[i] === '}') depth--;
 
-        if (depth === 0 && start !== -1) {
+        if (depth === 0 && start !== -1 && content[i] === '}') {
           end = i + 1;
+          // Skip any trailing whitespace or newlines after the closing brace
+          while (end < content.length && /[\s\n]/.test(content[end])) {
+            end++;
+          }
           break;
         }
       }
@@ -101,7 +114,7 @@ function updatePageToISR(filePath) {
     if (start !== -1 && end !== -1) {
       content =
         content.substring(0, start) +
-        '// Removed generateStaticParams - using pure ISR for faster builds\n// Pages are generated on-demand and cached with 30-day revalidation' +
+        '// Removed generateStaticParams - using pure ISR for faster builds\n// Pages are generated on-demand and cached with 30-day revalidation\n\n' +
         content.substring(end);
       modified = true;
     }
