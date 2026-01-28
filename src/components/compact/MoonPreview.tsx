@@ -233,7 +233,11 @@ const getDaysUntilNextPhase = (
   };
 };
 
-export const MoonPreview = () => {
+interface MoonPreviewProps {
+  isExpanded?: boolean; // Optional controlled state from parent
+}
+
+export const MoonPreview = ({ isExpanded }: MoonPreviewProps = {}) => {
   const { user } = useUser();
   const {
     currentMoonPhase,
@@ -438,6 +442,12 @@ export const MoonPreview = () => {
   );
 
   return (
-    <ExpandableCard preview={preview} expanded={expanded} autoExpandOnDesktop />
+    <ExpandableCard
+      preview={preview}
+      expanded={expanded}
+      autoExpandOnDesktop
+      isExpanded={isExpanded}
+      className='moon-preview-card'
+    />
   );
 };

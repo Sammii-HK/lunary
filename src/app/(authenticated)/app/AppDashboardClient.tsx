@@ -146,6 +146,9 @@ export default function AppDashboardClient() {
   const [isDemoMode, setIsDemoMode] = useState(
     demoContext?.isDemoMode || false,
   );
+  const [moonExpanded, setMoonExpanded] = useState<boolean | undefined>(
+    undefined,
+  );
 
   // Detect demo mode from context OR DOM (for reliability on tab changes)
   useEffect(() => {
@@ -158,6 +161,17 @@ export default function AppDashboardClient() {
 
     checkDemoMode();
   }, [demoContext]);
+
+  // In demo mode, auto-expand moon card after 1 second
+  useEffect(() => {
+    if (!isDemoMode) return;
+
+    const expandTimeout = setTimeout(() => {
+      setMoonExpanded(true);
+    }, 1000);
+
+    return () => clearTimeout(expandTimeout);
+  }, [isDemoMode]);
 
   // Handle push notification deep links
   useNotificationDeepLink();
@@ -274,7 +288,7 @@ export default function AppDashboardClient() {
         className={`grid gap-3 ${isDemoMode ? 'grid-cols-1' : 'grid-cols-1 md:grid-cols-2'}`}
       >
         <div id='moon-phase' className='scroll-mt-20'>
-          <MoonPreview />
+          <MoonPreview isExpanded={moonExpanded} />
         </div>
         <SkyNowCard />
 
