@@ -363,14 +363,14 @@ const getJupiterInfluence = (sign: string): string => {
 
 const getCosmicHighlight = (currentChart: any[]): string => {
   const highlights = [
-    'The cosmic energies invite you to embrace both stability and change, finding wisdom in the dance between security and growth.',
-    'Planetary alignments support growth through authentic self-expression, encouraging you to share your unique gifts with the world.',
-    'The universe encourages balance between action and reflection, showing that both movement and stillness have their place.',
-    'Cosmic influences favor connections that inspire and uplift, drawing meaningful relationships into your experience.',
-    'Stellar energies support manifestation through aligned intention, helping you create reality from authentic desire.',
-    'The celestial dance reminds you of your place in the greater cosmic story, connecting you to something larger than yourself.',
-    'Planetary wisdom flows through mindful awareness and presence, revealing insights in each moment of conscious attention.',
-    'Universal energies support healing through self-compassion and understanding, encouraging gentle transformation.',
+    'Embrace the dance between stability and growth.',
+    'Express your unique gifts authentically today.',
+    'Balance action with stillness — both matter.',
+    'Meaningful connections are drawn to you now.',
+    'Align your intentions with your deepest desires.',
+    'You are woven into the greater cosmic story.',
+    'Presence reveals what plans cannot.',
+    'Gentle transformation heals from within.',
   ];
 
   // Use a simple hash of the chart to get consistent but varied highlights
@@ -394,7 +394,6 @@ export const getGeneralHoroscope = (date?: Date): GeneralHoroscopeReading => {
     date: selectedDate.format('MMMM D, YYYY'),
     moonPhase,
     reading: getComprehensiveReading(currentChart, moonPhase, dayOfWeek),
-    generalAdvice:
-      'Remember that you are part of the cosmic dance. Trust your intuition, stay present, and allow the universe to guide you toward your highest good.',
+    generalAdvice: getCosmicHighlight(currentChart),
   };
 };
