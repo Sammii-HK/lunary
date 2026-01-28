@@ -31,6 +31,11 @@ const CTA_COPY: Record<string, Record<CTACopyVariant, string>> = {
     mystical: 'See All Transits',
     simple: 'See All Transits',
   },
+  crystal: {
+    'no-verb': 'Your Crystal Reading',
+    mystical: 'Discover Your Crystal Reading',
+    simple: 'See Your Crystal Reading',
+  },
 };
 
 export function useCTACopy() {
@@ -60,6 +65,7 @@ export function useCTACopy() {
     tarotWeekly: getCopy('tarotWeekly'),
     chartConnection: getCopy('chartConnection'),
     transitList: getCopy('transitList'),
+    crystal: getCopy('crystal'),
     trackCTAClick,
   };
 }

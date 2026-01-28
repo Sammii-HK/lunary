@@ -5,7 +5,7 @@ import { useUser } from '@/context/UserContext';
 import { useAuthStatus } from '@/components/AuthStatus';
 import { useSubscription } from '@/hooks/useSubscription';
 import { hasFeatureAccess } from '../../../utils/pricing';
-import { Check, Circle, Orbit, Lock, ArrowRight } from 'lucide-react';
+import { Check, Circle, Orbit, ArrowRight, Sparkles } from 'lucide-react';
 import Link from 'next/link';
 import { recordCheckIn, type StreakRecord } from '@/lib/streak/check-in';
 import { useRouter } from 'next/navigation';
@@ -13,6 +13,7 @@ import { getEnhancedPersonalizedHoroscope } from '../../../utils/astrology/enhan
 import { getGeneralHoroscope } from '../../../utils/astrology/generalHoroscope';
 import { MoreForToday } from '@/components/horoscope/MoreForToday';
 import { useFeatureFlagVariant } from '@/hooks/useFeatureFlag';
+import { useCTACopy } from '@/hooks/useCTACopy';
 
 type FocusArea = {
   area: 'love' | 'work' | 'inner';
@@ -56,6 +57,7 @@ export const PersonalizedHoroscopePreview = () => {
   const [isLoading, setIsLoading] = useState(true);
   const todayString = getTodayString();
   const variant = useFeatureFlagVariant('paywall_preview_style_v1');
+  const ctaCopy = useCTACopy();
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -351,16 +353,11 @@ export const PersonalizedHoroscopePreview = () => {
         className='group block border border-zinc-800 rounded-2xl bg-zinc-950/70 p-4 shadow-sm transition-colors hover:border-lunary-primary-500 hover:bg-zinc-900'
       >
         <div className='space-y-3'>
-          <div className='flex items-center justify-between gap-3'>
-            <div>
-              <h3 className='text-sm font-semibold leading-snug text-zinc-100 flex items-center'>
-                <Orbit className='mr-2 w-4 h-4 text-lunary-accent-300' />
-                Today's Cosmic Energy
-              </h3>
-            </div>
-            <span className='flex items-center gap-1 text-[10px] text-lunary-primary-300 uppercase tracking-wide'>
-              Personal <Lock className='w-3 h-3' />
-            </span>
+          <div>
+            <h3 className='text-sm font-semibold leading-snug text-zinc-100 flex items-center'>
+              <Orbit className='mr-2 w-4 h-4 text-lunary-accent-300' />
+              Today's Cosmic Energy
+            </h3>
           </div>
 
           {isLoading ? (
@@ -375,11 +372,16 @@ export const PersonalizedHoroscopePreview = () => {
                 {generalHoroscope.reading.split('.')[0]}.
               </p>
 
-              {/* A/B test: Show preview based on variant */}
-              {renderPreview()}
+              <div className='relative'>
+                {renderPreview()}
+                <span className='absolute top-0 right-0 inline-flex items-center gap-1 text-[10px] bg-lunary-primary-900/80 border border-lunary-primary-700/50 px-2 py-0.5 rounded text-lunary-primary-300'>
+                  <Sparkles className='w-2.5 h-2.5' />
+                  Lunary+
+                </span>
+              </div>
 
               <span className='flex items-center gap-1.5 text-xs text-lunary-primary-200 hover:text-lunary-primary-100 transition-colors font-medium'>
-                <span>Unlock Your Full Horoscope</span>
+                <span>{ctaCopy.horoscope}</span>
                 <ArrowRight className='w-4 h-4' />
               </span>
             </>

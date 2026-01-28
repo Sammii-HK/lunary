@@ -4,7 +4,7 @@ import { useMemo, useState, useEffect, useCallback } from 'react';
 import { useUser } from '@/context/UserContext';
 import { useAuthStatus } from '@/components/AuthStatus';
 import { useRouter } from 'next/navigation';
-import { X, Gem, ArrowRight, Sparkles, Lock } from 'lucide-react';
+import { X, Gem, ArrowRight, Sparkles } from 'lucide-react';
 import { getAstrologicalChart } from '../../../utils/astrology/astrology';
 import { getGeneralCrystalRecommendation } from '../../../utils/crystals/generalCrystals';
 import {
@@ -17,6 +17,7 @@ import { useAstronomyContext } from '../../context/AstronomyContext';
 import dayjs from 'dayjs';
 import { Button } from '../ui/button';
 import { useFeatureFlagVariant } from '@/hooks/useFeatureFlag';
+import { useCTACopy } from '@/hooks/useCTACopy';
 
 export const CrystalPreview = () => {
   const { user } = useUser();
@@ -27,6 +28,7 @@ export const CrystalPreview = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [observer, setObserver] = useState<any>(null);
   const variant = useFeatureFlagVariant('paywall_preview_style_v1');
+  const ctaCopy = useCTACopy();
 
   const hasPersonalizedAccess = hasFeatureAccess(
     subscription.status,
@@ -346,7 +348,7 @@ export const CrystalPreview = () => {
           <div className='flex items-center gap-2'>
             <Gem className='w-4 h-4 text-lunary-accent-200' />
             <span className='text-sm text-lunary-primary-200'>
-              Unlock personalized crystal guidance
+              {ctaCopy.crystal}
             </span>
           </div>
           <ArrowRight className='w-4 h-4 text-lunary-secondary-200' />
@@ -371,29 +373,25 @@ export const CrystalPreview = () => {
       >
         <div className='flex items-start gap-3 h-full'>
           <div className='flex-1 min-w-0 h-full mt-1 flex flex-col justify-between'>
-            <div className='flex items-center justify-between mb-1'>
-              <div className='flex items-center gap-2'>
-                <Gem className='w-4 h-4 text-lunary-accent-200' />
-                <span className='text-sm font-medium text-zinc-200'>
-                  {crystalName}
-                </span>
-              </div>
-              {canAccessPersonalized ? (
-                <span className='text-xs bg-zinc-800/50 text-lunary-primary-200 px-1.5 py-0.5 rounded'>
-                  Personal
-                </span>
-              ) : (
-                <span className='flex items-center gap-1 text-[10px] text-lunary-primary-300 uppercase tracking-wide'>
-                  Personal <Lock className='w-3 h-3' />
-                </span>
-              )}
+            <div className='flex items-center gap-2 mb-1'>
+              <Gem className='w-4 h-4 text-lunary-accent-200' />
+              <span className='text-sm font-medium text-zinc-200'>
+                {crystalName}
+              </span>
             </div>
             <p className='text-xs text-white line-clamp-2 mb-2'>
               {crystalReason}
             </p>
 
-            {/* A/B test: Show preview based on variant */}
-            {!canAccessPersonalized && renderPreview()}
+            {!canAccessPersonalized && (
+              <div className='relative'>
+                {renderPreview()}
+                <span className='absolute top-0 right-0 inline-flex items-center gap-1 text-[10px] bg-lunary-primary-900/80 border border-lunary-primary-700/50 px-2 py-0.5 rounded text-lunary-primary-300'>
+                  <Sparkles className='w-2.5 h-2.5' />
+                  Lunary+
+                </span>
+              </div>
+            )}
 
             {!canAccessPersonalized && (
               <span
@@ -402,6 +400,7 @@ export const CrystalPreview = () => {
                 onClick={(e) => {
                   e.preventDefault();
                   e.stopPropagation();
+                  ctaCopy.trackCTAClick('crystal', 'dashboard');
                   if (router) {
                     router.push(
                       authStatus.isAuthenticated
@@ -414,6 +413,7 @@ export const CrystalPreview = () => {
                   if (e.key === 'Enter' || e.key === ' ') {
                     e.preventDefault();
                     e.stopPropagation();
+                    ctaCopy.trackCTAClick('crystal', 'dashboard');
                     if (router) {
                       router.push(
                         authStatus.isAuthenticated
@@ -425,7 +425,7 @@ export const CrystalPreview = () => {
                 }}
                 className='flex items-center gap-1.5 text-xs text-lunary-primary-200 hover:text-lunary-primary-100 transition-colors bg-none border-none p-0 cursor-pointer font-medium'
               >
-                <span>Unlock Your Personal Recommendations</span>
+                {ctaCopy.crystal}
               </span>
             )}
           </div>

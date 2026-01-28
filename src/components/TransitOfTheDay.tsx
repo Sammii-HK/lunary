@@ -4,7 +4,7 @@ import { useMemo } from 'react';
 import { useUser } from '@/context/UserContext';
 import { useAuthStatus } from '@/components/AuthStatus';
 import Link from 'next/link';
-import { Sparkles, ArrowRight, Lock } from 'lucide-react';
+import { Sparkles, ArrowRight } from 'lucide-react';
 import {
   getUpcomingTransits,
   TransitEvent,
@@ -18,6 +18,7 @@ import { hasFeatureAccess } from '../../utils/pricing';
 import { bodiesSymbols } from '@/constants/symbols';
 import dayjs from 'dayjs';
 import { useFeatureFlagVariant } from '@/hooks/useFeatureFlag';
+import { useCTACopy } from '@/hooks/useCTACopy';
 
 const getOrdinalSuffix = (n: number): string => {
   if (n >= 11 && n <= 13) return 'th';
@@ -43,6 +44,7 @@ export const TransitOfTheDay = () => {
   const authStatus = useAuthStatus();
   const subscription = useSubscription();
   const variant = useFeatureFlagVariant('paywall_preview_style_v1');
+  const ctaCopy = useCTACopy();
 
   // For unauthenticated users, force paid access to false immediately
   // Don't wait for subscription to resolve
@@ -325,7 +327,7 @@ export const TransitOfTheDay = () => {
             <div className='flex items-center gap-2'>
               <Sparkles className='w-4 h-4 text-lunary-secondary-200' />
               <span className='text-sm text-lunary-primary-200'>
-                Unlock personal transit insights
+                {ctaCopy.transitList}
               </span>
             </div>
             <ArrowRight className='w-4 h-4 text-lunary-secondary-200' />
@@ -363,16 +365,11 @@ export const TransitOfTheDay = () => {
                   {dateLabel}
                 </span>
               </div>
-              <div className='flex items-center gap-2'>
-                {generalTransit.significance === 'high' && (
-                  <span className='text-xs bg-zinc-800/50 text-lunary-primary-200 px-1.5 py-0.5 rounded'>
-                    Major
-                  </span>
-                )}
-                <span className='flex items-center gap-1 text-[10px] text-lunary-primary-300 uppercase tracking-wide'>
-                  Personal <Lock className='w-3 h-3' />
+              {generalTransit.significance === 'high' && (
+                <span className='text-xs bg-zinc-800/50 text-lunary-primary-200 px-1.5 py-0.5 rounded'>
+                  Major
                 </span>
-              </div>
+              )}
             </div>
             <p className='text-sm text-zinc-200 mb-1'>
               {generalTransit.planet} {generalTransit.event}
@@ -382,16 +379,23 @@ export const TransitOfTheDay = () => {
             </p>
 
             {/* A/B test: Show preview of PERSONALIZED content (what they're missing) */}
-            {renderPreview(transit || generalTransit)}
+            <div className='relative'>
+              {renderPreview(transit || generalTransit)}
+              <span className='absolute top-0 right-0 inline-flex items-center gap-1 text-[10px] bg-lunary-primary-900/80 border border-lunary-primary-700/50 px-2 py-0.5 rounded text-lunary-primary-300'>
+                <Sparkles className='w-2.5 h-2.5' />
+                Lunary+
+              </span>
+            </div>
 
             <button
               onClick={(e) => {
                 e.preventDefault();
                 e.stopPropagation();
+                ctaCopy.trackCTAClick('transitList', 'dashboard');
               }}
               className='flex items-center gap-1.5 text-xs text-lunary-primary-200 hover:text-lunary-primary-100 transition-colors bg-none border-none p-0 cursor-pointer font-medium'
             >
-              See Your Transit Timing
+              {ctaCopy.transitList}
             </button>
           </div>
           <ArrowRight className='w-4 h-4 text-zinc-600 group-hover:text-lunary-secondary-200 transition-colors flex-shrink-0 mt-1' />

@@ -6,7 +6,7 @@ import { useAuthStatus } from '@/components/AuthStatus';
 import { useAstronomyContext } from '@/context/AstronomyContext';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { ArrowRight, Layers, Lock } from 'lucide-react';
+import { ArrowRight, Layers, Sparkles } from 'lucide-react';
 import { getTarotCard } from '../../../utils/tarot/tarot';
 import { useSubscription } from '../../hooks/useSubscription';
 import { hasFeatureAccess } from '../../../utils/pricing';
@@ -14,6 +14,7 @@ import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
 import dayOfYear from 'dayjs/plugin/dayOfYear';
 import { useFeatureFlagVariant } from '@/hooks/useFeatureFlag';
+import { useCTACopy } from '@/hooks/useCTACopy';
 import { calculateTransitAspects } from '@/lib/astrology/transit-aspects';
 import { generateTarotTransitConnection } from '@/lib/tarot/generate-transit-connection';
 import type { TransitInsight } from '@/lib/tarot/generate-transit-connection';
@@ -35,6 +36,7 @@ export const DailyCardPreview = () => {
   const userBirthday = user?.birthday;
   const variantRaw = useFeatureFlagVariant('paywall_preview_style_v1');
   const variant = variantRaw || 'blur'; // Default to blur if not loaded
+  const ctaCopy = useCTACopy();
   const [firstTransitInsight, setFirstTransitInsight] =
     useState<TransitInsight | null>(null);
 
@@ -295,15 +297,10 @@ export const DailyCardPreview = () => {
       >
         <div className='flex items-start justify-between gap-3 h-full'>
           <div className='flex-1 min-w-0 h-full justify-between flex flex-col'>
-            <div className='flex items-center justify-between gap-2 mb-1'>
-              <div className='flex items-center gap-2'>
-                <Layers className='w-4 h-4 text-lunary-accent-300' />
-                <span className='text-sm font-medium text-zinc-200'>
-                  Tarot for Today
-                </span>
-              </div>
-              <span className='flex items-center gap-1 text-[10px] text-lunary-primary-300 uppercase tracking-wide'>
-                Personal <Lock className='w-3 h-3' />
+            <div className='flex items-center gap-2 mb-1'>
+              <Layers className='w-4 h-4 text-lunary-accent-300' />
+              <span className='text-sm font-medium text-zinc-200'>
+                Tarot for Today
               </span>
             </div>
             <p className='text-sm text-lunary-primary-200 font-medium'>
@@ -318,8 +315,13 @@ export const DailyCardPreview = () => {
               </p>
             )}
 
-            {/* A/B test: Show preview based on variant */}
-            {renderPreview()}
+            <div className='relative'>
+              {renderPreview()}
+              <span className='absolute top-0 right-0 inline-flex items-center gap-1 text-[10px] bg-lunary-primary-900/80 border border-lunary-primary-700/50 px-2 py-0.5 rounded text-lunary-primary-300'>
+                <Sparkles className='w-2.5 h-2.5' />
+                Lunary+
+              </span>
+            </div>
 
             <span
               role='button'
@@ -327,6 +329,7 @@ export const DailyCardPreview = () => {
               onClick={(e) => {
                 e.preventDefault();
                 e.stopPropagation();
+                ctaCopy.trackCTAClick('tarotDaily', 'dashboard');
                 if (router) {
                   router.push(
                     authStatus.isAuthenticated
@@ -339,6 +342,7 @@ export const DailyCardPreview = () => {
                 if (e.key === 'Enter' || e.key === ' ') {
                   e.preventDefault();
                   e.stopPropagation();
+                  ctaCopy.trackCTAClick('tarotDaily', 'dashboard');
                   if (router) {
                     router.push(
                       authStatus.isAuthenticated
@@ -350,7 +354,7 @@ export const DailyCardPreview = () => {
               }}
               className='flex items-center gap-1.5 text-xs text-lunary-primary-200 hover:text-lunary-primary-100 transition-colors bg-none border-none p-0 cursor-pointer font-medium'
             >
-              <span>Unlock Your Personal Reading</span>
+              {ctaCopy.tarotDaily}
             </span>
           </div>
           <ArrowRight className='w-4 h-4 text-zinc-600 group-hover:text-lunary-accent-300 transition-colors flex-shrink-0 mt-1' />

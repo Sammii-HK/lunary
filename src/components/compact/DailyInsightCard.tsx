@@ -6,7 +6,7 @@ import { useAuthStatus } from '@/components/AuthStatus';
 import { useAstronomyContext } from '@/context/AstronomyContext';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { Sparkles, ArrowRight, Lock } from 'lucide-react';
+import { Sparkles, ArrowRight } from 'lucide-react';
 import dayjs from 'dayjs';
 import { getGeneralHoroscope } from '../../../utils/astrology/generalHoroscope';
 import { getEnhancedPersonalizedHoroscope } from '../../../utils/astrology/enhancedHoroscope';
@@ -24,6 +24,7 @@ import {
   LifeThemeInput,
 } from '@/lib/life-themes/engine';
 import { useFeatureFlagVariant } from '@/hooks/useFeatureFlag';
+import { useCTACopy } from '@/hooks/useCTACopy';
 import {
   buildTransitDetails,
   TransitAspect,
@@ -125,6 +126,7 @@ export const DailyInsightCard = () => {
   const [lifeThemeName, setLifeThemeName] = useState<string | null>(null);
   const [observer, setObserver] = useState<any>(null);
   const variant = useFeatureFlagVariant('paywall_preview_style_v1');
+  const ctaCopy = useCTACopy();
 
   const hasPersonalizedAccess = hasFeatureAccess(
     subscription.status,
@@ -470,23 +472,23 @@ export const DailyInsightCard = () => {
       >
         <div className='flex items-start justify-between gap-3'>
           <div className='flex-1 min-w-0'>
-            <div className='flex items-center justify-between gap-2 mb-1'>
-              <div className='flex items-center gap-2'>
-                <Sparkles className='w-4 h-4 text-lunary-primary-300' />
-                <span className='text-sm font-medium text-zinc-200'>
-                  Today&apos;s Influence
-                </span>
-              </div>
-              <span className='flex items-center gap-1 text-[10px] text-lunary-primary-300 uppercase tracking-wide'>
-                Personal <Lock className='w-3 h-3' />
+            <div className='flex items-center gap-2 mb-1'>
+              <Sparkles className='w-4 h-4 text-lunary-primary-300' />
+              <span className='text-sm font-medium text-zinc-200'>
+                Today&apos;s Influence
               </span>
             </div>
             <p className='text-sm text-zinc-200 leading-relaxed mb-2'>
               {generalTransitText ?? insight.text}
             </p>
 
-            {/* A/B test: Show preview based on variant */}
-            {renderPreview()}
+            <div className='relative'>
+              {renderPreview()}
+              <span className='absolute top-0 right-0 inline-flex items-center gap-1 text-[10px] bg-lunary-primary-900/80 border border-lunary-primary-700/50 px-2 py-0.5 rounded text-lunary-primary-300'>
+                <Sparkles className='w-2.5 h-2.5' />
+                Lunary+
+              </span>
+            </div>
 
             <span
               role='button'
@@ -494,6 +496,7 @@ export const DailyInsightCard = () => {
               onClick={(e) => {
                 e.preventDefault();
                 e.stopPropagation();
+                ctaCopy.trackCTAClick('horoscope', 'dashboard');
                 if (router) {
                   router.push(
                     authStatus.isAuthenticated
@@ -506,6 +509,7 @@ export const DailyInsightCard = () => {
                 if (e.key === 'Enter' || e.key === ' ') {
                   e.preventDefault();
                   e.stopPropagation();
+                  ctaCopy.trackCTAClick('horoscope', 'dashboard');
                   if (router) {
                     router.push(
                       authStatus.isAuthenticated
@@ -517,7 +521,7 @@ export const DailyInsightCard = () => {
               }}
               className='flex items-center gap-1.5 text-xs text-lunary-primary-200 hover:text-lunary-primary-100 transition-colors bg-none border-none p-0 cursor-pointer font-medium'
             >
-              Unlock Full-Chart Readings
+              {ctaCopy.horoscope}
             </span>
           </div>
           <ArrowRight className='w-4 h-4 text-zinc-600 group-hover:text-lunary-primary-300 transition-colors flex-shrink-0 mt-1' />
