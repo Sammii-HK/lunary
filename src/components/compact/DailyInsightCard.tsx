@@ -289,6 +289,45 @@ export const DailyInsightCard = () => {
 
   const displayText = transitSummaryText ?? insight.text;
 
+  // General (non-personalized) transit text for free users
+  const generalTransitText = useMemo(() => {
+    const todayStart = selectedDay.startOf('day');
+    const windowStart = todayStart.subtract(1, 'day');
+    const windowEnd = todayStart.add(1, 'day');
+    const transits = getUpcomingTransits(todayStart);
+
+    const significanceOrder: Record<string, number> = {
+      high: 3,
+      medium: 2,
+      low: 1,
+    };
+
+    const relevant = transits.filter((t) => {
+      const val = t.date.startOf('day').valueOf();
+      return val >= windowStart.valueOf() && val <= windowEnd.valueOf();
+    });
+
+    if (relevant.length === 0) return null;
+
+    const sorted = [...relevant].sort(
+      (a, b) =>
+        (significanceOrder[b.significance] ?? 1) -
+        (significanceOrder[a.significance] ?? 1),
+    );
+
+    const top2 = sorted.slice(0, 2);
+    return top2
+      .map((t, i) => {
+        const event = t.event.charAt(0).toLowerCase() + t.event.slice(1);
+        const sentence = `${t.planet} ${event}`;
+        const prefix = i === 0 ? '' : 'Meanwhile, ';
+        const full = `${prefix}${sentence}`.trim();
+        const cap = full.charAt(0).toUpperCase() + full.slice(1);
+        return cap.endsWith('.') ? cap : `${cap}.`;
+      })
+      .join(' ');
+  }, [selectedDay.valueOf()]);
+
   // Helper to determine if a word should be redacted
   const shouldRedactWord = (word: string, index: number): boolean => {
     const cleanWord = word.toLowerCase().replace(/[.,!?;:]/g, '');
@@ -443,7 +482,7 @@ export const DailyInsightCard = () => {
               </span>
             </div>
             <p className='text-sm text-zinc-200 leading-relaxed mb-2'>
-              {insight.text}
+              {generalTransitText ?? insight.text}
             </p>
 
             {/* A/B test: Show preview based on variant */}
