@@ -41,6 +41,13 @@ export function DemoNavigationProvider({
       // Only handle events within our container
       if (!container.contains(target)) return;
 
+      // If the click originated from a button, let the button handle it first
+      // (important for buttons like ritual complete that are inside links)
+      const button = target.closest('button');
+      if (button) {
+        return; // Let button's onClick handler run instead of intercepting
+      }
+
       const link = target.closest('a');
 
       if (link && link.href) {
