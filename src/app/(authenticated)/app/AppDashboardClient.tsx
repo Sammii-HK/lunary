@@ -156,22 +156,33 @@ export default function AppDashboardClient() {
       const inDemoContainer =
         document.getElementById('demo-preview-container') !== null;
       const contextDemoMode = demoContext?.isDemoMode || false;
-      setIsDemoMode(inDemoContainer || contextDemoMode);
+      const demoModeDetected = inDemoContainer || contextDemoMode;
+      setIsDemoMode(demoModeDetected);
+
+      // Initialize moonExpanded for controlled mode in demo
+      if (demoModeDetected && moonExpanded === undefined) {
+        setMoonExpanded(false);
+      }
     };
 
     checkDemoMode();
-  }, [demoContext]);
+  }, [demoContext, moonExpanded]);
 
   // In demo mode, auto-expand moon card after 1 second
   useEffect(() => {
-    if (!isDemoMode) return;
+    if (!isDemoMode || moonExpanded === undefined) return;
 
     const expandTimeout = setTimeout(() => {
       setMoonExpanded(true);
     }, 1000);
 
     return () => clearTimeout(expandTimeout);
-  }, [isDemoMode]);
+  }, [isDemoMode, moonExpanded]);
+
+  // Handle moon preview toggle
+  const handleMoonToggle = (isExpanded: boolean) => {
+    setMoonExpanded(isExpanded);
+  };
 
   // Handle push notification deep links
   useNotificationDeepLink();
@@ -288,7 +299,12 @@ export default function AppDashboardClient() {
         className={`grid gap-3 ${isDemoMode ? 'grid-cols-1' : 'grid-cols-1 md:grid-cols-2'}`}
       >
         <div id='moon-phase' className='scroll-mt-20'>
-          <MoonPreview isExpanded={moonExpanded} />
+          <MoonPreview
+            {...(isDemoMode && {
+              isExpanded: moonExpanded,
+              onToggle: handleMoonToggle,
+            })}
+          />
         </div>
         <SkyNowCard />
 

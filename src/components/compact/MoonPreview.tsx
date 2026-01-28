@@ -236,9 +236,13 @@ const getDaysUntilNextPhase = (
 
 interface MoonPreviewProps {
   isExpanded?: boolean; // Optional controlled state from parent
+  onToggle?: (isExpanded: boolean) => void; // Optional callback when toggled
 }
 
-export const MoonPreview = ({ isExpanded }: MoonPreviewProps = {}) => {
+export const MoonPreview = ({
+  isExpanded,
+  onToggle,
+}: MoonPreviewProps = {}) => {
   const { user } = useUser();
   const {
     currentMoonPhase,
@@ -462,6 +466,7 @@ export const MoonPreview = ({ isExpanded }: MoonPreviewProps = {}) => {
       expanded={expanded}
       autoExpandOnDesktop
       isExpanded={isExpanded}
+      onToggle={onToggle}
       className='moon-preview-card'
     />
   );
