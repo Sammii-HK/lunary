@@ -2,6 +2,8 @@
 
 import { Copy, Check, Share2, ChevronDown } from 'lucide-react';
 import { useState } from 'react';
+import { conversionTracking } from '@/lib/analytics';
+import { useUser } from '@/context/UserContext';
 
 interface SocialShareButtonsProps {
   url: string;
@@ -16,6 +18,7 @@ export function SocialShareButtons({
   description,
   imageUrl,
 }: SocialShareButtonsProps) {
+  const { user } = useUser();
   const [copied, setCopied] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
   const shareText = `${title} ${url}`;
@@ -23,6 +26,7 @@ export function SocialShareButtons({
   const handleCopyLink = async (customMessage?: string) => {
     try {
       await navigator.clipboard.writeText(url);
+      conversionTracking.contentShared(user?.id, 'clipboard');
       if (customMessage) {
         alert(customMessage);
       } else {
@@ -45,6 +49,7 @@ export function SocialShareButtons({
           text: description || title,
           url,
         });
+        conversionTracking.contentShared(user?.id, 'native');
       } catch (err) {
         // User cancelled or error
         console.error('Share failed:', err);
@@ -94,6 +99,9 @@ export function SocialShareButtons({
               href={`https://twitter.com/intent/tweet?text=${encodedTitle}&url=${encodedUrl}`}
               target='_blank'
               rel='noopener noreferrer'
+              onClick={() =>
+                conversionTracking.contentShared(user?.id, 'twitter')
+              }
               className='inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-zinc-800/50 bg-zinc-900/30 hover:bg-zinc-900/50 text-zinc-300 hover:text-white transition-colors text-sm text-left'
             >
               <svg className='w-4 h-4' fill='currentColor' viewBox='0 0 24 24'>
@@ -105,6 +113,9 @@ export function SocialShareButtons({
               href={`https://www.facebook.com/sharer/sharer.php?u=${encodedUrl}&quote=${encodedDescription}`}
               target='_blank'
               rel='noopener noreferrer'
+              onClick={() =>
+                conversionTracking.contentShared(user?.id, 'facebook')
+              }
               className='inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-zinc-800/50 bg-zinc-900/30 hover:bg-zinc-900/50 text-zinc-300 hover:text-white transition-colors text-sm text-left'
             >
               <svg className='w-4 h-4' fill='currentColor' viewBox='0 0 24 24'>
@@ -113,7 +124,10 @@ export function SocialShareButtons({
               Share on Facebook
             </a>
             <button
-              onClick={handleInstagramShare}
+              onClick={() => {
+                handleInstagramShare();
+                conversionTracking.contentShared(user?.id, 'instagram');
+              }}
               className='inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-zinc-800/50 bg-zinc-900/30 hover:bg-zinc-900/50 text-zinc-300 hover:text-white transition-colors text-sm text-left'
             >
               <svg className='w-4 h-4' fill='currentColor' viewBox='0 0 24 24'>
@@ -125,6 +139,9 @@ export function SocialShareButtons({
               href={`https://www.threads.net/intent/post?text=${encodeURIComponent(shareText)}`}
               target='_blank'
               rel='noopener noreferrer'
+              onClick={() =>
+                conversionTracking.contentShared(user?.id, 'threads')
+              }
               className='inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-zinc-800/50 bg-zinc-900/30 hover:bg-zinc-900/50 text-zinc-300 hover:text-white transition-colors text-sm text-left'
             >
               <svg
@@ -140,6 +157,9 @@ export function SocialShareButtons({
               href={`https://bsky.app/intent/compose?text=${encodeURIComponent(shareText)}`}
               target='_blank'
               rel='noopener noreferrer'
+              onClick={() =>
+                conversionTracking.contentShared(user?.id, 'bluesky')
+              }
               className='inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-zinc-800/50 bg-zinc-900/30 hover:bg-zinc-900/50 text-zinc-300 hover:text-white transition-colors text-sm text-left'
             >
               <svg
@@ -155,6 +175,9 @@ export function SocialShareButtons({
               href={`https://www.reddit.com/submit?url=${encodedUrl}&title=${encodedTitle}`}
               target='_blank'
               rel='noopener noreferrer'
+              onClick={() =>
+                conversionTracking.contentShared(user?.id, 'reddit')
+              }
               className='inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-zinc-800/50 bg-zinc-900/30 hover:bg-zinc-900/50 text-zinc-300 hover:text-white transition-colors text-sm text-left'
             >
               <svg className='w-4 h-4' fill='currentColor' viewBox='0 0 24 24'>

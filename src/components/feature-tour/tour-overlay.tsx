@@ -44,46 +44,10 @@ export function TourOverlay({
     typeof step.title === 'function' ? step.title(userTier) : step.title;
 
   // Calculate position based on target element
+  // For now, always center to avoid off-screen positioning issues
   useEffect(() => {
-    if (step.placement === 'center') {
-      setPosition({ top: '50%', left: '50%' });
-      return;
-    }
-
-    const targetElement = document.querySelector(step.target);
-    if (!targetElement) {
-      setPosition({ top: '50%', left: '50%' });
-      return;
-    }
-
-    const rect = targetElement.getBoundingClientRect();
-    const cardWidth = 400; // max-w-md
-    const cardHeight = 300; // estimated
-    const padding = 16;
-
-    let top = '50%';
-    let left = '50%';
-
-    switch (step.placement) {
-      case 'top':
-        top = `${Math.max(padding, rect.top - cardHeight - padding)}px`;
-        left = `${rect.left + rect.width / 2}px`;
-        break;
-      case 'bottom':
-        top = `${rect.bottom + padding}px`;
-        left = `${rect.left + rect.width / 2}px`;
-        break;
-      case 'left':
-        top = `${rect.top + rect.height / 2}px`;
-        left = `${Math.max(padding, rect.left - cardWidth - padding)}px`;
-        break;
-      case 'right':
-        top = `${rect.top + rect.height / 2}px`;
-        left = `${rect.right + padding}px`;
-        break;
-    }
-
-    setPosition({ top, left });
+    // Always center the tour overlay for reliable positioning
+    setPosition({ top: '50%', left: '50%' });
   }, [step.target, step.placement, currentStep]);
 
   const handleAction = () => {
@@ -94,16 +58,8 @@ export function TourOverlay({
   };
 
   const getTransformClass = () => {
-    if (step.placement === 'center') {
-      return '-translate-x-1/2 -translate-y-1/2';
-    }
-    if (step.placement === 'top' || step.placement === 'bottom') {
-      return '-translate-x-1/2';
-    }
-    if (step.placement === 'left' || step.placement === 'right') {
-      return '-translate-y-1/2';
-    }
-    return '';
+    // Always center for now
+    return '-translate-x-1/2 -translate-y-1/2';
   };
 
   return (
@@ -119,7 +75,8 @@ export function TourOverlay({
         ref={cardRef}
         className={cn(
           'fixed z-50 bg-white dark:bg-gray-900 rounded-lg shadow-xl',
-          'max-w-md p-6 animate-in fade-in slide-in-from-bottom-4',
+          'max-w-md w-[calc(100vw-2rem)] max-h-[80vh] overflow-y-auto',
+          'p-6 animate-in fade-in slide-in-from-bottom-4',
           'border border-gray-200 dark:border-gray-800',
           getTransformClass(),
         )}

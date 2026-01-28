@@ -101,7 +101,8 @@ export function SmartTrialButton({
   const config = getButtonConfig();
 
   const trackClick = (hrefOverride?: string) => {
-    const hub = getContextualHub(pathname, 'app');
+    // Use 'universal' fallback to standardize with other CTA tracking
+    const hub = getContextualHub(pathname, 'universal');
     trackCtaClick({
       hub,
       ctaId: 'smart_trial',

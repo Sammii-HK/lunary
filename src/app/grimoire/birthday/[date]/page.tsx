@@ -7,9 +7,10 @@ import {
   getZodiacForDate,
   getDecanForDate,
   getNumerologyNumber,
-  generateAllBirthdates,
 } from '@/constants/seo/birthday-zodiac';
 
+// 30-day ISR revalidation
+export const revalidate = 2592000;
 interface BirthdayData {
   month: number;
   day: number;
@@ -47,9 +48,8 @@ function getOrdinalSuffix(n: number): string {
   return s[(v - 20) % 10] || s[v] || s[0];
 }
 
-export async function generateStaticParams() {
-  return generateAllBirthdates().map((date) => ({ date }));
-}
+// Removed generateStaticParams - using pure ISR for faster builds
+// Pages are generated on-demand and cached with 30-day revalidation
 
 export async function generateMetadata({
   params,

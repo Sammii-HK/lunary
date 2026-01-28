@@ -37,7 +37,9 @@ export async function getUserTourProgress(userId: string) {
       .map((p) => p.tourId),
     lastShownAt: progress.reduce(
       (acc, p) => {
-        acc[p.tourId] = p.lastShownAt;
+        if (p.lastShownAt) {
+          acc[p.tourId] = p.lastShownAt;
+        }
         return acc;
       },
       {} as Record<string, Date>,
@@ -76,6 +78,8 @@ export async function getUserTourContext(
     tarotCount,
     journalCount,
     daysActive,
-    hasSeenTour: createHasSeenTourFn(progress.completed, progress.dismissed),
+    // Return arrays instead of function since this will be serialized to JSON
+    completedTours: progress.completed,
+    dismissedTours: progress.dismissed,
   };
 }

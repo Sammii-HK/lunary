@@ -66,14 +66,14 @@ import Link from 'next/link';
 import {
   YEARLY_TRANSITS,
   getTransitsForYear,
-  generateAllTransitParams,
 } from '@/constants/seo/yearly-transits';
 import { SEOContentTemplate } from '@/components/grimoire/SEOContentTemplate';
 import { createGrimoireMetadata } from '@/lib/grimoire-metadata';
 
-export async function generateStaticParams() {
-  return generateAllTransitParams();
-}
+// 30-day ISR revalidation
+export const revalidate = 2592000;
+// Removed generateStaticParams - using pure ISR for faster builds
+// Pages are generated on-demand and cached with 30-day revalidation
 
 export async function generateMetadata({
   params,

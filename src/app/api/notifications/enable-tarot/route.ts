@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { sql } from '@vercel/postgres';
+import { conversionTracking } from '@/lib/analytics';
 
 // This endpoint allows users to enable personalized tarot notifications
 // and store their personal data (birthday, name) in subscription preferences
@@ -120,6 +121,9 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Track notification preference change
+    conversionTracking.notificationPreferenceChanged(userId, 'tarot', true);
+
     return NextResponse.json({
       success: true,
       message: 'Personalized tarot notifications enabled',
@@ -139,7 +143,7 @@ export async function POST(request: NextRequest) {
 
 export async function DELETE(request: NextRequest) {
   try {
-    const { endpoint } = await request.json();
+    const { endpoint, userId } = await request.json();
 
     if (!endpoint) {
       return NextResponse.json(
@@ -166,6 +170,9 @@ export async function DELETE(request: NextRequest) {
         { status: 404 },
       );
     }
+
+    // Track notification preference change
+    conversionTracking.notificationPreferenceChanged(userId, 'tarot', false);
 
     return NextResponse.json({
       success: true,

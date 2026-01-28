@@ -27,12 +27,20 @@ export default function HoroscopePage() {
       );
 
   useEffect(() => {
-    if (hasPersonalHoroscopeAccess && user?.id) {
-      conversionTracking.horoscopeViewed(user.id, subscription.plan);
+    if (!user?.id) return;
+
+    const isPaidUser =
+      subscription.plan === 'monthly' || subscription.plan === 'yearly';
+
+    if (hasPersonalHoroscopeAccess && isPaidUser) {
+      // Paid users: track personalized horoscope view
       conversionTracking.personalizedHoroscopeViewed(
         user.id,
         subscription.plan,
       );
+    } else if (user.id) {
+      // Free users: track generic horoscope view
+      conversionTracking.horoscopeViewed(user.id, subscription.plan);
     }
   }, [hasPersonalHoroscopeAccess, user?.id, subscription.plan]);
 

@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useUser } from '@/context/UserContext';
 import { useAuthStatus } from './AuthStatus';
 import { Copy, Check, Users, Gift, Share2, RefreshCw } from 'lucide-react';
+import { conversionTracking } from '@/lib/analytics';
 
 export function ReferralProgram() {
   const { user } = useUser();
@@ -82,6 +83,9 @@ export function ReferralProgram() {
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
       setError(null);
+
+      // Track referral link copy
+      conversionTracking.referralLinkCopied(user?.id);
     } catch (copyError) {
       console.error('Failed to copy referral link:', copyError);
       setError(
@@ -111,6 +115,9 @@ export function ReferralProgram() {
           url: referralUrl,
         });
         setError(null);
+
+        // Track referral link share
+        conversionTracking.referralLinkShared(user?.id, 'native');
       } catch (shareError) {
         const err = shareError as Error;
         if (err.name !== 'AbortError') {

@@ -28,7 +28,6 @@ import { UserProvider } from '@/context/UserContext';
 import { CookieConsent } from '@/components/CookieConsent';
 import { AppOpenedTracker } from '@/components/AppOpenedTracker';
 import { AstronomyProviderWrapper } from '@/components/AstronomyProviderWrapper';
-import { TourProvider } from '@/context/TourContext';
 
 export async function generateMetadata(): Promise<Metadata> {
   return {
@@ -150,28 +149,26 @@ export default function RootLayout({
           <AuthStatusProvider>
             <ErrorBoundaryWrapper>
               <UserProvider>
-                <TourProvider>
-                  <AstronomyProviderWrapper>
-                    <Suspense
-                      fallback={
-                        <main className='flex flex-col flex-1 w-full min-h-0 h-[calc(100vh-4rem)]'>
-                          {children}
-                        </main>
-                      }
-                    >
-                      <ConditionalMainWrapper>
-                        <AppOpenedTracker />
-                        <ErrorBoundaryWrapper>{children}</ErrorBoundaryWrapper>
-                        <Analytics />
-                        <SpeedInsights />
-                      </ConditionalMainWrapper>
-                    </Suspense>
-                    <Suspense fallback={null}>
-                      <AppChrome />
-                    </Suspense>
-                    <CookieConsent />
-                  </AstronomyProviderWrapper>
-                </TourProvider>
+                <AstronomyProviderWrapper>
+                  <Suspense
+                    fallback={
+                      <main className='flex flex-col flex-1 w-full min-h-0 h-[calc(100vh-4rem)]'>
+                        {children}
+                      </main>
+                    }
+                  >
+                    <ConditionalMainWrapper>
+                      <AppOpenedTracker />
+                      <ErrorBoundaryWrapper>{children}</ErrorBoundaryWrapper>
+                      <Analytics />
+                      <SpeedInsights />
+                    </ConditionalMainWrapper>
+                  </Suspense>
+                  <Suspense fallback={null}>
+                    <AppChrome />
+                  </Suspense>
+                  <CookieConsent />
+                </AstronomyProviderWrapper>
               </UserProvider>
             </ErrorBoundaryWrapper>
           </AuthStatusProvider>

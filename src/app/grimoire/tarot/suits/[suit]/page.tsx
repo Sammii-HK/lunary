@@ -6,13 +6,12 @@ import { tarotSuits } from '@/constants/tarot';
 import { tarotCards } from '../../../../../../utils/tarot/tarot-cards';
 import { stringToKebabCase } from '../../../../../../utils/string';
 
+// 30-day ISR revalidation
+export const revalidate = 2592000;
 const suitKeys = Object.keys(tarotSuits);
 
-export async function generateStaticParams() {
-  return suitKeys.map((suit) => ({
-    suit: stringToKebabCase(suit),
-  }));
-}
+// Removed generateStaticParams - using pure ISR for faster builds
+// Pages are generated on-demand and cached with 30-day revalidation
 
 export async function generateMetadata({
   params,

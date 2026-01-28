@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useSubscription } from '../hooks/useSubscription';
+import { useUser } from '@/context/UserContext';
 import { useAuthStatus } from './AuthStatus';
 import { SmartTrialButton } from './SmartTrialButton';
 import { conversionTracking } from '@/lib/analytics';
@@ -64,6 +65,11 @@ export function UpgradePrompt({
     isSubscribed: _isSubscribed,
   } = subscription;
 
+  const { user } = useUser();
+  const hasCouponOrDiscount = Boolean(
+    (user as any)?.couponId || (user as any)?.hasDiscount,
+  );
+
   // Check if trial upsell was dismissed recently
   useEffect(() => {
     if (isTrialActive) {
@@ -85,26 +91,36 @@ export function UpgradePrompt({
     }
   }, [isTrialActive]);
 
+  useEffect(() => {
+    if (onShow && showUpgradePrompt) {
+      onShow();
+      conversionTracking.upgradePromptShown(featureName);
+      // Track paywall shown
+      conversionTracking.paywallShown(authState.user?.id, featureName);
+    }
+  }, [onShow, showUpgradePrompt, featureName, authState.user?.id]);
+
   // For trial-specific prompts, only show if user is actually on trial AND not dismissed
   // For general upgrade prompts, show if showUpgradePrompt is true (free users)
   // This prevents showing trial upsells to paid users who are not on trial
   if (isTrialActive && isDismissed) return null;
   if (!isTrialActive && !showUpgradePrompt) return null;
 
-  if (onShow && showUpgradePrompt) {
-    onShow();
-    conversionTracking.upgradePromptShown(featureName);
-  }
-
   const planLabel = requiredPlan ? PLAN_LABELS[requiredPlan] : undefined;
   const dayLabel = trialDaysRemaining === 1 ? 'day' : 'days';
-  const defaultTitle = isTrialActive
+
+  // Don't show trial countdown if user has a coupon/discount
+  // They likely have a special deal that continues past trial
+  const shouldShowTrialCountdown =
+    isTrialActive && !hasCouponOrDiscount && showTrialCountdown;
+
+  const defaultTitle = shouldShowTrialCountdown
     ? `Trial: ${trialDaysRemaining} ${dayLabel} left`
     : planLabel
       ? `Upgrade to ${planLabel}`
       : 'Unlock Personalized Features';
 
-  const defaultDescription = isTrialActive
+  const defaultDescription = shouldShowTrialCountdown
     ? 'Continue enjoying premium cosmic insights after your trial'
     : planLabel
       ? `This feature requires ${planLabel}. Upgrade to unlock it.`
@@ -115,10 +131,11 @@ export function UpgradePrompt({
 
   const handleUpgradeClick = () => {
     conversionTracking.upgradeClicked(featureName);
+    conversionTracking.paywallAccepted(authState.user?.id, featureName);
   };
 
   const handleDismiss = () => {
-    if (isTrialActive) {
+    if (shouldShowTrialCountdown) {
       // Store dismissal timestamp for trial upsells
       localStorage.setItem(
         TRIAL_UPSELL_DISMISSAL_KEY,
@@ -134,7 +151,7 @@ export function UpgradePrompt({
         <div
           className={`bg-gradient-to-r from-lunary-primary-900 to-lunary-secondary-900 border border-lunary-primary-700 rounded-lg p-4 relative ${className}`}
         >
-          {isTrialActive && (
+          {shouldShowTrialCountdown && (
             <button
               onClick={handleDismiss}
               className='absolute top-2 right-2 text-zinc-400 hover:text-zinc-100 transition-colors p-1'
@@ -162,7 +179,7 @@ export function UpgradePrompt({
             >
               <Link href={authState.isAuthenticated ? '/pricing' : '/auth'}>
                 {authState.isAuthenticated
-                  ? isTrialActive
+                  ? shouldShowTrialCountdown
                     ? 'Continue'
                     : 'Upgrade'
                   : 'Sign In'}
@@ -197,9 +214,9 @@ export function UpgradePrompt({
     case 'floating':
       return (
         <div
-          className={`fixed bottom-4 right-4 bg-zinc-900 border border-zinc-700 rounded-lg p-4 max-w-sm z-50 shadow-lg relative ${className}`}
+          className={`fixed bottom-4 right-4 bg-zinc-900 border border-zinc-700 rounded-lg p-4 max-w-sm z-50 shadow-lg ${className}`}
         >
-          {isTrialActive && (
+          {shouldShowTrialCountdown && (
             <button
               onClick={handleDismiss}
               className='absolute top-2 right-2 text-zinc-400 hover:text-zinc-100 transition-colors p-1'
@@ -224,7 +241,7 @@ export function UpgradePrompt({
               >
                 <Link href={authState.isAuthenticated ? '/pricing' : '/auth'}>
                   {authState.isAuthenticated
-                    ? isTrialActive
+                    ? shouldShowTrialCountdown
                       ? 'Continue Trial'
                       : 'Upgrade now'
                     : 'Sign In'}

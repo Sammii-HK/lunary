@@ -10,7 +10,6 @@ import {
   SIGN_ELEMENTS,
   SIGN_RULERS,
   getMonthlyTheme,
-  generateAllHoroscopeParams,
   ZodiacSign,
   Month,
 } from '@/constants/seo/monthly-horoscope';
@@ -18,6 +17,9 @@ import { SEOContentTemplate } from '@/components/grimoire/SEOContentTemplate';
 import { HoroscopeCosmicConnections } from '@/components/grimoire/HoroscopeCosmicConnections';
 import { monthMeta, articleSchema } from '@/lib/horoscope-meta';
 import { ArrowLeft, ArrowRight } from 'lucide-react';
+
+// 30-day revalidation for monthly horoscopes
+export const revalidate = 2592000;
 
 function resolveOgImageUrl(value: unknown): string | undefined {
   if (!value) return undefined;
@@ -57,9 +59,8 @@ function validateParams(params: PageParams): {
   return { sign, year, month, monthNumber };
 }
 
-export async function generateStaticParams() {
-  return generateAllHoroscopeParams();
-}
+// Removed generateStaticParams - using pure ISR for faster builds
+// Pages are generated on-demand and cached with 30-day revalidation
 
 export async function generateMetadata({
   params,

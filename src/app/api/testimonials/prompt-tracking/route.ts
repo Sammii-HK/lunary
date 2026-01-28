@@ -34,8 +34,8 @@ export async function GET() {
       return NextResponse.json({
         shouldPrompt: false, // Don't prompt immediately on first visit
         tracking: {
-          firstSeen: newTracking.firstSeen.getTime(),
-          dontAskUntil: newTracking.dontAskUntil.getTime(),
+          firstSeen: newTracking.firstSeen!.getTime(),
+          dontAskUntil: newTracking.dontAskUntil!.getTime(),
           submitted: newTracking.submitted,
         },
       });
@@ -43,8 +43,8 @@ export async function GET() {
 
     // Check if should prompt
     const now = Date.now();
-    const firstSeen = tracking.firstSeen.getTime();
-    const dontAskUntil = tracking.dontAskUntil.getTime();
+    const firstSeen = tracking.firstSeen!.getTime();
+    const dontAskUntil = tracking.dontAskUntil!.getTime();
 
     const shouldPrompt =
       !tracking.submitted && now >= firstSeen + WEEK_MS && now >= dontAskUntil;
@@ -91,7 +91,7 @@ export async function POST(req: Request) {
         );
       }
 
-      const firstSeen = tracking.firstSeen.getTime();
+      const firstSeen = tracking.firstSeen!.getTime();
       const reaskAt = new Date(firstSeen + THREE_WEEK_MS);
 
       await prisma.testimonialPromptTracking.update({

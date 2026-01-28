@@ -3,6 +3,8 @@ import { notFound } from 'next/navigation';
 import { SEOContentTemplate } from '@/components/grimoire/SEOContentTemplate';
 import { stringToKebabCase } from '../../../../../../utils/string';
 
+// 30-day ISR revalidation
+export const revalidate = 2592000;
 const witchTypes = {
   'green-witch': {
     name: 'Green Witch',
@@ -80,11 +82,8 @@ const witchTypes = {
 
 type WitchKey = keyof typeof witchTypes;
 
-export async function generateStaticParams() {
-  return Object.keys(witchTypes).map((key) => ({
-    witch: key,
-  }));
-}
+// Removed generateStaticParams - using pure ISR for faster builds
+// Pages are generated on-demand and cached with 30-day revalidation
 
 export async function generateMetadata({
   params,

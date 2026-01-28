@@ -5,6 +5,8 @@ import { createItemListSchema, renderJsonLd } from '@/lib/schema';
 import { annualFullMoons } from '@/constants/moon/annualFullMoons';
 import { stringToKebabCase } from '../../../../../utils/string';
 
+// 30-day ISR revalidation
+export const revalidate = 2592000;
 export const metadata: Metadata = {
   title: 'Full Moon Names: All 12 Monthly Moons & Meanings | Lunary',
   description:

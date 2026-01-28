@@ -5,11 +5,10 @@ import { stringToKebabCase } from '../../../../../utils/string';
 import { createGrimoireMetadata } from '@/lib/grimoire-metadata';
 import { createEventSchema, renderJsonLd } from '@/lib/schema';
 
-export async function generateStaticParams() {
-  return wheelOfTheYearSabbats.map((sabbat) => ({
-    sabbat: stringToKebabCase(sabbat.name),
-  }));
-}
+// 30-day ISR revalidation
+export const revalidate = 2592000;
+// Removed generateStaticParams - using pure ISR for faster builds
+// Pages are generated on-demand and cached with 30-day revalidation
 
 export async function generateMetadata({
   params,

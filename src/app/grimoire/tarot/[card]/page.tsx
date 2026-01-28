@@ -9,6 +9,9 @@ import { createTarotCardSchema, renderJsonLd } from '@/lib/schema';
 import { getTarotYesNo } from '@/utils/tarot/yes-no';
 
 // Helper to find card by slug
+
+// 30-day ISR revalidation
+export const revalidate = 2592000;
 function findCardBySlug(slug: string) {
   // Check Major Arcana
   for (const [key, card] of Object.entries(tarotCards.majorArcana)) {
@@ -53,11 +56,8 @@ function getAllCardSlugs() {
   return slugs;
 }
 
-export async function generateStaticParams() {
-  return getAllCardSlugs().map((slug) => ({
-    card: slug,
-  }));
-}
+// Removed generateStaticParams - using pure ISR for faster builds
+// Pages are generated on-demand and cached with 30-day revalidation
 
 export async function generateMetadata({
   params,

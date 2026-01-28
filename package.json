@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "next dev --turbopack",
     "postinstall": "prisma generate",
-    "build": "NODE_OPTIONS='--max-old-space-size=6144' pnpm run generate:sitemap-last-modified && NODE_OPTIONS='--max-old-space-size=6144' next build",
+    "build": "NODE_OPTIONS='--max-old-space-size=8192' pnpm run generate:sitemap-last-modified && NODE_OPTIONS='--max-old-space-size=8192' next build",
     "generate:sitemap-last-modified": "node scripts/generate-sitemap-last-modified.js",
     "start": "next start",
     "lint": "eslint . --fix --ext .ts,.tsx",
@@ -149,7 +149,6 @@
     "@remotion/bundler": "^4.0.409",
     "@remotion/cli": "^4.0.409",
     "@remotion/renderer": "^4.0.409",
-    "@sentry/nextjs": "^10",
     "@stripe/stripe-js": "^7.9.0",
     "@types/better-sqlite3": "^7.6.13",
     "@types/pg": "^8.15.6",

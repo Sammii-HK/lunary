@@ -2,6 +2,8 @@ import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { SEOContentTemplate } from '@/components/grimoire/SEOContentTemplate';
 
+// 30-day ISR revalidation
+export const revalidate = 2592000;
 interface MoonData {
   type: 'full' | 'new';
   month: string;
@@ -606,11 +608,8 @@ const moonData2026: Record<string, MoonData> = {
   },
 };
 
-export async function generateStaticParams() {
-  return Object.keys(moonData2026).map((moonPhase) => ({
-    moonPhase,
-  }));
-}
+// Removed generateStaticParams - using pure ISR for faster builds
+// Pages are generated on-demand and cached with 30-day revalidation
 
 export async function generateMetadata({
   params,

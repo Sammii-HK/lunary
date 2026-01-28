@@ -5,14 +5,13 @@ import { CosmicConnections } from '@/components/grimoire/CosmicConnections';
 import { retrogradeInfo } from '@/constants/grimoire/seo-data';
 import { createEventSchema, renderJsonLd } from '@/lib/schema';
 
+// 30-day ISR revalidation
+export const revalidate = 2592000;
 const retrogradeKeys = Object.keys(retrogradeInfo);
 const year = new Date().getFullYear();
 
-export async function generateStaticParams() {
-  return retrogradeKeys.map((planet) => ({
-    planet: planet,
-  }));
-}
+// Removed generateStaticParams - using pure ISR for faster builds
+// Pages are generated on-demand and cached with 30-day revalidation
 
 export async function generateMetadata({
   params,

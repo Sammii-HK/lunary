@@ -4,6 +4,8 @@ import { SEOContentTemplate } from '@/components/grimoire/SEOContentTemplate';
 import { correspondencesData } from '@/constants/grimoire/correspondences';
 import { stringToKebabCase } from '../../../../../utils/string';
 
+// 30-day ISR revalidation
+export const revalidate = 2592000;
 export const metadata: Metadata = {
   title: 'Days of the Week Correspondences: Planetary Magic | Lunary',
   description:

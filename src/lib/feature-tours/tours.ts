@@ -116,6 +116,7 @@ export const FEATURE_TOURS: FeatureTour[] = [
     trigger: 'limit_hit',
     requiredTier: ['free'],
     showUpgradePrompt: true,
+    triggerCondition: () => false, // Only triggered manually when limit actually hit
     steps: [
       {
         target: '.chat-input-container',
@@ -144,6 +145,7 @@ export const FEATURE_TOURS: FeatureTour[] = [
     trigger: 'limit_hit',
     requiredTier: ['free'],
     showUpgradePrompt: true,
+    triggerCondition: () => false, // Only triggered manually when limit actually hit
     steps: [
       {
         target: '.tarot-container',

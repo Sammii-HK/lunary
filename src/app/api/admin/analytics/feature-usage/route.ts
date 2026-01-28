@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { sql } from '@vercel/postgres';
 import { resolveDateRange, formatTimestamp } from '@/lib/analytics/date-range';
+import { ANALYTICS_CACHE_TTL_SECONDS } from '@/lib/analytics-cache-config';
 
 // Canonical event types shown in the product feature panel.
 const FEATURE_EVENTS = [
@@ -129,11 +130,16 @@ export async function GET(request: NextRequest) {
       }),
     );
 
-    return NextResponse.json({
+    const response = NextResponse.json({
       features,
       heatmap,
       source: 'database',
     });
+    response.headers.set(
+      'Cache-Control',
+      `private, max-age=${ANALYTICS_CACHE_TTL_SECONDS}`,
+    );
+    return response;
   } catch (error) {
     console.error('[analytics/feature-usage] Failed to load metrics', error);
     return NextResponse.json(

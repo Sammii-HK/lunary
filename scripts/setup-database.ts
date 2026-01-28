@@ -1461,9 +1461,46 @@ async function setupDatabase() {
 
     console.log('✅ Daily thread modules table created');
 
+    // Metric snapshots for weekly/monthly growth tracking
+    await sql`
+      CREATE TABLE IF NOT EXISTS metric_snapshots (
+        period_type TEXT NOT NULL CHECK (period_type IN ('weekly', 'monthly')),
+        period_key TEXT NOT NULL,
+        period_start DATE NOT NULL,
+        period_end DATE NOT NULL,
+
+        new_signups INTEGER NOT NULL DEFAULT 0,
+        new_trials INTEGER NOT NULL DEFAULT 0,
+        new_paying_subscribers INTEGER NOT NULL DEFAULT 0,
+
+        wau INTEGER NOT NULL DEFAULT 0,
+        activation_rate NUMERIC(5, 2) NOT NULL DEFAULT 0,
+
+        trial_to_paid_conversion_rate NUMERIC(5, 2) NOT NULL DEFAULT 0,
+
+        mrr NUMERIC(10, 2) NOT NULL DEFAULT 0,
+        active_subscribers INTEGER NOT NULL DEFAULT 0,
+
+        churn_rate NUMERIC(5, 2) NOT NULL DEFAULT 0,
+        d7_retention NUMERIC(5, 2),
+
+        extras JSONB,
+
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+        updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+
+        PRIMARY KEY (period_type, period_key)
+      )
+    `;
+
+    await sql`CREATE INDEX IF NOT EXISTS idx_metric_snapshots_type_start ON metric_snapshots(period_type, period_start)`;
+    await sql`CREATE INDEX IF NOT EXISTS idx_metric_snapshots_created_at ON metric_snapshots(created_at)`;
+
+    console.log('✅ Metric snapshots table created');
+
     console.log('✅ Database setup complete!');
     console.log(
-      '📊 Database ready for push subscriptions, conversion tracking, social posts, subscriptions, tarot readings, AI threads, user profiles, shop data, notes, API keys, consent, email preferences, user attribution, and videos',
+      '📊 Database ready for push subscriptions, conversion tracking, social posts, subscriptions, tarot readings, AI threads, user profiles, shop data, notes, API keys, consent, email preferences, user attribution, videos, and metric snapshots',
     );
   } catch (error) {
     console.error('❌ Database setup failed:', error);

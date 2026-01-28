@@ -4,13 +4,12 @@ import { SEOContentTemplate } from '@/components/grimoire/SEOContentTemplate';
 import { correspondencesData } from '@/constants/grimoire/correspondences';
 import { stringToKebabCase } from '../../../../../../utils/string';
 
+// 30-day ISR revalidation
+export const revalidate = 2592000;
 const flowerKeys = Object.keys(correspondencesData.flowers);
 
-export async function generateStaticParams() {
-  return flowerKeys.map((flower) => ({
-    flower: stringToKebabCase(flower),
-  }));
-}
+// Removed generateStaticParams - using pure ISR for faster builds
+// Pages are generated on-demand and cached with 30-day revalidation
 
 export async function generateMetadata({
   params,

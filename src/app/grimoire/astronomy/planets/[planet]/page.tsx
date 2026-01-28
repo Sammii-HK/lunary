@@ -13,13 +13,12 @@ import {
   getWikipediaUrl,
 } from '@/constants/entity-relationships';
 
+// 30-day ISR revalidation
+export const revalidate = 2592000;
 const planetKeys = Object.keys(planetaryBodies);
 
-export async function generateStaticParams() {
-  return planetKeys.map((planet) => ({
-    planet: planet.toLowerCase(),
-  }));
-}
+// Removed generateStaticParams - using pure ISR for faster builds
+// Pages are generated on-demand and cached with 30-day revalidation
 
 export async function generateMetadata({
   params,

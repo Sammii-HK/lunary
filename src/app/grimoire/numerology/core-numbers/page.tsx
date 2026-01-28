@@ -5,6 +5,8 @@ import { lifePathNumbers } from '@/constants/grimoire/numerology-data';
 import { NumerologyProfileCalculator } from '@/components/grimoire/NumerologyProfileCalculator';
 import { CoreNumbersCalculatorExtras } from '@/components/grimoire/CoreNumbersCalculatorExtras';
 
+// 30-day ISR revalidation
+export const revalidate = 2592000;
 const coreNumberKeys = ['1', '2', '3', '4', '5', '6', '7', '8', '9'];
 
 export const metadata: Metadata = {

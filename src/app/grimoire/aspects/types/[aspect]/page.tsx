@@ -5,13 +5,12 @@ import { astrologicalAspects } from '@/constants/grimoire/seo-data';
 import { stringToKebabCase } from '../../../../../../utils/string';
 import { createCosmicEntitySchema, renderJsonLd } from '@/lib/schema';
 
+// 30-day ISR revalidation
+export const revalidate = 2592000;
 const aspectKeys = Object.keys(astrologicalAspects);
 
-export async function generateStaticParams() {
-  return aspectKeys.map((aspect) => ({
-    aspect: stringToKebabCase(aspect),
-  }));
-}
+// Removed generateStaticParams - using pure ISR for faster builds
+// Pages are generated on-demand and cached with 30-day revalidation
 
 export async function generateMetadata({
   params,

@@ -1,16 +1,12 @@
 import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { SEOContentTemplate } from '@/components/grimoire/SEOContentTemplate';
-import {
-  mirrorHours,
-  mirrorHourKeys,
-} from '@/constants/grimoire/clock-numbers-data';
+import { mirrorHours } from '@/constants/grimoire/clock-numbers-data';
 
-export async function generateStaticParams() {
-  return mirrorHourKeys.map((time) => ({
-    time: time.replace(':', '-'),
-  }));
-}
+// 30-day ISR revalidation
+export const revalidate = 2592000;
+// Removed generateStaticParams - using pure ISR for faster builds
+// Pages are generated on-demand and cached with 30-day revalidation
 
 export async function generateMetadata({
   params,

@@ -6,13 +6,12 @@ import { stringToKebabCase } from '../../../../../utils/string';
 import { createGrimoireMetadata } from '@/lib/grimoire-metadata';
 import { createCosmicEntitySchema, renderJsonLd } from '@/lib/schema';
 
+// 30-day ISR revalidation
+export const revalidate = 2592000;
 const chakraKeys = Object.keys(chakras);
 
-export async function generateStaticParams() {
-  return chakraKeys.map((chakra) => ({
-    chakra: stringToKebabCase(chakra),
-  }));
-}
+// Removed generateStaticParams - using pure ISR for faster builds
+// Pages are generated on-demand and cached with 30-day revalidation
 
 export async function generateMetadata({
   params,

@@ -2,6 +2,8 @@ import { Metadata } from 'next';
 import { SEOContentTemplate } from '@/components/grimoire/SEOContentTemplate';
 import { createHowToSchema, renderJsonLd } from '@/lib/schema';
 
+// 30-day ISR revalidation
+export const revalidate = 2592000;
 export const metadata: Metadata = {
   title: 'Omen Reading: Signs from Nature, Animals & Synchronicities | Lunary',
   description:

@@ -5,6 +5,9 @@ import { wheelOfTheYearSabbats } from '@/constants/sabbats';
 import { stringToKebabCase } from '../../../../../utils/string';
 
 // Comprehensive sabbat data with detailed information
+
+// 30-day ISR revalidation
+export const revalidate = 2592000;
 const sabbatDetails: Record<
   string,
   {
@@ -499,11 +502,8 @@ function getAllSabbatSlugs() {
   return wheelOfTheYearSabbats.map((sabbat) => stringToKebabCase(sabbat.name));
 }
 
-export async function generateStaticParams() {
-  return getAllSabbatSlugs().map((slug) => ({
-    sabbat: slug,
-  }));
-}
+// Removed generateStaticParams - using pure ISR for faster builds
+// Pages are generated on-demand and cached with 30-day revalidation
 
 export async function generateMetadata({
   params,

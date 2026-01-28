@@ -4,6 +4,8 @@ import { ExploreGrimoire } from '@/components/grimoire/ExploreGrimoire';
 import { Compass } from 'lucide-react';
 import { GrimoireBreadcrumbs } from '@/components/grimoire/GrimoireBreadcrumbs';
 
+// 30-day ISR revalidation
+export const revalidate = 2592000;
 const houses = [
   { number: 1, name: 'First House', theme: 'Self & Identity' },
   { number: 2, name: 'Second House', theme: 'Resources & Values' },

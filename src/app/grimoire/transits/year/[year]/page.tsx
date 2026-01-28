@@ -12,6 +12,8 @@ import { getCosmicConnections } from '@/lib/cosmicConnectionsConfig';
 import { createItemListSchema } from '@/lib/schema';
 import yearlyTransitsContent from '@/data/grimoire/yearly-transits-content.json';
 
+// 30-day ISR revalidation
+export const revalidate = 2592000;
 const AVAILABLE_YEARS = Array.from(
   new Set(YEARLY_TRANSITS.map((transit) => transit.year)),
 ).sort((a, b) => a - b);
@@ -117,11 +119,8 @@ const getTransitsYearContent = (year: number): TransitsYearContent => {
   return resolveContent(merged, year);
 };
 
-export async function generateStaticParams() {
-  return AVAILABLE_YEARS.map((year) => ({
-    year: String(year),
-  }));
-}
+// Removed generateStaticParams - using pure ISR for faster builds
+// Pages are generated on-demand and cached with 30-day revalidation
 
 export async function generateMetadata({
   params,

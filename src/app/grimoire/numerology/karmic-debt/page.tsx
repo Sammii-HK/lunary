@@ -8,6 +8,8 @@ import {
 import { NumerologyProfileCalculator } from '@/components/grimoire/NumerologyProfileCalculator';
 import { KarmicDebtCalculatorExtras } from '@/components/grimoire/KarmicDebtCalculatorExtras';
 
+// 30-day ISR revalidation
+export const revalidate = 2592000;
 export const metadata: Metadata = {
   title: 'Karmic Debt Numbers 13, 14, 16, 19: Meanings & Healing | Lunary',
   description:

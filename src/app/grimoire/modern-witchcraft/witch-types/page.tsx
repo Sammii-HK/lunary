@@ -6,6 +6,8 @@ import witchTypesData from '@/constants/witch-types.json';
 import { getCosmicConnections } from '@/lib/cosmicConnectionsConfig';
 import CosmicConnections from '@/components/grimoire/CosmicConnections';
 
+// 30-day ISR revalidation
+export const revalidate = 2592000;
 export const metadata: Metadata = {
   title: 'Types of Witches: Meanings, Traits and Practices | Lunary',
   description:

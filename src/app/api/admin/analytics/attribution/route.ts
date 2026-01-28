@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { sql } from '@vercel/postgres';
+import { ANALYTICS_CACHE_TTL_SECONDS } from '@/lib/analytics-cache-config';
 
 const TEST_EMAIL_PATTERN = '%@test.lunary.app';
 const TEST_EMAIL_EXACT = 'test@test.lunary.app';
@@ -26,8 +27,8 @@ export async function GET(request: NextRequest) {
 
     const dateFilter =
       startDate && endDate
-        ? `WHERE ua.created_at >= '${startDate}'::date AND ua.created_at <= '${endDate}'::date + INTERVAL '1 day'`
-        : "WHERE ua.created_at >= NOW() - INTERVAL '30 days'";
+        ? `WHERE COALESCE(ua.first_touch_at, ua.created_at) >= '${startDate}'::date AND COALESCE(ua.first_touch_at, ua.created_at) <= '${endDate}'::date + INTERVAL '1 day'`
+        : "WHERE COALESCE(ua.first_touch_at, ua.created_at) >= NOW() - INTERVAL '30 days'";
 
     const sourceBreakdown = await sql.query(`
       SELECT 
@@ -106,11 +107,10 @@ export async function GET(request: NextRequest) {
       ${testUserFilter}
     `);
 
-    // Fix ambiguous column reference by properly qualifying created_at
     const conversionDateFilter =
       startDate && endDate
-        ? `WHERE ua.created_at >= '${startDate}'::date AND ua.created_at <= '${endDate}'::date + INTERVAL '1 day'`
-        : "WHERE ua.created_at >= NOW() - INTERVAL '30 days'";
+        ? `WHERE COALESCE(ua.first_touch_at, ua.created_at) >= '${startDate}'::date AND COALESCE(ua.first_touch_at, ua.created_at) <= '${endDate}'::date + INTERVAL '1 day'`
+        : "WHERE COALESCE(ua.first_touch_at, ua.created_at) >= NOW() - INTERVAL '30 days'";
 
     const conversionBySource = await sql.query(`
       SELECT 
@@ -130,7 +130,7 @@ export async function GET(request: NextRequest) {
       ORDER BY total_users DESC
     `);
 
-    return NextResponse.json({
+    const response = NextResponse.json({
       summary: {
         totalUsers: organicStats.rows[0]?.total_users || 0,
         organicUsers: organicStats.rows[0]?.organic_users || 0,
@@ -143,6 +143,11 @@ export async function GET(request: NextRequest) {
       dailyTrend: dailyTrend.rows,
       conversionBySource: conversionBySource.rows,
     });
+    response.headers.set(
+      'Cache-Control',
+      `private, max-age=${ANALYTICS_CACHE_TTL_SECONDS}`,
+    );
+    return response;
   } catch (error) {
     console.error('Attribution analytics error:', error);
     return NextResponse.json(

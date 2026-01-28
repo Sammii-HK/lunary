@@ -14,9 +14,10 @@ import { CosmicConnections } from '@/components/grimoire/CosmicConnections';
 import { SEOContentTemplate } from '@/components/grimoire/SEOContentTemplate';
 import { Heading } from '@/components/ui/Heading';
 
-export async function generateStaticParams() {
-  return PLANETS_FOR_HOUSES.map((planet) => ({ planet }));
-}
+// 30-day ISR revalidation
+export const revalidate = 2592000;
+// Removed generateStaticParams - using pure ISR for faster builds
+// Pages are generated on-demand and cached with 30-day revalidation
 
 export async function generateMetadata({
   params,

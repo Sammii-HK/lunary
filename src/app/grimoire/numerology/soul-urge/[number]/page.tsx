@@ -2,16 +2,12 @@ import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { SEOContentTemplate } from '@/components/grimoire/SEOContentTemplate';
 import { NumerologyProfileCalculator } from '@/components/grimoire/NumerologyProfileCalculator';
-import {
-  soulUrgeNumbers,
-  soulUrgeKeys,
-} from '@/constants/grimoire/numerology-extended-data';
+import { soulUrgeNumbers } from '@/constants/grimoire/numerology-extended-data';
 
-export async function generateStaticParams() {
-  return soulUrgeKeys.map((number) => ({
-    number,
-  }));
-}
+// 30-day ISR revalidation
+export const revalidate = 2592000;
+// Removed generateStaticParams - using pure ISR for faster builds
+// Pages are generated on-demand and cached with 30-day revalidation
 
 export async function generateMetadata({
   params,

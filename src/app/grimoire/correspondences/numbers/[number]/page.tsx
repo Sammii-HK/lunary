@@ -4,13 +4,12 @@ import { SEOContentTemplate } from '@/components/grimoire/SEOContentTemplate';
 import { correspondencesData } from '@/constants/grimoire/correspondences';
 import { stringToKebabCase } from '../../../../../../utils/string';
 
+// 30-day ISR revalidation
+export const revalidate = 2592000;
 const numberKeys = Object.keys(correspondencesData.numbers);
 
-export async function generateStaticParams() {
-  return numberKeys.map((num) => ({
-    number: stringToKebabCase(num),
-  }));
-}
+// Removed generateStaticParams - using pure ISR for faster builds
+// Pages are generated on-demand and cached with 30-day revalidation
 
 export async function generateMetadata({
   params,

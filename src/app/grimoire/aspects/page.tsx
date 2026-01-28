@@ -15,6 +15,8 @@ import {
   createBreadcrumbSchema,
 } from '@/lib/schema';
 
+// 30-day ISR revalidation
+export const revalidate = 2592000;
 const ASPECT_COLOR: Record<
   (typeof ASPECT_DATA)[keyof typeof ASPECT_DATA]['nature'],
   { border: string; bg: string; badge: string }

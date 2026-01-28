@@ -19,6 +19,14 @@ export type ConversionEvent =
   | 'trial_expired'
   | 'trial_converted'
   | 'subscription_started'
+  | 'subscription_cancelled'
+  | 'subscription_refunded'
+  | 'journal_entry_created'
+  | 'journal_entry_updated'
+  | 'journal_entry_deleted'
+  | 'dream_entry_created'
+  | 'dream_entry_updated'
+  | 'dream_entry_deleted'
   | 'pricing_page_viewed'
   | 'upgrade_prompt_shown'
   | 'upgrade_clicked'
@@ -41,7 +49,47 @@ export type ConversionEvent =
   | 'grimoire_viewed'
   | 'daily_dashboard_viewed'
   | 'astral_chat_used'
-  | 'ritual_started';
+  | 'ritual_started'
+  | 'content_shared'
+  | 'horoscope_shared'
+  | 'tarot_reading_shared'
+  | 'birth_chart_shared'
+  | 'referral_link_copied'
+  | 'referral_link_shared'
+  | 'referral_code_generated'
+  | 'session_started'
+  | 'session_ended'
+  | 'feature_first_use'
+  | 'grimoire_search_performed'
+  | 'grimoire_article_opened'
+  | 'preferences_updated'
+  | 'settings_changed'
+  | 'notification_preference_changed'
+  | 'birth_data_completed'
+  | 'birth_location_updated'
+  | 'payment_failed'
+  | 'payment_retry_attempted'
+  | 'payment_retry_success'
+  | 'payment_method_added'
+  | 'checkout_started'
+  | 'checkout_abandoned'
+  | 'subscription_cancellation_reason'
+  | 'subscription_plan_upgraded'
+  | 'subscription_plan_downgraded'
+  | 'paywall_shown'
+  | 'paywall_accepted'
+  | 'paywall_dismissed'
+  | 'upgrade_motivation_identified'
+  | 'user_reactivated'
+  | 'login_streak_milestone'
+  | 'streak_broken'
+  | 'notification_opened'
+  | 'notification_clicked'
+  | 'help_requested'
+  | 'support_ticket_submitted'
+  | 'feature_request_submitted'
+  | 'bug_report_submitted'
+  | 'feedback_submitted';
 
 export interface ConversionEventData {
   event: ConversionEvent;
@@ -682,5 +730,241 @@ export const conversionTracking = {
       userEmail: email,
       planType,
       metadata,
+    }),
+
+  // Journal & Content Creation
+  journalEntryCreated: (userId?: string, metadata?: Record<string, any>) =>
+    trackConversion('journal_entry_created', { userId, metadata }),
+  journalEntryUpdated: (userId?: string, metadata?: Record<string, any>) =>
+    trackConversion('journal_entry_updated', { userId, metadata }),
+  journalEntryDeleted: (userId?: string, metadata?: Record<string, any>) =>
+    trackConversion('journal_entry_deleted', { userId, metadata }),
+  dreamEntryCreated: (userId?: string, metadata?: Record<string, any>) =>
+    trackConversion('dream_entry_created', { userId, metadata }),
+  dreamEntryUpdated: (userId?: string, metadata?: Record<string, any>) =>
+    trackConversion('dream_entry_updated', { userId, metadata }),
+  dreamEntryDeleted: (userId?: string, metadata?: Record<string, any>) =>
+    trackConversion('dream_entry_deleted', { userId, metadata }),
+
+  // Sharing & Viral
+  contentShared: (
+    userId?: string,
+    contentType?: string,
+    platform?: string,
+    metadata?: Record<string, any>,
+  ) =>
+    trackConversion('content_shared', {
+      userId,
+      metadata: { contentType, platform, ...metadata },
+    }),
+  horoscopeShared: (userId?: string, platform?: string) =>
+    trackConversion('horoscope_shared', { userId, metadata: { platform } }),
+  tarotReadingShared: (userId?: string, platform?: string) =>
+    trackConversion('tarot_reading_shared', { userId, metadata: { platform } }),
+  birthChartShared: (userId?: string, platform?: string) =>
+    trackConversion('birth_chart_shared', { userId, metadata: { platform } }),
+  referralLinkCopied: (userId?: string) =>
+    trackConversion('referral_link_copied', { userId }),
+  referralLinkShared: (userId?: string, platform?: string) =>
+    trackConversion('referral_link_shared', {
+      userId,
+      metadata: { platform },
+    }),
+  referralCodeGenerated: (userId?: string, code?: string) =>
+    trackConversion('referral_code_generated', {
+      userId,
+      metadata: { code },
+    }),
+
+  // Session & Engagement
+  sessionStarted: (userId?: string, feature?: string) =>
+    trackConversion('session_started', {
+      userId,
+      metadata: { feature, timestamp: Date.now() },
+    }),
+  sessionEnded: (userId?: string, feature?: string, durationMs?: number) =>
+    trackConversion('session_ended', {
+      userId,
+      metadata: { feature, durationMs },
+    }),
+  featureFirstUse: (
+    userId?: string,
+    feature?: string,
+    timeFromSignupMs?: number,
+  ) =>
+    trackConversion('feature_first_use', {
+      userId,
+      metadata: { feature, timeFromSignupMs },
+    }),
+
+  // Search & Discovery
+  grimoireSearchPerformed: (userId?: string, query?: string) =>
+    trackConversion('grimoire_search_performed', {
+      userId,
+      metadata: { query },
+    }),
+  grimoireArticleOpened: (userId?: string, articleId?: string) =>
+    trackConversion('grimoire_article_opened', {
+      userId,
+      metadata: { articleId },
+    }),
+
+  // Personalization
+  preferencesUpdated: (userId?: string, preferences?: Record<string, any>) =>
+    trackConversion('preferences_updated', { userId, metadata: preferences }),
+  settingsChanged: (userId?: string, setting?: string, value?: any) =>
+    trackConversion('settings_changed', {
+      userId,
+      metadata: { setting, value },
+    }),
+  notificationPreferenceChanged: (
+    userId?: string,
+    preference?: string,
+    enabled?: boolean,
+  ) =>
+    trackConversion('notification_preference_changed', {
+      userId,
+      metadata: { preference, enabled },
+    }),
+  birthDataCompleted: (userId?: string) =>
+    trackConversion('birth_data_completed', { userId }),
+  birthLocationUpdated: (userId?: string, location?: string) =>
+    trackConversion('birth_location_updated', {
+      userId,
+      metadata: { location },
+    }),
+
+  // Payment & Revenue
+  paymentFailed: (
+    userId?: string,
+    reason?: string,
+    amount?: number,
+    planType?: string,
+  ) =>
+    trackConversion('payment_failed', {
+      userId,
+      metadata: { reason, amount, planType },
+    }),
+  paymentRetryAttempted: (userId?: string, attempt?: number) =>
+    trackConversion('payment_retry_attempted', {
+      userId,
+      metadata: { attempt },
+    }),
+  paymentRetrySuccess: (userId?: string) =>
+    trackConversion('payment_retry_success', { userId }),
+  paymentMethodAdded: (userId?: string, methodType?: string) =>
+    trackConversion('payment_method_added', {
+      userId,
+      metadata: { methodType },
+    }),
+  checkoutStarted: (userId?: string, planType?: string, amount?: number) =>
+    trackConversion('checkout_started', {
+      userId,
+      metadata: { planType, amount },
+    }),
+  checkoutAbandoned: (userId?: string, step?: string) =>
+    trackConversion('checkout_abandoned', { userId, metadata: { step } }),
+
+  // Subscription & Lifecycle
+  subscriptionCancelled: (userId?: string, planType?: string) =>
+    trackConversion('subscription_cancelled', {
+      userId,
+      metadata: { planType },
+    }),
+  subscriptionCancellationReason: (
+    userId?: string,
+    reason?: string,
+    reasonCategory?: string,
+  ) =>
+    trackConversion('subscription_cancellation_reason', {
+      userId,
+      metadata: { reason, reasonCategory },
+    }),
+  subscriptionPlanUpgraded: (
+    userId?: string,
+    fromPlan?: string,
+    toPlan?: string,
+  ) =>
+    trackConversion('subscription_plan_upgraded', {
+      userId,
+      metadata: { fromPlan, toPlan },
+    }),
+  subscriptionPlanDowngraded: (
+    userId?: string,
+    fromPlan?: string,
+    toPlan?: string,
+  ) =>
+    trackConversion('subscription_plan_downgraded', {
+      userId,
+      metadata: { fromPlan, toPlan },
+    }),
+  subscriptionRefunded: (userId?: string, amount?: number, reason?: string) =>
+    trackConversion('subscription_refunded', {
+      userId,
+      metadata: { amount, reason },
+    }),
+
+  // Paywall & Conversion
+  paywallShown: (userId?: string, feature?: string, impressionCount?: number) =>
+    trackConversion('paywall_shown', {
+      userId,
+      metadata: { feature, impressionCount },
+    }),
+  paywallAccepted: (userId?: string, feature?: string) =>
+    trackConversion('paywall_accepted', { userId, metadata: { feature } }),
+  paywallDismissed: (userId?: string, feature?: string) =>
+    trackConversion('paywall_dismissed', { userId, metadata: { feature } }),
+  upgradeMotivationIdentified: (userId?: string, motivation?: string) =>
+    trackConversion('upgrade_motivation_identified', {
+      userId,
+      metadata: { motivation },
+    }),
+
+  // Retention & Reactivation
+  userReactivated: (userId?: string, dormancyDays?: number, source?: string) =>
+    trackConversion('user_reactivated', {
+      userId,
+      metadata: { dormancyDays, source },
+    }),
+  loginStreakMilestone: (userId?: string, days?: number) =>
+    trackConversion('login_streak_milestone', {
+      userId,
+      metadata: { days },
+    }),
+  streakBroken: (userId?: string, previousDays?: number) =>
+    trackConversion('streak_broken', { userId, metadata: { previousDays } }),
+  notificationOpened: (userId?: string, notificationType?: string) =>
+    trackConversion('notification_opened', {
+      userId,
+      metadata: { notificationType },
+    }),
+  notificationClicked: (userId?: string, notificationType?: string) =>
+    trackConversion('notification_clicked', {
+      userId,
+      metadata: { notificationType },
+    }),
+
+  // Support & Feedback
+  helpRequested: (userId?: string, feature?: string) =>
+    trackConversion('help_requested', { userId, metadata: { feature } }),
+  supportTicketSubmitted: (userId?: string, category?: string) =>
+    trackConversion('support_ticket_submitted', {
+      userId,
+      metadata: { category },
+    }),
+  featureRequestSubmitted: (userId?: string, request?: string) =>
+    trackConversion('feature_request_submitted', {
+      userId,
+      metadata: { request },
+    }),
+  bugReportSubmitted: (userId?: string, bugDescription?: string) =>
+    trackConversion('bug_report_submitted', {
+      userId,
+      metadata: { bugDescription },
+    }),
+  feedbackSubmitted: (userId?: string, rating?: number, feedback?: string) =>
+    trackConversion('feedback_submitted', {
+      userId,
+      metadata: { rating, feedback },
     }),
 };

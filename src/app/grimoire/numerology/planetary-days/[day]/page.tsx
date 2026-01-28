@@ -3,6 +3,8 @@ import { notFound } from 'next/navigation';
 import { SEOContentTemplate } from '@/components/grimoire/SEOContentTemplate';
 import { correspondencesData } from '@/constants/grimoire/correspondences';
 
+// 30-day ISR revalidation
+export const revalidate = 2592000;
 const dayKeys = Object.keys(correspondencesData.days);
 const daySlugToKey: Record<string, string> = {
   sunday: 'Sunday',
@@ -24,11 +26,8 @@ const dayNumberMapping: Record<string, number> = {
   Saturday: 8,
 };
 
-export async function generateStaticParams() {
-  return dayKeys.map((day) => ({
-    day: day.toLowerCase(),
-  }));
-}
+// Removed generateStaticParams - using pure ISR for faster builds
+// Pages are generated on-demand and cached with 30-day revalidation
 
 export async function generateMetadata({
   params,

@@ -3,6 +3,7 @@ import { sql } from '@vercel/postgres';
 import { requireUser } from '@/lib/ai/auth';
 import { isDreamEntry } from '@/lib/journal/dream-classifier';
 import { JOURNAL_LIMITS, normalizePlanType } from '../../../../utils/pricing';
+import { conversionTracking } from '@/lib/analytics';
 
 export type JournalCategory = 'journal' | 'dream' | 'ritual';
 
@@ -183,6 +184,25 @@ export async function POST(request: NextRequest) {
     `;
 
     const entry = result.rows[0];
+
+    // Track journal/dream creation
+    if (entry.category === 'dream') {
+      conversionTracking.dreamEntryCreated(user.id, {
+        source,
+        hasMoodTags: moodTags.length > 0,
+        hasCardReferences: cardReferences.length > 0,
+        hasMoonPhase: !!moonPhase,
+        contentLength: content.trim().length,
+      });
+    } else if (entry.category === 'journal') {
+      conversionTracking.journalEntryCreated(user.id, {
+        source,
+        hasMoodTags: moodTags.length > 0,
+        hasCardReferences: cardReferences.length > 0,
+        hasMoonPhase: !!moonPhase,
+        contentLength: content.trim().length,
+      });
+    }
 
     return NextResponse.json({
       success: true,

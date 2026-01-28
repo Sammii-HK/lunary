@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { resolveDateRange } from '@/lib/analytics/date-range';
 import { sql } from '@vercel/postgres';
 import { formatTimestamp } from '@/lib/analytics/date-range';
+import { ANALYTICS_CACHE_TTL_SECONDS } from '@/lib/analytics-cache-config';
 
 const TEST_EMAIL_PATTERN = '%@test.lunary.app';
 const TEST_EMAIL_EXACT = 'test@test.lunary.app';
@@ -96,7 +97,7 @@ export async function GET(request: NextRequest) {
       };
     });
 
-    return NextResponse.json({
+    const response = NextResponse.json({
       totalCost: Number(totalCost.toFixed(2)),
       totalGenerations,
       uniqueUsers,
@@ -106,6 +107,11 @@ export async function GET(request: NextRequest) {
       revenueCostRatio: Number(revenueCostRatio.toFixed(2)),
       costTrends,
     });
+    response.headers.set(
+      'Cache-Control',
+      `private, max-age=${ANALYTICS_CACHE_TTL_SECONDS}`,
+    );
+    return response;
   } catch (error) {
     console.error('[analytics/api-costs] Failed to load metrics', error);
     return NextResponse.json(

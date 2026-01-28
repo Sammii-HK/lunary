@@ -4,6 +4,7 @@ import { useEffect } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import { useAuthStatus } from '@/components/AuthStatus';
 import { conversionTracking } from '@/lib/analytics';
+import SessionTracker from '@/components/SessionTracker';
 import { TourProvider } from '@/context/TourContext';
 
 export default function AuthenticatedLayout({
@@ -43,5 +44,10 @@ export default function AuthenticatedLayout({
     return null;
   }
 
-  return <TourProvider>{children}</TourProvider>;
+  return (
+    <TourProvider>
+      <SessionTracker />
+      {children}
+    </TourProvider>
+  );
 }

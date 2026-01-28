@@ -4,6 +4,8 @@ import { ExploreGrimoire } from '@/components/grimoire/ExploreGrimoire';
 import { Circle } from 'lucide-react';
 import { GrimoireBreadcrumbs } from '@/components/grimoire/GrimoireBreadcrumbs';
 
+// 30-day ISR revalidation
+export const revalidate = 2592000;
 const aspectTypes = [
   {
     slug: 'conjunction',

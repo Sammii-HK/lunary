@@ -3,16 +3,12 @@ import { notFound } from 'next/navigation';
 import { SEOContentTemplate } from '@/components/grimoire/SEOContentTemplate';
 import { NumerologyProfileCalculator } from '@/components/grimoire/NumerologyProfileCalculator';
 import { KarmicDebtCalculatorExtras } from '@/components/grimoire/KarmicDebtCalculatorExtras';
-import {
-  karmicDebtNumbers,
-  karmicDebtKeys,
-} from '@/constants/grimoire/numerology-extended-data';
+import { karmicDebtNumbers } from '@/constants/grimoire/numerology-extended-data';
 
-export async function generateStaticParams() {
-  return karmicDebtKeys.map((number) => ({
-    number,
-  }));
-}
+// 30-day ISR revalidation
+export const revalidate = 2592000;
+// Removed generateStaticParams - using pure ISR for faster builds
+// Pages are generated on-demand and cached with 30-day revalidation
 
 export async function generateMetadata({
   params,

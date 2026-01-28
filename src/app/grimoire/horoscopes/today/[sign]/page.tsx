@@ -37,11 +37,8 @@ const signs = [
   { name: 'Pisces', symbol: '♓', dates: 'Feb 19 - Mar 20', element: 'Water' },
 ];
 
-export async function generateStaticParams() {
-  return signs.map((sign) => ({
-    sign: sign.name.toLowerCase(),
-  }));
-}
+// Removed generateStaticParams - using pure ISR for faster builds
+// Pages are generated on-demand and cached with 1-day revalidation
 
 export async function generateMetadata({
   params,

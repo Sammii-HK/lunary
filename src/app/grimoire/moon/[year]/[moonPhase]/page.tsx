@@ -8,6 +8,8 @@ import {
   type MoonPhaseType,
 } from '@/lib/moon/events';
 
+// 30-day ISR revalidation
+export const revalidate = 2592000;
 const MIN_YEAR = 2025;
 const MAX_YEAR = 2030;
 const SUPPORTED_YEARS = [2025, 2027, 2028, 2029, 2030];
@@ -32,21 +34,8 @@ function getMoonEventBySlug(
   return list.find((event) => event.slug === moonPhase);
 }
 
-export async function generateStaticParams() {
-  return SUPPORTED_YEARS.flatMap((year) => {
-    const { fullMoons, newMoons } = getMoonEventsForYear(year);
-    return [
-      ...fullMoons.map((moon) => ({
-        year: year.toString(),
-        moonPhase: moon.slug,
-      })),
-      ...newMoons.map((moon) => ({
-        year: year.toString(),
-        moonPhase: moon.slug,
-      })),
-    ];
-  });
-}
+// Removed generateStaticParams - using pure ISR for faster builds
+// Pages are generated on-demand and cached with 30-day revalidation
 
 export async function generateMetadata({
   params,
