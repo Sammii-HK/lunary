@@ -38,11 +38,13 @@ export const ExpandableCard = ({
     // Skip auto-expansion logic if controlled
     if (isControlled) return;
 
-    // Check if we're in demo mode - if so, stay collapsed
-    const isDemoMode =
-      document.getElementById('demo-preview-container') !== null;
-    if (isDemoMode) {
-      return; // Don't auto-expand in demo mode
+    // Check if we're in demo mode - if so, stay collapsed (client-only check)
+    if (typeof window !== 'undefined') {
+      const isDemoMode =
+        document.getElementById('demo-preview-container') !== null;
+      if (isDemoMode) {
+        return; // Don't auto-expand in demo mode
+      }
     }
 
     // Handle defaultExpanded

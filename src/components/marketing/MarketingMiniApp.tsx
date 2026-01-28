@@ -87,34 +87,8 @@ export function MarketingMiniApp() {
   }, []);
 
   // Collapse cards and force dashboard grid to single column
-  useEffect(() => {
-    const contentEl = contentRef.current;
-    if (!contentEl) return;
-
-    const forceMobileLayout = () => {
-      // Collapse expandable cards
-      const expandableCards = contentEl.querySelectorAll(
-        '[data-component="expandable-card"]',
-      );
-      expandableCards.forEach((card) => {
-        const button = card.querySelector('[role="button"]');
-        if (button?.getAttribute('aria-expanded') === 'true') {
-          (button as HTMLElement).click();
-        }
-      });
-
-      // Force dashboard grid with inline style (highest specificity)
-      const dashboardGrid = contentEl.querySelector('#dashboard-main-grid');
-      if (dashboardGrid instanceof HTMLElement) {
-        dashboardGrid.style.gridTemplateColumns = 'repeat(1, minmax(0, 1fr))';
-      }
-    };
-
-    forceMobileLayout();
-    const timer = setTimeout(forceMobileLayout, 100);
-
-    return () => clearTimeout(timer);
-  }, [activeTab]);
+  // Note: Mobile layout and card collapsing is now handled via proper React state
+  // (isDemoMode prop controls grid layout and expandable card state)
 
   // Intercept modals and keep them inside the preview
   useEffect(() => {
