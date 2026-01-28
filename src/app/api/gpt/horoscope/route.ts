@@ -6,8 +6,7 @@ import {
 import { requireGptAuth } from '@/lib/gptAuth';
 
 export const runtime = 'nodejs';
-export const dynamic = 'force-dynamic';
-export const revalidate = 3600;
+export const revalidate = 86400; // minimum revalidation window (daily type)
 
 const ZODIAC_SIGNS = [
   'aries',
@@ -269,8 +268,9 @@ export async function GET(request: NextRequest) {
         ? generateWeeklyHoroscope(sign)
         : generateDailyHoroscope(sign, moonPhase.name);
 
-    // Weekly horoscopes get longer cache (1 week)
-    const cacheMaxAge = typeParam === 'weekly' ? 604800 : 3600;
+    // Daily: 1 day cache, Weekly: 7 day cache
+    const cacheMaxAge = typeParam === 'weekly' ? 604800 : 86400;
+    const staleWhileRevalidate = typeParam === 'weekly' ? 86400 : 3600;
 
     const response = {
       sign: sign.charAt(0).toUpperCase() + sign.slice(1),
@@ -290,7 +290,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json(response, {
       headers: {
-        'Cache-Control': `public, s-maxage=${cacheMaxAge}, stale-while-revalidate=86400`,
+        'Cache-Control': `public, s-maxage=${cacheMaxAge}, stale-while-revalidate=${staleWhileRevalidate}`,
       },
     });
   } catch (error) {

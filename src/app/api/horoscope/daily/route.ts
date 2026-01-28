@@ -6,7 +6,7 @@ import { decrypt } from '@/lib/encryption';
 import { getEnhancedPersonalizedHoroscope } from '../../../../../utils/astrology/enhancedHoroscope';
 
 export const runtime = 'nodejs';
-export const dynamic = 'force-dynamic';
+export const revalidate = 86400; // 1 day
 
 interface UserProfile {
   name?: string;
@@ -155,10 +155,17 @@ export async function GET(request: NextRequest) {
     // Check for cached horoscope first
     const cached = await getCachedHoroscope(userId, dateStr);
     if (cached) {
-      return NextResponse.json({
-        ...cached,
-        cached: true,
-      });
+      return NextResponse.json(
+        {
+          ...cached,
+          cached: true,
+        },
+        {
+          headers: {
+            'Cache-Control': 'private, max-age=86400',
+          },
+        },
+      );
     }
 
     // Fetch user profile from database
@@ -198,10 +205,17 @@ export async function GET(request: NextRequest) {
       console.error('[Daily Horoscope] Background save failed:', err),
     );
 
-    return NextResponse.json({
-      ...horoscopeData,
-      cached: false,
-    });
+    return NextResponse.json(
+      {
+        ...horoscopeData,
+        cached: false,
+      },
+      {
+        headers: {
+          'Cache-Control': 'private, max-age=86400',
+        },
+      },
+    );
   } catch (error: any) {
     if (error.name === 'UnauthorizedError') {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
