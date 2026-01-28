@@ -5,13 +5,12 @@ import { correspondencesData } from '@/constants/grimoire/correspondences';
 import { stringToKebabCase } from '../../../../../../utils/string';
 import Link from 'next/link';
 
+// 30-day ISR revalidation
+export const revalidate = 2592000;
 const pantheonKeys = Object.keys(correspondencesData.deities);
 
-export async function generateStaticParams() {
-  return pantheonKeys.map((pantheon) => ({
-    pantheon: stringToKebabCase(pantheon),
-  }));
-}
+// Removed generateStaticParams - using pure ISR for faster builds
+// Pages are generated on-demand and cached with 30-day revalidation
 
 export async function generateMetadata({
   params,

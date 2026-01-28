@@ -4,24 +4,12 @@ import { SEOContentTemplate } from '@/components/grimoire/SEOContentTemplate';
 import { correspondencesData } from '@/constants/grimoire/correspondences';
 import { stringToKebabCase } from '../../../../../../../utils/string';
 
+// 30-day ISR revalidation
+export const revalidate = 2592000;
 const pantheonKeys = Object.keys(correspondencesData.deities);
 
-export async function generateStaticParams() {
-  const params: Array<{ pantheon: string; deity: string }> = [];
-  pantheonKeys.forEach((pantheon) => {
-    const deities =
-      correspondencesData.deities[
-        pantheon as keyof typeof correspondencesData.deities
-      ];
-    Object.keys(deities).forEach((deity) => {
-      params.push({
-        pantheon: stringToKebabCase(pantheon),
-        deity: stringToKebabCase(deity),
-      });
-    });
-  });
-  return params;
-}
+// Removed generateStaticParams - using pure ISR for faster builds
+// Pages are generated on-demand and cached with 30-day revalidation
 
 export async function generateMetadata({
   params,
