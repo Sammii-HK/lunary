@@ -148,19 +148,19 @@ function PremiumSection({ premium }: { premium: TransitDetail['premium'] }) {
     <div className='pt-3 mt-3 border-t border-zinc-800/50 space-y-2'>
       {premium.houseSummary && (
         <p className='text-xs text-zinc-400'>
-          <span className='text-zinc-500'>House focus:</span>{' '}
+          <span className='text-zinc-500'>Where it lands:</span>{' '}
           {premium.houseSummary}
         </p>
       )}
       {premium.natalContext && (
         <p className='text-xs text-zinc-400'>
-          <span className='text-zinc-500'>Your natal context:</span>{' '}
+          <span className='text-zinc-500'>Your personal lens:</span>{' '}
           {premium.natalContext}
         </p>
       )}
       {premium.orbExplanation && (
         <p className='text-xs text-zinc-400'>
-          <span className='text-zinc-500'>Orb & strength:</span>{' '}
+          <span className='text-zinc-500'>How close & strong:</span>{' '}
           {premium.orbExplanation}
         </p>
       )}
@@ -288,8 +288,8 @@ export function TransitWisdom({
     return (
       <div className='text-center py-6'>
         <p className='text-sm text-zinc-400 leading-relaxed max-w-sm mx-auto'>
-          No major transits are making tight aspects to your natal chart today.
-          This is a day to integrate recent shifts rather than push for change.
+          Nothing major is pulling at your energy today. This is a day to settle
+          in and integrate recent shifts rather than push for change.
         </p>
       </div>
     );

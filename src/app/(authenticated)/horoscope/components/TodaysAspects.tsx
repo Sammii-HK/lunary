@@ -32,48 +32,39 @@ const getAspectInterpretation = (
   natalPlanet: string,
   aspectType: string,
 ): string => {
-  const transitThemes: Record<string, string> = {
-    Sun: 'vitality and identity',
-    Moon: 'emotions and intuition',
-    Mercury: 'communication and thought',
-    Venus: 'love and values',
-    Mars: 'drive and action',
-    Jupiter: 'expansion and opportunity',
-    Saturn: 'discipline and structure',
-    Uranus: 'change and innovation',
-    Neptune: 'imagination and spirituality',
-    Pluto: 'transformation and power',
+  const transitVerbs: Record<string, string> = {
+    Sun: 'is lighting up',
+    Moon: 'is stirring',
+    Mercury: 'is speaking to',
+    Venus: 'is gently lifting',
+    Mars: 'is pushing',
+    Jupiter: 'is opening doors around',
+    Saturn: 'is grounding',
+    Uranus: 'is shaking up',
+    Neptune: 'is softening',
+    Pluto: 'is quietly reshaping',
   };
 
   const natalThemes: Record<string, string> = {
-    Sun: 'your core identity',
-    Moon: 'your emotional needs',
-    Mercury: 'your thinking patterns',
-    Venus: 'your relationships and values',
-    Mars: 'your drive and motivation',
-    Jupiter: 'your growth and beliefs',
-    Saturn: 'your responsibilities',
-    Uranus: 'your need for change',
-    Neptune: 'your dreams and ideals',
+    Sun: 'your sense of self',
+    Moon: 'your emotions',
+    Mercury: 'how you think and communicate',
+    Venus: 'your relationships',
+    Mars: 'your drive and ambition',
+    Jupiter: 'your path to growth',
+    Saturn: 'your sense of responsibility',
+    Uranus: 'your need for freedom',
+    Neptune: 'your inner world',
     Pluto: 'your personal power',
-    Ascendant: 'how you present yourself',
-    Midheaven: 'your public image and career',
+    Ascendant: 'how you show up in the world',
+    Midheaven: 'your public life and career',
   };
 
-  const aspectMeanings: Record<string, string> = {
-    conjunction: 'intensifies and merges with',
-    opposition: 'creates awareness and balance in',
-    trine: 'harmoniously supports',
-    square: 'challenges and motivates growth in',
-    sextile: 'offers opportunities for',
-  };
+  const verb = transitVerbs[transitPlanet] || 'is influencing';
+  const natalTheme =
+    natalThemes[natalPlanet] || `your ${natalPlanet.toLowerCase()} energy`;
 
-  const transitTheme =
-    transitThemes[transitPlanet] || transitPlanet.toLowerCase() + ' energy';
-  const natalTheme = natalThemes[natalPlanet] || `your natal ${natalPlanet}`;
-  const aspectMeaning = aspectMeanings[aspectType] || 'influences';
-
-  return `Transit ${transitPlanet}'s ${transitTheme} ${aspectMeaning} ${natalTheme}.`;
+  return `${transitPlanet} ${verb} ${natalTheme}.`;
 };
 
 const calculateAspectsWithDegrees = (

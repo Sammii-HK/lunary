@@ -27,9 +27,7 @@ interface FeaturePreviewProps {
 
 export function FeaturePreview({
   title,
-  description,
   blurredContent,
-  icon,
   feature,
   ctaKey,
   trackingFeature,
@@ -37,8 +35,10 @@ export function FeaturePreview({
 }: FeaturePreviewProps) {
   const router = useRouter();
   const ctaCopy = useCTACopy();
+  const previewBlurVariant = useFeatureFlagVariant('feature_preview_blur_v1');
   const variantRaw = useFeatureFlagVariant('paywall_preview_style_v1');
-  const variant = variantRaw || 'blur';
+  // feature_preview_blur_v1 takes priority when set (blur vs peek test)
+  const variant = previewBlurVariant || variantRaw || 'blur';
 
   const handleUpgradeClick = useCallback(() => {
     if (ctaKey) {
@@ -48,10 +48,11 @@ export function FeaturePreview({
       captureEvent('locked_content_clicked', {
         feature: trackingFeature,
         tier: 'free',
+        preview_variant: variant,
       });
     }
     router.push('/pricing');
-  }, [ctaKey, ctaCopy, page, trackingFeature, router]);
+  }, [ctaKey, ctaCopy, page, trackingFeature, router, variant]);
 
   const renderBlurredContent = () => {
     if (variant === 'truncated') {
@@ -64,7 +65,16 @@ export function FeaturePreview({
 
     if (variant === 'redacted') {
       return (
-        <div className='filter blur-[2px] opacity-60 pointer-events-none rounded-lg overflow-hidden'>
+        <div className='filter blur-[2px] opacity-50 pointer-events-none rounded-lg overflow-hidden'>
+          {blurredContent}
+        </div>
+      );
+    }
+
+    if (variant === 'peek') {
+      // Lighter blur — content is more readable, gradient does the gating
+      return (
+        <div className='filter blur-[4px] opacity-80 pointer-events-none rounded-lg overflow-hidden'>
           {blurredContent}
         </div>
       );
@@ -72,7 +82,7 @@ export function FeaturePreview({
 
     // Default: blur
     return (
-      <div className='filter blur-sm opacity-50 pointer-events-none rounded-lg overflow-hidden'>
+      <div className='filter blur-sm opacity-60 pointer-events-none rounded-lg overflow-hidden'>
         {blurredContent}
       </div>
     );
@@ -93,25 +103,22 @@ export function FeaturePreview({
       </div>
       <div className='relative'>
         {renderBlurredContent()}
-        <div className='absolute inset-0 flex items-center justify-center rounded-lg bg-gradient-to-b from-transparent via-zinc-950/70 to-zinc-950'>
-          <div className='text-center p-6 max-w-sm'>
-            {icon && <div className='mb-3'>{icon}</div>}
-            <p className='text-sm text-zinc-400 mb-4 leading-relaxed'>
-              {description}
-            </p>
-            {ctaButtonText ? (
-              <button
-                type='button'
-                onClick={handleUpgradeClick}
-                className='inline-flex items-center gap-1.5 rounded-lg border border-lunary-primary-700 bg-zinc-900/80 px-4 py-2 text-xs font-medium text-lunary-primary-300 hover:bg-zinc-900 transition-colors'
-              >
-                <Sparkles className='w-3 h-3' />
-                {ctaButtonText}
-              </button>
-            ) : (
-              <SmartTrialButton size='sm' feature={feature} />
-            )}
-          </div>
+        <div className='absolute inset-0 rounded-lg bg-gradient-to-b from-transparent via-zinc-950/60 to-zinc-950 flex items-end justify-center pb-3'>
+          {ctaButtonText ? (
+            <button
+              type='button'
+              onClick={handleUpgradeClick}
+              className='inline-flex items-center gap-2 rounded-lg border border-lunary-primary-700 bg-zinc-900/80 px-4 py-2 text-xs font-medium text-lunary-primary-300 hover:bg-zinc-900 transition-colors'
+            >
+              <Sparkles className='w-3 h-3' />
+              {ctaButtonText}
+              <span className='text-[10px] bg-lunary-primary-900/50 border border-lunary-primary-700/50 px-1.5 py-0.5 rounded'>
+                Lunary+
+              </span>
+            </button>
+          ) : (
+            <SmartTrialButton size='sm' feature={feature} />
+          )}
         </div>
       </div>
     </div>

@@ -996,7 +996,7 @@ const TarotReadings = () => {
                     </span>
                   </div>
                   {renderPreview(
-                    "Mars trine Sun supports your path · activates 5th house. See how today's transits connect to this card's message in your birth chart.",
+                    "Mars supports your path today. See how the sky connects to this card's message for you.",
                   )}
                   <button
                     type='button'
@@ -1029,7 +1029,7 @@ const TarotReadings = () => {
                     Weekly Card
                   </h4>
                   <p className='text-xs text-zinc-400 text-center max-w-[200px]'>
-                    Deeper weekly guidance seeded from your birth chart
+                    Deeper weekly guidance, written just for you
                   </p>
                   <span className='inline-flex items-center gap-1 text-[10px] bg-lunary-primary-900/50 border border-lunary-primary-700/50 px-2 py-0.5 rounded text-lunary-primary-300'>
                     <Sparkles className='w-2.5 h-2.5' />
@@ -1147,15 +1147,72 @@ const TarotReadings = () => {
             trackingFeature='tarot_patterns'
             page='tarot'
             blurredContent={
-              <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-6 opacity-60 h-150'>
-                <p className='text-sm text-zinc-300 leading-relaxed'>
-                  ●●●●● ●●●●● ●●● ●●●●●●●● ●●●●●●●● ●●● ●●●●●●● ●●●●●●●●●
-                  ●●●●●●● ●●● ●●●●●●●●● ●●●●●●●● ●●●●●. ●●●●●● ●●●●●●●● ●●●
-                  ●●●●●●●●● ●●●●●●●●● ●●●●●●● ●●●●●●●●● ●●●●●●●● ●●●●●●●●
-                  ●●●●●●●●● ●●● ●●●●●●●●● ●●●●●●●● ●●●●●. ●●●●●● ●●●●●●●● ●●●
-                  ●●●●●●●●● ●●● ●●●●●●●●● ●●●●●●●● ●●●●●. ●●●●●● ●●●●●●●● ●●●
-                  ●●●●●●●●● ●●●●●●●●●.
-                </p>
+              <div className='space-y-3'>
+                <div className='rounded-lg border border-zinc-700/50 bg-zinc-900/40 p-4'>
+                  <div className='flex items-center justify-between mb-2'>
+                    <span className='text-sm font-medium text-zinc-100'>
+                      Suit Balance
+                    </span>
+                    <span className='text-xs text-zinc-500'>Last 30 days</span>
+                  </div>
+                  <div className='flex gap-2 mt-3'>
+                    <div className='flex-1 text-center'>
+                      <div className='text-lg font-semibold text-rose-300'>
+                        38%
+                      </div>
+                      <div className='text-[10px] text-zinc-500 mt-0.5'>
+                        Cups
+                      </div>
+                    </div>
+                    <div className='flex-1 text-center'>
+                      <div className='text-lg font-semibold text-amber-300'>
+                        27%
+                      </div>
+                      <div className='text-[10px] text-zinc-500 mt-0.5'>
+                        Wands
+                      </div>
+                    </div>
+                    <div className='flex-1 text-center'>
+                      <div className='text-lg font-semibold text-sky-300'>
+                        22%
+                      </div>
+                      <div className='text-[10px] text-zinc-500 mt-0.5'>
+                        Swords
+                      </div>
+                    </div>
+                    <div className='flex-1 text-center'>
+                      <div className='text-lg font-semibold text-emerald-300'>
+                        13%
+                      </div>
+                      <div className='text-[10px] text-zinc-500 mt-0.5'>
+                        Pentacles
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div className='rounded-lg border border-zinc-700/50 bg-zinc-900/40 p-4'>
+                  <div className='flex items-center justify-between mb-2'>
+                    <span className='text-sm font-medium text-zinc-100'>
+                      Recurring Themes
+                    </span>
+                  </div>
+                  <div className='flex flex-wrap gap-1.5 mt-2'>
+                    <span className='px-2 py-1 rounded border border-rose-700/40 bg-rose-900/30 text-[11px] text-rose-300'>
+                      Transformation
+                    </span>
+                    <span className='px-2 py-1 rounded border border-amber-700/40 bg-amber-900/30 text-[11px] text-amber-300'>
+                      Creative Flow
+                    </span>
+                    <span className='px-2 py-1 rounded border border-sky-700/40 bg-sky-900/30 text-[11px] text-sky-300'>
+                      Inner Truth
+                    </span>
+                  </div>
+                  <p className='text-xs text-zinc-400 leading-relaxed mt-3'>
+                    Cups dominate your readings — emotional processing and
+                    intuition are your primary focus. A shift toward action
+                    (Wands) is emerging.
+                  </p>
+                </div>
               </div>
             }
           />
@@ -1169,16 +1226,45 @@ const TarotReadings = () => {
               trackingFeature='tarot_spreads'
               page='tarot'
               blurredContent={
-                <div className='rounded-lg border border-lunary-accent-700 bg-lunary-accent-950 p-6 opacity-60'>
-                  <div className='space-y-3'>
-                    <p className='text-sm text-zinc-300 leading-relaxed'>
-                      ●●●● ●●●●● ●●●●●●● ●●●●●●●●● ●●●●●●●●●● ●●● ●●●●●●●●●●
-                      ●●●●●●●●●● ●●●●●●●● ●●●●●●●●●●● ●●●●●●●●● ●●●●●●●●●
-                      ●●●●●●● ●●●●●●●●● ●●●●●●●● ●●●●●●●●.
+                <div className='space-y-3'>
+                  <div className='rounded-lg border border-lunary-accent-700 bg-lunary-accent-950 p-4'>
+                    <div className='flex items-center gap-3 mb-3'>
+                      <div className='w-10 h-10 rounded-lg bg-zinc-800/60 border border-zinc-700 flex items-center justify-center'>
+                        <span className='text-lg'>🌙</span>
+                      </div>
+                      <div>
+                        <h4 className='text-sm font-medium text-zinc-100'>
+                          Celtic Cross
+                        </h4>
+                        <p className='text-xs text-zinc-500'>
+                          10-card spread · Deep insight
+                        </p>
+                      </div>
+                    </div>
+                    <p className='text-xs text-zinc-400 leading-relaxed'>
+                      Draw 10 cards and explore how past influences, present
+                      challenges, and future possibilities weave together into a
+                      single narrative.
                     </p>
-                    <p className='text-sm text-zinc-300 leading-relaxed'>
-                      ●●●● ●●●●● ●●●●●●● ●●●●●●●●● ●●●●●●●●●● ●●● ●●●●●●●●●●
-                      ●●●●●●●●●● ●●●●●●●● ●●●●●●●●●●●.
+                  </div>
+                  <div className='rounded-lg border border-lunary-accent-700 bg-lunary-accent-950 p-4'>
+                    <div className='flex items-center gap-3 mb-3'>
+                      <div className='w-10 h-10 rounded-lg bg-zinc-800/60 border border-zinc-700 flex items-center justify-center'>
+                        <span className='text-lg'>💫</span>
+                      </div>
+                      <div>
+                        <h4 className='text-sm font-medium text-zinc-100'>
+                          Love Triangle
+                        </h4>
+                        <p className='text-xs text-zinc-500'>
+                          3-card spread · Relationship focus
+                        </p>
+                      </div>
+                    </div>
+                    <p className='text-xs text-zinc-400 leading-relaxed'>
+                      Explore the dynamics between you and another — what you
+                      bring, what they bring, and where the connection is
+                      headed.
                     </p>
                   </div>
                 </div>

@@ -128,8 +128,7 @@ function TransitCard({
             </span>
           </div>
           <p className='text-xs text-zinc-500'>
-            See how this transit affects your birth chart, house, and what to
-            do.
+            See how this shift is touching your life and what it means for you.
           </p>
           <button
             type='button'
