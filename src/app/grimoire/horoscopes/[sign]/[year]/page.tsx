@@ -16,6 +16,9 @@ import {
   ZodiacSign,
 } from '@/constants/seo/monthly-horoscope';
 
+// 30-day revalidation for yearly horoscopes
+export const revalidate = 2592000;
+
 const AVAILABLE_YEARS = [2025, 2026, 2027, 2028, 2029, 2030];
 
 function resolveOgImageUrl(value: unknown): string | undefined {
@@ -60,20 +63,8 @@ const SIGN_SEASON_MONTHS: Record<ZodiacSign, string[]> = {
   pisces: ['February', 'March'],
 };
 
-export async function generateStaticParams() {
-  const params: { sign: string; year: string }[] = [];
-
-  ZODIAC_SIGNS.forEach((sign) => {
-    AVAILABLE_YEARS.forEach((year) => {
-      params.push({
-        sign,
-        year: String(year),
-      });
-    });
-  });
-
-  return params;
-}
+// Removed generateStaticParams - using pure ISR for faster builds
+// Pages are generated on-demand and cached with 30-day revalidation
 
 export async function generateMetadata({
   params,
