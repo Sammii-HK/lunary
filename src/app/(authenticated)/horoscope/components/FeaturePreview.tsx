@@ -92,18 +92,16 @@ export function FeaturePreview({
 
   return (
     <div>
-      <div className='flex justify-between items-center mb-4'>
-        <h2 className='text-base md:text-lg font-medium text-zinc-100'>
-          {title}
-        </h2>
-        <span className='inline-flex items-center gap-1 text-[10px] bg-lunary-primary-900/50 border border-lunary-primary-700/50 px-2 py-0.5 rounded text-lunary-primary-300'>
-          <Sparkles className='w-2.5 h-2.5' />
-          Lunary+
-        </span>
-      </div>
+      <h2 className='text-base md:text-lg font-medium text-zinc-100 mb-4'>
+        {title}
+      </h2>
       <div className='relative'>
         {renderBlurredContent()}
-        <div className='absolute inset-0 rounded-lg bg-gradient-to-b from-transparent via-zinc-950/60 to-zinc-950 flex items-end justify-center pb-3'>
+        <div className='absolute inset-0 rounded-lg bg-gradient-to-b from-transparent via-zinc-950/60 to-zinc-950 flex flex-col items-center justify-center gap-3'>
+          <span className='inline-flex items-center gap-1 text-[10px] bg-lunary-primary-900/50 border border-lunary-primary-700/50 px-2 py-0.5 rounded text-lunary-primary-300'>
+            <Sparkles className='w-2.5 h-2.5' />
+            Lunary+
+          </span>
           {ctaButtonText ? (
             <button
               type='button'
@@ -112,9 +110,6 @@ export function FeaturePreview({
             >
               <Sparkles className='w-3 h-3' />
               {ctaButtonText}
-              <span className='text-[10px] bg-lunary-primary-900/50 border border-lunary-primary-700/50 px-1.5 py-0.5 rounded'>
-                Lunary+
-              </span>
             </button>
           ) : (
             <SmartTrialButton size='sm' feature={feature} />
