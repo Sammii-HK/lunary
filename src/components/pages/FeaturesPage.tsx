@@ -1,3 +1,5 @@
+'use client';
+
 import Link from 'next/link';
 import {
   LayoutDashboard,
@@ -11,12 +13,29 @@ import {
   BookText,
   Check,
 } from 'lucide-react';
+import { useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { MarketingFooter } from '@/components/MarketingFooter';
 import { PricingComparisonTable } from '@/components/PricingComparisonTable';
 import { CTA_COPY } from '@/lib/cta-copy';
+import { conversionTracking } from '@/lib/analytics';
 
 export default function FeaturesPage() {
+  // Track page view on mount
+  useEffect(() => {
+    conversionTracking.pageViewed('/features');
+  }, []);
+
+  // CTA click handler
+  const handleCtaClick = (location: string, label: string, href: string) => {
+    conversionTracking.ctaClicked({
+      location,
+      label,
+      href,
+      pagePath: '/features',
+    });
+  };
+
   return (
     <div className='min-h-fit bg-zinc-950 text-zinc-50'>
       {/* Hero */}
@@ -547,7 +566,16 @@ export default function FeaturesPage() {
 
             <div className='pt-4 flex flex-col gap-3 items-center'>
               <Button variant='lunary' asChild size='lg'>
-                <Link href='/auth?signup=true'>
+                <Link
+                  href='/auth?signup=true'
+                  onClick={() =>
+                    handleCtaClick(
+                      'final-cta',
+                      CTA_COPY.auth.createChart,
+                      '/auth?signup=true',
+                    )
+                  }
+                >
                   {CTA_COPY.auth.createChart}
                 </Link>
               </Button>
@@ -556,6 +584,13 @@ export default function FeaturesPage() {
                 <Link
                   href='/pricing'
                   className='text-lunary-primary-400 hover:text-lunary-primary-200'
+                  onClick={() =>
+                    handleCtaClick(
+                      'final-cta-secondary',
+                      'Compare plans',
+                      '/pricing',
+                    )
+                  }
                 >
                   Compare plans
                 </Link>

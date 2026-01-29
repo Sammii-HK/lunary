@@ -31,6 +31,16 @@
       "answer": "1. **Create your free birth chart** - Enter birth date, time, and location\n2. **Explore your dashboard** - See today's cosmic energy\n3. **Try daily practice for a week** - Morning check-in, daily card, quick reflection\n4. **See if it resonates** - Notice if insights match your experience\n5. **Upgrade when ready** - Get full interpretations and pattern tracking"
     },
     {
+      "id": "scientifically-accurate",
+      "question": "Is this scientifically accurate?",
+      "answer": "Lunary uses precise astronomical calculations for all planetary positions, transits, and timing.\n\n**What's scientific:**\n- Planetary positions calculated with astronomy-engine (accurate to ±1 arcminute)\n- Based on VSOP87 and NOVAS C 3.1 models\n- Proper house calculations based on your location\n- Actual moon phases and astronomical events\n\n**What's interpretive:**\n- The meanings assigned to planetary positions\n- How transits might relate to your experience\n- Pattern recognition from your journal entries\n\nWe're transparent: astrology is a symbolic system built on real astronomy. The planets are where we say they are—the interpretation is the art."
+    },
+    {
+      "id": "what-are-patterns",
+      "question": "What are patterns and why do they matter?",
+      "answer": "Patterns are correlations Lunary finds between cosmic events and your experiences.\n\n**Example:** \"During the last 5 Full Moons, you journaled about relationships and pulled partnership cards (2 of Cups, The Lovers).\"\n\n**Why this matters:** Next Full Moon, you get a heads up based on YOUR history: \"Based on your pattern, relationships might come into focus. Consider checking in with your partner.\"\n\nThis is personal validation that astrology shows up consistently for YOU. Your own data becomes proof—you can't get this from generic horoscopes.\n\nNo other app does this. Patterns emerge after 6-8 weeks of consistent use."
+    },
+    {
       "id": "can-cancel",
       "question": "Can I cancel anytime?",
       "answer": "Yes. Cancel from your account settings with no questions asked.\n\nYour subscription continues until the end of your billing period, then you drop back to the free tier. Your data stays intact—you just lose access to paid features."
@@ -71,6 +81,31 @@
       "id": "pricing-downgrade",
       "question": "What happens to my data if I downgrade?",
       "answer": "**Your data stays:**\n- All journal entries preserved\n- All tarot readings saved\n- Patterns remain in database\n- Birth chart unchanged\n\n**What you lose access to:**\n- Full transit interpretations (revert to truncated)\n- Weekly tarot (can't pull new ones, past readings saved)\n- Extended pattern history (only see last 30 days)\n\nIf you re-upgrade later, everything is still there. Nothing is deleted."
+    },
+    {
+      "id": "pricing-how-lunary-works",
+      "question": "How does Lunary work?",
+      "answer": "Charts and timings come from real astronomical data. The Astral Guide chat interprets your chart, patterns, and the current sky."
+    },
+    {
+      "id": "pricing-accuracy",
+      "question": "How accurate are the calculations?",
+      "answer": "We use precise astronomical algorithms based on your exact birth time, date, and location. Planetary positions are calculated with astronomy-engine (accurate to ±1 arcminute) based on VSOP87 and NOVAS C 3.1 models."
+    },
+    {
+      "id": "pricing-different",
+      "question": "What makes Lunary different?",
+      "answer": "Every insight is calculated from your exact birth chart, not generic sun sign horoscopes. All charts are powered by real astronomy."
+    },
+    {
+      "id": "pricing-chat-limits",
+      "question": "What are the Astral Guide chat limits?",
+      "answer": "Astral Guide chat limits are set per plan.\n\nFree accounts include up to 3 messages per day.\n\nLunary+ includes up to 50 messages per day.\n\nLunary+ Pro includes up to 300 messages per day."
+    },
+    {
+      "id": "pricing-memory",
+      "question": "What are \"recent messages\" and \"memory snippets\"?",
+      "answer": "Recent messages are the last chat turns included as live context. Memory snippets are short, saved notes about your preferences or recurring themes. Plans vary in how many recent messages and memory snippets are included."
     }
   ],
   "categories": [
@@ -102,7 +137,12 @@
         {
           "id": "scientifically-accurate",
           "question": "Is this scientifically accurate?",
-          "answer": "The **astronomy** is precise—we use VSOP87 and NOVAS C 3.1 for planetary calculations, the same models NASA uses. Where planets are on any date is exactly where they are in space.\n\nThe **astrology**—the interpretation and meaning—is a symbolic system. We're transparent about this. Whether astrology \"works\" is something you discover through your own experience.\n\nWe calculate the science accurately. The symbolism is for you to explore."
+          "answer": "Lunary uses precise astronomical calculations for all planetary positions, transits, and timing.\n\n**What's scientific:**\n- Planetary positions calculated with astronomy-engine (accurate to ±1 arcminute)\n- Based on VSOP87 and NOVAS C 3.1 models\n- Proper house calculations based on your location\n- Actual moon phases and astronomical events\n\n**What's interpretive:**\n- The meanings assigned to planetary positions\n- How transits might relate to your experience\n- Pattern recognition from your journal entries\n\nWe're transparent: astrology is a symbolic system built on real astronomy. The planets are where we say they are—the interpretation is the art."
+        },
+        {
+          "id": "what-are-patterns",
+          "question": "What are patterns and why do they matter?",
+          "answer": "Patterns are correlations Lunary finds between cosmic events and your experiences.\n\n**Example:** \"During the last 5 Full Moons, you journaled about relationships and pulled partnership cards (2 of Cups, The Lovers).\"\n\n**Why this matters:** Next Full Moon, you get a heads up based on YOUR history: \"Based on your pattern, relationships might come into focus. Consider checking in with your partner.\"\n\nThis is personal validation that astrology shows up consistently for YOU. Your own data becomes proof—you can't get this from generic horoscopes.\n\nNo other app does this. Patterns emerge after 6-8 weeks of consistent use."
         },
         {
           "id": "how-to-start",
