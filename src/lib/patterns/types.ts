@@ -171,20 +171,32 @@ export interface CosmicData {
   moonPhase: {
     name: string;
     illumination: number;
-    angle: number;
+    energy?: string;
+    emoji?: string;
+    age?: number;
+    isSignificant?: boolean;
+    priority?: number;
   };
-  planetaryPositions: Array<{
-    planet: string;
-    sign: string;
-    degree: number;
-    isRetrograde: boolean;
-  }>;
+  planetaryPositions: Record<
+    string,
+    {
+      longitude: number;
+      sign: string;
+      degree: number;
+      minutes?: number;
+      retrograde: boolean;
+      newRetrograde?: boolean;
+      newDirect?: boolean;
+    }
+  >;
   aspects?: Array<{
-    type: string;
-    planet1: string;
-    planet2: string;
-    angle: number;
-    orb: number;
+    name: string;
+    aspect: string;
+    planetA: { name: string; constellation: string };
+    planetB: { name: string; constellation: string } | null;
+    energy: string;
+    priority: number;
+    separation: number;
   }>;
 }
 

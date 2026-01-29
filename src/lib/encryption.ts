@@ -117,3 +117,49 @@ export const encryptBirthday = encrypt;
  * Decrypt birthday specifically (alias for clarity)
  */
 export const decryptBirthday = decrypt;
+
+/**
+ * Encrypt a JSON object
+ * Serializes to JSON, encrypts, returns encrypted string
+ */
+export function encryptJSON<T = any>(data: T): string {
+  const jsonString = JSON.stringify(data);
+  return encrypt(jsonString);
+}
+
+/**
+ * Decrypt a JSON object
+ * Decrypts string, parses JSON
+ */
+export function decryptJSON<T = any>(encrypted: string): T {
+  const jsonString = decrypt(encrypted);
+  return JSON.parse(jsonString) as T;
+}
+
+/**
+ * Validate that encryption/decryption works correctly
+ * Used in tests and health checks
+ */
+export function validateEncryption(): boolean {
+  try {
+    const testData = { test: 'encryption validation', timestamp: Date.now() };
+    const encrypted = encryptJSON(testData);
+
+    // Verify it's actually encrypted (not plaintext)
+    if (encrypted.includes('encryption validation')) {
+      throw new Error('Data appears to be in plaintext');
+    }
+
+    const decrypted = decryptJSON(encrypted);
+
+    // Verify round-trip integrity
+    if (JSON.stringify(decrypted) !== JSON.stringify(testData)) {
+      throw new Error('Decrypted data does not match original');
+    }
+
+    return true;
+  } catch (error) {
+    console.error('Encryption validation failed:', error);
+    return false;
+  }
+}
