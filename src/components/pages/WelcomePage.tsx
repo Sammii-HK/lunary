@@ -61,15 +61,28 @@ export default function WelcomePage() {
               Lunary connects astrology, tarot and lunar cycles through real
               astronomical timing.
             </p>
-            <div className='flex flex-col sm:flex-row gap-4 justify-center items-center pt-2 pb-0 md:pb-6'>
-              <Button variant='lunary-soft' asChild>
+            <div className='flex flex-col gap-3 justify-center items-center pt-2 pb-0 md:pb-6'>
+              <Button variant='lunary-soft' size='lg' asChild>
                 <Link href='/auth?signup=true'>
                   {CTA_COPY.auth.createChart}
                 </Link>
               </Button>
-              <Button variant='lunary' asChild>
-                <Link href='/pricing'>{CTA_COPY.pricing.viewPricing}</Link>
-              </Button>
+              <p className='text-xs text-zinc-500'>
+                Already have an account?{' '}
+                <Link
+                  href='/auth'
+                  className='text-lunary-primary-400 hover:text-lunary-primary-200 transition-colors'
+                >
+                  Sign in
+                </Link>
+              </p>
+              <p className='text-xs text-zinc-500 mt-2'>
+                Start free • Use code{' '}
+                <span className='font-mono text-lunary-primary-400'>
+                  STARGAZER
+                </span>{' '}
+                for 3 months of Lunary+
+              </p>
             </div>
           </div>
 
@@ -80,36 +93,22 @@ export default function WelcomePage() {
         </section>
 
         <section className='py-2 px-4 md:py-8 leading-relaxed max-w-3xl mx-auto text-center'>
-          <p className='text-xs text-zinc-500 mb-4'>
-            Chart calculations are based on real astronomy.
+          <p className='text-sm text-zinc-400 mb-6'>
+            See Lunary in action with today's actual planetary positions.
             <br />
-            The Astral Guide chat helps interpret your chart, patterns and the
-            current sky.
+            This demo uses real cosmic data. Everything updates daily based on
+            current transits and moon phases.
           </p>
-          <p className='text-sm text-zinc-400'>
-            Free access includes your birth chart and Grimoire tools.
-            <br />
-            <span className='text-lunary-primary-200'>
-              Upgrade for personalised interpretation and deeper analysis.
-            </span>
-            <br />
-            Personal Day and Personal Year numbers are free; Lunary+ Pro
-            includes the interpretation.
-          </p>
-          <p className='text-sm text-zinc-400 pb-8'>
-            No card required. Takes under 2 minutes.
-          </p>
-          <p className='text-zinc-400 leading-relaxed max-w-3xl mx-auto mt-4'>
+          <p className='text-zinc-400 leading-relaxed max-w-3xl mx-auto'>
             Lunary is designed for reflection rather than prediction. Instead of
             offering fixed meanings or one-size-fits-all readings, it helps you
-            understand patterns, timing, and cycles as they unfold, so insight
-            can adapt as you do.
+            understand patterns, timing, and cycles as they unfold.
           </p>
           <a
             href='#how-it-works'
-            className='text-sm text-lunary-primary-400 hover:text-lunary-primary-200 transition-colors'
+            className='text-sm text-lunary-primary-400 hover:text-lunary-primary-200 transition-colors inline-block mt-4'
           >
-            See how Lunary works
+            See all features
           </a>
         </section>
 
@@ -679,22 +678,59 @@ export default function WelcomePage() {
 
         {/* Section 14: Final CTA */}
         <section className='py-12 md:py-20 px-4 md:px-6 border-t border-zinc-800/30'>
-          <div className='max-w-2xl mx-auto text-center space-y-5'>
+          <div className='max-w-2xl mx-auto text-center space-y-6'>
             <h2 className='text-2xl md:text-3xl font-light text-zinc-100'>
-              Understanding yourself changes everything.
+              Start understanding yourself better
             </h2>
-            <p className='text-zinc-400 leading-relaxed'>
-              Lunary is here to walk that with you.
-            </p>
-            <div className='pt-2 flex flex-col sm:flex-row gap-4 justify-center items-center'>
-              <Button variant='lunary-soft' asChild>
+
+            <div className='max-w-md mx-auto text-left space-y-2'>
+              <div className='flex items-center gap-2'>
+                <Check className='w-4 h-4 text-lunary-primary-400 flex-shrink-0' />
+                <span className='text-sm text-zinc-400'>
+                  Complete birth chart in 60 seconds
+                </span>
+              </div>
+              <div className='flex items-center gap-2'>
+                <Check className='w-4 h-4 text-lunary-primary-400 flex-shrink-0' />
+                <span className='text-sm text-zinc-400'>
+                  Daily guidance based on YOUR chart
+                </span>
+              </div>
+              <div className='flex items-center gap-2'>
+                <Check className='w-4 h-4 text-lunary-primary-400 flex-shrink-0' />
+                <span className='text-sm text-zinc-400'>
+                  2,000+ free grimoire articles
+                </span>
+              </div>
+              <div className='flex items-center gap-2'>
+                <Check className='w-4 h-4 text-lunary-primary-400 flex-shrink-0' />
+                <span className='text-sm text-zinc-400'>
+                  Pattern tracking over time
+                </span>
+              </div>
+              <div className='flex items-center gap-2'>
+                <Check className='w-4 h-4 text-lunary-primary-400 flex-shrink-0' />
+                <span className='text-sm text-zinc-400'>
+                  No credit card required
+                </span>
+              </div>
+            </div>
+
+            <div className='pt-4 flex flex-col gap-3 items-center'>
+              <Button variant='lunary-soft' size='lg' asChild>
                 <Link href='/auth?signup=true'>
                   {CTA_COPY.auth.createChart}
                 </Link>
               </Button>
-              <Button variant='lunary' asChild>
-                <Link href='/pricing'>{CTA_COPY.pricing.viewPricing}</Link>
-              </Button>
+              <p className='text-xs text-zinc-500'>
+                Want to see features first?{' '}
+                <Link
+                  href='/pricing'
+                  className='text-lunary-primary-400 hover:text-lunary-primary-200 transition-colors'
+                >
+                  Explore what's included
+                </Link>
+              </p>
             </div>
           </div>
         </section>

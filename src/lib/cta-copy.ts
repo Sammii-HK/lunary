@@ -6,7 +6,7 @@
 export const CTA_COPY = {
   // Authentication & Onboarding
   auth: {
-    createChart: 'Create your birth chart', // ✅ Keep - clear & personal
+    createChart: 'Create your free birth chart', // ✅ Emphasize "free" to remove friction
     signUp: 'Start your practice', // More aligned with daily ritual concept
     continue: 'Continue',
   },

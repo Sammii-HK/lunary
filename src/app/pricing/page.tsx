@@ -326,11 +326,21 @@ export default function PricingPage() {
               <span className='text-lunary-accent-300'>starts here</span>
             </h1>
 
-            <p className='text-base md:text-lg text-zinc-400 max-w-xl mx-auto leading-relaxed'>
+            <p className='text-base md:text-lg text-zinc-400 max-w-xl mx-auto leading-relaxed mb-4'>
               Start with free access to your birth chart, moon phases, and
               general cosmic insights. Upgrade for personalized readings based
               on your exact birth chart.
             </p>
+            <div className='flex items-center justify-center gap-4 text-sm text-zinc-500'>
+              <div className='flex items-center gap-2'>
+                <Check className='w-4 h-4 text-lunary-primary-400' />
+                <span>No credit card required</span>
+              </div>
+              <div className='flex items-center gap-2'>
+                <Check className='w-4 h-4 text-lunary-primary-400' />
+                <span>Cancel anytime</span>
+              </div>
+            </div>
           </div>
         </section>
 
@@ -361,6 +371,68 @@ export default function PricingPage() {
                   Save 25%
                 </span>
               </button>
+            </div>
+          </div>
+        </section>
+
+        {/* Which Plan Guide */}
+        <section className='relative pb-12'>
+          <div className='max-w-4xl mx-auto px-6'>
+            <div className='p-6 md:p-8 bg-zinc-900/40 rounded-2xl border border-zinc-800/60'>
+              <h3 className='text-lg md:text-xl font-light text-zinc-100 mb-6 text-center'>
+                Which plan is right for me?
+              </h3>
+              <div className='space-y-3 text-sm'>
+                <div className='flex flex-col md:flex-row md:justify-between gap-2 md:gap-4 py-2 border-b border-zinc-800/50'>
+                  <span className='text-zinc-400'>
+                    Try astrology for the first time
+                  </span>
+                  <span className='text-lunary-primary-300 font-medium'>
+                    Free
+                  </span>
+                </div>
+                <div className='flex flex-col md:flex-row md:justify-between gap-2 md:gap-4 py-2 border-b border-zinc-800/50'>
+                  <span className='text-zinc-400'>
+                    Build a daily check-in habit
+                  </span>
+                  <span className='text-lunary-primary-300 font-medium'>
+                    Lunary+ ($4.99/mo)
+                  </span>
+                </div>
+                <div className='flex flex-col md:flex-row md:justify-between gap-2 md:gap-4 py-2 border-b border-zinc-800/50'>
+                  <span className='text-zinc-400'>
+                    Learn astrology deeply over time
+                  </span>
+                  <span className='text-lunary-primary-300 font-medium'>
+                    Lunary+ ($4.99/mo)
+                  </span>
+                </div>
+                <div className='flex flex-col md:flex-row md:justify-between gap-2 md:gap-4 py-2 border-b border-zinc-800/50'>
+                  <span className='text-zinc-400'>
+                    Have AI explain your chart in context
+                  </span>
+                  <span className='text-lunary-primary-300 font-medium'>
+                    Lunary+ Pro ($8.99/mo)
+                  </span>
+                </div>
+                <div className='flex flex-col md:flex-row md:justify-between gap-2 md:gap-4 py-2'>
+                  <span className='text-zinc-400'>
+                    Track long-term patterns (years)
+                  </span>
+                  <span className='text-lunary-primary-300 font-medium'>
+                    Lunary+ Pro ($8.99/mo)
+                  </span>
+                </div>
+              </div>
+              <p className='text-xs text-zinc-500 mt-6 text-center'>
+                Still not sure?{' '}
+                <Link
+                  href='#pricing-plans'
+                  className='text-lunary-primary-400 hover:text-lunary-primary-300'
+                >
+                  Compare features below
+                </Link>
+              </p>
             </div>
           </div>
         </section>
