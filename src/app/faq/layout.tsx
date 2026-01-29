@@ -19,7 +19,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: 'Frequently Asked Questions | Lunary',
     description:
-      'Get answers to all your questions about Lunary—from getting started to advanced features, pricing, privacy, and patterns.',
+      'Get answers to all your questions about Lunary:from getting started to advanced features, pricing, privacy, and patterns.',
     url: 'https://lunary.app/faq',
     siteName: 'Lunary',
     type: 'website',
@@ -36,7 +36,7 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: 'FAQ | Lunary',
     description:
-      'Get answers to all your questions about Lunary—from getting started to advanced features.',
+      'Get answers to all your questions about Lunary:from getting started to advanced features.',
     images: ['https://lunary.app/og-image.png'],
   },
   alternates: {

@@ -157,7 +157,7 @@ export default function FeaturesPage() {
           <FeatureCard
             icon={<Sparkles className='w-5 h-5 md:w-6 md:h-6' />}
             title='Personal Daily Horoscope'
-            description='Not your sun sign—YOUR specific planetary movements'
+            description='Not your sun signNot includedYOUR specific planetary movements'
             features={[
               'Based on current planets transiting YOUR natal chart',
               'Updates daily with real astronomical data',
@@ -214,7 +214,7 @@ export default function FeaturesPage() {
               'Reflects broader energy patterns',
               'Updates every Monday',
             ]}
-            freeTier='—'
+            freeTier='Not included'
             paidTier='Weekly card with full interpretation'
             cta='Get your weekly card'
             ctaHref='/pricing'
@@ -303,7 +303,7 @@ export default function FeaturesPage() {
               'Shows themes like "Full Moons = relationship tension"',
               'Helps understand your personal cycles',
             ]}
-            freeTier='—'
+            freeTier='Not included'
             paidTier='30-day pattern analysis'
             proTier='90-day deep pattern recognition'
             cta='Track your patterns'
@@ -498,7 +498,7 @@ function FeatureCard({
         className='w-full sm:w-auto'
         size='sm'
       >
-        <Link href={ctaHref}>{cta} →</Link>
+        <Link href={ctaHref}>{cta}</Link>
       </Button>
     </div>
   );
