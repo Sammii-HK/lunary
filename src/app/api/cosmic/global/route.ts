@@ -3,6 +3,7 @@ import { getGlobalCosmicData } from '@/lib/cosmic-snapshot/global-cache';
 import { getHourlyCacheHeaders } from '@/lib/cache-utils';
 
 export const runtime = 'nodejs';
+export const dynamic = 'force-dynamic'; // Uses request.url for search params
 export const revalidate = 3600; // Revalidate hourly (moon/planets update frequently)
 
 export async function GET(request: NextRequest) {
