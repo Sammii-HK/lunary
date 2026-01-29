@@ -3,30 +3,46 @@ import Link from 'next/link';
 import { Check, Star, ArrowRight } from 'lucide-react';
 import { ComparisonPageStructuredData } from '@/components/ComparisonPageStructuredData';
 
+const currentYear = new Date().getFullYear();
+
 export const metadata: Metadata = {
-  title:
-    'Best Personalized Astrology Apps 2025: Lunary vs Moonly vs Lunar Guide',
+  title: `Best Personalized Astrology Apps ${currentYear}: Lunary vs Co-Star vs CHANI`,
   description:
-    'Compare Lunary vs Moonly vs Lunar Guide. See which astrology app uses real astronomical data, offers personalized birth charts, and includes a complete grimoire. Free monthly or annual trial available.',
+    'Compare Lunary vs Co-Star vs CHANI. See which astrology app uses real astronomical data, offers personalized birth charts with no ads, and includes a complete grimoire. Free tier available.',
   keywords: [
     'best astrology apps',
     'personalized astrology apps',
     'astrology app comparison',
+    'Lunary vs Co-Star',
+    'Lunary vs CHANI',
+    'Lunary vs Astro Gold',
+    'Lunary vs TimePassages',
+    'Lunary vs AstroFuture',
+    'Lunary vs Astro.com',
+    'Lunary vs Arcanene',
+    'Lunary vs AstroMatrix',
+    'Lunary vs Astro.com',
+    'Lunary vs Moonly',
+    'Lunary vs Lunar Guide',
+    'Lunary vs Arcarae',
+    'Lunary vs Pattern',
+    'Lunary vs Moonly',
+    'Lunary vs Lunar Guide',
+    'Lunary vs Pattern',
     'Lunary vs Moonly',
     'Lunary vs Lunar Guide',
     'best birth chart app',
     'astrology app review',
     'personalized horoscope app',
-    'astrology app 2025',
+    `astrology app ${currentYear}`,
   ],
   authors: [{ name: 'Lunary' }],
   creator: 'Lunary',
   publisher: 'Lunary',
   openGraph: {
-    title:
-      'Best Personalized Astrology Apps 2025: Lunary vs Moonly vs Lunar Guide',
+    title: `Best Personalized Astrology Apps ${currentYear}: Lunary vs Co-Star vs CHANI`,
     description:
-      'Compare Lunary vs Moonly vs Lunar Guide. See which app uses real astronomical data and offers the most personalized insights.',
+      'Compare Lunary vs Co-Star vs CHANI, and more. See which app uses real astronomical data and offers the most personalized insights with no ads.',
     url: 'https://lunary.app/comparison/best-personalized-astrology-apps',
     siteName: 'Lunary',
     images: [
@@ -42,10 +58,9 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title:
-      'Best Personalized Astrology Apps 2025: Lunary vs Moonly vs Lunar Guide',
+    title: `Best Personalized Astrology Apps ${currentYear}: Lunary vs Co-Star vs CHANI`,
     description:
-      'Compare Lunary vs Moonly vs Lunar Guide. See which app uses real astronomical data and offers the most personalized insights.',
+      'Compare Lunary vs Co-Star vs CHANI. See which app uses real astronomical data and offers the most personalized insights with no ads.',
     images: ['/api/og/cosmic'],
   },
   alternates: {
@@ -68,20 +83,20 @@ export default function BestPersonalizedAstrologyAppsPage() {
   return (
     <div className='min-h-screen bg-zinc-950 text-zinc-100'>
       <ComparisonPageStructuredData
-        competitorName='Moonly and Lunar Guide'
+        competitorName='Co-Star and CHANI'
         featuresCompared={[
           'Real astronomical calculations',
           'Personalized birth charts',
           'Grimoire with spells and rituals',
-          'Free trial availability',
+          'Free tier with no ads',
           'Astronomical accuracy',
         ]}
-        conclusion='Lunary stands out as the best personalized astrology app for using real astronomical calculations, providing chart-based personalization, and including a complete grimoire with spells, rituals, and correspondences.'
+        conclusion='Lunary stands out as the best personalized astrology app for using real astronomical calculations (±1 arcminute accuracy), providing chart-based personalization with no ads in the free tier, and including a complete 2000+ page grimoire with spells, rituals, and correspondences.'
       />
       <div className='max-w-4xl mx-auto px-4 py-12'>
         <div className='mb-8'>
           <h1 className='text-4xl font-light text-zinc-100 mb-4'>
-            Best Personalized Astrology Apps 2025
+            Best Personalized Astrology Apps {currentYear}
           </h1>
           <p className='text-lg text-zinc-400'>
             A comprehensive comparison of the top personalized astrology apps to
@@ -110,13 +125,16 @@ export default function BestPersonalizedAstrologyAppsPage() {
                     Feature
                   </th>
                   <th className='border border-zinc-800 p-4 text-center text-lunary-primary-300 font-medium'>
-                    Lunary ⭐
+                    <div className='flex items-center justify-center gap-2'>
+                      Lunary
+                      <Star className='h-4 w-4' />
+                    </div>
                   </th>
                   <th className='border border-zinc-800 p-4 text-center text-zinc-300'>
-                    Moonly
+                    Co-Star
                   </th>
                   <th className='border border-zinc-800 p-4 text-center text-zinc-300'>
-                    Lunar Guide
+                    CHANI
                   </th>
                 </tr>
               </thead>
@@ -133,16 +151,16 @@ export default function BestPersonalizedAstrologyAppsPage() {
                   </td>
                   <td className='border border-zinc-800 p-4 text-center'>
                     <span className='text-lunary-success font-medium text-sm'>
-                      Real Astronomical Data
-                    </span>
-                  </td>
-                  <td className='border border-zinc-800 p-4 text-center'>
-                    <span className='text-zinc-400 text-sm'>
-                      Generic Astrology
+                      ±1 arcminute accuracy
                     </span>
                   </td>
                   <td className='border border-zinc-800 p-4 text-center'>
                     <Check className='h-5 w-5 text-lunary-success mx-auto' />
+                  </td>
+                  <td className='border border-zinc-800 p-4 text-center'>
+                    <span className='text-zinc-400 text-sm'>
+                      Standard Astrology
+                    </span>
                   </td>
                 </tr>
                 <tr className='bg-zinc-900/30'>
@@ -181,20 +199,22 @@ export default function BestPersonalizedAstrologyAppsPage() {
                     </span>
                   </td>
                   <td className='border border-zinc-800 p-4 text-center'>
-                    <span className='text-zinc-400 text-sm'>
-                      Generic Zodiac
-                    </span>
+                    <Check className='h-5 w-5 text-lunary-success mx-auto' />
                   </td>
                   <td className='border border-zinc-800 p-4 text-center'>
-                    <Check className='h-5 w-5 text-lunary-success mx-auto' />
+                    <span className='text-zinc-400 text-sm'>
+                      Expert-Written
+                    </span>
                   </td>
                 </tr>
                 <tr className='bg-zinc-900/30'>
                   <td className='border border-zinc-800 p-4 text-zinc-300'>
-                    <strong className='text-zinc-100'>Grimoire Included</strong>
+                    <strong className='text-zinc-100'>
+                      Grimoire (2000+ pages)
+                    </strong>
                     <br />
                     <span className='text-xs text-zinc-400'>
-                      Spells, rituals, correspondences
+                      Spells, rituals, correspondences - 100% free
                     </span>
                   </td>
                   <td className='border border-zinc-800 p-4 text-center'>
@@ -219,60 +239,152 @@ export default function BestPersonalizedAstrologyAppsPage() {
                     <Check className='h-5 w-5 text-lunary-success mx-auto' />
                   </td>
                   <td className='border border-zinc-800 p-4 text-center'>
-                    <span className='text-zinc-400 text-sm'>Limited</span>
+                    <span className='text-zinc-400'>—</span>
                   </td>
                   <td className='border border-zinc-800 p-4 text-center'>
-                    <span className='text-zinc-400 text-sm'>Limited</span>
+                    <span className='text-zinc-400'>—</span>
                   </td>
                 </tr>
                 <tr className='bg-zinc-900/30'>
                   <td className='border border-zinc-800 p-4 text-zinc-300'>
                     <strong className='text-zinc-100'>
-                      Astronomical Accuracy
+                      Tarot Pattern Analysis
                     </strong>
                     <br />
                     <span className='text-xs text-zinc-400'>
-                      Uses real planetary positions
+                      Identifies themes across your readings
                     </span>
                   </td>
                   <td className='border border-zinc-800 p-4 text-center'>
                     <Check className='h-5 w-5 text-lunary-success mx-auto' />
                   </td>
                   <td className='border border-zinc-800 p-4 text-center'>
-                    <span className='text-zinc-400 text-sm'>Generic</span>
+                    <span className='text-zinc-400'>—</span>
+                  </td>
+                  <td className='border border-zinc-800 p-4 text-center'>
+                    <span className='text-zinc-400'>—</span>
+                  </td>
+                </tr>
+                <tr className='bg-zinc-900/50'>
+                  <td className='border border-zinc-800 p-4 text-zinc-300'>
+                    <strong className='text-zinc-100'>
+                      Book of Shadows Journal
+                    </strong>
+                    <br />
+                    <span className='text-xs text-zinc-400'>
+                      With archetype pattern recognition
+                    </span>
+                  </td>
+                  <td className='border border-zinc-800 p-4 text-center'>
+                    <Check className='h-5 w-5 text-lunary-success mx-auto' />
+                  </td>
+                  <td className='border border-zinc-800 p-4 text-center'>
+                    <span className='text-zinc-400'>—</span>
+                  </td>
+                  <td className='border border-zinc-800 p-4 text-center'>
+                    <span className='text-zinc-400'>—</span>
+                  </td>
+                </tr>
+                <tr className='bg-zinc-900/30'>
+                  <td className='border border-zinc-800 p-4 text-zinc-300'>
+                    <strong className='text-zinc-100'>Astral Guide Chat</strong>
+                    <br />
+                    <span className='text-xs text-zinc-400'>
+                      AI with full chart context
+                    </span>
+                  </td>
+                  <td className='border border-zinc-800 p-4 text-center'>
+                    <Check className='h-5 w-5 text-lunary-success mx-auto' />
+                  </td>
+                  <td className='border border-zinc-800 p-4 text-center'>
+                    <span className='text-zinc-400'>—</span>
+                  </td>
+                  <td className='border border-zinc-800 p-4 text-center'>
+                    <span className='text-zinc-400'>—</span>
+                  </td>
+                </tr>
+                <tr className='bg-zinc-900/50'>
+                  <td className='border border-zinc-800 p-4 text-zinc-300'>
+                    <strong className='text-zinc-100'>Crystal Guidance</strong>
+                    <br />
+                    <span className='text-xs text-zinc-400'>
+                      Based on birth chart + current transits
+                    </span>
+                  </td>
+                  <td className='border border-zinc-800 p-4 text-center'>
+                    <Check className='h-5 w-5 text-lunary-success mx-auto' />
+                  </td>
+                  <td className='border border-zinc-800 p-4 text-center'>
+                    <span className='text-zinc-400'>—</span>
+                  </td>
+                  <td className='border border-zinc-800 p-4 text-center'>
+                    <span className='text-zinc-400'>—</span>
+                  </td>
+                </tr>
+                <tr className='bg-zinc-900/30'>
+                  <td className='border border-zinc-800 p-4 text-zinc-300'>
+                    <strong className='text-zinc-100'>
+                      Real-Time Transit Updates
+                    </strong>
+                    <br />
+                    <span className='text-xs text-zinc-400'>
+                      Updates throughout the day
+                    </span>
+                  </td>
+                  <td className='border border-zinc-800 p-4 text-center'>
+                    <Check className='h-5 w-5 text-lunary-success mx-auto' />
+                  </td>
+                  <td className='border border-zinc-800 p-4 text-center'>
+                    <span className='text-zinc-400'>—</span>
+                  </td>
+                  <td className='border border-zinc-800 p-4 text-center'>
+                    <span className='text-zinc-400'>—</span>
+                  </td>
+                </tr>
+                <tr className='bg-zinc-900/50'>
+                  <td className='border border-zinc-800 p-4 text-zinc-300'>
+                    <strong className='text-zinc-100'>Ads</strong>
+                    <br />
+                    <span className='text-xs text-zinc-400'>
+                      Ad-free experience
+                    </span>
+                  </td>
+                  <td className='border border-zinc-800 p-4 text-center'>
+                    <span className='text-lunary-success font-medium text-sm'>
+                      None
+                    </span>
                   </td>
                   <td className='border border-zinc-800 p-4 text-center'>
                     <span className='text-zinc-400 text-sm'>
-                      AI Interpretation
+                      Yes (free tier)
+                    </span>
+                  </td>
+                  <td className='border border-zinc-800 p-4 text-center'>
+                    <span className='text-lunary-success font-medium text-sm'>
+                      None
                     </span>
                   </td>
                 </tr>
                 <tr className='bg-zinc-900/50'>
                   <td className='border border-zinc-800 p-4 text-zinc-300'>
-                    <strong className='text-zinc-100'>Free Trial</strong>
+                    <strong className='text-zinc-100'>Free Tier</strong>
                     <br />
                     <span className='text-xs text-zinc-400'>
-                      Try before you buy
+                      What's included free
                     </span>
                   </td>
                   <td className='border border-zinc-800 p-4 text-center'>
-                    <span className='text-lunary-success font-medium'>
-                      7 days (monthly) / 14 days (annual)
-                    </span>
-                    <br />
-                    <span className='text-xs text-zinc-400'>
-                      No payment during trial
+                    <span className='text-lunary-success font-medium text-sm'>
+                      Generous (No Ads)
                     </span>
                   </td>
                   <td className='border border-zinc-800 p-4 text-center'>
                     <span className='text-zinc-400 text-sm'>
-                      Limited free features
+                      Available (With Ads)
                     </span>
                   </td>
                   <td className='border border-zinc-800 p-4 text-center'>
-                    <span className='text-zinc-400 text-sm'>
-                      Limited free features
-                    </span>
+                    <span className='text-zinc-400 text-sm'>Limited</span>
                   </td>
                 </tr>
                 <tr className='bg-zinc-900/30'>
@@ -284,19 +396,17 @@ export default function BestPersonalizedAstrologyAppsPage() {
                     </span>
                   </td>
                   <td className='border border-zinc-800 p-4 text-center'>
-                    <span className='text-zinc-100 font-medium'>$4.99/mo</span>
-                    <br />
-                    <span className='text-xs text-zinc-400'>or $39.99/yr</span>
-                  </td>
-                  <td className='border border-zinc-800 p-4 text-center'>
-                    <span className='text-zinc-400 text-sm'>
-                      Varies by plan
+                    <span className='text-lunary-success font-medium'>
+                      Free + from $4.99/mo
                     </span>
                   </td>
                   <td className='border border-zinc-800 p-4 text-center'>
                     <span className='text-zinc-400 text-sm'>
-                      Varies by plan
+                      Free + $2.99/mo
                     </span>
+                  </td>
+                  <td className='border border-zinc-800 p-4 text-center'>
+                    <span className='text-zinc-400 text-sm'>~$12.99/mo</span>
                   </td>
                 </tr>
                 <tr className='bg-zinc-900/50'>
@@ -334,7 +444,7 @@ export default function BestPersonalizedAstrologyAppsPage() {
               <Star className='h-6 w-6 text-lunary-primary-400 flex-shrink-0 mt-1' />
               <div className='flex-1'>
                 <h3 className='text-2xl font-medium text-zinc-100 mb-2'>
-                  Lunary ⭐ Our Top Pick
+                  Lunary - Our Top Pick
                 </h3>
                 <p className='text-sm text-zinc-300 leading-relaxed mb-4'>
                   Lunary stands out for using real astronomical calculations to
@@ -359,19 +469,37 @@ export default function BestPersonalizedAstrologyAppsPage() {
                   <div className='flex items-center gap-2'>
                     <Check className='h-4 w-4 text-lunary-success' />
                     <span className='text-sm text-zinc-300'>
-                      Complete grimoire with spells, rituals, correspondences
+                      Astral Guide chat with full chart context
                     </span>
                   </div>
                   <div className='flex items-center gap-2'>
                     <Check className='h-4 w-4 text-lunary-success' />
                     <span className='text-sm text-zinc-300'>
-                      7-day free trial - no card required during the trial
+                      Book of Shadows journal with pattern recognition
                     </span>
                   </div>
                   <div className='flex items-center gap-2'>
                     <Check className='h-4 w-4 text-lunary-success' />
                     <span className='text-sm text-zinc-300'>
-                      Transparent pricing: $4.99/mo or $39.99/yr
+                      Tarot with pattern analysis & chart-based readings
+                    </span>
+                  </div>
+                  <div className='flex items-center gap-2'>
+                    <Check className='h-4 w-4 text-lunary-success' />
+                    <span className='text-sm text-zinc-300'>
+                      Crystals personalized to transits + birth chart
+                    </span>
+                  </div>
+                  <div className='flex items-center gap-2'>
+                    <Check className='h-4 w-4 text-lunary-success' />
+                    <span className='text-sm text-zinc-300'>
+                      Real-time transit updates throughout the day
+                    </span>
+                  </div>
+                  <div className='flex items-center gap-2'>
+                    <Check className='h-4 w-4 text-lunary-success' />
+                    <span className='text-sm text-zinc-300'>
+                      Free tier with no ads · Paid tiers from $4.99/mo
                     </span>
                   </div>
                 </div>
@@ -386,75 +514,83 @@ export default function BestPersonalizedAstrologyAppsPage() {
             </div>
           </div>
 
-          {/* Moonly */}
+          {/* Co-Star */}
           <div className='mb-8 rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-6'>
-            <h3 className='text-xl font-medium text-zinc-100 mb-2'>Moonly</h3>
+            <h3 className='text-xl font-medium text-zinc-100 mb-2'>Co-Star</h3>
             <p className='text-sm text-zinc-300 leading-relaxed mb-4'>
-              Moonly offers Vedic astrology with lunar calendar tracking. Good
-              for users interested in Vedic traditions, but uses generic
-              astrology rather than real astronomical calculations.
+              Co-Star offers personalized horoscopes with a minimalist,
+              text-based interface and social features. Popular for its unique
+              aesthetic and push notifications.
             </p>
             <div className='space-y-2'>
               <div className='flex items-center gap-2'>
                 <Check className='h-4 w-4 text-lunary-success' />
                 <span className='text-sm text-zinc-300'>
-                  Vedic astrology focus
+                  Personalized birth charts
                 </span>
               </div>
               <div className='flex items-center gap-2'>
                 <Check className='h-4 w-4 text-lunary-success' />
                 <span className='text-sm text-zinc-300'>
-                  Lunar calendar tracking
+                  Social features for comparing charts
+                </span>
+              </div>
+              <div className='flex items-center gap-2'>
+                <span className='h-4 w-4 text-zinc-400'>—</span>
+                <span className='text-sm text-zinc-400'>Ads in free tier</span>
+              </div>
+              <div className='flex items-center gap-2'>
+                <span className='h-4 w-4 text-zinc-400'>—</span>
+                <span className='text-sm text-zinc-400'>
+                  No tarot, crystals, or magical tools
                 </span>
               </div>
               <div className='flex items-center gap-2'>
                 <span className='h-4 w-4 text-zinc-400'>—</span>
                 <span className='text-sm text-zinc-400'>
-                  Uses generic astrology (not real astronomy)
-                </span>
-              </div>
-              <div className='flex items-center gap-2'>
-                <span className='h-4 w-4 text-zinc-400'>—</span>
-                <span className='text-sm text-zinc-400'>
-                  No grimoire included
+                  No AI chat assistant or pattern recognition
                 </span>
               </div>
             </div>
           </div>
 
-          {/* Lunar Guide */}
+          {/* CHANI */}
           <div className='mb-8 rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-6'>
-            <h3 className='text-xl font-medium text-zinc-100 mb-2'>
-              Lunar Guide
-            </h3>
+            <h3 className='text-xl font-medium text-zinc-100 mb-2'>CHANI</h3>
             <p className='text-sm text-zinc-300 leading-relaxed mb-4'>
-              Lunar Guide uses AI to generate personalized guidance based on
-              your thoughts and moods. Good for users who want adaptive
-              insights, but doesn't use real astronomical calculations.
+              CHANI offers premium curated content from professional astrologers
+              with an editorial approach. Good for users who want expert-written
+              astrology content, but at a higher price point.
             </p>
             <div className='space-y-2'>
               <div className='flex items-center gap-2'>
                 <Check className='h-4 w-4 text-lunary-success' />
                 <span className='text-sm text-zinc-300'>
-                  AI-assisted insights
+                  Expert-written content
                 </span>
               </div>
               <div className='flex items-center gap-2'>
                 <Check className='h-4 w-4 text-lunary-success' />
                 <span className='text-sm text-zinc-300'>
-                  Adapts to your current state
+                  Editorial approach to astrology
                 </span>
               </div>
               <div className='flex items-center gap-2'>
                 <span className='h-4 w-4 text-zinc-400'>—</span>
                 <span className='text-sm text-zinc-400'>
-                  AI-generated (not real astronomy)
+                  Higher pricing (~$12.99/mo)
                 </span>
               </div>
               <div className='flex items-center gap-2'>
                 <span className='h-4 w-4 text-zinc-400'>—</span>
                 <span className='text-sm text-zinc-400'>
-                  No grimoire included
+                  No tarot, crystals, Book of Shadows, or AI chat
+                </span>
+              </div>
+              <div className='flex items-center gap-2'>
+                <span className='h-4 w-4 text-zinc-400'>—</span>
+                <span className='text-sm text-zinc-400'>
+                  No magical tools or pattern recognition
                 </span>
               </div>
             </div>
@@ -468,30 +604,61 @@ export default function BestPersonalizedAstrologyAppsPage() {
           </h2>
           <div className='rounded-lg border border-lunary-primary-700 bg-lunary-primary-900/10 p-6'>
             <p className='text-sm text-zinc-300 leading-relaxed mb-4'>
-              Lunary wins because it combines three unique advantages:
+              Lunary is the only astrology app that combines astronomical
+              accuracy with a complete magical practice ecosystem:
             </p>
             <ol className='list-decimal list-inside space-y-3 text-sm text-zinc-300 ml-4'>
               <li>
                 <strong className='text-zinc-100'>
-                  Real Astronomical Data:
+                  Real Astronomical Data (±1 arcminute):
                 </strong>{' '}
-                Uses actual planetary positions, not generic astrology or AI
-                interpretation
+                NASA-level accuracy for planetary positions, not generic
+                astrology
               </li>
               <li>
-                <strong className='text-zinc-100'>True Personalization:</strong>{' '}
-                Every horoscope is based on YOUR exact birth chart, not generic
-                zodiac signs
+                <strong className='text-zinc-100'>Astral Guide Chat:</strong> AI
+                assistant with complete knowledge of your birth chart, tarot
+                patterns, and journal entries
               </li>
               <li>
-                <strong className='text-zinc-100'>Complete Grimoire:</strong>{' '}
-                Includes spells, rituals, correspondences, and magical knowledge
-                - unique to Lunary
+                <strong className='text-zinc-100'>
+                  Book of Shadows with Pattern Recognition:
+                </strong>{' '}
+                Personal magical journal that identifies archetypes and themes
+                across your entries
+              </li>
+              <li>
+                <strong className='text-zinc-100'>
+                  Tarot Pattern Analysis:
+                </strong>{' '}
+                Personalized readings based on your chart, plus pattern tracking
+                across all your readings
+              </li>
+              <li>
+                <strong className='text-zinc-100'>
+                  Crystals with Transit Context:
+                </strong>{' '}
+                Recommendations personalized to both your birth chart AND
+                current transits
+              </li>
+              <li>
+                <strong className='text-zinc-100'>
+                  Real-Time Transit Updates:
+                </strong>{' '}
+                Updates throughout the day as planetary movements affect your
+                chart
+              </li>
+              <li>
+                <strong className='text-zinc-100'>
+                  No Ads, Generous Free Tier:
+                </strong>{' '}
+                Unlike Co-Star, free tier has zero ads. Upgrade when you want
+                full personalization.
               </li>
             </ol>
             <p className='text-sm text-zinc-300 leading-relaxed mt-4'>
-              Plus, Lunary offers a transparent 7-day free trial with no card
-              required, making it easy to try risk-free.
+              Start free today with no credit card required, upgrade when you
+              want personalization to your specific chart.
             </p>
           </div>
         </section>
