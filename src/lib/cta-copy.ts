@@ -6,56 +6,56 @@
 export const CTA_COPY = {
   // Authentication & Onboarding
   auth: {
-    createChart: 'Create your birth chart',
-    signUp: 'Get started',
+    createChart: 'Create your birth chart', // ✅ Keep - clear & personal
+    signUp: 'Start your practice', // More aligned with daily ritual concept
     continue: 'Continue',
   },
 
   // Pricing & Conversion
   pricing: {
-    startTrial: 'Continue', // Used for upgrade buttons
-    viewPricing: 'Plans & Pricing',
-    currentPlan: 'Current Plan',
+    startTrial: "See what's included", // Clear value, not pushy
+    viewPricing: 'Explore plans', // Softer than "Plans & Pricing"
+    currentPlan: 'Your plan',
     openApp: 'Open app',
-    comparePlans: 'Compare plans',
+    comparePlans: 'Compare', // Shorter, less salesy
   },
 
   // Navigation
   navigation: {
-    exploreFeatures: 'Explore all features →',
+    exploreFeatures: 'Explore all features →', // ✅ Good
   },
 
-  // Feature-specific CTAs (used by A/B test variants)
+  // Feature-specific CTAs
   features: {
     horoscope: {
-      noVerb: 'Your Personal Horoscope',
-      mystical: 'Discover Your Personal Horoscope',
-      simple: 'See Your Personal Horoscope',
+      noVerb: 'Your personal horoscope', // ✅ My favorite - invitation
+      mystical: 'See your personal horoscope', // Clearer for buttons
+      simple: 'See your horoscope',
     },
     tarotDaily: {
-      noVerb: 'Full Interpretation',
-      mystical: 'Read Full Interpretation',
-      simple: 'Read Full Interpretation',
+      noVerb: 'Your full interpretation', // Better than just "Full"
+      mystical: 'Your full interpretation', // Drop "Read" - less commanding
+      simple: 'Full interpretation',
     },
     tarotWeekly: {
-      noVerb: 'Your Weekly Card',
-      mystical: 'Reveal Your Weekly Card',
-      simple: 'See Your Weekly Card',
+      noVerb: 'Your weekly card', // Personal invitation
+      mystical: 'Pull your weekly card', // Action but ritual-focused
+      simple: 'Weekly card',
     },
     chartConnection: {
-      noVerb: 'Your Chart Connection',
-      mystical: 'See Your Chart Connection',
-      simple: 'See Your Chart Connection',
+      noVerb: 'How this connects to your chart', // More descriptive
+      mystical: 'See your chart connection',
+      simple: 'Chart connection',
     },
     transitList: {
-      noVerb: 'Complete Transit List',
-      mystical: 'See All Transits',
-      simple: 'See All Transits',
+      noVerb: "All of today's transits", // More specific
+      mystical: 'See all transits',
+      simple: 'All transits',
     },
     crystal: {
-      noVerb: 'Your Crystal Reading',
-      mystical: 'Discover Your Crystal Reading',
-      simple: 'See Your Crystal Reading',
+      noVerb: 'Your crystal reading', // Simple invitation
+      mystical: 'Your crystal reading', // Same - don't need verb
+      simple: 'Crystal reading',
     },
   },
 } as const;
