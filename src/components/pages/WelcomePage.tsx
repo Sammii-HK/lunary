@@ -43,9 +43,9 @@ export default function WelcomePage() {
   return (
     <>
       {renderJsonLd(structuredData)}
-      <div className='min-h-screen bg-zinc-950 text-zinc-50 flex flex-col'>
+      <div className='min-h-screen bg-zinc-950 text-zinc-50 flex flex-col pt-[calc(24px+40px)] md:pt-[calc(32px+64px)]'>
         {/* Promo Banner */}
-        <div className='bg-gradient-to-r from-lunary-primary-900/40 to-lunary-primary-800/40 border-b border-lunary-primary-700/30 py-2 px-4 mt-[calc(24px+40px)] md:mt-[calc(32px+64px)]'>
+        <div className='bg-gradient-to-r from-lunary-primary-900/40 to-lunary-primary-800/40 border-b border-lunary-primary-700/30 py-2 px-4'>
           <div className='flex items-center justify-center gap-2'>
             <Sparkles className='w-4 h-4 text-lunary-primary-200' />
             <p className='text-xs md:text-sm text-lunary-primary-100'>
