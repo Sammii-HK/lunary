@@ -240,9 +240,69 @@ export function getRealPlanetaryPositions(
   return positions;
 }
 
+// Constants for supermoon/micromoon detection
+const MOON_PERIGEE_KM = 356500;
+const MOON_APOGEE_KM = 406700;
+const SUPERMOON_THRESHOLD = 0.9;
+
 /**
- * Get accurate moon phase (global data, same for everyone)
- * Cache longer since it's not user-specific
+ * Calculate illumination change rate based on phase angle
+ * Rate varies: fastest at quarters (~0.28%/hr), slowest at new/full (~0%/hr)
+ */
+function calculateMoonChangeRate(phaseAngle: number): number {
+  // Distance from nearest new/full moon (0°, 180°, 360°)
+  const distanceFromPeak = Math.min(
+    Math.abs(phaseAngle),
+    Math.abs(phaseAngle - 180),
+    Math.abs(phaseAngle - 360),
+  );
+
+  // Maximum rate: ~0.28% per hour at quarters
+  const maxRate = 0.28;
+  const rate = maxRate * Math.sin((distanceFromPeak / 90) * (Math.PI / 2));
+
+  return Math.max(rate, 0.01); // Minimum 0.01 to avoid division by zero
+}
+
+/**
+ * Calculate smart TTL: expires when illumination reaches next integer %
+ * This eliminates "jumps" at arbitrary cache boundaries
+ */
+function calculateSmartMoonTTL(
+  currentIllumination: number,
+  changeRatePerHour: number,
+  trend: 'waxing' | 'waning',
+): { secondsUntilNext: number; optimalTTL: number } {
+  // Calculate distance to next integer percentage
+  let percentageGap: number;
+  if (trend === 'waxing') {
+    // Moving toward next higher integer
+    percentageGap = Math.ceil(currentIllumination) - currentIllumination;
+    if (percentageGap < 0.01) percentageGap = 1; // Just passed, next is +1%
+  } else {
+    // Moving toward next lower integer
+    percentageGap = currentIllumination - Math.floor(currentIllumination);
+    if (percentageGap < 0.01) percentageGap = 1; // Just passed, next is -1%
+  }
+
+  // Calculate time until next percentage (in hours)
+  const hoursUntilNext = percentageGap / changeRatePerHour;
+  const secondsUntilNext = Math.max(hoursUntilNext * 3600, 60); // Minimum 1 minute
+
+  // Set TTL with safety bounds
+  const minTTL = 60; // Minimum 1 minute
+  const maxTTL = 3600; // Maximum 1 hour
+  const optimalTTL = Math.max(minTTL, Math.min(secondsUntilNext, maxTTL));
+
+  return { secondsUntilNext, optimalTTL };
+}
+
+/**
+ * Get accurate moon phase with smart cache and supermoon detection
+ * Global data (same for everyone worldwide - geocentric view)
+ *
+ * Smart cache: Expires when illumination reaches next integer %
+ * No arbitrary hour-boundary jumps, updates feel smooth and natural
  */
 export function getAccurateMoonPhase(date: Date): {
   name: string;
@@ -250,28 +310,70 @@ export function getAccurateMoonPhase(date: Date): {
   priority: number;
   emoji: string;
   illumination: number;
+  illuminationPrecise: number;
   age: number;
   isSignificant: boolean;
+  distanceKm: number;
+  isSuperMoon: boolean;
+  isMicroMoon: boolean;
+  angularSize: number;
+  changeRatePerHour: number;
+  nextPercentageIn: number;
+  optimalCacheTTL: number;
+  phaseAngle: number;
+  trend: 'waxing' | 'waning';
 } {
-  // Cache key: round to nearest hour (moon phase changes slowly)
-  const hourKey = Math.floor(date.getTime() / (60 * 60 * 1000));
-  const cacheKey = `moon:${hourKey}`;
+  // Cache key: round to nearest minute (not hour!)
+  const minuteKey = Math.floor(date.getTime() / (60 * 1000));
+  const cacheKey = `moon:${minuteKey}`;
 
   const cached = moonPhaseCache.get(cacheKey);
   if (cached && cached.expiresAt > Date.now()) {
     return cached.data;
   }
 
+  // Calculate fresh data
   const astroTime = new AstroTime(date);
   const body = Body.Moon;
   const illum = Illumination(body, astroTime);
-  const phase = MoonPhase(date); // This gives us the phase angle in degrees
+  const phase = MoonPhase(date); // Phase angle in degrees
 
-  const illuminationPercent = illum.phase_fraction * 100;
+  // Get distance
+  const geoVector = GeoVector(body, astroTime, true);
+  const distanceKm =
+    Math.sqrt(
+      geoVector.x * geoVector.x +
+        geoVector.y * geoVector.y +
+        geoVector.z * geoVector.z,
+    ) * 149597870.7; // AU to km
 
-  // Convert phase angle to moon age (0-29.53 days)
-  // 0° = New Moon, 90° = First Quarter, 180° = Full Moon, 270° = Third Quarter
+  // Calculate illumination
+  const illuminationPrecise = illum.phase_fraction * 100;
+  const illumination = Math.round(illuminationPrecise);
   const moonAge = (phase / 360) * 29.530588853;
+
+  // Determine trend
+  const trend: 'waxing' | 'waning' = phase < 180 ? 'waxing' : 'waning';
+
+  // Calculate change rate (% per hour)
+  const changeRatePerHour = calculateMoonChangeRate(phase);
+
+  // Calculate when illumination will reach next integer percentage
+  const { secondsUntilNext, optimalTTL } = calculateSmartMoonTTL(
+    illuminationPrecise,
+    changeRatePerHour,
+    trend,
+  );
+
+  // Supermoon detection
+  const perigeeThreshold =
+    MOON_PERIGEE_KM +
+    (MOON_APOGEE_KM - MOON_PERIGEE_KM) * (1 - SUPERMOON_THRESHOLD);
+  const apogeeThreshold =
+    MOON_APOGEE_KM -
+    (MOON_APOGEE_KM - MOON_PERIGEE_KM) * (1 - SUPERMOON_THRESHOLD);
+  const isSuperMoon = distanceKm <= perigeeThreshold;
+  const isMicroMoon = distanceKm >= apogeeThreshold;
 
   // Named moons by month (used for full moon display)
   const moonNames: { [key: number]: string } = {
@@ -300,113 +402,92 @@ export function getAccurateMoonPhase(date: Date): {
     isExactFirstQuarter ||
     isExactThirdQuarter;
 
-  // Determine display phase based on illumination (wider window for user display)
-  // Show "Full Moon" for 97%+ illumination, "New Moon" for 3%- illumination
-  let result: {
-    name: string;
-    energy: string;
-    priority: number;
-    emoji: string;
-    illumination: number;
-    age: number;
-    isSignificant: boolean;
-  };
+  // Determine display phase and energy
+  let name: string;
+  let emoji: string;
+  let energy: string;
+  let priority: number;
 
-  if (illuminationPercent <= 3) {
-    // New Moon display (illumination ≤3%)
-    result = {
-      name: 'New Moon',
-      energy: 'New Beginnings',
-      priority: isSignificant ? 10 : 8,
-      emoji: '🌑',
-      illumination: illuminationPercent,
-      age: moonAge,
-      isSignificant,
-    };
-  } else if (illuminationPercent >= 97) {
-    // Full Moon display (illumination ≥97%)
+  if (illumination <= 3) {
+    name = 'New Moon';
+    emoji = '🌑';
+    energy = 'New Beginnings';
+    priority = isSignificant ? 10 : 8;
+  } else if (illumination >= 97) {
     const month = date.getMonth() + 1;
-    const moonName = moonNames[month] || 'Full Moon';
-    result = {
-      name: moonName,
-      energy: 'Peak Power',
-      priority: isSignificant ? 10 : 8,
-      emoji: '🌕',
-      illumination: illuminationPercent,
-      age: moonAge,
-      isSignificant,
-    };
+    name = moonNames[month] || 'Full Moon';
+    emoji = '🌕';
+    energy = 'Peak Power';
+    priority = isSignificant ? 10 : 8;
   } else if (phase >= 85 && phase <= 95) {
-    // First Quarter: 85° - 95° (around 90°)
-    result = {
-      name: 'First Quarter',
-      energy: 'Action & Decision',
-      priority: isSignificant ? 10 : 6,
-      emoji: '🌓',
-      illumination: illuminationPercent,
-      age: moonAge,
-      isSignificant,
-    };
+    name = 'First Quarter';
+    emoji = '🌓';
+    energy = 'Action & Decision';
+    priority = isSignificant ? 10 : 6;
   } else if (phase >= 265 && phase <= 275) {
-    // Third Quarter: 265° - 275° (around 270°)
-    result = {
-      name: 'Third Quarter',
-      energy: 'Release & Letting Go',
-      priority: isSignificant ? 10 : 6,
-      emoji: '🌗',
-      illumination: illuminationPercent,
-      age: moonAge,
-      isSignificant,
-    };
+    name = 'Third Quarter';
+    emoji = '🌗';
+    energy = 'Release & Letting Go';
+    priority = isSignificant ? 10 : 6;
+  } else if (phase > 5 && phase < 85) {
+    name = 'Waxing Crescent';
+    emoji = '🌒';
+    energy = 'Growing Energy';
+    priority = 2;
+  } else if (phase > 95 && phase < 175) {
+    name = 'Waxing Gibbous';
+    emoji = '🌔';
+    energy = 'Building Power';
+    priority = 2;
+  } else if (phase > 185 && phase < 265) {
+    name = 'Waning Gibbous';
+    emoji = '🌖';
+    energy = 'Gratitude & Wisdom';
+    priority = 2;
   } else {
-    // Non-significant phases based on angle ranges
-    if (phase > 5 && phase < 85) {
-      result = {
-        name: 'Waxing Crescent',
-        energy: 'Growing Energy',
-        priority: 2,
-        emoji: '🌒',
-        illumination: illuminationPercent,
-        age: moonAge,
-        isSignificant: false,
-      };
-    } else if (phase > 95 && phase < 175) {
-      result = {
-        name: 'Waxing Gibbous',
-        energy: 'Building Power',
-        priority: 2,
-        emoji: '🌔',
-        illumination: illuminationPercent,
-        age: moonAge,
-        isSignificant: false,
-      };
-    } else if (phase > 185 && phase < 265) {
-      result = {
-        name: 'Waning Gibbous',
-        energy: 'Gratitude & Wisdom',
-        priority: 2,
-        emoji: '🌖',
-        illumination: illuminationPercent,
-        age: moonAge,
-        isSignificant: false,
-      };
-    } else {
-      result = {
-        name: 'Waning Crescent',
-        energy: 'Rest & Reflection',
-        priority: 2,
-        emoji: '🌘',
-        illumination: illuminationPercent,
-        age: moonAge,
-        isSignificant: false,
-      };
-    }
+    name = 'Waning Crescent';
+    emoji = '🌘';
+    energy = 'Rest & Reflection';
+    priority = 2;
   }
 
-  // Cache for 1 hour (global data)
+  // Amplify energy for supermoons
+  if (isSuperMoon) {
+    energy = `${energy} (Supermoon!)`;
+    priority = Math.max(priority, 9);
+  }
+
+  // Calculate angular size from distance
+  // Moon's physical radius: 1737.4 km
+  // Angular diameter (arcseconds) = 2 * arctan(radius / distance) * 206265
+  const moonRadiusKm = 1737.4;
+  const angularDiameterArcsec =
+    2 * Math.atan(moonRadiusKm / distanceKm) * 206265;
+
+  const result = {
+    name,
+    energy,
+    priority,
+    emoji,
+    illumination,
+    illuminationPrecise,
+    age: moonAge,
+    isSignificant,
+    distanceKm,
+    isSuperMoon,
+    isMicroMoon,
+    angularSize: angularDiameterArcsec, // In arcseconds (~1758" to ~2046")
+    changeRatePerHour,
+    nextPercentageIn: secondsUntilNext,
+    optimalCacheTTL: optimalTTL,
+    phaseAngle: phase,
+    trend,
+  };
+
+  // Cache with smart TTL (expires when percentage changes)
   moonPhaseCache.set(cacheKey, {
     data: result,
-    expiresAt: Date.now() + 3600 * 1000,
+    expiresAt: Date.now() + optimalTTL * 1000,
   });
 
   cleanupCache(moonPhaseCache);
@@ -654,4 +735,33 @@ export function getSignDescription(sign: string): string {
     Pisces: 'intuitive and compassionate',
   };
   return descriptions[sign] || 'cosmic';
+}
+
+/**
+ * Helper: Format supermoon info for display
+ */
+export function formatSupermoonInfo(moonData: {
+  distanceKm: number;
+  isSuperMoon: boolean;
+  isMicroMoon: boolean;
+}): string {
+  if (moonData.isSuperMoon) {
+    return `🌕 Supermoon! (${Math.round(moonData.distanceKm).toLocaleString()} km - Extra close!)`;
+  } else if (moonData.isMicroMoon) {
+    return `🌑 Micromoon (${Math.round(moonData.distanceKm).toLocaleString()} km - Extra far)`;
+  }
+  return `${Math.round(moonData.distanceKm).toLocaleString()} km from Earth`;
+}
+
+/**
+ * Helper: Format cache info for debugging
+ */
+export function formatCacheInfo(moonData: {
+  nextPercentageIn: number;
+  illuminationPrecise: number;
+  trend: 'waxing' | 'waning';
+}): string {
+  const minutes = Math.floor(moonData.nextPercentageIn / 60);
+  const seconds = Math.round(moonData.nextPercentageIn % 60);
+  return `Next update in ${minutes}m ${seconds}s (when reaching ${moonData.trend === 'waxing' ? Math.ceil(moonData.illuminationPrecise) : Math.floor(moonData.illuminationPrecise)}%)`;
 }
