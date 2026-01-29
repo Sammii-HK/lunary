@@ -19,6 +19,7 @@ import { Button } from '../ui/button';
 import { useFeatureFlagVariant } from '@/hooks/useFeatureFlag';
 import { useCTACopy } from '@/hooks/useCTACopy';
 import { shouldRedactWord } from '@/constants/redactedWords';
+import { isInDemoMode } from '@/lib/demo-mode';
 
 export const CrystalPreview = () => {
   const { user } = useUser();
@@ -395,24 +396,39 @@ export const CrystalPreview = () => {
                 </Button>
               )}
 
-              <span
-                role='button'
-                tabIndex={0}
-                onClick={() => {
-                  router.push('/grimoire/crystals');
-                  setIsModalOpen(false);
-                }}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter' || e.key === ' ') {
-                    e.preventDefault();
+              {isInDemoMode() ? (
+                <button
+                  onClick={() => {
+                    window.dispatchEvent(
+                      new CustomEvent('demo-action-blocked', {
+                        detail: { action: 'Viewing Grimoire pages' },
+                      }),
+                    );
+                  }}
+                  className='block w-full py-2 text-center text-sm text-lunary-accent hover:text-lunary-accent-300 transition-colors cursor-pointer'
+                >
+                  Explore all crystals
+                </button>
+              ) : (
+                <span
+                  role='button'
+                  tabIndex={0}
+                  onClick={() => {
                     router.push('/grimoire/crystals');
                     setIsModalOpen(false);
-                  }
-                }}
-                className='block w-full py-2 text-center text-sm text-lunary-accent hover:text-lunary-accent-300 transition-colors cursor-pointer'
-              >
-                Explore all crystals
-              </span>
+                  }}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault();
+                      router.push('/grimoire/crystals');
+                      setIsModalOpen(false);
+                    }
+                  }}
+                  className='block w-full py-2 text-center text-sm text-lunary-accent hover:text-lunary-accent-300 transition-colors cursor-pointer'
+                >
+                  Explore all crystals
+                </span>
+              )}
             </div>
           </div>
         </div>

@@ -73,8 +73,12 @@ export function DemoNavigationProvider({
           if (onNavigate) {
             onNavigate(path);
           } else {
-            // Default: show alert
-            alert('Navigation not available in demo preview');
+            // Default: trigger modal
+            window.dispatchEvent(
+              new CustomEvent('demo-action-blocked', {
+                detail: { action: 'Navigating to this page' },
+              }),
+            );
           }
         }
       }
@@ -99,7 +103,11 @@ export function DemoNavigationProvider({
           if (onNavigate) {
             onNavigate(navigateTo);
           } else {
-            alert('Navigation not available in demo preview');
+            window.dispatchEvent(
+              new CustomEvent('demo-action-blocked', {
+                detail: { action: 'Navigating to this page' },
+              }),
+            );
           }
         }
       }

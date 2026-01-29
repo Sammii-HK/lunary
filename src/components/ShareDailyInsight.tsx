@@ -4,7 +4,7 @@ import { useState, useCallback, useMemo, useEffect } from 'react';
 import Image from 'next/image';
 import { Share2, X, Download, Copy, Check, Loader2 } from 'lucide-react';
 import { useUser } from '@/context/UserContext';
-import { useDemoMode } from '@/components/marketing/DemoModeProvider';
+import { isInDemoMode } from '@/lib/demo-mode';
 import { getTarotCard } from '../../utils/tarot/tarot';
 import { getGeneralCrystalRecommendation } from '../../utils/crystals/generalCrystals';
 import {
@@ -37,7 +37,7 @@ export function ShareDailyInsight() {
 
   const { user } = useUser();
   const subscription = useSubscription();
-  const { isDemoMode } = useDemoMode();
+  const isDemoMode = isInDemoMode();
 
   const userName = user?.name;
   const userBirthday = user?.birthday;

@@ -151,16 +151,40 @@ export function DemoClient() {
     };
   }, []);
 
-  // Auto-open moon card after 1 second to show interactivity
+  // Auto-open moon card after 1 second to show interactivity, then close after 2 more seconds
   useEffect(() => {
-    const timer = setTimeout(() => {
-      const moonCard = document.querySelector('#moon-phase button');
-      if (moonCard instanceof HTMLElement) {
-        moonCard.click();
-      }
-    }, 1000);
+    if (activeTab === 'app') {
+      const openTimer = setTimeout(() => {
+        const moonCard = document.querySelector('#moon-phase button');
+        if (moonCard instanceof HTMLElement) {
+          moonCard.click();
 
-    return () => clearTimeout(timer);
+          // Close it after 2 seconds
+          const closeTimer = setTimeout(() => {
+            const moonCardAgain = document.querySelector('#moon-phase button');
+            if (moonCardAgain instanceof HTMLElement) {
+              moonCardAgain.click();
+            }
+          }, 2000);
+
+          return () => clearTimeout(closeTimer);
+        }
+      }, 1000);
+
+      return () => clearTimeout(openTimer);
+    } else if (activeTab === 'tarot') {
+      // Auto-open tarot patterns section
+      const timer = setTimeout(() => {
+        const tarotSection = document.querySelector(
+          '[data-collapsible="Tarot Patterns"] button',
+        );
+        if (tarotSection instanceof HTMLElement) {
+          tarotSection.click();
+        }
+      }, 1000);
+
+      return () => clearTimeout(timer);
+    }
   }, [activeTab]); // Re-run when tab changes
 
   // Auto-cycle through tabs if user hasn't interacted
@@ -205,6 +229,8 @@ export function DemoClient() {
       '/horoscope': 'horoscope',
       '/guide': 'guide',
       '/explore': 'explore',
+      '/book-of-shadows/journal': 'explore',
+      '/book-of-shadows/dreams': 'explore',
       '/profile': 'explore',
       '/birth-chart': 'explore',
       '/grimoire': 'explore',
@@ -215,7 +241,12 @@ export function DemoClient() {
     if (targetTab) {
       handleTabClick(targetTab);
     } else {
-      alert('This feature is not available in the demo preview');
+      // Trigger modal for unmapped routes
+      window.dispatchEvent(
+        new CustomEvent('demo-action-blocked', {
+          detail: { action: 'Accessing this page' },
+        }),
+      );
     }
   };
 
