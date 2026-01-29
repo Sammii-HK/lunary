@@ -15,12 +15,12 @@ import { MarketingFooter } from '@/components/MarketingFooter';
 import { Button } from '@/components/ui/button';
 import { NewsletterSignupForm } from '@/components/NewsletterSignupForm';
 import { renderJsonLd } from '@/lib/schema';
-import { MarketingMiniApp } from '@/components/marketing/MarketingMiniApp';
 import { CTA_COPY } from '@/lib/cta-copy';
 import { FAQAccordion } from '@/components/FAQ';
 import { getHomepageFAQs } from '@/lib/faq-helpers';
 import { useState } from 'react';
 import { HomepageFeaturesTest } from '@/components/marketing/HomepageFeaturesTest';
+import { OptimizedDemoIframe } from '@/components/marketing/OptimizedDemoIframe';
 
 const structuredData = {
   '@context': 'https://schema.org',
@@ -101,8 +101,11 @@ export default function WelcomePage() {
           </div>
 
           {/* Hero Mini App */}
-          <div className='mt-8 md:mt-[72px] flex justify-center'>
-            <MarketingMiniApp />
+          <div className='mt-8 md:mt-[33px] flex justify-center'>
+            <OptimizedDemoIframe
+              loading='eager' // Above-the-fold
+              preload={true} // Max performance
+            />
           </div>
         </section>
 
@@ -126,76 +129,137 @@ export default function WelcomePage() {
           </Link>
         </section>
 
-        {/* Section 2: Problem Recognition */}
+        {/* Section 2: Differentiation */}
         <section className='py-12 md:py-16 px-4 md:px-6 border-t border-zinc-800/30'>
           <div className='max-w-4xl mx-auto text-center space-y-6'>
             <h2 className='text-2xl md:text-3xl font-light text-zinc-100'>
-              Why most astrology apps never quite land
-            </h2>
-            <div className='max-w-2xl mx-auto text-center md:text-center'>
-              <ul className='space-y-2 text-zinc-400'>
-                <li>They reduce you to a sun sign.</li>
-                <li>They repeat generic predictions.</li>
-                <li>
-                  They tell you what will happen instead of helping you
-                  understand yourself.
-                </li>
-              </ul>
-            </div>
-            <div className='pt-2'>
-              <Button variant='lunary' asChild>
-                <Link href='/auth?signup=true'>
-                  {CTA_COPY.auth.createChart}
-                </Link>
-              </Button>
-            </div>
-          </div>
-        </section>
-
-        {/* Section 3: Social Proof Strip */}
-        <section className='border-t border-zinc-800/30 py-6 md:py-8'>
-          <div className='max-w-4xl mx-auto px-4 md:px-6 text-center'>
-            <p className='text-base md:text-lg text-lunary-primary-100 font-light'>
-              A calm alternative to noisy horoscope apps
-            </p>
-            <p className='text-zinc-400 mt-2 max-w-2xl mx-auto'>
-              Lunary is not about predictions, fear, or telling you what will
-              happen.
-              <br />
-              It is about understanding patterns, cycles, and emotional themes
-              so you can move through life with clarity.
-            </p>
-            <p className='text-sm text-zinc-400 mt-5'>
-              Built for people who want depth, not drama.
-            </p>
-            <p className='text-xs text-zinc-500 mt-2'>
-              Built on precise astronomical calculations. Zero fear-based
-              predictions.
-            </p>
-            <Link
-              href='/about/methodology'
-              className='text-xs text-lunary-primary-300 hover:text-lunary-primary-200 transition-colors inline-block mt-2'
-            >
-              Read the methodology
-            </Link>
-          </div>
-        </section>
-
-        {/* Section 4: Differentiator Block */}
-        <section className='py-12 md:py-20 px-4 md:px-6'>
-          <div className='max-w-4xl mx-auto text-center space-y-5'>
-            <h2 className='text-2xl md:text-3xl lg:text-4xl font-light text-zinc-100 leading-tight'>
-              Most astrology apps entertain you.
+              Most apps entertain you.
               <br />
               <span className='text-lunary-primary-300/80'>
                 Lunary helps you understand yourself.
               </span>
             </h2>
-            <p className='text-zinc-400 leading-relaxed max-w-2xl mx-auto'>
-              Most apps give generic sun sign predictions. Lunary uses your full
-              birth chart, real astronomical data and intelligent interpretation
-              to offer meaningful insight you can actually use.
+            <div className='max-w-2xl mx-auto text-left md:text-center space-y-3'>
+              <p className='text-zinc-400'>
+                <span className='text-zinc-500'>Generic apps:</span> Sun sign
+                horoscopes for millions
+              </p>
+              <p className='text-zinc-300'>
+                <span className='text-lunary-primary-400'>Lunary:</span> Your
+                full chart analyzed daily
+              </p>
+              <p className='text-zinc-400'>
+                <span className='text-zinc-500'>Generic apps:</span> Predict
+                what will happen
+              </p>
+              <p className='text-zinc-300'>
+                <span className='text-lunary-primary-400'>Lunary:</span> Track
+                your own patterns over time
+              </p>
+              <p className='text-zinc-400'>
+                <span className='text-zinc-500'>Generic apps:</span> Built for
+                virality
+              </p>
+              <p className='text-zinc-300'>
+                <span className='text-lunary-primary-400'>Lunary:</span> Built
+                for depth and learning
+              </p>
+            </div>
+            <div className='pt-4'>
+              <p className='text-xs text-zinc-500 mb-4'>
+                Plus: 2,000+ free education articles
+              </p>
+              <Button variant='outline' asChild>
+                <Link href='#features'>See all features</Link>
+              </Button>
+            </div>
+          </div>
+        </section>
+
+        {/* Section 3: Founder Story */}
+        <section className='py-12 md:py-16 px-4 md:px-6 bg-zinc-900/20'>
+          <div className='max-w-3xl mx-auto text-center space-y-6'>
+            <div className='inline-flex items-center justify-center w-16 h-16 rounded-full bg-zinc-800 mb-4'>
+              <Sparkles
+                className='w-8 h-8 text-lunary-primary-400'
+                strokeWidth={1.5}
+              />
+            </div>
+            <h3 className='text-lg text-zinc-200'>
+              Built by someone who wanted better astrology tools
+            </h3>
+            <p className='text-sm text-zinc-400 leading-relaxed max-w-2xl mx-auto'>
+              "I got tired of generic sun sign horoscopes. So I built Lunary:
+              personal astrology that actually uses your full chart and tracks
+              your patterns over time. Small team, focused on quality over
+              scale."
             </p>
+            <p className='text-xs text-zinc-500'>Sammii, Founder</p>
+          </div>
+        </section>
+
+        {/* Section 4: Educational Empowerment */}
+        <section className='border-t border-zinc-800/30 py-12 md:py-16'>
+          <div className='max-w-4xl mx-auto px-4 md:px-6 text-center space-y-6'>
+            <h2 className='text-2xl md:text-3xl font-light text-zinc-100'>
+              Learn astrology through your own experience
+            </h2>
+            <p className='text-zinc-400 max-w-2xl mx-auto leading-relaxed'>
+              Most apps keep you dependent on daily horoscopes.
+              <br />
+              Lunary teaches you to read your own chart.
+            </p>
+
+            <div className='max-w-2xl mx-auto text-left space-y-3 pt-4'>
+              <div className='flex items-start gap-3'>
+                <Check className='w-5 h-5 text-lunary-primary-400 mt-0.5 flex-shrink-0' />
+                <div>
+                  <p className='text-sm text-zinc-200'>
+                    How your natal chart shapes your patterns
+                  </p>
+                </div>
+              </div>
+              <div className='flex items-start gap-3'>
+                <Check className='w-5 h-5 text-lunary-primary-400 mt-0.5 flex-shrink-0' />
+                <div>
+                  <p className='text-sm text-zinc-200'>
+                    Which transits affect you most (and how to work with them)
+                  </p>
+                </div>
+              </div>
+              <div className='flex items-start gap-3'>
+                <Check className='w-5 h-5 text-lunary-primary-400 mt-0.5 flex-shrink-0' />
+                <div>
+                  <p className='text-sm text-zinc-200'>
+                    Reading tarot in context of your chart
+                  </p>
+                </div>
+              </div>
+              <div className='flex items-start gap-3'>
+                <Check className='w-5 h-5 text-lunary-primary-400 mt-0.5 flex-shrink-0' />
+                <div>
+                  <p className='text-sm text-zinc-200'>
+                    When to expect emotional intensity vs. ease
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div className='pt-6'>
+              <p className='text-sm text-zinc-400 mb-2'>
+                After 3-6 months of daily practice, most users can confidently
+                interpret their own transits.
+              </p>
+              <p className='text-xs text-lunary-primary-300 font-medium'>
+                Free grimoire: 2,000+ articles explaining everything
+              </p>
+            </div>
+
+            <div className='pt-2'>
+              <Button variant='lunary' asChild>
+                <Link href='/grimoire'>Start learning</Link>
+              </Button>
+            </div>
           </div>
         </section>
 
@@ -211,26 +275,41 @@ export default function WelcomePage() {
                 grounded, gentle and useful.
               </p>
             </div>
-            <div className='grid md:grid-cols-2 gap-6 md:gap-8 text-xs md:text-sm'>
-              <div className='rounded-2xl border border-zinc-800/60 bg-zinc-900/40 p-5 md:p-6'>
-                <p className='text-zinc-300'>
-                  People who want astrology grounded in real astronomy
+            <div className='grid md:grid-cols-2 gap-6 md:gap-8 text-sm'>
+              <div className='rounded-2xl border border-zinc-800/60 bg-zinc-900/40 p-5 md:p-6 space-y-2'>
+                <p className='text-base text-lunary-primary-300 font-medium'>
+                  "I want to understand myself better"
+                </p>
+                <p className='text-zinc-400 text-sm'>
+                  Track patterns across time. Notice which transits affect you.
+                  Build self-awareness through cosmic timing.
                 </p>
               </div>
-              <div className='rounded-2xl border border-zinc-800/60 bg-zinc-900/40 p-5 md:p-6'>
-                <p className='text-zinc-300'>
-                  People tired of generic horoscopes
+              <div className='rounded-2xl border border-zinc-800/60 bg-zinc-900/40 p-5 md:p-6 space-y-2'>
+                <p className='text-base text-lunary-primary-300 font-medium'>
+                  "I'm learning astrology"
+                </p>
+                <p className='text-zinc-400 text-sm'>
+                  2,000+ free articles. Daily practice with your own chart.
+                  Hands-on education, not theory.
                 </p>
               </div>
-              <div className='rounded-2xl border border-zinc-800/60 bg-zinc-900/40 p-5 md:p-6'>
-                <p className='text-zinc-300'>
-                  People building a reflective daily practice
+              <div className='rounded-2xl border border-zinc-800/60 bg-zinc-900/40 p-5 md:p-6 space-y-2'>
+                <p className='text-base text-lunary-primary-300 font-medium'>
+                  "I'm tired of generic horoscopes"
+                </p>
+                <p className='text-zinc-400 text-sm'>
+                  Your full birth chart matters. Personal insights, not sun sign
+                  predictions. See what's actually happening in YOUR life.
                 </p>
               </div>
-              <div className='rounded-2xl border border-zinc-800/60 bg-zinc-900/40 p-5 md:p-6'>
-                <p className='text-zinc-300'>
-                  People who journal, explore tarot, and track emotional
-                  patterns
+              <div className='rounded-2xl border border-zinc-800/60 bg-zinc-900/40 p-5 md:p-6 space-y-2'>
+                <p className='text-base text-lunary-primary-300 font-medium'>
+                  "I journal and track my cycles"
+                </p>
+                <p className='text-zinc-400 text-sm'>
+                  Connect reflections to moon phases. Track patterns over time.
+                  Your journal becomes your astrology textbook.
                 </p>
               </div>
             </div>

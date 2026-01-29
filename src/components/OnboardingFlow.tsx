@@ -194,7 +194,11 @@ export function OnboardingFlow({
   })();
 
   useEffect(() => {
-    if (!authState.isAuthenticated || !user?.id || previewMode) {
+    // Skip onboarding in demo mode
+    const isDemoMode =
+      typeof window !== 'undefined' && (window as any).__LUNARY_DEMO_MODE__;
+
+    if (!authState.isAuthenticated || !user?.id || previewMode || isDemoMode) {
       setOnboardingStatus({ loading: false, completed: true });
       return;
     }
@@ -241,6 +245,14 @@ export function OnboardingFlow({
 
   useEffect(() => {
     const needsBirthDetails = !user?.birthday;
+    const isDemoMode =
+      typeof window !== 'undefined' && (window as any).__LUNARY_DEMO_MODE__;
+
+    // Never show onboarding in demo mode
+    if (isDemoMode && !forceOpen) {
+      setShowOnboarding(false);
+      return;
+    }
 
     if (forceOpen && previewMode) {
       setShowOnboarding(true);
