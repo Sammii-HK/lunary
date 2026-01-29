@@ -27,7 +27,6 @@ import {
   SubscriptionStatus,
   TarotSpreadExperience,
 } from '@/components/tarot/TarotSpreadExperience';
-import { TAROT_SPREADS } from '@/constants/tarotSpreads';
 import type { TarotPlan } from '@/constants/tarotSpreads';
 import { FeaturePreview } from '../../horoscope/components/FeaturePreview';
 import { HoroscopeSection } from '../../horoscope/components/HoroscopeSection';
@@ -1205,51 +1204,16 @@ export function TarotView({
                 onShareReading={handleShareSpread}
               />
 
-              {/* Written Spread Guides - paid only */}
-              {hasPaidAccess && (
-                <div className='mt-6 space-y-4 border-t border-zinc-800/40 pt-6'>
-                  <div className='flex items-center justify-between gap-4'>
-                    <div>
-                      <h3 className='text-lg font-medium text-zinc-100'>
-                        Written Spread Guides
-                      </h3>
-                      <p className='text-xs text-zinc-400'>
-                        Read about each spread before you draw cards.
-                      </p>
-                    </div>
-                    <Link
-                      href='/grimoire/tarot/spreads'
-                      className='text-xs font-semibold text-lunary-primary-400 transition-colors hover:text-lunary-primary-300'
-                    >
-                      View all spread guides →
-                    </Link>
-                  </div>
-                  <div className='grid gap-3 sm:grid-cols-2 lg:grid-cols-3'>
-                    {TAROT_SPREADS.map((spread) => (
-                      <Link
-                        key={spread.slug}
-                        href={`/grimoire/tarot/spreads/${spread.slug}`}
-                        className='group flex flex-col gap-2 rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4 transition hover:border-lunary-primary-500 hover:bg-zinc-900/50'
-                        aria-label={`Read the ${spread.name} spread guide`}
-                      >
-                        <div className='text-sm font-semibold text-zinc-100'>
-                          {spread.name}
-                        </div>
-                        <p className='text-xs text-zinc-400 leading-relaxed line-clamp-3'>
-                          {spread.description}
-                        </p>
-                        <div className='mt-auto flex justify-between text-[11px] uppercase tracking-wide text-zinc-500'>
-                          <span>{spread.cardCount} cards</span>
-                          <span>{spread.estimatedTime}</span>
-                        </div>
-                        <span className='text-[10px] uppercase tracking-[0.3em] text-zinc-500'>
-                          {spread.category}
-                        </span>
-                      </Link>
-                    ))}
-                  </div>
-                </div>
-              )}
+              <p className='text-xs text-zinc-400 p-2'>
+                Read about{' '}
+                <Link
+                  href='/grimoire/tarot/spreads'
+                  className='text-lunary-primary-300 hover:text-lunary-primary-200 transition-colors'
+                >
+                  each spread
+                </Link>{' '}
+                before you draw cards for the best results.
+              </p>
             </CollapsibleSection>
           </div>
         )}
