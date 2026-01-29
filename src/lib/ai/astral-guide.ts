@@ -15,6 +15,48 @@ import {
 import { getUpcomingTransits } from '../../../utils/astrology/transitCalendar';
 import type { BirthChartData } from '../../../utils/astrology/birthChart';
 
+/**
+ * Detects if a user message is asking about astrological/cosmic topics
+ * Returns true if the query should use the Astral Guide context
+ */
+export function isAstralQuery(userMessage: string): boolean {
+  const astralKeywords = [
+    'transit',
+    'retrograde',
+    'birth chart',
+    'natal',
+    'aspect',
+    'moon phase',
+    'planetary',
+    'cosmic',
+    'astrology',
+    'horoscope',
+    'placement',
+    'house',
+    'sign',
+    'zodiac',
+    'eclipse',
+    'conjunction',
+    'opposition',
+    'trine',
+    'square',
+    'sextile',
+    'ascendant',
+    'rising',
+    'mercury',
+    'venus',
+    'mars',
+    'jupiter',
+    'saturn',
+    'uranus',
+    'neptune',
+    'pluto',
+  ];
+
+  const lowerMessage = userMessage.toLowerCase();
+  return astralKeywords.some((keyword) => lowerMessage.includes(keyword));
+}
+
 export interface AstralContext {
   user: {
     name?: string;
@@ -30,6 +72,103 @@ export interface AstralContext {
   moonPhase: string;
   journalSummaries: { date: string; summary: string }[];
   moodTags: string[];
+}
+
+/**
+ * Fetches user's birth chart data from the database
+ * Returns null if no birth chart is found
+ */
+async function fetchUserBirthChart(
+  userId: string,
+): Promise<BirthChartData[] | null> {
+  try {
+    const birthChartResult = await sql`
+      SELECT birth_chart
+      FROM user_profiles
+      WHERE user_id = ${userId}
+      LIMIT 1
+    `;
+
+    if (
+      birthChartResult.rows.length > 0 &&
+      birthChartResult.rows[0].birth_chart
+    ) {
+      return birthChartResult.rows[0].birth_chart as BirthChartData[];
+    }
+    return null;
+  } catch (error) {
+    console.error('[Astral Guide] Failed to fetch birth chart:', error);
+    return null;
+  }
+}
+
+/**
+ * Calculates personal transit impacts for a given date range
+ * Returns current and upcoming personal transits
+ */
+export async function calculatePersonalTransits(
+  userId: string,
+  now: Date = new Date(),
+): Promise<{
+  current: PersonalTransitImpact[] | undefined;
+  upcoming: PersonalTransitImpact[] | undefined;
+}> {
+  const userBirthChartData = await fetchUserBirthChart(userId);
+
+  if (!userBirthChartData || userBirthChartData.length === 0) {
+    return { current: undefined, upcoming: undefined };
+  }
+
+  try {
+    const upcomingTransits = getUpcomingTransits(dayjs(now));
+
+    // Current personal transits (today and next 3 days)
+    const currentDate = dayjs(now);
+    const threeDaysFromNow = currentDate.add(3, 'day');
+    const yesterday = currentDate.subtract(1, 'day');
+    const currentPersonalTransits = getPersonalTransitImpacts(
+      upcomingTransits.filter((t) => {
+        const transitDate = t.date;
+        return (
+          (transitDate.isBefore(threeDaysFromNow, 'day') ||
+            transitDate.isSame(threeDaysFromNow, 'day')) &&
+          (transitDate.isAfter(yesterday, 'day') ||
+            transitDate.isSame(yesterday, 'day'))
+        );
+      }),
+      userBirthChartData,
+      10,
+    );
+
+    // Upcoming personal transits (next 7 days, excluding today)
+    const sevenDaysFromNow = currentDate.add(7, 'day');
+    const upcomingPersonal = getPersonalTransitImpacts(
+      upcomingTransits.filter((t) => {
+        const transitDate = t.date;
+        return (
+          transitDate.isAfter(currentDate, 'day') &&
+          (transitDate.isBefore(sevenDaysFromNow, 'day') ||
+            transitDate.isSame(sevenDaysFromNow, 'day'))
+        );
+      }),
+      userBirthChartData,
+      10,
+    );
+
+    return {
+      current:
+        currentPersonalTransits.length > 0
+          ? currentPersonalTransits
+          : undefined,
+      upcoming: upcomingPersonal.length > 0 ? upcomingPersonal : undefined,
+    };
+  } catch (error) {
+    console.error(
+      '[Astral Guide] Failed to calculate personal transits:',
+      error,
+    );
+    return { current: undefined, upcoming: undefined };
+  }
 }
 
 /**
@@ -68,82 +207,9 @@ export async function buildAstralContext(
   // Build natal summary
   const natalSummary = buildNatalSummary(context.birthChart);
 
-  // Fetch user's birth chart data for personal transit calculations
-  let userBirthChartData: BirthChartData[] | null = null;
-  try {
-    const birthChartResult = await sql`
-      SELECT birth_chart
-      FROM user_profiles
-      WHERE user_id = ${userId}
-      LIMIT 1
-    `;
-    if (
-      birthChartResult.rows.length > 0 &&
-      birthChartResult.rows[0].birth_chart
-    ) {
-      userBirthChartData = birthChartResult.rows[0]
-        .birth_chart as BirthChartData[];
-    }
-  } catch (error) {
-    console.error(
-      '[Astral Guide] Failed to fetch birth chart for personal transits:',
-      error,
-    );
-  }
-
-  // Calculate personal transit impacts if birth chart is available
-  let personalTransits: PersonalTransitImpact[] | undefined;
-  let upcomingPersonalTransits: PersonalTransitImpact[] | undefined;
-
-  if (userBirthChartData && userBirthChartData.length > 0) {
-    try {
-      const upcomingTransits = getUpcomingTransits(dayjs(now));
-
-      // Get current personal transits (today and next 3 days)
-      const currentDate = dayjs(now);
-      const threeDaysFromNow = currentDate.add(3, 'day');
-      const yesterday = currentDate.subtract(1, 'day');
-      const currentPersonalTransits = getPersonalTransitImpacts(
-        upcomingTransits.filter((t) => {
-          const transitDate = t.date;
-          return (
-            (transitDate.isBefore(threeDaysFromNow, 'day') ||
-              transitDate.isSame(threeDaysFromNow, 'day')) &&
-            (transitDate.isAfter(yesterday, 'day') ||
-              transitDate.isSame(yesterday, 'day'))
-          );
-        }),
-        userBirthChartData,
-        10,
-      );
-      personalTransits =
-        currentPersonalTransits.length > 0
-          ? currentPersonalTransits
-          : undefined;
-
-      // Get upcoming personal transits (next 7 days, excluding today)
-      const sevenDaysFromNow = currentDate.add(7, 'day');
-      const upcomingPersonal = getPersonalTransitImpacts(
-        upcomingTransits.filter((t) => {
-          const transitDate = t.date;
-          return (
-            transitDate.isAfter(currentDate, 'day') &&
-            (transitDate.isBefore(sevenDaysFromNow, 'day') ||
-              transitDate.isSame(sevenDaysFromNow, 'day'))
-          );
-        }),
-        userBirthChartData,
-        10,
-      );
-      upcomingPersonalTransits =
-        upcomingPersonal.length > 0 ? upcomingPersonal : undefined;
-    } catch (error) {
-      console.error(
-        '[Astral Guide] Failed to calculate personal transits:',
-        error,
-      );
-    }
-  }
+  // Calculate personal transit impacts using reusable function
+  const { current: personalTransits, upcoming: upcomingPersonalTransits } =
+    await calculatePersonalTransits(userId, now);
 
   // Build current transits summary (now includes personal transits if available)
   const currentTransits = buildTransitsSummary(

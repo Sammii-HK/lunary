@@ -535,6 +535,7 @@ export const buildPromptSections = ({
   memorySnippets,
   userMessage,
   grimoireData,
+  systemPromptOverride,
 }: {
   context: LunaryContext;
   memorySnippets: string[];
@@ -549,6 +550,7 @@ export const buildPromptSections = ({
     semanticContext?: string;
     sources?: Array<{ title: string; slug: string; category: string }>;
   };
+  systemPromptOverride?: string;
 }): PromptSections => {
   const memory =
     memorySnippets.length > 0
@@ -556,7 +558,9 @@ export const buildPromptSections = ({
       : null;
 
   const modeGuidance = getModeSpecificGuidance(userMessage);
-  const systemPrompt = SYSTEM_PROMPT + modeGuidance;
+  const systemPrompt = systemPromptOverride
+    ? systemPromptOverride + modeGuidance
+    : SYSTEM_PROMPT + modeGuidance;
 
   let contextData = `Context data:\n${describeContext(context, grimoireData, userMessage)}`;
 
