@@ -292,17 +292,10 @@ export default function WelcomePage() {
                 <h3 className='text-xl md:text-2xl font-light text-zinc-100'>
                   Daily Cosmic Dashboard
                 </h3>
-                <p className='text-base text-zinc-300'>
-                  Wake up knowing why today feels the way it does
+                <p className='text-sm md:text-base text-zinc-300 leading-relaxed'>
+                  Your morning briefing: moon phase, recommended spells, crystal
+                  guidance, planetary positions, and daily tarot
                 </p>
-                <ul className='text-sm text-zinc-400 leading-relaxed space-y-1'>
-                  <li>
-                    Today’s transits, with your birth chart saved to your
-                    account
-                  </li>
-                  <li>One tarot card that reflects your emotional climate</li>
-                  <li>A crystal focus that supports your current phase</li>
-                </ul>
                 <p className='text-xs text-zinc-500'>
                   Your birth chart is created and saved to your account.
                   Chart-based interpretation unlocks with Lunary+.
@@ -395,13 +388,9 @@ export default function WelcomePage() {
                 <h3 className='text-xl md:text-2xl font-light text-zinc-100'>
                   Astral Guide Chat
                 </h3>
-                <p className='text-base text-zinc-300'>
-                  Ask a question and leave with clarity
-                </p>
-                <p className='text-sm text-zinc-400 leading-relaxed'>
-                  Talk through emotions, energy, creativity or relationships.
-                  Lunary responds with context from your chart and the current
-                  sky.
+                <p className='text-sm md:text-base text-zinc-300 leading-relaxed'>
+                  Ask questions and get context-aware answers grounded in your
+                  chart and the current sky
                 </p>
                 <p className='text-xs text-zinc-500'>
                   Optional AI chat grounded in your chart. Your chart itself is
@@ -420,12 +409,10 @@ export default function WelcomePage() {
                 <h3 className='text-xl md:text-2xl font-light text-zinc-100'>
                   Living Book of Shadows
                 </h3>
-                <p className='text-base text-zinc-300'>
-                  See the patterns that keep repeating
-                </p>
-                <p className='text-sm text-zinc-400 leading-relaxed'>
+                <p className='text-sm md:text-base text-zinc-300 leading-relaxed'>
                   Record your insights and moods in one place. Lunary highlights
-                  the threads between your entries, transits and tarot pulls.
+                  the threads between your entries, transits and tarot pulls
+                  over time
                 </p>
               </div>
               <div className='rounded-2xl border border-zinc-800/60 bg-zinc-900/40 p-5 md:p-6'>
@@ -496,15 +483,24 @@ export default function WelcomePage() {
                   strokeWidth={1.5}
                 />
                 <h3 className='text-xl md:text-2xl font-light text-zinc-100'>
-                  Tarot and Transit Patterns
+                  Tarot & Pattern Tracking
                 </h3>
-                <p className='text-base text-zinc-300'>
-                  Notice the themes shaping your life
-                </p>
-                <p className='text-sm text-zinc-400 leading-relaxed'>
-                  Understand repeating cycles and ongoing lessons with clarity.
+                <p className='text-sm md:text-base text-zinc-300 leading-relaxed'>
+                  Daily cards, weekly guidance, spread library, and pattern
+                  recognition across time
                 </p>
               </div>
+            </div>
+
+            {/* Hint at More Features */}
+            <div className='mt-12 md:mt-16 text-center space-y-6'>
+              <p className='text-sm md:text-base text-zinc-300 leading-relaxed max-w-2xl mx-auto'>
+                Your complete cosmic toolkit includes birth chart calculator,
+                transit calendar, ritual library, wheel of the year, and more
+              </p>
+              <Button variant='lunary' asChild>
+                <Link href='/features'>Explore all features →</Link>
+              </Button>
             </div>
           </div>
         </section>
