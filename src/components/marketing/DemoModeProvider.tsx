@@ -425,6 +425,15 @@ export function DemoModeProvider({
         const ariaLabel =
           button.getAttribute('aria-label')?.toLowerCase() || '';
 
+        // Allow auth/signup buttons (these exit the demo)
+        if (
+          text.includes('free account') ||
+          text.includes('sign up') ||
+          text.includes('create account')
+        ) {
+          return; // Allow these buttons to work normally
+        }
+
         // Block share buttons
         if (text.includes('share') || ariaLabel.includes('share')) {
           e.preventDefault();

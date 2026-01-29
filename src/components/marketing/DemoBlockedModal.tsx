@@ -84,8 +84,13 @@ export function DemoBlockedModal({
                 source: 'blocked_modal',
                 blocked_action: action,
               });
-              window.open('/auth?signup=true', '_blank');
               onClose();
+              // Break out of iframe and navigate parent window to auth
+              if (window.top) {
+                window.top.location.href = '/auth?signup=true';
+              } else {
+                window.location.href = '/auth?signup=true';
+              }
             }}
             className='w-full mt-6 bg-gradient-to-r from-lunary-primary-600 to-lunary-accent-600 hover:from-lunary-primary-500 hover:to-lunary-accent-500 text-white font-medium px-4 py-3 rounded-lg transition-all duration-200 flex items-center justify-center gap-2 shadow-lg shadow-lunary-primary-600/20'
           >

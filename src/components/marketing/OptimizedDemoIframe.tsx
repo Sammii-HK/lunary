@@ -105,7 +105,7 @@ export function OptimizedDemoIframe({
             width='393'
             height='750'
             loading={loading}
-            sandbox='allow-scripts allow-same-origin'
+            sandbox='allow-scripts allow-same-origin allow-top-navigation-by-user-activation'
             allow='accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture'
             style={{
               border: 'none',

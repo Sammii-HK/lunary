@@ -287,7 +287,13 @@ export function DemoClient() {
                               <button
                                 onClick={(e) => {
                                   e.stopPropagation();
-                                  window.open('/auth?signup=true', '_blank');
+                                  // Break out of iframe and navigate to auth
+                                  if (window.top) {
+                                    window.top.location.href =
+                                      '/auth?signup=true';
+                                  } else {
+                                    window.location.href = '/auth?signup=true';
+                                  }
                                 }}
                                 className='px-4 py-2 bg-lunary-primary-600 hover:bg-lunary-primary-500 text-white text-xs rounded-md transition-colors'
                               >
@@ -321,7 +327,13 @@ export function DemoClient() {
                               <button
                                 onClick={(e) => {
                                   e.stopPropagation();
-                                  window.open('/auth?signup=true', '_blank');
+                                  // Break out of iframe and navigate to auth
+                                  if (window.top) {
+                                    window.top.location.href =
+                                      '/auth?signup=true';
+                                  } else {
+                                    window.location.href = '/auth?signup=true';
+                                  }
                                 }}
                                 className='px-4 py-2 bg-lunary-primary-600 hover:bg-lunary-primary-500 text-white text-xs rounded-md transition-colors'
                               >
