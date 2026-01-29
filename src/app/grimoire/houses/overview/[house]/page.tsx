@@ -39,8 +39,8 @@ export async function generateMetadata({
         : houseData.number === 3
           ? '3rd'
           : `${houseData.number}th`;
-  const title = `${ordinal} House in Astrology: Meaning, Planets & Themes - Lunary`;
-  const description = `${ordinal} House (${houseData.name}) meaning in astrology. Planets, themes & how the ${ordinal} house affects your birth chart. Complete natal chart guide.`;
+  const title = `${ordinal} House in Astrology: Meaning, Planets & Themes`;
+  const description = `Discover the ${ordinal} house in astrology: what it reveals about ${houseData.area.toLowerCase()}. Learn how planets in your ${ordinal} house shape your ${houseData.themes[0].toLowerCase()}. Complete guide with examples.`;
 
   return {
     title,
@@ -48,6 +48,8 @@ export async function generateMetadata({
     keywords: [
       `${houseData.name} astrology`,
       `${houseData.name} meaning`,
+      `${ordinal} house`,
+      `planets in ${ordinal} house`,
       `${houseData.symbol} house`,
       `house ${houseData.number}`,
       `${houseData.name} birth chart`,
@@ -119,24 +121,24 @@ export default async function HousePage({
 
   const faqs = [
     {
-      question: `What does the ${houseData.name} represent?`,
-      answer: `The ${houseData.name} represents ${houseData.area.toLowerCase()}. It governs ${houseData.themes.join(', ').toLowerCase()}.`,
+      question: `What is the ${ordinal} house in astrology?`,
+      answer: `The ${ordinal} house in astrology governs ${houseData.area.toLowerCase()}. It reveals how you approach ${houseData.themes[0].toLowerCase()} and expresses themes like ${houseData.themes.slice(0, 3).join(', ').toLowerCase()}. This house is ruled by ${houseData.rulingSign} and ${houseData.rulingPlanet}.`,
     },
     {
-      question: `What sign rules the ${houseData.name}?`,
-      answer: `The ${houseData.name} is ruled by ${houseData.rulingSign}, a ${houseData.element} sign. ${houseData.rulingPlanet} is the ruling planet.`,
+      question: `What does the ${ordinal} house represent?`,
+      answer: `The ${ordinal} house represents ${houseData.area.toLowerCase()}. It governs ${houseData.themes.join(', ').toLowerCase()}. When planets are in this house, they influence these life areas.`,
     },
     {
-      question: `What planets are associated with the ${houseData.name}?`,
-      answer: `The ${houseData.name} is naturally associated with ${houseData.planets.join(' and ')}. When these planets are in the ${houseData.name}, their energy is expressed through this house's themes.`,
+      question: `What planets rule the ${ordinal} house?`,
+      answer: `The ${ordinal} house is naturally ruled by ${houseData.rulingPlanet} and associated with ${houseData.rulingSign}. However, any planet can be placed in your ${ordinal} house depending on your birth chart.`,
     },
     {
-      question: `How does the ${houseData.name} affect my birth chart?`,
-      answer: `Planets in your ${houseData.name} reveal how you express energy related to ${houseData.area.toLowerCase()}. The sign on the cusp of this house shows your approach to these themes.`,
+      question: `How does the ${ordinal} house affect my birth chart?`,
+      answer: `Planets in your ${ordinal} house reveal how you express energy related to ${houseData.area.toLowerCase()}. The sign on the cusp shows your natural approach to these themes. Understanding this house helps you work consciously with ${houseData.themes[0].toLowerCase()}.`,
     },
     {
-      question: `What is the ${houseData.name} element?`,
-      answer: `The ${houseData.name} is associated with ${houseData.element} element, which influences how energy is expressed in this house.`,
+      question: `What are the themes of the ${ordinal} house?`,
+      answer: `The ${ordinal} house themes include ${houseData.themes.join(', ').toLowerCase()}. This ${houseData.element} house influences how you experience and express these areas of life.`,
     },
   ];
 
@@ -159,18 +161,24 @@ export default async function HousePage({
     <div className='p-4 md:p-6 lg:p-8 xl:p-10 min-h-full'>
       {renderJsonLd(houseSchema)}
       <SEOContentTemplate
-        title={`${houseData.name} - Lunary`}
-        h1={`${houseData.name} (${houseData.symbol}): Complete Astrological Guide`}
+        title={houseData.name}
+        h1={`The ${ordinal} House in Astrology: ${houseData.area}`}
         description={`Discover everything about the ${houseData.name} in astrology. Learn about its meaning, themes, and influence on your birth chart.`}
         keywords={[
           `${houseData.name}`,
+          `${ordinal} house`,
           `${houseData.symbol} house`,
           `house ${houseData.number}`,
           `${houseData.name} astrology`,
+          `planets in ${ordinal} house`,
         ]}
         canonicalUrl={`https://lunary.app/grimoire/houses/overview/${house}`}
-        intro={`The ${houseData.name}, represented by ${houseData.symbol}, is the ${houseData.number}${houseData.number === 1 ? 'st' : houseData.number === 2 ? 'nd' : houseData.number === 3 ? 'rd' : 'th'} house in astrology. It governs ${houseData.area.toLowerCase()} and is ruled by ${houseData.rulingSign} (${houseData.element} element).`}
-        tldr={`The ${houseData.name} (${houseData.symbol}) governs ${houseData.area.toLowerCase()}.`}
+        whatIs={{
+          question: `What is the ${ordinal} house in astrology?`,
+          answer: `The ${ordinal} house in astrology governs ${houseData.area.toLowerCase()}. Ruled by ${houseData.rulingSign} and ${houseData.rulingPlanet}, this ${houseData.element} house reveals how you approach ${houseData.themes[0].toLowerCase()} in your life. Planets placed here shape your experience of ${houseData.themes.slice(0, 2).join(' and ').toLowerCase()}.`,
+        }}
+        intro={`The ${houseData.name}, represented by ${houseData.symbol}, is the ${ordinal} house in astrology. It governs ${houseData.area.toLowerCase()} and is ruled by ${houseData.rulingSign} (${houseData.element} element).`}
+        tldr={`The ${ordinal} house governs ${houseData.area.toLowerCase()}. Ruled by ${houseData.rulingSign} & ${houseData.rulingPlanet}. Key themes: ${houseData.themes.slice(0, 3).join(', ').toLowerCase()}. Element: ${houseData.element}.`}
         meaning={`The ${houseData.name} is one of the twelve astrological houses, each representing a different area of life. This house governs ${houseData.area.toLowerCase()}.
 
 ${houseData.description}
@@ -178,6 +186,26 @@ ${houseData.description}
 The ${houseData.name} is ruled by ${houseData.rulingSign}, a ${houseData.element} sign, and its ruling planet is ${houseData.rulingPlanet}. This connection influences how energy is expressed in this house.
 
 When planets are placed in your ${houseData.name}, they activate themes related to ${houseData.themes.join(', ').toLowerCase()}. The sign on the cusp of this house shows your approach and style in these areas.
+
+## Planets in the ${ordinal} House
+
+Any planet can appear in your ${ordinal} house, and each brings its unique energy to ${houseData.area.toLowerCase()}:
+
+**Sun in ${ordinal} House:** Your core identity and life purpose express through ${houseData.area.toLowerCase()}. This placement makes ${houseData.themes[0].toLowerCase()} central to who you are.
+
+**Moon in ${ordinal} House:** Your emotions and instincts are deeply connected to ${houseData.area.toLowerCase()}. You feel most secure when honoring ${houseData.themes[0].toLowerCase()}.
+
+**Mercury in ${ordinal} House:** You think and communicate about ${houseData.area.toLowerCase()}. Mental energy flows toward ${houseData.themes[0].toLowerCase()}.
+
+**Venus in ${ordinal} House:** You find beauty and value in ${houseData.area.toLowerCase()}. Relationships may connect to ${houseData.themes[0].toLowerCase()}.
+
+**Mars in ${ordinal} House:** You take action through ${houseData.area.toLowerCase()}. Drive and ambition express via ${houseData.themes[0].toLowerCase()}.
+
+**Jupiter in ${ordinal} House:** Expansion and growth come through ${houseData.area.toLowerCase()}. This placement often brings opportunity in ${houseData.themes[0].toLowerCase()}.
+
+**Saturn in ${ordinal} House:** You learn discipline and mastery in ${houseData.area.toLowerCase()}. Challenges teach valuable lessons about ${houseData.themes[0].toLowerCase()}.
+
+The specific influence depends on the planet's sign, aspects, and your overall chart. Each planet colors how you experience the ${ordinal} house themes.
 
 Understanding your ${houseData.name} helps you understand how you express energy related to ${houseData.area.toLowerCase()}. This knowledge empowers you to work with this house's themes consciously and constructively.`}
         emotionalThemes={houseData.themes}

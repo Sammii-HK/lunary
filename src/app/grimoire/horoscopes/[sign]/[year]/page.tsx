@@ -176,17 +176,48 @@ export default async function YearHoroscopePage({
     .find((value): value is string => typeof value === 'string');
   const image = resolvedImage ?? 'https://lunary.app/api/og/cosmic';
 
+  // ItemList schema for all 12 months
+  const monthsItemListSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'ItemList',
+    itemListElement: MONTHS.map((month, index) => ({
+      '@type': 'ListItem',
+      position: index + 1,
+      name: `${signName} ${MONTH_DISPLAY_NAMES[month]} ${year}`,
+      url: `https://lunary.app/grimoire/horoscopes/${sign}/${year}/${month}`,
+    })),
+  };
+
   return (
     <SEOContentTemplate
       title={metaTitle ?? `${signName} Horoscope ${year}`}
-      h1={`${signName} Horoscope ${year}`}
+      h1={`${signName} Horoscope ${year}: Complete Year Guide`}
       description={meta.description ?? ''}
       keywords={keywords}
       canonicalUrl={canonicalUrl}
+      datePublished={`${year}-01-01`}
       image={image}
       imageAlt={`${signName} Horoscope ${year} | Lunary`}
+      whatIs={{
+        question: `What does the ${signName} horoscope for ${year} include?`,
+        answer: `The ${signName} horoscope for ${year} provides complete monthly forecasts covering love, career, health, and personal growth. As a ${element} sign ruled by ${ruler}, ${signName} experiences ${year} through themes of consistency and growth. This guide includes all 12 monthly predictions, key transits, and practical guidance for the year ahead.`,
+      }}
       intro={`Dive into every month of ${year} with forecasts for ${signName} that weave together the Moon, planetary transits, and practical rituals so you can plan ahead.`}
-      meaning={`This ${year} forecast helps ${signName} timeframe focus. Use slow, deliberate planning infused with ${element.toLowerCase()} energy and the guidance of ${ruler} to own visible progress throughout the year.`}
+      meaning={`## What to Expect for ${signName} in ${year}
+
+${year} brings important themes for ${signName}. This comprehensive guide covers all 12 months with detailed predictions for:
+
+- **Love & Relationships:** Building deeper connections through ${element.toLowerCase()} consistency
+- **Career & Finance:** Long-term momentum guided by ${ruler}
+- **Health & Wellness:** Honoring your ${element.toLowerCase()} nature
+- **Personal Growth:** Aligning monthly choices with your bigger vision
+
+The year emphasizes steady progress and visible wins. Your element (${element}) and ruling planet (${ruler}) provide the framework for growth.
+
+Select any month below for your detailed forecast.
+
+This ${year} forecast helps ${signName} timeframe focus. Use slow, deliberate planning infused with ${element.toLowerCase()} energy and the guidance of ${ruler} to own visible progress throughout the year.`}
+      additionalSchemas={[monthsItemListSchema]}
       heroContent={heroContent}
       breadcrumbs={[
         { label: 'Grimoire', href: '/grimoire' },
@@ -204,7 +235,7 @@ export default async function YearHoroscopePage({
         />
       }
       faqs={faqItems}
-      tldr={`TL;DR: ${year} keeps ${signName} rooted in ${element.toLowerCase()} consistency while ${ruler} asks you to tell a longer story with your choices.`}
+      tldr={`${year} keeps ${signName} rooted in ${element.toLowerCase()} consistency while ${ruler} asks you to tell a longer story with your choices.`}
       ctaText='See your full birth-chart horoscope in the app'
       ctaHref='/horoscope'
       childrenPosition='after-description'

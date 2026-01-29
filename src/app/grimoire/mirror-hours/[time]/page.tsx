@@ -111,7 +111,7 @@ export default async function MirrorHourPage({
         } is a mirror hour associated with ${hourData.meaning}. Mirror hours appear through contrast, reflection, and awareness, often during moments where perspective matters more than action.
 
 When this time appears, it is an invitation to notice what you were thinking or feeling rather than rushing to interpret it.`}
-        tldr={`TL;DR: ${hourData.time} reflects themes of ${hourData.meaning}. It appears as a moment of awareness rather than instruction.`}
+        tldr={`${hourData.time} reflects themes of ${hourData.meaning}. It appears as a moment of awareness rather than instruction.`}
         meaning={`Mirror hours are times when the hour and minute digits mirror each other, like ${hourData.time}. These synchronicities are believed to carry messages from your guardian angels and the universe.
 
 ${hourData.spiritualMeaning}

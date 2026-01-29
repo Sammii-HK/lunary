@@ -101,7 +101,7 @@ export default async function DoubleHourPage({
         } is a double hour linked to ${hourData.meaning}. Double hours repeat a number’s energy, amplifying its influence and signalling alignment or momentum.
 
 When you notice this time, it often confirms that you are moving in the right direction.`}
-        tldr={`TL;DR: ${hourData.time} amplifies ${hourData.meaning}. It often appears as confirmation or energetic reinforcement.`}
+        tldr={`${hourData.time} amplifies ${hourData.meaning}. It often appears as confirmation or energetic reinforcement.`}
         meaning={`Double hours are times when the hour and minute are the same number, like ${hourData.time}. These powerful synchronicities are believed to be messages from your guardian angels and the universe, amplifying the energy of the repeated number.
 
 ${hourData.spiritualMeaning}

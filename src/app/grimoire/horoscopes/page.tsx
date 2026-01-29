@@ -15,8 +15,8 @@ const nextYear = currentYear + 1;
 
 export async function generateMetadata(): Promise<Metadata> {
   return {
-    title: `Monthly Horoscopes ${currentYear} & ${nextYear}: All Zodiac Signs | Lunary`,
-    description: `Free monthly horoscopes for all 12 zodiac signs. Get your Aries, Taurus, Gemini, Cancer, Leo, Virgo, Libra, Scorpio, Sagittarius, Capricorn, Aquarius, and Pisces predictions for ${currentYear} and ${nextYear}.`,
+    title: `Monthly Horoscopes ${currentYear} & ${nextYear}: All Zodiac Signs`,
+    description: `Free monthly horoscopes for all 12 zodiac signs. Get detailed predictions for love, career, health & more. Updated monthly for ${currentYear}-${nextYear + 4}.`,
     keywords: [
       'monthly horoscope',
       'free horoscope',
@@ -72,8 +72,8 @@ const AVAILABLE_YEARS = [2026, 2027, 2028, 2029, 2030, 2031];
 export default function GrimoireHoroscopesPage() {
   return (
     <SEOContentTemplate
-      title={`Monthly Horoscopes ${currentYear} & ${nextYear}: All Zodiac Signs | Lunary`}
-      h1='Monthly Horoscopes'
+      title={`Monthly Horoscopes ${currentYear} & ${nextYear}: All Zodiac Signs`}
+      h1='Free Monthly Horoscopes for All Zodiac Signs'
       description='Discover free monthly horoscopes for all 12 zodiac signs, with updates for every sign and season.'
       keywords={[
         'monthly horoscope',
@@ -82,6 +82,8 @@ export default function GrimoireHoroscopesPage() {
         `${nextYear} horoscope`,
         'zodiac predictions',
         'astrology forecast',
+        'monthly forecast',
+        'zodiac signs',
         'aries horoscope',
         'taurus horoscope',
         'gemini horoscope',
@@ -97,7 +99,15 @@ export default function GrimoireHoroscopesPage() {
       ]}
       canonicalUrl='https://lunary.app/grimoire/horoscopes'
       additionalSchemas={[structuredData]}
-      intro='Select your zodiac sign to read the freshest monthly predictions for love, career, health, and more—updated with real-time lunar, solar, and planetary context.'
+      whatIs={{
+        question: 'What are monthly horoscopes?',
+        answer: `Monthly horoscopes provide detailed astrological predictions for each zodiac sign covering an entire month. They forecast trends in love, career, health, and personal growth based on planetary movements and astrological transits. Our monthly horoscopes are updated regularly for ${currentYear} through ${nextYear + 4}, giving you comprehensive insights for long-range planning.`,
+      }}
+      intro={`Welcome to your complete monthly horoscope guide. Discover what the stars have in store for your zodiac sign with detailed predictions covering love, career, health, and personal growth.
+
+Our monthly horoscopes are updated regularly and provide personalized insights based on current planetary movements and astrological transits. We publish forecasts from ${currentYear} through ${nextYear + 4}, giving you unprecedented long-range insight into your cosmic journey.
+
+Select your zodiac sign below to explore detailed monthly predictions.`}
       breadcrumbs={[
         { label: 'Grimoire', href: '/grimoire' },
         { label: 'Horoscopes' },

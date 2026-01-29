@@ -153,14 +153,13 @@ export default async function MonthlyHoroscopePage({
   return (
     <SEOContentTemplate
       title={metaTitle ?? `${signName} Horoscope ${monthName} ${year}`}
-      h1={`${symbol} ${signName} Horoscope: ${monthName} ${year}`}
+      h1={`${symbol} ${signName} Horoscope ${monthName} ${year}: Your Complete Monthly Guide`}
       description={meta.description ?? ''}
       keywords={keywords}
       canonicalUrl={canonicalUrl}
       image={image}
       imageAlt={`${signName} ${monthName} ${year} Horoscope | Lunary`}
       datePublished={`${year}-${String(monthNumber).padStart(2, '0')}-01`}
-      dateModified={new Date().toISOString().split('T')[0]}
       articleSection='Monthly Horoscopes'
       breadcrumbs={[
         { label: 'Grimoire', href: '/grimoire' },
@@ -170,10 +169,24 @@ export default async function MonthlyHoroscopePage({
         { label: monthName },
       ]}
       whatIs={{
-        question: `What is the ${signName} horoscope for ${monthName} ${year}?`,
-        answer: `${monthName} ${year} for ${signName} focuses on ${theme.focus}. This month, ${signName} individuals may face challenges around ${theme.challenges}, but will find opportunities in ${theme.opportunities}. Lucky days this month are the ${theme.luckyDays.join(', ')}, and your power color is ${theme.powerColor}.`,
+        question: `What can ${signName} expect in ${monthName} ${year}?`,
+        answer: `${monthName} ${year} for ${signName} focuses on ${theme.focus}. This month brings opportunities in ${theme.opportunities}, with challenges around ${theme.challenges}. Lucky days are ${theme.luckyDays.join(', ')}, and your power color is ${theme.powerColor}.`,
       }}
-      tldr={`${signName} ${monthName} ${year}: Focus on ${theme.focus}. Lucky days: ${theme.luckyDays.join(', ')}. Power color: ${theme.powerColor}. Key opportunity: ${theme.opportunities}.`}
+      tldr={`${signName}, ${monthName} brings ${theme.opportunities}. Focus on ${theme.focus}. Luck Days: ${theme.luckyDays.join(' & ')} (wear ${theme.powerColor}). Navigate: ${theme.challenges}.`}
+      faqs={[
+        {
+          question: `What can ${signName} expect in ${monthName} ${year}?`,
+          answer: `${signName} ${monthName} ${year} focuses on ${theme.focus}. Key highlights include lucky days on the ${theme.luckyDays.join(', ')}, power color ${theme.powerColor}, main opportunity in ${theme.opportunities}, and key challenge around ${theme.challenges}.`,
+        },
+        {
+          question: `What are the lucky days for ${signName} in ${monthName} ${year}?`,
+          answer: `The most auspicious days for ${signName} in ${monthName} ${year} are ${theme.luckyDays.join(', ')}. These dates carry especially favorable energy for ${signName}.`,
+        },
+        {
+          question: `What is ${signName}'s power color for ${monthName} ${year}?`,
+          answer: `${signName}'s power color for ${monthName} ${year} is ${theme.powerColor}. Incorporating this color can help align your energy with the month's cosmic themes.`,
+        },
+      ]}
       meaning={`
 ## ${signName} Overview for ${monthName} ${year}
 

@@ -8,6 +8,7 @@ import {
   renderJsonLd,
 } from '@/lib/schema';
 import { ParsedMarkdown } from '@/utils/markdown';
+import { getSmartPageDates } from '@/lib/getPageDates';
 import { NavParamLink } from '@/components/NavParamLink';
 import { getContextualCopy } from '@/lib/grimoire/getContextualCopy';
 import {
@@ -62,9 +63,9 @@ export interface SEOContentTemplateProps {
   keywords: string[];
   canonicalUrl: string;
 
-  // Article metadata
-  datePublished?: string;
-  dateModified?: string;
+  // Article metadata (auto-detected from git history if not provided)
+  datePublished?: string; // First commit date if omitted
+  dateModified?: string; // Last commit date if omitted
   image?: string;
   imageAlt?: string;
   articleSection?: string;
@@ -213,14 +214,21 @@ export function SEOContentTemplate({
   const articleImage = image || `https://lunary.app/api/og/cosmic`;
   const articleImageAlt = imageAlt || `${h1} - Lunary Grimoire`;
 
+  // Automatically get dates from git history if not provided
+  const smartDates = getSmartPageDates(
+    canonicalUrl,
+    datePublished,
+    dateModified,
+  );
+
   // Create article schema with auto-speakable for AI/voice results
   const articleSchema = createArticleSchema({
     headline: h1,
     description,
     url: canonicalUrl,
     keywords,
-    datePublished,
-    dateModified,
+    datePublished: smartDates.datePublished,
+    dateModified: smartDates.dateModified,
     image: articleImage,
     section: articleSection,
     ...(entityId &&
@@ -715,8 +723,8 @@ export function SEOContentTemplate({
         {showEAT && (
           <ArticleFooter
             sources={sources || []}
-            datePublished={datePublished}
-            dateModified={dateModified}
+            datePublished={smartDates.datePublished}
+            dateModified={smartDates.dateModified}
           />
         )}
       </div>
