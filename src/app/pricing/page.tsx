@@ -24,6 +24,8 @@ import { AuthComponent } from '@/components/Auth';
 import { useModal } from '@/hooks/useModal';
 import { PricingComparisonTable } from '@/components/PricingComparisonTable';
 import { CTA_COPY } from '@/lib/cta-copy';
+import { FAQAccordion } from '@/components/FAQ';
+import { getPricingFAQs } from '@/lib/faq-helpers';
 
 const formatChatFeature = (plan: PricingPlan): string | undefined => {
   if (!plan.chatLabel) return undefined;
@@ -237,43 +239,8 @@ export default function PricingPage() {
     await startCheckout(pending.priceId, pending.planId, pending.planInterval);
   };
 
-  const faqs = [
-    {
-      question: "What's included in the free trial?",
-      answer:
-        'Full access to personalised features, including complete birth chart analysis and daily horoscopes. Astral Guide chat is included according to the selected plan. No card required to start.',
-    },
-    {
-      question: 'How does Lunary work?',
-      answer:
-        'Charts and timings come from real astronomical data. The Astral Guide chat interprets your chart, patterns, and the current sky.',
-    },
-    {
-      question: 'Can I cancel anytime?',
-      answer:
-        "Yes. Cancel through your account settings anytime. You'll keep access until the end of your billing period.",
-    },
-    {
-      question: 'How accurate are the calculations?',
-      answer:
-        'We use precise astronomical algorithms based on your exact birth time, date, and location.',
-    },
-    {
-      question: 'What makes Lunary different?',
-      answer:
-        'Every insight is calculated from your exact birth chart - not generic sun sign horoscopes. All charts are powered by real astronomy.',
-    },
-    {
-      question: 'What are the Astral Guide chat limits?',
-      answer:
-        'Astral Guide chat limits are set per plan.\n\nFree accounts include up to 3 messages per day.\n\nLunary+ includes up to 50 messages per day.\n\nLunary+ Pro includes up to 300 messages per day.',
-    },
-    {
-      question: 'What are “recent messages” and “memory snippets”?',
-      answer:
-        'Recent messages are the last chat turns included as live context. Memory snippets are short, saved notes about your preferences or recurring themes. Plans vary in how many recent messages and memory snippets are included.',
-    },
-  ];
+  const faqs = getPricingFAQs();
+  const [openFAQId, setOpenFAQId] = useState<string | null>(null);
 
   const productSchemas = useMemo(
     () =>
@@ -297,7 +264,7 @@ export default function PricingPage() {
       {productSchemas.map((schema, index) => (
         <span key={index}>{renderJsonLd(schema)}</span>
       ))}
-      <div className='min-h-screen bg-[#0a0a0f] text-zinc-100 flex flex-col'>
+      <div className='min-h-fit bg-[#0a0a0f] text-zinc-100 flex flex-col'>
         {/* Subtle gradient background */}
         <div className='fixed inset-0 bg-gradient-to-b from-lunary-primary-950/20 via-transparent to-transparent pointer-events-none' />
 
@@ -713,18 +680,16 @@ export default function PricingPage() {
             </h2>
 
             <div className='space-y-4'>
-              {faqs.map((faq, i) => (
-                <div
-                  key={i}
-                  className='p-5 rounded-xl bg-zinc-900/50 border border-zinc-800/50'
-                >
-                  <h3 className='text-sm font-medium text-zinc-200 mb-2'>
-                    {faq.question}
-                  </h3>
-                  <p className='text-sm text-zinc-400 leading-relaxed'>
-                    {faq.answer}
-                  </p>
-                </div>
+              {faqs.map((faq) => (
+                <FAQAccordion
+                  key={faq.id}
+                  question={faq.question}
+                  answer={faq.answer}
+                  isOpen={openFAQId === faq.id}
+                  onToggle={() =>
+                    setOpenFAQId(openFAQId === faq.id ? null : faq.id)
+                  }
+                />
               ))}
             </div>
           </div>

@@ -55,26 +55,6 @@ export default function FAQPage() {
       {renderFAQSchema(allFAQs)}
 
       <div className='min-h-screen bg-zinc-950 text-zinc-50'>
-        {/* Header */}
-        <header className='border-b border-zinc-800/30 py-4 px-4 md:px-6 sticky top-0 bg-zinc-950/95 backdrop-blur-sm z-50'>
-          <div className='max-w-6xl mx-auto flex items-center justify-between'>
-            <Link href='/' className='text-lg font-light text-zinc-100'>
-              Lunary
-            </Link>
-            <div className='flex items-center gap-3'>
-              <Button variant='ghost' asChild size='sm'>
-                <Link href='/features'>Features</Link>
-              </Button>
-              <Button variant='ghost' asChild size='sm'>
-                <Link href='/pricing'>Pricing</Link>
-              </Button>
-              <Button variant='lunary' asChild size='sm'>
-                <Link href='/auth?signup=true'>Get started</Link>
-              </Button>
-            </div>
-          </div>
-        </header>
-
         {/* Hero */}
         <section className='py-12 md:py-16 px-4 md:px-6'>
           <div className='max-w-4xl mx-auto text-center space-y-4'>
