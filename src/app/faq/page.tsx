@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import Link from 'next/link';
 import { Mail, ExternalLink } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -9,10 +9,26 @@ import { FAQCategory, FAQSearch } from '@/components/FAQ';
 import { getAllFAQCategories, getAllFAQs } from '@/lib/faq-helpers';
 import { getIcon } from '@/lib/icon-map';
 import { renderFAQSchema } from '@/lib/faq-schema';
+import { conversionTracking } from '@/lib/analytics';
 
 export default function FAQPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [openQuestionId, setOpenQuestionId] = useState<string | null>(null);
+
+  // Track page view on mount
+  useEffect(() => {
+    conversionTracking.pageViewed('/faq');
+  }, []);
+
+  // CTA click handler
+  const handleCtaClick = (location: string, label: string, href: string) => {
+    conversionTracking.ctaClicked({
+      location,
+      label,
+      href,
+      pagePath: '/faq',
+    });
+  };
 
   const categories = getAllFAQCategories();
 
@@ -156,6 +172,13 @@ export default function FAQPage() {
                 <Link
                   href='/features'
                   className='inline-flex items-center gap-2'
+                  onClick={() =>
+                    handleCtaClick(
+                      'help-section',
+                      'Explore features',
+                      '/features',
+                    )
+                  }
                 >
                   Explore features
                   <ExternalLink className='w-4 h-4' />

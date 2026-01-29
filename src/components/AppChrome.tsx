@@ -179,6 +179,8 @@ export function AppChrome() {
     '/press-kit',
     '/developers',
     '/pricing',
+    '/features',
+    '/faq',
     '/about',
   ];
 

@@ -242,6 +242,11 @@ export default function PricingPage() {
   const faqs = getPricingFAQs();
   const [openFAQId, setOpenFAQId] = useState<string | null>(null);
 
+  // Track page view on mount
+  useEffect(() => {
+    conversionTracking.pageViewed('/pricing');
+  }, []);
+
   const productSchemas = useMemo(
     () =>
       pricingPlans.map((plan) =>

@@ -18,9 +18,10 @@ import { renderJsonLd } from '@/lib/schema';
 import { CTA_COPY } from '@/lib/cta-copy';
 import { FAQAccordion } from '@/components/FAQ';
 import { getHomepageFAQs } from '@/lib/faq-helpers';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { HomepageFeaturesTest } from '@/components/marketing/HomepageFeaturesTest';
 import { OptimizedDemoIframe } from '@/components/marketing/OptimizedDemoIframe';
+import { conversionTracking } from '@/lib/analytics';
 
 const structuredData = {
   '@context': 'https://schema.org',
@@ -39,6 +40,21 @@ const structuredData = {
 export default function WelcomePage() {
   const [openFAQId, setOpenFAQId] = useState<string | null>(null);
   const homepageFAQs = getHomepageFAQs();
+
+  // Track page view on mount
+  useEffect(() => {
+    conversionTracking.pageViewed('/welcome');
+  }, []);
+
+  // CTA click handler
+  const handleCtaClick = (location: string, label: string, href: string) => {
+    conversionTracking.ctaClicked({
+      location,
+      label,
+      href,
+      pagePath: '/welcome',
+    });
+  };
 
   return (
     <>
@@ -77,7 +93,16 @@ export default function WelcomePage() {
             </p>
             <div className='flex flex-col gap-3 justify-center items-center pt-2 pb-0 md:pb-6'>
               <Button variant='lunary-soft' size='lg' asChild>
-                <Link href='/auth?signup=true'>
+                <Link
+                  href='/auth?signup=true'
+                  onClick={() =>
+                    handleCtaClick(
+                      'hero',
+                      CTA_COPY.auth.createChart,
+                      '/auth?signup=true',
+                    )
+                  }
+                >
                   {CTA_COPY.auth.createChart}
                 </Link>
               </Button>
@@ -709,7 +734,14 @@ export default function WelcomePage() {
             </div>
             <div className='pt-2'>
               <Button variant='outline' asChild>
-                <Link href='/pricing'>View plans</Link>
+                <Link
+                  href='/pricing'
+                  onClick={() =>
+                    handleCtaClick('promo-banner', 'View plans', '/pricing')
+                  }
+                >
+                  View plans
+                </Link>
               </Button>
             </div>
           </div>
@@ -814,7 +846,16 @@ export default function WelcomePage() {
 
             <div className='pt-4 flex flex-col gap-3 items-center'>
               <Button variant='lunary-soft' size='lg' asChild>
-                <Link href='/auth?signup=true'>
+                <Link
+                  href='/auth?signup=true'
+                  onClick={() =>
+                    handleCtaClick(
+                      'final-cta',
+                      CTA_COPY.auth.createChart,
+                      '/auth?signup=true',
+                    )
+                  }
+                >
                   {CTA_COPY.auth.createChart}
                 </Link>
               </Button>
@@ -823,6 +864,13 @@ export default function WelcomePage() {
                 <Link
                   href='/pricing'
                   className='text-lunary-primary-400 hover:text-lunary-primary-200 transition-colors'
+                  onClick={() =>
+                    handleCtaClick(
+                      'final-cta-secondary',
+                      'View pricing',
+                      '/pricing',
+                    )
+                  }
                 >
                   Explore what's included
                 </Link>
