@@ -17,12 +17,22 @@ export function createComparisonMetadata(data: ComparisonData): Metadata {
       `${competitorName.toLowerCase()} vs lunary`,
       `best astrology app ${year}`,
       'astrology app comparison',
+      'personalized astrology',
+      'birth chart app',
     ],
     openGraph: {
+      type: 'article',
       title,
       description,
       url,
       siteName: 'Lunary',
+      locale: 'en_US',
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title,
+      description,
+      site: '@lunaryapp',
     },
     alternates: {
       canonical: url,

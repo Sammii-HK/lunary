@@ -142,7 +142,7 @@ export default function BestPersonalizedAstrologyAppsPage() {
                     </span>
                   </td>
                   <td className='border border-zinc-800 p-4 text-center'>
-                    <span className='text-zinc-400 text-sm'>AI-Powered</span>
+                    <Check className='h-5 w-5 text-lunary-success mx-auto' />
                   </td>
                 </tr>
                 <tr className='bg-zinc-900/30'>
@@ -186,7 +186,7 @@ export default function BestPersonalizedAstrologyAppsPage() {
                     </span>
                   </td>
                   <td className='border border-zinc-800 p-4 text-center'>
-                    <span className='text-zinc-400 text-sm'>AI-Generated</span>
+                    <Check className='h-5 w-5 text-lunary-success mx-auto' />
                   </td>
                 </tr>
                 <tr className='bg-zinc-900/30'>

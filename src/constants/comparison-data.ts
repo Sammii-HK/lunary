@@ -4,14 +4,14 @@ export const comparisonData: Record<string, ComparisonData> = {
   'lunary-vs-costar': {
     competitorName: 'Co-Star',
     competitorSlug: 'lunary-vs-costar',
-    tagline: 'Lunary vs Co-Star: Real Astronomy vs AI-Generated Astrology',
+    tagline: 'Lunary vs Co-Star: Which Astrology App is Right for You?',
     subtitle:
-      'A detailed comparison between real astronomical calculations and AI-generated horoscopes.',
+      'A detailed comparison to help you choose between Lunary and Co-Star for your astrological practice.',
     featuresCompared: [
-      'Real astronomical calculations vs AI-generated content',
-      'Personalized birth charts',
-      'Grimoire with spells and rituals',
-      'Free trial availability',
+      'Real astronomical calculations with ±1 arcminute accuracy',
+      'Complete grimoire with 2000+ pages',
+      'Personalized tarot readings based on your chart',
+      'Magical tools (spells, rituals, correspondences)',
     ],
     features: [
       {
@@ -19,10 +19,10 @@ export const comparisonData: Record<string, ComparisonData> = {
         description: 'How birth charts are calculated',
         lunary: {
           type: 'text',
-          value: 'Real Astronomical Data',
+          value: '±1 arcminute accuracy',
           highlight: true,
         },
-        competitor: { type: 'text', value: 'AI-Generated' },
+        competitor: { type: 'check' },
       },
       {
         name: 'Personalized Birth Chart',
@@ -34,10 +34,10 @@ export const comparisonData: Record<string, ComparisonData> = {
         name: 'Personalized Horoscopes',
         description: 'Based on YOUR chart vs generic zodiac',
         lunary: { type: 'text', value: 'Chart-Based', highlight: true },
-        competitor: { type: 'text', value: 'AI-Generated' },
+        competitor: { type: 'check' },
       },
       {
-        name: 'Grimoire Included',
+        name: 'Grimoire (2000+ pages)',
         description: 'Spells, rituals, correspondences',
         lunary: { type: 'check' },
         competitor: { type: 'x' },
@@ -49,10 +49,40 @@ export const comparisonData: Record<string, ComparisonData> = {
         competitor: { type: 'x' },
       },
       {
-        name: 'Astronomical Accuracy',
-        description: 'Uses real planetary positions',
+        name: 'Crystal Guidance',
+        description: 'Based on your birth chart & current transits',
         lunary: { type: 'check' },
-        competitor: { type: 'text', value: 'AI Interpretation' },
+        competitor: { type: 'x' },
+      },
+      {
+        name: 'Moon Circles',
+        description: 'New & Full Moon insights',
+        lunary: { type: 'check' },
+        competitor: { type: 'x' },
+      },
+      {
+        name: 'Solar Return',
+        description: 'Birthday chart & yearly forecast',
+        lunary: { type: 'check' },
+        competitor: { type: 'x' },
+      },
+      {
+        name: 'Tarot Pattern Analysis',
+        description: 'Identifies patterns across your tarot readings',
+        lunary: { type: 'check' },
+        competitor: { type: 'x' },
+      },
+      {
+        name: 'Archetypes',
+        description: 'Patterns detected from your Book of Shadows journaling',
+        lunary: { type: 'check' },
+        competitor: { type: 'x' },
+      },
+      {
+        name: 'Book of Shadows Journal',
+        description: 'Personal magical journal',
+        lunary: { type: 'check' },
+        competitor: { type: 'x' },
       },
       {
         name: 'Free Trial',
@@ -67,36 +97,40 @@ export const comparisonData: Record<string, ComparisonData> = {
       {
         name: 'Pricing',
         description: 'Monthly subscription',
-        lunary: { type: 'text', value: '$4.99/mo', highlight: false },
+        lunary: {
+          type: 'text',
+          value: 'Free + from $4.99/mo',
+          highlight: true,
+        },
         competitor: { type: 'text', value: 'Free + $2.99/mo' },
       },
     ],
     lunaryAdvantages: [
       {
-        title: 'Real Astronomical Calculations',
+        title: 'Real Astronomical Calculations (±1 arcminute accuracy)',
         description:
-          "Lunary uses actual astronomical calculations from your exact birth time, date, and location. Unlike Co-Star's AI-generated approach, Lunary calculates planetary positions using real astronomy.",
+          'Lunary uses astronomy-engine for calculations accurate to ±1 arcminute based on VSOP87 models, ensuring precise planetary positions from your exact birth time, date, and location.',
       },
       {
-        title: 'Complete Grimoire Included',
+        title: 'Complete Grimoire (2000+ pages)',
         description:
-          'Lunary includes a complete grimoire with spells, rituals, correspondences, and magical knowledge - unique to Lunary and not available in Co-Star.',
+          'Lunary includes a comprehensive grimoire with 2000+ pages of spells, rituals, correspondences, and magical knowledge - unique to Lunary and not available in Co-Star.',
       },
       {
-        title: 'Chart-Based Personalization',
+        title: 'Chart-Personalized Tarot with Pattern Analysis',
         description:
-          "Every horoscope and insight is based on YOUR exact birth chart, calculated using real astronomical data. This provides more accurate and personalized guidance than Co-Star's AI-generated content.",
+          'Every tarot reading is personalized to YOUR exact birth chart. Tarot Pattern Analysis identifies recurring themes across your readings over time. Also includes Moon Circles, ritual generator, and personalized crystal recommendations.',
       },
       {
-        title: 'Free Trial with No Payment During Trial',
+        title: 'Astral Guide with Complete Chart Context',
         description:
-          'Try Lunary free with a 7-day monthly or 14-day annual trial. No card required during the trial, making it easy to explore all features risk-free.',
+          'The Astral Guide has complete context of your birth chart, tarot patterns, readings history, and archetypes to provide comprehensive insights in plain language. It understands your unique astrological profile and how it evolves over time.',
       },
     ],
     competitorStrengths:
-      "Co-Star may be a good choice if you want a free tier with basic features and enjoy their minimalist, text-based approach to astrology. Their social features for comparing charts with friends can be fun, though the AI-generated content means it's not based on real astronomical data.",
+      'Co-Star may be a good choice if you prefer their minimalist, text-based interface and social features for comparing charts with friends. Their hyper-personalized push notifications and unique aesthetic appeal to users who want a different astrology app experience.',
     conclusion:
-      "Lunary stands out for using real astronomical calculations to create truly personalized birth charts and horoscopes. Combined with a complete grimoire, personalized tarot readings, and a transparent free trial, Lunary offers a comprehensive astrology experience that's grounded in real astronomy rather than AI generation.",
+      'Choose Lunary if you want real astronomical calculations with ±1 arcminute accuracy, a complete grimoire with 2000+ pages, and personalized tarot readings based on your exact birth chart. Choose Co-Star if you prefer their minimalist text-based interface and social features for comparing charts with friends.',
   },
 
   'lunary-vs-chani': {
@@ -127,7 +161,7 @@ export const comparisonData: Record<string, ComparisonData> = {
         description: 'How insights are delivered',
         lunary: {
           type: 'text',
-          value: 'AI + Astronomical Data',
+          value: 'Astral Guide + Astronomical Data',
           highlight: true,
         },
         competitor: { type: 'text', value: 'Expert-Written' },
@@ -145,6 +179,24 @@ export const comparisonData: Record<string, ComparisonData> = {
         competitor: { type: 'x' },
       },
       {
+        name: 'Tarot Pattern Analysis',
+        description: 'Identifies patterns across your readings',
+        lunary: { type: 'check' },
+        competitor: { type: 'x' },
+      },
+      {
+        name: 'Solar Return',
+        description: 'Birthday chart & yearly forecast',
+        lunary: { type: 'check' },
+        competitor: { type: 'x' },
+      },
+      {
+        name: 'Monthly Cosmic Insights',
+        description: 'Personalized monthly guidance',
+        lunary: { type: 'check' },
+        competitor: { type: 'x' },
+      },
+      {
         name: 'Free Trial',
         description: 'Try before you buy',
         lunary: {
@@ -157,7 +209,11 @@ export const comparisonData: Record<string, ComparisonData> = {
       {
         name: 'Pricing',
         description: 'Monthly subscription',
-        lunary: { type: 'text', value: '$4.99/mo', highlight: false },
+        lunary: {
+          type: 'text',
+          value: 'Free + from $4.99/mo',
+          highlight: true,
+        },
         competitor: { type: 'text', value: '~$12.99/mo' },
       },
     ],
@@ -181,7 +237,7 @@ export const comparisonData: Record<string, ComparisonData> = {
     competitorStrengths:
       'CHANI may be a better choice if you specifically want curated content from professional astrologers and prefer a more editorial approach to astrology. However, this comes at a significantly higher price point.',
     conclusion:
-      'Lunary offers a comprehensive, affordable alternative to CHANI with real astronomical calculations, magical tools, and AI-powered personalization. For users seeking accurate, data-driven astrology with additional magical practices, Lunary provides exceptional value at a fraction of the cost.',
+      'Lunary offers a comprehensive, affordable alternative to CHANI with real astronomical calculations, magical tools, and the Astral Guide with complete chart context. For users seeking accurate, data-driven astrology with additional magical practices, Lunary provides exceptional value at a fraction of the cost.',
   },
 
   'lunary-vs-nebula': {
@@ -193,7 +249,7 @@ export const comparisonData: Record<string, ComparisonData> = {
     featuresCompared: [
       'Real astronomical calculations vs generic astrology',
       'Magical tools (grimoire, tarot, rituals)',
-      'AI-powered insights vs chat-based readings',
+      'Astral Guide with chart context vs chat-based readings',
       'Subscription vs credit-based pricing',
     ],
     features: [
@@ -210,7 +266,7 @@ export const comparisonData: Record<string, ComparisonData> = {
       {
         name: 'Reading Style',
         description: 'How insights are delivered',
-        lunary: { type: 'text', value: 'Instant AI + Magical Tools' },
+        lunary: { type: 'text', value: 'Astral Guide + Magical Tools' },
         competitor: { type: 'text', value: 'Chat with Psychics' },
       },
       {
@@ -224,13 +280,35 @@ export const comparisonData: Record<string, ComparisonData> = {
         competitor: { type: 'check' },
       },
       {
+        name: 'Tarot Pattern Analysis',
+        description: 'Identifies patterns across your readings',
+        lunary: { type: 'check' },
+        competitor: { type: 'x' },
+      },
+      {
+        name: 'Transit Calendar',
+        description: 'Track planetary transits affecting you',
+        lunary: { type: 'check' },
+        competitor: { type: 'x' },
+      },
+      {
+        name: 'Archetypes',
+        description: 'Patterns detected from your Book of Shadows journaling',
+        lunary: { type: 'check' },
+        competitor: { type: 'x' },
+      },
+      {
         name: 'Pricing Model',
         lunary: { type: 'text', value: 'Flat Subscription', highlight: true },
         competitor: { type: 'text', value: 'Credit-Based' },
       },
       {
         name: 'Pricing',
-        lunary: { type: 'text', value: '$4.99/mo', highlight: false },
+        lunary: {
+          type: 'text',
+          value: 'Free + from $4.99/mo',
+          highlight: true,
+        },
         competitor: { type: 'text', value: 'Varies by usage' },
       },
     ],
@@ -266,7 +344,7 @@ export const comparisonData: Record<string, ComparisonData> = {
     featuresCompared: [
       'Real astronomical calculations',
       'Magical tools (grimoire, tarot, rituals)',
-      'Premium astrologer content vs AI-powered insights',
+      'Premium astrologer content vs Astral Guide with chart context',
       'Pricing and value',
     ],
     features: [
@@ -285,7 +363,7 @@ export const comparisonData: Record<string, ComparisonData> = {
         description: 'Who creates the insights',
         lunary: {
           type: 'text',
-          value: 'AI + Astronomical Data',
+          value: 'Astral Guide + Astronomical Data',
           highlight: true,
         },
         competitor: { type: 'text', value: 'Human Astrologers' },
@@ -299,6 +377,24 @@ export const comparisonData: Record<string, ComparisonData> = {
       {
         name: 'Tarot Readings',
         description: 'Personalized to your chart',
+        lunary: { type: 'check' },
+        competitor: { type: 'x' },
+      },
+      {
+        name: 'Transit Calendar',
+        description: 'Track planetary transits affecting you',
+        lunary: { type: 'check' },
+        competitor: { type: 'x' },
+      },
+      {
+        name: 'Archetypes',
+        description: 'Patterns detected from your Book of Shadows journaling',
+        lunary: { type: 'check' },
+        competitor: { type: 'x' },
+      },
+      {
+        name: 'Monthly Cosmic Insights',
+        description: 'Personalized monthly guidance',
         lunary: { type: 'check' },
         competitor: { type: 'x' },
       },
@@ -321,7 +417,11 @@ export const comparisonData: Record<string, ComparisonData> = {
       {
         name: 'Pricing',
         description: 'Monthly subscription',
-        lunary: { type: 'text', value: '$4.99/mo', highlight: false },
+        lunary: {
+          type: 'text',
+          value: 'Free + from $4.99/mo',
+          highlight: true,
+        },
         competitor: { type: 'text', value: '~$19.99/mo' },
       },
     ],
@@ -343,9 +443,9 @@ export const comparisonData: Record<string, ComparisonData> = {
       },
     ],
     competitorStrengths:
-      'Sanctuary may be a better choice if you specifically want live, one-on-one readings with human astrologers and prefer premium, hand-crafted content over AI-powered insights. However, this comes at a significantly higher price point.',
+      'Sanctuary may be a better choice if you specifically want live, one-on-one readings with human astrologers and prefer premium, hand-crafted content over the Astral Guide. However, this comes at a significantly higher price point.',
     conclusion:
-      'Lunary offers a comprehensive, affordable alternative to Sanctuary with real astronomical calculations, magical tools, and AI-powered personalization. For users seeking accurate, data-driven astrology with additional magical practices, Lunary provides exceptional value at a fraction of the cost.',
+      'Lunary offers a comprehensive, affordable alternative to Sanctuary with real astronomical calculations, magical tools, and the Astral Guide with complete chart context. For users seeking accurate, data-driven astrology with additional magical practices, Lunary provides exceptional value at a fraction of the cost.',
   },
 
   'lunary-vs-pattern': {
@@ -406,6 +506,24 @@ export const comparisonData: Record<string, ComparisonData> = {
         competitor: { type: 'x' },
       },
       {
+        name: 'Tarot Pattern Analysis',
+        description: 'Identifies patterns across your tarot readings',
+        lunary: { type: 'check' },
+        competitor: { type: 'x' },
+      },
+      {
+        name: 'Archetypes',
+        description: 'Patterns detected from your Book of Shadows journaling',
+        lunary: { type: 'check' },
+        competitor: { type: 'x' },
+      },
+      {
+        name: 'Transit Calendar',
+        description: 'Track planetary transits',
+        lunary: { type: 'check' },
+        competitor: { type: 'x' },
+      },
+      {
         name: 'Behavioral Insights',
         description: 'Psychology-based pattern analysis',
         lunary: { type: 'text', value: 'Limited' },
@@ -424,7 +542,11 @@ export const comparisonData: Record<string, ComparisonData> = {
       {
         name: 'Pricing',
         description: 'Monthly subscription',
-        lunary: { type: 'text', value: '$4.99/mo', highlight: false },
+        lunary: {
+          type: 'text',
+          value: 'Free + from $4.99/mo',
+          highlight: true,
+        },
         competitor: { type: 'text', value: 'Varies by plan' },
       },
     ],
@@ -445,9 +567,9 @@ export const comparisonData: Record<string, ComparisonData> = {
           'Lunary includes personalized tarot readings that provide pattern insights based on your birth chart, combining astrological patterns with tarot wisdom for deeper understanding.',
       },
       {
-        title: 'AI-Powered Astral Guide',
+        title: 'Astral Guide with Complete Chart Context',
         description:
-          'Lunary includes an AI-powered astral guide that provides personalized insights based on your exact birth chart, combining real astronomy with intelligent pattern recognition.',
+          'The Astral Guide has complete context of your birth chart, patterns, tarot readings, and history to provide personalized insights based on your exact birth chart, combining real astronomy with intelligent pattern recognition.',
       },
     ],
     competitorStrengths:
@@ -510,6 +632,24 @@ export const comparisonData: Record<string, ComparisonData> = {
         competitor: { type: 'text', value: 'Generic' },
       },
       {
+        name: 'Solar Return',
+        description: 'Birthday chart & yearly forecast',
+        lunary: { type: 'check' },
+        competitor: { type: 'x' },
+      },
+      {
+        name: 'Transit Calendar',
+        description: 'Track planetary transits',
+        lunary: { type: 'check' },
+        competitor: { type: 'x' },
+      },
+      {
+        name: 'Archetypes',
+        description: 'Patterns detected from your Book of Shadows journaling',
+        lunary: { type: 'check' },
+        competitor: { type: 'x' },
+      },
+      {
         name: 'Free Trial',
         description: 'Try before you buy',
         lunary: {
@@ -522,7 +662,11 @@ export const comparisonData: Record<string, ComparisonData> = {
       {
         name: 'Pricing',
         description: 'Monthly subscription',
-        lunary: { type: 'text', value: '$4.99/mo', highlight: false },
+        lunary: {
+          type: 'text',
+          value: 'Free + from $4.99/mo',
+          highlight: true,
+        },
         competitor: { type: 'text', value: 'Varies by plan' },
       },
     ],
@@ -563,7 +707,7 @@ export const comparisonData: Record<string, ComparisonData> = {
     featuresCompared: [
       'Modern app experience vs website',
       'Magical tools (grimoire, tarot, rituals)',
-      'AI-powered insights vs raw calculations',
+      'Astral Guide with chart context vs raw calculations',
       'Beautiful design vs technical focus',
     ],
     features: [
@@ -593,13 +737,32 @@ export const comparisonData: Record<string, ComparisonData> = {
         competitor: { type: 'check' },
       },
       {
-        name: 'AI Insights',
+        name: 'Astral Guide',
         lunary: { type: 'check' },
         competitor: { type: 'x' },
       },
       {
+        name: 'Transit Calendar',
+        lunary: { type: 'check' },
+        competitor: { type: 'check' },
+      },
+      {
+        name: 'Archetypes',
+        lunary: { type: 'check' },
+        competitor: { type: 'x' },
+      },
+      {
+        name: 'Solar Return',
+        lunary: { type: 'check' },
+        competitor: { type: 'check' },
+      },
+      {
         name: 'Pricing',
-        lunary: { type: 'text', value: '$4.99/mo', highlight: false },
+        lunary: {
+          type: 'text',
+          value: 'Free + from $4.99/mo',
+          highlight: true,
+        },
         competitor: { type: 'text', value: 'Free', highlight: true },
       },
     ],
@@ -607,7 +770,7 @@ export const comparisonData: Record<string, ComparisonData> = {
       {
         title: 'Accessible to Everyone',
         description:
-          'Lunary makes astrology accessible with AI-powered interpretations—no years of study required to understand your chart.',
+          'The Astral Guide has complete context of your chart, patterns, and tarot readings to explain everything in plain language—no years of study required to understand your chart.',
       },
       {
         title: 'Complete Magical Practice',
@@ -674,6 +837,24 @@ export const comparisonData: Record<string, ComparisonData> = {
         competitor: { type: 'text', value: 'Limited' },
       },
       {
+        name: 'Tarot Pattern Analysis',
+        description: 'Identifies patterns across your readings',
+        lunary: { type: 'check' },
+        competitor: { type: 'x' },
+      },
+      {
+        name: 'Solar Return',
+        description: 'Birthday chart & yearly forecast',
+        lunary: { type: 'check' },
+        competitor: { type: 'x' },
+      },
+      {
+        name: 'Archetypes',
+        description: 'Patterns detected from your Book of Shadows journaling',
+        lunary: { type: 'check' },
+        competitor: { type: 'x' },
+      },
+      {
         name: 'Community Features',
         description: 'Social sharing, community content',
         lunary: { type: 'text', value: 'Limited' },
@@ -692,7 +873,11 @@ export const comparisonData: Record<string, ComparisonData> = {
       {
         name: 'Pricing',
         description: 'Monthly subscription',
-        lunary: { type: 'text', value: '$4.99/mo', highlight: false },
+        lunary: {
+          type: 'text',
+          value: 'Free + from $4.99/mo',
+          highlight: true,
+        },
         competitor: { type: 'text', value: 'Varies by plan' },
       },
     ],
@@ -733,7 +918,7 @@ export const comparisonData: Record<string, ComparisonData> = {
     featuresCompared: [
       'Modern app experience vs website',
       'Magical tools (grimoire, tarot, rituals)',
-      'AI-powered insights vs manual interpretation',
+      'Astral Guide with chart context vs manual interpretation',
       'User-friendly design vs technical interface',
     ],
     features: [
@@ -762,13 +947,32 @@ export const comparisonData: Record<string, ComparisonData> = {
         competitor: { type: 'x' },
       },
       {
-        name: 'AI Interpretation',
+        name: 'Astral Guide',
+        lunary: { type: 'check' },
+        competitor: { type: 'x' },
+      },
+      {
+        name: 'Transit Calendar',
+        lunary: { type: 'check' },
+        competitor: { type: 'check' },
+      },
+      {
+        name: 'Archetypes',
+        lunary: { type: 'check' },
+        competitor: { type: 'x' },
+      },
+      {
+        name: 'Book of Shadows Journal',
         lunary: { type: 'check' },
         competitor: { type: 'x' },
       },
       {
         name: 'Pricing',
-        lunary: { type: 'text', value: '$4.99/mo', highlight: false },
+        lunary: {
+          type: 'text',
+          value: 'Free + from $4.99/mo',
+          highlight: true,
+        },
         competitor: { type: 'text', value: 'Free (basic)', highlight: true },
       },
     ],
@@ -776,7 +980,7 @@ export const comparisonData: Record<string, ComparisonData> = {
       {
         title: 'Instant Understanding',
         description:
-          "Lunary's AI explains your chart in plain language—no astrology degree required to understand your cosmic profile.",
+          'The Astral Guide has complete context of your chart, patterns, and tarot readings to explain everything in plain language—no astrology degree required to understand your cosmic profile.',
       },
       {
         title: 'Integrated Magical Practice',
@@ -806,7 +1010,7 @@ export const comparisonData: Record<string, ComparisonData> = {
     featuresCompared: [
       'Modern app vs website experience',
       'Magical tools (grimoire, tarot, rituals)',
-      'AI-powered personalization vs static content',
+      'Astral Guide with chart context vs static content',
       'Premium features vs free with ads',
     ],
     features: [
@@ -821,7 +1025,7 @@ export const comparisonData: Record<string, ComparisonData> = {
       },
       {
         name: 'Personalization',
-        lunary: { type: 'text', value: 'AI-Powered', highlight: true },
+        lunary: { type: 'text', value: 'Astral Guide', highlight: true },
         competitor: { type: 'text', value: 'Static Content' },
       },
       {
@@ -845,21 +1049,40 @@ export const comparisonData: Record<string, ComparisonData> = {
         competitor: { type: 'check' },
       },
       {
+        name: 'Transit Calendar',
+        lunary: { type: 'check' },
+        competitor: { type: 'x' },
+      },
+      {
+        name: 'Archetypes',
+        lunary: { type: 'check' },
+        competitor: { type: 'x' },
+      },
+      {
+        name: 'Monthly Cosmic Insights',
+        lunary: { type: 'check' },
+        competitor: { type: 'x' },
+      },
+      {
         name: 'Ad-Free',
         lunary: { type: 'check' },
         competitor: { type: 'x' },
       },
       {
         name: 'Pricing',
-        lunary: { type: 'text', value: '$4.99/mo', highlight: false },
+        lunary: {
+          type: 'text',
+          value: 'Free + from $4.99/mo',
+          highlight: true,
+        },
         competitor: { type: 'text', value: 'Free (with ads)', highlight: true },
       },
     ],
     lunaryAdvantages: [
       {
-        title: 'AI-Powered Personalization',
+        title: 'Astral Guide with Complete Chart Context',
         description:
-          'Lunary provides truly personalized insights based on your chart, not just static articles that apply to everyone with your sign.',
+          'The Astral Guide has complete context of your chart, patterns, and tarot readings to provide truly personalized insights, not just static articles that apply to everyone with your sign.',
       },
       {
         title: 'Complete Magical Ecosystem',
@@ -875,7 +1098,7 @@ export const comparisonData: Record<string, ComparisonData> = {
     competitorStrengths:
       "Cafe Astrology is a great free resource for learning astrology basics and generating basic birth charts. It's ideal if you want free access to astrology content and don't mind ads.",
     conclusion:
-      'While Cafe Astrology is a useful free resource, Lunary offers a significantly better experience with AI-powered personalization, interactive magical tools, and an ad-free modern interface—all at an affordable price.',
+      'While Cafe Astrology is a useful free resource, Lunary offers a significantly better experience with the Astral Guide (complete chart context), interactive magical tools, and an ad-free modern interface—all at an affordable price.',
   },
 
   'lunary-vs-timepassages': {
@@ -888,7 +1111,7 @@ export const comparisonData: Record<string, ComparisonData> = {
       'Modern mobile-first design vs traditional software',
       'Magical tools (grimoire, tarot) vs pure astrology',
       'Subscription vs one-time purchase',
-      'AI-powered insights vs manual interpretation',
+      'Astral Guide with chart context vs manual interpretation',
     ],
     features: [
       {
@@ -920,13 +1143,32 @@ export const comparisonData: Record<string, ComparisonData> = {
         competitor: { type: 'check' },
       },
       {
-        name: 'AI-Powered Insights',
+        name: 'Astral Guide',
+        lunary: { type: 'check' },
+        competitor: { type: 'x' },
+      },
+      {
+        name: 'Archetypes',
+        lunary: { type: 'check' },
+        competitor: { type: 'x' },
+      },
+      {
+        name: 'Monthly Cosmic Insights',
+        lunary: { type: 'check' },
+        competitor: { type: 'x' },
+      },
+      {
+        name: 'Book of Shadows Journal',
         lunary: { type: 'check' },
         competitor: { type: 'x' },
       },
       {
         name: 'Pricing Model',
-        lunary: { type: 'text', value: '$4.99/mo', highlight: false },
+        lunary: {
+          type: 'text',
+          value: 'Free + from $4.99/mo',
+          highlight: true,
+        },
         competitor: { type: 'text', value: 'One-time ~$15-50' },
       },
     ],
@@ -942,9 +1184,9 @@ export const comparisonData: Record<string, ComparisonData> = {
           "Beyond charts, Lunary includes tarot, grimoire, rituals, and correspondences—tools TimePassages doesn't offer.",
       },
       {
-        title: 'AI-Powered Personalization',
+        title: 'Astral Guide with Complete Chart Context',
         description:
-          "Lunary's AI provides personalized insights based on your chart, making interpretation accessible without years of study.",
+          'The Astral Guide has complete context of your chart, patterns, and tarot readings to provide personalized insights, making interpretation accessible without years of study.',
       },
     ],
     competitorStrengths:
@@ -962,7 +1204,7 @@ export const comparisonData: Record<string, ComparisonData> = {
     featuresCompared: [
       'Modern web app vs professional mobile software',
       'Magical tools (grimoire, tarot, rituals)',
-      'AI-powered insights vs manual interpretation',
+      'Astral Guide with chart context vs manual interpretation',
       'Subscription vs one-time purchase',
     ],
     features: [
@@ -987,13 +1229,32 @@ export const comparisonData: Record<string, ComparisonData> = {
         competitor: { type: 'check' },
       },
       {
-        name: 'AI Interpretation',
+        name: 'Astral Guide',
+        lunary: { type: 'check' },
+        competitor: { type: 'x' },
+      },
+      {
+        name: 'Archetypes',
+        lunary: { type: 'check' },
+        competitor: { type: 'x' },
+      },
+      {
+        name: 'Book of Shadows Journal',
+        lunary: { type: 'check' },
+        competitor: { type: 'x' },
+      },
+      {
+        name: 'Collections & Folders',
         lunary: { type: 'check' },
         competitor: { type: 'x' },
       },
       {
         name: 'Pricing',
-        lunary: { type: 'text', value: '$4.99/mo', highlight: false },
+        lunary: {
+          type: 'text',
+          value: 'Free + from $4.99/mo',
+          highlight: true,
+        },
         competitor: { type: 'text', value: '~$50 one-time' },
       },
     ],
@@ -1001,7 +1262,7 @@ export const comparisonData: Record<string, ComparisonData> = {
       {
         title: 'Accessible to All Levels',
         description:
-          "Lunary's AI makes astrology accessible—you don't need to be a professional to understand your chart.",
+          "The Astral Guide has complete context of your chart, patterns, and tarot readings to make astrology accessible—you don't need to be a professional to understand your chart.",
       },
       {
         title: 'Complete Magical Toolkit',
@@ -1017,19 +1278,19 @@ export const comparisonData: Record<string, ComparisonData> = {
     competitorStrengths:
       "Astro Gold is designed for professional astrologers who need advanced chart types, detailed calculations, and extensive customization options. It's a one-time purchase with no ongoing subscription.",
     conclusion:
-      'Lunary is ideal for users who want accessible astrology with magical tools and AI guidance. Astro Gold suits professional astrologers who need advanced technical features.',
+      'Lunary is ideal for users who want accessible astrology with magical tools and the Astral Guide. Astro Gold suits professional astrologers who need advanced technical features.',
   },
 
   'lunary-vs-astrofuture': {
     competitorName: 'AstroFuture',
     competitorSlug: 'lunary-vs-astrofuture',
-    tagline: 'Lunary vs AstroFuture: Real Astronomy vs AI Predictions',
+    tagline: 'Lunary vs AstroFuture: Which Astrology App is Better?',
     subtitle:
-      'A detailed comparison between real astronomical data and AI-generated predictions.',
+      'A detailed comparison between real astronomical data with magical tools and AstroFuture.',
     featuresCompared: [
-      'Real astronomical calculations vs generic',
+      'Real astronomical calculations with ±1 arcminute accuracy',
       'Magical tools (grimoire, tarot, rituals)',
-      'Transparent methodology vs black-box AI',
+      'Transparent methodology',
       'Pricing and features',
     ],
     features: [
@@ -1037,10 +1298,10 @@ export const comparisonData: Record<string, ComparisonData> = {
         name: 'Calculation Method',
         lunary: {
           type: 'text',
-          value: 'Real Astronomical Data',
+          value: '±1 arcminute accuracy',
           highlight: true,
         },
-        competitor: { type: 'text', value: 'AI-Generated' },
+        competitor: { type: 'check' },
       },
       {
         name: 'Grimoire & Rituals',
@@ -1064,20 +1325,24 @@ export const comparisonData: Record<string, ComparisonData> = {
       },
       {
         name: 'Pricing',
-        lunary: { type: 'text', value: '$4.99/mo', highlight: false },
+        lunary: {
+          type: 'text',
+          value: 'Free + from $4.99/mo',
+          highlight: true,
+        },
         competitor: { type: 'text', value: '~$9.99/mo' },
       },
     ],
     lunaryAdvantages: [
       {
-        title: 'Real Astronomical Foundation',
+        title: 'Real Astronomical Calculations (±1 arcminute accuracy)',
         description:
-          'Lunary bases all insights on actual astronomical calculations, not black-box AI predictions.',
+          'Lunary uses astronomy-engine for calculations accurate to ±1 arcminute based on VSOP87 models, ensuring precise planetary positions.',
       },
       {
         title: 'Complete Magical Practice',
         description:
-          'Lunary includes grimoire, rituals, and correspondences for a complete spiritual toolkit.',
+          'Lunary includes a 2000+ page grimoire, rituals, and correspondences for a complete spiritual toolkit.',
       },
       {
         title: 'Better Value',
@@ -1086,9 +1351,9 @@ export const comparisonData: Record<string, ComparisonData> = {
       },
     ],
     competitorStrengths:
-      'AstroFuture may suit users who prefer AI-generated predictions and want a different style of astrology content. However, its methodology is less transparent.',
+      'AstroFuture may suit users who prefer a different style of astrology content and interface.',
     conclusion:
-      "Lunary offers more reliable, astronomically-grounded insights with additional magical tools at a better price. It's the superior choice for serious cosmic practitioners.",
+      'Lunary offers real astronomical calculations with ±1 arcminute accuracy, a complete grimoire with 2000+ pages, and magical tools at a better price.',
   },
 
   'lunary-vs-astromatrix': {
@@ -1125,13 +1390,32 @@ export const comparisonData: Record<string, ComparisonData> = {
         competitor: { type: 'check' },
       },
       {
-        name: 'AI-Powered Insights',
+        name: 'Astral Guide',
+        lunary: { type: 'check' },
+        competitor: { type: 'x' },
+      },
+      {
+        name: 'Archetypes',
+        lunary: { type: 'check' },
+        competitor: { type: 'x' },
+      },
+      {
+        name: 'Solar Return',
+        lunary: { type: 'check' },
+        competitor: { type: 'x' },
+      },
+      {
+        name: 'Book of Shadows Journal',
         lunary: { type: 'check' },
         competitor: { type: 'x' },
       },
       {
         name: 'Pricing',
-        lunary: { type: 'text', value: '$4.99/mo', highlight: false },
+        lunary: {
+          type: 'text',
+          value: 'Free + from $4.99/mo',
+          highlight: true,
+        },
         competitor: { type: 'text', value: '~$9.99/mo' },
       },
     ],
@@ -1168,7 +1452,7 @@ export const comparisonData: Record<string, ComparisonData> = {
       'Astrology + Tarot integration vs Tarot-only',
       'Grimoire with rituals and correspondences',
       'Real astronomical calculations',
-      'AI-powered personalization',
+      'Astral Guide with complete chart context',
     ],
     features: [
       {
@@ -1202,8 +1486,28 @@ export const comparisonData: Record<string, ComparisonData> = {
         competitor: { type: 'x' },
       },
       {
+        name: 'Tarot Pattern Analysis',
+        description: 'Identifies patterns across your readings',
+        lunary: { type: 'check' },
+        competitor: { type: 'x' },
+      },
+      {
+        name: 'Archetypes',
+        lunary: { type: 'check' },
+        competitor: { type: 'x' },
+      },
+      {
+        name: 'Transit Calendar',
+        lunary: { type: 'check' },
+        competitor: { type: 'x' },
+      },
+      {
         name: 'Pricing',
-        lunary: { type: 'text', value: '$4.99/mo', highlight: false },
+        lunary: {
+          type: 'text',
+          value: 'Free + from $4.99/mo',
+          highlight: true,
+        },
         competitor: { type: 'text', value: 'Free + IAP' },
       },
     ],
@@ -1233,14 +1537,14 @@ export const comparisonData: Record<string, ComparisonData> = {
   'lunary-vs-lunar-guide': {
     competitorName: 'Lunar Guide',
     competitorSlug: 'lunary-vs-lunar-guide',
-    tagline: 'Lunary vs Lunar Guide: Real Astronomy vs AI',
+    tagline: 'Lunary vs Lunar Guide: Which Astrology App is Better?',
     subtitle:
-      'A detailed comparison between real astronomical calculations and AI-powered astrology insights.',
+      'A detailed comparison to help you choose between Lunary and Lunar Guide for your astrological practice.',
     featuresCompared: [
-      'Real astronomical calculations vs AI',
-      'Personalized birth charts',
-      'Grimoire with spells and rituals',
-      'Astronomical accuracy',
+      'Real astronomical calculations with ±1 arcminute accuracy',
+      'Complete grimoire with 2000+ pages',
+      'Personalized tarot readings based on your chart',
+      'Magical tools (spells, rituals, correspondences)',
     ],
     features: [
       {
@@ -1248,10 +1552,10 @@ export const comparisonData: Record<string, ComparisonData> = {
         description: 'How birth charts are calculated',
         lunary: {
           type: 'text',
-          value: 'Real Astronomical Data',
+          value: '±1 arcminute accuracy',
           highlight: true,
         },
-        competitor: { type: 'text', value: 'AI-Powered' },
+        competitor: { type: 'check' },
       },
       {
         name: 'Personalized Birth Chart',
@@ -1263,10 +1567,10 @@ export const comparisonData: Record<string, ComparisonData> = {
         name: 'Personalized Horoscopes',
         description: 'Based on YOUR chart vs generic zodiac',
         lunary: { type: 'text', value: 'Chart-Based', highlight: true },
-        competitor: { type: 'text', value: 'AI-Generated' },
+        competitor: { type: 'check' },
       },
       {
-        name: 'Grimoire Included',
+        name: 'Grimoire (2000+ pages)',
         description: 'Spells, rituals, correspondences',
         lunary: { type: 'check' },
         competitor: { type: 'x' },
@@ -1278,10 +1582,34 @@ export const comparisonData: Record<string, ComparisonData> = {
         competitor: { type: 'text', value: 'Limited' },
       },
       {
-        name: 'Astronomical Accuracy',
-        description: 'Uses real planetary positions',
+        name: 'Moon Circles',
+        description: 'New & Full Moon insights',
         lunary: { type: 'check' },
-        competitor: { type: 'text', value: 'AI Interpretation' },
+        competitor: { type: 'x' },
+      },
+      {
+        name: 'Solar Return',
+        description: 'Birthday chart & yearly forecast',
+        lunary: { type: 'check' },
+        competitor: { type: 'x' },
+      },
+      {
+        name: 'Tarot Pattern Analysis',
+        description: 'Identifies patterns across your readings',
+        lunary: { type: 'check' },
+        competitor: { type: 'x' },
+      },
+      {
+        name: 'Archetypes',
+        description: 'Patterns detected from your Book of Shadows journaling',
+        lunary: { type: 'check' },
+        competitor: { type: 'x' },
+      },
+      {
+        name: 'Book of Shadows Journal',
+        description: 'Personal magical journal',
+        lunary: { type: 'check' },
+        competitor: { type: 'x' },
       },
       {
         name: 'Free Trial',
@@ -1296,36 +1624,40 @@ export const comparisonData: Record<string, ComparisonData> = {
       {
         name: 'Pricing',
         description: 'Monthly subscription',
-        lunary: { type: 'text', value: '$4.99/mo', highlight: false },
+        lunary: {
+          type: 'text',
+          value: 'Free + from $4.99/mo',
+          highlight: true,
+        },
         competitor: { type: 'text', value: 'Varies by plan' },
       },
     ],
     lunaryAdvantages: [
       {
-        title: 'Real Astronomical Calculations',
+        title: 'Real Astronomical Calculations (±1 arcminute accuracy)',
         description:
-          'Lunary uses actual astronomical calculations from your exact birth time, date, and location. Unlike AI-powered apps that interpret data, Lunary calculates planetary positions using real astronomy for maximum accuracy.',
+          'Lunary uses astronomy-engine for calculations accurate to ±1 arcminute based on VSOP87 models, ensuring precise planetary positions from your exact birth time, date, and location.',
       },
       {
-        title: 'Chart-Based Personalization',
+        title: 'Complete Grimoire (2000+ pages)',
         description:
-          'Every horoscope and insight is based on YOUR exact birth chart, calculated using real astronomical data. This provides more accurate and personalized guidance than AI-generated interpretations.',
+          'Lunary includes a comprehensive grimoire with 2000+ pages of spells, rituals, correspondences, and magical knowledge - unique to Lunary and not available in Lunar Guide.',
       },
       {
-        title: 'Complete Grimoire Included',
+        title: 'Chart-Personalized Tarot with Pattern Analysis',
         description:
-          'Lunary includes a complete grimoire with spells, rituals, correspondences, and magical knowledge - unique to Lunary and not available in Lunar Guide.',
+          'Every tarot reading is personalized to YOUR exact birth chart. Tarot Pattern Analysis identifies recurring themes across your readings over time. Also includes Moon Circles, ritual generator, and personalized crystal recommendations.',
       },
       {
-        title: 'Astronomical Precision',
+        title: 'Astral Guide with Complete Chart Context',
         description:
-          'By using real planetary positions rather than AI interpretation, Lunary provides astronomically accurate birth charts and insights based on actual celestial mechanics.',
+          'The Astral Guide has complete context of your birth chart, tarot patterns, readings history, and archetypes to provide comprehensive insights in plain language. It understands your unique astrological profile and how it evolves over time.',
       },
     ],
     competitorStrengths:
-      'Lunar Guide may be a better choice if you prefer AI-powered insights that adapt to your current thoughts and moods. Lunar Guide appears to use AI to generate personalized guidance based on your current state, which may appeal to users seeking adaptive, context-aware insights. However, if you want real astronomical calculations, chart-based personalization, and a complete grimoire, Lunary is the better choice for astronomical accuracy and magical tools.',
+      'Lunar Guide may be a good choice if you prefer a different approach to astrology insights. However, if you want real astronomical calculations with ±1 arcminute accuracy, chart-based personalization, and a complete grimoire, Lunary is the better choice.',
     conclusion:
-      "The key difference between Lunary and Lunar Guide is the calculation method: Lunary uses real astronomical calculations while Lunar Guide uses AI-powered insights. Lunary's approach provides astronomically accurate birth charts based on actual planetary positions, while Lunar Guide uses AI to interpret and adapt insights. If you're looking for an astrology app that uses real astronomy, provides chart-based personalization, and includes magical tools like a grimoire, Lunary is the better choice.",
+      'Choose Lunary if you want real astronomical calculations with ±1 arcminute accuracy, a complete grimoire with 2000+ pages, and personalized tarot readings based on your exact birth chart. Choose Lunar Guide if you prefer their specific approach to astrology insights.',
   },
 
   'lunary-vs-moon-calendar': {
@@ -1339,7 +1671,7 @@ export const comparisonData: Record<string, ComparisonData> = {
       'Full astrology vs calendar-only',
       'Magical tools (grimoire, tarot, rituals)',
       'Birth chart personalization',
-      'AI-powered insights vs basic info',
+      'Astral Guide with chart context vs basic info',
     ],
     features: [
       {
@@ -1368,8 +1700,27 @@ export const comparisonData: Record<string, ComparisonData> = {
         competitor: { type: 'x' },
       },
       {
+        name: 'Transit Calendar',
+        lunary: { type: 'check' },
+        competitor: { type: 'x' },
+      },
+      {
+        name: 'Solar Return',
+        lunary: { type: 'check' },
+        competitor: { type: 'x' },
+      },
+      {
+        name: 'Archetypes',
+        lunary: { type: 'check' },
+        competitor: { type: 'x' },
+      },
+      {
         name: 'Pricing',
-        lunary: { type: 'text', value: '$4.99/mo', highlight: false },
+        lunary: {
+          type: 'text',
+          value: 'Free + from $4.99/mo',
+          highlight: true,
+        },
         competitor: { type: 'text', value: 'Free + Ads' },
       },
     ],
@@ -1406,7 +1757,7 @@ export const comparisonData: Record<string, ComparisonData> = {
       'Full astrology vs moon-only tracking',
       'Magical tools (grimoire, tarot, rituals)',
       'Birth chart personalization',
-      'AI-powered insights',
+      'Astral Guide with complete chart context',
     ],
     features: [
       {
@@ -1435,8 +1786,27 @@ export const comparisonData: Record<string, ComparisonData> = {
         competitor: { type: 'x' },
       },
       {
+        name: 'Transit Calendar',
+        lunary: { type: 'check' },
+        competitor: { type: 'x' },
+      },
+      {
+        name: 'Solar Return',
+        lunary: { type: 'check' },
+        competitor: { type: 'x' },
+      },
+      {
+        name: 'Archetypes',
+        lunary: { type: 'check' },
+        competitor: { type: 'x' },
+      },
+      {
         name: 'Pricing',
-        lunary: { type: 'text', value: '$4.99/mo', highlight: false },
+        lunary: {
+          type: 'text',
+          value: 'Free + from $4.99/mo',
+          highlight: true,
+        },
         competitor: { type: 'text', value: 'Free + Premium' },
       },
     ],
@@ -1452,9 +1822,9 @@ export const comparisonData: Record<string, ComparisonData> = {
           'Combine moon tracking with tarot, grimoire, and rituals for a complete spiritual toolkit.',
       },
       {
-        title: 'AI-Powered Personalization',
+        title: 'Astral Guide with Complete Chart Context',
         description:
-          'Get insights tailored to YOUR chart, not generic moon phase information.',
+          'The Astral Guide has complete context of your chart, patterns, and tarot readings to provide insights tailored to YOUR chart, not generic moon phase information.',
       },
     ],
     competitorStrengths:
