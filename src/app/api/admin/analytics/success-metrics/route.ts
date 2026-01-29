@@ -500,6 +500,12 @@ export async function GET(request: NextRequest) {
         AND created_at BETWEEN ${formatTimestamp(range.start)} AND ${formatTimestamp(range.end)}
         AND user_id IS NOT NULL
         AND (user_email IS NULL OR (user_email NOT LIKE ${TEST_EMAIL_PATTERN} AND user_email != ${TEST_EMAIL_EXACT}))
+        AND NOT EXISTS (
+          SELECT 1 FROM subscriptions s
+          WHERE s.user_id = conversion_events.user_id
+            AND s.status IN ('active', 'trial', 'past_due')
+            AND COALESCE(s.updated_at, s.created_at) <= ${formatTimestamp(range.end)}
+        )
     `;
     const churnedCustomers = Number(
       churnedCustomersResult.rows[0]?.churned || 0,
