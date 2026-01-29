@@ -343,11 +343,11 @@ export default function WelcomePage() {
                   strokeWidth={1.5}
                 />
                 <h3 className='text-lg text-zinc-100'>
-                  Interpreted intelligently
+                  Connected & Contextual
                 </h3>
                 <p className='text-sm text-zinc-400 leading-relaxed'>
-                  Tarot, transits, moods and lunar cycles connected into one
-                  clear message.
+                  Tarot, transits, and moon cycles work together. Each insight
+                  connects to your full chart and current timing.
                 </p>
               </div>
               <div className='text-center space-y-3'>
@@ -377,13 +377,16 @@ export default function WelcomePage() {
           <div className='max-w-5xl mx-auto'>
             <div className='text-center space-y-4 mb-10 md:mb-14'>
               <h2 className='text-2xl md:text-3xl font-light text-zinc-100'>
-                Learn & explore the cosmos
+                Free astrology education: 2,000+ articles
               </h2>
               <p className='text-zinc-400 leading-relaxed max-w-2xl mx-auto'>
-                New to astrology or already deep in it, you can start here.
-                Lunary's Grimoire is free to explore, with clear, grounded
-                guides on astrology, tarot, moon phases and symbolism so you can
-                understand the patterns shaping your life.
+                Learn astrology by doing: study your own chart while
+                understanding the concepts behind it.
+                <br />
+                <br />
+                <span className='text-lunary-primary-300'>
+                  100% free. No paywall. No upsells.
+                </span>
               </p>
             </div>
             <div className='grid md:grid-cols-2 gap-6 md:gap-8'>
