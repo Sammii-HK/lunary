@@ -65,7 +65,6 @@ export async function enrichJournalEntries(
         c.content,
         c.tags,
         c.created_at,
-        c.metadata,
         gcd.moon_phase,
         gcd.planetary_positions,
         gcd.general_transits
@@ -83,7 +82,7 @@ export async function enrichJournalEntries(
       created_at: row.created_at,
       content: row.content,
       tags: row.tags,
-      emotions: extractEmotionsFromMetadata(row.metadata),
+      emotions: [], // Will be extracted from content/tags by EmotionMoonPhaseDetector
       cosmicData: parseCosmicData(row),
     }));
 

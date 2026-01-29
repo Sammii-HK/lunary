@@ -33,6 +33,7 @@ const FEATURE_ACCESS_BASE = {
     'birth_chart', // Allow free users to view their birth chart (encourage signups & sharing)
     'personal_day_number',
     'personal_year_number',
+    'cosmic_patterns', // Basic cosmic patterns (moon phase correlations)
   ],
   lunary_plus: [
     'birth_chart',
@@ -53,6 +54,7 @@ const FEATURE_ACCESS_BASE = {
     'personal_day_meaning',
     'personal_year_number',
     'personal_year_meaning',
+    'cosmic_patterns', // Basic cosmic patterns (moon phase correlations)
   ],
   lunary_plus_ai: [
     'birth_chart',
@@ -80,6 +82,8 @@ const FEATURE_ACCESS_BASE = {
     'personal_day_meaning',
     'personal_year_number',
     'personal_year_meaning',
+    'cosmic_patterns', // Basic cosmic patterns (moon phase correlations)
+    'advanced_cosmic_patterns', // Premium patterns (planetary, aspects, natal transits)
   ],
   lunary_plus_ai_annual: [
     'birth_chart',
@@ -110,6 +114,8 @@ const FEATURE_ACCESS_BASE = {
     'personal_day_meaning',
     'personal_year_number',
     'personal_year_meaning',
+    'cosmic_patterns', // Basic cosmic patterns (moon phase correlations)
+    'advanced_cosmic_patterns', // Premium patterns (planetary, aspects, natal transits)
   ],
 } as const satisfies Record<PlanKey, readonly string[]>;
 
