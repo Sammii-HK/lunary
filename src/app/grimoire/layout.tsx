@@ -1,7 +1,10 @@
 import { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Free Grimoire [500+ Spells, Crystals, Tarot & More] | Lunary',
+  title: {
+    template: '%s | Lunary',
+    default: 'Free Grimoire [500+ Spells, Crystals, Tarot & More]',
+  },
   description:
     'Complete digital grimoire with 78 tarot cards, 50+ crystals, 24 runes, 12 zodiac signs, moon phases, candle magic & correspondences. Free access to centuries of mystical knowledge.',
   keywords: [

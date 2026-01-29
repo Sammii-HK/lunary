@@ -15,6 +15,7 @@ import { MoreForToday } from '@/components/horoscope/MoreForToday';
 import { useFeatureFlagVariant } from '@/hooks/useFeatureFlag';
 import { useCTACopy } from '@/hooks/useCTACopy';
 import { shouldRedactWord } from '@/constants/redactedWords';
+import { isInDemoMode } from '@/lib/demo-mode';
 
 type FocusArea = {
   area: 'love' | 'work' | 'inner';
@@ -34,6 +35,12 @@ interface CachedHoroscope {
 
 const FOCUS_COMPLETE_KEY = 'lunary_focus_complete';
 const getTodayString = () => new Date().toISOString().split('T')[0];
+
+// Use sessionStorage in demo mode so each visitor gets a fresh view
+const getStorage = () => {
+  if (typeof window === 'undefined') return null;
+  return isInDemoMode() ? sessionStorage : localStorage;
+};
 
 export const PersonalizedHoroscopePreview = () => {
   const { user } = useUser();
@@ -62,7 +69,10 @@ export const PersonalizedHoroscopePreview = () => {
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
-    const stored = localStorage.getItem(FOCUS_COMPLETE_KEY);
+    const storage = getStorage();
+    if (!storage) return;
+
+    const stored = storage.getItem(FOCUS_COMPLETE_KEY);
     if (stored) {
       try {
         const parsed = JSON.parse(stored) as {
@@ -75,7 +85,7 @@ export const PersonalizedHoroscopePreview = () => {
         }
         return;
       } catch {
-        localStorage.removeItem(FOCUS_COMPLETE_KEY);
+        storage.removeItem(FOCUS_COMPLETE_KEY);
       }
     }
     setRitualComplete(false);
@@ -83,13 +93,16 @@ export const PersonalizedHoroscopePreview = () => {
 
   useEffect(() => {
     if (!ritualComplete || typeof window === 'undefined') return undefined;
+    const storage = getStorage();
+    if (!storage) return undefined;
+
     const now = new Date();
     const midnight = new Date(now);
     midnight.setDate(now.getDate() + 1);
     midnight.setHours(0, 0, 0, 0);
     const delay = midnight.getTime() - now.getTime();
     const timeout = setTimeout(() => {
-      localStorage.removeItem(FOCUS_COMPLETE_KEY);
+      storage.removeItem(FOCUS_COMPLETE_KEY);
       window.dispatchEvent(new Event('lunary-focus-complete'));
       setRitualComplete(false);
     }, delay);
@@ -153,8 +166,21 @@ export const PersonalizedHoroscopePreview = () => {
     ? horoscope.dailyGuidance.replace(/\n+/g, ' ')
     : '';
   const handleJournalClick = (event: MouseEvent<HTMLButtonElement>) => {
+    // CRITICAL: Stop all propagation first to prevent Link navigation
     event.preventDefault();
     event.stopPropagation();
+
+    // Check if in demo mode - show modal instead of navigating
+    const demoMode = isInDemoMode();
+    if (demoMode) {
+      window.dispatchEvent(
+        new CustomEvent('demo-action-blocked', {
+          detail: { action: 'Accessing journal' },
+        }),
+      );
+      return;
+    }
+
     const promptKey = Date.now();
     router.push(
       `/book-of-shadows?prompt=${encodeURIComponent(
@@ -171,12 +197,15 @@ export const PersonalizedHoroscopePreview = () => {
     if (ritualComplete) return;
     const result = await recordCheckIn();
     if (typeof window !== 'undefined') {
-      const today = new Date().toISOString().split('T')[0];
-      localStorage.setItem(
-        FOCUS_COMPLETE_KEY,
-        JSON.stringify({ date: today, streak: result?.streak }),
-      );
-      window.dispatchEvent(new Event('lunary-focus-complete'));
+      const storage = getStorage();
+      if (storage) {
+        const today = new Date().toISOString().split('T')[0];
+        storage.setItem(
+          FOCUS_COMPLETE_KEY,
+          JSON.stringify({ date: today, streak: result?.streak }),
+        );
+        window.dispatchEvent(new Event('lunary-focus-complete'));
+      }
     }
     setRitualComplete(true);
     if (result?.streak) {
@@ -272,6 +301,13 @@ export const PersonalizedHoroscopePreview = () => {
       <Link
         href='/pricing'
         className='group block border border-zinc-800 rounded-2xl bg-zinc-950/70 p-4 shadow-sm transition-colors hover:border-lunary-primary-500 hover:bg-zinc-900'
+        onClick={(e) => {
+          // If click target is a button, let button handle it
+          const target = e.target as HTMLElement;
+          if (target.closest('button')) {
+            e.preventDefault();
+          }
+        }}
       >
         <div className='space-y-3'>
           <div>
@@ -317,6 +353,13 @@ export const PersonalizedHoroscopePreview = () => {
     <Link
       href='/horoscope'
       className='group block border border-zinc-800 rounded-2xl bg-zinc-950/70 p-4 shadow-sm transition-colors hover:border-lunary-primary-500 hover:bg-zinc-900'
+      onClick={(e) => {
+        // If click target is a button, let button handle it
+        const target = e.target as HTMLElement;
+        if (target.closest('button')) {
+          e.preventDefault();
+        }
+      }}
     >
       <div className='space-y-3'>
         <div className='flex items-center justify-between gap-3'>

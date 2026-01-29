@@ -8,6 +8,7 @@ import { stringToKebabCase } from '../../utils/string';
 import { TarotTransitConnection } from './tarot/TarotTransitConnection';
 import type { BirthChartPlacement } from '@/context/UserContext';
 import type { AstroChartInformation } from '../../utils/astrology/astrology';
+import { isInDemoMode } from '@/lib/demo-mode';
 
 interface TarotCardModalProps {
   card: {
@@ -78,12 +79,27 @@ export function TarotCardModal({
         )}
 
         <div className='mt-4'>
-          <Link
-            href={`/grimoire/tarot/${cardSlug}`}
-            className='text-xs text-lunary-primary-300 hover:text-lunary-primary-200 transition-colors'
-          >
-            Continue to the full {card.name} meaning →
-          </Link>
+          {isInDemoMode() ? (
+            <button
+              onClick={() => {
+                window.dispatchEvent(
+                  new CustomEvent('demo-action-blocked', {
+                    detail: { action: 'Viewing Grimoire pages' },
+                  }),
+                );
+              }}
+              className='text-xs text-lunary-primary-300 hover:text-lunary-primary-200 transition-colors'
+            >
+              Explore the Grimoire to learn more
+            </button>
+          ) : (
+            <Link
+              href={`/grimoire/tarot/${cardSlug}`}
+              className='text-xs text-lunary-primary-300 hover:text-lunary-primary-200 transition-colors'
+            >
+              Continue to the full {card.name} meaning
+            </Link>
+          )}
         </div>
       </div>
     </div>

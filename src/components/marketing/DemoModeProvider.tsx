@@ -1,9 +1,19 @@
 'use client';
 
-import { createContext, useContext, ReactNode, useEffect, useRef } from 'react';
+import {
+  createContext,
+  useContext,
+  ReactNode,
+  useEffect,
+  useRef,
+  useState,
+} from 'react';
+import { DemoBlockedModal } from './DemoBlockedModal';
+import { trackDemoEvent } from '@/lib/demo-tracking';
 
 interface DemoModeContextValue {
   isDemoMode: boolean;
+  showBlockedAction?: (action: string) => void;
 }
 
 const DemoModeContext = createContext<DemoModeContextValue>({
@@ -42,6 +52,15 @@ export function useDemoMode() {
 //    - GET /api/journal - returns empty
 //    - GET /api/patterns - returns empty
 //    - All other endpoints - blocked with error message
+// Helper to trigger demo blocked modal instead of browser alert
+function showDemoBlocked(action: string) {
+  if (typeof window !== 'undefined') {
+    window.dispatchEvent(
+      new CustomEvent('demo-action-blocked', { detail: { action } }),
+    );
+  }
+}
+
 if (typeof window !== 'undefined') {
   const originalFetch = window.fetch;
   const fetchCache = new Map<string, Response>();
@@ -94,7 +113,7 @@ if (typeof window !== 'undefined') {
 
       // BLOCK journal/reflection submissions (POST)
       if (url.includes('/api/journal') && init?.method === 'POST') {
-        alert('Reflections cannot be saved in the demo preview');
+        showDemoBlocked('Saving reflections');
         return new Response(
           JSON.stringify({ success: false, error: 'Demo mode' }),
           { status: 403, headers: { 'Content-Type': 'application/json' } },
@@ -107,30 +126,40 @@ if (typeof window !== 'undefined') {
         url.includes('/insights') &&
         init?.method === 'POST'
       ) {
-        alert('Insights cannot be shared in the demo preview');
+        showDemoBlocked('Sharing insights');
         return new Response(
           JSON.stringify({ success: false, error: 'Demo mode' }),
           { status: 403, headers: { 'Content-Type': 'application/json' } },
         );
       }
 
-      // BLOCK tarot spread pulls and modifications
+      // BLOCK tarot spread modifications only (allow GET to show pre-pulled spreads)
       if (url.includes('/api/tarot/readings')) {
         const method = init?.method || 'GET';
         // Block POST (new spreads), PATCH (updates), DELETE (deletions)
+        // Allow GET to fetch existing demo spreads
         if (method === 'POST' || method === 'PATCH' || method === 'DELETE') {
-          const action =
+          const actionText =
             method === 'POST'
-              ? 'pulled'
+              ? 'Pulling new tarot spreads'
               : method === 'DELETE'
-                ? 'deleted'
-                : 'modified';
-          alert(`Tarot spreads cannot be ${action} in the demo preview`);
+                ? 'Deleting tarot spreads'
+                : 'Modifying tarot spreads';
+          showDemoBlocked(actionText);
           return new Response(
             JSON.stringify({ success: false, error: 'Demo mode' }),
             { status: 403, headers: { 'Content-Type': 'application/json' } },
           );
         }
+        // For GET requests, add demo user header to fetch persona's data
+        const headers = new Headers(init?.headers);
+        headers.set('X-Demo-User', 'celeste-demo');
+
+        const modifiedInit = {
+          ...(init || {}),
+          headers,
+        };
+        return originalFetch(input, modifiedInit);
       }
 
       // ALLOW ritual completion (POST) but return mock success - session only, doesn't persist
@@ -148,12 +177,9 @@ if (typeof window !== 'undefined') {
         );
       }
 
-      // BLOCK GET requests to user-specific data (journal, patterns, tarot history)
-      if (
-        url.includes('/api/tarot/readings') ||
-        url.includes('/api/journal') ||
-        url.includes('/api/patterns')
-      ) {
+      // BLOCK GET requests to user-specific data (journal, patterns)
+      // Note: /api/tarot/readings GET is handled above to show pre-pulled demo spreads
+      if (url.includes('/api/journal') || url.includes('/api/patterns')) {
         return new Response(JSON.stringify([]), {
           status: 200,
           headers: { 'Content-Type': 'application/json' },
@@ -171,19 +197,36 @@ if (typeof window !== 'undefined') {
       );
 
       if (isAllowed) {
+        // Add demo user header for personalized endpoints
+        const needsDemoUser = url.includes('/api/horoscope/daily');
+
+        let modifiedInit = init;
+        if (needsDemoUser) {
+          const headers = new Headers(init?.headers);
+          headers.set('X-Demo-User', 'celeste-demo');
+          modifiedInit = {
+            ...(init || {}),
+            headers,
+          };
+        }
+
         // Cache GET requests
-        if (!init || init.method === 'GET' || !init.method) {
+        if (
+          !modifiedInit ||
+          modifiedInit.method === 'GET' ||
+          !modifiedInit.method
+        ) {
           if (fetchCache.has(url)) {
             const cached = fetchCache.get(url)!;
             return cached.clone();
           }
 
-          const response = await originalFetch(input, init);
+          const response = await originalFetch(input, modifiedInit);
           const cloned = response.clone();
           fetchCache.set(url, cloned);
           return response;
         }
-        return originalFetch(input, init);
+        return originalFetch(input, modifiedInit);
       }
 
       // Block everything else
@@ -214,6 +257,34 @@ export function DemoModeProvider({
   containerId = 'demo-preview-container',
 }: DemoModeProviderProps) {
   const containerRef = useRef<HTMLElement | null>(null);
+  const [showModal, setShowModal] = useState(false);
+  const [blockedAction, setBlockedAction] = useState('This action');
+
+  const showBlockedAction = (action: string) => {
+    setBlockedAction(action);
+    setShowModal(true);
+  };
+
+  // Listen for blocked action events
+  useEffect(() => {
+    const handleBlockedAction = (event: CustomEvent) => {
+      const action = event.detail?.action || 'This action';
+      showBlockedAction(action);
+
+      // Track blocked action
+      trackDemoEvent('grimoire_blocked', {
+        action_type: action,
+      });
+    };
+
+    window.addEventListener('demo-action-blocked' as any, handleBlockedAction);
+    return () => {
+      window.removeEventListener(
+        'demo-action-blocked' as any,
+        handleBlockedAction,
+      );
+    };
+  }, []);
 
   // Override Math.random in demo mode to make it deterministic
   // This prevents Transit Wisdom suggestions from cycling on each render
@@ -251,7 +322,7 @@ export function DemoModeProvider({
       typeof originalClipboardWriteText !== 'undefined'
     ) {
       navigator.clipboard.writeText = async (text: string) => {
-        alert('Sharing is not available in the demo preview');
+        showDemoBlocked('Copying to clipboard');
         throw new Error('Demo mode - clipboard blocked');
       };
     }
@@ -259,7 +330,7 @@ export function DemoModeProvider({
     // Override navigator.share to prevent native share dialog
     if (typeof originalShare !== 'undefined') {
       navigator.share = async (data?: ShareData) => {
-        alert('Sharing is not available in the demo preview');
+        showDemoBlocked('Sharing');
         throw new Error('Demo mode - sharing blocked');
       };
     }
@@ -301,7 +372,7 @@ export function DemoModeProvider({
       // Block all other form submissions
       e.preventDefault();
       e.stopPropagation();
-      alert('Saving is not available in the demo preview');
+      showDemoBlocked('Saving changes');
     };
 
     container.addEventListener('submit', handleSubmit, true);
@@ -342,7 +413,7 @@ export function DemoModeProvider({
         if (isSocialShare) {
           e.preventDefault();
           e.stopPropagation();
-          alert('Sharing is not available in the demo preview');
+          showDemoBlocked('Sharing');
           return;
         }
       }
@@ -354,11 +425,20 @@ export function DemoModeProvider({
         const ariaLabel =
           button.getAttribute('aria-label')?.toLowerCase() || '';
 
+        // Allow auth/signup buttons (these exit the demo)
+        if (
+          text.includes('free account') ||
+          text.includes('sign up') ||
+          text.includes('create account')
+        ) {
+          return; // Allow these buttons to work normally
+        }
+
         // Block share buttons
         if (text.includes('share') || ariaLabel.includes('share')) {
           e.preventDefault();
           e.stopPropagation();
-          alert('Sharing is not available in the demo preview');
+          showDemoBlocked('Sharing');
           return;
         }
 
@@ -378,7 +458,16 @@ export function DemoModeProvider({
         if (shouldBlock && !button.hasAttribute('data-demo-allowed')) {
           e.preventDefault();
           e.stopPropagation();
-          alert('This action is not available in the demo preview');
+          const actionText = text.includes('save')
+            ? 'Saving'
+            : text.includes('create')
+              ? 'Creating'
+              : text.includes('delete')
+                ? 'Deleting'
+                : text.includes('submit')
+                  ? 'Submitting'
+                  : 'This action';
+          showDemoBlocked(actionText);
         }
       }
     };
@@ -391,8 +480,13 @@ export function DemoModeProvider({
   }, [containerId]);
 
   return (
-    <DemoModeContext.Provider value={{ isDemoMode: true }}>
+    <DemoModeContext.Provider value={{ isDemoMode: true, showBlockedAction }}>
       {children}
+      <DemoBlockedModal
+        isOpen={showModal}
+        onClose={() => setShowModal(false)}
+        action={blockedAction}
+      />
     </DemoModeContext.Provider>
   );
 }

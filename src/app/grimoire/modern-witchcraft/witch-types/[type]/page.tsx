@@ -33,13 +33,18 @@ export async function generateMetadata({
     };
   }
 
-  const title = `${typeData.name}: Meaning, Traits, Practices and Tools | Lunary`;
-  const description = `What is a ${typeData.name.toLowerCase()}? Learn the meaning, common traits, beginner practices, and tools, with a grounded way to start.`;
+  const title = `${typeData.name}: Meaning, Traits, Practices and Tools`;
+  const description = `Are you a ${typeData.name.toLowerCase()}? Discover the path of ${typeData.name.toLowerCase()} witchcraft: working with ${typeData.focuses[0].toLowerCase()}. Complete guide to ${typeData.name.toLowerCase()} practices, rituals & philosophy.`;
 
   return {
     title,
     description,
-    keywords: typeData.seo.keywords,
+    keywords: [
+      ...typeData.seo.keywords,
+      `${typeData.name.toLowerCase()} witch`,
+      `${typeData.name.toLowerCase()} practices`,
+      `how to be a ${typeData.name.toLowerCase()}`,
+    ],
     openGraph: {
       title,
       description,
@@ -92,24 +97,23 @@ export default async function WitchTypePage({
   const pageFaqList: FAQItem[] = [
     {
       question: `What is a ${typeData.name.toLowerCase()}?`,
-      answer: introDefinition,
+      answer: `A ${typeData.name.toLowerCase()} is a witch who focuses on ${typeData.focuses[0].toLowerCase()}. This path centers on ${typeData.focuses.slice(0, 2).join(' and ').toLowerCase()}, working with ${typeData.element.toLowerCase()} element energy. ${introDefinition}`,
     },
     {
       question: `What are common ${typeData.name.toLowerCase()} traits?`,
-      answer: `Common traits include: ${typeData.traits.join(', ')}.`,
+      answer: `Common ${typeData.name.toLowerCase()} traits include ${typeData.traits.slice(0, 3).join(', ').toLowerCase()}. These witches typically resonate with ${typeData.element.toLowerCase()} element and express their practice through ${typeData.practices[0].toLowerCase()}.`,
     },
     {
-      question: `How do you start as a ${typeData.name.toLowerCase()}?`,
-      answer: `Start with these beginner steps: ${typeData.beginnerSteps.join(', ')}.`,
+      question: `How do you become a ${typeData.name.toLowerCase()}?`,
+      answer: `To become a ${typeData.name.toLowerCase()}, start by ${typeData.beginnerSteps[0].toLowerCase()}. Then ${typeData.beginnerSteps[1].toLowerCase()}. Focus on ${typeData.focuses[0].toLowerCase()} and work with tools like ${typeData.tools.slice(0, 2).join(' and ')}. Begin small and build consistency.`,
     },
     {
       question: `What tools does a ${typeData.name.toLowerCase()} use?`,
-      answer: `Typical tools include: ${typeData.tools.join(', ')}.`,
+      answer: `${typeData.name} witches commonly use ${typeData.tools.join(', ')}. These tools help work with ${typeData.element.toLowerCase()} element energy and support practices focused on ${typeData.focuses[0].toLowerCase()}.`,
     },
     {
-      question: 'Is this witch type beginner friendly?',
-      answer:
-        'Yes. You do not need to be “advanced” to begin. Start small, repeat what works, and let your practice grow through consistency rather than intensity.',
+      question: `Is ${typeData.name.toLowerCase()} witchcraft beginner friendly?`,
+      answer: `Yes, ${typeData.name.toLowerCase()} witchcraft is beginner friendly. You don't need experience to start. Begin with ${typeData.beginnerSteps[0].toLowerCase()}, then gradually explore ${typeData.practices[0].toLowerCase()}. Consistency matters more than intensity in this path.`,
     },
   ];
   const pageInternalLinks = [
@@ -134,8 +138,12 @@ export default async function WitchTypePage({
       description={pageDescription}
       keywords={pageKeywords}
       canonicalUrl={`https://lunary.app/grimoire/modern-witchcraft/witch-types/${type}`}
+      whatIs={{
+        question: `What is a ${typeData.name.toLowerCase()}?`,
+        answer: `A ${typeData.name.toLowerCase()} is a witch who works primarily with ${typeData.focuses[0].toLowerCase()}. This path focuses on ${typeData.focuses.slice(0, 2).join(' and ').toLowerCase()}, using tools like ${typeData.tools.slice(0, 3).join(', ')}. ${typeData.name} witchcraft embraces ${typeData.element.toLowerCase()} element energy and practices such as ${typeData.practices.slice(0, 2).join(' and ').toLowerCase()}.`,
+      }}
       intro={pageIntro}
-      tldr={pageTldr}
+      tldr={`${typeData.name}: Work with ${typeData.focuses[0].toLowerCase()}. Element: ${typeData.element}. Key practices: ${typeData.practices.slice(0, 2).join(', ').toLowerCase()}. Tools: ${typeData.tools.slice(0, 3).join(', ')}.`}
       meaning={`In modern witchcraft, “witch types” are simply ways to describe what your practice naturally centres on. They are not ranks, rules, or exclusive boxes. Many people blend paths, or shift over time.
 
 ${typeData.seo.intro}

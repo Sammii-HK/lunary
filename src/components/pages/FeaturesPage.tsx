@@ -1,3 +1,5 @@
+'use client';
+
 import Link from 'next/link';
 import {
   LayoutDashboard,
@@ -9,32 +11,33 @@ import {
   Map,
   Gem,
   BookText,
+  Check,
 } from 'lucide-react';
+import { useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { MarketingFooter } from '@/components/MarketingFooter';
 import { PricingComparisonTable } from '@/components/PricingComparisonTable';
 import { CTA_COPY } from '@/lib/cta-copy';
+import { conversionTracking } from '@/lib/analytics';
 
 export default function FeaturesPage() {
-  return (
-    <div className='min-h-screen bg-zinc-950 text-zinc-50'>
-      {/* Header */}
-      <header className='border-b border-zinc-800/30 py-4 px-4 md:px-6'>
-        <div className='max-w-6xl mx-auto flex items-center justify-between'>
-          <Link href='/' className='text-lg font-light text-zinc-100'>
-            Lunary
-          </Link>
-          <div className='flex items-center gap-3'>
-            <Button variant='ghost' asChild size='sm'>
-              <Link href='/pricing'>Pricing</Link>
-            </Button>
-            <Button variant='lunary' asChild size='sm'>
-              <Link href='/auth?signup=true'>Get started</Link>
-            </Button>
-          </div>
-        </div>
-      </header>
+  // Track page view on mount
+  useEffect(() => {
+    conversionTracking.pageViewed('/features');
+  }, []);
 
+  // CTA click handler
+  const handleCtaClick = (location: string, label: string, href: string) => {
+    conversionTracking.ctaClicked({
+      location,
+      label,
+      href,
+      pagePath: '/features',
+    });
+  };
+
+  return (
+    <div className='min-h-fit bg-zinc-950 text-zinc-50'>
       {/* Hero */}
       <section className='py-12 md:py-16 px-4 md:px-6'>
         <div className='max-w-4xl mx-auto text-center space-y-4'>
@@ -137,8 +140,8 @@ export default function FeaturesPage() {
           {/* Daily Cosmic Dashboard */}
           <FeatureCard
             icon={<LayoutDashboard className='w-5 h-5 md:w-6 md:h-6' />}
-            title='Daily Cosmic Dashboard'
-            description='Wake up knowing why today feels the way it does'
+            title='Your Daily 2-Minute Check-In'
+            description='Know what cosmic energy is available today. Check-in takes 2 minutes.'
             features={[
               "Today's cosmic energy overview",
               'Moon phase with personal meaning',
@@ -146,9 +149,10 @@ export default function FeaturesPage() {
               'Crystal guidance for current energy',
               'Sky Now: real-time planetary positions',
               'Daily tarot card seeded from your chart',
+              'Example: "Mars in your 10th house = career focus for the next 6 weeks"',
             ]}
             freeTier='General cosmic energy + moon phase'
-            paidTier='Full personalized dashboard'
+            paidTier='Full personalized dashboard with interpretations'
             cta='See your dashboard'
             ctaHref='/auth?signup=true'
           />
@@ -157,7 +161,7 @@ export default function FeaturesPage() {
           <FeatureCard
             icon={<Sparkles className='w-5 h-5 md:w-6 md:h-6' />}
             title='Personal Daily Horoscope'
-            description='Not your sun sign—YOUR specific planetary movements'
+            description='Not your sun sign. YOUR specific planetary movements based on your full chart.'
             features={[
               'Based on current planets transiting YOUR natal chart',
               'Updates daily with real astronomical data',
@@ -214,7 +218,7 @@ export default function FeaturesPage() {
               'Reflects broader energy patterns',
               'Updates every Monday',
             ]}
-            freeTier='—'
+            freeTier='Not included'
             paidTier='Weekly card with full interpretation'
             cta='Get your weekly card'
             ctaHref='/pricing'
@@ -276,14 +280,15 @@ export default function FeaturesPage() {
           {/* Astral Guide Chat */}
           <FeatureCard
             icon={<MessageCircle className='w-5 h-5 md:w-6 md:h-6' />}
-            title='Astral Guide'
-            description='Ask questions, get context-aware answers'
+            title='Your Personal Astrology Teacher (Pro)'
+            description='Like having an astrology teacher who knows your birth chart'
             features={[
               'Knows your complete birth chart',
-              'Aware of current transits',
-              'Remembers your past tarot readings',
-              'Understands current moon phase',
-              'Example: "Why am I feeling restless today?"',
+              'Aware of current transits affecting YOU',
+              'References your journal entries and patterns',
+              'Example: "Why do I always feel anxious during Mercury retrograde?"',
+              'Example: "What does Mars in my 10th house mean for my career?"',
+              'Different from ChatGPT: answers are specific to YOUR astrology, not generic',
             ]}
             freeTier='3 messages per day'
             paidTier='50 messages per day'
@@ -295,17 +300,19 @@ export default function FeaturesPage() {
           {/* Pattern Tracking */}
           <FeatureCard
             icon={<Sparkles className='w-5 h-5 md:w-6 md:h-6' />}
-            title='Pattern Tracking & Insights'
-            description='See recurring themes in your cosmic story'
+            title='Your Personal Astrology Textbook'
+            description="This is Lunary's unique feature. No other app tracks patterns from YOUR experience."
             features={[
-              'Analyzes your journal entries over time',
-              'Connects patterns to transits and moon phases',
-              'Shows themes like "Full Moons = relationship tension"',
-              'Helps understand your personal cycles',
+              'After 6-8 weeks, patterns emerge from your data',
+              'Example: "You always pull The Tower during Pluto transits"',
+              'Example: "During the last 6 Full Moons, you journaled about relationships"',
+              'This is personal proof astrology works for YOU specifically',
+              'Your own data becomes your astrology education',
+              'Next time that transit happens, you get a heads up based on YOUR history',
             ]}
-            freeTier='—'
+            freeTier='Not included'
             paidTier='30-day pattern analysis'
-            proTier='90-day deep pattern recognition'
+            proTier='Lifetime pattern history + AI insights'
             cta='Track your patterns'
             ctaHref='/pricing'
           />
@@ -344,8 +351,8 @@ export default function FeaturesPage() {
           {/* Grimoire */}
           <FeatureCard
             icon={<BookText className='w-5 h-5 md:w-6 md:h-6' />}
-            title='The Grimoire'
-            description='2,000+ free articles on astrology, tarot, and symbolism'
+            title='Your Free Astrology Education: 2,000+ Articles'
+            description='100% free for everyone. This is our commitment to education. No paywall. No upsells.'
             features={[
               'Every planet in every sign',
               'All 12 houses explained',
@@ -353,6 +360,7 @@ export default function FeaturesPage() {
               'Complete tarot card library',
               'Moon phases and timing',
               'Crystals, herbs, correspondences',
+              'After 6 months of daily practice + reading, most users can confidently read their own transits',
             ]}
             freeTier='100% Free - All educational content, no paywall'
             cta='Explore the Grimoire'
@@ -392,22 +400,202 @@ export default function FeaturesPage() {
           <PricingComparisonTable />
         </section>
 
+        {/* How Lunary Compares */}
+        <section className='py-12 md:py-20 border-t border-zinc-800/30'>
+          <div className='max-w-4xl mx-auto space-y-8'>
+            <div className='text-center space-y-3'>
+              <h2 className='text-2xl md:text-3xl font-light text-zinc-100'>
+                Which astrology app is right for you?
+              </h2>
+              <p className='text-sm md:text-base text-zinc-400 max-w-2xl mx-auto'>
+                Different tools for different needs
+              </p>
+            </div>
+
+            <div className='grid md:grid-cols-2 gap-6'>
+              {/* Lunary */}
+              <div className='rounded-xl border border-lunary-primary-700/30 bg-lunary-primary-900/10 p-6 space-y-4'>
+                <h3 className='text-lg font-medium text-lunary-primary-300'>
+                  Choose Lunary if you want to:
+                </h3>
+                <ul className='space-y-2 text-sm text-zinc-300'>
+                  <li className='flex items-start gap-2'>
+                    <Check className='w-4 h-4 text-lunary-primary-400 mt-0.5 flex-shrink-0' />
+                    <span>
+                      Learn astrology through daily practice with your own chart
+                    </span>
+                  </li>
+                  <li className='flex items-start gap-2'>
+                    <Check className='w-4 h-4 text-lunary-primary-400 mt-0.5 flex-shrink-0' />
+                    <span>
+                      Track patterns over time and see personal proof astrology
+                      works for you
+                    </span>
+                  </li>
+                  <li className='flex items-start gap-2'>
+                    <Check className='w-4 h-4 text-lunary-primary-400 mt-0.5 flex-shrink-0' />
+                    <span>
+                      Access 2,000+ free educational articles explaining every
+                      concept
+                    </span>
+                  </li>
+                  <li className='flex items-start gap-2'>
+                    <Check className='w-4 h-4 text-lunary-primary-400 mt-0.5 flex-shrink-0' />
+                    <span>Integrate tarot with your astrological practice</span>
+                  </li>
+                  <li className='flex items-start gap-2'>
+                    <Check className='w-4 h-4 text-lunary-primary-400 mt-0.5 flex-shrink-0' />
+                    <span>
+                      Build self-awareness through reflection and journaling
+                    </span>
+                  </li>
+                </ul>
+              </div>
+
+              {/* Other Apps */}
+              <div className='rounded-xl border border-zinc-800/60 bg-zinc-900/40 p-6 space-y-4'>
+                <h3 className='text-lg font-medium text-zinc-300'>
+                  Other apps might be better if you want:
+                </h3>
+                <ul className='space-y-2 text-sm text-zinc-400'>
+                  <li className='flex items-start gap-2'>
+                    <span className='text-zinc-600 mt-0.5 flex-shrink-0'>
+                      •
+                    </span>
+                    <span>
+                      <span className='text-zinc-300'>Social features:</span>{' '}
+                      Co-Star has friend compatibility and social sharing
+                    </span>
+                  </li>
+                  <li className='flex items-start gap-2'>
+                    <span className='text-zinc-600 mt-0.5 flex-shrink-0'>
+                      •
+                    </span>
+                    <span>
+                      <span className='text-zinc-300'>Technical analysis:</span>{' '}
+                      TimePassages offers advanced chart calculations for
+                      astrologers
+                    </span>
+                  </li>
+                  <li className='flex items-start gap-2'>
+                    <span className='text-zinc-600 mt-0.5 flex-shrink-0'>
+                      •
+                    </span>
+                    <span>
+                      <span className='text-zinc-300'>
+                        Quick entertainment:
+                      </span>{' '}
+                      Many apps focus on bite-sized daily horoscopes
+                    </span>
+                  </li>
+                  <li className='flex items-start gap-2'>
+                    <span className='text-zinc-600 mt-0.5 flex-shrink-0'>
+                      •
+                    </span>
+                    <span>
+                      <span className='text-zinc-300'>Relationship focus:</span>{' '}
+                      Some apps specialize in compatibility readings
+                    </span>
+                  </li>
+                </ul>
+                <p className='text-xs text-zinc-500 pt-2'>
+                  Many people use multiple apps for different purposes
+                </p>
+              </div>
+            </div>
+
+            <div className='text-center pt-4'>
+              <p className='text-sm text-zinc-400'>
+                Lunary stands out for{' '}
+                <span className='text-lunary-primary-300'>
+                  pattern recognition
+                </span>
+                ,{' '}
+                <span className='text-lunary-primary-300'>
+                  educational depth
+                </span>
+                , and{' '}
+                <span className='text-lunary-primary-300'>
+                  tarot integration
+                </span>
+                . No other app combines these three.
+              </p>
+            </div>
+          </div>
+        </section>
+
         {/* Final CTA */}
-        <section className='py-12 md:py-16 text-center space-y-6 border-t border-zinc-800/30'>
-          <h2 className='text-2xl md:text-3xl font-light text-zinc-100'>
-            Ready to begin?
-          </h2>
-          <p className='text-sm md:text-base text-zinc-400 max-w-xl mx-auto'>
-            Start with your free birth chart and explore from there. Upgrade
-            only when you're ready for deeper insights.
-          </p>
-          <div className='flex flex-col sm:flex-row gap-4 justify-center items-center'>
-            <Button variant='lunary' asChild size='lg'>
-              <Link href='/auth?signup=true'>{CTA_COPY.auth.createChart}</Link>
-            </Button>
-            <Button variant='outline' asChild size='lg'>
-              <Link href='/pricing'>{CTA_COPY.pricing.comparePlans}</Link>
-            </Button>
+        <section className='py-12 md:py-20 px-4 md:px-6 bg-zinc-900/20 border-t border-zinc-800/30'>
+          <div className='max-w-2xl mx-auto text-center space-y-6'>
+            <h2 className='text-2xl md:text-3xl font-light text-zinc-100'>
+              Ready to start your practice?
+            </h2>
+
+            <div className='max-w-md mx-auto text-left space-y-2'>
+              <div className='flex items-center gap-2'>
+                <Check className='w-4 h-4 text-lunary-primary-400 flex-shrink-0' />
+                <span className='text-sm text-zinc-400'>
+                  Complete birth chart in 60 seconds
+                </span>
+              </div>
+              <div className='flex items-center gap-2'>
+                <Check className='w-4 h-4 text-lunary-primary-400 flex-shrink-0' />
+                <span className='text-sm text-zinc-400'>
+                  Daily guidance based on YOUR chart
+                </span>
+              </div>
+              <div className='flex items-center gap-2'>
+                <Check className='w-4 h-4 text-lunary-primary-400 flex-shrink-0' />
+                <span className='text-sm text-zinc-400'>
+                  2,000+ free grimoire articles
+                </span>
+              </div>
+              <div className='flex items-center gap-2'>
+                <Check className='w-4 h-4 text-lunary-primary-400 flex-shrink-0' />
+                <span className='text-sm text-zinc-400'>
+                  Pattern tracking over time
+                </span>
+              </div>
+              <div className='flex items-center gap-2'>
+                <Check className='w-4 h-4 text-lunary-primary-400 flex-shrink-0' />
+                <span className='text-sm text-zinc-400'>
+                  No credit card required
+                </span>
+              </div>
+            </div>
+
+            <div className='pt-4 flex flex-col gap-3 items-center'>
+              <Button variant='lunary' asChild size='lg'>
+                <Link
+                  href='/auth?signup=true'
+                  onClick={() =>
+                    handleCtaClick(
+                      'final-cta',
+                      CTA_COPY.auth.createChart,
+                      '/auth?signup=true',
+                    )
+                  }
+                >
+                  {CTA_COPY.auth.createChart}
+                </Link>
+              </Button>
+              <p className='text-xs text-zinc-500'>
+                Want to see pricing first?{' '}
+                <Link
+                  href='/pricing'
+                  className='text-lunary-primary-400 hover:text-lunary-primary-200'
+                  onClick={() =>
+                    handleCtaClick(
+                      'final-cta-secondary',
+                      'Compare plans',
+                      '/pricing',
+                    )
+                  }
+                >
+                  Compare plans
+                </Link>
+              </p>
+            </div>
           </div>
         </section>
       </div>
@@ -498,7 +686,7 @@ function FeatureCard({
         className='w-full sm:w-auto'
         size='sm'
       >
-        <Link href={ctaHref}>{cta} →</Link>
+        <Link href={ctaHref}>{cta}</Link>
       </Button>
     </div>
   );

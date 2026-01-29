@@ -17,10 +17,22 @@ export function CollapsibleSection({
   defaultCollapsed = false,
   className,
 }: CollapsibleSectionProps) {
-  const [isCollapsed, setIsCollapsed] = useState(defaultCollapsed);
+  // Check if in demo mode - start collapsed if so
+  const [isCollapsed, setIsCollapsed] = useState(() => {
+    if (typeof window !== 'undefined') {
+      const isDemoMode =
+        document.getElementById('demo-preview-container') !== null ||
+        (window as any).__LUNARY_DEMO_MODE__;
+      return isDemoMode ? true : defaultCollapsed;
+    }
+    return defaultCollapsed;
+  });
+
+  // Get title string for data attribute
+  const titleString = typeof title === 'string' ? title : 'section';
 
   return (
-    <div className={cn('space-y-4', className)}>
+    <div className={cn('space-y-4', className)} data-collapsible={titleString}>
       <button
         onClick={() => setIsCollapsed(!isCollapsed)}
         className='flex w-full items-center justify-between rounded-lg border border-zinc-800/50 bg-zinc-900/30 px-4 py-3 text-left transition-colors hover:bg-zinc-900/50'

@@ -30,7 +30,7 @@ export default function SubscriptionManagement({
   customerId,
   subscriptionId,
 }: SubscriptionManagementProps) {
-  const { user } = useUser();
+  const { user, refetch } = useUser();
   const subscription = useSubscription();
   const [loading, setLoading] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -145,8 +145,9 @@ export default function SubscriptionManagement({
     // Force refresh with cache-busting
     await fetchStripeSubscription(true);
 
-    // Trigger subscription hook refresh by updating customerId dependency
-    // This will cause useSubscription to re-fetch
+    // Update UserContext with fresh data so it persists
+    await refetch();
+
     setLoading(null);
   };
 

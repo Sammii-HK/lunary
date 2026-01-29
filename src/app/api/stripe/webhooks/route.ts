@@ -154,6 +154,38 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Invalid signature' }, { status: 400 });
   }
 
+  // === IDEMPOTENCY CHECK ===
+  // Prevent duplicate webhook processing
+  try {
+    const existingEvent = await sql`
+      INSERT INTO stripe_webhook_events (
+        event_id, event_type, processing_status, raw_payload, created_at
+      ) VALUES (
+        ${event.id}, ${event.type}, 'processing', ${JSON.stringify(event)}, NOW()
+      )
+      ON CONFLICT (event_id) DO UPDATE SET
+        retry_count = stripe_webhook_events.retry_count + 1,
+        updated_at = NOW()
+      RETURNING processing_status, retry_count
+    `;
+
+    const status = existingEvent.rows[0]?.processing_status;
+    const retryCount = existingEvent.rows[0]?.retry_count || 0;
+
+    if (status === 'completed') {
+      console.log(
+        `[Webhook] Event ${event.id} already processed (idempotent), returning 200`,
+      );
+      return NextResponse.json({ received: true, idempotent: true });
+    }
+
+    // If stuck in processing for more than 5 minutes, allow retry
+    // Otherwise this could be a stuck webhook that never completed
+  } catch (error) {
+    console.error('[Webhook] Idempotency check failed:', error);
+    // Continue processing - better to risk duplicate than fail
+  }
+
   try {
     switch (event.type) {
       case 'customer.subscription.created':
@@ -162,6 +194,7 @@ export async function POST(request: NextRequest) {
           event.data.object as Stripe.Subscription,
           event.type === 'customer.subscription.created',
           event.data.previous_attributes as Stripe.Subscription | undefined,
+          event.id,
         );
         break;
 
@@ -174,6 +207,7 @@ export async function POST(request: NextRequest) {
       case 'checkout.session.completed':
         await handleCheckoutSessionCompleted(
           event.data.object as Stripe.Checkout.Session,
+          event.id,
         );
         break;
 
@@ -213,6 +247,7 @@ async function handleSubscriptionChange(
   subscription: Stripe.Subscription,
   isNew: boolean,
   previousAttributes?: Stripe.Subscription,
+  eventId?: string,
 ) {
   const stripe = getStripe();
   const customerId = subscription.customer as string;
@@ -308,6 +343,37 @@ async function handleSubscriptionChange(
     }
   }
 
+  // === VALIDATE USER ID RESOLUTION ===
+  if (!userId) {
+    // Log failure to webhook event
+    console.error(
+      '[Webhook] Unable to resolve userId for subscription:',
+      subscription.id,
+    );
+
+    if (eventId) {
+      try {
+        await sql`
+          UPDATE stripe_webhook_events
+          SET processing_status = 'failed',
+              failure_reason = 'Unable to resolve user_id',
+              processed_at = NOW()
+          WHERE event_id = ${eventId}
+        `;
+      } catch (error) {
+        console.error(
+          '[Webhook] Failed to log userId resolution failure:',
+          error,
+        );
+      }
+    }
+
+    // Don't silently fail - throw error so Stripe retries
+    throw new Error(
+      `Unable to resolve userId for subscription ${subscription.id}`,
+    );
+  }
+
   // Write to database
   if (userId) {
     const trialEndsAt = subscription.trial_end
@@ -351,7 +417,38 @@ async function handleSubscriptionChange(
           updated_at = NOW()
       `;
     } catch (error) {
-      console.error('DB write failed:', error);
+      console.error('[Webhook] DB write failed:', error);
+
+      // Log failure to webhook event
+      if (eventId) {
+        try {
+          await sql`
+            UPDATE stripe_webhook_events
+            SET processing_status = 'failed',
+                failure_reason = ${error instanceof Error ? error.message : 'Database write failed'},
+                processed_at = NOW()
+            WHERE event_id = ${eventId}
+          `;
+        } catch (logError) {
+          console.error('[Webhook] Failed to log DB write failure:', logError);
+        }
+      }
+
+      // Update subscription error tracking
+      try {
+        await sql`
+          UPDATE subscriptions
+          SET sync_error_count = COALESCE(sync_error_count, 0) + 1,
+              last_sync_error = ${error instanceof Error ? error.message : 'Database write failed'},
+              last_sync_error_at = NOW()
+          WHERE user_id = ${userId}
+        `;
+      } catch (trackError) {
+        console.error('[Webhook] Failed to track sync error:', trackError);
+      }
+
+      // Throw so Stripe retries
+      throw error;
     }
   }
 
@@ -431,10 +528,50 @@ async function handleSubscriptionChange(
       });
     }
   }
+
+  // === UPDATE WEBHOOK EVENT STATUS ===
+  if (eventId && userId) {
+    try {
+      await sql`
+        UPDATE stripe_webhook_events
+        SET processing_status = 'completed',
+            user_id = ${userId},
+            stripe_customer_id = ${customerId},
+            stripe_subscription_id = ${subscription.id},
+            processed_at = NOW()
+        WHERE event_id = ${eventId}
+      `;
+    } catch (error) {
+      console.error('[Webhook] Failed to update event status:', error);
+      // Don't throw - webhook already processed successfully
+    }
+
+    // === LOG TO AUDIT TABLE ===
+    try {
+      await sql`
+        INSERT INTO subscription_audit_log (
+          user_id, event_type, new_state, source,
+          stripe_event_id, created_by, created_at
+        ) VALUES (
+          ${userId},
+          ${isNew ? 'subscription_created' : 'subscription_updated'},
+          ${JSON.stringify({ status, planType, customerId, subscriptionId: subscription.id })},
+          'webhook',
+          ${eventId},
+          'system',
+          NOW()
+        )
+      `;
+    } catch (error) {
+      console.error('[Webhook] Failed to create audit log:', error);
+      // Don't throw - webhook already processed successfully
+    }
+  }
 }
 
 async function handleCheckoutSessionCompleted(
   session: Stripe.Checkout.Session,
+  eventId?: string,
 ) {
   if (session.mode !== 'subscription') return;
 
@@ -498,7 +635,7 @@ async function handleCheckoutSessionCompleted(
     }
   }
 
-  await handleSubscriptionChange(subscription, false);
+  await handleSubscriptionChange(subscription, false, undefined, eventId);
 }
 
 async function handleSubscriptionDeleted(subscription: Stripe.Subscription) {

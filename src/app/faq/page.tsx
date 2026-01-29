@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import Link from 'next/link';
 import { Mail, ExternalLink } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -9,10 +9,26 @@ import { FAQCategory, FAQSearch } from '@/components/FAQ';
 import { getAllFAQCategories, getAllFAQs } from '@/lib/faq-helpers';
 import { getIcon } from '@/lib/icon-map';
 import { renderFAQSchema } from '@/lib/faq-schema';
+import { conversionTracking } from '@/lib/analytics';
 
 export default function FAQPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [openQuestionId, setOpenQuestionId] = useState<string | null>(null);
+
+  // Track page view on mount
+  useEffect(() => {
+    conversionTracking.pageViewed('/faq');
+  }, []);
+
+  // CTA click handler
+  const handleCtaClick = (location: string, label: string, href: string) => {
+    conversionTracking.ctaClicked({
+      location,
+      label,
+      href,
+      pagePath: '/faq',
+    });
+  };
 
   const categories = getAllFAQCategories();
 
@@ -55,26 +71,6 @@ export default function FAQPage() {
       {renderFAQSchema(allFAQs)}
 
       <div className='min-h-screen bg-zinc-950 text-zinc-50'>
-        {/* Header */}
-        <header className='border-b border-zinc-800/30 py-4 px-4 md:px-6 sticky top-0 bg-zinc-950/95 backdrop-blur-sm z-50'>
-          <div className='max-w-6xl mx-auto flex items-center justify-between'>
-            <Link href='/' className='text-lg font-light text-zinc-100'>
-              Lunary
-            </Link>
-            <div className='flex items-center gap-3'>
-              <Button variant='ghost' asChild size='sm'>
-                <Link href='/features'>Features</Link>
-              </Button>
-              <Button variant='ghost' asChild size='sm'>
-                <Link href='/pricing'>Pricing</Link>
-              </Button>
-              <Button variant='lunary' asChild size='sm'>
-                <Link href='/auth?signup=true'>Get started</Link>
-              </Button>
-            </div>
-          </div>
-        </header>
-
         {/* Hero */}
         <section className='py-12 md:py-16 px-4 md:px-6'>
           <div className='max-w-4xl mx-auto text-center space-y-4'>
@@ -176,6 +172,13 @@ export default function FAQPage() {
                 <Link
                   href='/features'
                   className='inline-flex items-center gap-2'
+                  onClick={() =>
+                    handleCtaClick(
+                      'help-section',
+                      'Explore features',
+                      '/features',
+                    )
+                  }
                 >
                   Explore features
                   <ExternalLink className='w-4 h-4' />

@@ -11,7 +11,7 @@ const formatKeywords = (...terms: string[]) =>
     .filter(Boolean);
 
 export const signMeta = (signName: string, slug: string): Metadata => {
-  const title = `${signName} Horoscopes: Monthly Predictions & Forecasts | Lunary`;
+  const title = `${signName} Horoscopes: Monthly Predictions & Forecasts`;
   const description = `${signName} horoscopes for all months and years. Get detailed monthly predictions for ${signName} including love, career, health, and finance forecasts.`;
   const image = `${OG_BASE}?sign=${encode(signName)}`;
 
@@ -35,7 +35,7 @@ export const signMeta = (signName: string, slug: string): Metadata => {
     },
     twitter: {
       card: 'summary_large_image',
-      title: `${signName} Horoscope Guide | Lunary`,
+      title: `${signName} Horoscope Guide`,
       description: `Explore ${signName} monthly and yearly astrology forecasts.`,
       images: [image],
     },
@@ -50,8 +50,8 @@ export const yearMeta = (
   slug: string,
   year: string,
 ): Metadata => {
-  const title = `${signName} Horoscope ${year}: All Monthly Forecasts | Lunary`;
-  const description = `${signName} horoscope for all 12 months of ${year}. Complete monthly predictions including love, career, and life guidance for ${signName}.`;
+  const title = `${signName} Horoscope ${year}: All Monthly Forecasts`;
+  const description = `Complete ${signName} horoscope for ${year}! Explore all 12 monthly forecasts, yearly themes, love & career predictions. Your full year astrological guide.`;
   const image = `${OG_BASE}?sign=${encode(signName)}&year=${encode(year)}`;
 
   return {
@@ -60,8 +60,10 @@ export const yearMeta = (
     keywords: formatKeywords(
       `${signName} horoscope ${year}`,
       `${signName} astrology ${year}`,
+      `${signName} ${year} predictions`,
       'yearly horoscope',
       `${signName} monthly forecast`,
+      `${signName} ${year} forecast`,
       'Lunary',
     ),
     openGraph: {
@@ -73,7 +75,7 @@ export const yearMeta = (
     },
     twitter: {
       card: 'summary_large_image',
-      title: `${signName} Horoscope ${year} | Lunary`,
+      title: `${signName} Horoscope ${year}`,
       description: `Month-by-month astrology forecast for ${signName} in ${year}.`,
       images: [image],
     },
@@ -91,8 +93,8 @@ export const monthMeta = (
   monthName: string,
   monthNumber: number,
 ): Metadata => {
-  const title = `${signName} Horoscope ${monthName} ${year}: Monthly Predictions | Lunary`;
-  const description = `${signName} horoscope for ${monthName} ${year}. Discover what the stars have in store for ${signName} this month including love, career, health, and financial predictions.`;
+  const title = `${signName} Horoscope ${monthName} ${year}: Monthly Predictions`;
+  const description = `Your complete ${signName} horoscope for ${monthName} ${year}! Discover your lucky days, power color, love forecast & career opportunities. Free detailed monthly predictions.`;
   const image = `${OG_BASE}?sign=${encode(signName)}&month=${encode(monthSlug)}&year=${encode(year)}`;
 
   return {
@@ -103,6 +105,8 @@ export const monthMeta = (
       `${signName} monthly horoscope`,
       `${signName} ${year} astrology`,
       `${signName} ${monthName} forecast`,
+      `${signName} ${monthName} predictions`,
+      `${signName} lucky days ${monthName}`,
       'Lunary',
     ),
     openGraph: {
@@ -114,7 +118,7 @@ export const monthMeta = (
     },
     twitter: {
       card: 'summary_large_image',
-      title: `${signName} Horoscope ${monthName} ${year} | Lunary`,
+      title: `${signName} Horoscope ${monthName} ${year}`,
       description: `Detailed ${signName} astrology forecast for ${monthName} ${year}.`,
       images: [image],
     },

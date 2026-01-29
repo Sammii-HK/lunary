@@ -22,6 +22,7 @@ import { UpgradePrompt } from '@/components/UpgradePrompt';
 import { TarotTransitConnection } from './TarotTransitConnection';
 import type { BirthChartPlacement } from '@/context/UserContext';
 import { useAstronomyContext } from '@/context/AstronomyContext';
+import { isInDemoMode } from '@/lib/demo-mode';
 
 export type SubscriptionStatus =
   | 'free'
@@ -123,7 +124,7 @@ const findFirstUnlockedSpread = (
 };
 
 function CollapsibleSpreadLibrary({ children }: { children: ReactNode }) {
-  const [isCollapsed, setIsCollapsed] = useState(true);
+  const [isCollapsed, setIsCollapsed] = useState(false);
 
   return (
     <div className='space-y-2'>
@@ -185,6 +186,17 @@ export function TarotSpreadExperience({
     () => unlockedSpreadSlugs,
     [unlockedSpreadSlugs],
   );
+
+  // In demo mode, treat all spreads as unlocked for UI purposes
+  // API will still block pulling new spreads with modal
+  const displayUnlockedSpreads = useMemo(() => {
+    const demoMode = isInDemoMode();
+    if (demoMode) {
+      // Show all spreads as unlocked in demo
+      return new Set(Object.keys(TAROT_SPREAD_MAP));
+    }
+    return unlockedSpreads;
+  }, [unlockedSpreads]);
 
   const refreshReadings = useCallback(async () => {
     // Don't fetch if user is not authenticated
@@ -574,7 +586,7 @@ export function TarotSpreadExperience({
                 <p className='text-xs font-medium text-zinc-400'>{category}</p>
                 <div className='space-y-2'>
                   {spreads.map((spread) => {
-                    const isLocked = !unlockedSpreads.has(spread.slug);
+                    const isLocked = !displayUnlockedSpreads.has(spread.slug);
                     const isSelected = selectedSpreadSlug === spread.slug;
 
                     return (
@@ -644,7 +656,7 @@ export function TarotSpreadExperience({
 
         {selectedSpread && (
           <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/40 p-4 space-y-3'>
-            {!unlockedSpreads.has(selectedSpread.slug) && (
+            {!displayUnlockedSpreads.has(selectedSpread.slug) && (
               <div className='rounded-lg border border-lunary-primary-700 bg-lunary-primary-950 p-4 mb-3'>
                 <div className='flex items-start gap-3'>
                   <LockIcon className='h-5 w-5 text-lunary-accent mt-0.5 flex-shrink-0' />
@@ -682,13 +694,13 @@ export function TarotSpreadExperience({
                 disabled={
                   isGenerating ||
                   isLoading ||
-                  !unlockedSpreads.has(selectedSpread.slug)
+                  !displayUnlockedSpreads.has(selectedSpread.slug)
                 }
                 className={clsx(
                   'inline-flex items-center justify-center gap-2 rounded-md px-4 py-2 text-sm font-medium transition-colors',
                   isGenerating
                     ? 'bg-lunary-primary-950 text-lunary-accent-200'
-                    : unlockedSpreads.has(selectedSpread.slug)
+                    : displayUnlockedSpreads.has(selectedSpread.slug)
                       ? 'bg-lunary-primary text-white hover:bg-lunary-primary-400'
                       : 'bg-zinc-800/80 text-zinc-400 cursor-not-allowed',
                 )}
@@ -701,7 +713,7 @@ export function TarotSpreadExperience({
                 ) : (
                   <>
                     <Sparkles className='h-4 w-4' />
-                    {unlockedSpreads.has(selectedSpread.slug)
+                    {displayUnlockedSpreads.has(selectedSpread.slug)
                       ? 'Start a reading'
                       : 'Upgrade to unlock'}
                   </>

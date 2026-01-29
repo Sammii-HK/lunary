@@ -12,7 +12,7 @@ import {
 } from '@/components/ui/expandable-card';
 import { useUser } from '@/context/UserContext';
 import { getPersonalizedHoroscope } from '../../../utils/astrology/personalizedHoroscope';
-import { useDemoMode } from '@/components/marketing/DemoModeProvider';
+import { isInDemoMode } from '@/lib/demo-mode';
 import { DailyCache } from '@/lib/cache/dailyCache';
 import { getZodiacSymbol } from 'utils/astrology/cosmic-og';
 
@@ -256,7 +256,7 @@ export const MoonPreview = ({
 
   // Detect mobile or demo mode to show compact symbol display
   const [isMobile, setIsMobile] = useState(false);
-  const { isDemoMode } = useDemoMode();
+  const isDemoMode = isInDemoMode();
 
   // Check if viewport is mobile-sized
   useEffect(() => {

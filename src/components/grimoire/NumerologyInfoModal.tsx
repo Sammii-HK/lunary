@@ -8,6 +8,7 @@ import {
   ModalHeader,
 } from '@/components/ui/modal';
 import { NumerologyDetailSection } from '@/lib/numerology/numerologyDetails';
+import { isInDemoMode } from '@/lib/demo-mode';
 
 export type NumerologyModalPayload = {
   number: number;
@@ -133,12 +134,27 @@ export function NumerologyInfoModal({
         </div>
       </ModalBody>
       <ModalFooter>
-        <Link
-          href={href}
-          className='w-full text-center rounded-lg border border-lunary-primary-600 bg-lunary-primary-950 px-4 py-3 text-sm font-semibold text-lunary-primary-300 transition hover:border-lunary-primary-400 hover:text-white'
-        >
-          {label}
-        </Link>
+        {isInDemoMode() ? (
+          <button
+            onClick={() => {
+              window.dispatchEvent(
+                new CustomEvent('demo-action-blocked', {
+                  detail: { action: 'Viewing Grimoire pages' },
+                }),
+              );
+            }}
+            className='w-full text-center rounded-lg border border-lunary-primary-600 bg-lunary-primary-950 px-4 py-3 text-sm font-semibold text-lunary-primary-300 transition hover:border-lunary-primary-400 hover:text-white'
+          >
+            {label}
+          </button>
+        ) : (
+          <Link
+            href={href}
+            className='w-full text-center rounded-lg border border-lunary-primary-600 bg-lunary-primary-950 px-4 py-3 text-sm font-semibold text-lunary-primary-300 transition hover:border-lunary-primary-400 hover:text-white'
+          >
+            {label}
+          </Link>
+        )}
       </ModalFooter>
     </Modal>
   );
