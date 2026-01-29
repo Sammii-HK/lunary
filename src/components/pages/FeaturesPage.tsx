@@ -485,7 +485,7 @@ function FeatureCard({
         )}
         {proTier && (
           <div className='text-xs md:text-sm'>
-            <span className='text-zinc-500'>Pro:</span>{' '}
+            <span className='text-zinc-500'>Lunary+ Pro:</span>{' '}
             <span className='text-zinc-300'>{proTier}</span>
           </div>
         )}
