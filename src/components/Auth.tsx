@@ -10,6 +10,7 @@ import {
   getAttributionForTracking,
 } from '@/lib/attribution';
 import { captureEvent } from '@/lib/posthog-client';
+import { Eye, EyeOff, Loader2 } from 'lucide-react';
 
 interface AuthFormData {
   email: string;
@@ -38,6 +39,7 @@ export function AuthComponent({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
+  const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState<AuthFormData>(
     () =>
       cachedAuthFormData || {
@@ -373,17 +375,31 @@ export function AuthComponent({
             >
               Password
             </label>
-            <input
-              id='password'
-              name='password'
-              type='password'
-              required
-              value={formData.password}
-              onChange={handleInputChange}
-              className='w-full bg-zinc-800 border border-zinc-700 text-white rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-lunary-primary focus:border-transparent text base'
-              placeholder='Enter your password'
-              minLength={6}
-            />
+            <div className='relative'>
+              <input
+                id='password'
+                name='password'
+                type={showPassword ? 'text' : 'password'}
+                required
+                value={formData.password}
+                onChange={handleInputChange}
+                className='w-full bg-zinc-800 border border-zinc-700 text-white rounded-lg px-4 py-3 pr-12 focus:outline-none focus:ring-2 focus:ring-lunary-primary focus:border-transparent text-base'
+                placeholder='Enter your password'
+                minLength={6}
+              />
+              <button
+                type='button'
+                onClick={() => setShowPassword(!showPassword)}
+                className='absolute right-3 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-300 transition-colors'
+                aria-label={showPassword ? 'Hide password' : 'Show password'}
+              >
+                {showPassword ? (
+                  <EyeOff className='w-5 h-5' />
+                ) : (
+                  <Eye className='w-5 h-5' />
+                )}
+              </button>
+            </div>
           </div>
         )}
 
@@ -418,11 +434,11 @@ export function AuthComponent({
         <button
           type='submit'
           disabled={loading}
-          className={`w-full bg-lunary-primary hover:bg-lunary-primary-400 disabled:bg-lunary-primary-800 disabled:opacity-50 text-white font-medium rounded-lg transition-colors ${compact ? 'py-2 px-3 text-sm' : 'py-3 px-4'}`}
+          className={`w-full bg-lunary-primary hover:bg-lunary-primary-400 disabled:bg-lunary-primary-800 disabled:opacity-50 text-white font-medium rounded-lg transition-colors flex items-center justify-center ${compact ? 'py-2 px-3 text-sm' : 'py-3 px-4'}`}
         >
           {loading ? (
             <>
-              <span className='animate-spin mr-2'>⏳</span>
+              <Loader2 className='w-4 h-4 mr-2 animate-spin' />
               {isSignUp
                 ? 'Creating Account...'
                 : isForgot
