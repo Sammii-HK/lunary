@@ -146,9 +146,8 @@ export default function AppDashboardClient() {
   const [isDemoMode, setIsDemoMode] = useState(
     demoContext?.isDemoMode || false,
   );
-  const [moonExpanded, setMoonExpanded] = useState<boolean | undefined>(
-    undefined,
-  );
+  // Always use controlled mode - start with false, never undefined
+  const [moonExpanded, setMoonExpanded] = useState<boolean>(false);
 
   // Detect demo mode from context OR DOM (for reliability on tab changes)
   useEffect(() => {
@@ -156,28 +155,29 @@ export default function AppDashboardClient() {
       const inDemoContainer =
         document.getElementById('demo-preview-container') !== null;
       const contextDemoMode = demoContext?.isDemoMode || false;
-      const demoModeDetected = inDemoContainer || contextDemoMode;
-      setIsDemoMode(demoModeDetected);
-
-      // Initialize moonExpanded for controlled mode in demo
-      if (demoModeDetected && moonExpanded === undefined) {
-        setMoonExpanded(false);
-      }
+      setIsDemoMode(inDemoContainer || contextDemoMode);
     };
 
     checkDemoMode();
-  }, [demoContext, moonExpanded]);
+  }, [demoContext]);
 
-  // In demo mode, auto-expand moon card after 1 second
+  // Auto-expand moon card logic
   useEffect(() => {
-    if (!isDemoMode || moonExpanded === undefined) return;
-
-    const expandTimeout = setTimeout(() => {
-      setMoonExpanded(true);
-    }, 1000);
-
-    return () => clearTimeout(expandTimeout);
-  }, [isDemoMode, moonExpanded]);
+    if (isDemoMode) {
+      // Demo mode: auto-expand after 1 second
+      const expandTimeout = setTimeout(() => {
+        setMoonExpanded(true);
+      }, 1000);
+      return () => clearTimeout(expandTimeout);
+    } else {
+      // Non-demo mode: auto-expand on desktop immediately
+      const isDesktop = window.matchMedia('(min-width: 768px)').matches;
+      if (isDesktop) {
+        setMoonExpanded(true);
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isDemoMode]); // Only depend on isDemoMode, not moonExpanded
 
   // Handle moon preview toggle
   const handleMoonToggle = (isExpanded: boolean) => {
@@ -299,12 +299,7 @@ export default function AppDashboardClient() {
         className={`grid gap-3 ${isDemoMode ? 'grid-cols-1' : 'grid-cols-1 md:grid-cols-2'}`}
       >
         <div id='moon-phase' className='scroll-mt-20'>
-          <MoonPreview
-            {...(isDemoMode && {
-              isExpanded: moonExpanded,
-              onToggle: handleMoonToggle,
-            })}
-          />
+          <MoonPreview isExpanded={moonExpanded} onToggle={handleMoonToggle} />
         </div>
         <SkyNowCard />
 
