@@ -21,6 +21,7 @@ import { NewsletterSignupForm } from '@/components/NewsletterSignupForm';
 import { renderJsonLd } from '@/lib/schema';
 import { MarketingMiniApp } from '@/components/marketing/MarketingMiniApp';
 import ctaExamples from '@/lib/cta-examples.json';
+import { CTA_COPY } from '@/lib/cta-copy';
 
 const moonPhaseIconMap: Record<string, string> = {
   'New Moon': '/icons/moon-phases/new-moon.svg',
@@ -71,10 +72,12 @@ export default function WelcomePage() {
             </p>
             <div className='flex flex-col sm:flex-row gap-4 justify-center items-center pt-2 pb-0 md:pb-6'>
               <Button variant='lunary-soft' asChild>
-                <Link href='/auth?signup=true'>Create your birth chart</Link>
+                <Link href='/auth?signup=true'>
+                  {CTA_COPY.auth.createChart}
+                </Link>
               </Button>
               <Button variant='lunary' asChild>
-                <Link href='/pricing'>See what Lunary+ unlocks</Link>
+                <Link href='/pricing'>{CTA_COPY.pricing.viewPricing}</Link>
               </Button>
             </div>
           </div>
@@ -89,8 +92,8 @@ export default function WelcomePage() {
           <p className='text-xs text-zinc-500 mb-4'>
             Chart calculations are based on real astronomy.
             <br />
-            The Astral Guide chat uses AI to help interpret your chart, patterns
-            and the current sky.
+            The Astral Guide chat helps interpret your chart, patterns and the
+            current sky.
           </p>
           <p className='text-sm text-zinc-400'>
             Free access includes your birth chart and Grimoire tools.
@@ -99,8 +102,8 @@ export default function WelcomePage() {
               Upgrade for personalised interpretation and deeper analysis.
             </span>
             <br />
-            Personal Day and Personal Year numbers are free; Lunary+ Pro unlocks
-            the interpretation.
+            Personal Day and Personal Year numbers are free; Lunary+ Pro
+            includes the interpretation.
           </p>
           <p className='text-sm text-zinc-400 pb-8'>
             No card required. Takes under 2 minutes.
@@ -137,7 +140,9 @@ export default function WelcomePage() {
             </div>
             <div className='pt-2'>
               <Button variant='lunary' asChild>
-                <Link href='/auth?signup=true'>Start your birth chart</Link>
+                <Link href='/auth?signup=true'>
+                  {CTA_COPY.auth.createChart}
+                </Link>
               </Button>
             </div>
           </div>
@@ -298,7 +303,7 @@ export default function WelcomePage() {
                 </p>
                 <p className='text-xs text-zinc-500'>
                   Your birth chart is created and saved to your account.
-                  Chart-based interpretation unlocks with Lunary+.
+                  Chart-based interpretation included with Lunary+.
                 </p>
               </div>
               <div className='space-y-2'>
@@ -393,7 +398,7 @@ export default function WelcomePage() {
                   chart and the current sky
                 </p>
                 <p className='text-xs text-zinc-500'>
-                  Optional AI chat grounded in your chart. Your chart itself is
+                  Optional chat grounded in your chart. Your chart itself is
                   always astronomy-based.
                 </p>
               </div>
@@ -499,7 +504,9 @@ export default function WelcomePage() {
                 transit calendar, ritual library, wheel of the year, and more
               </p>
               <Button variant='lunary' asChild>
-                <Link href='/features'>Explore all features →</Link>
+                <Link href='/features'>
+                  {CTA_COPY.navigation.exploreFeatures}
+                </Link>
               </Button>
             </div>
           </div>
@@ -790,7 +797,7 @@ export default function WelcomePage() {
                     </p>
                     <p className='text-[9px] text-zinc-500 mt-1'>
                       Interpreted at a general level. Chart-specific insight
-                      unlocks with Lunary+.
+                      included with Lunary+.
                     </p>
                   </li>
                   <li>
@@ -804,7 +811,7 @@ export default function WelcomePage() {
               </div>
               <div className='rounded-2xl border border-zinc-800/60 bg-zinc-900/40 p-4'>
                 <p className='text-xs uppercase tracking-[0.2em] text-zinc-500'>
-                  Unlock deeper personal insight
+                  Your Personal Insight
                 </p>
                 <ul className='mt-2 space-y-3'>
                   <li>
@@ -870,10 +877,12 @@ export default function WelcomePage() {
             </p>
             <div className='pt-2 flex flex-col sm:flex-row gap-4 justify-center items-center'>
               <Button variant='lunary-soft' asChild>
-                <Link href='/auth?signup=true'>Create your birth chart</Link>
+                <Link href='/auth?signup=true'>
+                  {CTA_COPY.auth.createChart}
+                </Link>
               </Button>
               <Button variant='lunary' asChild>
-                <Link href='/pricing'>See what Lunary+ unlocks</Link>
+                <Link href='/pricing'>{CTA_COPY.pricing.viewPricing}</Link>
               </Button>
             </div>
           </div>

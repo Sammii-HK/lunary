@@ -12,6 +12,8 @@ import {
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { MarketingFooter } from '@/components/MarketingFooter';
+import { PricingComparisonTable } from '@/components/PricingComparisonTable';
+import { CTA_COPY } from '@/lib/cta-copy';
 
 export default function FeaturesPage() {
   return (
@@ -274,7 +276,7 @@ export default function FeaturesPage() {
           {/* Astral Guide Chat */}
           <FeatureCard
             icon={<MessageCircle className='w-5 h-5 md:w-6 md:h-6' />}
-            title='Astral Guide (AI Chat)'
+            title='Astral Guide'
             description='Ask questions, get context-aware answers'
             features={[
               'Knows your complete birth chart',
@@ -371,10 +373,23 @@ export default function FeaturesPage() {
             ]}
             freeTier='Daily suggestions'
             paidTier='Personalized rituals + detailed instructions'
-            proTier='AI-generated custom rituals'
+            proTier='Custom rituals'
             cta="Get today's ritual"
             ctaHref='/auth?signup=true'
           />
+        </section>
+
+        {/* Comparison Table */}
+        <section className='py-12 md:py-20 border-t border-zinc-800/30'>
+          <div className='text-center space-y-3 mb-12'>
+            <h2 className='text-2xl md:text-3xl font-light text-zinc-100'>
+              Compare Plans
+            </h2>
+            <p className='text-sm md:text-base text-zinc-400 max-w-2xl mx-auto'>
+              See what's included at each tier
+            </p>
+          </div>
+          <PricingComparisonTable />
         </section>
 
         {/* Final CTA */}
@@ -388,10 +403,10 @@ export default function FeaturesPage() {
           </p>
           <div className='flex flex-col sm:flex-row gap-4 justify-center items-center'>
             <Button variant='lunary' asChild size='lg'>
-              <Link href='/auth?signup=true'>Create your birth chart</Link>
+              <Link href='/auth?signup=true'>{CTA_COPY.auth.createChart}</Link>
             </Button>
             <Button variant='outline' asChild size='lg'>
-              <Link href='/pricing'>Compare plans</Link>
+              <Link href='/pricing'>{CTA_COPY.pricing.comparePlans}</Link>
             </Button>
           </div>
         </section>
