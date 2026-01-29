@@ -589,15 +589,24 @@ model grimoire_embeddings {
 }
 
 model journal_patterns {
-  id           Int       @id @default(autoincrement())
-  user_id      String
-  pattern_type String
-  pattern_data Json
-  generated_at DateTime? @default(now()) @db.Timestamptz(6)
-  expires_at   DateTime? @db.Timestamptz(6)
+  id               Int       @id @default(autoincrement())
+  user_id          String
+  pattern_type     String
+  pattern_category String?   // 'transient', 'natal', 'cyclical', 'progression'
+  pattern_data     Json
+  confidence       Float?    // 0-1 confidence score
+  generated_at     DateTime? @default(now()) @db.Timestamptz(6)
+  expires_at       DateTime? @db.Timestamptz(6)
+  first_detected   DateTime? @db.Timestamptz(6)
+  last_observed    DateTime? @db.Timestamptz(6)
+  metadata         Json?
+  source_snapshot  String?
 
+  @@index([user_id, pattern_type], map: "idx_journal_patterns_user_type")
+  @@index([user_id, pattern_category], map: "idx_journal_patterns_user_category")
   @@index([expires_at], map: "idx_journal_patterns_expires")
   @@index([user_id], map: "idx_journal_patterns_user_id")
+  @@index([pattern_data], map: "idx_journal_patterns_data", type: Gin)
 }
 
 model launch_signups {

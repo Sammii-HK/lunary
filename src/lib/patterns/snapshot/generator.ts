@@ -60,8 +60,13 @@ export async function generateLifeThemesSnapshot(
       if (typeof row.content === 'string') {
         content = row.content;
       } else if (row.content && typeof row.content === 'object') {
-        // If it's stored as JSON, stringify it
-        content = JSON.stringify(row.content);
+        // If it's stored as JSON with a 'text' field, extract it
+        if ('text' in row.content) {
+          content = String(row.content.text || '');
+        } else {
+          // Otherwise stringify the whole object
+          content = JSON.stringify(row.content);
+        }
       } else if (row.content) {
         // Try to convert to string
         content = String(row.content);

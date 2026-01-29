@@ -14,6 +14,11 @@ import {
 } from '../../../utils/astrology/personalTransits';
 import { getUpcomingTransits } from '../../../utils/astrology/transitCalendar';
 import type { BirthChartData } from '../../../utils/astrology/birthChart';
+import { detectNatalAspectPatterns } from '../journal/aspect-pattern-detector';
+import { calculatePlanetaryReturns } from '../journal/planetary-return-tracker';
+import { detectLunarSensitivity } from '../journal/lunar-pattern-detector';
+import { detectNatalHouseEmphasis } from '../journal/house-emphasis-tracker';
+import { getUserPatterns } from '../journal/pattern-storage';
 
 /**
  * Detects if a user message is asking about astrological/cosmic topics
@@ -72,6 +77,17 @@ export interface AstralContext {
   moonPhase: string;
   journalSummaries: { date: string; summary: string }[];
   moodTags: string[];
+  // Phase 2: Pattern Recognition
+  natalAspectPatterns?: any[]; // Grand Trines, T-Squares, Stelliums, Yods
+  planetaryReturns?: any[]; // Saturn/Jupiter/Solar returns
+  natalHouseEmphasis?: any[]; // Houses with 2+ planets
+  lunarSensitivity?: any; // Moon phase sensitivity
+  storedPatterns?: {
+    // Patterns from database
+    natal?: any[];
+    cyclical?: any[];
+    transient?: any[];
+  };
 }
 
 /**
@@ -218,6 +234,41 @@ export async function buildAstralContext(
     personalTransits,
   );
 
+  // PHASE 2: Detect patterns
+  const userBirthChartData = await fetchUserBirthChart(userId);
+  let natalAspectPatterns;
+  let planetaryReturns;
+  let natalHouseEmphasis;
+  let lunarSensitivity;
+
+  if (userBirthChartData && userBirthChartData.length > 0) {
+    // Detect natal aspect patterns (Grand Trines, T-Squares, etc.)
+    natalAspectPatterns = detectNatalAspectPatterns(userBirthChartData);
+
+    // Calculate planetary returns (Saturn/Jupiter/Solar)
+    planetaryReturns = userBirthday
+      ? calculatePlanetaryReturns(
+          userBirthChartData,
+          now,
+          new Date(userBirthday),
+        )
+      : undefined;
+
+    // Detect natal house emphasis
+    natalHouseEmphasis = detectNatalHouseEmphasis(userBirthChartData);
+
+    // Detect lunar sensitivity
+    lunarSensitivity = detectLunarSensitivity(userBirthChartData);
+  }
+
+  // Retrieve stored patterns from database
+  const storedPatterns = await getUserPatterns(userId);
+  const patternsByCategory = {
+    natal: storedPatterns.filter((p) => p.pattern_category === 'natal'),
+    cyclical: storedPatterns.filter((p) => p.pattern_category === 'cyclical'),
+    transient: storedPatterns.filter((p) => p.pattern_category === 'transient'),
+  };
+
   // Build today's tarot summary
   const todaysTarot = buildTarotSummary(context.tarot);
 
@@ -245,6 +296,21 @@ export async function buildAstralContext(
     moonPhase,
     journalSummaries,
     moodTags,
+    // Phase 2: Pattern Recognition
+    natalAspectPatterns:
+      natalAspectPatterns && natalAspectPatterns.length > 0
+        ? natalAspectPatterns
+        : undefined,
+    planetaryReturns:
+      planetaryReturns && planetaryReturns.length > 0
+        ? planetaryReturns
+        : undefined,
+    natalHouseEmphasis:
+      natalHouseEmphasis && natalHouseEmphasis.length > 0
+        ? natalHouseEmphasis
+        : undefined,
+    lunarSensitivity: lunarSensitivity || undefined,
+    storedPatterns: storedPatterns.length > 0 ? patternsByCategory : undefined,
   };
 }
 
@@ -604,6 +670,19 @@ PERSONAL TRANSITS:
 - Use aspects to natal planets to explain how transiting energy interacts with their birth chart (e.g., "Mars square your natal Sun brings tension between action and identity")
 - When UPCOMING PERSONAL TRANSITS are provided, you can prepare users for what's coming and suggest how to work with those energies
 - House meanings: 1=self/identity, 2=finances/values, 3=communication, 4=home/family, 5=creativity/romance, 6=health/work, 7=partnerships, 8=transformation/intimacy, 9=philosophy/travel, 10=career/reputation, 11=friends/community, 12=spirituality/subconscious
+
+NATAL PATTERNS (Phase 2 Enhancement):
+- When NATAL ASPECT PATTERNS are provided, you can reference powerful configurations in the birth chart:
+  - Grand Trines: Harmonious flow of energy in one element (Fire/Earth/Air/Water)
+  - T-Squares: Dynamic tension that drives growth and achievement
+  - Stelliums: Concentrated energy in one sign or house
+  - Yods (Finger of God): Karmic/fated energy requiring adjustment
+- When PLANETARY RETURNS are provided, acknowledge major life cycles:
+  - Solar Return: Annual birthday energy renewal
+  - Jupiter Return: ~12 years, expansion and growth phase
+  - Saturn Return: ~29 years, maturity and life lessons
+- When HOUSE EMPHASIS patterns are present, note which life areas are naturally highlighted
+- When LUNAR SENSITIVITY is detected, acknowledge the user may be particularly attuned to moon phases
 
 RITUAL SUGGESTIONS:
 - When suggesting rituals, deeply personalize them to the user's chart, current transits, and tarot cards
