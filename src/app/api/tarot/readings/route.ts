@@ -60,7 +60,7 @@ export async function GET(request: NextRequest) {
           );
 
           const response = NextResponse.json({
-            readings: [], // Empty - demo shows pre-loaded spreads from MarketingMiniApp
+            readings: [], // Empty - demo uses client-side data
             usage: {
               monthlyLimit: null,
               monthlyUsed: 0,

@@ -35,7 +35,7 @@ const tabs = [
   { id: 'explore' as TabId, name: 'More', icon: MoreHorizontal },
 ];
 
-// Dynamic imports - same as MarketingMiniApp
+// Dynamic imports for code splitting
 const AppDashboardClient = dynamic(
   () => import('@/app/(authenticated)/app/AppDashboardClient'),
   { ssr: false },
@@ -71,7 +71,7 @@ function DashboardSkeleton() {
   );
 }
 
-// Same user data as MarketingMiniApp
+// Demo user data from SSOT
 // Only cycle through these tabs (skip guide/explore) - OUTSIDE component to avoid re-renders
 const cyclableTabs: TabId[] = ['app', 'tarot', 'horoscope'];
 
@@ -226,7 +226,7 @@ export function DemoClient() {
 
   return (
     <div className='flex flex-col h-full w-full bg-zinc-950'>
-      {/* Content area - EXACT same structure as MarketingMiniApp */}
+      {/* Content area - Demo content area */}
       <div
         className='flex-1 overflow-y-auto demo-mobile-view'
         id='demo-preview-container'

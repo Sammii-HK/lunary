@@ -27,7 +27,7 @@ function checkRateLimit(ip: string): boolean {
  * GET /api/persona/profile
  * Fetches profile data for the marketing persona
  * Email is stored server-side only (not exposed to client)
- * Used by the MarketingMiniApp to display real, live data in the preview
+ * Used by the demo to display real, live persona data
  *
  * Security:
  * - Email never exposed to client (server-side env var only)
