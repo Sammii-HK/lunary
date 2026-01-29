@@ -19,7 +19,7 @@ export async function GET(request: NextRequest, context: unknown) {
       // Demo mode: Look up REAL persona account from database
       try {
         const userResult = await sql`
-          SELECT id FROM users WHERE email = ${process.env.PERSONA_EMAIL} LIMIT 1
+          SELECT id FROM "user" WHERE email = ${process.env.PERSONA_EMAIL} LIMIT 1
         `;
 
         if (userResult.rows.length === 0) {

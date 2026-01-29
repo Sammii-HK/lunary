@@ -360,6 +360,14 @@ export async function trackEvent(
   data?: Partial<ConversionEventData>,
 ): Promise<void> {
   try {
+    // SECURITY: Block analytics from demo iframe
+    if (
+      typeof window !== 'undefined' &&
+      window.location.pathname.startsWith('/demo-preview')
+    ) {
+      return; // Silently skip analytics in demo mode
+    }
+
     const utmParams = extractUTMParams();
     const attributionData = getAttributionForTracking();
     const originMetadata = event === 'signup' ? getOriginMetadata() : {};

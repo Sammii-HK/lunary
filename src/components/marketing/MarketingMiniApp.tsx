@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef, Suspense, useMemo } from 'react';
+import { useState, useEffect, useRef, Suspense } from 'react';
 import {
   Home,
   Layers,
@@ -14,8 +14,7 @@ import { UserProvider } from '@/context/UserContext';
 import { AstronomyContextProvider } from '@/context/AstronomyContext';
 import { AuthStatusProvider } from '@/components/AuthStatus';
 import { TourProvider } from '@/context/TourContext';
-import type { UserData } from '@/context/UserContext';
-import referenceChartData from '@/lib/reference-chart-data.json';
+import { DEMO_USER_DATA } from '@/constants/demoData';
 import { DemoNavigationProvider } from './DemoNavigationProvider';
 import { DemoModeProvider } from './DemoModeProvider';
 import { ForceMobileLayout } from './ForceMobileLayout';
@@ -91,7 +90,15 @@ export function MarketingMiniApp() {
   }
 
   // Use static fallback data for demo (no API calls)
-  const celesteUser = useMemo(() => createFallbackUser(), []);
+  const celesteUser = DEMO_USER_DATA;
+
+  useEffect(() => {
+    console.log('[MarketingMiniApp] Using demo user:', {
+      subscriptionPlan: celesteUser.subscriptionPlan,
+      subscriptionStatus: celesteUser.subscriptionStatus,
+      isPaid: celesteUser.isPaid,
+    });
+  }, []);
 
   // Preload the app dashboard component on mount for faster initial render
   useEffect(() => {
@@ -735,30 +742,4 @@ export function MarketingMiniApp() {
       </div>
     </div>
   );
-}
-
-// Fallback user data if API fetch fails
-function createFallbackUser(): UserData {
-  return {
-    id: 'celeste-demo',
-    email: 'celeste@lunary.app',
-    name: referenceChartData.persona.name,
-    birthday: referenceChartData.persona.birthDate,
-    birthChart: referenceChartData.planets as any,
-    hasBirthChart: true,
-    hasPersonalCard: true,
-    isPaid: true,
-    subscriptionStatus: 'active',
-    subscriptionPlan: 'pro',
-    location: {
-      latitude: 51.5074,
-      longitude: -0.1278,
-      city: 'London',
-      country: 'UK',
-      timezone: 'Europe/London',
-      birthTime: referenceChartData.persona.birthTime,
-      birthLocation: referenceChartData.persona.birthLocation,
-      birthTimezone: 'Europe/London',
-    },
-  };
 }

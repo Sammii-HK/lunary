@@ -45,8 +45,19 @@ const normalizePlan = (
   if (planType === 'yearly') return 'yearly';
   if (planType === 'monthly') return 'monthly';
 
-  // Fallback to status-based detection
-  if (status === 'trial') return 'monthly';
+  // Trial users should get their plan type, not default to monthly
+  if (status === 'trial' || status === 'trialing') {
+    // If they have a specific plan type, use it
+    if (planType?.includes('annual') || planType?.includes('yearly')) {
+      return 'yearly';
+    }
+    if (planType?.includes('monthly') || planType?.includes('plus')) {
+      return 'monthly';
+    }
+    // Default trial to monthly
+    return 'monthly';
+  }
+
   if (status === 'active' && planType) {
     return planType as TarotPlan;
   }

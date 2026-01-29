@@ -27,7 +27,7 @@ export async function GET(request: NextRequest) {
 
       try {
         const userResult = await sql`
-          SELECT id, email FROM users WHERE email = ${process.env.PERSONA_EMAIL} LIMIT 1
+          SELECT id, email FROM "user" WHERE email = ${process.env.PERSONA_EMAIL} LIMIT 1
         `;
 
         console.log('[Tarot API] User lookup result:', {
@@ -127,6 +127,14 @@ export async function GET(request: NextRequest) {
     const subscription = await getSubscription(userId, userEmail);
     const usage = await computeUsageSnapshot(userId, subscription);
 
+    console.log('[tarot/readings] GET - Subscription check:', {
+      userId,
+      userEmail,
+      subscription_plan: subscription.plan,
+      subscription_status: subscription.status,
+      isDemoMode: !!demoUserId,
+    });
+
     const historyCutoffDays = usage.historyWindowDays;
     const cutoffDate =
       subscription.plan === 'free'
@@ -196,6 +204,7 @@ export async function GET(request: NextRequest) {
       subscription_plan: subscription.plan,
       subscription_status: subscription.status,
       spreads_unlocked_count: spreadsUnlocked.length,
+      spreads_unlocked: spreadsUnlocked,
       total_spreads: Object.keys(TAROT_SPREAD_MAP).length,
       usage_limit: usage.monthlyLimit,
       usage_used: usage.monthlyUsed,

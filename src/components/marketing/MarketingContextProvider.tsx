@@ -2,34 +2,12 @@
 
 import { ReactNode, createContext, useContext } from 'react';
 import ctaExamples from '@/lib/cta-examples.json';
-import referenceChartData from '@/lib/reference-chart-data.json';
-import type { UserData } from '@/context/UserContext';
+import { DEMO_USER_DATA } from '@/constants/demoData';
 
 // Create marketing-specific contexts that mirror the real ones
 
-// Mock user data for Celeste
-const mockUser: UserData = {
-  id: 'celeste-demo',
-  email: 'celeste@lunary.app',
-  name: referenceChartData.persona.name,
-  birthday: referenceChartData.persona.birthDate,
-  birthChart: referenceChartData.planets as any,
-  hasBirthChart: true,
-  hasPersonalCard: true,
-  isPaid: true,
-  subscriptionStatus: 'active',
-  subscriptionPlan: 'pro',
-  location: {
-    latitude: 51.5074,
-    longitude: -0.1278,
-    city: 'London',
-    country: 'UK',
-    timezone: 'Europe/London',
-    birthTime: referenceChartData.persona.birthTime,
-    birthLocation: referenceChartData.persona.birthLocation,
-    birthTimezone: 'Europe/London',
-  },
-};
+// Mock user data for Celeste (imported from single source of truth)
+const mockUser = DEMO_USER_DATA;
 
 // Marketing User Context
 const MarketingUserContext = createContext({

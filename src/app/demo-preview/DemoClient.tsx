@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useMemo, Suspense } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import dynamic from 'next/dynamic';
 // lucide-react automatically tree-shakes with modern bundlers
 import {
@@ -15,8 +15,7 @@ import { UserProvider } from '@/context/UserContext';
 import { AstronomyContextProvider } from '@/context/AstronomyContext';
 import { AuthStatusProvider } from '@/components/AuthStatus';
 import { TourProvider } from '@/context/TourContext';
-import type { UserData } from '@/context/UserContext';
-import referenceChartData from '@/lib/reference-chart-data.json';
+import { DEMO_USER_DATA } from '@/constants/demoData';
 import { DemoNavigationProvider } from '@/components/marketing/DemoNavigationProvider';
 import { DemoModeProvider } from '@/components/marketing/DemoModeProvider';
 import { ForceMobileLayout } from '@/components/marketing/ForceMobileLayout';
@@ -73,31 +72,6 @@ function DashboardSkeleton() {
 }
 
 // Same user data as MarketingMiniApp
-function createFallbackUser(): UserData {
-  return {
-    id: 'celeste-demo',
-    email: 'celeste@lunary.app',
-    name: referenceChartData.persona.name,
-    birthday: referenceChartData.persona.birthDate,
-    birthChart: referenceChartData.planets as any,
-    hasBirthChart: true,
-    hasPersonalCard: true,
-    isPaid: true,
-    subscriptionStatus: 'active',
-    subscriptionPlan: 'pro',
-    location: {
-      latitude: 51.5074,
-      longitude: -0.1278,
-      city: 'London',
-      country: 'UK',
-      timezone: 'Europe/London',
-      birthTime: referenceChartData.persona.birthTime,
-      birthLocation: referenceChartData.persona.birthLocation,
-      birthTimezone: 'Europe/London',
-    },
-  };
-}
-
 // Only cycle through these tabs (skip guide/explore) - OUTSIDE component to avoid re-renders
 const cyclableTabs: TabId[] = ['app', 'tarot', 'horoscope'];
 
@@ -105,7 +79,7 @@ export function DemoClient() {
   const [activeTab, setActiveTab] = useState<TabId>('app');
   const [userHasInteracted, setUserHasInteracted] = useState(false);
   const [cycleProgress, setCycleProgress] = useState(0);
-  const celesteUser = useMemo(() => createFallbackUser(), []);
+  const celesteUser = DEMO_USER_DATA;
 
   useEffect(() => {
     // Warm preload other tab components for instant switching
