@@ -124,10 +124,7 @@ const findFirstUnlockedSpread = (
 };
 
 function CollapsibleSpreadLibrary({ children }: { children: ReactNode }) {
-  // Start open in demo mode to show spreads immediately
-  const [isCollapsed, setIsCollapsed] = useState(() => {
-    return !isInDemoMode(); // Open if demo (false = not collapsed)
-  });
+  const [isCollapsed, setIsCollapsed] = useState(false);
 
   return (
     <div className='space-y-2'>

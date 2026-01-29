@@ -127,14 +127,6 @@ export async function GET(request: NextRequest) {
     const subscription = await getSubscription(userId, userEmail);
     const usage = await computeUsageSnapshot(userId, subscription);
 
-    console.log('[tarot/readings] GET - Subscription check:', {
-      userId,
-      userEmail,
-      subscription_plan: subscription.plan,
-      subscription_status: subscription.status,
-      isDemoMode: !!demoUserId,
-    });
-
     const historyCutoffDays = usage.historyWindowDays;
     const cutoffDate =
       subscription.plan === 'free'
@@ -199,18 +191,6 @@ export async function GET(request: NextRequest) {
     );
 
     const isDemoMode = !!demoUserId;
-
-    console.log(`[tarot/readings] GET response for user ${userId}:`, {
-      subscription_plan: subscription.plan,
-      subscription_status: subscription.status,
-      spreads_unlocked_count: spreadsUnlocked.length,
-      spreads_unlocked: spreadsUnlocked,
-      total_spreads: Object.keys(TAROT_SPREAD_MAP).length,
-      usage_limit: usage.monthlyLimit,
-      usage_used: usage.monthlyUsed,
-      is_demo: isDemoMode,
-    });
-
     const response = NextResponse.json({
       readings,
       usage,

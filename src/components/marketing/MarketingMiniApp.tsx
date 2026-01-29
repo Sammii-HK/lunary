@@ -92,14 +92,6 @@ export function MarketingMiniApp() {
   // Use static fallback data for demo (no API calls)
   const celesteUser = DEMO_USER_DATA;
 
-  useEffect(() => {
-    console.log('[MarketingMiniApp] Using demo user:', {
-      subscriptionPlan: celesteUser.subscriptionPlan,
-      subscriptionStatus: celesteUser.subscriptionStatus,
-      isPaid: celesteUser.isPaid,
-    });
-  }, []);
-
   // Preload the app dashboard component on mount for faster initial render
   useEffect(() => {
     import('@/app/(authenticated)/app/AppDashboardClient');

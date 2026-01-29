@@ -66,13 +66,6 @@ export function useSubscription(): SubscriptionStatus {
     const rawPlan = user.subscriptionPlan || 'free';
     const normalizedPlan = normalizePlanType(rawPlan);
 
-    console.log('[useSubscription] Processing user subscription:', {
-      rawPlan,
-      normalizedPlan,
-      status,
-      userId: user.id,
-    });
-
     // Determine plan for state (free/monthly/yearly)
     const planForState: 'free' | 'monthly' | 'yearly' =
       normalizedPlan === 'lunary_plus_ai_annual'
