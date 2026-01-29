@@ -12,7 +12,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { CTA_COPY } from '@/lib/cta-copy';
 import { moonPhaseIconMap } from '@/lib/constants/moon';
-import { ctaExamples } from '@/lib/cta-examples';
+import ctaExamples from '@/lib/cta-examples.json';
 
 export function ControlVariant() {
   return (
