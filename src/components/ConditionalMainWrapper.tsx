@@ -57,6 +57,8 @@ export function ConditionalMainWrapper({
       '/press-kit',
       '/developers',
       '/pricing',
+      '/features',
+      '/faq',
       '/about',
     ];
     const isCoreMarketingRoute =

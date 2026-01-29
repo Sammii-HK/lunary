@@ -26,7 +26,7 @@ const DateWidget = dynamic(
   },
 );
 import dayjs from 'dayjs';
-import { useDemoMode } from '@/components/marketing/DemoModeProvider';
+import { isInDemoMode } from '@/lib/demo-mode';
 
 const MoonPreview = dynamic(
   () =>
@@ -86,7 +86,13 @@ const PersonalizedHoroscopePreview = dynamic(
       default: m.PersonalizedHoroscopePreview,
     })),
   {
-    loading: () => <div className='min-h-0' />,
+    loading: () => (
+      <div className='bg-gradient-to-br from-lunary-primary-900/30 to-lunary-accent-900/20 rounded-xl p-4 border border-lunary-primary-800/30 animate-pulse'>
+        <div className='h-4 bg-lunary-primary-800/30 rounded w-3/4 mb-3' />
+        <div className='h-3 bg-lunary-primary-800/20 rounded w-full mb-2' />
+        <div className='h-3 bg-lunary-primary-800/20 rounded w-5/6' />
+      </div>
+    ),
     ssr: false,
   },
 );
@@ -142,24 +148,21 @@ export default function AppDashboardClient() {
   const { startTour, hasSeenOnboarding } = useTour();
   const [focusHonoured, setFocusHonoured] = useState(false);
   const firstName = user?.name?.trim() ? user.name.split(' ')[0] : null;
-  const demoContext = useDemoMode();
-  const [isDemoMode, setIsDemoMode] = useState(
-    demoContext?.isDemoMode || false,
-  );
+  const [isDemoMode, setIsDemoMode] = useState(false);
   // Always use controlled mode - start with false, never undefined
   const [moonExpanded, setMoonExpanded] = useState<boolean>(false);
+
+  // Defer heavy components for faster initial render
+  const [showHoroscope, setShowHoroscope] = useState(false);
 
   // Detect demo mode from context OR DOM (for reliability on tab changes)
   useEffect(() => {
     const checkDemoMode = () => {
-      const inDemoContainer =
-        document.getElementById('demo-preview-container') !== null;
-      const contextDemoMode = demoContext?.isDemoMode || false;
-      setIsDemoMode(inDemoContainer || contextDemoMode);
+      setIsDemoMode(isInDemoMode());
     };
 
     checkDemoMode();
-  }, [demoContext]);
+  }, []);
 
   // Auto-expand moon card logic
   useEffect(() => {
@@ -217,6 +220,26 @@ export default function AppDashboardClient() {
     authState.user?.email,
     today,
   ]);
+
+  // Prefetch horoscope data early, but defer component render
+  useEffect(() => {
+    if (authState.isAuthenticated && user?.birthday) {
+      // Prefetch the API in background
+      fetch('/api/horoscope/daily', { credentials: 'include' }).catch(() => {
+        // Silent fail - component will handle fallback
+      });
+    }
+  }, [authState.isAuthenticated, user?.birthday]);
+
+  // Defer PersonalizedHoroscopePreview for faster initial load
+  useEffect(() => {
+    // Wait for page to be interactive before loading heavy component
+    const timer = setTimeout(() => {
+      setShowHoroscope(true);
+    }, 100); // Small delay to prioritize above-the-fold content
+
+    return () => clearTimeout(timer);
+  }, []);
 
   useEffect(() => {
     if (!authState.isAuthenticated) {
@@ -293,7 +316,7 @@ export default function AppDashboardClient() {
         </div>
       </header>
 
-      <PersonalizedHoroscopePreview />
+      {showHoroscope && <PersonalizedHoroscopePreview />}
       <div
         id='dashboard-main-grid'
         className={`grid gap-3 ${isDemoMode ? 'grid-cols-1' : 'grid-cols-1 md:grid-cols-2'}`}
