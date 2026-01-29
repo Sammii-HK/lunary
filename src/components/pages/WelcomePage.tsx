@@ -1,3 +1,5 @@
+'use client';
+
 import Link from 'next/link';
 import {
   Telescope,
@@ -22,6 +24,9 @@ import { renderJsonLd } from '@/lib/schema';
 import { MarketingMiniApp } from '@/components/marketing/MarketingMiniApp';
 import ctaExamples from '@/lib/cta-examples.json';
 import { CTA_COPY } from '@/lib/cta-copy';
+import { FAQAccordion } from '@/components/FAQ';
+import { getHomepageFAQs } from '@/lib/faq-helpers';
+import { useState } from 'react';
 
 const moonPhaseIconMap: Record<string, string> = {
   'New Moon': '/icons/moon-phases/new-moon.svg',
@@ -49,6 +54,9 @@ const structuredData = {
 };
 
 export default function WelcomePage() {
+  const [openFAQId, setOpenFAQId] = useState<string | null>(null);
+  const homepageFAQs = getHomepageFAQs();
+
   return (
     <>
       {renderJsonLd(structuredData)}
@@ -866,8 +874,51 @@ export default function WelcomePage() {
           </div>
         </section>
 
-        {/* Section 13: Final CTA */}
+        {/* Section 13: FAQs */}
         <section className='py-12 md:py-20 px-4 md:px-6 bg-zinc-900/20'>
+          <div className='max-w-3xl mx-auto'>
+            <h2 className='text-2xl md:text-3xl font-light text-zinc-100 text-center mb-12'>
+              Common questions
+            </h2>
+            <div className='space-y-3'>
+              {homepageFAQs.map((faq) => (
+                <FAQAccordion
+                  key={faq.id}
+                  question={faq.question}
+                  answer={faq.answer}
+                  isOpen={openFAQId === faq.id}
+                  onToggle={() =>
+                    setOpenFAQId(openFAQId === faq.id ? null : faq.id)
+                  }
+                />
+              ))}
+            </div>
+            <div className='text-center mt-8'>
+              <Link
+                href='/faq'
+                className='text-sm text-lunary-primary-300 hover:text-lunary-primary-200 transition-colors inline-flex items-center gap-2'
+              >
+                View all FAQs
+                <svg
+                  className='w-4 h-4'
+                  fill='none'
+                  viewBox='0 0 24 24'
+                  stroke='currentColor'
+                >
+                  <path
+                    strokeLinecap='round'
+                    strokeLinejoin='round'
+                    strokeWidth={2}
+                    d='M9 5l7 7-7 7'
+                  />
+                </svg>
+              </Link>
+            </div>
+          </div>
+        </section>
+
+        {/* Section 14: Final CTA */}
+        <section className='py-12 md:py-20 px-4 md:px-6 border-t border-zinc-800/30'>
           <div className='max-w-2xl mx-auto text-center space-y-5'>
             <h2 className='text-2xl md:text-3xl font-light text-zinc-100'>
               Understanding yourself changes everything.
@@ -888,7 +939,7 @@ export default function WelcomePage() {
           </div>
         </section>
 
-        {/* Section 14: Newsletter */}
+        {/* Section 15: Newsletter */}
         <section className='py-12 md:py-20 px-4 md:px-6'>
           <div className='max-w-4xl mx-auto'>
             <NewsletterSignupForm

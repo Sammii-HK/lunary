@@ -44,6 +44,11 @@ export const marketingSectionItems: Record<
   ],
   resources: [
     {
+      title: 'FAQ',
+      href: '/faq',
+      description: 'Frequently asked questions about Lunary.',
+    },
+    {
       title: 'Help Center',
       href: '/help',
       description: 'Answers to common questions and support.',
