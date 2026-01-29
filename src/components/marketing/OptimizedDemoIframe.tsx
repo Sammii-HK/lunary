@@ -60,6 +60,28 @@ export function OptimizedDemoIframe({
   // Track load performance
   useEffect(() => {
     const handleMessage = (event: MessageEvent) => {
+      // SECURITY: Verify message origin to prevent malicious cross-origin messages
+      if (typeof window === 'undefined') return;
+
+      // Only accept messages from same origin (demo-preview is same-origin iframe)
+      if (event.origin !== window.location.origin) {
+        console.warn(
+          '[Demo Iframe] Rejected message from untrusted origin:',
+          event.origin,
+        );
+        return;
+      }
+
+      // Verify message comes from our specific iframe
+      if (
+        iframeRef.current &&
+        event.source !== iframeRef.current.contentWindow
+      ) {
+        console.warn('[Demo Iframe] Rejected message from non-iframe source');
+        return;
+      }
+
+      // Process legitimate DEMO_READY message
       if (event.data.type === 'DEMO_READY') {
         const time = Date.now() - loadStartTime;
         setLoadTime(time);
