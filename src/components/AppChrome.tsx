@@ -9,7 +9,6 @@ import { NotificationManager } from '@/components/NotificationManager';
 import { ExitIntent } from '@/components/ExitIntent';
 import { OnboardingFlow } from '@/components/OnboardingFlow';
 import { ErrorBoundaryWrapper } from '@/components/ErrorBoundaryWrapper';
-import { BetaBanner } from '@/components/BetaBanner';
 import { Button } from '@/components/ui/button';
 import {
   Modal,
@@ -280,8 +279,6 @@ export function AppChrome() {
     navOverride !== 'marketing' &&
     !isAdminSurface;
 
-  const showBetaBanner = !authState.loading && !authState.isAuthenticated;
-
   useEffect(() => {
     if (typeof window === 'undefined') return;
 
@@ -332,13 +329,12 @@ export function AppChrome() {
       resizeObserver?.disconnect();
       window.removeEventListener('resize', setNavOffset);
     };
-  }, [showMarketingNav, showAppNav, showBetaBanner]);
+  }, [showMarketingNav, showAppNav]);
 
   return (
     <>
       {!isAdminSurface && (
         <>
-          {showMarketingNav && <BetaBanner />}
           {showMarketingNav && <MarketingNavbar />}
           {showAppNav && (
             <>
