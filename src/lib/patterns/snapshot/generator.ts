@@ -16,6 +16,7 @@ import {
 
 /**
  * Generate life themes snapshot from user's journal, tarot, and dreams
+ * Uses the REAL life themes engine with proper scoring
  */
 export async function generateLifeThemesSnapshot(
   userId: string,
@@ -32,18 +33,7 @@ export async function generateLifeThemesSnapshot(
       LIMIT 30
     `;
 
-    // Fetch tarot patterns
-    const patternsResult = await sql`
-      SELECT pattern_data
-      FROM journal_patterns
-      WHERE user_id = ${userId}
-        AND pattern_type LIKE '%tarot%'
-        AND expires_at > NOW()
-      ORDER BY generated_at DESC
-      LIMIT 20
-    `;
-
-    // Fetch dream tags
+    // Fetch dreams
     const dreamsResult = await sql`
       SELECT content, tags
       FROM collections
@@ -54,43 +44,72 @@ export async function generateLifeThemesSnapshot(
       LIMIT 20
     `;
 
-    // Extract mood tags from journal entries
-    const journalEntries = journalResult.rows.map((row) => ({
-      content: row.content || '',
-      moodTags: Array.isArray(row.tags) ? row.tags : [],
-      createdAt: row.created_at,
-    }));
+    // Fetch tarot readings for pattern analysis
+    const tarotResult = await sql`
+      SELECT cards
+      FROM tarot_readings
+      WHERE user_id = ${userId}
+        AND created_at >= NOW() - INTERVAL '30 days'
+      ORDER BY created_at DESC
+    `;
+
+    // Format journal entries with defensive type checking
+    const journalEntries = journalResult.rows.map((row) => {
+      // Ensure content is a string
+      let content = '';
+      if (typeof row.content === 'string') {
+        content = row.content;
+      } else if (row.content && typeof row.content === 'object') {
+        // If it's stored as JSON, stringify it
+        content = JSON.stringify(row.content);
+      } else if (row.content) {
+        // Try to convert to string
+        content = String(row.content);
+      }
+
+      return {
+        content,
+        moodTags: Array.isArray(row.tags) ? row.tags : [],
+        createdAt: row.created_at,
+      };
+    });
 
     // Extract dream tags
     const dreamTags = dreamsResult.rows.flatMap((row) =>
       Array.isArray(row.tags) ? row.tags : [],
     );
 
-    // Build tarot patterns summary
+    // Build tarot patterns from readings
     let tarotPatterns = null;
-    if (patternsResult.rows.length > 0) {
-      const dominantThemes = new Map<string, number>();
-      const frequentCards = new Map<string, number>();
+    if (tarotResult.rows.length >= 5) {
+      const cardCounts = new Map<string, number>();
       const suitCounts = new Map<string, number>();
 
-      for (const row of patternsResult.rows) {
-        const pattern = row.pattern_data;
-        // Extract themes, cards, suits from pattern data
-        // This depends on the actual pattern structure
+      for (const row of tarotResult.rows) {
+        const cards = Array.isArray(row.cards) ? row.cards : [];
+        for (const cardData of cards) {
+          const card = cardData.card || cardData;
+          const cardName = card.name || '';
+          const suit = card.suit || card.arcana || 'Major Arcana';
+
+          cardCounts.set(cardName, (cardCounts.get(cardName) || 0) + 1);
+          suitCounts.set(suit, (suitCounts.get(suit) || 0) + 1);
+        }
       }
 
+      const frequentCards = Array.from(cardCounts.entries())
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, 10)
+        .map(([name, count]) => ({ name, count }));
+
+      const suitDistribution = Array.from(suitCounts.entries())
+        .map(([suit, count]) => ({ suit, count }))
+        .sort((a, b) => b.count - a.count);
+
       tarotPatterns = {
-        dominantThemes: Array.from(dominantThemes.entries())
-          .sort((a, b) => b[1] - a[1])
-          .slice(0, 5)
-          .map(([theme]) => theme),
-        frequentCards: Array.from(frequentCards.entries())
-          .sort((a, b) => b[1] - a[1])
-          .slice(0, 10)
-          .map(([card, count]) => ({ card, count })),
-        suitDistribution: Array.from(suitCounts.entries())
-          .map(([suit, count]) => ({ suit, count }))
-          .sort((a, b) => b.count - a.count),
+        dominantThemes: [],
+        frequentCards,
+        suitDistribution,
       };
     }
 
@@ -105,7 +124,7 @@ export async function generateLifeThemesSnapshot(
       return null;
     }
 
-    // Analyze themes
+    // Use the REAL Life Themes engine!
     const themes = analyzeLifeThemes(input, 3);
 
     if (themes.length === 0) {
@@ -116,12 +135,15 @@ export async function generateLifeThemesSnapshot(
     const snapshot: LifeThemeSnapshot = {
       type: 'life_themes',
       themes: themes.map((theme) => ({
+        id: theme.id,
         name: theme.name,
-        confidence: theme.confidence,
+        score: theme.score,
+        shortSummary: theme.shortSummary,
         sources: {
-          journalMentions: theme.sources.journalCount || 0,
-          tarotCards: theme.sources.tarotCards || [],
-          dreamTags: theme.sources.dreamTags || [],
+          journalEntries: journalEntries.length,
+          tarotCards:
+            tarotPatterns?.frequentCards.slice(0, 5).map((c) => c.name) || [],
+          dreamTags: dreamTags.slice(0, 10),
         },
       })),
       dominantTheme: themes[0].name,

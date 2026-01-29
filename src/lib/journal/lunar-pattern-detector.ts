@@ -27,7 +27,7 @@ export type LunarCyclePattern = {
 export function detectLunarSensitivity(
   birthChart: BirthChartData[],
 ): LunarCyclePattern | null {
-  const moonPlacement = birthChart.find((p) => p.planet === 'Moon');
+  const moonPlacement = birthChart.find((p) => p.body === 'Moon');
   if (!moonPlacement) return null;
 
   const angularHouses = [1, 4, 7, 10];

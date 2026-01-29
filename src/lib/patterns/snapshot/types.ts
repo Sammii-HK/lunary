@@ -15,15 +15,17 @@ export type SnapshotPatternType =
 export interface LifeThemeSnapshot {
   type: 'life_themes';
   themes: Array<{
-    name: string; // 'healing', 'transformation', 'creativity', etc.
-    confidence: number;
+    id: string; // 'healing', 'transformation', 'seeking', 'creation', etc.
+    name: string; // 'Healing & Restoration', 'Deep Transformation', etc.
+    score: number; // Scoring from the engine (higher = stronger match)
+    shortSummary: string; // Brief description of the theme
     sources: {
-      journalMentions: number;
-      tarotCards: string[];
-      dreamTags: string[];
+      journalEntries: number; // Count of journal entries analyzed
+      tarotCards: string[]; // Top tarot cards that triggered this theme
+      dreamTags: string[]; // Dream tags that contributed
     };
   }>;
-  dominantTheme: string;
+  dominantTheme: string; // ID of the dominant theme
   timestamp: string;
 }
 

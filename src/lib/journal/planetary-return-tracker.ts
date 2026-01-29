@@ -109,7 +109,7 @@ export function calculatePlanetaryReturns(
   const returnPlanets = ['Sun', 'Jupiter', 'Saturn'];
 
   returnPlanets.forEach((planet) => {
-    const placement = birthChart.find((p) => p.planet === planet);
+    const placement = birthChart.find((p) => p.body === planet);
     if (!placement) return;
 
     const { proximityDays, returnDate, phase } = estimateReturnProximity(
