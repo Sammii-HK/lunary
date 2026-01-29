@@ -30,6 +30,11 @@ export type TransitRecord = {
   exactUtc: string;
   applying: boolean;
   strength: number;
+  duration?: {
+    totalDays: number;
+    remainingDays: number;
+    displayText: string;
+  };
 };
 
 export type MoonSnapshot = {

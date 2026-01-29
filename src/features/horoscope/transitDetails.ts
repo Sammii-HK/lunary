@@ -8,6 +8,11 @@ export interface TransitAspect {
   natalDegree: string;
   orbDegrees: number;
   house?: number;
+  duration?: {
+    totalDays: number;
+    remainingDays: number;
+    displayText: string;
+  };
 }
 
 export type IntensityLevel =

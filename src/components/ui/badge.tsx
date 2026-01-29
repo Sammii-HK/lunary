@@ -19,6 +19,10 @@ const badgeVariants = cva(
         warning:
           'border-transparent bg-lunary-accent text-white hover:bg-lunary-accent-400',
         error: 'border-transparent bg-red-500 text-white hover:bg-red-600',
+        'cosmic-rose':
+          'border-transparent bg-[#EE789E] text-white hover:bg-[#EE789E]/80',
+        aurora:
+          'border-transparent bg-[#6B9B7A] text-white hover:bg-[#6B9B7A]/80',
       },
     },
     defaultVariants: {
