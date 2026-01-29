@@ -55,6 +55,11 @@ export interface TransitDetail {
   meaning: string;
   suggestion: string;
   premium?: TransitPremiumDetail;
+  duration?: {
+    totalDays: number;
+    remainingDays: number;
+    displayText: string;
+  };
 }
 
 type Intensity = 'Subtle' | 'Strong' | 'Exact';
@@ -622,6 +627,7 @@ export function buildTransitDetails(
       ),
       suggestion: buildSuggestion(aspect.transitPlanet),
       premium,
+      duration: aspect.duration,
     };
   });
 }

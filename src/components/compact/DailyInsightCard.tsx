@@ -32,6 +32,7 @@ import {
   TransitAspect,
   TransitDetail,
 } from '@/features/horoscope';
+import { TransitDurationBadge } from '../TransitDurationBadge';
 
 const getOrdinalSuffix = (n: number): string => {
   if (n >= 11 && n <= 13) return 'th';
@@ -490,6 +491,19 @@ export const DailyInsightCard = () => {
             </span> */}
           </div>
           <p className='text-sm text-zinc-300 leading-relaxed'>{displayText}</p>
+          {transitHighlights.length > 0 && (
+            <div className='flex flex-wrap gap-1.5 mt-2'>
+              {transitHighlights.map(
+                (transit) =>
+                  transit.duration && (
+                    <TransitDurationBadge
+                      key={`${transit.planet}-${transit.event}`}
+                      duration={transit.duration}
+                    />
+                  ),
+              )}
+            </div>
+          )}
           {transitDetails.length > 0 && (
             <div className='mt-2 space-y-1'>
               {transitDetails.map((detail) => (
