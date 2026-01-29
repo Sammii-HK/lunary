@@ -18,7 +18,6 @@ import { TourProvider } from '@/context/TourContext';
 import { DEMO_USER_DATA } from '@/constants/demoData';
 import { DemoNavigationProvider } from '@/components/marketing/DemoNavigationProvider';
 import { DemoModeProvider } from '@/components/marketing/DemoModeProvider';
-import { ForceMobileLayout } from '@/components/marketing/ForceMobileLayout';
 
 // Set demo mode IMMEDIATELY
 if (typeof window !== 'undefined') {
@@ -247,30 +246,22 @@ export function DemoClient() {
                 <AstronomyContextProvider>
                   <TourProvider demoMode={true}>
                     <Suspense fallback={<DashboardSkeleton />}>
-                      {activeTab === 'app' && (
-                        <ForceMobileLayout>
-                          <AppDashboardClient />
-                        </ForceMobileLayout>
-                      )}
+                      {activeTab === 'app' && <AppDashboardClient />}
                       {activeTab === 'tarot' && (
-                        <ForceMobileLayout>
-                          <TarotView
-                            hasPaidAccess={celesteUser.isPaid}
-                            userName={celesteUser.name}
-                            userBirthday={celesteUser.birthday}
-                            user={celesteUser}
-                          />
-                        </ForceMobileLayout>
+                        <TarotView
+                          hasPaidAccess={celesteUser.isPaid}
+                          userName={celesteUser.name}
+                          userBirthday={celesteUser.birthday}
+                          user={celesteUser}
+                        />
                       )}
                       {activeTab === 'horoscope' && (
-                        <ForceMobileLayout>
-                          <HoroscopeView
-                            hasPaidAccess={celesteUser.isPaid}
-                            userName={celesteUser.name}
-                            userBirthday={celesteUser.birthday}
-                            profile={celesteUser}
-                          />
-                        </ForceMobileLayout>
+                        <HoroscopeView
+                          hasPaidAccess={celesteUser.isPaid}
+                          userName={celesteUser.name}
+                          userBirthday={celesteUser.birthday}
+                          profile={celesteUser}
+                        />
                       )}
                     </Suspense>
                     {activeTab === 'guide' && (
