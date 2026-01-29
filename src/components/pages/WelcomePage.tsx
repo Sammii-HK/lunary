@@ -104,12 +104,12 @@ export default function WelcomePage() {
             offering fixed meanings or one-size-fits-all readings, it helps you
             understand patterns, timing, and cycles as they unfold.
           </p>
-          <a
-            href='#how-it-works'
+          <Link
+            href='/features'
             className='text-sm text-lunary-primary-400 hover:text-lunary-primary-200 transition-colors inline-block mt-4'
           >
             See all features
-          </a>
+          </Link>
         </section>
 
         {/* Section 2: Problem Recognition */}
