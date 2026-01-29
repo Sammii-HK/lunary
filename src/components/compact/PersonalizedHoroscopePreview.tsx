@@ -275,7 +275,7 @@ export const PersonalizedHoroscopePreview = () => {
       >
         <div className='space-y-3'>
           <div>
-            <h3 className='text-sm font-semibold leading-snug text-zinc-100 flex items-center'>
+            <h3 className='text-sm leading-snug text-zinc-100 flex items-center'>
               <Orbit className='mr-2 w-4 h-4 text-lunary-accent-300' />
               Today's Cosmic Energy
             </h3>
@@ -301,7 +301,7 @@ export const PersonalizedHoroscopePreview = () => {
                 </span>
               </div>
 
-              <span className='flex items-center gap-1.5 text-xs text-lunary-primary-200 hover:text-lunary-primary-100 transition-colors font-medium'>
+              <span className='flex items-center gap-1.5 text-xs text-lunary-primary-200 hover:text-lunary-primary-100 transition-colors'>
                 <span>{ctaCopy.horoscope}</span>
                 <ArrowRight className='w-4 h-4' />
               </span>
@@ -321,7 +321,7 @@ export const PersonalizedHoroscopePreview = () => {
       <div className='space-y-3'>
         <div className='flex items-center justify-between gap-3'>
           <div>
-            <h3 className='text-sm font-semibold leading-snug text-zinc-100 flex'>
+            <h3 className='text-sm leading-snug text-zinc-100 flex'>
               <Orbit className='mr-2 w-4 h-4 text-lunary-accent-300' />
               {horoscope?.headline || 'Personalized review'}
             </h3>
@@ -389,7 +389,7 @@ export const PersonalizedHoroscopePreview = () => {
                     event.stopPropagation();
                     handleJournalClick(event);
                   }}
-                  className='text-[0.65rem] font-medium text-lunary-accent hover:text-lunary-accent-100 transition-colors'
+                  className='text-[0.65rem] text-lunary-accent hover:text-lunary-accent-100 transition-colors'
                 >
                   Journal about it
                 </button>

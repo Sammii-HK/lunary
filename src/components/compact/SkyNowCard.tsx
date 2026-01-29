@@ -412,9 +412,7 @@ export const SkyNowCard = () => {
                 >
                   {getPlanetSymbol(planet.body)}
                 </span>
-                <span className='text-sm font-medium text-zinc-200'>
-                  {planet.body}
-                </span>
+                <span className='text-sm text-zinc-200'>{planet.body}</span>
                 <span className='font-astro text-zinc-400'>
                   {getZodiacSymbol(planet.sign)}
                 </span>
@@ -429,9 +427,7 @@ export const SkyNowCard = () => {
                   </span>
                 )}
                 {planet.retrograde && (
-                  <span className='text-xs text-lunary-error-300 font-medium'>
-                    ℞
-                  </span>
+                  <span className='text-xs text-lunary-error-300'>℞</span>
                 )}
               </div>
               <p className='text-xs text-zinc-400 mt-1 ml-7'>

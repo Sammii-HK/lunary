@@ -22,6 +22,8 @@ import { MarketingFooter } from '@/components/MarketingFooter';
 import { createProductSchema, renderJsonLd } from '@/lib/schema';
 import { AuthComponent } from '@/components/Auth';
 import { useModal } from '@/hooks/useModal';
+import { PricingComparisonTable } from '@/components/PricingComparisonTable';
+import { CTA_COPY } from '@/lib/cta-copy';
 
 const formatChatFeature = (plan: PricingPlan): string | undefined => {
   if (!plan.chatLabel) return undefined;
@@ -242,9 +244,9 @@ export default function PricingPage() {
         'Full access to personalised features, including complete birth chart analysis and daily horoscopes. Astral Guide chat is included according to the selected plan. No card required to start.',
     },
     {
-      question: 'Is Lunary AI-led?',
+      question: 'How does Lunary work?',
       answer:
-        'No. Charts and timings come from real astronomical data. AI is used only in the Astral Guide chat to interpret your chart, patterns, and the current sky.',
+        'Charts and timings come from real astronomical data. The Astral Guide chat interprets your chart, patterns, and the current sky.',
     },
     {
       question: 'Can I cancel anytime?',
@@ -259,7 +261,7 @@ export default function PricingPage() {
     {
       question: 'What makes Lunary different?',
       answer:
-        'Every insight is calculated from your exact birth chart - not generic sun sign horoscopes. Astronomy powers the charts - AI only appears in Astral Guide chat.',
+        'Every insight is calculated from your exact birth chart - not generic sun sign horoscopes. All charts are powered by real astronomy.',
     },
     {
       question: 'What are the Astral Guide chat limits?',
@@ -491,8 +493,8 @@ export default function PricingPage() {
                             className='w-full block text-center py-3 rounded-xl border border-zinc-800 text-zinc-400 text-sm font-medium hover:bg-zinc-800/50 transition-colors'
                           >
                             {authState.isAuthenticated
-                              ? 'Open app'
-                              : 'Create your birth chart'}
+                              ? CTA_COPY.pricing.openApp
+                              : CTA_COPY.auth.createChart}
                           </Link>
                         ) : (subscriptionStatus === 'active' ||
                             subscriptionStatus === 'trial') &&
@@ -501,7 +503,7 @@ export default function PricingPage() {
                             href='/profile'
                             className='w-full block text-center py-3 rounded-xl border border-lunary-primary-600 bg-lunary-primary-900 text-lunary-accent-300 text-sm font-medium hover:bg-lunary-primary-800 transition-colors'
                           >
-                            Current Plan
+                            {CTA_COPY.pricing.currentPlan}
                           </Link>
                         ) : (
                           <button
@@ -537,12 +539,12 @@ export default function PricingPage() {
                               </span>
                             ) : isFree ? (
                               authState.isAuthenticated ? (
-                                'Open app'
+                                CTA_COPY.pricing.openApp
                               ) : (
-                                'Create your birth chart'
+                                CTA_COPY.auth.createChart
                               )
                             ) : (
-                              'See what Lunary+ unlocks'
+                              CTA_COPY.pricing.startTrial
                             )}
                           </button>
                         )}
@@ -618,6 +620,16 @@ export default function PricingPage() {
                 </div>
               ))}
             </div>
+          </div>
+        </section>
+
+        {/* Detailed Comparison */}
+        <section className='relative py-20 border-t border-zinc-800/50'>
+          <div className='max-w-6xl mx-auto px-6'>
+            <h2 className='text-2xl md:text-3xl font-light text-center mb-12'>
+              Feature comparison
+            </h2>
+            <PricingComparisonTable />
           </div>
         </section>
 

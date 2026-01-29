@@ -2,41 +2,9 @@
 
 import { useFeatureFlagVariant } from '@/hooks/useFeatureFlag';
 import { captureEvent } from '@/lib/posthog-client';
+import { CTA_COPY as CTA_CONSTANTS, getFeatureCTA } from '@/lib/cta-copy';
 
 type CTACopyVariant = 'no-verb' | 'mystical' | 'simple';
-
-const CTA_COPY: Record<string, Record<CTACopyVariant, string>> = {
-  horoscope: {
-    'no-verb': 'Your Personal Horoscope',
-    mystical: 'Discover Your Personal Horoscope',
-    simple: 'See Your Personal Horoscope',
-  },
-  tarotDaily: {
-    'no-verb': 'Full Interpretation',
-    mystical: 'Read Full Interpretation',
-    simple: 'Read Full Interpretation',
-  },
-  tarotWeekly: {
-    'no-verb': 'Your Weekly Card',
-    mystical: 'Reveal Your Weekly Card',
-    simple: 'See Your Weekly Card',
-  },
-  chartConnection: {
-    'no-verb': 'Your Chart Connection',
-    mystical: 'See Your Chart Connection',
-    simple: 'See Your Chart Connection',
-  },
-  transitList: {
-    'no-verb': 'Complete Transit List',
-    mystical: 'See All Transits',
-    simple: 'See All Transits',
-  },
-  crystal: {
-    'no-verb': 'Your Crystal Reading',
-    mystical: 'Discover Your Crystal Reading',
-    simple: 'See Your Crystal Reading',
-  },
-};
 
 export function useCTACopy() {
   const variantRaw = useFeatureFlagVariant('cta-copy-test');
@@ -47,10 +15,16 @@ export function useCTACopy() {
       ? variantRaw
       : 'no-verb';
 
-  const getCopy = (key: keyof typeof CTA_COPY): string =>
-    CTA_COPY[key][variant];
+  // Map PostHog variant (kebab-case) to constant key (camelCase)
+  const variantKey = variant === 'no-verb' ? 'noVerb' : variant;
 
-  const trackCTAClick = (ctaType: keyof typeof CTA_COPY, page: string) => {
+  const getCopy = (feature: keyof typeof CTA_CONSTANTS.features): string =>
+    getFeatureCTA(feature, variantKey);
+
+  const trackCTAClick = (
+    ctaType: keyof typeof CTA_CONSTANTS.features,
+    page: string,
+  ) => {
     captureEvent('cta_clicked', {
       variant,
       cta_type: ctaType,

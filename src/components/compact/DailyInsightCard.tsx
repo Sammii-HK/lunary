@@ -26,6 +26,7 @@ import {
 import { useFeatureFlagVariant } from '@/hooks/useFeatureFlag';
 import { useCTACopy } from '@/hooks/useCTACopy';
 import { shouldRedactWord } from '@/constants/redactedWords';
+import { DailyCache } from '@/lib/cache/dailyCache';
 import {
   buildTransitDetails,
   TransitAspect,
@@ -154,22 +155,42 @@ export const DailyInsightCard = () => {
 
     async function loadTheme() {
       try {
-        const [journalRes, patternsRes] = await Promise.all([
-          fetch('/api/journal?limit=30', { credentials: 'include' }).catch(
-            () => null,
-          ),
-          fetch('/api/patterns?days=30', { credentials: 'include' }).catch(
-            () => null,
-          ),
-        ]);
+        // Check cache first
+        const userId = authStatus.user?.id || 'anon';
+        const journalCacheKey = `journal_${userId}`;
+        const patternsCacheKey = `patterns_${userId}`;
 
-        const journalData = journalRes?.ok
-          ? await journalRes.json()
-          : { entries: [] };
-        const patternsData = patternsRes?.ok ? await patternsRes.json() : null;
+        let journalData = DailyCache.get<{ entries: any[] }>(journalCacheKey);
+        let patternsData = DailyCache.get<any>(patternsCacheKey);
+
+        // Fetch if not cached
+        if (!journalData || !patternsData) {
+          const [journalRes, patternsRes] = await Promise.all([
+            fetch('/api/journal?limit=30', { credentials: 'include' }).catch(
+              () => null,
+            ),
+            fetch('/api/patterns?days=30', { credentials: 'include' }).catch(
+              () => null,
+            ),
+          ]);
+
+          if (!journalData) {
+            journalData = journalRes?.ok
+              ? await journalRes.json()
+              : { entries: [] };
+            // Cache journal data until midnight (daily)
+            DailyCache.set(journalCacheKey, journalData, 'daily');
+          }
+
+          if (!patternsData) {
+            patternsData = patternsRes?.ok ? await patternsRes.json() : null;
+            // Cache patterns data until midnight (daily)
+            DailyCache.set(patternsCacheKey, patternsData, 'daily');
+          }
+        }
 
         const input: LifeThemeInput = {
-          journalEntries: (journalData.entries || []).map((e: any) => ({
+          journalEntries: (journalData?.entries || []).map((e: any) => ({
             content: e.content || '',
             moodTags: e.moodTags || [],
             createdAt: e.createdAt,
@@ -396,7 +417,7 @@ export const DailyInsightCard = () => {
           <div className='flex-1 min-w-0'>
             <div className='flex items-center gap-2 mb-1'>
               <Sparkles className='w-4 h-4 text-lunary-primary-300' />
-              <span className='text-sm font-medium text-zinc-200'>
+              <span className='text-sm text-zinc-200'>
                 Today&apos;s Influence
               </span>
             </div>
@@ -441,7 +462,7 @@ export const DailyInsightCard = () => {
                   }
                 }
               }}
-              className='flex items-center gap-1.5 text-xs text-lunary-primary-200 hover:text-lunary-primary-100 transition-colors bg-none border-none p-0 cursor-pointer font-medium'
+              className='flex items-center gap-1.5 text-xs text-lunary-primary-200 hover:text-lunary-primary-100 transition-colors bg-none border-none p-0 cursor-pointer'
             >
               {ctaCopy.horoscope}
             </span>
@@ -462,9 +483,7 @@ export const DailyInsightCard = () => {
           <div className='flex items-center justify-between mb-1'>
             <div className='flex items-center gap-2'>
               <Sparkles className='w-4 h-4 text-lunary-primary-300' />
-              <span className='text-sm font-medium text-zinc-200'>
-                Today's Influence
-              </span>
+              <span className='text-sm text-zinc-200'>Today's Influence</span>
             </div>
             {/* <span className='text-xs bg-zinc-800/50 text-lunary-primary-200 px-1.5 py-0.5 rounded'>
               Personal

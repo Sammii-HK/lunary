@@ -280,9 +280,7 @@ export const TransitOfTheDay = () => {
                 <span className='font-astro text-lg text-lunary-secondary-200 align-middle'>
                   {getPlanetSymbol(generalTransit.planet)}
                 </span>
-                <span className='text-sm font-medium text-zinc-200'>
-                  Your Next Transit
-                </span>
+                <span className='text-sm text-zinc-200'>Your Next Transit</span>
                 <span className='text-xs text-zinc-400 uppercase tracking-wide'>
                   {dateLabel}
                 </span>
@@ -315,7 +313,7 @@ export const TransitOfTheDay = () => {
                 e.stopPropagation();
                 ctaCopy.trackCTAClick('transitList', 'dashboard');
               }}
-              className='flex items-center gap-1.5 text-xs text-lunary-primary-200 hover:text-lunary-primary-100 transition-colors bg-none border-none p-0 cursor-pointer font-medium'
+              className='flex items-center gap-1.5 text-xs text-lunary-primary-200 hover:text-lunary-primary-100 transition-colors bg-none border-none p-0 cursor-pointer'
             >
               {ctaCopy.transitList}
             </button>
@@ -350,7 +348,7 @@ export const TransitOfTheDay = () => {
                   <span className='font-astro text-lg text-lunary-secondary-200'>
                     {getPlanetSymbol(generalTransit.planet)}
                   </span>
-                  <span className='text-sm font-medium text-zinc-200'>
+                  <span className='text-sm text-zinc-200'>
                     Your Next Transit
                   </span>
                   <span className='text-xs text-zinc-400 uppercase tracking-wide'>
@@ -399,9 +397,7 @@ export const TransitOfTheDay = () => {
               <span className='font-astro text-lg text-lunary-secondary-200'>
                 {getPlanetSymbol(transit.planet)}
               </span>
-              <span className='text-sm font-medium text-zinc-200'>
-                Your Next Transit
-              </span>
+              <span className='text-sm text-zinc-200'>Your Next Transit</span>
               <span className='text-xs text-zinc-400 uppercase tracking-wide'>
                 {dateLabel}
               </span>
@@ -417,7 +413,7 @@ export const TransitOfTheDay = () => {
             {transit.house && (
               <span className='text-zinc-400'>
                 {' '}
-                → your {transit.house}
+                your {transit.house}
                 {getOrdinalSuffix(transit.house)} house
               </span>
             )}

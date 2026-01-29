@@ -246,11 +246,9 @@ export const CrystalPreview = () => {
           <div className='flex-1 min-w-0 h-full mt-1 flex flex-col justify-between'>
             <div className='flex items-center gap-2 mb-1'>
               <Gem className='w-4 h-4 text-lunary-accent-200' />
-              <span className='text-sm font-medium text-zinc-200'>
-                {crystalName}
-              </span>
+              <span className='text-sm text-zinc-200'>{crystalName}</span>
             </div>
-            <p className='text-xs text-white line-clamp-2 mb-2'>
+            <p className='text-xs text-zinc-300 line-clamp-3 mb-2'>
               {crystalReason}
             </p>
 
@@ -294,7 +292,7 @@ export const CrystalPreview = () => {
                     }
                   }
                 }}
-                className='flex items-center gap-1.5 text-xs text-lunary-primary-200 hover:text-lunary-primary-100 transition-colors bg-none border-none p-0 cursor-pointer font-medium'
+                className='flex items-center gap-1.5 text-xs text-lunary-primary-200 hover:text-lunary-primary-100 transition-colors bg-none border-none p-0 cursor-pointer'
               >
                 {ctaCopy.crystal}
               </span>
@@ -336,7 +334,7 @@ export const CrystalPreview = () => {
 
             <div className='space-y-4'>
               <div>
-                <h3 className='text-xs font-medium text-zinc-400 uppercase tracking-wide mb-2'>
+                <h3 className='text-xs text-zinc-400 uppercase tracking-wide mb-2'>
                   Why this crystal today
                 </h3>
                 {canAccessPersonalized && crystalData?.reasons ? (
@@ -359,7 +357,7 @@ export const CrystalPreview = () => {
               {crystalData?.crystal && (
                 <>
                   <div>
-                    <h3 className='text-xs font-medium text-zinc-400 uppercase tracking-wide mb-1'>
+                    <h3 className='text-xs text-zinc-400 uppercase tracking-wide mb-1'>
                       Intention
                     </h3>
                     <p className='text-sm text-zinc-300 italic'>
@@ -367,7 +365,7 @@ export const CrystalPreview = () => {
                     </p>
                   </div>
                   <div>
-                    <h3 className='text-xs font-medium text-zinc-400 uppercase tracking-wide mb-1'>
+                    <h3 className='text-xs text-zinc-400 uppercase tracking-wide mb-1'>
                       Properties
                     </h3>
                     <p className='text-sm text-zinc-400'>

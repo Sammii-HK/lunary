@@ -4,6 +4,7 @@ import { useState, useCallback, useMemo, useEffect } from 'react';
 import Image from 'next/image';
 import { Share2, X, Download, Copy, Check, Loader2 } from 'lucide-react';
 import { useUser } from '@/context/UserContext';
+import { useDemoMode } from '@/components/marketing/DemoModeProvider';
 import { getTarotCard } from '../../utils/tarot/tarot';
 import { getGeneralCrystalRecommendation } from '../../utils/crystals/generalCrystals';
 import {
@@ -36,6 +37,7 @@ export function ShareDailyInsight() {
 
   const { user } = useUser();
   const subscription = useSubscription();
+  const { isDemoMode } = useDemoMode();
 
   const userName = user?.name;
   const userBirthday = user?.birthday;
@@ -81,9 +83,9 @@ export function ShareDailyInsight() {
       };
     }
 
-    const nowUtc = today.utc();
-    const dayOfYearUtc = nowUtc.dayOfYear();
-    const generalSeed = `cosmic-${nowUtc.format('YYYY-MM-DD')}-${dayOfYearUtc}-energy`;
+    // Use LOCAL date/day so card changes at user's midnight, not UTC midnight
+    const dayOfYearLocal = today.dayOfYear();
+    const generalSeed = `cosmic-${dateStr}-${dayOfYearLocal}-energy`;
     const card = getTarotCard(generalSeed);
     return {
       name: card.name,
@@ -327,7 +329,10 @@ export function ShareDailyInsight() {
         aria-label='Share your daily cosmic insight'
       >
         <Share2 className='w-4 h-4' />
-        <span className='hidden sm:inline'>Share</span>
+        {/* Show text on desktop, but always hide in demo mode */}
+        <span className={isDemoMode ? 'hidden' : 'hidden md:inline'}>
+          Share
+        </span>
       </button>
 
       {isOpen && (

@@ -12,6 +12,9 @@ import {
 } from '@/components/ui/expandable-card';
 import { useUser } from '@/context/UserContext';
 import { getPersonalizedHoroscope } from '../../../utils/astrology/personalizedHoroscope';
+import { useDemoMode } from '@/components/marketing/DemoModeProvider';
+import { DailyCache } from '@/lib/cache/dailyCache';
+import { getZodiacSymbol } from 'utils/astrology/cosmic-og';
 
 const ZODIAC_ELEMENTS: Record<string, string> = {
   aries: 'Fire',
@@ -231,7 +234,15 @@ const getDaysUntilNextPhase = (
   };
 };
 
-export const MoonPreview = () => {
+interface MoonPreviewProps {
+  isExpanded?: boolean; // Optional controlled state from parent
+  onToggle?: (isExpanded: boolean) => void; // Optional callback when toggled
+}
+
+export const MoonPreview = ({
+  isExpanded,
+  onToggle,
+}: MoonPreviewProps = {}) => {
   const { user } = useUser();
   const {
     currentMoonPhase,
@@ -243,8 +254,35 @@ export const MoonPreview = () => {
   const [spells, setSpells] = useState<Spell[]>([]);
   const [loading, setLoading] = useState(true);
 
+  // Detect mobile or demo mode to show compact symbol display
+  const [isMobile, setIsMobile] = useState(false);
+  const { isDemoMode } = useDemoMode();
+
+  // Check if viewport is mobile-sized
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.matchMedia('(max-width: 767px)').matches);
+    };
+
+    checkMobile();
+    const mediaQuery = window.matchMedia('(max-width: 767px)');
+    mediaQuery.addEventListener('change', checkMobile);
+    return () => mediaQuery.removeEventListener('change', checkMobile);
+  }, []);
+
   const nextPhaseInfo = getDaysUntilNextPhase(currentMoonPhase, moonAge);
   const zodiacInfo = getZodiacInfo(currentMoonConstellationPosition || '');
+
+  // Show zodiac symbol only on mobile or in demo mode
+  const shouldShowSymbolOnly = isMobile || isDemoMode;
+  const moonPhaseConstellation =
+    shouldShowSymbolOnly && currentMoonConstellationPosition ? (
+      <span className='font-astro'>
+        {getZodiacSymbol(currentMoonConstellationPosition)}
+      </span>
+    ) : (
+      currentMoonConstellationPosition
+    );
   const illuminationDisplay = Math.round(moonIllumination);
 
   const personalizedHoroscope = user?.birthday
@@ -286,12 +324,26 @@ export const MoonPreview = () => {
       ? 'Full Moon'
       : currentMoonPhase;
 
+    // Check cache first
+    const cacheKey = `spells_${normalizedPhase}`;
+    const cached = DailyCache.get<Spell[]>(cacheKey);
+
+    if (cached) {
+      setSpells(cached.slice(0, 3));
+      setLoading(false);
+      return;
+    }
+
+    // Cache miss, fetch from API
     fetch(
       `/api/grimoire/spells?moonPhase=${encodeURIComponent(normalizedPhase)}`,
     )
       .then((r) => r.json())
       .then((data) => {
-        setSpells((data || []).slice(0, 3));
+        const spellData = (data || []).slice(0, 3);
+        // Cache spells for this phase until midnight (daily) - spells don't change throughout the day
+        DailyCache.set(cacheKey, data || [], 'daily');
+        setSpells(spellData);
         setLoading(false);
       })
       .catch(() => {
@@ -321,9 +373,13 @@ export const MoonPreview = () => {
         }
         title={currentMoonPhase}
         subtitle={
-          currentMoonConstellationPosition
-            ? `in ${currentMoonConstellationPosition}, ${illuminationDisplay}% illuminated`
-            : `${illuminationDisplay}% illuminated`
+          currentMoonConstellationPosition ? (
+            <>
+              in {moonPhaseConstellation} {illuminationDisplay}% illuminated
+            </>
+          ) : (
+            <>{illuminationDisplay}% illuminated</>
+          )
         }
       />
       {cycleLine && <p className='text-xs text-zinc-400 mt-1'>{cycleLine}</p>}
@@ -377,7 +433,7 @@ export const MoonPreview = () => {
         </div>
       ) : spells.length > 0 ? (
         <div>
-          <h4 className='text-xs font-medium text-lunary-accent-300 capitalize tracking-wide mb-2'>
+          <h4 className='text-xs text-lunary-accent-300 capitalize tracking-wide mb-2'>
             Recommended Spells
           </h4>
           <div className='space-y-2'>
@@ -405,6 +461,13 @@ export const MoonPreview = () => {
   );
 
   return (
-    <ExpandableCard preview={preview} expanded={expanded} autoExpandOnDesktop />
+    <ExpandableCard
+      preview={preview}
+      expanded={expanded}
+      autoExpandOnDesktop
+      isExpanded={isExpanded}
+      onToggle={onToggle}
+      className='moon-preview-card'
+    />
   );
 };

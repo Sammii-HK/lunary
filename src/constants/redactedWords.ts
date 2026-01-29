@@ -59,8 +59,20 @@ const GUIDANCE_TERMS = [
   'illuminate',
 ];
 
-export const shouldRedactWord = (word: string, index: number): boolean => {
+export const shouldRedactWord = (
+  word: string,
+  index: number,
+  crystalName?: string,
+): boolean => {
   const cleanWord = word.toLowerCase().replace(/[.,!?;:]/g, '');
+
+  // Always redact the crystal name if provided
+  if (
+    crystalName &&
+    cleanWord === crystalName.toLowerCase().replace(/[.,!?;:]/g, '')
+  ) {
+    return true;
+  }
 
   // House numbers (1st, 2nd, 3rd, 12th, etc.)
   if (/^\d+(st|nd|rd|th)$/.test(cleanWord)) return true;
