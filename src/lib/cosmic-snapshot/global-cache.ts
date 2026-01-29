@@ -7,7 +7,7 @@ import {
   checkSeasonalEvents,
   checkSignIngress,
   checkRetrogradeEvents,
-} from '../../../utils/astrology/cosmic-og';
+} from '../../../utils/astrology/astronomical-data';
 import { Observer } from 'astronomy-engine';
 
 const DEFAULT_OBSERVER = new Observer(51.4769, 0.0005, 0);
@@ -27,8 +27,19 @@ export type GlobalCosmicData = {
     {
       longitude: number;
       sign: string;
+      degree: number; // Degree in sign (0-29)
+      minutes: number; // Minutes of arc (0-59)
       retrograde: boolean;
       newRetrograde: boolean;
+      newDirect: boolean; // Detect direct station
+      // Duration fields (will be added in Phase 1)
+      duration?: {
+        totalDays: number;
+        remainingDays: number;
+        displayText: string;
+        startDate: Date;
+        endDate: Date;
+      };
     }
   >;
   generalTransits: Array<{
