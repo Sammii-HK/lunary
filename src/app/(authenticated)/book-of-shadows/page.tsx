@@ -30,6 +30,7 @@ import { LifeThemeBanner } from '@/components/journal/LifeThemeBanner';
 import { ArchetypeBar } from '@/components/journal/ArchetypeBar';
 import { DreamTagChips } from '@/components/journal/DreamTagChips';
 import { PremiumPathway } from '@/components/PremiumPathway';
+import { PatternSnapshotsSection } from '@/components/patterns/PatternSnapshotsSection';
 
 interface JournalEntry {
   id: number;
@@ -688,14 +689,17 @@ export default function BookOfShadowsPage() {
               <div className='flex items-center gap-2 mb-2'>
                 <Sparkles className='w-4 h-4 text-lunary-primary-400' />
                 <span className='text-sm font-medium text-zinc-300'>
-                  Life Themes & Archetypes
+                  Your Pattern Evolution
                 </span>
               </div>
               <p className='text-xs text-zinc-500'>
-                As you journal, record dreams, and pull tarot, Lunary detects
-                recurring themes and archetypal patterns in your journey.
+                Track how your Life Themes, Tarot Seasons, and cosmic patterns
+                evolve over time. Patterns are generated weekly based on your
+                journal entries, dreams, and tarot pulls.
               </p>
             </div>
+
+            <PatternSnapshotsSection />
 
             <PremiumPathway variant='shadow' className='mt-6' />
           </div>

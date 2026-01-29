@@ -101,7 +101,7 @@ export async function getPatternHistory(
           SELECT pattern_data, generated_at
           FROM journal_patterns
           WHERE user_id = ${userId}
-            AND pattern_type IN ('life_themes', 'tarot_season', 'archetype')
+            AND pattern_type IN ('life_themes', 'tarot_season', 'archetype', 'tarot_moon_phase', 'emotion_moon_phase')
             AND expires_at > NOW()
           ORDER BY generated_at DESC
           LIMIT ${limit}
@@ -139,7 +139,7 @@ export async function getCurrentSnapshots(
         generated_at
       FROM journal_patterns
       WHERE user_id = ${userId}
-        AND pattern_type IN ('life_themes', 'tarot_season', 'archetype')
+        AND pattern_type IN ('life_themes', 'tarot_season', 'archetype', 'tarot_moon_phase', 'emotion_moon_phase')
         AND expires_at > NOW()
       ORDER BY pattern_type, generated_at DESC
     `;

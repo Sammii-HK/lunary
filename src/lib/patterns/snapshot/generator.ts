@@ -7,12 +7,18 @@ import { sql } from '@vercel/postgres';
 import type {
   LifeThemeSnapshot,
   TarotSeasonSnapshot,
+  ArchetypeSnapshot,
   PatternSnapshot,
 } from './types';
 import {
   analyzeLifeThemes,
   hasEnoughDataForThemes,
 } from '@/lib/life-themes/engine';
+import {
+  detectArchetypes,
+  hasEnoughDataForArchetypes,
+  type ArchetypeDetectorInput,
+} from '@/lib/archetypes/detector';
 
 /**
  * Generate life themes snapshot from user's journal, tarot, and dreams
@@ -344,6 +350,162 @@ function inferThemeFromKeyword(keyword: string): string | null {
 }
 
 /**
+ * Generate archetype snapshot from user's journal, tarot, and dreams
+ */
+export async function generateArchetypeSnapshot(
+  userId: string,
+): Promise<ArchetypeSnapshot | null> {
+  try {
+    // Fetch recent journal entries
+    const journalResult = await sql`
+      SELECT content, tags
+      FROM collections
+      WHERE user_id = ${userId}
+        AND category = 'journal'
+        AND created_at >= NOW() - INTERVAL '30 days'
+      ORDER BY created_at DESC
+      LIMIT 30
+    `;
+
+    // Fetch dreams
+    const dreamsResult = await sql`
+      SELECT tags
+      FROM collections
+      WHERE user_id = ${userId}
+        AND category = 'dream'
+        AND created_at >= NOW() - INTERVAL '30 days'
+      ORDER BY created_at DESC
+      LIMIT 20
+    `;
+
+    // Fetch tarot readings for pattern analysis
+    const tarotResult = await sql`
+      SELECT cards
+      FROM tarot_readings
+      WHERE user_id = ${userId}
+        AND created_at >= NOW() - INTERVAL '30 days'
+      ORDER BY created_at DESC
+    `;
+
+    // Format journal entries
+    const journalEntries = journalResult.rows.map((row) => {
+      let content = '';
+      if (typeof row.content === 'string') {
+        content = row.content;
+      } else if (row.content && typeof row.content === 'object') {
+        if ('text' in row.content) {
+          content = String(row.content.text || '');
+        } else {
+          content = JSON.stringify(row.content);
+        }
+      } else if (row.content) {
+        content = String(row.content);
+      }
+
+      return {
+        content,
+        moodTags: Array.isArray(row.tags) ? row.tags : [],
+      };
+    });
+
+    // Extract dream tags
+    const dreamTags = dreamsResult.rows.flatMap((row) =>
+      Array.isArray(row.tags) ? row.tags : [],
+    );
+
+    // Extract tarot majors and suits
+    const tarotMajors: string[] = [];
+    const suitCounts = new Map<string, number>();
+
+    for (const row of tarotResult.rows) {
+      const cards = Array.isArray(row.cards) ? row.cards : [];
+      for (const cardData of cards) {
+        const card = cardData.card || cardData;
+        const cardName = card.name || '';
+        const suit = card.suit || card.arcana || 'Major Arcana';
+
+        if (isMajorArcana(cardName)) {
+          tarotMajors.push(cardName);
+        }
+
+        suitCounts.set(suit, (suitCounts.get(suit) || 0) + 1);
+      }
+    }
+
+    const tarotSuits = Array.from(suitCounts.entries())
+      .map(([suit, count]) => ({ suit, count }))
+      .sort((a, b) => b.count - a.count);
+
+    const input: ArchetypeDetectorInput = {
+      journalEntries,
+      dreamTags,
+      tarotMajors,
+      tarotSuits,
+    };
+
+    // Check if we have enough data
+    if (!hasEnoughDataForArchetypes(input)) {
+      return null;
+    }
+
+    // Detect top 3 archetypes
+    const archetypes = detectArchetypes(input, 3);
+
+    if (archetypes.length === 0) {
+      return null;
+    }
+
+    // Build snapshot
+    const snapshot: ArchetypeSnapshot = {
+      type: 'archetype',
+      archetypes: archetypes.map((archetype) => ({
+        name: archetype.name,
+        strength: archetype.score,
+        basedOn: [
+          ...tarotMajors.slice(0, 5),
+          ...journalEntries.flatMap((e) => e.moodTags).slice(0, 5),
+        ],
+      })),
+      dominantArchetype: archetypes[0].name,
+      timestamp: new Date().toISOString(),
+    };
+
+    return snapshot;
+  } catch (error) {
+    console.error('Error generating archetype snapshot:', error);
+    return null;
+  }
+}
+
+function isMajorArcana(cardName: string): boolean {
+  const majors = [
+    'The Fool',
+    'The Magician',
+    'The High Priestess',
+    'The Empress',
+    'The Emperor',
+    'The Hierophant',
+    'The Lovers',
+    'The Chariot',
+    'Strength',
+    'The Hermit',
+    'Wheel of Fortune',
+    'Justice',
+    'The Hanged Man',
+    'Death',
+    'Temperance',
+    'The Devil',
+    'The Tower',
+    'The Star',
+    'The Moon',
+    'The Sun',
+    'Judgement',
+    'The World',
+  ];
+  return majors.includes(cardName);
+}
+
+/**
  * Generate all snapshots for a user
  */
 export async function generateAllSnapshots(
@@ -361,6 +523,12 @@ export async function generateAllSnapshots(
   const tarotSeason = await generateTarotSeasonSnapshot(userId, 30);
   if (tarotSeason) {
     snapshots.push(tarotSeason);
+  }
+
+  // Generate archetype
+  const archetype = await generateArchetypeSnapshot(userId);
+  if (archetype) {
+    snapshots.push(archetype);
   }
 
   return snapshots;

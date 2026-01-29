@@ -19,6 +19,8 @@ import { calculatePlanetaryReturns } from '../journal/planetary-return-tracker';
 import { detectLunarSensitivity } from '../journal/lunar-pattern-detector';
 import { detectNatalHouseEmphasis } from '../journal/house-emphasis-tracker';
 import { getUserPatterns } from '../journal/pattern-storage';
+import { calculateProgressedChart } from '../../../utils/astrology/progressedChart';
+import { getRelevantEclipses } from '../../../utils/astrology/eclipseTracker';
 
 /**
  * Detects if a user message is asking about astrological/cosmic topics
@@ -88,6 +90,9 @@ export interface AstralContext {
     cyclical?: any[];
     transient?: any[];
   };
+  // Phase 3: Progressed Charts & Eclipses
+  progressedChart?: any; // Secondary progressions
+  relevantEclipses?: any[]; // Upcoming eclipses aspecting natal chart
 }
 
 /**
@@ -190,13 +195,31 @@ export async function calculatePersonalTransits(
 /**
  * Builds the Astral Context for the AI Astral Guide
  * This context includes all mystical data needed for personalized guidance
+ *
+ * OPTIMIZATION: Accepts optional contextRequirements to conditionally build expensive context
+ * This reduces API costs by only computing what's needed for the query
  */
 export async function buildAstralContext(
   userId: string,
   userName?: string,
   userBirthday?: string,
   now: Date = new Date(),
+  contextRequirements?: {
+    needsPersonalTransits?: boolean;
+    needsNatalPatterns?: boolean;
+    needsPlanetaryReturns?: boolean;
+    needsProgressedChart?: boolean;
+    needsEclipses?: boolean;
+  },
 ): Promise<AstralContext> {
+  // Default to building everything if no requirements specified (backward compatible)
+  const requirements = {
+    needsPersonalTransits: contextRequirements?.needsPersonalTransits ?? true,
+    needsNatalPatterns: contextRequirements?.needsNatalPatterns ?? true,
+    needsPlanetaryReturns: contextRequirements?.needsPlanetaryReturns ?? true,
+    needsProgressedChart: contextRequirements?.needsProgressedChart ?? true,
+    needsEclipses: contextRequirements?.needsEclipses ?? true,
+  };
   // Fetch all context data in parallel
   const { context } = await buildLunaryContext({
     userId,
@@ -223,9 +246,13 @@ export async function buildAstralContext(
   // Build natal summary
   const natalSummary = buildNatalSummary(context.birthChart);
 
-  // Calculate personal transit impacts using reusable function
-  const { current: personalTransits, upcoming: upcomingPersonalTransits } =
-    await calculatePersonalTransits(userId, now);
+  // OPTIMIZATION: Only calculate personal transits if needed (expensive operation)
+  let personalTransits, upcomingPersonalTransits;
+  if (requirements.needsPersonalTransits) {
+    const result = await calculatePersonalTransits(userId, now);
+    personalTransits = result.current;
+    upcomingPersonalTransits = result.upcoming;
+  }
 
   // Build current transits summary (now includes personal transits if available)
   const currentTransits = buildTransitsSummary(
@@ -234,31 +261,69 @@ export async function buildAstralContext(
     personalTransits,
   );
 
-  // PHASE 2: Detect patterns
+  // PHASE 2 & 3: Detect patterns, calculate progressions & eclipses
   const userBirthChartData = await fetchUserBirthChart(userId);
   let natalAspectPatterns;
   let planetaryReturns;
   let natalHouseEmphasis;
   let lunarSensitivity;
+  let progressedChart;
+  let relevantEclipses;
 
   if (userBirthChartData && userBirthChartData.length > 0) {
-    // Detect natal aspect patterns (Grand Trines, T-Squares, etc.)
-    natalAspectPatterns = detectNatalAspectPatterns(userBirthChartData);
+    // OPTIMIZATION: Only detect patterns if needed
+    if (requirements.needsNatalPatterns) {
+      // PHASE 2: Detect natal aspect patterns (Grand Trines, T-Squares, etc.)
+      natalAspectPatterns = detectNatalAspectPatterns(userBirthChartData);
 
-    // Calculate planetary returns (Saturn/Jupiter/Solar)
-    planetaryReturns = userBirthday
-      ? calculatePlanetaryReturns(
+      // PHASE 2: Detect natal house emphasis
+      natalHouseEmphasis = detectNatalHouseEmphasis(userBirthChartData);
+
+      // PHASE 2: Detect lunar sensitivity
+      lunarSensitivity = detectLunarSensitivity(userBirthChartData);
+    }
+
+    // OPTIMIZATION: Only calculate returns if needed
+    if (requirements.needsPlanetaryReturns && userBirthday) {
+      // PHASE 2: Calculate planetary returns (Saturn/Jupiter/Solar)
+      planetaryReturns = calculatePlanetaryReturns(
+        userBirthChartData,
+        now,
+        new Date(userBirthday),
+      );
+    }
+
+    // OPTIMIZATION: Only calculate progressed chart if needed (expensive)
+    if (requirements.needsProgressedChart && userBirthday) {
+      // PHASE 3: Calculate progressed chart
+      try {
+        progressedChart = await calculateProgressedChart(
+          new Date(userBirthday),
+          now,
+        );
+      } catch (error) {
+        console.error(
+          '[Astral Guide] Failed to calculate progressed chart:',
+          error,
+        );
+      }
+    }
+
+    // OPTIMIZATION: Only calculate eclipses if needed
+    if (requirements.needsEclipses) {
+      // PHASE 3: Get relevant eclipses (next 6 months)
+      try {
+        const eclipseRelevance = getRelevantEclipses(
           userBirthChartData,
           now,
-          new Date(userBirthday),
-        )
-      : undefined;
-
-    // Detect natal house emphasis
-    natalHouseEmphasis = detectNatalHouseEmphasis(userBirthChartData);
-
-    // Detect lunar sensitivity
-    lunarSensitivity = detectLunarSensitivity(userBirthChartData);
+          6, // Next 6 months
+        );
+        relevantEclipses =
+          eclipseRelevance.length > 0 ? eclipseRelevance : undefined;
+      } catch (error) {
+        console.error('[Astral Guide] Failed to calculate eclipses:', error);
+      }
+    }
   }
 
   // Retrieve stored patterns from database
@@ -311,6 +376,9 @@ export async function buildAstralContext(
         : undefined,
     lunarSensitivity: lunarSensitivity || undefined,
     storedPatterns: storedPatterns.length > 0 ? patternsByCategory : undefined,
+    // Phase 3: Progressed Charts & Eclipses
+    progressedChart: progressedChart || undefined,
+    relevantEclipses: relevantEclipses || undefined,
   };
 }
 
@@ -683,6 +751,25 @@ NATAL PATTERNS (Phase 2 Enhancement):
   - Saturn Return: ~29 years, maturity and life lessons
 - When HOUSE EMPHASIS patterns are present, note which life areas are naturally highlighted
 - When LUNAR SENSITIVITY is detected, acknowledge the user may be particularly attuned to moon phases
+
+PROGRESSED CHART (Phase 3 Enhancement):
+- When PROGRESSED CHART data is provided, this shows the user's evolved cosmic blueprint:
+  - Progressed Sun: Moves ~1° per year, changes sign every ~30 years (major life theme shift)
+  - Progressed Moon: Moves ~1° per month, changes sign every ~2.5 years, completes cycle in ~27-28 years
+  - Progressed Moon cycle position indicates current emotional/developmental phase
+- Progressed planets show how the birth chart has evolved over time
+- Reference when Progressed Sun or Moon has recently changed sign (significant life transition)
+- Note: Progressions are subtle but profound, operating on the soul level
+
+ECLIPSE AWARENESS (Phase 3 Enhancement):
+- When RELEVANT ECLIPSES are provided, these are powerful portal moments:
+  - Eclipses that conjunct or oppose natal planets (±3° orb) mark significant turning points
+  - Solar Eclipses: New beginnings, fresh starts, planting seeds
+  - Lunar Eclipses: Culminations, releases, emotional revelations
+  - Affected houses show which life areas are being activated
+- Eclipses have a 6-month window of influence (±3 months either side of exact)
+- When an eclipse aspects a personal planet, acknowledge the transformative potential
+- Example: "The upcoming Solar Eclipse in Aries conjuncts your natal Mars - a powerful time to initiate new projects"
 
 RITUAL SUGGESTIONS:
 - When suggesting rituals, deeply personalize them to the user's chart, current transits, and tarot cards

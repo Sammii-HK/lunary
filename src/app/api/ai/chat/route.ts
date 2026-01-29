@@ -33,6 +33,7 @@ import {
   calculatePersonalTransits,
   ASTRAL_GUIDE_PROMPT,
 } from '@/lib/ai/astral-guide';
+import { analyzeContextNeeds } from '@/lib/ai/context-optimizer';
 
 type ChatRequest = {
   message?: string;
@@ -156,12 +157,22 @@ export async function POST(request: NextRequest) {
     let astralContext: any;
 
     if (useAstralContext) {
-      // Use Astral Guide context for astrological queries
+      // OPTIMIZATION: Analyze query to determine required context
+      const contextNeeds = analyzeContextNeeds(userMessage);
+
+      // Use Astral Guide context for astrological queries (optimized)
       astralContext = await buildAstralContext(
         user.id,
         user.displayName,
         userWithBirthday.birthday,
         now,
+        {
+          needsPersonalTransits: contextNeeds.needsPersonalTransits,
+          needsNatalPatterns: contextNeeds.needsNatalPatterns,
+          needsPlanetaryReturns: contextNeeds.needsPlanetaryReturns,
+          needsProgressedChart: contextNeeds.needsProgressedChart,
+          needsEclipses: contextNeeds.needsEclipses,
+        },
       );
       // For astral mode, we still need some basic context
       const lunaryResult = await buildLunaryContext({
