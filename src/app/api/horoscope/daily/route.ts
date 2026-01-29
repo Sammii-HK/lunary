@@ -4,13 +4,9 @@ import { revalidateTag } from 'next/cache';
 import { requireUser } from '@/lib/ai/auth';
 import { decrypt } from '@/lib/encryption';
 import { getEnhancedPersonalizedHoroscope } from '../../../../../utils/astrology/enhancedHoroscope';
-import {
-  getDailyCacheHeaders,
-  getDailyRevalidateTime,
-} from '@/lib/cache-utils';
+import { getDailyCacheHeaders } from '@/lib/cache-utils';
 
 export const runtime = 'nodejs';
-export const revalidate = getDailyRevalidateTime(); // Resets at midnight London time
 
 interface UserProfile {
   name?: string;
