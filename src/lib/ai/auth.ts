@@ -68,6 +68,82 @@ export const requireUser = async (
   request: NextRequest,
 ): Promise<AuthenticatedUser> => {
   try {
+    // Check for demo mode first - fetch REAL persona account data
+    const demoUserId = request.headers.get('X-Demo-User');
+    if (demoUserId && process.env.PERSONA_EMAIL) {
+      // Look up the ACTUAL persona user from database by email
+      try {
+        const { sql } = await import('@vercel/postgres');
+
+        // Get user ID from email
+        const userResult = await sql`
+          SELECT id FROM users WHERE email = ${process.env.PERSONA_EMAIL} LIMIT 1
+        `;
+
+        if (userResult.rows.length === 0) {
+          console.error(
+            '[Auth] Persona user not found:',
+            process.env.PERSONA_EMAIL,
+          );
+          throw new UnauthorizedError('Persona user not found');
+        }
+
+        const personaUserId = userResult.rows[0].id;
+
+        // Fetch subscription
+        const subscriptionResult = await sql`
+          SELECT plan_type, status FROM subscriptions
+          WHERE user_id = ${personaUserId}
+          ORDER BY created_at DESC
+          LIMIT 1
+        `;
+
+        let plan: string | undefined;
+        if (subscriptionResult.rows.length > 0) {
+          const sub = subscriptionResult.rows[0];
+          if (
+            sub.status === 'active' ||
+            sub.status === 'trial' ||
+            sub.status === 'trialing'
+          ) {
+            plan = normalizePlanType(sub.plan_type);
+          }
+        }
+
+        // Fetch birthday
+        let birthday: string | undefined;
+        try {
+          const profileResult = await sql`
+            SELECT birthday FROM user_profiles WHERE user_id = ${personaUserId} LIMIT 1
+          `;
+          if (profileResult.rows.length > 0 && profileResult.rows[0].birthday) {
+            birthday = decrypt(profileResult.rows[0].birthday);
+          }
+        } catch (e) {
+          console.error('[Auth] Failed to fetch persona birthday:', e);
+        }
+
+        console.log('[Auth] Using REAL persona account:', {
+          id: personaUserId,
+          email: process.env.PERSONA_EMAIL,
+          plan,
+        });
+
+        return {
+          id: personaUserId,
+          email: process.env.PERSONA_EMAIL,
+          displayName: 'Celeste',
+          timezone: 'Europe/London',
+          locale: 'en-GB',
+          plan,
+          birthday,
+        };
+      } catch (error) {
+        console.error('[Auth] Failed to fetch persona user:', error);
+        throw new UnauthorizedError('Failed to fetch persona user');
+      }
+    }
+
     const headers = Object.fromEntries(request.headers.entries());
     const origin = request.headers.get('origin') || new URL(request.url).origin;
     const cookieHeader = request.headers.get('cookie');

@@ -45,6 +45,9 @@ export async function POST(request: Request) {
       },
     );
   }
+
+  // Sign-in allowed - password is the protection
+  // Password reset is blocked separately to prevent account takeover
   return withCors(request, auth.handler);
 }
 

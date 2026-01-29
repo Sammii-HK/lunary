@@ -10,16 +10,54 @@ import { formatTextArray } from '@/lib/postgres/formatTextArray';
 
 export async function GET(request: NextRequest, context: unknown) {
   try {
-    const session = await auth.api.getSession({ headers: request.headers });
+    // Check for demo mode header first
+    const demoUserId = request.headers.get('X-Demo-User');
 
-    if (!session?.user) {
-      return NextResponse.json(
-        { error: 'Authentication required' },
-        { status: 401 },
-      );
+    let userId: string;
+
+    if (demoUserId && process.env.PERSONA_EMAIL) {
+      // Demo mode: Look up REAL persona account from database
+      try {
+        const userResult = await sql`
+          SELECT id FROM users WHERE email = ${process.env.PERSONA_EMAIL} LIMIT 1
+        `;
+
+        if (userResult.rows.length === 0) {
+          return NextResponse.json(
+            { error: 'Persona account not found' },
+            { status: 500 },
+          );
+        }
+
+        userId = userResult.rows[0].id;
+        console.log('[Tarot API GET [id]] Using real persona account:', userId);
+      } catch (dbError: any) {
+        // Database not set up - return not found (demo uses client-side data)
+        if (dbError?.code === '42P01') {
+          console.warn(
+            '[Tarot API [id]] Database tables not found - demo uses client data',
+          );
+          return NextResponse.json(
+            { error: 'Reading not found' },
+            { status: 404 },
+          );
+        }
+        throw dbError;
+      }
+    } else {
+      // Normal mode: use session
+      const session = await auth.api.getSession({ headers: request.headers });
+
+      if (!session?.user) {
+        return NextResponse.json(
+          { error: 'Authentication required' },
+          { status: 401 },
+        );
+      }
+
+      userId = session.user.id;
     }
 
-    const userId = session.user.id;
     const { params } = (context || {}) as { params: { id: string } };
 
     const result = await sql`
@@ -49,7 +87,32 @@ export async function GET(request: NextRequest, context: unknown) {
 
     const reading = mapRowToReading(result.rows[0]);
 
-    return NextResponse.json({ reading });
+    const response = NextResponse.json({ reading });
+
+    // Aggressive caching for demo mode - cache until UTC midnight
+    if (demoUserId) {
+      const now = new Date();
+      const midnight = new Date(
+        Date.UTC(
+          now.getUTCFullYear(),
+          now.getUTCMonth(),
+          now.getUTCDate() + 1,
+          0,
+          0,
+          0,
+          0,
+        ),
+      );
+      const secondsUntilMidnight = Math.floor(
+        (midnight.getTime() - now.getTime()) / 1000,
+      );
+      response.headers.set(
+        'Cache-Control',
+        `public, max-age=${secondsUntilMidnight}, s-maxage=${secondsUntilMidnight}`,
+      );
+    }
+
+    return response;
   } catch (error) {
     console.error('[tarot/readings/:id] GET failed', error);
     return NextResponse.json(
@@ -61,6 +124,15 @@ export async function GET(request: NextRequest, context: unknown) {
 
 export async function PATCH(request: NextRequest, context: unknown) {
   try {
+    // Check for demo mode - block modifications
+    const demoUserId = request.headers.get('X-Demo-User');
+    if (demoUserId) {
+      return NextResponse.json(
+        { error: 'Demo mode - cannot modify spreads' },
+        { status: 403 },
+      );
+    }
+
     const session = await auth.api.getSession({ headers: request.headers });
 
     if (!session?.user) {
@@ -214,6 +286,15 @@ export async function PATCH(request: NextRequest, context: unknown) {
 
 export async function DELETE(request: NextRequest, context: unknown) {
   try {
+    // Check for demo mode - block deletions
+    const demoUserId = request.headers.get('X-Demo-User');
+    if (demoUserId) {
+      return NextResponse.json(
+        { error: 'Demo mode - cannot delete spreads' },
+        { status: 403 },
+      );
+    }
+
     const session = await auth.api.getSession({ headers: request.headers });
 
     if (!session?.user) {

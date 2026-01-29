@@ -12,18 +12,107 @@ import { auth } from '@/lib/auth';
 import { formatTextArray } from '@/lib/postgres/formatTextArray';
 
 export async function GET(request: NextRequest) {
+  const demoUserId = request.headers.get('X-Demo-User');
+
   try {
-    const session = await auth.api.getSession({ headers: request.headers });
+    let userId: string;
+    let userEmail: string | undefined;
 
-    if (!session?.user) {
-      return NextResponse.json(
-        { error: 'Authentication required' },
-        { status: 401 },
+    if (demoUserId && process.env.PERSONA_EMAIL) {
+      // Demo mode: Look up REAL persona account from database
+      console.log(
+        '[Tarot API] Demo mode detected, PERSONA_EMAIL:',
+        process.env.PERSONA_EMAIL,
       );
-    }
 
-    const userId = session.user.id;
-    const userEmail = session.user.email;
+      try {
+        const userResult = await sql`
+          SELECT id, email FROM users WHERE email = ${process.env.PERSONA_EMAIL} LIMIT 1
+        `;
+
+        console.log('[Tarot API] User lookup result:', {
+          found: userResult.rows.length > 0,
+          rowCount: userResult.rows.length,
+        });
+
+        if (userResult.rows.length === 0) {
+          console.error('[Tarot API] Persona account not found in database!');
+          return NextResponse.json(
+            {
+              error: 'Persona account not found',
+              details: 'Email not in database',
+            },
+            { status: 500 },
+          );
+        }
+
+        userId = userResult.rows[0].id;
+        userEmail = userResult.rows[0].email;
+        console.log('[Tarot API] ✅ Using real persona:', {
+          userId,
+          userEmail,
+        });
+      } catch (dbError: any) {
+        // Database not set up - return empty demo state
+        if (dbError?.code === '42P01') {
+          console.warn(
+            '[Tarot API] Database tables not found - using fallback demo state',
+          );
+
+          const response = NextResponse.json({
+            readings: [], // Empty - demo shows pre-loaded spreads from MarketingMiniApp
+            usage: {
+              monthlyLimit: null,
+              monthlyUsed: 0,
+              historyWindowDays: null,
+            },
+            hasMore: false,
+            nextCursor: null,
+            spreadsUnlocked: Object.keys(TAROT_SPREAD_MAP), // Unlock all spreads in demo
+          });
+
+          // Aggressive caching for demo mode
+          const now = new Date();
+          const midnight = new Date(
+            Date.UTC(
+              now.getUTCFullYear(),
+              now.getUTCMonth(),
+              now.getUTCDate() + 1,
+              0,
+              0,
+              0,
+              0,
+            ),
+          );
+          const secondsUntilMidnight = Math.floor(
+            (midnight.getTime() - now.getTime()) / 1000,
+          );
+          response.headers.set(
+            'Cache-Control',
+            `public, max-age=${secondsUntilMidnight}, s-maxage=${secondsUntilMidnight}`,
+          );
+
+          return response;
+        }
+        throw dbError;
+      }
+    } else {
+      if (demoUserId && !process.env.PERSONA_EMAIL) {
+        console.error('[Tarot API] Demo mode but PERSONA_EMAIL not set!');
+      }
+      // Normal mode: use session
+      const session = await auth.api.getSession({ headers: request.headers });
+
+      if (!session?.user) {
+        return NextResponse.json(
+          { error: 'Authentication required' },
+          { status: 401 },
+        );
+      }
+
+      userId = session.user.id;
+      userEmail = session.user.email;
+    }
     const { searchParams } = new URL(request.url);
 
     const spreadSlug = searchParams.get('spread');
@@ -34,6 +123,7 @@ export async function GET(request: NextRequest) {
         ? new Date(cursorParam)
         : null;
 
+    // Fetch REAL subscription from database (not mocked)
     const subscription = await getSubscription(userId, userEmail);
     const usage = await computeUsageSnapshot(userId, subscription);
 
@@ -100,6 +190,8 @@ export async function GET(request: NextRequest) {
       isSpreadAccessible(slug, subscription.plan),
     );
 
+    const isDemoMode = !!demoUserId;
+
     console.log(`[tarot/readings] GET response for user ${userId}:`, {
       subscription_plan: subscription.plan,
       subscription_status: subscription.status,
@@ -107,29 +199,69 @@ export async function GET(request: NextRequest) {
       total_spreads: Object.keys(TAROT_SPREAD_MAP).length,
       usage_limit: usage.monthlyLimit,
       usage_used: usage.monthlyUsed,
+      is_demo: isDemoMode,
     });
 
-    return NextResponse.json({
+    const response = NextResponse.json({
       readings,
       usage,
       hasMore,
       nextCursor,
       spreadsUnlocked,
     });
+
+    // Aggressive caching for demo mode - cache until UTC midnight
+    if (isDemoMode) {
+      const now = new Date();
+      const midnight = new Date(
+        Date.UTC(
+          now.getUTCFullYear(),
+          now.getUTCMonth(),
+          now.getUTCDate() + 1,
+          0,
+          0,
+          0,
+          0,
+        ),
+      );
+      const secondsUntilMidnight = Math.floor(
+        (midnight.getTime() - now.getTime()) / 1000,
+      );
+      response.headers.set(
+        'Cache-Control',
+        `public, max-age=${secondsUntilMidnight}, s-maxage=${secondsUntilMidnight}`,
+      );
+    }
+
+    return response;
   } catch (error) {
-    console.error('[tarot/readings] GET failed', error);
+    console.error('[tarot/readings] GET failed:', error);
+    console.error('[tarot/readings] Error details:', {
+      message: error instanceof Error ? error.message : 'Unknown error',
+      stack: error instanceof Error ? error.stack : undefined,
+      demoMode: !!demoUserId,
+      hasPersonaEmail: !!process.env.PERSONA_EMAIL,
+    });
 
     // Try to return spreadsUnlocked even on error, based on subscription if available
     let spreadsUnlocked: string[] = [];
     try {
-      const session = await auth.api.getSession({ headers: request.headers });
-      if (session?.user) {
-        const userId = session.user.id;
-        const userEmail = session.user.email;
-        const subscription = await getSubscription(userId, userEmail);
-        spreadsUnlocked = Object.keys(TAROT_SPREAD_MAP).filter((slug) =>
-          isSpreadAccessible(slug, subscription.plan),
+      // For demo mode, return all spreads as unlocked on error
+      if (demoUserId && process.env.PERSONA_EMAIL) {
+        console.log(
+          '[tarot/readings] Demo mode error fallback - unlocking all spreads',
         );
+        spreadsUnlocked = Object.keys(TAROT_SPREAD_MAP);
+      } else {
+        const session = await auth.api.getSession({ headers: request.headers });
+        if (session?.user) {
+          const userId = session.user.id;
+          const userEmail = session.user.email;
+          const subscription = await getSubscription(userId, userEmail);
+          spreadsUnlocked = Object.keys(TAROT_SPREAD_MAP).filter((slug) =>
+            isSpreadAccessible(slug, subscription.plan),
+          );
+        }
       }
     } catch (subError) {
       console.error(
@@ -151,6 +283,22 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
+    // Check for demo mode header first
+    const demoUserId = request.headers.get('X-Demo-User');
+
+    let userId: string;
+    let userEmail: string | undefined;
+
+    if (demoUserId) {
+      // Demo mode: use the specified demo user
+      console.log('[Tarot API POST] Demo mode detected, blocking');
+      // This should already be blocked by DemoModeProvider, but just in case
+      return NextResponse.json(
+        { error: 'Demo mode - cannot create new spreads' },
+        { status: 403 },
+      );
+    }
+
     const session = await auth.api.getSession({ headers: request.headers });
 
     if (!session?.user) {
@@ -160,8 +308,8 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const userId = session.user.id;
-    const userEmail = session.user.email;
+    userId = session.user.id;
+    userEmail = session.user.email;
 
     const bodyText = await request.text();
     if (!bodyText) {

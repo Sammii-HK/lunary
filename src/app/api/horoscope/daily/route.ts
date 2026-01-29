@@ -145,8 +145,107 @@ async function saveHoroscope(
 
 export async function GET(request: NextRequest) {
   try {
-    const user = await requireUser(request);
-    const userId = user.id;
+    // Check for demo mode header first
+    const demoUserId = request.headers.get('X-Demo-User');
+
+    let userId: string;
+
+    if (demoUserId && process.env.PERSONA_EMAIL) {
+      // Demo mode: Look up REAL persona account from database
+      const { sql } = await import('@vercel/postgres');
+
+      try {
+        const userResult = await sql`
+          SELECT id FROM users WHERE email = ${process.env.PERSONA_EMAIL} LIMIT 1
+        `;
+
+        if (userResult.rows.length === 0) {
+          return NextResponse.json(
+            { error: 'Persona account not found' },
+            { status: 500 },
+          );
+        }
+
+        userId = userResult.rows[0].id;
+        console.log('[Horoscope API] Using real persona account:', userId);
+      } catch (dbError: any) {
+        // Database not set up - use fallback persona data
+        if (dbError?.code === '42P01') {
+          console.warn(
+            '[Horoscope API] Database tables not found - using fallback data',
+          );
+
+          // Load reference chart data for fallback
+          const referenceData = await import('@/lib/reference-chart-data.json');
+          const today = new Date();
+
+          const horoscope = getEnhancedPersonalizedHoroscope(
+            referenceData.persona.birthDate,
+            referenceData.persona.name,
+            {
+              birthday: referenceData.persona.birthDate,
+              birthChart: referenceData.planets,
+            },
+            today,
+          );
+
+          const horoscopeData = {
+            userId: 'demo-fallback',
+            date: today.toISOString().split('T')[0],
+            sunSign: horoscope.sunSign,
+            moonPhase: horoscope.moonPhase,
+            headline: horoscope.headline,
+            overview: horoscope.overview,
+            focusAreas: horoscope.focusAreas,
+            tinyAction: horoscope.tinyAction,
+            dailyGuidance: horoscope.dailyGuidance,
+            personalInsight: horoscope.personalInsight,
+            luckyElements: horoscope.luckyElements,
+            cosmicHighlight: horoscope.cosmicHighlight,
+            dailyAffirmation: horoscope.dailyAffirmation,
+            generatedAt: new Date().toISOString(),
+          };
+
+          const response = NextResponse.json(
+            {
+              ...horoscopeData,
+              cached: false,
+            },
+            {
+              headers: getDailyCacheHeaders(),
+            },
+          );
+
+          // Aggressive caching for demo mode
+          const now = new Date();
+          const midnight = new Date(
+            Date.UTC(
+              now.getUTCFullYear(),
+              now.getUTCMonth(),
+              now.getUTCDate() + 1,
+              0,
+              0,
+              0,
+              0,
+            ),
+          );
+          const secondsUntilMidnight = Math.floor(
+            (midnight.getTime() - now.getTime()) / 1000,
+          );
+          response.headers.set(
+            'Cache-Control',
+            `public, max-age=${secondsUntilMidnight}, s-maxage=${secondsUntilMidnight}`,
+          );
+
+          return response;
+        }
+        throw dbError;
+      }
+    } else {
+      // Normal mode: use session
+      const user = await requireUser(request);
+      userId = user.id;
+    }
 
     // Get today's date string
     const today = new Date();
@@ -155,7 +254,7 @@ export async function GET(request: NextRequest) {
     // Check for cached horoscope first
     const cached = await getCachedHoroscope(userId, dateStr);
     if (cached) {
-      return NextResponse.json(
+      const response = NextResponse.json(
         {
           ...cached,
           cached: true,
@@ -164,14 +263,39 @@ export async function GET(request: NextRequest) {
           headers: getDailyCacheHeaders(), // Resets at midnight London time
         },
       );
+
+      // Aggressive caching for demo mode - cache until UTC midnight
+      if (demoUserId) {
+        const now = new Date();
+        const midnight = new Date(
+          Date.UTC(
+            now.getUTCFullYear(),
+            now.getUTCMonth(),
+            now.getUTCDate() + 1,
+            0,
+            0,
+            0,
+            0,
+          ),
+        );
+        const secondsUntilMidnight = Math.floor(
+          (midnight.getTime() - now.getTime()) / 1000,
+        );
+        response.headers.set(
+          'Cache-Control',
+          `public, max-age=${secondsUntilMidnight}, s-maxage=${secondsUntilMidnight}`,
+        );
+      }
+
+      return response;
     }
 
     // Fetch user profile from database
     const profile = await getUserProfile(userId);
 
     // Generate fresh horoscope
-    const userBirthday = user.birthday || profile.birthday;
-    const userName = user.displayName || profile.name;
+    const userBirthday = profile.birthday;
+    const userName = profile.name;
     const birthChart = profile.birthChart;
 
     const horoscope = getEnhancedPersonalizedHoroscope(

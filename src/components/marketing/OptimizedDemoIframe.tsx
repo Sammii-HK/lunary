@@ -113,9 +113,8 @@ export function OptimizedDemoIframe({
               height: '100%',
               display: 'block',
             }}
-            // Performance optimizations
             referrerPolicy='no-referrer'
-            importance='high'
+            {...({ importance: 'high' } as any)}
           />
         ) : (
           // Placeholder while lazy loading
@@ -132,9 +131,6 @@ export function OptimizedDemoIframe({
         <p className='text-xs text-zinc-400'>
           Live preview using real cosmic data for today
         </p>
-        {loadTime !== null && process.env.NODE_ENV === 'development' && (
-          <p className='text-[10px] text-zinc-600'>Loaded in {loadTime}ms</p>
-        )}
       </div>
     </div>
   );

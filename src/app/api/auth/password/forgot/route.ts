@@ -31,6 +31,23 @@ export async function POST(request: Request) {
     const json = await request.json();
     const { email, redirectTo } = requestSchema.parse(json);
 
+    // SECURITY: Block password reset for demo persona account
+    const personaEmail = process.env.PERSONA_EMAIL?.toLowerCase();
+    if (email.toLowerCase() === personaEmail) {
+      console.warn(
+        `🚫 SECURITY: Blocked password reset attempt for demo persona account: ${email}`,
+      );
+      // Return success message to avoid revealing account existence
+      return NextResponse.json(
+        {
+          status: true,
+          message:
+            'If this email exists in our system, look for a reset link shortly.',
+        },
+        { status: 200, headers: corsHeaders },
+      );
+    }
+
     const fallbackOrigin = (() => {
       try {
         return new URL(request.url).origin;
