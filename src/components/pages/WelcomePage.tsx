@@ -44,8 +44,22 @@ export default function WelcomePage() {
     <>
       {renderJsonLd(structuredData)}
       <div className='min-h-screen bg-zinc-950 text-zinc-50 flex flex-col'>
+        {/* Promo Banner */}
+        <div className='bg-gradient-to-r from-lunary-primary-900/40 to-lunary-primary-800/40 border-b border-lunary-primary-700/30 py-2 px-4 mt-[calc(24px+40px)] md:mt-[calc(32px+64px)]'>
+          <div className='flex items-center justify-center gap-2'>
+            <Sparkles className='w-4 h-4 text-lunary-primary-200' />
+            <p className='text-xs md:text-sm text-lunary-primary-100'>
+              Limited time: Use code{' '}
+              <span className='font-mono font-semibold text-lunary-primary-200'>
+                STARGAZER
+              </span>{' '}
+              for 3 months free of Lunary+
+            </p>
+          </div>
+        </div>
+
         {/* Section 1: Hero */}
-        <section className='relative px-4 md:px-6 pt-[calc(24px+40px+1rem)] md:pt-[calc(32px+64px+4rem)] pb-10 md:pb-16 bg-zinc-950'>
+        <section className='relative px-4 md:px-6 pt-4 md:pt-16 pb-10 md:pb-16 bg-zinc-950'>
           <div className='max-w-3xl mx-auto text-center space-y-6'>
             <p className='text-xs uppercase tracking-[0.2em] text-zinc-400'>
               Personal astrology grounded in real astronomy
