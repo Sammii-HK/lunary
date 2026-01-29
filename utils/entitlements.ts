@@ -158,7 +158,7 @@ export const PRICING_PLANS: PricingPlan[] = [
     trialDays: 0,
     features: [
       'Your personal birth chart',
-      'Daily moon phases & basic insights',
+      'Daily moon phases & insights (with supermoon detection)',
       'General tarot card of the day',
       'Tarot pattern analysis (last 7 days)',
       'Limited tarot spreads (free library only)',
@@ -188,7 +188,7 @@ export const PRICING_PLANS: PricingPlan[] = [
       'Everything in Cosmic Explorer',
       'Complete birth chart analysis',
       'Personalized daily horoscopes',
-      'Personal transit impacts',
+      'Personal transit impacts (with duration tracking)',
       'Solar Return & birthday insights',
       'Moon Circles (New & Full Moon)',
       'Personal tarot card drawn from your birth chart, with transit context',
