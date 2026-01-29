@@ -12,18 +12,22 @@ import type {
 
 /**
  * Enrich tarot pulls with cosmic data from global_cosmic_data cache
+ * Includes ALL tarot readings: spreads (3-card, Celtic Cross, etc.) AND daily tarot
  */
 export async function enrichTarotPulls(
   userId: string,
   startDate: Date,
 ): Promise<EnrichedTarotPull[]> {
   try {
+    // Fetch ALL tarot readings (spreads + daily tarot)
+    // Daily tarot is identified by spread_slug = 'daily-tarot'
     const result = await sql`
       SELECT
         tr.id,
         tr.created_at,
         tr.cards,
         tr.metadata,
+        tr.spread_slug,
         gcd.moon_phase,
         gcd.planetary_positions,
         gcd.general_transits
@@ -40,6 +44,7 @@ export async function enrichTarotPulls(
       created_at: row.created_at,
       cards: row.cards,
       metadata: row.metadata,
+      spread_slug: row.spread_slug, // Identifies if it's daily-tarot vs spread
       cosmicData: parseCosmicData(row),
     }));
 

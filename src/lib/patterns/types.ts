@@ -19,7 +19,9 @@ export type PatternType =
   | 'tarot_natal_transit'
   | 'emotion_planetary_position'
   | 'emotion_planetary_aspect'
-  | 'emotion_natal_transit';
+  | 'emotion_natal_transit'
+  // Special types
+  | 'insufficient_data';
 
 export interface TimeWindow {
   startDate: string; // ISO date
@@ -205,6 +207,7 @@ export interface EnrichedTarotPull {
   created_at: string;
   cards: any; // Original tarot reading cards
   metadata?: any;
+  spread_slug?: string; // e.g., 'daily-tarot', '3-card', 'celtic-cross'
   cosmicData: CosmicData;
 }
 

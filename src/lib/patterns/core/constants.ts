@@ -11,8 +11,8 @@ export const PATTERN_CONSTANTS = {
   // Minimum requirements for pattern detection
   MIN_OCCURRENCES: 3,
   MIN_CONFIDENCE: 0.6,
-  MIN_TAROT_PULLS: 3,
-  MIN_JOURNAL_ENTRIES: 5,
+  MIN_TAROT_PULLS: 2, // Lowered for daily tarot users
+  MIN_JOURNAL_ENTRIES: 3, // Lowered to capture more patterns
 
   // Analysis window configuration
   DEFAULT_ANALYSIS_WINDOW: 90, // days
