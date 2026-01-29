@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { ChevronDown } from 'lucide-react';
 import Link from 'next/link';
 import { BirthChartData } from '../../../../../utils/astrology/birthChart';
@@ -277,12 +277,19 @@ export function TransitWisdom({
   const { hasAccess } = useSubscription();
   const canViewPremium = hasAccess('transit_calendar');
 
+  const aspects = useMemo(
+    () => calculateAspectsForWisdom(birthChart, currentTransits),
+    [birthChart, currentTransits],
+  );
+
+  const details = useMemo(
+    () => buildTransitDetails(aspects, { maxItems }),
+    [aspects, maxItems],
+  );
+
   if (!birthChart || !currentTransits || birthChart.length === 0) {
     return null;
   }
-
-  const aspects = calculateAspectsForWisdom(birthChart, currentTransits);
-  const details = buildTransitDetails(aspects, { maxItems });
 
   if (details.length === 0) {
     return (

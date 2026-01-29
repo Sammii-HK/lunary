@@ -16,6 +16,7 @@ import {
 } from '../../utils/moon/moonPhases';
 import type { GlobalCosmicData } from '@/lib/cosmic-snapshot/global-cache';
 import { useUser } from '@/context/UserContext';
+import { DailyCache, getLocalDateString } from '@/lib/cache/dailyCache';
 
 export const AstronomyContext = createContext<{
   currentAstrologicalChart: AstroChartInformation[];
@@ -112,7 +113,7 @@ export function useAstronomyContext() {
       writtenDate: '',
       currentTarotCard: null,
       symbol: '',
-      currentDate: dayjs().utc().format('YYYY-MM-DD'),
+      currentDate: getLocalDateString(), // User's local date, not UTC
       refreshCosmicData: () => {
         console.warn('AstronomyContext fallback: refreshCosmicData called');
       },
@@ -124,12 +125,22 @@ export function useAstronomyContext() {
 
 export const AstronomyContextProvider = ({
   children,
+  demoData,
 }: {
   children: React.ReactNode;
+  demoData?: {
+    currentMoonPhase?: MoonPhaseLabels;
+    currentMoonConstellationPosition?: ZodiacSign;
+    currentTarotCard?: any;
+    moonIllumination?: number;
+    moonAge?: number;
+  };
 }) => {
   const { user } = useUser();
   const userName = user?.name;
   const userBirthday = user?.birthday;
+
+  const isDemoMode = Boolean(demoData);
 
   const [currentDateTime, setCurrentDateTime] = useState(dayjs().toDate());
   const [currentDate, setCurrentDate] = useState(
@@ -139,12 +150,27 @@ export const AstronomyContextProvider = ({
   const [refreshKey, setRefreshKey] = useState(0);
 
   useEffect(() => {
+    if (isDemoMode) return; // Skip fetching in demo mode
+
     let isMounted = true;
 
+    // Check cache first - cosmic data updates every 2 hours
+    const cacheKey = `cosmic_global_${currentDate}`;
+    const cached = DailyCache.get<GlobalCosmicData>(cacheKey);
+
+    if (cached && refreshKey === 0) {
+      // Use cached data (skip if user manually refreshed)
+      setCosmicData(cached);
+      return;
+    }
+
+    // Cache miss or manual refresh, fetch from API
     fetch(`/api/cosmic/global?date=${currentDate}`)
       .then((res) => res.json())
       .then((data) => {
         if (isMounted && data && !data.error) {
+          // Cache for 2 hours (hourly = 2 hour expiration)
+          DailyCache.set(cacheKey, data, 'hourly');
           setCosmicData(data);
         }
       })
@@ -155,7 +181,7 @@ export const AstronomyContextProvider = ({
     return () => {
       isMounted = false;
     };
-  }, [currentDate, refreshKey]);
+  }, [currentDate, refreshKey, isDemoMode]);
 
   const currentAstrologicalChart = useMemo(() => {
     if (!cosmicData?.planetaryPositions) return [];
@@ -265,15 +291,24 @@ export const AstronomyContextProvider = ({
       value={{
         currentAstrologicalChart,
         currentMoonPosition,
-        currentMoonConstellationPosition,
+        currentMoonConstellationPosition: isDemoMode
+          ? demoData!.currentMoonConstellationPosition ||
+            currentMoonConstellationPosition
+          : currentMoonConstellationPosition,
         currentMoonConstellation,
         currentDateTime,
         setCurrentDateTime,
-        currentMoonPhase,
-        moonIllumination,
-        moonAge,
+        currentMoonPhase: isDemoMode
+          ? demoData!.currentMoonPhase || currentMoonPhase
+          : currentMoonPhase,
+        moonIllumination: isDemoMode
+          ? (demoData!.moonIllumination ?? moonIllumination)
+          : moonIllumination,
+        moonAge: isDemoMode ? (demoData!.moonAge ?? moonAge) : moonAge,
         writtenDate,
-        currentTarotCard,
+        currentTarotCard: isDemoMode
+          ? demoData!.currentTarotCard || currentTarotCard
+          : currentTarotCard,
         symbol,
         currentDate,
         refreshCosmicData: () => setRefreshKey((prev) => prev + 1),

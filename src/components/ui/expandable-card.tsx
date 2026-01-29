@@ -9,6 +9,7 @@ interface ExpandableCardProps {
   expanded: ReactNode;
   defaultExpanded?: boolean;
   autoExpandOnDesktop?: boolean;
+  isExpanded?: boolean; // Controlled state from parent
   className?: string;
   previewClassName?: string;
   expandedClassName?: string;
@@ -20,22 +21,45 @@ export const ExpandableCard = ({
   expanded,
   defaultExpanded = false,
   autoExpandOnDesktop = false,
+  isExpanded: controlledExpanded,
   className,
   previewClassName,
   expandedClassName,
   onToggle,
 }: ExpandableCardProps) => {
-  const [isExpanded, setIsExpanded] = useState(defaultExpanded);
-  const [isDesktop, setIsDesktop] = useState(false);
+  // Internal state for uncontrolled mode
+  const [internalExpanded, setInternalExpanded] = useState(false);
+
+  // Use controlled prop if provided, otherwise use internal state
+  const isControlled = controlledExpanded !== undefined;
+  const isExpanded = isControlled ? controlledExpanded : internalExpanded;
 
   useEffect(() => {
+    // Skip auto-expansion logic if controlled
+    if (isControlled) return;
+
+    // Check if we're in demo mode - if so, stay collapsed (client-only check)
+    if (typeof window !== 'undefined') {
+      const isDemoMode =
+        document.getElementById('demo-preview-container') !== null;
+      if (isDemoMode) {
+        return; // Don't auto-expand in demo mode
+      }
+    }
+
+    // Handle defaultExpanded
+    if (defaultExpanded && !autoExpandOnDesktop) {
+      setInternalExpanded(true);
+      return;
+    }
+
+    // Auto-expand on desktop if enabled (and not in demo mode)
     if (!autoExpandOnDesktop) return;
 
     const checkDesktop = () => {
       const isNowDesktop = window.matchMedia('(min-width: 768px)').matches;
-      setIsDesktop(isNowDesktop);
       if (isNowDesktop) {
-        setIsExpanded(true);
+        setInternalExpanded(true);
       }
     };
 
@@ -43,11 +67,13 @@ export const ExpandableCard = ({
     const mediaQuery = window.matchMedia('(min-width: 768px)');
     mediaQuery.addEventListener('change', checkDesktop);
     return () => mediaQuery.removeEventListener('change', checkDesktop);
-  }, [autoExpandOnDesktop]);
+  }, [autoExpandOnDesktop, defaultExpanded, isControlled]);
 
   const handleToggle = () => {
     const newState = !isExpanded;
-    setIsExpanded(newState);
+    if (!isControlled) {
+      setInternalExpanded(newState);
+    }
     onToggle?.(newState);
   };
 
@@ -89,7 +115,7 @@ export const ExpandableCard = ({
 
       <div
         className={cn(
-          'overflow-hidden transition-all duration-300 ease-in-out',
+          'overflow-hidden transition-all duration-500 ease-in-out',
           isExpanded ? 'max-h-[600px] opacity-100' : 'max-h-0 opacity-0',
         )}
       >
@@ -109,7 +135,7 @@ export const ExpandableCard = ({
 interface ExpandableCardHeaderProps {
   icon?: ReactNode;
   title: string;
-  subtitle?: string;
+  subtitle?: ReactNode;
   badge?: string;
   badgeVariant?: 'default' | 'highlight' | 'warning' | 'danger';
   action?: ReactNode;
@@ -134,7 +160,7 @@ export const ExpandableCardHeader = ({
     <div className='flex items-center justify-between w-full pr-2'>
       <div className='flex items-center gap-2'>
         {icon && <span>{icon}</span>}
-        <span className='text-sm font-medium text-zinc-200'>{title}</span>
+        <span className='text-sm text-zinc-200'>{title}</span>
         {subtitle && <span className='text-xs text-zinc-400'>{subtitle}</span>}
       </div>
       <div className='flex items-center gap-2'>

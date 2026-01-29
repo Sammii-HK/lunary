@@ -1,24 +1,26 @@
+'use client';
+
 import Link from 'next/link';
 import {
   Telescope,
   Sparkles,
   NotebookPen,
-  LayoutDashboard,
-  MessageCircle,
-  BookOpen,
-  Layers,
   Calendar,
   Map,
   MessagesSquare,
   X,
   Check,
-  Gem,
 } from 'lucide-react';
 import { MarketingFooter } from '@/components/MarketingFooter';
-import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import { NewsletterSignupForm } from '@/components/NewsletterSignupForm';
 import { renderJsonLd } from '@/lib/schema';
+import { MarketingMiniApp } from '@/components/marketing/MarketingMiniApp';
+import { CTA_COPY } from '@/lib/cta-copy';
+import { FAQAccordion } from '@/components/FAQ';
+import { getHomepageFAQs } from '@/lib/faq-helpers';
+import { useState } from 'react';
+import { HomepageFeaturesTest } from '@/components/marketing/HomepageFeaturesTest';
 
 const structuredData = {
   '@context': 'https://schema.org',
@@ -35,6 +37,9 @@ const structuredData = {
 };
 
 export default function WelcomePage() {
+  const [openFAQId, setOpenFAQId] = useState<string | null>(null);
+  const homepageFAQs = getHomepageFAQs();
+
   return (
     <>
       {renderJsonLd(structuredData)}
@@ -58,40 +63,28 @@ export default function WelcomePage() {
             </p>
             <div className='flex flex-col sm:flex-row gap-4 justify-center items-center pt-2 pb-0 md:pb-6'>
               <Button variant='lunary-soft' asChild>
-                <Link href='/auth?signup=true'>Create your birth chart</Link>
+                <Link href='/auth?signup=true'>
+                  {CTA_COPY.auth.createChart}
+                </Link>
               </Button>
               <Button variant='lunary' asChild>
-                <Link href='/pricing'>See what Lunary+ unlocks</Link>
+                <Link href='/pricing'>{CTA_COPY.pricing.viewPricing}</Link>
               </Button>
             </div>
           </div>
 
-          {/* Hero Screenshot */}
+          {/* Hero Mini App */}
           <div className='mt-8 md:mt-[72px] flex justify-center'>
-            <Image
-              src='/lunary_hero.png'
-              alt='Lunary app dashboard showing personalised cosmic insights'
-              className='w-full max-w-[420px] md:max-w-[380px] h-auto rounded-2xl border border-zinc-700/50'
-              width={380}
-              height={827}
-              priority
-              style={{
-                boxShadow:
-                  '0 18px 28px rgba(0, 0, 0, 0.28), 0 0 22px rgba(178, 126, 255, 0.18)',
-              }}
-            />
+            <MarketingMiniApp />
           </div>
-          <p className='text-xs text-zinc-500 mt-4 text-center'>
-            Preview shown from Lunary+.
-          </p>
         </section>
 
         <section className='py-2 px-4 md:py-8 leading-relaxed max-w-3xl mx-auto text-center'>
           <p className='text-xs text-zinc-500 mb-4'>
             Chart calculations are based on real astronomy.
             <br />
-            The Astral Guide chat uses AI to help interpret your chart, patterns
-            and the current sky.
+            The Astral Guide chat helps interpret your chart, patterns and the
+            current sky.
           </p>
           <p className='text-sm text-zinc-400'>
             Free access includes your birth chart and Grimoire tools.
@@ -100,8 +93,8 @@ export default function WelcomePage() {
               Upgrade for personalised interpretation and deeper analysis.
             </span>
             <br />
-            Personal Day and Personal Year numbers are free; Lunary+ Pro unlocks
-            the interpretation.
+            Personal Day and Personal Year numbers are free; Lunary+ Pro
+            includes the interpretation.
           </p>
           <p className='text-sm text-zinc-400 pb-8'>
             No card required. Takes under 2 minutes.
@@ -138,7 +131,9 @@ export default function WelcomePage() {
             </div>
             <div className='pt-2'>
               <Button variant='lunary' asChild>
-                <Link href='/auth?signup=true'>Start your birth chart</Link>
+                <Link href='/auth?signup=true'>
+                  {CTA_COPY.auth.createChart}
+                </Link>
               </Button>
             </div>
           </div>
@@ -280,227 +275,9 @@ export default function WelcomePage() {
           </div>
         </section>
 
-        {/* Section 7: Feature Spotlights */}
+        {/* Section 7: Feature Spotlights (A/B Test) */}
         <section className='py-12 md:py-20 px-4 md:px-6'>
-          <div className='max-w-5xl mx-auto space-y-12 md:space-y-20'>
-            {/* Feature 1: Daily Cosmic Dashboard */}
-            <div className='grid md:grid-cols-2 gap-6 md:gap-10 items-center'>
-              <div className='space-y-3'>
-                <LayoutDashboard
-                  className='w-7 h-7 text-lunary-primary-400'
-                  strokeWidth={1.5}
-                />
-                <h3 className='text-xl md:text-2xl font-light text-zinc-100'>
-                  Daily Cosmic Dashboard
-                </h3>
-                <p className='text-base text-zinc-300'>
-                  Wake up knowing why today feels the way it does
-                </p>
-                <ul className='text-sm text-zinc-400 leading-relaxed space-y-1'>
-                  <li>
-                    Today’s transits, with your birth chart saved to your
-                    account
-                  </li>
-                  <li>One tarot card that reflects your emotional climate</li>
-                  <li>A crystal focus that supports your current phase</li>
-                </ul>
-                <p className='text-xs text-zinc-500'>
-                  Your birth chart is created and saved to your account.
-                  Chart-based interpretation unlocks with Lunary+.
-                </p>
-              </div>
-              <div className='space-y-2'>
-                <div className='py-3 px-4 border border-zinc-800 rounded-lg'>
-                  <div className='flex items-center gap-2 mb-1'>
-                    <Image
-                      src='/icons/moon-phases/waning-cresent-moon.svg'
-                      alt='Waning Crescent'
-                      width={20}
-                      height={20}
-                    />
-                    <span className='text-sm font-medium text-zinc-200'>
-                      Waning Crescent
-                    </span>
-                  </div>
-                  <p className='text-xs text-zinc-400'>in Scorpio</p>
-                  <p className='text-xs text-zinc-600 mt-1'>
-                    3 days until New Moon
-                  </p>
-                </div>
-                <div className='py-3 px-4 border border-zinc-800 rounded-lg'>
-                  <div className='flex items-center gap-2 mb-1'>
-                    <Layers className='w-4 h-4 text-lunary-accent-300' />
-                    <span className='text-sm font-medium text-zinc-200'>
-                      Daily Card
-                    </span>
-                    <span className='text-xs bg-lunary-primary-900/20 text-lunary-primary-300 px-1.5 py-0.5 rounded'>
-                      Personal
-                    </span>
-                  </div>
-                  <p className='text-sm text-lunary-primary-300'>The Star</p>
-                  <p className='text-xs text-zinc-400'>
-                    Hope • Renewal • Serenity
-                  </p>
-                </div>
-                <div className='py-3 px-4 border border-zinc-800 rounded-lg'>
-                  <div className='flex items-center gap-2 mb-1'>
-                    <Gem className='w-4 h-4 text-lunary-accent-200' />
-                    <span className='text-sm font-medium text-zinc-200'>
-                      Amethyst
-                    </span>
-                    <span className='text-xs bg-lunary-primary-900/20 text-lunary-primary-300 px-1.5 py-0.5 rounded'>
-                      For you
-                    </span>
-                  </div>
-                  <p className='text-xs text-zinc-400'>
-                    Supports intuition during this reflective phase
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            {/* Feature 2: Astral Guide Chat */}
-            <div className='grid md:grid-cols-2 gap-6 md:gap-10 items-center'>
-              <div className='order-2 md:order-1 rounded-2xl border border-zinc-800/60 bg-zinc-900/40 p-5 md:p-6'>
-                <div className='space-y-3'>
-                  <div className='flex justify-end'>
-                    <div className='max-w-[80%]'>
-                      <div className='rounded-2xl bg-lunary-primary-900 border border-lunary-primary-700 px-3.5 py-2.5 text-white text-sm leading-relaxed'>
-                        Why am I feeling so restless today?
-                      </div>
-                    </div>
-                  </div>
-                  <div className='flex justify-start'>
-                    <div className='max-w-[85%]'>
-                      <div className='rounded-2xl bg-zinc-800/80 border border-zinc-700/40 px-3.5 py-2.5 text-zinc-100 text-sm leading-relaxed'>
-                        With Mars currently transiting your 3rd house and the
-                        Moon in Gemini, your mind is seeking stimulation. This
-                        is a good day for movement and short conversations.
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <div className='order-1 md:order-2 space-y-3'>
-                <MessageCircle
-                  className='w-7 h-7 text-lunary-primary-400'
-                  strokeWidth={1.5}
-                />
-                <h3 className='text-xl md:text-2xl font-light text-zinc-100'>
-                  Astral Guide Chat
-                </h3>
-                <p className='text-base text-zinc-300'>
-                  Ask a question and leave with clarity
-                </p>
-                <p className='text-sm text-zinc-400 leading-relaxed'>
-                  Talk through emotions, energy, creativity or relationships.
-                  Lunary responds with context from your chart and the current
-                  sky.
-                </p>
-                <p className='text-xs text-zinc-500'>
-                  Optional AI chat grounded in your chart. Your chart itself is
-                  always astronomy-based.
-                </p>
-              </div>
-            </div>
-
-            {/* Feature 3: Living Book of Shadows */}
-            <div className='grid md:grid-cols-2 gap-6 md:gap-10 items-center'>
-              <div className='space-y-3'>
-                <BookOpen
-                  className='w-7 h-7 text-lunary-primary-400'
-                  strokeWidth={1.5}
-                />
-                <h3 className='text-xl md:text-2xl font-light text-zinc-100'>
-                  Living Book of Shadows
-                </h3>
-                <p className='text-base text-zinc-300'>
-                  See the patterns that keep repeating
-                </p>
-                <p className='text-sm text-zinc-400 leading-relaxed'>
-                  Record your insights and moods in one place. Lunary highlights
-                  the threads between your entries, transits and tarot pulls.
-                </p>
-              </div>
-              <div className='rounded-2xl border border-zinc-800/60 bg-zinc-900/40 p-5 md:p-6'>
-                <div className='space-y-2.5'>
-                  <div className='p-2.5 rounded-lg bg-zinc-800/50 border border-zinc-700/30'>
-                    <p className='text-xs text-zinc-400 mb-0.5'>Nov 28</p>
-                    <p className='text-sm text-zinc-300'>
-                      Feeling introspective. The Star appeared again.
-                    </p>
-                  </div>
-                  <div className='p-2.5 rounded-lg bg-zinc-800/50 border border-zinc-700/30'>
-                    <p className='text-xs text-zinc-400 mb-0.5'>Nov 25</p>
-                    <p className='text-sm text-zinc-300'>
-                      New Moon intention: trust the process.
-                    </p>
-                  </div>
-                  <div className='text-xs text-lunary-primary-400/80 pl-1'>
-                    Pattern: Hope themes recurring during Sagittarius season
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Feature 4: Tarot and Transit Patterns */}
-            <div className='grid md:grid-cols-2 gap-6 md:gap-10 items-center'>
-              <div className='order-2 md:order-1 rounded-2xl border border-zinc-800/60 bg-zinc-900/40 p-5 md:p-6'>
-                <div className='space-y-3'>
-                  <div className='flex items-center justify-between'>
-                    <span className='text-sm text-zinc-400'>
-                      Recurring themes
-                    </span>
-                    <span className='text-xs text-zinc-400'>Last 30 days</span>
-                  </div>
-                  <div className='space-y-2'>
-                    <div className='flex items-center gap-3'>
-                      <div className='w-2 h-2 rounded-full bg-lunary-primary-400'></div>
-                      <span className='text-sm text-zinc-300'>
-                        Transformation
-                      </span>
-                      <div className='flex-1 h-1.5 bg-zinc-800 rounded-full'>
-                        <div className='w-3/4 h-full bg-lunary-primary-500/60 rounded-full'></div>
-                      </div>
-                    </div>
-                    <div className='flex items-center gap-3'>
-                      <div className='w-2 h-2 rounded-full bg-lunary-primary-400'></div>
-                      <span className='text-sm text-zinc-300'>
-                        New beginnings
-                      </span>
-                      <div className='flex-1 h-1.5 bg-zinc-800 rounded-full'>
-                        <div className='w-1/2 h-full bg-lunary-primary-500/60 rounded-full'></div>
-                      </div>
-                    </div>
-                    <div className='flex items-center gap-3'>
-                      <div className='w-2 h-2 rounded-full bg-lunary-primary-400'></div>
-                      <span className='text-sm text-zinc-300'>
-                        Inner wisdom
-                      </span>
-                      <div className='flex-1 h-1.5 bg-zinc-800 rounded-full'>
-                        <div className='w-2/5 h-full bg-lunary-primary-500/60 rounded-full'></div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <div className='order-1 md:order-2 space-y-3'>
-                <Layers
-                  className='w-7 h-7 text-lunary-primary-400'
-                  strokeWidth={1.5}
-                />
-                <h3 className='text-xl md:text-2xl font-light text-zinc-100'>
-                  Tarot and Transit Patterns
-                </h3>
-                <p className='text-base text-zinc-300'>
-                  Notice the themes shaping your life
-                </p>
-                <p className='text-sm text-zinc-400 leading-relaxed'>
-                  Understand repeating cycles and ongoing lessons with clarity.
-                </p>
-              </div>
-            </div>
-          </div>
+          <HomepageFeaturesTest />
         </section>
 
         {/* Section 8: Learn & Explore */}
@@ -512,7 +289,7 @@ export default function WelcomePage() {
               </h2>
               <p className='text-zinc-400 leading-relaxed max-w-2xl mx-auto'>
                 New to astrology or already deep in it, you can start here.
-                Lunary’s Grimoire is free to explore, with clear, grounded
+                Lunary's Grimoire is free to explore, with clear, grounded
                 guides on astrology, tarot, moon phases and symbolism so you can
                 understand the patterns shaping your life.
               </p>
@@ -585,7 +362,7 @@ export default function WelcomePage() {
             </div>
             <div className='text-center mt-10 md:mt-14'>
               <p className='text-sm md:text-base text-zinc-400 leading-relaxed max-w-2xl mx-auto'>
-                Learning gives context. When you’re ready, Lunary connects that
+                Learning gives context. When you're ready, Lunary connects that
                 understanding to your birth chart and current timing for deeper
                 personal insight.
               </p>
@@ -788,7 +565,7 @@ export default function WelcomePage() {
                     </p>
                     <p className='text-[9px] text-zinc-500 mt-1'>
                       Interpreted at a general level. Chart-specific insight
-                      unlocks with Lunary+.
+                      included with Lunary+.
                     </p>
                   </li>
                   <li>
@@ -802,7 +579,7 @@ export default function WelcomePage() {
               </div>
               <div className='rounded-2xl border border-zinc-800/60 bg-zinc-900/40 p-4'>
                 <p className='text-xs uppercase tracking-[0.2em] text-zinc-500'>
-                  Unlock deeper personal insight
+                  Your Personal Insight
                 </p>
                 <ul className='mt-2 space-y-3'>
                   <li>
@@ -857,8 +634,51 @@ export default function WelcomePage() {
           </div>
         </section>
 
-        {/* Section 13: Final CTA */}
+        {/* Section 13: FAQs */}
         <section className='py-12 md:py-20 px-4 md:px-6 bg-zinc-900/20'>
+          <div className='max-w-3xl mx-auto'>
+            <h2 className='text-2xl md:text-3xl font-light text-zinc-100 text-center mb-12'>
+              Common questions
+            </h2>
+            <div className='space-y-3'>
+              {homepageFAQs.map((faq) => (
+                <FAQAccordion
+                  key={faq.id}
+                  question={faq.question}
+                  answer={faq.answer}
+                  isOpen={openFAQId === faq.id}
+                  onToggle={() =>
+                    setOpenFAQId(openFAQId === faq.id ? null : faq.id)
+                  }
+                />
+              ))}
+            </div>
+            <div className='text-center mt-8'>
+              <Link
+                href='/faq'
+                className='text-sm text-lunary-primary-300 hover:text-lunary-primary-200 transition-colors inline-flex items-center gap-2'
+              >
+                View all FAQs
+                <svg
+                  className='w-4 h-4'
+                  fill='none'
+                  viewBox='0 0 24 24'
+                  stroke='currentColor'
+                >
+                  <path
+                    strokeLinecap='round'
+                    strokeLinejoin='round'
+                    strokeWidth={2}
+                    d='M9 5l7 7-7 7'
+                  />
+                </svg>
+              </Link>
+            </div>
+          </div>
+        </section>
+
+        {/* Section 14: Final CTA */}
+        <section className='py-12 md:py-20 px-4 md:px-6 border-t border-zinc-800/30'>
           <div className='max-w-2xl mx-auto text-center space-y-5'>
             <h2 className='text-2xl md:text-3xl font-light text-zinc-100'>
               Understanding yourself changes everything.
@@ -868,16 +688,18 @@ export default function WelcomePage() {
             </p>
             <div className='pt-2 flex flex-col sm:flex-row gap-4 justify-center items-center'>
               <Button variant='lunary-soft' asChild>
-                <Link href='/auth?signup=true'>Create your birth chart</Link>
+                <Link href='/auth?signup=true'>
+                  {CTA_COPY.auth.createChart}
+                </Link>
               </Button>
               <Button variant='lunary' asChild>
-                <Link href='/pricing'>See what Lunary+ unlocks</Link>
+                <Link href='/pricing'>{CTA_COPY.pricing.viewPricing}</Link>
               </Button>
             </div>
           </div>
         </section>
 
-        {/* Section 14: Newsletter */}
+        {/* Section 15: Newsletter */}
         <section className='py-12 md:py-20 px-4 md:px-6'>
           <div className='max-w-4xl mx-auto'>
             <NewsletterSignupForm

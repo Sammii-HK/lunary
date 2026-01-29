@@ -56,8 +56,31 @@ export function invalidateAuthCache() {
   authPromise = null;
 }
 
-export function AuthStatusProvider({ children }: { children: ReactNode }) {
+interface AuthStatusProviderProps {
+  children: ReactNode;
+  demoData?: {
+    isAuthenticated: boolean;
+    user: any;
+  };
+}
+
+export function AuthStatusProvider({
+  children,
+  demoData,
+}: AuthStatusProviderProps) {
+  const isDemoMode = Boolean(demoData);
+
   const [authState, setAuthState] = useState<AuthState>(() => {
+    // If demo mode, return demo auth state immediately
+    if (isDemoMode) {
+      return {
+        isAuthenticated: demoData!.isAuthenticated,
+        user: demoData!.user,
+        profile: null,
+        loading: false,
+      };
+    }
+
     if (isAuthenticatedTestMode()) {
       // Return authenticated state for Playwright authenticated tests
       return {
@@ -100,7 +123,7 @@ export function AuthStatusProvider({ children }: { children: ReactNode }) {
   }, []);
 
   useEffect(() => {
-    if (isTestMode()) return;
+    if (isDemoMode || isTestMode()) return; // Skip auth check in demo mode
 
     let isMounted = true;
 

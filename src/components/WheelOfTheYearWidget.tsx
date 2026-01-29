@@ -87,24 +87,20 @@ export const WheelOfTheYearWidget = () => {
   return (
     <div className='bg-gradient-to-br from-lunary-secondary-900/20 to-lunary-accent-900/20 rounded-lg p-4 border border-lunary-secondary-700'>
       <div className='flex items-center justify-between mb-1'>
-        <h3 className='text-md font-semibold text-lunary-secondary-300'>
-          Wheel of the Year
-        </h3>
+        <h3 className='text-md text-lunary-secondary-300'>Wheel of the Year</h3>
       </div>
 
       <div className='space-y-3'>
         <div>
-          <div className='flex items-center gap-2 mb-1 justify-between align-middle'>
+          <div className='flex items-center gap-2 justify-between align-middle mb-2'>
             <div className='flex items-center gap-2'>
-              <h4 className='font-medium text-lunary-secondary-200'>
-                Current Season
-              </h4>
+              <h4 className='text-lunary-secondary-200'>Current Season</h4>
               <span className='text-sm text-lunary-secondary'>
                 {displaySabbat}
               </span>
             </div>
             {sabbatInfo && (
-              <p className='text-sm text-lunary-secondary-100 mb-2'>
+              <p className='text-sm text-lunary-secondary-100'>
                 {sabbatInfo.date}
               </p>
             )}

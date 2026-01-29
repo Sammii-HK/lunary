@@ -4,9 +4,9 @@ import { revalidateTag } from 'next/cache';
 import { requireUser } from '@/lib/ai/auth';
 import { decrypt } from '@/lib/encryption';
 import { getEnhancedPersonalizedHoroscope } from '../../../../../utils/astrology/enhancedHoroscope';
+import { getDailyCacheHeaders } from '@/lib/cache-utils';
 
 export const runtime = 'nodejs';
-export const revalidate = 86400; // 1 day
 
 interface UserProfile {
   name?: string;
@@ -161,9 +161,7 @@ export async function GET(request: NextRequest) {
           cached: true,
         },
         {
-          headers: {
-            'Cache-Control': 'private, max-age=86400',
-          },
+          headers: getDailyCacheHeaders(), // Resets at midnight London time
         },
       );
     }
@@ -211,9 +209,7 @@ export async function GET(request: NextRequest) {
         cached: false,
       },
       {
-        headers: {
-          'Cache-Control': 'private, max-age=86400',
-        },
+        headers: getDailyCacheHeaders(), // Resets at midnight London time
       },
     );
   } catch (error: any) {

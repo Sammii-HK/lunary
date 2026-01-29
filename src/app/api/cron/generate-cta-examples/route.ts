@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import * as fs from 'fs/promises';
 import * as path from 'path';
 import { generateExamples } from '../../../../../scripts/generate-cta-examples';
+import { getReferenceChartWithHouses } from '../../../../../scripts/lib/reference-chart';
 import { sendDiscordNotification } from '@/lib/discord';
 
 /**
@@ -31,7 +32,7 @@ export async function GET(request: NextRequest) {
     // Generate examples
     const examples = await generateExamples();
 
-    // Write to output file
+    // Write CTA examples to output file
     const outputPath = path.join(
       process.cwd(),
       'src',
@@ -39,9 +40,33 @@ export async function GET(request: NextRequest) {
       'cta-examples.json',
     );
     await fs.writeFile(outputPath, JSON.stringify(examples, null, 2), 'utf-8');
+    console.log('✓ CTA examples written');
+
+    // Generate and write reference chart data for marketing
+    console.log('📊 Generating reference chart data with houses...');
+    const referenceChart = await getReferenceChartWithHouses();
+
+    const referenceChartData = {
+      persona: examples.marketing.persona,
+      planets: referenceChart.planets,
+      houses: referenceChart.houses,
+    };
+
+    const referenceChartPath = path.join(
+      process.cwd(),
+      'src',
+      'lib',
+      'reference-chart-data.json',
+    );
+    await fs.writeFile(
+      referenceChartPath,
+      JSON.stringify(referenceChartData, null, 2),
+      'utf-8',
+    );
+    console.log('✓ Reference chart data written');
 
     const duration = Date.now() - startTime;
-    console.log(`✅ CTA examples generated successfully in ${duration}ms`);
+    console.log(`✅ All files generated successfully in ${duration}ms`);
 
     // Count examples generated
     const exampleCounts = Object.entries(examples)

@@ -12,7 +12,12 @@ import * as path from 'path';
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
 import timezone from 'dayjs/plugin/timezone';
-import { getReferenceChart, formatFullPosition } from './lib/reference-chart';
+import {
+  getReferenceChart,
+  getReferenceChartWithHouses,
+  formatFullPosition,
+  REFERENCE_PROFILE,
+} from './lib/reference-chart';
 import { generateBirthChart } from '../utils/astrology/birthChart';
 import { calculateTransitHouses } from '../src/lib/ai/transit-houses';
 import type { BirthChartSnapshot } from '../src/lib/ai/types';
@@ -24,6 +29,55 @@ interface CTAExample {
   type: string;
   text: string;
   interpretation: string;
+}
+
+interface MarketingPersona {
+  name: string;
+  birthDate: string;
+  birthTime: string;
+  birthLocation: string;
+  sunSign: string;
+  moonSign: string;
+  risingSign: string;
+}
+
+interface MarketingMoonPhase {
+  phase: string;
+  sign: string;
+  daysUntilNext: number;
+  nextPhase: string;
+  element: string;
+  rulingPlanet: string;
+  modality: string;
+  spell: string;
+}
+
+interface MarketingTarotCard {
+  name: string;
+  keywords: string;
+}
+
+interface MarketingCrystal {
+  name: string;
+  meaning: string;
+}
+
+interface MarketingTransit {
+  planet: string;
+  aspect: string;
+  aspectSymbol: string;
+  natalPlanet: string;
+  house: number;
+  meaning: string;
+}
+
+interface MarketingData {
+  persona: MarketingPersona;
+  moonPhase: MarketingMoonPhase;
+  tarotCard: MarketingTarotCard;
+  crystal: MarketingCrystal;
+  todayTheme: string;
+  todayTransit: MarketingTransit;
 }
 
 interface CTAExamplesOutput {
@@ -52,6 +106,7 @@ interface CTAExamplesOutput {
   aspects: {
     examples: CTAExample[];
   };
+  marketing: MarketingData;
 }
 
 /**
@@ -240,6 +295,292 @@ function getPersonalDayInterpretation(day: number): string {
 }
 
 /**
+ * Get zodiac sign properties
+ */
+function getZodiacProperties(sign: string): {
+  element: string;
+  rulingPlanet: string;
+  modality: string;
+} {
+  const properties: Record<
+    string,
+    { element: string; rulingPlanet: string; modality: string }
+  > = {
+    Aries: { element: 'Fire', rulingPlanet: 'Mars', modality: 'Cardinal' },
+    Taurus: { element: 'Earth', rulingPlanet: 'Venus', modality: 'Fixed' },
+    Gemini: { element: 'Air', rulingPlanet: 'Mercury', modality: 'Mutable' },
+    Cancer: { element: 'Water', rulingPlanet: 'Moon', modality: 'Cardinal' },
+    Leo: { element: 'Fire', rulingPlanet: 'Sun', modality: 'Fixed' },
+    Virgo: { element: 'Earth', rulingPlanet: 'Mercury', modality: 'Mutable' },
+    Libra: { element: 'Air', rulingPlanet: 'Venus', modality: 'Cardinal' },
+    Scorpio: { element: 'Water', rulingPlanet: 'Pluto', modality: 'Fixed' },
+    Sagittarius: {
+      element: 'Fire',
+      rulingPlanet: 'Jupiter',
+      modality: 'Mutable',
+    },
+    Capricorn: {
+      element: 'Earth',
+      rulingPlanet: 'Saturn',
+      modality: 'Cardinal',
+    },
+    Aquarius: { element: 'Air', rulingPlanet: 'Uranus', modality: 'Fixed' },
+    Pisces: { element: 'Water', rulingPlanet: 'Neptune', modality: 'Mutable' },
+  };
+  return (
+    properties[sign] || {
+      element: 'Unknown',
+      rulingPlanet: 'Unknown',
+      modality: 'Unknown',
+    }
+  );
+}
+
+/**
+ * Calculate days until next moon phase
+ */
+function calculateDaysUntilNextPhase(
+  moonLongitude: number,
+  sunLongitude: number,
+): number {
+  let diff = moonLongitude - sunLongitude;
+  if (diff < 0) diff += 360;
+
+  const phaseBoundaries = [45, 90, 135, 180, 225, 270, 315, 360];
+  let degreesUntilNext = 0;
+
+  for (const boundary of phaseBoundaries) {
+    if (diff < boundary) {
+      degreesUntilNext = boundary - diff;
+      break;
+    }
+  }
+
+  const synodicMotion = 12.2;
+  return Math.round(degreesUntilNext / synodicMotion);
+}
+
+/**
+ * Get next moon phase name
+ */
+function getNextPhaseName(currentPhase: string): string {
+  const phases = [
+    'New Moon',
+    'Waxing Crescent',
+    'First Quarter',
+    'Waxing Gibbous',
+    'Full Moon',
+    'Waning Gibbous',
+    'Last Quarter',
+    'Waning Crescent',
+  ];
+  const currentIndex = phases.indexOf(currentPhase);
+  return phases[(currentIndex + 1) % phases.length];
+}
+
+/**
+ * Get spell suggestion for moon phase
+ */
+function getSpellForPhase(phase: string): string {
+  const spells: Record<string, string> = {
+    'New Moon': 'Intention Setting Ritual',
+    'Waxing Crescent': 'Growth Manifestation Spell',
+    'First Quarter': 'Decision Clarity Ritual',
+    'Waxing Gibbous': 'Refinement & Preparation Spell',
+    'Full Moon': 'Gratitude & Release Ceremony',
+    'Waning Gibbous': 'Wisdom Sharing Ritual',
+    'Last Quarter': 'Release & Letting Go Spell',
+    'Waning Crescent': 'Rest & Integration Meditation',
+  };
+  return spells[phase] || 'Moon Phase Ritual';
+}
+
+/**
+ * Determine tarot card from moon phase and aspects
+ */
+function determineTarotCard(
+  aspects: Array<{ aspectType: string }>,
+  moonPhase: string,
+): { name: string; keywords: string } {
+  const dominantAspectType = aspects[0]?.aspectType || 'conjunction';
+
+  const harmoniousAspects = ['trine', 'sextile'];
+  const challengingAspects = ['square', 'opposition'];
+
+  if (harmoniousAspects.includes(dominantAspectType)) {
+    const harmoniousCards = [
+      { name: 'The Star', keywords: 'Hope • Renewal • Serenity' },
+      { name: 'The Sun', keywords: 'Joy • Success • Vitality' },
+      { name: 'Temperance', keywords: 'Balance • Patience • Harmony' },
+      { name: 'The World', keywords: 'Completion • Achievement • Integration' },
+    ];
+    return harmoniousCards[
+      aspects.length % harmoniousCards.length
+    ] as (typeof harmoniousCards)[0];
+  }
+
+  if (challengingAspects.includes(dominantAspectType)) {
+    const challengeCards = [
+      { name: 'The Tower', keywords: 'Change • Revelation • Breakthrough' },
+      { name: 'The Devil', keywords: 'Liberation • Shadow Work • Release' },
+      { name: 'Death', keywords: 'Transformation • Endings • Renewal' },
+      {
+        name: 'The Hanged Man',
+        keywords: 'Surrender • New Perspective • Pause',
+      },
+    ];
+    return challengeCards[
+      aspects.length % challengeCards.length
+    ] as (typeof challengeCards)[0];
+  }
+
+  const phaseCards: Record<string, { name: string; keywords: string }> = {
+    'New Moon': {
+      name: 'The Fool',
+      keywords: 'New Beginnings • Trust • Potential',
+    },
+    'Waxing Crescent': {
+      name: 'The Magician',
+      keywords: 'Manifestation • Power • Action',
+    },
+    'First Quarter': {
+      name: 'The Chariot',
+      keywords: 'Willpower • Direction • Success',
+    },
+    'Waxing Gibbous': {
+      name: 'Strength',
+      keywords: 'Courage • Patience • Compassion',
+    },
+    'Full Moon': { name: 'The Moon', keywords: 'Intuition • Dreams • Mystery' },
+    'Waning Gibbous': {
+      name: 'The Hermit',
+      keywords: 'Reflection • Wisdom • Solitude',
+    },
+    'Last Quarter': {
+      name: 'Justice',
+      keywords: 'Truth • Fairness • Clarity',
+    },
+    'Waning Crescent': {
+      name: 'Judgement',
+      keywords: 'Reflection • Rebirth • Evaluation',
+    },
+  };
+
+  return (
+    phaseCards[moonPhase] || {
+      name: 'The Star',
+      keywords: 'Hope • Renewal • Serenity',
+    }
+  );
+}
+
+/**
+ * Determine crystal from moon sign and dominant aspect
+ */
+function determineCrystal(
+  moonSign: string,
+  dominantAspectType: string,
+): { name: string; meaning: string } {
+  const challengingAspects = ['square', 'opposition'];
+
+  if (challengingAspects.includes(dominantAspectType)) {
+    return {
+      name: 'Black Tourmaline',
+      meaning: 'Protection and grounding during challenging transits',
+    };
+  }
+
+  const crystalsBySign: Record<string, { name: string; meaning: string }> = {
+    Aries: {
+      name: 'Carnelian',
+      meaning: 'Supports courage and passionate action',
+    },
+    Taurus: {
+      name: 'Rose Quartz',
+      meaning: 'Encourages love and sensory pleasure',
+    },
+    Gemini: {
+      name: 'Clear Quartz',
+      meaning: 'Amplifies mental clarity and communication',
+    },
+    Cancer: {
+      name: 'Moonstone',
+      meaning: 'Honors intuition and emotional depths',
+    },
+    Leo: {
+      name: 'Citrine',
+      meaning: 'Enhances confidence and creative expression',
+    },
+    Virgo: {
+      name: 'Amazonite',
+      meaning: 'Supports practical wisdom and healing',
+    },
+    Libra: {
+      name: 'Jade',
+      meaning: 'Brings harmony and balanced relationships',
+    },
+    Scorpio: {
+      name: 'Obsidian',
+      meaning: 'Facilitates deep transformation and shadow work',
+    },
+    Sagittarius: {
+      name: 'Turquoise',
+      meaning: 'Encourages adventure and philosophical insight',
+    },
+    Capricorn: {
+      name: 'Garnet',
+      meaning: 'Grounds ambition with steady determination',
+    },
+    Aquarius: {
+      name: 'Amethyst',
+      meaning: 'Supports intuition during this visionary phase',
+    },
+    Pisces: {
+      name: 'Aquamarine',
+      meaning: 'Enhances compassion and spiritual connection',
+    },
+  };
+
+  return (
+    crystalsBySign[moonSign] || {
+      name: 'Clear Quartz',
+      meaning: 'Universal amplifier of energy and intention',
+    }
+  );
+}
+
+/**
+ * Generate today's theme from dominant aspect
+ */
+function generateTodayTheme(
+  aspects: Array<{
+    transitPlanet: string;
+    natalPlanet: string;
+    aspectType: string;
+  }>,
+  moonPhase: string,
+): string {
+  if (aspects.length === 0) {
+    return `A ${moonPhase.toLowerCase()} for reflection and intention`;
+  }
+
+  const { transitPlanet, natalPlanet, aspectType } = aspects[0];
+
+  const themeTemplates: Record<string, (t: string, n: string) => string> = {
+    conjunction: (t, n) =>
+      `${t} merges with your natal ${n} - powerful activation`,
+    opposition: (t, n) =>
+      `${t} opposes your natal ${n} - balance seeking perspective`,
+    square: (t, n) => `${t} squares your natal ${n} - tension creates growth`,
+    trine: (t, n) => `${t} flows with your natal ${n} - graceful harmony`,
+    sextile: (t, n) => `${t} supports your natal ${n} - opportunity emerging`,
+  };
+
+  const template = themeTemplates[aspectType] || themeTemplates.conjunction;
+  return template(transitPlanet, natalPlanet);
+}
+
+/**
  * Get Moon phase description
  */
 function getMoonPhase(
@@ -383,6 +724,72 @@ async function generateExamples(): Promise<CTAExamplesOutput> {
   const moon = transitChart.find((p) => p.body === 'Moon')!;
   const sun = transitChart.find((p) => p.body === 'Sun')!;
   const moonPhase = getMoonPhase(moon.eclipticLongitude, sun.eclipticLongitude);
+
+  // Generate marketing data for persona "Celeste"
+  console.log('🎨 Generating marketing data for Celeste...');
+
+  const natalSun = natalChart.find((p) => p.body === 'Sun');
+  const natalMoon = natalChart.find((p) => p.body === 'Moon');
+  const natalAscendant = natalChart.find((p) => p.body === 'Ascendant');
+
+  const moonSignProps = getZodiacProperties(moon.sign);
+  const daysUntilNext = calculateDaysUntilNextPhase(
+    moon.eclipticLongitude,
+    sun.eclipticLongitude,
+  );
+  const nextPhase = getNextPhaseName(moonPhase.phase);
+  const spell = getSpellForPhase(moonPhase.phase);
+
+  const tarotCard = determineTarotCard(aspects, moonPhase.phase);
+  const crystal = determineCrystal(
+    moon.sign,
+    aspects[0]?.aspectType || 'trine',
+  );
+  const todayTheme = generateTodayTheme(aspects, moonPhase.phase);
+
+  const tightestAspect = aspects[0];
+  const natalPlanetForTransit = natalChart.find(
+    (p) => p.body === tightestAspect?.natalPlanet,
+  );
+
+  const marketing: MarketingData = {
+    persona: {
+      name: 'Celeste',
+      birthDate: REFERENCE_PROFILE.birthDate,
+      birthTime: REFERENCE_PROFILE.birthTime,
+      birthLocation: REFERENCE_PROFILE.birthLocation,
+      sunSign: natalSun?.sign || 'Capricorn',
+      moonSign: natalMoon?.sign || 'Virgo',
+      risingSign: natalAscendant?.sign || 'Taurus',
+    },
+    moonPhase: {
+      phase: moonPhase.phase,
+      sign: moon.sign,
+      daysUntilNext,
+      nextPhase,
+      element: moonSignProps.element,
+      rulingPlanet: moonSignProps.rulingPlanet,
+      modality: moonSignProps.modality,
+      spell,
+    },
+    tarotCard,
+    crystal,
+    todayTheme,
+    todayTransit: {
+      planet: tightestAspect?.transitPlanet || 'Jupiter',
+      aspect: tightestAspect?.aspectType || 'sextile',
+      aspectSymbol: getAspectSymbol(tightestAspect?.aspectType || 'sextile'),
+      natalPlanet: tightestAspect?.natalPlanet || 'Moon',
+      house: natalPlanetForTransit?.house || 6,
+      meaning: getAspectInterpretation(
+        tightestAspect?.aspectType || 'sextile',
+        tightestAspect?.transitPlanet || 'Jupiter',
+        tightestAspect?.natalPlanet || 'Moon',
+      ),
+    },
+  };
+
+  console.log(`✓ Marketing data generated for ${marketing.persona.name}\n`);
 
   // Build examples
   const examples: CTAExamplesOutput = {
@@ -578,6 +985,9 @@ async function generateExamples(): Promise<CTAExamplesOutput> {
         interpretation: `${aspect.aspectType}, ${Math.round(aspect.orb * 10) / 10}° orb`,
       })),
     },
+
+    // MARKETING data
+    marketing,
   };
 
   console.log('✅ Example generation complete!\n');
@@ -604,7 +1014,7 @@ async function main() {
 
     const examples = await generateExamples();
 
-    // Write to output file
+    // Write CTA examples to output file
     const outputPath = path.join(
       process.cwd(),
       'src',
@@ -612,8 +1022,31 @@ async function main() {
       'cta-examples.json',
     );
     await fs.writeFile(outputPath, JSON.stringify(examples, null, 2), 'utf-8');
+    console.log('📝 CTA examples written to:', outputPath);
 
-    console.log('📝 Output written to:', outputPath);
+    // Generate and write reference chart data for marketing
+    console.log('\n📊 Generating reference chart data with houses...');
+    const referenceChart = await getReferenceChartWithHouses();
+
+    const referenceChartData = {
+      persona: examples.marketing.persona,
+      planets: referenceChart.planets,
+      houses: referenceChart.houses,
+    };
+
+    const referenceChartPath = path.join(
+      process.cwd(),
+      'src',
+      'lib',
+      'reference-chart-data.json',
+    );
+    await fs.writeFile(
+      referenceChartPath,
+      JSON.stringify(referenceChartData, null, 2),
+      'utf-8',
+    );
+    console.log('📝 Reference chart data written to:', referenceChartPath);
+
     console.log(
       '\n✨ Done! Run this script again when the Sun changes signs (~20th of each month)\n',
     );
