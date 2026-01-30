@@ -1,6 +1,6 @@
 'use client';
 
-import { RadialBarChart, RadialBar, ResponsiveContainer } from 'recharts';
+import { RadialBarChart, RadialBar, ResponsiveContainer, Cell } from 'recharts';
 import { getSuitColorHSL } from '@/lib/patterns/utils/suit-colors';
 import type { SuitPattern } from '@/lib/patterns/tarot-pattern-types';
 import { formatPercentage } from '@/lib/patterns/utils/pattern-formatters';
@@ -95,7 +95,21 @@ export function SuitDistributionChart({ data }: SuitDistributionChartProps) {
                 clockWise: true,
                 dataKey: 'value',
               } as any)}
-            />
+            >
+              {chartDataWithScale.map((entry, index) => (
+                <Cell
+                  key={`cell-${index}`}
+                  fill={
+                    entry.name === '_hidden_scale' ? 'transparent' : entry.fill
+                  }
+                  fillOpacity={entry.name === '_hidden_scale' ? 0 : 1}
+                  stroke={
+                    entry.name === '_hidden_scale' ? 'transparent' : undefined
+                  }
+                  strokeOpacity={entry.name === '_hidden_scale' ? 0 : 1}
+                />
+              ))}
+            </RadialBar>
           </RadialBarChart>
         </ResponsiveContainer>
       </div>

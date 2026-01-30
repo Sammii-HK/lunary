@@ -151,16 +151,40 @@ export async function analyzeJournalPatterns(
   patterns.push(...seasonPatterns);
 
   // NEW: Enhanced lunar pattern detection (moon phase + sign)
-  const lunarPatterns = await findEnhancedLunarPatterns(entries);
-  patterns.push(...lunarPatterns);
+  try {
+    const lunarPatterns = await findEnhancedLunarPatterns(entries);
+    console.log(
+      `[Pattern Analyzer] Lunar patterns detected: ${lunarPatterns.length}`,
+    );
+    patterns.push(...lunarPatterns);
+  } catch (error) {
+    console.error('[Pattern Analyzer] Lunar pattern detection failed:', error);
+  }
 
   // NEW: Transit correlation detection (journaling frequency during transits)
-  const transitPatterns = await findTransitCorrelations(entries, userId);
-  patterns.push(...transitPatterns);
+  try {
+    const transitPatterns = await findTransitCorrelations(entries, userId);
+    console.log(
+      `[Pattern Analyzer] Transit patterns detected: ${transitPatterns.length}`,
+    );
+    patterns.push(...transitPatterns);
+  } catch (error) {
+    console.error(
+      '[Pattern Analyzer] Transit pattern detection failed:',
+      error,
+    );
+  }
 
   // NEW: House activation pattern detection (journal themes by house)
-  const housePatterns = await findHouseActivationPatterns(entries, userId);
-  patterns.push(...housePatterns);
+  try {
+    const housePatterns = await findHouseActivationPatterns(entries, userId);
+    console.log(
+      `[Pattern Analyzer] House patterns detected: ${housePatterns.length}`,
+    );
+    patterns.push(...housePatterns);
+  } catch (error) {
+    console.error('[Pattern Analyzer] House pattern detection failed:', error);
+  }
 
   patterns.sort((a, b) => b.confidence - a.confidence);
 
@@ -817,6 +841,19 @@ export async function savePatterns(
     }
 
     // Insert new pattern
+    // Calculate expires_at date
+    const now = new Date();
+    const expiresAt = new Date(now);
+    if (expiresIn === '30 days') {
+      expiresAt.setDate(expiresAt.getDate() + 30);
+    } else if (expiresIn === '90 days') {
+      expiresAt.setDate(expiresAt.getDate() + 90);
+    } else if (expiresIn === '180 days') {
+      expiresAt.setDate(expiresAt.getDate() + 180);
+    } else {
+      expiresAt.setDate(expiresAt.getDate() + 365);
+    }
+
     await sql`
       INSERT INTO journal_patterns (
         user_id,
@@ -836,7 +873,7 @@ export async function savePatterns(
         ${JSON.stringify({ ...pattern })}::jsonb,
         ${pattern.confidence},
         NOW(),
-        NOW() + INTERVAL '${sql([expiresIn])}',
+        ${expiresAt.toISOString()},
         NOW(),
         NOW()
       )
