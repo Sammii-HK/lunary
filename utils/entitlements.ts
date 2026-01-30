@@ -252,6 +252,7 @@ export const PRICING_PLANS: PricingPlan[] = [
       'Astral Guide ritual prompts (AI)',
       'Tarot pattern analysis (up to 12 months + year-over-year)',
       'Advanced multi-dimensional pattern analysis',
+      'Cosmic context for tarot patterns (moon phase & aspects when cards pulled)',
       'Enhanced mood detection (catches subtle emotions & implicit feelings)',
       'Enhanced pattern analysis (moon phase, transit, house activation)',
       'Advanced cosmic pattern detection (planetary, aspects, natal transits)',

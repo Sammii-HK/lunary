@@ -15,7 +15,7 @@ import { getPersonalTransitImpacts } from '../../../../../utils/astrology/person
 import { getUpcomingTransits } from '../../../../../utils/astrology/transitCalendar';
 import { HoroscopeSection } from './HoroscopeSection';
 import { FeaturePreview } from './FeaturePreview';
-import { TodaysAspects } from './TodaysAspects';
+import { TodaysAspects, MoonPhaseCard } from './TodaysAspects';
 import { TransitWisdom } from './TransitWisdom';
 import { UnifiedTransitList } from './UnifiedTransitList';
 import { useCTACopy } from '@/hooks/useCTACopy';
@@ -619,6 +619,21 @@ export function HoroscopeView({
           />
         )
       )}
+
+      {/* Moon Phase — free for all users */}
+      <HoroscopeSection
+        title='Current Lunar Energy'
+        color='secondary'
+        id='moon-phase'
+      >
+        <p className='text-sm text-zinc-400 mb-4'>
+          The moon&apos;s influence on your chart right now
+        </p>
+        <MoonPhaseCard
+          birthChart={birthChart}
+          currentTransits={currentTransits}
+        />
+      </HoroscopeSection>
 
       {/* Today's Aspects — paid: full component; free: locked preview */}
       {hasPaidAccess && birthChart && currentTransits.length > 0 ? (

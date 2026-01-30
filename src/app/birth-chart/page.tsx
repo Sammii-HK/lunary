@@ -25,6 +25,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { ShareBirthChart } from '@/components/ShareBirthChart';
 import { Button } from '@/components/ui/button';
 import { CollapsibleSection } from '@/components/CollapsibleSection';
+import { Sparkles, Moon, Star, Home } from 'lucide-react';
 import { PersonalPlanetsSection } from '@/components/birth-chart-sections/PersonalPlanetsSection';
 import { SocialPlanetsSection } from '@/components/birth-chart-sections/SocialPlanetsSection';
 import { GenerationalPlanetsSection } from '@/components/birth-chart-sections/GenerationalPlanetsSection';
@@ -1139,20 +1140,37 @@ const BirthChartPage = () => {
         <div className='flex items-center justify-center min-h-[60vh]'>
           <div className='text-center max-w-lg px-4'>
             <h1 className='text-3xl font-bold text-white mb-6'>
-              🌟 Your Birth Chart Awaits
+              Your Birth Chart Awaits
             </h1>
             <div className='bg-gradient-to-r from-lunary-primary-900/30 to-lunary-rose-900/30 rounded-lg p-6 border border-lunary-primary-700 mb-6'>
               <p className='text-zinc-300 mb-4'>
                 Sign up for a free account and unlock your complete cosmic
-                blueprint with a detailed birth chart analysis. Discover your
-                planetary positions, aspects, and the deeper meaning behind your
-                astrological profile.
+                blueprint with our comprehensive birth chart. We calculate 24+
+                celestial bodies including all planets, asteroids, nodes, and
+                sensitive points for the most detailed astrological analysis.
               </p>
               <ul className='text-sm text-zinc-400 space-y-2 mb-6 text-left'>
-                <li>✨ Complete planetary positions at your birth</li>
-                <li>🌙 Sun, Moon, and Rising sign analysis</li>
-                <li>⭐ Cosmic aspects and their interpretations</li>
-                <li>🎯 Personality insights and guidance</li>
+                <li className='flex items-start gap-2'>
+                  <Sparkles className='w-4 h-4 mt-0.5 flex-shrink-0 text-lunary-primary' />
+                  <span>
+                    All 10 planets + 8 asteroids (Ceres, Pallas, Juno, Vesta,
+                    Hygiea, Pholus, Psyche, Eros)
+                  </span>
+                </li>
+                <li className='flex items-start gap-2'>
+                  <Moon className='w-4 h-4 mt-0.5 flex-shrink-0 text-lunary-secondary' />
+                  <span>
+                    Sun, Moon, Rising + Chiron, Lilith, North & South Nodes
+                  </span>
+                </li>
+                <li className='flex items-start gap-2'>
+                  <Star className='w-4 h-4 mt-0.5 flex-shrink-0 text-lunary-accent' />
+                  <span>Complete aspects, dignities, and pattern analysis</span>
+                </li>
+                <li className='flex items-start gap-2'>
+                  <Home className='w-4 h-4 mt-0.5 flex-shrink-0 text-lunary-highlight' />
+                  <span>12 house placements with detailed interpretations</span>
+                </li>
               </ul>
             </div>
             <SmartTrialButton feature='birth_chart' size='lg' />
@@ -1162,7 +1180,7 @@ const BirthChartPage = () => {
           variant='card'
           featureName='birth_chart'
           title='Unlock Your Complete Birth Chart'
-          description='Get detailed planetary positions, aspects, and cosmic patterns unique to your birth time'
+          description='Get 24+ celestial bodies including all planets, 8 major asteroids, Chiron, Lilith, Nodes, houses, aspects, and personalized insights based on your exact birth time'
           className='max-w-2xl mx-auto'
         />
       </div>
