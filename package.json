@@ -118,7 +118,8 @@
     "cron:daily:date": "DATE=${DATE:-$(date -u +%F)}; curl -sS -H \"Authorization: Bearer $CRON_SECRET\" \"http://localhost:3000/api/cron/daily-posts?date=$DATE\"",
     "cron:daily:date:force": "DATE=${DATE:-$(date -u +%F)}; curl -sS -H \"Authorization: Bearer $CRON_SECRET\" \"http://localhost:3000/api/cron/daily-posts?force=true&date=$DATE\"",
     "cron:cta-examples": "curl -sS -H \"Authorization: Bearer $CRON_SECRET\" \"http://localhost:3000/api/cron/generate-cta-examples\"",
-    "oauth:google": "tsx scripts/regenerate-google-token.ts"
+    "oauth:google": "tsx scripts/regenerate-google-token.ts",
+    "check:quick": "pnpm lint && pnpm test"
   },
   "lint-staged": {
     "*.{ts,tsx,js,jsx}": [
