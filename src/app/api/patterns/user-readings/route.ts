@@ -1,11 +1,105 @@
 /**
  * API route to fetch user's actual tarot readings for pattern analysis
  * Replaces seeded generation with real database data
+ * Enhanced with moon phase and aspects for each reading
  */
 
 import { NextRequest, NextResponse } from 'next/server';
 import { sql } from '@vercel/postgres';
 import { auth } from '@/lib/auth';
+import { getMoonPhase } from '@/../../utils/moon/moonPhases';
+import { monthlyMoonPhases } from '@/../../utils/moon/monthlyPhases';
+import { getPlanetaryPositions } from '@/../../utils/astrology/astronomical-data';
+import { ASPECT_DATA } from '@/constants/seo/aspects';
+
+// Helper to convert moon phase label to key
+function getMoonPhaseKey(label: string): string {
+  return label.toLowerCase().replace(' ', '_') as any;
+}
+
+// Helper to get moon phase emoji
+function getMoonPhaseEmoji(phaseLabel: string): string {
+  const phaseKey = phaseLabel.toLowerCase().replace(' ', '');
+  const phaseData =
+    monthlyMoonPhases[phaseKey as keyof typeof monthlyMoonPhases];
+  return phaseData?.symbol || '🌙';
+}
+
+// Helper to calculate major daily aspects (transit to transit only, simplified)
+function calculateDailyAspects(date: Date): Array<{
+  planet1: string;
+  planet2: string;
+  aspectType: string;
+  aspectSymbol: string;
+}> {
+  try {
+    const positions = getPlanetaryPositions(date);
+    const aspects: Array<{
+      planet1: string;
+      planet2: string;
+      aspectType: string;
+      aspectSymbol: string;
+    }> = [];
+
+    const planets = [
+      'Sun',
+      'Moon',
+      'Mercury',
+      'Venus',
+      'Mars',
+      'Jupiter',
+      'Saturn',
+    ];
+    const significantAspects = [
+      {
+        name: 'conjunct',
+        angle: 0,
+        orb: 8,
+        symbol: ASPECT_DATA.conjunct.symbol,
+      },
+      {
+        name: 'opposite',
+        angle: 180,
+        orb: 8,
+        symbol: ASPECT_DATA.opposite.symbol,
+      },
+      { name: 'trine', angle: 120, orb: 6, symbol: ASPECT_DATA.trine.symbol },
+      { name: 'square', angle: 90, orb: 6, symbol: ASPECT_DATA.square.symbol },
+    ];
+
+    for (let i = 0; i < planets.length; i++) {
+      for (let j = i + 1; j < planets.length; j++) {
+        const planet1 = planets[i];
+        const planet2 = planets[j];
+        const pos1 = positions[planet1];
+        const pos2 = positions[planet2];
+
+        if (!pos1 || !pos2) continue;
+
+        let diff = Math.abs(pos1.longitude - pos2.longitude);
+        if (diff > 180) diff = 360 - diff;
+
+        for (const aspectDef of significantAspects) {
+          const orb = Math.abs(diff - aspectDef.angle);
+          if (orb <= aspectDef.orb) {
+            aspects.push({
+              planet1,
+              planet2,
+              aspectType: aspectDef.name,
+              aspectSymbol: aspectDef.symbol,
+            });
+          }
+        }
+      }
+    }
+
+    // Return top 3 most significant aspects
+    return aspects.slice(0, 3);
+  } catch (error) {
+    console.error('Error calculating aspects:', error);
+    return [];
+  }
+}
 
 export async function GET(request: NextRequest) {
   try {
@@ -38,7 +132,7 @@ export async function GET(request: NextRequest) {
       ORDER BY created_at DESC
     `;
 
-    // Extract and format cards
+    // Extract and format cards with cosmic context
     const readings = result.rows
       .map((row) => {
         try {
@@ -48,11 +142,27 @@ export async function GET(request: NextRequest) {
           if (Array.isArray(cardsData) && cardsData.length > 0) {
             const cardData = cardsData[0];
             if (cardData.card) {
+              const readingDate = new Date(row.created_at);
+
+              // Get moon phase for this date
+              const moonPhaseLabel = getMoonPhase(readingDate);
+              const moonPhaseKey = getMoonPhaseKey(moonPhaseLabel);
+              const moonPhaseEmoji = getMoonPhaseEmoji(moonPhaseLabel);
+
+              // Calculate aspects for this date
+              const aspects = calculateDailyAspects(readingDate);
+
               return {
                 name: cardData.card.name,
                 keywords: cardData.card.keywords || [],
                 information: cardData.card.information || '',
                 createdAt: row.created_at,
+                moonPhase: {
+                  phase: moonPhaseKey,
+                  emoji: moonPhaseEmoji,
+                  name: moonPhaseLabel,
+                },
+                aspects: aspects.length > 0 ? aspects : undefined,
               };
             }
           }

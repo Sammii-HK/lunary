@@ -1,6 +1,6 @@
 'use client';
 
-import { RadialBarChart, RadialBar, ResponsiveContainer } from 'recharts';
+import { RadialBarChart, RadialBar, ResponsiveContainer, Cell } from 'recharts';
 import { formatPercentage } from '@/lib/patterns/utils/pattern-formatters';
 import { interpretArcanaBalance } from '@/lib/patterns/utils/arcana-weighting';
 
@@ -41,7 +41,7 @@ export function ArcanaBalanceRadial({
   }
 
   // Sort data so larger percentage is outer ring (better visualization)
-  const data = [
+  const chartData = [
     {
       name: 'Major Arcana',
       value: majorPercentage,
@@ -56,6 +56,17 @@ export function ArcanaBalanceRadial({
     },
   ].sort((a, b) => b.value - a.value);
 
+  // Add hidden scale reference point to establish 0-100 scale
+  const dataWithScale = [
+    ...chartData,
+    {
+      name: '_hidden_scale',
+      value: 100,
+      count: 0,
+      fill: 'transparent',
+    },
+  ];
+
   return (
     <div className='w-full space-y-3'>
       <div className='h-[160px]'>
@@ -65,7 +76,7 @@ export function ArcanaBalanceRadial({
             cy='50%'
             innerRadius='30%'
             outerRadius='90%'
-            data={data}
+            data={dataWithScale}
             startAngle={180}
             endAngle={0}
           >
@@ -77,14 +88,28 @@ export function ArcanaBalanceRadial({
                 background: { fill: 'rgba(255, 255, 255, 0.05)' },
                 dataKey: 'value',
               } as any)}
-            />
+            >
+              {dataWithScale.map((entry, index) => (
+                <Cell
+                  key={`cell-${index}`}
+                  fill={
+                    entry.name === '_hidden_scale' ? 'transparent' : entry.fill
+                  }
+                  fillOpacity={entry.name === '_hidden_scale' ? 0 : 1}
+                  stroke={
+                    entry.name === '_hidden_scale' ? 'transparent' : undefined
+                  }
+                  strokeOpacity={entry.name === '_hidden_scale' ? 0 : 1}
+                />
+              ))}
+            </RadialBar>
           </RadialBarChart>
         </ResponsiveContainer>
       </div>
 
       {/* Legend below chart */}
       <div className='flex flex-col gap-2 px-2'>
-        {data.map((item) => (
+        {chartData.map((item) => (
           <div key={item.name} className='flex items-center gap-2'>
             <div
               className='w-3 h-3 rounded-full'

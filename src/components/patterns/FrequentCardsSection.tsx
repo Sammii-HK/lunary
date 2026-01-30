@@ -73,31 +73,53 @@ export function FrequentCardsSection({
 
             {allowDrillDown && expandedCard === card.name && (
               <div className='pl-4 pr-2 space-y-3 animate-in fade-in slide-in-from-top-2 duration-200'>
-                {card.meaning && (
-                  <p className='text-xs text-zinc-400 leading-relaxed'>
-                    {card.meaning}
-                  </p>
-                )}
-
                 {card.appearances && card.appearances.length > 0 && (
                   <>
-                    <div className='flex flex-wrap gap-2'>
+                    {/* Cosmic context for each appearance */}
+                    <div className='space-y-2 max-h-64 overflow-y-auto'>
                       {card.appearances.slice(0, 10).map((appearance, idx) => (
-                        <Badge
+                        <div
                           key={`${appearance.date}-${idx}`}
-                          variant='outline'
-                          className='text-xs'
+                          className='bg-zinc-900/50 rounded-lg p-3 space-y-1'
                         >
-                          {dayjs(appearance.date).format('MMM D')}
-                        </Badge>
+                          <div className='flex items-center justify-between'>
+                            <span className='text-xs font-medium text-zinc-300'>
+                              {dayjs(appearance.date).format('MMM D, YYYY')}
+                            </span>
+                            {appearance.moonPhase && (
+                              <div className='flex items-center gap-1'>
+                                <span className='text-lg'>
+                                  {appearance.moonPhase.emoji}
+                                </span>
+                                <span className='text-xs text-zinc-500'>
+                                  {appearance.moonPhase.name}
+                                </span>
+                              </div>
+                            )}
+                          </div>
+
+                          {appearance.aspects &&
+                            appearance.aspects.length > 0 && (
+                              <div className='flex flex-wrap gap-1.5 mt-2'>
+                                {appearance.aspects.map((aspect, aspectIdx) => (
+                                  <Badge
+                                    key={aspectIdx}
+                                    variant='outline'
+                                    className='text-xs'
+                                  >
+                                    {aspect.planet1} {aspect.aspectSymbol}{' '}
+                                    {aspect.planet2}
+                                  </Badge>
+                                ))}
+                              </div>
+                            )}
+                        </div>
                       ))}
+
                       {card.appearances.length > 10 && (
-                        <Badge
-                          variant='outline'
-                          className='text-xs text-zinc-500'
-                        >
-                          +{card.appearances.length - 10} more
-                        </Badge>
+                        <p className='text-xs text-zinc-500 text-center py-2'>
+                          +{card.appearances.length - 10} more appearances
+                        </p>
                       )}
                     </div>
 

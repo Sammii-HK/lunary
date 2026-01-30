@@ -461,11 +461,18 @@ async function findEnhancedLunarPatterns(
 ): Promise<JournalPattern[]> {
   const patterns: JournalPattern[] = [];
 
+  console.log(
+    `[findEnhancedLunarPatterns] Processing ${entries.length} entries`,
+  );
+
   // Group entries by moon phase AND sign
   const lunarData: Record<
     string,
     { moods: string[]; count: number; dates: Date[] }
   > = {};
+
+  let successCount = 0;
+  let errorCount = 0;
 
   for (const entry of entries) {
     const entryDate = new Date(entry.createdAt);
@@ -485,15 +492,42 @@ async function findEnhancedLunarPatterns(
       lunarData[lunarKey].moods.push(...entry.moodTags);
       lunarData[lunarKey].count++;
       lunarData[lunarKey].dates.push(entryDate);
+      successCount++;
     } catch (error) {
-      // Skip entries where moon data unavailable
+      errorCount++;
+      console.log(
+        `[findEnhancedLunarPatterns] Error for entry ${entry.createdAt}:`,
+        error,
+      );
       continue;
     }
   }
 
+  console.log(
+    `[findEnhancedLunarPatterns] Success: ${successCount}, Errors: ${errorCount}`,
+  );
+  console.log(
+    `[findEnhancedLunarPatterns] Lunar combos found:`,
+    Object.keys(lunarData).length,
+  );
+  console.log(
+    `[findEnhancedLunarPatterns] Lunar data:`,
+    JSON.stringify(lunarData, null, 2),
+  );
+
   // Analyze patterns
   for (const [lunarKey, data] of Object.entries(lunarData)) {
-    if (data.count < 2) continue;
+    console.log(
+      `[findEnhancedLunarPatterns] Checking ${lunarKey}: ${data.count} entries`,
+    );
+
+    // LOWERED THRESHOLD FOR TESTING: 1 entry instead of 2
+    if (data.count < 1) {
+      console.log(
+        `[findEnhancedLunarPatterns] Skipping ${lunarKey}: less than 1 entry`,
+      );
+      continue;
+    }
 
     const [phase, sign] = lunarKey.split('_');
 
@@ -503,13 +537,28 @@ async function findEnhancedLunarPatterns(
       moodCounts[mood] = (moodCounts[mood] || 0) + 1;
     }
 
+    console.log(
+      `[findEnhancedLunarPatterns] Mood counts for ${lunarKey}:`,
+      moodCounts,
+    );
+
     const dominantMood = Object.entries(moodCounts)
       .sort((a, b) => b[1] - a[1])
       .slice(0, 2);
 
-    if (dominantMood.length > 0 && dominantMood[0][1] >= 2) {
+    console.log(
+      `[findEnhancedLunarPatterns] Dominant moods for ${lunarKey}:`,
+      dominantMood,
+    );
+
+    // LOWERED THRESHOLD FOR TESTING: 1 mood occurrence instead of 2
+    if (dominantMood.length > 0 && dominantMood[0][1] >= 1) {
       const moodName = dominantMood[0][0];
       const moodCount = dominantMood[0][1];
+
+      console.log(
+        `[findEnhancedLunarPatterns] Creating pattern for ${lunarKey}`,
+      );
 
       patterns.push({
         type: 'moon_sign_pattern',
@@ -525,8 +574,16 @@ async function findEnhancedLunarPatterns(
         },
         confidence: Math.min((moodCount / data.count) * 0.9, 0.85),
       });
+    } else {
+      console.log(
+        `[findEnhancedLunarPatterns] Not enough mood occurrences for ${lunarKey}`,
+      );
     }
   }
+
+  console.log(
+    `[findEnhancedLunarPatterns] Final patterns created: ${patterns.length}`,
+  );
 
   return patterns;
 }
@@ -541,24 +598,42 @@ async function findTransitCorrelations(
 ): Promise<JournalPattern[]> {
   const patterns: JournalPattern[] = [];
 
+  console.log(
+    `[findTransitCorrelations] Processing ${entries.length} entries for user ${userId}`,
+  );
+
   // Get user's birth chart for personal transit analysis
   let birthChart: BirthChartData[] = [];
   try {
     const birthChartResult = await sql`
       SELECT birth_chart FROM user_profiles WHERE user_id = ${userId} LIMIT 1
     `;
+    console.log(
+      `[findTransitCorrelations] Birth chart query returned ${birthChartResult.rows.length} rows`,
+    );
     if (birthChartResult.rows.length > 0) {
       birthChart = birthChartResult.rows[0].birth_chart as BirthChartData[];
+      console.log(
+        `[findTransitCorrelations] Birth chart has ${birthChart.length} placements`,
+      );
     }
   } catch (error) {
-    // No birth chart available, skip personal transit analysis
+    console.log(`[findTransitCorrelations] Error fetching birth chart:`, error);
     return patterns;
   }
 
-  if (birthChart.length === 0) return patterns;
+  if (birthChart.length === 0) {
+    console.log(
+      `[findTransitCorrelations] No birth chart found, returning empty patterns`,
+    );
+    return patterns;
+  }
 
   // Group entries by major transiting planets
   const transitData: Record<string, { count: number; moods: string[] }> = {};
+
+  let successCount = 0;
+  let errorCount = 0;
 
   for (const entry of entries) {
     const entryDate = new Date(entry.createdAt);
@@ -580,42 +655,66 @@ async function findTransitCorrelations(
         transitData[transitKey].count++;
         transitData[transitKey].moods.push(...entry.moodTags);
       }
+      successCount++;
     } catch (error) {
+      errorCount++;
+      console.log(
+        `[findTransitCorrelations] Error for entry ${entry.createdAt}:`,
+        error,
+      );
       continue;
     }
   }
 
+  console.log(
+    `[findTransitCorrelations] Transit data fetch - Success: ${successCount}, Errors: ${errorCount}`,
+  );
+  console.log(
+    `[findTransitCorrelations] Transit combinations found:`,
+    Object.keys(transitData).length,
+  );
+  console.log(
+    `[findTransitCorrelations] Transit data:`,
+    JSON.stringify(transitData, null, 2),
+  );
+
   // Analyze correlations
   for (const [transitKey, data] of Object.entries(transitData)) {
-    if (data.count < 3) continue; // Need at least 3 entries
+    console.log(
+      `[findTransitCorrelations] Checking ${transitKey}: ${data.count} entries`,
+    );
+
+    // LOWERED THRESHOLD FOR TESTING: 1 entry instead of 3
+    if (data.count < 1) {
+      console.log(
+        `[findTransitCorrelations] Skipping ${transitKey}: less than 1 entry`,
+      );
+      continue;
+    }
 
     const [planet, sign] = transitKey.split('_');
 
-    // Calculate journaling frequency during this transit
-    const avgEntriesPerDay = entries.length / 30; // Assuming 30-day analysis
-    const transitFrequency = data.count / (data.count * 2); // Rough estimate
+    // SIMPLIFIED FOR TESTING: Create pattern if transit appears in entries
+    const moodCounts: Record<string, number> = {};
+    for (const mood of data.moods) {
+      moodCounts[mood] = (moodCounts[mood] || 0) + 1;
+    }
 
-    if (transitFrequency > avgEntriesPerDay * 1.2) {
-      // User journals 20% more during this transit
-      const moodCounts: Record<string, number> = {};
-      for (const mood of data.moods) {
-        moodCounts[mood] = (moodCounts[mood] || 0) + 1;
-      }
+    const topMood = Object.entries(moodCounts).sort((a, b) => b[1] - a[1])[0];
 
-      const topMood = Object.entries(moodCounts).sort((a, b) => b[1] - a[1])[0];
-
+    if (topMood) {
       patterns.push({
         type: 'transit_correlation',
         title: `Active during ${planet} in ${sign}`,
-        description: `You journal more frequently when ${planet} is in ${sign}`,
+        description: `You journaled ${data.count} time(s) when ${planet} was in ${sign}`,
         data: {
           planet,
           sign,
           entryCount: data.count,
-          topMood: topMood ? topMood[0] : null,
-          frequency: Math.round(transitFrequency * 100),
+          topMood: topMood[0],
+          moodCount: topMood[1],
         },
-        confidence: Math.min(data.count / 10, 0.75),
+        confidence: Math.min(data.count / 10, 0.7),
       });
     }
   }
@@ -754,8 +853,9 @@ async function findHouseActivationPatterns(
   }
 
   // Create patterns for emphasized houses
+  // LOWERED THRESHOLD FOR TESTING: 1 entry instead of 3
   const sortedHouses = Object.entries(houseActivation)
-    .filter(([, count]) => count >= 3)
+    .filter(([, count]) => count >= 1)
     .sort((a, b) => b[1] - a[1]);
 
   const houseNames: Record<number, string> = {

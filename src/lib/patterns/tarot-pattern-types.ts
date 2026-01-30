@@ -24,14 +24,37 @@ export interface PatternTheme {
   appearanceDates?: string[];
 }
 
+export interface CardAppearance {
+  date: string;
+  readingId?: string;
+  moonPhase?: {
+    phase:
+      | 'new'
+      | 'waxing_crescent'
+      | 'first_quarter'
+      | 'waxing_gibbous'
+      | 'full'
+      | 'waning_gibbous'
+      | 'last_quarter'
+      | 'waning_crescent';
+    emoji: string;
+    name: string;
+  };
+  aspects?: Array<{
+    planet1: string;
+    planet2: string;
+    aspectType: string;
+    aspectSymbol: string;
+  }>;
+}
+
 export interface FrequentCard {
   name: string;
   count: number;
   percentage: number;
   suit?: string;
-  meaning?: string;
   emoji?: string;
-  appearances: Array<{ date: string; readingId?: string }>;
+  appearances: CardAppearance[];
 }
 
 export interface SuitPattern {
