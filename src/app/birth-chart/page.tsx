@@ -1086,6 +1086,10 @@ const BirthChartPage = () => {
   const { user, loading } = useUser();
   const subscription = useSubscription();
   const [hasMounted, setHasMounted] = useState(false);
+  const [showAspects, setShowAspects] = useState(false);
+  const [aspectFilter, setAspectFilter] = useState<
+    'all' | 'harmonious' | 'challenging'
+  >('all');
   const userName = user?.name;
   const userBirthday = user?.birthday;
   const originalBirthChartData = user?.birthChart || null;
@@ -1250,11 +1254,64 @@ const BirthChartPage = () => {
           </div>
         </nav>
 
-        <BirthChart
-          birthChart={birthChartData}
-          userName={userName}
-          birthDate={userBirthday}
-        />
+        <div className='flex flex-col items-center gap-3'>
+          <div className='flex flex-col sm:flex-row gap-2 items-center'>
+            <button
+              onClick={() => setShowAspects(!showAspects)}
+              className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
+                showAspects
+                  ? 'bg-lunary-primary text-white shadow-lg'
+                  : 'bg-zinc-800 text-zinc-400 hover:bg-zinc-700'
+              }`}
+            >
+              {showAspects ? '✨ Hide Aspects' : '🔗 Show Aspects'}
+            </button>
+
+            {showAspects && (
+              <div className='flex gap-2 items-center'>
+                <span className='text-xs text-zinc-500'>Filter:</span>
+                <button
+                  onClick={() => setAspectFilter('all')}
+                  className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all ${
+                    aspectFilter === 'all'
+                      ? 'bg-zinc-700 text-white'
+                      : 'bg-zinc-800/50 text-zinc-500 hover:bg-zinc-800'
+                  }`}
+                >
+                  All
+                </button>
+                <button
+                  onClick={() => setAspectFilter('harmonious')}
+                  className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all ${
+                    aspectFilter === 'harmonious'
+                      ? 'bg-green-700 text-white'
+                      : 'bg-zinc-800/50 text-zinc-500 hover:bg-zinc-800'
+                  }`}
+                >
+                  Harmonious
+                </button>
+                <button
+                  onClick={() => setAspectFilter('challenging')}
+                  className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all ${
+                    aspectFilter === 'challenging'
+                      ? 'bg-red-700 text-white'
+                      : 'bg-zinc-800/50 text-zinc-500 hover:bg-zinc-800'
+                  }`}
+                >
+                  Challenging
+                </button>
+              </div>
+            )}
+          </div>
+
+          <BirthChart
+            birthChart={birthChartData}
+            userName={userName}
+            birthDate={userBirthday}
+            showAspects={showAspects}
+            aspectFilter={aspectFilter}
+          />
+        </div>
 
         {birthChartData && (
           <div className='flex flex-col items-center gap-3'>

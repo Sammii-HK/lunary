@@ -9,8 +9,32 @@ import {
 } from '@/constants/symbols';
 import classNames from 'classnames';
 import { parseIsoDateOnly } from '@/lib/date-only';
+import { useAspects } from '@/hooks/useAspects';
+import { AspectLines } from '@/components/AspectLines';
 
 const cx = classNames;
+
+const ELEMENT_COLORS = {
+  Fire: '#ff6b6b',
+  Earth: '#6b8e4e',
+  Air: '#5dade2',
+  Water: '#9b59b6',
+} as const;
+
+const SIGN_ELEMENTS: Record<string, keyof typeof ELEMENT_COLORS> = {
+  Aries: 'Fire',
+  Taurus: 'Earth',
+  Gemini: 'Air',
+  Cancer: 'Water',
+  Leo: 'Fire',
+  Virgo: 'Earth',
+  Libra: 'Air',
+  Scorpio: 'Water',
+  Sagittarius: 'Fire',
+  Capricorn: 'Earth',
+  Aquarius: 'Air',
+  Pisces: 'Water',
+};
 
 const MAIN_PLANETS = [
   'Sun',
@@ -69,6 +93,9 @@ type BirthChartProps = {
   houses?: HouseCusp[];
   userName?: string;
   birthDate?: string;
+  showAspects?: boolean;
+  aspectFilter?: 'all' | 'harmonious' | 'challenging';
+  onAspectsToggle?: (show: boolean) => void;
 };
 
 export const BirthChart = ({
@@ -76,8 +103,14 @@ export const BirthChart = ({
   houses,
   userName,
   birthDate,
+  showAspects = false,
+  aspectFilter = 'all',
+  onAspectsToggle,
 }: BirthChartProps) => {
   const [hoveredBody, setHoveredBody] = useState<string | null>(null);
+  const [highlightedPlanet, setHighlightedPlanet] = useState<string | null>(
+    null,
+  );
   const ascendant = birthChart.find((p) => p.body === 'Ascendant');
   const ascendantAngle = ascendant ? ascendant.eclipticLongitude : 0;
 
@@ -161,6 +194,23 @@ export const BirthChart = ({
   const angles = chartData.filter((p) => ANGLES.includes(p.body));
   const points = chartData.filter((p) => POINTS.includes(p.body));
 
+  const allAspects = useAspects(chartData);
+
+  const aspects = useMemo(() => {
+    if (aspectFilter === 'all') return allAspects;
+    if (aspectFilter === 'harmonious') {
+      return allAspects.filter((a) =>
+        ['Trine', 'Sextile', 'Conjunction'].includes(a.type),
+      );
+    }
+    if (aspectFilter === 'challenging') {
+      return allAspects.filter((a) =>
+        ['Square', 'Opposition'].includes(a.type),
+      );
+    }
+    return allAspects;
+  }, [allAspects, aspectFilter]);
+
   return (
     <div className='flex flex-col items-center space-y-4 md:space-y-6'>
       <div className='text-center'>
@@ -213,6 +263,15 @@ export const BirthChart = ({
             stroke='#27272a'
             strokeWidth='1'
           />
+
+          {showAspects && (
+            <AspectLines
+              aspects={aspects}
+              visible={showAspects}
+              highlightedPlanet={highlightedPlanet}
+              opacity={0.15}
+            />
+          )}
 
           {houseData.map((house, i) => {
             const radian = house.radian;
@@ -306,13 +365,22 @@ export const BirthChart = ({
             ({ body, x, y, retrograde, sign, degree, minute }) => {
               const isAngle = ANGLES.includes(body);
               const isPoint = POINTS.includes(body);
+              const isPlanet = MAIN_PLANETS.includes(body);
+
+              // Get element color for planets based on their sign
+              const elementColor =
+                isPlanet && sign && SIGN_ELEMENTS[sign]
+                  ? ELEMENT_COLORS[SIGN_ELEMENTS[sign]]
+                  : undefined;
+
               const baseColor = retrograde
                 ? '#f87171'
                 : isAngle
                   ? '#C77DFF'
                   : isPoint
                     ? '#7B7BE8'
-                    : '#ffffff';
+                    : elementColor || '#ffffff';
+
               const color = hoveredBody
                 ? body === hoveredBody
                   ? '#ffffff'
@@ -324,6 +392,11 @@ export const BirthChart = ({
                   className='planet-node'
                   onMouseEnter={() => setHoveredBody(body)}
                   onMouseLeave={() => setHoveredBody(null)}
+                  onClick={() =>
+                    setHighlightedPlanet(
+                      highlightedPlanet === body ? null : body,
+                    )
+                  }
                 >
                   <title>
                     {formatPlacementLabel({
