@@ -242,8 +242,8 @@ export default function FeaturesPage() {
               'Eclipse seasons',
               'Major aspects forming',
             ]}
-            freeTier='Next 3 upcoming transits'
-            paidTier='30-day calendar view + alerts'
+            freeTier='2 transits (general descriptions only)'
+            paidTier='All 5-10 daily transits + personalized to YOUR chart + 30-day calendar'
             cta="See what's ahead"
             ctaHref='/auth?signup=true'
           />
@@ -312,16 +312,16 @@ export default function FeaturesPage() {
               'After 6-8 weeks, patterns emerge from your data',
               'Example: "You always pull The Tower during Pluto transits"',
               'Example: "During the last 6 Full Moons, you journaled about relationships"',
-              'NEW: Moon phase pattern detection (e.g., "creative energy during New Moon")',
-              'NEW: Transit correlation tracking (how you respond to specific planetary movements)',
-              'NEW: House activation patterns (life areas you focus on)',
+              'Track your tarot cards over time and see what cosmic conditions were present',
+              'View cosmic context for each card appearance (moon phase & planetary aspects)',
+              'Personalized transit analysis for your frequently pulled cards',
               'This is personal proof astrology works for YOU specifically',
               'Your own data becomes your astrology education',
               'Next time that transit happens, you get a heads up based on YOUR history',
             ]}
-            freeTier='Basic moon phase patterns (7 days)'
-            paidTier='Enhanced pattern analysis (moon, transits, houses - 30 days)'
-            proTier='Lifetime pattern history + AI insights + advanced correlations'
+            freeTier='Tarot pattern tracking (last 7 days) + basic moon phase correlations'
+            paidTier='Up to 6 months history + cosmic context for each card + personalized transit analysis'
+            proTier='Up to 12 months + year-over-year analysis + advanced multi-dimensional pattern analysis'
             cta='Track your patterns'
             ctaHref='/pricing'
           />
