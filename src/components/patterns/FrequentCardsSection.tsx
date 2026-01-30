@@ -57,7 +57,7 @@ export function FrequentCardsSection({
                     {card.name}
                   </p>
                   <p className='text-xs text-zinc-500'>
-                    Appeared {card.count}x ({Math.round(card.percentage)}%)
+                    Appeared {card.count}x
                   </p>
                 </div>
               </div>
