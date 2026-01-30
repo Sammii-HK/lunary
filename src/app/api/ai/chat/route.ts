@@ -166,6 +166,7 @@ export async function POST(request: NextRequest) {
         user.displayName,
         userWithBirthday.birthday,
         now,
+        userMessage, // NEW: Pass user message for query analysis
         {
           needsPersonalTransits: contextNeeds.needsPersonalTransits,
           needsNatalPatterns: contextNeeds.needsNatalPatterns,
