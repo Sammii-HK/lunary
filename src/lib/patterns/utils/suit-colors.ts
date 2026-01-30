@@ -74,15 +74,16 @@ export function getSuitColorClasses(suit: SuitName) {
 
 /**
  * Get HSL color value for use with chart libraries
+ * Returns actual HSL values (not CSS variables) for recharts compatibility
  */
 export function getSuitColorHSL(suit: SuitName): string {
-  // Note: Only includes variants actually used by suits
+  // Actual Lunary brand colors in HSL format
   const colorMap: Record<SuitColorVariant, string> = {
-    primary: 'hsl(var(--lunary-primary))',
-    secondary: 'hsl(var(--lunary-secondary))',
-    accent: 'hsl(var(--lunary-accent))',
-    highlight: 'hsl(var(--lunary-highlight))',
-    success: 'hsl(var(--lunary-success))',
+    primary: 'hsl(256, 64%, 60%)', // Nebula Violet #8458D8
+    secondary: 'hsl(240, 74%, 68%)', // Comet Trail #7B7BE8
+    accent: 'hsl(282, 100%, 74%)', // Galaxy Haze #C77DFF
+    highlight: 'hsl(289, 75%, 67%)', // Supernova #D070E8
+    success: 'hsl(143, 20%, 51%)', // Aurora Green #6B9B7A
   };
 
   return colorMap[SUIT_COLORS[suit]];
