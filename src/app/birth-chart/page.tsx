@@ -24,6 +24,7 @@ import { UpgradePrompt } from '@/components/UpgradePrompt';
 import { conversionTracking } from '@/lib/analytics';
 import { useEffect, useMemo, useState } from 'react';
 import { ShareBirthChart } from '@/components/ShareBirthChart';
+import { Button } from '@/components/ui/button';
 
 const ZODIAC_ORDER = [
   'Aries',
@@ -1256,50 +1257,42 @@ const BirthChartPage = () => {
 
         <div className='flex flex-col items-center gap-3'>
           <div className='flex flex-col sm:flex-row gap-2 items-center'>
-            <button
+            <Button
               onClick={() => setShowAspects(!showAspects)}
-              className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
-                showAspects
-                  ? 'bg-lunary-primary text-white shadow-lg'
-                  : 'bg-zinc-800 text-zinc-400 hover:bg-zinc-700'
-              }`}
+              variant='lunary-soft'
+              size='sm'
             >
-              {showAspects ? '✨ Hide Aspects' : '🔗 Show Aspects'}
-            </button>
+              {showAspects ? 'Hide Aspects' : 'Show Aspects'}
+            </Button>
 
             {showAspects && (
               <div className='flex gap-2 items-center'>
                 <span className='text-xs text-zinc-500'>Filter:</span>
-                <button
+                <Button
                   onClick={() => setAspectFilter('all')}
-                  className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all ${
-                    aspectFilter === 'all'
-                      ? 'bg-zinc-700 text-white'
-                      : 'bg-zinc-800/50 text-zinc-500 hover:bg-zinc-800'
-                  }`}
+                  variant={aspectFilter === 'all' ? 'lunary-soft' : 'ghost'}
+                  size='xs'
                 >
                   All
-                </button>
-                <button
+                </Button>
+                <Button
                   onClick={() => setAspectFilter('harmonious')}
-                  className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all ${
-                    aspectFilter === 'harmonious'
-                      ? 'bg-green-700 text-white'
-                      : 'bg-zinc-800/50 text-zinc-500 hover:bg-zinc-800'
-                  }`}
+                  variant={
+                    aspectFilter === 'harmonious' ? 'lunary-soft' : 'ghost'
+                  }
+                  size='xs'
                 >
                   Harmonious
-                </button>
-                <button
+                </Button>
+                <Button
                   onClick={() => setAspectFilter('challenging')}
-                  className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all ${
-                    aspectFilter === 'challenging'
-                      ? 'bg-red-700 text-white'
-                      : 'bg-zinc-800/50 text-zinc-500 hover:bg-zinc-800'
-                  }`}
+                  variant={
+                    aspectFilter === 'challenging' ? 'lunary-soft' : 'ghost'
+                  }
+                  size='xs'
                 >
                   Challenging
-                </button>
+                </Button>
               </div>
             )}
           </div>
