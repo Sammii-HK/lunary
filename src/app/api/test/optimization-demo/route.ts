@@ -29,7 +29,7 @@ export async function GET() {
     const { estimatedTokens, components } = estimateContextCost(requirements);
 
     // Full context cost (if we built everything)
-    const fullContextTokens = 1550;
+    const fullContextTokens = 1750;
 
     const savings = fullContextTokens - estimatedTokens;
     const savingsPercent = Math.round((savings / fullContextTokens) * 100);
@@ -60,7 +60,7 @@ export async function GET() {
     (sum, r) => sum + r.optimized.tokens,
     0,
   );
-  const totalFullTokens = results.length * 1550;
+  const totalFullTokens = results.length * 1750;
   const totalSavings = totalFullTokens - totalOptimizedTokens;
   const averageSavingsPercent = Math.round(
     (totalSavings / totalFullTokens) * 100,
@@ -71,7 +71,7 @@ export async function GET() {
   const daysPerMonth = 30;
   const totalMonthlyQueries = queriesPerDay * daysPerMonth;
 
-  const monthlyFullTokens = totalMonthlyQueries * 1550;
+  const monthlyFullTokens = totalMonthlyQueries * 1750;
   const averageOptimizedTokensPerQuery = totalOptimizedTokens / results.length;
   const monthlyOptimizedTokens = Math.round(
     totalMonthlyQueries * averageOptimizedTokensPerQuery,
@@ -90,7 +90,7 @@ export async function GET() {
       queriesPerMonth: totalMonthlyQueries,
       withoutOptimization: {
         tokens: monthlyFullTokens.toLocaleString(),
-        description: 'Every query builds full context (1,550 tokens)',
+        description: 'Every query builds full context (1,750 tokens)',
       },
       withOptimization: {
         tokens: monthlyOptimizedTokens.toLocaleString(),

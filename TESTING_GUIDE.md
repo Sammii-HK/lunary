@@ -1,5 +1,7 @@
 # Testing Guide: Context Optimization System
 
+> **For detailed cost analysis and usage assumptions, see [COST_ANALYSIS.md](./COST_ANALYSIS.md)**
+
 ## Quick Start
 
 ### 1. Test Context Optimization Analysis
@@ -17,9 +19,9 @@ curl "http://localhost:3000/api/test/context-optimization?query=What transits am
 
 **Expected Results**:
 
-- Simple query: ~80% savings (300 vs 1,550 tokens)
-- Complex query: ~23% savings (1,200 vs 1,550 tokens)
-- Transit query: ~71% savings (450 vs 1,550 tokens)
+- Simple query: ~91% savings (150 vs 1,750 tokens)
+- Complex query: ~23% savings (1,350 vs 1,750 tokens)
+- Transit query: ~74% savings (450 vs 1,750 tokens)
 
 ### 2. Test Actual Context Building
 
@@ -69,7 +71,7 @@ curl "http://localhost:3000/api/test/optimization-demo"
   "query": "What's the moon phase?",
   "optimization": {
     "estimatedTokens": 300,
-    "fullContextTokens": 1550,
+    "fullContextTokens": 1750,
     "tokensSaved": 1250,
     "savingsPercent": "81%"
   },
@@ -165,7 +167,7 @@ Expected Optimization:
 ❌ Progressed chart: NOT calculated
 ❌ Eclipses: NOT checked
 
-Expected Savings: ~80% (300 vs 1,550 tokens)
+Expected Savings: ~80% (300 vs 1,750 tokens)
 ```
 
 ### Scenario 2: Saturn Return Question
@@ -180,7 +182,7 @@ Expected Optimization:
 ❌ Progressed chart: NOT calculated
 ❌ Eclipses: NOT checked
 
-Expected Savings: ~58% (650 vs 1,550 tokens)
+Expected Savings: ~58% (650 vs 1,750 tokens)
 ```
 
 ### Scenario 3: Deep Astrological Analysis
@@ -196,7 +198,7 @@ Expected Optimization:
 ✅ Progressed chart: Calculated
 ✅ Eclipses: Checked
 
-Expected Savings: ~23% (1,200 vs 1,550 tokens)
+Expected Savings: ~23% (1,200 vs 1,750 tokens)
 ```
 
 ### Scenario 4: Tarot-Only Query
@@ -211,7 +213,7 @@ Expected Optimization:
 ❌ Natal patterns: NOT analyzed
 ❌ All astrological depth: Skipped
 
-Expected Savings: ~71% (450 vs 1,550 tokens)
+Expected Savings: ~71% (450 vs 1,750 tokens)
 ```
 
 ## Optimization Rules
@@ -236,23 +238,27 @@ The system analyzes queries using keyword detection:
 
 | Query Type              | Full Context | Optimized | Savings |
 | ----------------------- | ------------ | --------- | ------- |
-| Simple (moon phase)     | 1,550        | 300       | 80%     |
-| Medium (Saturn return)  | 1,550        | 650       | 58%     |
-| Complex (deep analysis) | 1,550        | 1,200     | 23%     |
-| Tarot-focused           | 1,550        | 450       | 71%     |
-| Transit-focused         | 1,550        | 450       | 71%     |
+| Simple (moon phase)     | 1,750        | 300       | 80%     |
+| Medium (Saturn return)  | 1,750        | 650       | 58%     |
+| Complex (deep analysis) | 1,750        | 1,200     | 23%     |
+| Tarot-focused           | 1,750        | 450       | 71%     |
+| Transit-focused         | 1,750        | 450       | 71%     |
 
 ### Monthly Projections (100 queries/day)
 
-**Without Optimization**: 4.65M tokens/month
-**With Optimization**: 1.86M tokens/month (60% savings)
-**Tokens Saved**: 2.79M/month
+> **Note**: These are input token costs only. For complete cost analysis including output tokens and different usage scenarios, see [COST_ANALYSIS.md](./COST_ANALYSIS.md)
 
-At $0.002 per 1K tokens (typical GPT-4 pricing):
+**Without Optimization**: 5.25M input tokens/month (3,000 queries × 1,750 tokens)
+**With Optimization**: 1.10M input tokens/month (79% savings, avg 367 tokens/query)
+**Tokens Saved**: 4.15M/month
 
-- Without: $9,300/month
-- With: $3,720/month
-- **Savings: $5,580/month** 💰
+At GPT-4o-mini pricing ($0.00015 per 1K input tokens):
+
+- Without: $0.79/month (input tokens only)
+- With: $0.17/month (input tokens only)
+- **Input Savings: $0.62/month**
+
+**Total cost including output tokens**: See [COST_ANALYSIS.md](./COST_ANALYSIS.md) for complete calculations with output token costs.
 
 ## Troubleshooting
 
