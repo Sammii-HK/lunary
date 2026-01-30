@@ -198,20 +198,26 @@ const getSuitReading = (suit: string, count: number, total: number): string => {
 };
 
 // Analyze patterns for specified time period
-const analyzeTrends = (
+const analyzeTrends = async (
+  userReadings?: TarotCard[] | null,
   userName?: string,
   timeFrameDays: number = 30,
   userBirthday?: string,
-): TrendAnalysis => {
+): Promise<TrendAnalysis> => {
   const pastReadings: TarotCard[] = [];
   const today = dayjs();
 
-  // Collect past readings - use same seed format as daily cards display
-  for (let i = 1; i <= timeFrameDays; i++) {
-    const date = today.subtract(i, 'day');
-    const dateStr = date.format('YYYY-MM-DD');
-    const card = getTarotCard(`daily-${dateStr}`, userName, userBirthday);
-    pastReadings.push(card);
+  // Use provided user readings from database if available
+  if (userReadings && userReadings.length > 0) {
+    pastReadings.push(...userReadings);
+  } else {
+    // Fallback to seeded generation if no database readings
+    for (let i = 1; i <= timeFrameDays; i++) {
+      const date = today.subtract(i, 'day');
+      const dateStr = date.format('YYYY-MM-DD');
+      const card = getTarotCard(`daily-${dateStr}`, userName, userBirthday);
+      pastReadings.push(card);
+    }
   }
 
   // Ensure we have at least some readings to analyze
@@ -310,8 +316,11 @@ const analyzeTrends = (
     });
 
   // Enhanced suit patterns with card breakdown
-  const suitPatterns = Object.entries(suitCounts)
-    .map(([suit, count]) => {
+  // Include ALL suits with cards, not just ones with interpretations
+  const allSuits = ['Cups', 'Wands', 'Swords', 'Pentacles', 'Major Arcana'];
+  const suitPatterns = allSuits
+    .map((suit) => {
+      const count = suitCounts[suit] || 0;
       const cards = Object.entries(suitCardBreakdown[suit] || {})
         .map(([name, cardCount]) => ({ name, count: cardCount }))
         .sort((a, b) => b.count - a.count);
@@ -319,11 +328,11 @@ const analyzeTrends = (
       return {
         suit,
         count,
-        reading: getSuitReading(suit, count, pastReadings.length),
+        reading:
+          count > 0 ? getSuitReading(suit, count, pastReadings.length) : '',
         cards,
       };
     })
-    .filter((pattern) => pattern.reading)
     .sort((a, b) => b.count - a.count);
 
   // Number patterns analysis
@@ -345,36 +354,30 @@ const analyzeTrends = (
     })
     .sort((a, b) => b.count - a.count);
 
-  // Arcana patterns
+  // Arcana patterns - always include both types even without interpretations
   const arcanaPatterns = [];
-  if (arcanaCounts.major > 0) {
-    const reading = getArcanaReading(
-      'Major',
-      arcanaCounts.major,
-      pastReadings.length,
-    );
-    if (reading) {
-      arcanaPatterns.push({
-        type: 'Major Arcana',
-        count: arcanaCounts.major,
-        reading,
-      });
-    }
-  }
-  if (arcanaCounts.minor > 0) {
-    const reading = getArcanaReading(
-      'Minor',
-      arcanaCounts.minor,
-      pastReadings.length,
-    );
-    if (reading) {
-      arcanaPatterns.push({
-        type: 'Minor Arcana',
-        count: arcanaCounts.minor,
-        reading,
-      });
-    }
-  }
+
+  // Always include Major Arcana count
+  const majorReading =
+    arcanaCounts.major > 0
+      ? getArcanaReading('Major', arcanaCounts.major, pastReadings.length)
+      : '';
+  arcanaPatterns.push({
+    type: 'Major Arcana',
+    count: arcanaCounts.major,
+    reading: majorReading,
+  });
+
+  // Always include Minor Arcana count
+  const minorReading =
+    arcanaCounts.minor > 0
+      ? getArcanaReading('Minor', arcanaCounts.minor, pastReadings.length)
+      : '';
+  arcanaPatterns.push({
+    type: 'Minor Arcana',
+    count: arcanaCounts.minor,
+    reading: minorReading,
+  });
 
   return {
     dominantThemes,
@@ -417,12 +420,13 @@ const generateClearGuidance = (
   };
 };
 
-export const getImprovedTarotReading = (
+export const getImprovedTarotReading = async (
   userName?: string,
   includeTrends: boolean = true,
   timeFrameDays: number = 30,
   userBirthday?: string,
-): ImprovedReading => {
+  userReadings?: TarotCard[] | null,
+): Promise<ImprovedReading> => {
   const today = new Date();
   const todayString = today.toISOString().split('T')[0];
 
@@ -453,7 +457,12 @@ export const getImprovedTarotReading = (
   // Always generate trends if requested (ensures data is always available)
   let trendAnalysis: TrendAnalysis | undefined;
   if (includeTrends && userName && userBirthday) {
-    trendAnalysis = analyzeTrends(userName, timeFrameDays, userBirthday);
+    trendAnalysis = await analyzeTrends(
+      userReadings,
+      userName,
+      timeFrameDays,
+      userBirthday,
+    );
   }
 
   return {
