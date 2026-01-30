@@ -186,10 +186,42 @@ export async function analyzeJournalPatterns(
     console.error('[Pattern Analyzer] House pattern detection failed:', error);
   }
 
+  console.log(
+    `[Pattern Analyzer] Total patterns before sorting: ${patterns.length}`,
+  );
+  console.log(
+    `[Pattern Analyzer] Pattern types:`,
+    patterns.map((p) => `${p.type}(${p.confidence.toFixed(2)})`).join(', '),
+  );
+
   patterns.sort((a, b) => b.confidence - a.confidence);
 
+  // ENHANCED: Ensure pattern type diversity - limit each type to max 5 occurrences
+  const diversePatterns = [];
+  const typeCounts: Record<string, number> = {};
+  const MAX_PER_TYPE = 5;
+
+  for (const pattern of patterns) {
+    const currentCount = typeCounts[pattern.type] || 0;
+    if (currentCount < MAX_PER_TYPE) {
+      diversePatterns.push(pattern);
+      typeCounts[pattern.type] = currentCount + 1;
+    }
+  }
+
+  console.log(
+    `[Pattern Analyzer] Diverse patterns (max ${MAX_PER_TYPE} per type): ${diversePatterns.length}`,
+  );
+  console.log(
+    `[Pattern Analyzer] Top 15 diverse patterns:`,
+    diversePatterns
+      .slice(0, 15)
+      .map((p) => `${p.type}(${p.confidence.toFixed(2)})`)
+      .join(', '),
+  );
+
   return {
-    patterns: patterns.slice(0, 10), // Increased from 5 to 10 to show more patterns
+    patterns: diversePatterns.slice(0, 15), // Increased to 15 with diversity
     generatedAt: new Date().toISOString(),
   };
 }
@@ -703,7 +735,7 @@ async function findTransitCorrelations(
     const topMood = Object.entries(moodCounts).sort((a, b) => b[1] - a[1])[0];
 
     if (topMood) {
-      patterns.push({
+      const pattern = {
         type: 'transit_correlation',
         title: `Active during ${planet} in ${sign}`,
         description: `You journaled ${data.count} time(s) when ${planet} was in ${sign}`,
@@ -715,10 +747,17 @@ async function findTransitCorrelations(
           moodCount: topMood[1],
         },
         confidence: Math.min(data.count / 10, 0.7),
-      });
+      };
+      console.log(
+        `[findTransitCorrelations] Creating pattern for ${transitKey} with confidence ${pattern.confidence}`,
+      );
+      patterns.push(pattern);
     }
   }
 
+  console.log(
+    `[findTransitCorrelations] Total patterns created: ${patterns.length}`,
+  );
   return patterns;
 }
 

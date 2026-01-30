@@ -1,6 +1,7 @@
 'use client';
 
 import { BirthChartData } from '../../../../../utils/astrology/birthChart';
+import { getCosmicContextForDate } from '@/lib/cosmic/cosmic-context-utils';
 
 interface TodaysAspectsProps {
   birthChart: BirthChartData[];
@@ -193,75 +194,108 @@ export function TodaysAspects({
   }
 
   const aspects = calculateAspectsWithDegrees(birthChart, currentTransits);
+  const cosmicContext = getCosmicContextForDate(new Date());
 
   if (aspects.length === 0) {
     return (
-      <div className='text-center py-4'>
-        <p className='text-sm text-zinc-400'>
-          No significant aspects between today&apos;s transits and your birth
-          chart.
-        </p>
+      <div className='space-y-3'>
+        {/* Moon Phase Header */}
+        <div className='rounded-lg border border-lunary-secondary-800 bg-lunary-secondary-950/40 p-3'>
+          <div className='flex items-center gap-2'>
+            <span className='text-2xl'>{cosmicContext.moonPhase.emoji}</span>
+            <div>
+              <p className='text-sm font-medium text-lunary-secondary-300'>
+                {cosmicContext.moonPhase.name}
+              </p>
+              <p className='text-xs text-zinc-500'>Current lunar phase</p>
+            </div>
+          </div>
+        </div>
+        <div className='text-center py-4'>
+          <p className='text-sm text-zinc-400'>
+            No significant aspects between today&apos;s transits and your birth
+            chart.
+          </p>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className='space-y-2'>
-      {aspects.map((aspect, index) => {
-        const styles = getAspectStyles(aspect.aspectType);
-        return (
-          <div
-            key={index}
-            className={`rounded-lg border ${styles.border} ${styles.bg} p-3`}
-          >
-            <div className='flex items-start gap-3'>
-              <div
-                className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center ${styles.bg} border ${styles.border}`}
-              >
-                <span className={`text-lg ${styles.symbol}`}>
-                  {aspect.aspectSymbol}
-                </span>
-              </div>
+    <div className='space-y-3'>
+      {/* Moon Phase Header */}
+      <div className='rounded-lg border border-lunary-secondary-800 bg-lunary-secondary-950/40 p-3'>
+        <div className='flex items-center gap-2'>
+          <span className='text-2xl'>{cosmicContext.moonPhase.emoji}</span>
+          <div>
+            <p className='text-sm font-medium text-lunary-secondary-300'>
+              {cosmicContext.moonPhase.name}
+            </p>
+            <p className='text-xs text-zinc-500'>Current lunar phase</p>
+          </div>
+        </div>
+      </div>
 
-              <div className='flex-1 min-w-0'>
-                <div className='flex items-center justify-between mb-1'>
-                  <div className='flex items-center gap-2'>
-                    <span
-                      className={`text-sm font-medium capitalize ${styles.label}`}
-                    >
-                      {aspect.aspectType}
-                    </span>
-                    <span className='text-xs text-zinc-400'>
-                      {getAspectDescription(aspect.aspectType)}
-                    </span>
-                  </div>
-                  <span className={`text-xs ${getOrbColor(aspect.orb)}`}>
-                    {aspect.orb}°
-                  </span>
-                </div>
-
-                <div className='flex items-center gap-2 text-xs mb-2'>
-                  <span className='text-zinc-300'>{aspect.transitPlanet}</span>
-                  <span className='text-zinc-600'>
-                    {aspect.transitDegree.split(' ')[0]}
-                  </span>
-                  <span className={`${styles.symbol}`}>
+      {/* Aspects List */}
+      <div className='space-y-2'>
+        {aspects.map((aspect, index) => {
+          const styles = getAspectStyles(aspect.aspectType);
+          return (
+            <div
+              key={index}
+              className={`rounded-lg border ${styles.border} ${styles.bg} p-3`}
+            >
+              <div className='flex items-start gap-3'>
+                <div
+                  className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center ${styles.bg} border ${styles.border}`}
+                >
+                  <span className={`text-lg ${styles.symbol}`}>
                     {aspect.aspectSymbol}
                   </span>
-                  <span className='text-zinc-300'>{aspect.natalPlanet}</span>
-                  <span className='text-zinc-600'>
-                    {aspect.natalDegree.split(' ')[0]}
-                  </span>
                 </div>
 
-                <p className='text-xs text-zinc-400 leading-relaxed'>
-                  {aspect.interpretation}
-                </p>
+                <div className='flex-1 min-w-0'>
+                  <div className='flex items-center justify-between mb-1'>
+                    <div className='flex items-center gap-2'>
+                      <span
+                        className={`text-sm font-medium capitalize ${styles.label}`}
+                      >
+                        {aspect.aspectType}
+                      </span>
+                      <span className='text-xs text-zinc-400'>
+                        {getAspectDescription(aspect.aspectType)}
+                      </span>
+                    </div>
+                    <span className={`text-xs ${getOrbColor(aspect.orb)}`}>
+                      {aspect.orb}°
+                    </span>
+                  </div>
+
+                  <div className='flex items-center gap-2 text-xs mb-2'>
+                    <span className='text-zinc-300'>
+                      {aspect.transitPlanet}
+                    </span>
+                    <span className='text-zinc-600'>
+                      {aspect.transitDegree.split(' ')[0]}
+                    </span>
+                    <span className={`${styles.symbol}`}>
+                      {aspect.aspectSymbol}
+                    </span>
+                    <span className='text-zinc-300'>{aspect.natalPlanet}</span>
+                    <span className='text-zinc-600'>
+                      {aspect.natalDegree.split(' ')[0]}
+                    </span>
+                  </div>
+
+                  <p className='text-xs text-zinc-400 leading-relaxed'>
+                    {aspect.interpretation}
+                  </p>
+                </div>
               </div>
             </div>
-          </div>
-        );
-      })}
+          );
+        })}
+      </div>
     </div>
   );
 }

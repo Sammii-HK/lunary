@@ -1328,7 +1328,7 @@ const BirthChartPage = () => {
 
               if (sun || moon || rising) {
                 return (
-                  <div className='sm:col-span-2'>
+                  <div className='col-span-1 md:col-span-2'>
                     <CollapsibleSection
                       title='The Big Three'
                       defaultCollapsed={false}
@@ -1405,7 +1405,7 @@ const BirthChartPage = () => {
               const houses = calculateWholeSigHouses(birthChartData);
               if (!houses) {
                 return (
-                  <div className='sm:col-span-2'>
+                  <div className='col-span-1 md:col-span-2'>
                     <CollapsibleSection
                       title='Houses'
                       defaultCollapsed={true}
@@ -1422,7 +1422,7 @@ const BirthChartPage = () => {
               }
 
               return (
-                <div className='sm:col-span-2'>
+                <div className='col-span-1 md:col-span-2'>
                   <CollapsibleSection
                     title='Your 12 Houses'
                     defaultCollapsed={true}
@@ -1500,7 +1500,7 @@ const BirthChartPage = () => {
               persistState={true}
             >
               <div className='bg-lunary-bg rounded-lg p-4 border border-zinc-800'>
-                <div className='space-y-2'>
+                <div className='grid grid-cols-1 md:grid-cols-2 gap-3'>
                   {birthChartData
                     .filter((planet) =>
                       ['Sun', 'Moon', 'Mercury', 'Venus', 'Mars'].includes(
@@ -1546,7 +1546,7 @@ const BirthChartPage = () => {
               persistState={true}
             >
               <div className='bg-lunary-bg rounded-lg p-4 border border-zinc-800'>
-                <div className='space-y-2'>
+                <div className='grid grid-cols-1 md:grid-cols-2 gap-3'>
                   {birthChartData
                     .filter((planet) =>
                       ['Jupiter', 'Saturn'].includes(planet.body),
@@ -1590,7 +1590,7 @@ const BirthChartPage = () => {
               persistState={true}
             >
               <div className='bg-lunary-bg rounded-lg p-4 border border-zinc-800'>
-                <div className='space-y-2'>
+                <div className='grid grid-cols-1 md:grid-cols-2 gap-3'>
                   {birthChartData
                     .filter((planet) =>
                       ['Uranus', 'Neptune', 'Pluto'].includes(planet.body),
@@ -1652,7 +1652,7 @@ const BirthChartPage = () => {
               if (asteroidsData.length === 0) return null;
 
               return (
-                <div className='sm:col-span-2'>
+                <div className='col-span-1 md:col-span-2'>
                   <CollapsibleSection
                     title='Asteroids'
                     defaultCollapsed={true}
@@ -1710,13 +1710,29 @@ const BirthChartPage = () => {
               const descendant = birthChartData.find(
                 (p) => p.body === 'Descendant',
               );
+
+              const asteroidsList = [
+                'Ceres',
+                'Pallas',
+                'Juno',
+                'Vesta',
+                'Hygiea',
+                'Pholus',
+                'Psyche',
+                'Eros',
+              ];
+              const asteroidsData = birthChartData.filter((p) =>
+                asteroidsList.includes(p.body),
+              );
+
               const hasPoints =
                 midheaven ||
                 descendant ||
                 northNode ||
                 southNode ||
                 chiron ||
-                lilith;
+                lilith ||
+                asteroidsData.length > 0;
 
               if (!hasPoints) return null;
 
@@ -1727,7 +1743,7 @@ const BirthChartPage = () => {
                   persistState={true}
                 >
                   <div className='bg-lunary-bg rounded-lg p-4 border border-zinc-800'>
-                    <div className='space-y-2'>
+                    <div className='grid grid-cols-1 md:grid-cols-2 gap-3'>
                       {midheaven && (
                         <div className='border-l-2 border-lunary-highlight pl-3'>
                           <h5 className='text-sm font-medium text-white flex items-center gap-2'>
@@ -1848,6 +1864,38 @@ const BirthChartPage = () => {
                           </p>
                         </div>
                       )}
+                      {asteroidsData.map((asteroid) => (
+                        <div
+                          key={asteroid.body}
+                          className='border-l-2 border-[#FCD34D] pl-3'
+                        >
+                          <h5 className='text-sm font-medium text-white flex items-center gap-2'>
+                            <span className='font-astro text-lg text-[#FCD34D]'>
+                              {
+                                astroPointSymbols[
+                                  asteroid.body.toLowerCase() as keyof typeof astroPointSymbols
+                                ]
+                              }
+                            </span>
+                            {asteroid.body} in {asteroid.sign}
+                            <span className='font-astro text-zinc-400'>
+                              {
+                                zodiacSymbol[
+                                  asteroid.sign.toLowerCase() as keyof typeof zodiacSymbol
+                                ]
+                              }
+                            </span>
+                            {asteroid.retrograde && (
+                              <span className='text-lunary-error text-xs'>
+                                ℞
+                              </span>
+                            )}
+                          </h5>
+                          <p className='text-xs text-zinc-400 mt-1'>
+                            {asteroid.degree}°{asteroid.minute}' {asteroid.sign}
+                          </p>
+                        </div>
+                      ))}
                     </div>
                   </div>
                 </CollapsibleSection>
@@ -1869,7 +1917,7 @@ const BirthChartPage = () => {
               });
 
               return (
-                <div className='bg-lunary-bg rounded-lg p-4 border border-zinc-800 sm:col-span-2'>
+                <div className='bg-lunary-bg rounded-lg p-4 border border-zinc-800 col-span-1 md:col-span-2'>
                   <h4 className='text-xs font-medium text-lunary-secondary mb-2 uppercase tracking-wide'>
                     Houses
                   </h4>
@@ -1917,7 +1965,7 @@ const BirthChartPage = () => {
 
             {/* Chart Analysis */}
             {getChartAnalysis(birthChartData).length > 0 && (
-              <div className='sm:col-span-2'>
+              <div className='col-span-1 md:col-span-2'>
                 <CollapsibleSection
                   title='Chart Analysis'
                   defaultCollapsed={true}
@@ -1944,7 +1992,7 @@ const BirthChartPage = () => {
             )}
 
             {/* Element & Modality Breakdown */}
-            <div className='sm:col-span-2'>
+            <div className='col-span-1 md:col-span-2'>
               <CollapsibleSection
                 title='Elemental & Modal Balance'
                 defaultCollapsed={true}
@@ -2086,7 +2134,7 @@ const BirthChartPage = () => {
 
             {/* Planetary Aspects */}
             {getPlanetaryAspects(birthChartData).length > 0 && (
-              <div className='sm:col-span-2'>
+              <div className='col-span-1 md:col-span-2'>
                 <CollapsibleSection
                   title='Major Aspects'
                   defaultCollapsed={true}
@@ -2118,7 +2166,7 @@ const BirthChartPage = () => {
 
             {/* Chart Patterns */}
             {getChartPatterns(birthChartData).length > 0 && (
-              <div className='sm:col-span-2'>
+              <div className='col-span-1 md:col-span-2'>
                 <CollapsibleSection
                   title='Chart Patterns'
                   defaultCollapsed={true}
@@ -2149,7 +2197,7 @@ const BirthChartPage = () => {
 
             {/* Stelliums */}
             {getStelliums(birthChartData).length > 0 && (
-              <div className='sm:col-span-2'>
+              <div className='col-span-1 md:col-span-2'>
                 <CollapsibleSection
                   title='Stelliums & Concentrations'
                   defaultCollapsed={true}
@@ -2184,7 +2232,7 @@ const BirthChartPage = () => {
 
             {/* Planetary Dignities */}
             {getPlanetaryDignities(birthChartData).length > 0 && (
-              <div className='sm:col-span-2'>
+              <div className='col-span-1 md:col-span-2'>
                 <CollapsibleSection
                   title='Special Placements'
                   defaultCollapsed={true}
