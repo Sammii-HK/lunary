@@ -42,10 +42,10 @@ function calculateSlowPlanetDuration(
   date: Date,
 ): TransitDuration | null {
   const planetData = SLOW_PLANET_SIGN_CHANGES[planet];
-  if (!planetData) return null;
+  if (!planetData) return estimateSlowPlanetDuration(planet, date);
 
   const signData = planetData[currentSign];
-  if (!signData) return null;
+  if (!signData) return estimateSlowPlanetDuration(planet, date);
 
   const { start, end } = signData;
   const now = date.getTime();

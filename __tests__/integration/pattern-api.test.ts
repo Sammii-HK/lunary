@@ -4,7 +4,7 @@
  */
 
 import { GET } from '../../src/app/api/patterns/history/route';
-import { NextRequest } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 
 // Mock dependencies
 jest.mock('@/lib/ai/auth', () => ({
@@ -23,11 +23,26 @@ import {
   getCachedCurrentSnapshots,
 } from '@/lib/patterns/snapshot/cache';
 
+// Mock NextResponse.json to capture response data
+const originalNextResponse = NextResponse.json;
+let capturedResponseData: any = null;
+
+NextResponse.json = function (data: any, init?: any) {
+  capturedResponseData = data;
+  return originalNextResponse(data, init);
+};
+
+// Helper to get the captured response data
+function getCapturedData() {
+  return capturedResponseData;
+}
+
 describe('Pattern API Endpoints', () => {
   const mockUser = { id: 'test-user-123', email: 'test@example.com' };
 
   beforeEach(() => {
     jest.clearAllMocks();
+    capturedResponseData = null;
     (requireUser as jest.Mock).mockResolvedValue(mockUser);
   });
 
@@ -63,7 +78,7 @@ describe('Pattern API Endpoints', () => {
         'http://localhost:3000/api/patterns/history?limit=50',
       );
       const response = await GET(request);
-      const data = await response.json();
+      const data = getCapturedData();
 
       expect(response.status).toBe(200);
       expect(data.success).toBe(true);
@@ -101,7 +116,7 @@ describe('Pattern API Endpoints', () => {
         'http://localhost:3000/api/patterns/history?type=archetype&limit=50',
       );
       const response = await GET(request);
-      const data = await response.json();
+      const data = getCapturedData();
 
       expect(response.status).toBe(200);
       expect(getCachedPatternHistory).toHaveBeenCalledWith(
@@ -162,7 +177,7 @@ describe('Pattern API Endpoints', () => {
         'http://localhost:3000/api/patterns/history?current=true',
       );
       const response = await GET(request);
-      const data = await response.json();
+      const data = getCapturedData();
 
       expect(response.status).toBe(200);
       expect(data.success).toBe(true);
@@ -183,7 +198,7 @@ describe('Pattern API Endpoints', () => {
         'http://localhost:3000/api/patterns/history',
       );
       const response = await GET(request);
-      const data = await response.json();
+      const data = getCapturedData();
 
       expect(response.status).toBe(401);
       expect(data.success).toBe(false);
@@ -199,7 +214,7 @@ describe('Pattern API Endpoints', () => {
         'http://localhost:3000/api/patterns/history',
       );
       const response = await GET(request);
-      const data = await response.json();
+      const data = getCapturedData();
 
       expect(response.status).toBe(500);
       expect(data.success).toBe(false);
@@ -219,7 +234,7 @@ describe('Pattern API Endpoints', () => {
         'http://localhost:3000/api/patterns/history',
       );
       const response = await GET(request);
-      const data = await response.json();
+      const data = getCapturedData();
 
       expect(response.status).toBe(200);
       expect(data.success).toBe(true);
@@ -256,7 +271,7 @@ describe('Pattern API Endpoints', () => {
         'http://localhost:3000/api/patterns/history',
       );
       const response = await GET(request);
-      const data = await response.json();
+      const data = getCapturedData();
 
       // Verify response structure
       expect(data).toHaveProperty('success');

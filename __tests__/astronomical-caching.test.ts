@@ -106,28 +106,29 @@ describe('Astronomical Data Caching', () => {
       expect(phase3.illumination).toBeDefined();
     });
 
-    it('rounds cache key to nearest hour', () => {
-      // Calls within same hour should share cache
-      const date1 = new Date('2025-02-01T12:15:00Z');
-      const date2 = new Date('2025-02-01T12:45:00Z');
+    it('rounds cache key to nearest minute', () => {
+      // Calls within same minute should share cache
+      const date1 = new Date('2025-02-01T12:15:10Z');
+      const date2 = new Date('2025-02-01T12:15:50Z');
 
       const phase1 = getAccurateMoonPhase(date1);
       const phase2 = getAccurateMoonPhase(date2);
 
-      // Should be from same cached result (rounded to 12:00)
+      // Should be from same cached result (rounded to 12:15)
       expect(phase2).toEqual(phase1);
     });
 
-    it('provides different cache for different hours', () => {
-      const date1 = new Date('2025-02-01T12:00:00Z');
-      const date2 = new Date('2025-02-01T13:00:00Z');
+    it('provides different cache for different minutes', () => {
+      const date1 = new Date('2025-02-01T12:15:00Z');
+      const date2 = new Date('2025-02-01T12:16:00Z');
 
       const phase1 = getAccurateMoonPhase(date1);
       const phase2 = getAccurateMoonPhase(date2);
 
-      // Different hours = different cache entries (though values might be similar)
+      // Different minutes = different cache entries
       expect(phase1).toBeDefined();
       expect(phase2).toBeDefined();
+      // Values might be very similar but from different cache entries
     });
   });
 
