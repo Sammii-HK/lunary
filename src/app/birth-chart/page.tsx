@@ -15,7 +15,6 @@ import {
   modalityAstro,
   astroPointSymbols,
   houseThemes,
-  astrologicalPoints,
 } from '../../../utils/zodiac/zodiac';
 import { useSubscription } from '../../hooks/useSubscription';
 import { hasBirthChartAccess } from '../../../utils/pricing';
@@ -26,6 +25,11 @@ import { useEffect, useMemo, useState } from 'react';
 import { ShareBirthChart } from '@/components/ShareBirthChart';
 import { Button } from '@/components/ui/button';
 import { CollapsibleSection } from '@/components/CollapsibleSection';
+import { PersonalPlanetsSection } from '@/components/birth-chart-sections/PersonalPlanetsSection';
+import { SocialPlanetsSection } from '@/components/birth-chart-sections/SocialPlanetsSection';
+import { GenerationalPlanetsSection } from '@/components/birth-chart-sections/GenerationalPlanetsSection';
+import { AsteroidsSection } from '@/components/birth-chart-sections/AsteroidsSection';
+import { SensitivePointsSection } from '@/components/birth-chart-sections/SensitivePointsSection';
 
 const ZODIAC_ORDER = [
   'Aries',
@@ -1328,7 +1332,7 @@ const BirthChartPage = () => {
 
               if (sun || moon || rising) {
                 return (
-                  <div className='col-span-1 md:col-span-2'>
+                  <div className='col-span-1 sm:col-span-2'>
                     <CollapsibleSection
                       title='The Big Three'
                       defaultCollapsed={false}
@@ -1405,7 +1409,7 @@ const BirthChartPage = () => {
               const houses = calculateWholeSigHouses(birthChartData);
               if (!houses) {
                 return (
-                  <div className='col-span-1 md:col-span-2'>
+                  <div className='col-span-1 sm:col-span-2'>
                     <CollapsibleSection
                       title='Houses'
                       defaultCollapsed={true}
@@ -1422,7 +1426,7 @@ const BirthChartPage = () => {
               }
 
               return (
-                <div className='col-span-1 md:col-span-2'>
+                <div className='col-span-1 sm:col-span-2'>
                   <CollapsibleSection
                     title='Your 12 Houses'
                     defaultCollapsed={true}
@@ -1494,413 +1498,28 @@ const BirthChartPage = () => {
             })()}
 
             {/* Personal Planets */}
-            <CollapsibleSection
-              title='Personal Planets'
-              defaultCollapsed={true}
-              persistState={true}
-            >
-              <div className='bg-lunary-bg rounded-lg p-4 border border-zinc-800'>
-                <div className='grid grid-cols-1 md:grid-cols-2 gap-3'>
-                  {birthChartData
-                    .filter((planet) =>
-                      ['Sun', 'Moon', 'Mercury', 'Venus', 'Mars'].includes(
-                        planet.body,
-                      ),
-                    )
-                    .map((planet) => {
-                      const interpretation = getPlanetaryInterpretation(planet);
-                      return (
-                        <div
-                          key={planet.body}
-                          className='border-l-2 border-lunary-secondary pl-3'
-                        >
-                          <h5 className='text-sm font-medium text-white flex items-center gap-2'>
-                            <span className='font-astro text-lg'>
-                              {
-                                bodiesSymbols[
-                                  planet.body.toLowerCase() as keyof typeof bodiesSymbols
-                                ]
-                              }
-                            </span>
-                            {planet.body} in {planet.sign}
-                            {planet.retrograde && (
-                              <span className='text-lunary-error text-xs'>
-                                ℞
-                              </span>
-                            )}
-                          </h5>
-                          <p className='text-xs text-zinc-300 mt-1'>
-                            {interpretation}
-                          </p>
-                        </div>
-                      );
-                    })}
-                </div>
-              </div>
-            </CollapsibleSection>
+            <PersonalPlanetsSection
+              birthChartData={birthChartData}
+              getPlanetaryInterpretation={getPlanetaryInterpretation}
+            />
 
             {/* Social Planets */}
-            <CollapsibleSection
-              title='Social Planets'
-              defaultCollapsed={true}
-              persistState={true}
-            >
-              <div className='bg-lunary-bg rounded-lg p-4 border border-zinc-800'>
-                <div className='grid grid-cols-1 md:grid-cols-2 gap-3'>
-                  {birthChartData
-                    .filter((planet) =>
-                      ['Jupiter', 'Saturn'].includes(planet.body),
-                    )
-                    .map((planet) => {
-                      const interpretation = getPlanetaryInterpretation(planet);
-                      return (
-                        <div
-                          key={planet.body}
-                          className='border-l-2 border-lunary-accent pl-3'
-                        >
-                          <h5 className='text-sm font-medium text-white flex items-center gap-2'>
-                            <span className='font-astro text-lg'>
-                              {
-                                bodiesSymbols[
-                                  planet.body.toLowerCase() as keyof typeof bodiesSymbols
-                                ]
-                              }
-                            </span>
-                            {planet.body} in {planet.sign}
-                            {planet.retrograde && (
-                              <span className='text-lunary-error text-xs'>
-                                ℞
-                              </span>
-                            )}
-                          </h5>
-                          <p className='text-xs text-zinc-300 mt-1'>
-                            {interpretation}
-                          </p>
-                        </div>
-                      );
-                    })}
-                </div>
-              </div>
-            </CollapsibleSection>
+            <SocialPlanetsSection
+              birthChartData={birthChartData}
+              getPlanetaryInterpretation={getPlanetaryInterpretation}
+            />
 
             {/* Generational Planets */}
-            <CollapsibleSection
-              title='Generational Planets'
-              defaultCollapsed={true}
-              persistState={true}
-            >
-              <div className='bg-lunary-bg rounded-lg p-4 border border-zinc-800'>
-                <div className='grid grid-cols-1 md:grid-cols-2 gap-3'>
-                  {birthChartData
-                    .filter((planet) =>
-                      ['Uranus', 'Neptune', 'Pluto'].includes(planet.body),
-                    )
-                    .map((planet) => {
-                      const interpretation = getPlanetaryInterpretation(planet);
-                      return (
-                        <div
-                          key={planet.body}
-                          className='border-l-2 border-lunary-primary-400 pl-3'
-                        >
-                          <h5 className='text-sm font-medium text-white flex items-center gap-2'>
-                            <span className='font-astro text-lg'>
-                              {
-                                bodiesSymbols[
-                                  planet.body.toLowerCase() as keyof typeof bodiesSymbols
-                                ]
-                              }
-                            </span>
-                            {planet.body} in {planet.sign}
-                            {planet.retrograde && (
-                              <span className='text-lunary-error text-xs'>
-                                ℞
-                              </span>
-                            )}
-                          </h5>
-                          <p className='text-xs text-zinc-300 mt-1'>
-                            {interpretation}
-                          </p>
-                        </div>
-                      );
-                    })}
-                </div>
-              </div>
-            </CollapsibleSection>
+            <GenerationalPlanetsSection
+              birthChartData={birthChartData}
+              getPlanetaryInterpretation={getPlanetaryInterpretation}
+            />
 
             {/* Asteroids */}
-            {(() => {
-              const asteroidsList = [
-                'Ceres',
-                'Pallas',
-                'Juno',
-                'Vesta',
-                'Hygiea',
-                'Pholus',
-                'Psyche',
-                'Eros',
-              ];
-              const asteroidsData = birthChartData.filter((p) =>
-                asteroidsList.includes(p.body),
-              );
-
-              console.log(
-                'Asteroids found:',
-                asteroidsData.length,
-                asteroidsData.map((a) => a.body),
-              );
-
-              if (asteroidsData.length === 0) return null;
-
-              return (
-                <div className='col-span-1 md:col-span-2'>
-                  <CollapsibleSection
-                    title='Asteroids'
-                    defaultCollapsed={true}
-                    persistState={true}
-                  >
-                    <div className='bg-lunary-bg rounded-lg p-4 border border-zinc-800'>
-                      <div className='grid grid-cols-1 sm:grid-cols-2 gap-3'>
-                        {asteroidsData.map((asteroid) => (
-                          <div
-                            key={asteroid.body}
-                            className='border-l-2 border-[#FCD34D] pl-3'
-                          >
-                            <h5 className='text-sm font-medium text-white flex items-center gap-2'>
-                              <span className='font-astro text-lg text-[#FCD34D]'>
-                                {
-                                  astroPointSymbols[
-                                    asteroid.body.toLowerCase() as keyof typeof astroPointSymbols
-                                  ]
-                                }
-                              </span>
-                              {asteroid.body} in {asteroid.sign}
-                              {asteroid.retrograde && (
-                                <span className='text-lunary-error text-xs'>
-                                  ℞
-                                </span>
-                              )}
-                            </h5>
-                            <p className='text-xs text-zinc-400 mt-1'>
-                              {asteroid.degree}°{asteroid.minute}'{' '}
-                              {asteroid.sign}
-                            </p>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  </CollapsibleSection>
-                </div>
-              );
-            })()}
+            <AsteroidsSection birthChartData={birthChartData} />
 
             {/* Sensitive Points */}
-            {(() => {
-              const midheaven = birthChartData.find(
-                (p) => p.body === 'Midheaven',
-              );
-              const northNode = birthChartData.find(
-                (p) => p.body === 'North Node',
-              );
-              const southNode = birthChartData.find(
-                (p) => p.body === 'South Node',
-              );
-              const chiron = birthChartData.find((p) => p.body === 'Chiron');
-              const lilith = birthChartData.find((p) => p.body === 'Lilith');
-
-              const descendant = birthChartData.find(
-                (p) => p.body === 'Descendant',
-              );
-
-              const asteroidsList = [
-                'Ceres',
-                'Pallas',
-                'Juno',
-                'Vesta',
-                'Hygiea',
-                'Pholus',
-                'Psyche',
-                'Eros',
-              ];
-              const asteroidsData = birthChartData.filter((p) =>
-                asteroidsList.includes(p.body),
-              );
-
-              const hasPoints =
-                midheaven ||
-                descendant ||
-                northNode ||
-                southNode ||
-                chiron ||
-                lilith ||
-                asteroidsData.length > 0;
-
-              if (!hasPoints) return null;
-
-              return (
-                <CollapsibleSection
-                  title='Sensitive Points'
-                  defaultCollapsed={true}
-                  persistState={true}
-                >
-                  <div className='bg-lunary-bg rounded-lg p-4 border border-zinc-800'>
-                    <div className='grid grid-cols-1 md:grid-cols-2 gap-3'>
-                      {midheaven && (
-                        <div className='border-l-2 border-lunary-highlight pl-3'>
-                          <h5 className='text-sm font-medium text-white flex items-center gap-2'>
-                            <span className='font-astro text-lg text-lunary-highlight'>
-                              {astroPointSymbols.midheaven}
-                            </span>
-                            Midheaven in {midheaven.sign}
-                            <span className='font-astro text-zinc-400'>
-                              {
-                                zodiacSymbol[
-                                  midheaven.sign.toLowerCase() as keyof typeof zodiacSymbol
-                                ]
-                              }
-                            </span>
-                          </h5>
-                          <p className='text-xs text-zinc-300 mt-1'>
-                            {astrologicalPoints.midheaven.mysticalProperties}
-                          </p>
-                        </div>
-                      )}
-                      {descendant && (
-                        <div className='border-l-2 border-lunary-primary-400 pl-3'>
-                          <h5 className='text-sm font-medium text-white flex items-center gap-2'>
-                            <span className='font-astro text-lg text-lunary-primary-400'>
-                              {astroPointSymbols.descendant}
-                            </span>
-                            Descendant in {descendant.sign}
-                            <span className='font-astro text-zinc-400'>
-                              {
-                                zodiacSymbol[
-                                  descendant.sign.toLowerCase() as keyof typeof zodiacSymbol
-                                ]
-                              }
-                            </span>
-                          </h5>
-                          <p className='text-xs text-zinc-300 mt-1'>
-                            {astrologicalPoints.descendant.mysticalProperties}
-                          </p>
-                        </div>
-                      )}
-                      {northNode && (
-                        <div className='border-l-2 border-emerald-500 pl-3'>
-                          <h5 className='text-sm font-medium text-white flex items-center gap-2'>
-                            <span className='font-astro text-lg text-emerald-400'>
-                              {astroPointSymbols.northnode}
-                            </span>
-                            North Node in {northNode.sign}
-                            <span className='font-astro text-zinc-400'>
-                              {
-                                zodiacSymbol[
-                                  northNode.sign.toLowerCase() as keyof typeof zodiacSymbol
-                                ]
-                              }
-                            </span>
-                          </h5>
-                          <p className='text-xs text-zinc-300 mt-1'>
-                            {astrologicalPoints.northnode.mysticalProperties}
-                          </p>
-                        </div>
-                      )}
-                      {southNode && (
-                        <div className='border-l-2 border-violet-500 pl-3'>
-                          <h5 className='text-sm font-medium text-white flex items-center gap-2'>
-                            <span className='font-astro text-lg text-violet-400'>
-                              {astroPointSymbols.southnode}
-                            </span>
-                            South Node in {southNode.sign}
-                            <span className='font-astro text-zinc-400'>
-                              {
-                                zodiacSymbol[
-                                  southNode.sign.toLowerCase() as keyof typeof zodiacSymbol
-                                ]
-                              }
-                            </span>
-                          </h5>
-                          <p className='text-xs text-zinc-300 mt-1'>
-                            {astrologicalPoints.southnode.mysticalProperties}
-                          </p>
-                        </div>
-                      )}
-                      {chiron && (
-                        <div className='border-l-2 border-amber-500 pl-3'>
-                          <h5 className='text-sm font-medium text-white flex items-center gap-2'>
-                            <span className='font-astro text-lg text-amber-400'>
-                              {astroPointSymbols.chiron}
-                            </span>
-                            Chiron in {chiron.sign}
-                            <span className='font-astro text-zinc-400'>
-                              {
-                                zodiacSymbol[
-                                  chiron.sign.toLowerCase() as keyof typeof zodiacSymbol
-                                ]
-                              }
-                            </span>
-                          </h5>
-                          <p className='text-xs text-zinc-300 mt-1'>
-                            {astrologicalPoints.chiron.mysticalProperties}
-                          </p>
-                        </div>
-                      )}
-                      {lilith && (
-                        <div className='border-l-2 border-fuchsia-500 pl-3'>
-                          <h5 className='text-sm font-medium text-white flex items-center gap-2'>
-                            <span className='font-astro text-lg text-fuchsia-400'>
-                              {astroPointSymbols.lilith}
-                            </span>
-                            Lilith in {lilith.sign}
-                            <span className='font-astro text-zinc-400'>
-                              {
-                                zodiacSymbol[
-                                  lilith.sign.toLowerCase() as keyof typeof zodiacSymbol
-                                ]
-                              }
-                            </span>
-                          </h5>
-                          <p className='text-xs text-zinc-300 mt-1'>
-                            {astrologicalPoints.lilith.mysticalProperties}
-                          </p>
-                        </div>
-                      )}
-                      {asteroidsData.map((asteroid) => (
-                        <div
-                          key={asteroid.body}
-                          className='border-l-2 border-[#FCD34D] pl-3'
-                        >
-                          <h5 className='text-sm font-medium text-white flex items-center gap-2'>
-                            <span className='font-astro text-lg text-[#FCD34D]'>
-                              {
-                                astroPointSymbols[
-                                  asteroid.body.toLowerCase() as keyof typeof astroPointSymbols
-                                ]
-                              }
-                            </span>
-                            {asteroid.body} in {asteroid.sign}
-                            <span className='font-astro text-zinc-400'>
-                              {
-                                zodiacSymbol[
-                                  asteroid.sign.toLowerCase() as keyof typeof zodiacSymbol
-                                ]
-                              }
-                            </span>
-                            {asteroid.retrograde && (
-                              <span className='text-lunary-error text-xs'>
-                                ℞
-                              </span>
-                            )}
-                          </h5>
-                          <p className='text-xs text-zinc-400 mt-1'>
-                            {asteroid.degree}°{asteroid.minute}' {asteroid.sign}
-                          </p>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                </CollapsibleSection>
-              );
-            })()}
+            <SensitivePointsSection birthChartData={birthChartData} />
 
             {/* Houses */}
             {(() => {
@@ -1917,7 +1536,7 @@ const BirthChartPage = () => {
               });
 
               return (
-                <div className='bg-lunary-bg rounded-lg p-4 border border-zinc-800 col-span-1 md:col-span-2'>
+                <div className='bg-lunary-bg rounded-lg p-4 border border-zinc-800 col-span-1 sm:col-span-2'>
                   <h4 className='text-xs font-medium text-lunary-secondary mb-2 uppercase tracking-wide'>
                     Houses
                   </h4>
@@ -1965,7 +1584,7 @@ const BirthChartPage = () => {
 
             {/* Chart Analysis */}
             {getChartAnalysis(birthChartData).length > 0 && (
-              <div className='col-span-1 md:col-span-2'>
+              <div className='col-span-1 sm:col-span-2'>
                 <CollapsibleSection
                   title='Chart Analysis'
                   defaultCollapsed={true}
@@ -1992,7 +1611,7 @@ const BirthChartPage = () => {
             )}
 
             {/* Element & Modality Breakdown */}
-            <div className='col-span-1 md:col-span-2'>
+            <div className='col-span-1 sm:col-span-2'>
               <CollapsibleSection
                 title='Elemental & Modal Balance'
                 defaultCollapsed={true}
@@ -2134,7 +1753,7 @@ const BirthChartPage = () => {
 
             {/* Planetary Aspects */}
             {getPlanetaryAspects(birthChartData).length > 0 && (
-              <div className='col-span-1 md:col-span-2'>
+              <div className='col-span-1 sm:col-span-2'>
                 <CollapsibleSection
                   title='Major Aspects'
                   defaultCollapsed={true}
@@ -2166,7 +1785,7 @@ const BirthChartPage = () => {
 
             {/* Chart Patterns */}
             {getChartPatterns(birthChartData).length > 0 && (
-              <div className='col-span-1 md:col-span-2'>
+              <div className='col-span-1 sm:col-span-2'>
                 <CollapsibleSection
                   title='Chart Patterns'
                   defaultCollapsed={true}
@@ -2197,7 +1816,7 @@ const BirthChartPage = () => {
 
             {/* Stelliums */}
             {getStelliums(birthChartData).length > 0 && (
-              <div className='col-span-1 md:col-span-2'>
+              <div className='col-span-1 sm:col-span-2'>
                 <CollapsibleSection
                   title='Stelliums & Concentrations'
                   defaultCollapsed={true}
@@ -2232,7 +1851,7 @@ const BirthChartPage = () => {
 
             {/* Planetary Dignities */}
             {getPlanetaryDignities(birthChartData).length > 0 && (
-              <div className='col-span-1 md:col-span-2'>
+              <div className='col-span-1 sm:col-span-2'>
                 <CollapsibleSection
                   title='Special Placements'
                   defaultCollapsed={true}

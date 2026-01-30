@@ -771,24 +771,52 @@ async function findHouseActivationPatterns(
 ): Promise<JournalPattern[]> {
   const patterns: JournalPattern[] = [];
 
+  console.log(
+    `[findHouseActivationPatterns] Processing ${entries.length} entries for user ${userId}`,
+  );
+
   // Get user's birth chart to calculate houses
   let birthChart: BirthChartData[] = [];
   try {
     const birthChartResult = await sql`
       SELECT birth_chart FROM user_profiles WHERE user_id = ${userId} LIMIT 1
     `;
+    console.log(
+      `[findHouseActivationPatterns] Birth chart query returned ${birthChartResult.rows.length} rows`,
+    );
     if (birthChartResult.rows.length > 0) {
       birthChart = birthChartResult.rows[0].birth_chart as BirthChartData[];
+      console.log(
+        `[findHouseActivationPatterns] Birth chart has ${birthChart.length} placements`,
+      );
     }
   } catch (error) {
+    console.log(
+      `[findHouseActivationPatterns] Error fetching birth chart:`,
+      error,
+    );
     return patterns;
   }
 
-  if (birthChart.length === 0) return patterns;
+  if (birthChart.length === 0) {
+    console.log(
+      `[findHouseActivationPatterns] No birth chart found, returning empty patterns`,
+    );
+    return patterns;
+  }
 
   // Get ascendant for house calculation
   const ascendant = birthChart.find((p) => p.body === 'Ascendant');
-  if (!ascendant || !ascendant.eclipticLongitude) return patterns;
+  if (!ascendant || !ascendant.eclipticLongitude) {
+    console.log(
+      `[findHouseActivationPatterns] No Ascendant found in birth chart, cannot calculate houses`,
+    );
+    return patterns;
+  }
+
+  console.log(
+    `[findHouseActivationPatterns] Ascendant found at ${ascendant.eclipticLongitude}° in ${ascendant.sign}`,
+  );
 
   const ascendantSign = Math.floor(
     (((ascendant.eclipticLongitude % 360) + 360) % 360) / 30,
@@ -858,6 +886,9 @@ async function findHouseActivationPatterns(
 
   // Analyze which houses are emphasized in journal entries
   const houseActivation: Record<number, number> = {};
+  let totalMatches = 0;
+  let successCount = 0;
+  let errorCount = 0;
 
   for (const entry of entries) {
     const entryDate = new Date(entry.createdAt);
@@ -882,20 +913,42 @@ async function findHouseActivationPatterns(
         for (const keyword of houseKeywords) {
           if (lowerText.includes(keyword)) {
             houseActivation[house] = (houseActivation[house] || 0) + 1;
+            totalMatches++;
             break;
           }
         }
       }
+      successCount++;
     } catch (error) {
+      errorCount++;
+      console.log(
+        `[findHouseActivationPatterns] Error for entry ${entry.createdAt}:`,
+        error,
+      );
       continue;
     }
   }
+
+  console.log(
+    `[findHouseActivationPatterns] Processing complete - Success: ${successCount}, Errors: ${errorCount}`,
+  );
+  console.log(
+    `[findHouseActivationPatterns] Total keyword matches: ${totalMatches}`,
+  );
+  console.log(
+    `[findHouseActivationPatterns] House activations:`,
+    JSON.stringify(houseActivation, null, 2),
+  );
 
   // Create patterns for emphasized houses
   // LOWERED THRESHOLD FOR TESTING: 1 entry instead of 3
   const sortedHouses = Object.entries(houseActivation)
     .filter(([, count]) => count >= 1)
     .sort((a, b) => b[1] - a[1]);
+
+  console.log(
+    `[findHouseActivationPatterns] Houses meeting threshold (>=1): ${sortedHouses.length}`,
+  );
 
   const houseNames: Record<number, string> = {
     1: 'Self & Identity',
@@ -916,6 +969,10 @@ async function findHouseActivationPatterns(
     const house = parseInt(houseStr);
     const houseName = houseNames[house] || `House ${house}`;
 
+    console.log(
+      `[findHouseActivationPatterns] Creating pattern for House ${house} (${houseName}) with ${count} activations`,
+    );
+
     patterns.push({
       type: 'house_activation',
       title: `${houseName} themes emphasized`,
@@ -931,6 +988,9 @@ async function findHouseActivationPatterns(
     });
   }
 
+  console.log(
+    `[findHouseActivationPatterns] Total patterns created: ${patterns.length}`,
+  );
   return patterns;
 }
 
