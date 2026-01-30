@@ -43,6 +43,7 @@ const FEATURE_ACCESS_BASE = {
     'personalized_crystal_recommendations',
     'transit_calendar',
     'tarot_patterns',
+    'tarot_patterns_basic', // 14-90 day patterns, progress bars, basic visualizations
     'solar_return',
     'cosmic_profile',
     'personalized_transit_readings',
@@ -64,6 +65,12 @@ const FEATURE_ACCESS_BASE = {
     'personalized_crystal_recommendations',
     'transit_calendar',
     'tarot_patterns',
+    'tarot_patterns_basic', // 14-90 day patterns, progress bars
+    'tarot_patterns_advanced', // Radial charts, sparklines, drill-down, heatmap
+    'pattern_drill_down', // Interactive frequent cards
+    'pattern_heatmap', // Calendar heatmap view
+    'card_combinations', // Combination analysis
+    'ai_pattern_insights', // Astral Chat pattern narratives
     'solar_return',
     'cosmic_profile',
     'personalized_transit_readings',
@@ -93,6 +100,17 @@ const FEATURE_ACCESS_BASE = {
     'personalized_crystal_recommendations',
     'transit_calendar',
     'tarot_patterns',
+    'tarot_patterns_basic', // 14-90 day patterns
+    'tarot_patterns_advanced', // Advanced visualizations
+    'pattern_drill_down', // Interactive cards
+    'pattern_heatmap', // Calendar heatmap
+    'card_combinations', // Combination analysis
+    'ai_pattern_insights', // Astral Chat narratives
+    'pattern_export', // PDF/JSON export
+    'pattern_comparison', // Period comparison
+    'predictive_insights', // AI predictions
+    'year_over_year', // YoY analysis (existing)
+    'pattern_network_graph', // Network visualization (future)
     'solar_return',
     'cosmic_profile',
     'personalized_transit_readings',
