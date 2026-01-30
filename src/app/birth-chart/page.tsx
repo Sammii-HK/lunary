@@ -1213,7 +1213,7 @@ const BirthChartPage = () => {
 
   return (
     <div className='h-full overflow-auto'>
-      <div className='flex w-full flex-col gap-4 max-w-2xl md:max-w-4xl mx-auto p-4'>
+      <div className='flex w-full flex-col gap-4 max-w-2xl sm:max-w-3xl md:max-w-4xl mx-auto p-4'>
         {/* Internal Links for SEO */}
         <nav className='p-4 bg-zinc-900/50 rounded-lg border border-zinc-800'>
           <p className='text-sm text-zinc-400 mb-3'>
@@ -1422,7 +1422,7 @@ const BirthChartPage = () => {
               }
 
               return (
-                <div className='md:col-span-2'>
+                <div className='sm:col-span-2'>
                   <CollapsibleSection
                     title='Your 12 Houses'
                     defaultCollapsed={true}
@@ -1646,7 +1646,7 @@ const BirthChartPage = () => {
               if (asteroidsData.length === 0) return null;
 
               return (
-                <div className='md:col-span-2'>
+                <div className='sm:col-span-2'>
                   <CollapsibleSection
                     title='Asteroids'
                     defaultCollapsed={true}
@@ -1863,7 +1863,7 @@ const BirthChartPage = () => {
               });
 
               return (
-                <div className='bg-lunary-bg rounded-lg p-4 border border-zinc-800 md:col-span-2'>
+                <div className='bg-lunary-bg rounded-lg p-4 border border-zinc-800 sm:col-span-2'>
                   <h4 className='text-xs font-medium text-lunary-secondary mb-2 uppercase tracking-wide'>
                     Houses
                   </h4>
@@ -1911,7 +1911,7 @@ const BirthChartPage = () => {
 
             {/* Chart Analysis */}
             {getChartAnalysis(birthChartData).length > 0 && (
-              <div className='md:col-span-2'>
+              <div className='sm:col-span-2'>
                 <CollapsibleSection
                   title='Chart Analysis'
                   defaultCollapsed={true}
@@ -1938,7 +1938,7 @@ const BirthChartPage = () => {
             )}
 
             {/* Element & Modality Breakdown */}
-            <div className='md:col-span-2'>
+            <div className='sm:col-span-2'>
               <CollapsibleSection
                 title='Elemental & Modal Balance'
                 defaultCollapsed={true}
@@ -2080,7 +2080,7 @@ const BirthChartPage = () => {
 
             {/* Planetary Aspects */}
             {getPlanetaryAspects(birthChartData).length > 0 && (
-              <div className='md:col-span-2'>
+              <div className='sm:col-span-2'>
                 <CollapsibleSection
                   title='Major Aspects'
                   defaultCollapsed={true}
@@ -2112,7 +2112,7 @@ const BirthChartPage = () => {
 
             {/* Chart Patterns */}
             {getChartPatterns(birthChartData).length > 0 && (
-              <div className='md:col-span-2'>
+              <div className='sm:col-span-2'>
                 <CollapsibleSection
                   title='Chart Patterns'
                   defaultCollapsed={true}
@@ -2143,7 +2143,7 @@ const BirthChartPage = () => {
 
             {/* Stelliums */}
             {getStelliums(birthChartData).length > 0 && (
-              <div className='md:col-span-2'>
+              <div className='sm:col-span-2'>
                 <CollapsibleSection
                   title='Stelliums & Concentrations'
                   defaultCollapsed={true}
@@ -2178,7 +2178,7 @@ const BirthChartPage = () => {
 
             {/* Planetary Dignities */}
             {getPlanetaryDignities(birthChartData).length > 0 && (
-              <div className='md:col-span-2'>
+              <div className='sm:col-span-2'>
                 <CollapsibleSection
                   title='Special Placements'
                   defaultCollapsed={true}
