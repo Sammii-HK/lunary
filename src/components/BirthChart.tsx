@@ -56,6 +56,16 @@ const ANGLE_DISPLAY: Record<string, string> = {
   Midheaven: 'Midheaven',
 };
 const POINTS = ['North Node', 'South Node', 'Chiron', 'Lilith'];
+const ASTEROIDS = [
+  'Ceres',
+  'Pallas',
+  'Juno',
+  'Vesta',
+  'Hygiea',
+  'Pholus',
+  'Psyche',
+  'Eros',
+];
 
 function getSymbolForBody(body: string): string {
   const key = body
@@ -194,6 +204,7 @@ export const BirthChart = ({
   const mainPlanets = chartData.filter((p) => MAIN_PLANETS.includes(p.body));
   const angles = chartData.filter((p) => ANGLES.includes(p.body));
   const points = chartData.filter((p) => POINTS.includes(p.body));
+  const asteroids = chartData.filter((p) => ASTEROIDS.includes(p.body));
 
   const allAspects = useAspects(chartData);
 
@@ -268,6 +279,10 @@ export const BirthChart = ({
           <div className='flex items-center gap-2'>
             <div className='w-3 h-3 rounded-full bg-[#C77DFF]' />
             <span className='text-zinc-300'>Angles (AC, MC, DC)</span>
+          </div>
+          <div className='flex items-center gap-2'>
+            <div className='w-3 h-3 rounded-full bg-[#FCD34D]' />
+            <span className='text-zinc-300'>Asteroids</span>
           </div>
           <div className='flex items-center gap-2'>
             <div className='w-3 h-3 rounded-full bg-[#f87171]' />
@@ -411,12 +426,13 @@ export const BirthChart = ({
           ))}
 
           {/* Render non-hovered planets first */}
-          {[...mainPlanets, ...angles, ...points]
+          {[...mainPlanets, ...angles, ...points, ...asteroids]
             .filter((p) => p.body !== hoveredBody)
             .map(({ body, x, y, retrograde, sign, degree, minute }) => {
               const isAngle = ANGLES.includes(body);
               const isPoint = POINTS.includes(body);
               const isPlanet = MAIN_PLANETS.includes(body);
+              const isAsteroid = ASTEROIDS.includes(body);
 
               // Get element color for planets based on their sign
               const elementColor =
@@ -430,7 +446,9 @@ export const BirthChart = ({
                   ? '#C77DFF'
                   : isPoint
                     ? '#7B7BE8'
-                    : elementColor || '#ffffff';
+                    : isAsteroid
+                      ? '#FCD34D'
+                      : elementColor || '#ffffff';
 
               const color = hoveredBody ? '#6b7280' : baseColor;
 
@@ -473,7 +491,9 @@ export const BirthChart = ({
                       'planet-glyph font-astro',
                       styles.planetGlyph,
                     )}
-                    fontSize={isAngle || isPoint ? '12' : '14'}
+                    fontSize={
+                      isAngle || isPoint ? '12' : isAsteroid ? '11' : '14'
+                    }
                     fill={color}
                   >
                     {getSymbolForBody(body)}
@@ -484,12 +504,13 @@ export const BirthChart = ({
 
           {/* Render hovered planet last so it appears on top */}
           {hoveredBody &&
-            [...mainPlanets, ...angles, ...points]
+            [...mainPlanets, ...angles, ...points, ...asteroids]
               .filter((p) => p.body === hoveredBody)
               .map(({ body, x, y, retrograde, sign, degree, minute }) => {
                 const isAngle = ANGLES.includes(body);
                 const isPoint = POINTS.includes(body);
                 const isPlanet = MAIN_PLANETS.includes(body);
+                const isAsteroid = ASTEROIDS.includes(body);
 
                 const elementColor =
                   isPlanet && sign && SIGN_ELEMENTS[sign]
@@ -502,7 +523,9 @@ export const BirthChart = ({
                     ? '#C77DFF'
                     : isPoint
                       ? '#7B7BE8'
-                      : elementColor || '#ffffff';
+                      : isAsteroid
+                        ? '#FCD34D'
+                        : elementColor || '#ffffff';
 
                 return (
                   <g
@@ -543,7 +566,9 @@ export const BirthChart = ({
                         'planet-glyph font-astro',
                         styles.planetGlyph,
                       )}
-                      fontSize={isAngle || isPoint ? '12' : '14'}
+                      fontSize={
+                        isAngle || isPoint ? '12' : isAsteroid ? '11' : '14'
+                      }
                       fill='#ffffff'
                     >
                       {getSymbolForBody(body)}
