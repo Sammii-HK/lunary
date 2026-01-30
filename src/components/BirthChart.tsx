@@ -230,6 +230,51 @@ export const BirthChart = ({
         )}
       </div>
 
+      {/* Color Legend */}
+      <div className='bg-zinc-900/50 border border-zinc-800 rounded-lg p-3 w-full max-w-[320px] md:max-w-[360px]'>
+        <h3 className='text-xs font-semibold text-zinc-400 mb-2'>
+          Planet Colors
+        </h3>
+        <div className='grid grid-cols-2 gap-2 text-xs'>
+          <div className='flex items-center gap-2'>
+            <div
+              className='w-3 h-3 rounded-full'
+              style={{ backgroundColor: ELEMENT_COLORS.Fire }}
+            />
+            <span className='text-zinc-300'>Fire (Aries, Leo, Sag)</span>
+          </div>
+          <div className='flex items-center gap-2'>
+            <div
+              className='w-3 h-3 rounded-full'
+              style={{ backgroundColor: ELEMENT_COLORS.Earth }}
+            />
+            <span className='text-zinc-300'>Earth (Tau, Vir, Cap)</span>
+          </div>
+          <div className='flex items-center gap-2'>
+            <div
+              className='w-3 h-3 rounded-full'
+              style={{ backgroundColor: ELEMENT_COLORS.Air }}
+            />
+            <span className='text-zinc-300'>Air (Gem, Lib, Aqu)</span>
+          </div>
+          <div className='flex items-center gap-2'>
+            <div
+              className='w-3 h-3 rounded-full'
+              style={{ backgroundColor: ELEMENT_COLORS.Water }}
+            />
+            <span className='text-zinc-300'>Water (Can, Sco, Pis)</span>
+          </div>
+          <div className='flex items-center gap-2'>
+            <div className='w-3 h-3 rounded-full bg-[#C77DFF]' />
+            <span className='text-zinc-300'>Angles (AC, MC, DC)</span>
+          </div>
+          <div className='flex items-center gap-2'>
+            <div className='w-3 h-3 rounded-full bg-[#f87171]' />
+            <span className='text-zinc-300'>Retrograde</span>
+          </div>
+        </div>
+      </div>
+
       <div className='relative w-full max-w-[320px] md:max-w-[360px] aspect-square'>
         <svg
           viewBox='-140 -140 280 280'
@@ -361,8 +406,10 @@ export const BirthChart = ({
             </text>
           ))}
 
-          {[...mainPlanets, ...angles, ...points].map(
-            ({ body, x, y, retrograde, sign, degree, minute }) => {
+          {/* Render non-hovered planets first */}
+          {[...mainPlanets, ...angles, ...points]
+            .filter((p) => p.body !== hoveredBody)
+            .map(({ body, x, y, retrograde, sign, degree, minute }) => {
               const isAngle = ANGLES.includes(body);
               const isPoint = POINTS.includes(body);
               const isPlanet = MAIN_PLANETS.includes(body);
@@ -381,11 +428,8 @@ export const BirthChart = ({
                     ? '#7B7BE8'
                     : elementColor || '#ffffff';
 
-              const color = hoveredBody
-                ? body === hoveredBody
-                  ? '#ffffff'
-                  : '#6b7280'
-                : baseColor;
+              const color = hoveredBody ? '#6b7280' : baseColor;
+
               return (
                 <g
                   key={body}
@@ -429,8 +473,74 @@ export const BirthChart = ({
                   </text>
                 </g>
               );
-            },
-          )}
+            })}
+
+          {/* Render hovered planet last so it appears on top */}
+          {hoveredBody &&
+            [...mainPlanets, ...angles, ...points]
+              .filter((p) => p.body === hoveredBody)
+              .map(({ body, x, y, retrograde, sign, degree, minute }) => {
+                const isAngle = ANGLES.includes(body);
+                const isPoint = POINTS.includes(body);
+                const isPlanet = MAIN_PLANETS.includes(body);
+
+                const elementColor =
+                  isPlanet && sign && SIGN_ELEMENTS[sign]
+                    ? ELEMENT_COLORS[SIGN_ELEMENTS[sign]]
+                    : undefined;
+
+                const baseColor = retrograde
+                  ? '#f87171'
+                  : isAngle
+                    ? '#C77DFF'
+                    : isPoint
+                      ? '#7B7BE8'
+                      : elementColor || '#ffffff';
+
+                return (
+                  <g
+                    key={`${body}-hover`}
+                    className='planet-node'
+                    onMouseEnter={() => setHoveredBody(body)}
+                    onMouseLeave={() => setHoveredBody(null)}
+                    onClick={() =>
+                      setHighlightedPlanet(
+                        highlightedPlanet === body ? null : body,
+                      )
+                    }
+                  >
+                    <title>
+                      {formatPlacementLabel({
+                        body,
+                        sign,
+                        degree,
+                        minute,
+                        retrograde,
+                      })}
+                    </title>
+                    <line
+                      x1='0'
+                      y1='0'
+                      x2={x}
+                      y2={y}
+                      stroke='#ffffff'
+                      strokeWidth='0.5'
+                      opacity='0.4'
+                    />
+                    <text
+                      x={x}
+                      y={y}
+                      textAnchor='middle'
+                      dominantBaseline='central'
+                      className='planet-glyph font-astro'
+                      fontSize={isAngle || isPoint ? '12' : '14'}
+                      fill='#ffffff'
+                    >
+                      {getSymbolForBody(body)}
+                    </text>
+                  </g>
+                );
+              })}
         </svg>
       </div>
 
