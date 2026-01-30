@@ -49,7 +49,8 @@ export function usePatternCache(options: UsePatternsOptions = {}) {
         setError(null);
 
         // Try to get from cache first (unless skipCache is true)
-        if (!skipCache) {
+        // Only access cache on client-side (avoid SSR issues)
+        if (!skipCache && typeof window !== 'undefined') {
           const cached = ClientCache.get<PatternResponse>(
             cacheKey,
             cacheMaxAge,
@@ -79,8 +80,10 @@ export function usePatternCache(options: UsePatternsOptions = {}) {
 
         const result: PatternResponse = await response.json();
 
-        // Save to cache
-        ClientCache.set(cacheKey, result);
+        // Save to cache (only on client-side)
+        if (typeof window !== 'undefined') {
+          ClientCache.set(cacheKey, result);
+        }
 
         setData(result);
         setIsFromCache(false);
@@ -104,9 +107,11 @@ export function usePatternCache(options: UsePatternsOptions = {}) {
     ClientCache.clear(cacheKey);
   }, [cacheKey]);
 
-  // Initial fetch
+  // Initial fetch (only on client-side)
   useEffect(() => {
-    fetchPatterns();
+    if (typeof window !== 'undefined') {
+      fetchPatterns();
+    }
   }, [fetchPatterns]);
 
   return {
