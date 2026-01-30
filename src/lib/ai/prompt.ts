@@ -230,6 +230,14 @@ const describeContext = (
   const personalTransits = (context as any).personalTransits;
   const upcomingPersonalTransits = (context as any).upcomingPersonalTransits;
 
+  console.log('[describeContext] Transit info:', {
+    hasPersonalTransits: !!personalTransits,
+    personalTransitsLength: personalTransits?.length || 0,
+    hasCurrentTransits: !!(context as any).currentTransits,
+    currentTransitsType: typeof (context as any).currentTransits,
+    currentTransitsValue: (context as any).currentTransits,
+  });
+
   if (personalTransits && personalTransits.length > 0) {
     const personalTransitDescriptions = personalTransits
       .slice(0, 8)
@@ -262,17 +270,13 @@ const describeContext = (
       });
 
     parts.push(`PERSONAL TRANSITS: ${personalTransitDescriptions.join(' | ')}`);
-  } else if (context.currentTransits && context.currentTransits.length > 0) {
-    // Fallback to general transits if no personal transits available
-    const topTransits = context.currentTransits
-      .slice(0, 8)
-      .map((t) => {
-        const applying = t.applying ? ' (applying)' : '';
-        const strength = t.strength ? ` strength:${t.strength.toFixed(2)}` : '';
-        return `${t.from} ${t.aspect} ${t.to}${applying}${strength}`;
-      })
-      .join(', ');
-    parts.push(`TRANSITS: ${topTransits}`);
+  } else if (
+    (context as any).currentTransits &&
+    typeof (context as any).currentTransits === 'string' &&
+    (context as any).currentTransits.length > 0
+  ) {
+    // Fallback to general transits summary string if no personal transits available
+    parts.push(`TRANSITS: ${(context as any).currentTransits}`);
   }
 
   // Upcoming personal transits (next 7 days)
@@ -346,7 +350,7 @@ const describeContext = (
           p.planet === 'Rising' ||
           p.planet === 'ASC',
       );
-      if (ascendant?.sign) {
+      if (ascendant?.sign && Array.isArray(context.currentTransits)) {
         const transitHouses = context.currentTransits
           .filter((t) => t.aspect === 'ingress')
           .map((t) => {
@@ -362,6 +366,16 @@ const describeContext = (
         }
       }
     }
+  }
+
+  // Natal Summary - includes chart patterns (Yods, T-Squares, Grand Trines, etc.)
+  const natalSummary = (context as any).natalSummary;
+  if (
+    natalSummary &&
+    typeof natalSummary === 'string' &&
+    natalSummary !== 'Birth chart data is not available.'
+  ) {
+    parts.push(`NATAL DETAILS: ${natalSummary}`);
   }
 
   // Mood - include recent trend

@@ -1,11 +1,6 @@
 import dayjs from 'dayjs';
 import { sql } from '@vercel/postgres';
-import {
-  BirthChartSnapshot,
-  MoonSnapshot,
-  TransitRecord,
-  TarotCard,
-} from './types';
+import { MoonSnapshot, TransitRecord, TarotCard } from './types';
 import { buildLunaryContext } from './context';
 import { searchSimilar, type EmbeddingResult } from '@/lib/embeddings';
 import {
@@ -30,6 +25,7 @@ import {
   getContextRequirements,
   type QueryContext,
 } from '../grimoire/query-analyzer';
+import { formatBirthChartSummary } from './birth-chart-with-patterns';
 
 /**
  * Detects if a user message is asking about astrological/cosmic topics
@@ -67,6 +63,17 @@ export function isAstralQuery(userMessage: string): boolean {
     'uranus',
     'neptune',
     'pluto',
+    // Chart patterns
+    'yod',
+    'pattern',
+    'grand trine',
+    't-square',
+    't square',
+    'stellium',
+    'grand cross',
+    'grand conjunction',
+    'kite',
+    'finger of god',
   ];
 
   const lowerMessage = userMessage.toLowerCase();
@@ -264,7 +271,9 @@ export async function buildAstralContext(
     needsProgressedChart: contextRequirements?.needsProgressedChart ?? true,
     needsEclipses: contextRequirements?.needsEclipses ?? true,
   };
-  // Fetch all context data in parallel
+
+  // Fetch context with caching enabled
+  // Cache versioning ensures old snapshots without patterns are invalidated
   const { context } = await buildLunaryContext({
     userId,
     tz: 'Europe/London', // Will be overridden by actual user timezone
@@ -274,6 +283,7 @@ export async function buildAstralContext(
     historyLimit: 0, // Don't need conversation history for astral guide
     includeMood: true,
     now,
+    useCache: true, // Cache enabled - version check handles invalidation
   });
 
   // Extract natal chart placements
@@ -287,8 +297,16 @@ export async function buildAstralContext(
     (p) => p.planet === 'Ascendant' || p.planet === 'Rising',
   );
 
-  // Build natal summary
-  const natalSummary = buildNatalSummary(context.birthChart);
+  // Build natal summary using the pure formatter function
+  // This ensures patterns are ALWAYS included since context.birthChart comes from fetchBirthChartWithPatterns
+  const natalSummary = formatBirthChartSummary(context.birthChart);
+  console.log('[Astral Guide] Natal summary:', natalSummary);
+  console.log(
+    '[Astral Guide] Birth chart has patterns?',
+    !!context.birthChart?.patterns,
+    'Count:',
+    context.birthChart?.patterns?.length || 0,
+  );
 
   // OPTIMIZATION: Only calculate personal transits if needed (expensive operation)
   let personalTransits, upcomingPersonalTransits;
@@ -299,11 +317,19 @@ export async function buildAstralContext(
   }
 
   // Build current transits summary (now includes personal transits if available)
+  console.log('[Astral Guide] Transit data:', {
+    generalTransits: context.currentTransits?.length || 0,
+    personalTransits: personalTransits?.length || 0,
+    moonPhase: context.moon?.phase,
+  });
+
   const currentTransits = buildTransitsSummary(
     context.currentTransits,
     context.moon,
     personalTransits,
   );
+
+  console.log('[Astral Guide] Built transits summary:', currentTransits);
 
   // PHASE 2 & 3: Detect patterns, calculate progressions & eclipses
   const userBirthChartData = await fetchUserBirthChart(userId);
@@ -467,52 +493,8 @@ export async function buildAstralContext(
   };
 }
 
-/**
- * Builds a summary of the natal chart
- * Focuses on key placements and aspects, avoiding technical astrological math
- */
-function buildNatalSummary(birthChart: BirthChartSnapshot | null): string {
-  if (!birthChart || !birthChart.placements) {
-    return 'Birth chart data is not available.';
-  }
-
-  const parts: string[] = [];
-
-  // Include all major planets (not just inner planets)
-  const majorPlanets = [
-    'Sun',
-    'Moon',
-    'Mercury',
-    'Venus',
-    'Mars',
-    'Jupiter',
-    'Saturn',
-    'Uranus',
-    'Neptune',
-    'Pluto',
-  ];
-  const keyPlacements = birthChart.placements
-    .filter((p) => majorPlanets.includes(p.planet))
-    .map((p) => {
-      const house = p.house ? ` (H${p.house})` : '';
-      return `${p.planet} in ${p.sign}${house}`;
-    });
-
-  if (keyPlacements.length > 0) {
-    parts.push(`Placements: ${keyPlacements.join(', ')}`);
-  }
-
-  // Include more aspects (up to 5 instead of 3)
-  if (birthChart.aspects && birthChart.aspects.length > 0) {
-    const topAspects = birthChart.aspects
-      .slice(0, 5)
-      .map((a) => `${a.a} ${a.type} ${a.b}`)
-      .join(', ');
-    parts.push(`Aspects: ${topAspects}`);
-  }
-
-  return parts.length > 0 ? parts.join('. ') : 'Birth chart data available.';
-}
+// NOTE: buildNatalSummary has been replaced with formatBirthChartSummary
+// in birth-chart-with-patterns.ts for DRY code organization
 
 /**
  * Builds a summary of current transits
