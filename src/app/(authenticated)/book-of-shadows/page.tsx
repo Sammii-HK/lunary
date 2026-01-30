@@ -31,6 +31,7 @@ import { ArchetypeBar } from '@/components/journal/ArchetypeBar';
 import { DreamTagChips } from '@/components/journal/DreamTagChips';
 import { PremiumPathway } from '@/components/PremiumPathway';
 import { PatternSnapshotsSection } from '@/components/patterns/PatternSnapshotsSection';
+import { ShareWeeklyPattern } from '@/components/share/ShareWeeklyPattern';
 
 interface JournalEntry {
   id: number;
@@ -700,6 +701,23 @@ export default function BookOfShadowsPage() {
             </div>
 
             <PatternSnapshotsSection />
+
+            {/* Share Weekly Pattern Button */}
+            <div className='flex justify-center mt-6'>
+              <ShareWeeklyPattern
+                onDataFetch={async () => {
+                  try {
+                    const response = await fetch('/api/patterns/weekly');
+                    if (!response.ok) return null;
+                    const data = await response.json();
+                    return data.pattern || null;
+                  } catch (error) {
+                    console.error('Failed to fetch weekly pattern:', error);
+                    return null;
+                  }
+                }}
+              />
+            </div>
 
             <PremiumPathway variant='shadow' className='mt-6' />
           </div>

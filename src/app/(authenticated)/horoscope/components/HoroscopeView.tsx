@@ -19,6 +19,7 @@ import { TodaysAspects, MoonPhaseCard } from './TodaysAspects';
 import { TransitWisdom } from './TransitWisdom';
 import { UnifiedTransitList } from './UnifiedTransitList';
 import { useCTACopy } from '@/hooks/useCTACopy';
+import { ShareRetrogradeBadge } from '@/components/share/ShareRetrogradeBadge';
 
 const GuideNudge = dynamic(
   () =>
@@ -620,20 +621,27 @@ export function HoroscopeView({
         )
       )}
 
-      {/* Moon Phase — free for all users */}
+      {/* Moon Phase — free for all users, house placement is paid */}
       <HoroscopeSection
         title='Current Lunar Energy'
-        color='secondary'
+        color='purple'
         id='moon-phase'
       >
         <p className='text-sm text-zinc-400 mb-4'>
-          The moon&apos;s influence on your chart right now
+          The moon&apos;s influence{hasPaidAccess ? ' on your chart' : ''} right
+          now
         </p>
         <MoonPhaseCard
-          birthChart={birthChart}
+          birthChart={birthChart ?? undefined}
           currentTransits={currentTransits}
+          showHousePlacement={hasPaidAccess}
         />
       </HoroscopeSection>
+
+      {/* Mercury Retrograde Badge */}
+      <div className='flex justify-center my-4'>
+        <ShareRetrogradeBadge />
+      </div>
 
       {/* Today's Aspects — paid: full component; free: locked preview */}
       {hasPaidAccess && birthChart && currentTransits.length > 0 ? (

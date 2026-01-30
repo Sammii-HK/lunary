@@ -12,6 +12,8 @@ import { useNotificationDeepLink } from '@/hooks/useNotificationDeepLink';
 import { useABTestTracking } from '@/hooks/useABTestTracking';
 
 import { ShareDailyInsight } from '@/components/ShareDailyInsight';
+import { ShareDailyCosmicState } from '@/components/share/ShareDailyCosmicState';
+import { ShareZodiacSeason } from '@/components/share/ShareZodiacSeason';
 import { TourTrigger } from '@/components/feature-tour/tour-trigger';
 
 const DateWidget = dynamic(
@@ -320,6 +322,9 @@ export default function AppDashboardClient() {
         </div>
       </header>
 
+      {/* Zodiac Season Banner */}
+      <ShareZodiacSeason />
+
       {showHoroscope && <PersonalizedHoroscopePreview />}
       <div
         id='dashboard-main-grid'
@@ -329,6 +334,11 @@ export default function AppDashboardClient() {
           <MoonPreview isExpanded={moonExpanded} onToggle={handleMoonToggle} />
         </div>
         <SkyNowCard />
+
+        {/* Daily Cosmic State Share */}
+        <div className={isDemoMode ? '' : 'md:col-span-2'}>
+          <ShareDailyCosmicState />
+        </div>
 
         <DailyInsightCard />
         <DailyCardPreview />
