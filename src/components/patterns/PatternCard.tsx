@@ -1,5 +1,7 @@
 'use client';
 
+import { useState } from 'react';
+import { ChevronDown } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Badge } from '@/components/ui/badge';
 
@@ -21,6 +23,8 @@ interface PatternCardProps {
   locked?: boolean;
   onUpgradeClick?: () => void;
   className?: string;
+  collapsible?: boolean;
+  defaultCollapsed?: boolean;
 }
 
 // Map variant to Tailwind classes (avoids dynamic class generation issues)
@@ -73,8 +77,17 @@ export function PatternCard({
   locked = false,
   onUpgradeClick,
   className,
+  collapsible = false,
+  defaultCollapsed = false,
 }: PatternCardProps) {
   const colorClasses = COLOR_CLASSES[color];
+  const [isCollapsed, setIsCollapsed] = useState(defaultCollapsed);
+
+  const handleHeaderClick = () => {
+    if (collapsible && !locked) {
+      setIsCollapsed(!isCollapsed);
+    }
+  };
 
   return (
     <div
@@ -86,38 +99,62 @@ export function PatternCard({
         className,
       )}
     >
-      <div className='flex items-center justify-between mb-4'>
+      <div
+        className={cn(
+          'flex items-center justify-between',
+          collapsible && !locked && 'cursor-pointer',
+          !isCollapsed && 'mb-4',
+        )}
+        onClick={handleHeaderClick}
+      >
         <div className='flex items-center gap-2'>
           {icon && <span className={colorClasses.icon}>{icon}</span>}
           <h3 className={cn('text-sm font-medium', colorClasses.title)}>
             {title}
           </h3>
         </div>
-        {badge && (
-          <Badge variant='outline' className='text-xs'>
-            {badge}
-          </Badge>
-        )}
-      </div>
-      {subtitle && <p className='text-xs text-zinc-500 mb-3'>{subtitle}</p>}
-
-      {locked ? (
-        <>
-          <div className='filter blur-sm pointer-events-none'>{children}</div>
-          <div className='absolute inset-0 flex items-center justify-center bg-lunary-bg/80 backdrop-blur-sm'>
-            <button
-              onClick={onUpgradeClick}
+        <div className='flex items-center gap-2'>
+          {badge && (
+            <Badge variant='outline' className='text-xs'>
+              {badge}
+            </Badge>
+          )}
+          {collapsible && !locked && (
+            <ChevronDown
               className={cn(
-                'px-4 py-2 rounded-lg font-medium text-sm transition-colors',
-                'bg-lunary-accent hover:bg-lunary-accent/80 text-white',
+                'w-4 h-4 transition-transform text-zinc-400',
+                isCollapsed && '-rotate-90',
               )}
-            >
-              Upgrade to unlock
-            </button>
-          </div>
+            />
+          )}
+        </div>
+      </div>
+
+      {!isCollapsed && (
+        <>
+          {subtitle && <p className='text-xs text-zinc-500 mb-3'>{subtitle}</p>}
+
+          {locked ? (
+            <>
+              <div className='filter blur-sm pointer-events-none'>
+                {children}
+              </div>
+              <div className='absolute inset-0 flex items-center justify-center bg-lunary-bg/80 backdrop-blur-sm'>
+                <button
+                  onClick={onUpgradeClick}
+                  className={cn(
+                    'px-4 py-2 rounded-lg font-medium text-sm transition-colors',
+                    'bg-lunary-accent hover:bg-lunary-accent/80 text-white',
+                  )}
+                >
+                  Upgrade to unlock
+                </button>
+              </div>
+            </>
+          ) : (
+            children
+          )}
         </>
-      ) : (
-        children
       )}
     </div>
   );
