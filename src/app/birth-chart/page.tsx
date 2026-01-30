@@ -1643,6 +1643,12 @@ const BirthChartPage = () => {
                 asteroidsList.includes(p.body),
               );
 
+              console.log(
+                'Asteroids found:',
+                asteroidsData.length,
+                asteroidsData.map((a) => a.body),
+              );
+
               if (asteroidsData.length === 0) return null;
 
               return (
