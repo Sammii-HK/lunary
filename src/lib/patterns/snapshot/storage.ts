@@ -7,6 +7,7 @@ import { sql } from '@vercel/postgres';
 import { encryptJSON, decryptJSON } from '@/lib/encryption';
 import type { PatternSnapshot } from './types';
 import { hasPatternChanged } from './types';
+import { invalidatePatternCache } from './cache';
 
 /**
  * Save a pattern snapshot (if it changed)
@@ -71,6 +72,10 @@ export async function savePatternSnapshot(
     console.log(
       `[PatternSnapshot] Saved ${snapshot.type} snapshot for user ${userId}`,
     );
+
+    // Invalidate cache after saving new pattern
+    invalidatePatternCache(userId);
+
     return true;
   } catch (error) {
     console.error('Error saving pattern snapshot:', error);

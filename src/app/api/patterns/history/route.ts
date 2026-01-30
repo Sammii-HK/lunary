@@ -1,18 +1,18 @@
 /**
  * API endpoint for fetching pattern history
  * GET /api/patterns/history - Returns historical pattern snapshots
+ * Now with multi-layer caching for optimal performance
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { sql } from '@vercel/postgres';
-import { decryptJSON } from '@/lib/encryption';
 import { requireUser, UnauthorizedError } from '@/lib/ai/auth';
 import {
-  getPatternHistory,
-  getCurrentSnapshots,
-} from '@/lib/patterns/snapshot/storage';
+  getCachedPatternHistory,
+  getCachedCurrentSnapshots,
+} from '@/lib/patterns/snapshot/cache';
 
-export const dynamic = 'force-dynamic';
+// Enable caching with revalidation
+export const revalidate = 3600; // 1 hour
 
 export async function GET(request: NextRequest) {
   try {
@@ -24,63 +24,26 @@ export async function GET(request: NextRequest) {
     const currentOnly = searchParams.get('current') === 'true';
 
     if (currentOnly) {
-      // Get only the most recent snapshot for each type
-      const currentSnapshots = await getCurrentSnapshots(userId);
+      // Get only the most recent snapshot for each type (CACHED)
+      const currentSnapshots = await getCachedCurrentSnapshots(userId);
 
       return NextResponse.json({
         success: true,
         current: currentSnapshots,
+        cached: true,
       });
     }
 
-    // Get full history
-    const history = await getPatternHistory(userId, patternType, limit);
-
-    // Add metadata (generatedAt from database timestamp)
-    const patternsResult = await sql`
-      SELECT pattern_type, pattern_data, generated_at
-      FROM journal_patterns
-      WHERE user_id = ${userId}
-        AND pattern_type IN ('life_themes', 'tarot_season', 'archetype', 'tarot_moon_phase', 'emotion_moon_phase')
-        AND expires_at > NOW()
-      ORDER BY generated_at DESC
-      LIMIT ${limit}
-    `;
-
-    const snapshotsWithMeta = [];
-    for (const row of patternsResult.rows) {
-      const encryptedString = row.pattern_data.encrypted;
-      if (encryptedString) {
-        const decrypted = decryptJSON(encryptedString);
-        snapshotsWithMeta.push({
-          type: row.pattern_type,
-          generatedAt: row.generated_at,
-          data: decrypted,
-        });
-      }
-    }
-
-    // Group by pattern type for easier consumption
-    const grouped: Record<string, any[]> = {};
-    for (const snapshot of snapshotsWithMeta) {
-      if (!grouped[snapshot.type]) {
-        grouped[snapshot.type] = [];
-      }
-      grouped[snapshot.type].push(snapshot);
-    }
-
-    // Count by type
-    const byType = Object.entries(grouped).map(([type, items]) => ({
-      type,
-      count: items.length,
-    }));
+    // Get full history (CACHED)
+    const result = await getCachedPatternHistory(userId, patternType, limit);
 
     return NextResponse.json({
       success: true,
       userId,
-      totalSnapshots: snapshotsWithMeta.length,
-      byType,
-      snapshots: grouped,
+      totalSnapshots: result.totalSnapshots,
+      byType: result.byType,
+      snapshots: result.snapshots,
+      cached: true,
     });
   } catch (error) {
     if (error instanceof UnauthorizedError) {

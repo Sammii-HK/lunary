@@ -1,8 +1,9 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { Sparkles, TrendingUp, Moon, Zap } from 'lucide-react';
+import { useState } from 'react';
+import { Sparkles, TrendingUp, Moon, Zap, RefreshCw } from 'lucide-react';
 import { ArchetypeEvolutionChart } from './ArchetypeEvolutionChart';
+import { usePatternCache } from '@/hooks/usePatternCache';
 
 interface LifeTheme {
   id: string;
@@ -305,32 +306,12 @@ function ArchetypeCard({ snapshot }: { snapshot: ArchetypeSnapshot }) {
 }
 
 export function PatternSnapshotsSection() {
-  const [patterns, setPatterns] = useState<PatternResponse | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
   const [selectedType, setSelectedType] = useState<
     'all' | 'life_themes' | 'tarot_season' | 'tarot_moon_phase' | 'archetype'
   >('all');
 
-  useEffect(() => {
-    async function loadPatterns() {
-      try {
-        const response = await fetch('/api/patterns/history', {
-          credentials: 'include',
-        });
-
-        if (response.ok) {
-          const data = await response.json();
-          setPatterns(data);
-        }
-      } catch (error) {
-        console.error('Failed to load patterns:', error);
-      } finally {
-        setIsLoading(false);
-      }
-    }
-
-    loadPatterns();
-  }, []);
+  // Use caching hook for automatic performance optimization
+  const { data: patterns, isLoading, isFromCache, refresh } = usePatternCache();
 
   if (isLoading) {
     return (
@@ -394,6 +375,28 @@ export function PatternSnapshotsSection() {
 
   return (
     <div className='space-y-4'>
+      {/* Header with refresh button */}
+      <div className='flex items-center justify-between'>
+        <div className='flex items-center gap-2'>
+          {isFromCache && (
+            <span className='text-xs text-zinc-500 bg-zinc-800/50 px-2 py-1 rounded'>
+              📦 Cached
+            </span>
+          )}
+        </div>
+        <button
+          onClick={() => refresh()}
+          disabled={isLoading}
+          className='flex items-center gap-1.5 px-3 py-1.5 text-xs text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800/50 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed'
+          title='Refresh patterns'
+        >
+          <RefreshCw
+            className={`w-3.5 h-3.5 ${isLoading ? 'animate-spin' : ''}`}
+          />
+          Refresh
+        </button>
+      </div>
+
       {/* Summary Stats */}
       <div className='grid grid-cols-3 gap-2'>
         {patterns.byType.map((type) => (
