@@ -19,6 +19,11 @@ import {
   hasEnoughDataForArchetypes,
   type ArchetypeDetectorInput,
 } from '@/lib/archetypes/detector';
+import {
+  fetchJournalEntries,
+  fetchDreamTags,
+  fetchFrequentTarotCards,
+} from '../utils/data-fetching';
 
 /**
  * Generate life themes snapshot from user's journal, tarot, and dreams
@@ -28,33 +33,33 @@ export async function generateLifeThemesSnapshot(
   userId: string,
 ): Promise<LifeThemeSnapshot | null> {
   try {
-    // Fetch recent journal entries
+    // Fetch recent journal entries (match archetype logic: last 30 entries, any timeframe)
     const journalResult = await sql`
       SELECT content, tags, created_at
       FROM collections
       WHERE user_id = ${userId}
-        AND category = 'journal'
-        AND created_at >= NOW() - INTERVAL '30 days'
+        AND category IN ('journal', 'dream', 'ritual')
       ORDER BY created_at DESC
       LIMIT 30
     `;
 
-    // Fetch dreams
+    // Fetch dreams (match archetype logic: last 20 dream entries, any timeframe)
     const dreamsResult = await sql`
       SELECT content, tags
       FROM collections
       WHERE user_id = ${userId}
         AND category = 'dream'
-        AND created_at >= NOW() - INTERVAL '30 days'
       ORDER BY created_at DESC
       LIMIT 20
     `;
 
-    // Fetch tarot readings for pattern analysis
+    // Fetch tarot readings (match archetype logic: last 30 days)
     const tarotResult = await sql`
       SELECT cards
       FROM tarot_readings
       WHERE user_id = ${userId}
+        AND archived_at IS NULL
+        AND created_at >= NOW() - INTERVAL '30 days'
         AND created_at >= NOW() - INTERVAL '30 days'
       ORDER BY created_at DESC
     `;
@@ -176,12 +181,14 @@ export async function generateTarotSeasonSnapshot(
   period: number = 30,
 ): Promise<TarotSeasonSnapshot | null> {
   try {
-    // Fetch recent tarot readings
+    // Fetch recent tarot readings (match archetype logic: last 30 days, exclude archived/daily)
     const result = await sql`
       SELECT cards, created_at
       FROM tarot_readings
       WHERE user_id = ${userId}
-        AND created_at >= NOW() - INTERVAL '${period} days'
+        AND archived_at IS NULL
+        AND created_at >= NOW() - INTERVAL '30 days'
+        AND jsonb_array_length(cards) > 1
       ORDER BY created_at DESC
     `;
 
@@ -356,103 +363,10 @@ export async function generateArchetypeSnapshot(
   userId: string,
 ): Promise<ArchetypeSnapshot | null> {
   try {
-    // Fetch recent journal entries (match ArchetypeBar: last 30 entries, any timeframe)
-    const journalResult = await sql`
-      SELECT content, tags
-      FROM collections
-      WHERE user_id = ${userId}
-        AND category IN ('journal', 'dream', 'ritual')
-      ORDER BY created_at DESC
-      LIMIT 30
-    `;
-
-    // Fetch dreams (match ArchetypeBar: last 20 dream entries, any timeframe)
-    const dreamsResult = await sql`
-      SELECT content, tags
-      FROM collections
-      WHERE user_id = ${userId}
-        AND category = 'dream'
-      ORDER BY created_at DESC
-      LIMIT 20
-    `;
-
-    // Fetch tarot readings (match ArchetypeBar: last 30 days)
-    const tarotResult = await sql`
-      SELECT cards
-      FROM tarot_readings
-      WHERE user_id = ${userId}
-        AND archived_at IS NULL
-        AND created_at >= NOW() - INTERVAL '30 days'
-      ORDER BY created_at DESC
-    `;
-
-    // Format journal entries
-    const journalEntries = journalResult.rows.map((row) => {
-      let content = '';
-      if (typeof row.content === 'string') {
-        content = row.content;
-      } else if (row.content && typeof row.content === 'object') {
-        if ('text' in row.content) {
-          content = String(row.content.text || '');
-        } else {
-          content = JSON.stringify(row.content);
-        }
-      } else if (row.content) {
-        content = String(row.content);
-      }
-
-      return {
-        content,
-        moodTags: Array.isArray(row.tags) ? row.tags : [],
-      };
-    });
-
-    // Extract dream tags (match ArchetypeBar: extract from content.dreamTags or moodTags)
-    const dreamTags = dreamsResult.rows.flatMap((row) => {
-      // Parse content to get dreamTags or moodTags
-      let contentData = row.content;
-      if (typeof row.content === 'string') {
-        try {
-          contentData = JSON.parse(row.content);
-        } catch {
-          contentData = row.content;
-        }
-      }
-
-      if (contentData && typeof contentData === 'object') {
-        return contentData.dreamTags || contentData.moodTags || [];
-      }
-
-      return Array.isArray(row.tags) ? row.tags : [];
-    });
-
-    // Extract tarot majors and suits (using frequency - only cards appearing 2+ times)
-    const cardFrequency = new Map<string, number>();
-    const suitCounts = new Map<string, number>();
-
-    for (const row of tarotResult.rows) {
-      const cards = Array.isArray(row.cards) ? row.cards : [];
-      for (const cardData of cards) {
-        const card = cardData.card || cardData;
-        const cardName = card.name || '';
-        const suit = card.suit || card.arcana || 'Major Arcana';
-
-        if (cardName) {
-          cardFrequency.set(cardName, (cardFrequency.get(cardName) || 0) + 1);
-        }
-
-        suitCounts.set(suit, (suitCounts.get(suit) || 0) + 1);
-      }
-    }
-
-    // Filter to only frequent cards (2+ appearances) and major arcana only
-    const tarotMajors = Array.from(cardFrequency.entries())
-      .filter(([cardName, count]) => count >= 2 && isMajorArcana(cardName))
-      .map(([cardName]) => cardName);
-
-    const tarotSuits = Array.from(suitCounts.entries())
-      .map(([suit, count]) => ({ suit, count }))
-      .sort((a, b) => b.count - a.count);
+    // Use shared data fetching utilities
+    const journalEntries = await fetchJournalEntries(userId);
+    const dreamTags = await fetchDreamTags(userId);
+    const { tarotMajors, tarotSuits } = await fetchFrequentTarotCards(userId);
 
     const input: ArchetypeDetectorInput = {
       journalEntries,
@@ -493,34 +407,6 @@ export async function generateArchetypeSnapshot(
     console.error('Error generating archetype snapshot:', error);
     return null;
   }
-}
-
-function isMajorArcana(cardName: string): boolean {
-  const majors = [
-    'The Fool',
-    'The Magician',
-    'The High Priestess',
-    'The Empress',
-    'The Emperor',
-    'The Hierophant',
-    'The Lovers',
-    'The Chariot',
-    'Strength',
-    'The Hermit',
-    'Wheel of Fortune',
-    'Justice',
-    'The Hanged Man',
-    'Death',
-    'Temperance',
-    'The Devil',
-    'The Tower',
-    'The Star',
-    'The Moon',
-    'The Sun',
-    'Judgement',
-    'The World',
-  ];
-  return majors.includes(cardName);
 }
 
 /**
