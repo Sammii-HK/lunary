@@ -282,14 +282,14 @@ export async function GET(request: NextRequest) {
   // Format-aware sizing
   const isLandscape = format === 'landscape';
   const isStory = format === 'story';
-  const padding = isLandscape ? 40 : isStory ? 60 : 64;
-  const titleSize = isLandscape ? 36 : isStory ? 52 : 52;
-  const subtitleSize = isLandscape ? 14 : isStory ? 16 : 16;
-  const bigThreeSize = isLandscape ? 18 : isStory ? 22 : 22;
-  const bigThreeGlyphSize = isLandscape ? 22 : isStory ? 28 : 28;
-  const chartSize = isLandscape ? 280 : isStory ? 420 : 420;
-  const badgeTextSize = isLandscape ? 16 : isStory ? 18 : 18;
-  const elementCountSize = isLandscape ? 28 : isStory ? 36 : 36;
+  const padding = isLandscape ? 40 : isStory ? 80 : 64;
+  const titleSize = isLandscape ? 36 : isStory ? 64 : 52;
+  const subtitleSize = isLandscape ? 14 : isStory ? 20 : 16;
+  const bigThreeSize = isLandscape ? 18 : isStory ? 28 : 22;
+  const bigThreeGlyphSize = isLandscape ? 22 : isStory ? 36 : 28;
+  const chartSize = isLandscape ? 280 : isStory ? 540 : 420;
+  const badgeTextSize = isLandscape ? 16 : isStory ? 22 : 18;
+  const elementCountSize = isLandscape ? 28 : isStory ? 48 : 36;
 
   const elementCounts = ELEMENT_ORDER.reduce(
     (acc, label) => {

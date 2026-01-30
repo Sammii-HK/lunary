@@ -6,6 +6,23 @@ import type { ShareFormat } from '@/hooks/useShareModal';
 
 export const runtime = 'edge';
 
+let robotoMonoPromise: Promise<ArrayBuffer> | null = null;
+
+const loadRobotoMono = async (request: Request) => {
+  if (!robotoMonoPromise) {
+    const fontUrl = new URL('/fonts/RobotoMono-Regular.ttf', request.url);
+    robotoMonoPromise = fetch(fontUrl, { cache: 'force-cache' }).then((res) => {
+      if (!res.ok) {
+        throw new Error(
+          `Roboto Mono font fetch failed with status ${res.status}`,
+        );
+      }
+      return res.arrayBuffer();
+    });
+  }
+  return robotoMonoPromise;
+};
+
 interface CosmicStateShareRecord {
   shareId: string;
   name?: string;
@@ -35,6 +52,9 @@ export async function GET(request: NextRequest) {
     if (!shareId) {
       return new Response('Missing shareId', { status: 400 });
     }
+
+    // Load fonts
+    const robotoMonoData = await loadRobotoMono(request);
 
     // Fetch share data from KV or use demo data
     const raw = await kvGet(`cosmic-state:${shareId}`);
@@ -66,12 +86,12 @@ export async function GET(request: NextRequest) {
 
     const isLandscape = format === 'landscape';
     const isStory = format === 'story';
-    const padding = isLandscape ? 40 : isStory ? 60 : 60;
-    const titleSize = isLandscape ? 40 : isStory ? 56 : 52;
-    const dateSize = isLandscape ? 18 : isStory ? 24 : 22;
-    const phaseSize = isLandscape ? 32 : isStory ? 44 : 40;
-    const labelSize = isLandscape ? 18 : isStory ? 24 : 22;
-    const insightSize = isLandscape ? 16 : isStory ? 22 : 20;
+    const padding = isLandscape ? 40 : isStory ? 80 : 60;
+    const titleSize = isLandscape ? 40 : isStory ? 72 : 52;
+    const dateSize = isLandscape ? 18 : isStory ? 32 : 22;
+    const phaseSize = isLandscape ? 32 : isStory ? 56 : 40;
+    const labelSize = isLandscape ? 18 : isStory ? 32 : 22;
+    const insightSize = isLandscape ? 16 : isStory ? 28 : 20;
 
     // Format date
     const date = new Date(data.date);
@@ -157,9 +177,9 @@ export async function GET(request: NextRequest) {
           >
             <img
               src={`${baseUrl}${moonIconPath}`}
-              width={isLandscape ? 56 : 80}
-              height={isLandscape ? 56 : 80}
-              style={{ marginBottom: 12 }}
+              width={isLandscape ? 56 : isStory ? 120 : 80}
+              height={isLandscape ? 56 : isStory ? 120 : 80}
+              style={{ marginBottom: isStory ? 20 : 12 }}
               alt={data.moonPhase.name}
             />
             <div
@@ -288,9 +308,7 @@ export async function GET(request: NextRequest) {
         fonts: [
           {
             name: 'Roboto Mono',
-            data: await fetch(
-              new URL('/fonts/RobotoMono-Regular.ttf', request.url),
-            ).then((res) => res.arrayBuffer()),
+            data: robotoMonoData,
             style: 'normal',
             weight: 400,
           },

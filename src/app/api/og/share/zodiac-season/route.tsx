@@ -6,6 +6,23 @@ import type { ShareFormat } from '@/hooks/useShareModal';
 
 export const runtime = 'edge';
 
+let robotoMonoPromise: Promise<ArrayBuffer> | null = null;
+
+const loadRobotoMono = async (request: Request) => {
+  if (!robotoMonoPromise) {
+    const fontUrl = new URL('/fonts/RobotoMono-Regular.ttf', request.url);
+    robotoMonoPromise = fetch(fontUrl, { cache: 'force-cache' }).then((res) => {
+      if (!res.ok) {
+        throw new Error(
+          `Roboto Mono font fetch failed with status ${res.status}`,
+        );
+      }
+      return res.arrayBuffer();
+    });
+  }
+  return robotoMonoPromise;
+};
+
 interface ZodiacSeasonShareRecord {
   shareId: string;
   name?: string;
@@ -63,6 +80,9 @@ export async function GET(request: NextRequest) {
     if (!shareId) {
       return new Response('Missing shareId', { status: 400 });
     }
+
+    // Load fonts
+    const robotoMonoData = await loadRobotoMono(request);
 
     // Fetch share data from KV or use demo data
     const raw = await kvGet(`zodiac-season:${shareId}`);
@@ -302,9 +322,7 @@ export async function GET(request: NextRequest) {
         fonts: [
           {
             name: 'Roboto Mono',
-            data: await fetch(
-              new URL('/fonts/RobotoMono-Regular.ttf', request.url),
-            ).then((res) => res.arrayBuffer()),
+            data: robotoMonoData,
             style: 'normal',
             weight: 400,
           },

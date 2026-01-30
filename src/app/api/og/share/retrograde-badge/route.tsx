@@ -6,6 +6,23 @@ import type { ShareFormat } from '@/hooks/useShareModal';
 
 export const runtime = 'edge';
 
+let robotoMonoPromise: Promise<ArrayBuffer> | null = null;
+
+const loadRobotoMono = async (request: Request) => {
+  if (!robotoMonoPromise) {
+    const fontUrl = new URL('/fonts/RobotoMono-Regular.ttf', request.url);
+    robotoMonoPromise = fetch(fontUrl, { cache: 'force-cache' }).then((res) => {
+      if (!res.ok) {
+        throw new Error(
+          `Roboto Mono font fetch failed with status ${res.status}`,
+        );
+      }
+      return res.arrayBuffer();
+    });
+  }
+  return robotoMonoPromise;
+};
+
 interface RetrogradeBadgeShareRecord {
   shareId: string;
   name?: string;
@@ -69,6 +86,9 @@ export async function GET(request: NextRequest) {
       return new Response('Missing shareId', { status: 400 });
     }
 
+    // Load fonts
+    const robotoMonoData = await loadRobotoMono(request);
+
     // Fetch share data from KV or use demo data
     const raw = await kvGet(`retrograde-badge:${shareId}`);
 
@@ -96,13 +116,13 @@ export async function GET(request: NextRequest) {
 
     const isLandscape = format === 'landscape';
     const isStory = format === 'story';
-    const padding = isLandscape ? 40 : isStory ? 60 : 60;
-    const titleSize = isLandscape ? 36 : isStory ? 52 : 48;
-    const subtitleSize = isLandscape ? 20 : isStory ? 28 : 24;
-    const daySize = isLandscape ? 80 : isStory ? 120 : 96;
-    const labelSize = isLandscape ? 18 : isStory ? 24 : 22;
-    const humorSize = isLandscape ? 14 : isStory ? 20 : 18;
-    const badgeSize = isLandscape ? 200 : isStory ? 280 : 240;
+    const padding = isLandscape ? 40 : isStory ? 80 : 60;
+    const titleSize = isLandscape ? 36 : isStory ? 64 : 48;
+    const subtitleSize = isLandscape ? 20 : isStory ? 36 : 24;
+    const daySize = isLandscape ? 80 : isStory ? 160 : 96;
+    const labelSize = isLandscape ? 18 : isStory ? 32 : 22;
+    const humorSize = isLandscape ? 14 : isStory ? 26 : 18;
+    const badgeSize = isLandscape ? 200 : isStory ? 380 : 240;
 
     const badgeColors = BADGE_COLORS[data.badgeLevel];
     const badgeLabel = BADGE_LABELS[data.badgeLevel];
@@ -285,9 +305,7 @@ export async function GET(request: NextRequest) {
         fonts: [
           {
             name: 'Roboto Mono',
-            data: await fetch(
-              new URL('/fonts/RobotoMono-Regular.ttf', request.url),
-            ).then((res) => res.arrayBuffer()),
+            data: robotoMonoData,
             style: 'normal',
             weight: 400,
           },

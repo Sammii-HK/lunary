@@ -76,12 +76,12 @@ export async function GET(request: NextRequest) {
 
     const isLandscape = format === 'landscape';
     const isStory = format === 'story';
-    const padding = isLandscape ? 40 : isStory ? 60 : 60;
-    const titleSize = isLandscape ? 40 : isStory ? 56 : 52;
-    const signSize = isLandscape ? 72 : isStory ? 96 : 84;
-    const headlineSize = isLandscape ? 24 : isStory ? 32 : 28;
-    const overviewSize = isLandscape ? 16 : isStory ? 20 : 18;
-    const labelSize = isLandscape ? 14 : isStory ? 18 : 16;
+    const padding = isLandscape ? 40 : isStory ? 80 : 60;
+    const titleSize = isLandscape ? 40 : isStory ? 72 : 52;
+    const signSize = isLandscape ? 72 : isStory ? 140 : 84;
+    const headlineSize = isLandscape ? 24 : isStory ? 42 : 28;
+    const overviewSize = isLandscape ? 16 : isStory ? 26 : 18;
+    const labelSize = isLandscape ? 14 : isStory ? 24 : 16;
 
     // Format date
     const date = new Date(data.date);

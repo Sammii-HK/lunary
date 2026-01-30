@@ -77,12 +77,12 @@ export async function GET(request: NextRequest) {
 
     const isLandscape = format === 'landscape';
     const isStory = format === 'story';
-    const padding = isLandscape ? 40 : isStory ? 60 : 60;
-    const titleSize = isLandscape ? 36 : isStory ? 52 : 48;
-    const dateSize = isLandscape ? 18 : isStory ? 24 : 22;
-    const labelSize = isLandscape ? 18 : isStory ? 22 : 20;
-    const planetSymbolSize = isLandscape ? 32 : isStory ? 42 : 38;
-    const zodiacSymbolSize = isLandscape ? 26 : isStory ? 34 : 30;
+    const padding = isLandscape ? 40 : isStory ? 70 : 60;
+    const titleSize = isLandscape ? 36 : isStory ? 64 : 48;
+    const dateSize = isLandscape ? 18 : isStory ? 28 : 22;
+    const labelSize = isLandscape ? 18 : isStory ? 28 : 20;
+    const planetSymbolSize = isLandscape ? 32 : isStory ? 52 : 38;
+    const zodiacSymbolSize = isLandscape ? 26 : isStory ? 42 : 30;
 
     // Format date
     const date = new Date(data.date);
