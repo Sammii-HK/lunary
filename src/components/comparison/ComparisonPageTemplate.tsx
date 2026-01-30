@@ -1,6 +1,10 @@
 import Link from 'next/link';
 import { Check, X, ArrowRight, Star } from 'lucide-react';
-import { ComparisonPageStructuredData } from '@/components/ComparisonPageStructuredData';
+import {
+  ComparisonPageStructuredData,
+  FAQ,
+} from '@/components/ComparisonPageStructuredData';
+import { Breadcrumbs } from '@/components/comparison/Breadcrumbs';
 
 export type FeatureValue =
   | { type: 'check' }
@@ -30,6 +34,7 @@ export interface ComparisonData {
   competitorStrengths: string;
   conclusion: string;
   disclaimer?: string;
+  faqs?: FAQ[];
 }
 
 function FeatureCell({ value }: { value: FeatureValue }) {
@@ -64,7 +69,16 @@ export function ComparisonPageTemplate({ data }: { data: ComparisonData }) {
     competitorStrengths,
     conclusion,
     disclaimer,
+    faqs = [],
   } = data;
+
+  const breadcrumbs = [
+    { label: 'Comparisons', href: '/comparison' },
+    {
+      label: `Lunary vs ${competitorName}`,
+      href: `/comparison/${competitorSlug}`,
+    },
+  ];
 
   return (
     <div className='min-h-screen bg-zinc-950 text-zinc-100'>
@@ -72,8 +86,12 @@ export function ComparisonPageTemplate({ data }: { data: ComparisonData }) {
         competitorName={competitorName}
         featuresCompared={featuresCompared}
         conclusion={conclusion}
+        faqs={faqs}
+        breadcrumbs={breadcrumbs}
       />
       <div className='max-w-4xl mx-auto px-4 py-8 md:py-12'>
+        <Breadcrumbs items={breadcrumbs} />
+
         <div className='mb-8'>
           <h1 className='text-2xl md:text-4xl font-light text-zinc-100 mb-4'>
             {tagline}

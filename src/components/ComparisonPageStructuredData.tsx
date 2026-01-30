@@ -1,11 +1,18 @@
 import { renderJsonLd } from '@/lib/schema';
 
+export interface FAQ {
+  question: string;
+  answer: string;
+}
+
 interface ComparisonPageStructuredDataProps {
   competitorName: string;
   competitorUrl?: string;
   featuresCompared: string[];
   conclusion: string;
   lunaryUrl?: string;
+  faqs?: FAQ[];
+  breadcrumbs?: Array<{ label: string; href: string }>;
 }
 
 export function ComparisonPageStructuredData({
@@ -14,6 +21,8 @@ export function ComparisonPageStructuredData({
   featuresCompared,
   conclusion,
   lunaryUrl = 'https://lunary.app',
+  faqs = [],
+  breadcrumbs = [],
 }: ComparisonPageStructuredDataProps) {
   const comparisonPageSchema = {
     '@context': 'https://schema.org',
@@ -53,5 +62,51 @@ export function ComparisonPageStructuredData({
     text: conclusion,
   };
 
-  return renderJsonLd(comparisonPageSchema);
+  // FAQ Schema
+  const faqSchema =
+    faqs.length > 0
+      ? {
+          '@context': 'https://schema.org',
+          '@type': 'FAQPage',
+          mainEntity: faqs.map((faq) => ({
+            '@type': 'Question',
+            name: faq.question,
+            acceptedAnswer: {
+              '@type': 'Answer',
+              text: faq.answer,
+            },
+          })),
+        }
+      : null;
+
+  // Breadcrumb Schema
+  const breadcrumbSchema =
+    breadcrumbs.length > 0
+      ? {
+          '@context': 'https://schema.org',
+          '@type': 'BreadcrumbList',
+          itemListElement: [
+            {
+              '@type': 'ListItem',
+              position: 1,
+              name: 'Home',
+              item: 'https://lunary.app',
+            },
+            ...breadcrumbs.map((item, index) => ({
+              '@type': 'ListItem',
+              position: index + 2,
+              name: item.label,
+              item: `https://lunary.app${item.href}`,
+            })),
+          ],
+        }
+      : null;
+
+  return (
+    <>
+      {renderJsonLd(comparisonPageSchema)}
+      {faqSchema && renderJsonLd(faqSchema)}
+      {breadcrumbSchema && renderJsonLd(breadcrumbSchema)}
+    </>
+  );
 }

@@ -199,8 +199,12 @@ async function initializeAuth() {
         ? 'http://localhost:3000'
         : 'https://lunary.app'),
 
-    trustedOrigins: (request: Request) => {
+    trustedOrigins: (request?: Request) => {
       const origins = getAllowedOrigins();
+      // Handle cases where request might be undefined during initialization
+      if (!request?.headers) {
+        return origins;
+      }
       const reqOrigin = request.headers.get('origin');
       if (reqOrigin) {
         const patterns = [
