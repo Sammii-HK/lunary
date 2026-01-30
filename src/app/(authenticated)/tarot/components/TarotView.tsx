@@ -48,7 +48,6 @@ import { captureEvent } from '@/lib/posthog-client';
 import { TarotSeasonReading } from '@/components/tarot/TarotSeasonReading';
 import { TarotRitualForPatterns } from '@/components/tarot/TarotRitualForPatterns';
 import { TarotReflectionPrompts } from '@/components/tarot/TarotReflectionPrompts';
-import { RecurringThemesCard } from '@/components/RecurringThemesCard';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { useAuthStatus } from '@/components/AuthStatus';
@@ -165,13 +164,58 @@ export function TarotView({
   }, [hasPaidAccess]);
 
   const timeFrame = typeof selectedView === 'number' ? selectedView : 30;
-  const personalizedReading = useMemo(
-    () =>
-      hasPaidAccess && userName && userBirthday
-        ? getImprovedTarotReading(userName, true, timeFrame, userBirthday)
-        : null,
-    [hasPaidAccess, userName, timeFrame, userBirthday],
-  );
+
+  // Fetch personalized reading with actual database data
+  const [personalizedReading, setPersonalizedReading] = useState<any>(null);
+  const [isLoadingPatterns, setIsLoadingPatterns] = useState(false);
+
+  useEffect(() => {
+    async function fetchPersonalizedReading() {
+      if (!hasPaidAccess || !userName || !userBirthday) {
+        setPersonalizedReading(null);
+        return;
+      }
+
+      setIsLoadingPatterns(true);
+      try {
+        // Fetch actual database readings from API
+        let userReadings = null;
+        try {
+          const response = await fetch(
+            `/api/patterns/user-readings?days=${timeFrame}`,
+          );
+          if (response.ok) {
+            const data = await response.json();
+            if (data.success && data.readings) {
+              userReadings = data.readings;
+            }
+          }
+        } catch (apiError) {
+          console.warn(
+            'Failed to fetch user readings, falling back to seeded generation:',
+            apiError,
+          );
+        }
+
+        // Generate reading with database data (or seeded fallback)
+        const reading = await getImprovedTarotReading(
+          userName,
+          true,
+          timeFrame,
+          userBirthday,
+          userReadings,
+        );
+        setPersonalizedReading(reading);
+      } catch (error) {
+        console.error('Error fetching personalized reading:', error);
+        setPersonalizedReading(null);
+      } finally {
+        setIsLoadingPatterns(false);
+      }
+    }
+
+    fetchPersonalizedReading();
+  }, [hasPaidAccess, userName, userBirthday, timeFrame]);
 
   // Build basic 7-day patterns for free users from previousReadings
   const freeBasicPatterns = useMemo(() => {
@@ -201,20 +245,35 @@ export function TarotView({
     const frequentCards = Array.from(cardCounts.entries())
       .map(([name, count]) => ({ name, count }))
       .sort((a, b) => b.count - a.count);
-    const suitPatterns = Array.from(suitCounts.entries())
-      .map(([suit, data]) => ({
+
+    // Include ALL suits, even if count is 0 (important for visualizations)
+    const allSuits = ['Cups', 'Wands', 'Swords', 'Pentacles', 'Major Arcana'];
+    const suitPatterns = allSuits.map((suit) => {
+      const data = suitCounts.get(suit);
+      return {
         suit,
-        count: data.count,
-        cards: Array.from(data.cards.entries()).map(([name, count]) => ({
-          name,
-          count,
-        })),
-      }))
-      .sort((a, b) => b.count - a.count);
+        count: data?.count || 0,
+        cards: data
+          ? Array.from(data.cards.entries()).map(([name, count]) => ({
+              name,
+              count,
+            }))
+          : [],
+      };
+    });
+
     const themes = frequentCards.slice(0, 3).flatMap((c) => {
       const card = previousReadings.find((r) => r.card.name === c.name);
       return card?.card.keywords?.slice(0, 2) || [];
     });
+    // Calculate arcana counts (Major Arcana vs Minor Arcana)
+    const majorArcanaCount = suitCounts.get('Major Arcana')?.count || 0;
+    const minorArcanaCount =
+      (suitCounts.get('Cups')?.count || 0) +
+      (suitCounts.get('Wands')?.count || 0) +
+      (suitCounts.get('Swords')?.count || 0) +
+      (suitCounts.get('Pentacles')?.count || 0);
+
     return {
       dominantThemes: [...new Set(themes)],
       frequentCards,
@@ -224,7 +283,10 @@ export function TarotView({
         count: number;
         cards: string[];
       }>,
-      arcanaPatterns: [] as Array<{ type: string; count: number }>,
+      arcanaPatterns: [
+        { type: 'Major Arcana', count: majorArcanaCount },
+        { type: 'Minor Arcana', count: minorArcanaCount },
+      ],
       timeFrame: 7,
     };
   }, [hasPaidAccess, previousReadings]);
@@ -943,29 +1005,7 @@ export function TarotView({
           />
         )}
 
-        {/* Recurring themes - paid only, behind tarot_patterns */}
-        {hasPaidAccess &&
-          subscription.hasAccess('tarot_patterns') &&
-          personalizedReading?.trendAnalysis && (
-            <HoroscopeSection
-              title={`Your ${timeFrame}-Day Tarot Patterns`}
-              color='zinc'
-            >
-              <RecurringThemesCard
-                className='mb-6'
-                subtitle={`Based on your last ${timeFrame} days of readings`}
-                items={recurringThemeItems}
-              />
-              <AdvancedPatterns
-                basicPatterns={personalizedReading.trendAnalysis}
-                selectedView={30}
-                isMultidimensionalMode={false}
-                onMultidimensionalModeChange={() => {}}
-              />
-            </HoroscopeSection>
-          )}
-
-        {/* 7-day patterns are shown to free users in the Tarot Patterns section below */}
+        {/* All patterns are now consolidated in the Tarot Patterns collapsible section below */}
 
         {/* Feature preview for spreads - unauthenticated only */}
         {!authStatus.isAuthenticated && (
