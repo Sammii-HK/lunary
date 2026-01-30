@@ -356,33 +356,32 @@ export async function generateArchetypeSnapshot(
   userId: string,
 ): Promise<ArchetypeSnapshot | null> {
   try {
-    // Fetch recent journal entries
+    // Fetch recent journal entries (match ArchetypeBar: last 30 entries, any timeframe)
     const journalResult = await sql`
       SELECT content, tags
       FROM collections
       WHERE user_id = ${userId}
-        AND category = 'journal'
-        AND created_at >= NOW() - INTERVAL '30 days'
+        AND category IN ('journal', 'dream', 'ritual')
       ORDER BY created_at DESC
       LIMIT 30
     `;
 
-    // Fetch dreams
+    // Fetch dreams (match ArchetypeBar: last 20 dream entries, any timeframe)
     const dreamsResult = await sql`
-      SELECT tags
+      SELECT content, tags
       FROM collections
       WHERE user_id = ${userId}
         AND category = 'dream'
-        AND created_at >= NOW() - INTERVAL '30 days'
       ORDER BY created_at DESC
       LIMIT 20
     `;
 
-    // Fetch tarot readings for pattern analysis
+    // Fetch tarot readings (match ArchetypeBar: last 30 days)
     const tarotResult = await sql`
       SELECT cards
       FROM tarot_readings
       WHERE user_id = ${userId}
+        AND archived_at IS NULL
         AND created_at >= NOW() - INTERVAL '30 days'
       ORDER BY created_at DESC
     `;
@@ -408,13 +407,27 @@ export async function generateArchetypeSnapshot(
       };
     });
 
-    // Extract dream tags
-    const dreamTags = dreamsResult.rows.flatMap((row) =>
-      Array.isArray(row.tags) ? row.tags : [],
-    );
+    // Extract dream tags (match ArchetypeBar: extract from content.dreamTags or moodTags)
+    const dreamTags = dreamsResult.rows.flatMap((row) => {
+      // Parse content to get dreamTags or moodTags
+      let contentData = row.content;
+      if (typeof row.content === 'string') {
+        try {
+          contentData = JSON.parse(row.content);
+        } catch {
+          contentData = row.content;
+        }
+      }
 
-    // Extract tarot majors and suits
-    const tarotMajors: string[] = [];
+      if (contentData && typeof contentData === 'object') {
+        return contentData.dreamTags || contentData.moodTags || [];
+      }
+
+      return Array.isArray(row.tags) ? row.tags : [];
+    });
+
+    // Extract tarot majors and suits (using frequency - only cards appearing 2+ times)
+    const cardFrequency = new Map<string, number>();
     const suitCounts = new Map<string, number>();
 
     for (const row of tarotResult.rows) {
@@ -424,13 +437,18 @@ export async function generateArchetypeSnapshot(
         const cardName = card.name || '';
         const suit = card.suit || card.arcana || 'Major Arcana';
 
-        if (isMajorArcana(cardName)) {
-          tarotMajors.push(cardName);
+        if (cardName) {
+          cardFrequency.set(cardName, (cardFrequency.get(cardName) || 0) + 1);
         }
 
         suitCounts.set(suit, (suitCounts.get(suit) || 0) + 1);
       }
     }
+
+    // Filter to only frequent cards (2+ appearances) and major arcana only
+    const tarotMajors = Array.from(cardFrequency.entries())
+      .filter(([cardName, count]) => count >= 2 && isMajorArcana(cardName))
+      .map(([cardName]) => cardName);
 
     const tarotSuits = Array.from(suitCounts.entries())
       .map(([suit, count]) => ({ suit, count }))
