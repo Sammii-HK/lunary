@@ -1,5 +1,9 @@
 import React from 'react';
 import type { Aspect } from '@/hooks/useAspects';
+import classNames from 'classnames';
+import styles from './BirthChart.module.css';
+
+const cx = classNames;
 
 interface AspectLinesProps {
   aspects: Aspect[];
@@ -33,7 +37,9 @@ export function AspectLines({
             stroke={color}
             strokeWidth={isHighlighted ? 1.5 : 1}
             opacity={lineOpacity}
-            className='transition-all duration-200'
+            className={cx('transition-all duration-200', styles.aspectLine, {
+              [styles.highlighted]: isHighlighted,
+            })}
           />
         );
       })}

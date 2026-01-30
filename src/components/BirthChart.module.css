@@ -1,0 +1,126 @@
+/* Chart wheel fade-in animation */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Planet appearance animation */
+@keyframes planetAppear {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Aspect line fade-in */
+@keyframes aspectFadeIn {
+  from {
+    opacity: 0;
+    stroke-dashoffset: 100;
+  }
+  to {
+    opacity: 0.15;
+    stroke-dashoffset: 0;
+  }
+}
+
+.chartWheel {
+  animation: fadeIn 0.5s ease-out;
+}
+
+.planetNode {
+  animation: planetAppear 0.3s ease-out both;
+}
+
+/* Staggered animation delays for planets */
+.planetNode:nth-child(1) {
+  animation-delay: 0.05s;
+}
+.planetNode:nth-child(2) {
+  animation-delay: 0.1s;
+}
+.planetNode:nth-child(3) {
+  animation-delay: 0.15s;
+}
+.planetNode:nth-child(4) {
+  animation-delay: 0.2s;
+}
+.planetNode:nth-child(5) {
+  animation-delay: 0.25s;
+}
+.planetNode:nth-child(6) {
+  animation-delay: 0.3s;
+}
+.planetNode:nth-child(7) {
+  animation-delay: 0.35s;
+}
+.planetNode:nth-child(8) {
+  animation-delay: 0.4s;
+}
+.planetNode:nth-child(9) {
+  animation-delay: 0.45s;
+}
+.planetNode:nth-child(10) {
+  animation-delay: 0.5s;
+}
+.planetNode:nth-child(11) {
+  animation-delay: 0.55s;
+}
+.planetNode:nth-child(12) {
+  animation-delay: 0.6s;
+}
+.planetNode:nth-child(13) {
+  animation-delay: 0.65s;
+}
+.planetNode:nth-child(14) {
+  animation-delay: 0.7s;
+}
+.planetNode:nth-child(15) {
+  animation-delay: 0.75s;
+}
+.planetNode:nth-child(16) {
+  animation-delay: 0.8s;
+}
+.planetNode:nth-child(17) {
+  animation-delay: 0.85s;
+}
+.planetNode:nth-child(18) {
+  animation-delay: 0.9s;
+}
+.planetNode:nth-child(19) {
+  animation-delay: 0.95s;
+}
+.planetNode:nth-child(20) {
+  animation-delay: 1s;
+}
+
+.planetGlyph {
+  transition: all 0.3s ease;
+}
+
+.planetGlyph:hover {
+  transform: scale(1.1);
+  filter: drop-shadow(0 0 8px currentColor);
+}
+
+.aspectLine {
+  animation: aspectFadeIn 0.6s ease-out both;
+  transition:
+    opacity 0.2s ease,
+    stroke-width 0.2s ease;
+}
+
+.aspectLine.highlighted {
+  opacity: 0.6 !important;
+  stroke-width: 1.5px;
+}

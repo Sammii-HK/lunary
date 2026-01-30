@@ -11,6 +11,7 @@ import classNames from 'classnames';
 import { parseIsoDateOnly } from '@/lib/date-only';
 import { useAspects } from '@/hooks/useAspects';
 import { AspectLines } from '@/components/AspectLines';
+import styles from './BirthChart.module.css';
 
 const cx = classNames;
 
@@ -278,7 +279,10 @@ export const BirthChart = ({
       <div className='relative w-full max-w-[320px] md:max-w-[360px] aspect-square'>
         <svg
           viewBox='-140 -140 280 280'
-          className='chart-wheel-svg w-full h-full border border-zinc-700 rounded-full bg-zinc-900'
+          className={cx(
+            'chart-wheel-svg w-full h-full border border-zinc-700 rounded-full bg-zinc-900',
+            styles.chartWheel,
+          )}
         >
           <style>{`
             .planet-node { cursor: pointer; }
@@ -433,7 +437,7 @@ export const BirthChart = ({
               return (
                 <g
                   key={body}
-                  className='planet-node'
+                  className={cx('planet-node', styles.planetNode)}
                   onMouseEnter={() => setHoveredBody(body)}
                   onMouseLeave={() => setHoveredBody(null)}
                   onClick={() =>
@@ -465,7 +469,10 @@ export const BirthChart = ({
                     y={y}
                     textAnchor='middle'
                     dominantBaseline='central'
-                    className='planet-glyph font-astro'
+                    className={cx(
+                      'planet-glyph font-astro',
+                      styles.planetGlyph,
+                    )}
                     fontSize={isAngle || isPoint ? '12' : '14'}
                     fill={color}
                   >
@@ -500,7 +507,7 @@ export const BirthChart = ({
                 return (
                   <g
                     key={`${body}-hover`}
-                    className='planet-node'
+                    className={cx('planet-node', styles.planetNode)}
                     onMouseEnter={() => setHoveredBody(body)}
                     onMouseLeave={() => setHoveredBody(null)}
                     onClick={() =>
@@ -532,7 +539,10 @@ export const BirthChart = ({
                       y={y}
                       textAnchor='middle'
                       dominantBaseline='central'
-                      className='planet-glyph font-astro'
+                      className={cx(
+                        'planet-glyph font-astro',
+                        styles.planetGlyph,
+                      )}
                       fontSize={isAngle || isPoint ? '12' : '14'}
                       fill='#ffffff'
                     >
