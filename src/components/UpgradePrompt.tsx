@@ -6,9 +6,11 @@ import { useSubscription } from '../hooks/useSubscription';
 import { useUser } from '@/context/UserContext';
 import { useAuthStatus } from './AuthStatus';
 import { SmartTrialButton } from './SmartTrialButton';
-import { conversionTracking } from '@/lib/analytics';
+import { conversionTracking, trackEvent } from '@/lib/analytics';
 import { Sparkles, Zap, Star, X } from 'lucide-react';
 import { Button } from './ui/button';
+import { useFeatureFlagVariant } from '@/hooks/useFeatureFlag';
+import { getABTestMetadataFromVariant } from '@/lib/ab-test-tracking';
 
 export type UpgradePromptVariant =
   | 'banner'
@@ -70,6 +72,9 @@ export function UpgradePrompt({
     (user as any)?.couponId || (user as any)?.hasDiscount,
   );
 
+  // A/B Test: Track upgrade prompt variant
+  const upgradePromptVariant = useFeatureFlagVariant('upgrade_prompt_test');
+
   // Check if trial upsell was dismissed recently
   useEffect(() => {
     if (isTrialActive) {
@@ -94,11 +99,36 @@ export function UpgradePrompt({
   useEffect(() => {
     if (onShow && showUpgradePrompt) {
       onShow();
-      conversionTracking.upgradePromptShown(featureName);
-      // Track paywall shown
-      conversionTracking.paywallShown(authState.user?.id, featureName);
+
+      // Track with A/B test metadata if available
+      const abMetadata = getABTestMetadataFromVariant(
+        'upgrade_prompt_test',
+        upgradePromptVariant,
+      );
+
+      if (abMetadata) {
+        // Track as app_opened impression event with A/B test metadata
+        trackEvent('app_opened', {
+          featureName,
+          metadata: abMetadata,
+        });
+        trackEvent('paywall_shown', {
+          userId: authState.user?.id,
+          featureName,
+          metadata: abMetadata,
+        });
+      } else {
+        conversionTracking.upgradePromptShown(featureName);
+        conversionTracking.paywallShown(authState.user?.id, featureName);
+      }
     }
-  }, [onShow, showUpgradePrompt, featureName, authState.user?.id]);
+  }, [
+    onShow,
+    showUpgradePrompt,
+    featureName,
+    authState.user?.id,
+    upgradePromptVariant,
+  ]);
 
   // For trial-specific prompts, only show if user is actually on trial AND not dismissed
   // For general upgrade prompts, show if showUpgradePrompt is true (free users)
@@ -130,8 +160,26 @@ export function UpgradePrompt({
   const promptDescription = description || defaultDescription;
 
   const handleUpgradeClick = () => {
-    conversionTracking.upgradeClicked(featureName);
-    conversionTracking.paywallAccepted(authState.user?.id, featureName);
+    // Track with A/B test metadata if available
+    const abMetadata = getABTestMetadataFromVariant(
+      'upgrade_prompt_test',
+      upgradePromptVariant,
+    );
+
+    if (abMetadata) {
+      trackEvent('upgrade_clicked', {
+        featureName,
+        metadata: abMetadata,
+      });
+      trackEvent('paywall_accepted', {
+        userId: authState.user?.id,
+        featureName,
+        metadata: abMetadata,
+      });
+    } else {
+      conversionTracking.upgradeClicked(featureName);
+      conversionTracking.paywallAccepted(authState.user?.id, featureName);
+    }
   };
 
   const handleDismiss = () => {

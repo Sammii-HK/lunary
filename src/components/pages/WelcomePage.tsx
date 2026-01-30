@@ -18,10 +18,13 @@ import { renderJsonLd } from '@/lib/schema';
 import { CTA_COPY } from '@/lib/cta-copy';
 import { FAQAccordion } from '@/components/FAQ';
 import { getHomepageFAQs } from '@/lib/faq-helpers';
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { HomepageFeaturesTest } from '@/components/marketing/HomepageFeaturesTest';
 import { OptimizedDemoIframe } from '@/components/marketing/OptimizedDemoIframe';
-import { conversionTracking } from '@/lib/analytics';
+import {
+  useABTestTracking,
+  useABTestConversion,
+} from '@/hooks/useABTestTracking';
 
 const structuredData = {
   '@context': 'https://schema.org',
@@ -41,18 +44,25 @@ export default function WelcomePage() {
   const [openFAQId, setOpenFAQId] = useState<string | null>(null);
   const homepageFAQs = getHomepageFAQs();
 
-  // Track page view on mount
-  useEffect(() => {
-    conversionTracking.pageViewed('/welcome');
-  }, []);
+  // Track page view with A/B test data (homepage-features-test, cta-copy-test)
+  useABTestTracking('welcome', 'page_viewed', [
+    'homepage-features-test',
+    'cta-copy-test',
+  ]);
 
-  // CTA click handler
+  // Get conversion tracker with A/B test metadata
+  const { trackConversion } = useABTestConversion();
+
+  // CTA click handler with A/B tracking
   const handleCtaClick = (location: string, label: string, href: string) => {
-    conversionTracking.ctaClicked({
-      location,
-      label,
-      href,
+    trackConversion('cta_clicked', {
+      featureName: `homepage_${location}`,
       pagePath: '/welcome',
+      metadata: {
+        cta_location: location,
+        cta_label: label,
+        cta_href: href,
+      },
     });
   };
 

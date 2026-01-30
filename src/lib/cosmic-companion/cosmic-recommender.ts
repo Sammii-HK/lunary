@@ -799,6 +799,73 @@ function getPlanetaryDayRecommendation(date: Date = new Date()): any {
 }
 
 /**
+ * Get zodiac sign correspondences from grimoire
+ * INTERNAL: Only used within cosmic recommender
+ */
+function getZodiacCorrespondences(sign: string): {
+  element: string;
+  modality: string;
+  rulingPlanet: string;
+  keywords: string[];
+} {
+  const signData = (zodiacSignsData as any)[sign.toLowerCase()];
+  if (!signData) {
+    return {
+      element: 'Unknown',
+      modality: 'Unknown',
+      rulingPlanet: 'Unknown',
+      keywords: [],
+    };
+  }
+
+  return {
+    element: signData.element || 'Unknown',
+    modality: signData.modality || 'Unknown',
+    rulingPlanet: signData.rulingPlanet || 'Unknown',
+    keywords: signData.keywords || [],
+  };
+}
+
+/**
+ * Get chakra correspondence for a planet or element
+ * INTERNAL: Only used within cosmic recommender
+ */
+function getChakraForEnergy(planet?: string, element?: string): string {
+  // Planetary chakra correspondences
+  const planetaryChakras: { [key: string]: string } = {
+    Saturn: 'Root',
+    Mars: 'Sacral',
+    Sun: 'Solar Plexus',
+    Venus: 'Heart',
+    Mercury: 'Throat',
+    Jupiter: 'Third Eye',
+    Neptune: 'Crown',
+    Moon: 'Sacral',
+    Uranus: 'Crown',
+    Pluto: 'Root',
+  };
+
+  // Element chakra correspondences
+  const elementChakras: { [key: string]: string } = {
+    Earth: 'Root',
+    Water: 'Sacral',
+    Fire: 'Solar Plexus',
+    Air: 'Heart',
+    Ether: 'Throat',
+  };
+
+  if (planet && planetaryChakras[planet]) {
+    return planetaryChakras[planet];
+  }
+
+  if (element && elementChakras[element]) {
+    return elementChakras[element];
+  }
+
+  return 'All Chakras';
+}
+
+/**
  * Get unified cosmic recommendations
  * Integrates ALL grimoire data: crystals, spells, numerology, aspects, retrogrades, sabbats, tarot, planetary days,
  * runes, lunar nodes, synastry, decans, witch types, divination
@@ -1077,73 +1144,6 @@ function getHouseMeaning(houseNumber: number): string {
   };
 
   return houseMeanings[houseNumber] || 'Unknown life area';
-}
-
-/**
- * Get zodiac sign correspondences from grimoire
- * INTERNAL: Only used within cosmic recommender
- */
-function getZodiacCorrespondences(sign: string): {
-  element: string;
-  modality: string;
-  rulingPlanet: string;
-  keywords: string[];
-} {
-  const signData = (zodiacSignsData as any)[sign.toLowerCase()];
-  if (!signData) {
-    return {
-      element: 'Unknown',
-      modality: 'Unknown',
-      rulingPlanet: 'Unknown',
-      keywords: [],
-    };
-  }
-
-  return {
-    element: signData.element || 'Unknown',
-    modality: signData.modality || 'Unknown',
-    rulingPlanet: signData.rulingPlanet || 'Unknown',
-    keywords: signData.keywords || [],
-  };
-}
-
-/**
- * Get chakra correspondence for a planet or element
- * INTERNAL: Only used within cosmic recommender
- */
-function getChakraForEnergy(planet?: string, element?: string): string {
-  // Planetary chakra correspondences
-  const planetaryChakras: { [key: string]: string } = {
-    Saturn: 'Root',
-    Mars: 'Sacral',
-    Sun: 'Solar Plexus',
-    Venus: 'Heart',
-    Mercury: 'Throat',
-    Jupiter: 'Third Eye',
-    Neptune: 'Crown',
-    Moon: 'Sacral',
-    Uranus: 'Crown',
-    Pluto: 'Root',
-  };
-
-  // Element chakra correspondences
-  const elementChakras: { [key: string]: string } = {
-    Earth: 'Root',
-    Water: 'Sacral',
-    Fire: 'Solar Plexus',
-    Air: 'Heart',
-    Ether: 'Throat',
-  };
-
-  if (planet && planetaryChakras[planet]) {
-    return planetaryChakras[planet];
-  }
-
-  if (element && elementChakras[element]) {
-    return elementChakras[element];
-  }
-
-  return 'All Chakras';
 }
 
 /**

@@ -9,12 +9,22 @@ import { HoroscopeView } from './components/HoroscopeView';
 import { conversionTracking } from '@/lib/analytics';
 import { useEffect } from 'react';
 import { MarketingFooterGate } from '@/components/MarketingFooterGate';
+import { useABTestTracking } from '@/hooks/useABTestTracking';
 
 export default function HoroscopePage() {
   const { user, loading } = useUser();
   const authStatus = useAuthStatus();
   const subscription = useSubscription();
   useNotificationDeepLink(); // Handle push notification deep links
+
+  // Track horoscope page with A/B tests: cta-copy, feature-preview, transit-limit
+  useABTestTracking('horoscope', 'page_viewed', [
+    'cta-copy-test',
+    'feature_preview_blur_v1',
+    'transit-limit-test',
+    'transit-overflow-style',
+  ]);
+
   // For unauthenticated users, force paid horoscope access to false immediately
   // Don't wait for subscription to resolve
   const hasPersonalHoroscopeAccess = !authStatus.isAuthenticated

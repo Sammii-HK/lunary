@@ -26,6 +26,8 @@ import { PricingComparisonTable } from '@/components/PricingComparisonTable';
 import { CTA_COPY } from '@/lib/cta-copy';
 import { FAQAccordion } from '@/components/FAQ';
 import { getPricingFAQs } from '@/lib/faq-helpers';
+import { useFeatureFlagVariant } from '@/hooks/useFeatureFlag';
+import { getABTestMetadataFromVariant } from '@/lib/ab-test-tracking';
 
 const formatChatFeature = (plan: PricingPlan): string | undefined => {
   if (!plan.chatLabel) return undefined;
@@ -67,6 +69,10 @@ export default function PricingPage() {
     planId: string;
     planInterval: 'month' | 'year';
   } | null>(null);
+
+  // A/B Test: Track PostHog variants
+  const pricingCtaVariant = useFeatureFlagVariant('pricing_cta_test');
+  const pricingDisplayVariant = useFeatureFlagVariant('pricing_display_test');
 
   useModal({
     isOpen: showAuthModal,
@@ -169,7 +175,23 @@ export default function PricingPage() {
 
     setLoading(planId);
     const planLabel = planInterval === 'year' ? 'yearly_plan' : 'monthly_plan';
-    conversionTracking.upgradeClicked(`${planId}-${planLabel}`, '/pricing');
+
+    // Track upgrade click with A/B test metadata
+    const ctaMetadata = getABTestMetadataFromVariant(
+      'pricing_cta_test',
+      pricingCtaVariant,
+    );
+    if (ctaMetadata) {
+      import('@/lib/analytics').then(({ trackEvent }) => {
+        trackEvent('upgrade_clicked', {
+          featureName: `${planId}-${planLabel}`,
+          pagePath: '/pricing',
+          metadata: ctaMetadata,
+        });
+      });
+    } else {
+      conversionTracking.upgradeClicked(`${planId}-${planLabel}`, '/pricing');
+    }
 
     try {
       const storedReferralCode = localStorage.getItem('lunary_referral_code');
@@ -242,10 +264,31 @@ export default function PricingPage() {
   const faqs = getPricingFAQs();
   const [openFAQId, setOpenFAQId] = useState<string | null>(null);
 
-  // Track page view on mount
+  // Track page view on mount with A/B test data
   useEffect(() => {
-    conversionTracking.pageViewed('/pricing');
-  }, []);
+    const ctaMetadata = getABTestMetadataFromVariant(
+      'pricing_cta_test',
+      pricingCtaVariant,
+    );
+    const displayMetadata = getABTestMetadataFromVariant(
+      'pricing_display_test',
+      pricingDisplayVariant,
+    );
+
+    // Track with whichever A/B test is active (prefer CTA test)
+    const abMetadata = ctaMetadata || displayMetadata || {};
+
+    if (Object.keys(abMetadata).length > 0) {
+      // Track pricing_page_viewed as impression event with A/B test metadata
+      import('@/lib/analytics').then(({ trackEvent }) => {
+        trackEvent('pricing_page_viewed', {
+          metadata: abMetadata,
+        });
+      });
+    } else {
+      conversionTracking.pageViewed('/pricing');
+    }
+  }, [pricingCtaVariant, pricingDisplayVariant]);
 
   const productSchemas = useMemo(
     () =>
