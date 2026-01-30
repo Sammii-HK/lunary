@@ -1,18 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth/auth-options';
+import { requireUser } from '@/lib/ai/auth';
 import { generateTarotSeasonSnapshot } from '@/lib/patterns/snapshot/generator';
 
 export async function GET(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions);
-
-    if (!session?.user?.id) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
+    const user = await requireUser(request);
 
     // Generate 7-day tarot season snapshot
-    const snapshot = await generateTarotSeasonSnapshot(session.user.id, 7);
+    const snapshot = await generateTarotSeasonSnapshot(user.id, 7);
 
     if (!snapshot) {
       return NextResponse.json(
