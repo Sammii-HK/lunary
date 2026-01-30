@@ -29,6 +29,42 @@ This implementation enhances the Astral Guide pattern detection system and intro
 ✅ **Smart hybrid mood tagging** (keyword + AI fallback for Plus AI users)
 ✅ **94% cost savings** vs always using AI ($3/year vs $50/year for 10K users)
 ✅ **Production-ready** with comprehensive error handling and monitoring
+✅ **Astral Guide integrated** into main chat route (Phase 1 complete)
+
+---
+
+## Implementation Phases
+
+### ✅ Phase 1: Astral Guide Integration (COMPLETE)
+
+**Goal**: Wire existing astral guide infrastructure into main chat route
+
+**Status**: All components verified and working in production
+
+#### 1.1 Astral Query Detection ✅
+
+- **File**: `/src/lib/ai/astral-guide.ts:34`
+- **Function**: `isAstralQuery(userMessage: string): boolean`
+- **Keywords**: 77 astral keywords including planets, aspects, chart patterns
+- **Verification**: Function exists and is exported
+
+#### 1.2 Chat Route Integration ✅
+
+- **File**: `/src/app/api/ai/chat/route.ts:90`
+- **Detection**: `const useAstralContext = isAstralQuery(userMessage) || aiMode === 'astral'`
+- **Context Building**: Lines 159-177 build astral context when detected
+- **Context Merging**: Lines 194-197 merge astral context into main context
+- **Fallback**: Lines 198-214 use regular Lunary context for general queries
+- **Verification**: Astral context is conditionally built and merged
+
+#### 1.3 Prompt Builder Update ✅
+
+- **File**: `/src/lib/ai/prompt.ts:545`
+- **Parameter**: `systemPromptOverride?: string` accepted in buildPromptSections()
+- **Usage**: `/src/app/api/ai/chat/route.ts:287,448` passes `ASTRAL_GUIDE_PROMPT` when astral
+- **Verification**: System prompt override working correctly
+
+**Result**: Astral queries now automatically use specialized context and prompt 🎯
 
 ---
 
