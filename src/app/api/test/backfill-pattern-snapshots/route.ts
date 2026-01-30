@@ -134,8 +134,24 @@ export async function POST(request: NextRequest) {
                 );
                 userSnapshots++;
               }
+            }
 
-              // Generate Archetype snapshot for this period
+            // Generate Archetype snapshots MONTHLY (archetypes are slower patterns)
+            const monthsBack = Math.ceil(weeksBack / 4); // Convert weeks to months
+            for (let month = 0; month < monthsBack; month++) {
+              // For month 0 (current), use today; for historical months, use start of month
+              const snapshotDate =
+                month === 0
+                  ? dayjs()
+                  : dayjs().subtract(month, 'months').startOf('month');
+              const periodStart = snapshotDate.subtract(60, 'days'); // 60-day window for stable archetype detection
+              const periodEnd = snapshotDate;
+
+              // Skip if before user creation
+              if (periodStart.isBefore(dayjs(user.createdAt))) {
+                continue;
+              }
+
               const archetypeSnapshot = await generateHistoricalArchetype(
                 user.id,
                 periodStart.toDate(),

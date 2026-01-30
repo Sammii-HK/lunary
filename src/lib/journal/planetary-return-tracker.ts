@@ -27,10 +27,10 @@ const ORBITAL_PERIODS: Record<string, number> = {
 };
 
 /**
- * Calculate the age of the person
+ * Calculate the age of the person at a specific date
  */
-function calculateAge(birthDate: Date): number {
-  const now = new Date();
+function calculateAge(birthDate: Date, atDate: Date = new Date()): number {
+  const now = atDate;
   const birth = new Date(birthDate);
   let age = now.getFullYear() - birth.getFullYear();
   const monthDiff = now.getMonth() - birth.getMonth();
@@ -58,7 +58,7 @@ function estimateReturnProximity(
     return { proximityDays: 999, returnDate: null, phase: 'pre' };
   }
 
-  const age = calculateAge(birthDate);
+  const age = calculateAge(birthDate, currentDate);
   const yearsPerReturn = period;
 
   // Calculate how many complete returns have occurred

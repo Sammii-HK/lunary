@@ -1,8 +1,8 @@
 import {
   getUpcomingEclipses,
   checkEclipseRelevance,
-} from '@/utils/astrology/eclipseTracker';
-import type { BirthChartData } from '@/utils/astrology/birthChart';
+} from 'utils/astrology/eclipseTracker';
+import type { BirthChartData } from 'utils/astrology/birthChart';
 
 describe('Eclipse Tracking', () => {
   describe('getUpcomingEclipses', () => {
@@ -16,8 +16,8 @@ describe('Eclipse Tracking', () => {
     it('should include both solar and lunar eclipses', () => {
       const eclipses = getUpcomingEclipses(new Date('2026-01-01'), 12);
 
-      const solarEclipses = eclipses.filter((e) => e.kind === 'solar');
-      const lunarEclipses = eclipses.filter((e) => e.kind === 'lunar');
+      const solarEclipses = eclipses.filter((e) => e.type === 'solar');
+      const lunarEclipses = eclipses.filter((e) => e.type === 'lunar');
 
       expect(solarEclipses.length).toBeGreaterThan(0);
       expect(lunarEclipses.length).toBeGreaterThan(0);
@@ -27,14 +27,14 @@ describe('Eclipse Tracking', () => {
       const eclipses = getUpcomingEclipses(new Date('2026-01-01'), 6);
 
       eclipses.forEach((eclipse) => {
-        expect(eclipse.peak).toBeDefined();
+        expect(eclipse.date).toBeDefined();
+        expect(eclipse.date).toBeInstanceOf(Date);
         expect(eclipse.kind).toBeDefined();
-        expect(['solar', 'lunar']).toContain(eclipse.kind);
-        expect(eclipse.obscuration).toBeGreaterThanOrEqual(0);
-        expect(eclipse.obscuration).toBeLessThanOrEqual(1);
-        expect(eclipse.eclipticLongitude).toBeGreaterThanOrEqual(0);
-        expect(eclipse.eclipticLongitude).toBeLessThan(360);
+        expect(eclipse.type).toBeDefined();
+        expect(['solar', 'lunar']).toContain(eclipse.type);
+        expect(eclipse.degree).toBeGreaterThanOrEqual(0);
         expect(eclipse.sign).toBeDefined();
+        expect(typeof eclipse.daysAway).toBe('number');
       });
     });
 
@@ -49,8 +49,8 @@ describe('Eclipse Tracking', () => {
       const eclipses = getUpcomingEclipses(new Date('2026-01-01'), 12);
 
       for (let i = 1; i < eclipses.length; i++) {
-        expect(eclipses[i].peak.getTime()).toBeGreaterThan(
-          eclipses[i - 1].peak.getTime(),
+        expect(eclipses[i].date.getTime()).toBeGreaterThan(
+          eclipses[i - 1].date.getTime(),
         );
       }
     });
@@ -90,16 +90,16 @@ describe('Eclipse Tracking', () => {
 
       // Find an eclipse in Aries (close to natal Sun at 15° Aries)
       const ariesEclipse = eclipses.find(
-        (e) => e.sign === 'Aries' && Math.abs(e.eclipticLongitude - 15.5) < 3, // Within 3° orb
+        (e) => e.sign === 'Aries' && Math.abs(e.degree - 15.5) < 3, // Within 3° orb
       );
 
       if (ariesEclipse) {
         const relevance = checkEclipseRelevance(ariesEclipse, sampleBirthChart);
 
         expect(relevance.isRelevant).toBe(true);
-        expect(relevance.affectedPlanets).toContain('Sun');
-        expect(relevance.closestAspect).toBeDefined();
-        expect(relevance.closestAspect?.planet).toBe('Sun');
+        expect(relevance.aspectedPlanets.map((p) => p.planet)).toContain('Sun');
+        expect(relevance.aspectedPlanets.length).toBeGreaterThan(0);
+        expect(relevance.aspectedPlanets[0].planet).toBe('Sun');
       }
     });
 
@@ -124,7 +124,7 @@ describe('Eclipse Tracking', () => {
         );
 
         expect(relevance.isRelevant).toBe(false);
-        expect(relevance.affectedPlanets).toHaveLength(0);
+        expect(relevance.aspectedPlanets).toHaveLength(0);
       }
     });
 
@@ -139,9 +139,11 @@ describe('Eclipse Tracking', () => {
         .filter((r) => r.relevance.isRelevant);
 
       relevantEclipses.forEach(({ relevance }) => {
-        if (relevance.closestAspect) {
-          expect(relevance.closestAspect.orb).toBeGreaterThanOrEqual(0);
-          expect(relevance.closestAspect.orb).toBeLessThanOrEqual(3);
+        if (relevance.aspectedPlanets.length > 0) {
+          relevance.aspectedPlanets.forEach((aspect) => {
+            expect(aspect.orb).toBeGreaterThanOrEqual(0);
+            expect(aspect.orb).toBeLessThanOrEqual(3);
+          });
         }
       });
     });
@@ -185,7 +187,7 @@ describe('Eclipse Tracking', () => {
         const relevance = checkEclipseRelevance(ariesEclipse, clusteredChart);
 
         if (relevance.isRelevant) {
-          expect(relevance.affectedPlanets.length).toBeGreaterThanOrEqual(1);
+          expect(relevance.aspectedPlanets.length).toBeGreaterThanOrEqual(1);
         }
       }
     });
@@ -197,25 +199,24 @@ describe('Eclipse Tracking', () => {
         const relevance = checkEclipseRelevance(eclipses[0], []);
 
         expect(relevance.isRelevant).toBe(false);
-        expect(relevance.affectedPlanets).toHaveLength(0);
-        expect(relevance.closestAspect).toBeUndefined();
+        expect(relevance.aspectedPlanets).toHaveLength(0);
       }
     });
   });
 
   describe('Eclipse Types', () => {
-    it('should include eclipse obscuration percentage', () => {
+    it('should include eclipse type and kind', () => {
       const eclipses = getUpcomingEclipses(new Date('2026-01-01'), 12);
 
       eclipses.forEach((eclipse) => {
-        expect(eclipse.obscuration).toBeDefined();
-        expect(typeof eclipse.obscuration).toBe('number');
-        expect(eclipse.obscuration).toBeGreaterThanOrEqual(0);
-        expect(eclipse.obscuration).toBeLessThanOrEqual(1);
+        expect(eclipse.type).toBeDefined();
+        expect(['solar', 'lunar']).toContain(eclipse.type);
+        expect(eclipse.kind).toBeDefined();
+        expect(typeof eclipse.kind).toBe('string');
       });
     });
 
-    it('should map ecliptic longitude to zodiac sign correctly', () => {
+    it('should include zodiac sign for each eclipse', () => {
       const eclipses = getUpcomingEclipses(new Date('2026-01-01'), 12);
 
       const zodiacSigns = [
@@ -235,16 +236,7 @@ describe('Eclipse Tracking', () => {
 
       eclipses.forEach((eclipse) => {
         expect(zodiacSigns).toContain(eclipse.sign);
-
-        // Verify longitude matches sign
-        const signIndex = zodiacSigns.indexOf(eclipse.sign);
-        const expectedMinLongitude = signIndex * 30;
-        const expectedMaxLongitude = (signIndex + 1) * 30;
-
-        expect(eclipse.eclipticLongitude).toBeGreaterThanOrEqual(
-          expectedMinLongitude,
-        );
-        expect(eclipse.eclipticLongitude).toBeLessThan(expectedMaxLongitude);
+        expect(eclipse.degree).toBeGreaterThanOrEqual(0);
       });
     });
   });

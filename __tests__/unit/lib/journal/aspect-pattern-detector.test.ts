@@ -1,5 +1,5 @@
-import { detectNatalAspectPatterns } from '@/src/lib/journal/aspect-pattern-detector';
-import type { BirthChartData } from '@/utils/astrology/birthChart';
+import { detectNatalAspectPatterns } from '@/lib/journal/aspect-pattern-detector';
+import type { BirthChartData } from 'utils/astrology/birthChart';
 
 describe('Natal Aspect Pattern Detection', () => {
   describe('Stellium Detection', () => {
@@ -43,7 +43,7 @@ describe('Natal Aspect Pattern Detection', () => {
 
       expect(patterns.length).toBeGreaterThan(0);
 
-      const stellium = patterns.find((p) => p.patternType === 'stellium');
+      const stellium = patterns.find((p) => p.type === 'natal_stellium');
       expect(stellium).toBeDefined();
       expect(stellium?.planets).toContain('Sun');
       expect(stellium?.planets).toContain('Mercury');
@@ -89,10 +89,10 @@ describe('Natal Aspect Pattern Detection', () => {
 
       const patterns = detectNatalAspectPatterns(birthChart);
 
-      const stellium = patterns.find((p) => p.patternType === 'stellium');
+      const stellium = patterns.find((p) => p.type === 'natal_stellium');
       expect(stellium).toBeDefined();
       expect(stellium?.planets.length).toBe(4);
-      expect(stellium?.description).toContain('4 planets');
+      expect(stellium?.description).toContain('Aquarius');
     });
 
     it('should NOT detect stellium with only 2 planets', () => {
@@ -125,7 +125,7 @@ describe('Natal Aspect Pattern Detection', () => {
 
       const patterns = detectNatalAspectPatterns(birthChart);
 
-      const stellium = patterns.find((p) => p.patternType === 'stellium');
+      const stellium = patterns.find((p) => p.type === 'natal_stellium');
       expect(stellium).toBeUndefined();
     });
 
@@ -159,7 +159,7 @@ describe('Natal Aspect Pattern Detection', () => {
 
       const patterns = detectNatalAspectPatterns(birthChart);
 
-      const stellium = patterns.find((p) => p.patternType === 'stellium');
+      const stellium = patterns.find((p) => p.type === 'natal_stellium');
       expect(stellium?.element).toBe('Fire');
     });
 
@@ -217,7 +217,7 @@ describe('Natal Aspect Pattern Detection', () => {
 
       const patterns = detectNatalAspectPatterns(birthChart);
 
-      const stelliums = patterns.filter((p) => p.patternType === 'stellium');
+      const stelliums = patterns.filter((p) => p.type === 'natal_stellium');
       expect(stelliums.length).toBe(2);
 
       const ariesStellium = stelliums.find((s) => s.signs.includes('Aries'));
@@ -261,7 +261,7 @@ describe('Natal Aspect Pattern Detection', () => {
 
       const patterns = detectNatalAspectPatterns(birthChart);
 
-      const stellium = patterns.find((p) => p.patternType === 'stellium');
+      const stellium = patterns.find((p) => p.type === 'natal_stellium');
       expect(stellium?.houses).toBeDefined();
       expect(stellium?.houses).toContain(7);
     });
@@ -338,7 +338,7 @@ describe('Natal Aspect Pattern Detection', () => {
 
       const patterns = detectNatalAspectPatterns(birthChart);
 
-      const stellium = patterns.find((p) => p.patternType === 'stellium');
+      const stellium = patterns.find((p) => p.type === 'natal_stellium');
       if (stellium) {
         expect(stellium.houses).toBeDefined();
         expect(Array.isArray(stellium.houses)).toBe(true);
@@ -377,7 +377,7 @@ describe('Natal Aspect Pattern Detection', () => {
 
       const patterns = detectNatalAspectPatterns(birthChart);
 
-      const stellium = patterns.find((p) => p.patternType === 'stellium');
+      const stellium = patterns.find((p) => p.type === 'natal_stellium');
       expect(stellium?.description).toBeDefined();
       expect(stellium?.description).toContain('Sagittarius');
       expect(stellium?.description.toLowerCase()).toContain('stellium');

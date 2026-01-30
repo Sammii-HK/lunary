@@ -1,4 +1,4 @@
-import { calculateProgressedChart } from '@/utils/astrology/progressedChart';
+import { calculateProgressedChart } from 'utils/astrology/progressedChart';
 
 describe('Progressed Chart Calculations', () => {
   describe('Secondary Progressions Formula', () => {

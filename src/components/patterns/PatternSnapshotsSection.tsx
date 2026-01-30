@@ -291,12 +291,14 @@ function ArchetypeCard({ snapshot }: { snapshot: ArchetypeSnapshot }) {
         ))}
       </div>
 
-      <div className='text-xs text-zinc-500'>
-        <div>
-          Based on: {dominantArchetype.basedOn.slice(0, 3).join(', ')}
-          {dominantArchetype.basedOn.length > 3 && '...'}
+      {dominantArchetype.basedOn && dominantArchetype.basedOn.length > 0 && (
+        <div className='text-xs text-zinc-500'>
+          <div>
+            Based on: {dominantArchetype.basedOn.slice(0, 3).join(', ')}
+            {dominantArchetype.basedOn.length > 3 && '...'}
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }
