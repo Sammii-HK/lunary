@@ -374,32 +374,10 @@ export function detectNatalAspectPatterns(
   }
 
   const aspects = buildAspectList(birthChart);
-  console.log('[Pattern Detector] Total aspects found:', aspects.length);
-  console.log(
-    '[Pattern Detector] Quincunx aspects:',
-    aspects
-      .filter((a) => a.type === 'quincunx')
-      .map((a) => `${a.planet1}-${a.planet2}`)
-      .join(', '),
-  );
-  console.log(
-    '[Pattern Detector] Sextile aspects:',
-    aspects
-      .filter((a) => a.type === 'sextile')
-      .map((a) => `${a.planet1}-${a.planet2}`)
-      .join(', '),
-  );
 
   const patterns: AspectPattern[] = [];
 
-  const yods = detectYods(aspects, birthChart);
-  console.log(
-    '[Pattern Detector] Yods detected:',
-    yods.length,
-    yods.map((y) => y.planets.join('-')).join(', '),
-  );
-
-  patterns.push(...yods);
+  patterns.push(...detectYods(aspects, birthChart));
   patterns.push(...detectTSquares(aspects, birthChart));
   patterns.push(...detectGrandTrines(aspects, birthChart));
   patterns.push(...detectGrandConjunctions(aspects, birthChart));

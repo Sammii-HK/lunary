@@ -77,14 +77,6 @@ export async function fetchBirthChartWithPatterns(
         degree: descendantDegree,
         eclipticLongitude: descendantLongitude,
       });
-
-      console.log(
-        '[fetchBirthChartWithPatterns] Calculated Descendant:',
-        signNames[descendantSign],
-        'at',
-        descendantLongitude.toFixed(2),
-        '°',
-      );
     }
 
     // Calculate Whole Sign houses
@@ -139,13 +131,6 @@ export async function fetchBirthChartWithPatterns(
 
     // Detect chart patterns (Yods, T-Squares, Grand Trines, Stelliums, etc.)
     const chartPatterns = detectNatalAspectPatterns(birthChartData);
-
-    console.log(
-      '[fetchBirthChartWithPatterns] Detected',
-      chartPatterns.length,
-      'patterns for user',
-      userId,
-    );
 
     return {
       date: birthday || '1990-01-01',

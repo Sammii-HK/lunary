@@ -230,14 +230,6 @@ const describeContext = (
   const personalTransits = (context as any).personalTransits;
   const upcomingPersonalTransits = (context as any).upcomingPersonalTransits;
 
-  console.log('[describeContext] Transit info:', {
-    hasPersonalTransits: !!personalTransits,
-    personalTransitsLength: personalTransits?.length || 0,
-    hasCurrentTransits: !!(context as any).currentTransits,
-    currentTransitsType: typeof (context as any).currentTransits,
-    currentTransitsValue: (context as any).currentTransits,
-  });
-
   if (personalTransits && personalTransits.length > 0) {
     const personalTransitDescriptions = personalTransits
       .slice(0, 8)

@@ -300,13 +300,6 @@ export async function buildAstralContext(
   // Build natal summary using the pure formatter function
   // This ensures patterns are ALWAYS included since context.birthChart comes from fetchBirthChartWithPatterns
   const natalSummary = formatBirthChartSummary(context.birthChart);
-  console.log('[Astral Guide] Natal summary:', natalSummary);
-  console.log(
-    '[Astral Guide] Birth chart has patterns?',
-    !!context.birthChart?.patterns,
-    'Count:',
-    context.birthChart?.patterns?.length || 0,
-  );
 
   // OPTIMIZATION: Only calculate personal transits if needed (expensive operation)
   let personalTransits, upcomingPersonalTransits;
@@ -317,19 +310,11 @@ export async function buildAstralContext(
   }
 
   // Build current transits summary (now includes personal transits if available)
-  console.log('[Astral Guide] Transit data:', {
-    generalTransits: context.currentTransits?.length || 0,
-    personalTransits: personalTransits?.length || 0,
-    moonPhase: context.moon?.phase,
-  });
-
   const currentTransits = buildTransitsSummary(
     context.currentTransits,
     context.moon,
     personalTransits,
   );
-
-  console.log('[Astral Guide] Built transits summary:', currentTransits);
 
   // PHASE 2 & 3: Detect patterns, calculate progressions & eclipses
   const userBirthChartData = await fetchUserBirthChart(userId);
