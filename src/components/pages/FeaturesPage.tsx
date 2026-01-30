@@ -306,13 +306,16 @@ export default function FeaturesPage() {
               'After 6-8 weeks, patterns emerge from your data',
               'Example: "You always pull The Tower during Pluto transits"',
               'Example: "During the last 6 Full Moons, you journaled about relationships"',
+              'NEW: Moon phase pattern detection (e.g., "creative energy during New Moon")',
+              'NEW: Transit correlation tracking (how you respond to specific planetary movements)',
+              'NEW: House activation patterns (life areas you focus on)',
               'This is personal proof astrology works for YOU specifically',
               'Your own data becomes your astrology education',
               'Next time that transit happens, you get a heads up based on YOUR history',
             ]}
-            freeTier='Not included'
-            paidTier='30-day pattern analysis'
-            proTier='Lifetime pattern history + AI insights'
+            freeTier='Basic moon phase patterns (7 days)'
+            paidTier='Enhanced pattern analysis (moon, transits, houses - 30 days)'
+            proTier='Lifetime pattern history + AI insights + advanced correlations'
             cta='Track your patterns'
             ctaHref='/pricing'
           />
@@ -321,17 +324,19 @@ export default function FeaturesPage() {
           <FeatureCard
             icon={<BookOpen className='w-5 h-5 md:w-6 md:h-6' />}
             title='Living Book of Shadows'
-            description='Your personal astrology journal'
+            description='Your personal astrology journal with intelligent mood tracking'
             features={[
               'Record daily observations and reflections',
+              'NEW: Smart auto-mood tagging (instantly detects emotions from your writing)',
               'Track how transits affected you',
               'Note tarot insights and meanings',
               'Document moon phase experiences',
               'See "Last time Mars was here, you noted..."',
+              'Pro: Enhanced detection catches subtle emotions & implicit feelings',
             ]}
-            freeTier='Basic journaling'
-            paidTier='Pattern detection + timeline view'
-            proTier='Extended history (90 days) + export'
+            freeTier='Basic journaling (3 entries/month) + smart mood detection'
+            paidTier='Unlimited journaling + pattern detection + timeline view'
+            proTier='Enhanced mood detection + extended history (12 months) + export'
             cta='Start journaling'
             ctaHref='/auth?signup=true'
           />
