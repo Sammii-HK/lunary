@@ -1,5 +1,5 @@
-import { NextResponse } from 'next/server';
-import { calculateProgressedChart } from '@/utils/astrology/progressedChart';
+import { NextRequest, NextResponse } from 'next/server';
+import { calculateProgressedChart } from '../../../../../utils/astrology/progressedChart';
 import { requireUser } from '@/lib/ai/auth';
 import { sql } from '@vercel/postgres';
 
@@ -9,7 +9,7 @@ import { sql } from '@vercel/postgres';
  *
  * Usage: GET /api/test/progressed-chart
  */
-export async function GET(request: Request) {
+export async function GET(request: NextRequest) {
   try {
     // Require authentication
     const user = await requireUser(request);

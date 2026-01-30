@@ -1,8 +1,8 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import {
   getUpcomingEclipses,
   checkEclipseRelevance,
-} from '@/utils/astrology/eclipseTracker';
+} from '../../../../../utils/astrology/eclipseTracker';
 import { requireUser } from '@/lib/ai/auth';
 import { sql } from '@vercel/postgres';
 
@@ -12,7 +12,7 @@ import { sql } from '@vercel/postgres';
  *
  * Usage: GET /api/test/eclipses?months=6
  */
-export async function GET(request: Request) {
+export async function GET(request: NextRequest) {
   try {
     // Require authentication
     const user = await requireUser(request);
@@ -50,19 +50,20 @@ export async function GET(request: Request) {
       const relevance = checkEclipseRelevance(eclipse, birthChart);
 
       return {
-        date: eclipse.peak.toISOString().split('T')[0],
+        date:
+          (eclipse as any).peak?.toISOString().split('T')[0] || eclipse.date,
         type: eclipse.kind,
-        obscuration: `${Math.round(eclipse.obscuration * 100)}%`,
-        degree: `${Math.floor(eclipse.eclipticLongitude)}°`,
-        zodiacSign: eclipse.sign,
+        obscuration: `${Math.round((eclipse as any).obscuration * 100)}%`,
+        degree: `${Math.floor((eclipse as any).eclipticLongitude || 0)}°`,
+        zodiacSign: (eclipse as any).sign || 'Unknown',
         relevance: {
           isRelevant: relevance.isRelevant,
-          affectedPlanets: relevance.affectedPlanets,
-          closestAspect: relevance.closestAspect
-            ? `${relevance.closestAspect.planet} (${relevance.closestAspect.orb.toFixed(1)}° orb)`
+          affectedPlanets: relevance.aspectedPlanets || [],
+          closestAspect: (relevance as any).closestAspect
+            ? `${(relevance as any).closestAspect.planet} (${(relevance as any).closestAspect.orb.toFixed(1)}° orb)`
             : null,
           interpretation: relevance.isRelevant
-            ? `This eclipse aspects your natal ${relevance.affectedPlanets.join(', ')} - significant personal impact`
+            ? `This eclipse aspects your natal ${(relevance.aspectedPlanets || []).join(', ')} - significant personal impact`
             : 'This eclipse does not closely aspect your natal planets',
         },
       };

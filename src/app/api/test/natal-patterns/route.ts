@@ -1,6 +1,6 @@
-import { NextResponse } from 'next/server';
-import { detectNatalAspectPatterns } from '@/src/lib/journal/aspect-pattern-detector';
-import { calculatePlanetaryReturns } from '@/src/lib/journal/planetary-return-tracker';
+import { NextRequest, NextResponse } from 'next/server';
+import { detectNatalAspectPatterns } from '@/lib/journal/aspect-pattern-detector';
+import { calculatePlanetaryReturns } from '@/lib/journal/planetary-return-tracker';
 import { requireUser } from '@/lib/ai/auth';
 import { sql } from '@vercel/postgres';
 
@@ -10,7 +10,7 @@ import { sql } from '@vercel/postgres';
  *
  * Usage: GET /api/test/natal-patterns
  */
-export async function GET(request: Request) {
+export async function GET(request: NextRequest) {
   try {
     // Require authentication
     const user = await requireUser(request);
@@ -45,7 +45,7 @@ export async function GET(request: Request) {
     const patternDetectionTime = Date.now() - startTime;
 
     // Calculate planetary returns (if birthday available)
-    let planetaryReturns = undefined;
+    let planetaryReturns: any[] | undefined = undefined;
     let returnsCalculationTime = 0;
     if (birthDate) {
       const returnsStartTime = Date.now();
@@ -55,29 +55,29 @@ export async function GET(request: Request) {
         birthDate,
       );
       returnsCalculationTime = Date.now() - returnsStartTime;
-      planetaryReturns = allReturns.filter((r) => r.isActive);
+      planetaryReturns = allReturns.filter((r: any) => r.isActive);
     }
 
     // Format natal patterns for display
-    const formattedPatterns = natalPatterns.map((pattern) => ({
-      type: pattern.patternType,
+    const formattedPatterns = natalPatterns.map((pattern: any) => ({
+      type: pattern.patternType || pattern.type,
       planets: pattern.planets,
       signs: pattern.signs,
       element: pattern.element,
       houses: pattern.houses,
       description: pattern.description,
       significance:
-        pattern.patternType === 'stellium'
+        (pattern.patternType || pattern.type) === 'stellium'
           ? 'Strong focus of energy - major life theme'
           : 'Significant natal configuration',
     }));
 
     // Format planetary returns
-    const formattedReturns = planetaryReturns?.map((ret) => ({
+    const formattedReturns = planetaryReturns?.map((ret: any) => ({
       planet: ret.planet,
       type: ret.returnType,
       proximity: `${ret.proximityDays > 0 ? '+' : ''}${ret.proximityDays} days`,
-      returnDate: ret.returnDate.toISOString().split('T')[0],
+      returnDate: ret.returnDate?.toISOString().split('T')[0] || 'Unknown',
       phase: ret.phase,
       isActive: ret.isActive,
       significance:

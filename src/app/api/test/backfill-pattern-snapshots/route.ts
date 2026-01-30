@@ -619,8 +619,8 @@ async function generateHistoricalArchetype(
       Array.isArray(row.tags) ? row.tags : [],
     );
 
-    // Extract tarot majors and suits
-    const tarotMajors: string[] = [];
+    // Extract tarot majors and suits (using frequency - only cards appearing 2+ times)
+    const cardFrequency = new Map<string, number>();
     const suitCounts = new Map<string, number>();
 
     for (const row of tarotResult.rows) {
@@ -630,13 +630,18 @@ async function generateHistoricalArchetype(
         const cardName = card.name || '';
         const suit = card.suit || card.arcana || 'Major Arcana';
 
-        if (isMajorArcana(cardName)) {
-          tarotMajors.push(cardName);
+        if (cardName) {
+          cardFrequency.set(cardName, (cardFrequency.get(cardName) || 0) + 1);
         }
 
         suitCounts.set(suit, (suitCounts.get(suit) || 0) + 1);
       }
     }
+
+    // Filter to only frequent cards (2+ appearances) and major arcana
+    const tarotMajors = Array.from(cardFrequency.entries())
+      .filter(([cardName, count]) => count >= 2 && isMajorArcana(cardName))
+      .map(([cardName]) => cardName);
 
     const tarotSuits = Array.from(suitCounts.entries())
       .map(([suit, count]) => ({ suit, count }))
