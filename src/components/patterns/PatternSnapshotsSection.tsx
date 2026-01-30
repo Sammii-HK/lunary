@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { Sparkles, TrendingUp, Moon, Zap } from 'lucide-react';
+import { ArchetypeEvolutionChart } from './ArchetypeEvolutionChart';
 
 interface LifeTheme {
   id: string;
@@ -429,6 +430,16 @@ export function PatternSnapshotsSection() {
           </button>
         ))}
       </div>
+
+      {/* Archetype Evolution Chart */}
+      {selectedType === 'archetype' &&
+        patterns.snapshots.archetype &&
+        patterns.snapshots.archetype.length > 1 && (
+          <ArchetypeEvolutionChart
+            snapshots={patterns.snapshots.archetype}
+            className='mb-4'
+          />
+        )}
 
       {/* Pattern Cards */}
       <div className='space-y-3'>
