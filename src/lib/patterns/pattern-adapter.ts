@@ -7,12 +7,13 @@ import type {
   PatternTheme,
   FrequentCard,
   SuitPattern,
+  CardAppearance,
 } from './tarot-pattern-types';
 
 /**
  * Transform BasicPatterns from AdvancedPatterns.tsx to PatternAnalysis format
  */
-export function transformBasicPatternsToAnalysis(basicPatterns: {
+export async function transformBasicPatternsToAnalysis(basicPatterns: {
   dominantThemes: string[];
   frequentCards: Array<{ name: string; count: number; reading?: string }>;
   suitPatterns: Array<{
@@ -29,7 +30,7 @@ export function transformBasicPatternsToAnalysis(basicPatterns: {
   }>;
   arcanaPatterns: Array<{ type: string; count: number; reading?: string }>;
   timeFrame: number;
-}): PatternAnalysis {
+}): Promise<PatternAnalysis> {
   // Debug: Log incoming data
   if (process.env.NODE_ENV === 'development') {
     console.log('[Pattern Adapter] Input basicPatterns:', {
@@ -70,17 +71,43 @@ export function transformBasicPatternsToAnalysis(basicPatterns: {
       };
     });
 
-  // Transform frequent cards with meaningful percentages
+  // Fetch actual reading data with appearances
+  let readingsData: any[] = [];
+  try {
+    const response = await fetch(
+      `/api/patterns/user-readings?days=${basicPatterns.timeFrame}`,
+    );
+    if (response.ok) {
+      const data = await response.json();
+      readingsData = data.readings || [];
+    }
+  } catch (error) {
+    console.error('[Pattern Adapter] Failed to fetch readings:', error);
+  }
+
+  // Transform frequent cards with appearances
   const frequentCards: FrequentCard[] = basicPatterns.frequentCards.map(
-    (card) => ({
-      name: card.name,
-      count: card.count,
-      // Percentage based on ALL cards drawn, not just frequent cards
-      percentage:
-        totalCardsDrawn > 0 ? (card.count / totalCardsDrawn) * 100 : 0,
-      meaning: card.reading,
-      appearances: [], // Would need to be populated from actual reading data
-    }),
+    (card) => {
+      // Find all appearances of this card in the readings
+      const cardAppearances: CardAppearance[] = readingsData
+        .filter((reading) => reading.name === card.name)
+        .map((reading) => ({
+          date: reading.createdAt,
+          moonPhase: reading.moonPhase,
+          aspects: reading.aspects,
+        }))
+        .sort(
+          (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime(),
+        );
+
+      return {
+        name: card.name,
+        count: card.count,
+        percentage:
+          totalCardsDrawn > 0 ? (card.count / totalCardsDrawn) * 100 : 0,
+        appearances: cardAppearances,
+      };
+    },
   );
 
   // Transform suit patterns with percentages (based on total cards drawn)

@@ -145,6 +145,11 @@ interface AdvancedPatternsProps {
   onMultidimensionalModeChange: (enabled: boolean) => void;
   recentReadings?: RecentReading[];
   onCardClick?: (card: { name: string }) => void;
+  // Props for transit connections
+  birthChart?: any;
+  userBirthday?: string;
+  currentTransits?: any[];
+  userBirthLocation?: string;
 }
 
 export function AdvancedPatterns({
@@ -154,6 +159,10 @@ export function AdvancedPatterns({
   onMultidimensionalModeChange,
   recentReadings,
   onCardClick,
+  birthChart,
+  userBirthday,
+  currentTransits,
+  userBirthLocation,
 }: AdvancedPatternsProps) {
   const subscription = useSubscription();
   const timeFrame = typeof selectedView === 'number' ? selectedView : 30;
@@ -180,6 +189,9 @@ export function AdvancedPatterns({
   const [error, setError] = useState<string | null>(null);
   const lastFetchedRef = useRef<string>('');
   const loadingRef = useRef(false);
+  const [basicPatternAnalysis, setBasicPatternAnalysis] = useState<any | null>(
+    null,
+  );
 
   // Fetch callback must be defined before useEffect that uses it
   const fetchAdvancedPatterns = useCallback(async () => {
@@ -237,6 +249,23 @@ export function AdvancedPatterns({
       setLoading(false);
     }
   }, [selectedView, isMultidimensionalMode]);
+
+  // Transform basic patterns with appearances
+  useEffect(() => {
+    if (!basicPatterns) return;
+
+    const transform = async () => {
+      try {
+        const transformed =
+          await transformBasicPatternsToAnalysis(basicPatterns);
+        setBasicPatternAnalysis(transformed);
+      } catch (error) {
+        console.error('[AdvancedPatterns] Failed to transform:', error);
+      }
+    };
+
+    transform();
+  }, [basicPatterns]);
 
   useEffect(() => {
     // Fetch advanced patterns when:
@@ -321,12 +350,20 @@ export function AdvancedPatterns({
     typeof selectedView === 'number' &&
     !isMultidimensionalMode
   ) {
-    const patternAnalysis = transformBasicPatternsToAnalysis(basicPatterns);
     const userTier = mapSubscriptionPlanToUserTier(subscription.plan);
+
+    // Show loading while transforming
+    if (!basicPatternAnalysis) {
+      return (
+        <div className='text-center py-8 text-zinc-400 text-sm'>
+          Loading patterns...
+        </div>
+      );
+    }
 
     return (
       <TarotPatternsHub
-        patterns={patternAnalysis}
+        patterns={basicPatternAnalysis}
         userTier={userTier}
         subscriptionStatus={subscription.status}
         onUpgradeClick={() => {
@@ -335,6 +372,10 @@ export function AdvancedPatterns({
             window.location.href = '/pricing';
           }
         }}
+        birthChart={birthChart}
+        userBirthday={userBirthday}
+        currentTransits={currentTransits}
+        userBirthLocation={userBirthLocation}
       />
     );
   }

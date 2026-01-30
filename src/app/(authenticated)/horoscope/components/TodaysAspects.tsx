@@ -185,6 +185,41 @@ const getAspectDescription = (aspectType: string): string => {
   return descriptions[aspectType] || '';
 };
 
+// Calculate which house a planet is in using Whole Sign Houses
+const calculateHouseWholeSig = (
+  planetLongitude: number,
+  ascendantLongitude: number,
+): number => {
+  const ascendantSign = Math.floor(ascendantLongitude / 30);
+  const planetSign = Math.floor(planetLongitude / 30);
+  let house = ((planetSign - ascendantSign + 12) % 12) + 1;
+  return house;
+};
+
+const getMoonInHouseInterpretation = (
+  house: number,
+  moonPhaseName: string,
+): string => {
+  const houseInterpretations: Record<number, string> = {
+    1: 'Your emotional energy is focused on self-expression and personal identity. This is a powerful time to nurture your sense of self and how you show up in the world.',
+    2: 'Your emotions are connected to your values, finances, and sense of security. Focus on what truly matters to you and strengthening your foundation.',
+    3: 'Communication and learning are emotionally charged now. This is an ideal time for meaningful conversations, writing, or connecting with siblings and neighbors.',
+    4: 'Home, family, and your inner world are highlighted. You may feel a strong need to retreat, nurture your roots, or tend to family matters.',
+    5: 'Your heart is drawn to creativity, romance, and joy. This is a beautiful time for self-expression, play, and connecting with what brings you pleasure.',
+    6: 'Health, daily routines, and service are in focus. Your emotions guide you toward better habits and caring for your physical and mental well-being.',
+    7: 'Relationships and partnerships are emotionally significant now. This is a time to nurture your connections and find balance with others.',
+    8: 'Deep transformation, intimacy, and shared resources are highlighted. You may feel drawn to explore emotional depths and strengthen bonds of trust.',
+    9: 'Your spirit seeks expansion through travel, learning, or philosophical exploration. This is a time to broaden your horizons and embrace new perspectives.',
+    10: 'Career, public life, and your reputation are emotionally important. Your feelings guide your professional path and how you want to be seen in the world.',
+    11: 'Community, friendships, and your hopes for the future are highlighted. This is a time to connect with like-minded people and work toward shared dreams.',
+    12: 'Rest, solitude, and spiritual connection are calling. This is a powerful time for introspection, healing, and connecting with your subconscious.',
+  };
+  return (
+    houseInterpretations[house] ||
+    'Your emotional energy is flowing through an important area of your life.'
+  );
+};
+
 export function TodaysAspects({
   birthChart,
   currentTransits,
@@ -196,21 +231,79 @@ export function TodaysAspects({
   const aspects = calculateAspectsWithDegrees(birthChart, currentTransits);
   const cosmicContext = getCosmicContextForDate(new Date());
 
+  // Find the Moon in current transits and calculate which house it's in
+  const transitMoon = currentTransits.find((t) => t.body === 'Moon');
+  const ascendant = birthChart.find((p) => p.body === 'Ascendant');
+
+  let moonHouse: number | null = null;
+  let moonHouseInterpretation = '';
+
+  if (transitMoon && ascendant) {
+    moonHouse = calculateHouseWholeSig(
+      transitMoon.eclipticLongitude,
+      ascendant.eclipticLongitude,
+    );
+    moonHouseInterpretation = getMoonInHouseInterpretation(
+      moonHouse,
+      cosmicContext.moonPhase.name,
+    );
+  }
+
+  const MoonPhaseCard = () => (
+    <div className='rounded-lg border border-lunary-secondary-800 bg-lunary-secondary-950/40 p-4'>
+      <div className='flex items-start gap-3'>
+        <img
+          src={cosmicContext.moonPhase.icon.src}
+          alt={cosmicContext.moonPhase.icon.alt}
+          className='w-12 h-12 flex-shrink-0'
+        />
+        <div className='flex-1 min-w-0'>
+          <div className='flex items-center gap-2 mb-1'>
+            <p className='text-sm font-medium text-lunary-secondary-300'>
+              {cosmicContext.moonPhase.name}
+            </p>
+            {moonHouse && (
+              <span className='text-xs px-2 py-0.5 rounded-full bg-lunary-primary-900/50 text-lunary-primary-300 border border-lunary-primary-700/30 font-medium'>
+                in your {moonHouse}
+                {moonHouse === 1
+                  ? 'st'
+                  : moonHouse === 2
+                    ? 'nd'
+                    : moonHouse === 3
+                      ? 'rd'
+                      : 'th'}{' '}
+                house
+              </span>
+            )}
+          </div>
+          <div className='flex flex-wrap gap-1.5 mb-2'>
+            {cosmicContext.moonPhase.keywords.map((keyword, idx) => (
+              <span
+                key={idx}
+                className='text-xs px-2 py-0.5 rounded-full bg-lunary-secondary-900/50 text-lunary-secondary-400 border border-lunary-secondary-800'
+              >
+                {keyword}
+              </span>
+            ))}
+          </div>
+          {moonHouseInterpretation ? (
+            <p className='text-xs text-zinc-300 leading-relaxed mb-2 font-medium'>
+              {moonHouseInterpretation}
+            </p>
+          ) : (
+            <p className='text-xs text-zinc-400 leading-relaxed'>
+              {cosmicContext.moonPhase.information}
+            </p>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+
   if (aspects.length === 0) {
     return (
       <div className='space-y-3'>
-        {/* Moon Phase Header */}
-        <div className='rounded-lg border border-lunary-secondary-800 bg-lunary-secondary-950/40 p-3'>
-          <div className='flex items-center gap-2'>
-            <span className='text-2xl'>{cosmicContext.moonPhase.emoji}</span>
-            <div>
-              <p className='text-sm font-medium text-lunary-secondary-300'>
-                {cosmicContext.moonPhase.name}
-              </p>
-              <p className='text-xs text-zinc-500'>Current lunar phase</p>
-            </div>
-          </div>
-        </div>
+        <MoonPhaseCard />
         <div className='text-center py-4'>
           <p className='text-sm text-zinc-400'>
             No significant aspects between today&apos;s transits and your birth
@@ -223,18 +316,7 @@ export function TodaysAspects({
 
   return (
     <div className='space-y-3'>
-      {/* Moon Phase Header */}
-      <div className='rounded-lg border border-lunary-secondary-800 bg-lunary-secondary-950/40 p-3'>
-        <div className='flex items-center gap-2'>
-          <span className='text-2xl'>{cosmicContext.moonPhase.emoji}</span>
-          <div>
-            <p className='text-sm font-medium text-lunary-secondary-300'>
-              {cosmicContext.moonPhase.name}
-            </p>
-            <p className='text-xs text-zinc-500'>Current lunar phase</p>
-          </div>
-        </div>
-      </div>
+      <MoonPhaseCard />
 
       {/* Aspects List */}
       <div className='space-y-2'>

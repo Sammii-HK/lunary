@@ -6,6 +6,12 @@ export interface CosmicContextData {
     phase: string;
     emoji: string;
     name: string;
+    keywords: string[];
+    information: string;
+    icon: {
+      src: string;
+      alt: string;
+    };
   };
   aspects?: Array<{
     planet1: string;
@@ -36,6 +42,12 @@ export function getCosmicContextForDate(date: Date): CosmicContextData {
       phase: phaseKey,
       emoji: phaseData?.symbol || '🌙',
       name: moonPhaseLabel,
+      keywords: phaseData?.keywords || [],
+      information: phaseData?.information || '',
+      icon: phaseData?.icon || {
+        src: '/icons/moon-phases/new-moon.svg',
+        alt: 'Moon phase icon',
+      },
     },
   };
 }

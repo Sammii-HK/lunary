@@ -3,17 +3,24 @@
 import { useState } from 'react';
 import { ChevronDown, Star } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { Badge } from '@/components/ui/badge';
 import { PatternCard } from './PatternCard';
 import { CardFrequencyTimeline } from './visualizations/CardFrequencyTimeline';
+import { CosmicContextCard } from './CosmicContextCard';
+import { TarotTransitConnection } from '@/components/tarot/TarotTransitConnection';
 import type { FrequentCard } from '@/lib/patterns/tarot-pattern-types';
-import dayjs from 'dayjs';
+import type { BirthChartPlacement } from '@/context/UserContext';
+import type { AstroChartInformation } from '../../../utils/astrology/astrology';
 
 interface FrequentCardsSectionProps {
   cards: FrequentCard[];
   allowDrillDown?: boolean;
   locked?: boolean;
   onUpgradeClick?: () => void;
+  // Optional props for TarotTransitConnection
+  birthChart?: BirthChartPlacement[];
+  userBirthday?: string;
+  currentTransits?: AstroChartInformation[];
+  userBirthLocation?: string;
 }
 
 export function FrequentCardsSection({
@@ -21,8 +28,20 @@ export function FrequentCardsSection({
   allowDrillDown = false,
   locked = false,
   onUpgradeClick,
+  birthChart,
+  userBirthday,
+  currentTransits,
+  userBirthLocation,
 }: FrequentCardsSectionProps) {
   const [expandedCard, setExpandedCard] = useState<string | null>(null);
+
+  // Check if we have the data needed for TarotTransitConnection
+  const canShowTransitConnection =
+    birthChart &&
+    birthChart.length > 0 &&
+    userBirthday &&
+    currentTransits &&
+    currentTransits.length > 0;
 
   const handleCardClick = (cardName: string) => {
     if (!allowDrillDown) return;
@@ -75,55 +94,59 @@ export function FrequentCardsSection({
               <div className='pl-4 pr-2 space-y-3 animate-in fade-in slide-in-from-top-2 duration-200'>
                 {card.appearances && card.appearances.length > 0 && (
                   <>
-                    {/* Cosmic context for each appearance */}
-                    <div className='space-y-2 max-h-64 overflow-y-auto'>
-                      {card.appearances.slice(0, 10).map((appearance, idx) => (
-                        <div
-                          key={`${appearance.date}-${idx}`}
-                          className='bg-zinc-900/50 rounded-lg p-3 space-y-1'
-                        >
-                          <div className='flex items-center justify-between'>
-                            <span className='text-xs font-medium text-zinc-300'>
-                              {dayjs(appearance.date).format('MMM D, YYYY')}
-                            </span>
-                            {appearance.moonPhase && (
-                              <div className='flex items-center gap-1'>
-                                <span className='text-lg'>
-                                  {appearance.moonPhase.emoji}
-                                </span>
-                                <span className='text-xs text-zinc-500'>
-                                  {appearance.moonPhase.name}
-                                </span>
-                              </div>
-                            )}
-                          </div>
+                    {/* Show first appearance with full details */}
+                    {card.appearances.slice(0, 1).map((appearance, idx) => (
+                      <div
+                        key={`${appearance.date}-${idx}`}
+                        className='space-y-3'
+                      >
+                        <CosmicContextCard
+                          date={appearance.date}
+                          moonPhase={appearance.moonPhase}
+                          aspects={appearance.aspects}
+                          cardName={card.name}
+                          showCardMeaning={true}
+                        />
 
-                          {appearance.aspects &&
-                            appearance.aspects.length > 0 && (
-                              <div className='flex flex-wrap gap-1.5 mt-2'>
-                                {appearance.aspects.map((aspect, aspectIdx) => (
-                                  <Badge
-                                    key={aspectIdx}
-                                    variant='outline'
-                                    className='text-xs'
-                                  >
-                                    {aspect.planet1} {aspect.aspectSymbol}{' '}
-                                    {aspect.planet2}
-                                  </Badge>
-                                ))}
-                              </div>
-                            )}
-                        </div>
-                      ))}
+                        {/* TarotTransitConnection for "When Pulled" info */}
+                        {canShowTransitConnection && (
+                          <TarotTransitConnection
+                            cardName={card.name}
+                            birthChart={birthChart}
+                            userBirthday={userBirthday}
+                            currentTransits={currentTransits!}
+                            variant='inDepth'
+                            historicalTimestamp={appearance.date}
+                            readingCreatedAt={appearance.date}
+                            userBirthLocation={userBirthLocation}
+                          />
+                        )}
+                      </div>
+                    ))}
 
-                      {card.appearances.length > 10 && (
-                        <p className='text-xs text-zinc-500 text-center py-2'>
-                          +{card.appearances.length - 10} more appearances
-                        </p>
-                      )}
-                    </div>
+                    {/* Show remaining appearances with just cosmic context */}
+                    {card.appearances.length > 1 && (
+                      <div className='space-y-2 max-h-64 overflow-y-auto'>
+                        {card.appearances
+                          .slice(1, 10)
+                          .map((appearance, idx) => (
+                            <CosmicContextCard
+                              key={`${appearance.date}-${idx + 1}`}
+                              date={appearance.date}
+                              moonPhase={appearance.moonPhase}
+                              aspects={appearance.aspects}
+                            />
+                          ))}
+                      </div>
+                    )}
 
-                    <div className='bg-zinc-900/50 rounded-lg p-3'>
+                    {card.appearances.length > 10 && (
+                      <p className='text-xs text-zinc-500 text-center py-2'>
+                        +{card.appearances.length - 10} more appearances
+                      </p>
+                    )}
+
+                    <div className='bg-zinc-900/50 rounded-lg p-3 border border-zinc-800/50'>
                       <p className='text-xs text-zinc-500 mb-2'>
                         Frequency over time
                       </p>

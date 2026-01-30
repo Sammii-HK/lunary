@@ -11,12 +11,19 @@ import type {
   UserTier,
 } from '@/lib/patterns/tarot-pattern-types';
 import { hasFeatureAccess } from '../../../utils/pricing';
+import type { BirthChartPlacement } from '@/context/UserContext';
+import type { AstroChartInformation } from '../../../utils/astrology/astrology';
 
 interface TarotPatternsHubProps {
   patterns: PatternAnalysis;
   userTier: UserTier;
   subscriptionStatus?: string;
   onUpgradeClick?: () => void;
+  // Optional props for transit connections
+  birthChart?: BirthChartPlacement[];
+  userBirthday?: string;
+  currentTransits?: AstroChartInformation[];
+  userBirthLocation?: string;
 }
 
 export function TarotPatternsHub({
@@ -24,6 +31,10 @@ export function TarotPatternsHub({
   userTier,
   subscriptionStatus,
   onUpgradeClick,
+  birthChart,
+  userBirthday,
+  currentTransits,
+  userBirthLocation,
 }: TarotPatternsHubProps) {
   // Feature access checks
   const hasAdvancedPatterns = hasFeatureAccess(
@@ -123,6 +134,10 @@ export function TarotPatternsHub({
           allowDrillDown={hasDrillDown}
           locked={!hasBasicPatterns}
           onUpgradeClick={onUpgradeClick}
+          birthChart={birthChart}
+          userBirthday={userBirthday}
+          currentTransits={currentTransits}
+          userBirthLocation={userBirthLocation}
         />
       )}
 

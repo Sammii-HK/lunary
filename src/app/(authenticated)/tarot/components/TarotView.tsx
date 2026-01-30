@@ -51,6 +51,7 @@ import { TarotReflectionPrompts } from '@/components/tarot/TarotReflectionPrompt
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { useAuthStatus } from '@/components/AuthStatus';
+import { getCosmicContextForDate } from '@/lib/cosmic/cosmic-context-utils';
 
 const GuideNudge = dynamic(
   () =>
@@ -564,6 +565,8 @@ export function TarotView({
     ? personalizedWeeklyShare
     : generalWeeklyShare;
 
+  const cosmicContext = getCosmicContextForDate(new Date());
+
   return (
     <div className='h-full w-full space-y-6 p-4 overflow-y-auto overflow-x-hidden pb-32'>
       {/* Header */}
@@ -580,6 +583,32 @@ export function TarotView({
             ? 'Personalized guidance based on your cosmic signature'
             : 'General cosmic guidance based on universal energies'}
         </p>
+      </div>
+
+      {/* Moon Phase */}
+      <div className='rounded-lg border border-lunary-secondary-800 bg-lunary-secondary-950/40 p-3'>
+        <div className='flex items-center gap-3'>
+          <img
+            src={cosmicContext.moonPhase.icon.src}
+            alt={cosmicContext.moonPhase.icon.alt}
+            className='w-10 h-10 flex-shrink-0'
+          />
+          <div className='flex-1 min-w-0'>
+            <p className='text-sm font-medium text-lunary-secondary-300 mb-1'>
+              {cosmicContext.moonPhase.name}
+            </p>
+            <div className='flex flex-wrap gap-1.5'>
+              {cosmicContext.moonPhase.keywords.map((keyword, idx) => (
+                <span
+                  key={idx}
+                  className='text-xs px-2 py-0.5 rounded-full bg-lunary-secondary-900/50 text-lunary-secondary-400 border border-lunary-secondary-800'
+                >
+                  {keyword}
+                </span>
+              ))}
+            </div>
+          </div>
+        </div>
       </div>
 
       {/* CTA button to scroll to spreads */}
@@ -1219,6 +1248,10 @@ export function TarotView({
                 const tarotCard = getTarotCardByName(card.name);
                 if (tarotCard) setSelectedCard(tarotCard);
               }}
+              birthChart={user?.birthChart}
+              userBirthday={userBirthday}
+              currentTransits={currentAstrologicalChart}
+              userBirthLocation={user?.birthLocation}
             />
           </HoroscopeSection>
         </CollapsibleSection>
