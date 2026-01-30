@@ -11,6 +11,7 @@ export interface JournalPattern {
     | 'frequency'
     | 'season_correlation'
     | 'moon_phase_mood'
+    | 'moon_phase_pattern'
     | 'moon_sign_pattern'
     | 'transit_correlation'
     | 'house_activation';
@@ -186,14 +187,6 @@ export async function analyzeJournalPatterns(
     console.error('[Pattern Analyzer] House pattern detection failed:', error);
   }
 
-  console.log(
-    `[Pattern Analyzer] Total patterns before sorting: ${patterns.length}`,
-  );
-  console.log(
-    `[Pattern Analyzer] Pattern types:`,
-    patterns.map((p) => `${p.type}(${p.confidence.toFixed(2)})`).join(', '),
-  );
-
   patterns.sort((a, b) => b.confidence - a.confidence);
 
   // ENHANCED: Ensure pattern type diversity - limit each type to max 5 occurrences
@@ -208,17 +201,6 @@ export async function analyzeJournalPatterns(
       typeCounts[pattern.type] = currentCount + 1;
     }
   }
-
-  console.log(
-    `[Pattern Analyzer] Diverse patterns (max ${MAX_PER_TYPE} per type): ${diversePatterns.length}`,
-  );
-  console.log(
-    `[Pattern Analyzer] Top 15 diverse patterns:`,
-    diversePatterns
-      .slice(0, 15)
-      .map((p) => `${p.type}(${p.confidence.toFixed(2)})`)
-      .join(', '),
-  );
 
   return {
     patterns: diversePatterns.slice(0, 15), // Increased to 15 with diversity
@@ -486,25 +468,22 @@ function findSeasonPatterns(entries: JournalEntryData[]): JournalPattern[] {
 
 /**
  * Enhanced Moon Phase & Sign Pattern Detection
- * Analyzes mood and productivity correlations with both moon phase AND sign
+ * Analyzes mood and productivity correlations with moon phase (with and without sign)
  */
 async function findEnhancedLunarPatterns(
   entries: JournalEntryData[],
 ): Promise<JournalPattern[]> {
   const patterns: JournalPattern[] = [];
 
-  console.log(
-    `[findEnhancedLunarPatterns] Processing ${entries.length} entries`,
-  );
-
-  // Group entries by moon phase AND sign
-  const lunarData: Record<
+  // Track by BOTH phase-only AND phase+sign for different granularities
+  const phaseOnlyData: Record<
     string,
     { moods: string[]; count: number; dates: Date[] }
   > = {};
-
-  let successCount = 0;
-  let errorCount = 0;
+  const phaseSignData: Record<
+    string,
+    { moods: string[]; count: number; dates: Date[] }
+  > = {};
 
   for (const entry of entries) {
     const entryDate = new Date(entry.createdAt);
@@ -515,53 +494,72 @@ async function findEnhancedLunarPatterns(
       const planetaryData = await getRealPlanetaryPositions(entryDate);
       const moonSign = planetaryData.Moon?.sign || 'Unknown';
 
-      const lunarKey = `${moonData.name}_${moonSign}`;
+      const phaseKey = moonData.name;
+      const phaseSignKey = `${moonData.name}_${moonSign}`;
 
-      if (!lunarData[lunarKey]) {
-        lunarData[lunarKey] = { moods: [], count: 0, dates: [] };
+      // Track phase-only
+      if (!phaseOnlyData[phaseKey]) {
+        phaseOnlyData[phaseKey] = { moods: [], count: 0, dates: [] };
       }
+      phaseOnlyData[phaseKey].moods.push(...entry.moodTags);
+      phaseOnlyData[phaseKey].count++;
+      phaseOnlyData[phaseKey].dates.push(entryDate);
 
-      lunarData[lunarKey].moods.push(...entry.moodTags);
-      lunarData[lunarKey].count++;
-      lunarData[lunarKey].dates.push(entryDate);
-      successCount++;
+      // Track phase+sign
+      if (!phaseSignData[phaseSignKey]) {
+        phaseSignData[phaseSignKey] = { moods: [], count: 0, dates: [] };
+      }
+      phaseSignData[phaseSignKey].moods.push(...entry.moodTags);
+      phaseSignData[phaseSignKey].count++;
+      phaseSignData[phaseSignKey].dates.push(entryDate);
     } catch (error) {
-      errorCount++;
-      console.log(
-        `[findEnhancedLunarPatterns] Error for entry ${entry.createdAt}:`,
-        error,
-      );
+      // Skip entries where moon data is unavailable
       continue;
     }
   }
 
-  console.log(
-    `[findEnhancedLunarPatterns] Success: ${successCount}, Errors: ${errorCount}`,
-  );
-  console.log(
-    `[findEnhancedLunarPatterns] Lunar combos found:`,
-    Object.keys(lunarData).length,
-  );
-  console.log(
-    `[findEnhancedLunarPatterns] Lunar data:`,
-    JSON.stringify(lunarData, null, 2),
-  );
+  // 1. Analyze PHASE-ONLY patterns (easier to detect, need less data)
+  for (const [phase, data] of Object.entries(phaseOnlyData)) {
+    // Require at least 2 entries for this moon phase
+    if (data.count < 2) continue;
 
-  // Analyze patterns
-  for (const [lunarKey, data] of Object.entries(lunarData)) {
-    console.log(
-      `[findEnhancedLunarPatterns] Checking ${lunarKey}: ${data.count} entries`,
-    );
-
-    // LOWERED THRESHOLD FOR TESTING: 1 entry instead of 2
-    if (data.count < 1) {
-      console.log(
-        `[findEnhancedLunarPatterns] Skipping ${lunarKey}: less than 1 entry`,
-      );
-      continue;
+    // Find dominant mood for this phase
+    const moodCounts: Record<string, number> = {};
+    for (const mood of data.moods) {
+      moodCounts[mood] = (moodCounts[mood] || 0) + 1;
     }
 
-    const [phase, sign] = lunarKey.split('_');
+    const dominantMood = Object.entries(moodCounts)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 2);
+
+    // Require at least 1 occurrence of the dominant mood
+    if (dominantMood.length > 0 && dominantMood[0][1] >= 1) {
+      const moodName = dominantMood[0][0];
+      const moodCount = dominantMood[0][1];
+
+      patterns.push({
+        type: 'moon_phase_pattern',
+        title: `${moodName} energy during ${phase}`,
+        description: `You tend to feel ${moodName} during ${phase}`,
+        data: {
+          moonPhase: phase,
+          dominantMood: moodName,
+          moodCount,
+          totalEntries: data.count,
+          percentage: Math.round((moodCount / data.count) * 100),
+        },
+        confidence: Math.min((moodCount / data.count) * 0.85, 0.8),
+      });
+    }
+  }
+
+  // 2. Analyze PHASE+SIGN patterns (more specific, need more data)
+  for (const [phaseSignKey, data] of Object.entries(phaseSignData)) {
+    // Require at least 2 entries for this moon phase + sign combination
+    if (data.count < 2) continue;
+
+    const [phase, sign] = phaseSignKey.split('_');
 
     // Find dominant mood for this lunar combination
     const moodCounts: Record<string, number> = {};
@@ -569,28 +567,14 @@ async function findEnhancedLunarPatterns(
       moodCounts[mood] = (moodCounts[mood] || 0) + 1;
     }
 
-    console.log(
-      `[findEnhancedLunarPatterns] Mood counts for ${lunarKey}:`,
-      moodCounts,
-    );
-
     const dominantMood = Object.entries(moodCounts)
       .sort((a, b) => b[1] - a[1])
       .slice(0, 2);
 
-    console.log(
-      `[findEnhancedLunarPatterns] Dominant moods for ${lunarKey}:`,
-      dominantMood,
-    );
-
-    // LOWERED THRESHOLD FOR TESTING: 1 mood occurrence instead of 2
+    // Require at least 1 occurrence of the dominant mood
     if (dominantMood.length > 0 && dominantMood[0][1] >= 1) {
       const moodName = dominantMood[0][0];
       const moodCount = dominantMood[0][1];
-
-      console.log(
-        `[findEnhancedLunarPatterns] Creating pattern for ${lunarKey}`,
-      );
 
       patterns.push({
         type: 'moon_sign_pattern',
@@ -606,16 +590,8 @@ async function findEnhancedLunarPatterns(
         },
         confidence: Math.min((moodCount / data.count) * 0.9, 0.85),
       });
-    } else {
-      console.log(
-        `[findEnhancedLunarPatterns] Not enough mood occurrences for ${lunarKey}`,
-      );
     }
   }
-
-  console.log(
-    `[findEnhancedLunarPatterns] Final patterns created: ${patterns.length}`,
-  );
 
   return patterns;
 }
@@ -630,42 +606,23 @@ async function findTransitCorrelations(
 ): Promise<JournalPattern[]> {
   const patterns: JournalPattern[] = [];
 
-  console.log(
-    `[findTransitCorrelations] Processing ${entries.length} entries for user ${userId}`,
-  );
-
   // Get user's birth chart for personal transit analysis
   let birthChart: BirthChartData[] = [];
   try {
     const birthChartResult = await sql`
       SELECT birth_chart FROM user_profiles WHERE user_id = ${userId} LIMIT 1
     `;
-    console.log(
-      `[findTransitCorrelations] Birth chart query returned ${birthChartResult.rows.length} rows`,
-    );
     if (birthChartResult.rows.length > 0) {
       birthChart = birthChartResult.rows[0].birth_chart as BirthChartData[];
-      console.log(
-        `[findTransitCorrelations] Birth chart has ${birthChart.length} placements`,
-      );
     }
   } catch (error) {
-    console.log(`[findTransitCorrelations] Error fetching birth chart:`, error);
     return patterns;
   }
 
-  if (birthChart.length === 0) {
-    console.log(
-      `[findTransitCorrelations] No birth chart found, returning empty patterns`,
-    );
-    return patterns;
-  }
+  if (birthChart.length === 0) return patterns;
 
   // Group entries by major transiting planets
   const transitData: Record<string, { count: number; moods: string[] }> = {};
-
-  let successCount = 0;
-  let errorCount = 0;
 
   for (const entry of entries) {
     const entryDate = new Date(entry.createdAt);
@@ -687,42 +644,16 @@ async function findTransitCorrelations(
         transitData[transitKey].count++;
         transitData[transitKey].moods.push(...entry.moodTags);
       }
-      successCount++;
     } catch (error) {
-      errorCount++;
-      console.log(
-        `[findTransitCorrelations] Error for entry ${entry.createdAt}:`,
-        error,
-      );
+      // Skip entries where transit data is unavailable
       continue;
     }
   }
 
-  console.log(
-    `[findTransitCorrelations] Transit data fetch - Success: ${successCount}, Errors: ${errorCount}`,
-  );
-  console.log(
-    `[findTransitCorrelations] Transit combinations found:`,
-    Object.keys(transitData).length,
-  );
-  console.log(
-    `[findTransitCorrelations] Transit data:`,
-    JSON.stringify(transitData, null, 2),
-  );
-
   // Analyze correlations
   for (const [transitKey, data] of Object.entries(transitData)) {
-    console.log(
-      `[findTransitCorrelations] Checking ${transitKey}: ${data.count} entries`,
-    );
-
-    // LOWERED THRESHOLD FOR TESTING: 1 entry instead of 3
-    if (data.count < 1) {
-      console.log(
-        `[findTransitCorrelations] Skipping ${transitKey}: less than 1 entry`,
-      );
-      continue;
-    }
+    // Require at least 3 entries during this transit
+    if (data.count < 3) continue;
 
     const [planet, sign] = transitKey.split('_');
 
@@ -735,7 +666,7 @@ async function findTransitCorrelations(
     const topMood = Object.entries(moodCounts).sort((a, b) => b[1] - a[1])[0];
 
     if (topMood) {
-      const pattern = {
+      patterns.push({
         type: 'transit_correlation',
         title: `Active during ${planet} in ${sign}`,
         description: `You journaled ${data.count} time(s) when ${planet} was in ${sign}`,
@@ -747,17 +678,10 @@ async function findTransitCorrelations(
           moodCount: topMood[1],
         },
         confidence: Math.min(data.count / 10, 0.7),
-      };
-      console.log(
-        `[findTransitCorrelations] Creating pattern for ${transitKey} with confidence ${pattern.confidence}`,
-      );
-      patterns.push(pattern);
+      });
     }
   }
 
-  console.log(
-    `[findTransitCorrelations] Total patterns created: ${patterns.length}`,
-  );
   return patterns;
 }
 
@@ -771,52 +695,32 @@ async function findHouseActivationPatterns(
 ): Promise<JournalPattern[]> {
   const patterns: JournalPattern[] = [];
 
-  console.log(
-    `[findHouseActivationPatterns] Processing ${entries.length} entries for user ${userId}`,
-  );
-
   // Get user's birth chart to calculate houses
   let birthChart: BirthChartData[] = [];
   try {
     const birthChartResult = await sql`
       SELECT birth_chart FROM user_profiles WHERE user_id = ${userId} LIMIT 1
     `;
-    console.log(
-      `[findHouseActivationPatterns] Birth chart query returned ${birthChartResult.rows.length} rows`,
-    );
     if (birthChartResult.rows.length > 0) {
       birthChart = birthChartResult.rows[0].birth_chart as BirthChartData[];
-      console.log(
-        `[findHouseActivationPatterns] Birth chart has ${birthChart.length} placements`,
-      );
     }
   } catch (error) {
-    console.log(
-      `[findHouseActivationPatterns] Error fetching birth chart:`,
+    console.error(
+      '[findHouseActivationPatterns] Error fetching birth chart:',
       error,
     );
     return patterns;
   }
 
   if (birthChart.length === 0) {
-    console.log(
-      `[findHouseActivationPatterns] No birth chart found, returning empty patterns`,
-    );
     return patterns;
   }
 
   // Get ascendant for house calculation
   const ascendant = birthChart.find((p) => p.body === 'Ascendant');
   if (!ascendant || !ascendant.eclipticLongitude) {
-    console.log(
-      `[findHouseActivationPatterns] No Ascendant found in birth chart, cannot calculate houses`,
-    );
     return patterns;
   }
-
-  console.log(
-    `[findHouseActivationPatterns] Ascendant found at ${ascendant.eclipticLongitude}° in ${ascendant.sign}`,
-  );
 
   const ascendantSign = Math.floor(
     (((ascendant.eclipticLongitude % 360) + 360) % 360) / 30,
@@ -887,11 +791,6 @@ async function findHouseActivationPatterns(
   // Analyze which houses are emphasized in journal entries
   // SIMPLIFIED LOGIC: Check if text contains house keywords, regardless of transits
   const houseActivation: Record<number, number> = {};
-  let totalMatches = 0;
-
-  console.log(
-    `[findHouseActivationPatterns] Analyzing ${entries.length} entries for house themes`,
-  );
 
   for (const entry of entries) {
     const lowerText = entry.text.toLowerCase();
@@ -903,30 +802,17 @@ async function findHouseActivationPatterns(
       for (const keyword of keywords) {
         if (lowerText.includes(keyword)) {
           houseActivation[house] = (houseActivation[house] || 0) + 1;
-          totalMatches++;
           break; // Only count once per house per entry
         }
       }
     }
   }
 
-  console.log(
-    `[findHouseActivationPatterns] Total keyword matches: ${totalMatches}`,
-  );
-  console.log(
-    `[findHouseActivationPatterns] House activations:`,
-    JSON.stringify(houseActivation, null, 2),
-  );
-
   // Create patterns for emphasized houses
-  // LOWERED THRESHOLD FOR TESTING: 1 entry instead of 3
+  // Require at least 3 activations for a house to be considered emphasized
   const sortedHouses = Object.entries(houseActivation)
-    .filter(([, count]) => count >= 1)
+    .filter(([, count]) => count >= 3)
     .sort((a, b) => b[1] - a[1]);
-
-  console.log(
-    `[findHouseActivationPatterns] Houses meeting threshold (>=1): ${sortedHouses.length}`,
-  );
 
   const houseNames: Record<number, string> = {
     1: 'Self & Identity',
@@ -947,10 +833,6 @@ async function findHouseActivationPatterns(
     const house = parseInt(houseStr);
     const houseName = houseNames[house] || `House ${house}`;
 
-    console.log(
-      `[findHouseActivationPatterns] Creating pattern for House ${house} (${houseName}) with ${count} activations`,
-    );
-
     patterns.push({
       type: 'house_activation',
       title: `${houseName} themes emphasized`,
@@ -966,9 +848,6 @@ async function findHouseActivationPatterns(
     });
   }
 
-  console.log(
-    `[findHouseActivationPatterns] Total patterns created: ${patterns.length}`,
-  );
   return patterns;
 }
 
@@ -991,6 +870,7 @@ export async function savePatterns(
 
     switch (pattern.type) {
       case 'moon_phase_mood':
+      case 'moon_phase_pattern':
       case 'moon_sign_pattern':
         category = 'cyclical';
         expiresIn = '90 days'; // Moon patterns evolve over ~3 months

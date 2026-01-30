@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { sql } from '@vercel/postgres';
 import { requireUser } from '@/lib/ai/auth';
 import { hasFeatureAccess, normalizePlanType } from '../../../../utils/pricing';
+import { detectMoods } from '@/lib/journal/mood-detector';
 
 export async function GET(request: NextRequest) {
   try {
@@ -298,6 +299,53 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // AUTO-TAG MOODS for journal entries
+    let finalContent = content;
+    if (category === 'journal' && content.text) {
+      try {
+        // Check if moodTags already exist (user may have manually tagged)
+        if (!content.moodTags || content.moodTags.length === 0) {
+          // SMART HYBRID APPROACH:
+          // 1. Try keyword detection first (free, fast)
+          // 2. If no moods found AND user is Pro → fallback to AI
+          // This minimizes costs while maximizing coverage!
+
+          let detection = await detectMoods(content.text, false); // Try keyword first
+
+          // If keyword found nothing AND user has AI plan → try AI
+          if (detection.moods.length === 0) {
+            const hasAIPlan =
+              planType === 'lunary_plus_ai' ||
+              planType === 'lunary_plus_ai_annual';
+
+            if (hasAIPlan) {
+              console.log(
+                '🤖 Keyword found no moods, trying AI for Plus AI user...',
+              );
+              detection = await detectMoods(content.text, true); // AI fallback
+            }
+          }
+
+          if (detection.moods.length > 0) {
+            finalContent = {
+              ...content,
+              moodTags: detection.moods,
+              autoTagged: true,
+              tagMethod: detection.method,
+            };
+            console.log(
+              `✨ Auto-tagged journal with ${detection.moods.length} moods (${detection.method}): ${detection.moods.join(', ')}`,
+            );
+          } else {
+            console.log('ℹ️ No moods detected (text may be too short/neutral)');
+          }
+        }
+      } catch (error) {
+        // Don't fail the request if mood detection fails
+        console.error('Mood auto-tagging failed (non-critical):', error);
+      }
+    }
+
     const result = await sql`
       INSERT INTO collections (user_id, title, description, category, content, tags, folder_id)
       VALUES (
@@ -305,7 +353,7 @@ export async function POST(request: NextRequest) {
         ${title},
         ${description || null},
         ${category},
-        ${JSON.stringify(content)}::jsonb,
+        ${JSON.stringify(finalContent)}::jsonb,
         ${tags || []}::text[],
         ${folderId ? parseInt(folderId, 10) : null}
       )

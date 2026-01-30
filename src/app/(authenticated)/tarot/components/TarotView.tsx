@@ -421,16 +421,18 @@ export function TarotView({
 
     if (themes.length === 0 && cards.length === 0) return [];
 
-    const themeItems = themes.slice(0, 3).map((theme, index) => ({
-      label: theme,
-      detail: cards[index]?.name
-        ? `${cards[index].name} showing up often`
-        : undefined,
-    }));
+    const themeItems = themes
+      .slice(0, 3)
+      .map((theme: string, index: number) => ({
+        label: theme,
+        detail: cards[index]?.name
+          ? `${cards[index].name} showing up often`
+          : undefined,
+      }));
 
     if (themeItems.length > 0) return themeItems;
 
-    return cards.slice(0, 3).map((card) => ({
+    return cards.slice(0, 3).map((card: any) => ({
       label: card.name,
       detail: typeof card.count === 'number' ? `Seen ${card.count} times` : '',
     }));
@@ -660,7 +662,7 @@ export function TarotView({
                   </span>
                   <span className='text-zinc-400'>
                     {personalizedReading!.daily.keywords
-                      .filter((_, idx) => idx !== 2 && idx < 2)
+                      .filter((_: string, idx: number) => idx !== 2 && idx < 2)
                       .join(', ')}
                   </span>
                 </div>
@@ -714,7 +716,7 @@ export function TarotView({
                   </span>
                   <span className='text-zinc-400'>
                     {personalizedReading!.weekly.keywords
-                      .filter((_, idx) => idx !== 2 && idx < 2)
+                      .filter((_: string, idx: number) => idx !== 2 && idx < 2)
                       .join(', ')}
                   </span>
                 </div>
@@ -750,11 +752,13 @@ export function TarotView({
               <div className='rounded-lg border border-lunary-success-800 bg-lunary-success-950 p-4'>
                 <ul className='space-y-2 text-xs text-zinc-300'>
                   {guidanceActionPoints.length > 0 ? (
-                    guidanceActionPoints.slice(-1).map((point, index) => (
-                      <li key={index} className='flex items-start gap-2'>
-                        <span>{point}</span>
-                      </li>
-                    ))
+                    guidanceActionPoints
+                      .slice(-1)
+                      .map((point: string, index: number) => (
+                        <li key={index} className='flex items-start gap-2'>
+                          <span>{point}</span>
+                        </li>
+                      ))
                   ) : (
                     <li className='text-xs text-zinc-400'>
                       Key insight drives your next move—save a spread to capture

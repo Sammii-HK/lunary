@@ -1,5 +1,6 @@
 'use client';
 
+import Image from 'next/image';
 import { BirthChartData } from '../../../../../utils/astrology/birthChart';
 import { getCosmicContextForDate } from '@/lib/cosmic/cosmic-context-utils';
 
@@ -252,10 +253,12 @@ export function TodaysAspects({
   const MoonPhaseCard = () => (
     <div className='rounded-lg border border-lunary-secondary-800 bg-lunary-secondary-950/40 p-4'>
       <div className='flex items-start gap-3'>
-        <img
+        <Image
           src={cosmicContext.moonPhase.icon.src}
           alt={cosmicContext.moonPhase.icon.alt}
-          className='w-12 h-12 flex-shrink-0'
+          width={48}
+          height={48}
+          className='flex-shrink-0'
         />
         <div className='flex-1 min-w-0'>
           <div className='flex items-center gap-2 mb-1'>

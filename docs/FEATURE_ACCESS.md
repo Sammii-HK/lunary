@@ -28,6 +28,9 @@ Available to all authenticated users:
 
 - **Birth Chart** (`birth_chart`)
 - **Moon Phases** (`moon_phases`)
+  - Includes moon phase display on horoscope page with personalized house placement\*
+  - Includes moon phase display on tarot page
+  - \*Requires birth chart with birth time for house placement
 - **General Horoscope** (`general_horoscope`)
 - **General Tarot** (`general_tarot`)
 - **General Crystal Recommendations** (`general_crystal_recommendations`)
@@ -68,6 +71,9 @@ Available to all authenticated users:
 - **Downloadable Reports** (`downloadable_reports`)
 - **AI Ritual Generation** (`ai_ritual_generation`)
 - **Advanced Patterns** (`advanced_patterns`)
+  - Includes tarot pattern drill-down with cosmic context (moon phase + aspects when each card was pulled)
+  - Includes AI-generated transit insights for frequent cards
+  - Includes frequency timeline visualization
 
 ### Lunary+ Pro Annual (additional)
 
@@ -126,6 +132,48 @@ Available to all authenticated users:
 | **Transit of the Day** | General transits                  | `personalized_transit_readings`        |
 | **Crystal Preview**    | `general_crystal_recommendations` | `personalized_crystal_recommendations` |
 | **Wheel of the Year**  | Seasonal (no feature key)         | Same                                   |
+
+---
+
+## Cosmic Context Integration
+
+### Moon Phase Display
+
+Available to all users via `moon_phases` feature:
+
+- **Horoscope page** (`/horoscope`):
+  - Current moon phase with branded SVG icon
+  - Moon phase keywords (3 per phase)
+  - Personalized house placement when birth chart available\*
+  - House-specific interpretations (12 unique messages)
+  - Full moon phase description
+
+- **Tarot page** (`/tarot`):
+  - Current moon phase with branded icon
+  - Moon phase keywords
+  - Available to all users
+
+\*Requires birth chart with birth time for house placement calculation (Whole Sign House system)
+
+### Tarot Pattern Cosmic Context
+
+Available to Pro Monthly/Annual users via `advanced_patterns` feature:
+
+- **Frequent Cards Drill-Down**:
+  - Date when each card was pulled
+  - Moon phase at time of reading (with branded icon)
+  - Active planetary aspects (top 3 daily transits)
+  - Card meaning with keywords (first appearance only)
+  - AI-generated transit insights (requires birth chart)\*
+  - Frequency timeline visualization
+  - Up to 10 appearances shown per card
+
+- **Cosmic Context Format**:
+  - First appearance: Full context + card meaning + AI insights
+  - Remaining appearances: Date + moon phase + aspects only
+  - All data persisted from reading creation time
+
+\*AI transit insights require birth chart data; gracefully hidden if unavailable
 
 ---
 
