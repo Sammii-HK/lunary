@@ -8,6 +8,8 @@ import {
   getPlanetSymbol,
   getZodiacSymbol,
 } from '../../../../../utils/astrology/cosmic-og';
+import { getFormatDimensions } from '@/lib/share/og-utils';
+import type { ShareFormat } from '@/hooks/useShareModal';
 
 export const runtime = 'nodejs';
 
@@ -150,6 +152,9 @@ export async function GET(request: NextRequest): Promise<Response> {
     loadAssets();
 
     const { searchParams } = new URL(request.url);
+    const format = (searchParams.get('format') as ShareFormat) || 'square';
+    const { width, height } = getFormatDimensions(format);
+
     const baseUrl =
       process.env.NODE_ENV === 'production'
         ? 'https://lunary.app'
@@ -183,6 +188,27 @@ export async function GET(request: NextRequest): Promise<Response> {
 
     const positions = getRealPlanetaryPositions(today);
     const moonPhase = getAccurateMoonPhase(today);
+
+    // Format-aware sizing
+    const isLandscape = format === 'landscape';
+    const isStory = format === 'story';
+    const padding = isLandscape
+      ? '32px 36px'
+      : isStory
+        ? '40px 44px'
+        : '40px 44px';
+    const titleSize = isLandscape ? '36px' : isStory ? '48px' : '48px';
+    const dateSize = isLandscape ? '24px' : isStory ? '30px' : '30px';
+    const cardPadding = isLandscape
+      ? '14px 18px'
+      : isStory
+        ? '18px 24px'
+        : '18px 24px';
+    const cardMargin = isLandscape ? '10px' : isStory ? '12px' : '12px';
+    const iconSize = isLandscape ? 22 : isStory ? 28 : 28;
+    const cardTitleSize = isLandscape ? '26px' : isStory ? '32px' : '32px';
+    const cardTextSize = isLandscape ? '20px' : isStory ? '24px' : '24px';
+    const largeTextSize = isLandscape ? '26px' : isStory ? '32px' : '32px';
 
     const planets = [
       'Sun',
@@ -234,7 +260,7 @@ export async function GET(request: NextRequest): Promise<Response> {
           background: '#09090b',
           fontFamily: 'Roboto Mono, monospace',
           color: 'white',
-          padding: '40px 44px',
+          padding,
         }}
       >
         <div
@@ -242,12 +268,12 @@ export async function GET(request: NextRequest): Promise<Response> {
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
-            marginBottom: '24px',
+            marginBottom: isLandscape ? '16px' : '24px',
           }}
         >
           <div
             style={{
-              fontSize: '48px',
+              fontSize: titleSize,
               display: 'flex',
               color: firstName ? '#d8b4fe' : '#e4e4e7',
             }}
@@ -256,7 +282,7 @@ export async function GET(request: NextRequest): Promise<Response> {
           </div>
           <div
             style={{
-              fontSize: '30px',
+              fontSize: dateSize,
               color: '#a1a1aa',
               marginTop: '8px',
               display: 'flex',
@@ -272,8 +298,8 @@ export async function GET(request: NextRequest): Promise<Response> {
             flexDirection: 'column',
             border: '1px solid #27272a',
             borderRadius: '16px',
-            padding: '18px 24px',
-            marginBottom: '12px',
+            padding: cardPadding,
+            marginBottom: cardMargin,
             background: '#18181b',
           }}
         >
@@ -287,8 +313,8 @@ export async function GET(request: NextRequest): Promise<Response> {
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src={`${baseUrl}/icons/moon-phases/${getMoonPhaseSvgPath(moonPhase.name)}.png`}
-              width={44}
-              height={44}
+              width={isLandscape ? 36 : 44}
+              height={isLandscape ? 36 : 44}
               alt={moonPhase.name}
               style={{ display: 'flex' }}
             />
@@ -302,7 +328,7 @@ export async function GET(request: NextRequest): Promise<Response> {
               >
                 <div
                   style={{
-                    fontSize: '36px',
+                    fontSize: largeTextSize,
                     fontWeight: 600,
                     color: '#fafafa',
                     display: 'flex',
@@ -312,7 +338,7 @@ export async function GET(request: NextRequest): Promise<Response> {
                 </div>
                 <div
                   style={{
-                    fontSize: '30px',
+                    fontSize: cardTextSize,
                     color: '#a1a1aa',
                     display: 'flex',
                   }}
@@ -322,7 +348,7 @@ export async function GET(request: NextRequest): Promise<Response> {
               </div>
               <div
                 style={{
-                  fontSize: '24px',
+                  fontSize: cardTextSize,
                   color: '#a1a1aa',
                   marginTop: '4px',
                   display: 'flex',
@@ -340,8 +366,8 @@ export async function GET(request: NextRequest): Promise<Response> {
             flexDirection: 'column',
             border: '1px solid #27272a',
             borderRadius: '16px',
-            padding: '18px 24px',
-            marginBottom: '12px',
+            padding: cardPadding,
+            marginBottom: cardMargin,
             background: '#18181b',
           }}
         >
@@ -353,9 +379,13 @@ export async function GET(request: NextRequest): Promise<Response> {
               marginBottom: '14px',
             }}
           >
-            <TelescopeIcon size={28} />
+            <TelescopeIcon size={iconSize} />
             <div
-              style={{ fontSize: '32px', color: '#fafafa', display: 'flex' }}
+              style={{
+                fontSize: cardTitleSize,
+                color: '#fafafa',
+                display: 'flex',
+              }}
             >
               Sky Now
             </div>
@@ -424,8 +454,8 @@ export async function GET(request: NextRequest): Promise<Response> {
             flexDirection: 'column',
             border: '1px solid #27272a',
             borderRadius: '16px',
-            padding: '18px 24px',
-            marginBottom: '12px',
+            padding: cardPadding,
+            marginBottom: cardMargin,
             background: '#18181b',
           }}
         >
@@ -437,9 +467,13 @@ export async function GET(request: NextRequest): Promise<Response> {
               marginBottom: '10px',
             }}
           >
-            <SparklesIcon size={28} />
+            <SparklesIcon size={iconSize} />
             <div
-              style={{ fontSize: '32px', color: '#fafafa', display: 'flex' }}
+              style={{
+                fontSize: cardTitleSize,
+                color: '#fafafa',
+                display: 'flex',
+              }}
             >
               Your Day
             </div>
@@ -460,7 +494,7 @@ export async function GET(request: NextRequest): Promise<Response> {
           </div>
           <div
             style={{
-              fontSize: '24px',
+              fontSize: cardTextSize,
               color: '#a1a1aa',
               lineHeight: 1.4,
               display: 'flex',
@@ -476,8 +510,8 @@ export async function GET(request: NextRequest): Promise<Response> {
             flexDirection: 'column',
             border: '1px solid #27272a',
             borderRadius: '16px',
-            padding: '18px 24px',
-            marginBottom: '12px',
+            padding: cardPadding,
+            marginBottom: cardMargin,
             background: '#18181b',
           }}
         >
@@ -489,9 +523,13 @@ export async function GET(request: NextRequest): Promise<Response> {
               marginBottom: '8px',
             }}
           >
-            <LayersIcon size={28} />
+            <LayersIcon size={iconSize} />
             <div
-              style={{ fontSize: '32px', color: '#fafafa', display: 'flex' }}
+              style={{
+                fontSize: cardTitleSize,
+                color: '#fafafa',
+                display: 'flex',
+              }}
             >
               Daily Card
             </div>
@@ -512,7 +550,7 @@ export async function GET(request: NextRequest): Promise<Response> {
           </div>
           <div
             style={{
-              fontSize: '32px',
+              fontSize: largeTextSize,
               color: '#d8b4fe',
               marginBottom: '6px',
               display: 'flex',
@@ -520,7 +558,13 @@ export async function GET(request: NextRequest): Promise<Response> {
           >
             {tarotCard}
           </div>
-          <div style={{ fontSize: '24px', color: '#a1a1aa', display: 'flex' }}>
+          <div
+            style={{
+              fontSize: cardTextSize,
+              color: '#a1a1aa',
+              display: 'flex',
+            }}
+          >
             {tarotKeywords}
           </div>
         </div>
@@ -531,8 +575,8 @@ export async function GET(request: NextRequest): Promise<Response> {
             flexDirection: 'column',
             border: '1px solid #27272a',
             borderRadius: '16px',
-            padding: '18px 24px',
-            marginBottom: '12px',
+            padding: cardPadding,
+            marginBottom: cardMargin,
             background: '#18181b',
           }}
         >
@@ -574,7 +618,7 @@ export async function GET(request: NextRequest): Promise<Response> {
           </div>
           <div
             style={{
-              fontSize: '28px',
+              fontSize: isLandscape ? '24px' : '28px',
               color: '#fafafa',
               marginBottom: '6px',
               display: 'flex',
@@ -584,7 +628,13 @@ export async function GET(request: NextRequest): Promise<Response> {
               ? transitTitle
               : `${transitPlanet} ${transitTitle}`}
           </div>
-          <div style={{ fontSize: '24px', color: '#a1a1aa', display: 'flex' }}>
+          <div
+            style={{
+              fontSize: cardTextSize,
+              color: '#a1a1aa',
+              display: 'flex',
+            }}
+          >
             {transitDesc}
           </div>
         </div>
@@ -595,7 +645,7 @@ export async function GET(request: NextRequest): Promise<Response> {
             flexDirection: 'column',
             border: '1px solid #27272a',
             borderRadius: '16px',
-            padding: '18px 24px',
+            padding: cardPadding,
             background: '#18181b',
           }}
         >
@@ -607,9 +657,13 @@ export async function GET(request: NextRequest): Promise<Response> {
               marginBottom: '8px',
             }}
           >
-            <GemIcon size={28} />
+            <GemIcon size={iconSize} />
             <div
-              style={{ fontSize: '32px', color: '#fafafa', display: 'flex' }}
+              style={{
+                fontSize: cardTitleSize,
+                color: '#fafafa',
+                display: 'flex',
+              }}
             >
               {crystal}
             </div>
@@ -628,7 +682,13 @@ export async function GET(request: NextRequest): Promise<Response> {
               </div>
             )}
           </div>
-          <div style={{ fontSize: '24px', color: '#a1a1aa', display: 'flex' }}>
+          <div
+            style={{
+              fontSize: cardTextSize,
+              color: '#a1a1aa',
+              display: 'flex',
+            }}
+          >
             {crystalReason}
           </div>
         </div>
@@ -639,19 +699,25 @@ export async function GET(request: NextRequest): Promise<Response> {
             display: 'flex',
             justifyContent: 'center',
             alignItems: 'center',
-            paddingTop: '20px',
+            paddingTop: isLandscape ? '16px' : '20px',
             gap: '14px',
           }}
         >
-          <LunaryLogo size={40} />
-          <div style={{ fontSize: '32px', color: '#d8b4fe', display: 'flex' }}>
+          <LunaryLogo size={isLandscape ? 32 : 40} />
+          <div
+            style={{
+              fontSize: largeTextSize,
+              color: '#d8b4fe',
+              display: 'flex',
+            }}
+          >
             lunary.app
           </div>
         </div>
       </div>,
       {
-        width: 1080,
-        height: 1350,
+        width,
+        height,
         fonts,
       },
     );

@@ -3,6 +3,8 @@ import { ImageResponse } from 'next/og';
 import { NextRequest } from 'next/server';
 import { astroPointSymbols, bodiesSymbols } from '@/constants/symbols';
 import { getBirthChartShare } from '@/lib/share/birth-chart';
+import { getFormatDimensions } from '@/lib/share/og-utils';
+import type { ShareFormat } from '@/hooks/useShareModal';
 import {
   elementAstro,
   modalityAstro,
@@ -11,9 +13,6 @@ import type { BirthChartData } from '../../../../../../utils/astrology/birthChar
 
 export const runtime = 'edge';
 export const revalidate = 60;
-
-const WIDTH = 1080;
-const HEIGHT = 1350;
 
 let robotoMonoPromise: Promise<ArrayBuffer> | null = null;
 let astronomiconFontPromise: Promise<ArrayBuffer> | null = null;
@@ -255,6 +254,9 @@ function parsePlacements(raw: string | null): BirthChartData[] {
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
   const shareId = searchParams.get('shareId');
+  const format = (searchParams.get('format') as ShareFormat) || 'square';
+  const { width, height } = getFormatDimensions(format);
+
   const shareRecord = shareId ? await getBirthChartShare(shareId) : null;
   const name = shareRecord?.name ?? sanitize(searchParams.get('name'), 32);
   const sun = shareRecord?.sun ?? sanitize(searchParams.get('sun'), 16) ?? '—';
@@ -276,6 +278,18 @@ export async function GET(request: NextRequest) {
     (element && gradientsByElement[element]) || gradientsByElement.default;
   const robotoMono = await loadRobotoMono(request);
   const astronomiconFont = await loadAstronomiconFont(request);
+
+  // Format-aware sizing
+  const isLandscape = format === 'landscape';
+  const isStory = format === 'story';
+  const padding = isLandscape ? 40 : isStory ? 60 : 64;
+  const titleSize = isLandscape ? 36 : isStory ? 52 : 52;
+  const subtitleSize = isLandscape ? 14 : isStory ? 16 : 16;
+  const bigThreeSize = isLandscape ? 18 : isStory ? 22 : 22;
+  const bigThreeGlyphSize = isLandscape ? 22 : isStory ? 28 : 28;
+  const chartSize = isLandscape ? 280 : isStory ? 420 : 420;
+  const badgeTextSize = isLandscape ? 16 : isStory ? 18 : 18;
+  const elementCountSize = isLandscape ? 28 : isStory ? 36 : 36;
 
   const elementCounts = ELEMENT_ORDER.reduce(
     (acc, label) => {
@@ -391,7 +405,7 @@ export async function GET(request: NextRequest) {
         alignItems: 'center',
         background: theme.background,
         color: '#fff',
-        padding: 64,
+        padding,
         fontFamily: 'Roboto Mono',
         position: 'relative',
       }}
@@ -435,7 +449,7 @@ export async function GET(request: NextRequest) {
               display: 'flex',
               letterSpacing: 4,
               textTransform: 'uppercase',
-              fontSize: 16,
+              fontSize: subtitleSize,
               opacity: 0.6,
             }}
           >
@@ -444,20 +458,20 @@ export async function GET(request: NextRequest) {
           <div
             style={{
               display: 'flex',
-              fontSize: 52,
+              fontSize: titleSize,
               fontWeight: 500,
               lineHeight: 1.05,
             }}
           >
-            {name ? `${name}’s birth chart` : 'Birth chart highlights'}
+            {name ? `${name}'s birth chart` : 'Birth chart highlights'}
           </div>
           <div
             style={{
               display: 'flex',
-              gap: 24,
+              gap: isLandscape ? 16 : 24,
               flexWrap: 'wrap',
               justifyContent: 'center',
-              fontSize: 22,
+              fontSize: bigThreeSize,
               letterSpacing: 1,
             }}
           >
@@ -473,7 +487,7 @@ export async function GET(request: NextRequest) {
                 <span
                   style={{
                     fontFamily: 'Astronomicon',
-                    fontSize: 28,
+                    fontSize: bigThreeGlyphSize,
                     opacity: 0.85,
                   }}
                 >
@@ -496,7 +510,7 @@ export async function GET(request: NextRequest) {
         >
           <ChartWheelOg
             birthChart={birthChart}
-            size={420}
+            size={chartSize}
             showTooltips={false}
           />
         </div>
@@ -546,17 +560,17 @@ export async function GET(request: NextRequest) {
                   display: 'flex',
                   flexDirection: 'column',
                   gap: 6,
-                  padding: '16px 20px',
+                  padding: isLandscape ? '12px 16px' : '16px 20px',
                   borderRadius: 14,
                   border: '1px solid rgba(255,255,255,0.12)',
                   background: 'rgba(0,0,0,0.15)',
-                  minWidth: 150,
+                  minWidth: isLandscape ? 120 : 150,
                   alignItems: 'center',
                 }}
               >
                 <span
                   style={{
-                    fontSize: 16,
+                    fontSize: isLandscape ? 14 : 16,
                     letterSpacing: 2,
                     textTransform: 'uppercase',
                     opacity: 0.6,
@@ -566,13 +580,13 @@ export async function GET(request: NextRequest) {
                 </span>
                 <span
                   style={{
-                    fontSize: 36,
+                    fontSize: elementCountSize,
                     fontWeight: 500,
                   }}
                 >
                   {entry.count}
                 </span>
-                <span style={{ fontSize: 16, opacity: 0.6 }}>
+                <span style={{ fontSize: isLandscape ? 14 : 16, opacity: 0.6 }}>
                   {entry.count === 1 ? 'planet' : 'planets'}
                 </span>
               </div>
@@ -699,7 +713,7 @@ export async function GET(request: NextRequest) {
               borderRadius: 20,
               border: '1px solid rgba(255,255,255,0.16)',
               background: theme.soft,
-              padding: '20px 22px',
+              padding: isLandscape ? '16px 18px' : '20px 22px',
             }}
           >
             <div
@@ -711,7 +725,7 @@ export async function GET(request: NextRequest) {
             >
               <span
                 style={{
-                  fontSize: 16,
+                  fontSize: isLandscape ? 14 : 16,
                   letterSpacing: 4,
                   textTransform: 'uppercase',
                   opacity: 0.75,
@@ -722,7 +736,7 @@ export async function GET(request: NextRequest) {
             </div>
             <div
               style={{
-                fontSize: 24,
+                fontSize: isLandscape ? 18 : 24,
                 lineHeight: 1.4,
                 opacity: 0.95,
               }}
@@ -748,8 +762,8 @@ export async function GET(request: NextRequest) {
       </div>
     </div>,
     {
-      width: WIDTH,
-      height: HEIGHT,
+      width,
+      height,
       fonts: [
         { name: 'Roboto Mono', data: robotoMono, style: 'normal' },
         { name: 'Astronomicon', data: astronomiconFont, style: 'normal' },

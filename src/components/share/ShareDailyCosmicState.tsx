@@ -11,6 +11,57 @@ import { ShareFormatSelector } from './ShareFormatSelector';
 import { shareTracking } from '@/lib/analytics/share-tracking';
 import { getCosmicContextForDate } from '@/lib/cosmic/cosmic-context-utils';
 
+// Zodiac season calculation
+const ZODIAC_SEASONS = [
+  { sign: 'Capricorn', startMonth: 12, startDay: 22, endMonth: 1, endDay: 19 },
+  { sign: 'Aquarius', startMonth: 1, startDay: 20, endMonth: 2, endDay: 18 },
+  { sign: 'Pisces', startMonth: 2, startDay: 19, endMonth: 3, endDay: 20 },
+  { sign: 'Aries', startMonth: 3, startDay: 21, endMonth: 4, endDay: 19 },
+  { sign: 'Taurus', startMonth: 4, startDay: 20, endMonth: 5, endDay: 20 },
+  { sign: 'Gemini', startMonth: 5, startDay: 21, endMonth: 6, endDay: 20 },
+  { sign: 'Cancer', startMonth: 6, startDay: 21, endMonth: 7, endDay: 22 },
+  { sign: 'Leo', startMonth: 7, startDay: 23, endMonth: 8, endDay: 22 },
+  { sign: 'Virgo', startMonth: 8, startDay: 23, endMonth: 9, endDay: 22 },
+  { sign: 'Libra', startMonth: 9, startDay: 23, endMonth: 10, endDay: 22 },
+  { sign: 'Scorpio', startMonth: 10, startDay: 23, endMonth: 11, endDay: 21 },
+  {
+    sign: 'Sagittarius',
+    startMonth: 11,
+    startDay: 22,
+    endMonth: 12,
+    endDay: 21,
+  },
+];
+
+function getZodiacSeasonFromDate(date: Date): string {
+  const month = date.getMonth() + 1;
+  const day = date.getDate();
+
+  for (const season of ZODIAC_SEASONS) {
+    if (season.startMonth <= season.endMonth) {
+      if (
+        (month === season.startMonth && day >= season.startDay) ||
+        (month === season.endMonth && day <= season.endDay) ||
+        (month > season.startMonth && month < season.endMonth)
+      ) {
+        return season.sign;
+      }
+    } else {
+      // Handle year-crossing seasons like Capricorn
+      if (
+        (month === season.startMonth && day >= season.startDay) ||
+        (month === season.endMonth && day <= season.endDay) ||
+        month > season.startMonth ||
+        month < season.endMonth
+      ) {
+        return season.sign;
+      }
+    }
+  }
+
+  return 'Capricorn'; // Default fallback
+}
+
 interface DailyCosmicStateData {
   moonPhase: {
     name: string;
@@ -34,11 +85,13 @@ interface ShareDailyCosmicStateProps {
     headline: string;
     description: string;
   };
+  compact?: boolean; // Icon-only mode for header integration
 }
 
 export function ShareDailyCosmicState({
   generalInsight = 'Follow the cosmic flow and trust your intuition today',
   transitInfo,
+  compact = false,
 }: ShareDailyCosmicStateProps) {
   const { user } = useUser();
   const [imageBlob, setImageBlob] = useState<Blob | null>(null);
@@ -61,20 +114,35 @@ export function ShareDailyCosmicState({
 
   // Calculate today's cosmic state
   useEffect(() => {
-    const today = new Date();
-    const cosmicContext = getCosmicContextForDate(today);
+    try {
+      const today = new Date();
+      const cosmicContext = getCosmicContextForDate(today);
 
-    // Get zodiac season
-    const zodiacSeason = getZodiacSeasonForDate(today);
+      // Validate moon phase data
+      if (
+        !cosmicContext?.moonPhase?.icon?.src ||
+        !cosmicContext?.moonPhase?.name
+      ) {
+        console.error('Invalid moon phase data:', cosmicContext);
+        setError('Failed to load cosmic data');
+        return;
+      }
 
-    setCosmicData({
-      moonPhase: cosmicContext.moonPhase,
-      zodiacSeason,
-      insight: generalInsight,
-      transit: transitInfo,
-      date: today.toISOString().split('T')[0],
-    });
-  }, [generalInsight, transitInfo]);
+      // Get zodiac season (simple calculation)
+      const zodiacSeason = getZodiacSeasonFromDate(today);
+
+      setCosmicData({
+        moonPhase: cosmicContext.moonPhase,
+        zodiacSeason,
+        insight: generalInsight,
+        transit: transitInfo,
+        date: today.toISOString().split('T')[0],
+      });
+    } catch (error) {
+      console.error('Cosmic data error:', error);
+      setError('Failed to load cosmic data');
+    }
+  }, [generalInsight, transitInfo, setError]);
 
   const generateCard = useCallback(async () => {
     if (!cosmicData) {
@@ -202,10 +270,15 @@ export function ShareDailyCosmicState({
     <div className='flex flex-col items-center justify-center'>
       <button
         onClick={handleOpen}
-        className='inline-flex items-center gap-2 rounded-lg border border-lunary-primary-700 bg-lunary-primary-900/10 px-4 py-2 text-sm font-medium text-lunary-primary-200 hover:text-lunary-primary-100 hover:bg-lunary-primary-900/20 transition-colors'
+        className={
+          compact
+            ? 'inline-flex items-center justify-center rounded-lg border border-lunary-primary-700 bg-lunary-primary-900/10 p-2 text-lunary-primary-200 hover:text-lunary-primary-100 hover:bg-lunary-primary-900/20 transition-colors'
+            : 'inline-flex items-center gap-2 rounded-lg border border-lunary-primary-700 bg-lunary-primary-900/10 px-4 py-2 text-sm font-medium text-lunary-primary-200 hover:text-lunary-primary-100 hover:bg-lunary-primary-900/20 transition-colors'
+        }
+        title={compact ? "Share Today's Cosmic State" : undefined}
       >
         <Share2 className='w-4 h-4' />
-        Share Today's Cosmic State
+        {!compact && "Share Today's Cosmic State"}
       </button>
 
       <ShareModal
@@ -260,60 +333,4 @@ export function ShareDailyCosmicState({
       </ShareModal>
     </div>
   );
-}
-
-// Helper function to get zodiac season
-function getZodiacSeasonForDate(date: Date): string {
-  const ZODIAC_SEASONS = [
-    {
-      sign: 'Capricorn',
-      startMonth: 12,
-      startDay: 22,
-      endMonth: 1,
-      endDay: 19,
-    },
-    { sign: 'Aquarius', startMonth: 1, startDay: 20, endMonth: 2, endDay: 18 },
-    { sign: 'Pisces', startMonth: 2, startDay: 19, endMonth: 3, endDay: 20 },
-    { sign: 'Aries', startMonth: 3, startDay: 21, endMonth: 4, endDay: 19 },
-    { sign: 'Taurus', startMonth: 4, startDay: 20, endMonth: 5, endDay: 20 },
-    { sign: 'Gemini', startMonth: 5, startDay: 21, endMonth: 6, endDay: 20 },
-    { sign: 'Cancer', startMonth: 6, startDay: 21, endMonth: 7, endDay: 22 },
-    { sign: 'Leo', startMonth: 7, startDay: 23, endMonth: 8, endDay: 22 },
-    { sign: 'Virgo', startMonth: 8, startDay: 23, endMonth: 9, endDay: 22 },
-    { sign: 'Libra', startMonth: 9, startDay: 23, endMonth: 10, endDay: 22 },
-    { sign: 'Scorpio', startMonth: 10, startDay: 23, endMonth: 11, endDay: 21 },
-    {
-      sign: 'Sagittarius',
-      startMonth: 11,
-      startDay: 22,
-      endMonth: 12,
-      endDay: 21,
-    },
-  ];
-
-  const month = date.getMonth() + 1;
-  const day = date.getDate();
-
-  for (const season of ZODIAC_SEASONS) {
-    if (season.startMonth <= season.endMonth) {
-      if (
-        (month === season.startMonth && day >= season.startDay) ||
-        (month === season.endMonth && day <= season.endDay) ||
-        (month > season.startMonth && month < season.endMonth)
-      ) {
-        return season.sign;
-      }
-    } else {
-      if (
-        (month === season.startMonth && day >= season.startDay) ||
-        (month === season.endMonth && day <= season.endDay) ||
-        month > season.startMonth ||
-        month < season.endMonth
-      ) {
-        return season.sign;
-      }
-    }
-  }
-
-  return 'Aquarius';
 }

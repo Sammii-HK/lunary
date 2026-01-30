@@ -20,6 +20,7 @@ import { TransitWisdom } from './TransitWisdom';
 import { UnifiedTransitList } from './UnifiedTransitList';
 import { useCTACopy } from '@/hooks/useCTACopy';
 import { ShareRetrogradeBadge } from '@/components/share/ShareRetrogradeBadge';
+import { ShareHoroscope } from '@/components/share/ShareHoroscope';
 
 const GuideNudge = dynamic(
   () =>
@@ -344,7 +345,7 @@ export function HoroscopeView({
       {/* Header */}
       <div className='pt-6'>
         <div className='flex flex-wrap items-start justify-between gap-3'>
-          <div>
+          <div className='flex-1'>
             <h1 className='text-2xl md:text-3xl font-light text-zinc-100 mb-2'>
               {hasPaidAccess && userName
                 ? `${userName}'s Horoscope`
@@ -356,15 +357,26 @@ export function HoroscopeView({
                 : 'Universal reading — unlock yours for something personal'}
             </p>
           </div>
-          <button
-            type='button'
-            onClick={handleShareHoroscope}
-            disabled={hasPaidAccess && !horoscope}
-            className='inline-flex items-center gap-2 rounded-full border border-zinc-700 px-4 py-2 text-xs font-semibold tracking-wide uppercase text-zinc-200 transition hover:border-lunary-primary-500 hover:text-white disabled:cursor-not-allowed disabled:opacity-50'
-          >
-            <Share2 className='h-4 w-4' />
-            Share {hasPaidAccess ? 'horoscope' : 'highlight'}
-          </button>
+          <div className='flex items-center gap-2'>
+            <ShareRetrogradeBadge compact />
+            {horoscope ? (
+              <ShareHoroscope
+                sunSign={horoscope.sunSign}
+                headline={horoscope.headline}
+                overview={horoscope.overview}
+                numerologyNumber={personalDay?.number || universalDay.number}
+              />
+            ) : (
+              <button
+                type='button'
+                disabled
+                className='inline-flex items-center gap-2 rounded-full border border-zinc-700 px-4 py-2 text-xs font-semibold tracking-wide uppercase text-zinc-200 transition hover:border-lunary-primary-500 hover:text-white disabled:cursor-not-allowed disabled:opacity-50'
+              >
+                <Share2 className='h-4 w-4' />
+                Share {hasPaidAccess ? 'horoscope' : 'highlight'}
+              </button>
+            )}
+          </div>
         </div>
       </div>
 
@@ -637,11 +649,6 @@ export function HoroscopeView({
           showHousePlacement={hasPaidAccess}
         />
       </HoroscopeSection>
-
-      {/* Mercury Retrograde Badge */}
-      <div className='flex justify-center my-4'>
-        <ShareRetrogradeBadge />
-      </div>
 
       {/* Today's Aspects — paid: full component; free: locked preview */}
       {hasPaidAccess && birthChart && currentTransits.length > 0 ? (

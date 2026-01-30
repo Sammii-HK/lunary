@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useCallback, useEffect } from 'react';
-import { Share2, Award } from 'lucide-react';
+import { Award } from 'lucide-react';
 import { useUser } from '@/context/UserContext';
 import { useShareModal } from '@/hooks/useShareModal';
 import { ShareModal } from './ShareModal';
@@ -28,6 +28,7 @@ interface RetrogradeStatus {
 interface ShareRetrogradeBadgeProps {
   retrogradeStatus?: RetrogradeStatus;
   onStatusFetch?: () => Promise<RetrogradeStatus | null>;
+  compact?: boolean; // Icon-only mode for header integration
 }
 
 // Helper function to check if currently in Mercury retrograde
@@ -120,6 +121,7 @@ function getCurrentRetrogradeStatus(): RetrogradeStatus {
 export function ShareRetrogradeBadge({
   retrogradeStatus,
   onStatusFetch,
+  compact = false,
 }: ShareRetrogradeBadgeProps) {
   const { user } = useUser();
   const [imageBlob, setImageBlob] = useState<Blob | null>(null);
@@ -344,23 +346,53 @@ export function ShareRetrogradeBadge({
     : `Share Day ${status.survivalDays} Badge`;
 
   return (
-    <div className='flex flex-col items-center justify-center gap-2'>
-      <div className='flex items-center gap-2 text-sm text-zinc-400'>
-        <Award className='w-4 h-4 text-amber-500' />
-        <span>
-          {status.isCompleted
-            ? `You survived Mercury Retrograde!`
-            : `Day ${status.survivalDays} - ${badgeLabels[status.badgeLevel]}`}
-        </span>
-      </div>
+    <>
+      {compact ? (
+        // Compact mode (icon only for header)
+        <button
+          onClick={handleOpen}
+          className='inline-flex items-center justify-center rounded-lg border border-amber-600 bg-amber-900/10 p-2 text-amber-200 hover:text-amber-100 hover:bg-amber-900/20 transition-colors'
+          title={buttonText}
+        >
+          <Award className='w-4 h-4' />
+        </button>
+      ) : (
+        // Full display mode with enhanced design
+        <div className='flex flex-col items-center gap-3 p-4 rounded-lg bg-gradient-to-br from-amber-900/40 to-orange-900/40 border-2 border-amber-500/60'>
+          <div className='flex items-center gap-2'>
+            <Award className='w-5 h-5 text-amber-400' />
+            <span className='text-sm font-semibold text-amber-200'>
+              {status.isCompleted
+                ? 'Retrograde Survivor!'
+                : `Day ${status.survivalDays} Survivor`}
+            </span>
+          </div>
 
-      <button
-        onClick={handleOpen}
-        className='inline-flex items-center gap-2 rounded-lg border border-amber-600 bg-amber-900/10 px-4 py-2 text-sm font-medium text-amber-200 hover:text-amber-100 hover:bg-amber-900/20 transition-colors'
-      >
-        <Share2 className='w-4 h-4' />
-        {buttonText}
-      </button>
+          {/* Progress indicator */}
+          <div className='w-full max-w-xs'>
+            <div className='h-1.5 bg-amber-950/50 rounded-full overflow-hidden'>
+              <div
+                className='h-full bg-gradient-to-r from-amber-500 to-orange-500 transition-all duration-500'
+                style={{
+                  width: `${Math.min((status.survivalDays / 21) * 100, 100)}%`,
+                }}
+              />
+            </div>
+            <div className='flex justify-between mt-1 text-xs text-amber-300/60'>
+              <span>Start</span>
+              <span>{status.survivalDays} / 21 days</span>
+            </div>
+          </div>
+
+          <button
+            onClick={handleOpen}
+            className='inline-flex items-center gap-2 rounded-lg border-2 border-amber-500 bg-amber-900/30 px-4 py-2 text-sm font-medium text-amber-100 hover:text-white hover:bg-amber-900/50 hover:border-amber-400 transition-all'
+          >
+            <Award className='w-4 h-4' />
+            {buttonText}
+          </button>
+        </div>
+      )}
 
       <ShareModal
         isOpen={isOpen}
@@ -412,6 +444,6 @@ export function ShareRetrogradeBadge({
           </div>
         )}
       </ShareModal>
-    </div>
+    </>
   );
 }

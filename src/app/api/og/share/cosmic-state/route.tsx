@@ -36,13 +36,30 @@ export async function GET(request: NextRequest) {
       return new Response('Missing shareId', { status: 400 });
     }
 
-    // Fetch share data from KV
+    // Fetch share data from KV or use demo data
     const raw = await kvGet(`cosmic-state:${shareId}`);
-    if (!raw) {
-      return new Response('Share not found', { status: 404 });
-    }
 
-    const data = JSON.parse(raw) as CosmicStateShareRecord;
+    let data: CosmicStateShareRecord;
+
+    if (!raw || shareId === 'demo') {
+      // Provide demo/fallback data
+      data = {
+        shareId: 'demo',
+        createdAt: new Date().toISOString(),
+        moonPhase: {
+          name: 'Waxing Crescent',
+          icon: {
+            src: '/icons/moon-phases/waxing-cresent-moon.png',
+            alt: 'Waxing Crescent Moon',
+          },
+        },
+        zodiacSeason: 'Aquarius',
+        insight: 'The cosmic currents support growth and new beginnings',
+        date: new Date().toISOString().split('T')[0],
+      };
+    } else {
+      data = JSON.parse(raw) as CosmicStateShareRecord;
+    }
     const { width, height } = getFormatDimensions(format);
     const firstName = data.name?.trim().split(' ')[0] || '';
     const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://lunary.app';
@@ -256,6 +273,16 @@ export async function GET(request: NextRequest) {
       {
         width,
         height,
+        fonts: [
+          {
+            name: 'Roboto Mono',
+            data: await fetch(
+              new URL('/fonts/RobotoMono-Regular.ttf', request.url),
+            ).then((res) => res.arrayBuffer()),
+            style: 'normal',
+            weight: 400,
+          },
+        ],
       },
     );
   } catch (error) {

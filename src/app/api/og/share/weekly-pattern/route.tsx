@@ -56,13 +56,43 @@ export async function GET(request: NextRequest) {
       return new Response('Missing shareId', { status: 400 });
     }
 
-    // Fetch share data from KV
+    // Fetch share data from KV or use demo data
     const raw = await kvGet(`weekly-pattern:${shareId}`);
-    if (!raw) {
-      return new Response('Share not found', { status: 404 });
-    }
 
-    const data = JSON.parse(raw) as WeeklyPatternShareRecord;
+    let data: WeeklyPatternShareRecord;
+
+    if (!raw || shareId === 'demo') {
+      // Provide demo/fallback data
+      const today = new Date();
+      const weekAgo = new Date(today);
+      weekAgo.setDate(weekAgo.getDate() - 7);
+
+      data = {
+        shareId: 'demo',
+        createdAt: new Date().toISOString(),
+        season: {
+          name: 'Season of Reflection',
+          suit: 'Cups',
+          description: 'A time of emotional depth and intuitive wisdom',
+        },
+        topCards: [
+          { name: 'The Star', count: 3 },
+          { name: 'Two of Cups', count: 2 },
+          { name: 'Ace of Cups', count: 2 },
+        ],
+        dominantSuit: {
+          suit: 'Cups',
+          percentage: 60,
+          count: 6,
+        },
+        dateRange: {
+          start: weekAgo.toISOString().split('T')[0],
+          end: today.toISOString().split('T')[0],
+        },
+      };
+    } else {
+      data = JSON.parse(raw) as WeeklyPatternShareRecord;
+    }
     const { width, height } = getFormatDimensions(format);
     const firstName = data.name?.trim().split(' ')[0] || '';
     const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://lunary.app';
@@ -280,6 +310,16 @@ export async function GET(request: NextRequest) {
       {
         width,
         height,
+        fonts: [
+          {
+            name: 'Roboto Mono',
+            data: await fetch(
+              new URL('/fonts/RobotoMono-Regular.ttf', request.url),
+            ).then((res) => res.arrayBuffer()),
+            style: 'normal',
+            weight: 400,
+          },
+        ],
       },
     );
   } catch (error) {

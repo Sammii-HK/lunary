@@ -64,13 +64,27 @@ export async function GET(request: NextRequest) {
       return new Response('Missing shareId', { status: 400 });
     }
 
-    // Fetch share data from KV
+    // Fetch share data from KV or use demo data
     const raw = await kvGet(`zodiac-season:${shareId}`);
-    if (!raw) {
-      return new Response('Share not found', { status: 404 });
-    }
 
-    const data = JSON.parse(raw) as ZodiacSeasonShareRecord;
+    let data: ZodiacSeasonShareRecord;
+
+    if (!raw || shareId === 'demo') {
+      // Provide demo/fallback data - Aquarius season
+      data = {
+        shareId: 'demo',
+        createdAt: new Date().toISOString(),
+        sign: 'Aquarius',
+        element: 'Air',
+        modality: 'Fixed',
+        startDate: '2026-01-20',
+        endDate: '2026-02-18',
+        themes: ['Innovation', 'Community', 'Progress'],
+        symbol: '♒',
+      };
+    } else {
+      data = JSON.parse(raw) as ZodiacSeasonShareRecord;
+    }
     const { width, height } = getFormatDimensions(format);
     const firstName = data.name?.trim().split(' ')[0] || '';
     const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://lunary.app';
@@ -285,6 +299,16 @@ export async function GET(request: NextRequest) {
       {
         width,
         height,
+        fonts: [
+          {
+            name: 'Roboto Mono',
+            data: await fetch(
+              new URL('/fonts/RobotoMono-Regular.ttf', request.url),
+            ).then((res) => res.arrayBuffer()),
+            style: 'normal',
+            weight: 400,
+          },
+        ],
       },
     );
   } catch (error) {

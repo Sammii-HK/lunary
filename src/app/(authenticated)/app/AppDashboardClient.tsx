@@ -307,8 +307,9 @@ export default function AppDashboardClient() {
               </>
             )}
           </p>
-          <div className='w-16 flex justify-end'>
+          <div className='flex justify-end gap-2'>
             <ShareDailyInsight />
+            <ShareDailyCosmicState compact />
           </div>
         </div>
         <div className='text-center'>
@@ -334,12 +335,6 @@ export default function AppDashboardClient() {
           <MoonPreview isExpanded={moonExpanded} onToggle={handleMoonToggle} />
         </div>
         <SkyNowCard />
-
-        {/* Daily Cosmic State Share */}
-        <div className={isDemoMode ? '' : 'md:col-span-2'}>
-          <ShareDailyCosmicState />
-        </div>
-
         <DailyInsightCard />
         <DailyCardPreview />
 

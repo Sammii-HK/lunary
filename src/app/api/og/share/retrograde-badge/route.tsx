@@ -69,13 +69,27 @@ export async function GET(request: NextRequest) {
       return new Response('Missing shareId', { status: 400 });
     }
 
-    // Fetch share data from KV
+    // Fetch share data from KV or use demo data
     const raw = await kvGet(`retrograde-badge:${shareId}`);
-    if (!raw) {
-      return new Response('Share not found', { status: 404 });
-    }
 
-    const data = JSON.parse(raw) as RetrogradeBadgeShareRecord;
+    let data: RetrogradeBadgeShareRecord;
+
+    if (!raw || shareId === 'demo') {
+      // Provide demo/fallback data - Mercury retrograde in progress
+      data = {
+        shareId: 'demo',
+        createdAt: new Date().toISOString(),
+        planet: 'Mercury',
+        badgeLevel: 'silver',
+        survivalDays: 10,
+        isCompleted: false,
+        retrogradeStart: '2026-01-15',
+        retrogradeEnd: '2026-02-04',
+        sign: 'Aquarius',
+      };
+    } else {
+      data = JSON.parse(raw) as RetrogradeBadgeShareRecord;
+    }
     const { width, height } = getFormatDimensions(format);
     const firstName = data.name?.trim().split(' ')[0] || '';
     const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://lunary.app';

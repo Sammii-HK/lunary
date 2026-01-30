@@ -23,6 +23,7 @@ interface ZodiacSeasonData {
 interface ShareZodiacSeasonProps {
   currentSeason?: ZodiacSeasonData;
   onSeasonFetch?: () => Promise<ZodiacSeasonData | null>;
+  demo?: boolean; // Always show for testing/demo purposes
 }
 
 // Zodiac sign metadata
@@ -180,9 +181,113 @@ function getCurrentSeasonIfTransitioning(): ZodiacSeasonData | null {
   return null;
 }
 
+// Demo data for testing/preview
+function getDemoSeasonData(): ZodiacSeasonData {
+  const today = new Date();
+  const currentMonth = today.getMonth() + 1;
+
+  // Determine current zodiac sign based on month
+  const zodiacSigns = [
+    {
+      name: 'Aquarius',
+      start: { month: 1, day: 20 },
+      end: { month: 2, day: 18 },
+    },
+    {
+      name: 'Pisces',
+      start: { month: 2, day: 19 },
+      end: { month: 3, day: 20 },
+    },
+    { name: 'Aries', start: { month: 3, day: 21 }, end: { month: 4, day: 19 } },
+    {
+      name: 'Taurus',
+      start: { month: 4, day: 20 },
+      end: { month: 5, day: 20 },
+    },
+    {
+      name: 'Gemini',
+      start: { month: 5, day: 21 },
+      end: { month: 6, day: 20 },
+    },
+    {
+      name: 'Cancer',
+      start: { month: 6, day: 21 },
+      end: { month: 7, day: 22 },
+    },
+    { name: 'Leo', start: { month: 7, day: 23 }, end: { month: 8, day: 22 } },
+    { name: 'Virgo', start: { month: 8, day: 23 }, end: { month: 9, day: 22 } },
+    {
+      name: 'Libra',
+      start: { month: 9, day: 23 },
+      end: { month: 10, day: 22 },
+    },
+    {
+      name: 'Scorpio',
+      start: { month: 10, day: 23 },
+      end: { month: 11, day: 21 },
+    },
+    {
+      name: 'Sagittarius',
+      start: { month: 11, day: 22 },
+      end: { month: 12, day: 21 },
+    },
+    {
+      name: 'Capricorn',
+      start: { month: 12, day: 22 },
+      end: { month: 1, day: 19 },
+    },
+  ];
+
+  const currentSign = zodiacSigns.find((sign) => {
+    if (sign.start.month <= sign.end.month) {
+      return (
+        (currentMonth === sign.start.month &&
+          today.getDate() >= sign.start.day) ||
+        (currentMonth === sign.end.month && today.getDate() <= sign.end.day) ||
+        (currentMonth > sign.start.month && currentMonth < sign.end.month)
+      );
+    } else {
+      // Handle year-crossing signs like Capricorn
+      return (
+        (currentMonth === sign.start.month &&
+          today.getDate() >= sign.start.day) ||
+        (currentMonth === sign.end.month && today.getDate() <= sign.end.day) ||
+        currentMonth > sign.start.month ||
+        currentMonth < sign.end.month
+      );
+    }
+  });
+
+  const signName = (currentSign?.name ||
+    'Aquarius') as keyof typeof ZODIAC_METADATA;
+  const metadata = ZODIAC_METADATA[signName];
+
+  const startDate = new Date(
+    today.getFullYear(),
+    (currentSign?.start.month || 1) - 1,
+    currentSign?.start.day || 20,
+  );
+  const endDate = new Date(
+    today.getFullYear(),
+    (currentSign?.end.month || 2) - 1,
+    currentSign?.end.day || 18,
+  );
+
+  return {
+    sign: signName,
+    element: metadata.element,
+    modality: metadata.modality,
+    startDate: startDate.toISOString().split('T')[0],
+    endDate: endDate.toISOString().split('T')[0],
+    themes: metadata.themes,
+    symbol: metadata.symbol,
+  };
+}
+
 export function ShareZodiacSeason({
   currentSeason,
   onSeasonFetch,
+  demo = false,
 }: ShareZodiacSeasonProps) {
   const { user } = useUser();
   const [imageBlob, setImageBlob] = useState<Blob | null>(null);
@@ -213,13 +318,18 @@ export function ShareZodiacSeason({
       if (onSeasonFetch) {
         const fetchedSeason = await onSeasonFetch();
         setSeasonData(fetchedSeason);
+      } else if (demo) {
+        // In demo mode, use current season or create demo data
+        const demoSeason =
+          getCurrentSeasonIfTransitioning() || getDemoSeasonData();
+        setSeasonData(demoSeason);
       } else {
         const currentTransition = getCurrentSeasonIfTransitioning();
         setSeasonData(currentTransition);
       }
     };
     checkSeason();
-  }, [onSeasonFetch]);
+  }, [onSeasonFetch, demo]);
 
   const generateCard = useCallback(async () => {
     if (!seasonData) {
@@ -380,8 +490,8 @@ export function ShareZodiacSeason({
     threads: `https://www.threads.net/intent/post?text=${encodeURIComponent(`${socialText} ${socialShareUrl}`)}`,
   };
 
-  // Don't show button if not in season transition window
-  if (!seasonData) {
+  // Don't show button if not in season transition window (unless in demo mode)
+  if (!seasonData && !demo) {
     return null;
   }
 
