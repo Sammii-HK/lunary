@@ -30,17 +30,33 @@ export function transformBasicPatternsToAnalysis(basicPatterns: {
   arcanaPatterns: Array<{ type: string; count: number; reading?: string }>;
   timeFrame: number;
 }): PatternAnalysis {
-  // Calculate total readings from suit patterns
-  const totalReadings = basicPatterns.suitPatterns.reduce(
+  // Debug: Log incoming data
+  if (process.env.NODE_ENV === 'development') {
+    console.log('[Pattern Adapter] Input basicPatterns:', {
+      suitPatterns: basicPatterns.suitPatterns,
+      arcanaPatterns: basicPatterns.arcanaPatterns,
+      frequentCards: basicPatterns.frequentCards,
+    });
+  }
+
+  // Calculate total cards drawn across all suits
+  // This represents the total number of card positions across all readings
+  const totalCardsDrawn = basicPatterns.suitPatterns.reduce(
     (sum, suit) => sum + suit.count,
     0,
   );
 
-  // Calculate total cards for percentages
-  const totalCards = basicPatterns.frequentCards.reduce(
-    (sum, card) => sum + card.count,
-    0,
-  );
+  // Estimate total readings based on total cards
+  // Assuming average 3 cards per reading (adjust based on your app's typical spread size)
+  const estimatedReadings =
+    totalCardsDrawn > 0 ? Math.ceil(totalCardsDrawn / 3) : 0;
+
+  if (process.env.NODE_ENV === 'development') {
+    console.log('[Pattern Adapter] Calculated:', {
+      totalCardsDrawn,
+      estimatedReadings,
+    });
+  }
 
   // Transform dominant themes
   const dominantThemes: PatternTheme[] = basicPatterns.dominantThemes
@@ -54,23 +70,26 @@ export function transformBasicPatternsToAnalysis(basicPatterns: {
       };
     });
 
-  // Transform frequent cards
+  // Transform frequent cards with meaningful percentages
   const frequentCards: FrequentCard[] = basicPatterns.frequentCards.map(
     (card) => ({
       name: card.name,
       count: card.count,
-      percentage: totalCards > 0 ? (card.count / totalCards) * 100 : 0,
+      // Percentage based on ALL cards drawn, not just frequent cards
+      percentage:
+        totalCardsDrawn > 0 ? (card.count / totalCardsDrawn) * 100 : 0,
       meaning: card.reading,
       appearances: [], // Would need to be populated from actual reading data
     }),
   );
 
-  // Transform suit patterns with percentages
+  // Transform suit patterns with percentages (based on total cards drawn)
   const suitPatterns: SuitPattern[] = basicPatterns.suitPatterns.map(
     (suit) => ({
       suit: suit.suit,
       count: suit.count,
-      percentage: totalReadings > 0 ? (suit.count / totalReadings) * 100 : 0,
+      percentage:
+        totalCardsDrawn > 0 ? (suit.count / totalCardsDrawn) * 100 : 0,
     }),
   );
 
@@ -97,7 +116,7 @@ export function transformBasicPatternsToAnalysis(basicPatterns: {
     frequentCards,
     suitPatterns,
     arcanaBalance,
-    totalReadings,
+    totalReadings: estimatedReadings,
     dateRange: {
       start: startDate.toISOString(),
       end: endDate.toISOString(),
