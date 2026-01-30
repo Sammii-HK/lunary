@@ -131,74 +131,86 @@ export async function GET(request: NextRequest) {
           </div>
         </div>
 
-        {/* Moon Phase Card */}
+        {/* Cards Container - Horizontal for landscape, vertical otherwise */}
         <div
           style={{
             display: 'flex',
-            flexDirection: 'column',
-            padding: isLandscape ? 20 : 28,
-            background: OG_COLORS.cardBg,
-            border: `1px solid ${OG_COLORS.border}`,
-            borderRadius: 16,
-            marginBottom: isLandscape ? 16 : 24,
-            alignItems: 'center',
-          }}
-        >
-          <img
-            src={`${baseUrl}${moonIconPath}`}
-            width={isLandscape ? 64 : 80}
-            height={isLandscape ? 64 : 80}
-            style={{ marginBottom: 16 }}
-            alt={data.moonPhase.name}
-          />
-          <div
-            style={{
-              fontSize: phaseSize,
-              fontWeight: 400,
-              color: OG_COLORS.primaryViolet,
-              letterSpacing: '0.05em',
-              textAlign: 'center',
-              marginBottom: 8,
-            }}
-          >
-            {data.moonPhase.name}
-          </div>
-          <div
-            style={{
-              fontSize: labelSize,
-              color: OG_COLORS.textSecondary,
-              textTransform: 'uppercase',
-              letterSpacing: '0.1em',
-              fontWeight: 300,
-              textAlign: 'center',
-            }}
-          >
-            {data.zodiacSeason} Season
-          </div>
-        </div>
-
-        {/* Insight Card */}
-        <div
-          style={{
-            display: 'flex',
-            flexDirection: 'column',
-            padding: isLandscape ? 20 : 28,
-            background: OG_COLORS.cardBg,
-            border: `1px solid ${OG_COLORS.border}`,
-            borderRadius: 16,
+            flexDirection: isLandscape ? 'row' : 'column',
+            gap: isLandscape ? 16 : 0,
             marginBottom: data.transit ? (isLandscape ? 16 : 24) : 0,
             flex: data.transit ? 0 : 1,
           }}
         >
+          {/* Moon Phase Card */}
           <div
             style={{
-              fontSize: insightSize,
-              color: OG_COLORS.textPrimary,
-              lineHeight: 1.5,
-              textAlign: 'center',
+              display: 'flex',
+              flexDirection: 'column',
+              padding: isLandscape ? 20 : 28,
+              background: OG_COLORS.cardBg,
+              border: `1px solid ${OG_COLORS.border}`,
+              borderRadius: 16,
+              marginBottom: isLandscape ? 0 : 24,
+              alignItems: 'center',
+              flex: isLandscape ? 1 : 0,
             }}
           >
-            {data.insight}
+            <img
+              src={`${baseUrl}${moonIconPath}`}
+              width={isLandscape ? 56 : 80}
+              height={isLandscape ? 56 : 80}
+              style={{ marginBottom: 12 }}
+              alt={data.moonPhase.name}
+            />
+            <div
+              style={{
+                fontSize: isLandscape ? 28 : phaseSize,
+                fontWeight: 400,
+                color: OG_COLORS.primaryViolet,
+                letterSpacing: '0.05em',
+                textAlign: 'center',
+                marginBottom: 8,
+              }}
+            >
+              {data.moonPhase.name}
+            </div>
+            <div
+              style={{
+                fontSize: isLandscape ? 14 : labelSize,
+                color: OG_COLORS.textSecondary,
+                textTransform: 'uppercase',
+                letterSpacing: '0.1em',
+                fontWeight: 300,
+                textAlign: 'center',
+              }}
+            >
+              {data.zodiacSeason} Season
+            </div>
+          </div>
+
+          {/* Insight Card */}
+          <div
+            style={{
+              display: 'flex',
+              flexDirection: 'column',
+              padding: isLandscape ? 20 : 28,
+              background: OG_COLORS.cardBg,
+              border: `1px solid ${OG_COLORS.border}`,
+              borderRadius: 16,
+              flex: 1,
+              justifyContent: 'center',
+            }}
+          >
+            <div
+              style={{
+                fontSize: isLandscape ? 14 : insightSize,
+                color: OG_COLORS.textPrimary,
+                lineHeight: 1.5,
+                textAlign: 'center',
+              }}
+            >
+              {data.insight}
+            </div>
           </div>
         </div>
 

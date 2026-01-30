@@ -282,6 +282,16 @@ export async function GET(request: NextRequest) {
       {
         width,
         height,
+        fonts: [
+          {
+            name: 'Roboto Mono',
+            data: await fetch(
+              new URL('/fonts/RobotoMono-Regular.ttf', request.url),
+            ).then((res) => res.arrayBuffer()),
+            style: 'normal',
+            weight: 400,
+          },
+        ],
       },
     );
   } catch (error) {
