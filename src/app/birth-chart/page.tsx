@@ -1319,7 +1319,7 @@ const BirthChartPage = () => {
 
         {/* Planetary Interpretations - Responsive Grid */}
         {birthChartData && (
-          <div className='grid grid-cols-1 md:grid-cols-2 gap-3'>
+          <div className='grid grid-cols-1 sm:grid-cols-2 gap-3'>
             {/* Big Three - Sun, Moon, Rising */}
             {(() => {
               const sun = birthChartData.find((p) => p.body === 'Sun');
@@ -1328,7 +1328,7 @@ const BirthChartPage = () => {
 
               if (sun || moon || rising) {
                 return (
-                  <div className='md:col-span-2'>
+                  <div className='sm:col-span-2'>
                     <CollapsibleSection
                       title='The Big Three'
                       defaultCollapsed={false}
@@ -1405,7 +1405,7 @@ const BirthChartPage = () => {
               const houses = calculateWholeSigHouses(birthChartData);
               if (!houses) {
                 return (
-                  <div className='md:col-span-2'>
+                  <div className='sm:col-span-2'>
                     <CollapsibleSection
                       title='Houses'
                       defaultCollapsed={true}
@@ -1653,7 +1653,7 @@ const BirthChartPage = () => {
                     persistState={true}
                   >
                     <div className='bg-lunary-bg rounded-lg p-4 border border-zinc-800'>
-                      <div className='grid grid-cols-1 md:grid-cols-2 gap-3'>
+                      <div className='grid grid-cols-1 sm:grid-cols-2 gap-3'>
                         {asteroidsData.map((asteroid) => (
                           <div
                             key={asteroid.body}
