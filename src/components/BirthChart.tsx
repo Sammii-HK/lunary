@@ -507,11 +507,11 @@ export const BirthChart = ({
         </svg>
       </div>
 
-      <div className='w-full max-w-md px-2'>
+      <div className='w-full max-w-2xl sm:max-w-3xl md:max-w-4xl px-2'>
         <h3 className='text-base md:text-lg font-semibold text-lunary-secondary mb-2 md:mb-3'>
           Planetary Positions
         </h3>
-        <div className='space-y-1.5 md:space-y-2'>
+        <div className='grid grid-cols-1 md:grid-cols-2 gap-2'>
           {mainPlanets.map(
             ({ body, sign, degree, minute, retrograde, house }) => (
               <div
@@ -561,7 +561,7 @@ export const BirthChart = ({
             <h3 className='text-base md:text-lg font-semibold text-lunary-accent mb-2 md:mb-3 mt-4'>
               Chart Angles
             </h3>
-            <div className='space-y-1.5 md:space-y-2'>
+            <div className='grid grid-cols-1 md:grid-cols-2 gap-2'>
               {angles.map(({ body, sign, degree, minute }) => (
                 <div
                   key={body}
@@ -602,7 +602,7 @@ export const BirthChart = ({
             <h3 className='text-base md:text-lg font-semibold text-lunary-secondary mb-2 md:mb-3 mt-4'>
               Sensitive Points
             </h3>
-            <div className='space-y-1.5 md:space-y-2'>
+            <div className='grid grid-cols-1 md:grid-cols-2 gap-2'>
               {points.map(({ body, sign, degree, minute, retrograde }) => (
                 <div
                   key={body}

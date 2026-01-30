@@ -1321,9 +1321,9 @@ const BirthChartPage = () => {
           </div>
         )}
 
-        {/* Planetary Interpretations - Responsive Grid */}
+        {/* Planetary Interpretations - Stacked Sections */}
         {birthChartData && (
-          <div className='grid grid-cols-1 sm:grid-cols-2 gap-3'>
+          <div className='flex flex-col gap-3'>
             {/* Big Three - Sun, Moon, Rising */}
             {(() => {
               const sun = birthChartData.find((p) => p.body === 'Sun');
@@ -1332,7 +1332,7 @@ const BirthChartPage = () => {
 
               if (sun || moon || rising) {
                 return (
-                  <div className='col-span-1 sm:col-span-2'>
+                  <div className=''>
                     <CollapsibleSection
                       title='The Big Three'
                       defaultCollapsed={false}
@@ -1409,7 +1409,7 @@ const BirthChartPage = () => {
               const houses = calculateWholeSigHouses(birthChartData);
               if (!houses) {
                 return (
-                  <div className='col-span-1 sm:col-span-2'>
+                  <div className=''>
                     <CollapsibleSection
                       title='Houses'
                       defaultCollapsed={true}
@@ -1426,7 +1426,7 @@ const BirthChartPage = () => {
               }
 
               return (
-                <div className='col-span-1 sm:col-span-2'>
+                <div className=''>
                   <CollapsibleSection
                     title='Your 12 Houses'
                     defaultCollapsed={true}
@@ -1536,7 +1536,7 @@ const BirthChartPage = () => {
               });
 
               return (
-                <div className='bg-lunary-bg rounded-lg p-4 border border-zinc-800 col-span-1 sm:col-span-2'>
+                <div className='bg-lunary-bg rounded-lg p-4 border border-zinc-800 '>
                   <h4 className='text-xs font-medium text-lunary-secondary mb-2 uppercase tracking-wide'>
                     Houses
                   </h4>
@@ -1584,7 +1584,7 @@ const BirthChartPage = () => {
 
             {/* Chart Analysis */}
             {getChartAnalysis(birthChartData).length > 0 && (
-              <div className='col-span-1 sm:col-span-2'>
+              <div className=''>
                 <CollapsibleSection
                   title='Chart Analysis'
                   defaultCollapsed={true}
@@ -1611,7 +1611,7 @@ const BirthChartPage = () => {
             )}
 
             {/* Element & Modality Breakdown */}
-            <div className='col-span-1 sm:col-span-2'>
+            <div className=''>
               <CollapsibleSection
                 title='Elemental & Modal Balance'
                 defaultCollapsed={true}
@@ -1753,7 +1753,7 @@ const BirthChartPage = () => {
 
             {/* Planetary Aspects */}
             {getPlanetaryAspects(birthChartData).length > 0 && (
-              <div className='col-span-1 sm:col-span-2'>
+              <div className=''>
                 <CollapsibleSection
                   title='Major Aspects'
                   defaultCollapsed={true}
@@ -1785,7 +1785,7 @@ const BirthChartPage = () => {
 
             {/* Chart Patterns */}
             {getChartPatterns(birthChartData).length > 0 && (
-              <div className='col-span-1 sm:col-span-2'>
+              <div className=''>
                 <CollapsibleSection
                   title='Chart Patterns'
                   defaultCollapsed={true}
@@ -1816,7 +1816,7 @@ const BirthChartPage = () => {
 
             {/* Stelliums */}
             {getStelliums(birthChartData).length > 0 && (
-              <div className='col-span-1 sm:col-span-2'>
+              <div className=''>
                 <CollapsibleSection
                   title='Stelliums & Concentrations'
                   defaultCollapsed={true}
@@ -1851,7 +1851,7 @@ const BirthChartPage = () => {
 
             {/* Planetary Dignities */}
             {getPlanetaryDignities(birthChartData).length > 0 && (
-              <div className='col-span-1 sm:col-span-2'>
+              <div className=''>
                 <CollapsibleSection
                   title='Special Placements'
                   defaultCollapsed={true}
