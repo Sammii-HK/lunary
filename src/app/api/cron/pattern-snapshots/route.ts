@@ -37,7 +37,7 @@ export async function POST(request: NextRequest) {
 
     // Get all active users (activity in last 30 days)
     const usersResult = await sql`
-      SELECT DISTINCT u.id, u.email
+      SELECT DISTINCT u.id, u.email, u."createdAt"
       FROM "user" u
       WHERE u."createdAt" >= NOW() - INTERVAL '180 days'
         AND EXISTS (
