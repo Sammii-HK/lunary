@@ -70,6 +70,14 @@
     "southnode": "s",
     "chiron": "c",
     "lilith": "l",
-    "partoffortune": "p"
+    "partoffortune": "p",
+    "ceres": "j",
+    "pallas": "k",
+    "juno": "m",
+    "vesta": "v",
+    "hygiea": "h",
+    "pholus": "r",
+    "psyche": "Ψ",
+    "eros": "Ε"
   }
 }

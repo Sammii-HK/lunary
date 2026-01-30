@@ -1,4 +1,6 @@
-import React from 'react';
+'use client';
+
+import React, { useState } from 'react';
 import type {
   BirthChartData,
   HouseCusp,
@@ -8,6 +10,8 @@ import {
   zodiacSymbol,
   astroPointSymbols,
 } from '../../../utils/zodiac/zodiac';
+import { useAspects } from '@/hooks/useAspects';
+import { AspectLines } from '@/components/AspectLines';
 
 const MAIN_PLANETS = [
   'Sun',
@@ -23,6 +27,16 @@ const MAIN_PLANETS = [
 ];
 const ANGLES = ['Ascendant', 'Descendant', 'Midheaven'];
 const POINTS = ['North Node', 'South Node', 'Chiron', 'Lilith'];
+const ASTEROIDS = [
+  'Ceres',
+  'Pallas',
+  'Juno',
+  'Vesta',
+  'Hygiea',
+  'Pholus',
+  'Psyche',
+  'Eros',
+];
 
 function getSymbolForBody(body: string): string {
   const key = body
@@ -60,7 +74,7 @@ function polarFromLongitude(
   radius: number,
 ) {
   const adjustedLong = (longitude - ascendantAngle + 360) % 360;
-  const angle = (360 - adjustedLong) % 360;
+  const angle = (180 + adjustedLong) % 360;
   const radian = (angle * Math.PI) / 180;
   return {
     angle,
@@ -75,6 +89,7 @@ export function ChartWheelSvg({
   houses,
   size = 280,
   showHouseNumbers = true,
+  showAspects = false,
   colours = {
     ring: '#3f3f46',
     ringInner: '#27272a',
@@ -83,6 +98,7 @@ export function ChartWheelSvg({
     planet: '#ffffff',
     angle: '#C77DFF',
     point: '#7B7BE8',
+    asteroid: '#FCD34D',
     retrograde: '#f87171',
     angularHouse: '#7B7BE8',
     bg: '#18181b',
@@ -93,6 +109,7 @@ export function ChartWheelSvg({
   houses?: Partial<HouseCusp>[] | null;
   size?: number;
   showHouseNumbers?: boolean;
+  showAspects?: boolean;
   colours?: Partial<{
     ring: string;
     ringInner: string;
@@ -101,6 +118,7 @@ export function ChartWheelSvg({
     planet: string;
     angle: string;
     point: string;
+    asteroid: string;
     retrograde: string;
     angularHouse: string;
     bg: string;
@@ -110,6 +128,9 @@ export function ChartWheelSvg({
   const ascendant = birthChart.find((p) => p.body === 'Ascendant');
   const ascendantAngle = ascendant?.eclipticLongitude ?? 0;
   const hoverColor = '#FDE68A';
+  const [highlightedPlanet, setHighlightedPlanet] = useState<string | null>(
+    null,
+  );
 
   const chartData = birthChart.map((p) => {
     const pos = polarFromLongitude(p.eclipticLongitude, ascendantAngle, 65);
@@ -162,6 +183,9 @@ export function ChartWheelSvg({
   const mainPlanets = chartData.filter((p) => MAIN_PLANETS.includes(p.body));
   const angles = chartData.filter((p) => ANGLES.includes(p.body));
   const points = chartData.filter((p) => POINTS.includes(p.body));
+  const asteroids = chartData.filter((p) => ASTEROIDS.includes(p.body));
+
+  const aspects = useAspects(chartData);
 
   const view = '-140 -140 280 280';
 
@@ -176,11 +200,34 @@ export function ChartWheelSvg({
       }}
     >
       <style>{`
-        .planet-node { cursor: pointer; }
-        .planet-node .planet-highlight { opacity: 0; }
+        @keyframes fadeIn {
+          from { opacity: 0; transform: scale(0.95); }
+          to { opacity: 1; transform: scale(1); }
+        }
+        @keyframes planetAppear {
+          from { opacity: 0; transform: translateY(-5px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+        .planet-node {
+          cursor: pointer;
+          animation: planetAppear 0.3s ease-out both;
+        }
+        .planet-node:nth-child(1) { animation-delay: 0.05s; }
+        .planet-node:nth-child(2) { animation-delay: 0.10s; }
+        .planet-node:nth-child(3) { animation-delay: 0.15s; }
+        .planet-node:nth-child(4) { animation-delay: 0.20s; }
+        .planet-node:nth-child(5) { animation-delay: 0.25s; }
+        .planet-node .planet-highlight { opacity: 0; transition: opacity 0.2s; }
         .planet-node:hover .planet-highlight { opacity: 0.2; }
+        .planet-node .planet-line { transition: stroke 0.2s, opacity 0.2s; }
         .planet-node:hover .planet-line { stroke: ${hoverColor}; opacity: 0.6; }
-        .planet-node:hover .planet-glyph { fill: ${hoverColor}; }
+        .planet-node .planet-glyph {
+          transition: fill 0.2s, transform 0.3s;
+        }
+        .planet-node:hover .planet-glyph {
+          fill: ${hoverColor};
+          transform: scale(1.1);
+        }
       `}</style>
       {/* Rings */}
       <circle
@@ -207,6 +254,16 @@ export function ChartWheelSvg({
         stroke={colours.ringInner}
         strokeWidth='1'
       />
+
+      {/* Aspect lines */}
+      {showAspects && (
+        <AspectLines
+          aspects={aspects}
+          visible={showAspects}
+          highlightedPlanet={highlightedPlanet}
+          opacity={0.15}
+        />
+      )}
 
       {/* Houses */}
       {houseData.map((h, i) => {
@@ -298,11 +355,12 @@ export function ChartWheelSvg({
         </text>
       ))}
 
-      {/* Planets + angles + points */}
-      {[...mainPlanets, ...angles, ...points].map(
+      {/* Planets + angles + points + asteroids */}
+      {[...mainPlanets, ...angles, ...points, ...asteroids].map(
         ({ body, x, y, retrograde, sign, degree, minute }) => {
           const isAngle = ANGLES.includes(body);
           const isPoint = POINTS.includes(body);
+          const isAsteroid = ASTEROIDS.includes(body);
 
           const colour = retrograde
             ? colours.retrograde
@@ -310,10 +368,18 @@ export function ChartWheelSvg({
               ? colours.angle
               : isPoint
                 ? colours.point
-                : colours.planet;
+                : isAsteroid
+                  ? colours.asteroid
+                  : colours.planet;
 
           return (
-            <g key={body} className='planet-node'>
+            <g
+              key={body}
+              className='planet-node'
+              onClick={() =>
+                setHighlightedPlanet(highlightedPlanet === body ? null : body)
+              }
+            >
               <title>
                 {formatPlacementLabel({
                   body,
@@ -345,7 +411,7 @@ export function ChartWheelSvg({
                 y={y}
                 textAnchor='middle'
                 dominantBaseline='central'
-                fontSize={isAngle || isPoint ? '12' : '14'}
+                fontSize={isAsteroid ? '11' : isAngle || isPoint ? '12' : '14'}
                 fill={colour}
                 style={{ fontFamily: fontFamilySymbols }}
                 className='planet-glyph'

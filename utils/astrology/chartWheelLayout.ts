@@ -16,7 +16,7 @@ export function buildChartWheelLayout(args: {
   const chartData = birthChart.map((planet) => {
     const adjustedLong =
       (planet.eclipticLongitude - ascendantAngle + 360) % 360;
-    const angle = (360 - adjustedLong) % 360;
+    const angle = (180 + adjustedLong) % 360;
     const radian = (angle * Math.PI) / 180;
 
     const radius = 65;
@@ -30,7 +30,7 @@ export function buildChartWheelLayout(args: {
     const signStart = index * 30;
     const signMid = signStart + 15;
     const adjustedMid = (signMid - ascendantAngle + 360) % 360;
-    const angle = (360 - adjustedMid) % 360;
+    const angle = (180 + adjustedMid) % 360;
     const radian = (angle * Math.PI) / 180;
 
     const radius = 100;
@@ -45,14 +45,14 @@ export function buildChartWheelLayout(args: {
       ? houses.map((house) => {
           const adjustedLong =
             (house.eclipticLongitude - ascendantAngle + 360) % 360;
-          const angle = (360 - adjustedLong) % 360;
+          const angle = (180 + adjustedLong) % 360;
           const radian = (angle * Math.PI) / 180;
           return { ...house, adjustedLong, angle, radian };
         })
       : Array.from({ length: 12 }, (_, i) => {
           const houseStart = i * 30;
           const adjustedLong = houseStart;
-          const angle = (360 - adjustedLong) % 360;
+          const angle = (180 + adjustedLong) % 360;
           const radian = (angle * Math.PI) / 180;
           return {
             house: i + 1,
