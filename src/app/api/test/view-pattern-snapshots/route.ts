@@ -28,7 +28,7 @@ export async function GET(request: NextRequest) {
       SELECT pattern_type, pattern_data, generated_at
       FROM journal_patterns
       WHERE user_id = ${userId}
-        AND pattern_type IN ('life_themes', 'tarot_season', 'tarot_moon_phase', 'emotion_moon_phase')
+        AND pattern_type IN ('life_themes', 'tarot_season', 'tarot_moon_phase', 'emotion_moon_phase', 'archetype')
       ORDER BY generated_at DESC
       LIMIT ${limit}
     `;
