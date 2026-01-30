@@ -119,11 +119,11 @@ export async function GET(request: NextRequest) {
 
     const isLandscape = format === 'landscape';
     const isStory = format === 'story';
-    const padding = isLandscape ? 40 : isStory ? 60 : 60;
-    const titleSize = isLandscape ? 40 : isStory ? 56 : 52;
-    const subtitleSize = isLandscape ? 18 : isStory ? 24 : 22;
-    const cardNameSize = isLandscape ? 16 : isStory ? 22 : 20;
-    const labelSize = isLandscape ? 16 : isStory ? 20 : 18;
+    const padding = isLandscape ? 40 : isStory ? 80 : 60;
+    const titleSize = isLandscape ? 40 : isStory ? 64 : 52;
+    const subtitleSize = isLandscape ? 18 : isStory ? 28 : 22;
+    const cardNameSize = isLandscape ? 16 : isStory ? 26 : 20;
+    const labelSize = isLandscape ? 16 : isStory ? 24 : 18;
 
     const suitColor =
       SUIT_COLORS[data.dominantSuit.suit] || OG_COLORS.primaryViolet;
@@ -153,7 +153,7 @@ export async function GET(request: NextRequest) {
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
-            marginBottom: isLandscape ? 20 : isStory ? 40 : 32,
+            marginBottom: isLandscape ? 20 : isStory ? 48 : 32,
           }}
         >
           <div
@@ -163,6 +163,7 @@ export async function GET(request: NextRequest) {
               color: OG_COLORS.textPrimary,
               letterSpacing: '0.05em',
               textAlign: 'center',
+              display: 'flex',
             }}
           >
             {firstName ? `${firstName}'s` : 'My'} Week in Tarot
@@ -174,6 +175,7 @@ export async function GET(request: NextRequest) {
               marginTop: 8,
               letterSpacing: '0.1em',
               textAlign: 'center',
+              display: 'flex',
             }}
           >
             {dateRangeText}
@@ -204,6 +206,7 @@ export async function GET(request: NextRequest) {
               style={{
                 fontSize: isLandscape ? 48 : 64,
                 color: suitColor,
+                display: 'flex',
               }}
             >
               {suitSymbol}
@@ -220,6 +223,7 @@ export async function GET(request: NextRequest) {
                   fontWeight: 400,
                   color: suitColor,
                   letterSpacing: '0.05em',
+                  display: 'flex',
                 }}
               >
                 {data.season.name}
@@ -232,6 +236,7 @@ export async function GET(request: NextRequest) {
                   textTransform: 'uppercase',
                   letterSpacing: '0.1em',
                   fontWeight: 300,
+                  display: 'flex',
                 }}
               >
                 {data.dominantSuit.suit} Dominant •{' '}
@@ -257,6 +262,7 @@ export async function GET(request: NextRequest) {
               textTransform: 'uppercase',
               letterSpacing: '0.1em',
               fontWeight: 300,
+              display: 'flex',
             }}
           >
             Top Cards This Week
@@ -279,6 +285,7 @@ export async function GET(request: NextRequest) {
                   fontSize: cardNameSize,
                   color: OG_COLORS.textPrimary,
                   fontWeight: 400,
+                  display: 'flex',
                 }}
               >
                 {card.name}
@@ -288,6 +295,7 @@ export async function GET(request: NextRequest) {
                   fontSize: cardNameSize,
                   color: OG_COLORS.textTertiary,
                   fontWeight: 300,
+                  display: 'flex',
                 }}
               >
                 ×{card.count}
@@ -321,6 +329,7 @@ export async function GET(request: NextRequest) {
               opacity: 0.4,
               letterSpacing: '0.1em',
               color: OG_COLORS.textPrimary,
+              display: 'flex',
             }}
           >
             Discover your patterns at lunary.app

@@ -111,13 +111,13 @@ export async function GET(request: NextRequest) {
 
     const isLandscape = format === 'landscape';
     const isStory = format === 'story';
-    const padding = isLandscape ? 40 : isStory ? 60 : 60;
-    const titleSize = isLandscape ? 40 : isStory ? 56 : 52;
-    const symbolSize = isLandscape ? 120 : isStory ? 180 : 160;
-    const signSize = isLandscape ? 48 : isStory ? 64 : 56;
-    const badgeSize = isLandscape ? 18 : isStory ? 24 : 22;
-    const themeSize = isLandscape ? 16 : isStory ? 22 : 20;
-    const dateSize = isLandscape ? 18 : isStory ? 24 : 22;
+    const padding = isLandscape ? 40 : isStory ? 80 : 60;
+    const titleSize = isLandscape ? 40 : isStory ? 64 : 52;
+    const symbolSize = isLandscape ? 120 : isStory ? 200 : 160;
+    const signSize = isLandscape ? 48 : isStory ? 72 : 56;
+    const badgeSize = isLandscape ? 18 : isStory ? 28 : 22;
+    const themeSize = isLandscape ? 16 : isStory ? 26 : 20;
+    const dateSize = isLandscape ? 18 : isStory ? 28 : 22;
 
     const gradient = ELEMENT_GRADIENTS[data.element];
     const elementColor = ELEMENT_COLORS[data.element];
@@ -153,6 +153,7 @@ export async function GET(request: NextRequest) {
             bottom: 0,
             background: gradientBg,
             opacity: 0.15,
+            display: 'flex',
           }}
         />
 
@@ -182,6 +183,7 @@ export async function GET(request: NextRequest) {
                 color: OG_COLORS.textPrimary,
                 letterSpacing: '0.05em',
                 textAlign: 'center',
+                display: 'flex',
               }}
             >
               {firstName ? `${firstName} Welcomes` : 'Welcome to'}
@@ -205,6 +207,7 @@ export async function GET(request: NextRequest) {
                 color: elementColor,
                 marginBottom: 16,
                 lineHeight: 1,
+                display: 'flex',
               }}
             >
               {data.symbol}
@@ -217,6 +220,7 @@ export async function GET(request: NextRequest) {
                 color: elementColor,
                 letterSpacing: '0.05em',
                 marginBottom: 16,
+                display: 'flex',
               }}
             >
               {data.sign} Season
@@ -242,6 +246,7 @@ export async function GET(request: NextRequest) {
                   fontWeight: 300,
                   textTransform: 'uppercase',
                   letterSpacing: '0.1em',
+                  display: 'flex',
                 }}
               >
                 {data.modality} {data.element}
@@ -255,6 +260,7 @@ export async function GET(request: NextRequest) {
                 color: OG_COLORS.textTertiary,
                 marginBottom: isLandscape ? 16 : 24,
                 letterSpacing: '0.1em',
+                display: 'flex',
               }}
             >
               {dateRangeText}
@@ -276,6 +282,7 @@ export async function GET(request: NextRequest) {
                     fontSize: themeSize,
                     color: OG_COLORS.textSecondary,
                     letterSpacing: '0.05em',
+                    display: 'flex',
                   }}
                 >
                   {theme}
@@ -309,6 +316,7 @@ export async function GET(request: NextRequest) {
                 opacity: 0.4,
                 letterSpacing: '0.1em',
                 color: OG_COLORS.textPrimary,
+                display: 'flex',
               }}
             >
               Explore the cosmic weather at lunary.app

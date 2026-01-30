@@ -201,7 +201,12 @@ function Badge({
     >
       {glyph ? (
         <span
-          style={{ fontFamily: 'Astronomicon', fontSize: 18, opacity: 0.9 }}
+          style={{
+            fontFamily: 'Astronomicon',
+            fontSize: 18,
+            opacity: 0.9,
+            display: 'flex',
+          }}
         >
           {glyph}
         </span>
@@ -213,12 +218,15 @@ function Badge({
           letterSpacing: 3,
           opacity: 0.65,
           textTransform: 'uppercase',
+          display: 'flex',
         }}
       >
         {label}
       </span>
 
-      <span style={{ fontSize: 18, opacity: 0.92 }}>{value}</span>
+      <span style={{ fontSize: 18, opacity: 0.92, display: 'flex' }}>
+        {value}
+      </span>
     </div>
   );
 }
@@ -282,14 +290,14 @@ export async function GET(request: NextRequest) {
   // Format-aware sizing
   const isLandscape = format === 'landscape';
   const isStory = format === 'story';
-  const padding = isLandscape ? 40 : isStory ? 80 : 64;
-  const titleSize = isLandscape ? 36 : isStory ? 64 : 52;
-  const subtitleSize = isLandscape ? 14 : isStory ? 20 : 16;
-  const bigThreeSize = isLandscape ? 18 : isStory ? 28 : 22;
-  const bigThreeGlyphSize = isLandscape ? 22 : isStory ? 36 : 28;
-  const chartSize = isLandscape ? 280 : isStory ? 540 : 420;
-  const badgeTextSize = isLandscape ? 16 : isStory ? 22 : 18;
-  const elementCountSize = isLandscape ? 28 : isStory ? 48 : 36;
+  const padding = isLandscape ? 40 : isStory ? 100 : 64;
+  const titleSize = isLandscape ? 36 : isStory ? 72 : 52;
+  const subtitleSize = isLandscape ? 14 : isStory ? 24 : 16;
+  const bigThreeSize = isLandscape ? 18 : isStory ? 32 : 22;
+  const bigThreeGlyphSize = isLandscape ? 22 : isStory ? 42 : 28;
+  const chartSize = isLandscape ? 360 : isStory ? 600 : 420;
+  const badgeTextSize = isLandscape ? 16 : isStory ? 26 : 18;
+  const elementCountSize = isLandscape ? 28 : isStory ? 60 : 36;
 
   const elementCounts = ELEMENT_ORDER.reduce(
     (acc, label) => {
@@ -395,7 +403,289 @@ export async function GET(request: NextRequest) {
     { glyph: astroPointSymbols.ascendant, value: rising, label: 'Rising' },
   ];
 
-  return new ImageResponse(
+  // Inline JSX directly based on format
+  const layoutJsx = isLandscape ? (
+    // Landscape Layout
+    <div
+      style={{
+        width: '100%',
+        height: '100%',
+        display: 'flex',
+        flexDirection: 'column',
+        background: theme.background,
+        color: '#fff',
+        padding,
+        fontFamily: 'Roboto Mono',
+        position: 'relative',
+      }}
+    >
+      <div
+        style={{
+          display: 'flex',
+          position: 'absolute',
+          inset: 0,
+          backgroundImage:
+            'radial-gradient(circle at 20% 30%, rgba(255,255,255,0.10) 0 1px, transparent 2px),' +
+            'radial-gradient(circle at 70% 60%, rgba(255,255,255,0.08) 0 1px, transparent 2px),' +
+            'radial-gradient(circle at 50% 10%, rgba(255,255,255,0.06) 0 1px, transparent 2px)',
+          opacity: 0.35,
+        }}
+      />
+
+      {/* Header - spans full width */}
+      <div
+        style={{
+          display: 'flex',
+          flexDirection: 'column',
+          gap: 12,
+          alignItems: 'center',
+          textAlign: 'center',
+          position: 'relative',
+          marginBottom: 20,
+        }}
+      >
+        <div
+          style={{
+            display: 'flex',
+            letterSpacing: 4,
+            textTransform: 'uppercase',
+            fontSize: subtitleSize,
+            opacity: 0.6,
+          }}
+        >
+          Cosmic preview
+        </div>
+        <div
+          style={{
+            display: 'flex',
+            fontSize: titleSize,
+            fontWeight: 500,
+            lineHeight: 1.05,
+          }}
+        >
+          {name ? `${name}'s birth chart` : 'Birth chart highlights'}
+        </div>
+        <div
+          style={{
+            display: 'flex',
+            gap: 16,
+            flexWrap: 'wrap',
+            justifyContent: 'center',
+            fontSize: bigThreeSize,
+            letterSpacing: 1,
+          }}
+        >
+          {bigThree.map((item) => (
+            <div
+              key={item.label}
+              style={{
+                display: 'flex',
+                gap: 10,
+                alignItems: 'center',
+              }}
+            >
+              <span
+                style={{
+                  fontFamily: 'Astronomicon',
+                  fontSize: bigThreeGlyphSize,
+                  opacity: 0.85,
+                  display: 'flex',
+                }}
+              >
+                {item.glyph}
+              </span>
+              <span style={{ display: 'flex' }}>{item.value || '—'}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Main horizontal layout: Chart on left, Stats on right */}
+      <div
+        style={{
+          display: 'flex',
+          flexDirection: 'row',
+          gap: 24,
+          flex: 1,
+          position: 'relative',
+          alignItems: 'flex-start',
+        }}
+      >
+        {/* Left column: Chart */}
+        <div
+          style={{
+            width: 420,
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            flexShrink: 0,
+          }}
+        >
+          <ChartWheelOg
+            birthChart={birthChart}
+            size={chartSize}
+            showTooltips={false}
+          />
+        </div>
+
+        {/* Right column: Stats */}
+        <div
+          style={{
+            flex: 1,
+            display: 'flex',
+            flexDirection: 'column',
+            gap: 16,
+          }}
+        >
+          {/* Element & Modality Badges */}
+          <div
+            style={{
+              display: 'flex',
+              gap: 12,
+              flexWrap: 'wrap',
+            }}
+          >
+            <Badge
+              label='Element'
+              value={element ?? 'Balanced'}
+              glyph={elementGlyph(element)}
+            />
+            <Badge
+              label='Modality'
+              value={modality ?? 'Dynamic'}
+              glyph={modalityGlyph(modality)}
+            />
+          </div>
+
+          {/* Element counts - 2x2 grid */}
+          <div
+            style={{
+              display: 'flex',
+              gap: 12,
+              flexWrap: 'wrap',
+            }}
+          >
+            {elementSummary.map((entry) => (
+              <div
+                key={entry.label}
+                style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: 4,
+                  padding: '10px 14px',
+                  borderRadius: 12,
+                  border: '1px solid rgba(255,255,255,0.12)',
+                  background: 'rgba(0,0,0,0.15)',
+                  minWidth: 100,
+                  alignItems: 'center',
+                }}
+              >
+                <span
+                  style={{
+                    fontSize: 12,
+                    letterSpacing: 2,
+                    textTransform: 'uppercase',
+                    opacity: 0.6,
+                    display: 'flex',
+                  }}
+                >
+                  {entry.label}
+                </span>
+                <span
+                  style={{
+                    fontSize: 24,
+                    fontWeight: 500,
+                    display: 'flex',
+                  }}
+                >
+                  {entry.count}
+                </span>
+              </div>
+            ))}
+          </div>
+
+          {/* Modality line */}
+          <div
+            style={{
+              display: 'flex',
+              flexWrap: 'wrap',
+              gap: 8,
+              fontSize: 13,
+              letterSpacing: 1,
+              opacity: 0.78,
+              alignItems: 'center',
+            }}
+          >
+            <span
+              style={{
+                fontSize: 12,
+                letterSpacing: 2,
+                textTransform: 'uppercase',
+                opacity: 0.8,
+                display: 'flex',
+              }}
+            >
+              Modality
+            </span>
+            <span style={{ display: 'flex' }}>{modalityLine}</span>
+          </div>
+
+          {/* Insight box - compact */}
+          <div
+            style={{
+              display: 'flex',
+              flexDirection: 'column',
+              gap: 6,
+              borderRadius: 16,
+              border: '1px solid rgba(255,255,255,0.16)',
+              background: theme.soft,
+              padding: '12px 14px',
+            }}
+          >
+            <div
+              style={{
+                fontSize: 11,
+                letterSpacing: 3,
+                textTransform: 'uppercase',
+                opacity: 0.75,
+                display: 'flex',
+              }}
+            >
+              Chart insight
+            </div>
+            <div
+              style={{
+                fontSize: 14,
+                lineHeight: 1.3,
+                opacity: 0.95,
+                display: 'flex',
+              }}
+            >
+              {insightText.length > 100
+                ? insightText.slice(0, 97) + '...'
+                : insightText}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div
+        style={{
+          position: 'absolute',
+          bottom: 24,
+          fontSize: 18,
+          letterSpacing: 4,
+          opacity: 0.45,
+          width: '100%',
+          display: 'flex',
+          justifyContent: 'center',
+        }}
+      >
+        Lunary.app
+      </div>
+    </div>
+  ) : (
+    // Square/Story Layout
     <div
       style={{
         width: '100%',
@@ -412,6 +702,7 @@ export async function GET(request: NextRequest) {
     >
       <div
         style={{
+          display: 'flex',
           position: 'absolute',
           inset: 0,
           backgroundImage:
@@ -430,7 +721,7 @@ export async function GET(request: NextRequest) {
           width: '100%',
           maxWidth: 960,
           minHeight: 1180,
-          gap: 54,
+          gap: isStory ? 64 : 54,
           alignItems: 'center',
           position: 'relative',
         }}
@@ -489,11 +780,12 @@ export async function GET(request: NextRequest) {
                     fontFamily: 'Astronomicon',
                     fontSize: bigThreeGlyphSize,
                     opacity: 0.85,
+                    display: 'flex',
                   }}
                 >
                   {item.glyph}
                 </span>
-                <span>{item.value || '—'}</span>
+                <span style={{ display: 'flex' }}>{item.value || '—'}</span>
               </div>
             ))}
           </div>
@@ -574,6 +866,7 @@ export async function GET(request: NextRequest) {
                     letterSpacing: 2,
                     textTransform: 'uppercase',
                     opacity: 0.6,
+                    display: 'flex',
                   }}
                 >
                   {entry.label}
@@ -582,11 +875,18 @@ export async function GET(request: NextRequest) {
                   style={{
                     fontSize: elementCountSize,
                     fontWeight: 500,
+                    display: 'flex',
                   }}
                 >
                   {entry.count}
                 </span>
-                <span style={{ fontSize: isLandscape ? 14 : 16, opacity: 0.6 }}>
+                <span
+                  style={{
+                    fontSize: isLandscape ? 14 : 16,
+                    opacity: 0.6,
+                    display: 'flex',
+                  }}
+                >
                   {entry.count === 1 ? 'planet' : 'planets'}
                 </span>
               </div>
@@ -616,9 +916,10 @@ export async function GET(request: NextRequest) {
                   height: 6,
                   borderRadius: 999,
                   background: theme.accent,
+                  display: 'flex',
                 }}
               />
-              <span>
+              <span style={{ display: 'flex' }}>
                 {retrogradeCount} retrograde{' '}
                 {retrogradeCount === 1 ? 'planet' : 'planets'}
               </span>
@@ -636,9 +937,10 @@ export async function GET(request: NextRequest) {
                   height: 6,
                   borderRadius: 999,
                   background: '#fff',
+                  display: 'flex',
                 }}
               />
-              <span>
+              <span style={{ display: 'flex' }}>
                 {houseFocusCount > 0
                   ? `${houseFocusLabel} · ${houseFocusCount} placements`
                   : 'House focus charging'}
@@ -657,9 +959,12 @@ export async function GET(request: NextRequest) {
                   height: 6,
                   borderRadius: 999,
                   background: '#7BFFB8',
+                  display: 'flex',
                 }}
               />
-              <span>{uniqueSigns} unique signs activated</span>
+              <span style={{ display: 'flex' }}>
+                {uniqueSigns} unique signs activated
+              </span>
             </div>
             <div
               style={{
@@ -674,9 +979,10 @@ export async function GET(request: NextRequest) {
                   height: 6,
                   borderRadius: 999,
                   background: '#94d1ff',
+                  display: 'flex',
                 }}
               />
-              <span>{signFocusText}</span>
+              <span style={{ display: 'flex' }}>{signFocusText}</span>
             </div>
           </div>
 
@@ -698,11 +1004,12 @@ export async function GET(request: NextRequest) {
                 justifyContent: 'center',
                 opacity: 0.8,
                 marginRight: 10,
+                display: 'flex',
               }}
             >
               Modality balance
             </span>
-            <span>{modalityLine}</span>
+            <span style={{ display: 'flex' }}>{modalityLine}</span>
           </div>
 
           <div
@@ -729,6 +1036,7 @@ export async function GET(request: NextRequest) {
                   letterSpacing: 4,
                   textTransform: 'uppercase',
                   opacity: 0.75,
+                  display: 'flex',
                 }}
               >
                 Chart insight
@@ -739,6 +1047,7 @@ export async function GET(request: NextRequest) {
                 fontSize: isLandscape ? 18 : 24,
                 lineHeight: 1.4,
                 opacity: 0.95,
+                display: 'flex',
               }}
             >
               {insightText}
@@ -760,14 +1069,15 @@ export async function GET(request: NextRequest) {
       >
         Lunary.app
       </div>
-    </div>,
-    {
-      width,
-      height,
-      fonts: [
-        { name: 'Roboto Mono', data: robotoMono, style: 'normal' },
-        { name: 'Astronomicon', data: astronomiconFont, style: 'normal' },
-      ],
-    },
+    </div>
   );
+
+  return new ImageResponse(layoutJsx, {
+    width,
+    height,
+    fonts: [
+      { name: 'Roboto Mono', data: robotoMono, style: 'normal' },
+      { name: 'Astronomicon', data: astronomiconFont, style: 'normal' },
+    ],
+  });
 }

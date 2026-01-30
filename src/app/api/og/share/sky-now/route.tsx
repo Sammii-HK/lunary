@@ -77,12 +77,12 @@ export async function GET(request: NextRequest) {
 
     const isLandscape = format === 'landscape';
     const isStory = format === 'story';
-    const padding = isLandscape ? 40 : isStory ? 70 : 60;
-    const titleSize = isLandscape ? 36 : isStory ? 64 : 48;
-    const dateSize = isLandscape ? 18 : isStory ? 28 : 22;
-    const labelSize = isLandscape ? 18 : isStory ? 28 : 20;
-    const planetSymbolSize = isLandscape ? 32 : isStory ? 52 : 38;
-    const zodiacSymbolSize = isLandscape ? 26 : isStory ? 42 : 30;
+    const padding = isLandscape ? 40 : isStory ? 90 : 60;
+    const titleSize = isLandscape ? 36 : isStory ? 72 : 48;
+    const dateSize = isLandscape ? 18 : isStory ? 32 : 22;
+    const labelSize = isLandscape ? 18 : isStory ? 32 : 20;
+    const planetSymbolSize = isLandscape ? 32 : isStory ? 64 : 38;
+    const zodiacSymbolSize = isLandscape ? 26 : isStory ? 50 : 30;
 
     // Format date
     const date = new Date(data.date);
@@ -226,7 +226,7 @@ export async function GET(request: NextRequest) {
           </div>
         )}
 
-        {/* Planet Grid */}
+        {/* Planet Grid - 2 columns for landscape, single column otherwise */}
         <div
           style={{
             display: 'flex',
@@ -252,104 +252,305 @@ export async function GET(request: NextRequest) {
             Current Positions
           </div>
 
-          {/* Planet rows */}
-          <div
-            style={{
-              display: 'flex',
-              flexDirection: 'column',
-              gap: isLandscape ? 10 : 14,
-            }}
-          >
-            {PLANETS.map((planet) => {
-              const position = data.positions[planet];
-              const isRetrograde = position?.retrograde || false;
+          {/* Planet rows - 2 columns for landscape */}
+          {isLandscape ? (
+            <div
+              style={{
+                display: 'flex',
+                gap: 12,
+              }}
+            >
+              {/* Left column - first 5 planets */}
+              <div
+                style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: 10,
+                  flex: 1,
+                }}
+              >
+                {PLANETS.slice(0, 5).map((planet) => {
+                  const position = data.positions[planet];
+                  const isRetrograde = position?.retrograde || false;
 
-              return (
-                <div
-                  key={planet}
-                  style={{
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    alignItems: 'center',
-                    padding: isLandscape ? '8px 12px' : '12px 16px',
-                    background: isRetrograde
-                      ? 'rgba(248, 113, 113, 0.08)'
-                      : 'rgba(255, 255, 255, 0.02)',
-                    border: `1px solid ${isRetrograde ? 'rgba(248, 113, 113, 0.2)' : 'rgba(255, 255, 255, 0.06)'}`,
-                    borderRadius: 12,
-                  }}
-                >
-                  <div
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: 16,
-                    }}
-                  >
+                  return (
                     <div
+                      key={planet}
                       style={{
-                        fontFamily: 'Astronomicon',
-                        fontSize: planetSymbolSize,
-                        color: isRetrograde ? '#f87171' : OG_COLORS.textPrimary,
                         display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'center',
+                        padding: '8px 12px',
+                        background: isRetrograde
+                          ? 'rgba(248, 113, 113, 0.08)'
+                          : 'rgba(255, 255, 255, 0.02)',
+                        border: `1px solid ${isRetrograde ? 'rgba(248, 113, 113, 0.2)' : 'rgba(255, 255, 255, 0.06)'}`,
+                        borderRadius: 12,
                       }}
                     >
-                      {getPlanetSymbol(planet)}
-                    </div>
-                    <div
-                      style={{
-                        fontSize: labelSize,
-                        color: OG_COLORS.textSecondary,
-                        display: 'flex',
-                      }}
-                    >
-                      {planet}
-                    </div>
-                  </div>
-
-                  <div
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: 12,
-                    }}
-                  >
-                    {isRetrograde && (
                       <div
                         style={{
-                          fontSize: isLandscape ? 14 : 16,
-                          color: '#f87171',
-                          letterSpacing: '0.05em',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: 10,
+                        }}
+                      >
+                        <div
+                          style={{
+                            fontFamily: 'Astronomicon',
+                            fontSize: 28,
+                            color: isRetrograde
+                              ? '#f87171'
+                              : OG_COLORS.textPrimary,
+                            display: 'flex',
+                          }}
+                        >
+                          {getPlanetSymbol(planet)}
+                        </div>
+                        <div
+                          style={{
+                            fontSize: 16,
+                            color: OG_COLORS.textSecondary,
+                            display: 'flex',
+                          }}
+                        >
+                          {planet}
+                        </div>
+                      </div>
+
+                      <div
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: 8,
+                        }}
+                      >
+                        {isRetrograde && (
+                          <div
+                            style={{
+                              fontSize: 12,
+                              color: '#f87171',
+                              letterSpacing: '0.05em',
+                              display: 'flex',
+                            }}
+                          >
+                            ℞
+                          </div>
+                        )}
+                        <div
+                          style={{
+                            fontFamily: 'Astronomicon',
+                            fontSize: 22,
+                            color: OG_COLORS.primaryViolet,
+                            display: 'flex',
+                          }}
+                        >
+                          {position?.sign
+                            ? getZodiacSymbol(position.sign)
+                            : '?'}
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+
+              {/* Right column - last 5 planets */}
+              <div
+                style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: 10,
+                  flex: 1,
+                }}
+              >
+                {PLANETS.slice(5, 10).map((planet) => {
+                  const position = data.positions[planet];
+                  const isRetrograde = position?.retrograde || false;
+
+                  return (
+                    <div
+                      key={planet}
+                      style={{
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'center',
+                        padding: '8px 12px',
+                        background: isRetrograde
+                          ? 'rgba(248, 113, 113, 0.08)'
+                          : 'rgba(255, 255, 255, 0.02)',
+                        border: `1px solid ${isRetrograde ? 'rgba(248, 113, 113, 0.2)' : 'rgba(255, 255, 255, 0.06)'}`,
+                        borderRadius: 12,
+                      }}
+                    >
+                      <div
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: 10,
+                        }}
+                      >
+                        <div
+                          style={{
+                            fontFamily: 'Astronomicon',
+                            fontSize: 28,
+                            color: isRetrograde
+                              ? '#f87171'
+                              : OG_COLORS.textPrimary,
+                            display: 'flex',
+                          }}
+                        >
+                          {getPlanetSymbol(planet)}
+                        </div>
+                        <div
+                          style={{
+                            fontSize: 16,
+                            color: OG_COLORS.textSecondary,
+                            display: 'flex',
+                          }}
+                        >
+                          {planet}
+                        </div>
+                      </div>
+
+                      <div
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: 8,
+                        }}
+                      >
+                        {isRetrograde && (
+                          <div
+                            style={{
+                              fontSize: 12,
+                              color: '#f87171',
+                              letterSpacing: '0.05em',
+                              display: 'flex',
+                            }}
+                          >
+                            ℞
+                          </div>
+                        )}
+                        <div
+                          style={{
+                            fontFamily: 'Astronomicon',
+                            fontSize: 22,
+                            color: OG_COLORS.primaryViolet,
+                            display: 'flex',
+                          }}
+                        >
+                          {position?.sign
+                            ? getZodiacSymbol(position.sign)
+                            : '?'}
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          ) : (
+            <div
+              style={{
+                display: 'flex',
+                flexDirection: 'column',
+                gap: isLandscape ? 10 : isStory ? 18 : 14,
+              }}
+            >
+              {PLANETS.map((planet) => {
+                const position = data.positions[planet];
+                const isRetrograde = position?.retrograde || false;
+
+                return (
+                  <div
+                    key={planet}
+                    style={{
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      alignItems: 'center',
+                      padding: isLandscape ? '8px 12px' : '12px 16px',
+                      background: isRetrograde
+                        ? 'rgba(248, 113, 113, 0.08)'
+                        : 'rgba(255, 255, 255, 0.02)',
+                      border: `1px solid ${isRetrograde ? 'rgba(248, 113, 113, 0.2)' : 'rgba(255, 255, 255, 0.06)'}`,
+                      borderRadius: 12,
+                    }}
+                  >
+                    <div
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 16,
+                      }}
+                    >
+                      <div
+                        style={{
+                          fontFamily: 'Astronomicon',
+                          fontSize: planetSymbolSize,
+                          color: isRetrograde
+                            ? '#f87171'
+                            : OG_COLORS.textPrimary,
                           display: 'flex',
                         }}
                       >
-                        ℞
+                        {getPlanetSymbol(planet)}
                       </div>
-                    )}
-                    <div
-                      style={{
-                        fontFamily: 'Astronomicon',
-                        fontSize: zodiacSymbolSize,
-                        color: OG_COLORS.primaryViolet,
-                        display: 'flex',
-                      }}
-                    >
-                      {position?.sign ? getZodiacSymbol(position.sign) : '?'}
+                      <div
+                        style={{
+                          fontSize: labelSize,
+                          color: OG_COLORS.textSecondary,
+                          display: 'flex',
+                        }}
+                      >
+                        {planet}
+                      </div>
                     </div>
+
                     <div
                       style={{
-                        fontSize: labelSize,
-                        color: OG_COLORS.textPrimary,
                         display: 'flex',
+                        alignItems: 'center',
+                        gap: 12,
                       }}
                     >
-                      {position?.sign || 'Unknown'}
+                      {isRetrograde && (
+                        <div
+                          style={{
+                            fontSize: isLandscape ? 14 : 16,
+                            color: '#f87171',
+                            letterSpacing: '0.05em',
+                            display: 'flex',
+                          }}
+                        >
+                          ℞
+                        </div>
+                      )}
+                      <div
+                        style={{
+                          fontFamily: 'Astronomicon',
+                          fontSize: zodiacSymbolSize,
+                          color: OG_COLORS.primaryViolet,
+                          display: 'flex',
+                        }}
+                      >
+                        {position?.sign ? getZodiacSymbol(position.sign) : '?'}
+                      </div>
+                      <div
+                        style={{
+                          fontSize: labelSize,
+                          color: OG_COLORS.textPrimary,
+                          display: 'flex',
+                        }}
+                      >
+                        {position?.sign || 'Unknown'}
+                      </div>
                     </div>
                   </div>
-                </div>
-              );
-            })}
-          </div>
+                );
+              })}
+            </div>
+          )}
         </div>
 
         {/* Footer */}

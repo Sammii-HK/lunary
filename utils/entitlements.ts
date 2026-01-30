@@ -45,6 +45,7 @@ const FEATURE_ACCESS_BASE = {
     'transit_calendar',
     'tarot_patterns',
     'tarot_patterns_basic', // 14-90 day patterns, progress bars, basic visualizations
+    'pattern_drill_down', // Interactive frequent cards with cosmic context
     'solar_return',
     'cosmic_profile',
     'personalized_transit_readings',
@@ -216,6 +217,7 @@ export const PRICING_PLANS: PricingPlan[] = [
       'Everything in Cosmic Explorer',
       'Complete birth chart analysis',
       'Personalized daily horoscopes',
+      'Moon phase with personalized house placement',
       'Personal transit impacts (with duration tracking)',
       'Solar Return & birthday insights',
       'Moon Circles (New & Full Moon)',
@@ -225,6 +227,8 @@ export const PRICING_PLANS: PricingPlan[] = [
       'Monthly cosmic insights',
       'Personal Day & Personal Year interpretations',
       'Tarot pattern analysis (up to 6 months)',
+      'View cosmic context for each card appearance (moon phase & aspects)',
+      'Personalized transit analysis for frequent cards',
       'Smart keyword mood detection (auto-tags journal emotions)',
       'Basic cosmic pattern detection (moon phase correlations)',
       'Cosmic State (shareable snapshot)',
@@ -252,7 +256,6 @@ export const PRICING_PLANS: PricingPlan[] = [
       'Astral Guide ritual prompts (AI)',
       'Tarot pattern analysis (up to 12 months + year-over-year)',
       'Advanced multi-dimensional pattern analysis',
-      'Cosmic context for tarot patterns (moon phase & aspects when cards pulled)',
       'Enhanced mood detection (catches subtle emotions & implicit feelings)',
       'Enhanced pattern analysis (moon phase, transit, house activation)',
       'Advanced cosmic pattern detection (planetary, aspects, natal transits)',

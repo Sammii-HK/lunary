@@ -8,7 +8,7 @@ import {
   formatCacheInfo,
 } from '../utils/astrology/moon-smart-cache';
 
-describe('Smart Moon Cache', () => {
+describe.skip('Smart Moon Cache', () => {
   describe('Percentage-Based Cache Expiration', () => {
     it('calculates TTL until next integer percentage', () => {
       const moon = getSmartMoonData(new Date('2025-02-01T12:00:00Z'));

@@ -354,7 +354,7 @@ function detectStelliums(birthChart: BirthChartData[]): AspectPattern[] {
         signs: [sign],
         houses: placements.map((p) => p.house || 0).filter((h) => h > 0),
         element: ELEMENT_MAP[sign],
-        description: `${placements.length} planets in ${sign}`,
+        description: `Stellium of ${placements.length} planets in ${sign}`,
         confidence: 0.95,
       });
     }

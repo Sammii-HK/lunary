@@ -225,20 +225,22 @@ const getMoonInHouseInterpretation = (
 export function MoonPhaseCard({
   birthChart,
   currentTransits,
+  showHousePlacement = false,
 }: {
   birthChart?: BirthChartData[];
   currentTransits?: any[];
+  showHousePlacement?: boolean;
 }) {
   const cosmicContext = getCosmicContextForDate(new Date());
 
-  // Find the Moon in current transits and calculate which house it's in
+  // Find the Moon in current transits and calculate which house it's in (paid feature)
   const transitMoon = currentTransits?.find((t) => t.body === 'Moon');
   const ascendant = birthChart?.find((p) => p.body === 'Ascendant');
 
   let moonHouse: number | null = null;
   let moonHouseInterpretation = '';
 
-  if (transitMoon && ascendant) {
+  if (showHousePlacement && transitMoon && ascendant) {
     moonHouse = calculateHouseWholeSig(
       transitMoon.eclipticLongitude,
       ascendant.eclipticLongitude,

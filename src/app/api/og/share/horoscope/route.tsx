@@ -76,12 +76,12 @@ export async function GET(request: NextRequest) {
 
     const isLandscape = format === 'landscape';
     const isStory = format === 'story';
-    const padding = isLandscape ? 40 : isStory ? 80 : 60;
-    const titleSize = isLandscape ? 40 : isStory ? 72 : 52;
-    const signSize = isLandscape ? 72 : isStory ? 140 : 84;
-    const headlineSize = isLandscape ? 24 : isStory ? 42 : 28;
-    const overviewSize = isLandscape ? 16 : isStory ? 26 : 18;
-    const labelSize = isLandscape ? 14 : isStory ? 24 : 16;
+    const padding = isLandscape ? 40 : isStory ? 100 : 60;
+    const titleSize = isLandscape ? 40 : isStory ? 84 : 52;
+    const signSize = isLandscape ? 72 : isStory ? 160 : 84;
+    const headlineSize = isLandscape ? 24 : isStory ? 48 : 28;
+    const overviewSize = isLandscape ? 16 : isStory ? 30 : 18;
+    const labelSize = isLandscape ? 14 : isStory ? 28 : 16;
 
     // Format date
     const date = new Date(data.date);
@@ -129,11 +129,11 @@ export async function GET(request: NextRequest) {
         {/* Gradient overlay for sign */}
         <div
           style={{
+            display: 'flex',
             position: 'absolute',
             inset: 0,
             background: `linear-gradient(135deg, ${gradient.from}15 0%, ${gradient.via}10 50%, ${gradient.to}15 100%)`,
             opacity: 0.3,
-            display: 'flex',
           }}
         />
 
@@ -354,8 +354,12 @@ export async function GET(request: NextRequest) {
                   color: OG_COLORS.textTertiary,
                 }}
               >
-                <span>{data.transitInfo.planet}:</span>
-                <span style={{ color: OG_COLORS.textSecondary }}>
+                <span style={{ display: 'flex' }}>
+                  {data.transitInfo.planet}:
+                </span>
+                <span
+                  style={{ display: 'flex', color: OG_COLORS.textSecondary }}
+                >
                   {data.transitInfo.headline}
                 </span>
               </div>

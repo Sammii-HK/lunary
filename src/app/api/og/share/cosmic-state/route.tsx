@@ -86,12 +86,12 @@ export async function GET(request: NextRequest) {
 
     const isLandscape = format === 'landscape';
     const isStory = format === 'story';
-    const padding = isLandscape ? 40 : isStory ? 80 : 60;
-    const titleSize = isLandscape ? 40 : isStory ? 72 : 52;
-    const dateSize = isLandscape ? 18 : isStory ? 32 : 22;
-    const phaseSize = isLandscape ? 32 : isStory ? 56 : 40;
-    const labelSize = isLandscape ? 18 : isStory ? 32 : 22;
-    const insightSize = isLandscape ? 16 : isStory ? 28 : 20;
+    const padding = isLandscape ? 40 : isStory ? 100 : 60;
+    const titleSize = isLandscape ? 40 : isStory ? 84 : 52;
+    const dateSize = isLandscape ? 18 : isStory ? 36 : 22;
+    const phaseSize = isLandscape ? 32 : isStory ? 64 : 40;
+    const labelSize = isLandscape ? 18 : isStory ? 36 : 22;
+    const insightSize = isLandscape ? 16 : isStory ? 32 : 20;
 
     // Format date
     const date = new Date(data.date);
@@ -135,6 +135,7 @@ export async function GET(request: NextRequest) {
               color: OG_COLORS.textPrimary,
               letterSpacing: '0.05em',
               textAlign: 'center',
+              display: 'flex',
             }}
           >
             {firstName ? `${firstName}'s` : "Today's"} Cosmic State
@@ -145,6 +146,7 @@ export async function GET(request: NextRequest) {
               color: OG_COLORS.textTertiary,
               marginTop: 8,
               letterSpacing: '0.1em',
+              display: 'flex',
             }}
           >
             {dateText}
@@ -172,13 +174,14 @@ export async function GET(request: NextRequest) {
               borderRadius: 16,
               marginBottom: isLandscape ? 0 : 24,
               alignItems: 'center',
-              flex: isLandscape ? 1 : 0,
+              flex: isLandscape ? 0 : 0,
+              width: isLandscape ? 280 : 'auto',
             }}
           >
             <img
               src={`${baseUrl}${moonIconPath}`}
-              width={isLandscape ? 56 : isStory ? 120 : 80}
-              height={isLandscape ? 56 : isStory ? 120 : 80}
+              width={isLandscape ? 120 : isStory ? 140 : 80}
+              height={isLandscape ? 120 : isStory ? 140 : 80}
               style={{ marginBottom: isStory ? 20 : 12 }}
               alt={data.moonPhase.name}
             />
@@ -190,6 +193,7 @@ export async function GET(request: NextRequest) {
                 letterSpacing: '0.05em',
                 textAlign: 'center',
                 marginBottom: 8,
+                display: 'flex',
               }}
             >
               {data.moonPhase.name}
@@ -202,6 +206,7 @@ export async function GET(request: NextRequest) {
                 letterSpacing: '0.1em',
                 fontWeight: 300,
                 textAlign: 'center',
+                display: 'flex',
               }}
             >
               {data.zodiacSeason} Season
@@ -227,6 +232,7 @@ export async function GET(request: NextRequest) {
                 color: OG_COLORS.textPrimary,
                 lineHeight: 1.5,
                 textAlign: 'center',
+                display: 'flex',
               }}
             >
               {data.insight}
@@ -254,6 +260,7 @@ export async function GET(request: NextRequest) {
                 fontWeight: 400,
                 marginBottom: 8,
                 textAlign: 'center',
+                display: 'flex',
               }}
             >
               {data.transit.headline}
@@ -264,6 +271,7 @@ export async function GET(request: NextRequest) {
                 color: OG_COLORS.textSecondary,
                 textAlign: 'center',
                 lineHeight: 1.4,
+                display: 'flex',
               }}
             >
               {data.transit.description}
@@ -296,6 +304,7 @@ export async function GET(request: NextRequest) {
               opacity: 0.4,
               letterSpacing: '0.1em',
               color: OG_COLORS.textPrimary,
+              display: 'flex',
             }}
           >
             lunary.app

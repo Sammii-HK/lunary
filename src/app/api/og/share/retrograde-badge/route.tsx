@@ -116,13 +116,13 @@ export async function GET(request: NextRequest) {
 
     const isLandscape = format === 'landscape';
     const isStory = format === 'story';
-    const padding = isLandscape ? 40 : isStory ? 80 : 60;
-    const titleSize = isLandscape ? 36 : isStory ? 64 : 48;
-    const subtitleSize = isLandscape ? 20 : isStory ? 36 : 24;
-    const daySize = isLandscape ? 80 : isStory ? 160 : 96;
-    const labelSize = isLandscape ? 18 : isStory ? 32 : 22;
-    const humorSize = isLandscape ? 14 : isStory ? 26 : 18;
-    const badgeSize = isLandscape ? 200 : isStory ? 380 : 240;
+    const padding = isLandscape ? 40 : isStory ? 100 : 60;
+    const titleSize = isLandscape ? 36 : isStory ? 72 : 48;
+    const subtitleSize = isLandscape ? 20 : isStory ? 42 : 24;
+    const daySize = isLandscape ? 120 : isStory ? 180 : 96;
+    const labelSize = isLandscape ? 18 : isStory ? 36 : 22;
+    const humorSize = isLandscape ? 14 : isStory ? 30 : 18;
+    const badgeSize = isLandscape ? 200 : isStory ? 420 : 240;
 
     const badgeColors = BADGE_COLORS[data.badgeLevel];
     const badgeLabel = BADGE_LABELS[data.badgeLevel];
@@ -146,7 +146,177 @@ export async function GET(request: NextRequest) {
       ? 'I survived Mercury Retrograde and all I got was this badge'
       : 'Still standing, still surviving';
 
-    return new ImageResponse(
+    // Inline JSX directly based on format
+    const layoutJsx = isLandscape ? (
+      // Landscape Layout - horizontal layout
+      <div
+        style={{
+          width: '100%',
+          height: '100%',
+          display: 'flex',
+          flexDirection: 'column',
+          background: OG_COLORS.background,
+          padding: `${padding}px`,
+          position: 'relative',
+          fontFamily: 'Roboto Mono',
+        }}
+      >
+        {/* Header */}
+        <div
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            marginBottom: 20,
+          }}
+        >
+          <div
+            style={{
+              fontSize: titleSize,
+              fontWeight: 400,
+              color: OG_COLORS.textPrimary,
+              letterSpacing: '0.05em',
+              textAlign: 'center',
+              display: 'flex',
+            }}
+          >
+            {mainText}
+          </div>
+          <div
+            style={{
+              fontSize: subtitleSize,
+              color: OG_COLORS.textTertiary,
+              marginTop: 6,
+              letterSpacing: '0.1em',
+              textAlign: 'center',
+              display: 'flex',
+            }}
+          >
+            {dateRangeText}
+          </div>
+        </div>
+
+        {/* Horizontal layout: Badge on left, text on right */}
+        <div
+          style={{
+            display: 'flex',
+            flexDirection: 'row',
+            alignItems: 'center',
+            gap: 32,
+            flex: 1,
+            justifyContent: 'center',
+          }}
+        >
+          {/* Left: Badge Circle */}
+          <div
+            style={{
+              display: 'flex',
+              width: badgeSize,
+              height: badgeSize,
+              borderRadius: '50%',
+              border: `4px solid ${badgeColors.border}`,
+              background: badgeColors.bg,
+              alignItems: 'center',
+              justifyContent: 'center',
+              flexDirection: 'column',
+              flexShrink: 0,
+            }}
+          >
+            <div
+              style={{
+                fontSize: daySize,
+                fontWeight: 400,
+                color: badgeColors.text,
+                marginBottom: 8,
+                display: 'flex',
+              }}
+            >
+              {badgeEmoji}
+            </div>
+            <div
+              style={{
+                fontSize: 48,
+                fontWeight: 400,
+                color: badgeColors.text,
+                display: 'flex',
+              }}
+            >
+              ☿
+            </div>
+          </div>
+
+          {/* Right: Text content */}
+          <div
+            style={{
+              display: 'flex',
+              flexDirection: 'column',
+              gap: 12,
+              maxWidth: 400,
+            }}
+          >
+            {/* Badge Label */}
+            <div
+              style={{
+                fontSize: labelSize,
+                fontWeight: 400,
+                color: badgeColors.text,
+                textTransform: 'uppercase',
+                letterSpacing: '0.1em',
+                display: 'flex',
+              }}
+            >
+              {badgeLabel}
+            </div>
+
+            {/* Humor Line */}
+            <div
+              style={{
+                fontSize: humorSize,
+                color: OG_COLORS.textSecondary,
+                fontStyle: 'italic',
+                lineHeight: 1.4,
+                display: 'flex',
+              }}
+            >
+              {humorLine}
+            </div>
+          </div>
+        </div>
+
+        {/* Footer Branding */}
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: 8,
+            marginTop: 16,
+          }}
+        >
+          <img
+            src={`${baseUrl}/icons/moon-phases/full-moon.svg`}
+            width={22}
+            height={22}
+            style={{ opacity: 0.45 }}
+            alt=''
+          />
+          <span
+            style={{
+              fontFamily: 'Roboto Mono',
+              fontWeight: 300,
+              fontSize: 16,
+              opacity: 0.4,
+              letterSpacing: '0.1em',
+              color: OG_COLORS.textPrimary,
+              display: 'flex',
+            }}
+          >
+            Survive retrograde at lunary.app
+          </span>
+        </div>
+      </div>
+    ) : (
+      // Square/Story Layout
       <div
         style={{
           width: '100%',
@@ -175,6 +345,7 @@ export async function GET(request: NextRequest) {
               color: OG_COLORS.textPrimary,
               letterSpacing: '0.05em',
               textAlign: 'center',
+              display: 'flex',
             }}
           >
             {mainText}
@@ -186,6 +357,7 @@ export async function GET(request: NextRequest) {
               marginTop: 8,
               letterSpacing: '0.1em',
               textAlign: 'center',
+              display: 'flex',
             }}
           >
             {dateRangeText}
@@ -223,6 +395,7 @@ export async function GET(request: NextRequest) {
                 fontWeight: 400,
                 color: badgeColors.text,
                 marginBottom: 8,
+                display: 'flex',
               }}
             >
               {badgeEmoji}
@@ -232,6 +405,7 @@ export async function GET(request: NextRequest) {
                 fontSize: isLandscape ? 48 : isStory ? 72 : 64,
                 fontWeight: 400,
                 color: badgeColors.text,
+                display: 'flex',
               }}
             >
               ☿
@@ -248,6 +422,7 @@ export async function GET(request: NextRequest) {
               letterSpacing: '0.1em',
               marginBottom: 12,
               textAlign: 'center',
+              display: 'flex',
             }}
           >
             {badgeLabel}
@@ -262,6 +437,7 @@ export async function GET(request: NextRequest) {
               textAlign: 'center',
               maxWidth: isLandscape ? '80%' : '90%',
               lineHeight: 1.4,
+              display: 'flex',
             }}
           >
             {humorLine}
@@ -293,25 +469,27 @@ export async function GET(request: NextRequest) {
               opacity: 0.4,
               letterSpacing: '0.1em',
               color: OG_COLORS.textPrimary,
+              display: 'flex',
             }}
           >
             Survive retrograde at lunary.app
           </span>
         </div>
-      </div>,
-      {
-        width,
-        height,
-        fonts: [
-          {
-            name: 'Roboto Mono',
-            data: robotoMonoData,
-            style: 'normal',
-            weight: 400,
-          },
-        ],
-      },
+      </div>
     );
+
+    return new ImageResponse(layoutJsx, {
+      width,
+      height,
+      fonts: [
+        {
+          name: 'Roboto Mono',
+          data: robotoMonoData,
+          style: 'normal',
+          weight: 400,
+        },
+      ],
+    });
   } catch (error) {
     console.error('[RetrogradeBadgeOG] Failed to generate image:', error);
     return new Response('Failed to generate image', { status: 500 });

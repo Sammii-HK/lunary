@@ -53,6 +53,10 @@ Available to all authenticated users:
 - **Personalized Transit Readings** (`personalized_transit_readings`)
 - **Transit Calendar** (`transit_calendar`)
 - **Tarot Patterns** (`tarot_patterns`)
+  - Basic pattern visualizations (progress bars, frequency charts)
+  - Cosmic context for card appearances (`pattern_drill_down`):
+    - Moon phase + aspects when each card was pulled
+    - Personalized transit analysis for frequent cards
 - **Solar Return Insights** (`solar_return`)
 - **Cosmic Profile** (`cosmic_profile`) - life themes, archetypes, profile insights
 - **Moon Circles** (`moon_circles`)
@@ -72,9 +76,9 @@ Available to all authenticated users:
 - **AI Ritual Generation** (`ai_ritual_generation`)
 - **Advanced Patterns** (`advanced_patterns`)
   - Advanced pattern visualizations (radial charts, sparklines, heatmaps)
-  - Pattern drill-down (`pattern_drill_down`) with cosmic context:
+  - Cosmic context for card appearances (`pattern_drill_down`):
     - Moon phase + aspects when each card was pulled
-    - AI-generated transit insights for frequent cards
+    - Personalized transit analysis for frequent cards
     - Frequency timeline visualization
     - Interactive frequent cards expansion
 
@@ -160,19 +164,19 @@ Available to all users via `moon_phases` feature:
 
 ### Tarot Pattern Cosmic Context
 
-Available to Pro Monthly/Annual users via `pattern_drill_down` feature:
+Available to Lunary+ and Pro users via `pattern_drill_down` feature:
 
 - **Frequent Cards Drill-Down**:
   - Date when each card was pulled
   - Moon phase at time of reading (with branded icon)
   - Active planetary aspects (top 3 daily transits)
   - Card meaning with keywords (first appearance only)
-  - AI-generated transit insights (requires birth chart)\*
+  - Personalized transit analysis (requires birth chart)\*
   - Frequency timeline visualization
   - Up to 10 appearances shown per card
 
 - **Cosmic Context Format**:
-  - First appearance: Full context + card meaning + AI insights
+  - First appearance: Full context + card meaning + transit analysis
   - Remaining appearances: Date + moon phase + aspects only
   - All data persisted from reading creation time
 
@@ -218,7 +222,7 @@ Available to Pro Monthly/Annual users via `pattern_drill_down` feature:
 | `downloadable_reports`                 | ❌   | ❌      | ✅          | ✅         |
 | `ai_ritual_generation`                 | ❌   | ❌      | ✅          | ✅         |
 | `advanced_patterns`                    | ❌   | ❌      | ✅          | ✅         |
-| `pattern_drill_down`                   | ❌   | ❌      | ✅          | ✅         |
+| `pattern_drill_down`                   | ❌   | ✅      | ✅          | ✅         |
 | `unlimited_tarot_spreads`              | ❌   | ❌      | ❌          | ✅         |
 | `yearly_forecast`                      | ❌   | ❌      | ❌          | ✅         |
 | `data_export`                          | ❌   | ❌      | ❌          | ✅         |
