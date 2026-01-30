@@ -104,19 +104,6 @@ export function ChartWheelOg({
         display: 'flex',
       }}
     >
-      <style>{`
-        .planet-node { cursor: pointer; z-index: 1; }
-        .planet-node:hover { z-index: 3; }
-        .planet-glyph { transition: color 0.2s ease; }
-        .chart-wheel:has(.planet-node:hover) .planet-glyph { color: #6b7280 !important; }
-        .chart-wheel:has(.planet-node:hover) .planet-node:hover .planet-glyph { color: ${hoverColor} !important; }
-        .planet-tooltip {
-          opacity: 0;
-          transform: translate(-50%, -120%);
-          transition: opacity 0.2s ease;
-        }
-        .planet-node:hover .planet-tooltip { opacity: 1; }
-      `}</style>
       <svg
         viewBox='-140 -140 280 280'
         width={size}

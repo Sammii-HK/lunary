@@ -425,14 +425,14 @@ export const BirthChart = ({
             </text>
           ))}
 
-          {/* Render non-hovered planets first */}
-          {[...mainPlanets, ...angles, ...points, ...asteroids]
-            .filter((p) => p.body !== hoveredBody)
-            .map(({ body, x, y, retrograde, sign, degree, minute }) => {
+          {/* Render all planets */}
+          {[...mainPlanets, ...angles, ...points, ...asteroids].map(
+            ({ body, x, y, retrograde, sign, degree, minute }) => {
               const isAngle = ANGLES.includes(body);
               const isPoint = POINTS.includes(body);
               const isPlanet = MAIN_PLANETS.includes(body);
               const isAsteroid = ASTEROIDS.includes(body);
+              const isHovered = body === hoveredBody;
 
               // Get element color for planets based on their sign
               const elementColor =
@@ -450,7 +450,8 @@ export const BirthChart = ({
                       ? '#FCD34D'
                       : elementColor || '#ffffff';
 
-              const color = hoveredBody ? '#6b7280' : baseColor;
+              const color = isHovered ? '#ffffff' : baseColor;
+              const opacity = isHovered ? 1 : hoveredBody ? 0.4 : 1;
 
               return (
                 <g
@@ -463,6 +464,7 @@ export const BirthChart = ({
                       highlightedPlanet === body ? null : body,
                     )
                   }
+                  opacity={opacity}
                 >
                   <title>
                     {formatPlacementLabel({
@@ -479,7 +481,7 @@ export const BirthChart = ({
                     x2={x}
                     y2={y}
                     stroke={color}
-                    strokeWidth='0.3'
+                    strokeWidth={isHovered ? '0.5' : '0.3'}
                     opacity='0.2'
                   />
                   <text
@@ -500,82 +502,8 @@ export const BirthChart = ({
                   </text>
                 </g>
               );
-            })}
-
-          {/* Render hovered planet last so it appears on top */}
-          {hoveredBody &&
-            [...mainPlanets, ...angles, ...points, ...asteroids]
-              .filter((p) => p.body === hoveredBody)
-              .map(({ body, x, y, retrograde, sign, degree, minute }) => {
-                const isAngle = ANGLES.includes(body);
-                const isPoint = POINTS.includes(body);
-                const isPlanet = MAIN_PLANETS.includes(body);
-                const isAsteroid = ASTEROIDS.includes(body);
-
-                const elementColor =
-                  isPlanet && sign && SIGN_ELEMENTS[sign]
-                    ? ELEMENT_COLORS[SIGN_ELEMENTS[sign]]
-                    : undefined;
-
-                const baseColor = retrograde
-                  ? '#f87171'
-                  : isAngle
-                    ? '#C77DFF'
-                    : isPoint
-                      ? '#7B7BE8'
-                      : isAsteroid
-                        ? '#FCD34D'
-                        : elementColor || '#ffffff';
-
-                return (
-                  <g
-                    key={`${body}-hover`}
-                    className={cx('planet-node', styles.planetNode)}
-                    onMouseEnter={() => setHoveredBody(body)}
-                    onMouseLeave={() => setHoveredBody(null)}
-                    onClick={() =>
-                      setHighlightedPlanet(
-                        highlightedPlanet === body ? null : body,
-                      )
-                    }
-                  >
-                    <title>
-                      {formatPlacementLabel({
-                        body,
-                        sign,
-                        degree,
-                        minute,
-                        retrograde,
-                      })}
-                    </title>
-                    <line
-                      x1='0'
-                      y1='0'
-                      x2={x}
-                      y2={y}
-                      stroke='#ffffff'
-                      strokeWidth='0.5'
-                      opacity='0.4'
-                    />
-                    <text
-                      x={x}
-                      y={y}
-                      textAnchor='middle'
-                      dominantBaseline='central'
-                      className={cx(
-                        'planet-glyph font-astro',
-                        styles.planetGlyph,
-                      )}
-                      fontSize={
-                        isAngle || isPoint ? '12' : isAsteroid ? '11' : '14'
-                      }
-                      fill='#ffffff'
-                    >
-                      {getSymbolForBody(body)}
-                    </text>
-                  </g>
-                );
-              })}
+            },
+          )}
         </svg>
       </div>
 

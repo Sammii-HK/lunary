@@ -2,6 +2,7 @@
 ALTER TABLE "journal_patterns"
   ADD COLUMN "pattern_category" VARCHAR(20),
   ADD COLUMN "confidence" DOUBLE PRECISION,
+  ADD COLUMN "expires_at" TIMESTAMPTZ(6),
   ADD COLUMN "first_detected" TIMESTAMPTZ(6),
   ADD COLUMN "last_observed" TIMESTAMPTZ(6),
   ADD COLUMN "metadata" JSONB,
@@ -10,6 +11,7 @@ ALTER TABLE "journal_patterns"
 -- Create new indexes for improved query performance
 CREATE INDEX "idx_journal_patterns_user_type" ON "journal_patterns"("user_id", "pattern_type");
 CREATE INDEX "idx_journal_patterns_user_category" ON "journal_patterns"("user_id", "pattern_category");
+CREATE INDEX "idx_journal_patterns_expires" ON "journal_patterns"("expires_at");
 CREATE INDEX "idx_journal_patterns_data" ON "journal_patterns" USING GIN("pattern_data");
 
 -- Set defaults for existing rows

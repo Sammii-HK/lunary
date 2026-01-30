@@ -494,7 +494,11 @@ export async function GET(request: NextRequest) {
             alignItems: 'center',
           }}
         >
-          <ChartWheelOg birthChart={birthChart} size={420} />
+          <ChartWheelOg
+            birthChart={birthChart}
+            size={420}
+            showTooltips={false}
+          />
         </div>
 
         <div

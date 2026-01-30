@@ -25,8 +25,13 @@ function getZodiacSign(longitude: number): string {
 }
 
 function getHouse(longitude: number, ascendantLongitude: number): number {
-  const diff = (longitude - ascendantLongitude + 360) % 360;
-  return Math.floor(diff / 30) + 1;
+  // Whole Sign Houses: each sign = one house, based on Ascendant sign
+  const ascendantSign = Math.floor(
+    (((ascendantLongitude % 360) + 360) % 360) / 30,
+  );
+  const planetSign = Math.floor((((longitude % 360) + 360) % 360) / 30);
+  const houseDiff = (planetSign - ascendantSign + 12) % 12;
+  return houseDiff + 1;
 }
 
 function calculatePlanetPosition(date: Date, planet: string): number {

@@ -185,7 +185,8 @@ const MessageBubble = ({
 
   const parseMarkdown = (text: string): React.ReactNode[] => {
     const result: React.ReactNode[] = [];
-    const regex = /(\*\*(.+?)\*\*|\*(.+?)\*)/g;
+    // Match headings (###), bold (**text**), and italic (*text*)
+    const regex = /(^###\s+(.+)$)|(\*\*(.+?)\*\*)|(\*(.+?)\*)/gm;
     let lastIndex = 0;
     let match;
     let key = 0;
@@ -195,13 +196,25 @@ const MessageBubble = ({
         result.push(text.slice(lastIndex, match.index));
       }
       if (match[2]) {
+        // Heading (### Text)
+        result.push(
+          <h3
+            key={key++}
+            className='font-bold text-base md:text-lg mt-3 mb-1 text-lunary-primary-200'
+          >
+            {match[2]}
+          </h3>,
+        );
+      } else if (match[4]) {
+        // Bold (**text**)
         result.push(
           <strong key={key++} className='font-semibold'>
-            {match[2]}
+            {match[4]}
           </strong>,
         );
-      } else if (match[3]) {
-        result.push(<em key={key++}>{match[3]}</em>);
+      } else if (match[6]) {
+        // Italic (*text*)
+        result.push(<em key={key++}>{match[6]}</em>);
       }
       lastIndex = regex.lastIndex;
     }
@@ -289,6 +302,11 @@ const MessageBubble = ({
         }`}
       >
         {renderContent()}
+        {!isUser && content.length > 500 && !/[.!?]$/.test(content.trim()) && (
+          <div className='mt-2 text-xs text-lunary-primary-400 italic'>
+            ...Reply "continue" for more
+          </div>
+        )}
       </div>
       {!isUser && (
         <div className='opacity-0 group-hover:opacity-100 transition-opacity shrink-0 mb-1'>

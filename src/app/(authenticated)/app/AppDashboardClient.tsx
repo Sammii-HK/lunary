@@ -9,6 +9,7 @@ import { recordCheckIn } from '@/lib/streak/check-in';
 import { conversionTracking } from '@/lib/analytics';
 import { useTour } from '@/context/TourContext';
 import { useNotificationDeepLink } from '@/hooks/useNotificationDeepLink';
+import { useABTestTracking } from '@/hooks/useABTestTracking';
 
 import { ShareDailyInsight } from '@/components/ShareDailyInsight';
 import { TourTrigger } from '@/components/feature-tour/tour-trigger';
@@ -147,6 +148,9 @@ export default function AppDashboardClient() {
   const authState = useAuthStatus();
   const { startTour, hasSeenOnboarding } = useTour();
   const [focusHonoured, setFocusHonoured] = useState(false);
+
+  // Track dashboard view with A/B test data (cta-copy-test)
+  useABTestTracking('dashboard', 'app_opened', ['cta-copy-test']);
   const firstName = user?.name?.trim() ? user.name.split(' ')[0] : null;
   const [isDemoMode, setIsDemoMode] = useState(false);
   // Always use controlled mode - start with false, never undefined

@@ -21,6 +21,12 @@ export type BirthChartSnapshot = {
   lon: number;
   placements: BirthChartPlacement[];
   aspects?: BirthChartAspect[];
+  patterns?: Array<{
+    type: string;
+    planets: string[];
+    description: string;
+    significance?: string;
+  }>;
 };
 
 export type TransitRecord = {

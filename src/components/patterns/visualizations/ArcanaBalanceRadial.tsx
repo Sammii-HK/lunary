@@ -1,11 +1,6 @@
 'use client';
 
-import {
-  RadialBarChart,
-  RadialBar,
-  Legend,
-  ResponsiveContainer,
-} from 'recharts';
+import { RadialBarChart, RadialBar, ResponsiveContainer } from 'recharts';
 import { formatPercentage } from '@/lib/patterns/utils/pattern-formatters';
 import { interpretArcanaBalance } from '@/lib/patterns/utils/arcana-weighting';
 
@@ -34,65 +29,76 @@ export function ArcanaBalanceRadial({
   const minorPercentage = (minorCount / total) * 100;
   const interpretation = interpretArcanaBalance(majorCount, minorCount);
 
+  // Debug logging
+  if (process.env.NODE_ENV === 'development') {
+    console.log('[ArcanaBalanceRadial] Data:', {
+      majorCount,
+      minorCount,
+      total,
+      majorPercentage,
+      minorPercentage,
+    });
+  }
+
+  // Sort data so larger percentage is outer ring (better visualization)
   const data = [
     {
       name: 'Major Arcana',
       value: majorPercentage,
       count: majorCount,
-      fill: 'hsl(var(--lunary-primary))',
+      fill: 'hsl(256, 64%, 60%)', // Nebula Violet
     },
     {
       name: 'Minor Arcana',
       value: minorPercentage,
       count: minorCount,
-      fill: 'hsl(var(--lunary-secondary))',
+      fill: 'hsl(240, 74%, 68%)', // Comet Trail blue
     },
-  ];
+  ].sort((a, b) => b.value - a.value);
 
   return (
     <div className='w-full space-y-3'>
-      <div className='h-[180px]'>
+      <div className='h-[160px]'>
         <ResponsiveContainer width='100%' height='100%'>
           <RadialBarChart
             cx='50%'
             cy='50%'
-            innerRadius='40%'
-            outerRadius='100%'
+            innerRadius='30%'
+            outerRadius='90%'
             data={data}
             startAngle={180}
             endAngle={0}
           >
             <RadialBar
+              isAnimationActive={false}
+              cornerRadius={6}
               {...({
                 minAngle: 15,
-                label: {
-                  position: 'insideStart',
-                  fill: '#fff',
-                  fontSize: 12,
-                  formatter: (value: number) => formatPercentage(value),
-                },
-                background: true,
+                background: { fill: 'rgba(255, 255, 255, 0.05)' },
                 dataKey: 'value',
               } as any)}
-            />
-            <Legend
-              iconSize={10}
-              layout='vertical'
-              verticalAlign='bottom'
-              align='center'
-              formatter={(value, entry: any) => (
-                <span className='text-xs text-zinc-300'>
-                  {value}: {entry.payload.count} (
-                  {formatPercentage(entry.payload.value)})
-                </span>
-              )}
             />
           </RadialBarChart>
         </ResponsiveContainer>
       </div>
 
+      {/* Legend below chart */}
+      <div className='flex flex-col gap-2 px-2'>
+        {data.map((item) => (
+          <div key={item.name} className='flex items-center gap-2'>
+            <div
+              className='w-3 h-3 rounded-full'
+              style={{ backgroundColor: item.fill }}
+            />
+            <span className='text-xs text-zinc-300'>
+              {item.name}: {item.count} ({formatPercentage(item.value)})
+            </span>
+          </div>
+        ))}
+      </div>
+
       {showInterpretation && (
-        <div className='text-xs space-y-1 px-2'>
+        <div className='text-xs space-y-1 px-2 pt-2 border-t border-zinc-800'>
           <p className='text-zinc-300 font-medium'>
             {interpretation.interpretation}
           </p>
