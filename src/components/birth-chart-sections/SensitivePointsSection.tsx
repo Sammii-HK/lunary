@@ -175,36 +175,46 @@ export function SensitivePointsSection({
               </p>
             </div>
           )}
-          {asteroidsData.map((asteroid) => (
-            <div
-              key={asteroid.body}
-              className='border-l-2 border-[#FCD34D] pl-3'
-            >
-              <h5 className='text-sm font-medium text-white flex items-center gap-2'>
-                <span className='font-astro text-lg text-[#FCD34D]'>
-                  {
-                    astroPointSymbols[
-                      asteroid.body.toLowerCase() as keyof typeof astroPointSymbols
-                    ]
-                  }
-                </span>
-                {asteroid.body} in {asteroid.sign}
-                <span className='font-astro text-zinc-400'>
-                  {
-                    zodiacSymbol[
-                      asteroid.sign.toLowerCase() as keyof typeof zodiacSymbol
-                    ]
-                  }
-                </span>
-                {asteroid.retrograde && (
-                  <span className='text-lunary-error text-xs'>℞</span>
+          {asteroidsData.map((asteroid) => {
+            const asteroidKey =
+              asteroid.body.toLowerCase() as keyof typeof astrologicalPoints;
+            const asteroidInfo = astrologicalPoints[asteroidKey];
+            return (
+              <div
+                key={asteroid.body}
+                className='border-l-2 border-[#FCD34D] pl-3'
+              >
+                <h5 className='text-sm font-medium text-white flex items-center gap-2'>
+                  <span className='font-astro text-lg text-[#FCD34D]'>
+                    {
+                      astroPointSymbols[
+                        asteroid.body.toLowerCase() as keyof typeof astroPointSymbols
+                      ]
+                    }
+                  </span>
+                  {asteroid.body} in {asteroid.sign}
+                  <span className='font-astro text-zinc-400'>
+                    {
+                      zodiacSymbol[
+                        asteroid.sign.toLowerCase() as keyof typeof zodiacSymbol
+                      ]
+                    }
+                  </span>
+                  {asteroid.retrograde && (
+                    <span className='text-lunary-error text-xs'>℞</span>
+                  )}
+                </h5>
+                <p className='text-xs text-zinc-400 mt-1'>
+                  {asteroid.degree}°{asteroid.minute}' {asteroid.sign}
+                </p>
+                {asteroidInfo?.mysticalProperties && (
+                  <p className='text-xs text-zinc-300 mt-1'>
+                    {asteroidInfo.mysticalProperties}
+                  </p>
                 )}
-              </h5>
-              <p className='text-xs text-zinc-400 mt-1'>
-                {asteroid.degree}°{asteroid.minute}' {asteroid.sign}
-              </p>
-            </div>
-          ))}
+              </div>
+            );
+          })}
         </div>
       </div>
     </CollapsibleSection>

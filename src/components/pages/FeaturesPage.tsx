@@ -109,15 +109,21 @@ export default function FeaturesPage() {
           <FeatureCard
             icon={<Map className='w-5 h-5 md:w-6 md:h-6' />}
             title='Birth Chart Calculator'
-            description='Create your complete natal chart with precise planetary positions'
+            description='The most comprehensive free birth chart available - 24+ celestial bodies with educational interpretations'
             features={[
-              'Visual chart wheel with all 10 planets',
-              'Every planet in sign and house',
+              'All 10 planets + 8 asteroids (Ceres, Pallas, Juno, Vesta, Hygiea, Pholus, Psyche, Eros)',
+              'Planetary dignities (Rulership, Exaltation, Detriment, Fall)',
+              'Chart ruler detection and analysis',
+              'Chiron, Lilith, North & South Nodes',
+              'Every placement explained in educational detail',
+              'Visual chart wheel with all bodies',
               'Major aspects explained in plain language',
+              '12 houses with Whole Sign system',
+              'Elemental & modal balance analysis',
               'Saved to your account for personalized features',
             ]}
-            freeTier='Complete birth chart calculation'
-            paidTier='Transit analysis + ongoing interpretations'
+            freeTier='Complete birth chart with 24+ bodies - all features included'
+            paidTier='Transit analysis + ongoing personalized interpretations'
             cta='Calculate my chart'
             ctaHref='/auth?signup=true'
           />
