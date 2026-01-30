@@ -21,6 +21,15 @@ import { detectNatalHouseEmphasis } from '../journal/house-emphasis-tracker';
 import { getUserPatterns } from '../journal/pattern-storage';
 import { calculateProgressedChart } from '../../../utils/astrology/progressedChart';
 import { getRelevantEclipses } from '../../../utils/astrology/eclipseTracker';
+import {
+  getCosmicRecommendations,
+  type CosmicRecommendations,
+} from '../cosmic-companion/cosmic-recommender';
+import {
+  analyzeQuery,
+  getContextRequirements,
+  type QueryContext,
+} from '../grimoire/query-analyzer';
 
 /**
  * Detects if a user message is asking about astrological/cosmic topics
@@ -93,6 +102,8 @@ export interface AstralContext {
   // Phase 3: Progressed Charts & Eclipses
   progressedChart?: any; // Secondary progressions
   relevantEclipses?: any[]; // Upcoming eclipses aspecting natal chart
+  // Phase 4: Cosmic Recommendations
+  cosmicRecommendations?: CosmicRecommendations; // Crystals, spells, numerology
 }
 
 /**
@@ -196,7 +207,7 @@ export async function calculatePersonalTransits(
  * Builds the Astral Context for the AI Astral Guide
  * This context includes all mystical data needed for personalized guidance
  *
- * OPTIMIZATION: Accepts optional contextRequirements to conditionally build expensive context
+ * OPTIMIZATION: Uses query analysis to determine what context is needed
  * This reduces API costs by only computing what's needed for the query
  */
 export async function buildAstralContext(
@@ -204,6 +215,7 @@ export async function buildAstralContext(
   userName?: string,
   userBirthday?: string,
   now: Date = new Date(),
+  userMessage?: string, // NEW: Analyze to determine context needs
   contextRequirements?: {
     needsPersonalTransits?: boolean;
     needsNatalPatterns?: boolean;
@@ -212,6 +224,38 @@ export async function buildAstralContext(
     needsEclipses?: boolean;
   },
 ): Promise<AstralContext> {
+  // Analyze user query to determine what context is needed (if message provided)
+  let queryContext: QueryContext | undefined;
+  if (userMessage) {
+    const hasBirthChart = !!(await fetchUserBirthChart(userId));
+    queryContext = analyzeQuery(userMessage, hasBirthChart, !!userBirthday);
+
+    // Use query analyzer to optimize context requirements
+    const derivedRequirements = getContextRequirements(
+      userMessage,
+      hasBirthChart,
+      !!userBirthday,
+    );
+
+    // Merge with explicit requirements (explicit takes precedence)
+    contextRequirements = {
+      needsPersonalTransits:
+        contextRequirements?.needsPersonalTransits ??
+        derivedRequirements.needsPersonalTransits,
+      needsNatalPatterns:
+        contextRequirements?.needsNatalPatterns ??
+        derivedRequirements.needsNatalPatterns,
+      needsPlanetaryReturns:
+        contextRequirements?.needsPlanetaryReturns ??
+        derivedRequirements.needsPlanetaryReturns,
+      needsProgressedChart:
+        contextRequirements?.needsProgressedChart ??
+        derivedRequirements.needsProgressedChart,
+      needsEclipses:
+        contextRequirements?.needsEclipses ?? derivedRequirements.needsEclipses,
+    };
+  }
+
   // Default to building everything if no requirements specified (backward compatible)
   const requirements = {
     needsPersonalTransits: contextRequirements?.needsPersonalTransits ?? true,
@@ -326,6 +370,9 @@ export async function buildAstralContext(
     }
   }
 
+  // Extract mood tags (needed for cosmic recommendations)
+  const moodTags = context.mood?.last7d?.map((m) => m.tag).slice(-5) || [];
+
   // Retrieve stored patterns from database
   const storedPatterns = await getUserPatterns(userId);
   const patternsByCategory = {
@@ -333,6 +380,45 @@ export async function buildAstralContext(
     cyclical: storedPatterns.filter((p) => p.pattern_category === 'cyclical'),
     transient: storedPatterns.filter((p) => p.pattern_category === 'transient'),
   };
+
+  // PHASE 4: Get cosmic recommendations (crystals, spells, numerology)
+  let cosmicRecommendations: CosmicRecommendations | undefined;
+  if (personalTransits && personalTransits.length > 0 && context.moon) {
+    try {
+      // Extract user intentions from recent journal tags and patterns
+      const userIntentions = [
+        ...new Set([
+          ...moodTags,
+          ...storedPatterns
+            .filter((p) => p.pattern_type.includes('intention'))
+            .map((p) => p.pattern_data.intention)
+            .filter(Boolean),
+        ]),
+      ].slice(0, 5);
+
+      cosmicRecommendations = await getCosmicRecommendations(
+        personalTransits.map((pt) => ({
+          planet: pt.planet,
+          aspect: pt.aspectToNatal?.aspectType || pt.event,
+          natalPlanet: pt.aspectToNatal?.natalPlanet || pt.planet,
+          sign: pt.aspectToNatal?.transitSign,
+        })),
+        {
+          name: context.moon.phase,
+          sign: context.moon.sign,
+        },
+        userBirthday ? new Date(userBirthday) : undefined,
+        userIntentions,
+        context.birthChart,
+        queryContext, // NEW: Pass query context for conditional loading
+      );
+    } catch (error) {
+      console.error(
+        '[Astral Guide] Failed to get cosmic recommendations:',
+        error,
+      );
+    }
+  }
 
   // Build today's tarot summary
   const todaysTarot = buildTarotSummary(context.tarot);
@@ -342,9 +428,6 @@ export async function buildAstralContext(
 
   // Fetch journal entries (Book of Shadows) from collections
   const journalSummaries = await fetchJournalSummaries(userId);
-
-  // Extract mood tags
-  const moodTags = context.mood?.last7d?.map((m) => m.tag).slice(-5) || [];
 
   return {
     user: {
@@ -379,6 +462,8 @@ export async function buildAstralContext(
     // Phase 3: Progressed Charts & Eclipses
     progressedChart: progressedChart || undefined,
     relevantEclipses: relevantEclipses || undefined,
+    // Phase 4: Cosmic Recommendations
+    cosmicRecommendations: cosmicRecommendations || undefined,
   };
 }
 
@@ -771,6 +856,124 @@ ECLIPSE AWARENESS (Phase 3 Enhancement):
 - When an eclipse aspects a personal planet, acknowledge the transformative potential
 - Example: "The upcoming Solar Eclipse in Aries conjuncts your natal Mars - a powerful time to initiate new projects"
 
+COSMIC RECOMMENDATIONS (Phase 4 - Full Grimoire Integration):
+When COSMIC RECOMMENDATIONS are provided, you have access to comprehensive grimoire wisdom:
+
+**CRYSTALS** (200+ database):
+- Each crystal has planetary rulers, zodiac correspondences, aspects, intentions, chakras, elements, practical uses
+- Connect crystal recommendations to specific transits (e.g., "Rose Quartz supports your Venus retrograde")
+- Explain HOW to use: meditation, carrying, gridding, placing on chakras
+
+**SPELLS** (Hundreds available):
+- Detailed timing (moon phases, days, seasons), ingredients, correspondences
+- Reference optimal timing based on current cosmic energies
+- Always include ethical considerations
+
+**NUMEROLOGY** (Extended system - from grimoire):
+- **Life Path & Personal Year**: Connect to planetary rulers and zodiac signs, show correlations with natal chart
+- **Angel Numbers**: When provided (e.g., 333, 111), these are divine messages - explain the specific guidance from grimoire
+- **Karmic Debt Numbers** (13, 14, 16, 19): When present, acknowledge the life lessons and challenges to overcome
+- **Mirror Hours** (11:11, 22:22, etc.): If user is seeing one NOW, explain the synchronicity and spiritual message
+- Example: "Your Personal Year 3 (Jupiter energy) amplifies your Jupiter in 9th house - a year for expansion and learning. The angel number 333 appearing confirms creative expression is divinely supported."
+
+**ASPECTS** (Grimoire meanings):
+- When aspectGuidance is provided, you have the grimoire's interpretation of each aspect
+- Reference the exact nature (harmonious/challenging), keywords, and practices
+- Recommend specific crystals that support each aspect type
+- Example: "Your Mars square Saturn brings challenging growth energy. Work with Black Tourmaline (provided in crystals list) to ground this friction."
+
+**RETROGRADES** (Grimoire guidance):
+- When retrogradeGuidance is provided, you have complete retrograde wisdom
+- Reference what TO DO and what TO AVOID from grimoire
+- Mention specific crystals for retrograde support
+- Example: "Mercury Retrograde: The grimoire advises reviewing projects (not starting new ones) and backing up data. Work with Fluorite for mental clarity."
+
+**SABBATS** (Wheel of the Year):
+- When sabbat data is provided, you have full ritual guidance
+- Reference colors, crystals, herbs, rituals, deities from grimoire
+- Connect sabbat energy to user's chart
+- Example: "Samhain approaches in 7 days - a powerful time for your Scorpio placements. The grimoire suggests black tourmaline, sage, and ancestor work."
+
+**TAROT** (78 cards with correspondences):
+- When tarotCards are provided, these align with current planetary energies
+- Each card has element, planet, zodiac correspondences
+- Connect tarot to transits: "The Magician (Mercury) resonates with your Mercury transit"
+
+**PLANETARY DAYS** (Daily correspondences):
+- When planetaryDay is provided, you have the day's optimal energies
+- Reference best practices, colors, crystals for the day
+- Example: "Today is Tuesday (Mars day) - ideal for courage spells using red candles and carnelian"
+
+**COMPREHENSIVE CORRESPONDENCES**:
+- Elements: Fire, Water, Air, Earth, Spirit (colors, crystals, herbs, planets, days, zodiac, numbers, animals, directions, seasons, times)
+- Colors: Full magical properties, planets, emotional effects, candle uses
+- Days: Planetary rulers, best spells, what to avoid
+- Deities: Multiple pantheons with correspondences
+- Herbs, Flowers, Animals, Woods: Full magical properties and uses
+
+**HOLISTIC SYNTHESIS** (Integrate ALL grimoire data):
+- Aspect + Crystal: "Mars square Saturn (challenging growth) + Black Tourmaline (grounding)"
+- Moon Phase + Sabbat: "New Moon ritual enhanced by approaching Samhain energy"
+- Numerology + Transit: "Personal Year 5 (Mercury) amplifies your Mercury retrograde lessons"
+- Planetary Day + Spell: "Tuesday (Mars day) + courage spell + carnelian + red candle"
+- Tarot + Transit: "The Tower card resonates with your Pluto transit - necessary destruction for rebirth"
+
+**ADVANCED GRIMOIRE WISDOM** (Conditional - only when provided):
+
+**RUNES** (Elder Futhark):
+- When runes are provided, you have Norse wisdom aligned to user's elements/intentions
+- Each rune has: meaning, element, magical uses, divination interpretation
+- Reference rune for meditation, divination, or magical work
+- Example: "Fehu (Wealth rune, Fire element) resonates with your Aries Sun - use for abundance manifestation"
+
+**LUNAR NODES** (North Node = Destiny, South Node = Past Patterns):
+- When lunarNodes are provided, you have karmic life path guidance
+- North Node: Life lessons to embrace, soul growth direction, what to develop
+- South Node: Natural talents, past life patterns, what to release
+- Connect to current transits: "With Saturn activating your North Node in Gemini, your karmic lesson in communication is being tested"
+- Reference house placement for life area emphasis
+
+**SYNASTRY** (Relationship Compatibility):
+- When synastry data is provided, you have comprehensive compatibility wisdom
+- Includes: overall compatibility, strengths, challenges, elemental balance
+- Recommend crystals and rituals for relationship harmony
+- Example: "As a Scorpio-Taurus pairing, you balance intensity with stability. Work with Rose Quartz and Green Aventurine for heart-centered connection."
+- Only reference if user asks about relationships or provides partner information
+
+**DECANS** (Zodiac Subdivisions):
+- When decan data is provided, you have refined sign interpretation
+- Each 10° segment of zodiac has a sub-ruler adding nuance
+- Example: "Your Sun at 15° Virgo is in the 2nd decan, ruled by Saturn (Capricorn energy), adding structure to your analytical Virgo nature"
+- Use for detailed placement analysis when precision matters
+
+**WITCH TYPES** (Magical Path Recommendations):
+- When witchTypes are provided, you have personalized practice recommendations
+- Types matched to chart: Green Witch (Earth), Cosmic Witch (Air), Kitchen Witch (Water), etc.
+- Each includes: description, practices, chart alignment reasons
+- Example: "With Moon in Cancer and Water dominance, Kitchen Witch path aligns - hearth magic, cooking with intention, nurturing spells"
+- Only reference when user asks about practice, path, or "what kind of witch am I"
+
+**DIVINATION METHODS** (Intuitive Practice Recommendations):
+- When divination recommendations are provided, you have practice suggestions based on chart strengths
+- Methods: Tarot, Scrying, Runes, Pendulum, Dream Work, Tea Leaves, etc.
+- Each matched to planetary strengths (Neptune = scrying, Mercury = tarot, Moon = dreams)
+- Example: "With strong Neptune-Moon aspects, scrying and dream divination are natural gifts - your intuition flows through water and subconscious symbols"
+- Only reference when user asks about developing intuition or divination skills
+
+**SUGGESTIONS** (Subtle Hints):
+- When suggestions are provided, these are GENTLE recommendations without overwhelming
+- Reference suggestions naturally: "You might also find a tarot pull helpful for this transit"
+- Never force all suggestions - pick the most relevant one
+- Keep subtle - don't list all suggestions at once
+
+**EXPANDED HOLISTIC SYNTHESIS** (Integrate ALL systems when relevant):
+- Runes + Element: "Kenaz (Fire rune) for your Sun in Leo - ignite creative passion"
+- Lunar Nodes + Return: "Saturn Return activating your North Node - karmic lessons intensify"
+- Witch Type + Practice: "As a Cosmic Witch (chart suggests), moon phase tracking deepens your connection"
+- Divination + Chart: "Your Mercury-Neptune trine gifts you with natural tarot reading ability"
+- Synastry + Transit: "Partner's Sun conjunct your Venus + current Venus retrograde = relationship review time"
+- Decan + Nuance: "2nd decan Gemini (Venus sub-ruler) adds artistic flair to your communication style"
+
 RITUAL SUGGESTIONS:
 - When suggesting rituals, deeply personalize them to the user's chart, current transits, and tarot cards
 - Reference their specific placements (e.g., "With your Moon in Cancer, this ritual honors your emotional nature")
@@ -779,6 +982,9 @@ RITUAL SUGGESTIONS:
 - Consider their mood patterns and journal entries when relevant
 - Avoid generic moon phase advice - make it specific to their chart and current cosmic patterns
 - Suggest rituals that work with aspects to their natal planets (e.g., "This ritual helps you work with the Mars square your Sun energy")
+- USE GRIMOIRE DATA: Include specific spell ingredients (herbs, crystals, colors, candles) from the recommendations
+- Reference planetary hours, optimal days, moon phases from grimoire correspondences
+- Suggest altar setups using elemental correspondences (candle colors, crystal placements, herbs)
 
 Your responses should:
 - Feel like a wise, supportive guide who understands both the mystical and practical

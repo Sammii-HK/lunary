@@ -31,6 +31,8 @@ export interface QueryContext {
   suggestRunes: boolean;
   suggestDivination: boolean;
   suggestSabbat: boolean;
+
+  specificRune: string | undefined;
 }
 
 /**
@@ -156,6 +158,37 @@ export function analyzeQuery(
   const hasKeyword = (keywords: string[]) =>
     keywords.some((kw) => lowerMessage.includes(kw));
 
+  // Detect specific rune names (Elder Futhark 24-rune alphabet)
+  const runeNames = [
+    'Fehu',
+    'Uruz',
+    'Thurisaz',
+    'Ansuz',
+    'Raidho',
+    'Kenaz',
+    'Gebo',
+    'Wunjo',
+    'Hagalaz',
+    'Nauthiz',
+    'Isa',
+    'Jera',
+    'Eihwaz',
+    'Perthro',
+    'Algiz',
+    'Sowilo',
+    'Tiwaz',
+    'Berkano',
+    'Ehwaz',
+    'Mannaz',
+    'Laguz',
+    'Ingwaz',
+    'Dagaz',
+    'Othala',
+  ];
+  const specificRune = runeNames.find((rune) =>
+    lowerMessage.includes(rune.toLowerCase()),
+  );
+
   return {
     // Core data - include if directly mentioned or if no specific request
     needsCrystals:
@@ -183,6 +216,9 @@ export function analyzeQuery(
     needsMeditation: hasKeyword(meditationKeywords),
     needsPlanetaryDay:
       lowerMessage.includes('today') || lowerMessage.includes('right now'),
+
+    // Specific queries (when user asks about specific items by name)
+    specificRune: specificRune || undefined,
 
     // Suggestions - offer when relevant but not explicitly asked
     suggestTarot:
