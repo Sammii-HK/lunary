@@ -2,7 +2,7 @@
 
 import { BirthChartData } from '@/utils/astrology/birthChart';
 import { CollapsibleSection } from '@/components/CollapsibleSection';
-import { bodiesSymbols } from '@/utils/zodiac/zodiac';
+import { bodiesSymbols } from '../../../utils/zodiac/zodiac';
 
 interface PersonalPlanetsSectionProps {
   birthChartData: BirthChartData[];

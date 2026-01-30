@@ -6,7 +6,7 @@ import {
   astroPointSymbols,
   zodiacSymbol,
   astrologicalPoints,
-} from '@/utils/zodiac/zodiac';
+} from '../../../utils/zodiac/zodiac';
 
 interface SensitivePointsSectionProps {
   birthChartData: BirthChartData[];

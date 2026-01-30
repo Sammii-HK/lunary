@@ -7,9 +7,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { sql } from '@vercel/postgres';
 import { auth } from '@/lib/auth';
-import { getMoonPhase } from '@/../../utils/moon/moonPhases';
-import { monthlyMoonPhases } from '@/../../utils/moon/monthlyPhases';
-import { getPlanetaryPositions } from '@/../../utils/astrology/astronomical-data';
+import {
+  getAccurateMoonPhase,
+  getRealPlanetaryPositions,
+} from '../../../../../utils/astrology/astronomical-data';
 import { ASPECT_DATA } from '@/constants/seo/aspects';
 
 // Helper to convert moon phase label to key
@@ -19,10 +20,18 @@ function getMoonPhaseKey(label: string): string {
 
 // Helper to get moon phase emoji
 function getMoonPhaseEmoji(phaseLabel: string): string {
-  const phaseKey = phaseLabel.toLowerCase().replace(' ', '');
-  const phaseData =
-    monthlyMoonPhases[phaseKey as keyof typeof monthlyMoonPhases];
-  return phaseData?.symbol || '🌙';
+  // Moon phase emoji mapping
+  const emojiMap: Record<string, string> = {
+    'new moon': '🌑',
+    'waxing crescent': '🌒',
+    'first quarter': '🌓',
+    'waxing gibbous': '🌔',
+    'full moon': '🌕',
+    'waning gibbous': '🌖',
+    'last quarter': '🌗',
+    'waning crescent': '🌘',
+  };
+  return emojiMap[phaseLabel.toLowerCase()] || '🌙';
 }
 
 // Helper to calculate major daily aspects (transit to transit only, simplified)
@@ -33,7 +42,7 @@ function calculateDailyAspects(date: Date): Array<{
   aspectSymbol: string;
 }> {
   try {
-    const positions = getPlanetaryPositions(date);
+    const positions = getRealPlanetaryPositions(date);
     const aspects: Array<{
       planet1: string;
       planet2: string;
@@ -133,8 +142,8 @@ export async function GET(request: NextRequest) {
     `;
 
     // Extract and format cards with cosmic context
-    const readings = result.rows
-      .map((row) => {
+    const readings = await Promise.all(
+      result.rows.map(async (row) => {
         try {
           const cardsData =
             typeof row.cards === 'string' ? JSON.parse(row.cards) : row.cards;
@@ -145,9 +154,11 @@ export async function GET(request: NextRequest) {
               const readingDate = new Date(row.created_at);
 
               // Get moon phase for this date
-              const moonPhaseLabel = getMoonPhase(readingDate);
+              const moonPhase = await getAccurateMoonPhase(readingDate);
+              const moonPhaseLabel = moonPhase.name;
               const moonPhaseKey = getMoonPhaseKey(moonPhaseLabel);
-              const moonPhaseEmoji = getMoonPhaseEmoji(moonPhaseLabel);
+              const moonPhaseEmoji =
+                moonPhase.emoji || getMoonPhaseEmoji(moonPhaseLabel);
 
               // Calculate aspects for this date
               const aspects = calculateDailyAspects(readingDate);
@@ -171,8 +182,10 @@ export async function GET(request: NextRequest) {
           console.error('Error parsing card data:', error);
           return null;
         }
-      })
-      .filter((card): card is NonNullable<typeof card> => card !== null);
+      }),
+    ).then((results) =>
+      results.filter((card): card is NonNullable<typeof card> => card !== null),
+    );
 
     return NextResponse.json({
       success: true,

@@ -885,53 +885,31 @@ async function findHouseActivationPatterns(
   };
 
   // Analyze which houses are emphasized in journal entries
+  // SIMPLIFIED LOGIC: Check if text contains house keywords, regardless of transits
   const houseActivation: Record<number, number> = {};
   let totalMatches = 0;
-  let successCount = 0;
-  let errorCount = 0;
+
+  console.log(
+    `[findHouseActivationPatterns] Analyzing ${entries.length} entries for house themes`,
+  );
 
   for (const entry of entries) {
-    const entryDate = new Date(entry.createdAt);
     const lowerText = entry.text.toLowerCase();
 
-    try {
-      // Get transiting planets for this date
-      const transits = await getRealPlanetaryPositions(entryDate);
+    // Check all houses for keyword matches
+    for (const [houseNum, keywords] of Object.entries(houseThemes)) {
+      const house = parseInt(houseNum);
 
-      // Calculate which houses were activated by major transits
-      for (const planet of ['Sun', 'Moon', 'Mars', 'Jupiter', 'Saturn']) {
-        const transitingPlanet = transits[planet];
-        if (!transitingPlanet || !transitingPlanet.eclipticLongitude) continue;
-
-        const planetSign = Math.floor(
-          (((transitingPlanet.eclipticLongitude % 360) + 360) % 360) / 30,
-        );
-        const house = ((planetSign - ascendantSign + 12) % 12) + 1;
-
-        // Check if journal entry mentions themes related to this house
-        const houseKeywords = houseThemes[house] || [];
-        for (const keyword of houseKeywords) {
-          if (lowerText.includes(keyword)) {
-            houseActivation[house] = (houseActivation[house] || 0) + 1;
-            totalMatches++;
-            break;
-          }
+      for (const keyword of keywords) {
+        if (lowerText.includes(keyword)) {
+          houseActivation[house] = (houseActivation[house] || 0) + 1;
+          totalMatches++;
+          break; // Only count once per house per entry
         }
       }
-      successCount++;
-    } catch (error) {
-      errorCount++;
-      console.log(
-        `[findHouseActivationPatterns] Error for entry ${entry.createdAt}:`,
-        error,
-      );
-      continue;
     }
   }
 
-  console.log(
-    `[findHouseActivationPatterns] Processing complete - Success: ${successCount}, Errors: ${errorCount}`,
-  );
   console.log(
     `[findHouseActivationPatterns] Total keyword matches: ${totalMatches}`,
   );
