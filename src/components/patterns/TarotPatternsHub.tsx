@@ -56,28 +56,6 @@ export function TarotPatternsHub({
 
   return (
     <div className='space-y-6'>
-      {/* Summary Stats Row */}
-      <div className='grid gap-4 md:grid-cols-3'>
-        <div className='rounded-lg border border-zinc-800 bg-zinc-900/40 p-4'>
-          <p className='text-xs text-zinc-500 mb-1'>Total Readings</p>
-          <p className='text-2xl font-semibold text-zinc-200'>
-            {patterns.totalReadings}
-          </p>
-        </div>
-        <div className='rounded-lg border border-zinc-800 bg-zinc-900/40 p-4'>
-          <p className='text-xs text-zinc-500 mb-1'>Time Period</p>
-          <p className='text-2xl font-semibold text-zinc-200'>
-            {timeFrameDays} days
-          </p>
-        </div>
-        <div className='rounded-lg border border-zinc-800 bg-zinc-900/40 p-4'>
-          <p className='text-xs text-zinc-500 mb-1'>Unique Cards</p>
-          <p className='text-2xl font-semibold text-zinc-200'>
-            {patterns.frequentCards.length}
-          </p>
-        </div>
-      </div>
-
       {/* Dominant Themes - Enhanced RecurringThemesCard */}
       {patterns.dominantThemes.length > 0 && (
         <RecurringThemesCard
@@ -98,6 +76,8 @@ export function TarotPatternsHub({
           icon={<Sparkles className='w-4 h-4' />}
           locked={!hasBasicPatterns}
           onUpgradeClick={onUpgradeClick}
+          collapsible={true}
+          defaultCollapsed={false}
         >
           <SuitDistributionChart data={patterns.suitPatterns} />
         </PatternCard>
@@ -110,6 +90,8 @@ export function TarotPatternsHub({
           icon={<Moon className='w-4 h-4' />}
           locked={!hasBasicPatterns}
           onUpgradeClick={onUpgradeClick}
+          collapsible={true}
+          defaultCollapsed={false}
         >
           <ArcanaBalanceRadial
             majorCount={patterns.arcanaBalance.major}
@@ -124,6 +106,8 @@ export function TarotPatternsHub({
             subtitle='Your practice over time'
             color='accent'
             icon={<TrendingUp className='w-4 h-4' />}
+            collapsible={true}
+            defaultCollapsed={true}
           >
             <div className='flex items-center justify-center h-[250px] text-sm text-zinc-500'>
               Timeline visualization coming soon
