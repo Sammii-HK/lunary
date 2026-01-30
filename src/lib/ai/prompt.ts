@@ -370,6 +370,12 @@ const describeContext = (
     parts.push(`NATAL DETAILS: ${natalSummary}`);
   }
 
+  // Grimoire Pattern Data - rich interpretations for detected patterns
+  const grimoirePatternData = (context as any).grimoirePatternData;
+  if (grimoirePatternData && typeof grimoirePatternData === 'string') {
+    parts.push(grimoirePatternData);
+  }
+
   // Mood - include recent trend
   if (context.mood?.last7d && context.mood.last7d.length > 0) {
     const recentMoods = context.mood.last7d

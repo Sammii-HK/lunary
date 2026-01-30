@@ -106,6 +106,7 @@ export interface AstralContext {
     cyclical?: any[];
     transient?: any[];
   };
+  grimoirePatternData?: string; // Grimoire interpretations for detected patterns
   // Phase 3: Progressed Charts & Eclipses
   progressedChart?: any; // Secondary progressions
   relevantEclipses?: any[]; // Upcoming eclipses aspecting natal chart
@@ -431,6 +432,60 @@ export async function buildAstralContext(
     }
   }
 
+  // PHASE 2: Retrieve grimoire interpretations for detected patterns
+  let grimoirePatternData: string | undefined;
+  if (
+    natalAspectPatterns ||
+    planetaryReturns ||
+    (storedPatterns && storedPatterns.length > 0)
+  ) {
+    try {
+      const patternQueries: string[] = [];
+
+      // Add natal aspect pattern queries
+      if (natalAspectPatterns && natalAspectPatterns.length > 0) {
+        patternQueries.push(
+          ...natalAspectPatterns
+            .slice(0, 3)
+            .map((p) => `${p.type.replace('natal_', '')} ${p.element || ''}`),
+        );
+      }
+
+      // Add planetary return queries
+      if (planetaryReturns && planetaryReturns.length > 0) {
+        patternQueries.push(
+          ...planetaryReturns
+            .filter((r) => r.isActive)
+            .slice(0, 2)
+            .map((r) => `${r.planet} return guidance`),
+        );
+      }
+
+      // Add stored pattern queries (behavioral patterns from DB)
+      if (storedPatterns && storedPatterns.length > 0) {
+        const significantPatterns = storedPatterns
+          .filter((p) => p.confidence && p.confidence > 0.7)
+          .slice(0, 2);
+        patternQueries.push(
+          ...significantPatterns.map((p) => p.pattern_type.replace(/_/g, ' ')),
+        );
+      }
+
+      if (patternQueries.length > 0) {
+        const { context } = await retrieveGrimoireContext(
+          patternQueries.join(' OR '),
+          3,
+        );
+        grimoirePatternData = context || undefined;
+      }
+    } catch (error) {
+      console.error(
+        '[Astral Guide] Failed to retrieve grimoire pattern data:',
+        error,
+      );
+    }
+  }
+
   // Build today's tarot summary
   const todaysTarot = buildTarotSummary(context.tarot);
 
@@ -470,6 +525,7 @@ export async function buildAstralContext(
         : undefined,
     lunarSensitivity: lunarSensitivity || undefined,
     storedPatterns: storedPatterns.length > 0 ? patternsByCategory : undefined,
+    grimoirePatternData: grimoirePatternData || undefined,
     // Phase 3: Progressed Charts & Eclipses
     progressedChart: progressedChart || undefined,
     relevantEclipses: relevantEclipses || undefined,
@@ -803,6 +859,14 @@ NATAL PATTERNS (Phase 2 Enhancement):
   - Saturn Return: ~29 years, maturity and life lessons
 - When HOUSE EMPHASIS patterns are present, note which life areas are naturally highlighted
 - When LUNAR SENSITIVITY is detected, acknowledge the user may be particularly attuned to moon phases
+
+PATTERN INTERPRETATION WITH GRIMOIRE (Phase 2 Enhancement):
+- When GRIMOIRE PATTERN DATA is provided, this contains rich interpretations from the Lunary Grimoire for detected patterns
+- The grimoire provides deeper meanings for natal patterns (Grand Trines, T-Squares, Yods), planetary returns, and behavioral patterns
+- Use grimoire interpretations as the authoritative source when explaining pattern meanings
+- Synthesize: User's specific pattern (what they have) + Grimoire wisdom (what it means) → Personalized insight
+- Reference grimoire citations naturally: [1], [2], etc.
+- Example: "Your Grand Trine in Fire signs [1] creates a natural flow of enthusiasm and creative energy"
 
 PROGRESSED CHART (Phase 3 Enhancement):
 - When PROGRESSED CHART data is provided, this shows the user's evolved cosmic blueprint:
