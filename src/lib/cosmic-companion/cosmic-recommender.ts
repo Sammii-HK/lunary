@@ -24,9 +24,14 @@ import {
   getTarotCardsByPlanet,
   getTarotCardsByZodiac,
   getPlanetaryDayCorrespondences,
+  getCurrentPlanetaryDay,
   getAngelNumberMeaning,
   getKarmicDebtMeaning,
   getMirrorHourMeaning,
+  getElementCorrespondences,
+  getColorCorrespondences,
+  getDayCorrespondences,
+  getHerbCorrespondences,
 } from '@/lib/grimoire/data-accessor';
 
 // Import advanced recommenders (runes, nodes, synastry, decans, witch types, divination)
@@ -45,6 +50,8 @@ import { type QueryContext } from '@/lib/grimoire/query-analyzer';
 
 // Import JSON data - comprehensive grimoire knowledge base
 import numerologyData from '@/data/numerology.json';
+import zodiacSignsData from '@/data/zodiac-signs.json';
+import planetaryBodiesData from '@/data/planetary-bodies.json';
 
 export interface CrystalRecommendation {
   crystal: Crystal;
@@ -127,6 +134,26 @@ export interface TarotRecommendation {
   zodiacSign?: string;
 }
 
+export interface RitualRecommendation {
+  purpose: string;
+  timing: {
+    day: string;
+    moonPhase: string;
+    planetaryHour?: string;
+  };
+  correspondences: {
+    element: string;
+    elementProperties: string[];
+    colors: string[];
+    colorMeanings: string[];
+    herbs: string[];
+    herbProperties: string[];
+    crystals: string[];
+  };
+  steps: string[];
+  intention: string;
+}
+
 export interface CosmicRecommendations {
   // Core recommendations (always present if relevant)
   crystals: CrystalRecommendation[];
@@ -193,6 +220,9 @@ export interface CosmicRecommendations {
     divination?: string;
     sabbat?: string;
   };
+
+  // Personalized ritual using correspondences
+  ritual?: RitualRecommendation;
 
   synthesisMessage: string;
 }
@@ -668,6 +698,72 @@ function getTarotRecommendations(
 }
 
 /**
+ * Build personalized ritual using grimoire correspondences
+ * INTERNAL: Only used within getCosmicRecommendations
+ */
+function buildPersonalizedRitual(
+  primaryElement: string,
+  intention: string,
+  moonPhase: string,
+  planetaryDay: string,
+  crystals: CrystalRecommendation[],
+): RitualRecommendation | null {
+  // Get correspondences from grimoire
+  const elementData = getElementCorrespondences(primaryElement);
+  if (!elementData) return null;
+
+  // Get day correspondences
+  const dayData = getDayCorrespondences(planetaryDay);
+
+  // Get colors for this element
+  const elementColors = elementData.colors || [];
+  const colorMeanings = elementColors.map((color: string) => {
+    const colorData = getColorCorrespondences(color);
+    return colorData?.meaning || color;
+  });
+
+  // Get herbs for this element
+  const elementHerbs = elementData.herbs?.slice(0, 3) || [];
+  const herbProperties = elementHerbs
+    .map((herb: string) => {
+      const herbData = getHerbCorrespondences(herb);
+      return herbData?.magicalProperties?.[0] || '';
+    })
+    .filter(Boolean);
+
+  // Build ritual steps
+  const steps = [
+    `Cleanse your space with ${elementHerbs[0] || 'sage'} incense`,
+    `Set up altar with ${elementColors[0] || 'white'} candle (${colorMeanings[0] || 'purity'})`,
+    `Place ${crystals[0]?.crystal.name || 'crystal'} in ${elementData.direction || 'center'}`,
+    `Call upon ${primaryElement} element energy`,
+    `State your intention: "${intention}"`,
+    `Meditate on ${primaryElement} qualities: ${elementData.qualities?.slice(0, 2).join(', ') || 'balance'}`,
+    `Close ritual with gratitude`,
+  ];
+
+  return {
+    purpose: intention,
+    timing: {
+      day: planetaryDay,
+      moonPhase: moonPhase,
+      planetaryHour: dayData?.planetaryHours?.[0],
+    },
+    correspondences: {
+      element: primaryElement,
+      elementProperties: elementData.qualities || [],
+      colors: elementColors,
+      colorMeanings: colorMeanings,
+      herbs: elementHerbs,
+      herbProperties: herbProperties,
+      crystals: crystals.slice(0, 3).map((c) => c.crystal.name),
+    },
+    steps: steps,
+    intention: intention,
+  };
+}
+
+/**
  * Get planetary day recommendation using grimoire data
  * INTERNAL: Only used within getCosmicRecommendations
  */
@@ -749,7 +845,11 @@ export async function getCosmicRecommendations(
 
   // Get numerology insights
   const numerology = userBirthday
-    ? getNumerologyInsights(userBirthday, new Date().getFullYear(), natalChart)
+    ? getNumerologyInsights(
+        userBirthday,
+        new Date().getFullYear(),
+        natalChart,
+      ) || undefined
     : undefined;
 
   // NEW: Get aspect guidance from grimoire
@@ -893,6 +993,31 @@ export async function getCosmicRecommendations(
     }
   }
 
+  // Build personalized ritual using correspondences (if user has spell/ritual intent)
+  let ritual: RitualRecommendation | undefined;
+  if (queryContext?.needsSpells && allCrystals.length > 0 && natalChart) {
+    // Determine primary element from natal chart or moon phase
+    const sunSignData = natalChart.sun
+      ? getZodiacCorrespondences(natalChart.sun.sign)
+      : null;
+    const primaryElement = sunSignData?.element || moonPhase.sign;
+
+    // Determine intention from user's top challenge or general manifestation
+    const intention = userIntentions?.[0] || 'manifestation and alignment';
+
+    // Get planetary day
+    const currentDay = getCurrentPlanetaryDay(new Date());
+
+    ritual =
+      buildPersonalizedRitual(
+        primaryElement,
+        intention,
+        moonPhase.name,
+        currentDay,
+        allCrystals,
+      ) || undefined;
+  }
+
   // Generate synthesis message with ALL data
   const synthesisMessage = generateSynthesisMessage(
     allCrystals,
@@ -924,6 +1049,8 @@ export async function getCosmicRecommendations(
     divination: divination && divination.length > 0 ? divination : undefined,
     // Suggestions (subtle hints)
     suggestions,
+    // Personalized ritual
+    ritual,
     synthesisMessage,
   };
 }
