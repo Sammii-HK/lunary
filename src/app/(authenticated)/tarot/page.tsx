@@ -7,11 +7,20 @@ import { hasFeatureAccess } from '../../../../utils/pricing';
 import { TarotView } from './components/TarotView';
 import { conversionTracking } from '@/lib/analytics';
 import { useEffect } from 'react';
+import { useABTestTracking } from '@/hooks/useABTestTracking';
 
 export default function TarotReadings() {
   const { user, loading } = useUser();
   const authStatus = useAuthStatus();
   const subscription = useSubscription();
+
+  // Track tarot page with A/B tests: cta-copy, tarot-truncation, weekly-lock, paywall-preview
+  useABTestTracking('tarot', 'page_viewed', [
+    'cta-copy-test',
+    'tarot-truncation-length',
+    'weekly-lock-style',
+    'paywall_preview_style_v1',
+  ]);
 
   // For unauthenticated users, force paid tarot access to false immediately
   // Don't wait for subscription to resolve

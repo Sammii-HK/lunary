@@ -28,6 +28,9 @@ Available to all authenticated users:
 
 - **Birth Chart** (`birth_chart`)
 - **Moon Phases** (`moon_phases`)
+  - Includes moon phase display on horoscope page with personalized house placement\*
+  - Includes moon phase display on tarot page
+  - \*Requires birth chart with birth time for house placement
 - **General Horoscope** (`general_horoscope`)
 - **General Tarot** (`general_tarot`)
 - **General Crystal Recommendations** (`general_crystal_recommendations`)
@@ -50,6 +53,10 @@ Available to all authenticated users:
 - **Personalized Transit Readings** (`personalized_transit_readings`)
 - **Transit Calendar** (`transit_calendar`)
 - **Tarot Patterns** (`tarot_patterns`)
+  - Basic pattern visualizations (progress bars, frequency charts)
+  - Cosmic context for card appearances (`pattern_drill_down`):
+    - Moon phase + aspects when each card was pulled
+    - Personalized transit analysis for frequent cards
 - **Solar Return Insights** (`solar_return`)
 - **Cosmic Profile** (`cosmic_profile`) - life themes, archetypes, profile insights
 - **Moon Circles** (`moon_circles`)
@@ -68,6 +75,12 @@ Available to all authenticated users:
 - **Downloadable Reports** (`downloadable_reports`)
 - **AI Ritual Generation** (`ai_ritual_generation`)
 - **Advanced Patterns** (`advanced_patterns`)
+  - Advanced pattern visualizations (radial charts, sparklines, heatmaps)
+  - Cosmic context for card appearances (`pattern_drill_down`):
+    - Moon phase + aspects when each card was pulled
+    - Personalized transit analysis for frequent cards
+    - Frequency timeline visualization
+    - Interactive frequent cards expansion
 
 ### Lunary+ Pro Annual (additional)
 
@@ -129,6 +142,50 @@ Available to all authenticated users:
 
 ---
 
+## Cosmic Context Integration
+
+### Moon Phase Display
+
+Available to all users via `moon_phases` feature:
+
+- **Horoscope page** (`/horoscope`):
+  - Current moon phase with branded SVG icon
+  - Moon phase keywords (3 per phase)
+  - Personalized house placement when birth chart available\*
+  - House-specific interpretations (12 unique messages)
+  - Full moon phase description
+
+- **Tarot page** (`/tarot`):
+  - Current moon phase with branded icon
+  - Moon phase keywords
+  - Available to all users
+
+\*Requires birth chart with birth time for house placement calculation (Whole Sign House system)
+
+### Tarot Pattern Cosmic Context
+
+Available to Lunary+ and Pro users via `pattern_drill_down` feature:
+
+- **Frequent Cards Drill-Down**:
+  - Date when each card was pulled
+  - Moon phase at time of reading (with branded icon)
+  - Active planetary aspects (top 3 daily transits)
+  - Card meaning with keywords (first appearance only)
+  - Personalized transit analysis (requires birth chart)\*
+  - Frequency timeline visualization
+  - Up to 10 appearances shown per card
+
+- **Cosmic Context Format**:
+  - First appearance: Full context + card meaning + transit analysis
+  - Remaining appearances: Date + moon phase + aspects only
+  - All data persisted from reading creation time
+
+\*AI transit insights require birth chart data; gracefully hidden if unavailable
+
+**Note**: The cosmic context integration described above is separate from the `cosmic_patterns` and `advanced_cosmic_patterns` features, which provide automated pattern detection for tarot and journal entries. See `COSMIC_PATTERNS_IMPLEMENTATION.md` for details on that system.
+
+---
+
 ## Feature Access Matrix
 
 | Feature key                            | Free | Lunary+ | Lunary+ Pro | Pro Annual |
@@ -165,6 +222,7 @@ Available to all authenticated users:
 | `downloadable_reports`                 | ❌   | ❌      | ✅          | ✅         |
 | `ai_ritual_generation`                 | ❌   | ❌      | ✅          | ✅         |
 | `advanced_patterns`                    | ❌   | ❌      | ✅          | ✅         |
+| `pattern_drill_down`                   | ❌   | ✅      | ✅          | ✅         |
 | `unlimited_tarot_spreads`              | ❌   | ❌      | ❌          | ✅         |
 | `yearly_forecast`                      | ❌   | ❌      | ❌          | ✅         |
 | `data_export`                          | ❌   | ❌      | ❌          | ✅         |

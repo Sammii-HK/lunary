@@ -95,7 +95,7 @@ export function UserProvider({ children, demoData }: UserProviderProps) {
   const birthChartRefreshAttemptRef = useRef<number>(0);
   const subscriptionSyncAttemptRef = useRef(false);
   const [hasLoadedOnce, setHasLoadedOnce] = useState(false);
-  const BIRTH_CHART_VERSION = 5;
+  const BIRTH_CHART_VERSION = 6; // Incremented to include asteroids
 
   const fetchUserData = useCallback(async () => {
     if (!isAuthenticated || !userId) {

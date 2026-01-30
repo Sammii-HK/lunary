@@ -1,8 +1,14 @@
 import { Sparkles } from 'lucide-react';
+import {
+  getTrendIcon,
+  getTrendColor,
+} from '@/lib/patterns/utils/pattern-formatters';
 
 type RecurringThemeItem = {
   label: string;
   detail?: string;
+  trend?: 'up' | 'down' | 'stable';
+  strength?: number; // 0-100, overrides bar width calculation
 };
 
 interface RecurringThemesCardProps {
@@ -10,6 +16,7 @@ interface RecurringThemesCardProps {
   subtitle?: string;
   items: RecurringThemeItem[];
   className?: string;
+  showTrendIndicators?: boolean;
 }
 
 const BAR_WIDTHS = ['w-3/4', 'w-1/2', 'w-2/5', 'w-1/3'];
@@ -19,6 +26,7 @@ export function RecurringThemesCard({
   subtitle,
   items,
   className = '',
+  showTrendIndicators = false,
 }: RecurringThemesCardProps) {
   if (items.length === 0) return null;
 
@@ -37,14 +45,28 @@ export function RecurringThemesCard({
       </div>
       <ul className='space-y-2'>
         {items.slice(0, 3).map((item, index) => {
+          // Use actual strength if provided, otherwise use default widths
           const widthClass = BAR_WIDTHS[index] ?? 'w-1/3';
+          const barStyle =
+            item.strength !== undefined
+              ? { width: `${item.strength}%` }
+              : undefined;
+
           return (
             <li key={`${item.label}-${index}`} className='space-y-1'>
               <div className='flex items-center gap-3'>
-                <span className='text-sm text-zinc-200'>{item.label}</span>
-                <div className='flex-1 h-1.5 bg-zinc-800 rounded-full'>
+                <span className='text-sm text-zinc-200 flex items-center gap-1.5'>
+                  {item.label}
+                  {showTrendIndicators && item.trend && (
+                    <span className={`text-xs ${getTrendColor(item.trend)}`}>
+                      {getTrendIcon(item.trend)}
+                    </span>
+                  )}
+                </span>
+                <div className='flex-1 h-1.5 bg-zinc-800 rounded-full overflow-hidden'>
                   <div
-                    className={`h-full bg-lunary-primary-500/60 rounded-full ${widthClass}`}
+                    className={`h-full bg-lunary-primary-500/60 rounded-full transition-all ${!barStyle ? widthClass : ''}`}
+                    style={barStyle}
                   />
                 </div>
               </div>

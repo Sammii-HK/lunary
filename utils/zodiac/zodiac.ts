@@ -19,7 +19,8 @@ export type constellationItems =
   | 'rulingPlanet'
   | 'symbol';
 
-// Astromicon font characters (use with font-astro class)
+// Astronomicon font characters for celestial bodies (use with font-astro class)
+// Official mappings from https://astronomicon.co/en/astronomicon-fonts/
 export const bodiesSymbols = {
   sun: 'Q',
   moon: 'R',
@@ -31,30 +32,34 @@ export const bodiesSymbols = {
   uranus: 'X',
   neptune: 'Y',
   pluto: 'Z',
-  ascendant: 'a',
-  midheaven: 'm',
-  northnode: 'n',
-  southnode: 's',
-  chiron: 'c',
-  lilith: 'l',
 };
 
 export const planetSymbols = {
   ...bodiesSymbols,
-  earth: 'L',
+  earth: 'h', // Earth (Antinomy) from Astronomicon
 };
 
 // Astromicon symbols for astrological points (use with font-astro class)
 export const astroPointSymbols = {
-  ascendant: 'a',
+  ascendant: 'c', // Astronomicon official mapping
   descendant: 'f',
-  midheaven: 'm',
-  imumcoeli: 'i',
-  northnode: 'n',
-  southnode: 's',
-  chiron: 'c',
-  lilith: 'l',
-  partoffortune: 'p',
+  midheaven: 'd',
+  imumcoeli: 'e',
+  northnode: 'g', // North Node (not 'n')
+  southnode: 'i', // South Node (not 's')
+  chiron: 'q', // Chiron is 'q' not 'c'
+  lilith: 'z', // Lilith
+  partoffortune: '?', // Part of Fortune
+  // Asteroids - Official Astronomicon mappings (v1.1)
+  ceres: 'l',
+  pallas: 'm',
+  juno: 'n',
+  vesta: 'o',
+  hygiea: 'p',
+  pholus: 'r',
+  // Unicode fallbacks (NOT in Astronomicon font)
+  psyche: 'Ψ', // Not in Astronomicon
+  eros: '♡', // Not in Astronomicon
 };
 
 // Unicode symbols for astrological points (fallback without special font)
@@ -1043,6 +1048,54 @@ export const astrologicalPoints = {
     alias: 'Black Moon Lilith',
     mysticalProperties:
       'Your shadow self and suppressed desires. Raw, untamed feminine energy and hidden power.',
+  },
+  ceres: {
+    name: 'Ceres',
+    alias: 'The Great Mother',
+    mysticalProperties:
+      'Represents nurturing, motherhood, and how you care for others. Shows your relationship with food, nature, and the cycles of growth and loss.',
+  },
+  pallas: {
+    name: 'Pallas',
+    alias: 'Pallas Athena',
+    mysticalProperties:
+      'Symbolizes wisdom, strategy, and creative intelligence. Reflects your ability to see patterns, solve problems, and bring justice to situations.',
+  },
+  juno: {
+    name: 'Juno',
+    alias: 'The Divine Partner',
+    mysticalProperties:
+      'Governs partnership, marriage, and committed relationships. Reveals what you need in a long-term partner and how you approach commitment.',
+  },
+  vesta: {
+    name: 'Vesta',
+    alias: 'The Sacred Flame',
+    mysticalProperties:
+      'Represents sacred dedication, focus, and where you direct your devotional energy. Shows what you hold sacred and your capacity for concentrated work.',
+  },
+  hygiea: {
+    name: 'Hygiea',
+    alias: 'The Healer',
+    mysticalProperties:
+      'Rules health, wellness, and preventive care. Indicates your approach to physical and mental wellbeing, and where healing comes naturally.',
+  },
+  pholus: {
+    name: 'Pholus',
+    alias: 'The Catalyst',
+    mysticalProperties:
+      'Represents catalysts and turning points. Small actions that lead to big consequences. Shows where small causes create major effects in your life.',
+  },
+  psyche: {
+    name: 'Psyche',
+    alias: 'The Soul',
+    mysticalProperties:
+      'Symbolizes the soul, mental essence, and psychological growth. Represents your journey toward self-awareness and soul-level connections.',
+  },
+  eros: {
+    name: 'Eros',
+    alias: 'The Passionate',
+    mysticalProperties:
+      'Governs erotic love, passion, and creative life force. Shows what turns you on at a soul level and where you experience deep desire.',
   },
 };
 

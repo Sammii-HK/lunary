@@ -136,7 +136,11 @@ export async function GET(request: NextRequest) {
           : null;
 
     const values: (string | number | boolean | null | undefined)[] = [userId];
-    const whereClauses = ['user_id = $1', 'archived_at IS NULL'];
+    const whereClauses = [
+      'user_id = $1',
+      'archived_at IS NULL',
+      'jsonb_array_length(cards) > 1', // Exclude single-card daily pulls
+    ];
 
     if (spreadSlug) {
       values.push(spreadSlug);

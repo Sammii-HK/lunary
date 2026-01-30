@@ -268,7 +268,12 @@ export function TarotSpreadExperience({
       const data = await response.json();
       const fetchedReadings: SpreadReadingRecord[] = data.readings || [];
 
-      setReadings(fetchedReadings);
+      // Filter out daily single-card pulls - only show actual spreads (2+ cards)
+      const actualSpreads = fetchedReadings.filter(
+        (reading) => reading.cards && reading.cards.length > 1,
+      );
+
+      setReadings(actualSpreads);
       setUsage(data.usage || null);
 
       let unlocked = new Set<string>(data.spreadsUnlocked || []);

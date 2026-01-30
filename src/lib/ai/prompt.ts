@@ -262,17 +262,13 @@ const describeContext = (
       });
 
     parts.push(`PERSONAL TRANSITS: ${personalTransitDescriptions.join(' | ')}`);
-  } else if (context.currentTransits && context.currentTransits.length > 0) {
-    // Fallback to general transits if no personal transits available
-    const topTransits = context.currentTransits
-      .slice(0, 8)
-      .map((t) => {
-        const applying = t.applying ? ' (applying)' : '';
-        const strength = t.strength ? ` strength:${t.strength.toFixed(2)}` : '';
-        return `${t.from} ${t.aspect} ${t.to}${applying}${strength}`;
-      })
-      .join(', ');
-    parts.push(`TRANSITS: ${topTransits}`);
+  } else if (
+    (context as any).currentTransits &&
+    typeof (context as any).currentTransits === 'string' &&
+    (context as any).currentTransits.length > 0
+  ) {
+    // Fallback to general transits summary string if no personal transits available
+    parts.push(`TRANSITS: ${(context as any).currentTransits}`);
   }
 
   // Upcoming personal transits (next 7 days)
@@ -346,7 +342,7 @@ const describeContext = (
           p.planet === 'Rising' ||
           p.planet === 'ASC',
       );
-      if (ascendant?.sign) {
+      if (ascendant?.sign && Array.isArray(context.currentTransits)) {
         const transitHouses = context.currentTransits
           .filter((t) => t.aspect === 'ingress')
           .map((t) => {
@@ -362,6 +358,22 @@ const describeContext = (
         }
       }
     }
+  }
+
+  // Natal Summary - includes chart patterns (Yods, T-Squares, Grand Trines, etc.)
+  const natalSummary = (context as any).natalSummary;
+  if (
+    natalSummary &&
+    typeof natalSummary === 'string' &&
+    natalSummary !== 'Birth chart data is not available.'
+  ) {
+    parts.push(`NATAL DETAILS: ${natalSummary}`);
+  }
+
+  // Grimoire Pattern Data - rich interpretations for detected patterns
+  const grimoirePatternData = (context as any).grimoirePatternData;
+  if (grimoirePatternData && typeof grimoirePatternData === 'string') {
+    parts.push(grimoirePatternData);
   }
 
   // Mood - include recent trend
@@ -535,6 +547,7 @@ export const buildPromptSections = ({
   memorySnippets,
   userMessage,
   grimoireData,
+  systemPromptOverride,
 }: {
   context: LunaryContext;
   memorySnippets: string[];
@@ -549,6 +562,7 @@ export const buildPromptSections = ({
     semanticContext?: string;
     sources?: Array<{ title: string; slug: string; category: string }>;
   };
+  systemPromptOverride?: string;
 }): PromptSections => {
   const memory =
     memorySnippets.length > 0
@@ -556,7 +570,9 @@ export const buildPromptSections = ({
       : null;
 
   const modeGuidance = getModeSpecificGuidance(userMessage);
-  const systemPrompt = SYSTEM_PROMPT + modeGuidance;
+  const systemPrompt = systemPromptOverride
+    ? systemPromptOverride + modeGuidance
+    : SYSTEM_PROMPT + modeGuidance;
 
   let contextData = `Context data:\n${describeContext(context, grimoireData, userMessage)}`;
 

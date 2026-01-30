@@ -258,11 +258,13 @@ export const computeUsageSnapshot = async (
   let monthlyUsed = 0;
 
   try {
+    // Only count actual spreads (2+ cards), not single-card daily pulls
     const result = await sql`
       SELECT COUNT(*)::int as count
       FROM tarot_readings
       WHERE user_id = ${userId}
         AND created_at >= date_trunc('month', NOW())
+        AND jsonb_array_length(cards) > 1
     `;
 
     monthlyUsed =

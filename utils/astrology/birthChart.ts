@@ -5,6 +5,16 @@ import {
   formatDegree,
 } from './astrology';
 import {
+  calculateCeres,
+  calculatePallas,
+  calculateJuno,
+  calculateVesta,
+  calculateHygiea,
+  calculatePholus,
+  calculatePsyche,
+  calculateEros,
+} from './asteroids';
+import {
   Observer,
   AstroTime,
   SiderealTime,
@@ -187,7 +197,7 @@ function calculateTrueLilith(date: Date): number {
   return normalizeDegrees(moonEcliptic.elon);
 }
 
-function getJulianDay(date: Date): number {
+export function getJulianDay(date: Date): number {
   const year = date.getUTCFullYear();
   const month = date.getUTCMonth() + 1;
   const day =
@@ -215,7 +225,7 @@ function getJulianDay(date: Date): number {
   );
 }
 
-function normalizeDegrees(degrees: number): number {
+export function normalizeDegrees(degrees: number): number {
   return ((degrees % 360) + 360) % 360;
 }
 
@@ -236,7 +246,7 @@ function solveKepler(meanAnomaly: number, eccentricity: number): number {
   return E;
 }
 
-function getEarthHeliocentricEcliptic(date: Date): {
+export function getEarthHeliocentricEcliptic(date: Date): {
   x: number;
   y: number;
   z: number;
@@ -697,6 +707,40 @@ export const generateBirthChart = async (
     });
   } catch {
     // If Lilith calculation fails, continue without it
+  }
+
+  // Add asteroids
+  const asteroids = [
+    { name: 'Ceres', calc: calculateCeres },
+    { name: 'Pallas', calc: calculatePallas },
+    { name: 'Juno', calc: calculateJuno },
+    { name: 'Vesta', calc: calculateVesta },
+    { name: 'Hygiea', calc: calculateHygiea },
+    { name: 'Pholus', calc: calculatePholus },
+    { name: 'Psyche', calc: calculatePsyche },
+    { name: 'Eros', calc: calculateEros },
+  ];
+
+  for (const asteroid of asteroids) {
+    try {
+      const asteroidLong = asteroid.calc(birthDateTime);
+      const asteroidSign = getZodiacSign(asteroidLong);
+      const asteroidFormatted = formatDegree(asteroidLong);
+      const asteroidPrevLong = asteroid.calc(
+        new Date(birthDateTime.getTime() - 24 * 60 * 60 * 1000),
+      );
+
+      birthChartData.push({
+        body: asteroid.name,
+        sign: asteroidSign,
+        degree: asteroidFormatted.degree,
+        minute: asteroidFormatted.minute,
+        eclipticLongitude: asteroidLong,
+        retrograde: isRetrograde(asteroidLong, asteroidPrevLong),
+      });
+    } catch {
+      // If asteroid calculation fails, continue without it
+    }
   }
 
   return birthChartData;

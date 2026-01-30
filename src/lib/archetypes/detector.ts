@@ -9,6 +9,7 @@ export interface ArchetypeResult {
   shadowTraits: string[];
   suggestedWork: string[];
   score: number;
+  strength: number;
 }
 
 export interface ArchetypeDetectorInput {
@@ -105,6 +106,7 @@ export function detectArchetypes(
     shadowTraits: archetype.shadowTraits,
     suggestedWork: archetype.suggestedWork,
     score: scoreArchetype(archetype, input),
+    strength: scoreArchetype(archetype, input),
   }));
 
   scoredArchetypes.sort((a, b) => b.score - a.score);

@@ -11,6 +11,7 @@ export type AssistantMessage = {
   id: string;
   role: AssistantRole;
   content: string;
+  finishReason?: 'stop' | 'length' | 'content_filter' | 'tool_calls' | null;
 };
 
 export type AssistantUsage = {

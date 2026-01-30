@@ -33,6 +33,8 @@ const FEATURE_ACCESS_BASE = {
     'birth_chart', // Allow free users to view their birth chart (encourage signups & sharing)
     'personal_day_number',
     'personal_year_number',
+    'cosmic_patterns', // Basic cosmic patterns (moon phase correlations)
+    'keyword_mood_detection', // Free keyword-based mood tagging (70% coverage)
   ],
   lunary_plus: [
     'birth_chart',
@@ -42,6 +44,8 @@ const FEATURE_ACCESS_BASE = {
     'personalized_crystal_recommendations',
     'transit_calendar',
     'tarot_patterns',
+    'tarot_patterns_basic', // 14-90 day patterns, progress bars, basic visualizations
+    'pattern_drill_down', // Interactive frequent cards with cosmic context
     'solar_return',
     'cosmic_profile',
     'personalized_transit_readings',
@@ -53,6 +57,8 @@ const FEATURE_ACCESS_BASE = {
     'personal_day_meaning',
     'personal_year_number',
     'personal_year_meaning',
+    'cosmic_patterns', // Basic cosmic patterns (moon phase correlations)
+    'keyword_mood_detection', // Free keyword-based mood tagging (70% coverage)
   ],
   lunary_plus_ai: [
     'birth_chart',
@@ -62,6 +68,12 @@ const FEATURE_ACCESS_BASE = {
     'personalized_crystal_recommendations',
     'transit_calendar',
     'tarot_patterns',
+    'tarot_patterns_basic', // 14-90 day patterns, progress bars
+    'tarot_patterns_advanced', // Radial charts, sparklines, drill-down, heatmap
+    'pattern_drill_down', // Interactive frequent cards
+    'pattern_heatmap', // Calendar heatmap view
+    'card_combinations', // Combination analysis
+    'ai_pattern_insights', // Astral Chat pattern narratives
     'solar_return',
     'cosmic_profile',
     'personalized_transit_readings',
@@ -80,6 +92,11 @@ const FEATURE_ACCESS_BASE = {
     'personal_day_meaning',
     'personal_year_number',
     'personal_year_meaning',
+    'cosmic_patterns', // Basic cosmic patterns (moon phase correlations)
+    'advanced_cosmic_patterns', // Premium patterns (planetary, aspects, natal transits)
+    'keyword_mood_detection', // Keyword-based mood tagging
+    'ai_mood_detection', // AI-enhanced mood tagging (smart fallback for complex emotions)
+    'enhanced_pattern_analysis', // Moon phase, transit, and house activation patterns
   ],
   lunary_plus_ai_annual: [
     'birth_chart',
@@ -89,6 +106,17 @@ const FEATURE_ACCESS_BASE = {
     'personalized_crystal_recommendations',
     'transit_calendar',
     'tarot_patterns',
+    'tarot_patterns_basic', // 14-90 day patterns
+    'tarot_patterns_advanced', // Advanced visualizations
+    'pattern_drill_down', // Interactive cards
+    'pattern_heatmap', // Calendar heatmap
+    'card_combinations', // Combination analysis
+    'ai_pattern_insights', // Astral Chat narratives
+    'pattern_export', // PDF/JSON export
+    'pattern_comparison', // Period comparison
+    'predictive_insights', // AI predictions
+    'year_over_year', // YoY analysis (existing)
+    'pattern_network_graph', // Network visualization (future)
     'solar_return',
     'cosmic_profile',
     'personalized_transit_readings',
@@ -110,6 +138,11 @@ const FEATURE_ACCESS_BASE = {
     'personal_day_meaning',
     'personal_year_number',
     'personal_year_meaning',
+    'cosmic_patterns', // Basic cosmic patterns (moon phase correlations)
+    'advanced_cosmic_patterns', // Premium patterns (planetary, aspects, natal transits)
+    'keyword_mood_detection', // Keyword-based mood tagging
+    'ai_mood_detection', // AI-enhanced mood tagging (smart fallback for complex emotions)
+    'enhanced_pattern_analysis', // Moon phase, transit, and house activation patterns
   ],
 } as const satisfies Record<PlanKey, readonly string[]>;
 
@@ -152,7 +185,7 @@ export const PRICING_PLANS: PricingPlan[] = [
     trialDays: 0,
     features: [
       'Your personal birth chart',
-      'Daily moon phases & basic insights',
+      'Daily moon phases & insights (with supermoon detection)',
       'General tarot card of the day',
       'Tarot pattern analysis (last 7 days)',
       'Limited tarot spreads (free library only)',
@@ -161,6 +194,8 @@ export const PRICING_PLANS: PricingPlan[] = [
       'General daily horoscope',
       'Access to grimoire knowledge',
       'Book of Shadows journal (3 entries/month)',
+      'Smart keyword mood detection (auto-tags journal emotions)',
+      'Basic cosmic pattern detection (moon phase correlations)',
       'Astral Guide context memory (no history, no memory snippets)',
       'Chat history (last 50 messages)',
       'Personal Day number (number only)',
@@ -182,7 +217,8 @@ export const PRICING_PLANS: PricingPlan[] = [
       'Everything in Cosmic Explorer',
       'Complete birth chart analysis',
       'Personalized daily horoscopes',
-      'Personal transit impacts',
+      'Moon phase with personalized house placement',
+      'Personal transit impacts (with duration tracking)',
       'Solar Return & birthday insights',
       'Moon Circles (New & Full Moon)',
       'Personal tarot card drawn from your birth chart, with transit context',
@@ -191,6 +227,10 @@ export const PRICING_PLANS: PricingPlan[] = [
       'Monthly cosmic insights',
       'Personal Day & Personal Year interpretations',
       'Tarot pattern analysis (up to 6 months)',
+      'View cosmic context for each card appearance (moon phase & aspects)',
+      'Personalized transit analysis for frequent cards',
+      'Smart keyword mood detection (auto-tags journal emotions)',
+      'Basic cosmic pattern detection (moon phase correlations)',
       'Cosmic State (shareable snapshot)',
       'Book of Shadows journal (no limit)',
       'Astral Guide context memory (4 recent messages + 2 memory snippets)',
@@ -216,6 +256,9 @@ export const PRICING_PLANS: PricingPlan[] = [
       'Astral Guide ritual prompts (AI)',
       'Tarot pattern analysis (up to 12 months + year-over-year)',
       'Advanced multi-dimensional pattern analysis',
+      'Enhanced mood detection (catches subtle emotions & implicit feelings)',
+      'Enhanced pattern analysis (moon phase, transit, house activation)',
+      'Advanced cosmic pattern detection (planetary, aspects, natal transits)',
       'Downloadable PDF reports',
       'Astral Guide context memory (8 recent messages + 4 memory snippets)',
       'All tarot spreads unlocked (10/month)',
@@ -242,6 +285,9 @@ export const PRICING_PLANS: PricingPlan[] = [
       'Unlimited tarot spreads',
       'Yearly cosmic forecast',
       'Extended timeline analysis (6 & 12-month trends)',
+      'Enhanced mood detection (catches subtle emotions & implicit feelings)',
+      'Enhanced pattern analysis (moon phase, transit, house activation)',
+      'Advanced cosmic pattern detection (planetary, aspects, natal transits)',
       'Book of Shadows journal (no limit)',
       'Astral Guide context memory (8 recent messages + 4 memory snippets)',
       'Save chat messages to collections (no limit)',

@@ -188,3 +188,40 @@ export const getCrystalOGProperties = (
     keywords: crystal.keywords || crystal.properties.slice(0, 3),
   };
 };
+
+// Astrological query functions for cosmic companion integration
+export const getCrystalsByPlanet = (planet: string): Crystal[] => {
+  return crystalDatabase.filter((crystal) =>
+    crystal.planets.some((p) => p.toLowerCase() === planet.toLowerCase()),
+  );
+};
+
+export const getCrystalsByAspect = (aspect: string): Crystal[] => {
+  return crystalDatabase.filter((crystal) =>
+    crystal.aspects?.some((a) =>
+      a.toLowerCase().includes(aspect.toLowerCase()),
+    ),
+  );
+};
+
+export const getCrystalsByTransit = (
+  planet: string,
+  aspect?: string,
+  zodiacSign?: string,
+): Crystal[] => {
+  let results = getCrystalsByPlanet(planet);
+
+  if (aspect) {
+    const aspectCrystals = getCrystalsByAspect(aspect);
+    results = results.filter((c) =>
+      aspectCrystals.some((ac) => ac.id === c.id),
+    );
+  }
+
+  if (zodiacSign) {
+    const signCrystals = getCrystalsByZodiacSign(zodiacSign);
+    results = results.filter((c) => signCrystals.some((sc) => sc.id === c.id));
+  }
+
+  return results;
+};

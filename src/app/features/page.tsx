@@ -4,7 +4,7 @@ import FeaturesPage from '@/components/pages/FeaturesPage';
 export const metadata: Metadata = {
   title: 'Features | Lunary - Your Complete Cosmic Toolkit',
   description:
-    "Explore all Lunary features: daily cosmic dashboard, birth chart calculator, personal horoscopes, tarot spreads, AI chat, pattern tracking, and more. See what's included with each plan.",
+    "Explore all Lunary features: daily cosmic dashboard, birth chart calculator, personal horoscopes, tarot spreads, AI chat, smart mood detection, enhanced pattern tracking, and more. See what's included with each plan.",
   keywords: [
     'lunary features',
     'astrology app features',
@@ -13,6 +13,9 @@ export const metadata: Metadata = {
     'tarot spreads',
     'astrology chat',
     'pattern tracking',
+    'mood detection',
+    'journal mood tagging',
+    'astrological patterns',
   ],
   openGraph: {
     title: 'All Features | Lunary',

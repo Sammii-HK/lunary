@@ -23,6 +23,16 @@ const MAIN_PLANETS = [
 ];
 const ANGLES = ['Ascendant', 'Descendant', 'Midheaven'];
 const POINTS = ['North Node', 'South Node', 'Chiron', 'Lilith'];
+const ASTEROIDS = [
+  'Ceres',
+  'Pallas',
+  'Juno',
+  'Vesta',
+  'Hygiea',
+  'Pholus',
+  'Psyche',
+  'Eros',
+];
 
 function getSymbolForBody(body: string): string {
   const key = body
@@ -62,10 +72,12 @@ export function ChartWheelOg({
   birthChart,
   houses,
   size = 360,
+  showTooltips = true,
 }: {
   birthChart: BirthChartData[];
   houses?: HouseCusp[];
   size?: number;
+  showTooltips?: boolean;
 }) {
   const { ascendantAngle, chartData, zodiacSigns, houseData } =
     buildChartWheelLayout({ birthChart, houses });
@@ -73,6 +85,7 @@ export function ChartWheelOg({
   const mainPlanets = chartData.filter((p) => MAIN_PLANETS.includes(p.body));
   const angles = chartData.filter((p) => ANGLES.includes(p.body));
   const points = chartData.filter((p) => POINTS.includes(p.body));
+  const asteroids = chartData.filter((p) => ASTEROIDS.includes(p.body));
 
   const viewBoxSize = 280;
   const scale = size / viewBoxSize;
@@ -91,19 +104,6 @@ export function ChartWheelOg({
         display: 'flex',
       }}
     >
-      <style>{`
-        .planet-node { cursor: pointer; z-index: 1; }
-        .planet-node:hover { z-index: 3; }
-        .planet-glyph { transition: color 0.2s ease; }
-        .chart-wheel:has(.planet-node:hover) .planet-glyph { color: #6b7280 !important; }
-        .chart-wheel:has(.planet-node:hover) .planet-node:hover .planet-glyph { color: ${hoverColor} !important; }
-        .planet-tooltip {
-          opacity: 0;
-          transform: translate(-50%, -120%);
-          transition: opacity 0.2s ease;
-        }
-        .planet-node:hover .planet-tooltip { opacity: 1; }
-      `}</style>
       <svg
         viewBox='-140 -140 280 280'
         width={size}
@@ -165,7 +165,7 @@ export function ChartWheelOg({
         {Array.from({ length: 12 }, (_, i) => {
           const signStart = i * 30;
           const adjustedStart = (signStart - ascendantAngle + 360) % 360;
-          const angle = (270 - adjustedStart + 360) % 360;
+          const angle = (180 + adjustedStart) % 360;
           const radian = (angle * Math.PI) / 180;
           const x1 = Math.cos(radian) * 85;
           const y1 = Math.sin(radian) * 85;
@@ -186,17 +186,20 @@ export function ChartWheelOg({
           );
         })}
 
-        {[...mainPlanets, ...angles, ...points].map(
+        {[...mainPlanets, ...angles, ...points, ...asteroids].map(
           ({ body, x, y, retrograde }) => {
             const isAngle = ANGLES.includes(body);
             const isPoint = POINTS.includes(body);
+            const isAsteroid = ASTEROIDS.includes(body);
             const color = retrograde
               ? '#f87171'
               : isAngle
                 ? '#C77DFF'
                 : isPoint
                   ? '#7B7BE8'
-                  : '#ffffff';
+                  : isAsteroid
+                    ? '#FCD34D'
+                    : '#ffffff';
 
             return (
               <line
@@ -262,17 +265,20 @@ export function ChartWheelOg({
         </div>
       ))}
 
-      {[...mainPlanets, ...angles, ...points].map(
+      {[...mainPlanets, ...angles, ...points, ...asteroids].map(
         ({ body, x, y, retrograde, sign, degree, minute }) => {
           const isAngle = ANGLES.includes(body);
           const isPoint = POINTS.includes(body);
+          const isAsteroid = ASTEROIDS.includes(body);
           const color = retrograde
             ? '#f87171'
             : isAngle
               ? '#C77DFF'
               : isPoint
                 ? '#7B7BE8'
-                : '#ffffff';
+                : isAsteroid
+                  ? '#FCD34D'
+                  : '#ffffff';
 
           return (
             <div
@@ -299,39 +305,41 @@ export function ChartWheelOg({
                 className='planet-glyph'
                 style={{
                   fontFamily: 'Astronomicon',
-                  fontSize: 28,
+                  fontSize: isAsteroid ? 22 : 28,
                   color,
                   display: 'flex',
                 }}
               >
                 {getSymbolForBody(body)}
               </span>
-              <span
-                className='planet-tooltip'
-                style={{
-                  position: 'absolute',
-                  left: '50%',
-                  top: 0,
-                  padding: '6px 10px',
-                  borderRadius: 10,
-                  border: '1px solid rgba(255,255,255,0.3)',
-                  background: 'rgba(8,8,12,0.9)',
-                  color: '#ffffff',
-                  fontSize: 12,
-                  letterSpacing: 0.5,
-                  whiteSpace: 'nowrap',
-                  pointerEvents: 'none',
-                  transition: 'opacity 0.15s ease',
-                }}
-              >
-                {formatPlacementLabel({
-                  body,
-                  sign,
-                  degree,
-                  minute,
-                  retrograde,
-                })}
-              </span>
+              {showTooltips && (
+                <span
+                  className='planet-tooltip'
+                  style={{
+                    position: 'absolute',
+                    left: '50%',
+                    top: 0,
+                    padding: '6px 10px',
+                    borderRadius: 10,
+                    border: '1px solid rgba(255,255,255,0.3)',
+                    background: 'rgba(8,8,12,0.9)',
+                    color: '#ffffff',
+                    fontSize: 12,
+                    letterSpacing: 0.5,
+                    whiteSpace: 'nowrap',
+                    pointerEvents: 'none',
+                    transition: 'opacity 0.15s ease',
+                  }}
+                >
+                  {formatPlacementLabel({
+                    body,
+                    sign,
+                    degree,
+                    minute,
+                    retrograde,
+                  })}
+                </span>
+              )}
             </div>
           );
         },

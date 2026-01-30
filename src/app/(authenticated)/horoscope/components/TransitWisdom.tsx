@@ -12,6 +12,7 @@ import {
   ThemeTag,
 } from '@/features/horoscope';
 import { useSubscription } from '@/hooks/useSubscription';
+import { TransitDurationBadge } from '@/components/TransitDurationBadge';
 
 interface TransitWisdomProps {
   birthChart: BirthChartData[];
@@ -223,6 +224,8 @@ function TransitCard({
       </div>
 
       <ThemeTags themes={detail.themes} />
+
+      {detail.duration && <TransitDurationBadge duration={detail.duration} />}
 
       <p className='text-xs text-zinc-500 leading-relaxed'>
         {detail.degreeInfo}

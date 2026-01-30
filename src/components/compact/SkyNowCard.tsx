@@ -15,6 +15,7 @@ import {
   ExpandableCard,
   ExpandableCardHeader,
 } from '@/components/ui/expandable-card';
+import { ShareSkyNow } from '@/components/share/ShareSkyNow';
 
 const getPlanetMeaning = (planet: string, sign: string): string => {
   const planetMeanings: Record<string, Record<string, string>> = {
@@ -323,6 +324,9 @@ export const SkyNowCard = () => {
         badgeVariant={retrogradeCount > 0 ? 'danger' : 'default'}
         action={
           <div className='flex items-center gap-2'>
+            <div onClick={(e) => e.stopPropagation()}>
+              <ShareSkyNow compact />
+            </div>
             <button
               type='button'
               onClick={async (event) => {

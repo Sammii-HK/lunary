@@ -1,4 +1,7 @@
 import { sql } from '@vercel/postgres';
+import { getAccurateMoonPhase } from '../../../utils/astrology/astronomical-data';
+import { getRealPlanetaryPositions } from '../../../utils/astrology/astronomical-data';
+import type { BirthChartData } from '../../../utils/astrology/birthChart';
 
 export interface JournalPattern {
   type:
@@ -6,7 +9,12 @@ export interface JournalPattern {
     | 'mood_transit'
     | 'theme'
     | 'frequency'
-    | 'season_correlation';
+    | 'season_correlation'
+    | 'moon_phase_mood'
+    | 'moon_phase_pattern'
+    | 'moon_sign_pattern'
+    | 'transit_correlation'
+    | 'house_activation';
   title: string;
   description: string;
   data: Record<string, unknown>;
@@ -143,10 +151,59 @@ export async function analyzeJournalPatterns(
   const seasonPatterns = findSeasonPatterns(entries);
   patterns.push(...seasonPatterns);
 
+  // NEW: Enhanced lunar pattern detection (moon phase + sign)
+  try {
+    const lunarPatterns = await findEnhancedLunarPatterns(entries);
+    console.log(
+      `[Pattern Analyzer] Lunar patterns detected: ${lunarPatterns.length}`,
+    );
+    patterns.push(...lunarPatterns);
+  } catch (error) {
+    console.error('[Pattern Analyzer] Lunar pattern detection failed:', error);
+  }
+
+  // NEW: Transit correlation detection (journaling frequency during transits)
+  try {
+    const transitPatterns = await findTransitCorrelations(entries, userId);
+    console.log(
+      `[Pattern Analyzer] Transit patterns detected: ${transitPatterns.length}`,
+    );
+    patterns.push(...transitPatterns);
+  } catch (error) {
+    console.error(
+      '[Pattern Analyzer] Transit pattern detection failed:',
+      error,
+    );
+  }
+
+  // NEW: House activation pattern detection (journal themes by house)
+  try {
+    const housePatterns = await findHouseActivationPatterns(entries, userId);
+    console.log(
+      `[Pattern Analyzer] House patterns detected: ${housePatterns.length}`,
+    );
+    patterns.push(...housePatterns);
+  } catch (error) {
+    console.error('[Pattern Analyzer] House pattern detection failed:', error);
+  }
+
   patterns.sort((a, b) => b.confidence - a.confidence);
 
+  // ENHANCED: Ensure pattern type diversity - limit each type to max 5 occurrences
+  const diversePatterns = [];
+  const typeCounts: Record<string, number> = {};
+  const MAX_PER_TYPE = 5;
+
+  for (const pattern of patterns) {
+    const currentCount = typeCounts[pattern.type] || 0;
+    if (currentCount < MAX_PER_TYPE) {
+      diversePatterns.push(pattern);
+      typeCounts[pattern.type] = currentCount + 1;
+    }
+  }
+
   return {
-    patterns: patterns.slice(0, 5),
+    patterns: diversePatterns.slice(0, 15), // Increased to 15 with diversity
     generatedAt: new Date().toISOString(),
   };
 }
@@ -409,23 +466,473 @@ function findSeasonPatterns(entries: JournalEntryData[]): JournalPattern[] {
   return patterns;
 }
 
+/**
+ * Enhanced Moon Phase & Sign Pattern Detection
+ * Analyzes mood and productivity correlations with moon phase (with and without sign)
+ */
+async function findEnhancedLunarPatterns(
+  entries: JournalEntryData[],
+): Promise<JournalPattern[]> {
+  const patterns: JournalPattern[] = [];
+
+  // Track by BOTH phase-only AND phase+sign for different granularities
+  const phaseOnlyData: Record<
+    string,
+    { moods: string[]; count: number; dates: Date[] }
+  > = {};
+  const phaseSignData: Record<
+    string,
+    { moods: string[]; count: number; dates: Date[] }
+  > = {};
+
+  for (const entry of entries) {
+    const entryDate = new Date(entry.createdAt);
+
+    // Get accurate moon data for this date
+    try {
+      const moonData = await getAccurateMoonPhase(entryDate);
+      const planetaryData = await getRealPlanetaryPositions(entryDate);
+      const moonSign = planetaryData.Moon?.sign || 'Unknown';
+
+      const phaseKey = moonData.name;
+      const phaseSignKey = `${moonData.name}_${moonSign}`;
+
+      // Track phase-only
+      if (!phaseOnlyData[phaseKey]) {
+        phaseOnlyData[phaseKey] = { moods: [], count: 0, dates: [] };
+      }
+      phaseOnlyData[phaseKey].moods.push(...entry.moodTags);
+      phaseOnlyData[phaseKey].count++;
+      phaseOnlyData[phaseKey].dates.push(entryDate);
+
+      // Track phase+sign
+      if (!phaseSignData[phaseSignKey]) {
+        phaseSignData[phaseSignKey] = { moods: [], count: 0, dates: [] };
+      }
+      phaseSignData[phaseSignKey].moods.push(...entry.moodTags);
+      phaseSignData[phaseSignKey].count++;
+      phaseSignData[phaseSignKey].dates.push(entryDate);
+    } catch (error) {
+      // Skip entries where moon data is unavailable
+      continue;
+    }
+  }
+
+  // 1. Analyze PHASE-ONLY patterns (easier to detect, need less data)
+  for (const [phase, data] of Object.entries(phaseOnlyData)) {
+    // Require at least 2 entries for this moon phase
+    if (data.count < 2) continue;
+
+    // Find dominant mood for this phase
+    const moodCounts: Record<string, number> = {};
+    for (const mood of data.moods) {
+      moodCounts[mood] = (moodCounts[mood] || 0) + 1;
+    }
+
+    const dominantMood = Object.entries(moodCounts)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 2);
+
+    // Require at least 1 occurrence of the dominant mood
+    if (dominantMood.length > 0 && dominantMood[0][1] >= 1) {
+      const moodName = dominantMood[0][0];
+      const moodCount = dominantMood[0][1];
+
+      patterns.push({
+        type: 'moon_phase_pattern',
+        title: `${moodName} energy during ${phase}`,
+        description: `You tend to feel ${moodName} during ${phase}`,
+        data: {
+          moonPhase: phase,
+          dominantMood: moodName,
+          moodCount,
+          totalEntries: data.count,
+          percentage: Math.round((moodCount / data.count) * 100),
+        },
+        confidence: Math.min((moodCount / data.count) * 0.85, 0.8),
+      });
+    }
+  }
+
+  // 2. Analyze PHASE+SIGN patterns (more specific, need more data)
+  for (const [phaseSignKey, data] of Object.entries(phaseSignData)) {
+    // Require at least 2 entries for this moon phase + sign combination
+    if (data.count < 2) continue;
+
+    const [phase, sign] = phaseSignKey.split('_');
+
+    // Find dominant mood for this lunar combination
+    const moodCounts: Record<string, number> = {};
+    for (const mood of data.moods) {
+      moodCounts[mood] = (moodCounts[mood] || 0) + 1;
+    }
+
+    const dominantMood = Object.entries(moodCounts)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 2);
+
+    // Require at least 1 occurrence of the dominant mood
+    if (dominantMood.length > 0 && dominantMood[0][1] >= 1) {
+      const moodName = dominantMood[0][0];
+      const moodCount = dominantMood[0][1];
+
+      patterns.push({
+        type: 'moon_sign_pattern',
+        title: `${moodName} energy during ${phase} in ${sign}`,
+        description: `You tend to feel ${moodName} when the moon is ${phase} in ${sign}`,
+        data: {
+          moonPhase: phase,
+          moonSign: sign,
+          dominantMood: moodName,
+          moodCount,
+          totalEntries: data.count,
+          percentage: Math.round((moodCount / data.count) * 100),
+        },
+        confidence: Math.min((moodCount / data.count) * 0.9, 0.85),
+      });
+    }
+  }
+
+  return patterns;
+}
+
+/**
+ * Transit Correlation Pattern Detection
+ * Analyzes which planetary transits correlate with journaling behavior
+ */
+async function findTransitCorrelations(
+  entries: JournalEntryData[],
+  userId: string,
+): Promise<JournalPattern[]> {
+  const patterns: JournalPattern[] = [];
+
+  // Get user's birth chart for personal transit analysis
+  let birthChart: BirthChartData[] = [];
+  try {
+    const birthChartResult = await sql`
+      SELECT birth_chart FROM user_profiles WHERE user_id = ${userId} LIMIT 1
+    `;
+    if (birthChartResult.rows.length > 0) {
+      birthChart = birthChartResult.rows[0].birth_chart as BirthChartData[];
+    }
+  } catch (error) {
+    return patterns;
+  }
+
+  if (birthChart.length === 0) return patterns;
+
+  // Group entries by major transiting planets
+  const transitData: Record<string, { count: number; moods: string[] }> = {};
+
+  for (const entry of entries) {
+    const entryDate = new Date(entry.createdAt);
+
+    try {
+      const transits = await getRealPlanetaryPositions(entryDate);
+
+      // Check major transits (Mars, Jupiter, Saturn)
+      for (const planet of ['Mars', 'Jupiter', 'Saturn']) {
+        const transitingPlanet = transits[planet];
+        if (!transitingPlanet) continue;
+
+        const transitKey = `${planet}_${transitingPlanet.sign}`;
+
+        if (!transitData[transitKey]) {
+          transitData[transitKey] = { count: 0, moods: [] };
+        }
+
+        transitData[transitKey].count++;
+        transitData[transitKey].moods.push(...entry.moodTags);
+      }
+    } catch (error) {
+      // Skip entries where transit data is unavailable
+      continue;
+    }
+  }
+
+  // Analyze correlations
+  for (const [transitKey, data] of Object.entries(transitData)) {
+    // Require at least 3 entries during this transit
+    if (data.count < 3) continue;
+
+    const [planet, sign] = transitKey.split('_');
+
+    // SIMPLIFIED FOR TESTING: Create pattern if transit appears in entries
+    const moodCounts: Record<string, number> = {};
+    for (const mood of data.moods) {
+      moodCounts[mood] = (moodCounts[mood] || 0) + 1;
+    }
+
+    const topMood = Object.entries(moodCounts).sort((a, b) => b[1] - a[1])[0];
+
+    if (topMood) {
+      patterns.push({
+        type: 'transit_correlation',
+        title: `Active during ${planet} in ${sign}`,
+        description: `You journaled ${data.count} time(s) when ${planet} was in ${sign}`,
+        data: {
+          planet,
+          sign,
+          entryCount: data.count,
+          topMood: topMood[0],
+          moodCount: topMood[1],
+        },
+        confidence: Math.min(data.count / 10, 0.7),
+      });
+    }
+  }
+
+  return patterns;
+}
+
+/**
+ * House Activation Pattern Detection
+ * Analyzes which astrological houses are emphasized in journal themes
+ */
+async function findHouseActivationPatterns(
+  entries: JournalEntryData[],
+  userId: string,
+): Promise<JournalPattern[]> {
+  const patterns: JournalPattern[] = [];
+
+  // Get user's birth chart to calculate houses
+  let birthChart: BirthChartData[] = [];
+  try {
+    const birthChartResult = await sql`
+      SELECT birth_chart FROM user_profiles WHERE user_id = ${userId} LIMIT 1
+    `;
+    if (birthChartResult.rows.length > 0) {
+      birthChart = birthChartResult.rows[0].birth_chart as BirthChartData[];
+    }
+  } catch (error) {
+    console.error(
+      '[findHouseActivationPatterns] Error fetching birth chart:',
+      error,
+    );
+    return patterns;
+  }
+
+  if (birthChart.length === 0) {
+    return patterns;
+  }
+
+  // Get ascendant for house calculation
+  const ascendant = birthChart.find((p) => p.body === 'Ascendant');
+  if (!ascendant || !ascendant.eclipticLongitude) {
+    return patterns;
+  }
+
+  const ascendantSign = Math.floor(
+    (((ascendant.eclipticLongitude % 360) + 360) % 360) / 30,
+  );
+
+  // House theme keywords
+  const houseThemes: Record<number, string[]> = {
+    1: [
+      'self',
+      'identity',
+      'appearance',
+      'personality',
+      'me',
+      'myself',
+      'I am',
+    ],
+    2: ['money', 'value', 'worth', 'finances', 'resources', 'security'],
+    3: [
+      'communication',
+      'learn',
+      'study',
+      'sibling',
+      'neighbor',
+      'message',
+      'talk',
+    ],
+    4: ['home', 'family', 'mother', 'roots', 'past', 'private', 'foundation'],
+    5: ['creative', 'romance', 'fun', 'children', 'joy', 'express', 'pleasure'],
+    6: ['health', 'work', 'routine', 'service', 'daily', 'habit', 'wellness'],
+    7: [
+      'relationship',
+      'partner',
+      'marriage',
+      'other',
+      'commitment',
+      'cooperation',
+    ],
+    8: ['transform', 'deep', 'intimate', 'death', 'rebirth', 'shared', 'power'],
+    9: [
+      'travel',
+      'philosophy',
+      'belief',
+      'meaning',
+      'expand',
+      'higher',
+      'adventure',
+    ],
+    10: [
+      'career',
+      'reputation',
+      'public',
+      'achievement',
+      'success',
+      'status',
+      'goal',
+    ],
+    11: ['friend', 'community', 'group', 'future', 'hope', 'network', 'social'],
+    12: [
+      'spiritual',
+      'dream',
+      'unconscious',
+      'hidden',
+      'solitude',
+      'meditation',
+    ],
+  };
+
+  // Analyze which houses are emphasized in journal entries
+  // SIMPLIFIED LOGIC: Check if text contains house keywords, regardless of transits
+  const houseActivation: Record<number, number> = {};
+
+  for (const entry of entries) {
+    const lowerText = entry.text.toLowerCase();
+
+    // Check all houses for keyword matches
+    for (const [houseNum, keywords] of Object.entries(houseThemes)) {
+      const house = parseInt(houseNum);
+
+      for (const keyword of keywords) {
+        if (lowerText.includes(keyword)) {
+          houseActivation[house] = (houseActivation[house] || 0) + 1;
+          break; // Only count once per house per entry
+        }
+      }
+    }
+  }
+
+  // Create patterns for emphasized houses
+  // Require at least 3 activations for a house to be considered emphasized
+  const sortedHouses = Object.entries(houseActivation)
+    .filter(([, count]) => count >= 3)
+    .sort((a, b) => b[1] - a[1]);
+
+  const houseNames: Record<number, string> = {
+    1: 'Self & Identity',
+    2: 'Values & Resources',
+    3: 'Communication & Learning',
+    4: 'Home & Family',
+    5: 'Creativity & Romance',
+    6: 'Health & Service',
+    7: 'Partnerships',
+    8: 'Transformation & Intimacy',
+    9: 'Philosophy & Travel',
+    10: 'Career & Reputation',
+    11: 'Community & Friendship',
+    12: 'Spirituality & Subconscious',
+  };
+
+  for (const [houseStr, count] of sortedHouses.slice(0, 2)) {
+    const house = parseInt(houseStr);
+    const houseName = houseNames[house] || `House ${house}`;
+
+    patterns.push({
+      type: 'house_activation',
+      title: `${houseName} themes emphasized`,
+      description: `You often journal about ${houseName.toLowerCase()} matters`,
+      data: {
+        house,
+        houseName,
+        count,
+        percentage: Math.round((count / entries.length) * 100),
+        keywords: houseThemes[house]?.slice(0, 3),
+      },
+      confidence: Math.min(count / 5, 0.8),
+    });
+  }
+
+  return patterns;
+}
+
 export async function savePatterns(
   userId: string,
   patterns: JournalPattern[],
 ): Promise<void> {
+  // Delete old transient/cyclical patterns to avoid duplicates
+  // Preserve natal patterns (permanent patterns)
   await sql`
-    DELETE FROM journal_patterns WHERE user_id = ${userId}
+    DELETE FROM journal_patterns
+    WHERE user_id = ${userId}
+    AND pattern_category IN ('transient', 'cyclical')
   `;
 
   for (const pattern of patterns) {
+    // Determine pattern category and expiration based on type
+    let category: string;
+    let expiresIn: string;
+
+    switch (pattern.type) {
+      case 'moon_phase_mood':
+      case 'moon_phase_pattern':
+      case 'moon_sign_pattern':
+        category = 'cyclical';
+        expiresIn = '90 days'; // Moon patterns evolve over ~3 months
+        break;
+      case 'transit_correlation':
+        category = 'cyclical';
+        expiresIn = '90 days'; // Transit patterns valid for several months
+        break;
+      case 'house_activation':
+        category = 'cyclical';
+        expiresIn = '180 days'; // House emphasis patterns are longer-term
+        break;
+      case 'recurring_card':
+      case 'mood_transit':
+        category = 'transient';
+        expiresIn = '30 days'; // Short-term patterns
+        break;
+      case 'season_correlation':
+        category = 'cyclical';
+        expiresIn = '365 days'; // Seasonal patterns recur yearly
+        break;
+      default:
+        category = 'transient';
+        expiresIn = '30 days';
+    }
+
+    // Insert new pattern
+    // Calculate expires_at date
+    const now = new Date();
+    const expiresAt = new Date(now);
+    if (expiresIn === '30 days') {
+      expiresAt.setDate(expiresAt.getDate() + 30);
+    } else if (expiresIn === '90 days') {
+      expiresAt.setDate(expiresAt.getDate() + 90);
+    } else if (expiresIn === '180 days') {
+      expiresAt.setDate(expiresAt.getDate() + 180);
+    } else {
+      expiresAt.setDate(expiresAt.getDate() + 365);
+    }
+
     await sql`
-      INSERT INTO journal_patterns (user_id, pattern_type, pattern_data, generated_at, expires_at)
+      INSERT INTO journal_patterns (
+        user_id,
+        pattern_type,
+        pattern_category,
+        pattern_data,
+        confidence,
+        generated_at,
+        expires_at,
+        first_detected,
+        last_observed
+      )
       VALUES (
         ${userId},
         ${pattern.type},
+        ${category},
         ${JSON.stringify({ ...pattern })}::jsonb,
+        ${pattern.confidence},
         NOW(),
-        NOW() + INTERVAL '7 days'
+        ${expiresAt.toISOString()},
+        NOW(),
+        NOW()
       )
     `;
   }

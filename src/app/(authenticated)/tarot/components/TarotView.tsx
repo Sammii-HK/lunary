@@ -48,10 +48,10 @@ import { captureEvent } from '@/lib/posthog-client';
 import { TarotSeasonReading } from '@/components/tarot/TarotSeasonReading';
 import { TarotRitualForPatterns } from '@/components/tarot/TarotRitualForPatterns';
 import { TarotReflectionPrompts } from '@/components/tarot/TarotReflectionPrompts';
-import { RecurringThemesCard } from '@/components/RecurringThemesCard';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { useAuthStatus } from '@/components/AuthStatus';
+import { getCosmicContextForDate } from '@/lib/cosmic/cosmic-context-utils';
 
 const GuideNudge = dynamic(
   () =>
@@ -165,13 +165,58 @@ export function TarotView({
   }, [hasPaidAccess]);
 
   const timeFrame = typeof selectedView === 'number' ? selectedView : 30;
-  const personalizedReading = useMemo(
-    () =>
-      hasPaidAccess && userName && userBirthday
-        ? getImprovedTarotReading(userName, true, timeFrame, userBirthday)
-        : null,
-    [hasPaidAccess, userName, timeFrame, userBirthday],
-  );
+
+  // Fetch personalized reading with actual database data
+  const [personalizedReading, setPersonalizedReading] = useState<any>(null);
+  const [isLoadingPatterns, setIsLoadingPatterns] = useState(false);
+
+  useEffect(() => {
+    async function fetchPersonalizedReading() {
+      if (!hasPaidAccess || !userName || !userBirthday) {
+        setPersonalizedReading(null);
+        return;
+      }
+
+      setIsLoadingPatterns(true);
+      try {
+        // Fetch actual database readings from API
+        let userReadings = null;
+        try {
+          const response = await fetch(
+            `/api/patterns/user-readings?days=${timeFrame}`,
+          );
+          if (response.ok) {
+            const data = await response.json();
+            if (data.success && data.readings) {
+              userReadings = data.readings;
+            }
+          }
+        } catch (apiError) {
+          console.warn(
+            'Failed to fetch user readings, falling back to seeded generation:',
+            apiError,
+          );
+        }
+
+        // Generate reading with database data (or seeded fallback)
+        const reading = await getImprovedTarotReading(
+          userName,
+          true,
+          timeFrame,
+          userBirthday,
+          userReadings,
+        );
+        setPersonalizedReading(reading);
+      } catch (error) {
+        console.error('Error fetching personalized reading:', error);
+        setPersonalizedReading(null);
+      } finally {
+        setIsLoadingPatterns(false);
+      }
+    }
+
+    fetchPersonalizedReading();
+  }, [hasPaidAccess, userName, userBirthday, timeFrame]);
 
   // Build basic 7-day patterns for free users from previousReadings
   const freeBasicPatterns = useMemo(() => {
@@ -201,20 +246,35 @@ export function TarotView({
     const frequentCards = Array.from(cardCounts.entries())
       .map(([name, count]) => ({ name, count }))
       .sort((a, b) => b.count - a.count);
-    const suitPatterns = Array.from(suitCounts.entries())
-      .map(([suit, data]) => ({
+
+    // Include ALL suits, even if count is 0 (important for visualizations)
+    const allSuits = ['Cups', 'Wands', 'Swords', 'Pentacles', 'Major Arcana'];
+    const suitPatterns = allSuits.map((suit) => {
+      const data = suitCounts.get(suit);
+      return {
         suit,
-        count: data.count,
-        cards: Array.from(data.cards.entries()).map(([name, count]) => ({
-          name,
-          count,
-        })),
-      }))
-      .sort((a, b) => b.count - a.count);
+        count: data?.count || 0,
+        cards: data
+          ? Array.from(data.cards.entries()).map(([name, count]) => ({
+              name,
+              count,
+            }))
+          : [],
+      };
+    });
+
     const themes = frequentCards.slice(0, 3).flatMap((c) => {
       const card = previousReadings.find((r) => r.card.name === c.name);
       return card?.card.keywords?.slice(0, 2) || [];
     });
+    // Calculate arcana counts (Major Arcana vs Minor Arcana)
+    const majorArcanaCount = suitCounts.get('Major Arcana')?.count || 0;
+    const minorArcanaCount =
+      (suitCounts.get('Cups')?.count || 0) +
+      (suitCounts.get('Wands')?.count || 0) +
+      (suitCounts.get('Swords')?.count || 0) +
+      (suitCounts.get('Pentacles')?.count || 0);
+
     return {
       dominantThemes: [...new Set(themes)],
       frequentCards,
@@ -224,7 +284,10 @@ export function TarotView({
         count: number;
         cards: string[];
       }>,
-      arcanaPatterns: [] as Array<{ type: string; count: number }>,
+      arcanaPatterns: [
+        { type: 'Major Arcana', count: majorArcanaCount },
+        { type: 'Minor Arcana', count: minorArcanaCount },
+      ],
       timeFrame: 7,
     };
   }, [hasPaidAccess, previousReadings]);
@@ -358,16 +421,18 @@ export function TarotView({
 
     if (themes.length === 0 && cards.length === 0) return [];
 
-    const themeItems = themes.slice(0, 3).map((theme, index) => ({
-      label: theme,
-      detail: cards[index]?.name
-        ? `${cards[index].name} showing up often`
-        : undefined,
-    }));
+    const themeItems = themes
+      .slice(0, 3)
+      .map((theme: string, index: number) => ({
+        label: theme,
+        detail: cards[index]?.name
+          ? `${cards[index].name} showing up often`
+          : undefined,
+      }));
 
     if (themeItems.length > 0) return themeItems;
 
-    return cards.slice(0, 3).map((card) => ({
+    return cards.slice(0, 3).map((card: any) => ({
       label: card.name,
       detail: typeof card.count === 'number' ? `Seen ${card.count} times` : '',
     }));
@@ -502,6 +567,8 @@ export function TarotView({
     ? personalizedWeeklyShare
     : generalWeeklyShare;
 
+  const cosmicContext = getCosmicContextForDate(new Date());
+
   return (
     <div className='h-full w-full space-y-6 p-4 overflow-y-auto overflow-x-hidden pb-32'>
       {/* Header */}
@@ -518,6 +585,32 @@ export function TarotView({
             ? 'Personalized guidance based on your cosmic signature'
             : 'General cosmic guidance based on universal energies'}
         </p>
+      </div>
+
+      {/* Moon Phase */}
+      <div className='rounded-lg border border-lunary-secondary-800 bg-lunary-secondary-950/40 p-3'>
+        <div className='flex items-center gap-3'>
+          <img
+            src={cosmicContext.moonPhase.icon.src}
+            alt={cosmicContext.moonPhase.icon.alt}
+            className='w-10 h-10 flex-shrink-0'
+          />
+          <div className='flex-1 min-w-0'>
+            <p className='text-sm font-medium text-lunary-secondary-300 mb-1'>
+              {cosmicContext.moonPhase.name}
+            </p>
+            <div className='flex flex-wrap gap-1.5'>
+              {cosmicContext.moonPhase.keywords.map((keyword, idx) => (
+                <span
+                  key={idx}
+                  className='text-xs px-2 py-0.5 rounded-full bg-lunary-secondary-900/50 text-lunary-secondary-400 border border-lunary-secondary-800'
+                >
+                  {keyword}
+                </span>
+              ))}
+            </div>
+          </div>
+        </div>
       </div>
 
       {/* CTA button to scroll to spreads */}
@@ -569,7 +662,7 @@ export function TarotView({
                   </span>
                   <span className='text-zinc-400'>
                     {personalizedReading!.daily.keywords
-                      .filter((_, idx) => idx !== 2 && idx < 2)
+                      .filter((_: string, idx: number) => idx !== 2 && idx < 2)
                       .join(', ')}
                   </span>
                 </div>
@@ -623,7 +716,7 @@ export function TarotView({
                   </span>
                   <span className='text-zinc-400'>
                     {personalizedReading!.weekly.keywords
-                      .filter((_, idx) => idx !== 2 && idx < 2)
+                      .filter((_: string, idx: number) => idx !== 2 && idx < 2)
                       .join(', ')}
                   </span>
                 </div>
@@ -659,11 +752,13 @@ export function TarotView({
               <div className='rounded-lg border border-lunary-success-800 bg-lunary-success-950 p-4'>
                 <ul className='space-y-2 text-xs text-zinc-300'>
                   {guidanceActionPoints.length > 0 ? (
-                    guidanceActionPoints.slice(-1).map((point, index) => (
-                      <li key={index} className='flex items-start gap-2'>
-                        <span>{point}</span>
-                      </li>
-                    ))
+                    guidanceActionPoints
+                      .slice(-1)
+                      .map((point: string, index: number) => (
+                        <li key={index} className='flex items-start gap-2'>
+                          <span>{point}</span>
+                        </li>
+                      ))
                   ) : (
                     <li className='text-xs text-zinc-400'>
                       Key insight drives your next move—save a spread to capture
@@ -943,29 +1038,7 @@ export function TarotView({
           />
         )}
 
-        {/* Recurring themes - paid only, behind tarot_patterns */}
-        {hasPaidAccess &&
-          subscription.hasAccess('tarot_patterns') &&
-          personalizedReading?.trendAnalysis && (
-            <HoroscopeSection
-              title={`Your ${timeFrame}-Day Tarot Patterns`}
-              color='zinc'
-            >
-              <RecurringThemesCard
-                className='mb-6'
-                subtitle={`Based on your last ${timeFrame} days of readings`}
-                items={recurringThemeItems}
-              />
-              <AdvancedPatterns
-                basicPatterns={personalizedReading.trendAnalysis}
-                selectedView={30}
-                isMultidimensionalMode={false}
-                onMultidimensionalModeChange={() => {}}
-              />
-            </HoroscopeSection>
-          )}
-
-        {/* 7-day patterns are shown to free users in the Tarot Patterns section below */}
+        {/* All patterns are now consolidated in the Tarot Patterns collapsible section below */}
 
         {/* Feature preview for spreads - unauthenticated only */}
         {!authStatus.isAuthenticated && (
@@ -1179,6 +1252,10 @@ export function TarotView({
                 const tarotCard = getTarotCardByName(card.name);
                 if (tarotCard) setSelectedCard(tarotCard);
               }}
+              birthChart={user?.birthChart}
+              userBirthday={userBirthday}
+              currentTransits={currentAstrologicalChart}
+              userBirthLocation={user?.birthLocation}
             />
           </HoroscopeSection>
         </CollapsibleSection>

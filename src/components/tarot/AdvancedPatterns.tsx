@@ -6,6 +6,11 @@ import { Paywall } from '@/components/Paywall';
 import { UpgradePrompt } from '@/components/UpgradePrompt';
 import { Lock as LockIcon } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { TarotPatternsHub } from '@/components/patterns/TarotPatternsHub';
+import {
+  transformBasicPatternsToAnalysis,
+  mapSubscriptionPlanToUserTier,
+} from '@/lib/patterns/pattern-adapter';
 
 type AdvancedPatternAnalysis = {
   yearOverYear: {
@@ -140,6 +145,11 @@ interface AdvancedPatternsProps {
   onMultidimensionalModeChange: (enabled: boolean) => void;
   recentReadings?: RecentReading[];
   onCardClick?: (card: { name: string }) => void;
+  // Props for transit connections
+  birthChart?: any;
+  userBirthday?: string;
+  currentTransits?: any[];
+  userBirthLocation?: string;
 }
 
 export function AdvancedPatterns({
@@ -149,6 +159,10 @@ export function AdvancedPatterns({
   onMultidimensionalModeChange,
   recentReadings,
   onCardClick,
+  birthChart,
+  userBirthday,
+  currentTransits,
+  userBirthLocation,
 }: AdvancedPatternsProps) {
   const subscription = useSubscription();
   const timeFrame = typeof selectedView === 'number' ? selectedView : 30;
@@ -167,6 +181,7 @@ export function AdvancedPatterns({
     [subscription.plan],
   );
 
+  // All hooks must be called before any early returns
   const [analysis, setAnalysis] = useState<AdvancedPatternAnalysis | null>(
     null,
   );
@@ -174,26 +189,11 @@ export function AdvancedPatterns({
   const [error, setError] = useState<string | null>(null);
   const lastFetchedRef = useRef<string>('');
   const loadingRef = useRef(false);
+  const [basicPatternAnalysis, setBasicPatternAnalysis] = useState<any | null>(
+    null,
+  );
 
-  // Debug logging
-  useEffect(() => {
-    if (process.env.NODE_ENV === 'development') {
-      console.log('[AdvancedPatterns] Subscription state:', {
-        plan: subscription.plan,
-        status: subscription.status,
-        hasAdvancedAccess,
-        hasTarotPatternsAccess,
-        isSubscribed: subscription.isSubscribed,
-        customerId: subscription.customerId,
-      });
-      // Test feature access directly
-      console.log('[AdvancedPatterns] Direct feature access test:', {
-        advanced: subscription.hasAccess('advanced_patterns'),
-        tarot: subscription.hasAccess('tarot_patterns'),
-      });
-    }
-  }, [subscription, hasAdvancedAccess, hasTarotPatternsAccess]);
-
+  // Fetch callback must be defined before useEffect that uses it
   const fetchAdvancedPatterns = useCallback(async () => {
     if (loadingRef.current) return; // Prevent concurrent fetches
     loadingRef.current = true;
@@ -250,6 +250,23 @@ export function AdvancedPatterns({
     }
   }, [selectedView, isMultidimensionalMode]);
 
+  // Transform basic patterns with appearances
+  useEffect(() => {
+    if (!basicPatterns) return;
+
+    const transform = async () => {
+      try {
+        const transformed =
+          await transformBasicPatternsToAnalysis(basicPatterns);
+        setBasicPatternAnalysis(transformed);
+      } catch (error) {
+        console.error('[AdvancedPatterns] Failed to transform:', error);
+      }
+    };
+
+    transform();
+  }, [basicPatterns]);
+
   useEffect(() => {
     // Fetch advanced patterns when:
     // 1. Multidimensional mode is ON and we don't have data yet
@@ -303,6 +320,65 @@ export function AdvancedPatterns({
     fetchAdvancedPatterns();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isMultidimensionalMode, selectedView]);
+
+  // Debug logging
+  useEffect(() => {
+    if (process.env.NODE_ENV === 'development') {
+      console.log('[AdvancedPatterns] Subscription state:', {
+        plan: subscription.plan,
+        status: subscription.status,
+        hasAdvancedAccess,
+        hasTarotPatternsAccess,
+        isSubscribed: subscription.isSubscribed,
+        customerId: subscription.customerId,
+      });
+      // Test feature access directly
+      console.log('[AdvancedPatterns] Direct feature access test:', {
+        advanced: subscription.hasAccess('advanced_patterns'),
+        tarot: subscription.hasAccess('tarot_patterns'),
+      });
+    }
+  }, [subscription, hasAdvancedAccess, hasTarotPatternsAccess]);
+
+  // Feature flag for new patterns hub
+  const USE_NEW_PATTERNS_HUB = true;
+
+  // Early return for new hub on basic time-based views (not year-over-year, not multidimensional)
+  if (
+    USE_NEW_PATTERNS_HUB &&
+    basicPatterns &&
+    typeof selectedView === 'number' &&
+    !isMultidimensionalMode
+  ) {
+    const userTier = mapSubscriptionPlanToUserTier(subscription.plan);
+
+    // Show loading while transforming
+    if (!basicPatternAnalysis) {
+      return (
+        <div className='text-center py-8 text-zinc-400 text-sm'>
+          Loading patterns...
+        </div>
+      );
+    }
+
+    return (
+      <TarotPatternsHub
+        patterns={basicPatternAnalysis}
+        userTier={userTier}
+        subscriptionStatus={subscription.status}
+        onUpgradeClick={() => {
+          // Redirect to pricing page for upgrades
+          if (typeof window !== 'undefined') {
+            window.location.href = '/pricing';
+          }
+        }}
+        birthChart={birthChart}
+        userBirthday={userBirthday}
+        currentTransits={currentTransits}
+        userBirthLocation={userBirthLocation}
+      />
+    );
+  }
 
   // Wait for subscription to load before showing paywall
   if (subscription.loading) {

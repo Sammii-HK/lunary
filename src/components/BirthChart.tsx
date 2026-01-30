@@ -9,8 +9,33 @@ import {
 } from '@/constants/symbols';
 import classNames from 'classnames';
 import { parseIsoDateOnly } from '@/lib/date-only';
+import { useAspects } from '@/hooks/useAspects';
+import { AspectLines } from '@/components/AspectLines';
+import styles from './BirthChart.module.css';
 
 const cx = classNames;
+
+const ELEMENT_COLORS = {
+  Fire: '#ff6b6b',
+  Earth: '#6b8e4e',
+  Air: '#5dade2',
+  Water: '#9b59b6',
+} as const;
+
+const SIGN_ELEMENTS: Record<string, keyof typeof ELEMENT_COLORS> = {
+  Aries: 'Fire',
+  Taurus: 'Earth',
+  Gemini: 'Air',
+  Cancer: 'Water',
+  Leo: 'Fire',
+  Virgo: 'Earth',
+  Libra: 'Air',
+  Scorpio: 'Water',
+  Sagittarius: 'Fire',
+  Capricorn: 'Earth',
+  Aquarius: 'Air',
+  Pisces: 'Water',
+};
 
 const MAIN_PLANETS = [
   'Sun',
@@ -31,6 +56,16 @@ const ANGLE_DISPLAY: Record<string, string> = {
   Midheaven: 'Midheaven',
 };
 const POINTS = ['North Node', 'South Node', 'Chiron', 'Lilith'];
+const ASTEROIDS = [
+  'Ceres',
+  'Pallas',
+  'Juno',
+  'Vesta',
+  'Hygiea',
+  'Pholus',
+  'Psyche',
+  'Eros',
+];
 
 function getSymbolForBody(body: string): string {
   const key = body
@@ -69,6 +104,9 @@ type BirthChartProps = {
   houses?: HouseCusp[];
   userName?: string;
   birthDate?: string;
+  showAspects?: boolean;
+  aspectFilter?: 'all' | 'harmonious' | 'challenging';
+  onAspectsToggle?: (show: boolean) => void;
 };
 
 export const BirthChart = ({
@@ -76,8 +114,14 @@ export const BirthChart = ({
   houses,
   userName,
   birthDate,
+  showAspects = false,
+  aspectFilter = 'all',
+  onAspectsToggle,
 }: BirthChartProps) => {
   const [hoveredBody, setHoveredBody] = useState<string | null>(null);
+  const [highlightedPlanet, setHighlightedPlanet] = useState<string | null>(
+    null,
+  );
   const ascendant = birthChart.find((p) => p.body === 'Ascendant');
   const ascendantAngle = ascendant ? ascendant.eclipticLongitude : 0;
 
@@ -85,7 +129,7 @@ export const BirthChart = ({
     return birthChart.map((planet) => {
       const adjustedLong =
         (planet.eclipticLongitude - ascendantAngle + 360) % 360;
-      const angle = (360 - adjustedLong) % 360;
+      const angle = (180 + adjustedLong) % 360;
       const radian = (angle * Math.PI) / 180;
 
       const radius = 65;
@@ -122,7 +166,7 @@ export const BirthChart = ({
       const signStart = index * 30;
       const signMid = signStart + 15;
       const adjustedMid = (signMid - ascendantAngle + 360) % 360;
-      const angle = (360 - adjustedMid) % 360;
+      const angle = (180 + adjustedMid) % 360;
       const radian = (angle * Math.PI) / 180;
       const radius = 100;
       const x = Math.cos(radian) * radius;
@@ -137,7 +181,7 @@ export const BirthChart = ({
       return houses.map((house) => {
         const adjustedLong =
           (house.eclipticLongitude - ascendantAngle + 360) % 360;
-        const angle = (360 - adjustedLong) % 360;
+        const angle = (180 + adjustedLong) % 360;
         const radian = (angle * Math.PI) / 180;
         return { ...house, adjustedLong, angle, radian };
       });
@@ -145,7 +189,7 @@ export const BirthChart = ({
     return Array.from({ length: 12 }, (_, i) => {
       const houseStart = i * 30;
       const adjustedLong = houseStart;
-      const angle = (360 - adjustedLong) % 360;
+      const angle = (180 + adjustedLong) % 360;
       const radian = (angle * Math.PI) / 180;
       return {
         house: i + 1,
@@ -160,6 +204,24 @@ export const BirthChart = ({
   const mainPlanets = chartData.filter((p) => MAIN_PLANETS.includes(p.body));
   const angles = chartData.filter((p) => ANGLES.includes(p.body));
   const points = chartData.filter((p) => POINTS.includes(p.body));
+  const asteroids = chartData.filter((p) => ASTEROIDS.includes(p.body));
+
+  const allAspects = useAspects(chartData);
+
+  const aspects = useMemo(() => {
+    if (aspectFilter === 'all') return allAspects;
+    if (aspectFilter === 'harmonious') {
+      return allAspects.filter((a) =>
+        ['Trine', 'Sextile', 'Conjunction'].includes(a.type),
+      );
+    }
+    if (aspectFilter === 'challenging') {
+      return allAspects.filter((a) =>
+        ['Square', 'Opposition'].includes(a.type),
+      );
+    }
+    return allAspects;
+  }, [allAspects, aspectFilter]);
 
   return (
     <div className='flex flex-col items-center space-y-4 md:space-y-6'>
@@ -180,10 +242,62 @@ export const BirthChart = ({
         )}
       </div>
 
+      {/* Color Legend */}
+      <div className='bg-zinc-900/50 border border-zinc-800 rounded-lg p-3 w-full max-w-[320px] md:max-w-[360px]'>
+        <h3 className='text-xs font-semibold text-zinc-400 mb-2'>
+          Planet Colors
+        </h3>
+        <div className='grid grid-cols-2 gap-2 text-xs'>
+          <div className='flex items-center gap-2'>
+            <div
+              className='w-3 h-3 rounded-full'
+              style={{ backgroundColor: ELEMENT_COLORS.Fire }}
+            />
+            <span className='text-zinc-300'>Fire (Aries, Leo, Sag)</span>
+          </div>
+          <div className='flex items-center gap-2'>
+            <div
+              className='w-3 h-3 rounded-full'
+              style={{ backgroundColor: ELEMENT_COLORS.Earth }}
+            />
+            <span className='text-zinc-300'>Earth (Tau, Vir, Cap)</span>
+          </div>
+          <div className='flex items-center gap-2'>
+            <div
+              className='w-3 h-3 rounded-full'
+              style={{ backgroundColor: ELEMENT_COLORS.Air }}
+            />
+            <span className='text-zinc-300'>Air (Gem, Lib, Aqu)</span>
+          </div>
+          <div className='flex items-center gap-2'>
+            <div
+              className='w-3 h-3 rounded-full'
+              style={{ backgroundColor: ELEMENT_COLORS.Water }}
+            />
+            <span className='text-zinc-300'>Water (Can, Sco, Pis)</span>
+          </div>
+          <div className='flex items-center gap-2'>
+            <div className='w-3 h-3 rounded-full bg-[#C77DFF]' />
+            <span className='text-zinc-300'>Angles (AC, MC, DC)</span>
+          </div>
+          <div className='flex items-center gap-2'>
+            <div className='w-3 h-3 rounded-full bg-[#FCD34D]' />
+            <span className='text-zinc-300'>Asteroids</span>
+          </div>
+          <div className='flex items-center gap-2'>
+            <div className='w-3 h-3 rounded-full bg-[#f87171]' />
+            <span className='text-zinc-300'>Retrograde</span>
+          </div>
+        </div>
+      </div>
+
       <div className='relative w-full max-w-[320px] md:max-w-[360px] aspect-square'>
         <svg
           viewBox='-140 -140 280 280'
-          className='chart-wheel-svg w-full h-full border border-zinc-700 rounded-full bg-zinc-900'
+          className={cx(
+            'chart-wheel-svg w-full h-full border border-zinc-700 rounded-full bg-zinc-900',
+            styles.chartWheel,
+          )}
         >
           <style>{`
             .planet-node { cursor: pointer; }
@@ -213,6 +327,15 @@ export const BirthChart = ({
             stroke='#27272a'
             strokeWidth='1'
           />
+
+          {showAspects && (
+            <AspectLines
+              aspects={aspects}
+              visible={showAspects}
+              highlightedPlanet={highlightedPlanet}
+              opacity={0.15}
+            />
+          )}
 
           {houseData.map((house, i) => {
             const radian = house.radian;
@@ -267,7 +390,7 @@ export const BirthChart = ({
           {Array.from({ length: 12 }, (_, i) => {
             const signStart = i * 30;
             const adjustedStart = (signStart - ascendantAngle + 360) % 360;
-            const angle = (360 - adjustedStart) % 360;
+            const angle = (180 + adjustedStart) % 360;
             const radian = (angle * Math.PI) / 180;
             const x1 = Math.cos(radian) * 85;
             const y1 = Math.sin(radian) * 85;
@@ -302,28 +425,46 @@ export const BirthChart = ({
             </text>
           ))}
 
-          {[...mainPlanets, ...angles, ...points].map(
+          {/* Render all planets */}
+          {[...mainPlanets, ...angles, ...points, ...asteroids].map(
             ({ body, x, y, retrograde, sign, degree, minute }) => {
               const isAngle = ANGLES.includes(body);
               const isPoint = POINTS.includes(body);
+              const isPlanet = MAIN_PLANETS.includes(body);
+              const isAsteroid = ASTEROIDS.includes(body);
+              const isHovered = body === hoveredBody;
+
+              // Get element color for planets based on their sign
+              const elementColor =
+                isPlanet && sign && SIGN_ELEMENTS[sign]
+                  ? ELEMENT_COLORS[SIGN_ELEMENTS[sign]]
+                  : undefined;
+
               const baseColor = retrograde
                 ? '#f87171'
                 : isAngle
                   ? '#C77DFF'
                   : isPoint
                     ? '#7B7BE8'
-                    : '#ffffff';
-              const color = hoveredBody
-                ? body === hoveredBody
-                  ? '#ffffff'
-                  : '#6b7280'
-                : baseColor;
+                    : isAsteroid
+                      ? '#FCD34D'
+                      : elementColor || '#ffffff';
+
+              const color = isHovered ? '#ffffff' : baseColor;
+              const opacity = isHovered ? 1 : hoveredBody ? 0.4 : 1;
+
               return (
                 <g
                   key={body}
-                  className='planet-node'
+                  className={cx('planet-node', styles.planetNode)}
                   onMouseEnter={() => setHoveredBody(body)}
                   onMouseLeave={() => setHoveredBody(null)}
+                  onClick={() =>
+                    setHighlightedPlanet(
+                      highlightedPlanet === body ? null : body,
+                    )
+                  }
+                  opacity={opacity}
                 >
                   <title>
                     {formatPlacementLabel({
@@ -340,7 +481,7 @@ export const BirthChart = ({
                     x2={x}
                     y2={y}
                     stroke={color}
-                    strokeWidth='0.3'
+                    strokeWidth={isHovered ? '0.5' : '0.3'}
                     opacity='0.2'
                   />
                   <text
@@ -348,8 +489,13 @@ export const BirthChart = ({
                     y={y}
                     textAnchor='middle'
                     dominantBaseline='central'
-                    className='planet-glyph font-astro'
-                    fontSize={isAngle || isPoint ? '12' : '14'}
+                    className={cx(
+                      'planet-glyph font-astro',
+                      styles.planetGlyph,
+                    )}
+                    fontSize={
+                      isAngle || isPoint ? '12' : isAsteroid ? '11' : '14'
+                    }
                     fill={color}
                   >
                     {getSymbolForBody(body)}
@@ -361,11 +507,11 @@ export const BirthChart = ({
         </svg>
       </div>
 
-      <div className='w-full max-w-md px-2'>
+      <div className='w-full max-w-2xl sm:max-w-3xl md:max-w-4xl px-2'>
         <h3 className='text-base md:text-lg font-semibold text-lunary-secondary mb-2 md:mb-3'>
           Planetary Positions
         </h3>
-        <div className='space-y-1.5 md:space-y-2'>
+        <div className='grid grid-cols-1 md:grid-cols-2 gap-2'>
           {mainPlanets.map(
             ({ body, sign, degree, minute, retrograde, house }) => (
               <div
@@ -415,7 +561,7 @@ export const BirthChart = ({
             <h3 className='text-base md:text-lg font-semibold text-lunary-accent mb-2 md:mb-3 mt-4'>
               Chart Angles
             </h3>
-            <div className='space-y-1.5 md:space-y-2'>
+            <div className='grid grid-cols-1 md:grid-cols-2 gap-2'>
               {angles.map(({ body, sign, degree, minute }) => (
                 <div
                   key={body}
@@ -456,7 +602,7 @@ export const BirthChart = ({
             <h3 className='text-base md:text-lg font-semibold text-lunary-secondary mb-2 md:mb-3 mt-4'>
               Sensitive Points
             </h3>
-            <div className='space-y-1.5 md:space-y-2'>
+            <div className='grid grid-cols-1 md:grid-cols-2 gap-2'>
               {points.map(({ body, sign, degree, minute, retrograde }) => (
                 <div
                   key={body}

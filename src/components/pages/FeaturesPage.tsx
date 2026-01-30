@@ -109,15 +109,21 @@ export default function FeaturesPage() {
           <FeatureCard
             icon={<Map className='w-5 h-5 md:w-6 md:h-6' />}
             title='Birth Chart Calculator'
-            description='Create your complete natal chart with precise planetary positions'
+            description='The most comprehensive free birth chart available - 24+ celestial bodies with educational interpretations'
             features={[
-              'Visual chart wheel with all 10 planets',
-              'Every planet in sign and house',
+              'All 10 planets + 8 asteroids (Ceres, Pallas, Juno, Vesta, Hygiea, Pholus, Psyche, Eros)',
+              'Planetary dignities (Rulership, Exaltation, Detriment, Fall)',
+              'Chart ruler detection and analysis',
+              'Chiron, Lilith, North & South Nodes',
+              'Every placement explained in educational detail',
+              'Visual chart wheel with all bodies',
               'Major aspects explained in plain language',
+              '12 houses with Whole Sign system',
+              'Elemental & modal balance analysis',
               'Saved to your account for personalized features',
             ]}
-            freeTier='Complete birth chart calculation'
-            paidTier='Transit analysis + ongoing interpretations'
+            freeTier='Complete birth chart with 24+ bodies - all features included'
+            paidTier='Transit analysis + ongoing personalized interpretations'
             cta='Calculate my chart'
             ctaHref='/auth?signup=true'
           />
@@ -236,8 +242,8 @@ export default function FeaturesPage() {
               'Eclipse seasons',
               'Major aspects forming',
             ]}
-            freeTier='Next 3 upcoming transits'
-            paidTier='30-day calendar view + alerts'
+            freeTier='2 transits (general descriptions only)'
+            paidTier='All 5-10 daily transits + personalized to YOUR chart + 30-day calendar'
             cta="See what's ahead"
             ctaHref='/auth?signup=true'
           />
@@ -306,13 +312,16 @@ export default function FeaturesPage() {
               'After 6-8 weeks, patterns emerge from your data',
               'Example: "You always pull The Tower during Pluto transits"',
               'Example: "During the last 6 Full Moons, you journaled about relationships"',
+              'Track your tarot cards over time and see what cosmic conditions were present',
+              'View cosmic context for each card appearance (moon phase & planetary aspects)',
+              'Personalized transit analysis for your frequently pulled cards',
               'This is personal proof astrology works for YOU specifically',
               'Your own data becomes your astrology education',
               'Next time that transit happens, you get a heads up based on YOUR history',
             ]}
-            freeTier='Not included'
-            paidTier='30-day pattern analysis'
-            proTier='Lifetime pattern history + AI insights'
+            freeTier='Tarot pattern tracking (last 7 days) + basic moon phase correlations'
+            paidTier='Up to 6 months history + cosmic context for each card + personalized transit analysis'
+            proTier='Up to 12 months + year-over-year analysis + advanced multi-dimensional pattern analysis'
             cta='Track your patterns'
             ctaHref='/pricing'
           />
@@ -321,17 +330,19 @@ export default function FeaturesPage() {
           <FeatureCard
             icon={<BookOpen className='w-5 h-5 md:w-6 md:h-6' />}
             title='Living Book of Shadows'
-            description='Your personal astrology journal'
+            description='Your personal astrology journal with intelligent mood tracking'
             features={[
               'Record daily observations and reflections',
+              'NEW: Smart auto-mood tagging (instantly detects emotions from your writing)',
               'Track how transits affected you',
               'Note tarot insights and meanings',
               'Document moon phase experiences',
               'See "Last time Mars was here, you noted..."',
+              'Pro: Enhanced detection catches subtle emotions & implicit feelings',
             ]}
-            freeTier='Basic journaling'
-            paidTier='Pattern detection + timeline view'
-            proTier='Extended history (90 days) + export'
+            freeTier='Basic journaling (3 entries/month) + smart mood detection'
+            paidTier='Unlimited journaling + pattern detection + timeline view'
+            proTier='Enhanced mood detection + extended history (12 months) + export'
             cta='Start journaling'
             ctaHref='/auth?signup=true'
           />

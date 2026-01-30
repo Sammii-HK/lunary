@@ -1,11 +1,6 @@
 import dayjs from 'dayjs';
 import { sql } from '@vercel/postgres';
-import {
-  BirthChartSnapshot,
-  MoonSnapshot,
-  TransitRecord,
-  TarotCard,
-} from './types';
+import { MoonSnapshot, TransitRecord, TarotCard } from './types';
 import { buildLunaryContext } from './context';
 import { searchSimilar, type EmbeddingResult } from '@/lib/embeddings';
 import {
@@ -14,6 +9,76 @@ import {
 } from '../../../utils/astrology/personalTransits';
 import { getUpcomingTransits } from '../../../utils/astrology/transitCalendar';
 import type { BirthChartData } from '../../../utils/astrology/birthChart';
+import { detectNatalAspectPatterns } from '../journal/aspect-pattern-detector';
+import { calculatePlanetaryReturns } from '../journal/planetary-return-tracker';
+import { detectLunarSensitivity } from '../journal/lunar-pattern-detector';
+import { detectNatalHouseEmphasis } from '../journal/house-emphasis-tracker';
+import { getUserPatterns } from '../journal/pattern-storage';
+import { calculateProgressedChart } from '../../../utils/astrology/progressedChart';
+import { getRelevantEclipses } from '../../../utils/astrology/eclipseTracker';
+import {
+  getCosmicRecommendations,
+  type CosmicRecommendations,
+} from '../cosmic-companion/cosmic-recommender';
+import {
+  analyzeQuery,
+  getContextRequirements,
+  type QueryContext,
+} from '../grimoire/query-analyzer';
+import { formatBirthChartSummary } from './birth-chart-with-patterns';
+
+/**
+ * Detects if a user message is asking about astrological/cosmic topics
+ * Returns true if the query should use the Astral Guide context
+ */
+export function isAstralQuery(userMessage: string): boolean {
+  const astralKeywords = [
+    'transit',
+    'retrograde',
+    'birth chart',
+    'natal',
+    'aspect',
+    'moon phase',
+    'planetary',
+    'cosmic',
+    'astrology',
+    'horoscope',
+    'placement',
+    'house',
+    'sign',
+    'zodiac',
+    'eclipse',
+    'conjunction',
+    'opposition',
+    'trine',
+    'square',
+    'sextile',
+    'ascendant',
+    'rising',
+    'mercury',
+    'venus',
+    'mars',
+    'jupiter',
+    'saturn',
+    'uranus',
+    'neptune',
+    'pluto',
+    // Chart patterns
+    'yod',
+    'pattern',
+    'grand trine',
+    't-square',
+    't square',
+    'stellium',
+    'grand cross',
+    'grand conjunction',
+    'kite',
+    'finger of god',
+  ];
+
+  const lowerMessage = userMessage.toLowerCase();
+  return astralKeywords.some((keyword) => lowerMessage.includes(keyword));
+}
 
 export interface AstralContext {
   user: {
@@ -30,19 +95,186 @@ export interface AstralContext {
   moonPhase: string;
   journalSummaries: { date: string; summary: string }[];
   moodTags: string[];
+  // Phase 2: Pattern Recognition
+  natalAspectPatterns?: any[]; // Grand Trines, T-Squares, Stelliums, Yods
+  planetaryReturns?: any[]; // Saturn/Jupiter/Solar returns
+  natalHouseEmphasis?: any[]; // Houses with 2+ planets
+  lunarSensitivity?: any; // Moon phase sensitivity
+  storedPatterns?: {
+    // Patterns from database
+    natal?: any[];
+    cyclical?: any[];
+    transient?: any[];
+  };
+  grimoirePatternData?: string; // Grimoire interpretations for detected patterns
+  // Phase 3: Progressed Charts & Eclipses
+  progressedChart?: any; // Secondary progressions
+  relevantEclipses?: any[]; // Upcoming eclipses aspecting natal chart
+  // Phase 4: Cosmic Recommendations
+  cosmicRecommendations?: CosmicRecommendations; // Crystals, spells, numerology
+}
+
+/**
+ * Fetches user's birth chart data from the database
+ * Returns null if no birth chart is found
+ */
+async function fetchUserBirthChart(
+  userId: string,
+): Promise<BirthChartData[] | null> {
+  try {
+    const birthChartResult = await sql`
+      SELECT birth_chart
+      FROM user_profiles
+      WHERE user_id = ${userId}
+      LIMIT 1
+    `;
+
+    if (
+      birthChartResult.rows.length > 0 &&
+      birthChartResult.rows[0].birth_chart
+    ) {
+      return birthChartResult.rows[0].birth_chart as BirthChartData[];
+    }
+    return null;
+  } catch (error) {
+    console.error('[Astral Guide] Failed to fetch birth chart:', error);
+    return null;
+  }
+}
+
+/**
+ * Calculates personal transit impacts for a given date range
+ * Returns current and upcoming personal transits
+ */
+export async function calculatePersonalTransits(
+  userId: string,
+  now: Date = new Date(),
+): Promise<{
+  current: PersonalTransitImpact[] | undefined;
+  upcoming: PersonalTransitImpact[] | undefined;
+}> {
+  const userBirthChartData = await fetchUserBirthChart(userId);
+
+  if (!userBirthChartData || userBirthChartData.length === 0) {
+    return { current: undefined, upcoming: undefined };
+  }
+
+  try {
+    const upcomingTransits = getUpcomingTransits(dayjs(now));
+
+    // Current personal transits (today and next 3 days)
+    const currentDate = dayjs(now);
+    const threeDaysFromNow = currentDate.add(3, 'day');
+    const yesterday = currentDate.subtract(1, 'day');
+    const currentPersonalTransits = getPersonalTransitImpacts(
+      upcomingTransits.filter((t) => {
+        const transitDate = t.date;
+        return (
+          (transitDate.isBefore(threeDaysFromNow, 'day') ||
+            transitDate.isSame(threeDaysFromNow, 'day')) &&
+          (transitDate.isAfter(yesterday, 'day') ||
+            transitDate.isSame(yesterday, 'day'))
+        );
+      }),
+      userBirthChartData,
+      10,
+    );
+
+    // Upcoming personal transits (next 7 days, excluding today)
+    const sevenDaysFromNow = currentDate.add(7, 'day');
+    const upcomingPersonal = getPersonalTransitImpacts(
+      upcomingTransits.filter((t) => {
+        const transitDate = t.date;
+        return (
+          transitDate.isAfter(currentDate, 'day') &&
+          (transitDate.isBefore(sevenDaysFromNow, 'day') ||
+            transitDate.isSame(sevenDaysFromNow, 'day'))
+        );
+      }),
+      userBirthChartData,
+      10,
+    );
+
+    return {
+      current:
+        currentPersonalTransits.length > 0
+          ? currentPersonalTransits
+          : undefined,
+      upcoming: upcomingPersonal.length > 0 ? upcomingPersonal : undefined,
+    };
+  } catch (error) {
+    console.error(
+      '[Astral Guide] Failed to calculate personal transits:',
+      error,
+    );
+    return { current: undefined, upcoming: undefined };
+  }
 }
 
 /**
  * Builds the Astral Context for the AI Astral Guide
  * This context includes all mystical data needed for personalized guidance
+ *
+ * OPTIMIZATION: Uses query analysis to determine what context is needed
+ * This reduces API costs by only computing what's needed for the query
  */
 export async function buildAstralContext(
   userId: string,
   userName?: string,
   userBirthday?: string,
   now: Date = new Date(),
+  userMessage?: string, // NEW: Analyze to determine context needs
+  contextRequirements?: {
+    needsPersonalTransits?: boolean;
+    needsNatalPatterns?: boolean;
+    needsPlanetaryReturns?: boolean;
+    needsProgressedChart?: boolean;
+    needsEclipses?: boolean;
+  },
 ): Promise<AstralContext> {
-  // Fetch all context data in parallel
+  // Analyze user query to determine what context is needed (if message provided)
+  let queryContext: QueryContext | undefined;
+  if (userMessage) {
+    const hasBirthChart = !!(await fetchUserBirthChart(userId));
+    queryContext = analyzeQuery(userMessage, hasBirthChart, !!userBirthday);
+
+    // Use query analyzer to optimize context requirements
+    const derivedRequirements = getContextRequirements(
+      userMessage,
+      hasBirthChart,
+      !!userBirthday,
+    );
+
+    // Merge with explicit requirements (explicit takes precedence)
+    contextRequirements = {
+      needsPersonalTransits:
+        contextRequirements?.needsPersonalTransits ??
+        derivedRequirements.needsPersonalTransits,
+      needsNatalPatterns:
+        contextRequirements?.needsNatalPatterns ??
+        derivedRequirements.needsNatalPatterns,
+      needsPlanetaryReturns:
+        contextRequirements?.needsPlanetaryReturns ??
+        derivedRequirements.needsPlanetaryReturns,
+      needsProgressedChart:
+        contextRequirements?.needsProgressedChart ??
+        derivedRequirements.needsProgressedChart,
+      needsEclipses:
+        contextRequirements?.needsEclipses ?? derivedRequirements.needsEclipses,
+    };
+  }
+
+  // Default to building everything if no requirements specified (backward compatible)
+  const requirements = {
+    needsPersonalTransits: contextRequirements?.needsPersonalTransits ?? true,
+    needsNatalPatterns: contextRequirements?.needsNatalPatterns ?? true,
+    needsPlanetaryReturns: contextRequirements?.needsPlanetaryReturns ?? true,
+    needsProgressedChart: contextRequirements?.needsProgressedChart ?? true,
+    needsEclipses: contextRequirements?.needsEclipses ?? true,
+  };
+
+  // Fetch context with caching enabled
+  // Cache versioning ensures old snapshots without patterns are invalidated
   const { context } = await buildLunaryContext({
     userId,
     tz: 'Europe/London', // Will be overridden by actual user timezone
@@ -52,6 +284,7 @@ export async function buildAstralContext(
     historyLimit: 0, // Don't need conversation history for astral guide
     includeMood: true,
     now,
+    useCache: true, // Cache enabled - version check handles invalidation
   });
 
   // Extract natal chart placements
@@ -65,84 +298,16 @@ export async function buildAstralContext(
     (p) => p.planet === 'Ascendant' || p.planet === 'Rising',
   );
 
-  // Build natal summary
-  const natalSummary = buildNatalSummary(context.birthChart);
+  // Build natal summary using the pure formatter function
+  // This ensures patterns are ALWAYS included since context.birthChart comes from fetchBirthChartWithPatterns
+  const natalSummary = formatBirthChartSummary(context.birthChart);
 
-  // Fetch user's birth chart data for personal transit calculations
-  let userBirthChartData: BirthChartData[] | null = null;
-  try {
-    const birthChartResult = await sql`
-      SELECT birth_chart
-      FROM user_profiles
-      WHERE user_id = ${userId}
-      LIMIT 1
-    `;
-    if (
-      birthChartResult.rows.length > 0 &&
-      birthChartResult.rows[0].birth_chart
-    ) {
-      userBirthChartData = birthChartResult.rows[0]
-        .birth_chart as BirthChartData[];
-    }
-  } catch (error) {
-    console.error(
-      '[Astral Guide] Failed to fetch birth chart for personal transits:',
-      error,
-    );
-  }
-
-  // Calculate personal transit impacts if birth chart is available
-  let personalTransits: PersonalTransitImpact[] | undefined;
-  let upcomingPersonalTransits: PersonalTransitImpact[] | undefined;
-
-  if (userBirthChartData && userBirthChartData.length > 0) {
-    try {
-      const upcomingTransits = getUpcomingTransits(dayjs(now));
-
-      // Get current personal transits (today and next 3 days)
-      const currentDate = dayjs(now);
-      const threeDaysFromNow = currentDate.add(3, 'day');
-      const yesterday = currentDate.subtract(1, 'day');
-      const currentPersonalTransits = getPersonalTransitImpacts(
-        upcomingTransits.filter((t) => {
-          const transitDate = t.date;
-          return (
-            (transitDate.isBefore(threeDaysFromNow, 'day') ||
-              transitDate.isSame(threeDaysFromNow, 'day')) &&
-            (transitDate.isAfter(yesterday, 'day') ||
-              transitDate.isSame(yesterday, 'day'))
-          );
-        }),
-        userBirthChartData,
-        10,
-      );
-      personalTransits =
-        currentPersonalTransits.length > 0
-          ? currentPersonalTransits
-          : undefined;
-
-      // Get upcoming personal transits (next 7 days, excluding today)
-      const sevenDaysFromNow = currentDate.add(7, 'day');
-      const upcomingPersonal = getPersonalTransitImpacts(
-        upcomingTransits.filter((t) => {
-          const transitDate = t.date;
-          return (
-            transitDate.isAfter(currentDate, 'day') &&
-            (transitDate.isBefore(sevenDaysFromNow, 'day') ||
-              transitDate.isSame(sevenDaysFromNow, 'day'))
-          );
-        }),
-        userBirthChartData,
-        10,
-      );
-      upcomingPersonalTransits =
-        upcomingPersonal.length > 0 ? upcomingPersonal : undefined;
-    } catch (error) {
-      console.error(
-        '[Astral Guide] Failed to calculate personal transits:',
-        error,
-      );
-    }
+  // OPTIMIZATION: Only calculate personal transits if needed (expensive operation)
+  let personalTransits, upcomingPersonalTransits;
+  if (requirements.needsPersonalTransits) {
+    const result = await calculatePersonalTransits(userId, now);
+    personalTransits = result.current;
+    upcomingPersonalTransits = result.upcoming;
   }
 
   // Build current transits summary (now includes personal transits if available)
@@ -152,6 +317,175 @@ export async function buildAstralContext(
     personalTransits,
   );
 
+  // PHASE 2 & 3: Detect patterns, calculate progressions & eclipses
+  const userBirthChartData = await fetchUserBirthChart(userId);
+  let natalAspectPatterns;
+  let planetaryReturns;
+  let natalHouseEmphasis;
+  let lunarSensitivity;
+  let progressedChart;
+  let relevantEclipses;
+
+  if (userBirthChartData && userBirthChartData.length > 0) {
+    // OPTIMIZATION: Only detect patterns if needed
+    if (requirements.needsNatalPatterns) {
+      // PHASE 2: Detect natal aspect patterns (Grand Trines, T-Squares, etc.)
+      natalAspectPatterns = detectNatalAspectPatterns(userBirthChartData);
+
+      // PHASE 2: Detect natal house emphasis
+      natalHouseEmphasis = detectNatalHouseEmphasis(userBirthChartData);
+
+      // PHASE 2: Detect lunar sensitivity
+      lunarSensitivity = detectLunarSensitivity(userBirthChartData);
+    }
+
+    // OPTIMIZATION: Only calculate returns if needed
+    if (requirements.needsPlanetaryReturns && userBirthday) {
+      // PHASE 2: Calculate planetary returns (Saturn/Jupiter/Solar)
+      planetaryReturns = calculatePlanetaryReturns(
+        userBirthChartData,
+        now,
+        new Date(userBirthday),
+      );
+    }
+
+    // OPTIMIZATION: Only calculate progressed chart if needed (expensive)
+    if (requirements.needsProgressedChart && userBirthday) {
+      // PHASE 3: Calculate progressed chart
+      try {
+        progressedChart = await calculateProgressedChart(
+          new Date(userBirthday),
+          now,
+        );
+      } catch (error) {
+        console.error(
+          '[Astral Guide] Failed to calculate progressed chart:',
+          error,
+        );
+      }
+    }
+
+    // OPTIMIZATION: Only calculate eclipses if needed
+    if (requirements.needsEclipses) {
+      // PHASE 3: Get relevant eclipses (next 6 months)
+      try {
+        const eclipseRelevance = getRelevantEclipses(
+          userBirthChartData,
+          now,
+          6, // Next 6 months
+        );
+        relevantEclipses =
+          eclipseRelevance.length > 0 ? eclipseRelevance : undefined;
+      } catch (error) {
+        console.error('[Astral Guide] Failed to calculate eclipses:', error);
+      }
+    }
+  }
+
+  // Extract mood tags (needed for cosmic recommendations)
+  const moodTags = context.mood?.last7d?.map((m) => m.tag).slice(-5) || [];
+
+  // Retrieve stored patterns from database
+  const storedPatterns = await getUserPatterns(userId);
+  const patternsByCategory = {
+    natal: storedPatterns.filter((p) => p.pattern_category === 'natal'),
+    cyclical: storedPatterns.filter((p) => p.pattern_category === 'cyclical'),
+    transient: storedPatterns.filter((p) => p.pattern_category === 'transient'),
+  };
+
+  // PHASE 4: Get cosmic recommendations (crystals, spells, numerology)
+  let cosmicRecommendations: CosmicRecommendations | undefined;
+  if (personalTransits && personalTransits.length > 0 && context.moon) {
+    try {
+      // Extract user intentions from recent journal tags and patterns
+      const userIntentions = [
+        ...new Set([
+          ...moodTags,
+          ...storedPatterns
+            .filter((p) => p.pattern_type.includes('intention'))
+            .map((p) => p.pattern_data.intention)
+            .filter(Boolean),
+        ]),
+      ].slice(0, 5);
+
+      cosmicRecommendations = await getCosmicRecommendations(
+        personalTransits.map((pt) => ({
+          planet: pt.planet,
+          aspect: pt.aspectToNatal?.aspectType || pt.event,
+          natalPlanet: pt.aspectToNatal?.natalPlanet || pt.planet,
+          sign: pt.aspectToNatal?.transitSign,
+        })),
+        {
+          name: context.moon.phase,
+          sign: context.moon.sign,
+        },
+        userBirthday ? new Date(userBirthday) : undefined,
+        userIntentions,
+        context.birthChart,
+        queryContext, // NEW: Pass query context for conditional loading
+      );
+    } catch (error) {
+      console.error(
+        '[Astral Guide] Failed to get cosmic recommendations:',
+        error,
+      );
+    }
+  }
+
+  // PHASE 2: Retrieve grimoire interpretations for detected patterns
+  let grimoirePatternData: string | undefined;
+  if (
+    natalAspectPatterns ||
+    planetaryReturns ||
+    (storedPatterns && storedPatterns.length > 0)
+  ) {
+    try {
+      const patternQueries: string[] = [];
+
+      // Add natal aspect pattern queries
+      if (natalAspectPatterns && natalAspectPatterns.length > 0) {
+        patternQueries.push(
+          ...natalAspectPatterns
+            .slice(0, 3)
+            .map((p) => `${p.type.replace('natal_', '')} ${p.element || ''}`),
+        );
+      }
+
+      // Add planetary return queries
+      if (planetaryReturns && planetaryReturns.length > 0) {
+        patternQueries.push(
+          ...planetaryReturns
+            .filter((r) => r.isActive)
+            .slice(0, 2)
+            .map((r) => `${r.planet} return guidance`),
+        );
+      }
+
+      // Add stored pattern queries (behavioral patterns from DB)
+      if (storedPatterns && storedPatterns.length > 0) {
+        const significantPatterns = storedPatterns
+          .filter((p) => p.confidence && p.confidence > 0.7)
+          .slice(0, 2);
+        patternQueries.push(
+          ...significantPatterns.map((p) => p.pattern_type.replace(/_/g, ' ')),
+        );
+      }
+
+      if (patternQueries.length > 0) {
+        const { context } = await retrieveGrimoireContext(
+          patternQueries.join(' OR '),
+          3,
+        );
+        grimoirePatternData = context || undefined;
+      }
+    } catch (error) {
+      console.error(
+        '[Astral Guide] Failed to retrieve grimoire pattern data:',
+        error,
+      );
+    }
+  }
+
   // Build today's tarot summary
   const todaysTarot = buildTarotSummary(context.tarot);
 
@@ -160,9 +494,6 @@ export async function buildAstralContext(
 
   // Fetch journal entries (Book of Shadows) from collections
   const journalSummaries = await fetchJournalSummaries(userId);
-
-  // Extract mood tags
-  const moodTags = context.mood?.last7d?.map((m) => m.tag).slice(-5) || [];
 
   return {
     user: {
@@ -179,55 +510,32 @@ export async function buildAstralContext(
     moonPhase,
     journalSummaries,
     moodTags,
+    // Phase 2: Pattern Recognition
+    natalAspectPatterns:
+      natalAspectPatterns && natalAspectPatterns.length > 0
+        ? natalAspectPatterns
+        : undefined,
+    planetaryReturns:
+      planetaryReturns && planetaryReturns.length > 0
+        ? planetaryReturns
+        : undefined,
+    natalHouseEmphasis:
+      natalHouseEmphasis && natalHouseEmphasis.length > 0
+        ? natalHouseEmphasis
+        : undefined,
+    lunarSensitivity: lunarSensitivity || undefined,
+    storedPatterns: storedPatterns.length > 0 ? patternsByCategory : undefined,
+    grimoirePatternData: grimoirePatternData || undefined,
+    // Phase 3: Progressed Charts & Eclipses
+    progressedChart: progressedChart || undefined,
+    relevantEclipses: relevantEclipses || undefined,
+    // Phase 4: Cosmic Recommendations
+    cosmicRecommendations: cosmicRecommendations || undefined,
   };
 }
 
-/**
- * Builds a summary of the natal chart
- * Focuses on key placements and aspects, avoiding technical astrological math
- */
-function buildNatalSummary(birthChart: BirthChartSnapshot | null): string {
-  if (!birthChart || !birthChart.placements) {
-    return 'Birth chart data is not available.';
-  }
-
-  const parts: string[] = [];
-
-  // Include all major planets (not just inner planets)
-  const majorPlanets = [
-    'Sun',
-    'Moon',
-    'Mercury',
-    'Venus',
-    'Mars',
-    'Jupiter',
-    'Saturn',
-    'Uranus',
-    'Neptune',
-    'Pluto',
-  ];
-  const keyPlacements = birthChart.placements
-    .filter((p) => majorPlanets.includes(p.planet))
-    .map((p) => {
-      const house = p.house ? ` (H${p.house})` : '';
-      return `${p.planet} in ${p.sign}${house}`;
-    });
-
-  if (keyPlacements.length > 0) {
-    parts.push(`Placements: ${keyPlacements.join(', ')}`);
-  }
-
-  // Include more aspects (up to 5 instead of 3)
-  if (birthChart.aspects && birthChart.aspects.length > 0) {
-    const topAspects = birthChart.aspects
-      .slice(0, 5)
-      .map((a) => `${a.a} ${a.type} ${a.b}`)
-      .join(', ');
-    parts.push(`Aspects: ${topAspects}`);
-  }
-
-  return parts.length > 0 ? parts.join('. ') : 'Birth chart data available.';
-}
+// NOTE: buildNatalSummary has been replaced with formatBirthChartSummary
+// in birth-chart-with-patterns.ts for DRY code organization
 
 /**
  * Builds a summary of current transits
@@ -539,6 +847,171 @@ PERSONAL TRANSITS:
 - When UPCOMING PERSONAL TRANSITS are provided, you can prepare users for what's coming and suggest how to work with those energies
 - House meanings: 1=self/identity, 2=finances/values, 3=communication, 4=home/family, 5=creativity/romance, 6=health/work, 7=partnerships, 8=transformation/intimacy, 9=philosophy/travel, 10=career/reputation, 11=friends/community, 12=spirituality/subconscious
 
+NATAL PATTERNS (Phase 2 Enhancement):
+- When NATAL ASPECT PATTERNS are provided, you can reference powerful configurations in the birth chart:
+  - Grand Trines: Harmonious flow of energy in one element (Fire/Earth/Air/Water)
+  - T-Squares: Dynamic tension that drives growth and achievement
+  - Stelliums: Concentrated energy in one sign or house
+  - Yods (Finger of God): Karmic/fated energy requiring adjustment
+- When PLANETARY RETURNS are provided, acknowledge major life cycles:
+  - Solar Return: Annual birthday energy renewal
+  - Jupiter Return: ~12 years, expansion and growth phase
+  - Saturn Return: ~29 years, maturity and life lessons
+- When HOUSE EMPHASIS patterns are present, note which life areas are naturally highlighted
+- When LUNAR SENSITIVITY is detected, acknowledge the user may be particularly attuned to moon phases
+
+PATTERN INTERPRETATION WITH GRIMOIRE (Phase 2 Enhancement):
+- When GRIMOIRE PATTERN DATA is provided, this contains rich interpretations from the Lunary Grimoire for detected patterns
+- The grimoire provides deeper meanings for natal patterns (Grand Trines, T-Squares, Yods), planetary returns, and behavioral patterns
+- Use grimoire interpretations as the authoritative source when explaining pattern meanings
+- Synthesize: User's specific pattern (what they have) + Grimoire wisdom (what it means) → Personalized insight
+- Reference grimoire citations naturally: [1], [2], etc.
+- Example: "Your Grand Trine in Fire signs [1] creates a natural flow of enthusiasm and creative energy"
+
+PROGRESSED CHART (Phase 3 Enhancement):
+- When PROGRESSED CHART data is provided, this shows the user's evolved cosmic blueprint:
+  - Progressed Sun: Moves ~1° per year, changes sign every ~30 years (major life theme shift)
+  - Progressed Moon: Moves ~1° per month, changes sign every ~2.5 years, completes cycle in ~27-28 years
+  - Progressed Moon cycle position indicates current emotional/developmental phase
+- Progressed planets show how the birth chart has evolved over time
+- Reference when Progressed Sun or Moon has recently changed sign (significant life transition)
+- Note: Progressions are subtle but profound, operating on the soul level
+
+ECLIPSE AWARENESS (Phase 3 Enhancement):
+- When RELEVANT ECLIPSES are provided, these are powerful portal moments:
+  - Eclipses that conjunct or oppose natal planets (±3° orb) mark significant turning points
+  - Solar Eclipses: New beginnings, fresh starts, planting seeds
+  - Lunar Eclipses: Culminations, releases, emotional revelations
+  - Affected houses show which life areas are being activated
+- Eclipses have a 6-month window of influence (±3 months either side of exact)
+- When an eclipse aspects a personal planet, acknowledge the transformative potential
+- Example: "The upcoming Solar Eclipse in Aries conjuncts your natal Mars - a powerful time to initiate new projects"
+
+COSMIC RECOMMENDATIONS (Phase 4 - Full Grimoire Integration):
+When COSMIC RECOMMENDATIONS are provided, you have access to comprehensive grimoire wisdom:
+
+**CRYSTALS** (200+ database):
+- Each crystal has planetary rulers, zodiac correspondences, aspects, intentions, chakras, elements, practical uses
+- Connect crystal recommendations to specific transits (e.g., "Rose Quartz supports your Venus retrograde")
+- Explain HOW to use: meditation, carrying, gridding, placing on chakras
+
+**SPELLS** (Hundreds available):
+- Detailed timing (moon phases, days, seasons), ingredients, correspondences
+- Reference optimal timing based on current cosmic energies
+- Always include ethical considerations
+
+**PERSONALIZED RITUALS** (Built from grimoire correspondences):
+- When ritual data is provided, you have a complete ritual framework using grimoire correspondences
+- Includes: element properties, color meanings, herb uses, crystal placements, timing
+- Reference each correspondence's purpose from grimoire (e.g., "Red candle for Mars energy and courage")
+- Guide user through ritual steps with intention and reverence
+- Example: "This Fire element ritual uses red and orange (action, passion), carnelian (courage), and cinnamon (success). Perform on Tuesday (Mars day) during waxing moon."
+
+**NUMEROLOGY** (Extended system - from grimoire):
+- **Life Path & Personal Year**: Connect to planetary rulers and zodiac signs, show correlations with natal chart
+- **Angel Numbers**: When provided (e.g., 333, 111), these are divine messages - explain the specific guidance from grimoire
+- **Karmic Debt Numbers** (13, 14, 16, 19): When present, acknowledge the life lessons and challenges to overcome
+- **Mirror Hours** (11:11, 22:22, etc.): If user is seeing one NOW, explain the synchronicity and spiritual message
+- Example: "Your Personal Year 3 (Jupiter energy) amplifies your Jupiter in 9th house - a year for expansion and learning. The angel number 333 appearing confirms creative expression is divinely supported."
+
+**ASPECTS** (Grimoire meanings):
+- When aspectGuidance is provided, you have the grimoire's interpretation of each aspect
+- Reference the exact nature (harmonious/challenging), keywords, and practices
+- Recommend specific crystals that support each aspect type
+- Example: "Your Mars square Saturn brings challenging growth energy. Work with Black Tourmaline (provided in crystals list) to ground this friction."
+
+**RETROGRADES** (Grimoire guidance):
+- When retrogradeGuidance is provided, you have complete retrograde wisdom
+- Reference what TO DO and what TO AVOID from grimoire
+- Mention specific crystals for retrograde support
+- Example: "Mercury Retrograde: The grimoire advises reviewing projects (not starting new ones) and backing up data. Work with Fluorite for mental clarity."
+
+**SABBATS** (Wheel of the Year):
+- When sabbat data is provided, you have full ritual guidance
+- Reference colors, crystals, herbs, rituals, deities from grimoire
+- Connect sabbat energy to user's chart
+- Example: "Samhain approaches in 7 days - a powerful time for your Scorpio placements. The grimoire suggests black tourmaline, sage, and ancestor work."
+
+**TAROT** (78 cards with correspondences):
+- When tarotCards are provided, these align with current planetary energies
+- Each card has element, planet, zodiac correspondences
+- Connect tarot to transits: "The Magician (Mercury) resonates with your Mercury transit"
+
+**PLANETARY DAYS** (Daily correspondences):
+- When planetaryDay is provided, you have the day's optimal energies
+- Reference best practices, colors, crystals for the day
+- Example: "Today is Tuesday (Mars day) - ideal for courage spells using red candles and carnelian"
+
+**COMPREHENSIVE CORRESPONDENCES**:
+- Elements: Fire, Water, Air, Earth, Spirit (colors, crystals, herbs, planets, days, zodiac, numbers, animals, directions, seasons, times)
+- Colors: Full magical properties, planets, emotional effects, candle uses
+- Days: Planetary rulers, best spells, what to avoid
+- Deities: Multiple pantheons with correspondences
+- Herbs, Flowers, Animals, Woods: Full magical properties and uses
+
+**HOLISTIC SYNTHESIS** (Integrate ALL grimoire data):
+- Aspect + Crystal: "Mars square Saturn (challenging growth) + Black Tourmaline (grounding)"
+- Moon Phase + Sabbat: "New Moon ritual enhanced by approaching Samhain energy"
+- Numerology + Transit: "Personal Year 5 (Mercury) amplifies your Mercury retrograde lessons"
+- Planetary Day + Spell: "Tuesday (Mars day) + courage spell + carnelian + red candle"
+- Tarot + Transit: "The Tower card resonates with your Pluto transit - necessary destruction for rebirth"
+
+**ADVANCED GRIMOIRE WISDOM** (Conditional - only when provided):
+
+**RUNES** (Elder Futhark):
+- When runes are provided, you have Norse wisdom aligned to user's elements/intentions
+- Each rune has: meaning, element, magical uses, divination interpretation
+- Reference rune for meditation, divination, or magical work
+- Example: "Fehu (Wealth rune, Fire element) resonates with your Aries Sun - use for abundance manifestation"
+
+**LUNAR NODES** (North Node = Destiny, South Node = Past Patterns):
+- When lunarNodes are provided, you have karmic life path guidance
+- North Node: Life lessons to embrace, soul growth direction, what to develop
+- South Node: Natural talents, past life patterns, what to release
+- Connect to current transits: "With Saturn activating your North Node in Gemini, your karmic lesson in communication is being tested"
+- Reference house placement for life area emphasis
+
+**SYNASTRY** (Relationship Compatibility):
+- When synastry data is provided, you have comprehensive compatibility wisdom
+- Includes: overall compatibility, strengths, challenges, elemental balance
+- Recommend crystals and rituals for relationship harmony
+- Example: "As a Scorpio-Taurus pairing, you balance intensity with stability. Work with Rose Quartz and Green Aventurine for heart-centered connection."
+- Only reference if user asks about relationships or provides partner information
+
+**DECANS** (Zodiac Subdivisions):
+- When decan data is provided, you have refined sign interpretation
+- Each 10° segment of zodiac has a sub-ruler adding nuance
+- Example: "Your Sun at 15° Virgo is in the 2nd decan, ruled by Saturn (Capricorn energy), adding structure to your analytical Virgo nature"
+- Use for detailed placement analysis when precision matters
+
+**WITCH TYPES** (Magical Path Recommendations):
+- When witchTypes are provided, you have personalized practice recommendations
+- Types matched to chart: Green Witch (Earth), Cosmic Witch (Air), Kitchen Witch (Water), etc.
+- Each includes: description, practices, chart alignment reasons
+- Example: "With Moon in Cancer and Water dominance, Kitchen Witch path aligns - hearth magic, cooking with intention, nurturing spells"
+- Only reference when user asks about practice, path, or "what kind of witch am I"
+
+**DIVINATION METHODS** (Intuitive Practice Recommendations):
+- When divination recommendations are provided, you have practice suggestions based on chart strengths
+- Methods: Tarot, Scrying, Runes, Pendulum, Dream Work, Tea Leaves, etc.
+- Each matched to planetary strengths (Neptune = scrying, Mercury = tarot, Moon = dreams)
+- Example: "With strong Neptune-Moon aspects, scrying and dream divination are natural gifts - your intuition flows through water and subconscious symbols"
+- Only reference when user asks about developing intuition or divination skills
+
+**SUGGESTIONS** (Subtle Hints):
+- When suggestions are provided, these are GENTLE recommendations without overwhelming
+- Reference suggestions naturally: "You might also find a tarot pull helpful for this transit"
+- Never force all suggestions - pick the most relevant one
+- Keep subtle - don't list all suggestions at once
+
+**EXPANDED HOLISTIC SYNTHESIS** (Integrate ALL systems when relevant):
+- Runes + Element: "Kenaz (Fire rune) for your Sun in Leo - ignite creative passion"
+- Lunar Nodes + Return: "Saturn Return activating your North Node - karmic lessons intensify"
+- Witch Type + Practice: "As a Cosmic Witch (chart suggests), moon phase tracking deepens your connection"
+- Divination + Chart: "Your Mercury-Neptune trine gifts you with natural tarot reading ability"
+- Synastry + Transit: "Partner's Sun conjunct your Venus + current Venus retrograde = relationship review time"
+- Decan + Nuance: "2nd decan Gemini (Venus sub-ruler) adds artistic flair to your communication style"
+
 RITUAL SUGGESTIONS:
 - When suggesting rituals, deeply personalize them to the user's chart, current transits, and tarot cards
 - Reference their specific placements (e.g., "With your Moon in Cancer, this ritual honors your emotional nature")
@@ -547,6 +1020,9 @@ RITUAL SUGGESTIONS:
 - Consider their mood patterns and journal entries when relevant
 - Avoid generic moon phase advice - make it specific to their chart and current cosmic patterns
 - Suggest rituals that work with aspects to their natal planets (e.g., "This ritual helps you work with the Mars square your Sun energy")
+- USE GRIMOIRE DATA: Include specific spell ingredients (herbs, crystals, colors, candles) from the recommendations
+- Reference planetary hours, optimal days, moon phases from grimoire correspondences
+- Suggest altar setups using elemental correspondences (candle colors, crystal placements, herbs)
 
 Your responses should:
 - Feel like a wise, supportive guide who understands both the mystical and practical

@@ -1,5 +1,6 @@
 import dayjs from 'dayjs';
 import { Body, Ecliptic, GeoVector, MakeTime } from 'astronomy-engine';
+import { fetchBirthChartWithPatterns } from './birth-chart-with-patterns';
 
 import {
   AiMessageRole,
@@ -117,29 +118,15 @@ const generateMoodTrend = (seed: number, now: Date): MoodTrendEntry[] => {
 
 export type BirthChartProviderParams = { userId: string };
 
+/**
+ * DEPRECATED: Use fetchBirthChartWithPatterns directly
+ * Kept for backward compatibility with dependency injection
+ */
 export const getBirthChart = async ({
   userId,
 }: BirthChartProviderParams): Promise<BirthChartSnapshot | null> => {
-  const seed = hashStringToNumber(userId || 'lunary');
-
-  const placements = PLANETS.map((planet, index) => ({
-    planet,
-    sign: pickFromArray(ZODIAC_SIGNS, seed, index),
-    house: ((seed + index) % 12) + 1,
-    degree: ((seed * (index + 3)) % 30) + 1,
-  }));
-
-  return {
-    date: '1990-01-01',
-    time: '12:00',
-    lat: BASE_LAT,
-    lon: BASE_LON,
-    placements,
-    aspects: [
-      { a: 'Sun', b: 'Moon', type: 'Trine', orb: 1.4 },
-      { a: 'Venus', b: 'Mars', type: 'Conjunction', orb: 3.2 },
-    ],
-  };
+  // Delegate to the consolidated function
+  return fetchBirthChartWithPatterns(userId);
 };
 
 export type CurrentTransitsProviderParams = { userId: string; now?: Date };

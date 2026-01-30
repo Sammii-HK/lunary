@@ -26,8 +26,14 @@ import {
 } from '@/lib/ai/weekly-ritual-usage';
 import { recordAiInteraction } from '@/lib/analytics/tracking';
 import { captureAIGeneration } from '@/lib/posthog-server';
-import { retrieveGrimoireContext } from '@/lib/ai/astral-guide';
-import { sql } from '@vercel/postgres';
+import {
+  retrieveGrimoireContext,
+  isAstralQuery,
+  buildAstralContext,
+  calculatePersonalTransits,
+  ASTRAL_GUIDE_PROMPT,
+} from '@/lib/ai/astral-guide';
+import { analyzeContextNeeds } from '@/lib/ai/context-optimizer';
 
 type ChatRequest = {
   message?: string;
@@ -79,6 +85,9 @@ export async function POST(request: NextRequest) {
       typeof body.mode === 'string' && body.mode.trim().length > 0
         ? body.mode.trim()
         : (assistCommand.type ?? 'general');
+
+    // Detect if this is an astral query
+    const useAstralContext = isAstralQuery(userMessage) || aiMode === 'astral';
 
     // Use userMessage throughout instead of userMessage
     const memorySnippetLimit = MEMORY_SNIPPET_LIMITS[planId] ?? 0;
@@ -142,20 +151,67 @@ export async function POST(request: NextRequest) {
     const { historyLimit, includeMood } =
       CONTEXT_RULES[planId] ?? CONTEXT_RULES.free;
 
-    // Disable cache for chat to ensure fresh, comprehensive context
-    // Cached snapshots may be stale and missing recent tarot readings or updates
-    const { context, dailyHighlight } = await buildLunaryContext({
-      userId: user.id,
-      tz: user.timezone ?? 'Europe/London',
-      locale: user.locale ?? 'en-GB',
-      displayName: user.displayName,
-      userBirthday: userWithBirthday.birthday,
-      historyLimit,
-      includeMood,
-      planId,
-      now,
-      useCache: false, // Always build fresh context for chat
-    });
+    // Conditionally build astral or lunary context
+    let context: any;
+    let dailyHighlight: any;
+    let astralContext: any;
+
+    if (useAstralContext) {
+      // OPTIMIZATION: Analyze query to determine required context
+      const contextNeeds = analyzeContextNeeds(userMessage);
+
+      // Use Astral Guide context for astrological queries (optimized)
+      astralContext = await buildAstralContext(
+        user.id,
+        user.displayName,
+        userWithBirthday.birthday,
+        now,
+        userMessage, // NEW: Pass user message for query analysis
+        {
+          needsPersonalTransits: contextNeeds.needsPersonalTransits,
+          needsNatalPatterns: contextNeeds.needsNatalPatterns,
+          needsPlanetaryReturns: contextNeeds.needsPlanetaryReturns,
+          needsProgressedChart: contextNeeds.needsProgressedChart,
+          needsEclipses: contextNeeds.needsEclipses,
+        },
+      );
+      // For astral mode, we still need some basic context
+      const lunaryResult = await buildLunaryContext({
+        userId: user.id,
+        tz: user.timezone ?? 'Europe/London',
+        locale: user.locale ?? 'en-GB',
+        displayName: user.displayName,
+        userBirthday: userWithBirthday.birthday,
+        historyLimit: 0, // Don't need conversation history for astral guide
+        includeMood: true,
+        planId,
+        now,
+        useCache: false,
+      });
+      context = lunaryResult.context;
+      dailyHighlight = lunaryResult.dailyHighlight;
+      // Merge astral context into the main context
+      context = {
+        ...context,
+        ...astralContext,
+      };
+    } else {
+      // Use regular Lunary context for general queries
+      const lunaryResult = await buildLunaryContext({
+        userId: user.id,
+        tz: user.timezone ?? 'Europe/London',
+        locale: user.locale ?? 'en-GB',
+        displayName: user.displayName,
+        userBirthday: userWithBirthday.birthday,
+        historyLimit,
+        includeMood,
+        planId,
+        now,
+        useCache: false, // Always build fresh context for chat
+      });
+      context = lunaryResult.context;
+      dailyHighlight = lunaryResult.dailyHighlight;
+    }
 
     // Detect if user is asking about a specific tarot card and fetch grimoire data
     let grimoireData:
@@ -227,6 +283,9 @@ export async function POST(request: NextRequest) {
           context,
           memorySnippets,
           userMessage: userMessage,
+          systemPromptOverride: useAstralContext
+            ? ASTRAL_GUIDE_PROMPT
+            : undefined,
         });
 
         const assistantContent = assistSnippet;
@@ -366,84 +425,19 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Calculate personal transits if user has birth chart
-    let personalTransits: any[] | undefined;
-    let upcomingPersonalTransits: any[] | undefined;
+    // Calculate personal transits for non-astral queries (astral queries already include them)
+    let contextWithPersonalTransits = context;
 
-    if (userWithBirthday.birthday) {
-      try {
-        const { getPersonalTransitImpacts } =
-          await import('../../../../../utils/astrology/personalTransits');
-        const { getUpcomingTransits } =
-          await import('../../../../../utils/astrology/transitCalendar');
-        const dayjs = (await import('dayjs')).default;
+    if (!useAstralContext && userWithBirthday.birthday) {
+      const { current: personalTransits, upcoming: upcomingPersonalTransits } =
+        await calculatePersonalTransits(user.id, now);
 
-        // Fetch user's birth chart from database
-        const birthChartResult = await sql`
-          SELECT birth_chart
-          FROM user_profiles
-          WHERE user_id = ${user.id}
-          LIMIT 1
-        `;
-
-        if (
-          birthChartResult.rows.length > 0 &&
-          birthChartResult.rows[0].birth_chart
-        ) {
-          const userBirthChartData = birthChartResult.rows[0].birth_chart;
-          const upcomingTransits = getUpcomingTransits(dayjs(now));
-
-          // Current personal transits (today and next 3 days)
-          const currentDate = dayjs(now);
-          const threeDaysFromNow = currentDate.add(3, 'day');
-          const yesterday = currentDate.subtract(1, 'day');
-          const currentPersonal = getPersonalTransitImpacts(
-            upcomingTransits.filter((t: any) => {
-              const transitDate = t.date;
-              return (
-                (transitDate.isBefore(threeDaysFromNow, 'day') ||
-                  transitDate.isSame(threeDaysFromNow, 'day')) &&
-                (transitDate.isAfter(yesterday, 'day') ||
-                  transitDate.isSame(yesterday, 'day'))
-              );
-            }),
-            userBirthChartData,
-            10,
-          );
-          personalTransits =
-            currentPersonal.length > 0 ? currentPersonal : undefined;
-
-          // Upcoming personal transits (next 7 days)
-          const sevenDaysFromNow = currentDate.add(7, 'day');
-          const upcomingPersonal = getPersonalTransitImpacts(
-            upcomingTransits.filter((t: any) => {
-              const transitDate = t.date;
-              return (
-                transitDate.isAfter(currentDate, 'day') &&
-                (transitDate.isBefore(sevenDaysFromNow, 'day') ||
-                  transitDate.isSame(sevenDaysFromNow, 'day'))
-              );
-            }),
-            userBirthChartData,
-            10,
-          );
-          upcomingPersonalTransits =
-            upcomingPersonal.length > 0 ? upcomingPersonal : undefined;
-        }
-      } catch (error) {
-        console.error(
-          '[AI Chat] Failed to calculate personal transits:',
-          error,
-        );
-      }
+      contextWithPersonalTransits = {
+        ...context,
+        personalTransits,
+        upcomingPersonalTransits,
+      };
     }
-
-    // Add personal transits to context for prompt building
-    const contextWithPersonalTransits = {
-      ...context,
-      personalTransits,
-      upcomingPersonalTransits,
-    };
 
     // Build prompt sections with grimoire data if available
     const promptSections = buildPromptSections({
@@ -451,6 +445,7 @@ export async function POST(request: NextRequest) {
       memorySnippets,
       userMessage: userMessage,
       grimoireData,
+      systemPromptOverride: useAstralContext ? ASTRAL_GUIDE_PROMPT : undefined,
     });
 
     const aiStartTime = Date.now();

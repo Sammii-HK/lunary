@@ -23,6 +23,11 @@ export type PersonalTransitImpact = {
     transitSign?: string;
     natalSign?: string;
   };
+  duration?: {
+    totalDays: number;
+    remainingDays: number;
+    displayText: string;
+  };
 };
 
 // Calculate which house a planet is in using Whole Sign Houses

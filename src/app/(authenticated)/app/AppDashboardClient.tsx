@@ -9,8 +9,11 @@ import { recordCheckIn } from '@/lib/streak/check-in';
 import { conversionTracking } from '@/lib/analytics';
 import { useTour } from '@/context/TourContext';
 import { useNotificationDeepLink } from '@/hooks/useNotificationDeepLink';
+import { useABTestTracking } from '@/hooks/useABTestTracking';
 
 import { ShareDailyInsight } from '@/components/ShareDailyInsight';
+import { ShareDailyCosmicState } from '@/components/share/ShareDailyCosmicState';
+import { ShareZodiacSeason } from '@/components/share/ShareZodiacSeason';
 import { TourTrigger } from '@/components/feature-tour/tour-trigger';
 
 const DateWidget = dynamic(
@@ -147,6 +150,9 @@ export default function AppDashboardClient() {
   const authState = useAuthStatus();
   const { startTour, hasSeenOnboarding } = useTour();
   const [focusHonoured, setFocusHonoured] = useState(false);
+
+  // Track dashboard view with A/B test data (cta-copy-test)
+  useABTestTracking('dashboard', 'app_opened', ['cta-copy-test']);
   const firstName = user?.name?.trim() ? user.name.split(' ')[0] : null;
   const [isDemoMode, setIsDemoMode] = useState(false);
   // Always use controlled mode - start with false, never undefined
@@ -301,8 +307,9 @@ export default function AppDashboardClient() {
               </>
             )}
           </p>
-          <div className='w-16 flex justify-end'>
+          <div className='flex justify-end gap-2'>
             <ShareDailyInsight />
+            <ShareDailyCosmicState compact />
           </div>
         </div>
         <div className='text-center'>
@@ -316,6 +323,9 @@ export default function AppDashboardClient() {
         </div>
       </header>
 
+      {/* Zodiac Season Banner */}
+      <ShareZodiacSeason />
+
       {showHoroscope && <PersonalizedHoroscopePreview />}
       <div
         id='dashboard-main-grid'
@@ -325,7 +335,6 @@ export default function AppDashboardClient() {
           <MoonPreview isExpanded={moonExpanded} onToggle={handleMoonToggle} />
         </div>
         <SkyNowCard />
-
         <DailyInsightCard />
         <DailyCardPreview />
 

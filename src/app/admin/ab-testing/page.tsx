@@ -145,10 +145,14 @@ export default function ABTestingPage() {
 
   const getTestDisplayName = (testName: string): string => {
     const names: Record<string, string> = {
-      pricing_cta: 'Pricing CTA Text',
-      pricing_price: 'Pricing Display',
-      onboarding_flow: 'Onboarding Flow',
-      upgrade_prompt: 'Upgrade Prompt',
+      cta_copy: 'CTA Copy Variations',
+      paywall_preview: 'Paywall Preview Style',
+      homepage_features: 'Homepage Features',
+      feature_preview: 'Feature Preview Blur',
+      transit_overflow: 'Transit Overflow Style',
+      weekly_lock: 'Weekly Tarot Lock Style',
+      tarot_truncation: 'Tarot Truncation Length',
+      transit_limit: 'Free User Transit Limit',
     };
     return names[testName] || testName;
   };
