@@ -102,7 +102,7 @@ interface CosmicContextCardProps {
 - `src/components/patterns/TarotPatternsHub.tsx`
 - `src/components/tarot/AdvancedPatterns.tsx`
 
-**User Access**: Pro Monthly/Annual users via `advanced_patterns` feature
+**User Access**: Pro Monthly/Annual users via `pattern_drill_down` feature
 
 ---
 

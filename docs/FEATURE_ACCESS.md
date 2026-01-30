@@ -71,9 +71,12 @@ Available to all authenticated users:
 - **Downloadable Reports** (`downloadable_reports`)
 - **AI Ritual Generation** (`ai_ritual_generation`)
 - **Advanced Patterns** (`advanced_patterns`)
-  - Includes tarot pattern drill-down with cosmic context (moon phase + aspects when each card was pulled)
-  - Includes AI-generated transit insights for frequent cards
-  - Includes frequency timeline visualization
+  - Advanced pattern visualizations (radial charts, sparklines, heatmaps)
+  - Pattern drill-down (`pattern_drill_down`) with cosmic context:
+    - Moon phase + aspects when each card was pulled
+    - AI-generated transit insights for frequent cards
+    - Frequency timeline visualization
+    - Interactive frequent cards expansion
 
 ### Lunary+ Pro Annual (additional)
 
@@ -157,7 +160,7 @@ Available to all users via `moon_phases` feature:
 
 ### Tarot Pattern Cosmic Context
 
-Available to Pro Monthly/Annual users via `advanced_patterns` feature:
+Available to Pro Monthly/Annual users via `pattern_drill_down` feature:
 
 - **Frequent Cards Drill-Down**:
   - Date when each card was pulled
@@ -174,6 +177,8 @@ Available to Pro Monthly/Annual users via `advanced_patterns` feature:
   - All data persisted from reading creation time
 
 \*AI transit insights require birth chart data; gracefully hidden if unavailable
+
+**Note**: The cosmic context integration described above is separate from the `cosmic_patterns` and `advanced_cosmic_patterns` features, which provide automated pattern detection for tarot and journal entries. See `COSMIC_PATTERNS_IMPLEMENTATION.md` for details on that system.
 
 ---
 
@@ -213,6 +218,7 @@ Available to Pro Monthly/Annual users via `advanced_patterns` feature:
 | `downloadable_reports`                 | ❌   | ❌      | ✅          | ✅         |
 | `ai_ritual_generation`                 | ❌   | ❌      | ✅          | ✅         |
 | `advanced_patterns`                    | ❌   | ❌      | ✅          | ✅         |
+| `pattern_drill_down`                   | ❌   | ❌      | ✅          | ✅         |
 | `unlimited_tarot_spreads`              | ❌   | ❌      | ❌          | ✅         |
 | `yearly_forecast`                      | ❌   | ❌      | ❌          | ✅         |
 | `data_export`                          | ❌   | ❌      | ❌          | ✅         |
