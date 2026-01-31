@@ -650,30 +650,17 @@ export default function AnalyticsPage() {
     const cacheBuster = `&_t=${Date.now()}`; // Force fresh data
 
     try {
+      // Batch requests to avoid overwhelming the database connection pool
+      // Previously: 23 parallel requests caused 48-131s timeouts and connection errors
+
+      // Batch 1: Core metrics (6 requests)
       const [
         activityRes,
         engagementOverviewRes,
-        featureAdoptionRes,
-        grimoireHealthRes,
-        conversionInfluenceRes,
         conversionsRes,
-        ctaConversionsRes,
-        subscription30dRes,
-        notificationsRes,
-        featureUsageRes,
-        attributionRes,
-        successMetricsRes,
-        discordRes,
-        searchConsoleRes,
         userGrowthRes,
         activationRes,
-        subscriptionLifecycleRes,
-        planBreakdownRes,
-        apiCostsRes,
         cohortsRes,
-        userSegmentsRes,
-        intentionBreakdownRes,
-        insightsRes,
       ] = await Promise.all([
         fetch(
           `/api/admin/analytics/dau-wau-mau?${queryParams}&granularity=${granularity}${cacheBuster}`,
@@ -681,8 +668,30 @@ export default function AnalyticsPage() {
         fetch(
           `/api/admin/analytics/engagement-overview?${queryParams}${debugParam}${cacheBuster}`,
         ),
+        fetch(`/api/admin/analytics/conversions?${queryParams}${cacheBuster}`),
+        fetch(
+          `/api/admin/analytics/user-growth?${queryParams}&granularity=${granularity}${cacheBuster}`,
+        ),
+        fetch(`/api/admin/analytics/activation?${queryParams}${cacheBuster}`),
+        fetch(
+          `/api/admin/analytics/cohorts?${queryParams}&type=week&weeks=12${cacheBuster}`,
+        ),
+      ]);
+
+      // Batch 2: Feature metrics (6 requests)
+      const [
+        featureAdoptionRes,
+        featureUsageRes,
+        grimoireHealthRes,
+        conversionInfluenceRes,
+        successMetricsRes,
+        intentionBreakdownRes,
+      ] = await Promise.all([
         fetch(
           `/api/admin/analytics/feature-adoption?${queryParams}${cacheBuster}`,
+        ),
+        fetch(
+          `/api/admin/analytics/feature-usage?${queryParams}${cacheBuster}`,
         ),
         fetch(
           `/api/admin/analytics/grimoire-health?${queryParams}${cacheBuster}`,
@@ -690,46 +699,56 @@ export default function AnalyticsPage() {
         fetch(
           `/api/admin/analytics/conversion-influence?${queryParams}${cacheBuster}`,
         ),
-        fetch(`/api/admin/analytics/conversions?${queryParams}${cacheBuster}`),
-        fetch(
-          `/api/admin/analytics/cta-conversions?${queryParams}${cacheBuster}`,
-        ),
-        fetch(
-          `/api/admin/analytics/subscription-30d?${queryParams}${cacheBuster}`,
-        ),
-        fetch(
-          `/api/admin/analytics/notifications?${queryParams}${cacheBuster}`,
-        ),
-        fetch(
-          `/api/admin/analytics/feature-usage?${queryParams}${cacheBuster}`,
-        ),
-        fetch(`/api/admin/analytics/attribution?${queryParams}${cacheBuster}`),
         fetch(
           `/api/admin/analytics/success-metrics?${queryParams}${cacheBuster}`,
         ),
-        fetch(`/api/analytics/discord-interactions?range=7d${cacheBuster}`),
         fetch(
-          `/api/admin/analytics/search-console?${queryParams}${cacheBuster}`,
+          `/api/admin/analytics/intention-breakdown?${queryParams}${cacheBuster}`,
         ),
+      ]);
+
+      // Batch 3: Subscription & monetization (6 requests)
+      const [
+        subscription30dRes,
+        subscriptionLifecycleRes,
+        planBreakdownRes,
+        ctaConversionsRes,
+        apiCostsRes,
+        userSegmentsRes,
+      ] = await Promise.all([
         fetch(
-          `/api/admin/analytics/user-growth?${queryParams}&granularity=${granularity}${cacheBuster}`,
+          `/api/admin/analytics/subscription-30d?${queryParams}${cacheBuster}`,
         ),
-        fetch(`/api/admin/analytics/activation?${queryParams}${cacheBuster}`),
         fetch(
           `/api/admin/analytics/subscription-lifecycle?${queryParams}&stripe=1${cacheBuster}`,
         ),
         fetch(
           `/api/admin/analytics/plan-breakdown?${queryParams}${cacheBuster}`,
         ),
-        fetch(`/api/admin/analytics/api-costs?${queryParams}${cacheBuster}`),
         fetch(
-          `/api/admin/analytics/cohorts?${queryParams}&type=week&weeks=12${cacheBuster}`,
+          `/api/admin/analytics/cta-conversions?${queryParams}${cacheBuster}`,
         ),
+        fetch(`/api/admin/analytics/api-costs?${queryParams}${cacheBuster}`),
         fetch(
           `/api/admin/analytics/user-segments?${queryParams}${cacheBuster}`,
         ),
+      ]);
+
+      // Batch 4: External & misc (5 requests)
+      const [
+        notificationsRes,
+        attributionRes,
+        discordRes,
+        searchConsoleRes,
+        insightsRes,
+      ] = await Promise.all([
         fetch(
-          `/api/admin/analytics/intention-breakdown?${queryParams}${cacheBuster}`,
+          `/api/admin/analytics/notifications?${queryParams}${cacheBuster}`,
+        ),
+        fetch(`/api/admin/analytics/attribution?${queryParams}${cacheBuster}`),
+        fetch(`/api/analytics/discord-interactions?range=7d${cacheBuster}`),
+        fetch(
+          `/api/admin/analytics/search-console?${queryParams}${cacheBuster}`,
         ),
         fetch(`/api/admin/analytics/insights?${queryParams}${cacheBuster}`),
       ]);
