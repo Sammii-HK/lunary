@@ -647,6 +647,7 @@ export default function AnalyticsPage() {
 
     const queryParams = `start_date=${startDate}&end_date=${endDate}`;
     const debugParam = includeAudit ? '&debug=1' : '';
+    const cacheBuster = `&_t=${Date.now()}`; // Force fresh data
 
     try {
       const [
@@ -675,36 +676,62 @@ export default function AnalyticsPage() {
         insightsRes,
       ] = await Promise.all([
         fetch(
-          `/api/admin/analytics/dau-wau-mau?${queryParams}&granularity=${granularity}`,
+          `/api/admin/analytics/dau-wau-mau?${queryParams}&granularity=${granularity}${cacheBuster}`,
         ),
         fetch(
-          `/api/admin/analytics/engagement-overview?${queryParams}${debugParam}`,
+          `/api/admin/analytics/engagement-overview?${queryParams}${debugParam}${cacheBuster}`,
         ),
-        fetch(`/api/admin/analytics/feature-adoption?${queryParams}`),
-        fetch(`/api/admin/analytics/grimoire-health?${queryParams}`),
-        fetch(`/api/admin/analytics/conversion-influence?${queryParams}`),
-        fetch(`/api/admin/analytics/conversions?${queryParams}`),
-        fetch(`/api/admin/analytics/cta-conversions?${queryParams}`),
-        fetch(`/api/admin/analytics/subscription-30d?${queryParams}`),
-        fetch(`/api/admin/analytics/notifications?${queryParams}`),
-        fetch(`/api/admin/analytics/feature-usage?${queryParams}`),
-        fetch(`/api/admin/analytics/attribution?${queryParams}`),
-        fetch(`/api/admin/analytics/success-metrics?${queryParams}`),
-        fetch(`/api/analytics/discord-interactions?range=7d`),
-        fetch(`/api/admin/analytics/search-console?${queryParams}`),
         fetch(
-          `/api/admin/analytics/user-growth?${queryParams}&granularity=${granularity}`,
+          `/api/admin/analytics/feature-adoption?${queryParams}${cacheBuster}`,
         ),
-        fetch(`/api/admin/analytics/activation?${queryParams}`),
         fetch(
-          `/api/admin/analytics/subscription-lifecycle?${queryParams}&stripe=1`,
+          `/api/admin/analytics/grimoire-health?${queryParams}${cacheBuster}`,
         ),
-        fetch(`/api/admin/analytics/plan-breakdown?${queryParams}`),
-        fetch(`/api/admin/analytics/api-costs?${queryParams}`),
-        fetch(`/api/admin/analytics/cohorts?${queryParams}&type=week&weeks=12`),
-        fetch(`/api/admin/analytics/user-segments?${queryParams}`),
-        fetch(`/api/admin/analytics/intention-breakdown?${queryParams}`),
-        fetch(`/api/admin/analytics/insights?${queryParams}`),
+        fetch(
+          `/api/admin/analytics/conversion-influence?${queryParams}${cacheBuster}`,
+        ),
+        fetch(`/api/admin/analytics/conversions?${queryParams}${cacheBuster}`),
+        fetch(
+          `/api/admin/analytics/cta-conversions?${queryParams}${cacheBuster}`,
+        ),
+        fetch(
+          `/api/admin/analytics/subscription-30d?${queryParams}${cacheBuster}`,
+        ),
+        fetch(
+          `/api/admin/analytics/notifications?${queryParams}${cacheBuster}`,
+        ),
+        fetch(
+          `/api/admin/analytics/feature-usage?${queryParams}${cacheBuster}`,
+        ),
+        fetch(`/api/admin/analytics/attribution?${queryParams}${cacheBuster}`),
+        fetch(
+          `/api/admin/analytics/success-metrics?${queryParams}${cacheBuster}`,
+        ),
+        fetch(`/api/analytics/discord-interactions?range=7d${cacheBuster}`),
+        fetch(
+          `/api/admin/analytics/search-console?${queryParams}${cacheBuster}`,
+        ),
+        fetch(
+          `/api/admin/analytics/user-growth?${queryParams}&granularity=${granularity}${cacheBuster}`,
+        ),
+        fetch(`/api/admin/analytics/activation?${queryParams}${cacheBuster}`),
+        fetch(
+          `/api/admin/analytics/subscription-lifecycle?${queryParams}&stripe=1${cacheBuster}`,
+        ),
+        fetch(
+          `/api/admin/analytics/plan-breakdown?${queryParams}${cacheBuster}`,
+        ),
+        fetch(`/api/admin/analytics/api-costs?${queryParams}${cacheBuster}`),
+        fetch(
+          `/api/admin/analytics/cohorts?${queryParams}&type=week&weeks=12${cacheBuster}`,
+        ),
+        fetch(
+          `/api/admin/analytics/user-segments?${queryParams}${cacheBuster}`,
+        ),
+        fetch(
+          `/api/admin/analytics/intention-breakdown?${queryParams}${cacheBuster}`,
+        ),
+        fetch(`/api/admin/analytics/insights?${queryParams}${cacheBuster}`),
       ]);
 
       const errors: string[] = [];
