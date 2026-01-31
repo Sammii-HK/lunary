@@ -202,21 +202,23 @@ export async function GET(request: NextRequest) {
     `;
     const freeUsersCount = Number(freeUsersResult.rows[0]?.count || 0);
 
+    // Count users who STARTED trial in range (regardless of current status)
     const trialUsersResult = await sql`
       SELECT COUNT(DISTINCT user_id) AS count
-      FROM subscriptions
-      WHERE status = 'trial'
-        AND updated_at BETWEEN ${formatTimestamp(range.start)} AND ${formatTimestamp(
+      FROM conversion_events
+      WHERE event_type = 'trial_started'
+        AND created_at BETWEEN ${formatTimestamp(range.start)} AND ${formatTimestamp(
           range.end,
         )}
         AND (user_email IS NULL OR (user_email NOT LIKE ${TEST_EMAIL_PATTERN} AND user_email != ${TEST_EMAIL_EXACT}))
     `;
 
+    // Count users who BECAME paid in range (regardless of current status)
     const paidUsersResult = await sql`
       SELECT COUNT(DISTINCT user_id) AS count
-      FROM subscriptions
-      WHERE status = 'active'
-        AND updated_at BETWEEN ${formatTimestamp(range.start)} AND ${formatTimestamp(
+      FROM conversion_events
+      WHERE event_type IN ('subscription_started', 'trial_converted')
+        AND created_at BETWEEN ${formatTimestamp(range.start)} AND ${formatTimestamp(
           range.end,
         )}
         AND (user_email IS NULL OR (user_email NOT LIKE ${TEST_EMAIL_PATTERN} AND user_email != ${TEST_EMAIL_EXACT}))
