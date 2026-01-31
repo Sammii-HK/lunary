@@ -129,8 +129,7 @@ export async function GET(request: NextRequest) {
               SELECT 1
               FROM conversion_events ce2
               WHERE ce2.event_type = ANY($5::text[])
-                AND ce2.created_at > u."createdAt"
-                AND ce2.created_at <= u."createdAt" + INTERVAL '1 day'
+                AND DATE(ce2.created_at AT TIME ZONE 'UTC') = DATE(u."createdAt" AT TIME ZONE 'UTC') + 1
                 AND (
                   ce2.user_id = u.id
                   OR (
@@ -156,8 +155,7 @@ export async function GET(request: NextRequest) {
               FROM conversion_events ce2
               WHERE ce2.user_id = u.id
                 AND ce2.event_type = ANY($5::text[])
-                AND ce2.created_at > u."createdAt"
-                AND ce2.created_at <= u."createdAt" + INTERVAL '1 day'
+                AND DATE(ce2.created_at AT TIME ZONE 'UTC') = DATE(u."createdAt" AT TIME ZONE 'UTC') + 1
             )
         `,
         [
@@ -182,8 +180,9 @@ export async function GET(request: NextRequest) {
               SELECT 1
               FROM conversion_events ce2
               WHERE ce2.event_type = ANY($5::text[])
-                AND ce2.created_at > u."createdAt"
-                AND ce2.created_at <= u."createdAt" + INTERVAL '7 days'
+                AND DATE(ce2.created_at AT TIME ZONE 'UTC') BETWEEN
+                    DATE(u."createdAt" AT TIME ZONE 'UTC') + 1 AND
+                    DATE(u."createdAt" AT TIME ZONE 'UTC') + 7
                 AND (
                   ce2.user_id = u.id
                   OR (
@@ -209,8 +208,9 @@ export async function GET(request: NextRequest) {
               FROM conversion_events ce2
               WHERE ce2.user_id = u.id
                 AND ce2.event_type = ANY($5::text[])
-                AND ce2.created_at > u."createdAt"
-                AND ce2.created_at <= u."createdAt" + INTERVAL '7 days'
+                AND DATE(ce2.created_at AT TIME ZONE 'UTC') BETWEEN
+                    DATE(u."createdAt" AT TIME ZONE 'UTC') + 1 AND
+                    DATE(u."createdAt" AT TIME ZONE 'UTC') + 7
             )
         `,
         [
@@ -235,8 +235,9 @@ export async function GET(request: NextRequest) {
               SELECT 1
               FROM conversion_events ce2
               WHERE ce2.event_type = ANY($5::text[])
-                AND ce2.created_at > u."createdAt"
-                AND ce2.created_at <= u."createdAt" + INTERVAL '30 days'
+                AND DATE(ce2.created_at AT TIME ZONE 'UTC') BETWEEN
+                    DATE(u."createdAt" AT TIME ZONE 'UTC') + 1 AND
+                    DATE(u."createdAt" AT TIME ZONE 'UTC') + 30
                 AND (
                   ce2.user_id = u.id
                   OR (
@@ -262,8 +263,9 @@ export async function GET(request: NextRequest) {
               FROM conversion_events ce2
               WHERE ce2.user_id = u.id
                 AND ce2.event_type = ANY($5::text[])
-                AND ce2.created_at > u."createdAt"
-                AND ce2.created_at <= u."createdAt" + INTERVAL '30 days'
+                AND DATE(ce2.created_at AT TIME ZONE 'UTC') BETWEEN
+                    DATE(u."createdAt" AT TIME ZONE 'UTC') + 1 AND
+                    DATE(u."createdAt" AT TIME ZONE 'UTC') + 30
             )
         `,
         [
