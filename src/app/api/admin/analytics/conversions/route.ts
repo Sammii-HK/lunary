@@ -193,39 +193,112 @@ export async function GET(request: NextRequest) {
       };
     });
 
-    const freeUsersResult = await sql`
-      SELECT COUNT(*) AS count
+    // COHORT-BASED FUNNEL: Track users who signed up in the range through their journey
+    // This ensures monotonic funnel: free_users >= trial_users >= paid_users
+    // Uses identity stitching to match conversion_events (anon:, ph:, user:) with user table IDs
+
+    // Check if identity links table exists
+    const identityLinksExistsResult = await sql.query(
+      `SELECT to_regclass('analytics_identity_links') IS NOT NULL AS exists`,
+    );
+    const hasIdentityLinks = Boolean(identityLinksExistsResult.rows[0]?.exists);
+
+    // 1. Get all users who signed up in the range (the cohort)
+    const cohortUsersResult = await sql`
+      SELECT id
       FROM "user"
       WHERE "createdAt" >= ${formatTimestamp(range.start)}
         AND "createdAt" <= ${formatTimestamp(range.end)}
         AND (email IS NULL OR (email NOT LIKE ${TEST_EMAIL_PATTERN} AND email != ${TEST_EMAIL_EXACT}))
     `;
-    const freeUsersCount = Number(freeUsersResult.rows[0]?.count || 0);
+    const cohortUserIds = cohortUsersResult.rows.map((row) => row.id);
+    const freeUsers = cohortUserIds.length;
 
-    // Count users who STARTED trial in range (regardless of current status)
-    const trialUsersResult = await sql`
-      SELECT COUNT(DISTINCT user_id) AS count
-      FROM conversion_events
-      WHERE event_type = 'trial_started'
-        AND created_at BETWEEN ${formatTimestamp(range.start)} AND ${formatTimestamp(
-          range.end,
-        )}
-        AND (user_email IS NULL OR (user_email NOT LIKE ${TEST_EMAIL_PATTERN} AND user_email != ${TEST_EMAIL_EXACT}))
-    `;
-
-    // Count users who BECAME paid in range (regardless of current status)
-    const paidUsersResult = await sql`
-      SELECT COUNT(DISTINCT user_id) AS count
-      FROM conversion_events
-      WHERE event_type IN ('subscription_started', 'trial_converted')
-        AND created_at BETWEEN ${formatTimestamp(range.start)} AND ${formatTimestamp(
-          range.end,
-        )}
-        AND (user_email IS NULL OR (user_email NOT LIKE ${TEST_EMAIL_PATTERN} AND user_email != ${TEST_EMAIL_EXACT}))
-    `;
-
-    const freeUsers = freeUsersCount;
+    // 2. Of the cohort, count how many EVER started a trial (even after the range)
+    // Match using user: prefix or linked anonymous_id
+    const trialUsersResult =
+      cohortUserIds.length > 0
+        ? await sql.query(
+            hasIdentityLinks
+              ? `
+          SELECT COUNT(DISTINCT u.id) AS count
+          FROM "user" u
+          WHERE u.id = ANY($1::text[])
+            AND EXISTS (
+              SELECT 1
+              FROM conversion_events ce
+              WHERE ce.event_type = 'trial_started'
+                AND (
+                  ce.user_id = 'user:' || u.id
+                  OR (
+                    ce.anonymous_id IS NOT NULL
+                    AND EXISTS (
+                      SELECT 1
+                      FROM analytics_identity_links l
+                      WHERE l.user_id = u.id
+                        AND l.anonymous_id = ce.anonymous_id
+                    )
+                  )
+                )
+            )
+        `
+              : `
+          SELECT COUNT(DISTINCT u.id) AS count
+          FROM "user" u
+          WHERE u.id = ANY($1::text[])
+            AND EXISTS (
+              SELECT 1
+              FROM conversion_events ce
+              WHERE ce.event_type = 'trial_started'
+                AND ce.user_id = 'user:' || u.id
+            )
+        `,
+            [cohortUserIds],
+          )
+        : { rows: [{ count: 0 }] };
     const trialUsers = Number(trialUsersResult.rows[0]?.count || 0);
+
+    // 3. Of the cohort, count how many EVER became paid (even after the range)
+    const paidUsersResult =
+      cohortUserIds.length > 0
+        ? await sql.query(
+            hasIdentityLinks
+              ? `
+          SELECT COUNT(DISTINCT u.id) AS count
+          FROM "user" u
+          WHERE u.id = ANY($1::text[])
+            AND EXISTS (
+              SELECT 1
+              FROM conversion_events ce
+              WHERE ce.event_type IN ('subscription_started', 'trial_converted')
+                AND (
+                  ce.user_id = 'user:' || u.id
+                  OR (
+                    ce.anonymous_id IS NOT NULL
+                    AND EXISTS (
+                      SELECT 1
+                      FROM analytics_identity_links l
+                      WHERE l.user_id = u.id
+                        AND l.anonymous_id = ce.anonymous_id
+                    )
+                  )
+                )
+            )
+        `
+              : `
+          SELECT COUNT(DISTINCT u.id) AS count
+          FROM "user" u
+          WHERE u.id = ANY($1::text[])
+            AND EXISTS (
+              SELECT 1
+              FROM conversion_events ce
+              WHERE ce.event_type IN ('subscription_started', 'trial_converted')
+                AND ce.user_id = 'user:' || u.id
+            )
+        `,
+            [cohortUserIds],
+          )
+        : { rows: [{ count: 0 }] };
     const paidUsers = Number(paidUsersResult.rows[0]?.count || 0);
 
     const trialConversions = Number(trialConversionsResult.rows[0]?.count || 0);
