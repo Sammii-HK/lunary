@@ -116,7 +116,8 @@ export async function GET(request: NextRequest) {
       const cohortSize = Number(cohortUsersResult.rows[0]?.cohort_size ?? 0);
       if (cohortSize === 0) continue;
 
-      // Calculate retention metrics using identity stitching (user_id or linked anonymous_id).
+      // Day 1 retention: users who returned on day 1 or later (standard retention metric)
+      // This ensures Day 1 >= Day 7 >= Day 30 (monotonically decreasing)
       const day1Retained = await sql.query(
         hasIdentityLinks
           ? `
@@ -129,7 +130,7 @@ export async function GET(request: NextRequest) {
               SELECT 1
               FROM conversion_events ce2
               WHERE ce2.event_type = ANY($5::text[])
-                AND DATE(ce2.created_at AT TIME ZONE 'UTC') = DATE(u."createdAt" AT TIME ZONE 'UTC') + 1
+                AND DATE(ce2.created_at AT TIME ZONE 'UTC') >= DATE(u."createdAt" AT TIME ZONE 'UTC') + 1
                 AND (
                   ce2.user_id = u.id
                   OR (
@@ -155,7 +156,7 @@ export async function GET(request: NextRequest) {
               FROM conversion_events ce2
               WHERE ce2.user_id = u.id
                 AND ce2.event_type = ANY($5::text[])
-                AND DATE(ce2.created_at AT TIME ZONE 'UTC') = DATE(u."createdAt" AT TIME ZONE 'UTC') + 1
+                AND DATE(ce2.created_at AT TIME ZONE 'UTC') >= DATE(u."createdAt" AT TIME ZONE 'UTC') + 1
             )
         `,
         [
@@ -167,7 +168,7 @@ export async function GET(request: NextRequest) {
         ],
       );
 
-      // Day 7 retention: users who returned within 7 days after their signup
+      // Day 7 retention: users who returned on day 7 or later (standard retention metric)
       const day7Retained = await sql.query(
         hasIdentityLinks
           ? `
@@ -180,9 +181,7 @@ export async function GET(request: NextRequest) {
               SELECT 1
               FROM conversion_events ce2
               WHERE ce2.event_type = ANY($5::text[])
-                AND DATE(ce2.created_at AT TIME ZONE 'UTC') BETWEEN
-                    DATE(u."createdAt" AT TIME ZONE 'UTC') + 1 AND
-                    DATE(u."createdAt" AT TIME ZONE 'UTC') + 7
+                AND DATE(ce2.created_at AT TIME ZONE 'UTC') >= DATE(u."createdAt" AT TIME ZONE 'UTC') + 7
                 AND (
                   ce2.user_id = u.id
                   OR (
@@ -208,9 +207,7 @@ export async function GET(request: NextRequest) {
               FROM conversion_events ce2
               WHERE ce2.user_id = u.id
                 AND ce2.event_type = ANY($5::text[])
-                AND DATE(ce2.created_at AT TIME ZONE 'UTC') BETWEEN
-                    DATE(u."createdAt" AT TIME ZONE 'UTC') + 1 AND
-                    DATE(u."createdAt" AT TIME ZONE 'UTC') + 7
+                AND DATE(ce2.created_at AT TIME ZONE 'UTC') >= DATE(u."createdAt" AT TIME ZONE 'UTC') + 7
             )
         `,
         [
@@ -222,7 +219,7 @@ export async function GET(request: NextRequest) {
         ],
       );
 
-      // Day 30 retention: users who returned within 30 days after their signup
+      // Day 30 retention: users who returned on day 30 or later (standard retention metric)
       const day30Retained = await sql.query(
         hasIdentityLinks
           ? `
@@ -235,9 +232,7 @@ export async function GET(request: NextRequest) {
               SELECT 1
               FROM conversion_events ce2
               WHERE ce2.event_type = ANY($5::text[])
-                AND DATE(ce2.created_at AT TIME ZONE 'UTC') BETWEEN
-                    DATE(u."createdAt" AT TIME ZONE 'UTC') + 1 AND
-                    DATE(u."createdAt" AT TIME ZONE 'UTC') + 30
+                AND DATE(ce2.created_at AT TIME ZONE 'UTC') >= DATE(u."createdAt" AT TIME ZONE 'UTC') + 30
                 AND (
                   ce2.user_id = u.id
                   OR (
@@ -263,9 +258,7 @@ export async function GET(request: NextRequest) {
               FROM conversion_events ce2
               WHERE ce2.user_id = u.id
                 AND ce2.event_type = ANY($5::text[])
-                AND DATE(ce2.created_at AT TIME ZONE 'UTC') BETWEEN
-                    DATE(u."createdAt" AT TIME ZONE 'UTC') + 1 AND
-                    DATE(u."createdAt" AT TIME ZONE 'UTC') + 30
+                AND DATE(ce2.created_at AT TIME ZONE 'UTC') >= DATE(u."createdAt" AT TIME ZONE 'UTC') + 30
             )
         `,
         [

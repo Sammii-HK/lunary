@@ -768,12 +768,8 @@ export async function GET(request: NextRequest) {
       days: 1 | 7 | 30,
     ): Promise<number | null> => {
       if (cohortEndInclusive < cohortStart) return null;
-      const dateCondition =
-        days === 1
-          ? `DATE(ce.created_at AT TIME ZONE 'UTC') = DATE(cohort."createdAt" AT TIME ZONE 'UTC') + 1`
-          : `DATE(ce.created_at AT TIME ZONE 'UTC') BETWEEN
-             DATE(cohort."createdAt" AT TIME ZONE 'UTC') + 1 AND
-             DATE(cohort."createdAt" AT TIME ZONE 'UTC') + ${days}`;
+      // Standard retention: "Day N or later" (ensures Day 1 >= Day 7 >= Day 30)
+      const dateCondition = `DATE(ce.created_at AT TIME ZONE 'UTC') >= DATE(cohort."createdAt" AT TIME ZONE 'UTC') + ${days}`;
 
       const query = hasIdentityLinks
         ? `
