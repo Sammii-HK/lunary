@@ -80,17 +80,19 @@ export function useABTestTracking(
     tests,
   ]);
 
-  // Track page view with A/B metadata
+  // Track page view with A/B metadata (always track, include A/B data when available)
   useEffect(() => {
-    if (abMetadata) {
-      trackEvent(eventType, {
-        pagePath: `/${pageName}`,
-        metadata: {
-          ...abMetadata,
-          page: pageName,
-        },
-      });
-    }
+    trackEvent(eventType, {
+      pagePath: `/${pageName}`,
+      metadata: abMetadata
+        ? {
+            ...abMetadata,
+            page: pageName,
+          }
+        : {
+            page: pageName,
+          },
+    });
   }, [pageName, eventType, abMetadata]);
 
   return {
