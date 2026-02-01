@@ -99,7 +99,9 @@ export async function GET(request: NextRequest) {
     }> = [];
 
     // DB SSOT: retention is based on meaningful opens (deduped at source).
-    const ACTIVITY_EVENTS = ['app_opened'];
+    // Use product_opened for cohort retention (authenticated product usage)
+    // app_opened is site-wide (includes anonymous grimoire visitors)
+    const ACTIVITY_EVENTS = ['product_opened'];
 
     for (const period of periodStarts) {
       const cohortStartDate = period.start;

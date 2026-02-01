@@ -122,8 +122,9 @@ const ANON_ID_STORAGE_KEY = 'lunary_anon_id';
 const APP_OPENED_GUARD_KEY = 'lunary_event_guard';
 const PRODUCT_OPENED_GUARD_KEY = 'lunary_product_opened_guard';
 const DAILY_DASHBOARD_GUARD_PREFIX = 'lunary_daily_dashboard_viewed_guard';
-const APP_OPENED_GUARD_TTL_MS = 1000 * 60 * 30; // 30 minutes
+const APP_OPENED_GUARD_TTL_MS = 1000 * 60 * 30; // 30 minutes (for product_opened)
 
+// Daily deduplication for app_opened: one event per user per calendar day (UTC)
 const shouldTrackAppOpened = () => {
   if (typeof window === 'undefined') return true;
   try {
@@ -132,11 +133,29 @@ const shouldTrackAppOpened = () => {
     );
     const lastRecorded =
       typeof payload?.appOpened === 'number' ? payload.appOpened : 0;
-    const now = Date.now();
-    if (lastRecorded && now - lastRecorded < APP_OPENED_GUARD_TTL_MS) {
-      return false;
+
+    if (lastRecorded) {
+      // Check if last event was on a different UTC calendar day
+      const lastDate = new Date(lastRecorded);
+      const nowDate = new Date();
+      const lastDay = lastDate.getUTCDate();
+      const lastMonth = lastDate.getUTCMonth();
+      const lastYear = lastDate.getUTCFullYear();
+      const nowDay = nowDate.getUTCDate();
+      const nowMonth = nowDate.getUTCMonth();
+      const nowYear = nowDate.getUTCFullYear();
+
+      // Same calendar day = don't track again
+      if (
+        lastDay === nowDay &&
+        lastMonth === nowMonth &&
+        lastYear === nowYear
+      ) {
+        return false;
+      }
     }
-    payload.appOpened = now;
+
+    payload.appOpened = Date.now();
     window.sessionStorage.setItem(
       APP_OPENED_GUARD_KEY,
       JSON.stringify(payload),
