@@ -72,26 +72,33 @@ export async function GET(request: NextRequest) {
 
     // Enhanced time to conversion breakdown
     const timeToTrialResult = await sql`
-      SELECT 
+      SELECT
         AVG(EXTRACT(EPOCH FROM (t2.created_at - t1.created_at)) / 86400) as avg_days
       FROM conversion_events t1
       JOIN conversion_events t2 ON t1.user_id = t2.user_id
       WHERE t1.event_type = 'signup'
         AND t2.event_type = 'trial_started'
         AND t2.created_at > t1.created_at
+        AND EXTRACT(EPOCH FROM (t2.created_at - t1.created_at)) > 0
+        AND EXTRACT(EPOCH FROM (t2.created_at - t1.created_at)) < 86400 * 365
         AND t1.created_at >= ${formatTimestamp(range.start)}
         AND t1.created_at <= ${formatTimestamp(range.end)}
         AND (t1.user_email IS NULL OR (t1.user_email NOT LIKE ${TEST_EMAIL_PATTERN} AND t1.user_email != ${TEST_EMAIL_EXACT}))
     `;
-    const avgDaysToTrial = Number(timeToTrialResult.rows[0]?.avg_days || 0);
+    const avgDaysToTrial = Math.max(
+      0,
+      Number(timeToTrialResult.rows[0]?.avg_days || 0),
+    );
 
     const timeToPaidResult = await sql`
-      SELECT 
+      SELECT
         AVG(EXTRACT(EPOCH FROM (t2.created_at - t1.created_at)) / 86400) as avg_days
       FROM conversion_events t1
       JOIN conversion_events t2 ON t1.user_id = t2.user_id
       WHERE t1.event_type = 'trial_started'
         AND t2.event_type IN ('trial_converted', 'subscription_started')
+        AND EXTRACT(EPOCH FROM (t2.created_at - t1.created_at)) > 0
+        AND EXTRACT(EPOCH FROM (t2.created_at - t1.created_at)) < 86400 * 365
         AND t2.created_at > t1.created_at
         AND t1.created_at >= ${formatTimestamp(range.start)}
         AND t1.created_at <= ${formatTimestamp(range.end)}

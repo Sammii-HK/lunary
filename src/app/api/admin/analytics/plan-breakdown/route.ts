@@ -13,10 +13,10 @@ export async function GET(request: NextRequest) {
 
     // Get plan breakdown with MRR contribution
     const planBreakdownResult = await sql`
-      SELECT 
+      SELECT
         plan_type,
         COUNT(*) as count,
-        COALESCE(SUM(monthly_amount_due), 0) as mrr_contribution,
+        COALESCE(SUM(COALESCE(monthly_amount_due, 0)), 0) as mrr_contribution,
         COUNT(*) FILTER (WHERE status = 'active') as active_count,
         COUNT(*) FILTER (WHERE status = 'trial') as trial_count,
         COUNT(*) FILTER (WHERE status IN ('cancelled', 'canceled')) as cancelled_count
@@ -39,7 +39,34 @@ export async function GET(request: NextRequest) {
       Map<string, PlanAggregate>
     >((acc, row) => {
       const rawPlan = (row.plan_type as string) || 'unknown';
-      const normalizedPlan = rawPlan;
+
+      // Normalize plan types to handle variations and map to canonical names
+      // Based on actual Stripe plan IDs: lunary_plus, lunary_plus_ai, lunary_plus_ai_annual
+      // Note: No basic-yearly plan exists in Stripe (no lunary_plus_annual)
+      let normalizedPlan: string;
+      const lower = rawPlan.toLowerCase();
+      if (['lunary_plus', 'basic', 'monthly', 'month'].includes(lower)) {
+        normalizedPlan = 'basic-monthly';
+      } else if (['lunary_plus_ai', 'pro', 'ai'].includes(lower)) {
+        normalizedPlan = 'pro-monthly';
+      } else if (
+        [
+          'lunary_plus_ai_annual',
+          'annual',
+          'yearly',
+          'year',
+          'pro_annual',
+        ].includes(lower)
+      ) {
+        // 'annual' maps to pro-yearly (lunary_plus_ai_annual), not basic
+        normalizedPlan = 'pro-yearly';
+      } else if (lower === 'free') {
+        normalizedPlan = 'free';
+      } else if (['lifetime', 'enterprise'].includes(lower)) {
+        normalizedPlan = 'enterprise';
+      } else {
+        normalizedPlan = 'unknown';
+      }
       const existing = acc.get(normalizedPlan) || {
         plan: normalizedPlan,
         count: 0,
