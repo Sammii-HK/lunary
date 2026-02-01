@@ -11,8 +11,8 @@ import {
   getCachedCurrentSnapshots,
 } from '@/lib/patterns/snapshot/cache';
 
-// Enable caching with revalidation
-export const revalidate = 3600; // 1 hour
+// Force dynamic rendering (uses request.headers for auth)
+export const dynamic = 'force-dynamic';
 
 export async function GET(request: NextRequest) {
   try {
