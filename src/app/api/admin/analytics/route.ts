@@ -59,10 +59,12 @@ export async function GET(request: NextRequest) {
         AND ${testUserFilter()}
     `;
 
+    // Fix: Use only subscription_started (canonical conversion event)
+    // Avoids double-counting users who have both trial_converted and subscription_started events
     const conversions = await sql`
       SELECT COUNT(DISTINCT user_id) as count
       FROM conversion_events
-      WHERE event_type IN ('trial_converted', 'subscription_started')
+      WHERE event_type = 'subscription_started'
         AND ${(sql as any).raw(dateFilter)}
         AND ${testUserFilter()}
     `;

@@ -12,6 +12,11 @@ export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
     const range = resolveDateRange(searchParams, 30);
+
+    // Create exclusive upper bound for date range (standard practice)
+    const rangeEndExclusive = new Date(range.end);
+    rangeEndExclusive.setDate(rangeEndExclusive.getDate() + 1);
+
     const conversionType = searchParams.get('conversion_type');
 
     const filterByType = conversionType && conversionType !== 'all';
@@ -22,9 +27,8 @@ export async function GET(request: NextRequest) {
           COUNT(*) AS total_conversions,
           AVG(days_to_convert) AS avg_days_to_convert
         FROM analytics_conversions
-        WHERE created_at BETWEEN ${formatTimestamp(range.start)} AND ${formatTimestamp(
-          range.end,
-        )}
+        WHERE created_at >= ${formatTimestamp(range.start)}
+          AND created_at < ${formatTimestamp(rangeEndExclusive)}
           AND conversion_type = ${conversionType}
           AND NOT EXISTS (
             SELECT 1 FROM subscriptions s
@@ -42,9 +46,8 @@ export async function GET(request: NextRequest) {
           COUNT(*) AS total_conversions,
           AVG(days_to_convert) AS avg_days_to_convert
         FROM analytics_conversions
-        WHERE created_at BETWEEN ${formatTimestamp(range.start)} AND ${formatTimestamp(
-          range.end,
-        )}
+        WHERE created_at >= ${formatTimestamp(range.start)}
+          AND created_at < ${formatTimestamp(rangeEndExclusive)}
           AND NOT EXISTS (
             SELECT 1 FROM subscriptions s
             WHERE s.user_id = analytics_conversions.user_id
@@ -120,9 +123,8 @@ export async function GET(request: NextRequest) {
     const trialConversionsResult = await sql`
       SELECT COUNT(*) AS count
       FROM analytics_conversions
-      WHERE created_at BETWEEN ${formatTimestamp(range.start)} AND ${formatTimestamp(
-        range.end,
-      )}
+      WHERE created_at >= ${formatTimestamp(range.start)}
+        AND created_at < ${formatTimestamp(rangeEndExclusive)}
         AND conversion_type = 'trial_to_paid'
         AND NOT EXISTS (
           SELECT 1 FROM subscriptions s
@@ -142,9 +144,8 @@ export async function GET(request: NextRequest) {
           COALESCE(trigger_feature, 'unknown') AS feature,
           COUNT(*) AS count
         FROM analytics_conversions
-        WHERE created_at BETWEEN ${formatTimestamp(range.start)} AND ${formatTimestamp(
-          range.end,
-        )}
+        WHERE created_at >= ${formatTimestamp(range.start)}
+          AND created_at < ${formatTimestamp(rangeEndExclusive)}
           AND conversion_type = ${conversionType}
           AND NOT EXISTS (
             SELECT 1 FROM subscriptions s
@@ -164,9 +165,8 @@ export async function GET(request: NextRequest) {
           COALESCE(trigger_feature, 'unknown') AS feature,
           COUNT(*) AS count
         FROM analytics_conversions
-        WHERE created_at BETWEEN ${formatTimestamp(range.start)} AND ${formatTimestamp(
-          range.end,
-        )}
+        WHERE created_at >= ${formatTimestamp(range.start)}
+          AND created_at < ${formatTimestamp(rangeEndExclusive)}
           AND NOT EXISTS (
             SELECT 1 FROM subscriptions s
             WHERE s.user_id = analytics_conversions.user_id

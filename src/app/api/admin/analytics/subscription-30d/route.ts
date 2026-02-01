@@ -34,7 +34,7 @@ export async function GET(request: NextRequest) {
             ON ce.user_id = s.user_id
            AND ce.event_type = 'subscription_started'
            AND ce.created_at >= s.created_at
-           AND ce.created_at <= s.created_at + INTERVAL '${WINDOW_DAYS} days'
+           AND ce.created_at < s.created_at + INTERVAL '${WINDOW_DAYS + 1} days'
            AND (ce.user_email IS NULL OR (ce.user_email NOT LIKE $3 AND ce.user_email != $4))
         )
         SELECT
