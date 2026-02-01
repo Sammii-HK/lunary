@@ -2,10 +2,11 @@
  * Sync MRR with coupon/discount data from Stripe
  *
  * This script:
- * 1. Fetches all active subscriptions from database
+ * 1. Fetches ALL subscriptions with Stripe IDs from database
  * 2. Gets full subscription details from Stripe including discounts
  * 3. Calculates correct monthly_amount_due with coupons applied
  * 4. Updates database with accurate MRR
+ * 5. Handles NULL values and edge cases robustly
  */
 
 import { config } from 'dotenv';
@@ -150,17 +151,20 @@ async function main() {
   let errors = 0;
   let totalMRR = 0;
 
-  // Get all active subscriptions with Stripe IDs
+  // Get ALL subscriptions with Stripe IDs (not just active - for complete sync)
   const subs = await sql`
-    SELECT user_id, user_email, stripe_subscription_id, plan_type,
+    SELECT user_id, user_email, stripe_subscription_id, plan_type, status,
            has_discount, discount_percent, monthly_amount_due, coupon_id
     FROM subscriptions
     WHERE stripe_subscription_id IS NOT NULL
-      AND status IN ('active', 'trial', 'trialing', 'past_due')
     ORDER BY user_email
   `;
 
-  console.log(`Checking ${subs.rows.length} active subscriptions...\n`);
+  console.log(
+    `Checking ${subs.rows.length} subscriptions with Stripe IDs...\n`,
+  );
+
+  const payingUsers: Array<{ email: string; mrr: number; status: string }> = [];
 
   for (const sub of subs.rows) {
     try {
@@ -173,21 +177,31 @@ async function main() {
       );
 
       const discountInfo = extractDiscountInfo(subscription, sub.plan_type);
-      totalMRR += discountInfo.monthlyAmountDue;
 
-      // Check if update needed
+      // Only count MRR for active subscriptions
+      const isActive = ['active', 'trialing', 'past_due'].includes(
+        sub.status || '',
+      );
+      if (isActive) {
+        totalMRR += discountInfo.monthlyAmountDue;
+      }
+
+      // Check if update needed - handle NULL values properly
+      const currentMRR = sub.monthly_amount_due ?? -1; // Use -1 to detect NULL
+      const mrrDiff = Math.abs(
+        Number(currentMRR) - discountInfo.monthlyAmountDue,
+      );
       const needsUpdate =
         sub.has_discount !== discountInfo.hasDiscount ||
-        Number(sub.discount_percent) !== discountInfo.discountPercent ||
-        Math.abs(
-          Number(sub.monthly_amount_due) - discountInfo.monthlyAmountDue,
-        ) > 0.01 ||
+        Number(sub.discount_percent || 0) !== discountInfo.discountPercent ||
+        currentMRR === -1 || // NULL monthly_amount_due
+        mrrDiff > 0.01 ||
         sub.coupon_id !== discountInfo.couponId;
 
       if (discountInfo.hasDiscount) {
         withDiscount++;
         console.log(`💰 ${sub.user_email || sub.user_id?.slice(0, 8)}`);
-        console.log(`   Plan: ${sub.plan_type}`);
+        console.log(`   Plan: ${sub.plan_type} | Status: ${sub.status}`);
         console.log(
           `   Coupon: ${discountInfo.couponId} (${discountInfo.discountPercent}% off)`,
         );
@@ -200,6 +214,14 @@ async function main() {
         console.log();
       } else {
         noDiscount++;
+        // Track paying users (no discount, MRR > 0)
+        if (discountInfo.monthlyAmountDue > 0 && isActive) {
+          payingUsers.push({
+            email: sub.user_email || sub.user_id?.slice(0, 8) || 'unknown',
+            mrr: discountInfo.monthlyAmountDue,
+            status: sub.status || 'unknown',
+          });
+        }
       }
 
       if (needsUpdate) {
@@ -230,8 +252,23 @@ async function main() {
   console.log(`  📦 Full price: ${noDiscount}`);
   console.log(`  ✏️  Updated: ${updated}`);
   console.log(`  ⚠️  Errors: ${errors}`);
-  console.log(`  📝 Total active: ${subs.rows.length}`);
-  console.log(`\n  💵 Total MRR: $${totalMRR.toFixed(2)}\n`);
+  console.log(`  📝 Total synced: ${subs.rows.length}`);
+  console.log(`\n  💵 Total MRR (active subs): $${totalMRR.toFixed(2)}`);
+
+  // Show paying users (no 100% discount)
+  if (payingUsers.length > 0) {
+    const payingMRR = payingUsers.reduce((sum, u) => sum + u.mrr, 0);
+    console.log(`\n  💸 PAYING CUSTOMERS (no 100% coupon):`);
+    payingUsers.forEach((u) => {
+      console.log(`     ${u.email}: $${u.mrr.toFixed(2)}/mo (${u.status})`);
+    });
+    console.log(`\n  💵 Paying MRR: $${payingMRR.toFixed(2)}`);
+    console.log(`  👥 Paying users: ${payingUsers.length}`);
+  } else {
+    console.log(`\n  ⚠️  No paying customers found (all have 100% discounts)`);
+  }
+
+  console.log();
 
   if (DRY_RUN) {
     console.log('⚠️  DRY RUN - No changes were made');
