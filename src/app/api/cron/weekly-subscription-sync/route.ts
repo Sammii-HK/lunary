@@ -1,10 +1,71 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { sendDiscordAdminNotification } from '@/lib/discord';
 import { runSync } from '../../../../../scripts/weekly-sync-cron';
+import { sql } from '@vercel/postgres';
 
 // Force dynamic rendering to prevent build-time database access
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
+
+/**
+ * Cleanup old pending_checkouts records
+ * Removes completed/expired records older than 7 days
+ */
+async function cleanupPendingCheckouts(): Promise<number> {
+  try {
+    const result = await sql`
+      DELETE FROM pending_checkouts
+      WHERE (
+        status IN ('completed', 'expired', 'cancelled')
+        OR expires_at < NOW() - INTERVAL '7 days'
+        OR created_at < NOW() - INTERVAL '7 days'
+      )
+      RETURNING id
+    `;
+    return result.rowCount || 0;
+  } catch (error) {
+    console.error('[Cleanup] Failed to cleanup pending_checkouts:', error);
+    return 0;
+  }
+}
+
+/**
+ * Cleanup old webhook events
+ * Removes completed events older than 30 days
+ */
+async function cleanupWebhookEvents(): Promise<number> {
+  try {
+    const result = await sql`
+      DELETE FROM stripe_webhook_events
+      WHERE processing_status = 'completed'
+      AND created_at < NOW() - INTERVAL '30 days'
+      RETURNING id
+    `;
+    return result.rowCount || 0;
+  } catch (error) {
+    console.error('[Cleanup] Failed to cleanup webhook events:', error);
+    return 0;
+  }
+}
+
+/**
+ * Cleanup resolved orphaned subscriptions
+ * Removes resolved records older than 30 days
+ */
+async function cleanupOrphanedSubscriptions(): Promise<number> {
+  try {
+    const result = await sql`
+      DELETE FROM orphaned_subscriptions
+      WHERE resolved = TRUE
+      AND resolved_at < NOW() - INTERVAL '30 days'
+      RETURNING id
+    `;
+    return result.rowCount || 0;
+  } catch (error) {
+    console.error('[Cleanup] Failed to cleanup orphaned subscriptions:', error);
+    return 0;
+  }
+}
 
 /**
  * Weekly Subscription Sync
@@ -28,6 +89,16 @@ export async function GET(request: NextRequest) {
 
     console.log('[Weekly Subscription Sync] Starting sync...');
 
+    // Run cleanup tasks first
+    console.log('[Weekly Subscription Sync] Running cleanup tasks...');
+    const cleanupStats = {
+      pendingCheckouts: await cleanupPendingCheckouts(),
+      webhookEvents: await cleanupWebhookEvents(),
+      orphanedSubscriptions: await cleanupOrphanedSubscriptions(),
+    };
+    console.log('[Weekly Subscription Sync] Cleanup complete:', cleanupStats);
+
+    // Run the main sync
     const stats = await runSync();
 
     console.log(
@@ -35,6 +106,11 @@ export async function GET(request: NextRequest) {
     );
 
     // Send Discord notification with results
+    const totalCleanup =
+      cleanupStats.pendingCheckouts +
+      cleanupStats.webhookEvents +
+      cleanupStats.orphanedSubscriptions;
+
     await sendDiscordAdminNotification({
       title: '✅ Weekly Subscription Sync Complete',
       message: `Successfully synced ${stats.total} users with Stripe`,
@@ -57,6 +133,11 @@ export async function GET(request: NextRequest) {
         },
         { name: '⚠️ Errors', value: stats.errors.toString(), inline: true },
         { name: '📊 Total', value: stats.total.toString(), inline: true },
+        {
+          name: '🧹 Cleanup',
+          value: `${totalCleanup} records`,
+          inline: true,
+        },
       ],
       priority: stats.errors > 0 ? 'high' : 'normal',
       category: 'analytics',
@@ -68,6 +149,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({
       success: true,
       stats,
+      cleanup: cleanupStats,
     });
   } catch (error: any) {
     console.error('[Weekly Subscription Sync] Sync failed:', error);
