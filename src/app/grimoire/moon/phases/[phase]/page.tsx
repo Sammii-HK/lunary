@@ -43,7 +43,7 @@ export async function generateMetadata({
     ? phaseName
     : `${phaseName} Moon`;
   const title = `${displayName}: Meaning, Rituals & Manifestation - Lunary`;
-  const description = `${displayName} meaning: energy, rituals & spiritual practices. Best activities, spell timing & manifestation guide for the ${phaseName.toLowerCase()} phase.`;
+  const description = `Discover the ${displayName.toLowerCase()}: meaning, energy & rituals. Learn what to do during the ${phaseName.toLowerCase()} for manifestation, release & spiritual growth. Complete moon phase guide.`;
 
   return {
     title,

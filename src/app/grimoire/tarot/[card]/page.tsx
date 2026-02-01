@@ -73,13 +73,15 @@ export async function generateMetadata({
 
   return createGrimoireMetadata({
     title: `${cardData.card.name} Tarot Card: Meaning Upright & Reversed - Lunary`,
-    description: `${cardData.card.name} tarot card meaning: upright & reversed interpretations. ${cardData.type === 'major' ? 'Major Arcana' : `${cardData.suit ? cardData.suit.charAt(0).toUpperCase() + cardData.suit.slice(1) : ''} suit`}. Learn symbolism, keywords & how to read ${cardData.card.name} in spreads.`,
+    description: `Discover the ${cardData.card.name} tarot card: upright & reversed meanings, symbolism & interpretation. Learn what ${cardData.card.name} means in love, career & life readings. Complete card guide.`,
     keywords: [
       `${cardData.card.name} tarot`,
       `${cardData.card.name} tarot card`,
       `${cardData.card.name} meaning`,
       `${cardData.card.name} upright`,
       `${cardData.card.name} reversed`,
+      `${cardData.card.name} love`,
+      `${cardData.card.name} career`,
       `tarot ${cardData.card.name}`,
     ],
     url: `https://lunary.app/grimoire/tarot/${card}`,

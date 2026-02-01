@@ -29,7 +29,7 @@ export async function generateMetadata({
 
   const moonData = annualFullMoons[monthKey as keyof typeof annualFullMoons];
   const title = `${monthKey} ${moonData.name}: Full Moon Meaning & Rituals - Lunary`;
-  const description = `Discover the ${monthKey} ${moonData.name} meaning, rituals, and magical correspondences. Learn how to work with this full moon's energy for manifestation and spiritual growth.`;
+  const description = `Discover the ${monthKey} full moon (${moonData.name}): meaning, rituals & spiritual significance. Learn how to work with ${moonData.name} energy for manifestation and magic. Complete guide.`;
 
   return {
     title,
