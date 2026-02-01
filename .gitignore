@@ -24,8 +24,9 @@ logs/
 /.next/
 /out/
 
-# generated data
-data/sitemap-last-modified.json
+# generated data / output files
+data/
+scripts/output/
 
 # production
 /build
@@ -49,7 +50,6 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
-data/auth.db
 
 .next
 
