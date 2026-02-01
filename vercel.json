@@ -58,6 +58,10 @@
     {
       "path": "/api/cron/pattern-snapshots",
       "schedule": "0 4 * * 0"
+    },
+    {
+      "path": "/api/cron/weekly-subscription-sync",
+      "schedule": "0 2 * * 0"
     }
   ]
 }

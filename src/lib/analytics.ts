@@ -166,6 +166,7 @@ const shouldTrackAppOpened = () => {
   return true;
 };
 
+// Daily deduplication for product_opened: one event per user per calendar day (UTC)
 const shouldTrackProductOpened = () => {
   if (typeof window === 'undefined') return true;
   try {
@@ -174,11 +175,29 @@ const shouldTrackProductOpened = () => {
     );
     const lastRecorded =
       typeof payload?.productOpened === 'number' ? payload.productOpened : 0;
-    const now = Date.now();
-    if (lastRecorded && now - lastRecorded < APP_OPENED_GUARD_TTL_MS) {
-      return false;
+
+    if (lastRecorded) {
+      // Check if last event was on a different UTC calendar day
+      const lastDate = new Date(lastRecorded);
+      const nowDate = new Date();
+      const lastDay = lastDate.getUTCDate();
+      const lastMonth = lastDate.getUTCMonth();
+      const lastYear = lastDate.getUTCFullYear();
+      const nowDay = nowDate.getUTCDate();
+      const nowMonth = nowDate.getUTCMonth();
+      const nowYear = nowDate.getUTCFullYear();
+
+      // Same calendar day = don't track again
+      if (
+        lastDay === nowDay &&
+        lastMonth === nowMonth &&
+        lastYear === nowYear
+      ) {
+        return false;
+      }
     }
-    payload.productOpened = now;
+
+    payload.productOpened = Date.now();
     window.sessionStorage.setItem(
       PRODUCT_OPENED_GUARD_KEY,
       JSON.stringify(payload),

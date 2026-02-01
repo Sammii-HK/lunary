@@ -128,7 +128,7 @@ async function sendDiscordNotification(
   }
 }
 
-async function runSync(): Promise<SyncStats> {
+export async function runSync(): Promise<SyncStats> {
   const stripe = getStripe();
 
   const stats: SyncStats = {
