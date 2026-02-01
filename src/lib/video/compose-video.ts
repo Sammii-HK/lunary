@@ -453,7 +453,7 @@ export async function composeVideo(
       const fadeOut = 0.4;
       const start = overlay.startTime;
       const end = overlay.endTime;
-      const alpha = `if(lt(t-${start},${fadeIn}),(t-${start})/${fadeIn},if(gt(${end}-t,${fadeOut}),1,(${end}-t)/${fadeOut}))`;
+      const alpha = `if(lt(t-${start}\,${fadeIn})\,(t-${start})/${fadeIn}\,if(gt(${end}-t\,${fadeOut})\,1\,(${end}-t)/${fadeOut}))`;
 
       console.log(
         `  Overlay ${idx}: style=${style}, text="${overlay.text.substring(0, 30)}...", time=${overlay.startTime}-${overlay.endTime}`,

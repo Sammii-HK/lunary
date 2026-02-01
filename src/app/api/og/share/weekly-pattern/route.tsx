@@ -1,7 +1,12 @@
 import { ImageResponse } from 'next/og';
 import { NextRequest } from 'next/server';
 import { kvGet } from '@/lib/cloudflare/kv';
-import { getFormatDimensions, OG_COLORS } from '@/lib/share/og-utils';
+import {
+  getFormatDimensions,
+  OG_COLORS,
+  generateStarfield,
+  getStarCount,
+} from '@/lib/share/og-utils';
 import type { ShareFormat } from '@/hooks/useShareModal';
 
 export const runtime = 'edge';
@@ -69,49 +74,108 @@ export async function GET(request: NextRequest) {
     const shareId = searchParams.get('shareId');
     const format = (searchParams.get('format') || 'square') as ShareFormat;
 
-    if (!shareId) {
-      return new Response('Missing shareId', { status: 400 });
-    }
-
     // Load fonts
     const robotoMonoData = await loadRobotoMono(request);
 
-    // Fetch share data from KV or use demo data
-    const raw = await kvGet(`weekly-pattern:${shareId}`);
+    // Check for URL parameters for real-time data (Priority 0 Data Flow Fix)
+    const urlName = searchParams.get('name');
+    const urlSeasonName = searchParams.get('seasonName');
+    const urlSeasonSuit = searchParams.get('seasonSuit');
+    const urlSeasonDesc = searchParams.get('seasonDesc');
+    const urlTopCards = searchParams.get('topCards');
+    const urlDominantSuit = searchParams.get('dominantSuit');
+    const urlDominantPercentage = searchParams.get('dominantPercentage');
+    const urlStartDate = searchParams.get('startDate');
+    const urlEndDate = searchParams.get('endDate');
 
     let data: WeeklyPatternShareRecord;
 
-    if (!raw || shareId === 'demo') {
-      // Provide demo/fallback data
+    // If URL params provided, use them directly instead of KV lookup
+    if (urlSeasonName || urlSeasonSuit || urlTopCards) {
       const today = new Date();
       const weekAgo = new Date(today);
       weekAgo.setDate(weekAgo.getDate() - 7);
 
+      // Parse top cards from JSON or comma-separated format
+      let topCards = [
+        { name: 'The Star', count: 3 },
+        { name: 'Two of Cups', count: 2 },
+        { name: 'Ace of Cups', count: 2 },
+      ];
+      if (urlTopCards) {
+        try {
+          topCards = JSON.parse(decodeURIComponent(urlTopCards));
+        } catch {
+          // Keep default if parsing fails
+        }
+      }
+
       data = {
-        shareId: 'demo',
+        shareId: 'url-params',
+        name: urlName || undefined,
         createdAt: new Date().toISOString(),
         season: {
-          name: 'Season of Reflection',
-          suit: 'Cups',
-          description: 'A time of emotional depth and intuitive wisdom',
+          name: urlSeasonName
+            ? decodeURIComponent(urlSeasonName)
+            : 'Season of Reflection',
+          suit: urlSeasonSuit || 'Cups',
+          description: urlSeasonDesc
+            ? decodeURIComponent(urlSeasonDesc)
+            : 'A time of emotional depth and intuitive wisdom',
         },
-        topCards: [
-          { name: 'The Star', count: 3 },
-          { name: 'Two of Cups', count: 2 },
-          { name: 'Ace of Cups', count: 2 },
-        ],
+        topCards,
         dominantSuit: {
-          suit: 'Cups',
-          percentage: 60,
+          suit: urlDominantSuit || urlSeasonSuit || 'Cups',
+          percentage: urlDominantPercentage
+            ? parseFloat(urlDominantPercentage)
+            : 60,
           count: 6,
         },
         dateRange: {
-          start: weekAgo.toISOString().split('T')[0],
-          end: today.toISOString().split('T')[0],
+          start: urlStartDate || weekAgo.toISOString().split('T')[0],
+          end: urlEndDate || today.toISOString().split('T')[0],
         },
       };
     } else {
-      data = JSON.parse(raw) as WeeklyPatternShareRecord;
+      if (!shareId) {
+        return new Response('Missing shareId', { status: 400 });
+      }
+
+      // Fetch share data from KV or use demo data
+      const raw = await kvGet(`weekly-pattern:${shareId}`);
+
+      if (!raw || shareId === 'demo') {
+        // Provide demo/fallback data
+        const today = new Date();
+        const weekAgo = new Date(today);
+        weekAgo.setDate(weekAgo.getDate() - 7);
+
+        data = {
+          shareId: 'demo',
+          createdAt: new Date().toISOString(),
+          season: {
+            name: 'Season of Reflection',
+            suit: 'Cups',
+            description: 'A time of emotional depth and intuitive wisdom',
+          },
+          topCards: [
+            { name: 'The Star', count: 3 },
+            { name: 'Two of Cups', count: 2 },
+            { name: 'Ace of Cups', count: 2 },
+          ],
+          dominantSuit: {
+            suit: 'Cups',
+            percentage: 60,
+            count: 6,
+          },
+          dateRange: {
+            start: weekAgo.toISOString().split('T')[0],
+            end: today.toISOString().split('T')[0],
+          },
+        };
+      } else {
+        data = JSON.parse(raw) as WeeklyPatternShareRecord;
+      }
     }
     const { width, height } = getFormatDimensions(format);
     const firstName = data.name?.trim().split(' ')[0] || '';
@@ -119,22 +183,54 @@ export async function GET(request: NextRequest) {
 
     const isLandscape = format === 'landscape';
     const isStory = format === 'story';
-    const padding = isLandscape ? 40 : isStory ? 80 : 60;
-    const titleSize = isLandscape ? 40 : isStory ? 64 : 52;
-    const subtitleSize = isLandscape ? 18 : isStory ? 28 : 22;
-    const cardNameSize = isLandscape ? 16 : isStory ? 26 : 20;
-    const labelSize = isLandscape ? 16 : isStory ? 24 : 18;
+    const padding = isLandscape ? 48 : isStory ? 60 : 60;
+    const titleSize = isLandscape ? 48 : isStory ? 84 : 72;
+    const subtitleSize = isLandscape ? 22 : isStory ? 36 : 32;
+    const cardNameSize = isLandscape ? 22 : isStory ? 36 : 32;
+    const labelSize = isLandscape ? 20 : isStory ? 32 : 28;
+    const seasonTitleSize = isLandscape ? 36 : isStory ? 56 : 52;
+    const suitSymbolSize = isLandscape ? 72 : isStory ? 120 : 108;
+
+    // Truncation helper for text overflow prevention
+    const truncate = (text: string, limit: number) =>
+      text.length > limit ? text.slice(0, limit - 1) + '…' : text;
+
+    // Limit top cards to prevent overflow (max 3 for landscape/square)
+    const maxCards = isStory ? 4 : 3;
+    const displayTopCards = data.topCards.slice(0, maxCards);
 
     const suitColor =
       SUIT_COLORS[data.dominantSuit.suit] || OG_COLORS.primaryViolet;
     const suitSymbol = SUIT_SYMBOLS[data.dominantSuit.suit] || '★';
+
+    // Generate unique starfield based on shareId
+    const stars = generateStarfield(data.shareId, getStarCount(format));
 
     // Format date range
     const startDate = new Date(data.dateRange.start);
     const endDate = new Date(data.dateRange.end);
     const dateRangeText = `${startDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} - ${endDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}`;
 
-    return new ImageResponse(
+    // Starfield JSX
+    const starfieldJsx = stars.map((star, i) => (
+      <div
+        key={i}
+        style={{
+          position: 'absolute',
+          left: `${star.x}%`,
+          top: `${star.y}%`,
+          width: star.size,
+          height: star.size,
+          borderRadius: '50%',
+          background: '#fff',
+          opacity: star.opacity,
+        }}
+      />
+    ));
+
+    // Layout based on format
+    const layoutJsx = isLandscape ? (
+      // Landscape Layout - Season card left (50%), Top cards right (50%)
       <div
         style={{
           width: '100%',
@@ -147,13 +243,15 @@ export async function GET(request: NextRequest) {
           fontFamily: 'Roboto Mono',
         }}
       >
+        {starfieldJsx}
+
         {/* Header */}
         <div
           style={{
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
-            marginBottom: isLandscape ? 20 : isStory ? 48 : 32,
+            marginBottom: 20,
           }}
         >
           <div
@@ -182,67 +280,261 @@ export async function GET(request: NextRequest) {
           </div>
         </div>
 
-        {/* Season Card */}
+        {/* Two-column layout */}
         <div
           style={{
             display: 'flex',
-            flexDirection: 'column',
-            padding: isLandscape ? 20 : 28,
-            background: OG_COLORS.cardBg,
-            border: `2px solid ${suitColor}`,
-            borderRadius: 16,
-            marginBottom: isLandscape ? 16 : 24,
+            flexDirection: 'row',
+            gap: 24,
+            flex: 1,
           }}
         >
+          {/* Left: Season Card */}
           <div
             style={{
               display: 'flex',
+              flexDirection: 'column',
+              padding: '28px 32px',
+              background: OG_COLORS.cardBg,
+              border: `2px solid ${suitColor}`,
+              borderRadius: 18,
+              width: '50%',
               alignItems: 'center',
-              gap: 16,
-              marginBottom: 12,
+              justifyContent: 'center',
             }}
           >
             <div
               style={{
-                fontSize: isLandscape ? 48 : 64,
+                fontSize: suitSymbolSize,
                 color: suitColor,
                 display: 'flex',
+                marginBottom: 16,
               }}
             >
               {suitSymbol}
             </div>
             <div
               style={{
+                fontSize: seasonTitleSize,
+                fontWeight: 400,
+                color: suitColor,
+                letterSpacing: '0.05em',
                 display: 'flex',
-                flexDirection: 'column',
+                textAlign: 'center',
+                marginBottom: 8,
               }}
             >
-              <div
-                style={{
-                  fontSize: isLandscape ? 28 : isStory ? 38 : 36,
-                  fontWeight: 400,
-                  color: suitColor,
-                  letterSpacing: '0.05em',
-                  display: 'flex',
-                }}
-              >
-                {data.season.name}
-              </div>
-              <div
-                style={{
-                  fontSize: labelSize,
-                  color: OG_COLORS.textSecondary,
-                  marginTop: 4,
-                  textTransform: 'uppercase',
-                  letterSpacing: '0.1em',
-                  fontWeight: 300,
-                  display: 'flex',
-                }}
-              >
-                {data.dominantSuit.suit} Dominant •{' '}
-                {data.dominantSuit.percentage.toFixed(0)}%
-              </div>
+              {data.season.name}
             </div>
+            <div
+              style={{
+                fontSize: labelSize,
+                color: OG_COLORS.textSecondary,
+                textTransform: 'uppercase',
+                letterSpacing: '0.1em',
+                fontWeight: 300,
+                display: 'flex',
+              }}
+            >
+              {data.dominantSuit.suit} Dominant •{' '}
+              {data.dominantSuit.percentage.toFixed(0)}%
+            </div>
+          </div>
+
+          {/* Right: Top Cards */}
+          <div
+            style={{
+              display: 'flex',
+              flexDirection: 'column',
+              gap: 12,
+              flex: 1,
+            }}
+          >
+            <div
+              style={{
+                fontSize: labelSize,
+                color: OG_COLORS.textSecondary,
+                textTransform: 'uppercase',
+                letterSpacing: '0.1em',
+                fontWeight: 300,
+                display: 'flex',
+              }}
+            >
+              Top Cards This Week
+            </div>
+            {displayTopCards.map((card, index) => (
+              <div
+                key={index}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  padding: '16px 20px',
+                  background: OG_COLORS.cardBg,
+                  border: `1px solid ${OG_COLORS.border}`,
+                  borderRadius: 14,
+                  flex: 1,
+                }}
+              >
+                <div
+                  style={{
+                    fontSize: cardNameSize,
+                    color: OG_COLORS.textPrimary,
+                    fontWeight: 400,
+                    display: 'flex',
+                  }}
+                >
+                  {truncate(card.name, 25)}
+                </div>
+                <div
+                  style={{
+                    fontSize: cardNameSize,
+                    color: OG_COLORS.textTertiary,
+                    fontWeight: 300,
+                    display: 'flex',
+                  }}
+                >
+                  ×{card.count}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Footer */}
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: 12,
+            position: 'absolute',
+            bottom: 40,
+            left: 0,
+            right: 0,
+          }}
+        >
+          <img
+            src={`${baseUrl}/icons/moon-phases/full-moon.svg`}
+            width={24}
+            height={24}
+            style={{ opacity: 0.6 }}
+            alt=''
+          />
+          <span
+            style={{
+              fontFamily: 'Roboto Mono',
+              fontWeight: 300,
+              fontSize: 16,
+              opacity: 0.6,
+              letterSpacing: '0.1em',
+              color: OG_COLORS.textPrimary,
+              display: 'flex',
+            }}
+          >
+            Join free at lunary.app
+          </span>
+        </div>
+      </div>
+    ) : isStory ? (
+      // Story Layout - Large season card with big symbol
+      <div
+        style={{
+          width: '100%',
+          height: '100%',
+          display: 'flex',
+          flexDirection: 'column',
+          background: OG_COLORS.background,
+          padding: '120px 60px 200px 60px',
+          position: 'relative',
+          fontFamily: 'Roboto Mono',
+        }}
+      >
+        {starfieldJsx}
+
+        {/* Header */}
+        <div
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            marginBottom: 48,
+          }}
+        >
+          <div
+            style={{
+              fontSize: titleSize,
+              fontWeight: 400,
+              color: OG_COLORS.textPrimary,
+              letterSpacing: '0.05em',
+              textAlign: 'center',
+              display: 'flex',
+            }}
+          >
+            {firstName ? `${firstName}'s` : 'My'} Week in Tarot
+          </div>
+          <div
+            style={{
+              fontSize: subtitleSize,
+              color: OG_COLORS.textTertiary,
+              marginTop: 12,
+              letterSpacing: '0.1em',
+              textAlign: 'center',
+              display: 'flex',
+            }}
+          >
+            {dateRangeText}
+          </div>
+        </div>
+
+        {/* Large Season Card */}
+        <div
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+            padding: '40px 48px',
+            background: OG_COLORS.cardBg,
+            border: `3px solid ${suitColor}`,
+            borderRadius: 24,
+            marginBottom: 36,
+            alignItems: 'center',
+          }}
+        >
+          <div
+            style={{
+              fontSize: suitSymbolSize,
+              color: suitColor,
+              display: 'flex',
+              marginBottom: 20,
+            }}
+          >
+            {suitSymbol}
+          </div>
+          <div
+            style={{
+              fontSize: seasonTitleSize,
+              fontWeight: 400,
+              color: suitColor,
+              letterSpacing: '0.05em',
+              display: 'flex',
+              textAlign: 'center',
+              marginBottom: 12,
+            }}
+          >
+            {data.season.name}
+          </div>
+          <div
+            style={{
+              fontSize: labelSize,
+              color: OG_COLORS.textSecondary,
+              textTransform: 'uppercase',
+              letterSpacing: '0.1em',
+              fontWeight: 300,
+              display: 'flex',
+            }}
+          >
+            {data.dominantSuit.suit} Dominant •{' '}
+            {data.dominantSuit.percentage.toFixed(0)}%
           </div>
         </div>
 
@@ -251,7 +543,7 @@ export async function GET(request: NextRequest) {
           style={{
             display: 'flex',
             flexDirection: 'column',
-            gap: isLandscape ? 12 : 16,
+            gap: 20,
             flex: 1,
           }}
         >
@@ -267,17 +559,17 @@ export async function GET(request: NextRequest) {
           >
             Top Cards This Week
           </div>
-          {data.topCards.map((card, index) => (
+          {displayTopCards.map((card, index) => (
             <div
               key={index}
               style={{
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'space-between',
-                padding: isLandscape ? 12 : 16,
+                padding: '24px 32px',
                 background: OG_COLORS.cardBg,
                 border: `1px solid ${OG_COLORS.border}`,
-                borderRadius: 12,
+                borderRadius: 18,
               }}
             >
               <div
@@ -288,7 +580,7 @@ export async function GET(request: NextRequest) {
                   display: 'flex',
                 }}
               >
-                {card.name}
+                {truncate(card.name, 30)}
               </div>
               <div
                 style={{
@@ -304,21 +596,219 @@ export async function GET(request: NextRequest) {
           ))}
         </div>
 
-        {/* Footer Branding */}
+        {/* Footer */}
         <div
           style={{
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            gap: 8,
-            marginTop: isLandscape ? 20 : 32,
+            gap: 12,
+            position: 'absolute',
+            bottom: 40,
+            left: 0,
+            right: 0,
           }}
         >
           <img
             src={`${baseUrl}/icons/moon-phases/full-moon.svg`}
-            width={22}
-            height={22}
-            style={{ opacity: 0.45 }}
+            width={28}
+            height={28}
+            style={{ opacity: 0.6 }}
+            alt=''
+          />
+          <span
+            style={{
+              fontFamily: 'Roboto Mono',
+              fontWeight: 300,
+              fontSize: 20,
+              opacity: 0.6,
+              letterSpacing: '0.1em',
+              color: OG_COLORS.textPrimary,
+              display: 'flex',
+            }}
+          >
+            Join free at lunary.app
+          </span>
+        </div>
+      </div>
+    ) : (
+      // Square Layout
+      <div
+        style={{
+          width: '100%',
+          height: '100%',
+          display: 'flex',
+          flexDirection: 'column',
+          background: OG_COLORS.background,
+          padding: `${padding}px`,
+          position: 'relative',
+          fontFamily: 'Roboto Mono',
+        }}
+      >
+        {starfieldJsx}
+
+        {/* Header */}
+        <div
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            marginBottom: 36,
+          }}
+        >
+          <div
+            style={{
+              fontSize: titleSize,
+              fontWeight: 400,
+              color: OG_COLORS.textPrimary,
+              letterSpacing: '0.05em',
+              textAlign: 'center',
+              display: 'flex',
+            }}
+          >
+            {firstName ? `${firstName}'s` : 'My'} Week in Tarot
+          </div>
+          <div
+            style={{
+              fontSize: subtitleSize,
+              color: OG_COLORS.textTertiary,
+              marginTop: 10,
+              letterSpacing: '0.1em',
+              textAlign: 'center',
+              display: 'flex',
+            }}
+          >
+            {dateRangeText}
+          </div>
+        </div>
+
+        {/* Season Card - Full width, prominent */}
+        <div
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+            padding: '32px 36px',
+            background: OG_COLORS.cardBg,
+            border: `2px solid ${suitColor}`,
+            borderRadius: 20,
+            marginBottom: 28,
+            alignItems: 'center',
+          }}
+        >
+          <div
+            style={{
+              fontSize: suitSymbolSize,
+              color: suitColor,
+              display: 'flex',
+              marginBottom: 16,
+            }}
+          >
+            {suitSymbol}
+          </div>
+          <div
+            style={{
+              fontSize: seasonTitleSize,
+              fontWeight: 400,
+              color: suitColor,
+              letterSpacing: '0.05em',
+              display: 'flex',
+              textAlign: 'center',
+              marginBottom: 10,
+            }}
+          >
+            {data.season.name}
+          </div>
+          <div
+            style={{
+              fontSize: labelSize,
+              color: OG_COLORS.textSecondary,
+              textTransform: 'uppercase',
+              letterSpacing: '0.1em',
+              fontWeight: 300,
+              display: 'flex',
+            }}
+          >
+            {data.dominantSuit.suit} Dominant •{' '}
+            {data.dominantSuit.percentage.toFixed(0)}%
+          </div>
+        </div>
+
+        {/* Top Cards - Full width list */}
+        <div
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+            gap: 16,
+            flex: 1,
+          }}
+        >
+          <div
+            style={{
+              fontSize: labelSize,
+              color: OG_COLORS.textSecondary,
+              textTransform: 'uppercase',
+              letterSpacing: '0.1em',
+              fontWeight: 300,
+              display: 'flex',
+            }}
+          >
+            Top Cards This Week
+          </div>
+          {displayTopCards.map((card, index) => (
+            <div
+              key={index}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                padding: '20px 24px',
+                background: OG_COLORS.cardBg,
+                border: `1px solid ${OG_COLORS.border}`,
+                borderRadius: 16,
+              }}
+            >
+              <div
+                style={{
+                  fontSize: cardNameSize,
+                  color: OG_COLORS.textPrimary,
+                  fontWeight: 400,
+                  display: 'flex',
+                }}
+              >
+                {truncate(card.name, 28)}
+              </div>
+              <div
+                style={{
+                  fontSize: cardNameSize,
+                  color: OG_COLORS.textTertiary,
+                  fontWeight: 300,
+                  display: 'flex',
+                }}
+              >
+                ×{card.count}
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* Footer */}
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: 12,
+            position: 'absolute',
+            bottom: 40,
+            left: 0,
+            right: 0,
+          }}
+        >
+          <img
+            src={`${baseUrl}/icons/moon-phases/full-moon.svg`}
+            width={24}
+            height={24}
+            style={{ opacity: 0.6 }}
             alt=''
           />
           <span
@@ -326,29 +816,30 @@ export async function GET(request: NextRequest) {
               fontFamily: 'Roboto Mono',
               fontWeight: 300,
               fontSize: 16,
-              opacity: 0.4,
+              opacity: 0.6,
               letterSpacing: '0.1em',
               color: OG_COLORS.textPrimary,
               display: 'flex',
             }}
           >
-            Discover your patterns at lunary.app
+            Join free at lunary.app
           </span>
         </div>
-      </div>,
-      {
-        width,
-        height,
-        fonts: [
-          {
-            name: 'Roboto Mono',
-            data: robotoMonoData,
-            style: 'normal',
-            weight: 400,
-          },
-        ],
-      },
+      </div>
     );
+
+    return new ImageResponse(layoutJsx, {
+      width,
+      height,
+      fonts: [
+        {
+          name: 'Roboto Mono',
+          data: robotoMonoData,
+          style: 'normal',
+          weight: 400,
+        },
+      ],
+    });
   } catch (error) {
     console.error('[WeeklyPatternOG] Failed to generate image:', error);
     return new Response('Failed to generate image', { status: 500 });

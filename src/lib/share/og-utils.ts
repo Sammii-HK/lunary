@@ -1,6 +1,9 @@
 import type { ShareFormat } from '@/hooks/useShareModal';
 import { FORMAT_SIZES, STORY_SAFE_ZONES } from './types';
 
+// Increment this to bust OG image caches when designs change
+export const OG_IMAGE_VERSION = 6;
+
 export function getFormatDimensions(format: ShareFormat = 'square') {
   return FORMAT_SIZES[format];
 }
@@ -74,6 +77,7 @@ export function getOGFonts() {
 export const OG_COLORS = {
   background: '#0A0A0A',
   primaryViolet: '#8458D8',
+  cometTrail: '#7B7BE8',
   galaxyHaze: '#C77DFF',
   cosmicRose: '#EE789E',
   textPrimary: '#FFFFFF',
@@ -82,3 +86,60 @@ export const OG_COLORS = {
   border: 'rgba(255, 255, 255, 0.12)',
   cardBg: 'rgba(255, 255, 255, 0.03)',
 } as const;
+
+// Seeded pseudo-random number generator
+function seededRandom(seed: string) {
+  let hash = 0;
+  for (let i = 0; i < seed.length; i++) {
+    hash = (hash << 5) - hash + seed.charCodeAt(i);
+    hash = hash & hash;
+  }
+
+  return function () {
+    hash = (hash * 1103515245 + 12345) & 0x7fffffff;
+    return hash / 0x7fffffff;
+  };
+}
+
+export interface Star {
+  x: number;
+  y: number;
+  size: number;
+  opacity: number;
+}
+
+export function generateStarfield(shareId: string, count: number = 80): Star[] {
+  const random = seededRandom(shareId);
+  const stars: Star[] = [];
+
+  for (let i = 0; i < count; i++) {
+    stars.push({
+      x: random() * 100,
+      y: random() * 100,
+      size: 1 + random() * 2,
+      opacity: 0.3 + random() * 0.6,
+    });
+  }
+
+  return stars;
+}
+
+export function getStarCount(format: ShareFormat): number {
+  switch (format) {
+    case 'story':
+      return 120;
+    case 'landscape':
+      return 60;
+    default:
+      return 80;
+  }
+}
+
+export function renderBrandedFooter(baseUrl: string, fontSize: number = 16) {
+  return {
+    display: 'flex',
+    alignItems: 'center',
+    gap: 12,
+    justifyContent: 'center',
+  };
+}

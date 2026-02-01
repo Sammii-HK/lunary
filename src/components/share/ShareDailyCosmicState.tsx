@@ -10,6 +10,8 @@ import { ShareActions } from './ShareActions';
 import { ShareFormatSelector } from './ShareFormatSelector';
 import { shareTracking } from '@/lib/analytics/share-tracking';
 import { getCosmicContextForDate } from '@/lib/cosmic/cosmic-context-utils';
+import { isInDemoMode } from '@/lib/demo-mode';
+import { OG_IMAGE_VERSION } from '@/lib/share/og-utils';
 
 // Zodiac season calculation
 const ZODIAC_SEASONS = [
@@ -177,7 +179,7 @@ export function ShareDailyCosmicState({
 
       const ogImageUrl = `/api/og/share/cosmic-state?shareId=${encodeURIComponent(
         data.shareId,
-      )}&format=${format}`;
+      )}&format=${format}&v=${OG_IMAGE_VERSION}`;
 
       const imageResponse = await fetch(ogImageUrl);
       if (!imageResponse.ok) throw new Error('Failed to generate image');
@@ -195,6 +197,14 @@ export function ShareDailyCosmicState({
   }, [cosmicData, format, user?.name, setLoading, setError]);
 
   const handleOpen = async () => {
+    if (isInDemoMode()) {
+      window.dispatchEvent(
+        new CustomEvent('demo-action-blocked', {
+          detail: { action: 'Sharing images' },
+        }),
+      );
+      return;
+    }
     openModal();
     shareTracking.shareInitiated(user?.id, 'cosmic-state');
     if (!imageBlob) {

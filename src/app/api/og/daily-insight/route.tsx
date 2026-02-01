@@ -8,7 +8,11 @@ import {
   getPlanetSymbol,
   getZodiacSymbol,
 } from '../../../../../utils/astrology/cosmic-og';
-import { getFormatDimensions } from '@/lib/share/og-utils';
+import {
+  getFormatDimensions,
+  generateStarfield,
+  getStarCount,
+} from '@/lib/share/og-utils';
 import type { ShareFormat } from '@/hooks/useShareModal';
 
 export const runtime = 'nodejs';
@@ -192,23 +196,31 @@ export async function GET(request: NextRequest): Promise<Response> {
     // Format-aware sizing
     const isLandscape = format === 'landscape';
     const isStory = format === 'story';
+    const isSquare = format === 'square';
     const padding = isLandscape
       ? '32px 36px'
       : isStory
         ? '60px 50px'
-        : '40px 44px';
-    const titleSize = isLandscape ? '36px' : isStory ? '56px' : '48px';
-    const dateSize = isLandscape ? '24px' : isStory ? '36px' : '30px';
+        : '48px 52px';
+    const titleSize = isLandscape ? '36px' : isStory ? '56px' : '52px';
+    const dateSize = isLandscape ? '24px' : isStory ? '36px' : '24px';
     const cardPadding = isLandscape
       ? '14px 18px'
       : isStory
         ? '24px 32px'
-        : '18px 24px';
+        : '24px 30px';
     const cardMargin = isLandscape ? '10px' : isStory ? '16px' : '12px';
     const iconSize = isLandscape ? 22 : isStory ? 32 : 28;
-    const cardTitleSize = isLandscape ? '26px' : isStory ? '38px' : '32px';
-    const cardTextSize = isLandscape ? '20px' : isStory ? '28px' : '24px';
-    const largeTextSize = isLandscape ? '26px' : isStory ? '38px' : '32px';
+    const cardTitleSize = isLandscape ? '26px' : isStory ? '38px' : '36px';
+    const cardTextSize = isLandscape ? '20px' : isStory ? '28px' : '28px';
+    const largeTextSize = isLandscape ? '26px' : isStory ? '38px' : '36px';
+
+    // Truncation helper with increased limits for better space utilization
+    const truncate = (text: string, limit: number) =>
+      text.length > limit ? text.slice(0, limit - 1) + '…' : text;
+
+    // Increased truncation limits for square format
+    const insightTruncLimit = isSquare ? 180 : isLandscape ? 90 : 180;
 
     const PLANETS = [
       'Sun',
@@ -231,6 +243,27 @@ export async function GET(request: NextRequest): Promise<Response> {
     ).length;
 
     const firstName = userName ? userName.split(' ')[0] : '';
+
+    // Generate starfield for consistent look with other OG images
+    const starfieldId = userName || 'daily-insight-default';
+    const stars = generateStarfield(starfieldId, getStarCount(format));
+
+    // Starfield JSX
+    const starfieldJsx = stars.map((star, i) => (
+      <div
+        key={i}
+        style={{
+          position: 'absolute',
+          left: `${star.x}%`,
+          top: `${star.y}%`,
+          width: star.size,
+          height: star.size,
+          borderRadius: '50%',
+          background: '#fff',
+          opacity: star.opacity * 0.6,
+        }}
+      />
+    ));
 
     const fonts: {
       name: string;
@@ -255,7 +288,483 @@ export async function GET(request: NextRequest): Promise<Response> {
       : 'Lunary Insight';
 
     // Inline JSX directly based on format
-    const layoutJsx = isLandscape ? (
+    const layoutJsx = isSquare ? (
+      // Square Layout - 2x3 grid (critical fix for overflow)
+      <div
+        style={{
+          height: '100%',
+          width: '100%',
+          display: 'flex',
+          flexDirection: 'column',
+          background: '#09090b',
+          fontFamily: 'Roboto Mono, monospace',
+          color: 'white',
+          padding: '48px',
+          position: 'relative',
+        }}
+      >
+        {/* Starfield background */}
+        {starfieldJsx}
+
+        {/* Header */}
+        <div
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            marginBottom: '20px',
+            position: 'relative',
+          }}
+        >
+          <div
+            style={{
+              fontSize: '52px',
+              display: 'flex',
+              color: firstName ? '#d8b4fe' : '#e4e4e7',
+            }}
+          >
+            {titleContent}
+          </div>
+          <div
+            style={{
+              fontSize: '24px',
+              color: '#a1a1aa',
+              marginTop: '8px',
+              display: 'flex',
+            }}
+          >
+            {dateStr}
+          </div>
+        </div>
+
+        {/* 2x3 Grid of cards */}
+        <div
+          style={{
+            display: 'flex',
+            flexWrap: 'wrap',
+            gap: '20px',
+            flex: 1,
+            position: 'relative',
+          }}
+        >
+          {/* Row 1: Moon Phase, Sky Now */}
+          {/* Moon Phase Card */}
+          <div
+            style={{
+              display: 'flex',
+              flexDirection: 'column',
+              border: '1px solid #27272a',
+              borderRadius: '14px',
+              padding: '20px 24px',
+              background: 'rgba(24, 24, 27, 0.9)',
+              width: '480px',
+              height: '220px',
+            }}
+          >
+            <div
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '14px',
+              }}
+            >
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={`${baseUrl}/icons/moon-phases/${getMoonPhaseSvgPath(moonPhase.name)}.png`}
+                width={48}
+                height={48}
+                alt={moonPhase.name}
+                style={{ display: 'flex' }}
+              />
+              <div style={{ display: 'flex', flexDirection: 'column' }}>
+                <div
+                  style={{
+                    fontSize: '28px',
+                    fontWeight: 600,
+                    color: '#fafafa',
+                    display: 'flex',
+                  }}
+                >
+                  {moonPhase.name}
+                </div>
+                <div
+                  style={{
+                    fontSize: '22px',
+                    color: '#a1a1aa',
+                    display: 'flex',
+                  }}
+                >
+                  in {positions.Moon?.sign || 'Aries'}
+                </div>
+              </div>
+            </div>
+            <div
+              style={{
+                fontSize: '20px',
+                color: '#a1a1aa',
+                marginTop: '12px',
+                display: 'flex',
+              }}
+            >
+              4 days until Full Moon
+            </div>
+          </div>
+
+          {/* Sky Now Card */}
+          <div
+            style={{
+              display: 'flex',
+              flexDirection: 'column',
+              border: '1px solid #27272a',
+              borderRadius: '14px',
+              padding: '20px 24px',
+              background: 'rgba(24, 24, 27, 0.9)',
+              width: '480px',
+              height: '220px',
+            }}
+          >
+            <div
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '12px',
+                marginBottom: '14px',
+              }}
+            >
+              <TelescopeIcon size={26} />
+              <div
+                style={{
+                  fontSize: '26px',
+                  color: '#fafafa',
+                  display: 'flex',
+                }}
+              >
+                Sky Now
+              </div>
+              {retrogradeCount > 0 && (
+                <div
+                  style={{
+                    fontSize: '16px',
+                    color: '#f87171',
+                    background: 'rgba(248, 113, 113, 0.15)',
+                    padding: '4px 10px',
+                    borderRadius: '6px',
+                    display: 'flex',
+                  }}
+                >
+                  {retrogradeCount}℞
+                </div>
+              )}
+            </div>
+            <div
+              style={{
+                display: 'flex',
+                flexWrap: 'wrap',
+                gap: '12px',
+              }}
+            >
+              {['Sun', 'Moon', 'Mercury', 'Venus', 'Mars'].map((planet) => (
+                <div
+                  key={planet}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                  }}
+                >
+                  <div
+                    style={{
+                      fontFamily: 'Astronomicon',
+                      fontSize: '28px',
+                      color: positions[planet]?.retrograde
+                        ? '#f87171'
+                        : '#e4e4e7',
+                      display: 'flex',
+                    }}
+                  >
+                    {getPlanetSymbol(planet)}
+                  </div>
+                  <div
+                    style={{
+                      fontFamily: 'Astronomicon',
+                      fontSize: '22px',
+                      color: '#a1a1aa',
+                      display: 'flex',
+                    }}
+                  >
+                    {getZodiacSymbol(positions[planet]?.sign || 'Aries')}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Row 2: Your Day, Daily Card */}
+          {/* Your Day Card */}
+          <div
+            style={{
+              display: 'flex',
+              flexDirection: 'column',
+              border: '1px solid #27272a',
+              borderRadius: '14px',
+              padding: '20px 24px',
+              background: 'rgba(24, 24, 27, 0.9)',
+              width: '480px',
+              height: '220px',
+            }}
+          >
+            <div
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '12px',
+                marginBottom: '12px',
+              }}
+            >
+              <SparklesIcon size={26} />
+              <div
+                style={{
+                  fontSize: '26px',
+                  color: '#fafafa',
+                  display: 'flex',
+                }}
+              >
+                Your Day
+              </div>
+              {isPersonalized && (
+                <div
+                  style={{
+                    fontSize: '14px',
+                    color: '#d8b4fe',
+                    background: 'rgba(216, 180, 254, 0.15)',
+                    padding: '4px 10px',
+                    borderRadius: '6px',
+                    display: 'flex',
+                  }}
+                >
+                  Personal
+                </div>
+              )}
+            </div>
+            <div
+              style={{
+                fontSize: '22px',
+                color: '#a1a1aa',
+                lineHeight: 1.4,
+                display: 'flex',
+              }}
+            >
+              {truncate(insight, insightTruncLimit)}
+            </div>
+          </div>
+
+          {/* Daily Card */}
+          <div
+            style={{
+              display: 'flex',
+              flexDirection: 'column',
+              border: '1px solid #27272a',
+              borderRadius: '14px',
+              padding: '20px 24px',
+              background: 'rgba(24, 24, 27, 0.9)',
+              width: '480px',
+              height: '220px',
+            }}
+          >
+            <div
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '12px',
+                marginBottom: '10px',
+              }}
+            >
+              <LayersIcon size={26} />
+              <div
+                style={{
+                  fontSize: '26px',
+                  color: '#fafafa',
+                  display: 'flex',
+                }}
+              >
+                Daily Card
+              </div>
+            </div>
+            <div
+              style={{
+                fontSize: '28px',
+                color: '#d8b4fe',
+                marginBottom: '8px',
+                display: 'flex',
+              }}
+            >
+              {truncate(tarotCard, 25)}
+            </div>
+            <div
+              style={{
+                fontSize: '20px',
+                color: '#a1a1aa',
+                display: 'flex',
+              }}
+            >
+              {truncate(tarotKeywords, 50)}
+            </div>
+          </div>
+
+          {/* Row 3: Transit, Crystal */}
+          {/* Transit Card */}
+          <div
+            style={{
+              display: 'flex',
+              flexDirection: 'column',
+              border: '1px solid #27272a',
+              borderRadius: '14px',
+              padding: '20px 24px',
+              background: 'rgba(24, 24, 27, 0.9)',
+              width: '480px',
+              height: '220px',
+            }}
+          >
+            <div
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '12px',
+                marginBottom: '10px',
+              }}
+            >
+              <div
+                style={{
+                  fontFamily: 'Astronomicon',
+                  fontSize: '30px',
+                  color: '#d8b4fe',
+                  display: 'flex',
+                }}
+              >
+                {getPlanetSymbol(transitPlanet)}
+              </div>
+              <div
+                style={{ fontSize: '24px', color: '#a1a1aa', display: 'flex' }}
+              >
+                {transitDate}
+              </div>
+              <div
+                style={{
+                  fontSize: '14px',
+                  color: '#fbbf24',
+                  background: 'rgba(251, 191, 36, 0.15)',
+                  padding: '4px 10px',
+                  borderRadius: '6px',
+                  display: 'flex',
+                }}
+              >
+                Major
+              </div>
+            </div>
+            <div
+              style={{
+                fontSize: '24px',
+                color: '#fafafa',
+                marginBottom: '8px',
+                display: 'flex',
+              }}
+            >
+              {truncate(transitTitle, 35)}
+            </div>
+            <div
+              style={{
+                fontSize: '20px',
+                color: '#a1a1aa',
+                display: 'flex',
+              }}
+            >
+              {truncate(transitDesc, 50)}
+            </div>
+          </div>
+
+          {/* Crystal Card */}
+          <div
+            style={{
+              display: 'flex',
+              flexDirection: 'column',
+              border: '1px solid #27272a',
+              borderRadius: '14px',
+              padding: '20px 24px',
+              background: 'rgba(24, 24, 27, 0.9)',
+              width: '480px',
+              height: '220px',
+            }}
+          >
+            <div
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '12px',
+                marginBottom: '10px',
+              }}
+            >
+              <GemIcon size={26} />
+              <div
+                style={{
+                  fontSize: '26px',
+                  color: '#fafafa',
+                  display: 'flex',
+                }}
+              >
+                {truncate(crystal, 20)}
+              </div>
+              {isPersonalized && (
+                <div
+                  style={{
+                    fontSize: '14px',
+                    color: '#d8b4fe',
+                    background: 'rgba(216, 180, 254, 0.15)',
+                    padding: '4px 10px',
+                    borderRadius: '6px',
+                    display: 'flex',
+                  }}
+                >
+                  For you
+                </div>
+              )}
+            </div>
+            <div
+              style={{
+                fontSize: '20px',
+                color: '#a1a1aa',
+                lineHeight: 1.4,
+                display: 'flex',
+              }}
+            >
+              {truncate(crystalReason, 90)}
+            </div>
+          </div>
+        </div>
+
+        {/* Footer */}
+        <div
+          style={{
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            gap: '12px',
+            marginTop: '14px',
+            position: 'relative',
+          }}
+        >
+          <LunaryLogo size={28} />
+          <div
+            style={{
+              fontSize: '20px',
+              color: '#d8b4fe',
+              display: 'flex',
+            }}
+          >
+            lunary.app
+          </div>
+        </div>
+      </div>
+    ) : isLandscape ? (
       // Landscape Layout - 3x2 grid
       <div
         style={{
@@ -266,21 +775,26 @@ export async function GET(request: NextRequest): Promise<Response> {
           background: '#09090b',
           fontFamily: 'Roboto Mono, monospace',
           color: 'white',
-          padding,
+          padding: '48px',
+          position: 'relative',
         }}
       >
+        {/* Starfield background */}
+        {starfieldJsx}
+
         {/* Header */}
         <div
           style={{
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
-            marginBottom: '12px',
+            marginBottom: '16px',
+            position: 'relative',
           }}
         >
           <div
             style={{
-              fontSize: titleSize,
+              fontSize: '44px',
               display: 'flex',
               color: firstName ? '#d8b4fe' : '#e4e4e7',
             }}
@@ -289,9 +803,9 @@ export async function GET(request: NextRequest): Promise<Response> {
           </div>
           <div
             style={{
-              fontSize: dateSize,
+              fontSize: '20px',
               color: '#a1a1aa',
-              marginTop: '6px',
+              marginTop: '8px',
               display: 'flex',
             }}
           >
@@ -299,13 +813,14 @@ export async function GET(request: NextRequest): Promise<Response> {
           </div>
         </div>
 
-        {/* 3x2 Grid of cards */}
+        {/* 3x2 Grid of cards - fixed width calculation */}
         <div
           style={{
             display: 'flex',
             flexWrap: 'wrap',
-            gap: '10px',
+            gap: '12px',
             flex: 1,
+            position: 'relative',
           }}
         >
           {/* Row 1: Moon Phase, Sky Now, Crystal */}
@@ -316,30 +831,31 @@ export async function GET(request: NextRequest): Promise<Response> {
               flexDirection: 'column',
               border: '1px solid #27272a',
               borderRadius: '12px',
-              padding: '10px 12px',
-              background: '#18181b',
-              width: 'calc(33.33% - 7px)',
+              padding: '14px 16px',
+              background: 'rgba(24, 24, 27, 0.9)',
+              width: '352px',
+              height: '120px',
             }}
           >
             <div
               style={{
                 display: 'flex',
                 alignItems: 'center',
-                gap: '10px',
+                gap: '12px',
               }}
             >
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src={`${baseUrl}/icons/moon-phases/${getMoonPhaseSvgPath(moonPhase.name)}.png`}
-                width={28}
-                height={28}
+                width={36}
+                height={36}
                 alt={moonPhase.name}
                 style={{ display: 'flex' }}
               />
               <div style={{ display: 'flex', flexDirection: 'column' }}>
                 <div
                   style={{
-                    fontSize: '18px',
+                    fontSize: '20px',
                     fontWeight: 600,
                     color: '#fafafa',
                     display: 'flex',
@@ -349,7 +865,7 @@ export async function GET(request: NextRequest): Promise<Response> {
                 </div>
                 <div
                   style={{
-                    fontSize: '14px',
+                    fontSize: '16px',
                     color: '#a1a1aa',
                     display: 'flex',
                   }}
@@ -367,20 +883,21 @@ export async function GET(request: NextRequest): Promise<Response> {
               flexDirection: 'column',
               border: '1px solid #27272a',
               borderRadius: '12px',
-              padding: '10px 12px',
-              background: '#18181b',
-              width: 'calc(33.33% - 7px)',
+              padding: '14px 16px',
+              background: 'rgba(24, 24, 27, 0.9)',
+              width: '352px',
+              height: '120px',
             }}
           >
             <div
               style={{
                 display: 'flex',
                 alignItems: 'center',
-                gap: '8px',
-                marginBottom: '6px',
+                gap: '10px',
+                marginBottom: '8px',
               }}
             >
-              <TelescopeIcon size={16} />
+              <TelescopeIcon size={18} />
               <div
                 style={{
                   fontSize: '18px',
@@ -395,7 +912,7 @@ export async function GET(request: NextRequest): Promise<Response> {
               style={{
                 display: 'flex',
                 flexWrap: 'wrap',
-                gap: '8px',
+                gap: '10px',
               }}
             >
               {displayPlanets.map((planet) => (
@@ -404,14 +921,14 @@ export async function GET(request: NextRequest): Promise<Response> {
                   style={{
                     display: 'flex',
                     alignItems: 'center',
-                    gap: '4px',
-                    width: 'calc(50% - 4px)',
+                    gap: '6px',
+                    width: '70px',
                   }}
                 >
                   <div
                     style={{
                       fontFamily: 'Astronomicon',
-                      fontSize: '20px',
+                      fontSize: '22px',
                       color: positions[planet]?.retrograde
                         ? '#f87171'
                         : '#e4e4e7',
@@ -423,7 +940,7 @@ export async function GET(request: NextRequest): Promise<Response> {
                   <div
                     style={{
                       fontFamily: 'Astronomicon',
-                      fontSize: '16px',
+                      fontSize: '18px',
                       color: '#a1a1aa',
                       display: 'flex',
                     }}
@@ -442,20 +959,21 @@ export async function GET(request: NextRequest): Promise<Response> {
               flexDirection: 'column',
               border: '1px solid #27272a',
               borderRadius: '12px',
-              padding: '10px 12px',
-              background: '#18181b',
-              width: 'calc(33.33% - 7px)',
+              padding: '14px 16px',
+              background: 'rgba(24, 24, 27, 0.9)',
+              width: '352px',
+              height: '120px',
             }}
           >
             <div
               style={{
                 display: 'flex',
                 alignItems: 'center',
-                gap: '8px',
-                marginBottom: '4px',
+                gap: '10px',
+                marginBottom: '6px',
               }}
             >
-              <GemIcon size={16} />
+              <GemIcon size={18} />
               <div
                 style={{
                   fontSize: '18px',
@@ -468,14 +986,14 @@ export async function GET(request: NextRequest): Promise<Response> {
             </div>
             <div
               style={{
-                fontSize: '13px',
+                fontSize: '14px',
                 color: '#a1a1aa',
                 display: 'flex',
-                lineHeight: 1.3,
+                lineHeight: 1.4,
               }}
             >
-              {crystalReason.length > 60
-                ? crystalReason.substring(0, 60) + '...'
+              {crystalReason.length > 70
+                ? crystalReason.substring(0, 70) + '...'
                 : crystalReason}
             </div>
           </div>
@@ -488,20 +1006,21 @@ export async function GET(request: NextRequest): Promise<Response> {
               flexDirection: 'column',
               border: '1px solid #27272a',
               borderRadius: '12px',
-              padding: '10px 12px',
-              background: '#18181b',
-              width: 'calc(33.33% - 7px)',
+              padding: '14px 16px',
+              background: 'rgba(24, 24, 27, 0.9)',
+              width: '352px',
+              height: '120px',
             }}
           >
             <div
               style={{
                 display: 'flex',
                 alignItems: 'center',
-                gap: '8px',
-                marginBottom: '6px',
+                gap: '10px',
+                marginBottom: '8px',
               }}
             >
-              <SparklesIcon size={16} />
+              <SparklesIcon size={18} />
               <div
                 style={{
                   fontSize: '18px',
@@ -514,13 +1033,13 @@ export async function GET(request: NextRequest): Promise<Response> {
             </div>
             <div
               style={{
-                fontSize: '14px',
+                fontSize: '15px',
                 color: '#a1a1aa',
-                lineHeight: 1.3,
+                lineHeight: 1.4,
                 display: 'flex',
               }}
             >
-              {insight.length > 80 ? insight.substring(0, 80) + '...' : insight}
+              {insight.length > 90 ? insight.substring(0, 90) + '...' : insight}
             </div>
           </div>
 
@@ -531,20 +1050,21 @@ export async function GET(request: NextRequest): Promise<Response> {
               flexDirection: 'column',
               border: '1px solid #27272a',
               borderRadius: '12px',
-              padding: '10px 12px',
-              background: '#18181b',
-              width: 'calc(33.33% - 7px)',
+              padding: '14px 16px',
+              background: 'rgba(24, 24, 27, 0.9)',
+              width: '352px',
+              height: '120px',
             }}
           >
             <div
               style={{
                 display: 'flex',
                 alignItems: 'center',
-                gap: '8px',
-                marginBottom: '4px',
+                gap: '10px',
+                marginBottom: '6px',
               }}
             >
-              <LayersIcon size={16} />
+              <LayersIcon size={18} />
               <div
                 style={{
                   fontSize: '18px',
@@ -557,9 +1077,9 @@ export async function GET(request: NextRequest): Promise<Response> {
             </div>
             <div
               style={{
-                fontSize: '16px',
+                fontSize: '17px',
                 color: '#d8b4fe',
-                marginBottom: '2px',
+                marginBottom: '4px',
                 display: 'flex',
               }}
             >
@@ -567,7 +1087,7 @@ export async function GET(request: NextRequest): Promise<Response> {
             </div>
             <div
               style={{
-                fontSize: '13px',
+                fontSize: '14px',
                 color: '#a1a1aa',
                 display: 'flex',
               }}
@@ -583,23 +1103,24 @@ export async function GET(request: NextRequest): Promise<Response> {
               flexDirection: 'column',
               border: '1px solid #27272a',
               borderRadius: '12px',
-              padding: '10px 12px',
-              background: '#18181b',
-              width: 'calc(33.33% - 7px)',
+              padding: '14px 16px',
+              background: 'rgba(24, 24, 27, 0.9)',
+              width: '352px',
+              height: '120px',
             }}
           >
             <div
               style={{
                 display: 'flex',
                 alignItems: 'center',
-                gap: '8px',
-                marginBottom: '4px',
+                gap: '10px',
+                marginBottom: '6px',
               }}
             >
               <div
                 style={{
                   fontFamily: 'Astronomicon',
-                  fontSize: '20px',
+                  fontSize: '22px',
                   color: '#d8b4fe',
                   display: 'flex',
                 }}
@@ -614,9 +1135,9 @@ export async function GET(request: NextRequest): Promise<Response> {
             </div>
             <div
               style={{
-                fontSize: '15px',
+                fontSize: '16px',
                 color: '#fafafa',
-                marginBottom: '3px',
+                marginBottom: '4px',
                 display: 'flex',
               }}
             >
@@ -624,7 +1145,7 @@ export async function GET(request: NextRequest): Promise<Response> {
             </div>
             <div
               style={{
-                fontSize: '13px',
+                fontSize: '14px',
                 color: '#a1a1aa',
                 display: 'flex',
               }}
@@ -637,11 +1158,12 @@ export async function GET(request: NextRequest): Promise<Response> {
         {/* Footer */}
         <div
           style={{
-            marginTop: '12px',
+            marginTop: '16px',
             display: 'flex',
             justifyContent: 'center',
             alignItems: 'center',
-            gap: '10px',
+            gap: '12px',
+            position: 'relative',
           }}
         >
           <LunaryLogo size={24} />
@@ -668,14 +1190,19 @@ export async function GET(request: NextRequest): Promise<Response> {
           fontFamily: 'Roboto Mono, monospace',
           color: 'white',
           padding,
+          position: 'relative',
         }}
       >
+        {/* Starfield background */}
+        {starfieldJsx}
+
         <div
           style={{
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
             marginBottom: isLandscape ? '16px' : '24px',
+            position: 'relative',
           }}
         >
           <div

@@ -15,6 +15,8 @@ import {
   calculateExpression,
   getNumberMeaning,
 } from '@/lib/numerology';
+import { isInDemoMode } from '@/lib/demo-mode';
+import { OG_IMAGE_VERSION } from '@/lib/share/og-utils';
 
 interface ShareNumerologyProps {
   userName?: string;
@@ -103,7 +105,7 @@ export function ShareNumerology({ userName, birthDate }: ShareNumerologyProps) {
 
       const ogImageUrl = `/api/og/share/numerology?shareId=${encodeURIComponent(
         currentShareId,
-      )}&format=${format}`;
+      )}&format=${format}&v=${OG_IMAGE_VERSION}`;
 
       const imageResponse = await fetch(ogImageUrl);
       if (!imageResponse.ok) throw new Error('Failed to generate image');
@@ -131,6 +133,14 @@ export function ShareNumerology({ userName, birthDate }: ShareNumerologyProps) {
   ]);
 
   const handleOpen = async () => {
+    if (isInDemoMode()) {
+      window.dispatchEvent(
+        new CustomEvent('demo-action-blocked', {
+          detail: { action: 'Sharing images' },
+        }),
+      );
+      return;
+    }
     openModal();
     shareTracking.shareInitiated(user?.id, 'numerology');
     if (!imageBlob) {

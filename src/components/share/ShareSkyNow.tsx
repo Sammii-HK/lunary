@@ -9,6 +9,8 @@ import { SharePreview } from './SharePreview';
 import { ShareActions } from './ShareActions';
 import { ShareFormatSelector } from './ShareFormatSelector';
 import { shareTracking } from '@/lib/analytics/share-tracking';
+import { isInDemoMode } from '@/lib/demo-mode';
+import { OG_IMAGE_VERSION } from '@/lib/share/og-utils';
 
 interface PlanetPosition {
   sign: string;
@@ -115,7 +117,7 @@ export function ShareSkyNow({ compact = false }: ShareSkyNowProps) {
       }
 
       const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://lunary.app';
-      const ogImageUrl = `${baseUrl}/api/og/share/sky-now?shareId=${currentShareId}&format=${format}`;
+      const ogImageUrl = `${baseUrl}/api/og/share/sky-now?shareId=${currentShareId}&format=${format}&v=${OG_IMAGE_VERSION}`;
 
       const imageResponse = await fetch(ogImageUrl);
       if (!imageResponse.ok) {
@@ -137,6 +139,14 @@ export function ShareSkyNow({ compact = false }: ShareSkyNowProps) {
   }, [skyData, format, shareRecord, user, setLoading, setError]);
 
   const handleOpen = () => {
+    if (isInDemoMode()) {
+      window.dispatchEvent(
+        new CustomEvent('demo-action-blocked', {
+          detail: { action: 'Sharing images' },
+        }),
+      );
+      return;
+    }
     openModal();
     if (!imageBlob) {
       generateCard();

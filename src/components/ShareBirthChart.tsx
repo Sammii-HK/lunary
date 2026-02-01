@@ -11,6 +11,8 @@ import { ShareActions } from './share/ShareActions';
 import { ShareFormatSelector } from './share/ShareFormatSelector';
 import { shareTracking } from '@/lib/analytics/share-tracking';
 import { useUser } from '@/context/UserContext';
+import { isInDemoMode } from '@/lib/demo-mode';
+import { OG_IMAGE_VERSION } from '@/lib/share/og-utils';
 
 interface ShareBirthChartProps {
   birthChart: BirthChartData[];
@@ -195,7 +197,7 @@ export function ShareBirthChart({
 
       const ogImageUrl = `/api/og/share/birth-chart?shareId=${encodeURIComponent(
         currentShareId,
-      )}&format=${format}`;
+      )}&format=${format}&v=${OG_IMAGE_VERSION}`;
 
       const imageResponse = await fetch(ogImageUrl);
       if (!imageResponse.ok) throw new Error('Failed to generate image');
@@ -227,6 +229,14 @@ export function ShareBirthChart({
   ]);
 
   const handleOpen = async () => {
+    if (isInDemoMode()) {
+      window.dispatchEvent(
+        new CustomEvent('demo-action-blocked', {
+          detail: { action: 'Sharing images' },
+        }),
+      );
+      return;
+    }
     openModal();
     shareTracking.shareInitiated(user?.id, 'birth-chart');
     if (!imageBlob) {

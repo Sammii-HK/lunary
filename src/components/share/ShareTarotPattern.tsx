@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useCallback, useEffect } from 'react';
-import { TrendingUp } from 'lucide-react';
+import { Share2 } from 'lucide-react';
 import { useUser } from '@/context/UserContext';
 import { useShareModal } from '@/hooks/useShareModal';
 import { ShareModal } from './ShareModal';
@@ -9,6 +9,8 @@ import { SharePreview } from './SharePreview';
 import { ShareActions } from './ShareActions';
 import { ShareFormatSelector } from './ShareFormatSelector';
 import { shareTracking } from '@/lib/analytics/share-tracking';
+import { isInDemoMode } from '@/lib/demo-mode';
+import { OG_IMAGE_VERSION } from '@/lib/share/og-utils';
 
 interface TarotPatternData {
   topCards: Array<{ name: string; count: number }>;
@@ -106,7 +108,7 @@ export function ShareTarotPattern({
       }
 
       const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://lunary.app';
-      const ogImageUrl = `${baseUrl}/api/og/share/tarot-pattern?shareId=${currentShareId}&format=${format}`;
+      const ogImageUrl = `${baseUrl}/api/og/share/tarot-pattern?shareId=${currentShareId}&format=${format}&v=${OG_IMAGE_VERSION}`;
 
       const imageResponse = await fetch(ogImageUrl);
       if (!imageResponse.ok) {
@@ -128,6 +130,14 @@ export function ShareTarotPattern({
   }, [patternData, format, shareRecord, user, setLoading, setError]);
 
   const handleOpen = () => {
+    if (isInDemoMode()) {
+      window.dispatchEvent(
+        new CustomEvent('demo-action-blocked', {
+          detail: { action: 'Sharing images' },
+        }),
+      );
+      return;
+    }
     openModal();
     if (!imageBlob) {
       generateCard();
@@ -221,7 +231,7 @@ export function ShareTarotPattern({
         }
         title={compact ? 'Share Tarot Pattern' : undefined}
       >
-        <TrendingUp className='w-4 h-4' />
+        <Share2 className='w-4 h-4' />
         {!compact && 'Share Pattern'}
       </button>
 

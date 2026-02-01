@@ -1,7 +1,12 @@
 import { ImageResponse } from 'next/og';
 import { NextRequest } from 'next/server';
 import { kvGet } from '@/lib/cloudflare/kv';
-import { getFormatDimensions, OG_COLORS } from '@/lib/share/og-utils';
+import {
+  getFormatDimensions,
+  OG_COLORS,
+  generateStarfield,
+  getStarCount,
+} from '@/lib/share/og-utils';
 import type { ShareFormat } from '@/hooks/useShareModal';
 import { zodiacSymbol } from '@/constants/symbols';
 
@@ -47,44 +52,101 @@ export async function GET(request: NextRequest) {
     const shareId = searchParams.get('shareId');
     const format = (searchParams.get('format') || 'square') as ShareFormat;
 
-    if (!shareId) {
-      return new Response('Missing shareId', { status: 400 });
-    }
-
-    // Fetch share data from KV or use demo data
-    const raw = await kvGet(`horoscope:${shareId}`);
+    // Check for URL parameters for real-time data (Priority 0 Data Flow Fix)
+    const urlName = searchParams.get('name');
+    const urlSunSign = searchParams.get('sunSign');
+    const urlHeadline = searchParams.get('headline');
+    const urlOverview = searchParams.get('overview');
+    const urlNumerologyNumber = searchParams.get('numerologyNumber');
+    const urlDate = searchParams.get('date');
 
     let data: HoroscopeShareRecord;
 
-    if (!raw || shareId === 'demo') {
-      // Provide demo/fallback data
+    // If URL params provided, use them directly instead of KV lookup
+    if (urlSunSign || urlHeadline || urlOverview) {
       data = {
-        shareId: 'demo',
+        shareId: 'url-params',
+        name: urlName || undefined,
         createdAt: new Date().toISOString(),
-        sunSign: 'Aquarius',
-        headline: 'Innovation and connection light your path',
-        overview:
-          'Today brings opportunities for creative breakthroughs and meaningful connections. Your unique perspective is valued.',
-        numerologyNumber: 7,
-        date: new Date().toISOString().split('T')[0],
+        sunSign: urlSunSign || 'Aquarius',
+        headline: urlHeadline
+          ? decodeURIComponent(urlHeadline)
+          : 'Innovation and connection light your path',
+        overview: urlOverview
+          ? decodeURIComponent(urlOverview)
+          : 'Today brings opportunities for creative breakthroughs and meaningful connections.',
+        numerologyNumber: urlNumerologyNumber
+          ? parseInt(urlNumerologyNumber)
+          : undefined,
+        date: urlDate || new Date().toISOString().split('T')[0],
       };
     } else {
-      data = JSON.parse(raw) as HoroscopeShareRecord;
+      if (!shareId) {
+        return new Response('Missing shareId', { status: 400 });
+      }
+
+      // Fetch share data from KV or use demo data
+      const raw = await kvGet(`horoscope:${shareId}`);
+
+      if (!raw || shareId === 'demo') {
+        // Provide demo/fallback data
+        data = {
+          shareId: 'demo',
+          createdAt: new Date().toISOString(),
+          sunSign: 'Aquarius',
+          headline: 'Innovation and connection light your path',
+          overview:
+            'Today brings opportunities for creative breakthroughs and meaningful connections. Your unique perspective is valued.',
+          numerologyNumber: 7,
+          date: new Date().toISOString().split('T')[0],
+        };
+      } else {
+        data = JSON.parse(raw) as HoroscopeShareRecord;
+      }
     }
     const { width, height } = getFormatDimensions(format);
     const firstName = data.name?.trim().split(' ')[0] || '';
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://lunary.app';
 
     const isLandscape = format === 'landscape';
     const isStory = format === 'story';
-    const padding = isLandscape ? 40 : isStory ? 100 : 60;
-    const titleSize = isLandscape ? 40 : isStory ? 84 : 52;
-    const signSize = isLandscape ? 72 : isStory ? 160 : 84;
-    const headlineSize = isLandscape ? 24 : isStory ? 48 : 28;
-    const overviewSize = isLandscape ? 16 : isStory ? 30 : 18;
-    const labelSize = isLandscape ? 14 : isStory ? 28 : 16;
+    const padding = isLandscape ? 48 : isStory ? 60 : 60;
+    const titleSize = isLandscape ? 48 : isStory ? 84 : 72;
+    const signSize = isLandscape ? 100 : isStory ? 220 : 160;
+    const signNameSize = isLandscape ? 40 : isStory ? 64 : 52;
+    const headlineSize = isLandscape ? 30 : isStory ? 52 : 44;
+    const overviewSize = isLandscape ? 22 : isStory ? 34 : 30;
+    const labelSize = isLandscape ? 18 : isStory ? 28 : 24;
+
+    // Truncation helper for text overflow prevention
+    const truncate = (text: string, limit: number) =>
+      text.length > limit ? text.slice(0, limit - 1) + '…' : text;
+
+    // Format-specific character limits - increased for better space usage
+    const headlineLimit = isLandscape ? 70 : isStory ? 140 : 100;
+    const overviewLimit = isLandscape ? 160 : isStory ? 280 : 220;
+
+    // Generate unique starfield based on shareId
+    const stars = generateStarfield(data.shareId, getStarCount(format));
 
     // Format date
     const date = new Date(data.date);
+
+    // Calculate universal day number from current date
+    const calculateUniversalDay = (d: Date): number => {
+      const day = d.getDate();
+      const month = d.getMonth() + 1;
+      const year = d.getFullYear();
+      let sum = day + month + year;
+      while (sum > 9 && sum !== 11 && sum !== 22) {
+        sum = String(sum)
+          .split('')
+          .reduce((a, b) => a + parseInt(b), 0);
+      }
+      return sum;
+    };
+
+    const universalDay = calculateUniversalDay(date);
     const dateText = date.toLocaleDateString('en-US', {
       month: 'long',
       day: 'numeric',
@@ -113,7 +175,39 @@ export async function GET(request: NextRequest) {
 
     const gradient = SIGN_GRADIENTS[data.sunSign] || SIGN_GRADIENTS.Aries;
 
-    return new ImageResponse(
+    // Starfield JSX
+    const starfieldJsx = stars.map((star, i) => (
+      <div
+        key={i}
+        style={{
+          position: 'absolute',
+          left: `${star.x}%`,
+          top: `${star.y}%`,
+          width: star.size,
+          height: star.size,
+          borderRadius: '50%',
+          background: '#fff',
+          opacity: star.opacity,
+        }}
+      />
+    ));
+
+    // Gradient overlay JSX
+    const gradientOverlay = (
+      <div
+        style={{
+          display: 'flex',
+          position: 'absolute',
+          inset: 0,
+          background: `linear-gradient(135deg, ${gradient.from}20 0%, ${gradient.via}15 50%, ${gradient.to}20 100%)`,
+          opacity: 0.4,
+        }}
+      />
+    );
+
+    // Layout based on format
+    const layoutJsx = isLandscape ? (
+      // Landscape Layout - Two column: Symbol + sign left, Message + overview right
       <div
         style={{
           width: '100%',
@@ -126,223 +220,88 @@ export async function GET(request: NextRequest) {
           fontFamily: 'Roboto Mono',
         }}
       >
-        {/* Gradient overlay for sign */}
-        <div
-          style={{
-            display: 'flex',
-            position: 'absolute',
-            inset: 0,
-            background: `linear-gradient(135deg, ${gradient.from}15 0%, ${gradient.via}10 50%, ${gradient.to}15 100%)`,
-            opacity: 0.3,
-          }}
-        />
+        {gradientOverlay}
+        {starfieldJsx}
 
-        {/* Star background pattern */}
-        <div
-          style={{
-            position: 'absolute',
-            inset: 0,
-            backgroundImage:
-              'radial-gradient(circle at 20% 30%, rgba(255,255,255,0.08) 0 1px, transparent 2px),' +
-              'radial-gradient(circle at 70% 60%, rgba(255,255,255,0.06) 0 1px, transparent 2px),' +
-              'radial-gradient(circle at 50% 10%, rgba(255,255,255,0.05) 0 1px, transparent 2px)',
-            opacity: 0.6,
-            display: 'flex',
-          }}
-        />
-
+        {/* Header */}
         <div
           style={{
             display: 'flex',
             flexDirection: 'column',
-            position: 'relative',
-            height: '100%',
+            alignItems: 'center',
+            marginBottom: 20,
           }}
         >
-          {/* Header */}
+          <div
+            style={{
+              fontSize: titleSize,
+              fontWeight: 400,
+              color: OG_COLORS.textPrimary,
+              letterSpacing: '0.05em',
+              textAlign: 'center',
+              display: 'flex',
+            }}
+          >
+            {firstName ? `${firstName}'s Horoscope` : 'Your Horoscope'}
+          </div>
+          <div
+            style={{
+              fontSize: labelSize,
+              color: OG_COLORS.textTertiary,
+              marginTop: 8,
+              display: 'flex',
+            }}
+          >
+            {dateText}
+          </div>
+        </div>
+
+        {/* Two-column layout */}
+        <div
+          style={{
+            display: 'flex',
+            flexDirection: 'row',
+            gap: 32,
+            flex: 1,
+          }}
+        >
+          {/* Left: Symbol + Sign */}
           <div
             style={{
               display: 'flex',
               flexDirection: 'column',
               alignItems: 'center',
-              marginBottom: isLandscape ? 20 : isStory ? 32 : 28,
-            }}
-          >
-            <div
-              style={{
-                fontSize: titleSize,
-                fontWeight: 400,
-                color: OG_COLORS.textPrimary,
-                letterSpacing: '0.05em',
-                textAlign: 'center',
-                display: 'flex',
-              }}
-            >
-              {firstName ? `${firstName}'s Horoscope` : 'Your Horoscope'}
-            </div>
-            <div
-              style={{
-                fontSize: labelSize,
-                color: OG_COLORS.textTertiary,
-                marginTop: 8,
-                display: 'flex',
-              }}
-            >
-              {dateText}
-            </div>
-          </div>
-
-          {/* Zodiac Sign Symbol */}
-          <div
-            style={{
-              display: 'flex',
               justifyContent: 'center',
-              marginBottom: isLandscape ? 24 : 32,
+              width: '35%',
             }}
           >
             <div
               style={{
+                fontFamily: 'Astronomicon',
+                fontSize: signSize,
+                color: gradient.via,
                 display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                gap: 12,
-              }}
-            >
-              <div
-                style={{
-                  fontFamily: 'Astronomicon',
-                  fontSize: signSize,
-                  color: gradient.via,
-                  display: 'flex',
-                }}
-              >
-                {getZodiacSymbol(data.sunSign)}
-              </div>
-              <div
-                style={{
-                  fontSize: headlineSize,
-                  color: OG_COLORS.textPrimary,
-                  fontWeight: 500,
-                  display: 'flex',
-                }}
-              >
-                {data.sunSign}
-              </div>
-            </div>
-          </div>
-
-          {/* Headline */}
-          <div
-            style={{
-              display: 'flex',
-              flexDirection: 'column',
-              background: 'rgba(255, 255, 255, 0.03)',
-              border: '1px solid rgba(255, 255, 255, 0.12)',
-              borderRadius: 20,
-              padding: isLandscape ? '20px 24px' : '28px 32px',
-              marginBottom: isLandscape ? 16 : 20,
-            }}
-          >
-            <div
-              style={{
-                fontSize: labelSize,
-                color: OG_COLORS.textSecondary,
-                textTransform: 'uppercase',
-                letterSpacing: '0.1em',
                 marginBottom: 12,
-                display: 'flex',
               }}
             >
-              Today's Message
+              {getZodiacSymbol(data.sunSign)}
             </div>
             <div
               style={{
-                fontSize: headlineSize,
+                fontSize: signNameSize,
                 color: OG_COLORS.textPrimary,
-                lineHeight: 1.4,
+                fontWeight: 500,
                 display: 'flex',
               }}
             >
-              {data.headline}
+              {data.sunSign}
             </div>
-          </div>
-
-          {/* Overview */}
-          <div
-            style={{
-              display: 'flex',
-              flexDirection: 'column',
-              background: 'rgba(255, 255, 255, 0.02)',
-              border: '1px solid rgba(255, 255, 255, 0.08)',
-              borderRadius: 16,
-              padding: isLandscape ? '16px 20px' : '20px 24px',
-              marginBottom: isLandscape ? 12 : 16,
-            }}
-          >
-            <div
-              style={{
-                fontSize: overviewSize,
-                color: OG_COLORS.textSecondary,
-                lineHeight: 1.6,
-                display: 'flex',
-              }}
-            >
-              {data.overview.length > 150
-                ? data.overview.substring(0, 150) + '...'
-                : data.overview}
-            </div>
-          </div>
-
-          {/* Numerology Number (if provided) */}
-          {data.numerologyNumber && (
+            {/* Day Numbers Row */}
             <div
               style={{
                 display: 'flex',
-                justifyContent: 'center',
-                marginBottom: 12,
-              }}
-            >
-              <div
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 12,
-                  background: `linear-gradient(135deg, ${gradient.from}20, ${gradient.to}20)`,
-                  border: `1px solid ${gradient.via}40`,
-                  borderRadius: 12,
-                  padding: '12px 20px',
-                }}
-              >
-                <div
-                  style={{
-                    fontSize: labelSize,
-                    color: OG_COLORS.textSecondary,
-                    display: 'flex',
-                  }}
-                >
-                  Day Number
-                </div>
-                <div
-                  style={{
-                    fontSize: headlineSize,
-                    color: gradient.via,
-                    fontWeight: 600,
-                    display: 'flex',
-                  }}
-                >
-                  {data.numerologyNumber}
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* Transit Info (if provided) */}
-          {data.transitInfo && (
-            <div
-              style={{
-                display: 'flex',
-                justifyContent: 'center',
-                marginBottom: 12,
+                gap: 12,
+                marginTop: 16,
               }}
             >
               <div
@@ -350,67 +309,695 @@ export async function GET(request: NextRequest) {
                   display: 'flex',
                   alignItems: 'center',
                   gap: 8,
-                  fontSize: labelSize,
-                  color: OG_COLORS.textTertiary,
+                  background: `linear-gradient(135deg, ${gradient.from}20, ${gradient.to}20)`,
+                  border: `1px solid ${gradient.via}40`,
+                  borderRadius: 12,
+                  padding: '8px 14px',
                 }}
               >
-                <span style={{ display: 'flex' }}>
-                  {data.transitInfo.planet}:
-                </span>
-                <span
-                  style={{ display: 'flex', color: OG_COLORS.textSecondary }}
+                <div
+                  style={{
+                    fontSize: 12,
+                    color: OG_COLORS.textSecondary,
+                    display: 'flex',
+                  }}
                 >
-                  {data.transitInfo.headline}
-                </span>
+                  Universal
+                </div>
+                <div
+                  style={{
+                    fontSize: 24,
+                    color: gradient.via,
+                    fontWeight: 600,
+                    display: 'flex',
+                  }}
+                >
+                  {universalDay}
+                </div>
               </div>
+              {data.numerologyNumber && (
+                <div
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 8,
+                    background: `linear-gradient(135deg, ${gradient.from}20, ${gradient.to}20)`,
+                    border: `1px solid ${gradient.via}40`,
+                    borderRadius: 12,
+                    padding: '8px 14px',
+                  }}
+                >
+                  <div
+                    style={{
+                      fontSize: 12,
+                      color: OG_COLORS.textSecondary,
+                      display: 'flex',
+                    }}
+                  >
+                    Personal
+                  </div>
+                  <div
+                    style={{
+                      fontSize: 24,
+                      color: gradient.via,
+                      fontWeight: 600,
+                      display: 'flex',
+                    }}
+                  >
+                    {data.numerologyNumber}
+                  </div>
+                </div>
+              )}
             </div>
-          )}
+          </div>
 
-          {/* Footer */}
+          {/* Right: Message + Overview */}
           <div
             style={{
-              marginTop: 'auto',
               display: 'flex',
+              flexDirection: 'column',
+              gap: 16,
+              flex: 1,
               justifyContent: 'center',
+            }}
+          >
+            {/* Headline */}
+            <div
+              style={{
+                display: 'flex',
+                flexDirection: 'column',
+                background: 'rgba(255, 255, 255, 0.03)',
+                border: '1px solid rgba(255, 255, 255, 0.12)',
+                borderRadius: 16,
+                padding: '20px 24px',
+              }}
+            >
+              <div
+                style={{
+                  fontSize: 14,
+                  color: OG_COLORS.textSecondary,
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.1em',
+                  marginBottom: 10,
+                  display: 'flex',
+                }}
+              >
+                Today's Message
+              </div>
+              <div
+                style={{
+                  fontSize: headlineSize,
+                  color: OG_COLORS.textPrimary,
+                  lineHeight: 1.4,
+                  display: 'flex',
+                }}
+              >
+                {truncate(data.headline, headlineLimit)}
+              </div>
+            </div>
+
+            {/* Overview */}
+            <div
+              style={{
+                display: 'flex',
+                flexDirection: 'column',
+                background: 'rgba(255, 255, 255, 0.02)',
+                border: '1px solid rgba(255, 255, 255, 0.08)',
+                borderRadius: 14,
+                padding: '16px 20px',
+              }}
+            >
+              <div
+                style={{
+                  fontSize: overviewSize,
+                  color: OG_COLORS.textSecondary,
+                  lineHeight: 1.5,
+                  display: 'flex',
+                }}
+              >
+                {truncate(data.overview, overviewLimit)}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Footer */}
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 12,
+            justifyContent: 'center',
+            position: 'absolute',
+            bottom: 40,
+            left: 0,
+            right: 0,
+          }}
+        >
+          <img
+            src={`${baseUrl}/icons/moon-phases/full-moon.svg`}
+            width={24}
+            height={24}
+            style={{ opacity: 0.6 }}
+            alt=''
+          />
+          <span
+            style={{
+              fontSize: 16,
+              opacity: 0.6,
+              letterSpacing: '0.1em',
+              color: OG_COLORS.textPrimary,
+              display: 'flex',
+            }}
+          >
+            Join free at lunary.app
+          </span>
+        </div>
+      </div>
+    ) : isStory ? (
+      // Story Layout - Giant zodiac symbol, full-width cards
+      <div
+        style={{
+          width: '100%',
+          height: '100%',
+          display: 'flex',
+          flexDirection: 'column',
+          background: OG_COLORS.background,
+          padding: '120px 60px 200px 60px',
+          position: 'relative',
+          fontFamily: 'Roboto Mono',
+        }}
+      >
+        {gradientOverlay}
+        {starfieldJsx}
+
+        {/* Header */}
+        <div
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            marginBottom: 40,
+          }}
+        >
+          <div
+            style={{
+              fontSize: titleSize,
+              fontWeight: 400,
+              color: OG_COLORS.textPrimary,
+              letterSpacing: '0.05em',
+              textAlign: 'center',
+              display: 'flex',
+            }}
+          >
+            {firstName ? `${firstName}'s Horoscope` : 'Your Horoscope'}
+          </div>
+          <div
+            style={{
+              fontSize: labelSize,
+              color: OG_COLORS.textTertiary,
+              marginTop: 12,
+              display: 'flex',
+            }}
+          >
+            {dateText}
+          </div>
+        </div>
+
+        {/* Giant Zodiac Symbol */}
+        <div
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            marginBottom: 48,
+          }}
+        >
+          <div
+            style={{
+              fontFamily: 'Astronomicon',
+              fontSize: signSize,
+              color: gradient.via,
+              display: 'flex',
+              marginBottom: 16,
+            }}
+          >
+            {getZodiacSymbol(data.sunSign)}
+          </div>
+          <div
+            style={{
+              fontSize: signNameSize,
+              color: OG_COLORS.textPrimary,
+              fontWeight: 500,
+              display: 'flex',
+            }}
+          >
+            {data.sunSign}
+          </div>
+        </div>
+
+        {/* Message Card - Full width */}
+        <div
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+            background: 'rgba(255, 255, 255, 0.03)',
+            border: '1px solid rgba(255, 255, 255, 0.12)',
+            borderRadius: 24,
+            padding: '36px 40px',
+            marginBottom: 28,
+          }}
+        >
+          <div
+            style={{
+              fontSize: 20,
+              color: OG_COLORS.textSecondary,
+              textTransform: 'uppercase',
+              letterSpacing: '0.1em',
+              marginBottom: 16,
+              display: 'flex',
+            }}
+          >
+            Today's Message
+          </div>
+          <div
+            style={{
+              fontSize: headlineSize,
+              color: OG_COLORS.textPrimary,
+              lineHeight: 1.4,
+              display: 'flex',
+            }}
+          >
+            {truncate(data.headline, headlineLimit)}
+          </div>
+        </div>
+
+        {/* Overview Card - Full width */}
+        <div
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+            background: 'rgba(255, 255, 255, 0.02)',
+            border: '1px solid rgba(255, 255, 255, 0.08)',
+            borderRadius: 20,
+            padding: '28px 36px',
+            flex: 1,
+          }}
+        >
+          <div
+            style={{
+              fontSize: overviewSize,
+              color: OG_COLORS.textSecondary,
+              lineHeight: 1.6,
+              display: 'flex',
+            }}
+          >
+            {truncate(data.overview, overviewLimit)}
+          </div>
+        </div>
+
+        {/* Day Number Badges */}
+        <div
+          style={{
+            display: 'flex',
+            justifyContent: 'center',
+            gap: 20,
+            marginTop: 28,
+          }}
+        >
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 14,
+              background: `linear-gradient(135deg, ${gradient.from}20, ${gradient.to}20)`,
+              border: `1px solid ${gradient.via}40`,
+              borderRadius: 16,
+              padding: '14px 24px',
             }}
           >
             <div
               style={{
-                fontSize: labelSize,
-                color: OG_COLORS.textTertiary,
-                letterSpacing: '0.15em',
-                textTransform: 'uppercase',
+                fontSize: labelSize - 4,
+                color: OG_COLORS.textSecondary,
                 display: 'flex',
               }}
             >
-              Lunary.app
+              Universal
+            </div>
+            <div
+              style={{
+                fontSize: 44,
+                color: gradient.via,
+                fontWeight: 600,
+                display: 'flex',
+              }}
+            >
+              {universalDay}
             </div>
           </div>
+          {data.numerologyNumber && (
+            <div
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: 14,
+                background: `linear-gradient(135deg, ${gradient.from}20, ${gradient.to}20)`,
+                border: `1px solid ${gradient.via}40`,
+                borderRadius: 16,
+                padding: '14px 24px',
+              }}
+            >
+              <div
+                style={{
+                  fontSize: labelSize - 4,
+                  color: OG_COLORS.textSecondary,
+                  display: 'flex',
+                }}
+              >
+                Personal
+              </div>
+              <div
+                style={{
+                  fontSize: 44,
+                  color: gradient.via,
+                  fontWeight: 600,
+                  display: 'flex',
+                }}
+              >
+                {data.numerologyNumber}
+              </div>
+            </div>
+          )}
         </div>
-      </div>,
-      {
-        width,
-        height,
-        fonts: [
-          {
-            name: 'Roboto Mono',
-            data: await fetch(
-              new URL('/fonts/RobotoMono-Regular.ttf', request.url),
-            ).then((res) => res.arrayBuffer()),
-            style: 'normal',
-            weight: 400,
-          },
-          {
-            name: 'Astronomicon',
-            data: await fetch(
-              new URL('/fonts/Astronomicon.ttf', request.url),
-            ).then((res) => res.arrayBuffer()),
-            style: 'normal',
-            weight: 400,
-          },
-        ],
-      },
+
+        {/* Footer */}
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 12,
+            justifyContent: 'center',
+            position: 'absolute',
+            bottom: 40,
+            left: 0,
+            right: 0,
+          }}
+        >
+          <img
+            src={`${baseUrl}/icons/moon-phases/full-moon.svg`}
+            width={28}
+            height={28}
+            style={{ opacity: 0.6 }}
+            alt=''
+          />
+          <span
+            style={{
+              fontSize: 20,
+              opacity: 0.6,
+              letterSpacing: '0.1em',
+              color: OG_COLORS.textPrimary,
+              display: 'flex',
+            }}
+          >
+            Join free at lunary.app
+          </span>
+        </div>
+      </div>
+    ) : (
+      // Square Layout
+      <div
+        style={{
+          width: '100%',
+          height: '100%',
+          display: 'flex',
+          flexDirection: 'column',
+          background: OG_COLORS.background,
+          padding: `${padding}px`,
+          position: 'relative',
+          fontFamily: 'Roboto Mono',
+        }}
+      >
+        {gradientOverlay}
+        {starfieldJsx}
+
+        {/* Header */}
+        <div
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            marginBottom: 32,
+          }}
+        >
+          <div
+            style={{
+              fontSize: titleSize,
+              fontWeight: 400,
+              color: OG_COLORS.textPrimary,
+              letterSpacing: '0.05em',
+              textAlign: 'center',
+              display: 'flex',
+            }}
+          >
+            {firstName ? `${firstName}'s Horoscope` : 'Your Horoscope'}
+          </div>
+          <div
+            style={{
+              fontSize: labelSize,
+              color: OG_COLORS.textTertiary,
+              marginTop: 10,
+              display: 'flex',
+            }}
+          >
+            {dateText}
+          </div>
+        </div>
+
+        {/* Zodiac Symbol */}
+        <div
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            marginBottom: 36,
+          }}
+        >
+          <div
+            style={{
+              fontFamily: 'Astronomicon',
+              fontSize: signSize,
+              color: gradient.via,
+              display: 'flex',
+              marginBottom: 12,
+            }}
+          >
+            {getZodiacSymbol(data.sunSign)}
+          </div>
+          <div
+            style={{
+              fontSize: signNameSize,
+              color: OG_COLORS.textPrimary,
+              fontWeight: 500,
+              display: 'flex',
+            }}
+          >
+            {data.sunSign}
+          </div>
+        </div>
+
+        {/* Message Card - Full width */}
+        <div
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+            background: 'rgba(255, 255, 255, 0.03)',
+            border: '1px solid rgba(255, 255, 255, 0.12)',
+            borderRadius: 20,
+            padding: '28px 32px',
+            marginBottom: 24,
+          }}
+        >
+          <div
+            style={{
+              fontSize: 16,
+              color: OG_COLORS.textSecondary,
+              textTransform: 'uppercase',
+              letterSpacing: '0.1em',
+              marginBottom: 14,
+              display: 'flex',
+            }}
+          >
+            Today's Message
+          </div>
+          <div
+            style={{
+              fontSize: headlineSize,
+              color: OG_COLORS.textPrimary,
+              lineHeight: 1.4,
+              display: 'flex',
+            }}
+          >
+            {truncate(data.headline, headlineLimit)}
+          </div>
+        </div>
+
+        {/* Overview Card - Full width */}
+        <div
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+            background: 'rgba(255, 255, 255, 0.02)',
+            border: '1px solid rgba(255, 255, 255, 0.08)',
+            borderRadius: 18,
+            padding: '24px 28px',
+            flex: 1,
+          }}
+        >
+          <div
+            style={{
+              fontSize: overviewSize,
+              color: OG_COLORS.textSecondary,
+              lineHeight: 1.6,
+              display: 'flex',
+            }}
+          >
+            {truncate(data.overview, overviewLimit)}
+          </div>
+        </div>
+
+        {/* Day Number Badges */}
+        <div
+          style={{
+            display: 'flex',
+            justifyContent: 'center',
+            gap: 16,
+            marginTop: 24,
+          }}
+        >
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 12,
+              background: `linear-gradient(135deg, ${gradient.from}20, ${gradient.to}20)`,
+              border: `1px solid ${gradient.via}40`,
+              borderRadius: 14,
+              padding: '12px 20px',
+            }}
+          >
+            <div
+              style={{
+                fontSize: labelSize - 2,
+                color: OG_COLORS.textSecondary,
+                display: 'flex',
+              }}
+            >
+              Universal
+            </div>
+            <div
+              style={{
+                fontSize: 32,
+                color: gradient.via,
+                fontWeight: 600,
+                display: 'flex',
+              }}
+            >
+              {universalDay}
+            </div>
+          </div>
+          {data.numerologyNumber && (
+            <div
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: 12,
+                background: `linear-gradient(135deg, ${gradient.from}20, ${gradient.to}20)`,
+                border: `1px solid ${gradient.via}40`,
+                borderRadius: 14,
+                padding: '12px 20px',
+              }}
+            >
+              <div
+                style={{
+                  fontSize: labelSize - 2,
+                  color: OG_COLORS.textSecondary,
+                  display: 'flex',
+                }}
+              >
+                Personal
+              </div>
+              <div
+                style={{
+                  fontSize: 32,
+                  color: gradient.via,
+                  fontWeight: 600,
+                  display: 'flex',
+                }}
+              >
+                {data.numerologyNumber}
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Footer */}
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 12,
+            justifyContent: 'center',
+            position: 'absolute',
+            bottom: 40,
+            left: 0,
+            right: 0,
+          }}
+        >
+          <img
+            src={`${baseUrl}/icons/moon-phases/full-moon.svg`}
+            width={24}
+            height={24}
+            style={{ opacity: 0.6 }}
+            alt=''
+          />
+          <span
+            style={{
+              fontSize: 16,
+              opacity: 0.6,
+              letterSpacing: '0.1em',
+              color: OG_COLORS.textPrimary,
+              display: 'flex',
+            }}
+          >
+            Join free at lunary.app
+          </span>
+        </div>
+      </div>
     );
+
+    return new ImageResponse(layoutJsx, {
+      width,
+      height,
+      fonts: [
+        {
+          name: 'Roboto Mono',
+          data: await fetch(
+            new URL('/fonts/RobotoMono-Regular.ttf', request.url),
+          ).then((res) => res.arrayBuffer()),
+          style: 'normal',
+          weight: 400,
+        },
+        {
+          name: 'Astronomicon',
+          data: await fetch(
+            new URL('/fonts/Astronomicon.ttf', request.url),
+          ).then((res) => res.arrayBuffer()),
+          style: 'normal',
+          weight: 400,
+        },
+      ],
+    });
   } catch (error) {
     console.error('[HoroscopeOG] Error:', error);
     return new Response('Failed to generate image', { status: 500 });

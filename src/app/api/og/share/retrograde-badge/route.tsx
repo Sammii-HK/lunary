@@ -1,7 +1,12 @@
 import { ImageResponse } from 'next/og';
 import { NextRequest } from 'next/server';
 import { kvGet } from '@/lib/cloudflare/kv';
-import { getFormatDimensions, OG_COLORS } from '@/lib/share/og-utils';
+import {
+  getFormatDimensions,
+  OG_COLORS,
+  generateStarfield,
+  getStarCount,
+} from '@/lib/share/og-utils';
 import type { ShareFormat } from '@/hooks/useShareModal';
 
 export const runtime = 'edge';
@@ -69,11 +74,12 @@ const BADGE_LABELS: Record<string, string> = {
   diamond: 'Unscathed Champion',
 };
 
-const BADGE_EMOJIS: Record<string, string> = {
-  bronze: '🥉',
-  silver: '🥈',
-  gold: '🥇',
-  diamond: '💎',
+// Badge text icons (replacing emoji that may not render correctly)
+const BADGE_ICONS: Record<string, string> = {
+  bronze: '★',
+  silver: '★★',
+  gold: '★★★',
+  diamond: '◆',
 };
 
 export async function GET(request: NextRequest) {
@@ -82,33 +88,61 @@ export async function GET(request: NextRequest) {
     const shareId = searchParams.get('shareId');
     const format = (searchParams.get('format') || 'square') as ShareFormat;
 
-    if (!shareId) {
-      return new Response('Missing shareId', { status: 400 });
-    }
-
     // Load fonts
     const robotoMonoData = await loadRobotoMono(request);
 
-    // Fetch share data from KV or use demo data
-    const raw = await kvGet(`retrograde-badge:${shareId}`);
+    // Check for URL parameters for real-time data (Priority 0 Data Flow Fix)
+    const urlName = searchParams.get('name');
+    const urlPlanet = searchParams.get('planet');
+    const urlBadgeLevel = searchParams.get('badgeLevel');
+    const urlSurvivalDays = searchParams.get('survivalDays');
+    const urlIsCompleted = searchParams.get('isCompleted');
+    const urlRetroStart = searchParams.get('retrogradeStart');
+    const urlRetroEnd = searchParams.get('retrogradeEnd');
+    const urlSign = searchParams.get('sign');
 
     let data: RetrogradeBadgeShareRecord;
 
-    if (!raw || shareId === 'demo') {
-      // Provide demo/fallback data - Mercury retrograde in progress
+    // If URL params provided, use them directly instead of KV lookup
+    if (urlPlanet || urlBadgeLevel || urlSurvivalDays) {
       data = {
-        shareId: 'demo',
+        shareId: 'url-params',
+        name: urlName || undefined,
         createdAt: new Date().toISOString(),
-        planet: 'Mercury',
-        badgeLevel: 'silver',
-        survivalDays: 10,
-        isCompleted: false,
-        retrogradeStart: '2026-01-15',
-        retrogradeEnd: '2026-02-04',
-        sign: 'Aquarius',
+        planet: urlPlanet || 'Mercury',
+        badgeLevel:
+          (urlBadgeLevel as 'bronze' | 'silver' | 'gold' | 'diamond') ||
+          'silver',
+        survivalDays: urlSurvivalDays ? parseInt(urlSurvivalDays) : 10,
+        isCompleted: urlIsCompleted === 'true',
+        retrogradeStart: urlRetroStart || '2026-01-15',
+        retrogradeEnd: urlRetroEnd || '2026-02-04',
+        sign: urlSign || 'Aquarius',
       };
     } else {
-      data = JSON.parse(raw) as RetrogradeBadgeShareRecord;
+      if (!shareId) {
+        return new Response('Missing shareId', { status: 400 });
+      }
+
+      // Fetch share data from KV or use demo data
+      const raw = await kvGet(`retrograde-badge:${shareId}`);
+
+      if (!raw || shareId === 'demo') {
+        // Provide demo/fallback data - Mercury retrograde in progress
+        data = {
+          shareId: 'demo',
+          createdAt: new Date().toISOString(),
+          planet: 'Mercury',
+          badgeLevel: 'silver',
+          survivalDays: 10,
+          isCompleted: false,
+          retrogradeStart: '2026-01-15',
+          retrogradeEnd: '2026-02-04',
+          sign: 'Aquarius',
+        };
+      } else {
+        data = JSON.parse(raw) as RetrogradeBadgeShareRecord;
+      }
     }
     const { width, height } = getFormatDimensions(format);
     const firstName = data.name?.trim().split(' ')[0] || '';
@@ -116,17 +150,23 @@ export async function GET(request: NextRequest) {
 
     const isLandscape = format === 'landscape';
     const isStory = format === 'story';
-    const padding = isLandscape ? 40 : isStory ? 100 : 60;
-    const titleSize = isLandscape ? 36 : isStory ? 72 : 48;
-    const subtitleSize = isLandscape ? 20 : isStory ? 42 : 24;
-    const daySize = isLandscape ? 120 : isStory ? 180 : 96;
-    const labelSize = isLandscape ? 18 : isStory ? 36 : 22;
-    const humorSize = isLandscape ? 14 : isStory ? 30 : 18;
-    const badgeSize = isLandscape ? 200 : isStory ? 420 : 240;
+    const padding = isLandscape ? 48 : isStory ? 60 : 60;
+    const titleSize = isLandscape ? 44 : isStory ? 84 : 72;
+    const subtitleSize = isLandscape ? 20 : isStory ? 36 : 28;
+    const daySize = isLandscape ? 100 : isStory ? 160 : 140;
+    const labelSize = isLandscape ? 20 : isStory ? 42 : 32;
+    const humorSize = isLandscape ? 16 : isStory ? 32 : 26;
+    const mercurySymbolSize = isLandscape ? 48 : isStory ? 80 : 72;
 
     const badgeColors = BADGE_COLORS[data.badgeLevel];
     const badgeLabel = BADGE_LABELS[data.badgeLevel];
-    const badgeEmoji = BADGE_EMOJIS[data.badgeLevel];
+    const badgeIcon = BADGE_ICONS[data.badgeLevel];
+
+    // Dynamic badge circle sizing based on content
+    const badgeSizeBase = isLandscape ? 220 : isStory ? 460 : 400;
+
+    // Generate unique starfield based on shareId
+    const stars = generateStarfield(data.shareId, getStarCount(format));
 
     // Format dates
     const startDate = data.retrogradeStart
@@ -146,6 +186,23 @@ export async function GET(request: NextRequest) {
       ? 'I survived Mercury Retrograde and all I got was this badge'
       : 'Still standing, still surviving';
 
+    // Starfield component
+    const starfieldJsx = stars.map((star, i) => (
+      <div
+        key={i}
+        style={{
+          position: 'absolute',
+          left: `${star.x}%`,
+          top: `${star.y}%`,
+          width: star.size,
+          height: star.size,
+          borderRadius: '50%',
+          background: '#fff',
+          opacity: star.opacity,
+        }}
+      />
+    ));
+
     // Inline JSX directly based on format
     const layoutJsx = isLandscape ? (
       // Landscape Layout - horizontal layout
@@ -161,48 +218,16 @@ export async function GET(request: NextRequest) {
           fontFamily: 'Roboto Mono',
         }}
       >
-        {/* Header */}
-        <div
-          style={{
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            marginBottom: 20,
-          }}
-        >
-          <div
-            style={{
-              fontSize: titleSize,
-              fontWeight: 400,
-              color: OG_COLORS.textPrimary,
-              letterSpacing: '0.05em',
-              textAlign: 'center',
-              display: 'flex',
-            }}
-          >
-            {mainText}
-          </div>
-          <div
-            style={{
-              fontSize: subtitleSize,
-              color: OG_COLORS.textTertiary,
-              marginTop: 6,
-              letterSpacing: '0.1em',
-              textAlign: 'center',
-              display: 'flex',
-            }}
-          >
-            {dateRangeText}
-          </div>
-        </div>
+        {/* Unique starfield background */}
+        {starfieldJsx}
 
-        {/* Horizontal layout: Badge on left, text on right */}
+        {/* Main content - horizontal layout */}
         <div
           style={{
             display: 'flex',
             flexDirection: 'row',
             alignItems: 'center',
-            gap: 32,
+            gap: 48,
             flex: 1,
             justifyContent: 'center',
           }}
@@ -211,31 +236,33 @@ export async function GET(request: NextRequest) {
           <div
             style={{
               display: 'flex',
-              width: badgeSize,
-              height: badgeSize,
+              width: badgeSizeBase,
+              height: badgeSizeBase,
               borderRadius: '50%',
-              border: `4px solid ${badgeColors.border}`,
+              border: `6px solid ${badgeColors.border}`,
               background: badgeColors.bg,
               alignItems: 'center',
               justifyContent: 'center',
               flexDirection: 'column',
               flexShrink: 0,
+              padding: 24,
             }}
           >
             <div
               style={{
-                fontSize: daySize,
+                fontSize: 48,
                 fontWeight: 400,
                 color: badgeColors.text,
                 marginBottom: 8,
                 display: 'flex',
+                letterSpacing: '0.1em',
               }}
             >
-              {badgeEmoji}
+              {badgeIcon}
             </div>
             <div
               style={{
-                fontSize: 48,
+                fontSize: 64,
                 fontWeight: 400,
                 color: badgeColors.text,
                 display: 'flex',
@@ -250,10 +277,34 @@ export async function GET(request: NextRequest) {
             style={{
               display: 'flex',
               flexDirection: 'column',
-              gap: 12,
-              maxWidth: 400,
+              gap: 16,
+              maxWidth: 550,
             }}
           >
+            {/* Title */}
+            <div
+              style={{
+                fontSize: titleSize,
+                fontWeight: 400,
+                color: OG_COLORS.textPrimary,
+                letterSpacing: '0.05em',
+                display: 'flex',
+                lineHeight: 1.1,
+              }}
+            >
+              {mainText}
+            </div>
+            <div
+              style={{
+                fontSize: subtitleSize,
+                color: OG_COLORS.textTertiary,
+                letterSpacing: '0.1em',
+                display: 'flex',
+              }}
+            >
+              {dateRangeText}
+            </div>
+
             {/* Badge Label */}
             <div
               style={{
@@ -276,10 +327,181 @@ export async function GET(request: NextRequest) {
                 fontStyle: 'italic',
                 lineHeight: 1.4,
                 display: 'flex',
+                textAlign: 'left',
               }}
             >
               {humorLine}
             </div>
+          </div>
+        </div>
+
+        {/* Branded Footer */}
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: 12,
+            position: 'absolute',
+            bottom: 40,
+            left: 0,
+            right: 0,
+          }}
+        >
+          <img
+            src={`${baseUrl}/icons/moon-phases/full-moon.svg`}
+            width={24}
+            height={24}
+            style={{ opacity: 0.6 }}
+            alt=''
+          />
+          <span
+            style={{
+              fontFamily: 'Roboto Mono',
+              fontWeight: 300,
+              fontSize: 16,
+              opacity: 0.6,
+              letterSpacing: '0.1em',
+              color: OG_COLORS.textPrimary,
+              display: 'flex',
+            }}
+          >
+            Join free at lunary.app
+          </span>
+        </div>
+      </div>
+    ) : isStory ? (
+      // Story Layout - vertical with large badge
+      <div
+        style={{
+          width: '100%',
+          height: '100%',
+          display: 'flex',
+          flexDirection: 'column',
+          background: OG_COLORS.background,
+          padding: '120px 60px 200px 60px',
+          position: 'relative',
+          fontFamily: 'Roboto Mono',
+        }}
+      >
+        {/* Unique starfield background */}
+        {starfieldJsx}
+
+        {/* Header */}
+        <div
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            marginBottom: 48,
+          }}
+        >
+          <div
+            style={{
+              fontSize: titleSize,
+              fontWeight: 400,
+              color: OG_COLORS.textPrimary,
+              letterSpacing: '0.05em',
+              textAlign: 'center',
+              display: 'flex',
+              lineHeight: 1.1,
+            }}
+          >
+            {mainText}
+          </div>
+          <div
+            style={{
+              fontSize: subtitleSize,
+              color: OG_COLORS.textTertiary,
+              marginTop: 16,
+              letterSpacing: '0.1em',
+              textAlign: 'center',
+              display: 'flex',
+            }}
+          >
+            {dateRangeText}
+          </div>
+        </div>
+
+        {/* Badge Circle - Large and centered */}
+        <div
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            flex: 1,
+            justifyContent: 'center',
+          }}
+        >
+          <div
+            style={{
+              display: 'flex',
+              width: badgeSizeBase,
+              height: badgeSizeBase,
+              borderRadius: '50%',
+              border: `8px solid ${badgeColors.border}`,
+              background: badgeColors.bg,
+              alignItems: 'center',
+              justifyContent: 'center',
+              flexDirection: 'column',
+              marginBottom: 40,
+              padding: 32,
+            }}
+          >
+            <div
+              style={{
+                fontSize: 72,
+                fontWeight: 400,
+                color: badgeColors.text,
+                marginBottom: 16,
+                display: 'flex',
+                letterSpacing: '0.1em',
+              }}
+            >
+              {badgeIcon}
+            </div>
+            <div
+              style={{
+                fontSize: mercurySymbolSize,
+                fontWeight: 400,
+                color: badgeColors.text,
+                display: 'flex',
+              }}
+            >
+              ☿
+            </div>
+          </div>
+
+          {/* Badge Label */}
+          <div
+            style={{
+              fontSize: labelSize,
+              fontWeight: 400,
+              color: badgeColors.text,
+              textTransform: 'uppercase',
+              letterSpacing: '0.15em',
+              marginBottom: 20,
+              textAlign: 'center',
+              display: 'flex',
+            }}
+          >
+            {badgeLabel}
+          </div>
+
+          {/* Humor Line */}
+          <div
+            style={{
+              fontSize: humorSize,
+              color: OG_COLORS.textSecondary,
+              fontStyle: 'italic',
+              textAlign: 'center',
+              maxWidth: '85%',
+              lineHeight: 1.5,
+              display: 'flex',
+              justifyContent: 'center',
+            }}
+          >
+            {humorLine}
           </div>
         </div>
 
@@ -289,34 +511,37 @@ export async function GET(request: NextRequest) {
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            gap: 8,
-            marginTop: 16,
+            gap: 12,
+            position: 'absolute',
+            bottom: 40,
+            left: 0,
+            right: 0,
           }}
         >
           <img
             src={`${baseUrl}/icons/moon-phases/full-moon.svg`}
-            width={22}
-            height={22}
-            style={{ opacity: 0.45 }}
+            width={28}
+            height={28}
+            style={{ opacity: 0.6 }}
             alt=''
           />
           <span
             style={{
               fontFamily: 'Roboto Mono',
               fontWeight: 300,
-              fontSize: 16,
-              opacity: 0.4,
+              fontSize: 20,
+              opacity: 0.6,
               letterSpacing: '0.1em',
               color: OG_COLORS.textPrimary,
               display: 'flex',
             }}
           >
-            Survive retrograde at lunary.app
+            Join free at lunary.app
           </span>
         </div>
       </div>
     ) : (
-      // Square/Story Layout
+      // Square Layout
       <div
         style={{
           width: '100%',
@@ -329,13 +554,16 @@ export async function GET(request: NextRequest) {
           fontFamily: 'Roboto Mono',
         }}
       >
+        {/* Unique starfield background */}
+        {starfieldJsx}
+
         {/* Header */}
         <div
           style={{
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
-            marginBottom: isLandscape ? 20 : isStory ? 32 : 28,
+            marginBottom: 32,
           }}
         >
           <div
@@ -346,6 +574,7 @@ export async function GET(request: NextRequest) {
               letterSpacing: '0.05em',
               textAlign: 'center',
               display: 'flex',
+              lineHeight: 1.1,
             }}
           >
             {mainText}
@@ -354,7 +583,7 @@ export async function GET(request: NextRequest) {
             style={{
               fontSize: subtitleSize,
               color: OG_COLORS.textTertiary,
-              marginTop: 8,
+              marginTop: 12,
               letterSpacing: '0.1em',
               textAlign: 'center',
               display: 'flex',
@@ -372,37 +601,38 @@ export async function GET(request: NextRequest) {
             alignItems: 'center',
             flex: 1,
             justifyContent: 'center',
-            marginBottom: isLandscape ? 20 : 32,
           }}
         >
           <div
             style={{
               display: 'flex',
-              width: badgeSize,
-              height: badgeSize,
+              width: badgeSizeBase,
+              height: badgeSizeBase,
               borderRadius: '50%',
-              border: `4px solid ${badgeColors.border}`,
+              border: `6px solid ${badgeColors.border}`,
               background: badgeColors.bg,
               alignItems: 'center',
               justifyContent: 'center',
               flexDirection: 'column',
-              marginBottom: isLandscape ? 16 : 24,
+              marginBottom: 32,
+              padding: 28,
             }}
           >
             <div
               style={{
-                fontSize: daySize,
+                fontSize: 64,
                 fontWeight: 400,
                 color: badgeColors.text,
-                marginBottom: 8,
+                marginBottom: 12,
                 display: 'flex',
+                letterSpacing: '0.1em',
               }}
             >
-              {badgeEmoji}
+              {badgeIcon}
             </div>
             <div
               style={{
-                fontSize: isLandscape ? 48 : isStory ? 72 : 64,
+                fontSize: mercurySymbolSize,
                 fontWeight: 400,
                 color: badgeColors.text,
                 display: 'flex',
@@ -419,8 +649,8 @@ export async function GET(request: NextRequest) {
               fontWeight: 400,
               color: badgeColors.text,
               textTransform: 'uppercase',
-              letterSpacing: '0.1em',
-              marginBottom: 12,
+              letterSpacing: '0.12em',
+              marginBottom: 16,
               textAlign: 'center',
               display: 'flex',
             }}
@@ -435,9 +665,10 @@ export async function GET(request: NextRequest) {
               color: OG_COLORS.textSecondary,
               fontStyle: 'italic',
               textAlign: 'center',
-              maxWidth: isLandscape ? '80%' : '90%',
+              maxWidth: '90%',
               lineHeight: 1.4,
               display: 'flex',
+              justifyContent: 'center',
             }}
           >
             {humorLine}
@@ -450,15 +681,18 @@ export async function GET(request: NextRequest) {
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            gap: 8,
-            marginTop: isLandscape ? 16 : 24,
+            gap: 12,
+            position: 'absolute',
+            bottom: 40,
+            left: 0,
+            right: 0,
           }}
         >
           <img
             src={`${baseUrl}/icons/moon-phases/full-moon.svg`}
-            width={22}
-            height={22}
-            style={{ opacity: 0.45 }}
+            width={24}
+            height={24}
+            style={{ opacity: 0.6 }}
             alt=''
           />
           <span
@@ -466,13 +700,13 @@ export async function GET(request: NextRequest) {
               fontFamily: 'Roboto Mono',
               fontWeight: 300,
               fontSize: 16,
-              opacity: 0.4,
+              opacity: 0.6,
               letterSpacing: '0.1em',
               color: OG_COLORS.textPrimary,
               display: 'flex',
             }}
           >
-            Survive retrograde at lunary.app
+            Join free at lunary.app
           </span>
         </div>
       </div>

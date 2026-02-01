@@ -1,7 +1,12 @@
 import { ImageResponse } from 'next/og';
 import { NextRequest } from 'next/server';
 import { kvGet } from '@/lib/cloudflare/kv';
-import { getFormatDimensions, OG_COLORS } from '@/lib/share/og-utils';
+import {
+  getFormatDimensions,
+  OG_COLORS,
+  generateStarfield,
+  getStarCount,
+} from '@/lib/share/og-utils';
 import type { ShareFormat } from '@/hooks/useShareModal';
 
 export const runtime = 'edge';
@@ -49,36 +54,82 @@ export async function GET(request: NextRequest) {
     const shareId = searchParams.get('shareId');
     const format = (searchParams.get('format') || 'square') as ShareFormat;
 
-    if (!shareId) {
-      return new Response('Missing shareId', { status: 400 });
-    }
-
     // Load fonts
     const robotoMonoData = await loadRobotoMono(request);
 
-    // Fetch share data from KV or use demo data
-    const raw = await kvGet(`cosmic-state:${shareId}`);
+    // Check for URL params first (for real-time data)
+    const urlName = searchParams.get('name');
+    const urlMoonPhase = searchParams.get('moonPhase');
+    const urlZodiacSeason = searchParams.get('zodiacSeason');
+    const urlInsight = searchParams.get('insight');
+    const urlTransitHeadline = searchParams.get('transitHeadline');
+    const urlTransitDesc = searchParams.get('transitDesc');
 
     let data: CosmicStateShareRecord;
 
-    if (!raw || shareId === 'demo') {
-      // Provide demo/fallback data
+    // If URL params provided, use them directly
+    if (urlMoonPhase || urlZodiacSeason || urlInsight) {
+      const getMoonIcon = (phase: string) => {
+        const phaseMap: Record<string, string> = {
+          'New Moon': 'new-moon',
+          'Waxing Crescent': 'waxing-cresent-moon',
+          'First Quarter': 'first-quarter',
+          'Waxing Gibbous': 'waxing-gibbous-moon',
+          'Full Moon': 'full-moon',
+          'Waning Gibbous': 'waning-gibbous-moon',
+          'Last Quarter': 'last-quarter',
+          'Waning Crescent': 'waning-cresent-moon',
+        };
+        return phaseMap[phase] || 'full-moon';
+      };
+
       data = {
-        shareId: 'demo',
+        shareId: 'url-params',
         createdAt: new Date().toISOString(),
+        name: urlName || undefined,
         moonPhase: {
-          name: 'Waxing Crescent',
+          name: urlMoonPhase || 'Full Moon',
           icon: {
-            src: '/icons/moon-phases/waxing-cresent-moon.png',
-            alt: 'Waxing Crescent Moon',
+            src: `/icons/moon-phases/${getMoonIcon(urlMoonPhase || 'Full Moon')}.png`,
+            alt: urlMoonPhase || 'Full Moon',
           },
         },
-        zodiacSeason: 'Aquarius',
-        insight: 'The cosmic currents support growth and new beginnings',
+        zodiacSeason: urlZodiacSeason || 'Aquarius',
+        insight:
+          urlInsight || 'The cosmic currents support growth and new beginnings',
+        transit: urlTransitHeadline
+          ? {
+              headline: urlTransitHeadline,
+              description: urlTransitDesc || '',
+            }
+          : undefined,
         date: new Date().toISOString().split('T')[0],
       };
+    } else if (shareId) {
+      // Fetch share data from KV or use demo data
+      const raw = await kvGet(`cosmic-state:${shareId}`);
+
+      if (!raw || shareId === 'demo') {
+        // Provide demo/fallback data
+        data = {
+          shareId: 'demo',
+          createdAt: new Date().toISOString(),
+          moonPhase: {
+            name: 'Waxing Crescent',
+            icon: {
+              src: '/icons/moon-phases/waxing-cresent-moon.png',
+              alt: 'Waxing Crescent Moon',
+            },
+          },
+          zodiacSeason: 'Aquarius',
+          insight: 'The cosmic currents support growth and new beginnings',
+          date: new Date().toISOString().split('T')[0],
+        };
+      } else {
+        data = JSON.parse(raw) as CosmicStateShareRecord;
+      }
     } else {
-      data = JSON.parse(raw) as CosmicStateShareRecord;
+      return new Response('Missing shareId or URL params', { status: 400 });
     }
     const { width, height } = getFormatDimensions(format);
     const firstName = data.name?.trim().split(' ')[0] || '';
@@ -86,12 +137,25 @@ export async function GET(request: NextRequest) {
 
     const isLandscape = format === 'landscape';
     const isStory = format === 'story';
-    const padding = isLandscape ? 40 : isStory ? 100 : 60;
-    const titleSize = isLandscape ? 40 : isStory ? 84 : 52;
-    const dateSize = isLandscape ? 18 : isStory ? 36 : 22;
-    const phaseSize = isLandscape ? 32 : isStory ? 64 : 40;
-    const labelSize = isLandscape ? 18 : isStory ? 36 : 22;
-    const insightSize = isLandscape ? 16 : isStory ? 32 : 20;
+    const padding = isLandscape ? 48 : isStory ? 60 : 60;
+    const titleSize = isLandscape ? 48 : isStory ? 84 : 72;
+    const dateSize = isLandscape ? 22 : isStory ? 36 : 28;
+    const phaseSize = isLandscape ? 40 : isStory ? 72 : 56;
+    const labelSize = isLandscape ? 22 : isStory ? 36 : 32;
+    const insightSize = isLandscape ? 22 : isStory ? 36 : 32;
+    const moonIconSize = isLandscape ? 140 : isStory ? 250 : 200;
+
+    // Truncation helper for text overflow prevention
+    const truncate = (text: string, limit: number) =>
+      text.length > limit ? text.slice(0, limit - 1) + '…' : text;
+
+    // Format-specific character limits - increased for better space utilization
+    const insightLimit = isLandscape ? 140 : isStory ? 350 : 250;
+    const transitHeadlineLimit = isLandscape ? 60 : isStory ? 100 : 80;
+    const transitDescLimit = isLandscape ? 100 : isStory ? 180 : 150;
+
+    // Generate unique starfield based on shareId
+    const stars = generateStarfield(data.shareId, getStarCount(format));
 
     // Format date
     const date = new Date(data.date);
@@ -106,7 +170,26 @@ export async function GET(request: NextRequest) {
       ? data.moonPhase.icon.src
       : `/icons/moon-phases/${data.moonPhase.icon.src}`;
 
-    return new ImageResponse(
+    // Starfield JSX
+    const starfieldJsx = stars.map((star, i) => (
+      <div
+        key={i}
+        style={{
+          position: 'absolute',
+          left: `${star.x}%`,
+          top: `${star.y}%`,
+          width: star.size,
+          height: star.size,
+          borderRadius: '50%',
+          background: '#fff',
+          opacity: star.opacity,
+        }}
+      />
+    ));
+
+    // Layout based on format
+    const layoutJsx = isLandscape ? (
+      // Landscape Layout - Two column
       <div
         style={{
           width: '100%',
@@ -119,13 +202,15 @@ export async function GET(request: NextRequest) {
           fontFamily: 'Roboto Mono',
         }}
       >
+        {starfieldJsx}
+
         {/* Header */}
         <div
           style={{
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
-            marginBottom: isLandscape ? 24 : isStory ? 40 : 32,
+            marginBottom: 20,
           }}
         >
           <div
@@ -153,41 +238,39 @@ export async function GET(request: NextRequest) {
           </div>
         </div>
 
-        {/* Cards Container - Horizontal for landscape, vertical otherwise */}
+        {/* Two-column layout */}
         <div
           style={{
             display: 'flex',
-            flexDirection: isLandscape ? 'row' : 'column',
-            gap: isLandscape ? 16 : 0,
-            marginBottom: data.transit ? (isLandscape ? 16 : 24) : 0,
-            flex: data.transit ? 0 : 1,
+            flexDirection: 'row',
+            gap: 24,
+            flex: 1,
           }}
         >
-          {/* Moon Phase Card */}
+          {/* Left: Moon Phase (40%) */}
           <div
             style={{
               display: 'flex',
               flexDirection: 'column',
-              padding: isLandscape ? 20 : 28,
+              padding: '24px',
               background: OG_COLORS.cardBg,
               border: `1px solid ${OG_COLORS.border}`,
               borderRadius: 16,
-              marginBottom: isLandscape ? 0 : 24,
               alignItems: 'center',
-              flex: isLandscape ? 0 : 0,
-              width: isLandscape ? 280 : 'auto',
+              justifyContent: 'center',
+              width: '40%',
             }}
           >
             <img
               src={`${baseUrl}${moonIconPath}`}
-              width={isLandscape ? 120 : isStory ? 140 : 80}
-              height={isLandscape ? 120 : isStory ? 140 : 80}
-              style={{ marginBottom: isStory ? 20 : 12 }}
+              width={moonIconSize}
+              height={moonIconSize}
+              style={{ marginBottom: 16 }}
               alt={data.moonPhase.name}
             />
             <div
               style={{
-                fontSize: isLandscape ? 28 : phaseSize,
+                fontSize: phaseSize,
                 fontWeight: 400,
                 color: OG_COLORS.primaryViolet,
                 letterSpacing: '0.05em',
@@ -200,7 +283,7 @@ export async function GET(request: NextRequest) {
             </div>
             <div
               style={{
-                fontSize: isLandscape ? 14 : labelSize,
+                fontSize: labelSize,
                 color: OG_COLORS.textSecondary,
                 textTransform: 'uppercase',
                 letterSpacing: '0.1em',
@@ -213,30 +296,256 @@ export async function GET(request: NextRequest) {
             </div>
           </div>
 
-          {/* Insight Card */}
+          {/* Right: Insight + Transit (60%) */}
           <div
             style={{
               display: 'flex',
               flexDirection: 'column',
-              padding: isLandscape ? 20 : 28,
-              background: OG_COLORS.cardBg,
-              border: `1px solid ${OG_COLORS.border}`,
-              borderRadius: 16,
+              gap: 16,
               flex: 1,
-              justifyContent: 'center',
             }}
           >
+            {/* Insight Card */}
             <div
               style={{
-                fontSize: isLandscape ? 14 : insightSize,
-                color: OG_COLORS.textPrimary,
-                lineHeight: 1.5,
-                textAlign: 'center',
                 display: 'flex',
+                flexDirection: 'column',
+                padding: '24px',
+                background: OG_COLORS.cardBg,
+                border: `1px solid ${OG_COLORS.border}`,
+                borderRadius: 16,
+                flex: 1,
+                justifyContent: 'center',
               }}
             >
-              {data.insight}
+              <div
+                style={{
+                  fontSize: 14,
+                  color: OG_COLORS.textSecondary,
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.1em',
+                  marginBottom: 12,
+                  display: 'flex',
+                }}
+              >
+                Cosmic Insight
+              </div>
+              <div
+                style={{
+                  fontSize: insightSize,
+                  color: OG_COLORS.textPrimary,
+                  lineHeight: 1.5,
+                  display: 'flex',
+                }}
+              >
+                {truncate(data.insight, insightLimit)}
+              </div>
             </div>
+
+            {/* Transit Card (if present) */}
+            {data.transit && (
+              <div
+                style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  padding: '20px 24px',
+                  background: OG_COLORS.cardBg,
+                  border: `2px solid ${OG_COLORS.galaxyHaze}`,
+                  borderRadius: 16,
+                }}
+              >
+                <div
+                  style={{
+                    fontSize: 18,
+                    color: OG_COLORS.galaxyHaze,
+                    fontWeight: 400,
+                    marginBottom: 6,
+                    display: 'flex',
+                  }}
+                >
+                  {truncate(data.transit.headline, transitHeadlineLimit)}
+                </div>
+                <div
+                  style={{
+                    fontSize: 16,
+                    color: OG_COLORS.textSecondary,
+                    lineHeight: 1.4,
+                    display: 'flex',
+                  }}
+                >
+                  {truncate(data.transit.description, transitDescLimit)}
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Footer */}
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: 12,
+            marginTop: 20,
+            position: 'absolute',
+            bottom: 40,
+            left: 0,
+            right: 0,
+          }}
+        >
+          <img
+            src={`${baseUrl}/icons/moon-phases/full-moon.svg`}
+            width={24}
+            height={24}
+            style={{ opacity: 0.6 }}
+            alt=''
+          />
+          <span
+            style={{
+              fontFamily: 'Roboto Mono',
+              fontWeight: 300,
+              fontSize: 16,
+              opacity: 0.6,
+              letterSpacing: '0.1em',
+              color: OG_COLORS.textPrimary,
+              display: 'flex',
+            }}
+          >
+            Join free at lunary.app
+          </span>
+        </div>
+      </div>
+    ) : isStory ? (
+      // Story Layout - Large moon, vertical stacking
+      <div
+        style={{
+          width: '100%',
+          height: '100%',
+          display: 'flex',
+          flexDirection: 'column',
+          background: OG_COLORS.background,
+          padding: '120px 60px 200px 60px',
+          position: 'relative',
+          fontFamily: 'Roboto Mono',
+        }}
+      >
+        {starfieldJsx}
+
+        {/* Header */}
+        <div
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            marginBottom: 48,
+          }}
+        >
+          <div
+            style={{
+              fontSize: titleSize,
+              fontWeight: 400,
+              color: OG_COLORS.textPrimary,
+              letterSpacing: '0.05em',
+              textAlign: 'center',
+              display: 'flex',
+            }}
+          >
+            {firstName ? `${firstName}'s` : "Today's"} Cosmic State
+          </div>
+          <div
+            style={{
+              fontSize: dateSize,
+              color: OG_COLORS.textTertiary,
+              marginTop: 12,
+              letterSpacing: '0.1em',
+              display: 'flex',
+            }}
+          >
+            {dateText}
+          </div>
+        </div>
+
+        {/* Large Moon Icon - upper third */}
+        <div
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            marginBottom: 48,
+          }}
+        >
+          <img
+            src={`${baseUrl}${moonIconPath}`}
+            width={moonIconSize}
+            height={moonIconSize}
+            style={{ marginBottom: 24 }}
+            alt={data.moonPhase.name}
+          />
+          <div
+            style={{
+              fontSize: phaseSize,
+              fontWeight: 400,
+              color: OG_COLORS.primaryViolet,
+              letterSpacing: '0.05em',
+              textAlign: 'center',
+              marginBottom: 12,
+              display: 'flex',
+            }}
+          >
+            {data.moonPhase.name}
+          </div>
+          <div
+            style={{
+              fontSize: labelSize,
+              color: OG_COLORS.textSecondary,
+              textTransform: 'uppercase',
+              letterSpacing: '0.1em',
+              fontWeight: 300,
+              textAlign: 'center',
+              display: 'flex',
+            }}
+          >
+            {data.zodiacSeason} Season
+          </div>
+        </div>
+
+        {/* Insight Card - Full width */}
+        <div
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+            padding: '36px 40px',
+            background: OG_COLORS.cardBg,
+            border: `1px solid ${OG_COLORS.border}`,
+            borderRadius: 20,
+            marginBottom: data.transit ? 28 : 0,
+            flex: data.transit ? 0 : 1,
+            justifyContent: 'center',
+          }}
+        >
+          <div
+            style={{
+              fontSize: 20,
+              color: OG_COLORS.textSecondary,
+              textTransform: 'uppercase',
+              letterSpacing: '0.1em',
+              marginBottom: 16,
+              display: 'flex',
+            }}
+          >
+            Cosmic Insight
+          </div>
+          <div
+            style={{
+              fontSize: insightSize,
+              color: OG_COLORS.textPrimary,
+              lineHeight: 1.6,
+              textAlign: 'center',
+              display: 'flex',
+            }}
+          >
+            {truncate(data.insight, insightLimit)}
           </div>
         </div>
 
@@ -246,11 +555,12 @@ export async function GET(request: NextRequest) {
             style={{
               display: 'flex',
               flexDirection: 'column',
-              padding: isLandscape ? 20 : 28,
+              padding: '32px 40px',
               background: OG_COLORS.cardBg,
               border: `2px solid ${OG_COLORS.galaxyHaze}`,
-              borderRadius: 16,
+              borderRadius: 20,
               flex: 1,
+              justifyContent: 'center',
             }}
           >
             <div
@@ -258,42 +568,257 @@ export async function GET(request: NextRequest) {
                 fontSize: labelSize,
                 color: OG_COLORS.galaxyHaze,
                 fontWeight: 400,
-                marginBottom: 8,
+                marginBottom: 12,
                 textAlign: 'center',
                 display: 'flex',
               }}
             >
-              {data.transit.headline}
+              {truncate(data.transit.headline, transitHeadlineLimit)}
             </div>
             <div
               style={{
-                fontSize: insightSize,
+                fontSize: insightSize - 4,
                 color: OG_COLORS.textSecondary,
                 textAlign: 'center',
-                lineHeight: 1.4,
+                lineHeight: 1.5,
                 display: 'flex',
               }}
             >
-              {data.transit.description}
+              {truncate(data.transit.description, transitDescLimit)}
             </div>
           </div>
         )}
 
-        {/* Footer Branding */}
+        {/* Footer */}
         <div
           style={{
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            gap: 8,
-            marginTop: isLandscape ? 20 : 32,
+            gap: 12,
+            position: 'absolute',
+            bottom: 40,
+            left: 0,
+            right: 0,
           }}
         >
           <img
             src={`${baseUrl}/icons/moon-phases/full-moon.svg`}
-            width={22}
-            height={22}
-            style={{ opacity: 0.45 }}
+            width={28}
+            height={28}
+            style={{ opacity: 0.6 }}
+            alt=''
+          />
+          <span
+            style={{
+              fontFamily: 'Roboto Mono',
+              fontWeight: 300,
+              fontSize: 20,
+              opacity: 0.6,
+              letterSpacing: '0.1em',
+              color: OG_COLORS.textPrimary,
+              display: 'flex',
+            }}
+          >
+            Join free at lunary.app
+          </span>
+        </div>
+      </div>
+    ) : (
+      // Square Layout
+      <div
+        style={{
+          width: '100%',
+          height: '100%',
+          display: 'flex',
+          flexDirection: 'column',
+          background: OG_COLORS.background,
+          padding: `${padding}px`,
+          position: 'relative',
+          fontFamily: 'Roboto Mono',
+        }}
+      >
+        {starfieldJsx}
+
+        {/* Header */}
+        <div
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            marginBottom: 36,
+          }}
+        >
+          <div
+            style={{
+              fontSize: titleSize,
+              fontWeight: 400,
+              color: OG_COLORS.textPrimary,
+              letterSpacing: '0.05em',
+              textAlign: 'center',
+              display: 'flex',
+            }}
+          >
+            {firstName ? `${firstName}'s` : "Today's"} Cosmic State
+          </div>
+          <div
+            style={{
+              fontSize: dateSize,
+              color: OG_COLORS.textTertiary,
+              marginTop: 10,
+              letterSpacing: '0.1em',
+              display: 'flex',
+            }}
+          >
+            {dateText}
+          </div>
+        </div>
+
+        {/* Moon Phase - Full width card */}
+        <div
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+            padding: '32px',
+            background: OG_COLORS.cardBg,
+            border: `1px solid ${OG_COLORS.border}`,
+            borderRadius: 20,
+            marginBottom: 28,
+            alignItems: 'center',
+          }}
+        >
+          <img
+            src={`${baseUrl}${moonIconPath}`}
+            width={moonIconSize}
+            height={moonIconSize}
+            style={{ marginBottom: 20 }}
+            alt={data.moonPhase.name}
+          />
+          <div
+            style={{
+              fontSize: phaseSize,
+              fontWeight: 400,
+              color: OG_COLORS.primaryViolet,
+              letterSpacing: '0.05em',
+              textAlign: 'center',
+              marginBottom: 10,
+              display: 'flex',
+            }}
+          >
+            {data.moonPhase.name}
+          </div>
+          <div
+            style={{
+              fontSize: labelSize,
+              color: OG_COLORS.textSecondary,
+              textTransform: 'uppercase',
+              letterSpacing: '0.1em',
+              fontWeight: 300,
+              textAlign: 'center',
+              display: 'flex',
+            }}
+          >
+            {data.zodiacSeason} Season
+          </div>
+        </div>
+
+        {/* Insight Card - Full width */}
+        <div
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+            padding: '28px 32px',
+            background: OG_COLORS.cardBg,
+            border: `1px solid ${OG_COLORS.border}`,
+            borderRadius: 20,
+            marginBottom: data.transit ? 24 : 0,
+            flex: data.transit ? 0 : 1,
+            justifyContent: 'center',
+          }}
+        >
+          <div
+            style={{
+              fontSize: 16,
+              color: OG_COLORS.textSecondary,
+              textTransform: 'uppercase',
+              letterSpacing: '0.1em',
+              marginBottom: 12,
+              display: 'flex',
+            }}
+          >
+            Cosmic Insight
+          </div>
+          <div
+            style={{
+              fontSize: insightSize,
+              color: OG_COLORS.textPrimary,
+              lineHeight: 1.5,
+              textAlign: 'center',
+              display: 'flex',
+            }}
+          >
+            {truncate(data.insight, insightLimit)}
+          </div>
+        </div>
+
+        {/* Transit Card (if present) */}
+        {data.transit && (
+          <div
+            style={{
+              display: 'flex',
+              flexDirection: 'column',
+              padding: '24px 32px',
+              background: OG_COLORS.cardBg,
+              border: `2px solid ${OG_COLORS.galaxyHaze}`,
+              borderRadius: 20,
+              flex: 1,
+              justifyContent: 'center',
+            }}
+          >
+            <div
+              style={{
+                fontSize: labelSize,
+                color: OG_COLORS.galaxyHaze,
+                fontWeight: 400,
+                marginBottom: 10,
+                textAlign: 'center',
+                display: 'flex',
+              }}
+            >
+              {truncate(data.transit.headline, transitHeadlineLimit)}
+            </div>
+            <div
+              style={{
+                fontSize: insightSize - 2,
+                color: OG_COLORS.textSecondary,
+                textAlign: 'center',
+                lineHeight: 1.5,
+                display: 'flex',
+              }}
+            >
+              {truncate(data.transit.description, transitDescLimit)}
+            </div>
+          </div>
+        )}
+
+        {/* Footer */}
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: 12,
+            position: 'absolute',
+            bottom: 40,
+            left: 0,
+            right: 0,
+          }}
+        >
+          <img
+            src={`${baseUrl}/icons/moon-phases/full-moon.svg`}
+            width={24}
+            height={24}
+            style={{ opacity: 0.6 }}
             alt=''
           />
           <span
@@ -301,29 +826,30 @@ export async function GET(request: NextRequest) {
               fontFamily: 'Roboto Mono',
               fontWeight: 300,
               fontSize: 16,
-              opacity: 0.4,
+              opacity: 0.6,
               letterSpacing: '0.1em',
               color: OG_COLORS.textPrimary,
               display: 'flex',
             }}
           >
-            lunary.app
+            Join free at lunary.app
           </span>
         </div>
-      </div>,
-      {
-        width,
-        height,
-        fonts: [
-          {
-            name: 'Roboto Mono',
-            data: robotoMonoData,
-            style: 'normal',
-            weight: 400,
-          },
-        ],
-      },
+      </div>
     );
+
+    return new ImageResponse(layoutJsx, {
+      width,
+      height,
+      fonts: [
+        {
+          name: 'Roboto Mono',
+          data: robotoMonoData,
+          style: 'normal',
+          weight: 400,
+        },
+      ],
+    });
   } catch (error) {
     console.error('[CosmicStateOG] Failed to generate image:', error);
     return new Response('Failed to generate image', { status: 500 });
