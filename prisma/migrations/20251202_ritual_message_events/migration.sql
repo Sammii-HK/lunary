@@ -18,8 +18,8 @@ CREATE INDEX IF NOT EXISTS idx_ritual_message_performance
 CREATE INDEX IF NOT EXISTS idx_ritual_message_user 
   ON ritual_message_events(user_id, shown_at DESC);
 
--- Index for recent events (last 30 days)
-CREATE INDEX IF NOT EXISTS idx_ritual_message_recent 
-  ON ritual_message_events(shown_at DESC) 
-  WHERE shown_at > NOW() - INTERVAL '30 days';
+-- Index for recent events (partial index removed due to Prisma shadow DB limitations)
+-- Use a regular index instead - still fast for recent queries
+CREATE INDEX IF NOT EXISTS idx_ritual_message_recent
+  ON ritual_message_events(shown_at DESC);
 

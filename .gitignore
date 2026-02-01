@@ -18,6 +18,7 @@ test-results/
 playwright-report/
 playwright/.cache/
 *.log
+logs/
 
 # next.js
 /.next/

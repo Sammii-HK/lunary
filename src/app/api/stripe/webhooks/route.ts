@@ -345,10 +345,17 @@ async function handleSubscriptionChange(
 
   // === VALIDATE USER ID RESOLUTION ===
   if (!userId) {
-    // Log failure to webhook event
+    // CRITICAL: Log for manual review but DO NOT throw error
+    // Throwing errors causes Stripe to retry and users to create duplicate subscriptions
     console.error(
-      '[Webhook] Unable to resolve userId for subscription:',
-      subscription.id,
+      '[Webhook] ⚠️ CRITICAL: Unable to resolve userId for subscription:',
+      {
+        subscriptionId: subscription.id,
+        customerId,
+        email: userEmail,
+        hasMetadata: !!subscription.metadata?.userId,
+        metadata: subscription.metadata,
+      },
     );
 
     if (eventId) {
@@ -356,7 +363,9 @@ async function handleSubscriptionChange(
         await sql`
           UPDATE stripe_webhook_events
           SET processing_status = 'failed',
-              failure_reason = 'Unable to resolve user_id',
+              failure_reason = 'Unable to resolve user_id - needs manual review',
+              stripe_customer_id = ${customerId},
+              stripe_subscription_id = ${subscription.id},
               processed_at = NOW()
           WHERE event_id = ${eventId}
         `;
@@ -368,10 +377,45 @@ async function handleSubscriptionChange(
       }
     }
 
-    // Don't silently fail - throw error so Stripe retries
-    throw new Error(
-      `Unable to resolve userId for subscription ${subscription.id}`,
-    );
+    // Store the orphaned subscription for manual linking later
+    try {
+      await sql`
+        INSERT INTO orphaned_subscriptions (
+          stripe_subscription_id,
+          stripe_customer_id,
+          customer_email,
+          status,
+          plan_type,
+          subscription_metadata,
+          created_at
+        ) VALUES (
+          ${subscription.id},
+          ${customerId},
+          ${userEmail},
+          ${status},
+          ${planType},
+          ${JSON.stringify(subscription.metadata || {})},
+          NOW()
+        )
+        ON CONFLICT (stripe_subscription_id) DO UPDATE SET
+          customer_email = EXCLUDED.customer_email,
+          status = EXCLUDED.status,
+          updated_at = NOW()
+      `;
+      console.log(
+        '[Webhook] Stored orphaned subscription for manual review:',
+        subscription.id,
+      );
+    } catch (dbError) {
+      console.error(
+        '[Webhook] Failed to store orphaned subscription:',
+        dbError,
+      );
+    }
+
+    // Return success to Stripe to prevent retries
+    // Manual intervention needed to link this subscription to the correct user
+    return;
   }
 
   // Write to database

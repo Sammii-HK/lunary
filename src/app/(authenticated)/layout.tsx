@@ -24,13 +24,19 @@ export default function AuthenticatedLayout({
   }, [authStatus.isAuthenticated, authStatus.loading, pathname, router]);
 
   useEffect(() => {
-    if (!authStatus.loading) {
+    if (!authStatus.loading && authStatus.isAuthenticated) {
       conversionTracking.productOpened(
         authStatus.user?.id,
         authStatus.user?.email,
       );
     }
-  }, [authStatus.loading, authStatus.user?.id, authStatus.user?.email]);
+  }, [
+    authStatus.loading,
+    authStatus.isAuthenticated,
+    authStatus.user?.id,
+    authStatus.user?.email,
+    pathname,
+  ]);
 
   if (authStatus.loading) {
     return (

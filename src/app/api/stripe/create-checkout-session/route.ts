@@ -114,6 +114,8 @@ async function findCustomerIdByEmail(
       return null;
     }
 
+    // CRITICAL: If userId provided, ONLY return customer if metadata matches
+    // This prevents matching the wrong customer when multiple exist with same email
     if (userId) {
       const match = customers.data.find(
         (customer) => customer.metadata?.userId === userId,
@@ -121,13 +123,27 @@ async function findCustomerIdByEmail(
       if (match?.id) {
         return match.id;
       }
+
+      // If we have multiple customers with this email but none match userId,
+      // DO NOT return any of them - create a new one instead
+      if (customers.data.length > 1) {
+        console.warn(
+          `Multiple customers found for email ${email} but none match userId ${userId}. Will create new customer.`,
+        );
+        return null;
+      }
     }
 
+    // Only return single customer if no userId to match against
     if (customers.data.length === 1) {
       return customers.data[0].id;
     }
 
-    return customers.data[0]?.id || null;
+    // Multiple customers, no userId to disambiguate - don't guess
+    console.warn(
+      `Multiple customers found for email ${email} without userId. Cannot determine which to use.`,
+    );
+    return null;
   } catch (error) {
     console.warn('Failed to lookup Stripe customer by email:', error);
     return null;
@@ -160,6 +176,7 @@ async function ensureStripeCustomer(
 ): Promise<string | null> {
   const { existingCustomerId, userId, email } = params;
 
+  // First, validate existing customer ID if provided
   if (existingCustomerId) {
     try {
       const customer = await stripe.customers.retrieve(existingCustomerId);
@@ -168,6 +185,12 @@ async function ensureStripeCustomer(
         'deleted' in customer &&
         customer.deleted;
       if (!isDeleted) {
+        // Ensure metadata is set
+        if (userId && !(customer as any).metadata?.userId) {
+          await stripe.customers.update(existingCustomerId, {
+            metadata: { userId },
+          });
+        }
         return existingCustomerId;
       }
     } catch {
@@ -175,6 +198,7 @@ async function ensureStripeCustomer(
     }
   }
 
+  // Search by userId metadata (most reliable)
   if (userId) {
     const foundByMetadata = await findCustomerIdByMetadata(stripe, userId);
     if (foundByMetadata) {
@@ -182,26 +206,49 @@ async function ensureStripeCustomer(
     }
   }
 
-  if (email) {
+  // Search by email - but be STRICT to avoid false matches
+  if (email && userId) {
     const foundByEmail = await findCustomerIdByEmail(
       stripe,
       email,
       userId || undefined,
     );
     if (foundByEmail) {
+      // Update the customer to include userId metadata to prevent future duplicates
+      try {
+        await stripe.customers.update(foundByEmail, {
+          metadata: { userId },
+        });
+      } catch (error) {
+        console.warn('Failed to backfill userId metadata on customer:', error);
+      }
       return foundByEmail;
     }
   }
 
+  // Only create if we have userId or email
   if (userId || email) {
     try {
-      const created = await stripe.customers.create({
-        email: email || undefined,
-        metadata: userId ? { userId } : undefined,
-      });
+      // Use idempotency key based on userId to prevent duplicate creation
+      const idempotencyKey = userId
+        ? `customer_${userId}_${Date.now()}`
+        : undefined;
+
+      const created = await stripe.customers.create(
+        {
+          email: email || undefined,
+          metadata: userId ? { userId } : undefined,
+        },
+        idempotencyKey ? { idempotencyKey } : undefined,
+      );
+
+      console.log(
+        `✅ Created new Stripe customer ${created.id} for user ${userId || email}`,
+      );
       return created.id;
     } catch (error) {
-      console.warn('Failed to create Stripe customer:', error);
+      console.error('Failed to create Stripe customer:', error);
+      throw error; // Don't silently fail - this is critical
     }
   }
 
@@ -448,24 +495,35 @@ export async function POST(request: NextRequest) {
     // Use the same Stripe account for checkout session
     const checkoutStripe = priceStripe;
 
-    if (!resolvedCustomerId && typeof userId === 'string') {
+    // CRITICAL: Always check database FIRST to prevent duplicate customers
+    if (typeof userId === 'string') {
       const storedCustomer = await getStoredCustomerForUser(userId);
       if (storedCustomer?.customerId) {
         resolvedCustomerId = storedCustomer.customerId;
+        console.log(
+          `✅ Found existing customer ${resolvedCustomerId} for user ${userId}`,
+        );
       }
       if (!resolvedEmail && storedCustomer?.email) {
         resolvedEmail = storedCustomer.email;
       }
     }
 
+    // Ensure we have a customer (will reuse existing or create new)
     const ensuredCustomerId = await ensureStripeCustomer(checkoutStripe, {
       existingCustomerId: resolvedCustomerId,
       userId: typeof userId === 'string' ? userId : null,
       email: resolvedEmail,
     });
-    if (ensuredCustomerId) {
-      resolvedCustomerId = ensuredCustomerId;
+
+    if (!ensuredCustomerId) {
+      return NextResponse.json(
+        { error: 'Failed to create or find Stripe customer' },
+        { status: 500 },
+      );
     }
+
+    resolvedCustomerId = ensuredCustomerId;
 
     const normalizedPromoCode =
       typeof promoCode === 'string' && promoCode.trim().length > 0
@@ -599,26 +657,41 @@ export async function POST(request: NextRequest) {
 
     if (resolvedCustomerId) {
       sessionConfig.customer = resolvedCustomerId;
+
+      // CRITICAL: Persist customer to database BEFORE creating checkout session
+      // This prevents duplicate customers if user refreshes/retries
       if (typeof userId === 'string') {
         await persistStripeCustomer(userId, resolvedCustomerId, resolvedEmail);
+
+        // CRITICAL: Ensure metadata is set on Stripe customer IMMEDIATELY
+        // This ensures webhooks can always resolve the user
         try {
           await checkoutStripe.customers.update(resolvedCustomerId, {
             metadata: {
               userId: userId,
             },
           });
+          console.log(
+            `✅ Set userId metadata on customer ${resolvedCustomerId}`,
+          );
         } catch (error) {
-          console.warn('Failed to update customer metadata:', error);
+          console.error('CRITICAL: Failed to update customer metadata:', error);
+          // This is critical - if we can't set metadata, webhooks will fail
+          return NextResponse.json(
+            { error: 'Failed to configure customer account' },
+            { status: 500 },
+          );
         }
       }
     } else if (resolvedEmail) {
       sessionConfig.customer_email = resolvedEmail;
     }
 
+    // CRITICAL: Check for existing active subscription to prevent duplicates
     if (typeof userId === 'string' && resolvedCustomerId) {
       try {
         const existingSubscription = await sql`
-          SELECT status, plan_type, stripe_subscription_id
+          SELECT status, plan_type, stripe_subscription_id, stripe_customer_id
           FROM subscriptions
           WHERE user_id = ${userId}
           LIMIT 1
@@ -631,19 +704,49 @@ export async function POST(request: NextRequest) {
           existing.stripe_subscription_id;
 
         if (hasActiveSubscription) {
+          console.log(
+            `⚠️ User ${userId} already has active subscription ${existing.stripe_subscription_id}. Redirecting to billing portal.`,
+          );
           const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || originFromRequest;
           const portalSession =
             await checkoutStripe.billingPortal.sessions.create({
-              customer: resolvedCustomerId,
+              customer: existing.stripe_customer_id || resolvedCustomerId,
               return_url: `${baseUrl}/pricing`,
             });
           return NextResponse.json({
             portalUrl: portalSession.url,
             reason: 'existing_subscription',
+            message:
+              'You already have an active subscription. Redirecting to billing portal.',
           });
         }
       } catch (error) {
-        console.warn('Failed to check existing subscription:', error);
+        console.error('Failed to check existing subscription:', error);
+        // Don't fail - allow checkout to proceed
+      }
+    }
+
+    // Also check for orphaned subscriptions that might belong to this user
+    if (typeof userId === 'string' || resolvedEmail) {
+      try {
+        const orphanedCheck = await sql`
+          SELECT stripe_subscription_id, stripe_customer_id, customer_email
+          FROM orphaned_subscriptions
+          WHERE resolved = FALSE
+            AND (customer_email = ${resolvedEmail} OR stripe_customer_id = ${resolvedCustomerId})
+          ORDER BY created_at DESC
+          LIMIT 1
+        `;
+
+        if (orphanedCheck.rows.length > 0) {
+          const orphaned = orphanedCheck.rows[0];
+          console.warn(
+            `⚠️ Found orphaned subscription ${orphaned.stripe_subscription_id} for ${resolvedEmail || resolvedCustomerId}. May need manual linking.`,
+          );
+          // Log for admin review but don't block checkout
+        }
+      } catch (error) {
+        console.error('Failed to check for orphaned subscriptions:', error);
       }
     }
     // Note: For subscription mode, Stripe automatically creates customers

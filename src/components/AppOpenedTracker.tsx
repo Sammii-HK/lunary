@@ -8,7 +8,9 @@ export function AppOpenedTracker() {
   const pathname = usePathname();
 
   useEffect(() => {
-    conversionTracking.appOpened();
+    console.log('[AppOpenedTracker] Firing app_opened for pathname:', pathname);
+    const result = conversionTracking.appOpened();
+    console.log('[AppOpenedTracker] Result:', result);
   }, [pathname]);
 
   return null;
