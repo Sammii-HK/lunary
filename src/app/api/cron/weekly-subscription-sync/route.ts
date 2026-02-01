@@ -2,6 +2,10 @@ import { NextRequest, NextResponse } from 'next/server';
 import { sendDiscordAdminNotification } from '@/lib/discord';
 import { runSync } from '../../../../../scripts/weekly-sync-cron';
 
+// Force dynamic rendering to prevent build-time database access
+export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
+
 /**
  * Weekly Subscription Sync
  * Runs Sunday 02:00 UTC via Vercel cron
