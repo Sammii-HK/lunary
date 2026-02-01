@@ -248,6 +248,9 @@ async function createMoonCircle(dateStr: string, force: boolean = false) {
     let emailsSent = 0;
     let emailsFailed = 0;
 
+    // Track emails already sent to prevent duplicates (user may have multiple push subscriptions)
+    const emailsSentTo = new Set<string>();
+
     const now = new Date();
     const hour = now.getUTCHours();
     const isQuietHours = hour >= 22 || hour < 8;
@@ -312,7 +315,8 @@ async function createMoonCircle(dateStr: string, force: boolean = false) {
 
           pushSent++;
 
-          if (userEmail && moonCircleId) {
+          // Only send email if we haven't already sent to this address
+          if (userEmail && moonCircleId && !emailsSentTo.has(userEmail)) {
             try {
               const dateLabel = new Intl.DateTimeFormat('en-US', {
                 weekday: 'long',
@@ -348,6 +352,7 @@ async function createMoonCircle(dateStr: string, force: boolean = false) {
                 text: emailText,
               });
 
+              emailsSentTo.add(userEmail);
               emailsSent++;
 
               // Track conversion via API (server-side)
