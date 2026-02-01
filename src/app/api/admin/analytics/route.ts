@@ -1,5 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { sql } from '@vercel/postgres';
+import {
+  testUserFilter,
+  testUserFilterUsers,
+} from '@/lib/analytics/test-filter';
 const ACTIVITY_EVENTS = [
   'app_opened',
   'tarot_viewed',
@@ -44,24 +48,31 @@ export async function GET(request: NextRequest) {
       FROM "user"
       WHERE "createdAt" IS NOT NULL
         AND ${(sql as any).raw(dateFilter.replace('created_at', '"createdAt"'))}
+        AND ${testUserFilterUsers()}
     `;
 
     const trials = await sql`
       SELECT COUNT(DISTINCT user_id) as count
       FROM conversion_events
-      WHERE event_type = 'trial_started' AND ${(sql as any).raw(dateFilter)}
+      WHERE event_type = 'trial_started'
+        AND ${(sql as any).raw(dateFilter)}
+        AND ${testUserFilter()}
     `;
 
     const conversions = await sql`
       SELECT COUNT(DISTINCT user_id) as count
       FROM conversion_events
-      WHERE event_type IN ('trial_converted', 'subscription_started') AND ${(sql as any).raw(dateFilter)}
+      WHERE event_type IN ('trial_converted', 'subscription_started')
+        AND ${(sql as any).raw(dateFilter)}
+        AND ${testUserFilter()}
     `;
 
     const trialConversions = await sql`
       SELECT COUNT(DISTINCT user_id) as count
       FROM conversion_events
-      WHERE event_type = 'trial_converted' AND ${(sql as any).raw(dateFilter)}
+      WHERE event_type = 'trial_converted'
+        AND ${(sql as any).raw(dateFilter)}
+        AND ${testUserFilter()}
     `;
 
     const totalSignups = parseInt(signups.rows[0]?.count || '0');
@@ -75,7 +86,7 @@ export async function GET(request: NextRequest) {
       trialStarted > 0 ? (trialConverted / trialStarted) * 100 : 0;
 
     const timeToConvert = await sql`
-      SELECT 
+      SELECT
         AVG(EXTRACT(EPOCH FROM (t2.created_at - t1.created_at)) / 86400) as avg_days
       FROM conversion_events t1
       JOIN conversion_events t2 ON t1.user_id = t2.user_id
@@ -83,6 +94,8 @@ export async function GET(request: NextRequest) {
         AND t2.event_type IN ('trial_converted', 'subscription_started')
         AND t2.created_at > t1.created_at
         AND ${(sql as any).raw(dateFilter.replace('created_at', 't1.created_at'))}
+        AND (t1.user_email IS NULL OR (t1.user_email NOT LIKE '%@test.lunary.app' AND t1.user_email != 'test@test.lunary.app'))
+        AND (t2.user_email IS NULL OR (t2.user_email NOT LIKE '%@test.lunary.app' AND t2.user_email != 'test@test.lunary.app'))
     `;
 
     const avgTimeToConvert =
