@@ -117,6 +117,33 @@ export async function GET(request: NextRequest) {
 
     const latestRows = latestPerEmailResult.rows;
 
+    // Get total subscriptions at START of period for correct churn rate denominator
+    // Churn rate = (cancelled_in_period / subscriptions_at_START) * 100
+    // NOT (cancelled_in_period / subscriptions_at_END) which would be wrong for growing/declining base
+    const subsAtStartResult = await sql`
+      WITH normalized_subs AS (
+        SELECT
+          s.*,
+          LOWER(COALESCE(NULLIF(TRIM(s.user_email), ''), NULLIF(TRIM(u.email), ''))) AS email
+        FROM subscriptions s
+        LEFT JOIN "user" u ON u.id = s.user_id
+        WHERE s.stripe_subscription_id IS NOT NULL
+      ),
+      active_at_start AS (
+        SELECT DISTINCT email
+        FROM normalized_subs
+        WHERE email IS NOT NULL
+          AND created_at < ${formatTimestamp(range.start)}
+          AND (cancelled_at IS NULL OR cancelled_at >= ${formatTimestamp(range.start)})
+          AND (email NOT LIKE ${TEST_EMAIL_PATTERN} AND email != ${TEST_EMAIL_EXACT})
+      )
+      SELECT COUNT(*) as count
+      FROM active_at_start
+    `;
+    const totalSubscriptionsAtStart = Number(
+      subsAtStartResult.rows[0]?.count || 0,
+    );
+
     const candidateStripeEmails = Array.from(
       new Set(
         latestRows
@@ -282,9 +309,8 @@ export async function GET(request: NextRequest) {
     }));
 
     // Calculate churn rate (cancellations / total subscriptions at period start)
-    // Use normalizedRows.length as denominator (start-of-period count), not activeSubscriptions (end-of-period)
+    // totalSubscriptionsAtStart is queried separately above to get count at range.start, not range.end
     const activeSubscriptions = states.active || 0;
-    const totalSubscriptionsAtStart = normalizedRows.length;
     const cancelledInPeriod = churnTrends.reduce(
       (sum, t) => sum + t.churned,
       0,

@@ -687,14 +687,96 @@ export async function POST(request: NextRequest) {
       sessionConfig.customer_email = resolvedEmail;
     }
 
-    // CRITICAL: Check for existing active subscription to prevent duplicates
+    // CRITICAL: Multi-layered defense against duplicate subscriptions
+    // Layer 0: Check for pending checkout (prevents concurrent requests)
+    // Layer 1: Check database for existing subscription
+    // Layer 2: Check Stripe directly (catches unsynced subscriptions)
+    // Layer 3: Use idempotency key on checkout.sessions.create (prevents duplicates at Stripe level)
+
+    if (typeof userId === 'string') {
+      // LAYER 0: Check and create pending checkout record
+      // This is the FIRST line of defense - uses UNIQUE constraint on user_id
+      try {
+        const expiresAt = new Date(
+          Date.now() + 24 * 60 * 60 * 1000,
+        ).toISOString(); // 24 hours
+
+        // First, clean up any expired pending checkouts for this user
+        await sql`
+          DELETE FROM pending_checkouts
+          WHERE user_id = ${userId}
+          AND (status = 'expired' OR expires_at < NOW() OR status = 'completed')
+        `;
+
+        // Check if there's an active pending checkout
+        const pendingCheck = await sql`
+          SELECT checkout_session_id, created_at, status
+          FROM pending_checkouts
+          WHERE user_id = ${userId}
+          AND status = 'pending'
+          AND expires_at > NOW()
+        `;
+
+        if (pendingCheck.rows.length > 0) {
+          const pending = pendingCheck.rows[0];
+          const ageSeconds =
+            (Date.now() - new Date(pending.created_at).getTime()) / 1000;
+
+          // If pending checkout is less than 30 seconds old, return the existing session
+          if (ageSeconds < 30 && pending.checkout_session_id) {
+            console.log(
+              `⚠️ User ${userId} has pending checkout from ${ageSeconds.toFixed(0)}s ago. Returning existing session.`,
+            );
+            try {
+              const existingSession =
+                await checkoutStripe.checkout.sessions.retrieve(
+                  pending.checkout_session_id,
+                );
+              if (existingSession.status === 'open') {
+                return NextResponse.json({
+                  sessionId: existingSession.id,
+                  url: existingSession.url,
+                  reason: 'existing_pending_checkout',
+                });
+              }
+            } catch {
+              // Session might have expired, continue to create new one
+            }
+          }
+
+          // If older than 30 seconds, mark as expired and continue
+          await sql`
+            UPDATE pending_checkouts
+            SET status = 'expired'
+            WHERE user_id = ${userId}
+            AND status = 'pending'
+          `;
+        }
+
+        // Try to insert new pending checkout (will fail if one exists due to UNIQUE constraint)
+        await sql`
+          INSERT INTO pending_checkouts (user_id, price_id, status, expires_at)
+          VALUES (${userId}, ${priceId}, 'pending', ${expiresAt})
+          ON CONFLICT (user_id) DO UPDATE SET
+            price_id = EXCLUDED.price_id,
+            status = 'pending',
+            expires_at = EXCLUDED.expires_at,
+            created_at = NOW(),
+            checkout_session_id = NULL
+        `;
+      } catch (error) {
+        console.error('Error managing pending checkout:', error);
+        // Continue anyway - idempotency key will protect us
+      }
+    }
+
     if (typeof userId === 'string' && resolvedCustomerId) {
       try {
+        // LAYER 1: Check database for existing subscription
         const existingSubscription = await sql`
           SELECT status, plan_type, stripe_subscription_id, stripe_customer_id
           FROM subscriptions
           WHERE user_id = ${userId}
-          LIMIT 1
         `;
         const existing = existingSubscription.rows[0];
         const hasActiveSubscription =
@@ -719,6 +801,40 @@ export async function POST(request: NextRequest) {
             message:
               'You already have an active subscription. Redirecting to billing portal.',
           });
+        }
+
+        // ADDITIONAL CHECK: Verify no active subscription in Stripe directly
+        // This catches cases where webhook hasn't synced yet
+        try {
+          const stripeSubscriptions = await checkoutStripe.subscriptions.list({
+            customer: resolvedCustomerId,
+            status: 'all',
+            limit: 10,
+          });
+          const activeInStripe = stripeSubscriptions.data.filter((s) =>
+            ['active', 'trialing', 'past_due'].includes(s.status),
+          );
+          if (activeInStripe.length > 0) {
+            console.log(
+              `⚠️ User ${userId} has ${activeInStripe.length} active subscription(s) in Stripe. Redirecting to billing portal.`,
+            );
+            const baseUrl =
+              process.env.NEXT_PUBLIC_BASE_URL || originFromRequest;
+            const portalSession =
+              await checkoutStripe.billingPortal.sessions.create({
+                customer: resolvedCustomerId,
+                return_url: `${baseUrl}/pricing`,
+              });
+            return NextResponse.json({
+              portalUrl: portalSession.url,
+              reason: 'existing_subscription_stripe',
+              message:
+                'You already have an active subscription. Redirecting to billing portal.',
+            });
+          }
+        } catch (stripeError) {
+          console.error('Failed to check Stripe subscriptions:', stripeError);
+          // Continue if Stripe check fails - DB check is primary
         }
       } catch (error) {
         console.error('Failed to check existing subscription:', error);
@@ -752,8 +868,39 @@ export async function POST(request: NextRequest) {
     // Note: For subscription mode, Stripe automatically creates customers
     // so we don't need to set customer_creation
 
-    const session =
-      await checkoutStripe.checkout.sessions.create(sessionConfig);
+    // CRITICAL: Use idempotency key to prevent duplicate checkout sessions
+    // This is the ULTIMATE safeguard against double-clicks and race conditions
+    // Stripe will return the same session if called with the same key within 24 hours
+    const idempotencyKey = `checkout_${userId}_${priceId}_${Math.floor(Date.now() / 60000)}`; // Changes every minute
+
+    const session = await checkoutStripe.checkout.sessions.create(
+      sessionConfig,
+      {
+        idempotencyKey,
+      },
+    );
+
+    console.log(
+      `✅ Created checkout session ${session.id} for user ${userId} with idempotency key`,
+    );
+
+    // Update pending checkout with session ID
+    if (typeof userId === 'string') {
+      try {
+        await sql`
+          UPDATE pending_checkouts
+          SET checkout_session_id = ${session.id}
+          WHERE user_id = ${userId}
+          AND status = 'pending'
+        `;
+      } catch (error) {
+        console.error(
+          'Failed to update pending checkout with session ID:',
+          error,
+        );
+        // Non-critical - continue
+      }
+    }
 
     return NextResponse.json({ sessionId: session.id, url: session.url });
   } catch (error) {

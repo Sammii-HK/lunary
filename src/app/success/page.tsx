@@ -114,9 +114,14 @@ export default function SuccessPage() {
           );
         }
 
+        // CRITICAL: Set flag so UserContext knows to refresh on navigation
+        sessionStorage.setItem('lunary_just_paid', 'true');
+
         setSynced(true);
       } catch (error) {
         console.error('Error syncing subscription:', error);
+        // Still set the flag even on error - user did pay
+        sessionStorage.setItem('lunary_just_paid', 'true');
         setSynced(true);
       }
     }

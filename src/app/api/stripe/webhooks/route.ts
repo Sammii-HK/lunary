@@ -345,8 +345,6 @@ async function handleSubscriptionChange(
 
   // === VALIDATE USER ID RESOLUTION ===
   if (!userId) {
-    // CRITICAL: Log for manual review but DO NOT throw error
-    // Throwing errors causes Stripe to retry and users to create duplicate subscriptions
     console.error(
       '[Webhook] ⚠️ CRITICAL: Unable to resolve userId for subscription:',
       {
@@ -358,12 +356,59 @@ async function handleSubscriptionChange(
       },
     );
 
+    // Check retry count to decide whether to throw or store as orphaned
+    let retryCount = 0;
+    if (eventId) {
+      try {
+        const eventCheck = await sql`
+          SELECT retry_count FROM stripe_webhook_events
+          WHERE event_id = ${eventId}
+        `;
+        retryCount = eventCheck.rows[0]?.retry_count || 0;
+      } catch (error) {
+        console.error('[Webhook] Failed to check retry count:', error);
+      }
+    }
+
+    // CRITICAL FIX: If this is a recent subscription (within last 60 seconds),
+    // throw error to trigger Stripe retry - metadata might still be propagating
+    const subscriptionAge = Date.now() - subscription.created * 1000;
+    const isRecentSubscription = subscriptionAge < 60000; // 60 seconds
+
+    if (isRecentSubscription && retryCount < 3) {
+      console.log(
+        `[Webhook] Subscription ${subscription.id} is recent (${Math.round(subscriptionAge / 1000)}s old) with ${retryCount} retries. Throwing to trigger Stripe retry.`,
+      );
+
+      if (eventId) {
+        try {
+          await sql`
+            UPDATE stripe_webhook_events
+            SET processing_status = 'pending_retry',
+                failure_reason = 'Unable to resolve user_id - awaiting metadata propagation',
+                stripe_customer_id = ${customerId},
+                stripe_subscription_id = ${subscription.id},
+                processed_at = NOW()
+            WHERE event_id = ${eventId}
+          `;
+        } catch (error) {
+          console.error('[Webhook] Failed to update event status:', error);
+        }
+      }
+
+      // Throw error to trigger Stripe retry
+      throw new Error(
+        `Cannot resolve userId for subscription ${subscription.id} - metadata may still be propagating`,
+      );
+    }
+
+    // After 3 retries or if subscription is old, store as orphaned
     if (eventId) {
       try {
         await sql`
           UPDATE stripe_webhook_events
           SET processing_status = 'failed',
-              failure_reason = 'Unable to resolve user_id - needs manual review',
+              failure_reason = 'Unable to resolve user_id after retries - needs manual review',
               stripe_customer_id = ${customerId},
               stripe_subscription_id = ${subscription.id},
               processed_at = NOW()
@@ -413,7 +458,7 @@ async function handleSubscriptionChange(
       );
     }
 
-    // Return success to Stripe to prevent retries
+    // Return success to Stripe to prevent infinite retries
     // Manual intervention needed to link this subscription to the correct user
     return;
   }
@@ -426,6 +471,8 @@ async function handleSubscriptionChange(
     const currentPeriodEnd = (subscription as any).current_period_end
       ? new Date((subscription as any).current_period_end * 1000).toISOString()
       : null;
+    // CRITICAL: Track cancel_at_period_end so users can see if subscription will cancel
+    const cancelAtPeriodEnd = subscription.cancel_at_period_end || false;
 
     try {
       await sql`
@@ -434,14 +481,14 @@ async function handleSubscriptionChange(
           stripe_customer_id, stripe_subscription_id,
           trial_ends_at, current_period_end,
           has_discount, discount_percent, monthly_amount_due, coupon_id,
-          promo_code, discount_ends_at, trial_used
+          promo_code, discount_ends_at, trial_used, cancel_at_period_end
         ) VALUES (
           ${userId}, ${userEmail}, ${status}, ${planType},
           ${customerId}, ${subscription.id},
           ${trialEndsAt}, ${currentPeriodEnd},
           ${discountInfo.hasDiscount}, ${discountInfo.discountPercent || null},
           ${discountInfo.monthlyAmountDue || null}, ${discountInfo.couponId || null},
-          ${promoCode}, ${discountInfo.discountEndsAt || null}, true
+          ${promoCode}, ${discountInfo.discountEndsAt || null}, true, ${cancelAtPeriodEnd}
         )
         ON CONFLICT (user_id) DO UPDATE SET
           status = EXCLUDED.status,
@@ -458,6 +505,7 @@ async function handleSubscriptionChange(
           discount_ends_at = EXCLUDED.discount_ends_at,
           user_email = COALESCE(EXCLUDED.user_email, subscriptions.user_email),
           trial_used = true,
+          cancel_at_period_end = EXCLUDED.cancel_at_period_end,
           updated_at = NOW()
       `;
     } catch (error) {
@@ -588,6 +636,21 @@ async function handleSubscriptionChange(
     } catch (error) {
       console.error('[Webhook] Failed to update event status:', error);
       // Don't throw - webhook already processed successfully
+    }
+
+    // CRITICAL: Mark any pending checkouts as completed
+    // This clears the lock for future checkout attempts
+    try {
+      await sql`
+        UPDATE pending_checkouts
+        SET status = 'completed',
+            completed_at = NOW()
+        WHERE user_id = ${userId}
+        AND status = 'pending'
+      `;
+    } catch (error) {
+      console.error('[Webhook] Failed to complete pending checkout:', error);
+      // Non-critical
     }
 
     // === LOG TO AUDIT TABLE ===

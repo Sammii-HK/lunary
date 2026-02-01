@@ -124,79 +124,137 @@ const PRODUCT_OPENED_GUARD_KEY = 'lunary_product_opened_guard';
 const DAILY_DASHBOARD_GUARD_PREFIX = 'lunary_daily_dashboard_viewed_guard';
 const APP_OPENED_GUARD_TTL_MS = 1000 * 60 * 30; // 30 minutes (for product_opened)
 
+// In-memory fallback for when localStorage is unavailable (private browsing)
+// This prevents duplicate events within the same browser session
+let inMemoryAppOpenedGuard: number | null = null;
+let inMemoryProductOpenedGuard: number | null = null;
+let inMemoryDailyDashboardGuard: string | null = null;
+
+// Helper to check if same UTC calendar day
+const isSameUTCDay = (timestamp: number): boolean => {
+  const lastDate = new Date(timestamp);
+  const now = new Date();
+  return (
+    lastDate.getUTCDate() === now.getUTCDate() &&
+    lastDate.getUTCMonth() === now.getUTCMonth() &&
+    lastDate.getUTCFullYear() === now.getUTCFullYear()
+  );
+};
+
 // Daily deduplication for app_opened: one event per user per calendar day (UTC)
-// Uses localStorage for persistence across browser sessions
+// Uses localStorage for persistence across browser sessions, with in-memory fallback
+// for private browsing mode to prevent duplicate events within the session
 const shouldTrackAppOpened = () => {
   if (typeof window === 'undefined') return true;
+
+  const now = Date.now();
+
+  // First check in-memory guard (catches private browsing + rapid calls)
+  if (inMemoryAppOpenedGuard !== null && isSameUTCDay(inMemoryAppOpenedGuard)) {
+    return false;
+  }
+
   try {
     const guardKey = 'lunary_app_opened_guard';
     const lastEvent = window.localStorage.getItem(guardKey);
 
     if (lastEvent) {
-      const lastDate = new Date(Number(lastEvent));
-      const now = new Date();
-
-      // Check if same UTC calendar day
-      if (
-        lastDate.getUTCDate() === now.getUTCDate() &&
-        lastDate.getUTCMonth() === now.getUTCMonth() &&
-        lastDate.getUTCFullYear() === now.getUTCFullYear()
-      ) {
+      const timestamp = Number(lastEvent);
+      if (isSameUTCDay(timestamp)) {
+        // Update in-memory guard to match localStorage
+        inMemoryAppOpenedGuard = timestamp;
         return false;
       }
     }
 
-    window.localStorage.setItem(guardKey, String(Date.now()));
+    // Record the event
+    window.localStorage.setItem(guardKey, String(now));
+    inMemoryAppOpenedGuard = now;
     return true;
   } catch {
-    // Fail open to avoid blocking tracking when storage is unavailable.
+    // localStorage unavailable (private browsing) - use in-memory only
+    // This prevents duplicates within the session but allows one event per session
+    if (
+      inMemoryAppOpenedGuard !== null &&
+      isSameUTCDay(inMemoryAppOpenedGuard)
+    ) {
+      return false;
+    }
+    inMemoryAppOpenedGuard = now;
     return true;
   }
 };
 
 // Daily deduplication for product_opened: one event per user per calendar day (UTC)
-// Uses localStorage for persistence across browser sessions
+// Uses localStorage for persistence across browser sessions, with in-memory fallback
 const shouldTrackProductOpened = () => {
   if (typeof window === 'undefined') return true;
+
+  const now = Date.now();
+
+  // First check in-memory guard
+  if (
+    inMemoryProductOpenedGuard !== null &&
+    isSameUTCDay(inMemoryProductOpenedGuard)
+  ) {
+    return false;
+  }
+
   try {
     const guardKey = 'lunary_product_opened_guard';
     const lastEvent = window.localStorage.getItem(guardKey);
 
     if (lastEvent) {
-      const lastDate = new Date(Number(lastEvent));
-      const now = new Date();
-
-      // Check if same UTC calendar day
-      if (
-        lastDate.getUTCDate() === now.getUTCDate() &&
-        lastDate.getUTCMonth() === now.getUTCMonth() &&
-        lastDate.getUTCFullYear() === now.getUTCFullYear()
-      ) {
+      const timestamp = Number(lastEvent);
+      if (isSameUTCDay(timestamp)) {
+        inMemoryProductOpenedGuard = timestamp;
         return false;
       }
     }
 
-    window.localStorage.setItem(guardKey, String(Date.now()));
+    window.localStorage.setItem(guardKey, String(now));
+    inMemoryProductOpenedGuard = now;
     return true;
   } catch {
-    // Fail open to avoid blocking tracking when storage is unavailable.
+    // localStorage unavailable - use in-memory only
+    if (
+      inMemoryProductOpenedGuard !== null &&
+      isSameUTCDay(inMemoryProductOpenedGuard)
+    ) {
+      return false;
+    }
+    inMemoryProductOpenedGuard = now;
     return true;
   }
 };
 
 const shouldTrackDailyDashboardViewed = () => {
   if (typeof window === 'undefined') return true;
+
+  const today = new Date().toISOString().split('T')[0];
+
+  // Check in-memory guard first
+  if (inMemoryDailyDashboardGuard === today) {
+    return false;
+  }
+
   try {
-    const today = new Date().toISOString().split('T')[0];
     const key = `${DAILY_DASHBOARD_GUARD_PREFIX}:${today}`;
     if (window.localStorage.getItem(key)) {
+      inMemoryDailyDashboardGuard = today;
       return false;
     }
     window.localStorage.setItem(key, '1');
+    inMemoryDailyDashboardGuard = today;
+    return true;
   } catch {
-    // Fail open so analytics still fires if storage is blocked.
+    // localStorage unavailable - use in-memory only
+    if (inMemoryDailyDashboardGuard === today) {
+      return false;
+    }
+    inMemoryDailyDashboardGuard = today;
+    return true;
   }
-  return true;
 };
 
 function extractEmailFromMetadata(

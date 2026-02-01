@@ -369,9 +369,14 @@ function mapStatus(stripeStatus: string): string {
 }
 
 function formatResponse(sub: any, forceRefresh?: boolean) {
-  const cacheHeaders: Record<string, string> = forceRefresh
-    ? { 'Cache-Control': 'no-cache, no-store, must-revalidate' }
-    : { 'Cache-Control': 'private, s-maxage=300, stale-while-revalidate=600' };
+  // CRITICAL FIX: Never use stale-while-revalidate for subscription data
+  // Users seeing "free" status when they're paying is a critical bug
+  // Always fetch fresh data - subscription status is too important to cache
+  const cacheHeaders: Record<string, string> = {
+    'Cache-Control': 'private, no-cache, no-store, must-revalidate',
+    Pragma: 'no-cache',
+    Expires: '0',
+  };
 
   // cancel_at_period_end might not be in DB, default to false
   const cancelAtPeriodEnd =

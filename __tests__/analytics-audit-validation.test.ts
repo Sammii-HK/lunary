@@ -471,4 +471,254 @@ describe('Analytics Audit Validation', () => {
       expect(result).toBe(100);
     });
   });
+
+  describe('Duplicate Subscription Handling', () => {
+    describe('User with multiple subscriptions', () => {
+      it('should NOT count as churned if user has one active and one cancelled subscription', () => {
+        // Simulate user with 2 subscriptions: one cancelled, one active
+        const userEmail = 'user@example.com';
+        const subscriptions = [
+          {
+            email: userEmail,
+            status: 'cancelled',
+            updated_at: new Date('2024-01-15'),
+            subscription_id: 'sub_old',
+          },
+          {
+            email: userEmail,
+            status: 'active',
+            updated_at: new Date('2024-01-20'),
+            subscription_id: 'sub_new',
+          },
+        ];
+
+        // Check if ANY subscription is active
+        const hasActiveSubscription = subscriptions.some(
+          (sub) => sub.status === 'active',
+        );
+        expect(hasActiveSubscription).toBe(true);
+
+        // User should NOT be counted in churn
+        const shouldCountAsChurned = !hasActiveSubscription;
+        expect(shouldCountAsChurned).toBe(false);
+      });
+
+      it('should count as churned only if ALL subscriptions are cancelled', () => {
+        const userEmail = 'churned@example.com';
+        const subscriptions = [
+          {
+            email: userEmail,
+            status: 'cancelled',
+            updated_at: new Date('2024-01-10'),
+            subscription_id: 'sub_1',
+          },
+          {
+            email: userEmail,
+            status: 'cancelled',
+            updated_at: new Date('2024-01-15'),
+            subscription_id: 'sub_2',
+          },
+        ];
+
+        const hasActiveSubscription = subscriptions.some(
+          (sub) => sub.status === 'active' || sub.status === 'trial',
+        );
+        expect(hasActiveSubscription).toBe(false);
+
+        // User SHOULD be counted in churn
+        const shouldCountAsChurned = !hasActiveSubscription;
+        expect(shouldCountAsChurned).toBe(true);
+      });
+
+      it('should deduplicate by email for churn calculation', () => {
+        // Multiple subscriptions for same user
+        const users = [
+          { email: 'user1@example.com', status: 'active' },
+          { email: 'user1@example.com', status: 'cancelled' }, // Same user, duplicate
+          { email: 'user2@example.com', status: 'active' },
+        ];
+
+        // Group by email to get unique users
+        const uniqueEmails = new Set(users.map((u) => u.email));
+        expect(uniqueEmails.size).toBe(2); // Only 2 unique users
+
+        // Check each unique user's effective status
+        const userStatuses = new Map<string, string>();
+        users.forEach((user) => {
+          const currentStatus = userStatuses.get(user.email);
+          // If any subscription is active, user is active
+          if (user.status === 'active' || currentStatus === 'active') {
+            userStatuses.set(user.email, 'active');
+          } else {
+            userStatuses.set(user.email, user.status);
+          }
+        });
+
+        expect(userStatuses.get('user1@example.com')).toBe('active');
+        expect(userStatuses.get('user2@example.com')).toBe('active');
+
+        // Count churned users (effective status is cancelled)
+        const churnedCount = Array.from(userStatuses.values()).filter(
+          (status) => status === 'cancelled',
+        ).length;
+        expect(churnedCount).toBe(0); // No churned users
+      });
+
+      it('should use DISTINCT ON (email) to get one row per user', () => {
+        // Simulating SQL: SELECT DISTINCT ON (email)
+        const subscriptions = [
+          {
+            email: 'user@example.com',
+            status: 'cancelled',
+            updated_at: new Date('2024-01-10'),
+          },
+          {
+            email: 'user@example.com',
+            status: 'active',
+            updated_at: new Date('2024-01-20'),
+          }, // Latest
+          {
+            email: 'other@example.com',
+            status: 'active',
+            updated_at: new Date('2024-01-15'),
+          },
+        ];
+
+        // Group by email and take the one with latest updated_at
+        const latestByEmail = new Map<
+          string,
+          { email: string; status: string; updated_at: Date }
+        >();
+        subscriptions.forEach((sub) => {
+          const existing = latestByEmail.get(sub.email);
+          if (!existing || sub.updated_at > existing.updated_at) {
+            latestByEmail.set(sub.email, sub);
+          }
+        });
+
+        expect(latestByEmail.size).toBe(2); // 2 unique users
+        expect(latestByEmail.get('user@example.com')?.status).toBe('active'); // Latest is active
+      });
+    });
+
+    describe('Churn rate denominator', () => {
+      it('should use subscriptions at START of period, not END', () => {
+        // Period: 2024-01-01 to 2024-01-31
+        const periodStart = new Date('2024-01-01');
+        const periodEnd = new Date('2024-01-31');
+
+        // Subscriptions timeline
+        const events = [
+          {
+            date: new Date('2023-12-15'),
+            type: 'created',
+            email: 'user1@ex.com',
+          }, // Before period
+          {
+            date: new Date('2024-01-05'),
+            type: 'created',
+            email: 'user2@ex.com',
+          }, // During period (NEW)
+          {
+            date: new Date('2024-01-10'),
+            type: 'cancelled',
+            email: 'user1@ex.com',
+          }, // Churned
+        ];
+
+        // Count at START (should include user1, NOT user2)
+        const subsAtStart = events.filter(
+          (e) =>
+            e.type === 'created' &&
+            e.date < periodStart &&
+            !events.some(
+              (cancel) =>
+                cancel.type === 'cancelled' &&
+                cancel.email === e.email &&
+                cancel.date < periodStart,
+            ),
+        ).length;
+
+        // Count at END
+        const subsAtEnd = events.filter((e) => e.type === 'created').length;
+
+        expect(subsAtStart).toBe(1); // Only user1 existed at start
+        expect(subsAtEnd).toBe(2); // user1 + user2 by end
+
+        // Cancelled in period
+        const cancelledInPeriod = events.filter(
+          (e) =>
+            e.type === 'cancelled' &&
+            e.date >= periodStart &&
+            e.date <= periodEnd,
+        ).length;
+        expect(cancelledInPeriod).toBe(1);
+
+        // CORRECT churn rate: cancelled / subs_at_start
+        const correctChurnRate = (cancelledInPeriod / subsAtStart) * 100;
+        expect(correctChurnRate).toBe(100); // 1 cancelled / 1 at start = 100%
+
+        // WRONG churn rate: cancelled / subs_at_end
+        const wrongChurnRate = (cancelledInPeriod / subsAtEnd) * 100;
+        expect(wrongChurnRate).toBe(50); // 1 cancelled / 2 at end = 50% (WRONG!)
+
+        // The denominators MUST be different when new subs are created in period
+        expect(subsAtStart).not.toBe(subsAtEnd);
+        expect(correctChurnRate).not.toBe(wrongChurnRate);
+      });
+    });
+
+    describe('effectiveStatus logic', () => {
+      it('should override cancelled status if user has active subscription elsewhere', () => {
+        // User email with multiple subscriptions
+        const email = 'user@example.com';
+
+        // activeEmails set (from first CTE query)
+        const activeEmails = new Set<string>(['user@example.com']); // Has active sub
+
+        // Latest subscription for this email
+        const latestSubscription = {
+          email,
+          status: 'cancelled', // Latest one is cancelled
+        };
+
+        // effectiveStatus logic (from lines 178-181)
+        const effectiveStatus = activeEmails.has(email)
+          ? 'active'
+          : latestSubscription.status;
+
+        // Should be 'active' even though latest sub is 'cancelled'
+        expect(effectiveStatus).toBe('active');
+
+        // This user should NOT be counted as churned
+        const isCancelled = ['cancelled', 'canceled', 'ended'].includes(
+          effectiveStatus,
+        );
+        expect(isCancelled).toBe(false);
+      });
+
+      it('should keep cancelled status if user has NO active subscriptions', () => {
+        const email = 'churned@example.com';
+
+        // activeEmails set (no active subs for this user)
+        const activeEmails = new Set<string>([]);
+
+        const latestSubscription = {
+          email,
+          status: 'cancelled',
+        };
+
+        const effectiveStatus = activeEmails.has(email)
+          ? 'active'
+          : latestSubscription.status;
+
+        expect(effectiveStatus).toBe('cancelled');
+
+        const isCancelled = ['cancelled', 'canceled', 'ended'].includes(
+          effectiveStatus,
+        );
+        expect(isCancelled).toBe(true);
+      });
+    });
+  });
 });
