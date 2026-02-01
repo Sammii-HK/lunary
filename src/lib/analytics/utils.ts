@@ -85,3 +85,60 @@ export function safeDivide(
   const result = (numerator || 0) / denominator;
   return Number(result.toFixed(decimals));
 }
+
+/**
+ * Calculate trend (change) between two values with robust error handling
+ * Handles NaN, Infinity, division by zero, and extreme values
+ *
+ * @param current - Current value
+ * @param previous - Previous value
+ * @returns Object with change, percentChange, and optional error message
+ *
+ * @example
+ * calculateTrend(150, 100) // { change: 50, percentChange: 50.00 }
+ * calculateTrend(100, 0) // { change: 100, percentChange: null, error: 'Division by zero' }
+ * calculateTrend(NaN, 100) // { change: null, percentChange: null, error: 'Invalid inputs' }
+ */
+export function calculateTrend(
+  current: number | null | undefined,
+  previous: number | null | undefined,
+): { change: number | null; percentChange: number | null; error?: string } {
+  if (
+    current === null ||
+    current === undefined ||
+    previous === null ||
+    previous === undefined
+  ) {
+    return { change: null, percentChange: null };
+  }
+
+  if (!Number.isFinite(current) || !Number.isFinite(previous)) {
+    console.error('[analytics] Invalid trend inputs (NaN or Infinity):', {
+      current,
+      previous,
+    });
+    return { change: null, percentChange: null, error: 'Invalid inputs' };
+  }
+
+  const change = current - previous;
+
+  if (previous === 0) {
+    if (current === 0) return { change: 0, percentChange: 0 };
+    return { change, percentChange: null, error: 'Division by zero' };
+  }
+
+  const percentChange = (change / previous) * 100;
+
+  if (Math.abs(percentChange) > 10000) {
+    console.warn('[analytics] Extreme change detected (>10000%):', {
+      current,
+      previous,
+      percentChange: percentChange.toFixed(2),
+    });
+  }
+
+  return {
+    change: Number(change.toFixed(2)),
+    percentChange: Number(percentChange.toFixed(2)),
+  };
+}

@@ -44,29 +44,21 @@ export async function GET(request: NextRequest) {
     const typedError = error as Error & { code?: string };
     const errorMessage = typedError.message || 'Unknown error';
 
-    // Always return successful response with empty data to prevent analytics page from breaking
-    // Log the error but don't fail the entire analytics dashboard
-    return NextResponse.json({
-      success: true,
-      data: {
-        performance: {
-          startDate,
-          endDate,
-          metrics: [],
-          totalClicks: 0,
-          totalImpressions: 0,
-          averageCtr: 0,
-          averagePosition: 0,
+    // Return proper error state with 503 status
+    // Frontend should handle gracefully and show empty state
+    return NextResponse.json(
+      {
+        success: false,
+        error: errorMessage,
+        errorType: typedError.code || 'SEARCH_CONSOLE_ERROR',
+        message: 'Search Console data unavailable',
+        data: null,
+        range: {
+          start: startDate,
+          end: endDate,
         },
-        topQueries: [],
-        topPages: [],
       },
-      range: {
-        start: startDate,
-        end: endDate,
-      },
-      warning: `Search Console unavailable: ${errorMessage}`,
-      error: errorMessage,
-    });
+      { status: 503 },
+    );
   }
 }
