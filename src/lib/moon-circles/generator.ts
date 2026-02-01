@@ -5,6 +5,7 @@ import {
   MoonPhase,
   GeoVector,
   Ecliptic,
+  SearchMoonPhase,
 } from 'astronomy-engine';
 
 export interface MoonCircleContent {
@@ -45,6 +46,87 @@ const getMoonSign = (date: Date): string => {
   const longitude = moonEcliptic.elon;
   return getZodiacSign(longitude);
 };
+
+/**
+ * Find the exact peak of the nearest New Moon or Full Moon within ±2 days of the given date.
+ * Uses astronomy-engine's SearchMoonPhase for precise calculations.
+ */
+export function findMoonPhasePeak(
+  date: Date,
+): { peakDate: Date; phase: 'New Moon' | 'Full Moon' } | null {
+  const searchStart = new Date(date);
+  searchStart.setDate(searchStart.getDate() - 2);
+  const startTime = new AstroTime(searchStart);
+
+  // Search for New Moon (0°) and Full Moon (180°) within ±2 days window
+  const newMoonResult = SearchMoonPhase(0, startTime, 4); // 4-day window
+  const fullMoonResult = SearchMoonPhase(180, startTime, 4);
+
+  const candidates: { peakDate: Date; phase: 'New Moon' | 'Full Moon' }[] = [];
+
+  if (newMoonResult) {
+    candidates.push({
+      peakDate: newMoonResult.date,
+      phase: 'New Moon',
+    });
+  }
+
+  if (fullMoonResult) {
+    candidates.push({
+      peakDate: fullMoonResult.date,
+      phase: 'Full Moon',
+    });
+  }
+
+  if (candidates.length === 0) {
+    return null;
+  }
+
+  // Return the closest peak to the input date
+  const inputTime = date.getTime();
+  candidates.sort(
+    (a, b) =>
+      Math.abs(a.peakDate.getTime() - inputTime) -
+      Math.abs(b.peakDate.getTime() - inputTime),
+  );
+
+  const closest = candidates[0];
+
+  // Verify the peak is within ±2 days
+  const diffDays =
+    Math.abs(closest.peakDate.getTime() - inputTime) / (1000 * 60 * 60 * 24);
+  if (diffDays > 2) {
+    return null;
+  }
+
+  return closest;
+}
+
+/**
+ * Check if the given date IS the peak day for a New Moon or Full Moon.
+ * Returns true only if the calendar date matches the peak date.
+ */
+export function isMoonPhasePeakDay(date: Date): {
+  isPeakDay: boolean;
+  phase: 'New Moon' | 'Full Moon' | null;
+  peakDate: Date | null;
+} {
+  const peak = findMoonPhasePeak(date);
+
+  if (!peak) {
+    return { isPeakDay: false, phase: null, peakDate: null };
+  }
+
+  // Compare calendar dates (ignoring time)
+  const inputDateStr = date.toISOString().split('T')[0];
+  const peakDateStr = peak.peakDate.toISOString().split('T')[0];
+
+  return {
+    isPeakDay: inputDateStr === peakDateStr,
+    phase: peak.phase,
+    peakDate: peak.peakDate,
+  };
+}
 
 const getMoonPhase = (date: Date): 'New Moon' | 'Full Moon' | null => {
   const astroTime = new AstroTime(date);
