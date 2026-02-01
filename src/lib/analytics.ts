@@ -125,87 +125,63 @@ const DAILY_DASHBOARD_GUARD_PREFIX = 'lunary_daily_dashboard_viewed_guard';
 const APP_OPENED_GUARD_TTL_MS = 1000 * 60 * 30; // 30 minutes (for product_opened)
 
 // Daily deduplication for app_opened: one event per user per calendar day (UTC)
+// Uses localStorage for persistence across browser sessions
 const shouldTrackAppOpened = () => {
   if (typeof window === 'undefined') return true;
   try {
-    const payload = JSON.parse(
-      window.sessionStorage.getItem(APP_OPENED_GUARD_KEY) || '{}',
-    );
-    const lastRecorded =
-      typeof payload?.appOpened === 'number' ? payload.appOpened : 0;
+    const guardKey = 'lunary_app_opened_guard';
+    const lastEvent = window.localStorage.getItem(guardKey);
 
-    if (lastRecorded) {
-      // Check if last event was on a different UTC calendar day
-      const lastDate = new Date(lastRecorded);
-      const nowDate = new Date();
-      const lastDay = lastDate.getUTCDate();
-      const lastMonth = lastDate.getUTCMonth();
-      const lastYear = lastDate.getUTCFullYear();
-      const nowDay = nowDate.getUTCDate();
-      const nowMonth = nowDate.getUTCMonth();
-      const nowYear = nowDate.getUTCFullYear();
+    if (lastEvent) {
+      const lastDate = new Date(Number(lastEvent));
+      const now = new Date();
 
-      // Same calendar day = don't track again
+      // Check if same UTC calendar day
       if (
-        lastDay === nowDay &&
-        lastMonth === nowMonth &&
-        lastYear === nowYear
+        lastDate.getUTCDate() === now.getUTCDate() &&
+        lastDate.getUTCMonth() === now.getUTCMonth() &&
+        lastDate.getUTCFullYear() === now.getUTCFullYear()
       ) {
         return false;
       }
     }
 
-    payload.appOpened = Date.now();
-    window.sessionStorage.setItem(
-      APP_OPENED_GUARD_KEY,
-      JSON.stringify(payload),
-    );
+    window.localStorage.setItem(guardKey, String(Date.now()));
+    return true;
   } catch {
     // Fail open to avoid blocking tracking when storage is unavailable.
+    return true;
   }
-  return true;
 };
 
 // Daily deduplication for product_opened: one event per user per calendar day (UTC)
+// Uses localStorage for persistence across browser sessions
 const shouldTrackProductOpened = () => {
   if (typeof window === 'undefined') return true;
   try {
-    const payload = JSON.parse(
-      window.sessionStorage.getItem(PRODUCT_OPENED_GUARD_KEY) || '{}',
-    );
-    const lastRecorded =
-      typeof payload?.productOpened === 'number' ? payload.productOpened : 0;
+    const guardKey = 'lunary_product_opened_guard';
+    const lastEvent = window.localStorage.getItem(guardKey);
 
-    if (lastRecorded) {
-      // Check if last event was on a different UTC calendar day
-      const lastDate = new Date(lastRecorded);
-      const nowDate = new Date();
-      const lastDay = lastDate.getUTCDate();
-      const lastMonth = lastDate.getUTCMonth();
-      const lastYear = lastDate.getUTCFullYear();
-      const nowDay = nowDate.getUTCDate();
-      const nowMonth = nowDate.getUTCMonth();
-      const nowYear = nowDate.getUTCFullYear();
+    if (lastEvent) {
+      const lastDate = new Date(Number(lastEvent));
+      const now = new Date();
 
-      // Same calendar day = don't track again
+      // Check if same UTC calendar day
       if (
-        lastDay === nowDay &&
-        lastMonth === nowMonth &&
-        lastYear === nowYear
+        lastDate.getUTCDate() === now.getUTCDate() &&
+        lastDate.getUTCMonth() === now.getUTCMonth() &&
+        lastDate.getUTCFullYear() === now.getUTCFullYear()
       ) {
         return false;
       }
     }
 
-    payload.productOpened = Date.now();
-    window.sessionStorage.setItem(
-      PRODUCT_OPENED_GUARD_KEY,
-      JSON.stringify(payload),
-    );
+    window.localStorage.setItem(guardKey, String(Date.now()));
+    return true;
   } catch {
     // Fail open to avoid blocking tracking when storage is unavailable.
+    return true;
   }
-  return true;
 };
 
 const shouldTrackDailyDashboardViewed = () => {

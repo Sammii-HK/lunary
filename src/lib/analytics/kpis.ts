@@ -16,9 +16,16 @@ const identityLinksCte = `
   identity_links AS (
     SELECT DISTINCT ON (anonymous_id)
       anonymous_id,
-      user_id
+      user_id,
+      last_seen_at
     FROM analytics_identity_links
-    ORDER BY anonymous_id, last_seen_at DESC, first_seen_at DESC
+    WHERE user_id IS NOT NULL
+      AND user_id != ''
+      AND anonymous_id IS NOT NULL
+      AND anonymous_id != ''
+    ORDER BY anonymous_id,
+             last_seen_at DESC NULLS LAST,
+             first_seen_at DESC NULLS LAST
   )
 `;
 
