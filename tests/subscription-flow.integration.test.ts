@@ -5,6 +5,7 @@
  * webhook processing, and customer deduplication.
  *
  * Run with: npm test tests/subscription-flow.test.ts
+ * @jest-environment node
  */
 
 import { describe, it, expect, beforeEach, afterEach } from '@jest/globals';
@@ -28,10 +29,17 @@ beforeEach(async () => {
   createdCustomers = [];
   createdSubscriptions = [];
 
-  // Clean up test data
-  await sql`DELETE FROM subscriptions WHERE user_id = ${TEST_USER.id}`;
-  await sql`DELETE FROM user_profiles WHERE user_id = ${TEST_USER.id}`;
-  await sql`DELETE FROM orphaned_subscriptions WHERE customer_email = ${TEST_USER.email}`;
+  // Clean up test data (skip if database not available)
+  try {
+    await sql`DELETE FROM subscriptions WHERE user_id = ${TEST_USER.id}`;
+    await sql`DELETE FROM user_profiles WHERE user_id = ${TEST_USER.id}`;
+    await sql`DELETE FROM orphaned_subscriptions WHERE customer_email = ${TEST_USER.email}`;
+  } catch (error) {
+    console.warn(
+      'Database cleanup skipped (database not available for tests):',
+      error,
+    );
+  }
 });
 
 afterEach(async () => {
