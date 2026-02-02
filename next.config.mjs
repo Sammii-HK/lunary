@@ -21,6 +21,8 @@ const nextConfig = {
         chromium: 'commonjs chromium',
         'ffmpeg-static': 'commonjs ffmpeg-static',
         'fluent-ffmpeg': 'commonjs fluent-ffmpeg',
+        // Sharp - native image processing, must be external
+        sharp: 'commonjs sharp',
         // Remotion packages - must be external to avoid parsing esbuild binary
         '@remotion/bundler': 'commonjs @remotion/bundler',
         '@remotion/renderer': 'commonjs @remotion/renderer',
@@ -40,6 +42,7 @@ const nextConfig = {
             request === 'chromium' ||
             request === 'ffmpeg-static' ||
             request === 'fluent-ffmpeg' ||
+            request === 'sharp' ||
             request === '@remotion/bundler' ||
             request === '@remotion/renderer' ||
             request === '@remotion/cli' ||

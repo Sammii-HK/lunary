@@ -192,6 +192,7 @@
     "require-in-the-middle": "^8.0.1",
     "resend": "^6.5.2",
     "seed-random": "^2.2.0",
+    "sharp": "^0.34.5",
     "stripe": "^18.5.0",
     "tailwind-merge": "^3.4.0",
     "tweetnacl": "^1.0.3",
