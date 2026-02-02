@@ -345,7 +345,7 @@ function OverviewTab({
                 <div className='text-xs text-zinc-400'>
                   {placement.sign} {placement.degree}°{placement.minute}&apos;
                   {placement.retrograde && (
-                    <span className='font-astro text-amber-400'> r</span>
+                    <span className='text-lunary-error-300'> ℞</span>
                   )}
                 </div>
               </div>
@@ -453,7 +453,7 @@ function SynastryTab({ synastry }: { synastry?: SynastryData }) {
               synastry.elementBalance.compatibility === 'complementary'
                 ? 'text-green-400'
                 : synastry.elementBalance.compatibility === 'challenging'
-                  ? 'text-amber-400'
+                  ? 'text-lunary-error-300'
                   : 'text-zinc-300'
             }
           >
@@ -509,7 +509,7 @@ function SynastryTab({ synastry }: { synastry?: SynastryData }) {
               ))}
           </div>
           <div className='space-y-2'>
-            <h4 className='text-xs font-medium text-amber-400 flex items-center gap-1'>
+            <h4 className='text-xs font-medium text-lunary-error-300 flex items-center gap-1'>
               <Sparkles className='w-3 h-3' />
               Challenging ({challengingAspects.length})
             </h4>
@@ -700,7 +700,7 @@ function PlacementSection({
             <div className='flex-1 text-sm text-zinc-300'>
               {placement.sign} {placement.degree}°{placement.minute}&apos;
               {placement.retrograde && (
-                <span className='ml-1 text-amber-400 font-astro'>r</span>
+                <span className='ml-1 text-lunary-error-300'>℞</span>
               )}
             </div>
             {placement.house && (
