@@ -118,11 +118,12 @@ export async function GET(
       sunSign,
       relationshipType: connection.relationship_type,
       hasBirthChart: !!friendBirthChart,
+      birthChart: friendBirthChart || undefined,
       synastry: synastry
         ? {
             compatibilityScore: synastry.compatibilityScore,
             summary: synastry.summary,
-            aspects: synastry.aspects.slice(0, 10), // Top 10 aspects
+            aspects: synastry.aspects,
             elementBalance: synastry.elementBalance,
             modalityBalance: synastry.modalityBalance,
           }

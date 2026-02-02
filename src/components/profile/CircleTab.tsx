@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
+import Link from 'next/link';
 import {
   Plus,
   Heart,
@@ -14,6 +15,7 @@ import {
   Copy,
   Check,
   UserPlus,
+  ExternalLink,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { BirthdayInput } from '@/components/ui/birthday-input';
@@ -514,21 +516,16 @@ export function CircleTab() {
             Connected Friends
           </h3>
           {friends.map((friend) => {
-            const isSelected =
-              selectedItem?.type === 'friend' && selectedItem.id === friend.id;
             const Icon =
               RELATIONSHIP_TYPES.find(
                 (t) => t.value === friend.relationshipType,
               )?.icon || Users;
 
             return (
-              <div
+              <Link
                 key={friend.id}
-                className={`rounded-xl border bg-lunary-bg-deep/90 transition-all ${
-                  isSelected
-                    ? 'border-lunary-primary-600'
-                    : 'border-zinc-700/70 hover:border-zinc-600'
-                }`}
+                href={`/profile/friends/${friend.id}`}
+                className='block rounded-xl border border-zinc-700/70 bg-lunary-bg-deep/90 hover:border-lunary-primary-600 transition-all'
               >
                 <div className='p-4 flex items-center gap-4'>
                   <div className='w-10 h-10 rounded-full bg-zinc-800 flex items-center justify-center'>
@@ -546,36 +543,31 @@ export function CircleTab() {
                     </p>
                   </div>
                   <div className='flex items-center gap-2'>
-                    <Button
-                      onClick={() => handleViewSynastry('friend', friend.id)}
-                      variant='outline'
-                      size='sm'
-                      className='gap-1 text-xs'
-                    >
-                      <Sparkles className='w-3.5 h-3.5' />
-                      Synastry
-                      {isSelected ? (
-                        <ChevronDown className='w-3.5 h-3.5' />
-                      ) : (
-                        <ChevronRight className='w-3.5 h-3.5' />
-                      )}
-                    </Button>
+                    {friend.synastryScore && (
+                      <div className='text-center mr-2'>
+                        <div className='text-lg font-bold text-lunary-accent-200'>
+                          {friend.synastryScore}%
+                        </div>
+                        <div className='text-[10px] text-zinc-500'>Match</div>
+                      </div>
+                    )}
+                    <div className='flex items-center gap-1 text-xs text-zinc-400'>
+                      View Profile
+                      <ExternalLink className='w-3.5 h-3.5' />
+                    </div>
                     <button
-                      onClick={() => handleRemoveFriend(friend.id)}
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        handleRemoveFriend(friend.id);
+                      }}
                       className='p-2 text-zinc-500 hover:text-red-400 transition-colors'
                     >
                       <Trash2 className='w-4 h-4' />
                     </button>
                   </div>
                 </div>
-                {isSelected && (
-                  <SynastryPanel
-                    loading={synastryLoading}
-                    error={synastryError}
-                    result={synastryResult}
-                  />
-                )}
-              </div>
+              </Link>
             );
           })}
         </div>
