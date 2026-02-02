@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { sql } from '@vercel/postgres';
 import { requireUser } from '@/lib/ai/auth';
-import { hashForLookup } from '@/lib/encryption';
+import { hashForLookup, decrypt } from '@/lib/encryption';
 import { hasFeatureAccess } from '../../../../../../utils/pricing';
 
 /**
@@ -53,9 +53,14 @@ export async function GET(
       );
     }
 
+    // Decrypt the inviter's name (stored encrypted in user_profiles)
+    const inviterName = invite.inviter_name
+      ? decrypt(invite.inviter_name)
+      : 'A Lunary user';
+
     return NextResponse.json({
       valid: true,
-      inviterName: invite.inviter_name || 'A Lunary user',
+      inviterName: inviterName || 'A Lunary user',
       expiresAt: invite.expires_at,
     });
   } catch (error) {
