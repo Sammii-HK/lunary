@@ -701,6 +701,9 @@ export default function BookOfShadowsPage() {
           <div className='space-y-4'>
             <ArchetypeBar className='mb-4' />
 
+            {/* This Time Last Year - At top for visibility */}
+            <ThisTimeLastYear />
+
             <div className='bg-zinc-900/50 border border-zinc-800 rounded-lg p-4'>
               <div className='flex items-center gap-2 mb-2'>
                 <Sparkles className='w-4 h-4 text-lunary-primary-400' />
@@ -716,9 +719,6 @@ export default function BookOfShadowsPage() {
             </div>
 
             <PatternSnapshotsSection />
-
-            {/* This Time Last Year */}
-            <ThisTimeLastYear className='mt-4' />
 
             {/* Share Weekly Pattern Button */}
             <div className='flex justify-center mt-6'>
