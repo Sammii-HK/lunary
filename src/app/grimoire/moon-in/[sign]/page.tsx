@@ -31,7 +31,7 @@ export async function generateMetadata({
   const signData = zodiacSigns[signKey as keyof typeof zodiacSigns];
   const symbol = zodiacSymbol[signKey as keyof typeof zodiacSymbol];
   const title = `Moon in ${signData.name}: Emotions, Traits & Compatibility - Lunary`;
-  const description = `Moon in ${signData.name} natal chart meaning: emotional needs, personality traits & compatibility. What your ${signData.name} moon sign reveals about you.`;
+  const description = `Discover Moon in ${signData.name}: emotional nature, needs & instincts. Learn how ${signData.name} Moon influences your feelings, reactions & inner world. Complete moon sign guide.`;
 
   return {
     title,

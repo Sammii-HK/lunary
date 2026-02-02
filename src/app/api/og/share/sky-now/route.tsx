@@ -1,7 +1,12 @@
 import { ImageResponse } from 'next/og';
 import { NextRequest } from 'next/server';
 import { kvGet } from '@/lib/cloudflare/kv';
-import { getFormatDimensions, OG_COLORS } from '@/lib/share/og-utils';
+import {
+  getFormatDimensions,
+  OG_COLORS,
+  generateStarfield,
+  getStarCount,
+} from '@/lib/share/og-utils';
 import type { ShareFormat } from '@/hooks/useShareModal';
 import { bodiesSymbols, zodiacSymbol } from '@/constants/symbols';
 
@@ -40,49 +45,82 @@ export async function GET(request: NextRequest) {
     const shareId = searchParams.get('shareId');
     const format = (searchParams.get('format') || 'square') as ShareFormat;
 
-    if (!shareId) {
-      return new Response('Missing shareId', { status: 400 });
+    // Check for URL parameters for real-time data (Priority 0 Data Flow Fix)
+    const urlName = searchParams.get('name');
+    const urlPositions = searchParams.get('positions');
+    const urlDate = searchParams.get('date');
+
+    let data: SkyNowShareRecord | null = null;
+
+    // If URL params provided, use them directly instead of KV lookup
+    if (urlPositions) {
+      try {
+        const positions = JSON.parse(decodeURIComponent(urlPositions));
+        const retrogradeCount = Object.values(positions).filter(
+          (p: any) => p.retrograde,
+        ).length;
+        data = {
+          shareId: 'url-params',
+          name: urlName || undefined,
+          createdAt: new Date().toISOString(),
+          positions,
+          retrogradeCount,
+          date: urlDate || new Date().toISOString().split('T')[0],
+        };
+      } catch (e) {
+        // Fall through to KV/demo if parsing fails
+        data = null;
+      }
     }
 
-    // Fetch share data from KV or use demo data
-    const raw = await kvGet(`sky-now:${shareId}`);
+    if (data === null) {
+      if (!shareId) {
+        return new Response('Missing shareId', { status: 400 });
+      }
 
-    let data: SkyNowShareRecord;
+      // Fetch share data from KV or use demo data
+      const raw = await kvGet(`sky-now:${shareId}`);
 
-    if (!raw || shareId === 'demo') {
-      // Provide demo/fallback data with current planetary positions
-      data = {
-        shareId: 'demo',
-        createdAt: new Date().toISOString(),
-        positions: {
-          Sun: { sign: 'Aquarius', retrograde: false },
-          Moon: { sign: 'Gemini', retrograde: false },
-          Mercury: { sign: 'Capricorn', retrograde: false },
-          Venus: { sign: 'Pisces', retrograde: false },
-          Mars: { sign: 'Cancer', retrograde: false },
-          Jupiter: { sign: 'Gemini', retrograde: false },
-          Saturn: { sign: 'Pisces', retrograde: false },
-          Uranus: { sign: 'Taurus', retrograde: true },
-          Neptune: { sign: 'Pisces', retrograde: false },
-          Pluto: { sign: 'Aquarius', retrograde: false },
-        },
-        retrogradeCount: 1,
-        date: new Date().toISOString().split('T')[0],
-      };
-    } else {
-      data = JSON.parse(raw) as SkyNowShareRecord;
+      if (!raw || shareId === 'demo') {
+        // Provide demo/fallback data with current planetary positions
+        data = {
+          shareId: 'demo',
+          createdAt: new Date().toISOString(),
+          positions: {
+            Sun: { sign: 'Aquarius', retrograde: false },
+            Moon: { sign: 'Gemini', retrograde: false },
+            Mercury: { sign: 'Capricorn', retrograde: false },
+            Venus: { sign: 'Pisces', retrograde: false },
+            Mars: { sign: 'Cancer', retrograde: false },
+            Jupiter: { sign: 'Gemini', retrograde: false },
+            Saturn: { sign: 'Pisces', retrograde: false },
+            Uranus: { sign: 'Taurus', retrograde: true },
+            Neptune: { sign: 'Pisces', retrograde: false },
+            Pluto: { sign: 'Aquarius', retrograde: false },
+          },
+          retrogradeCount: 1,
+          date: new Date().toISOString().split('T')[0],
+        };
+      } else {
+        data = JSON.parse(raw) as SkyNowShareRecord;
+      }
     }
     const { width, height } = getFormatDimensions(format);
     const firstName = data.name?.trim().split(' ')[0] || '';
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://lunary.app';
 
     const isLandscape = format === 'landscape';
     const isStory = format === 'story';
-    const padding = isLandscape ? 40 : isStory ? 90 : 60;
-    const titleSize = isLandscape ? 36 : isStory ? 72 : 48;
-    const dateSize = isLandscape ? 18 : isStory ? 32 : 22;
-    const labelSize = isLandscape ? 18 : isStory ? 32 : 20;
-    const planetSymbolSize = isLandscape ? 32 : isStory ? 64 : 38;
-    const zodiacSymbolSize = isLandscape ? 26 : isStory ? 50 : 30;
+    const padding = isLandscape ? 48 : isStory ? 60 : 60;
+    const titleSize = isLandscape ? 48 : isStory ? 84 : 72;
+    const dateSize = isLandscape ? 22 : isStory ? 36 : 28;
+    const labelSize = isLandscape ? 22 : isStory ? 36 : 30;
+    const planetSymbolSize = isLandscape ? 48 : isStory ? 72 : 60;
+    const zodiacSymbolSize = isLandscape ? 38 : isStory ? 56 : 48;
+    const planetNameSize = isLandscape ? 20 : isStory ? 28 : 26;
+
+    // Generate unique starfield based on shareId
+    const stars = generateStarfield(data.shareId, getStarCount(format));
 
     // Format date
     const date = new Date(data.date);
@@ -129,7 +167,155 @@ export async function GET(request: NextRequest) {
       return symbols[normalizedSign] || '?';
     };
 
-    return new ImageResponse(
+    // Starfield JSX
+    const starfieldJsx = stars.map((star, i) => (
+      <div
+        key={i}
+        style={{
+          position: 'absolute',
+          left: `${star.x}%`,
+          top: `${star.y}%`,
+          width: star.size,
+          height: star.size,
+          borderRadius: '50%',
+          background: '#fff',
+          opacity: star.opacity,
+        }}
+      />
+    ));
+
+    // Retrograde badge JSX
+    const retrogradeBadge =
+      data.retrogradeCount > 0 ? (
+        <div
+          style={{
+            background: 'rgba(248, 113, 113, 0.15)',
+            border: '1px solid rgba(248, 113, 113, 0.3)',
+            borderRadius: 14,
+            padding: isLandscape ? '10px 20px' : '14px 28px',
+            display: 'flex',
+            alignItems: 'center',
+            gap: 10,
+          }}
+        >
+          <div
+            style={{
+              fontSize: isLandscape ? 18 : labelSize,
+              color: '#f87171',
+              fontWeight: 500,
+              display: 'flex',
+            }}
+          >
+            {data.retrogradeCount} Planet
+            {data.retrogradeCount > 1 ? 's' : ''} Retrograde
+          </div>
+        </div>
+      ) : null;
+
+    // Planet row component
+    const renderPlanetRow = (planet: string, compact: boolean = false) => {
+      const position = data.positions[planet];
+      const isRetrograde = position?.retrograde || false;
+      const rowPadding = compact
+        ? '10px 14px'
+        : isStory
+          ? '16px 20px'
+          : '14px 18px';
+      const symbolSize = compact ? 36 : planetSymbolSize;
+      const zodiacSize = compact ? 28 : zodiacSymbolSize;
+      const nameSize = compact ? 15 : planetNameSize;
+
+      return (
+        <div
+          key={planet}
+          style={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            padding: rowPadding,
+            background: isRetrograde
+              ? 'rgba(248, 113, 113, 0.08)'
+              : 'rgba(255, 255, 255, 0.02)',
+            border: `1px solid ${isRetrograde ? 'rgba(248, 113, 113, 0.2)' : 'rgba(255, 255, 255, 0.06)'}`,
+            borderRadius: 14,
+          }}
+        >
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: compact ? 10 : 16,
+            }}
+          >
+            <div
+              style={{
+                fontFamily: 'Astronomicon',
+                fontSize: symbolSize,
+                color: isRetrograde ? '#f87171' : OG_COLORS.textPrimary,
+                display: 'flex',
+              }}
+            >
+              {getPlanetSymbol(planet)}
+            </div>
+            <div
+              style={{
+                fontSize: nameSize,
+                color: OG_COLORS.textSecondary,
+                display: 'flex',
+              }}
+            >
+              {planet}
+            </div>
+          </div>
+
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: compact ? 8 : 12,
+            }}
+          >
+            {isRetrograde && (
+              <div
+                style={{
+                  fontSize: compact ? 14 : 18,
+                  color: '#f87171',
+                  letterSpacing: '0.05em',
+                  display: 'flex',
+                }}
+              >
+                ℞
+              </div>
+            )}
+            <div
+              style={{
+                fontFamily: 'Astronomicon',
+                fontSize: zodiacSize,
+                color: OG_COLORS.primaryViolet,
+                display: 'flex',
+              }}
+            >
+              {position?.sign ? getZodiacSymbol(position.sign) : '?'}
+            </div>
+            {!compact && (
+              <div
+                style={{
+                  fontSize: nameSize,
+                  color: OG_COLORS.textPrimary,
+                  display: 'flex',
+                }}
+              >
+                {position?.sign || 'Unknown'}
+              </div>
+            )}
+          </div>
+        </div>
+      );
+    };
+
+    // Layout based on format
+    const layoutJsx = isLandscape ? (
+      // Landscape Layout - 5x2 grid (horizontal emphasis)
       <div
         style={{
           width: '100%',
@@ -142,19 +328,126 @@ export async function GET(request: NextRequest) {
           fontFamily: 'Roboto Mono',
         }}
       >
-        {/* Star background pattern */}
+        {starfieldJsx}
+
+        {/* Header */}
         <div
           style={{
-            position: 'absolute',
-            inset: 0,
-            backgroundImage:
-              'radial-gradient(circle at 20% 30%, rgba(255,255,255,0.10) 0 1px, transparent 2px),' +
-              'radial-gradient(circle at 70% 60%, rgba(255,255,255,0.08) 0 1px, transparent 2px),' +
-              'radial-gradient(circle at 50% 10%, rgba(255,255,255,0.06) 0 1px, transparent 2px)',
-            opacity: 0.5,
             display: 'flex',
+            flexDirection: 'row',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            marginBottom: 20,
           }}
-        />
+        >
+          <div style={{ display: 'flex', flexDirection: 'column' }}>
+            <div
+              style={{
+                fontSize: titleSize,
+                fontWeight: 400,
+                color: OG_COLORS.textPrimary,
+                letterSpacing: '0.05em',
+                display: 'flex',
+              }}
+            >
+              {firstName ? `${firstName}'s Sky Now` : 'Sky Now'}
+            </div>
+            <div
+              style={{
+                fontSize: dateSize,
+                color: OG_COLORS.textTertiary,
+                marginTop: 6,
+                display: 'flex',
+              }}
+            >
+              {dateText}
+            </div>
+          </div>
+          {retrogradeBadge}
+        </div>
+
+        {/* Planet Grid - 5x2 */}
+        <div
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+            gap: 10,
+            background: 'rgba(255, 255, 255, 0.03)',
+            border: '1px solid rgba(255, 255, 255, 0.12)',
+            borderRadius: 16,
+            padding: '20px 24px',
+            flex: 1,
+          }}
+        >
+          <div
+            style={{
+              fontSize: 14,
+              color: OG_COLORS.textSecondary,
+              textTransform: 'uppercase',
+              letterSpacing: '0.1em',
+              marginBottom: 8,
+              display: 'flex',
+            }}
+          >
+            Current Positions
+          </div>
+
+          {/* Two rows of 5 planets each */}
+          <div style={{ display: 'flex', gap: 10 }}>
+            {PLANETS.slice(0, 5).map((planet) => renderPlanetRow(planet, true))}
+          </div>
+          <div style={{ display: 'flex', gap: 10 }}>
+            {PLANETS.slice(5, 10).map((planet) =>
+              renderPlanetRow(planet, true),
+            )}
+          </div>
+        </div>
+
+        {/* Footer */}
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 12,
+            justifyContent: 'center',
+            marginTop: 16,
+          }}
+        >
+          <img
+            src={`${baseUrl}/icons/moon-phases/full-moon.svg`}
+            width={24}
+            height={24}
+            style={{ opacity: 0.6 }}
+            alt=''
+          />
+          <span
+            style={{
+              fontSize: 16,
+              opacity: 0.6,
+              letterSpacing: '0.1em',
+              color: OG_COLORS.textPrimary,
+              display: 'flex',
+            }}
+          >
+            Join free at lunary.app
+          </span>
+        </div>
+      </div>
+    ) : isStory ? (
+      // Story Layout - 2x5 grid with generous spacing
+      <div
+        style={{
+          width: '100%',
+          height: '100%',
+          display: 'flex',
+          flexDirection: 'column',
+          background: OG_COLORS.background,
+          padding: '120px 60px 200px 60px',
+          position: 'relative',
+          fontFamily: 'Roboto Mono',
+        }}
+      >
+        {starfieldJsx}
 
         {/* Header */}
         <div
@@ -162,8 +455,7 @@ export async function GET(request: NextRequest) {
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
-            marginBottom: isLandscape ? 20 : isStory ? 32 : 28,
-            position: 'relative',
+            marginBottom: 40,
           }}
         >
           <div
@@ -182,7 +474,7 @@ export async function GET(request: NextRequest) {
             style={{
               fontSize: dateSize,
               color: OG_COLORS.textTertiary,
-              marginTop: 8,
+              marginTop: 12,
               display: 'flex',
             }}
           >
@@ -191,414 +483,242 @@ export async function GET(request: NextRequest) {
         </div>
 
         {/* Retrograde Badge */}
-        {data.retrogradeCount > 0 && (
+        {retrogradeBadge && (
           <div
             style={{
               display: 'flex',
               justifyContent: 'center',
-              marginBottom: isLandscape ? 20 : 24,
-              position: 'relative',
+              marginBottom: 32,
             }}
           >
-            <div
-              style={{
-                background: 'rgba(248, 113, 113, 0.15)',
-                border: '1px solid rgba(248, 113, 113, 0.3)',
-                borderRadius: 12,
-                padding: '12px 24px',
-                display: 'flex',
-                alignItems: 'center',
-                gap: 8,
-              }}
-            >
-              <div
-                style={{
-                  fontSize: labelSize,
-                  color: '#f87171',
-                  fontWeight: 500,
-                  display: 'flex',
-                }}
-              >
-                {data.retrogradeCount} Planet
-                {data.retrogradeCount > 1 ? 's' : ''} Retrograde
-              </div>
-            </div>
+            {retrogradeBadge}
           </div>
         )}
 
-        {/* Planet Grid - 2 columns for landscape, single column otherwise */}
+        {/* Planet Grid - 2x5 */}
         <div
           style={{
             display: 'flex',
-            flexDirection: 'column',
-            gap: isLandscape ? 12 : 16,
+            flexDirection: 'row',
+            gap: 20,
             background: 'rgba(255, 255, 255, 0.03)',
             border: '1px solid rgba(255, 255, 255, 0.12)',
-            borderRadius: 20,
-            padding: isLandscape ? '24px' : isStory ? '36px' : '32px',
-            position: 'relative',
+            borderRadius: 24,
+            padding: '36px 40px',
+            flex: 1,
           }}
         >
+          {/* Left column - first 5 planets */}
           <div
             style={{
-              fontSize: labelSize,
-              color: OG_COLORS.textSecondary,
-              textTransform: 'uppercase',
-              letterSpacing: '0.1em',
-              marginBottom: 8,
               display: 'flex',
+              flexDirection: 'column',
+              gap: 16,
+              flex: 1,
             }}
           >
-            Current Positions
+            {PLANETS.slice(0, 5).map((planet) => renderPlanetRow(planet))}
           </div>
 
-          {/* Planet rows - 2 columns for landscape */}
-          {isLandscape ? (
-            <div
-              style={{
-                display: 'flex',
-                gap: 12,
-              }}
-            >
-              {/* Left column - first 5 planets */}
-              <div
-                style={{
-                  display: 'flex',
-                  flexDirection: 'column',
-                  gap: 10,
-                  flex: 1,
-                }}
-              >
-                {PLANETS.slice(0, 5).map((planet) => {
-                  const position = data.positions[planet];
-                  const isRetrograde = position?.retrograde || false;
-
-                  return (
-                    <div
-                      key={planet}
-                      style={{
-                        display: 'flex',
-                        justifyContent: 'space-between',
-                        alignItems: 'center',
-                        padding: '8px 12px',
-                        background: isRetrograde
-                          ? 'rgba(248, 113, 113, 0.08)'
-                          : 'rgba(255, 255, 255, 0.02)',
-                        border: `1px solid ${isRetrograde ? 'rgba(248, 113, 113, 0.2)' : 'rgba(255, 255, 255, 0.06)'}`,
-                        borderRadius: 12,
-                      }}
-                    >
-                      <div
-                        style={{
-                          display: 'flex',
-                          alignItems: 'center',
-                          gap: 10,
-                        }}
-                      >
-                        <div
-                          style={{
-                            fontFamily: 'Astronomicon',
-                            fontSize: 28,
-                            color: isRetrograde
-                              ? '#f87171'
-                              : OG_COLORS.textPrimary,
-                            display: 'flex',
-                          }}
-                        >
-                          {getPlanetSymbol(planet)}
-                        </div>
-                        <div
-                          style={{
-                            fontSize: 16,
-                            color: OG_COLORS.textSecondary,
-                            display: 'flex',
-                          }}
-                        >
-                          {planet}
-                        </div>
-                      </div>
-
-                      <div
-                        style={{
-                          display: 'flex',
-                          alignItems: 'center',
-                          gap: 8,
-                        }}
-                      >
-                        {isRetrograde && (
-                          <div
-                            style={{
-                              fontSize: 12,
-                              color: '#f87171',
-                              letterSpacing: '0.05em',
-                              display: 'flex',
-                            }}
-                          >
-                            ℞
-                          </div>
-                        )}
-                        <div
-                          style={{
-                            fontFamily: 'Astronomicon',
-                            fontSize: 22,
-                            color: OG_COLORS.primaryViolet,
-                            display: 'flex',
-                          }}
-                        >
-                          {position?.sign
-                            ? getZodiacSymbol(position.sign)
-                            : '?'}
-                        </div>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-
-              {/* Right column - last 5 planets */}
-              <div
-                style={{
-                  display: 'flex',
-                  flexDirection: 'column',
-                  gap: 10,
-                  flex: 1,
-                }}
-              >
-                {PLANETS.slice(5, 10).map((planet) => {
-                  const position = data.positions[planet];
-                  const isRetrograde = position?.retrograde || false;
-
-                  return (
-                    <div
-                      key={planet}
-                      style={{
-                        display: 'flex',
-                        justifyContent: 'space-between',
-                        alignItems: 'center',
-                        padding: '8px 12px',
-                        background: isRetrograde
-                          ? 'rgba(248, 113, 113, 0.08)'
-                          : 'rgba(255, 255, 255, 0.02)',
-                        border: `1px solid ${isRetrograde ? 'rgba(248, 113, 113, 0.2)' : 'rgba(255, 255, 255, 0.06)'}`,
-                        borderRadius: 12,
-                      }}
-                    >
-                      <div
-                        style={{
-                          display: 'flex',
-                          alignItems: 'center',
-                          gap: 10,
-                        }}
-                      >
-                        <div
-                          style={{
-                            fontFamily: 'Astronomicon',
-                            fontSize: 28,
-                            color: isRetrograde
-                              ? '#f87171'
-                              : OG_COLORS.textPrimary,
-                            display: 'flex',
-                          }}
-                        >
-                          {getPlanetSymbol(planet)}
-                        </div>
-                        <div
-                          style={{
-                            fontSize: 16,
-                            color: OG_COLORS.textSecondary,
-                            display: 'flex',
-                          }}
-                        >
-                          {planet}
-                        </div>
-                      </div>
-
-                      <div
-                        style={{
-                          display: 'flex',
-                          alignItems: 'center',
-                          gap: 8,
-                        }}
-                      >
-                        {isRetrograde && (
-                          <div
-                            style={{
-                              fontSize: 12,
-                              color: '#f87171',
-                              letterSpacing: '0.05em',
-                              display: 'flex',
-                            }}
-                          >
-                            ℞
-                          </div>
-                        )}
-                        <div
-                          style={{
-                            fontFamily: 'Astronomicon',
-                            fontSize: 22,
-                            color: OG_COLORS.primaryViolet,
-                            display: 'flex',
-                          }}
-                        >
-                          {position?.sign
-                            ? getZodiacSymbol(position.sign)
-                            : '?'}
-                        </div>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-          ) : (
-            <div
-              style={{
-                display: 'flex',
-                flexDirection: 'column',
-                gap: isLandscape ? 10 : isStory ? 18 : 14,
-              }}
-            >
-              {PLANETS.map((planet) => {
-                const position = data.positions[planet];
-                const isRetrograde = position?.retrograde || false;
-
-                return (
-                  <div
-                    key={planet}
-                    style={{
-                      display: 'flex',
-                      justifyContent: 'space-between',
-                      alignItems: 'center',
-                      padding: isLandscape ? '8px 12px' : '12px 16px',
-                      background: isRetrograde
-                        ? 'rgba(248, 113, 113, 0.08)'
-                        : 'rgba(255, 255, 255, 0.02)',
-                      border: `1px solid ${isRetrograde ? 'rgba(248, 113, 113, 0.2)' : 'rgba(255, 255, 255, 0.06)'}`,
-                      borderRadius: 12,
-                    }}
-                  >
-                    <div
-                      style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: 16,
-                      }}
-                    >
-                      <div
-                        style={{
-                          fontFamily: 'Astronomicon',
-                          fontSize: planetSymbolSize,
-                          color: isRetrograde
-                            ? '#f87171'
-                            : OG_COLORS.textPrimary,
-                          display: 'flex',
-                        }}
-                      >
-                        {getPlanetSymbol(planet)}
-                      </div>
-                      <div
-                        style={{
-                          fontSize: labelSize,
-                          color: OG_COLORS.textSecondary,
-                          display: 'flex',
-                        }}
-                      >
-                        {planet}
-                      </div>
-                    </div>
-
-                    <div
-                      style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: 12,
-                      }}
-                    >
-                      {isRetrograde && (
-                        <div
-                          style={{
-                            fontSize: isLandscape ? 14 : 16,
-                            color: '#f87171',
-                            letterSpacing: '0.05em',
-                            display: 'flex',
-                          }}
-                        >
-                          ℞
-                        </div>
-                      )}
-                      <div
-                        style={{
-                          fontFamily: 'Astronomicon',
-                          fontSize: zodiacSymbolSize,
-                          color: OG_COLORS.primaryViolet,
-                          display: 'flex',
-                        }}
-                      >
-                        {position?.sign ? getZodiacSymbol(position.sign) : '?'}
-                      </div>
-                      <div
-                        style={{
-                          fontSize: labelSize,
-                          color: OG_COLORS.textPrimary,
-                          display: 'flex',
-                        }}
-                      >
-                        {position?.sign || 'Unknown'}
-                      </div>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          )}
+          {/* Right column - last 5 planets */}
+          <div
+            style={{
+              display: 'flex',
+              flexDirection: 'column',
+              gap: 16,
+              flex: 1,
+            }}
+          >
+            {PLANETS.slice(5, 10).map((planet) => renderPlanetRow(planet))}
+          </div>
         </div>
 
         {/* Footer */}
         <div
           style={{
-            marginTop: 'auto',
-            paddingTop: isLandscape ? 24 : 32,
             display: 'flex',
+            alignItems: 'center',
+            gap: 12,
             justifyContent: 'center',
-            position: 'relative',
+            marginTop: 'auto',
+            paddingTop: 32,
+          }}
+        >
+          <img
+            src={`${baseUrl}/icons/moon-phases/full-moon.svg`}
+            width={28}
+            height={28}
+            style={{ opacity: 0.6 }}
+            alt=''
+          />
+          <span
+            style={{
+              fontSize: 20,
+              opacity: 0.6,
+              letterSpacing: '0.1em',
+              color: OG_COLORS.textPrimary,
+              display: 'flex',
+            }}
+          >
+            Join free at lunary.app
+          </span>
+        </div>
+      </div>
+    ) : (
+      // Square Layout - 2x5 grid
+      <div
+        style={{
+          width: '100%',
+          height: '100%',
+          display: 'flex',
+          flexDirection: 'column',
+          background: OG_COLORS.background,
+          padding: `${padding}px`,
+          position: 'relative',
+          fontFamily: 'Roboto Mono',
+        }}
+      >
+        {starfieldJsx}
+
+        {/* Header */}
+        <div
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            marginBottom: 32,
           }}
         >
           <div
             style={{
-              fontSize: dateSize,
-              color: OG_COLORS.textTertiary,
-              letterSpacing: '0.15em',
-              textTransform: 'uppercase',
+              fontSize: titleSize,
+              fontWeight: 400,
+              color: OG_COLORS.textPrimary,
+              letterSpacing: '0.05em',
+              textAlign: 'center',
               display: 'flex',
             }}
           >
-            Lunary.app
+            {firstName ? `${firstName}'s Sky Now` : 'Sky Now'}
+          </div>
+          <div
+            style={{
+              fontSize: dateSize,
+              color: OG_COLORS.textTertiary,
+              marginTop: 10,
+              display: 'flex',
+            }}
+          >
+            {dateText}
           </div>
         </div>
-      </div>,
-      {
-        width,
-        height,
-        fonts: [
-          {
-            name: 'Roboto Mono',
-            data: await fetch(
-              new URL('/fonts/RobotoMono-Regular.ttf', request.url),
-            ).then((res) => res.arrayBuffer()),
-            style: 'normal',
-            weight: 400,
-          },
-          {
-            name: 'Astronomicon',
-            data: await fetch(
-              new URL('/fonts/Astronomicon.ttf', request.url),
-            ).then((res) => res.arrayBuffer()),
-            style: 'normal',
-            weight: 400,
-          },
-        ],
-      },
+
+        {/* Retrograde Badge */}
+        {retrogradeBadge && (
+          <div
+            style={{
+              display: 'flex',
+              justifyContent: 'center',
+              marginBottom: 28,
+            }}
+          >
+            {retrogradeBadge}
+          </div>
+        )}
+
+        {/* Planet Grid - 2x5 */}
+        <div
+          style={{
+            display: 'flex',
+            flexDirection: 'row',
+            gap: 16,
+            background: 'rgba(255, 255, 255, 0.03)',
+            border: '1px solid rgba(255, 255, 255, 0.12)',
+            borderRadius: 20,
+            padding: '28px 32px',
+            flex: 1,
+          }}
+        >
+          {/* Left column - first 5 planets */}
+          <div
+            style={{
+              display: 'flex',
+              flexDirection: 'column',
+              gap: 12,
+              flex: 1,
+            }}
+          >
+            {PLANETS.slice(0, 5).map((planet) => renderPlanetRow(planet))}
+          </div>
+
+          {/* Right column - last 5 planets */}
+          <div
+            style={{
+              display: 'flex',
+              flexDirection: 'column',
+              gap: 12,
+              flex: 1,
+            }}
+          >
+            {PLANETS.slice(5, 10).map((planet) => renderPlanetRow(planet))}
+          </div>
+        </div>
+
+        {/* Footer */}
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 12,
+            justifyContent: 'center',
+            marginTop: 'auto',
+            paddingTop: 28,
+          }}
+        >
+          <img
+            src={`${baseUrl}/icons/moon-phases/full-moon.svg`}
+            width={24}
+            height={24}
+            style={{ opacity: 0.6 }}
+            alt=''
+          />
+          <span
+            style={{
+              fontSize: 16,
+              opacity: 0.6,
+              letterSpacing: '0.1em',
+              color: OG_COLORS.textPrimary,
+              display: 'flex',
+            }}
+          >
+            Join free at lunary.app
+          </span>
+        </div>
+      </div>
     );
+
+    return new ImageResponse(layoutJsx, {
+      width,
+      height,
+      fonts: [
+        {
+          name: 'Roboto Mono',
+          data: await fetch(
+            new URL('/fonts/RobotoMono-Regular.ttf', request.url),
+          ).then((res) => res.arrayBuffer()),
+          style: 'normal',
+          weight: 400,
+        },
+        {
+          name: 'Astronomicon',
+          data: await fetch(
+            new URL('/fonts/Astronomicon.ttf', request.url),
+          ).then((res) => res.arrayBuffer()),
+          style: 'normal',
+          weight: 400,
+        },
+      ],
+    });
   } catch (error) {
     console.error('[SkyNowOG] Error:', error);
     return new Response('Failed to generate image', { status: 500 });

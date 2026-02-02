@@ -550,9 +550,14 @@ export function getSymbolForContent(
     case 'planetary':
       return planetSymbols[normalizedSlug] || null;
 
-    case 'runes':
+    case 'runes': {
       // Elder Futhark unicode - uses Noto Sans Runic font
-      return runeSymbols[normalizedSlug] || null;
+      // Handle both "algiz" and "runes/algiz" slug formats
+      const runeName = normalizedSlug.includes('/')
+        ? normalizedSlug.split('/').pop() || normalizedSlug
+        : normalizedSlug;
+      return runeSymbols[runeName] || null;
+    }
 
     case 'tarot':
       return tarotMajorSymbols[normalizedSlug] || tarotSuitSymbols.major;

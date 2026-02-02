@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useCallback, useEffect } from 'react';
-import { Layers } from 'lucide-react';
+import { Share2 } from 'lucide-react';
 import { useUser } from '@/context/UserContext';
 import { useShareModal } from '@/hooks/useShareModal';
 import { ShareModal } from './ShareModal';
@@ -9,6 +9,8 @@ import { SharePreview } from './SharePreview';
 import { ShareActions } from './ShareActions';
 import { ShareFormatSelector } from './ShareFormatSelector';
 import { shareTracking } from '@/lib/analytics/share-tracking';
+import { isInDemoMode } from '@/lib/demo-mode';
+import { OG_IMAGE_VERSION } from '@/lib/share/og-utils';
 
 interface SpreadCard {
   position: string;
@@ -98,7 +100,7 @@ export function ShareTarotSpread({
       }
 
       const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://lunary.app';
-      const ogImageUrl = `${baseUrl}/api/og/share/tarot-spread?shareId=${currentShareId}&format=${format}`;
+      const ogImageUrl = `${baseUrl}/api/og/share/tarot-spread?shareId=${currentShareId}&format=${format}&v=${OG_IMAGE_VERSION}`;
 
       const imageResponse = await fetch(ogImageUrl);
       if (!imageResponse.ok) {
@@ -120,6 +122,14 @@ export function ShareTarotSpread({
   }, [spreadData, format, shareRecord, user, setLoading, setError]);
 
   const handleOpen = () => {
+    if (isInDemoMode()) {
+      window.dispatchEvent(
+        new CustomEvent('demo-action-blocked', {
+          detail: { action: 'Sharing images' },
+        }),
+      );
+      return;
+    }
     openModal();
     if (!imageBlob) {
       generateCard();
@@ -208,7 +218,7 @@ export function ShareTarotSpread({
         }
         title={compact ? 'Share Spread' : undefined}
       >
-        <Layers className='w-4 h-4' />
+        <Share2 className='w-4 h-4' />
         {!compact && 'Share Spread'}
       </button>
 

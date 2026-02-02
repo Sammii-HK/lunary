@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useCallback, useEffect } from 'react';
-import { Award } from 'lucide-react';
+import { Share2, Award } from 'lucide-react';
 import { useUser } from '@/context/UserContext';
 import { useShareModal } from '@/hooks/useShareModal';
 import { ShareModal } from './ShareModal';
@@ -9,6 +9,8 @@ import { SharePreview } from './SharePreview';
 import { ShareActions } from './ShareActions';
 import { ShareFormatSelector } from './ShareFormatSelector';
 import { shareTracking } from '@/lib/analytics/share-tracking';
+import { isInDemoMode } from '@/lib/demo-mode';
+import { OG_IMAGE_VERSION } from '@/lib/share/og-utils';
 
 interface RetrogradePeriod {
   planet: string;
@@ -210,7 +212,7 @@ export function ShareRetrogradeBadge({
 
       const ogImageUrl = `/api/og/share/retrograde-badge?shareId=${encodeURIComponent(
         currentShareId,
-      )}&format=${format}`;
+      )}&format=${format}&v=${OG_IMAGE_VERSION}`;
 
       const imageResponse = await fetch(ogImageUrl);
       if (!imageResponse.ok) throw new Error('Failed to generate image');
@@ -228,6 +230,14 @@ export function ShareRetrogradeBadge({
   }, [status, shareRecord, format, user?.name, setLoading, setError]);
 
   const handleOpen = async () => {
+    if (isInDemoMode()) {
+      window.dispatchEvent(
+        new CustomEvent('demo-action-blocked', {
+          detail: { action: 'Sharing images' },
+        }),
+      );
+      return;
+    }
     openModal();
     shareTracking.shareInitiated(user?.id, 'retrograde-badge');
     if (!imageBlob) {
@@ -354,7 +364,7 @@ export function ShareRetrogradeBadge({
           className='inline-flex items-center justify-center rounded-lg border border-amber-600 bg-amber-900/10 p-2 text-amber-200 hover:text-amber-100 hover:bg-amber-900/20 transition-colors'
           title={buttonText}
         >
-          <Award className='w-4 h-4' />
+          <Share2 className='w-4 h-4' />
         </button>
       ) : (
         // Full display mode with enhanced design
@@ -388,7 +398,7 @@ export function ShareRetrogradeBadge({
             onClick={handleOpen}
             className='inline-flex items-center gap-2 rounded-lg border-2 border-amber-500 bg-amber-900/30 px-4 py-2 text-sm font-medium text-amber-100 hover:text-white hover:bg-amber-900/50 hover:border-amber-400 transition-all'
           >
-            <Award className='w-4 h-4' />
+            <Share2 className='w-4 h-4' />
             {buttonText}
           </button>
         </div>

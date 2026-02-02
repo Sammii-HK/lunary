@@ -5,6 +5,12 @@
  * It exports the root component that defines all compositions.
  */
 
+import { registerRoot } from 'remotion';
+import { RemotionRoot } from './Root';
+
+// Register the root component with Remotion
+registerRoot(RemotionRoot);
+
 export { RemotionRoot } from './Root';
 export { RemotionVideo } from './Video';
 

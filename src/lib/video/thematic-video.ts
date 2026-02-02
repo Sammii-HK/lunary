@@ -305,26 +305,27 @@ export function buildThematicVideoComposition({
   const totalDuration = images[images.length - 1]?.endTime || durationEstimate;
 
   const overlays = [
-    // Hook text (first sentence) below center during first segment
+    // Hook text (first sentence) as the first section header
     ...(hookText.length > 10
       ? [
           {
             text: hookText,
             startTime: 0.3,
-            endTime: Math.min(3.5, images[0].endTime - 0.3),
-            style: 'hook' as const, // Hook style = below center
+            endTime: Math.min(4, images[0].endTime), // Show for ~3-4 seconds
+            style: 'hook' as const,
           },
         ]
       : []),
-    // Chapter labels for middle and end segments
+    // "Significance" - delayed by 2-3 seconds into segment 2
     {
-      text: CHAPTER_LABELS[1],
-      startTime: images[1].startTime,
+      text: CHAPTER_LABELS[1], // "Significance"
+      startTime: images[1].startTime + 2.5, // Delay 2.5 seconds
       endTime: images[1].endTime,
       style: 'chapter' as const,
     },
+    // "Reflection" - starts with segment 3
     {
-      text: CHAPTER_LABELS[2],
+      text: CHAPTER_LABELS[2], // "Reflection"
       startTime: images[2].startTime,
       endTime: images[2].endTime,
       style: 'chapter' as const,
@@ -353,7 +354,7 @@ export function buildThematicVideoComposition({
     style: 'stamp' as const,
   }));
 
-  // sentences and hookText already declared above for hook overlay
+  // Extract highlight terms (hookText used for fallback detection)
   const rawHighlightTerms = extractHighlightTerms(script, facet);
   const filteredHighlightTerms = rawHighlightTerms.filter(
     (term) => !STOPWORDS.has(term.toLowerCase()),

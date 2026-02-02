@@ -3,7 +3,11 @@ import { ImageResponse } from 'next/og';
 import { NextRequest } from 'next/server';
 import { astroPointSymbols, bodiesSymbols } from '@/constants/symbols';
 import { getBirthChartShare } from '@/lib/share/birth-chart';
-import { getFormatDimensions } from '@/lib/share/og-utils';
+import {
+  getFormatDimensions,
+  generateStarfield,
+  getStarCount,
+} from '@/lib/share/og-utils';
 import type { ShareFormat } from '@/hooks/useShareModal';
 import {
   elementAstro,
@@ -53,37 +57,38 @@ const sanitize = (value: string | null, limit = 80) => {
   return trimmed.length > limit ? `${trimmed.slice(0, limit - 1)}…` : trimmed;
 };
 
+// Vibrant gradients (85% intensity) for prominent element colors
 const gradientsByElement: Record<
   string,
   { background: string; accent: string; soft: string }
 > = {
   Fire: {
     background:
-      'linear-gradient(135deg, #12060a 0%, #3b0f1b 40%, #a23030 100%)',
+      'linear-gradient(135deg, rgba(18, 6, 10, 0.85) 0%, rgba(59, 15, 27, 0.85) 40%, rgba(162, 48, 48, 0.85) 100%)',
     accent: '#ffd6a3',
     soft: 'rgba(255, 214, 163, 0.18)',
   },
   Earth: {
     background:
-      'linear-gradient(135deg, #07110d 0%, #0f1f17 40%, #2d6a4f 100%)',
+      'linear-gradient(135deg, rgba(7, 17, 13, 0.85) 0%, rgba(15, 31, 23, 0.85) 40%, rgba(45, 106, 79, 0.85) 100%)',
     accent: '#b7f4c3',
     soft: 'rgba(183, 244, 195, 0.18)',
   },
   Air: {
     background:
-      'linear-gradient(135deg, #06131f 0%, #091d2c 35%, #3a6ea5 100%)',
+      'linear-gradient(135deg, rgba(6, 19, 31, 0.85) 0%, rgba(9, 29, 44, 0.85) 35%, rgba(58, 110, 165, 0.85) 100%)',
     accent: '#c3e3ff',
     soft: 'rgba(195, 227, 255, 0.18)',
   },
   Water: {
     background:
-      'linear-gradient(135deg, #07081a 0%, #0b1029 40%, #3048a2 100%)',
+      'linear-gradient(135deg, rgba(7, 8, 26, 0.85) 0%, rgba(11, 16, 41, 0.85) 40%, rgba(48, 72, 162, 0.85) 100%)',
     accent: '#d4dfff',
     soft: 'rgba(212, 223, 255, 0.18)',
   },
   default: {
     background:
-      'linear-gradient(135deg, #0a0b12 0%, #14151f 40%, #433878 100%)',
+      'linear-gradient(135deg, rgba(10, 11, 18, 0.85) 0%, rgba(20, 21, 31, 0.85) 40%, rgba(67, 56, 120, 0.85) 100%)',
     accent: '#f3d4ff',
     soft: 'rgba(243, 212, 255, 0.18)',
   },
@@ -290,14 +295,15 @@ export async function GET(request: NextRequest) {
   // Format-aware sizing
   const isLandscape = format === 'landscape';
   const isStory = format === 'story';
-  const padding = isLandscape ? 40 : isStory ? 100 : 64;
-  const titleSize = isLandscape ? 36 : isStory ? 72 : 52;
-  const subtitleSize = isLandscape ? 14 : isStory ? 24 : 16;
-  const bigThreeSize = isLandscape ? 18 : isStory ? 32 : 22;
-  const bigThreeGlyphSize = isLandscape ? 22 : isStory ? 42 : 28;
-  const chartSize = isLandscape ? 360 : isStory ? 600 : 420;
-  const badgeTextSize = isLandscape ? 16 : isStory ? 26 : 18;
-  const elementCountSize = isLandscape ? 28 : isStory ? 60 : 36;
+  const isSquare = format === 'square';
+  const padding = isLandscape ? 40 : isStory ? 100 : 48;
+  const titleSize = isLandscape ? 36 : isStory ? 72 : 56;
+  const subtitleSize = isLandscape ? 14 : isStory ? 24 : 18;
+  const bigThreeSize = isLandscape ? 18 : isStory ? 32 : 26;
+  const bigThreeGlyphSize = isLandscape ? 22 : isStory ? 42 : 32;
+  const chartSize = isLandscape ? 360 : isStory ? 600 : 480;
+  const badgeTextSize = isLandscape ? 16 : isStory ? 26 : 20;
+  const elementCountSize = isLandscape ? 28 : isStory ? 60 : 42;
 
   const elementCounts = ELEMENT_ORDER.reduce(
     (acc, label) => {
@@ -403,6 +409,28 @@ export async function GET(request: NextRequest) {
     { glyph: astroPointSymbols.ascendant, value: rising, label: 'Rising' },
   ];
 
+  // Generate unique starfield based on shareId
+  const starfieldId = shareId || 'default-birth-chart';
+  const stars = generateStarfield(starfieldId, getStarCount(format));
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://lunary.app';
+
+  // Starfield component - increased opacity for better visibility
+  const starfieldJsx = stars.map((star, i) => (
+    <div
+      key={i}
+      style={{
+        position: 'absolute',
+        left: `${star.x}%`,
+        top: `${star.y}%`,
+        width: star.size,
+        height: star.size,
+        borderRadius: '50%',
+        background: '#fff',
+        opacity: star.opacity * 0.8, // Brighter stars with reduced gradient
+      }}
+    />
+  ));
+
   // Inline JSX directly based on format
   const layoutJsx = isLandscape ? (
     // Landscape Layout
@@ -412,25 +440,24 @@ export async function GET(request: NextRequest) {
         height: '100%',
         display: 'flex',
         flexDirection: 'column',
-        background: theme.background,
+        background: '#0A0A0A',
         color: '#fff',
         padding,
         fontFamily: 'Roboto Mono',
         position: 'relative',
       }}
     >
+      {/* Gradient overlay */}
       <div
         style={{
-          display: 'flex',
           position: 'absolute',
           inset: 0,
-          backgroundImage:
-            'radial-gradient(circle at 20% 30%, rgba(255,255,255,0.10) 0 1px, transparent 2px),' +
-            'radial-gradient(circle at 70% 60%, rgba(255,255,255,0.08) 0 1px, transparent 2px),' +
-            'radial-gradient(circle at 50% 10%, rgba(255,255,255,0.06) 0 1px, transparent 2px)',
-          opacity: 0.35,
+          background: theme.background,
+          display: 'flex',
         }}
       />
+      {/* Unique starfield background */}
+      {starfieldJsx}
 
       {/* Header - spans full width */}
       <div
@@ -669,19 +696,35 @@ export async function GET(request: NextRequest) {
         </div>
       </div>
 
+      {/* Branded Footer */}
       <div
         style={{
           position: 'absolute',
           bottom: 24,
-          fontSize: 18,
-          letterSpacing: 4,
-          opacity: 0.45,
           width: '100%',
           display: 'flex',
+          alignItems: 'center',
+          gap: 12,
           justifyContent: 'center',
         }}
       >
-        Lunary.app
+        <img
+          src={`${baseUrl}/icons/moon-phases/full-moon.svg`}
+          width={24}
+          height={24}
+          style={{ opacity: 0.6 }}
+          alt=''
+        />
+        <span
+          style={{
+            fontSize: 16,
+            opacity: 0.6,
+            letterSpacing: '0.1em',
+            display: 'flex',
+          }}
+        >
+          Join free at lunary.app
+        </span>
       </div>
     </div>
   ) : (
@@ -693,25 +736,25 @@ export async function GET(request: NextRequest) {
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
-        background: theme.background,
+        background: '#0A0A0A',
         color: '#fff',
         padding,
         fontFamily: 'Roboto Mono',
         position: 'relative',
       }}
     >
+      {/* Gradient overlay */}
       <div
         style={{
-          display: 'flex',
           position: 'absolute',
           inset: 0,
-          backgroundImage:
-            'radial-gradient(circle at 20% 30%, rgba(255,255,255,0.10) 0 1px, transparent 2px),' +
-            'radial-gradient(circle at 70% 60%, rgba(255,255,255,0.08) 0 1px, transparent 2px),' +
-            'radial-gradient(circle at 50% 10%, rgba(255,255,255,0.06) 0 1px, transparent 2px)',
-          opacity: 0.35,
+          background: theme.background,
+          display: 'flex',
         }}
       />
+
+      {/* Unique starfield background */}
+      {starfieldJsx}
 
       <div
         style={{
@@ -720,8 +763,8 @@ export async function GET(request: NextRequest) {
           justifyContent: 'center',
           width: '100%',
           maxWidth: 960,
-          minHeight: 1180,
-          gap: isStory ? 64 : 54,
+          minHeight: isSquare ? 900 : 1180,
+          gap: isStory ? 64 : isSquare ? 32 : 54,
           alignItems: 'center',
           position: 'relative',
         }}
@@ -813,8 +856,9 @@ export async function GET(request: NextRequest) {
             maxWidth: 820,
             display: 'flex',
             flexDirection: 'column',
-            gap: 24,
+            gap: isSquare ? 16 : 24,
             alignItems: 'stretch',
+            marginBottom: isSquare ? 60 : 0,
           }}
         >
           <div
@@ -1055,19 +1099,35 @@ export async function GET(request: NextRequest) {
           </div>
         </div>
       </div>
+      {/* Branded Footer */}
       <div
         style={{
           position: 'absolute',
           bottom: 33,
-          fontSize: 22,
-          letterSpacing: 4,
-          opacity: 0.45,
           width: '100%',
           display: 'flex',
+          alignItems: 'center',
+          gap: 12,
           justifyContent: 'center',
         }}
       >
-        Lunary.app
+        <img
+          src={`${baseUrl}/icons/moon-phases/full-moon.svg`}
+          width={24}
+          height={24}
+          style={{ opacity: 0.6 }}
+          alt=''
+        />
+        <span
+          style={{
+            fontSize: 16,
+            opacity: 0.6,
+            letterSpacing: '0.1em',
+            display: 'flex',
+          }}
+        >
+          Join free at lunary.app
+        </span>
       </div>
     </div>
   );

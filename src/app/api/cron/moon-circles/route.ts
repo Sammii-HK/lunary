@@ -118,7 +118,7 @@ async function createMoonCircle(dateStr: string, force: boolean = false) {
         ? 'https://lunary.app'
         : 'http://localhost:3000';
 
-    console.log('🌙 Creating Moon Circle for:', dateStr);
+    console.log('🌙 Checking Moon Circle for:', dateStr);
 
     await logActivity({
       activityType: 'moon_circle_creation',
@@ -139,15 +139,20 @@ async function createMoonCircle(dateStr: string, force: boolean = false) {
       });
     }
 
+    // Step 2: Window-based deduplication - check for existing circle within 10 days for same phase
     if (!force) {
       const existingCircle = await sql`
-        SELECT id FROM moon_circles WHERE event_date = ${dateStr}::date
+        SELECT id, event_date FROM moon_circles
+        WHERE moon_phase = ${moonCircle.moonPhase}
+          AND event_date BETWEEN (${dateStr}::date - 10) AND (${dateStr}::date + 10)
+        LIMIT 1
       `;
 
       if (existingCircle.rows.length > 0) {
+        const existingDate = existingCircle.rows[0].event_date;
         await sendDiscordNotification({
           title: '🌙 Moon Circle Check',
-          description: `Moon Circle already exists for ${dateStr}`,
+          description: `Moon Circle already exists within window for ${dateStr}`,
           fields: [
             {
               name: 'Phase',
@@ -160,9 +165,14 @@ async function createMoonCircle(dateStr: string, force: boolean = false) {
               inline: true,
             },
             {
-              name: 'Status',
-              value: 'Already exists',
+              name: 'Existing Circle Date',
+              value: String(existingDate).split('T')[0],
               inline: true,
+            },
+            {
+              name: 'Status',
+              value: 'Duplicate prevented (10-day window)',
+              inline: false,
             },
           ],
           color: 'info',
@@ -172,16 +182,22 @@ async function createMoonCircle(dateStr: string, force: boolean = false) {
         return NextResponse.json({
           success: true,
           moonCircleGenerated: false,
-          message: 'Moon Circle already exists',
+          message: `Moon Circle for ${moonCircle.moonPhase} already exists within 10-day window (${existingDate})`,
           date: dateStr,
+          existingCircleDate: existingDate,
         });
       }
     } else {
+      // Force mode: delete existing circle for this exact date only
       await sql`
         DELETE FROM moon_circles WHERE event_date = ${dateStr}::date
       `;
-      console.log('🗑️ Deleted existing Moon Circle (force mode)');
+      console.log('🗑️ Deleted existing Moon Circle for this date (force mode)');
     }
+
+    console.log(
+      `🌙 Creating Moon Circle: ${moonCircle.moonPhase} in ${moonCircle.moonSign}`,
+    );
 
     const contentJson = {
       guidedRitual: moonCircle.guidedRitual,
@@ -231,6 +247,9 @@ async function createMoonCircle(dateStr: string, force: boolean = false) {
     let pushFailed = 0;
     let emailsSent = 0;
     let emailsFailed = 0;
+
+    // Track emails already sent to prevent duplicates (user may have multiple push subscriptions)
+    const emailsSentTo = new Set<string>();
 
     const now = new Date();
     const hour = now.getUTCHours();
@@ -296,7 +315,8 @@ async function createMoonCircle(dateStr: string, force: boolean = false) {
 
           pushSent++;
 
-          if (userEmail && moonCircleId) {
+          // Only send email if we haven't already sent to this address
+          if (userEmail && moonCircleId && !emailsSentTo.has(userEmail)) {
             try {
               const dateLabel = new Intl.DateTimeFormat('en-US', {
                 weekday: 'long',
@@ -332,6 +352,7 @@ async function createMoonCircle(dateStr: string, force: boolean = false) {
                 text: emailText,
               });
 
+              emailsSentTo.add(userEmail);
               emailsSent++;
 
               // Track conversion via API (server-side)

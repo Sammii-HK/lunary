@@ -8,6 +8,7 @@ import {
   chmod,
   access,
   mkdtemp,
+  mkdir,
   rm,
 } from 'fs/promises';
 import { readFileSync } from 'fs';
@@ -15,6 +16,7 @@ import { join, dirname } from 'path';
 import { tmpdir } from 'os';
 import { constants } from 'fs';
 import { createRequire } from 'module';
+import { generateStarfieldFrames } from './starfield-generator';
 
 // Buffer time added at the end of the video for the last subtitle to be readable
 // and for a nice pause before the video ends
@@ -329,7 +331,7 @@ export async function composeVideo(
   ): string => {
     // ASS subtitles with:
     // - Fade in/out effects (200ms each)
-    // - Semi-transparent background box (BorderStyle=4)
+    // - Text outline + shadow (BorderStyle=1) - no background box
     // - Roboto font for cleaner look
     const header = [
       '[Script Info]',
@@ -341,8 +343,8 @@ export async function composeVideo(
       '[V4+ Styles]',
       'Format: Name,Fontname,Fontsize,PrimaryColour,SecondaryColour,OutlineColour,BackColour,Bold,Italic,Underline,StrikeOut,ScaleX,ScaleY,Spacing,Angle,BorderStyle,Outline,Shadow,Alignment,MarginL,MarginR,MarginV,Encoding',
       // Default: center-bottom for main subtitles
-      // BorderStyle=4 creates opaque box background, BackColour with alpha for semi-transparent
-      `Style: Default,RobotoMono-Bold,${fontSize},&H00FFFFFF,&H00FFFFFF,&H40000000,&HAA000000,0,0,0,0,100,100,1,0,4,0,3,2,50,50,${marginV},0`,
+      // BorderStyle=1 = outline + shadow (no box), Outline=3 for thickness, Shadow=4 for drop shadow
+      `Style: Default,RobotoMono-Bold,${fontSize},&H00FFFFFF,&H00FFFFFF,&H80000000,&H80000000,0,0,0,0,100,100,1,0,1,3,4,2,50,50,${marginV},0`,
       '',
       '[Events]',
       'Format: Layer,Start,End,Style,Name,MarginL,MarginR,MarginV,Effect,Text',
@@ -367,8 +369,9 @@ export async function composeVideo(
     text
       .replace(/\\/g, '\\\\')
       .replace(/:/g, '\\:')
-      .replace(/'/g, "\\'")
-      .replace(/%/g, '\\%');
+      .replace(/'/g, "'\\''") // Escape single quotes for FFmpeg: end quote, escaped quote, start quote
+      .replace(/%/g, '\\%')
+      .replace(/\n/g, ' '); // Replace newlines with spaces - FFmpeg drawtext can't handle literal newlines
 
   // Wrap text to fit within screen width (for overlays)
   const wrapText = (text: string, maxCharsPerLine: number): string => {
@@ -412,7 +415,9 @@ export async function composeVideo(
     console.log(
       `🎬 Building overlay filters for ${overlayItems.length} overlays`,
     );
-    const filters = overlayItems.map((overlay, idx) => {
+    const allFilters: string[] = [];
+
+    overlayItems.forEach((overlay, idx) => {
       const style = overlay.style || 'chapter';
       const fontFile = fontRegular;
 
@@ -426,42 +431,44 @@ export async function composeVideo(
               ? baseFontSize - 12 // Stamp much smaller
               : baseFontSize; // Chapter labels
 
-      // Wrap text for hook/cta/chapter styles
+      // Line height for multi-line text
+      const lineHeight = fontSize * 1.4;
+
+      // Wrap text into lines
       const shouldWrap =
         style === 'hook' || style === 'cta' || style === 'chapter';
-      const wrappedText = shouldWrap
-        ? wrapText(overlay.text, maxCharsPerLine)
-        : overlay.text;
-      const text = escapeDrawText(wrappedText);
+      const lines = shouldWrap
+        ? wrapText(overlay.text, maxCharsPerLine).split('\n')
+        : [overlay.text];
 
-      // All styles centered horizontally
-      const x = `(w-text_w)/2`;
-
-      // Vertical positioning by style
-      const y =
+      // Base Y position by style
+      const baseYPercent =
         style === 'hook'
-          ? `h*0.65` // Hook above subtitles
+          ? 0.55 // Hook above subtitles
           : style === 'cta'
-            ? `h*0.28` // CTA in upper area
+            ? 0.25 // CTA in upper area
             : style === 'stamp'
-              ? `h*0.90` // Stamp 10% from bottom
-              : `h*0.65`; // Chapter labels lower
-
-      // Fade in/out effect using alpha
-      // Fade in over 0.4s, fade out over 0.4s
-      const fadeIn = 0.4;
-      const fadeOut = 0.4;
-      const start = overlay.startTime;
-      const end = overlay.endTime;
-      const alpha = `if(lt(t-${start},${fadeIn}),(t-${start})/${fadeIn},if(gt(${end}-t,${fadeOut}),1,(${end}-t)/${fadeOut}))`;
+              ? 0.9 // Stamp 10% from bottom
+              : 0.55; // Chapter labels
 
       console.log(
-        `  Overlay ${idx}: style=${style}, text="${overlay.text.substring(0, 30)}...", time=${overlay.startTime}-${overlay.endTime}`,
+        `  Overlay ${idx}: style=${style}, lines=${lines.length}, text="${overlay.text.substring(0, 50)}...", time=${overlay.startTime}-${overlay.endTime}`,
       );
-      return `drawtext=fontfile='${fontFile}':text='${text}':x=${x}:y=${y}:fontsize=${fontSize}:fontcolor=white:alpha='${alpha}':box=0:line_spacing=8:enable='between(t,${overlay.startTime},${overlay.endTime})'`;
+
+      // Create a drawtext filter for each line
+      lines.forEach((line, lineIdx) => {
+        const escapedLine = escapeDrawText(line);
+        // Center the block of lines vertically
+        const totalHeight = lines.length * lineHeight;
+        const startY = baseYPercent * size.height - totalHeight / 2;
+        const lineY = Math.round(startY + lineIdx * lineHeight);
+
+        const drawtextFilter = `drawtext=fontfile='${fontFile}':text='${escapedLine}':x=(w-text_w)/2:y=${lineY}:fontsize=${fontSize}:fontcolor=white:alpha=1:box=0:enable='between(t,${overlay.startTime},${overlay.endTime})'`;
+        allFilters.push(drawtextFilter);
+      });
     });
 
-    return filters.join(',');
+    return allFilters.join(',');
   };
 
   try {
@@ -634,6 +641,47 @@ export async function composeVideo(
           .inputOptions(['-stream_loop', '-1']);
       }
 
+      // Generate animated starfield overlay with twinkling
+      const starfieldSeed = `${Date.now()}-${outputPath}`;
+      const starfieldDir = join(workDir, 'starfield-frames');
+      await mkdir(starfieldDir, { recursive: true });
+      const starfieldStarCount =
+        format === 'story' ? 120 : format === 'square' ? 80 : 60;
+
+      console.log(
+        `🌟 Generating animated starfield with seed: ${starfieldSeed.substring(0, 30)}... (${starfieldStarCount} stars)`,
+      );
+      const { framePaths: starfieldFramePaths, fps: starfieldFps } =
+        await generateStarfieldFrames(
+          starfieldSeed,
+          dimensions.width,
+          dimensions.height,
+          totalVideoDuration,
+          starfieldDir,
+          {
+            fps: 10, // Low fps for subtle twinkle
+            starCount: starfieldStarCount,
+            loopDuration: 5, // 5-second twinkle cycle (gentle)
+          },
+        );
+      console.log(
+        `🌟 Generated ${starfieldFramePaths.length} starfield frames at ${starfieldFps}fps`,
+      );
+
+      // Add starfield frames as video input - FFmpeg will read the image sequence and loop it
+      const starfieldInputIndex =
+        adjustedImages.length + (resolvedMusicPath ? 2 : 1);
+      const starfieldPattern = join(starfieldDir, 'stars-%04d.png');
+      command = command.input(starfieldPattern).inputOptions([
+        '-framerate',
+        String(starfieldFps),
+        '-stream_loop',
+        '-1', // Loop infinitely
+      ]);
+      console.log(
+        `🌟 Starfield added as input ${starfieldInputIndex} (animated, ${starfieldFps}fps)`,
+      );
+
       // Build filter complex for scaling, padding, and concatenation
       const filterParts: string[] = [];
 
@@ -723,13 +771,27 @@ export async function composeVideo(
       if (overlayFilter) {
         // Overlay filter needs to be applied after subtitles
         // FFmpeg syntax: [input]filter1,filter2[output]
-        const overlayFilterChain = `${intermediateLabel}${overlayFilter}[vfinal]`;
+        const overlayFilterChain = `${intermediateLabel}${overlayFilter}[voverlay]`;
         console.log(
           `🎬 Adding overlay filter chain: ${overlayFilterChain.substring(0, 300)}...`,
         );
         filterParts.push(overlayFilterChain);
-        intermediateLabel = '[vfinal]';
+        intermediateLabel = '[voverlay]';
       }
+
+      // Overlay animated starfield on top of video (fps=30 to match video framerate)
+      filterParts.push(
+        `[${starfieldInputIndex}:v]fps=30,trim=duration=${totalVideoDuration.toFixed(2)},setpts=PTS-STARTPTS,format=rgba[stars]`,
+      );
+      filterParts.push(
+        `${intermediateLabel}[stars]overlay=0:0:format=auto[vwithstars]`,
+      );
+      // Add video fade in/out for smooth transitions (1s fade in, 1.5s fade out)
+      const videoFadeOutStart = Math.max(0, totalVideoDuration - 1.5);
+      filterParts.push(
+        `[vwithstars]fade=t=in:st=0:d=1,fade=t=out:st=${videoFadeOutStart.toFixed(2)}:d=1.5[vfinal]`,
+      );
+      intermediateLabel = '[vfinal]';
 
       const finalLabel = intermediateLabel;
       let audioMap = `${adjustedImages.length}:a`;
@@ -752,6 +814,14 @@ export async function composeVideo(
       }
 
       const filterComplex = filterParts.join(';');
+
+      // Debug: Log the full filter complex to diagnose issues
+      console.log('🎬 FULL FILTER COMPLEX:');
+      filterParts.forEach((part, i) => {
+        console.log(
+          `  Part ${i}: ${part.substring(0, 200)}${part.length > 200 ? '...' : ''}`,
+        );
+      });
 
       command = command
         .complexFilter(filterComplex)
@@ -805,6 +875,8 @@ export async function composeVideo(
       for (const imagePath of imagePaths) {
         await unlink(imagePath).catch(() => {});
       }
+      // Cleanup starfield frames directory
+      await rm(starfieldDir, { recursive: true, force: true }).catch(() => {});
     } else {
       // Single image
       const singleImageUrl = imageUrl || images?.[0]?.url;
@@ -844,12 +916,16 @@ export async function composeVideo(
       // Stronger vignette (PI/3), crushed blacks (gamma=0.95), cinematic color balance
       const colorGradingFilter = `colorbalance=rs=-0.05:gs=-0.02:bs=0.08:rm=-0.03:gm=0:bm=0.05,eq=saturation=0.92:contrast=1.06:brightness=-0.04:gamma=0.95,vignette=PI/5`;
       const overlayFilter = buildOverlayFilters(overlays, dimensions, format);
+      // Add video fade in/out for smooth transitions (1s fade in, 1.5s fade out)
+      const videoFadeOutStart = Math.max(0, totalVideoDuration - 1.5);
+      const videoFadeFilter = `fade=t=in:st=0:d=1,fade=t=out:st=${videoFadeOutStart.toFixed(2)}:d=1.5`;
       const videoFilter = [
         zoomFilter,
         gradientBlendFilter,
         colorGradingFilter,
         subtitleFilter,
         overlayFilter,
+        videoFadeFilter,
       ]
         .filter(Boolean)
         .join(',');

@@ -6,3 +6,4 @@ export { TopicCard } from './TopicCard';
 export { LowerThird } from './LowerThird';
 export { ProgressIndicator } from './ProgressIndicator';
 export { TransitionEffect } from './TransitionEffect';
+export { TextOverlays } from './TextOverlays';

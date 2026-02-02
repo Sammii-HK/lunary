@@ -9,6 +9,8 @@ import { SharePreview } from './SharePreview';
 import { ShareActions } from './ShareActions';
 import { ShareFormatSelector } from './ShareFormatSelector';
 import { shareTracking } from '@/lib/analytics/share-tracking';
+import { isInDemoMode } from '@/lib/demo-mode';
+import { OG_IMAGE_VERSION } from '@/lib/share/og-utils';
 
 interface ShareHoroscopeProps {
   sunSign: string;
@@ -96,7 +98,7 @@ export function ShareHoroscope({
       }
 
       const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://lunary.app';
-      const ogImageUrl = `${baseUrl}/api/og/share/horoscope?shareId=${currentShareId}&format=${format}`;
+      const ogImageUrl = `${baseUrl}/api/og/share/horoscope?shareId=${currentShareId}&format=${format}&v=${OG_IMAGE_VERSION}`;
 
       const imageResponse = await fetch(ogImageUrl);
       if (!imageResponse.ok) {
@@ -129,6 +131,14 @@ export function ShareHoroscope({
   ]);
 
   const handleOpen = () => {
+    if (isInDemoMode()) {
+      window.dispatchEvent(
+        new CustomEvent('demo-action-blocked', {
+          detail: { action: 'Sharing images' },
+        }),
+      );
+      return;
+    }
     openModal();
     if (!imageBlob) {
       generateCard();

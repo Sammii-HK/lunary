@@ -60,8 +60,10 @@ export async function GET(request: NextRequest) {
       });
     }
 
+    // Deduplicate by user_email to ensure only one email per user
+    // (users may have multiple push subscriptions across devices)
     const subscriptions = await sql`
-      SELECT DISTINCT user_id, user_email, preferences
+      SELECT DISTINCT ON (user_email) user_id, user_email, preferences
       FROM push_subscriptions
       WHERE is_active = true
       AND (
@@ -69,9 +71,10 @@ export async function GET(request: NextRequest) {
         OR preferences->>'weeklyReport' IS NULL
       )
       AND (
-        preferences->>'birthday' IS NOT NULL 
+        preferences->>'birthday' IS NOT NULL
         AND preferences->>'birthday' != ''
       )
+      ORDER BY user_email, created_at DESC
     `;
 
     if (subscriptions.rows.length === 0) {

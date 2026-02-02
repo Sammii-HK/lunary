@@ -243,7 +243,7 @@ export async function generateMetadata({
   }
 
   const title = `${colorData.name} Candle Magic: Meaning & Spells - Lunary`;
-  const description = `Learn ${colorData.name.toLowerCase()} candle magic meanings, correspondences, and spell uses. Discover how to use ${colorData.name.toLowerCase()} candles for ${colorData.uses.slice(0, 2).join(' and ').toLowerCase()}.`;
+  const description = `Discover ${colorData.name.toLowerCase()} candle magic: meaning, properties & spells. Learn how to use ${colorData.name.toLowerCase()} candles for ${colorData.meanings.slice(0, 2).join(' & ').toLowerCase()}. Complete color magic guide with rituals.`;
 
   return {
     title,

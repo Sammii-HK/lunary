@@ -104,18 +104,22 @@ export function getThematicImageUrl(
   const slugNorm = normalizeForComparison(normalizedSlug);
   const rawTitleNorm = normalizeForComparison(title);
 
+  // Unicode symbols (runes, etc.) normalize to empty string - always allow them
+  const isUnicodeSymbol = rawSymbol && symbolNorm === '';
+
   // Only include symbol if it's different from title AND slug (avoids duplication like "111" symbol + "111" title)
   // Use includes() check because title might be "111 Angel Number" while symbol is just "111"
   const symbol =
     rawSymbol &&
-    !titleNorm.includes(symbolNorm) &&
-    !slugNorm.includes(symbolNorm) &&
-    !rawTitleNorm.includes(symbolNorm)
+    (isUnicodeSymbol ||
+      (!titleNorm.includes(symbolNorm) &&
+        !slugNorm.includes(symbolNorm) &&
+        !rawTitleNorm.includes(symbolNorm)))
       ? rawSymbol
       : null;
 
   // Build URL - include version for cache busting when we make changes
-  const IMAGE_VERSION = '2';
+  const IMAGE_VERSION = '4';
   const params = new URLSearchParams({
     category: thematicCategory,
     title: formattedTitle,

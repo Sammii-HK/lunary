@@ -1,27 +1,25 @@
 import React from 'react';
-import {
-  AbsoluteFill,
-  Audio,
-  Img,
-  Sequence,
-  useCurrentFrame,
-  useVideoConfig,
-} from 'remotion';
+import { AbsoluteFill, Audio, Img, Sequence, useVideoConfig } from 'remotion';
 import { AnimatedBackground } from '../components/AnimatedBackground';
 import { AnimatedSubtitles } from '../components/AnimatedSubtitles';
-import { HookSequence } from '../components/HookSequence';
-import { TopicCard } from '../components/TopicCard';
+import { TextOverlays } from '../components/TextOverlays';
 import { ProgressIndicator } from '../components/ProgressIndicator';
 import { TransitionEffect } from '../components/TransitionEffect';
 import type { AudioSegment } from '../utils/timing';
-import { secondsToFrames } from '../utils/timing';
 import { COLORS } from '../styles/theme';
 
+// Helper to convert seconds to frames
+const secondsToFrames = (seconds: number, fps: number) =>
+  Math.round(seconds * fps);
+
+interface Overlay {
+  text: string;
+  startTime: number;
+  endTime: number;
+  style?: 'hook' | 'cta' | 'stamp' | 'chapter';
+}
+
 export interface MediumFormVideoProps {
-  /** Title/hook text for the intro */
-  hookText: string;
-  /** Subtitle for intro */
-  hookSubtitle?: string;
   /** Audio segments for subtitles with topic info */
   segments: AudioSegment[];
   /** Audio file URL */
@@ -38,6 +36,8 @@ export interface MediumFormVideoProps {
   highlightTerms?: string[];
   /** Show progress indicator */
   showProgress?: boolean;
+  /** Text overlays (hook, cta, stamps, chapters) */
+  overlays?: Overlay[];
 }
 
 /**
@@ -51,57 +51,25 @@ export interface MediumFormVideoProps {
  * - 9:16 aspect ratio (1080x1920)
  */
 export const MediumFormVideo: React.FC<MediumFormVideoProps> = ({
-  hookText,
-  hookSubtitle,
   segments,
   audioUrl,
   images = [],
   highlightTerms = [],
   showProgress = true,
+  overlays = [],
 }) => {
-  const frame = useCurrentFrame();
   const { fps, durationInFrames } = useVideoConfig();
-
-  // Calculate hook duration (first 3 seconds)
-  const hookDurationFrames = 90; // 3 seconds at 30fps
-  const showHook = frame < hookDurationFrames;
-
-  // Determine current background image and segment
-  const currentTime = frame / fps;
-  let currentImage = images[0];
-  let currentSegmentIndex = 0;
-
-  if (images.length > 0) {
-    for (let i = 0; i < images.length; i++) {
-      if (
-        currentTime >= images[i].startTime &&
-        currentTime < images[i].endTime
-      ) {
-        currentImage = images[i];
-        currentSegmentIndex = i;
-        break;
-      }
-    }
-  }
-
-  // Check if we're at a segment transition (first 1 second of new segment)
-  const segmentStartFrame = currentImage
-    ? secondsToFrames(currentImage.startTime, fps)
-    : 0;
-  const isAtSegmentStart =
-    frame >= segmentStartFrame && frame < segmentStartFrame + 30;
-  const showTopicCard =
-    isAtSegmentStart && currentImage?.topic && frame > hookDurationFrames;
 
   return (
     <AbsoluteFill style={{ backgroundColor: COLORS.cosmicBlack }}>
-      {/* Animated background */}
-      <AnimatedBackground showStars={false} />
-
-      {/* Background images with crossfade */}
+      {/* Background images first - extend last image to full video duration */}
       {images.map((image, index) => {
         const startFrame = secondsToFrames(image.startTime, fps);
-        const endFrame = secondsToFrames(image.endTime, fps);
+        const isLastImage = index === images.length - 1;
+        // Extend last image to fill entire video duration
+        const endFrame = isLastImage
+          ? durationInFrames
+          : secondsToFrames(image.endTime, fps);
         const duration = endFrame - startFrame;
 
         return (
@@ -121,6 +89,9 @@ export const MediumFormVideo: React.FC<MediumFormVideoProps> = ({
         );
       })}
 
+      {/* Stars render ON TOP of background images */}
+      <AnimatedBackground showStars={true} overlayMode={true} />
+
       {/* Fade in from black */}
       <TransitionEffect
         type='fade'
@@ -128,26 +99,6 @@ export const MediumFormVideo: React.FC<MediumFormVideoProps> = ({
         durationFrames={15}
         direction='in'
       />
-
-      {/* Hook sequence (first 3 seconds) */}
-      {showHook && (
-        <HookSequence
-          hookText={hookText}
-          subtitle={hookSubtitle}
-          startFrame={0}
-          durationFrames={hookDurationFrames}
-        />
-      )}
-
-      {/* Topic cards at segment transitions */}
-      {showTopicCard && currentImage?.topic && (
-        <TopicCard
-          title={currentImage.topic}
-          item={currentImage.item}
-          startFrame={segmentStartFrame}
-          position='top'
-        />
-      )}
 
       {/* Animated subtitles */}
       <AnimatedSubtitles
@@ -157,6 +108,9 @@ export const MediumFormVideo: React.FC<MediumFormVideoProps> = ({
         bottomPosition={15}
         fps={fps}
       />
+
+      {/* Text overlays (hook, cta, stamps, chapters) - matches FFmpeg drawtext */}
+      {overlays.length > 0 && <TextOverlays overlays={overlays} />}
 
       {/* Audio track */}
       {audioUrl && <Audio src={audioUrl} />}

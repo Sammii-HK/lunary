@@ -9,6 +9,14 @@ function getStripe() {
   return new Stripe(process.env.STRIPE_SECRET_KEY);
 }
 
+function sanitizeForLog(value: unknown): string {
+  if (typeof value !== 'string') {
+    return String(value);
+  }
+  // Remove newline and carriage return characters to prevent log injection
+  return value.replace(/[\r\n]/g, '');
+}
+
 export async function GET(request: NextRequest) {
   try {
     // List all unresolved orphaned subscriptions
@@ -92,8 +100,8 @@ export async function POST(request: NextRequest) {
       });
 
       // Insert/update subscriptions table
-      const trialEndsAt = null; // Will be updated by next webhook
-      const currentPeriodEnd = null;
+      const trialEndsAt: Date | null = null; // Will be updated by next webhook
+      const currentPeriodEnd: Date | null = null;
 
       await sql`
         INSERT INTO subscriptions (
@@ -136,7 +144,7 @@ export async function POST(request: NextRequest) {
       `;
 
       console.log(
-        `✅ Linked orphaned subscription ${subscriptionId} to user ${userId}`,
+        `✅ Linked orphaned subscription ${sanitizeForLog(subscriptionId)} to user ${sanitizeForLog(userId)}`,
       );
 
       return NextResponse.json({
@@ -158,7 +166,9 @@ export async function POST(request: NextRequest) {
         WHERE stripe_subscription_id = ${subscriptionId}
       `;
 
-      console.log(`✅ Cancelled orphaned subscription ${subscriptionId}`);
+      console.log(
+        `✅ Cancelled orphaned subscription ${sanitizeForLog(subscriptionId)}`,
+      );
 
       return NextResponse.json({
         success: true,

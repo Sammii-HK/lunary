@@ -177,6 +177,9 @@ export async function GET(request: NextRequest) {
     let emailsSent = 0;
     let emailsFailed = 0;
 
+    // Track emails already sent to prevent duplicates (user may have multiple push subscriptions)
+    const emailsSentTo = new Set<string>();
+
     for (const sub of subscriptions.rows) {
       try {
         const preferences = sub.preferences || {};
@@ -264,7 +267,8 @@ export async function GET(request: NextRequest) {
 
           pushSent++;
 
-          if (userEmail) {
+          // Only send email if we haven't already sent to this address
+          if (userEmail && !emailsSentTo.has(userEmail)) {
             try {
               const emailHtml = await generateCosmicPulseEmailHTML(
                 cosmicPulse,
@@ -286,6 +290,7 @@ export async function GET(request: NextRequest) {
                 text: emailText,
               });
 
+              emailsSentTo.add(userEmail);
               emailsSent++;
 
               await trackConversionServer(baseUrl, {

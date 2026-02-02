@@ -1,6 +1,6 @@
 import React from 'react';
 import { useCurrentFrame, interpolate, Easing } from 'remotion';
-import { COLORS, FONTS, STYLES } from '../styles/theme';
+import { COLORS, STYLES } from '../styles/theme';
 import type { AudioSegment } from '../utils/timing';
 import { secondsToFrames } from '../utils/timing';
 
@@ -121,6 +121,7 @@ export const AnimatedSubtitles: React.FC<AnimatedSubtitlesProps> = ({
     });
   };
 
+  // FFmpeg-matching style: no background box, outline + shadow
   return (
     <div
       style={{
@@ -131,30 +132,30 @@ export const AnimatedSubtitles: React.FC<AnimatedSubtitlesProps> = ({
         textAlign: 'center',
         opacity,
         transform: `translateY(${slideUp}px)`,
+        zIndex: 15, // Above stars (5), below fade transitions (100)
       }}
     >
-      <div
+      <p
         style={{
-          display: 'inline-block',
-          backgroundColor: STYLES.subtitle.backgroundColor,
-          padding: STYLES.subtitle.padding,
-          borderRadius: STYLES.subtitle.borderRadius,
+          fontFamily: 'Roboto Mono, monospace',
+          fontSize,
+          fontWeight: 500, // Medium weight - less bold
+          color: COLORS.primaryText,
+          lineHeight: 1.4,
+          margin: 0,
+          // Softer shadow - subtle outline + gentle glow
+          textShadow: `
+            -1px -1px 0 rgba(0,0,0,0.5),
+            1px -1px 0 rgba(0,0,0,0.5),
+            -1px 1px 0 rgba(0,0,0,0.5),
+            1px 1px 0 rgba(0,0,0,0.5),
+            0 0 8px rgba(0,0,0,0.4),
+            2px 2px 4px rgba(0,0,0,0.3)
+          `,
         }}
       >
-        <p
-          style={{
-            fontFamily: FONTS.subtitle,
-            fontSize,
-            fontWeight: FONTS.subtitleWeight,
-            color: COLORS.primaryText,
-            lineHeight: STYLES.subtitle.lineHeight,
-            margin: 0,
-            textShadow: '0 2px 4px rgba(0, 0, 0, 0.5)',
-          }}
-        >
-          {renderText()}
-        </p>
-      </div>
+        {renderText()}
+      </p>
     </div>
   );
 };

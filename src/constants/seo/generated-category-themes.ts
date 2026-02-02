@@ -12626,7 +12626,7 @@ export const generatedCategoryThemes: WeeklyTheme[] = [
     name: 'Runes Algiz',
     description:
       "A structured deep dive into Runes Algiz from Lunary's Grimoire.",
-    category: 'zodiac',
+    category: 'runes',
     facets: [
       {
         dayIndex: 0,
@@ -12723,7 +12723,7 @@ export const generatedCategoryThemes: WeeklyTheme[] = [
     name: 'Runes Ansuz',
     description:
       "A structured deep dive into Runes Ansuz from Lunary's Grimoire.",
-    category: 'zodiac',
+    category: 'runes',
     facets: [
       {
         dayIndex: 0,
@@ -12820,7 +12820,7 @@ export const generatedCategoryThemes: WeeklyTheme[] = [
     name: 'Runes Berkano',
     description:
       "A structured deep dive into Runes Berkano from Lunary's Grimoire.",
-    category: 'zodiac',
+    category: 'runes',
     facets: [
       {
         dayIndex: 0,
@@ -12917,7 +12917,7 @@ export const generatedCategoryThemes: WeeklyTheme[] = [
     name: 'Runes Dagaz',
     description:
       "A structured deep dive into Runes Dagaz from Lunary's Grimoire.",
-    category: 'zodiac',
+    category: 'runes',
     facets: [
       {
         dayIndex: 0,
@@ -13014,7 +13014,7 @@ export const generatedCategoryThemes: WeeklyTheme[] = [
     name: 'Runes Ehwaz',
     description:
       "A structured deep dive into Runes Ehwaz from Lunary's Grimoire.",
-    category: 'zodiac',
+    category: 'runes',
     facets: [
       {
         dayIndex: 0,
@@ -13111,7 +13111,7 @@ export const generatedCategoryThemes: WeeklyTheme[] = [
     name: 'Runes Eihwaz',
     description:
       "A structured deep dive into Runes Eihwaz from Lunary's Grimoire.",
-    category: 'zodiac',
+    category: 'runes',
     facets: [
       {
         dayIndex: 0,
@@ -13208,7 +13208,7 @@ export const generatedCategoryThemes: WeeklyTheme[] = [
     name: 'Runes Fehu',
     description:
       "A structured deep dive into Runes Fehu from Lunary's Grimoire.",
-    category: 'zodiac',
+    category: 'runes',
     facets: [
       {
         dayIndex: 0,
@@ -13305,7 +13305,7 @@ export const generatedCategoryThemes: WeeklyTheme[] = [
     name: 'Runes Gebo',
     description:
       "A structured deep dive into Runes Gebo from Lunary's Grimoire.",
-    category: 'zodiac',
+    category: 'runes',
     facets: [
       {
         dayIndex: 0,
@@ -13402,7 +13402,7 @@ export const generatedCategoryThemes: WeeklyTheme[] = [
     name: 'Runes Hagalaz',
     description:
       "A structured deep dive into Runes Hagalaz from Lunary's Grimoire.",
-    category: 'zodiac',
+    category: 'runes',
     facets: [
       {
         dayIndex: 0,
@@ -13499,7 +13499,7 @@ export const generatedCategoryThemes: WeeklyTheme[] = [
     name: 'Runes Ingwaz',
     description:
       "A structured deep dive into Runes Ingwaz from Lunary's Grimoire.",
-    category: 'zodiac',
+    category: 'runes',
     facets: [
       {
         dayIndex: 0,
@@ -13596,7 +13596,7 @@ export const generatedCategoryThemes: WeeklyTheme[] = [
     name: 'Runes Isa',
     description:
       "A structured deep dive into Runes Isa from Lunary's Grimoire.",
-    category: 'zodiac',
+    category: 'runes',
     facets: [
       {
         dayIndex: 0,
@@ -13693,7 +13693,7 @@ export const generatedCategoryThemes: WeeklyTheme[] = [
     name: 'Runes Jera',
     description:
       "A structured deep dive into Runes Jera from Lunary's Grimoire.",
-    category: 'zodiac',
+    category: 'runes',
     facets: [
       {
         dayIndex: 0,
@@ -13790,7 +13790,7 @@ export const generatedCategoryThemes: WeeklyTheme[] = [
     name: 'Runes Kenaz',
     description:
       "A structured deep dive into Runes Kenaz from Lunary's Grimoire.",
-    category: 'zodiac',
+    category: 'runes',
     facets: [
       {
         dayIndex: 0,
@@ -13887,7 +13887,7 @@ export const generatedCategoryThemes: WeeklyTheme[] = [
     name: 'Runes Laguz',
     description:
       "A structured deep dive into Runes Laguz from Lunary's Grimoire.",
-    category: 'zodiac',
+    category: 'runes',
     facets: [
       {
         dayIndex: 0,
@@ -13984,7 +13984,7 @@ export const generatedCategoryThemes: WeeklyTheme[] = [
     name: 'Runes Mannaz',
     description:
       "A structured deep dive into Runes Mannaz from Lunary's Grimoire.",
-    category: 'zodiac',
+    category: 'runes',
     facets: [
       {
         dayIndex: 0,
@@ -14081,7 +14081,7 @@ export const generatedCategoryThemes: WeeklyTheme[] = [
     name: 'Runes Nauthiz',
     description:
       "A structured deep dive into Runes Nauthiz from Lunary's Grimoire.",
-    category: 'zodiac',
+    category: 'runes',
     facets: [
       {
         dayIndex: 0,
@@ -14178,7 +14178,7 @@ export const generatedCategoryThemes: WeeklyTheme[] = [
     name: 'Runes Othala',
     description:
       "A structured deep dive into Runes Othala from Lunary's Grimoire.",
-    category: 'zodiac',
+    category: 'runes',
     facets: [
       {
         dayIndex: 0,
@@ -14275,7 +14275,7 @@ export const generatedCategoryThemes: WeeklyTheme[] = [
     name: 'Runes Perthro',
     description:
       "A structured deep dive into Runes Perthro from Lunary's Grimoire.",
-    category: 'zodiac',
+    category: 'runes',
     facets: [
       {
         dayIndex: 0,
@@ -14372,7 +14372,7 @@ export const generatedCategoryThemes: WeeklyTheme[] = [
     name: 'Runes Raidho',
     description:
       "A structured deep dive into Runes Raidho from Lunary's Grimoire.",
-    category: 'zodiac',
+    category: 'runes',
     facets: [
       {
         dayIndex: 0,
@@ -14469,7 +14469,7 @@ export const generatedCategoryThemes: WeeklyTheme[] = [
     name: 'Runes Sowilo',
     description:
       "A structured deep dive into Runes Sowilo from Lunary's Grimoire.",
-    category: 'zodiac',
+    category: 'runes',
     facets: [
       {
         dayIndex: 0,
@@ -14566,7 +14566,7 @@ export const generatedCategoryThemes: WeeklyTheme[] = [
     name: 'Runes Thurisaz',
     description:
       "A structured deep dive into Runes Thurisaz from Lunary's Grimoire.",
-    category: 'zodiac',
+    category: 'runes',
     facets: [
       {
         dayIndex: 0,
@@ -14663,7 +14663,7 @@ export const generatedCategoryThemes: WeeklyTheme[] = [
     name: 'Runes Tiwaz',
     description:
       "A structured deep dive into Runes Tiwaz from Lunary's Grimoire.",
-    category: 'zodiac',
+    category: 'runes',
     facets: [
       {
         dayIndex: 0,
@@ -14760,7 +14760,7 @@ export const generatedCategoryThemes: WeeklyTheme[] = [
     name: 'Runes Uruz',
     description:
       "A structured deep dive into Runes Uruz from Lunary's Grimoire.",
-    category: 'zodiac',
+    category: 'runes',
     facets: [
       {
         dayIndex: 0,
@@ -14857,7 +14857,7 @@ export const generatedCategoryThemes: WeeklyTheme[] = [
     name: 'Runes Wunjo',
     description:
       "A structured deep dive into Runes Wunjo from Lunary's Grimoire.",
-    category: 'zodiac',
+    category: 'runes',
     facets: [
       {
         dayIndex: 0,

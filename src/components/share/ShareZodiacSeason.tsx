@@ -9,6 +9,8 @@ import { SharePreview } from './SharePreview';
 import { ShareActions } from './ShareActions';
 import { ShareFormatSelector } from './ShareFormatSelector';
 import { shareTracking } from '@/lib/analytics/share-tracking';
+import { isInDemoMode } from '@/lib/demo-mode';
+import { OG_IMAGE_VERSION } from '@/lib/share/og-utils';
 
 interface ZodiacSeasonData {
   sign: string;
@@ -381,7 +383,7 @@ export function ShareZodiacSeason({
 
       const ogImageUrl = `/api/og/share/zodiac-season?shareId=${encodeURIComponent(
         currentShareId,
-      )}&format=${format}`;
+      )}&format=${format}&v=${OG_IMAGE_VERSION}`;
 
       const imageResponse = await fetch(ogImageUrl);
       if (!imageResponse.ok) throw new Error('Failed to generate image');
@@ -399,6 +401,14 @@ export function ShareZodiacSeason({
   }, [seasonData, shareRecord, format, user?.name, setLoading, setError]);
 
   const handleOpen = async () => {
+    if (isInDemoMode()) {
+      window.dispatchEvent(
+        new CustomEvent('demo-action-blocked', {
+          detail: { action: 'Sharing images' },
+        }),
+      );
+      return;
+    }
     openModal();
     shareTracking.shareInitiated(user?.id, 'zodiac-season');
     if (!imageBlob) {

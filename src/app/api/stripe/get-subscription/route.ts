@@ -4,6 +4,14 @@ import Stripe from 'stripe';
 
 export const revalidate = 300;
 
+function sanitizeForLog(value: unknown): string {
+  if (typeof value !== 'string') {
+    return String(value);
+  }
+  // Remove newline and carriage return characters to prevent log injection
+  return value.replace(/[\r\n]/g, '');
+}
+
 function getStripe(secretKey?: string) {
   const key = secretKey || process.env.STRIPE_SECRET_KEY;
   if (!key) return null;
@@ -160,7 +168,7 @@ export async function POST(request: NextRequest) {
         if (orphanedResult.rows.length > 0 && userId) {
           const orphaned = orphanedResult.rows[0];
           console.log(
-            `🔄 Auto-recovering orphaned subscription ${orphaned.stripe_subscription_id} for user ${userId}`,
+            `🔄 Auto-recovering orphaned subscription ${sanitizeForLog(orphaned.stripe_subscription_id)} for user ${sanitizeForLog(userId)}`,
           );
 
           const stripe = getStripe();
@@ -201,7 +209,7 @@ export async function POST(request: NextRequest) {
             `;
 
             console.log(
-              `✅ Successfully auto-recovered subscription for user ${userId}`,
+              `✅ Successfully auto-recovered subscription for user ${sanitizeForLog(userId)}`,
             );
 
             // Return the recovered subscription
