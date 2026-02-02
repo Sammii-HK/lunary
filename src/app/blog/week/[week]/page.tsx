@@ -10,14 +10,13 @@ import {
   TrendingUp,
   Moon,
   Sparkles,
-  Gem,
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { generateWeeklyContent } from '../../../../../utils/blog/weeklyContentGenerator';
 import { SocialShareButtons } from '@/components/SocialShareButtons';
 import { CrossPlatformCTA } from '@/components/CrossPlatformCTA';
-import { QuickStats, AspectNatureBadge } from '@/components/blog';
+import { QuickStats, AspectNatureBadge, CrystalCards } from '@/components/blog';
 import { getPlanetSymbol, getAspectSymbol } from '@/constants/symbols';
 
 interface BlogPostPageProps {
@@ -714,64 +713,7 @@ export default async function BlogPostPage({
           )}
 
           {displayedCrystals.length > 0 && (
-            <section className='space-y-6'>
-              <h2 className='text-3xl font-bold flex items-center gap-2'>
-                <Gem className='h-8 w-8' />
-                Weekly Crystal Companions
-              </h2>
-              <div className='grid gap-4 md:grid-cols-2 lg:grid-cols-3'>
-                {displayedCrystals.map((crystal: any, index: number) => {
-                  const crystalDate =
-                    crystal.date instanceof Date
-                      ? crystal.date
-                      : new Date(crystal.date);
-                  return (
-                    <Card
-                      key={index}
-                      className='border border-lunary-primary-700'
-                    >
-                      <CardHeader>
-                        <CardTitle className='text-lg text-lunary-primary-200'>
-                          {crystal.crystal}
-                        </CardTitle>
-                        <p className='text-sm text-zinc-400'>
-                          {crystalDate.toLocaleDateString('en-US', {
-                            weekday: 'long',
-                            month: 'long',
-                            day: 'numeric',
-                          })}
-                        </p>
-                      </CardHeader>
-                      <CardContent className='space-y-3 text-sm text-zinc-300'>
-                        <p>{crystal.reason}</p>
-                        {crystal.usage && (
-                          <p className='text-xs text-zinc-400'>
-                            {crystal.usage}
-                          </p>
-                        )}
-                        <div className='flex flex-wrap gap-2'>
-                          {crystal.chakra && (
-                            <Badge variant='outline' className='text-xs'>
-                              {crystal.chakra === 'All Chakras' ||
-                              crystal.chakra === 'Alls Chakra'
-                                ? 'All Chakras'
-                                : crystal.chakra.endsWith(' Chakra')
-                                  ? crystal.chakra
-                                  : `${crystal.chakra} Chakra`}
-                            </Badge>
-                          )}
-                          {crystal.intention && (
-                            <Badge variant='secondary' className='text-xs'>
-                              {crystal.intention}
-                            </Badge>
-                          )}
-                        </div>
-                      </CardContent>
-                    </Card>
-                  );
-                })}
-              </div>
-            </section>
+            <CrystalCards crystals={displayedCrystals} />
           )}
 
           {displayedAspects.length > 0 && (
