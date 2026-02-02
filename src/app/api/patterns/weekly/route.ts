@@ -9,7 +9,7 @@ export async function GET(request: NextRequest) {
     // Generate 7-day tarot season snapshot
     const snapshot = await generateTarotSeasonSnapshot(user.id, 7);
 
-    if (!snapshot) {
+    if (!snapshot || !snapshot.data) {
       return NextResponse.json(
         { pattern: null, message: 'Not enough readings (need 3+)' },
         { status: 200 },
@@ -18,10 +18,10 @@ export async function GET(request: NextRequest) {
 
     // Transform snapshot data to match ShareWeeklyPattern interface
     const pattern = {
-      season: snapshot.data.season,
-      suitDistribution: snapshot.data.suitDistribution,
-      frequentCards: snapshot.data.frequentCards,
-      period: snapshot.data.period,
+      season: snapshot.data.season || null,
+      suitDistribution: snapshot.data.suitDistribution || [],
+      frequentCards: snapshot.data.frequentCards || [],
+      period: snapshot.data.period || null,
       readingCount: snapshot.data.totalReadings || 0,
     };
 

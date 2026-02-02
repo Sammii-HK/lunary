@@ -8,6 +8,9 @@ export const metadata: Metadata = {
   description:
     'Read the terms and conditions governing your use of Lunary, the astronomy-based astrology platform with optional AI chat.',
   robots: 'index, follow',
+  alternates: {
+    canonical: 'https://lunary.app/terms',
+  },
 };
 
 export default function TermsOfServicePage() {

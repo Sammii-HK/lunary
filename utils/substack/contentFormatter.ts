@@ -29,11 +29,129 @@ export function generateFreeSubstackPost(
   };
 }
 
+// Generate the most dramatic hook for the week
+function generateDramaticHook(data: WeeklyCosmicData): string {
+  // Find the most significant event to lead with
+  const majorMoon = data.moonPhases.find(
+    (m) => m.phase.includes('Full') || m.phase.includes('New'),
+  );
+  const majorRetrograde = data.retrogradeChanges.find(
+    (r) => r.action === 'begins',
+  );
+  const majorIngress = data.planetaryHighlights.find(
+    (h) => h.significance === 'extraordinary' || h.significance === 'high',
+  );
+
+  if (majorMoon?.phase.includes('Full')) {
+    return `✨ **The ${majorMoon.phase} in ${majorMoon.sign} illuminates the sky this week** — a powerful moment for release, clarity, and manifestation. But that's just the beginning...`;
+  }
+  if (majorMoon?.phase.includes('New')) {
+    return `🌑 **A potent ${majorMoon.phase} in ${majorMoon.sign} marks the beginning of a new cycle** — the universe is handing you a blank canvas. Here's how to use it...`;
+  }
+  if (majorRetrograde) {
+    return `⚠️ **${majorRetrograde.planet} stations retrograde this week** — before you panic, here's what this actually means for you and how to navigate it gracefully...`;
+  }
+  if (majorIngress) {
+    return `🔥 **Major cosmic shift incoming: ${majorIngress.planet} enters ${majorIngress.details?.toSign || 'a new sign'}** — expect the energy to change dramatically. Here's your guide...`;
+  }
+
+  return `🌟 **This week brings ${data.planetaryHighlights.length + data.majorAspects.length} significant cosmic events** — here's everything you need to navigate them with intention...`;
+}
+
+// Generate week at a glance table
+function generateWeekAtGlanceTable(data: WeeklyCosmicData): string {
+  const dayAbbrevs = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+  const rows: string[] = [];
+
+  // Get day by day events
+  const currentDate = new Date(data.weekStart);
+  for (let i = 0; i < 7; i++) {
+    const dayDate = new Date(currentDate);
+    dayDate.setDate(dayDate.getDate() + i);
+    const dayStr = dayDate.toDateString();
+
+    const dayEvents: string[] = [];
+
+    // Check highlights
+    data.planetaryHighlights.forEach((h) => {
+      const eventDate = h.date instanceof Date ? h.date : new Date(h.date);
+      if (eventDate.toDateString() === dayStr) {
+        dayEvents.push(
+          `${h.planet} ${h.event === 'enters-sign' ? 'enters ' + (h.details?.toSign || '') : h.event.replace('-', ' ')}`,
+        );
+      }
+    });
+
+    // Check moon phases
+    data.moonPhases.forEach((m) => {
+      const eventDate = m.date instanceof Date ? m.date : new Date(m.date);
+      if (eventDate.toDateString() === dayStr) {
+        dayEvents.push(`${m.phase} in ${m.sign}`);
+      }
+    });
+
+    // Check retrogrades
+    data.retrogradeChanges.forEach((r) => {
+      const eventDate = r.date instanceof Date ? r.date : new Date(r.date);
+      if (eventDate.toDateString() === dayStr) {
+        dayEvents.push(
+          `${r.planet} ${r.action === 'begins' ? 'Rx' : 'Direct'}`,
+        );
+      }
+    });
+
+    const dayName = dayAbbrevs[dayDate.getDay()];
+    const dateNum = dayDate.getDate();
+    const event = dayEvents.length > 0 ? dayEvents[0] : '—';
+    const energy =
+      dayEvents.length > 1 ? '🔥' : dayEvents.length === 1 ? '✨' : '🌿';
+
+    rows.push(`| ${dayName} ${dateNum} | ${event} | ${energy} |`);
+  }
+
+  return `## 📅 This Week at a Glance
+
+| Day | Key Event | Energy |
+|-----|-----------|--------|
+${rows.join('\n')}
+
+`;
+}
+
+// Generate weekly affirmation
+function generateWeeklyAffirmationForSubstack(data: WeeklyCosmicData): string {
+  const majorMoon = data.moonPhases.find(
+    (m) => m.phase.includes('Full') || m.phase.includes('New'),
+  );
+
+  if (majorMoon?.phase.includes('Full')) {
+    return 'I release what no longer serves me and welcome the clarity this illumination brings.';
+  }
+  if (majorMoon?.phase.includes('New')) {
+    return 'I plant seeds of intention with trust, knowing they will blossom in divine timing.';
+  }
+  if (data.retrogradeChanges.length > 0) {
+    return 'I embrace this period of reflection and trust that revisiting the past leads to wiser choices ahead.';
+  }
+
+  const generalAffirmations = [
+    'I move with the cosmic currents, trusting my inner wisdom to guide each step.',
+    'I am aligned with the universe, open to the opportunities this week brings.',
+    'I embrace change as a catalyst for growth and welcome new beginnings.',
+  ];
+
+  return generalAffirmations[data.weekNumber % generalAffirmations.length];
+}
+
 function generateFreeContentFromWeeklyData(
   data: WeeklyCosmicData,
   appUrl: string,
 ): string {
   const weekRange = `${data.weekStart.toLocaleDateString('en-US', { month: 'long', day: 'numeric' })} - ${data.weekEnd.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}`;
+
+  const dramaticHook = generateDramaticHook(data);
+  const weekTable = generateWeekAtGlanceTable(data);
+  const affirmation = generateWeeklyAffirmationForSubstack(data);
 
   return `
 # ${data.title}
@@ -41,6 +159,22 @@ function generateFreeContentFromWeeklyData(
 *${data.subtitle}*
 
 **Week of ${weekRange}**
+
+---
+
+${dramaticHook}
+
+---
+
+${weekTable}
+
+> **✨ Affirmation of the Week**
+>
+> *"${affirmation}"*
+
+---
+
+## The Big Picture
 
 ${data.summary}
 
@@ -94,22 +228,300 @@ ${Object.entries(data.bestDaysFor)
 
 ---
 
+## 🔮 Want More? Here's What's in the Full Forecast...
+
+**Paid subscribers this week get:**
+
+- 📅 **Complete Daily Breakdowns** — Detailed guidance for all 7 days
+- 💎 **All 7 Crystal Companions** — With specific usage rituals and affirmations
+- 🕯️ **Weekly Ritual Guide** — Step-by-step practices aligned with this week's energy
+- ⏰ **Void of Course Moon Times** — Know when to pause and when to act
+- 🔮 **Extended Aspect Analysis** — Deep dive into what these transits mean for you
+- ✨ **Journal Prompts** — Reflection questions for each major event
+
+*[Upgrade to paid for $5/month →](https://lunary.substack.com/subscribe)*
+
+---
+
+## 💬 Your Turn!
+
+**Which cosmic event are you most curious about this week?**
+
+Drop a comment below — I read every single one and love hearing how these energies are showing up in your life! 👇
+
 ---
 
 ### 🌕 Get Your Personalized Cosmic Profile
 
-**Want your personalized daily horoscope and full week ahead?**
+**Ready for guidance tailored to YOUR birth chart?**
 
 🌕 **[Open Lunary App →](${appUrl}?utm_source=substack&utm_medium=free_post&utm_campaign=cross_platform)**
 
-Get complete birth chart analysis, personalized daily horoscopes, and interactive cosmic profile - just £4.99/month.
+- Complete birth chart analysis
+- Personalized daily horoscopes
+- How this week's transits affect YOUR signs
+- Interactive cosmic profile
 
-*Upgrade from newsletter to full cosmic experience.*
+*Just £4.99/month — Upgrade from newsletter to full cosmic experience.*
 
 ---
 
-**📧 Subscribe to our Substack** for weekly cosmic insights: [lunary.substack.com](https://lunary.substack.com?utm_source=app&utm_medium=cta&utm_campaign=cross_platform)
+**📧 Not subscribed yet?** Get free weekly cosmic insights: [lunary.substack.com](https://lunary.substack.com?utm_source=app&utm_medium=cta&utm_campaign=cross_platform)
+
+*See you among the stars! ✨*
 `.trim();
+}
+
+// Helper functions for paid content
+
+// Select tarot card based on weekly energy
+function selectWeeklyTarotCard(data: WeeklyCosmicData): {
+  name: string;
+  reason: string;
+  meaning: string;
+  keywords: string[];
+  affirmation: string;
+  ritual: string;
+  journalPrompts: string[];
+} {
+  // Planet to card mappings
+  const planetCards: Record<
+    string,
+    { name: string; meaning: string; keywords: string[]; affirmation: string }
+  > = {
+    Sun: {
+      name: 'The Sun',
+      meaning: 'Joy, success, and vitality illuminate your path this week.',
+      keywords: ['joy', 'success', 'vitality', 'clarity'],
+      affirmation: 'I radiate positivity and attract abundance.',
+    },
+    Moon: {
+      name: 'The High Priestess',
+      meaning: 'Trust your intuition and look beneath the surface.',
+      keywords: ['intuition', 'mystery', 'inner wisdom'],
+      affirmation: 'I trust my inner knowing.',
+    },
+    Mercury: {
+      name: 'The Magician',
+      meaning: 'You have all the tools needed to manifest your desires.',
+      keywords: ['manifestation', 'skill', 'action'],
+      affirmation: 'I have the power to create my reality.',
+    },
+    Venus: {
+      name: 'The Empress',
+      meaning: 'Abundance, creativity, and nurturing energy flow freely.',
+      keywords: ['abundance', 'creativity', 'love'],
+      affirmation: 'I nurture abundance in all areas of my life.',
+    },
+    Mars: {
+      name: 'The Chariot',
+      meaning: 'Focused determination carries you toward victory.',
+      keywords: ['determination', 'willpower', 'triumph'],
+      affirmation: 'I move forward with confidence and purpose.',
+    },
+    Jupiter: {
+      name: 'Wheel of Fortune',
+      meaning: 'Luck and expansion are on your side this week.',
+      keywords: ['luck', 'cycles', 'expansion'],
+      affirmation: 'I embrace the cycles of fortune.',
+    },
+    Saturn: {
+      name: 'The World',
+      meaning: 'Completion and accomplishment are within reach.',
+      keywords: ['completion', 'integration', 'achievement'],
+      affirmation: 'I celebrate my accomplishments.',
+    },
+    Uranus: {
+      name: 'The Tower',
+      meaning: 'Sudden change clears the way for authentic transformation.',
+      keywords: ['change', 'revelation', 'awakening'],
+      affirmation: 'I embrace transformation.',
+    },
+    Neptune: {
+      name: 'The Moon',
+      meaning: 'Navigate through illusion to find deeper truths.',
+      keywords: ['dreams', 'intuition', 'subconscious'],
+      affirmation: 'I trust my path even in uncertainty.',
+    },
+    Pluto: {
+      name: 'Death',
+      meaning: 'Transformation and rebirth create space for new beginnings.',
+      keywords: ['transformation', 'endings', 'rebirth'],
+      affirmation: 'I release what no longer serves me.',
+    },
+  };
+
+  const dominantPlanet =
+    data.planetaryHighlights[0]?.planet ||
+    data.retrogradeChanges[0]?.planet ||
+    'Sun';
+  const card = planetCards[dominantPlanet] || planetCards.Sun;
+
+  return {
+    ...card,
+    reason: `Selected for ${dominantPlanet}'s influence this week`,
+    ritual: `**Morning Meditation:** Spend 5 minutes each morning visualizing ${card.name}. Imagine its energy flowing through you, guiding your day.\n\n**Card Placement:** Place this card (or an image of it) on your altar or workspace as a weekly touchstone.\n\n**Evening Reflection:** Before bed, ask yourself: "How did ${card.name}'s energy show up for me today?"`,
+    journalPrompts: [
+      `What does ${card.name} mean to you personally at this time in your life?`,
+      `Where in your life are you experiencing the themes of ${card.keywords.join(' and ')}?`,
+      `What would it look like to fully embody ${card.name}'s energy this week?`,
+    ],
+  };
+}
+
+// Calculate weekly numerology
+function calculateWeeklyNumerology(weekStart: Date): {
+  number: number;
+  name: string;
+  theme: string;
+  energy: string;
+  bestFor: string[];
+  avoid: string[];
+} {
+  const day = weekStart.getDate();
+  const month = weekStart.getMonth() + 1;
+  const year = weekStart.getFullYear();
+
+  let sum = day + month;
+  const yearStr = year.toString();
+  for (const digit of yearStr) {
+    sum += parseInt(digit, 10);
+  }
+  while (sum > 9) {
+    let newSum = 0;
+    const sumStr = sum.toString();
+    for (const digit of sumStr) {
+      newSum += parseInt(digit, 10);
+    }
+    sum = newSum;
+  }
+  const number = sum || 9;
+
+  const meanings: Record<
+    number,
+    {
+      name: string;
+      theme: string;
+      energy: string;
+      bestFor: string[];
+      avoid: string[];
+    }
+  > = {
+    1: {
+      name: 'The Pioneer',
+      theme: 'New Beginnings',
+      energy: 'Fresh starts and bold initiatives are supported.',
+      bestFor: ['Starting projects', 'Leadership', 'Independence'],
+      avoid: ['Following the crowd', 'Procrastination'],
+    },
+    2: {
+      name: 'The Diplomat',
+      theme: 'Partnership',
+      energy: 'Cooperation and balance are emphasized.',
+      bestFor: ['Relationships', 'Negotiations', 'Patience'],
+      avoid: ['Going it alone', 'Rushing decisions'],
+    },
+    3: {
+      name: 'The Creator',
+      theme: 'Expression',
+      energy: 'Creativity and communication flow freely.',
+      bestFor: ['Creative projects', 'Social events', 'Self-expression'],
+      avoid: ['Suppressing feelings', 'Isolation'],
+    },
+    4: {
+      name: 'The Builder',
+      theme: 'Foundation',
+      energy: 'Building structures and organization are favored.',
+      bestFor: ['Planning', 'Hard work', 'Organization'],
+      avoid: ['Cutting corners', 'Rigidity'],
+    },
+    5: {
+      name: 'The Adventurer',
+      theme: 'Change',
+      energy: 'Embrace flexibility and new experiences.',
+      bestFor: ['Travel', 'Adventure', 'Learning'],
+      avoid: ['Resisting change', 'Overindulgence'],
+    },
+    6: {
+      name: 'The Nurturer',
+      theme: 'Love',
+      energy: 'Home, family, and nurturing connections shine.',
+      bestFor: ['Family time', 'Self-care', 'Healing'],
+      avoid: ['Martyrdom', 'Neglecting yourself'],
+    },
+    7: {
+      name: 'The Seeker',
+      theme: 'Wisdom',
+      energy: 'Introspection and spiritual growth are supported.',
+      bestFor: ['Meditation', 'Study', 'Solitude'],
+      avoid: ['Overthinking', 'Extreme isolation'],
+    },
+    8: {
+      name: 'The Powerhouse',
+      theme: 'Abundance',
+      energy: 'Material success and achievement are highlighted.',
+      bestFor: ['Business', 'Finances', 'Career moves'],
+      avoid: ['Greed', 'Power struggles'],
+    },
+    9: {
+      name: 'The Humanitarian',
+      theme: 'Completion',
+      energy: 'Endings and service to others are emphasized.',
+      bestFor: ['Finishing projects', 'Charity', 'Release'],
+      avoid: ['Clinging to the past', 'Bitterness'],
+    },
+  };
+
+  return { number, ...meanings[number] };
+}
+
+// Generate VOC Moon schedule for Substack
+function generateVOCSchedule(data: WeeklyCosmicData): string {
+  const voidPeriods = data.magicalTiming?.voidOfCourseMoon || [];
+  if (voidPeriods.length === 0) return '';
+
+  const formatTime = (date: Date) =>
+    date.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+  const formatDay = (date: Date) =>
+    date.toLocaleDateString('en-US', {
+      weekday: 'short',
+      month: 'short',
+      day: 'numeric',
+    });
+
+  let content = `## 🌙 Void of Course Moon Schedule
+
+*During these times, avoid starting new projects or making major decisions.*
+
+| Day | Time | Duration |
+|-----|------|----------|
+`;
+
+  voidPeriods.forEach((period) => {
+    const start =
+      period.start instanceof Date ? period.start : new Date(period.start);
+    const end = period.end instanceof Date ? period.end : new Date(period.end);
+    const diffHours = Math.round(
+      (end.getTime() - start.getTime()) / (1000 * 60 * 60),
+    );
+    content += `| ${formatDay(start)} | ${formatTime(start)} - ${formatTime(end)} | ${diffHours}h |\n`;
+  });
+
+  content += `
+**What to do during VOC Moon:**
+- Complete existing projects
+- Rest and reflect
+- Routine maintenance
+- Meditation
+
+**What to avoid:**
+- Starting new ventures
+- Important meetings
+- Signing contracts
+- Major purchases
+`;
+
+  return content;
 }
 
 export function generatePaidSubstackPost(
@@ -126,6 +538,10 @@ export function generatePaidSubstackPost(
   const ritualGuides = generateWeeklyRitualGuides(weeklyData);
   const astronomicalData = formatAstronomicalData(weeklyData);
 
+  const tarotCard = selectWeeklyTarotCard(weeklyData);
+  const numerology = calculateWeeklyNumerology(weeklyData.weekStart);
+  const vocSchedule = generateVOCSchedule(weeklyData);
+
   const content = `
 # ${weeklyData.title}
 
@@ -134,6 +550,39 @@ export function generatePaidSubstackPost(
 **Week of ${weekRange}**
 
 ${extendedSummary}
+
+---
+
+## 🃏 Tarot Card of the Week: ${tarotCard.name}
+
+*${tarotCard.reason}*
+
+**Core Message:** ${tarotCard.meaning}
+
+**Keywords:** ${tarotCard.keywords.join(' • ')}
+
+> **Affirmation:** "${tarotCard.affirmation}"
+
+### Working With ${tarotCard.name} This Week
+
+${tarotCard.ritual}
+
+**Journal Prompts:**
+${tarotCard.journalPrompts.map((p: string) => `- ${p}`).join('\n')}
+
+---
+
+## 🔢 Weekly Numerology: ${numerology.number} - ${numerology.name}
+
+*${numerology.theme}*
+
+${numerology.energy}
+
+**Best For:** ${numerology.bestFor.join(', ')}
+
+**Avoid:** ${numerology.avoid.join(', ')}
+
+---
 
 ${planetaryAnalysis}
 
@@ -148,6 +597,8 @@ ${generateFullCrystalGuide(weeklyData)}
 ## 🔮 Spell Recommendations
 
 ${generateSpellRecommendations(weeklyData)}
+
+${vocSchedule}
 
 ${astronomicalData}
 

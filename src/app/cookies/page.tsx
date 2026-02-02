@@ -8,6 +8,9 @@ export const metadata: Metadata = {
   description:
     'Learn about how Lunary uses cookies and similar technologies to provide and improve our service.',
   robots: 'index, follow',
+  alternates: {
+    canonical: 'https://lunary.app/cookies',
+  },
 };
 
 export default function CookiePolicyPage() {

@@ -10,13 +10,23 @@ import {
   TrendingUp,
   Moon,
   Sparkles,
-  Gem,
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { generateWeeklyContent } from '../../../../../utils/blog/weeklyContentGenerator';
 import { SocialShareButtons } from '@/components/SocialShareButtons';
 import { CrossPlatformCTA } from '@/components/CrossPlatformCTA';
+import {
+  QuickStats,
+  AspectNatureBadge,
+  CrystalCards,
+  WeekTimeline,
+  WeeklyAffirmation,
+  TarotOfWeek,
+  WeeklyNumerology,
+  VOCMoonSchedule,
+} from '@/components/blog';
+import { getPlanetSymbol, getAspectSymbol } from '@/constants/symbols';
 
 interface BlogPostPageProps {
   params: Promise<{ week: string }>;
@@ -181,6 +191,119 @@ function getAspectDescriptionFallback(
   const keyword = aspectKeywords[aspectType] || 'cosmic influence';
 
   return `This ${aspectType} between ${planetA} and ${planetB} highlights themes of ${keyword}. Notice where this shows up in your conversations and choices.`;
+}
+
+// Generate a weekly affirmation based on the dominant energy
+function generateWeeklyAffirmation(
+  moonPhases: any[],
+  highlights: any[],
+  retrogrades: any[],
+): string {
+  // Find the major moon phase
+  const majorMoon = moonPhases.find(
+    (m) => m.phase?.includes('Full') || m.phase?.includes('New'),
+  );
+
+  // Affirmations by moon phase
+  const moonAffirmations: Record<string, string> = {
+    'Full Moon':
+      'I release what no longer serves me and welcome the clarity this illumination brings.',
+    'New Moon':
+      'I plant seeds of intention with trust, knowing they will blossom in divine timing.',
+  };
+
+  if (majorMoon?.phase) {
+    for (const [phase, affirmation] of Object.entries(moonAffirmations)) {
+      if (majorMoon.phase.includes(phase)) {
+        return affirmation;
+      }
+    }
+  }
+
+  // Retrograde affirmation
+  if (retrogrades.length > 0) {
+    return 'I embrace this period of reflection and trust that revisiting the past leads to wiser choices ahead.';
+  }
+
+  // Default affirmations based on highlights
+  const generalAffirmations = [
+    'I move with the cosmic currents, trusting my inner wisdom to guide each step.',
+    'I am aligned with the universe, open to the opportunities this week brings.',
+    'I embrace change as a catalyst for growth and welcome new beginnings.',
+  ];
+
+  // Pick based on week number for consistency
+  const weekBasedIndex = highlights.length % generalAffirmations.length;
+  return generalAffirmations[weekBasedIndex];
+}
+
+// Build timeline events from blog data
+interface TimelineEvent {
+  date: Date;
+  type: 'ingress' | 'retrograde' | 'direct' | 'moon-phase' | 'aspect';
+  title: string;
+  planet?: string;
+  sign?: string;
+  phase?: string;
+}
+
+function buildTimelineEvents(
+  highlights: any[],
+  moonPhases: any[],
+  retrogrades: any[],
+  aspects: any[],
+): TimelineEvent[] {
+  const events: TimelineEvent[] = [];
+
+  // Add planetary highlights (ingresses)
+  highlights.forEach((h) => {
+    const eventDate = h.date instanceof Date ? h.date : new Date(h.date);
+    if (h.event === 'enters-sign' && h.details?.toSign) {
+      events.push({
+        date: eventDate,
+        type: 'ingress',
+        title: `${h.planet} enters ${h.details.toSign}`,
+        planet: h.planet,
+        sign: h.details.toSign,
+      });
+    }
+  });
+
+  // Add moon phases
+  moonPhases.forEach((m) => {
+    const eventDate = m.date instanceof Date ? m.date : new Date(m.date);
+    events.push({
+      date: eventDate,
+      type: 'moon-phase',
+      title: m.phase,
+      phase: m.phase,
+      sign: m.sign,
+    });
+  });
+
+  // Add retrogrades
+  retrogrades.forEach((r) => {
+    const eventDate = r.date instanceof Date ? r.date : new Date(r.date);
+    events.push({
+      date: eventDate,
+      type: r.type === 'station-direct' ? 'direct' : 'retrograde',
+      title: `${r.planet} ${r.type === 'station-direct' ? 'stations direct' : 'goes retrograde'}`,
+      planet: r.planet,
+    });
+  });
+
+  // Add major aspects (limit to avoid clutter)
+  aspects.slice(0, 3).forEach((a) => {
+    const eventDate = a.date instanceof Date ? a.date : new Date(a.date);
+    events.push({
+      date: eventDate,
+      type: 'aspect',
+      title: `${a.planetA} ${a.aspect} ${a.planetB}`,
+      planet: a.planetA,
+    });
+  });
+
+  return events;
 }
 
 async function getBlogData(weekInfo: WeekInfo) {
@@ -491,30 +614,79 @@ export default async function BlogPostPage({
             <p className='text-xl text-muted-foreground italic'>
               {blogData.subtitle || ''}
             </p>
-
-            <div className='flex flex-wrap gap-4 text-sm text-muted-foreground'>
-              <span className='flex items-center gap-1'>
-                <Star className='h-4 w-4' />
-                {displayedHighlights.length} planetary events
-              </span>
-              <span className='flex items-center gap-1'>
-                <TrendingUp className='h-4 w-4' />
-                {displayedRetrogrades.length} retrograde changes
-              </span>
-              <span className='flex items-center gap-1'>
-                <Moon className='h-4 w-4' />
-                {displayedMoonPhases.length} moon phases
-              </span>
-              <span className='flex items-center gap-1'>
-                <Sparkles className='h-4 w-4' />
-                {displayedAspects.length} major aspects
-              </span>
-            </div>
           </header>
+
+          {/* Quick Stats Summary */}
+          <QuickStats
+            retrogradeCount={displayedRetrogrades.length}
+            retrogradePlanets={displayedRetrogrades.map((r: any) => r.planet)}
+            majorMoonPhase={
+              displayedMoonPhases.find(
+                (m: any) =>
+                  m.phase?.includes('Full') || m.phase?.includes('New'),
+              )
+                ? {
+                    phase:
+                      displayedMoonPhases.find(
+                        (m: any) =>
+                          m.phase?.includes('Full') || m.phase?.includes('New'),
+                      )?.phase || '',
+                    sign:
+                      displayedMoonPhases.find(
+                        (m: any) =>
+                          m.phase?.includes('Full') || m.phase?.includes('New'),
+                      )?.sign || '',
+                  }
+                : undefined
+            }
+            planetaryHighlightCount={displayedHighlights.length}
+            aspectCount={displayedAspects.length}
+          />
+
+          {/* Week Timeline */}
+          {(() => {
+            const timelineEvents = buildTimelineEvents(
+              displayedHighlights,
+              displayedMoonPhases,
+              displayedRetrogrades,
+              displayedAspects,
+            );
+            return timelineEvents.length > 0 ? (
+              <WeekTimeline
+                weekStart={weekStart}
+                weekEnd={weekEnd}
+                events={timelineEvents}
+              />
+            ) : null;
+          })()}
 
           <div className='prose prose-invert max-w-none'>
             <p className='text-lg leading-relaxed'>{summaryText}</p>
           </div>
+
+          {/* Weekly Affirmation */}
+          <WeeklyAffirmation
+            affirmation={generateWeeklyAffirmation(
+              displayedMoonPhases,
+              displayedHighlights,
+              displayedRetrogrades,
+            )}
+            weekTitle={blogData.title}
+          />
+
+          {/* Tarot Card of the Week */}
+          <TarotOfWeek
+            weekNumber={blogData.weekNumber || 1}
+            year={blogData.year || new Date().getFullYear()}
+            dominantPlanet={
+              displayedHighlights[0]?.planet || displayedRetrogrades[0]?.planet
+            }
+            variant='full'
+            weekTitle={blogData.title}
+          />
+
+          {/* Weekly Numerology */}
+          <WeeklyNumerology weekStart={weekStart} variant='full' />
 
           {displayedHighlights.length > 0 && (
             <section className='space-y-6'>
@@ -704,64 +876,15 @@ export default async function BlogPostPage({
           )}
 
           {displayedCrystals.length > 0 && (
-            <section className='space-y-6'>
-              <h2 className='text-3xl font-bold flex items-center gap-2'>
-                <Gem className='h-8 w-8' />
-                Weekly Crystal Companions
-              </h2>
-              <div className='grid gap-4 md:grid-cols-2 lg:grid-cols-3'>
-                {displayedCrystals.map((crystal: any, index: number) => {
-                  const crystalDate =
-                    crystal.date instanceof Date
-                      ? crystal.date
-                      : new Date(crystal.date);
-                  return (
-                    <Card
-                      key={index}
-                      className='border border-lunary-primary-700'
-                    >
-                      <CardHeader>
-                        <CardTitle className='text-lg text-lunary-primary-200'>
-                          {crystal.crystal}
-                        </CardTitle>
-                        <p className='text-sm text-zinc-400'>
-                          {crystalDate.toLocaleDateString('en-US', {
-                            weekday: 'long',
-                            month: 'long',
-                            day: 'numeric',
-                          })}
-                        </p>
-                      </CardHeader>
-                      <CardContent className='space-y-3 text-sm text-zinc-300'>
-                        <p>{crystal.reason}</p>
-                        {crystal.usage && (
-                          <p className='text-xs text-zinc-400'>
-                            {crystal.usage}
-                          </p>
-                        )}
-                        <div className='flex flex-wrap gap-2'>
-                          {crystal.chakra && (
-                            <Badge variant='outline' className='text-xs'>
-                              {crystal.chakra === 'All Chakras' ||
-                              crystal.chakra === 'Alls Chakra'
-                                ? 'All Chakras'
-                                : crystal.chakra.endsWith(' Chakra')
-                                  ? crystal.chakra
-                                  : `${crystal.chakra} Chakra`}
-                            </Badge>
-                          )}
-                          {crystal.intention && (
-                            <Badge variant='secondary' className='text-xs'>
-                              {crystal.intention}
-                            </Badge>
-                          )}
-                        </div>
-                      </CardContent>
-                    </Card>
-                  );
-                })}
-              </div>
-            </section>
+            <CrystalCards crystals={displayedCrystals} />
+          )}
+
+          {/* Void of Course Moon Schedule */}
+          {blogData.magicalTiming?.voidOfCourseMoon?.length > 0 && (
+            <VOCMoonSchedule
+              voidPeriods={blogData.magicalTiming.voidOfCourseMoon}
+              variant='full'
+            />
           )}
 
           {displayedAspects.length > 0 && (
@@ -783,11 +906,20 @@ export default async function BlogPostPage({
                       className={`border ${borderColor} ${bgColor}`}
                     >
                       <CardHeader>
-                        <CardTitle className='text-xl'>
-                          <span className={planetAColor}>{aspect.planetA}</span>{' '}
-                          <span className='text-zinc-400'>{aspect.aspect}</span>{' '}
-                          <span className={planetBColor}>{aspect.planetB}</span>
-                        </CardTitle>
+                        <div className='flex items-start justify-between'>
+                          <CardTitle className='text-xl'>
+                            <span className={planetAColor}>
+                              {getPlanetSymbol(aspect.planetA)} {aspect.planetA}
+                            </span>{' '}
+                            <span className='text-zinc-400'>
+                              {getAspectSymbol(aspect.aspect)}
+                            </span>{' '}
+                            <span className={planetBColor}>
+                              {getPlanetSymbol(aspect.planetB)} {aspect.planetB}
+                            </span>
+                          </CardTitle>
+                          <AspectNatureBadge aspect={aspect.aspect} />
+                        </div>
                       </CardHeader>
                       <CardContent>
                         <p className='text-sm text-muted-foreground mb-2'>
@@ -1264,8 +1396,8 @@ export async function generateMetadata({
   ];
 
   return {
-    title: `${blogData.title} | Weekly Astrology & Planetary Transits`,
-    description: `${blogData.subtitle}. Week of ${weekRange}. Key planetary transits, moon phases, and the best days for love, career, money, and healing.`,
+    title: `${blogData.title} (${weekRange}) | Free Weekly Forecast`,
+    description: `What's cosmically in store ${weekRange}? ${blogData.subtitle} Discover the best days for love, career & big decisions this week.`,
     keywords: [
       'weekly astrology forecast',
       'astrology timing',
@@ -1285,8 +1417,8 @@ export async function generateMetadata({
       canonical: url,
     },
     openGraph: {
-      title: blogData.title,
-      description: `Weekly astrology forecast for ${weekRange}. Planetary transits, moon phases, and practical timing for love, work, money, and rest.`,
+      title: `${blogData.title} | ${weekRange}`,
+      description: `What's happening in the stars ${weekRange}? ${blogData.subtitle} Best days for love, career & decisions.`,
       url,
       siteName: 'Lunary',
       images: [
@@ -1313,8 +1445,8 @@ export async function generateMetadata({
     },
     twitter: {
       card: 'summary_large_image',
-      title: blogData.title,
-      description: `This week’s astrology forecast with key transits, moon phases, and the best days for love, money, and healing.`,
+      title: `${blogData.title} | ${weekRange}`,
+      description: `What's cosmically in store this week? Best days for love, career & big decisions. Free forecast.`,
       images: [ogImage],
       creator: '@lunaryapp',
     },

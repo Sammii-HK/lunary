@@ -8,6 +8,9 @@ export const metadata: Metadata = {
   description:
     'Learn how Lunary collects, uses, and protects your personal information. GDPR and CCPA compliant.',
   robots: 'index, follow',
+  alternates: {
+    canonical: 'https://lunary.app/privacy',
+  },
 };
 
 export default function PrivacyPolicyPage() {

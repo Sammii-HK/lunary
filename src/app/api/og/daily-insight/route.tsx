@@ -162,7 +162,7 @@ export async function GET(request: NextRequest): Promise<Response> {
     const baseUrl =
       process.env.NODE_ENV === 'production'
         ? 'https://lunary.app'
-        : `${request.nextUrl.protocol}//${request.nextUrl.host}`;
+        : process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
     const userName = searchParams.get('name') || '';
     const tarotCard = searchParams.get('tarot') || 'Two of Wands';
     const tarotKeywords =

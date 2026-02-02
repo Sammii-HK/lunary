@@ -3,8 +3,9 @@
 import { useUser } from '@/context/UserContext';
 import { useState, useEffect, useRef, useCallback } from 'react';
 import Link from 'next/link';
+import { useSearchParams, useRouter } from 'next/navigation';
 import dynamic from 'next/dynamic';
-import { HelpCircle, Stars, Layers, Hash, X, Calendar } from 'lucide-react';
+import { HelpCircle } from 'lucide-react';
 import { createBirthChartWithMetadata } from '../../../../utils/astrology/birthChartService';
 import { useSubscription } from '../../../hooks/useSubscription';
 import {
@@ -15,48 +16,20 @@ import { betterAuthClient } from '@/lib/auth-client';
 import { useAuthStatus } from '@/components/AuthStatus';
 import { conversionTracking } from '@/lib/analytics';
 import { BirthdayInput } from '@/components/ui/birthday-input';
-import { calculateLifePathNumber } from '../../../../utils/personalization';
 import { geocodeLocation, parseCoordinates } from '../../../../utils/location';
-import { calculatePersonalYear } from '@/lib/numerology';
 import { useModal } from '@/hooks/useModal';
 import { Heading } from '@/components/ui/Heading';
-import { SectionTitle } from '@/components/ui/SectionTitle';
 import { Button } from '@/components/ui/button';
 import { formatIsoDateOnly } from '@/lib/date-only';
 
-const SkeletonCard = () => (
-  <div className='h-32 bg-zinc-800 animate-pulse rounded-xl' />
-);
+// Profile components
+import { ProfileTabs, type ProfileTab } from '@/components/profile/ProfileTabs';
+import { CosmicProfileGrid } from '@/components/profile/CosmicProfileGrid';
+import { PersonalCardModal } from '@/components/profile/PersonalCardModal';
+import { JourneySection } from '@/components/profile/JourneySection';
+import { SettingsTab } from '@/components/profile/SettingsTab';
+import { CircleTab } from '@/components/profile/CircleTab';
 
-const SubscriptionManagement = dynamic(
-  () => import('../../../components/SubscriptionManagement'),
-  { loading: () => <SkeletonCard /> },
-);
-const LocationRefresh = dynamic(
-  () => import('../../../components/LocationRefreshPanel'),
-  { ssr: false },
-);
-const NotificationSettings = dynamic(
-  () =>
-    import('../../../components/NotificationSettings').then((m) => ({
-      default: m.NotificationSettings,
-    })),
-  { ssr: false },
-);
-const EmailSubscriptionSettings = dynamic(
-  () =>
-    import('../../../components/EmailSubscriptionSettings').then((m) => ({
-      default: m.EmailSubscriptionSettings,
-    })),
-  { ssr: false },
-);
-const ReferralProgram = dynamic(
-  () =>
-    import('../../../components/ReferralProgram').then((m) => ({
-      default: m.ReferralProgram,
-    })),
-  { ssr: false },
-);
 const AuthComponent = dynamic(
   () => import('@/components/Auth').then((m) => ({ default: m.AuthComponent })),
   {
@@ -65,6 +38,7 @@ const AuthComponent = dynamic(
     ),
   },
 );
+
 const SmartTrialButton = dynamic(
   () =>
     import('@/components/SmartTrialButton').then((m) => ({
@@ -72,35 +46,7 @@ const SmartTrialButton = dynamic(
     })),
   { ssr: false },
 );
-const StreakDisplay = dynamic(
-  () =>
-    import('@/components/StreakDisplay').then((m) => ({
-      default: m.StreakDisplay,
-    })),
-  { loading: () => <SkeletonCard /> },
-);
-const RitualTracker = dynamic(
-  () =>
-    import('@/components/RitualTracker').then((m) => ({
-      default: m.RitualTracker,
-    })),
-  { loading: () => <SkeletonCard /> },
-);
-const MonthlyInsights = dynamic(
-  () =>
-    import('@/components/MonthlyInsights').then((m) => ({
-      default: m.MonthlyInsights,
-    })),
-  {
-    loading: () => (
-      <div className='h-64 bg-zinc-800 animate-pulse rounded-xl' />
-    ),
-  },
-);
-const Paywall = dynamic(
-  () => import('@/components/Paywall').then((m) => ({ default: m.Paywall })),
-  { ssr: false },
-);
+
 const GuideNudge = dynamic(
   () =>
     import('@/components/GuideNudge').then((m) => ({
@@ -108,6 +54,7 @@ const GuideNudge = dynamic(
     })),
   { ssr: false },
 );
+
 const LifeThemesCard = dynamic(
   () =>
     import('@/components/profile/LifeThemesCard').then((m) => ({
@@ -115,6 +62,7 @@ const LifeThemesCard = dynamic(
     })),
   { ssr: false },
 );
+
 const DailyCosmicOverview = dynamic(
   () =>
     import('@/components/profile/DailyCosmicOverview').then((m) => ({
@@ -122,30 +70,33 @@ const DailyCosmicOverview = dynamic(
     })),
   { ssr: false },
 );
-const PremiumPathway = dynamic(
-  () =>
-    import('@/components/PremiumPathway').then((m) => ({
-      default: m.PremiumPathway,
-    })),
-  { ssr: false },
-);
+
+const normalizeProfileTab = (tab: string | null): ProfileTab => {
+  if (tab === 'settings') return 'settings';
+  if (tab === 'circle') return 'circle';
+  return 'profile';
+};
 
 export default function ProfilePage() {
-  const { user, updateProfile, refetch: refetchUser } = useUser();
+  const { user, refetch: refetchUser } = useUser();
   const subscription = useSubscription();
   const authState = useAuthStatus();
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const queryTab = searchParams.get('tab');
+
+  // Form state
   const [name, setName] = useState('');
   const [birthday, setBirthday] = useState('');
   const [birthTime, setBirthTime] = useState('');
   const [birthLocation, setBirthLocation] = useState('');
+
+  // Location suggestions state
   const [locationSuggestions, setLocationSuggestions] = useState<
     Array<{
       label: string;
       latitude: number;
       longitude: number;
-      city?: string;
-      region?: string;
-      country?: string;
     }>
   >([]);
   const [isLoadingLocationSuggestions, setIsLoadingLocationSuggestions] =
@@ -158,22 +109,52 @@ export default function ProfilePage() {
   const [isCheckingBirthLocation, setIsCheckingBirthLocation] = useState(false);
   const [showBirthChartConfirmation, setShowBirthChartConfirmation] =
     useState(false);
+
+  // Refs for location handling
   const lastBirthLocationCheck = useRef<string | null>(null);
   const locationSuggestionsAbortRef = useRef<AbortController | null>(null);
   const lastLocationQueryRef = useRef<string | null>(null);
   const locationSuggestionBlurTimeoutRef = useRef<number | null>(null);
   const lastLocationSelectionRef = useRef<string | null>(null);
   const birthChartConfirmationTimeoutRef = useRef<number | null>(null);
+
+  // UI state
   const [isEditing, setIsEditing] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [authMode, setAuthMode] = useState<'signIn' | 'signUp'>('signIn');
-  const [openSettingsSections, setOpenSettingsSections] = useState<string[]>(
-    [],
+  const [activeTab, setActiveTab] = useState<ProfileTab>(() =>
+    normalizeProfileTab(queryTab),
   );
   const [showPersonalCardModal, setShowPersonalCardModal] = useState(false);
 
-  // Check if user can collect birthday data
+  // Sync tab state with URL
+  useEffect(() => {
+    if (!queryTab) return;
+    setActiveTab((current) => {
+      const requested = normalizeProfileTab(queryTab);
+      return current === requested ? current : requested;
+    });
+  }, [queryTab]);
+
+  const handleTabChange = useCallback(
+    (tab: ProfileTab) => {
+      setActiveTab(tab);
+      const params = new URLSearchParams(searchParams.toString());
+      if (tab === 'profile') {
+        params.delete('tab');
+      } else {
+        params.set('tab', tab);
+      }
+      const queryString = params.toString();
+      router.replace(`/profile${queryString ? `?${queryString}` : ''}`, {
+        scroll: false,
+      });
+    },
+    [router, searchParams],
+  );
+
+  // Computed values
   const canCollectBirthdayData = canCollectBirthday(subscription.status);
   const hasBirthChartAccessData = hasBirthChartAccess(
     subscription.status,
@@ -181,14 +162,14 @@ export default function ProfilePage() {
   );
   const canEditProfile = authState.isAuthenticated && canCollectBirthdayData;
 
-  // Simplified authentication check
+  // Auth loading effect
   useEffect(() => {
-    // The authState hook handles all authentication logic
     if (!authState.loading) {
       setIsLoading(false);
     }
   }, [authState.loading]);
 
+  // Cleanup effect
   useEffect(() => {
     return () => {
       if (birthChartConfirmationTimeoutRef.current) {
@@ -231,11 +212,11 @@ export default function ProfilePage() {
     [cancelLocationSuggestionBlur],
   );
 
-  // Load existing profile data when component mounts
+  // Load existing profile data
   useEffect(() => {
     if (user) {
       try {
-        let profileName = user.name || '';
+        const profileName = user.name || '';
         const profileBirthday = user.birthday || '';
         const location = (user as any)?.location || {};
         const profileBirthTime = location?.birthTime || '';
@@ -247,10 +228,9 @@ export default function ProfilePage() {
         setBirthLocation(profileBirthLocation);
         setIsEditing(!profileName && !profileBirthday);
 
-        // Auto-generate birth chart if missing but birthday exists
+        // Auto-generate birth chart if missing
         if (profileBirthday && !user.hasBirthChart) {
           (async () => {
-            console.log('[Profile] Auto-generating missing birth chart...');
             const { birthChart, timezone, timezoneSource } =
               await createBirthChartWithMetadata({
                 birthDate: profileBirthday,
@@ -285,8 +265,6 @@ export default function ProfilePage() {
                 }),
               });
             }
-            console.log('[Profile] Birth chart generated and saved!');
-            // Refetch user data
             if (typeof window !== 'undefined') {
               window.location.reload();
             }
@@ -300,12 +278,12 @@ export default function ProfilePage() {
         setIsEditing(true);
       }
     } else {
-      // If no profile exists, allow editing
       setIsLoading(false);
       setIsEditing(false);
     }
   }, [user]);
 
+  // Location suggestions effect
   useEffect(() => {
     if (!isEditing) {
       setShowLocationSuggestions(false);
@@ -348,17 +326,7 @@ export default function ProfilePage() {
           throw new Error('Location suggestions unavailable');
         }
 
-        const data = (await response.json()) as {
-          results?: Array<{
-            label: string;
-            latitude: number;
-            longitude: number;
-            city?: string;
-            region?: string;
-            country?: string;
-          }>;
-        };
-
+        const data = await response.json();
         const results = Array.isArray(data.results) ? data.results : [];
         setLocationSuggestions(results);
         setShowLocationSuggestions(true);
@@ -394,15 +362,12 @@ export default function ProfilePage() {
           const coords = await geocodeLocation(trimmedBirthLocation);
           setShowBirthLocationHint(!coords);
           setIsCheckingBirthLocation(false);
-          if (!coords) {
-            return;
-          }
+          if (!coords) return;
         } else if (showBirthLocationHint) {
           return;
         }
       }
 
-      // Save basic profile to Postgres (including birthTime and birthLocation in location object)
       const existingLocation = (user as any)?.location || {};
       const locationPayload =
         birthTime || birthLocation
@@ -417,22 +382,16 @@ export default function ProfilePage() {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
-        body: JSON.stringify({
-          name,
-          birthday,
-          location: locationPayload,
-        }),
+        body: JSON.stringify({ name, birthday, location: locationPayload }),
       });
 
       if (!profileResponse.ok) {
         throw new Error('Failed to save profile');
       }
 
-      // Generate and save cosmic data if birthday is provided
       if (birthday) {
         const hasExistingChart = user?.hasBirthChart || false;
         const hasExistingPersonalCard = user?.personalCard ? true : false;
-
         const userLocation = (user as any)?.location || {};
         const shouldRegenerateChart =
           !hasExistingChart ||
@@ -440,7 +399,6 @@ export default function ProfilePage() {
           (birthLocation && birthLocation !== userLocation?.birthLocation);
 
         if (shouldRegenerateChart) {
-          console.log('Generating birth chart...');
           const { birthChart, timezone, timezoneSource } =
             await createBirthChartWithMetadata({
               birthDate: birthday,
@@ -480,7 +438,6 @@ export default function ProfilePage() {
         }
 
         if (!hasExistingPersonalCard) {
-          console.log('Generating personal card...');
           const { calculatePersonalCard } =
             await import('../../../../utils/tarot/personalCard');
           const personalCard = calculatePersonalCard(birthday, name);
@@ -494,13 +451,8 @@ export default function ProfilePage() {
         }
       }
 
-      // Refresh user data in context so widgets update immediately
       await refetchUser();
-
       setIsEditing(false);
-
-      // Refresh user data to update UI with saved changes
-      await refetchUser();
 
       if (birthday) {
         setShowBirthChartConfirmation(true);
@@ -510,9 +462,6 @@ export default function ProfilePage() {
         birthChartConfirmationTimeoutRef.current = window.setTimeout(() => {
           setShowBirthChartConfirmation(false);
         }, 8000);
-      }
-
-      if (birthday) {
         conversionTracking.birthdayEntered(authState.user?.id);
       }
       if (name && birthday) {
@@ -525,41 +474,23 @@ export default function ProfilePage() {
 
   const handleSignOut = async () => {
     try {
-      // Clear storage
       localStorage.clear();
       sessionStorage.clear();
-
-      // Clear cookies
       document.cookie.split(';').forEach((c) => {
-        const name = c.split('=')[0].trim();
-        if (name) {
-          document.cookie = `${name}=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/`;
+        const cookieName = c.split('=')[0].trim();
+        if (cookieName) {
+          document.cookie = `${cookieName}=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/`;
         }
       });
-
-      // Sign out from server
       await betterAuthClient.signOut();
-
-      // Hard reload to update UI
       window.location.href = '/';
     } catch (error) {
       console.error('Sign out failed:', error);
-      // Still reload even if error
       window.location.href = '/';
     }
   };
 
-  const toggleSettingsSection = (sectionId: string) => {
-    setOpenSettingsSections((prev) =>
-      prev.includes(sectionId)
-        ? prev.filter((id) => id !== sectionId)
-        : [...prev, sectionId],
-    );
-  };
-
-  const isSettingsSectionOpen = (sectionId: string) =>
-    openSettingsSections.includes(sectionId);
-
+  // Display values
   const nameDisplay = canCollectBirthdayData
     ? name || 'Add your name'
     : authState.isAuthenticated
@@ -580,34 +511,6 @@ export default function ProfilePage() {
   const birthdayLabel = birthday ? 'Birthdate' : 'DOB';
   const isBirthdayPlaceholder = !birthday;
 
-  const settingsSections = [
-    {
-      id: 'location',
-      title: 'Location',
-      description: 'Keep your coordinates current for precise readings.',
-      content: <LocationRefresh variant='settings' />,
-    },
-    {
-      id: 'email',
-      title: 'Email Preferences',
-      description: 'Manage horoscope updates and product news.',
-      content: <EmailSubscriptionSettings />,
-    },
-    {
-      id: 'notifications',
-      title: 'Push Notifications',
-      description: 'Control reminders and device alerts.',
-      content: <NotificationSettings />,
-    },
-    {
-      id: 'referrals',
-      title: 'Referral Program',
-      description: 'Share the magic and unlock rewards.',
-      content: <ReferralProgram />,
-    },
-  ];
-
-  // Show loading state while checking auth or if me is loading
   if (authState.loading || isLoading) {
     return (
       <div className='flex flex-col items-center justify-center min-h-[400px] gap-4'>
@@ -625,598 +528,386 @@ export default function ProfilePage() {
         </Heading>
       </div>
 
-      <div className='w-full max-w-3xl'>
-        <div className='rounded-xl border border-zinc-700/70 bg-lunary-bg-deep/90 p-4 shadow-lg sm:p-5'>
-          <div className='space-y-4'>
-            {canEditProfile && isEditing ? (
-              <>
-                <div className='space-y-4'>
-                  <div className='grid gap-4 sm:grid-cols-2'>
-                    <div className='space-y-2'>
-                      <label className='text-xs font-semibold uppercase tracking-wide text-zinc-400'>
-                        Name
-                        <span className='ml-2 text-[10px] font-normal text-lunary-accent'>
-                          ✨ Personalised Feature
-                        </span>
-                      </label>
-                      <input
-                        type='text'
-                        value={name}
-                        onChange={(e) => setName(e.target.value)}
-                        className='w-full rounded-md border border-zinc-600 bg-zinc-700 px-3 py-2 text-sm text-white placeholder-zinc-400 focus:outline-none focus:ring-2 focus:ring-lunary-primary'
-                        placeholder='Enter your name'
-                      />
-                    </div>
-                    <div className='space-y-2'>
-                      <label className='text-xs font-semibold uppercase tracking-wide text-zinc-400'>
-                        Birthday *
-                        <span className='ml-2 text-[10px] font-normal text-lunary-accent'>
-                          ✨ Personalised Feature
-                        </span>
-                      </label>
-                      <BirthdayInput
-                        value={birthday}
-                        onChange={setBirthday}
-                        className='rounded-md border-zinc-600 bg-zinc-700 px-3 py-2 text-sm'
-                      />
-                    </div>
-                  </div>
-                  <div className='grid gap-4 sm:grid-cols-2'>
-                    <div className='space-y-2'>
-                      <label className='text-xs font-semibold uppercase tracking-wide text-zinc-400'>
-                        Birth Time (optional)
-                        <span className='ml-2 text-[10px] font-normal text-zinc-400'>
-                          More precise = more accurate
-                        </span>
-                      </label>
-                      <input
-                        type='time'
-                        value={birthTime}
-                        onChange={(e) => setBirthTime(e.target.value)}
-                        className='w-full rounded-md border border-zinc-600 bg-zinc-700 px-3 py-2 text-sm text-white placeholder-zinc-400 focus:outline-none focus:ring-2 focus:ring-lunary-primary'
-                      />
-                    </div>
-                    <div className='space-y-2'>
-                      <label className='text-xs font-semibold uppercase tracking-wide text-zinc-400'>
-                        Birth Location (optional)
-                        <span className='ml-2 text-[10px] font-normal text-zinc-400'>
-                          City, Country or coordinates
-                        </span>
-                      </label>
-                      <div className='relative'>
+      {/* Tab Navigation */}
+      {authState.isAuthenticated && (
+        <ProfileTabs activeTab={activeTab} onTabChange={handleTabChange} />
+      )}
+
+      {/* Profile Tab Content */}
+      {(activeTab === 'profile' || !authState.isAuthenticated) && (
+        <>
+          {/* Profile Header Card */}
+          <div className='w-full max-w-3xl'>
+            <div className='rounded-xl border border-zinc-700/70 bg-lunary-bg-deep/90 p-4 shadow-lg sm:p-5'>
+              <div className='space-y-4'>
+                {canEditProfile && isEditing ? (
+                  <div className='space-y-4'>
+                    <div className='grid gap-4 sm:grid-cols-2'>
+                      <div className='space-y-2'>
+                        <label className='text-xs font-semibold uppercase tracking-wide text-zinc-400'>
+                          Name
+                          <span className='ml-2 text-[10px] font-normal text-lunary-accent'>
+                            ✨ Personalised Feature
+                          </span>
+                        </label>
                         <input
                           type='text'
-                          value={birthLocation}
-                          onChange={(e) => {
-                            setBirthLocation(e.target.value);
-                            setShowBirthLocationHint(false);
-                            setLocationSuggestionError(null);
-                            lastLocationQueryRef.current = null;
-                            lastLocationSelectionRef.current = null;
-                          }}
-                          onFocus={cancelLocationSuggestionBlur}
-                          onBlur={async () => {
-                            scheduleCloseLocationSuggestions();
-                            const trimmed = birthLocation.trim();
-                            if (!trimmed) return;
-                            if (lastBirthLocationCheck.current === trimmed)
-                              return;
-                            setIsCheckingBirthLocation(true);
-                            lastBirthLocationCheck.current = trimmed;
-                            const coords = await geocodeLocation(trimmed);
-                            setShowBirthLocationHint(!coords);
-                            setIsCheckingBirthLocation(false);
-                          }}
+                          value={name}
+                          onChange={(e) => setName(e.target.value)}
                           className='w-full rounded-md border border-zinc-600 bg-zinc-700 px-3 py-2 text-sm text-white placeholder-zinc-400 focus:outline-none focus:ring-2 focus:ring-lunary-primary'
-                          placeholder='e.g., London, UK or 51.4769, 0.0005'
+                          placeholder='Enter your name'
                         />
-                        {showLocationSuggestions && (
-                          <div className='absolute z-20 mt-2 w-full rounded-lg border border-zinc-700 bg-zinc-900 shadow-xl'>
-                            {isLoadingLocationSuggestions ? (
-                              <div className='px-4 py-3 text-xs text-zinc-400'>
-                                Loading suggestions...
-                              </div>
-                            ) : locationSuggestionError ? (
-                              <div className='px-4 py-3 text-xs text-zinc-400'>
-                                {locationSuggestionError}
-                              </div>
-                            ) : locationSuggestions.length === 0 ? (
-                              <div className='px-4 py-3 text-xs text-zinc-400'>
-                                No matches found. Try adding a country or use
-                                coordinates.
-                              </div>
-                            ) : (
-                              <ul className='max-h-56 overflow-y-auto py-1 text-sm text-zinc-200'>
-                                {locationSuggestions.map((suggestion) => (
-                                  <li key={suggestion.label}>
-                                    <button
-                                      type='button'
-                                      onMouseDown={(event) =>
-                                        event.preventDefault()
-                                      }
-                                      onClick={() =>
-                                        handleLocationSuggestionSelect(
-                                          suggestion,
-                                        )
-                                      }
-                                      className='w-full px-4 py-2 text-left hover:bg-zinc-800/70 transition-colors'
-                                    >
-                                      {suggestion.label}
-                                    </button>
-                                  </li>
-                                ))}
-                              </ul>
-                            )}
-                          </div>
+                      </div>
+                      <div className='space-y-2'>
+                        <label className='text-xs font-semibold uppercase tracking-wide text-zinc-400'>
+                          Birthday *
+                          <span className='ml-2 text-[10px] font-normal text-lunary-accent'>
+                            ✨ Personalised Feature
+                          </span>
+                        </label>
+                        <BirthdayInput
+                          value={birthday}
+                          onChange={setBirthday}
+                          className='rounded-md border-zinc-600 bg-zinc-700 px-3 py-2 text-sm'
+                        />
+                      </div>
+                    </div>
+                    <div className='grid gap-4 sm:grid-cols-2'>
+                      <div className='space-y-2'>
+                        <label className='text-xs font-semibold uppercase tracking-wide text-zinc-400'>
+                          Birth Time (optional)
+                          <span className='ml-2 text-[10px] font-normal text-zinc-400'>
+                            More precise = more accurate
+                          </span>
+                        </label>
+                        <input
+                          type='time'
+                          value={birthTime}
+                          onChange={(e) => setBirthTime(e.target.value)}
+                          className='w-full rounded-md border border-zinc-600 bg-zinc-700 px-3 py-2 text-sm text-white placeholder-zinc-400 focus:outline-none focus:ring-2 focus:ring-lunary-primary'
+                        />
+                      </div>
+                      <div className='space-y-2'>
+                        <label className='text-xs font-semibold uppercase tracking-wide text-zinc-400'>
+                          Birth Location (optional)
+                          <span className='ml-2 text-[10px] font-normal text-zinc-400'>
+                            City, Country or coordinates
+                          </span>
+                        </label>
+                        <div className='relative'>
+                          <input
+                            type='text'
+                            value={birthLocation}
+                            onChange={(e) => {
+                              setBirthLocation(e.target.value);
+                              setShowBirthLocationHint(false);
+                              setLocationSuggestionError(null);
+                              lastLocationQueryRef.current = null;
+                              lastLocationSelectionRef.current = null;
+                            }}
+                            onFocus={cancelLocationSuggestionBlur}
+                            onBlur={async () => {
+                              scheduleCloseLocationSuggestions();
+                              const trimmed = birthLocation.trim();
+                              if (!trimmed) return;
+                              if (lastBirthLocationCheck.current === trimmed)
+                                return;
+                              setIsCheckingBirthLocation(true);
+                              lastBirthLocationCheck.current = trimmed;
+                              const coords = await geocodeLocation(trimmed);
+                              setShowBirthLocationHint(!coords);
+                              setIsCheckingBirthLocation(false);
+                            }}
+                            className='w-full rounded-md border border-zinc-600 bg-zinc-700 px-3 py-2 text-sm text-white placeholder-zinc-400 focus:outline-none focus:ring-2 focus:ring-lunary-primary'
+                            placeholder='e.g., London, UK or 51.4769, 0.0005'
+                          />
+                          {showLocationSuggestions && (
+                            <div className='absolute z-20 mt-2 w-full rounded-lg border border-zinc-700 bg-zinc-900 shadow-xl'>
+                              {isLoadingLocationSuggestions ? (
+                                <div className='px-4 py-3 text-xs text-zinc-400'>
+                                  Loading suggestions...
+                                </div>
+                              ) : locationSuggestionError ? (
+                                <div className='px-4 py-3 text-xs text-zinc-400'>
+                                  {locationSuggestionError}
+                                </div>
+                              ) : locationSuggestions.length === 0 ? (
+                                <div className='px-4 py-3 text-xs text-zinc-400'>
+                                  No matches found. Try adding a country or use
+                                  coordinates.
+                                </div>
+                              ) : (
+                                <ul className='max-h-56 overflow-y-auto py-1 text-sm text-zinc-200'>
+                                  {locationSuggestions.map((suggestion) => (
+                                    <li key={suggestion.label}>
+                                      <button
+                                        type='button'
+                                        onMouseDown={(e) => e.preventDefault()}
+                                        onClick={() =>
+                                          handleLocationSuggestionSelect(
+                                            suggestion,
+                                          )
+                                        }
+                                        className='w-full px-4 py-2 text-left hover:bg-zinc-800/70 transition-colors'
+                                      >
+                                        {suggestion.label}
+                                      </button>
+                                    </li>
+                                  ))}
+                                </ul>
+                              )}
+                            </div>
+                          )}
+                        </div>
+                        {isCheckingBirthLocation && (
+                          <p className='text-xs text-zinc-500'>
+                            Checking location...
+                          </p>
+                        )}
+                        {showBirthLocationHint && !isCheckingBirthLocation && (
+                          <p className='text-xs text-zinc-500'>
+                            Tip: use a city name if your location is not found.
+                          </p>
                         )}
                       </div>
-                      {isCheckingBirthLocation && (
-                        <p className='text-xs text-zinc-500'>
-                          Checking location...
-                        </p>
-                      )}
-                      {showBirthLocationHint && !isCheckingBirthLocation && (
-                        <p className='text-xs text-zinc-500'>
-                          Tip: use a city name if your location is not found.
-                        </p>
-                      )}
                     </div>
-                  </div>
-                  <p className='text-xs text-zinc-400 sm:text-sm'>
-                    Your birthday enables personalized birth chart analysis,
-                    horoscopes, and cosmic insights. Adding birth time and
-                    location makes your chart more accurate.
-                  </p>
-                  {showBirthChartConfirmation && (
-                    <p className='text-xs text-lime-300 font-medium'>
-                      Your birth chart is now set. Lunary uses it to interpret
-                      everything you explore.
+                    <p className='text-xs text-zinc-400 sm:text-sm'>
+                      Your birthday enables personalized birth chart analysis,
+                      horoscopes, and cosmic insights.
                     </p>
-                  )}
-                </div>
-              </>
-            ) : (
-              <div className='flex flex-wrap items-center justify-between gap-3'>
-                <div className='flex flex-wrap items-center gap-x-6 gap-y-2 text-sm text-white sm:text-base'>
-                  <div className='flex items-center gap-2'>
-                    <span className='text-[11px] uppercase tracking-wide text-zinc-400'>
-                      {nameLabel}
-                    </span>
-                    <span
-                      className={`font-medium ${isNamePlaceholder ? 'text-zinc-400' : ''}`}
-                    >
-                      {nameDisplay}
-                    </span>
-                  </div>
-                  <span className='hidden text-zinc-600 sm:inline'>•</span>
-                  <div className='flex items-center gap-2'>
-                    <span className='text-[11px] uppercase tracking-wide text-zinc-400'>
-                      {birthdayLabel}
-                    </span>
-                    <span
-                      className={`font-medium ${isBirthdayPlaceholder ? 'text-zinc-400' : ''}`}
-                    >
-                      {birthdayDisplay}
-                    </span>
-                  </div>
-                  {birthTime && (
-                    <>
-                      <span className='hidden text-zinc-600 sm:inline'>•</span>
-                      <div className='flex items-center gap-2'>
-                        <span className='text-[11px] uppercase tracking-wide text-zinc-400'>
-                          Time
-                        </span>
-                        <span className='font-medium text-zinc-300'>
-                          {birthTime}
-                        </span>
-                      </div>
-                    </>
-                  )}
-                  {birthLocation && (
-                    <>
-                      <span className='hidden text-zinc-600 sm:inline'>•</span>
-                      <div className='flex items-center gap-2'>
-                        <span className='text-[11px] uppercase tracking-wide text-zinc-400'>
-                          Location
-                        </span>
-                        <span className='font-medium text-zinc-300'>
-                          {birthLocation}
-                        </span>
-                      </div>
-                    </>
-                  )}
-                </div>
-                <div className='flex items-center gap-2'>
-                  {canEditProfile && (
-                    <Button
-                      onClick={() => setIsEditing(true)}
-                      variant='lunary'
-                      size='sm'
-                    >
-                      Edit details
-                    </Button>
-                  )}
-                  {authState.isAuthenticated && (
-                    <Button onClick={handleSignOut} variant='outline' size='sm'>
-                      Sign out
-                    </Button>
-                  )}
-                </div>
-              </div>
-            )}
-
-            {canEditProfile && isEditing && (
-              <div className='flex flex-wrap items-center justify-end gap-2'>
-                <button
-                  onClick={() => setIsEditing(false)}
-                  className='rounded-full border border-zinc-600 px-4 py-2 text-sm text-zinc-300 transition-colors hover:border-zinc-500 hover:text-white'
-                >
-                  Cancel
-                </button>
-                <button
-                  onClick={handleSave}
-                  disabled={!name}
-                  className='rounded-full bg-lunary-primary px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-lunary-primary-400 disabled:cursor-not-allowed disabled:bg-zinc-600 disabled:text-zinc-300'
-                >
-                  Save Profile
-                </button>
-              </div>
-            )}
-
-            {authState.isAuthenticated && !canCollectBirthdayData && (
-              <div className='rounded-lg border border-lunary-primary-700 bg-gradient-to-r from-lunary-primary-900/40 to-lunary-highlight-900/40 p-4'>
-                <h4 className='mb-2 font-medium text-white'>
-                  🌍 Birthday Collection
-                </h4>
-                <p className='mb-3 text-sm text-zinc-300'>
-                  Unlock personalized astrology by providing your birthday. Get
-                  your birth chart, personalized horoscopes, and cosmic insights
-                  tailored specifically to you.
-                </p>
-                <SmartTrialButton size='sm' />
-              </div>
-            )}
-
-            {!authState.isAuthenticated ? (
-              <div className='space-y-3 rounded-md border-2 border-dashed border-zinc-600 py-4 text-center'>
-                <p className='text-sm text-zinc-400'>
-                  Sign in to save your profile and unlock cosmic insights
-                </p>
-                <div className='flex flex-col items-center gap-2 sm:flex-row sm:justify-center'>
-                  <button
-                    onClick={() => {
-                      setAuthMode('signIn');
-                      setShowAuthModal(true);
-                    }}
-                    className='rounded-md bg-lunary-primary px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-lunary-primary-400'
-                  >
-                    Sign In
-                  </button>
-                  <button
-                    onClick={() => {
-                      setAuthMode('signUp');
-                      setShowAuthModal(true);
-                    }}
-                    className='rounded-md border border-lunary-primary-700 px-4 py-2 text-sm font-medium text-lunary-accent-200 transition-colors hover:border-lunary-primary-500 hover:text-lunary-accent-100'
-                  >
-                    Create Account
-                  </button>
-                </div>
-              </div>
-            ) : !canCollectBirthdayData ? (
-              <div className='space-y-3 rounded-md border-2 border-dashed border-lunary-primary-700 bg-gradient-to-r from-lunary-primary-900/20 to-lunary-highlight-900/20 py-4 text-center'>
-                <p className='text-sm text-zinc-300'>
-                  👋 Welcome{' '}
-                  {authState.user?.name || authState.profile?.name || 'User'}!
-                  Upgrade to unlock Personalised Features
-                </p>
-                <div className='flex justify-center'>
-                  <a
-                    href='/pricing'
-                    className='rounded-md bg-gradient-to-r from-lunary-primary to-lunary-highlight px-4 py-2 text-sm font-medium text-white transition-all duration-300 hover:from-lunary-primary-400 hover:to-lunary-highlight-400'
-                  >
-                    Upgrade to Premium
-                  </a>
-                </div>
-              </div>
-            ) : null}
-          </div>
-        </div>
-      </div>
-
-      {authState.isAuthenticated &&
-        !isEditing &&
-        birthday &&
-        hasBirthChartAccessData && (
-          <>
-            <div className='w-full max-w-3xl'>
-              <SectionTitle as='h2' className='mb-3'>
-                Cosmic Profile
-              </SectionTitle>
-              <div className='grid grid-cols-1 sm:grid-cols-2 gap-3'>
-                <Link
-                  href='/birth-chart'
-                  className='group rounded-xl border border-lunary-primary-700 bg-gradient-to-br from-lunary-primary-950/60 to-zinc-900 p-4 shadow-lg hover:border-lunary-primary-600 transition-colors'
-                >
-                  <div className='flex items-center justify-between'>
-                    <div>
-                      <h3 className='text-lg font-medium text-white group-hover:text-lunary-accent-300 transition-colors'>
-                        Birth Chart
-                      </h3>
-                      <p className='text-xs text-lunary-accent-200/70'>
-                        View your cosmic fingerprint
-                      </p>
-                    </div>
-                    <Stars className='w-6 h-6 text-lunary-accent' />
-                  </div>
-                </Link>
-
-                {(() => {
-                  const personalCard = user?.personalCard;
-                  return (
-                    <button
-                      onClick={() => setShowPersonalCardModal(true)}
-                      className='group rounded-xl border border-zinc-700 bg-zinc-900/70 p-4 shadow-lg hover:border-lunary-primary-700 transition-colors text-left w-full'
-                    >
-                      <div className='flex items-center justify-between'>
-                        <div>
-                          <h3 className='text-lg font-medium text-white group-hover:text-lunary-accent-300 transition-colors'>
-                            Personal Card
-                          </h3>
-                          <p className='text-xs text-zinc-400'>
-                            {personalCard
-                              ? personalCard.name
-                              : 'Your tarot signature'}
-                          </p>
-                        </div>
-                        <Layers className='w-6 h-6 text-lunary-accent' />
-                      </div>
-                    </button>
-                  );
-                })()}
-
-                {(() => {
-                  const lifePathNumber = calculateLifePathNumber(birthday);
-                  const isMasterNumber = [11, 22, 33].includes(lifePathNumber);
-                  return (
-                    <Link
-                      href={`/grimoire/life-path/${lifePathNumber}`}
-                      className='group rounded-xl border border-zinc-700 bg-zinc-900/70 p-4 shadow-lg hover:border-lunary-secondary-600 transition-colors'
-                    >
-                      <div className='flex items-center justify-between'>
-                        <div>
-                          <h3 className='text-lg font-medium text-white group-hover:text-lunary-secondary-300 transition-colors'>
-                            Life Path {lifePathNumber}
-                            {isMasterNumber && (
-                              <span className='ml-2 text-xs text-lunary-accent-400'>
-                                Master
-                              </span>
-                            )}
-                          </h3>
-                          <p className='text-xs text-zinc-400'>
-                            Your numerology destiny
-                          </p>
-                        </div>
-                        <Hash className='w-6 h-6 text-lunary-secondary' />
-                      </div>
-                    </Link>
-                  );
-                })()}
-
-                {(() => {
-                  const currentYear = new Date().getFullYear();
-                  const personalYear = calculatePersonalYear(
-                    birthday,
-                    currentYear,
-                  ).result;
-                  return (
-                    <Link
-                      href={`/grimoire/numerology/year/${personalYear}`}
-                      className='group rounded-xl border border-zinc-700 bg-zinc-900/70 p-4 shadow-lg hover:border-lunary-primary-600 transition-colors'
-                    >
-                      <div className='flex items-center justify-between'>
-                        <div>
-                          <h3 className='text-lg font-medium text-white group-hover:text-lunary-primary-300 transition-colors'>
-                            Personal Year {personalYear}
-                          </h3>
-                          <p className='text-xs text-zinc-400'>
-                            Based on your birth date, not the universal year
-                          </p>
-                        </div>
-                        <Calendar className='w-6 h-6 text-lunary-primary-400' />
-                      </div>
-                    </Link>
-                  );
-                })()}
-              </div>
-            </div>
-          </>
-        )}
-
-      {/* Personal Card Modal */}
-      {showPersonalCardModal &&
-        (() => {
-          const personalCard = user?.personalCard;
-          return (
-            <div className='fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50'>
-              <div className='bg-zinc-900 rounded-lg p-6 w-full max-w-md relative border border-zinc-700'>
-                <button
-                  onClick={() => setShowPersonalCardModal(false)}
-                  className='absolute top-4 right-4 text-zinc-400 hover:text-white'
-                >
-                  <X size={20} />
-                </button>
-                {personalCard ? (
-                  <>
-                    <div className='text-center mb-4'>
-                      <Layers className='w-12 h-12 text-lunary-accent mx-auto mb-3' />
-                      <h3 className='text-xl font-bold text-white'>
-                        {personalCard.name}
-                      </h3>
-                      <p className='text-sm text-lunary-accent-300'>
-                        Your Personal Card
-                      </p>
-                    </div>
-                    <div className='space-y-4 text-sm text-zinc-300'>
-                      {personalCard.keywords &&
-                        personalCard.keywords.length > 0 && (
-                          <div className='flex flex-wrap gap-2 justify-center'>
-                            {personalCard.keywords.map(
-                              (keyword: string, i: number) => (
-                                <span
-                                  key={i}
-                                  className='px-2 py-1 bg-lunary-primary-900 text-lunary-accent-300 rounded text-xs'
-                                >
-                                  {keyword}
-                                </span>
-                              ),
-                            )}
-                          </div>
-                        )}
-                      {personalCard.information && (
-                        <p className='leading-relaxed'>
-                          {personalCard.information}
-                        </p>
-                      )}
-                      {personalCard.reason && (
-                        <div>
-                          <h4 className='text-xs font-medium text-zinc-400 uppercase tracking-wide mb-1'>
-                            Why This Card
-                          </h4>
-                          <p className='leading-relaxed'>
-                            {personalCard.reason}
-                          </p>
-                        </div>
-                      )}
-                    </div>
-                  </>
-                ) : (
-                  <div className='text-center py-8'>
-                    <Layers className='w-12 h-12 text-zinc-600 mx-auto mb-3' />
-                    <p className='text-zinc-400'>
-                      Add your birthday to discover your personal tarot card
-                    </p>
-                  </div>
-                )}
-              </div>
-            </div>
-          );
-        })()}
-
-      <div className='w-full max-w-3xl space-y-4'>
-        <DailyCosmicOverview className='w-full' />
-        <LifeThemesCard className='w-full' />
-        <GuideNudge location='profile' className='w-full' />
-      </div>
-
-      {authState.isAuthenticated && !isEditing && (
-        <div className='w-full max-w-3xl space-y-3'>
-          <SectionTitle as='h2'>Settings</SectionTitle>
-          {settingsSections.map((section) => {
-            const open = isSettingsSectionOpen(section.id);
-            return (
-              <div
-                key={section.id}
-                className='rounded-xl border border-zinc-700 bg-zinc-900/70 shadow-lg'
-              >
-                <button
-                  onClick={() => toggleSettingsSection(section.id)}
-                  className='flex w-full items-center justify-between gap-3 px-4 py-3 text-left text-sm font-medium text-white transition-colors hover:bg-zinc-800/80'
-                >
-                  <div>
-                    <p>{section.title}</p>
-                    {section.description && (
-                      <p className='text-xs font-normal text-zinc-400'>
-                        {section.description}
+                    {showBirthChartConfirmation && (
+                      <p className='text-xs text-lime-300 font-medium'>
+                        Your birth chart is now set. Lunary uses it to interpret
+                        everything you explore.
                       </p>
                     )}
                   </div>
-                  <span className='text-lg font-semibold text-lunary-accent-200'>
-                    {open ? '-' : '+'}
-                  </span>
-                </button>
-                {open && (
-                  <div className='border-t border-zinc-700/60 px-4 py-4 text-sm text-zinc-200'>
-                    {section.content}
+                ) : (
+                  <div className='flex flex-wrap items-center justify-between gap-3'>
+                    <div className='flex flex-wrap items-center gap-x-6 gap-y-2 text-sm text-white sm:text-base'>
+                      <div className='flex items-center gap-2'>
+                        <span className='text-[11px] uppercase tracking-wide text-zinc-400'>
+                          {nameLabel}
+                        </span>
+                        <span
+                          className={`font-medium ${isNamePlaceholder ? 'text-zinc-400' : ''}`}
+                        >
+                          {nameDisplay}
+                        </span>
+                      </div>
+                      <span className='hidden text-zinc-600 sm:inline'>•</span>
+                      <div className='flex items-center gap-2'>
+                        <span className='text-[11px] uppercase tracking-wide text-zinc-400'>
+                          {birthdayLabel}
+                        </span>
+                        <span
+                          className={`font-medium ${isBirthdayPlaceholder ? 'text-zinc-400' : ''}`}
+                        >
+                          {birthdayDisplay}
+                        </span>
+                      </div>
+                      {birthTime && (
+                        <>
+                          <span className='hidden text-zinc-600 sm:inline'>
+                            •
+                          </span>
+                          <div className='flex items-center gap-2'>
+                            <span className='text-[11px] uppercase tracking-wide text-zinc-400'>
+                              Time
+                            </span>
+                            <span className='font-medium text-zinc-300'>
+                              {birthTime}
+                            </span>
+                          </div>
+                        </>
+                      )}
+                      {birthLocation && (
+                        <>
+                          <span className='hidden text-zinc-600 sm:inline'>
+                            •
+                          </span>
+                          <div className='flex items-center gap-2'>
+                            <span className='text-[11px] uppercase tracking-wide text-zinc-400'>
+                              Location
+                            </span>
+                            <span className='font-medium text-zinc-300'>
+                              {birthLocation}
+                            </span>
+                          </div>
+                        </>
+                      )}
+                    </div>
+                    <div className='flex items-center gap-2'>
+                      {canEditProfile && (
+                        <Button
+                          onClick={() => setIsEditing(true)}
+                          variant='lunary'
+                          size='sm'
+                        >
+                          Edit details
+                        </Button>
+                      )}
+                      {authState.isAuthenticated && (
+                        <Button
+                          onClick={handleSignOut}
+                          variant='outline'
+                          size='sm'
+                        >
+                          Sign out
+                        </Button>
+                      )}
+                    </div>
                   </div>
                 )}
-              </div>
-            );
-          })}
-        </div>
-      )}
 
-      {authState.isAuthenticated && !isEditing && (
-        <div className='w-full max-w-3xl space-y-4'>
-          <div className='rounded-xl border border-zinc-700 bg-zinc-900/70 p-4 shadow-lg'>
-            <SectionTitle as='h2' className='mb-3'>
-              Your Journey
-            </SectionTitle>
-            <div className='grid grid-cols-1 gap-3'>
-              <StreakDisplay />
-              {/* <RitualTracker /> */}
+                {canEditProfile && isEditing && (
+                  <div className='flex flex-wrap items-center justify-end gap-2'>
+                    <button
+                      onClick={() => setIsEditing(false)}
+                      className='rounded-full border border-zinc-600 px-4 py-2 text-sm text-zinc-300 transition-colors hover:border-zinc-500 hover:text-white'
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      onClick={handleSave}
+                      disabled={!name}
+                      className='rounded-full bg-lunary-primary px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-lunary-primary-400 disabled:cursor-not-allowed disabled:bg-zinc-600 disabled:text-zinc-300'
+                    >
+                      Save Profile
+                    </button>
+                  </div>
+                )}
+
+                {authState.isAuthenticated && !canCollectBirthdayData && (
+                  <div className='rounded-lg border border-lunary-primary-700 bg-gradient-to-r from-lunary-primary-900/40 to-lunary-highlight-900/40 p-4'>
+                    <h4 className='mb-2 font-medium text-white'>
+                      🌍 Birthday Collection
+                    </h4>
+                    <p className='mb-3 text-sm text-zinc-300'>
+                      Unlock personalized astrology by providing your birthday.
+                    </p>
+                    <SmartTrialButton size='sm' />
+                  </div>
+                )}
+
+                {!authState.isAuthenticated ? (
+                  <div className='space-y-3 rounded-md border-2 border-dashed border-zinc-600 py-4 text-center'>
+                    <p className='text-sm text-zinc-400'>
+                      Sign in to save your profile and unlock cosmic insights
+                    </p>
+                    <div className='flex flex-col items-center gap-2 sm:flex-row sm:justify-center'>
+                      <button
+                        onClick={() => {
+                          setAuthMode('signIn');
+                          setShowAuthModal(true);
+                        }}
+                        className='rounded-md bg-lunary-primary px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-lunary-primary-400'
+                      >
+                        Sign In
+                      </button>
+                      <button
+                        onClick={() => {
+                          setAuthMode('signUp');
+                          setShowAuthModal(true);
+                        }}
+                        className='rounded-md border border-lunary-primary-700 px-4 py-2 text-sm font-medium text-lunary-accent-200 transition-colors hover:border-lunary-primary-500 hover:text-lunary-accent-100'
+                      >
+                        Create Account
+                      </button>
+                    </div>
+                  </div>
+                ) : !canCollectBirthdayData ? (
+                  <div className='space-y-3 rounded-md border-2 border-dashed border-lunary-primary-700 bg-gradient-to-r from-lunary-primary-900/20 to-lunary-highlight-900/20 py-4 text-center'>
+                    <p className='text-sm text-zinc-300'>
+                      👋 Welcome{' '}
+                      {authState.user?.name ||
+                        authState.profile?.name ||
+                        'User'}
+                      ! Upgrade to unlock Personalised Features
+                    </p>
+                    <div className='flex justify-center'>
+                      <a
+                        href='/pricing'
+                        className='rounded-md bg-gradient-to-r from-lunary-primary to-lunary-highlight px-4 py-2 text-sm font-medium text-white transition-all duration-300 hover:from-lunary-primary-400 hover:to-lunary-highlight-400'
+                      >
+                        Upgrade to Premium
+                      </a>
+                    </div>
+                  </div>
+                ) : null}
+              </div>
             </div>
-            <Paywall feature='monthly_insights'>
-              <div className='mt-3 pt-3 border-t border-zinc-800'>
-                <button
-                  onClick={() =>
-                    document
-                      .getElementById('monthly-insights')
-                      ?.scrollIntoView({ behavior: 'smooth' })
-                  }
-                  className='text-sm text-lunary-accent hover:text-lunary-accent-300 transition-colors'
+          </div>
+
+          {/* Cosmic Profile Grid */}
+          {authState.isAuthenticated &&
+            !isEditing &&
+            birthday &&
+            hasBirthChartAccessData && (
+              <CosmicProfileGrid
+                birthday={birthday}
+                personalCard={user?.personalCard}
+                onPersonalCardClick={() => setShowPersonalCardModal(true)}
+              />
+            )}
+
+          {/* Daily Cosmic Overview & Life Themes */}
+          <div className='w-full max-w-3xl space-y-4'>
+            <DailyCosmicOverview className='w-full' />
+            <LifeThemesCard className='w-full' />
+            <GuideNudge location='profile' className='w-full' />
+          </div>
+
+          {/* Journey Section (Streak + Insights) */}
+          {authState.isAuthenticated && !isEditing && <JourneySection />}
+
+          {/* Footer Links */}
+          <div className='w-full max-w-3xl'>
+            <div className='text-center text-sm text-zinc-400'>
+              <p>
+                Your cosmic profile information is stored securely and
+                encrypted.
+              </p>
+            </div>
+            <div className='flex flex-col items-center gap-2 text-sm mt-4'>
+              <span className='text-zinc-400'>Looking for more?</span>
+              <div className='flex flex-wrap justify-center gap-3'>
+                <Link
+                  href='/shop'
+                  className='rounded-full border border-zinc-700/70 px-4 py-1.5 text-zinc-300 transition hover:border-lunary-primary-600 hover:text-lunary-accent-200'
                 >
-                  View Monthly Insights →
-                </button>
+                  Browse Shop
+                </Link>
+                <a
+                  href='/blog'
+                  className='rounded-full border border-zinc-700/70 px-4 py-1.5 text-zinc-300 transition hover:border-lunary-primary-600 hover:text-lunary-accent-200'
+                >
+                  Read the Blog
+                </a>
               </div>
-            </Paywall>
-          </div>
-          <Paywall feature='monthly_insights'>
-            <div id='monthly-insights'>
-              <MonthlyInsights />
             </div>
-          </Paywall>
-          <PremiumPathway variant='guide' className='mt-4' />
-        </div>
-      )}
-
-      {authState.isAuthenticated && (
-        <div className='w-full max-w-3xl space-y-6'>
-          <SubscriptionManagement
-            customerId={user?.stripeCustomerId || undefined}
-            subscriptionId={subscription.subscriptionId}
-          />
-        </div>
-      )}
-
-      <div className='w-full max-w-3xl'>
-        <div className='text-center text-sm text-zinc-400'>
-          <p>
-            Your cosmic profile information is stored securely and encrypted.
-            This includes your personal tarot card and birth chart data, which
-            create a personalized spiritual experience with custom readings and
-            insights.
-          </p>
-        </div>
-
-        <div className='flex flex-col items-center gap-2 text-sm'>
-          <span className='text-zinc-400'>Looking for more?</span>
-          <div className='flex flex-wrap justify-center gap-3'>
-            <Link
-              href='/shop'
-              className='rounded-full border border-zinc-700/70 px-4 py-1.5 text-zinc-300 transition hover:border-lunary-primary-600 hover:text-lunary-accent-200'
-            >
-              Browse Shop
-            </Link>
-            <a
-              href='/blog'
-              className='rounded-full border border-zinc-700/70 px-4 py-1.5 text-zinc-300 transition hover:border-lunary-primary-600 hover:text-lunary-accent-200'
-            >
-              Read the Blog
-            </a>
           </div>
-        </div>
-      </div>
+        </>
+      )}
+
+      {/* Circle Tab Content */}
+      {activeTab === 'circle' && authState.isAuthenticated && <CircleTab />}
+
+      {/* Settings Tab Content */}
+      {activeTab === 'settings' && authState.isAuthenticated && (
+        <SettingsTab
+          stripeCustomerId={user?.stripeCustomerId || undefined}
+          subscriptionId={subscription.subscriptionId}
+        />
+      )}
+
+      {/* Personal Card Modal */}
+      {showPersonalCardModal && (
+        <PersonalCardModal
+          personalCard={user?.personalCard}
+          onClose={() => setShowPersonalCardModal(false)}
+        />
+      )}
 
       {/* Auth Modal */}
       {showAuthModal && (
@@ -1228,103 +919,17 @@ export default function ProfilePage() {
             >
               ✕
             </button>
-
             <AuthComponent
               defaultToSignUp={authMode === 'signUp'}
               onSuccess={() => {
-                console.log('🎉 Auth success callback triggered');
                 setShowAuthModal(false);
-                // Don't redirect - let React state handle the change
-                // The AuthStatus hook should automatically detect the new session
               }}
             />
           </div>
         </div>
       )}
 
-      {/* Data & Privacy Section */}
-      {authState.isAuthenticated && (
-        <div className='w-full max-w-3xl mt-8'>
-          <div className='rounded-xl border border-zinc-800 bg-zinc-900/50 p-6'>
-            <h3 className='text-lg font-medium text-zinc-100 mb-4'>
-              Data & Privacy
-            </h3>
-
-            <div className='space-y-4'>
-              {/* Export Data */}
-              <div className='flex items-center justify-between p-4 rounded-lg bg-zinc-800/50'>
-                <div>
-                  <h4 className='text-sm font-medium text-zinc-200'>
-                    Export Your Data
-                  </h4>
-                  <p className='text-xs text-zinc-400'>
-                    Download all your Lunary data as JSON
-                  </p>
-                </div>
-                <a
-                  href='/api/account/export'
-                  download
-                  className='px-4 py-2 text-sm font-medium text-lunary-accent hover:text-lunary-accent-300 border border-lunary-primary-700 rounded-lg hover:bg-lunary-primary-950 transition-colors'
-                >
-                  Download
-                </a>
-              </div>
-
-              {/* Delete Account */}
-              <div className='flex items-center justify-between p-4 rounded-lg bg-lunary-error-900/10 border border-lunary-error-700'>
-                <div>
-                  <h4 className='text-sm font-medium text-lunary-error-300'>
-                    Delete Account
-                  </h4>
-                  <p className='text-xs text-zinc-400'>
-                    Permanently delete your account and all data (30-day grace
-                    period)
-                  </p>
-                </div>
-                <button
-                  onClick={async () => {
-                    if (
-                      !confirm(
-                        'Are you sure you want to delete your account? This will schedule your account for deletion in 30 days. You can cancel during this period.',
-                      )
-                    ) {
-                      return;
-                    }
-
-                    try {
-                      const response = await fetch('/api/account/delete', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        credentials: 'include',
-                        body: JSON.stringify({
-                          reason: 'User requested deletion from profile',
-                        }),
-                      });
-
-                      const data = await response.json();
-
-                      if (!response.ok) {
-                        alert(data.error || 'Failed to request deletion');
-                        return;
-                      }
-
-                      alert(
-                        `Account deletion scheduled for ${new Date(data.scheduledFor).toLocaleDateString()}. You can cancel this from your profile within 30 days.`,
-                      );
-                    } catch (error) {
-                      alert('Failed to request account deletion');
-                    }
-                  }}
-                  className='px-4 py-2 text-sm font-medium text-lunary-error hover:text-lunary-error-300 border border-lunary-error-700 rounded-lg hover:bg-lunary-error-900 transition-colors'
-                >
-                  Delete
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
+      {/* Help Link */}
       <div className='pt-3 border-t border-zinc-800/50'>
         <div className='flex justify-center'>
           <Link

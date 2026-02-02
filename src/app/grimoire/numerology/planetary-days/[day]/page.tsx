@@ -47,8 +47,8 @@ export async function generateMetadata({
     correspondencesData.days[dayKey as keyof typeof correspondencesData.days];
   const numerologyNumber = dayNumberMapping[dayKey];
 
-  const title = `${dayKey} Numerology: ${dayData.planet}'s Planetary Day - Lunary`;
-  const description = `Discover ${dayKey}'s numerological significance. Learn about ${dayData.planet}'s influence, the number ${numerologyNumber}, and how to work with ${dayKey.toLowerCase()}'s planetary energy in numerology.`;
+  const title = `${dayKey}'s Planet: ${dayData.planet} Rules This Day | Energy & Meaning`;
+  const description = `${dayKey} is ruled by ${dayData.planet}. Discover why this planetary day boosts ${dayData.uses.slice(0, 2).join(' and ').toLowerCase()}. Best activities and rituals for ${dayData.planet}'s day.`;
 
   return {
     title,
@@ -141,9 +141,9 @@ export default async function PlanetaryDayPage({
   return (
     <div className='p-4 md:p-6 lg:p-8 xl:p-10 min-h-full'>
       <SEOContentTemplate
-        title={`${dayKey} Planetary Day - Lunary`}
-        h1={`${dayKey}: ${dayData.planet}'s Planetary Day`}
-        description={`Discover ${dayKey}'s numerological significance. Learn about ${dayData.planet}'s influence and how to work with ${dayKey.toLowerCase()}'s planetary energy.`}
+        title={`${dayKey}'s Planet: ${dayData.planet} | Energy & Meaning`}
+        h1={`${dayKey}: ${dayData.planet}'s Day`}
+        description={`${dayKey} is ruled by ${dayData.planet}. Learn why this planetary day boosts ${dayData.uses.slice(0, 2).join(' and ').toLowerCase()}, and discover the best activities for ${dayKey.toLowerCase()}.`}
         keywords={[
           `${dayKey.toLowerCase()} numerology`,
           `${dayData.planet} day`,

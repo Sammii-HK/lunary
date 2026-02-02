@@ -21,6 +21,27 @@ describe('pricing entitlements', () => {
     ).toBe(true);
   });
 
+  it('grants friend_connections for paid plans only', () => {
+    // Free users should not have access
+    expect(hasFeatureAccess('free', 'free', 'friend_connections')).toBe(false);
+
+    // Paid users should have access
+    expect(
+      hasFeatureAccess('active', 'lunary_plus', 'friend_connections'),
+    ).toBe(true);
+    expect(
+      hasFeatureAccess('active', 'lunary_plus_ai', 'friend_connections'),
+    ).toBe(true);
+    expect(
+      hasFeatureAccess('active', 'lunary_plus_ai_annual', 'friend_connections'),
+    ).toBe(true);
+
+    // Trial users should have access
+    expect(
+      hasFeatureAccess('trialing', 'lunary_plus', 'friend_connections'),
+    ).toBe(true);
+  });
+
   it('normalizes yearly plan to annual entitlements', () => {
     expect(hasFeatureAccess('active', 'yearly', 'yearly_forecast')).toBe(true);
   });

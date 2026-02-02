@@ -1,7 +1,8 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { ChevronDown, Sparkles } from 'lucide-react';
+import Link from 'next/link';
+import { ChevronDown, Sparkles, Star, Layers, ArrowRight } from 'lucide-react';
 import { useSubscription } from '@/hooks/useSubscription';
 import { hasFeatureAccess } from '../../../utils/pricing';
 import {
@@ -10,6 +11,7 @@ import {
   LifeThemeInput,
   LifeThemeResult,
 } from '@/lib/life-themes/engine';
+import { getThemeById } from '@/lib/life-themes/themes';
 
 interface LifeThemesCardProps {
   className?: string;
@@ -182,6 +184,49 @@ export function LifeThemesCard({ className = '' }: LifeThemesCardProps) {
                       : theme.shortSummary}
                   </p>
 
+                  {/* What this theme relates to */}
+                  {(() => {
+                    const themeData = getThemeById(theme.id);
+                    if (!themeData) return null;
+                    const { triggers } = themeData;
+                    return (
+                      <div className='space-y-2 pt-2 border-t border-zinc-800/50'>
+                        <p className='text-xs font-medium text-zinc-500 uppercase tracking-wide'>
+                          Connected to
+                        </p>
+                        <div className='space-y-1.5'>
+                          {triggers.tarotMajors.length > 0 && (
+                            <div className='flex items-start gap-2'>
+                              <Star className='w-3.5 h-3.5 text-lunary-accent mt-0.5 shrink-0' />
+                              <p className='text-xs text-zinc-400'>
+                                <span className='text-zinc-300'>Tarot:</span>{' '}
+                                {triggers.tarotMajors.slice(0, 3).join(', ')}
+                                {triggers.tarotSuits.length > 0 && (
+                                  <span className='text-zinc-500'>
+                                    {' '}
+                                    • {triggers.tarotSuits.join(' & ')} energy
+                                  </span>
+                                )}
+                              </p>
+                            </div>
+                          )}
+                          {hasCosmicProfileAccess &&
+                            triggers.transits.length > 0 && (
+                              <div className='flex items-start gap-2'>
+                                <Layers className='w-3.5 h-3.5 text-lunary-secondary mt-0.5 shrink-0' />
+                                <p className='text-xs text-zinc-400'>
+                                  <span className='text-zinc-300'>
+                                    Transits:
+                                  </span>{' '}
+                                  {triggers.transits.slice(0, 2).join(', ')}
+                                </p>
+                              </div>
+                            )}
+                        </div>
+                      </div>
+                    );
+                  })()}
+
                   {hasCosmicProfileAccess &&
                     theme.guidanceBullets.length > 0 && (
                       <div className='space-y-1.5'>
@@ -230,6 +275,15 @@ export function LifeThemesCard({ className = '' }: LifeThemesCardProps) {
           Upgrade for deeper theme insights and guidance.
         </p>
       )}
+
+      {/* Link to patterns */}
+      <Link
+        href='/book-of-shadows?tab=patterns'
+        className='mt-3 flex items-center justify-between gap-2 text-xs text-lunary-accent-300 hover:text-lunary-accent-200 transition-colors group'
+      >
+        <span>View your pattern evolution</span>
+        <ArrowRight className='w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform' />
+      </Link>
     </div>
   );
 }

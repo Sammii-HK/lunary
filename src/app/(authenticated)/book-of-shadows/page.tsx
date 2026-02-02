@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback, useRef } from 'react';
 import Link from 'next/link';
-import { useSearchParams } from 'next/navigation';
+import { useSearchParams, useRouter } from 'next/navigation';
 import {
   BookOpen,
   Plus,
@@ -32,6 +32,7 @@ import { DreamTagChips } from '@/components/journal/DreamTagChips';
 import { PremiumPathway } from '@/components/PremiumPathway';
 import { PatternSnapshotsSection } from '@/components/patterns/PatternSnapshotsSection';
 import { ShareWeeklyPattern } from '@/components/share/ShareWeeklyPattern';
+import { ThisTimeLastYear } from '@/components/patterns/ThisTimeLastYear';
 
 interface JournalEntry {
   id: number;
@@ -218,21 +219,22 @@ function MemoryCard({
   );
 }
 
-type TabId = 'journal' | 'dreams' | 'memories' | 'patterns' | 'ritual';
+type TabId = 'patterns' | 'journal' | 'dreams' | 'memories' | 'ritual';
 
 const VALID_TAB_IDS: TabId[] = [
+  'patterns',
   'journal',
   'dreams',
   'memories',
-  'patterns',
   'ritual',
 ];
 
 const normalizeTab = (tab: string | null): TabId =>
-  VALID_TAB_IDS.includes(tab as TabId) ? (tab as TabId) : 'journal';
+  VALID_TAB_IDS.includes(tab as TabId) ? (tab as TabId) : 'patterns';
 
 export default function BookOfShadowsPage() {
   const { user, loading: authLoading } = useAuthStatus();
+  const router = useRouter();
   const searchParams = useSearchParams();
   const queryTabParam = searchParams.get('tab');
   const queryPrompt = searchParams.get('prompt') ?? '';
@@ -376,6 +378,19 @@ export default function BookOfShadowsPage() {
     }
   };
 
+  const handleTabChange = useCallback(
+    (tabId: TabId) => {
+      setActiveTab(tabId);
+      // Update URL without full navigation
+      const params = new URLSearchParams(searchParams.toString());
+      params.set('tab', tabId);
+      router.replace(`/book-of-shadows?${params.toString()}`, {
+        scroll: false,
+      });
+    },
+    [router, searchParams],
+  );
+
   const handleDeleteMemory = async (memoryId: number) => {
     try {
       const response = await fetch(`/api/user-memory?id=${memoryId}`, {
@@ -431,6 +446,11 @@ export default function BookOfShadowsPage() {
     count?: number;
   }[] = [
     {
+      id: 'patterns',
+      label: 'Patterns',
+      icon: <Sparkles className='w-4 h-4' />,
+    },
+    {
       id: 'journal',
       label: 'Journal',
       icon: <Feather className='w-4 h-4' />,
@@ -453,11 +473,6 @@ export default function BookOfShadowsPage() {
       label: 'Memories',
       icon: <Brain className='w-4 h-4' />,
       count: memories.length,
-    },
-    {
-      id: 'patterns',
-      label: 'Patterns',
-      icon: <Sparkles className='w-4 h-4' />,
     },
   ];
 
@@ -486,7 +501,7 @@ export default function BookOfShadowsPage() {
             {tabs.map((tab) => (
               <button
                 key={tab.id}
-                onClick={() => setActiveTab(tab.id)}
+                onClick={() => handleTabChange(tab.id)}
                 className={`flex-1 flex items-center justify-center gap-1.5 py-2.5 px-2 rounded-lg text-sm font-medium transition-colors ${
                   activeTab === tab.id
                     ? tab.id === 'dreams'
@@ -685,6 +700,9 @@ export default function BookOfShadowsPage() {
         {activeTab === 'patterns' && (
           <div className='space-y-4'>
             <ArchetypeBar className='mb-4' />
+
+            {/* This Time Last Year - At top for visibility */}
+            <ThisTimeLastYear />
 
             <div className='bg-zinc-900/50 border border-zinc-800 rounded-lg p-4'>
               <div className='flex items-center gap-2 mb-2'>

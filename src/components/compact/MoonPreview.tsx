@@ -15,6 +15,7 @@ import { getPersonalizedHoroscope } from '../../../utils/astrology/personalizedH
 import { isInDemoMode } from '@/lib/demo-mode';
 import { DailyCache } from '@/lib/cache/dailyCache';
 import { getZodiacSymbol } from 'utils/astrology/cosmic-og';
+import { ShareMoonPhase } from '@/components/share/ShareMoonPhase';
 
 const ZODIAC_ELEMENTS: Record<string, string> = {
   aries: 'Fire',
@@ -380,6 +381,16 @@ export const MoonPreview = ({
           ) : (
             <>{illuminationDisplay}% illuminated</>
           )
+        }
+        action={
+          <div onClick={(e) => e.stopPropagation()}>
+            <ShareMoonPhase
+              moonPhase={currentMoonPhase}
+              moonSign={currentMoonConstellationPosition || undefined}
+              illumination={illuminationDisplay}
+              compact
+            />
+          </div>
         }
       />
       {cycleLine && <p className='text-xs text-zinc-400 mt-1'>{cycleLine}</p>}

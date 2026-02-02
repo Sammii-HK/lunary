@@ -16,6 +16,17 @@ export const metadata: Metadata = {
   title: 'Digital Ritual Packs & Spell Collections | Lunary Shop',
   description:
     'Curated packs of rituals, tarot spreads, crystal guides, and cosmic wisdom. Instant digital access to deepen your spiritual practice.',
+  alternates: {
+    canonical: 'https://lunary.app/shop',
+  },
+  openGraph: {
+    title: 'Digital Ritual Packs & Spell Collections | Lunary Shop',
+    description:
+      'Curated packs of rituals, tarot spreads, crystal guides, and cosmic wisdom. Instant digital access.',
+    url: 'https://lunary.app/shop',
+    siteName: 'Lunary',
+    type: 'website',
+  },
 };
 
 export default async function ShopPage() {
