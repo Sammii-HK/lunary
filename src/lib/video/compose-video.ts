@@ -661,7 +661,7 @@ export async function composeVideo(
           {
             fps: 10, // Low fps for subtle twinkle
             starCount: starfieldStarCount,
-            loopDuration: 4.5, // 4.5-second twinkle cycle (medium speed)
+            loopDuration: 3, // 3-second twinkle cycle (faster)
           },
         );
       console.log(
