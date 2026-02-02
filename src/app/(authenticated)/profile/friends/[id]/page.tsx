@@ -17,6 +17,8 @@ import {
 import { Button } from '@/components/ui/button';
 import { Heading } from '@/components/ui/Heading';
 import { zodiacSymbol } from '@/constants/symbols';
+import { ShareSynastry } from '@/components/share/ShareSynastry';
+import { useUser } from '@/context/UserContext';
 
 type FriendProfile = {
   id: string;
@@ -103,6 +105,7 @@ const PLANET_ORDER = [
 export default function FriendProfilePage() {
   const params = useParams();
   const router = useRouter();
+  const { user } = useUser();
   const friendId = params.id as string;
 
   const [friend, setFriend] = useState<FriendProfile | null>(null);
@@ -202,11 +205,26 @@ export default function FriendProfilePage() {
             </p>
           </div>
           {friend.synastry && (
-            <div className='ml-auto text-center'>
-              <div className='text-3xl font-bold text-lunary-accent-200'>
-                {friend.synastry.compatibilityScore}%
+            <div className='ml-auto flex items-center gap-4'>
+              <div className='text-center'>
+                <div className='text-3xl font-bold text-lunary-accent-200'>
+                  {friend.synastry.compatibilityScore}%
+                </div>
+                <div className='text-xs text-zinc-400'>Compatible</div>
               </div>
-              <div className='text-xs text-zinc-400'>Compatible</div>
+              <ShareSynastry
+                userName={user?.name?.split(' ')[0]}
+                friendName={friend.name}
+                compatibilityScore={friend.synastry.compatibilityScore}
+                summary={friend.synastry.summary}
+                harmoniousAspects={
+                  friend.synastry.aspects?.filter((a) => a.isHarmonious).length
+                }
+                challengingAspects={
+                  friend.synastry.aspects?.filter((a) => !a.isHarmonious).length
+                }
+                buttonVariant='small'
+              />
             </div>
           )}
         </div>
