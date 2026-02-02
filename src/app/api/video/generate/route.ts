@@ -2,13 +2,15 @@ import { NextRequest, NextResponse } from 'next/server';
 import { put } from '@vercel/blob';
 import { sql } from '@vercel/postgres';
 import { composeVideo } from '@/lib/video/compose-video';
+import {
+  renderRemotionVideo,
+  scriptToAudioSegments,
+  isRemotionAvailable,
+} from '@/lib/video/remotion-renderer';
 import { generateVoiceover } from '@/lib/tts';
 import { generateVoiceoverScriptFromWeeklyData } from '@/lib/video/composition';
 import { TTS_PRESETS } from '@/lib/tts/presets';
 import { normalizeScriptForTTS } from '@/lib/tts/normalize-script';
-
-// Feature flags for video rendering
-const USE_REMOTION_RENDERER = process.env.USE_REMOTION_RENDERER === 'true';
 import {
   generateNarrativeFromWeeklyData,
   generateShortFormNarrative,
@@ -1156,7 +1158,7 @@ export async function POST(request: NextRequest) {
 
     // Compose video (image + audio)
     console.log(`🎬 Composing video (${videoFormat})...`);
-    let videoBuffer: Buffer;
+    let videoBuffer: Buffer | undefined;
 
     // For medium-form and long-form videos, segment script into items and generate topic images
     if ((type === 'medium' || type === 'long') && weeklyData) {
@@ -1248,70 +1250,111 @@ export async function POST(request: NextRequest) {
           }
         }
 
-        // Compose video with multiple images
-        // Future: When USE_REMOTION_RENDERER is enabled, use Remotion for more
-        // sophisticated animations. For now, FFmpeg handles all rendering.
-        // To enable Remotion: set USE_REMOTION_RENDERER=true in environment
-        if (USE_REMOTION_RENDERER) {
-          console.log(
-            `🎬 Remotion rendering enabled but not yet implemented for production`,
-          );
-          console.log(
-            `💡 Falling back to FFmpeg for now. Remotion structure ready at src/remotion/`,
-          );
-        }
-
+        // Compose video with multiple images using Remotion
         // Extract hook (first sentence) for overlay
         const hookMatch = script.match(/^[^.!?]+[.!?]/);
         const hookText = hookMatch
           ? hookMatch[0].trim().substring(0, 60) // Max 60 chars for readability
           : undefined;
 
-        // Build overlays for hook and CTA
-        const videoOverlays: Array<{
-          text: string;
-          startTime: number;
-          endTime: number;
-          style: 'chapter' | 'stamp' | 'title';
-        }> = [];
+        // Check if Remotion is available
+        const remotionAvailable = await isRemotionAvailable();
 
-        // Hook overlay at the beginning
-        if (hookText && hookText.length > 10) {
-          videoOverlays.push({
-            text: hookText,
-            startTime: 0.5,
-            endTime: 3.5,
-            style: 'title',
-          });
+        let useFFmpegFallback = !remotionAvailable || !actualAudioDuration;
+
+        if (!useFFmpegFallback) {
+          try {
+            // Use Remotion for smooth animations and shooting stars
+            const remotionFormat =
+              type === 'medium' ? 'MediumFormVideo' : 'LongFormVideo';
+
+            // Convert script to audio segments for subtitles
+            const segments = scriptToAudioSegments(
+              script,
+              actualAudioDuration!,
+              2.6,
+            );
+
+            videoBuffer = await renderRemotionVideo({
+              format: remotionFormat,
+              outputPath: '',
+              hookText: hookText || title,
+              subtitle: description,
+              segments,
+              audioUrl: audioUrl!,
+              images: topicImages.map((img) => ({
+                url: img.imageUrl,
+                startTime: img.startTime,
+                endTime: img.endTime,
+                topic: img.topic,
+              })),
+              highlightTerms: [],
+              durationSeconds: actualAudioDuration! + 2, // Add buffer at end
+            });
+            console.log(
+              `✅ Remotion: Video rendered with ${topicImages.length} images, shooting stars, animated subtitles`,
+            );
+          } catch (remotionError) {
+            console.error(
+              `❌ Remotion render failed, falling back to FFmpeg:`,
+              remotionError,
+            );
+            useFFmpegFallback = true;
+          }
         }
 
-        // CTA overlay at the end (random from bank)
-        if (actualAudioDuration && actualAudioDuration > 8) {
-          videoOverlays.push({
-            text: getRandomCTA(),
-            startTime: actualAudioDuration - 2,
-            endTime: actualAudioDuration + 1.5,
-            style: 'stamp',
-          });
-        }
+        if (useFFmpegFallback) {
+          // Fallback to FFmpeg if Remotion not available
+          console.log(
+            `⚠️ Remotion not available or failed, falling back to FFmpeg`,
+          );
 
-        videoBuffer = await composeVideo({
-          images: topicImages.map((img) => ({
-            url: img.imageUrl,
-            startTime: img.startTime,
-            endTime: img.endTime,
-          })),
-          audioBuffer,
-          format: videoFormat,
-          subtitlesText: script,
-          overlays: videoOverlays.length > 0 ? videoOverlays : undefined,
-          hueShiftBase,
-          hueShiftMaxDelta: 12,
-          lockIntroHue: true,
-        });
-        console.log(
-          `✅ Video composed with ${topicImages.length} images, subtitles, ${videoOverlays.length} overlays`,
-        );
+          // Build overlays for hook and CTA
+          const videoOverlays: Array<{
+            text: string;
+            startTime: number;
+            endTime: number;
+            style: 'chapter' | 'stamp' | 'title';
+          }> = [];
+
+          // Hook overlay at the beginning
+          if (hookText && hookText.length > 10) {
+            videoOverlays.push({
+              text: hookText,
+              startTime: 0.5,
+              endTime: 3.5,
+              style: 'title',
+            });
+          }
+
+          // CTA overlay at the end (random from bank)
+          if (actualAudioDuration && actualAudioDuration > 8) {
+            videoOverlays.push({
+              text: getRandomCTA(),
+              startTime: actualAudioDuration - 2,
+              endTime: actualAudioDuration + 1.5,
+              style: 'stamp',
+            });
+          }
+
+          videoBuffer = await composeVideo({
+            images: topicImages.map((img) => ({
+              url: img.imageUrl,
+              startTime: img.startTime,
+              endTime: img.endTime,
+            })),
+            audioBuffer,
+            format: videoFormat,
+            subtitlesText: script,
+            overlays: videoOverlays.length > 0 ? videoOverlays : undefined,
+            hueShiftBase,
+            hueShiftMaxDelta: 12,
+            lockIntroHue: true,
+          });
+          console.log(
+            `✅ FFmpeg: Video composed with ${topicImages.length} images, subtitles, ${videoOverlays.length} overlays`,
+          );
+        }
       } catch (error) {
         console.error(
           '❌ Failed to generate topic-based images:',
@@ -1335,47 +1378,96 @@ export async function POST(request: NextRequest) {
         ? hookMatch[0].trim().substring(0, 50) // Max 50 chars for short-form
         : undefined;
 
-      // Build overlays for hook and CTA
-      const videoOverlays: Array<{
-        text: string;
-        startTime: number;
-        endTime: number;
-        style: 'chapter' | 'stamp' | 'title';
-      }> = [];
+      // Check if Remotion is available
+      const remotionAvailable = await isRemotionAvailable();
 
-      // Hook overlay at the beginning
-      if (hookText && hookText.length > 10) {
-        videoOverlays.push({
-          text: hookText,
-          startTime: 0.3,
-          endTime: 3.0,
-          style: 'title',
-        });
+      let useFFmpegFallback = !remotionAvailable || !actualAudioDuration;
+
+      if (!useFFmpegFallback) {
+        try {
+          // Use Remotion for smooth animations and shooting stars
+          const segments = scriptToAudioSegments(
+            script,
+            actualAudioDuration!,
+            2.6,
+          );
+
+          videoBuffer = await renderRemotionVideo({
+            format: 'ShortFormVideo',
+            outputPath: '',
+            hookText: hookText || title,
+            subtitle: description,
+            segments,
+            audioUrl: audioUrl!,
+            backgroundImage: imageUrl,
+            highlightTerms: [],
+            durationSeconds: actualAudioDuration! + 2,
+          });
+          console.log(
+            `✅ Remotion: Short-form video rendered with shooting stars, animated subtitles`,
+          );
+        } catch (remotionError) {
+          console.error(
+            `❌ Remotion render failed, falling back to FFmpeg:`,
+            remotionError,
+          );
+          useFFmpegFallback = true;
+        }
       }
 
-      // CTA overlay at the end (random from bank)
-      if (actualAudioDuration && actualAudioDuration > 8) {
-        videoOverlays.push({
-          text: getRandomCTA(),
-          startTime: actualAudioDuration - 1.5,
-          endTime: actualAudioDuration + 1.5,
-          style: 'stamp',
-        });
-      }
+      if (useFFmpegFallback) {
+        // Fallback to FFmpeg if Remotion not available
+        console.log(
+          `⚠️ Remotion not available, falling back to FFmpeg for short-form`,
+        );
 
-      videoBuffer = await composeVideo({
-        imageUrl,
-        audioBuffer,
-        format: videoFormat,
-        subtitlesText: script,
-        overlays: videoOverlays.length > 0 ? videoOverlays : undefined,
-        hueShiftBase,
-        hueShiftMaxDelta: 12,
-        lockIntroHue: true,
-      });
-      console.log(
-        `✅ Short-form video composed with subtitles, ${videoOverlays.length} overlays`,
-      );
+        // Build overlays for hook and CTA
+        const videoOverlays: Array<{
+          text: string;
+          startTime: number;
+          endTime: number;
+          style: 'chapter' | 'stamp' | 'title';
+        }> = [];
+
+        // Hook overlay at the beginning
+        if (hookText && hookText.length > 10) {
+          videoOverlays.push({
+            text: hookText,
+            startTime: 0.3,
+            endTime: 3.0,
+            style: 'title',
+          });
+        }
+
+        // CTA overlay at the end (random from bank)
+        if (actualAudioDuration && actualAudioDuration > 8) {
+          videoOverlays.push({
+            text: getRandomCTA(),
+            startTime: actualAudioDuration - 1.5,
+            endTime: actualAudioDuration + 1.5,
+            style: 'stamp',
+          });
+        }
+
+        videoBuffer = await composeVideo({
+          imageUrl,
+          audioBuffer,
+          format: videoFormat,
+          subtitlesText: script,
+          overlays: videoOverlays.length > 0 ? videoOverlays : undefined,
+          hueShiftBase,
+          hueShiftMaxDelta: 12,
+          lockIntroHue: true,
+        });
+        console.log(
+          `✅ FFmpeg: Short-form video composed with subtitles, ${videoOverlays.length} overlays`,
+        );
+      }
+    }
+
+    // Ensure video was generated
+    if (!videoBuffer) {
+      throw new Error('Video generation failed - no video buffer produced');
     }
 
     // Upload to Vercel Blob
