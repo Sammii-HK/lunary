@@ -11,6 +11,10 @@
   "scope": "/",
   "lang": "en",
   "categories": ["lifestyle", "productivity", "spirituality"],
+  "handle_links": "preferred",
+  "launch_handler": {
+    "client_mode": ["navigate-existing", "auto"]
+  },
   "icons": [
     {
       "src": "/icons/icon-72x72.png",
