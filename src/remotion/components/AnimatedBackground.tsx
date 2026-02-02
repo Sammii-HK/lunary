@@ -320,7 +320,7 @@ const StarField: React.FC<{
         y: seededRandom(i * 5 + 1) * 100,
         baseSize: 2 + seededRandom(i * 5 + 2) * 2, // 2-4px (visible on 1080x1920)
         delay: Math.floor(seededRandom(i * 5 + 3) * 100),
-        twinkleSpeed: 0.3 + seededRandom(i * 5 + 4) * 0.4, // 0.3-0.7 Hz (visible twinkle)
+        twinkleSpeed: 0.08 + seededRandom(i * 5 + 4) * 0.12, // 0.08-0.2 Hz (gentle, slow twinkle ~5-12 second cycles)
       });
     }
 

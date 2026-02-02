@@ -211,7 +211,7 @@ export function generateAnimatedStarfield(
       y: random() * 100,
       size: 0.8 + random() * 1.2, // Small, subtle stars (0.8-2px)
       baseOpacity: 0.3 + random() * 0.4, // Subtle opacity (0.3-0.7)
-      twinkleSpeed: 0.2 + random() * 0.3, // Gentle twinkle (0.2-0.5 cycles per second)
+      twinkleSpeed: 0.08 + random() * 0.12, // Very gentle twinkle (0.08-0.2 cycles per second = 5-12 second cycles)
       twinklePhase: random() * Math.PI * 2, // Random starting phase
     });
   }
