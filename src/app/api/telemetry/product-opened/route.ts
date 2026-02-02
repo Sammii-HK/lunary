@@ -1,10 +1,24 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { sql } from '@vercel/postgres';
+import { createHash } from 'crypto';
 import {
   canonicaliseEvent,
   insertCanonicalEvent,
 } from '@/lib/analytics/canonical-events';
 import { getCurrentUser } from '@/lib/get-user-session';
+
+/**
+ * Generate deterministic eventId for deduplication
+ * Same identity + date = same eventId, so DB unique constraint catches races
+ */
+function generateDeterministicEventId(
+  eventType: string,
+  userId: string,
+  date: string,
+): string {
+  const input = `${eventType}:${userId}:${date}`;
+  return createHash('md5').update(input).digest('hex');
+}
 
 export const runtime = 'nodejs';
 
@@ -32,8 +46,19 @@ export async function POST(request: NextRequest) {
     const userId = currentUser.id;
     const userEmail = currentUser.email;
 
+    // Check for existing product_opened today (UTC day) - daily deduplication
+    const today = new Date().toISOString().split('T')[0];
+
+    // Generate deterministic eventId so DB unique constraint catches race conditions
+    const eventId = generateDeterministicEventId(
+      'product_opened',
+      userId,
+      today,
+    );
+
     const canonical = canonicaliseEvent({
       eventType: 'product_opened',
+      eventId,
       userId,
       userEmail,
       pagePath: path,
@@ -50,9 +75,6 @@ export async function POST(request: NextRequest) {
         reason: canonical.reason,
       });
     }
-
-    // Check for existing product_opened today (UTC day) - daily deduplication
-    const today = new Date().toISOString().split('T')[0];
 
     const existing = await sql`
       SELECT 1 FROM conversion_events

@@ -1,10 +1,26 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { sql } from '@vercel/postgres';
+import { createHash } from 'crypto';
 import {
   canonicaliseEvent,
   insertCanonicalEvent,
 } from '@/lib/analytics/canonical-events';
 import { getCurrentUser } from '@/lib/get-user-session';
+
+/**
+ * Generate deterministic eventId for deduplication
+ * Same identity + date = same eventId, so DB unique constraint catches races
+ */
+function generateDeterministicEventId(
+  eventType: string,
+  userId: string | undefined,
+  anonymousId: string | undefined,
+  date: string,
+): string {
+  const identity = userId || anonymousId || 'unknown';
+  const input = `${eventType}:${identity}:${date}`;
+  return createHash('md5').update(input).digest('hex');
+}
 
 export const runtime = 'nodejs';
 
@@ -37,8 +53,21 @@ export async function POST(request: NextRequest) {
       });
     }
 
+    // Check for existing app_opened today (UTC day) - daily deduplication
+    // Check BOTH user_id AND anonymous_id to prevent double-counting when user logs in mid-session
+    const today = new Date().toISOString().split('T')[0];
+
+    // Generate deterministic eventId so DB unique constraint catches race conditions
+    const eventId = generateDeterministicEventId(
+      'app_opened',
+      userId,
+      anonymousId,
+      today,
+    );
+
     const canonical = canonicaliseEvent({
       eventType: 'app_opened',
+      eventId,
       userId,
       anonymousId,
       userEmail,
@@ -57,10 +86,6 @@ export async function POST(request: NextRequest) {
         reason: canonical.reason,
       });
     }
-
-    // Check for existing app_opened today (UTC day) - daily deduplication
-    // Check BOTH user_id AND anonymous_id to prevent double-counting when user logs in mid-session
-    const today = new Date().toISOString().split('T')[0];
 
     // Check if already tracked by user_id OR anonymous_id
     const existing = await sql`
