@@ -5,11 +5,9 @@ import Stripe from 'stripe';
 export const revalidate = 300;
 
 function sanitizeForLog(value: unknown): string {
-  if (typeof value !== 'string') {
-    return String(value);
-  }
-  // Remove newline and carriage return characters to prevent log injection
-  return value.replace(/[\r\n]/g, '');
+  const str = typeof value === 'string' ? value : String(value);
+  // Remove ASCII control characters (U+0000-U+001F and U+007F) to prevent log injection
+  return str.replace(/[\x00-\x1F\x7F]/g, '');
 }
 
 function getStripe(secretKey?: string) {
