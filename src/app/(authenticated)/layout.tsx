@@ -6,6 +6,7 @@ import { useAuthStatus } from '@/components/AuthStatus';
 import { conversionTracking } from '@/lib/analytics';
 import SessionTracker from '@/components/SessionTracker';
 import { TourProvider } from '@/context/TourContext';
+import { AnnouncementProvider } from '@/components/feature-announcements/AnnouncementProvider';
 
 export default function AuthenticatedLayout({
   children,
@@ -61,8 +62,10 @@ export default function AuthenticatedLayout({
 
   return (
     <TourProvider>
-      <SessionTracker />
-      {children}
+      <AnnouncementProvider>
+        <SessionTracker />
+        {children}
+      </AnnouncementProvider>
     </TourProvider>
   );
 }

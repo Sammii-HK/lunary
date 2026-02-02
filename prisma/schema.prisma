@@ -1355,6 +1355,33 @@ model youtube_uploads {
   @@unique([topic, scheduled_date])
 }
 
+model feature_announcements {
+  id            String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  title         String
+  description   String
+  icon          String    @default("Sparkles") // Lucide icon name
+  cta_label     String?
+  cta_href      String?
+  required_tier String[]  @default([]) // Empty = all users, otherwise filter by plan
+  is_active     Boolean   @default(true)
+  released_at   DateTime  @default(now()) @db.Timestamptz(6)
+  created_at    DateTime  @default(now()) @db.Timestamptz(6)
+  updated_at    DateTime  @default(now()) @updatedAt @db.Timestamptz(6)
+
+  @@index([is_active], map: "idx_feature_announcements_active")
+  @@index([released_at], map: "idx_feature_announcements_released")
+}
+
+model feature_announcements_seen {
+  id              String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  user_id         String
+  announcement_id String
+  seen_at         DateTime @default(now()) @db.Timestamptz(6)
+
+  @@unique([user_id, announcement_id])
+  @@index([user_id], map: "idx_feature_announcements_seen_user_id")
+}
+
 enum tour_status {
   ACTIVE
   COMPLETED
