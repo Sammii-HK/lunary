@@ -336,7 +336,7 @@ export async function GET(request: NextRequest) {
       all_users AS (
         SELECT id as user_id
         FROM "user"
-        WHERE created_at <= ${formatTimestamp(range.end)}
+        WHERE "createdAt" <= ${formatTimestamp(range.end)}
           AND (email IS NULL OR (email NOT LIKE ${TEST_EMAIL_PATTERN} AND email != ${TEST_EMAIL_EXACT}))
       )
       SELECT
