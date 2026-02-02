@@ -59,25 +59,21 @@ export async function POST(request: NextRequest) {
     }
 
     // Check for existing app_opened today (UTC day) - daily deduplication
+    // Check BOTH user_id AND anonymous_id to prevent double-counting when user logs in mid-session
     const today = new Date().toISOString().split('T')[0];
 
-    const existing = userId
-      ? await sql`
-          SELECT 1 FROM conversion_events
-          WHERE event_type = 'app_opened'
-            AND user_id = ${userId}
-            AND created_at >= ${today}::date
-            AND created_at < (${today}::date + INTERVAL '1 day')
-          LIMIT 1
-        `
-      : await sql`
-          SELECT 1 FROM conversion_events
-          WHERE event_type = 'app_opened'
-            AND anonymous_id = ${anonymousId}
-            AND created_at >= ${today}::date
-            AND created_at < (${today}::date + INTERVAL '1 day')
-          LIMIT 1
-        `;
+    // Check if already tracked by user_id OR anonymous_id
+    const existing = await sql`
+      SELECT 1 FROM conversion_events
+      WHERE event_type = 'app_opened'
+        AND created_at >= ${today}::date
+        AND created_at < (${today}::date + INTERVAL '1 day')
+        AND (
+          (${userId}::text IS NOT NULL AND user_id = ${userId})
+          OR (${anonymousId}::text IS NOT NULL AND anonymous_id = ${anonymousId})
+        )
+      LIMIT 1
+    `;
 
     if (existing.rows.length > 0) {
       return NextResponse.json({
