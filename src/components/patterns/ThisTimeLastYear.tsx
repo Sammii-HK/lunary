@@ -9,6 +9,8 @@ import {
   Sparkles,
   ChevronDown,
   ChevronRight,
+  Sun,
+  Lock,
 } from 'lucide-react';
 
 interface JournalEntry {
@@ -30,8 +32,17 @@ interface TarotReading {
   createdAt: string;
 }
 
+interface DailyCard {
+  id: string;
+  cardName: string;
+  cardImage?: string;
+  interpretation?: string;
+  createdAt: string;
+}
+
 interface ThisTimeLastYearData {
   hasData: boolean;
+  hasYearOverYear: boolean;
   dateRange: {
     start: string;
     end: string;
@@ -40,11 +51,13 @@ interface ThisTimeLastYearData {
   summary: {
     journalCount: number;
     tarotCount: number;
+    dailyCardCount: number;
     frequentCards: Array<{ name: string; count: number }>;
     dominantMoods: Array<{ mood: string; count: number }>;
   };
   journalEntries: JournalEntry[];
   tarotReadings: TarotReading[];
+  dailyCards: DailyCard[];
 }
 
 interface ThisTimeLastYearProps {
@@ -161,6 +174,12 @@ export function ThisTimeLastYear({ className = '' }: ThisTimeLastYearProps) {
         </div>
         <div className='flex items-center gap-3'>
           <div className='flex items-center gap-2 text-xs text-zinc-400'>
+            {data.summary.dailyCardCount > 0 && (
+              <span className='flex items-center gap-1'>
+                <Sun className='w-3 h-3 text-amber-400' />
+                {data.summary.dailyCardCount}
+              </span>
+            )}
             {data.summary.journalCount > 0 && (
               <span className='flex items-center gap-1'>
                 <BookOpen className='w-3 h-3' />
@@ -223,6 +242,63 @@ export function ThisTimeLastYear({ className = '' }: ThisTimeLastYearProps) {
               </div>
             )}
           </div>
+
+          {/* Daily Cards Section (Premium Feature) */}
+          {data.hasYearOverYear && data.dailyCards.length > 0 && (
+            <div className='space-y-2'>
+              <p className='text-[10px] uppercase tracking-wide text-zinc-500'>
+                Your Daily Cards
+              </p>
+              <div className='flex gap-2 overflow-x-auto pb-2'>
+                {data.dailyCards.slice(0, 5).map((card) => (
+                  <div
+                    key={card.id}
+                    className='flex-shrink-0 rounded-lg bg-gradient-to-b from-amber-950/30 to-zinc-900/50 p-3 border border-amber-800/30 w-32'
+                  >
+                    <div className='flex items-center gap-1 mb-1'>
+                      <Sun className='w-3 h-3 text-amber-400' />
+                      <span className='text-[10px] text-zinc-500'>
+                        {new Date(card.createdAt).toLocaleDateString('en-GB', {
+                          month: 'short',
+                          day: 'numeric',
+                        })}
+                      </span>
+                    </div>
+                    <p className='text-xs font-medium text-amber-200 truncate'>
+                      {card.cardName}
+                    </p>
+                    {card.interpretation && (
+                      <p className='text-[10px] text-zinc-400 mt-1 line-clamp-2'>
+                        {card.interpretation}
+                      </p>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Premium Upsell for Daily Cards */}
+          {!data.hasYearOverYear && (
+            <div className='rounded-lg bg-amber-950/20 border border-amber-800/30 p-3'>
+              <div className='flex items-center gap-2 mb-1'>
+                <Lock className='w-3 h-3 text-amber-400' />
+                <span className='text-xs font-medium text-amber-200'>
+                  Daily Cards from Last Year
+                </span>
+              </div>
+              <p className='text-[10px] text-zinc-400'>
+                Upgrade to Annual to see which daily cards you pulled this time
+                last year.
+              </p>
+              <Link
+                href='/pricing'
+                className='inline-block mt-2 text-[10px] text-amber-400 hover:text-amber-300 transition-colors'
+              >
+                Learn more →
+              </Link>
+            </div>
+          )}
 
           {/* Journal Entries Preview */}
           {data.journalEntries.length > 0 && (

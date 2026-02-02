@@ -1,17 +1,36 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { sql } from '@vercel/postgres';
 import { requireUser } from '@/lib/ai/auth';
+import {
+  hasFeatureAccess,
+  normalizePlanType,
+} from '../../../../../utils/pricing';
 
 /**
  * GET /api/history/this-time-last-year
  *
  * Fetches user's historical data from approximately one year ago (±7 days)
  * Returns: journal entries, tarot readings from that time period
+ * Premium feature (year_over_year): Includes daily tarot cards from this time last year
  */
 export async function GET(request: NextRequest) {
   try {
     const user = await requireUser(request);
     const userId = user.id;
+
+    // Check subscription for premium features
+    const subscriptionResult = await sql`
+      SELECT status, plan_type FROM subscriptions WHERE user_id = ${userId} ORDER BY created_at DESC LIMIT 1
+    `;
+    const subscription = subscriptionResult.rows[0];
+    const rawStatus = subscription?.status || 'free';
+    const subscriptionStatus = rawStatus === 'trialing' ? 'trial' : rawStatus;
+    const planType = normalizePlanType(subscription?.plan_type);
+    const hasYearOverYear = hasFeatureAccess(
+      subscriptionStatus,
+      planType,
+      'year_over_year',
+    );
 
     // Calculate date range: 1 year ago ±7 days
     const now = new Date();
@@ -40,7 +59,7 @@ export async function GET(request: NextRequest) {
       LIMIT 10
     `;
 
-    // Fetch tarot readings from this time last year
+    // Fetch tarot readings from this time last year (spreads only, not daily cards)
     const tarotResult = await sql`
       SELECT
         id,
@@ -53,9 +72,55 @@ export async function GET(request: NextRequest) {
       WHERE user_id = ${userId}
         AND created_at >= ${startDate.toISOString()}
         AND created_at <= ${endDate.toISOString()}
+        AND spread_slug != 'daily-tarot'
       ORDER BY created_at DESC
       LIMIT 10
     `;
+
+    // Fetch daily tarot cards from this time last year (premium feature)
+    let dailyCards: Array<{
+      id: string;
+      cardName: string;
+      cardImage?: string;
+      interpretation?: string;
+      createdAt: string;
+    }> = [];
+
+    if (hasYearOverYear) {
+      const dailyTarotResult = await sql`
+        SELECT
+          id,
+          cards,
+          summary,
+          created_at
+        FROM tarot_readings
+        WHERE user_id = ${userId}
+          AND spread_slug = 'daily-tarot'
+          AND created_at >= ${startDate.toISOString()}
+          AND created_at <= ${endDate.toISOString()}
+        ORDER BY created_at DESC
+        LIMIT 7
+      `;
+
+      dailyCards = dailyTarotResult.rows.map((row) => {
+        let cardData = null;
+        try {
+          const cards =
+            typeof row.cards === 'string' ? JSON.parse(row.cards) : row.cards;
+          cardData = Array.isArray(cards) ? cards[0] : null;
+        } catch {
+          cardData = null;
+        }
+
+        return {
+          id: row.id,
+          cardName: cardData?.card?.name || cardData?.name || 'Unknown Card',
+          cardImage: cardData?.card?.image || cardData?.image || null,
+          interpretation: row.summary || null,
+          createdAt: row.created_at,
+        };
+      });
+    }
 
     // Parse journal entries (content is JSON with text, moodTags, etc.)
     const journalEntries = journalResult.rows.map((row) => {
@@ -137,10 +202,14 @@ export async function GET(request: NextRequest) {
       .map(([mood, count]) => ({ mood, count }));
 
     // Check if we have any data
-    const hasData = journalEntries.length > 0 || tarotReadings.length > 0;
+    const hasData =
+      journalEntries.length > 0 ||
+      tarotReadings.length > 0 ||
+      dailyCards.length > 0;
 
     return NextResponse.json({
       hasData,
+      hasYearOverYear,
       dateRange: {
         start: startDate.toISOString(),
         end: endDate.toISOString(),
@@ -149,11 +218,13 @@ export async function GET(request: NextRequest) {
       summary: {
         journalCount: journalEntries.length,
         tarotCount: tarotReadings.length,
+        dailyCardCount: dailyCards.length,
         frequentCards,
         dominantMoods,
       },
       journalEntries: journalEntries.slice(0, 3), // Return top 3 for preview
       tarotReadings: tarotReadings.slice(0, 3), // Return top 3 for preview
+      dailyCards, // Daily cards from this time last year (premium)
     });
   } catch (error) {
     console.error('[ThisTimeLastYear] Error:', error);
