@@ -784,7 +784,12 @@ export async function composeVideo(
         `[${starfieldInputIndex}:v]fps=30,trim=duration=${totalVideoDuration.toFixed(2)},setpts=PTS-STARTPTS,format=rgba[stars]`,
       );
       filterParts.push(
-        `${intermediateLabel}[stars]overlay=0:0:format=auto[vfinal]`,
+        `${intermediateLabel}[stars]overlay=0:0:format=auto[vwithstars]`,
+      );
+      // Add video fade in/out for smooth transitions (1s fade in, 1.5s fade out)
+      const videoFadeOutStart = Math.max(0, totalVideoDuration - 1.5);
+      filterParts.push(
+        `[vwithstars]fade=t=in:st=0:d=1,fade=t=out:st=${videoFadeOutStart.toFixed(2)}:d=1.5[vfinal]`,
       );
       intermediateLabel = '[vfinal]';
 
@@ -911,12 +916,16 @@ export async function composeVideo(
       // Stronger vignette (PI/3), crushed blacks (gamma=0.95), cinematic color balance
       const colorGradingFilter = `colorbalance=rs=-0.05:gs=-0.02:bs=0.08:rm=-0.03:gm=0:bm=0.05,eq=saturation=0.92:contrast=1.06:brightness=-0.04:gamma=0.95,vignette=PI/5`;
       const overlayFilter = buildOverlayFilters(overlays, dimensions, format);
+      // Add video fade in/out for smooth transitions (1s fade in, 1.5s fade out)
+      const videoFadeOutStart = Math.max(0, totalVideoDuration - 1.5);
+      const videoFadeFilter = `fade=t=in:st=0:d=1,fade=t=out:st=${videoFadeOutStart.toFixed(2)}:d=1.5`;
       const videoFilter = [
         zoomFilter,
         gradientBlendFilter,
         colorGradingFilter,
         subtitleFilter,
         overlayFilter,
+        videoFadeFilter,
       ]
         .filter(Boolean)
         .join(',');
