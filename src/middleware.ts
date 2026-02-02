@@ -245,8 +245,33 @@ export function middleware(request: NextRequest, event: NextFetchEvent) {
     const realIp = request.headers.get('x-real-ip');
     if (realIp) headers.set('x-real-ip', realIp);
 
+    // Track page_viewed (one per page per user per day)
     event.waitUntil(
       fetch(trackingUrl, {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({ path: finalPath }),
+      }),
+    );
+
+    // Track app_opened (one per user per UTC day) - server-side for reliability
+    const appOpenedUrl = new URL('/api/telemetry/app-opened', request.url);
+    event.waitUntil(
+      fetch(appOpenedUrl, {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({ path: finalPath }),
+      }),
+    );
+
+    // Track product_opened (one per authenticated user per UTC day)
+    // Endpoint checks auth and skips if user not logged in
+    const productOpenedUrl = new URL(
+      '/api/telemetry/product-opened',
+      request.url,
+    );
+    event.waitUntil(
+      fetch(productOpenedUrl, {
         method: 'POST',
         headers,
         body: JSON.stringify({ path: finalPath }),

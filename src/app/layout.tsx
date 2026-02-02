@@ -152,6 +152,7 @@ export default function RootLayout({
             <ErrorBoundaryWrapper>
               <UserProvider>
                 <AstronomyProviderWrapper>
+                  <AppOpenedTracker />
                   <Suspense
                     fallback={
                       <main className='flex flex-col flex-1 w-full min-h-0 h-[calc(100vh-4rem)]'>
@@ -160,7 +161,6 @@ export default function RootLayout({
                     }
                   >
                     <ConditionalMainWrapper>
-                      <AppOpenedTracker />
                       <ErrorBoundaryWrapper>{children}</ErrorBoundaryWrapper>
                       <Analytics />
                       <SpeedInsights />
