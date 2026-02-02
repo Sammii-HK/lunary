@@ -13,6 +13,13 @@ import {
   getCrystalsByZodiacSign,
   type Crystal,
 } from '../../src/constants/grimoire/crystals';
+import { getAspectMeaning } from './aspectInterpretations';
+import {
+  generateEngagingTitle,
+  generateEngagingSubtitle,
+  generateNarrativeIntro,
+  generateClosingStatement,
+} from './titleTemplates';
 
 const DEFAULT_OBSERVER = new Observer(51.4769, 0.0005, 0);
 
@@ -118,13 +125,19 @@ export interface DailyForecast {
   avoid: string[];
 }
 
+export interface RankedDay {
+  date: Date;
+  strength: 'best' | 'good' | 'favorable';
+  whyGood: string;
+}
+
 export interface BestDaysGuidance {
-  love: { dates: Date[]; reason: string };
-  prosperity: { dates: Date[]; reason: string };
-  healing: { dates: Date[]; reason: string };
-  protection: { dates: Date[]; reason: string };
-  manifestation: { dates: Date[]; reason: string };
-  cleansing: { dates: Date[]; reason: string };
+  love: { dates: Date[]; reason: string; ranked?: RankedDay[] };
+  prosperity: { dates: Date[]; reason: string; ranked?: RankedDay[] };
+  healing: { dates: Date[]; reason: string; ranked?: RankedDay[] };
+  protection: { dates: Date[]; reason: string; ranked?: RankedDay[] };
+  manifestation: { dates: Date[]; reason: string; ranked?: RankedDay[] };
+  cleansing: { dates: Date[]; reason: string; ranked?: RankedDay[] };
 }
 
 export interface WeeklyCrystalGuide {
@@ -134,6 +147,7 @@ export interface WeeklyCrystalGuide {
   usage: string;
   chakra: string;
   intention: string;
+  affirmation: string;
 }
 
 export interface MagicalTimingGuide {
@@ -766,15 +780,9 @@ function getAspectEnergy(
   planetB: string,
   aspect: string,
 ): string {
-  const aspectEnergies: { [key: string]: string } = {
-    conjunction: 'unified and intensified',
-    opposition: 'polarized and dynamic',
-    trine: 'harmonious and flowing',
-    square: 'challenging and transformative',
-    sextile: 'supportive and opportunistic',
-  };
-
-  return `The ${aspect} between ${planetA} and ${planetB} creates ${aspectEnergies[aspect] || 'cosmic'} energy`;
+  // Use rich aspect interpretations database
+  const meaning = getAspectMeaning(planetA, planetB, aspect);
+  return meaning.energy;
 }
 
 function getAspectGuidance(
@@ -782,18 +790,22 @@ function getAspectGuidance(
   planetB: string,
   aspect: string,
 ): string {
-  const guidance: { [key: string]: string } = {
-    conjunction: `Work with the combined power of ${planetA} and ${planetB}. This is a time for new beginnings and focused action.`,
-    opposition: `Balance the energies of ${planetA} and ${planetB}. Find harmony between opposing forces.`,
-    trine: `The harmonious flow between ${planetA} and ${planetB} supports your goals. Trust the process.`,
-    square: `The tension between ${planetA} and ${planetB} requires action. Use challenges as catalysts for growth.`,
-    sextile: `The supportive connection between ${planetA} and ${planetB} offers opportunities. Take advantage of favorable conditions.`,
-  };
+  // Use rich aspect interpretations database
+  const meaning = getAspectMeaning(planetA, planetB, aspect);
 
-  return (
-    guidance[aspect] ||
-    `Work with the ${aspect} energy between ${planetA} and ${planetB}.`
-  );
+  // Combine expect and workWith for comprehensive guidance
+  const parts: string[] = [];
+  if (meaning.expect) {
+    parts.push(`Expect: ${meaning.expect}.`);
+  }
+  if (meaning.workWith) {
+    parts.push(`How to work with this: ${meaning.workWith}.`);
+  }
+  if (meaning.avoid) {
+    parts.push(`Avoid: ${meaning.avoid}.`);
+  }
+
+  return parts.join(' ') || `Work with this ${aspect} energy consciously.`;
 }
 
 async function calculateMoonPhases(
@@ -1365,163 +1377,329 @@ function generateBestDaysGuidance(
   majorAspects: MajorAspect[],
   moonPhases: MoonPhaseEvent[],
 ): BestDaysGuidance {
-  const loveDates: Date[] = [];
-  const prosperityDates: Date[] = [];
-  const healingDates: Date[] = [];
-  const protectionDates: Date[] = [];
-  const manifestationDates: Date[] = [];
-  const cleansingDates: Date[] = [];
+  // Track ranked days with reasons for each category
+  type DayScore = {
+    date: Date;
+    score: number;
+    reasons: string[];
+    forecast: DailyForecast;
+  };
 
-  // Analyze daily forecasts for best days
+  const loveScores: DayScore[] = [];
+  const prosperityScores: DayScore[] = [];
+  const healingScores: DayScore[] = [];
+  const protectionScores: DayScore[] = [];
+  const manifestationScores: DayScore[] = [];
+  const cleansingScores: DayScore[] = [];
+
+  // Score modifiers for different factors
+  const PLANET_RULER_BONUS = 3;
+  const MOON_SIGN_BONUS = 2;
+  const HARMONIOUS_ASPECT_BONUS = 4;
+  const CHALLENGING_ASPECT_PENALTY = -1;
+  const MOON_PHASE_BONUS = 3;
+
+  // Helper to find aspects on a specific date
+  const getAspectsOnDate = (date: Date) =>
+    majorAspects.filter((a) => a.date.toDateString() === date.toDateString());
+
+  // Helper to find moon phase on a specific date
+  const getMoonPhaseOnDate = (date: Date) =>
+    moonPhases.find((m) => m.date.toDateString() === date.toDateString());
+
+  // Analyze each day
   dailyForecasts.forEach((forecast) => {
-    // Love: Venus days, Venus aspects, or Moon in Libra/Taurus
-    if (
-      forecast.planetaryRuler === 'Venus' ||
-      forecast.moonSign === 'Libra' ||
-      forecast.moonSign === 'Taurus'
-    ) {
-      loveDates.push(forecast.date);
+    const dayAspects = getAspectsOnDate(forecast.date);
+    const dayMoonPhase = getMoonPhaseOnDate(forecast.date);
+
+    // === LOVE scoring ===
+    let loveScore = 0;
+    const loveReasons: string[] = [];
+
+    if (forecast.planetaryRuler === 'Venus') {
+      loveScore += PLANET_RULER_BONUS;
+      loveReasons.push('Venus rules this day - peak romantic energy');
+    }
+    if (forecast.moonSign === 'Libra') {
+      loveScore += MOON_SIGN_BONUS;
+      loveReasons.push('Moon in Libra favors partnership and harmony');
+    }
+    if (forecast.moonSign === 'Taurus') {
+      loveScore += MOON_SIGN_BONUS;
+      loveReasons.push('Moon in Taurus enhances sensuality and connection');
+    }
+    dayAspects.forEach((aspect) => {
+      if (aspect.planetA === 'Venus' || aspect.planetB === 'Venus') {
+        if (['trine', 'sextile', 'conjunction'].includes(aspect.aspect)) {
+          loveScore += HARMONIOUS_ASPECT_BONUS;
+          const other =
+            aspect.planetA === 'Venus' ? aspect.planetB : aspect.planetA;
+          loveReasons.push(
+            `Venus ${aspect.aspect} ${other} brings romantic flow`,
+          );
+        }
+      }
+      if (
+        (aspect.planetA === 'Venus' && aspect.planetB === 'Mars') ||
+        (aspect.planetA === 'Mars' && aspect.planetB === 'Venus')
+      ) {
+        loveScore += 2;
+        loveReasons.push(`Venus-Mars ${aspect.aspect} ignites attraction`);
+      }
+    });
+
+    if (loveScore > 0) {
+      loveScores.push({
+        date: forecast.date,
+        score: loveScore,
+        reasons: loveReasons,
+        forecast,
+      });
     }
 
-    // Prosperity: Jupiter days, Jupiter aspects, or Moon in Sagittarius/Pisces
-    if (
-      forecast.planetaryRuler === 'Jupiter' ||
-      forecast.moonSign === 'Sagittarius' ||
-      forecast.moonSign === 'Pisces'
-    ) {
-      prosperityDates.push(forecast.date);
+    // === PROSPERITY scoring ===
+    let prosperityScore = 0;
+    const prosperityReasons: string[] = [];
+
+    if (forecast.planetaryRuler === 'Jupiter') {
+      prosperityScore += PLANET_RULER_BONUS;
+      prosperityReasons.push('Jupiter rules this day - expansion and luck');
+    }
+    if (forecast.moonSign === 'Sagittarius') {
+      prosperityScore += MOON_SIGN_BONUS;
+      prosperityReasons.push('Moon in Sagittarius amplifies opportunity');
+    }
+    if (forecast.moonSign === 'Taurus') {
+      prosperityScore += MOON_SIGN_BONUS;
+      prosperityReasons.push('Moon in Taurus grounds financial matters');
+    }
+    dayAspects.forEach((aspect) => {
+      if (aspect.planetA === 'Jupiter' || aspect.planetB === 'Jupiter') {
+        if (['trine', 'sextile', 'conjunction'].includes(aspect.aspect)) {
+          prosperityScore += HARMONIOUS_ASPECT_BONUS;
+          const other =
+            aspect.planetA === 'Jupiter' ? aspect.planetB : aspect.planetA;
+          prosperityReasons.push(
+            `Jupiter ${aspect.aspect} ${other} expands abundance`,
+          );
+        }
+      }
+    });
+
+    if (prosperityScore > 0) {
+      prosperityScores.push({
+        date: forecast.date,
+        score: prosperityScore,
+        reasons: prosperityReasons,
+        forecast,
+      });
     }
 
-    // Healing: Moon days, Moon phases, or Moon in Cancer/Pisces
-    if (
-      forecast.planetaryRuler === 'Moon' ||
-      forecast.moonSign === 'Cancer' ||
-      forecast.moonSign === 'Pisces' ||
-      moonPhases.some(
-        (mp) => mp.date.toDateString() === forecast.date.toDateString(),
-      )
-    ) {
-      healingDates.push(forecast.date);
+    // === HEALING scoring ===
+    let healingScore = 0;
+    const healingReasons: string[] = [];
+
+    if (forecast.planetaryRuler === 'Moon') {
+      healingScore += PLANET_RULER_BONUS;
+      healingReasons.push('Moon rules this day - emotional healing supported');
+    }
+    if (forecast.moonSign === 'Cancer') {
+      healingScore += MOON_SIGN_BONUS;
+      healingReasons.push('Moon in Cancer nurtures inner healing');
+    }
+    if (forecast.moonSign === 'Pisces') {
+      healingScore += MOON_SIGN_BONUS;
+      healingReasons.push('Moon in Pisces opens spiritual healing');
+    }
+    if (dayMoonPhase) {
+      healingScore += MOON_PHASE_BONUS;
+      healingReasons.push(`${dayMoonPhase.phase} amplifies healing rituals`);
     }
 
-    // Protection: Mars days, Mars aspects, or Moon in Aries/Scorpio
-    if (
-      forecast.planetaryRuler === 'Mars' ||
-      forecast.moonSign === 'Aries' ||
-      forecast.moonSign === 'Scorpio'
-    ) {
-      protectionDates.push(forecast.date);
+    if (healingScore > 0) {
+      healingScores.push({
+        date: forecast.date,
+        score: healingScore,
+        reasons: healingReasons,
+        forecast,
+      });
     }
 
-    // Manifestation: New Moon or Sun days
-    if (
-      forecast.planetaryRuler === 'Sun' ||
-      moonPhases.some(
-        (mp) =>
-          mp.phase === 'New Moon' &&
-          mp.date.toDateString() === forecast.date.toDateString(),
-      )
-    ) {
-      manifestationDates.push(forecast.date);
+    // === PROTECTION scoring ===
+    let protectionScore = 0;
+    const protectionReasons: string[] = [];
+
+    if (forecast.planetaryRuler === 'Mars') {
+      protectionScore += PLANET_RULER_BONUS;
+      protectionReasons.push('Mars rules this day - defensive strength peaks');
+    }
+    if (forecast.planetaryRuler === 'Saturn') {
+      protectionScore += 2;
+      protectionReasons.push("Saturn's energy builds lasting protection");
+    }
+    if (forecast.moonSign === 'Aries') {
+      protectionScore += MOON_SIGN_BONUS;
+      protectionReasons.push('Moon in Aries empowers boundaries');
+    }
+    if (forecast.moonSign === 'Scorpio') {
+      protectionScore += MOON_SIGN_BONUS;
+      protectionReasons.push('Moon in Scorpio strengthens psychic shields');
     }
 
-    // Cleansing: Waning Moon phases or Saturn days
+    if (protectionScore > 0) {
+      protectionScores.push({
+        date: forecast.date,
+        score: protectionScore,
+        reasons: protectionReasons,
+        forecast,
+      });
+    }
+
+    // === MANIFESTATION scoring ===
+    let manifestationScore = 0;
+    const manifestationReasons: string[] = [];
+
+    if (forecast.planetaryRuler === 'Sun') {
+      manifestationScore += PLANET_RULER_BONUS;
+      manifestationReasons.push('Sun rules this day - willpower magnified');
+    }
+    if (dayMoonPhase?.phase.includes('New')) {
+      manifestationScore += MOON_PHASE_BONUS + 2;
+      manifestationReasons.push(
+        'New Moon is the ultimate time for new intentions',
+      );
+    }
+    if (forecast.moonSign === 'Aries') {
+      manifestationScore += MOON_SIGN_BONUS;
+      manifestationReasons.push('Moon in Aries initiates powerful beginnings');
+    }
+    if (forecast.moonSign === 'Leo') {
+      manifestationScore += MOON_SIGN_BONUS;
+      manifestationReasons.push('Moon in Leo amplifies creative vision');
+    }
+
+    if (manifestationScore > 0) {
+      manifestationScores.push({
+        date: forecast.date,
+        score: manifestationScore,
+        reasons: manifestationReasons,
+        forecast,
+      });
+    }
+
+    // === CLEANSING scoring ===
+    let cleansingScore = 0;
+    const cleansingReasons: string[] = [];
+
+    if (forecast.planetaryRuler === 'Saturn') {
+      cleansingScore += PLANET_RULER_BONUS;
+      cleansingReasons.push(
+        'Saturn rules this day - release what no longer serves',
+      );
+    }
+    if (dayMoonPhase?.phase.includes('Full')) {
+      cleansingScore += MOON_PHASE_BONUS;
+      cleansingReasons.push('Full Moon illuminates what needs releasing');
+    }
     if (
-      forecast.planetaryRuler === 'Saturn' ||
-      moonPhases.some(
-        (mp) =>
-          (mp.phase.includes('Waning') || mp.phase === 'Full Moon') &&
-          mp.date.toDateString() === forecast.date.toDateString(),
-      )
+      dayMoonPhase?.phase.includes('Waning') ||
+      dayMoonPhase?.phase.includes('Last')
     ) {
-      cleansingDates.push(forecast.date);
+      cleansingScore += MOON_PHASE_BONUS;
+      cleansingReasons.push('Waning Moon naturally supports letting go');
+    }
+    if (forecast.moonSign === 'Scorpio') {
+      cleansingScore += MOON_SIGN_BONUS;
+      cleansingReasons.push('Moon in Scorpio transforms and purges');
+    }
+    if (forecast.moonSign === 'Capricorn') {
+      cleansingScore += MOON_SIGN_BONUS;
+      cleansingReasons.push('Moon in Capricorn clears obstacles to goals');
+    }
+
+    if (cleansingScore > 0) {
+      cleansingScores.push({
+        date: forecast.date,
+        score: cleansingScore,
+        reasons: cleansingReasons,
+        forecast,
+      });
     }
   });
 
-  // Check major aspects for additional guidance
-  majorAspects.forEach((aspect) => {
-    if (aspect.planetA === 'Venus' || aspect.planetB === 'Venus') {
-      if (aspect.aspect === 'trine' || aspect.aspect === 'sextile') {
-        loveDates.push(aspect.date);
-      }
-    }
-    if (aspect.planetA === 'Jupiter' || aspect.planetB === 'Jupiter') {
-      if (aspect.aspect === 'trine' || aspect.aspect === 'sextile') {
-        prosperityDates.push(aspect.date);
-      }
-    }
-  });
-
-  // Deduplicate dates by converting to date strings and back
-  const deduplicateDates = (dates: Date[]): Date[] => {
-    const uniqueDateStrings = Array.from(
-      new Set(dates.map((d) => d.toISOString().split('T')[0])),
-    );
-    return uniqueDateStrings
-      .map((ds) => new Date(ds))
-      .sort((a, b) => a.getTime() - b.getTime());
+  // Helper to convert scores to ranked days
+  const toRankedDays = (scores: DayScore[]): RankedDay[] => {
+    return scores
+      .sort((a, b) => b.score - a.score)
+      .slice(0, 5)
+      .map((s, index) => ({
+        date: s.date,
+        strength:
+          index === 0 && s.score >= 5
+            ? 'best'
+            : s.score >= 4
+              ? 'good'
+              : 'favorable',
+        whyGood: s.reasons[0] || 'Favorable cosmic alignment',
+      }));
   };
 
-  // Deduplicate all date arrays first
-  const uniqueLoveDates = deduplicateDates(loveDates);
-  const uniqueProsperityDates = deduplicateDates(prosperityDates);
-  const uniqueHealingDates = deduplicateDates(healingDates);
-  const uniqueProtectionDates = deduplicateDates(protectionDates);
-  const uniqueManifestationDates = deduplicateDates(manifestationDates);
-  const uniqueCleansingDates = deduplicateDates(cleansingDates);
-
-  // Generate reasons using deduplicated counts
-  const reasons = {
-    love:
-      uniqueLoveDates.length > 0
-        ? `Venus energy and favorable aspects support romantic connections on ${uniqueLoveDates.length} day${uniqueLoveDates.length > 1 ? 's' : ''}`
-        : 'Venus aspects favor romantic connections',
-    prosperity:
-      uniqueProsperityDates.length > 0
-        ? `Jupiter energy supports abundance work on ${uniqueProsperityDates.length} day${uniqueProsperityDates.length > 1 ? 's' : ''}`
-        : 'Jupiter energy supports abundance work',
-    healing:
-      uniqueHealingDates.length > 0
-        ? `Moon phases support healing rituals on ${uniqueHealingDates.length} day${uniqueHealingDates.length > 1 ? 's' : ''}`
-        : 'Moon phases support healing rituals',
-    protection:
-      uniqueProtectionDates.length > 0
-        ? `Mars energy strengthens protective work on ${uniqueProtectionDates.length} day${uniqueProtectionDates.length > 1 ? 's' : ''}`
-        : 'Mars energy strengthens protective work',
-    manifestation:
-      uniqueManifestationDates.length > 0
-        ? `New moon energy perfect for intention setting on ${uniqueManifestationDates.length} day${uniqueManifestationDates.length > 1 ? 's' : ''}`
-        : 'New moon energy perfect for intention setting',
-    cleansing:
-      uniqueCleansingDates.length > 0
-        ? `Waning moon supports release and clearing on ${uniqueCleansingDates.length} day${uniqueCleansingDates.length > 1 ? 's' : ''}`
-        : 'Waning moon supports release and clearing',
+  // Helper to generate summary reason
+  const generateSummaryReason = (
+    ranked: RankedDay[],
+    category: string,
+  ): string => {
+    if (ranked.length === 0) {
+      return `Look for ${category.toLowerCase()} opportunities throughout the week.`;
+    }
+    const best = ranked.find((r) => r.strength === 'best');
+    if (best) {
+      const dayName = best.date.toLocaleDateString('en-US', {
+        weekday: 'long',
+      });
+      return `${dayName} is your power day for ${category.toLowerCase()}. ${best.whyGood}.`;
+    }
+    return `${ranked.length} favorable days for ${category.toLowerCase()} this week.`;
   };
+
+  // Build results
+  const loveRanked = toRankedDays(loveScores);
+  const prosperityRanked = toRankedDays(prosperityScores);
+  const healingRanked = toRankedDays(healingScores);
+  const protectionRanked = toRankedDays(protectionScores);
+  const manifestationRanked = toRankedDays(manifestationScores);
+  const cleansingRanked = toRankedDays(cleansingScores);
 
   return {
     love: {
-      dates: uniqueLoveDates,
-      reason: reasons.love,
+      dates: loveRanked.map((r) => r.date),
+      reason: generateSummaryReason(loveRanked, 'Love'),
+      ranked: loveRanked,
     },
     prosperity: {
-      dates: uniqueProsperityDates,
-      reason: reasons.prosperity,
+      dates: prosperityRanked.map((r) => r.date),
+      reason: generateSummaryReason(prosperityRanked, 'Prosperity'),
+      ranked: prosperityRanked,
     },
     healing: {
-      dates: uniqueHealingDates,
-      reason: reasons.healing,
+      dates: healingRanked.map((r) => r.date),
+      reason: generateSummaryReason(healingRanked, 'Healing'),
+      ranked: healingRanked,
     },
     protection: {
-      dates: uniqueProtectionDates,
-      reason: reasons.protection,
+      dates: protectionRanked.map((r) => r.date),
+      reason: generateSummaryReason(protectionRanked, 'Protection'),
+      ranked: protectionRanked,
     },
     manifestation: {
-      dates: uniqueManifestationDates,
-      reason: reasons.manifestation,
+      dates: manifestationRanked.map((r) => r.date),
+      reason: generateSummaryReason(manifestationRanked, 'Manifestation'),
+      ranked: manifestationRanked,
     },
     cleansing: {
-      dates: uniqueCleansingDates,
-      reason: reasons.cleansing,
+      dates: cleansingRanked.map((r) => r.date),
+      reason: generateSummaryReason(cleansingRanked, 'Cleansing'),
+      ranked: cleansingRanked,
     },
   };
 }
@@ -1535,7 +1713,6 @@ function generateWeeklyCrystalGuide(
   // Safety check: ensure crystal database is available
   if (!crystalDatabase || crystalDatabase.length === 0) {
     console.error('Crystal database is empty or unavailable');
-    // Return empty array - this will be handled gracefully by the UI
     return crystalGuide;
   }
 
@@ -1548,6 +1725,68 @@ function generateWeeklyCrystalGuide(
     Jupiter: 'Jupiter',
     Venus: 'Venus',
     Saturn: 'Saturn',
+  };
+
+  // Planet themes for contextual reasons
+  const planetThemes: Record<string, { theme: string; action: string }> = {
+    Sun: { theme: 'vitality and self-expression', action: 'shine your light' },
+    Moon: { theme: 'intuition and emotions', action: 'trust your feelings' },
+    Mars: { theme: 'courage and motivation', action: 'take bold action' },
+    Mercury: { theme: 'communication and clarity', action: 'speak your truth' },
+    Jupiter: { theme: 'abundance and growth', action: 'expand your horizons' },
+    Venus: { theme: 'love and harmony', action: 'open your heart' },
+    Saturn: {
+      theme: 'discipline and mastery',
+      action: 'build solid foundations',
+    },
+  };
+
+  // Varied usage templates
+  const usageTemplates = [
+    (crystal: string, chakra: string) =>
+      `Hold ${crystal} during morning meditation to set your intention for the day.`,
+    (crystal: string, chakra: string) =>
+      `Place ${crystal} on your ${chakra} chakra while resting to absorb its energy.`,
+    (crystal: string, chakra: string) =>
+      `Carry ${crystal} in your pocket or bag to maintain its supportive vibration throughout the day.`,
+    (crystal: string, chakra: string) =>
+      `Keep ${crystal} on your desk or workspace to enhance focus and alignment.`,
+    (crystal: string, chakra: string) =>
+      `Sleep with ${crystal} under your pillow or on your nightstand for dream work.`,
+    (crystal: string, chakra: string) =>
+      `Create a small altar with ${crystal} as the centerpiece for today's intentions.`,
+    (crystal: string, chakra: string) =>
+      `Hold ${crystal} while journaling to deepen your insights and self-reflection.`,
+  ];
+
+  // Affirmation templates based on crystal/planet energy
+  const generateAffirmation = (
+    crystal: Crystal,
+    planet: string,
+    moonSign: string,
+  ): string => {
+    const theme = planetThemes[planet]?.theme || 'cosmic alignment';
+    const intentions = crystal.intentions || [];
+
+    if (intentions.length > 0) {
+      const intention = intentions[0].toLowerCase();
+      return `I welcome ${intention} into my life with ease and grace.`;
+    }
+
+    // Fallback based on planet
+    const affirmations: Record<string, string> = {
+      Sun: 'I radiate confidence and embrace my authentic self.',
+      Moon: 'I trust my intuition and honor my emotional wisdom.',
+      Mars: 'I have the courage to pursue what sets my soul on fire.',
+      Mercury: 'My thoughts are clear and my words carry power.',
+      Jupiter: 'Abundance flows to me naturally and effortlessly.',
+      Venus: 'I am worthy of love and beauty surrounds me.',
+      Saturn: 'I build my dreams with patience and persistence.',
+    };
+
+    return (
+      affirmations[planet] || `I align with the cosmic energy of ${moonSign}.`
+    );
   };
 
   // Helper function to get crystals by planet
@@ -1572,12 +1811,9 @@ function generateWeeklyCrystalGuide(
     try {
       const moonCrystals = getCrystalsByZodiacSign(moonSign);
       const planetCrystals = getCrystalsByPlanet(planet);
-
-      // Find crystals that match both
       const matches = moonCrystals.filter((crystal) =>
         planetCrystals.some((pc) => pc.id === crystal.id),
       );
-
       return matches.length > 0 ? matches[0] : null;
     } catch (error) {
       console.error('Error finding combination crystal:', error);
@@ -1585,22 +1821,53 @@ function generateWeeklyCrystalGuide(
     }
   };
 
-  dailyForecasts.forEach((forecast) => {
+  // Generate contextual reason based on daily events
+  const generateContextualReason = (
+    crystal: Crystal,
+    forecast: DailyForecast,
+    planet: string,
+  ): string => {
+    const theme = planetThemes[planet];
+
+    // Check for major events
+    if (forecast.majorEvents && forecast.majorEvents.length > 0) {
+      const event = forecast.majorEvents[0];
+      if (event.includes('retrograde')) {
+        return `As ${event}, ${crystal.name} helps maintain clarity and perspective during this reflective period.`;
+      }
+      if (event.includes('enters')) {
+        return `With ${event}, ${crystal.name} supports smooth transitions and helps you embrace new energy.`;
+      }
+      if (event.includes('trine') || event.includes('sextile')) {
+        return `Today's harmonious aspects are enhanced by ${crystal.name}, amplifying the flow of positive energy.`;
+      }
+      if (event.includes('square') || event.includes('opposition')) {
+        return `${crystal.name} provides grounding support as you navigate today's dynamic cosmic tensions.`;
+      }
+    }
+
+    // Default to planet/moon themed reason
+    if (theme) {
+      return `On this ${forecast.planetaryRuler} day with Moon in ${forecast.moonSign}, ${crystal.name} enhances ${theme.theme} and helps you ${theme.action}.`;
+    }
+
+    return `${crystal.name} aligns with today's ${forecast.moonSign} moon energy, supporting your intentions.`;
+  };
+
+  dailyForecasts.forEach((forecast, index) => {
     try {
       const planet =
         planetMap[forecast.planetaryRuler] || forecast.planetaryRuler;
 
       let selectedCrystal: Crystal | null = null;
-      let reason = '';
 
-      // Priority 1: Find crystal matching both moon sign AND planetary ruler (most specific)
+      // Priority 1: Find crystal matching both moon sign AND planetary ruler
       const combinationCrystal = findCombinationCrystal(
         forecast.moonSign,
         planet,
       );
       if (combinationCrystal && !usedCrystals.has(combinationCrystal.name)) {
         selectedCrystal = combinationCrystal;
-        reason = `The ${forecast.planetaryRuler} ruler with Moon in ${forecast.moonSign} resonates with ${combinationCrystal.name}`;
       }
 
       // Priority 2: Find crystal matching moon sign
@@ -1610,7 +1877,6 @@ function generateWeeklyCrystalGuide(
           for (const crystal of moonCrystals) {
             if (!usedCrystals.has(crystal.name)) {
               selectedCrystal = crystal;
-              reason = `Moon in ${forecast.moonSign} aligns with ${crystal.name}`;
               break;
             }
           }
@@ -1625,78 +1891,80 @@ function generateWeeklyCrystalGuide(
         for (const crystal of planetCrystals) {
           if (!usedCrystals.has(crystal.name)) {
             selectedCrystal = crystal;
-            reason = `${forecast.planetaryRuler} rules today, resonating with ${crystal.name}`;
             break;
           }
         }
       }
 
-      // Priority 4: Find any unused crystal from database
+      // Priority 4: Find any unused crystal
       if (!selectedCrystal) {
         for (const crystal of crystalDatabase) {
           if (!usedCrystals.has(crystal.name)) {
             selectedCrystal = crystal;
-            reason = `${crystal.name} supports today's unique cosmic energy`;
             break;
           }
         }
       }
 
-      // Fallback: Allow reuse if database is small, but prefer moon sign match
+      // Fallback: Allow reuse if needed
       if (!selectedCrystal) {
         try {
           const moonCrystals = getCrystalsByZodiacSign(forecast.moonSign);
           if (moonCrystals.length > 0) {
-            // Use first moon sign crystal (may be a repeat, but still relevant)
             selectedCrystal = moonCrystals[0];
-            reason = `Moon in ${forecast.moonSign} aligns with ${selectedCrystal.name}`;
           } else {
-            // Last resort: use any crystal from database (cycle through if needed)
-            const index = crystalGuide.length % crystalDatabase.length;
-            selectedCrystal = crystalDatabase[index];
-            reason = `${selectedCrystal.name} supports today's cosmic energy`;
+            const idx = crystalGuide.length % crystalDatabase.length;
+            selectedCrystal = crystalDatabase[idx];
           }
         } catch (error) {
-          console.error('Error in fallback crystal selection:', error);
-          // Ultimate fallback - cycle through database
-          const index = crystalGuide.length % crystalDatabase.length;
-          selectedCrystal = crystalDatabase[index];
-          reason = `${selectedCrystal.name} supports today's cosmic energy`;
+          const idx = crystalGuide.length % crystalDatabase.length;
+          selectedCrystal = crystalDatabase[idx];
         }
       }
 
-      // Ensure we have a crystal - always return one, even if we need to reuse
       if (!selectedCrystal) {
-        // Last resort: cycle through database to ensure variety
-        const index = crystalGuide.length % crystalDatabase.length;
-        selectedCrystal = crystalDatabase[index];
-        reason = `${selectedCrystal.name} supports today's cosmic energy`;
+        const idx = crystalGuide.length % crystalDatabase.length;
+        selectedCrystal = crystalDatabase[idx];
       }
 
-      // Track usage - ensure we never reuse a crystal
       usedCrystals.add(selectedCrystal.name);
 
-      // Get primary chakra (use first chakra or primaryChakra if available)
+      // Get chakra
       const chakra = selectedCrystal.primaryChakra
         ? selectedCrystal.primaryChakra.replace(' Chakra', '')
         : selectedCrystal.chakras && selectedCrystal.chakras.length > 0
           ? selectedCrystal.chakras[0]
           : 'Crown';
 
-      // Get intention (use first intention or generate from description)
+      // Get intention
       const intention =
         selectedCrystal.intentions && selectedCrystal.intentions.length > 0
           ? selectedCrystal.intentions[0]
-          : `Work with ${selectedCrystal.name} to align with ${forecast.moonSign} moon energy`;
+          : `Align with ${forecast.moonSign} moon energy`;
 
-      // Generate usage from crystal's workingWith properties
+      // Generate contextual reason
+      const reason = generateContextualReason(
+        selectedCrystal,
+        forecast,
+        planet,
+      );
+
+      // Generate varied usage (cycle through templates)
+      const usageTemplate = usageTemplates[index % usageTemplates.length];
       const usage =
-        (selectedCrystal.workingWith &&
-          selectedCrystal.workingWith.meditation) ||
-        `Carry ${selectedCrystal.name} with you, place it on your ${chakra} chakra during meditation, or keep it nearby while working with today's energy.`;
+        selectedCrystal.workingWith?.meditation ||
+        usageTemplate(selectedCrystal.name, chakra);
+
+      // Generate affirmation
+      const affirmation = generateAffirmation(
+        selectedCrystal,
+        planet,
+        forecast.moonSign,
+      );
 
       const crystalDate =
         forecast.date instanceof Date ? forecast.date : new Date(forecast.date);
+
       crystalGuide.push({
         date: crystalDate,
         crystal: selectedCrystal.name,
@@ -1704,25 +1972,23 @@ function generateWeeklyCrystalGuide(
         usage,
         chakra,
         intention,
+        affirmation,
       });
-
-      // Removed verbose logging - only log summary at end
     } catch (error) {
       console.error(
         'Error generating crystal guide for forecast:',
         error,
         forecast,
       );
-      // Continue to next forecast even if this one fails
     }
   });
 
-  // Only log summary in development or if there's an issue
   if (process.env.NODE_ENV === 'development' && crystalGuide.length === 0) {
     console.warn(
-      `[Crystal Guide] WARNING: No crystal recommendations generated`,
+      '[Crystal Guide] WARNING: No crystal recommendations generated',
     );
   }
+
   return crystalGuide;
 }
 
@@ -1847,37 +2113,58 @@ function generateWeeklyTitle(
   highlights: PlanetaryHighlight[],
   moonPhases: MoonPhaseEvent[],
 ): string {
-  const weekOf = weekStart.toLocaleDateString('en-US', {
-    month: 'long',
-    day: 'numeric',
-  });
-  const year = weekStart.getFullYear();
-
   // Find the most significant event
   const majorEvent =
     highlights.find((h) => h.significance === 'extraordinary') ||
     highlights.find((h) => h.significance === 'high') ||
     highlights.find((h) => h.event === 'goes-retrograde') ||
     highlights.find((h) => h.event === 'enters-sign') ||
-    moonPhases[0];
+    null;
+
+  // Determine event type for title generation
+  let event: {
+    type: 'ingress' | 'retrograde' | 'direct' | 'moon-phase';
+    planet?: string;
+    sign?: string;
+    phaseName?: string;
+    moonName?: string;
+  } | null = null;
 
   if (majorEvent && 'planet' in majorEvent) {
-    // Format the event name properly
-    let eventText = '';
     if (majorEvent.event === 'enters-sign') {
-      const sign = majorEvent.details.toSign || 'sign';
-      eventText = `enters ${sign}`;
+      event = {
+        type: 'ingress',
+        planet: majorEvent.planet,
+        sign: majorEvent.details.toSign,
+      };
     } else if (majorEvent.event === 'goes-retrograde') {
-      eventText = 'goes retrograde';
+      event = {
+        type: 'retrograde',
+        planet: majorEvent.planet,
+      };
     } else if (majorEvent.event === 'goes-direct') {
-      eventText = 'goes direct';
-    } else {
-      eventText = majorEvent.event.replace('-', ' ');
+      event = {
+        type: 'direct',
+        planet: majorEvent.planet,
+      };
     }
-    return `${majorEvent.planet} ${eventText} - Week of ${weekOf}, ${year}`;
+  } else if (moonPhases.length > 0) {
+    const majorMoon = moonPhases.find(
+      (m) => m.phase.includes('Full') || m.phase.includes('New'),
+    );
+    if (majorMoon) {
+      // Extract named moon if present (e.g., "Wolf Moon (Full Moon)")
+      const namedMatch = majorMoon.phase.match(/^(\w+ Moon)/);
+      event = {
+        type: 'moon-phase',
+        phaseName: majorMoon.phase.includes('Full') ? 'Full Moon' : 'New Moon',
+        sign: majorMoon.sign,
+        moonName: namedMatch ? namedMatch[1] : undefined,
+      };
+    }
   }
 
-  return `Cosmic Currents - Week of ${weekOf}, ${year}`;
+  return generateEngagingTitle(weekStart, event);
 }
 
 function generateWeeklySubtitle(
@@ -1886,36 +2173,45 @@ function generateWeeklySubtitle(
   highlights: PlanetaryHighlight[],
   moonPhases: MoonPhaseEvent[],
 ): string {
-  // Find the most significant event for the subtitle
-  const majorEvent =
-    highlights.find((h) => h.significance === 'extraordinary') ||
-    highlights.find((h) => h.significance === 'high') ||
-    highlights.find((h) => h.event === 'goes-retrograde') ||
-    highlights.find((h) => h.event === 'enters-sign') ||
-    moonPhases[0];
+  // Count retrogrades
+  const retrogradeCount = retrogradeChanges.filter(
+    (r) => r.action === 'begins',
+  ).length;
 
-  if (majorEvent && 'planet' in majorEvent) {
-    // Format the event name properly
-    let eventText = '';
-    if (majorEvent.event === 'enters-sign') {
-      const sign = majorEvent.details.toSign || 'sign';
-      eventText = `enters ${sign}`;
-    } else if (majorEvent.event === 'goes-retrograde') {
-      eventText = 'goes retrograde';
-    } else if (majorEvent.event === 'goes-direct') {
-      eventText = 'goes direct';
-    } else {
-      eventText = majorEvent.event.replace('-', ' ');
-    }
-    return `${majorEvent.planet} ${eventText}`;
-  }
+  // Find major moon phase
+  const majorMoon = moonPhases.find(
+    (m) => m.phase.includes('Full') || m.phase.includes('New'),
+  );
+  const majorMoonPhase = majorMoon
+    ? { phase: majorMoon.phase, sign: majorMoon.sign }
+    : null;
 
-  // Fallback to first moon phase if available
-  if (moonPhases.length > 0) {
-    return moonPhases[0].phase;
-  }
+  // Find top aspect
+  const topAspect =
+    majorAspects.length > 0
+      ? {
+          planetA: majorAspects[0].planetA,
+          planetB: majorAspects[0].planetB,
+          aspect: majorAspects[0].aspect,
+        }
+      : null;
 
-  return 'Cosmic Currents';
+  // Find top ingress
+  const ingressHighlight = highlights.find((h) => h.event === 'enters-sign');
+  const topIngress =
+    ingressHighlight && ingressHighlight.details.toSign
+      ? {
+          planet: ingressHighlight.planet,
+          sign: ingressHighlight.details.toSign,
+        }
+      : null;
+
+  return generateEngagingSubtitle(
+    retrogradeCount,
+    majorMoonPhase,
+    topAspect,
+    topIngress,
+  );
 }
 
 function generateWeeklySummary(
@@ -1923,53 +2219,87 @@ function generateWeeklySummary(
   aspects: MajorAspect[],
   moonPhases: MoonPhaseEvent[],
 ): string {
-  // Build summary from actual events, avoiding placeholder text
-  const summaryParts: string[] = [];
+  // Convert to simple format for narrative generation
+  const simpleHighlights = highlights
+    .filter((h) => h.event !== 'enters-sign' || h.details?.toSign)
+    .slice(0, 3)
+    .map((h) => ({
+      planet: h.planet,
+      event: h.event,
+      sign: h.details?.toSign,
+    }));
 
-  // Add notable planetary movements (only if we have highlights with proper descriptions)
-  if (highlights.length > 0) {
-    const notableHighlights = highlights
-      .slice(0, 2)
-      .map((h) => {
-        if (h.event === 'enters-sign' && h.details?.toSign) {
-          return `${h.planet} enters ${h.details.toSign}`;
-        } else if (h.event === 'goes-retrograde') {
-          return `${h.planet} stations retrograde`;
-        } else if (h.event === 'goes-direct') {
-          return `${h.planet} stations direct`;
-        } else {
-          return `${h.planet} ${h.event.replace('-', ' ')}`;
-        }
-      })
-      .filter((text) => !text.includes('enters sign')); // Filter out placeholder text
+  const simpleMoonPhases = moonPhases.slice(0, 2).map((m) => ({
+    phase: m.phase,
+    sign: m.sign,
+  }));
 
-    if (notableHighlights.length > 0) {
-      if (notableHighlights.length === 1) {
-        summaryParts.push(
-          `Notable planetary movements include ${notableHighlights[0]}.`,
-        );
-      } else {
-        summaryParts.push(
-          `Notable planetary movements include ${notableHighlights.join(' and ')}.`,
-        );
-      }
+  const simpleAspects = aspects.slice(0, 2).map((a) => ({
+    planetA: a.planetA,
+    planetB: a.planetB,
+    aspect: a.aspect,
+  }));
+
+  // Generate narrative intro
+  const narrativeIntro = generateNarrativeIntro(
+    simpleHighlights,
+    simpleMoonPhases,
+    simpleAspects,
+  );
+
+  // Determine dominant element for closing statement
+  const signElements: Record<string, 'fire' | 'earth' | 'air' | 'water'> = {
+    Aries: 'fire',
+    Leo: 'fire',
+    Sagittarius: 'fire',
+    Taurus: 'earth',
+    Virgo: 'earth',
+    Capricorn: 'earth',
+    Gemini: 'air',
+    Libra: 'air',
+    Aquarius: 'air',
+    Cancer: 'water',
+    Scorpio: 'water',
+    Pisces: 'water',
+  };
+
+  const elementCounts = { fire: 0, earth: 0, air: 0, water: 0 };
+  [...simpleHighlights, ...simpleMoonPhases].forEach((item) => {
+    const sign = 'sign' in item ? item.sign : undefined;
+    if (sign && signElements[sign]) {
+      elementCounts[signElements[sign]]++;
     }
+  });
+
+  const dominantElement = (
+    Object.entries(elementCounts) as [
+      'fire' | 'earth' | 'air' | 'water',
+      number,
+    ][]
+  ).reduce(
+    (max, [element, count]) => (count > max.count ? { element, count } : max),
+    { element: 'mixed' as const, count: 0 },
+  ).element as 'fire' | 'earth' | 'air' | 'water' | 'mixed';
+
+  // Generate closing statement
+  const closing = generateClosingStatement(
+    dominantElement === 'mixed' || elementCounts[dominantElement] < 2
+      ? 'mixed'
+      : dominantElement,
+  );
+
+  // Combine parts
+  if (narrativeIntro) {
+    return `${narrativeIntro} ${closing}`;
   }
 
-  // Add themes if available
+  // Fallback with old logic if narrative generation fails
   const themes = getWeeklyThemes(highlights, aspects);
   if (themes.length > 0) {
-    summaryParts.push(
-      `The week offers opportunities for ${themes.join(', ')}.`,
-    );
+    return `This week brings opportunities for ${themes.join(', ')}. ${closing}`;
   }
 
-  // Fallback if no meaningful content
-  if (summaryParts.length === 0) {
-    return 'This week brings cosmic shifts and opportunities for growth and reflection.';
-  }
-
-  return summaryParts.join(' ');
+  return `Navigate this week with awareness and intention. ${closing}`;
 }
 
 function getWeeklyThemes(
