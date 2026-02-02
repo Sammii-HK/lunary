@@ -134,7 +134,7 @@ export async function GET(request: NextRequest) {
         FROM normalized_subs
         WHERE email IS NOT NULL
           AND created_at < ${formatTimestamp(range.start)}
-          AND (cancelled_at IS NULL OR cancelled_at >= ${formatTimestamp(range.start)})
+          AND status NOT IN ('cancelled', 'canceled', 'ended')
           AND (email NOT LIKE ${TEST_EMAIL_PATTERN} AND email != ${TEST_EMAIL_EXACT})
       )
       SELECT COUNT(*) as count

@@ -860,10 +860,45 @@ export async function GET(request: NextRequest) {
         ? Number((100 - day30Retention).toFixed(2))
         : null;
 
+    // Calculate stickiness metrics using the same DAU/WAU/MAU values
+    // Stickiness = (smaller window users / larger window users) * 100
+    const trendDau = currentTrend.dau;
+    const trendWau = currentTrend.wau;
+    const trendMau = currentTrend.mau;
+    const stickinessDauMau = trendMau > 0 ? (trendDau / trendMau) * 100 : 0;
+    const stickinessWauMau = trendMau > 0 ? (trendWau / trendMau) * 100 : 0;
+    const stickinessDauWau = trendWau > 0 ? (trendDau / trendWau) * 100 : 0;
+
+    // Also calculate for app_opened metrics
+    const appOpenedStickinessDauMau =
+      appOpenedMau > 0 ? (appOpenedDau / appOpenedMau) * 100 : 0;
+    const appOpenedStickinessWauMau =
+      appOpenedMau > 0 ? (appOpenedWau / appOpenedMau) * 100 : 0;
+
+    // Product stickiness metrics
+    const productStickinessDauMau =
+      productMau > 0 ? (productDau / productMau) * 100 : 0;
+    const productStickinessWauMau =
+      productMau > 0 ? (productWau / productMau) * 100 : 0;
+
+    // Signed-in product stickiness (same as product for now since they use same values)
+    const signedInProductStickinessDauMau =
+      signedInProductMau > 0
+        ? (signedInProductDau / signedInProductMau) * 100
+        : 0;
+    const signedInProductStickinessWauMau =
+      signedInProductMau > 0
+        ? (signedInProductWau / signedInProductMau) * 100
+        : 0;
+
     const response = NextResponse.json({
       dau: currentTrend.dau,
       wau: currentTrend.wau,
       mau: currentTrend.mau,
+      // Stickiness metrics using engagement events (consistent with DAU/WAU/MAU above)
+      stickiness_dau_mau: Number(stickinessDauMau.toFixed(2)),
+      stickiness_wau_mau: Number(stickinessWauMau.toFixed(2)),
+      stickiness_dau_wau: Number(stickinessDauWau.toFixed(2)),
       returning_dau: returningDau,
       returning_wau: returningWau,
       returning_mau: returningMau,
@@ -891,12 +926,20 @@ export async function GET(request: NextRequest) {
       product_dau: productDau,
       product_wau: productWau,
       product_mau: productMau,
+      product_stickiness_dau_mau: Number(productStickinessDauMau.toFixed(2)),
+      product_stickiness_wau_mau: Number(productStickinessWauMau.toFixed(2)),
       grimoire_dau: grimoireDau,
       grimoire_wau: grimoireWau,
       grimoire_mau: grimoireMau,
       app_opened_dau: appOpenedDau,
       app_opened_wau: appOpenedWau,
       app_opened_mau: appOpenedMau,
+      app_opened_stickiness_dau_mau: Number(
+        appOpenedStickinessDauMau.toFixed(2),
+      ),
+      app_opened_stickiness_wau_mau: Number(
+        appOpenedStickinessWauMau.toFixed(2),
+      ),
       sitewide_dau: sitewideDau,
       sitewide_wau: sitewideWau,
       sitewide_mau: sitewideMau,
@@ -916,6 +959,12 @@ export async function GET(request: NextRequest) {
       signed_in_product_dau: signedInProductDau,
       signed_in_product_wau: signedInProductWau,
       signed_in_product_mau: signedInProductMau,
+      signed_in_product_stickiness_dau_mau: Number(
+        signedInProductStickinessDauMau.toFixed(2),
+      ),
+      signed_in_product_stickiness_wau_mau: Number(
+        signedInProductStickinessWauMau.toFixed(2),
+      ),
       signed_in_product_users: productUsers,
       signed_in_product_returning_users: returningUsers,
       signed_in_product_avg_sessions_per_user: Number(

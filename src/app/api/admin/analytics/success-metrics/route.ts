@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { sql } from '@vercel/postgres';
+import Stripe from 'stripe';
 
 import {
   formatDate,
@@ -9,6 +10,13 @@ import {
 import { getSearchConsoleData } from '@/lib/google/search-console';
 import { summarizeEntitlements } from '@/lib/metrics/entitlement-metrics';
 import { ANALYTICS_CACHE_TTL_SECONDS } from '@/lib/analytics-cache-config';
+
+function getStripe() {
+  if (!process.env.STRIPE_SECRET_KEY) {
+    return null;
+  }
+  return new Stripe(process.env.STRIPE_SECRET_KEY);
+}
 
 // Test user exclusion patterns
 const TEST_EMAIL_PATTERN = '%@test.lunary.app';
@@ -293,7 +301,8 @@ export async function GET(request: NextRequest) {
 
     const currentEntitlementStats = summarizeEntitlements(entitlementEntries);
 
-    const activeSubscriptionsCountResult = await sql`
+    // Count paid subscriptions from subscriptions table
+    const paidSubscriptionsResult = await sql`
       WITH scoped AS (
         SELECT user_id, status
         FROM subscriptions
@@ -304,13 +313,48 @@ export async function GET(request: NextRequest) {
       per_user AS (
         SELECT
           user_id,
-          BOOL_OR(status IN ('active', 'trial', 'past_due', 'free')) AS has_active
+          BOOL_OR(status IN ('active', 'trial', 'past_due', 'free')) AS has_active,
+          BOOL_OR(status IN ('active', 'trial', 'past_due')) AS has_paid
         FROM scoped
         GROUP BY user_id
       )
-      SELECT COUNT(*) FILTER (WHERE has_active) AS total_active
+      SELECT
+        COUNT(*) FILTER (WHERE has_active) AS total_active,
+        COUNT(*) FILTER (WHERE has_paid) AS total_paid
       FROM per_user
     `;
+
+    // Count total registered users and free users (users without paid subscription)
+    const userCountsResult = await sql`
+      WITH paid_users AS (
+        SELECT DISTINCT user_id
+        FROM subscriptions
+        WHERE status IN ('active', 'trial', 'past_due')
+          AND user_id IS NOT NULL
+          AND (user_email IS NULL OR (user_email NOT LIKE ${TEST_EMAIL_PATTERN} AND user_email != ${TEST_EMAIL_EXACT}))
+      ),
+      all_users AS (
+        SELECT id as user_id
+        FROM "user"
+        WHERE created_at <= ${formatTimestamp(range.end)}
+          AND (email IS NULL OR (email NOT LIKE ${TEST_EMAIL_PATTERN} AND email != ${TEST_EMAIL_EXACT}))
+      )
+      SELECT
+        COUNT(*) AS total_users,
+        COUNT(*) FILTER (WHERE user_id NOT IN (SELECT user_id FROM paid_users)) AS free_users
+      FROM all_users
+    `;
+
+    const activeSubscriptionsCountResult = {
+      rows: [
+        {
+          total_active: paidSubscriptionsResult.rows[0]?.total_active || 0,
+          total_paid: paidSubscriptionsResult.rows[0]?.total_paid || 0,
+          total_users: userCountsResult.rows[0]?.total_users || 0,
+          free_users: userCountsResult.rows[0]?.free_users || 0,
+        },
+      ],
+    };
 
     const prevActiveSubscriptionsResult = await sql`
       WITH scoped AS (
@@ -371,9 +415,74 @@ export async function GET(request: NextRequest) {
     const activeSubscriptions = Number(
       activeSubscriptionsCountResult.rows[0]?.total_active || 0,
     );
+    const paidSubscriptions = Number(
+      activeSubscriptionsCountResult.rows[0]?.total_paid || 0,
+    );
+    const totalUsers = Number(
+      activeSubscriptionsCountResult.rows[0]?.total_users || 0,
+    );
+    const freeUsers = Number(
+      activeSubscriptionsCountResult.rows[0]?.free_users || 0,
+    );
     const prevActiveSubscriptions = Number(
       prevActiveSubscriptionsResult.rows[0]?.total_active || 0,
     );
+
+    // Get orphaned subscriptions count (subscriptions that couldn't be linked to a user)
+    let orphanedSubscriptionsCount = 0;
+    try {
+      const orphanedResult = await sql`
+        SELECT COUNT(*) AS count
+        FROM orphaned_subscriptions
+        WHERE status IN ('active', 'trial', 'past_due')
+      `;
+      orphanedSubscriptionsCount = Number(orphanedResult.rows[0]?.count || 0);
+    } catch {
+      // Table may not exist
+    }
+
+    // Get direct Stripe subscription count for comparison
+    // Note: This is optional - if Stripe calls fail/timeout, we still return the rest of the metrics
+    let stripeActiveSubscriptions = 0;
+    let stripeActiveCustomers = 0;
+    const stripe = getStripe();
+    if (stripe) {
+      try {
+        // Use a simple approach with expand to get counts without iteration
+        // Fetch first page of active and trialing subscriptions
+        const [activeSubs, trialingSubs] = await Promise.all([
+          stripe.subscriptions.list({ status: 'active', limit: 100 }),
+          stripe.subscriptions.list({ status: 'trialing', limit: 100 }),
+        ]);
+
+        // Count subscriptions from first page (good enough for comparison)
+        stripeActiveSubscriptions =
+          activeSubs.data.length + trialingSubs.data.length;
+
+        // Count unique customers from first page
+        const customerIds = new Set<string>();
+        for (const sub of activeSubs.data) {
+          if (typeof sub.customer === 'string') {
+            customerIds.add(sub.customer);
+          }
+        }
+        for (const sub of trialingSubs.data) {
+          if (typeof sub.customer === 'string') {
+            customerIds.add(sub.customer);
+          }
+        }
+        stripeActiveCustomers = customerIds.size;
+      } catch (error) {
+        // Stripe calls are optional - log and continue with 0 values
+        console.warn(
+          '[success-metrics] Stripe count failed (non-fatal):',
+          error,
+        );
+        stripeActiveSubscriptions = 0;
+        stripeActiveCustomers = 0;
+      }
+    }
+
     const prevMrr = previousEntitlementStats.dedupedMrr;
     const startingPayingCustomers = previousEntitlementStats.payingCustomers;
 
@@ -698,6 +807,19 @@ export async function GET(request: NextRequest) {
         trend: activeSubscriptionsTrend,
         change: Number(activeSubscriptionsChange.toFixed(1)),
         target: null,
+        // Breakdown: paid vs free (free = registered users without paid subscription)
+        paid_subscriptions: paidSubscriptions,
+        free_users: freeUsers,
+        total_registered_users: totalUsers,
+        // Stripe direct counts for comparison (paid only)
+        stripe_active_subscriptions: stripeActiveSubscriptions,
+        stripe_active_customers: stripeActiveCustomers,
+        orphaned_subscriptions: orphanedSubscriptionsCount,
+        // Discrepancy compares DB paid users to Stripe (not including free)
+        discrepancy:
+          stripeActiveCustomers > 0
+            ? stripeActiveCustomers - paidSubscriptions
+            : null,
       },
       active_entitlements: {
         value: activeEntitlements,
