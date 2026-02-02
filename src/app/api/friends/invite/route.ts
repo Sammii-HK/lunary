@@ -1,0 +1,72 @@
+import { NextRequest, NextResponse } from 'next/server';
+import { sql } from '@vercel/postgres';
+import { randomBytes } from 'crypto';
+import { requireUser } from '@/lib/ai/auth';
+import { encrypt } from '@/lib/encryption';
+
+/**
+ * POST /api/friends/invite
+ * Generate a friend invite link
+ */
+export async function POST(request: NextRequest) {
+  try {
+    const user = await requireUser(request);
+
+    // Generate a unique invite code
+    const rawCode = randomBytes(16).toString('hex');
+    const encryptedCode = encrypt(rawCode);
+
+    // Invite expires in 7 days
+    const expiresAt = new Date();
+    expiresAt.setDate(expiresAt.getDate() + 7);
+
+    const result = await sql`
+      INSERT INTO friend_invites (inviter_id, invite_code, expires_at)
+      VALUES (${user.id}, ${encryptedCode}, ${expiresAt.toISOString()}::timestamptz)
+      RETURNING id, invite_code, expires_at
+    `;
+
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://lunary.app';
+    const inviteUrl = `${baseUrl}/invite/${rawCode}`;
+
+    return NextResponse.json({
+      success: true,
+      inviteUrl,
+      expiresAt: result.rows[0].expires_at,
+    });
+  } catch (error) {
+    console.error('[Friends] Error creating invite:', error);
+    return NextResponse.json(
+      { error: 'Failed to create invite link' },
+      { status: 500 },
+    );
+  }
+}
+
+/**
+ * GET /api/friends/invite
+ * List user's pending invites
+ */
+export async function GET(request: NextRequest) {
+  try {
+    const user = await requireUser(request);
+
+    const result = await sql`
+      SELECT id, status, expires_at, created_at, accepted_at
+      FROM friend_invites
+      WHERE inviter_id = ${user.id}
+      ORDER BY created_at DESC
+      LIMIT 10
+    `;
+
+    return NextResponse.json({
+      invites: result.rows,
+    });
+  } catch (error) {
+    console.error('[Friends] Error fetching invites:', error);
+    return NextResponse.json(
+      { error: 'Failed to fetch invites' },
+      { status: 500 },
+    );
+  }
+}

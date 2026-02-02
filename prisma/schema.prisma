@@ -1185,6 +1185,38 @@ model synastry_reports {
   @@index([relationship_profile_id], map: "idx_synastry_reports_profile_id")
 }
 
+model friend_invites {
+  id              String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  inviter_id      String
+  invite_code     String    @unique // Encrypted unique code
+  status          String    @default("pending") // pending, accepted, expired
+  accepted_by_id  String?   // User who accepted the invite
+  expires_at      DateTime  @db.Timestamptz(6)
+  created_at      DateTime  @default(now()) @db.Timestamptz(6)
+  accepted_at     DateTime? @db.Timestamptz(6)
+
+  @@index([inviter_id], map: "idx_friend_invites_inviter")
+  @@index([invite_code], map: "idx_friend_invites_code")
+  @@index([status], map: "idx_friend_invites_status")
+}
+
+model friend_connections {
+  id                  String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  user_id             String    // The user who owns this connection view
+  friend_id           String    // The connected friend's user ID
+  nickname            String?   // Optional nickname for the friend
+  relationship_type   String?   // partner, friend, family, etc
+  synastry_score      Int?      // Cached compatibility score
+  synastry_data       Json?     // Cached synastry analysis (encrypted)
+  last_synastry_calc  DateTime? @db.Timestamptz(6)
+  created_at          DateTime  @default(now()) @db.Timestamptz(6)
+  updated_at          DateTime  @default(now()) @updatedAt @db.Timestamptz(6)
+
+  @@unique([user_id, friend_id], map: "idx_friend_connections_unique")
+  @@index([user_id], map: "idx_friend_connections_user")
+  @@index([friend_id], map: "idx_friend_connections_friend")
+}
+
 model verification {
   id         String   @id
   identifier String
