@@ -12,10 +12,17 @@
  * Run with: npx ts-node scripts/weekly-sync-cron.ts
  */
 
-// Load environment variables from .env.local
+// Load environment variables from .env.local (only for CLI execution)
 import { config } from 'dotenv';
 import { resolve } from 'path';
-config({ path: resolve(process.cwd(), '.env.local') });
+
+// Only load dotenv when running as CLI script
+if (
+  process.argv[1]?.includes('weekly-sync-cron') ||
+  process.argv[1]?.includes('ts-node')
+) {
+  config({ path: resolve(process.cwd(), '.env.local') });
+}
 
 import Stripe from 'stripe';
 import { sql } from '@vercel/postgres';
@@ -314,4 +321,10 @@ async function main() {
   }
 }
 
-main();
+// Only run if executed directly as a script (not when imported)
+if (
+  process.argv[1]?.includes('weekly-sync-cron') ||
+  process.argv[1]?.includes('ts-node')
+) {
+  main();
+}
