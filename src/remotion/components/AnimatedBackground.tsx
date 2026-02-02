@@ -76,7 +76,7 @@ const StarField: React.FC<{ frame: number }> = ({ frame }) => {
         x: pseudoRandom(i * 4) * 100,
         y: pseudoRandom(i * 4 + 1) * 100,
         size: 1 + pseudoRandom(i * 4 + 2) * 1.5, // Very small stars
-        delay: pseudoRandom(i * 4 + 3) * 300, // Frame offset for twinkle
+        delay: pseudoRandom(i * 4 + 3) * 135, // Frame offset for twinkle (4.5s cycle)
       });
     }
 
@@ -86,10 +86,10 @@ const StarField: React.FC<{ frame: number }> = ({ frame }) => {
   return (
     <div style={{ position: 'absolute', width: '100%', height: '100%' }}>
       {stars.map((star, index) => {
-        // Very slow, subtle twinkle
+        // Medium speed twinkle (4.5s cycle at 30fps = 135 frames)
         const twinkle = interpolate(
-          (frame + star.delay) % 300,
-          [0, 150, 300],
+          (frame + star.delay) % 135,
+          [0, 67, 135],
           [0.2, 0.4, 0.2], // Very low opacity range
           {
             extrapolateLeft: 'clamp',
