@@ -95,10 +95,7 @@ export const MediumFormVideo: React.FC<MediumFormVideoProps> = ({
 
   return (
     <AbsoluteFill style={{ backgroundColor: COLORS.cosmicBlack }}>
-      {/* Animated background */}
-      <AnimatedBackground showStars={false} />
-
-      {/* Background images with crossfade */}
+      {/* Background images first */}
       {images.map((image, index) => {
         const startFrame = secondsToFrames(image.startTime, fps);
         const endFrame = secondsToFrames(image.endTime, fps);
@@ -120,6 +117,9 @@ export const MediumFormVideo: React.FC<MediumFormVideoProps> = ({
           </Sequence>
         );
       })}
+
+      {/* Stars render ON TOP of background images */}
+      <AnimatedBackground showStars={true} overlayMode={true} />
 
       {/* Fade in from black */}
       <TransitionEffect

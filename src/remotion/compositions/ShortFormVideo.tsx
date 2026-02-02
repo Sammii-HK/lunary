@@ -76,10 +76,7 @@ export const ShortFormVideo: React.FC<ShortFormVideoProps> = ({
 
   return (
     <AbsoluteFill style={{ backgroundColor: COLORS.cosmicBlack }}>
-      {/* Animated background */}
-      <AnimatedBackground showStars={false} />
-
-      {/* Background image with Ken Burns effect */}
+      {/* Background image first */}
       {currentImage && (
         <AbsoluteFill>
           <Img
@@ -93,6 +90,9 @@ export const ShortFormVideo: React.FC<ShortFormVideoProps> = ({
           />
         </AbsoluteFill>
       )}
+
+      {/* Stars render ON TOP of background image */}
+      <AnimatedBackground showStars={true} overlayMode={true} />
 
       {/* Fade in from black */}
       <TransitionEffect
