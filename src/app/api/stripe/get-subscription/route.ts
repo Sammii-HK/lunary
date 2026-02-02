@@ -132,6 +132,87 @@ export async function POST(request: NextRequest) {
       }
     }
 
+    // RECOVERY: Check for orphaned subscriptions that match this user
+    if (userId || userEmail) {
+      try {
+        const orphanedQuery = userId
+          ? sql`
+              SELECT stripe_subscription_id, stripe_customer_id, customer_email, status, plan_type
+              FROM orphaned_subscriptions
+              WHERE resolved = FALSE
+                AND customer_email = (
+                  SELECT email FROM "user" WHERE id = ${userId} LIMIT 1
+                )
+              ORDER BY created_at DESC
+              LIMIT 1
+            `
+          : sql`
+              SELECT stripe_subscription_id, stripe_customer_id, customer_email, status, plan_type
+              FROM orphaned_subscriptions
+              WHERE resolved = FALSE
+                AND LOWER(customer_email) = LOWER(${userEmail})
+              ORDER BY created_at DESC
+              LIMIT 1
+            `;
+
+        const orphanedResult = await orphanedQuery;
+
+        if (orphanedResult.rows.length > 0 && userId) {
+          const orphaned = orphanedResult.rows[0];
+          console.log(
+            `🔄 Auto-recovering orphaned subscription ${orphaned.stripe_subscription_id} for user ${userId}`,
+          );
+
+          const stripe = getStripe();
+          if (stripe) {
+            // Update Stripe metadata
+            await stripe.subscriptions.update(orphaned.stripe_subscription_id, {
+              metadata: { userId },
+            });
+            await stripe.customers.update(orphaned.stripe_customer_id, {
+              metadata: { userId },
+            });
+
+            // Link to user in database
+            await sql`
+              INSERT INTO subscriptions (
+                user_id, user_email, status, plan_type,
+                stripe_customer_id, stripe_subscription_id, trial_used
+              ) VALUES (
+                ${userId}, ${orphaned.customer_email}, ${orphaned.status}, ${orphaned.plan_type},
+                ${orphaned.stripe_customer_id}, ${orphaned.stripe_subscription_id}, true
+              )
+              ON CONFLICT (user_id) DO UPDATE SET
+                status = EXCLUDED.status,
+                plan_type = EXCLUDED.plan_type,
+                stripe_customer_id = EXCLUDED.stripe_customer_id,
+                stripe_subscription_id = EXCLUDED.stripe_subscription_id,
+                updated_at = NOW()
+            `;
+
+            // Mark orphaned subscription as resolved
+            await sql`
+              UPDATE orphaned_subscriptions
+              SET resolved = TRUE,
+                  resolved_user_id = ${userId},
+                  resolved_at = NOW(),
+                  resolved_by = 'auto_recovery'
+              WHERE stripe_subscription_id = ${orphaned.stripe_subscription_id}
+            `;
+
+            console.log(
+              `✅ Successfully auto-recovered subscription for user ${userId}`,
+            );
+
+            // Return the recovered subscription
+            return formatResponse(orphaned, forceRefresh);
+          }
+        }
+      } catch (error) {
+        console.error('Error checking for orphaned subscriptions:', error);
+      }
+    }
+
     return NextResponse.json({
       success: true,
       subscription: null,
@@ -288,9 +369,14 @@ function mapStatus(stripeStatus: string): string {
 }
 
 function formatResponse(sub: any, forceRefresh?: boolean) {
-  const cacheHeaders: Record<string, string> = forceRefresh
-    ? { 'Cache-Control': 'no-cache, no-store, must-revalidate' }
-    : { 'Cache-Control': 'private, s-maxage=300, stale-while-revalidate=600' };
+  // CRITICAL FIX: Never use stale-while-revalidate for subscription data
+  // Users seeing "free" status when they're paying is a critical bug
+  // Always fetch fresh data - subscription status is too important to cache
+  const cacheHeaders: Record<string, string> = {
+    'Cache-Control': 'private, no-cache, no-store, must-revalidate',
+    Pragma: 'no-cache',
+    Expires: '0',
+  };
 
   // cancel_at_period_end might not be in DB, default to false
   const cancelAtPeriodEnd =

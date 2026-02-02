@@ -25,40 +25,42 @@ import {
 } from '../src/lib/analytics/canonical-events';
 
 // PostHog test name -> Admin dashboard test name mapping
+// Updated to match current A/B tests from src/lib/ab-test-tracking.ts
 const POSTHOG_TEST_MAPPING: Record<string, string> = {
-  pricing_cta_test: 'pricing_cta',
-  pricing_display_test: 'pricing_price',
-  onboarding_flow_test: 'onboarding_flow',
-  upgrade_prompt_test: 'upgrade_prompt',
+  'cta-copy-test': 'cta_copy',
+  paywall_preview_style_v1: 'paywall_preview',
+  'homepage-features-test': 'homepage_features',
+  feature_preview_blur_v1: 'feature_preview',
+  'transit-overflow-style': 'transit_overflow',
+  'weekly-lock-style': 'weekly_lock',
+  'tarot-truncation-length': 'tarot_truncation',
+  'transit-limit-test': 'transit_limit',
 };
 
-// PostHog variant normalization
+// PostHog variant normalization - supports multivariate tests
 function normalizeVariant(
   variant: string | boolean | undefined,
-): 'A' | 'B' | null {
+): string | null {
   if (variant === undefined || variant === null) return null;
 
   if (typeof variant === 'boolean') {
     return variant ? 'B' : 'A';
   }
 
-  const normalized = variant.toString().toLowerCase();
-  if (
-    normalized === 'control' ||
-    normalized === 'a' ||
-    normalized === 'variant_a'
-  ) {
+  const normalized = variant.toString().toLowerCase().trim();
+  if (!normalized) return null;
+
+  // For backward compatibility with binary tests
+  if (normalized === 'control' || normalized === 'variant_a') {
     return 'A';
   }
-  if (
-    normalized === 'test' ||
-    normalized === 'b' ||
-    normalized === 'variant_b'
-  ) {
+  if (normalized === 'test' || normalized === 'variant_b') {
     return 'B';
   }
 
-  return null;
+  // Return variant as-is to support multivariate tests
+  // (e.g., "no-verb", "mystical", "simple", "blur", "truncated")
+  return normalized;
 }
 
 interface PostHogEvent {
@@ -159,7 +161,7 @@ async function fetchPostHogEvents(daysBack: number): Promise<PostHogEvent[]> {
 function transformPostHogEvent(event: PostHogEvent) {
   // Determine A/B test name and variant
   let testName: string | null = null;
-  let variant: 'A' | 'B' | null = null;
+  let variant: string | null = null;
 
   // Check for PostHog feature flag properties
   if (event.properties.$feature_flag) {
@@ -182,12 +184,26 @@ function transformPostHogEvent(event: PostHogEvent) {
 
   // Map PostHog event names to canonical event types
   const eventTypeMapping: Record<string, CanonicalEventType> = {
+    // Page views
+    $pageview: 'page_viewed',
+    page_viewed: 'page_viewed',
+
+    // App events
+    app_opened: 'app_opened',
+
+    // Pricing & conversion
     pricing_page_viewed: 'pricing_page_viewed',
-    $pageview: 'app_opened',
-    upgrade_clicked: 'upgrade_clicked',
+    upgrade_prompted: 'upgrade_prompted', // Fixed: was upgrade_prompt_shown
+
+    // Trial & subscription
     trial_started: 'trial_started',
     subscription_started: 'subscription_started',
     trial_converted: 'trial_converted',
+
+    // Feature usage
+    horoscope_viewed: 'horoscope_viewed',
+    chart_viewed: 'chart_viewed', // Fixed: was birth_chart_viewed
+    grimoire_viewed: 'grimoire_viewed',
   };
 
   const canonicalEventType = eventTypeMapping[event.event];

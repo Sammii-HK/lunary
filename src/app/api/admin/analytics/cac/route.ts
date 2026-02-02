@@ -7,6 +7,9 @@ import {
   resolveDateRange,
 } from '@/lib/analytics/date-range';
 
+const TEST_EMAIL_PATTERN = '%@test.lunary.app';
+const TEST_EMAIL_EXACT = 'test@test.lunary.app';
+
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
@@ -26,6 +29,11 @@ export async function GET(request: NextRequest) {
       FROM analytics_conversions
       WHERE created_at BETWEEN ${formatTimestamp(range.start)} AND ${formatTimestamp(range.end)}
         AND metadata IS NOT NULL
+        AND NOT EXISTS (
+          SELECT 1 FROM conversion_events ce
+          WHERE ce.user_id = analytics_conversions.user_id
+            AND (ce.user_email LIKE ${TEST_EMAIL_PATTERN} OR ce.user_email = ${TEST_EMAIL_EXACT})
+        )
       GROUP BY
         metadata->>'utm_source',
         metadata->>'utm_medium',
@@ -43,6 +51,7 @@ export async function GET(request: NextRequest) {
       WHERE event_type = 'signup'
         AND created_at BETWEEN ${formatTimestamp(range.start)} AND ${formatTimestamp(range.end)}
         AND metadata IS NOT NULL
+        AND (user_email IS NULL OR (user_email NOT LIKE ${TEST_EMAIL_PATTERN} AND user_email != ${TEST_EMAIL_EXACT}))
       GROUP BY
         metadata->>'utm_source',
         metadata->>'utm_medium',
@@ -59,6 +68,7 @@ export async function GET(request: NextRequest) {
           OR metadata->>'utm_source' IS NULL
           OR metadata->>'utm_source' = ''
         )
+        AND (user_email IS NULL OR (user_email NOT LIKE ${TEST_EMAIL_PATTERN} AND user_email != ${TEST_EMAIL_EXACT}))
     `;
 
     const organicConversionsResult = await sql`
@@ -69,6 +79,11 @@ export async function GET(request: NextRequest) {
           metadata IS NULL
           OR metadata->>'utm_source' IS NULL
           OR metadata->>'utm_source' = ''
+        )
+        AND NOT EXISTS (
+          SELECT 1 FROM conversion_events ce
+          WHERE ce.user_id = analytics_conversions.user_id
+            AND (ce.user_email LIKE ${TEST_EMAIL_PATTERN} OR ce.user_email = ${TEST_EMAIL_EXACT})
         )
     `;
 

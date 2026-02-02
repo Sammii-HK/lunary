@@ -22,12 +22,12 @@ const POSTHOG_TEST_MAPPING: Record<string, string> = {
 };
 
 /**
- * Variant value mapping (PostHog values -> A/B labels)
- * Supports both string variants and boolean flags
+ * Variant value mapping
+ * Returns the variant value as-is for multivariate tests, or normalizes to A/B for binary tests
  */
 function normalizeVariant(
   variant: string | boolean | undefined,
-): 'A' | 'B' | null {
+): string | null {
   if (variant === undefined || variant === null) return null;
 
   // Boolean flags: true = B, false = A
@@ -35,26 +35,22 @@ function normalizeVariant(
     return variant ? 'B' : 'A';
   }
 
-  // String variants
-  const normalized = variant.toString().toLowerCase();
+  // String variants - return as-is to support multivariate tests
+  // (e.g., "no-verb", "mystical", "simple" instead of just "A"/"B")
+  const normalized = variant.toString().toLowerCase().trim();
 
-  // Common PostHog variant names
-  if (
-    normalized === 'control' ||
-    normalized === 'a' ||
-    normalized === 'variant_a'
-  ) {
+  if (!normalized) return null;
+
+  // For backward compatibility, still normalize common binary test names
+  if (normalized === 'control' || normalized === 'variant_a') {
     return 'A';
   }
-  if (
-    normalized === 'test' ||
-    normalized === 'b' ||
-    normalized === 'variant_b'
-  ) {
+  if (normalized === 'test' || normalized === 'variant_b') {
     return 'B';
   }
 
-  return null;
+  // Return variant as-is (supports multivariate tests)
+  return normalized;
 }
 
 /**

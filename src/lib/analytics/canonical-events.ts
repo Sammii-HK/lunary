@@ -321,6 +321,10 @@ function sanitiseMetadata(
     'origin_hub',
     'origin_page',
     'origin_type',
+    'abTest',
+    'abVariant',
+    'ab_test',
+    'ab_variant',
   ]);
 
   const result: Record<string, unknown> = {};

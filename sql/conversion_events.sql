@@ -44,6 +44,7 @@ CREATE INDEX IF NOT EXISTS idx_conversion_events_user_created_at ON conversion_e
 CREATE INDEX IF NOT EXISTS idx_conversion_events_user_event ON conversion_events(user_id, event_type, created_at);
 
 -- Dedupe unique indexes (UTC date bucketing)
+-- For authenticated users: one app_opened per user per day
 CREATE UNIQUE INDEX IF NOT EXISTS uq_conversion_events_app_opened_daily
   ON conversion_events (
     user_id,
@@ -51,6 +52,52 @@ CREATE UNIQUE INDEX IF NOT EXISTS uq_conversion_events_app_opened_daily
     ((created_at AT TIME ZONE 'UTC')::date)
   )
   WHERE event_type = 'app_opened' AND user_id IS NOT NULL;
+
+-- For anonymous users: one app_opened per anonymous_id per day
+-- This prevents duplicate tracking in private browsing when client-side guard fails
+CREATE UNIQUE INDEX IF NOT EXISTS uq_conversion_events_app_opened_daily_anon
+  ON conversion_events (
+    anonymous_id,
+    event_type,
+    ((created_at AT TIME ZONE 'UTC')::date)
+  )
+  WHERE event_type = 'app_opened' AND user_id IS NULL AND anonymous_id IS NOT NULL;
+
+-- For product_opened: one per user per day (authenticated)
+CREATE UNIQUE INDEX IF NOT EXISTS uq_conversion_events_product_opened_daily
+  ON conversion_events (
+    user_id,
+    event_type,
+    ((created_at AT TIME ZONE 'UTC')::date)
+  )
+  WHERE event_type = 'product_opened' AND user_id IS NOT NULL;
+
+-- For product_opened: one per anonymous_id per day
+CREATE UNIQUE INDEX IF NOT EXISTS uq_conversion_events_product_opened_daily_anon
+  ON conversion_events (
+    anonymous_id,
+    event_type,
+    ((created_at AT TIME ZONE 'UTC')::date)
+  )
+  WHERE event_type = 'product_opened' AND user_id IS NULL AND anonymous_id IS NOT NULL;
+
+-- For daily_dashboard_viewed: one per user per day (authenticated)
+CREATE UNIQUE INDEX IF NOT EXISTS uq_conversion_events_daily_dashboard_daily
+  ON conversion_events (
+    user_id,
+    event_type,
+    ((created_at AT TIME ZONE 'UTC')::date)
+  )
+  WHERE event_type = 'daily_dashboard_viewed' AND user_id IS NOT NULL;
+
+-- For daily_dashboard_viewed: one per anonymous_id per day
+CREATE UNIQUE INDEX IF NOT EXISTS uq_conversion_events_daily_dashboard_daily_anon
+  ON conversion_events (
+    anonymous_id,
+    event_type,
+    ((created_at AT TIME ZONE 'UTC')::date)
+  )
+  WHERE event_type = 'daily_dashboard_viewed' AND user_id IS NULL AND anonymous_id IS NOT NULL;
 
 CREATE UNIQUE INDEX IF NOT EXISTS uq_conversion_events_grimoire_viewed_daily
   ON conversion_events (

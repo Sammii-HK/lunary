@@ -27,6 +27,7 @@ import { AuthStatusProvider } from '@/components/AuthStatus';
 import { UserProvider } from '@/context/UserContext';
 import { CookieConsent } from '@/components/CookieConsent';
 import { AppOpenedTracker } from '@/components/AppOpenedTracker';
+import { AttributionCapture } from '@/components/AttributionCapture';
 import { AstronomyProviderWrapper } from '@/components/AstronomyProviderWrapper';
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -146,6 +147,7 @@ export default function RootLayout({
       >
         <StructuredData />
         <Suspense fallback={null}>
+          <AttributionCapture />
           <AuthStatusProvider>
             <ErrorBoundaryWrapper>
               <UserProvider>

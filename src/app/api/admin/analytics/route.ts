@@ -1,5 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { sql } from '@vercel/postgres';
+import {
+  testUserFilter,
+  testUserFilterUsers,
+} from '@/lib/analytics/test-filter';
 const ACTIVITY_EVENTS = [
   'app_opened',
   'tarot_viewed',
@@ -44,24 +48,33 @@ export async function GET(request: NextRequest) {
       FROM "user"
       WHERE "createdAt" IS NOT NULL
         AND ${(sql as any).raw(dateFilter.replace('created_at', '"createdAt"'))}
+        AND ${testUserFilterUsers()}
     `;
 
     const trials = await sql`
       SELECT COUNT(DISTINCT user_id) as count
       FROM conversion_events
-      WHERE event_type = 'trial_started' AND ${(sql as any).raw(dateFilter)}
+      WHERE event_type = 'trial_started'
+        AND ${(sql as any).raw(dateFilter)}
+        AND ${testUserFilter()}
     `;
 
+    // Fix: Use only subscription_started (canonical conversion event)
+    // Avoids double-counting users who have both trial_converted and subscription_started events
     const conversions = await sql`
       SELECT COUNT(DISTINCT user_id) as count
       FROM conversion_events
-      WHERE event_type IN ('trial_converted', 'subscription_started') AND ${(sql as any).raw(dateFilter)}
+      WHERE event_type = 'subscription_started'
+        AND ${(sql as any).raw(dateFilter)}
+        AND ${testUserFilter()}
     `;
 
     const trialConversions = await sql`
       SELECT COUNT(DISTINCT user_id) as count
       FROM conversion_events
-      WHERE event_type = 'trial_converted' AND ${(sql as any).raw(dateFilter)}
+      WHERE event_type = 'trial_converted'
+        AND ${(sql as any).raw(dateFilter)}
+        AND ${testUserFilter()}
     `;
 
     const totalSignups = parseInt(signups.rows[0]?.count || '0');
@@ -75,7 +88,7 @@ export async function GET(request: NextRequest) {
       trialStarted > 0 ? (trialConverted / trialStarted) * 100 : 0;
 
     const timeToConvert = await sql`
-      SELECT 
+      SELECT
         AVG(EXTRACT(EPOCH FROM (t2.created_at - t1.created_at)) / 86400) as avg_days
       FROM conversion_events t1
       JOIN conversion_events t2 ON t1.user_id = t2.user_id
@@ -83,47 +96,50 @@ export async function GET(request: NextRequest) {
         AND t2.event_type IN ('trial_converted', 'subscription_started')
         AND t2.created_at > t1.created_at
         AND ${(sql as any).raw(dateFilter.replace('created_at', 't1.created_at'))}
+        AND (t1.user_email IS NULL OR (t1.user_email NOT LIKE '%@test.lunary.app' AND t1.user_email != 'test@test.lunary.app'))
+        AND (t2.user_email IS NULL OR (t2.user_email NOT LIKE '%@test.lunary.app' AND t2.user_email != 'test@test.lunary.app'))
     `;
 
     const avgTimeToConvert =
       parseFloat(timeToConvert.rows[0]?.avg_days || '0') || 0;
 
+    // Fix: Use subscriptions table with Stripe-backed validation instead of conversion_events
+    // This ensures we count actual active subscriptions, not just historical events
     const activeSubscriptions = await sql`
-      SELECT COUNT(DISTINCT user_id) as count
-      FROM conversion_events
-      WHERE event_type IN ('subscription_started', 'trial_converted')
-        AND ${(sql as any).raw(dateFilter)}
+      SELECT COUNT(DISTINCT s.user_id) as count
+      FROM subscriptions s
+      LEFT JOIN "user" u ON u.id = s.user_id
+      WHERE s.stripe_subscription_id IS NOT NULL
+        AND s.status IN ('active', 'trial', 'trialing', 'past_due')
+        AND (COALESCE(s.user_email, u.email) IS NULL
+             OR (COALESCE(s.user_email, u.email) NOT LIKE '%@test.lunary.app'
+                 AND COALESCE(s.user_email, u.email) != 'test@test.lunary.app'))
     `;
 
-    const monthlySubscriptions = await sql`
-      SELECT COUNT(DISTINCT user_id) as count
-      FROM conversion_events
-      WHERE event_type IN ('subscription_started', 'trial_converted')
-        AND plan_type = 'monthly'
-        AND ${(sql as any).raw(dateFilter)}
+    // Fix: Use actual monthly_amount_due from database instead of hardcoded prices
+    // This handles all pricing tiers ($4.99, $8.99, $89.99/12), discounts, and multi-currency
+    const mrrResult = await sql`
+      SELECT COALESCE(SUM(s.monthly_amount_due), 0) as total_mrr
+      FROM subscriptions s
+      LEFT JOIN "user" u ON u.id = s.user_id
+      WHERE s.stripe_subscription_id IS NOT NULL
+        AND s.status IN ('active', 'trial', 'trialing')
+        AND (COALESCE(s.user_email, u.email) IS NULL
+             OR (COALESCE(s.user_email, u.email) NOT LIKE '%@test.lunary.app'
+                 AND COALESCE(s.user_email, u.email) != 'test@test.lunary.app'))
     `;
+    const mrr = Number(mrrResult.rows[0]?.total_mrr || 0);
 
-    const yearlySubscriptions = await sql`
-      SELECT COUNT(DISTINCT user_id) as count
-      FROM conversion_events
-      WHERE event_type IN ('subscription_started', 'trial_converted')
-        AND plan_type = 'yearly'
-        AND ${(sql as any).raw(dateFilter)}
-    `;
-
-    const monthlyCount = parseInt(monthlySubscriptions.rows[0]?.count || '0');
-    const yearlyCount = parseInt(yearlySubscriptions.rows[0]?.count || '0');
-
-    const mrr = monthlyCount * 4.99 + (yearlyCount * 39.99) / 12;
-    const revenue =
-      mrr *
-      (timeRange === '7d'
-        ? 7 / 30
+    // Fix: Proper revenue calculation (daily rate × days in period)
+    const daysInPeriod =
+      timeRange === '7d'
+        ? 7
         : timeRange === '30d'
-          ? 1
+          ? 30
           : timeRange === '90d'
-            ? 3
-            : 12);
+            ? 90
+            : 365;
+    const revenue = (mrr * daysInPeriod) / 30;
 
     const events = await sql`
       SELECT 

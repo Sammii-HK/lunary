@@ -180,10 +180,13 @@ export function UserProvider({ children, demoData }: UserProviderProps) {
     if (isDemoMode) return; // Skip sync in demo mode
     const syncSubscription = async () => {
       if (!user || subscriptionSyncAttemptRef.current) return;
-      if (!user.stripeCustomerId) return;
+      if (!user.stripeCustomerId && !user.email) return;
 
       const status = user.subscriptionStatus || 'free';
-      if (status === 'active' || status === 'trial') return;
+      // CRITICAL FIX: Always sync if status is free/cancelled - user might have just paid
+      // The old check `if (status === 'active' || status === 'trial') return;` was too aggressive
+      // and could leave users stuck on 'free' after payment
+      if (status === 'active') return; // Only skip if confirmed active
 
       subscriptionSyncAttemptRef.current = true;
       try {
@@ -206,6 +209,64 @@ export function UserProvider({ children, demoData }: UserProviderProps) {
 
     syncSubscription();
   }, [user, fetchUserData]);
+
+  // CRITICAL FIX: Force refresh subscription status on window focus
+  // This ensures users see updated status after paying in a new tab
+  useEffect(() => {
+    if (isDemoMode) return;
+
+    const handleFocus = async () => {
+      if (!user?.id) return;
+
+      // Check if we just came from the success page (stored in sessionStorage)
+      const justPaid = sessionStorage.getItem('lunary_just_paid');
+      if (justPaid) {
+        sessionStorage.removeItem('lunary_just_paid');
+        console.log(
+          '[UserContext] Detected return from payment, forcing subscription refresh',
+        );
+        subscriptionSyncAttemptRef.current = false; // Reset to allow sync
+        await fetchUserData();
+        return;
+      }
+
+      // Also refresh on focus if status is free/cancelled (might have paid in another tab)
+      const status = user.subscriptionStatus || 'free';
+      if (status === 'free' || status === 'cancelled') {
+        console.log(
+          '[UserContext] Window focused with free/cancelled status, checking for updates',
+        );
+        try {
+          const response = await fetch('/api/stripe/get-subscription', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              userId: user.id,
+              userEmail: user.email,
+              customerId: user.stripeCustomerId,
+              forceRefresh: true,
+            }),
+            cache: 'no-store',
+          });
+
+          if (response.ok) {
+            const data = await response.json();
+            if (data.status && data.status !== status) {
+              console.log(
+                `[UserContext] Subscription status changed: ${status} -> ${data.status}`,
+              );
+              await fetchUserData();
+            }
+          }
+        } catch (err) {
+          console.warn('Failed to check subscription on focus:', err);
+        }
+      }
+    };
+
+    window.addEventListener('focus', handleFocus);
+    return () => window.removeEventListener('focus', handleFocus);
+  }, [user, fetchUserData, isDemoMode]);
 
   useEffect(() => {
     if (isDemoMode) return; // Skip refresh in demo mode

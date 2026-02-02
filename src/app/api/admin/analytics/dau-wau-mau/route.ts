@@ -768,6 +768,9 @@ export async function GET(request: NextRequest) {
       days: 1 | 7 | 30,
     ): Promise<number | null> => {
       if (cohortEndInclusive < cohortStart) return null;
+      // Standard retention: "Day N or later" (ensures Day 1 >= Day 7 >= Day 30)
+      const dateCondition = `DATE(ce.created_at AT TIME ZONE 'UTC') >= DATE(cohort."createdAt" AT TIME ZONE 'UTC') + ${days}`;
+
       const query = hasIdentityLinks
         ? `
         WITH cohort AS (
@@ -784,8 +787,7 @@ export async function GET(request: NextRequest) {
               SELECT 1
               FROM conversion_events ce
               WHERE ce.event_type = ANY($3::text[])
-                AND ce.created_at > cohort."createdAt"
-                AND ce.created_at <= cohort."createdAt" + INTERVAL '${days} days'
+                AND ${dateCondition}
                 AND (
                   ce.user_id = cohort.id
                   OR (
@@ -819,8 +821,7 @@ export async function GET(request: NextRequest) {
               FROM conversion_events ce
               WHERE ce.user_id = cohort.id
                 AND ce.event_type = ANY($3::text[])
-                AND ce.created_at > cohort."createdAt"
-                AND ce.created_at <= cohort."createdAt" + INTERVAL '${days} days'
+                AND ${dateCondition}
                 AND (ce.user_email IS NULL OR (ce.user_email NOT LIKE $4 AND ce.user_email != $5))
             )
           ) AS returned

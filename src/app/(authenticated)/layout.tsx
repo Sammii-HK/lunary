@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import { useAuthStatus } from '@/components/AuthStatus';
 import { conversionTracking } from '@/lib/analytics';
@@ -16,6 +16,9 @@ export default function AuthenticatedLayout({
   const router = useRouter();
   const pathname = usePathname() ?? '/app';
 
+  // Track if product_opened has been fired this session to avoid wasteful API calls
+  const productOpenedFired = useRef(false);
+
   useEffect(() => {
     if (!authStatus.loading && !authStatus.isAuthenticated) {
       const returnTo = encodeURIComponent(pathname);
@@ -23,14 +26,26 @@ export default function AuthenticatedLayout({
     }
   }, [authStatus.isAuthenticated, authStatus.loading, pathname, router]);
 
+  // Fire product_opened once when user is authenticated
+  // The analytics guard handles daily deduplication at storage/DB level
   useEffect(() => {
-    if (!authStatus.loading) {
+    if (
+      !authStatus.loading &&
+      authStatus.isAuthenticated &&
+      !productOpenedFired.current
+    ) {
+      productOpenedFired.current = true;
       conversionTracking.productOpened(
         authStatus.user?.id,
         authStatus.user?.email,
       );
     }
-  }, [authStatus.loading, authStatus.user?.id, authStatus.user?.email]);
+  }, [
+    authStatus.loading,
+    authStatus.isAuthenticated,
+    authStatus.user?.id,
+    authStatus.user?.email,
+  ]);
 
   if (authStatus.loading) {
     return (

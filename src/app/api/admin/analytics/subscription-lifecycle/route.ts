@@ -117,6 +117,33 @@ export async function GET(request: NextRequest) {
 
     const latestRows = latestPerEmailResult.rows;
 
+    // Get total subscriptions at START of period for correct churn rate denominator
+    // Churn rate = (cancelled_in_period / subscriptions_at_START) * 100
+    // NOT (cancelled_in_period / subscriptions_at_END) which would be wrong for growing/declining base
+    const subsAtStartResult = await sql`
+      WITH normalized_subs AS (
+        SELECT
+          s.*,
+          LOWER(COALESCE(NULLIF(TRIM(s.user_email), ''), NULLIF(TRIM(u.email), ''))) AS email
+        FROM subscriptions s
+        LEFT JOIN "user" u ON u.id = s.user_id
+        WHERE s.stripe_subscription_id IS NOT NULL
+      ),
+      active_at_start AS (
+        SELECT DISTINCT email
+        FROM normalized_subs
+        WHERE email IS NOT NULL
+          AND created_at < ${formatTimestamp(range.start)}
+          AND (cancelled_at IS NULL OR cancelled_at >= ${formatTimestamp(range.start)})
+          AND (email NOT LIKE ${TEST_EMAIL_PATTERN} AND email != ${TEST_EMAIL_EXACT})
+      )
+      SELECT COUNT(*) as count
+      FROM active_at_start
+    `;
+    const totalSubscriptionsAtStart = Number(
+      subsAtStartResult.rows[0]?.count || 0,
+    );
+
     const candidateStripeEmails = Array.from(
       new Set(
         latestRows
@@ -281,16 +308,27 @@ export async function GET(request: NextRequest) {
       count: Number(row.count || 0),
     }));
 
-    // Calculate churn rate (cancellations / active subscriptions)
+    // Calculate churn rate (cancellations / total subscriptions at period start)
+    // totalSubscriptionsAtStart is queried separately above to get count at range.start, not range.end
     const activeSubscriptions = states.active || 0;
     const cancelledInPeriod = churnTrends.reduce(
       (sum, t) => sum + t.churned,
       0,
     );
     const churnRate =
-      activeSubscriptions > 0
-        ? (cancelledInPeriod / activeSubscriptions) * 100
+      totalSubscriptionsAtStart > 0
+        ? (cancelledInPeriod / totalSubscriptionsAtStart) * 100
         : 0;
+
+    // Sanity check: churn rate should never exceed 100%
+    if (churnRate > 100) {
+      console.error('[subscription-lifecycle] Invalid churn rate detected:', {
+        churnRate,
+        cancelledInPeriod,
+        totalSubscriptionsAtStart,
+        activeSubscriptions,
+      });
+    }
 
     const response = NextResponse.json({
       states,

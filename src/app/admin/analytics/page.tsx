@@ -647,64 +647,110 @@ export default function AnalyticsPage() {
 
     const queryParams = `start_date=${startDate}&end_date=${endDate}`;
     const debugParam = includeAudit ? '&debug=1' : '';
+    const cacheBuster = `&_t=${Date.now()}`; // Force fresh data
 
     try {
+      // Batch requests to avoid overwhelming the database connection pool
+      // Previously: 23 parallel requests caused 48-131s timeouts and connection errors
+
+      // Batch 1: Core metrics (6 requests)
       const [
         activityRes,
         engagementOverviewRes,
-        featureAdoptionRes,
-        grimoireHealthRes,
-        conversionInfluenceRes,
         conversionsRes,
-        ctaConversionsRes,
-        subscription30dRes,
-        notificationsRes,
-        featureUsageRes,
-        attributionRes,
-        successMetricsRes,
-        discordRes,
-        searchConsoleRes,
         userGrowthRes,
         activationRes,
+        cohortsRes,
+      ] = await Promise.all([
+        fetch(
+          `/api/admin/analytics/dau-wau-mau?${queryParams}&granularity=${granularity}${cacheBuster}`,
+        ),
+        fetch(
+          `/api/admin/analytics/engagement-overview?${queryParams}${debugParam}${cacheBuster}`,
+        ),
+        fetch(`/api/admin/analytics/conversions?${queryParams}${cacheBuster}`),
+        fetch(
+          `/api/admin/analytics/user-growth?${queryParams}&granularity=${granularity}${cacheBuster}`,
+        ),
+        fetch(`/api/admin/analytics/activation?${queryParams}${cacheBuster}`),
+        fetch(
+          `/api/admin/analytics/cohorts?${queryParams}&type=week&weeks=12${cacheBuster}`,
+        ),
+      ]);
+
+      // Batch 2: Feature metrics (6 requests)
+      const [
+        featureAdoptionRes,
+        featureUsageRes,
+        grimoireHealthRes,
+        conversionInfluenceRes,
+        successMetricsRes,
+        intentionBreakdownRes,
+      ] = await Promise.all([
+        fetch(
+          `/api/admin/analytics/feature-adoption?${queryParams}${cacheBuster}`,
+        ),
+        fetch(
+          `/api/admin/analytics/feature-usage?${queryParams}${cacheBuster}`,
+        ),
+        fetch(
+          `/api/admin/analytics/grimoire-health?${queryParams}${cacheBuster}`,
+        ),
+        fetch(
+          `/api/admin/analytics/conversion-influence?${queryParams}${cacheBuster}`,
+        ),
+        fetch(
+          `/api/admin/analytics/success-metrics?${queryParams}${cacheBuster}`,
+        ),
+        fetch(
+          `/api/admin/analytics/intention-breakdown?${queryParams}${cacheBuster}`,
+        ),
+      ]);
+
+      // Batch 3: Subscription & monetization (6 requests)
+      const [
+        subscription30dRes,
         subscriptionLifecycleRes,
         planBreakdownRes,
+        ctaConversionsRes,
         apiCostsRes,
-        cohortsRes,
         userSegmentsRes,
-        intentionBreakdownRes,
+      ] = await Promise.all([
+        fetch(
+          `/api/admin/analytics/subscription-30d?${queryParams}${cacheBuster}`,
+        ),
+        fetch(
+          `/api/admin/analytics/subscription-lifecycle?${queryParams}&stripe=1${cacheBuster}`,
+        ),
+        fetch(
+          `/api/admin/analytics/plan-breakdown?${queryParams}${cacheBuster}`,
+        ),
+        fetch(
+          `/api/admin/analytics/cta-conversions?${queryParams}${cacheBuster}`,
+        ),
+        fetch(`/api/admin/analytics/api-costs?${queryParams}${cacheBuster}`),
+        fetch(
+          `/api/admin/analytics/user-segments?${queryParams}${cacheBuster}`,
+        ),
+      ]);
+
+      // Batch 4: External & misc (5 requests)
+      const [
+        notificationsRes,
+        attributionRes,
+        discordRes,
+        searchConsoleRes,
         insightsRes,
       ] = await Promise.all([
         fetch(
-          `/api/admin/analytics/dau-wau-mau?${queryParams}&granularity=${granularity}`,
+          `/api/admin/analytics/notifications?${queryParams}${cacheBuster}`,
         ),
+        fetch(`/api/admin/analytics/attribution?${queryParams}${cacheBuster}`),
+        fetch(`/api/analytics/discord-interactions?range=7d${cacheBuster}`),
         fetch(
-          `/api/admin/analytics/engagement-overview?${queryParams}${debugParam}`,
+          `/api/admin/analytics/search-console?${queryParams}${cacheBuster}`,
         ),
-        fetch(`/api/admin/analytics/feature-adoption?${queryParams}`),
-        fetch(`/api/admin/analytics/grimoire-health?${queryParams}`),
-        fetch(`/api/admin/analytics/conversion-influence?${queryParams}`),
-        fetch(`/api/admin/analytics/conversions?${queryParams}`),
-        fetch(`/api/admin/analytics/cta-conversions?${queryParams}`),
-        fetch(`/api/admin/analytics/subscription-30d?${queryParams}`),
-        fetch(`/api/admin/analytics/notifications?${queryParams}`),
-        fetch(`/api/admin/analytics/feature-usage?${queryParams}`),
-        fetch(`/api/admin/analytics/attribution?${queryParams}`),
-        fetch(`/api/admin/analytics/success-metrics?${queryParams}`),
-        fetch(`/api/analytics/discord-interactions?range=7d`),
-        fetch(`/api/admin/analytics/search-console?${queryParams}`),
-        fetch(
-          `/api/admin/analytics/user-growth?${queryParams}&granularity=${granularity}`,
-        ),
-        fetch(`/api/admin/analytics/activation?${queryParams}`),
-        fetch(
-          `/api/admin/analytics/subscription-lifecycle?${queryParams}&stripe=1`,
-        ),
-        fetch(`/api/admin/analytics/plan-breakdown?${queryParams}`),
-        fetch(`/api/admin/analytics/api-costs?${queryParams}`),
-        fetch(`/api/admin/analytics/cohorts?${queryParams}&type=week&weeks=12`),
-        fetch(`/api/admin/analytics/user-segments?${queryParams}`),
-        fetch(`/api/admin/analytics/intention-breakdown?${queryParams}`),
-        fetch(`/api/admin/analytics/insights?${queryParams}`),
+        fetch(`/api/admin/analytics/insights?${queryParams}${cacheBuster}`),
       ]);
 
       const errors: string[] = [];
@@ -4304,6 +4350,11 @@ export default function AnalyticsPage() {
                         <span>
                           Share: {Number(plan.percentage ?? 0).toFixed(1)}%
                         </span>
+                        {(plan.withDiscount > 0 || plan.fullPrice > 0) && (
+                          <span className='text-zinc-500'>
+                            Coupon: {plan.withDiscount} | Full: {plan.fullPrice}
+                          </span>
+                        )}
                       </div>
                     ))}
                     {!planBreakdown?.planBreakdown?.length && (
@@ -4312,6 +4363,113 @@ export default function AnalyticsPage() {
                       </div>
                     )}
                   </div>
+
+                  {/* Coupon Summary */}
+                  {planBreakdown?.couponSummary && (
+                    <div className='mt-4 rounded-lg border border-amber-800/40 bg-amber-950/20 p-3'>
+                      <div className='text-[11px] uppercase tracking-wide text-amber-400/80 mb-2'>
+                        Coupon Analysis
+                      </div>
+                      <div className='space-y-1 text-xs'>
+                        <div className='flex justify-between text-zinc-300'>
+                          <span>With coupon</span>
+                          <span>
+                            {planBreakdown.couponSummary.totalWithDiscount}
+                          </span>
+                        </div>
+                        <div className='flex justify-between text-zinc-300'>
+                          <span>Full price</span>
+                          <span>
+                            {planBreakdown.couponSummary.totalFullPrice}
+                          </span>
+                        </div>
+                        <div className='flex justify-between text-zinc-400'>
+                          <span>Coupon %</span>
+                          <span>
+                            {Number(
+                              planBreakdown.couponSummary.discountPercentage ??
+                                0,
+                            ).toFixed(1)}
+                            %
+                          </span>
+                        </div>
+                        <div className='flex justify-between text-emerald-400 pt-1 border-t border-zinc-800/50'>
+                          <span>Potential MRR</span>
+                          <span>
+                            $
+                            {Number(
+                              planBreakdown.couponSummary.potentialMrr ?? 0,
+                            ).toFixed(2)}
+                          </span>
+                        </div>
+                        <div className='flex justify-between text-emerald-500/70'>
+                          <span>When coupons expire</span>
+                          <span>
+                            +$
+                            {Number(
+                              planBreakdown.couponSummary
+                                .potentialMrrIncrease ?? 0,
+                            ).toFixed(2)}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Coupon Breakdown by Code */}
+                  {planBreakdown?.couponBreakdown?.length > 0 && (
+                    <div className='mt-3 space-y-2'>
+                      <div className='text-[11px] uppercase tracking-wide text-zinc-500'>
+                        Active Coupons
+                      </div>
+                      {planBreakdown.couponBreakdown.map((coupon: any) => (
+                        <div
+                          key={coupon.couponCode}
+                          className='flex items-center justify-between rounded border border-zinc-800/40 bg-zinc-950/30 px-2 py-1.5 text-xs'
+                        >
+                          <div className='flex flex-col'>
+                            <span className='text-zinc-300 font-medium'>
+                              {coupon.couponCode}
+                            </span>
+                            <span className='text-zinc-500 text-[10px]'>
+                              {coupon.discountPercent}% off •{' '}
+                              {coupon.activeCount} active
+                            </span>
+                          </div>
+                          {coupon.latestExpiry && (
+                            <span className='text-zinc-500 text-[10px]'>
+                              Expires:{' '}
+                              {new Date(
+                                coupon.latestExpiry,
+                              ).toLocaleDateString()}
+                            </span>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  {/* Legacy Monthly Subscriber Alert */}
+                  {planBreakdown?.legacyMonthlySubscribers?.length > 0 && (
+                    <div className='mt-3 rounded-lg border border-orange-800/40 bg-orange-950/20 p-3'>
+                      <div className='text-[11px] uppercase tracking-wide text-orange-400/80 mb-2'>
+                        ⚠️ Legacy &apos;monthly&apos; Subscribers
+                      </div>
+                      <div className='space-y-1 text-xs'>
+                        {planBreakdown.legacyMonthlySubscribers.map(
+                          (sub: any) => (
+                            <div
+                              key={sub.subscriptionId}
+                              className='text-zinc-400'
+                            >
+                              {sub.email || sub.name || 'Unknown'} -{' '}
+                              {sub.status}
+                            </div>
+                          ),
+                        )}
+                      </div>
+                    </div>
+                  )}
                 </CardContent>
               </Card>
             </div>
