@@ -331,7 +331,7 @@ export async function composeVideo(
   ): string => {
     // ASS subtitles with:
     // - Fade in/out effects (200ms each)
-    // - Semi-transparent background box (BorderStyle=4)
+    // - Text outline + shadow (BorderStyle=1) - no background box
     // - Roboto font for cleaner look
     const header = [
       '[Script Info]',
@@ -343,8 +343,8 @@ export async function composeVideo(
       '[V4+ Styles]',
       'Format: Name,Fontname,Fontsize,PrimaryColour,SecondaryColour,OutlineColour,BackColour,Bold,Italic,Underline,StrikeOut,ScaleX,ScaleY,Spacing,Angle,BorderStyle,Outline,Shadow,Alignment,MarginL,MarginR,MarginV,Encoding',
       // Default: center-bottom for main subtitles
-      // BorderStyle=4 creates opaque box background, BackColour with alpha for semi-transparent
-      `Style: Default,RobotoMono-Bold,${fontSize},&H00FFFFFF,&H00FFFFFF,&H40000000,&HAA000000,0,0,0,0,100,100,1,0,4,0,3,2,50,50,${marginV},0`,
+      // BorderStyle=1 = outline + shadow (no box), Outline=3 for thickness, Shadow=4 for drop shadow
+      `Style: Default,RobotoMono-Bold,${fontSize},&H00FFFFFF,&H00FFFFFF,&H80000000,&H80000000,0,0,0,0,100,100,1,0,1,3,4,2,50,50,${marginV},0`,
       '',
       '[Events]',
       'Format: Layer,Start,End,Style,Name,MarginL,MarginR,MarginV,Effect,Text',
