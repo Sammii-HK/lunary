@@ -6,10 +6,7 @@ import { join } from 'path';
 import { tmpdir } from 'os';
 import ffmpeg from 'fluent-ffmpeg';
 import { composeVideo } from '@/lib/video/compose-video';
-import {
-  renderRemotionVideo,
-  isRemotionAvailable,
-} from '@/lib/video/remotion-renderer';
+import { renderRemotionVideo } from '@/lib/video/remotion-renderer';
 import { generateVoiceover } from '@/lib/tts';
 import {
   categoryThemes,
@@ -128,9 +125,9 @@ export async function POST(
     const dateKey = script.scheduledDate.toISOString().split('T')[0];
     let videoBuffer: Buffer | undefined;
 
-    // Try Remotion first for better animations
-    const remotionAvailable = await isRemotionAvailable();
-    let useFFmpegFallback = !remotionAvailable || !audioDuration;
+    // TODO: Stage 2 - Re-enable Remotion once text/subtitles are implemented
+    // For now, use FFmpeg which has full text/CTA functionality
+    const useFFmpegFallback = true;
 
     if (!useFFmpegFallback) {
       try {
