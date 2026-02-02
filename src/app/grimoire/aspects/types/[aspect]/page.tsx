@@ -30,8 +30,10 @@ export async function generateMetadata({
 
   const aspectData =
     astrologicalAspects[aspectKey as keyof typeof astrologicalAspects];
-  const title = `${aspectData.name} Aspect: Meaning in Astrology (${aspectData.degrees}°) | Lunary`;
-  const description = `What does a ${aspectData.name.toLowerCase()} mean in astrology? Learn how this ${aspectData.nature.toLowerCase()} aspect shows up between planets in birth charts and transits.`;
+  // Use "an" for vowel sounds (Opposition, etc.), "a" for consonants
+  const article = /^[aeiou]/i.test(aspectData.name) ? 'an' : 'a';
+  const title = `${aspectData.name} Aspect in Astrology: ${aspectData.degrees}° Meaning & Interpretation`;
+  const description = `What is ${article} ${aspectData.name.toLowerCase()} aspect? When planets sit ${aspectData.degrees}° apart, they create ${aspectData.nature === 'harmonious' ? 'flow and ease' : aspectData.nature === 'challenging' ? 'tension and awareness' : 'unique dynamics'}. Learn how ${aspectData.name.toLowerCase()}s work in your birth chart and transits.`;
 
   return {
     title,
@@ -98,11 +100,12 @@ export default async function AspectPage({
 
   const aspectData =
     astrologicalAspects[aspectKey as keyof typeof astrologicalAspects];
+  const article = /^[aeiou]/i.test(aspectData.name) ? 'an' : 'a';
 
   const faqs = [
     {
-      question: `What is a ${aspectData.name} aspect?`,
-      answer: `A ${aspectData.name} aspect occurs when two planets are ${aspectData.degrees} degrees apart. ${aspectData.description}`,
+      question: `What is ${article} ${aspectData.name} aspect?`,
+      answer: `${article.charAt(0).toUpperCase() + article.slice(1)} ${aspectData.name} aspect occurs when two planets are ${aspectData.degrees} degrees apart. ${aspectData.description}`,
     },
     {
       question: `Is ${aspectData.name} a ${aspectData.nature} aspect?`,
@@ -137,9 +140,9 @@ export default async function AspectPage({
     <div className='p-4 md:p-6 lg:p-8 xl:p-10 min-h-full'>
       {renderJsonLd(aspectSchema)}
       <SEOContentTemplate
-        title={`${aspectData.name} Aspect - Lunary`}
-        h1={`${aspectData.name} Aspect: Complete Guide`}
-        description={`Discover everything about ${aspectData.name} aspect. Learn about its meaning, nature, degrees, and how it affects your birth chart.`}
+        title={`${aspectData.name} Aspect: ${aspectData.degrees}° Meaning`}
+        h1={`${aspectData.name} Aspect (${aspectData.degrees}°)`}
+        description={`What is ${article} ${aspectData.name.toLowerCase()} aspect? When planets are ${aspectData.degrees}° apart, they create ${aspectData.nature === 'harmonious' ? 'ease and flow' : aspectData.nature === 'challenging' ? 'tension and growth' : 'unique dynamics'}. Learn how it works in your chart.`}
         keywords={[
           `${aspectData.name} aspect`,
           `${aspectData.degrees} degree aspect`,
