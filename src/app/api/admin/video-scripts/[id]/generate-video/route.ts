@@ -9,7 +9,6 @@ import { composeVideo } from '@/lib/video/compose-video';
 import {
   renderRemotionVideo,
   isRemotionAvailable,
-  scriptToAudioSegments,
 } from '@/lib/video/remotion-renderer';
 import { generateVoiceover } from '@/lib/tts';
 import {
@@ -144,21 +143,15 @@ export async function POST(
           { access: 'public', addRandomSuffix: true },
         );
 
-        const segments = scriptToAudioSegments(
-          script.fullScript,
-          audioDuration,
-          2.6,
-        );
-
         // Determine format based on number of images
         const remotionFormat =
           images.length > 1 ? 'MediumFormVideo' : 'ShortFormVideo';
 
+        // Stage 1: No text/subtitles in Remotion - just background + shooting stars + audio
+        // Text will be added in stage 2 with matching styles
         videoBuffer = await renderRemotionVideo({
           format: remotionFormat,
           outputPath: '',
-          hookText: script.facetTitle,
-          segments,
           audioUrl: audioBlob.url,
           images:
             images.length > 1
@@ -172,7 +165,6 @@ export async function POST(
                 }))
               : undefined,
           backgroundImage: images.length === 1 ? images[0].url : undefined,
-          highlightTerms: highlightTerms || [],
           durationSeconds: audioDuration + 2,
         });
 

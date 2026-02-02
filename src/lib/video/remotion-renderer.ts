@@ -82,8 +82,8 @@ export interface RemotionVideoProps {
   /** Subtitle text */
   subtitle?: string;
   hookSubtitle?: string;
-  /** Audio segments for subtitles */
-  segments: AudioSegment[];
+  /** Audio segments for subtitles (optional - stage 2) */
+  segments?: AudioSegment[];
   /** Audio file URL */
   audioUrl?: string;
   /** Background music URL (for long-form) */
