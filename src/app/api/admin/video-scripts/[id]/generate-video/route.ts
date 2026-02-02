@@ -1,12 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { sql } from '@vercel/postgres';
 import { put } from '@vercel/blob';
-import { writeFile, unlink, mkdtemp } from 'fs/promises';
-import { join } from 'path';
-import { tmpdir } from 'os';
-import ffmpeg from 'fluent-ffmpeg';
 import { composeVideo } from '@/lib/video/compose-video';
-import { renderRemotionVideo } from '@/lib/video/remotion-renderer';
 import { generateVoiceover } from '@/lib/tts';
 import {
   categoryThemes,
@@ -16,25 +11,6 @@ import {
 import { getVideoScripts } from '@/lib/social/video-script-generator';
 import { buildThematicVideoComposition } from '@/lib/video/thematic-video';
 import { getImageBaseUrl } from '@/lib/urls';
-
-async function getAudioDurationFromBuffer(buffer: Buffer): Promise<number> {
-  const tempDir = await mkdtemp(join(tmpdir(), 'audio-'));
-  const tempPath = join(tempDir, 'audio.mp3');
-  await writeFile(tempPath, buffer);
-
-  return new Promise((resolve, reject) => {
-    ffmpeg.ffprobe(tempPath, async (err, metadata) => {
-      await unlink(tempPath).catch(() => {});
-      if (err) {
-        reject(err);
-      } else if (metadata.format.duration) {
-        resolve(metadata.format.duration);
-      } else {
-        reject(new Error('Could not determine audio duration'));
-      }
-    });
-  });
-}
 
 export const runtime = 'nodejs';
 
@@ -117,77 +93,21 @@ export async function POST(
       speed: 1.0,
     });
 
-    // Get audio duration for Remotion
-    const audioNodeBuffer = Buffer.from(audioBuffer);
-    const audioDuration = await getAudioDurationFromBuffer(audioNodeBuffer);
-    console.log(`🎵 Audio duration: ${audioDuration}s`);
-
     const dateKey = script.scheduledDate.toISOString().split('T')[0];
-    let videoBuffer: Buffer | undefined;
 
     // TODO: Stage 2 - Re-enable Remotion once text/subtitles are implemented
     // For now, use FFmpeg which has full text/CTA functionality
-    const useFFmpegFallback = true;
-
-    if (!useFFmpegFallback) {
-      try {
-        console.log(`🎬 Using Remotion for video generation...`);
-
-        // Upload audio to a temporary URL for Remotion
-        const audioBlob = await put(
-          `temp/audio-${Date.now()}.mp3`,
-          audioBuffer,
-          { access: 'public', addRandomSuffix: true },
-        );
-
-        // Determine format based on number of images
-        const remotionFormat =
-          images.length > 1 ? 'MediumFormVideo' : 'ShortFormVideo';
-
-        // Stage 1: No text/subtitles in Remotion - just background + shooting stars + audio
-        // Text will be added in stage 2 with matching styles
-        videoBuffer = await renderRemotionVideo({
-          format: remotionFormat,
-          outputPath: '',
-          audioUrl: audioBlob.url,
-          images:
-            images.length > 1
-              ? images.map((img, idx) => ({
-                  url: img.url,
-                  startTime:
-                    img.startTime || (idx * audioDuration) / images.length,
-                  endTime:
-                    img.endTime || ((idx + 1) * audioDuration) / images.length,
-                  topic: script.facetTitle,
-                }))
-              : undefined,
-          backgroundImage: images.length === 1 ? images[0].url : undefined,
-          durationSeconds: audioDuration + 2,
-        });
-
-        console.log(`✅ Remotion: Video rendered with shooting stars`);
-      } catch (remotionError) {
-        console.error(
-          `❌ Remotion render failed, falling back to FFmpeg:`,
-          remotionError,
-        );
-        useFFmpegFallback = true;
-      }
-    }
-
-    if (useFFmpegFallback) {
-      console.log(`⚠️ Using FFmpeg fallback for video generation...`);
-      videoBuffer = await composeVideo({
-        images,
-        audioBuffer,
-        format: 'story',
-        outputFilename: `short-${safeSlug}-${dateKey}.mp4`,
-        subtitlesText: script.fullScript,
-        subtitlesHighlightTerms: highlightTerms,
-        subtitlesHighlightColor: highlightColor,
-        overlays,
-      });
-    }
+    console.log(`🎬 Using FFmpeg for video generation...`);
+    const videoBuffer = await composeVideo({
+      images,
+      audioBuffer,
+      format: 'story',
+      outputFilename: `short-${safeSlug}-${dateKey}.mp4`,
+      subtitlesText: script.fullScript,
+      subtitlesHighlightTerms: highlightTerms,
+      subtitlesHighlightColor: highlightColor,
+      overlays,
+    });
 
     if (!videoBuffer) {
       throw new Error('Video generation failed - no video buffer produced');
