@@ -9,7 +9,7 @@ import {
 } from '@/lib/analytics/date-range';
 import { getSearchConsoleData } from '@/lib/google/search-console';
 import { summarizeEntitlements } from '@/lib/metrics/entitlement-metrics';
-import { ANALYTICS_CACHE_TTL_SECONDS } from '@/lib/analytics-cache-config';
+import { ANALYTICS_HISTORICAL_TTL_SECONDS } from '@/lib/analytics-cache-config';
 
 function getStripe() {
   if (!process.env.STRIPE_SECRET_KEY) {
@@ -867,7 +867,7 @@ export async function GET(request: NextRequest) {
     });
     response.headers.set(
       'Cache-Control',
-      `private, max-age=${ANALYTICS_CACHE_TTL_SECONDS}`,
+      `private, max-age=${ANALYTICS_HISTORICAL_TTL_SECONDS}`,
     );
     return response;
   } catch (error) {
