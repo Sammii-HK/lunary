@@ -72,7 +72,7 @@ export async function GET(
         u.image as avatar,
         u.email
       FROM user_profiles up
-      LEFT JOIN users u ON u.id = up.user_id
+      LEFT JOIN "user" u ON u.id = up.user_id
       WHERE up.user_id = ${connection.friend_id}
     `;
 

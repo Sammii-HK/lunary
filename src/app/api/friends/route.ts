@@ -47,7 +47,7 @@ export async function GET(request: NextRequest) {
         u.image as friend_avatar
       FROM friend_connections fc
       LEFT JOIN user_profiles up ON up.user_id = fc.friend_id
-      LEFT JOIN users u ON u.id = fc.friend_id
+      LEFT JOIN "user" u ON u.id = fc.friend_id
       WHERE fc.user_id = ${user.id}
       ORDER BY fc.created_at DESC
     `;
