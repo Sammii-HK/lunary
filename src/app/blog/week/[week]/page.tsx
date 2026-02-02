@@ -17,6 +17,8 @@ import { Badge } from '@/components/ui/badge';
 import { generateWeeklyContent } from '../../../../../utils/blog/weeklyContentGenerator';
 import { SocialShareButtons } from '@/components/SocialShareButtons';
 import { CrossPlatformCTA } from '@/components/CrossPlatformCTA';
+import { QuickStats, AspectNatureBadge } from '@/components/blog';
+import { getPlanetSymbol, getAspectSymbol } from '@/constants/symbols';
 
 interface BlogPostPageProps {
   params: Promise<{ week: string }>;
@@ -491,26 +493,34 @@ export default async function BlogPostPage({
             <p className='text-xl text-muted-foreground italic'>
               {blogData.subtitle || ''}
             </p>
-
-            <div className='flex flex-wrap gap-4 text-sm text-muted-foreground'>
-              <span className='flex items-center gap-1'>
-                <Star className='h-4 w-4' />
-                {displayedHighlights.length} planetary events
-              </span>
-              <span className='flex items-center gap-1'>
-                <TrendingUp className='h-4 w-4' />
-                {displayedRetrogrades.length} retrograde changes
-              </span>
-              <span className='flex items-center gap-1'>
-                <Moon className='h-4 w-4' />
-                {displayedMoonPhases.length} moon phases
-              </span>
-              <span className='flex items-center gap-1'>
-                <Sparkles className='h-4 w-4' />
-                {displayedAspects.length} major aspects
-              </span>
-            </div>
           </header>
+
+          {/* Quick Stats Summary */}
+          <QuickStats
+            retrogradeCount={displayedRetrogrades.length}
+            retrogradePlanets={displayedRetrogrades.map((r: any) => r.planet)}
+            majorMoonPhase={
+              displayedMoonPhases.find(
+                (m: any) =>
+                  m.phase?.includes('Full') || m.phase?.includes('New'),
+              )
+                ? {
+                    phase:
+                      displayedMoonPhases.find(
+                        (m: any) =>
+                          m.phase?.includes('Full') || m.phase?.includes('New'),
+                      )?.phase || '',
+                    sign:
+                      displayedMoonPhases.find(
+                        (m: any) =>
+                          m.phase?.includes('Full') || m.phase?.includes('New'),
+                      )?.sign || '',
+                  }
+                : undefined
+            }
+            planetaryHighlightCount={displayedHighlights.length}
+            aspectCount={displayedAspects.length}
+          />
 
           <div className='prose prose-invert max-w-none'>
             <p className='text-lg leading-relaxed'>{summaryText}</p>
@@ -783,11 +793,20 @@ export default async function BlogPostPage({
                       className={`border ${borderColor} ${bgColor}`}
                     >
                       <CardHeader>
-                        <CardTitle className='text-xl'>
-                          <span className={planetAColor}>{aspect.planetA}</span>{' '}
-                          <span className='text-zinc-400'>{aspect.aspect}</span>{' '}
-                          <span className={planetBColor}>{aspect.planetB}</span>
-                        </CardTitle>
+                        <div className='flex items-start justify-between'>
+                          <CardTitle className='text-xl'>
+                            <span className={planetAColor}>
+                              {getPlanetSymbol(aspect.planetA)} {aspect.planetA}
+                            </span>{' '}
+                            <span className='text-zinc-400'>
+                              {getAspectSymbol(aspect.aspect)}
+                            </span>{' '}
+                            <span className={planetBColor}>
+                              {getPlanetSymbol(aspect.planetB)} {aspect.planetB}
+                            </span>
+                          </CardTitle>
+                          <AspectNatureBadge aspect={aspect.aspect} />
+                        </div>
                       </CardHeader>
                       <CardContent>
                         <p className='text-sm text-muted-foreground mb-2'>
