@@ -481,14 +481,9 @@ export const DailyInsightCard = () => {
     >
       <div className='flex items-start justify-between gap-3'>
         <div className='flex-1 min-w-0'>
-          <div className='flex items-center justify-between mb-1'>
-            <div className='flex items-center gap-2'>
-              <Sparkles className='w-4 h-4 text-lunary-primary-300' />
-              <span className='text-sm text-zinc-200'>Today's Influence</span>
-            </div>
-            {/* <span className='text-xs bg-zinc-800/50 text-lunary-primary-200 px-1.5 py-0.5 rounded'>
-              Personal
-            </span> */}
+          <div className='flex items-center gap-2 mb-1'>
+            <Sparkles className='w-4 h-4 text-lunary-primary-300' />
+            <span className='text-sm text-zinc-200'>Today's Influence</span>
           </div>
           <p className='text-sm text-zinc-300 leading-relaxed'>{displayText}</p>
           {transitHighlights.length > 0 && (

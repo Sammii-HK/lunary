@@ -20,6 +20,7 @@ import { calculateTransitAspects } from '@/lib/astrology/transit-aspects';
 import { generateTarotTransitConnection } from '@/lib/tarot/generate-transit-connection';
 import type { TransitInsight } from '@/lib/tarot/generate-transit-connection';
 import { getLocalDateString } from '@/lib/cache/dailyCache';
+import { ShareDailyTarotCard } from '@/components/share/ShareDailyTarotCard';
 
 dayjs.extend(utc);
 dayjs.extend(dayOfYear);
@@ -222,9 +223,17 @@ export const DailyCardPreview = () => {
       >
         <div className='flex items-start justify-between gap-3 h-full'>
           <div className='flex-1 min-w-0 h-full justify-between flex flex-col'>
-            <div className='flex items-center gap-2 mb-1'>
-              <Layers className='w-4 h-4 text-lunary-accent-300' />
-              <span className='text-sm text-zinc-200'>Tarot for Today</span>
+            <div className='flex items-center justify-between mb-1'>
+              <div className='flex items-center gap-2'>
+                <Layers className='w-4 h-4 text-lunary-accent-300' />
+                <span className='text-sm text-zinc-200'>Tarot for Today</span>
+              </div>
+              <ShareDailyTarotCard
+                cardName={dailyCard.name}
+                keywords={dailyCard.keywords}
+                isPersonalized={false}
+                compact
+              />
             </div>
             <p className='text-sm text-lunary-primary-2'>{dailyCard.name}</p>
             <p className='text-xs text-zinc-400 mb-2'>
@@ -296,9 +305,17 @@ export const DailyCardPreview = () => {
               <Layers className='w-4 h-4 text-lunary-accent-300' />
               <span className='text-sm text-zinc-200'>Tarot for Today</span>
             </div>
-            <span className='text-xs bg-zinc-800/50 text-lunary-primary-200 px-1.5 py-0.5 rounded'>
-              Personal
-            </span>
+            <div className='flex items-center gap-2'>
+              <ShareDailyTarotCard
+                cardName={dailyCard.name}
+                keywords={dailyCard.keywords}
+                isPersonalized={true}
+                compact
+              />
+              <span className='text-xs bg-zinc-800/50 text-lunary-primary-200 px-1.5 py-0.5 rounded'>
+                Personal
+              </span>
+            </div>
           </div>
           <p className='text-sm text-lunary-primary-200'>{dailyCard.name}</p>
           <p className='text-xs text-zinc-400 mt-12'>
