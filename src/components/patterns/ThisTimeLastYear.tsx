@@ -96,7 +96,22 @@ export function ThisTimeLastYear({ className = '' }: ThisTimeLastYearProps) {
   }
 
   if (error || !data) {
-    return null; // Silently fail if no data
+    return (
+      <div
+        className={`rounded-xl border border-zinc-800/60 bg-zinc-950/40 p-4 ${className}`}
+      >
+        <div className='flex items-center gap-2 mb-2'>
+          <Clock className='w-4 h-4 text-zinc-600' />
+          <h3 className='text-sm font-medium text-zinc-400'>
+            This Time Last Year
+          </h3>
+        </div>
+        <p className='text-xs text-zinc-500'>
+          {error ||
+            'Keep journaling and pulling cards - your history will appear here next year.'}
+        </p>
+      </div>
+    );
   }
 
   if (!data.hasData) {

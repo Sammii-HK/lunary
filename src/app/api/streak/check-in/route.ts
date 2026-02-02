@@ -90,7 +90,7 @@ export async function POST(request: NextRequest) {
       const previousStreak = currentStreak - 1;
       if (shouldSendStreakNotification(currentStreak, previousStreak)) {
         try {
-          const userName = user.name?.split(' ')[0];
+          const userName = user.displayName?.split(' ')[0];
           const notification = getStreakNotification(currentStreak, userName);
 
           // Get user's push subscription

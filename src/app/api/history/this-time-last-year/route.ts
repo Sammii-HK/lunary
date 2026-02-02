@@ -1,6 +1,6 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { sql } from '@vercel/postgres';
-import { getServerSession } from '@/lib/auth-server';
+import { requireUser } from '@/lib/ai/auth';
 
 /**
  * GET /api/history/this-time-last-year
@@ -8,14 +8,10 @@ import { getServerSession } from '@/lib/auth-server';
  * Fetches user's historical data from approximately one year ago (±7 days)
  * Returns: journal entries, tarot readings from that time period
  */
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
-    const session = await getServerSession();
-    if (!session?.user?.id) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-
-    const userId = session.user.id;
+    const user = await requireUser(request);
+    const userId = user.id;
 
     // Calculate date range: 1 year ago ±7 days
     const now = new Date();
