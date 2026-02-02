@@ -2,6 +2,25 @@ import { render, screen, act, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import ProfilePage from '@/app/(authenticated)/profile/page';
 
+// Mock Next.js navigation
+const mockPush = jest.fn();
+const mockReplace = jest.fn();
+jest.mock('next/navigation', () => ({
+  useRouter: () => ({
+    push: mockPush,
+    replace: mockReplace,
+    back: jest.fn(),
+    forward: jest.fn(),
+    refresh: jest.fn(),
+    prefetch: jest.fn(),
+  }),
+  useSearchParams: () => ({
+    get: jest.fn().mockReturnValue(null),
+    toString: jest.fn().mockReturnValue(''),
+  }),
+  usePathname: () => '/profile',
+}));
+
 jest.mock('next/dynamic', () => ({
   __esModule: true,
   default: () => {
