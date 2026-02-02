@@ -21,6 +21,11 @@ const nextConfig = {
         chromium: 'commonjs chromium',
         'ffmpeg-static': 'commonjs ffmpeg-static',
         'fluent-ffmpeg': 'commonjs fluent-ffmpeg',
+        // Remotion packages - must be external to avoid parsing esbuild binary
+        '@remotion/bundler': 'commonjs @remotion/bundler',
+        '@remotion/renderer': 'commonjs @remotion/renderer',
+        '@remotion/cli': 'commonjs @remotion/cli',
+        esbuild: 'commonjs esbuild',
       };
 
       // Handle both array and function externals
@@ -34,7 +39,12 @@ const nextConfig = {
             request === 'playwright-core' ||
             request === 'chromium' ||
             request === 'ffmpeg-static' ||
-            request === 'fluent-ffmpeg'
+            request === 'fluent-ffmpeg' ||
+            request === '@remotion/bundler' ||
+            request === '@remotion/renderer' ||
+            request === '@remotion/cli' ||
+            request === 'esbuild' ||
+            request?.startsWith('@esbuild/')
           ) {
             return callback(null, `commonjs ${request}`);
           }
@@ -248,6 +258,20 @@ const nextConfig = {
           }
         : false,
   },
+
+  // Server external packages - these are not bundled and loaded from node_modules at runtime
+  // Required for packages with native binaries or platform-specific code
+  serverExternalPackages: [
+    '@remotion/bundler',
+    '@remotion/renderer',
+    '@remotion/cli',
+    'esbuild',
+    'playwright',
+    'playwright-core',
+    'chromium',
+    'ffmpeg-static',
+    'fluent-ffmpeg',
+  ],
 
   // Experimental optimizations for faster builds
   experimental: {
