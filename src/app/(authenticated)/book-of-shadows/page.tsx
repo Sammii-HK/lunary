@@ -32,6 +32,7 @@ import { DreamTagChips } from '@/components/journal/DreamTagChips';
 import { PremiumPathway } from '@/components/PremiumPathway';
 import { PatternSnapshotsSection } from '@/components/patterns/PatternSnapshotsSection';
 import { ShareWeeklyPattern } from '@/components/share/ShareWeeklyPattern';
+import { ThisTimeLastYear } from '@/components/patterns/ThisTimeLastYear';
 
 interface JournalEntry {
   id: number;
@@ -715,6 +716,9 @@ export default function BookOfShadowsPage() {
             </div>
 
             <PatternSnapshotsSection />
+
+            {/* This Time Last Year */}
+            <ThisTimeLastYear className='mt-4' />
 
             {/* Share Weekly Pattern Button */}
             <div className='flex justify-center mt-6'>
