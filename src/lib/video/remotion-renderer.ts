@@ -1,7 +1,71 @@
 import path from 'path';
 import { bundle } from '@remotion/bundler';
 import { renderMedia, selectComposition } from '@remotion/renderer';
+import { readFile, unlink, mkdtemp } from 'fs/promises';
+import { join } from 'path';
+import { tmpdir } from 'os';
 import type { AudioSegment } from '@/remotion/utils/timing';
+
+/**
+ * Convert script text to AudioSegments for Remotion subtitles
+ * Similar to FFmpeg's buildSubtitleChunks but returns AudioSegment[]
+ */
+export function scriptToAudioSegments(
+  text: string,
+  audioDuration: number,
+  wordsPerSecond: number = 2.6,
+): AudioSegment[] {
+  const clean = text.replace(/\s+/g, ' ').trim();
+  if (!clean) return [];
+
+  // Split by sentences for natural pacing
+  const sentenceRegex = /[^.!?,;:]+[.!?,;:]*/g;
+  const sentences = clean.match(sentenceRegex) || [clean];
+
+  const segments: AudioSegment[] = [];
+  const maxWordsPerChunk = 6; // TikTok-style pacing
+
+  // First pass: create chunks
+  const chunks: { words: string[]; text: string }[] = [];
+  for (const sentence of sentences) {
+    const trimmed = sentence.trim();
+    if (!trimmed) continue;
+
+    const words = trimmed.split(' ').filter((w) => w.length > 0);
+
+    if (words.length <= maxWordsPerChunk) {
+      chunks.push({ words, text: trimmed });
+    } else {
+      let i = 0;
+      while (i < words.length) {
+        const phraseWords = words.slice(i, i + maxWordsPerChunk);
+        chunks.push({ words: phraseWords, text: phraseWords.join(' ') });
+        i += maxWordsPerChunk;
+      }
+    }
+  }
+
+  // Second pass: calculate timing
+  const totalWords = chunks.reduce((sum, c) => sum + c.words.length, 0);
+  const startOffset = 0.1;
+  const usableDuration = Math.max(audioDuration - startOffset, 1);
+  let currentTime = startOffset;
+
+  for (const chunk of chunks) {
+    const chunkDuration = (chunk.words.length / totalWords) * usableDuration;
+    const endTime = Math.min(currentTime + chunkDuration, audioDuration);
+
+    segments.push({
+      text: chunk.text,
+      startTime: currentTime,
+      endTime: endTime,
+    });
+
+    currentTime = endTime;
+  }
+
+  return segments;
+}
 
 /**
  * Props for Remotion video rendering
@@ -49,12 +113,17 @@ export interface RemotionVideoProps {
  *
  * This function bundles the Remotion project and renders
  * the specified composition to a video file.
+ * Returns the video as a Buffer.
  */
 export async function renderRemotionVideo(
   props: RemotionVideoProps,
-): Promise<void> {
+): Promise<Buffer> {
   const fps = 30;
   const durationInFrames = Math.ceil(props.durationSeconds * fps);
+
+  // Create temp directory for output
+  const workDir = await mkdtemp(join(tmpdir(), 'remotion-render-'));
+  const outputPath = props.outputPath || join(workDir, 'output.mp4');
 
   console.log(
     `🎬 Remotion: Rendering ${props.format} (${props.durationSeconds}s, ${durationInFrames} frames)`,
@@ -133,7 +202,7 @@ export async function renderRemotionVideo(
     composition: compositionWithDuration,
     serveUrl: bundleLocation,
     codec: 'h264',
-    outputLocation: props.outputPath,
+    outputLocation: outputPath,
     inputProps,
     // Quality settings
     crf: 20, // Good balance of quality and file size
@@ -146,7 +215,15 @@ export async function renderRemotionVideo(
     },
   });
 
-  console.log(`✅ Remotion: Video rendered to ${props.outputPath}`);
+  console.log(`✅ Remotion: Video rendered to ${outputPath}`);
+
+  // Read the output file into a buffer
+  const videoBuffer = await readFile(outputPath);
+
+  // Clean up temp file
+  await unlink(outputPath).catch(() => {});
+
+  return videoBuffer;
 }
 
 /**
