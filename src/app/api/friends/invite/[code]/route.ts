@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { sql } from '@vercel/postgres';
 import { requireUser } from '@/lib/ai/auth';
-import { encrypt } from '@/lib/encryption';
+import { hashForLookup } from '@/lib/encryption';
 import { hasFeatureAccess } from '../../../../../../utils/pricing';
 
 /**
@@ -14,7 +14,7 @@ export async function GET(
 ) {
   try {
     const { code } = await params;
-    const encryptedCode = encrypt(code);
+    const hashedCode = hashForLookup(code);
 
     const result = await sql`
       SELECT
@@ -25,7 +25,7 @@ export async function GET(
         up.name as inviter_name
       FROM friend_invites fi
       LEFT JOIN user_profiles up ON up.user_id = fi.inviter_id
-      WHERE fi.invite_code = ${encryptedCode}
+      WHERE fi.invite_code = ${hashedCode}
     `;
 
     if (result.rows.length === 0) {
@@ -101,13 +101,13 @@ export async function POST(
       );
     }
 
-    const encryptedCode = encrypt(code);
+    const hashedCode = hashForLookup(code);
 
     // Get the invite
     const inviteResult = await sql`
       SELECT id, inviter_id, status, expires_at
       FROM friend_invites
-      WHERE invite_code = ${encryptedCode}
+      WHERE invite_code = ${hashedCode}
     `;
 
     if (inviteResult.rows.length === 0) {

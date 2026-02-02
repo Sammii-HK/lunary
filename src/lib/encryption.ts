@@ -8,6 +8,7 @@
 import {
   createCipheriv,
   createDecipheriv,
+  createHash,
   randomBytes,
   scryptSync,
 } from 'crypto';
@@ -134,6 +135,17 @@ export function encryptJSON<T = any>(data: T): string {
 export function decryptJSON<T = any>(encrypted: string): T {
   const jsonString = decrypt(encrypted);
   return JSON.parse(jsonString) as T;
+}
+
+/**
+ * Create a deterministic hash of a value (for lookups)
+ * Unlike encrypt(), this always produces the same output for the same input
+ * @param text Plain text to hash
+ * @returns SHA-256 hash as hex string
+ */
+export function hashForLookup(text: string): string {
+  if (!text) return text;
+  return createHash('sha256').update(text).digest('hex');
 }
 
 /**
