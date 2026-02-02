@@ -140,6 +140,8 @@ export async function GET(request: NextRequest): Promise<Response> {
     const formatParam = searchParams.get('format') || 'square';
     const format = (formatParam as Format) || 'square';
 
+    // Note: 'v' query param used for cache busting (not read, just changes URL)
+
     // Cover image presets for video thumbnails
     // 'tiktok', 'youtube', or 'true' (defaults to tiktok)
     const coverType = searchParams.get('cover');
@@ -250,9 +252,13 @@ export async function GET(request: NextRequest): Promise<Response> {
 
     // First check if URL symbol param matches title - if so, ignore it
     // Use includes() to handle cases like title "111 Angel Number" with symbol "111"
+    // Exception: Unicode symbols (runes, etc.) normalize to empty string - always allow them
     const symbolNormalized = symbol ? normalizeForComparison(symbol) : '';
+    const isUrlSymbolUnicode = symbol && symbolNormalized === '';
     const symbolFromUrl =
-      symbol && symbolNormalized && !titleNormalized.includes(symbolNormalized)
+      symbol &&
+      (isUrlSymbolUnicode ||
+        (symbolNormalized && !titleNormalized.includes(symbolNormalized)))
         ? symbol
         : null;
 
@@ -264,12 +270,15 @@ export async function GET(request: NextRequest): Promise<Response> {
 
     // Double-check: if symbol still matches title or slug after all lookups, hide it
     // Use includes() to handle cases like title "111 Angel Number" with symbol "111"
+    // Exception: Unicode symbols (runes, etc.) that normalize to empty string should always show
     const rawSymbolNorm = rawSymbol ? normalizeForComparison(rawSymbol) : '';
+    const isUnicodeSymbol = rawSymbol && rawSymbolNorm === '';
     const displaySymbol =
       rawSymbol &&
-      rawSymbolNorm &&
-      !titleNormalized.includes(rawSymbolNorm) &&
-      !slugNormalized.includes(rawSymbolNorm)
+      (isUnicodeSymbol ||
+        (rawSymbolNorm &&
+          !titleNormalized.includes(rawSymbolNorm) &&
+          !slugNormalized.includes(rawSymbolNorm)))
         ? rawSymbol
         : null;
 
