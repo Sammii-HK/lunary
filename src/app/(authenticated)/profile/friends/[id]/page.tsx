@@ -16,9 +16,15 @@ import {
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Heading } from '@/components/ui/Heading';
-import { zodiacSymbol } from '@/constants/symbols';
+import {
+  zodiacSymbol,
+  bodiesSymbols,
+  astroPointSymbols,
+} from '@/constants/symbols';
 import { ShareSynastry } from '@/components/share/ShareSynastry';
 import { useUser } from '@/context/UserContext';
+import { BirthChart } from '@/components/BirthChart';
+import type { BirthChartData } from '../../../../../../utils/astrology/birthChart';
 
 type FriendProfile = {
   id: string;
@@ -29,16 +35,7 @@ type FriendProfile = {
   relationshipType?: string;
   hasBirthChart: boolean;
   synastry?: SynastryData;
-  birthChart?: BirthChartPlacement[];
-};
-
-type BirthChartPlacement = {
-  body: string;
-  sign: string;
-  degree: number;
-  minute: number;
-  house?: number;
-  retrograde: boolean;
+  birthChart?: BirthChartData[];
 };
 
 type SynastryAspect = {
@@ -160,7 +157,7 @@ export default function FriendProfilePage() {
     RELATIONSHIP_ICONS[friend.relationshipType || 'friend'] || Users;
 
   return (
-    <div className='flex flex-col items-center gap-6 p-4'>
+    <div className='flex flex-col items-center gap-6 p-4 h-fit mb-16'>
       {/* Header */}
       <div className='w-full max-w-3xl'>
         <button
@@ -190,7 +187,7 @@ export default function FriendProfilePage() {
             <p className='text-zinc-400 flex items-center gap-2'>
               {friend.sunSign && (
                 <>
-                  <span>
+                  <span className='font-astro'>
                     {zodiacSymbol[
                       friend.sunSign.toLowerCase() as keyof typeof zodiacSymbol
                     ] || friend.sunSign}
@@ -337,7 +334,7 @@ function OverviewTab({
                 key={placement.body}
                 className='rounded-lg bg-zinc-800/50 p-3 text-center'
               >
-                <div className='text-2xl mb-1'>
+                <div className='text-2xl font-astro text-lunary-accent-200 mb-1'>
                   {zodiacSymbol[
                     placement.sign.toLowerCase() as keyof typeof zodiacSymbol
                   ] || placement.sign}
@@ -346,8 +343,10 @@ function OverviewTab({
                   {placement.body}
                 </div>
                 <div className='text-xs text-zinc-400'>
-                  {placement.sign} {placement.degree}°{placement.minute}'
-                  {placement.retrograde && ' R'}
+                  {placement.sign} {placement.degree}°{placement.minute}&apos;
+                  {placement.retrograde && (
+                    <span className='font-astro text-amber-400'> r</span>
+                  )}
                 </div>
               </div>
             ))}
@@ -561,9 +560,11 @@ function ChartTab({
   birthChart,
   name,
 }: {
-  birthChart?: BirthChartPlacement[];
+  birthChart?: BirthChartData[];
   name: string;
 }) {
+  const [showWheel, setShowWheel] = useState(true);
+
   if (!birthChart || birthChart.length === 0) {
     return (
       <div className='rounded-xl border-2 border-dashed border-zinc-700 p-8 text-center'>
@@ -597,23 +598,74 @@ function ChartTab({
 
   return (
     <div className='space-y-6'>
-      {personalPlanets.length > 0 && (
-        <PlacementSection
-          title='Personal Planets'
-          placements={personalPlanets}
-        />
-      )}
-      {socialPlanets.length > 0 && (
-        <PlacementSection title='Social Planets' placements={socialPlanets} />
-      )}
-      {outerPlanets.length > 0 && (
-        <PlacementSection title='Outer Planets' placements={outerPlanets} />
-      )}
-      {points.length > 0 && (
-        <PlacementSection title='Points & Asteroids' placements={points} />
+      {/* View Toggle */}
+      <div className='flex justify-center'>
+        <div className='flex gap-1 p-1 rounded-lg bg-zinc-800/50 border border-zinc-700/50'>
+          <button
+            onClick={() => setShowWheel(true)}
+            className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${
+              showWheel
+                ? 'bg-lunary-primary-900/50 text-white border border-lunary-primary-700/50'
+                : 'text-zinc-400 hover:text-zinc-200'
+            }`}
+          >
+            Chart Wheel
+          </button>
+          <button
+            onClick={() => setShowWheel(false)}
+            className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${
+              !showWheel
+                ? 'bg-lunary-primary-900/50 text-white border border-lunary-primary-700/50'
+                : 'text-zinc-400 hover:text-zinc-200'
+            }`}
+          >
+            Placements List
+          </button>
+        </div>
+      </div>
+
+      {showWheel ? (
+        <div className='rounded-xl border border-zinc-700/70 bg-lunary-bg-deep/90 p-4'>
+          <BirthChart
+            birthChart={birthChart}
+            userName={name}
+            showAspects={false}
+          />
+        </div>
+      ) : (
+        <>
+          {personalPlanets.length > 0 && (
+            <PlacementSection
+              title='Personal Planets'
+              placements={personalPlanets}
+            />
+          )}
+          {socialPlanets.length > 0 && (
+            <PlacementSection
+              title='Social Planets'
+              placements={socialPlanets}
+            />
+          )}
+          {outerPlanets.length > 0 && (
+            <PlacementSection title='Outer Planets' placements={outerPlanets} />
+          )}
+          {points.length > 0 && (
+            <PlacementSection title='Points & Asteroids' placements={points} />
+          )}
+        </>
       )}
     </div>
   );
+}
+
+function getBodySymbol(body: string): string {
+  const key = body
+    .toLowerCase()
+    .replace(/\s+/g, '') as keyof typeof bodiesSymbols;
+  if (bodiesSymbols[key]) return bodiesSymbols[key];
+  const pointKey = key as keyof typeof astroPointSymbols;
+  if (astroPointSymbols[pointKey]) return astroPointSymbols[pointKey];
+  return body.charAt(0);
 }
 
 function PlacementSection({
@@ -621,7 +673,7 @@ function PlacementSection({
   placements,
 }: {
   title: string;
-  placements: BirthChartPlacement[];
+  placements: BirthChartData[];
 }) {
   return (
     <div className='rounded-xl border border-zinc-700/70 bg-lunary-bg-deep/90 p-5'>
@@ -634,18 +686,21 @@ function PlacementSection({
             key={placement.body}
             className='flex items-center gap-3 py-2 border-b border-zinc-800 last:border-0'
           >
-            <div className='w-24 text-sm font-medium text-white'>
+            <div className='w-8 text-xl font-astro text-lunary-accent-300 text-center'>
+              {getBodySymbol(placement.body)}
+            </div>
+            <div className='w-20 text-sm font-medium text-white'>
               {placement.body}
             </div>
-            <div className='text-xl'>
+            <div className='text-xl font-astro text-zinc-400'>
               {zodiacSymbol[
                 placement.sign.toLowerCase() as keyof typeof zodiacSymbol
               ] || ''}
             </div>
             <div className='flex-1 text-sm text-zinc-300'>
-              {placement.sign} {placement.degree}°{placement.minute}'
+              {placement.sign} {placement.degree}°{placement.minute}&apos;
               {placement.retrograde && (
-                <span className='ml-1 text-amber-400'>R</span>
+                <span className='ml-1 text-amber-400 font-astro'>r</span>
               )}
             </div>
             {placement.house && (

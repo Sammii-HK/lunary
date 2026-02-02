@@ -3,6 +3,7 @@ import { sql } from '@vercel/postgres';
 import { requireUser } from '@/lib/ai/auth';
 import { calculateSynastry } from '@/lib/astrology/synastry';
 import { hasFeatureAccess } from '../../../../../utils/pricing';
+import { decrypt } from '@/lib/encryption';
 import type { BirthChartData } from '../../../../../utils/astrology/birthChart';
 
 /**
@@ -75,7 +76,16 @@ export async function GET(
       WHERE up.user_id = ${connection.friend_id}
     `;
 
-    const friendProfile = friendResult.rows[0] || {};
+    const friendProfileRaw = friendResult.rows[0] || {};
+
+    // Decrypt friend's name and birthday (stored encrypted in user_profiles)
+    const friendProfile = {
+      ...friendProfileRaw,
+      name: friendProfileRaw.name ? decrypt(friendProfileRaw.name) : null,
+      birthday: friendProfileRaw.birthday
+        ? decrypt(friendProfileRaw.birthday)
+        : null,
+    };
 
     // Get user's birth chart
     const userResult = await sql`
