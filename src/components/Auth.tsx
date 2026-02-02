@@ -263,6 +263,14 @@ export function AuthComponent({
     }));
   };
 
+  // If user is authenticated and there's an onSuccess callback, call it immediately
+  // This handles the case where the user is already logged in when viewing an invite
+  useEffect(() => {
+    if (authState.isAuthenticated && onSuccess) {
+      onSuccess();
+    }
+  }, [authState.isAuthenticated, onSuccess]);
+
   // If user is authenticated and on /auth page, redirect (handled by page component)
   // If in a modal/compact mode, show sign out option
   if (authState.isAuthenticated) {
@@ -271,7 +279,19 @@ export function AuthComponent({
       return null; // Page component will handle redirect
     }
 
-    // Otherwise show sign out option (for modals)
+    // If there's an onSuccess callback, don't show sign out - the callback will handle it
+    if (onSuccess) {
+      return (
+        <div className='w-full max-w-md mx-auto bg-zinc-900 rounded-lg p-6'>
+          <div className='text-center'>
+            <div className='animate-spin rounded-full h-8 w-8 border-b-2 border-lunary-primary mx-auto mb-4' />
+            <p className='text-zinc-400'>Processing...</p>
+          </div>
+        </div>
+      );
+    }
+
+    // Otherwise show sign out option (for modals without onSuccess)
     return (
       <div className='w-full max-w-md mx-auto bg-zinc-900 rounded-lg p-6'>
         <div className='text-center mb-6'>
