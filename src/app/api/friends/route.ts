@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { sql } from '@vercel/postgres';
 import { requireUser } from '@/lib/ai/auth';
 import { hasFeatureAccess } from '../../../../utils/pricing';
+import { decrypt } from '@/lib/encryption';
 
 /**
  * GET /api/friends
@@ -55,14 +56,23 @@ export async function GET(request: NextRequest) {
     const friends = result.rows.map((row) => {
       let sunSign = null;
       if (row.friend_birthday) {
-        const date = new Date(row.friend_birthday);
-        sunSign = getSunSign(date.getMonth() + 1, date.getDate());
+        // Birthday might be encrypted
+        const birthdayStr = decrypt(row.friend_birthday);
+        if (birthdayStr) {
+          const date = new Date(birthdayStr);
+          if (!isNaN(date.getTime())) {
+            sunSign = getSunSign(date.getMonth() + 1, date.getDate());
+          }
+        }
       }
+
+      // Decrypt friend name (stored encrypted in user_profiles)
+      const friendName = row.friend_name ? decrypt(row.friend_name) : null;
 
       return {
         id: row.id,
         friendId: row.friend_id,
-        name: row.nickname || row.friend_name || 'Friend',
+        name: row.nickname || friendName || 'Friend',
         avatar: row.friend_avatar,
         relationshipType: row.relationship_type,
         sunSign,
