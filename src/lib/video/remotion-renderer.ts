@@ -1,10 +1,11 @@
 import path from 'path';
-import { bundle } from '@remotion/bundler';
-import { renderMedia, selectComposition } from '@remotion/renderer';
 import { readFile, unlink, mkdtemp } from 'fs/promises';
 import { join } from 'path';
 import { tmpdir } from 'os';
 import type { AudioSegment } from '@/remotion/utils/timing';
+
+// Note: @remotion/bundler and @remotion/renderer are dynamically imported
+// to avoid Next.js trying to parse the esbuild binary at compile time
 
 /**
  * Convert script text to AudioSegments for Remotion subtitles
@@ -118,6 +119,10 @@ export interface RemotionVideoProps {
 export async function renderRemotionVideo(
   props: RemotionVideoProps,
 ): Promise<Buffer> {
+  // Dynamically import Remotion modules to avoid Next.js compile-time parsing
+  const { bundle } = await import('@remotion/bundler');
+  const { renderMedia, selectComposition } = await import('@remotion/renderer');
+
   const fps = 30;
   const durationInFrames = Math.ceil(props.durationSeconds * fps);
 
