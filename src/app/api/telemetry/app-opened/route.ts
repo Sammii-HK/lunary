@@ -19,7 +19,7 @@ function generateDeterministicEventId(
 ): string {
   const identity = userId || anonymousId || 'unknown';
   const input = `${eventType}:${identity}:${date}`;
-  return createHash('md5').update(input).digest('hex');
+  return createHash('sha256').update(input).digest('hex');
 }
 
 export const runtime = 'nodejs';
