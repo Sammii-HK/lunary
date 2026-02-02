@@ -16,7 +16,13 @@ import { Badge } from '@/components/ui/badge';
 import { generateWeeklyContent } from '../../../../../utils/blog/weeklyContentGenerator';
 import { SocialShareButtons } from '@/components/SocialShareButtons';
 import { CrossPlatformCTA } from '@/components/CrossPlatformCTA';
-import { QuickStats, AspectNatureBadge, CrystalCards } from '@/components/blog';
+import {
+  QuickStats,
+  AspectNatureBadge,
+  CrystalCards,
+  WeekTimeline,
+  WeeklyAffirmation,
+} from '@/components/blog';
 import { getPlanetSymbol, getAspectSymbol } from '@/constants/symbols';
 
 interface BlogPostPageProps {
@@ -182,6 +188,119 @@ function getAspectDescriptionFallback(
   const keyword = aspectKeywords[aspectType] || 'cosmic influence';
 
   return `This ${aspectType} between ${planetA} and ${planetB} highlights themes of ${keyword}. Notice where this shows up in your conversations and choices.`;
+}
+
+// Generate a weekly affirmation based on the dominant energy
+function generateWeeklyAffirmation(
+  moonPhases: any[],
+  highlights: any[],
+  retrogrades: any[],
+): string {
+  // Find the major moon phase
+  const majorMoon = moonPhases.find(
+    (m) => m.phase?.includes('Full') || m.phase?.includes('New'),
+  );
+
+  // Affirmations by moon phase
+  const moonAffirmations: Record<string, string> = {
+    'Full Moon':
+      'I release what no longer serves me and welcome the clarity this illumination brings.',
+    'New Moon':
+      'I plant seeds of intention with trust, knowing they will blossom in divine timing.',
+  };
+
+  if (majorMoon?.phase) {
+    for (const [phase, affirmation] of Object.entries(moonAffirmations)) {
+      if (majorMoon.phase.includes(phase)) {
+        return affirmation;
+      }
+    }
+  }
+
+  // Retrograde affirmation
+  if (retrogrades.length > 0) {
+    return 'I embrace this period of reflection and trust that revisiting the past leads to wiser choices ahead.';
+  }
+
+  // Default affirmations based on highlights
+  const generalAffirmations = [
+    'I move with the cosmic currents, trusting my inner wisdom to guide each step.',
+    'I am aligned with the universe, open to the opportunities this week brings.',
+    'I embrace change as a catalyst for growth and welcome new beginnings.',
+  ];
+
+  // Pick based on week number for consistency
+  const weekBasedIndex = highlights.length % generalAffirmations.length;
+  return generalAffirmations[weekBasedIndex];
+}
+
+// Build timeline events from blog data
+interface TimelineEvent {
+  date: Date;
+  type: 'ingress' | 'retrograde' | 'direct' | 'moon-phase' | 'aspect';
+  title: string;
+  planet?: string;
+  sign?: string;
+  phase?: string;
+}
+
+function buildTimelineEvents(
+  highlights: any[],
+  moonPhases: any[],
+  retrogrades: any[],
+  aspects: any[],
+): TimelineEvent[] {
+  const events: TimelineEvent[] = [];
+
+  // Add planetary highlights (ingresses)
+  highlights.forEach((h) => {
+    const eventDate = h.date instanceof Date ? h.date : new Date(h.date);
+    if (h.event === 'enters-sign' && h.details?.toSign) {
+      events.push({
+        date: eventDate,
+        type: 'ingress',
+        title: `${h.planet} enters ${h.details.toSign}`,
+        planet: h.planet,
+        sign: h.details.toSign,
+      });
+    }
+  });
+
+  // Add moon phases
+  moonPhases.forEach((m) => {
+    const eventDate = m.date instanceof Date ? m.date : new Date(m.date);
+    events.push({
+      date: eventDate,
+      type: 'moon-phase',
+      title: m.phase,
+      phase: m.phase,
+      sign: m.sign,
+    });
+  });
+
+  // Add retrogrades
+  retrogrades.forEach((r) => {
+    const eventDate = r.date instanceof Date ? r.date : new Date(r.date);
+    events.push({
+      date: eventDate,
+      type: r.type === 'station-direct' ? 'direct' : 'retrograde',
+      title: `${r.planet} ${r.type === 'station-direct' ? 'stations direct' : 'goes retrograde'}`,
+      planet: r.planet,
+    });
+  });
+
+  // Add major aspects (limit to avoid clutter)
+  aspects.slice(0, 3).forEach((a) => {
+    const eventDate = a.date instanceof Date ? a.date : new Date(a.date);
+    events.push({
+      date: eventDate,
+      type: 'aspect',
+      title: `${a.planetA} ${a.aspect} ${a.planetB}`,
+      planet: a.planetA,
+    });
+  });
+
+  return events;
 }
 
 async function getBlogData(weekInfo: WeekInfo) {
@@ -521,9 +640,36 @@ export default async function BlogPostPage({
             aspectCount={displayedAspects.length}
           />
 
+          {/* Week Timeline */}
+          {(() => {
+            const timelineEvents = buildTimelineEvents(
+              displayedHighlights,
+              displayedMoonPhases,
+              displayedRetrogrades,
+              displayedAspects,
+            );
+            return timelineEvents.length > 0 ? (
+              <WeekTimeline
+                weekStart={weekStart}
+                weekEnd={weekEnd}
+                events={timelineEvents}
+              />
+            ) : null;
+          })()}
+
           <div className='prose prose-invert max-w-none'>
             <p className='text-lg leading-relaxed'>{summaryText}</p>
           </div>
+
+          {/* Weekly Affirmation */}
+          <WeeklyAffirmation
+            affirmation={generateWeeklyAffirmation(
+              displayedMoonPhases,
+              displayedHighlights,
+              displayedRetrogrades,
+            )}
+            weekTitle={blogData.title}
+          />
 
           {displayedHighlights.length > 0 && (
             <section className='space-y-6'>
