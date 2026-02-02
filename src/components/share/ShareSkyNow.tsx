@@ -53,13 +53,32 @@ export function ShareSkyNow({ compact = false }: ShareSkyNowProps) {
   useEffect(() => {
     const fetchSkyData = async () => {
       try {
-        const response = await fetch('/api/cosmic/current');
+        const response = await fetch('/api/cosmic/global');
         if (!response.ok) throw new Error('Failed to fetch sky data');
 
         const data = await response.json();
+        const positions: Record<string, PlanetPosition> = {};
+        let retrogradeCount = 0;
+
+        // Transform planetaryPositions to the expected format
+        if (data.planetaryPositions) {
+          for (const [planet, info] of Object.entries(
+            data.planetaryPositions,
+          )) {
+            const planetInfo = info as { sign: string; retrograde?: boolean };
+            positions[planet] = {
+              sign: planetInfo.sign,
+              retrograde: planetInfo.retrograde,
+            };
+            if (planetInfo.retrograde) {
+              retrogradeCount++;
+            }
+          }
+        }
+
         setSkyData({
-          positions: data.positions || {},
-          retrogradeCount: data.retrogradeCount || 0,
+          positions,
+          retrogradeCount,
           date: new Date().toISOString().split('T')[0],
         });
       } catch (error) {

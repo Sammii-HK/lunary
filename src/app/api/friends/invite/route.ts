@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { sql } from '@vercel/postgres';
 import { randomBytes } from 'crypto';
 import { requireUser } from '@/lib/ai/auth';
-import { encrypt } from '@/lib/encryption';
+import { hashForLookup } from '@/lib/encryption';
 import { hasFeatureAccess } from '../../../../../utils/pricing';
 
 /**
@@ -37,7 +37,7 @@ export async function POST(request: NextRequest) {
 
     // Generate a unique invite code
     const rawCode = randomBytes(16).toString('hex');
-    const encryptedCode = encrypt(rawCode);
+    const hashedCode = hashForLookup(rawCode);
 
     // Invite expires in 7 days
     const expiresAt = new Date();
@@ -45,11 +45,14 @@ export async function POST(request: NextRequest) {
 
     const result = await sql`
       INSERT INTO friend_invites (inviter_id, invite_code, expires_at)
-      VALUES (${user.id}, ${encryptedCode}, ${expiresAt.toISOString()}::timestamptz)
+      VALUES (${user.id}, ${hashedCode}, ${expiresAt.toISOString()}::timestamptz)
       RETURNING id, invite_code, expires_at
     `;
 
-    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://lunary.app';
+    // Remove trailing slash from base URL to prevent double slashes
+    const baseUrl = (
+      process.env.NEXT_PUBLIC_BASE_URL || 'https://lunary.app'
+    ).replace(/\/$/, '');
     const inviteUrl = `${baseUrl}/invite/${rawCode}`;
 
     return NextResponse.json({

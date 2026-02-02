@@ -2,8 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { sql } from '@vercel/postgres';
 import { requireUser } from '@/lib/ai/auth';
 import { calculateSynastry } from '@/lib/astrology/synastry';
-import { encryptJSON, decryptJSON } from '@/lib/encryption';
 import { hasFeatureAccess } from '../../../../../utils/pricing';
+import { decrypt } from '@/lib/encryption';
 import type { BirthChartData } from '../../../../../utils/astrology/birthChart';
 
 /**
@@ -72,11 +72,20 @@ export async function GET(
         u.image as avatar,
         u.email
       FROM user_profiles up
-      LEFT JOIN users u ON u.id = up.user_id
+      LEFT JOIN "user" u ON u.id = up.user_id
       WHERE up.user_id = ${connection.friend_id}
     `;
 
-    const friendProfile = friendResult.rows[0] || {};
+    const friendProfileRaw = friendResult.rows[0] || {};
+
+    // Decrypt friend's name and birthday (stored encrypted in user_profiles)
+    const friendProfile = {
+      ...friendProfileRaw,
+      name: friendProfileRaw.name ? decrypt(friendProfileRaw.name) : null,
+      birthday: friendProfileRaw.birthday
+        ? decrypt(friendProfileRaw.birthday)
+        : null,
+    };
 
     // Get user's birth chart
     const userResult = await sql`
@@ -102,24 +111,20 @@ export async function GET(
         lastCalc && Date.now() - lastCalc.getTime() < 24 * 60 * 60 * 1000;
 
       if (cacheValid && connection.synastry_data) {
-        try {
-          synastry = decryptJSON(connection.synastry_data);
-        } catch {
-          // Cache invalid, recalculate
-        }
+        // Use cached synastry data (stored as plain JSON)
+        synastry = connection.synastry_data as typeof synastry;
       }
 
       if (!synastry) {
         // Calculate fresh synastry
         synastry = calculateSynastry(userBirthChart, friendBirthChart);
 
-        // Cache the result (encrypted)
-        const encryptedSynastry = encryptJSON(synastry);
+        // Cache the result as JSON (synastry isn't sensitive personal data)
         await sql`
           UPDATE friend_connections
           SET
             synastry_score = ${synastry.compatibilityScore},
-            synastry_data = ${encryptedSynastry},
+            synastry_data = ${JSON.stringify(synastry)}::jsonb,
             last_synastry_calc = NOW()
           WHERE id = ${id}::uuid
         `;

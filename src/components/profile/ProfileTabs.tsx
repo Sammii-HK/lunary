@@ -11,7 +11,7 @@ type ProfileTabsProps = {
 
 export function ProfileTabs({ activeTab, onTabChange }: ProfileTabsProps) {
   return (
-    <div className='w-full max-w-3xl'>
+    <div className='w-full max-w-3xl mb-8'>
       <div className='flex gap-1 p-1 rounded-lg bg-zinc-800/50 border border-zinc-700/50'>
         <button
           onClick={() => onTabChange('profile')}

@@ -52,12 +52,17 @@ export default function InvitePage() {
     checkInvite();
   }, [code]);
 
+  // Accept invite - used when clicking the button while authenticated
   const handleAccept = async () => {
     if (!authState.isAuthenticated) {
       setShowAuth(true);
       return;
     }
+    await acceptInvite();
+  };
 
+  // Actually perform the invite acceptance (called after auth or directly)
+  const acceptInvite = async () => {
     setAccepting(true);
     try {
       const response = await fetch(`/api/friends/invite/${code}`, {
@@ -172,7 +177,9 @@ export default function InvitePage() {
                 defaultToSignUp={true}
                 onSuccess={() => {
                   setShowAuth(false);
-                  handleAccept();
+                  // Force accept without checking local auth state
+                  // The server will validate the session
+                  acceptInvite();
                 }}
               />
             </div>

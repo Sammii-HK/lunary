@@ -2,6 +2,16 @@
  * Analytics utility functions for safe calculations
  */
 
+// Re-export React-based utils
+export {
+  describeTrend,
+  computeWeekOverWeekChange,
+  formatMetricValue,
+  computePercent,
+  formatDateInput,
+  shiftDateInput,
+} from './utils-react';
+
 /**
  * Calculate percentage with safeguards against invalid values
  *

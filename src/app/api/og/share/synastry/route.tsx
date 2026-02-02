@@ -171,6 +171,7 @@ export async function GET(request: NextRequest) {
           >
             <div
               style={{
+                display: 'flex',
                 fontSize: labelSize,
                 color: OG_COLORS.textSecondary,
                 textTransform: 'uppercase',
@@ -181,6 +182,7 @@ export async function GET(request: NextRequest) {
             </div>
             <div
               style={{
+                display: 'flex',
                 fontSize: titleSize,
                 fontWeight: 600,
                 color: OG_COLORS.textPrimary,
@@ -207,6 +209,7 @@ export async function GET(request: NextRequest) {
           >
             <div
               style={{
+                display: 'flex',
                 fontSize: scoreSize,
                 fontWeight: 700,
                 color: scoreColor,
@@ -217,6 +220,7 @@ export async function GET(request: NextRequest) {
             </div>
             <div
               style={{
+                display: 'flex',
                 fontSize: labelSize,
                 color: OG_COLORS.textSecondary,
                 marginTop: 4,
@@ -229,6 +233,7 @@ export async function GET(request: NextRequest) {
           {/* Summary */}
           <div
             style={{
+              display: 'flex',
               fontSize: summarySize,
               color: OG_COLORS.textSecondary,
               textAlign: 'center',
@@ -259,6 +264,7 @@ export async function GET(request: NextRequest) {
                 >
                   <div
                     style={{
+                      display: 'flex',
                       fontSize: isLandscape ? 32 : 48,
                       fontWeight: 600,
                       color: '#22C55E',
@@ -268,6 +274,7 @@ export async function GET(request: NextRequest) {
                   </div>
                   <div
                     style={{
+                      display: 'flex',
                       fontSize: isLandscape ? 14 : 18,
                       color: OG_COLORS.textTertiary,
                     }}
@@ -287,6 +294,7 @@ export async function GET(request: NextRequest) {
                 >
                   <div
                     style={{
+                      display: 'flex',
                       fontSize: isLandscape ? 32 : 48,
                       fontWeight: 600,
                       color: '#F59E0B',
@@ -296,6 +304,7 @@ export async function GET(request: NextRequest) {
                   </div>
                   <div
                     style={{
+                      display: 'flex',
                       fontSize: isLandscape ? 14 : 18,
                       color: OG_COLORS.textTertiary,
                     }}
@@ -320,19 +329,21 @@ export async function GET(request: NextRequest) {
           }}
         >
           <img
-            src={`${baseUrl}/lunary-icon-light.png`}
+            src={`${baseUrl}/apple-touch-icon.png`}
+            alt='Lunary'
             width={isLandscape ? 24 : 32}
             height={isLandscape ? 24 : 32}
             style={{ borderRadius: 6 }}
           />
-          <span
+          <div
             style={{
+              display: 'flex',
               fontSize: isLandscape ? 16 : 20,
               color: OG_COLORS.textTertiary,
             }}
           >
             lunary.app
-          </span>
+          </div>
         </div>
       </div>,
       {

@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { sql } from '@vercel/postgres';
 import { formatTimestamp } from '@/lib/analytics/date-range';
-import { ANALYTICS_CACHE_TTL_SECONDS } from '@/lib/analytics-cache-config';
+import { ANALYTICS_HISTORICAL_TTL_SECONDS } from '@/lib/analytics-cache-config';
 
 const TEST_EMAIL_PATTERN = '%@test.lunary.app';
 const TEST_EMAIL_EXACT = 'test@test.lunary.app';
@@ -273,12 +273,34 @@ export async function GET(request: NextRequest) {
       );
 
       const formattedStart = period.start.toISOString().split('T')[0];
-      const day1Retention =
+      const day1RetentionRaw =
         (Number(day1Retained.rows[0]?.count || 0) / cohortSize) * 100;
-      const day7Retention =
+      const day7RetentionRaw =
         (Number(day7Retained.rows[0]?.count || 0) / cohortSize) * 100;
-      const day30Retention =
+      const day30RetentionRaw =
         (Number(day30Retained.rows[0]?.count || 0) / cohortSize) * 100;
+
+      // Cap retention at 100% - values >100% indicate a data integrity issue
+      const day1Retention = Math.min(day1RetentionRaw, 100);
+      const day7Retention = Math.min(day7RetentionRaw, 100);
+      const day30Retention = Math.min(day30RetentionRaw, 100);
+
+      // Log warning if any raw value exceeds 100% (data integrity issue)
+      if (
+        day1RetentionRaw > 100 ||
+        day7RetentionRaw > 100 ||
+        day30RetentionRaw > 100
+      ) {
+        console.warn(
+          `[analytics/cohorts] Retention >100% detected for cohort ${formattedStart}:`,
+          {
+            day1: day1RetentionRaw,
+            day7: day7RetentionRaw,
+            day30: day30RetentionRaw,
+            cohortSize,
+          },
+        );
+      }
 
       retentionMatrix.push({
         cohort: formattedStart,
@@ -295,7 +317,7 @@ export async function GET(request: NextRequest) {
     });
     response.headers.set(
       'Cache-Control',
-      `private, max-age=${ANALYTICS_CACHE_TTL_SECONDS}`,
+      `private, max-age=${ANALYTICS_HISTORICAL_TTL_SECONDS}`,
     );
     return response;
   } catch (error) {
