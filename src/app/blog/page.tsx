@@ -8,12 +8,12 @@ export const revalidate = 3600;
 const year = new Date().getFullYear();
 
 export const metadata: Metadata = {
-  title: `Weekly Astrology Forecast ${year}: Transits, Moon Phases & More - Lunary`,
-  description: `Weekly astrology updates for ${year}. This week's planetary transits, moon phases, retrogrades & cosmic events. Your personalized cosmic forecast.`,
+  title: `This Week's Astrology Forecast: What the Stars Have Planned | Lunary`,
+  description: `Find out what's cosmically in store this week. Mercury retrograde warnings, best days for big decisions, moon phases & planetary shifts. Free weekly updates.`,
   openGraph: {
-    title: `Weekly Astrology Forecast ${year} - Lunary`,
+    title: `This Week's Astrology Forecast | Lunary`,
     description:
-      'Weekly cosmic insights, planetary highlights, moon phases, and astrological guidance.',
+      'What the stars have planned for you this week. Retrograde alerts, best timing for decisions, and cosmic energy shifts.',
     url: 'https://lunary.app/blog',
     siteName: 'Lunary',
     images: [
@@ -29,9 +29,9 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: `Weekly Astrology Forecast ${year} - Lunary`,
+    title: `This Week's Astrology Forecast | Lunary`,
     description:
-      'Weekly cosmic insights, planetary highlights, moon phases, and astrological guidance.',
+      'What the stars have planned this week. Retrograde alerts, best timing, and cosmic shifts.',
     images: ['/api/og/blog'],
   },
   alternates: {
@@ -96,8 +96,8 @@ export default async function BlogPage() {
           __html: JSON.stringify({
             '@context': 'https://schema.org',
             '@type': 'CollectionPage',
-            name: `Weekly Astrology Forecast ${year}`,
-            description: `Weekly astrology updates for ${year}. This week's planetary transits, moon phases, retrogrades & cosmic events.`,
+            name: `Weekly Astrology Forecasts`,
+            description: `Free weekly astrology forecasts. What the stars have planned each week - retrogrades, best timing, moon phases & cosmic shifts.`,
             url: 'https://lunary.app/blog',
             publisher: {
               '@type': 'Organization',

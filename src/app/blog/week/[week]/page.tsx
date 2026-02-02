@@ -1264,8 +1264,8 @@ export async function generateMetadata({
   ];
 
   return {
-    title: `${blogData.title} | Weekly Astrology & Planetary Transits`,
-    description: `${blogData.subtitle}. Week of ${weekRange}. Key planetary transits, moon phases, and the best days for love, career, money, and healing.`,
+    title: `${blogData.title} (${weekRange}) | Free Weekly Forecast`,
+    description: `What's cosmically in store ${weekRange}? ${blogData.subtitle} Discover the best days for love, career & big decisions this week.`,
     keywords: [
       'weekly astrology forecast',
       'astrology timing',
@@ -1285,8 +1285,8 @@ export async function generateMetadata({
       canonical: url,
     },
     openGraph: {
-      title: blogData.title,
-      description: `Weekly astrology forecast for ${weekRange}. Planetary transits, moon phases, and practical timing for love, work, money, and rest.`,
+      title: `${blogData.title} | ${weekRange}`,
+      description: `What's happening in the stars ${weekRange}? ${blogData.subtitle} Best days for love, career & decisions.`,
       url,
       siteName: 'Lunary',
       images: [
@@ -1313,8 +1313,8 @@ export async function generateMetadata({
     },
     twitter: {
       card: 'summary_large_image',
-      title: blogData.title,
-      description: `This week’s astrology forecast with key transits, moon phases, and the best days for love, money, and healing.`,
+      title: `${blogData.title} | ${weekRange}`,
+      description: `What's cosmically in store this week? Best days for love, career & big decisions. Free forecast.`,
       images: [ogImage],
       creator: '@lunaryapp',
     },
