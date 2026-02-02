@@ -94,7 +94,7 @@ From `docs/SHOP_README.md`:
 
 ### Crystal Index Integration
 
-**Status**: Low priority (separate site)  
+**Status**: Low priority (separate site)
 **Requirements**:
 
 - Transit-based crystal recommendations
@@ -103,6 +103,237 @@ From `docs/SHOP_README.md`:
 - CTA in Crystal Index to open Lunary
 
 **Files**: `src/components/CrystalWidget.tsx`, `src/app/api/crystals/search/route.ts`
+
+---
+
+## 🎄 YEARLY WRAPPED FEATURE (December)
+
+**Status**: Planned for December launch
+**Effort**: 1-2 weeks
+**Impact**: MASSIVE viral potential (Spotify Wrapped style)
+
+### What to Include:
+
+1. **Your Tarot Year**
+   - Most-pulled cards of the year
+   - Card that defined your year
+   - Total readings count
+   - Suit dominance over time
+
+2. **Your Cosmic Journey**
+   - Major transits you experienced
+   - Your "theme" months (what suited each month)
+   - Moon phases you were most active during
+
+3. **Your Reflections**
+   - Journal entries count
+   - Mood trends over the year
+   - Themes that emerged in your writing
+   - Word cloud of your journal
+
+4. **Your Community**
+   - Moon Circles participated in
+   - Insights shared
+   - Your cosmic archetype for the year
+
+5. **Year Ahead Preview**
+   - Major 2027 transits for your chart
+   - Your personal year number (numerology)
+   - Cards to watch for
+
+### Shareable Cards:
+
+- "My 2026 in Cards" - top 3 cards visual
+- "My Cosmic Year" - summary card
+- "My Year Ahead" - 2027 preview
+- Animated story format for Instagram
+
+### Technical Needs:
+
+- Aggregate queries across tarot_readings, collections, moon_circles
+- OG image generation for each card type
+- Story-format animations (Remotion?)
+- Scheduled reveal (Dec 1-15 data collection, Dec 15+ reveal)
+
+**Files to create**:
+
+- `src/app/(authenticated)/wrapped/page.tsx`
+- `src/app/api/wrapped/route.ts`
+- `src/components/wrapped/` (card components)
+- `src/app/api/og/wrapped/` (OG images)
+
+---
+
+## 👥 COMMUNITY FEATURE EXPANSION
+
+**Status**: Future roadmap
+**Effort**: Varies by feature
+**Impact**: HIGH for retention and differentiation
+
+### Building on Moon Circles:
+
+1. **Transit Support Groups**
+   - "Saturn Return Survivors" - for 27-30 year olds
+   - "Pluto Transit Support" - deep transformation
+   - "Mercury Retrograde Check-in" - seasonal
+   - Auto-join based on user's current transits
+   - **Effort**: Medium (new group types, auto-assignment logic)
+
+2. **Sign-Based Spaces**
+   - Rising sign rooms (most personal identity)
+   - "Virgo Rising Lounge" etc.
+   - Shared experiences, tips for your rising
+   - **Effort**: Low (extend Moon Circles with sign filter)
+
+3. **Anonymous Q&A / Ask the Circle**
+   - Post a question to the community
+   - Community upvotes/answers
+   - AI can seed initial responses
+   - Good for: relationship questions, transit interpretations
+   - **Effort**: Medium (new post type, voting system)
+
+4. **Collaborative Interpretations**
+   - Share a reading, get community input
+   - "What would you make of this spread?"
+   - Premium feature (limits for free users)
+   - **Effort**: Medium (reading sharing, comment system)
+
+5. **Local Circles**
+   - City/region based groups
+   - "London Moon Circle"
+   - Could lead to real-world meetups
+   - **Effort**: Low (location field + filter)
+
+### Technical Needs:
+
+- Extend `moon_circles` or new `community_groups` table
+- Real-time updates (consider Supabase realtime or polling)
+- Moderation tools / reporting
+- Notification preferences per group
+
+**Files to create/modify**:
+
+- `src/app/(authenticated)/community/` (new section)
+- `src/app/api/community/` (groups, posts, comments)
+- `src/components/community/` (UI components)
+
+---
+
+## 🛍️ PHYSICAL PRODUCTS ROADMAP
+
+**Status**: Future revenue stream
+**Effort**: Varies (mostly partnerships + print-on-demand)
+**Impact**: Additional revenue, brand presence
+
+### Tier 1: Low Effort / High Margin (Print-on-Demand)
+
+1. **Birth Chart Prints**
+   - Generate from existing chart wheel visualization
+   - Print-on-demand via Printful/Gelato
+   - Frame options, multiple sizes
+   - Personalized with name, date, placements
+   - **Effort**: Low (already have chart, just need commerce flow)
+
+2. **Personalized Planners / Journals**
+   - Transit dates pre-filled for the year
+   - Moon phases marked
+   - Personal numerology dates highlighted
+   - Blank journal pages for Book of Shadows
+   - **Effort**: Medium (PDF generation + print partner)
+
+3. **Merch (Apparel, Mugs, Stickers)**
+   - Zodiac-themed designs
+   - "Mercury Retrograde Survivor" etc.
+   - Low priority but easy passive revenue
+   - **Effort**: Low (design + print-on-demand)
+
+### Tier 2: Medium Effort (Partnerships)
+
+4. **Crystal Kits**
+   - "Your Chart Crystal Set" - based on dominant element/placements
+   - Partner with crystal supplier (dropship model)
+   - Could be subscription box
+   - **Effort**: Medium (supplier relationship, fulfillment)
+
+5. **Tarot Card Deck**
+   - Lunary-branded deck with unique artwork
+   - QR codes on cards linking to Grimoire meanings
+   - Pre-order model to fund print run
+   - **Effort**: High (artwork, print run, fulfillment)
+
+### Tier 3: Subscription Boxes
+
+6. **Monthly Cosmic Box**
+   - Crystal of the month (aligned to transits)
+   - Printed transit guide
+   - Ritual supplies (candles, herbs)
+   - Exclusive digital content
+   - **Effort**: High (ongoing curation, fulfillment partner)
+
+### Unique Angle (vs CHANI):
+
+- Multi-system bundles: chart print + crystal kit + numerology guide
+- "Complete Cosmic Starter Kit"
+- Personalization based on actual birth chart data
+
+### Technical Needs:
+
+- E-commerce integration (Shopify embed or custom)
+- PDF generation for personalized products
+- Order management / fulfillment API
+- Extend existing `/shop` or new `/products` section
+
+**Reference**: CHANI does ~$30-40 planners, workbooks, seasonal guides
+
+---
+
+## 🎙️ PODCAST / AUDIO CONTENT
+
+**Status**: Future content stream
+**Effort**: Medium-High (ongoing content creation)
+**Impact**: HIGH for retention (CHANI's weekly podcast is major driver)
+
+### Options:
+
+1. **AI-Generated Weekly Forecasts** (Easiest)
+   - Use existing horoscope/transit content as script
+   - Generate with ElevenLabs (already have `src/lib/tts/elevenlabs.ts`)
+   - ~5-10 min per rising sign weekly
+   - Fully automated pipeline possible
+   - **Effort**: Medium (script generation + TTS + hosting)
+
+2. **Hybrid: AI Script + Human Voice**
+   - AI generates personalized script from cosmic data
+   - You or voice actor records
+   - More authentic feel
+   - Bi-weekly or monthly cadence
+   - **Effort**: Medium-High (recording time)
+
+3. **Partner with Existing Podcasters**
+   - Sponsor astrology podcasters
+   - Guest appearances
+   - No production overhead
+   - **Effort**: Low (outreach + payment)
+
+### Integration Points:
+
+- Audio player on `/horoscope` page
+- "Listen to your forecast" button
+- Push notification: "Your weekly audio is ready"
+- Podcast feed for Apple/Spotify distribution
+
+### Technical Needs:
+
+- Audio file storage (S3/Cloudflare R2)
+- RSS feed generation for podcast apps
+- Audio player component
+- Script-to-speech pipeline
+
+**Files to create**:
+
+- `src/app/api/audio/generate/route.ts`
+- `src/components/AudioPlayer.tsx`
+- `src/app/(authenticated)/listen/page.tsx`
 
 ---
 
