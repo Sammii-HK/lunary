@@ -23,11 +23,12 @@ import { Button } from '@/components/ui/button';
 import { formatIsoDateOnly } from '@/lib/date-only';
 
 // Profile components
-import { ProfileTabs } from '@/components/profile/ProfileTabs';
+import { ProfileTabs, type ProfileTab } from '@/components/profile/ProfileTabs';
 import { CosmicProfileGrid } from '@/components/profile/CosmicProfileGrid';
 import { PersonalCardModal } from '@/components/profile/PersonalCardModal';
 import { JourneySection } from '@/components/profile/JourneySection';
 import { SettingsTab } from '@/components/profile/SettingsTab';
+import { CircleTab } from '@/components/profile/CircleTab';
 
 const AuthComponent = dynamic(
   () => import('@/components/Auth').then((m) => ({ default: m.AuthComponent })),
@@ -70,10 +71,11 @@ const DailyCosmicOverview = dynamic(
   { ssr: false },
 );
 
-type ProfileTab = 'profile' | 'settings';
-
-const normalizeProfileTab = (tab: string | null): ProfileTab =>
-  tab === 'settings' ? 'settings' : 'profile';
+const normalizeProfileTab = (tab: string | null): ProfileTab => {
+  if (tab === 'settings') return 'settings';
+  if (tab === 'circle') return 'circle';
+  return 'profile';
+};
 
 export default function ProfilePage() {
   const { user, refetch: refetchUser } = useUser();
@@ -887,6 +889,9 @@ export default function ProfilePage() {
           </div>
         </>
       )}
+
+      {/* Circle Tab Content */}
+      {activeTab === 'circle' && authState.isAuthenticated && <CircleTab />}
 
       {/* Settings Tab Content */}
       {activeTab === 'settings' && authState.isAuthenticated && (
