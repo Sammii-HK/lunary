@@ -263,6 +263,20 @@ export function middleware(request: NextRequest, event: NextFetchEvent) {
         body: JSON.stringify({ path: finalPath }),
       }),
     );
+
+    // Track product_opened (one per authenticated user per UTC day)
+    // Endpoint checks auth and skips if user not logged in
+    const productOpenedUrl = new URL(
+      '/api/telemetry/product-opened',
+      request.url,
+    );
+    event.waitUntil(
+      fetch(productOpenedUrl, {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({ path: finalPath }),
+      }),
+    );
   }
 
   return response;
