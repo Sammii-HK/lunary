@@ -1,14 +1,37 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { sql } from '@vercel/postgres';
 import { requireUser } from '@/lib/ai/auth';
+import { hasFeatureAccess } from '../../../../utils/pricing';
 
 /**
  * GET /api/friends
  * List all friends with their basic profile info
+ * Requires paid subscription
  */
 export async function GET(request: NextRequest) {
   try {
     const user = await requireUser(request);
+
+    // Check subscription access
+    const subscriptionResult = await sql`
+      SELECT status FROM subscriptions
+      WHERE user_id = ${user.id}
+      ORDER BY created_at DESC
+      LIMIT 1
+    `;
+    const subscriptionStatus = subscriptionResult.rows[0]?.status || 'free';
+
+    if (
+      !hasFeatureAccess(subscriptionStatus, user.plan, 'friend_connections')
+    ) {
+      return NextResponse.json(
+        {
+          error: 'Friend connections require a Lunary+ subscription',
+          requiresUpgrade: true,
+        },
+        { status: 403 },
+      );
+    }
 
     const result = await sql`
       SELECT

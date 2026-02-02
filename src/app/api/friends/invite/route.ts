@@ -3,14 +3,37 @@ import { sql } from '@vercel/postgres';
 import { randomBytes } from 'crypto';
 import { requireUser } from '@/lib/ai/auth';
 import { encrypt } from '@/lib/encryption';
+import { hasFeatureAccess } from '../../../../../utils/pricing';
 
 /**
  * POST /api/friends/invite
  * Generate a friend invite link
+ * Requires paid subscription
  */
 export async function POST(request: NextRequest) {
   try {
     const user = await requireUser(request);
+
+    // Check subscription access
+    const subscriptionResult = await sql`
+      SELECT status FROM subscriptions
+      WHERE user_id = ${user.id}
+      ORDER BY created_at DESC
+      LIMIT 1
+    `;
+    const subscriptionStatus = subscriptionResult.rows[0]?.status || 'free';
+
+    if (
+      !hasFeatureAccess(subscriptionStatus, user.plan, 'friend_connections')
+    ) {
+      return NextResponse.json(
+        {
+          error: 'Friend invites require a Lunary+ subscription',
+          requiresUpgrade: true,
+        },
+        { status: 403 },
+      );
+    }
 
     // Generate a unique invite code
     const rawCode = randomBytes(16).toString('hex');

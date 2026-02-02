@@ -642,9 +642,93 @@ function PlacementSection({
   );
 }
 
+type TimingWindow = {
+  date: string;
+  dateFormatted: string;
+  quality: 'great' | 'good' | 'neutral';
+  reason: string;
+  transitingPlanet: string;
+  aspectType: string;
+  affectedPlanets: string[];
+};
+
+type CosmicEvent = {
+  date: string;
+  dateFormatted: string;
+  event: string;
+  impact: string;
+  type: 'lunar_phase' | 'planet_transit' | 'retrograde';
+};
+
 function TimingTab({ friend }: { friend: FriendProfile }) {
-  // This would ideally fetch timing data from an API
-  // For now, show a placeholder with the concept
+  const [timingWindows, setTimingWindows] = useState<TimingWindow[]>([]);
+  const [sharedEvents, setSharedEvents] = useState<CosmicEvent[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    async function fetchTiming() {
+      try {
+        const response = await fetch(`/api/friends/${friend.id}/timing`, {
+          credentials: 'include',
+        });
+
+        if (!response.ok) {
+          const data = await response.json();
+          throw new Error(data.message || 'Failed to load timing data');
+        }
+
+        const data = await response.json();
+        setTimingWindows(data.timingWindows || []);
+        setSharedEvents(data.sharedEvents || []);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Failed to load timing');
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    if (friend.hasBirthChart) {
+      fetchTiming();
+    } else {
+      setLoading(false);
+    }
+  }, [friend.id, friend.hasBirthChart]);
+
+  if (loading) {
+    return (
+      <div className='flex flex-col items-center justify-center min-h-[200px] gap-4'>
+        <div className='animate-spin rounded-full h-6 w-6 border-b-2 border-lunary-primary' />
+        <p className='text-sm text-zinc-400'>Calculating cosmic timing...</p>
+      </div>
+    );
+  }
+
+  if (!friend.hasBirthChart) {
+    return (
+      <div className='rounded-xl border-2 border-dashed border-zinc-700 p-8 text-center'>
+        <Calendar className='w-10 h-10 mx-auto text-zinc-600 mb-3' />
+        <h3 className='font-medium text-zinc-300 mb-1'>
+          Timing Analysis Unavailable
+        </h3>
+        <p className='text-sm text-zinc-500'>
+          {friend.name} needs to add their birth details for timing analysis
+        </p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className='rounded-xl border-2 border-dashed border-zinc-700 p-8 text-center'>
+        <Calendar className='w-10 h-10 mx-auto text-zinc-600 mb-3' />
+        <h3 className='font-medium text-zinc-300 mb-1'>{error}</h3>
+        <p className='text-sm text-zinc-500'>
+          Both you and {friend.name} need complete birth charts
+        </p>
+      </div>
+    );
+  }
 
   return (
     <div className='space-y-6'>
@@ -656,84 +740,75 @@ function TimingTab({ friend }: { friend: FriendProfile }) {
           Based on both your transits, here are optimal times for connection.
         </p>
 
-        <div className='space-y-3'>
-          {[
-            {
-              date: 'This Weekend',
-              reason: 'Venus harmonizes with both your Moons',
-              quality: 'great',
-            },
-            {
-              date: 'Next Tuesday',
-              reason: 'Mercury trine creates easy communication',
-              quality: 'good',
-            },
-            {
-              date: 'February 14',
-              reason: 'Venus conjunct - perfect for heart-to-hearts',
-              quality: 'great',
-            },
-          ].map((timing, i) => (
-            <div
-              key={i}
-              className={`flex items-center gap-3 p-3 rounded-lg ${
-                timing.quality === 'great'
-                  ? 'bg-green-900/20 border border-green-800/30'
-                  : 'bg-zinc-800/50'
-              }`}
-            >
-              <Calendar
-                className={`w-5 h-5 ${
+        {timingWindows.length > 0 ? (
+          <div className='space-y-3'>
+            {timingWindows.map((timing, i) => (
+              <div
+                key={i}
+                className={`flex items-center gap-3 p-3 rounded-lg ${
                   timing.quality === 'great'
-                    ? 'text-green-400'
-                    : 'text-zinc-400'
+                    ? 'bg-green-900/20 border border-green-800/30'
+                    : 'bg-zinc-800/50'
                 }`}
-              />
-              <div className='flex-1'>
-                <div className='text-sm font-medium text-white'>
-                  {timing.date}
+              >
+                <Calendar
+                  className={`w-5 h-5 ${
+                    timing.quality === 'great'
+                      ? 'text-green-400'
+                      : 'text-zinc-400'
+                  }`}
+                />
+                <div className='flex-1'>
+                  <div className='text-sm font-medium text-white'>
+                    {timing.dateFormatted}
+                  </div>
+                  <div className='text-xs text-zinc-400'>{timing.reason}</div>
                 </div>
-                <div className='text-xs text-zinc-400'>{timing.reason}</div>
+                {timing.quality === 'great' && (
+                  <span className='text-xs px-2 py-0.5 rounded-full bg-green-800/50 text-green-300'>
+                    Great
+                  </span>
+                )}
+                {timing.quality === 'good' && (
+                  <span className='text-xs px-2 py-0.5 rounded-full bg-blue-800/50 text-blue-300'>
+                    Good
+                  </span>
+                )}
               </div>
-              {timing.quality === 'great' && (
-                <span className='text-xs px-2 py-0.5 rounded-full bg-green-800/50 text-green-300'>
-                  Great
-                </span>
-              )}
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        ) : (
+          <p className='text-sm text-zinc-500 text-center py-4'>
+            No optimal timing windows found in the next 30 days
+          </p>
+        )}
       </div>
 
       <div className='rounded-xl border border-zinc-700/70 bg-lunary-bg-deep/90 p-5'>
         <h3 className='text-sm font-semibold uppercase tracking-wide text-zinc-400 mb-4'>
           Shared Cosmic Events
         </h3>
-        <div className='space-y-3'>
-          {[
-            {
-              event: 'Full Moon in Virgo',
-              date: 'Feb 24',
-              impact:
-                "Illuminates both your 6th houses - great for supporting each other's routines",
-            },
-            {
-              event: 'Mercury Retrograde Ends',
-              date: 'Feb 28',
-              impact: 'Communication flows more easily between you',
-            },
-          ].map((event, i) => (
-            <div key={i} className='p-3 rounded-lg bg-zinc-800/50'>
-              <div className='flex items-center justify-between mb-1'>
-                <div className='text-sm font-medium text-white'>
-                  {event.event}
+        {sharedEvents.length > 0 ? (
+          <div className='space-y-3'>
+            {sharedEvents.map((event, i) => (
+              <div key={i} className='p-3 rounded-lg bg-zinc-800/50'>
+                <div className='flex items-center justify-between mb-1'>
+                  <div className='text-sm font-medium text-white'>
+                    {event.event}
+                  </div>
+                  <div className='text-xs text-zinc-500'>
+                    {event.dateFormatted}
+                  </div>
                 </div>
-                <div className='text-xs text-zinc-500'>{event.date}</div>
+                <div className='text-xs text-zinc-400'>{event.impact}</div>
               </div>
-              <div className='text-xs text-zinc-400'>{event.impact}</div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        ) : (
+          <p className='text-sm text-zinc-500 text-center py-4'>
+            No shared cosmic events in the next 30 days
+          </p>
+        )}
       </div>
     </div>
   );

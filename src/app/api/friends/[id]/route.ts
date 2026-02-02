@@ -3,11 +3,13 @@ import { sql } from '@vercel/postgres';
 import { requireUser } from '@/lib/ai/auth';
 import { calculateSynastry } from '@/lib/astrology/synastry';
 import { encryptJSON, decryptJSON } from '@/lib/encryption';
+import { hasFeatureAccess } from '../../../../../utils/pricing';
 import type { BirthChartData } from '../../../../../utils/astrology/birthChart';
 
 /**
  * GET /api/friends/[id]
  * Get friend details with full synastry analysis
+ * Requires paid subscription
  */
 export async function GET(
   request: NextRequest,
@@ -16,6 +18,27 @@ export async function GET(
   try {
     const user = await requireUser(request);
     const { id } = await params;
+
+    // Check subscription access
+    const subscriptionResult = await sql`
+      SELECT status FROM subscriptions
+      WHERE user_id = ${user.id}
+      ORDER BY created_at DESC
+      LIMIT 1
+    `;
+    const subscriptionStatus = subscriptionResult.rows[0]?.status || 'free';
+
+    if (
+      !hasFeatureAccess(subscriptionStatus, user.plan, 'friend_connections')
+    ) {
+      return NextResponse.json(
+        {
+          error: 'Friend profiles require a Lunary+ subscription',
+          requiresUpgrade: true,
+        },
+        { status: 403 },
+      );
+    }
 
     // Get the friend connection
     const connectionResult = await sql`
