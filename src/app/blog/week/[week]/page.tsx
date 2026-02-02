@@ -22,6 +22,9 @@ import {
   CrystalCards,
   WeekTimeline,
   WeeklyAffirmation,
+  TarotOfWeek,
+  WeeklyNumerology,
+  VOCMoonSchedule,
 } from '@/components/blog';
 import { getPlanetSymbol, getAspectSymbol } from '@/constants/symbols';
 
@@ -671,6 +674,20 @@ export default async function BlogPostPage({
             weekTitle={blogData.title}
           />
 
+          {/* Tarot Card of the Week */}
+          <TarotOfWeek
+            weekNumber={blogData.weekNumber || 1}
+            year={blogData.year || new Date().getFullYear()}
+            dominantPlanet={
+              displayedHighlights[0]?.planet || displayedRetrogrades[0]?.planet
+            }
+            variant='full'
+            weekTitle={blogData.title}
+          />
+
+          {/* Weekly Numerology */}
+          <WeeklyNumerology weekStart={weekStart} variant='full' />
+
           {displayedHighlights.length > 0 && (
             <section className='space-y-6'>
               <h2 className='text-3xl font-bold flex items-center gap-2'>
@@ -860,6 +877,14 @@ export default async function BlogPostPage({
 
           {displayedCrystals.length > 0 && (
             <CrystalCards crystals={displayedCrystals} />
+          )}
+
+          {/* Void of Course Moon Schedule */}
+          {blogData.magicalTiming?.voidOfCourseMoon?.length > 0 && (
+            <VOCMoonSchedule
+              voidPeriods={blogData.magicalTiming.voidOfCourseMoon}
+              variant='full'
+            />
           )}
 
           {displayedAspects.length > 0 && (
