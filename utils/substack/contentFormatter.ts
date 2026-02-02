@@ -29,11 +29,129 @@ export function generateFreeSubstackPost(
   };
 }
 
+// Generate the most dramatic hook for the week
+function generateDramaticHook(data: WeeklyCosmicData): string {
+  // Find the most significant event to lead with
+  const majorMoon = data.moonPhases.find(
+    (m) => m.phase.includes('Full') || m.phase.includes('New'),
+  );
+  const majorRetrograde = data.retrogradeChanges.find(
+    (r) => r.action === 'begins',
+  );
+  const majorIngress = data.planetaryHighlights.find(
+    (h) => h.significance === 'extraordinary' || h.significance === 'high',
+  );
+
+  if (majorMoon?.phase.includes('Full')) {
+    return `✨ **The ${majorMoon.phase} in ${majorMoon.sign} illuminates the sky this week** — a powerful moment for release, clarity, and manifestation. But that's just the beginning...`;
+  }
+  if (majorMoon?.phase.includes('New')) {
+    return `🌑 **A potent ${majorMoon.phase} in ${majorMoon.sign} marks the beginning of a new cycle** — the universe is handing you a blank canvas. Here's how to use it...`;
+  }
+  if (majorRetrograde) {
+    return `⚠️ **${majorRetrograde.planet} stations retrograde this week** — before you panic, here's what this actually means for you and how to navigate it gracefully...`;
+  }
+  if (majorIngress) {
+    return `🔥 **Major cosmic shift incoming: ${majorIngress.planet} enters ${majorIngress.details?.toSign || 'a new sign'}** — expect the energy to change dramatically. Here's your guide...`;
+  }
+
+  return `🌟 **This week brings ${data.planetaryHighlights.length + data.majorAspects.length} significant cosmic events** — here's everything you need to navigate them with intention...`;
+}
+
+// Generate week at a glance table
+function generateWeekAtGlanceTable(data: WeeklyCosmicData): string {
+  const dayAbbrevs = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+  const rows: string[] = [];
+
+  // Get day by day events
+  const currentDate = new Date(data.weekStart);
+  for (let i = 0; i < 7; i++) {
+    const dayDate = new Date(currentDate);
+    dayDate.setDate(dayDate.getDate() + i);
+    const dayStr = dayDate.toDateString();
+
+    const dayEvents: string[] = [];
+
+    // Check highlights
+    data.planetaryHighlights.forEach((h) => {
+      const eventDate = h.date instanceof Date ? h.date : new Date(h.date);
+      if (eventDate.toDateString() === dayStr) {
+        dayEvents.push(
+          `${h.planet} ${h.event === 'enters-sign' ? 'enters ' + (h.details?.toSign || '') : h.event.replace('-', ' ')}`,
+        );
+      }
+    });
+
+    // Check moon phases
+    data.moonPhases.forEach((m) => {
+      const eventDate = m.date instanceof Date ? m.date : new Date(m.date);
+      if (eventDate.toDateString() === dayStr) {
+        dayEvents.push(`${m.phase} in ${m.sign}`);
+      }
+    });
+
+    // Check retrogrades
+    data.retrogradeChanges.forEach((r) => {
+      const eventDate = r.date instanceof Date ? r.date : new Date(r.date);
+      if (eventDate.toDateString() === dayStr) {
+        dayEvents.push(
+          `${r.planet} ${r.action === 'begins' ? 'Rx' : 'Direct'}`,
+        );
+      }
+    });
+
+    const dayName = dayAbbrevs[dayDate.getDay()];
+    const dateNum = dayDate.getDate();
+    const event = dayEvents.length > 0 ? dayEvents[0] : '—';
+    const energy =
+      dayEvents.length > 1 ? '🔥' : dayEvents.length === 1 ? '✨' : '🌿';
+
+    rows.push(`| ${dayName} ${dateNum} | ${event} | ${energy} |`);
+  }
+
+  return `## 📅 This Week at a Glance
+
+| Day | Key Event | Energy |
+|-----|-----------|--------|
+${rows.join('\n')}
+
+`;
+}
+
+// Generate weekly affirmation
+function generateWeeklyAffirmationForSubstack(data: WeeklyCosmicData): string {
+  const majorMoon = data.moonPhases.find(
+    (m) => m.phase.includes('Full') || m.phase.includes('New'),
+  );
+
+  if (majorMoon?.phase.includes('Full')) {
+    return 'I release what no longer serves me and welcome the clarity this illumination brings.';
+  }
+  if (majorMoon?.phase.includes('New')) {
+    return 'I plant seeds of intention with trust, knowing they will blossom in divine timing.';
+  }
+  if (data.retrogradeChanges.length > 0) {
+    return 'I embrace this period of reflection and trust that revisiting the past leads to wiser choices ahead.';
+  }
+
+  const generalAffirmations = [
+    'I move with the cosmic currents, trusting my inner wisdom to guide each step.',
+    'I am aligned with the universe, open to the opportunities this week brings.',
+    'I embrace change as a catalyst for growth and welcome new beginnings.',
+  ];
+
+  return generalAffirmations[data.weekNumber % generalAffirmations.length];
+}
+
 function generateFreeContentFromWeeklyData(
   data: WeeklyCosmicData,
   appUrl: string,
 ): string {
   const weekRange = `${data.weekStart.toLocaleDateString('en-US', { month: 'long', day: 'numeric' })} - ${data.weekEnd.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}`;
+
+  const dramaticHook = generateDramaticHook(data);
+  const weekTable = generateWeekAtGlanceTable(data);
+  const affirmation = generateWeeklyAffirmationForSubstack(data);
 
   return `
 # ${data.title}
@@ -41,6 +159,22 @@ function generateFreeContentFromWeeklyData(
 *${data.subtitle}*
 
 **Week of ${weekRange}**
+
+---
+
+${dramaticHook}
+
+---
+
+${weekTable}
+
+> **✨ Affirmation of the Week**
+>
+> *"${affirmation}"*
+
+---
+
+## The Big Picture
 
 ${data.summary}
 
@@ -94,21 +228,47 @@ ${Object.entries(data.bestDaysFor)
 
 ---
 
+## 🔮 Want More? Here's What's in the Full Forecast...
+
+**Paid subscribers this week get:**
+
+- 📅 **Complete Daily Breakdowns** — Detailed guidance for all 7 days
+- 💎 **All 7 Crystal Companions** — With specific usage rituals and affirmations
+- 🕯️ **Weekly Ritual Guide** — Step-by-step practices aligned with this week's energy
+- ⏰ **Void of Course Moon Times** — Know when to pause and when to act
+- 🔮 **Extended Aspect Analysis** — Deep dive into what these transits mean for you
+- ✨ **Journal Prompts** — Reflection questions for each major event
+
+*[Upgrade to paid for $5/month →](https://lunary.substack.com/subscribe)*
+
+---
+
+## 💬 Your Turn!
+
+**Which cosmic event are you most curious about this week?**
+
+Drop a comment below — I read every single one and love hearing how these energies are showing up in your life! 👇
+
 ---
 
 ### 🌕 Get Your Personalized Cosmic Profile
 
-**Want your personalized daily horoscope and full week ahead?**
+**Ready for guidance tailored to YOUR birth chart?**
 
 🌕 **[Open Lunary App →](${appUrl}?utm_source=substack&utm_medium=free_post&utm_campaign=cross_platform)**
 
-Get complete birth chart analysis, personalized daily horoscopes, and interactive cosmic profile - just £4.99/month.
+- Complete birth chart analysis
+- Personalized daily horoscopes
+- How this week's transits affect YOUR signs
+- Interactive cosmic profile
 
-*Upgrade from newsletter to full cosmic experience.*
+*Just £4.99/month — Upgrade from newsletter to full cosmic experience.*
 
 ---
 
-**📧 Subscribe to our Substack** for weekly cosmic insights: [lunary.substack.com](https://lunary.substack.com?utm_source=app&utm_medium=cta&utm_campaign=cross_platform)
+**📧 Not subscribed yet?** Get free weekly cosmic insights: [lunary.substack.com](https://lunary.substack.com?utm_source=app&utm_medium=cta&utm_campaign=cross_platform)
+
+*See you among the stars! ✨*
 `.trim();
 }
 
