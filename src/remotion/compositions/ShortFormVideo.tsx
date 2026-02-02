@@ -69,7 +69,7 @@ export const ShortFormVideo: React.FC<ShortFormVideoProps> = ({
   const frame = useCurrentFrame();
   const { fps, durationInFrames } = useVideoConfig();
 
-  // Determine current background image
+  // Determine current background image - use last image as fallback to prevent early fade
   const currentTime = frame / fps;
   let currentImage = backgroundImage;
 
@@ -77,7 +77,8 @@ export const ShortFormVideo: React.FC<ShortFormVideoProps> = ({
     const activeImage = images.find(
       (img) => currentTime >= img.startTime && currentTime < img.endTime,
     );
-    currentImage = activeImage?.url || images[0].url;
+    // Fall back to LAST image (not first) to keep showing until video ends
+    currentImage = activeImage?.url || images[images.length - 1].url;
   }
 
   return (

@@ -132,24 +132,25 @@ export const AnimatedSubtitles: React.FC<AnimatedSubtitlesProps> = ({
         textAlign: 'center',
         opacity,
         transform: `translateY(${slideUp}px)`,
+        zIndex: 15, // Above stars (5), below fade transitions (100)
       }}
     >
       <p
         style={{
           fontFamily: 'Roboto Mono, monospace',
           fontSize,
-          fontWeight: 700, // Bold to match RobotoMono-Bold
+          fontWeight: 500, // Medium weight - less bold
           color: COLORS.primaryText,
           lineHeight: 1.4,
           margin: 0,
-          // Match FFmpeg: 3px outline + 4px drop shadow
+          // Softer shadow - subtle outline + gentle glow
           textShadow: `
-            -2px -2px 0 rgba(0,0,0,0.8),
-            2px -2px 0 rgba(0,0,0,0.8),
-            -2px 2px 0 rgba(0,0,0,0.8),
-            2px 2px 0 rgba(0,0,0,0.8),
-            0 0 3px rgba(0,0,0,0.9),
-            4px 4px 4px rgba(0,0,0,0.5)
+            -1px -1px 0 rgba(0,0,0,0.5),
+            1px -1px 0 rgba(0,0,0,0.5),
+            -1px 1px 0 rgba(0,0,0,0.5),
+            1px 1px 0 rgba(0,0,0,0.5),
+            0 0 8px rgba(0,0,0,0.4),
+            2px 2px 4px rgba(0,0,0,0.3)
           `,
         }}
       >

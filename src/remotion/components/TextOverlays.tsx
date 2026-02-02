@@ -21,7 +21,7 @@ interface TextOverlaysProps {
  * - stamp: 90% from top, fontSize 32px
  * - chapter: 55% from top, fontSize 44px
  *
- * All use: Roboto Mono Bold, white, no background, outline + shadow
+ * All use: Roboto Mono Regular (400), white, no background, outline + shadow
  */
 export const TextOverlays: React.FC<TextOverlaysProps> = ({ overlays }) => {
   const frame = useCurrentFrame();
@@ -46,18 +46,18 @@ export const TextOverlays: React.FC<TextOverlaysProps> = ({ overlays }) => {
     }
   };
 
-  // Get Y position by style (matching FFmpeg percentages)
+  // Get Y position by style - hook and chapter closer to subtitles at bottom
   const getYPosition = (style: string) => {
     switch (style) {
       case 'hook':
-        return '55%';
+        return '68%'; // Closer to subtitles
       case 'cta':
         return '25%';
       case 'stamp':
-        return '90%';
+        return '88%'; // Near bottom, below subtitles
       case 'chapter':
       default:
-        return '55%';
+        return '68%'; // Closer to subtitles
     }
   };
 
@@ -79,14 +79,14 @@ export const TextOverlays: React.FC<TextOverlaysProps> = ({ overlays }) => {
     return lines;
   };
 
-  // Common text shadow matching FFmpeg (3px outline + 4px drop shadow)
+  // Softer text shadow - subtle outline + gentle drop shadow
   const textShadow = `
-    -2px -2px 0 rgba(0,0,0,0.8),
-    2px -2px 0 rgba(0,0,0,0.8),
-    -2px 2px 0 rgba(0,0,0,0.8),
-    2px 2px 0 rgba(0,0,0,0.8),
-    0 0 3px rgba(0,0,0,0.9),
-    4px 4px 4px rgba(0,0,0,0.5)
+    -1px -1px 0 rgba(0,0,0,0.5),
+    1px -1px 0 rgba(0,0,0,0.5),
+    -1px 1px 0 rgba(0,0,0,0.5),
+    1px 1px 0 rgba(0,0,0,0.5),
+    0 0 8px rgba(0,0,0,0.4),
+    2px 2px 4px rgba(0,0,0,0.3)
   `;
 
   return (
@@ -146,6 +146,7 @@ export const TextOverlays: React.FC<TextOverlaysProps> = ({ overlays }) => {
               transform: 'translateY(-50%)',
               textAlign: 'center',
               opacity,
+              zIndex: 15, // Above stars (5) and background, below fade transitions
             }}
           >
             {lines.map((line, lineIndex) => (
@@ -154,7 +155,7 @@ export const TextOverlays: React.FC<TextOverlaysProps> = ({ overlays }) => {
                 style={{
                   fontFamily: 'Roboto Mono, monospace',
                   fontSize,
-                  fontWeight: 700,
+                  fontWeight: 400, // Regular weight to match FFmpeg RobotoMono-Regular
                   color: '#ffffff',
                   lineHeight: `${lineHeight}px`,
                   margin: 0,

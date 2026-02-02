@@ -52,6 +52,7 @@ export const TransitionEffect: React.FC<TransitionEffectProps> = ({
         style={{
           backgroundColor: color,
           opacity: actualProgress,
+          zIndex: 100, // Above all content for proper fade to/from black
         }}
       />
     );
@@ -64,6 +65,7 @@ export const TransitionEffect: React.FC<TransitionEffectProps> = ({
         style={{
           backgroundColor: color,
           clipPath: `inset(0 0 ${100 - height}% 0)`,
+          zIndex: 100, // Above all content for proper transition
         }}
       />
     );
