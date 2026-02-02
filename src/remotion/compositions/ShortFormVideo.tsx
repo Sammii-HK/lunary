@@ -8,19 +8,26 @@ import {
 } from 'remotion';
 import { AnimatedBackground } from '../components/AnimatedBackground';
 import { AnimatedSubtitles } from '../components/AnimatedSubtitles';
-import { HookSequence } from '../components/HookSequence';
+import { TextOverlays } from '../components/TextOverlays';
 import { ProgressIndicator } from '../components/ProgressIndicator';
 import { TransitionEffect } from '../components/TransitionEffect';
 import type { AudioSegment } from '../utils/timing';
 import { COLORS } from '../styles/theme';
 
+interface Overlay {
+  text: string;
+  startTime: number;
+  endTime: number;
+  style?: 'hook' | 'cta' | 'stamp' | 'chapter';
+}
+
 export interface ShortFormVideoProps {
-  /** Title/hook text for the intro */
-  hookText: string;
+  /** Title/hook text for the intro (deprecated - use overlays) */
+  hookText?: string;
   /** Subtitle for intro */
   hookSubtitle?: string;
   /** Audio segments for subtitles */
-  segments: AudioSegment[];
+  segments?: AudioSegment[];
   /** Audio file URL */
   audioUrl?: string;
   /** Background images (with timestamps) */
@@ -35,6 +42,8 @@ export interface ShortFormVideoProps {
   highlightTerms?: string[];
   /** Show progress indicator */
   showProgress?: boolean;
+  /** Text overlays (hook, cta, stamps, chapters) */
+  overlays?: Overlay[];
 }
 
 /**
@@ -55,13 +64,10 @@ export const ShortFormVideo: React.FC<ShortFormVideoProps> = ({
   backgroundImage,
   highlightTerms = [],
   showProgress = true,
+  overlays = [],
 }) => {
   const frame = useCurrentFrame();
   const { fps, durationInFrames } = useVideoConfig();
-
-  // Calculate hook duration (first 3 seconds)
-  const hookDurationFrames = 90; // 3 seconds at 30fps
-  const showHook = frame < hookDurationFrames;
 
   // Determine current background image
   const currentTime = frame / fps;
@@ -98,30 +104,23 @@ export const ShortFormVideo: React.FC<ShortFormVideoProps> = ({
       <TransitionEffect
         type='fade'
         startFrame={0}
-        durationFrames={15}
+        durationFrames={30}
         direction='in'
       />
 
-      {/* Hook sequence (first 3 seconds) */}
-      {showHook && (
-        <HookSequence
-          hookText={hookText}
-          subtitle={hookSubtitle}
-          startFrame={0}
-          durationFrames={hookDurationFrames}
-        />
-      )}
-
-      {/* Animated subtitles (after hook) */}
-      {!showHook && (
+      {/* Animated subtitles - matches FFmpeg ASS styling */}
+      {segments && segments.length > 0 && (
         <AnimatedSubtitles
           segments={segments}
           highlightTerms={highlightTerms}
-          fontSize={42}
-          bottomPosition={15}
+          fontSize={44}
+          bottomPosition={12}
           fps={fps}
         />
       )}
+
+      {/* Text overlays (hook, cta, stamps, chapters) - matches FFmpeg drawtext */}
+      {overlays.length > 0 && <TextOverlays overlays={overlays} />}
 
       {/* Audio track */}
       {audioUrl && <Audio src={audioUrl} />}
@@ -132,8 +131,8 @@ export const ShortFormVideo: React.FC<ShortFormVideoProps> = ({
       {/* Fade out at end */}
       <TransitionEffect
         type='fade'
-        startFrame={durationInFrames - 15}
-        durationFrames={15}
+        startFrame={durationInFrames - 45}
+        durationFrames={45}
         direction='out'
       />
     </AbsoluteFill>

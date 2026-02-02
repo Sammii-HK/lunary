@@ -158,7 +158,6 @@ export async function POST(
         videoBuffer = await renderRemotionVideo({
           format: remotionFormat,
           outputPath: '',
-          hookText: script.facetTitle,
           segments,
           audioUrl: audioBlob.url,
           images:
@@ -175,6 +174,7 @@ export async function POST(
           backgroundImage: images.length === 1 ? images[0].url : undefined,
           highlightTerms: highlightTerms || [],
           durationSeconds: audioDuration + 2,
+          overlays: overlays || [],
         });
 
         console.log(`✅ Remotion: Video rendered with shooting stars`);

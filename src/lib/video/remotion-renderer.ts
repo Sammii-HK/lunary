@@ -71,6 +71,14 @@ export function scriptToAudioSegments(
 /**
  * Props for Remotion video rendering
  */
+/** Overlay text element */
+interface Overlay {
+  text: string;
+  startTime: number;
+  endTime: number;
+  style?: 'hook' | 'cta' | 'stamp' | 'chapter';
+}
+
 export interface RemotionVideoProps {
   /** Video format/composition ID */
   format: 'ShortFormVideo' | 'MediumFormVideo' | 'LongFormVideo';
@@ -82,7 +90,7 @@ export interface RemotionVideoProps {
   /** Subtitle text */
   subtitle?: string;
   hookSubtitle?: string;
-  /** Audio segments for subtitles (optional - stage 2) */
+  /** Audio segments for subtitles */
   segments?: AudioSegment[];
   /** Audio file URL */
   audioUrl?: string;
@@ -107,6 +115,8 @@ export interface RemotionVideoProps {
     title: string;
     subtitle?: string;
   };
+  /** Text overlays (hook, cta, stamps, chapters) */
+  overlays?: Overlay[];
 }
 
 /**
@@ -148,7 +158,7 @@ export async function renderRemotionVideo(
 
   if (props.format === 'ShortFormVideo') {
     inputProps = {
-      hookText: props.hookText || props.title || 'Your Weekly Forecast',
+      hookText: props.hookText || props.title,
       hookSubtitle: props.hookSubtitle || props.subtitle,
       segments: props.segments,
       audioUrl: props.audioUrl,
@@ -156,16 +166,18 @@ export async function renderRemotionVideo(
       backgroundImage: props.backgroundImage,
       highlightTerms: props.highlightTerms || [],
       showProgress: true,
+      overlays: props.overlays || [],
     };
   } else if (props.format === 'MediumFormVideo') {
     inputProps = {
-      hookText: props.hookText || props.title || 'Your Weekly Forecast',
+      hookText: props.hookText || props.title,
       hookSubtitle: props.hookSubtitle || props.subtitle,
       segments: props.segments,
       audioUrl: props.audioUrl,
       images: props.images,
       highlightTerms: props.highlightTerms || [],
       showProgress: true,
+      overlays: props.overlays || [],
     };
   } else {
     // LongFormVideo

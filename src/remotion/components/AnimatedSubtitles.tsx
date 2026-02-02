@@ -1,6 +1,6 @@
 import React from 'react';
 import { useCurrentFrame, interpolate, Easing } from 'remotion';
-import { COLORS, FONTS, STYLES } from '../styles/theme';
+import { COLORS, STYLES } from '../styles/theme';
 import type { AudioSegment } from '../utils/timing';
 import { secondsToFrames } from '../utils/timing';
 
@@ -121,6 +121,7 @@ export const AnimatedSubtitles: React.FC<AnimatedSubtitlesProps> = ({
     });
   };
 
+  // FFmpeg-matching style: no background box, outline + shadow
   return (
     <div
       style={{
@@ -133,28 +134,27 @@ export const AnimatedSubtitles: React.FC<AnimatedSubtitlesProps> = ({
         transform: `translateY(${slideUp}px)`,
       }}
     >
-      <div
+      <p
         style={{
-          display: 'inline-block',
-          backgroundColor: STYLES.subtitle.backgroundColor,
-          padding: STYLES.subtitle.padding,
-          borderRadius: STYLES.subtitle.borderRadius,
+          fontFamily: 'Roboto Mono, monospace',
+          fontSize,
+          fontWeight: 700, // Bold to match RobotoMono-Bold
+          color: COLORS.primaryText,
+          lineHeight: 1.4,
+          margin: 0,
+          // Match FFmpeg: 3px outline + 4px drop shadow
+          textShadow: `
+            -2px -2px 0 rgba(0,0,0,0.8),
+            2px -2px 0 rgba(0,0,0,0.8),
+            -2px 2px 0 rgba(0,0,0,0.8),
+            2px 2px 0 rgba(0,0,0,0.8),
+            0 0 3px rgba(0,0,0,0.9),
+            4px 4px 4px rgba(0,0,0,0.5)
+          `,
         }}
       >
-        <p
-          style={{
-            fontFamily: FONTS.subtitle,
-            fontSize,
-            fontWeight: FONTS.subtitleWeight,
-            color: COLORS.primaryText,
-            lineHeight: STYLES.subtitle.lineHeight,
-            margin: 0,
-            textShadow: '0 2px 4px rgba(0, 0, 0, 0.5)',
-          }}
-        >
-          {renderText()}
-        </p>
-      </div>
+        {renderText()}
+      </p>
     </div>
   );
 };
