@@ -318,7 +318,7 @@ export const DailyCardPreview = () => {
             </div>
           </div>
           <p className='text-sm text-lunary-primary-200'>{dailyCard.name}</p>
-          <p className='text-xs text-zinc-400 mt-12'>
+          <p className='text-xs text-zinc-400 mt-2'>
             {dailyCard.keywords.join(' • ')}
           </p>
           {dailyCard.information && (

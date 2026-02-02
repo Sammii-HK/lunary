@@ -8,21 +8,22 @@ const badgeVariants = cva(
     variants: {
       variant: {
         default:
-          'border-transparent bg-primary text-primary-foreground hover:bg-primary/80',
+          'text-xs border-transparent bg-primary text-primary-foreground hover:bg-primary/80',
         secondary:
-          'border-transparent bg-secondary text-secondary-foreground hover:bg-secondary/80',
+          'text-xs border-transparent bg-secondary text-secondary-foreground hover:bg-secondary/80',
         destructive:
-          'border-transparent bg-destructive text-destructive-foreground hover:bg-destructive/80',
-        outline: 'text-foreground',
+          'text-xs border-transparent bg-destructive text-destructive-foreground hover:bg-destructive/80',
+        outline: 'text-xs text-foreground',
         success:
-          'border-transparent bg-lunary-success text-white hover:bg-lunary-success-400',
+          'text-xs border-transparent bg-lunary-success text-white hover:bg-lunary-success-400',
         warning:
-          'border-transparent bg-lunary-accent text-white hover:bg-lunary-accent-400',
-        error: 'border-transparent bg-red-500 text-white hover:bg-red-600',
+          'text-xs border-transparent bg-lunary-accent text-white hover:bg-lunary-accent-400',
+        error:
+          'text-xs border-transparent bg-red-500 text-white hover:bg-red-600',
         'cosmic-rose':
-          'border-transparent bg-[#EE789E] text-white hover:bg-[#EE789E]/80',
+          'text-xs border-transparent bg-[#EE789E] text-white hover:bg-[#EE789E]/80',
         aurora:
-          'border-transparent bg-[#6B9B7A] text-white hover:bg-[#6B9B7A]/80',
+          'text-xs border-transparent bg-[#6B9B7A] text-white hover:bg-[#6B9B7A]/80',
       },
     },
     defaultVariants: {

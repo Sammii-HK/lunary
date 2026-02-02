@@ -43,7 +43,7 @@ export function TransitDurationBadge({
   // else: Long term (> 30 days) → Secondary gray (default)
 
   return (
-    <Badge variant={variant} className={className}>
+    <Badge variant={variant} className={`${className} text-xs`}>
       {displayText}
     </Badge>
   );

@@ -249,7 +249,7 @@ export const CrystalPreview = () => {
               <Gem className='w-4 h-4 text-lunary-accent-200' />
               <span className='text-sm text-zinc-200'>{crystalName}</span>
             </div>
-            <p className='text-xs text-zinc-300 line-clamp-3 mb-2'>
+            <p className='text-xs text-zinc-300 line-clamp-4 mb-2'>
               {crystalReason}
             </p>
 
