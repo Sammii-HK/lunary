@@ -152,3 +152,22 @@ export function getVideoPostingHour(isSecondary: boolean): number {
     ? VIDEO_POSTING_HOURS.secondary
     : VIDEO_POSTING_HOURS.primary;
 }
+
+/**
+ * Threads posting schedule (UTC)
+ * Research-backed schedule for optimal engagement:
+ * - 12:00 UTC: Question/engagement post (morning scroll, algorithm boost)
+ * - 17:00 UTC: Educational deep-dive (UK evening, US lunch - value content)
+ * - 20:00 UTC: Dear-style beta CTA (peak app usage, leisure time = signups)
+ */
+export const THREADS_POST_HOURS = {
+  question: 12,
+  deepDive: 17,
+  betaCta: 20,
+} as const;
+
+export type ThreadsPostType = 'question' | 'deepDive' | 'betaCta';
+
+export function getThreadsPostingHour(postType: ThreadsPostType): number {
+  return THREADS_POST_HOURS[postType];
+}

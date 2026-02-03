@@ -44,7 +44,10 @@ import {
   PERSONA_BODY_TEMPLATES,
   QUESTION_POOL,
   CLOSING_STATEMENTS,
+  getThreadsQuestion,
+  getDearStyleBetaPost,
 } from './shared/constants/persona-templates';
+import { THREADS_POST_HOURS } from '@/utils/posting-times';
 import { isAllowedSlugForCategory } from './shared/constants/category-slugs';
 
 // Import data sources
@@ -1581,7 +1584,9 @@ export interface ThematicPost {
     | 'persona'
     | 'question'
     | 'video'
-    | 'video_caption';
+    | 'video_caption'
+    | 'threads_question'
+    | 'threads_beta_cta';
   topic: string;
   scheduledDate: Date;
   hashtags: string;
@@ -1988,6 +1993,9 @@ export async function generateThematicPostsForWeek(
             platform,
             dayContent.hashtags,
           );
+          // Schedule deep-dive at 17:00 UTC for Threads
+          const deepDiveDate = new Date(dayContent.date);
+          deepDiveDate.setUTCHours(THREADS_POST_HOURS.deepDive, 0, 0, 0);
           posts.push({
             content: deepDiveContent,
             platform,
@@ -1998,7 +2006,7 @@ export async function generateThematicPostsForWeek(
                   ? 'educational_deep_2'
                   : 'educational_deep_3',
             topic: dayContent.facet.title,
-            scheduledDate: dayContent.date,
+            scheduledDate: deepDiveDate,
             hashtags: `${dayContent.hashtags.domain} ${dayContent.hashtags.topic}`,
             category: dayContent.theme.category,
             dayOffset,
@@ -2013,6 +2021,64 @@ export async function generateThematicPostsForWeek(
                 : 7,
             ...sourceMeta,
           });
+        });
+
+        // Add Threads-specific posts: question (12:00 UTC) and beta CTA (20:00 UTC)
+        // Question post for engagement at 12:00 UTC
+        const questionSeed = dayOffset + dayContent.facet.title.length;
+        const questionContent = getThreadsQuestion(
+          dayContent.facet.title,
+          questionSeed,
+        );
+        const questionDate = new Date(dayContent.date);
+        questionDate.setUTCHours(THREADS_POST_HOURS.question, 0, 0, 0);
+        posts.push({
+          content: questionContent,
+          platform,
+          postType: 'threads_question',
+          topic: dayContent.facet.title,
+          scheduledDate: questionDate,
+          hashtags: dayContent.hashtags.topic,
+          category: dayContent.theme.category,
+          dayOffset,
+          slug:
+            dayContent.facet.grimoireSlug.split('/').pop() ||
+            dayContent.facet.title.toLowerCase().replace(/\s+/g, '-'),
+          themeName: dayContent.theme.name,
+          partNumber: dayOffset + 1,
+          totalParts:
+            dayContent.theme.category === 'sabbat'
+              ? (dayContent.theme as SabbatTheme).leadUpFacets.length
+              : 7,
+          ...sourceMeta,
+        });
+
+        // Beta CTA post at 20:00 UTC
+        const betaCtaSeed = dayOffset;
+        const betaCtaContent = getDearStyleBetaPost(betaCtaSeed);
+        const betaCtaDate = new Date(dayContent.date);
+        betaCtaDate.setUTCHours(THREADS_POST_HOURS.betaCta, 0, 0, 0);
+        posts.push({
+          content: betaCtaContent,
+          platform,
+          postType: 'threads_beta_cta',
+          topic: dayContent.facet.title,
+          scheduledDate: betaCtaDate,
+          hashtags: '',
+          category: dayContent.theme.category,
+          dayOffset,
+          slug:
+            dayContent.facet.grimoireSlug.split('/').pop() ||
+            dayContent.facet.title.toLowerCase().replace(/\s+/g, '-'),
+          themeName: dayContent.theme.name,
+          partNumber: dayOffset + 1,
+          totalParts:
+            dayContent.theme.category === 'sabbat'
+              ? (dayContent.theme as SabbatTheme).leadUpFacets.length
+              : 7,
+          sourceType: 'fallback' as const,
+          sourceId: 'beta-cta',
+          sourceTitle: 'Beta CTA',
         });
 
         if (override) {
