@@ -310,13 +310,14 @@ export async function GET(request: NextRequest) {
 
     const trialConversions = Number(trialConversionsResult.rows[0]?.count || 0);
 
+    // Cohort-based conversion rate: % of signups who became paid
     const conversionRate =
       freeUsers > 0 ? Number(((paidUsers / freeUsers) * 100).toFixed(2)) : 0;
 
+    // Trial conversion rate: % of trial users who became paid (both from cohort)
+    // This ensures the rate can never exceed 100%
     const trialConversionRate =
-      trialUsers > 0
-        ? Number(((trialConversions / trialUsers) * 100).toFixed(2))
-        : 0;
+      trialUsers > 0 ? Number(((paidUsers / trialUsers) * 100).toFixed(2)) : 0;
 
     const dropOffPoints = [
       {

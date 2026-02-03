@@ -544,13 +544,14 @@ export async function GET(request: NextRequest) {
     const endOfRangeDay = toUtcStartOfDay(range.end);
     const lookbackEnd = new Date(endOfRangeDay);
     lookbackEnd.setUTCDate(lookbackEnd.getUTCDate() - 1);
+    // Use activityMap (engagement events) for returning users to match DAU/WAU/MAU
     const earlierLookbackSet = gatherUsersBetween(
-      appOpenedMap,
+      activityMap,
       lookbackEnd,
       lookbackEnd,
     );
     const currentDaySet =
-      appOpenedMap.get(formatDateKey(endOfRangeDay)) ?? new Set<string>();
+      activityMap.get(formatDateKey(endOfRangeDay)) ?? new Set<string>();
     const returningDau = intersectionSize(currentDaySet, earlierLookbackSet);
 
     const currentWauStart = new Date(endOfRangeDay);
@@ -560,12 +561,12 @@ export async function GET(request: NextRequest) {
     const prevWauStart = new Date(prevWauEnd);
     prevWauStart.setUTCDate(prevWauStart.getUTCDate() - 6);
     const currentWauSet = gatherUsersBetween(
-      appOpenedMap,
+      activityMap,
       currentWauStart,
       endOfRangeDay,
     );
     const prevWauSet = gatherUsersBetween(
-      appOpenedMap,
+      activityMap,
       prevWauStart,
       prevWauEnd,
     );
@@ -578,12 +579,12 @@ export async function GET(request: NextRequest) {
     const prevMauStart = new Date(prevMauEnd);
     prevMauStart.setUTCDate(prevMauStart.getUTCDate() - 29);
     const currentMauSet = gatherUsersBetween(
-      appOpenedMap,
+      activityMap,
       currentMauStart,
       endOfRangeDay,
     );
     const prevMauSet = gatherUsersBetween(
-      appOpenedMap,
+      activityMap,
       prevMauStart,
       prevMauEnd,
     );
