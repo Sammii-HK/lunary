@@ -3,6 +3,7 @@ import { headers } from 'next/headers';
 import { getGlobalCosmicData } from '@/lib/cosmic-snapshot/global-cache';
 import { auth } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
+import { sql } from '@vercel/postgres';
 import { calculatePersonalYear, reduceToDigit } from '@/lib/numerology';
 import { getTarotCard } from '../../../../../utils/tarot/tarot';
 import { decrypt } from '@/lib/encryption';
@@ -70,26 +71,55 @@ export async function GET() {
           dayTheme: dayTheme,
         };
 
-        // Try to get today's horoscope from cache or generate
+        // Try to get today's horoscope directly from database
         try {
-          const horoscopeRes = await fetch(
-            `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/api/horoscope/daily`,
-            {
-              headers: {
-                Cookie: headersList.get('cookie') || '',
-              },
-            },
-          );
-          if (horoscopeRes.ok) {
-            const horoscope = await horoscopeRes.json();
+          // Use raw SQL like horoscope/daily/route.ts does (known working)
+          const today = new Date();
+          const dateStr = today.toISOString().split('T')[0];
+
+          const result = await sql`
+            SELECT horoscope_data
+            FROM daily_horoscopes
+            WHERE user_id = ${session.user.id} AND horoscope_date = ${dateStr}
+            LIMIT 1
+          `;
+
+          if (result.rows.length > 0 && result.rows[0].horoscope_data) {
+            const horoscope = result.rows[0].horoscope_data as {
+              headline?: string;
+              overview?: string;
+              dailyGuidance?: string;
+            };
             horoscopeData = {
               headline: horoscope.headline || 'Your cosmic guidance awaits',
               guidance: horoscope.overview || horoscope.dailyGuidance || '',
             };
+          } else {
+            // Generate a simple fallback based on moon phase and day number
+            const moonPhase = cosmicData.moonPhase.name.toLowerCase();
+            const dayNum = personalData?.personalDayNumber || 1;
+            horoscopeData = {
+              headline: getSimpleHeadline(moonPhase, dayNum),
+              guidance: getSimpleGuidance(moonPhase, dayNum),
+            };
           }
-        } catch {
+        } catch (e) {
           // Horoscope fetch failed, use fallback
+          console.error('[Widget API] Horoscope fetch error:', e);
+          const moonPhase = cosmicData.moonPhase.name.toLowerCase();
+          const dayNum = personalData?.personalDayNumber || 1;
+          horoscopeData = {
+            headline: getSimpleHeadline(moonPhase, dayNum),
+            guidance: getSimpleGuidance(moonPhase, dayNum),
+          };
         }
+      } else {
+        // No birthday - generate generic horoscope based on moon phase
+        const moonPhase = cosmicData.moonPhase.name.toLowerCase();
+        horoscopeData = {
+          headline: getSimpleHeadline(moonPhase, 1),
+          guidance: getSimpleGuidance(moonPhase, 1),
+        };
       }
 
       // Get today's tarot card from DB, or generate and save if missing
@@ -187,8 +217,8 @@ export async function GET() {
       currentTransit: getTopTransit(cosmicData),
       planets: formatPlanets(cosmicData.planetaryPositions),
       horoscope: horoscopeData || {
-        headline: 'Open Lunary for insights',
-        guidance: 'Tap to see your personalized cosmic guidance',
+        headline: getSimpleHeadline(cosmicData.moonPhase.name.toLowerCase(), 1),
+        guidance: getSimpleGuidance(cosmicData.moonPhase.name.toLowerCase(), 1),
       },
     };
 
@@ -356,4 +386,98 @@ function getPersonalDayTheme(dayNumber: number): string {
     9: 'Completion',
   };
   return themes[dayNumber] || 'Discovery';
+}
+
+function getSimpleHeadline(moonPhase: string, dayNumber: number): string {
+  const moonHeadlines: Record<string, string[]> = {
+    'new moon': [
+      'Fresh Starts Await',
+      'Set Your Intentions',
+      'Plant New Seeds',
+    ],
+    'waxing crescent': [
+      'Building Momentum',
+      'Trust the Process',
+      'Small Steps Forward',
+    ],
+    'first quarter': [
+      'Take Bold Action',
+      'Overcome Challenges',
+      'Push Through',
+    ],
+    'waxing gibbous': ['Refine Your Path', 'Stay Focused', 'Almost There'],
+    'full moon': [
+      'Embrace Illumination',
+      'Celebrate Progress',
+      'Release What No Longer Serves',
+    ],
+    'waning gibbous': ['Share Your Wisdom', 'Practice Gratitude', 'Give Back'],
+    'last quarter': ['Let Go Gracefully', 'Forgive and Release', 'Make Space'],
+    'waning crescent': [
+      'Rest and Reflect',
+      'Honor Your Journey',
+      'Prepare for Renewal',
+    ],
+  };
+
+  const dayHeadlines: Record<number, string[]> = {
+    1: ['Lead with Confidence', 'Your Day to Shine'],
+    2: ['Seek Balance', 'Connect Deeply'],
+    3: ['Express Yourself', 'Create Freely'],
+    4: ['Build Strong Foundations', 'Stay Grounded'],
+    5: ['Embrace Adventure', 'Welcome Change'],
+    6: ['Nurture Relationships', 'Spread Love'],
+    7: ['Trust Your Intuition', 'Seek Inner Wisdom'],
+    8: ['Manifest Abundance', 'Step Into Power'],
+    9: ['Complete What You Started', 'Let Go with Grace'],
+  };
+
+  // Combine moon phase and day number for variety
+  const moonOptions = moonHeadlines[moonPhase] || moonHeadlines['full moon'];
+  const dayOptions = dayHeadlines[dayNumber] || dayHeadlines[1];
+
+  // Use day number to pick which headline style to use
+  const useMoon = dayNumber % 2 === 0;
+  const options = useMoon ? moonOptions : dayOptions;
+  const index = (dayNumber - 1) % options.length;
+
+  return options[index];
+}
+
+function getSimpleGuidance(moonPhase: string, dayNumber: number): string {
+  const moonGuidance: Record<string, string> = {
+    'new moon':
+      'The dark sky invites you to dream. What seeds will you plant today?',
+    'waxing crescent':
+      'Your intentions are taking root. Nurture them with patience and care.',
+    'first quarter':
+      'Challenges are opportunities in disguise. Take decisive action.',
+    'waxing gibbous':
+      'Fine-tune your approach. Small adjustments lead to big results.',
+    'full moon':
+      "The cosmos illuminates your path. Celebrate how far you've come.",
+    'waning gibbous':
+      'Share your gifts with others. Gratitude multiplies blessings.',
+    'last quarter': 'Release what weighs you down. Forgiveness sets you free.',
+    'waning crescent':
+      'Rest is productive too. Honor your need for quiet reflection.',
+  };
+
+  const dayGuidance: Record<number, string> = {
+    1: 'Today favors independence and new initiatives. Trust your vision.',
+    2: 'Partnerships and cooperation bring success. Listen as much as you speak.',
+    3: 'Creative expression flows naturally. Share your unique perspective.',
+    4: 'Focus on practical matters. Steady effort builds lasting results.',
+    5: 'Adventure calls to you. Embrace unexpected opportunities.',
+    6: 'Love and harmony surround you. Nurture your closest bonds.',
+    7: 'Your intuition is heightened. Take time for meditation and reflection.',
+    8: 'Material and spiritual abundance align. Step confidently toward your goals.',
+    9: 'Completion and wisdom mark this day. Tie up loose ends with grace.',
+  };
+
+  const moon = moonGuidance[moonPhase] || moonGuidance['full moon'];
+  const day = dayGuidance[dayNumber] || dayGuidance[1];
+
+  // Alternate based on day number
+  return dayNumber % 2 === 0 ? moon : day;
 }

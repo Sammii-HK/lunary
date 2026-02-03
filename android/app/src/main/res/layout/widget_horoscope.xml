@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/widget_container"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="16dp"
+    android:background="#0A0514"
+    android:gravity="center">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="HOROSCOPE"
+        android:textColor="#9966CC"
+        android:textSize="9sp"
+        android:fontFamily="monospace"
+        android:letterSpacing="0.15" />
+
+    <TextView
+        android:id="@+id/horoscope_headline"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="14dp"
+        android:text="Embrace Change"
+        android:textColor="#FFFFFF"
+        android:textSize="14sp"
+        android:fontFamily="monospace"
+        android:textStyle="bold"
+        android:gravity="center" />
+
+    <TextView
+        android:id="@+id/horoscope_guidance"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:text="Today brings opportunities"
+        android:textColor="#FFFFFF99"
+        android:textSize="10sp"
+        android:fontFamily="monospace"
+        android:gravity="center"
+        android:maxLines="3" />
+
+</LinearLayout>

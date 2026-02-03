@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/widget_container"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="16dp"
+    android:background="#0A0514"
+    android:gravity="center">
+
+    <ImageView
+        android:id="@+id/moon_icon"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:src="@drawable/ic_moon_full" />
+
+    <TextView
+        android:id="@+id/moon_phase"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:text="Snow Moon"
+        android:textColor="#FFFFFF"
+        android:textSize="14sp"
+        android:fontFamily="monospace"
+        android:textStyle="bold" />
+
+    <TextView
+        android:id="@+id/moon_sign"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="2dp"
+        android:text="in Virgo · 98%"
+        android:textColor="#9966CC"
+        android:textSize="11sp"
+        android:fontFamily="monospace" />
+
+    <TextView
+        android:id="@+id/card_name"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:text="The Sun"
+        android:textColor="#FFFFFF"
+        android:textSize="13sp"
+        android:fontFamily="monospace"
+        android:textStyle="bold" />
+
+    <TextView
+        android:id="@+id/card_meaning"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="2dp"
+        android:text="positivity, fun, warmth"
+        android:textColor="#9966CC"
+        android:textSize="10sp"
+        android:fontFamily="monospace" />
+
+    <TextView
+        android:id="@+id/day_number"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:text="Day 9"
+        android:textColor="#FFFFFF"
+        android:textSize="11sp"
+        android:fontFamily="monospace"
+        android:textStyle="bold" />
+
+    <TextView
+        android:id="@+id/day_theme"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Completion"
+        android:textColor="#9966CC"
+        android:textSize="10sp"
+        android:fontFamily="monospace" />
+
+</LinearLayout>
