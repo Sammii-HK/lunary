@@ -20,6 +20,9 @@ importers:
       '@astrodraw/astrochart':
         specifier: ^3.0.2
         version: 3.0.2
+      '@capacitor/android':
+        specifier: ^8.0.2
+        version: 8.0.2(@capacitor/core@8.0.2)
       '@capacitor/cli':
         specifier: ^8.0.2
         version: 8.0.2
@@ -599,6 +602,11 @@ packages:
 
   '@better-fetch/fetch@1.1.18':
     resolution: {integrity: sha512-rEFOE1MYIsBmoMJtQbl32PGHHXuG2hDxvEd7rUHE0vCBoFQVSDqaVs9hkZEtHCxRoY+CljXKFCOuJ8uxqw1LcA==}
+
+  '@capacitor/android@8.0.2':
+    resolution: {integrity: sha512-0D7j0YvzjnfCMKLvFkAbx8b3Vwx+QfHFG5NzoXpI9sAl3zWiLsfa+NX4x92Fy+k4MGjLSMAfLThCqILYGDDsgw==}
+    peerDependencies:
+      '@capacitor/core': ^8.0.0
 
   '@capacitor/cli@8.0.2':
     resolution: {integrity: sha512-/8qLYxhytMyUKTHK8i6YU+DMD3AuFiQgSuJCyMltcg9MN3W9En7zqQZSo/WN4eC7qif/oyZACzm7OkAZKani7g==}
@@ -7004,6 +7012,10 @@ snapshots:
 
   '@better-fetch/fetch@1.1.18': {}
 
+  '@capacitor/android@8.0.2(@capacitor/core@8.0.2)':
+    dependencies:
+      '@capacitor/core': 8.0.2
+
   '@capacitor/cli@8.0.2':
     dependencies:
       '@ionic/cli-framework-output': 2.2.8
@@ -8387,14 +8399,14 @@ snapshots:
       '@remotion/media-parser': 4.0.417
       '@remotion/studio': 4.0.417(bufferutil@4.0.9)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@remotion/studio-shared': 4.0.417(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
-      css-loader: 5.2.7(webpack@5.96.1(esbuild@0.25.0))
+      css-loader: 5.2.7(webpack@5.96.1)
       esbuild: 0.25.0
       react: 18.3.1
       react-dom: 18.3.1(react@18.3.1)
       react-refresh: 0.9.0
       remotion: 4.0.417(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       source-map: 0.7.3
-      style-loader: 4.0.0(webpack@5.96.1(esbuild@0.25.0))
+      style-loader: 4.0.0(webpack@5.96.1)
       webpack: 5.96.1(esbuild@0.25.0)
     transitivePeerDependencies:
       - '@swc/core'
@@ -9678,7 +9690,7 @@ snapshots:
 
   crypto@1.0.1: {}
 
-  css-loader@5.2.7(webpack@5.96.1(esbuild@0.25.0)):
+  css-loader@5.2.7(webpack@5.96.1):
     dependencies:
       icss-utils: 5.1.0(postcss@8.5.6)
       loader-utils: 2.0.4
@@ -13157,7 +13169,7 @@ snapshots:
 
   strnum@1.1.2: {}
 
-  style-loader@4.0.0(webpack@5.96.1(esbuild@0.25.0)):
+  style-loader@4.0.0(webpack@5.96.1):
     dependencies:
       webpack: 5.96.1(esbuild@0.25.0)
 

@@ -842,16 +842,324 @@ struct HoroscopeView: View {
     }
 }
 
+// MARK: - watchOS Accessory Widgets
+
+#if os(watchOS)
+struct MoonPhaseWatchWidget: Widget {
+    let kind = "MoonPhaseWatch"
+
+    var body: some WidgetConfiguration {
+        StaticConfiguration(kind: kind, provider: LunaryProvider()) { entry in
+            MoonPhaseWatchView(data: entry.data)
+        }
+        .configurationDisplayName("Moon Phase")
+        .description("Current moon phase and sign")
+        .supportedFamilies([.accessoryCircular, .accessoryCorner])
+    }
+}
+
+struct MoonPhaseWatchView: View {
+    let data: LunaryWidgetData
+    @Environment(\.widgetFamily) var family
+
+    var body: some View {
+        switch family {
+        case .accessoryCircular:
+            circularView
+        case .accessoryCorner:
+            cornerView
+        default:
+            circularView
+        }
+    }
+
+    var circularView: some View {
+        ZStack {
+            AccessoryWidgetBackground()
+            VStack(spacing: 1) {
+                Image(systemName: moonSystemImage(for: data.moon.phase))
+                    .font(.system(size: 18))
+                    .foregroundStyle(.primary)
+                Text(signAstro(data.moon.sign))
+                    .font(LunaryFont.astro(12))
+                    .foregroundStyle(.secondary)
+            }
+        }
+    }
+
+    var cornerView: some View {
+        ZStack {
+            AccessoryWidgetBackground()
+            Text(signAstro(data.moon.sign))
+                .font(LunaryFont.astro(20))
+                .foregroundStyle(.primary)
+        }
+        .widgetLabel {
+            Text("\(Int(data.moon.illumination))%")
+        }
+    }
+
+    func moonSystemImage(for phase: String) -> String {
+        let normalized = phase.lowercased()
+        if normalized.contains("new") { return "moon.fill" }
+        else if normalized.contains("full") { return "moon.circle.fill" }
+        else if normalized.contains("waxing") && normalized.contains("crescent") { return "moon.stars.fill" }
+        else if normalized.contains("waxing") && normalized.contains("gibbous") { return "moon.haze.fill" }
+        else if normalized.contains("waning") && normalized.contains("crescent") { return "moon.stars" }
+        else if normalized.contains("waning") && normalized.contains("gibbous") { return "moon.haze" }
+        else if normalized.contains("first") || normalized.contains("quarter") { return "moon.zzz.fill" }
+        else if normalized.contains("last") || normalized.contains("third") { return "moon.zzz" }
+        return "moon.fill"
+    }
+}
+
+struct TarotWatchWidget: Widget {
+    let kind = "TarotWatch"
+
+    var body: some WidgetConfiguration {
+        StaticConfiguration(kind: kind, provider: LunaryProvider()) { entry in
+            TarotWatchView(data: entry.data)
+        }
+        .configurationDisplayName("Daily Tarot")
+        .description("Your tarot card of the day")
+        .supportedFamilies([.accessoryCircular, .accessoryRectangular])
+    }
+}
+
+struct TarotWatchView: View {
+    let data: LunaryWidgetData
+    @Environment(\.widgetFamily) var family
+
+    var body: some View {
+        switch family {
+        case .accessoryCircular:
+            circularView
+        case .accessoryRectangular:
+            rectangularView
+        default:
+            circularView
+        }
+    }
+
+    var circularView: some View {
+        ZStack {
+            AccessoryWidgetBackground()
+            VStack(spacing: 2) {
+                Image(systemName: "sparkles")
+                    .font(.system(size: 16))
+                    .foregroundStyle(.primary)
+                if let card = data.todayCard {
+                    Text(cardShortName(card.name))
+                        .font(.system(size: 9, weight: .semibold))
+                        .foregroundStyle(.secondary)
+                        .lineLimit(1)
+                }
+            }
+        }
+    }
+
+    var rectangularView: some View {
+        HStack(spacing: 8) {
+            Image(systemName: "sparkles")
+                .font(.system(size: 20))
+                .foregroundStyle(.primary)
+            VStack(alignment: .leading, spacing: 2) {
+                if let card = data.todayCard {
+                    Text(card.name)
+                        .font(.system(size: 12, weight: .semibold))
+                        .foregroundStyle(.primary)
+                        .lineLimit(1)
+                    Text(card.briefMeaning)
+                        .font(.system(size: 10))
+                        .foregroundStyle(.secondary)
+                        .lineLimit(2)
+                } else {
+                    Text("Daily Card")
+                        .font(.system(size: 12, weight: .semibold))
+                    Text("Open app to sync")
+                        .font(.system(size: 10))
+                        .foregroundStyle(.secondary)
+                }
+            }
+            Spacer()
+        }
+    }
+
+    func cardShortName(_ name: String) -> String {
+        let shortened = name
+            .replacingOccurrences(of: "The ", with: "")
+            .replacingOccurrences(of: " of ", with: "/")
+        return shortened.count > 8 ? String(shortened.prefix(7)) + "…" : shortened
+    }
+}
+
+struct TransitWatchWidget: Widget {
+    let kind = "TransitWatch"
+
+    var body: some WidgetConfiguration {
+        StaticConfiguration(kind: kind, provider: LunaryProvider()) { entry in
+            TransitWatchView(data: entry.data)
+        }
+        .configurationDisplayName("Active Transit")
+        .description("Current transit affecting you")
+        .supportedFamilies([.accessoryRectangular])
+    }
+}
+
+struct TransitWatchView: View {
+    let data: LunaryWidgetData
+
+    var body: some View {
+        HStack(spacing: 6) {
+            if let transit = data.currentTransit {
+                HStack(spacing: 3) {
+                    Text(planetAstro(transit.planet))
+                        .font(LunaryFont.astro(16))
+                        .foregroundStyle(.primary)
+                    Text(aspectSymbol(transit.aspect))
+                        .font(.system(size: 12))
+                        .foregroundStyle(.secondary)
+                    Text(planetAstro(transit.natalPoint))
+                        .font(LunaryFont.astro(16))
+                        .foregroundStyle(.primary)
+                }
+                VStack(alignment: .leading, spacing: 1) {
+                    Text(transit.briefMeaning)
+                        .font(.system(size: 10))
+                        .foregroundStyle(.secondary)
+                        .lineLimit(2)
+                }
+            } else {
+                Image(systemName: "sparkle")
+                    .font(.system(size: 18))
+                    .foregroundStyle(.secondary)
+                Text("No active transit")
+                    .font(.system(size: 11))
+                    .foregroundStyle(.secondary)
+            }
+            Spacer()
+        }
+    }
+}
+
+struct CosmicInlineWatchWidget: Widget {
+    let kind = "CosmicInlineWatch"
+
+    var body: some WidgetConfiguration {
+        StaticConfiguration(kind: kind, provider: LunaryProvider()) { entry in
+            CosmicInlineWatchView(data: entry.data)
+        }
+        .configurationDisplayName("Cosmic Glance")
+        .description("Moon sign and illumination")
+        .supportedFamilies([.accessoryInline])
+    }
+}
+
+struct CosmicInlineWatchView: View {
+    let data: LunaryWidgetData
+
+    var body: some View {
+        HStack(spacing: 4) {
+            Image(systemName: "moon.fill")
+            Text(data.moon.sign)
+            Text("•")
+            Text("\(Int(data.moon.illumination))%")
+        }
+    }
+}
+
+struct DayNumberWatchWidget: Widget {
+    let kind = "DayNumberWatch"
+
+    var body: some WidgetConfiguration {
+        StaticConfiguration(kind: kind, provider: LunaryProvider()) { entry in
+            DayNumberWatchView(data: entry.data)
+        }
+        .configurationDisplayName("Personal Day")
+        .description("Your numerology day number")
+        .supportedFamilies([.accessoryCircular])
+    }
+}
+
+struct DayNumberWatchView: View {
+    let data: LunaryWidgetData
+
+    var body: some View {
+        ZStack {
+            AccessoryWidgetBackground()
+            VStack(spacing: 2) {
+                Text("\(data.personalDayNumber)")
+                    .font(.system(size: 24, weight: .bold, design: .rounded))
+                    .foregroundStyle(.primary)
+                Text("Day")
+                    .font(.system(size: 9))
+                    .foregroundStyle(.secondary)
+            }
+        }
+    }
+}
+
+struct HoroscopeWatchWidget: Widget {
+    let kind = "HoroscopeWatch"
+
+    var body: some WidgetConfiguration {
+        StaticConfiguration(kind: kind, provider: LunaryProvider()) { entry in
+            HoroscopeWatchView(data: entry.data)
+        }
+        .configurationDisplayName("Daily Horoscope")
+        .description("Your cosmic guidance")
+        .supportedFamilies([.accessoryRectangular])
+    }
+}
+
+struct HoroscopeWatchView: View {
+    let data: LunaryWidgetData
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 2) {
+            if let horoscope = data.horoscope {
+                Text(horoscope.headline)
+                    .font(.system(size: 12, weight: .semibold))
+                    .foregroundStyle(.primary)
+                    .lineLimit(1)
+                Text(horoscope.guidance)
+                    .font(.system(size: 10))
+                    .foregroundStyle(.secondary)
+                    .lineLimit(2)
+            } else {
+                Text("Open Lunary")
+                    .font(.system(size: 12, weight: .semibold))
+                Text("Sync your horoscope")
+                    .font(.system(size: 10))
+                    .foregroundStyle(.secondary)
+            }
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+    }
+}
+#endif
+
 // MARK: - Widget Bundle
 
 @main
 struct LunaryWidgetBundle: WidgetBundle {
     var body: some Widget {
+        // iOS Home Screen Widgets
         CosmicDashboardWidget()
         MoonTrackerWidget()
         DailyCardWidget()
         SkyNowWidget()
         TransitWidget()
         HoroscopeWidget()
+
+        // watchOS Complications
+        #if os(watchOS)
+        MoonPhaseWatchWidget()
+        TarotWatchWidget()
+        TransitWatchWidget()
+        CosmicInlineWatchWidget()
+        DayNumberWatchWidget()
+        HoroscopeWatchWidget()
+        #endif
     }
 }
