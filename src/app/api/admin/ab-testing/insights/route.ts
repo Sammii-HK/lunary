@@ -14,9 +14,16 @@ function getAIContext(): string {
 
 const AI_CONTEXT = getAIContext();
 
+interface VariantMetrics {
+  name: string;
+  impressions: number;
+  conversions: number;
+  conversionRate: number;
+}
+
 export async function POST(request: NextRequest) {
   try {
-    const { testName, variantA, variantB, timeRange } = await request.json();
+    const { testName, variants, timeRange } = await request.json();
 
     if (!testName) {
       return NextResponse.json(
@@ -40,63 +47,42 @@ export async function POST(request: NextRequest) {
         dateFilter = '1=1';
     }
 
-    // Get detailed event breakdown
-    const eventsA = await sql`
-      SELECT event_type, COUNT(*) as count
-      FROM conversion_events
-      WHERE metadata->>'abTest' = ${testName}
-      AND metadata->>'abVariant' = 'A'
-      AND ${(sql as any).raw(dateFilter)}
-      GROUP BY event_type
-      ORDER BY count DESC
-    `;
+    // Get detailed event breakdown and journey data for each variant
+    const variantsWithDetails = await Promise.all(
+      (variants as VariantMetrics[]).map(async (variant) => {
+        const events = await sql`
+          SELECT event_type, COUNT(*) as count
+          FROM conversion_events
+          WHERE metadata->>'abTest' = ${testName}
+            AND metadata->>'abVariant' = ${variant.name}
+            AND ${(sql as any).raw(dateFilter)}
+          GROUP BY event_type
+          ORDER BY count DESC
+        `;
 
-    const eventsB = await sql`
-      SELECT event_type, COUNT(*) as count
-      FROM conversion_events
-      WHERE metadata->>'abTest' = ${testName}
-      AND metadata->>'abVariant' = 'B'
-      AND ${(sql as any).raw(dateFilter)}
-      GROUP BY event_type
-      ORDER BY count DESC
-    `;
+        const journey = await sql`
+          SELECT
+            COUNT(DISTINCT CASE WHEN event_type = 'signup' THEN user_id END) as signups,
+            COUNT(DISTINCT CASE WHEN event_type = 'trial_started' THEN user_id END) as trials,
+            COUNT(DISTINCT CASE WHEN event_type IN ('trial_converted', 'subscription_started') THEN user_id END) as conversions
+          FROM conversion_events
+          WHERE metadata->>'abTest' = ${testName}
+            AND metadata->>'abVariant' = ${variant.name}
+            AND ${(sql as any).raw(dateFilter)}
+        `;
 
-    // Get user journey data
-    const journeysA = await sql`
-      SELECT 
-        COUNT(DISTINCT CASE WHEN event_type = 'signup' THEN user_id END) as signups,
-        COUNT(DISTINCT CASE WHEN event_type = 'trial_started' THEN user_id END) as trials,
-        COUNT(DISTINCT CASE WHEN event_type IN ('trial_converted', 'subscription_started') THEN user_id END) as conversions
-      FROM conversion_events
-      WHERE metadata->>'abTest' = ${testName}
-      AND metadata->>'abVariant' = 'A'
-      AND ${(sql as any).raw(dateFilter)}
-    `;
-
-    const journeysB = await sql`
-      SELECT 
-        COUNT(DISTINCT CASE WHEN event_type = 'signup' THEN user_id END) as signups,
-        COUNT(DISTINCT CASE WHEN event_type = 'trial_started' THEN user_id END) as trials,
-        COUNT(DISTINCT CASE WHEN event_type IN ('trial_converted', 'subscription_started') THEN user_id END) as conversions
-      FROM conversion_events
-      WHERE metadata->>'abTest' = ${testName}
-      AND metadata->>'abVariant' = 'B'
-      AND ${(sql as any).raw(dateFilter)}
-    `;
+        return {
+          ...variant,
+          events: events.rows,
+          journey: journey.rows[0],
+        };
+      }),
+    );
 
     // Generate AI insights
     const insights = await generateAIInsights({
       testName,
-      variantA: {
-        ...variantA,
-        events: eventsA.rows,
-        journey: journeysA.rows[0],
-      },
-      variantB: {
-        ...variantB,
-        events: eventsB.rows,
-        journey: journeysB.rows[0],
-      },
+      variants: variantsWithDetails,
     });
 
     return NextResponse.json({ insights });
@@ -112,7 +98,15 @@ export async function POST(request: NextRequest) {
   }
 }
 
-async function generateAIInsights(data: any): Promise<string> {
+interface VariantWithDetails extends VariantMetrics {
+  events: Array<Record<string, unknown>>;
+  journey: Record<string, unknown>;
+}
+
+async function generateAIInsights(data: {
+  testName: string;
+  variants: VariantWithDetails[];
+}): Promise<string> {
   // If OpenAI is not configured, return basic insights
   if (!process.env.OPENAI_API_KEY) {
     return generateBasicInsights(data);
@@ -122,29 +116,31 @@ async function generateAIInsights(data: any): Promise<string> {
     const { OpenAI } = await import('openai');
     const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
+    const variantsSummary = data.variants
+      .map(
+        (v, i) => `${v.name}:
+- Impressions: ${v.impressions}
+- Conversions: ${v.conversions}
+- Conversion Rate: ${v.conversionRate.toFixed(2)}%
+- Events: ${JSON.stringify(v.events)}`,
+      )
+      .join('\n\n');
+
     const prompt = `${AI_CONTEXT}
 
-**Task**: Analyze A/B test results
+**Task**: Analyze A/B test results for a multivariate experiment
 
 Test: ${data.testName}
 
-Variant A:
-- Impressions: ${data.variantA.impressions}
-- Conversions: ${data.variantA.conversions}
-- Conversion Rate: ${data.variantA.conversionRate.toFixed(2)}%
-- Events: ${JSON.stringify(data.variantA.events)}
+Variants (${data.variants.length} total):
 
-Variant B:
-- Impressions: ${data.variantB.impressions}
-- Conversions: ${data.variantB.conversions}
-- Conversion Rate: ${data.variantB.conversionRate.toFixed(2)}%
-- Events: ${JSON.stringify(data.variantB.events)}
+${variantsSummary}
 
 Provide concise analysis (3-4 paragraphs):
-1. Key insights
+1. Key insights - which variant(s) perform best and why
 2. Actionable recommendations
-3. Reasons for difference
-4. Next steps`;
+3. Possible reasons for performance differences
+4. Next steps (more testing, implement winner, etc.)`;
 
     const completion = await openai.chat.completions.create({
       model: 'gpt-4o-mini',
@@ -152,11 +148,11 @@ Provide concise analysis (3-4 paragraphs):
         {
           role: 'system',
           content:
-            'You are a data-driven conversion optimization expert. Provide clear, actionable insights.',
+            'You are a data-driven conversion optimization expert. Provide clear, actionable insights for multivariate A/B tests.',
         },
         { role: 'user', content: prompt },
       ],
-      max_tokens: 500,
+      max_tokens: 600,
       temperature: 0.7,
     });
 
@@ -169,19 +165,44 @@ Provide concise analysis (3-4 paragraphs):
   }
 }
 
-function generateBasicInsights(data: any): string {
+function generateBasicInsights(data: {
+  testName: string;
+  variants: VariantWithDetails[];
+}): string {
+  const sortedVariants = [...data.variants].sort(
+    (a, b) => b.conversionRate - a.conversionRate,
+  );
+  const best = sortedVariants[0];
+  const worst = sortedVariants[sortedVariants.length - 1];
+
+  const variantList = sortedVariants
+    .map(
+      (v, i) =>
+        `${i + 1}. **${v.name}**: ${v.conversionRate.toFixed(2)}% (${v.conversions}/${v.impressions})`,
+    )
+    .join('\n');
+
   const improvement =
-    data.variantB.conversionRate - data.variantA.conversionRate;
-  const isWinning = improvement > 0;
+    worst.conversionRate > 0
+      ? ((best.conversionRate - worst.conversionRate) / worst.conversionRate) *
+        100
+      : best.conversionRate > 0
+        ? 100
+        : 0;
 
   return `**Analysis for ${data.testName}**
 
-${isWinning ? 'Variant B' : 'Variant A'} is performing ${Math.abs(improvement).toFixed(2)}% ${isWinning ? 'better' : 'worse'} than the other variant.
+**Performance Ranking:**
+${variantList}
 
 **Key Observations:**
-- Variant A: ${data.variantA.conversionRate.toFixed(2)}% conversion rate (${data.variantA.conversions}/${data.variantA.impressions})
-- Variant B: ${data.variantB.conversionRate.toFixed(2)}% conversion rate (${data.variantB.conversions}/${data.variantB.impressions})
+- "${best.name}" leads with ${best.conversionRate.toFixed(2)}% conversion rate
+- ${improvement > 0 ? `${improvement.toFixed(1)}% improvement over worst-performing variant` : 'No significant difference between variants'}
 
 **Recommendation:**
-${isWinning ? 'Consider implementing Variant B' : 'Keep Variant A'} if the difference is statistically significant (95%+ confidence). Continue collecting data if sample size is small (<100 impressions per variant).`;
+${
+  improvement >= 20 && best.impressions >= 50
+    ? `Consider implementing "${best.name}" if statistically significant (95%+ confidence).`
+    : `Continue collecting data. Current sample size may be too small for confident conclusions.`
+}`;
 }

@@ -11,26 +11,26 @@ import {
   Loader2,
   CheckCircle,
   Zap,
+  Trophy,
 } from 'lucide-react';
+
+interface VariantMetrics {
+  name: string;
+  impressions: number;
+  conversions: number;
+  conversionRate: number;
+}
 
 interface ABTestResult {
   testName: string;
-  variantA: {
-    name: string;
-    impressions: number;
-    conversions: number;
-    conversionRate: number;
-  };
-  variantB: {
-    name: string;
-    impressions: number;
-    conversions: number;
-    conversionRate: number;
-  };
-  improvement: number;
+  variants: VariantMetrics[];
+  bestVariant: string | null;
+  improvement: number | null;
   confidence: number;
   isSignificant: boolean;
   recommendation: string;
+  totalImpressions: number;
+  totalConversions: number;
 }
 
 export default function ABTestingPage() {
@@ -106,7 +106,7 @@ export default function ABTestingPage() {
 
       if (response.ok) {
         alert(`✅ Changes for ${suggestion.testName} have been queued!`);
-        loadAutoSuggestions(); // Reload to remove applied suggestion
+        loadAutoSuggestions();
       } else {
         alert('Failed to apply changes');
       }
@@ -127,8 +127,7 @@ export default function ABTestingPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           testName: test.testName,
-          variantA: test.variantA,
-          variantB: test.variantB,
+          variants: test.variants,
           timeRange,
         }),
       });
@@ -153,8 +152,16 @@ export default function ABTestingPage() {
       weekly_lock: 'Weekly Tarot Lock Style',
       tarot_truncation: 'Tarot Truncation Length',
       transit_limit: 'Free User Transit Limit',
+      inline_cta: 'Inline CTA Visibility',
     };
     return names[testName] || testName;
+  };
+
+  const formatVariantName = (name: string): string => {
+    // Convert kebab-case or snake_case to Title Case
+    return name
+      .replace(/[-_]/g, ' ')
+      .replace(/\b\w/g, (char) => char.toUpperCase());
   };
 
   return (
@@ -193,6 +200,9 @@ export default function ABTestingPage() {
               <BarChart3 className='w-12 h-12 text-zinc-600 mx-auto mb-4' />
               <p className='text-zinc-400'>
                 No A/B tests found. Start testing to see results here.
+              </p>
+              <p className='text-zinc-500 text-sm mt-2'>
+                Events need to include abTest and abVariant in metadata.
               </p>
             </CardContent>
           </Card>
@@ -279,105 +289,126 @@ export default function ABTestingPage() {
               <Card key={test.testName} className='bg-zinc-900 border-zinc-800'>
                 <CardHeader>
                   <div className='flex items-center justify-between'>
-                    <CardTitle className='text-xl'>
-                      {getTestDisplayName(test.testName)}
-                    </CardTitle>
-                    <Badge
-                      className={
-                        test.isSignificant
-                          ? 'bg-lunary-success-900 text-lunary-success border-lunary-success-800'
-                          : 'bg-lunary-accent-900 text-lunary-accent border-lunary-accent-700'
-                      }
-                    >
-                      {test.confidence.toFixed(1)}% confidence
-                    </Badge>
+                    <div>
+                      <CardTitle className='text-xl'>
+                        {getTestDisplayName(test.testName)}
+                      </CardTitle>
+                      <p className='text-sm text-zinc-500 mt-1'>
+                        {test.totalImpressions.toLocaleString()} impressions ·{' '}
+                        {test.totalConversions.toLocaleString()} conversions
+                      </p>
+                    </div>
+                    <div className='flex items-center gap-2'>
+                      {test.bestVariant && (
+                        <Badge className='bg-lunary-accent-900/50 text-lunary-accent-300 border-lunary-accent-700'>
+                          <Trophy className='w-3 h-3 mr-1' />
+                          {formatVariantName(test.bestVariant)}
+                        </Badge>
+                      )}
+                      <Badge
+                        className={
+                          test.isSignificant
+                            ? 'bg-lunary-success-900 text-lunary-success border-lunary-success-800'
+                            : 'bg-lunary-accent-900 text-lunary-accent border-lunary-accent-700'
+                        }
+                      >
+                        {test.confidence.toFixed(1)}% confidence
+                      </Badge>
+                    </div>
                   </div>
                 </CardHeader>
                 <CardContent className='space-y-6'>
-                  <div className='grid md:grid-cols-2 gap-6'>
-                    {/* Variant A */}
-                    <div className='p-4 bg-zinc-800/50 rounded-lg border border-zinc-700'>
-                      <div className='flex items-center justify-between mb-3'>
-                        <h3 className='font-semibold text-zinc-200'>
-                          {test.variantA.name}
-                        </h3>
-                        {test.variantA.conversionRate >
-                        test.variantB.conversionRate ? (
-                          <TrendingUp className='w-5 h-5 text-lunary-success' />
-                        ) : (
-                          <TrendingDown className='w-5 h-5 text-lunary-error' />
-                        )}
-                      </div>
-                      <div className='space-y-2'>
-                        <div className='flex justify-between text-sm'>
-                          <span className='text-zinc-400'>Impressions:</span>
-                          <span className='text-zinc-200 font-medium'>
-                            {test.variantA.impressions}
-                          </span>
-                        </div>
-                        <div className='flex justify-between text-sm'>
-                          <span className='text-zinc-400'>Conversions:</span>
-                          <span className='text-zinc-200 font-medium'>
-                            {test.variantA.conversions}
-                          </span>
-                        </div>
-                        <div className='flex justify-between text-sm'>
-                          <span className='text-zinc-400'>
-                            Conversion Rate:
-                          </span>
-                          <span className='text-lunary-primary-400 font-bold'>
-                            {test.variantA.conversionRate.toFixed(2)}%
-                          </span>
-                        </div>
-                      </div>
-                    </div>
+                  {/* Variants Grid */}
+                  <div
+                    className={`grid gap-4 ${
+                      test.variants.length === 2
+                        ? 'md:grid-cols-2'
+                        : test.variants.length === 3
+                          ? 'md:grid-cols-3'
+                          : 'md:grid-cols-2 lg:grid-cols-4'
+                    }`}
+                  >
+                    {test.variants.map((variant, idx) => {
+                      const isWinner = variant.name === test.bestVariant;
+                      const hasHighestRate =
+                        variant.conversionRate ===
+                        Math.max(...test.variants.map((v) => v.conversionRate));
+                      const hasLowestRate =
+                        variant.conversionRate ===
+                          Math.min(
+                            ...test.variants.map((v) => v.conversionRate),
+                          ) && variant.impressions > 0;
 
-                    {/* Variant B */}
-                    <div className='p-4 bg-zinc-800/50 rounded-lg border border-zinc-700'>
-                      <div className='flex items-center justify-between mb-3'>
-                        <h3 className='font-semibold text-zinc-200'>
-                          {test.variantB.name}
-                        </h3>
-                        {test.variantB.conversionRate >
-                        test.variantA.conversionRate ? (
-                          <TrendingUp className='w-5 h-5 text-lunary-success' />
-                        ) : (
-                          <TrendingDown className='w-5 h-5 text-lunary-error' />
-                        )}
-                      </div>
-                      <div className='space-y-2'>
-                        <div className='flex justify-between text-sm'>
-                          <span className='text-zinc-400'>Impressions:</span>
-                          <span className='text-zinc-200 font-medium'>
-                            {test.variantB.impressions}
-                          </span>
+                      return (
+                        <div
+                          key={variant.name}
+                          className={`p-4 rounded-lg border ${
+                            isWinner && test.isSignificant
+                              ? 'bg-lunary-success-900/20 border-lunary-success-700'
+                              : 'bg-zinc-800/50 border-zinc-700'
+                          }`}
+                        >
+                          <div className='flex items-center justify-between mb-3'>
+                            <h3 className='font-semibold text-zinc-200'>
+                              {formatVariantName(variant.name)}
+                            </h3>
+                            {hasHighestRate && variant.impressions > 0 ? (
+                              <TrendingUp className='w-5 h-5 text-lunary-success' />
+                            ) : hasLowestRate ? (
+                              <TrendingDown className='w-5 h-5 text-lunary-error' />
+                            ) : null}
+                          </div>
+                          <div className='space-y-2'>
+                            <div className='flex justify-between text-sm'>
+                              <span className='text-zinc-400'>
+                                Impressions:
+                              </span>
+                              <span className='text-zinc-200 font-medium'>
+                                {variant.impressions.toLocaleString()}
+                              </span>
+                            </div>
+                            <div className='flex justify-between text-sm'>
+                              <span className='text-zinc-400'>
+                                Conversions:
+                              </span>
+                              <span className='text-zinc-200 font-medium'>
+                                {variant.conversions.toLocaleString()}
+                              </span>
+                            </div>
+                            <div className='flex justify-between text-sm'>
+                              <span className='text-zinc-400'>
+                                Conversion Rate:
+                              </span>
+                              <span
+                                className={`font-bold ${
+                                  isWinner && test.isSignificant
+                                    ? 'text-lunary-success'
+                                    : 'text-lunary-primary-400'
+                                }`}
+                              >
+                                {variant.conversionRate.toFixed(2)}%
+                              </span>
+                            </div>
+                          </div>
                         </div>
-                        <div className='flex justify-between text-sm'>
-                          <span className='text-zinc-400'>Conversions:</span>
-                          <span className='text-zinc-200 font-medium'>
-                            {test.variantB.conversions}
-                          </span>
-                        </div>
-                        <div className='flex justify-between text-sm'>
-                          <span className='text-zinc-400'>
-                            Conversion Rate:
-                          </span>
-                          <span className='text-lunary-primary-400 font-bold'>
-                            {test.variantB.conversionRate.toFixed(2)}%
-                          </span>
-                        </div>
-                      </div>
-                    </div>
+                      );
+                    })}
                   </div>
 
                   {/* Improvement */}
                   <div className='p-4 bg-lunary-primary-900/10 border border-lunary-primary-700 rounded-lg'>
                     <div className='flex items-center gap-2 mb-2'>
                       <Sparkles className='w-5 h-5 text-lunary-primary-400' />
-                      <span className='font-semibold text-lunary-primary-300'>
-                        Improvement: {test.improvement > 0 ? '+' : ''}
-                        {test.improvement.toFixed(2)}%
-                      </span>
+                      {test.improvement !== null ? (
+                        <span className='font-semibold text-lunary-primary-300'>
+                          Best vs Worst: {test.improvement > 0 ? '+' : ''}
+                          {test.improvement.toFixed(2)}%
+                        </span>
+                      ) : (
+                        <span className='font-semibold text-zinc-400'>
+                          Not enough data to compare
+                        </span>
+                      )}
                     </div>
                     <p className='text-sm text-zinc-300'>
                       {test.recommendation}
