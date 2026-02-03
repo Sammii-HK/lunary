@@ -1,5 +1,6 @@
 import { notFound } from 'next/navigation';
 import { SEOContentTemplate } from '@/components/grimoire/SEOContentTemplate';
+import { CosmicConnections } from '@/components/grimoire/CosmicConnections';
 import { getAngelNumber } from '@/lib/angel-numbers/getAngelNumber';
 import { createGrimoireMetadata } from '@/lib/grimoire-metadata';
 import { createCosmicEntitySchema, renderJsonLd } from '@/lib/schema';
@@ -188,6 +189,13 @@ Keywords: ${data.keywords.join(', ')}`}
             </div>
           </div>
         </section>
+
+        {/* Cosmic Connections */}
+        <CosmicConnections
+          entityType='angel-number'
+          entityKey={number}
+          title='Explore Related Topics'
+        />
       </SEOContentTemplate>
     </div>
   );

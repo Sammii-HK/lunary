@@ -22,10 +22,8 @@ import {
   retrogradeInfo,
   eclipseInfo,
 } from '@/constants/grimoire/seo-data';
-import {
-  angelNumbers,
-  lifePathNumbers,
-} from '@/constants/grimoire/numerology-data';
+import { lifePathNumbers } from '@/constants/grimoire/numerology-data';
+import { getAllAngelNumberSlugs } from '@/lib/angel-numbers/getAngelNumber';
 import {
   mirrorHourKeys,
   doubleHourKeys,
@@ -1150,7 +1148,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
   ];
 
   // Add all angel number pages
-  const angelNumberRoutes = Object.keys(angelNumbers).map((number) => ({
+  const angelNumberRoutes = getAllAngelNumberSlugs().map((number) => ({
     url: `${baseUrl}/grimoire/angel-numbers/${number}`,
     lastModified: date,
     changeFrequency: 'monthly' as const,

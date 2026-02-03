@@ -36,7 +36,8 @@ export type EntityType =
   | 'hub-horoscopes'
   | 'archetype'
   | 'witchcraft'
-  | 'hub-events';
+  | 'hub-events'
+  | 'angel-number';
 
 function toSlug(str: string): string {
   return str
@@ -648,6 +649,41 @@ function getArchetypeConnections(
   return sections;
 }
 
+function getAngelNumberConnections(
+  numberSlug: string,
+): CosmicConnectionSection[] {
+  const sections: CosmicConnectionSection[] = [];
+
+  // Numerology basics
+  const basics: CosmicConnectionLink[] = [
+    { label: 'All Angel Numbers', href: '/grimoire/angel-numbers' },
+    { label: 'Numerology Overview', href: '/grimoire/numerology' },
+    { label: 'Life Path Numbers', href: '/grimoire/life-path' },
+    { label: 'Mirror Hours', href: '/grimoire/mirror-hours' },
+  ];
+  sections.push({ title: 'Numerology', links: basics });
+
+  // Related spiritual practices
+  const spiritual: CosmicConnectionLink[] = [
+    { label: 'Manifestation', href: '/grimoire/manifestation' },
+    { label: 'Meditation', href: '/grimoire/meditation' },
+    { label: 'Daily Tarot', href: '/tarot' },
+    { label: 'Moon Phases', href: '/grimoire/moon' },
+  ];
+  sections.push({ title: 'Spiritual Practice', links: spiritual });
+
+  // Deepen your understanding
+  const deepen: CosmicConnectionLink[] = [
+    { label: 'Birth Chart', href: '/birth-chart' },
+    { label: 'Daily Horoscope', href: '/horoscope' },
+    { label: 'Crystals', href: '/grimoire/crystals' },
+    { label: 'Correspondences', href: '/grimoire/correspondences' },
+  ];
+  sections.push({ title: 'Explore More', links: deepen });
+
+  return sections;
+}
+
 function getWitchConnections(): CosmicConnectionSection[] {
   const sections: CosmicConnectionSection[] = [];
 
@@ -740,6 +776,8 @@ export function getCosmicConnections(
       return getArchetypeConnections(slugOrKey);
     case 'witchcraft':
       return getWitchConnections();
+    case 'angel-number':
+      return getAngelNumberConnections(slugOrKey);
     default:
       return [];
   }
