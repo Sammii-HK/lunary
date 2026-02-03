@@ -21,6 +21,7 @@ import { Heading } from '../ui/Heading';
 import { ArticleFooter } from './ArticleFooter';
 import { PeopleAlsoAsk } from './PeopleAlsoAsk';
 import { ContextualNudgeSection } from '../ui/ContextualNudgeSection';
+import { InlineContextualNudge } from './InlineContextualNudge';
 import { ReadFullGuidePrompt } from '@/app/grimoire/guides/ReadFullGuidePrompt';
 
 /**
@@ -379,6 +380,14 @@ export function SEOContentTemplate({
           </div>
         )}
 
+        {/* Inline Contextual Nudge - after TL;DR for early conversion */}
+        {hasContextualNudge && contextualNudge && (
+          <InlineContextualNudge
+            nudge={contextualNudge}
+            location='seo_inline_post_tldr'
+          />
+        )}
+
         {/* What is X? - Featured Snippet Optimization */}
         {whatIs && (
           <section id='what-is' className='mb-8'>
@@ -660,25 +669,6 @@ export function SEOContentTemplate({
           </section>
         )}
 
-        {/* CTA or contextual nudge */}
-        {hasContextualNudge && contextualNudge ? (
-          <ContextualNudgeSection
-            nudge={contextualNudge}
-            location='seo_contextual_nudge'
-          />
-        ) : ctaText && ctaHref ? (
-          <section className='bg-gradient-to-r from-lunary-primary-900/30 to-lunary-highlight-900/30 border border-lunary-primary-700 rounded-lg p-6 sm:p-8 text-center overflow-x-hidden'>
-            <Heading as='h2' variant='h3'>
-              {ctaText}
-            </Heading>
-            <SEOCTAButton
-              href={ctaHref}
-              label='Get Started'
-              hub={contextualHub}
-            />
-          </section>
-        ) : null}
-
         {/* Optional slot before FAQs */}
         {childrenPosition === 'before-faqs' && children && (
           <div id='explore-practices' className='mt-8'>
@@ -715,6 +705,25 @@ export function SEOContentTemplate({
             <PeopleAlsoAsk questions={faqs} />
           </section>
         )}
+
+        {/* Full CTA or contextual nudge - positioned after FAQs for committed readers */}
+        {hasContextualNudge && contextualNudge ? (
+          <ContextualNudgeSection
+            nudge={contextualNudge}
+            location='seo_contextual_nudge'
+          />
+        ) : ctaText && ctaHref ? (
+          <section className='bg-gradient-to-r from-lunary-primary-900/30 to-lunary-highlight-900/30 border border-lunary-primary-700 rounded-lg p-6 sm:p-8 text-center overflow-x-hidden'>
+            <Heading as='h2' variant='h3'>
+              {ctaText}
+            </Heading>
+            <SEOCTAButton
+              href={ctaHref}
+              label='Get Started'
+              hub={contextualHub}
+            />
+          </section>
+        ) : null}
 
         {/* Universal Grimoire Exploration - always shown */}
         <ExploreGrimoire />
