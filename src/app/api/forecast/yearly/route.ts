@@ -243,11 +243,16 @@ export async function GET(request: NextRequest) {
       subscriptionStatus = 'active';
     }
 
+    // Use hardcoded baseUrl to prevent SSRF attacks
+    const baseUrl = process.env.VERCEL
+      ? 'https://lunary.app'
+      : 'http://localhost:3000';
+
     // If we don't have a customer ID yet, try to find it via Stripe customer lookup using email
     if (!customerId && userEmail) {
       try {
         const customerLookup = await fetch(
-          `${request.nextUrl.origin}/api/stripe/find-customer`,
+          `${baseUrl}/api/stripe/find-customer`,
           {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -284,7 +289,7 @@ export async function GET(request: NextRequest) {
       try {
         // Pass userId so get-subscription route can update database automatically
         const stripeResponse = await fetch(
-          `${request.nextUrl.origin}/api/stripe/get-subscription`,
+          `${baseUrl}/api/stripe/get-subscription`,
           {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },

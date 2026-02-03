@@ -21,7 +21,10 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    const baseUrl = request.nextUrl.origin;
+    // Use hardcoded baseUrl to prevent SSRF attacks
+    const baseUrl = process.env.VERCEL
+      ? 'https://lunary.app'
+      : 'http://localhost:3000';
     const queryParams = `start_date=${startDate}&end_date=${endDate}`;
 
     // Fetch data from the same endpoints as the dashboard

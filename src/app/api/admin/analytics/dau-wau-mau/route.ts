@@ -91,6 +91,18 @@ const canonicalIdentityFromRow = (
   identityLinks: Map<string, string>,
 ): { identity: string | null; signedIn: boolean } => {
   const userId = sanitizeIdentityValue(row.user_id);
+
+  // Check if user_id is actually an anonymous ID (stored with anon: prefix)
+  // This happens when events are tracked for anonymous users
+  if (userId && userId.startsWith('anon:')) {
+    const anonId = userId.slice(5); // Remove 'anon:' prefix
+    const linkedUserId = identityLinks.get(anonId);
+    if (linkedUserId) {
+      return { identity: `user:${linkedUserId}`, signedIn: true };
+    }
+    return { identity: `anon:${anonId}`, signedIn: false };
+  }
+
   if (userId) {
     return { identity: `user:${userId}`, signedIn: true };
   }
@@ -751,50 +763,61 @@ export async function GET(request: NextRequest) {
     const signedInProductWau = productWau;
     const signedInProductMau = productMau;
 
+    // Calculate grimoire-only MAU
+    // Grimoire-only = users who ONLY viewed grimoire content, no other app activity
+    // This includes anonymous users who only browse the grimoire (content-only visitors)
     const grimoireWindowStart = new Date(range.end);
     grimoireWindowStart.setUTCDate(grimoireWindowStart.getUTCDate() - 29);
-    const grimoireEventsResult = await sql`
-        SELECT DISTINCT user_id
-        FROM conversion_events
-        WHERE event_type = 'grimoire_viewed'
-        AND user_id IS NOT NULL
-        AND user_id NOT LIKE 'anon:%'
-        AND created_at >= ${formatTimestamp(grimoireWindowStart)}
-        AND created_at <= ${formatTimestamp(range.end)}
-        AND (user_email IS NULL OR (user_email NOT LIKE ${TEST_EMAIL_PATTERN} AND user_email != ${TEST_EMAIL_EXACT}))
-      `;
-    const productWindowResult = await sql.query(
-      `
-        SELECT DISTINCT user_id
-        FROM conversion_events
-        WHERE event_type = ANY($1::text[])
-          AND user_id IS NOT NULL
-          AND user_id NOT LIKE 'anon:%'
-          AND created_at >= $2
-          AND created_at <= $3
-          AND (user_email IS NULL OR (user_email NOT LIKE $4 AND user_email != $5))
-      `,
-      [
-        // Treat any app_opened as product engagement for the purpose of
-        // identifying Grimoire-only users (Grimoire-only means Grimoire without app engagement).
-        ['app_opened', ...PRODUCT_EVENTS],
-        formatTimestamp(grimoireWindowStart),
-        formatTimestamp(range.end),
-        TEST_EMAIL_PATTERN,
-        TEST_EMAIL_EXACT,
-      ],
-    );
 
-    const grimoireUsers = new Set(
-      grimoireEventsResult.rows.map((row) => String(row.user_id)),
-    );
-    const signedInProductUsers = new Set(
-      productWindowResult.rows.map((row) => String(row.user_id)),
-    );
-    const grimoireOnlyMauBase = grimoireUsers.size;
+    // Gather all grimoire viewers in MAU window (includes anonymous via grimoireMap)
+    const grimoireWindowUsers = new Set<string>();
+    for (
+      let d = new Date(grimoireWindowStart);
+      d <= range.end;
+      d.setUTCDate(d.getUTCDate() + 1)
+    ) {
+      const key = formatDateKey(d);
+      const users = grimoireMap.get(key);
+      if (users) {
+        users.forEach((id) => grimoireWindowUsers.add(id));
+      }
+    }
+
+    // Gather SIGNED-IN users with app_opened or product activity in MAU window
+    // Only signed-in users count as "engaged" - anonymous grimoire viewers who
+    // also have app_opened events are still considered "grimoire-only" because
+    // they haven't signed in or used authenticated product features
+    const signedInEngagedUsers = new Set<string>();
+    for (
+      let d = new Date(grimoireWindowStart);
+      d <= range.end;
+      d.setUTCDate(d.getUTCDate() + 1)
+    ) {
+      const key = formatDateKey(d);
+      // app_opened activity - only count signed-in users (user: prefix)
+      const appUsers = appOpenedMap.get(key);
+      if (appUsers) {
+        appUsers.forEach((id) => {
+          if (id.startsWith('user:')) {
+            signedInEngagedUsers.add(id);
+          }
+        });
+      }
+      // product activity (already signed-in users only via requireSignedIn)
+      const prodUsers = productMap.get(key);
+      if (prodUsers) {
+        prodUsers.forEach((id) => signedInEngagedUsers.add(id));
+      }
+    }
+
+    // Grimoire-only = grimoire viewers who are not signed-in engaged users
+    // This includes:
+    // - Anonymous users who only view grimoire (anon: prefix, not in signedInEngagedUsers)
+    // - Signed-in users who only view grimoire (user: prefix, no app_opened or product events)
+    const grimoireOnlyMauBase = grimoireWindowUsers.size;
     let grimoireOnlyMau = 0;
-    grimoireUsers.forEach((id) => {
-      if (!signedInProductUsers.has(id)) {
+    grimoireWindowUsers.forEach((id) => {
+      if (!signedInEngagedUsers.has(id)) {
         grimoireOnlyMau += 1;
       }
     });
@@ -1069,6 +1092,17 @@ export async function GET(request: NextRequest) {
         engagement_events_dau: engagementEventsDau,
         engagement_users_dau: engagementUsersDau,
         activity_rows: activityRows.rows.length,
+        // Grimoire-only debug
+        grimoire_rows_total: grimoireRows.rows.length,
+        grimoire_window_users_total: grimoireWindowUsers.size,
+        grimoire_window_users_anon: [...grimoireWindowUsers].filter((id) =>
+          id.startsWith('anon:'),
+        ).length,
+        grimoire_window_users_signed_in: [...grimoireWindowUsers].filter((id) =>
+          id.startsWith('user:'),
+        ).length,
+        signed_in_engaged_users_total: signedInEngagedUsers.size,
+        grimoire_only_calculated: grimoireOnlyMau,
       },
       source: 'database',
     });
