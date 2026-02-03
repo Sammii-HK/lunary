@@ -10,6 +10,7 @@ import { conversionTracking } from '@/lib/analytics';
 import { useTour } from '@/context/TourContext';
 import { useNotificationDeepLink } from '@/hooks/useNotificationDeepLink';
 import { useABTestTracking } from '@/hooks/useABTestTracking';
+import { useWidgetSync } from '@/hooks/useWidgetSync';
 
 import { ShareDailyInsight } from '@/components/ShareDailyInsight';
 import { ShareDailyCosmicState } from '@/components/share/ShareDailyCosmicState';
@@ -153,6 +154,9 @@ export default function AppDashboardClient() {
 
   // Track dashboard view with A/B test data (cta-copy-test)
   useABTestTracking('dashboard', 'app_opened', ['cta-copy-test']);
+
+  // Sync widget data when dashboard loads (native platforms only)
+  useWidgetSync({ enabled: authState.isAuthenticated });
   const firstName = user?.name?.trim() ? user.name.split(' ')[0] : null;
   const [isDemoMode, setIsDemoMode] = useState(false);
   // Always use controlled mode - start with false, never undefined
