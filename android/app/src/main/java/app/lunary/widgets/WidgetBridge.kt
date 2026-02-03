@@ -13,7 +13,7 @@ class WidgetBridge(private val context: Context) {
 
     @JavascriptInterface
     fun setWidgetData(jsonData: String) {
-        // Save data to SharedPreferences
+        // Save data to SharedPreferences (all widgets share the same data)
         CosmicWidget.saveWidgetData(context, jsonData)
 
         // Update all widget instances
@@ -25,6 +25,30 @@ class WidgetBridge(private val context: Context) {
         )
         for (widgetId in cosmicWidgetIds) {
             CosmicWidget.updateWidget(context, appWidgetManager, widgetId)
+        }
+
+        // Update Horoscope widgets
+        val horoscopeWidgetIds = appWidgetManager.getAppWidgetIds(
+            ComponentName(context, HoroscopeWidget::class.java)
+        )
+        for (widgetId in horoscopeWidgetIds) {
+            HoroscopeWidget.updateWidget(context, appWidgetManager, widgetId)
+        }
+
+        // Update Moon widgets
+        val moonWidgetIds = appWidgetManager.getAppWidgetIds(
+            ComponentName(context, MoonWidget::class.java)
+        )
+        for (widgetId in moonWidgetIds) {
+            MoonWidget.updateWidget(context, appWidgetManager, widgetId)
+        }
+
+        // Update Tarot widgets
+        val tarotWidgetIds = appWidgetManager.getAppWidgetIds(
+            ComponentName(context, TarotWidget::class.java)
+        )
+        for (widgetId in tarotWidgetIds) {
+            TarotWidget.updateWidget(context, appWidgetManager, widgetId)
         }
     }
 

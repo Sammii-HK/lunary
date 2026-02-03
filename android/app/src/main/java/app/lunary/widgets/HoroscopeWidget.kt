@@ -39,25 +39,34 @@ class HoroscopeWidget : AppWidgetProvider() {
             val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
             val jsonString = prefs.getString(DATA_KEY, null)
 
+            var headline = ""
+            var guidance = ""
+
             if (jsonString != null) {
                 try {
                     val data = JSONObject(jsonString)
                     val horoscope = data.optJSONObject("horoscope")
 
                     if (horoscope != null) {
-                        views.setTextViewText(R.id.horoscope_headline, horoscope.optString("headline", ""))
-                        views.setTextViewText(R.id.horoscope_guidance, horoscope.optString("guidance", ""))
-                    } else {
-                        views.setTextViewText(R.id.horoscope_headline, "Open Lunary")
-                        views.setTextViewText(R.id.horoscope_guidance, "Sync your horoscope")
+                        headline = horoscope.optString("headline", "")
+                        guidance = horoscope.optString("guidance", "")
                     }
                 } catch (e: Exception) {
-                    views.setTextViewText(R.id.horoscope_headline, "Open Lunary")
-                    views.setTextViewText(R.id.horoscope_guidance, "Sync your horoscope")
+                    // Use fallback
                 }
+            }
+
+            // Check if we have valid data (not empty and not the API fallback)
+            val hasValidData = headline.isNotEmpty()
+                && !headline.contains("Open Lunary", ignoreCase = true)
+                && !headline.contains("Open app", ignoreCase = true)
+
+            if (hasValidData) {
+                views.setTextViewText(R.id.horoscope_headline, headline)
+                views.setTextViewText(R.id.horoscope_guidance, guidance)
             } else {
-                views.setTextViewText(R.id.horoscope_headline, "Open Lunary")
-                views.setTextViewText(R.id.horoscope_guidance, "Sync your horoscope")
+                views.setTextViewText(R.id.horoscope_headline, "Tap to sync")
+                views.setTextViewText(R.id.horoscope_guidance, "Open Lunary for your daily horoscope")
             }
 
             val intent = Intent(context, MainActivity::class.java)
