@@ -511,7 +511,11 @@ export async function GET(request: NextRequest) {
     activityRows.rows.forEach((row) => {
       addIdentityRow(activityMap, row, identityLinks);
     });
+    // Calculate engagement DAU/WAU/MAU using range.end for consistency
+    // These are used in the response to ensure returning_dau <= dau
     const engagementDau = countDistinctInWindow(activityMap, range.end, 1);
+    const engagementWau = countDistinctInWindow(activityMap, range.end, 7);
+    const engagementMau = countDistinctInWindow(activityMap, range.end, 30);
 
     const productMap = new Map<string, Set<string>>();
     productRows.rows.forEach((row) =>
@@ -866,16 +870,7 @@ export async function GET(request: NextRequest) {
         ? Number((100 - day30Retention).toFixed(2))
         : null;
 
-    // Calculate stickiness metrics using the same DAU/WAU/MAU values
-    // Stickiness = (smaller window users / larger window users) * 100
-    const trendDau = currentTrend.dau;
-    const trendWau = currentTrend.wau;
-    const trendMau = currentTrend.mau;
-    const stickinessDauMau = trendMau > 0 ? (trendDau / trendMau) * 100 : 0;
-    const stickinessWauMau = trendMau > 0 ? (trendWau / trendMau) * 100 : 0;
-    const stickinessDauWau = trendWau > 0 ? (trendDau / trendWau) * 100 : 0;
-
-    // Also calculate for app_opened metrics
+    // Calculate stickiness for app_opened metrics
     const appOpenedStickinessDauMau =
       appOpenedMau > 0 ? (appOpenedDau / appOpenedMau) * 100 : 0;
     const appOpenedStickinessWauMau =
@@ -898,13 +893,24 @@ export async function GET(request: NextRequest) {
         : 0;
 
     const response = NextResponse.json({
-      dau: currentTrend.dau,
-      wau: currentTrend.wau,
-      mau: currentTrend.mau,
-      // Stickiness metrics using engagement events (consistent with DAU/WAU/MAU above)
-      stickiness_dau_mau: Number(stickinessDauMau.toFixed(2)),
-      stickiness_wau_mau: Number(stickinessWauMau.toFixed(2)),
-      stickiness_dau_wau: Number(stickinessDauWau.toFixed(2)),
+      // Use consistent calculations (countDistinctInWindow with range.end)
+      // This ensures returning_dau <= dau since they use the same date
+      dau: engagementDau,
+      wau: engagementWau,
+      mau: engagementMau,
+      // Stickiness metrics using the same DAU/WAU/MAU values
+      stickiness_dau_mau:
+        engagementMau > 0
+          ? Number(((engagementDau / engagementMau) * 100).toFixed(2))
+          : 0,
+      stickiness_wau_mau:
+        engagementMau > 0
+          ? Number(((engagementWau / engagementMau) * 100).toFixed(2))
+          : 0,
+      stickiness_dau_wau:
+        engagementWau > 0
+          ? Number(((engagementDau / engagementWau) * 100).toFixed(2))
+          : 0,
       returning_dau: returningDau,
       returning_wau: returningWau,
       returning_mau: returningMau,
