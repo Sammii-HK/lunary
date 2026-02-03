@@ -567,6 +567,9 @@ type CtaClickPayload = {
   ctaVariant?: string;
   ctaHeadline?: string;
   ctaSubline?: string;
+  abTest?: string;
+  abVariant?: string;
+  inlineStyle?: string;
 };
 
 type CtaImpressionPayload = {
@@ -581,6 +584,9 @@ type CtaImpressionPayload = {
   ctaVariant?: string;
   ctaHeadline?: string;
   ctaSubline?: string;
+  abTest?: string;
+  abVariant?: string;
+  inlineStyle?: string;
 };
 
 export async function trackCtaImpression(
@@ -612,6 +618,9 @@ export async function trackCtaImpression(
       ctaVariant: payload.ctaVariant,
       ctaHeadline: payload.ctaHeadline,
       ctaSubline: payload.ctaSubline,
+      abTest: payload.abTest,
+      abVariant: payload.abVariant,
+      inlineStyle: payload.inlineStyle,
       anonymousId: getAnonymousId(),
     });
 
@@ -659,6 +668,9 @@ export async function trackCtaClick(payload: CtaClickPayload): Promise<void> {
       ctaVariant: payload.ctaVariant,
       ctaHeadline: payload.ctaHeadline,
       ctaSubline: payload.ctaSubline,
+      abTest: payload.abTest,
+      abVariant: payload.abVariant,
+      inlineStyle: payload.inlineStyle,
       anonymousId: getAnonymousId(),
     });
 
