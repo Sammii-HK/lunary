@@ -56,7 +56,9 @@ import {
 } from '@/constants/engagement-hooks';
 import {
   detectUpcomingSignChanges,
+  detectUpcomingRetrogradeStations,
   type SignChangeEvent,
+  type RetrogradeStationEvent,
 } from '@/lib/cosmic-snapshot/global-cache';
 import {
   getUpcomingEclipses,
@@ -808,18 +810,25 @@ async function runDailyPosts(dateStr: string) {
     ).toISOString();
   };
 
-  // Add text-first transit and retrograde updates for X, Threads, and Bluesky
-  const retrogradeTextPosts = buildRetrogradeTextPosts({
-    events: cosmicContent.retrogradeEvents ?? [],
-    platformHashtags,
-    getSchedule: getTransitSchedule,
-  });
-
-  // NEW: Detect upcoming sign changes (tomorrow vs today) to post BEFORE events
-  // This eliminates the duplicate ingress post problem for slow-moving planets
+  // NEW: Detect upcoming sign changes and retrograde stations (tomorrow vs today)
+  // Post BEFORE events happen to eliminate duplicates and give followers a heads-up
   const today = new Date(dateStr);
   const tomorrow = new Date(dateStr);
   tomorrow.setDate(tomorrow.getDate() + 1);
+
+  // Detect retrograde/direct stations happening TOMORROW (post TODAY)
+  const upcomingStations = await detectUpcomingRetrogradeStations(
+    today,
+    tomorrow,
+  );
+
+  // Add text-first transit and retrograde updates for X, Threads, and Bluesky
+  const retrogradeTextPosts = buildRetrogradeTextPosts({
+    dateStr,
+    events: upcomingStations,
+    platformHashtags,
+    getSchedule: getTransitSchedule,
+  });
   const { ingresses, egresses } = await detectUpcomingSignChanges(
     today,
     tomorrow,
@@ -3505,11 +3514,13 @@ function addAstrologyHashtags(text: string, baseHashtags?: string): string {
 }
 
 function buildRetrogradeTextPosts({
+  dateStr,
   events,
   getSchedule,
   platformHashtags,
 }: {
-  events: Array<any>;
+  dateStr: string;
+  events: RetrogradeStationEvent[];
   getSchedule: () => string;
   platformHashtags: Record<string, string>;
 }): DailySocialPost[] {
@@ -3532,48 +3543,78 @@ function buildRetrogradeTextPosts({
   );
 
   const posts: DailySocialPost[] = [];
-  // const cta = 'Find the full timing details with Lunary.app';
 
   for (const event of retrogradeEvents) {
     const planet = event.planet;
     if (!planet) continue;
 
-    const actionLabel =
-      event.type === 'retrograde_start'
-        ? 'stations retrograde'
-        : 'stations direct';
-    const retrogradePrefix =
-      event.type === 'retrograde_start'
-        ? 'Astrology update'
-        : 'Current astrology';
     const focus = focusMap[planet] || `${planet.toLowerCase()} energy`;
-    const reflectionLine =
-      event.type === 'retrograde_start'
-        ? getRetrogradeReflectionLine(focus, event.sign)
-        : `Momentum returns to ${focus}.`;
-    const baseMessage = `${retrogradePrefix}: ${planet} ${actionLabel} in ${event.sign}. ${reflectionLine}`;
+    const isRetrograde = event.type === 'retrograde_start';
 
-    const xContent = addRetrogradeHashtags(
-      baseMessage,
-      platformHashtags.twitter,
-    );
+    // Create seed for deterministic hook selection
+    const seed = `retrograde-${planet}-${event.type}-${dateStr}`;
+    const engagementHook = getEngagementHook('retrograde', seed);
+
+    // Threads: conversational with engagement hook, "tomorrow" framing
+    const threadsBody = isRetrograde
+      ? [
+          `${planet} stations retrograde tomorrow in ${event.sign}.`,
+          `Time to slow down and review ${focus}.`,
+          '',
+          engagementHook,
+        ].join('\n')
+      : [
+          `${planet} stations direct tomorrow in ${event.sign}.`,
+          `Momentum returns to ${focus}.`,
+          '',
+          engagementHook,
+        ].join('\n');
     const threadsContent = addRetrogradeHashtags(
-      baseMessage,
+      threadsBody,
       platformHashtags.threads,
     );
+
+    // X/Twitter: compact with CTA, "tomorrow" framing
+    const xBody = isRetrograde
+      ? [
+          `${planet} stations retrograde tomorrow.`,
+          `Time to slow down and review ${focus}.`,
+          '',
+          'lunary.app',
+        ].join('\n')
+      : [
+          `${planet} stations direct tomorrow.`,
+          `Momentum returns to ${focus}.`,
+          '',
+          'lunary.app',
+        ].join('\n');
+    const xContent = addRetrogradeHashtags(xBody, platformHashtags.twitter);
+
+    // Bluesky: informational with CTA
+    const blueskyBody = isRetrograde
+      ? [
+          `${planet} stations retrograde tomorrow in ${event.sign}.`,
+          `Time to slow down and review ${focus}.`,
+          '',
+          'Track retrogrades at lunary.app',
+        ].join('\n')
+      : [
+          `${planet} stations direct tomorrow in ${event.sign}.`,
+          `Momentum returns to ${focus}.`,
+          '',
+          'Track retrogrades at lunary.app',
+        ].join('\n');
     const blueskyContent = addRetrogradeHashtags(
-      baseMessage,
+      blueskyBody,
       platformHashtags.bluesky,
     );
 
     posts.push({
-      name: `Retrograde • ${planet} ${
-        event.type === 'retrograde_start' ? 'Begins' : 'Ends'
-      }`,
+      name: `Retrograde • ${planet} ${isRetrograde ? 'Retrograde' : 'Direct'} tomorrow`,
       content: xContent,
       platforms: ['x', 'threads', 'bluesky'],
       imageUrls: [],
-      alt: `${planet} retrograde update`,
+      alt: `${planet} ${isRetrograde ? 'retrograde' : 'direct'} station tomorrow`,
       scheduledDate: getSchedule(),
       variants: {
         threads: { content: threadsContent },

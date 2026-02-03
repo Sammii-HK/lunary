@@ -254,3 +254,70 @@ export async function detectUpcomingSignChanges(
 
   return { ingresses, egresses };
 }
+
+export type RetrogradeStationEvent = {
+  name: string;
+  energy: string;
+  priority: number;
+  type: 'retrograde_start' | 'retrograde_end';
+  planet: string;
+  sign: string;
+};
+
+/**
+ * Detect upcoming retrograde stations by comparing today vs tomorrow.
+ * Returns retrograde/direct station events happening TOMORROW so we can post TODAY.
+ * This provides a heads-up before the station rather than posting after.
+ */
+export async function detectUpcomingRetrogradeStations(
+  today: Date,
+  tomorrow: Date,
+): Promise<RetrogradeStationEvent[]> {
+  const [todayData, tomorrowData] = await Promise.all([
+    getGlobalCosmicData(today),
+    getGlobalCosmicData(tomorrow),
+  ]);
+
+  const stations: RetrogradeStationEvent[] = [];
+
+  if (!todayData?.planetaryPositions || !tomorrowData?.planetaryPositions) {
+    return stations;
+  }
+
+  // Compare today vs tomorrow - post TODAY about TOMORROW's stations
+  for (const [planet, todayPos] of Object.entries(
+    todayData.planetaryPositions,
+  )) {
+    const tomorrowPos = tomorrowData.planetaryPositions[planet];
+    if (!tomorrowPos) continue;
+
+    const todayRetrograde = todayPos.retrograde;
+    const tomorrowRetrograde = tomorrowPos.retrograde;
+
+    // Planet goes retrograde TOMORROW = post TODAY
+    if (!todayRetrograde && tomorrowRetrograde) {
+      stations.push({
+        name: `${planet} stations retrograde tomorrow`,
+        energy: `Time to slow down and review ${planet.toLowerCase()} themes`,
+        priority: 9,
+        type: 'retrograde_start',
+        planet,
+        sign: todayPos.sign,
+      });
+    }
+
+    // Planet goes direct TOMORROW = post TODAY
+    if (todayRetrograde && !tomorrowRetrograde) {
+      stations.push({
+        name: `${planet} stations direct tomorrow`,
+        energy: `Momentum returns to ${planet.toLowerCase()} themes`,
+        priority: 9,
+        type: 'retrograde_end',
+        planet,
+        sign: todayPos.sign,
+      });
+    }
+  }
+
+  return stations;
+}
