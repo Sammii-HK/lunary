@@ -1,12 +1,12 @@
 import { notFound } from 'next/navigation';
 import { SEOContentTemplate } from '@/components/grimoire/SEOContentTemplate';
-import { angelNumbers } from '@/constants/grimoire/numerology-data';
+import { getAngelNumber } from '@/lib/angel-numbers/getAngelNumber';
 import { createGrimoireMetadata } from '@/lib/grimoire-metadata';
 import { createCosmicEntitySchema, renderJsonLd } from '@/lib/schema';
+import { Heading } from '@/components/ui/Heading';
 
 // 30-day ISR revalidation
 export const revalidate = 2592000;
-const angelNumberKeys = Object.keys(angelNumbers);
 
 // Removed generateStaticParams - using pure ISR for faster builds
 // Pages are generated on-demand and cached with 30-day revalidation
@@ -17,7 +17,7 @@ export async function generateMetadata({
   params: Promise<{ number: string }>;
 }) {
   const { number } = await params;
-  const numberData = angelNumbers[number as keyof typeof angelNumbers];
+  const numberData = getAngelNumber(number);
 
   if (!numberData) {
     return { title: 'Not Found - Lunary Grimoire' };
@@ -46,79 +46,60 @@ export default async function AngelNumberPage({
   params: Promise<{ number: string }>;
 }) {
   const { number } = await params;
-  const numberData = angelNumbers[number as keyof typeof angelNumbers];
+  const data = getAngelNumber(number);
 
-  if (!numberData) {
+  if (!data) {
     notFound();
   }
 
-  const meaningExtras = `
-## Why do you keep seeing ${numberData.number}?
+  // Build rich meaning content with all the curated data
+  const meaningContent = `${data.meaning}
 
-Seeing ${numberData.number} repeatedly is a signal to pay attention. It often shows up when you are moving through a transition or being nudged to notice your timing, habits, or direction. The repetition itself is the message: you are meant to be aware right now, not later.
+## Why You Keep Seeing ${data.number}
 
-## When does ${numberData.number} usually appear?
+${data.whyYouKeepSeeing}
 
-${numberData.number} tends to appear:
-- during change or fresh starts
-- before a decision that sets a new direction
-- during emotional or spiritual shifts that need your attention
+## When ${data.number} Usually Appears
 
-## Is ${numberData.number} a yes or no sign?
+${data.whenItAppears.map((item) => `- ${item}`).join('\n')}
 
-Generally yes, but not as a prediction. Think of ${numberData.number} as alignment: it is a green light to move forward if the choice feels honest and grounded.
+## Is ${data.number} a Yes or No?
 
-## ${numberData.number} in love
+${data.yesOrNo}
 
-### If you're single
-${numberData.number} highlights ${numberData.meaning.toLowerCase()}. Be open to a new connection that feels aligned, not forced.
+## ${data.number} in Love
 
-### If you're in a relationship
-Lean into ${numberData.meaning.toLowerCase()} together. Small resets and honest check-ins bring you back into alignment.
+### If You're Single
+${data.love.single}
 
-### If you're thinking about someone
-Check your motives and timing. If it feels aligned, take a simple, direct step.
+### If You're in a Relationship
+${data.love.relationship}
 
-## What to do when you see ${numberData.number}
+### If You're Thinking About Someone
+${data.love.thinkingOfSomeone}
 
-- Pause for a beat
-- Notice what you were just thinking about
-- Take one aligned action today
-- Journal a quick prompt: "What shift is ready for me now?"
-`;
+## ${data.number} Career Meaning
 
-  const faqs = [
-    {
-      question: `What does ${numberData.number} mean?`,
-      answer: `${numberData.number} is an angel number meaning ${numberData.meaning.toLowerCase()}. ${numberData.description}`,
-    },
-    {
-      question: `What does it mean when I see ${numberData.number}?`,
-      answer: `When you see ${numberData.number}, it means ${numberData.message.toLowerCase()}`,
-    },
-    {
-      question: `What does ${numberData.number} mean in love?`,
-      answer: `${numberData.loveMeaning}`,
-    },
-    {
-      question: `What does ${numberData.number} mean for my career?`,
-      answer: `${numberData.careerMeaning}`,
-    },
-    {
-      question: `What is the spiritual meaning of ${numberData.number}?`,
-      answer: `${numberData.spiritualMeaning}`,
-    },
-  ];
+${data.career}
+
+## Numerology of ${data.number}
+
+**Root Number:** ${data.numerologyBreakdown.rootNumber}
+**Calculation:** ${data.numerologyBreakdown.calculation}
+
+${data.numerologyBreakdown.rootMeaning}
+
+${data.numerologyBreakdown.amplification}`;
 
   // Entity schema for Knowledge Graph
   const angelNumberSchema = createCosmicEntitySchema({
-    name: numberData.name,
-    description: `${numberData.name} spiritual meaning: ${numberData.spiritualMeaning.slice(0, 150)}...`,
+    name: data.name,
+    description: `${data.name} spiritual meaning: ${data.spiritualMeaning.slice(0, 150)}...`,
     url: `/grimoire/angel-numbers/${number}`,
     additionalType: 'https://en.wikipedia.org/wiki/Angel_number',
     keywords: [
-      numberData.name,
-      `${numberData.number} meaning`,
+      data.name,
+      `${data.number} meaning`,
       'angel number',
       'spiritual meaning',
       'numerology',
@@ -130,75 +111,84 @@ Check your motives and timing. If it feels aligned, take a simple, direct step.
     <div className='p-4 md:p-6 lg:p-8 xl:p-10 min-h-full'>
       {renderJsonLd(angelNumberSchema)}
       <SEOContentTemplate
-        title={`${numberData.name} - Lunary`}
-        h1={`${numberData.name}: Complete Spiritual Guide`}
-        description={`Discover the complete meaning of ${numberData.name}. Learn about spiritual significance, love meaning, career meaning, and what it means when you see this angel number.`}
-        keywords={[
-          `${numberData.name}`,
-          `angel number ${numberData.number}`,
-          `seeing ${numberData.number}`,
-          `${numberData.number} meaning`,
-        ]}
+        title={`${data.name} - Lunary`}
+        h1={`${data.name}: Complete Spiritual Guide`}
+        subtitle={data.coreMeaning}
+        description={data.description}
+        keywords={data.keywords}
         canonicalUrl={`https://lunary.app/grimoire/angel-numbers/${number}`}
-        intro={`${numberData.name} is a powerful angel number that appears when your angels want to communicate with you. ${numberData.description}`}
-        tldr={`${numberData.name} means ${numberData.meaning.toLowerCase()}. When you see this number, ${numberData.message.toLowerCase()}`}
-        meaning={`Angel numbers are sequences of numbers that carry divine guidance and messages from your angels and the spiritual realm. ${numberData.number} is particularly significant because it carries the energy of ${numberData.meaning.toLowerCase()}.
-
-${numberData.description}
-
-When ${numberData.number} appears repeatedly in your life - on clocks, license plates, receipts, addresses, or anywhere else - it's a sign that your angels are trying to get your attention. This number carries a specific message for you at this moment in your life.
-
-The appearance of ${numberData.number} is not a coincidence. It's a synchronicity, a meaningful coincidence that carries spiritual significance. Your angels use these numbers to communicate because they're a universal language that transcends barriers.
-
-Understanding what ${numberData.number} means helps you interpret the message your angels are sending and take appropriate action in your life.${meaningExtras}`}
-        emotionalThemes={numberData.keywords}
-        howToWorkWith={[
-          `Pay attention when you see ${numberData.number}`,
-          `Reflect on ${numberData.meaning.toLowerCase()}`,
-          `Trust the message your angels are sending`,
-          `Take action aligned with ${numberData.number}'s meaning`,
-          `Express gratitude for the guidance`,
-        ]}
-        journalPrompts={[
-          `Where have I been seeing ${numberData.number}?`,
-          `What does ${numberData.meaning.toLowerCase()} mean to me right now?`,
-          `How can I work with ${numberData.number}'s energy?`,
-          `What message are my angels sending me?`,
-          `What action should I take based on this guidance?`,
-        ]}
-        numerology={`Angel Number: ${numberData.number}
-Meaning: ${numberData.meaning}
-Keywords: ${numberData.keywords.join(', ')}`}
-        relatedItems={[
-          {
-            name: 'Numerology Guide',
-            href: '/grimoire/numerology',
-            type: 'Guide',
-          },
-          {
-            name: 'Life Path Numbers',
-            href: '/grimoire/numerology',
-            type: 'Guide',
-          },
-        ]}
+        intro={data.quickMeaning}
+        tldr={`${data.name} means ${data.coreMeaning.toLowerCase()}. ${data.message}`}
+        meaning={meaningContent}
+        emotionalThemes={data.keywords}
+        howToWorkWith={data.whatToDo}
+        journalPrompts={data.journalPrompts}
+        numerology={`Angel Number: ${data.number}
+Core Meaning: ${data.coreMeaning}
+Root Number: ${data.numerologyBreakdown.rootNumber}
+Keywords: ${data.keywords.join(', ')}`}
         breadcrumbs={[
           { label: 'Grimoire', href: '/grimoire' },
-          { label: 'Numerology', href: '/grimoire/numerology' },
+          { label: 'Angel Numbers', href: '/grimoire/angel-numbers' },
           {
-            label: numberData.name,
+            label: data.name,
             href: `/grimoire/angel-numbers/${number}`,
           },
         ]}
         internalLinks={[
-          { text: 'Explore Numerology', href: '/grimoire/numerology' },
+          { text: 'All Angel Numbers', href: '/grimoire/angel-numbers' },
+          { text: 'Numerology Guide', href: '/grimoire/numerology' },
           { text: "View Today's Horoscope", href: '/horoscope' },
           { text: 'Calculate Birth Chart', href: '/birth-chart' },
-          { text: 'Grimoire Home', href: '/grimoire' },
         ]}
-        ctaText={`Want personalized numerology insights for your life?`}
+        ctaText='Want personalized numerology insights for your life?'
         ctaHref='/pricing'
-        faqs={faqs}
-      />
+        faqs={data.faq}
+      >
+        {/* Correspondences Section */}
+        <section className='mb-8'>
+          <Heading as='h2' variant='h3'>
+            {data.number} Correspondences
+          </Heading>
+          <div className='grid grid-cols-2 md:grid-cols-5 gap-4 mt-4'>
+            <div className='p-4 rounded-lg border border-zinc-800 bg-zinc-900/50 text-center'>
+              <div className='text-2xl mb-1'>🪐</div>
+              <div className='text-xs text-zinc-400'>Planet</div>
+              <div className='text-sm text-zinc-300'>
+                {data.correspondences.planet}
+              </div>
+            </div>
+            <div className='p-4 rounded-lg border border-zinc-800 bg-zinc-900/50 text-center'>
+              <div className='text-2xl mb-1'>🔥</div>
+              <div className='text-xs text-zinc-400'>Element</div>
+              <div className='text-sm text-zinc-300'>
+                {data.correspondences.element}
+              </div>
+            </div>
+            <div className='p-4 rounded-lg border border-zinc-800 bg-zinc-900/50 text-center'>
+              <div className='text-2xl mb-1'>✨</div>
+              <div className='text-xs text-zinc-400'>Chakra</div>
+              <div className='text-sm text-zinc-300'>
+                {data.correspondences.chakra}
+              </div>
+            </div>
+            <div className='p-4 rounded-lg border border-zinc-800 bg-zinc-900/50 text-center'>
+              <div className='text-2xl mb-1'>💎</div>
+              <div className='text-xs text-zinc-400'>Crystal</div>
+              <div className='text-sm text-zinc-300'>
+                {data.correspondences.crystal}
+              </div>
+            </div>
+            <div className='p-4 rounded-lg border border-zinc-800 bg-zinc-900/50 text-center'>
+              <div className='text-2xl mb-1'>🃏</div>
+              <div className='text-xs text-zinc-400'>Tarot</div>
+              <div className='text-sm text-zinc-300'>
+                {data.correspondences.tarotCard}
+              </div>
+            </div>
+          </div>
+        </section>
+      </SEOContentTemplate>
     </div>
   );
 }
