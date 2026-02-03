@@ -647,7 +647,7 @@ export function checkSignIngress(positions: any, date: Date): Array<any> {
     if (degreeInSign < 2) {
       ingresses.push({
         name: `${planet} enters ${data.sign}`,
-        energy: `${planet} energy shifts`,
+        energy: getSignDescription(data.sign),
         priority: 8,
         type: 'ingress',
         planet,
