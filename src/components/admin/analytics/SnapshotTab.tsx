@@ -424,28 +424,6 @@ export function SnapshotTab({
               />
             )}
           </div>
-          <div className='grid gap-4 md:grid-cols-2 lg:grid-cols-4'>
-            <MiniStat
-              label={`App Daily Stickiness (DAU/WAU) [${appDau}/${appWau}]`}
-              value={formatPercent(appWau > 0 ? (appDau / appWau) * 100 : 0, 2)}
-              icon={<Sparkles className='h-5 w-5 text-lunary-success-300' />}
-            />
-            <MiniStat
-              label={`App Weekly Stickiness (WAU/MAU) [${appWau}/${appMau}]`}
-              value={formatPercent(activity?.app_opened_stickiness_wau_mau, 2)}
-              icon={<Sparkles className='h-5 w-5 text-lunary-secondary-300' />}
-            />
-            <MiniStat
-              label='Returning DAU'
-              value={activity?.returning_dau ?? 0}
-              icon={<Activity className='h-5 w-5 text-lunary-accent-300' />}
-            />
-            <MiniStat
-              label='Returning MAU'
-              value={activity?.returning_mau ?? 0}
-              icon={<Activity className='h-5 w-5 text-lunary-primary-300' />}
-            />
-          </div>
           {appVisits !== null && (
             <div className='grid gap-4 md:grid-cols-2'>
               <MiniStat
