@@ -321,3 +321,87 @@ export async function detectUpcomingRetrogradeStations(
 
   return stations;
 }
+
+// Slow planets that get milestone posts
+const SLOW_PLANETS = ['Jupiter', 'Saturn', 'Uranus', 'Neptune', 'Pluto'];
+
+export type TransitMilestoneEvent = {
+  planet: string;
+  sign: string;
+  totalDays: number;
+  remainingDays: number;
+  milestone: 'halfway' | '3_months' | '1_month' | '1_week';
+  milestoneLabel: string;
+  displayText: string;
+};
+
+/**
+ * Detect transit milestones for slow-moving planets.
+ * Returns milestone events when a slow planet transit hits:
+ * - Halfway point
+ * - 3 months remaining
+ * - 1 month remaining
+ * - 1 week remaining
+ *
+ * Only triggers on the exact day of the milestone to avoid duplicates.
+ */
+export async function detectTransitMilestones(
+  date: Date,
+): Promise<TransitMilestoneEvent[]> {
+  const data = await getGlobalCosmicData(date);
+  const milestones: TransitMilestoneEvent[] = [];
+
+  if (!data?.planetaryPositions) {
+    return milestones;
+  }
+
+  for (const [planet, position] of Object.entries(data.planetaryPositions)) {
+    // Only check slow planets
+    if (!SLOW_PLANETS.includes(planet)) continue;
+
+    const duration = position.duration;
+    if (!duration || !duration.totalDays || !duration.remainingDays) continue;
+
+    const { totalDays, remainingDays } = duration;
+    const halfwayDays = Math.floor(totalDays / 2);
+
+    // Check for milestone matches (use ranges to account for daily check)
+    let milestone: TransitMilestoneEvent['milestone'] | null = null;
+    let milestoneLabel = '';
+
+    // Halfway point (within 1 day of halfway)
+    if (remainingDays === halfwayDays || remainingDays === halfwayDays + 1) {
+      milestone = 'halfway';
+      milestoneLabel = 'Halfway through';
+    }
+    // 3 months remaining (90 days, check 89-91)
+    else if (remainingDays >= 89 && remainingDays <= 91) {
+      milestone = '3_months';
+      milestoneLabel = '3 months remaining';
+    }
+    // 1 month remaining (30 days, check 29-31)
+    else if (remainingDays >= 29 && remainingDays <= 31) {
+      milestone = '1_month';
+      milestoneLabel = '1 month remaining';
+    }
+    // 1 week remaining (7 days, check 6-8)
+    else if (remainingDays >= 6 && remainingDays <= 8) {
+      milestone = '1_week';
+      milestoneLabel = '1 week remaining';
+    }
+
+    if (milestone) {
+      milestones.push({
+        planet,
+        sign: position.sign,
+        totalDays,
+        remainingDays,
+        milestone,
+        milestoneLabel,
+        displayText: duration.displayText || `${remainingDays} days remaining`,
+      });
+    }
+  }
+
+  return milestones;
+}

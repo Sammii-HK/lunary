@@ -222,6 +222,24 @@ export const lastQuarterHooks = [
 ];
 
 /**
+ * Transit milestone hooks - for slow planet transit updates
+ */
+export const transitMilestoneHooks = [
+  'How has this transit shaped you so far?',
+  'What themes keep emerging?',
+  'What has this period taught you?',
+  'How are you growing through this?',
+  'What patterns are you noticing?',
+  'Where have you transformed?',
+  'What is this transit asking of you?',
+  'How has your perspective shifted?',
+  'What foundations are forming?',
+  'What is being restructured?',
+  'Where do you feel the influence most?',
+  'What collective shifts are you witnessing?',
+];
+
+/**
  * Get a deterministic hook based on date and event type
  * Uses date string to ensure consistent selection per day
  */
@@ -247,7 +265,8 @@ export type HookType =
   | 'newMoon'
   | 'fullMoon'
   | 'firstQuarter'
-  | 'lastQuarter';
+  | 'lastQuarter'
+  | 'transitMilestone';
 
 export function getEngagementHook(type: HookType, seed: string): string {
   const hooks: Record<HookType, string[]> = {
@@ -263,6 +282,7 @@ export function getEngagementHook(type: HookType, seed: string): string {
     fullMoon: fullMoonHooks,
     firstQuarter: firstQuarterHooks,
     lastQuarter: lastQuarterHooks,
+    transitMilestone: transitMilestoneHooks,
   };
 
   const hookList = hooks[type];
