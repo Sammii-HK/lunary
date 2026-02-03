@@ -1469,3 +1469,28 @@ model pending_checkouts {
   @@index([status], map: "idx_pending_checkouts_status")
   @@index([expires_at], map: "idx_pending_checkouts_expires_at")
 }
+
+/// Metric snapshots for analytics - stores weekly and monthly aggregated metrics
+model metric_snapshots {
+  period_type                    String   @db.VarChar(20) // 'weekly' or 'monthly'
+  period_key                     String   @db.VarChar(50) // e.g. '2024-W01' or '2024-01'
+  period_start                   DateTime @db.Date
+  period_end                     DateTime @db.Date
+  new_signups                    Int
+  new_trials                     Int
+  new_paying_subscribers         Int
+  wau                            Int // Weekly Active Users
+  activation_rate                Float    @db.Real
+  trial_to_paid_conversion_rate  Float    @db.Real
+  mrr                            Float    @db.Real // Monthly Recurring Revenue
+  active_subscribers             Int
+  churn_rate                     Float    @db.Real
+  d7_retention                   Float?   @db.Real // Day 7 retention
+  extras                         Json?
+  created_at                     DateTime @default(now()) @db.Timestamptz(6)
+  updated_at                     DateTime @default(now()) @db.Timestamptz(6)
+
+  @@id([period_type, period_key])
+  @@index([period_type], map: "idx_metric_snapshots_period_type")
+  @@index([period_start], map: "idx_metric_snapshots_period_start")
+}
