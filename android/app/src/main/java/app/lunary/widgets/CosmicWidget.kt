@@ -29,6 +29,25 @@ class CosmicWidget : AppWidgetProvider() {
         private const val PREFS_NAME = "LunaryWidgetData"
         private const val DATA_KEY = "widgetData"
 
+        fun getMoonDrawable(phase: String?, illumination: Int): Int {
+            val phaseLower = phase?.lowercase() ?: ""
+            return when {
+                phaseLower.contains("new") -> R.drawable.ic_moon_new
+                phaseLower.contains("waxing crescent") -> R.drawable.ic_moon_waxing_crescent
+                phaseLower.contains("first quarter") -> R.drawable.ic_moon_first_quarter
+                phaseLower.contains("waxing gibbous") -> R.drawable.ic_moon_waxing_gibbous
+                phaseLower.contains("full") -> R.drawable.ic_moon_full
+                phaseLower.contains("waning gibbous") -> R.drawable.ic_moon_waning_gibbous
+                phaseLower.contains("last quarter") || phaseLower.contains("third quarter") -> R.drawable.ic_moon_last_quarter
+                phaseLower.contains("waning crescent") -> R.drawable.ic_moon_waning_crescent
+                illumination > 90 -> R.drawable.ic_moon_full
+                illumination > 60 -> if (phaseLower.contains("waning")) R.drawable.ic_moon_waning_gibbous else R.drawable.ic_moon_waxing_gibbous
+                illumination > 40 -> if (phaseLower.contains("waning")) R.drawable.ic_moon_last_quarter else R.drawable.ic_moon_first_quarter
+                illumination > 10 -> if (phaseLower.contains("waning")) R.drawable.ic_moon_waning_crescent else R.drawable.ic_moon_waxing_crescent
+                else -> R.drawable.ic_moon_new
+            }
+        }
+
         fun updateWidget(
             context: Context,
             appWidgetManager: AppWidgetManager,
@@ -49,9 +68,13 @@ class CosmicWidget : AppWidgetProvider() {
                     val dayTheme = data.optString("dayTheme", "")
 
                     // Update moon info
-                    views.setTextViewText(R.id.moon_phase, moon?.optString("phase", "Sync needed") ?: "Sync needed")
-                    views.setTextViewText(R.id.moon_sign, moon?.optString("sign", "") ?: "")
-                    views.setTextViewText(R.id.moon_illumination, "${moon?.optInt("illumination", 0) ?: 0}%")
+                    val phase = moon?.optString("phase", "Sync needed") ?: "Sync needed"
+                    val sign = moon?.optString("sign", "") ?: ""
+                    val illumination = moon?.optInt("illumination", 0) ?: 0
+
+                    views.setImageViewResource(R.id.moon_icon, getMoonDrawable(phase, illumination))
+                    views.setTextViewText(R.id.moon_phase, phase)
+                    views.setTextViewText(R.id.moon_sign, if (sign.isNotEmpty()) "in $sign · $illumination%" else "$illumination%")
 
                     // Update tarot card
                     if (todayCard != null) {
@@ -63,8 +86,13 @@ class CosmicWidget : AppWidgetProvider() {
                     }
 
                     // Update day number
-                    views.setTextViewText(R.id.day_number, "Day $dayNumber")
-                    views.setTextViewText(R.id.day_theme, dayTheme)
+                    if (dayNumber > 0) {
+                        views.setTextViewText(R.id.day_number, "Day $dayNumber")
+                        views.setTextViewText(R.id.day_theme, dayTheme)
+                    } else {
+                        views.setTextViewText(R.id.day_number, "")
+                        views.setTextViewText(R.id.day_theme, "")
+                    }
 
                 } catch (e: Exception) {
                     setFallbackData(views)
@@ -87,11 +115,11 @@ class CosmicWidget : AppWidgetProvider() {
         }
 
         private fun setFallbackData(views: RemoteViews) {
-            views.setTextViewText(R.id.moon_phase, "Open app")
+            views.setImageViewResource(R.id.moon_icon, R.drawable.ic_moon_full)
+            views.setTextViewText(R.id.moon_phase, "Open Lunary")
             views.setTextViewText(R.id.moon_sign, "to sync")
-            views.setTextViewText(R.id.moon_illumination, "")
-            views.setTextViewText(R.id.card_name, "Open app")
-            views.setTextViewText(R.id.card_meaning, "to sync")
+            views.setTextViewText(R.id.card_name, "")
+            views.setTextViewText(R.id.card_meaning, "")
             views.setTextViewText(R.id.day_number, "")
             views.setTextViewText(R.id.day_theme, "")
         }
@@ -103,19 +131,29 @@ class CosmicWidget : AppWidgetProvider() {
             val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
             prefs.edit().putString(DATA_KEY, jsonData).apply()
 
-            // Trigger widget refresh
-            val intent = Intent(context, CosmicWidget::class.java).apply {
+            // Trigger widget refresh for all widget types
+            val cosmicIntent = Intent(context, CosmicWidget::class.java).apply {
                 action = AppWidgetManager.ACTION_APPWIDGET_UPDATE
             }
-            context.sendBroadcast(intent)
+            context.sendBroadcast(cosmicIntent)
+
+            val moonIntent = Intent(context, MoonWidget::class.java).apply {
+                action = AppWidgetManager.ACTION_APPWIDGET_UPDATE
+            }
+            context.sendBroadcast(moonIntent)
+
+            val tarotIntent = Intent(context, TarotWidget::class.java).apply {
+                action = AppWidgetManager.ACTION_APPWIDGET_UPDATE
+            }
+            context.sendBroadcast(tarotIntent)
+
+            val horoscopeIntent = Intent(context, HoroscopeWidget::class.java).apply {
+                action = AppWidgetManager.ACTION_APPWIDGET_UPDATE
+            }
+            context.sendBroadcast(horoscopeIntent)
         }
     }
 
-    override fun onEnabled(context: Context) {
-        // Widget first enabled
-    }
-
-    override fun onDisabled(context: Context) {
-        // Last widget removed
-    }
+    override fun onEnabled(context: Context) {}
+    override fun onDisabled(context: Context) {}
 }

@@ -5,6 +5,7 @@ import { useAuthStatus } from '@/components/AuthStatus';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
 import { SquarePlus, Ellipsis, Share } from 'lucide-react';
+import { Capacitor } from '@capacitor/core';
 
 interface BeforeInstallPromptEvent extends Event {
   readonly platforms: string[];
@@ -34,6 +35,9 @@ export function PWAHandler({
   forceShowBanner = false,
   ignoreDismissed = false,
 }: PWAHandlerProps = {}) {
+  // Don't show PWA prompts in native Capacitor app
+  const isNativeApp = Capacitor.isNativePlatform();
+
   const authState = useAuthStatus();
   const [deferredPrompt, setDeferredPrompt] =
     useState<BeforeInstallPromptEvent | null>(null);
@@ -283,7 +287,8 @@ export function PWAHandler({
     showNotificationPrompt &&
     authState.isAuthenticated;
 
-  if (!showInstallBanner && !showNotificationsBanner) {
+  // Don't show any prompts in native app or if nothing to show
+  if (isNativeApp || (!showInstallBanner && !showNotificationsBanner)) {
     return null;
   }
 

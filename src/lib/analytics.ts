@@ -7,6 +7,7 @@ import {
   getStoredAttribution,
 } from '@/lib/attribution';
 import { getContextualHub } from '@/lib/grimoire/getContextualNudge';
+import { generateUUID } from '@/lib/utils';
 
 export type ConversionEvent =
   | 'signup'
@@ -384,7 +385,7 @@ export function getAnonymousId(): string | undefined {
   try {
     let anonId = window.localStorage.getItem(ANON_ID_STORAGE_KEY);
     if (!anonId) {
-      anonId = crypto.randomUUID();
+      anonId = generateUUID();
       window.localStorage.setItem(ANON_ID_STORAGE_KEY, anonId);
     }
     return anonId;
@@ -447,7 +448,7 @@ export async function trackEvent(
     const eventIdValue =
       typeof data?.eventId === 'string' && data.eventId.trim().length > 0
         ? data.eventId.trim()
-        : crypto.randomUUID();
+        : generateUUID();
 
     const eventData: ConversionEventData = {
       event,

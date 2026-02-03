@@ -211,6 +211,7 @@
     "@next/bundle-analyzer": "^16.0.8",
     "@playwright/test": "^1.57.0",
     "@prisma/client": "^6.19.0",
+    "@resvg/resvg-js": "^2.6.2",
     "@stylistic/eslint-plugin-js": "^2.13.0",
     "@testing-library/dom": "^10.4.1",
     "@testing-library/jest-dom": "^6.9.1",

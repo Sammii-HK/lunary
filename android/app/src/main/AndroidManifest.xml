@@ -37,13 +37,53 @@
         <!-- Cosmic Overview Widget -->
         <receiver
             android:name=".widgets.CosmicWidget"
-            android:exported="true">
+            android:exported="true"
+            android:label="Lunary Cosmic">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
             </intent-filter>
             <meta-data
                 android:name="android.appwidget.provider"
                 android:resource="@xml/cosmic_widget_info" />
+        </receiver>
+
+        <!-- Moon Phase Widget -->
+        <receiver
+            android:name=".widgets.MoonWidget"
+            android:exported="true"
+            android:label="Lunary Moon">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/moon_widget_info" />
+        </receiver>
+
+        <!-- Daily Tarot Widget -->
+        <receiver
+            android:name=".widgets.TarotWidget"
+            android:exported="true"
+            android:label="Lunary Tarot">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/tarot_widget_info" />
+        </receiver>
+
+        <!-- Daily Horoscope Widget -->
+        <receiver
+            android:name=".widgets.HoroscopeWidget"
+            android:exported="true"
+            android:label="Lunary Horoscope">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/horoscope_widget_info" />
         </receiver>
     </application>
 

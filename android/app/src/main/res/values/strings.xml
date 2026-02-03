@@ -6,4 +6,6 @@
     <string name="custom_url_scheme">app.lunary</string>
     <string name="widget_cosmic_description">Moon phase, tarot card, and numerology at a glance</string>
     <string name="widget_moon_description">Current moon phase and zodiac sign</string>
+    <string name="widget_tarot_description">Your tarot card of the day</string>
+    <string name="widget_horoscope_description">Your daily cosmic guidance</string>
 </resources>
