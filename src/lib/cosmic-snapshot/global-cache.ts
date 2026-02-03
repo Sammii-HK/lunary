@@ -7,6 +7,7 @@ import {
   checkSeasonalEvents,
   checkSignIngress,
   checkRetrogradeEvents,
+  getSignDescription,
 } from '../../../utils/astrology/astronomical-data';
 import { Observer } from 'astronomy-engine';
 
@@ -182,4 +183,74 @@ export async function saveGlobalCosmicData(
     revalidateTag('cosmic-global');
     revalidateTag(`cosmic-global-${dateStr}`);
   }
+}
+
+export type SignChangeEvent = {
+  name: string;
+  energy: string;
+  priority: number;
+  type: 'ingress' | 'egress';
+  planet: string;
+  sign: string;
+  previousSign?: string;
+  nextSign?: string;
+};
+
+/**
+ * Detect upcoming planet sign changes by comparing today vs tomorrow.
+ * Returns ingress/egress events for changes happening TOMORROW so we can post TODAY.
+ * This eliminates the problem of slow planets (like Neptune) generating
+ * duplicate ingress posts for months when using degree-based detection.
+ */
+export async function detectUpcomingSignChanges(
+  today: Date,
+  tomorrow: Date,
+): Promise<{ ingresses: SignChangeEvent[]; egresses: SignChangeEvent[] }> {
+  const [todayData, tomorrowData] = await Promise.all([
+    getGlobalCosmicData(today),
+    getGlobalCosmicData(tomorrow),
+  ]);
+
+  const ingresses: SignChangeEvent[] = [];
+  const egresses: SignChangeEvent[] = [];
+
+  if (!todayData?.planetaryPositions || !tomorrowData?.planetaryPositions) {
+    return { ingresses, egresses };
+  }
+
+  // Compare today vs tomorrow - post TODAY about TOMORROW's changes
+  for (const [planet, todayPos] of Object.entries(
+    todayData.planetaryPositions,
+  )) {
+    const tomorrowPos = tomorrowData.planetaryPositions[planet];
+    if (!tomorrowPos) continue;
+
+    const todaySign = todayPos.sign;
+    const tomorrowSign = tomorrowPos.sign;
+
+    // Sign changes TOMORROW = post TODAY
+    if (todaySign !== tomorrowSign) {
+      ingresses.push({
+        name: `${planet} enters ${tomorrowSign} tomorrow`,
+        energy: getSignDescription(tomorrowSign),
+        priority: 8,
+        type: 'ingress',
+        planet,
+        sign: tomorrowSign,
+        previousSign: todaySign,
+      });
+
+      egresses.push({
+        name: `${planet}'s final day in ${todaySign}`,
+        energy: getSignDescription(todaySign),
+        priority: 7,
+        type: 'egress',
+        planet,
+        sign: todaySign,
+        nextSign: tomorrowSign,
+      });
+    }
+  }
+
+  return { ingresses, egresses };
 }
