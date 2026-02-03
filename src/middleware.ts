@@ -12,6 +12,48 @@ const isProductionHost = (hostname: string) =>
   hostname.startsWith('admin.');
 
 const ANON_ID_COOKIE = 'lunary_anon_id';
+const AB_TEST_COOKIE = 'lunary_ab_tests';
+
+// A/B test definitions: test name -> variants with weights
+const AB_TESTS: Record<string, { variants: string[]; weights?: number[] }> = {
+  'inline-cta-style': {
+    variants: ['control', 'minimal', 'sparkles', 'card'],
+    // Equal weights by default (25% each)
+  },
+};
+
+// Simple hash function for deterministic variant assignment
+function hashString(str: string): number {
+  let hash = 5381;
+  for (let i = 0; i < str.length; i++) {
+    hash = ((hash << 5) + hash) ^ str.charCodeAt(i);
+  }
+  return Math.abs(hash);
+}
+
+// Assign variant deterministically based on user ID + test name
+function assignVariant(
+  userId: string,
+  testName: string,
+  test: { variants: string[]; weights?: number[] },
+): string {
+  const hash = hashString(`${userId}-${testName}`);
+  const { variants, weights } = test;
+
+  if (weights && weights.length === variants.length) {
+    // Weighted assignment
+    const totalWeight = weights.reduce((a, b) => a + b, 0);
+    const normalized = hash % totalWeight;
+    let cumulative = 0;
+    for (let i = 0; i < variants.length; i++) {
+      cumulative += weights[i];
+      if (normalized < cumulative) return variants[i];
+    }
+  }
+
+  // Equal weight assignment
+  return variants[hash % variants.length];
+}
 
 const BOT_UA_PATTERN =
   /bot|crawler|spider|crawling|preview|facebookexternalhit|slackbot|discordbot|whatsapp|telegrambot|pinterest|embedly|quora|tumblr|redditbot|gpt|openai|anthropic|gemini|perplexity|cohere|googlebot|baiduspider|yandexbot|ccbot|duckduckbot|bingbot|python-requests|libcurl|scrapy|wget|curl\//i;
@@ -219,6 +261,37 @@ export function middleware(request: NextRequest, event: NextFetchEvent) {
         secure: isProd,
         path: '/',
         maxAge: 60 * 60 * 24 * 365,
+      });
+    }
+
+    // Assign A/B test variants (deterministic based on anonId)
+    const existingTests = request.cookies.get(AB_TEST_COOKIE)?.value;
+    let abTests: Record<string, string> = {};
+
+    try {
+      if (existingTests) {
+        abTests = JSON.parse(existingTests);
+      }
+    } catch {
+      // Invalid JSON, reset
+    }
+
+    // Assign variants for any missing tests
+    let testsChanged = false;
+    for (const [testName, testConfig] of Object.entries(AB_TESTS)) {
+      if (!abTests[testName]) {
+        abTests[testName] = assignVariant(anonId, testName, testConfig);
+        testsChanged = true;
+      }
+    }
+
+    if (testsChanged || !existingTests) {
+      response.cookies.set(AB_TEST_COOKIE, JSON.stringify(abTests), {
+        httpOnly: false, // Readable by client JS for tracking
+        sameSite: 'lax',
+        secure: isProd,
+        path: '/',
+        maxAge: 60 * 60 * 24 * 90, // 90 days
       });
     }
 

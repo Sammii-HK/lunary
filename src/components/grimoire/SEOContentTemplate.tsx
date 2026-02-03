@@ -23,6 +23,7 @@ import { PeopleAlsoAsk } from './PeopleAlsoAsk';
 import { ContextualNudgeSection } from '../ui/ContextualNudgeSection';
 import { InlineContextualNudge } from './InlineContextualNudge';
 import { ReadFullGuidePrompt } from '@/app/grimoire/guides/ReadFullGuidePrompt';
+import { getInlineCtaVariant } from '@/lib/ab-tests-server';
 
 /**
  * Format a URL segment into a human-readable label
@@ -153,7 +154,7 @@ export interface SEOContentTemplateProps {
   components?: React.ReactNode;
 }
 
-export function SEOContentTemplate({
+export async function SEOContentTemplate({
   title,
   h1,
   subtitle,
@@ -204,6 +205,9 @@ export function SEOContentTemplate({
   contextualCopyVariant = 'note',
   components,
 }: SEOContentTemplateProps) {
+  // Get A/B test variant for inline CTA (server-side)
+  const inlineCtaVariant = await getInlineCtaVariant();
+
   // Auto-generate breadcrumbs from URL if not provided
   const autoBreadcrumbs =
     breadcrumbs && breadcrumbs.length > 0
@@ -385,6 +389,7 @@ export function SEOContentTemplate({
           <InlineContextualNudge
             nudge={contextualNudge}
             location='seo_inline_post_tldr'
+            serverVariant={inlineCtaVariant}
           />
         )}
 

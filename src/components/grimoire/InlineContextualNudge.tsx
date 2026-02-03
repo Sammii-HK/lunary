@@ -10,13 +10,6 @@ import { Button } from '@/components/ui/button';
 import { ContextualNudge } from '@/lib/grimoire/getContextualNudge';
 import { trackCtaClick, trackCtaImpression } from '@/lib/analytics';
 import { Heading } from '../ui/Heading';
-import { useFeatureFlagVariant } from '@/hooks/useFeatureFlag';
-import { getABTestMetadataFromVariant } from '@/lib/ab-test-tracking';
-
-interface InlineContextualNudgeProps {
-  nudge: ContextualNudge;
-  location?: string;
-}
 
 /**
  * Inline CTA Style Variants:
@@ -25,11 +18,19 @@ interface InlineContextualNudgeProps {
  * - sparkles: Icon + text + chevron (current default)
  * - card: Small card with background
  */
-type InlineCtaVariant = 'control' | 'minimal' | 'sparkles' | 'card';
+export type InlineCtaVariant = 'control' | 'minimal' | 'sparkles' | 'card';
+
+interface InlineContextualNudgeProps {
+  nudge: ContextualNudge;
+  location?: string;
+  /** Server-assigned A/B test variant (from middleware cookie) */
+  serverVariant?: InlineCtaVariant;
+}
 
 export function InlineContextualNudge({
   nudge,
   location = 'seo_inline_post_tldr',
+  serverVariant,
 }: InlineContextualNudgeProps) {
   const authState = useAuthStatus();
   const router = useRouter();
@@ -37,14 +38,8 @@ export function InlineContextualNudge({
   const [showAuthModal, setShowAuthModal] = useState(false);
   const impressionTracked = useRef(false);
 
-  // A/B test for inline CTA style
-  const styleVariant = useFeatureFlagVariant('inline-cta-style') as
-    | InlineCtaVariant
-    | undefined;
-  const abMetadata = getABTestMetadataFromVariant(
-    'inline-cta-style',
-    styleVariant,
-  );
+  // Use server-assigned variant (works for all users, no PostHog needed)
+  const variant: InlineCtaVariant = serverVariant || 'sparkles';
 
   useModal({
     isOpen: showAuthModal,
@@ -52,9 +47,9 @@ export function InlineContextualNudge({
     closeOnClickOutside: false,
   });
 
-  // Track impression when component mounts (including control group)
+  // Track impression when component mounts
   useEffect(() => {
-    if (!impressionTracked.current && styleVariant !== undefined) {
+    if (!impressionTracked.current) {
       impressionTracked.current = true;
       trackCtaImpression({
         hub: nudge.hub,
@@ -68,12 +63,12 @@ export function InlineContextualNudge({
         ctaVariant: nudge.ctaVariant,
         ctaHeadline: nudge.ctaHeadline,
         ctaSubline: nudge.ctaSubline,
-        abTest: abMetadata?.abTest,
-        abVariant: abMetadata?.abVariant,
-        inlineStyle: styleVariant || 'sparkles',
+        abTest: 'inline_cta',
+        abVariant: variant,
+        inlineStyle: variant,
       });
     }
-  }, [nudge, location, pathname, styleVariant, abMetadata]);
+  }, [nudge, location, pathname, variant]);
 
   const navigateToHref = () => {
     if (nudge.href) {
@@ -94,9 +89,9 @@ export function InlineContextualNudge({
       ctaVariant: nudge.ctaVariant,
       ctaHeadline: nudge.ctaHeadline,
       ctaSubline: nudge.ctaSubline,
-      abTest: abMetadata?.abTest,
-      abVariant: abMetadata?.abVariant,
-      inlineStyle: styleVariant || 'sparkles',
+      abTest: 'inline_cta',
+      abVariant: variant,
+      inlineStyle: variant,
     });
 
     if (nudge.action === 'link') {
@@ -115,13 +110,10 @@ export function InlineContextualNudge({
   // Use inlineCopy if available, otherwise fall back to headline
   const displayText = nudge.inlineCopy || nudge.headline;
 
-  // Control variant: don't render anything
-  if (styleVariant === 'control') {
+  // Control variant: don't render anything (but still track impression above)
+  if (variant === 'control') {
     return null;
   }
-
-  // Render based on variant (default to sparkles if flag not loaded yet)
-  const variant = styleVariant || 'sparkles';
 
   return (
     <>
