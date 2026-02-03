@@ -1,7 +1,9 @@
 // Content database for Zodiac Compatibility pages
 // 12 × 12 = 144 combinations (78 unique pairs)
+// Uses curated content from JSON when available, otherwise generates algorithmically
 
 import { signDescriptions } from './planet-sign-content';
+import curatedPairsData from '@/data/zodiac-compatibility-pairs.json';
 
 export interface CompatibilityContent {
   sign1: string;
@@ -17,6 +19,25 @@ export interface CompatibilityContent {
   strengths: string[];
   challenges: string[];
   advice: string;
+  summary?: string; // Only available for curated pairs
+  isCurated?: boolean;
+}
+
+// Type for curated pair data from JSON
+interface CuratedPair {
+  sign1: string;
+  sign2: string;
+  scores: { overall: number; love: number; friendship: number; work: number };
+  summary: string;
+  strengths: string[];
+  challenges: string[];
+  advice: string;
+}
+
+// Get curated pair data if available
+function getCuratedPair(slug: string): CuratedPair | null {
+  const pairs = curatedPairsData.pairs as Record<string, CuratedPair>;
+  return pairs[slug] || null;
 }
 
 // Element compatibility matrix
@@ -45,7 +66,42 @@ export function generateCompatibilityContent(
     throw new Error(`Invalid signs: ${sign1Key}, ${sign2Key}`);
   }
 
-  // Calculate scores
+  // Normalize slug (alphabetical order)
+  const slug =
+    sign1Key <= sign2Key
+      ? `${sign1Key}-and-${sign2Key}`
+      : `${sign2Key}-and-${sign1Key}`;
+
+  // Check for curated content first
+  const curated = getCuratedPair(slug);
+
+  if (curated) {
+    return {
+      sign1: curated.sign1,
+      sign2: curated.sign2,
+      slug,
+      title: `${curated.sign1} and ${curated.sign2} Compatibility: Love, Friendship & More`,
+      description: curated.summary,
+      keywords: [
+        `${curated.sign1.toLowerCase()} and ${curated.sign2.toLowerCase()} compatibility`,
+        `${curated.sign1.toLowerCase()} ${curated.sign2.toLowerCase()} love`,
+        `${curated.sign1.toLowerCase()} ${curated.sign2.toLowerCase()} relationship`,
+        `are ${curated.sign1.toLowerCase()} and ${curated.sign2.toLowerCase()} compatible`,
+        `${curated.sign1.toLowerCase()} ${curated.sign2.toLowerCase()} match`,
+      ],
+      overallScore: curated.scores.overall,
+      loveScore: curated.scores.love,
+      friendshipScore: curated.scores.friendship,
+      workScore: curated.scores.work,
+      strengths: curated.strengths,
+      challenges: curated.challenges,
+      advice: curated.advice,
+      summary: curated.summary,
+      isCurated: true,
+    };
+  }
+
+  // Fall back to generated content
   const elementScore = elementCompatibility[s1.element][s2.element];
   const modalityScore = modalityCompatibility[s1.modality][s2.modality];
   const baseScore = (elementScore + modalityScore) / 2;
@@ -55,11 +111,6 @@ export function generateCompatibilityContent(
   const overallScore = sameSign
     ? Math.round(baseScore * 0.9)
     : Math.round(baseScore);
-
-  const slug =
-    sign1Key <= sign2Key
-      ? `${sign1Key}-and-${sign2Key}`
-      : `${sign2Key}-and-${sign1Key}`;
 
   return {
     sign1: s1.name,
@@ -84,6 +135,7 @@ export function generateCompatibilityContent(
     strengths: generateStrengths(s1, s2),
     challenges: generateChallenges(s1, s2),
     advice: generateAdvice(s1, s2),
+    isCurated: false,
   };
 }
 

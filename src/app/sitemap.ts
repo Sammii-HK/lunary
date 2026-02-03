@@ -38,6 +38,12 @@ import {
 import { stringToKebabCase } from '../../utils/string';
 import dayjs from 'dayjs';
 import { getAllProducts } from '@/lib/shop/generators';
+import { getAllSynastryAspectSlugs } from '@/constants/seo/synastry-aspects';
+import { getAllCompatibilitySlugs } from '@/constants/seo/compatibility-content';
+import {
+  signDescriptions,
+  planetDescriptions,
+} from '@/constants/seo/planet-sign-content';
 
 const PROJECT_ROOT = process.cwd();
 const LAST_MODIFIED_MANIFEST_PATH = resolvePath(
@@ -1207,6 +1213,42 @@ export default function sitemap(): MetadataRoute.Sitemap {
     priority: 0.7,
   };
 
+  // Add synastry aspects index and individual pages
+  const synastryAspectSlugs = getAllSynastryAspectSlugs();
+  const synastryAspectsIndexRoute = {
+    url: `${baseUrl}/grimoire/synastry/aspects`,
+    lastModified: date,
+    changeFrequency: 'monthly' as const,
+    priority: 0.8,
+  };
+  const synastryAspectRoutes = synastryAspectSlugs.map((slug) => ({
+    url: `${baseUrl}/grimoire/synastry/aspects/${slug}`,
+    lastModified: date,
+    changeFrequency: 'monthly' as const,
+    priority: 0.7,
+  }));
+
+  // Add zodiac compatibility pages (all 78 unique pairs + 12 same-sign)
+  const compatibilitySlugs = getAllCompatibilitySlugs();
+  const compatibilityRoutes = compatibilitySlugs.map((slug) => ({
+    url: `${baseUrl}/grimoire/compatibility/${slug}`,
+    lastModified: date,
+    changeFrequency: 'monthly' as const,
+    priority: 0.7,
+  }));
+
+  // Add planetary placement pages (planet-in-sign combinations)
+  const planetKeys = Object.keys(planetDescriptions);
+  const signKeys = Object.keys(signDescriptions);
+  const placementRoutes = planetKeys.flatMap((planet) =>
+    signKeys.map((sign) => ({
+      url: `${baseUrl}/grimoire/placements/${planet}-in-${sign}`,
+      lastModified: date,
+      changeFrequency: 'monthly' as const,
+      priority: 0.7,
+    })),
+  );
+
   // Add mirror hour pages
   const mirrorHourRoutes = mirrorHourKeys.map((time) => ({
     url: `${baseUrl}/grimoire/mirror-hours/${time.replace(':', '-')}`,
@@ -1413,6 +1455,10 @@ export default function sitemap(): MetadataRoute.Sitemap {
     ...soulUrgeRoutes,
     ...karmicDebtRoutes,
     synastryGeneratorRoute,
+    synastryAspectsIndexRoute,
+    ...synastryAspectRoutes,
+    ...compatibilityRoutes,
+    ...placementRoutes,
     ...numerologyIndexRoutes,
     ...moonIndexRoutes,
     ...moonYearRoutes,
