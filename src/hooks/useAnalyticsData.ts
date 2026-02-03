@@ -228,6 +228,9 @@ export type FeatureAdoptionResponse = {
 
 export type GrimoireHealthResponse = {
   grimoire_entry_rate: number;
+  grimoire_to_app_rate: number;
+  grimoire_visitors: number;
+  grimoire_to_app_users: number;
   grimoire_views_per_active_user: number;
   return_to_grimoire_rate: number;
   influence: {

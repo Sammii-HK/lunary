@@ -625,11 +625,16 @@ export function SnapshotTab({
           <CardContent className='space-y-4'>
             <div className='grid gap-4 md:grid-cols-2 lg:grid-cols-5'>
               <MiniStat
-                label='Grimoire Entry Rate'
+                label='Grimoire → App Rate'
                 value={
-                  typeof grimoireHealth?.grimoire_entry_rate === 'number'
-                    ? `${grimoireHealth.grimoire_entry_rate.toFixed(2)}%`
+                  typeof grimoireHealth?.grimoire_to_app_rate === 'number'
+                    ? `${grimoireHealth.grimoire_to_app_rate.toFixed(2)}%`
                     : '—'
+                }
+                subValue={
+                  grimoireHealth?.grimoire_visitors
+                    ? `${grimoireHealth.grimoire_to_app_users} of ${grimoireHealth.grimoire_visitors}`
+                    : undefined
                 }
                 icon={<Sparkles className='h-5 w-5 text-lunary-primary-300' />}
               />
