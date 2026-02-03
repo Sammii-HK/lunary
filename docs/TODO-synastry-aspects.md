@@ -63,21 +63,86 @@ Page updated: `src/app/grimoire/placements/[placement]/page.tsx` now uses curate
 
 ---
 
-## Future Content Pillars (Not Yet Implemented)
+## All Planet Placements - COMPLETED
 
-### Mars Placements
+All planets now have curated data in `src/data/`:
 
-- Action, drive, passion, sexuality
-- 12 placements needed
+- [x] Sun placements (12) - `sun-placements.json`
+- [x] Moon placements (12) - `moon-placements.json`
+- [x] Mercury placements (12) - `mercury-placements.json`
+- [x] Venus placements (12) - `venus-placements.json`
+- [x] Mars placements (12) - `mars-placements.json`
+- [x] Jupiter placements (12) - `jupiter-placements.json`
+- [x] Saturn placements (12) - `saturn-placements.json`
+- [x] Uranus placements (12) - `uranus-placements.json`
+- [x] Neptune placements (12) - `neptune-placements.json`
+- [x] Pluto placements (12) - `pluto-placements.json`
+- [x] Chiron placements (12) - `chiron-placements.json`
+- [x] North Node placements (12) - `north-node-placements.json`
 
-### Mercury Placements
+Total: 144 planet placements with SEO-optimized content.
 
-- Communication style, learning, thinking
-- 12 placements needed
+---
 
-### Rising Sign Content
+## Rising Sign Content - COMPLETED
 
-- Ascendant descriptions and appearance
+All 12 rising signs now in `src/data/rising-signs.json`:
+
+- [x] aries-rising
+- [x] taurus-rising
+- [x] gemini-rising
+- [x] cancer-rising
+- [x] leo-rising
+- [x] virgo-rising
+- [x] libra-rising
+- [x] scorpio-rising
+- [x] sagittarius-rising
+- [x] capricorn-rising
+- [x] aquarius-rising
+- [x] pisces-rising
+
+Pages: `src/app/grimoire/rising/page.tsx` (index) and `src/app/grimoire/rising/[sign]/page.tsx` (individual)
+
+---
+
+## Synastry Pairs - TODO
+
+Curated synastry compatibility content for specific Sun sign pairs.
+Similar to zodiac compatibility but focused on relationship dynamics.
+
+Location: `src/data/synastry-pairs.json`
+
+### Priority Pairs (Most Searched)
+
+- [ ] aries-leo-synastry
+- [ ] taurus-virgo-synastry
+- [ ] gemini-aquarius-synastry
+- [ ] cancer-pisces-synastry
+- [ ] leo-sagittarius-synastry
+- [ ] virgo-capricorn-synastry
+- [ ] libra-gemini-synastry
+- [ ] scorpio-cancer-synastry
+- [ ] sagittarius-aries-synastry
+- [ ] capricorn-taurus-synastry
+- [ ] aquarius-libra-synastry
+- [ ] pisces-scorpio-synastry
+
+### Opposite Sign Pairs (High Interest)
+
+- [ ] aries-libra-synastry
+- [ ] taurus-scorpio-synastry
+- [ ] gemini-sagittarius-synastry
+- [ ] cancer-capricorn-synastry
+- [ ] leo-aquarius-synastry
+- [ ] virgo-pisces-synastry
+
+---
+
+## Future Content Pillars
+
+### House Placements
+
+- Planets in houses interpretation
 - 12 rising signs needed
 
 ---

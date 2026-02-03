@@ -1249,6 +1249,34 @@ export default function sitemap(): MetadataRoute.Sitemap {
     })),
   );
 
+  // Add rising sign pages
+  const risingSignSlugs = [
+    'aries-rising',
+    'taurus-rising',
+    'gemini-rising',
+    'cancer-rising',
+    'leo-rising',
+    'virgo-rising',
+    'libra-rising',
+    'scorpio-rising',
+    'sagittarius-rising',
+    'capricorn-rising',
+    'aquarius-rising',
+    'pisces-rising',
+  ];
+  const risingSignIndexRoute = {
+    url: `${baseUrl}/grimoire/rising`,
+    lastModified: date,
+    changeFrequency: 'monthly' as const,
+    priority: 0.8,
+  };
+  const risingSignRoutes = risingSignSlugs.map((slug) => ({
+    url: `${baseUrl}/grimoire/rising/${slug}`,
+    lastModified: date,
+    changeFrequency: 'monthly' as const,
+    priority: 0.7,
+  }));
+
   // Add mirror hour pages
   const mirrorHourRoutes = mirrorHourKeys.map((time) => ({
     url: `${baseUrl}/grimoire/mirror-hours/${time.replace(':', '-')}`,
@@ -1459,6 +1487,8 @@ export default function sitemap(): MetadataRoute.Sitemap {
     ...synastryAspectRoutes,
     ...compatibilityRoutes,
     ...placementRoutes,
+    risingSignIndexRoute,
+    ...risingSignRoutes,
     ...numerologyIndexRoutes,
     ...moonIndexRoutes,
     ...moonYearRoutes,
