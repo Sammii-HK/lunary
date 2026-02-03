@@ -387,66 +387,6 @@ export function SnapshotTab({
         </StatSection>
       </section>
 
-      {/* App Active Users */}
-      <section className='space-y-3'>
-        <StatSection
-          eyebrow='Core App Usage'
-          title='App Active Users'
-          description='Measures who opened the app in the selected window.'
-          footerText='App Active Users (DAU/WAU/MAU) are deduplicated by canonical identity per UTC window.'
-        >
-          <div className='grid gap-4 md:grid-cols-2 lg:grid-cols-4'>
-            <MiniStat
-              label='App DAU'
-              value={appDau}
-              icon={<Activity className='h-5 w-5 text-lunary-primary-300' />}
-            />
-            <MiniStat
-              label='App WAU'
-              value={appWau}
-              icon={<Activity className='h-5 w-5 text-lunary-success-300' />}
-            />
-            <MiniStat
-              label='App MAU'
-              value={appMau}
-              icon={<Activity className='h-5 w-5 text-lunary-secondary-300' />}
-            />
-            <MiniStat
-              label='New users (range)'
-              value={engagementOverview?.new_users ?? 0}
-              icon={<Target className='h-5 w-5 text-lunary-secondary-300' />}
-            />
-            {appVisits !== null && (
-              <MiniStat
-                label='App Visits'
-                value={appVisits}
-                icon={<Loader2 className='h-5 w-5 text-lunary-accent-300' />}
-              />
-            )}
-          </div>
-          {appVisits !== null && (
-            <div className='grid gap-4 md:grid-cols-2'>
-              <MiniStat
-                label='App visits per App user'
-                value={
-                  appVisitsPerUser !== null ? appVisitsPerUser.toFixed(2) : '—'
-                }
-                icon={<Target className='h-5 w-5 text-lunary-primary-300' />}
-              />
-              {includeAudit && canonicalIdentities !== null && (
-                <MiniStat
-                  label='Canonical identities (audit)'
-                  value={canonicalIdentities}
-                  icon={
-                    <Sparkles className='h-5 w-5 text-lunary-success-300' />
-                  }
-                />
-              )}
-            </div>
-          )}
-        </StatSection>
-      </section>
-
       {/* Engagement Health */}
       <section className='space-y-3'>
         <StatSection
@@ -541,6 +481,66 @@ export function SnapshotTab({
               icon={<Target className='h-5 w-5 text-lunary-accent-300' />}
             />
           </div>
+        </StatSection>
+      </section>
+
+      {/* App Active Users */}
+      <section className='space-y-3'>
+        <StatSection
+          eyebrow='Core App Usage'
+          title='App Active Users'
+          description='Measures who opened the app in the selected window.'
+          footerText='App Active Users (DAU/WAU/MAU) are deduplicated by canonical identity per UTC window.'
+        >
+          <div className='grid gap-4 md:grid-cols-2 lg:grid-cols-4'>
+            <MiniStat
+              label='App DAU'
+              value={appDau}
+              icon={<Activity className='h-5 w-5 text-lunary-primary-300' />}
+            />
+            <MiniStat
+              label='App WAU'
+              value={appWau}
+              icon={<Activity className='h-5 w-5 text-lunary-success-300' />}
+            />
+            <MiniStat
+              label='App MAU'
+              value={appMau}
+              icon={<Activity className='h-5 w-5 text-lunary-secondary-300' />}
+            />
+            <MiniStat
+              label='New users (range)'
+              value={engagementOverview?.new_users ?? 0}
+              icon={<Target className='h-5 w-5 text-lunary-secondary-300' />}
+            />
+            {appVisits !== null && (
+              <MiniStat
+                label='App Visits'
+                value={appVisits}
+                icon={<Loader2 className='h-5 w-5 text-lunary-accent-300' />}
+              />
+            )}
+          </div>
+          {appVisits !== null && (
+            <div className='grid gap-4 md:grid-cols-2'>
+              <MiniStat
+                label='App visits per App user'
+                value={
+                  appVisitsPerUser !== null ? appVisitsPerUser.toFixed(2) : '—'
+                }
+                icon={<Target className='h-5 w-5 text-lunary-primary-300' />}
+              />
+              {includeAudit && canonicalIdentities !== null && (
+                <MiniStat
+                  label='Canonical identities (audit)'
+                  value={canonicalIdentities}
+                  icon={
+                    <Sparkles className='h-5 w-5 text-lunary-success-300' />
+                  }
+                />
+              )}
+            </div>
+          )}
         </StatSection>
       </section>
 
