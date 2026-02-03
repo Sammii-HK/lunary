@@ -4,6 +4,7 @@ import { join } from 'path';
 import {
   PLATFORM_POSTING_TIMES,
   getDefaultPostingTime,
+  getVideoPostingHour,
 } from '@/utils/posting-times';
 import { getImageBaseUrl } from '@/lib/urls';
 import type { SocialPostType } from '@/lib/social/social-copy-generator';
@@ -1278,8 +1279,8 @@ async function generateThematicWeeklyPosts(
           const existingVideoUrl = existingVideoByKey.get(existingVideoKey);
 
           for (const platform of videoPlatforms) {
-            const videoHours = platformOptimalHours[platform] || [20];
-            const videoHour = videoHours[videoHours.length - 1] || 20;
+            const isSecondaryVideo = script.secondaryThemeId != null;
+            const videoHour = getVideoPostingHour(isSecondaryVideo);
             const videoScheduledDate = new Date(`${dateKey}T00:00:00.000Z`);
             videoScheduledDate.setUTCHours(videoHour, 0, 0, 0);
             const baseGroupKey = buildGroupKey(

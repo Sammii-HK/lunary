@@ -1863,7 +1863,7 @@ export async function generateThematicPostsForWeek(
           data,
           dayContent.theme.category,
         );
-        const deepDiveTargets = override ? 2 : 3;
+        const deepDiveTargets = 1; // Keep 1 educational deep-dive per day
         const usedTexts: string[] = [safeIntro];
         const deep1Candidate = pickDeepDiveCandidate(
           deepDiveCandidates,

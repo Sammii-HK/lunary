@@ -136,3 +136,19 @@ export function getPlatformPostingInfo(
 ): PlatformPostingTimes | null {
   return PLATFORM_POSTING_TIMES[platform.toLowerCase()] || null;
 }
+
+/**
+ * Video posting times (UTC)
+ * Primary videos post at 12:00 UTC (UK lunch, US morning)
+ * Secondary videos post at 20:00 UTC (UK evening, US afternoon)
+ */
+export const VIDEO_POSTING_HOURS = {
+  primary: 12,
+  secondary: 20,
+} as const;
+
+export function getVideoPostingHour(isSecondary: boolean): number {
+  return isSecondary
+    ? VIDEO_POSTING_HOURS.secondary
+    : VIDEO_POSTING_HOURS.primary;
+}

@@ -224,7 +224,7 @@ export async function POST(request: NextRequest) {
       `;
 
       const post = postResult.rows[0];
-      const videoPlatforms = ['instagram', 'tiktok', 'threads', 'twitter'];
+      const videoPlatforms = ['instagram', 'tiktok', 'twitter'];
 
       if (
         post?.post_type === 'video' &&
