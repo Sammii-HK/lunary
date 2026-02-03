@@ -128,13 +128,18 @@ export function DemoClient() {
   useEffect(() => {
     if (activeTab === 'app') {
       const openTimer = setTimeout(() => {
-        const moonCard = document.querySelector('#moon-phase button');
+        // Target the expandable card toggle (div with role="button"), not the share button
+        const moonCard = document.querySelector(
+          '#moon-phase [data-component="expandable-card"] > [role="button"]',
+        );
         if (moonCard instanceof HTMLElement) {
           moonCard.click();
 
           // Close it after 2 seconds
           const closeTimer = setTimeout(() => {
-            const moonCardAgain = document.querySelector('#moon-phase button');
+            const moonCardAgain = document.querySelector(
+              '#moon-phase [data-component="expandable-card"] > [role="button"]',
+            );
             if (moonCardAgain instanceof HTMLElement) {
               moonCardAgain.click();
             }

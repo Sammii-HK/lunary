@@ -102,9 +102,25 @@ export function CookieConsent() {
       host.startsWith('admin.') ||
       host.endsWith('.admin.lunary.app');
     setIsAdminHost(adminHost);
+
+    // Check for demo mode
+    const isDemoMode =
+      (window as any).__LUNARY_DEMO_MODE__ === true ||
+      document.getElementById('demo-preview-container') !== null;
+    if (isDemoMode) {
+      setIsVisible(false);
+    }
   }, []);
 
   useEffect(() => {
+    // Don't show in demo mode
+    if (typeof window !== 'undefined') {
+      const isDemoMode =
+        (window as any).__LUNARY_DEMO_MODE__ === true ||
+        document.getElementById('demo-preview-container') !== null;
+      if (isDemoMode) return;
+    }
+
     const consent = getCookieConsent();
     if (!consent) {
       const timer = setTimeout(() => setIsVisible(true), 1000);
