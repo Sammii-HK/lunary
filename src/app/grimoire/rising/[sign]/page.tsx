@@ -1,6 +1,7 @@
 import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { SEOContentTemplate } from '@/components/grimoire/SEOContentTemplate';
+import { CosmicConnections } from '@/components/grimoire/CosmicConnections';
 import { NavParamLink } from '@/components/NavParamLink';
 import { Heading } from '@/components/ui/Heading';
 import { Eye, Star, AlertTriangle, Users } from 'lucide-react';
@@ -282,6 +283,13 @@ ${rising.compatibility}`;
           ))}
         </div>
       </section>
+
+      {/* Cosmic Connections */}
+      <CosmicConnections
+        entityType='rising'
+        entityKey={sign}
+        title='Explore Related Topics'
+      />
     </SEOContentTemplate>
   );
 }

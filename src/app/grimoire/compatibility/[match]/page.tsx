@@ -1,6 +1,7 @@
 import { notFound } from 'next/navigation';
 import { Heart, Users, Briefcase, Star, AlertTriangle } from 'lucide-react';
 import { SEOContentTemplate } from '@/components/grimoire/SEOContentTemplate';
+import { CosmicConnections } from '@/components/grimoire/CosmicConnections';
 import { NavParamLink } from '@/components/NavParamLink';
 import { Heading } from '@/components/ui/Heading';
 import { signDescriptions } from '@/constants/seo/planet-sign-content';
@@ -325,6 +326,13 @@ export default async function CompatibilityPage({ params }: PageProps) {
           })}
         </div>
       </section>
+
+      {/* Cosmic Connections */}
+      <CosmicConnections
+        entityType='compatibility'
+        entityKey={match}
+        title='Explore Related Topics'
+      />
     </SEOContentTemplate>
   );
 }

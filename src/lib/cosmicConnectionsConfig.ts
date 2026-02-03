@@ -37,7 +37,9 @@ export type EntityType =
   | 'archetype'
   | 'witchcraft'
   | 'hub-events'
-  | 'angel-number';
+  | 'angel-number'
+  | 'rising'
+  | 'compatibility';
 
 function toSlug(str: string): string {
   return str
@@ -649,6 +651,99 @@ function getArchetypeConnections(
   return sections;
 }
 
+function getRisingConnections(risingSlug: string): CosmicConnectionSection[] {
+  const signMatch = risingSlug.match(/^([a-z]+)-rising$/);
+  const sign = signMatch?.[1] || risingSlug;
+  const signName = sign.charAt(0).toUpperCase() + sign.slice(1);
+
+  const sections: CosmicConnectionSection[] = [];
+
+  // Core astrology
+  const core: CosmicConnectionLink[] = [
+    { label: 'All Rising Signs', href: '/grimoire/rising' },
+    { label: `${signName} Sun Sign`, href: `/grimoire/zodiac/${sign}` },
+    { label: `Moon in ${signName}`, href: `/grimoire/moon-in/${sign}` },
+    {
+      label: 'Birth Chart Guide',
+      href: '/grimoire/guides/birth-chart-complete-guide',
+    },
+  ];
+  sections.push({ title: 'Astrology', links: core });
+
+  // Placements
+  const placements: CosmicConnectionLink[] = [
+    {
+      label: `Sun in ${signName}`,
+      href: `/grimoire/placements/sun-in-${sign}`,
+    },
+    {
+      label: `Mercury in ${signName}`,
+      href: `/grimoire/placements/mercury-in-${sign}`,
+    },
+    {
+      label: `Venus in ${signName}`,
+      href: `/grimoire/placements/venus-in-${sign}`,
+    },
+    { label: 'All Placements', href: '/grimoire/placements' },
+  ];
+  sections.push({ title: 'Placements', links: placements });
+
+  // Tools
+  const tools: CosmicConnectionLink[] = [
+    { label: 'Calculate Birth Chart', href: '/birth-chart' },
+    { label: 'Daily Horoscope', href: '/horoscope' },
+    { label: 'Compatibility', href: '/grimoire/compatibility' },
+  ];
+  sections.push({ title: 'Tools', links: tools });
+
+  return sections;
+}
+
+function getCompatibilityConnections(
+  matchSlug: string,
+): CosmicConnectionSection[] {
+  const match = matchSlug.match(/^([a-z]+)-and-([a-z]+)$/);
+  const sign1 = match?.[1] || '';
+  const sign2 = match?.[2] || '';
+  const sign1Name = sign1.charAt(0).toUpperCase() + sign1.slice(1);
+  const sign2Name = sign2.charAt(0).toUpperCase() + sign2.slice(1);
+
+  const sections: CosmicConnectionSection[] = [];
+
+  // Individual signs
+  const signs: CosmicConnectionLink[] = [
+    { label: `${sign1Name} Sign`, href: `/grimoire/zodiac/${sign1}` },
+    { label: `${sign2Name} Sign`, href: `/grimoire/zodiac/${sign2}` },
+    { label: 'All Zodiac Signs', href: '/grimoire/zodiac' },
+    { label: 'All Compatibility', href: '/grimoire/compatibility' },
+  ];
+  sections.push({ title: 'Zodiac Signs', links: signs });
+
+  // Synastry
+  const synastry: CosmicConnectionLink[] = [
+    { label: 'Synastry Calculator', href: '/grimoire/synastry/generate' },
+    { label: 'Synastry Aspects', href: '/grimoire/synastry/aspects' },
+    {
+      label: 'Venus-Mars Aspects',
+      href: '/grimoire/synastry/aspects/venus-conjunct-mars',
+    },
+  ];
+  sections.push({ title: 'Synastry', links: synastry });
+
+  // Deepen understanding
+  const deepen: CosmicConnectionLink[] = [
+    {
+      label: 'Birth Chart Guide',
+      href: '/grimoire/guides/birth-chart-complete-guide',
+    },
+    { label: 'Calculate Birth Chart', href: '/birth-chart' },
+    { label: 'Daily Horoscope', href: '/horoscope' },
+  ];
+  sections.push({ title: 'Learn More', links: deepen });
+
+  return sections;
+}
+
 function getAngelNumberConnections(
   numberSlug: string,
 ): CosmicConnectionSection[] {
@@ -778,6 +873,10 @@ export function getCosmicConnections(
       return getWitchConnections();
     case 'angel-number':
       return getAngelNumberConnections(slugOrKey);
+    case 'rising':
+      return getRisingConnections(slugOrKey);
+    case 'compatibility':
+      return getCompatibilityConnections(slugOrKey);
     default:
       return [];
   }
