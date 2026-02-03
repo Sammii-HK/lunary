@@ -3,6 +3,9 @@ import { NextRequest, NextResponse } from 'next/server';
 /**
  * Export analytics data as CSV or JSON
  * GET /api/admin/analytics/export?start_date=YYYY-MM-DD&end_date=YYYY-MM-DD&format=csv|json
+ *
+ * This endpoint aggregates data from multiple analytics endpoints to provide
+ * a consistent export that matches dashboard metrics.
  */
 export async function GET(request: NextRequest) {
   try {
@@ -21,7 +24,7 @@ export async function GET(request: NextRequest) {
     const baseUrl = request.nextUrl.origin;
     const queryParams = `start_date=${startDate}&end_date=${endDate}`;
 
-    // Fetch data from multiple endpoints in parallel
+    // Fetch data from the same endpoints as the dashboard
     const [
       dauWauMauRes,
       conversionsRes,
@@ -29,6 +32,7 @@ export async function GET(request: NextRequest) {
       userGrowthRes,
       cohortsRes,
       successMetricsRes,
+      subscriptionLifecycleRes,
     ] = await Promise.all([
       fetch(`${baseUrl}/api/admin/analytics/dau-wau-mau?${queryParams}`),
       fetch(`${baseUrl}/api/admin/analytics/conversions?${queryParams}`),
@@ -38,6 +42,9 @@ export async function GET(request: NextRequest) {
         `${baseUrl}/api/admin/analytics/cohorts?${queryParams}&type=week&weeks=12`,
       ),
       fetch(`${baseUrl}/api/admin/analytics/success-metrics?${queryParams}`),
+      fetch(
+        `${baseUrl}/api/admin/analytics/subscription-lifecycle?${queryParams}`,
+      ),
     ]);
 
     const dauWauMau = dauWauMauRes.ok ? await dauWauMauRes.json() : null;
@@ -48,8 +55,11 @@ export async function GET(request: NextRequest) {
     const successMetrics = successMetricsRes.ok
       ? await successMetricsRes.json()
       : null;
+    const subscriptionLifecycle = subscriptionLifecycleRes.ok
+      ? await subscriptionLifecycleRes.json()
+      : null;
 
-    // Build the export data structure
+    // Build the export data structure - matches dashboard exactly
     const exportData = {
       metadata: {
         exported_at: new Date().toISOString(),
@@ -58,58 +68,81 @@ export async function GET(request: NextRequest) {
           end: endDate,
         },
       },
-      summary: {
-        // Active users
+      engagement: {
+        // DAU/WAU/MAU from engagement events (matches dashboard "Engagement" metrics)
         dau: dauWauMau?.dau ?? null,
         wau: dauWauMau?.wau ?? null,
         mau: dauWauMau?.mau ?? null,
-        app_opened_dau: dauWauMau?.app_opened_dau ?? null,
-        app_opened_wau: dauWauMau?.app_opened_wau ?? null,
-        app_opened_mau: dauWauMau?.app_opened_mau ?? null,
-        signed_in_product_dau: dauWauMau?.signed_in_product_dau ?? null,
-        signed_in_product_wau: dauWauMau?.signed_in_product_wau ?? null,
-        signed_in_product_mau: dauWauMau?.signed_in_product_mau ?? null,
-
-        // Stickiness
+        // Stickiness ratios
         stickiness_dau_mau: dauWauMau?.stickiness_dau_mau ?? null,
         stickiness_wau_mau: dauWauMau?.stickiness_wau_mau ?? null,
-
-        // Retention
-        retention_day_1: dauWauMau?.retention?.day_1 ?? null,
-        retention_day_7: dauWauMau?.retention?.day_7 ?? null,
-        retention_day_30: dauWauMau?.retention?.day_30 ?? null,
-        churn_rate: dauWauMau?.churn_rate ?? null,
-
-        // Returning users
+        stickiness_dau_wau: dauWauMau?.stickiness_dau_wau ?? null,
+        // Returning users (now uses same events as DAU/WAU/MAU)
         returning_dau: dauWauMau?.returning_dau ?? null,
         returning_wau: dauWauMau?.returning_wau ?? null,
         returning_mau: dauWauMau?.returning_mau ?? null,
-
-        // Conversions
+        // App opened metrics (separate tracking)
+        app_opened_dau: dauWauMau?.app_opened_dau ?? null,
+        app_opened_wau: dauWauMau?.app_opened_wau ?? null,
+        app_opened_mau: dauWauMau?.app_opened_mau ?? null,
+        // Product metrics (signed-in users only)
+        signed_in_product_dau: dauWauMau?.signed_in_product_dau ?? null,
+        signed_in_product_wau: dauWauMau?.signed_in_product_wau ?? null,
+        signed_in_product_mau: dauWauMau?.signed_in_product_mau ?? null,
+        // Grimoire
+        grimoire_mau: dauWauMau?.content_mau_grimoire ?? null,
+        grimoire_only_mau: dauWauMau?.grimoire_only_mau ?? null,
+      },
+      retention: {
+        day_1: dauWauMau?.retention?.day_1 ?? null,
+        day_7: dauWauMau?.retention?.day_7 ?? null,
+        day_30: dauWauMau?.retention?.day_30 ?? null,
+        churn_rate: dauWauMau?.churn_rate ?? null,
+      },
+      conversions: {
+        // Cohort-based conversion metrics
         total_conversions: conversions?.total_conversions ?? null,
         conversion_rate: conversions?.conversion_rate ?? null,
         trial_conversion_rate: conversions?.trial_conversion_rate ?? null,
         avg_days_to_convert: conversions?.avg_days_to_convert ?? null,
-
-        // Activation
+        avg_days_to_trial: conversions?.avg_days_to_trial ?? null,
+        avg_days_to_paid: conversions?.avg_days_to_paid ?? null,
+        // Funnel
+        funnel_free_users: conversions?.funnel?.free_users ?? null,
+        funnel_trial_users: conversions?.funnel?.trial_users ?? null,
+        funnel_paid_users: conversions?.funnel?.paid_users ?? null,
+      },
+      activation: {
         activation_rate: activation?.activationRate ?? null,
         total_signups: activation?.totalSignups ?? null,
         activated_users: activation?.activatedUsers ?? null,
-
-        // Growth
+      },
+      growth: {
         growth_rate: userGrowth?.growthRate ?? null,
-        new_signups: userGrowth?.totalSignups ?? null,
-
-        // Revenue
+        total_signups: userGrowth?.totalSignups ?? null,
+      },
+      revenue: {
         mrr: successMetrics?.monthly_recurring_revenue?.value ?? null,
         arr: successMetrics?.annual_recurring_revenue?.value ?? null,
-        active_subscribers:
+        arpu: successMetrics?.arpu?.value ?? null,
+        paying_customers: successMetrics?.paying_customers?.value ?? null,
+      },
+      subscriptions: {
+        active_subscriptions:
+          successMetrics?.active_subscriptions?.value ?? null,
+        paid_subscriptions:
           successMetrics?.active_subscriptions?.paid_subscriptions ?? null,
-
-        // Totals
+        free_users: successMetrics?.active_subscriptions?.free_users ?? null,
+        total_registered_users:
+          successMetrics?.active_subscriptions?.total_registered_users ?? null,
+        // Lifecycle
+        new_trials: subscriptionLifecycle?.new_trials ?? null,
+        trial_conversions: subscriptionLifecycle?.trial_conversions ?? null,
+        cancellations: subscriptionLifecycle?.cancellations ?? null,
+        net_change: subscriptionLifecycle?.net_change ?? null,
+      },
+      totals: {
         total_accounts: dauWauMau?.total_accounts ?? null,
-        grimoire_mau: dauWauMau?.content_mau_grimoire ?? null,
-        grimoire_only_mau: dauWauMau?.grimoire_only_mau ?? null,
       },
       trends: dauWauMau?.trends ?? [],
       cohorts: cohorts?.cohorts ?? [],
@@ -117,23 +150,72 @@ export async function GET(request: NextRequest) {
     };
 
     if (format === 'csv') {
-      // Convert summary to CSV
-      const summaryRows = Object.entries(exportData.summary).map(
-        ([key, value]) => ({
-          metric: key,
+      // Helper to flatten section into rows
+      const sectionToRows = (section: Record<string, unknown>, prefix = '') => {
+        return Object.entries(section).map(([key, value]) => ({
+          metric: prefix ? `${prefix}_${key}` : key,
           value: value ?? 'N/A',
-        }),
-      );
+        }));
+      };
 
       // Build CSV content
       let csvContent = 'Analytics Export\n';
       csvContent += `Date Range,${startDate} to ${endDate}\n`;
       csvContent += `Exported At,${exportData.metadata.exported_at}\n\n`;
 
-      // Summary section
-      csvContent += 'SUMMARY METRICS\n';
+      // Engagement section
+      csvContent += 'ENGAGEMENT METRICS\n';
       csvContent += 'Metric,Value\n';
-      summaryRows.forEach((row) => {
+      sectionToRows(exportData.engagement).forEach((row) => {
+        csvContent += `${row.metric},${row.value}\n`;
+      });
+
+      // Retention section
+      csvContent += '\nRETENTION METRICS\n';
+      csvContent += 'Metric,Value\n';
+      sectionToRows(exportData.retention).forEach((row) => {
+        csvContent += `${row.metric},${row.value}\n`;
+      });
+
+      // Conversions section
+      csvContent += '\nCONVERSION METRICS\n';
+      csvContent += 'Metric,Value\n';
+      sectionToRows(exportData.conversions).forEach((row) => {
+        csvContent += `${row.metric},${row.value}\n`;
+      });
+
+      // Activation section
+      csvContent += '\nACTIVATION METRICS\n';
+      csvContent += 'Metric,Value\n';
+      sectionToRows(exportData.activation).forEach((row) => {
+        csvContent += `${row.metric},${row.value}\n`;
+      });
+
+      // Growth section
+      csvContent += '\nGROWTH METRICS\n';
+      csvContent += 'Metric,Value\n';
+      sectionToRows(exportData.growth).forEach((row) => {
+        csvContent += `${row.metric},${row.value}\n`;
+      });
+
+      // Revenue section
+      csvContent += '\nREVENUE METRICS\n';
+      csvContent += 'Metric,Value\n';
+      sectionToRows(exportData.revenue).forEach((row) => {
+        csvContent += `${row.metric},${row.value}\n`;
+      });
+
+      // Subscriptions section
+      csvContent += '\nSUBSCRIPTION METRICS\n';
+      csvContent += 'Metric,Value\n';
+      sectionToRows(exportData.subscriptions).forEach((row) => {
+        csvContent += `${row.metric},${row.value}\n`;
+      });
+
+      // Totals
+      csvContent += '\nTOTALS\n';
+      csvContent += 'Metric,Value\n';
+      sectionToRows(exportData.totals).forEach((row) => {
         csvContent += `${row.metric},${row.value}\n`;
       });
 
