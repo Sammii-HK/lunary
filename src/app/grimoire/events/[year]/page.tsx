@@ -27,16 +27,16 @@ export async function generateMetadata({
 
   // Year-specific highlights for SEO
   const yearHighlights: Record<number, string> = {
-    2027: 'Saturn Enters Taurus, ',
-    2028: 'Uranus Enters Gemini, ',
-    2029: 'Saturn in Taurus, ',
-    2030: 'Neptune Enters Aries, ',
+    2027: 'Saturn Enters Taurus',
+    2028: 'Uranus Enters Gemini',
+    2029: 'Saturn in Taurus',
+    2030: 'Neptune Enters Aries',
   };
   const highlight = yearHighlights[yearNum] || '';
 
   return {
-    title: `${year} Astrology Events: ${highlight}Eclipses & Retrogrades | Lunary`,
-    description: `Your complete ${year} cosmic calendar. ${highlight ? highlight.trim() + ', all ' : 'All '}Mercury retrogrades, eclipses, and major transits. Plan ahead for transformational shifts.`,
+    title: `${year} Astrology Events: ${highlight ? highlight + ', ' : ''}Eclipses & Retrogrades | Lunary`,
+    description: `Your complete ${year} cosmic calendar. ${highlight ? highlight + ', all ' : 'All '}Mercury retrogrades, eclipses, and major transits. Plan ahead for transformational shifts.`,
     keywords: [
       `${year} astrology`,
       `${year} mercury retrograde`,
@@ -47,7 +47,7 @@ export async function generateMetadata({
       `major astrological transits ${year}`,
     ],
     openGraph: {
-      title: `${year} Astrology Events: ${highlight}Eclipses & Retrogrades | Lunary`,
+      title: `${year} Astrology Events: ${highlight ? highlight + ', ' : ''}Eclipses & Retrogrades | Lunary`,
       description: `Your complete guide to cosmic events in ${year}. Plan ahead for transformational shifts.`,
       url: `https://lunary.app/grimoire/events/${year}`,
       siteName: 'Lunary',
