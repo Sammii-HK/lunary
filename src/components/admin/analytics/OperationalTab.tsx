@@ -56,6 +56,7 @@ interface OperationalTabProps {
     activationTotalSignups: number;
     activationActivatedUsers: number;
     ctaHubs: any[];
+    ctaLocationMetrics: any[];
     lifecycleStateEntries: [string, number][];
     conversionStages: Array<{ label: string; value: number }>;
     conversionDropOff: any[];
@@ -118,6 +119,7 @@ export function OperationalTab({ data, computed }: OperationalTabProps) {
     activationTotalSignups,
     activationActivatedUsers,
     ctaHubs,
+    ctaLocationMetrics,
     lifecycleStateEntries,
     conversionStages,
     conversionDropOff,
@@ -441,6 +443,71 @@ export function OperationalTab({ data, computed }: OperationalTabProps) {
               ]}
               data={ctaHubs}
               emptyMessage='No CTA conversion data for this range.'
+            />
+          </CardContent>
+        </Card>
+      </section>
+
+      {/* CTA Location Breakdown - Inline vs Full nudge */}
+      <section className='space-y-3'>
+        <div>
+          <h2 className='text-sm font-medium text-zinc-200'>
+            CTA Performance by Location
+          </h2>
+          <p className='text-xs text-zinc-500'>
+            Compare inline (after TL;DR) vs full CTA (bottom of page)
+            performance.
+          </p>
+        </div>
+        <Card className='border-zinc-800/30 bg-zinc-900/10'>
+          <CardHeader>
+            <CardTitle className='text-base font-medium'>
+              Inline vs Full CTA comparison
+            </CardTitle>
+            <CardDescription className='text-xs text-zinc-400'>
+              Track which CTA position converts better. CTR = clicks /
+              impressions. Conversion = signups / clickers (7d window).
+            </CardDescription>
+          </CardHeader>
+          <CardContent className='overflow-x-auto'>
+            <MetricTable
+              columns={[
+                { label: 'Location', key: 'location_label', type: 'text' },
+                {
+                  label: 'Impressions',
+                  key: 'total_impressions',
+                  type: 'number',
+                  align: 'right',
+                },
+                {
+                  label: 'Clicks',
+                  key: 'total_clicks',
+                  type: 'number',
+                  align: 'right',
+                },
+                {
+                  label: 'CTR %',
+                  key: 'click_through_rate',
+                  type: 'percentage',
+                  align: 'right',
+                  decimals: 2,
+                },
+                {
+                  label: 'Signups (7d)',
+                  key: 'signups_7d',
+                  type: 'number',
+                  align: 'right',
+                },
+                {
+                  label: 'Conversion %',
+                  key: 'conversion_rate',
+                  type: 'percentage',
+                  align: 'right',
+                  decimals: 2,
+                },
+              ]}
+              data={ctaLocationMetrics}
+              emptyMessage='No CTA location data for this range. Data will appear after the inline nudge is deployed.'
             />
           </CardContent>
         </Card>

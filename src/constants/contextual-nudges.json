@@ -36,14 +36,16 @@
         "subline": "Sign in to view your full birth chart with planets, houses, and aspects.",
         "buttonLabel": "View my chart",
         "href": "/auth?signup=true",
-        "action": "authOrLink"
+        "action": "authOrLink",
+        "inlineCopy": "See how this shows up in your chart"
       },
       {
         "headline": "Connect this to your placements",
         "subline": "Create a free account to see your natal chart and how this relates to you.",
         "buttonLabel": "Get my free chart",
         "href": "/auth?signup=true",
-        "action": "authOrLink"
+        "action": "authOrLink",
+        "inlineCopy": "See how this shows up in your chart"
       }
     ],
 
@@ -53,7 +55,8 @@
         "subline": "Create a free account to see your complete natal chart with all planets and houses.",
         "buttonLabel": "Get my free chart",
         "href": "/auth?signup=true",
-        "action": "authOrLink"
+        "action": "authOrLink",
+        "inlineCopy": "Go beyond your sun sign with your full chart"
       }
     ],
 
@@ -63,7 +66,8 @@
         "subline": "Sign in to see where this planet sits in your natal chart.",
         "buttonLabel": "View my chart",
         "href": "/auth?signup=true",
-        "action": "authOrLink"
+        "action": "authOrLink",
+        "inlineCopy": "See where this planet sits in your chart"
       }
     ],
 
@@ -73,7 +77,8 @@
         "subline": "Sign in to see which planets sit in this house in your chart.",
         "buttonLabel": "View my chart",
         "href": "/auth?signup=true",
-        "action": "authOrLink"
+        "action": "authOrLink",
+        "inlineCopy": "See which planets occupy this house for you"
       }
     ],
 
@@ -83,7 +88,8 @@
         "subline": "Sign in to view all the aspects in your birth chart.",
         "buttonLabel": "View my chart",
         "href": "/auth?signup=true",
-        "action": "authOrLink"
+        "action": "authOrLink",
+        "inlineCopy": "View this aspect in your birth chart"
       }
     ],
 
@@ -93,7 +99,8 @@
         "subline": "Sign in to view today's planetary positions and your birth chart.",
         "buttonLabel": "View transits & my chart",
         "href": "/auth?signup=true",
-        "action": "authOrLink"
+        "action": "authOrLink",
+        "inlineCopy": "See how today's planets touch your chart"
       }
     ],
 
@@ -103,7 +110,8 @@
         "subline": "Sign in to see your complete natal chart with all planets and houses.",
         "buttonLabel": "Get my free chart",
         "href": "/auth?signup=true",
-        "action": "authOrLink"
+        "action": "authOrLink",
+        "inlineCopy": "Get your full chart, not just your sun sign"
       }
     ],
 
@@ -113,7 +121,8 @@
         "subline": "Sign in to follow moon phases and see your natal moon placement.",
         "buttonLabel": "View my chart",
         "href": "/auth?signup=true",
-        "action": "authOrLink"
+        "action": "authOrLink",
+        "inlineCopy": "Track the moon through your natal placements"
       }
     ],
 
@@ -123,7 +132,8 @@
         "subline": "Sign in to try tarot spreads and get interpretations.",
         "buttonLabel": "Try a reading",
         "href": "/auth?signup=true",
-        "action": "authOrLink"
+        "action": "authOrLink",
+        "inlineCopy": "Pull a spread and get your interpretation"
       }
     ],
 
@@ -133,7 +143,8 @@
         "subline": "Sign in to try these spreads and get interpretations.",
         "buttonLabel": "Try a spread",
         "href": "/auth?signup=true",
-        "action": "authOrLink"
+        "action": "authOrLink",
+        "inlineCopy": "Try these spreads with your own reading"
       }
     ],
 
@@ -143,7 +154,8 @@
         "subline": "Sign in to pull this spread and get an interpretation.",
         "buttonLabel": "Pull this spread",
         "href": "/auth?signup=true",
-        "action": "authOrLink"
+        "action": "authOrLink",
+        "inlineCopy": "Pull this spread for yourself"
       }
     ],
 
@@ -153,7 +165,8 @@
         "subline": "Sign in to see your Personal Day number and birth chart.",
         "buttonLabel": "View my chart",
         "href": "/auth?signup=true",
-        "action": "authOrLink"
+        "action": "authOrLink",
+        "inlineCopy": "See your Personal Day number and chart"
       }
     ],
 
@@ -163,7 +176,8 @@
         "subline": "Sign in to connect repeating times to your current season and chart context.",
         "buttonLabel": "Make it personal",
         "href": "/auth?signup=true",
-        "action": "authOrLink"
+        "action": "authOrLink",
+        "inlineCopy": "Connect this time to your current cycle"
       }
     ],
 
@@ -173,7 +187,8 @@
         "subline": "Sign in to interpret angel numbers through your cycle and full birth chart context.",
         "buttonLabel": "Personalise this sign",
         "href": "/auth?signup=true",
-        "action": "authOrLink"
+        "action": "authOrLink",
+        "inlineCopy": "Interpret this through your chart context"
       }
     ],
 
@@ -183,7 +198,8 @@
         "subline": "Sign in to see your birth chart and get crystal recommendations for today.",
         "buttonLabel": "View recommendations",
         "href": "/auth?signup=true",
-        "action": "authOrLink"
+        "action": "authOrLink",
+        "inlineCopy": "Get crystal recommendations for your chart"
       }
     ],
 
@@ -193,7 +209,8 @@
         "subline": "Sign in to align spells with lunar timing and your chart so you are not guessing.",
         "buttonLabel": "Find the right timing",
         "href": "/auth?signup=true",
-        "action": "authOrLink"
+        "action": "authOrLink",
+        "inlineCopy": "Align this ritual with your lunar timing"
       }
     ],
 
@@ -203,7 +220,8 @@
         "subline": "Sign in to connect correspondences to lunar cycles and your chart context.",
         "buttonLabel": "Personalise my practice",
         "href": "/auth?signup=true",
-        "action": "authOrLink"
+        "action": "authOrLink",
+        "inlineCopy": "Ground your practice in personal timing"
       }
     ],
 
@@ -213,7 +231,8 @@
         "subline": "Sign in to choose practices that match your current cycle and chart context.",
         "buttonLabel": "Find my next step",
         "href": "/auth?signup=true",
-        "action": "authOrLink"
+        "action": "authOrLink",
+        "inlineCopy": "Find what fits your current season"
       }
     ],
 
@@ -223,7 +242,8 @@
         "subline": "Sign in to view today's transits and your birth chart.",
         "buttonLabel": "View my chart",
         "href": "/auth?signup=true",
-        "action": "authOrLink"
+        "action": "authOrLink",
+        "inlineCopy": "See how this timing affects your chart"
       }
     ],
 
@@ -233,7 +253,8 @@
         "subline": "Sign in to view your full natal chart with all placements.",
         "buttonLabel": "View my chart",
         "href": "/auth?signup=true",
-        "action": "authOrLink"
+        "action": "authOrLink",
+        "inlineCopy": "View your complete natal chart"
       }
     ],
 
@@ -243,7 +264,8 @@
         "subline": "Sign in to link this topic across systems through your chart context.",
         "buttonLabel": "See the pattern",
         "href": "/auth?signup=true",
-        "action": "authOrLink"
+        "action": "authOrLink",
+        "inlineCopy": "Connect these symbols through your chart"
       }
     ],
 
@@ -253,7 +275,8 @@
         "subline": "Sign in once, then Lunary can interpret every topic through your full birth chart.",
         "buttonLabel": "Start personalised",
         "href": "/auth?signup=true",
-        "action": "authOrLink"
+        "action": "authOrLink",
+        "inlineCopy": "Let Lunary interpret this through your chart"
       }
     ],
 
@@ -263,7 +286,8 @@
         "subline": "Sign in to revisit this with timing and chart context, not as a one-off meaning.",
         "buttonLabel": "Start tracking",
         "href": "/auth?signup=true",
-        "action": "authOrLink"
+        "action": "authOrLink",
+        "inlineCopy": "Track this pattern over time"
       }
     ],
 
@@ -273,7 +297,8 @@
         "subline": "Sign in to explore how this pattern shows up through your placements and timing.",
         "buttonLabel": "Personalise this archetype",
         "href": "/auth?signup=true",
-        "action": "authOrLink"
+        "action": "authOrLink",
+        "inlineCopy": "See this archetype in your placements"
       }
     ],
 
@@ -283,7 +308,8 @@
         "subline": "Sign in to see your birth chart and explore how this relates to you.",
         "buttonLabel": "View my chart",
         "href": "/auth?signup=true",
-        "action": "authOrLink"
+        "action": "authOrLink",
+        "inlineCopy": "Connect this to your birth chart"
       }
     ]
   }
