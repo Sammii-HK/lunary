@@ -387,6 +387,103 @@ export function SnapshotTab({
         </StatSection>
       </section>
 
+      {/* Engagement Health */}
+      <section className='space-y-3'>
+        <StatSection
+          eyebrow='Engagement Health'
+          title='Engagement events & rates'
+          description='Total engagement events and events per signed-in user.'
+        >
+          <div className='grid gap-4 md:grid-cols-2 lg:grid-cols-4'>
+            <MiniStat
+              label='Engaged DAU'
+              value={engagedDau}
+              icon={<Activity className='h-5 w-5 text-lunary-primary-300' />}
+            />
+            <MiniStat
+              label='Engaged WAU'
+              value={engagedWau}
+              icon={<Activity className='h-5 w-5 text-lunary-success-300' />}
+            />
+            <MiniStat
+              label='Engaged MAU'
+              value={engagedMau}
+              icon={<Activity className='h-5 w-5 text-lunary-secondary-300' />}
+            />
+            <MiniStat
+              label='Returning Users'
+              value={engagementOverview?.returning_users_range ?? 0}
+              icon={<Activity className='h-5 w-5 text-lunary-accent-300' />}
+            />
+          </div>
+          {engagedMatchesApp && (
+            <p className='text-xs text-zinc-500'>
+              Engaged Users currently matches App opens for this window. Check
+              key-action event set.
+            </p>
+          )}
+          <div className='grid gap-4 md:grid-cols-2 lg:grid-cols-4'>
+            <MiniStat
+              label='Engaged Rate (DAU)'
+              value={activity?.engaged_rate_dau?.toFixed(1) ?? '—'}
+              icon={<Sparkles className='h-5 w-5 text-lunary-success-300' />}
+            />
+            <MiniStat
+              label='Engaged Rate (WAU)'
+              value={activity?.engaged_rate_wau?.toFixed(1) ?? '—'}
+              icon={<Sparkles className='h-5 w-5 text-lunary-secondary-300' />}
+            />
+            <MiniStat
+              label='Engaged Rate (MAU)'
+              value={activity?.engaged_rate_mau?.toFixed(1) ?? '—'}
+              icon={<Sparkles className='h-5 w-5 text-lunary-accent-300' />}
+            />
+            <MiniStat
+              label='Avg Active Days'
+              value={
+                typeof engagementOverview?.avg_active_days_per_user === 'number'
+                  ? engagementOverview.avg_active_days_per_user.toFixed(2)
+                  : '—'
+              }
+              icon={<Target className='h-5 w-5 text-lunary-primary-300' />}
+            />
+          </div>
+        </StatSection>
+      </section>
+
+      {/* Retention & Return */}
+      <section className='space-y-3'>
+        <StatSection
+          eyebrow='Retention & return'
+          title='Returning canonical users'
+          description='D1 + WAU/MAU overlap inspect deduped identity recurrence.'
+          footerText='Returning Users (range) need 2+ distinct active days in the window. WAU/MAU overlap compares the current period to the prior window.'
+        >
+          <div className='grid gap-4 md:grid-cols-2 lg:grid-cols-4'>
+            <MiniStat
+              label='Returning DAU (D1)'
+              value={engagementOverview?.returning_dau ?? 0}
+              icon={<Activity className='h-5 w-5 text-lunary-secondary-300' />}
+            />
+            <MiniStat
+              label='Returning WAU overlap'
+              value={engagementOverview?.returning_wau ?? 0}
+              icon={<Activity className='h-5 w-5 text-lunary-success-300' />}
+            />
+            <MiniStat
+              label='Returning MAU overlap'
+              value={engagementOverview?.returning_mau ?? 0}
+              icon={<Activity className='h-5 w-5 text-lunary-primary-300' />}
+            />
+            <MiniStat
+              label='Returning Users (range)'
+              value={engagementOverview?.returning_users_range ?? 0}
+              icon={<Target className='h-5 w-5 text-lunary-accent-300' />}
+            />
+          </div>
+        </StatSection>
+      </section>
+
       {/* App Active Users */}
       <section className='space-y-3'>
         <StatSection
@@ -424,28 +521,6 @@ export function SnapshotTab({
               />
             )}
           </div>
-          <div className='grid gap-4 md:grid-cols-2 lg:grid-cols-4'>
-            <MiniStat
-              label={`App Daily Stickiness (DAU/WAU) [${appDau}/${appWau}]`}
-              value={formatPercent(appWau > 0 ? (appDau / appWau) * 100 : 0, 2)}
-              icon={<Sparkles className='h-5 w-5 text-lunary-success-300' />}
-            />
-            <MiniStat
-              label={`App Weekly Stickiness (WAU/MAU) [${appWau}/${appMau}]`}
-              value={formatPercent(activity?.app_opened_stickiness_wau_mau, 2)}
-              icon={<Sparkles className='h-5 w-5 text-lunary-secondary-300' />}
-            />
-            <MiniStat
-              label='Returning DAU'
-              value={activity?.returning_dau ?? 0}
-              icon={<Activity className='h-5 w-5 text-lunary-accent-300' />}
-            />
-            <MiniStat
-              label='Returning MAU'
-              value={activity?.returning_mau ?? 0}
-              icon={<Activity className='h-5 w-5 text-lunary-primary-300' />}
-            />
-          </div>
           {appVisits !== null && (
             <div className='grid gap-4 md:grid-cols-2'>
               <MiniStat
@@ -466,103 +541,6 @@ export function SnapshotTab({
               )}
             </div>
           )}
-        </StatSection>
-      </section>
-
-      {/* Engagement Health */}
-      <section className='space-y-3'>
-        <StatSection
-          eyebrow='Engagement Health'
-          title='Engaged users & stickiness'
-          description='Key actions vs. returns inside the same canonical window.'
-        >
-          <div className='grid gap-4 md:grid-cols-2 lg:grid-cols-4'>
-            <MiniStat
-              label='Engaged DAU'
-              value={engagedDau}
-              icon={<Activity className='h-5 w-5 text-lunary-primary-300' />}
-            />
-            <MiniStat
-              label='Engaged WAU'
-              value={engagedWau}
-              icon={<Activity className='h-5 w-5 text-lunary-success-300' />}
-            />
-            <MiniStat
-              label='Engaged MAU'
-              value={engagedMau}
-              icon={<Activity className='h-5 w-5 text-lunary-secondary-300' />}
-            />
-            <MiniStat
-              label='Engaged Rate (MAU)'
-              value={formatPercent(engagementRate ?? undefined, 1)}
-              icon={<Sparkles className='h-5 w-5 text-lunary-accent-300' />}
-            />
-          </div>
-          {engagedMatchesApp && (
-            <p className='text-xs text-zinc-500'>
-              Engaged Users currently matches App opens for this window. Check
-              key-action event set.
-            </p>
-          )}
-          <div className='grid gap-4 md:grid-cols-2 lg:grid-cols-4'>
-            <MiniStat
-              label={`Daily Stickiness (DAU/WAU) [${engagedDau}/${engagedWau}]`}
-              value={formatPercent(activity?.stickiness_dau_wau, 2)}
-              icon={<Sparkles className='h-5 w-5 text-lunary-success-300' />}
-            />
-            <MiniStat
-              label={`Weekly Stickiness (WAU/MAU) [${engagedWau}/${engagedMau}]`}
-              value={formatPercent(activity?.stickiness_wau_mau, 2)}
-              icon={<Sparkles className='h-5 w-5 text-lunary-secondary-300' />}
-            />
-            <MiniStat
-              label='Avg active days'
-              value={
-                typeof engagementOverview?.avg_active_days_per_user === 'number'
-                  ? engagementOverview.avg_active_days_per_user.toFixed(2)
-                  : '—'
-              }
-              icon={<Target className='h-5 w-5 text-lunary-primary-300' />}
-            />
-            <MiniStat
-              label='Returning Users (range)'
-              value={engagementOverview?.returning_users_range ?? 0}
-              icon={<Activity className='h-5 w-5 text-lunary-accent-300' />}
-            />
-          </div>
-        </StatSection>
-      </section>
-
-      {/* Retention & Return */}
-      <section className='space-y-3'>
-        <StatSection
-          eyebrow='Retention & return'
-          title='Returning canonical users'
-          description='D1 + WAU/MAU overlap inspect deduped identity recurrence.'
-          footerText='Returning Users (range) need 2+ distinct active days in the window. WAU/MAU overlap compares the current period to the prior window.'
-        >
-          <div className='grid gap-4 md:grid-cols-2 lg:grid-cols-4'>
-            <MiniStat
-              label='Returning DAU (D1)'
-              value={engagementOverview?.returning_dau ?? 0}
-              icon={<Activity className='h-5 w-5 text-lunary-secondary-300' />}
-            />
-            <MiniStat
-              label='Returning WAU overlap'
-              value={engagementOverview?.returning_wau ?? 0}
-              icon={<Activity className='h-5 w-5 text-lunary-success-300' />}
-            />
-            <MiniStat
-              label='Returning MAU overlap'
-              value={engagementOverview?.returning_mau ?? 0}
-              icon={<Activity className='h-5 w-5 text-lunary-primary-300' />}
-            />
-            <MiniStat
-              label='Returning Users (range)'
-              value={engagementOverview?.returning_users_range ?? 0}
-              icon={<Target className='h-5 w-5 text-lunary-accent-300' />}
-            />
-          </div>
         </StatSection>
       </section>
 
@@ -647,11 +625,16 @@ export function SnapshotTab({
           <CardContent className='space-y-4'>
             <div className='grid gap-4 md:grid-cols-2 lg:grid-cols-5'>
               <MiniStat
-                label='Grimoire Entry Rate'
+                label='Grimoire → App Rate'
                 value={
-                  typeof grimoireHealth?.grimoire_entry_rate === 'number'
-                    ? `${grimoireHealth.grimoire_entry_rate.toFixed(2)}%`
+                  typeof grimoireHealth?.grimoire_to_app_rate === 'number'
+                    ? `${grimoireHealth.grimoire_to_app_rate.toFixed(2)}%`
                     : '—'
+                }
+                subValue={
+                  grimoireHealth?.grimoire_visitors
+                    ? `${grimoireHealth.grimoire_to_app_users} of ${grimoireHealth.grimoire_visitors}`
+                    : undefined
                 }
                 icon={<Sparkles className='h-5 w-5 text-lunary-primary-300' />}
               />

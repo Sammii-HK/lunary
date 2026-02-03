@@ -614,13 +614,18 @@ export async function GET(request: NextRequest) {
       subscriptionStatus = 'active';
     }
 
+    // Use hardcoded baseUrl to prevent SSRF attacks
+    const baseUrl = process.env.VERCEL
+      ? 'https://lunary.app'
+      : 'http://localhost:3000';
+
     // Always check Stripe if we have customer ID (Stripe is source of truth)
     // This ensures we get correct plan even if database is stale
     if (customerId) {
       try {
         // Pass userId so get-subscription route can update database automatically
         const stripeResponse = await fetch(
-          `${request.nextUrl.origin}/api/stripe/get-subscription`,
+          `${baseUrl}/api/stripe/get-subscription`,
           {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },

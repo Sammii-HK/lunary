@@ -11,21 +11,35 @@ const ENGAGEMENT_EVENTS = [
   'grimoire_viewed',
   'tarot_drawn',
   'chart_viewed',
+  'birth_chart_viewed',
   'personalized_horoscope_viewed',
   'personalized_tarot_viewed',
   'astral_chat_used',
   'ritual_started',
   'horoscope_viewed',
+  'daily_dashboard_viewed',
+  'journal_entry_created',
+  'dream_entry_created',
+  'cosmic_pulse_opened',
 ];
 const APP_OPENED_EVENTS = ['app_opened'];
 
-// Product interaction events (exclude Grimoire)
+// Product interaction events - same as engagement events
+// The difference is Product requires signed-in users
 const PRODUCT_EVENTS = [
-  'daily_dashboard_viewed',
-  'chart_viewed',
+  'grimoire_viewed',
   'tarot_drawn',
+  'chart_viewed',
+  'birth_chart_viewed',
+  'personalized_horoscope_viewed',
+  'personalized_tarot_viewed',
   'astral_chat_used',
   'ritual_started',
+  'horoscope_viewed',
+  'daily_dashboard_viewed',
+  'journal_entry_created',
+  'dream_entry_created',
+  'cosmic_pulse_opened',
 ];
 const SITEWIDE_EVENTS = ['page_viewed'];
 const GRIMOIRE_EVENTS = ['grimoire_viewed'];
@@ -35,6 +49,26 @@ const AUDIT_THRESHOLD_PERCENT = 2;
 // or nesting sql fragments. Instead pass JS arrays as parameters and cast to text[].
 
 const formatDateKey = (date: Date) => date.toISOString().split('T')[0];
+
+// Count total events (not distinct users) in a window
+const countEventsInWindow = (
+  eventCountMap: Map<string, number>,
+  endDate: Date,
+  days: number,
+) => {
+  const start = new Date(endDate);
+  start.setUTCDate(start.getUTCDate() - (days - 1));
+  let total = 0;
+  for (
+    let d = new Date(start);
+    d <= endDate;
+    d.setUTCDate(d.getUTCDate() + 1)
+  ) {
+    const key = formatDateKey(d);
+    total += eventCountMap.get(key) || 0;
+  }
+  return total;
+};
 
 type IdentityRow = {
   date: unknown;
@@ -57,6 +91,18 @@ const canonicalIdentityFromRow = (
   identityLinks: Map<string, string>,
 ): { identity: string | null; signedIn: boolean } => {
   const userId = sanitizeIdentityValue(row.user_id);
+
+  // Check if user_id is actually an anonymous ID (stored with anon: prefix)
+  // This happens when events are tracked for anonymous users
+  if (userId && userId.startsWith('anon:')) {
+    const anonId = userId.slice(5); // Remove 'anon:' prefix
+    const linkedUserId = identityLinks.get(anonId);
+    if (linkedUserId) {
+      return { identity: `user:${linkedUserId}`, signedIn: true };
+    }
+    return { identity: `anon:${anonId}`, signedIn: false };
+  }
+
   if (userId) {
     return { identity: `user:${userId}`, signedIn: true };
   }
@@ -503,10 +549,47 @@ export async function GET(request: NextRequest) {
     );
 
     const activityMap = new Map<string, Set<string>>();
+    const activityEventCountMap = new Map<string, number>();
     activityRows.rows.forEach((row) => {
       addIdentityRow(activityMap, row, identityLinks);
+      // Also count total events per day (not distinct)
+      const dateKey =
+        typeof row.date === 'string'
+          ? row.date.split('T')[0]
+          : row.date instanceof Date
+            ? formatDateKey(row.date)
+            : '';
+      if (dateKey) {
+        activityEventCountMap.set(
+          dateKey,
+          (activityEventCountMap.get(dateKey) || 0) + 1,
+        );
+      }
     });
-    const engagementDau = countDistinctInWindow(activityMap, range.end, 1);
+    // Engagement = total events (not distinct users) - shows usage intensity
+    const engagementEventsDau = countEventsInWindow(
+      activityEventCountMap,
+      range.end,
+      1,
+    );
+    const engagementEventsWau = countEventsInWindow(
+      activityEventCountMap,
+      range.end,
+      7,
+    );
+    const engagementEventsMau = countEventsInWindow(
+      activityEventCountMap,
+      range.end,
+      30,
+    );
+    // Also keep distinct user counts for returning/stickiness calculations
+    const engagementUsersDau = countDistinctInWindow(activityMap, range.end, 1);
+    const engagementUsersWau = countDistinctInWindow(activityMap, range.end, 7);
+    const engagementUsersMau = countDistinctInWindow(
+      activityMap,
+      range.end,
+      30,
+    );
 
     const productMap = new Map<string, Set<string>>();
     productRows.rows.forEach((row) =>
@@ -539,13 +622,14 @@ export async function GET(request: NextRequest) {
     const endOfRangeDay = toUtcStartOfDay(range.end);
     const lookbackEnd = new Date(endOfRangeDay);
     lookbackEnd.setUTCDate(lookbackEnd.getUTCDate() - 1);
+    // Use activityMap (engagement events) for returning users to match DAU/WAU/MAU
     const earlierLookbackSet = gatherUsersBetween(
-      appOpenedMap,
+      activityMap,
       lookbackEnd,
       lookbackEnd,
     );
     const currentDaySet =
-      appOpenedMap.get(formatDateKey(endOfRangeDay)) ?? new Set<string>();
+      activityMap.get(formatDateKey(endOfRangeDay)) ?? new Set<string>();
     const returningDau = intersectionSize(currentDaySet, earlierLookbackSet);
 
     const currentWauStart = new Date(endOfRangeDay);
@@ -555,12 +639,12 @@ export async function GET(request: NextRequest) {
     const prevWauStart = new Date(prevWauEnd);
     prevWauStart.setUTCDate(prevWauStart.getUTCDate() - 6);
     const currentWauSet = gatherUsersBetween(
-      appOpenedMap,
+      activityMap,
       currentWauStart,
       endOfRangeDay,
     );
     const prevWauSet = gatherUsersBetween(
-      appOpenedMap,
+      activityMap,
       prevWauStart,
       prevWauEnd,
     );
@@ -573,12 +657,12 @@ export async function GET(request: NextRequest) {
     const prevMauStart = new Date(prevMauEnd);
     prevMauStart.setUTCDate(prevMauStart.getUTCDate() - 29);
     const currentMauSet = gatherUsersBetween(
-      appOpenedMap,
+      activityMap,
       currentMauStart,
       endOfRangeDay,
     );
     const prevMauSet = gatherUsersBetween(
-      appOpenedMap,
+      activityMap,
       prevMauStart,
       prevMauEnd,
     );
@@ -679,50 +763,61 @@ export async function GET(request: NextRequest) {
     const signedInProductWau = productWau;
     const signedInProductMau = productMau;
 
+    // Calculate grimoire-only MAU
+    // Grimoire-only = users who ONLY viewed grimoire content, no other app activity
+    // This includes anonymous users who only browse the grimoire (content-only visitors)
     const grimoireWindowStart = new Date(range.end);
     grimoireWindowStart.setUTCDate(grimoireWindowStart.getUTCDate() - 29);
-    const grimoireEventsResult = await sql`
-        SELECT DISTINCT user_id
-        FROM conversion_events
-        WHERE event_type = 'grimoire_viewed'
-        AND user_id IS NOT NULL
-        AND user_id NOT LIKE 'anon:%'
-        AND created_at >= ${formatTimestamp(grimoireWindowStart)}
-        AND created_at <= ${formatTimestamp(range.end)}
-        AND (user_email IS NULL OR (user_email NOT LIKE ${TEST_EMAIL_PATTERN} AND user_email != ${TEST_EMAIL_EXACT}))
-      `;
-    const productWindowResult = await sql.query(
-      `
-        SELECT DISTINCT user_id
-        FROM conversion_events
-        WHERE event_type = ANY($1::text[])
-          AND user_id IS NOT NULL
-          AND user_id NOT LIKE 'anon:%'
-          AND created_at >= $2
-          AND created_at <= $3
-          AND (user_email IS NULL OR (user_email NOT LIKE $4 AND user_email != $5))
-      `,
-      [
-        // Treat any app_opened as product engagement for the purpose of
-        // identifying Grimoire-only users (Grimoire-only means Grimoire without app engagement).
-        ['app_opened', ...PRODUCT_EVENTS],
-        formatTimestamp(grimoireWindowStart),
-        formatTimestamp(range.end),
-        TEST_EMAIL_PATTERN,
-        TEST_EMAIL_EXACT,
-      ],
-    );
 
-    const grimoireUsers = new Set(
-      grimoireEventsResult.rows.map((row) => String(row.user_id)),
-    );
-    const signedInProductUsers = new Set(
-      productWindowResult.rows.map((row) => String(row.user_id)),
-    );
-    const grimoireOnlyMauBase = grimoireUsers.size;
+    // Gather all grimoire viewers in MAU window (includes anonymous via grimoireMap)
+    const grimoireWindowUsers = new Set<string>();
+    for (
+      let d = new Date(grimoireWindowStart);
+      d <= range.end;
+      d.setUTCDate(d.getUTCDate() + 1)
+    ) {
+      const key = formatDateKey(d);
+      const users = grimoireMap.get(key);
+      if (users) {
+        users.forEach((id) => grimoireWindowUsers.add(id));
+      }
+    }
+
+    // Gather SIGNED-IN users with app_opened or product activity in MAU window
+    // Only signed-in users count as "engaged" - anonymous grimoire viewers who
+    // also have app_opened events are still considered "grimoire-only" because
+    // they haven't signed in or used authenticated product features
+    const signedInEngagedUsers = new Set<string>();
+    for (
+      let d = new Date(grimoireWindowStart);
+      d <= range.end;
+      d.setUTCDate(d.getUTCDate() + 1)
+    ) {
+      const key = formatDateKey(d);
+      // app_opened activity - only count signed-in users (user: prefix)
+      const appUsers = appOpenedMap.get(key);
+      if (appUsers) {
+        appUsers.forEach((id) => {
+          if (id.startsWith('user:')) {
+            signedInEngagedUsers.add(id);
+          }
+        });
+      }
+      // product activity (already signed-in users only via requireSignedIn)
+      const prodUsers = productMap.get(key);
+      if (prodUsers) {
+        prodUsers.forEach((id) => signedInEngagedUsers.add(id));
+      }
+    }
+
+    // Grimoire-only = grimoire viewers who are not signed-in engaged users
+    // This includes:
+    // - Anonymous users who only view grimoire (anon: prefix, not in signedInEngagedUsers)
+    // - Signed-in users who only view grimoire (user: prefix, no app_opened or product events)
+    const grimoireOnlyMauBase = grimoireWindowUsers.size;
     let grimoireOnlyMau = 0;
-    grimoireUsers.forEach((id) => {
-      if (!signedInProductUsers.has(id)) {
+    grimoireWindowUsers.forEach((id) => {
+      if (!signedInEngagedUsers.has(id)) {
         grimoireOnlyMau += 1;
       }
     });
@@ -860,16 +955,7 @@ export async function GET(request: NextRequest) {
         ? Number((100 - day30Retention).toFixed(2))
         : null;
 
-    // Calculate stickiness metrics using the same DAU/WAU/MAU values
-    // Stickiness = (smaller window users / larger window users) * 100
-    const trendDau = currentTrend.dau;
-    const trendWau = currentTrend.wau;
-    const trendMau = currentTrend.mau;
-    const stickinessDauMau = trendMau > 0 ? (trendDau / trendMau) * 100 : 0;
-    const stickinessWauMau = trendMau > 0 ? (trendWau / trendMau) * 100 : 0;
-    const stickinessDauWau = trendWau > 0 ? (trendDau / trendWau) * 100 : 0;
-
-    // Also calculate for app_opened metrics
+    // Calculate stickiness for app_opened metrics
     const appOpenedStickinessDauMau =
       appOpenedMau > 0 ? (appOpenedDau / appOpenedMau) * 100 : 0;
     const appOpenedStickinessWauMau =
@@ -891,14 +977,40 @@ export async function GET(request: NextRequest) {
         ? (signedInProductWau / signedInProductMau) * 100
         : 0;
 
+    // Engaged Rate = events per signed-in user (how much each user engages)
+    const engagedRateDau =
+      productDau > 0 ? engagementEventsDau / productDau : 0;
+    const engagedRateWau =
+      productWau > 0 ? engagementEventsWau / productWau : 0;
+    const engagedRateMau =
+      productMau > 0 ? engagementEventsMau / productMau : 0;
+
     const response = NextResponse.json({
-      dau: currentTrend.dau,
-      wau: currentTrend.wau,
-      mau: currentTrend.mau,
-      // Stickiness metrics using engagement events (consistent with DAU/WAU/MAU above)
-      stickiness_dau_mau: Number(stickinessDauMau.toFixed(2)),
-      stickiness_wau_mau: Number(stickinessWauMau.toFixed(2)),
-      stickiness_dau_wau: Number(stickinessDauWau.toFixed(2)),
+      // Engagement = total events (not distinct users) - shows usage intensity
+      dau: engagementEventsDau,
+      wau: engagementEventsWau,
+      mau: engagementEventsMau,
+      // Also expose distinct user counts
+      engaged_users_dau: engagementUsersDau,
+      engaged_users_wau: engagementUsersWau,
+      engaged_users_mau: engagementUsersMau,
+      // Engaged Rate = events per signed-in user (replaces stickiness)
+      engaged_rate_dau: Number(engagedRateDau.toFixed(2)),
+      engaged_rate_wau: Number(engagedRateWau.toFixed(2)),
+      engaged_rate_mau: Number(engagedRateMau.toFixed(2)),
+      // Keep stickiness for backwards compatibility
+      stickiness_dau_mau:
+        engagementUsersMau > 0
+          ? Number(((engagementUsersDau / engagementUsersMau) * 100).toFixed(2))
+          : 0,
+      stickiness_wau_mau:
+        engagementUsersMau > 0
+          ? Number(((engagementUsersWau / engagementUsersMau) * 100).toFixed(2))
+          : 0,
+      stickiness_dau_wau:
+        engagementUsersWau > 0
+          ? Number(((engagementUsersDau / engagementUsersWau) * 100).toFixed(2))
+          : 0,
       returning_dau: returningDau,
       returning_wau: returningWau,
       returning_mau: returningMau,
@@ -977,8 +1089,20 @@ export async function GET(request: NextRequest) {
         grimoire_metrics_source: 'conversion_events',
         product_summary_source: 'conversion_events',
         sitewide_metrics_source: 'conversion_events',
-        engagement_dau: engagementDau,
+        engagement_events_dau: engagementEventsDau,
+        engagement_users_dau: engagementUsersDau,
         activity_rows: activityRows.rows.length,
+        // Grimoire-only debug
+        grimoire_rows_total: grimoireRows.rows.length,
+        grimoire_window_users_total: grimoireWindowUsers.size,
+        grimoire_window_users_anon: [...grimoireWindowUsers].filter((id) =>
+          id.startsWith('anon:'),
+        ).length,
+        grimoire_window_users_signed_in: [...grimoireWindowUsers].filter((id) =>
+          id.startsWith('user:'),
+        ).length,
+        signed_in_engaged_users_total: signedInEngagedUsers.size,
+        grimoire_only_calculated: grimoireOnlyMau,
       },
       source: 'database',
     });

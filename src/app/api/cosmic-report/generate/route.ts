@@ -188,12 +188,17 @@ export async function POST(request: NextRequest) {
       'downloadable_reports',
     );
 
+    // Use hardcoded baseUrl to prevent SSRF attacks
+    const baseUrl = process.env.VERCEL
+      ? 'https://lunary.app'
+      : 'http://localhost:3000';
+
     // If database doesn't grant access but we have a customer ID, check Stripe as source of truth
     if (!hasAccess && customerId) {
       try {
         // Pass userId so get-subscription route can update database automatically
         const stripeResponse = await fetch(
-          `${request.nextUrl.origin}/api/stripe/get-subscription`,
+          `${baseUrl}/api/stripe/get-subscription`,
           {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },

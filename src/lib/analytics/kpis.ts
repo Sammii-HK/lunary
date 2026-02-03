@@ -216,6 +216,9 @@ export type FeatureAdoption = {
 
 export type GrimoireHealth = {
   grimoire_entry_rate: number;
+  grimoire_to_app_rate: number;
+  grimoire_visitors: number;
+  grimoire_to_app_users: number;
   grimoire_views_per_active_user: number;
   return_to_grimoire_rate: number;
   grimoire_penetration: number;
@@ -962,11 +965,53 @@ export async function getGrimoireHealth(
   const returnUsers = Number(returnToGrimoireResult.rows[0]?.return_users || 0);
   const grimoirePenetration = pct(grimoireUsers, activeUsers);
 
+  // Grimoire → App Conversion: % of grimoire visitors who also used the app
+  // This measures how well SEO content converts to product usage
+  const grimoireToAppResult = await sql.query(
+    `
+      WITH ${identityLinksCte},
+           grimoire_users AS (
+             SELECT DISTINCT ${canonicalIdentityExpression} AS canonical_identity
+             FROM conversion_events ce
+             ${identityLinkJoin}
+             WHERE ce.event_type = 'grimoire_viewed'
+               AND ce.created_at >= $1
+               AND ce.created_at <= $2
+               AND ${canonicalIdentityExpression} IS NOT NULL
+           ),
+           app_users AS (
+             SELECT DISTINCT ${canonicalIdentityExpression} AS canonical_identity
+             FROM conversion_events ce
+             ${identityLinkJoin}
+             WHERE ce.event_type = 'app_opened'
+               AND ce.created_at >= $1
+               AND ce.created_at <= $2
+               AND ${canonicalIdentityExpression} IS NOT NULL
+           )
+      SELECT
+        (SELECT COUNT(*) FROM grimoire_users) AS grimoire_visitors,
+        (SELECT COUNT(*) FROM grimoire_users g WHERE EXISTS (
+          SELECT 1 FROM app_users a WHERE a.canonical_identity = g.canonical_identity
+        )) AS grimoire_to_app_users
+    `,
+    [startTs, endTs],
+  );
+  const grimoireVisitors = Number(
+    grimoireToAppResult.rows[0]?.grimoire_visitors || 0,
+  );
+  const grimoireToAppUsers = Number(
+    grimoireToAppResult.rows[0]?.grimoire_to_app_users || 0,
+  );
+  const grimoireToAppRate = pct(grimoireToAppUsers, grimoireVisitors);
+
   // Influence metrics
   const influence = await getConversionInfluence(range);
 
   return {
     grimoire_entry_rate: Number(pct(entryUsers, newUsers).toFixed(2)),
+    grimoire_to_app_rate: Number(grimoireToAppRate.toFixed(2)),
+    grimoire_visitors: grimoireVisitors,
+    grimoire_to_app_users: grimoireToAppUsers,
     grimoire_views_per_active_user: Number(viewsPerActiveUser.toFixed(2)),
     return_to_grimoire_rate: Number(
       pct(returnUsers, anyGrimoireUsers).toFixed(2),

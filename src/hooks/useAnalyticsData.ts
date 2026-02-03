@@ -19,6 +19,15 @@ export type ActivityResponse = {
   dau: number;
   wau: number;
   mau: number;
+  // Distinct engaged users
+  engaged_users_dau: number;
+  engaged_users_wau: number;
+  engaged_users_mau: number;
+  // Engaged rate = events per signed-in user
+  engaged_rate_dau: number;
+  engaged_rate_wau: number;
+  engaged_rate_mau: number;
+  // Legacy stickiness (kept for backwards compatibility)
   stickiness_dau_mau: number;
   stickiness_wau_mau: number;
   stickiness_dau_wau: number;
@@ -219,6 +228,9 @@ export type FeatureAdoptionResponse = {
 
 export type GrimoireHealthResponse = {
   grimoire_entry_rate: number;
+  grimoire_to_app_rate: number;
+  grimoire_visitors: number;
+  grimoire_to_app_users: number;
   grimoire_views_per_active_user: number;
   return_to_grimoire_rate: number;
   influence: {

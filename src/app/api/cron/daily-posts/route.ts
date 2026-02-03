@@ -2942,9 +2942,9 @@ function createNotificationFromEvent(event: any, cosmicData?: any) {
   };
 }
 
-function getBaseUrl(request: NextRequest): string {
-  // Use production URL on any Vercel deployment
-  return process.env.VERCEL ? 'https://lunary.app' : request.nextUrl.origin;
+function getBaseUrl(_request: NextRequest): string {
+  // Use hardcoded URLs to prevent SSRF attacks
+  return process.env.VERCEL ? 'https://lunary.app' : 'http://localhost:3000';
 }
 
 // CONSOLIDATED NOTIFICATIONS - replaces 5+ separate cron routes
