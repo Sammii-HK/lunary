@@ -1,4 +1,61 @@
-# Grimoire Content Expansion TODO
+# Grimoire Content Moat Expansion - Master TODO
+
+This document tracks progress on Plans 14, 14.1-14.4 for expanding Lunary's content moat.
+
+---
+
+## Plans Overview
+
+| Plan     | Description                           | Status                       |
+| -------- | ------------------------------------- | ---------------------------- |
+| **14**   | Content Moat Analysis & Strategy      | ✅ Complete                  |
+| **14.1** | Implementation Guide                  | ✅ Complete                  |
+| **14.2** | Angel Numbers (Numerology)            | ❌ TODO                      |
+| **14.2** | Synastry Aspects                      | 🔄 In Progress (25/111)      |
+| **14.3** | Zodiac Compatibility                  | ✅ Complete                  |
+| **14.4** | Planetary Placements (Venus template) | ✅ Complete (All 12 planets) |
+
+---
+
+## Angel Numbers / Numerology (Plan 14.2) - TODO
+
+**Status: NOT IMPLEMENTED** - Curated data exists in `.claude/plans/14.2.angel-numers.md` but not yet added to the app.
+
+**Search Volume: EXTREMELY HIGH** - This is the biggest opportunity for traffic growth.
+
+Current implementation uses basic data from `src/constants/grimoire/numerology-data.ts`. Plan 14.2 provides much richer content with:
+
+- Extended meanings
+- Love meanings (single/relationship/thinking of someone)
+- Career guidance
+- Spiritual meaning
+- Numerology breakdown
+- Correspondences (planet, element, chakra, crystal, tarot)
+- Journal prompts
+- Rich FAQs
+
+### Priority Numbers (from Plan 14.2)
+
+- [ ] 000 - Infinite Potential & Divine Connection
+- [ ] 111 - Manifestation & New Beginnings (UPGRADE existing)
+- [ ] 222 - Balance & Partnership (UPGRADE existing)
+- [ ] 333 - Creativity & Ascended Master Support (UPGRADE existing)
+- [ ] 444 - Protection & Solid Foundations (UPGRADE existing)
+- [ ] 555 - Major Life Changes (UPGRADE existing)
+- [ ] 666 - Balance & Realignment (UPGRADE existing)
+- [ ] 777 - Spiritual Awakening & Divine Luck (UPGRADE existing)
+- [ ] 888 - Abundance & Infinite Flow (UPGRADE existing)
+- [ ] 999 - Completion & Endings (UPGRADE existing)
+- [ ] 1111 - Spiritual Awakening Portal (most searched!)
+- [ ] 1212 - Trust Your Path & Keep Going
+- [ ] 1234 - Steps in the Right Direction
+
+### Implementation Steps
+
+1. Create `src/data/angel-numbers.json` with curated content from Plan 14.2
+2. Create helper `src/lib/angel-numbers/getAngelNumber.ts`
+3. Update `src/app/grimoire/angel-numbers/[number]/page.tsx` to use curated data
+4. Add additional numbers beyond the basic 111-999 range
 
 ---
 
@@ -23,49 +80,9 @@ Page updated: `src/app/grimoire/compatibility/[match]/page.tsx` now uses SEOCont
 
 ---
 
-## Venus Placements (Plan 14.4) - COMPLETED
+## Planetary Placements (Plan 14.4) - COMPLETED
 
-All 12 Venus placements in `src/data/venus-placements.json`:
-
-- [x] venus-in-aries (Detriment)
-- [x] venus-in-taurus (Domicile)
-- [x] venus-in-gemini
-- [x] venus-in-cancer
-- [x] venus-in-leo
-- [x] venus-in-virgo (Fall)
-- [x] venus-in-libra (Domicile)
-- [x] venus-in-scorpio (Detriment)
-- [x] venus-in-sagittarius
-- [x] venus-in-capricorn
-- [x] venus-in-aquarius
-- [x] venus-in-pisces (Exalted)
-
----
-
-## Moon Placements - COMPLETED
-
-All 12 Moon placements in `src/data/moon-placements.json`:
-
-- [x] moon-in-aries
-- [x] moon-in-taurus (Exalted)
-- [x] moon-in-gemini
-- [x] moon-in-cancer (Domicile)
-- [x] moon-in-leo
-- [x] moon-in-virgo
-- [x] moon-in-libra
-- [x] moon-in-scorpio (Fall)
-- [x] moon-in-sagittarius
-- [x] moon-in-capricorn (Detriment)
-- [x] moon-in-aquarius (Detriment)
-- [x] moon-in-pisces
-
-Page updated: `src/app/grimoire/placements/[placement]/page.tsx` now uses curated data for both Venus and Moon.
-
----
-
-## All Planet Placements - COMPLETED
-
-All planets now have curated data in `src/data/`:
+Plan 14.4 provided the Venus placement template. All 12 planets now have curated data in `src/data/`:
 
 - [x] Sun placements (12) - `sun-placements.json`
 - [x] Moon placements (12) - `moon-placements.json`
@@ -80,7 +97,9 @@ All planets now have curated data in `src/data/`:
 - [x] Chiron placements (12) - `chiron-placements.json`
 - [x] North Node placements (12) - `north-node-placements.json`
 
-Total: 144 planet placements with SEO-optimized content.
+**Total: 144 planet placements with SEO-optimized content.**
+
+Page: `src/app/grimoire/placements/[placement]/page.tsx` uses consolidated helper.
 
 ---
 
@@ -143,7 +162,12 @@ Location: `src/data/synastry-pairs.json`
 ### House Placements
 
 - Planets in houses interpretation
-- 12 rising signs needed
+- 12 houses × 10+ planets = 120+ pages
+
+### Life Path Numbers (Numerology extension)
+
+- Life path 1-9, 11, 22, 33
+- Already have some basic data
 
 ---
 
@@ -388,7 +412,7 @@ Location: `src/data/synastry-pairs.json`
 
 ---
 
-## Estimated Total When Complete: ~100 aspects
+## Estimated Total When Complete: ~111 aspects
 
 Current: 25
 Priority 1: +20 = 45
@@ -399,3 +423,20 @@ Priority 5: +7 = 92
 Priority 6: +6 = 98
 Priority 7: +8 = 106
 Priority 8: +5 = 111
+
+---
+
+## Summary: What's Next
+
+### Highest Priority (Traffic Impact)
+
+1. **Angel Numbers (Plan 14.2)** - EXTREMELY HIGH search volume, curated data ready
+2. **Synastry Aspects Priority 1** - 20 high-search aspects to add
+3. **Synastry Pairs** - 18 curated pairs needed
+
+### Already Complete
+
+- ✅ 144 planetary placements
+- ✅ 12 rising signs
+- ✅ 12 zodiac compatibility pairs
+- ✅ 25 synastry aspects
