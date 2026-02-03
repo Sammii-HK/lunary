@@ -12,7 +12,7 @@ export interface ABTestResult {
   testName: string;
   variants: VariantMetrics[];
   bestVariant: string | null;
-  improvement: number | null; // % improvement of best vs worst
+  improvement: number | null;
   confidence: number;
   isSignificant: boolean;
   recommendation: string;
@@ -20,25 +20,26 @@ export interface ABTestResult {
   totalConversions: number;
 }
 
+// Helper to get date cutoff based on time range
+function getDateCutoff(timeRange: string): Date {
+  const now = new Date();
+  switch (timeRange) {
+    case '7d':
+      return new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+    case '30d':
+      return new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+    case '90d':
+      return new Date(now.getTime() - 90 * 24 * 60 * 60 * 1000);
+    default:
+      return new Date(0); // Beginning of time
+  }
+}
+
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
     const timeRange = searchParams.get('timeRange') || '30d';
-
-    let dateFilter = '';
-    switch (timeRange) {
-      case '7d':
-        dateFilter = "created_at >= NOW() - INTERVAL '7 days'";
-        break;
-      case '30d':
-        dateFilter = "created_at >= NOW() - INTERVAL '30 days'";
-        break;
-      case '90d':
-        dateFilter = "created_at >= NOW() - INTERVAL '90 days'";
-        break;
-      default:
-        dateFilter = '1=1';
-    }
+    const dateCutoff = getDateCutoff(timeRange);
 
     // Get all unique test names and variants
     const testsAndVariants = await sql`
@@ -48,7 +49,7 @@ export async function GET(request: NextRequest) {
       FROM conversion_events
       WHERE metadata->>'abTest' IS NOT NULL
         AND metadata->>'abVariant' IS NOT NULL
-        AND ${(sql as any).raw(dateFilter)}
+        AND created_at >= ${dateCutoff.toISOString()}
       ORDER BY test_name, variant
     `;
 
@@ -74,7 +75,7 @@ export async function GET(request: NextRequest) {
           WHERE metadata->>'abTest' = ${testName}
             AND metadata->>'abVariant' = ${variant}
             AND event_type IN ('app_opened', 'pricing_page_viewed')
-            AND ${(sql as any).raw(dateFilter)}
+            AND created_at >= ${dateCutoff.toISOString()}
         `;
 
         // Get conversions for this variant
@@ -84,7 +85,7 @@ export async function GET(request: NextRequest) {
           WHERE metadata->>'abTest' = ${testName}
             AND metadata->>'abVariant' = ${variant}
             AND event_type IN ('trial_started', 'subscription_started', 'trial_converted')
-            AND ${(sql as any).raw(dateFilter)}
+            AND created_at >= ${dateCutoff.toISOString()}
         `;
 
         const impressions = parseInt(impressionsResult.rows[0]?.count || '0');

@@ -7,7 +7,7 @@ function getAIContext(): string {
   try {
     const contextPath = join(process.cwd(), 'docs', 'AI_CONTEXT.md');
     return readFileSync(contextPath, 'utf-8');
-  } catch (error) {
+  } catch {
     return `Lunary is a cosmic/spiritual astrology app providing personalized birth chart analysis, daily horoscopes, tarot readings, and cosmic guidance.`;
   }
 }
@@ -21,6 +21,21 @@ interface VariantMetrics {
   conversionRate: number;
 }
 
+// Helper to get date cutoff based on time range
+function getDateCutoff(timeRange: string): Date {
+  const now = new Date();
+  switch (timeRange) {
+    case '7d':
+      return new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+    case '30d':
+      return new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+    case '90d':
+      return new Date(now.getTime() - 90 * 24 * 60 * 60 * 1000);
+    default:
+      return new Date(0);
+  }
+}
+
 export async function POST(request: NextRequest) {
   try {
     const { testName, variants, timeRange } = await request.json();
@@ -32,20 +47,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    let dateFilter = '';
-    switch (timeRange || '30d') {
-      case '7d':
-        dateFilter = "created_at >= NOW() - INTERVAL '7 days'";
-        break;
-      case '30d':
-        dateFilter = "created_at >= NOW() - INTERVAL '30 days'";
-        break;
-      case '90d':
-        dateFilter = "created_at >= NOW() - INTERVAL '90 days'";
-        break;
-      default:
-        dateFilter = '1=1';
-    }
+    const dateCutoff = getDateCutoff(timeRange || '30d');
 
     // Get detailed event breakdown and journey data for each variant
     const variantsWithDetails = await Promise.all(
@@ -55,7 +57,7 @@ export async function POST(request: NextRequest) {
           FROM conversion_events
           WHERE metadata->>'abTest' = ${testName}
             AND metadata->>'abVariant' = ${variant.name}
-            AND ${(sql as any).raw(dateFilter)}
+            AND created_at >= ${dateCutoff.toISOString()}
           GROUP BY event_type
           ORDER BY count DESC
         `;
@@ -68,7 +70,7 @@ export async function POST(request: NextRequest) {
           FROM conversion_events
           WHERE metadata->>'abTest' = ${testName}
             AND metadata->>'abVariant' = ${variant.name}
-            AND ${(sql as any).raw(dateFilter)}
+            AND created_at >= ${dateCutoff.toISOString()}
         `;
 
         return {
@@ -118,7 +120,7 @@ async function generateAIInsights(data: {
 
     const variantsSummary = data.variants
       .map(
-        (v, i) => `${v.name}:
+        (v) => `${v.name}:
 - Impressions: ${v.impressions}
 - Conversions: ${v.conversions}
 - Conversion Rate: ${v.conversionRate.toFixed(2)}%
