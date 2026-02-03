@@ -50,6 +50,26 @@ const AUDIT_THRESHOLD_PERCENT = 2;
 
 const formatDateKey = (date: Date) => date.toISOString().split('T')[0];
 
+// Count total events (not distinct users) in a window
+const countEventsInWindow = (
+  eventCountMap: Map<string, number>,
+  endDate: Date,
+  days: number,
+) => {
+  const start = new Date(endDate);
+  start.setUTCDate(start.getUTCDate() - (days - 1));
+  let total = 0;
+  for (
+    let d = new Date(start);
+    d <= endDate;
+    d.setUTCDate(d.getUTCDate() + 1)
+  ) {
+    const key = formatDateKey(d);
+    total += eventCountMap.get(key) || 0;
+  }
+  return total;
+};
+
 type IdentityRow = {
   date: unknown;
   user_id?: string | null;
@@ -517,14 +537,47 @@ export async function GET(request: NextRequest) {
     );
 
     const activityMap = new Map<string, Set<string>>();
+    const activityEventCountMap = new Map<string, number>();
     activityRows.rows.forEach((row) => {
       addIdentityRow(activityMap, row, identityLinks);
+      // Also count total events per day (not distinct)
+      const dateKey =
+        typeof row.date === 'string'
+          ? row.date.split('T')[0]
+          : row.date instanceof Date
+            ? formatDateKey(row.date)
+            : '';
+      if (dateKey) {
+        activityEventCountMap.set(
+          dateKey,
+          (activityEventCountMap.get(dateKey) || 0) + 1,
+        );
+      }
     });
-    // Calculate engagement DAU/WAU/MAU using range.end for consistency
-    // These are used in the response to ensure returning_dau <= dau
-    const engagementDau = countDistinctInWindow(activityMap, range.end, 1);
-    const engagementWau = countDistinctInWindow(activityMap, range.end, 7);
-    const engagementMau = countDistinctInWindow(activityMap, range.end, 30);
+    // Engagement = total events (not distinct users) - shows usage intensity
+    const engagementEventsDau = countEventsInWindow(
+      activityEventCountMap,
+      range.end,
+      1,
+    );
+    const engagementEventsWau = countEventsInWindow(
+      activityEventCountMap,
+      range.end,
+      7,
+    );
+    const engagementEventsMau = countEventsInWindow(
+      activityEventCountMap,
+      range.end,
+      30,
+    );
+    // Also keep distinct user counts for returning/stickiness calculations
+    const engagementUsersDau = countDistinctInWindow(activityMap, range.end, 1);
+    const engagementUsersWau = countDistinctInWindow(activityMap, range.end, 7);
+    const engagementUsersMau = countDistinctInWindow(
+      activityMap,
+      range.end,
+      30,
+    );
 
     const productMap = new Map<string, Set<string>>();
     productRows.rows.forEach((row) =>
@@ -902,23 +955,26 @@ export async function GET(request: NextRequest) {
         : 0;
 
     const response = NextResponse.json({
-      // Use consistent calculations (countDistinctInWindow with range.end)
-      // This ensures returning_dau <= dau since they use the same date
-      dau: engagementDau,
-      wau: engagementWau,
-      mau: engagementMau,
-      // Stickiness metrics using the same DAU/WAU/MAU values
+      // Engagement = total events (not distinct users) - shows usage intensity
+      dau: engagementEventsDau,
+      wau: engagementEventsWau,
+      mau: engagementEventsMau,
+      // Also expose distinct user counts
+      engaged_users_dau: engagementUsersDau,
+      engaged_users_wau: engagementUsersWau,
+      engaged_users_mau: engagementUsersMau,
+      // Stickiness uses distinct users (user-based ratio makes sense)
       stickiness_dau_mau:
-        engagementMau > 0
-          ? Number(((engagementDau / engagementMau) * 100).toFixed(2))
+        engagementUsersMau > 0
+          ? Number(((engagementUsersDau / engagementUsersMau) * 100).toFixed(2))
           : 0,
       stickiness_wau_mau:
-        engagementMau > 0
-          ? Number(((engagementWau / engagementMau) * 100).toFixed(2))
+        engagementUsersMau > 0
+          ? Number(((engagementUsersWau / engagementUsersMau) * 100).toFixed(2))
           : 0,
       stickiness_dau_wau:
-        engagementWau > 0
-          ? Number(((engagementDau / engagementWau) * 100).toFixed(2))
+        engagementUsersWau > 0
+          ? Number(((engagementUsersDau / engagementUsersWau) * 100).toFixed(2))
           : 0,
       returning_dau: returningDau,
       returning_wau: returningWau,
@@ -998,7 +1054,8 @@ export async function GET(request: NextRequest) {
         grimoire_metrics_source: 'conversion_events',
         product_summary_source: 'conversion_events',
         sitewide_metrics_source: 'conversion_events',
-        engagement_dau: engagementDau,
+        engagement_events_dau: engagementEventsDau,
+        engagement_users_dau: engagementUsersDau,
         activity_rows: activityRows.rows.length,
       },
       source: 'database',
