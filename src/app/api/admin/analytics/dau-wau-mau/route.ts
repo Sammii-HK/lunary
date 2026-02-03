@@ -24,13 +24,22 @@ const ENGAGEMENT_EVENTS = [
 ];
 const APP_OPENED_EVENTS = ['app_opened'];
 
-// Product interaction events (exclude Grimoire)
+// Product interaction events - same as engagement events
+// The difference is Product requires signed-in users
 const PRODUCT_EVENTS = [
-  'daily_dashboard_viewed',
-  'chart_viewed',
+  'grimoire_viewed',
   'tarot_drawn',
+  'chart_viewed',
+  'birth_chart_viewed',
+  'personalized_horoscope_viewed',
+  'personalized_tarot_viewed',
   'astral_chat_used',
   'ritual_started',
+  'horoscope_viewed',
+  'daily_dashboard_viewed',
+  'journal_entry_created',
+  'dream_entry_created',
+  'cosmic_pulse_opened',
 ];
 const SITEWIDE_EVENTS = ['page_viewed'];
 const GRIMOIRE_EVENTS = ['grimoire_viewed'];
