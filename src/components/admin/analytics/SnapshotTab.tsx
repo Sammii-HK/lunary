@@ -473,8 +473,8 @@ export function SnapshotTab({
       <section className='space-y-3'>
         <StatSection
           eyebrow='Engagement Health'
-          title='Engaged users & stickiness'
-          description='Key actions vs. returns inside the same canonical window.'
+          title='Engagement events & rates'
+          description='Total engagement events and events per signed-in user.'
         >
           <div className='grid gap-4 md:grid-cols-2 lg:grid-cols-4'>
             <MiniStat
@@ -493,9 +493,9 @@ export function SnapshotTab({
               icon={<Activity className='h-5 w-5 text-lunary-secondary-300' />}
             />
             <MiniStat
-              label='Engaged Rate (MAU)'
-              value={formatPercent(engagementRate ?? undefined, 1)}
-              icon={<Sparkles className='h-5 w-5 text-lunary-accent-300' />}
+              label='Returning Users'
+              value={engagementOverview?.returning_users_range ?? 0}
+              icon={<Activity className='h-5 w-5 text-lunary-accent-300' />}
             />
           </div>
           {engagedMatchesApp && (
@@ -506,28 +506,28 @@ export function SnapshotTab({
           )}
           <div className='grid gap-4 md:grid-cols-2 lg:grid-cols-4'>
             <MiniStat
-              label={`Daily Stickiness (DAU/WAU) [${engagedDau}/${engagedWau}]`}
-              value={formatPercent(activity?.stickiness_dau_wau, 2)}
+              label='Engaged Rate (DAU)'
+              value={activity?.engaged_rate_dau?.toFixed(1) ?? '—'}
               icon={<Sparkles className='h-5 w-5 text-lunary-success-300' />}
             />
             <MiniStat
-              label={`Weekly Stickiness (WAU/MAU) [${engagedWau}/${engagedMau}]`}
-              value={formatPercent(activity?.stickiness_wau_mau, 2)}
+              label='Engaged Rate (WAU)'
+              value={activity?.engaged_rate_wau?.toFixed(1) ?? '—'}
               icon={<Sparkles className='h-5 w-5 text-lunary-secondary-300' />}
             />
             <MiniStat
-              label='Avg active days'
+              label='Engaged Rate (MAU)'
+              value={activity?.engaged_rate_mau?.toFixed(1) ?? '—'}
+              icon={<Sparkles className='h-5 w-5 text-lunary-accent-300' />}
+            />
+            <MiniStat
+              label='Avg Active Days'
               value={
                 typeof engagementOverview?.avg_active_days_per_user === 'number'
                   ? engagementOverview.avg_active_days_per_user.toFixed(2)
                   : '—'
               }
               icon={<Target className='h-5 w-5 text-lunary-primary-300' />}
-            />
-            <MiniStat
-              label='Returning Users (range)'
-              value={engagementOverview?.returning_users_range ?? 0}
-              icon={<Activity className='h-5 w-5 text-lunary-accent-300' />}
             />
           </div>
         </StatSection>

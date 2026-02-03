@@ -954,6 +954,14 @@ export async function GET(request: NextRequest) {
         ? (signedInProductWau / signedInProductMau) * 100
         : 0;
 
+    // Engaged Rate = events per signed-in user (how much each user engages)
+    const engagedRateDau =
+      productDau > 0 ? engagementEventsDau / productDau : 0;
+    const engagedRateWau =
+      productWau > 0 ? engagementEventsWau / productWau : 0;
+    const engagedRateMau =
+      productMau > 0 ? engagementEventsMau / productMau : 0;
+
     const response = NextResponse.json({
       // Engagement = total events (not distinct users) - shows usage intensity
       dau: engagementEventsDau,
@@ -963,7 +971,11 @@ export async function GET(request: NextRequest) {
       engaged_users_dau: engagementUsersDau,
       engaged_users_wau: engagementUsersWau,
       engaged_users_mau: engagementUsersMau,
-      // Stickiness uses distinct users (user-based ratio makes sense)
+      // Engaged Rate = events per signed-in user (replaces stickiness)
+      engaged_rate_dau: Number(engagedRateDau.toFixed(2)),
+      engaged_rate_wau: Number(engagedRateWau.toFixed(2)),
+      engaged_rate_mau: Number(engagedRateMau.toFixed(2)),
+      // Keep stickiness for backwards compatibility
       stickiness_dau_mau:
         engagementUsersMau > 0
           ? Number(((engagementUsersDau / engagementUsersMau) * 100).toFixed(2))
