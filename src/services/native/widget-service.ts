@@ -11,7 +11,7 @@
 
 import { Capacitor } from '@capacitor/core';
 
-// Type for WebKit message handlers (iOS)
+// Type for WebKit message handlers (iOS) and Android bridge
 declare global {
   interface Window {
     webkit?: {
@@ -20,6 +20,10 @@ declare global {
           postMessage: (data: unknown) => void;
         };
       };
+    };
+    AndroidWidgetBridge?: {
+      setWidgetData: (jsonData: string) => void;
+      isWidgetSupported: () => boolean;
     };
   }
 }
@@ -92,18 +96,38 @@ class NativeWidgetService {
       return { success: false, error: 'Not native platform' };
     }
 
+    const platform = Capacitor.getPlatform();
+
     try {
-      // Use WebKit message handler directly (bypasses Capacitor plugin system)
-      const handler = window.webkit?.messageHandlers?.widgetBridge;
-      if (handler) {
-        console.log('[Widget] Sending data via WebKit message handler...');
-        handler.postMessage({ action: 'setWidgetData', data });
-        console.log('[Widget] Data sent successfully');
-        return { success: true };
-      } else {
-        console.warn('[Widget] WebKit message handler not available');
-        return { success: false, error: 'Message handler not available' };
+      // iOS: Use WebKit message handler
+      if (platform === 'ios') {
+        const handler = window.webkit?.messageHandlers?.widgetBridge;
+        if (handler) {
+          console.log('[Widget] Sending data via WebKit message handler...');
+          handler.postMessage({ action: 'setWidgetData', data });
+          console.log('[Widget] Data sent successfully');
+          return { success: true };
+        } else {
+          console.warn('[Widget] WebKit message handler not available');
+          return { success: false, error: 'Message handler not available' };
+        }
       }
+
+      // Android: Use JavaScript interface
+      if (platform === 'android') {
+        const bridge = window.AndroidWidgetBridge;
+        if (bridge) {
+          console.log('[Widget] Sending data via Android bridge...');
+          bridge.setWidgetData(JSON.stringify(data));
+          console.log('[Widget] Data sent successfully');
+          return { success: true };
+        } else {
+          console.warn('[Widget] Android bridge not available');
+          return { success: false, error: 'Android bridge not available' };
+        }
+      }
+
+      return { success: false, error: 'Unknown platform' };
     } catch (error) {
       console.error('[Widget] Failed to update:', error);
       return { success: false, error: String(error) };

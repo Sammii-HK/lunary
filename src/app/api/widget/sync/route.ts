@@ -70,18 +70,23 @@ export async function GET() {
           dayTheme: dayTheme,
         };
 
-        // Try to get today's horoscope from cache or generate
+        // Try to get today's horoscope directly from database
         try {
-          const horoscopeRes = await fetch(
-            `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/api/horoscope/daily`,
-            {
-              headers: {
-                Cookie: headersList.get('cookie') || '',
-              },
+          const todayStr = dayjs().format('YYYY-MM-DD');
+          const cachedHoroscope = await prisma.daily_horoscopes.findFirst({
+            where: {
+              user_id: session.user.id,
+              horoscope_date: todayStr,
             },
-          );
-          if (horoscopeRes.ok) {
-            const horoscope = await horoscopeRes.json();
+            select: { horoscope_data: true },
+          });
+
+          if (cachedHoroscope?.horoscope_data) {
+            const horoscope = cachedHoroscope.horoscope_data as {
+              headline?: string;
+              overview?: string;
+              dailyGuidance?: string;
+            };
             horoscopeData = {
               headline: horoscope.headline || 'Your cosmic guidance awaits',
               guidance: horoscope.overview || horoscope.dailyGuidance || '',
