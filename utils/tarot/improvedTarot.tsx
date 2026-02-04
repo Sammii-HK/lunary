@@ -76,6 +76,7 @@ const getCardDetails = (
 
 // Get suit from card name
 const getCardSuit = (cardName: string): string => {
+  if (!cardName) return 'Major Arcana';
   if (cardName.includes('Cups')) return 'Cups';
   if (cardName.includes('Wands')) return 'Wands';
   if (cardName.includes('Swords')) return 'Swords';
