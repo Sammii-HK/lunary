@@ -1,6 +1,7 @@
 import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { SEOContentTemplate } from '@/components/grimoire/SEOContentTemplate';
+import { CosmicConnections } from '@/components/grimoire/CosmicConnections';
 import { doubleHours } from '@/constants/grimoire/clock-numbers-data';
 
 // 30-day ISR revalidation
@@ -129,23 +130,13 @@ ${hourData.message}
           `What guidance am I receiving from this double hour?`,
           `How can I work with ${hourData.time}'s energy today?`,
         ]}
-        relatedItems={[
-          {
-            name: 'Numerology Guide',
-            href: '/grimoire/numerology',
-            type: 'Guide',
-          },
-          {
-            name: 'Clock-based numerology',
-            href: '/grimoire/numerology',
-            type: 'Guide',
-          },
-          {
-            name: 'Mirror Hours',
-            href: '/grimoire/numerology',
-            type: 'Guide',
-          },
-        ]}
+        cosmicConnections={
+          <CosmicConnections
+            entityType='double-hour'
+            entityKey={time}
+            title='Explore More'
+          />
+        }
         breadcrumbs={[
           { label: 'Grimoire', href: '/grimoire' },
           { label: 'Numerology', href: '/grimoire/numerology' },
