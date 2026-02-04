@@ -12,6 +12,7 @@ import {
 import Link from 'next/link';
 import { useRitualBadge } from '@/hooks/useRitualBadge';
 import { useSubscription } from '@/hooks/useSubscription';
+import { hapticService } from '@/services/native/haptic-service';
 
 export const Navbar = () => {
   const pathname = usePathname();
@@ -148,10 +149,18 @@ const NavLink = ({
   dataNav,
 }: NavLinkProps) => {
   const active = isActive(activePath, href);
+
+  const handleClick = () => {
+    if (!active) {
+      hapticService.light();
+    }
+  };
+
   return (
     <Link
       href={href}
       data-nav={dataNav}
+      onClick={handleClick}
       className={`relative flex flex-col items-center gap-0.5 rounded-lg px-3 py-1.5 text-xs transition ${
         active ? 'text-lunary-secondary' : 'text-zinc-400 hover:text-zinc-300'
       }`}

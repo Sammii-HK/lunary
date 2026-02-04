@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { BookOpen, Check, Loader2 } from 'lucide-react';
+import { useHaptic } from '@/hooks/useHaptic';
 
 interface ReflectionBoxProps {
   className?: string;
@@ -12,6 +13,7 @@ export function ReflectionBox({ className = '' }: ReflectionBoxProps) {
   const [isSaving, setIsSaving] = useState(false);
   const [isSaved, setIsSaved] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
+  const haptic = useHaptic();
 
   const handleSave = async () => {
     if (!reflection.trim() || isSaving) return;
@@ -31,6 +33,7 @@ export function ReflectionBox({ className = '' }: ReflectionBoxProps) {
       });
 
       if (response.ok) {
+        haptic.success();
         setIsSaved(true);
         setReflection('');
         setTimeout(() => {
@@ -40,6 +43,7 @@ export function ReflectionBox({ className = '' }: ReflectionBoxProps) {
       }
     } catch (error) {
       console.error('[ReflectionBox] Failed to save:', error);
+      haptic.error();
     } finally {
       setIsSaving(false);
     }
