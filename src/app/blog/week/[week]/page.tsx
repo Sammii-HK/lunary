@@ -16,6 +16,10 @@ import { Badge } from '@/components/ui/badge';
 import { generateWeeklyContent } from '../../../../../utils/blog/weeklyContentGenerator';
 import { SocialShareButtons } from '@/components/SocialShareButtons';
 import { CrossPlatformCTA } from '@/components/CrossPlatformCTA';
+import { getContextualNudge } from '@/lib/grimoire/getContextualNudge';
+import { InlineContextualNudge } from '@/components/grimoire/InlineContextualNudge';
+import { ContextualNudgeSection } from '@/components/ui/ContextualNudgeSection';
+import { getInlineCtaVariant } from '@/lib/ab-tests-server';
 import {
   QuickStats,
   AspectNatureBadge,
@@ -243,6 +247,8 @@ interface TimelineEvent {
   type: 'ingress' | 'retrograde' | 'direct' | 'moon-phase' | 'aspect';
   title: string;
   planet?: string;
+  planetB?: string;
+  aspect?: string;
   sign?: string;
   phase?: string;
 }
@@ -300,6 +306,8 @@ function buildTimelineEvents(
       type: 'aspect',
       title: `${a.planetA} ${a.aspect} ${a.planetB}`,
       planet: a.planetA,
+      planetB: a.planetB,
+      aspect: a.aspect,
     });
   });
 
@@ -663,6 +671,21 @@ export default async function BlogPostPage({
           <div className='prose prose-invert max-w-none'>
             <p className='text-lg leading-relaxed'>{summaryText}</p>
           </div>
+
+          {/* Inline Contextual CTA - personalisation hook after summary */}
+          {await (async () => {
+            const contextualNudge = getContextualNudge(
+              `/blog/week/${canonicalWeekSlug}`,
+            );
+            const inlineCtaVariant = await getInlineCtaVariant();
+            return contextualNudge ? (
+              <InlineContextualNudge
+                nudge={contextualNudge}
+                location='blog_inline_post_summary'
+                serverVariant={inlineCtaVariant}
+              />
+            ) : null;
+          })()}
 
           {/* Weekly Affirmation */}
           <WeeklyAffirmation
@@ -1057,6 +1080,19 @@ export default async function BlogPostPage({
             </section>
           )}
         </article>
+
+        {/* Contextual Nudge Section - personalisation CTA */}
+        {(() => {
+          const contextualNudge = getContextualNudge(
+            `/blog/week/${canonicalWeekSlug}`,
+          );
+          return contextualNudge ? (
+            <ContextualNudgeSection
+              nudge={contextualNudge}
+              location='blog_contextual_nudge'
+            />
+          ) : null;
+        })()}
 
         {/* App CTA Section */}
         <section className='mt-8 pt-8 border-t border-zinc-800'>

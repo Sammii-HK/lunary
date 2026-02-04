@@ -8,6 +8,7 @@ import {
   Illumination,
   MoonPhase,
 } from 'astronomy-engine';
+import { getISOWeek, getISOWeekYear, startOfWeek } from 'date-fns';
 import {
   crystalDatabase,
   getCrystalsByZodiacSign,
@@ -20,6 +21,12 @@ import {
   generateNarrativeIntro,
   generateClosingStatement,
 } from './titleTemplates';
+import { getWeeklyBlogData } from '../../src/lib/blog/weekly-data';
+
+// Normalize any date to the Monday of its week
+function getMonday(date: Date): Date {
+  return startOfWeek(date, { weekStartsOn: 1 });
+}
 
 const DEFAULT_OBSERVER = new Observer(51.4769, 0.0005, 0);
 
@@ -161,7 +168,8 @@ export interface MagicalTimingGuide {
 export async function generateWeeklyContent(
   startDate: Date,
 ): Promise<WeeklyCosmicData> {
-  const weekStart = new Date(startDate);
+  // Normalize to Monday of the week (handles any day being passed in)
+  const weekStart = getMonday(startDate);
   weekStart.setHours(0, 0, 0, 0);
 
   const weekEnd = new Date(weekStart);
@@ -175,14 +183,9 @@ export async function generateWeeklyContent(
     process.env.PLAYWRIGHT_TEST_BASE_URL !== undefined;
 
   if (isTestMode) {
-    // Calculate week number manually (getWeekNumber is defined later in file)
-    const startOfYear = new Date(weekStart.getFullYear(), 0, 1);
-    const daysSinceStartOfYear = Math.floor(
-      (weekStart.getTime() - startOfYear.getTime()) / (24 * 60 * 60 * 1000),
-    );
-    const weekNumber = Math.ceil(
-      (daysSinceStartOfYear + startOfYear.getDay() + 1) / 7,
-    );
+    // Use ISO week numbering for consistency
+    const weekNumber = getISOWeek(weekStart);
+    const year = getISOWeekYear(weekStart);
 
     return {
       weekStart,
@@ -215,10 +218,30 @@ export async function generateWeeklyContent(
       },
       generatedAt: new Date().toISOString(),
       weekNumber,
-      year: weekStart.getFullYear(),
+      year,
     };
   }
 
+  // Try to use pre-computed data first (much faster: 2 DB queries vs ~56 calculations)
+  try {
+    const precomputedData = await getWeeklyBlogData(weekStart);
+    if (precomputedData) {
+      console.log(
+        `[generateWeeklyContent] Using pre-computed data for week ${getISOWeek(weekStart)}-${getISOWeekYear(weekStart)}`,
+      );
+      return precomputedData;
+    }
+    console.log(
+      `[generateWeeklyContent] No pre-computed data available, falling back to full generation`,
+    );
+  } catch (error) {
+    console.warn(
+      `[generateWeeklyContent] Error fetching pre-computed data, falling back to full generation:`,
+      error,
+    );
+  }
+
+  // Fall back to full astronomical calculations
   // Generate all astronomical data for the week (aspects and moon phases needed for daily forecasts)
   const [
     planetaryHighlights,
@@ -272,6 +295,7 @@ export async function generateWeeklyContent(
   );
 
   const weekNumber = getWeekNumber(weekStart);
+  const year = getISOWeekYear(weekStart);
 
   return {
     weekStart,
@@ -291,7 +315,7 @@ export async function generateWeeklyContent(
     magicalTiming,
     generatedAt: new Date().toISOString(),
     weekNumber,
-    year: weekStart.getFullYear(),
+    year,
   };
 }
 
@@ -2326,9 +2350,6 @@ function getWeeklyThemes(
 }
 
 function getWeekNumber(date: Date): number {
-  const startDate = new Date(date.getFullYear(), 0, 1);
-  const days = Math.floor(
-    (date.getTime() - startDate.getTime()) / (24 * 60 * 60 * 1000),
-  );
-  return Math.floor(days / 7) + 1;
+  // Use ISO week numbering for consistency across the codebase
+  return getISOWeek(date);
 }
