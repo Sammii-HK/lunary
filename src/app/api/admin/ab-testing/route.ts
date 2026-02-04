@@ -69,22 +69,24 @@ export async function GET(request: NextRequest) {
 
       for (const variant of variants) {
         // Get impressions for this variant
+        // Include cta_impression for SEO page A/B tests, app_opened/pricing_page_viewed for app tests
         const impressionsResult = await sql`
-          SELECT COUNT(DISTINCT user_id) as count
+          SELECT COUNT(DISTINCT COALESCE(user_id, anonymous_id)) as count
           FROM conversion_events
           WHERE metadata->>'abTest' = ${testName}
             AND metadata->>'abVariant' = ${variant}
-            AND event_type IN ('app_opened', 'pricing_page_viewed')
+            AND event_type IN ('app_opened', 'pricing_page_viewed', 'cta_impression')
             AND created_at >= ${dateCutoff.toISOString()}
         `;
 
         // Get conversions for this variant
+        // Include cta_click for CTA tests (click is the conversion), plus hard conversions
         const conversionsResult = await sql`
-          SELECT COUNT(DISTINCT user_id) as count
+          SELECT COUNT(DISTINCT COALESCE(user_id, anonymous_id)) as count
           FROM conversion_events
           WHERE metadata->>'abTest' = ${testName}
             AND metadata->>'abVariant' = ${variant}
-            AND event_type IN ('trial_started', 'subscription_started', 'trial_converted')
+            AND event_type IN ('trial_started', 'subscription_started', 'trial_converted', 'cta_clicked')
             AND created_at >= ${dateCutoff.toISOString()}
         `;
 
