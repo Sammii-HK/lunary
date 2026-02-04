@@ -138,6 +138,7 @@
     "@ai-sdk/openai": "^3.0.19",
     "@ai-sdk/react": "^1.2.12",
     "@astrodraw/astrochart": "^3.0.2",
+    "@capacitor-firebase/messaging": "^8.0.1",
     "@capacitor/android": "^8.0.2",
     "@capacitor/cli": "^8.0.2",
     "@capacitor/core": "^8.0.2",

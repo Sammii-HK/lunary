@@ -20,6 +20,9 @@ importers:
       '@astrodraw/astrochart':
         specifier: ^3.0.2
         version: 3.0.2
+      '@capacitor-firebase/messaging':
+        specifier: ^8.0.1
+        version: 8.0.1(@capacitor/core@8.0.2)
       '@capacitor/android':
         specifier: ^8.0.2
         version: 8.0.2(@capacitor/core@8.0.2)
@@ -611,6 +614,15 @@ packages:
 
   '@better-fetch/fetch@1.1.18':
     resolution: {integrity: sha512-rEFOE1MYIsBmoMJtQbl32PGHHXuG2hDxvEd7rUHE0vCBoFQVSDqaVs9hkZEtHCxRoY+CljXKFCOuJ8uxqw1LcA==}
+
+  '@capacitor-firebase/messaging@8.0.1':
+    resolution: {integrity: sha512-Jla5/yg0o/8gAaTl3Z33XDAyC9xwqRZctt3sSh1KBIzYwV3fZVP/ty/5HGn84qqoO2aBBBL28erL+tkgZZPt2Q==}
+    peerDependencies:
+      '@capacitor/core': '>=8.0.0'
+      firebase: ^12.6.0
+    peerDependenciesMeta:
+      firebase:
+        optional: true
 
   '@capacitor/android@8.0.2':
     resolution: {integrity: sha512-0D7j0YvzjnfCMKLvFkAbx8b3Vwx+QfHFG5NzoXpI9sAl3zWiLsfa+NX4x92Fy+k4MGjLSMAfLThCqILYGDDsgw==}
@@ -7106,6 +7118,10 @@ snapshots:
   '@better-auth/utils@0.3.0': {}
 
   '@better-fetch/fetch@1.1.18': {}
+
+  '@capacitor-firebase/messaging@8.0.1(@capacitor/core@8.0.2)':
+    dependencies:
+      '@capacitor/core': 8.0.2
 
   '@capacitor/android@8.0.2(@capacitor/core@8.0.2)':
     dependencies:
