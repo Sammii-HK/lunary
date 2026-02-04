@@ -242,18 +242,23 @@ export async function generateMetadata({
     };
   }
 
-  const title = `${colorData.name} Candle Magic: Meaning & Spells - Lunary`;
-  const description = `Discover ${colorData.name.toLowerCase()} candle magic: meaning, properties & spells. Learn how to use ${colorData.name.toLowerCase()} candles for ${colorData.meanings.slice(0, 2).join(' & ').toLowerCase()}. Complete color magic guide with rituals.`;
+  // SEO-optimized title pattern: emphasize "meaning" and "witchcraft" keywords
+  const title = `${colorData.name} Candle Meaning in Witchcraft: Uses, Spells & Color Magic | Lunary`;
+  // Description answers the query directly: "What do X candles mean?"
+  const meaningsList = colorData.meanings.slice(0, 4).join(', ').toLowerCase();
+  const description = `What do ${colorData.name.toLowerCase()} candles mean? In witchcraft, ${colorData.name.toLowerCase()} candles represent ${meaningsList}. Learn how to use ${colorData.name.toLowerCase()} candle magic for spells and rituals.`;
 
   return {
     title,
     description,
     keywords: [
-      `${colorData.name.toLowerCase()} candle`,
-      `${colorData.name.toLowerCase()} candle magic`,
       `${colorData.name.toLowerCase()} candle meaning`,
+      `what does a ${colorData.name.toLowerCase()} candle mean`,
+      `${colorData.name.toLowerCase()} candle witchcraft`,
+      `${colorData.name.toLowerCase()} candle magic`,
+      `${colorData.name.toLowerCase()} candle spells`,
       'candle magic',
-      'candle spells',
+      'candle color meanings',
     ],
     openGraph: {
       title,
@@ -374,6 +379,14 @@ When working with ${colorData.name.toLowerCase()} candles, focus your intention 
           'What other correspondences can I combine?',
         ]}
         relatedItems={[
+          // Cross-link to all other candle colors for better internal linking
+          ...colorKeys
+            .filter((c) => c !== color)
+            .map((c) => ({
+              name: `${candleColors[c as keyof typeof candleColors].name} Candle`,
+              href: `/grimoire/candle-magic/colors/${c}`,
+              type: 'Candle Color' as const,
+            })),
           {
             name: 'Candle Magic Guide',
             href: '/grimoire/candle-magic',
@@ -403,6 +416,14 @@ When working with ${colorData.name.toLowerCase()} candles, focus your intention 
           { text: 'Color Correspondences', href: '/grimoire/correspondences' },
           { text: 'Spells & Rituals', href: '/grimoire/spells' },
           { text: 'Grimoire Home', href: '/grimoire' },
+          // Cross-links to other candle colors
+          ...colorKeys
+            .filter((c) => c !== color)
+            .slice(0, 6) // Show first 6 other colors
+            .map((c) => ({
+              text: `${candleColors[c as keyof typeof candleColors].name} Candle`,
+              href: `/grimoire/candle-magic/colors/${c}`,
+            })),
         ]}
         ctaText='Explore more candle magic'
         ctaHref='/grimoire/candle-magic'

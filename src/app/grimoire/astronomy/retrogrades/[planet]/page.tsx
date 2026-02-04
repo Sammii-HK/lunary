@@ -27,18 +27,25 @@ export async function generateMetadata({
     };
   }
 
-  const title = `${retrogradeData.name}: Meaning, Effects & How to Work With It | Lunary`;
-  const description = `Complete guide to ${retrogradeData.name} retrograde: what it means, how often it happens, how long it lasts, common effects, and grounded ways to work with the energy.`;
+  // Extract planet name without "Retrograde" for proper SEO phrasing
+  const planetName = retrogradeData.name.replace(' Retrograde', '');
+  const currentYear = new Date().getFullYear();
+
+  // SEO-optimized title with year for trending queries
+  const title = `${retrogradeData.name} ${currentYear}: Dates, Meaning & How to Survive It | Lunary`;
+  // Description answers search queries and includes year
+  const description = `${retrogradeData.name} dates for ${currentYear}. What it means, how often ${planetName} goes retrograde, common effects, and practical tips to work with the energy.`;
 
   return {
     title,
     description,
     keywords: [
-      `${retrogradeData.name}`,
+      `${retrogradeData.name.toLowerCase()} ${currentYear}`,
+      `${retrogradeData.name.toLowerCase()} dates ${currentYear}`,
       `${retrogradeData.name.toLowerCase()} meaning`,
-      `${retrogradeData.name.toLowerCase()} dates`,
+      `when is ${retrogradeData.name.toLowerCase()} ${currentYear}`,
       `${retrogradeData.name.toLowerCase()} effects`,
-      `when is ${retrogradeData.name.toLowerCase()}`,
+      `${planetName.toLowerCase()} retrograde`,
     ],
     openGraph: {
       title,
