@@ -3,6 +3,9 @@
  * Tests to verify data consistency in PostgreSQL
  */
 
+// Make this a module to avoid global scope pollution
+export {};
+
 jest.mock('@vercel/postgres', () => ({
   sql: jest.fn(),
 }));

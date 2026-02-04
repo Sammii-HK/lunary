@@ -123,7 +123,7 @@ describe('OG Synastry Share Route', () => {
 
       await GET(request);
 
-      const call = (ImageResponse as jest.Mock).mock.calls[0];
+      const call = (ImageResponse as unknown as jest.Mock).mock.calls[0];
       expect(call[1]).toEqual({ width: 1080, height: 1080 });
     });
 
@@ -139,7 +139,7 @@ describe('OG Synastry Share Route', () => {
 
       await GET(request);
 
-      const call = (ImageResponse as jest.Mock).mock.calls[0];
+      const call = (ImageResponse as unknown as jest.Mock).mock.calls[0];
       expect(call[1]).toEqual({ width: 1200, height: 630 });
     });
 
@@ -155,7 +155,7 @@ describe('OG Synastry Share Route', () => {
 
       await GET(request);
 
-      const call = (ImageResponse as jest.Mock).mock.calls[0];
+      const call = (ImageResponse as unknown as jest.Mock).mock.calls[0];
       expect(call[1]).toEqual({ width: 1080, height: 1920 });
     });
   });
@@ -173,7 +173,7 @@ describe('OG Synastry Share Route', () => {
 
       await GET(request);
 
-      const call = (ImageResponse as jest.Mock).mock.calls[0];
+      const call = (ImageResponse as unknown as jest.Mock).mock.calls[0];
       const element = call[0];
 
       // Helper to check if element or children have display flex
@@ -225,7 +225,7 @@ describe('OG Synastry Share Route', () => {
 
       await GET(request);
 
-      const call = (ImageResponse as jest.Mock).mock.calls[0];
+      const call = (ImageResponse as unknown as jest.Mock).mock.calls[0];
       const element = call[0];
 
       // Recursively find img element
@@ -263,7 +263,7 @@ describe('OG Synastry Share Route', () => {
 
       await GET(request);
 
-      const call = (ImageResponse as jest.Mock).mock.calls[0];
+      const call = (ImageResponse as unknown as jest.Mock).mock.calls[0];
       const element = call[0];
 
       // Convert element to string representation to check content
@@ -283,7 +283,7 @@ describe('OG Synastry Share Route', () => {
 
       await GET(request);
 
-      const call = (ImageResponse as jest.Mock).mock.calls[0];
+      const call = (ImageResponse as unknown as jest.Mock).mock.calls[0];
       const element = call[0];
 
       const elementString = JSON.stringify(element);
@@ -303,7 +303,7 @@ describe('OG Synastry Share Route', () => {
 
       await GET(request);
 
-      const call = (ImageResponse as jest.Mock).mock.calls[0];
+      const call = (ImageResponse as unknown as jest.Mock).mock.calls[0];
       const element = call[0];
 
       const elementString = JSON.stringify(element);
@@ -326,7 +326,7 @@ describe('OG Synastry Share Route', () => {
 
       await GET(request);
 
-      const call = (ImageResponse as jest.Mock).mock.calls[0];
+      const call = (ImageResponse as unknown as jest.Mock).mock.calls[0];
       const elementString = JSON.stringify(call[0]);
 
       // Green color for high scores
@@ -344,7 +344,7 @@ describe('OG Synastry Share Route', () => {
 
       await GET(request);
 
-      const call = (ImageResponse as jest.Mock).mock.calls[0];
+      const call = (ImageResponse as unknown as jest.Mock).mock.calls[0];
       const elementString = JSON.stringify(call[0]);
 
       // Purple color for medium-high scores
@@ -362,7 +362,7 @@ describe('OG Synastry Share Route', () => {
 
       await GET(request);
 
-      const call = (ImageResponse as jest.Mock).mock.calls[0];
+      const call = (ImageResponse as unknown as jest.Mock).mock.calls[0];
       const elementString = JSON.stringify(call[0]);
 
       // Yellow color for medium scores
@@ -380,7 +380,7 @@ describe('OG Synastry Share Route', () => {
 
       await GET(request);
 
-      const call = (ImageResponse as jest.Mock).mock.calls[0];
+      const call = (ImageResponse as unknown as jest.Mock).mock.calls[0];
       const elementString = JSON.stringify(call[0]);
 
       // Red color for low scores
