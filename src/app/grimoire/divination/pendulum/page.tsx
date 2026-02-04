@@ -1,13 +1,18 @@
 import { Metadata } from 'next';
 import { SEOContentTemplate } from '@/components/grimoire/SEOContentTemplate';
-import { createHowToSchema, renderJsonLd } from '@/lib/schema';
+import {
+  createHowToSchema,
+  createItemListSchema,
+  renderJsonLd,
+} from '@/lib/schema';
 
 // 30-day ISR revalidation
 export const revalidate = 2592000;
 export const metadata: Metadata = {
-  title: 'Pendulum Divination: How to Use a Pendulum for Answers | Lunary',
+  title:
+    'How to Use a Pendulum: Dowsing Guide for Yes/No Answers [With Charts]',
   description:
-    'Master pendulum divination for yes/no answers and spiritual guidance. Learn how to choose, cleanse, program, and use a pendulum for dowsing and decision-making.',
+    'Complete pendulum guide: how to choose, cleanse, and program a pendulum for yes/no answers. Includes pendulum movement charts, DIY pendulum instructions, and troubleshooting tips.',
   keywords: [
     'pendulum divination',
     'dowsing',
@@ -83,6 +88,21 @@ const faqs = [
     answer:
       "If your pendulum won't move, you may be too tense, the question unclear, or the energy blocked. Relax, rephrase your question, cleanse the pendulum, and try again. Some days readings just don't flow—that's normal.",
   },
+  {
+    question: 'How do I make a homemade pendulum?',
+    answer:
+      'You can make a pendulum from any weighted object on a string or chain. Common DIY options: a ring on a thread, a needle on string, a button on dental floss, or a small crystal wrapped in wire on a chain. The weight should be 1-2 inches and hang 6-10 inches from your fingers. Cleanse and program it like any other pendulum.',
+  },
+  {
+    question: 'Can I use a necklace as a pendulum?',
+    answer:
+      'Yes! A necklace with a pendant works perfectly as a pendulum. The pendant should have some weight and hang freely. Many practitioners prefer using a personal necklace because it already carries their energy. Remove the necklace, hold the chain, and let the pendant swing freely.',
+  },
+  {
+    question: 'What is a pendulum board and do I need one?',
+    answer:
+      'A pendulum board (or chart) is a printed surface with words, letters, numbers, or symbols arranged in a circle or fan shape. You hold the pendulum over the board and it swings toward answers. Boards are useful for complex questions but not required—yes/no dowsing works without any board.',
+  },
 ];
 
 export default function PendulumDivinationPage() {
@@ -119,9 +139,55 @@ export default function PendulumDivinationPage() {
     ],
   });
 
+  const pendulumTypesSchema = createItemListSchema({
+    name: 'Types of Pendulums for Divination',
+    description:
+      'A guide to different pendulum types including crystal, metal, and wood pendulums for dowsing.',
+    url: 'https://lunary.app/grimoire/divination/pendulum',
+    items: [
+      {
+        name: 'Clear Quartz Pendulum',
+        url: 'https://lunary.app/grimoire/divination/pendulum#types',
+        description:
+          'All-purpose crystal pendulum that amplifies energy. Ideal for beginners and all types of questions.',
+      },
+      {
+        name: 'Amethyst Pendulum',
+        url: 'https://lunary.app/grimoire/divination/pendulum#types',
+        description:
+          'Spiritual crystal pendulum for intuition, psychic development, and higher guidance questions.',
+      },
+      {
+        name: 'Rose Quartz Pendulum',
+        url: 'https://lunary.app/grimoire/divination/pendulum#types',
+        description:
+          'Heart-centered crystal pendulum for love, relationships, and emotional questions.',
+      },
+      {
+        name: 'Metal (Brass/Copper) Pendulum',
+        url: 'https://lunary.app/grimoire/divination/pendulum#types',
+        description:
+          'Neutral and highly responsive pendulum. Good for general divination and practical questions.',
+      },
+      {
+        name: 'Wood Pendulum',
+        url: 'https://lunary.app/grimoire/divination/pendulum#types',
+        description:
+          'Grounding natural pendulum for earth-based questions and nature-connected practice.',
+      },
+      {
+        name: 'Chamber Pendulum',
+        url: 'https://lunary.app/grimoire/divination/pendulum#types',
+        description:
+          'Hollow pendulum that can hold small items (herbs, paper) to focus the reading.',
+      },
+    ],
+  });
+
   return (
     <>
       {renderJsonLd(pendulumHowToSchema)}
+      {renderJsonLd(pendulumTypesSchema)}
       <div className='p-4 md:p-6 lg:p-8 xl:p-10 min-h-full'>
         <SEOContentTemplate
           title='Pendulum Divination | Lunary'
@@ -169,7 +235,29 @@ These movements can vary by practitioner, so it's essential to program your own 
 - **Crystal Pendulums:** Clear quartz, amethyst, rose quartz. Add specific energetic properties.
 - **Metal Pendulums:** Brass, copper, silver. Neutral and responsive.
 - **Wood Pendulums:** Natural and grounding. Good for earth-based questions.
-- **Specialty Pendulums:** Chamber pendulums (hold items inside), Egyptian pendulums (specific shapes).`}
+- **Specialty Pendulums:** Chamber pendulums (hold items inside), Egyptian pendulums (specific shapes).
+
+**Making a DIY Pendulum:**
+
+You don't need to buy a pendulum—you can make one easily:
+- A ring on a thread or string
+- A needle suspended from thread
+- A button or bead on dental floss
+- A small crystal wrapped in wire on a chain
+- Any weighted necklace pendant
+
+The weight should be 1-2 inches and hang 6-10 inches from your fingers. Cleanse and program it like any purchased pendulum.
+
+**Using Pendulum Boards:**
+
+Pendulum boards (or charts) expand what you can ask. Common types:
+- **Yes/No boards:** Simple circle divided in half
+- **Alphabet boards:** Letters for spelling out messages
+- **Number boards:** For dates, quantities, percentages
+- **Chakra boards:** For energy healing work
+- **Custom boards:** Create your own for specific questions
+
+To use a board, hold your pendulum over the center and ask your question. The pendulum will swing toward the relevant answer.`}
           emotionalThemes={[
             'Guidance',
             'Clarity',
