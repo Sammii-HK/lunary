@@ -501,6 +501,33 @@ export async function POST(request: NextRequest) {
     const savedReading = mapRowToReading(insertResult.rows[0]);
     const updatedUsage = await computeUsageSnapshot(userId, subscription);
 
+    // Increment tarot progress for multi-card spreads only (not daily single cards)
+    const cardCount = cardsForStorage.length;
+    if (cardCount > 1) {
+      const isPro = subscription.plan !== 'free';
+      try {
+        const { incrementProgress } = await import('@/lib/progress/server');
+        // Count 1 spread (not individual cards) for progress
+        const progressResult = await incrementProgress(
+          userId,
+          'tarot',
+          1, // Count spreads, not cards
+          isPro,
+        );
+        if (progressResult.leveledUp) {
+          console.log(
+            `[tarot/readings] User ${userId} leveled up to tarot level ${progressResult.newLevel}`,
+          );
+        }
+      } catch (progressError) {
+        // Non-critical - don't fail the reading
+        console.warn(
+          '[tarot/readings] Failed to update progress:',
+          progressError,
+        );
+      }
+    }
+
     return NextResponse.json(
       {
         reading: savedReading,

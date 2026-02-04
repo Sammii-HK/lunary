@@ -21,6 +21,8 @@ import {
 import { Button } from '@/components/ui/button';
 import { BirthdayInput } from '@/components/ui/birthday-input';
 import { UpgradePrompt } from '@/components/UpgradePrompt';
+import { CircleLeaderboard } from '@/components/CircleLeaderboard';
+import { CircleInviteCTA } from '@/components/CircleInviteCTA';
 
 type Friend = {
   id: string;
@@ -551,6 +553,12 @@ export function CircleTab() {
 
   return (
     <div className='w-full max-w-3xl space-y-6'>
+      {/* Leaderboard & Invite CTA at top */}
+      <div className='grid gap-4 sm:grid-cols-2'>
+        <CircleLeaderboard />
+        <CircleInviteCTA />
+      </div>
+
       <div className='flex items-center justify-between'>
         <div>
           <h2 className='text-lg font-semibold text-white'>Your Circle</h2>
