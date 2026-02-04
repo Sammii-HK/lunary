@@ -81,7 +81,7 @@ export async function CosmicHighlight({
           )}
         </div>
       </div>
-      <div className='space-y-4 rounded-2xl border border-zinc-800/60 bg-zinc-900/60 p-5'>
+      <div className='space-y-4 rounded-2xl border border-zinc-800/60 bg-zinc-900/60 p-5 col-span-3 md:col-span-1'>
         <div>
           <h3 className='text-sm font-semibold tracking-wide text-zinc-300'>
             {variant === 'daily' ? 'Daily Signals' : 'Weekly Signals'}
