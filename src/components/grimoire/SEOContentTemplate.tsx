@@ -317,20 +317,21 @@ export async function SEOContentTemplate({
       ))}
 
       {/* Sticky Breadcrumbs with Search - sticks after title scrolls off */}
-      {autoBreadcrumbs.length > 0 && (
-        <div
-          style={{
-            position: 'sticky',
-            top: 0,
-          }}
-          className='z-40 bg-zinc-950 border-b border-zinc-800/50 -mx-4 px-4 py-2 mb-6'
-        >
-          <div className='flex items-center justify-between gap-4 [&>nav]:mb-0'>
+
+      <div
+        style={{
+          position: 'sticky',
+          top: 0,
+        }}
+        className='z-40 bg-zinc-950 border-b border-zinc-800/50 -mx-4 px-4 py-2 mb-6'
+      >
+        <div className='flex items-center justify-between gap-4 [&>nav]:mb-0'>
+          {autoBreadcrumbs.length > 0 && (
             <Breadcrumbs items={autoBreadcrumbs} renderSchema={false} />
-            <GrimoireSearch compact placeholder='Search grimoire...' />
-          </div>
+          )}
+          <GrimoireSearch compact placeholder='Search grimoire...' />
         </div>
-      )}
+      </div>
 
       {/* H1 - above sticky breadcrumbs so they stick after title scrolls off */}
       <header className='pt-2 md:pt-4 mb-2 md:mb-3'>
