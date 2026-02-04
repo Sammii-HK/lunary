@@ -17,3 +17,4 @@ export {
 export { hapticService } from './haptic-service';
 export { shareService } from './share-service';
 export { offlineService } from './offline-service';
+export { nativePushService } from './push-service';
