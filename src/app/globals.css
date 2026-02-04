@@ -301,3 +301,8 @@ html {
     font-size: 16px !important;
   }
 }
+
+/* Grimoire hash navigation - account for sticky header */
+[id] {
+  scroll-margin-top: calc(var(--global-nav-offset, 0px) + 60px);
+}

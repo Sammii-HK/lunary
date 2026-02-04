@@ -24,6 +24,7 @@ import { ContextualNudgeSection } from '../ui/ContextualNudgeSection';
 import { InlineContextualNudge } from './InlineContextualNudge';
 import { ReadFullGuidePrompt } from '@/app/grimoire/guides/ReadFullGuidePrompt';
 import { getInlineCtaVariant } from '@/lib/ab-tests-server';
+import { GrimoireSearch } from '@/app/grimoire/GrimoireSearch';
 
 /**
  * Format a URL segment into a human-readable label
@@ -302,7 +303,7 @@ export async function SEOContentTemplate({
     Boolean(contextualNudge?.headline) && Boolean(contextualNudge?.buttonLabel);
 
   return (
-    <article className='max-w-4xl h-fit mx-auto overflow-x-hidden pt-2 px-4 pb-[120px]'>
+    <article className='max-w-4xl mx-auto px-4 pb-[120px]'>
       {/* JSON-LD Schemas */}
       {renderJsonLd(faqSchema)}
       {renderJsonLd(articleSchema)}
@@ -315,15 +316,24 @@ export async function SEOContentTemplate({
         </React.Fragment>
       ))}
 
-      {/* Breadcrumbs - auto-generated from URL if not provided */}
+      {/* Sticky Breadcrumbs with Search - sticks after title scrolls off */}
       {autoBreadcrumbs.length > 0 && (
-        <div className='mt-2 md:mb-8 md:mt-4'>
-          <Breadcrumbs items={autoBreadcrumbs} renderSchema={false} />
+        <div
+          style={{
+            position: 'sticky',
+            top: 0,
+          }}
+          className='z-40 bg-zinc-950 border-b border-zinc-800/50 -mx-4 px-4 py-2 mb-6'
+        >
+          <div className='flex items-center justify-between gap-4 [&>nav]:mb-0'>
+            <Breadcrumbs items={autoBreadcrumbs} renderSchema={false} />
+            <GrimoireSearch compact placeholder='Search grimoire...' />
+          </div>
         </div>
       )}
 
-      {/* H1 */}
-      <header className='mb-8'>
+      {/* H1 - above sticky breadcrumbs so they stick after title scrolls off */}
+      <header className='pt-2 md:pt-4 mb-2 md:mb-3'>
         <Heading as='h1' variant='h1'>
           {h1 || title}
         </Heading>
@@ -338,6 +348,7 @@ export async function SEOContentTemplate({
           </p>
         )}
       </header>
+
       <div className='space-y-8 p-2 md:p-4'>
         {heroContent && <div className='mb-8'>{heroContent}</div>}
 
