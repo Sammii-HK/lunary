@@ -238,10 +238,10 @@ Spiritually, ${signData.name} teaches lessons about ${signData.element.toLowerCa
         ]}
         astrologyCorrespondences={`Element: ${signData.element}
 Quality: ${quality}
-Ruling Planet: (varies by sign)
+Ruling Planet: ${signData.rulingPlanet}
 Symbol: ${unicodeSymbol}
 Dates: ${signData.dates}
-Season: (varies by sign)`}
+Tarot Card: ${signData.tarotCard}`}
         relatedItems={[
           ...getEntityRelationships('zodiac', signKey)
             .slice(0, 5)
@@ -250,6 +250,11 @@ Season: (varies by sign)`}
               href: rel.url,
               type: rel.type.charAt(0).toUpperCase() + rel.type.slice(1),
             })),
+          {
+            name: signData.tarotCard,
+            href: `/grimoire/tarot/${signData.tarotCard.toLowerCase().replace(/\s+/g, '-')}`,
+            type: 'Tarot',
+          },
           {
             name: 'Birth Chart',
             href: '/grimoire/birth-chart',
