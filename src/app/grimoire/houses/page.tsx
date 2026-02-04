@@ -72,7 +72,7 @@ export default function HousesIndexPage() {
     url: 'https://lunary.app/grimoire/houses',
     items: HOUSES.map((house) => ({
       name: `${house}${getOrdinalSuffix(house)} House`,
-      url: `https://lunary.app/grimoire/houses/overview/${house}`,
+      url: `https://lunary.app/grimoire/houses/${house}${getOrdinalSuffix(house)}-house`,
       description: HOUSE_DATA[house].lifeArea,
     })),
   });

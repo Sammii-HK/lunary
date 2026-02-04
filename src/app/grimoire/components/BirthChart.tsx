@@ -8,7 +8,7 @@ import { BookOpenIcon, HeartIcon } from 'lucide-react';
 import symbols from '@/data/symbols.json';
 import { cn } from '@/lib/utils';
 import { elementColors } from '@/constants/elements';
-import { houseMap, housesData } from '@/constants/seo/houses';
+import { housesData } from '@/constants/seo/houses';
 import birthChartPlanets from '@/data/birth-chart-planets.json';
 
 type BirthChartPlanet = {
@@ -186,11 +186,18 @@ const BirthChart = () => {
         <div className='grid grid-cols-1 md:grid-cols-2 gap-3'>
           {houses.map((house) => {
             const houseNumber = house.number;
-            const houseSlug = houseMap[houseNumber] || house.name;
+            const suffix =
+              houseNumber === 1
+                ? 'st'
+                : houseNumber === 2
+                  ? 'nd'
+                  : houseNumber === 3
+                    ? 'rd'
+                    : 'th';
             return (
               <Link
                 key={house.number}
-                href={`/grimoire/houses/overview/${houseSlug}`}
+                href={`/grimoire/houses/${houseNumber}${suffix}-house`}
                 className='block rounded-lg border border-zinc-800/50 bg-zinc-900/30 p-4 hover:bg-zinc-900/50 hover:border-lunary-primary-600 transition-all group'
               >
                 <div className='flex items-start gap-3'>

@@ -3483,12 +3483,13 @@ function getRetrogradeReflectionLine(focus: string, sign?: string): string {
 function mergeHashtagsWithPriority(
   baseHashtags: string | undefined,
   priorityHashtags: string[],
+  limit: number = 5,
 ): string {
   const tags: string[] = [];
   const seen = new Set<string>();
 
   const pushTag = (tag?: string) => {
-    if (!tag) return;
+    if (!tag || tags.length >= limit) return;
     const trimmed = tag.trim();
     if (trimmed && !seen.has(trimmed)) {
       seen.add(trimmed);
@@ -3496,39 +3497,44 @@ function mergeHashtagsWithPriority(
     }
   };
 
+  // Priority hashtags first (most relevant to the specific post type)
   for (const tag of priorityHashtags) {
     pushTag(tag);
   }
 
+  // Add base platform hashtags up to the limit
   if (baseHashtags) {
     baseHashtags.split(/\s+/).forEach(pushTag);
   }
 
-  return tags.join(' ');
+  return tags.slice(0, limit).join(' ');
 }
 
 function addFocusedHashtags(
   text: string,
   baseHashtags: string | undefined,
   priorityHashtags: string[],
+  limit: number = 4,
 ): string {
   const mergedHashtags = mergeHashtagsWithPriority(
     baseHashtags,
     priorityHashtags,
+    limit,
   );
   return addHashtags(text, mergedHashtags);
 }
 
+// Transit posts: 3 hashtags max (optimized for Threads engagement)
 function addTransitHashtags(text: string, baseHashtags?: string): string {
-  return addFocusedHashtags(text, baseHashtags, transitHashtagPriority);
+  return addFocusedHashtags(text, baseHashtags, transitHashtagPriority, 3);
 }
 
 function addRetrogradeHashtags(text: string, baseHashtags?: string): string {
-  return addFocusedHashtags(text, baseHashtags, retrogradeHashtagPriority);
+  return addFocusedHashtags(text, baseHashtags, retrogradeHashtagPriority, 3);
 }
 
 function addAstrologyHashtags(text: string, baseHashtags?: string): string {
-  return addFocusedHashtags(text, baseHashtags, astrologyHashtagPriority);
+  return addFocusedHashtags(text, baseHashtags, astrologyHashtagPriority, 3);
 }
 
 function buildRetrogradeTextPosts({

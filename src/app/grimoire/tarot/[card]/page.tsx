@@ -82,6 +82,10 @@ export async function generateMetadata({
       `${cardData.card.name} reversed`,
       `${cardData.card.name} love`,
       `${cardData.card.name} career`,
+      `${cardData.card.name} yes or no`,
+      `${cardData.card.name} feelings`,
+      `${cardData.card.name} as a person`,
+      `${cardData.card.name} advice`,
       `tarot ${cardData.card.name}`,
     ],
     url: `https://lunary.app/grimoire/tarot/${card}`,
@@ -141,6 +145,12 @@ export default async function TarotCardPage({
   const careerMeaning =
     cardDetails.careerMeaning ||
     `In career readings, ${cardData.card.name} indicates ${cardData.card.keywords[0]?.toLowerCase() || 'work-related themes'}. Consider how the card's energy applies to your professional life.`;
+
+  const feelingsMeaning = `When asking about feelings, ${cardData.card.name} suggests someone is experiencing ${cardData.card.keywords.slice(0, 2).join(' and ').toLowerCase() || 'complex emotions'}. This card often indicates ${cardData.card.keywords[0]?.toLowerCase() || 'deep feelings'} toward you or the situation.`;
+
+  const asPersonMeaning = `As a person, ${cardData.card.name} represents someone who embodies ${cardData.card.keywords.slice(0, 2).join(' and ').toLowerCase() || 'these qualities'}. They may be ${cardData.card.keywords[0]?.toLowerCase() || 'a significant figure'} in your life or someone you aspire to become.`;
+
+  const adviceMeaning = `${cardData.card.name} advises you to embrace ${cardData.card.keywords[0]?.toLowerCase() || 'its energy'}. ${cardData.card.information.split('.')[0]}.`;
 
   const yesNo = getTarotYesNo({
     name: cardData.card.name,
@@ -239,6 +249,18 @@ export default async function TarotCardPage({
       question: `Is ${cardData.card.name} yes or no?`,
       answer: `Upright: ${yesNo.upright.answer} — ${yesNo.upright.reason} Reversed: ${yesNo.reversed.answer} — ${yesNo.reversed.reason} Best used for simple questions.`,
     },
+    {
+      question: `What does ${cardData.card.name} mean for feelings?`,
+      answer: feelingsMeaning,
+    },
+    {
+      question: `What does ${cardData.card.name} represent as a person?`,
+      answer: asPersonMeaning,
+    },
+    {
+      question: `What advice does ${cardData.card.name} give?`,
+      answer: adviceMeaning,
+    },
     ...(cardDetails.affirmation
       ? [
           {
@@ -306,7 +328,7 @@ export default async function TarotCardPage({
           answer: `${cardData.card.name} is ${cardData.type === 'major' ? 'a Major Arcana tarot card' : `a ${suitInfo?.name || 'Minor Arcana'} tarot card`} representing ${cardData.card.keywords.join(', ').toLowerCase()}. ${cardData.type === 'major' ? 'As one of the 22 Major Arcana cards, it represents significant life themes and spiritual lessons.' : suitInfo ? `Associated with the ${suitInfo.element} element, it relates to ${suitInfo.qualities.toLowerCase()}.` : ''} When this card appears in a reading, it brings attention to themes of ${cardData.card.keywords.slice(0, 3).join(', ').toLowerCase()}.`,
         }}
         intro={`${cardData.card.name} is ${cardData.type === 'major' ? 'a Major Arcana card' : `a ${suitInfo?.name || 'Minor Arcana'} card`} representing ${cardData.card.keywords.join(', ').toLowerCase()}. ${cardData.card.information}`}
-        tldr={`${cardData.card.name} represents ${cardData.card.keywords.join(', ').toLowerCase()}.`}
+        tldr={`${cardData.card.name} represents ${cardData.card.keywords.slice(0, 3).join(', ').toLowerCase()}. Yes/No: ${yesNo.upright.answer}. As feelings: ${cardData.card.keywords[0]?.toLowerCase() || 'complex emotions'}. As a person: someone embodying ${cardData.card.keywords[0]?.toLowerCase() || 'these qualities'}.`}
         meaning={`${cardData.card.name} is ${cardData.type === 'major' ? 'one of the 22 Major Arcana cards' : `a ${suitInfo?.name || 'Minor Arcana'} card`} in the tarot deck. ${cardData.type === 'major' ? 'Major Arcana cards represent significant life themes and spiritual lessons.' : suitInfo ? `${suitInfo.name} cards are associated with ${suitInfo.element} element and represent ${suitInfo.qualities.toLowerCase()}.` : ''}
 
 ## Upright Meaning
@@ -322,6 +344,18 @@ ${reversedMeaning}
 Upright: ${yesNo.upright.answer} — ${yesNo.upright.reason}
 Reversed: ${yesNo.reversed.answer} — ${yesNo.reversed.reason}
 Best used for simple questions.
+
+## ${cardData.card.name} for Feelings
+
+${feelingsMeaning}
+
+## ${cardData.card.name} as a Person
+
+${asPersonMeaning}
+
+## Advice from ${cardData.card.name}
+
+${adviceMeaning}
 
 When ${cardData.card.name} appears in a reading, it brings attention to ${cardData.card.keywords.join(', ').toLowerCase()}. The card's position, surrounding cards, and your question all influence how this energy manifests in your situation.`}
         symbolism={

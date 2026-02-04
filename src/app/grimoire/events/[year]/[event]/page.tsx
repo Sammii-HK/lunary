@@ -10,9 +10,14 @@ import { CosmicConnections } from '@/components/grimoire/CosmicConnections';
 // 30-day ISR revalidation
 export const revalidate = 2592000;
 
-// Dynamic year range: current year to 10 years ahead
+// Keep historical years indexed (starting from 2025) and extend 10 years into the future
+const START_YEAR = 2025;
 const CURRENT_YEAR = new Date().getFullYear();
-const AVAILABLE_YEARS = Array.from({ length: 11 }, (_, i) => CURRENT_YEAR + i);
+const END_YEAR = Math.max(CURRENT_YEAR + 10, START_YEAR + 10);
+const AVAILABLE_YEARS = Array.from(
+  { length: END_YEAR - START_YEAR + 1 },
+  (_, i) => START_YEAR + i,
+);
 
 const EVENT_KEYS = [
   'mercury-retrograde',
@@ -20,6 +25,7 @@ const EVENT_KEYS = [
   'mars-retrograde',
   'retrogrades',
   'eclipses',
+  'equinoxes-solstices',
 ] as const;
 
 type EventKey = (typeof EVENT_KEYS)[number];
@@ -98,6 +104,19 @@ const DEFAULT_EVENT_COPY: Record<
     title: 'Eclipses',
     description: 'Solar and lunar eclipses with dates and zodiac signs.',
     keywords: ['eclipses', 'solar eclipse', 'lunar eclipse'],
+  },
+  'equinoxes-solstices': {
+    title: 'Equinoxes & Solstices',
+    description:
+      'Seasonal turning points with dates and astrological significance.',
+    keywords: [
+      'equinox',
+      'solstice',
+      'spring equinox',
+      'summer solstice',
+      'fall equinox',
+      'winter solstice',
+    ],
   },
 };
 
@@ -329,7 +348,49 @@ export default async function EventsYearEventPage({
       endDate: r.endDate,
     }));
 
-  const entries = event === 'eclipses' ? eclipseEntries : retrogradeEntries;
+  // Seasonal events (equinoxes and solstices)
+  const seasonalEntries = (forecast.seasonalEvents || []).map((s) => {
+    const typeLabels: Record<
+      string,
+      { name: string; sign: string; theme: string }
+    > = {
+      spring_equinox: {
+        name: 'Spring Equinox',
+        sign: 'Aries',
+        theme: 'New beginnings, balance, fresh starts',
+      },
+      summer_solstice: {
+        name: 'Summer Solstice',
+        sign: 'Cancer',
+        theme: 'Peak energy, abundance, manifestation',
+      },
+      fall_equinox: {
+        name: 'Fall Equinox',
+        sign: 'Libra',
+        theme: 'Harvest, gratitude, balance',
+      },
+      winter_solstice: {
+        name: 'Winter Solstice',
+        sign: 'Capricorn',
+        theme: 'Return of light, introspection, rebirth',
+      },
+    };
+    const info = typeLabels[s.type] || { name: s.type, sign: '—', theme: '—' };
+    return {
+      date: formatDate(s.date),
+      name: info.name,
+      sign: info.sign,
+      theme: info.theme,
+      description: s.description,
+    };
+  });
+
+  const entries =
+    event === 'eclipses'
+      ? eclipseEntries
+      : event === 'equinoxes-solstices'
+        ? seasonalEntries
+        : retrogradeEntries;
 
   if (entries.length === 0) {
     notFound();
@@ -347,27 +408,38 @@ export default async function EventsYearEventPage({
             'Cosmic shift',
           ]),
         }
-      : event === 'retrogrades'
+      : event === 'equinoxes-solstices'
         ? {
-            title: `${yearNum} Retrograde Calendar`,
-            headers: ['Planet', 'Start Date', 'End Date', 'Sign(s)'],
-            rows: retrogradeEntries.map((entry) => [
-              entry.planet,
-              formatDate(entry.startDate),
-              formatDate(entry.endDate),
-              entry.description ?? '—',
+            title: `${yearNum} Equinoxes & Solstices`,
+            headers: ['Date', 'Event', 'Sign', 'Theme'],
+            rows: seasonalEntries.map((entry) => [
+              entry.date,
+              entry.name,
+              entry.sign,
+              entry.theme,
             ]),
           }
-        : {
-            title: `${config.title} ${yearNum} Dates`,
-            headers: ['Period', 'Start Date', 'End Date', 'Sign(s)'],
-            rows: retrogradeEntries.map((entry, index) => [
-              `Period ${index + 1}`,
-              formatDate(entry.startDate),
-              formatDate(entry.endDate),
-              entry.description ?? '—',
-            ]),
-          };
+        : event === 'retrogrades'
+          ? {
+              title: `${yearNum} Retrograde Calendar`,
+              headers: ['Planet', 'Start Date', 'End Date', 'Sign(s)'],
+              rows: retrogradeEntries.map((entry) => [
+                entry.planet,
+                formatDate(entry.startDate),
+                formatDate(entry.endDate),
+                entry.description ?? '—',
+              ]),
+            }
+          : {
+              title: `${config.title} ${yearNum} Dates`,
+              headers: ['Period', 'Start Date', 'End Date', 'Sign(s)'],
+              rows: retrogradeEntries.map((entry, index) => [
+                `Period ${index + 1}`,
+                formatDate(entry.startDate),
+                formatDate(entry.endDate),
+                entry.description ?? '—',
+              ]),
+            };
 
   const tables = content.tables?.map((table) => ({
     ...table,

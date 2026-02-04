@@ -1,5 +1,5 @@
 {
-  "version": 1,
+  "version": 2,
   "rules": [
     { "match": "^/grimoire/tarot/spreads$", "hub": "tarotSpreadsIndex" },
     { "match": "^/grimoire/tarot/spreads/", "hub": "tarotSpreadsDetail" },
@@ -14,6 +14,7 @@
     { "match": "^/grimoire/moon", "hub": "moon" },
     { "match": "^/grimoire/tarot", "hub": "tarot" },
     { "match": "^/grimoire/numerology", "hub": "numerology" },
+    { "match": "^/grimoire/life-path", "hub": "numerology" },
     { "match": "^/grimoire/double-hours", "hub": "clockNumbers" },
     { "match": "^/grimoire/mirror-hours", "hub": "clockNumbers" },
     { "match": "^/grimoire/angel-numbers", "hub": "angelNumbers" },
@@ -24,292 +25,689 @@
     { "match": "^/grimoire/practices", "hub": "practiceWithoutDogma" },
     { "match": "^/grimoire/correspondences", "hub": "symbolicSystems" },
     { "match": "^/grimoire/birth-chart", "hub": "personalContext" },
+    { "match": "^/grimoire/guides/birth-chart", "hub": "personalContext" },
     { "match": "^/grimoire/events", "hub": "cosmicTiming" },
-    { "match": "^/grimoire/transits", "hub": "cosmicTiming" },
-    { "match": "^/grimoire/astrology", "hub": "astrology" },
+    { "match": "^/grimoire/zodiac", "hub": "astrology" },
+    { "match": "^/grimoire/rising", "hub": "astrology" },
+    { "match": "^/grimoire/placements", "hub": "astrology" },
+    { "match": "^/grimoire/compatibility", "hub": "astrology" },
+    { "match": "^/grimoire/synastry", "hub": "astrology" },
+    { "match": "^/grimoire/archetypes", "hub": "archetypes" },
     { "match": "^/grimoire", "hub": "grimoireReference" }
   ],
   "ctaNudges": {
     "universal": [
       {
-        "headline": "See how this shows up in your chart",
-        "subline": "Sign in to view your full birth chart with planets, houses, and aspects.",
-        "buttonLabel": "View my chart",
-        "href": "/auth?signup=true",
-        "action": "authOrLink",
-        "inlineCopy": "See how this shows up in your chart"
-      },
-      {
-        "headline": "Connect this to your placements",
-        "subline": "Create a free account to see your natal chart and how this relates to you.",
+        "headline": "Generic meanings only go so far",
+        "subline": "Lunary shows everything through YOUR birth chart, not one-size-fits-all descriptions.",
         "buttonLabel": "Get my free chart",
         "href": "/auth?signup=true",
         "action": "authOrLink",
-        "inlineCopy": "See how this shows up in your chart"
+        "inlineCopy": "Generic meanings only go so far → see YOUR chart"
+      },
+      {
+        "headline": "This is reference. Your chart makes it personal.",
+        "subline": "Create a free account to see your full birth chart with all placements and houses.",
+        "buttonLabel": "Make it personal",
+        "href": "/auth?signup=true",
+        "action": "authOrLink",
+        "inlineCopy": "This is reference. Your chart makes it personal."
+      },
+      {
+        "headline": "You've got the concepts. Now see your chart.",
+        "subline": "Your full birth chart, today's transits, and lunar timing. All free.",
+        "buttonLabel": "Get my free chart",
+        "href": "/auth?signup=true",
+        "action": "authOrLink",
+        "inlineCopy": "You've got the concepts. Now see YOUR chart."
       }
     ],
 
     "astrology": [
       {
-        "headline": "Go beyond your sun sign",
-        "subline": "Create a free account to see your complete natal chart with all planets and houses.",
+        "headline": "This is your sun sign. Your chart has 10 more.",
+        "subline": "See your full birth chart with all your placements, houses, and aspects. Free.",
+        "buttonLabel": "See my full chart",
+        "href": "/auth?signup=true",
+        "action": "authOrLink",
+        "inlineCopy": "This is your sun sign. Your chart has 10 more."
+      },
+      {
+        "headline": "Sun sign is 1 of 10 placements",
+        "subline": "Your moon, rising, Mercury, Venus... each one tells a different story. See them all.",
+        "buttonLabel": "See all my placements",
+        "href": "/auth?signup=true",
+        "action": "authOrLink",
+        "inlineCopy": "Sun sign is 1 of 10 placements. See yours."
+      },
+      {
+        "headline": "There's more to you than this sign",
+        "subline": "Your full birth chart shows where every planet was when you were born. Free to calculate.",
         "buttonLabel": "Get my free chart",
         "href": "/auth?signup=true",
         "action": "authOrLink",
-        "inlineCopy": "Go beyond your sun sign with your full chart"
+        "inlineCopy": "There's more to you than this sign."
       }
     ],
 
     "planets": [
       {
-        "headline": "Where is this planet in your chart?",
-        "subline": "Sign in to see where this planet sits in your natal chart.",
-        "buttonLabel": "View my chart",
+        "headline": "Which house does this planet rule in YOUR chart?",
+        "subline": "The sign it's in matters. The house it lands in tells you where it plays out.",
+        "buttonLabel": "Find this planet in my chart",
         "href": "/auth?signup=true",
         "action": "authOrLink",
-        "inlineCopy": "See where this planet sits in your chart"
+        "inlineCopy": "Which house does this planet rule in YOUR chart?"
+      },
+      {
+        "headline": "Same planet, different house = different story",
+        "subline": "Where this lands in your chart changes everything. See your placements.",
+        "buttonLabel": "See my placements",
+        "href": "/auth?signup=true",
+        "action": "authOrLink",
+        "inlineCopy": "Same planet, different house = different story."
+      },
+      {
+        "headline": "This planet sits somewhere in your chart",
+        "subline": "Which sign? Which house? What aspects does it make? Find out free.",
+        "buttonLabel": "Find it in my chart",
+        "href": "/auth?signup=true",
+        "action": "authOrLink",
+        "inlineCopy": "This planet sits somewhere in your chart."
       }
     ],
 
     "houses": [
       {
-        "headline": "What planets live in this house?",
-        "subline": "Sign in to see which planets sit in this house in your chart.",
-        "buttonLabel": "View my chart",
+        "headline": "Empty house? Doesn't mean inactive.",
+        "subline": "See which planets sit here and which sign rules this house for you.",
+        "buttonLabel": "Check my houses",
         "href": "/auth?signup=true",
         "action": "authOrLink",
-        "inlineCopy": "See which planets occupy this house for you"
+        "inlineCopy": "Empty house? Doesn't mean inactive. Check yours."
+      },
+      {
+        "headline": "What's actually in this house for you?",
+        "subline": "The ruling sign and any planets here shape how this area plays out in your life.",
+        "buttonLabel": "See my houses",
+        "href": "/auth?signup=true",
+        "action": "authOrLink",
+        "inlineCopy": "What's actually in this house for you?"
+      },
+      {
+        "headline": "This house has a ruler in your chart",
+        "subline": "Which sign rules it? Are there planets here? Your chart has the specifics.",
+        "buttonLabel": "Check my chart",
+        "href": "/auth?signup=true",
+        "action": "authOrLink",
+        "inlineCopy": "This house has a ruler in your chart."
       }
     ],
 
     "aspects": [
       {
-        "headline": "See this aspect in your chart",
-        "subline": "Sign in to view all the aspects in your birth chart.",
+        "headline": "Do you have this aspect?",
+        "subline": "Your chart might have it natally. Or today's sky might be forming it to one of your planets.",
+        "buttonLabel": "Check my aspects",
+        "href": "/auth?signup=true",
+        "action": "authOrLink",
+        "inlineCopy": "Do you have this aspect? Check your chart."
+      },
+      {
+        "headline": "This aspect might be in your chart right now",
+        "subline": "Natally or by transit. See what's actually active for you today.",
+        "buttonLabel": "See my aspects",
+        "href": "/auth?signup=true",
+        "action": "authOrLink",
+        "inlineCopy": "This aspect might be in your chart right now."
+      },
+      {
+        "headline": "Aspects show where the tension and flow are",
+        "subline": "Your chart has its own pattern. See which planets are talking to each other.",
         "buttonLabel": "View my chart",
         "href": "/auth?signup=true",
         "action": "authOrLink",
-        "inlineCopy": "View this aspect in your birth chart"
+        "inlineCopy": "Aspects show where the tension and flow are."
       }
     ],
 
     "transits": [
       {
-        "headline": "See where the planets are today",
-        "subline": "Sign in to view today's planetary positions and your birth chart.",
-        "buttonLabel": "View transits & my chart",
+        "headline": "Same transit, different experience",
+        "subline": "Where this lands in YOUR chart changes everything. See which house it's activating.",
+        "buttonLabel": "See transits in my chart",
         "href": "/auth?signup=true",
         "action": "authOrLink",
-        "inlineCopy": "See how today's planets touch your chart"
+        "inlineCopy": "Same transit, different experience. See YOUR houses."
+      },
+      {
+        "headline": "This transit is hitting a specific house for you",
+        "subline": "Not the same as everyone else. See where it lands in your chart.",
+        "buttonLabel": "Find it in my chart",
+        "href": "/auth?signup=true",
+        "action": "authOrLink",
+        "inlineCopy": "This transit is hitting a specific house for you."
+      },
+      {
+        "headline": "The sky moves. Your chart shows where it matters.",
+        "subline": "Today's planets are aspecting your natal placements. See what's active.",
+        "buttonLabel": "See today's transits",
+        "href": "/auth?signup=true",
+        "action": "authOrLink",
+        "inlineCopy": "The sky moves. Your chart shows where it matters."
       }
     ],
 
     "horoscopes": [
       {
-        "headline": "Go beyond your sun sign",
-        "subline": "Sign in to see your complete natal chart with all planets and houses.",
-        "buttonLabel": "Get my free chart",
+        "headline": "This is your sun sign. Your chart has 10 more.",
+        "subline": "See your full birth chart with all your placements, houses, and aspects. Free.",
+        "buttonLabel": "See my full chart",
         "href": "/auth?signup=true",
         "action": "authOrLink",
-        "inlineCopy": "Get your full chart, not just your sun sign"
+        "inlineCopy": "This is your sun sign. Your chart has 10 more."
+      },
+      {
+        "headline": "Generic horoscope? Your chart is more specific.",
+        "subline": "Sun sign forecasts are broad. Your actual transits tell a different story.",
+        "buttonLabel": "See my transits",
+        "href": "/auth?signup=true",
+        "action": "authOrLink",
+        "inlineCopy": "Generic horoscope? Your chart is more specific."
+      },
+      {
+        "headline": "Your rising sign gets a horoscope too",
+        "subline": "Many astrologers say read your rising. See your full chart to know what that is.",
+        "buttonLabel": "Find my rising sign",
+        "href": "/auth?signup=true",
+        "action": "authOrLink",
+        "inlineCopy": "Your rising sign gets a horoscope too."
       }
     ],
 
     "moon": [
       {
-        "headline": "Track the moon through your chart",
-        "subline": "Sign in to follow moon phases and see your natal moon placement.",
-        "buttonLabel": "View my chart",
+        "headline": "The moon moves. Your natal moon doesn't.",
+        "subline": "Track how today's moon aspects your natal placements, not just the generic forecast.",
+        "buttonLabel": "Track moon through my chart",
         "href": "/auth?signup=true",
         "action": "authOrLink",
-        "inlineCopy": "Track the moon through your natal placements"
+        "inlineCopy": "The moon moves. Your natal moon doesn't."
+      },
+      {
+        "headline": "Where's your natal moon?",
+        "subline": "The sign and house of your moon shapes your emotional world. See yours.",
+        "buttonLabel": "Find my moon",
+        "href": "/auth?signup=true",
+        "action": "authOrLink",
+        "inlineCopy": "Where's your natal moon? Find it in your chart."
+      },
+      {
+        "headline": "Today's moon is aspecting something in your chart",
+        "subline": "The moon moves fast. See what it's touching for you specifically today.",
+        "buttonLabel": "See today's moon aspects",
+        "href": "/auth?signup=true",
+        "action": "authOrLink",
+        "inlineCopy": "Today's moon is aspecting something in your chart."
       }
     ],
 
     "tarot": [
       {
-        "headline": "Pull a spread for yourself",
-        "subline": "Sign in to try tarot spreads and get interpretations.",
+        "headline": "Reading about it is not the same as pulling for yourself",
+        "subline": "Try a spread. See what comes up when YOU ask the question.",
+        "buttonLabel": "Pull a spread",
+        "href": "/auth?signup=true",
+        "action": "authOrLink",
+        "inlineCopy": "Reading about it ≠ pulling for yourself."
+      },
+      {
+        "headline": "Card meanings are theory. Your pull is practice.",
+        "subline": "Shuffle, ask your question, see what lands. Free to try.",
         "buttonLabel": "Try a reading",
         "href": "/auth?signup=true",
         "action": "authOrLink",
-        "inlineCopy": "Pull a spread and get your interpretation"
+        "inlineCopy": "Card meanings are theory. Your pull is practice."
+      },
+      {
+        "headline": "What would this card say to YOU today?",
+        "subline": "Pull it in context. See how it lands with your actual question.",
+        "buttonLabel": "Pull a card",
+        "href": "/auth?signup=true",
+        "action": "authOrLink",
+        "inlineCopy": "What would this card say to YOU today?"
       }
     ],
 
     "tarotSpreadsIndex": [
       {
-        "headline": "Pull a spread",
-        "subline": "Sign in to try these spreads and get interpretations.",
+        "headline": "Pick a spread. Ask your question.",
+        "subline": "Stop hypothetically learning. Pull the cards and see what lands.",
         "buttonLabel": "Try a spread",
         "href": "/auth?signup=true",
         "action": "authOrLink",
-        "inlineCopy": "Try these spreads with your own reading"
+        "inlineCopy": "Stop hypothetically learning. Pull the cards."
+      },
+      {
+        "headline": "Which spread fits your question?",
+        "subline": "Browse, pick one, pull it. See what comes up for you right now.",
+        "buttonLabel": "Choose a spread",
+        "href": "/auth?signup=true",
+        "action": "authOrLink",
+        "inlineCopy": "Which spread fits your question? Try one."
+      },
+      {
+        "headline": "Spreads are meant to be pulled, not just read about",
+        "subline": "You've got the layouts. Now ask something real and see what shows up.",
+        "buttonLabel": "Pull a spread",
+        "href": "/auth?signup=true",
+        "action": "authOrLink",
+        "inlineCopy": "Spreads are meant to be pulled, not just read about."
       }
     ],
 
     "tarotSpreadsDetail": [
       {
-        "headline": "Try this spread for yourself",
-        "subline": "Sign in to pull this spread and get an interpretation.",
+        "headline": "This spread. Your question. Right now.",
+        "subline": "You've read what it's for. Now pull it and see what comes up.",
         "buttonLabel": "Pull this spread",
         "href": "/auth?signup=true",
         "action": "authOrLink",
-        "inlineCopy": "Pull this spread for yourself"
+        "inlineCopy": "You've read what it's for. Now pull it."
+      },
+      {
+        "headline": "Ready to try this spread?",
+        "subline": "You know the positions. Bring your question and see what lands.",
+        "buttonLabel": "Pull this spread",
+        "href": "/auth?signup=true",
+        "action": "authOrLink",
+        "inlineCopy": "Ready to try this spread? Pull it now."
+      },
+      {
+        "headline": "This layout is waiting for your question",
+        "subline": "Stop reading about it. Pull the cards and see what they say to you.",
+        "buttonLabel": "Try this spread",
+        "href": "/auth?signup=true",
+        "action": "authOrLink",
+        "inlineCopy": "This layout is waiting for your question."
       }
     ],
 
     "numerology": [
       {
-        "headline": "What's your number today?",
-        "subline": "Sign in to see your Personal Day number and birth chart.",
-        "buttonLabel": "View my chart",
+        "headline": "Your Personal Day number changes daily",
+        "subline": "Today's energy isn't the same as yesterday's. Check what number you're in right now.",
+        "buttonLabel": "See today's number",
         "href": "/auth?signup=true",
         "action": "authOrLink",
-        "inlineCopy": "See your Personal Day number and chart"
+        "inlineCopy": "Your Personal Day number changes daily."
+      },
+      {
+        "headline": "What's your Life Path number?",
+        "subline": "It's calculated from your birth date. See yours and what it means.",
+        "buttonLabel": "Calculate mine",
+        "href": "/auth?signup=true",
+        "action": "authOrLink",
+        "inlineCopy": "What's your Life Path number? Calculate it free."
+      },
+      {
+        "headline": "Numbers in theory vs. YOUR numbers",
+        "subline": "Your Life Path, Personal Year, Personal Day. See what's active for you.",
+        "buttonLabel": "See my numbers",
+        "href": "/auth?signup=true",
+        "action": "authOrLink",
+        "inlineCopy": "Numbers in theory vs. YOUR numbers."
       }
     ],
 
     "clockNumbers": [
       {
-        "headline": "Turn repetition into clarity",
-        "subline": "Sign in to connect repeating times to your current season and chart context.",
-        "buttonLabel": "Make it personal",
+        "headline": "You keep seeing this time. Now what?",
+        "subline": "Context matters. See what's active in your chart when these numbers keep appearing.",
+        "buttonLabel": "Connect this to my chart",
         "href": "/auth?signup=true",
         "action": "authOrLink",
-        "inlineCopy": "Connect this time to your current cycle"
+        "inlineCopy": "You keep seeing this time. Now what?"
+      },
+      {
+        "headline": "Repeating times catch your attention for a reason",
+        "subline": "See what's happening in your chart and transits when you notice these patterns.",
+        "buttonLabel": "Check my chart",
+        "href": "/auth?signup=true",
+        "action": "authOrLink",
+        "inlineCopy": "Repeating times catch your attention for a reason."
+      },
+      {
+        "headline": "The clock is one signal. Your chart is another.",
+        "subline": "See what transits are active and what your chart says about this moment.",
+        "buttonLabel": "See what's active",
+        "href": "/auth?signup=true",
+        "action": "authOrLink",
+        "inlineCopy": "The clock is one signal. Your chart is another."
       }
     ],
 
     "angelNumbers": [
       {
-        "headline": "Read the signal, not just the digits",
-        "subline": "Sign in to interpret angel numbers through your cycle and full birth chart context.",
-        "buttonLabel": "Personalise this sign",
+        "headline": "You saw the number. Now what?",
+        "subline": "Context matters. See what's active in your chart when this number keeps appearing.",
+        "buttonLabel": "Connect this to my chart",
         "href": "/auth?signup=true",
         "action": "authOrLink",
-        "inlineCopy": "Interpret this through your chart context"
+        "inlineCopy": "You saw the number. Now what?"
+      },
+      {
+        "headline": "Angel numbers are signals. Your chart shows the context.",
+        "subline": "What transits are active? What's your Personal Day number? See the full picture.",
+        "buttonLabel": "See my chart context",
+        "href": "/auth?signup=true",
+        "action": "authOrLink",
+        "inlineCopy": "Angel numbers are signals. Your chart shows the context."
+      },
+      {
+        "headline": "You noticed the pattern. Now check your timing.",
+        "subline": "See what's active in the sky and in your chart right now.",
+        "buttonLabel": "Check my timing",
+        "href": "/auth?signup=true",
+        "action": "authOrLink",
+        "inlineCopy": "You noticed the pattern. Now check your timing."
       }
     ],
 
     "crystals": [
       {
-        "headline": "See what crystals support this moment",
-        "subline": "Sign in to see your birth chart and get crystal recommendations for today.",
-        "buttonLabel": "View recommendations",
+        "headline": "Not every crystal is for every moment",
+        "subline": "See which ones support what's active in your chart today, not a generic list.",
+        "buttonLabel": "Get my crystal recs",
         "href": "/auth?signup=true",
         "action": "authOrLink",
-        "inlineCopy": "Get crystal recommendations for your chart"
+        "inlineCopy": "Not every crystal is for every moment."
+      },
+      {
+        "headline": "Crystals work better with timing",
+        "subline": "See what's active in your chart and which stones match this energy.",
+        "buttonLabel": "See my recommendations",
+        "href": "/auth?signup=true",
+        "action": "authOrLink",
+        "inlineCopy": "Crystals work better with timing."
+      },
+      {
+        "headline": "Which crystal fits YOUR chart right now?",
+        "subline": "Generic lists help. Timing-based recommendations help more.",
+        "buttonLabel": "Get personalised recs",
+        "href": "/auth?signup=true",
+        "action": "authOrLink",
+        "inlineCopy": "Which crystal fits YOUR chart right now?"
       }
     ],
 
     "spells": [
       {
-        "headline": "Match the ritual to the moment",
-        "subline": "Sign in to align spells with lunar timing and your chart so you are not guessing.",
-        "buttonLabel": "Find the right timing",
+        "headline": "Timing is half the spell",
+        "subline": "Lunary shows you when moon phases, planetary hours, and your transits align for this intention.",
+        "buttonLabel": "Find my timing",
         "href": "/auth?signup=true",
         "action": "authOrLink",
-        "inlineCopy": "Align this ritual with your lunar timing"
+        "inlineCopy": "Timing is half the spell."
+      },
+      {
+        "headline": "The spell is here. The timing matters.",
+        "subline": "Moon phase, planetary day, your transits. See when this intention has support.",
+        "buttonLabel": "Check the timing",
+        "href": "/auth?signup=true",
+        "action": "authOrLink",
+        "inlineCopy": "The spell is here. The timing matters."
+      },
+      {
+        "headline": "When should you actually do this?",
+        "subline": "See today's moon phase, planetary hours, and what's active in your chart.",
+        "buttonLabel": "Find the right moment",
+        "href": "/auth?signup=true",
+        "action": "authOrLink",
+        "inlineCopy": "When should you actually do this?"
       }
     ],
 
     "modernWitchcraft": [
       {
-        "headline": "Ground your practice in timing",
-        "subline": "Sign in to connect correspondences to lunar cycles and your chart context.",
-        "buttonLabel": "Personalise my practice",
+        "headline": "Correspondences without context are just lists",
+        "subline": "Connect what you're learning to lunar cycles and your chart so it actually lands.",
+        "buttonLabel": "Ground my practice",
         "href": "/auth?signup=true",
         "action": "authOrLink",
-        "inlineCopy": "Ground your practice in personal timing"
+        "inlineCopy": "Correspondences without context are just lists."
+      },
+      {
+        "headline": "Theory is useful. Timing makes it work.",
+        "subline": "See how today's moon and your chart context shape when to practice.",
+        "buttonLabel": "See my timing",
+        "href": "/auth?signup=true",
+        "action": "authOrLink",
+        "inlineCopy": "Theory is useful. Timing makes it work."
+      },
+      {
+        "headline": "Connect this to your actual practice",
+        "subline": "Your chart and today's lunar timing. See how they relate to what you're learning.",
+        "buttonLabel": "See my chart",
+        "href": "/auth?signup=true",
+        "action": "authOrLink",
+        "inlineCopy": "Connect this to your actual practice."
       }
     ],
 
     "practiceWithoutDogma": [
       {
-        "headline": "Find what fits your season",
-        "subline": "Sign in to choose practices that match your current cycle and chart context.",
-        "buttonLabel": "Find my next step",
+        "headline": "Not every practice fits every season",
+        "subline": "See which approaches match your current cycle and chart context, not someone else's path.",
+        "buttonLabel": "Find what fits now",
         "href": "/auth?signup=true",
         "action": "authOrLink",
-        "inlineCopy": "Find what fits your current season"
+        "inlineCopy": "Not every practice fits every season."
+      },
+      {
+        "headline": "What works for you might not work for them",
+        "subline": "Your chart and timing are unique. See what's actually active for you.",
+        "buttonLabel": "See my chart",
+        "href": "/auth?signup=true",
+        "action": "authOrLink",
+        "inlineCopy": "What works for you might not work for them."
+      },
+      {
+        "headline": "Your path isn't generic",
+        "subline": "See your chart, your transits, your timing. Build from there.",
+        "buttonLabel": "Get my free chart",
+        "href": "/auth?signup=true",
+        "action": "authOrLink",
+        "inlineCopy": "Your path isn't generic. See your chart."
       }
     ],
 
     "cosmicTiming": [
       {
-        "headline": "See how this timing relates to you",
-        "subline": "Sign in to view today's transits and your birth chart.",
-        "buttonLabel": "View my chart",
+        "headline": "Same event, different impact",
+        "subline": "Where this lands in your chart determines how you'll feel it. Check your houses.",
+        "buttonLabel": "See this in my chart",
         "href": "/auth?signup=true",
         "action": "authOrLink",
-        "inlineCopy": "See how this timing affects your chart"
+        "inlineCopy": "Same event, different impact. Check your houses."
+      },
+      {
+        "headline": "This cosmic event hits everyone differently",
+        "subline": "Which house? Which planets does it aspect? Your chart has the specifics.",
+        "buttonLabel": "Check my chart",
+        "href": "/auth?signup=true",
+        "action": "authOrLink",
+        "inlineCopy": "This cosmic event hits everyone differently."
+      },
+      {
+        "headline": "The timing is universal. The impact is personal.",
+        "subline": "See where this event activates your chart and what it means for you.",
+        "buttonLabel": "See my chart",
+        "href": "/auth?signup=true",
+        "action": "authOrLink",
+        "inlineCopy": "The timing is universal. The impact is personal."
       }
     ],
 
     "personalContext": [
       {
-        "headline": "See your complete chart",
-        "subline": "Sign in to view your full natal chart with all placements.",
+        "headline": "You've got the concepts. Now see YOUR chart.",
+        "subline": "All your placements, houses, and aspects in one place. Free.",
+        "buttonLabel": "View my full chart",
+        "href": "/auth?signup=true",
+        "action": "authOrLink",
+        "inlineCopy": "You've got the concepts. Now see YOUR chart."
+      },
+      {
+        "headline": "Theory learned. Time to see yours.",
+        "subline": "Your complete birth chart with all placements and houses. Free to calculate.",
+        "buttonLabel": "Get my free chart",
+        "href": "/auth?signup=true",
+        "action": "authOrLink",
+        "inlineCopy": "Theory learned. Time to see yours."
+      },
+      {
+        "headline": "This is how birth charts work. Here's yours.",
+        "subline": "See your placements, houses, and aspects. Free.",
         "buttonLabel": "View my chart",
         "href": "/auth?signup=true",
         "action": "authOrLink",
-        "inlineCopy": "View your complete natal chart"
+        "inlineCopy": "This is how birth charts work. Here's yours."
       }
     ],
 
     "symbolicSystems": [
       {
-        "headline": "Connect the symbols together",
-        "subline": "Sign in to link this topic across systems through your chart context.",
-        "buttonLabel": "See the pattern",
+        "headline": "Symbols connect. Your chart shows how.",
+        "subline": "See how this topic links to your placements and what's active for you right now.",
+        "buttonLabel": "See the pattern in my chart",
         "href": "/auth?signup=true",
         "action": "authOrLink",
-        "inlineCopy": "Connect these symbols through your chart"
+        "inlineCopy": "Symbols connect. Your chart shows how."
+      },
+      {
+        "headline": "Correspondences are maps. Your chart is the territory.",
+        "subline": "See your actual placements and how they relate to these systems.",
+        "buttonLabel": "View my chart",
+        "href": "/auth?signup=true",
+        "action": "authOrLink",
+        "inlineCopy": "Correspondences are maps. Your chart is the territory."
+      },
+      {
+        "headline": "These systems point to something. Your chart makes it specific.",
+        "subline": "See your placements and how today's timing connects.",
+        "buttonLabel": "See my chart",
+        "href": "/auth?signup=true",
+        "action": "authOrLink",
+        "inlineCopy": "These systems point to something. Your chart makes it specific."
       }
     ],
 
     "integratedGuidance": [
       {
-        "headline": "Make the Grimoire work for you",
-        "subline": "Sign in once, then Lunary can interpret every topic through your full birth chart.",
-        "buttonLabel": "Start personalised",
+        "headline": "You've got the concepts. Now see your chart.",
+        "subline": "Your full birth chart, today's transits, and lunar timing. All free.",
+        "buttonLabel": "Get my free chart",
         "href": "/auth?signup=true",
         "action": "authOrLink",
-        "inlineCopy": "Let Lunary interpret this through your chart"
+        "inlineCopy": "You've got the concepts. Now see your chart."
+      },
+      {
+        "headline": "Reference is a starting point. Your chart is the map.",
+        "subline": "See your full birth chart and what's active in the sky today. Free.",
+        "buttonLabel": "Get my free chart",
+        "href": "/auth?signup=true",
+        "action": "authOrLink",
+        "inlineCopy": "Reference is a starting point. Your chart is the map."
+      },
+      {
+        "headline": "Knowledge → Application",
+        "subline": "You've been reading. Now see your actual chart, transits, and timing.",
+        "buttonLabel": "See my chart",
+        "href": "/auth?signup=true",
+        "action": "authOrLink",
+        "inlineCopy": "You've been reading. Now see your chart."
       }
     ],
 
     "learningThroughCycles": [
       {
-        "headline": "Track the pattern over time",
-        "subline": "Sign in to revisit this with timing and chart context, not as a one-off meaning.",
+        "headline": "Meanings shift as you do",
+        "subline": "Track this over time through your transits and cycles, not as a one-off definition.",
         "buttonLabel": "Start tracking",
         "href": "/auth?signup=true",
         "action": "authOrLink",
-        "inlineCopy": "Track this pattern over time"
+        "inlineCopy": "Meanings shift as you do. Track over time."
+      },
+      {
+        "headline": "This isn't static. Your chart moves.",
+        "subline": "Transits change daily. See what's active for you now and track it over time.",
+        "buttonLabel": "See what's active",
+        "href": "/auth?signup=true",
+        "action": "authOrLink",
+        "inlineCopy": "This isn't static. Your chart moves."
+      },
+      {
+        "headline": "Today's chart context isn't tomorrow's",
+        "subline": "Track your transits and cycles. See how meanings evolve for you.",
+        "buttonLabel": "Start tracking",
+        "href": "/auth?signup=true",
+        "action": "authOrLink",
+        "inlineCopy": "Today's chart context isn't tomorrow's."
       }
     ],
 
     "archetypes": [
       {
-        "headline": "See this archetype in your chart",
-        "subline": "Sign in to explore how this pattern shows up through your placements and timing.",
-        "buttonLabel": "Personalise this archetype",
+        "headline": "This archetype lives somewhere in your chart",
+        "subline": "See which placements carry this energy and how it's showing up for you now.",
+        "buttonLabel": "Find this in my chart",
         "href": "/auth?signup=true",
         "action": "authOrLink",
-        "inlineCopy": "See this archetype in your placements"
+        "inlineCopy": "This archetype lives somewhere in your chart."
+      },
+      {
+        "headline": "Where does this energy show up for you?",
+        "subline": "Your chart has placements that carry this archetype. See which ones.",
+        "buttonLabel": "Check my chart",
+        "href": "/auth?signup=true",
+        "action": "authOrLink",
+        "inlineCopy": "Where does this energy show up for you?"
+      },
+      {
+        "headline": "Archetypes are universal. Your expression is specific.",
+        "subline": "See how your placements shape how you carry this energy.",
+        "buttonLabel": "See my placements",
+        "href": "/auth?signup=true",
+        "action": "authOrLink",
+        "inlineCopy": "Archetypes are universal. Your expression is specific."
       }
     ],
 
     "grimoireReference": [
       {
-        "headline": "Connect this to your chart",
-        "subline": "Sign in to see your birth chart and explore how this relates to you.",
+        "headline": "Reference is a starting point. Your chart is the map.",
+        "subline": "See your full birth chart and what's active in the sky today. Free.",
+        "buttonLabel": "Get my free chart",
+        "href": "/auth?signup=true",
+        "action": "authOrLink",
+        "inlineCopy": "Reference is a starting point. Your chart is the map."
+      },
+      {
+        "headline": "You've been reading. Now see your chart.",
+        "subline": "Your birth chart with all placements, houses, and today's transits. Free.",
+        "buttonLabel": "Get my free chart",
+        "href": "/auth?signup=true",
+        "action": "authOrLink",
+        "inlineCopy": "You've been reading. Now see your chart."
+      },
+      {
+        "headline": "Knowledge becomes useful when it's about YOU",
+        "subline": "See your complete birth chart and what's active for you today.",
         "buttonLabel": "View my chart",
         "href": "/auth?signup=true",
         "action": "authOrLink",
-        "inlineCopy": "Connect this to your birth chart"
+        "inlineCopy": "Knowledge becomes useful when it's about YOU."
       }
     ]
   }

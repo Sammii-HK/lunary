@@ -12,36 +12,42 @@ import { getCosmicConnections } from '@/lib/cosmicConnectionsConfig';
 // 30-day ISR revalidation
 export const revalidate = 2592000;
 export const metadata: Metadata = {
-  title: 'Astrological Transits: What They Mean and How to Read Them | Lunary',
+  title:
+    'Major Astrological Transits 2025-2030: Saturn, Jupiter & Key Dates | Lunary',
   description:
-    'Learn what astrological transits mean, how to read planetary movement, and how to use timing for decisions, growth, and self-understanding.',
+    'Complete transit calendar with exact dates: Saturn enters Taurus 2028, Jupiter movements, and all major planetary transits 2025-2030. Track cosmic shifts that matter.',
   keywords: [
+    'major astrological transits 2027',
+    'major astrological transits 2028',
+    'major astrological transits 2030',
+    'saturn enters taurus 2028 date',
     'astrological transits',
-    'transit meaning',
-    'how to read transits',
-    'transit timing',
     'planetary transits',
     'saturn return meaning',
+    'jupiter transit',
+    'neptune enters aries',
   ],
   openGraph: {
-    title: 'Astrological Transits: Meaning, How To Read Them, Timing | Lunary',
+    title:
+      'Major Astrological Transits 2025-2030: Saturn, Jupiter & Key Dates | Lunary',
     description:
-      'Transits meaning, how to read transits, and the transit of the day—learn how planetary timing shapes your life and where to start.',
+      'Complete transit calendar with exact dates: Saturn enters Taurus 2028, Jupiter movements, and all major planetary transits 2025-2030.',
     url: 'https://lunary.app/grimoire/transits',
     images: [
       {
         url: '/api/og/grimoire/transits',
         width: 1200,
         height: 630,
-        alt: 'Astrological Transits Guide',
+        alt: 'Major Astrological Transits 2025-2030',
       },
     ],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Astrological Transits: Meaning, How To Read Them, Timing | Lunary',
+    title:
+      'Major Astrological Transits 2025-2030: Saturn, Jupiter & Key Dates | Lunary',
     description:
-      'Transits meaning, how to read transits, and the transit of the day—learn how planetary timing shapes your life and where to start.',
+      'Complete transit calendar with exact dates: Saturn enters Taurus 2028, Jupiter movements, and all major transits 2025-2030.',
     images: ['/api/og/grimoire/transits'],
   },
   alternates: { canonical: 'https://lunary.app/grimoire/transits' },

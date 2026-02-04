@@ -593,7 +593,7 @@ export function GrimoireSearch({
       }
     });
 
-    // Birth chart houses (1-12)
+    // Astrological houses (1-12)
     for (let i = 1; i <= 12; i++) {
       if (
         String(i).includes(query) ||
@@ -607,8 +607,8 @@ export function GrimoireSearch({
         results.push({
           type: 'house',
           title: `${i}${suffix} House`,
-          section: 'birth-chart',
-          href: `/grimoire/birth-chart/houses/${i}`,
+          section: 'houses',
+          href: `/grimoire/houses/${i}${suffix}-house`,
         });
       }
     }

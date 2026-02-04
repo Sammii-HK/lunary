@@ -3,6 +3,10 @@ import Link from 'next/link';
 import { ArrowRight } from 'lucide-react';
 import { createFAQPageSchema, renderJsonLd } from '@/lib/schema';
 
+// Helper for ordinal suffix
+const getOrdinalSuffix = (n: number) =>
+  n === 1 ? 'st' : n === 2 ? 'nd' : n === 3 ? 'rd' : 'th';
+
 export const metadata: Metadata = {
   title: 'Birth Chart Example - How to Read Your Natal Chart | Lunary',
   description:
@@ -66,7 +70,7 @@ const chartElements = [
       'Your outward personality, first impressions, and physical appearance.',
     example:
       'Scorpio Rising: Intense presence, magnetic, perceived as mysterious.',
-    link: '/grimoire/houses/overview/1',
+    link: '/grimoire/houses/1st-house',
   },
   {
     title: 'Mercury',
@@ -226,7 +230,7 @@ export default function BirthChartExamplePage() {
             {houses.map((house) => (
               <Link
                 key={house.number}
-                href={`/grimoire/houses/overview/${house.number}`}
+                href={`/grimoire/houses/${house.number}${getOrdinalSuffix(house.number)}-house`}
                 className='p-4 rounded-lg border border-zinc-800 bg-zinc-900/30 hover:border-lunary-primary-600 transition-colors'
               >
                 <div className='text-2xl font-light text-lunary-primary-400 mb-1'>

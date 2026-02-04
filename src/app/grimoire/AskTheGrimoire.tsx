@@ -660,8 +660,8 @@ export function AskTheGrimoire({
         scoredResults.push({
           type: 'house',
           title: `${i}${suffix} House`,
-          section: 'birth-chart',
-          href: `/grimoire/birth-chart/houses/${i}`,
+          section: 'houses',
+          href: `/grimoire/houses/${i}${suffix}-house`,
           score,
         });
       }

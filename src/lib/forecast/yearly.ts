@@ -725,7 +725,6 @@ export function calculateSlowPlanetIngresses(
   for (const planet of SLOW_PLANETS) {
     let currentDate = new Date(startDate);
     let previousSign: string | null = null;
-    let previousRetrograde: boolean | null = null;
 
     // Sample every day to find sign changes
     while (currentDate <= endDate) {
@@ -765,7 +764,6 @@ export function calculateSlowPlanetIngresses(
         }
 
         previousSign = currentSign;
-        previousRetrograde = isRetrograde;
       }
 
       // Move to next day

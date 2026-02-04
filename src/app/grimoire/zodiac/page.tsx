@@ -102,6 +102,11 @@ export default function ZodiacIndexPage() {
         relatedItems={[
           { name: 'Birth Chart', href: '/birth-chart', type: 'tool' },
           {
+            name: '2026 Horoscopes',
+            href: '/grimoire/horoscopes',
+            type: 'topic',
+          },
+          {
             name: 'Planets',
             href: '/grimoire/astronomy/planets',
             type: 'topic',
@@ -142,6 +147,37 @@ export default function ZodiacIndexPage() {
               );
             })}
           </div>
+
+          <section className='p-6 rounded-lg border border-lunary-primary-800/50 bg-lunary-primary-900/10'>
+            <h2 className='text-xl font-medium text-zinc-100 mb-2'>
+              2026 Horoscope Overview
+            </h2>
+            <p className='text-sm text-zinc-400 mb-4'>
+              Discover what the cosmos has in store for each sign this year.
+            </p>
+            <div className='grid md:grid-cols-3 lg:grid-cols-4 gap-3'>
+              {signs.map(([key, sign]) => {
+                const symbol = zodiacSymbol[key as keyof typeof zodiacSymbol];
+                return (
+                  <Link
+                    key={`horoscope-${key}`}
+                    href={`/grimoire/horoscopes/${stringToKebabCase(key)}/2026`}
+                    className='p-3 rounded-lg border border-zinc-800 bg-zinc-900/50 hover:border-lunary-primary-600 hover:bg-zinc-900 transition-all group'
+                  >
+                    <div className='flex items-center gap-2 mb-1'>
+                      <span className='text-lg font-astro'>{symbol}</span>
+                      <span className='text-sm font-medium text-zinc-200 group-hover:text-lunary-primary-300 transition-colors'>
+                        {sign.name} 2026
+                      </span>
+                    </div>
+                    <p className='text-xs text-zinc-500'>
+                      View yearly forecast →
+                    </p>
+                  </Link>
+                );
+              })}
+            </div>
+          </section>
 
           <section className='p-6 rounded-lg border border-zinc-800 bg-zinc-900/30'>
             <h2 className='text-xl font-medium text-zinc-100 mb-4'>

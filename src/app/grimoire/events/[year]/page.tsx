@@ -14,8 +14,14 @@ import { Heading } from '@/components/ui/Heading';
 export const revalidate = 2592000;
 
 // Dynamic year range: current year to 10 years in advance
+// Keep historical years indexed (starting from 2025) and extend 10 years into the future
+const START_YEAR = 2025;
 const CURRENT_YEAR = new Date().getFullYear();
-const AVAILABLE_YEARS = Array.from({ length: 11 }, (_, i) => CURRENT_YEAR + i);
+const END_YEAR = Math.max(CURRENT_YEAR + 10, START_YEAR + 10);
+const AVAILABLE_YEARS = Array.from(
+  { length: END_YEAR - START_YEAR + 1 },
+  (_, i) => START_YEAR + i,
+);
 
 // Removed generateStaticParams - using pure ISR for faster builds
 // Pages are generated on-demand and cached with 30-day revalidation
@@ -50,30 +56,61 @@ export async function generateMetadata({
     (r) => r.planet === 'Mercury',
   ).length;
 
+  // If no major ingress this year, check next year for preview (e.g., 2027 previews Saturn 2028)
+  let nextYearPreview = '';
+  if (!majorIngress) {
+    const nextYearForecast = await generateYearlyForecast(yearNum + 1);
+    const nextYearIngress = nextYearForecast.ingresses.find(
+      (i) =>
+        ['Saturn', 'Uranus', 'Neptune', 'Pluto'].includes(i.planet) &&
+        !i.isRetrograde,
+    );
+    if (nextYearIngress) {
+      nextYearPreview = `${nextYearIngress.planet} enters ${nextYearIngress.toSign} ${yearNum + 1}`;
+    }
+  }
+
+  // Build description parts - only mention supermoons if > 0
+  const descParts = [
+    `${eclipseCount} eclipses`,
+    `${mercuryRxCount} Mercury retrogrades`,
+  ];
+  if (supermoonsCount > 0) {
+    descParts.push(`${supermoonsCount} supermoons`);
+  }
+
+  // Build title - emphasize "Major Transits" for better keyword match
+  const titleHighlight = highlight
+    ? `${highlight}, `
+    : nextYearPreview
+      ? `${nextYearPreview} Preview, `
+      : '';
+
   return {
-    title: `${year} Astrology Events: ${highlight ? highlight + ', ' : ''}Eclipses, Retrogrades & Supermoons | Lunary`,
-    description: `Complete ${year} cosmic calendar with ${eclipseCount} eclipses, ${mercuryRxCount} Mercury retrogrades, ${supermoonsCount} supermoons, equinoxes, solstices & planetary transits.${highlight ? ` Major event: ${highlight}.` : ''} Plan ahead with precise astronomical dates.`,
+    title: `${year} Major Astrological Transits: ${titleHighlight}Eclipses & Retrogrades | Lunary`,
+    description: `Complete ${year} astrology calendar: ${descParts.join(', ')}, equinoxes, solstices & major planetary transits.${highlight ? ` Major event: ${highlight}.` : ''}${nextYearPreview ? ` Plus ${nextYearPreview} preview.` : ''} Exact dates for all cosmic events.`,
     keywords: [
+      `major astrological transits ${year}`,
       `${year} astrology`,
       `${year} mercury retrograde`,
       `${year} eclipses`,
-      `${year} supermoon`,
+      ...(supermoonsCount > 0 ? [`${year} supermoon`] : []),
       `${year} equinox`,
       `${year} solstice`,
       `${year} astrological events`,
       `${year} lunar calendar`,
       `${year} planetary transits`,
       `${year} retrograde dates`,
-      `major astrological transits ${year}`,
       ...(majorIngress
         ? [
             `${majorIngress.planet.toLowerCase()} ${majorIngress.toSign.toLowerCase()} ${year}`,
           ]
         : []),
+      ...(nextYearPreview ? [`saturn enters taurus ${yearNum + 1} date`] : []),
     ],
     openGraph: {
-      title: `${year} Astrology Events: ${highlight ? highlight + ', ' : ''}Eclipses & Retrogrades | Lunary`,
-      description: `Complete ${year} cosmic calendar: ${eclipseCount} eclipses, ${mercuryRxCount} Mercury retrogrades, supermoons & more. Plan ahead with precise dates.`,
+      title: `${year} Major Astrological Transits: ${titleHighlight}Eclipses & Retrogrades | Lunary`,
+      description: `Complete ${year} cosmic calendar: ${descParts.join(', ')} & major transits.${nextYearPreview ? ` ${nextYearPreview} preview.` : ''} Plan ahead with precise dates.`,
       url: `https://lunary.app/grimoire/events/${year}`,
       siteName: 'Lunary',
       images: [`/api/og/cosmic?title=${year}%20Cosmic%20Events`],
@@ -228,7 +265,7 @@ async function getEventsForYear(year: number): Promise<EventCategory[]> {
           .replace(/_/g, ' ')
           .replace(/\b\w/g, (l) => l.toUpperCase()),
       })),
-      link: `/grimoire/events/${year}`,
+      link: `/grimoire/events/${year}/equinoxes-solstices`,
     });
   }
 
@@ -397,8 +434,8 @@ export default async function EventsYearPage({
   const yearNum = parseInt(year);
   const nextYear = yearNum + 1;
 
-  const minYear = CURRENT_YEAR;
-  const maxYear = CURRENT_YEAR + 10;
+  const minYear = START_YEAR;
+  const maxYear = END_YEAR;
   if (yearNum < minYear || yearNum > maxYear) {
     notFound();
   }

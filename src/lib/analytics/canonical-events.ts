@@ -6,6 +6,7 @@ export type CanonicalEventType =
   | 'product_opened'
   | 'page_viewed'
   | 'cta_clicked'
+  | 'cta_impression'
   | 'user_signed_up'
   | 'user_logged_in'
   | 'nav_tab_clicked'
@@ -190,6 +191,7 @@ function canonicaliseEventType(raw: unknown): {
     value === 'product_opened' ||
     value === 'page_viewed' ||
     value === 'cta_clicked' ||
+    value === 'cta_impression' ||
     value === 'user_signed_up' ||
     value === 'user_logged_in' ||
     value === 'nav_tab_clicked' ||

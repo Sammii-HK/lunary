@@ -19,7 +19,9 @@ function generateDeterministicEventId(
 ): string {
   const identity = userId || anonymousId || 'unknown';
   const input = `${eventType}:${identity}:${date}`;
-  return createHash('sha256').update(input).digest('hex');
+  const hash = createHash('sha256').update(input).digest('hex');
+  // Convert hash to UUID format (take first 32 chars and format as UUID v5-like)
+  return `00000000-0000-5000-8000-${hash.substring(0, 12)}`;
 }
 
 export const runtime = 'nodejs';

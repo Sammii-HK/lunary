@@ -39,7 +39,8 @@ export type EntityType =
   | 'hub-events'
   | 'angel-number'
   | 'rising'
-  | 'compatibility';
+  | 'compatibility'
+  | 'double-hour';
 
 function toSlug(str: string): string {
   return str
@@ -352,24 +353,26 @@ function getMoonConnections(_moonKey: string): CosmicConnectionSection[] {
 function getTarotConnections(cardSlug: string): CosmicConnectionSection[] {
   const sections: CosmicConnectionSection[] = [];
 
+  // Tarot basics - always shown
   const basics: CosmicConnectionLink[] = [
     { label: 'Tarot Guide', href: '/grimoire/guides/tarot-complete-guide' },
     { label: 'All Tarot Cards', href: '/grimoire/tarot' },
+    { label: 'Yes or No Tarot', href: '/grimoire/tarot/yes-or-no' },
     { label: 'Tarot Spreads', href: '/grimoire/tarot/spreads' },
-    { label: 'Tarot Suits', href: '/grimoire/tarot/suits' },
   ];
-  sections.push({ title: 'Tarot Basics', links: basics.slice(0, 4) });
+  sections.push({ title: 'Tarot Basics', links: basics });
 
+  // Determine if major or minor arcana and get correspondences
   const tarotCorr = TAROT_MAJOR_ARCANA_CORRESPONDENCES[cardSlug];
   const astroLinks: CosmicConnectionLink[] = [];
 
+  // Major Arcana: link to zodiac sign and planet
   if (tarotCorr?.zodiacSign) {
     astroLinks.push({
       label: tarotCorr.zodiacSign,
       href: `/grimoire/zodiac/${tarotCorr.zodiacSign.toLowerCase()}`,
     });
   }
-
   if (tarotCorr?.planet) {
     astroLinks.push({
       label: tarotCorr.planet,
@@ -377,15 +380,44 @@ function getTarotConnections(cardSlug: string): CosmicConnectionSection[] {
     });
   }
 
-  if (astroLinks.length > 0) {
-    sections.push({ title: 'Astrology Links', links: astroLinks.slice(0, 2) });
+  // Minor Arcana: detect suit from slug and link to element
+  const suitMatch = cardSlug.match(/-(cups|wands|swords|pentacles)$/);
+  if (suitMatch) {
+    const suit = suitMatch[1];
+    const suitElementMap: Record<string, { element: string; sign: string }> = {
+      cups: { element: 'water', sign: 'cancer' },
+      wands: { element: 'fire', sign: 'aries' },
+      swords: { element: 'air', sign: 'gemini' },
+      pentacles: { element: 'earth', sign: 'taurus' },
+    };
+    const suitData = suitElementMap[suit];
+    if (suitData) {
+      astroLinks.push({
+        label: `${suitData.element.charAt(0).toUpperCase() + suitData.element.slice(1)} Element`,
+        href: `/grimoire/correspondences/elements/${suitData.element}`,
+      });
+      astroLinks.push({
+        label: `Suit of ${suit.charAt(0).toUpperCase() + suit.slice(1)}`,
+        href: `/grimoire/tarot/suits/${suit}`,
+      });
+    }
   }
 
-  const app: CosmicConnectionLink[] = [
+  if (astroLinks.length > 0) {
+    sections.push({
+      title: 'Astrology & Elements',
+      links: astroLinks.slice(0, 4),
+    });
+  }
+
+  // Spiritual practice links
+  const practice: CosmicConnectionLink[] = [
     { label: 'Daily Tarot Reading', href: '/tarot' },
-    { label: 'Card Combinations', href: '/grimoire/card-combinations' },
+    { label: 'Moon Phases', href: '/grimoire/moon' },
+    { label: 'Crystals', href: '/grimoire/crystals' },
+    { label: 'Meditation', href: '/grimoire/meditation' },
   ];
-  sections.push({ title: 'In the App', links: app });
+  sections.push({ title: 'Practice', links: practice });
 
   return sections;
 }
@@ -821,6 +853,39 @@ function getWitchConnections(): CosmicConnectionSection[] {
   return sections;
 }
 
+function getDoubleHourConnections(timeSlug: string): CosmicConnectionSection[] {
+  const sections: CosmicConnectionSection[] = [];
+
+  // Numerology basics
+  const basics: CosmicConnectionLink[] = [
+    { label: 'All Double Hours', href: '/grimoire/double-hours' },
+    { label: 'Mirror Hours', href: '/grimoire/mirror-hours' },
+    { label: 'Numerology Overview', href: '/grimoire/numerology' },
+    { label: 'Angel Numbers', href: '/grimoire/angel-numbers' },
+  ];
+  sections.push({ title: 'Clock Numerology', links: basics });
+
+  // Related spiritual practices
+  const spiritual: CosmicConnectionLink[] = [
+    { label: 'Manifestation', href: '/grimoire/manifestation' },
+    { label: 'Meditation', href: '/grimoire/meditation' },
+    { label: 'Moon Phases', href: '/grimoire/moon' },
+    { label: 'Daily Tarot', href: '/tarot' },
+  ];
+  sections.push({ title: 'Spiritual Practice', links: spiritual });
+
+  // Deepen your understanding
+  const deepen: CosmicConnectionLink[] = [
+    { label: 'Birth Chart', href: '/birth-chart' },
+    { label: 'Daily Horoscope', href: '/horoscope' },
+    { label: 'Crystals', href: '/grimoire/crystals' },
+    { label: 'Correspondences', href: '/grimoire/correspondences' },
+  ];
+  sections.push({ title: 'Explore More', links: deepen });
+
+  return sections;
+}
+
 export function getCosmicConnections(
   entityType: EntityType,
   slugOrKey: string,
@@ -877,6 +942,8 @@ export function getCosmicConnections(
       return getRisingConnections(slugOrKey);
     case 'compatibility':
       return getCompatibilityConnections(slugOrKey);
+    case 'double-hour':
+      return getDoubleHourConnections(slugOrKey);
     default:
       return [];
   }
