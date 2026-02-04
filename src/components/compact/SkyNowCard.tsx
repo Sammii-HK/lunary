@@ -16,6 +16,7 @@ import {
   ExpandableCardHeader,
 } from '@/components/ui/expandable-card';
 import { ShareSkyNow } from '@/components/share/ShareSkyNow';
+import { TransitDurationBadge } from '@/components/TransitDurationBadge';
 
 const getPlanetMeaning = (planet: string, sign: string): string => {
   const planetMeanings: Record<string, Record<string, string>> = {
@@ -410,29 +411,32 @@ export const SkyNowCard = () => {
               key={planet.body}
               className={`py-2 border-b border-zinc-800/30 last:border-0 ${planet.retrograde ? 'text-lunary-error-200' : ''}`}
             >
-              <div className='flex items-baseline gap-2'>
-                <span
-                  className={`font-astro text-lg ${planet.retrograde ? 'text-lunary-error-300' : 'text-lunary-secondary-300'}`}
-                >
-                  {getPlanetSymbol(planet.body)}
-                </span>
-                <span className='text-sm text-zinc-200'>{planet.body}</span>
-                <span className='font-astro text-zinc-400'>
-                  {getZodiacSymbol(planet.sign)}
-                </span>
-                <span className='text-sm text-zinc-400'>
-                  {planet.sign} {planet.formattedDegree?.degree || 0}°
-                  {planet.formattedDegree?.minute !== undefined &&
-                    `${planet.formattedDegree.minute}'`}
-                </span>
-                {natalSignHouseLookup[normalizedSign] != null && (
-                  <span className='text-xs uppercase text-zinc-500'>
-                    {natalSignHouseLookup[normalizedSign]}H
+              <div className='flex items-baseline justify-between gap-2'>
+                <div className='flex items-baseline gap-2'>
+                  <span
+                    className={`font-astro text-lg ${planet.retrograde ? 'text-lunary-error-300' : 'text-lunary-secondary-300'}`}
+                  >
+                    {getPlanetSymbol(planet.body)}
                   </span>
-                )}
-                {planet.retrograde && (
-                  <span className='text-xs text-lunary-error-300'>℞</span>
-                )}
+                  <span className='text-sm text-zinc-200'>{planet.body}</span>
+                  <span className='font-astro text-zinc-400'>
+                    {getZodiacSymbol(planet.sign)}
+                  </span>
+                  <span className='text-sm text-zinc-400'>
+                    {planet.sign} {planet.formattedDegree?.degree || 0}°
+                    {planet.formattedDegree?.minute !== undefined &&
+                      `${planet.formattedDegree.minute}'`}
+                  </span>
+                  {natalSignHouseLookup[normalizedSign] != null && (
+                    <span className='text-xs uppercase text-zinc-500'>
+                      {natalSignHouseLookup[normalizedSign]}H
+                    </span>
+                  )}
+                  {planet.retrograde && (
+                    <span className='text-xs text-lunary-error-300'>℞</span>
+                  )}
+                </div>
+                <TransitDurationBadge duration={planet.duration} />
               </div>
               <p className='text-xs text-zinc-400 mt-1 ml-7'>
                 {getPlanetMeaning(planet.body, planet.sign)}

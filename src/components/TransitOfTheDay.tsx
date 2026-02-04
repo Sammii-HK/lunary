@@ -20,7 +20,6 @@ import dayjs from 'dayjs';
 import { useFeatureFlagVariant } from '@/hooks/useFeatureFlag';
 import { useCTACopy } from '@/hooks/useCTACopy';
 import { shouldRedactWord } from '@/constants/redactedWords';
-import { TransitDurationBadge } from './TransitDurationBadge';
 
 const getOrdinalSuffix = (n: number): string => {
   if (n >= 11 && n <= 13) return 'th';
@@ -295,12 +294,6 @@ export const TransitOfTheDay = () => {
             <p className='text-sm text-zinc-200 mb-1'>
               {generalTransit.planet} {generalTransit.event}
             </p>
-            {generalTransit.duration && (
-              <TransitDurationBadge
-                duration={generalTransit.duration}
-                className='mb-2'
-              />
-            )}
             <p className='text-xs text-zinc-200 mb-2'>
               {generalTransit.description.split('.')[0]}.
             </p>
@@ -371,12 +364,6 @@ export const TransitOfTheDay = () => {
               <p className='text-sm text-zinc-200 mb-1'>
                 {generalTransit.planet} {generalTransit.event}
               </p>
-              {generalTransit.duration && (
-                <TransitDurationBadge
-                  duration={generalTransit.duration}
-                  className='mb-1'
-                />
-              )}
               <p className='text-xs text-zinc-400 line-clamp-2'>
                 {generalTransit.description}
               </p>
@@ -431,12 +418,6 @@ export const TransitOfTheDay = () => {
               </span>
             )}
           </p>
-          {transit.duration && (
-            <TransitDurationBadge
-              duration={transit.duration}
-              className='mb-1'
-            />
-          )}
           <p className='text-xs text-zinc-400 line-clamp-2'>
             {transit.actionableGuidance}
           </p>

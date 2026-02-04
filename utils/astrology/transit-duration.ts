@@ -59,11 +59,10 @@ function calculateSlowPlanetDuration(
   }
 
   const totalMs = endTime - startTime;
-  const elapsedMs = now - startTime;
   const remainingMs = endTime - now;
 
   const totalDays = Math.ceil(totalMs / (1000 * 60 * 60 * 24));
-  const remainingDays = Math.ceil(remainingMs / (1000 * 60 * 60 * 24));
+  const remainingDays = remainingMs / (1000 * 60 * 60 * 24);
 
   return {
     totalDays,
@@ -107,11 +106,11 @@ function calculateFastPlanetDuration(
   // Degrees remaining in sign
   const degreesRemaining = 30 - degreeInSign;
 
-  // Days remaining = degrees remaining / daily motion
-  const remainingDays = Math.ceil(degreesRemaining / dailyMotion);
+  // Days remaining = degrees remaining / daily motion (fractional for hour precision)
+  const remainingDays = degreesRemaining / dailyMotion;
 
   // Calculate start date (when planet entered this sign)
-  const daysElapsed = Math.ceil(degreeInSign / dailyMotion);
+  const daysElapsed = degreeInSign / dailyMotion;
   const startDate = new Date(date);
   startDate.setDate(startDate.getDate() - daysElapsed);
 
@@ -131,27 +130,31 @@ function calculateFastPlanetDuration(
 }
 
 /**
- * Format duration intelligently
- * - < 1 day: "< 1 day remaining"
- * - 1 day: "1 day remaining"
- * - 2-6 days: "X days remaining"
- * - 7-55 days: "X weeks remaining"
- * - 56+ days: "X months remaining"
+ * Format duration as compact badge text
+ * - < 1 hour: "<1h left"
+ * - < 1 day: "Xh left"
+ * - 1-6 days: "Xd left"
+ * - 7-55 days: "Xw left"
+ * - 56-364 days: "Xm left"
+ * - 365+ days: "Xy left"
  */
 export function formatDuration(days: number): string {
-  if (days < 1) {
-    return '< 1 day remaining';
-  } else if (days === 1) {
-    return '1 day remaining';
+  const hours = Math.round(days * 24);
+
+  if (hours < 1) {
+    return '<1h left';
+  } else if (days < 1) {
+    return `${hours}h left`;
   } else if (days < 7) {
-    return `${days} days remaining`;
+    return `${Math.round(days)}d left`;
   } else if (days < 56) {
-    // 56 days = 8 weeks threshold
     const weeks = Math.round(days / 7);
-    return weeks === 1 ? '1 week remaining' : `${weeks} weeks remaining`;
-  } else {
-    // 56+ days = months
+    return `${weeks}w left`;
+  } else if (days < 365) {
     const months = Math.round(days / 30);
-    return months === 1 ? '1 month remaining' : `${months} months remaining`;
+    return `${months}m left`;
+  } else {
+    const years = Math.round((days / 365) * 10) / 10;
+    return years % 1 === 0 ? `${Math.round(years)}y left` : `${years}y left`;
   }
 }

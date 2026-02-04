@@ -1,5 +1,3 @@
-import { Badge } from '@/components/ui/badge';
-
 interface TransitDurationBadgeProps {
   duration?: {
     totalDays: number;
@@ -10,11 +8,8 @@ interface TransitDurationBadgeProps {
 }
 
 /**
- * Display transit duration with color-coded urgency
- * - Aurora green (#6B9B7A): Newly entered < 3 days
- * - Default blue: < 30 days remaining
- * - Cosmic rose (#EE789E): Ending soon < 7 days
- * - Secondary gray: Long term > 30 days
+ * Display transit duration with keyword-style badge
+ * Styled to match tarot keyword badges (rounded-md, outline)
  */
 export function TransitDurationBadge({
   duration,
@@ -23,28 +18,37 @@ export function TransitDurationBadge({
   if (!duration) return null;
 
   const { totalDays, remainingDays, displayText } = duration;
-
-  // Calculate days since entered sign
   const daysSinceEntered = totalDays - remainingDays;
+  const elapsed = daysSinceEntered / totalDays;
+  const remaining = remainingDays / totalDays;
 
-  // Determine variant based on timing
-  let variant: 'aurora' | 'default' | 'cosmic-rose' | 'secondary' = 'secondary';
+  // Proportional thresholds capped for slow planets
+  // Moon (2.3d): green first ~5h, pink last ~8h
+  // Sun (30d): green first ~3d, pink last ~4.5d
+  // Jupiter (365d): green first 7d, pink last 14d
+  const newThreshold = Math.min(totalDays * 0.1, 7);
+  const endingThreshold = Math.min(totalDays * 0.15, 14);
+  const midThreshold = Math.min(totalDays * 0.5, 60);
 
-  if (daysSinceEntered < 3) {
-    // Newly entered (< 3 days in sign) → Aurora green
-    variant = 'aurora';
-  } else if (remainingDays < 7) {
-    // Ending soon (< 7 days left) → Cosmic rose (soft pink)
-    variant = 'cosmic-rose';
-  } else if (remainingDays < 30) {
-    // Medium term (< 30 days) → Default blue
-    variant = 'default';
+  let colorClasses = 'bg-zinc-900 border-zinc-800 text-zinc-400';
+
+  if (daysSinceEntered < newThreshold) {
+    // Newly entered → aurora green
+    colorClasses = 'bg-emerald-950/50 border-emerald-800/40 text-emerald-400';
+  } else if (remainingDays < endingThreshold) {
+    // Ending soon → cosmic rose
+    colorClasses = 'bg-pink-950/50 border-pink-800/40 text-pink-400';
+  } else if (remainingDays < midThreshold) {
+    // Medium term → primary
+    colorClasses =
+      'bg-lunary-primary-900/50 border-lunary-primary-700/30 text-lunary-primary-200';
   }
-  // else: Long term (> 30 days) → Secondary gray (default)
 
   return (
-    <Badge variant={variant} className={`${className} text-xs`}>
+    <span
+      className={`inline-flex items-center text-xs px-2 py-0.5 rounded-md border ${colorClasses} ${className ?? ''}`}
+    >
       {displayText}
-    </Badge>
+    </span>
   );
 }

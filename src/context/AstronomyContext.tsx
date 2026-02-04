@@ -213,6 +213,13 @@ export const AstronomyContextProvider = ({
         },
         retrograde: data.retrograde,
         eclipticLongitude: data.longitude,
+        duration: data.duration
+          ? {
+              totalDays: data.duration.totalDays,
+              remainingDays: data.duration.remainingDays,
+              displayText: data.duration.displayText,
+            }
+          : undefined,
       };
     }) as AstroChartInformation[];
 
