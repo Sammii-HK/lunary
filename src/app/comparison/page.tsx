@@ -5,8 +5,8 @@ import { ArrowRight, Star } from 'lucide-react';
 const year = new Date().getFullYear();
 
 export const metadata: Metadata = {
-  title: `Best Astrology Apps ${year}: Honest Comparisons & Reviews - Lunary`,
-  description: `Compare the best astrology apps in ${year}. Lunary vs Co-Star, Pattern, Sanctuary & more. Features, accuracy, pricing & which app is right for you.`,
+  title: `Best Astrology Apps ${year}: Honest Comparisons & Reviews`,
+  description: `Compare Lunary vs Co-Star, Pattern, Sanctuary & more. Which app offers free birth charts, ad-free experience, and accurate personalized readings? Find out.`,
   keywords: [
     `best astrology app ${year}`,
     'astrology app comparison',

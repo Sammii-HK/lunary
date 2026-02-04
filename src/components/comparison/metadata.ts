@@ -6,7 +6,7 @@ export function createComparisonMetadata(data: ComparisonData): Metadata {
   const url = `https://lunary.app/comparison/${competitorSlug}`;
   const year = new Date().getFullYear();
   const title = `Lunary vs ${competitorName} (${year}): Which Astrology App is Better?`;
-  const description = `Compare Lunary vs ${competitorName} in ${year}. Features, accuracy, pricing & user reviews. Find which astrology app is right for you.`;
+  const description = `Compare Lunary vs ${competitorName}. Which app offers free birth charts, ad-free experience & real astronomical accuracy? Honest ${year} comparison.`;
 
   return {
     title,
