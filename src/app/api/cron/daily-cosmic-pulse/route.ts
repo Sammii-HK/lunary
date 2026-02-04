@@ -31,7 +31,7 @@ async function trackConversionServer(
   },
 ) {
   try {
-    await fetch(`${baseUrl}/api/analytics/conversion`, {
+    await fetch(`${baseUrl}/api/ether/cv`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload),

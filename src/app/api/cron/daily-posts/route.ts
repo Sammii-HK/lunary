@@ -2480,7 +2480,7 @@ async function runNotificationCheck(dateStr: string) {
           // Track trial expired event
           try {
             await fetch(
-              `${process.env.NEXT_PUBLIC_APP_URL || 'https://lunary.app'}/api/analytics/conversion`,
+              `${process.env.NEXT_PUBLIC_APP_URL || 'https://lunary.app'}/api/ether/cv`,
               {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },

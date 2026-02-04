@@ -330,14 +330,18 @@ export default function ABTestingPage() {
                   >
                     {test.variants.map((variant, idx) => {
                       const isWinner = variant.name === test.bestVariant;
+                      const validRates = test.variants
+                        .map((v) => v.conversionRate)
+                        .filter((r): r is number => r !== null);
                       const hasHighestRate =
-                        variant.conversionRate ===
-                        Math.max(...test.variants.map((v) => v.conversionRate));
+                        variant.conversionRate !== null &&
+                        validRates.length > 0 &&
+                        variant.conversionRate === Math.max(...validRates);
                       const hasLowestRate =
-                        variant.conversionRate ===
-                          Math.min(
-                            ...test.variants.map((v) => v.conversionRate),
-                          ) && variant.impressions > 0;
+                        variant.conversionRate !== null &&
+                        validRates.length > 0 &&
+                        variant.conversionRate === Math.min(...validRates) &&
+                        variant.impressions > 0;
 
                       return (
                         <div
@@ -383,10 +387,14 @@ export default function ABTestingPage() {
                                 className={`font-bold ${
                                   isWinner && test.isSignificant
                                     ? 'text-lunary-success'
-                                    : 'text-lunary-primary-400'
+                                    : variant.conversionRate === null
+                                      ? 'text-zinc-500'
+                                      : 'text-lunary-primary-400'
                                 }`}
                               >
-                                {variant.conversionRate.toFixed(2)}%
+                                {variant.conversionRate !== null
+                                  ? `${variant.conversionRate.toFixed(2)}%`
+                                  : 'N/A'}
                               </span>
                             </div>
                           </div>

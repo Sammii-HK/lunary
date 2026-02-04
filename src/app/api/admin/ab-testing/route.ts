@@ -5,7 +5,7 @@ export interface VariantMetrics {
   name: string;
   impressions: number;
   conversions: number;
-  conversionRate: number;
+  conversionRate: number | null; // null when impressions = 0
 }
 
 export interface ABTestResult {
@@ -92,8 +92,9 @@ export async function GET(request: NextRequest) {
 
         const impressions = parseInt(impressionsResult.rows[0]?.count || '0');
         const conversions = parseInt(conversionsResult.rows[0]?.count || '0');
+        // null when no impressions - can't calculate rate without a denominator
         const conversionRate =
-          impressions > 0 ? (conversions / impressions) * 100 : 0;
+          impressions > 0 ? (conversions / impressions) * 100 : null;
 
         variantMetrics.push({
           name: variant,
@@ -103,8 +104,13 @@ export async function GET(request: NextRequest) {
         });
       }
 
-      // Sort variants by conversion rate (descending)
-      variantMetrics.sort((a, b) => b.conversionRate - a.conversionRate);
+      // Sort variants by conversion rate (descending), nulls last
+      variantMetrics.sort((a, b) => {
+        if (a.conversionRate === null && b.conversionRate === null) return 0;
+        if (a.conversionRate === null) return 1;
+        if (b.conversionRate === null) return -1;
+        return b.conversionRate - a.conversionRate;
+      });
 
       const totalImpressions = variantMetrics.reduce(
         (sum, v) => sum + v.impressions,

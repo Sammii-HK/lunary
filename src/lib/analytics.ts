@@ -508,7 +508,7 @@ export async function trackEvent(
     // Track to Vercel Analytics (web vitals focus)
     track(event, payload);
 
-    const analyticsPromise = fetch('/api/analytics/conversion', {
+    const analyticsPromise = fetch('/api/ether/cv', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -624,13 +624,9 @@ export async function trackCtaImpression(
       anonymousId: getAnonymousId(),
     });
 
-    if (typeof navigator !== 'undefined' && 'sendBeacon' in navigator) {
-      const blob = new Blob([body], { type: 'application/json' });
-      navigator.sendBeacon('/api/telemetry/cta-impression', blob);
-      return;
-    }
-
-    await fetch('/api/telemetry/cta-impression', {
+    // Use "cta-view" instead of "cta-impression" - ad blockers target "impression" in URLs
+    // Also use fetch instead of sendBeacon for better error visibility
+    await fetch('/api/ether/view', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body,
@@ -676,11 +672,11 @@ export async function trackCtaClick(payload: CtaClickPayload): Promise<void> {
 
     if (typeof navigator !== 'undefined' && 'sendBeacon' in navigator) {
       const blob = new Blob([body], { type: 'application/json' });
-      navigator.sendBeacon('/api/telemetry/cta-click', blob);
+      navigator.sendBeacon('/api/ether/speak', blob);
       return;
     }
 
-    await fetch('/api/telemetry/cta-click', {
+    await fetch('/api/ether/speak', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body,

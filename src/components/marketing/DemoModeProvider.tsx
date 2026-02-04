@@ -100,9 +100,10 @@ if (typeof window !== 'undefined') {
         );
       }
 
-      // BLOCK analytics and notifications
+      // BLOCK analytics, ether tracking, and notifications
       if (
         url.includes('/api/analytics') ||
+        url.includes('/api/ether') ||
         url.includes('/api/admin/notifications')
       ) {
         return new Response(JSON.stringify({ success: true }), {
