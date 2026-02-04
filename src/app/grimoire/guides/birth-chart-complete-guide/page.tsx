@@ -783,7 +783,7 @@ export default function BirthChartCompleteGuidePage() {
           </h4>
           <div className='grid grid-cols-2 md:grid-cols-4 gap-3'>
             <Link
-              href='/grimoire/houses/overview'
+              href='/grimoire/houses'
               className='text-sm text-zinc-300 hover:text-lunary-primary-400'
             >
               → Houses Overview

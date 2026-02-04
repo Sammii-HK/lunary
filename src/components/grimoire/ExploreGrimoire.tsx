@@ -12,7 +12,7 @@ const GRIMOIRE_LINKS = [
   { href: '/grimoire/tarot', label: 'Tarot' },
   { href: '/grimoire/crystals', label: 'Crystals' },
   { href: '/grimoire/guides/moon-phases-guide', label: 'Moon Phases' },
-  { href: '/grimoire/houses/overview/', label: 'Astrological Houses' },
+  { href: '/grimoire/houses', label: 'Astrological Houses' },
   { href: '/grimoire/spells', label: 'Spells' },
 ];
 

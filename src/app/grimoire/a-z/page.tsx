@@ -39,7 +39,7 @@ const topics = [
     items: [
       { name: 'Aquarius', url: '/grimoire/zodiac/aquarius' },
       { name: 'Aries', url: '/grimoire/zodiac/aries' },
-      { name: 'Ascendant', url: '/grimoire/houses/overview/1' },
+      { name: 'Ascendant', url: '/grimoire/houses/1st-house' },
       { name: 'Aspects', url: '/grimoire/aspects' },
     ],
   },
@@ -67,7 +67,7 @@ const topics = [
     letter: 'D',
     items: [
       { name: 'Decans', url: '/grimoire/decans' },
-      { name: 'Descendant', url: '/grimoire/houses/overview/7' },
+      { name: 'Descendant', url: '/grimoire/houses/7th-house' },
     ],
   },
   {
@@ -97,7 +97,7 @@ const topics = [
   },
   {
     letter: 'I',
-    items: [{ name: 'IC (Imum Coeli)', url: '/grimoire/houses/overview/4' }],
+    items: [{ name: 'IC (Imum Coeli)', url: '/grimoire/houses/4th-house' }],
   },
   {
     letter: 'J',
@@ -116,7 +116,7 @@ const topics = [
     items: [
       { name: 'Mars', url: '/grimoire/astronomy/planets/mars' },
       { name: 'Mercury', url: '/grimoire/astronomy/planets/mercury' },
-      { name: 'Midheaven', url: '/grimoire/houses/overview/10' },
+      { name: 'Midheaven', url: '/grimoire/houses/10th-house' },
       { name: 'Moon', url: '/grimoire/astronomy/planets/moon' },
       { name: 'Moon Phases', url: '/grimoire/moon/phases' },
     ],
@@ -146,7 +146,7 @@ const topics = [
     letter: 'R',
     items: [
       { name: 'Retrogrades', url: '/grimoire/astronomy/retrogrades' },
-      { name: 'Rising Sign', url: '/grimoire/houses/overview/1' },
+      { name: 'Rising Sign', url: '/grimoire/houses/1st-house' },
       { name: 'Runes', url: '/grimoire/runes' },
     ],
   },

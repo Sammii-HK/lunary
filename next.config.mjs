@@ -675,19 +675,210 @@ const nextConfig = {
       // ========================================
       // END GRIMOIRE CONSOLIDATION REDIRECTS
       // ========================================
-      // Aspects and Houses route restructure (SEO preservation)
+      // Aspects route restructure (SEO preservation)
       {
         source:
           '/grimoire/aspects/:aspect(conjunction|opposition|trine|square|sextile)',
         destination: '/grimoire/aspects/types/:aspect',
         permanent: true,
       },
+      // ========================================
+      // HOUSE PAGE CONSOLIDATION REDIRECTS
+      // Consolidating /grimoire/houses/overview/[name] and /grimoire/birth-chart/houses/[number]
+      // into /grimoire/houses/[ordinal]-house (e.g., 1st-house, 10th-house)
+      // ========================================
+      // Hub redirect: overview index → houses hub
       {
-        source:
-          '/grimoire/houses/:house(first|second|third|fourth|fifth|sixth|seventh|eighth|ninth|tenth|eleventh|twelfth)',
-        destination: '/grimoire/houses/overview/:house',
+        source: '/grimoire/houses/overview',
+        destination: '/grimoire/houses',
         permanent: true,
       },
+      // Name-based redirects: /grimoire/houses/first → /grimoire/houses/1st-house
+      {
+        source: '/grimoire/houses/first',
+        destination: '/grimoire/houses/1st-house',
+        permanent: true,
+      },
+      {
+        source: '/grimoire/houses/second',
+        destination: '/grimoire/houses/2nd-house',
+        permanent: true,
+      },
+      {
+        source: '/grimoire/houses/third',
+        destination: '/grimoire/houses/3rd-house',
+        permanent: true,
+      },
+      {
+        source: '/grimoire/houses/fourth',
+        destination: '/grimoire/houses/4th-house',
+        permanent: true,
+      },
+      {
+        source: '/grimoire/houses/fifth',
+        destination: '/grimoire/houses/5th-house',
+        permanent: true,
+      },
+      {
+        source: '/grimoire/houses/sixth',
+        destination: '/grimoire/houses/6th-house',
+        permanent: true,
+      },
+      {
+        source: '/grimoire/houses/seventh',
+        destination: '/grimoire/houses/7th-house',
+        permanent: true,
+      },
+      {
+        source: '/grimoire/houses/eighth',
+        destination: '/grimoire/houses/8th-house',
+        permanent: true,
+      },
+      {
+        source: '/grimoire/houses/ninth',
+        destination: '/grimoire/houses/9th-house',
+        permanent: true,
+      },
+      {
+        source: '/grimoire/houses/tenth',
+        destination: '/grimoire/houses/10th-house',
+        permanent: true,
+      },
+      {
+        source: '/grimoire/houses/eleventh',
+        destination: '/grimoire/houses/11th-house',
+        permanent: true,
+      },
+      {
+        source: '/grimoire/houses/twelfth',
+        destination: '/grimoire/houses/12th-house',
+        permanent: true,
+      },
+      // Overview path redirects: /grimoire/houses/overview/first → /grimoire/houses/1st-house
+      {
+        source: '/grimoire/houses/overview/first',
+        destination: '/grimoire/houses/1st-house',
+        permanent: true,
+      },
+      {
+        source: '/grimoire/houses/overview/second',
+        destination: '/grimoire/houses/2nd-house',
+        permanent: true,
+      },
+      {
+        source: '/grimoire/houses/overview/third',
+        destination: '/grimoire/houses/3rd-house',
+        permanent: true,
+      },
+      {
+        source: '/grimoire/houses/overview/fourth',
+        destination: '/grimoire/houses/4th-house',
+        permanent: true,
+      },
+      {
+        source: '/grimoire/houses/overview/fifth',
+        destination: '/grimoire/houses/5th-house',
+        permanent: true,
+      },
+      {
+        source: '/grimoire/houses/overview/sixth',
+        destination: '/grimoire/houses/6th-house',
+        permanent: true,
+      },
+      {
+        source: '/grimoire/houses/overview/seventh',
+        destination: '/grimoire/houses/7th-house',
+        permanent: true,
+      },
+      {
+        source: '/grimoire/houses/overview/eighth',
+        destination: '/grimoire/houses/8th-house',
+        permanent: true,
+      },
+      {
+        source: '/grimoire/houses/overview/ninth',
+        destination: '/grimoire/houses/9th-house',
+        permanent: true,
+      },
+      {
+        source: '/grimoire/houses/overview/tenth',
+        destination: '/grimoire/houses/10th-house',
+        permanent: true,
+      },
+      {
+        source: '/grimoire/houses/overview/eleventh',
+        destination: '/grimoire/houses/11th-house',
+        permanent: true,
+      },
+      {
+        source: '/grimoire/houses/overview/twelfth',
+        destination: '/grimoire/houses/12th-house',
+        permanent: true,
+      },
+      // Number-based redirects: /grimoire/birth-chart/houses/1 → /grimoire/houses/1st-house
+      {
+        source: '/grimoire/birth-chart/houses/1',
+        destination: '/grimoire/houses/1st-house',
+        permanent: true,
+      },
+      {
+        source: '/grimoire/birth-chart/houses/2',
+        destination: '/grimoire/houses/2nd-house',
+        permanent: true,
+      },
+      {
+        source: '/grimoire/birth-chart/houses/3',
+        destination: '/grimoire/houses/3rd-house',
+        permanent: true,
+      },
+      {
+        source: '/grimoire/birth-chart/houses/4',
+        destination: '/grimoire/houses/4th-house',
+        permanent: true,
+      },
+      {
+        source: '/grimoire/birth-chart/houses/5',
+        destination: '/grimoire/houses/5th-house',
+        permanent: true,
+      },
+      {
+        source: '/grimoire/birth-chart/houses/6',
+        destination: '/grimoire/houses/6th-house',
+        permanent: true,
+      },
+      {
+        source: '/grimoire/birth-chart/houses/7',
+        destination: '/grimoire/houses/7th-house',
+        permanent: true,
+      },
+      {
+        source: '/grimoire/birth-chart/houses/8',
+        destination: '/grimoire/houses/8th-house',
+        permanent: true,
+      },
+      {
+        source: '/grimoire/birth-chart/houses/9',
+        destination: '/grimoire/houses/9th-house',
+        permanent: true,
+      },
+      {
+        source: '/grimoire/birth-chart/houses/10',
+        destination: '/grimoire/houses/10th-house',
+        permanent: true,
+      },
+      {
+        source: '/grimoire/birth-chart/houses/11',
+        destination: '/grimoire/houses/11th-house',
+        permanent: true,
+      },
+      {
+        source: '/grimoire/birth-chart/houses/12',
+        destination: '/grimoire/houses/12th-house',
+        permanent: true,
+      },
+      // ========================================
+      // END HOUSE PAGE CONSOLIDATION REDIRECTS
+      // ========================================
       // Monthly horoscopes moved under Grimoire
       {
         source: '/horoscope/today/',

@@ -441,7 +441,7 @@ export default function BeginnersGuidePage() {
                 career, community, spirituality.
               </p>
               <Link
-                href='/grimoire/houses/overview'
+                href='/grimoire/houses'
                 className='text-lunary-primary-400 text-sm hover:underline'
               >
                 Explore houses →

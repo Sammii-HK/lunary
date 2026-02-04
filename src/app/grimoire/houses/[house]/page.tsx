@@ -3,15 +3,34 @@ import { notFound } from 'next/navigation';
 import { SEOContentTemplate } from '@/components/grimoire/SEOContentTemplate';
 import { CosmicConnections } from '@/components/grimoire/CosmicConnections';
 import { astrologicalHouses } from '@/constants/grimoire/seo-data';
-import { stringToKebabCase } from '../../../../../../utils/string';
 import { createCosmicEntitySchema, renderJsonLd } from '@/lib/schema';
 
 // 30-day ISR revalidation
 export const revalidate = 2592000;
-const houseKeys = Object.keys(astrologicalHouses);
 
-// Removed generateStaticParams - using pure ISR for faster builds
-// Pages are generated on-demand and cached with 30-day revalidation
+// Map URL slugs (1st-house, 2nd-house, etc.) to house keys
+const houseSlugMap: Record<string, keyof typeof astrologicalHouses> = {
+  '1st-house': 'first',
+  '2nd-house': 'second',
+  '3rd-house': 'third',
+  '4th-house': 'fourth',
+  '5th-house': 'fifth',
+  '6th-house': 'sixth',
+  '7th-house': 'seventh',
+  '8th-house': 'eighth',
+  '9th-house': 'ninth',
+  '10th-house': 'tenth',
+  '11th-house': 'eleventh',
+  '12th-house': 'twelfth',
+};
+
+// Get ordinal string from house number
+function getOrdinal(num: number): string {
+  if (num === 1) return '1st';
+  if (num === 2) return '2nd';
+  if (num === 3) return '3rd';
+  return `${num}th`;
+}
 
 export async function generateMetadata({
   params,
@@ -19,9 +38,7 @@ export async function generateMetadata({
   params: Promise<{ house: string }>;
 }): Promise<Metadata> {
   const { house } = await params;
-  const houseKey = houseKeys.find(
-    (h) => stringToKebabCase(h) === house.toLowerCase(),
-  );
+  const houseKey = houseSlugMap[house.toLowerCase()];
 
   if (!houseKey) {
     return {
@@ -29,42 +46,35 @@ export async function generateMetadata({
     };
   }
 
-  const houseData =
-    astrologicalHouses[houseKey as keyof typeof astrologicalHouses];
-  const ordinal =
-    houseData.number === 1
-      ? '1st'
-      : houseData.number === 2
-        ? '2nd'
-        : houseData.number === 3
-          ? '3rd'
-          : `${houseData.number}th`;
-  const title = `${ordinal} House in Astrology: Meaning, Planets & Themes`;
-  const description = `Discover the ${ordinal} house in astrology: what it reveals about ${houseData.area.toLowerCase()}. Learn how planets in your ${ordinal} house shape your ${houseData.themes[0].toLowerCase()}. Complete guide with examples.`;
+  const houseData = astrologicalHouses[houseKey];
+  const ordinal = getOrdinal(houseData.number);
+
+  const title = `${ordinal} House in Astrology: ${houseData.keywords[0]}, ${houseData.keywords[1]} & Meaning | Lunary`;
+  const description = `What is the ${ordinal} house in astrology? The ${houseData.name} governs ${houseData.area.toLowerCase()}. Learn how planets in your ${ordinal} house shape ${houseData.themes[0].toLowerCase()}. Complete guide with examples.`;
 
   return {
     title,
     description,
     keywords: [
-      `${houseData.name} astrology`,
-      `${houseData.name} meaning`,
-      `${ordinal} house`,
+      `${ordinal} house astrology`,
+      `${ordinal} house meaning`,
+      `${houseData.name.toLowerCase()} astrology`,
       `planets in ${ordinal} house`,
-      `${houseData.symbol} house`,
-      `house ${houseData.number}`,
-      `${houseData.name} birth chart`,
+      `${houseData.keywords[0].toLowerCase()} house`,
+      `house ${houseData.number} astrology`,
+      `${ordinal} house birth chart`,
     ],
     openGraph: {
       title,
       description,
-      url: `https://lunary.app/grimoire/houses/overview/${house}`,
+      url: `https://lunary.app/grimoire/houses/${house}`,
       siteName: 'Lunary',
       images: [
         {
           url: '/api/og/grimoire/houses',
           width: 1200,
           height: 630,
-          alt: `${houseData.name}`,
+          alt: `${ordinal} House in Astrology`,
         },
       ],
       locale: 'en_US',
@@ -74,10 +84,10 @@ export async function generateMetadata({
       card: 'summary_large_image',
       title,
       description,
-      images: ['/api/og/cosmic'],
+      images: ['/api/og/grimoire/houses'],
     },
     alternates: {
-      canonical: `https://lunary.app/grimoire/houses/overview/${house}`,
+      canonical: `https://lunary.app/grimoire/houses/${house}`,
     },
     robots: {
       index: true,
@@ -99,26 +109,28 @@ export default async function HousePage({
   params: Promise<{ house: string }>;
 }) {
   const { house } = await params;
-  const houseKey = houseKeys.find(
-    (h) => stringToKebabCase(h) === house.toLowerCase(),
-  );
+  const houseKey = houseSlugMap[house.toLowerCase()];
 
   if (!houseKey) {
     notFound();
   }
 
-  const houseData =
-    astrologicalHouses[houseKey as keyof typeof astrologicalHouses];
+  const houseData = astrologicalHouses[houseKey];
+  const ordinal = getOrdinal(houseData.number);
 
-  const ordinal =
-    houseData.number === 1
-      ? '1st'
-      : houseData.number === 2
-        ? '2nd'
-        : houseData.number === 3
-          ? '3rd'
-          : `${houseData.number}th`;
+  // Extra notes for upper houses (10, 11, 12)
+  const extraHouseNotes =
+    houseData.number === 10
+      ? `\n\nThe ${ordinal} House is strongly tied to career, reputation, and life direction. It relates to the Midheaven (MC) and shows how you want to be seen for your work in the world.`
+      : houseData.number === 11
+        ? `\n\nThe ${ordinal} House highlights community, collaboration, and long-term goals. It shows the kind of networks that support your future.`
+        : houseData.number === 12
+          ? `\n\nThe ${ordinal} House governs solitude, subconscious patterns, and spiritual restoration. It often asks for quiet reflection before major decisions.`
+          : '';
 
+  const isUpperHouse = [10, 11, 12].includes(houseData.number);
+
+  // Comprehensive FAQs merged from both pages
   const faqs = [
     {
       question: `What is the ${ordinal} house in astrology?`,
@@ -137,8 +149,8 @@ export default async function HousePage({
       answer: `Planets in your ${ordinal} house reveal how you express energy related to ${houseData.area.toLowerCase()}. The sign on the cusp shows your natural approach to these themes. Understanding this house helps you work consciously with ${houseData.themes[0].toLowerCase()}.`,
     },
     {
-      question: `What are the themes of the ${ordinal} house?`,
-      answer: `The ${ordinal} house themes include ${houseData.themes.join(', ').toLowerCase()}. This ${houseData.element} house influences how you experience and express these areas of life.`,
+      question: `How do I know what sign is in my ${ordinal} house?`,
+      answer: `Your ${ordinal} house sign is determined by your birth chart. Calculate your chart using your exact birth time, date, and location to discover your house placements.`,
     },
   ];
 
@@ -146,7 +158,7 @@ export default async function HousePage({
   const houseSchema = createCosmicEntitySchema({
     name: `${houseData.name} in Astrology`,
     description: `The ${houseData.name} (${houseData.symbol}) governs ${houseData.area.toLowerCase()}. ${houseData.description.slice(0, 100)}...`,
-    url: `/grimoire/houses/overview/${house}`,
+    url: `/grimoire/houses/${house}`,
     additionalType: 'https://en.wikipedia.org/wiki/House_(astrology)',
     keywords: [
       houseData.name,
@@ -156,6 +168,60 @@ export default async function HousePage({
       houseData.area,
     ],
   });
+
+  // Related items with extra links for upper houses
+  const relatedItems = [
+    {
+      name: 'Birth Chart Guide',
+      href: '/grimoire/birth-chart',
+      type: 'Guide' as const,
+    },
+    {
+      name: 'Get Your Birth Chart',
+      href: '/birth-chart',
+      type: 'Tool' as const,
+    },
+    {
+      name: houseData.rulingSign,
+      href: `/grimoire/zodiac/${houseData.rulingSign.toLowerCase()}`,
+      type: 'Zodiac Sign' as const,
+    },
+    {
+      name: houseData.rulingPlanet,
+      href: `/grimoire/astronomy/planets/${houseData.rulingPlanet.toLowerCase()}`,
+      type: 'Planet' as const,
+    },
+    ...(isUpperHouse
+      ? [
+          {
+            name: 'Rising Sign',
+            href: '/grimoire/rising',
+            type: 'Guide' as const,
+          },
+          {
+            name: 'Life Path Numbers',
+            href: '/grimoire/life-path',
+            type: 'Guide' as const,
+          },
+        ]
+      : []),
+  ];
+
+  // Internal links
+  const internalLinks = [
+    { text: 'Calculate Birth Chart', href: '/birth-chart' },
+    { text: "View Today's Horoscope", href: '/horoscope' },
+    { text: 'Explore All Houses', href: '/grimoire/houses' },
+    { text: 'Zodiac Signs', href: '/grimoire/zodiac' },
+    ...(isUpperHouse
+      ? [
+          { text: 'Rising Sign (Ascendant)', href: '/grimoire/rising' },
+          { text: 'Planets in Astrology', href: '/grimoire/astronomy/planets' },
+          { text: 'Astrology Placements', href: '/grimoire/placements' },
+        ]
+      : []),
+    { text: 'Grimoire Home', href: '/grimoire' },
+  ];
 
   return (
     <div className='p-4 md:p-6 lg:p-8 xl:p-10 min-h-full'>
@@ -172,7 +238,7 @@ export default async function HousePage({
           `${houseData.name} astrology`,
           `planets in ${ordinal} house`,
         ]}
-        canonicalUrl={`https://lunary.app/grimoire/houses/overview/${house}`}
+        canonicalUrl={`https://lunary.app/grimoire/houses/${house}`}
         whatIs={{
           question: `What is the ${ordinal} house in astrology?`,
           answer: `The ${ordinal} house in astrology governs ${houseData.area.toLowerCase()}. Ruled by ${houseData.rulingSign} and ${houseData.rulingPlanet}, this ${houseData.element} house reveals how you approach ${houseData.themes[0].toLowerCase()} in your life. Planets placed here shape your experience of ${houseData.themes.slice(0, 2).join(' and ').toLowerCase()}.`,
@@ -205,61 +271,63 @@ Any planet can appear in your ${ordinal} house, and each brings its unique energ
 
 **Saturn in ${ordinal} House:** You learn discipline and mastery in ${houseData.area.toLowerCase()}. Challenges teach valuable lessons about ${houseData.themes[0].toLowerCase()}.
 
-The specific influence depends on the planet's sign, aspects, and your overall chart. Each planet colors how you experience the ${ordinal} house themes.
+The specific influence depends on the planet's sign, aspects, and your overall chart. Each planet colors how you experience the ${ordinal} house themes.${extraHouseNotes}
 
-Understanding your ${houseData.name} helps you understand how you express energy related to ${houseData.area.toLowerCase()}. This knowledge empowers you to work with this house's themes consciously and constructively.`}
+Understanding your ${houseData.name} helps you work consciously with energy related to ${houseData.area.toLowerCase()}.`}
+        glyphs={[houseData.symbol]}
         emotionalThemes={houseData.themes}
-        howToWorkWith={[
-          `Understand planets in your ${houseData.name}`,
-          `Work with ${houseData.rulingSign} energy consciously`,
-          `Express ${houseData.element} element through this house`,
-          `Honor ${houseData.name} themes in your life`,
-          `Use ${houseData.name} energy for growth`,
-        ]}
         astrologyCorrespondences={`House Number: ${houseData.number}
 Symbol: ${houseData.symbol}
 Ruling Sign: ${houseData.rulingSign}
 Ruling Planet: ${houseData.rulingPlanet}
 Element: ${houseData.element}
 Area: ${houseData.area}`}
-        relatedItems={[
+        howToWorkWith={[
+          `Study planets in your ${ordinal} House`,
+          `Note the sign on your ${ordinal} House cusp`,
+          `Observe transits through your ${ordinal} House`,
+          `Work with ${houseData.rulingPlanet} for house support`,
+          `Honor ${houseData.element} element practices`,
+          `Use ${houseData.name} energy for growth`,
+        ]}
+        tables={[
           {
-            name: 'Birth Chart Guide',
-            href: '/grimoire/birth-chart',
-            type: 'Guide',
-          },
-          {
-            name: houseData.rulingSign,
-            href: `/grimoire/zodiac/${houseData.rulingSign.toLowerCase()}`,
-            type: 'Zodiac Sign',
-          },
-          {
-            name: houseData.rulingPlanet,
-            href: `/grimoire/astronomy/planets/${houseData.rulingPlanet.toLowerCase()}`,
-            type: 'Planet',
+            title: `${ordinal} House Correspondences`,
+            headers: ['Aspect', 'Details'],
+            rows: [
+              ['House Name', houseData.name],
+              ['Keywords', houseData.keywords.join(', ')],
+              ['Element', houseData.element],
+              ['Ruling Sign', houseData.rulingSign],
+              ['Ruling Planet', houseData.rulingPlanet],
+              ['Life Area', houseData.area],
+              ['Themes', houseData.themes.join(', ')],
+            ],
           },
         ]}
+        journalPrompts={[
+          `What planets do I have in my ${ordinal} House?`,
+          `How do ${houseData.keywords[0].toLowerCase()} themes show up in my life?`,
+          `What sign rules my ${ordinal} House?`,
+          `How can I work with my ${ordinal} House energy?`,
+        ]}
+        relatedItems={relatedItems}
         breadcrumbs={[
           { label: 'Grimoire', href: '/grimoire' },
-          { label: 'Birth Chart', href: '/grimoire/birth-chart' },
+          { label: 'Houses', href: '/grimoire/houses' },
           {
-            label: houseData.name,
-            href: `/grimoire/houses/overview/${house}`,
+            label: `${ordinal} House`,
+            href: `/grimoire/houses/${house}`,
           },
         ]}
-        internalLinks={[
-          { text: 'Calculate Birth Chart', href: '/birth-chart' },
-          { text: "View Today's Horoscope", href: '/horoscope' },
-          { text: 'Explore All Houses', href: '/grimoire/houses' },
-          { text: 'Grimoire Home', href: '/grimoire' },
-        ]}
+        internalLinks={internalLinks}
         ctaText={`Want to see planets in your ${houseData.name}?`}
-        ctaHref='/pricing'
+        ctaHref='/birth-chart'
         faqs={faqs}
         cosmicConnections={
           <CosmicConnections
             entityType='house'
-            entityKey={house}
+            entityKey={houseKey}
             title={`${houseData.name} Cosmic Connections`}
           />
         }

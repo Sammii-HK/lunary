@@ -1562,7 +1562,7 @@ const BirthChartPage = () => {
               Planet Meanings
             </Link>
             <Link
-              href='/grimoire/houses/overview/first'
+              href='/grimoire/houses'
               className='text-xs px-3 py-1.5 bg-lunary-secondary-900/30 text-lunary-secondary-300 border border-lunary-secondary-700/50 rounded-full hover:bg-lunary-secondary-900/50 transition-colors'
             >
               The 12 Houses

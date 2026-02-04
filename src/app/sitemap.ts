@@ -17,7 +17,6 @@ import { wheelOfTheYearSabbats } from '@/constants/sabbats';
 import { correspondencesData } from '@/constants/grimoire/correspondences';
 import witchTypesData from '@/constants/witch-types.json';
 import {
-  astrologicalHouses,
   astrologicalAspects,
   retrogradeInfo,
   eclipseInfo,
@@ -863,15 +862,13 @@ export default function sitemap(): MetadataRoute.Sitemap {
     priority: 0.6,
   }));
 
-  // Add birth chart house pages (1st-12th)
-  const birthChartHouseRoutes = Array.from({ length: 12 }, (_, i) => i + 1).map(
-    (houseNum) => ({
-      url: `${baseUrl}/grimoire/birth-chart/houses/${houseNum}`,
-      lastModified: date,
-      changeFrequency: 'monthly' as const,
-      priority: 0.6,
-    }),
-  );
+  // Helper for ordinal numbers (1st, 2nd, 3rd, etc.)
+  const getOrdinal = (num: number): string => {
+    if (num === 1) return '1st';
+    if (num === 2) return '2nd';
+    if (num === 3) return '3rd';
+    return `${num}th`;
+  };
 
   // Add modern witchcraft witch type pages
   const witchTypeRoutes = (witchTypesData.witchTypesOverview || []).map(
@@ -967,13 +964,15 @@ export default function sitemap(): MetadataRoute.Sitemap {
     priority: 0.8,
   }));
 
-  // Add all house pages
-  const houseRoutes = Object.keys(astrologicalHouses).map((house) => ({
-    url: `${baseUrl}/grimoire/houses/overview/${stringToKebabCase(house)}`,
-    lastModified: date,
-    changeFrequency: 'monthly' as const,
-    priority: 0.8,
-  }));
+  // Add all house pages (consolidated to /grimoire/houses/[ordinal]-house)
+  const houseRoutes = Array.from({ length: 12 }, (_, i) => i + 1).map(
+    (houseNum) => ({
+      url: `${baseUrl}/grimoire/houses/${getOrdinal(houseNum)}-house`,
+      lastModified: date,
+      changeFrequency: 'monthly' as const,
+      priority: 0.8,
+    }),
+  );
 
   // Add all moon in sign pages
   const moonInSignRoutes = Object.keys(zodiacSigns).map((sign) => ({
@@ -1453,7 +1452,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
     ...numerologyMasterRoutes,
     ...numerologyDayRoutes,
     ...candleColorRoutes,
-    ...birthChartHouseRoutes,
     ...witchTypeRoutes,
     ...witchToolRoutes,
     ...meditationTechniqueRoutes,
