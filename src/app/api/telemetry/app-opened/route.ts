@@ -32,6 +32,9 @@ const ANON_ID_COOKIE = 'lunary_anon_id';
  * Called from middleware to ensure reliable tracking (bypasses ad blockers)
  */
 export async function POST(request: NextRequest) {
+  const startTime = Date.now();
+  console.log('[app_opened] Request received');
+
   try {
     const payload = await request.json().catch(() => ({}));
     const path = typeof payload?.path === 'string' ? payload.path.trim() : '/';
@@ -44,8 +47,17 @@ export async function POST(request: NextRequest) {
     const userId = currentUser?.id;
     const userEmail = currentUser?.email;
 
+    console.log('[app_opened] Identity check:', {
+      userId: userId ? 'present' : 'none',
+      anonymousId: anonymousId ? 'present' : 'none',
+      anonHeader: anonHeader ? 'present' : 'none',
+      anonCookie: anonCookie ? 'present' : 'none',
+      path,
+    });
+
     // Must have either userId or anonymousId
     if (!userId && !anonymousId) {
+      console.warn('[app_opened] SKIPPED - no identity');
       return NextResponse.json({
         success: true,
         skipped: true,
@@ -80,6 +92,10 @@ export async function POST(request: NextRequest) {
     });
 
     if (!canonical.ok) {
+      console.warn(
+        '[app_opened] SKIPPED - canonicalization failed:',
+        canonical.reason,
+      );
       return NextResponse.json({
         success: true,
         skipped: true,
@@ -101,6 +117,7 @@ export async function POST(request: NextRequest) {
     `;
 
     if (existing.rows.length > 0) {
+      console.log('[app_opened] SKIPPED - already tracked today');
       return NextResponse.json({
         success: true,
         skipped: true,
@@ -109,9 +126,17 @@ export async function POST(request: NextRequest) {
     }
 
     await insertCanonicalEvent(canonical.row);
+    console.log('[app_opened] INSERT success', {
+      duration: Date.now() - startTime,
+      userId: userId ? 'present' : 'none',
+      anonymousId: anonymousId ? 'present' : 'none',
+    });
     return NextResponse.json({ success: true, tracked: true });
   } catch (error) {
-    console.error('[telemetry/app-opened] Failed to record app_opened', error);
+    console.error('[app_opened] ERROR:', {
+      error: error instanceof Error ? error.message : 'Unknown error',
+      stack: error instanceof Error ? error.stack : undefined,
+    });
     return NextResponse.json(
       {
         success: false,

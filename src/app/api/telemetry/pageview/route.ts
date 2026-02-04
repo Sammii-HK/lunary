@@ -11,11 +11,15 @@ export const runtime = 'nodejs';
 const ANON_ID_COOKIE = 'lunary_anon_id';
 
 export async function POST(request: NextRequest) {
+  const startTime = Date.now();
+  console.log('[page_viewed] Request received');
+
   try {
     const payload = await request.json().catch(() => ({}));
     const path = typeof payload?.path === 'string' ? payload.path.trim() : '';
 
     if (!path) {
+      console.warn('[page_viewed] SKIPPED - missing path');
       return NextResponse.json(
         { success: false, error: 'Missing path' },
         { status: 400 },
@@ -29,6 +33,14 @@ export async function POST(request: NextRequest) {
     const currentUser = await getCurrentUser(request);
     const userId = currentUser?.id;
     const userEmail = currentUser?.email;
+
+    console.log('[page_viewed] Identity check:', {
+      userId: userId ? 'present' : 'none',
+      anonymousId: anonymousId ? 'present' : 'none',
+      anonHeader: anonHeader ? 'present' : 'none',
+      anonCookie: anonCookie ? 'present' : 'none',
+      path,
+    });
 
     const canonical = canonicaliseEvent({
       eventType: 'page_viewed',
@@ -44,6 +56,10 @@ export async function POST(request: NextRequest) {
     });
 
     if (!canonical.ok) {
+      console.warn(
+        '[page_viewed] SKIPPED - canonicalization failed:',
+        canonical.reason,
+      );
       return NextResponse.json({
         success: true,
         skipped: true,
@@ -75,13 +91,22 @@ export async function POST(request: NextRequest) {
         : { rows: [] };
 
     if (existing.rows.length > 0) {
+      console.log('[page_viewed] SKIPPED - duplicate');
       return NextResponse.json({ status: 'skipped', reason: 'duplicate' });
     }
 
     await insertCanonicalEvent(canonical.row);
+    console.log('[page_viewed] INSERT success', {
+      duration: Date.now() - startTime,
+      userId: userId ? 'present' : 'none',
+      anonymousId: anonymousId ? 'present' : 'none',
+    });
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error('[telemetry/pageview] Failed to record pageview', error);
+    console.error('[page_viewed] ERROR:', {
+      error: error instanceof Error ? error.message : 'Unknown error',
+      stack: error instanceof Error ? error.stack : undefined,
+    });
     return NextResponse.json(
       {
         success: false,
