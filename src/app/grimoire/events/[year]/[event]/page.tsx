@@ -9,10 +9,16 @@ import { CosmicConnections } from '@/components/grimoire/CosmicConnections';
 
 // 30-day ISR revalidation
 export const revalidate = 2592000;
-const AVAILABLE_YEARS = [2025, 2026, 2027, 2028, 2029, 2030];
+
+// Dynamic year range: current year to 10 years ahead
+const CURRENT_YEAR = new Date().getFullYear();
+const AVAILABLE_YEARS = Array.from({ length: 11 }, (_, i) => CURRENT_YEAR + i);
+
 const EVENT_KEYS = [
   'mercury-retrograde',
   'venus-retrograde',
+  'mars-retrograde',
+  'retrogrades',
   'eclipses',
 ] as const;
 
@@ -72,6 +78,22 @@ const DEFAULT_EVENT_COPY: Record<
     description: 'Dates, meanings, and how to work with Venus retrograde.',
     keywords: ['Venus retrograde', 'retrograde dates', 'astrology events'],
   },
+  'mars-retrograde': {
+    title: 'Mars Retrograde',
+    description:
+      'Dates, meanings, and how to work with Mars retrograde. Mars retrogrades every ~2 years.',
+    keywords: ['Mars retrograde', 'retrograde dates', 'astrology events'],
+  },
+  retrogrades: {
+    title: 'All Retrogrades',
+    description:
+      'Complete retrograde calendar with all planetary retrogrades for the year.',
+    keywords: [
+      'retrograde calendar',
+      'all retrogrades',
+      'planetary retrogrades',
+    ],
+  },
   eclipses: {
     title: 'Eclipses',
     description: 'Solar and lunar eclipses with dates and zodiac signs.',
@@ -83,6 +105,29 @@ const eventContentData = yearlyEventContent as EventContentData;
 
 const applyYear = (value: string, year: number) =>
   value.replace(/\{year\}/g, year.toString());
+
+// Dynamic stats that can be used in JSON content as placeholders
+type DynamicStats = {
+  eclipseCount: number;
+  solarEclipseCount: number;
+  lunarEclipseCount: number;
+  retrogradeCount: number;
+  mercuryRxCount: number;
+  venusRxCount: number;
+  marsRxCount: number;
+  outerRxCount: number;
+};
+
+const applyStats = (value: string, stats: DynamicStats): string =>
+  value
+    .replace(/\{eclipseCount\}/g, stats.eclipseCount.toString())
+    .replace(/\{solarEclipseCount\}/g, stats.solarEclipseCount.toString())
+    .replace(/\{lunarEclipseCount\}/g, stats.lunarEclipseCount.toString())
+    .replace(/\{retrogradeCount\}/g, stats.retrogradeCount.toString())
+    .replace(/\{mercuryRxCount\}/g, stats.mercuryRxCount.toString())
+    .replace(/\{venusRxCount\}/g, stats.venusRxCount.toString())
+    .replace(/\{marsRxCount\}/g, stats.marsRxCount.toString())
+    .replace(/\{outerRxCount\}/g, stats.outerRxCount.toString());
 
 const resolveContent = (content: EventContent, year: number): EventContent => ({
   ...content,
@@ -134,6 +179,29 @@ const getEventContent = (event: EventKey, year: number): EventContent => {
 
   return resolveContent(merged, year);
 };
+
+// Apply dynamic stats to content after forecast is loaded
+const applyStatsToContent = (
+  content: EventContent,
+  stats: DynamicStats,
+): EventContent => ({
+  ...content,
+  intro: content.intro ? applyStats(content.intro, stats) : content.intro,
+  tldr: content.tldr ? applyStats(content.tldr, stats) : content.tldr,
+  meaning: content.meaning
+    ? applyStats(content.meaning, stats)
+    : content.meaning,
+  whatIs: content.whatIs
+    ? {
+        question: applyStats(content.whatIs.question, stats),
+        answer: applyStats(content.whatIs.answer, stats),
+      }
+    : content.whatIs,
+  faqs: content.faqs?.map((faq) => ({
+    question: applyStats(faq.question, stats),
+    answer: applyStats(faq.answer, stats),
+  })),
+});
 
 // Removed generateStaticParams - using pure ISR for faster builds
 // Pages are generated on-demand and cached with 30-day revalidation
@@ -208,13 +276,34 @@ export default async function EventsYearEventPage({
   const { year, event } = await params;
   const yearNum = parseInt(year, 10);
   const config = DEFAULT_EVENT_COPY[event];
-  const content = getEventContent(event, yearNum);
 
   if (!config || !AVAILABLE_YEARS.includes(yearNum)) {
     notFound();
   }
 
   const forecast = await generateYearlyForecast(yearNum);
+
+  // Calculate dynamic stats for content placeholders
+  const stats: DynamicStats = {
+    eclipseCount: forecast.eclipses.length,
+    solarEclipseCount: forecast.eclipses.filter((e) => e.type === 'solar')
+      .length,
+    lunarEclipseCount: forecast.eclipses.filter((e) => e.type === 'lunar')
+      .length,
+    retrogradeCount: forecast.retrogrades.length,
+    mercuryRxCount: forecast.retrogrades.filter((r) => r.planet === 'Mercury')
+      .length,
+    venusRxCount: forecast.retrogrades.filter((r) => r.planet === 'Venus')
+      .length,
+    marsRxCount: forecast.retrogrades.filter((r) => r.planet === 'Mars').length,
+    outerRxCount: forecast.retrogrades.filter((r) =>
+      ['Jupiter', 'Saturn', 'Uranus', 'Neptune', 'Pluto'].includes(r.planet),
+    ).length,
+  };
+
+  // Get content and apply dynamic stats
+  const baseContent = getEventContent(event, yearNum);
+  const content = applyStatsToContent(baseContent, stats);
 
   const eclipseEntries = forecast.eclipses.map((e) => ({
     date: formatDate(e.date),
@@ -223,10 +312,16 @@ export default async function EventsYearEventPage({
     sign: e.sign,
   }));
 
+  // For "retrogrades" event, show ALL retrogrades; otherwise filter by planet
   const retrogradeEntries = forecast.retrogrades
-    .filter((r) => r.planet.toLowerCase() === event.split('-')[0])
+    .filter(
+      (r) =>
+        event === 'retrogrades' ||
+        r.planet.toLowerCase() === event.split('-')[0],
+    )
     .map((r) => ({
       date: formatDateRange(r.startDate, r.endDate),
+      planet: r.planet,
       description: r.description
         .replace(/retrograde period \(/i, '')
         .replace(/\)$/, ''),
@@ -252,16 +347,27 @@ export default async function EventsYearEventPage({
             'Cosmic shift',
           ]),
         }
-      : {
-          title: `${config.title} ${yearNum} Dates`,
-          headers: ['Period', 'Start Date', 'End Date', 'Sign(s)'],
-          rows: retrogradeEntries.map((entry, index) => [
-            `Period ${index + 1}`,
-            formatDate(entry.startDate),
-            formatDate(entry.endDate),
-            entry.description ?? '—',
-          ]),
-        };
+      : event === 'retrogrades'
+        ? {
+            title: `${yearNum} Retrograde Calendar`,
+            headers: ['Planet', 'Start Date', 'End Date', 'Sign(s)'],
+            rows: retrogradeEntries.map((entry) => [
+              entry.planet,
+              formatDate(entry.startDate),
+              formatDate(entry.endDate),
+              entry.description ?? '—',
+            ]),
+          }
+        : {
+            title: `${config.title} ${yearNum} Dates`,
+            headers: ['Period', 'Start Date', 'End Date', 'Sign(s)'],
+            rows: retrogradeEntries.map((entry, index) => [
+              `Period ${index + 1}`,
+              formatDate(entry.startDate),
+              formatDate(entry.endDate),
+              entry.description ?? '—',
+            ]),
+          };
 
   const tables = content.tables?.map((table) => ({
     ...table,

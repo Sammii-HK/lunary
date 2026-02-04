@@ -12,7 +12,10 @@ import { Heading } from '@/components/ui/Heading';
 
 // 30-day ISR revalidation
 export const revalidate = 2592000;
-const AVAILABLE_YEARS = [2025, 2026, 2027, 2028, 2029, 2030];
+
+// Dynamic year range: current year to 10 years in advance
+const CURRENT_YEAR = new Date().getFullYear();
+const AVAILABLE_YEARS = Array.from({ length: 11 }, (_, i) => CURRENT_YEAR + i);
 
 // Removed generateStaticParams - using pure ISR for faster builds
 // Pages are generated on-demand and cached with 30-day revalidation
@@ -25,34 +28,52 @@ export async function generateMetadata({
   const { year } = await params;
   const yearNum = parseInt(year);
 
-  // Year-specific highlights for SEO
-  // Verified astronomical data:
-  // - Uranus enters Gemini: July 7, 2025 (preview), April 26, 2026 (permanent)
-  // - Saturn enters Taurus: April 12-14, 2028
-  // - Saturn enters Gemini: May 31, 2030
-  const yearHighlights: Record<number, string> = {
-    2025: 'Uranus Enters Gemini',
-    2026: 'Uranus in Gemini Begins',
-    2028: 'Saturn Enters Taurus',
-    2030: 'Saturn Enters Gemini',
-  };
-  const highlight = yearHighlights[yearNum] || '';
+  // Generate dynamic highlight from actual forecast data
+  const forecast = await generateYearlyForecast(yearNum);
+
+  // Get the most significant ingress for SEO highlight
+  const majorIngress = forecast.ingresses.find(
+    (i) =>
+      ['Saturn', 'Uranus', 'Neptune', 'Pluto'].includes(i.planet) &&
+      !i.isRetrograde,
+  );
+  const highlight = majorIngress
+    ? `${majorIngress.planet} Enters ${majorIngress.toSign}`
+    : '';
+
+  // Count special events for description
+  const supermoonsCount = forecast.moonEvents.filter(
+    (m) => m.type === 'supermoon',
+  ).length;
+  const eclipseCount = forecast.eclipses.length;
+  const mercuryRxCount = forecast.retrogrades.filter(
+    (r) => r.planet === 'Mercury',
+  ).length;
 
   return {
-    title: `${year} Astrology Events: ${highlight ? highlight + ', ' : ''}Eclipses & Retrogrades | Lunary`,
-    description: `Your complete ${year} cosmic calendar. ${highlight ? highlight + ', all ' : 'All '}Mercury retrogrades, eclipses, and major transits. Plan ahead for transformational shifts.`,
+    title: `${year} Astrology Events: ${highlight ? highlight + ', ' : ''}Eclipses, Retrogrades & Supermoons | Lunary`,
+    description: `Complete ${year} cosmic calendar with ${eclipseCount} eclipses, ${mercuryRxCount} Mercury retrogrades, ${supermoonsCount} supermoons, equinoxes, solstices & planetary transits.${highlight ? ` Major event: ${highlight}.` : ''} Plan ahead with precise astronomical dates.`,
     keywords: [
       `${year} astrology`,
       `${year} mercury retrograde`,
       `${year} eclipses`,
+      `${year} supermoon`,
+      `${year} equinox`,
+      `${year} solstice`,
       `${year} astrological events`,
       `${year} lunar calendar`,
       `${year} planetary transits`,
+      `${year} retrograde dates`,
       `major astrological transits ${year}`,
+      ...(majorIngress
+        ? [
+            `${majorIngress.planet.toLowerCase()} ${majorIngress.toSign.toLowerCase()} ${year}`,
+          ]
+        : []),
     ],
     openGraph: {
       title: `${year} Astrology Events: ${highlight ? highlight + ', ' : ''}Eclipses & Retrogrades | Lunary`,
-      description: `Your complete guide to cosmic events in ${year}. Plan ahead for transformational shifts.`,
+      description: `Complete ${year} cosmic calendar: ${eclipseCount} eclipses, ${mercuryRxCount} Mercury retrogrades, supermoons & more. Plan ahead with precise dates.`,
       url: `https://lunary.app/grimoire/events/${year}`,
       siteName: 'Lunary',
       images: [`/api/og/cosmic?title=${year}%20Cosmic%20Events`],
@@ -72,255 +93,239 @@ interface EventCategory {
 }
 
 async function getEventsForYear(year: number): Promise<EventCategory[]> {
-  // Hardcoded data for known years (2025, 2026)
-  const eventsData: Record<number, EventCategory[]> = {
-    2025: [
-      {
-        category: 'Mercury Retrograde',
-        icon: Star,
-        color: 'orange',
-        events: [
-          { date: 'March 14 - April 7', description: 'Aries → Pisces' },
-          { date: 'July 18 - August 11', description: 'Leo → Cancer' },
-          { date: 'November 9 - 29', description: 'Sagittarius → Scorpio' },
-        ],
-        link: `/grimoire/events/${year}/mercury-retrograde`,
-      },
-      {
-        category: 'Venus Retrograde',
-        icon: Sparkles,
-        color: 'pink',
-        events: [{ date: 'March 1 - April 12', description: 'Aries → Pisces' }],
-        link: `/grimoire/events/${year}/venus-retrograde`,
-      },
-      {
-        category: 'Eclipses',
-        icon: Sun,
-        color: 'amber',
-        events: [
-          { date: 'March 14', description: 'Total Lunar Eclipse in Virgo' },
-          { date: 'March 29', description: 'Partial Solar Eclipse in Aries' },
-          { date: 'September 7', description: 'Total Lunar Eclipse in Pisces' },
-          {
-            date: 'September 21',
-            description: 'Partial Solar Eclipse in Virgo',
-          },
-        ],
-        link: `/grimoire/events/${year}/eclipses`,
-      },
-      {
-        category: 'Other Retrogrades',
-        icon: Moon,
-        color: 'blue',
-        events: [
-          { date: 'May 4 - September 1', description: 'Pluto Retrograde' },
-          { date: 'July 7 - November 27', description: 'Saturn Retrograde' },
-          { date: 'July 19 - December 7', description: 'Neptune Retrograde' },
-          {
-            date: 'September 1 - February 2026',
-            description: 'Uranus Retrograde',
-          },
-          {
-            date: 'October 9 - February 2026',
-            description: 'Jupiter Retrograde',
-          },
-          {
-            date: 'December 6 - February 2026',
-            description: 'Mars Retrograde',
-          },
-        ],
-        link: '/grimoire/astronomy',
-      },
-    ],
-    2026: [
-      {
-        category: 'Mercury Retrograde',
-        icon: Star,
-        color: 'orange',
-        events: [
-          { date: 'February 23 - March 18', description: 'Pisces → Aquarius' },
-          { date: 'June 26 - July 20', description: 'Cancer → Gemini' },
-          { date: 'October 21 - November 10', description: 'Scorpio → Libra' },
-        ],
-        link: `/grimoire/events/${year}/mercury-retrograde`,
-      },
-      {
-        category: 'Venus Retrograde',
-        icon: Sparkles,
-        color: 'pink',
-        events: [
-          { date: 'July 23 - September 3', description: 'Leo → Cancer' },
-        ],
-        link: `/grimoire/events/${year}/venus-retrograde`,
-      },
-      {
-        category: 'Eclipses',
-        icon: Sun,
-        color: 'amber',
-        events: [
-          { date: 'March 3', description: 'Total Lunar Eclipse in Virgo' },
-          { date: 'March 18', description: 'Partial Solar Eclipse in Pisces' },
-          { date: 'August 28', description: 'Total Lunar Eclipse in Pisces' },
-          {
-            date: 'September 12',
-            description: 'Partial Solar Eclipse in Virgo',
-          },
-        ],
-        link: `/grimoire/events/${year}/eclipses`,
-      },
-      {
-        category: 'Other Retrogrades',
-        icon: Moon,
-        color: 'blue',
-        events: [
-          { date: 'May 1 - October 8', description: 'Pluto Retrograde' },
-          { date: 'June 29 - November 15', description: 'Saturn Retrograde' },
-          { date: 'July 2 - December 6', description: 'Neptune Retrograde' },
-          {
-            date: 'January 26 - August 28',
-            description: 'Uranus Retrograde',
-          },
-          {
-            date: 'October 9 - February 2027',
-            description: 'Jupiter Retrograde',
-          },
-          {
-            date: 'December 6 - February 2027',
-            description: 'Mars Retrograde',
-          },
-        ],
-        link: '/grimoire/astronomy',
-      },
-    ],
-  };
+  // All data is now dynamically generated using astronomical calculations
+  const forecast = await generateYearlyForecast(year);
 
-  // For future years (2027+), generate data dynamically using astronomical calculations
-  if (!eventsData[year]) {
-    const forecast = await generateYearlyForecast(year);
+  // Group retrogrades by planet
+  const mercuryRetrogrades = forecast.retrogrades.filter(
+    (r) => r.planet.toLowerCase() === 'mercury',
+  );
+  const venusRetrogrades = forecast.retrogrades.filter(
+    (r) => r.planet.toLowerCase() === 'venus',
+  );
+  const marsRetrogrades = forecast.retrogrades.filter(
+    (r) => r.planet.toLowerCase() === 'mars',
+  );
+  const outerRetrogrades = forecast.retrogrades.filter(
+    (r) =>
+      r.planet.toLowerCase() !== 'mercury' &&
+      r.planet.toLowerCase() !== 'venus' &&
+      r.planet.toLowerCase() !== 'mars',
+  );
 
-    // Group retrogrades by planet
-    const mercuryRetrogrades = forecast.retrogrades.filter(
-      (r) => r.planet.toLowerCase() === 'mercury',
-    );
-    const venusRetrogrades = forecast.retrogrades.filter(
-      (r) => r.planet.toLowerCase() === 'venus',
-    );
-    const otherRetrogrades = forecast.retrogrades.filter(
-      (r) =>
-        r.planet.toLowerCase() !== 'mercury' &&
-        r.planet.toLowerCase() !== 'venus',
-    );
+  // Format date range helper with validation
+  const formatDateRange = (startDate: string, endDate: string): string => {
+    try {
+      const start = new Date(startDate);
+      const end = new Date(endDate);
 
-    // Format date range helper with validation
-    const formatDateRange = (startDate: string, endDate: string): string => {
-      try {
-        const start = new Date(startDate);
-        const end = new Date(endDate);
-
-        // Validate dates
-        if (isNaN(start.getTime()) || isNaN(end.getTime())) {
-          return `${startDate} - ${endDate}`;
-        }
-
-        const startFormatted = format(start, 'MMMM d');
-        const endFormatted = format(end, 'MMMM d');
-        return `${startFormatted} - ${endFormatted}`;
-      } catch (error) {
-        // Fallback to raw dates if formatting fails
+      // Validate dates
+      if (isNaN(start.getTime()) || isNaN(end.getTime())) {
         return `${startDate} - ${endDate}`;
       }
-    };
 
-    // Format single date with validation
-    const formatDate = (dateStr: string): string => {
-      try {
-        const date = new Date(dateStr);
-        if (isNaN(date.getTime())) {
-          return dateStr;
-        }
-        return format(date, 'MMMM d');
-      } catch (error) {
+      // Handle cross-year ranges
+      const startYear = start.getFullYear();
+      const endYear = end.getFullYear();
+
+      if (startYear !== endYear) {
+        return `${format(start, 'MMMM d')} - ${format(end, 'MMMM d, yyyy')}`;
+      }
+
+      return `${format(start, 'MMMM d')} - ${format(end, 'MMMM d')}`;
+    } catch (error) {
+      // Fallback to raw dates if formatting fails
+      return `${startDate} - ${endDate}`;
+    }
+  };
+
+  // Format single date with validation
+  const formatDate = (dateStr: string): string => {
+    try {
+      const date = new Date(dateStr);
+      if (isNaN(date.getTime())) {
         return dateStr;
       }
-    };
-
-    const categories: EventCategory[] = [];
-
-    // Mercury Retrograde
-    if (mercuryRetrogrades.length > 0) {
-      categories.push({
-        category: 'Mercury Retrograde',
-        icon: Star,
-        color: 'orange',
-        events: mercuryRetrogrades.map((r) => ({
-          date: formatDateRange(r.startDate, r.endDate),
-          description: r.description
-            .replace(/Mercury retrograde period \(/, '')
-            .replace(/\)$/, ''),
-        })),
-        link: `/grimoire/events/${year}/mercury-retrograde`,
-      });
+      return format(date, 'MMMM d');
+    } catch (error) {
+      return dateStr;
     }
+  };
 
-    // Venus Retrograde
-    if (venusRetrogrades.length > 0) {
-      categories.push({
-        category: 'Venus Retrograde',
-        icon: Sparkles,
-        color: 'pink',
-        events: venusRetrogrades.map((r) => ({
-          date: formatDateRange(r.startDate, r.endDate),
-          description: r.description
-            .replace(/Venus retrograde period \(/, '')
-            .replace(/\)$/, ''),
-        })),
-        link: `/grimoire/events/${year}/venus-retrograde`,
-      });
-    }
+  const categories: EventCategory[] = [];
 
-    // Eclipses
-    if (forecast.eclipses.length > 0) {
-      categories.push({
-        category: 'Eclipses',
-        icon: Sun,
-        color: 'amber',
-        events: forecast.eclipses.map((e) => ({
-          date: formatDate(e.date),
-          description: `${e.type === 'solar' ? 'Solar' : 'Lunar'} Eclipse in ${e.sign}`,
-        })),
-        link: `/grimoire/events/${year}/eclipses`,
-      });
-    }
-
-    // Other Retrogrades
-    if (otherRetrogrades.length > 0) {
-      categories.push({
-        category: 'Other Retrogrades',
-        icon: Moon,
-        color: 'blue',
-        events: otherRetrogrades.map((r) => ({
-          date: formatDateRange(r.startDate, r.endDate),
-          description: r.planet,
-        })),
-        link: '/grimoire/astronomy',
-      });
-    }
-
-    const transits = getTransitsForYear(year);
-    if (transits.length > 0) {
-      categories.push({
-        category: 'Transits',
-        icon: Satellite,
-        color: 'blue',
-        events: transits.map((t) => ({ date: t.dates, description: t.title })),
-        link: `/grimoire/transits/year/${year}`,
-      });
-    }
-
-    return categories;
+  // Mercury Retrograde
+  if (mercuryRetrogrades.length > 0) {
+    categories.push({
+      category: 'Mercury Retrograde',
+      icon: Star,
+      color: 'orange',
+      events: mercuryRetrogrades.map((r) => ({
+        date: formatDateRange(r.startDate, r.endDate),
+        description: r.description
+          .replace(/Mercury retrograde period \(/, '')
+          .replace(/\)$/, ''),
+      })),
+      link: `/grimoire/events/${year}/mercury-retrograde`,
+    });
   }
 
-  return eventsData[year];
+  // Venus Retrograde
+  if (venusRetrogrades.length > 0) {
+    categories.push({
+      category: 'Venus Retrograde',
+      icon: Sparkles,
+      color: 'pink',
+      events: venusRetrogrades.map((r) => ({
+        date: formatDateRange(r.startDate, r.endDate),
+        description: r.description
+          .replace(/Venus retrograde period \(/, '')
+          .replace(/\)$/, ''),
+      })),
+      link: `/grimoire/events/${year}/venus-retrograde`,
+    });
+  }
+
+  // Mars Retrograde (happens every ~2 years, important enough for its own category)
+  if (marsRetrogrades.length > 0) {
+    categories.push({
+      category: 'Mars Retrograde',
+      icon: Star,
+      color: 'orange',
+      events: marsRetrogrades.map((r) => ({
+        date: formatDateRange(r.startDate, r.endDate),
+        description: r.description
+          .replace(/Mars retrograde period \(/, '')
+          .replace(/\)$/, ''),
+      })),
+      link: `/grimoire/events/${year}/mars-retrograde`,
+    });
+  }
+
+  // Eclipses
+  if (forecast.eclipses.length > 0) {
+    categories.push({
+      category: 'Eclipses',
+      icon: Sun,
+      color: 'amber',
+      events: forecast.eclipses.map((e) => ({
+        date: formatDate(e.date),
+        description: `${e.type === 'solar' ? 'Solar' : 'Lunar'} Eclipse in ${e.sign}`,
+      })),
+      link: `/grimoire/events/${year}/eclipses`,
+    });
+  }
+
+  // Seasonal Events (Equinoxes & Solstices)
+  if (forecast.seasonalEvents && forecast.seasonalEvents.length > 0) {
+    categories.push({
+      category: 'Equinoxes & Solstices',
+      icon: Sun,
+      color: 'amber',
+      events: forecast.seasonalEvents.map((s) => ({
+        date: formatDate(s.date),
+        description: s.type
+          .replace(/_/g, ' ')
+          .replace(/\b\w/g, (l) => l.toUpperCase()),
+      })),
+      link: `/grimoire/events/${year}`,
+    });
+  }
+
+  // Supermoons and special moon events
+  const specialMoons =
+    forecast.moonEvents?.filter(
+      (m) =>
+        m.type === 'supermoon' ||
+        m.type === 'blue_moon' ||
+        m.type === 'micromoon' ||
+        m.type === 'black_moon',
+    ) || [];
+  if (specialMoons.length > 0) {
+    categories.push({
+      category: 'Special Moons',
+      icon: Moon,
+      color: 'pink',
+      events: specialMoons.map((m) => ({
+        date: formatDate(m.date),
+        description: `${m.type.replace(/_/g, ' ').replace(/\b\w/g, (l) => l.toUpperCase())} in ${m.sign}`,
+      })),
+      link: `/grimoire/moon`,
+    });
+  }
+
+  // Planetary Elongations (Mercury/Venus visibility)
+  if (
+    forecast.planetaryElongations &&
+    forecast.planetaryElongations.length > 0
+  ) {
+    categories.push({
+      category: 'Planetary Visibility',
+      icon: Star,
+      color: 'blue',
+      events: forecast.planetaryElongations.map((e) => ({
+        date: formatDate(e.date),
+        description: `${e.planet} - ${e.visibility} star (${e.elongation}°)`,
+      })),
+      link: `/grimoire/astronomy`,
+    });
+  }
+
+  // Major Planetary Conjunctions (rare events)
+  if (forecast.conjunctions && forecast.conjunctions.length > 0) {
+    categories.push({
+      category: 'Major Conjunctions',
+      icon: Sparkles,
+      color: 'amber',
+      events: forecast.conjunctions.map((c) => ({
+        date: formatDate(c.date),
+        description: `${c.planet1}-${c.planet2} in ${c.sign}`,
+      })),
+      link: `/grimoire/transits/year/${year}`,
+    });
+  }
+
+  // Sign Changes (Ingresses) - major planet sign changes
+  if (forecast.ingresses && forecast.ingresses.length > 0) {
+    categories.push({
+      category: 'Major Sign Changes',
+      icon: Satellite,
+      color: 'pink',
+      events: forecast.ingresses.map((i) => ({
+        date: formatDate(i.exactDate),
+        description: `${i.planet} enters ${i.toSign}${i.isRetrograde ? ' (Retrograde)' : ''}`,
+      })),
+      link: `/grimoire/transits/year/${year}`,
+    });
+  }
+
+  // Outer Planet Retrogrades (Jupiter, Saturn, Uranus, Neptune, Pluto)
+  if (outerRetrogrades.length > 0) {
+    categories.push({
+      category: 'Outer Planet Retrogrades',
+      icon: Moon,
+      color: 'blue',
+      events: outerRetrogrades.map((r) => ({
+        date: formatDateRange(r.startDate, r.endDate),
+        description: `${r.planet} Retrograde`,
+      })),
+      link: `/grimoire/events/${year}/retrogrades`,
+    });
+  }
+
+  // Add static transits data if available (for backwards compatibility)
+  const transits = getTransitsForYear(year);
+  if (transits.length > 0) {
+    categories.push({
+      category: 'Major Transits',
+      icon: Satellite,
+      color: 'blue',
+      events: transits.map((t) => ({ date: t.dates, description: t.title })),
+      link: `/grimoire/transits/year/${year}`,
+    });
+  }
+
+  return categories;
 }
 
 function getSummaryStats(
@@ -331,17 +336,29 @@ function getSummaryStats(
   venusRetrograde: number;
   eclipses: number;
   outerPlanetRx: number;
+  signChanges: number;
+  specialMoons: number;
+  seasonalEvents: number;
+  conjunctions: number;
 } {
   const mercury = events.find((e) => e.category === 'Mercury Retrograde');
   const venus = events.find((e) => e.category === 'Venus Retrograde');
   const eclipses = events.find((e) => e.category === 'Eclipses');
-  const other = events.find((e) => e.category === 'Other Retrogrades');
+  const other = events.find((e) => e.category === 'Outer Planet Retrogrades');
+  const signChanges = events.find((e) => e.category === 'Major Sign Changes');
+  const specialMoons = events.find((e) => e.category === 'Special Moons');
+  const seasonal = events.find((e) => e.category === 'Equinoxes & Solstices');
+  const conjunctions = events.find((e) => e.category === 'Major Conjunctions');
 
   return {
     mercuryRetrograde: mercury?.events.length || 0,
     venusRetrograde: venus?.events.length || 0,
     eclipses: eclipses?.events.length || 0,
     outerPlanetRx: other?.events.length || 0,
+    signChanges: signChanges?.events.length || 0,
+    specialMoons: specialMoons?.events.length || 0,
+    seasonalEvents: seasonal?.events.length || 0,
+    conjunctions: conjunctions?.events.length || 0,
   };
 }
 
@@ -380,7 +397,9 @@ export default async function EventsYearPage({
   const yearNum = parseInt(year);
   const nextYear = yearNum + 1;
 
-  if (yearNum < 2025 || yearNum > 2030) {
+  const minYear = CURRENT_YEAR;
+  const maxYear = CURRENT_YEAR + 10;
+  if (yearNum < minYear || yearNum > maxYear) {
     notFound();
   }
 
@@ -433,7 +452,7 @@ export default async function EventsYearPage({
   const faqs = [
     {
       question: `What are the major astrological events in ${year}?`,
-      answer: `${year} features ${stats.mercuryRetrograde} Mercury retrograde periods, ${stats.venusRetrograde} Venus retrograde period, ${stats.eclipses} eclipses, and ${stats.outerPlanetRx} outer planet retrograde periods.`,
+      answer: `${year} features ${stats.mercuryRetrograde} Mercury retrograde periods, ${stats.venusRetrograde} Venus retrograde period, ${stats.eclipses} eclipses, ${stats.outerPlanetRx} outer planet retrograde periods${stats.signChanges > 0 ? `, and ${stats.signChanges} major planet sign changes` : ''}.`,
     },
     {
       question: `When is Mercury retrograde in ${year}?`,
@@ -443,9 +462,17 @@ export default async function EventsYearPage({
       question: `How many eclipses occur in ${year}?`,
       answer: `There are ${stats.eclipses} eclipses in ${year}, including both solar and lunar eclipses.`,
     },
+    ...(stats.signChanges > 0
+      ? [
+          {
+            question: `What major planet sign changes happen in ${year}?`,
+            answer: `${year} includes ${stats.signChanges} significant planetary sign changes. These are moments when slow-moving outer planets (Jupiter, Saturn, Uranus, Neptune, Pluto) enter new zodiac signs, marking major shifts in collective energy that affect everyone.`,
+          },
+        ]
+      : []),
     {
       question: `What should I know about ${year} astrological events?`,
-      answer: `${year} brings significant cosmic shifts with retrogrades, eclipses, and planetary transits. Use this calendar to plan ahead and align with cosmic energies.`,
+      answer: `${year} brings significant cosmic shifts with retrogrades, eclipses, ${stats.signChanges > 0 ? 'major sign changes, ' : ''}and planetary transits. Use this calendar to plan ahead and align with cosmic energies.`,
     },
   ];
 
@@ -502,7 +529,7 @@ While these events affect everyone, their impact on your personal chart is uniqu
       ]}
       whatIs={{
         question: `What are the astrological events in ${year}?`,
-        answer: `${year} features ${stats.mercuryRetrograde} Mercury retrograde periods, ${stats.venusRetrograde} Venus retrograde, ${stats.eclipses} eclipses, and ${stats.outerPlanetRx} outer planet retrograde periods. This calendar provides complete dates and guidance for navigating all major cosmic events.`,
+        answer: `${year} features ${stats.mercuryRetrograde} Mercury retrograde periods, ${stats.venusRetrograde} Venus retrograde, ${stats.eclipses} eclipses, ${stats.outerPlanetRx} outer planet retrograde periods${stats.signChanges > 0 ? `, and ${stats.signChanges} major planet sign changes` : ''}. This calendar provides complete dates and guidance for navigating all major cosmic events.`,
       }}
       intro={`Major astrological events gathers the eclipses, retrogrades, and major transits that matter so you can scan the dates and the quick meaning they carry. Each date also notes what to expect so you can plan within the timing instead of reacting to it.`}
       tldr={`${year} Astrological Events: ${stats.mercuryRetrograde} Mercury retrogrades, ${stats.venusRetrograde} Venus retrograde, ${stats.eclipses} eclipses, ${stats.outerPlanetRx} outer planet retrogrades. Use this calendar to plan ahead and align with cosmic energies.`}
@@ -519,7 +546,7 @@ While these events affect everyone, their impact on your personal chart is uniqu
     >
       {/* Custom content: Events Calendar */}
       <div className='mt-8 space-y-8'>
-        {nextYear <= 2030 && (
+        {nextYear <= maxYear && (
           <section className='rounded-2xl border border-zinc-800 bg-zinc-900/50 px-6 py-5'>
             <Heading as='h2' variant='h3' className='text-zinc-100 mb-3'>
               Upcoming events
@@ -549,7 +576,7 @@ While these events affect everyone, their impact on your personal chart is uniqu
           >
             {year} At a Glance
           </Heading>
-          <div className='grid grid-cols-2 md:grid-cols-4 gap-4 text-center'>
+          <div className='grid grid-cols-2 md:grid-cols-5 gap-4 text-center'>
             <div>
               <div className='text-3xl font-light text-lunary-primary-400'>
                 {stats.mercuryRetrograde}
@@ -574,6 +601,14 @@ While these events affect everyone, their impact on your personal chart is uniqu
               </div>
               <div className='text-sm text-zinc-400'>Outer Planet Rx</div>
             </div>
+            {stats.signChanges > 0 && (
+              <div>
+                <div className='text-3xl font-light text-lunary-primary-400'>
+                  {stats.signChanges}
+                </div>
+                <div className='text-sm text-zinc-400'>Sign Changes</div>
+              </div>
+            )}
           </div>
         </div>
         {eclipseEntries.length > 0 && (

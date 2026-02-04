@@ -73,7 +73,7 @@
           }
         ],
         "ctaText": "See Mercury retrograde through your chart",
-        "ctaHref": "/welcome?from=mercury-retrograde-{year}",
+        "ctaHref": "/auth?signup=true",
         "sources": [
           {
             "name": "NASA Ephemeris Data",
@@ -162,7 +162,7 @@
             }
           ],
           "ctaText": "See Mercury retrograde through your chart",
-          "ctaHref": "/welcome?from=mercury-retrograde-2026",
+          "ctaHref": "/auth?signup=true",
           "sources": [
             {
               "name": "NASA Ephemeris Data",
@@ -173,6 +173,146 @@
             }
           ]
         }
+      }
+    },
+    "mars-retrograde": {
+      "default": {
+        "title": "Mars Retrograde {year}: Dates, Signs & Calendar",
+        "h1": "Mars Retrograde {year}: Dates, Signs, and What to Expect",
+        "description": "Discover Mars retrograde {year}: dates, signs & action themes. Learn how to navigate energy, motivation & conflict during Mars retrograde. Complete guide with calendar.",
+        "keywords": [
+          "mars retrograde {year}",
+          "{year} mars retrograde dates",
+          "mars retrograde dates {year}",
+          "when is mars retrograde {year}"
+        ],
+        "whatIs": {
+          "question": "When is Mars Retrograde in {year}?",
+          "answer": "Mars retrograde happens approximately every 2 years and lasts about 2-2.5 months. It's a time to reassess how you take action, handle conflict, and direct your energy."
+        },
+        "intro": "Mars retrograde slows down forward momentum. It's a time to review your approach to action, anger, and ambition rather than charging ahead.",
+        "tldr": "Mars Retrograde {year} is a period for reassessing how you take action and direct energy. Avoid starting major conflicts or aggressive new ventures. Review what drives you.",
+        "meaning": "Mars Retrograde {year} asks you to reconsider your approach to action and assertion. Progress may feel slower, and frustration can build if you push too hard.\n\nDuring Mars retrograde, you may notice:\n- Decreased energy or motivation\n- Frustration with delays and obstacles\n- Old conflicts resurfacing\n- Questions about what you're fighting for\n\nUse this time to reassess your goals and how you pursue them.",
+        "tables": [
+          {
+            "title": "Mars Retrograde {year} Dates",
+            "headers": ["Period", "Start Date", "End Date", "Sign(s)"]
+          }
+        ],
+        "howToWorkWith": [
+          "Avoid starting major conflicts or confrontations",
+          "Review fitness routines and energy management",
+          "Reflect on what truly motivates you",
+          "Be patient with delays and setbacks",
+          "Channel frustration into constructive review"
+        ],
+        "emotionalThemes": [
+          "Frustration with slow progress",
+          "Questioning your direction",
+          "Old anger resurfacing",
+          "Reassessing what you fight for"
+        ],
+        "signsMostAffected": ["Aries", "Scorpio"],
+        "faqs": [
+          {
+            "question": "Should I avoid exercise during Mars retrograde?",
+            "answer": "No, but you may need to adjust intensity. Listen to your body and avoid pushing through fatigue."
+          },
+          {
+            "question": "Is Mars retrograde a bad time to start projects?",
+            "answer": "Major new initiatives may face more obstacles. It's better for reviewing and refining existing projects."
+          }
+        ],
+        "relatedItems": [
+          {
+            "name": "Mars in Astrology",
+            "href": "/grimoire/astronomy/planets/mars",
+            "type": "Planet"
+          },
+          {
+            "name": "Aries Sign",
+            "href": "/grimoire/zodiac/aries",
+            "type": "Zodiac"
+          }
+        ],
+        "ctaText": "See Mars retrograde through your chart",
+        "ctaHref": "/auth?signup=true",
+        "sources": [
+          {
+            "name": "Traditional astrological texts"
+          }
+        ]
+      }
+    },
+    "retrogrades": {
+      "default": {
+        "title": "{year} Retrograde Calendar: All Planetary Retrogrades",
+        "h1": "{year} Retrograde Calendar: Complete Guide to All Retrogrades",
+        "description": "Complete {year} retrograde calendar with all planetary retrogrades: Mercury, Venus, Mars, Jupiter, Saturn, Uranus, Neptune, Pluto. Dates, signs & meanings.",
+        "keywords": [
+          "{year} retrogrades",
+          "{year} retrograde calendar",
+          "all retrogrades {year}",
+          "planetary retrogrades {year}",
+          "retrograde dates {year}"
+        ],
+        "whatIs": {
+          "question": "How many retrogrades happen in {year}?",
+          "answer": "{year} has {retrogradeCount} retrograde periods: {mercuryRxCount} Mercury retrogrades, plus Venus, Mars, and {outerRxCount} outer planet retrogrades (Jupiter through Pluto)."
+        },
+        "intro": "{year} features {retrogradeCount} retrograde periods. Each planet's retrograde brings different themes - Mercury affects communication, Venus affects relationships, Mars affects action, and outer planets affect longer-term cycles.",
+        "tldr": "{year} Retrograde Calendar: {mercuryRxCount} Mercury retrogrades, {outerRxCount} outer planet retrogrades, plus any Venus or Mars retrogrades. Use this calendar to plan around review periods.",
+        "meaning": "Planetary retrogrades in {year} offer windows for reflection and revision. While they can bring delays, they also provide valuable opportunities to reassess and refine.\n\n**Personal Planet Retrogrades:**\n- Mercury (3-4x/year): Communication, tech, travel\n- Venus (~every 18 months): Love, values, finances\n- Mars (~every 2 years): Action, energy, conflict\n\n**Outer Planet Retrogrades (annual):**\n- Jupiter: Growth, expansion, beliefs\n- Saturn: Structure, responsibility, limits\n- Uranus: Change, innovation, rebellion\n- Neptune: Dreams, intuition, spirituality\n- Pluto: Transformation, power, depth",
+        "tables": [
+          {
+            "title": "{year} Retrograde Calendar",
+            "headers": ["Planet", "Start Date", "End Date", "Sign(s)"]
+          }
+        ],
+        "howToWorkWith": [
+          "Track which planets are retrograde at any given time",
+          "Plan major decisions around direct periods when possible",
+          "Use retrograde periods for review, revision, and completion",
+          "Pay attention to themes from the past resurfacing",
+          "Slow down and avoid rushing important matters"
+        ],
+        "emotionalThemes": [
+          "Reflection and introspection",
+          "Past matters resurfacing",
+          "Frustration with delays",
+          "Opportunities for closure",
+          "Reassessing priorities"
+        ],
+        "signsMostAffected": ["Varies by planet and sign"],
+        "faqs": [
+          {
+            "question": "How many retrogrades happen each year?",
+            "answer": "Mercury retrogrades 3-4 times, Venus and Mars each retrograde once every 1-2 years, and all outer planets (Jupiter through Pluto) retrograde once annually for several months each."
+          },
+          {
+            "question": "Are retrogrades always bad?",
+            "answer": "No. Retrogrades are simply periods of review. They can be productive for finishing projects, reconnecting with the past, and refining your approach."
+          }
+        ],
+        "relatedItems": [
+          {
+            "name": "Mercury Retrograde",
+            "href": "/grimoire/events/{year}/mercury-retrograde",
+            "type": "Event"
+          },
+          {
+            "name": "Venus Retrograde",
+            "href": "/grimoire/events/{year}/venus-retrograde",
+            "type": "Event"
+          }
+        ],
+        "ctaText": "See how retrogrades affect your chart",
+        "ctaHref": "/auth?signup=true",
+        "sources": [
+          {
+            "name": "Traditional astrological texts"
+          }
+        ]
       }
     },
     "venus-retrograde": {
@@ -242,7 +382,7 @@
           }
         ],
         "ctaText": "See Venus retrograde through your chart",
-        "ctaHref": "/welcome?from=venus-retrograde-{year}",
+        "ctaHref": "/auth?signup=true",
         "sources": [
           {
             "name": "Traditional astrological texts"
@@ -264,11 +404,11 @@
           "{year} eclipse calendar"
         ],
         "whatIs": {
-          "question": "What are the {year} eclipse dates?",
-          "answer": "{year} features multiple eclipses across two eclipse seasons. Eclipses are turning points that accelerate change and bring key themes to the surface."
+          "question": "How many eclipses occur in {year}?",
+          "answer": "There are {eclipseCount} eclipses in {year}: {solarEclipseCount} solar and {lunarEclipseCount} lunar. Eclipses are turning points that accelerate change and bring key themes to the surface."
         },
-        "intro": "Eclipses bring accelerated change. They highlight what needs to be released or begun and often reveal the next step in your path.",
-        "tldr": "The {year} eclipses mark high-signal turning points. Use the calendar to track dates and signs, and keep plans flexible around eclipse season for better clarity and rest.",
+        "intro": "Eclipses bring accelerated change. {year} features {eclipseCount} eclipses that highlight what needs to be released or begun.",
+        "tldr": "{year} has {eclipseCount} eclipses ({solarEclipseCount} solar, {lunarEclipseCount} lunar). Use the calendar to track dates and signs, and keep plans flexible around eclipse season.",
         "meaning": "Eclipses in {year} mark pivotal moments of change. Unlike regular full and new moons, eclipses tend to amplify themes and move stories forward.\n\nSolar eclipses (new moons amplified):\n- New beginnings and fresh starts\n- Unexpected opportunities\n- Doors opening that were previously closed\n\nLunar eclipses (full moons amplified):\n- Culminations and endings\n- Emotional revelations\n- Releasing what no longer serves you",
         "tables": [
           {
@@ -324,7 +464,7 @@
           }
         ],
         "ctaText": "See how {year} eclipses affect your birth chart",
-        "ctaHref": "/welcome?from=eclipses-{year}",
+        "ctaHref": "/auth?signup=true",
         "sources": [
           {
             "name": "NASA Eclipse Data",
@@ -443,7 +583,7 @@
             }
           ],
           "ctaText": "See how 2026 eclipses affect your birth chart",
-          "ctaHref": "/welcome?from=eclipses-2026",
+          "ctaHref": "/auth?signup=true",
           "sources": [
             {
               "name": "NASA Eclipse Data",
