@@ -1364,13 +1364,14 @@ export default function sitemap(): MetadataRoute.Sitemap {
     priority: 0.7,
   }));
 
-  // Add events subpages for all years (mercury-retrograde, venus-retrograde, mars-retrograde, retrogrades, eclipses)
+  // Add events subpages for all years (mercury-retrograde, venus-retrograde, mars-retrograde, retrogrades, eclipses, equinoxes-solstices)
   const eventTypes = [
     'mercury-retrograde',
     'venus-retrograde',
     'mars-retrograde',
     'retrogrades',
     'eclipses',
+    'equinoxes-solstices',
   ];
   const eventSubpages = dynamicYears.flatMap((year) =>
     eventTypes.map((eventType) => ({

@@ -234,7 +234,7 @@ async function getEventsForYear(year: number): Promise<EventCategory[]> {
           .replace(/_/g, ' ')
           .replace(/\b\w/g, (l) => l.toUpperCase()),
       })),
-      link: `/grimoire/events/${year}`,
+      link: `/grimoire/events/${year}/equinoxes-solstices`,
     });
   }
 

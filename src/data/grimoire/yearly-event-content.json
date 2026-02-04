@@ -595,6 +595,86 @@
           ]
         }
       }
+    },
+    "equinoxes-solstices": {
+      "default": {
+        "title": "{year} Equinoxes & Solstices: Dates & Astrological Meaning",
+        "h1": "{year} Equinoxes & Solstices: Seasonal Turning Points",
+        "description": "Discover {year} equinoxes and solstices: exact dates, astrological significance, and rituals. Navigate seasonal transitions with precision timing.",
+        "keywords": [
+          "{year} equinox",
+          "{year} solstice",
+          "spring equinox {year}",
+          "summer solstice {year}",
+          "fall equinox {year}",
+          "winter solstice {year}",
+          "{year} seasonal calendar"
+        ],
+        "whatIs": {
+          "question": "What are the equinoxes and solstices in {year}?",
+          "answer": "{year} features 4 seasonal turning points: Spring Equinox (Sun enters Aries), Summer Solstice (Sun enters Cancer), Fall Equinox (Sun enters Libra), and Winter Solstice (Sun enters Capricorn). These mark the astronomical start of each season."
+        },
+        "intro": "Equinoxes and solstices mark the Sun's journey through the zodiac and the natural rhythm of the seasons. These are powerful times for ritual, reflection, and aligning with nature's cycles.",
+        "tldr": "{year} Seasonal Calendar: 2 equinoxes (equal day and night) and 2 solstices (longest and shortest days). Use these dates for seasonal rituals, intention setting, and aligning with natural rhythms.",
+        "meaning": "The equinoxes and solstices in {year} are astronomical events that have been honored across cultures for millennia.\n\n**Equinoxes** (equal day and night):\n- Spring Equinox: New beginnings, planting seeds, fresh starts\n- Fall Equinox: Harvest, gratitude, finding balance\n\n**Solstices** (extremes of light):\n- Summer Solstice: Peak energy, abundance, celebration\n- Winter Solstice: Return of light, introspection, rebirth\n\nThese dates also mark the Sun's entry into cardinal signs, initiating new astrological seasons.",
+        "tables": [
+          {
+            "title": "{year} Equinoxes & Solstices",
+            "headers": ["Date", "Event", "Sign", "Theme"]
+          }
+        ],
+        "howToWorkWith": [
+          "Create seasonal rituals to mark each transition",
+          "Set intentions aligned with the seasonal energy",
+          "Spend time in nature during these powerful days",
+          "Reflect on what you want to release or cultivate",
+          "Honor the balance of light and dark in your life"
+        ],
+        "emotionalThemes": [
+          "Sense of transition and change",
+          "Connection to natural cycles",
+          "Reflection on the passing of time",
+          "Renewed energy at seasonal shifts",
+          "Gratitude for nature's rhythms"
+        ],
+        "signsMostAffected": ["Aries", "Cancer", "Libra", "Capricorn"],
+        "faqs": [
+          {
+            "question": "What is the difference between an equinox and a solstice?",
+            "answer": "Equinoxes occur when day and night are roughly equal length (spring and fall). Solstices occur at the extremes - summer solstice has the longest day, winter solstice has the longest night."
+          },
+          {
+            "question": "Why are equinoxes and solstices important in astrology?",
+            "answer": "They mark the Sun's entry into cardinal signs (Aries, Cancer, Libra, Capricorn), which initiates new seasons and brings powerful energy for new beginnings and major life shifts."
+          },
+          {
+            "question": "What rituals can I do during equinoxes and solstices?",
+            "answer": "Common practices include altar work, intention setting, gratitude ceremonies, nature walks, meditation at sunrise or sunset, and seasonal celebrations with community."
+          }
+        ],
+        "relatedItems": [
+          {
+            "name": "Sun in Astrology",
+            "href": "/grimoire/astronomy/planets/sun",
+            "type": "Planet"
+          },
+          {
+            "name": "Wheel of the Year",
+            "href": "/grimoire/wheel-of-the-year",
+            "type": "Guide"
+          }
+        ],
+        "ctaText": "See how seasonal shifts affect your chart",
+        "ctaHref": "/auth?signup=true",
+        "sources": [
+          {
+            "name": "NASA Solar System Data"
+          },
+          {
+            "name": "Traditional astrological texts"
+          }
+        ]
+      }
     }
   }
 }
