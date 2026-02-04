@@ -11,6 +11,48 @@ const dayKeys = Object.keys(correspondencesData.days);
 // Removed generateStaticParams - using pure ISR for faster builds
 // Pages are generated on-demand and cached with 30-day revalidation
 
+// Day-specific meta descriptions with use cases
+const dayMetaInfo: Record<
+  string,
+  { titleSuffix: string; description: string }
+> = {
+  Sunday: {
+    titleSuffix: 'Sun Day for Success, Vitality & Confidence Spells',
+    description:
+      'Sunday is ruled by the Sun. Best day for success spells, career magic, confidence rituals, healing work, and leadership. Use gold and yellow candles.',
+  },
+  Monday: {
+    titleSuffix: 'Moon Day for Intuition, Dreams & Emotional Magic',
+    description:
+      'Monday is ruled by the Moon. Best day for intuition, dream work, psychic development, emotional healing, and lunar magic. Use silver and white candles.',
+  },
+  Tuesday: {
+    titleSuffix: 'Mars Day for Courage, Protection & Strength Spells',
+    description:
+      'Tuesday is ruled by Mars. Best day for courage spells, protection magic, banishing enemies, physical strength, and overcoming obstacles. Use red candles.',
+  },
+  Wednesday: {
+    titleSuffix: 'Mercury Day for Communication, Travel & Study Magic',
+    description:
+      'Wednesday is ruled by Mercury. Best day for communication spells, business magic, travel protection, learning, and divination. Use orange and purple candles.',
+  },
+  Thursday: {
+    titleSuffix: 'Jupiter Day for Money, Abundance & Luck Spells',
+    description:
+      'Thursday is ruled by Jupiter. Best day for money magic, abundance spells, luck rituals, career growth, and legal success. Use blue and purple candles.',
+  },
+  Friday: {
+    titleSuffix: 'Venus Day for Love Spells, Beauty & Self-Care Rituals',
+    description:
+      'Friday is ruled by Venus. Best day for love spells, beauty magic, relationship healing, self-care rituals, and artistic creativity. Use green and pink candles.',
+  },
+  Saturday: {
+    titleSuffix: 'Saturn Day for Protection, Banishing & Breaking Bad Habits',
+    description:
+      'Saturday is ruled by Saturn. Best day for protection spells, banishing negativity, breaking bad habits, boundaries, and ancestor work. Use black candles.',
+  },
+};
+
 export async function generateMetadata({
   params,
 }: {
@@ -29,8 +71,13 @@ export async function generateMetadata({
 
   const dayData =
     correspondencesData.days[dayKey as keyof typeof correspondencesData.days];
-  const title = `${dayKey}: Planetary Day Correspondences & Magic - Lunary`;
-  const description = `Learn about ${dayKey}'s magical correspondences. Discover planetary influences, elemental energy, and optimal spellwork for ${dayKey.toLowerCase()}. Plan your magical timing with planetary days.`;
+  const metaInfo = dayMetaInfo[dayKey] || {
+    titleSuffix: `${dayData.planet} Day Correspondences & Magic`,
+    description: `Learn about ${dayKey}'s magical correspondences. Discover planetary influences, elemental energy, and optimal spellwork.`,
+  };
+
+  const title = `${dayKey}: ${metaInfo.titleSuffix}`;
+  const description = metaInfo.description;
 
   return {
     title,
@@ -41,6 +88,8 @@ export async function generateMetadata({
       `planetary day ${dayKey.toLowerCase()}`,
       `${dayData.planet} day`,
       `magic on ${dayKey.toLowerCase()}`,
+      `${dayData.uses[0].toLowerCase()} spells`,
+      `${dayData.planet.toLowerCase()} magic`,
     ],
     openGraph: {
       title,
@@ -75,9 +124,25 @@ export default async function DayPage({
   const dayData =
     correspondencesData.days[dayKey as keyof typeof correspondencesData.days];
 
-  const meaning = `${dayKey} is ruled by ${dayData.planet} and corresponds to the ${dayData.element} element. This planetary day carries specific energetic properties that make it ideal for certain types of magical work.
+  const meaning = `${dayData.description}
 
-${dayKey} corresponds to ${dayData.correspondences.join(', ')} energies, making it powerful for ${dayData.uses.join(', ')}. The ${dayData.element.toLowerCase()} element brings ${dayData.element.toLowerCase()}-related qualities to your practice, while ${dayData.planet}'s influence adds planetary power.
+## Best Spells for ${dayKey}
+
+${dayKey} is especially powerful for:
+${dayData.bestSpells.map((spell) => `- ${spell}`).join('\n')}
+
+## What to Avoid on ${dayKey}
+
+${dayData.planet} energy may conflict with:
+${dayData.avoidSpells.map((spell) => `- ${spell}`).join('\n')}
+
+## Ritual Suggestions
+
+${dayData.ritualSuggestions.map((ritual) => `- ${ritual}`).join('\n')}
+
+## Affirmation
+
+*"${dayData.affirmation}"*
 
 Understanding planetary days helps you time your spellwork for maximum effectiveness. Working with ${dayKey.toLowerCase()}'s energy aligns your magic with cosmic forces, amplifying your intentions.`;
 
@@ -99,7 +164,15 @@ Understanding planetary days helps you time your spellwork for maximum effective
     },
     {
       question: `What spells work best on ${dayKey}?`,
-      answer: `${dayKey} is ideal for ${dayData.uses.join(', ')} spells. The ${dayData.planet} planetary influence and ${dayData.element.toLowerCase()} element energy support these types of magical work.`,
+      answer: `${dayKey} is ideal for ${dayData.bestSpells.slice(0, 4).join(', ')} spells. The ${dayData.planet} planetary influence and ${dayData.element.toLowerCase()} element energy support these types of magical work.`,
+    },
+    {
+      question: `What should I avoid on ${dayKey}?`,
+      answer: `${dayData.planet} energy may not support ${dayData.avoidSpells.join(', ')} work. If these are your goals, consider a different day or work during a counterbalancing planetary hour.`,
+    },
+    {
+      question: `What colors enhance ${dayKey} magic?`,
+      answer: `${dayData.element === 'Fire' ? 'Red, orange, and gold colors' : dayData.element === 'Water' ? 'Blue, silver, and white colors' : dayData.element === 'Air' ? 'Yellow, white, and pale blue colors' : 'Green, brown, and black colors'} enhance ${dayKey} magic due to the ${dayData.element.toLowerCase()} elemental correspondence. ${dayData.planet} planetary colors also work well.`,
     },
     {
       question: `Do I have to do magic on the exact day?`,
