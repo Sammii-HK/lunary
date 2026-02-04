@@ -23,6 +23,7 @@ import { TarotTransitConnection } from './TarotTransitConnection';
 import type { BirthChartPlacement } from '@/context/UserContext';
 import { useAstronomyContext } from '@/context/AstronomyContext';
 import { isInDemoMode } from '@/lib/demo-mode';
+import { useHaptic } from '@/hooks/useHaptic';
 
 export type SubscriptionStatus =
   | 'free'
@@ -158,6 +159,7 @@ export function TarotSpreadExperience({
   onShareReading,
 }: TarotSpreadExperienceProps) {
   const { currentAstrologicalChart } = useAstronomyContext();
+  const haptic = useHaptic();
   const [selectedSpreadSlug, setSelectedSpreadSlug] = useState<string | null>(
     null,
   );
@@ -415,13 +417,14 @@ export function TarotSpreadExperience({
   const handleCardPreview = useCallback(
     (cardData: SpreadReadingCard['card']) => {
       if (!onCardPreview) return;
+      haptic.light(); // Subtle feedback on card tap
       onCardPreview({
         name: cardData.name,
         keywords: cardData.keywords,
         information: cardData.information,
       });
     },
-    [onCardPreview],
+    [onCardPreview, haptic],
   );
 
   const handleGenerateReading = async () => {
@@ -476,6 +479,7 @@ export function TarotSpreadExperience({
 
       const data = await response.json();
       const newReading: SpreadReadingRecord = data.reading;
+      haptic.medium(); // Tactile feedback for successful reading
       setReadings((prev) => [newReading, ...prev]);
       setCurrentReading(newReading);
       setUsage(data.usage || usage);

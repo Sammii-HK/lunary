@@ -4,6 +4,7 @@ import { Copy, Check, Share2, ChevronDown } from 'lucide-react';
 import { useState } from 'react';
 import { conversionTracking } from '@/lib/analytics';
 import { useUser } from '@/context/UserContext';
+import { useHaptic } from '@/hooks/useHaptic';
 
 interface SocialShareButtonsProps {
   url: string;
@@ -19,6 +20,7 @@ export function SocialShareButtons({
   imageUrl,
 }: SocialShareButtonsProps) {
   const { user } = useUser();
+  const haptic = useHaptic();
   const [copied, setCopied] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
   const shareText = `${title} ${url}`;
@@ -26,6 +28,7 @@ export function SocialShareButtons({
   const handleCopyLink = async (customMessage?: string) => {
     try {
       await navigator.clipboard.writeText(url);
+      haptic.success();
       conversionTracking.contentShared(user?.id, 'clipboard');
       if (customMessage) {
         alert(customMessage);
@@ -44,11 +47,13 @@ export function SocialShareButtons({
       typeof navigator.share === 'function'
     ) {
       try {
+        haptic.light();
         await navigator.share({
           title,
           text: description || title,
           url,
         });
+        haptic.success();
         conversionTracking.contentShared(user?.id, 'native');
       } catch (err) {
         // User cancelled or error
@@ -71,7 +76,10 @@ export function SocialShareButtons({
   return (
     <div className='relative'>
       <button
-        onClick={() => setIsOpen(!isOpen)}
+        onClick={() => {
+          haptic.light();
+          setIsOpen(!isOpen);
+        }}
         className='inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-zinc-800/50 bg-zinc-900/30 hover:bg-zinc-900/50 text-zinc-300 hover:text-white transition-colors text-sm'
       >
         <Share2 className='w-4 h-4' />

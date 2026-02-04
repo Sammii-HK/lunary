@@ -1,8 +1,9 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { Flame, Trophy, Sparkles } from 'lucide-react';
 import { SharePersonalized } from './SharePersonalized';
+import { hapticService } from '@/services/native/haptic-service';
 
 interface StreakData {
   current: number;
@@ -75,6 +76,18 @@ function getMilestoneInfo(streak: number) {
 export function StreakDisplay() {
   const [streak, setStreak] = useState<StreakData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const hasTriggeredHaptic = useRef(false);
+
+  // Trigger haptic feedback for milestone celebrations
+  useEffect(() => {
+    if (streak && !hasTriggeredHaptic.current) {
+      const milestone = getMilestoneInfo(streak.current);
+      if (milestone?.isExact) {
+        hapticService.heavy(); // Celebrate milestone!
+        hasTriggeredHaptic.current = true;
+      }
+    }
+  }, [streak]);
 
   useEffect(() => {
     const fetchStreak = async () => {
