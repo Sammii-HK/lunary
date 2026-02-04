@@ -319,22 +319,42 @@ export function middleware(request: NextRequest, event: NextFetchEvent) {
     if (realIp) headers.set('x-real-ip', realIp);
 
     // Track page_viewed (one per page per user per day)
+    console.log('[middleware] Calling page_viewed:', { path: finalPath });
     event.waitUntil(
       fetch(trackingUrl, {
         method: 'POST',
         headers,
         body: JSON.stringify({ path: finalPath }),
-      }),
+      })
+        .then((res) => {
+          if (!res.ok) {
+            console.error('[middleware] page_viewed fetch failed:', res.status);
+          }
+          return res.json();
+        })
+        .catch((err) => {
+          console.error('[middleware] page_viewed fetch error:', err.message);
+        }),
     );
 
     // Track app_opened (one per user per UTC day) - server-side for reliability
     const appOpenedUrl = new URL('/api/telemetry/app-opened', request.url);
+    console.log('[middleware] Calling app_opened:', { path: finalPath });
     event.waitUntil(
       fetch(appOpenedUrl, {
         method: 'POST',
         headers,
         body: JSON.stringify({ path: finalPath }),
-      }),
+      })
+        .then((res) => {
+          if (!res.ok) {
+            console.error('[middleware] app_opened fetch failed:', res.status);
+          }
+          return res.json();
+        })
+        .catch((err) => {
+          console.error('[middleware] app_opened fetch error:', err.message);
+        }),
     );
 
     // Track product_opened (one per authenticated user per UTC day)
