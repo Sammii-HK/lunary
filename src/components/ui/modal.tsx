@@ -3,6 +3,7 @@
 import { useEffect, useCallback, useRef, ReactNode } from 'react';
 import { X } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { hapticService } from '@/services/native/haptic-service';
 
 interface ModalProps {
   isOpen: boolean;
@@ -56,6 +57,9 @@ export function Modal({
 
   useEffect(() => {
     if (!isOpen) return;
+
+    // Light haptic feedback when modal opens
+    hapticService.light();
 
     document.addEventListener('keydown', handleEscKey);
     document.body.style.overflow = 'hidden';

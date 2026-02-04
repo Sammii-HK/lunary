@@ -7,6 +7,17 @@ import { conversionTracking } from '@/lib/analytics';
 import SessionTracker from '@/components/SessionTracker';
 import { TourProvider } from '@/context/TourContext';
 import { AnnouncementProvider } from '@/components/feature-announcements/AnnouncementProvider';
+import dynamic from 'next/dynamic';
+import { nativePushService } from '@/services/native';
+
+// Dynamically import OfflineBanner to avoid SSR issues
+const OfflineBanner = dynamic(
+  () =>
+    import('@/components/native/OfflineBanner').then((m) => ({
+      default: m.OfflineBanner,
+    })),
+  { ssr: false },
+);
 
 export default function AuthenticatedLayout({
   children,
@@ -19,6 +30,7 @@ export default function AuthenticatedLayout({
 
   // Track if product_opened has been fired this session to avoid wasteful API calls
   const productOpenedFired = useRef(false);
+  const nativePushInitialized = useRef(false);
 
   useEffect(() => {
     if (!authStatus.loading && !authStatus.isAuthenticated) {
@@ -48,6 +60,22 @@ export default function AuthenticatedLayout({
     authStatus.user?.email,
   ]);
 
+  // Initialize native push notifications for authenticated users
+  useEffect(() => {
+    if (
+      !authStatus.loading &&
+      authStatus.isAuthenticated &&
+      authStatus.user?.id &&
+      !nativePushInitialized.current
+    ) {
+      nativePushInitialized.current = true;
+      // Initialize in background - don't block render
+      nativePushService.initialize(authStatus.user.id).catch((error) => {
+        console.debug('[Layout] Native push init skipped:', error);
+      });
+    }
+  }, [authStatus.loading, authStatus.isAuthenticated, authStatus.user?.id]);
+
   if (authStatus.loading) {
     return (
       <div className='min-h-screen flex items-center justify-center'>
@@ -63,6 +91,7 @@ export default function AuthenticatedLayout({
   return (
     <TourProvider>
       <AnnouncementProvider>
+        <OfflineBanner />
         <SessionTracker />
         {children}
       </AnnouncementProvider>
