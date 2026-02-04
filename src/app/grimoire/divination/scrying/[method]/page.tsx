@@ -1,12 +1,16 @@
 import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { SEOContentTemplate } from '@/components/grimoire/SEOContentTemplate';
+import { createHowToSchema, renderJsonLd } from '@/lib/schema';
 
 // 30-day ISR revalidation
 export const revalidate = 2592000;
 const scryingMethods = {
   'crystal-ball': {
     name: 'Crystal Ball Scrying',
+    metaTitle: 'Crystal Ball Scrying: How to Gaze & See Visions (Step-by-Step)',
+    metaDescription:
+      'Learn crystal ball scrying with this complete guide. Step-by-step technique, common mistakes, what visions look like, and tips from Dr. John Dee tradition.',
     description:
       'The classic and most iconic form of scrying, using a clear or smoky crystal sphere to receive visions, messages, and prophetic insights from beyond the veil.',
     tools: [
@@ -51,11 +55,58 @@ const scryingMethods = {
       'State your intention or question clearly',
       'Enter a light meditative state',
     ],
+    howToSteps: [
+      {
+        name: 'Prepare your space',
+        text: 'Find a quiet room and dim the lights. Light candles behind or beside you so their light does not reflect directly in the crystal.',
+      },
+      {
+        name: 'Position the crystal',
+        text: 'Place your crystal ball on a dark cloth at eye level. Sit comfortably where you can gaze without straining your neck.',
+      },
+      {
+        name: 'Cleanse and set intention',
+        text: 'Pass incense smoke around the crystal or visualize white light cleansing it. State your question or intention clearly in your mind.',
+      },
+      {
+        name: 'Relax your gaze',
+        text: 'Look into the crystal without focusing. Let your eyes relax and blur slightly. Do not stare—soft gaze is key.',
+      },
+      {
+        name: 'Enter receptive state',
+        text: 'Breathe slowly and allow your mind to quiet. Release expectations. Be open to whatever arises.',
+      },
+      {
+        name: 'Observe without judgment',
+        text: 'Notice any clouds, colors, shapes, or impressions. Do not analyze during the session—simply observe and receive.',
+      },
+      {
+        name: 'Record your visions',
+        text: 'After 15-30 minutes, gently close the session. Immediately write down everything you saw, felt, or sensed in your journal.',
+      },
+    ],
+    commonMistakes: [
+      'Staring too hard—relax your eyes completely',
+      'Expecting movie-like visions—impressions are often subtle',
+      'Giving up too soon—first sessions may yield little',
+      'Trying to interpret during the session—observe first, analyze later',
+      'Using bright lighting—darkness is essential',
+    ],
+    troubleshooting: [
+      'If you see nothing: try a different time of day or moon phase',
+      'If you get headaches: you are straining—relax your gaze more',
+      'If you fall asleep: try sitting upright or practicing earlier in the day',
+      'If visions are unclear: keep a consistent practice schedule',
+    ],
     affirmation:
       'I gaze into the crystal depths, and the universe reveals its secrets to my inner eye.',
   },
-  'black-mirror': {
+  mirror: {
     name: 'Black Mirror Scrying',
+    metaTitle:
+      'Black Mirror Scrying: How to Use a Scrying Mirror for Divination',
+    metaDescription:
+      'Learn black mirror scrying (catoptromancy) for spirit contact and deep visions. Step-by-step technique, safety tips, and troubleshooting guide.',
     description:
       'A powerful and intense form of scrying using a dark, reflective surface to peer into other realms, contact spirits, and receive profound visions from the void.',
     tools: [
@@ -101,6 +152,49 @@ const scryingMethods = {
       'Have grounding tools nearby (food, earth)',
       'Know how to close the session properly',
     ],
+    howToSteps: [
+      {
+        name: 'Create total darkness',
+        text: 'Close all blinds and curtains. The room should be completely dark except for candles you will place behind you.',
+      },
+      {
+        name: 'Position candles carefully',
+        text: 'Place 1-2 candles behind you so no flame reflects in the mirror surface. The mirror should show only darkness.',
+      },
+      {
+        name: 'Cast protection',
+        text: 'Create a salt circle around your working space or visualize protective white light. Black mirror work requires protection.',
+      },
+      {
+        name: 'Cleanse and attune',
+        text: 'Pass incense smoke over the mirror surface. Hold it and state your intention for this session.',
+      },
+      {
+        name: 'Enter the void',
+        text: 'Gaze into the absolute blackness with soft, unfocused eyes. Breathe slowly and let your mind enter trance.',
+      },
+      {
+        name: 'Observe the darkness',
+        text: 'Watch for movement, faces, or scenes emerging from the void. Do not force—let visions arise naturally.',
+      },
+      {
+        name: 'Close formally',
+        text: 'Thank any beings present, close your protection, and ground thoroughly. Eat something and touch the earth.',
+      },
+    ],
+    commonMistakes: [
+      'Allowing reflections in the mirror—total darkness is essential',
+      'Skipping protection—the void requires boundaries',
+      'Not grounding afterward—can cause disorientation',
+      'Starting with black mirror as a beginner—build skills first',
+      'Forcing contact—patience is required',
+    ],
+    troubleshooting: [
+      'If you feel fear: close the session and ground immediately',
+      'If nothing happens: try during a waning or dark moon',
+      'If you see disturbing images: strengthen your protection',
+      'If you feel drained: you need better grounding practices',
+    ],
     warnings: [
       'Black mirror work is intense—build up gradually',
       'Always use magical protection',
@@ -111,8 +205,12 @@ const scryingMethods = {
     affirmation:
       'I gaze into the sacred darkness, protected and open, receiving wisdom from the void.',
   },
-  'water-scrying': {
+  water: {
     name: 'Water Scrying',
+    metaTitle:
+      'Water Scrying (Hydromancy): Ancient Technique for Psychic Visions',
+    metaDescription:
+      'Learn water scrying (hydromancy) like Nostradamus. Step-by-step technique, best moon phases, bowl setup, and how to receive visions through still water.',
     description:
       'One of the oldest and most accessible forms of scrying, using still water in a dark bowl or natural body to receive visions, guidance, and prophetic insights connected to lunar and emotional energies.',
     tools: [
@@ -164,11 +262,57 @@ const scryingMethods = {
       'Enter receptive, meditative state',
       'Invoke water elementals or lunar deities (optional)',
     ],
+    howToSteps: [
+      {
+        name: 'Choose your timing',
+        text: 'Full moon nights are most powerful. Waxing moon for growth questions, waning for release. Avoid void-of-course moon if possible.',
+      },
+      {
+        name: 'Prepare the water',
+        text: 'Fill a dark bowl with water. Optionally add a drop of black ink for depth. Use moon-charged or spring water for stronger connection.',
+      },
+      {
+        name: 'Create stillness',
+        text: 'Place the bowl where moonlight or soft candlelight touches the surface. Wait for all ripples to settle completely.',
+      },
+      {
+        name: 'Set your intention',
+        text: 'Hold your hands over the water and state your question or intention. Visualize your query entering the water.',
+      },
+      {
+        name: 'Gaze softly',
+        text: 'Look at the water surface with relaxed, unfocused eyes. Do not stare—let your vision soften and blur.',
+      },
+      {
+        name: 'Receive visions',
+        text: 'Watch for movement, colors, faces, or symbols on or beneath the surface. Trust emotional impressions as much as visual ones.',
+      },
+      {
+        name: 'Thank and close',
+        text: 'When finished, thank the water and pour it outside onto earth as an offering. Cleanse your bowl with salt.',
+      },
+    ],
+    commonMistakes: [
+      'Using a light-colored bowl—dark is essential',
+      'Starting before water is completely still',
+      'Working under harsh electric light',
+      'Ignoring moon phase timing',
+      'Dismissing emotional impressions as "not real visions"',
+    ],
+    troubleshooting: [
+      'If water keeps rippling: move to more stable surface, ensure no drafts',
+      'If no visions come: try during full moon or add black ink',
+      'If visions are emotional: that is valid—water connects to feelings',
+      'If you feel sad after: water can surface buried emotions—ground and process',
+    ],
     affirmation:
       'I gaze into sacred waters, and the Moon illuminates the hidden currents of truth.',
   },
-  'fire-scrying': {
+  fire: {
     name: 'Fire Scrying',
+    metaTitle: 'Fire Scrying (Pyromancy): How to Read Flames for Divination',
+    metaDescription:
+      'Learn fire scrying (pyromancy) to read candle flames and bonfires. Flame color meanings, behavior interpretation, and step-by-step technique.',
     description:
       'An ancient and primal form of divination using the dancing flames of candles, fireplaces, or bonfires to receive visions, messages, and prophetic insights connected to transformation and passion.',
     tools: [
@@ -230,12 +374,64 @@ const scryingMethods = {
       'Enter calm, receptive state',
       'Thank the fire spirit when finished',
     ],
+    howToSteps: [
+      {
+        name: 'Ensure fire safety',
+        text: 'Have water or sand nearby. Use a fire-safe container. Never leave fire unattended. Ensure good ventilation if indoors.',
+      },
+      {
+        name: 'Create darkness',
+        text: 'Dim or turn off all other lights. Fire scrying works best in darkness where the flames are your only light source.',
+      },
+      {
+        name: 'Light your fire',
+        text: 'For beginners, a single white or natural beeswax candle is ideal. For deeper work, use a fireplace or bonfire.',
+      },
+      {
+        name: 'Set your intention',
+        text: 'State your question aloud or in your mind. Focus on transformation, passion, or ancestral questions—fire excels at these.',
+      },
+      {
+        name: 'Gaze into the flames',
+        text: 'Soften your eyes and watch the dance of the fire. Notice colors, movements, shapes, and how the flames respond.',
+      },
+      {
+        name: 'Interpret flame behavior',
+        text: 'Note if flames leap (yes/strong energy), shrink (no/blocked), crackle (obstacles), or show colors (spirit presence).',
+      },
+      {
+        name: 'Thank and close',
+        text: 'When finished, thank the fire spirit for its messages. Let candles burn out safely or extinguish with a snuffer (never blow).',
+      },
+    ],
+    commonMistakes: [
+      'Using a drafty location—wind distorts flame reading',
+      'Expecting visual scenes—fire often speaks through flame behavior',
+      'Ignoring safety precautions',
+      'Blowing out candles—disrupts the energy',
+      'Not noting flame colors—they carry meaning',
+    ],
+    troubleshooting: [
+      'If flame keeps going out: the fire is saying "not now" or needs wind protection',
+      'If no visions come: focus on flame behavior instead of images',
+      'If flame is erratic: cleanse the space or your own energy first',
+      'If you feel drained: fire work can be intense—ground afterward',
+    ],
     affirmation:
       'I gaze into the sacred flame, and transformation reveals the path forward.',
   },
 };
 
 const methodKeys = Object.keys(scryingMethods);
+
+// Type guard for methods with enhanced data
+type EnhancedMethod = (typeof scryingMethods)['crystal-ball'];
+
+function hasHowToSteps(data: EnhancedMethod): data is EnhancedMethod & {
+  howToSteps: Array<{ name: string; text: string }>;
+} {
+  return 'howToSteps' in data;
+}
 
 // Removed generateStaticParams - using pure ISR for faster builds
 // Pages are generated on-demand and cached with 30-day revalidation
@@ -254,8 +450,15 @@ export async function generateMetadata({
     };
   }
 
-  const title = `${methodData.name}: Complete Guide & Techniques - Lunary`;
-  const description = `Learn ${methodData.name} techniques for divination and receiving visions. Discover tools, methods, and tips for successful ${methodData.name.toLowerCase()}.`;
+  // Use custom meta if available
+  const title =
+    'metaTitle' in methodData && methodData.metaTitle
+      ? methodData.metaTitle
+      : `${methodData.name}: Complete Guide & Techniques - Lunary`;
+  const description =
+    'metaDescription' in methodData && methodData.metaDescription
+      ? methodData.metaDescription
+      : `Learn ${methodData.name} techniques for divination and receiving visions. Discover tools, methods, and tips for successful ${methodData.name.toLowerCase()}.`;
 
   return {
     title,
@@ -266,6 +469,8 @@ export async function generateMetadata({
       'divination',
       'visions',
       method.replace('-', ' '),
+      'how to scry',
+      'psychic visions',
     ],
     openGraph: {
       title,
@@ -308,6 +513,7 @@ export default async function ScryingMethodPage({
     notFound();
   }
 
+  // Build FAQs with additional scrying-specific questions
   const faqs = [
     {
       question: `What is ${methodData.name}?`,
@@ -322,8 +528,19 @@ export default async function ScryingMethodPage({
       answer: methodData.technique,
     },
     {
-      question: `What is the history of ${methodData.name}?`,
-      answer: methodData.history,
+      question: 'Is scrying dangerous?',
+      answer:
+        'Scrying itself is not dangerous—it is a meditative practice. However, black mirror work can be intense and is not recommended for beginners. Always ground afterward, use protection if working with spirit contact, and stop if you feel uncomfortable.',
+    },
+    {
+      question: 'What do scrying visions look like?',
+      answer:
+        'Visions vary widely. Some see literal images, faces, or scenes. Others see colors, shapes, or mists. Many receive impressions, feelings, or sudden knowing rather than visual images. All are valid forms of scrying reception.',
+    },
+    {
+      question: 'How long should a scrying session last?',
+      answer:
+        'Sessions typically last 15-30 minutes. Beginners should start with shorter sessions (10-15 minutes). Extended sessions beyond 45 minutes can cause eye strain and fatigue. Quality matters more than duration.',
     },
     {
       question: `What is ${methodData.name} best for?`,
@@ -335,8 +552,115 @@ export default async function ScryingMethodPage({
     },
   ];
 
+  // Build extended meaning content
+  let meaningContent = `Scrying is the ancient art of gazing into a reflective or receptive surface to receive visions, messages, and insights from beyond ordinary perception. ${methodData.name} is one of the most respected and time-honored forms of this practice.
+
+${methodData.description}
+
+## The Symbolism of ${methodData.name}
+
+${methodData.symbolism}
+
+## Historical Background
+
+${methodData.history}
+
+## The Technique
+
+${methodData.technique}
+
+## What You Might Experience
+
+Practitioners of ${methodData.name} commonly report: ${methodData.commonExperiences.join('; ')}.`;
+
+  // Add common mistakes and troubleshooting if available
+  if ('commonMistakes' in methodData && methodData.commonMistakes) {
+    meaningContent += `
+
+## Common Mistakes to Avoid
+
+${(methodData.commonMistakes as string[]).map((m) => `• ${m}`).join('\n')}`;
+  }
+
+  if ('troubleshooting' in methodData && methodData.troubleshooting) {
+    meaningContent += `
+
+## Troubleshooting
+
+${(methodData.troubleshooting as string[]).map((t) => `• ${t}`).join('\n')}`;
+  }
+
+  meaningContent += `
+
+Scrying requires patience and regular practice. Your first sessions may yield little, but with consistent effort, your ability to receive clear visions will develop. The key is entering a relaxed, receptive state where your conscious mind quiets and your inner sight awakens.
+
+## Preparation Steps
+
+${methodData.preparation.map((p) => `• ${p}`).join('\n')}
+
+## Tools Needed
+
+${methodData.tools.map((t) => `• ${t}`).join('\n')}`;
+
+  // Create HowTo schema if steps are available
+  const howToSchema = hasHowToSteps(methodData)
+    ? createHowToSchema({
+        name: `How to Practice ${methodData.name}`,
+        description: `Step-by-step guide to ${methodData.name.toLowerCase()} for divination and receiving psychic visions.`,
+        url: `https://lunary.app/grimoire/divination/scrying/${method}`,
+        totalTime: 'PT30M',
+        tools: methodData.tools,
+        steps: methodData.howToSteps,
+      })
+    : null;
+
+  // Build tables
+  const tables = [
+    {
+      title: `${methodData.name} Requirements`,
+      headers: ['Aspect', 'Details'],
+      rows: [
+        ['Tools', methodData.tools.slice(0, 3).join(', ')],
+        ['Best For', methodData.bestFor.slice(0, 2).join(', ')],
+        ['Lighting', 'Dim, ambient'],
+        ['Duration', '15-30 minutes'],
+      ],
+    },
+    {
+      title: 'What This Method Is Best For',
+      headers: ['Purpose', 'Description'],
+      rows: methodData.bestFor.map((b) => [b, '✓ Recommended']),
+    },
+  ];
+
+  // Add flame meanings table for fire scrying
+  if ('flameColors' in methodData && methodData.flameColors) {
+    tables.push({
+      title: 'Flame Color Meanings',
+      headers: ['Color', 'Meaning'],
+      rows: Object.entries(
+        methodData.flameColors as Record<string, string>,
+      ).map(([color, meaning]) => [
+        color.charAt(0).toUpperCase() + color.slice(1),
+        meaning,
+      ]),
+    });
+  }
+
+  // Add moon phase table for water scrying
+  if ('moonPhases' in methodData && methodData.moonPhases) {
+    tables.push({
+      title: 'Moon Phase Timing',
+      headers: ['Phase', 'Best For'],
+      rows: Object.entries(methodData.moonPhases as Record<string, string>).map(
+        ([phase, use]) => [phase.replace(/([A-Z])/g, ' $1').trim(), use],
+      ),
+    });
+  }
+
   return (
     <div className='p-4 md:p-6 lg:p-8 xl:p-10 min-h-full'>
+      {howToSchema && renderJsonLd(howToSchema)}
       <SEOContentTemplate
         title={`${methodData.name} - Lunary`}
         h1={`${methodData.name}: Complete Guide`}
@@ -348,39 +672,12 @@ export default async function ScryingMethodPage({
           'visions',
           method.replace('-', ' '),
           'how to scry',
+          'psychic visions',
         ]}
         canonicalUrl={`https://lunary.app/grimoire/divination/scrying/${method}`}
         intro={methodData.description}
         tldr={`${methodData.name} is a powerful divination technique. ${methodData.symbolism.split('.')[0]}.`}
-        meaning={`Scrying is the ancient art of gazing into a reflective or receptive surface to receive visions, messages, and insights from beyond ordinary perception. ${methodData.name} is one of the most respected and time-honored forms of this practice.
-
-${methodData.description}
-
-**The Symbolism of ${methodData.name}**
-
-${methodData.symbolism}
-
-**Historical Background**
-
-${methodData.history}
-
-**The Technique**
-
-${methodData.technique}
-
-**What You Might Experience**
-
-Practitioners of ${methodData.name} commonly report: ${methodData.commonExperiences.join('; ')}.
-
-Scrying requires patience and regular practice. Your first sessions may yield little, but with consistent effort, your ability to receive clear visions will develop. The key is entering a relaxed, receptive state where your conscious mind quiets and your inner sight awakens.
-
-**Preparation Steps**
-
-${methodData.preparation.map((p) => `• ${p}`).join('\n')}
-
-**Tools Needed**
-
-${methodData.tools.map((t) => `• ${t}`).join('\n')}`}
+        meaning={meaningContent}
         emotionalThemes={[
           'Vision',
           'Insight',
@@ -390,23 +687,7 @@ ${methodData.tools.map((t) => `• ${t}`).join('\n')}`}
         ]}
         howToWorkWith={methodData.preparation}
         rituals={methodData.tips}
-        tables={[
-          {
-            title: `${methodData.name} Requirements`,
-            headers: ['Aspect', 'Details'],
-            rows: [
-              ['Tools', methodData.tools.slice(0, 3).join(', ')],
-              ['Best For', methodData.bestFor.slice(0, 2).join(', ')],
-              ['Lighting', 'Dim, ambient'],
-              ['Duration', '15-30 minutes'],
-            ],
-          },
-          {
-            title: 'What This Method Is Best For',
-            headers: ['Purpose', 'Description'],
-            rows: methodData.bestFor.map((b) => [b, '✓ Recommended']),
-          },
-        ]}
+        tables={tables}
         journalPrompts={[
           'What visions did I receive during my scrying session?',
           'What colors, shapes, or symbols appeared?',
