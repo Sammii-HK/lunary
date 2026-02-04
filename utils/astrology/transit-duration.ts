@@ -76,35 +76,17 @@ function calculateSlowPlanetDuration(
 
 /**
  * Estimate duration for slow planets when not in YEARLY_TRANSITS data
- * Uses average orbital speed as fallback
+ * Returns null to avoid triggering false milestones - we only generate
+ * milestone posts when we have actual transit dates from YEARLY_TRANSITS.
  */
 function estimateSlowPlanetDuration(
-  planet: string,
-  date: Date,
+  _planet: string,
+  _date: Date,
 ): TransitDuration | null {
-  const dailyMotion =
-    PLANET_DAILY_MOTION[planet as keyof typeof PLANET_DAILY_MOTION];
-  if (!dailyMotion) return null;
-
-  // Estimate days to traverse 30 degrees (one sign)
-  const daysPerSign = 30 / dailyMotion;
-
-  // Estimate we're halfway through (average)
-  const remainingDays = Math.ceil(daysPerSign / 2);
-
-  const endDate = new Date(date);
-  endDate.setDate(endDate.getDate() + remainingDays);
-
-  const startDate = new Date(date);
-  startDate.setDate(startDate.getDate() - remainingDays);
-
-  return {
-    totalDays: Math.ceil(daysPerSign),
-    remainingDays,
-    displayText: formatDuration(remainingDays),
-    startDate,
-    endDate,
-  };
+  // Return null when we don't have real transit data
+  // This prevents false "halfway through" or other milestone triggers
+  // Add missing transit entries to YEARLY_TRANSITS instead
+  return null;
 }
 
 /**
