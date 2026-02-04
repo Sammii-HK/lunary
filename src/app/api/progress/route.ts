@@ -21,7 +21,9 @@ export interface SkillTreeProgress {
   nextThreshold: number | null;
   unlockedFeatures: string[];
   nextUnlock: string | null;
+  nextUnlockDescription: string | null;
   actionVerb: string;
+  featureRoute: string | null;
 }
 
 /**
@@ -72,6 +74,12 @@ export async function GET(request: NextRequest) {
           levelCalc.currentLevel,
         );
 
+        // Get current level config for feature route
+        const currentLevelConfig =
+          levelCalc.currentLevel > 0
+            ? config.levels.find((l) => l.level === levelCalc.currentLevel)
+            : null;
+
         return {
           skillTree: config.id,
           name: config.name,
@@ -85,7 +93,12 @@ export async function GET(request: NextRequest) {
           unlockedFeatures,
           nextUnlock:
             nextLevelConfig?.freeUnlock || nextLevelConfig?.proUnlock || null,
+          nextUnlockDescription: nextLevelConfig?.unlockDescription || null,
           actionVerb: config.actionVerb,
+          featureRoute:
+            currentLevelConfig?.featureRoute ||
+            nextLevelConfig?.featureRoute ||
+            null,
         };
       },
     );

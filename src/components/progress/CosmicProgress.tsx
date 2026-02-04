@@ -24,8 +24,8 @@ export function CosmicProgress({
               Your Cosmic Progress
             </h2>
           </div>
-          <div className='grid gap-3 sm:grid-cols-3'>
-            {[1, 2, 3].map((i) => (
+          <div className='grid gap-3 sm:grid-cols-2 lg:grid-cols-4'>
+            {[1, 2, 3, 4].map((i) => (
               <div
                 key={i}
                 className='h-32 bg-zinc-800/50 animate-pulse rounded-xl'
@@ -61,7 +61,9 @@ export function CosmicProgress({
 
         <div
           className={
-            variant === 'compact' ? 'space-y-2' : 'grid gap-3 sm:grid-cols-3'
+            variant === 'compact'
+              ? 'space-y-2'
+              : 'grid gap-3 sm:grid-cols-2 lg:grid-cols-4'
           }
         >
           {progress.map((p) => (
@@ -74,7 +76,9 @@ export function CosmicProgress({
               progressToNext={p.progressToNext}
               actionsToNext={p.actionsToNext}
               nextUnlock={p.nextUnlock}
+              nextUnlockDescription={p.nextUnlockDescription}
               actionVerb={p.actionVerb}
+              featureRoute={p.featureRoute}
               variant={variant}
             />
           ))}

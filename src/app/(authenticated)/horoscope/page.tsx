@@ -10,6 +10,7 @@ import { conversionTracking } from '@/lib/analytics';
 import { useEffect } from 'react';
 import { MarketingFooterGate } from '@/components/MarketingFooterGate';
 import { useABTestTracking } from '@/hooks/useABTestTracking';
+import { SkillProgressWidget } from '@/components/progress/SkillProgressWidget';
 
 export default function HoroscopePage() {
   const { user, loading } = useUser();
@@ -82,6 +83,11 @@ export default function HoroscopePage() {
 
   return (
     <div className='min-h-screen flex flex-col'>
+      {authStatus.isAuthenticated && (
+        <div className='max-w-4xl mx-auto px-4 pt-4 w-full'>
+          <SkillProgressWidget skillTree='explorer' />
+        </div>
+      )}
       <div className='flex-1'>
         <HoroscopeView
           userBirthday={user?.birthday}

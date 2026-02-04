@@ -13,8 +13,9 @@ interface SkillTreeCardProps {
   progressToNext: number;
   actionsToNext: number | null;
   nextUnlock: string | null;
+  nextUnlockDescription?: string | null;
   actionVerb: string;
-  featureRoute?: string;
+  featureRoute?: string | null;
   variant?: 'compact' | 'full';
   className?: string;
 }
@@ -27,6 +28,7 @@ export function SkillTreeCard({
   progressToNext,
   actionsToNext,
   nextUnlock,
+  nextUnlockDescription,
   actionVerb,
   featureRoute,
   variant = 'full',
@@ -61,6 +63,10 @@ export function SkillTreeCard({
     );
   }
 
+  const unlockText =
+    nextUnlockDescription ||
+    (nextUnlock ? formatFeatureName(nextUnlock) : null);
+
   const content = (
     <div
       className={cn(
@@ -93,17 +99,14 @@ export function SkillTreeCard({
       {/* Next Unlock */}
       {!isMaxLevel && actionsToNext !== null && (
         <div className='flex items-center gap-2 p-2 rounded-lg bg-zinc-800/30 border border-zinc-700/30'>
-          {nextUnlock ? (
+          {unlockText ? (
             <>
               <Sparkles className='w-4 h-4 text-lunary-accent shrink-0' />
               <span className='text-xs text-zinc-300'>
                 <span className='text-lunary-accent font-medium'>
                   {actionsToNext}
                 </span>{' '}
-                more to unlock{' '}
-                <span className='text-white'>
-                  {formatFeatureName(nextUnlock)}
-                </span>
+                more to unlock: <span className='text-white'>{unlockText}</span>
               </span>
             </>
           ) : (
@@ -136,9 +139,5 @@ export function SkillTreeCard({
 }
 
 function formatFeatureName(feature: string): string {
-  return feature
-    .replace(/_/g, ' ')
-    .replace(/\b\w/g, (l) => l.toUpperCase())
-    .replace(' Preview', '')
-    .replace(' Teaser', '');
+  return feature.replace(/_/g, ' ').replace(/\b\w/g, (l) => l.toUpperCase());
 }

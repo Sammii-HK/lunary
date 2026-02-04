@@ -122,6 +122,82 @@ export async function incrementProgress(
 }
 
 /**
+ * Set explorer progress to an absolute value (streak count)
+ * Unlike incrementProgress, this SETS the value rather than adding to it.
+ * Used for streak-based progress where the value reflects current streak.
+ */
+export async function setExplorerProgress(
+  userId: string,
+  currentStreak: number,
+): Promise<ProgressResult> {
+  try {
+    const skillTree: SkillTreeId = 'explorer';
+
+    // Get current progress
+    const currentResult = await sql`
+      SELECT total_actions, current_level
+      FROM user_progress
+      WHERE user_id = ${userId} AND skill_tree = ${skillTree}
+    `;
+
+    const previousActions = currentResult.rows[0]?.total_actions || 0;
+
+    // Only update if streak is higher (don't decrease on streak reset)
+    const newActions = Math.max(previousActions, currentStreak);
+
+    const levelCalc = calculateLevel(skillTree, newActions);
+    const levelUpCheck = checkLevelUp(skillTree, previousActions, newActions);
+    const unlockedFeatures = getUnlockedFeatures(
+      skillTree,
+      levelCalc.currentLevel,
+      false,
+    );
+
+    if (currentResult.rows.length === 0) {
+      await sql`
+        INSERT INTO user_progress (user_id, skill_tree, current_level, total_actions, unlocked_features, last_level_up_at)
+        VALUES (
+          ${userId},
+          ${skillTree},
+          ${levelCalc.currentLevel},
+          ${newActions},
+          ${JSON.stringify(unlockedFeatures)}::jsonb,
+          ${levelUpCheck.leveledUp ? new Date().toISOString() : null}
+        )
+      `;
+    } else {
+      await sql`
+        UPDATE user_progress
+        SET
+          current_level = ${levelCalc.currentLevel},
+          total_actions = ${newActions},
+          unlocked_features = ${JSON.stringify(unlockedFeatures)}::jsonb,
+          last_level_up_at = CASE WHEN ${levelUpCheck.leveledUp} THEN NOW() ELSE last_level_up_at END,
+          updated_at = NOW()
+        WHERE user_id = ${userId} AND skill_tree = ${skillTree}
+      `;
+    }
+
+    return {
+      success: true,
+      leveledUp: levelUpCheck.leveledUp,
+      newLevel: levelCalc.currentLevel,
+      totalActions: newActions,
+      unlockMessage: levelUpCheck.levelConfig?.unlockMessage,
+      featureRoute: levelUpCheck.levelConfig?.featureRoute,
+    };
+  } catch (error) {
+    console.error('[Progress] Failed to set explorer progress:', error);
+    return {
+      success: false,
+      leveledUp: false,
+      newLevel: 0,
+      totalActions: 0,
+    };
+  }
+}
+
+/**
  * Get the current progress for a user and skill tree
  */
 export async function getProgress(

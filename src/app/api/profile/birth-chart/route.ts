@@ -56,6 +56,14 @@ export async function PUT(request: NextRequest) {
         updated_at = NOW()
     `;
 
+    // Track explorer progress - birth chart saved (Level 1 threshold = 1)
+    try {
+      const { setExplorerProgress } = await import('@/lib/progress/server');
+      await setExplorerProgress(user.id, 1);
+    } catch (progressError) {
+      console.warn('[Birth Chart] Failed to track progress:', progressError);
+    }
+
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error('Error saving birth chart:', error);

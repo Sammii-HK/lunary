@@ -204,6 +204,16 @@ export async function POST(request: NextRequest) {
       });
     }
 
+    // Track journal progress for skill tree (journals and dreams count)
+    if (entry.category === 'journal' || entry.category === 'dream') {
+      try {
+        const { incrementProgress } = await import('@/lib/progress/server');
+        await incrementProgress(user.id, 'journal', 1, isPaid);
+      } catch (progressError) {
+        console.warn('[Journal] Failed to track progress:', progressError);
+      }
+    }
+
     return NextResponse.json({
       success: true,
       entry: {

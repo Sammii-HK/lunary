@@ -116,8 +116,9 @@ function getSkillTreeInfo(skillTree: SkillTreeId): {
 } {
   const info: Record<SkillTreeId, { name: string; icon: string }> = {
     tarot: { name: 'Tarot Mastery', icon: '🎴' },
-    chart: { name: 'Chart Explorer', icon: '🌟' },
     journal: { name: 'Journal Keeper', icon: '✍️' },
+    explorer: { name: 'Cosmic Explorer', icon: '🌟' },
+    ritual: { name: 'Ritual Keeper', icon: '🕯️' },
   };
   return info[skillTree];
 }

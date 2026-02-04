@@ -33,6 +33,7 @@ import { PremiumPathway } from '@/components/PremiumPathway';
 import { PatternSnapshotsSection } from '@/components/patterns/PatternSnapshotsSection';
 import { ShareWeeklyPattern } from '@/components/share/ShareWeeklyPattern';
 import { ThisTimeLastYear } from '@/components/patterns/ThisTimeLastYear';
+import { SkillProgressWidget } from '@/components/progress/SkillProgressWidget';
 
 interface JournalEntry {
   id: number;
@@ -496,6 +497,7 @@ export default function BookOfShadowsPage() {
               <span className='hidden sm:inline'>Ask Guide</span>
             </Link>
           </div>
+          <SkillProgressWidget skillTree='journal' className='mb-3' />
 
           <div className='flex gap-1'>
             {tabs.map((tab) => (

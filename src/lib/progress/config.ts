@@ -1,22 +1,34 @@
 /**
  * Skill Tree Configuration for the Progress/Leveling System
  *
- * Each skill tree ties to REAL features in the Lunary app:
- * - Tarot: tarot_patterns, pattern visualization, AI interpretation
- * - Chart: cosmic_profile, transit_history, solar_return
- * - Journal: emotion tracking, monthly_insights, AI analysis
+ * All unlocks tie to REAL features and thresholds:
+ * - Tarot Mastery: Aligns with pattern detection minEvents (spreads only)
+ * - Journal Keeper: Aligns with emotion pattern detection + Daily Thread levels
+ * - Cosmic Explorer: Streak-based, ties to Daily Thread and pattern insights
+ * - Ritual Keeper: Ritual habit tracking from dashboard
+ *
+ * Pattern detection reference (from src/lib/patterns/core/constants.ts):
+ * - tarot_moon_phase: free, minEvents 3
+ * - emotion_moon_phase: free, minEvents 5
+ * - tarot_planetary_position: premium, minEvents 3
+ * - emotion_planetary_position: premium, minEvents 5
+ * - tarot_natal_transit: premium, minEvents 3, requires birth chart
+ * - emotion_natal_transit: premium, minEvents 5, requires birth chart
+ *
+ * Archetype detection requires 3 of 4 data sources + min score 3
  */
 
-export type SkillTreeId = 'tarot' | 'chart' | 'journal';
+export type SkillTreeId = 'tarot' | 'journal' | 'explorer' | 'ritual';
 
 export interface LevelConfig {
   level: number;
   threshold: number;
   freeUnlock: string | null;
   proUnlock: string | null;
+  unlockDescription: string;
   unlockMessage: string;
   proRequired: boolean;
-  featureRoute?: string; // Route to the unlocked feature
+  featureRoute?: string;
 }
 
 export interface SkillTreeConfig {
@@ -33,146 +45,218 @@ export const SKILL_TREES: Record<SkillTreeId, SkillTreeConfig> = {
     id: 'tarot',
     name: 'Tarot Mastery',
     icon: '🎴',
-    description: 'Master the art of tarot reading',
-    actionVerb: 'cards pulled',
+    description: 'Deepen your tarot practice with spreads',
+    actionVerb: 'spreads completed',
     levels: [
       {
         level: 1,
-        threshold: 10,
-        freeUnlock: 'tarot_patterns_basic',
-        proUnlock: 'pattern_drill_down',
+        threshold: 3,
+        freeUnlock: 'tarot_moon_phase_patterns',
+        proUnlock: null,
+        unlockDescription: 'Moon phase tarot patterns become detectable',
         unlockMessage:
-          "You've unlocked Tarot Patterns! See which cards appear most in your readings.",
+          'Moon phase patterns unlocked! See how the moon influences your tarot pulls.',
         proRequired: false,
         featureRoute: '/patterns',
       },
       {
         level: 2,
+        threshold: 10,
+        freeUnlock: 'archetype_detection_tarot',
+        proUnlock: null,
+        unlockDescription: 'Archetype detection from tarot data',
+        unlockMessage:
+          'Your tarot data can now contribute to archetype detection!',
+        proRequired: false,
+        featureRoute: '/patterns',
+      },
+      {
+        level: 3,
+        threshold: 25,
+        freeUnlock: null,
+        proUnlock: 'planetary_tarot_patterns',
+        unlockDescription: 'Planetary position & aspect tarot patterns',
+        unlockMessage:
+          'Planetary tarot patterns unlocked! See how planetary alignments shape your readings.',
+        proRequired: true,
+        featureRoute: '/patterns',
+      },
+      {
+        level: 4,
         threshold: 50,
-        freeUnlock: 'card_frequency_tracker',
-        proUnlock: 'card_combinations',
+        freeUnlock: null,
+        proUnlock: 'natal_transit_tarot_patterns',
+        unlockDescription:
+          'Natal transit tarot patterns (requires birth chart)',
         unlockMessage:
-          'Card Frequency Tracker unlocked! Discover recurring themes and combinations.',
-        proRequired: false,
-        featureRoute: '/patterns',
-      },
-      {
-        level: 3,
-        threshold: 100,
-        freeUnlock: 'tarot_patterns_advanced_preview',
-        proUnlock: 'tarot_patterns_advanced',
-        unlockMessage:
-          'Advanced Pattern Visualizations available! See heatmaps and deep analytics.',
+          'Natal transit patterns unlocked! See how transits to your birth chart affect your tarot.',
         proRequired: true,
         featureRoute: '/patterns',
       },
-      {
-        level: 4,
-        threshold: 250,
-        freeUnlock: null,
-        proUnlock: 'ai_spread_interpretation',
-        unlockMessage:
-          'AI Spread Interpretation unlocked! Get deep cosmic insights into your readings.',
-        proRequired: true,
-        featureRoute: '/tarot',
-      },
     ],
   },
-  chart: {
-    id: 'chart',
-    name: 'Chart Explorer',
-    icon: '🌟',
-    description: 'Explore the depths of astrological charts',
-    actionVerb: 'transits checked',
-    levels: [
-      {
-        level: 1,
-        threshold: 1,
-        freeUnlock: 'cosmic_profile_basic',
-        proUnlock: 'cosmic_profile',
-        unlockMessage:
-          "You've started your cosmic journey! Explore your planet placements.",
-        proRequired: false,
-        featureRoute: '/profile',
-      },
-      {
-        level: 2,
-        threshold: 10,
-        freeUnlock: 'transit_history_7d',
-        proUnlock: 'transit_history_30d',
-        unlockMessage:
-          "Transit History unlocked! See how past week's transits affected you.",
-        proRequired: false,
-        featureRoute: '/forecast',
-      },
-      {
-        level: 3,
-        threshold: 30,
-        freeUnlock: 'solar_return_preview',
-        proUnlock: 'solar_return',
-        unlockMessage:
-          'Solar Return preview! Upgrade to see your full birthday chart.',
-        proRequired: true,
-        featureRoute: '/profile',
-      },
-      {
-        level: 4,
-        threshold: 100,
-        freeUnlock: null,
-        proUnlock: 'personalized_transit_readings',
-        unlockMessage:
-          'Personalized Transit Readings unlocked! See exactly how transits affect YOUR chart.',
-        proRequired: true,
-        featureRoute: '/forecast',
-      },
-    ],
-  },
+
   journal: {
     id: 'journal',
     name: 'Journal Keeper',
     icon: '✍️',
-    description: 'Chronicle your cosmic journey',
+    description: 'Chronicle your inner world',
     actionVerb: 'entries written',
     levels: [
       {
         level: 1,
         threshold: 5,
-        freeUnlock: 'basic_cosmic_patterns',
-        proUnlock: 'moon_phase_mood',
+        freeUnlock: 'emotion_moon_phase_patterns',
+        proUnlock: null,
+        unlockDescription: 'Emotion moon phase patterns become detectable',
         unlockMessage:
-          'Cosmic Patterns unlocked! See how moon phases affect your mood.',
+          'Moon mood patterns unlocked! See how the moon influences your emotions.',
         proRequired: false,
         featureRoute: '/patterns',
       },
       {
         level: 2,
-        threshold: 20,
-        freeUnlock: 'monthly_reflection_summary',
+        threshold: 15,
+        freeUnlock: 'daily_thread_level_2',
         proUnlock: 'monthly_insights',
+        unlockDescription:
+          'Personalised daily thread content + monthly insights',
         unlockMessage:
-          'Monthly Summary ready! See your cosmic journey for this month.',
+          'Your daily thread now includes personalised transits and pattern insights!',
+        proRequired: false,
+        featureRoute: '/guide',
+      },
+      {
+        level: 3,
+        threshold: 35,
+        freeUnlock: 'archetype_detection_journal',
+        proUnlock: 'planetary_emotion_patterns',
+        unlockDescription:
+          'Archetype detection from journal + planetary emotion patterns',
+        unlockMessage: 'Your journal data now reveals your cosmic archetype!',
+        proRequired: false,
+        featureRoute: '/patterns',
+      },
+      {
+        level: 4,
+        threshold: 60,
+        freeUnlock: null,
+        proUnlock: 'natal_transit_emotion_patterns',
+        unlockDescription:
+          'Natal transit emotion patterns (requires birth chart)',
+        unlockMessage:
+          'Natal transit emotion patterns unlocked! See how personal transits shape your moods.',
+        proRequired: true,
+        featureRoute: '/patterns',
+      },
+    ],
+  },
+
+  explorer: {
+    id: 'explorer',
+    name: 'Cosmic Explorer',
+    icon: '🌟',
+    description: 'Build a consistent cosmic practice',
+    actionVerb: 'day streak',
+    levels: [
+      {
+        level: 1,
+        threshold: 1,
+        freeUnlock: 'cosmic_profile',
+        proUnlock: 'personal_transits',
+        unlockDescription: 'Cosmic profile + personal transit tracking',
+        unlockMessage:
+          'Your cosmic profile is active! Track your personal transits.',
+        proRequired: false,
+        featureRoute: '/horoscope',
+      },
+      {
+        level: 2,
+        threshold: 7,
+        freeUnlock: 'streak_milestones',
+        proUnlock: null,
+        unlockDescription: 'Streak milestones + expanded daily thread',
+        unlockMessage:
+          '7-day streak! Streak milestones are now tracked in your journey.',
+        proRequired: false,
+        featureRoute: '/guide',
+      },
+      {
+        level: 3,
+        threshold: 14,
+        freeUnlock: 'pattern_insights_daily_thread',
+        proUnlock: null,
+        unlockDescription: 'Pattern insights in your daily thread',
+        unlockMessage:
+          '14-day streak! Your daily thread now includes pattern insights.',
+        proRequired: false,
+        featureRoute: '/guide',
+      },
+      {
+        level: 4,
+        threshold: 30,
+        freeUnlock: 'daily_thread_level_3',
+        proUnlock: 'full_integrative_experience',
+        unlockDescription:
+          'Full integrative daily thread with memories and milestones',
+        unlockMessage:
+          '30-day streak! You now have the full integrative daily thread experience.',
+        proRequired: false,
+        featureRoute: '/guide',
+      },
+    ],
+  },
+
+  ritual: {
+    id: 'ritual',
+    name: 'Ritual Keeper',
+    icon: '🕯️',
+    description: 'Build sacred daily practices',
+    actionVerb: 'rituals completed',
+    levels: [
+      {
+        level: 1,
+        threshold: 3,
+        freeUnlock: 'ritual_tracking',
+        proUnlock: null,
+        unlockDescription: 'Ritual streak tracking',
+        unlockMessage:
+          'Ritual tracking active! Your practice is building momentum.',
+        proRequired: false,
+        featureRoute: '/profile',
+      },
+      {
+        level: 2,
+        threshold: 10,
+        freeUnlock: 'ritual_streak_milestones',
+        proUnlock: null,
+        unlockDescription: 'Ritual streak milestones',
+        unlockMessage:
+          '10 rituals completed! Your ritual streak milestones are now tracked.',
         proRequired: false,
         featureRoute: '/profile',
       },
       {
         level: 3,
-        threshold: 50,
-        freeUnlock: 'enhanced_pattern_analysis_preview',
-        proUnlock: 'enhanced_pattern_analysis',
+        threshold: 25,
+        freeUnlock: 'moon_phase_rituals',
+        proUnlock: null,
+        unlockDescription: 'Moon-phase-aligned ritual suggestions',
         unlockMessage:
-          'Enhanced Pattern Analysis available! Discover transit and house activation patterns.',
-        proRequired: true,
-        featureRoute: '/patterns',
+          'Moon ritual alignment unlocked! Get rituals tuned to the lunar cycle.',
+        proRequired: false,
+        featureRoute: '/profile',
       },
       {
         level: 4,
-        threshold: 100,
+        threshold: 50,
         freeUnlock: null,
-        proUnlock: 'data_export',
+        proUnlock: 'ritual_calendar',
+        unlockDescription: 'Full ritual calendar with cosmic timing',
         unlockMessage:
-          'Data Export unlocked! Download your cosmic journal as PDF.',
+          'Ritual calendar unlocked! Plan rituals aligned with cosmic events.',
         proRequired: true,
-        featureRoute: '/book-of-shadows',
+        featureRoute: '/profile',
       },
     ],
   },

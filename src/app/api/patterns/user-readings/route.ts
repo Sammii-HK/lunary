@@ -129,19 +129,18 @@ export async function GET(request: NextRequest) {
     startDate.setDate(startDate.getDate() - timeFrameDays);
     const startDateStr = startDate.toISOString().split('T')[0];
 
-    // Query actual database readings
+    // Query multi-card spread readings only (exclude daily single-card pulls)
     const result = await sql`
-      SELECT cards, created_at
+      SELECT cards, created_at, spread_slug
       FROM tarot_readings
       WHERE user_id = ${userId}
-        AND spread_slug = 'daily-tarot'
+        AND jsonb_array_length(cards) > 1
         AND created_at >= ${startDateStr}::date
-        AND created_at < CURRENT_DATE
         AND archived_at IS NULL
       ORDER BY created_at DESC
     `;
 
-    // Extract and format cards with cosmic context
+    // Extract and format spread readings with cosmic context
     const readings = await Promise.all(
       result.rows.map(async (row) => {
         try {
@@ -149,33 +148,41 @@ export async function GET(request: NextRequest) {
             typeof row.cards === 'string' ? JSON.parse(row.cards) : row.cards;
 
           if (Array.isArray(cardsData) && cardsData.length > 0) {
-            const cardData = cardsData[0];
-            if (cardData.card) {
-              const readingDate = new Date(row.created_at);
+            const readingDate = new Date(row.created_at);
 
-              // Get moon phase for this date
-              const moonPhase = await getAccurateMoonPhase(readingDate);
-              const moonPhaseLabel = moonPhase.name;
-              const moonPhaseKey = getMoonPhaseKey(moonPhaseLabel);
-              const moonPhaseEmoji =
-                moonPhase.emoji || getMoonPhaseEmoji(moonPhaseLabel);
+            // Get moon phase for this date
+            const moonPhase = await getAccurateMoonPhase(readingDate);
+            const moonPhaseLabel = moonPhase.name;
+            const moonPhaseKey = getMoonPhaseKey(moonPhaseLabel);
+            const moonPhaseEmoji =
+              moonPhase.emoji || getMoonPhaseEmoji(moonPhaseLabel);
 
-              // Calculate aspects for this date
-              const aspects = calculateDailyAspects(readingDate);
+            // Calculate aspects for this date
+            const aspects = calculateDailyAspects(readingDate);
 
-              return {
-                name: cardData.card.name,
-                keywords: cardData.card.keywords || [],
-                information: cardData.card.information || '',
-                createdAt: row.created_at,
-                moonPhase: {
-                  phase: moonPhaseKey,
-                  emoji: moonPhaseEmoji,
-                  name: moonPhaseLabel,
-                },
-                aspects: aspects.length > 0 ? aspects : undefined,
-              };
-            }
+            // Extract all cards from the spread
+            const cards = cardsData
+              .filter((cd: any) => cd.card)
+              .map((cd: any) => ({
+                name: cd.card.name,
+                keywords: cd.card.keywords || [],
+                position: cd.position || undefined,
+              }));
+
+            if (cards.length === 0) return null;
+
+            return {
+              spreadSlug: row.spread_slug || 'unknown',
+              cards,
+              cardCount: cards.length,
+              createdAt: row.created_at,
+              moonPhase: {
+                phase: moonPhaseKey,
+                emoji: moonPhaseEmoji,
+                name: moonPhaseLabel,
+              },
+              aspects: aspects.length > 0 ? aspects : undefined,
+            };
           }
           return null;
         } catch (error) {
@@ -184,7 +191,7 @@ export async function GET(request: NextRequest) {
         }
       }),
     ).then((results) =>
-      results.filter((card): card is NonNullable<typeof card> => card !== null),
+      results.filter((r): r is NonNullable<typeof r> => r !== null),
     );
 
     return NextResponse.json({

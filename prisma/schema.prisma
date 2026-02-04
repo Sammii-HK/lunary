@@ -1147,12 +1147,12 @@ model user_streaks {
   @@index([last_check_in], map: "idx_user_streaks_last_check_in")
 }
 
-/// Tracks user progress across skill trees (Tarot Mastery, Chart Explorer, Journal Keeper)
+/// Tracks user progress across skill trees (Tarot Mastery, Journal Keeper, Cosmic Explorer, Ritual Keeper)
 /// Used for the gamification/leveling system to drive engagement
 model user_progress {
   id                String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   user_id           String
-  skill_tree        String    @db.VarChar(50) // 'tarot', 'chart', 'journal'
+  skill_tree        String    @db.VarChar(50) // 'tarot', 'journal', 'explorer', 'ritual'
   current_level     Int       @default(1)
   total_actions     Int       @default(0)
   unlocked_features Json?     @default("[]") // Array of feature IDs unlocked

@@ -86,6 +86,17 @@ export async function POST(request: NextRequest) {
           updated_at = NOW()
       `;
 
+      // Update explorer progress based on current streak
+      try {
+        const { setExplorerProgress } = await import('@/lib/progress/server');
+        await setExplorerProgress(userId, currentStreak);
+      } catch (progressError) {
+        console.warn(
+          '[Streak] Failed to update explorer progress:',
+          progressError,
+        );
+      }
+
       // Check for streak milestone and send notification
       const previousStreak = currentStreak - 1;
       if (shouldSendStreakNotification(currentStreak, previousStreak)) {

@@ -12,15 +12,14 @@ import type {
 
 /**
  * Enrich tarot pulls with cosmic data from global_cosmic_data cache
- * Includes ALL tarot readings: spreads (3-card, Celtic Cross, etc.) AND daily tarot
+ * Only includes multi-card spreads (excludes daily single-card pulls)
  */
 export async function enrichTarotPulls(
   userId: string,
   startDate: Date,
 ): Promise<EnrichedTarotPull[]> {
   try {
-    // Fetch ALL tarot readings (spreads + daily tarot)
-    // Daily tarot is identified by spread_slug = 'daily-tarot'
+    // Fetch multi-card spread readings only (exclude daily single-card pulls)
     const result = await sql`
       SELECT
         tr.id,
@@ -36,6 +35,7 @@ export async function enrichTarotPulls(
         ON DATE(tr.created_at) = gcd.data_date
       WHERE tr.user_id = ${userId}
         AND tr.created_at >= ${startDate.toISOString()}
+        AND jsonb_array_length(tr.cards) > 1
       ORDER BY tr.created_at DESC
     `;
 
