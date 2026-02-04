@@ -140,8 +140,9 @@ export async function GET(request: NextRequest) {
       ORDER BY created_at DESC
     `;
 
-    // Extract and format spread readings with cosmic context
-    const readings = await Promise.all(
+    // Extract individual cards from spreads, each with cosmic context
+    // Consumers expect flat card objects: { name, keywords, information, createdAt, moonPhase, aspects }
+    const readingArrays = await Promise.all(
       result.rows.map(async (row) => {
         try {
           const cardsData =
@@ -160,39 +161,31 @@ export async function GET(request: NextRequest) {
             // Calculate aspects for this date
             const aspects = calculateDailyAspects(readingDate);
 
-            // Extract all cards from the spread
-            const cards = cardsData
+            // Flatten: emit one item per card, each carrying the spread's context
+            return cardsData
               .filter((cd: any) => cd.card)
               .map((cd: any) => ({
                 name: cd.card.name,
                 keywords: cd.card.keywords || [],
-                position: cd.position || undefined,
+                information: cd.card.information || '',
+                createdAt: row.created_at,
+                moonPhase: {
+                  phase: moonPhaseKey,
+                  emoji: moonPhaseEmoji,
+                  name: moonPhaseLabel,
+                },
+                aspects: aspects.length > 0 ? aspects : undefined,
               }));
-
-            if (cards.length === 0) return null;
-
-            return {
-              spreadSlug: row.spread_slug || 'unknown',
-              cards,
-              cardCount: cards.length,
-              createdAt: row.created_at,
-              moonPhase: {
-                phase: moonPhaseKey,
-                emoji: moonPhaseEmoji,
-                name: moonPhaseLabel,
-              },
-              aspects: aspects.length > 0 ? aspects : undefined,
-            };
           }
-          return null;
+          return [];
         } catch (error) {
           console.error('Error parsing card data:', error);
-          return null;
+          return [];
         }
       }),
-    ).then((results) =>
-      results.filter((r): r is NonNullable<typeof r> => r !== null),
     );
+
+    const readings = readingArrays.flat();
 
     return NextResponse.json({
       success: true,
