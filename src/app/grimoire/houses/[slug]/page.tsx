@@ -1,7 +1,18 @@
 import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
-import { SEOContentTemplate } from '@/components/grimoire/SEOContentTemplate';
+import Link from 'next/link';
+
+import {
+  HOUSES,
+  PLANETS_FOR_HOUSES,
+  PLANET_HOUSE_DISPLAY,
+  HOUSE_DATA,
+  getOrdinalSuffix,
+  HousePlanet,
+} from '@/constants/seo/houses';
 import { CosmicConnections } from '@/components/grimoire/CosmicConnections';
+import { SEOContentTemplate } from '@/components/grimoire/SEOContentTemplate';
+import { Heading } from '@/components/ui/Heading';
 import { astrologicalHouses } from '@/constants/grimoire/seo-data';
 import { createCosmicEntitySchema, renderJsonLd } from '@/lib/schema';
 
@@ -32,89 +43,120 @@ function getOrdinal(num: number): string {
   return `${num}th`;
 }
 
+// Detect if slug is a house or a planet
+function isHouseSlug(slug: string): boolean {
+  return slug.toLowerCase() in houseSlugMap;
+}
+
+function isPlanetSlug(slug: string): boolean {
+  return PLANETS_FOR_HOUSES.includes(slug as HousePlanet);
+}
+
 export async function generateMetadata({
   params,
 }: {
-  params: Promise<{ house: string }>;
+  params: Promise<{ slug: string }>;
 }): Promise<Metadata> {
-  const { house } = await params;
-  const houseKey = houseSlugMap[house.toLowerCase()];
+  const { slug } = await params;
+  const slugLower = slug.toLowerCase();
 
-  if (!houseKey) {
+  // Handle house detail pages (1st-house, 2nd-house, etc.)
+  if (isHouseSlug(slugLower)) {
+    const houseKey = houseSlugMap[slugLower];
+    const houseData = astrologicalHouses[houseKey];
+    const ordinal = getOrdinal(houseData.number);
+
+    const title = `${ordinal} House in Astrology: ${houseData.keywords[0]}, ${houseData.keywords[1]} & Meaning | Lunary`;
+    const description = `What is the ${ordinal} house in astrology? The ${houseData.name} governs ${houseData.area.toLowerCase()}. Learn how planets in your ${ordinal} house shape ${houseData.themes[0].toLowerCase()}. Complete guide with examples.`;
+
     return {
-      title: 'Not Found - Lunary Grimoire',
+      title,
+      description,
+      keywords: [
+        `${ordinal} house astrology`,
+        `${ordinal} house meaning`,
+        `${houseData.name.toLowerCase()} astrology`,
+        `planets in ${ordinal} house`,
+        `${houseData.keywords[0].toLowerCase()} house`,
+        `house ${houseData.number} astrology`,
+        `${ordinal} house birth chart`,
+      ],
+      openGraph: {
+        title,
+        description,
+        url: `https://lunary.app/grimoire/houses/${slug}`,
+        siteName: 'Lunary',
+        images: [
+          {
+            url: '/api/og/grimoire/houses',
+            width: 1200,
+            height: 630,
+            alt: `${ordinal} House in Astrology`,
+          },
+        ],
+        locale: 'en_US',
+        type: 'article',
+      },
+      twitter: {
+        card: 'summary_large_image',
+        title,
+        description,
+        images: ['/api/og/grimoire/houses'],
+      },
+      alternates: {
+        canonical: `https://lunary.app/grimoire/houses/${slug}`,
+      },
+      robots: {
+        index: true,
+        follow: true,
+        googleBot: {
+          index: true,
+          follow: true,
+          'max-video-preview': -1,
+          'max-image-preview': 'large',
+          'max-snippet': -1,
+        },
+      },
     };
   }
 
-  const houseData = astrologicalHouses[houseKey];
-  const ordinal = getOrdinal(houseData.number);
+  // Handle planet-in-houses pages (mars, venus, etc.)
+  if (isPlanetSlug(slugLower)) {
+    const planetName = PLANET_HOUSE_DISPLAY[slugLower as HousePlanet];
+    const title = `${planetName} in Houses: All 12 House Placements | Lunary`;
+    const description = `Explore ${planetName} through all 12 houses. Learn how ${planetName}'s energy manifests in different life areas of your birth chart.`;
 
-  const title = `${ordinal} House in Astrology: ${houseData.keywords[0]}, ${houseData.keywords[1]} & Meaning | Lunary`;
-  const description = `What is the ${ordinal} house in astrology? The ${houseData.name} governs ${houseData.area.toLowerCase()}. Learn how planets in your ${ordinal} house shape ${houseData.themes[0].toLowerCase()}. Complete guide with examples.`;
-
-  return {
-    title,
-    description,
-    keywords: [
-      `${ordinal} house astrology`,
-      `${ordinal} house meaning`,
-      `${houseData.name.toLowerCase()} astrology`,
-      `planets in ${ordinal} house`,
-      `${houseData.keywords[0].toLowerCase()} house`,
-      `house ${houseData.number} astrology`,
-      `${ordinal} house birth chart`,
-    ],
-    openGraph: {
+    return {
       title,
       description,
-      url: `https://lunary.app/grimoire/houses/${house}`,
-      siteName: 'Lunary',
-      images: [
-        {
-          url: '/api/og/grimoire/houses',
-          width: 1200,
-          height: 630,
-          alt: `${ordinal} House in Astrology`,
-        },
+      keywords: [
+        `${planetName.toLowerCase()} in houses`,
+        `${planetName.toLowerCase()} house placement`,
+        `${planetName.toLowerCase()} natal chart`,
+        `${planetName.toLowerCase()} astrology`,
       ],
-      locale: 'en_US',
-      type: 'article',
-    },
-    twitter: {
-      card: 'summary_large_image',
-      title,
-      description,
-      images: ['/api/og/grimoire/houses'],
-    },
-    alternates: {
-      canonical: `https://lunary.app/grimoire/houses/${house}`,
-    },
-    robots: {
-      index: true,
-      follow: true,
-      googleBot: {
-        index: true,
-        follow: true,
-        'max-video-preview': -1,
-        'max-image-preview': 'large',
-        'max-snippet': -1,
+      openGraph: {
+        title,
+        description,
+        url: `https://lunary.app/grimoire/houses/${slug}`,
       },
-    },
-  };
-}
-
-export default async function HousePage({
-  params,
-}: {
-  params: Promise<{ house: string }>;
-}) {
-  const { house } = await params;
-  const houseKey = houseSlugMap[house.toLowerCase()];
-
-  if (!houseKey) {
-    notFound();
+      alternates: {
+        canonical: `https://lunary.app/grimoire/houses/${slug}`,
+      },
+    };
   }
 
+  return { title: 'Not Found | Lunary' };
+}
+
+// House detail page component
+function HouseDetailPage({
+  slug,
+  houseKey,
+}: {
+  slug: string;
+  houseKey: keyof typeof astrologicalHouses;
+}) {
   const houseData = astrologicalHouses[houseKey];
   const ordinal = getOrdinal(houseData.number);
 
@@ -130,7 +172,7 @@ export default async function HousePage({
 
   const isUpperHouse = [10, 11, 12].includes(houseData.number);
 
-  // Comprehensive FAQs merged from both pages
+  // Comprehensive FAQs
   const faqs = [
     {
       question: `What is the ${ordinal} house in astrology?`,
@@ -158,7 +200,7 @@ export default async function HousePage({
   const houseSchema = createCosmicEntitySchema({
     name: `${houseData.name} in Astrology`,
     description: `The ${houseData.name} (${houseData.symbol}) governs ${houseData.area.toLowerCase()}. ${houseData.description.slice(0, 100)}...`,
-    url: `/grimoire/houses/${house}`,
+    url: `/grimoire/houses/${slug}`,
     additionalType: 'https://en.wikipedia.org/wiki/House_(astrology)',
     keywords: [
       houseData.name,
@@ -238,7 +280,7 @@ export default async function HousePage({
           `${houseData.name} astrology`,
           `planets in ${ordinal} house`,
         ]}
-        canonicalUrl={`https://lunary.app/grimoire/houses/${house}`}
+        canonicalUrl={`https://lunary.app/grimoire/houses/${slug}`}
         whatIs={{
           question: `What is the ${ordinal} house in astrology?`,
           answer: `The ${ordinal} house in astrology governs ${houseData.area.toLowerCase()}. Ruled by ${houseData.rulingSign} and ${houseData.rulingPlanet}, this ${houseData.element} house reveals how you approach ${houseData.themes[0].toLowerCase()} in your life. Planets placed here shape your experience of ${houseData.themes.slice(0, 2).join(' and ').toLowerCase()}.`,
@@ -317,7 +359,7 @@ Area: ${houseData.area}`}
           { label: 'Houses', href: '/grimoire/houses' },
           {
             label: `${ordinal} House`,
-            href: `/grimoire/houses/${house}`,
+            href: `/grimoire/houses/${slug}`,
           },
         ]}
         internalLinks={internalLinks}
@@ -334,4 +376,98 @@ Area: ${houseData.area}`}
       />
     </div>
   );
+}
+
+// Planet-in-houses overview page component
+function PlanetInHousesPage({ planet }: { planet: HousePlanet }) {
+  const planetName = PLANET_HOUSE_DISPLAY[planet];
+  const pageTitle = `${planetName} in Houses: All 12 House Placements`;
+  const pageDescription = `Discover how ${planetName}'s energy expresses through each of the 12 houses in the birth chart.`;
+  const pageKeywords = [
+    `${planetName.toLowerCase()} in houses`,
+    `${planetName.toLowerCase()} house placement`,
+    `${planetName.toLowerCase()} natal chart`,
+    `${planetName.toLowerCase()} astrology`,
+  ];
+
+  return (
+    <SEOContentTemplate
+      title={pageTitle}
+      h1={`${planetName} in Houses`}
+      description={pageDescription}
+      keywords={pageKeywords}
+      canonicalUrl={`https://lunary.app/grimoire/houses/${planet}`}
+      breadcrumbs={[
+        { label: 'Grimoire', href: '/grimoire' },
+        { label: 'Houses', href: '/grimoire/houses' },
+        { label: planetName },
+      ]}
+      cosmicConnections={
+        <CosmicConnections
+          entityType='hub-placements'
+          entityKey='houses'
+          title='House Connections'
+        />
+      }
+      whatIs={{
+        question: `What does the ${planetName} in your House mean?`,
+        answer: `The house containing ${planetName} in your birth chart shows where
+            its energy naturally focuses. Each house represents a different
+            area of life, and ${planetName}'s presence there colors your
+            experience of that domain.`,
+      }}
+    >
+      <div className='p-4 md:p-6 lg:p-8 xl:p-10 min-h-full'>
+        <div className='max-w-5xl mx-auto'>
+          <section className='mb-12'>
+            <div className='grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4'>
+              {HOUSES.map((house) => {
+                const houseData = HOUSE_DATA[house];
+                return (
+                  <Link
+                    key={house}
+                    href={`/grimoire/houses/${planet}/${house}`}
+                    className='group rounded-xl border border-zinc-800 bg-zinc-900/30 p-4 hover:bg-zinc-900/50 hover:border-lunary-primary-600 transition-all'
+                  >
+                    <Heading
+                      as='h2'
+                      variant='h2'
+                      className='text-lunary-accent-200'
+                    >
+                      {getOrdinalSuffix(house)} House
+                    </Heading>
+                    <p className='text-xs text-zinc-400 mt-1'>
+                      {houseData.lifeArea}
+                    </p>
+                  </Link>
+                );
+              })}
+            </div>
+          </section>
+        </div>
+      </div>
+    </SEOContentTemplate>
+  );
+}
+
+export default async function HousesSlugPage({
+  params,
+}: {
+  params: Promise<{ slug: string }>;
+}) {
+  const { slug } = await params;
+  const slugLower = slug.toLowerCase();
+
+  // Handle house detail pages (1st-house, 2nd-house, etc.)
+  if (isHouseSlug(slugLower)) {
+    const houseKey = houseSlugMap[slugLower];
+    return <HouseDetailPage slug={slug} houseKey={houseKey} />;
+  }
+
+  // Handle planet-in-houses pages (mars, venus, etc.)
+  if (isPlanetSlug(slugLower)) {
+    return <PlanetInHousesPage planet={slugLower as HousePlanet} />;
+  }
+
+  notFound();
 }

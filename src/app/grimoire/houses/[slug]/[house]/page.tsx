@@ -15,7 +15,7 @@ import { SEOContentTemplate } from '@/components/grimoire/SEOContentTemplate';
 // 30-day ISR revalidation
 export const revalidate = 2592000;
 interface PageParams {
-  planet: string;
+  slug: string;
   house: string;
 }
 
@@ -27,7 +27,7 @@ export async function generateMetadata({
 }: {
   params: Promise<PageParams>;
 }): Promise<Metadata> {
-  const { planet, house: houseStr } = await params;
+  const { slug: planet, house: houseStr } = await params;
   const house = parseInt(houseStr) as House;
 
   if (
@@ -70,7 +70,7 @@ export default async function HousePlacementPage({
 }: {
   params: Promise<PageParams>;
 }) {
-  const { planet, house: houseStr } = await params;
+  const { slug: planet, house: houseStr } = await params;
   const house = parseInt(houseStr) as House;
 
   if (
