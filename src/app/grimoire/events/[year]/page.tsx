@@ -26,11 +26,15 @@ export async function generateMetadata({
   const yearNum = parseInt(year);
 
   // Year-specific highlights for SEO
+  // Verified astronomical data:
+  // - Uranus enters Gemini: July 7, 2025 (preview), April 26, 2026 (permanent)
+  // - Saturn enters Taurus: April 12-14, 2028
+  // - Saturn enters Gemini: May 31, 2030
   const yearHighlights: Record<number, string> = {
-    2027: 'Saturn Enters Taurus',
-    2028: 'Uranus Enters Gemini',
-    2029: 'Saturn in Taurus',
-    2030: 'Neptune Enters Aries',
+    2025: 'Uranus Enters Gemini',
+    2026: 'Uranus in Gemini Begins',
+    2028: 'Saturn Enters Taurus',
+    2030: 'Saturn Enters Gemini',
   };
   const highlight = yearHighlights[yearNum] || '';
 
