@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Modal, ModalHeader, ModalBody } from '@/components/ui/modal';
 import { useAuthStatus } from '@/components/AuthStatus';
 import { conversionTracking } from '@/lib/analytics';
+import { useHaptic } from '@/hooks/useHaptic';
 
 interface Folder {
   id: number;
@@ -52,6 +53,7 @@ export function SaveToCollection({
   className = '',
 }: SaveToCollectionProps) {
   const authState = useAuthStatus();
+  const haptic = useHaptic();
   const [isSavedInternal, setIsSavedInternal] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [showFolderDialog, setShowFolderDialog] = useState(false);
@@ -141,6 +143,7 @@ export function SaveToCollection({
 
       const data = await response.json();
       if (data.success && data.folder) {
+        haptic.success();
         const newFolder: Folder = {
           id: data.folder.id,
           name: data.folder.name,
@@ -156,6 +159,7 @@ export function SaveToCollection({
       }
     } catch (error) {
       console.error('Error creating folder:', error);
+      haptic.error();
     } finally {
       setIsCreatingFolder(false);
     }
@@ -179,6 +183,7 @@ export function SaveToCollection({
 
       const data = await response.json();
       if (data.success) {
+        haptic.success();
         setIsSavedInternal(true);
         conversionTracking.upgradeClicked('save_to_collection', item.category);
         onSaved?.();
@@ -186,6 +191,7 @@ export function SaveToCollection({
       }
     } catch (error) {
       console.error('Error saving to collection:', error);
+      haptic.error();
     } finally {
       setIsSaving(false);
     }

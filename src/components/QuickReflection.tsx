@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { X, Feather } from 'lucide-react';
+import { useHaptic } from '@/hooks/useHaptic';
 
 interface QuickReflectionProps {
   isOpen: boolean;
@@ -30,6 +31,7 @@ export function QuickReflection({
   const [content, setContent] = useState('');
   const [selectedMoods, setSelectedMoods] = useState<string[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const haptic = useHaptic();
 
   useEffect(() => {
     if (!isOpen) return;
@@ -43,6 +45,7 @@ export function QuickReflection({
   if (!isOpen) return null;
 
   const toggleMood = (mood: string) => {
+    haptic.light();
     setSelectedMoods((prev) =>
       prev.includes(mood) ? prev.filter((m) => m !== mood) : [...prev, mood],
     );
@@ -55,11 +58,13 @@ export function QuickReflection({
     setIsSubmitting(true);
     try {
       await onSubmit(content.trim(), selectedMoods);
+      haptic.success();
       setContent('');
       setSelectedMoods([]);
       onClose();
     } catch (error) {
       console.error('Failed to save reflection:', error);
+      haptic.error();
     } finally {
       setIsSubmitting(false);
     }
