@@ -14,8 +14,14 @@ import { Heading } from '@/components/ui/Heading';
 export const revalidate = 2592000;
 
 // Dynamic year range: current year to 10 years in advance
+// Keep historical years indexed (starting from 2025) and extend 10 years into the future
+const START_YEAR = 2025;
 const CURRENT_YEAR = new Date().getFullYear();
-const AVAILABLE_YEARS = Array.from({ length: 11 }, (_, i) => CURRENT_YEAR + i);
+const END_YEAR = Math.max(CURRENT_YEAR + 10, START_YEAR + 10);
+const AVAILABLE_YEARS = Array.from(
+  { length: END_YEAR - START_YEAR + 1 },
+  (_, i) => START_YEAR + i,
+);
 
 // Removed generateStaticParams - using pure ISR for faster builds
 // Pages are generated on-demand and cached with 30-day revalidation
@@ -397,8 +403,8 @@ export default async function EventsYearPage({
   const yearNum = parseInt(year);
   const nextYear = yearNum + 1;
 
-  const minYear = CURRENT_YEAR;
-  const maxYear = CURRENT_YEAR + 10;
+  const minYear = START_YEAR;
+  const maxYear = END_YEAR;
   if (yearNum < minYear || yearNum > maxYear) {
     notFound();
   }
