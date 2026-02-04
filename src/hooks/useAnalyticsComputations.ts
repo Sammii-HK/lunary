@@ -182,6 +182,7 @@ export function useAnalyticsComputations(data: AnalyticsDataState) {
     insightTypeFilter,
     insightCategoryFilter,
     ctaConversions,
+    ctaLocations,
     subscriptionLifecycle,
     notifications,
     showProductSeries,
@@ -393,6 +394,7 @@ export function useAnalyticsComputations(data: AnalyticsDataState) {
 
   // CTA and lifecycle
   const ctaHubs = ctaConversions?.hubs ?? [];
+  const ctaLocationMetrics = ctaLocations?.locations ?? [];
   const lifecycleStateEntries = subscriptionLifecycle?.states
     ? Object.entries(subscriptionLifecycle.states as Record<string, number>)
     : [];
@@ -948,6 +950,7 @@ export function useAnalyticsComputations(data: AnalyticsDataState) {
 
     // CTA and lifecycle
     ctaHubs,
+    ctaLocationMetrics,
     lifecycleStateEntries,
 
     // UI state

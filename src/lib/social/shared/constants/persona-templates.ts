@@ -123,6 +123,149 @@ export const CLOSING_STATEMENTS = [
 ];
 
 /**
+ * Topic-aware question templates for Threads engagement posts
+ * Use {topic} for the daily facet title, {sign_type} for sun/moon/rising
+ */
+export const THREADS_QUESTION_TEMPLATES = [
+  "what's your {sign_type} sign? drop below 👇",
+  'does your {placement} placement feel accurate? be honest',
+  '{topic} — love it or dread it?',
+  "what's the best astrology advice you've ever received?",
+  'which sign do people always assume you are vs what you actually are?',
+  "what's your big three? drop below 👇",
+  'what part of your chart do you resonate with most?',
+  'do you check your horoscope daily or only when things feel off?',
+];
+
+/**
+ * Dear-style beta CTA templates for Threads
+ * These drive signups during peak app usage times (evening)
+ * Always includes FULLORBIT beta code
+ * Moon phase emojis: 🌑🌒🌓🌔🌕🌖🌗🌘
+ */
+export const DEAR_STYLE_BETA_TEMPLATES = [
+  `dear tarot readers, witches, astrologers, and moon lovers 🌕
+i'm gifting a free year of lunary during the beta.
+code: FULLORBIT
+let me know what you think`,
+
+  `for astrology lovers, moon watchers, and chart nerds 🌔
+lunary is in beta and i'm giving away a free year.
+code: FULLORBIT
+feedback welcome`,
+
+  `dear moon gazers and cosmic seekers 🌓
+trying something new with lunary.
+free year with code: FULLORBIT
+curious what you notice`,
+
+  `to the witches, the chart readers, the crystal collectors 🌖
+lunary is finally in beta.
+i'm giving away a free year to early supporters.
+code: FULLORBIT
+tell me what's missing`,
+
+  `dear cosmic wanderers and horoscope checkers 🌗
+if you've ever wished your astrology app actually knew your chart...
+lunary does. gifting a free year during beta.
+code: FULLORBIT`,
+
+  `for the transit trackers and birth chart obsessives 🌕
+lunary is live and i want you to try it.
+free year with code: FULLORBIT
+let me know what you think`,
+
+  `dear tarot pullers, moon trackers, and star gazers 🌒
+i built lunary for you.
+gifting a free year during beta.
+code: FULLORBIT
+feedback welcome`,
+
+  `to the astrologers and the astro-curious 🌘
+lunary goes beyond your sun sign.
+free year with code: FULLORBIT
+curious what you notice`,
+
+  `dear crystal hoarders and horoscope readers 🌑
+opening lunary beta to early supporters.
+free year with code: FULLORBIT
+tell me what's missing`,
+
+  `for moon lovers and chart nerds 🌔
+lunary is ready for you.
+free year during beta.
+code: FULLORBIT`,
+];
+
+/**
+ * Conversational deep-dive templates for Threads
+ * These replace formal educational copy with casual, engaging hooks
+ * {topic} gets replaced with the facet title
+ */
+export const CONVERSATIONAL_DEEP_DIVE_TEMPLATES = [
+  `{topic} is one of those chart placements people sleep on`,
+  `unpopular opinion: {topic} matters more than people think`,
+  `ever looked at your {topic} and thought "that explains a lot"?`,
+  `the thing about {topic} is it shows up when you least expect it`,
+  `if you've never checked your {topic}, now's the time`,
+  `{topic} — quietly running the show in your chart`,
+  `{topic} hits different once you actually understand it`,
+  `{topic} is underrated and i'll die on this hill`,
+  `your {topic} says more about you than you'd expect`,
+  `{topic} is the placement nobody talks about enough`,
+  `there's a reason {topic} keeps coming up in readings`,
+  `{topic} — not as simple as it sounds`,
+];
+
+/**
+ * Get a conversational deep-dive for Threads
+ */
+export function getConversationalDeepDive(
+  topic: string,
+  seed?: number,
+): string {
+  const index =
+    seed !== undefined
+      ? seed % CONVERSATIONAL_DEEP_DIVE_TEMPLATES.length
+      : Math.floor(Math.random() * CONVERSATIONAL_DEEP_DIVE_TEMPLATES.length);
+  return CONVERSATIONAL_DEEP_DIVE_TEMPLATES[index].replace('{topic}', topic);
+}
+
+/**
+ * Get a random question template with topic substitution
+ */
+export function getThreadsQuestion(topic: string, seed?: number): string {
+  const index =
+    seed !== undefined
+      ? seed % THREADS_QUESTION_TEMPLATES.length
+      : Math.floor(Math.random() * THREADS_QUESTION_TEMPLATES.length);
+  const template = THREADS_QUESTION_TEMPLATES[index];
+
+  // Substitute placeholders
+  const signTypes = ['sun', 'moon', 'rising'];
+  const placements = ['Venus', 'Mars', 'Mercury', 'Moon'];
+  const signType = signTypes[seed !== undefined ? seed % signTypes.length : 0];
+  const placement =
+    placements[seed !== undefined ? seed % placements.length : 0];
+
+  return template
+    .replace('{topic}', topic)
+    .replace('{sign_type}', signType)
+    .replace('{placement}', placement);
+}
+
+/**
+ * Get a dear-style beta CTA post
+ */
+export function getDearStyleBetaPost(seed?: number): string {
+  const index =
+    seed !== undefined
+      ? seed % DEAR_STYLE_BETA_TEMPLATES.length
+      : Math.floor(Math.random() * DEAR_STYLE_BETA_TEMPLATES.length);
+  return DEAR_STYLE_BETA_TEMPLATES[index];
+}
+
+/**
  * @deprecated Use AUDIENCE_TERMS instead
  */
 export const PERSONA_VOCAB = AUDIENCE_TERMS;

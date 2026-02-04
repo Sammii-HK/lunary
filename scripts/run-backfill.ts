@@ -22,9 +22,9 @@ async function runBackfill() {
       COALESCE(user_id, 'anon:' || anonymous_id)
     )
       'app_opened' as event_type,
-      -- Deterministic event_id for idempotency: backfill-dau-{date}-{identity_hash}
-      'backfill-dau-' || ((created_at AT TIME ZONE 'UTC')::date)::text || '-' ||
-        md5(COALESCE(user_id, 'anon:' || anonymous_id)) as event_id,
+      -- Deterministic UUID for idempotency using md5 hash as UUID v5-like
+      ('00000000-0000-5000-8000-' ||
+        substring(md5(COALESCE(user_id, 'anon:' || anonymous_id) || ((created_at AT TIME ZONE 'UTC')::date)::text), 1, 12))::uuid as event_id,
       user_id,
       anonymous_id,
       user_email,

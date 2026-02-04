@@ -8,6 +8,7 @@ export type ContextualNudge = {
   buttonLabel: string;
   href: string;
   action: 'authOrLink' | 'link';
+  inlineCopy?: string;
   exampleType?: string;
   exampleText?: string;
   ctaVariant?: string;
@@ -130,6 +131,7 @@ export function getContextualNudge(pathname: string): ContextualNudge {
     ...base,
     headline: injectExamples(base.headline, hub, normalizedPath),
     subline: injectExamples(base.subline, hub, normalizedPath),
+    inlineCopy: base.inlineCopy,
     exampleType: example?.type,
     exampleText: example?.text,
     ctaVariant: `${hub}_${index}`,

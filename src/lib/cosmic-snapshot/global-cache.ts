@@ -7,6 +7,7 @@ import {
   checkSeasonalEvents,
   checkSignIngress,
   checkRetrogradeEvents,
+  getSignDescription,
 } from '../../../utils/astrology/astronomical-data';
 import { Observer } from 'astronomy-engine';
 
@@ -182,4 +183,225 @@ export async function saveGlobalCosmicData(
     revalidateTag('cosmic-global');
     revalidateTag(`cosmic-global-${dateStr}`);
   }
+}
+
+export type SignChangeEvent = {
+  name: string;
+  energy: string;
+  priority: number;
+  type: 'ingress' | 'egress';
+  planet: string;
+  sign: string;
+  previousSign?: string;
+  nextSign?: string;
+};
+
+/**
+ * Detect upcoming planet sign changes by comparing today vs tomorrow.
+ * Returns ingress/egress events for changes happening TOMORROW so we can post TODAY.
+ * This eliminates the problem of slow planets (like Neptune) generating
+ * duplicate ingress posts for months when using degree-based detection.
+ */
+export async function detectUpcomingSignChanges(
+  today: Date,
+  tomorrow: Date,
+): Promise<{ ingresses: SignChangeEvent[]; egresses: SignChangeEvent[] }> {
+  const [todayData, tomorrowData] = await Promise.all([
+    getGlobalCosmicData(today),
+    getGlobalCosmicData(tomorrow),
+  ]);
+
+  const ingresses: SignChangeEvent[] = [];
+  const egresses: SignChangeEvent[] = [];
+
+  if (!todayData?.planetaryPositions || !tomorrowData?.planetaryPositions) {
+    return { ingresses, egresses };
+  }
+
+  // Compare today vs tomorrow - post TODAY about TOMORROW's changes
+  for (const [planet, todayPos] of Object.entries(
+    todayData.planetaryPositions,
+  )) {
+    const tomorrowPos = tomorrowData.planetaryPositions[planet];
+    if (!tomorrowPos) continue;
+
+    const todaySign = todayPos.sign;
+    const tomorrowSign = tomorrowPos.sign;
+
+    // Sign changes TOMORROW = post TODAY
+    if (todaySign !== tomorrowSign) {
+      ingresses.push({
+        name: `${planet} enters ${tomorrowSign} tomorrow`,
+        energy: getSignDescription(tomorrowSign),
+        priority: 8,
+        type: 'ingress',
+        planet,
+        sign: tomorrowSign,
+        previousSign: todaySign,
+      });
+
+      egresses.push({
+        name: `${planet}'s final day in ${todaySign}`,
+        energy: getSignDescription(todaySign),
+        priority: 7,
+        type: 'egress',
+        planet,
+        sign: todaySign,
+        nextSign: tomorrowSign,
+      });
+    }
+  }
+
+  return { ingresses, egresses };
+}
+
+export type RetrogradeStationEvent = {
+  name: string;
+  energy: string;
+  priority: number;
+  type: 'retrograde_start' | 'retrograde_end';
+  planet: string;
+  sign: string;
+};
+
+/**
+ * Detect upcoming retrograde stations by comparing today vs tomorrow.
+ * Returns retrograde/direct station events happening TOMORROW so we can post TODAY.
+ * This provides a heads-up before the station rather than posting after.
+ */
+export async function detectUpcomingRetrogradeStations(
+  today: Date,
+  tomorrow: Date,
+): Promise<RetrogradeStationEvent[]> {
+  const [todayData, tomorrowData] = await Promise.all([
+    getGlobalCosmicData(today),
+    getGlobalCosmicData(tomorrow),
+  ]);
+
+  const stations: RetrogradeStationEvent[] = [];
+
+  if (!todayData?.planetaryPositions || !tomorrowData?.planetaryPositions) {
+    return stations;
+  }
+
+  // Compare today vs tomorrow - post TODAY about TOMORROW's stations
+  for (const [planet, todayPos] of Object.entries(
+    todayData.planetaryPositions,
+  )) {
+    const tomorrowPos = tomorrowData.planetaryPositions[planet];
+    if (!tomorrowPos) continue;
+
+    const todayRetrograde = todayPos.retrograde;
+    const tomorrowRetrograde = tomorrowPos.retrograde;
+
+    // Planet goes retrograde TOMORROW = post TODAY
+    if (!todayRetrograde && tomorrowRetrograde) {
+      stations.push({
+        name: `${planet} stations retrograde tomorrow`,
+        energy: `Time to slow down and review ${planet.toLowerCase()} themes`,
+        priority: 9,
+        type: 'retrograde_start',
+        planet,
+        sign: todayPos.sign,
+      });
+    }
+
+    // Planet goes direct TOMORROW = post TODAY
+    if (todayRetrograde && !tomorrowRetrograde) {
+      stations.push({
+        name: `${planet} stations direct tomorrow`,
+        energy: `Momentum returns to ${planet.toLowerCase()} themes`,
+        priority: 9,
+        type: 'retrograde_end',
+        planet,
+        sign: todayPos.sign,
+      });
+    }
+  }
+
+  return stations;
+}
+
+// Slow planets that get milestone posts
+const SLOW_PLANETS = ['Jupiter', 'Saturn', 'Uranus', 'Neptune', 'Pluto'];
+
+export type TransitMilestoneEvent = {
+  planet: string;
+  sign: string;
+  totalDays: number;
+  remainingDays: number;
+  milestone: 'halfway' | '3_months' | '1_month' | '1_week';
+  milestoneLabel: string;
+  displayText: string;
+};
+
+/**
+ * Detect transit milestones for slow-moving planets.
+ * Returns milestone events when a slow planet transit hits:
+ * - Halfway point
+ * - 3 months remaining
+ * - 1 month remaining
+ * - 1 week remaining
+ *
+ * Only triggers on the exact day of the milestone to avoid duplicates.
+ */
+export async function detectTransitMilestones(
+  date: Date,
+): Promise<TransitMilestoneEvent[]> {
+  const data = await getGlobalCosmicData(date);
+  const milestones: TransitMilestoneEvent[] = [];
+
+  if (!data?.planetaryPositions) {
+    return milestones;
+  }
+
+  for (const [planet, position] of Object.entries(data.planetaryPositions)) {
+    // Only check slow planets
+    if (!SLOW_PLANETS.includes(planet)) continue;
+
+    const duration = position.duration;
+    if (!duration || !duration.totalDays || !duration.remainingDays) continue;
+
+    const { totalDays, remainingDays } = duration;
+    const halfwayDays = Math.floor(totalDays / 2);
+
+    // Check for milestone matches (use ranges to account for daily check)
+    let milestone: TransitMilestoneEvent['milestone'] | null = null;
+    let milestoneLabel = '';
+
+    // Halfway point (within 1 day of halfway)
+    if (remainingDays === halfwayDays || remainingDays === halfwayDays + 1) {
+      milestone = 'halfway';
+      milestoneLabel = 'Halfway through';
+    }
+    // 3 months remaining (90 days, check 89-91)
+    else if (remainingDays >= 89 && remainingDays <= 91) {
+      milestone = '3_months';
+      milestoneLabel = '3 months remaining';
+    }
+    // 1 month remaining (30 days, check 29-31)
+    else if (remainingDays >= 29 && remainingDays <= 31) {
+      milestone = '1_month';
+      milestoneLabel = '1 month remaining';
+    }
+    // 1 week remaining (7 days, check 6-8)
+    else if (remainingDays >= 6 && remainingDays <= 8) {
+      milestone = '1_week';
+      milestoneLabel = '1 week remaining';
+    }
+
+    if (milestone) {
+      milestones.push({
+        planet,
+        sign: position.sign,
+        totalDays,
+        remainingDays,
+        milestone,
+        milestoneLabel,
+        displayText: duration.displayText || `${remainingDays} days remaining`,
+      });
+    }
+  }
+
+  return milestones;
 }

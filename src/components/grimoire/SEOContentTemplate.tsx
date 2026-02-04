@@ -21,7 +21,9 @@ import { Heading } from '../ui/Heading';
 import { ArticleFooter } from './ArticleFooter';
 import { PeopleAlsoAsk } from './PeopleAlsoAsk';
 import { ContextualNudgeSection } from '../ui/ContextualNudgeSection';
+import { InlineContextualNudge } from './InlineContextualNudge';
 import { ReadFullGuidePrompt } from '@/app/grimoire/guides/ReadFullGuidePrompt';
+import { getInlineCtaVariant } from '@/lib/ab-tests-server';
 
 /**
  * Format a URL segment into a human-readable label
@@ -152,7 +154,7 @@ export interface SEOContentTemplateProps {
   components?: React.ReactNode;
 }
 
-export function SEOContentTemplate({
+export async function SEOContentTemplate({
   title,
   h1,
   subtitle,
@@ -203,6 +205,9 @@ export function SEOContentTemplate({
   contextualCopyVariant = 'note',
   components,
 }: SEOContentTemplateProps) {
+  // Get A/B test variant for inline CTA (server-side)
+  const inlineCtaVariant = await getInlineCtaVariant();
+
   // Auto-generate breadcrumbs from URL if not provided
   const autoBreadcrumbs =
     breadcrumbs && breadcrumbs.length > 0
@@ -377,6 +382,15 @@ export function SEOContentTemplate({
             </Heading>
             <p className='text-zinc-200 leading-relaxed break-words'>{tldr}</p>
           </div>
+        )}
+
+        {/* Inline Contextual Nudge - after TL;DR for early conversion */}
+        {hasContextualNudge && contextualNudge && (
+          <InlineContextualNudge
+            nudge={contextualNudge}
+            location='seo_inline_post_tldr'
+            serverVariant={inlineCtaVariant}
+          />
         )}
 
         {/* What is X? - Featured Snippet Optimization */}
@@ -660,25 +674,6 @@ export function SEOContentTemplate({
           </section>
         )}
 
-        {/* CTA or contextual nudge */}
-        {hasContextualNudge && contextualNudge ? (
-          <ContextualNudgeSection
-            nudge={contextualNudge}
-            location='seo_contextual_nudge'
-          />
-        ) : ctaText && ctaHref ? (
-          <section className='bg-gradient-to-r from-lunary-primary-900/30 to-lunary-highlight-900/30 border border-lunary-primary-700 rounded-lg p-6 sm:p-8 text-center overflow-x-hidden'>
-            <Heading as='h2' variant='h3'>
-              {ctaText}
-            </Heading>
-            <SEOCTAButton
-              href={ctaHref}
-              label='Get Started'
-              hub={contextualHub}
-            />
-          </section>
-        ) : null}
-
         {/* Optional slot before FAQs */}
         {childrenPosition === 'before-faqs' && children && (
           <div id='explore-practices' className='mt-8'>
@@ -715,6 +710,25 @@ export function SEOContentTemplate({
             <PeopleAlsoAsk questions={faqs} />
           </section>
         )}
+
+        {/* Full CTA or contextual nudge - positioned after FAQs for committed readers */}
+        {hasContextualNudge && contextualNudge ? (
+          <ContextualNudgeSection
+            nudge={contextualNudge}
+            location='seo_contextual_nudge'
+          />
+        ) : ctaText && ctaHref ? (
+          <section className='bg-gradient-to-r from-lunary-primary-900/30 to-lunary-highlight-900/30 border border-lunary-primary-700 rounded-lg p-6 sm:p-8 text-center overflow-x-hidden'>
+            <Heading as='h2' variant='h3'>
+              {ctaText}
+            </Heading>
+            <SEOCTAButton
+              href={ctaHref}
+              label='Get Started'
+              hub={contextualHub}
+            />
+          </section>
+        ) : null}
 
         {/* Universal Grimoire Exploration - always shown */}
         <ExploreGrimoire />

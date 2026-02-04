@@ -253,15 +253,45 @@ export const YEARLY_TRANSITS: YearlyTransit[] = [
     tone: 'Reflective and relational. Opposition energy works best when it invites dialogue instead of blame.',
   },
   {
-    id: 'uranus-gemini-2027',
-    year: 2027,
+    id: 'uranus-gemini-2025',
+    year: 2025,
     planet: 'Uranus',
     transitType: 'Uranus Transit',
-    title: 'Uranus Enters Gemini 2027',
-    dates: 'Starting May 2027',
+    title: 'Uranus Enters Gemini 2025',
+    dates: 'July 7 - November 7, 2025 (preview)',
     signs: ['Gemini'],
     description:
-      'Uranus enters Gemini in 2027, revolutionizing communication, technology, and information. Expect major breakthroughs in AI, media, and how we share information.',
+      'Uranus enters Gemini for the first time on July 7, 2025, giving us a preview of its revolutionary energy in communication, technology, and information before retrograding back to Taurus in November.',
+    themes: [
+      'communication revolution',
+      'technology',
+      'information',
+      'innovation',
+    ],
+    doList: [
+      'embrace new tech',
+      'learn cutting-edge skills',
+      'be adaptable',
+      'think differently',
+    ],
+    avoidList: [
+      'resistance to change',
+      'information overload',
+      'nervous energy',
+      'scattered thinking',
+    ],
+    tone: 'Electric and disruptive in the best way. This preview period hints at the major shifts coming when Uranus settles into Gemini permanently in 2026.',
+  },
+  {
+    id: 'uranus-gemini-2026',
+    year: 2026,
+    planet: 'Uranus',
+    transitType: 'Uranus Transit',
+    title: 'Uranus in Gemini 2026',
+    dates: 'April 26, 2026 onwards (long-term)',
+    signs: ['Gemini'],
+    description:
+      'Uranus re-enters Gemini on April 26, 2026, beginning its long-term transit through the sign of the twins that lasts until 2032. Expect major breakthroughs in AI, media, and how we share information.',
     themes: [
       'communication revolution',
       'technology',
@@ -353,17 +383,43 @@ export const YEARLY_TRANSITS: YearlyTransit[] = [
     avoidList: ['perfectionism', 'over-analysis', 'criticism', 'workaholism'],
     tone: 'Practical and improving. Progress comes through routines, skill-building, health, and small changes that compound.',
   },
+  // 2028
+  {
+    id: 'saturn-taurus-2028',
+    year: 2028,
+    planet: 'Saturn',
+    transitType: 'Saturn Transit',
+    title: 'Saturn Enters Taurus 2028',
+    dates: 'April 12-14, 2028 onwards',
+    signs: ['Taurus'],
+    description:
+      'Saturn enters Taurus in April 2028, bringing lessons about finances, values, and material security. This transit teaches sustainable wealth-building and lasts until May 2030.',
+    themes: ['finances', 'values', 'security', 'sustainability'],
+    doList: [
+      'build savings',
+      'define values',
+      'create stability',
+      'invest wisely',
+    ],
+    avoidList: [
+      'overspending',
+      'stubbornness',
+      'materialism',
+      'resistance to change',
+    ],
+    tone: 'Grounding and reality-based. It is time to stabilise money, values, and long-term security through patience and structure.',
+  },
   // 2029
   {
     id: 'saturn-taurus-2029',
     year: 2029,
     planet: 'Saturn',
     transitType: 'Saturn Transit',
-    title: 'Saturn Enters Taurus 2029',
-    dates: 'Starting late 2029',
+    title: 'Saturn in Taurus 2029',
+    dates: 'All year (continuing from April 2028)',
     signs: ['Taurus'],
     description:
-      'Saturn enters Taurus in late 2029, bringing lessons about finances, values, and material security. This transit teaches sustainable wealth-building.',
+      'Saturn continues its journey through Taurus in 2029, deepening lessons about finances, values, and material security that began in April 2028.',
     themes: ['finances', 'values', 'security', 'sustainability'],
     doList: [
       'build savings',
@@ -385,10 +441,10 @@ export const YEARLY_TRANSITS: YearlyTransit[] = [
     planet: 'Saturn',
     transitType: 'Saturn Return',
     title: 'Saturn Return 2029',
-    dates: 'All year (for those born ~2000-2001)',
+    dates: 'All year (for those born ~1999-2000)',
     signs: ['Taurus'],
     description:
-      'The late 2000/2001 birth cohort hits Saturn Return as Saturn moves through Taurus, demanding a sober review of finances, values, and how secure your routines really are.',
+      'The 1999/2000 birth cohort hits Saturn Return as Saturn moves through Taurus, demanding a sober review of finances, values, and how secure your routines really are.',
     themes: ['responsibility', 'stability', 'values', 'financial maturity'],
     doList: [
       'audit your spending and savings plans',
@@ -411,10 +467,10 @@ export const YEARLY_TRANSITS: YearlyTransit[] = [
     planet: 'Saturn',
     transitType: 'Saturn Return',
     title: 'Saturn Return 2030',
-    dates: 'All year (for those born ~2001-2002)',
+    dates: 'Until May 2030 (for those born ~2000-2001)',
     signs: ['Taurus'],
     description:
-      'Saturn finishes its return for people born in 2001-2002, wrapping up the Taurus lessons about values, security, and personal worth so the next decade can start with a clear ledger.',
+      'Saturn finishes its journey through Taurus in May 2030, completing the return for people born in 2000-2001 and wrapping up lessons about values, security, and personal worth.',
     themes: ['integration', 'boundaries', 'security', 'personal worth'],
     doList: [
       'complete any commitments you promised yourself',
@@ -429,6 +485,31 @@ export const YEARLY_TRANSITS: YearlyTransit[] = [
       'underpricing the value you bring',
     ],
     tone: 'Clarifying and wrapping up. This year ties loose ends so you can enter the next Saturn cycle with confidence.',
+  },
+  {
+    id: 'saturn-gemini-2030',
+    year: 2030,
+    planet: 'Saturn',
+    transitType: 'Saturn Transit',
+    title: 'Saturn Enters Gemini 2030',
+    dates: 'May 31, 2030 onwards',
+    signs: ['Gemini'],
+    description:
+      'Saturn enters Gemini on May 31, 2030, shifting lessons to communication, learning, and mental discipline. This transit teaches structured thinking and responsible information sharing.',
+    themes: ['communication', 'learning', 'mental discipline', 'teaching'],
+    doList: [
+      'develop communication skills',
+      'commit to learning',
+      'write and teach',
+      'think before speaking',
+    ],
+    avoidList: [
+      'scattered thinking',
+      'gossip',
+      'superficial knowledge',
+      'nervous anxiety',
+    ],
+    tone: 'Focused and intellectually grounding. Saturn asks you to deepen your knowledge and communicate with integrity.',
   },
   {
     id: 'jupiter-libra-2030',

@@ -35,7 +35,7 @@ describe.skip('Auto-Tagging Integration', () => {
       });
 
       // Mock user profile query (free plan)
-      (sql as jest.Mock).mockResolvedValueOnce({
+      (sql as unknown as jest.Mock).mockResolvedValueOnce({
         rows: [
           {
             id: 'user-123',
@@ -53,7 +53,7 @@ describe.skip('Auto-Tagging Integration', () => {
       });
 
       // Mock collection insert
-      (sql as jest.Mock).mockResolvedValueOnce({
+      (sql as unknown as jest.Mock).mockResolvedValueOnce({
         rows: [
           {
             id: 'collection-123',
@@ -105,7 +105,7 @@ describe.skip('Auto-Tagging Integration', () => {
       });
 
       // Mock user profile query (Pro AI plan)
-      (sql as jest.Mock).mockResolvedValueOnce({
+      (sql as unknown as jest.Mock).mockResolvedValueOnce({
         rows: [
           {
             id: 'user-pro',
@@ -130,7 +130,7 @@ describe.skip('Auto-Tagging Integration', () => {
       });
 
       // Mock collection insert
-      (sql as jest.Mock).mockResolvedValueOnce({
+      (sql as unknown as jest.Mock).mockResolvedValueOnce({
         rows: [
           {
             id: 'collection-456',
@@ -191,7 +191,7 @@ describe.skip('Auto-Tagging Integration', () => {
       });
 
       // Mock user profile query (free plan)
-      (sql as jest.Mock).mockResolvedValueOnce({
+      (sql as unknown as jest.Mock).mockResolvedValueOnce({
         rows: [
           {
             id: 'user-free',
@@ -209,7 +209,7 @@ describe.skip('Auto-Tagging Integration', () => {
       });
 
       // Mock collection insert
-      (sql as jest.Mock).mockResolvedValueOnce({
+      (sql as unknown as jest.Mock).mockResolvedValueOnce({
         rows: [
           {
             id: 'collection-789',
@@ -259,7 +259,7 @@ describe.skip('Auto-Tagging Integration', () => {
       });
 
       // Mock user profile query (annual Pro AI plan)
-      (sql as jest.Mock).mockResolvedValueOnce({
+      (sql as unknown as jest.Mock).mockResolvedValueOnce({
         rows: [
           {
             id: 'user-annual',
@@ -284,7 +284,7 @@ describe.skip('Auto-Tagging Integration', () => {
       });
 
       // Mock collection insert
-      (sql as jest.Mock).mockResolvedValueOnce({
+      (sql as unknown as jest.Mock).mockResolvedValueOnce({
         rows: [
           {
             id: 'collection-annual',
@@ -330,7 +330,7 @@ describe.skip('Auto-Tagging Integration', () => {
       });
 
       // Mock user profile query
-      (sql as jest.Mock).mockResolvedValueOnce({
+      (sql as unknown as jest.Mock).mockResolvedValueOnce({
         rows: [
           {
             id: 'user-123',
@@ -341,7 +341,7 @@ describe.skip('Auto-Tagging Integration', () => {
       });
 
       // Mock collection insert
-      (sql as jest.Mock).mockResolvedValueOnce({
+      (sql as unknown as jest.Mock).mockResolvedValueOnce({
         rows: [
           {
             id: 'collection-other',
@@ -384,7 +384,7 @@ describe.skip('Auto-Tagging Integration', () => {
       });
 
       // Mock user profile query
-      (sql as jest.Mock).mockResolvedValueOnce({
+      (sql as unknown as jest.Mock).mockResolvedValueOnce({
         rows: [
           {
             id: 'user-123',
@@ -395,7 +395,7 @@ describe.skip('Auto-Tagging Integration', () => {
       });
 
       // Mock collection insert
-      (sql as jest.Mock).mockResolvedValueOnce({
+      (sql as unknown as jest.Mock).mockResolvedValueOnce({
         rows: [
           {
             id: 'collection-no-text',
@@ -438,7 +438,7 @@ describe.skip('Auto-Tagging Integration', () => {
         session: { id: 'session-pro' },
       });
 
-      (sql as jest.Mock).mockResolvedValueOnce({
+      (sql as unknown as jest.Mock).mockResolvedValueOnce({
         rows: [
           {
             id: 'user-pro',
@@ -455,7 +455,7 @@ describe.skip('Auto-Tagging Integration', () => {
         confidence: 0.8,
       });
 
-      (sql as jest.Mock).mockResolvedValueOnce({
+      (sql as unknown as jest.Mock).mockResolvedValueOnce({
         rows: [
           {
             id: 'collection-cost',
@@ -502,7 +502,7 @@ describe.skip('Auto-Tagging Integration', () => {
         session: { id: 'session-123' },
       });
 
-      (sql as jest.Mock).mockResolvedValueOnce({
+      (sql as unknown as jest.Mock).mockResolvedValueOnce({
         rows: [
           {
             id: 'user-123',
@@ -516,7 +516,7 @@ describe.skip('Auto-Tagging Integration', () => {
       mockDetectMoods.mockRejectedValue(new Error('Detection failed'));
 
       // Should still create entry without mood tags
-      (sql as jest.Mock).mockResolvedValueOnce({
+      (sql as unknown as jest.Mock).mockResolvedValueOnce({
         rows: [
           {
             id: 'collection-error',

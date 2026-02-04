@@ -73,6 +73,16 @@ export async function POST(request: NextRequest) {
           typeof payload?.ctaSubline === 'string'
             ? payload.ctaSubline
             : undefined,
+        abTest:
+          typeof payload?.abTest === 'string' ? payload.abTest : undefined,
+        abVariant:
+          typeof payload?.abVariant === 'string'
+            ? payload.abVariant
+            : undefined,
+        inline_style:
+          typeof payload?.inlineStyle === 'string'
+            ? payload.inlineStyle
+            : undefined,
         referrer: request.headers.get('referer') || undefined,
       },
     });

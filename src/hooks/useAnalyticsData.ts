@@ -173,6 +173,24 @@ export type CtaConversionResponse = {
   hubs: CtaConversionHub[];
 };
 
+export type CtaLocationMetric = {
+  location: string;
+  location_label: string;
+  cta_id: string;
+  total_impressions: number;
+  unique_viewers: number;
+  total_clicks: number;
+  unique_clickers: number;
+  signups_7d: number;
+  click_through_rate: number;
+  conversion_rate: number;
+};
+
+export type CtaLocationsResponse = {
+  window_days: number;
+  locations: CtaLocationMetric[];
+};
+
 export type Subscription30dResponse = {
   window_days: number;
   signups: number;
@@ -310,6 +328,7 @@ export interface AnalyticsDataState {
   grimoireHealth: GrimoireHealthResponse | null;
   conversionInfluence: ConversionInfluenceResponse | null;
   ctaConversions: CtaConversionResponse | null;
+  ctaLocations: CtaLocationsResponse | null;
   subscription30d: Subscription30dResponse | null;
   attribution: AttributionResponse | null;
   successMetrics: any | null;
@@ -388,6 +407,9 @@ export function useAnalyticsData(): AnalyticsDataState & AnalyticsDataActions {
     useState<ConversionInfluenceResponse | null>(null);
   const [ctaConversions, setCtaConversions] =
     useState<CtaConversionResponse | null>(null);
+  const [ctaLocations, setCtaLocations] = useState<CtaLocationsResponse | null>(
+    null,
+  );
   const [subscription30d, setSubscription30d] =
     useState<Subscription30dResponse | null>(null);
   const [attribution, setAttribution] = useState<AttributionResponse | null>(
@@ -487,12 +509,13 @@ export function useAnalyticsData(): AnalyticsDataState & AnalyticsDataActions {
         ),
       ]);
 
-      // Batch 3: Subscription & monetization (6 requests)
+      // Batch 3: Subscription & monetization (7 requests)
       const [
         subscription30dRes,
         subscriptionLifecycleRes,
         planBreakdownRes,
         ctaConversionsRes,
+        ctaLocationsRes,
         apiCostsRes,
         userSegmentsRes,
       ] = await Promise.all([
@@ -507,6 +530,9 @@ export function useAnalyticsData(): AnalyticsDataState & AnalyticsDataActions {
         ),
         fetch(
           `/api/admin/analytics/cta-conversions?${queryParams}${cacheBuster}`,
+        ),
+        fetch(
+          `/api/admin/analytics/cta-locations?${queryParams}${cacheBuster}`,
         ),
         fetch(`/api/admin/analytics/api-costs?${queryParams}${cacheBuster}`),
         fetch(
@@ -575,6 +601,12 @@ export function useAnalyticsData(): AnalyticsDataState & AnalyticsDataActions {
         setCtaConversions(await ctaConversionsRes.json());
       } else {
         errors.push('CTA conversions');
+      }
+
+      if (ctaLocationsRes.ok) {
+        setCtaLocations(await ctaLocationsRes.json());
+      } else {
+        errors.push('CTA locations');
       }
 
       if (subscription30dRes.ok) {
@@ -737,6 +769,7 @@ export function useAnalyticsData(): AnalyticsDataState & AnalyticsDataActions {
     grimoireHealth,
     conversionInfluence,
     ctaConversions,
+    ctaLocations,
     subscription30d,
     attribution,
     successMetrics,

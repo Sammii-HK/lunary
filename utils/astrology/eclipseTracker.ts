@@ -7,6 +7,7 @@ import {
 } from 'astronomy-engine';
 import type { BirthChartData } from './birthChart';
 import dayjs from 'dayjs';
+import { getRealPlanetaryPositions } from './astronomical-data';
 
 export type EclipseEvent = {
   type: 'solar' | 'lunar';
@@ -63,6 +64,7 @@ function eclipticToZodiac(eclipticLongitude: number): {
 /**
  * Get upcoming eclipses within the next 6 months
  * Uses astronomy-engine for accurate eclipse calculations
+ * Now with accurate zodiac positions using real planetary data
  */
 export function getUpcomingEclipses(
   startDate: Date = new Date(),
@@ -75,20 +77,21 @@ export function getUpcomingEclipses(
     // Search for solar eclipses
     let solarEclipse = SearchGlobalSolarEclipse(startDate);
     while (solarEclipse && dayjs(solarEclipse.peak.date).isBefore(endDate)) {
-      // For solar eclipses, we need to estimate the zodiac position
-      // Use a simplified approach for now (Phase 3 simplified)
-      const estimatedDegree = 0; // Placeholder
-      const estimatedSign = 'Aries'; // Placeholder
       const peakDate = solarEclipse.peak.date;
       const daysAway = dayjs(peakDate).diff(dayjs(startDate), 'day');
+
+      // Solar eclipses occur at Sun position (Sun and Moon are conjunct)
+      const positions = getRealPlanetaryPositions(peakDate);
+      const sunLongitude = positions.Sun?.longitude ?? 0;
+      const { sign, degree } = eclipticToZodiac(sunLongitude);
 
       eclipses.push({
         type: 'solar',
         kind: getEclipseKindDescription(solarEclipse.kind),
         date: peakDate,
-        degree: estimatedDegree,
-        sign: estimatedSign,
-        description: `${getEclipseKindDescription(solarEclipse.kind)} Solar Eclipse`,
+        degree,
+        sign,
+        description: `${getEclipseKindDescription(solarEclipse.kind)} Solar Eclipse in ${sign}`,
         daysAway,
         isUpcoming: daysAway >= 0 && daysAway <= months * 30,
       });
@@ -99,19 +102,21 @@ export function getUpcomingEclipses(
     // Search for lunar eclipses
     let lunarEclipse = SearchLunarEclipse(startDate);
     while (lunarEclipse && dayjs(lunarEclipse.peak.date).isBefore(endDate)) {
-      // For lunar eclipses, estimate zodiac position (simplified for Phase 3)
-      const estimatedDegree = 0; // Placeholder
-      const estimatedSign = 'Aries'; // Placeholder
       const peakDate = lunarEclipse.peak.date;
       const daysAway = dayjs(peakDate).diff(dayjs(startDate), 'day');
+
+      // Lunar eclipses occur at Moon position (opposite the Sun)
+      const positions = getRealPlanetaryPositions(peakDate);
+      const moonLongitude = positions.Moon?.longitude ?? 0;
+      const { sign, degree } = eclipticToZodiac(moonLongitude);
 
       eclipses.push({
         type: 'lunar',
         kind: getEclipseKindDescription(lunarEclipse.kind),
         date: peakDate,
-        degree: estimatedDegree,
-        sign: estimatedSign,
-        description: `${getEclipseKindDescription(lunarEclipse.kind)} Lunar Eclipse`,
+        degree,
+        sign,
+        description: `${getEclipseKindDescription(lunarEclipse.kind)} Lunar Eclipse in ${sign}`,
         daysAway,
         isUpcoming: daysAway >= 0 && daysAway <= months * 30,
       });

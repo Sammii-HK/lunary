@@ -501,6 +501,7 @@ export interface ZodiacSign {
   loveTrait: string;
   careerTrait: string;
   affirmation: string;
+  tarotCard: string;
 }
 
 export const zodiacSigns: Record<string, ZodiacSign> = {
@@ -546,6 +547,7 @@ export const zodiacSigns: Record<string, ZodiacSign> = {
     careerTrait:
       'Aries excels in leadership roles, entrepreneurship, and careers requiring initiative. They thrive in competitive environments and pioneering fields.',
     affirmation: 'I courageously lead with passion and embrace new beginnings.',
+    tarotCard: 'The Emperor',
   },
   taurus: {
     name: 'Taurus',
@@ -588,6 +590,7 @@ export const zodiacSigns: Record<string, ZodiacSign> = {
     careerTrait:
       'Taurus excels in finance, arts, culinary fields, and any career requiring patience and attention to quality. They build lasting success through steady effort.',
     affirmation: 'I build lasting abundance through patience and devotion.',
+    tarotCard: 'The Hierophant',
   },
   gemini: {
     name: 'Gemini',
@@ -630,6 +633,7 @@ export const zodiacSigns: Record<string, ZodiacSign> = {
     careerTrait:
       'Gemini excels in media, writing, teaching, sales, and any field requiring communication and adaptability. They thrive on variety and intellectual challenge.',
     affirmation: 'I embrace curiosity and express myself with clarity and wit.',
+    tarotCard: 'The Lovers',
   },
   cancer: {
     name: 'Cancer',
@@ -672,6 +676,7 @@ export const zodiacSigns: Record<string, ZodiacSign> = {
     careerTrait:
       'Cancer excels in caregiving, hospitality, real estate, and creative fields. They bring emotional intelligence and protective instincts to their work.',
     affirmation: 'I nurture with love and trust my intuitive wisdom.',
+    tarotCard: 'The Chariot',
   },
   leo: {
     name: 'Leo',
@@ -708,6 +713,7 @@ export const zodiacSigns: Record<string, ZodiacSign> = {
     careerTrait:
       'Leo excels in entertainment, leadership, creative arts, and any role that allows them to shine. They naturally inspire and motivate others.',
     affirmation: 'I shine my light confidently and inspire others with joy.',
+    tarotCard: 'Strength',
   },
   virgo: {
     name: 'Virgo',
@@ -751,6 +757,7 @@ export const zodiacSigns: Record<string, ZodiacSign> = {
       'Virgo excels in healthcare, editing, analysis, research, and any field requiring precision. They bring meticulous care and practical solutions.',
     affirmation:
       'I serve with excellence and embrace healthy self-improvement.',
+    tarotCard: 'The Hermit',
   },
   libra: {
     name: 'Libra',
@@ -793,6 +800,7 @@ export const zodiacSigns: Record<string, ZodiacSign> = {
     careerTrait:
       'Libra excels in law, diplomacy, arts, design, and any field requiring balance and beauty. They bring fairness and aesthetic sensibility.',
     affirmation: 'I create harmony and beauty in all my relationships.',
+    tarotCard: 'Justice',
   },
   scorpio: {
     name: 'Scorpio',
@@ -835,6 +843,7 @@ export const zodiacSigns: Record<string, ZodiacSign> = {
     careerTrait:
       'Scorpio excels in psychology, investigation, healing, and any field requiring depth and strategy. They bring transformative power to their work.',
     affirmation: 'I embrace transformation and the power of emotional depth.',
+    tarotCard: 'Death',
   },
   sagittarius: {
     name: 'Sagittarius',
@@ -876,6 +885,7 @@ export const zodiacSigns: Record<string, ZodiacSign> = {
     careerTrait:
       'Sagittarius excels in travel, education, publishing, and philosophy. They bring optimism and expansive vision to their work.',
     affirmation: 'I explore life with optimism and seek truth in all things.',
+    tarotCard: 'Temperance',
   },
   capricorn: {
     name: 'Capricorn',
@@ -919,6 +929,7 @@ export const zodiacSigns: Record<string, ZodiacSign> = {
       'Capricorn excels in management, government, finance, and any field requiring discipline. They naturally climb to positions of authority.',
     affirmation:
       'I achieve my goals through discipline and patient determination.',
+    tarotCard: 'The Devil',
   },
   aquarius: {
     name: 'Aquarius',
@@ -961,6 +972,7 @@ export const zodiacSigns: Record<string, ZodiacSign> = {
     careerTrait:
       'Aquarius excels in technology, science, social causes, and innovation. They bring revolutionary thinking and humanitarian vision.',
     affirmation: 'I embrace my uniqueness and work for the good of humanity.',
+    tarotCard: 'The Star',
   },
   pisces: {
     name: 'Pisces',
@@ -1003,6 +1015,7 @@ export const zodiacSigns: Record<string, ZodiacSign> = {
     careerTrait:
       'Pisces excels in arts, healing, spirituality, and creative fields. They bring imagination and compassion to their work.',
     affirmation: 'I flow with compassion and trust my intuitive creativity.',
+    tarotCard: 'The Moon',
   },
 };
 

@@ -1,157 +1,175 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { sql } from '@vercel/postgres';
 
+export interface VariantMetrics {
+  name: string;
+  impressions: number;
+  conversions: number;
+  conversionRate: number;
+}
+
 export interface ABTestResult {
   testName: string;
-  variantA: {
-    name: string;
-    impressions: number;
-    conversions: number;
-    conversionRate: number;
-  };
-  variantB: {
-    name: string;
-    impressions: number;
-    conversions: number;
-    conversionRate: number;
-  };
-  improvement: number;
+  variants: VariantMetrics[];
+  bestVariant: string | null;
+  improvement: number | null;
   confidence: number;
   isSignificant: boolean;
   recommendation: string;
+  totalImpressions: number;
+  totalConversions: number;
+}
+
+// Helper to get date cutoff based on time range
+function getDateCutoff(timeRange: string): Date {
+  const now = new Date();
+  switch (timeRange) {
+    case '7d':
+      return new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+    case '30d':
+      return new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+    case '90d':
+      return new Date(now.getTime() - 90 * 24 * 60 * 60 * 1000);
+    default:
+      return new Date(0); // Beginning of time
+  }
 }
 
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
     const timeRange = searchParams.get('timeRange') || '30d';
+    const dateCutoff = getDateCutoff(timeRange);
 
-    let dateFilter = '';
-    switch (timeRange) {
-      case '7d':
-        dateFilter = "created_at >= NOW() - INTERVAL '7 days'";
-        break;
-      case '30d':
-        dateFilter = "created_at >= NOW() - INTERVAL '30 days'";
-        break;
-      case '90d':
-        dateFilter = "created_at >= NOW() - INTERVAL '90 days'";
-        break;
-      default:
-        dateFilter = '1=1';
-    }
-
-    // Get all A/B tests from metadata
-    const abTests = await sql`
+    // Get all unique test names and variants
+    const testsAndVariants = await sql`
       SELECT DISTINCT
         metadata->>'abTest' as test_name,
         metadata->>'abVariant' as variant
       FROM conversion_events
       WHERE metadata->>'abTest' IS NOT NULL
-      AND ${(sql as any).raw(dateFilter)}
+        AND metadata->>'abVariant' IS NOT NULL
+        AND created_at >= ${dateCutoff.toISOString()}
+      ORDER BY test_name, variant
     `;
 
-    const testNames = [
-      ...new Set(abTests.rows.map((r) => r.test_name).filter(Boolean)),
-    ];
+    // Group variants by test name
+    const testVariantsMap = new Map<string, string[]>();
+    for (const row of testsAndVariants.rows) {
+      if (!row.test_name || !row.variant) continue;
+      const variants = testVariantsMap.get(row.test_name) || [];
+      variants.push(row.variant);
+      testVariantsMap.set(row.test_name, variants);
+    }
 
     const results: ABTestResult[] = [];
 
-    for (const testName of testNames) {
-      // Get impressions (app_opened or pricing_page_viewed with this test)
-      const impressionsA = await sql`
-        SELECT COUNT(DISTINCT user_id) as count
-        FROM conversion_events
-        WHERE metadata->>'abTest' = ${testName}
-        AND metadata->>'abVariant' = 'A'
-        AND event_type IN ('app_opened', 'pricing_page_viewed')
-        AND ${(sql as any).raw(dateFilter)}
-      `;
+    for (const [testName, variants] of Array.from(testVariantsMap.entries())) {
+      const variantMetrics: VariantMetrics[] = [];
 
-      const impressionsB = await sql`
-        SELECT COUNT(DISTINCT user_id) as count
-        FROM conversion_events
-        WHERE metadata->>'abTest' = ${testName}
-        AND metadata->>'abVariant' = 'B'
-        AND event_type IN ('app_opened', 'pricing_page_viewed')
-        AND ${(sql as any).raw(dateFilter)}
-      `;
+      for (const variant of variants) {
+        // Get impressions for this variant
+        const impressionsResult = await sql`
+          SELECT COUNT(DISTINCT user_id) as count
+          FROM conversion_events
+          WHERE metadata->>'abTest' = ${testName}
+            AND metadata->>'abVariant' = ${variant}
+            AND event_type IN ('app_opened', 'pricing_page_viewed')
+            AND created_at >= ${dateCutoff.toISOString()}
+        `;
 
-      // Get conversions (trial_started, subscription_started)
-      const conversionsA = await sql`
-        SELECT COUNT(DISTINCT user_id) as count
-        FROM conversion_events
-        WHERE metadata->>'abTest' = ${testName}
-        AND metadata->>'abVariant' = 'A'
-        AND event_type IN ('trial_started', 'subscription_started', 'trial_converted')
-        AND ${(sql as any).raw(dateFilter)}
-      `;
+        // Get conversions for this variant
+        const conversionsResult = await sql`
+          SELECT COUNT(DISTINCT user_id) as count
+          FROM conversion_events
+          WHERE metadata->>'abTest' = ${testName}
+            AND metadata->>'abVariant' = ${variant}
+            AND event_type IN ('trial_started', 'subscription_started', 'trial_converted')
+            AND created_at >= ${dateCutoff.toISOString()}
+        `;
 
-      const conversionsB = await sql`
-        SELECT COUNT(DISTINCT user_id) as count
-        FROM conversion_events
-        WHERE metadata->>'abTest' = ${testName}
-        AND metadata->>'abVariant' = 'B'
-        AND event_type IN ('trial_started', 'subscription_started', 'trial_converted')
-        AND ${(sql as any).raw(dateFilter)}
-      `;
+        const impressions = parseInt(impressionsResult.rows[0]?.count || '0');
+        const conversions = parseInt(conversionsResult.rows[0]?.count || '0');
+        const conversionRate =
+          impressions > 0 ? (conversions / impressions) * 100 : 0;
 
-      const impressionsA_count = parseInt(impressionsA.rows[0]?.count || '0');
-      const impressionsB_count = parseInt(impressionsB.rows[0]?.count || '0');
-      const conversionsA_count = parseInt(conversionsA.rows[0]?.count || '0');
-      const conversionsB_count = parseInt(conversionsB.rows[0]?.count || '0');
+        variantMetrics.push({
+          name: variant,
+          impressions,
+          conversions,
+          conversionRate,
+        });
+      }
 
-      const conversionRateA =
-        impressionsA_count > 0
-          ? (conversionsA_count / impressionsA_count) * 100
-          : 0;
-      const conversionRateB =
-        impressionsB_count > 0
-          ? (conversionsB_count / impressionsB_count) * 100
-          : 0;
+      // Sort variants by conversion rate (descending)
+      variantMetrics.sort((a, b) => b.conversionRate - a.conversionRate);
 
-      const improvement =
-        conversionRateA > 0
-          ? ((conversionRateB - conversionRateA) / conversionRateA) * 100
-          : conversionRateB > 0
-            ? 100
-            : 0;
-
-      // Calculate statistical significance (chi-square test simplified)
-      const confidence = calculateConfidence(
-        impressionsA_count,
-        conversionsA_count,
-        impressionsB_count,
-        conversionsB_count,
+      const totalImpressions = variantMetrics.reduce(
+        (sum, v) => sum + v.impressions,
+        0,
       );
+      const totalConversions = variantMetrics.reduce(
+        (sum, v) => sum + v.conversions,
+        0,
+      );
+
+      // Calculate improvement (best vs worst with traffic)
+      const variantsWithTraffic = variantMetrics.filter(
+        (v) => v.impressions > 0,
+      );
+      let improvement: number | null = null;
+      let bestVariant: string | null = null;
+
+      if (variantsWithTraffic.length >= 2) {
+        const best = variantsWithTraffic[0];
+        const worst = variantsWithTraffic[variantsWithTraffic.length - 1];
+        bestVariant = best.name;
+
+        if (worst.conversionRate > 0) {
+          improvement =
+            ((best.conversionRate - worst.conversionRate) /
+              worst.conversionRate) *
+            100;
+        } else if (best.conversionRate > 0) {
+          improvement = 100;
+        }
+      } else if (variantsWithTraffic.length === 1) {
+        bestVariant = variantsWithTraffic[0].name;
+      }
+
+      // Calculate confidence (pairwise between top 2 variants if available)
+      let confidence = 0;
+      if (variantsWithTraffic.length >= 2) {
+        const [first, second] = variantsWithTraffic;
+        confidence = calculateConfidence(
+          first.impressions,
+          first.conversions,
+          second.impressions,
+          second.conversions,
+        );
+      }
 
       const isSignificant = confidence >= 95;
 
       results.push({
         testName,
-        variantA: {
-          name: 'Variant A',
-          impressions: impressionsA_count,
-          conversions: conversionsA_count,
-          conversionRate: conversionRateA,
-        },
-        variantB: {
-          name: 'Variant B',
-          impressions: impressionsB_count,
-          conversions: conversionsB_count,
-          conversionRate: conversionRateB,
-        },
+        variants: variantMetrics,
+        bestVariant,
         improvement,
         confidence,
         isSignificant,
         recommendation: getRecommendation(
-          conversionRateA,
-          conversionRateB,
+          variantMetrics,
           confidence,
-          impressionsA_count + impressionsB_count,
+          totalImpressions,
         ),
+        totalImpressions,
+        totalConversions,
       });
     }
+
+    // Sort by total impressions descending (most active tests first)
+    results.sort((a, b) => b.totalImpressions - a.totalImpressions);
 
     return NextResponse.json({ tests: results });
   } catch (error) {
@@ -166,7 +184,7 @@ export async function GET(request: NextRequest) {
   }
 }
 
-// Simplified confidence calculation (chi-square approximation)
+// Simplified confidence calculation (z-test for two proportions)
 function calculateConfidence(
   n1: number,
   x1: number,
@@ -186,7 +204,7 @@ function calculateConfidence(
 
   const z = Math.abs(p2 - p1) / se;
 
-  // Z-score to confidence level (simplified)
+  // Z-score to confidence level
   if (z >= 2.576) return 99; // 99% confidence
   if (z >= 1.96) return 95; // 95% confidence
   if (z >= 1.645) return 90; // 90% confidence
@@ -196,26 +214,39 @@ function calculateConfidence(
 }
 
 function getRecommendation(
-  rateA: number,
-  rateB: number,
+  variants: VariantMetrics[],
   confidence: number,
   totalImpressions: number,
 ): string {
+  const variantsWithTraffic = variants.filter((v) => v.impressions > 0);
+
   if (totalImpressions < 100) {
-    return 'Need more data - collect at least 100 impressions per variant';
+    return 'Need more data — collect at least 100 impressions per variant';
+  }
+
+  if (variantsWithTraffic.length === 0) {
+    return 'No traffic recorded for any variant';
+  }
+
+  if (variantsWithTraffic.length === 1) {
+    return 'Only one variant has traffic — need multiple variants to compare';
   }
 
   if (confidence < 95) {
     return `Not statistically significant (${confidence.toFixed(1)}% confidence). Continue testing.`;
   }
 
-  if (rateB > rateA) {
-    const improvement = ((rateB - rateA) / rateA) * 100;
-    return `Variant B is winning! ${improvement.toFixed(1)}% improvement. Consider implementing.`;
-  } else if (rateA > rateB) {
-    const improvement = ((rateA - rateB) / rateB) * 100;
-    return `Variant A is winning! ${improvement.toFixed(1)}% improvement. Keep current version.`;
+  const [best, second] = variantsWithTraffic;
+
+  if (best.conversionRate > second.conversionRate) {
+    const improvement =
+      second.conversionRate > 0
+        ? ((best.conversionRate - second.conversionRate) /
+            second.conversionRate) *
+          100
+        : 100;
+    return `"${best.name}" is winning with ${improvement.toFixed(1)}% higher conversion. Consider implementing.`;
   }
 
-  return 'No significant difference. Both variants perform similarly.';
+  return 'No significant difference between top variants.';
 }

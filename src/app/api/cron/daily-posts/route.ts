@@ -48,6 +48,29 @@ import {
   getPlatformImageFormat,
   type ImageFormat,
 } from '@/lib/social/educational-images';
+import {
+  getEngagementHook,
+  getAspectHook,
+  isTensionAspect,
+  type HookType,
+} from '@/constants/engagement-hooks';
+import {
+  detectUpcomingSignChanges,
+  detectUpcomingRetrogradeStations,
+  detectTransitMilestones,
+  getGlobalCosmicData,
+  type SignChangeEvent,
+  type RetrogradeStationEvent,
+  type TransitMilestoneEvent,
+} from '@/lib/cosmic-snapshot/global-cache';
+import {
+  getUpcomingEclipses,
+  type EclipseEvent,
+} from '../../../../../utils/astrology/eclipseTracker';
+import {
+  aspectNatures,
+  planetKeywords,
+} from '../../../../../utils/blog/aspectInterpretations';
 
 // Track if cron is already running to prevent duplicate execution
 // Using a Map to track by date for better serverless resilience
@@ -773,24 +796,126 @@ async function runDailyPosts(dateStr: string) {
     },
   ];
 
+  // Transit post scheduling - avoid existing content slots at 12:00, 17:00, 20:00 UTC
+  // Use 07:00, 09:00, 14:00, 15:00 UTC for transit posts
+  const transitTimeSlots = [
+    { hour: 7, label: 'primary' }, // UK early morning
+    { hour: 9, label: 'secondary' }, // UK mid-morning
+    { hour: 14, label: 'tertiary' }, // UK afternoon, US East morning
+    { hour: 15, label: 'backup' }, // If many events
+  ];
+  let transitSlotIndex = 0;
+  const getTransitSchedule = () => {
+    const slot = transitTimeSlots[transitSlotIndex % transitTimeSlots.length];
+    transitSlotIndex++;
+    return new Date(
+      `${dateStr}T${String(slot.hour).padStart(2, '0')}:00:00Z`,
+    ).toISOString();
+  };
+
+  // NEW: Detect upcoming sign changes and retrograde stations (tomorrow vs today)
+  // Post BEFORE events happen to eliminate duplicates and give followers a heads-up
+  const today = new Date(dateStr);
+  const tomorrow = new Date(dateStr);
+  tomorrow.setDate(tomorrow.getDate() + 1);
+
+  // Detect retrograde/direct stations happening TOMORROW (post TODAY)
+  const upcomingStations = await detectUpcomingRetrogradeStations(
+    today,
+    tomorrow,
+  );
+
   // Add text-first transit and retrograde updates for X, Threads, and Bluesky
   const retrogradeTextPosts = buildRetrogradeTextPosts({
-    events: cosmicContent.retrogradeEvents ?? [],
+    dateStr,
+    events: upcomingStations,
     platformHashtags,
-    getSchedule: getMajorTransitSchedule,
+    getSchedule: getTransitSchedule,
+  });
+  const { ingresses, egresses } = await detectUpcomingSignChanges(
+    today,
+    tomorrow,
+  );
+
+  // Get tomorrow's positions for duration info on slow planet ingresses
+  const tomorrowData = await getGlobalCosmicData(tomorrow);
+  const tomorrowPositions = tomorrowData?.planetaryPositions;
+
+  // Build ingress posts for sign changes happening TOMORROW (posted TODAY)
+  const ingressTextPosts = buildIngressTextPosts({
+    dateStr,
+    ingressEvents: ingresses.map((event) => ({
+      ...event,
+      // Adjust messaging for "tomorrow" framing
+      name: event.name, // Already includes "tomorrow" from detectUpcomingSignChanges
+    })),
+    platformHashtags,
+    getSchedule: getTransitSchedule,
+    tomorrowPositions,
   });
 
-  const transitSummaryPost = buildTransitSummaryPost({
+  // Build egress posts (final day in sign) for sign changes happening TOMORROW
+  const egressTextPosts = buildEgressTextPosts({
     dateStr,
-    cosmicContent,
+    egressEvents: egresses,
     platformHashtags,
-    getSchedule: () => dailyTransitTextSchedule,
+    getSchedule: getTransitSchedule,
+  });
+
+  // Build supermoon posts (same day is fine for visual events)
+  const supermoonTextPosts = buildSupermoonTextPosts({
+    dateStr,
+    moonPhase: cosmicContent.astronomicalData?.moonPhase ?? {},
+    platformHashtags,
+    getSchedule: getTransitSchedule,
+  });
+
+  // Build eclipse posts (day BEFORE the eclipse)
+  const upcomingEclipses = getUpcomingEclipses(today, 1); // Check next month
+  const eclipseTextPosts = buildEclipseTextPosts({
+    dateStr,
+    eclipses: upcomingEclipses,
+    platformHashtags,
+    getSchedule: getTransitSchedule,
+  });
+
+  // Build moon phase posts (New, Full, First/Last Quarter)
+  const moonPhaseTextPosts = buildMoonPhaseTextPosts({
+    dateStr,
+    moonPhase: cosmicContent.astronomicalData?.moonPhase ?? {},
+    moonSign: cosmicContent.astronomicalData?.planets?.Moon?.sign,
+    platformHashtags,
+    getSchedule: getTransitSchedule,
+  });
+
+  // Build transit milestone posts for slow planets (halfway, 3mo, 1mo, 1wk remaining)
+  const transitMilestones = await detectTransitMilestones(today);
+  const transitMilestoneTextPosts = buildTransitMilestoneTextPosts({
+    dateStr,
+    milestones: transitMilestones,
+    platformHashtags,
+    getSchedule: getTransitSchedule,
+  });
+
+  // Build separate focused posts for significant aspects
+  const aspectSource = Array.isArray(cosmicContent.dailyAspects)
+    ? cosmicContent.dailyAspects
+    : (cosmicContent.aspectEvents ?? []);
+  const aspectTextPosts = buildAspectTextPosts({
+    dateStr,
+    aspects: aspectSource,
+    platformHashtags,
+    getSchedule: getTransitSchedule,
   });
 
   posts.push(...retrogradeTextPosts);
-  if (transitSummaryPost) {
-    posts.push(transitSummaryPost);
-  }
+  posts.push(...ingressTextPosts);
+  posts.push(...egressTextPosts);
+  posts.push(...supermoonTextPosts);
+  posts.push(...eclipseTextPosts);
+  posts.push(...moonPhaseTextPosts);
+  posts.push(...transitMilestoneTextPosts);
+  posts.push(...aspectTextPosts);
 
   const pinterestQuoteSlot = await getPinterestQuoteForDate(dateStr);
   if (pinterestQuoteSlot) {
@@ -3407,11 +3532,13 @@ function addAstrologyHashtags(text: string, baseHashtags?: string): string {
 }
 
 function buildRetrogradeTextPosts({
+  dateStr,
   events,
   getSchedule,
   platformHashtags,
 }: {
-  events: Array<any>;
+  dateStr: string;
+  events: RetrogradeStationEvent[];
   getSchedule: () => string;
   platformHashtags: Record<string, string>;
 }): DailySocialPost[] {
@@ -3434,48 +3561,78 @@ function buildRetrogradeTextPosts({
   );
 
   const posts: DailySocialPost[] = [];
-  // const cta = 'Find the full timing details with Lunary.app';
 
   for (const event of retrogradeEvents) {
     const planet = event.planet;
     if (!planet) continue;
 
-    const actionLabel =
-      event.type === 'retrograde_start'
-        ? 'stations retrograde'
-        : 'stations direct';
-    const retrogradePrefix =
-      event.type === 'retrograde_start'
-        ? 'Astrology update'
-        : 'Current astrology';
     const focus = focusMap[planet] || `${planet.toLowerCase()} energy`;
-    const reflectionLine =
-      event.type === 'retrograde_start'
-        ? getRetrogradeReflectionLine(focus, event.sign)
-        : `Momentum returns to ${focus}.`;
-    const baseMessage = `${retrogradePrefix}: ${planet} ${actionLabel} in ${event.sign}. ${reflectionLine}`;
+    const isRetrograde = event.type === 'retrograde_start';
 
-    const xContent = addRetrogradeHashtags(
-      baseMessage,
-      platformHashtags.twitter,
-    );
+    // Create seed for deterministic hook selection
+    const seed = `retrograde-${planet}-${event.type}-${dateStr}`;
+    const engagementHook = getEngagementHook('retrograde', seed);
+
+    // Threads: conversational with engagement hook, "tomorrow" framing
+    const threadsBody = isRetrograde
+      ? [
+          `${planet} stations retrograde tomorrow in ${event.sign}.`,
+          `Time to slow down and review ${focus}.`,
+          '',
+          engagementHook,
+        ].join('\n')
+      : [
+          `${planet} stations direct tomorrow in ${event.sign}.`,
+          `Momentum returns to ${focus}.`,
+          '',
+          engagementHook,
+        ].join('\n');
     const threadsContent = addRetrogradeHashtags(
-      baseMessage,
+      threadsBody,
       platformHashtags.threads,
     );
+
+    // X/Twitter: compact with CTA, "tomorrow" framing
+    const xBody = isRetrograde
+      ? [
+          `${planet} stations retrograde tomorrow.`,
+          `Time to slow down and review ${focus}.`,
+          '',
+          'lunary.app',
+        ].join('\n')
+      : [
+          `${planet} stations direct tomorrow.`,
+          `Momentum returns to ${focus}.`,
+          '',
+          'lunary.app',
+        ].join('\n');
+    const xContent = addRetrogradeHashtags(xBody, platformHashtags.twitter);
+
+    // Bluesky: informational with CTA
+    const blueskyBody = isRetrograde
+      ? [
+          `${planet} stations retrograde tomorrow in ${event.sign}.`,
+          `Time to slow down and review ${focus}.`,
+          '',
+          'Track retrogrades at lunary.app',
+        ].join('\n')
+      : [
+          `${planet} stations direct tomorrow in ${event.sign}.`,
+          `Momentum returns to ${focus}.`,
+          '',
+          'Track retrogrades at lunary.app',
+        ].join('\n');
     const blueskyContent = addRetrogradeHashtags(
-      baseMessage,
+      blueskyBody,
       platformHashtags.bluesky,
     );
 
     posts.push({
-      name: `Retrograde • ${planet} ${
-        event.type === 'retrograde_start' ? 'Begins' : 'Ends'
-      }`,
+      name: `Retrograde • ${planet} ${isRetrograde ? 'Retrograde' : 'Direct'} tomorrow`,
       content: xContent,
       platforms: ['x', 'threads', 'bluesky'],
       imageUrls: [],
-      alt: `${planet} retrograde update`,
+      alt: `${planet} ${isRetrograde ? 'retrograde' : 'direct'} station tomorrow`,
       scheduledDate: getSchedule(),
       variants: {
         threads: { content: threadsContent },
@@ -3488,122 +3645,673 @@ function buildRetrogradeTextPosts({
   return posts;
 }
 
-function buildTransitSummaryPost({
+/**
+ * Build separate posts for planet ingress events (entering new signs)
+ * One focused post per ingress event with platform-specific content
+ */
+function buildIngressTextPosts({
   dateStr,
-  cosmicContent,
+  ingressEvents,
+  platformHashtags,
+  getSchedule,
+  tomorrowPositions,
+}: {
+  dateStr: string;
+  ingressEvents: Array<any>;
+  platformHashtags: Record<string, string>;
+  getSchedule: () => string;
+  tomorrowPositions?: Record<string, any>;
+}): DailySocialPost[] {
+  const posts: DailySocialPost[] = [];
+  const events = (ingressEvents || []).filter(
+    (event) => event?.planet && event?.sign,
+  );
+
+  // Slow planets get duration info
+  const slowPlanets = ['Jupiter', 'Saturn', 'Uranus', 'Neptune', 'Pluto'];
+
+  for (const event of events) {
+    const planet = event.planet;
+    const sign = event.sign;
+    const energy = event.energy || 'fresh';
+    const previousSign = event.previousSign;
+
+    // Get duration info for slow planets from tomorrow's positions
+    let durationText = '';
+    if (slowPlanets.includes(planet) && tomorrowPositions?.[planet]?.duration) {
+      const duration = tomorrowPositions[planet].duration;
+      if (duration.totalDays) {
+        const years = Math.round(duration.totalDays / 365);
+        const months = Math.round(duration.totalDays / 30);
+        if (years >= 1) {
+          durationText = `This ~${years} year transit begins.`;
+        } else if (months >= 2) {
+          durationText = `This ~${months} month transit begins.`;
+        }
+      }
+    }
+
+    // Create seed for deterministic hook selection
+    const seed = `ingress-${planet}-${sign}-${dateStr}`;
+    const engagementHook = getEngagementHook('ingress', seed);
+
+    // Threads: conversational with engagement hook, no CTA
+    // Posts BEFORE the event - "tomorrow" framing
+    const threadsBodyParts = [
+      `${planet} enters ${sign} tomorrow.`,
+      durationText || `A shift toward ${energy} energy begins.`,
+      '',
+      engagementHook,
+    ];
+    const threadsBody = threadsBodyParts.join('\n');
+    const threadsContent = addTransitHashtags(
+      threadsBody,
+      platformHashtags.threads,
+    );
+
+    // X/Twitter: compact with CTA
+    const xBodyParts = [`${planet} enters ${sign} tomorrow.`];
+    if (durationText) {
+      xBodyParts.push(durationText);
+    } else if (previousSign) {
+      xBodyParts.push(`Moving from ${previousSign} into ${energy} energy.`);
+    } else {
+      xBodyParts.push(`A shift toward ${energy} energy begins.`);
+    }
+    xBodyParts.push('', 'lunary.app');
+    const xBody = xBodyParts.join('\n');
+    const xContent = addTransitHashtags(xBody, platformHashtags.twitter);
+
+    // Bluesky: informational with CTA
+    const blueskyBodyParts = [
+      `${planet} enters ${sign} tomorrow.`,
+      durationText || `A shift toward ${energy} energy begins.`,
+      '',
+      'Track cosmic shifts at lunary.app',
+    ];
+    const blueskyBody = blueskyBodyParts.join('\n');
+    const blueskyContent = addTransitHashtags(
+      blueskyBody,
+      platformHashtags.bluesky,
+    );
+
+    posts.push({
+      name: `Ingress • ${planet} enters ${sign} tomorrow`,
+      content: xContent,
+      platforms: ['x', 'threads', 'bluesky'],
+      imageUrls: [],
+      alt: `${planet} enters ${sign} tomorrow`,
+      scheduledDate: getSchedule(),
+      variants: {
+        threads: { content: threadsContent },
+        bluesky: { content: blueskyContent },
+        twitter: { content: xContent },
+      },
+    });
+  }
+
+  return posts;
+}
+
+/**
+ * Build separate posts for significant daily aspects
+ * Focuses on planet-to-planet connections with meaningful interpretation
+ */
+function buildAspectTextPosts({
+  dateStr,
+  aspects,
   platformHashtags,
   getSchedule,
 }: {
   dateStr: string;
-  cosmicContent: any;
+  aspects: Array<any>;
   platformHashtags: Record<string, string>;
   getSchedule: () => string;
-}): DailySocialPost | null {
-  const lines: string[] = [];
-  const leadLines: string[] = [];
-  const primaryEvent = cosmicContent.primaryEvent;
+}): DailySocialPost[] {
+  const posts: DailySocialPost[] = [];
 
-  if (primaryEvent?.name) {
-    const energyDescriptor = primaryEvent.energy?.toLowerCase();
-    const tone = energyDescriptor
-      ? `is channeling ${energyDescriptor} energy`
-      : 'is setting the tone for the day';
-    lines.push(`${primaryEvent.name} ${tone}.`);
+  // Filter valid aspects
+  const validAspects = (aspects || []).filter(
+    (aspect: any) =>
+      aspect?.planetA?.name && aspect?.planetB?.name && aspect?.aspect,
+  );
 
-    const transitIntro = energyDescriptor
-      ? `Planetary transit: ${primaryEvent.name} is channeling ${energyDescriptor} energy.`
-      : `Planetary transit: ${primaryEvent.name} is shaping the sky today.`;
-    const slowdownLine = energyDescriptor
-      ? `A time to slow down and lean into ${energyDescriptor} energy.`
-      : 'A time to slow down and observe the planetary rhythm.';
-    leadLines.push(transitIntro, slowdownLine);
+  if (validAspects.length === 0) return posts;
+
+  // Sort by priority (higher first), take top 1-2 aspects
+  const sortedAspects = [...validAspects].sort(
+    (a, b) => (b.priority || 5) - (a.priority || 5),
+  );
+  const selectedAspects = sortedAspects.slice(0, 2);
+
+  for (const aspect of selectedAspects) {
+    const planetA = aspect.planetA?.name || aspect.planetA;
+    const planetB = aspect.planetB?.name || aspect.planetB;
+    const aspectType = aspect.aspect?.toLowerCase() || 'aspect';
+    const aspectLabel =
+      aspectType.charAt(0).toUpperCase() + aspectType.slice(1);
+
+    // Get aspect nature for description
+    const aspectNature = aspectNatures[aspectType] || {
+      nature: 'connecting',
+      keyword: 'cosmic alignment',
+    };
+
+    // Get planet keywords for richer description
+    const planetAInfo = planetKeywords[planetA] || {
+      domain: planetA.toLowerCase(),
+    };
+    const planetBInfo = planetKeywords[planetB] || {
+      domain: planetB.toLowerCase(),
+    };
+
+    // Build description based on aspect type
+    const isTension = isTensionAspect(aspectType);
+    const connectionWord = isTension ? 'Tension between' : 'Connection between';
+    const description = `${connectionWord} ${planetAInfo.domain} and ${planetBInfo.domain}.`;
+
+    // Create seed for deterministic hook selection
+    const seed = `aspect-${planetA}-${aspectType}-${planetB}-${dateStr}`;
+    const engagementHook = getAspectHook(aspectType, seed);
+
+    // Threads: conversational with engagement hook, no CTA
+    const threadsBody = [
+      `${planetA} ${aspectLabel.toLowerCase()} ${planetB} today.`,
+      description,
+      '',
+      engagementHook,
+    ].join('\n');
+    const threadsContent = addTransitHashtags(
+      threadsBody,
+      platformHashtags.threads,
+    );
+
+    // X/Twitter: compact with CTA
+    const xBody = [
+      `${planetA} ${aspectLabel.toLowerCase()} ${planetB} today.`,
+      description,
+      '',
+      'lunary.app',
+    ].join('\n');
+    const xContent = addTransitHashtags(xBody, platformHashtags.twitter);
+
+    // Bluesky: informational with CTA
+    const blueskyBody = [
+      `${planetA} ${aspectLabel.toLowerCase()} ${planetB} today.`,
+      description,
+      '',
+      'lunary.app',
+    ].join('\n');
+    const blueskyContent = addTransitHashtags(
+      blueskyBody,
+      platformHashtags.bluesky,
+    );
+
+    posts.push({
+      name: `Aspect • ${planetA} ${aspectLabel} ${planetB}`,
+      content: xContent,
+      platforms: ['x', 'threads', 'bluesky'],
+      imageUrls: [],
+      alt: `${planetA} ${aspectLabel} ${planetB}`,
+      scheduledDate: getSchedule(),
+      variants: {
+        threads: { content: threadsContent },
+        bluesky: { content: blueskyContent },
+        twitter: { content: xContent },
+      },
+    });
   }
 
-  const ingressEvents = Array.isArray(cosmicContent.ingressEvents)
-    ? cosmicContent.ingressEvents
-    : [];
-  ingressEvents.slice(0, 2).forEach((event: any) => {
-    if (event?.planet && event?.sign) {
-      lines.push(
-        `${event.planet} slides into ${event.sign}, brightening ${event.sign} energy.`,
-      );
-    }
-  });
+  return posts;
+}
 
-  const aspectSource = Array.isArray(cosmicContent.dailyAspects)
-    ? cosmicContent.dailyAspects
-    : Array.isArray(cosmicContent.aspectEvents)
-      ? cosmicContent.aspectEvents
-      : [];
-  const aspectLines = aspectSource
-    .filter(
-      (aspect: any) =>
-        aspect?.planetA?.name && aspect?.planetB?.name && aspect.aspect,
-    )
-    .slice(0, 3)
-    .map(formatTransitAspectLine);
+/**
+ * Build posts for egress events (planet's final day in a sign)
+ * Framed as "final day" rather than "leaving" - posted BEFORE the change
+ */
+function buildEgressTextPosts({
+  dateStr,
+  egressEvents,
+  platformHashtags,
+  getSchedule,
+}: {
+  dateStr: string;
+  egressEvents: SignChangeEvent[];
+  platformHashtags: Record<string, string>;
+  getSchedule: () => string;
+}): DailySocialPost[] {
+  const posts: DailySocialPost[] = [];
+  const events = (egressEvents || []).filter(
+    (event) => event?.planet && event?.sign,
+  );
 
-  lines.push(...aspectLines);
-  lines.unshift(...leadLines);
+  for (const event of events) {
+    const planet = event.planet;
+    const sign = event.sign;
+    const nextSign = event.nextSign || 'a new sign';
+    const energy = event.energy || 'transitional';
 
-  if (lines.length === 0) {
-    const fallbackLine =
-      primaryEvent?.name && primaryEvent?.energy
-        ? `${primaryEvent.name} is bringing ${primaryEvent.energy.toLowerCase()} energy today.`
-        : ingressEvents[0]
-          ? `${ingressEvents[0].planet} enters ${ingressEvents[0].sign}, shifting today's themes.`
-          : aspectSource[0]
-            ? formatTransitAspectLine(aspectSource[0])
-            : 'Cosmic energies continue to shift—Lunary tracks the latest transits for you.';
+    // Create seed for deterministic hook selection
+    const seed = `egress-${planet}-${sign}-${dateStr}`;
+    const engagementHook = getEngagementHook('egress', seed);
 
-    if (fallbackLine) {
-      lines.push(fallbackLine);
-    }
+    // Threads: conversational with engagement hook
+    const threadsBody = [
+      `${planet}'s final day in ${sign}.`,
+      `A chapter of ${energy} energy is closing.`,
+      '',
+      engagementHook,
+    ].join('\n');
+    const threadsContent = addTransitHashtags(
+      threadsBody,
+      platformHashtags.threads,
+    );
+
+    // X/Twitter: compact with CTA
+    const xBody = [
+      `${planet}'s final day in ${sign}.`,
+      `Tomorrow: ${planet} enters ${nextSign}.`,
+      '',
+      'lunary.app',
+    ].join('\n');
+    const xContent = addTransitHashtags(xBody, platformHashtags.twitter);
+
+    // Bluesky: informational with CTA
+    const blueskyBody = [
+      `${planet}'s final day in ${sign}.`,
+      `A chapter of ${energy} energy is closing.`,
+      '',
+      'Track cosmic shifts at lunary.app',
+    ].join('\n');
+    const blueskyContent = addTransitHashtags(
+      blueskyBody,
+      platformHashtags.bluesky,
+    );
+
+    posts.push({
+      name: `Egress • ${planet}'s final day in ${sign}`,
+      content: xContent,
+      platforms: ['x', 'threads', 'bluesky'],
+      imageUrls: [],
+      alt: `${planet}'s final day in ${sign}`,
+      scheduledDate: getSchedule(),
+      variants: {
+        threads: { content: threadsContent },
+        bluesky: { content: blueskyContent },
+        twitter: { content: xContent },
+      },
+    });
   }
 
-  if (lines.length === 0) {
-    return null;
-  }
+  return posts;
+}
 
-  const header = `Transit snapshot • ${new Date(dateStr).toLocaleDateString(
-    'en-US',
-    {
-      weekday: 'long',
-      month: 'long',
-      day: 'numeric',
-    },
-  )}`;
-  const summaryBody = [
-    header,
+/**
+ * Build posts for supermoon events (full moon when moon is extra close)
+ * Only posts for Full Moon supermoons (the visual spectacle)
+ */
+function buildSupermoonTextPosts({
+  dateStr,
+  moonPhase,
+  platformHashtags,
+  getSchedule,
+}: {
+  dateStr: string;
+  moonPhase: {
+    name: string;
+    isSuperMoon?: boolean;
+    energy?: string;
+  };
+  platformHashtags: Record<string, string>;
+  getSchedule: () => string;
+}): DailySocialPost[] {
+  const posts: DailySocialPost[] = [];
+
+  // Only post for Full Moon supermoons
+  if (!moonPhase?.isSuperMoon) return posts;
+  const isFullMoon = moonPhase.name?.toLowerCase().includes('full');
+  if (!isFullMoon) return posts;
+
+  const seed = `supermoon-${dateStr}`;
+  const engagementHook = getEngagementHook('supermoon', seed);
+
+  // Threads: emotional and conversational
+  const threadsBody = [
+    'Supermoon tonight.',
+    'The moon is extra close, amplifying emotional intensity.',
     '',
-    ...lines,
-    '',
-    'Track every angle with Lunary',
+    engagementHook,
   ].join('\n');
-
-  const xContent = addTransitHashtags(summaryBody, platformHashtags.twitter);
   const threadsContent = addTransitHashtags(
-    summaryBody,
+    threadsBody,
     platformHashtags.threads,
   );
+
+  // X/Twitter: compact with CTA
+  const xBody = [
+    'Supermoon Full Moon tonight.',
+    'Emotions amplified. What is illuminated for you?',
+    '',
+    'lunary.app',
+  ].join('\n');
+  const xContent = addTransitHashtags(xBody, platformHashtags.twitter);
+
+  // Bluesky: informational with CTA
+  const blueskyBody = [
+    'Supermoon Full Moon tonight.',
+    'The moon is at its closest, making it appear larger and brighter.',
+    '',
+    'Track lunar events at lunary.app',
+  ].join('\n');
   const blueskyContent = addTransitHashtags(
-    summaryBody,
+    blueskyBody,
     platformHashtags.bluesky,
   );
 
-  return {
-    name: `Transit Snapshot • ${dateStr}`,
+  posts.push({
+    name: `Supermoon • Full Moon`,
     content: xContent,
     platforms: ['x', 'threads', 'bluesky'],
     imageUrls: [],
-    alt: 'Daily transit summary',
+    alt: 'Supermoon Full Moon',
     scheduledDate: getSchedule(),
     variants: {
       threads: { content: threadsContent },
       bluesky: { content: blueskyContent },
       twitter: { content: xContent },
     },
+  });
+
+  return posts;
+}
+
+/**
+ * Build posts for eclipse events
+ * Posts the DAY BEFORE the eclipse (when daysAway is between 0.5 and 1.5)
+ */
+function buildEclipseTextPosts({
+  dateStr,
+  eclipses,
+  platformHashtags,
+  getSchedule,
+}: {
+  dateStr: string;
+  eclipses: EclipseEvent[];
+  platformHashtags: Record<string, string>;
+  getSchedule: () => string;
+}): DailySocialPost[] {
+  const posts: DailySocialPost[] = [];
+
+  // Filter for eclipses happening tomorrow (daysAway ~ 1)
+  const tomorrowEclipses = (eclipses || []).filter(
+    (eclipse) => eclipse.daysAway >= 0.5 && eclipse.daysAway <= 1.5,
+  );
+
+  for (const eclipse of tomorrowEclipses) {
+    const seed = `eclipse-${eclipse.type}-${eclipse.sign}-${dateStr}`;
+    const engagementHook = getEngagementHook('eclipse', seed);
+
+    const eclipseLabel =
+      eclipse.type === 'solar' ? 'Solar Eclipse' : 'Lunar Eclipse';
+    const kindLabel = eclipse.kind || '';
+
+    // Threads: portal/transformation framing
+    const threadsBody = [
+      `${kindLabel} ${eclipseLabel} in ${eclipse.sign} tomorrow.`,
+      'A powerful reset point approaches.',
+      '',
+      engagementHook,
+    ].join('\n');
+    const threadsContent = addTransitHashtags(
+      threadsBody,
+      platformHashtags.threads,
+    );
+
+    // X/Twitter: compact with CTA
+    const xBody = [
+      `${kindLabel} ${eclipseLabel} in ${eclipse.sign} tomorrow.`,
+      'Major cosmic portal opening.',
+      '',
+      'lunary.app',
+    ].join('\n');
+    const xContent = addTransitHashtags(xBody, platformHashtags.twitter);
+
+    // Bluesky: informational with CTA
+    const blueskyBody = [
+      `${kindLabel} ${eclipseLabel} in ${eclipse.sign} tomorrow.`,
+      'Eclipse season brings fate-level shifts and new beginnings.',
+      '',
+      'Track eclipse impact at lunary.app',
+    ].join('\n');
+    const blueskyContent = addTransitHashtags(
+      blueskyBody,
+      platformHashtags.bluesky,
+    );
+
+    posts.push({
+      name: `Eclipse • ${kindLabel} ${eclipseLabel} in ${eclipse.sign}`,
+      content: xContent,
+      platforms: ['x', 'threads', 'bluesky'],
+      imageUrls: [],
+      alt: `${kindLabel} ${eclipseLabel} in ${eclipse.sign} tomorrow`,
+      scheduledDate: getSchedule(),
+      variants: {
+        threads: { content: threadsContent },
+        bluesky: { content: blueskyContent },
+        twitter: { content: xContent },
+      },
+    });
+  }
+
+  return posts;
+}
+
+/**
+ * Build posts for significant moon phases (New Moon, Full Moon, First/Last Quarter)
+ * Posts on the day of the moon phase
+ */
+function buildMoonPhaseTextPosts({
+  dateStr,
+  moonPhase,
+  moonSign,
+  platformHashtags,
+  getSchedule,
+}: {
+  dateStr: string;
+  moonPhase: {
+    name: string;
+    energy?: string;
+    isSignificant?: boolean;
+    isSuperMoon?: boolean;
   };
+  moonSign?: string;
+  platformHashtags: Record<string, string>;
+  getSchedule: () => string;
+}): DailySocialPost[] {
+  const posts: DailySocialPost[] = [];
+
+  // Only post for significant phases (New, Full, First Quarter, Last Quarter)
+  if (!moonPhase?.isSignificant) return posts;
+
+  // Skip if it's a supermoon - that gets its own post
+  if (moonPhase.isSuperMoon && moonPhase.name?.toLowerCase().includes('full')) {
+    return posts;
+  }
+
+  const phaseName = moonPhase.name || 'Moon Phase';
+  const energy = moonPhase.energy || '';
+  const signText = moonSign ? ` in ${moonSign}` : '';
+
+  // Determine hook type based on phase - use dedicated moon phase hooks
+  let hookType: HookType = 'general';
+  const phaseNameLower = phaseName.toLowerCase();
+  if (phaseNameLower.includes('new')) {
+    hookType = 'newMoon';
+  } else if (phaseNameLower.includes('full')) {
+    hookType = 'fullMoon';
+  } else if (phaseNameLower.includes('first quarter')) {
+    hookType = 'firstQuarter';
+  } else if (phaseNameLower.includes('last quarter')) {
+    hookType = 'lastQuarter';
+  }
+
+  const seed = `moon-${phaseName}-${dateStr}`;
+  const engagementHook = getEngagementHook(hookType, seed);
+
+  // Phase-specific messaging
+  let phaseDescription = '';
+  if (phaseName.toLowerCase().includes('new')) {
+    phaseDescription = 'Time for new intentions and fresh starts.';
+  } else if (phaseName.toLowerCase().includes('full')) {
+    phaseDescription = 'Time for illumination and release.';
+  } else if (phaseName.toLowerCase().includes('first quarter')) {
+    phaseDescription = 'Time for action and decision-making.';
+  } else if (phaseName.toLowerCase().includes('last quarter')) {
+    phaseDescription = 'Time for reflection and letting go.';
+  } else {
+    phaseDescription = energy;
+  }
+
+  // Threads: conversational with engagement hook
+  const threadsBody = [
+    `${phaseName}${signText} today.`,
+    phaseDescription,
+    '',
+    engagementHook,
+  ].join('\n');
+  const threadsContent = addTransitHashtags(
+    threadsBody,
+    platformHashtags.threads,
+  );
+
+  // X/Twitter: compact with CTA
+  const xBody = [
+    `${phaseName}${signText} today.`,
+    phaseDescription,
+    '',
+    'lunary.app',
+  ].join('\n');
+  const xContent = addTransitHashtags(xBody, platformHashtags.twitter);
+
+  // Bluesky: informational with CTA
+  const blueskyBody = [
+    `${phaseName}${signText} today.`,
+    phaseDescription,
+    '',
+    'Track moon phases at lunary.app',
+  ].join('\n');
+  const blueskyContent = addTransitHashtags(
+    blueskyBody,
+    platformHashtags.bluesky,
+  );
+
+  posts.push({
+    name: `Moon Phase • ${phaseName}`,
+    content: xContent,
+    platforms: ['x', 'threads', 'bluesky'],
+    imageUrls: [],
+    alt: `${phaseName}${signText}`,
+    scheduledDate: getSchedule(),
+    variants: {
+      threads: { content: threadsContent },
+      bluesky: { content: blueskyContent },
+      twitter: { content: xContent },
+    },
+  });
+
+  return posts;
+}
+
+/**
+ * Build posts for slow planet transit milestones
+ * Posts at: halfway point, 3 months remaining, 1 month remaining, 1 week remaining
+ */
+function buildTransitMilestoneTextPosts({
+  dateStr,
+  milestones,
+  platformHashtags,
+  getSchedule,
+}: {
+  dateStr: string;
+  milestones: TransitMilestoneEvent[];
+  platformHashtags: Record<string, string>;
+  getSchedule: () => string;
+}): DailySocialPost[] {
+  const posts: DailySocialPost[] = [];
+
+  const planetThemes: Record<string, string> = {
+    Jupiter: 'expansion, growth, and opportunity',
+    Saturn: 'structure, discipline, and mastery',
+    Uranus: 'innovation, awakening, and liberation',
+    Neptune: 'spirituality, imagination, and transcendence',
+    Pluto: 'transformation, power, and rebirth',
+  };
+
+  for (const milestone of milestones) {
+    const { planet, sign, milestoneLabel, remainingDays, totalDays } =
+      milestone;
+    const theme = planetThemes[planet] || `${planet.toLowerCase()} energy`;
+
+    // Create seed for deterministic hook selection
+    const seed = `milestone-${planet}-${sign}-${milestone.milestone}-${dateStr}`;
+    const engagementHook = getEngagementHook('transitMilestone', seed);
+
+    // Format duration context
+    const durationContext =
+      milestone.milestone === 'halfway'
+        ? `This ${Math.round(totalDays / 365)}-year transit is at the midpoint.`
+        : `${milestoneLabel} in this transit.`;
+
+    // Threads: reflective with engagement hook
+    const threadsBody = [
+      `${planet} in ${sign}: ${milestoneLabel}.`,
+      durationContext,
+      `Themes of ${theme} continue to unfold.`,
+      '',
+      engagementHook,
+    ].join('\n');
+    const threadsContent = addTransitHashtags(
+      threadsBody,
+      platformHashtags.threads,
+    );
+
+    // X/Twitter: compact with CTA
+    const xBody = [
+      `${planet} in ${sign}: ${milestoneLabel}.`,
+      `Themes of ${theme} continue.`,
+      '',
+      'lunary.app',
+    ].join('\n');
+    const xContent = addTransitHashtags(xBody, platformHashtags.twitter);
+
+    // Bluesky: informational with CTA
+    const blueskyBody = [
+      `${planet} in ${sign}: ${milestoneLabel}.`,
+      durationContext,
+      '',
+      'Track slow planet transits at lunary.app',
+    ].join('\n');
+    const blueskyContent = addTransitHashtags(
+      blueskyBody,
+      platformHashtags.bluesky,
+    );
+
+    posts.push({
+      name: `Transit Milestone • ${planet} in ${sign} ${milestoneLabel}`,
+      content: xContent,
+      platforms: ['x', 'threads', 'bluesky'],
+      imageUrls: [],
+      alt: `${planet} in ${sign} - ${milestoneLabel}`,
+      scheduledDate: getSchedule(),
+      variants: {
+        threads: { content: threadsContent },
+        bluesky: { content: blueskyContent },
+        twitter: { content: xContent },
+      },
+    });
+  }
+
+  return posts;
 }
 
 function formatTransitAspectLine(aspect: any): string {

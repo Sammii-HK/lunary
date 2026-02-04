@@ -19,6 +19,7 @@ const POSTHOG_TEST_MAPPING: Record<string, string> = {
   'weekly-lock-style': 'weekly_lock', // Weekly tarot lock style
   'tarot-truncation-length': 'tarot_truncation', // Tarot text truncation
   'transit-limit-test': 'transit_limit', // Free user transit limit
+  'inline-cta-style': 'inline_cta', // Inline CTA style variations on SEO pages
 };
 
 /**

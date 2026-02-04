@@ -1,30 +1,28 @@
 import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
-import Link from 'next/link';
-import { ExploreGrimoire } from '@/components/grimoire/ExploreGrimoire';
-import { Breadcrumbs } from '@/components/grimoire/Breadcrumbs';
+import { SEOContentTemplate } from '@/components/grimoire/SEOContentTemplate';
 import { CosmicConnections } from '@/components/grimoire/CosmicConnections';
-import { ArrowRight, Star, AlertTriangle, Lightbulb } from 'lucide-react';
+import { NavParamLink } from '@/components/NavParamLink';
+import { Heading } from '@/components/ui/Heading';
+import { Heart, Sparkles, Users, Star, AlertTriangle } from 'lucide-react';
 import {
   generatePlanetSignContent,
   planetDescriptions,
   signDescriptions,
 } from '@/constants/seo/planet-sign-content';
 import {
-  createArticleSchema,
-  renderJsonLd,
-  createBreadcrumbSchema,
-} from '@/lib/schema';
+  getCuratedPlacement,
+  getPlacementSEOTitle,
+  getPlacementSEODescription,
+  type CuratedPlacement,
+} from '@/lib/placements/getCuratedPlacement';
 
 // 30-day ISR revalidation
 export const revalidate = 2592000;
+
 interface PageProps {
   params: Promise<{ placement: string }>;
 }
-
-// Generate static params for all planet-sign combinations
-// Removed generateStaticParams - using pure ISR for faster builds
-// Pages are generated on-demand and cached with 30-day revalidation
 
 // Parse the placement slug to extract planet and sign
 function parsePlacement(slug: string): { planet: string; sign: string } | null {
@@ -48,22 +46,45 @@ export async function generateMetadata({
     return { title: 'Not Found' };
   }
 
+  const curated = getCuratedPlacement(placement);
   const content = generatePlanetSignContent(parsed.planet, parsed.sign);
 
+  // Use SEO-optimized title and description from curated data or fallback
+  const seoTitle = getPlacementSEOTitle(parsed.planet, parsed.sign, curated);
+  const seoDescription = getPlacementSEODescription(
+    parsed.planet,
+    parsed.sign,
+    curated,
+  );
+
+  const title = `${seoTitle} - Lunary`;
+  const description = seoDescription;
+
+  // Generate keywords based on planet and sign
+  const planetName = planetDescriptions[parsed.planet].name.toLowerCase();
+  const signName = signDescriptions[parsed.sign].name.toLowerCase();
+  const keywords = [
+    `${planetName} in ${signName}`,
+    `${planetName} ${signName}`,
+    `${planetName} in ${signName} meaning`,
+    `${planetName} in ${signName} personality`,
+    `${signName} ${planetName}`,
+  ];
+
   return {
-    title: `${content.title} - Lunary`,
-    description: content.description,
-    keywords: content.keywords,
+    title,
+    description,
+    keywords,
     openGraph: {
-      title: `${content.title} - Lunary`,
-      description: content.description,
+      title,
+      description,
       type: 'article',
       url: `https://lunary.app/grimoire/placements/${placement}`,
     },
     twitter: {
       card: 'summary',
-      title: `${content.title} - Lunary`,
-      description: content.description,
+      title,
+      description,
     },
     alternates: {
       canonical: `https://lunary.app/grimoire/placements/${placement}`,
@@ -79,11 +100,12 @@ export default async function PlacementPage({ params }: PageProps) {
     notFound();
   }
 
+  const curated = getCuratedPlacement(placement);
   const content = generatePlanetSignContent(parsed.planet, parsed.sign);
   const planetInfo = planetDescriptions[parsed.planet];
   const signInfo = signDescriptions[parsed.sign];
 
-  // Get related placements (same planet, different signs)
+  // Get related placements
   const relatedPlacements = Object.keys(signDescriptions)
     .filter((s) => s !== parsed.sign)
     .slice(0, 4)
@@ -92,8 +114,7 @@ export default async function PlacementPage({ params }: PageProps) {
       label: `${content.planet} in ${signDescriptions[s].name}`,
     }));
 
-  // Get same sign, different planets
-  const samePlaneRelated = Object.keys(planetDescriptions)
+  const samePlanetRelated = Object.keys(planetDescriptions)
     .filter((p) => p !== parsed.planet)
     .slice(0, 4)
     .map((p) => ({
@@ -101,52 +122,226 @@ export default async function PlacementPage({ params }: PageProps) {
       label: `${planetDescriptions[p].name} in ${content.sign}`,
     }));
 
-  const articleSchema = createArticleSchema({
-    headline: content.title,
-    description: content.description,
-    keywords: content.keywords,
-    url: `https://lunary.app/grimoire/placements/${placement}`,
-    datePublished: '2024-01-01',
-    dateModified: new Date().toISOString().split('T')[0],
-  });
+  // Build content based on whether we have curated data
+  const pageTitle = curated
+    ? `${content.planet} in ${curated.sign}`
+    : `${content.planet} in ${content.sign}`;
+
+  const pageSubtitle = curated
+    ? curated.dignity
+      ? `${curated.dignity} • ${signInfo.element} Sign`
+      : `${signInfo.element} Sign • ${signInfo.modality}`
+    : `${signInfo.element} Sign • ${signInfo.modality}`;
+
+  // Get intro based on available fields
+  const getIntro = (c: CuratedPlacement | null) => {
+    if (!c) return content.description;
+    // Try various intro fields in order of preference
+    const introFields = [
+      'overview',
+      'emotionalNeeds',
+      'lifeThemes',
+      'communicationStyle',
+      'actionStyle',
+    ] as const;
+    for (const field of introFields) {
+      if (field in c && typeof c[field] === 'string') {
+        return c[field] as string;
+      }
+    }
+    return content.description;
+  };
+
+  const intro = getIntro(curated);
+
+  // Generate meaning content based on planet and available fields
+  const getMeaningContent = (c: CuratedPlacement | null) => {
+    if (!c) {
+      return `### What Does ${content.planet} in ${content.sign} Mean?\n\n${content.meaning}`;
+    }
+
+    const sections: string[] = [];
+    const sign = c.sign;
+
+    // Planet-specific content sections
+    if ('loveStyle' in c) {
+      sections.push(
+        `### How ${content.planet} in ${sign} Loves\n\n${c.loveStyle}`,
+      );
+    }
+    if (
+      'whatTheyreAttractedTo' in c &&
+      Array.isArray(c.whatTheyreAttractedTo)
+    ) {
+      sections.push(
+        `### What They're Attracted To\n\n${(c.whatTheyreAttractedTo as string[]).map((item) => `- ${item}`).join('\n')}`,
+      );
+    }
+    if ('whatTheyValue' in c && Array.isArray(c.whatTheyValue)) {
+      sections.push(
+        `### What They Value\n\n${(c.whatTheyValue as string[]).map((item) => `- ${item}`).join('\n')}`,
+      );
+    }
+    if ('emotionalNeeds' in c) {
+      sections.push(`### Emotional Nature\n\n${c.emotionalNeeds}`);
+    }
+    if ('lifeThemes' in c) {
+      sections.push(`### Life Themes\n\n${c.lifeThemes}`);
+    }
+    if ('communicationStyle' in c) {
+      sections.push(`### Communication Style\n\n${c.communicationStyle}`);
+    }
+    if ('learningStyle' in c) {
+      sections.push(`### Learning Style\n\n${c.learningStyle}`);
+    }
+    if ('actionStyle' in c) {
+      sections.push(`### Action Style\n\n${c.actionStyle}`);
+    }
+    if ('driveAndMotivation' in c) {
+      sections.push(`### Drive & Motivation\n\n${c.driveAndMotivation}`);
+    }
+    if ('inRelationships' in c) {
+      sections.push(`### In Relationships\n\n${c.inRelationships}`);
+    }
+    if ('careerPaths' in c) {
+      sections.push(`### Career Paths\n\n${c.careerPaths}`);
+    }
+    if ('selfCareAdvice' in c) {
+      sections.push(`### Self-Care Advice\n\n${c.selfCareAdvice}`);
+    }
+    if ('growthPath' in c) {
+      sections.push(`### Growth Path\n\n${c.growthPath}`);
+    }
+
+    return sections.length > 0
+      ? sections.join('\n\n')
+      : `### What Does ${content.planet} in ${content.sign} Mean?\n\n${content.meaning}`;
+  };
+
+  const meaningContent = getMeaningContent(curated);
+  const strengths =
+    curated?.strengths || curated?.coreTraits || content.strengths;
+  const challenges = curated?.challenges || content.challenges;
+
+  // Generate FAQs based on available curated data
+  const generateFaqs = () => {
+    const baseFaqs = [
+      {
+        question: `What does ${content.planet} in ${content.sign} mean?`,
+        answer: intro.slice(0, 200) + (intro.length > 200 ? '...' : ''),
+      },
+      {
+        question: `What are the strengths of ${content.planet} in ${content.sign}?`,
+        answer: strengths.slice(0, 3).join(', ') + '.',
+      },
+      {
+        question: `What are challenges for ${content.planet} in ${content.sign}?`,
+        answer: challenges.slice(0, 2).join(' and ') + '.',
+      },
+    ];
+
+    if (!curated) return baseFaqs;
+
+    // Add planet-specific FAQ based on available fields
+    if ('loveStyle' in curated && typeof curated.loveStyle === 'string') {
+      baseFaqs.push({
+        question: `How does ${content.planet} in ${curated.sign} love?`,
+        answer: (curated.loveStyle as string).slice(0, 150) + '...',
+      });
+    }
+    if ('bestMatches' in curated && Array.isArray(curated.bestMatches)) {
+      baseFaqs.push({
+        question: `What are the best matches for ${content.planet} in ${curated.sign}?`,
+        answer: `Compatible with ${(curated.bestMatches as string[]).join(', ')}.`,
+      });
+    }
+    if (
+      'emotionalNeeds' in curated &&
+      typeof curated.emotionalNeeds === 'string'
+    ) {
+      baseFaqs.push({
+        question: `What does ${content.planet} in ${curated.sign} need emotionally?`,
+        answer: (curated.emotionalNeeds as string).slice(0, 150) + '...',
+      });
+    }
+    if ('careerPaths' in curated && typeof curated.careerPaths === 'string') {
+      baseFaqs.push({
+        question: `What careers suit ${content.planet} in ${curated.sign}?`,
+        answer: curated.careerPaths as string,
+      });
+    }
+
+    return baseFaqs.slice(0, 4); // Keep max 4 FAQs
+  };
+
+  const faqs = generateFaqs();
 
   return (
-    <div className='min-h-screen bg-zinc-950 text-zinc-100'>
-      {renderJsonLd(articleSchema)}
-      {renderJsonLd(
-        createBreadcrumbSchema([
-          { name: 'Grimoire', url: '/grimoire' },
-          { name: 'Placements', url: '/grimoire/placements' },
-        ]),
-      )}
-
-      <div className='max-w-4xl mx-auto px-4 py-12'>
-        <Breadcrumbs
-          items={[
-            { label: 'Grimoire', href: '/grimoire' },
-            { label: 'Placements', href: '/grimoire/placements' },
-            { label: content.title },
-          ]}
+    <SEOContentTemplate
+      title={`${pageTitle} - Lunary`}
+      h1={pageTitle}
+      subtitle={pageSubtitle}
+      description={intro}
+      keywords={[
+        `${parsed.planet} in ${parsed.sign}`,
+        `${parsed.planet} ${parsed.sign}`,
+        `${parsed.planet} in ${parsed.sign} meaning`,
+        `${parsed.sign} ${parsed.planet}`,
+        ...content.keywords,
+      ]}
+      canonicalUrl={`https://lunary.app/grimoire/placements/${placement}`}
+      breadcrumbs={[
+        { label: 'Grimoire', href: '/grimoire' },
+        { label: 'Placements', href: '/grimoire/placements' },
+        { label: pageTitle },
+      ]}
+      whatIs={{
+        question: `What does ${pageTitle} mean?`,
+        answer: intro,
+      }}
+      intro={intro}
+      tldr={
+        curated && curated.coreTraits
+          ? `${content.planet} in ${curated.sign}${curated.dignity ? ` (${curated.dignity})` : ''}: ${curated.coreTraits.slice(0, 3).join(', ')}.`
+          : `${content.planet} in ${content.sign}: ${content.strengths.slice(0, 2).join(', ')}.`
+      }
+      meaning={meaningContent}
+      howToWorkWith={
+        curated && 'growthPath' in curated
+          ? [curated.growthPath as string]
+          : curated && 'selfCareAdvice' in curated
+            ? [curated.selfCareAdvice as string]
+            : [content.advice]
+      }
+      faqs={faqs}
+      internalLinks={[
+        { text: 'All Placements', href: '/grimoire/placements' },
+        {
+          text: `About ${content.planet}`,
+          href: `/grimoire/astronomy/planets/${parsed.planet}`,
+        },
+        {
+          text: `${content.sign} Sign`,
+          href: `/grimoire/zodiac/${parsed.sign}`,
+        },
+        {
+          text: 'Birth Chart Guide',
+          href: '/grimoire/guides/birth-chart-complete-guide',
+        },
+      ]}
+      ctaText='Discover Your Placements'
+      ctaHref='/birth-chart'
+      cosmicConnections={
+        <CosmicConnections
+          entityType='placement'
+          entityKey={placement}
+          title={`${pageTitle} Cosmic Web`}
         />
-
-        {/* Header */}
-        <header className='mb-12'>
-          <div className='flex items-center gap-3 mb-4'>
-            <span className='px-3 py-1 rounded-full bg-lunary-primary-900/20 text-lunary-primary-300 text-sm'>
-              {signInfo.element} Sign
-            </span>
-            <span className='px-3 py-1 rounded-full bg-zinc-800 text-zinc-300 text-sm'>
-              {signInfo.modality}
-            </span>
-          </div>
-          <h1 className='text-4xl font-light text-zinc-100 mb-4'>
-            {content.planet} in {content.sign}
-          </h1>
-          <p className='text-lg text-zinc-400'>{content.description}</p>
-        </header>
-
-        {/* Quick Stats */}
-        <div className='grid grid-cols-2 md:grid-cols-4 gap-4 mb-12'>
+      }
+    >
+      {/* Quick Stats */}
+      <section className='mb-8'>
+        <div className='grid grid-cols-2 md:grid-cols-4 gap-4'>
           <div className='p-4 rounded-lg border border-zinc-800 bg-zinc-900/50 text-center'>
             <div className='text-2xl mb-1'>
               {signInfo.element === 'Fire'
@@ -170,221 +365,181 @@ export default async function PlacementPage({ params }: PageProps) {
             <div className='text-xs text-zinc-400'>Planet Rules</div>
             <div className='text-sm text-zinc-300'>{planetInfo.rules}</div>
           </div>
-          <div className='p-4 rounded-lg border border-zinc-800 bg-zinc-900/50 text-center'>
-            <div className='text-2xl mb-1'>♈</div>
-            <div className='text-xs text-zinc-400'>Sign Ruler</div>
-            <div className='text-sm text-zinc-300'>{signInfo.ruler}</div>
-          </div>
+          {curated?.dignity ? (
+            <div className='p-4 rounded-lg border border-zinc-800 bg-zinc-900/50 text-center'>
+              <div className='text-2xl mb-1'>✨</div>
+              <div className='text-xs text-zinc-400'>Dignity</div>
+              <div className='text-sm text-zinc-300'>{curated.dignity}</div>
+            </div>
+          ) : (
+            <div className='p-4 rounded-lg border border-zinc-800 bg-zinc-900/50 text-center'>
+              <div className='text-2xl mb-1'>♈</div>
+              <div className='text-xs text-zinc-400'>Sign Ruler</div>
+              <div className='text-sm text-zinc-300'>{signInfo.ruler}</div>
+            </div>
+          )}
         </div>
+      </section>
 
-        {/* Main Content */}
-        <article className='space-y-12'>
-          {/* Meaning Section */}
-          <section>
-            <h2 className='text-2xl font-medium text-zinc-100 mb-4'>
-              What Does {content.planet} in {content.sign} Mean?
-            </h2>
-            <div className='prose prose-invert prose-zinc max-w-none'>
-              {content.meaning.split('\n\n').map((paragraph, i) => (
-                <p key={i} className='text-zinc-300 leading-relaxed mb-4'>
-                  {paragraph}
+      {/* Compatibility (for planets with match data) */}
+      {curated &&
+        'bestMatches' in curated &&
+        Array.isArray(curated.bestMatches) && (
+          <section className='mb-8'>
+            <Heading as='h2' variant='h3'>
+              <Heart className='h-5 w-5 inline mr-2 text-lunary-rose' />
+              {content.planet} Sign Compatibility
+            </Heading>
+            <div className='grid md:grid-cols-2 gap-4 mt-4'>
+              <div className='p-5 rounded-lg border border-lunary-success-700 bg-lunary-success-950'>
+                <div className='flex items-center gap-2 mb-3'>
+                  <Sparkles className='h-4 w-4 text-lunary-success' />
+                  <span className='font-medium text-zinc-100'>
+                    Best Matches
+                  </span>
+                </div>
+                <div className='flex flex-wrap gap-2'>
+                  {(curated.bestMatches as string[]).map((match) => (
+                    <NavParamLink
+                      key={match}
+                      href={`/grimoire/placements/${parsed.planet}-in-${match.replace(`${content.planet} in `, '').toLowerCase()}`}
+                      className='px-3 py-1.5 rounded-lg bg-lunary-success-900/30 text-lunary-success-300 text-sm hover:bg-lunary-success-900/50 transition-colors'
+                    >
+                      {match}
+                    </NavParamLink>
+                  ))}
+                </div>
+              </div>
+              {'difficultMatches' in curated &&
+                Array.isArray(curated.difficultMatches) && (
+                  <div className='p-5 rounded-lg border border-lunary-accent-700 bg-lunary-accent-950'>
+                    <div className='flex items-center gap-2 mb-3'>
+                      <AlertTriangle className='h-4 w-4 text-lunary-accent' />
+                      <span className='font-medium text-zinc-100'>
+                        Challenging Matches
+                      </span>
+                    </div>
+                    <div className='flex flex-wrap gap-2'>
+                      {(curated.difficultMatches as string[]).map((match) => (
+                        <NavParamLink
+                          key={match}
+                          href={`/grimoire/placements/${parsed.planet}-in-${match.replace(`${content.planet} in `, '').toLowerCase()}`}
+                          className='px-3 py-1.5 rounded-lg bg-lunary-accent-900/30 text-lunary-accent-300 text-sm hover:bg-lunary-accent-900/50 transition-colors'
+                        >
+                          {match}
+                        </NavParamLink>
+                      ))}
+                    </div>
+                  </div>
+                )}
+            </div>
+            {curated.famousExamples && (
+              <div className='mt-4 p-4 rounded-lg border border-zinc-800 bg-zinc-900/30'>
+                <div className='flex items-center gap-2 mb-2'>
+                  <Users className='h-4 w-4 text-lunary-primary-400' />
+                  <span className='text-sm font-medium text-zinc-300'>
+                    Famous Examples
+                  </span>
+                </div>
+                <p className='text-sm text-zinc-400'>
+                  {curated.famousExamples}
                 </p>
+              </div>
+            )}
+          </section>
+        )}
+
+      {/* Famous Examples (for planets without match data) */}
+      {curated && curated.famousExamples && !('bestMatches' in curated) && (
+        <section className='mb-8'>
+          <div className='p-4 rounded-lg border border-zinc-800 bg-zinc-900/30'>
+            <div className='flex items-center gap-2 mb-2'>
+              <Users className='h-4 w-4 text-lunary-primary-400' />
+              <span className='text-sm font-medium text-zinc-300'>
+                Famous Examples
+              </span>
+            </div>
+            <p className='text-sm text-zinc-400'>{curated.famousExamples}</p>
+          </div>
+        </section>
+      )}
+
+      {/* Strengths/Core Traits */}
+      <section className='mb-8'>
+        <Heading as='h2' variant='h3'>
+          <Star className='h-5 w-5 inline mr-2 text-lunary-success' />
+          {curated?.coreTraits ? 'Core Traits' : 'Strengths'}
+        </Heading>
+        <div className='p-5 rounded-lg border border-lunary-success-700 bg-lunary-success-950 mt-4'>
+          <ul className='space-y-3'>
+            {strengths.map((item, i) => (
+              <li key={i} className='flex items-start gap-3 text-zinc-300'>
+                <span className='text-lunary-success mt-1'>✓</span>
+                {item}
+              </li>
+            ))}
+          </ul>
+        </div>
+      </section>
+
+      {/* Challenges */}
+      <section className='mb-8'>
+        <Heading as='h2' variant='h3'>
+          <AlertTriangle className='h-5 w-5 inline mr-2 text-lunary-accent' />
+          Potential Challenges
+        </Heading>
+        <div className='p-5 rounded-lg border border-lunary-accent-700 bg-lunary-accent-950 mt-4'>
+          <ul className='space-y-3'>
+            {challenges.map((item, i) => (
+              <li key={i} className='flex items-start gap-3 text-zinc-300'>
+                <span className='text-lunary-accent mt-1'>!</span>
+                {item}
+              </li>
+            ))}
+          </ul>
+        </div>
+      </section>
+
+      {/* Related Placements */}
+      <section className='mb-8'>
+        <Heading as='h2' variant='h3'>
+          Explore Related Placements
+        </Heading>
+        <div className='grid md:grid-cols-2 gap-4 mt-4'>
+          <div>
+            <h3 className='text-sm text-zinc-400 mb-3'>
+              {content.planet} in Other Signs
+            </h3>
+            <div className='flex flex-wrap gap-2'>
+              {relatedPlacements.map((p) => (
+                <NavParamLink
+                  key={p.slug}
+                  href={`/grimoire/placements/${p.slug}`}
+                  className='px-3 py-1.5 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-300 text-sm transition-colors'
+                >
+                  {p.label}
+                </NavParamLink>
               ))}
             </div>
-          </section>
-
-          {/* Strengths */}
-          <section>
-            <h2 className='text-2xl font-medium text-zinc-100 mb-4 flex items-center gap-2'>
-              <Star className='h-6 w-6 text-lunary-accent' />
-              Strengths of This Placement
-            </h2>
-            <div className='p-6 rounded-lg border border-lunary-success-700 bg-lunary-success-950'>
-              <ul className='space-y-3'>
-                {content.strengths.map((strength, i) => (
-                  <li key={i} className='flex items-start gap-3 text-zinc-300'>
-                    <span className='text-lunary-success mt-1'>✓</span>
-                    {strength}
-                  </li>
-                ))}
-              </ul>
-            </div>
-          </section>
-
-          {/* Challenges */}
-          <section>
-            <h2 className='text-2xl font-medium text-zinc-100 mb-4 flex items-center gap-2'>
-              <AlertTriangle className='h-6 w-6 text-lunary-accent' />
-              Potential Challenges
-            </h2>
-            <div className='p-6 rounded-lg border border-lunary-accent-700 bg-lunary-accent-950'>
-              <ul className='space-y-3'>
-                {content.challenges.map((challenge, i) => (
-                  <li key={i} className='flex items-start gap-3 text-zinc-300'>
-                    <span className='text-lunary-accent mt-1'>!</span>
-                    {challenge}
-                  </li>
-                ))}
-              </ul>
-            </div>
-          </section>
-
-          {/* Advice */}
-          <section>
-            <h2 className='text-2xl font-medium text-zinc-100 mb-4 flex items-center gap-2'>
-              <Lightbulb className='h-6 w-6 text-lunary-primary-400' />
-              How to Work With This Placement
-            </h2>
-            <div className='p-6 rounded-lg border border-lunary-primary-700 bg-lunary-primary-900/10'>
-              <p className='text-zinc-300 leading-relaxed'>{content.advice}</p>
-            </div>
-          </section>
-        </article>
-
-        {/* Cross-Links to Core Resources */}
-        <section className='mt-12 pt-8 border-t border-zinc-800'>
-          <h2 className='text-xl font-medium text-zinc-100 mb-6'>
-            Deep Dive Resources
-          </h2>
-          <div className='grid grid-cols-2 md:grid-cols-3 gap-3 mb-8'>
-            <Link
-              href={`/grimoire/astronomy/planets/${parsed.planet}`}
-              className='p-4 rounded-lg border border-zinc-800 bg-zinc-900/50 hover:border-lunary-primary-600 transition-colors text-center'
-            >
-              <div className='text-lg mb-1'>🪐</div>
-              <div className='text-sm text-zinc-300'>{content.planet}</div>
-              <div className='text-xs text-zinc-500'>
-                Learn about this planet
-              </div>
-            </Link>
-            <Link
-              href={`/grimoire/zodiac/${parsed.sign}`}
-              className='p-4 rounded-lg border border-zinc-800 bg-zinc-900/50 hover:border-lunary-primary-600 transition-colors text-center'
-            >
-              <div className='text-lg mb-1'>♈</div>
-              <div className='text-sm text-zinc-300'>{content.sign}</div>
-              <div className='text-xs text-zinc-500'>Explore this sign</div>
-            </Link>
-            <Link
-              href='/grimoire/houses/overview'
-              className='p-4 rounded-lg border border-zinc-800 bg-zinc-900/50 hover:border-lunary-primary-600 transition-colors text-center'
-            >
-              <div className='text-lg mb-1'>🏠</div>
-              <div className='text-sm text-zinc-300'>Houses</div>
-              <div className='text-xs text-zinc-500'>Where it manifests</div>
-            </Link>
-            <Link
-              href='/grimoire/guides/birth-chart-complete-guide'
-              className='p-4 rounded-lg border border-zinc-800 bg-zinc-900/50 hover:border-lunary-primary-600 transition-colors text-center'
-            >
-              <div className='text-lg mb-1'>📚</div>
-              <div className='text-sm text-zinc-300'>Birth Chart Guide</div>
-              <div className='text-xs text-zinc-500'>Complete guide</div>
-            </Link>
-            <Link
-              href='/grimoire/zodiac'
-              className='p-4 rounded-lg border border-zinc-800 bg-zinc-900/50 hover:border-lunary-primary-600 transition-colors text-center'
-            >
-              <div className='text-lg mb-1'>✨</div>
-              <div className='text-sm text-zinc-300'>All Zodiac Signs</div>
-              <div className='text-xs text-zinc-500'>Browse all 12 signs</div>
-            </Link>
-            <Link
-              href='/grimoire/placements'
-              className='p-4 rounded-lg border border-zinc-800 bg-zinc-900/50 hover:border-lunary-primary-600 transition-colors text-center'
-            >
-              <div className='text-lg mb-1'>🌟</div>
-              <div className='text-sm text-zinc-300'>All Placements</div>
-              <div className='text-xs text-zinc-500'>144+ combinations</div>
-            </Link>
           </div>
-        </section>
-
-        {/* Related Placements */}
-        <section className='pt-8 border-t border-zinc-800'>
-          <h2 className='text-xl font-medium text-zinc-100 mb-6'>
-            Explore Related Placements
-          </h2>
-          <div className='grid md:grid-cols-2 gap-4'>
-            <div>
-              <h3 className='text-sm text-zinc-400 mb-3'>
-                {content.planet} in Other Signs
-              </h3>
-              <div className='flex flex-wrap gap-2'>
-                {relatedPlacements.map((p) => (
-                  <Link
-                    key={p.slug}
-                    href={`/grimoire/placements/${p.slug}`}
-                    className='px-3 py-1.5 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-300 text-sm transition-colors'
-                  >
-                    {p.label}
-                  </Link>
-                ))}
-              </div>
-            </div>
-            <div>
-              <h3 className='text-sm text-zinc-400 mb-3'>
-                Other Planets in {content.sign}
-              </h3>
-              <div className='flex flex-wrap gap-2'>
-                {samePlaneRelated.map((p) => (
-                  <Link
-                    key={p.slug}
-                    href={`/grimoire/placements/${p.slug}`}
-                    className='px-3 py-1.5 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-300 text-sm transition-colors'
-                  >
-                    {p.label}
-                  </Link>
-                ))}
-              </div>
+          <div>
+            <h3 className='text-sm text-zinc-400 mb-3'>
+              Other Planets in {content.sign}
+            </h3>
+            <div className='flex flex-wrap gap-2'>
+              {samePlanetRelated.map((p) => (
+                <NavParamLink
+                  key={p.slug}
+                  href={`/grimoire/placements/${p.slug}`}
+                  className='px-3 py-1.5 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-300 text-sm transition-colors'
+                >
+                  {p.label}
+                </NavParamLink>
+              ))}
             </div>
           </div>
-        </section>
-
-        {/* Cosmic Connections */}
-        <CosmicConnections
-          entityType='placement'
-          entityKey={placement}
-          title={`${content.planet} in ${content.sign} Cosmic Web`}
-        />
-
-        {/* CTA */}
-        <section className='mt-12 text-center'>
-          <div className='p-8 rounded-lg border border-lunary-primary-700 bg-lunary-primary-900/10'>
-            <h2 className='text-xl font-medium text-zinc-100 mb-2'>
-              Discover Your Full Birth Chart
-            </h2>
-            <p className='text-zinc-400 mb-6'>
-              {content.planet} in {content.sign} is just one part of your cosmic
-              story. Get your complete birth chart analysis.
-            </p>
-            <Link
-              href='/birth-chart'
-              className='inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-lunary-primary-900/20 hover:bg-lunary-primary-900/30 border border-lunary-primary-700 text-lunary-primary-300 font-medium transition-colors'
-            >
-              View Your Birth Chart
-              <ArrowRight className='h-5 w-5' />
-            </Link>
-          </div>
-        </section>
-
-        {/* E-A-T Footer */}
-        <footer className='mt-12 pt-8 border-t border-zinc-800 text-sm text-zinc-400'>
-          <p>
-            Written by Sammii, Founder of Lunary • Last updated:{' '}
-            {new Date().toLocaleDateString('en-US', {
-              year: 'numeric',
-              month: 'long',
-              day: 'numeric',
-            })}
-          </p>
-          <p className='mt-2'>
-            Sources: Traditional astrological texts, modern psychological
-            astrology interpretations
-          </p>
-        </footer>
-        <ExploreGrimoire />
-      </div>
-    </div>
+        </div>
+      </section>
+    </SEOContentTemplate>
   );
 }

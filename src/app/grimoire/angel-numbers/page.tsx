@@ -1,7 +1,7 @@
 import { Metadata } from 'next';
 import Link from 'next/link';
 import { SEOContentTemplate } from '@/components/grimoire/SEOContentTemplate';
-import { angelNumbers } from '@/constants/grimoire/numerology-data';
+import { getAllAngelNumbers } from '@/lib/angel-numbers/getAngelNumber';
 
 // 30-day ISR revalidation
 export const revalidate = 2592000;
@@ -106,19 +106,85 @@ const numberTeasers: Record<string, string> = {
   '1818': 'Leadership, progress, and material momentum.',
   '1919': 'Closing a cycle and opening a new one.',
   '2020': 'Clear perspective and balanced direction.',
+  '1234': 'Steps in the right direction, progressive growth.',
 };
 
 export default function AngelNumbersIndexPage() {
-  const numbers = Object.keys(angelNumbers).sort(
-    (a, b) => parseInt(a) - parseInt(b),
-  );
+  const allNumbers = getAllAngelNumbers();
+  const numbers = allNumbers
+    .map((n) => n.number)
+    .sort((a, b) => parseInt(a) - parseInt(b));
 
-  const tripleNumbers = numbers.filter(
-    (n) => n.length === 3 && n[0] === n[1] && n[1] === n[2],
-  );
-  const otherNumbers = numbers.filter(
-    (n) => !(n.length === 3 && n[0] === n[1] && n[1] === n[2]),
-  );
+  // Triple repeating (111, 222, 333, etc.)
+  const tripleNumbers = allNumbers
+    .filter(
+      (n) =>
+        n.number.length === 3 &&
+        n.number[0] === n.number[1] &&
+        n.number[1] === n.number[2],
+    )
+    .sort((a, b) => parseInt(a.number) - parseInt(b.number));
+
+  // Quadruple repeating (1111, 2222, 3333, etc.)
+  const quadrupleNumbers = allNumbers
+    .filter(
+      (n) =>
+        n.number.length === 4 &&
+        n.number[0] === n.number[1] &&
+        n.number[1] === n.number[2] &&
+        n.number[2] === n.number[3],
+    )
+    .sort((a, b) => parseInt(a.number) - parseInt(b.number));
+
+  // Sequential patterns (123, 234, 345, 456, 567, 678, 789, 1234)
+  const sequentialPatterns = [
+    '123',
+    '234',
+    '345',
+    '456',
+    '567',
+    '678',
+    '789',
+    '1234',
+  ];
+  const sequentialNumbers = allNumbers
+    .filter((n) => sequentialPatterns.includes(n.number))
+    .sort((a, b) => parseInt(a.number) - parseInt(b.number));
+
+  // X0X0 patterns (1010, 2020, 3030, etc.)
+  const x0x0Numbers = allNumbers
+    .filter(
+      (n) =>
+        n.number.length === 4 &&
+        n.number[1] === '0' &&
+        n.number[3] === '0' &&
+        n.number[0] === n.number[2],
+    )
+    .sort((a, b) => parseInt(a.number) - parseInt(b.number));
+
+  // Mirror/alternating patterns (1212, 1313, 1414, 1515, 1717, 1818, 1919, 2121, 2323, etc.)
+  const mirrorNumbers = allNumbers
+    .filter(
+      (n) =>
+        n.number.length === 4 &&
+        n.number[0] === n.number[2] &&
+        n.number[1] === n.number[3] &&
+        n.number[0] !== n.number[1] &&
+        n.number[1] !== '0', // Exclude X0X0 patterns
+    )
+    .sort((a, b) => parseInt(a.number) - parseInt(b.number));
+
+  // Other patterns (1122, 1221, etc.)
+  const categorized = new Set([
+    ...tripleNumbers.map((n) => n.number),
+    ...quadrupleNumbers.map((n) => n.number),
+    ...sequentialNumbers.map((n) => n.number),
+    ...x0x0Numbers.map((n) => n.number),
+    ...mirrorNumbers.map((n) => n.number),
+  ]);
+  const otherNumbers = allNumbers
+    .filter((n) => !categorized.has(n.number))
+    .sort((a, b) => parseInt(a.number) - parseInt(b.number));
 
   return (
     <div className='p-4 md:p-6 lg:p-8 xl:p-10 min-h-full'>
@@ -192,53 +258,158 @@ export default function AngelNumbersIndexPage() {
             recognized angel numbers. Click a number to see its full meaning.
           </p>
           <div className='grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-5 gap-4'>
-            {tripleNumbers.map((num) => {
-              const data = angelNumbers[num as keyof typeof angelNumbers];
-              return (
-                <Link
-                  key={num}
-                  href={`/grimoire/angel-numbers/${num}`}
-                  className='group rounded-xl border border-zinc-800 bg-zinc-900/30 p-5 hover:bg-zinc-900/50 hover:border-lunary-primary-600 transition-all text-center'
-                >
-                  <span className='text-2xl font-light text-lunary-primary-400 group-hover:text-lunary-primary-300 transition-colors'>
-                    {num}
-                  </span>
-                  <p className='text-xs text-zinc-400 mt-2 line-clamp-2'>
-                    {numberTeasers[num] || data?.meaning}
-                  </p>
-                </Link>
-              );
-            })}
+            {tripleNumbers.map((data) => (
+              <Link
+                key={data.number}
+                href={`/grimoire/angel-numbers/${data.number}`}
+                className='group rounded-xl border border-zinc-800 bg-zinc-900/30 p-5 hover:bg-zinc-900/50 hover:border-lunary-primary-600 transition-all text-center'
+              >
+                <span className='text-2xl font-light text-lunary-primary-400 group-hover:text-lunary-primary-300 transition-colors'>
+                  {data.number}
+                </span>
+                <p className='text-xs text-zinc-400 mt-2 line-clamp-2'>
+                  {numberTeasers[data.number] || data.coreMeaning}
+                </p>
+              </Link>
+            ))}
           </div>
         </section>
+
+        {quadrupleNumbers.length > 0 && (
+          <section className='mb-12'>
+            <h2 className='text-2xl font-medium text-zinc-100 mb-6'>
+              Quadruple Number Sequences
+            </h2>
+            <p className='text-zinc-400 mb-6'>
+              Quadruple numbers (1111, 2222, etc.) amplify the energy of their
+              single digit to master levels.
+            </p>
+            <div className='grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-5 gap-4'>
+              {quadrupleNumbers.map((data) => (
+                <Link
+                  key={data.number}
+                  href={`/grimoire/angel-numbers/${data.number}`}
+                  className='group rounded-xl border border-zinc-800 bg-zinc-900/30 p-5 hover:bg-zinc-900/50 hover:border-lunary-secondary-600 transition-all text-center'
+                >
+                  <span className='text-2xl font-light text-lunary-secondary-400 group-hover:text-lunary-secondary-300 transition-colors'>
+                    {data.number}
+                  </span>
+                  <p className='text-xs text-zinc-400 mt-2 line-clamp-2'>
+                    {numberTeasers[data.number] || data.coreMeaning}
+                  </p>
+                </Link>
+              ))}
+            </div>
+          </section>
+        )}
+
+        {sequentialNumbers.length > 0 && (
+          <section className='mb-12'>
+            <h2 className='text-2xl font-medium text-zinc-100 mb-6'>
+              Sequential Patterns
+            </h2>
+            <p className='text-zinc-400 mb-6'>
+              Sequential numbers (123, 234, 345, etc.) represent step-by-step
+              progress and natural growth patterns.
+            </p>
+            <div className='grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-6 gap-3'>
+              {sequentialNumbers.map((data) => (
+                <Link
+                  key={data.number}
+                  href={`/grimoire/angel-numbers/${data.number}`}
+                  className='group rounded-lg border border-zinc-800 bg-zinc-900/30 p-4 hover:bg-zinc-900/50 hover:border-lunary-success-600 transition-all text-center'
+                >
+                  <span className='text-xl font-light text-lunary-success-400 group-hover:text-lunary-success-300 transition-colors'>
+                    {data.number}
+                  </span>
+                  <p className='text-[11px] text-zinc-400 mt-2 line-clamp-2'>
+                    {numberTeasers[data.number] || data.coreMeaning}
+                  </p>
+                </Link>
+              ))}
+            </div>
+          </section>
+        )}
+
+        {x0x0Numbers.length > 0 && (
+          <section className='mb-12'>
+            <h2 className='text-2xl font-medium text-zinc-100 mb-6'>
+              Divine Amplification Patterns
+            </h2>
+            <p className='text-zinc-400 mb-6'>
+              X0X0 patterns (1010, 2020, 3030, etc.) combine number energy with
+              zeros that amplify divine connection and infinite potential.
+            </p>
+            <div className='grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-5 gap-4'>
+              {x0x0Numbers.map((data) => (
+                <Link
+                  key={data.number}
+                  href={`/grimoire/angel-numbers/${data.number}`}
+                  className='group rounded-xl border border-zinc-800 bg-zinc-900/30 p-5 hover:bg-zinc-900/50 hover:border-lunary-accent-600 transition-all text-center'
+                >
+                  <span className='text-2xl font-light text-lunary-accent-400 group-hover:text-lunary-accent-300 transition-colors'>
+                    {data.number}
+                  </span>
+                  <p className='text-xs text-zinc-400 mt-2 line-clamp-2'>
+                    {numberTeasers[data.number] || data.coreMeaning}
+                  </p>
+                </Link>
+              ))}
+            </div>
+          </section>
+        )}
+
+        {mirrorNumbers.length > 0 && (
+          <section className='mb-12'>
+            <h2 className='text-2xl font-medium text-zinc-100 mb-6'>
+              Mirror & Alternating Patterns
+            </h2>
+            <p className='text-zinc-400 mb-6'>
+              Mirror patterns (1212, 1313, 1414, etc.) combine the energies of
+              two numbers in a balanced, repeating rhythm.
+            </p>
+            <div className='grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-6 gap-3'>
+              {mirrorNumbers.map((data) => (
+                <Link
+                  key={data.number}
+                  href={`/grimoire/angel-numbers/${data.number}`}
+                  className='group rounded-lg border border-zinc-800 bg-zinc-900/30 p-4 hover:bg-zinc-900/50 hover:border-lunary-rose-600 transition-all text-center'
+                >
+                  <span className='text-xl font-light text-lunary-rose-400 group-hover:text-lunary-rose-300 transition-colors'>
+                    {data.number}
+                  </span>
+                  <p className='text-[11px] text-zinc-400 mt-2 line-clamp-2'>
+                    {numberTeasers[data.number] || data.coreMeaning}
+                  </p>
+                </Link>
+              ))}
+            </div>
+          </section>
+        )}
 
         {otherNumbers.length > 0 && (
           <section className='mb-12'>
             <h2 className='text-2xl font-medium text-zinc-100 mb-6'>
-              Other Angel Numbers
+              Other Special Patterns
             </h2>
             <p className='text-zinc-400 mb-6'>
-              Beyond triple numbers, other repeating sequences also carry
-              spiritual messages. Click a number to see its full meaning.
+              Unique number patterns with special spiritual significance.
             </p>
             <div className='grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-6 gap-3'>
-              {otherNumbers.map((num) => {
-                const data = angelNumbers[num as keyof typeof angelNumbers];
-                return (
-                  <Link
-                    key={num}
-                    href={`/grimoire/angel-numbers/${num}`}
-                    className='group rounded-lg border border-zinc-800 bg-zinc-900/30 p-4 hover:bg-zinc-900/50 hover:border-lunary-accent-600 transition-all text-center'
-                  >
-                    <span className='text-xl font-light text-zinc-100 group-hover:text-lunary-accent-300 transition-colors'>
-                      {num}
-                    </span>
-                    <p className='text-[11px] text-zinc-400 mt-2 line-clamp-2'>
-                      {numberTeasers[num] || data?.meaning}
-                    </p>
-                  </Link>
-                );
-              })}
+              {otherNumbers.map((data) => (
+                <Link
+                  key={data.number}
+                  href={`/grimoire/angel-numbers/${data.number}`}
+                  className='group rounded-lg border border-zinc-800 bg-zinc-900/30 p-4 hover:bg-zinc-900/50 hover:border-zinc-600 transition-all text-center'
+                >
+                  <span className='text-xl font-light text-zinc-100 group-hover:text-zinc-300 transition-colors'>
+                    {data.number}
+                  </span>
+                  <p className='text-[11px] text-zinc-400 mt-2 line-clamp-2'>
+                    {numberTeasers[data.number] || data.coreMeaning}
+                  </p>
+                </Link>
+              ))}
             </div>
           </section>
         )}

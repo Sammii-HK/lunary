@@ -113,11 +113,12 @@ export function CookieConsent() {
   }, []);
 
   useEffect(() => {
-    // Don't show in demo mode
+    // Don't show in demo mode or demo-preview pages
     if (typeof window !== 'undefined') {
       const isDemoMode =
         (window as any).__LUNARY_DEMO_MODE__ === true ||
-        document.getElementById('demo-preview-container') !== null;
+        document.getElementById('demo-preview-container') !== null ||
+        window.location.pathname.startsWith('/demo-preview');
       if (isDemoMode) return;
     }
 
@@ -158,7 +159,14 @@ export function CookieConsent() {
     setIsVisible(false);
   };
 
-  if (!isVisible || pathname.startsWith('/admin') || isAdminHost) return null;
+  // Don't show on admin or demo-preview pages
+  if (
+    !isVisible ||
+    pathname.startsWith('/admin') ||
+    pathname.startsWith('/demo-preview') ||
+    isAdminHost
+  )
+    return null;
 
   return (
     <div className='fixed bottom-20 right-4 z-50 max-w-sm'>

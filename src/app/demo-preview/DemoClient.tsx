@@ -87,26 +87,34 @@ export function DemoClient() {
       import('@/app/(authenticated)/horoscope/components/HoroscopeView');
     }, 2000); // Preload after 2 seconds
 
-    // Performance tracking
+    // Performance tracking - defensive check for start mark existence
     if (typeof performance !== 'undefined') {
       performance.mark('demo-client-mounted');
-      performance.measure(
-        'demo-mount-time',
-        'demo-page-start',
-        'demo-client-mounted',
-      );
 
-      const measure = performance.getEntriesByName('demo-mount-time')[0];
-      if (measure) {
-        console.log(`[Demo Perf] Mounted in ${Math.round(measure.duration)}ms`);
+      // Only measure if the start mark exists (may not in some loading scenarios)
+      const startMarkExists =
+        performance.getEntriesByName('demo-page-start', 'mark').length > 0;
+      if (startMarkExists) {
+        performance.measure(
+          'demo-mount-time',
+          'demo-page-start',
+          'demo-client-mounted',
+        );
 
-        // Send to analytics if available
-        if (typeof window !== 'undefined' && (window as any).gtag) {
-          (window as any).gtag('event', 'timing_complete', {
-            name: 'demo_mount',
-            value: Math.round(measure.duration),
-            event_category: 'Performance',
-          });
+        const measure = performance.getEntriesByName('demo-mount-time')[0];
+        if (measure) {
+          console.log(
+            `[Demo Perf] Mounted in ${Math.round(measure.duration)}ms`,
+          );
+
+          // Send to analytics if available
+          if (typeof window !== 'undefined' && (window as any).gtag) {
+            (window as any).gtag('event', 'timing_complete', {
+              name: 'demo_mount',
+              value: Math.round(measure.duration),
+              event_category: 'Performance',
+            });
+          }
         }
       }
     }

@@ -37,17 +37,33 @@ export async function generateMetadata({
 
   const signData = zodiacSigns[signKey as keyof typeof zodiacSigns];
 
+  // Parse dates for compact format (e.g., "Oct 23 - Nov 21" from "October 23 - November 21")
+  const shortDates = signData.dates
+    .replace('January', 'Jan')
+    .replace('February', 'Feb')
+    .replace('March', 'Mar')
+    .replace('April', 'Apr')
+    .replace('May', 'May')
+    .replace('June', 'Jun')
+    .replace('July', 'Jul')
+    .replace('August', 'Aug')
+    .replace('September', 'Sep')
+    .replace('October', 'Oct')
+    .replace('November', 'Nov')
+    .replace('December', 'Dec');
+
   return createGrimoireMetadata({
-    title: `${signData.name} Dates (${signData.dates}) | Traits & Meaning - Lunary`,
-    description: `${signData.name} dates: ${signData.dates}. ${signData.element} sign known for ${signData.mysticalProperties.split('.')[0].toLowerCase()}. Complete guide to ${signData.name} traits, compatibility & horoscope.`,
+    title: `${signData.name} Zodiac Sign: Dates, Traits & Compatibility (${shortDates})`,
+    description: `Complete ${signData.name} guide: personality traits, love compatibility, career strengths, and horoscope. Discover the ${signData.element.toLowerCase()} sign's true nature.`,
     keywords: [
-      `${signData.name} dates`,
-      `${signData.name.toLowerCase()} dates`,
-      `when is ${signData.name.toLowerCase()}`,
       `${signData.name} zodiac sign`,
-      `${signData.name} traits`,
-      `${signData.name} horoscope`,
+      `${signData.name} dates`,
+      `${signData.name.toLowerCase()} traits`,
+      `${signData.name.toLowerCase()} compatibility`,
+      `${signData.name.toLowerCase()} horoscope`,
+      `when is ${signData.name.toLowerCase()}`,
       `${signData.element} sign`,
+      `${signData.name.toLowerCase()} personality`,
     ],
     url: `https://lunary.app/grimoire/zodiac/${sign}`,
     ogImagePath: '/api/og/grimoire/zodiac',
@@ -222,10 +238,10 @@ Spiritually, ${signData.name} teaches lessons about ${signData.element.toLowerCa
         ]}
         astrologyCorrespondences={`Element: ${signData.element}
 Quality: ${quality}
-Ruling Planet: (varies by sign)
+Ruling Planet: ${signData.rulingPlanet}
 Symbol: ${unicodeSymbol}
 Dates: ${signData.dates}
-Season: (varies by sign)`}
+Tarot Card: ${signData.tarotCard}`}
         relatedItems={[
           ...getEntityRelationships('zodiac', signKey)
             .slice(0, 5)
@@ -234,6 +250,11 @@ Season: (varies by sign)`}
               href: rel.url,
               type: rel.type.charAt(0).toUpperCase() + rel.type.slice(1),
             })),
+          {
+            name: signData.tarotCard,
+            href: `/grimoire/tarot/${signData.tarotCard.toLowerCase().replace(/\s+/g, '-')}`,
+            type: 'Tarot',
+          },
           {
             name: 'Birth Chart',
             href: '/grimoire/birth-chart',
