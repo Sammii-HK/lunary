@@ -8,8 +8,12 @@
 export {
   widgetService,
   isNativePlatform,
-  type LunaryWidgetData,
-  type MoonWidgetData,
-  type TransitWidgetData,
-  type CardWidgetData,
+  type WidgetData,
+  type MoonData,
+  type TransitData,
+  type CardData,
 } from './widget-service';
+
+export { hapticService } from './haptic-service';
+export { shareService } from './share-service';
+export { offlineService } from './offline-service';
