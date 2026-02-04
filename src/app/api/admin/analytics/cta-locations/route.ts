@@ -38,7 +38,8 @@ export async function GET(request: NextRequest) {
             created_at,
             user_id,
             anonymous_id,
-            COALESCE(metadata->>'cta_location', 'unknown') AS location
+            COALESCE(metadata->>'cta_location', 'unknown') AS location,
+            COALESCE(metadata->>'cta_id', 'unknown') AS cta_id
           FROM conversion_events
           WHERE event_type = 'cta_impression'
             AND created_at >= $1
@@ -59,10 +60,11 @@ export async function GET(request: NextRequest) {
         impression_counts AS (
           SELECT
             location,
+            cta_id,
             COUNT(*) AS total_impressions,
             COUNT(DISTINCT COALESCE(user_id::text, anonymous_id)) AS unique_viewers
           FROM impressions
-          GROUP BY location
+          GROUP BY location, cta_id
         )
         SELECT
           clicks.location AS location,
@@ -73,7 +75,7 @@ export async function GET(request: NextRequest) {
           COALESCE(ic.total_impressions, 0) AS total_impressions,
           COALESCE(ic.unique_viewers, 0) AS unique_viewers
         FROM clicks
-        LEFT JOIN impression_counts ic ON ic.location = clicks.location
+        LEFT JOIN impression_counts ic ON ic.location = clicks.location AND ic.cta_id = clicks.cta_id
         LEFT JOIN LATERAL (
           SELECT s.user_id
           FROM signups s

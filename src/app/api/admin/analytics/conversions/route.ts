@@ -222,7 +222,7 @@ export async function GET(request: NextRequest) {
     const freeUsers = cohortUserIds.length;
 
     // 2. Of the cohort, count how many EVER started a trial (even after the range)
-    // Match using user: prefix or linked anonymous_id
+    // Match using user: prefix, raw user_id, or linked anonymous_id
     const trialUsersResult =
       cohortUserIds.length > 0
         ? await sql.query(
@@ -237,6 +237,7 @@ export async function GET(request: NextRequest) {
               WHERE ce.event_type = 'trial_started'
                 AND (
                   ce.user_id = 'user:' || u.id
+                  OR ce.user_id = u.id
                   OR (
                     ce.anonymous_id IS NOT NULL
                     AND EXISTS (
@@ -257,7 +258,7 @@ export async function GET(request: NextRequest) {
               SELECT 1
               FROM conversion_events ce
               WHERE ce.event_type = 'trial_started'
-                AND ce.user_id = 'user:' || u.id
+                AND (ce.user_id = 'user:' || u.id OR ce.user_id = u.id)
             )
         `,
             [cohortUserIds],
@@ -266,6 +267,7 @@ export async function GET(request: NextRequest) {
     const trialUsers = Number(trialUsersResult.rows[0]?.count || 0);
 
     // 3. Of the cohort, count how many EVER became paid (even after the range)
+    // Handle both user_id formats: 'user:xxx' (prefixed) and 'xxx' (raw)
     const paidUsersResult =
       cohortUserIds.length > 0
         ? await sql.query(
@@ -280,6 +282,7 @@ export async function GET(request: NextRequest) {
               WHERE ce.event_type IN ('subscription_started', 'trial_converted')
                 AND (
                   ce.user_id = 'user:' || u.id
+                  OR ce.user_id = u.id
                   OR (
                     ce.anonymous_id IS NOT NULL
                     AND EXISTS (
@@ -300,7 +303,7 @@ export async function GET(request: NextRequest) {
               SELECT 1
               FROM conversion_events ce
               WHERE ce.event_type IN ('subscription_started', 'trial_converted')
-                AND ce.user_id = 'user:' || u.id
+                AND (ce.user_id = 'user:' || u.id OR ce.user_id = u.id)
             )
         `,
             [cohortUserIds],

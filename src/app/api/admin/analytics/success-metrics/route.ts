@@ -519,59 +519,64 @@ export async function GET(request: NextRequest) {
     const arpuChange = prevArpu > 0 ? ((arpu - prevArpu) / prevArpu) * 100 : 0;
 
     // 6d. Trial Conversion Rate (trial_started → trial_converted)
-    const trialStartedResult = await sql`
-      SELECT COUNT(DISTINCT user_id) AS count
-      FROM conversion_events
-      WHERE event_type = 'trial_started'
-        AND created_at BETWEEN ${formatTimestamp(range.start)} AND ${formatTimestamp(range.end)}
-        AND (user_email IS NULL OR (user_email NOT LIKE ${TEST_EMAIL_PATTERN} AND user_email != ${TEST_EMAIL_EXACT}))
+    // Cohort-based: Only count conversions from trials that started in the range
+    const trialConversionResult = await sql`
+      WITH trials_in_range AS (
+        SELECT DISTINCT user_id, MIN(created_at) AS trial_start
+        FROM conversion_events
+        WHERE event_type = 'trial_started'
+          AND created_at BETWEEN ${formatTimestamp(range.start)} AND ${formatTimestamp(range.end)}
+          AND (user_email IS NULL OR (user_email NOT LIKE ${TEST_EMAIL_PATTERN} AND user_email != ${TEST_EMAIL_EXACT}))
+        GROUP BY user_id
+      ),
+      conversions_from_range_trials AS (
+        SELECT DISTINCT ce.user_id
+        FROM conversion_events ce
+        INNER JOIN trials_in_range t ON ce.user_id = t.user_id
+        WHERE ce.event_type IN ('trial_converted', 'subscription_started')
+          AND ce.created_at > t.trial_start
+          AND (ce.user_email IS NULL OR (ce.user_email NOT LIKE ${TEST_EMAIL_PATTERN} AND ce.user_email != ${TEST_EMAIL_EXACT}))
+      )
+      SELECT
+        (SELECT COUNT(*) FROM trials_in_range) AS trial_started,
+        (SELECT COUNT(*) FROM conversions_from_range_trials) AS trial_converted
     `;
-    const trialStarted = Number(trialStartedResult.rows[0]?.count || 0);
-
-    const trialConvertedResult = await sql`
-      SELECT COUNT(DISTINCT user_id) AS count
-      FROM conversion_events
-      WHERE event_type IN ('trial_converted', 'subscription_started')
-        AND created_at BETWEEN ${formatTimestamp(range.start)} AND ${formatTimestamp(range.end)}
-        AND (user_email IS NULL OR (user_email NOT LIKE ${TEST_EMAIL_PATTERN} AND user_email != ${TEST_EMAIL_EXACT}))
-        AND EXISTS (
-          SELECT 1 FROM conversion_events ce2
-          WHERE ce2.user_id = conversion_events.user_id
-            AND ce2.event_type = 'trial_started'
-            AND ce2.created_at < conversion_events.created_at
-            AND ce2.created_at BETWEEN ${formatTimestamp(range.start)} AND ${formatTimestamp(range.end)}
-        )
-    `;
-    const trialConverted = Number(trialConvertedResult.rows[0]?.count || 0);
+    const trialStarted = Number(
+      trialConversionResult.rows[0]?.trial_started || 0,
+    );
+    const trialConverted = Number(
+      trialConversionResult.rows[0]?.trial_converted || 0,
+    );
     const trialConversionRate =
       trialStarted > 0 ? (trialConverted / trialStarted) * 100 : 0;
 
-    // Previous period trial conversion rate
-    const prevTrialStartedResult = await sql`
-      SELECT COUNT(DISTINCT user_id) AS count
-      FROM conversion_events
-      WHERE event_type = 'trial_started'
-        AND created_at BETWEEN ${formatTimestamp(prevRangeStart)} AND ${formatTimestamp(prevRangeEnd)}
-        AND (user_email IS NULL OR (user_email NOT LIKE ${TEST_EMAIL_PATTERN} AND user_email != ${TEST_EMAIL_EXACT}))
+    // Previous period trial conversion rate (cohort-based)
+    const prevTrialConversionResult = await sql`
+      WITH trials_in_range AS (
+        SELECT DISTINCT user_id, MIN(created_at) AS trial_start
+        FROM conversion_events
+        WHERE event_type = 'trial_started'
+          AND created_at BETWEEN ${formatTimestamp(prevRangeStart)} AND ${formatTimestamp(prevRangeEnd)}
+          AND (user_email IS NULL OR (user_email NOT LIKE ${TEST_EMAIL_PATTERN} AND user_email != ${TEST_EMAIL_EXACT}))
+        GROUP BY user_id
+      ),
+      conversions_from_range_trials AS (
+        SELECT DISTINCT ce.user_id
+        FROM conversion_events ce
+        INNER JOIN trials_in_range t ON ce.user_id = t.user_id
+        WHERE ce.event_type IN ('trial_converted', 'subscription_started')
+          AND ce.created_at > t.trial_start
+          AND (ce.user_email IS NULL OR (ce.user_email NOT LIKE ${TEST_EMAIL_PATTERN} AND ce.user_email != ${TEST_EMAIL_EXACT}))
+      )
+      SELECT
+        (SELECT COUNT(*) FROM trials_in_range) AS trial_started,
+        (SELECT COUNT(*) FROM conversions_from_range_trials) AS trial_converted
     `;
-    const prevTrialStarted = Number(prevTrialStartedResult.rows[0]?.count || 0);
-
-    const prevTrialConvertedResult = await sql`
-      SELECT COUNT(DISTINCT user_id) AS count
-      FROM conversion_events
-      WHERE event_type IN ('trial_converted', 'subscription_started')
-        AND created_at BETWEEN ${formatTimestamp(prevRangeStart)} AND ${formatTimestamp(prevRangeEnd)}
-        AND (user_email IS NULL OR (user_email NOT LIKE ${TEST_EMAIL_PATTERN} AND user_email != ${TEST_EMAIL_EXACT}))
-        AND EXISTS (
-          SELECT 1 FROM conversion_events ce2
-          WHERE ce2.user_id = conversion_events.user_id
-            AND ce2.event_type = 'trial_started'
-            AND ce2.created_at < conversion_events.created_at
-            AND ce2.created_at BETWEEN ${formatTimestamp(prevRangeStart)} AND ${formatTimestamp(prevRangeEnd)}
-        )
-    `;
+    const prevTrialStarted = Number(
+      prevTrialConversionResult.rows[0]?.trial_started || 0,
+    );
     const prevTrialConverted = Number(
-      prevTrialConvertedResult.rows[0]?.count || 0,
+      prevTrialConversionResult.rows[0]?.trial_converted || 0,
     );
     const prevTrialConversionRate =
       prevTrialStarted > 0 ? (prevTrialConverted / prevTrialStarted) * 100 : 0;
