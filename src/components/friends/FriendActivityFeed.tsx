@@ -8,6 +8,7 @@ import { formatDistanceToNow } from 'date-fns';
 import { cn } from '@/lib/utils';
 
 interface FriendActivity {
+  connectionId: string;
   friendId: string;
   name: string;
   avatar: string | null;
@@ -57,7 +58,7 @@ function FriendRow({
   onRemove,
 }: {
   friend: FriendActivity;
-  onRemove: (id: string) => void;
+  onRemove: (connectionId: string) => void;
 }) {
   const [showDelete, setShowDelete] = useState(false);
   const [swiped, setSwiped] = useState(false);
@@ -89,8 +90,9 @@ function FriendRow({
       onTouchEnd={handleTouchEnd}
     >
       <Link
-        href={`/profile/friends/${friend.friendId}`}
+        href={`/profile/friends/${friend.connectionId}`}
         className='flex items-center justify-between p-2.5 rounded-lg hover:bg-zinc-800/50 transition-colors'
+        data-testid='friend-activity-link'
       >
         <div className='flex items-center gap-2.5 min-w-0'>
           {friend.avatar ? (
@@ -157,9 +159,10 @@ function FriendRow({
             e.preventDefault();
             e.stopPropagation();
             setSwiped(false);
-            onRemove(friend.friendId);
+            onRemove(friend.connectionId);
           }}
           className='absolute right-1 top-1/2 -translate-y-1/2 p-2 rounded-lg bg-zinc-800 hover:bg-red-900/60 text-zinc-500 hover:text-red-400 transition-colors'
+          data-testid='remove-friend'
         >
           <Trash2 className='w-3.5 h-3.5' />
         </button>
@@ -197,16 +200,16 @@ export function FriendActivityFeed() {
     fetchActivity();
   }, []);
 
-  const handleRemoveFriend = async (friendId: string) => {
+  const handleRemoveFriend = async (connectionId: string) => {
     if (!data) return;
     // Optimistic removal
     setData({
       ...data,
-      friends: data.friends.filter((f) => f.friendId !== friendId),
+      friends: data.friends.filter((f) => f.connectionId !== connectionId),
     });
 
     try {
-      const response = await fetch(`/api/friends/${friendId}`, {
+      const response = await fetch(`/api/friends/${connectionId}`, {
         method: 'DELETE',
         credentials: 'include',
       });
