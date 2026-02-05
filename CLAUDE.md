@@ -23,6 +23,29 @@ Before adding a new package, check if we already have a solution:
 | Validation    | `zod`                      | yup, joi             |
 | AI/LLM        | `ai` (Vercel AI SDK)       | direct API calls     |
 
+## Use Existing UI Components
+
+Always use existing UI components from `src/components/ui/` instead of raw HTML:
+
+| Element  | Use                                      | Don't use                  |
+| -------- | ---------------------------------------- | -------------------------- |
+| Headings | `<Heading as="h1" variant="h1">`         | `<h1 className="...">`     |
+| Buttons  | `<Button>` from `@/components/ui/button` | `<button className="...">` |
+| Cards    | Check `src/components/ui/` first         | Custom card divs           |
+| Forms    | Existing form components                 | Raw input elements         |
+
+The `Heading` component ensures consistent typography across the app:
+
+```tsx
+import { Heading } from '@/components/ui/Heading';
+
+<Heading as="h1" variant="h1">Page Title</Heading>
+<Heading as="h2" variant="h2">Section Title</Heading>
+<Heading as="h3" variant="h3" className="text-lunary-primary-300">Styled Heading</Heading>
+```
+
+**Don't override default component styles** unless there's a specific design reason. The components are designed for consistency - adding custom classes like `font-light` or `text-3xl` to a `Heading` defeats the purpose of having a design system.
+
 ## Git Workflow
 
 - **Branch naming**: `feat/`, `fix/`, `chore/`, `refactor/`
@@ -95,6 +118,7 @@ src/
 - **Components**: Prefer function components with explicit prop types
 - **Exports**: Use named exports, barrel files (`index.ts`) for component directories
 - **Styling**: Tailwind CSS, use `cn()` for conditional classes
+- **Colors**: Use brand colors (`lunary-primary`, `lunary-secondary`, `lunary-accent`, `lunary-success`, `lunary-rose`) not basic Tailwind colors (`blue`, `green`, `red`)
 - **Data handling**: Use optional chaining (`?.`) and nullish coalescing (`?? []`) for safety
 
 ## Testing
