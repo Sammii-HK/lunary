@@ -220,6 +220,7 @@ export const DailyCardPreview = () => {
       <Link
         href='/tarot'
         className='block py-3 px-4 bg-lunary-bg border border-zinc-800/50 rounded-md hover:border-lunary-primary-700/50 transition-colors group h-full'
+        data-testid='tarot-daily-card'
       >
         <div className='flex items-start justify-between gap-3 h-full'>
           <div className='flex-1 min-w-0 h-full justify-between flex flex-col'>
@@ -297,6 +298,7 @@ export const DailyCardPreview = () => {
     <Link
       href='/tarot'
       className='block py-3 px-4 bg-lunary-bg border border-zinc-800/50 rounded-md hover:border-lunary-primary-700/50 transition-colors group h-full'
+      data-testid='tarot-daily-card'
     >
       <div className='flex items-start justify-between gap-3'>
         <div className='flex-1 min-w-0'>

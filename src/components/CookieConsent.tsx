@@ -187,6 +187,8 @@ export function CookieConsent() {
               </div>
               <div className='flex gap-2'>
                 <button
+                  aria-label='Accept all cookies'
+                  data-testid='accept-all-cookies'
                   onClick={handleAcceptAll}
                   className='flex-1 rounded-lg bg-lunary-primary hover:bg-lunary-primary-400 text-white text-xs font-medium py-2 px-3 transition-colors'
                 >

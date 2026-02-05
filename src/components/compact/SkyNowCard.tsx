@@ -385,6 +385,8 @@ export const SkyNowCard = ({ isExpanded, onToggle }: SkyNowCardProps = {}) => {
             <div
               key={planet.body}
               className='flex flex-col items-center justify-center gap-0'
+              data-testid='planet-item'
+              data-planet={planet.body}
             >
               <span
                 className={`font-astro text-base ${planet.retrograde ? 'text-lunary-error-300' : 'text-zinc-300'}`}
@@ -407,7 +409,7 @@ export const SkyNowCard = ({ isExpanded, onToggle }: SkyNowCardProps = {}) => {
   );
 
   const expanded = (
-    <div className='pt-3 space-y-4'>
+    <div className='pt-3 space-y-4' data-testid='sky-now-expand'>
       <div className='space-y-2'>
         {planets.map((planet) => {
           const normalizedSign = normalizeSignName(planet.sign);
@@ -415,6 +417,8 @@ export const SkyNowCard = ({ isExpanded, onToggle }: SkyNowCardProps = {}) => {
             <div
               key={planet.body}
               className={`py-2 border-b border-zinc-800/30 last:border-0 ${planet.retrograde ? 'text-lunary-error-200' : ''}`}
+              data-testid='planet-item'
+              data-planet={planet.body}
             >
               <div className='flex items-baseline justify-between gap-2'>
                 <div className='flex items-baseline gap-2'>
@@ -466,6 +470,7 @@ export const SkyNowCard = ({ isExpanded, onToggle }: SkyNowCardProps = {}) => {
         autoExpandOnDesktop
         isExpanded={isExpanded}
         onToggle={onToggle}
+        data-testid='sky-now-widget'
       />
       {showChartModal && (
         <div

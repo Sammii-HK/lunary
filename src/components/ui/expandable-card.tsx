@@ -4,7 +4,7 @@ import { ReactNode, useState, useEffect } from 'react';
 import { ChevronDown, ChevronUp } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
-interface ExpandableCardProps {
+interface ExpandableCardProps extends React.HTMLAttributes<HTMLDivElement> {
   preview: ReactNode;
   expanded: ReactNode;
   defaultExpanded?: boolean;
@@ -26,6 +26,7 @@ export const ExpandableCard = ({
   previewClassName,
   expandedClassName,
   onToggle,
+  ...props
 }: ExpandableCardProps) => {
   // Internal state for uncontrolled mode
   const [internalExpanded, setInternalExpanded] = useState(false);
@@ -86,6 +87,7 @@ export const ExpandableCard = ({
         isExpanded && 'border-lunary-primary-700/50',
         className,
       )}
+      {...props}
     >
       <div
         role='button'
