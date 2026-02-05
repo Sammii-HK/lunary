@@ -367,12 +367,7 @@ function sanitiseMetadata(
         typeof value === 'boolean' ||
         value === null
       ) {
-        Object.defineProperty(result, key, {
-          value,
-          writable: true,
-          enumerable: true,
-          configurable: true,
-        });
+        result[key] = value;
       }
       continue;
     }
@@ -384,12 +379,7 @@ function sanitiseMetadata(
       typeof value === 'boolean' ||
       value === null
     ) {
-      Object.defineProperty(result, key, {
-        value,
-        writable: true,
-        enumerable: true,
-        configurable: true,
-      });
+      result[key] = value;
     }
   }
 
