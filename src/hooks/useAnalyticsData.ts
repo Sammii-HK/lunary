@@ -462,7 +462,6 @@ export function useAnalyticsData(): AnalyticsDataState & AnalyticsDataActions {
 
     const queryParams = `start_date=${startDate}&end_date=${endDate}`;
     const debugParam = includeAudit ? '&debug=1' : '';
-    const cacheBuster = `&_t=${Date.now()}`;
 
     try {
       // Batch 1: Core metrics (6 requests)
@@ -475,18 +474,26 @@ export function useAnalyticsData(): AnalyticsDataState & AnalyticsDataActions {
         cohortsRes,
       ] = await Promise.all([
         fetch(
-          `/api/admin/analytics/dau-wau-mau?${queryParams}&granularity=${granularity}${cacheBuster}`,
+          `/api/admin/analytics/dau-wau-mau?${queryParams}&granularity=${granularity}`,
+          { cache: 'no-store' }, // Force fresh data on manual refresh
         ),
         fetch(
-          `/api/admin/analytics/engagement-overview?${queryParams}${debugParam}${cacheBuster}`,
+          `/api/admin/analytics/engagement-overview?${queryParams}${debugParam}`,
+          { cache: 'no-store' },
         ),
-        fetch(`/api/admin/analytics/conversions?${queryParams}${cacheBuster}`),
+        fetch(`/api/admin/analytics/conversions?${queryParams}`, {
+          cache: 'no-store',
+        }),
         fetch(
-          `/api/admin/analytics/user-growth?${queryParams}&granularity=${granularity}${cacheBuster}`,
+          `/api/admin/analytics/user-growth?${queryParams}&granularity=${granularity}`,
+          { cache: 'no-store' },
         ),
-        fetch(`/api/admin/analytics/activation?${queryParams}${cacheBuster}`),
+        fetch(`/api/admin/analytics/activation?${queryParams}`, {
+          cache: 'no-store',
+        }),
         fetch(
-          `/api/admin/analytics/cohorts?${queryParams}&type=week&weeks=12${cacheBuster}`,
+          `/api/admin/analytics/cohorts?${queryParams}&type=week&weeks=12`,
+          { cache: 'no-store' },
         ),
       ]);
 
@@ -499,24 +506,24 @@ export function useAnalyticsData(): AnalyticsDataState & AnalyticsDataActions {
         successMetricsRes,
         intentionBreakdownRes,
       ] = await Promise.all([
-        fetch(
-          `/api/admin/analytics/feature-adoption?${queryParams}${cacheBuster}`,
-        ),
-        fetch(
-          `/api/admin/analytics/feature-usage?${queryParams}${cacheBuster}`,
-        ),
-        fetch(
-          `/api/admin/analytics/grimoire-health?${queryParams}${cacheBuster}`,
-        ),
-        fetch(
-          `/api/admin/analytics/conversion-influence?${queryParams}${cacheBuster}`,
-        ),
-        fetch(
-          `/api/admin/analytics/success-metrics?${queryParams}${cacheBuster}`,
-        ),
-        fetch(
-          `/api/admin/analytics/intention-breakdown?${queryParams}${cacheBuster}`,
-        ),
+        fetch(`/api/admin/analytics/feature-adoption?${queryParams}`, {
+          cache: 'no-store',
+        }),
+        fetch(`/api/admin/analytics/feature-usage?${queryParams}`, {
+          cache: 'no-store',
+        }),
+        fetch(`/api/admin/analytics/grimoire-health?${queryParams}`, {
+          cache: 'no-store',
+        }),
+        fetch(`/api/admin/analytics/conversion-influence?${queryParams}`, {
+          cache: 'no-store',
+        }),
+        fetch(`/api/admin/analytics/success-metrics?${queryParams}`, {
+          cache: 'no-store',
+        }),
+        fetch(`/api/admin/analytics/intention-breakdown?${queryParams}`, {
+          cache: 'no-store',
+        }),
       ]);
 
       // Batch 3: Subscription & monetization (7 requests)
@@ -529,25 +536,28 @@ export function useAnalyticsData(): AnalyticsDataState & AnalyticsDataActions {
         apiCostsRes,
         userSegmentsRes,
       ] = await Promise.all([
+        fetch(`/api/admin/analytics/subscription-30d?${queryParams}`, {
+          cache: 'no-store',
+        }),
         fetch(
-          `/api/admin/analytics/subscription-30d?${queryParams}${cacheBuster}`,
+          `/api/admin/analytics/subscription-lifecycle?${queryParams}&stripe=1`,
+          { cache: 'no-store' },
         ),
-        fetch(
-          `/api/admin/analytics/subscription-lifecycle?${queryParams}&stripe=1${cacheBuster}`,
-        ),
-        fetch(
-          `/api/admin/analytics/plan-breakdown?${queryParams}${cacheBuster}`,
-        ),
-        fetch(
-          `/api/admin/analytics/cta-conversions?${queryParams}${cacheBuster}`,
-        ),
-        fetch(
-          `/api/admin/analytics/cta-locations?${queryParams}${cacheBuster}`,
-        ),
-        fetch(`/api/admin/analytics/api-costs?${queryParams}${cacheBuster}`),
-        fetch(
-          `/api/admin/analytics/user-segments?${queryParams}${cacheBuster}`,
-        ),
+        fetch(`/api/admin/analytics/plan-breakdown?${queryParams}`, {
+          cache: 'no-store',
+        }),
+        fetch(`/api/admin/analytics/cta-conversions?${queryParams}`, {
+          cache: 'no-store',
+        }),
+        fetch(`/api/admin/analytics/cta-locations?${queryParams}`, {
+          cache: 'no-store',
+        }),
+        fetch(`/api/admin/analytics/api-costs?${queryParams}`, {
+          cache: 'no-store',
+        }),
+        fetch(`/api/admin/analytics/user-segments?${queryParams}`, {
+          cache: 'no-store',
+        }),
       ]);
 
       // Batch 4: External & misc (6 requests)
@@ -559,16 +569,22 @@ export function useAnalyticsData(): AnalyticsDataState & AnalyticsDataActions {
         insightsRes,
         grimoireTopPagesRes,
       ] = await Promise.all([
-        fetch(
-          `/api/admin/analytics/notifications?${queryParams}${cacheBuster}`,
-        ),
-        fetch(`/api/admin/analytics/attribution?${queryParams}${cacheBuster}`),
-        fetch(`/api/analytics/discord-interactions?range=7d${cacheBuster}`),
-        fetch(
-          `/api/admin/analytics/search-console?${queryParams}${cacheBuster}`,
-        ),
-        fetch(`/api/admin/analytics/insights?${queryParams}${cacheBuster}`),
-        fetch(`/api/grimoire/stats?top=20${cacheBuster}`),
+        fetch(`/api/admin/analytics/notifications?${queryParams}`, {
+          cache: 'no-store',
+        }),
+        fetch(`/api/admin/analytics/attribution?${queryParams}`, {
+          cache: 'no-store',
+        }),
+        fetch(`/api/analytics/discord-interactions?range=7d`, {
+          cache: 'no-store',
+        }),
+        fetch(`/api/admin/analytics/search-console?${queryParams}`, {
+          cache: 'no-store',
+        }),
+        fetch(`/api/admin/analytics/insights?${queryParams}`, {
+          cache: 'no-store',
+        }),
+        fetch(`/api/grimoire/stats?top=20`, { cache: 'no-store' }),
       ]);
 
       const errors: string[] = [];

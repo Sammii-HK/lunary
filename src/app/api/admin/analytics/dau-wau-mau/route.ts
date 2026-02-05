@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { sql } from '@vercel/postgres';
 import { formatTimestamp, resolveDateRange } from '@/lib/analytics/date-range';
+import { ANALYTICS_REALTIME_TTL_SECONDS } from '@/lib/analytics-cache-config';
 
 const TEST_EMAIL_PATTERN = '%@test.lunary.app';
 const TEST_EMAIL_EXACT = 'test@test.lunary.app';
@@ -1109,7 +1110,13 @@ export async function GET(request: NextRequest) {
       },
       source: 'database',
     });
-    response.headers.set('Cache-Control', 'no-store');
+
+    // Cache for 5 minutes - balance between freshness and performance
+    response.headers.set(
+      'Cache-Control',
+      `public, s-maxage=${ANALYTICS_REALTIME_TTL_SECONDS}, stale-while-revalidate=${ANALYTICS_REALTIME_TTL_SECONDS * 2}`,
+    );
+
     return response;
   } catch (error) {
     console.error('[analytics/dau-wau-mau] Failed to load metrics', error);
