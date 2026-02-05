@@ -10,6 +10,9 @@ import {
   MessagesSquare,
   X,
   Check,
+  Users,
+  Heart,
+  Moon,
 } from 'lucide-react';
 import { MarketingFooter } from '@/components/MarketingFooter';
 import { Button } from '@/components/ui/button';
@@ -91,15 +94,15 @@ export default function WelcomePage() {
               Personal astrology grounded in real astronomy
             </p>
             <h1 className='text-2xl md:text-3xl lg:text-4xl font-light text-zinc-100'>
-              Personal astrology that
+              The astrology app that teaches you
               <br />
-              actually understands you
+              to read your own chart
             </h1>
             <p className='text-xs md:text-sm text-zinc-400 leading-relaxed max-w-3xl mx-auto'>
-              Built around your full birth chart.
+              Track how planets affect YOU specifically.
               <br />
-              Lunary connects astrology, tarot and lunar cycles through real
-              astronomical timing.
+              After 2-3 months, you'll recognize patterns and interpret transits
+              without depending on generic predictions.
             </p>
             <div className='flex flex-col gap-3 justify-center items-center pt-2 pb-0 md:pb-6'>
               <Button variant='lunary-soft' size='lg' asChild>
@@ -198,6 +201,22 @@ export default function WelcomePage() {
               <p className='text-zinc-300'>
                 <span className='text-lunary-primary-400'>Lunary:</span> Built
                 for depth and learning
+              </p>
+              <p className='text-zinc-400'>
+                <span className='text-zinc-500'>Generic apps:</span> Basic sun
+                sign compatibility
+              </p>
+              <p className='text-zinc-300'>
+                <span className='text-lunary-primary-400'>Lunary:</span> Full
+                synastry with 31+ aspects + Best Times to Connect
+              </p>
+              <p className='text-zinc-400'>
+                <span className='text-zinc-500'>Generic apps:</span> Tell you
+                what transits mean
+              </p>
+              <p className='text-zinc-300'>
+                <span className='text-lunary-primary-400'>Lunary:</span> Show
+                you YOUR patterns over time so you become the expert
               </p>
             </div>
             <div className='pt-4'>
@@ -298,6 +317,70 @@ export default function WelcomePage() {
           </div>
         </section>
 
+        {/* Section 4b: Connect with Your Cosmic Circle */}
+        <section className='py-12 md:py-16 px-4 md:px-6 bg-zinc-900/20'>
+          <div className='max-w-4xl mx-auto'>
+            <div className='text-center space-y-4 mb-8'>
+              <div className='inline-flex items-center justify-center w-14 h-14 rounded-full bg-gradient-to-br from-lunary-primary-800 to-lunary-highlight-800 mb-2'>
+                <Users className='w-7 h-7 text-lunary-accent-200' />
+              </div>
+              <h2 className='text-2xl md:text-3xl font-light text-zinc-100'>
+                Connect with Your Cosmic Circle
+              </h2>
+              <p className='text-zinc-400 max-w-2xl mx-auto leading-relaxed'>
+                See how your charts interact. Track compatibility. Get alerts
+                when cosmic timing is perfect for connection.
+              </p>
+            </div>
+
+            <div className='grid md:grid-cols-3 gap-4 mb-8'>
+              <div className='rounded-xl border border-zinc-800/60 bg-zinc-900/40 p-5 space-y-3'>
+                <Heart className='w-6 h-6 text-lunary-primary-400' />
+                <h3 className='text-base font-medium text-zinc-100'>
+                  Full Synastry Analysis
+                </h3>
+                <p className='text-sm text-zinc-400'>
+                  See exactly how your charts interact with 31+ aspects
+                  analyzed. Element and modality balance comparisons.
+                </p>
+              </div>
+              <div className='rounded-xl border border-zinc-800/60 bg-zinc-900/40 p-5 space-y-3'>
+                <Calendar className='w-6 h-6 text-lunary-primary-300' />
+                <h3 className='text-base font-medium text-zinc-100'>
+                  Best Times to Connect
+                </h3>
+                <p className='text-sm text-zinc-400'>
+                  Know when cosmic timing supports connection. Analyzes BOTH
+                  charts to find optimal windows.
+                </p>
+              </div>
+              <div className='rounded-xl border border-zinc-800/60 bg-zinc-900/40 p-5 space-y-3'>
+                <Moon className='w-6 h-6 text-blue-400/70' />
+                <h3 className='text-base font-medium text-zinc-100'>
+                  Shared Cosmic Events
+                </h3>
+                <p className='text-sm text-zinc-400'>
+                  Moon phases that activate compatible houses for both of you.
+                  Never miss cosmically significant moments together.
+                </p>
+              </div>
+            </div>
+
+            <div className='text-center space-y-3'>
+              <div className='flex flex-wrap justify-center gap-4 text-xs text-zinc-400'>
+                <span>Free: 5 friends with basic compatibility</span>
+                <span className='text-zinc-600'>•</span>
+                <span>Lunary+: Unlimited + full synastry</span>
+                <span className='text-zinc-600'>•</span>
+                <span>Pro: Best Times + Shared Events</span>
+              </div>
+              <Button variant='outline' asChild>
+                <Link href='/features#connect'>Explore Circle features</Link>
+              </Button>
+            </div>
+          </div>
+        </section>
+
         {/* Section 5: Who Lunary Is For */}
         <section className='py-12 md:py-20 px-4 md:px-6 bg-zinc-900/30'>
           <div className='max-w-5xl mx-auto'>
@@ -345,6 +428,18 @@ export default function WelcomePage() {
                 <p className='text-zinc-400 text-sm'>
                   Connect reflections to moon phases. Track patterns over time.
                   Your journal becomes your astrology textbook.
+                </p>
+              </div>
+              <div className='rounded-2xl border border-zinc-800/60 bg-zinc-900/40 p-5 md:p-6 space-y-2 md:col-span-2'>
+                <p className='text-base text-lunary-primary-300 font-medium'>
+                  "I want to understand my relationships better"
+                </p>
+                <p className='text-zinc-400 text-sm'>
+                  Connect with friends who get it. See how your charts interact
+                  with full synastry. Get alerts when cosmic timing supports
+                  connection—like "New Moon in Pisces activates your 5th and
+                  their 7th houses: great for starting new creative projects
+                  together."
                 </p>
               </div>
             </div>

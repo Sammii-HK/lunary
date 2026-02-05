@@ -5,23 +5,26 @@ import { Metadata } from 'next';
 import WelcomePage from '@/components/pages/WelcomePage';
 
 export const metadata: Metadata = {
-  title: 'Lunary: Personal Astrology App | Birth Chart, Horoscopes & Tarot',
+  title:
+    'Lunary: Learn to Read Your Birth Chart | Astrology App with Pattern Tracking',
   description:
-    'A calm astrology companion grounded in real astronomy. Create your birth chart, explore horoscopes, moon phase, tarot and transits, and learn through the Grimoire. Upgrade for personalised insights connected to your chart.',
+    'Learn to read your own birth chart through daily practice. Track patterns, interpret transits, and understand relationships with full synastry analysis. 2,000+ free astrology articles.',
   keywords: [
+    'learn astrology app',
+    'birth chart reading',
+    'astrology pattern tracking',
+    'synastry analysis app',
+    'relationship astrology',
+    'transit tracking',
     'personalised astrology app',
     'birth chart astrology',
-    'astronomy-based astrology',
-    'tarot and astrology app',
-    'moon phase astrology',
     'daily astrology based on birth chart',
-    'intelligent astrology',
-    'spiritual self reflection app',
     'personalized horoscope',
     'lunar cycles',
     'planetary transits',
     'cosmic guidance',
     'natal chart analysis',
+    'best times to connect',
   ],
   authors: [{ name: 'Lunary' }],
   creator: 'Lunary',
@@ -30,9 +33,9 @@ export const metadata: Metadata = {
     canonical: 'https://lunary.app',
   },
   openGraph: {
-    title: 'Lunary: Your Personal Astrology Companion',
+    title: 'Lunary: The Astrology App That Teaches You to Read Your Chart',
     description:
-      'Grounded astrology based on the sky today. Create your birth chart, explore horoscopes, moon phases and tarot, and learn through the Grimoire. Upgrade to connect it all to your chart for personalised insight.',
+      'Track how planets affect YOU specifically. Pattern recognition, full synastry analysis, and 2,000+ free articles. After 2-3 months, interpret transits without generic predictions.',
     url: 'https://lunary.app',
     siteName: 'Lunary',
     images: [
@@ -40,7 +43,7 @@ export const metadata: Metadata = {
         url: '/api/og/homepage',
         width: 1200,
         height: 630,
-        alt: 'Lunary - Personalised astrology for clarity and self understanding',
+        alt: 'Lunary - Learn to read your own birth chart',
       },
     ],
     locale: 'en_US',
@@ -48,9 +51,9 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Lunary: Your Personal Astrology Companion',
+    title: 'Lunary: The Astrology App That Teaches You to Read Your Chart',
     description:
-      'Grounded astrology based on the sky today. Create your birth chart, explore horoscopes, moon phases and tarot, and learn through the Grimoire. Upgrade to connect it all to your chart for personalised insight.',
+      'Track how planets affect YOU specifically. Pattern recognition, full synastry analysis, and 2,000+ free articles. After 2-3 months, interpret transits without generic predictions.',
     images: ['/api/og/homepage'],
   },
   robots: {
