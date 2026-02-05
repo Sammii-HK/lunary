@@ -84,9 +84,10 @@ export default function HoroscopePage() {
   return (
     <div className='min-h-screen flex flex-col'>
       {authStatus.isAuthenticated && (
-        <div className='max-w-4xl mx-auto px-4 pt-4 w-full'>
-          <SkillProgressWidget skillTree='explorer' />
-        </div>
+        <SkillProgressWidget
+          skillTree='explorer'
+          className='sticky top-0 z-10 px-4 pt-3 pb-2 bg-zinc-950/90 backdrop-blur-sm'
+        />
       )}
       <div className='flex-1'>
         <HoroscopeView

@@ -9,6 +9,7 @@ import {
   ZodiacSign,
 } from '@/constants/seo/monthly-horoscope';
 import { HoroscopeCosmicConnections } from '@/components/grimoire/HoroscopeCosmicConnections';
+import { PlacementSelector } from '@/components/grimoire/PlacementSelector';
 
 export const revalidate = 604800;
 
@@ -167,6 +168,7 @@ export default async function WeeklyHoroscopePage({
           currentYear={currentYear}
         />
       }
+      components={<PlacementSelector signName={signData.name} />}
       childrenPosition='after-description'
     >
       <section className='mb-12'>

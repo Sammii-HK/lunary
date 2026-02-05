@@ -15,6 +15,7 @@ import {
 } from '@/constants/seo/monthly-horoscope';
 import { SEOContentTemplate } from '@/components/grimoire/SEOContentTemplate';
 import { HoroscopeCosmicConnections } from '@/components/grimoire/HoroscopeCosmicConnections';
+import { PlacementSelector } from '@/components/grimoire/PlacementSelector';
 import { monthMeta, articleSchema } from '@/lib/horoscope-meta';
 import { ArrowLeft, ArrowRight } from 'lucide-react';
 
@@ -247,6 +248,7 @@ ${monthName} sets the tone for ${year}. Use this month to lay foundations that s
           ],
         },
       ]}
+      components={<PlacementSelector signName={signName} />}
       cosmicConnections={
         <HoroscopeCosmicConnections
           variant='monthly-sign'

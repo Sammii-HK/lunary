@@ -75,9 +75,10 @@ export default function TarotReadings() {
   return (
     <>
       {authStatus.isAuthenticated && (
-        <div className='max-w-4xl mx-auto px-4 pt-4'>
-          <SkillProgressWidget skillTree='tarot' />
-        </div>
+        <SkillProgressWidget
+          skillTree='tarot'
+          className='sticky top-0 z-10 px-4 pt-3 pb-2 bg-zinc-950/90 backdrop-blur-sm'
+        />
       )}
       <TarotView
         hasPaidAccess={hasPersonalTarotAccess}
