@@ -22,20 +22,17 @@ export async function GET(request: NextRequest) {
     // Query MRR and conversion metrics in parallel
     const [mrrResult, signupsResult, conversionsResult] = await Promise.all([
       // Calculate MRR from active subscriptions
+      // Only count Stripe-backed subscriptions for accurate MRR
       sql.query(
         `
         SELECT
-          COALESCE(SUM(CASE
-            WHEN currency = 'USD' THEN amount / 100.0
-            WHEN currency = 'EUR' THEN (amount / 100.0) * 1.1
-            WHEN currency = 'GBP' THEN (amount / 100.0) * 1.27
-            WHEN currency = 'AUD' THEN (amount / 100.0) * 0.67
-            WHEN currency = 'CAD' THEN (amount / 100.0) * 0.75
-            ELSE amount / 100.0
-          END), 0) as total_mrr
-        FROM "Subscription"
-        WHERE status = 'active'
+          COALESCE(SUM(COALESCE(monthly_amount_due, 0)), 0) as total_mrr
+        FROM subscriptions
+        WHERE status IN ('active', 'trial', 'trialing')
+          AND stripe_subscription_id IS NOT NULL
+          AND (user_email IS NULL OR (user_email NOT LIKE $1 AND user_email != $2))
       `,
+        [TEST_EMAIL_PATTERN, TEST_EMAIL_EXACT],
       ),
       // Count signups in window
       sql.query(
@@ -56,11 +53,11 @@ export async function GET(request: NextRequest) {
       // Count conversions (users who started subscription within window)
       sql.query(
         `
-        SELECT COUNT(DISTINCT s."userId") as count
-        FROM "Subscription" s
-        INNER JOIN "user" u ON u.id = s."userId"
-        WHERE s."createdAt" >= $1
-          AND s."createdAt" <= $2
+        SELECT COUNT(DISTINCT s.user_id) as count
+        FROM subscriptions s
+        INNER JOIN "user" u ON u.id = s.user_id
+        WHERE s.created_at >= $1
+          AND s.created_at <= $2
           AND (u.email IS NULL OR (u.email NOT LIKE $3 AND u.email != $4))
       `,
         [

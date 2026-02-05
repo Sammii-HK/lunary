@@ -43,21 +43,21 @@ ON "user"(email)
 WHERE email IS NOT NULL;
 
 -- ============================================================================
--- Subscription table indexes (for revenue queries)
+-- subscriptions table indexes (for revenue queries)
 -- ============================================================================
 
 -- Index for active subscriptions by status
 CREATE INDEX IF NOT EXISTS idx_subscription_status
-ON "Subscription"(status)
+ON subscriptions(status)
 WHERE status = 'active';
 
 -- Index for subscription creation date
 CREATE INDEX IF NOT EXISTS idx_subscription_created_at
-ON "Subscription"("createdAt" DESC);
+ON subscriptions("createdAt" DESC);
 
 -- Composite index for user + creation date (conversion queries)
 CREATE INDEX IF NOT EXISTS idx_subscription_user_created
-ON "Subscription"("userId", "createdAt" DESC);
+ON subscriptions("userId", "createdAt" DESC);
 
 -- ============================================================================
 -- ANALYZE to update query planner statistics
@@ -65,4 +65,4 @@ ON "Subscription"("userId", "createdAt" DESC);
 
 ANALYZE conversion_events;
 ANALYZE "user";
-ANALYZE "Subscription";
+ANALYZE subscriptions;
