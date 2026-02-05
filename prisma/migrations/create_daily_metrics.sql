@@ -52,9 +52,8 @@ CREATE TABLE IF NOT EXISTS daily_metrics (
 CREATE INDEX IF NOT EXISTS idx_daily_metrics_date
 ON daily_metrics(metric_date DESC);
 
--- Index for recent metrics (common query pattern)
-CREATE INDEX IF NOT EXISTS idx_daily_metrics_recent
-ON daily_metrics(metric_date DESC, computed_at DESC)
-WHERE metric_date >= CURRENT_DATE - INTERVAL '90 days';
+-- Composite index for date + computed_at queries
+CREATE INDEX IF NOT EXISTS idx_daily_metrics_date_computed
+ON daily_metrics(metric_date DESC, computed_at DESC);
 
 COMMENT ON TABLE daily_metrics IS 'Pre-computed daily analytics metrics to reduce database query costs. Historical data comes from this table, today comes from live queries.';
