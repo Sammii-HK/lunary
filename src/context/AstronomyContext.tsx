@@ -18,6 +18,38 @@ import type { GlobalCosmicData } from '@/lib/cosmic-snapshot/global-cache';
 import { useUser } from '@/context/UserContext';
 import { DailyCache, getLocalDateString } from '@/lib/cache/dailyCache';
 
+/** Lightweight client-side duration formatter (mirrors server formatDuration) */
+function formatDurationCompact(days: number): string {
+  const hours = Math.round(days * 24);
+  if (hours < 1) return '<1h left';
+  if (days < 1) return `${hours}h left`;
+  if (days < 14) return `${Math.round(days)}d left`;
+  if (days < 56) return `${Math.round(days / 7)}w left`;
+  if (days < 365) return `${Math.round(days / 30)}m left`;
+  const years = Math.round((days / 365) * 10) / 10;
+  return years % 1 === 0 ? `${Math.round(years)}y left` : `${years}y left`;
+}
+
+/** Recalculate remaining time from stored end date */
+function refreshClientDuration(duration: {
+  totalDays: number;
+  remainingDays: number;
+  displayText: string;
+  startDate?: string | Date;
+  endDate?: string | Date;
+}) {
+  if (!duration.endDate) return null; // No end date = stale cached data, discard
+  const endTime = new Date(duration.endDate).getTime();
+  const remainingMs = endTime - Date.now();
+  if (remainingMs <= 0) return null;
+  const remainingDays = remainingMs / (1000 * 60 * 60 * 24);
+  return {
+    totalDays: duration.totalDays,
+    remainingDays,
+    displayText: formatDurationCompact(remainingDays),
+  };
+}
+
 export const AstronomyContext = createContext<{
   currentAstrologicalChart: AstroChartInformation[];
   currentMoonPosition: AstroChartInformation | undefined;
@@ -155,7 +187,7 @@ export const AstronomyContextProvider = ({
     let isMounted = true;
 
     // Check cache first - cosmic data updates every 2 hours
-    const cacheKey = `cosmic_global_${currentDate}`;
+    const cacheKey = `cosmic_global_v3_${currentDate}`;
     const cached = DailyCache.get<GlobalCosmicData>(cacheKey);
 
     if (cached && refreshKey === 0) {
@@ -213,6 +245,9 @@ export const AstronomyContextProvider = ({
         },
         retrograde: data.retrograde,
         eclipticLongitude: data.longitude,
+        duration: data.duration
+          ? (refreshClientDuration(data.duration) ?? undefined)
+          : undefined,
       };
     }) as AstroChartInformation[];
 

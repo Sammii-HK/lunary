@@ -197,13 +197,20 @@ export function getRealPlanetaryPositions(
     // Detect direct station (planet just started moving forwards again)
     const newDirect = !retrograde && wasRetrograde;
 
-    // Calculate transit duration (zero additional astronomy calls!)
+    // Calculate actual daily motion from real positions (no extra astronomy calls)
+    let actualMotion = longitude - longitudePast;
+    if (actualMotion < -180) actualMotion += 360;
+    if (actualMotion > 180) actualMotion -= 360;
+    const actualDailyMotion = Math.abs(actualMotion);
+
+    // Calculate transit duration using real observed speed
     const sign = getZodiacSign(longitude);
     const duration = calculateTransitDuration(
       planetName,
       sign,
       longitude,
       date,
+      actualDailyMotion,
     );
 
     const positionData = {

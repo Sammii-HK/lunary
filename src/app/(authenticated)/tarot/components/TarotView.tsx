@@ -14,7 +14,6 @@ import {
   Copy,
   Loader2,
   Moon,
-  BookOpen,
 } from 'lucide-react';
 import { AdvancedPatterns } from '@/components/tarot/AdvancedPatterns';
 import { CollapsibleSection } from '@/components/CollapsibleSection';
@@ -49,9 +48,9 @@ import { TarotSeasonReading } from '@/components/tarot/TarotSeasonReading';
 import { TarotRitualForPatterns } from '@/components/tarot/TarotRitualForPatterns';
 import { TarotReflectionPrompts } from '@/components/tarot/TarotReflectionPrompts';
 import Link from 'next/link';
-import { Button } from '@/components/ui/button';
 import { useAuthStatus } from '@/components/AuthStatus';
 import { getCosmicContextForDate } from '@/lib/cosmic/cosmic-context-utils';
+import { Heading } from '@/components/ui/Heading';
 
 const GuideNudge = dynamic(
   () =>
@@ -572,22 +571,21 @@ export function TarotView({
   return (
     <div className='h-full w-full space-y-6 p-4 overflow-y-auto overflow-x-hidden pb-32'>
       {/* Header */}
-      <div className='pt-6'>
-        <h1 className='text-2xl md:text-3xl font-light text-zinc-100 mb-2'>
+      <div>
+        <Heading variant='h1' as='h1'>
           {hasPaidAccess && userName
             ? `${userName}'s Tarot Readings`
             : hasPaidAccess
               ? 'Your Tarot Readings'
               : "Today's Tarot Readings"}
-        </h1>
+        </Heading>
         <p className='text-xs md:text-sm text-zinc-400'>
           {hasPaidAccess
             ? 'Personalized guidance based on your cosmic signature'
             : 'General cosmic guidance based on universal energies'}
         </p>
       </div>
-
-      {/* Moon Phase */}
+      {/* Moon Phase
       <div className='rounded-lg border border-lunary-secondary-800 bg-lunary-secondary-950/40 p-3'>
         <div className='flex items-center gap-3'>
           <img
@@ -611,10 +609,9 @@ export function TarotView({
             </div>
           </div>
         </div>
-      </div>
-
+      </div> */}
       {/* CTA button to scroll to spreads */}
-      {authStatus.isAuthenticated && (
+      {/* {authStatus.isAuthenticated && (
         <div className='flex gap-3'>
           <Button
             onClick={() => {
@@ -632,8 +629,7 @@ export function TarotView({
             {hasPaidAccess ? 'Do a Reading' : 'Pull a Tarot Spread Reading'}
           </Button>
         </div>
-      )}
-
+      )} */}
       <div className='space-y-6'>
         {/* Daily & Weekly Cards section */}
         {hasPaidAccess ? (
@@ -950,10 +946,9 @@ export function TarotView({
           </div>
         )}
 
-        {/* GuideNudge - paid only */}
-        {hasPaidAccess && <GuideNudge location='tarot' className='mb-2' />}
+        <GuideNudge location='tarot' className='mb-2' />
 
-        {/* Season/Ritual/Reflection prompts - paid with tarot_patterns access */}
+        {/* Season/Ritual - paid with tarot_patterns access */}
         {hasPaidAccess &&
           subscription.hasAccess('tarot_patterns') &&
           personalizedReading?.trendAnalysis && (
@@ -965,17 +960,14 @@ export function TarotView({
               <TarotRitualForPatterns
                 trendAnalysis={personalizedReading.trendAnalysis}
               />
-              <TarotReflectionPrompts
-                trendAnalysis={personalizedReading.trendAnalysis}
-              />
             </div>
           )}
 
-        {/* Season/Ritual/Reflection prompts preview - free users FOMO */}
+        {/* Season/Ritual preview - free users FOMO */}
         {!hasPaidAccess && (
           <FeaturePreview
             title='Your Tarot Season & Rituals'
-            description='Unlock personalized season readings, ritual prompts, and reflection exercises based on your tarot patterns.'
+            description='Unlock personalized season readings and ritual prompts based on your tarot patterns.'
             feature='tarot_patterns'
             ctaKey='chartConnection'
             trackingFeature='tarot_season_rituals'
@@ -1016,27 +1008,15 @@ export function TarotView({
                     </div>
                   </div>
                 </div>
-                <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 overflow-hidden'>
-                  <div className='flex items-center justify-between p-4'>
-                    <div className='flex items-center gap-3'>
-                      <div className='p-2 rounded-lg bg-lunary-accent-900/30'>
-                        <BookOpen className='w-4 h-4 text-lunary-accent-400' />
-                      </div>
-                      <div>
-                        <p className='text-sm font-medium text-zinc-100'>
-                          Reflection Prompts
-                        </p>
-                        <p className='text-xs text-zinc-400'>
-                          5 prompts for your journal
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                </div>
               </div>
             }
           />
         )}
+
+        {/* Reflection prompts — all users (component handles its own gating) */}
+        <TarotReflectionPrompts
+          trendAnalysis={personalizedReading?.trendAnalysis ?? null}
+        />
 
         {/* All patterns are now consolidated in the Tarot Patterns collapsible section below */}
 
@@ -1302,7 +1282,6 @@ export function TarotView({
           </p>
         </div>
       </div>
-
       {/* Modals */}
       <TarotCardModal
         card={selectedCard}
@@ -1312,7 +1291,6 @@ export function TarotView({
         userBirthday={userBirthday}
         currentTransits={currentAstrologicalChart}
       />
-
       {/* Share Modal */}
       {shareTarget && (
         <div
@@ -1400,7 +1378,6 @@ export function TarotView({
           </div>
         </div>
       )}
-
       {/* Upgrade Modal */}
       {showUpgradeModal && (
         <div

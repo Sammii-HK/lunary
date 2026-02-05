@@ -12,6 +12,9 @@ const withBundleAnalyzer =
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   webpack: (config, { isServer, nextRuntime, dev }) => {
+    // Reduce parallelism to save memory during builds
+    config.parallelism = 1;
+
     // Exclude Playwright and ffmpeg-static from bundling (server-only, Node.js runtime)
     if (isServer) {
       config.externals = config.externals || [];
@@ -295,6 +298,8 @@ const nextConfig = {
     // Reduce memory usage during builds
     workerThreads: false,
     cpus: 1,
+    // Disable memory-intensive caching features during build
+    isrMemoryCacheSize: 0,
   },
 
   // Use on-demand ISR instead of generating all pages at build time

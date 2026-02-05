@@ -96,6 +96,29 @@ export async function POST(request: NextRequest) {
     }
 
     await insertCanonicalEvent(canonical.row);
+
+    // Server-side identity stitching: link anonymous browsing to authenticated user.
+    // This runs from middleware so it's ad-blocker proof — ensures the link exists
+    // even if the client-side /api/ether/cv call was blocked.
+    if (userId && anonymousId && !userId.startsWith('anon:')) {
+      sql
+        .query(
+          `INSERT INTO analytics_identity_links (user_id, anonymous_id)
+           VALUES ($1, $2)
+           ON CONFLICT DO NOTHING`,
+          [userId, anonymousId],
+        )
+        .catch((e) => {
+          // Table may not exist until migrations run
+          if (
+            !(e instanceof Error) ||
+            !e.message.includes('analytics_identity_links')
+          ) {
+            console.warn('[page_viewed] identity link error:', e);
+          }
+        });
+    }
+
     console.log('[page_viewed] INSERT success', {
       duration: Date.now() - startTime,
       userId: userId ? 'present' : 'none',

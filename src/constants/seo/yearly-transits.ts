@@ -1,3 +1,6 @@
+import transitData from '../../data/slow-planet-sign-changes.json';
+import { format } from 'date-fns';
+
 export interface YearlyTransit {
   id: string;
   year: number;
@@ -11,9 +14,11 @@ export interface YearlyTransit {
   doList: string[];
   avoidList: string[];
   tone: string;
+  startDate?: Date;
+  endDate?: Date;
 }
 
-export const YEARLY_TRANSITS: YearlyTransit[] = [
+const RAW_TRANSITS: YearlyTransit[] = [
   // 2025
   {
     id: 'saturn-return-2025',
@@ -186,7 +191,7 @@ export const YEARLY_TRANSITS: YearlyTransit[] = [
     id: 'saturn-aries-2027',
     year: 2027,
     planet: 'Saturn',
-    transitType: 'Saturn Transit',
+    transitType: 'Saturn Return',
     title: 'Saturn in Aries 2027',
     dates: 'All year',
     signs: ['Aries'],
@@ -762,6 +767,88 @@ export const YEARLY_TRANSITS: YearlyTransit[] = [
     tone: 'Strong but sensible. Step back from proving yourself and lean into generous leadership that steadies others.',
   },
 ];
+
+/**
+ * Enrich transit entries with computed start/end dates from pre-computed JSON.
+ * For each transit, finds matching segments (planet + sign within year) and
+ * sets startDate/endDate. Overwrites `dates` string with formatted range
+ * while preserving parenthetical notes like "(for those born ~1996-1997)".
+ */
+function enrichTransitDates(transits: YearlyTransit[]): YearlyTransit[] {
+  const segments = transitData.segments as Record<
+    string,
+    Record<string, { start: string; end: string }[]>
+  >;
+
+  return transits.map((transit) => {
+    const planetSegments = segments[transit.planet];
+    if (!planetSegments) return transit;
+
+    // Find all segments matching any of the transit's signs within the transit's year
+    const yearStart = new Date(`${transit.year}-01-01T00:00:00.000Z`);
+    const yearEnd = new Date(`${transit.year + 1}-01-01T00:00:00.000Z`);
+
+    let earliestStart: Date | null = null;
+    let latestEnd: Date | null = null;
+
+    for (const sign of transit.signs) {
+      const signSegs = planetSegments[sign];
+      if (!signSegs) continue;
+
+      for (const seg of signSegs) {
+        const segStart = new Date(seg.start);
+        const segEnd = new Date(seg.end);
+
+        // Segment overlaps with the transit's year
+        if (segEnd > yearStart && segStart < yearEnd) {
+          if (!earliestStart || segStart < earliestStart) {
+            earliestStart = segStart;
+          }
+          if (!latestEnd || segEnd > latestEnd) {
+            latestEnd = segEnd;
+          }
+        }
+      }
+    }
+
+    if (!earliestStart || !latestEnd) return transit;
+
+    // Extract parenthetical notes from existing dates string
+    const parenMatch = transit.dates.match(/\(.*\)/);
+    const parenNote = parenMatch ? ` ${parenMatch[0]}` : '';
+
+    // Format the date range
+    const startInYear = earliestStart >= yearStart;
+    const endInYear = latestEnd <= yearEnd;
+
+    let formattedDates: string;
+
+    if (!startInYear && !endInYear) {
+      // Spans the entire year
+      formattedDates = `All year${parenNote}`;
+    } else if (!startInYear && endInYear) {
+      // Started before this year, ends during it
+      formattedDates = `Until ${format(latestEnd, 'MMMM d, yyyy')}${parenNote}`;
+    } else if (startInYear && !endInYear) {
+      // Starts during this year, continues past it
+      formattedDates = `${format(earliestStart, 'MMMM d, yyyy')} onwards${parenNote}`;
+    } else {
+      // Both start and end within the year
+      formattedDates = `${format(earliestStart, 'MMMM d, yyyy')} - ${format(latestEnd, 'MMMM d, yyyy')}${parenNote}`;
+    }
+
+    return {
+      ...transit,
+      dates: formattedDates,
+      startDate: earliestStart,
+      endDate: latestEnd,
+    };
+  });
+}
+
+// Enrich with computed dates from pre-computed JSON
+export const YEARLY_TRANSITS: YearlyTransit[] =
+  enrichTransitDates(RAW_TRANSITS);
 
 export function getTransitsForYear(year: number): YearlyTransit[] {
   return YEARLY_TRANSITS.filter((t) => t.year === year);

@@ -122,7 +122,11 @@ export async function POST(request: NextRequest) {
     }
 
     // Track notification preference change
-    conversionTracking.notificationPreferenceChanged(userId, 'tarot', true);
+    if (
+      typeof conversionTracking.notificationPreferenceChanged === 'function'
+    ) {
+      conversionTracking.notificationPreferenceChanged(userId, 'tarot', true);
+    }
 
     return NextResponse.json({
       success: true,
@@ -172,7 +176,11 @@ export async function DELETE(request: NextRequest) {
     }
 
     // Track notification preference change
-    conversionTracking.notificationPreferenceChanged(userId, 'tarot', false);
+    if (
+      typeof conversionTracking.notificationPreferenceChanged === 'function'
+    ) {
+      conversionTracking.notificationPreferenceChanged(userId, 'tarot', false);
+    }
 
     return NextResponse.json({
       success: true,

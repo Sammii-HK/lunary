@@ -128,6 +128,26 @@ export async function POST(request: NextRequest) {
     }
 
     await insertCanonicalEvent(canonical.row);
+
+    // Server-side identity stitching (ad-blocker proof, runs from middleware)
+    if (userId && anonymousId && !userId.startsWith('anon:')) {
+      sql
+        .query(
+          `INSERT INTO analytics_identity_links (user_id, anonymous_id)
+           VALUES ($1, $2)
+           ON CONFLICT DO NOTHING`,
+          [userId, anonymousId],
+        )
+        .catch((e) => {
+          if (
+            !(e instanceof Error) ||
+            !e.message.includes('analytics_identity_links')
+          ) {
+            console.warn('[app_opened] identity link error:', e);
+          }
+        });
+    }
+
     console.log('[app_opened] INSERT success', {
       duration: Date.now() - startTime,
       userId: userId ? 'present' : 'none',

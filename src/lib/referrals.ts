@@ -108,6 +108,16 @@ export async function applyReferralCouponToSubscription(
   await applyCouponToStripeSubscription(stripeSubscriptionId, 'referred-user');
 }
 
+// ============================================
+// REFERRAL PROGRAM CONSTANTS (SSOT)
+// ============================================
+
+/** Maximum successful referrals per user (generous for beta) */
+export const MAX_REFERRALS_PER_USER = 50;
+
+/** Days of Pro trial granted for referrals (both parties) */
+export const REFERRAL_TRIAL_DAYS = 30;
+
 export async function generateReferralCode(userId: string): Promise<string> {
   const existingCode = await getReferralCode(userId);
   if (existingCode) {
@@ -119,8 +129,8 @@ export async function generateReferralCode(userId: string): Promise<string> {
 
   try {
     const result = await sql`
-      INSERT INTO referral_codes (code, user_id, created_at, uses)
-      VALUES (${code}, ${userId}, NOW(), 0)
+      INSERT INTO referral_codes (code, user_id, created_at, uses, max_uses)
+      VALUES (${code}, ${userId}, NOW(), 0, ${MAX_REFERRALS_PER_USER})
       ON CONFLICT (code) DO NOTHING
       RETURNING code
     `;
@@ -215,8 +225,9 @@ export async function processReferralCode(
       WHERE code = ${code.toUpperCase()}
     `;
 
-    // Grant free month to referrer (if they don't have active subscription)
-    await grantReferralReward(validation.userId!);
+    // Reward is deferred until the referred user completes an activation event
+    // (tarot spread, journal entry, or ritual completion).
+    // See src/lib/referrals/check-activation.ts
 
     return { success: true, referrerUserId: validation.userId };
   } catch (error) {
@@ -256,11 +267,12 @@ async function grantReferralReward(userId: string): Promise<void> {
       }
     }
 
+    // If already has active subscription, extend by REFERRAL_TRIAL_DAYS
     if (subscriptionRow) {
       await sql`
         UPDATE subscriptions
-        SET 
-          current_period_end = current_period_end + INTERVAL '1 month',
+        SET
+          current_period_end = current_period_end + INTERVAL '30 days',
           updated_at = NOW()
         WHERE user_id = ${userId}
         AND status = 'active'
@@ -268,6 +280,7 @@ async function grantReferralReward(userId: string): Promise<void> {
       return;
     }
 
+    // Grant new trial for 7 days (REFERRAL_TRIAL_DAYS)
     await sql`
       INSERT INTO subscriptions (
         user_id,
@@ -305,20 +318,28 @@ export async function getUserReferralStats(userId: string): Promise<{
   code: string | null;
   totalReferrals: number;
   activeReferrals: number;
+  remainingReferrals: number;
+  maxReferrals: number;
 }> {
   try {
-    const [codeResult, statsResult] = await Promise.all([
+    const [codeResult, statsResult, codeInfoResult] = await Promise.all([
       getReferralCode(userId),
       sql`
-        SELECT 
+        SELECT
           COUNT(*) as total,
           COUNT(CASE WHEN EXISTS (
-            SELECT 1 FROM subscriptions s 
-            WHERE s.user_id = user_referrals.referred_user_id 
+            SELECT 1 FROM subscriptions s
+            WHERE s.user_id = user_referrals.referred_user_id
             AND s.status IN ('active', 'trial')
           ) THEN 1 END) as active
         FROM user_referrals
         WHERE referrer_user_id = ${userId}
+      `,
+      sql`
+        SELECT uses, max_uses
+        FROM referral_codes
+        WHERE user_id = ${userId}
+        LIMIT 1
       `,
     ]);
 
@@ -327,13 +348,25 @@ export async function getUserReferralStats(userId: string): Promise<{
       code = await generateReferralCode(userId);
     }
 
+    const totalReferrals = parseInt(statsResult.rows[0]?.total || '0');
+    const maxUses = codeInfoResult.rows[0]?.max_uses || MAX_REFERRALS_PER_USER;
+    const remainingReferrals = Math.max(0, maxUses - totalReferrals);
+
     return {
       code,
-      totalReferrals: parseInt(statsResult.rows[0]?.total || '0'),
+      totalReferrals,
       activeReferrals: parseInt(statsResult.rows[0]?.active || '0'),
+      remainingReferrals,
+      maxReferrals: maxUses,
     };
   } catch (error) {
     console.error('Failed to get referral stats:', error);
-    return { code: null, totalReferrals: 0, activeReferrals: 0 };
+    return {
+      code: null,
+      totalReferrals: 0,
+      activeReferrals: 0,
+      remainingReferrals: MAX_REFERRALS_PER_USER,
+      maxReferrals: MAX_REFERRALS_PER_USER,
+    };
   }
 }

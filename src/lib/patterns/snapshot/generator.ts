@@ -53,14 +53,14 @@ export async function generateLifeThemesSnapshot(
       LIMIT 20
     `;
 
-    // Fetch tarot readings (match archetype logic: last 30 days)
+    // Fetch tarot readings - spreads only (exclude daily single-card pulls)
     const tarotResult = await sql`
       SELECT cards
       FROM tarot_readings
       WHERE user_id = ${userId}
         AND archived_at IS NULL
         AND created_at >= NOW() - INTERVAL '30 days'
-        AND created_at >= NOW() - INTERVAL '30 days'
+        AND jsonb_array_length(cards) > 1
       ORDER BY created_at DESC
     `;
 

@@ -123,6 +123,11 @@ export type AstroChartInformation = {
   sign: string;
   retrograde: boolean;
   eclipticLongitude: number;
+  duration?: {
+    totalDays: number;
+    remainingDays: number;
+    displayText: string;
+  };
 };
 
 export function calculateAstrologicalChart(positions: {

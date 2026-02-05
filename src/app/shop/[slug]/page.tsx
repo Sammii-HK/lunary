@@ -1,7 +1,6 @@
 import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import {
-  getAllProducts,
   getProductBySlug,
   getRelatedProducts,
   getUpsellProducts,
@@ -17,18 +16,18 @@ import {
 } from '@/lib/schema';
 import { getShopListingBySlugFromStripe } from '@/lib/stripe/catalogue';
 
+// 30-day ISR revalidation
+export const revalidate = 2592000;
+export const dynamicParams = true;
+
 interface ProductPageProps {
   params: Promise<{
     slug: string;
   }>;
 }
 
-export async function generateStaticParams() {
-  const products = getAllProducts();
-  return products.map((product) => ({
-    slug: product.slug,
-  }));
-}
+// Removed generateStaticParams - using pure ISR for faster builds
+// Pages are generated on-demand and cached with 30-day revalidation
 
 export async function generateMetadata({
   params,

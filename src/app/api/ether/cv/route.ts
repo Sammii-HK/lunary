@@ -197,14 +197,9 @@ export async function POST(request: NextRequest) {
       if (
         canonical.row.userId &&
         canonical.row.anonymousId &&
-        canonical.row.eventType === 'user_signed_up'
-      ) {
-        aliasPostHogUser(canonical.row.userId, canonical.row.anonymousId);
-      }
-      if (
-        canonical.row.userId &&
-        canonical.row.anonymousId &&
-        canonical.row.eventType === 'user_logged_in'
+        (canonical.row.eventType === 'user_signed_up' ||
+          canonical.row.eventType === 'signup_completed' ||
+          canonical.row.eventType === 'user_logged_in')
       ) {
         aliasPostHogUser(canonical.row.userId, canonical.row.anonymousId);
       }

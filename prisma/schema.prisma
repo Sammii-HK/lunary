@@ -1109,6 +1109,9 @@ model user_referrals {
   created_at        DateTime? @default(now()) @db.Timestamptz(6)
   reward_granted    Boolean?  @default(false)
   reward_granted_at DateTime? @db.Timestamptz(6)
+  activated         Boolean?  @default(false)
+  activated_at      DateTime? @db.Timestamptz(6)
+  activation_event  String?   @db.VarChar(100)
 
   @@index([referral_code], map: "idx_user_referrals_code")
   @@index([referred_user_id], map: "idx_user_referrals_referred")
@@ -1145,6 +1148,24 @@ model user_streaks {
   last_ritual_date      DateTime? @db.Date
 
   @@index([last_check_in], map: "idx_user_streaks_last_check_in")
+}
+
+/// Tracks user progress across skill trees (Tarot Mastery, Journal Keeper, Cosmic Explorer, Ritual Keeper)
+/// Used for the gamification/leveling system to drive engagement
+model user_progress {
+  id                String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  user_id           String
+  skill_tree        String    @db.VarChar(50) // 'tarot', 'journal', 'explorer', 'ritual'
+  current_level     Int       @default(1)
+  total_actions     Int       @default(0)
+  unlocked_features Json?     @default("[]") // Array of feature IDs unlocked
+  last_level_up_at  DateTime? @db.Timestamptz(6)
+  created_at        DateTime  @default(now()) @db.Timestamptz(6)
+  updated_at        DateTime  @default(now()) @updatedAt @db.Timestamptz(6)
+
+  @@unique([user_id, skill_tree], map: "idx_user_progress_user_skill_unique")
+  @@index([user_id], map: "idx_user_progress_user_id")
+  @@index([skill_tree], map: "idx_user_progress_skill_tree")
 }
 
 model relationship_profiles {
@@ -1215,6 +1236,18 @@ model friend_connections {
   @@unique([user_id, friend_id], map: "idx_friend_connections_unique")
   @@index([user_id], map: "idx_friend_connections_user")
   @@index([friend_id], map: "idx_friend_connections_friend")
+}
+
+model friend_celebrations {
+  id          String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  sender_id   String
+  receiver_id String
+  milestone   Int
+  message     String?
+  created_at  DateTime @default(now()) @db.Timestamptz(6)
+
+  @@index([receiver_id, created_at(sort: Desc)], map: "idx_celebrations_receiver")
+  @@index([sender_id, receiver_id, milestone], map: "idx_celebrations_sender")
 }
 
 model verification {

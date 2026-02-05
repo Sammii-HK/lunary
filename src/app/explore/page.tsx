@@ -2,6 +2,7 @@ import Link from 'next/link';
 import {
   BookMarked,
   User,
+  Users,
   Stars,
   BookOpen,
   Tag,
@@ -17,6 +18,8 @@ import {
 } from 'lucide-react';
 import { MarketingFooterGate } from '@/components/MarketingFooterGate';
 import { HappeningNowSection } from '@/components/explore/HappeningNowSection';
+import { CircleInviteCTA } from '@/components/CircleInviteCTA';
+import { Heading } from '@/components/ui/Heading';
 
 export const metadata = {
   title: 'Explore | Lunary',
@@ -80,6 +83,18 @@ const cosmicTools: ExploreItem[] = [
     description: 'Current planetary positions',
     icon: Globe,
   },
+  {
+    href: '/profile',
+    label: 'Profile',
+    description: 'Your cosmic identity',
+    icon: User,
+  },
+  {
+    href: '/profile?tab=circle',
+    label: 'Your Circle',
+    description: 'Friends & compatibility',
+    icon: Users,
+  },
 ];
 
 // Section 3: Learn & Connect - Educational content and community
@@ -140,7 +155,9 @@ export default function ExplorePage() {
       <div className='flex-1 p-4'>
         <div className='max-w-2xl mx-auto space-y-6'>
           <header className='pt-4 pb-2'>
-            <h1 className='text-2xl font-light text-zinc-100'>Explore</h1>
+            <Heading variant='h1' as='h1'>
+              Explore
+            </Heading>
             <p className='text-sm text-zinc-400'>
               Discover all Lunary features and resources
             </p>
@@ -160,6 +177,9 @@ export default function ExplorePage() {
               ))}
             </div>
           </section>
+
+          {/* Invite/Referral CTA */}
+          <CircleInviteCTA />
 
           {/* Section 3: Learn & Connect */}
           <section>

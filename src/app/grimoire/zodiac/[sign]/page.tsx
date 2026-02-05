@@ -1,6 +1,7 @@
 import { notFound } from 'next/navigation';
 import { SEOContentTemplate } from '@/components/grimoire/SEOContentTemplate';
 import { CosmicConnections } from '@/components/grimoire/CosmicConnections';
+import { PlacementSelector } from '@/components/grimoire/PlacementSelector';
 import {
   zodiacSigns,
   zodiacSymbol,
@@ -297,6 +298,7 @@ Tarot Card: ${signData.tarotCard}`}
         ctaText={`Want personalized insights for your ${signData.name} chart?`}
         ctaHref='/pricing'
         faqs={faqs}
+        components={<PlacementSelector signName={signData.name} />}
         cosmicConnections={
           <CosmicConnections
             entityType='sign'

@@ -341,8 +341,8 @@ export const MoonPreview = ({
     )
       .then((r) => r.json())
       .then((data) => {
+        // Cache all 3 but display count is controlled by isMobile in render
         const spellData = (data || []).slice(0, 3);
-        // Cache spells for this phase until midnight (daily) - spells don't change throughout the day
         DailyCache.set(cacheKey, data || [], 'daily');
         setSpells(spellData);
         setLoading(false);
@@ -448,7 +448,7 @@ export const MoonPreview = ({
             Recommended Spells
           </h4>
           <div className='space-y-2'>
-            {spells.map((spell) => (
+            {spells.slice(0, isMobile ? 1 : 3).map((spell) => (
               <Link
                 key={spell.id}
                 href={`/grimoire/spells/${spell.id}`}
@@ -459,6 +459,12 @@ export const MoonPreview = ({
               </Link>
             ))}
           </div>
+          <Link
+            href='/grimoire/spells'
+            className='inline-block text-xs text-lunary-accent hover:text-lunary-accent-300 transition-colors mt-2'
+          >
+            Browse all spells
+          </Link>
         </div>
       ) : null}
 

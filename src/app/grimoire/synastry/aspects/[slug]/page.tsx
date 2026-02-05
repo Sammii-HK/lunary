@@ -3,7 +3,6 @@ import { notFound } from 'next/navigation';
 import { SEOContentTemplate } from '@/components/grimoire/SEOContentTemplate';
 import {
   getSynastryAspect,
-  getAllSynastryAspectSlugs,
   aspectTypes,
   synastryAspects,
 } from '@/constants/seo/synastry-aspects';
@@ -18,14 +17,14 @@ import { Heading } from '@/components/ui/Heading';
 import { NavParamLink } from '@/components/NavParamLink';
 
 export const revalidate = 86400;
+export const dynamicParams = true;
 
 interface PageProps {
   params: Promise<{ slug: string }>;
 }
 
-export async function generateStaticParams() {
-  return getAllSynastryAspectSlugs().map((slug) => ({ slug }));
-}
+// Removed generateStaticParams - using pure ISR for faster builds
+// Pages are generated on-demand and cached with 1-day revalidation
 
 export async function generateMetadata({
   params,

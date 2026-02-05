@@ -7,19 +7,18 @@ import { Heading } from '@/components/ui/Heading';
 import { Eye, Star, AlertTriangle, Users } from 'lucide-react';
 import {
   getRisingSign,
-  getAllRisingSignSlugs,
   getAllRisingSigns,
 } from '@/lib/rising-signs/getRisingSign';
 
 export const revalidate = 2592000; // 30 days
+export const dynamicParams = true;
 
 interface PageProps {
   params: Promise<{ sign: string }>;
 }
 
-export async function generateStaticParams() {
-  return getAllRisingSignSlugs().map((slug) => ({ sign: slug }));
-}
+// Removed generateStaticParams - using pure ISR for faster builds
+// Pages are generated on-demand and cached with 30-day revalidation
 
 export async function generateMetadata({
   params,

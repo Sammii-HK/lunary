@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import { SEOContentTemplate } from '@/components/grimoire/SEOContentTemplate';
 import { HoroscopeCosmicConnections } from '@/components/grimoire/HoroscopeCosmicConnections';
+import { PlacementSelector } from '@/components/grimoire/PlacementSelector';
 import { yearMeta } from '@/lib/horoscope-meta';
 
 import {
@@ -234,6 +235,7 @@ This ${year} forecast helps ${signName} timeframe focus. Use slow, deliberate pl
           currentYear={currentYear}
         />
       }
+      components={<PlacementSelector signName={signName} />}
       faqs={faqItems}
       tldr={`${year} keeps ${signName} rooted in ${element.toLowerCase()} consistency while ${ruler} asks you to tell a longer story with your choices.`}
       ctaText='See your full birth-chart horoscope in the app'

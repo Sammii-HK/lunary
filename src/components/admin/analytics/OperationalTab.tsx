@@ -100,6 +100,7 @@ export function OperationalTab({ data, computed }: OperationalTabProps) {
     cohorts,
     discordAnalytics,
     searchConsoleData,
+    grimoireTopPages,
     loading,
   } = data;
 
@@ -966,6 +967,43 @@ export function OperationalTab({ data, computed }: OperationalTabProps) {
                 </div>
               </div>
             </div>
+          </CardContent>
+        </Card>
+        <Card className='border-zinc-800/30 bg-zinc-900/10'>
+          <CardHeader>
+            <CardTitle className='text-base font-medium'>
+              Top Grimoire Pages
+            </CardTitle>
+            <CardDescription className='text-xs text-zinc-400'>
+              Best performing grimoire pages by unique views (deduplicated, 1
+              per user per page per day).
+            </CardDescription>
+          </CardHeader>
+          <CardContent className='overflow-x-auto'>
+            <MetricTable
+              columns={[
+                {
+                  label: 'Page',
+                  key: 'pagePath',
+                  type: 'text',
+                  render: (value: string) => value.replace('/grimoire/', ''),
+                },
+                {
+                  label: '30d Views',
+                  key: 'viewsLast30Days',
+                  type: 'number',
+                  align: 'right',
+                },
+                {
+                  label: 'All-time',
+                  key: 'viewsAllTime',
+                  type: 'number',
+                  align: 'right',
+                },
+              ]}
+              data={grimoireTopPages ?? []}
+              emptyMessage='No grimoire page view data yet.'
+            />
           </CardContent>
         </Card>
         {searchConsoleData && (

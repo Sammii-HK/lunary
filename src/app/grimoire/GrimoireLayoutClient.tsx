@@ -1,17 +1,13 @@
 'use client';
 
-import { grimoire, customContentHrefs } from '@/constants/grimoire';
+import { grimoire } from '@/constants/grimoire';
 import Link from 'next/link';
-import { stringToKebabCase } from '../../../utils/string';
-import { sectionToSlug, slugToSection } from '@/utils/grimoire';
-import { useState, useEffect, useTransition, useRef, useCallback } from 'react';
+import { slugToSection } from '@/utils/grimoire';
+import { useEffect, useRef, useCallback } from 'react';
 import type { ComponentProps } from 'react';
 import dynamic from 'next/dynamic';
 import { MarketingFooterGate } from '@/components/MarketingFooterGate';
 import {
-  ChevronRightIcon,
-  Menu,
-  X,
   Sparkles,
   Moon as MoonIcon,
   Star,
@@ -24,96 +20,14 @@ import {
   Wand,
 } from 'lucide-react';
 import { ExploreGrimoire } from '@/components/grimoire/ExploreGrimoire';
+import { GrimoireStats } from '@/components/grimoire/GrimoireStats';
+import { GrimoireSearch } from './GrimoireSearch';
 
-const currentYear = new Date().getFullYear();
-
-// Sidebar categories for organized navigation
-const SIDEBAR_CATEGORIES = [
-  {
-    name: 'Complete Guides',
-    icon: <Sparkles size={14} />,
-    sections: ['guides', 'beginners'],
-  },
-  {
-    name: 'Zodiac & Signs',
-    icon: <Star size={14} />,
-    sections: [
-      'zodiac',
-      'decans',
-      'cusps',
-      'birthday',
-      'seasons',
-      'compatibility',
-    ],
-  },
-  {
-    name: 'Astrology',
-    icon: <Compass size={14} />,
-    sections: [
-      'birthChart',
-      'houses',
-      'aspects',
-      'placements',
-      'transits',
-      'horoscopes',
-      'astronomy',
-      'astronomyVsAstrology',
-    ],
-  },
-  {
-    name: 'Moon',
-    icon: <MoonIcon size={14} />,
-    sections: ['moon'],
-  },
-  {
-    name: 'Tarot & Divination',
-    icon: <Layers size={14} />,
-    sections: ['tarot', 'runes', 'divination'],
-  },
-  {
-    name: 'Crystals',
-    icon: <Gem size={14} />,
-    sections: ['crystals'],
-  },
-  {
-    name: 'Numerology',
-    icon: <Hash size={14} />,
-    sections: ['numerology'],
-  },
-  {
-    name: 'Witchcraft',
-    icon: <Wand size={14} />,
-    sections: [
-      'modernWitchcraft',
-      'practices',
-      'candleMagic',
-      'correspondences',
-      'meditation',
-      'protection',
-      'manifestation',
-    ],
-  },
-  {
-    name: 'Self-Discovery',
-    icon: <Sparkles size={14} />,
-    sections: ['archetypes', 'shadowWork'],
-  },
-  {
-    name: 'Other',
-    icon: <BookOpen size={14} />,
-    sections: [
-      'chakras',
-      'wheelOfTheYear',
-      'chineseZodiac',
-      'events',
-      'glossary',
-    ],
-  },
-];
-import { AskTheGrimoire } from './AskTheGrimoire';
 import { captureEvent } from '@/lib/posthog-client';
 import { conversionTracking } from '@/lib/analytics';
 import { getStoredAttribution, extractSearchQuery } from '@/lib/attribution';
+
+const currentYear = new Date().getFullYear();
 
 // Dynamic imports for grimoire components (lazy load to improve build speed)
 const Moon = dynamic(() => import('./components/Moon'), {
@@ -778,16 +692,21 @@ function GrimoireIndexPage({
   return (
     <div className='p-4 md:py-12 lg:py-16'>
       <div className='max-w-6xl mx-auto'>
-        {/* Header */}
+        {/* Header with Search */}
         <div className='text-center mb-12 md:mb-16'>
           <Notebook className='w-16 h-16 md:w-20 md:h-20 text-lunary-primary-400 mx-auto mb-6' />
           <h1 className='text-3xl md:text-4xl lg:text-5xl font-light text-zinc-100 mb-4'>
             Welcome to the Grimoire
           </h1>
-          <p className='text-base md:text-lg text-zinc-400 leading-relaxed max-w-2xl mx-auto'>
+          <p className='text-base md:text-lg text-zinc-400 leading-relaxed max-w-2xl mx-auto mb-8'>
             Explore mystical knowledge, cosmic wisdom, and ancient practices to
             deepen your spiritual journey.
           </p>
+
+          {/* Search */}
+          <div className='max-w-xl mx-auto'>
+            <GrimoireSearch placeholder='Search tarot, crystals, zodiac...' />
+          </div>
         </div>
 
         {/* Categories with all subsections */}
@@ -852,12 +771,6 @@ export default function GrimoireLayout({
   searchParams,
   pathname,
 }: GrimoireLayoutProps) {
-  const [isPending, startTransition] = useTransition();
-  const [expandedSections, setExpandedSections] = useState<Set<string>>(
-    new Set(),
-  );
-  const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [isDesktop, setIsDesktop] = useState(false);
   const navParam = normalizeParam(searchParams?.nav);
   const fromParam = normalizeParam(searchParams?.from);
 
@@ -865,9 +778,9 @@ export default function GrimoireLayout({
     ? slugToSection(currentSectionSlug)
     : undefined;
 
-  const trackedSectionRef = useRef<string | undefined>(undefined);
   const trackedPathRef = useRef<string | undefined>(undefined);
 
+  // Analytics tracking
   useEffect(() => {
     if (trackedPathRef.current === pathname) {
       return;
@@ -897,57 +810,28 @@ export default function GrimoireLayout({
       ...trackingPayload,
     });
     conversionTracking.grimoireViewed(undefined, trackingPayload);
-    trackedSectionRef.current = currentSection;
     trackedPathRef.current = pathname;
   }, [currentSection, pathname]);
 
-  // Auto-expand active section
-  useEffect(() => {
-    if (currentSection && grimoire[currentSection]?.contents) {
-      setExpandedSections(new Set([currentSection]));
-    }
-  }, [currentSection]);
-
-  // Handle hash navigation - expand section and scroll to hash
+  // Handle hash navigation on mount and pathname change
   useEffect(() => {
     if (typeof window === 'undefined') return;
+
     const hash = window.location.hash.slice(1);
-    if (hash && currentSection) {
-      const sectionHasHash = grimoire[currentSection]?.contents?.some(
-        (content) => stringToKebabCase(content) === hash,
-      );
-      if (sectionHasHash) {
-        setExpandedSections(new Set([currentSection]));
-        setTimeout(() => {
-          const element = document.getElementById(hash);
-          if (element) {
-            element.scrollIntoView({ behavior: 'smooth', block: 'start' });
-          }
-        }, 100);
+    if (!hash) return;
+
+    const scrollToElement = () => {
+      const element = document.getElementById(hash);
+      if (element) {
+        element.scrollIntoView({ behavior: 'smooth', block: 'start' });
       }
-    }
-  }, [currentSection, pathname]);
+    };
 
-  // Close sidebar on mobile when route changes
-  useEffect(() => {
-    setSidebarOpen(false);
+    // Wait for content to render
+    requestAnimationFrame(() => {
+      setTimeout(scrollToElement, 150);
+    });
   }, [pathname]);
-
-  const toggleSection = (sectionKey: string) => {
-    const newExpanded = new Set(expandedSections);
-    if (newExpanded.has(sectionKey)) {
-      newExpanded.delete(sectionKey);
-    } else {
-      newExpanded.add(sectionKey);
-    }
-    setExpandedSections(newExpanded);
-  };
-
-  const handleSearchResultClick = (section?: string) => {
-    if (section) {
-      setExpandedSections(new Set([section]));
-    }
-  };
 
   const withNavParams = useCallback(
     (href: string) => {
@@ -967,233 +851,25 @@ export default function GrimoireLayout({
     [navParam, fromParam],
   );
 
-  useEffect(() => {
-    if (typeof window === 'undefined') return;
-    const media = window.matchMedia('(min-width: 768px)');
-    const apply = () => setIsDesktop(media.matches);
-    apply();
-    media.addEventListener?.('change', apply);
-    return () => media.removeEventListener?.('change', apply);
-  }, []);
-
   return (
-    <div className='flex flex-row h-full overflow-hidden relative'>
-      {/* Mobile overlay */}
-      {sidebarOpen && (
-        <div
-          className='fixed inset-0 bg-black/50 z-40 md:hidden'
-          onClick={() => setSidebarOpen(false)}
-        />
+    <div className='h-full'>
+      {currentSection ? (
+        <div className='p-4 md:p-6 lg:p-8'>
+          <div className='max-w-4xl mx-auto'>
+            {GrimoireContent[currentSection as keyof typeof GrimoireContent]}
+            <GrimoireStats className='mt-8 pt-6 border-t border-zinc-800/50' />
+            <ExploreGrimoire />
+            <MarketingFooterGate />
+          </div>
+        </div>
+      ) : (
+        <div>
+          <GrimoireIndexPage withNavParams={withNavParams} />
+          <div className='max-w-6xl mx-auto px-4'>
+            <MarketingFooterGate />
+          </div>
+        </div>
       )}
-
-      {/* Sidebar */}
-      <div
-        style={
-          isDesktop
-            ? undefined
-            : {
-                top: 'var(--global-nav-offset, 0px)',
-                height: 'calc(100vh - var(--global-nav-offset, 0px))',
-              }
-        }
-        className={`
-          fixed md:sticky top-0 left-0
-          h-full z-50
-          ${sidebarOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}
-          w-64 md:w-72 lg:w-80 xl:w-96 flex-shrink-0 bg-zinc-900 border-r border-zinc-700
-          transition-transform duration-300 ease-in-out
-          flex flex-col
-          md:top-0 md:h-full
-        `}
-      >
-        {/* Header */}
-        <div className='p-4 md:p-5 lg:p-6 border-b border-zinc-700 flex items-center justify-between'>
-          <Link
-            href={withNavParams('/grimoire')}
-            onClick={() => setSidebarOpen(false)}
-            className='text-lg md:text-xl lg:text-2xl font-bold text-white hover:text-lunary-primary-400 transition-colors flex items-center gap-2'
-          >
-            <Sparkles className='w-5 h-5 md:w-6 md:h-6 text-lunary-primary-400' />
-            Grimoire
-          </Link>
-          <button
-            onClick={() => setSidebarOpen(false)}
-            className='md:hidden p-2 hover:bg-zinc-800 rounded-md transition-colors text-zinc-400 hover:text-white'
-            aria-label='Close sidebar menu'
-          >
-            <X size={20} aria-hidden='true' />
-          </button>
-        </div>
-
-        {/* Search / Ask AI */}
-        <AskTheGrimoire
-          onResultClick={handleSearchResultClick}
-          onSidebarClose={() => setSidebarOpen(false)}
-        />
-
-        {/* Navigation - Categorized */}
-        <div className='flex-1 overflow-y-auto p-3 md:p-4 lg:p-5'>
-          <div className='space-y-4'>
-            {SIDEBAR_CATEGORIES.map((category) => (
-              <div key={category.name}>
-                {/* Category Header */}
-                <div className='flex items-center gap-2 px-2 py-1.5 text-xs font-semibold text-zinc-400 uppercase tracking-wider'>
-                  <span className='text-lunary-primary-500'>
-                    {category.icon}
-                  </span>
-                  {category.name}
-                </div>
-
-                {/* Category Items */}
-                <div className='space-y-0.5'>
-                  {category.sections.map((itemKey: string) => {
-                    if (!grimoire[itemKey]) return null;
-                    const isExpanded = expandedSections.has(itemKey);
-                    const hasContents =
-                      grimoire[itemKey].contents &&
-                      grimoire[itemKey].contents!.length > 0;
-                    const isActive = currentSection === itemKey;
-
-                    const slug = sectionToSlug(itemKey);
-                    const href = `/grimoire/${slug}`;
-
-                    return (
-                      <div key={itemKey} className='w-full'>
-                        <div
-                          className={`flex items-center rounded-lg transition-all duration-200 group ${
-                            isActive
-                              ? 'bg-lunary-primary-900/10 border-l-2 border-lunary-primary-400'
-                              : 'hover:bg-zinc-800/50'
-                          }`}
-                        >
-                          {hasContents ? (
-                            <button
-                              onClick={(e) => {
-                                e.preventDefault();
-                                e.stopPropagation();
-                                toggleSection(itemKey);
-                              }}
-                              className='p-2 hover:bg-zinc-700/50 rounded-lg transition-colors'
-                              aria-label={
-                                isExpanded
-                                  ? `Collapse ${grimoire[itemKey].title}`
-                                  : `Expand ${grimoire[itemKey].title}`
-                              }
-                              aria-expanded={isExpanded}
-                            >
-                              <ChevronRightIcon
-                                size={14}
-                                className={`text-zinc-400 transition-transform duration-200 ${
-                                  isExpanded ? 'rotate-90' : ''
-                                }`}
-                                aria-hidden='true'
-                              />
-                            </button>
-                          ) : (
-                            <div className='w-8' />
-                          )}
-
-                          <Link
-                            href={withNavParams(href)}
-                            prefetch={true}
-                            onClick={() => {
-                              startTransition(() => {
-                                setSidebarOpen(false);
-                              });
-                            }}
-                            className={`flex-1 flex items-center gap-3 py-2 px-2 text-sm font-medium transition-colors ${
-                              isActive
-                                ? 'text-lunary-primary-400'
-                                : 'text-zinc-300 group-hover:text-white'
-                            }`}
-                          >
-                            {grimoire[itemKey].title}
-                          </Link>
-                        </div>
-
-                        {hasContents && (
-                          <div
-                            className={`
-                              overflow-hidden transition-all duration-300 ease-in-out
-                              ${isExpanded ? 'max-h-[500px] opacity-100' : 'max-h-0 opacity-0'}
-                            `}
-                          >
-                            <div className='ml-8 pl-3 mt-1 mb-2 border-l border-zinc-800 space-y-0.5'>
-                              {grimoire[itemKey].contents!.map(
-                                (content: string) => {
-                                  const customHref =
-                                    customContentHrefs[itemKey]?.[content];
-                                  const contentHref =
-                                    customHref ||
-                                    `/grimoire/${slug}#${stringToKebabCase(content)}`;
-                                  return (
-                                    <Link
-                                      key={content}
-                                      href={withNavParams(contentHref)}
-                                      prefetch={true}
-                                      onClick={() => {
-                                        startTransition(() => {
-                                          setSidebarOpen(false);
-                                        });
-                                      }}
-                                      className='block py-1.5 px-3 text-sm text-zinc-400 hover:text-lunary-primary-300 hover:bg-lunary-primary-900/5 rounded-md transition-colors'
-                                    >
-                                      {content}
-                                    </Link>
-                                  );
-                                },
-                              )}
-                            </div>
-                          </div>
-                        )}
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-
-      {/* Main content */}
-      <div className='flex-1 overflow-y-auto min-w-0 px-4 pt-4 pb-5'>
-        {/* Mobile menu button */}
-        <button
-          onClick={() => setSidebarOpen(true)}
-          style={{
-            top: 'calc(var(--global-nav-offset, 0px) + 12px)',
-          }}
-          className='md:hidden fixed left-4 z-30 p-2 bg-zinc-900 border border-zinc-700 rounded-md text-white hover:bg-zinc-800 transition-colors'
-          aria-label='Open grimoire menu'
-        >
-          <Menu size={20} aria-hidden='true' />
-        </button>
-
-        {/* Loading indicator */}
-        {isPending && (
-          <div className='absolute top-0 left-0 right-0 h-1 bg-lunary-primary-900/20 z-50'>
-            <div className='h-full bg-lunary-primary-500 animate-pulse' />
-          </div>
-        )}
-
-        {currentSection ? (
-          <div className='p-4 md:p-6 lg:p-8 xl:p-10 min-h-full'>
-            <div className='max-w-7xl mx-auto'>
-              {GrimoireContent[currentSection as keyof typeof GrimoireContent]}
-              <ExploreGrimoire />
-              <MarketingFooterGate />
-            </div>
-          </div>
-        ) : (
-          <div>
-            <GrimoireIndexPage withNavParams={withNavParams} />
-            <div className='max-w-7xl mx-auto px-4'>
-              <MarketingFooterGate />
-            </div>
-          </div>
-        )}
-      </div>
     </div>
   );
 }

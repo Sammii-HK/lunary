@@ -32,8 +32,6 @@ import {
   TransitAspect,
   TransitDetail,
 } from '@/features/horoscope';
-import { TransitDurationBadge } from '../TransitDurationBadge';
-
 const getOrdinalSuffix = (n: number): string => {
   if (n >= 11 && n <= 13) return 'th';
   switch (n % 10) {
@@ -48,6 +46,50 @@ const getOrdinalSuffix = (n: number): string => {
   }
 };
 
+/** Convert event text to past tense if the transit date is in the past */
+const toPastTense = (event: string, date: dayjs.Dayjs): string => {
+  if (!date.isBefore(dayjs())) return event;
+  return event
+    .replace(/\bEnters\b/i, 'Entered')
+    .replace(/\benters\b/, 'entered')
+    .replace(/\bGoes\b/i, 'Went')
+    .replace(/\bgoes\b/, 'went')
+    .replace(/\bMoves\b/i, 'Moved')
+    .replace(/\bmoves\b/, 'moved');
+};
+
+/** Highlight inline time strings with a soft primary color */
+const highlightInlineTime = (text: string): React.ReactNode => {
+  const pattern = /(in <1h|in \d+h|<1h ago|\d+h ago|yesterday|tomorrow)/;
+  const parts = text.split(pattern);
+  if (parts.length === 1) return text;
+  return parts.map((part, i) =>
+    i % 2 === 1 ? (
+      <span key={i} className='text-lunary-primary-200'>
+        {part}
+      </span>
+    ) : (
+      part
+    ),
+  );
+};
+
+/** Compact inline relative time: "3h ago", "in 5h", "yesterday", "tomorrow" */
+const inlineRelativeTime = (date: dayjs.Dayjs): string => {
+  const now = dayjs();
+  const today = now.startOf('day');
+  const transitDay = date.startOf('day');
+  const daysDiff = transitDay.diff(today, 'day');
+  const absHours = Math.round(Math.abs(date.diff(now)) / (1000 * 60 * 60));
+
+  if (daysDiff === 0) {
+    if (date.isAfter(now)) return absHours < 1 ? 'in <1h' : `in ${absHours}h`;
+    return absHours < 1 ? '<1h ago' : `${absHours}h ago`;
+  }
+  if (daysDiff < 0) return 'yesterday';
+  return 'tomorrow';
+};
+
 const formatTransitSentence = (
   transit: PersonalTransitImpact,
   isFirst: boolean,
@@ -55,8 +97,10 @@ const formatTransitSentence = (
   const houseLabel = transit.house
     ? `in your ${transit.house}${getOrdinalSuffix(transit.house)} house`
     : 'in your chart';
-  const eventLabel = transit.event || transit.type || 'moves through';
-  const base = `${transit.planet} ${eventLabel} ${houseLabel}`;
+  const raw = transit.event || transit.type || 'moves through';
+  const eventLabel = toPastTense(raw, transit.date);
+  const time = inlineRelativeTime(transit.date);
+  const base = `${transit.planet} ${eventLabel} ${houseLabel} ${time}`;
   const prefix = isFirst ? '' : 'Meanwhile, ';
   const sentence = `${prefix}${base}`.trim();
   const capitalized = sentence.charAt(0).toUpperCase() + sentence.slice(1);
@@ -248,12 +292,11 @@ export const DailyInsightCard = () => {
     selectedDay.valueOf(),
   ]);
 
-  // Calculate transit event sentences (enters/leaves)
+  // Calculate transit event sentences (enters/leaves) — TODAY ONLY
   const transitHighlights = useMemo<PersonalTransitImpact[]>(() => {
     if (!authStatus.isAuthenticated || !birthChart) return [];
     const todayStart = selectedDay.startOf('day');
-    const windowStart = todayStart.subtract(2, 'day');
-    const windowEnd = todayStart.add(1, 'day');
+    const todayEnd = todayStart.add(1, 'day');
     const upcomingTransits = getUpcomingTransits(todayStart);
     const impacts = getPersonalTransitImpacts(upcomingTransits, birthChart, 60);
 
@@ -262,26 +305,25 @@ export const DailyInsightCard = () => {
       number
     > = { high: 3, medium: 2, low: 1 };
 
-    const candidates = impacts.filter((impact) => {
+    // Only show transits that fall on today (not yesterday, not tomorrow)
+    const todayCandidates = impacts.filter((impact) => {
       const val = impact.date.startOf('day').valueOf();
       return (
-        val >= windowStart.valueOf() &&
-        val <= windowEnd.valueOf() &&
+        val >= todayStart.valueOf() &&
+        val < todayEnd.valueOf() &&
         !Number.isNaN(significanceOrder[impact.significance])
       );
     });
 
-    const withHouse = candidates.filter((impact) => impact.house);
-    const pool = withHouse.length > 0 ? withHouse : candidates;
+    const withHouse = todayCandidates.filter((impact) => impact.house);
+    const pool = withHouse.length > 0 ? withHouse : todayCandidates;
     if (pool.length === 0) return [];
 
     const sorted = pool
-      .map((impact) => ({
-        impact,
-        score:
-          (significanceOrder[impact.significance] ?? 1) * 100000 +
-          impact.date.valueOf(),
-      }))
+      .map((impact) => {
+        const sigScore = (significanceOrder[impact.significance] ?? 1) * 1_000;
+        return { impact, score: sigScore };
+      })
       .sort((a, b) => b.score - a.score);
 
     const seen = new Set<string>();
@@ -314,11 +356,10 @@ export const DailyInsightCard = () => {
 
   const displayText = transitSummaryText ?? insight.text;
 
-  // General (non-personalized) transit text for free users
+  // General (non-personalized) transit text for free users — TODAY ONLY
   const generalTransitText = useMemo(() => {
     const todayStart = selectedDay.startOf('day');
-    const windowStart = todayStart.subtract(1, 'day');
-    const windowEnd = todayStart.add(1, 'day');
+    const todayEnd = todayStart.add(1, 'day');
     const transits = getUpcomingTransits(todayStart);
 
     const significanceOrder: Record<string, number> = {
@@ -327,9 +368,10 @@ export const DailyInsightCard = () => {
       low: 1,
     };
 
+    // Only show transits that fall on today
     const relevant = transits.filter((t) => {
       const val = t.date.startOf('day').valueOf();
-      return val >= windowStart.valueOf() && val <= windowEnd.valueOf();
+      return val >= todayStart.valueOf() && val < todayEnd.valueOf();
     });
 
     if (relevant.length === 0) return null;
@@ -343,8 +385,10 @@ export const DailyInsightCard = () => {
     const top2 = sorted.slice(0, 2);
     return top2
       .map((t, i) => {
-        const event = t.event.charAt(0).toLowerCase() + t.event.slice(1);
-        const sentence = `${t.planet} ${event}`;
+        const raw = t.event.charAt(0).toLowerCase() + t.event.slice(1);
+        const event = toPastTense(raw, t.date);
+        const time = inlineRelativeTime(t.date);
+        const sentence = `${t.planet} ${event} ${time}`;
         const prefix = i === 0 ? '' : 'Meanwhile, ';
         const full = `${prefix}${sentence}`.trim();
         const cap = full.charAt(0).toUpperCase() + full.slice(1);
@@ -423,7 +467,7 @@ export const DailyInsightCard = () => {
               </span>
             </div>
             <p className='text-sm text-zinc-200 leading-relaxed mb-2'>
-              {generalTransitText ?? insight.text}
+              {highlightInlineTime(generalTransitText ?? insight.text)}
             </p>
 
             <div className='relative'>
@@ -485,20 +529,9 @@ export const DailyInsightCard = () => {
             <Sparkles className='w-4 h-4 text-lunary-primary-300' />
             <span className='text-sm text-zinc-200'>Today's Influence</span>
           </div>
-          <p className='text-sm text-zinc-300 leading-relaxed'>{displayText}</p>
-          {transitHighlights.length > 0 && (
-            <div className='flex flex-wrap gap-1.5 mt-2'>
-              {transitHighlights.map(
-                (transit) =>
-                  transit.duration && (
-                    <TransitDurationBadge
-                      key={`${transit.planet}-${transit.event}`}
-                      duration={transit.duration}
-                    />
-                  ),
-              )}
-            </div>
-          )}
+          <p className='text-sm text-zinc-300 leading-relaxed'>
+            {highlightInlineTime(displayText)}
+          </p>
           {transitDetails.length > 0 && (
             <div className='mt-2 space-y-1'>
               {transitDetails.map((detail) => (

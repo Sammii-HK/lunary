@@ -1,8 +1,9 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import Link from 'next/link';
 import dynamic from 'next/dynamic';
+import { useRouter } from 'next/navigation';
 import { useUser } from '@/context/UserContext';
 import { useAuthStatus } from '@/components/AuthStatus';
 import { recordCheckIn } from '@/lib/streak/check-in';
@@ -11,6 +12,7 @@ import { useTour } from '@/context/TourContext';
 import { useNotificationDeepLink } from '@/hooks/useNotificationDeepLink';
 import { useABTestTracking } from '@/hooks/useABTestTracking';
 import { useWidgetSync } from '@/hooks/useWidgetSync';
+import { usePullToRefresh } from '@/hooks/usePullToRefresh';
 
 import { ShareDailyInsight } from '@/components/ShareDailyInsight';
 import { ShareDailyCosmicState } from '@/components/share/ShareDailyCosmicState';
@@ -151,6 +153,16 @@ export default function AppDashboardClient() {
   const authState = useAuthStatus();
   const { startTour, hasSeenOnboarding } = useTour();
   const [focusHonoured, setFocusHonoured] = useState(false);
+  const router = useRouter();
+
+  const handleRefresh = useCallback(async () => {
+    router.refresh();
+    // Small delay so the user sees the refresh indicator
+    await new Promise((resolve) => setTimeout(resolve, 600));
+  }, [router]);
+
+  const { containerRef, pullDistance, isRefreshing, progress } =
+    usePullToRefresh({ onRefresh: handleRefresh });
 
   // Track dashboard view with A/B test data (cta-copy-test)
   useABTestTracking('dashboard', 'app_opened', ['cta-copy-test']);
@@ -159,8 +171,8 @@ export default function AppDashboardClient() {
   useWidgetSync({ enabled: authState.isAuthenticated });
   const firstName = user?.name?.trim() ? user.name.split(' ')[0] : null;
   const [isDemoMode, setIsDemoMode] = useState(false);
-  // Always use controlled mode - start with false, never undefined
   const [moonExpanded, setMoonExpanded] = useState<boolean>(false);
+  const [skyNowExpanded, setSkyNowExpanded] = useState<boolean>(false);
 
   // Defer heavy components for faster initial render
   const [showHoroscope, setShowHoroscope] = useState(false);
@@ -174,23 +186,35 @@ export default function AppDashboardClient() {
     checkDemoMode();
   }, []);
 
-  // Auto-expand moon card logic
+  // Auto-expand logic
   useEffect(() => {
     if (isDemoMode) {
-      // Demo mode: auto-expand after 1 second
+      // Demo mode: scroll to Sky Now, expand it, then collapse after a few seconds
+      const scrollTimeout = setTimeout(() => {
+        const skyNowEl = document.getElementById('sky-now');
+        skyNowEl?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }, 800);
       const expandTimeout = setTimeout(() => {
-        setMoonExpanded(true);
-      }, 1000);
-      return () => clearTimeout(expandTimeout);
+        setSkyNowExpanded(true);
+      }, 1500);
+      const collapseTimeout = setTimeout(() => {
+        setSkyNowExpanded(false);
+      }, 5000);
+      return () => {
+        clearTimeout(scrollTimeout);
+        clearTimeout(expandTimeout);
+        clearTimeout(collapseTimeout);
+      };
     } else {
-      // Non-demo mode: auto-expand on desktop immediately
+      // Non-demo mode: auto-expand moon and sky now on desktop immediately
       const isDesktop = window.matchMedia('(min-width: 768px)').matches;
       if (isDesktop) {
         setMoonExpanded(true);
+        setSkyNowExpanded(true);
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isDemoMode]); // Only depend on isDemoMode, not moonExpanded
+  }, [isDemoMode]);
 
   // Handle moon preview toggle
   const handleMoonToggle = (isExpanded: boolean) => {
@@ -286,83 +310,119 @@ export default function AppDashboardClient() {
   };
 
   return (
-    <div
-      id='dashboard-container'
-      className='dashboard-container flex w-full flex-col gap-4 max-w-2xl md:max-w-4xl mx-auto p-4 mb-10'
-    >
-      <h1 className='sr-only'>Lunary - Your Daily Cosmic Guide</h1>
-
-      <PostTrialMessaging />
-
-      <header className='py-4'>
-        <div className='flex items-center justify-between mb-2'>
-          <div className='w-16' />
-          <p className='text-lg text-zinc-300 text-center flex-1'>
-            {greeting()}
-            {firstName && (
-              <>
-                ,{' '}
-                <Link
-                  href='/profile'
-                  className='text-lunary-accent hover:text-lunary-accent-300 transition-colors'
-                >
-                  {firstName}
-                </Link>
-              </>
-            )}
-          </p>
-          <div className='flex justify-end gap-2'>
-            <ShareDailyInsight />
-            <ShareDailyCosmicState compact />
-          </div>
-        </div>
-        <div className='text-center'>
-          <DateWidget />
-          <div className='mt-2'>
-            <TourTrigger
-              onStartTour={() => startTour('first_time_onboarding')}
-              hasSeenOnboarding={hasSeenOnboarding}
-            />
-          </div>
-        </div>
-      </header>
-
-      {/* Zodiac Season Banner */}
-      <ShareZodiacSeason />
-
-      {showHoroscope && <PersonalizedHoroscopePreview />}
+    <div ref={containerRef}>
+      {/* Pull-to-refresh indicator */}
       <div
-        id='dashboard-main-grid'
-        className={`grid gap-3 ${isDemoMode ? 'grid-cols-1' : 'grid-cols-1 md:grid-cols-2'}`}
+        className='flex items-center justify-center overflow-hidden transition-all duration-200'
+        style={{ height: pullDistance > 0 || isRefreshing ? pullDistance : 0 }}
       >
-        <div id='moon-phase' className='scroll-mt-20'>
-          <MoonPreview isExpanded={moonExpanded} onToggle={handleMoonToggle} />
-        </div>
-        <SkyNowCard />
-        <DailyInsightCard />
-        <DailyCardPreview />
-
-        <div id='transit-of-day' className='scroll-mt-20'>
-          <TransitOfTheDay />
-        </div>
-        <CrystalPreview />
-
-        <div className={isDemoMode ? '' : 'md:col-span-2'}>
-          <ConditionalWheel />
+        <div
+          className='text-zinc-400'
+          style={{
+            opacity: progress,
+            transform: `rotate(${progress * 360}deg)`,
+            transition: isRefreshing ? 'none' : 'transform 0.1s ease',
+          }}
+        >
+          <svg
+            className={`w-6 h-6 ${isRefreshing ? 'animate-spin' : ''}`}
+            viewBox='0 0 24 24'
+            fill='none'
+            stroke='currentColor'
+            strokeWidth='2'
+          >
+            <path d='M21 12a9 9 0 1 1-6.22-8.56' />
+          </svg>
         </div>
       </div>
-      {authState.isAuthenticated && (
-        <p className='text-xs text-zinc-500 text-center mt-4'>
-          {focusHonoured
-            ? "You've honoured today's focus."
-            : "You've checked in with today's sky."}
-        </p>
-      )}
-      {authState.isAuthenticated && focusHonoured && (
-        <p className='text-[0.65rem] text-zinc-400 text-center'>
-          Tomorrow feels calm, steady light.
-        </p>
-      )}
+
+      <div
+        id='dashboard-container'
+        className='dashboard-container flex w-full flex-col gap-4 max-w-2xl md:max-w-4xl mx-auto p-4 mb-10'
+      >
+        <h1 className='sr-only'>Lunary - Your Daily Cosmic Guide</h1>
+
+        <PostTrialMessaging />
+
+        <header>
+          <div className='flex items-center justify-between mb-2'>
+            <div className='w-16' />
+            <p className='text-lg text-zinc-300 text-center flex-1'>
+              {greeting()}
+              {firstName && (
+                <>
+                  ,{' '}
+                  <Link
+                    href='/profile'
+                    className='text-lunary-accent hover:text-lunary-accent-300 transition-colors'
+                  >
+                    {firstName}
+                  </Link>
+                </>
+              )}
+            </p>
+            <div className='flex justify-end gap-2'>
+              <ShareDailyInsight />
+              <ShareDailyCosmicState compact />
+            </div>
+          </div>
+          <div className='text-center'>
+            <DateWidget />
+            <div className='mt-2'>
+              <TourTrigger
+                onStartTour={() => startTour('first_time_onboarding')}
+                hasSeenOnboarding={hasSeenOnboarding}
+              />
+            </div>
+          </div>
+        </header>
+
+        {/* Zodiac Season Banner */}
+        <ShareZodiacSeason />
+
+        {showHoroscope && <PersonalizedHoroscopePreview />}
+
+        <div
+          id='dashboard-main-grid'
+          className={`grid gap-3 ${isDemoMode ? 'grid-cols-1' : 'grid-cols-1 md:grid-cols-2'}`}
+        >
+          <div id='moon-phase' className='scroll-mt-20'>
+            <MoonPreview
+              isExpanded={moonExpanded}
+              onToggle={handleMoonToggle}
+            />
+          </div>
+          <div id='sky-now' className='scroll-mt-20'>
+            <SkyNowCard
+              isExpanded={skyNowExpanded}
+              onToggle={(expanded) => setSkyNowExpanded(expanded)}
+            />
+          </div>
+          <DailyInsightCard />
+          <DailyCardPreview />
+
+          <div id='transit-of-day' className='scroll-mt-20'>
+            <TransitOfTheDay />
+          </div>
+          <CrystalPreview />
+
+          <div className={isDemoMode ? '' : 'md:col-span-2'}>
+            <ConditionalWheel />
+          </div>
+        </div>
+        {authState.isAuthenticated && (
+          <p className='text-xs text-zinc-500 text-center mt-4'>
+            {focusHonoured
+              ? "You've honoured today's focus."
+              : "You've checked in with today's sky."}
+          </p>
+        )}
+        {authState.isAuthenticated && focusHonoured && (
+          <p className='text-[0.65rem] text-zinc-400 text-center'>
+            Tomorrow feels calm, steady light.
+          </p>
+        )}
+      </div>
     </div>
   );
 }

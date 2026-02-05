@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button';
 import { ContextualNudge } from '@/lib/grimoire/getContextualNudge';
 import { trackCtaClick, trackCtaImpression } from '@/lib/analytics';
 import { Heading } from '../ui/Heading';
+import { getABTestVariantClient } from '@/lib/ab-tests-client';
 
 interface ContextualNudgeButtonProps {
   nudge: ContextualNudge;
@@ -24,6 +25,7 @@ export function ContextualNudgeButton({
   const pathname = usePathname() || '';
   const [showAuthModal, setShowAuthModal] = useState(false);
   const impressionTracked = useRef(false);
+  const signupPageVariant = getABTestVariantClient('grimoire-signup-page');
 
   useModal({
     isOpen: showAuthModal,
@@ -78,7 +80,18 @@ export function ContextualNudgeButton({
     }
 
     if (!authState.isAuthenticated) {
-      setShowAuthModal(true);
+      if (signupPageVariant === 'value-prop') {
+        const params = new URLSearchParams({
+          hub: nudge.hub,
+          headline: nudge.headline,
+          subline: nudge.subline,
+          location,
+          pagePath: pathname,
+        });
+        router.push(`/signup/chart?${params.toString()}`);
+      } else {
+        setShowAuthModal(true);
+      }
       return;
     }
 

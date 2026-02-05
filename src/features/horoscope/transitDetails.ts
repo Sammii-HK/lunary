@@ -1,3 +1,5 @@
+import { PLANET_DAILY_MOTION } from '../../../utils/astrology/transit-duration-constants';
+
 export interface TransitAspect {
   transitPlanet: string;
   natalPlanet: string;
@@ -8,6 +10,8 @@ export interface TransitAspect {
   natalDegree: string;
   orbDegrees: number;
   house?: number;
+  transitLongitude?: number;
+  natalLongitude?: number;
   duration?: {
     totalDays: number;
     remainingDays: number;
@@ -35,6 +39,13 @@ export type ThemeTag =
   | 'Power'
   | 'Freedom';
 
+export interface AspectTiming {
+  startDate: Date;
+  exactDate: Date;
+  endDate: Date;
+  isApplying: boolean;
+}
+
 export interface TransitPremiumDetail {
   houseSummary?: string;
   natalContext?: string;
@@ -42,6 +53,7 @@ export interface TransitPremiumDetail {
   timingSummary?: string;
   stackingNotes?: string;
   pastPattern?: string;
+  aspectTiming?: AspectTiming;
 }
 
 export interface TransitDetail {
@@ -49,11 +61,13 @@ export interface TransitDetail {
   title: string;
   header: string;
   degreeInfo: string;
+  orbDegrees: number;
   intensity: 'Subtle' | 'Strong' | 'Exact';
   intensityLevel: IntensityLevel;
   themes: ThemeTag[];
   meaning: string;
   suggestion: string;
+  transitCycle: string;
   premium?: TransitPremiumDetail;
   duration?: {
     totalDays: number;
@@ -140,29 +154,121 @@ function getThemeTags(
   return Array.from(themes).slice(0, 3);
 }
 
-function buildPastPattern(
-  transitPlanet: string,
-  natalPlanet: string,
-  aspectType: string,
-): string {
-  const outerPlanets = ['Saturn', 'Uranus', 'Neptune', 'Pluto'];
-  const isOuterTransit = outerPlanets.includes(transitPlanet);
+/** Orbital period in years for each planet */
+const ORBITAL_PERIOD_YEARS: Record<string, number> = {
+  Moon: 27.3 / 365.25,
+  Sun: 1,
+  Mercury: 88 / 365.25,
+  Venus: 225 / 365.25,
+  Mars: 687 / 365.25,
+  Jupiter: 11.86,
+  Saturn: 29.46,
+  Uranus: 84.01,
+  Neptune: 164.8,
+  Pluto: 247.9,
+};
 
-  if (!isOuterTransit) {
-    return `This ${transitPlanet} transit recurs monthly, offering regular opportunities to work with these themes.`;
+/**
+ * Aspect-specific recurrence cycle.
+ * Conjunction/opposition: once per orbit.
+ * Square/trine/sextile: twice per orbit (two angular positions).
+ */
+function getTransitCycle(transitPlanet: string, aspectType: string): string {
+  const period = ORBITAL_PERIOD_YEARS[transitPlanet];
+  if (!period) return 'periodic';
+
+  const divisor = ['conjunction', 'opposition'].includes(aspectType) ? 1 : 2;
+  const cycleYears = period / divisor;
+
+  if (cycleYears < 7 / 365.25) return 'weekly';
+  if (cycleYears < 0.17) return 'monthly';
+  if (cycleYears < 1) return `~${Math.round(cycleYears * 12)}mo`;
+  if (cycleYears >= 0.9 && cycleYears < 1.5) return 'yearly';
+  return `~${Math.round(cycleYears)}y`;
+}
+
+/** Max orb for each aspect type (must match calculateAspectsForWisdom) */
+const ASPECT_MAX_ORB: Record<string, number> = {
+  conjunction: 10,
+  opposition: 10,
+  trine: 8,
+  square: 8,
+  sextile: 6,
+};
+
+/**
+ * Calculate aspect start/exact/end dates from current orb and planet speed.
+ * Uses yesterday's estimated position to determine applying vs separating.
+ */
+function buildAspectTiming(aspect: TransitAspect): AspectTiming | undefined {
+  if (aspect.transitLongitude == null || aspect.natalLongitude == null)
+    return undefined;
+
+  const dailyMotion =
+    PLANET_DAILY_MOTION[
+      aspect.transitPlanet as keyof typeof PLANET_DAILY_MOTION
+    ];
+  if (!dailyMotion) return undefined;
+
+  const maxOrb = ASPECT_MAX_ORB[aspect.aspectType] ?? 8;
+  const currentOrb = aspect.orbDegrees;
+  const now = new Date();
+
+  // Determine applying vs separating using yesterday's estimated position
+  const yesterdayLong = aspect.transitLongitude - dailyMotion;
+  let yesterdayDiff = Math.abs(yesterdayLong - aspect.natalLongitude);
+  if (yesterdayDiff > 180) yesterdayDiff = 360 - yesterdayDiff;
+  const aspectAngle =
+    { conjunction: 0, opposition: 180, trine: 120, square: 90, sextile: 60 }[
+      aspect.aspectType
+    ] ?? 0;
+  const yesterdayOrb = Math.abs(yesterdayDiff - aspectAngle);
+  const isApplying = yesterdayOrb > currentOrb;
+
+  let daysSinceStart: number;
+  let daysToExact: number;
+
+  if (isApplying) {
+    // Orb is shrinking: entered at maxOrb, now at currentOrb, heading toward 0
+    daysSinceStart = (maxOrb - currentOrb) / dailyMotion;
+    daysToExact = currentOrb / dailyMotion;
+  } else {
+    // Orb is growing: entered at maxOrb → went to 0 (exact) → now at currentOrb
+    daysSinceStart = (maxOrb + currentOrb) / dailyMotion;
+    daysToExact = -(currentOrb / dailyMotion); // negative = already past
   }
 
-  const cycles: Record<string, string> = {
-    Saturn:
-      'roughly every 7 years when Saturn makes major aspects to this point',
-    Uranus: 'roughly every 21 years when Uranus aspects this placement',
-    Neptune:
-      'roughly every 40+ years, making this a rare and significant influence',
-    Pluto:
-      'once or twice in a lifetime, marking a profound transformational period',
-  };
+  const daysToEnd = isApplying
+    ? (currentOrb + maxOrb) / dailyMotion
+    : (maxOrb - currentOrb) / dailyMotion;
 
-  return `This transit occurs ${cycles[transitPlanet] || 'periodically'}. Reflect on similar themes from past cycles.`;
+  const startDate = new Date(now);
+  startDate.setTime(now.getTime() - daysSinceStart * 24 * 60 * 60 * 1000);
+
+  const exactDate = new Date(now);
+  exactDate.setTime(now.getTime() + daysToExact * 24 * 60 * 60 * 1000);
+
+  const endDate = new Date(now);
+  endDate.setTime(now.getTime() + daysToEnd * 24 * 60 * 60 * 1000);
+
+  return { startDate, exactDate, endDate, isApplying };
+}
+
+function buildPastPattern(
+  transitPlanet: string,
+  _natalPlanet: string,
+  aspectType: string,
+): string {
+  const cycle = getTransitCycle(transitPlanet, aspectType);
+
+  // Word-form cycles read as adverbs; numeric cycles read with "every"
+  const isWordForm =
+    cycle === 'monthly' || cycle === 'yearly' || cycle === 'weekly';
+  const cycleText = isWordForm
+    ? `roughly ${cycle}`
+    : `roughly every ${cycle.replace('~', '')}`;
+
+  return `This ${aspectType} from ${transitPlanet} recurs ${cycleText}. Reflect on similar themes from past cycles.`;
 }
 
 const DOMAIN_MAP: Record<string, Record<string, string>> = {
@@ -610,13 +716,15 @@ export function buildTransitDetails(
         aspect.natalPlanet,
         aspect.aspectType,
       ),
+      aspectTiming: buildAspectTiming(aspect),
     };
 
     return {
       id: `transit-${index}-${aspect.transitPlanet}-${aspect.natalPlanet}`,
       title: `${aspect.transitPlanet} ${aspectName} your natal ${aspect.natalPlanet}`,
       header: getDomain(aspect.transitPlanet, aspect.natalPlanet),
-      degreeInfo: `${aspect.transitPlanet} at ${aspect.transitDegree} ${aspectName} ${aspect.natalPlanet} at ${aspect.natalDegree} (${orbRounded}° orb)`,
+      degreeInfo: `${aspect.transitPlanet} at ${aspect.transitDegree} ${aspectName} ${aspect.natalPlanet} at ${aspect.natalDegree}`,
+      orbDegrees: orbRounded,
       intensity,
       intensityLevel,
       themes,
@@ -626,6 +734,7 @@ export function buildTransitDetails(
         aspect.aspectType,
       ),
       suggestion: buildSuggestion(aspect.transitPlanet),
+      transitCycle: getTransitCycle(aspect.transitPlanet, aspect.aspectType),
       premium,
       duration: aspect.duration,
     };

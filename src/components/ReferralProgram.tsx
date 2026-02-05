@@ -5,6 +5,7 @@ import { useUser } from '@/context/UserContext';
 import { useAuthStatus } from './AuthStatus';
 import { Copy, Check, Users, Gift, Share2, RefreshCw } from 'lucide-react';
 import { conversionTracking } from '@/lib/analytics';
+import { REFERRAL_TRIAL_DAYS } from '@/lib/referrals';
 
 export function ReferralProgram() {
   const { user } = useUser();
@@ -111,7 +112,7 @@ export function ReferralProgram() {
       try {
         await nav.share({
           title: 'Join Lunary',
-          text: 'Unlock personalized astrology with Lunary. Use my link and we both get a free month!',
+          text: `Unlock personalized astrology with Lunary. Use my link and we both get ${REFERRAL_TRIAL_DAYS} days Pro free!`,
           url: referralUrl,
         });
         setError(null);
@@ -204,7 +205,8 @@ export function ReferralProgram() {
             </h3>
             <p className='text-sm text-zinc-200/80'>
               Share your link. When a friend starts their Lunary trial through
-              it, both of you receive 30 days of premium access automatically.
+              it, you both receive {REFERRAL_TRIAL_DAYS} days of premium access
+              automatically.
             </p>
           </div>
 
@@ -288,7 +290,10 @@ export function ReferralProgram() {
                   <li>
                     2. They create their Lunary account and start a trial.
                   </li>
-                  <li>3. Both accounts receive 30 bonus days automatically.</li>
+                  <li>
+                    3. Both accounts receive {REFERRAL_TRIAL_DAYS} days Pro
+                    automatically.
+                  </li>
                 </ol>
               </div>
 

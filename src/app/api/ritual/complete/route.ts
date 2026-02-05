@@ -25,6 +25,17 @@ export async function POST(request: NextRequest) {
       metadata,
     });
 
+    // Track ritual progress for skill tree
+    try {
+      const { incrementProgress } = await import('@/lib/progress/server');
+      await incrementProgress(userId, 'ritual', 1);
+    } catch (progressError) {
+      console.warn(
+        '[Ritual Complete] Failed to track progress:',
+        progressError,
+      );
+    }
+
     return NextResponse.json({
       success: true,
       ritualStreak: result.ritualStreak,

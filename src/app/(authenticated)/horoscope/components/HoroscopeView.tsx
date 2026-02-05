@@ -5,7 +5,7 @@ import Link from 'next/link';
 import dayjs from 'dayjs';
 import dynamic from 'next/dynamic';
 import { useRouter } from 'next/navigation';
-import { Share2, Sparkles, Lock } from 'lucide-react';
+import { Share2, Sparkles, Lock, Moon } from 'lucide-react';
 import { getGeneralHoroscope } from '../../../../../utils/astrology/generalHoroscope';
 import { getEnhancedPersonalizedHoroscope } from '../../../../../utils/astrology/enhancedHoroscope';
 import { getBirthChartFromProfile } from '../../../../../utils/astrology/birthChart';
@@ -21,6 +21,10 @@ import { UnifiedTransitList } from './UnifiedTransitList';
 import { useCTACopy } from '@/hooks/useCTACopy';
 import { ShareRetrogradeBadge } from '@/components/share/ShareRetrogradeBadge';
 import { ShareHoroscope } from '@/components/share/ShareHoroscope';
+import { HoroscopeReflectionPrompts } from '@/components/horoscope/HoroscopeReflectionPrompts';
+import { HoroscopeSeasonReading } from '@/components/horoscope/HoroscopeSeasonReading';
+import { HoroscopeRitualForDay } from '@/components/horoscope/HoroscopeRitualForDay';
+import { Heading } from '@/components/ui/Heading';
 
 const GuideNudge = dynamic(
   () =>
@@ -343,14 +347,14 @@ export function HoroscopeView({
   return (
     <div className='h-full space-y-6 p-4 pb-16 md:pb-20 overflow-auto'>
       {/* Header */}
-      <div className='pt-6'>
+      <div>
         <div className='flex flex-wrap items-start justify-between gap-3'>
           <div className='flex-1'>
-            <h1 className='text-2xl md:text-3xl font-light text-zinc-100 mb-2'>
+            <Heading variant='h1' as='h1'>
               {hasPaidAccess && userName
                 ? `${userName}'s Horoscope`
                 : 'Your Horoscope'}
-            </h1>
+            </Heading>
             <p className='text-sm text-zinc-400'>
               {hasPaidAccess
                 ? 'Guidance written just for you'
@@ -382,11 +386,15 @@ export function HoroscopeView({
 
       {/* Cosmic Highlight Card */}
       <div className='rounded-2xl border border-zinc-800/70 bg-gradient-to-br from-zinc-900/70 via-zinc-950/70 to-lunary-primary-950 p-5 space-y-4'>
-        <p className='text-[11px] font-semibold tracking-[0.3em] uppercase text-zinc-400'>
+        {/* <p className='text-[11px] font-semibold tracking-[0.3em] uppercase text-zinc-400'>
           Cosmic Highlight
+        </p> */}
+        <Heading variant='h2' as='h2'>
+          {cosmicHighlight}
+        </Heading>
+        <p className='text-xs md:text-sm text-zinc-300 leading-relaxed'>
+          {dailyGuidance}
         </p>
-        <p className='text-2xl font-light text-zinc-100'>{cosmicHighlight}</p>
-        <p className='text-sm text-zinc-300 leading-relaxed'>{dailyGuidance}</p>
 
         {personalizedTeaser && (
           <Link href='/pricing' className='block space-y-2 group'>
@@ -429,7 +437,7 @@ export function HoroscopeView({
         )}
 
         {/* Numerology Grid */}
-        <div className='mt-2 grid grid-cols-1 sm:grid-cols-2 gap-3'>
+        <div className='mt-2 grid grid-cols-2 gap-3'>
           {/* Universal Day — always interactive */}
           <div className='relative'>
             <button
@@ -542,15 +550,89 @@ export function HoroscopeView({
           )}
         </div>
 
-        <p className='text-xs text-zinc-400'>
+        {/* <p className='text-xs text-zinc-400'>
           {hasPaidAccess
             ? 'Highlight refreshes each sunrise with new numerology, moon, and transit energy—baseline for everything you read today.'
             : 'This highlight refreshes every sunrise—numerology, moon, and transit info all rebalance daily.'}
-        </p>
+        </p> */}
       </div>
 
       {/* GuideNudge — paid only */}
-      {hasPaidAccess && <GuideNudge location='horoscope' />}
+      <GuideNudge location='horoscope' />
+
+      {/* Season & Ritual — paid with horoscope data */}
+      {hasPaidAccess && horoscope && (
+        <div className='space-y-3'>
+          <HoroscopeSeasonReading
+            sunSign={horoscope.sunSign}
+            moonPhase={horoscope.moonPhase}
+            focusAreas={horoscope.focusAreas}
+          />
+          <HoroscopeRitualForDay
+            sunSign={horoscope.sunSign}
+            moonPhase={horoscope.moonPhase}
+            dailyAffirmation={horoscope.dailyAffirmation}
+          />
+        </div>
+      )}
+
+      {/* Season & Ritual preview — free users FOMO */}
+      {!hasPaidAccess && (
+        <FeaturePreview
+          title='Your Cosmic Season & Rituals'
+          description='Unlock personalized season readings and moon-timed rituals based on your horoscope.'
+          feature='personalized_horoscope'
+          ctaKey='horoscope'
+          trackingFeature='horoscope_season_rituals'
+          page='horoscope'
+          blurredContent={
+            <div className='space-y-3'>
+              {/* Mock season reading header */}
+              <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 overflow-hidden'>
+                <div className='flex items-center justify-between p-4'>
+                  <div className='flex items-center gap-3'>
+                    <div className='p-2 rounded-lg bg-lunary-primary-900/30'>
+                      <Sparkles className='w-4 h-4 text-lunary-primary-400' />
+                    </div>
+                    <div>
+                      <p className='text-sm font-medium text-zinc-100'>
+                        Your Cosmic Season: Emotional Depth
+                      </p>
+                      <p className='text-xs text-zinc-400'>
+                        Moon-guided energy reading
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              {/* Mock ritual header */}
+              <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 overflow-hidden'>
+                <div className='flex items-center justify-between p-4'>
+                  <div className='flex items-center gap-3'>
+                    <div className='p-2 rounded-lg bg-lunary-secondary-900/30'>
+                      <Moon className='w-4 h-4 text-lunary-secondary-400' />
+                    </div>
+                    <div>
+                      <p className='text-sm font-medium text-zinc-100'>
+                        Full Moon Release Ritual
+                      </p>
+                      <p className='text-xs text-zinc-400'>
+                        Today&apos;s moon-timed ritual
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          }
+        />
+      )}
+
+      {/* Reflection Prompts — all users (component handles its own gating) */}
+      <HoroscopeReflectionPrompts
+        sunSign={horoscope?.sunSign}
+        moonPhase={horoscope?.moonPhase || generalHoroscope?.moonPhase}
+      />
 
       {/* Transit Wisdom — paid: full component; free: locked preview */}
       {hasPaidAccess && birthChart && currentTransits.length > 0 ? (
@@ -633,22 +715,23 @@ export function HoroscopeView({
         )
       )}
 
-      {/* Moon Phase — free for all users, house placement is paid */}
-      <HoroscopeSection
-        title='Current Lunar Energy'
-        color='purple'
-        id='moon-phase'
-      >
-        <p className='text-sm text-zinc-400 mb-4'>
-          The moon&apos;s influence{hasPaidAccess ? ' on your chart' : ''} right
-          now
-        </p>
-        <MoonPhaseCard
-          birthChart={birthChart ?? undefined}
-          currentTransits={currentTransits}
-          showHousePlacement={hasPaidAccess}
-        />
-      </HoroscopeSection>
+      {/* Current Lunar Energy — free users only (paid get it inside SeasonReading) */}
+      {!hasPaidAccess && (
+        <HoroscopeSection
+          title='Current Lunar Energy'
+          color='purple'
+          id='moon-phase'
+        >
+          <p className='text-sm text-zinc-400 mb-4'>
+            The moon&apos;s influence right now
+          </p>
+          <MoonPhaseCard
+            birthChart={birthChart ?? undefined}
+            currentTransits={currentTransits}
+            showHousePlacement={false}
+          />
+        </HoroscopeSection>
+      )}
 
       {/* Today's Aspects — paid: full component; free: locked preview */}
       {hasPaidAccess && birthChart && currentTransits.length > 0 ? (

@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { sql } from '@vercel/postgres';
 import { MoonCircleInsights } from '@/components/MoonCircleInsights';
 import { MoonCirclesPreview } from '@/components/MoonCirclesPreview';
+import { CircleInviteCTA } from '@/components/CircleInviteCTA';
 import { cn } from '@/lib/utils';
 
 export const revalidate = 300;
@@ -164,6 +165,11 @@ export default async function MoonCirclesPage({
           })}
         </div>
       </header>
+
+      {/* Friend Invite CTA - Conversion Optimized */}
+      <div className='max-w-xl mx-auto'>
+        <CircleInviteCTA />
+      </div>
 
       {circles.length === 0 && (
         <div className='rounded-3xl border border-dashed border-lunary-primary-600 bg-lunary-primary-900/5 p-10 text-center text-lunary-primary-100/80'>

@@ -8,6 +8,7 @@ import { TarotView } from './components/TarotView';
 import { conversionTracking } from '@/lib/analytics';
 import { useEffect } from 'react';
 import { useABTestTracking } from '@/hooks/useABTestTracking';
+import { SkillProgressWidget } from '@/components/progress/SkillProgressWidget';
 
 export default function TarotReadings() {
   const { user, loading } = useUser();
@@ -72,11 +73,19 @@ export default function TarotReadings() {
 
   // Otherwise, continue to render content
   return (
-    <TarotView
-      hasPaidAccess={hasPersonalTarotAccess}
-      userName={user?.name}
-      userBirthday={user?.birthday}
-      user={user}
-    />
+    <>
+      {authStatus.isAuthenticated && (
+        <SkillProgressWidget
+          skillTree='tarot'
+          className='sticky top-0 z-10 px-4 pt-3 pb-2 bg-zinc-950/90 backdrop-blur-sm'
+        />
+      )}
+      <TarotView
+        hasPaidAccess={hasPersonalTarotAccess}
+        userName={user?.name}
+        userBirthday={user?.birthday}
+        user={user}
+      />
+    </>
   );
 }

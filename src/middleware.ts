@@ -20,6 +20,10 @@ const AB_TESTS: Record<string, { variants: string[]; weights?: number[] }> = {
     variants: ['control', 'minimal', 'sparkles', 'card'],
     // Equal weights by default (25% each)
   },
+  'grimoire-signup-page': {
+    variants: ['control', 'value-prop'],
+    // 50/50 split
+  },
 };
 
 // Simple hash function for deterministic variant assignment
@@ -256,7 +260,7 @@ export function middleware(request: NextRequest, event: NextFetchEvent) {
     if (!anonId) {
       anonId = crypto.randomUUID?.() ?? Math.random().toString(36).slice(2, 10);
       response.cookies.set(ANON_ID_COOKIE, anonId, {
-        httpOnly: true,
+        httpOnly: false, // Readable by client JS so analytics can use the same ID
         sameSite: 'lax',
         secure: isProd,
         path: '/',

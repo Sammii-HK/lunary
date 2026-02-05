@@ -86,6 +86,17 @@ export async function POST(request: NextRequest) {
           updated_at = NOW()
       `;
 
+      // Update explorer progress based on current streak
+      // Also increment ritual progress (daily check-in counts as ritual completion)
+      try {
+        const { setExplorerProgress, incrementProgress } =
+          await import('@/lib/progress/server');
+        await setExplorerProgress(userId, currentStreak);
+        await incrementProgress(userId, 'ritual', 1);
+      } catch (progressError) {
+        console.warn('[Streak] Failed to update progress:', progressError);
+      }
+
       // Check for streak milestone and send notification
       const previousStreak = currentStreak - 1;
       if (shouldSendStreakNotification(currentStreak, previousStreak)) {

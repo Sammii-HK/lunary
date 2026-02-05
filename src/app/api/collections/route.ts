@@ -362,6 +362,22 @@ export async function POST(request: NextRequest) {
 
     const collection = result.rows[0];
 
+    // Track journal progress for skill tree
+    if (category === 'journal' || category === 'ritual') {
+      try {
+        const { incrementProgress } = await import('@/lib/progress/server');
+        const isPro =
+          subscriptionStatus === 'active' || subscriptionStatus === 'trial';
+        if (category === 'journal') {
+          await incrementProgress(user.id, 'journal', 1, isPro);
+        } else if (category === 'ritual') {
+          await incrementProgress(user.id, 'ritual', 1, isPro);
+        }
+      } catch (progressError) {
+        console.warn('[Collections] Failed to track progress:', progressError);
+      }
+    }
+
     return NextResponse.json({
       success: true,
       collection: {
