@@ -245,6 +245,7 @@ export function DemoClient() {
         style={{
           containerType: 'inline-size',
           maxWidth: '100%',
+          overscrollBehavior: 'contain', // Prevent scroll from escaping to parent page
         }}
       >
         <DemoModeProvider>
