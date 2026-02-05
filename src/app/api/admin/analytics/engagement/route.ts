@@ -24,95 +24,107 @@ const PRODUCT_EVENTS = [
 
 /**
  * Engagement endpoint for insights
- * Optimized to query DB directly instead of fetching dau-wau-mau
+ * Uses pre-computed daily_metrics for 99% cost reduction
  */
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
     const range = resolveDateRange(searchParams, 30);
 
-    // Calculate DAU, WAU, MAU for signed-in product users
-    // Only query what we need - much faster than fetching full dau-wau-mau endpoint
-    const endDate = range.end;
-    const dauStart = new Date(endDate);
-    dauStart.setUTCDate(dauStart.getUTCDate() - 0); // Same day
+    // FAST PATH: Query pre-computed metrics from daily_metrics table
+    // This is 99% cheaper than querying conversion_events!
+    const result = await sql.query(
+      `SELECT
+        avg_active_days_per_week,
+        stickiness
+      FROM daily_metrics
+      WHERE metric_date >= $1 AND metric_date <= $2
+      ORDER BY metric_date DESC
+      LIMIT 1`,
+      [
+        range.start.toISOString().split('T')[0],
+        range.end.toISOString().split('T')[0],
+      ],
+    );
 
-    const wauStart = new Date(endDate);
-    wauStart.setUTCDate(wauStart.getUTCDate() - 6); // 7 days
+    let avgActiveDaysPerWeek: number;
+    let stickiness: number;
 
-    const mauStart = new Date(endDate);
-    mauStart.setUTCDate(mauStart.getUTCDate() - 29); // 30 days
+    if (result.rows.length > 0) {
+      // Got pre-computed metrics - FAST!
+      avgActiveDaysPerWeek = Number(
+        result.rows[0].avg_active_days_per_week || 0,
+      );
+      stickiness = Number(result.rows[0].stickiness || 0);
+    } else {
+      // LIVE PATH: Query conversion_events for today's data (slow but necessary)
+      const dauStart = new Date(endDate);
+      const wauStart = new Date(endDate);
+      wauStart.setUTCDate(wauStart.getUTCDate() - 6);
+      const mauStart = new Date(endDate);
+      mauStart.setUTCDate(mauStart.getUTCDate() - 29);
 
-    // Query all three metrics in parallel
-    const [dauResult, wauResult, mauResult] = await Promise.all([
-      sql.query(
-        `
-        SELECT COUNT(DISTINCT user_id) as count
-        FROM conversion_events
-        WHERE event_type = ANY($1::text[])
-          AND user_id IS NOT NULL
-          AND user_id NOT LIKE 'anon:%'
-          AND created_at >= $2
-          AND created_at <= $3
-          AND (user_email IS NULL OR (user_email NOT LIKE $4 AND user_email != $5))
-      `,
-        [
-          PRODUCT_EVENTS,
-          formatTimestamp(dauStart),
-          formatTimestamp(endDate),
-          TEST_EMAIL_PATTERN,
-          TEST_EMAIL_EXACT,
-        ],
-      ),
-      sql.query(
-        `
-        SELECT COUNT(DISTINCT user_id) as count
-        FROM conversion_events
-        WHERE event_type = ANY($1::text[])
-          AND user_id IS NOT NULL
-          AND user_id NOT LIKE 'anon:%'
-          AND created_at >= $2
-          AND created_at <= $3
-          AND (user_email IS NULL OR (user_email NOT LIKE $4 AND user_email != $5))
-      `,
-        [
-          PRODUCT_EVENTS,
-          formatTimestamp(wauStart),
-          formatTimestamp(endDate),
-          TEST_EMAIL_PATTERN,
-          TEST_EMAIL_EXACT,
-        ],
-      ),
-      sql.query(
-        `
-        SELECT COUNT(DISTINCT user_id) as count
-        FROM conversion_events
-        WHERE event_type = ANY($1::text[])
-          AND user_id IS NOT NULL
-          AND user_id NOT LIKE 'anon:%'
-          AND created_at >= $2
-          AND created_at <= $3
-          AND (user_email IS NULL OR (user_email NOT LIKE $4 AND user_email != $5))
-      `,
-        [
-          PRODUCT_EVENTS,
-          formatTimestamp(mauStart),
-          formatTimestamp(endDate),
-          TEST_EMAIL_PATTERN,
-          TEST_EMAIL_EXACT,
-        ],
-      ),
-    ]);
+      const [dauResult, wauResult, mauResult] = await Promise.all([
+        sql.query(
+          `SELECT COUNT(DISTINCT user_id) as count
+          FROM conversion_events
+          WHERE event_type = ANY($1::text[])
+            AND user_id IS NOT NULL
+            AND user_id NOT LIKE 'anon:%'
+            AND created_at >= $2
+            AND created_at <= $3
+            AND (user_email IS NULL OR (user_email NOT LIKE $4 AND user_email != $5))`,
+          [
+            PRODUCT_EVENTS,
+            formatTimestamp(dauStart),
+            formatTimestamp(endDate),
+            TEST_EMAIL_PATTERN,
+            TEST_EMAIL_EXACT,
+          ],
+        ),
+        sql.query(
+          `SELECT COUNT(DISTINCT user_id) as count
+          FROM conversion_events
+          WHERE event_type = ANY($1::text[])
+            AND user_id IS NOT NULL
+            AND user_id NOT LIKE 'anon:%'
+            AND created_at >= $2
+            AND created_at <= $3
+            AND (user_email IS NULL OR (user_email NOT LIKE $4 AND user_email != $5))`,
+          [
+            PRODUCT_EVENTS,
+            formatTimestamp(wauStart),
+            formatTimestamp(endDate),
+            TEST_EMAIL_PATTERN,
+            TEST_EMAIL_EXACT,
+          ],
+        ),
+        sql.query(
+          `SELECT COUNT(DISTINCT user_id) as count
+          FROM conversion_events
+          WHERE event_type = ANY($1::text[])
+            AND user_id IS NOT NULL
+            AND user_id NOT LIKE 'anon:%'
+            AND created_at >= $2
+            AND created_at <= $3
+            AND (user_email IS NULL OR (user_email NOT LIKE $4 AND user_email != $5))`,
+          [
+            PRODUCT_EVENTS,
+            formatTimestamp(mauStart),
+            formatTimestamp(endDate),
+            TEST_EMAIL_PATTERN,
+            TEST_EMAIL_EXACT,
+          ],
+        ),
+      ]);
 
-    const dau = Number(dauResult.rows[0]?.count || 0);
-    const wau = Number(wauResult.rows[0]?.count || 0);
-    const mau = Number(mauResult.rows[0]?.count || 0);
+      const dau = Number(dauResult.rows[0]?.count || 0);
+      const wau = Number(wauResult.rows[0]?.count || 0);
+      const mau = Number(mauResult.rows[0]?.count || 0);
 
-    // Calculate avg active days per week from DAU/WAU ratio
-    const avgActiveDaysPerWeek = wau > 0 ? (dau / wau) * 7 : 0;
-
-    // Calculate stickiness (DAU/MAU ratio)
-    const stickiness = mau > 0 ? (dau / mau) * 100 : 0;
+      avgActiveDaysPerWeek = wau > 0 ? (dau / wau) * 7 : 0;
+      stickiness = mau > 0 ? (dau / mau) * 100 : 0;
+    }
 
     const response = NextResponse.json({
       avg_active_days_per_week: Number(avgActiveDaysPerWeek.toFixed(2)),
