@@ -5,7 +5,7 @@ import Link from 'next/link';
 import dayjs from 'dayjs';
 import dynamic from 'next/dynamic';
 import { useRouter } from 'next/navigation';
-import { Share2, Sparkles, Lock, Moon, BookOpen } from 'lucide-react';
+import { Share2, Sparkles, Lock, Moon } from 'lucide-react';
 import { getGeneralHoroscope } from '../../../../../utils/astrology/generalHoroscope';
 import { getEnhancedPersonalizedHoroscope } from '../../../../../utils/astrology/enhancedHoroscope';
 import { getBirthChartFromProfile } from '../../../../../utils/astrology/birthChart';
@@ -560,7 +560,7 @@ export function HoroscopeView({
       {/* GuideNudge — paid only */}
       <GuideNudge location='horoscope' />
 
-      {/* Season, Ritual & Reflection — paid with horoscope data */}
+      {/* Season & Ritual — paid with horoscope data */}
       {hasPaidAccess && horoscope && (
         <div className='space-y-3'>
           <HoroscopeSeasonReading
@@ -573,18 +573,14 @@ export function HoroscopeView({
             moonPhase={horoscope.moonPhase}
             dailyAffirmation={horoscope.dailyAffirmation}
           />
-          <HoroscopeReflectionPrompts
-            sunSign={horoscope.sunSign}
-            moonPhase={horoscope.moonPhase || generalHoroscope?.moonPhase}
-          />
         </div>
       )}
 
-      {/* Season, Ritual & Reflection preview — free users FOMO */}
+      {/* Season & Ritual preview — free users FOMO */}
       {!hasPaidAccess && (
         <FeaturePreview
-          title='Your Cosmic Season, Rituals & Reflections'
-          description='Unlock personalized season readings, moon-timed rituals, and journal reflection prompts based on your horoscope.'
+          title='Your Cosmic Season & Rituals'
+          description='Unlock personalized season readings and moon-timed rituals based on your horoscope.'
           feature='personalized_horoscope'
           ctaKey='horoscope'
           trackingFeature='horoscope_season_rituals'
@@ -627,28 +623,16 @@ export function HoroscopeView({
                   </div>
                 </div>
               </div>
-              {/* Mock reflection prompts header */}
-              <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 overflow-hidden'>
-                <div className='flex items-center justify-between p-4'>
-                  <div className='flex items-center gap-3'>
-                    <div className='p-2 rounded-lg bg-lunary-accent-900/30'>
-                      <BookOpen className='w-4 h-4 text-lunary-accent-400' />
-                    </div>
-                    <div>
-                      <p className='text-sm font-medium text-zinc-100'>
-                        Cosmic Reflection Prompts
-                      </p>
-                      <p className='text-xs text-zinc-400'>
-                        5 prompts for your journal
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              </div>
             </div>
           }
         />
       )}
+
+      {/* Reflection Prompts — all users (component handles its own gating) */}
+      <HoroscopeReflectionPrompts
+        sunSign={horoscope?.sunSign}
+        moonPhase={horoscope?.moonPhase || generalHoroscope?.moonPhase}
+      />
 
       {/* Transit Wisdom — paid: full component; free: locked preview */}
       {hasPaidAccess && birthChart && currentTransits.length > 0 ? (

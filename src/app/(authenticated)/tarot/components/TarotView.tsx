@@ -14,7 +14,6 @@ import {
   Copy,
   Loader2,
   Moon,
-  BookOpen,
 } from 'lucide-react';
 import { AdvancedPatterns } from '@/components/tarot/AdvancedPatterns';
 import { CollapsibleSection } from '@/components/CollapsibleSection';
@@ -949,7 +948,7 @@ export function TarotView({
 
         <GuideNudge location='tarot' className='mb-2' />
 
-        {/* Season/Ritual/Reflection prompts - paid with tarot_patterns access */}
+        {/* Season/Ritual - paid with tarot_patterns access */}
         {hasPaidAccess &&
           subscription.hasAccess('tarot_patterns') &&
           personalizedReading?.trendAnalysis && (
@@ -961,17 +960,14 @@ export function TarotView({
               <TarotRitualForPatterns
                 trendAnalysis={personalizedReading.trendAnalysis}
               />
-              <TarotReflectionPrompts
-                trendAnalysis={personalizedReading.trendAnalysis}
-              />
             </div>
           )}
 
-        {/* Season/Ritual/Reflection prompts preview - free users FOMO */}
+        {/* Season/Ritual preview - free users FOMO */}
         {!hasPaidAccess && (
           <FeaturePreview
             title='Your Tarot Season & Rituals'
-            description='Unlock personalized season readings, ritual prompts, and reflection exercises based on your tarot patterns.'
+            description='Unlock personalized season readings and ritual prompts based on your tarot patterns.'
             feature='tarot_patterns'
             ctaKey='chartConnection'
             trackingFeature='tarot_season_rituals'
@@ -1012,27 +1008,15 @@ export function TarotView({
                     </div>
                   </div>
                 </div>
-                <div className='rounded-lg border border-zinc-800/50 bg-zinc-900/30 overflow-hidden'>
-                  <div className='flex items-center justify-between p-4'>
-                    <div className='flex items-center gap-3'>
-                      <div className='p-2 rounded-lg bg-lunary-accent-900/30'>
-                        <BookOpen className='w-4 h-4 text-lunary-accent-400' />
-                      </div>
-                      <div>
-                        <p className='text-sm font-medium text-zinc-100'>
-                          Reflection Prompts
-                        </p>
-                        <p className='text-xs text-zinc-400'>
-                          5 prompts for your journal
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                </div>
               </div>
             }
           />
         )}
+
+        {/* Reflection prompts — all users (component handles its own gating) */}
+        <TarotReflectionPrompts
+          trendAnalysis={personalizedReading?.trendAnalysis ?? null}
+        />
 
         {/* All patterns are now consolidated in the Tarot Patterns collapsible section below */}
 

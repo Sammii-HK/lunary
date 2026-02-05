@@ -1,9 +1,18 @@
 'use client';
 
 import { useState, useMemo } from 'react';
-import { ChevronDown, BookOpen, Check, Loader2, PenTool } from 'lucide-react';
+import {
+  ChevronDown,
+  BookOpen,
+  Check,
+  Loader2,
+  PenTool,
+  Sparkles,
+} from 'lucide-react';
 import { useSubscription } from '@/hooks/useSubscription';
+import Link from 'next/link';
 import { hasFeatureAccess } from '../../../utils/pricing';
+import { JOURNAL_PROMPT_LIMITS } from '../../../utils/entitlements';
 import { useProgress } from '@/components/progress/useProgress';
 import { ProgressBar } from '@/components/progress/ProgressBar';
 import { mutate } from 'swr';
@@ -189,9 +198,10 @@ export function HoroscopeReflectionPrompts({
       selectedPrompts = [...DEFAULT_PROMPTS];
     }
 
-    return hasAccess
-      ? selectedPrompts.slice(0, 5)
-      : selectedPrompts.slice(0, 1);
+    const limit = hasAccess
+      ? JOURNAL_PROMPT_LIMITS.lunary_plus
+      : JOURNAL_PROMPT_LIMITS.free;
+    return selectedPrompts.slice(0, limit);
   }, [sunSign, moonPhase, hasAccess]);
 
   const handleSaveToJournal = async (prompt: string, reflection: string) => {
@@ -245,8 +255,8 @@ export function HoroscopeReflectionPrompts({
               Cosmic Reflection Prompts
             </p>
             <p className='text-xs text-zinc-400'>
-              {hasAccess ? `${prompts.length} prompts` : '1 prompt'} for your
-              journal
+              {prompts.length} {prompts.length === 1 ? 'prompt' : 'prompts'} for
+              your journal
             </p>
           </div>
         </div>
@@ -277,78 +287,87 @@ export function HoroscopeReflectionPrompts({
                 className='p-3 rounded-lg border border-zinc-800/50 bg-zinc-800/20'
               >
                 <p className='text-sm text-zinc-300 mb-2'>{prompt}</p>
-                {hasAccess && (
-                  <div className='space-y-2'>
-                    {activePromptIndex === i && !isSaved ? (
-                      <>
-                        <textarea
-                          value={drafts[prompt] ?? ''}
-                          onChange={(e) =>
-                            setDrafts((prev) => ({
-                              ...prev,
-                              [prompt]: e.target.value,
-                            }))
+                <div className='space-y-2'>
+                  {activePromptIndex === i && !isSaved ? (
+                    <>
+                      <textarea
+                        value={drafts[prompt] ?? ''}
+                        onChange={(e) =>
+                          setDrafts((prev) => ({
+                            ...prev,
+                            [prompt]: e.target.value,
+                          }))
+                        }
+                        rows={3}
+                        placeholder='Write your reflection...'
+                        className='w-full bg-zinc-900/60 border border-zinc-700/60 rounded-md p-2 text-xs text-zinc-200 placeholder-zinc-500 focus:outline-none focus:border-lunary-primary-700 resize-none'
+                        disabled={isSaving}
+                      />
+                      <div className='flex items-center gap-2'>
+                        <button
+                          onClick={() =>
+                            handleSaveToJournal(prompt, drafts[prompt] ?? '')
                           }
-                          rows={3}
-                          placeholder='Write your reflection...'
-                          className='w-full bg-zinc-900/60 border border-zinc-700/60 rounded-md p-2 text-xs text-zinc-200 placeholder-zinc-500 focus:outline-none focus:border-lunary-primary-700 resize-none'
+                          disabled={!drafts[prompt]?.trim() || isSaving}
+                          className='inline-flex items-center gap-1.5 text-xs font-medium text-lunary-accent-300 hover:text-lunary-accent-200 transition-colors disabled:opacity-50'
+                        >
+                          {isSaving ? (
+                            <Loader2 className='w-3 h-3 animate-spin' />
+                          ) : (
+                            <BookOpen className='w-3 h-3' />
+                          )}
+                          Save reflection
+                        </button>
+                        <button
+                          onClick={() => setActivePromptIndex(null)}
                           disabled={isSaving}
-                        />
-                        <div className='flex items-center gap-2'>
-                          <button
-                            onClick={() =>
-                              handleSaveToJournal(prompt, drafts[prompt] ?? '')
-                            }
-                            disabled={!drafts[prompt]?.trim() || isSaving}
-                            className='inline-flex items-center gap-1.5 text-xs font-medium text-lunary-accent-300 hover:text-lunary-accent-200 transition-colors disabled:opacity-50'
-                          >
-                            {isSaving ? (
-                              <Loader2 className='w-3 h-3 animate-spin' />
-                            ) : (
-                              <BookOpen className='w-3 h-3' />
-                            )}
-                            Save reflection
-                          </button>
-                          <button
-                            onClick={() => setActivePromptIndex(null)}
-                            disabled={isSaving}
-                            className='text-xs text-zinc-500 hover:text-zinc-300 transition-colors'
-                          >
-                            Cancel
-                          </button>
-                        </div>
-                      </>
-                    ) : (
-                      <button
-                        onClick={() => setActivePromptIndex(i)}
-                        disabled={isSaved || isSaving}
-                        className={`inline-flex items-center gap-1.5 text-xs font-medium transition-colors ${
-                          isSaved
-                            ? 'text-lunary-success-400'
-                            : 'text-lunary-accent-400 hover:text-lunary-accent-300'
-                        }`}
-                      >
-                        {isSaving ? (
-                          <Loader2 className='w-3 h-3 animate-spin' />
-                        ) : isSaved ? (
-                          <Check className='w-3 h-3' />
-                        ) : (
-                          <BookOpen className='w-3 h-3' />
-                        )}
-                        {isSaved ? 'Saved' : 'Write reflection'}
-                      </button>
-                    )}
-                  </div>
-                )}
+                          className='text-xs text-zinc-500 hover:text-zinc-300 transition-colors'
+                        >
+                          Cancel
+                        </button>
+                      </div>
+                    </>
+                  ) : (
+                    <button
+                      onClick={() => setActivePromptIndex(i)}
+                      disabled={isSaved || isSaving}
+                      className={`inline-flex items-center gap-1.5 text-xs font-medium transition-colors ${
+                        isSaved
+                          ? 'text-lunary-success-400'
+                          : 'text-lunary-accent-400 hover:text-lunary-accent-300'
+                      }`}
+                    >
+                      {isSaving ? (
+                        <Loader2 className='w-3 h-3 animate-spin' />
+                      ) : isSaved ? (
+                        <Check className='w-3 h-3' />
+                      ) : (
+                        <BookOpen className='w-3 h-3' />
+                      )}
+                      {isSaved ? 'Saved' : 'Write reflection'}
+                    </button>
+                  )}
+                </div>
               </div>
             );
           })}
 
           {!hasAccess && (
-            <p className='text-xs text-zinc-500'>
-              Unlock more cosmic reflection prompts with Lunary+, plus save
-              reflections to your journal.
-            </p>
+            <Link
+              href='/pricing'
+              className='flex items-center gap-2 rounded-lg border border-lunary-primary-800/40 bg-lunary-primary-950/30 px-3 py-2.5 hover:bg-lunary-primary-950/50 transition-colors group'
+            >
+              <Sparkles className='w-3.5 h-3.5 text-lunary-primary-400 flex-shrink-0' />
+              <p className='text-xs text-zinc-400'>
+                Get{' '}
+                <span className='text-lunary-primary-300 font-medium group-hover:text-lunary-primary-200'>
+                  {JOURNAL_PROMPT_LIMITS.lunary_plus -
+                    JOURNAL_PROMPT_LIMITS.free}{' '}
+                  more prompts
+                </span>{' '}
+                and unlimited Book of Shadows entries with Lunary+
+              </p>
+            </Link>
           )}
 
           {journalSkill && (
