@@ -19,6 +19,7 @@ import {
 import { MarketingFooterGate } from '@/components/MarketingFooterGate';
 import { HappeningNowSection } from '@/components/explore/HappeningNowSection';
 import { CircleInviteCTA } from '@/components/CircleInviteCTA';
+import { Heading } from '@/components/ui/Heading';
 
 export const metadata = {
   title: 'Explore | Lunary',
@@ -154,7 +155,9 @@ export default function ExplorePage() {
       <div className='flex-1 p-4'>
         <div className='max-w-2xl mx-auto space-y-6'>
           <header className='pt-4 pb-2'>
-            <h1 className='text-2xl font-light text-zinc-100'>Explore</h1>
+            <Heading variant='h1' as='h1'>
+              Explore
+            </Heading>
             <p className='text-sm text-zinc-400'>
               Discover all Lunary features and resources
             </p>

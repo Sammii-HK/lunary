@@ -12,6 +12,7 @@ import { Breadcrumbs } from '@/components/grimoire/Breadcrumbs';
 import { CosmicConnections } from '@/components/grimoire/CosmicConnections';
 import { CosmicConnectionSection } from '@/lib/cosmicConnectionsConfig';
 import { Button } from '@/components/ui/button';
+import { Heading } from '@/components/ui/Heading';
 
 export const metadata: Metadata = {
   title: 'Book of Shadows: Create Your Personal Grimoire - Lunary',
@@ -131,12 +132,12 @@ export default function BookOfShadowsPage() {
       />
 
       <header className='mb-12'>
-        <h1 className='text-4xl md:text-5xl font-light text-zinc-100 mb-6'>
+        <Heading variant='h1' as='h1'>
           Book of Shadows
           <span className='block text-2xl text-lunary-primary-400 mt-2'>
             Your Personal Grimoire
           </span>
-        </h1>
+        </Heading>
         <p className='text-xl text-zinc-400 leading-relaxed'>
           A Book of Shadows is your personal record of magical practice—a place
           to document spells, rituals, dreams, reflections, and discoveries. It
