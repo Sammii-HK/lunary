@@ -9,6 +9,7 @@ import {
   checkRetrogradeEvents,
   getSignDescription,
 } from '../../../utils/astrology/astronomical-data';
+import { calculateTransitDuration } from '../../../utils/astrology/transit-duration';
 import { Observer } from 'astronomy-engine';
 
 const DEFAULT_OBSERVER = new Observer(51.4769, 0.0005, 0);
@@ -156,7 +157,33 @@ export async function getGlobalCosmicData(
     },
   );
 
-  return await cached();
+  const data = await cached();
+
+  // Recompute durations from current time using cached position data.
+  // The DB/cache stores static remainingDays that go stale, but longitude
+  // and sign are still valid — recalculate duration from those + current date.
+  if (data?.planetaryPositions) {
+    const now = new Date();
+    for (const [planet, pos] of Object.entries(data.planetaryPositions)) {
+      const fresh = calculateTransitDuration(
+        planet,
+        pos.sign,
+        pos.longitude,
+        now,
+      );
+      pos.duration = fresh
+        ? {
+            totalDays: fresh.totalDays,
+            remainingDays: fresh.remainingDays,
+            displayText: fresh.displayText,
+            startDate: fresh.startDate,
+            endDate: fresh.endDate,
+          }
+        : undefined;
+    }
+  }
+
+  return data;
 }
 
 export async function saveGlobalCosmicData(

@@ -128,7 +128,7 @@ function CollapsibleSpreadLibrary({ children }: { children: ReactNode }) {
   const [isCollapsed, setIsCollapsed] = useState(false);
 
   return (
-    <div className='space-y-2'>
+    <div className='space-y-2' id='spreads'>
       <button
         onClick={() => setIsCollapsed(!isCollapsed)}
         className='flex w-full items-center justify-between rounded-lg border border-zinc-800/50 bg-zinc-900/30 px-3 py-2 text-left transition-colors hover:bg-zinc-900/50'

@@ -15,7 +15,7 @@ export interface TransitDuration {
 
 /**
  * Calculate transit duration for a planet in its current sign
- * Branches: slow planets (Jupiter-Pluto) use YEARLY_TRANSITS, fast planets use orbital math
+ * Branches: slow planets (Jupiter-Pluto) use ephemeris-computed sign segments, fast planets use orbital math
  * @param actualDailyMotion - Real observed daily motion (degrees/day) from astronomy-engine.
  *   When provided, replaces the hardcoded average for fast planets — critical for the Moon
  *   where actual speed (12.2-14.8°/day) varies ~20% from the 13.176° average.
@@ -43,7 +43,9 @@ export function calculateTransitDuration(
 }
 
 /**
- * Slow planets (Jupiter-Pluto): O(1) lookup from YEARLY_TRANSITS
+ * Slow planets (Jupiter-Pluto): lookup from ephemeris-computed sign segments.
+ * Each planet+sign has an array of segments (multiple for retrograde re-entries).
+ * Finds the segment containing the current date.
  */
 function calculateSlowPlanetDuration(
   planet: string,
@@ -51,22 +53,22 @@ function calculateSlowPlanetDuration(
   date: Date,
 ): TransitDuration | null {
   const planetData = SLOW_PLANET_SIGN_CHANGES[planet];
-  if (!planetData) return estimateSlowPlanetDuration(planet, date);
+  if (!planetData) return null;
 
-  const signData = planetData[currentSign];
-  if (!signData) return estimateSlowPlanetDuration(planet, date);
+  const segments = planetData[currentSign];
+  if (!segments || segments.length === 0) return null;
 
-  const { start, end } = signData;
   const now = date.getTime();
-  const startTime = start.getTime();
-  const endTime = end.getTime();
 
-  // Check if current date is within the range
-  if (now < startTime || now > endTime) {
-    // Not in this transit period, return approximate based on average
-    return estimateSlowPlanetDuration(planet, date);
-  }
+  // Find the segment that contains the current date
+  const activeSegment = segments.find(
+    (seg) => now >= seg.start.getTime() && now <= seg.end.getTime(),
+  );
 
+  if (!activeSegment) return null;
+
+  const startTime = activeSegment.start.getTime();
+  const endTime = activeSegment.end.getTime();
   const totalMs = endTime - startTime;
   const remainingMs = endTime - now;
 
@@ -77,24 +79,9 @@ function calculateSlowPlanetDuration(
     totalDays,
     remainingDays,
     displayText: formatDuration(remainingDays),
-    startDate: start,
-    endDate: end,
+    startDate: activeSegment.start,
+    endDate: activeSegment.end,
   };
-}
-
-/**
- * Estimate duration for slow planets when not in YEARLY_TRANSITS data
- * Returns null to avoid triggering false milestones - we only generate
- * milestone posts when we have actual transit dates from YEARLY_TRANSITS.
- */
-function estimateSlowPlanetDuration(
-  _planet: string,
-  _date: Date,
-): TransitDuration | null {
-  // Return null when we don't have real transit data
-  // This prevents false "halfway through" or other milestone triggers
-  // Add missing transit entries to YEARLY_TRANSITS instead
-  return null;
 }
 
 /**
@@ -128,14 +115,48 @@ function calculateFastPlanetDuration(
 
   // Calculate start date (when planet entered this sign)
   const daysElapsed = degreeInSign / dailyMotion;
-  const startDate = new Date(date);
-  startDate.setDate(startDate.getDate() - daysElapsed);
+  const msPerDay = 86400000;
+  const startDate = new Date(date.getTime() - daysElapsed * msPerDay);
 
   // Calculate end date (when planet will leave this sign)
-  const endDate = new Date(date);
-  endDate.setDate(endDate.getDate() + remainingDays);
+  const endDate = new Date(date.getTime() + remainingDays * msPerDay);
 
   const totalDays = daysElapsed + remainingDays;
+
+  return {
+    totalDays,
+    remainingDays,
+    displayText: formatDuration(remainingDays),
+    startDate,
+    endDate,
+  };
+}
+
+/**
+ * Recalculate remainingDays and displayText from stored start/end dates.
+ * Fixes stale cached durations by computing remaining time from NOW.
+ * Handles both Date objects and ISO strings (from JSON/DB serialization).
+ */
+export function refreshDuration(
+  duration:
+    | { startDate: Date | string; endDate: Date | string; totalDays?: number }
+    | null
+    | undefined,
+): TransitDuration | null {
+  if (!duration?.endDate || !duration?.startDate) return null;
+
+  const endDate = new Date(duration.endDate);
+  const startDate = new Date(duration.startDate);
+  const now = Date.now();
+
+  const totalMs = endDate.getTime() - startDate.getTime();
+  const remainingMs = endDate.getTime() - now;
+
+  if (remainingMs <= 0) return null; // Transit has ended
+
+  const totalDays =
+    duration.totalDays ?? Math.ceil(totalMs / (1000 * 60 * 60 * 24));
+  const remainingDays = remainingMs / (1000 * 60 * 60 * 24);
 
   return {
     totalDays,
@@ -150,8 +171,8 @@ function calculateFastPlanetDuration(
  * Format duration as compact badge text
  * - < 1 hour: "<1h left"
  * - < 1 day: "Xh left"
- * - 1-6 days: "Xd left"
- * - 7-55 days: "Xw left"
+ * - 1-13 days: "Xd left"
+ * - 14-55 days: "Xw left"
  * - 56-364 days: "Xm left"
  * - 365+ days: "Xy left"
  */
@@ -162,7 +183,7 @@ export function formatDuration(days: number): string {
     return '<1h left';
   } else if (days < 1) {
     return `${hours}h left`;
-  } else if (days < 7) {
+  } else if (days < 14) {
     return `${Math.round(days)}d left`;
   } else if (days < 56) {
     const weeks = Math.round(days / 7);

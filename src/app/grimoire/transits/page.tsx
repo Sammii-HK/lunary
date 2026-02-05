@@ -78,33 +78,6 @@ const cosmicSections = [
   },
 ];
 
-const mostSearchedTransits = [
-  {
-    title: 'Saturn Return 2025',
-    description:
-      'Return lessons for the 1995-1996 birth years and the Pisces horizon.',
-    href: '/grimoire/transits/saturn-return-2025',
-  },
-  {
-    title: 'Saturn Return 2026',
-    description:
-      'Pisces → Aries return that launches the late-90s cohort into leadership.',
-    href: '/grimoire/transits/saturn-return-2026',
-  },
-  {
-    title: 'Jupiter in Gemini 2025',
-    description:
-      'Communication, learning, and curiosity expand—ideal for writers and students.',
-    href: '/grimoire/transits/jupiter-gemini-2025',
-  },
-  {
-    title: 'Mercury Retrograde 2025',
-    description:
-      'Mercury Rx periods for the year to help you spot moments for review.',
-    href: '/grimoire/events/2025/mercury-retrograde',
-  },
-];
-
 const SATURN_CYCLE_STEPS = [
   {
     label: 'First Square (1st Quarter)',
