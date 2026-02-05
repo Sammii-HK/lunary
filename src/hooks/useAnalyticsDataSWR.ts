@@ -35,6 +35,7 @@ const REFRESH_INTERVALS = {
   STANDARD: 30 * 60 * 1000, // 30 minutes for most metrics
   HISTORICAL: 4 * 60 * 60 * 1000, // 4 hours for historical data
   STATIC: 24 * 60 * 60 * 1000, // 24 hours for static data
+  DISABLED: 0, // No auto-refresh - only fetch once
 } as const;
 
 export interface UseAnalyticsDataSWROptions {
@@ -161,13 +162,13 @@ export function useAnalyticsDataSWR(options: UseAnalyticsDataSWROptions) {
   const { data: apiCosts, error: apiCostsError } = useSWR(
     `/api/admin/analytics/api-costs?${queryParams}`,
     fetcher,
-    { refreshInterval: REFRESH_INTERVALS.STANDARD },
+    { refreshInterval: REFRESH_INTERVALS.DISABLED }, // Historical data
   );
 
   const { data: userSegments, error: userSegmentsError } = useSWR(
     `/api/admin/analytics/user-segments?${queryParams}`,
     fetcher,
-    { refreshInterval: REFRESH_INTERVALS.STANDARD },
+    { refreshInterval: REFRESH_INTERVALS.DISABLED }, // Changes slowly
   );
 
   // External & misc
@@ -175,57 +176,57 @@ export function useAnalyticsDataSWR(options: UseAnalyticsDataSWROptions) {
     useSWR<NotificationResponse>(
       `/api/admin/analytics/notifications?${queryParams}`,
       fetcher,
-      { refreshInterval: REFRESH_INTERVALS.STANDARD },
+      { refreshInterval: REFRESH_INTERVALS.DISABLED }, // Historical data
     );
 
   const { data: attribution, error: attributionError } =
     useSWR<AttributionResponse>(
       `/api/admin/analytics/attribution?${queryParams}`,
       fetcher,
-      { refreshInterval: REFRESH_INTERVALS.STANDARD },
+      { refreshInterval: REFRESH_INTERVALS.DISABLED }, // Changes slowly
     );
 
   const { data: discordAnalytics, error: discordError } = useSWR(
     `/api/analytics/discord-interactions?range=7d`,
     fetcher,
-    { refreshInterval: REFRESH_INTERVALS.STANDARD },
+    { refreshInterval: REFRESH_INTERVALS.DISABLED }, // Not time-critical
   );
 
   const { data: searchConsoleResponse, error: searchConsoleError } = useSWR(
     `/api/admin/analytics/search-console?${queryParams}`,
     fetcher,
-    { refreshInterval: REFRESH_INTERVALS.STANDARD },
+    { refreshInterval: REFRESH_INTERVALS.DISABLED }, // Slow external API
   );
 
   const { data: insightsResponse, error: insightsError } = useSWR(
     `/api/admin/analytics/insights?${queryParams}`,
     fetcher,
-    { refreshInterval: REFRESH_INTERVALS.STANDARD },
+    { refreshInterval: REFRESH_INTERVALS.REALTIME }, // Keep insights fresh
   );
 
   const { data: grimoireTopPagesResponse, error: grimoireTopPagesError } =
     useSWR(`/api/grimoire/stats?top=20`, fetcher, {
-      refreshInterval: REFRESH_INTERVALS.STANDARD,
+      refreshInterval: REFRESH_INTERVALS.DISABLED, // Static data
     });
 
-  // Historical data - refresh every 4 hours
+  // Historical data - no auto-refresh needed
   const { data: cohorts, error: cohortsError } = useSWR(
     `/api/admin/analytics/cohorts?${queryParams}&type=week&weeks=12`,
     fetcher,
-    { refreshInterval: REFRESH_INTERVALS.HISTORICAL },
+    { refreshInterval: REFRESH_INTERVALS.DISABLED }, // Historical, doesn't change
   );
 
-  // Static data - refresh once per day
+  // Static data - no auto-refresh needed
   const { data: metricSnapshotsWeekly, error: snapshotsWeeklyError } = useSWR(
     `/api/admin/analytics/metric-snapshots?type=weekly&limit=12`,
     fetcher,
-    { refreshInterval: REFRESH_INTERVALS.STATIC },
+    { refreshInterval: REFRESH_INTERVALS.DISABLED }, // Weekly snapshots don't change
   );
 
   const { data: metricSnapshotsMonthly, error: snapshotsMonthlyError } = useSWR(
     `/api/admin/analytics/metric-snapshots?type=monthly&limit=12`,
     fetcher,
-    { refreshInterval: REFRESH_INTERVALS.STATIC },
+    { refreshInterval: REFRESH_INTERVALS.DISABLED }, // Monthly snapshots don't change
   );
 
   // Combine errors
