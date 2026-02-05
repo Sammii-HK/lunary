@@ -247,7 +247,12 @@ const buildNatalHouseInfo = (
   };
 };
 
-export const SkyNowCard = () => {
+interface SkyNowCardProps {
+  isExpanded?: boolean;
+  onToggle?: (isExpanded: boolean) => void;
+}
+
+export const SkyNowCard = ({ isExpanded, onToggle }: SkyNowCardProps = {}) => {
   const { user } = useUser();
   const { currentAstrologicalChart } = useAstronomyContext();
   const {
@@ -459,6 +464,8 @@ export const SkyNowCard = () => {
         preview={preview}
         expanded={expanded}
         autoExpandOnDesktop
+        isExpanded={isExpanded}
+        onToggle={onToggle}
       />
       {showChartModal && (
         <div

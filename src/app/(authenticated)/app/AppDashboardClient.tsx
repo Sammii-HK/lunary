@@ -171,8 +171,8 @@ export default function AppDashboardClient() {
   useWidgetSync({ enabled: authState.isAuthenticated });
   const firstName = user?.name?.trim() ? user.name.split(' ')[0] : null;
   const [isDemoMode, setIsDemoMode] = useState(false);
-  // Always use controlled mode - start with false, never undefined
   const [moonExpanded, setMoonExpanded] = useState<boolean>(false);
+  const [skyNowExpanded, setSkyNowExpanded] = useState<boolean>(false);
 
   // Defer heavy components for faster initial render
   const [showHoroscope, setShowHoroscope] = useState(false);
@@ -186,23 +186,35 @@ export default function AppDashboardClient() {
     checkDemoMode();
   }, []);
 
-  // Auto-expand moon card logic
+  // Auto-expand logic
   useEffect(() => {
     if (isDemoMode) {
-      // Demo mode: auto-expand after 1 second
+      // Demo mode: scroll to Sky Now, expand it, then collapse after a few seconds
+      const scrollTimeout = setTimeout(() => {
+        const skyNowEl = document.getElementById('sky-now');
+        skyNowEl?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }, 800);
       const expandTimeout = setTimeout(() => {
-        setMoonExpanded(true);
-      }, 1000);
-      return () => clearTimeout(expandTimeout);
+        setSkyNowExpanded(true);
+      }, 1500);
+      const collapseTimeout = setTimeout(() => {
+        setSkyNowExpanded(false);
+      }, 5000);
+      return () => {
+        clearTimeout(scrollTimeout);
+        clearTimeout(expandTimeout);
+        clearTimeout(collapseTimeout);
+      };
     } else {
-      // Non-demo mode: auto-expand on desktop immediately
+      // Non-demo mode: auto-expand moon and sky now on desktop immediately
       const isDesktop = window.matchMedia('(min-width: 768px)').matches;
       if (isDesktop) {
         setMoonExpanded(true);
+        setSkyNowExpanded(true);
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isDemoMode]); // Only depend on isDemoMode, not moonExpanded
+  }, [isDemoMode]);
 
   // Handle moon preview toggle
   const handleMoonToggle = (isExpanded: boolean) => {
@@ -380,7 +392,12 @@ export default function AppDashboardClient() {
               onToggle={handleMoonToggle}
             />
           </div>
-          <SkyNowCard />
+          <div id='sky-now' className='scroll-mt-20'>
+            <SkyNowCard
+              isExpanded={skyNowExpanded}
+              onToggle={(expanded) => setSkyNowExpanded(expanded)}
+            />
+          </div>
           <DailyInsightCard />
           <DailyCardPreview />
 
