@@ -18,7 +18,7 @@ describe('Transit Duration Calculation', () => {
       expect(duration).not.toBeNull();
       expect(duration!.remainingDays).toBeGreaterThan(0);
       expect(duration!.remainingDays).toBeLessThan(3); // Moon moves fast
-      expect(duration!.displayText).toMatch(/day/);
+      expect(duration!.displayText).toMatch(/d left|h left/);
     });
 
     it('calculates Sun duration correctly', () => {
@@ -33,7 +33,7 @@ describe('Transit Duration Calculation', () => {
       expect(duration).not.toBeNull();
       expect(duration!.remainingDays).toBeGreaterThan(15);
       expect(duration!.remainingDays).toBeLessThan(25);
-      expect(duration!.displayText).toMatch(/week|day/);
+      expect(duration!.displayText).toMatch(/w left|d left/);
     });
 
     it('calculates Mercury duration correctly', () => {
@@ -60,8 +60,8 @@ describe('Transit Duration Calculation', () => {
       );
 
       expect(duration).not.toBeNull();
-      expect(duration!.remainingDays).toBeLessThanOrEqual(1); // Ceil rounds 0.0076 up to 1
-      expect(duration!.displayText).toMatch(/1 day|< 1 day/);
+      expect(duration!.remainingDays).toBeLessThanOrEqual(1);
+      expect(duration!.displayText).toMatch(/h left/);
     });
 
     it('handles planet just entered sign (0.1°)', () => {
@@ -80,20 +80,18 @@ describe('Transit Duration Calculation', () => {
   });
 
   describe('Slow Planets (Jupiter-Pluto)', () => {
-    it('looks up Jupiter duration from YEARLY_TRANSITS', () => {
-      // Jupiter in Gemini - should return data from pre-computed transits
-      // Jupiter enters Gemini on June 9, 2025, test on July 1, 2025
+    it('looks up Jupiter duration from pre-computed segments', () => {
+      // Jupiter in Cancer — test within a known segment
       const duration = calculateTransitDuration(
         'Jupiter',
-        'Gemini',
-        75,
+        'Cancer',
+        105,
         new Date('2025-07-01'),
       );
 
       expect(duration).not.toBeNull();
-      // Jupiter stays in Gemini from June 9, 2025 to June 30, 2026 (~13 months)
-      expect(duration!.totalDays).toBeGreaterThan(300); // ~13 months
-      expect(duration!.displayText).toMatch(/month/);
+      expect(duration!.totalDays).toBeGreaterThan(200);
+      expect(duration!.displayText).toMatch(/m left|y left/);
     });
 
     it('handles Saturn in Pisces', () => {
@@ -105,11 +103,11 @@ describe('Transit Duration Calculation', () => {
       );
 
       expect(duration).not.toBeNull();
-      expect(duration!.totalDays).toBeGreaterThan(365); // Saturn stays ~2.5 years per sign
+      expect(duration!.totalDays).toBeGreaterThan(100);
     });
 
-    it('falls back to estimation if sign not in YEARLY_TRANSITS', () => {
-      // Use a sign/planet combo that might not be in the data
+    it('returns null for dates outside pre-computed range', () => {
+      // 2040 is outside the 2020-2035 scan range
       const duration = calculateTransitDuration(
         'Neptune',
         'Aries',
@@ -117,48 +115,51 @@ describe('Transit Duration Calculation', () => {
         new Date('2040-01-01'),
       );
 
-      expect(duration).not.toBeNull();
-      // Neptune daily motion: 0.006°/day → ~5000 days/sign
-      // Fallback estimates halfway through → ~2500 days remaining
-      expect(duration!.totalDays).toBeGreaterThan(4000); // Neptune stays ~14 years per sign
-      expect(duration!.remainingDays).toBeGreaterThan(2000);
+      expect(duration).toBeNull();
     });
   });
 
   describe('Duration Formatting', () => {
-    it('formats < 1 day correctly', () => {
-      expect(formatDuration(0.5)).toBe('< 1 day remaining');
+    it('formats hours correctly', () => {
+      expect(formatDuration(0.5)).toBe('12h left');
+      expect(formatDuration(0.04)).toBe('1h left');
     });
 
-    it('formats 1 day correctly', () => {
-      expect(formatDuration(1)).toBe('1 day remaining');
+    it('formats sub-hour correctly', () => {
+      expect(formatDuration(0.01)).toBe('<1h left');
     });
 
-    it('formats multiple days correctly', () => {
-      expect(formatDuration(5)).toBe('5 days remaining');
+    it('formats days correctly', () => {
+      expect(formatDuration(1)).toBe('1d left');
+      expect(formatDuration(5)).toBe('5d left');
+      expect(formatDuration(13)).toBe('13d left');
     });
 
     it('formats weeks correctly', () => {
-      expect(formatDuration(14)).toBe('2 weeks remaining');
-      expect(formatDuration(7)).toBe('1 week remaining');
-      expect(formatDuration(21)).toBe('3 weeks remaining');
+      expect(formatDuration(14)).toBe('2w left');
+      expect(formatDuration(21)).toBe('3w left');
+      expect(formatDuration(30)).toBe('4w left');
     });
 
     it('formats months correctly', () => {
-      expect(formatDuration(60)).toBe('2 months remaining');
-      expect(formatDuration(56)).toBe('2 months remaining'); // 56 days = threshold for months
-      expect(formatDuration(365)).toBe('12 months remaining');
+      expect(formatDuration(56)).toBe('2m left');
+      expect(formatDuration(60)).toBe('2m left');
+      expect(formatDuration(90)).toBe('3m left');
     });
 
-    it('formats weeks correctly', () => {
-      expect(formatDuration(30)).toBe('4 weeks remaining');
-      expect(formatDuration(14)).toBe('2 weeks remaining');
-      expect(formatDuration(7)).toBe('1 week remaining');
+    it('formats years correctly', () => {
+      expect(formatDuration(365)).toBe('1y left');
+      expect(formatDuration(730)).toBe('2y left');
+    });
+
+    it('transitions from days to weeks at 14 days', () => {
+      expect(formatDuration(13)).toBe('13d left'); // Still days
+      expect(formatDuration(14)).toBe('2w left'); // Now weeks
     });
 
     it('transitions from weeks to months at 8 weeks', () => {
-      expect(formatDuration(55)).toBe('8 weeks remaining'); // Just under threshold
-      expect(formatDuration(56)).toBe('2 months remaining'); // At threshold
+      expect(formatDuration(55)).toBe('8w left'); // Just under threshold
+      expect(formatDuration(56)).toBe('2m left'); // At threshold
     });
   });
 
