@@ -80,6 +80,28 @@ export function DemoClient() {
   const [cycleProgress, setCycleProgress] = useState(0);
   const celesteUser = DEMO_USER_DATA;
 
+  // NUCLEAR: Disable ALL scrolling in demo - inject global CSS override
+  useEffect(() => {
+    const style = document.createElement('style');
+    style.id = 'demo-no-scroll';
+    style.textContent = `
+      * {
+        overflow: hidden !important;
+        overscroll-behavior: none !important;
+      }
+      html, body {
+        overflow: hidden !important;
+        height: 100% !important;
+        position: fixed !important;
+        width: 100% !important;
+      }
+    `;
+    document.head.appendChild(style);
+    return () => {
+      document.head.removeChild(style);
+    };
+  }, []);
+
   useEffect(() => {
     // Warm preload other tab components for instant switching
     const preloadTimer = setTimeout(() => {
