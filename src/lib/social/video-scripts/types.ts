@@ -3,6 +3,7 @@
  */
 
 import { ContentAspect } from '../shared/types';
+import type { ContentType } from './content-types';
 
 export interface ScriptSection {
   name: string;
@@ -33,6 +34,7 @@ export interface VideoScript {
   topic?: string;
   angle?: string;
   aspect?: string;
+  contentType?: ContentType; // NEW: Content type for secondary videos
   platform: 'tiktok' | 'youtube';
   sections: ScriptSection[];
   fullScript: string;
@@ -44,7 +46,10 @@ export interface VideoScript {
   hookText?: string;
   hookVersion?: number;
   // TikTok-specific fields
-  metadata?: TikTokMetadata;
+  metadata?: TikTokMetadata & {
+    scheduledHour?: number; // UTC hour for optimal posting
+    targetAudience?: 'discovery' | 'consideration' | 'conversion';
+  };
   coverImageUrl?: string;
   partNumber?: number; // 1, 2, or 3
   writtenPostContent?: string; // Social media post content for this video

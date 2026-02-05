@@ -55,6 +55,47 @@ export const sabbatThemes: SabbatTheme[] = withSabbatThreads(
 // ============================================================================
 
 /**
+ * Theme category weights for selection
+ * Numerology gets 3x weight because it's the best-performing topic
+ */
+export const THEME_CATEGORY_WEIGHTS: Record<string, number> = {
+  numerology: 3, // Best performing - boost to ~18% of weeks
+  tarot: 2,
+  lunar: 2,
+  zodiac: 1,
+  planetary: 1,
+  crystals: 2,
+  sabbat: 1,
+  chakras: 1,
+  runes: 1,
+};
+
+/**
+ * Select a theme for a given week with weighted preference for numerology
+ */
+export function selectWeeklyTheme(
+  weekNumber: number,
+  customThemeIndex?: number,
+): WeeklyTheme {
+  if (customThemeIndex !== undefined) {
+    return categoryThemes[customThemeIndex % categoryThemes.length];
+  }
+
+  // Create weighted theme pool
+  const weightedThemes: WeeklyTheme[] = [];
+  for (const theme of categoryThemes) {
+    const weight = THEME_CATEGORY_WEIGHTS[theme.category] || 1;
+    // Add theme multiple times based on weight
+    for (let i = 0; i < weight; i++) {
+      weightedThemes.push(theme);
+    }
+  }
+
+  // Select from weighted pool using week number as seed
+  return weightedThemes[weekNumber % weightedThemes.length];
+}
+
+/**
  * Check if a date falls within the lead-up to a sabbat
  */
 export function getSabbatForDate(date: Date): {
@@ -114,11 +155,12 @@ export function getThemeForDate(
     }
   }
 
-  // Otherwise use rotating category theme
+  // Otherwise use rotating category theme with weighted selection
   const dayOfWeek = date.getDay();
   const facetIndex = dayOfWeek === 0 ? 6 : dayOfWeek - 1; // Mon=0, Sun=6
 
-  const theme = categoryThemes[currentThemeIndex % categoryThemes.length];
+  // Use weighted selection to favor numerology (best performing)
+  const theme = selectWeeklyTheme(currentThemeIndex);
   const facets =
     theme.facetPool && theme.facetPool.length > 0
       ? theme.facetPool
