@@ -24,8 +24,40 @@ export function OptimizedDemoIframe({
   preload = true,
 }: OptimizedDemoIframeProps) {
   const iframeRef = useRef<HTMLIFrameElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
   const [loadStartTime] = useState(Date.now());
   const [loadTime, setLoadTime] = useState<number | null>(null);
+
+  // Prevent wheel/touch events from scrolling the parent page
+  useEffect(() => {
+    const container = containerRef.current;
+    if (!container) return;
+
+    const handleWheel = (e: WheelEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
+
+      // Forward the scroll to the iframe content
+      if (iframeRef.current?.contentWindow) {
+        iframeRef.current.contentWindow.postMessage(
+          { type: 'SCROLL', deltaY: e.deltaY },
+          window.location.origin,
+        );
+      }
+    };
+
+    const handleTouch = (e: TouchEvent) => {
+      e.stopPropagation();
+    };
+
+    container.addEventListener('wheel', handleWheel, { passive: false });
+    container.addEventListener('touchmove', handleTouch, { passive: false });
+
+    return () => {
+      container.removeEventListener('wheel', handleWheel);
+      container.removeEventListener('touchmove', handleTouch);
+    };
+  }, []);
 
   // For lazy loading, use intersection observer
   const { ref: observerRef, inView } = useInView({
@@ -113,6 +145,7 @@ export function OptimizedDemoIframe({
     >
       {/* iPhone frame */}
       <div
+        ref={containerRef}
         className='relative w-full h-full bg-zinc-950 rounded-[2.5rem] border border-zinc-800 overflow-hidden'
         style={{
           boxShadow:

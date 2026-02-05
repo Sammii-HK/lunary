@@ -44,7 +44,7 @@ export default function DemoPreviewLayout({
 
       <div
         className='h-screen w-screen overflow-hidden bg-zinc-950'
-        style={{ overscrollBehavior: 'contain' }}
+        style={{ overscrollBehavior: 'none' }}
       >
         {children}
       </div>
