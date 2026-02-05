@@ -236,10 +236,10 @@ export async function GET(request: NextRequest) {
 
       // New conversions on target date
       sql.query(
-        `SELECT COUNT(DISTINCT s."userId") as count
+        `SELECT COUNT(DISTINCT s.user_id) as count
          FROM subscriptions s
-         INNER JOIN "user" u ON u.id = s."userId"
-         WHERE s."createdAt" >= $1 AND s."createdAt" <= $2
+         INNER JOIN "user" u ON u.id = s.user_id
+         WHERE s.created_at >= $1 AND s.created_at <= $2
            AND (u.email IS NULL OR (u.email NOT LIKE $3 AND u.email != $4))`,
         [
           dayStart.toISOString(),
