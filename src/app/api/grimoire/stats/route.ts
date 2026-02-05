@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { sql } from '@vercel/postgres';
+import { ANALYTICS_CACHE_TTL_SECONDS } from '@/lib/analytics-cache-config';
 
 export interface GrimoirePageStats {
   pagePath: string;
@@ -35,13 +36,18 @@ export async function GET(request: NextRequest) {
       `;
 
       const row = result.rows[0];
-      return NextResponse.json({
+      const response = NextResponse.json({
         stats: {
           pagePath,
           viewsLast30Days: parseInt(row?.views_30d || '0'),
           viewsAllTime: parseInt(row?.views_all_time || '0'),
         },
       });
+      response.headers.set(
+        'Cache-Control',
+        `private, max-age=${ANALYTICS_CACHE_TTL_SECONDS}`,
+      );
+      return response;
     }
 
     // Get top grimoire pages by views
@@ -64,7 +70,12 @@ export async function GET(request: NextRequest) {
       viewsAllTime: parseInt(row.views_all_time || '0'),
     }));
 
-    return NextResponse.json({ pages });
+    const response = NextResponse.json({ pages });
+    response.headers.set(
+      'Cache-Control',
+      `private, max-age=${ANALYTICS_CACHE_TTL_SECONDS}`,
+    );
+    return response;
   } catch (error: any) {
     // If tables don't exist yet, return empty stats
     if (error?.code === '42P01') {

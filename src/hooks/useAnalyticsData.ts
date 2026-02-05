@@ -268,6 +268,12 @@ export type ConversionInfluenceResponse = {
   median_days_signup_to_subscription: number | null;
 };
 
+export type GrimoireTopPage = {
+  pagePath: string;
+  viewsLast30Days: number;
+  viewsAllTime: number;
+};
+
 export type IntentionBreakdownItem = {
   intention: string;
   count: number;
@@ -341,6 +347,7 @@ export interface AnalyticsDataState {
   apiCosts: any | null;
   cohorts: any | null;
   userSegments: any | null;
+  grimoireTopPages: GrimoireTopPage[];
   intentionBreakdown: IntentionBreakdown | null;
   insights: InsightData[];
   metricSnapshots: {
@@ -427,6 +434,9 @@ export function useAnalyticsData(): AnalyticsDataState & AnalyticsDataActions {
   const [apiCosts, setApiCosts] = useState<any | null>(null);
   const [cohorts, setCohorts] = useState<any | null>(null);
   const [userSegments, setUserSegments] = useState<any | null>(null);
+  const [grimoireTopPages, setGrimoireTopPages] = useState<GrimoireTopPage[]>(
+    [],
+  );
   const [intentionBreakdown, setIntentionBreakdown] =
     useState<IntentionBreakdown | null>(null);
   const [insights, setInsights] = useState<InsightData[]>([]);
@@ -540,13 +550,14 @@ export function useAnalyticsData(): AnalyticsDataState & AnalyticsDataActions {
         ),
       ]);
 
-      // Batch 4: External & misc (5 requests)
+      // Batch 4: External & misc (6 requests)
       const [
         notificationsRes,
         attributionRes,
         discordRes,
         searchConsoleRes,
         insightsRes,
+        grimoireTopPagesRes,
       ] = await Promise.all([
         fetch(
           `/api/admin/analytics/notifications?${queryParams}${cacheBuster}`,
@@ -557,6 +568,7 @@ export function useAnalyticsData(): AnalyticsDataState & AnalyticsDataActions {
           `/api/admin/analytics/search-console?${queryParams}${cacheBuster}`,
         ),
         fetch(`/api/admin/analytics/insights?${queryParams}${cacheBuster}`),
+        fetch(`/api/grimoire/stats?top=20${cacheBuster}`),
       ]);
 
       const errors: string[] = [];
@@ -695,6 +707,11 @@ export function useAnalyticsData(): AnalyticsDataState & AnalyticsDataActions {
         setInsights(data.insights || []);
       }
 
+      if (grimoireTopPagesRes.ok) {
+        const data = await grimoireTopPagesRes.json();
+        setGrimoireTopPages(data.pages || []);
+      }
+
       if (errors.length > 0) {
         setError(`Some metrics unavailable: ${errors.join(', ')}`);
       }
@@ -782,6 +799,7 @@ export function useAnalyticsData(): AnalyticsDataState & AnalyticsDataActions {
     apiCosts,
     cohorts,
     userSegments,
+    grimoireTopPages,
     intentionBreakdown,
     insights,
     metricSnapshots,

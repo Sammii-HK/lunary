@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
   CalendarRange,
   Download,
@@ -40,9 +40,20 @@ export default function AnalyticsPage() {
 
   const { wauWindowStart, mauWindowStart, chartSeries } = computedMetrics;
 
-  const [activeTab, setActiveTab] = useState<'snapshot' | 'details'>(
-    'snapshot',
-  );
+  const VALID_TABS = ['snapshot', 'details'] as const;
+  type Tab = (typeof VALID_TABS)[number];
+
+  const [activeTab, setActiveTab] = useState<Tab>(() => {
+    if (typeof window !== 'undefined') {
+      const hash = window.location.hash.replace('#', '') as Tab;
+      if (VALID_TABS.includes(hash)) return hash;
+    }
+    return 'snapshot';
+  });
+
+  useEffect(() => {
+    window.location.hash = activeTab;
+  }, [activeTab]);
 
   const handleExportInsights = () => {
     const insightsJson = JSON.stringify(analyticsData.insights, null, 2);
@@ -238,7 +249,7 @@ export default function AnalyticsPage() {
       {!loading && (
         <Tabs
           value={activeTab}
-          onValueChange={(v) => setActiveTab(v as 'snapshot' | 'details')}
+          onValueChange={(v) => setActiveTab(v as Tab)}
           className='space-y-6'
         >
           <TabsList className='rounded-xl border border-zinc-800/40 bg-zinc-900/20 p-1'>
