@@ -86,6 +86,36 @@ export const comparisonData: Record<string, ComparisonData> = {
         competitor: { type: 'x' },
       },
       {
+        name: 'Synastry Analysis',
+        description: 'Detailed compatibility with aspects',
+        lunary: {
+          type: 'text',
+          value: '31+ aspects',
+          highlight: true,
+        },
+        competitor: { type: 'text', value: 'Basic %' },
+      },
+      {
+        name: 'Pattern Recognition',
+        description: 'Tracks YOUR patterns over time',
+        lunary: {
+          type: 'text',
+          value: 'Your textbook',
+          highlight: true,
+        },
+        competitor: { type: 'x' },
+      },
+      {
+        name: 'Best Times to Connect',
+        description: 'Optimal timing for relationships',
+        lunary: {
+          type: 'text',
+          value: 'Pro',
+          highlight: true,
+        },
+        competitor: { type: 'x' },
+      },
+      {
         name: 'Shareable Features',
         description: 'Share your dashboard, birth chart, horoscope',
         lunary: { type: 'check' },
@@ -165,11 +195,16 @@ export const comparisonData: Record<string, ComparisonData> = {
         description:
           'The Astral Guide has complete context of your birth chart, tarot patterns, readings history, and archetypes to provide comprehensive insights in plain language. It understands your unique astrological profile and how it evolves over time.',
       },
+      {
+        title: 'Cosmic Circle with Deep Synastry',
+        description:
+          'Connect with friends and see how your charts interact with 31+ aspects analyzed. Best Times to Connect shows optimal windows for important conversations. Free users get 5 friends with basic compatibility.',
+      },
     ],
     competitorStrengths:
       'Co-Star may be a good choice if you prefer their minimalist, text-based interface and social features for comparing charts with friends. Their hyper-personalized push notifications and unique aesthetic appeal to users who want a different astrology app experience.',
     conclusion:
-      "Both apps offer free tiers—Lunary's is ad-free with 2000+ grimoire articles, while Co-Star's free tier has ads. Choose Lunary if you want: no ads, real astronomical calculations (±1 arcminute accuracy), a complete grimoire with magical tools, and personalized tarot readings based on your exact birth chart. Choose Co-Star if you prefer their minimalist text-based interface and social features for comparing charts with friends.",
+      "Both apps offer free tiers—Lunary's is ad-free with 2000+ grimoire articles, while Co-Star's free tier has ads. Choose Lunary if you want: no ads, real astronomical calculations (±1 arcminute accuracy), a complete grimoire with magical tools, full synastry with 31+ aspects, and personalized tarot readings based on your exact birth chart. Choose Co-Star if you prefer their minimalist text-based interface.",
     faqs: [
       {
         question: 'Does Lunary have a free tier?',
