@@ -59,6 +59,7 @@
     "shop:sync:retrograde": "tsx scripts/sync-all-shop-products.ts --category retrograde",
     "shop:sync:retrograde:dry": "tsx scripts/sync-all-shop-products.ts --category retrograde --dry-run",
     "shop:sync:resync": "tsx scripts/sync-all-shop-products.ts --skip-existing false",
+    "db:add-analytics-indexes": "tsx scripts/add-analytics-indexes.ts",
     "test": "jest",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
