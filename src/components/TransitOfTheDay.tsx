@@ -40,6 +40,21 @@ const getPlanetSymbol = (planet: string): string => {
   return bodiesSymbols[key] || planet.charAt(0);
 };
 
+/** Compact relative time for badge display (future-only) */
+const formatRelativeTime = (date: dayjs.Dayjs): string => {
+  const now = dayjs();
+  const today = now.startOf('day');
+  const transitDay = date.startOf('day');
+  const daysDiff = transitDay.diff(today, 'day');
+
+  if (daysDiff === 0) {
+    const hours = Math.round(date.diff(now) / (1000 * 60 * 60));
+    return hours < 1 ? 'in <1h' : `in ${hours}h`;
+  }
+  if (daysDiff === 1) return 'tomorrow';
+  return date.format('MMM D');
+};
+
 export const TransitOfTheDay = () => {
   const { user } = useUser();
   const authStatus = useAuthStatus();
@@ -58,36 +73,39 @@ export const TransitOfTheDay = () => {
       );
 
   // Get general transits for unauthenticated users or when no chart access
+  // Future-only with tier-based scoring: today > tomorrow > this week
   const generalTransit = useMemo((): TransitEvent | null => {
     if (authStatus.isAuthenticated && hasPersonalizedAccess) return null;
 
     const upcomingTransits = getUpcomingTransits();
     if (upcomingTransits.length === 0) return null;
 
-    const today = dayjs().startOf('day');
-    const nextWeek = today.add(7, 'day');
+    const now = dayjs();
+    const today = now.startOf('day');
+    const priorityOrder: Record<string, number> = {
+      high: 3,
+      medium: 2,
+      low: 1,
+    };
 
-    const relevantTransits = upcomingTransits.filter((t) => {
-      const transitDate = dayjs(t.date);
-      return transitDate.isAfter(today); // && transitDate.isBefore(nextWeek);
-    });
+    const futureTransits = upcomingTransits.filter((t) =>
+      dayjs(t.date).isAfter(now),
+    );
+    if (futureTransits.length === 0) return null;
 
-    if (relevantTransits.length === 0) {
-      const futureTransit = upcomingTransits.find((t) =>
-        dayjs(t.date).isAfter(today),
-      );
-      return futureTransit ?? upcomingTransits[0];
-    }
+    const sorted = futureTransits
+      .map((t) => {
+        const daysDiff = dayjs(t.date).startOf('day').diff(today, 'day');
+        let tierScore = 0;
+        if (daysDiff === 0) tierScore = 3_000_000;
+        else if (daysDiff === 1) tierScore = 2_000_000;
+        else if (daysDiff <= 7) tierScore = 1_000_000;
+        const sigScore = (priorityOrder[t.significance] ?? 1) * 1_000;
+        return { transit: t, score: tierScore + sigScore };
+      })
+      .sort((a, b) => b.score - a.score);
 
-    const priorityOrder = { high: 3, medium: 2, low: 1 };
-    const sorted = relevantTransits.sort((a, b) => {
-      const priorityDiff =
-        priorityOrder[b.significance] - priorityOrder[a.significance];
-      if (priorityDiff !== 0) return priorityDiff;
-      return dayjs(a.date).diff(dayjs(b.date));
-    });
-
-    return sorted[0];
+    return sorted[0]?.transit ?? null;
   }, [authStatus.isAuthenticated, hasPersonalizedAccess]);
 
   // Calculate personal impacts for ALL authenticated users (for preview and paid access)
@@ -98,31 +116,36 @@ export const TransitOfTheDay = () => {
     return getPersonalTransitImpactList(birthChart, 60);
   }, [authStatus.isAuthenticated, user]);
 
+  // Future-only with tier-based scoring: today > tomorrow > this week
   const transit = useMemo((): PersonalTransitImpact | null => {
     if (personalImpacts.length === 0) return null;
-    const today = dayjs().startOf('day');
-    const nextWeek = today.add(7, 'day');
 
-    const futureImpacts = personalImpacts.filter((impact) => {
-      const impactDate = dayjs(impact.date);
-      return impactDate.isAfter(today) && impactDate.isBefore(nextWeek);
-    });
+    const now = dayjs();
+    const today = now.startOf('day');
+    const priorityOrder: Record<string, number> = {
+      high: 3,
+      medium: 2,
+      low: 1,
+    };
 
-    if (futureImpacts.length > 0) {
-      const priorityOrder = { high: 3, medium: 2, low: 1 };
-      const sorted = [...futureImpacts].sort((a, b) => {
-        const priorityDiff =
-          priorityOrder[b.significance] - priorityOrder[a.significance];
-        if (priorityDiff !== 0) return priorityDiff;
-        return dayjs(a.date).diff(dayjs(b.date));
-      });
-      return sorted[0];
-    }
-
-    const nextFuture = personalImpacts.find((impact) =>
-      dayjs(impact.date).isAfter(today),
+    const futureImpacts = personalImpacts.filter((impact) =>
+      dayjs(impact.date).isAfter(now),
     );
-    return nextFuture ?? personalImpacts[0];
+    if (futureImpacts.length === 0) return null;
+
+    const sorted = futureImpacts
+      .map((impact) => {
+        const daysDiff = dayjs(impact.date).startOf('day').diff(today, 'day');
+        let tierScore = 0;
+        if (daysDiff === 0) tierScore = 3_000_000;
+        else if (daysDiff === 1) tierScore = 2_000_000;
+        else if (daysDiff <= 7) tierScore = 1_000_000;
+        const sigScore = (priorityOrder[impact.significance] ?? 1) * 1_000;
+        return { impact, score: tierScore + sigScore };
+      })
+      .sort((a, b) => b.score - a.score);
+
+    return sorted[0]?.impact ?? null;
   }, [personalImpacts]);
 
   // Helper to render preview based on A/B test variant
@@ -258,16 +281,6 @@ export const TransitOfTheDay = () => {
       );
     }
 
-    const transitDate = dayjs(generalTransit.date);
-    // const isToday = transitDate.isSame(dayjs(), 'day');
-    const isTomorrow = transitDate.isSame(dayjs().add(1, 'day'), 'day');
-    // const dateLabel = isToday
-    //   ? 'Today'
-    //   : isTomorrow
-    //     ? 'Tomorrow'
-    //     : transitDate.format('MMM D');
-    const dateLabel = isTomorrow ? 'Tomorrow' : transitDate.format('MMM D');
-
     return (
       <Link
         href='/horoscope'
@@ -281,15 +294,10 @@ export const TransitOfTheDay = () => {
                   {getPlanetSymbol(generalTransit.planet)}
                 </span>
                 <span className='text-sm text-zinc-200'>Your Next Transit</span>
-                <span className='text-xs text-zinc-400 uppercase tracking-wide'>
-                  {dateLabel}
-                </span>
               </div>
-              {generalTransit.significance === 'high' && (
-                <span className='text-xs bg-zinc-800/50 text-lunary-primary-200 px-1.5 py-0.5 rounded'>
-                  Major
-                </span>
-              )}
+              <span className='inline-flex items-center text-xs px-2 py-0.5 rounded-md border bg-zinc-900 border-zinc-800 text-zinc-400'>
+                {formatRelativeTime(dayjs(generalTransit.date))}
+              </span>
             </div>
             <p className='text-sm text-zinc-200 mb-1'>
               {generalTransit.planet} {generalTransit.event}
@@ -327,15 +335,6 @@ export const TransitOfTheDay = () => {
   if (!transit) {
     // Fallback: show general transit if no personalized transit available
     if (generalTransit) {
-      const transitDate = dayjs(generalTransit.date);
-      const isToday = transitDate.isSame(dayjs(), 'day');
-      const isTomorrow = transitDate.isSame(dayjs().add(1, 'day'), 'day');
-      const dateLabel = isToday
-        ? 'Today'
-        : isTomorrow
-          ? 'Tomorrow'
-          : transitDate.format('MMM D');
-
       return (
         <Link
           href='/horoscope'
@@ -351,15 +350,10 @@ export const TransitOfTheDay = () => {
                   <span className='text-sm text-zinc-200'>
                     Your Next Transit
                   </span>
-                  <span className='text-xs text-zinc-400 uppercase tracking-wide'>
-                    {dateLabel}
-                  </span>
                 </div>
-                {generalTransit.significance === 'high' && (
-                  <span className='text-xs bg-zinc-800/50 text-lunary-primary-200 px-1.5 py-0.5 rounded'>
-                    Major
-                  </span>
-                )}
+                <span className='inline-flex items-center text-xs px-2 py-0.5 rounded-md border bg-zinc-900 border-zinc-800 text-zinc-400'>
+                  {formatRelativeTime(dayjs(generalTransit.date))}
+                </span>
               </div>
               <p className='text-sm text-zinc-200 mb-1'>
                 {generalTransit.planet} {generalTransit.event}
@@ -376,15 +370,6 @@ export const TransitOfTheDay = () => {
     return null;
   }
 
-  const transitDate = dayjs(transit.date);
-  const isToday = transitDate.isSame(dayjs(), 'day');
-  const isTomorrow = transitDate.isSame(dayjs().add(1, 'day'), 'day');
-  const dateLabel = isToday
-    ? 'Today'
-    : isTomorrow
-      ? 'Tomorrow'
-      : transitDate.format('MMM D');
-
   return (
     <Link
       href='/horoscope'
@@ -398,15 +383,10 @@ export const TransitOfTheDay = () => {
                 {getPlanetSymbol(transit.planet)}
               </span>
               <span className='text-sm text-zinc-200'>Your Next Transit</span>
-              <span className='text-xs text-zinc-400 uppercase tracking-wide'>
-                {dateLabel}
-              </span>
             </div>
-            {transit.significance === 'high' && (
-              <span className='text-xs bg-zinc-800/50 text-lunary-primary-200 px-1.5 py-0.5 rounded'>
-                Major
-              </span>
-            )}
+            <span className='inline-flex items-center text-xs px-2 py-0.5 rounded-md border bg-zinc-900 border-zinc-800 text-zinc-400'>
+              {formatRelativeTime(dayjs(transit.date))}
+            </span>
           </div>
           <p className='text-sm text-zinc-200 mb-1'>
             {transit.planet} {transit.event}

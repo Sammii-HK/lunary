@@ -79,8 +79,23 @@ const getSignChangeEvents = (
           }
         : undefined;
 
+      // Compute precise sign change time from previous position's remaining duration.
+      // `date` is the day we detected the change (planet already in new sign).
+      // `previous[planet].duration.remainingDays` tells us how long from the previous
+      // time point until the sign boundary — giving us hour-level precision.
+      let eventDate = date;
+      const prevDuration = previous[planet]?.duration;
+      if (
+        prevDuration?.remainingDays != null &&
+        prevDuration.remainingDays >= 0
+      ) {
+        const prevDate = date.subtract(1, 'day');
+        const mins = Math.round(prevDuration.remainingDays * 24 * 60);
+        eventDate = prevDate.add(mins, 'minute');
+      }
+
       events.push({
-        date,
+        date: eventDate,
         planet,
         event: `Enters ${current[planet].sign}`,
         description,

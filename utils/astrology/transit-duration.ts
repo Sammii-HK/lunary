@@ -16,18 +16,27 @@ export interface TransitDuration {
 /**
  * Calculate transit duration for a planet in its current sign
  * Branches: slow planets (Jupiter-Pluto) use YEARLY_TRANSITS, fast planets use orbital math
+ * @param actualDailyMotion - Real observed daily motion (degrees/day) from astronomy-engine.
+ *   When provided, replaces the hardcoded average for fast planets — critical for the Moon
+ *   where actual speed (12.2-14.8°/day) varies ~20% from the 13.176° average.
  */
 export function calculateTransitDuration(
   planet: string,
   currentSign: string,
   currentLongitude: number,
   date: Date = new Date(),
+  actualDailyMotion?: number,
 ): TransitDuration | null {
   // Check if planet is slow or fast
   if (SLOW_PLANETS.includes(planet)) {
     return calculateSlowPlanetDuration(planet, currentSign, date);
   } else if (FAST_PLANETS.includes(planet)) {
-    return calculateFastPlanetDuration(planet, currentLongitude, date);
+    return calculateFastPlanetDuration(
+      planet,
+      currentLongitude,
+      date,
+      actualDailyMotion,
+    );
   }
 
   return null;
@@ -90,15 +99,23 @@ function estimateSlowPlanetDuration(
 
 /**
  * Fast planets (Moon-Mars): degrees remaining ÷ daily motion
+ * Uses actual observed motion when available, falls back to orbital average
  */
 function calculateFastPlanetDuration(
   planet: string,
   currentLongitude: number,
   date: Date,
+  actualDailyMotion?: number,
 ): TransitDuration | null {
-  const dailyMotion =
+  const averageMotion =
     PLANET_DAILY_MOTION[planet as keyof typeof PLANET_DAILY_MOTION];
-  if (!dailyMotion) return null;
+  if (!averageMotion) return null;
+
+  // Use actual motion if provided and reasonable (> 50% of average)
+  const dailyMotion =
+    actualDailyMotion && actualDailyMotion > averageMotion * 0.5
+      ? actualDailyMotion
+      : averageMotion;
 
   // Calculate degree within current sign (0-30)
   const degreeInSign = currentLongitude % 30;

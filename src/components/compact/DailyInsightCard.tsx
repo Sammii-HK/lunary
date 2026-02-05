@@ -32,8 +32,6 @@ import {
   TransitAspect,
   TransitDetail,
 } from '@/features/horoscope';
-import { TransitDurationBadge } from '../TransitDurationBadge';
-
 const getOrdinalSuffix = (n: number): string => {
   if (n >= 11 && n <= 13) return 'th';
   switch (n % 10) {
@@ -48,6 +46,50 @@ const getOrdinalSuffix = (n: number): string => {
   }
 };
 
+/** Convert event text to past tense if the transit date is in the past */
+const toPastTense = (event: string, date: dayjs.Dayjs): string => {
+  if (!date.isBefore(dayjs())) return event;
+  return event
+    .replace(/\bEnters\b/i, 'Entered')
+    .replace(/\benters\b/, 'entered')
+    .replace(/\bGoes\b/i, 'Went')
+    .replace(/\bgoes\b/, 'went')
+    .replace(/\bMoves\b/i, 'Moved')
+    .replace(/\bmoves\b/, 'moved');
+};
+
+/** Highlight inline time strings with a soft primary color */
+const highlightInlineTime = (text: string): React.ReactNode => {
+  const pattern = /(in <1h|in \d+h|<1h ago|\d+h ago|yesterday|tomorrow)/;
+  const parts = text.split(pattern);
+  if (parts.length === 1) return text;
+  return parts.map((part, i) =>
+    i % 2 === 1 ? (
+      <span key={i} className='text-lunary-primary-200'>
+        {part}
+      </span>
+    ) : (
+      part
+    ),
+  );
+};
+
+/** Compact inline relative time: "3h ago", "in 5h", "yesterday", "tomorrow" */
+const inlineRelativeTime = (date: dayjs.Dayjs): string => {
+  const now = dayjs();
+  const today = now.startOf('day');
+  const transitDay = date.startOf('day');
+  const daysDiff = transitDay.diff(today, 'day');
+  const absHours = Math.round(Math.abs(date.diff(now)) / (1000 * 60 * 60));
+
+  if (daysDiff === 0) {
+    if (date.isAfter(now)) return absHours < 1 ? 'in <1h' : `in ${absHours}h`;
+    return absHours < 1 ? '<1h ago' : `${absHours}h ago`;
+  }
+  if (daysDiff < 0) return 'yesterday';
+  return 'tomorrow';
+};
+
 const formatTransitSentence = (
   transit: PersonalTransitImpact,
   isFirst: boolean,
@@ -55,8 +97,10 @@ const formatTransitSentence = (
   const houseLabel = transit.house
     ? `in your ${transit.house}${getOrdinalSuffix(transit.house)} house`
     : 'in your chart';
-  const eventLabel = transit.event || transit.type || 'moves through';
-  const base = `${transit.planet} ${eventLabel} ${houseLabel}`;
+  const raw = transit.event || transit.type || 'moves through';
+  const eventLabel = toPastTense(raw, transit.date);
+  const time = inlineRelativeTime(transit.date);
+  const base = `${transit.planet} ${eventLabel} ${houseLabel} ${time}`;
   const prefix = isFirst ? '' : 'Meanwhile, ';
   const sentence = `${prefix}${base}`.trim();
   const capitalized = sentence.charAt(0).toUpperCase() + sentence.slice(1);
@@ -275,13 +319,18 @@ export const DailyInsightCard = () => {
     const pool = withHouse.length > 0 ? withHouse : candidates;
     if (pool.length === 0) return [];
 
+    const today = dayjs().startOf('day');
     const sorted = pool
-      .map((impact) => ({
-        impact,
-        score:
-          (significanceOrder[impact.significance] ?? 1) * 100000 +
-          impact.date.valueOf(),
-      }))
+      .map((impact) => {
+        // Tier: today > yesterday > tomorrow
+        const daysDiff = impact.date.startOf('day').diff(today, 'day');
+        let tierScore = 0;
+        if (daysDiff === 0) tierScore = 3_000_000;
+        else if (daysDiff === -1 || daysDiff === -2) tierScore = 2_000_000;
+        else if (daysDiff === 1) tierScore = 1_000_000;
+        const sigScore = (significanceOrder[impact.significance] ?? 1) * 1_000;
+        return { impact, score: tierScore + sigScore };
+      })
       .sort((a, b) => b.score - a.score);
 
     const seen = new Set<string>();
@@ -334,17 +383,26 @@ export const DailyInsightCard = () => {
 
     if (relevant.length === 0) return null;
 
-    const sorted = [...relevant].sort(
-      (a, b) =>
+    const today = dayjs().startOf('day');
+    const sorted = [...relevant].sort((a, b) => {
+      const aDiff = a.date.startOf('day').diff(today, 'day');
+      const bDiff = b.date.startOf('day').diff(today, 'day');
+      const aTier = aDiff === 0 ? 3 : aDiff < 0 ? 2 : 1;
+      const bTier = bDiff === 0 ? 3 : bDiff < 0 ? 2 : 1;
+      if (bTier !== aTier) return bTier - aTier;
+      return (
         (significanceOrder[b.significance] ?? 1) -
-        (significanceOrder[a.significance] ?? 1),
-    );
+        (significanceOrder[a.significance] ?? 1)
+      );
+    });
 
     const top2 = sorted.slice(0, 2);
     return top2
       .map((t, i) => {
-        const event = t.event.charAt(0).toLowerCase() + t.event.slice(1);
-        const sentence = `${t.planet} ${event}`;
+        const raw = t.event.charAt(0).toLowerCase() + t.event.slice(1);
+        const event = toPastTense(raw, t.date);
+        const time = inlineRelativeTime(t.date);
+        const sentence = `${t.planet} ${event} ${time}`;
         const prefix = i === 0 ? '' : 'Meanwhile, ';
         const full = `${prefix}${sentence}`.trim();
         const cap = full.charAt(0).toUpperCase() + full.slice(1);
@@ -423,7 +481,7 @@ export const DailyInsightCard = () => {
               </span>
             </div>
             <p className='text-sm text-zinc-200 leading-relaxed mb-2'>
-              {generalTransitText ?? insight.text}
+              {highlightInlineTime(generalTransitText ?? insight.text)}
             </p>
 
             <div className='relative'>
@@ -485,20 +543,9 @@ export const DailyInsightCard = () => {
             <Sparkles className='w-4 h-4 text-lunary-primary-300' />
             <span className='text-sm text-zinc-200'>Today's Influence</span>
           </div>
-          <p className='text-sm text-zinc-300 leading-relaxed'>{displayText}</p>
-          {transitHighlights.length > 0 && (
-            <div className='flex flex-wrap gap-1.5 mt-2'>
-              {transitHighlights.map(
-                (transit) =>
-                  transit.duration && (
-                    <TransitDurationBadge
-                      key={`${transit.planet}-${transit.event}`}
-                      duration={transit.duration}
-                    />
-                  ),
-              )}
-            </div>
-          )}
+          <p className='text-sm text-zinc-300 leading-relaxed'>
+            {highlightInlineTime(displayText)}
+          </p>
           {transitDetails.length > 0 && (
             <div className='mt-2 space-y-1'>
               {transitDetails.map((detail) => (
