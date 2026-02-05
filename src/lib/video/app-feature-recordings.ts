@@ -28,7 +28,8 @@ export interface RecordingStep {
     | 'wait'
     | 'scroll'
     | 'hover'
-    | 'screenshot';
+    | 'screenshot'
+    | 'pressKey';
   /** Selector for the element (for click, type, hover) */
   selector?: string;
   /** Text to type (for type action) */
@@ -39,8 +40,14 @@ export interface RecordingStep {
   duration?: number;
   /** Scroll distance in pixels (for scroll action) */
   distance?: number;
+  /** Key to press (for pressKey action) - e.g., 'Escape', 'Enter' */
+  key?: string;
   /** Description of what this step does */
   description?: string;
+  /** If true, step failure won't stop recording (optional interactions) */
+  optional?: boolean;
+  /** If true, force the click even if element is obscured (bypasses actionability checks) */
+  force?: boolean;
 }
 
 /**
@@ -48,276 +55,239 @@ export interface RecordingStep {
  */
 export const FEATURE_RECORDINGS: FeatureRecordingConfig[] = [
   {
-    id: 'daily-transits',
-    name: 'Daily Transits',
-    startUrl: '/',
+    id: 'dashboard-overview-simple',
+    name: 'Dashboard Overview (Simple)',
+    startUrl: '/app',
     durationSeconds: 15,
+    viewport: { width: 390, height: 844 }, // iPhone 12 Pro
     steps: [
       {
         type: 'wait',
-        duration: 1000,
-        description: 'Let app load',
+        duration: 3000,
+        description: 'Let dashboard fully load',
       },
       {
-        type: 'navigate',
-        url: '/cosmic-weather',
-        description: 'Navigate to cosmic weather page',
+        type: 'pressKey',
+        key: 'Escape',
+        description: 'Close any modals',
       },
       {
         type: 'wait',
         duration: 2000,
-        description: 'Show daily transits overview',
-      },
-      {
-        type: 'scroll',
-        distance: 300,
-        description: 'Scroll to see transit details',
-      },
-      {
-        type: 'wait',
-        duration: 2000,
-        description: 'Show detailed transit information',
-      },
-      {
-        type: 'click',
-        selector: '[data-transit-card]:first-child',
-        description: 'Click on first transit',
-      },
-      {
-        type: 'wait',
-        duration: 3000,
-        description: 'Show personalized interpretation',
-      },
-    ],
-  },
-  {
-    id: 'synastry-comparison',
-    name: 'Relationship Compatibility',
-    startUrl: '/synastry',
-    durationSeconds: 18,
-    steps: [
-      {
-        type: 'wait',
-        duration: 1000,
-        description: 'Let page load',
-      },
-      {
-        type: 'click',
-        selector: '[data-add-person]',
-        description: 'Click add person button',
-      },
-      {
-        type: 'wait',
-        duration: 1000,
-        description: 'Form appears',
-      },
-      {
-        type: 'type',
-        selector: '[name="name"]',
-        text: 'Alex',
-        description: 'Enter name',
-      },
-      {
-        type: 'click',
-        selector: '[data-submit]',
-        description: 'Submit form',
-      },
-      {
-        type: 'wait',
-        duration: 3000,
-        description: 'Show synastry chart',
+        description: 'Wait after escape',
       },
       {
         type: 'scroll',
         distance: 400,
-        description: 'Scroll to compatibility insights',
+        description: 'Scroll through dashboard',
       },
       {
         type: 'wait',
         duration: 3000,
-        description: 'Show detailed compatibility',
+        description: 'Show content',
       },
       {
-        type: 'click',
-        selector: '[data-aspect-card]:first-child',
-        description: 'Click on first aspect',
+        type: 'scroll',
+        distance: 400,
+        description: 'Continue scrolling',
       },
       {
         type: 'wait',
-        duration: 2000,
-        description: 'Show aspect interpretation',
+        duration: 3000,
+        description: 'Show more content',
       },
     ],
   },
   {
-    id: 'pattern-recognition',
-    name: 'Pattern Recognition',
-    startUrl: '/patterns',
-    durationSeconds: 16,
+    id: 'dashboard-overview',
+    name: 'Dashboard Overview',
+    startUrl: '/app',
+    durationSeconds: 18,
     steps: [
       {
         type: 'wait',
+        duration: 2000,
+        description: 'Let dashboard load',
+      },
+      {
+        type: 'pressKey',
+        key: 'Escape',
+        description: 'Close any open modals (press Escape)',
+      },
+      {
+        type: 'wait',
+        duration: 500,
+        description: 'Wait for modal to start closing',
+      },
+      {
+        type: 'click',
+        selector:
+          '.fixed.inset-0.bg-black, [class*="backdrop"], [class*="overlay"]',
+        description: 'Click backdrop to close modal',
+        optional: true,
+      },
+      {
+        type: 'wait',
         duration: 1000,
-        description: 'Let page load',
+        description: 'Wait for modal to fully close',
       },
       {
         type: 'scroll',
         distance: 200,
-        description: 'Show pattern overview',
+        description: 'Show moon phase section',
       },
       {
         type: 'wait',
         duration: 2000,
-        description: 'Display discovered patterns',
+        description: 'Display moon phases',
       },
       {
         type: 'click',
-        selector: '[data-pattern-card]:first-child',
-        description: 'Click on first pattern',
+        selector: '[data-testid="sky-now-widget"]',
+        description: 'Expand sky now widget',
+        force: true, // Force click even if backdrop is present
       },
       {
         type: 'wait',
-        duration: 3000,
-        description: 'Show pattern details',
+        duration: 2500,
+        description: 'Show all planetary positions',
       },
       {
         type: 'scroll',
         distance: 300,
-        description: 'Scroll to correlations',
+        description: 'Scroll to transits section',
       },
       {
         type: 'wait',
-        duration: 3000,
-        description: 'Show transit correlations',
+        duration: 2000,
+        description: 'Show daily transits',
+      },
+      {
+        type: 'scroll',
+        distance: 300,
+        description: 'Scroll to tarot cards',
+      },
+      {
+        type: 'wait',
+        duration: 2000,
+        description: 'Display tarot cards',
+      },
+      {
+        type: 'scroll',
+        distance: 200,
+        description: 'Scroll to crystal recommendation',
+      },
+      {
+        type: 'wait',
+        duration: 1500,
+        description: 'Let crystal card load',
+      },
+      {
+        type: 'click',
+        selector: '[data-testid="crystal-card"]',
+        description: 'Open crystal recommendation',
+      },
+      {
+        type: 'wait',
+        duration: 2000,
+        description: 'Show crystal modal',
       },
     ],
   },
   {
-    id: 'birth-chart-walkthrough',
-    name: 'Birth Chart Walkthrough',
-    startUrl: '/chart',
+    id: 'horoscope-deepdive',
+    name: 'Horoscope Deep Dive',
+    startUrl: '/horoscope',
     durationSeconds: 20,
     steps: [
       {
         type: 'wait',
         duration: 2000,
-        description: 'Let chart render',
-      },
-      {
-        type: 'hover',
-        selector: '[data-planet="sun"]',
-        description: 'Hover over Sun',
-      },
-      {
-        type: 'wait',
-        duration: 2000,
-        description: 'Show Sun tooltip',
-      },
-      {
-        type: 'hover',
-        selector: '[data-planet="moon"]',
-        description: 'Hover over Moon',
-      },
-      {
-        type: 'wait',
-        duration: 2000,
-        description: 'Show Moon tooltip',
-      },
-      {
-        type: 'click',
-        selector: '[data-planet="rising"]',
-        description: 'Click Rising sign',
-      },
-      {
-        type: 'wait',
-        duration: 3000,
-        description: 'Show Rising interpretation',
-      },
-      {
-        type: 'scroll',
-        distance: 400,
-        description: 'Scroll to planet list',
-      },
-      {
-        type: 'wait',
-        duration: 3000,
-        description: 'Show all placements',
-      },
-    ],
-  },
-  {
-    id: 'aspect-analysis',
-    name: 'Aspect Analysis',
-    startUrl: '/chart',
-    durationSeconds: 14,
-    steps: [
-      {
-        type: 'wait',
-        duration: 1000,
-        description: 'Let page load',
-      },
-      {
-        type: 'click',
-        selector: '[data-tab="aspects"]',
-        description: 'Switch to aspects tab',
-      },
-      {
-        type: 'wait',
-        duration: 2000,
-        description: 'Show aspects list',
+        description: 'Let horoscope load',
       },
       {
         type: 'scroll',
         distance: 200,
-        description: 'Scroll through aspects',
-      },
-      {
-        type: 'wait',
-        duration: 2000,
-        description: 'Display aspect grid',
-      },
-      {
-        type: 'click',
-        selector: '[data-aspect]:first-child',
-        description: 'Click first aspect',
+        description: 'Show personal numerology',
       },
       {
         type: 'wait',
         duration: 3000,
-        description: 'Show aspect interpretation',
+        description: 'Display numerology insights',
+      },
+      {
+        type: 'scroll',
+        distance: 350,
+        description: 'Scroll to transit wisdom',
+      },
+      {
+        type: 'wait',
+        duration: 3000,
+        description: 'Show personalized transit wisdom',
+      },
+      {
+        type: 'scroll',
+        distance: 350,
+        description: 'Scroll to upcoming transits',
+      },
+      {
+        type: 'wait',
+        duration: 3000,
+        description: 'Display upcoming transits',
+      },
+      {
+        type: 'scroll',
+        distance: 300,
+        description: 'Scroll to more content',
+      },
+      {
+        type: 'wait',
+        duration: 2000,
+        description: 'Show additional insights',
       },
     ],
   },
   {
-    id: 'moon-phase-guidance',
-    name: 'Moon Phase Rituals',
-    startUrl: '/moon',
-    durationSeconds: 16,
+    id: 'tarot-patterns',
+    name: 'Tarot Pattern Analysis',
+    startUrl: '/tarot',
+    durationSeconds: 20,
     steps: [
       {
         type: 'wait',
-        duration: 1000,
-        description: 'Let page load',
+        duration: 2000,
+        description: 'Let tarot page load',
       },
       {
         type: 'scroll',
-        distance: 200,
-        description: 'Show moon phase calendar',
+        distance: 250,
+        description: 'Show daily and weekly cards',
       },
       {
         type: 'wait',
         duration: 2000,
-        description: 'Display current phase',
+        description: 'Display tarot cards',
       },
       {
-        type: 'click',
-        selector: '[data-moon-phase="full"]',
-        description: 'Click full moon',
+        type: 'scroll',
+        distance: 300,
+        description: 'Scroll to pattern analysis',
       },
       {
         type: 'wait',
-        duration: 3000,
-        description: 'Show full moon guidance',
+        duration: 2500,
+        description: 'Show pattern timeframes',
+      },
+      {
+        type: 'click',
+        selector:
+          '[data-pattern-timeframe]:first-child, button:has-text("7 days"), button:has-text("14 days")',
+        description: 'Select pattern timeframe',
+      },
+      {
+        type: 'wait',
+        duration: 2500,
+        description: 'Display pattern insights',
       },
       {
         type: 'scroll',
@@ -326,8 +296,186 @@ export const FEATURE_RECORDINGS: FeatureRecordingConfig[] = [
       },
       {
         type: 'wait',
-        duration: 3000,
+        duration: 2500,
         description: 'Show ritual suggestions',
+      },
+      {
+        type: 'scroll',
+        distance: 250,
+        description: 'Scroll to journal prompts',
+      },
+      {
+        type: 'wait',
+        duration: 2000,
+        description: 'Display journal prompts',
+      },
+    ],
+  },
+  {
+    id: 'astral-guide',
+    name: 'Astral Guide AI Assistant',
+    startUrl: '/guide',
+    durationSeconds: 18,
+    steps: [
+      {
+        type: 'wait',
+        duration: 2000,
+        description: 'Let guide page load',
+      },
+      {
+        type: 'click',
+        selector:
+          'button:has-text("Tarot Patterns"), [data-guide-option="tarot"]',
+        description: 'Select tarot patterns option',
+      },
+      {
+        type: 'wait',
+        duration: 2500,
+        description: 'Show tarot pattern prompt',
+      },
+      {
+        type: 'type',
+        selector: 'textarea, [contenteditable="true"], input[type="text"]',
+        text: 'What patterns do you see in my recent cards?',
+        description: 'Type question',
+      },
+      {
+        type: 'click',
+        selector:
+          'button[type="submit"], button:has-text("Send"), [aria-label="Send"]',
+        description: 'Send question',
+      },
+      {
+        type: 'wait',
+        duration: 4000,
+        description: 'Show AI response',
+      },
+      {
+        type: 'scroll',
+        distance: 300,
+        description: 'Scroll through response',
+      },
+      {
+        type: 'wait',
+        duration: 2500,
+        description: 'Display full AI insights',
+      },
+    ],
+  },
+  {
+    id: 'birth-chart',
+    name: 'Birth Chart Walkthrough',
+    startUrl: '/chart',
+    durationSeconds: 22,
+    steps: [
+      {
+        type: 'wait',
+        duration: 2500,
+        description: 'Let chart render fully',
+      },
+      {
+        type: 'scroll',
+        distance: 200,
+        description: 'Show chart visualization',
+      },
+      {
+        type: 'wait',
+        duration: 2000,
+        description: 'Display planetary positions',
+      },
+      {
+        type: 'scroll',
+        distance: 350,
+        description: 'Scroll to planetary list',
+      },
+      {
+        type: 'wait',
+        duration: 2500,
+        description: 'Show all planet placements',
+      },
+      {
+        type: 'click',
+        selector: '[data-tab="aspects"], button:has-text("Aspects")',
+        description: 'Switch to aspects tab',
+      },
+      {
+        type: 'wait',
+        duration: 2500,
+        description: 'Show aspects list',
+      },
+      {
+        type: 'scroll',
+        distance: 300,
+        description: 'Scroll through aspects',
+      },
+      {
+        type: 'wait',
+        duration: 2500,
+        description: 'Display detailed aspects',
+      },
+      {
+        type: 'click',
+        selector: '[data-tab="houses"], button:has-text("Houses")',
+        description: 'Switch to houses tab',
+      },
+      {
+        type: 'wait',
+        duration: 2500,
+        description: 'Show house placements',
+      },
+    ],
+  },
+  {
+    id: 'profile-circle',
+    name: 'Profile & Circle',
+    startUrl: '/profile',
+    durationSeconds: 18,
+    steps: [
+      {
+        type: 'wait',
+        duration: 2000,
+        description: 'Let profile load',
+      },
+      {
+        type: 'scroll',
+        distance: 250,
+        description: 'Show profile information',
+      },
+      {
+        type: 'wait',
+        duration: 2000,
+        description: 'Display user stats',
+      },
+      {
+        type: 'click',
+        selector:
+          '[data-tab="circle"], button:has-text("Circle"), a[href*="circle"]',
+        description: 'Navigate to circle',
+      },
+      {
+        type: 'wait',
+        duration: 2500,
+        description: 'Show circle/friends list',
+      },
+      {
+        type: 'scroll',
+        distance: 300,
+        description: 'Scroll through circle',
+      },
+      {
+        type: 'wait',
+        duration: 2500,
+        description: 'Display leaderboard',
+      },
+      {
+        type: 'click',
+        selector: '[data-friend]:first-child, [class*="friend" i]:first-child',
+        description: 'Click on friend',
+      },
+      {
+        type: 'wait',
+        duration: 3000,
+        description: 'Show synastry comparison',
       },
     ],
   },
