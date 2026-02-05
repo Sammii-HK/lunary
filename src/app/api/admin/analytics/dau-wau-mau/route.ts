@@ -1,11 +1,91 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { sql } from '@vercel/postgres';
 import { formatTimestamp, resolveDateRange } from '@/lib/analytics/date-range';
-import { ANALYTICS_REALTIME_TTL_SECONDS } from '@/lib/analytics-cache-config';
+import {
+  ANALYTICS_REALTIME_TTL_SECONDS,
+  ANALYTICS_CACHE_TTL_SECONDS,
+} from '@/lib/analytics-cache-config';
 import { filterFields, getFieldsParam } from '@/lib/analytics/field-selection';
 
 const TEST_EMAIL_PATTERN = '%@test.lunary.app';
 const TEST_EMAIL_EXACT = 'test@test.lunary.app';
+
+/**
+ * FAST PATH: Get snapshot data from daily_metrics
+ * Returns WAU/MAU from snapshots, DAU is computed real-time
+ */
+async function getSnapshotMetrics(rangeEnd: Date) {
+  const endDateStr = rangeEnd.toISOString().split('T')[0];
+
+  // Get the most recent snapshot (yesterday or earlier)
+  const snapshotResult = await sql.query(
+    `SELECT
+      metric_date,
+      dau, wau, mau,
+      signed_in_product_dau,
+      signed_in_product_wau,
+      signed_in_product_mau,
+      app_opened_mau,
+      stickiness,
+      avg_active_days_per_week
+    FROM daily_metrics
+    WHERE metric_date <= $1
+    ORDER BY metric_date DESC
+    LIMIT 1`,
+    [endDateStr],
+  );
+
+  if (snapshotResult.rows.length === 0) {
+    return null;
+  }
+
+  return snapshotResult.rows[0];
+}
+
+/**
+ * Get real-time DAU for today from conversion_events
+ */
+async function getRealtimeDAU() {
+  const today = new Date();
+  today.setUTCHours(0, 0, 0, 0);
+  const tomorrow = new Date(today);
+  tomorrow.setUTCDate(tomorrow.getUTCDate() + 1);
+
+  // Signed-in product DAU (real-time for today)
+  const dauResult = await sql.query(
+    `SELECT COUNT(DISTINCT user_id) as count
+    FROM conversion_events
+    WHERE event_type = ANY($1::text[])
+      AND user_id IS NOT NULL
+      AND user_id NOT LIKE 'anon:%'
+      AND created_at >= $2
+      AND created_at < $3
+      AND (user_email IS NULL OR (user_email NOT LIKE $4 AND user_email != $5))`,
+    [
+      [
+        'grimoire_viewed',
+        'tarot_drawn',
+        'chart_viewed',
+        'birth_chart_viewed',
+        'personalized_horoscope_viewed',
+        'personalized_tarot_viewed',
+        'astral_chat_used',
+        'ritual_started',
+        'horoscope_viewed',
+        'daily_dashboard_viewed',
+        'journal_entry_created',
+        'dream_entry_created',
+        'cosmic_pulse_opened',
+      ],
+      formatTimestamp(today),
+      formatTimestamp(tomorrow),
+      TEST_EMAIL_PATTERN,
+      TEST_EMAIL_EXACT,
+    ],
+  );
+
+  return Number(dauResult.rows[0]?.count || 0);
+}
 
 // Canonical event types (DB is SSOT)
 // - Engagement (DAU/WAU/MAU) is derived from app_opened plus key usage events.
@@ -291,6 +371,11 @@ const countDistinctInWindow = (
   return windowUsers.size;
 };
 
+/**
+ * DAU/WAU/MAU endpoint for insights
+ * HYBRID: DAU is real-time, WAU/MAU use pre-computed daily_metrics snapshots
+ * Use ?live=1 to force full live queries (slower but more detailed)
+ */
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
@@ -299,7 +384,88 @@ export async function GET(request: NextRequest) {
       | 'week'
       | 'month';
     const range = resolveDateRange(searchParams, 30);
+    const forceLive = searchParams.get('live') === '1';
 
+    // FAST PATH: Use daily_metrics snapshots for WAU/MAU, real-time for DAU
+    // Skip this if ?live=1 is passed or if granularity is not 'day'
+    if (!forceLive && granularity === 'day') {
+      const snapshot = await getSnapshotMetrics(range.end);
+
+      if (snapshot) {
+        // Get real-time DAU for today
+        const realtimeDAU = await getRealtimeDAU();
+
+        // Use snapshot WAU/MAU, but real-time DAU
+        const signedInProductDau = realtimeDAU;
+        const signedInProductWau = Number(snapshot.signed_in_product_wau || 0);
+        const signedInProductMau = Number(snapshot.signed_in_product_mau || 0);
+        const appOpenedMau = Number(snapshot.app_opened_mau || 0);
+        const stickiness = Number(snapshot.stickiness || 0);
+
+        const fullData = {
+          // Core metrics - DAU is real-time, WAU/MAU from snapshot
+          dau: realtimeDAU,
+          wau: signedInProductWau,
+          mau: signedInProductMau,
+          engaged_users_dau: realtimeDAU,
+          engaged_users_wau: signedInProductWau,
+          engaged_users_mau: signedInProductMau,
+          // Stickiness using real-time DAU with snapshot MAU
+          stickiness_dau_mau:
+            signedInProductMau > 0
+              ? Number(
+                  ((signedInProductDau / signedInProductMau) * 100).toFixed(2),
+                )
+              : 0,
+          stickiness_wau_mau:
+            signedInProductMau > 0
+              ? Number(
+                  ((signedInProductWau / signedInProductMau) * 100).toFixed(2),
+                )
+              : 0,
+          stickiness_dau_wau:
+            signedInProductWau > 0
+              ? Number(
+                  ((signedInProductDau / signedInProductWau) * 100).toFixed(2),
+                )
+              : 0,
+          // Signed-in product metrics
+          signed_in_product_dau: signedInProductDau,
+          signed_in_product_wau: signedInProductWau,
+          signed_in_product_mau: signedInProductMau,
+          signed_in_product_stickiness_dau_mau:
+            signedInProductMau > 0
+              ? Number(
+                  ((signedInProductDau / signedInProductMau) * 100).toFixed(2),
+                )
+              : 0,
+          signed_in_product_stickiness_wau_mau:
+            signedInProductMau > 0
+              ? Number(
+                  ((signedInProductWau / signedInProductMau) * 100).toFixed(2),
+                )
+              : 0,
+          // App opened metrics
+          app_opened_mau: appOpenedMau,
+          // Source indicator
+          source: 'daily_metrics',
+          snapshot_date: snapshot.metric_date,
+          dau_source: 'realtime',
+        };
+
+        const fields = getFieldsParam(searchParams);
+        const responseData = filterFields(fullData, fields);
+
+        const response = NextResponse.json(responseData);
+        response.headers.set(
+          'Cache-Control',
+          `private, max-age=${ANALYTICS_CACHE_TTL_SECONDS}, stale-while-revalidate=${ANALYTICS_CACHE_TTL_SECONDS * 2}`,
+        );
+        return response;
+      }
+    }
+
+    // FULL LIVE PATH: Complex queries for trends, retention, etc.
     const identityLinksExistsResult = await sql.query(
       `SELECT to_regclass('analytics_identity_links') IS NOT NULL AS exists`,
     );

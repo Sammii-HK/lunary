@@ -18,6 +18,30 @@ function getStripe() {
   return new Stripe(process.env.STRIPE_SECRET_KEY);
 }
 
+/**
+ * Get DAU/WAU/MRR from daily_metrics snapshot (fast path)
+ */
+async function getSnapshotMetrics(endDate: Date) {
+  const endDateStr = endDate.toISOString().split('T')[0];
+
+  const result = await sql.query(
+    `SELECT
+      signed_in_product_dau as dau,
+      signed_in_product_wau as wau,
+      mrr,
+      new_signups,
+      new_conversions,
+      activation_rate
+    FROM daily_metrics
+    WHERE metric_date <= $1
+    ORDER BY metric_date DESC
+    LIMIT 1`,
+    [endDateStr],
+  );
+
+  return result.rows.length > 0 ? result.rows[0] : null;
+}
+
 // Test user exclusion patterns
 const TEST_EMAIL_PATTERN = '%@test.lunary.app';
 const TEST_EMAIL_EXACT = 'test@test.lunary.app';
@@ -29,6 +53,10 @@ const PRODUCT_INTERACTION_EVENTS = [
   'login',
 ];
 
+/**
+ * Success Metrics endpoint for insights
+ * Uses pre-computed daily_metrics for DAU/WAU when available
+ */
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
@@ -37,7 +65,7 @@ export async function GET(request: NextRequest) {
     const endDate = formatDate(range.end);
     const startDate = formatDate(range.start);
 
-    // 1-3. DAU, WAU from database events
+    // 1-3. DAU, WAU - try daily_metrics first (fast path)
     const periodDays = Math.ceil(
       (range.end.getTime() - range.start.getTime()) / (1000 * 60 * 60 * 24),
     );
@@ -53,104 +81,131 @@ export async function GET(request: NextRequest) {
     let weeklyReturningTrend: 'up' | 'down' | 'stable' = 'stable';
     let weeklyReturningChange = 0;
 
-    const currentDayStart = new Date(range.end);
-    currentDayStart.setUTCDate(currentDayStart.getUTCDate() - 1);
-    const currentWeekStart = new Date(range.end);
-    currentWeekStart.setUTCDate(currentWeekStart.getUTCDate() - 7);
+    // FAST PATH: Try daily_metrics snapshot first
+    const [currentSnapshot, prevSnapshot] = await Promise.all([
+      getSnapshotMetrics(range.end),
+      getSnapshotMetrics(prevRangeEnd),
+    ]);
 
-    const prevDayStart = new Date(prevRangeEnd);
-    prevDayStart.setUTCDate(prevDayStart.getUTCDate() - 1);
-    const prevWeekStart = new Date(prevRangeEnd);
-    prevWeekStart.setUTCDate(prevWeekStart.getUTCDate() - 7);
+    if (currentSnapshot) {
+      // Use snapshot data
+      dau = Number(currentSnapshot.dau || 0);
+      weeklyReturning = Number(currentSnapshot.wau || 0);
+      const prevDau = prevSnapshot ? Number(prevSnapshot.dau || 0) : 0;
+      const prevWau = prevSnapshot ? Number(prevSnapshot.wau || 0) : 0;
 
-    const [currentDauResult, currentWauResult, prevDauResult, prevWauResult] =
-      await Promise.all([
-        sql.query(
-          `
-            SELECT COUNT(DISTINCT user_id) AS count
-            FROM conversion_events
-            WHERE event_type = ANY($1::text[])
-              AND created_at >= $2
-              AND created_at <= $3
-              AND (user_email IS NULL OR (user_email NOT LIKE $4 AND user_email != $5))
-          `,
-          [
-            PRODUCT_INTERACTION_EVENTS,
-            formatTimestamp(currentDayStart),
-            formatTimestamp(range.end),
-            TEST_EMAIL_PATTERN,
-            TEST_EMAIL_EXACT,
-          ],
-        ),
-        sql.query(
-          `
-            SELECT COUNT(DISTINCT user_id) AS count
-            FROM conversion_events
-            WHERE event_type = ANY($1::text[])
-              AND created_at >= $2
-              AND created_at <= $3
-              AND (user_email IS NULL OR (user_email NOT LIKE $4 AND user_email != $5))
-          `,
-          [
-            PRODUCT_INTERACTION_EVENTS,
-            formatTimestamp(currentWeekStart),
-            formatTimestamp(range.end),
-            TEST_EMAIL_PATTERN,
-            TEST_EMAIL_EXACT,
-          ],
-        ),
-        sql.query(
-          `
-            SELECT COUNT(DISTINCT user_id) AS count
-            FROM conversion_events
-            WHERE event_type = ANY($1::text[])
-              AND created_at >= $2
-              AND created_at <= $3
-              AND (user_email IS NULL OR (user_email NOT LIKE $4 AND user_email != $5))
-          `,
-          [
-            PRODUCT_INTERACTION_EVENTS,
-            formatTimestamp(prevDayStart),
-            formatTimestamp(prevRangeEnd),
-            TEST_EMAIL_PATTERN,
-            TEST_EMAIL_EXACT,
-          ],
-        ),
-        sql.query(
-          `
-            SELECT COUNT(DISTINCT user_id) AS count
-            FROM conversion_events
-            WHERE event_type = ANY($1::text[])
-              AND created_at >= $2
-              AND created_at <= $3
-              AND (user_email IS NULL OR (user_email NOT LIKE $4 AND user_email != $5))
-          `,
-          [
-            PRODUCT_INTERACTION_EVENTS,
-            formatTimestamp(prevWeekStart),
-            formatTimestamp(prevRangeEnd),
-            TEST_EMAIL_PATTERN,
-            TEST_EMAIL_EXACT,
-          ],
-        ),
-      ]);
+      dauChange = prevDau > 0 ? ((dau - prevDau) / prevDau) * 100 : 0;
+      dauTrend = dauChange > 1 ? 'up' : dauChange < -1 ? 'down' : 'stable';
 
-    dau = Number(currentDauResult.rows[0]?.count || 0);
-    weeklyReturning = Number(currentWauResult.rows[0]?.count || 0);
-    const prevDau = Number(prevDauResult.rows[0]?.count || 0);
-    const prevWau = Number(prevWauResult.rows[0]?.count || 0);
+      weeklyReturningChange =
+        prevWau > 0 ? ((weeklyReturning - prevWau) / prevWau) * 100 : 0;
+      weeklyReturningTrend =
+        weeklyReturningChange > 1
+          ? 'up'
+          : weeklyReturningChange < -1
+            ? 'down'
+            : 'stable';
+    } else {
+      // FALLBACK: Live query if no snapshot
+      const currentDayStart = new Date(range.end);
+      currentDayStart.setUTCDate(currentDayStart.getUTCDate() - 1);
+      const currentWeekStart = new Date(range.end);
+      currentWeekStart.setUTCDate(currentWeekStart.getUTCDate() - 7);
 
-    dauChange = prevDau > 0 ? ((dau - prevDau) / prevDau) * 100 : 0;
-    dauTrend = dauChange > 1 ? 'up' : dauChange < -1 ? 'down' : 'stable';
+      const prevDayStart = new Date(prevRangeEnd);
+      prevDayStart.setUTCDate(prevDayStart.getUTCDate() - 1);
+      const prevWeekStart = new Date(prevRangeEnd);
+      prevWeekStart.setUTCDate(prevWeekStart.getUTCDate() - 7);
 
-    weeklyReturningChange =
-      prevWau > 0 ? ((weeklyReturning - prevWau) / prevWau) * 100 : 0;
-    weeklyReturningTrend =
-      weeklyReturningChange > 1
-        ? 'up'
-        : weeklyReturningChange < -1
-          ? 'down'
-          : 'stable';
+      const [currentDauResult, currentWauResult, prevDauResult, prevWauResult] =
+        await Promise.all([
+          sql.query(
+            `
+              SELECT COUNT(DISTINCT user_id) AS count
+              FROM conversion_events
+              WHERE event_type = ANY($1::text[])
+                AND created_at >= $2
+                AND created_at <= $3
+                AND (user_email IS NULL OR (user_email NOT LIKE $4 AND user_email != $5))
+            `,
+            [
+              PRODUCT_INTERACTION_EVENTS,
+              formatTimestamp(currentDayStart),
+              formatTimestamp(range.end),
+              TEST_EMAIL_PATTERN,
+              TEST_EMAIL_EXACT,
+            ],
+          ),
+          sql.query(
+            `
+              SELECT COUNT(DISTINCT user_id) AS count
+              FROM conversion_events
+              WHERE event_type = ANY($1::text[])
+                AND created_at >= $2
+                AND created_at <= $3
+                AND (user_email IS NULL OR (user_email NOT LIKE $4 AND user_email != $5))
+            `,
+            [
+              PRODUCT_INTERACTION_EVENTS,
+              formatTimestamp(currentWeekStart),
+              formatTimestamp(range.end),
+              TEST_EMAIL_PATTERN,
+              TEST_EMAIL_EXACT,
+            ],
+          ),
+          sql.query(
+            `
+              SELECT COUNT(DISTINCT user_id) AS count
+              FROM conversion_events
+              WHERE event_type = ANY($1::text[])
+                AND created_at >= $2
+                AND created_at <= $3
+                AND (user_email IS NULL OR (user_email NOT LIKE $4 AND user_email != $5))
+            `,
+            [
+              PRODUCT_INTERACTION_EVENTS,
+              formatTimestamp(prevDayStart),
+              formatTimestamp(prevRangeEnd),
+              TEST_EMAIL_PATTERN,
+              TEST_EMAIL_EXACT,
+            ],
+          ),
+          sql.query(
+            `
+              SELECT COUNT(DISTINCT user_id) AS count
+              FROM conversion_events
+              WHERE event_type = ANY($1::text[])
+                AND created_at >= $2
+                AND created_at <= $3
+                AND (user_email IS NULL OR (user_email NOT LIKE $4 AND user_email != $5))
+            `,
+            [
+              PRODUCT_INTERACTION_EVENTS,
+              formatTimestamp(prevWeekStart),
+              formatTimestamp(prevRangeEnd),
+              TEST_EMAIL_PATTERN,
+              TEST_EMAIL_EXACT,
+            ],
+          ),
+        ]);
+
+      dau = Number(currentDauResult.rows[0]?.count || 0);
+      weeklyReturning = Number(currentWauResult.rows[0]?.count || 0);
+      const prevDau = Number(prevDauResult.rows[0]?.count || 0);
+      const prevWau = Number(prevWauResult.rows[0]?.count || 0);
+
+      dauChange = prevDau > 0 ? ((dau - prevDau) / prevDau) * 100 : 0;
+      dauTrend = dauChange > 1 ? 'up' : dauChange < -1 ? 'down' : 'stable';
+
+      weeklyReturningChange =
+        prevWau > 0 ? ((weeklyReturning - prevWau) / prevWau) * 100 : 0;
+      weeklyReturningTrend =
+        weeklyReturningChange > 1
+          ? 'up'
+          : weeklyReturningChange < -1
+            ? 'down'
+            : 'stable';
+    }
 
     // 4. Conversion Rate - use conversion_events for both numerator and denominator
     const signupsResult = await sql`
