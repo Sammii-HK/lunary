@@ -58,10 +58,10 @@ export async function GET(request: NextRequest) {
       stickiness = Number(result.rows[0].stickiness || 0);
     } else {
       // LIVE PATH: Query conversion_events for today's data (slow but necessary)
-      const dauStart = new Date(endDate);
-      const wauStart = new Date(endDate);
+      const dauStart = new Date(range.end);
+      const wauStart = new Date(range.end);
       wauStart.setUTCDate(wauStart.getUTCDate() - 6);
-      const mauStart = new Date(endDate);
+      const mauStart = new Date(range.end);
       mauStart.setUTCDate(mauStart.getUTCDate() - 29);
 
       const [dauResult, wauResult, mauResult] = await Promise.all([
@@ -77,7 +77,7 @@ export async function GET(request: NextRequest) {
           [
             PRODUCT_EVENTS,
             formatTimestamp(dauStart),
-            formatTimestamp(endDate),
+            formatTimestamp(range.end),
             TEST_EMAIL_PATTERN,
             TEST_EMAIL_EXACT,
           ],
@@ -94,7 +94,7 @@ export async function GET(request: NextRequest) {
           [
             PRODUCT_EVENTS,
             formatTimestamp(wauStart),
-            formatTimestamp(endDate),
+            formatTimestamp(range.end),
             TEST_EMAIL_PATTERN,
             TEST_EMAIL_EXACT,
           ],
@@ -111,7 +111,7 @@ export async function GET(request: NextRequest) {
           [
             PRODUCT_EVENTS,
             formatTimestamp(mauStart),
-            formatTimestamp(endDate),
+            formatTimestamp(range.end),
             TEST_EMAIL_PATTERN,
             TEST_EMAIL_EXACT,
           ],
